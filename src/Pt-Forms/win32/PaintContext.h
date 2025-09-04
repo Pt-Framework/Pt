@@ -30,7 +30,6 @@
 #define PT_FORMS_WIN32_PAINTCONTEXT_H
 
 #include <Pt/Forms/Api.h>
-
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
@@ -44,9 +43,7 @@ namespace Pt {
 
 namespace Forms {
 
-#ifndef PT_FORMS_WIN32_RASTER
-
-class PixmapCanvas;
+class PixmapImpl;
 
 class PaintContext : public Gfx::PaintContext
 {
@@ -55,7 +52,7 @@ class PaintContext : public Gfx::PaintContext
 
         ~PaintContext();
 
-        void setPixmap(PixmapCanvas& pixmap);
+        void setPixmap(PixmapImpl& pixmap);
 
         const Gfx::CompositionMode& compositionMode() const;
 
@@ -82,7 +79,10 @@ class PaintContext : public Gfx::PaintContext
 
         virtual void onResetPaint() override;
 
+    protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+        
+        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode) override;
 
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
@@ -90,9 +90,40 @@ class PaintContext : public Gfx::PaintContext
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
+        virtual void onApplyBrush(const Gfx::Brush& brush) override;
+
         virtual void onSetFont(const Gfx::Font& font) override;
 
+        virtual void onApplyFont(const Gfx::Font& font) override;
+
         virtual void onSetClip(const Gfx::RectF* clip) override;
+
+        virtual void onApplyClip(const Gfx::RectF* clip) override;
+
+    protected:
+        virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
+
+        virtual void onDrawPolyline(const Gfx::PointF* pts, const size_t n) override;
+
+        virtual void onFillPolygon(const Gfx::PointF* ps, const size_t n) override;
+
+        virtual void onDrawRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onFillRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) override;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) override;
+
+        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
+
+        virtual void onDrawText(const Gfx::PointF& to, 
+                                const Pt::String& text, 
+                                const Gfx::Transform* transform) override;
+
+        virtual void onDrawImage(const Gfx::PointF& toF, 
+                                 const Gfx::Image& image,
+                                 const Gfx::RectF* rect) override;
 
     protected:
         virtual void onSetPath(const Gfx::Path& path) override;
@@ -101,13 +132,22 @@ class PaintContext : public Gfx::PaintContext
 
         virtual void onFillPath() override;
 
+        virtual bool onDrawLayer(const Gfx::PointF& to, 
+                                 const Gfx::PaintLayer& layer,
+                                 const Gfx::RectF* rect);
+
+    private:
+        void onDrawPixmap(const Gfx::PointF& toF, 
+                          const PixmapImpl& surface,
+                          const Gfx::RectF* rect = 0);
+
     private:
         POINT toContext(double x, double y);
 
         void buildPath(HDC dc, const Gfx::Path& path);
 
     private:
-        PixmapCanvas*             _pixmapCanvas;
+        PixmapImpl*               _pixmap;
         Gfx::CompositionMode      _compositionMode;
         HPEN                      _pen;
         DWORD                     _penSize;
@@ -117,12 +157,11 @@ class PaintContext : public Gfx::PaintContext
         Gfx::Brush::GradientStyle _gradient;
         Gfx::Color                _gradientStart;
         Gfx::Color                _gradientStop;
+        std::wstring              _text;
         HRGN                      _clipRect;
         HFONT                     _font;
         Gfx::Path                 _path;
 };
-
-#endif
 
 } // namespace
 

@@ -41,10 +41,10 @@ namespace Forms {
 // ViewCanvas
 ///////////////////////////////////////////////////////////////////////
 
-class ViewCanvas : public Gfx::CanvasBase
+class ViewSurface : public Gfx::PaintSurface
 {
     public:
-        explicit ViewCanvas(View& view)
+        explicit ViewSurface(View& view)
         : _view(&view)
         , _surface(0)
         {
@@ -68,43 +68,36 @@ class ViewCanvas : public Gfx::CanvasBase
         }
 
     protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const
+        virtual const Gfx::ImageFormat& onGetFormat() const override
         {
             if (_surface)
-            {
-                const CanvasBase* canvas = _surface->canvas();
-                if (canvas)
-                    return canvas->format();
-            }
+                return _surface->format();
 
             return Gfx::ImageFormat::argb32();
         }
 
-        virtual const Gfx::SizeF& onGetSize() const
-        {
-            return _view->size();
-        }
-
-        virtual const Gfx::Scaling& onGetScaling() const
+        virtual const Gfx::Scaling& onGetScaling() const override
         {
             return _view->scaling();
         }
 
-        virtual Gfx::PaintContext* onGetPaint(Gfx::PaintContext* context)
+        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* reuse) override
         {
-            Gfx::PaintContext* paintContext = _surface ? _surface->getPaint(context)
-                                                       : 0;
-            if (paintContext)
-            {
-                Gfx::RectF r = paintContext->region();
+            Gfx::PaintContext* context = _surface ? _surface->getContext(reuse)
+                                                  : 0;
+            if( ! context )
+                return context;
+   
+            Gfx::RectF region = context->region();
+            region.shift( _position.x(), _position.y() );
+            region.setSize( _view->size() );
 
-                r.shift(position().x(), position().y());
-                r.setSize(this->size());
+            context->setRegion(region);
+            return context;
+        }
 
-                paintContext->setRegion(r);
-            }
-
-            return paintContext;
+        virtual void onReleaseContext() override
+        {
         }
 
     private:
@@ -118,35 +111,34 @@ class ViewCanvas : public Gfx::CanvasBase
 ///////////////////////////////////////////////////////////////////////
 
 View::View()
-: _canvas(0)
+: _surface(0)
 {
-    _canvas = new ViewCanvas(*this);
-    setCanvas(_canvas);
+    _surface = new ViewSurface(*this);
 }
 
 
 View::~View()
 {
-    delete _canvas;
+    delete _surface;
 }
 
 
 Gfx::PaintSurface& View::surface()
 {
-    return *this;
+    return *_surface;
 }
 
 
 const Gfx::PaintSurface& View::surface() const
 {
-    return *this;
+    return *_surface;
 }
 
 
 void View::setSurface(Gfx::PaintSurface* surface, 
                       const Gfx::PointF& pos)
 {
-    _canvas->setSurface(surface, pos);
+    _surface->setSurface(surface, pos);
 
     onSetSurface(surface, pos);
 }
@@ -200,8 +192,8 @@ void View::onDetach(Control& control)
 
 void View::onInit(Control& control)
 {
-    Gfx::PaintSurface* surface = _canvas->surface();
-    Gfx::PointF surfacePos = _canvas->position() + control.position();
+    Gfx::PaintSurface* surface = _surface->surface();
+    Gfx::PointF surfacePos = _surface->position() + control.position();
 
     control.setSurface(surface, surfacePos);
 }
@@ -246,7 +238,7 @@ void View::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    onPaint( *this, ev.rect() );
+    onPaint( *_surface, ev.rect() );
 }
 
 
@@ -295,8 +287,8 @@ void View::onMoveRequest(Control& control, const Gfx::PointF& pos)
     //
     // update client surface
     //
-    Gfx::PaintSurface* surface = _canvas->surface();
-    Gfx::PointF surfacePos = _canvas->position() + aligedPos;
+    Gfx::PaintSurface* surface = _surface->surface();
+    Gfx::PointF surfacePos = _surface->position() + aligedPos;
 
     control.setSurface(surface, surfacePos);
 

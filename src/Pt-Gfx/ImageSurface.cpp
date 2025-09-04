@@ -27,11 +27,13 @@
   02110-1301 USA
 */
 
-#include "ImageCanvas.h"
+#include "RasterContext.h"
+#include "FreeType.h"
 
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
 
@@ -42,80 +44,151 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 ImageSurface::ImageSurface()
-: _canvas(0)
+: _context(0)
 {
-    _canvas = new ImageCanvas(*this);
-    setCanvas(_canvas);
 }
 
 
 ImageSurface::ImageSurface(const Gfx::SizeF& size, std::size_t stride)
-: _canvas(0)
+: _context(0)
 {
-    _canvas = new ImageCanvas(*this);
-    setCanvas(_canvas);
-
     reset(size, stride);
 }
 
 
 ImageSurface::~ImageSurface()
 {
-    delete _canvas;
 }
 
 
 void ImageSurface::reset(const Gfx::Image& image)
 {
-    _canvas->reset(image);
+    if( image.format() != _image.format() )
+    {
+        _image.reset( format(), image.width(), image.height() );
+        Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
+    }
+    else
+    {
+        _image = image;
+    }
+
+    _physicalSize.set( image.width(), image.height() );
+    _logicalSize = _scaling.toLogical( Gfx::SizeF( image.width(), 
+                                                   image.height() ) );
+
+    invalidate();
 }
 
 
-void ImageSurface::reset(const Gfx::SizeF& size, std::size_t stride)
+void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
-    _canvas->reset(size, stride);
+    long width = lround( sizeF.width() );
+    long height = lround( sizeF.height() );
+
+    _image.reset( _image.format(), width, height, stride );
+
+    _physicalSize.set(width, height);
+    _logicalSize = _scaling.toLogical( Gfx::SizeF(width, height) );
+
+    invalidate();
+}
+
+
+Image& ImageSurface::image()
+{
+    return _image;
 }
 
 
 const Gfx::Image& ImageSurface::image() const
 {
-    return _canvas->image();
+    return _image;
+}
+
+
+const SizeF& ImageSurface::physicalSize() const
+{
+    return _physicalSize;
+}
+
+
+const SizeF& ImageSurface::logicalSize() const
+{
+    return _logicalSize;
 }
 
 
 const Gfx::SizeF& ImageSurface::size() const
 {
-    return _canvas->physicalSize();
+    return physicalSize();
 }
 
 
 void ImageSurface::setScaleFactor(double scaleFactor)
 {
-    _canvas->setScaleFactor(scaleFactor);
+    _scaling.setScaleFactor(scaleFactor);
+
+    _physicalSize.set( _image.width(), _image.height() );
+    _logicalSize = _scaling.toLogical( Gfx::SizeF( _image.width(), 
+                                                   _image.height() ) );
+
+    invalidate();
+}
+
+
+const Gfx::ImageFormat& ImageSurface::onGetFormat() const
+{
+    return Gfx::ImageFormat::argb32();
+}
+
+
+const Scaling& ImageSurface::onGetScaling() const
+{
+    return _scaling;
+}
+
+
+Gfx::PaintContext* ImageSurface::onCreateContext(Gfx::PaintContext* context)
+{
+    RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
+    if( ! paintContext )
+        paintContext = new RasterContext();
+
+    paintContext->setImage(*this);
+    
+    _context = paintContext;
+    return _context;
+}
+
+
+void ImageSurface::onReleaseContext()
+{
+    _context = 0;
 }
 
 
 void ImageSurface::setFontDir(const Pt::System::Path& path)
 {
-    ImageCanvas::setFontDir(path);
+    FreeType::instance().setFontDir(path);
 }
 
 
 const std::string& ImageSurface::defaultFont()
 {
-    return ImageCanvas::defaultFont();
+    return  FreeType::instance().defaultFont();
 }
 
 
 void ImageSurface::setDefaultFont(const std::string& f)
 {
-    ImageCanvas::setDefaultFont(f);
+    FreeType::instance().setDefaultFont(f);
 }
 
 
 std::vector<std::string> ImageSurface::fontNames()
 {
-    return ImageCanvas::fontNames();
+    return FreeType::instance().fontNames();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -178,14 +251,10 @@ void ImageLayer::onDraw(PaintSurface& surface,
     Gfx::Painter painter(surface);
     painter.setCompositionMode( paint.compositionMode() );
     
-    const CanvasBase* canvas = _surface.canvas();
-    if( ! canvas )
-        return;
-
     const Gfx::Image& image = this->image();
     if(rect)
     {
-        Gfx::RectF imageRect = canvas->scaling().toPhysical(*rect);
+        Gfx::RectF imageRect = _surface.scaling().toPhysical(*rect);
         painter.drawImage(to, image, imageRect);
     }
     else

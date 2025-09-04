@@ -27,60 +27,46 @@
 */
 
 #include <Pt/Gfx/PaintContext.h>
-#include <Pt/Gfx/Canvas.h>
-
-#include <limits>
+#include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
 
 namespace Gfx {
 
 PaintContext::PaintContext()
-: _canvas(0)
+: _surface(0)
 , _active(0)
-, _hasClip(false)
 {
 }
 
 
 PaintContext::~PaintContext()
 {
-    if(_canvas)
+    if(_surface)
     {
-        _canvas->onDetachPaint(*this);
-        _canvas = 0;
+        _surface->onDetachContext(*this);
+        _surface = 0;
         _active = 0;
     }
 }
 
 
-void PaintContext::attachCanvas(Canvas& canvas)
+void PaintContext::attachSurface(PaintSurface& surface)
 {
     finishPaint();
     
-    _region.clear();
-
-    const double unbounded = std::numeric_limits<double>::max();
-    _region.setSize( SizeF(unbounded, unbounded) );
-
-    _scaling = canvas.scaling();
-
-    Gfx::Transform tx;
-    tx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
-    _tx = tx;
-
-    _canvas = &canvas;
+    _surface = &surface;
 }
 
 
-void PaintContext::detachCanvas(Canvas& canvas)
+void PaintContext::detachSurface(PaintSurface& surface)
 {
-    _region.clear();
-
-    if(_canvas)
+    if(_surface)
     {
         onResetPaint();
-        _canvas = 0;
+        _surface = 0;
         _active = 0;
     }
 }
@@ -115,41 +101,30 @@ const Scaling& PaintContext::scaling() const
 }
 
 
+void PaintContext::setScaling(const Scaling& scaling)
+{
+    Gfx::Transform tx;
+    tx.translate( _region.x(), _region.y() );
+    tx.scale( scaling.scaleFactor(), scaling.scaleFactor() );
+
+    _scaling = scaling;
+    _tx = tx;
+}
+
+
 const Gfx::Transform& PaintContext::transform() const
 {
     return _tx;
 }
 
 
-void PaintContext::beginPaint(const Gfx::Paint& paint)
+const Gfx::ImageFormat& PaintContext::format() const
 {
-    if(_canvas)
-    {
-        _canvas->onCompositionModeChanged();
-        _canvas->onPenChanged();
-        _canvas->onBrushChanged();
-        _canvas->onFontChanged();
+    if(_surface)
+        return _surface->format();
 
-        if( ! _hasClip )
-        {
-            onSetClip(0);
-        }
-        else
-        {
-            Gfx::RectF clip = _clip;
-            clip.shift( origin().x(), origin().y() );
-            onSetClip(&clip);
-        }
-
-        _canvas->onClipChanged();
-        
-        _active = _canvas;
-        onBeginPaint(paint);
-
-        onApplyPen( paint.pen() );
-    }
+    return ImageFormat::argb32();
 }
-
 
 
 bool PaintContext::isActive() const
@@ -158,16 +133,42 @@ bool PaintContext::isActive() const
 }
 
 
+void PaintContext::beginPaint(const Gfx::Paint& paint)
+{
+    if(_surface)
+    {       
+        _active = _surface;
+        onBeginPaint(paint);
+
+        onApplyCompositionMode( paint.compositionMode() );
+        onApplyPen( paint.pen() );
+        onApplyBrush( paint.brush() );
+        onApplyFont( paint.font() );
+        onApplyClip( paint.clip() );
+    }
+}
+
+
 void PaintContext::finishPaint()
 {
-    if(_canvas)
+    if(_surface)
     {
-        _canvas->onDetachPaint(*this);
+        _surface->onDetachContext(*this);
 
         onResetPaint();
-        _canvas = 0;
+        _surface = 0;
         _active = 0;
     }
+}
+
+
+void PaintContext::onBeginPaint(const Gfx::Paint& paint)
+{
+}
+
+
+void PaintContext::onResetPaint()
+{
 }
 
 
@@ -177,7 +178,7 @@ void PaintContext::setCompositionMode(const Gfx::CompositionMode& mode)
 
     if(_active)
     {
-        _active->onCompositionModeChanged();
+        onApplyCompositionMode(mode);
     }
 }
 
@@ -189,8 +190,6 @@ void PaintContext::setPen(const Pen& pen)
     if(_active)
     {
         onApplyPen(pen);
-        
-        _active->onPenChanged();
     }
 }
 
@@ -201,7 +200,7 @@ void PaintContext::setBrush(const Brush& brush)
 
     if(_active)
     {
-        _active->onBrushChanged();
+        onApplyBrush(brush);
     }
 }
 
@@ -212,162 +211,117 @@ void PaintContext::setFont(const Gfx::Font& font)
 
     if(_active)
     {
-        _active->onFontChanged();
+        onApplyFont(font);
     }
 }
 
 
 void PaintContext::setClip(const RectF& rect)
-{ 
+{
+    onSetClip(&rect);
+
     if(_active)
     {
-        Gfx::RectF clip = rect;
-        clip.shift( origin().x(), origin().y() );
-        onSetClip(&clip);
-
-        _active->onClipChanged();
+        onApplyClip(&rect);
     }
-
-    _clip = rect;
-    _hasClip = true;
 }
 
 
 void PaintContext::resetClip()
 {
+    onSetClip(0);
+
     if(_active)
     {
-        onSetClip(0);
-        _active->onClipChanged();
+        onApplyClip(0);
     }
-
-    _clip.clear();
-    _hasClip = false;
 }
 
 
 void PaintContext::drawLine(const PointF& from, const PointF& to)
 {   
-    if( ! _active )
-        return;
-
-    Gfx::PointF p0 = from + origin();
-    Gfx::PointF p1 = to + origin();
-
-    p0 = scaling().toPhysical(p0);
-    p1 = scaling().toPhysical(p1);
-
-    _active->drawLine(p0, p1);
+    if( _active )
+        onDrawLine(from, to);
 }
 
 
-void PaintContext::drawPolyline(const Gfx::PointF* ps, const size_t n)
+void PaintContext::drawPolyline(const Gfx::PointF* pts, const size_t n)
 {
-    Polyline line(*this, ps, n);
-    
     if(_active)
-        _active->drawPolyline(line);
+        onDrawPolyline(pts, n);
 }
 
 
 void PaintContext::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
-    Polyline line(*this, ps, n);
-    
     if(_active)
-        _active->fillPolygon(line);
+        onFillPolygon(ps, n);
 }
 
 
 void PaintContext::drawRect(const Gfx::RectF& rect)
 {
-    Gfx::RectF r = rect;
-    r.shift( origin().x(), origin().y() ); 
-    
-    r = scaling().toPhysical(r); 
-
     if(_active)
-        _active->drawRect(r);
+        onDrawRect(rect);
 }
 
-
+        
 void PaintContext::fillRect(const Gfx::RectF& rect)
 {
-    Gfx::RectF r = rect;
-    r.shift( origin().x(), 
-              origin().y() );
-
-    r = scaling().toPhysical(r);
-
     if(_active)
-        _active->fillRect(r);
+        onFillRect(rect);
 }
 
 
 void PaintContext::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    Pt::Gfx::PointF p = topLeft + origin();
-    p = _scaling.toPhysical(p);
-    
-    Gfx::SizeF s = _scaling.toPhysical(size);
-
     if(_active)
-        _active->drawEllipse(p, s);
+        onDrawEllipse(topLeft, size);
 }
 
 
 void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    Pt::Gfx::PointF p = topLeft + origin();
-    p = _scaling.toPhysical(p);
-    
-    Gfx::SizeF s = _scaling.toPhysical(size);
-
     if(_active)
-        _active->fillEllipse(p, s);
+        onFillEllipse(topLeft, size);
 }
 
 
 void PaintContext::setPath(const Path& path)
 {
-    onSetPath(path);
+    if(_active)
+        onSetPath(path);
 }
 
 
 void PaintContext::drawPath()
 {
-    onDrawPath();
+    if(_active)
+        onDrawPath();
 }
+
 
 void PaintContext::fillPath()
 {
-    onFillPath();
+    if(_active)
+        onFillPath();
 }
 
 
 TextMetrics PaintContext::textMetrics(const Pt::String& text) const
 {
     if(_active)
-        return _active->textMetrics(text);
+        return onGetTextMetrics(text);
 
     return TextMetrics();
 }
 
 
 void PaintContext::drawText(const PointF& to, const Pt::String& text, 
-                            const Transform* transform)
+                            const Transform* tform)
 {
     if(_active)
-    {
-        Pt::Gfx::PointF p = to + origin();
-        p = scaling().toPhysical(p);
-
-        Gfx::Transform t = transform ? *transform : Gfx::Transform();
-        double scaleFactor = scaling().scaleFactor();
-        t.scale(scaleFactor, scaleFactor);
-
-        _active->drawText(p, text, &t);
-    }
+        onDrawText(to, text, tform);
 }
 
 
@@ -375,11 +329,18 @@ void PaintContext::drawImage(const Gfx::PointF& to,
                              const Gfx::Image& image, 
                              const Gfx::RectF* rect)
 {
-    Pt::Gfx::PointF p = to + origin();
-
     if(_active)
     {
-        _active->drawImage(p, image, rect);
+        if( image.format() == _active->format() )
+        {
+            onDrawImage(to, image, rect);
+        }
+        else
+        {
+            Pt::Gfx::Image dest( _active->format(), image.width(), image.height() );
+            Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
+            onDrawImage(to, dest, rect);
+        }
     }
 }
 
@@ -390,8 +351,7 @@ bool PaintContext::drawLayer(const Gfx::PointF& to,
 {
     if(_active)
     {
-        Pt::Gfx::PointF p = to + origin();
-        return _active->drawLayer(p, layer, rect);
+        onDrawLayer(to, layer, rect);
     }
 
     return true;

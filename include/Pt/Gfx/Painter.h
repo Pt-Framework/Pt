@@ -81,8 +81,6 @@ class PT_GFX_API Painter
 
         void finish();
 
-        // TODO: return pointer to surface instead of format or scaling
-
         /** @brief Returns the image format.
         */
         const ImageFormat& format() const;

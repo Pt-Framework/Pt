@@ -303,7 +303,7 @@ void Label::layoutText()
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
 
-    const Gfx::Scaling& scaling = _painter.scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     _textBlock.setMaxWidth( size().width() - padding().leftRight() );
     _textBlock.setAdjustment(a);
@@ -590,8 +590,8 @@ void Label::onPaint(Gfx::PaintSurface& surface,
     //    path.lineTo( Gfx::PointF(0, 0) );
     //    path.close();
     //    painter.setPath(path);
-    //    painter.fillPath(path);
-    //    painter.drawPath(path);
+    //    painter.fillPath();
+    //    painter.drawPath();
     //}
 }
 

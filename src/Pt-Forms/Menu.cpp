@@ -249,7 +249,7 @@ void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options,
 
     size -= 1;
 
-    const Gfx::Scaling& scaling = painter.scaling();
+    const Gfx::Scaling& scaling = this->scaling();
     double inset = scaling.alignContour(_pen.size()) / 2;
 
     // icon strip on the left side

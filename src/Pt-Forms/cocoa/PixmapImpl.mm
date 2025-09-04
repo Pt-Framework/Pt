@@ -196,27 +196,27 @@ const Gfx::Scaling& PixmapCanvas::onGetScaling() const
 }
 
 
-bool PixmapCanvas::onSetPaint(Gfx::PaintContext* context)
+Gfx::PaintContext* PixmapCanvas::onCreateContext(Gfx::PaintContext* context)
 {
     PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
     if( ! paintContext )
-        return false;
+        paintContext  = new PaintContext();;
     
     paintContext->setPixmap(*this);
 
     _paintContext = paintContext;
-    return true;
+    return _paintContext;
 }
 
 
-Gfx::PaintContext* PixmapCanvas::onCreatePaint()
-{
-    PaintContext* paintContext  = new PaintContext();
-    paintContext->setPixmap(*this);
-
-    _paintContext = paintContext;
-    return paintContext;
-}
+//Gfx::PaintContext* PixmapCanvas::onCreatePaint()
+//{
+//    PaintContext* paintContext  = new PaintContext();
+//    paintContext->setPixmap(*this);
+//
+//    _paintContext = paintContext;
+//    return paintContext;
+//}
 
 
 void PixmapCanvas::onReleasePaint()

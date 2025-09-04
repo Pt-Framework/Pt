@@ -52,6 +52,12 @@ class PT_GFX_API Transform
 
         bool isIdentity() const;
 
+        bool isAffine() const;
+        
+        /** @brief Returns true if the matrix is only translating and scaling.
+        */
+        bool isSimple() const;
+
         double m11() const;
 
         double m12() const;

@@ -28,28 +28,30 @@
 */
 
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/Painter.h>
+
+#include <limits>
 
 namespace Pt {
 
 namespace Gfx {
 
 PaintSurface::PaintSurface()
-: _canvas(0)
+: _context(0)
 , _painter(0)
 {
 }
 
 
-void PaintSurface::setCanvas(CanvasBase* canvas)
-{
-    _canvas = canvas;
-}
-
-
 PaintSurface::~PaintSurface()
 {
+    if(_context)
+    {
+        _context->detachSurface(*this);
+        _context = 0;
+    }
+
     if(_painter)
     {
         _painter->onDetachSurface(*this);
@@ -57,18 +59,78 @@ PaintSurface::~PaintSurface()
 }
 
 
-const CanvasBase* PaintSurface::canvas() const
+const Gfx::ImageFormat& PaintSurface::format() const
 {
-    return _canvas;
+    return onGetFormat();
 }
 
 
-PaintContext* PaintSurface::getPaint(PaintContext* reuse)
+const Scaling& PaintSurface::scaling() const
 {
-    if(_canvas)
-        return _canvas->getPaint(reuse);
+    return onGetScaling();
+}
 
-    return 0;   
+
+PaintContext* PaintSurface::getContext(PaintContext* reuse)
+{
+    return onGetContext(reuse);
+}
+
+
+Gfx::PaintContext* PaintSurface::onGetContext(Gfx::PaintContext* reuse)
+{
+    if(_context)
+    {
+        onReleaseContext();
+        _context->detachSurface(*this);
+        _context = 0;
+    }
+    
+    _context = onCreateContext(reuse);
+    _context->attachSurface(*this);
+
+    RectF nobounds(PointF(0, 0),
+                   SizeF( std::numeric_limits<double>::max(), 
+                          std::numeric_limits<double>::max() ) );
+    _context->setRegion(nobounds);
+
+    const Scaling& scale = scaling();
+    _context->setScaling(scale);
+
+    return _context;
+}
+
+
+Gfx::PaintContext* PaintSurface::onCreateContext(Gfx::PaintContext* reuse)
+{
+    return 0;
+}
+
+
+void PaintSurface::onReleaseContext()
+{
+}
+
+
+void PaintSurface::invalidate()
+{
+    if(_context)
+    {
+        onReleaseContext();
+        
+        _context->detachSurface(*this);
+        _context = 0;
+    }
+}
+
+
+void PaintSurface::onDetachContext(PaintContext& context)
+{
+    if(_context)
+    {
+        onReleaseContext();
+        _context = 0;
+    }
 }
 
 

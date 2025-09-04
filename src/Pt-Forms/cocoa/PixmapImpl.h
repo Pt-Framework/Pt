@@ -92,9 +92,7 @@ class PixmapCanvas : public Gfx::Canvas
         virtual const Gfx::Scaling& onGetScaling() const override;
 
     protected:
-        virtual bool onSetPaint(Gfx::PaintContext* context) override;
-
-        virtual Gfx::PaintContext* onCreatePaint() override;
+        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
 
         virtual void onReleasePaint() override;
 

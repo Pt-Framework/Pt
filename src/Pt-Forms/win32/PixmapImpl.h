@@ -42,9 +42,9 @@
 #else
 
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/System/Path.h>
 
@@ -136,138 +136,6 @@ class PixmapImpl
 #else // PT_FORMS_WIN32_RASTER
 
 class PaintContext;
-class PixmapImpl;
-
-class PixmapCanvas : public Gfx::Canvas
-{
-    public:
-        PixmapCanvas(Gfx::PaintSurface& surface);
-
-        ~PixmapCanvas();
-
-        HDC deviceContext() const;
-
-        void set(const Gfx::Image& image);
-        
-        Gfx::Image toImage() const;
-
-        const Gfx::SizeF& physicalSize() const;
-
-        const Gfx::SizeF& logicalSize() const;
-
-        void resize(const Gfx::SizeF& size);
-
-        void setScaleFactor(double scaleFactor);
-
-        void updatePen(HPEN pen, DWORD penColor);
-
-        void drawPathImpl(const Gfx::Path& path);
-
-        void fillPathImpl(const Gfx::Path& path);
-
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
-
-        virtual const Gfx::SizeF& onGetSize() const override;
-
-        virtual const Gfx::Scaling& onGetScaling() const override;
-
-    protected:
-        virtual bool onSetPaint(Gfx::PaintContext* context) override;
-
-        virtual Gfx::PaintContext* onCreatePaint() override;
-
-        virtual void onReleasePaint() override;
-
-    protected:
-        virtual void onCompositionModeChanged() override;
-
-        virtual void onPenChanged() override;
-
-        virtual void onBrushChanged() override;
-
-        virtual void onFontChanged() override;
-
-        virtual void onClipChanged() override;
-
-    protected:
-        virtual void onDrawLine(const Gfx::PointF& from, 
-                                const Gfx::PointF& to) override;
-
-        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
-
-        virtual void onFillPolygon(const Gfx::Polyline& line) override;
-
-        virtual void onDrawRect(const Gfx::RectF& rect) override;
-
-        virtual void onFillRect(const Gfx::RectF& rect) override;
-
-        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) override;
-
-        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) override;
-        
-        virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
-                               float degBegin, float degEnd) override
-        {}
-
-        virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
-                                 float degBegin, float degEnd) override
-        {}
-
-        virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
-                               float degBegin, float degEnd) override
-        {}
-
-    protected:
-        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
-
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
-                                const Gfx::Transform* trans) override;
-
-    protected:
-        virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image, 
-                                 const Gfx::RectF* rect) override;
-
-        virtual bool onDrawLayer(const Gfx::PointF& to, 
-                                 const Gfx::PaintLayer& layer,
-                                 const Gfx::RectF* rect) override;
-
-    private:
-        void onDrawPixmap(const Gfx::PointF& toF, 
-                          const PixmapImpl& surface,
-                          const Gfx::RectF* rect = 0);
-
-    private:
-        Gfx::SizeF     _physicalSize;
-        Gfx::SizeF     _logicalSize;
-        Gfx::Scaling   _scaling;
-
-        LONG           _width;
-        LONG           _height;
-        HDC            _dc;
-        HBITMAP        _bitmap;
-        HPEN           _oldPen;
-        HBRUSH         _oldBrush;
-        HFONT          _oldFont;
-        HBITMAP        _oldBitmap;
-        std::wstring   _text;
-
-        PaintContext*             _paintContext;
-
-        Gfx::Color                _penColor;
-
-        bool                      _hasPath;
-
-        bool                      _gradientBrush;
-        Gfx::Brush::GradientStyle _gradient;
-        Gfx::Color                _gradientStart;
-        Gfx::Color                _gradientStop;
-        Gfx::CompositionMode      _compositionMode;
-};
-
 
 class PixmapImpl : public Gfx::PaintSurface
 {
@@ -283,6 +151,10 @@ class PixmapImpl : public Gfx::PaintSurface
         void clear(const Gfx::Color& c);
 
         const Gfx::SizeF& size() const;
+
+        const Gfx::SizeF& physicalSize() const;
+
+        const Gfx::SizeF& logicalSize() const;
 
         void resize(const Gfx::SizeF& size);
         
@@ -300,6 +172,16 @@ class PixmapImpl : public Gfx::PaintSurface
 
         HDC deviceContext() const;
 
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::Scaling& onGetScaling() const override;
+
+    protected:
+        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+
+        virtual void onReleaseContext() override;
+
     public:
         static const std::string& defaultFont();
 
@@ -315,7 +197,20 @@ class PixmapImpl : public Gfx::PaintSurface
         static std::string getSystemFont();
 
     private:
-        PixmapCanvas*  _canvas;
+        Gfx::SizeF     _physicalSize;
+        Gfx::SizeF     _logicalSize;
+        Gfx::Scaling   _scaling;
+
+        LONG           _width;
+        LONG           _height;
+        HDC            _dc;
+        HBITMAP        _bitmap;
+        HPEN           _oldPen;
+        HBRUSH         _oldBrush;
+        HFONT          _oldFont;
+        HBITMAP        _oldBitmap;
+
+        PaintContext*  _paintContext;
 };
 
 #endif // PT_FORMS_WIN32_RASTER

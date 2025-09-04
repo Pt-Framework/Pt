@@ -35,7 +35,6 @@
 #include <Pt/Forms/Style.h>
 
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -45,11 +44,8 @@ namespace Pt {
 namespace Forms {
 
 class Control;
-class View;
-class ViewCanvas;
 
 class PT_FORMS_API View : public Widget
-                        , private Gfx::PaintSurface
 {
     friend class Control;
 
@@ -141,7 +137,7 @@ class PT_FORMS_API View : public Widget
         virtual void onResizeEvent(const ResizeEvent& ev) override;
 
     private:
-        ViewCanvas* _canvas;
+        class ViewSurface* _surface;
 };
 
 } // namespace

@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class ImageCanvas;
+class RasterContext;
 
 /** @brief Image drawing surface.
 */
@@ -64,13 +64,29 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
+    Image& image();
+
     const Gfx::Image& image() const;
 
-    /** @brief Returns the physical size.
+    /** @brief Returns the size in physical pixel.
     */
     const Gfx::SizeF& size() const;
 
+    const SizeF& physicalSize() const;
+
+    const SizeF& logicalSize() const;
+
     void setScaleFactor(double scaleFactor);
+
+  protected:
+    virtual const Gfx::ImageFormat& onGetFormat() const;
+
+    virtual const Scaling& onGetScaling() const;
+
+  protected:
+    virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+
+    virtual void onReleaseContext() override;
 
   public:
     static void setFontDir(const System::Path& path);
@@ -82,7 +98,11 @@ class PT_GFX_API ImageSurface : public PaintSurface
     static std::vector<std::string> fontNames();
 
   private:
-    ImageCanvas* _canvas;
+    Image          _image;
+    Gfx::SizeF     _physicalSize;
+    Gfx::SizeF     _logicalSize;
+    Gfx::Scaling   _scaling;
+    RasterContext* _context;
 };
 
 /** @brief Image drawing layer.

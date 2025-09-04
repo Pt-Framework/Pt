@@ -31,7 +31,6 @@
 #include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintLayer.h>
-#include <Pt/Gfx/Canvas.h>
 
 namespace Pt {
 
@@ -64,8 +63,15 @@ Painter::Painter(PaintLayer& layer)
 
 Painter::~Painter()
 {
-    finish();
+    // NOTE: finish() is also possible
+    //finish();
     
+    if( _surface )
+    {
+        _surface->detachPainter(*this);
+        _surface = 0;
+    }
+
     delete _paintContext;
 }
 
@@ -81,7 +87,7 @@ void Painter::begin(PaintSurface& surface)
     _surface = &surface;
    
     PaintContext* reuse = _paintContext;
-    _paintContext = surface.getPaint(reuse);
+    _paintContext = surface.getContext(reuse);
    
     if(reuse != _paintContext)
     {
@@ -139,12 +145,8 @@ void Painter::onDetachSurface(PaintSurface& surface)
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    if(_surface)
-    {
-        const CanvasBase* canvas = _surface->canvas();
-        if(canvas)
-            return canvas->format();
-    }
+    if(_paintContext)
+        return _paintContext->format();
 
     return ImageFormat::argb32();
 }
@@ -152,12 +154,8 @@ const Gfx::ImageFormat& Painter::format() const
 
 const Scaling& Painter::scaling() const
 {
-    if(_surface)
-    {
-        const CanvasBase* canvas = _surface->canvas();
-        if(canvas)
-            return canvas->scaling();
-    }
+    if(_paintContext)
+        return _paintContext->scaling();
 
     return _scaling;
 }

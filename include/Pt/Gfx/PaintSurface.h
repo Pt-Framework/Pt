@@ -31,12 +31,13 @@
 #define Pt_Gfx_PaintSurface_h
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Scaling.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class CanvasBase;
 class PaintContext;
 class Painter;
 
@@ -45,18 +46,33 @@ class Painter;
 class PT_GFX_API PaintSurface
 {
     friend class Painter;
+    friend class PaintContext;
 
     protected:
         PaintSurface();
 
-        void setCanvas(CanvasBase* canvas);
-
     public:
         virtual ~PaintSurface();
-        
-        const CanvasBase* canvas() const;
 
-        PaintContext* getPaint(PaintContext* context);
+        const Gfx::ImageFormat& format() const;
+
+        const Scaling& scaling() const;
+
+        PaintContext* getContext(PaintContext* context);
+
+        void invalidate();
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const = 0;
+
+        virtual const Scaling& onGetScaling() const = 0;
+
+    protected:
+        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* context);
+
+        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context);
+
+        virtual void onReleaseContext() = 0;
 
     private:
         void attachPainter(Painter& painter);
@@ -64,8 +80,11 @@ class PT_GFX_API PaintSurface
         void detachPainter(Painter& painter);
 
     private:
-        CanvasBase*                _canvas;
-        Painter*                   _painter;
+        void onDetachContext(PaintContext& context);
+
+    private:
+        PaintContext*  _context;
+        Painter*       _painter;
 };
 
 } // namespace

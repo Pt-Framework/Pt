@@ -30,6 +30,12 @@
 #include "PixmapImpl.h"
 #include "win32.h"
 
+#include <Pt/Gfx/PaintLayer.h>
+
+using std::max;
+using std::min;
+#include <Gdiplus.h>
+
 namespace {
 
 DWORD getPenStyle(const Pt::Gfx::Pen& pen)
@@ -149,6 +155,97 @@ HFONT getFont(const Pt::Gfx::Font& font)
     return hf;
 }
 
+HBRUSH getGradientBrush(HDC dc, int width, int height,
+                        Pt::Gfx::Color gradientStart, 
+                        Pt::Gfx::Color gradientStop, 
+                        Pt::Gfx::Brush::GradientStyle gradient)
+{
+
+    BITMAPINFO bi;
+    ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER); 
+    bi.bmiHeader.biPlanes       = 1;         // always 1
+    bi.bmiHeader.biBitCount     = 32;        // ARGB 32
+    bi.bmiHeader.biCompression  = BI_RGB;    // uncompressed RGB
+    bi.bmiHeader.biSizeImage    = 0;         // automatic
+    bi.bmiHeader.biClrUsed      = 0;         // no color table
+    bi.bmiHeader.biClrImportant = 0;         // no color table 
+    
+    if( gradient == Pt::Gfx::Brush::Horizontal )
+    {
+        bi.bmiHeader.biWidth    = width;
+        bi.bmiHeader.biHeight   = 1;
+    }
+    else // Pt::Gfx::Brush::Vertical
+    {
+        bi.bmiHeader.biWidth    = 1;
+        bi.bmiHeader.biHeight   = height;
+
+        std::swap(gradientStart, gradientStop);
+    }
+
+    int length = bi.bmiHeader.biWidth + bi.bmiHeader.biHeight - 1;
+
+    VOID* imageBits = NULL;
+    HBITMAP bitmap = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+    Pt::uint8_t* pixel = reinterpret_cast<Pt::uint8_t*>(imageBits);
+            
+    for(int n = 0; n < length; ++n)
+    {
+        float f1 = (length - n) / float(length);
+        float f2 = n / float(length);
+
+        float r1 = gradientStart.red() * f1;
+        float r2 = gradientStop.red() * f2;
+
+        float g1 = gradientStart.green() * f1;
+        float g2 = gradientStop.green() * f2;
+
+        float b1 = gradientStart.blue() * f1;
+        float b2 = gradientStop.blue() * f2;
+                
+        pixel[0] = static_cast<Pt::uint8_t>( (b1 + b2) / 257 );
+        pixel[1] = static_cast<Pt::uint8_t>( (g1 + g2) / 257 );
+        pixel[2] = static_cast<Pt::uint8_t>( (r1 + r2) / 257 );
+        pixel[3] = 0;
+
+        pixel += 4;
+    }
+
+    HBRUSH brush = CreatePatternBrush(bitmap);
+    DeleteObject(bitmap);
+    
+    return brush;
+}
+
+void toPreMulAlpha(const Pt::Gfx::Image& image, 
+                   std::vector<Pt::uint8_t>& bitmapData)
+{
+    size_t _width = image.width();
+    size_t _height = image.height();
+
+    for (std::size_t y = 0; y < image.height(); ++y)
+    {
+        for (std::size_t x = 0; x < image.width(); ++x)
+        {
+            Pt::Gfx::ConstPixel pixel(image.view(), x, y);
+            Pt::Gfx::Color color = pixel.getColor();
+
+            const Pt::uint8_t r = color.red() / 257;
+            const Pt::uint8_t g = color.green() / 257;
+            const Pt::uint8_t b = color.blue() / 257;
+            const Pt::uint8_t a = color.alpha() / 257;
+
+            bitmapData.push_back((Pt::uint8_t) (a * b / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * g / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * r / 255));
+            bitmapData.push_back((Pt::uint8_t) (a));
+        }
+    }
+}
+
 } // namespace
 
 namespace Pt {
@@ -159,7 +256,7 @@ namespace Forms {
 
 PaintContext::PaintContext()
 : Gfx::PaintContext()
-, _pixmapCanvas(0)
+, _pixmap(0)
 , _pen(0)
 , _penSize(1)
 , _penColor()
@@ -168,13 +265,15 @@ PaintContext::PaintContext()
 , _clipRect(0)
 , _font(0)
 {
-    //std::clog << "PaintContext " << this << std::endl;
 }
 
 
 PaintContext::~PaintContext()
 {
-    //std::clog << "~PaintContext " << this << std::endl;
+    // TODO: remove objects from DC before deleting them
+
+    if(_pixmap)
+        _pixmap->invalidate();
 
     if(_pen)
         DeleteObject(_pen);
@@ -190,9 +289,9 @@ PaintContext::~PaintContext()
 }
 
 
-void PaintContext::setPixmap(PixmapCanvas& pixmap)
+void PaintContext::setPixmap(PixmapImpl& pixmap)
 {
-    _pixmapCanvas = &pixmap;
+    _pixmap = &pixmap;
 }
 
 
@@ -208,17 +307,15 @@ void PaintContext::onBeginPaint(const Gfx::Paint& paint)
 
     if(_penSize != penSize)
         onSetPen( paint.pen() );
-
-    //std::clog << "onBeginPaint " << this << std::endl;
 }
 
 
 void PaintContext::onResetPaint()
 {
-    //std::clog << "onResetPaint " << this << std::endl;
+    // NOTE: this might be called from the attached canvas base class destructor
 
-    if(_pixmapCanvas)
-        _pixmapCanvas = 0;
+    if(_pixmap)
+        _pixmap = 0;
 }
 
 
@@ -229,6 +326,12 @@ const Gfx::CompositionMode& PaintContext::compositionMode() const
 
 
 void PaintContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+{
+    _compositionMode = mode;
+}
+
+
+void PaintContext::onApplyCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
@@ -283,13 +386,17 @@ void PaintContext::onSetPen(const Gfx::Pen& pen)
 
 void PaintContext::onApplyPen(const Gfx::Pen& pen)
 {
-    if(_pixmapCanvas)
+    if(_pixmap)
     {
         DWORD penColor = RGB( _penColor.red()  / 257, 
                               _penColor.green() / 257, 
                               _penColor.blue()  / 257 );
         
-        _pixmapCanvas->updatePen(_pen, penColor);
+        HDC dc = _pixmap->deviceContext();
+        if(_pen)
+            SelectObject(dc, _pen);
+
+        SetTextColor(dc, penColor);
     }
 }
 
@@ -402,6 +509,27 @@ void PaintContext::onSetBrush(const Gfx::Brush& brush)
 }
 
 
+void PaintContext::onApplyBrush(const Gfx::Brush& brush)
+{
+    if( ! _pixmap )
+        return;
+
+    if( _gradientBrush )
+    {
+        // do not set a brush now, because the gradient brush pattern can
+        // only be calculated later, when the fill area is known
+        return;
+    }
+
+    HDC dc = _pixmap->deviceContext();
+
+    if(_brush)
+    {
+        SelectObject(dc, _brush);
+    }
+}
+
+
 HFONT PaintContext::font() const
 {
     return _font;
@@ -417,6 +545,20 @@ void PaintContext::onSetFont(const Gfx::Font& font)
     }
 
     _font = getFont(font);
+}
+
+
+void PaintContext::onApplyFont(const Gfx::Font& font)
+{
+    if( ! _pixmap )
+        return;
+
+    HDC dc = _pixmap->deviceContext();
+
+    if(_font)
+        SelectObject(dc, _font);
+
+    SetTextAlign(dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
 }
 
 
@@ -438,8 +580,10 @@ void PaintContext::onSetClip(const Gfx::RectF* rectF)
 
     if( ! rectF )
         return;
-                                                       
-    Gfx::RectF rectP = scaling().toPhysical(*rectF);
+
+    Gfx::PointF origin =  transform() * rectF->origin();
+    Gfx::SizeF size =  transform() * rectF->size();
+    Gfx::RectF rectP(origin, size);
                
     long x = Pt::lround( rectP.x() );
     long y = Pt::lround( rectP.y() );
@@ -451,9 +595,17 @@ void PaintContext::onSetClip(const Gfx::RectF* rectF)
 }
 
 
-void PaintContext::onSetPath(const Gfx::Path& path)
-{
-    _path = path;
+void PaintContext::onApplyClip(const Gfx::RectF* rectF)
+{  
+    if(_pixmap)
+    {       
+        HDC dc = _pixmap->deviceContext();
+
+        if(_clipRect)
+            SelectClipRgn(dc, _clipRect);
+        else
+            SelectClipRgn(dc, NULL);
+    }
 }
 
 
@@ -466,6 +618,555 @@ POINT PaintContext::toContext(double x, double y)
     pp.y = Pt::lround(p.y() - 0.4999);
 
     return pp;
+}
+
+
+void PaintContext::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
+{
+    if( ! _pixmap )
+        return;
+
+    POINT points[2];
+    points[0] = toContext( p0.x(), p0.y() );
+    points[1] = toContext( p1.x(), p1.y() );
+
+    HDC dc = _pixmap->deviceContext();
+    Polyline(dc, points, 2);
+}
+
+
+void PaintContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+{
+    if( ! _pixmap )
+        return;
+
+    std::vector<POINT> points(n);
+
+    for(unsigned i = 0; i < n; i++)
+    {
+        const Gfx::PointF& p = pts[i];
+        points[i] = toContext(p.x(), p.y());
+    }
+
+    HDC dc = _pixmap->deviceContext();
+    Polyline( dc, &points[0], points.size() );
+}
+
+
+void PaintContext::onFillPolygon(const Gfx::PointF* ps, const size_t n)
+{
+    if( ! _pixmap )
+        return;
+
+    POINT brushOrigin = {0};
+
+    int left = std::numeric_limits<int>::max();
+    int top = std::numeric_limits<int>::max();
+    int right = 0;
+    int bottom = 0;
+
+    std::vector<POINT> points(n);
+
+    for(size_t i = 0; i < n; i++)
+    {
+        const Gfx::PointF& p = ps[i];
+
+        points[i] = toContext( p.x(), p.y() );
+
+        if( p.y() < top)
+            top = p.y();
+
+        if( p.y() > bottom)
+            bottom = p.y();
+
+        if( p.x() < left)
+            left = p.x();
+
+        if( p.x() > right)
+            right = p.x();
+    }
+
+    HDC dc = _pixmap->deviceContext();
+
+    HGDIOBJ oldBrush = 0;
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = getGradientBrush(dc, right - left, bottom - top,
+                                        _gradientStart, _gradientStop, _gradient);
+
+        oldBrush = SelectObject(dc, brush);
+
+        SetBrushOrgEx(dc, left, top, NULL);
+    }
+
+    HPEN originalPen = (HPEN) SelectObject(dc, GetStockObject(NULL_PEN) );
+    
+    Polygon( dc, &points[0], points.size() );
+    
+    SelectObject(dc, originalPen);
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = (HBRUSH) SelectObject(dc, oldBrush);
+        DeleteObject(brush);
+
+        SetBrushOrgEx(dc, brushOrigin.x, brushOrigin.y, NULL);
+    }
+}
+
+
+void PaintContext::onDrawRect(const Gfx::RectF& r)
+{
+    if( ! _pixmap )
+        return;
+
+    Gfx::PointF origin =  transform() * r.topLeft();
+    Gfx::SizeF size =  transform() * r.size();
+    Gfx::RectF rect(origin, size);
+
+    HDC dc = _pixmap->deviceContext();
+
+    HBRUSH originalBrush = (HBRUSH) SelectObject(dc, GetStockObject(NULL_BRUSH));
+
+    Rectangle(dc, lround(rect.left()   - 0.4999), 
+                  lround(rect.top()    - 0.4999), 
+                  lround(rect.right()  - 0.4999), 
+                  lround(rect.bottom() - 0.4999));
+
+    SelectObject(dc, originalBrush);
+}
+
+
+void PaintContext::onFillRect(const Gfx::RectF& r)
+{
+    if( ! _pixmap )
+        return;
+
+    Gfx::PointF origin =  transform() * r.topLeft();
+    Gfx::SizeF size =  transform() * r.size();
+    Gfx::RectF rect(origin, size);
+
+    HDC dc = _pixmap->deviceContext();
+
+    RECT rectangle;
+    rectangle.left   =  lround( rect.left() );
+    rectangle.top    =  lround( rect.top() );
+    rectangle.right  =  lround( rect.right() + 0.001);    
+    rectangle.bottom =  lround( rect.bottom() + 0.001);
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = getGradientBrush(dc, lround( rect.width() ), lround( rect.height() ),
+                                        _gradientStart, _gradientStop, _gradient);
+
+        POINT brushOrigin = {0};
+        SetBrushOrgEx(dc, lround(rect.x()),  lround(rect.y()), &brushOrigin);
+
+        FillRect(dc, &rectangle, brush);
+
+        SetBrushOrgEx(dc, brushOrigin.x, brushOrigin.y, NULL);
+        DeleteObject(brush);
+        return;
+    }
+
+    HBRUSH currentBrush = (HBRUSH) GetCurrentObject(dc, OBJ_BRUSH);
+    FillRect(dc, &rectangle, currentBrush);
+}
+
+
+void PaintContext::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    if( ! _pixmap )
+        return;
+
+    HDC dc = _pixmap->deviceContext();
+
+    Gfx::PointF p = transform() * topLeft;
+    Gfx::SizeF s = transform() * size;
+
+    HBRUSH originalBrush = (HBRUSH)SelectObject(dc, GetStockObject(NULL_BRUSH));
+
+    Ellipse( dc, lround( p.x() ),  
+                 lround( p.y() ), 
+                 lround( p.x() + s.width() - 1),     // - 0.999 ?
+                 lround( p.y() + s.height() - 1) );  // - 0.999 ?
+
+    SelectObject(dc, originalBrush);
+}
+
+
+void PaintContext::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    if( ! _pixmap )
+        return;
+
+    HDC dc = _pixmap->deviceContext();
+
+    Gfx::PointF p = transform() * topLeft;
+    Gfx::SizeF s = transform() * size;
+    
+    POINT brushOrigin = {0};
+    HGDIOBJ oldBrush = 0;
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = getGradientBrush(dc, lround( s.width() ), 
+                                            lround( s.height() ),
+                                        _gradientStart, _gradientStop, _gradient);
+
+        oldBrush = SelectObject(dc, brush);
+
+        SetBrushOrgEx(dc, lround(p.x()), lround(p.y()), &brushOrigin);
+    }
+
+    HPEN originalPen = (HPEN) SelectObject(dc, GetStockObject(NULL_PEN));
+
+    Ellipse( dc, lround( p.x() ),
+                  lround( p.y() ),
+                  lround( p.x() + s.width() - 1),    // - 0.999 ?
+                  lround( p.y() + s.height() - 1) ); // - 0.999 ?
+
+    SelectObject(dc, originalPen);
+
+    if(_gradientBrush)
+    {
+        HBRUSH brush = (HBRUSH) SelectObject(dc, oldBrush);
+        DeleteObject(brush);
+
+        SetBrushOrgEx(dc, brushOrigin.x, brushOrigin.y, NULL);
+    }
+}
+
+
+#ifndef PT_FORMS_GDIPLUS
+
+Gfx::TextMetrics PaintContext::onGetTextMetrics(const Pt::String& text) const
+{
+    if( ! _pixmap )
+        return Gfx::TextMetrics();
+
+    HDC dc = _pixmap->deviceContext();
+
+    //
+    // NOTE: transformation is neccessary because GDI scales the text
+    //       by the given scale factor to measure it and then scales
+    //       the actual size back because GetTextExtentPoint32 should
+    //       return logical coordinates. Without a XFORM the logical
+    //       size is inaccurate and often too short.
+    //
+
+    const Gfx::Transform& tform = transform();
+
+    XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
+                    static_cast<FLOAT>( tform.m12() ),
+                    static_cast<FLOAT>( tform.m21() ), 
+                    static_cast<FLOAT>( tform.m22() ),
+                    static_cast<FLOAT>( tform.dx() ),  
+                    static_cast<FLOAT>( tform.dy() ) };
+
+    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(dc, &oldXForm);
+    SetWorldTransform(dc, &xform);
+
+    TEXTMETRIC tm;
+    GetTextMetrics(dc, &tm);
+
+    std::wstring wtext;
+    text.toUtf16( std::back_inserter(wtext) );
+
+    SIZE textSize;
+    GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
+
+    SetWorldTransform(dc, &oldXForm);
+
+    long asc = tm.tmAscent;
+    long des = tm.tmDescent;
+    long inl = tm.tmInternalLeading;
+    long cap = tm.tmAscent - tm.tmInternalLeading;
+    long exl = tm.tmExternalLeading;
+    long lh = asc + des + exl;
+
+    Gfx::TextMetrics fm;
+    fm.setAscent(asc);
+    fm.setDescent(des);
+    fm.setCapHeight(cap);
+    fm.setLeading(exl);
+    fm.setWidth(textSize.cx);
+
+    //std::clog << "### " << text.narrow() << " " << fm.width() << std::endl;
+    return fm;
+}
+
+#else
+
+Gfx::TextMetrics PaintContext::onGetTextMetrics(const Pt::String& text) const
+{
+    if( ! _pixmap )
+        return Gfx::TextMetrics();
+
+    HDC dc = _pixmap->deviceContext();
+
+    std::wstring wtext;
+    text.toUtf16( std::back_inserter(wtext) );
+
+    Gdiplus::Font gdiFont(dc);
+    Gdiplus::Graphics graphics(dc);
+    graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+    graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+
+    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+
+    Gdiplus::FontFamily family;
+    gdiFont.GetFamily(&family);
+
+    Gdiplus::REAL lineSpacingF = gdiFont.GetHeight(graphics.GetDpiY());
+    Gdiplus::REAL sizeUnits = gdiFont.GetSize();
+
+    UINT16 ascentUnits = family.GetCellAscent(gdiFont.GetStyle());
+    UINT16 descentUnits = family.GetCellDescent(gdiFont.GetStyle());
+    UINT16 lineSpacingUnits = family.GetLineSpacing(gdiFont.GetStyle());
+    UINT16 emHeightUnits = family.GetEmHeight(gdiFont.GetStyle());
+
+    Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
+    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL heightF = ascentF + descentF;
+    Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
+
+    Gdiplus::REAL asc = ascentF;
+    Gdiplus::REAL des = descentF;
+    Gdiplus::REAL cap = emHeightF - descentF;
+    Gdiplus::REAL inl = ascentF - cap;
+    Gdiplus::REAL exl = lineSpacingF - heightF;
+    Gdiplus::REAL lh = asc + des + exl;
+
+    Gdiplus::RectF textRect;
+    graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
+                            Gdiplus::PointF(0, 0), format, &textRect);
+
+    int dpix = GetDeviceCaps(dc, LOGPIXELSX);
+    double pixelRatio = 96.0 / dpix;
+
+    Gfx::TextMetrics tm;
+    tm.setAscent(asc * pixelRatio);
+    tm.setDescent(des * pixelRatio);
+    tm.setCapHeight(cap * pixelRatio);
+    tm.setLeading(exl * pixelRatio);
+    tm.setWidth(textRect.Width * pixelRatio);
+    return tm;
+}
+#endif
+
+
+void PaintContext::onDrawText(const Gfx::PointF& to, 
+                              const Pt::String& text, 
+                              const Gfx::Transform* tform)
+{
+    if( ! _pixmap )
+        return;
+
+    HDC dc = _pixmap->deviceContext();
+
+    _text.clear();
+    text.toUtf16( std::back_inserter(_text) );
+
+    Gfx::Transform tf;
+    if(tform)
+        tf *= *tform;
+
+    tf.translate( to.x(), to.y() );
+    tf *= transform();
+
+#ifndef PT_FORMS_GDIPLUS
+    XFORM xform = { static_cast<FLOAT>( tf.m11() ), 
+                    static_cast<FLOAT>( tf.m12() ),
+                    static_cast<FLOAT>( tf.m21() ), 
+                    static_cast<FLOAT>( tf.m22() ),
+                    static_cast<FLOAT>( tf.dx() ),  
+                    static_cast<FLOAT>( tf.dy() ) };
+
+    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(dc, &oldXForm);
+
+    SetWorldTransform(dc, &xform);
+    TextOutW(dc, 0, 0, _text.c_str(), _text.size());
+    SetWorldTransform(dc, &oldXForm);
+#else
+    Gdiplus::Matrix matrix;
+    matrix.SetElements( static_cast<Gdiplus::REAL>( tf.m11() ), 
+                        static_cast<Gdiplus::REAL>( tf.m12() ),
+                        static_cast<Gdiplus::REAL>( tf.m21() ), 
+                        static_cast<Gdiplus::REAL>( tf.m22() ),
+                        static_cast<Gdiplus::REAL>( tf.dx() ), 
+                        static_cast<Gdiplus::REAL>( tf.dy() ) );
+
+    Gdiplus::Graphics graphics(dc);
+    graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
+    graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+
+    Gdiplus::Font font(dc);
+
+    Gdiplus::FontFamily family;
+    font.GetFamily(&family);
+
+    Gdiplus::REAL height = font.GetHeight( graphics.GetDpiY() );
+
+    UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
+    UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
+    UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
+    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
+
+    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
+    Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
+    Gdiplus::REAL spacing = height - ascent - descent;
+    Gdiplus::REAL offsetY = ascent + 0.5;
+    
+    Gdiplus::PointF origin( 0, -offsetY );
+    
+    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
+
+    Gdiplus::Matrix oldMatrix;
+    graphics.GetTransform(&oldMatrix);
+    graphics.SetTransform(&matrix);
+
+    const Gfx::Color& color = _penColor;
+    BYTE alpha = color.alpha() / 257;
+    BYTE red   = color.red()   / 257;
+    BYTE green = color.green() / 257; 
+    BYTE blue  = color.blue()  / 257;
+
+    Gdiplus::SolidBrush brush( Gdiplus::Color(alpha, red, green, blue) );
+
+    graphics.DrawString( _text.c_str(), _text.size(), &font, 
+                         origin, format, &brush);
+
+    graphics.SetTransform(&oldMatrix);
+#endif
+}
+
+
+void PaintContext::onDrawImage(const Gfx::PointF& toF, 
+                               const Gfx::Image& image,
+                               const Gfx::RectF* rect)
+{
+    if( ! _pixmap )
+        return;
+
+    HDC dc = _pixmap->deviceContext();
+
+    Gfx::PointF to = transform() * toF;
+
+    int fromX = 0;
+    int fromY = 0;
+    int width = image.width();
+    int height = image.height();
+
+    if(rect)
+    {
+        fromX = lround( rect->x() );
+        fromY = lround( rect->y()) ;
+        width = lround( rect->width() );
+        height = lround( rect->height() );
+    }
+
+    switch (_compositionMode)
+    {
+        case Gfx::CompositionMode::SourceCopy:
+        {
+            const Pt::uint8_t* data = image.data();
+            size_t depth = image.view().pixelStride() * 8;
+            size_t pixelStride = image.view().pixelStride();
+
+            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
+                                          depth, (VOID*)data);
+            if (bitmap == NULL)
+            {
+                BITMAPINFO bitmapInfo;
+                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+                bitmapInfo.bmiHeader.biWidth        = image.width();
+                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
+                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
+                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
+
+                VOID* imageBits = 0;
+                bitmap = CreateDIBSection(dc, &bitmapInfo,
+                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
+                memcpy(imageBits, data, image.width() * image.height() * pixelStride);
+            }
+
+            HDC bitmapDC = CreateCompatibleDC(NULL);
+            SelectObject(bitmapDC, bitmap);
+
+            BitBlt(dc, lround(to.x()), lround(to.y()), width, height,
+                   bitmapDC, fromX, fromY, SRCCOPY);
+
+            DeleteDC(bitmapDC);
+            DeleteObject(bitmap);
+            break;
+        }
+
+        case Gfx::CompositionMode::SourceOver:
+        {
+            std::vector<Pt::uint8_t> bitmapData;
+            toPreMulAlpha(image, bitmapData);
+
+            const Pt::uint8_t* data =  bitmapData.empty() ? 0 : &bitmapData[0];
+            size_t depth = image.view().pixelStride() * 8;
+            size_t pixelStride = image.view().pixelStride();
+
+            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
+                                          depth, (VOID*)data);
+            if (bitmap == NULL)
+            {
+                BITMAPINFO bitmapInfo;
+                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+                bitmapInfo.bmiHeader.biWidth        = image.width();
+                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
+                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
+                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
+
+                VOID* imageBits = 0;
+                bitmap = CreateDIBSection(dc, &bitmapInfo,
+                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
+                memcpy(imageBits, data, image.width() * image.height() * pixelStride);
+            }
+
+            HDC bitmapDC = CreateCompatibleDC(NULL);
+            SelectObject(bitmapDC, bitmap);
+
+            BLENDFUNCTION bf;
+            bf.BlendOp = AC_SRC_OVER;
+            bf.BlendFlags = 0;
+            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
+            bf.AlphaFormat = AC_SRC_ALPHA;
+
+            AlphaBlend(dc, lround(to.x()), lround(to.y()), width, height, 
+                       bitmapDC, fromX, fromY, width, height, bf);
+
+            DeleteObject(bitmap);
+            DeleteDC(bitmapDC);
+            break;
+        }
+    }
+}
+
+
+void PaintContext::onSetPath(const Gfx::Path& path)
+{
+    _path = path;
 }
 
 
@@ -551,9 +1252,9 @@ void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
 
 void PaintContext::onDrawPath()
 {
-    if(_pixmapCanvas)
+    if(_pixmap)
     {
-        HDC dc = _pixmapCanvas->deviceContext();
+        HDC dc = _pixmap->deviceContext();
         buildPath(dc, _path);
         StrokePath(dc);
     }
@@ -562,11 +1263,83 @@ void PaintContext::onDrawPath()
 
 void PaintContext::onFillPath()
 {
-    if(_pixmapCanvas)
+    if(_pixmap)
     {
-        HDC dc = _pixmapCanvas->deviceContext();
+        HDC dc = _pixmap->deviceContext();
         buildPath(dc, _path);
         FillPath(dc);
+    }
+}
+
+
+bool PaintContext::onDrawLayer(const Gfx::PointF& to,
+                               const Gfx::PaintLayer& layer,
+                               const Gfx::RectF* rect)
+{
+    //return Gfx::PaintContext::onDrawLayer(to, layer, rect);
+
+    const Gfx::PaintSurface* layerSurface = layer.surface();
+    const PixmapImpl* pixmap = dynamic_cast<const PixmapImpl*>(layerSurface);
+    if(pixmap)
+    {
+        onDrawPixmap(to, *pixmap, rect);
+        return true;
+    }
+
+    return false;
+}
+
+
+void PaintContext::onDrawPixmap(const Gfx::PointF& toF, 
+                                const PixmapImpl& pixmap,
+                                const Gfx::RectF* rect)
+{
+    if( ! _pixmap )
+        return;
+
+    HDC dc = _pixmap->deviceContext();
+
+    Gfx::PointF to = transform() * toF;
+
+    int fromX = 0;
+    int fromY = 0;
+    int width = lround( pixmap.size().width() );
+    int height = lround( pixmap.size().height() );
+
+    if(rect)
+    {
+        const Gfx::Scaling& scaling = pixmap.scaling();
+        Gfx::RectF rectP = scaling.toPhysical(*rect);
+        
+        fromX = lround( rectP.x() );
+        fromY = lround( rectP.y()) ;
+        width = lround( rectP.width() );
+        height = lround( rectP.height() );
+    }
+
+    switch (_compositionMode)
+    {
+        case Gfx::CompositionMode::SourceCopy:
+        {
+            BitBlt(dc, lround(to.x()), lround(to.y()), width, height,
+                   pixmap.deviceContext(), fromX, fromY, SRCCOPY);
+        }
+        break;
+
+        case Gfx::CompositionMode::SourceOver:
+        {
+            BLENDFUNCTION bf;
+            bf.BlendOp = AC_SRC_OVER;
+            bf.BlendFlags = 0;
+            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
+            bf.AlphaFormat = AC_SRC_ALPHA;
+
+            HDC pixmapDC = pixmap.deviceContext();
+
+            AlphaBlend(dc, lround(to.x()), lround(to.y()), width, height,
+                       pixmapDC, fromX, fromY, width, height, bf);
+        }
+        break;
     }
 }
 

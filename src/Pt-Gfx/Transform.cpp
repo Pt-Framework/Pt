@@ -28,6 +28,9 @@
 */
 
 #include <Pt/Gfx/Transform.h>
+
+#include <limits>
+#include <cmath>
 #include <cstring>
 
 namespace Pt {
@@ -56,6 +59,22 @@ Transform::~Transform()
 bool Transform::isIdentity() const
 {
     return _isIdentity;
+}
+
+
+bool Transform::isAffine() const
+{
+    return true;
+}
+
+bool Transform::isSimple() const
+{
+    double a = std::abs( m12() );
+    double b = std::abs( m21() );
+
+    const double eps = std::numeric_limits<double>::epsilon();
+
+    return a < eps && b < eps;
 }
 
 

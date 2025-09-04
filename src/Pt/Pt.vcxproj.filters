@@ -1674,9 +1674,6 @@
     <ClInclude Include="..\Pt-Gfx\raster\FreeType.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\ImageCanvas.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\raster\LineEdge.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
@@ -4680,9 +4677,6 @@
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\raster\FreeType.cpp">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\raster\ImageCanvas.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\raster\RasterContext.cpp">

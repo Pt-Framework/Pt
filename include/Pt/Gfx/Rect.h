@@ -119,6 +119,11 @@ class BasicRect
             _s = BasicSize<T>(  right - left , bottom - top );
         }
 
+        const BasicPoint<T>& origin() const
+        {
+            return _p;
+        }
+
         void setOrigin(const BasicPoint<T>& p)
         {
             _p = p;

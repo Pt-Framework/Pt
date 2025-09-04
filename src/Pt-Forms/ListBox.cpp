@@ -329,7 +329,7 @@ void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& paint
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
-    Gfx::SizeF pictureSize = painter.scaling().toLogical( _picture.size() );
+    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;

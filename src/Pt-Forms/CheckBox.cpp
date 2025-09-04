@@ -239,7 +239,7 @@ void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    const Gfx::Scaling& scaling = painter.scaling();
+    const Gfx::Scaling& scaling = this->scaling();
 
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 1.5);
 

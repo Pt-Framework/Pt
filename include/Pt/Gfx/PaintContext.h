@@ -51,7 +51,6 @@ namespace Pt {
 namespace Gfx {
 
 class Paint;
-class Canvas;
 class Polyline;
 class PaintLayer;
 
@@ -59,8 +58,7 @@ class PaintLayer;
 */
 class PT_GFX_API PaintContext
 {
-    friend class Canvas;
-    friend class PaintLayer;
+    friend class PaintSurface;
 
     protected:
         PaintContext();
@@ -76,13 +74,17 @@ class PT_GFX_API PaintContext
 
         const Scaling& scaling() const;
 
+        void setScaling(const Scaling& scaling);
+
         const Gfx::Transform& transform() const;
+
+        const Gfx::ImageFormat& format() const;
+
+        bool isActive() const;
 
         void beginPaint(const Gfx::Paint& paint);
 
         void finishPaint();
-
-        bool isActive() const;
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);
@@ -123,7 +125,7 @@ class PT_GFX_API PaintContext
         TextMetrics textMetrics(const Pt::String& text) const;
 
         void drawText(const PointF& to, const Pt::String& text, 
-                      const Transform* t = 0);
+                      const Transform* tform = 0);
 
     public:
         void drawImage(const Gfx::PointF& to, 
@@ -135,72 +137,80 @@ class PT_GFX_API PaintContext
                        const Gfx::RectF* rect = 0);
 
     protected:
-        virtual void onBeginPaint(const Gfx::Paint& paint) {};
+        virtual void onBeginPaint(const Gfx::Paint& paint);
        
-        virtual void onResetPaint() {};
+        virtual void onResetPaint();
 
+    protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
+
+        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
         virtual void onSetPen(const Pen& pen) = 0;
 
-        virtual void onApplyPen(const Gfx::Pen& pen) {};
+        virtual void onApplyPen(const Gfx::Pen& pen) = 0;
 
         virtual void onSetBrush(const Brush& pen) = 0;
 
+        virtual void onApplyBrush(const Brush& pen) = 0;
+
         virtual void onSetFont(const Gfx::Font& font) = 0;
+
+        virtual void onApplyFont(const Gfx::Font& font) = 0;
 
         virtual void onSetClip(const Gfx::RectF* clip) = 0;
 
-        virtual void onSetPath(const Path& path) = 0;
+        virtual void onApplyClip(const Gfx::RectF* clip) = 0;
 
     protected:
+        virtual void onDrawLine(const PointF& from, const PointF& to) = 0;
+
+        virtual void onDrawPolyline(const Gfx::PointF* pts, const size_t n) = 0;
+
+        virtual void onFillPolygon(const Gfx::PointF* ps, const size_t n) = 0;
+
+        virtual void onDrawRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void onFillRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+    protected:
+        virtual void onSetPath(const Path& path) = 0;
+
         virtual void onDrawPath() = 0;
 
         virtual void onFillPath() = 0;
 
-    private:
-        void attachCanvas(Canvas& canvas);
+    protected:
+        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const = 0;
 
-        void detachCanvas(Canvas& canvas);
+        virtual void onDrawText(const Gfx::PointF& to, 
+                                const Pt::String& text, 
+                                const Gfx::Transform* transform) = 0;
+
+    protected:
+        virtual void onDrawImage(const Gfx::PointF& to, 
+                                 const Gfx::Image& image, 
+                                 const Gfx::RectF* rect = 0) = 0;
+
+        virtual bool onDrawLayer(const Gfx::PointF& to,
+                                 const Gfx::PaintLayer& layer,
+                                 const Gfx::RectF* rect = 0) = 0;
 
     private:
-        Canvas*        _canvas;
-        Canvas*        _active;
+        void attachSurface(PaintSurface& surface);
+
+        void detachSurface(PaintSurface& surface);
+
+    private:
+        PaintSurface*  _surface;
+        PaintSurface*  _active;
         RectF          _region;
         Gfx::Scaling   _scaling;
-        RectF          _clip;
-        bool           _hasClip;
         Transform      _tx;
-};
-
-/** @brief Polyline.
-*/
-class Polyline
-{
-    public:
-        Polyline(PaintContext& paint,
-                 const Gfx::PointF* points, 
-                 std::size_t n)
-        : _paint(paint)
-        , _points(points)
-        , _n(n)
-        { }
-
-        Gfx::PointF at(std::size_t n) const
-        {
-            Gfx::PointF p = _points[n] + _paint.origin();
-            return _paint.scaling().toPhysical(p);
-        }
-
-        std::size_t size() const
-        {
-            return _n;
-        }
-
-    private:
-        PaintContext&      _paint;
-        const Gfx::PointF* _points;
-        std::size_t        _n;
 };
 
 } // namespace
