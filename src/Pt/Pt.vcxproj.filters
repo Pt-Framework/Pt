@@ -2943,6 +2943,9 @@
     <ClInclude Include="..\..\include\Pt\JsonRpc\Responder.h">
       <Filter>Pt-JsonRpc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Polygon.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">

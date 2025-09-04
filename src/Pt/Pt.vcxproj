@@ -95,6 +95,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Polygon.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h" />

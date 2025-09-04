@@ -32,151 +32,23 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Polygon.h>
 #include <Pt/Gfx/Transform.h>
+#include <Pt/SmartPtr.h>
 #include <vector>
-#include <limits>
 
 namespace Pt {
 
 namespace Gfx {
 
+class PathData;
 
-class Polygon
-{
-    public:
-        Polygon(const PointF* ps, std::size_t n)
-        : _points(ps, ps + n)
-        {
-        }
-
-        Polygon()
-        {
-        }
-
-        void assign(const PointF* ps, std::size_t n)
-        {
-            _points.assign(ps, ps+n);
-        }
-
-
-        const PointF& operator[](std::size_t n) const
-        {
-            return _points[n];
-        }
-
-        PointF& operator[](std::size_t n)
-        {
-            return _points[n];
-        }
-
-        const PointF& at(std::size_t n) const
-        {
-            return _points[n];
-        }
-
-        PointF& at(std::size_t n)
-        {
-            return _points[n];
-        }
-
-        void clear()
-        {
-            _points.clear();
-        }
-
-        bool empty() const
-        {
-            return _points.empty();
-        }
-
-        std::size_t size() const
-        {
-            return _points.size();
-        }
-
-        void push_back(const PointF& p)
-        {
-            _points.push_back(p);
-        }
-
-        std::vector<PointF>& points()
-        {
-            return _points;
-        }
-
-        const std::vector<PointF>& points() const
-        {
-            return _points;
-        }
-
-#if 0
-        Polygon toPixel() const
-        {
-
-            double xmin = std::numeric_limits<double>::max();
-            double xmax = std::numeric_limits<double>::min();
-            double ymin = std::numeric_limits<double>::max();
-            double ymax = std::numeric_limits<double>::min();
-
-            for (size_t i = 0; i < _points.size(); ++i)
-            {
-                xmin = std::min(xmin, _points[i].x());
-                xmax = std::max(xmax, _points[i].x());
-                ymin = std::min(ymin, _points[i].y());
-                ymax = std::max(ymax, _points[i].y());
-            }
-
-            const double w2 = (xmax - xmin) / 2;
-            const double h2 = (ymax - ymin) / 2;
-            const double transx = xmin + w2;
-            const double transy = ymin + h2;
-
-            Polygon polygon;
-
-            for (size_t i = 0; i < _points.size(); ++i)
-            {
-                PointF point = _points[i];
-
-                point.addX(-transx);
-                point.addY(-transy);
-
-                const double distx = std::abs(point.x());
-
-                if (distx >= std::numeric_limits<double>::epsilon())
-                {
-                    const double xscale = (distx - 0.5) / distx;
-                    point.setX(point.x() * xscale);
-                }
-
-                point.addX(transx - 0.5);
-
-                const double disty = std::abs(point.y());
-
-                if (disty >= std::numeric_limits<double>::epsilon())
-                {
-                    const double yscale = (disty - 0.5) / disty;
-                    point.setY(point.y() * yscale);
-                }
-
-                point.addY(transy - 0.5);
-
-                polygon.push_back(point);
-            }
-
-            return polygon;
-        }
-#endif
-
-    private:
-        std::vector<PointF> _points;
-};
-
-
+/* @brief Element of a path.
+*/
 struct Element
 {
-    enum ElementType
+    enum Type
     {
         IT_Close,
         IT_MoveTo,
@@ -186,34 +58,37 @@ struct Element
         IT_GenNBezierTo
     };
 
-    Element(ElementType type_)
+    Element(Type type_)
     : type(type_)
     {}
 
-    Element(ElementType type_, double x0, double y0)
+    Element(Type type_, double x0, double y0)
     : type(type_), pxy(2)
     { pxy[0] = x0; pxy[1] = y0; }
 
-    Element(ElementType type_, double x0, double y0, double x1, double y1)
+    Element(Type type_, double x0, double y0, double x1, double y1)
     : type(type_), pxy(4)
     { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; }
 
-    Element(ElementType type_, double x0, double y0, double x1, double y1, double x2, double y2)
+    Element(Type type_, double x0, double y0, double x1, double y1, double x2, double y2)
     : type(type_), pxy(6)
     { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; pxy[4] = x2; pxy[5] = y2; }
 
-    Element(ElementType type_, const std::vector<double>& pxy_)
+    Element(Type type_, const std::vector<double>& pxy_)
     : type(type_), pxy(pxy_)
     {}
 
-
-    ElementType         type;
+    Type                type;
     std::vector<double> pxy;
 };
 
-
+/* @brief Graphics path.
+*/
 class PT_GFX_API Path
 {
+    public:
+        typedef std::vector<Element> Elements;
+
     public:
         Path();
 
@@ -251,9 +126,9 @@ class PT_GFX_API Path
         */
         void addPath(const Path& p);
 
-        /** @brief Inserts a path into the current subpath.
+        /** @brief Appends a path into the current subpath.
         */
-        void insertPath(const Path& p);
+        void appendPath(const Path& p);
 
         void addRect(const SizeF& size);
 
@@ -268,6 +143,52 @@ class PT_GFX_API Path
         void transform(const Transform& transform);
 
         void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const;
+
+        void detach();
+
+    private:
+        SmartPtr<PathData> _pathData;
+};
+
+/* @internal Path data.
+*/
+class PathData
+{
+    public:
+        typedef std::vector<Element> Elements;
+
+    public:
+        PathData()
+        {}
+
+        ~PathData()
+        {
+        }
+
+        void clear()
+        {
+            return _elements.clear();
+        }
+
+        const PointF& currentPosition() const
+        {
+            return _position;
+        }
+
+        void setCurrentPosition(const PointF& p)
+        {
+            _position = p;
+        }
+
+        Elements& elements() 
+        {
+            return _elements;
+        }
+
+        const Elements& elements() const 
+        {
+            return _elements;
+        }
 
     private:
         typedef std::vector<Element> ElementVector;
