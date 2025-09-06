@@ -241,19 +241,25 @@ void Path::detach()
 
 std::size_t Path::size() const
 {
-    return _pathData->elements().size();
+    return _pathData->size();
 }
 
 
 bool Path::isEmpty() const
 {
-   return _pathData->elements().empty();
+   return _pathData->isEmpty();
 }
 
 
-const Element& Path::at(std::size_t n) const
+Path::Iterator Path::begin() const 
 {
-    return _pathData->elements().at(n);
+    return _pathData->begin();
+}
+
+
+Path::Iterator Path::end() const 
+{
+    return _pathData->end();
 }
 
 
@@ -261,7 +267,7 @@ void Path::clear()
 {
     detach();
 
-    return _pathData->elements().clear();
+    return _pathData->clear();
 }
 
 
@@ -280,23 +286,44 @@ const PointF& Path::currentPosition() const
 }
 
 
-void Path::moveTo(const PointF& p)
+void Path::moveTo(const PointF& to)
 {
     detach();
 
-    Element elem(Element::IT_MoveTo, p.x() , p.y());
-    _pathData->elements().push_back(elem);
-    _pathData->setCurrentPosition(p);
+    _pathData->moveTo(to);
 }
 
 
-void Path::lineTo(const PointF& p)
+void Path::lineTo(const PointF& to)
 {
     detach();
 
-    Element elem(Element::IT_LineTo, p.x() , p.y());
-    _pathData->elements().push_back(elem);
-    _pathData->setCurrentPosition(p);
+   _pathData->lineTo(to);
+}
+
+
+void Path::quadTo(const PointF &c, const PointF& to)
+{
+    detach();
+
+    _pathData->quadTo(c, to);
+
+}
+
+
+void Path::cubicTo(const PointF& c1, const PointF& c2, const PointF& to)
+{   
+    detach();
+
+    _pathData->cubicTo(c1, c2, to);
+}
+
+
+void Path::bezierTo(const PointF* cps, size_t cn, const PointF& to)
+{
+    detach();
+
+    _pathData->bezierTo(cps, cn, to);
 }
 
 
@@ -356,8 +383,7 @@ void Path::arcTo(const PointF& p, double r)
     const double c1x3 = c1x4 - nyrx * od;
     const double c1y3 = c1y4 - nxry * od;
 
-    Element elem1(Element::IT_CubicBezierTo, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4);
-    _pathData->elements().push_back(elem1);
+    cubicTo( PointF(c1x2, c1y2), PointF(c1x3, c1y3), PointF(c1x4, c1y4) );
 
     // Curve #2
     const double c2x1 = xm   + nxrx;
@@ -369,53 +395,7 @@ void Path::arcTo(const PointF& p, double r)
     const double c2x3 = c2x4 - nxrx * od;
     const double c2y3 = c2y4 + nyry * od;
 
-    Element elem2(Element::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
-    _pathData->elements().push_back(elem2);
-
-    _pathData->setCurrentPosition(p);
-}
-
-
-void Path::quadraticBezierTo(const PointF &c, const PointF& to)
-{
-    detach();
-
-    Element elem(Element::IT_QuadBezierTo, c.x() , c.y(), to.x(), to.y());
-    _pathData->elements().push_back(elem);
-    _pathData->setCurrentPosition(to);
-
-}
-
-
-void Path::cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to)
-{
-    detach();
-    
-    Element elem(Element::IT_CubicBezierTo,
-                 c1.x() , c1.y(), c2.x(), c2.y(), to.x(), to.y());
-    _pathData->elements().push_back(elem);
-    _pathData->setCurrentPosition(to);
-}
-
-
-void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& to)
-{
-    detach();
-
-    std::vector<double> points;
-
-    for(size_t i = 0; i < controlPointCount; ++i)
-    {
-        points.push_back(cxy[i].x());
-        points.push_back(cxy[i].y());
-    }
-
-    points.push_back(to.x());
-    points.push_back(to.y());
-
-    Element elem(Element::IT_GenNBezierTo, points);
-    _pathData->elements().push_back(elem);
-    _pathData->setCurrentPosition(to);
+    cubicTo( PointF(c2x2, c2y2), PointF(c2x3, c2y3), PointF(c2x4, c2y4) );
 }
 
 
@@ -423,8 +403,7 @@ void Path::close()
 {
     detach();
 
-    Element elem(Element::IT_Close);
-    _pathData->elements().push_back(elem);
+    _pathData->close();
 }
 
 
@@ -439,12 +418,7 @@ void Path::appendPath(const Path& p)
 {
     detach();
 
-    Elements::const_iterator it;
-    Elements& otherElements = p._pathData->elements();
-    Elements& elements = _pathData->elements();
-
-    for(it = otherElements.begin(); it != otherElements.end(); ++it)
-        elements.push_back( *it);
+    _pathData->append(*p._pathData);
 }
 
 
@@ -473,18 +447,18 @@ void Path::addRoundedRect(const SizeF& size, float radius)
     double y = pos.y();
 
     moveTo(Pt::Gfx::PointF(x, y +  radius));
-    quadraticBezierTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));
+    quadTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));
 
     lineTo(Pt::Gfx::PointF(x +  size.width() - radius, y));
-    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y),
+    quadTo(Pt::Gfx::PointF(x + size.width(), y),
                       Pt::Gfx::PointF(x + size.width(), y + radius));
 
     lineTo(Pt::Gfx::PointF(x +  size.width(), y + size.height() - radius));
-    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y+ size.height() ),
+    quadTo(Pt::Gfx::PointF(x + size.width(), y+ size.height() ),
                       Pt::Gfx::PointF(x + size.width() - radius, y + size.height()));
 
     lineTo(Pt::Gfx::PointF(x +  radius, y + size.height()));
-    quadraticBezierTo(Pt::Gfx::PointF(x, y + size.height()),
+    quadTo(Pt::Gfx::PointF(x, y + size.height()),
                       Pt::Gfx::PointF(x, y + size.height() - radius));
 
     lineTo(Pt::Gfx::PointF(x, y + radius));
@@ -530,83 +504,11 @@ void Path::addChord(const SizeF& size,  float degBegin, float degEnd)
 }
 
 
-void Path::transform(const Transform& transform)
+void Path::transform(const Transform& tform)
 {
     detach();
 
-   // For convenience
-    typedef Elements::iterator PathIterator;
-
-    Elements& elements = _pathData->elements();
-
-    // Walk through the instructions
-    for(PathIterator it = elements.begin(); it != elements.end(); ++it)
-    {
-        // Get the instruction
-        Element& elem = *it;
-
-        // Act based on the type of the instruction
-        switch(elem.type)
-        {
-            case Element::IT_Close:
-                break;
-
-            case Element::IT_MoveTo:
-            case Element::IT_LineTo:
-            {
-                Pt::Gfx::PointF p( elem.pxy[0], elem.pxy[1] );
-                p = transform * p;
-
-                elem.pxy[0] = p.x();
-                elem.pxy[1] = p.y();
-                break;
-            }
-
-            case Element::IT_QuadBezierTo:
-            {
-                Pt::Gfx::PointF p1( elem.pxy[0], elem.pxy[1] );
-                p1 = transform * p1;
-
-                elem.pxy[0] = p1.x();
-                elem.pxy[1] = p1.y();
-
-                Pt::Gfx::PointF p2( elem.pxy[2], elem.pxy[3] );
-                p2 = transform * p2;
-
-                elem.pxy[2] = p2.x();
-                elem.pxy[3] = p2.y();
-                break;
-            }
-
-            case Element::IT_CubicBezierTo:
-            {
-                Pt::Gfx::PointF p1( elem.pxy[0], elem.pxy[1] );
-                p1 = transform * p1;
-
-                elem.pxy[0] = p1.x();
-                elem.pxy[1] = p1.y();
-
-                Pt::Gfx::PointF p2( elem.pxy[2], elem.pxy[3] );
-                p2 = transform * p2;
-
-                elem.pxy[2] = p2.x();
-                elem.pxy[3] = p2.y();
-
-                Pt::Gfx::PointF p3( elem.pxy[4], elem.pxy[5] );
-                p3 = transform * p3;
-
-                elem.pxy[4] = p3.x();
-                elem.pxy[5] = p3.y();
-                break;
-            }
-
-            case Element::IT_GenNBezierTo:
-                break;
-
-            default:
-                break;
-        }
-    }
+    _pathData->transform(tform);
 }
 
 
@@ -617,57 +519,66 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
     double curY = 0.0;
 
     Polygon polygon;
-    Elements& elements = _pathData->elements();
 
-    Elements::const_iterator it;
-    for(it = elements.begin(); it != elements.end(); ++it)
+    for(PathIterator it = _pathData->begin(); it != _pathData->end(); ++it)
     {
-        // Get the instruction
-        const Element& ins = *it;
+        const PathElement& elem = *it;
 
-        // Act based on the type of the instruction
-        switch(ins.type)
+        switch( elem.type() )
         {
-            case Element::IT_Close:
+            case Path::Close:
+            {
                 polygons.push_back(polygon);
                 polygon.clear();
                 break;
+            }
 
-            case Element::IT_MoveTo:
-                curX = ins.pxy[0];
-                curY = ins.pxy[1];
+            case Path::MoveTo:
+            {
+                const PointF& to = it->point(0);
+                curX = to.x();
+                curY = to.y();
                 break;
+            }
 
-            case Element::IT_LineTo:
+            case Path::LineTo:
+            {
                 if( polygon.empty() )
                     polygon.push_back( PointF(curX, curY) );
 
-                curX = ins.pxy[0];
-                curY = ins.pxy[1];
-                polygon.push_back( PointF(curX, curY) );
+                const PointF& to = it->point(0);
+                polygon.push_back(to);
+                
+                curX = to.x();
+                curY = to.y();
                 break;
+            }
 
-            case Element::IT_QuadBezierTo:
+            case Path::QuadTo:
+            {
+                const PointF& c1 = it->point(0);
+                const PointF& to = it->point(1);
                 quadraticBezierToPoints(polygon.points(), curX, curY, 
-                                        ins.pxy[0], ins.pxy[1], 
-                                        ins.pxy[2], ins.pxy[3], smoothness);
-                curX = ins.pxy[2];
-                curY = ins.pxy[3];
+                                        c1.x(), c1.y(), 
+                                        to.x(), to.y(), smoothness);
+                curX = to.x();
+                curY = to.y();
                 break;
+            }
 
-            case Element::IT_CubicBezierTo:
+            case Path::CubicTo:
+            {
+                const PointF& c1 = it->point(0);
+                const PointF& c2 = it->point(1);
+                const PointF& to = it->point(3);
+
                 cubicBezierToPoints(polygon.points(), curX, curY, 
-                                    ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], 
-                                    ins.pxy[4], ins.pxy[5], smoothness);
-                curX = ins.pxy[4];
-                curY = ins.pxy[5];
+                                    c1.x(), c1.y(), c2.x(), c2.y(), 
+                                    to.x(), to.y(), smoothness);
+                curX = to.x();
+                curY = to.y();
                 break;
-
-            case Element::IT_GenNBezierTo:
-                bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
-                curX = ins.pxy[ins.pxy.size() - 2];
-                curY = ins.pxy[ins.pxy.size() - 1];
-                break;
+            }
 
             default:
                 break;
@@ -676,6 +587,82 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
 
     if( ! polygon.empty() )
         polygon.push_back( polygon.at(0) );
+}
+
+
+void PathData::append(const PathData& path)
+{
+    _entries.insert(_entries.end(), 
+                    path._entries.cbegin(), path._entries.end());
+
+    _points.insert(_points.end(), 
+                    path._points.cbegin(), path._points.end());
+}
+
+
+void PathData::moveTo(const PointF& to)
+{
+    _entries.push_back( PathEntry(Path::MoveTo, 1) );
+    _points.push_back(to);
+    
+    setCurrentPosition(to);
+}
+
+
+void PathData::lineTo(const PointF& to)
+{
+    _entries.push_back( PathEntry(Path::LineTo, 1) );
+    _points.push_back(to);
+
+    setCurrentPosition(to);
+}
+
+
+void PathData::quadTo(const PointF& c, const PointF& to)
+{
+    _entries.push_back( PathEntry(Path::QuadTo, 2) );
+    _points.push_back(c);
+    _points.push_back(to);
+
+    setCurrentPosition(to);
+}
+
+
+void PathData::cubicTo(const PointF& c1, const PointF& c2, const PointF& to)
+{
+    _entries.push_back( PathEntry(Path::CubicTo, 3) );
+    _points.push_back(c1);
+    _points.push_back(c2);
+    _points.push_back(to);
+
+    setCurrentPosition(to);
+}
+
+void PathData::bezierTo(const PointF* cps, size_t cn, const PointF& to)
+{
+    //_entries.push_back( PathEntry(Path::BezierTo, n) );
+
+    //for(const PointF* c)
+    //    _points.push_back(*p);
+    //
+    //_points.push_back(to);
+
+    setCurrentPosition(to);
+}
+
+
+void PathData::close()
+{
+    _entries.push_back( PathEntry(Path::Close, 0) );
+}
+
+
+void PathData::transform(const Transform& tform)
+{
+    for(std::vector<PointF>::iterator it = _points.begin(); it != _points.end(); ++it)
+    {
+        *it = tform * *it;
+    }
 }
 
 } // namespace

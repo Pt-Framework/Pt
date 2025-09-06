@@ -144,6 +144,8 @@ class PaintContext : public Gfx::PaintContext
     private:
         POINT toContext(double x, double y);
 
+        POINT toContext(const Gfx::PointF& p);
+
         void buildPath(HDC dc, const Gfx::Path& path);
 
     private:

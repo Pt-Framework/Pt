@@ -36,58 +36,35 @@
 #include <Pt/Gfx/Polygon.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/SmartPtr.h>
+
 #include <vector>
+#include <iterator>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
 class PathData;
-
-/* @brief Element of a path.
-*/
-struct Element
-{
-    enum Type
-    {
-        IT_Close,
-        IT_MoveTo,
-        IT_LineTo,
-        IT_QuadBezierTo,
-        IT_CubicBezierTo,
-        IT_GenNBezierTo
-    };
-
-    Element(Type type_)
-    : type(type_)
-    {}
-
-    Element(Type type_, double x0, double y0)
-    : type(type_), pxy(2)
-    { pxy[0] = x0; pxy[1] = y0; }
-
-    Element(Type type_, double x0, double y0, double x1, double y1)
-    : type(type_), pxy(4)
-    { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; }
-
-    Element(Type type_, double x0, double y0, double x1, double y1, double x2, double y2)
-    : type(type_), pxy(6)
-    { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; pxy[4] = x2; pxy[5] = y2; }
-
-    Element(Type type_, const std::vector<double>& pxy_)
-    : type(type_), pxy(pxy_)
-    {}
-
-    Type                type;
-    std::vector<double> pxy;
-};
+class PathElement;
+class PathIterator;
 
 /* @brief Graphics path.
 */
 class PT_GFX_API Path
 {
     public:
-        typedef std::vector<Element> Elements;
+        enum ElementType
+        {
+            MoveTo,
+            LineTo,
+            QuadTo,
+            CubicTo,
+            Close
+        };
+
+        typedef PathIterator Iterator;
+        typedef PathElement Element;
 
     public:
         Path();
@@ -98,7 +75,9 @@ class PT_GFX_API Path
 
         bool isEmpty() const;
 
-        const Element& at(std::size_t n) const;
+        Iterator begin() const;
+
+        Iterator end() const;
 
         void clear();
 
@@ -110,13 +89,15 @@ class PT_GFX_API Path
 
         void lineTo(const PointF& p);
 
+        void quadTo(const PointF &c, const PointF& to);
+
+        void cubicTo(const PointF &c1, const PointF &c2, const PointF& to);
+
+        /** @internal @brief Not implemented.
+        */
+        void bezierTo(const PointF* cps, size_t cn, const PointF& to);
+
         void arcTo(const PointF& p, double r);
-
-        void quadraticBezierTo(const PointF &c, const PointF& to);
-
-        void cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to);
-
-        void bezierTo(const PointF* controlPoints, size_t n, const PointF& to);
 
         /** @brief closes the current subpath.
         */
@@ -144,10 +125,152 @@ class PT_GFX_API Path
 
         void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const;
 
+    private:
         void detach();
 
     private:
         SmartPtr<PathData> _pathData;
+};
+
+/* @internal @brief Path entry.
+*/
+class PathEntry
+{
+    public:
+        typedef Path::ElementType Type;
+
+    public:
+        PathEntry(Type type, std::size_t n)
+        : _type(type)
+        , _size(n)
+        {
+        }
+
+        Type type() const
+        {
+            return _type;
+        }
+
+        std::size_t size() const
+        {
+            return _size;
+        }
+
+    private:
+        Type         _type;
+        std::size_t  _size;
+};
+
+/* @brief Path element.
+*/
+class PathElement 
+{
+    friend class PathIterator;
+
+    protected:
+        PathElement(const PathEntry* entry, const PointF* points)
+        : _entry(entry)
+        , _points(points)
+        {
+        }
+        
+        void set(const PathEntry* entry, const PointF* points)
+        {
+            _entry = entry;
+            _points =  points;
+        }
+    
+    public:
+        Path::ElementType type() const
+        {
+            return _entry->type();
+        }
+        
+        std::size_t size() const
+        {
+            return _entry->size();
+        }
+
+        const PointF& point(std::size_t n) const
+        {
+            return _points[n];
+        }
+
+    private:
+        const PathEntry*  _entry;
+        const PointF*     _points;
+};
+
+/* @brief Iterator for path elements.
+*/
+class PathIterator
+{
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = Path::Element;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const Path::Element*;
+        using reference = const Path::Element&;
+
+        PathIterator()
+        : _entry(0)
+        , _points(0)
+        , _element(0, 0)
+        {
+        }
+
+        PathIterator(const PathEntry* entry, const PointF* points)
+        : _entry(entry)
+        , _points(points)
+        , _element(_entry, _points)
+        {
+        }
+
+        const Path::Element& operator*() const 
+        {
+            return _element;
+        }
+
+        const Path::Element* operator->() const 
+        {
+            return &_element;
+        }
+
+        PathIterator& operator++() 
+        {
+            _points += _entry->size();
+            ++_entry;
+            
+            _element.set(_entry, _points);
+            return *this;
+        }
+
+        PathIterator operator++(int) 
+        {
+            PathIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        bool operator == (const PathIterator& other) const 
+        { 
+            return _entry == other._entry; 
+        }
+        
+        bool operator != (const PathIterator& other) const 
+        { 
+            return _entry != other._entry; 
+        }
+
+        bool operator < (const PathIterator & other) const
+        {
+          return _entry < other._entry;
+        }
+
+    private:
+        const PathEntry*  _entry;
+        const PointF*     _points;
+        Path::Element     _element;
 };
 
 /* @internal Path data.
@@ -155,20 +278,11 @@ class PT_GFX_API Path
 class PathData
 {
     public:
-        typedef std::vector<Element> Elements;
-
-    public:
         PathData()
-        {}
+        { }
 
         ~PathData()
-        {
-        }
-
-        void clear()
-        {
-            return _elements.clear();
-        }
+        { }
 
         const PointF& currentPosition() const
         {
@@ -180,22 +294,52 @@ class PathData
             _position = p;
         }
 
-        Elements& elements() 
+        Path::Iterator begin() const 
         {
-            return _elements;
+            return Path::Iterator( _entries.data(), _points.data() );
         }
 
-        const Elements& elements() const 
+        Path::Iterator end() const 
         {
-            return _elements;
+            return Path::Iterator(_entries.data() + _entries.size(), _points.data() + _points.size());
         }
 
-    private:
-        typedef std::vector<Element> ElementVector;
+        std::size_t size() const
+        {
+            return _entries.size();
+        }
+
+        bool isEmpty() const
+        {
+            return _entries.empty();
+        }
+
+        void clear()
+        {
+            _entries.clear();
+            _points.clear();
+        }
+
+        void append(const PathData& path);
+
+        void moveTo(const PointF& pos);
+
+        void lineTo(const PointF& pos);
+
+        void quadTo(const PointF& c, const PointF& to);
+
+        void cubicTo(const PointF& c1, const PointF& c2, const PointF& to);
+
+        void bezierTo(const PointF* cps, size_t cn, const PointF& to);
+
+        void close();
+
+        void transform(const Transform& tform);
 
     private:
-        ElementVector _elements;
-        PointF        _position;
+        std::vector<PathEntry> _entries;
+        std::vector<PointF>    _points;
+        PointF                 _position;
 };
 
 } // namespace

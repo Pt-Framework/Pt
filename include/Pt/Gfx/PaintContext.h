@@ -52,6 +52,7 @@ namespace Gfx {
 
 class Paint;
 class Polyline;
+class PaintSurface;
 class PaintLayer;
 
 /** @brief Paint context.

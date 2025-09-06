@@ -609,6 +609,12 @@ void PaintContext::onApplyClip(const Gfx::RectF* rectF)
 }
 
 
+POINT PaintContext::toContext(const Gfx::PointF& p)
+{
+    return toContext(p.x(), p.y());
+}
+
+
 POINT PaintContext::toContext(double x, double y)
 {
     Gfx::PointF p = transform() * Gfx::PointF(x, y);
@@ -1174,40 +1180,44 @@ void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
 {
     BeginPath(dc);
 
-    for(std::size_t n = 0; n < path.size(); ++n)
+    for(Gfx::PathIterator it = path.begin(); it != path.end(); ++it)
     {
-        const Gfx::Element& e = path.at(n);
+        const Gfx::PathElement& e = *it;
 
-        switch( e.type )
+        switch( e.type() )
         {
             default:
                 break;
 
-            case Gfx::Element::IT_Close:
+            case Gfx::Path::Close:
                 CloseFigure(dc);
                 break;
 
-            case Gfx::Element::IT_MoveTo:
+            case Gfx::Path::MoveTo:
             {
-                POINT p = toContext( e.pxy.at(0), e.pxy.at(1) );
+                const Gfx::PointF& to = it->point(0);
+                POINT p = toContext(to);
                 MoveToEx(dc, p.x, p.y, NULL);
                 break;
             }
 
-            case Gfx::Element::IT_LineTo:
+            case Gfx::Path::LineTo:
             {
-                POINT p = toContext( e.pxy.at(0), e.pxy.at(1) );
+                const Gfx::PointF& to = it->point(0);
+                POINT p = toContext(to);
                 LineTo(dc, p.x, p.y);
                 break;
             }
 
-            case Gfx::Element::IT_QuadBezierTo:
+            case Gfx::Path::QuadTo:
             {
+                const Gfx::PointF& c1 = it->point(0);
+                const Gfx::PointF& to = it->point(1);
+                
                 POINT p0;
                 GetCurrentPositionEx(dc, &p0);
-
-                POINT p1 = toContext( e.pxy.at(0), e.pxy.at(1) );
-                POINT p2 = toContext( e.pxy.at(2), e.pxy.at(3) );
+                POINT p1 = toContext(c1);
+                POINT p2 = toContext(to);
 
                 POINT cubicPoints[3];
 
@@ -1226,23 +1236,20 @@ void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
                 break;
             }
             
-            case Gfx::Element::IT_CubicBezierTo:
+            case Gfx::Path::CubicTo:
             {
-                POINT points[3];
+                const Gfx::PointF& c1 = it->point(0);
+                const Gfx::PointF& c2 = it->point(1);
+                const Gfx::PointF& to = it->point(3);
 
-                points[0] = toContext( e.pxy.at(0), e.pxy.at(1) );
-                points[1] = toContext( e.pxy.at(2), e.pxy.at(3) );
-                points[2] = toContext( e.pxy.at(4), e.pxy.at(5) );
+                POINT points[3];
+                points[0] = toContext(c1);
+                points[1] = toContext(c2);
+                points[2] = toContext(to);
                 
                 PolyBezierTo(dc, points, 3);
                 break;
             }
-
-            //case Element::IT_GenNBezierTo:
-            //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
-            //    curX = ins.pxy[ins.pxy.size() - 2];
-            //    curY = ins.pxy[ins.pxy.size() - 1];
-            //    break;
         }
     }
 
