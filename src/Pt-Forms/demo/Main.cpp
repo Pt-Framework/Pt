@@ -181,7 +181,7 @@ int main(int argc, char* args[])
 {
     try
     {
-        Pt::System::Logger::setLogLevel( "Pt.Forms", Pt::System::Debug );
+        Pt::System::Logger::setLogLevel( "Pt.Forms", Pt::System::Info );
 
         Pt::Forms::Application app(argc, args);
         app.setScaleFactor(1);

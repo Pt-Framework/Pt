@@ -184,10 +184,9 @@ bool InputDevice::onRun()
                   //std::clog << "EV_SYN " << ev.code << " " << ev.value << std::endl;
 
                   _eventReady.send(_touchEvent);
+                  _touchCount = 0;
 
-                  if( _touchEvent.isRelease() )
-                      _touchCount = 0;
-                  else
+                  if( _touchEvent.isPress() )
                       _touchEvent.setMove();
               }
 
@@ -280,6 +279,7 @@ void InputDevice::onAbsolute(const input_event& ev)
             return;
 
         default:
+            //std::clog << "UNKNOWN EV CODE " << ev.code << " " <<  ev.value << std::endl;
             return;
     }
 }
