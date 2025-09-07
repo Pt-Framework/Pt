@@ -144,7 +144,7 @@ namespace Gfx {
 RasterContext::RasterContext()
 : PaintContext()
 , _text( new DrawText() )
-, _imageCanvas(0)
+, _image(0)
 , _lastScaleFactor(1.0)
 , _penPixel(_penBuffer.view(), 0, 0)
 , _brushImage(0)
@@ -161,9 +161,9 @@ RasterContext::~RasterContext()
 }
 
 
-void RasterContext::setImage(ImageSurface& image)
+void RasterContext::setImage(Image& image)
 {
-    _imageCanvas = &image;
+    _image = &image;
 }
 
 
@@ -181,8 +181,8 @@ void RasterContext::onResetPaint()
 {
     // NOTE: this might be called from the attached canvas base class destructor
 
-    if(_imageCanvas)
-        _imageCanvas = 0;
+    if(_image)
+        _image = 0;
 }
 
 
@@ -214,12 +214,10 @@ void RasterContext::onSetPen(const Gfx::Pen& pen)
 
 void RasterContext::onApplyPen(const Gfx::Pen& pen)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
     
-    const Gfx::Image& image = _imageCanvas->image();
-
-    _penBuffer.reset(image.format(), 64, 1);
+    _penBuffer.reset(_image->format(), 64, 1);
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
@@ -236,26 +234,24 @@ void RasterContext::onSetBrush(const Gfx::Brush& brush)
 
 void RasterContext::onApplyBrush(const Gfx::Brush& brush)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-    
-    const Gfx::Image& image = _imageCanvas->image();
 
     _isGradient = false;
 
     switch( brush.fillStyle() )
     {
         case Brush::Solid:
-            _brushBuffer.reset( image.format(), 64, 1);
+            _brushBuffer.reset( _image->format(), 64, 1);
             Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
 
             _brushImage = &_brushBuffer;
             break;
 
         case Brush::Texture:
-            if( brush.texture().format() != image.format() )
+            if( brush.texture().format() != _image->format() )
             {
-                _brushBuffer.reset( image.format(), 
+                _brushBuffer.reset( _image->format(), 
                                     brush.texture().width(), brush.texture().height() );
                 Gfx::copy( brush.texture().begin(), brush.texture().end(), 
                            _brushBuffer.begin() );
@@ -280,10 +276,8 @@ void RasterContext::onApplyBrush(const Gfx::Brush& brush)
 
 void RasterContext::updateGradientBrush(int width, int height)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-    
-    const Gfx::Image& image = _imageCanvas->image();
 
     Color gradientStart = _brush.color();
     Color gradientStop = _brush.gradientColor();
@@ -291,12 +285,12 @@ void RasterContext::updateGradientBrush(int width, int height)
     switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
-          _brushBuffer.reset(image.format(), width, 1);
+          _brushBuffer.reset(_image->format(), width, 1);
           height = 1;
           break;
 
         case Pt::Gfx::Brush::Vertical:
-          _brushBuffer.reset(image.format(), 1, height);
+          _brushBuffer.reset(_image->format(), 1, height);
           width = 1;
           std::swap(gradientStart, gradientStop);
           break;
@@ -365,14 +359,12 @@ void RasterContext::onSetClip(const Gfx::RectF* clip)
 
 void RasterContext::onApplyClip(const Gfx::RectF* clip) 
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
 
-    const Gfx::Image& image = _imageCanvas->image();
-
     Rect imageRect;
-    imageRect.setWidth( image.width() );
-    imageRect.setHeight( image.height() );
+    imageRect.setWidth( _image->width() );
+    imageRect.setHeight( _image->height() );
 
     if( ! _hasClip )
     {
@@ -391,10 +383,8 @@ void RasterContext::onApplyClip(const Gfx::RectF* clip)
 
 void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-
-    const Gfx::Image& image = _imageCanvas->image();
 
     Point points[2];
 
@@ -543,7 +533,7 @@ TextMetrics RasterContext::onGetTextMetrics(const String& text) const
 void RasterContext::onDrawText(const PointF& to, const Pt::String& text, 
                                const Transform* tform)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
 
     Gfx::Transform tf;
@@ -553,10 +543,8 @@ void RasterContext::onDrawText(const PointF& to, const Pt::String& text,
     tf.translate( to.x(), to.y() );
     tf *= transform();
 
-    Gfx::Image& image = _imageCanvas->image();
-
     _text->setClip(_currentClip);
-    _text->draw(image, 0, 0, text, _compositionMode, &tf);
+    _text->draw(*_image, 0, 0, text, _compositionMode, &tf);
 }
 
 
@@ -673,12 +661,10 @@ void RasterContext::stroke(int x, int y, const Rect& clip)
         y < clip.y() || y >= clip.bottom() )
         return;
 
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
 
-    Gfx::Image& image = _imageCanvas->image();
-
-    Pixel pixel(image.view(), x, y);
+    Pixel pixel(_image->view(), x, y);
     pixel.assign(_penPixel, _compositionMode);
 
     //_image.format().setPixels(pixel, _penPixel, 1, _compositionMode);
@@ -687,10 +673,8 @@ void RasterContext::stroke(int x, int y, const Rect& clip)
 
 void RasterContext::stroke(int xpos, int ypos, int length, const Rect& currentClip)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-
-    Gfx::Image& image = _imageCanvas->image();
 
     clipSpan(xpos, ypos, length, currentClip);
 
@@ -701,8 +685,8 @@ void RasterContext::stroke(int xpos, int ypos, int length, const Rect& currentCl
         int n = std::min(length, bufferWidth);
         if( n )
         {
-            Pixel destPixel( image.view(), xpos, ypos);
-            image.view().copy(destPixel, _penPixel, n, _compositionMode);
+            Pixel destPixel( _image->view(), xpos, ypos);
+            _image->view().copy(destPixel, _penPixel, n, _compositionMode);
         }
 
         length -= n;
@@ -910,10 +894,8 @@ void RasterContext::fillRect(const Rect& rectIn, const Rect& currentClip)
 
 void RasterContext::fillSolid(const Point& pos, int length)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-
-    Gfx::Image& image = _imageCanvas->image();
 
     int xpos = pos.x();
     int ypos = pos.y();
@@ -929,8 +911,8 @@ void RasterContext::fillSolid(const Point& pos, int length)
 
         if( n )
         {
-            Pixel destPixel(image.view(), xpos,ypos);
-           image.view().copy(destPixel, _brushPixel, n, _compositionMode);
+            Pixel destPixel(_image->view(), xpos,ypos);
+           _image->view().copy(destPixel, _brushPixel, n, _compositionMode);
         }
 
         length -= n;
@@ -953,10 +935,8 @@ void RasterContext::fillHorizontalGradient( const Point& origin, const Point& po
 
 void RasterContext::fillTexture(const Point& origin, const Point& pos,  int length)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-
-    Gfx::Image& image = _imageCanvas->image();
 
     const Image& texture = *_brushImage;
     int xpos = pos.x();
@@ -979,9 +959,9 @@ void RasterContext::fillTexture(const Point& origin, const Point& pos,  int leng
         if(fillLength)
         {
             ConstPixel sourcePixel(texture.view(),  textureXPos, textureYPos);
-            Pixel destPixel(image.view(), xpos, ypos);
+            Pixel destPixel(_image->view(), xpos, ypos);
 
-            image.view().copy( destPixel, sourcePixel, fillLength, _compositionMode);
+            _image->view().copy( destPixel, sourcePixel, fillLength, _compositionMode);
         }
 
         // Remaining unfilled pixels of the span
@@ -1007,13 +987,11 @@ void RasterContext::outputEdges(const ActiveEdgeTable& edges, const Point& origi
 
 void RasterContext::outputSpan( const Point& topLeft, int x, int y, int width )
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
 
-    const Gfx::Image& image = _imageCanvas->image();
-
-    const int imageWidth = static_cast<int>( image.width() );
-    const int imageHeight = static_cast<int>( image.height() );
+    const int imageWidth = static_cast<int>( _image->width() );
+    const int imageHeight = static_cast<int>( _image->height() );
 
     if( y >= imageHeight )
         return;
@@ -2244,10 +2222,8 @@ void RasterContext::fillLine(int y,  int overall_height, LineEdge *left, LineEdg
     int left_height = 0;
     int right_height = 0;
 
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-
-    Gfx::Image& image = _imageCanvas->image();
 
     while( (left_count || left_height) && (right_count || right_height) )
     {
@@ -2294,7 +2270,7 @@ void RasterContext::fillLine(int y,  int overall_height, LineEdge *left, LineEdg
             if (right_x >= left_x)
             {
                 int xpos = std::max( left_x, 0 );
-                const int endx = std::min<int>( right_x, image.width() -1);
+                const int endx = std::min<int>( right_x, _image->width() -1);
                 stroke( xpos, y, endx - xpos + 1, currentClip );
             }
 
@@ -4135,10 +4111,8 @@ void RasterContext::putImage( const Point& to, const Image& img)
 
 void RasterContext::putImage(const Point& to, const Image& image, const Rect& imageRect)
 {
-    if( ! _imageCanvas )
+    if( ! _image )
         return;
-
-    Gfx::Image& dest = _imageCanvas->image();
 
     // clip against source boundaries
     Rect fromRect( image.width(), image.height() );
@@ -4160,9 +4134,9 @@ void RasterContext::putImage(const Point& to, const Image& image, const Rect& im
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    dest.view().copy(toRect.x(), toRect.y(),
-                     image.view(), fromRect.x(), fromRect.y(), 
-                     fromRect.width(), fromRect.height(), _compositionMode);
+    _image->view().copy(toRect.x(), toRect.y(),
+                        image.view(), fromRect.x(), fromRect.y(), 
+                        fromRect.width(), fromRect.height(), _compositionMode);
 
     //_image.format().copy(_image.view(), toRect.x(), toRect.y(),
     //                     image.view(), fromRect.x(), fromRect.y(), 

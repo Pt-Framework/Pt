@@ -64,8 +64,6 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
-    Image& image();
-
     const Gfx::Image& image() const;
 
     /** @brief Returns the size in physical pixel.

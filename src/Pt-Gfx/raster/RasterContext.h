@@ -30,6 +30,7 @@
 #define PT_GFX_RASTER_CONTEXT_H
 
 #include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -44,9 +45,7 @@ class LineSlope;
 class LineEdge;
 class LineFace;
 class ActiveEdgeTable;
-
 class DrawText;
-class ImageCanvas;
 
 class RasterContext : public PaintContext
 {
@@ -61,7 +60,7 @@ class RasterContext : public PaintContext
 
         ~RasterContext();
 
-        void setImage(ImageSurface& image);
+        void setImage(Image& image);
 
         const CompositionMode& compositionMode() const
         {
@@ -304,7 +303,7 @@ class RasterContext : public PaintContext
 
     private:
         DrawText*            _text;
-        ImageSurface*        _imageCanvas;
+        Image*               _image;
         double               _lastScaleFactor;
 
         CompositionMode      _compositionMode;

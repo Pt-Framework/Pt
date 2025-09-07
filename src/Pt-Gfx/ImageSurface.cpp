@@ -95,12 +95,6 @@ void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 }
 
 
-Image& ImageSurface::image()
-{
-    return _image;
-}
-
-
 const Gfx::Image& ImageSurface::image() const
 {
     return _image;
@@ -155,7 +149,7 @@ Gfx::PaintContext* ImageSurface::onCreateContext(Gfx::PaintContext* context)
     if( ! paintContext )
         paintContext = new RasterContext();
 
-    paintContext->setImage(*this);
+    paintContext->setImage(_image);
     
     _context = paintContext;
     return _context;
