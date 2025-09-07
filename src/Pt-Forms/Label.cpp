@@ -583,13 +583,12 @@ void Label::onPaint(Gfx::PaintSurface& surface,
 
     //if(pen)
     //{
-    //    Gfx::Path path;
-    //    path.moveTo( Gfx::PointF(0, 0) );
-    //    path.lineTo( Gfx::PointF(size().width(), size().height() - 1) );
-    //    path.lineTo( Gfx::PointF(0, size().height() - 1) );
-    //    path.lineTo( Gfx::PointF(0, 0) );
-    //    path.close();
-    //    painter.setPath(path);
+    //    painter.beginPath();
+    //    painter.moveTo( Gfx::PointF(0, 0) );
+    //    painter.lineTo( Gfx::PointF(size().width(), size().height() - 1) );
+    //    painter.lineTo( Gfx::PointF(0, size().height() - 1) );
+    //    painter.lineTo( Gfx::PointF(0, 0) );
+    //    painter.closePath();
     //    painter.fillPath();
     //    painter.drawPath();
     //}

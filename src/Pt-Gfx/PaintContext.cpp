@@ -140,6 +140,9 @@ void PaintContext::beginPaint(const Gfx::Paint& paint)
         _active = _surface;
         onBeginPaint(paint);
 
+        // TODO: apply in draw* functions and keep a state which attributes
+        //       are dirty and need to be applied
+
         onApplyCompositionMode( paint.compositionMode() );
         onApplyPen( paint.pen() );
         onApplyBrush( paint.brush() );
@@ -287,6 +290,49 @@ void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
 }
 
 
+void PaintContext::beginPath()
+{
+    if(_active)
+        onBeginPath();
+}
+
+
+void PaintContext::moveTo(const PointF& to)
+{
+    if(_active)
+        onMoveTo(to);
+}
+
+
+void PaintContext::lineTo(const PointF& to)
+{
+    if(_active)
+        onLineTo(to);
+}
+
+
+void PaintContext::curveTo(const PointF &cp, const PointF& to)
+{
+    if(_active)
+        onCurveTo(cp, to);
+}
+
+
+void PaintContext::curveTo(const PointF &cp1, const PointF &cp2, 
+                           const PointF& to)
+{
+    if(_active)
+        onCurveTo(cp1, cp2, to);
+}
+
+
+void PaintContext::closePath()
+{
+    if(_active)
+        onClosePath();
+}
+
+
 void PaintContext::setPath(const Path& path)
 {
     if(_active)
@@ -294,17 +340,17 @@ void PaintContext::setPath(const Path& path)
 }
 
 
-void PaintContext::drawPath()
+void PaintContext::drawPath(const Path& path)
 {
     if(_active)
-        onDrawPath();
+        onDrawPath(path);
 }
 
 
-void PaintContext::fillPath()
+void PaintContext::fillPath(const Path& path)
 {
     if(_active)
-        onFillPath();
+        onFillPath(path);
 }
 
 

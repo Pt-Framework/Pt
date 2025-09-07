@@ -302,6 +302,22 @@ void Path::lineTo(const PointF& to)
 }
 
 
+void Path::curveTo(const PointF &cp, const PointF& to)
+{
+    detach();
+
+    _pathData->quadTo(cp, to);
+}
+
+
+void Path::curveTo(const PointF &cp1, const PointF &cp2, const PointF& to)
+{
+    detach();
+
+    _pathData->cubicTo(cp1, cp2, to);
+}
+
+
 void Path::quadTo(const PointF &c, const PointF& to)
 {
     detach();
@@ -618,21 +634,21 @@ void PathData::lineTo(const PointF& to)
 }
 
 
-void PathData::quadTo(const PointF& c, const PointF& to)
+void PathData::quadTo(const PointF& cp, const PointF& to)
 {
     _entries.push_back( PathEntry(Path::QuadTo, 2) );
-    _points.push_back(c);
+    _points.push_back(cp);
     _points.push_back(to);
 
     setCurrentPosition(to);
 }
 
 
-void PathData::cubicTo(const PointF& c1, const PointF& c2, const PointF& to)
+void PathData::cubicTo(const PointF& cp1, const PointF& cp2, const PointF& to)
 {
     _entries.push_back( PathEntry(Path::CubicTo, 3) );
-    _points.push_back(c1);
-    _points.push_back(c2);
+    _points.push_back(cp1);
+    _points.push_back(cp2);
     _points.push_back(to);
 
     setCurrentPosition(to);

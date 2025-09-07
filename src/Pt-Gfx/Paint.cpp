@@ -111,6 +111,12 @@ void Paint::setFont(const Gfx::Font& font)
 }
 
 
+Gfx::Path& Paint::path()
+{
+    return _path;
+}
+
+
 const Gfx::Path& Paint::path() const
 {
     return _path;

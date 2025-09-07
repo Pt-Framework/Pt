@@ -31,7 +31,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Paint.h>
-
 #include <vector>
 
 namespace Pt {

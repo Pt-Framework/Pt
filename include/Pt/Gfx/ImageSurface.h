@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
+#include <Pt/NonCopyable.h>
 
 #include <string>
 #include <vector>
@@ -52,6 +53,7 @@ class RasterContext;
 /** @brief Image drawing surface.
 */
 class PT_GFX_API ImageSurface : public PaintSurface
+                              , private NonCopyable
 {
   public:
     ImageSurface();

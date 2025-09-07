@@ -41,47 +41,6 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @todo TODO:
-
-    - distinguish between paint scaling and the physical/logical pixel ratio.
-      If these are separate attributes, Paint objects can perform scaling, if
-      needed for painting. The pixel ratio is reported by the implementation for
-      alignment purposes. Paint scaling can be 1.0 if the underlying implementation
-      works with logic pixels, even if the reported pixel ratio is higher.
-
-    - Apply paint scaling in PaintContext and not in every impl tha needs it
-*/
-
-//
-// TODO: Paint objects shared/refcounted so PaintContext can recognise
-//       when paint attributes change
-//
-
-//
-// TODO: active flag to defer paint updates
-//
-// if not active set only invalid flag otherwise apply
-// so changes are visible immediately during painting
-//
-
-//
-// TODO: PaintDevice is returned from Canvas::beginPaint
-//
-// PaintDevice is a movable type with the drawing ops and the region
-//
-// rename PaintContxt -> PaintDevice
-
-
-/*
-  TODO:
-
-  drawLine in derived canvas should apply the necessary attribute
-  for the current begin/finsh paint session. then Canvas needs no
-  public apply* methods, but the NVI drawLine of canvas applies
-  the ccorrect attributes
-
-*/
-
 /** @brief Paint context.
 */
 class PT_GFX_API Paint
@@ -134,6 +93,10 @@ class PT_GFX_API Paint
         /** @brief Sets the font used to draw text.
         */
         void setFont(const Font& font);
+
+        /** @brief Returns the current path.
+        */
+        Gfx::Path& path();
 
         /** @brief Returns the current path.
         */

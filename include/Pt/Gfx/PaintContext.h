@@ -50,6 +50,16 @@ namespace Pt {
 
 namespace Gfx {
 
+/*
+  TODO:
+
+  drawLine etc in derived surface should apply the necessary attribute
+  for the current begin/finsh paint session, then Canvas needs no
+  public apply* methods, but the NVI drawLine of paint context updates
+  the required attributes
+
+*/
+
 /** @brief Paint context.
 */
 class PT_GFX_API PaintContext
@@ -111,11 +121,23 @@ class PT_GFX_API PaintContext
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
     public:
+        void beginPath();
+
+        void moveTo(const PointF& to);
+
+        void lineTo(const PointF& to);
+
+        void curveTo(const PointF &cp, const PointF& to);
+
+        void curveTo(const PointF &cp1, const PointF &cp2, const PointF& to);
+
+        void closePath();
+
         void setPath(const Path& path);
 
-        void drawPath();
+        void drawPath(const Path& path);
 
-        void fillPath();
+        void fillPath(const Path& path);
 
     public:
         TextMetrics textMetrics(const Pt::String& text) const;
@@ -174,11 +196,24 @@ class PT_GFX_API PaintContext
         virtual void onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
 
     protected:
+        virtual void onBeginPath() = 0;
+
+        virtual void onMoveTo(const PointF& to) = 0;
+
+        virtual void onLineTo(const PointF& to) = 0;
+
+        virtual void onCurveTo(const PointF &cp, const PointF& to) = 0;
+
+        virtual void onCurveTo(const PointF &cp1, const PointF &cp2, 
+                               const PointF& to) = 0;
+
+        virtual void onClosePath() = 0;
+
         virtual void onSetPath(const Path& path) = 0;
 
-        virtual void onDrawPath() = 0;
+        virtual void onDrawPath(const Path& path) = 0;
 
-        virtual void onFillPath() = 0;
+        virtual void onFillPath(const Path& path) = 0;
 
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const = 0;

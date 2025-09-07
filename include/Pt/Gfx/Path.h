@@ -89,9 +89,13 @@ class PT_GFX_API Path
 
         void lineTo(const PointF& p);
 
-        void quadTo(const PointF &c, const PointF& to);
+        void curveTo(const PointF &cp, const PointF& to);
 
-        void cubicTo(const PointF &c1, const PointF &c2, const PointF& to);
+        void curveTo(const PointF &cp1, const PointF &cp2, const PointF& to);
+
+        void quadTo(const PointF &cp, const PointF& to);
+
+        void cubicTo(const PointF &cp1, const PointF &cp2, const PointF& to);
 
         /** @internal @brief Not implemented.
         */
@@ -326,9 +330,9 @@ class PathData
 
         void lineTo(const PointF& pos);
 
-        void quadTo(const PointF& c, const PointF& to);
+        void quadTo(const PointF& cp, const PointF& to);
 
-        void cubicTo(const PointF& c1, const PointF& c2, const PointF& to);
+        void cubicTo(const PointF& cp1, const PointF& cp2, const PointF& to);
 
         void bezierTo(const PointF* cps, size_t cn, const PointF& to);
 

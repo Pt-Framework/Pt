@@ -126,11 +126,24 @@ class PaintContext : public Gfx::PaintContext
                                  const Gfx::RectF* rect) override;
 
     protected:
+        virtual void onBeginPath() override;
+
+        virtual void onMoveTo(const Gfx::PointF& to) override;
+
+        virtual void onLineTo(const Gfx::PointF& to) override;
+
+        virtual void onCurveTo(const Gfx::PointF &cp, const Gfx::PointF& to) override;
+
+        virtual void onCurveTo(const Gfx::PointF &cp1, const Gfx::PointF &cp2,
+                               const Gfx::PointF& to) override;
+
+        virtual void onClosePath() override;
+
         virtual void onSetPath(const Gfx::Path& path) override;
 
-        virtual void onDrawPath() override;
+        virtual void onDrawPath(const Gfx::Path& path) override;
 
-        virtual void onFillPath() override;
+        virtual void onFillPath(const Gfx::Path& path) override;
 
         virtual bool onDrawLayer(const Gfx::PointF& to, 
                                  const Gfx::PaintLayer& layer,
@@ -162,7 +175,6 @@ class PaintContext : public Gfx::PaintContext
         std::wstring              _text;
         HRGN                      _clipRect;
         HFONT                     _font;
-        Gfx::Path                 _path;
 };
 
 } // namespace

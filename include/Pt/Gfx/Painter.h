@@ -66,19 +66,32 @@ class PT_GFX_API Painter
     friend class PaintSurface;
 
     public:
+        /** @brief @brief Default constructor.
+        */
         Painter();
 
+        /** @brief @brief Constructs using a paint surface.
+        */
         explicit Painter(PaintSurface& surface);
-
+        
+        /** @brief @brief Constructs using a paint layer.
+        */
         explicit Painter(PaintLayer& layer);
 
-        //! @brief Destructor.
+        /** @brief @brief Destructor.
+        */
         virtual ~Painter();
 
+        /** @brief @brief Begins painting to a paint surface.
+        */
         void begin(PaintSurface& surface);
-
+        
+        /** @brief @brief Begins painting to a paint layer.
+        */
         void begin(PaintLayer& layer);
 
+        /** @brief @brief Ends painting.
+        */
         void finish();
 
         /** @brief Returns the image format.
@@ -90,6 +103,8 @@ class PT_GFX_API Painter
         const Scaling& scaling() const;
 
     public:
+        /** @brief Returns the paint attributes.
+        */
         const Paint& paint() const;
 
         /** @brief Returns the current composition mode.
@@ -173,12 +188,18 @@ class PT_GFX_API Painter
         */
         void fillEllipse(const PointF& topLeft, const SizeF& size);
 
+        /** @internal TODO.
+        */
         void drawArc(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
-
+        
+        /** @internal TODO.
+        */
         void fillChord(const PointF& topLeft, const SizeF& size,
                        float degBegin, float degEnd);
-
+        
+        /** @internal TODO.
+        */
         void fillPie(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
 
@@ -186,6 +207,18 @@ class PT_GFX_API Painter
         /** @brief Returns the current path.
         */
         const Gfx::Path& path() const;
+
+        void beginPath();
+
+        void moveTo(const PointF& to);
+
+        void lineTo(const PointF& to);
+
+        void curveTo(const PointF& cp, const PointF& to);
+
+        void curveTo(const PointF& cp1, const PointF& cp2, const PointF& to);
+
+        void closePath();
 
         /** @brief Sets the current path.
         */
@@ -200,20 +233,22 @@ class PT_GFX_API Painter
         void fillPath();
 
     public:
-        /** @brief Measures the metrics of a text block.
+        /** @brief Returns the metrics of a line of text.
         */
         TextMetrics textMetrics(const Pt::String& text) const;
 
+        /** @internal TODO.
+        */
         FontMetrics fontMetrics(const Pt::String& text) const
         {
             return textMetrics(text);
         }
 
-        /** @brief Draws a text block.
+        /** @brief Draws a line of text.
         */
         void drawText(const PointF& to, const Pt::String& text);
 
-        /** @brief Draws a text block.
+        /** @brief Draws a line of text.
         */
         void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
@@ -243,6 +278,7 @@ class PT_GFX_API Painter
         PaintContext*        _paintContext;
         Scaling              _scaling;
         Paint                _paint;
+        Path                 _path;
 };
 
 } // namespace

@@ -1169,10 +1169,61 @@ void PaintContext::onDrawImage(const Gfx::PointF& toF,
     }
 }
 
+void PaintContext::onBeginPath()
+{
+}
+
+
+void PaintContext::onMoveTo(const Gfx::PointF& to)
+{
+}
+
+
+void PaintContext::onLineTo(const Gfx::PointF& to)
+{
+}
+
+
+void PaintContext::onCurveTo(const Gfx::PointF &cp, const Gfx::PointF& to)
+{
+}
+
+
+void PaintContext::onCurveTo(const Gfx::PointF &cp1, const Gfx::PointF &cp2, 
+                             const Gfx::PointF& to)
+{
+}
+
+
+void PaintContext::onClosePath()
+{
+}
+
 
 void PaintContext::onSetPath(const Gfx::Path& path)
 {
-    _path = path;
+}
+
+
+void PaintContext::onDrawPath(const Gfx::Path& path)
+{
+    if(_pixmap)
+    {
+        HDC dc = _pixmap->deviceContext();
+        buildPath(dc, path);
+        StrokePath(dc);
+    }
+}
+
+
+void PaintContext::onFillPath(const Gfx::Path& path)
+{
+    if(_pixmap)
+    {
+        HDC dc = _pixmap->deviceContext();
+        buildPath(dc, path);
+        FillPath(dc);
+    }
 }
 
 
@@ -1225,7 +1276,7 @@ void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
                 cubicPoints[0].x = p0.x + (2 * (p1.x - p0.x)) / 3;
                 cubicPoints[0].y = p0.y + (2 * (p1.y - p0.y)) / 3;
 
-                // control2 2: P2 + (2/3) * (P1 - P2)
+                // control 2: P2 + (2/3) * (P1 - P2)
                 cubicPoints[1].x = p2.x + (2 * (p1.x - p2.x)) / 3;
                 cubicPoints[1].y = p2.y + (2 * (p1.y - p2.y)) / 3;
 
@@ -1257,34 +1308,10 @@ void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
 }
 
 
-void PaintContext::onDrawPath()
-{
-    if(_pixmap)
-    {
-        HDC dc = _pixmap->deviceContext();
-        buildPath(dc, _path);
-        StrokePath(dc);
-    }
-}
-
-
-void PaintContext::onFillPath()
-{
-    if(_pixmap)
-    {
-        HDC dc = _pixmap->deviceContext();
-        buildPath(dc, _path);
-        FillPath(dc);
-    }
-}
-
-
 bool PaintContext::onDrawLayer(const Gfx::PointF& to,
                                const Gfx::PaintLayer& layer,
                                const Gfx::RectF* rect)
 {
-    //return Gfx::PaintContext::onDrawLayer(to, layer, rect);
-
     const Gfx::PaintSurface* layerSurface = layer.surface();
     const PixmapImpl* pixmap = dynamic_cast<const PixmapImpl*>(layerSurface);
     if(pixmap)
