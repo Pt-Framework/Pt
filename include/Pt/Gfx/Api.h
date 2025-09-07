@@ -53,6 +53,12 @@ namespace Pt {
 */
 namespace Gfx {
 
+class Paint;
+class Painter;
+class PaintContext;
+class PaintLayer;
+class PaintSurface;
+
 } // namespace
 
 } // namespace

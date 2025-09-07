@@ -50,10 +50,6 @@ namespace Pt {
 
 namespace Gfx {
 
-class Paint;
-class PaintSurface;
-class PaintLayer;
-
 /** @brief Paint context.
 */
 class PT_GFX_API PaintContext

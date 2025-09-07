@@ -226,7 +226,7 @@ void PixmapImpl::clear(const Gfx::Color& c)
 }
 
 
-const Gfx::SizeF& PixmapImpl::size() const
+const Gfx::SizeF& PixmapImpl::onGetSize() const
 {
     return physicalSize();
 }

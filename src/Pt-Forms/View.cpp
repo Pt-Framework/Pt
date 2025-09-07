@@ -76,6 +76,14 @@ class ViewSurface : public Gfx::PaintSurface
             return Gfx::ImageFormat::argb32();
         }
 
+        const Gfx::SizeF& onGetSize() const
+        {
+            if(_surface)
+                return _surface->size();
+            
+            return _size;
+        }
+
         virtual const Gfx::Scaling& onGetScaling() const override
         {
             return _view->scaling();
@@ -104,6 +112,7 @@ class ViewSurface : public Gfx::PaintSurface
         View*                _view;
         Gfx::PaintSurface*   _surface;
         Gfx::PointF          _position;
+        Gfx::SizeF           _size;
 };
 
 ///////////////////////////////////////////////////////////////////////

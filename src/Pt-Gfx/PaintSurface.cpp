@@ -65,6 +65,12 @@ const Gfx::ImageFormat& PaintSurface::format() const
 }
 
 
+const Gfx::SizeF& PaintSurface::size() const
+{
+    return onGetSize();
+}
+
+
 const Scaling& PaintSurface::scaling() const
 {
     return onGetScaling();

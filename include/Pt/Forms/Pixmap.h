@@ -60,11 +60,11 @@ class PT_FORMS_API Pixmap : public Gfx::PaintLayer
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
-        /** @brief Returns the size in physical device pixels. 
+        /** @brief Returns the size in physical pixels. 
         */
         const Gfx::SizeF& size() const;
 
-        /** @brief Resizes to a size in physical device pixels. 
+        /** @brief Resizes to a size in physical pixels. 
         */
         void resize(const Gfx::SizeF& size);
 

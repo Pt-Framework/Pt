@@ -150,8 +150,6 @@ class PixmapImpl : public Gfx::PaintSurface
         
         void clear(const Gfx::Color& c);
 
-        const Gfx::SizeF& size() const;
-
         const Gfx::SizeF& physicalSize() const;
 
         const Gfx::SizeF& logicalSize() const;
@@ -174,6 +172,8 @@ class PixmapImpl : public Gfx::PaintSurface
 
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::SizeF& onGetSize() const override;
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 

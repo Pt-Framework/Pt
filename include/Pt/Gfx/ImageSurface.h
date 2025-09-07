@@ -60,15 +60,11 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     virtual ~ImageSurface();
 
+    const Gfx::Image& image() const;
+
     void reset(const Gfx::Image& image);
 
     void reset(const Gfx::SizeF&, std::size_t stride = 0);
-
-    const Gfx::Image& image() const;
-
-    /** @brief Returns the size in physical pixel.
-    */
-    const Gfx::SizeF& size() const;
 
     const SizeF& physicalSize() const;
 
@@ -78,6 +74,8 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
   protected:
     virtual const Gfx::ImageFormat& onGetFormat() const;
+
+    virtual const Gfx::SizeF& onGetSize() const;
 
     virtual const Scaling& onGetScaling() const;
 

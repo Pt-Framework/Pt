@@ -61,6 +61,12 @@ ImageSurface::~ImageSurface()
 }
 
 
+const Gfx::Image& ImageSurface::image() const
+{
+    return _image;
+}
+
+
 void ImageSurface::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
@@ -95,10 +101,6 @@ void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 }
 
 
-const Gfx::Image& ImageSurface::image() const
-{
-    return _image;
-}
 
 
 const SizeF& ImageSurface::physicalSize() const
@@ -110,12 +112,6 @@ const SizeF& ImageSurface::physicalSize() const
 const SizeF& ImageSurface::logicalSize() const
 {
     return _logicalSize;
-}
-
-
-const Gfx::SizeF& ImageSurface::size() const
-{
-    return physicalSize();
 }
 
 
@@ -134,6 +130,12 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 const Gfx::ImageFormat& ImageSurface::onGetFormat() const
 {
     return Gfx::ImageFormat::argb32();
+}
+
+
+const Gfx::SizeF& ImageSurface::onGetSize() const
+{
+    return physicalSize();
 }
 
 

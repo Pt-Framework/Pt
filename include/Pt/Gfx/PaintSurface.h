@@ -38,9 +38,6 @@ namespace Pt {
 
 namespace Gfx {
 
-class PaintContext;
-class Painter;
-
 /** @brief Paint surface.
 */
 class PT_GFX_API PaintSurface
@@ -49,37 +46,70 @@ class PT_GFX_API PaintSurface
     friend class PaintContext;
 
     protected:
+        /** @brief Default constructor.
+        */
         PaintSurface();
 
     public:
+        /** @brief Destructor.
+        */
         virtual ~PaintSurface();
-
+        
+        /** @brief Returns the image format.
+        */
         const Gfx::ImageFormat& format() const;
 
+        /** @brief Returns the size in physical pixel.
+        */
+        const Gfx::SizeF& size() const;
+
+        /** @brief Returns the scaling fro logical to physical pixels.
+        */
         const Scaling& scaling() const;
 
+        /** @brief Get a PaintContext.
+        */
         PaintContext* getContext(PaintContext* context);
 
+        /** @brief Resets the currently active paint context.
+        */
         void invalidate();
 
     protected:
+        /** @brief Returns the image format.
+        */
         virtual const Gfx::ImageFormat& onGetFormat() const = 0;
 
+        /** @brief Returns the size in physical pixel.
+        */
+        virtual const Gfx::SizeF& onGetSize() const = 0;
+
+        /** @brief Returns the scaling fro logical to physical pixels.
+        */
         virtual const Scaling& onGetScaling() const = 0;
 
     protected:
+        /** @brief Get a PaintContext.
+        */
         virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* context);
 
+        /** @brief Creates a PaintContext.
+        */
         virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context);
-
+        
+        /** @brief Releases the current PaintContext.
+        */
         virtual void onReleaseContext() = 0;
 
     private:
+        //! @internal
         void attachPainter(Painter& painter);
 
+        //! @internal
         void detachPainter(Painter& painter);
 
     private:
+        //! @internal
         void onDetachContext(PaintContext& context);
 
     private:
