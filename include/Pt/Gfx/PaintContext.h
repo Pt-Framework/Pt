@@ -51,7 +51,6 @@ namespace Pt {
 namespace Gfx {
 
 class Paint;
-class Polyline;
 class PaintSurface;
 class PaintLayer;
 
