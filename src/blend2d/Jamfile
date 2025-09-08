@@ -2,7 +2,7 @@ SubDir PT_TOP src blend2d ;
 SubDirObjects $(PT_OUTPUT_OBJECT) blend2d ;
 SubDirC++Flags $(BLEND2D_C++FLAGS) ;
 
-BLEND2D_SOURCES_DIR = [ FDirName $(PT_TOP) src blend2d src ] ;
+BLEND2D_SOURCES_DIR = [ FDirName $(PT_TOP) src blend2d src blend2d ] ;
 BLEND2D_SOURCES += [ GLOB $(BLEND2D_SOURCES_DIR) : *.cpp ] ;
 
 BLEND2D_CODEC_DIR = [ FDirName $(BLEND2D_SOURCES_DIR) codec ] ;
