@@ -2952,7 +2952,7 @@
     <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h">
       <Filter>Pt-Gfx\blend2d</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\freetype\FreeType.h">
+    <ClInclude Include="..\Pt-Gfx\freetype\FontManager.h">
       <Filter>Pt-Gfx\freetype</Filter>
     </ClInclude>
   </ItemGroup>
@@ -5654,7 +5654,7 @@
     <ClCompile Include="..\Pt-Gfx\blend2d\RasterContext.cpp">
       <Filter>Pt-Gfx\blend2d</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\freetype\FreeType.cpp">
+    <ClCompile Include="..\Pt-Gfx\freetype\FontManager.cpp">
       <Filter>Pt-Gfx\freetype</Filter>
     </ClCompile>
   </ItemGroup>

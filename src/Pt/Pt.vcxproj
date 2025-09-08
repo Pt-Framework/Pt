@@ -720,7 +720,7 @@
     <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h" />
     <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h" />
     <ClInclude Include="..\Pt-Gfx\Fixed.h" />
-    <ClInclude Include="..\Pt-Gfx\freetype\FreeType.h" />
+    <ClInclude Include="..\Pt-Gfx\freetype\FontManager.h" />
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h" />
     <ClInclude Include="..\Pt-Gfx\raster\DejaVuSans.h" />
     <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansBold.h" />
@@ -1398,7 +1398,7 @@
     <ClCompile Include="..\Pt-Gfx\Canvas.cpp" />
     <ClCompile Include="..\Pt-Gfx\Color.cpp" />
     <ClCompile Include="..\Pt-Gfx\Font.cpp" />
-    <ClCompile Include="..\Pt-Gfx\freetype\FreeType.cpp" />
+    <ClCompile Include="..\Pt-Gfx\freetype\FontManager.cpp" />
     <ClCompile Include="..\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageSurface.cpp" />
