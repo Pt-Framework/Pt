@@ -537,6 +537,8 @@ WITH_CPU_AVX1 = [ CheckBuildC++ "#include <intrin.h>"
 if $(WITH_CPU_AVX1)
 {
     PT_CPU_DEFINES += PT_CPU_AVX1_MSVC ;
+    CPU_AVX1_C++FLAGS = /arch:AVX ;
+    CPU_AVX1_CFLAGS = /arch:AVX ;
 }
 
 if ! $(WITH_CPU_AVX1)
@@ -552,6 +554,8 @@ if ! $(WITH_CPU_AVX1)
     if $(WITH_CPU_AVX1)
     {
         PT_CPU_DEFINES += PT_CPU_AVX1_GNU ;
+        CPU_AVX1_C++FLAGS = -mavx ;
+        CPU_AVX1_CFLAGS = -mavx ;
     }
 }
 
@@ -570,6 +574,8 @@ WITH_CPU_AVX2 = [ CheckBuildC++ "#include <intrin.h>"
 if $(WITH_CPU_AVX2)
 {
     PT_CPU_DEFINES += PT_CPU_AVX2_MSVC ;
+    CPU_AVX2_C++FLAGS = /arch:AVX2 ;
+    CPU_AVX2_CFLAGS = /arch:AVX2 ;
 }
 
 if ! $(WITH_CPU_AVX2)
@@ -585,6 +591,8 @@ if ! $(WITH_CPU_AVX2)
     if $(WITH_CPU_AVX2)
     {
         PT_CPU_DEFINES += PT_CPU_AVX2_GNU ;
+        CPU_AVX2_C++FLAGS = -mavx2 ;
+        CPU_AVX2_CFLAGS = -mavx2 ;
     }
 }
 
@@ -677,6 +685,51 @@ if ! $(PRELIB)
 }
 
 Configure ZLIB ;
+
+#############################################################################
+# blend2D graphics library
+#############################################################################
+
+if --with-blend2d in $(ARGV)
+{
+    WITH_BLEND2D = yes ;
+
+    BLEND2D_INCLUDES  = [ FDirName $(PT_TOP) src blend2d src ] ;
+    BLEND2D_C++FLAGS  = [ FDefines BL_STATIC BL_BUILD_NO_JIT ] ;
+    BLEND2D_LINKLIBS  = ;
+		BLEND2D_LINKFLAGS = ;
+}
+
+if $(WITH_CPU_AVX2)
+{
+    BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX2 ] ;
+    BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS) ;
+}
+else if $(WITH_CPU_AVX1)
+{
+    BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX ] ;
+    BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS)  ;
+}
+else
+{
+    Exit "CPU architecture not supported." ;
+}
+
+Configure WITH_BLEND2D ;
+EchoOption --with-blend2d : "Blend2d library" : $(WITH_BLEND2D:E="no") ;
+
+if $(WITH_BLEND2D) && ! $(BLEND2D_LINKLIBS)
+{
+    WITH_BLEND2D_BUILTIN = yes ;
+    Configure WITH_BLEND2D_BUILTIN ;
+    EchoOption WITH_BLEND2D_BUILTIN : "Blend2d builtin" : $(WITH_BLEND2D_BUILTIN:E="no") ;
+}
+
+Configure BLEND2D_INCLUDES ;
+EchoOption BLEND2D_INCLUDES : "Blend2d includes" ;
+
+Configure BLEND2D_C++FLAGS ;
+EchoOption BLEND2D_C++FLAGS : "Blend2d C++ flags" ;
 
 #############################################################################
 # Build rasterizer2 with experimental Gfx

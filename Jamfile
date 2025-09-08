@@ -185,6 +185,11 @@ if $(WITH_OPENSSL)
     SubInclude PT_TOP src openssl ;
 }
 
+if $(WITH_BLEND2D_BUILTIN)
+{
+    SubInclude PT_TOP src blend2d ;
+}
+
 if $(PT_SYSTEM)
 {
     SubInclude PT_TOP src Pt-System ;

@@ -1,5 +1,11 @@
 SubDir PT_TOP src Pt-Gfx ;
 
+if $(WITH_BLEND2D)
+{
+    SubDirHdrs $(BLEND2D_INCLUDES) ;
+    SubDirC++Flags $(BLEND2D_C++FLAGS) ;
+}
+
 if $(WITH_BUILTIN_SKIA)
 {
     SubDirC++Flags [ FDefines SK_SUPPORT_GPU=0 ] ;
@@ -85,6 +91,11 @@ MakeInstall Pt-Gfx : $(PT_INSTALL_LIBDIR) ;
 if $(WITH_BUILTIN_SKIA)
 {
     LinkLibraries Pt-Gfx : skia ;
+}
+
+if $(WITH_BLEND2D_BUILTIN)
+{
+    LinkLibraries Pt-Gfx : blend2d ;
 }
 
 if $(WITH_BUILTIN_LIBPNG)
