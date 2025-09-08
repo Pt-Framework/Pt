@@ -733,6 +733,7 @@
     <ClInclude Include="..\Pt-Gfx\raster\LineFace.h" />
     <ClInclude Include="..\Pt-Gfx\raster\LineSlope.h" />
     <ClInclude Include="..\Pt-Gfx\raster\RasterContext.h" />
+    <ClInclude Include="..\Pt-Gfx\raster\RasterSurface.h" />
     <ClInclude Include="..\Pt-Gfx\SIMDConfig.h" />
     <ClInclude Include="..\Pt-Gfx\skia\DrawText.h" />
     <ClInclude Include="..\Pt-Gfx\skia\FreeType.h" />
@@ -1415,6 +1416,7 @@
     <ClCompile Include="..\Pt-Gfx\raster\ClipPolygon.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\RasterContext.cpp" />
+    <ClCompile Include="..\Pt-Gfx\raster\RasterSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\Rgb16Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Rgb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\skia\DrawText.cpp" />

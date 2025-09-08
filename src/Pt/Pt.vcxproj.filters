@@ -2955,6 +2955,9 @@
     <ClInclude Include="..\Pt-Gfx\freetype\FontManager.h">
       <Filter>Pt-Gfx\freetype</Filter>
     </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\RasterSurface.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -5656,6 +5659,9 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\freetype\FontManager.cpp">
       <Filter>Pt-Gfx\freetype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\RasterSurface.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

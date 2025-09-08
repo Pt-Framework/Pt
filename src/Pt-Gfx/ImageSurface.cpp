@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include "RasterContext.h"
+#include "RasterSurface.h"
 #include "FontManager.h"
 
 #include <Pt/Gfx/ImageSurface.h>
@@ -44,59 +44,43 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 ImageSurface::ImageSurface()
-: _context(0)
+: _rasterSurface(0)
 {
+    _rasterSurface = new RasterSurface();
 }
 
 
 ImageSurface::ImageSurface(const Gfx::SizeF& size, std::size_t stride)
-: _context(0)
+: _rasterSurface(0)
 {
+    _rasterSurface = new RasterSurface();
+
     reset(size, stride);
 }
 
 
 ImageSurface::~ImageSurface()
 {
+    delete _rasterSurface;
 }
 
 
 const Gfx::Image& ImageSurface::image() const
 {
-    return _image;
+    return _rasterSurface->image();
 }
 
 
 void ImageSurface::reset(const Gfx::Image& image)
 {
-    if( image.format() != _image.format() )
-    {
-        _image.reset( format(), image.width(), image.height() );
-        Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
-    }
-    else
-    {
-        _image = image;
-    }
-
-    _physicalSize.set( image.width(), image.height() );
-    _logicalSize = _scaling.toLogical( Gfx::SizeF( image.width(), 
-                                                   image.height() ) );
-
+    _rasterSurface->reset(image);
     invalidate();
 }
 
 
 void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
-    long width = lround( sizeF.width() );
-    long height = lround( sizeF.height() );
-
-    _image.reset( _image.format(), width, height, stride );
-
-    _physicalSize.set(width, height);
-    _logicalSize = _scaling.toLogical( Gfx::SizeF(width, height) );
-
+    _rasterSurface->reset(sizeF, stride);
     invalidate();
 }
 
@@ -105,62 +89,50 @@ void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 
 const SizeF& ImageSurface::physicalSize() const
 {
-    return _physicalSize;
+    return _rasterSurface->physicalSize();
 }
 
 
 const SizeF& ImageSurface::logicalSize() const
 {
-    return _logicalSize;
+    return _rasterSurface->logicalSize();
 }
 
 
 void ImageSurface::setScaleFactor(double scaleFactor)
 {
-    _scaling.setScaleFactor(scaleFactor);
-
-    _physicalSize.set( _image.width(), _image.height() );
-    _logicalSize = _scaling.toLogical( Gfx::SizeF( _image.width(), 
-                                                   _image.height() ) );
-
+    _rasterSurface->setScaleFactor(scaleFactor);
     invalidate();
 }
 
 
 const Gfx::ImageFormat& ImageSurface::onGetFormat() const
 {
-    return Gfx::ImageFormat::argb32();
+    return _rasterSurface->format();
 }
 
 
 const Gfx::SizeF& ImageSurface::onGetSize() const
 {
-    return physicalSize();
+    return _rasterSurface->size();
 }
 
 
 const Scaling& ImageSurface::onGetScaling() const
 {
-    return _scaling;
+    return _rasterSurface->scaling();
 }
 
 
 Gfx::PaintContext* ImageSurface::onCreateContext(Gfx::PaintContext* context)
 {
-    RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
-    if( ! paintContext )
-        paintContext = new RasterContext();
-
-    paintContext->setImage(_image);
-    
-    _context = paintContext;
-    return _context;
+    return _rasterSurface->createContext(context);
 }
 
 
 void ImageSurface::onReleaseContext()
 {
-    _context = 0;
+    _rasterSurface->releaseContext();
 }
 
 

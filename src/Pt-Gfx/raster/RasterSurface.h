@@ -27,12 +27,11 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_ImageSurface_H
-#define PT_GFX_ImageSurface_H
+#ifndef PT_GFX_RasterSurface_H
+#define PT_GFX_RasterSurface_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -48,19 +47,18 @@ namespace Pt {
 
 namespace Gfx {
 
-class RasterSurface;
+class RasterContext;
 
 /** @brief Image drawing surface.
 */
-class PT_GFX_API ImageSurface : public PaintSurface
-                              , private NonCopyable
+class PT_GFX_API RasterSurface : private NonCopyable
 {
   public:
-    ImageSurface();
+    RasterSurface();
 
-    ImageSurface(const Gfx::SizeF& size, std::size_t stride = 0);
+    RasterSurface(const Gfx::SizeF& size, std::size_t stride = 0);
 
-    virtual ~ImageSurface();
+    virtual ~RasterSurface();
 
     const Gfx::Image& image() const;
 
@@ -74,61 +72,22 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     void setScaleFactor(double scaleFactor);
 
-  protected:
-    virtual const Gfx::ImageFormat& onGetFormat() const;
+    const Gfx::ImageFormat& format() const;
 
-    virtual const Gfx::SizeF& onGetSize() const;
+    const Gfx::SizeF& size() const;
 
-    virtual const Scaling& onGetScaling() const;
+    const Scaling& scaling() const;
 
-  protected:
-    virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+    virtual Gfx::PaintContext* createContext(Gfx::PaintContext* context);
 
-    virtual void onReleaseContext() override;
-
-  public:
-    static void setFontDir(const System::Path& path);
-
-    static const std::string& defaultFont();
-
-    static void setDefaultFont(const std::string& name);
-
-    static std::vector<std::string> fontNames();
+    virtual void releaseContext();
 
   private:
-    RasterSurface* _rasterSurface;
-};
-
-/** @brief Image drawing layer.
-*/
-class PT_GFX_API ImageLayer : public PaintLayer
-{
-    public:
-        ImageLayer();
-
-        ImageLayer(const Gfx::SizeF& size, std::size_t stride = 0);
-
-        virtual ~ImageLayer();
-
-        void reset(const Gfx::Image& image);
-
-        void reset(const Gfx::SizeF& size, std::size_t stride = 0);
-
-        const Gfx::Image& image() const;
-
-        /** @brief Returns the physical size.
-        */
-        const Gfx::SizeF& size() const;
-
-        void setScaleFactor(double scaleFactor);
-
-    protected:
-        virtual void onDraw(PaintSurface& surface,
-                            const Paint& paint,
-                            const Gfx::PointF& to,
-                            const Gfx::RectF* rect) const override;
-    private:
-        ImageSurface _surface;
+    Image          _image;
+    Gfx::SizeF     _physicalSize;
+    Gfx::SizeF     _logicalSize;
+    Gfx::Scaling   _scaling;
+    RasterContext* _context;
 };
 
 } // namespace
