@@ -28,7 +28,7 @@
 */
 
 #include "RasterContext.h"
-#include "FreeType.h"
+#include "FontManager.h"
 
 #include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Painter.h>

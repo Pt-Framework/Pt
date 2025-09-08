@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include "FreeType.h"
+#include "FontManager.h"
 #include "DejaVuSans.h"
 #include "DejaVuSansBold.h"
 #include "DejaVuSansItalic.h"

@@ -28,7 +28,7 @@
 */
 
 #include "DrawText.h"
-#include "FreeType.h"
+#include "FontManager.h"
 
 namespace Pt {
 

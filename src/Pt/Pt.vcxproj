@@ -718,7 +718,9 @@
     <ClInclude Include="..\Pt-Db\ValueImpl.h" />
     <ClInclude Include="..\Pt-Forms\WorkspaceFrame.h" />
     <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h" />
+    <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h" />
     <ClInclude Include="..\Pt-Gfx\Fixed.h" />
+    <ClInclude Include="..\Pt-Gfx\freetype\FreeType.h" />
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h" />
     <ClInclude Include="..\Pt-Gfx\raster\DejaVuSans.h" />
     <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansBold.h" />
@@ -727,7 +729,6 @@
     <ClInclude Include="..\Pt-Gfx\raster\DrawText.h" />
     <ClInclude Include="..\Pt-Gfx\raster\Edge.h" />
     <ClInclude Include="..\Pt-Gfx\raster\EdgeTable.h" />
-    <ClInclude Include="..\Pt-Gfx\raster\FreeType.h" />
     <ClInclude Include="..\Pt-Gfx\raster\LineEdge.h" />
     <ClInclude Include="..\Pt-Gfx\raster\LineFace.h" />
     <ClInclude Include="..\Pt-Gfx\raster\LineSlope.h" />
@@ -1392,10 +1393,12 @@
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp" />
+    <ClCompile Include="..\Pt-Gfx\blend2d\RasterContext.cpp" />
     <ClCompile Include="..\Pt-Gfx\Brush.cpp" />
     <ClCompile Include="..\Pt-Gfx\Canvas.cpp" />
     <ClCompile Include="..\Pt-Gfx\Color.cpp" />
     <ClCompile Include="..\Pt-Gfx\Font.cpp" />
+    <ClCompile Include="..\Pt-Gfx\freetype\FreeType.cpp" />
     <ClCompile Include="..\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageSurface.cpp" />
@@ -1411,7 +1414,6 @@
     <ClCompile Include="..\Pt-Gfx\PngWriter.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\ClipPolygon.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp" />
-    <ClCompile Include="..\Pt-Gfx\raster\FreeType.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\RasterContext.cpp" />
     <ClCompile Include="..\Pt-Gfx\Rgb16Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Rgb32Format.cpp" />

@@ -4,9 +4,10 @@ if $(WITH_BLEND2D)
 {
     SubDirHdrs $(BLEND2D_INCLUDES) ;
     SubDirC++Flags $(BLEND2D_C++FLAGS) ;
-}
 
-if $(WITH_BUILTIN_SKIA)
+    PT_GFX_IMPL = blend2d ;
+}
+else if $(WITH_BUILTIN_SKIA)
 {
     SubDirC++Flags [ FDefines SK_SUPPORT_GPU=0 ] ;
     SubDirC++Flags [ FDefines SKSL_STANDALONE  ] ;
@@ -36,6 +37,7 @@ else
 
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-Gfx/$(PT_GFX_IMPL:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
@@ -57,7 +59,11 @@ if $(FREETYPE_INCLUDES)
 PT_GFX_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx $(PT_GFX_IMPL:L) ] ;
 PT_GFX_IMPL_SOURCES += [ GLOB $(PT_GFX_IMPL_SUBDIR) : *.cpp  ] ;
 
+PT_GFX_FREETYPE_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx freetype ] ;
+PT_GFX_FREETYPE_SOURCES += [ GLOB $(PT_GFX_FREETYPE_SUBDIR) : *.cpp  ] ;
+
 SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
+                       $(PT_GFX_FREETYPE_SOURCES)
                        Argb32.cpp
                        Argb32Format.cpp
                        Argb32Image.cpp

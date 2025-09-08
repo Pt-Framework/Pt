@@ -265,6 +265,12 @@
     <Filter Include="Pt-JsonRpc">
       <UniqueIdentifier>{1e10ea02-e77e-4330-a9c0-05a38e934b8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Gfx\blend2d">
+      <UniqueIdentifier>{b592a28a-cd83-4fcf-b0a6-faf4eb76a707}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Gfx\freetype">
+      <UniqueIdentifier>{f7243491-0fb6-4bf9-9108-31c11ff9e734}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\freetype\include\ft2build.h">
@@ -1671,9 +1677,6 @@
     <ClInclude Include="..\Pt-Gfx\raster\EdgeTable.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\FreeType.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\raster\LineEdge.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
@@ -2945,6 +2948,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Polygon.h">
       <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\FreeType.h">
+      <Filter>Pt-Gfx\freetype</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4679,9 +4688,6 @@
     <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\raster\FreeType.cpp">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\raster\RasterContext.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
@@ -5644,6 +5650,12 @@
     </ClCompile>
     <ClCompile Include="..\Pt-JsonRpc\Responder.cpp">
       <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\blend2d\RasterContext.cpp">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\freetype\FreeType.cpp">
+      <Filter>Pt-Gfx\freetype</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

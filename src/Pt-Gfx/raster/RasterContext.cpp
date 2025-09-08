@@ -34,7 +34,6 @@
 #include "LineFace.h"
 #include "EdgeTable.h"
 #include "DrawText.h"
-#include "FreeType.h"
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageSurface.h>
