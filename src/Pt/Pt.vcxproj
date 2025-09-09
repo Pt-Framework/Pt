@@ -719,6 +719,7 @@
     <ClInclude Include="..\Pt-Forms\WorkspaceFrame.h" />
     <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h" />
     <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h" />
+    <ClInclude Include="..\Pt-Gfx\blend2d\RasterSurface.h" />
     <ClInclude Include="..\Pt-Gfx\Fixed.h" />
     <ClInclude Include="..\Pt-Gfx\freetype\FontManager.h" />
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h" />
@@ -1395,6 +1396,7 @@
     <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp" />
     <ClCompile Include="..\Pt-Gfx\blend2d\RasterContext.cpp" />
+    <ClCompile Include="..\Pt-Gfx\blend2d\RasterSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\Brush.cpp" />
     <ClCompile Include="..\Pt-Gfx\Canvas.cpp" />
     <ClCompile Include="..\Pt-Gfx\Color.cpp" />

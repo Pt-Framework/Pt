@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_RASTER_CONTEXT_H
-#define PT_GFX_RASTER_CONTEXT_H
+#ifndef PT_GFX_BLEND2D_RASTER_CONTEXT_H
+#define PT_GFX_BLEND2D_RASTER_CONTEXT_H
 
 #include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/Image.h>
@@ -45,12 +45,16 @@ namespace Gfx {
 
 class RasterContext : public PaintContext
 {
+    typedef BasicPoint<Pt::ssize_t> Point;
+    typedef BasicSize<Pt::ssize_t> Size;
+    typedef BasicRect<Pt::ssize_t> Rect;
+
     public:
         RasterContext();
 
         ~RasterContext();
 
-        void setImage(Image& image);
+        void init(BLImage& rasterImage, Image& image);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
@@ -130,7 +134,19 @@ class RasterContext : public PaintContext
                                  const Gfx::RectF* rect = 0);
 
     private:
-        Image*               _image;
+      void putImage( const Point& to, const Image& img);
+
+      void putImage(const Point& to, const Image& image, const Rect& rect);
+
+    private:
+        BLContext               _context;
+        BLImage*                _rasterImage;
+        Image*                  _image;
+        class DrawText*         _text;
+        CompositionMode         _compositionMode;
+        BasicRect<Pt::ssize_t>  _currentClip;
+        bool                    _hasClip;
+        RectF                   _clip;
 };
 
 } //namespace

@@ -2958,6 +2958,9 @@
     <ClInclude Include="..\Pt-Gfx\raster\RasterSurface.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\blend2d\RasterSurface.h">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -5662,6 +5665,9 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\raster\RasterSurface.cpp">
       <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\blend2d\RasterSurface.cpp">
+      <Filter>Pt-Gfx\blend2d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

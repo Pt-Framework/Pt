@@ -18,6 +18,7 @@
 
 
   <PropertyGroup Label="UserMacros">
+    <PT_INCLUDE_SEARCH_PATH>$(PT_INCLUDE_SEARCH_PATH);$(SolutionDir)src\blend2d\src</PT_INCLUDE_SEARCH_PATH>
   </PropertyGroup>
 
 
