@@ -24,7 +24,7 @@ ConfigureCc ;
 
 if $(TOOLSET) = gcc
 {
-    C++FLAGS += -std=c++11 ;
+    C++FLAGS += -std=c++17 ;
 }
 
 # configure basic C++ compiler
@@ -179,7 +179,7 @@ if $(PT_SYSTEM) = posix
     }
     else
     {
-        Exit "ERROR: clocks are required." ;
+        Exit "Error: clocks are required." ;
     }
 
     #
@@ -205,7 +205,7 @@ if $(PT_SYSTEM) = posix
 
     if ! $(WITH_DL)
     {
-        Exit "ERROR: dl is required." ;
+        Exit "Error: dl is required." ;
     }
 
     #
@@ -233,8 +233,26 @@ if $(PT_SYSTEM) = posix
 
     if ! $(WITH_PTHREADS)
     {
-        Exit "ERROR: pthread is required." ;
+        Exit "Error: pthread is required." ;
     }
+
+    #
+    # POSIX math
+    #
+
+    WITH_M = [ CheckBuildC++ "#include <math.h>"
+                             "int main() { return (int) sin(42); }"
+                             : "" : -lc ] ;
+    if ! $(WITH_M)
+    {
+        M_LINKLIBS = -lm ;
+
+        WITH_M = [ CheckBuildC++ "#include <math.h>"
+                                 "int main() { return (int) sin(42); }"
+                                 : "" : $(M_LINKLIBS) ] ;
+    }
+
+    EchoOption M_LINKLIBS : "Math libs" ;
 
     PT_SYSTEM_LINKLIBS +=  $(POSIX_CLOCK_LINKLIBS) $(PTHREAD_LINKLIBS) $(DL_LINKLIBS) ;
 }
@@ -349,7 +367,7 @@ if $(PT_SYSTEM) = win32
 
     if ! $(WITH_WSA)
     {
-        Exit "ERROR: windows sockets are required." ;
+        Exit "Error: windows sockets are required." ;
     }
 
     NETLIBS += $(WSA_LINKLIBS) ;
@@ -382,7 +400,7 @@ if $(PT_SYSTEM) = posix
 
     if ! $(WITH_UNIX_SOCKETS)
     {
-        Exit "ERROR: unix sockets are required." ;
+        Exit "Error: unix sockets are required." ;
     }
 
     WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
@@ -414,7 +432,7 @@ if $(PT_SYSTEM) = posix
 
     if ! $(WITH_NSL)
     {
-        Exit "ERROR: NSL is required." ;
+        Exit "Error: NSL is required." ;
     }
 
     NETLIBS += $(NSL_LINKLIBS) $(UNIX_SOCKETS_LINKLIBS) ;
@@ -422,199 +440,6 @@ if $(PT_SYSTEM) = posix
 
 Configure NETLIBS ;
 EchoOption NETLIBS : "Network libs" ;
-
-#############################################################################
-# SSE2 instructions
-#############################################################################
-
-WITH_CPU_SSE2 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "int v = 42;"
-                                "const __m128i r = _mm_set1_epi32(v);"
-                                "return 0; }"
-                                : ""
-                                : "" ] ;
-
-if $(WITH_CPU_SSE2)
-{
-    PT_CPU_DEFINES = PT_CPU_SSE2_MSVC ;
-}
-
-if ! $(WITH_CPU_SSE2)
-{
-    WITH_CPU_SSE2 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "int v = 42;"
-                                    "const __m128i r = _mm_set1_epi32(v);"
-                                    "return 0; }"
-                                    : ""
-                                    : "" ] ;
-
-    if $(WITH_CPU_SSE2)
-    {
-        PT_CPU_DEFINES = PT_CPU_SSE2_GNU ;
-    }
-}
-
-#############################################################################
-# SSE3 instructions
-#############################################################################
-
-WITH_CPU_SSE3 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m128i v;"
-                                "const __m128i r = _mm_lddqu_si128(&v);"
-                                "return 0; }"
-                                : ""
-                                : "" ] ;
-
-if $(WITH_CPU_SSE3)
-{
-    PT_CPU_DEFINES += PT_CPU_SSE3_MSVC ;
-}
-
-if ! $(WITH_CPU_SSE3)
-{
-    WITH_CPU_SSE3 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "__m128i v;"
-                                    "const __m128i r = _mm_lddqu_si128(&v);"
-                                    "return 0; }"
-                                    : ""
-                                    : "" ] ;
-
-    if $(WITH_CPU_SSE3)
-    {
-        PT_CPU_DEFINES += PT_CPU_SSE3_GNU ;
-    }
-}
-
-#############################################################################
-# SSSE3 instructions
-#############################################################################
-
-WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m128i v1, v2;"
-                                "const __m128i r = _mm_shuffle_epi8(v1, v2);"
-                                "return 0; }"
-                                : ""
-                                : "" ] ;
-
-if $(WITH_CPU_SSSE3)
-{
-    PT_CPU_DEFINES += PT_CPU_SSSE3_MSVC ;
-}
-
-if ! $(WITH_CPU_SSSE3)
-{
-    WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                     "int main() {"
-                                     "__m128i v1, v2;"
-                                     "const __m128i r = _mm_shuffle_epi8(v1, v2);"
-                                     "return 0; }"
-                                     : ""
-                                     : "" ] ;
-
-    if $(WITH_CPU_SSSE3)
-    {
-        PT_CPU_DEFINES += PT_CPU_SSSE3_GNU ;
-    }
-}
-
-#############################################################################
-# AVX1 instructions
-#############################################################################
-
-WITH_CPU_AVX1 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m256i v;"
-                                "const __m256i r = _mm256_lddqu_si256(&v);"
-                                "return 0; }"
-                                : ""
-                                : "" ] ;
-
-if $(WITH_CPU_AVX1)
-{
-    PT_CPU_DEFINES += PT_CPU_AVX1_MSVC ;
-    CPU_AVX1_C++FLAGS = /arch:AVX ;
-    CPU_AVX1_CFLAGS = /arch:AVX ;
-}
-
-if ! $(WITH_CPU_AVX1)
-{
-    WITH_CPU_AVX1 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "__m256i v;"
-                                    "const __m256i r = _mm256_lddqu_si256(&v);"
-                                    "return 0; }"
-                                    : ""
-                                    : "" ] ;
-
-    if $(WITH_CPU_AVX1)
-    {
-        PT_CPU_DEFINES += PT_CPU_AVX1_GNU ;
-        CPU_AVX1_C++FLAGS = -mavx ;
-        CPU_AVX1_CFLAGS = -mavx ;
-    }
-}
-
-#############################################################################
-# AVX2 instructions
-#############################################################################
-
-WITH_CPU_AVX2 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m256i v1, v2;"
-                                "const __m256i r = _mm256_and_si256(v1, v2);"
-                                "return 0; }"
-                                : ""
-                                : "" ] ;
-
-if $(WITH_CPU_AVX2)
-{
-    PT_CPU_DEFINES += PT_CPU_AVX2_MSVC ;
-    CPU_AVX2_C++FLAGS = /arch:AVX2 ;
-    CPU_AVX2_CFLAGS = /arch:AVX2 ;
-}
-
-if ! $(WITH_CPU_AVX2)
-{
-    WITH_CPU_AVX2 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "__m256i v1, v2;"
-                                    "const __m256i r = _mm256_and_si256(v1, v2);"
-                                    "return 0; }"
-                                    : ""
-                                    : "" ] ;
-
-    if $(WITH_CPU_AVX2)
-    {
-        PT_CPU_DEFINES += PT_CPU_AVX2_GNU ;
-        CPU_AVX2_C++FLAGS = -mavx2 ;
-        CPU_AVX2_CFLAGS = -mavx2 ;
-    }
-}
-
-#############################################################################
-# NEON instructions
-#############################################################################
-
-WITH_CPU_NEON = [ CheckBuildC++ "#include <arm_neon.h>"
-                                "int main() {"
-                                "int32x4_t v1, v2;"
-                                "int32x4_t r = vandq_s32(v1, v2);"
-                                "return 0; }"
-                                : ""
-                                : "" ] ;
-
-if $(WITH_CPU_NEON)
-{
-    PT_CPU_DEFINES += PT_CPU_NEON_GNU ;
-}
-
-Configure PT_CPU_DEFINES ;
-EchoOption PT_CPU_DEFINES : "CPU architecture" ;
 
 #############################################################################
 # Atomic operations
@@ -685,62 +510,6 @@ if ! $(PRELIB)
 }
 
 Configure ZLIB ;
-
-#############################################################################
-# blend2D graphics library
-#############################################################################
-
-if --with-blend2d in $(ARGV)
-{
-    WITH_BLEND2D = yes ;
-
-    BLEND2D_INCLUDES  = [ FDirName $(PT_TOP) src blend2d src ] ;
-    BLEND2D_C++FLAGS  = [ FDefines BL_STATIC BL_BUILD_NO_JIT ] ;
-    BLEND2D_LINKLIBS  = ;
-		BLEND2D_LINKFLAGS = ;
-}
-
-if $(WITH_CPU_AVX2)
-{
-    BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX2 ] ;
-    BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS) ;
-}
-else if $(WITH_CPU_AVX1)
-{
-    BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX ] ;
-    BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS)  ;
-}
-else
-{
-    Exit "CPU architecture not supported." ;
-}
-
-Configure WITH_BLEND2D ;
-EchoOption --with-blend2d : "Blend2d library" : $(WITH_BLEND2D:E="no") ;
-
-if $(WITH_BLEND2D) && ! $(BLEND2D_LINKLIBS)
-{
-    WITH_BLEND2D_BUILTIN = yes ;
-    Configure WITH_BLEND2D_BUILTIN ;
-    EchoOption WITH_BLEND2D_BUILTIN : "Blend2d builtin" : $(WITH_BLEND2D_BUILTIN:E="no") ;
-}
-
-Configure BLEND2D_INCLUDES ;
-EchoOption BLEND2D_INCLUDES : "Blend2d includes" ;
-
-Configure BLEND2D_C++FLAGS ;
-EchoOption BLEND2D_C++FLAGS : "Blend2d C++ flags" ;
-
-#############################################################################
-# Build rasterizer2 with experimental Gfx
-#############################################################################
-
-if --with-experimental-gfx in $(ARGV)
-{
-    WITH_EXPERIMENTAL_GFX = yes ;
-    Configure WITH_EXPERIMENTAL_GFX ;
-    EchoOption WITH_EXPERIMENTAL_GFX : "ExperimentalGfx" ;
-}
 
 #############################################################################
 # PNG support with libpng
@@ -820,6 +589,59 @@ EchoOption JPEG_INCLUDES : "JPEG includes" ;
 
 Configure JPEG_LINKLIBS ;
 EchoOption JPEG_LINKLIBS : "JPEG libs" ;
+
+#############################################################################
+# blend2D graphics library
+#############################################################################
+
+if --with-blend2d in $(ARGV)
+{
+    Load simd.jam ;
+
+    WITH_BLEND2D = yes ;
+    Configure WITH_BLEND2D ;
+    EchoOption --with-blend2d : "Blend2d library" : $(WITH_BLEND2D:E="no") ;
+
+    WITH_BLEND2D_BUILTIN = yes ; # only builtin available
+    Configure WITH_BLEND2D_BUILTIN ;
+    EchoOption WITH_BLEND2D_BUILTIN : "Blend2d builtin" : $(WITH_BLEND2D_BUILTIN:E="no") ;
+
+    BLEND2D_INCLUDES  = [ FDirName $(PT_TOP) src blend2d src ] ;
+    BLEND2D_C++FLAGS  = [ FDefines BL_STATIC BL_BUILD_NO_JIT ] ;
+    BLEND2D_LINKLIBS  = $(PTHREAD_LINKLIBS) $(M_LINKLIBS) ;
+		BLEND2D_LINKFLAGS = ;
+
+    if $(PT_SYSTEM) = posix && ! $(WITH_M)
+    {
+        Exit "Error: posix math library not found." ;
+    }
+
+    if $(WITH_CPU_AVX2)
+    {
+        BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX2 ] ;
+        BLEND2D_C++FLAGS += [ FDefines BL_TARGET_OPT_BMI2 BL_TARGET_OPT_POPCNT ] ;
+        BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS) ;
+    }
+    else if $(WITH_CPU_AVX1)
+    {
+        BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX ] ;
+        BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS) ;
+    }
+    else if $(WITH_CPU_NEON)
+    {
+        BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_ASIMD ] ;
+        BLEND2D_C++FLAGS +=  $(CPU_NEON_C++FLAGS) ;
+    }
+
+    Configure BLEND2D_INCLUDES ;
+    EchoOption BLEND2D_INCLUDES : "Blend2d includes" ;
+
+    Configure BLEND2D_C++FLAGS ;
+    EchoOption BLEND2D_C++FLAGS : "Blend2d C++ flags" ;
+
+    Configure BLEND2D_LINKLIBS ;
+    EchoOption BLEND2D_LINKLIBS : "Blend2d linklibs" : $(BLEND2D_LINKLIBS:E="none") ;
+}
 
 #############################################################################
 # Skia support
@@ -994,7 +816,7 @@ if --with-mfc in $(ARGV)
 	
     if ! $(MFC_INCLUDES)
     {
-        Exit "ERROR: MFC includes not found." ;
+        Exit "Error: MFC includes not found." ;
     }
 
     MFC_INCLUDES = \"$(MFC_INCLUDES)\" ;
@@ -1027,7 +849,7 @@ if --with-mfc in $(ARGV)
 
 	if ! $(MFC_LIBDIR)
 	{
-		Exit "ERROR: MFC libraries not found." ;
+		Exit "Error: MFC libraries not found." ;
 	}
 
     MFC_LINKFLAGS = /LIBPATH:\"$(MFC_LIBDIR)\" ;
@@ -1054,7 +876,7 @@ if --with-wxwidgets in $(ARGV)
     WXCONFIG_RESULT = [ EXEC $(WXCONFIG_CXXFLAGS:J=" ") ] ;
     if $(WXCONFIG_RESULT[1]) != 0
     {
-        Exit "ERROR:" $(WXCONFIG) "does not work" ;
+        Exit "Error:" $(WXCONFIG) "does not work" ;
     }
 
     WX_C++FLAGS = $(WXCONFIG_RESULT[2-]) ;
@@ -1064,7 +886,7 @@ if --with-wxwidgets in $(ARGV)
     WXCONFIG_RESULT = [ EXEC $(WXCONFIG_LIBS:J=" ") ] ;
     if $(WXCONFIG_RESULT[1]) != 0
     {
-        Exit "ERROR:" $(WXCONFIG) "does not work" ;
+        Exit "Error:" $(WXCONFIG) "does not work" ;
     }
 
     WX_LINKLIBS = $(WXCONFIG_RESULT[2-]) ;
@@ -1151,7 +973,7 @@ if $(QT5_SUPPORT)
 
 	if ! $(WITH_QT)
 	{
-		Exit "ERROR: Qt headers and libraries not found." ;
+		Exit "Error: Qt headers and libraries not found." ;
 	}
 }
 
@@ -1185,7 +1007,7 @@ if $(WITH_QT)
 
     if ! $(WITH_QT_MOC)
     {
-        Exit "ERROR: Qt moc tool not found." ;
+        Exit "Error: Qt moc tool not found." ;
     }
 }
 

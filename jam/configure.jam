@@ -597,7 +597,9 @@ rule CheckBuildCc
     return $(_r) ;
 }
 
-
+#!
+#! CheckBuildC++ src : cflags : linkflags : libpath ;
+#!
 rule CheckBuildC++
 {
     ConfigureLog "\n[ CheckBuildC++ ]" ;

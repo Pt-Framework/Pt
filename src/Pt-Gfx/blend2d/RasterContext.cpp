@@ -382,49 +382,54 @@ void RasterContext::onDrawText(const PointF& to, const Pt::String& text,
     _text->draw(*_image, 0, 0, text, _compositionMode, &tf);
 }
 
+#if USE_BLEND2D_BLIT
 
-//void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
-//                                const RectF* imageRect)
-//{
-//    _context.save();
-//    _context.reset_transform();
-//
-//    Gfx::PointF toP = transform() * toF;
-//    BLPoint pos( toP.x(), toP.y() );
-//
-//    void* data = const_cast<Pt::uint8_t*>( image.data() );
-//    std::size_t stride = image.format().imageSize( image.width(), 1, image.padding() );
-//
-//    BLImage view;
-//
-//    if(_compositionMode == CompositionMode::SourceCopy)
-//    {
-//        view.create_from_data(image.width(), image.height(), BL_FORMAT_XRGB32,
-//                              data, stride, BL_DATA_ACCESS_READ);
-//    }
-//    else
-//    {
-//        view.create_from_data(image.width(), image.height(), BL_FORMAT_PRGB32,
-//                              data, stride, BL_DATA_ACCESS_READ);
-//    }
-//
-//    if(imageRect)
-//    {
-//        BLRectI srcRect(lround( imageRect->x() ),
-//                        lround( imageRect->y() ), 
-//                        lround( imageRect->width() ),
-//                        lround( imageRect->height() ) );
-//
-//        _context.blit_image(pos, view, srcRect);
-//    }
-//    else
-//    {
-//        _context.blit_image(pos, view);
-//    }
-//    
-//    _context.restore();
-//}
+void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
+                                const RectF* imageRect)
+{
+    _context.save();
+    _context.reset_transform();
 
+    Gfx::PointF toP = transform() * toF;
+    BLPoint pos( toP.x(), toP.y() );
+
+    if( image.empty() )
+        return;
+
+    void* data = const_cast<Pt::uint8_t*>( image.data() );
+    std::size_t stride = image.format().imageSize( image.width(), 1, image.padding() );
+
+    BLImage view;
+
+    if(_compositionMode == CompositionMode::SourceCopy)
+    {
+        view.create_from_data(image.width(), image.height(), BL_FORMAT_XRGB32,
+                              data, stride, BL_DATA_ACCESS_READ);
+    }
+    else
+    {
+        view.create_from_data(image.width(), image.height(), BL_FORMAT_PRGB32,
+                              data, stride, BL_DATA_ACCESS_READ);
+    }
+
+    if(imageRect)
+    {
+        BLRectI srcRect(lround( imageRect->x() ),
+                        lround( imageRect->y() ), 
+                        lround( imageRect->width() ),
+                        lround( imageRect->height() ) );
+
+        _context.blit_image(pos, view, srcRect);
+    }
+    else
+    {
+        _context.blit_image(pos, view);
+    }
+    
+    _context.restore();
+}
+
+#else
 
 void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
                                const RectF* imageRect)
@@ -492,6 +497,7 @@ void RasterContext::putImage(const Point& to, const Image& image, const Rect& im
     //                     fromRect.width(), fromRect.height(), _compositionMode);
 }
 
+#endif // USE_BLEND2d_BLIT
 
 bool RasterContext::onDrawLayer(const Gfx::PointF& to,
                                 const Gfx::PaintLayer& layer,

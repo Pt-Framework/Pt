@@ -271,7 +271,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    //return;   
+    return;   
     
     const Gfx::RectF& rect = ev.rect();
  
