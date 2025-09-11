@@ -41,5 +41,21 @@ BLEND2D_SOURCES += [ GLOB $(BLEND2D_THREADING_DIR) : *.cpp ] ;
 BLEND2D_UNICODE_DIR = [ FDirName $(BLEND2D_SOURCES_DIR) unicode ] ;
 BLEND2D_SOURCES += [ GLOB $(BLEND2D_UNICODE_DIR) : *.cpp ] ;
 
+#for local s in $(BLEND2D_SOURCES)
+#{
+#    local obj = $(s:S=$(SUFOBJ)) ;
+#    switch $(f)
+#    {
+#        case *_sse2.cpp   :  on $(obj) C++FLAGS = $(BLEND2D_SSE2_C++FLAGS) ;
+#        case *_sse3.cpp   :  on $(obj) C++FLAGS = $(BLEND2D_SSE3_C++FLAGS) ;
+#        case *_ssse3.cpp  :  on $(obj) C++FLAGS = $(BLEND2D_SSSE3_C++FLAGS) ;
+#        case *_sse4_2.cpp :  on $(obj) C++FLAGS = $(BLEND2D_SSE4_1_C++FLAGS) ;
+#        case *_sse4_2.cpp :  on $(obj) C++FLAGS = $(BLEND2D_SSE4_2_C++FLAGS) ;
+#        case *_avx.cpp    :  on $(obj) C++FLAGS = $(BLEND2D_AVX_C++FLAGS) ;
+#        case *_avx2.cpp   :  on $(obj) C++FLAGS = $(BLEND2D_AVX2_C++FLAGS) ;
+#        case *_asimd.cpp  :  on $(obj) C++FLAGS = $(BLEND2D_ASIMD_C++FLAGS) ;
+#    }
+#}
+
 Library blend2d : $(BLEND2D_SOURCES) ;
 MakeLocate blend2d : $(PT_OUTPUT_TARGET) ;
