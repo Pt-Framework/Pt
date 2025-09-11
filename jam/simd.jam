@@ -2,9 +2,8 @@ if ! $(JAMBASE_SIMD_JAM_INCLUDED) {
 JAMBASE_SIMD_JAM_INCLUDED = true ;
 
 #############################################################################
-# SIMD intrinsics
+# CPU intrinsics
 #############################################################################
-
 WITH_CPU_INTRINSICS = [ CheckBuildC++ "#include <intrin.h>"
                                       "int main() { return 0; }"
                                       : "" : "" ] ;
@@ -27,7 +26,6 @@ if ! $(WITH_CPU_INTRINSICS)
 #############################################################################
 # SSE2 instructions
 #############################################################################
-
 WITH_CPU_SSE2_MSVC_SOURCE = "#include <intrin.h>"
                             "int main() {"
                             "int v = 42;"
@@ -65,13 +63,19 @@ if ! $(WITH_CPU_SSE2)
 #############################################################################
 # SSE3 instructions
 #############################################################################
+WITH_CPU_SSE3_MSVC_SOURCE = "#include <intrin.h>"
+                            "int main() {"
+                            "__m128i v;"
+                            "const __m128i r = _mm_lddqu_si128(&v);"
+                            "return 0; }" ;
 
-WITH_CPU_SSE3 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m128i v;"
-                                "const __m128i r = _mm_lddqu_si128(&v);"
-                                "return 0; }"
-                                : ""  : "" ] ;
+WITH_CPU_SSE3_GNU_SOURCE = "#include <x86intrin.h>"
+                           "int main() {"
+                           "__m128i v;"
+                           "const __m128i r = _mm_lddqu_si128(&v);"
+                           "return 0; }" ;
+
+WITH_CPU_SSE3 = [ CheckBuildC++ $(WITH_CPU_SSE3_MSVC_SOURCE) : ""  : "" ] ;
 if $(WITH_CPU_SSE3)
 {
     CPU_SSE3_C++FLAGS = [ FDefines __SSE3__ ] ;
@@ -80,12 +84,7 @@ if $(WITH_CPU_SSE3)
 
 if ! $(WITH_CPU_SSE3)
 {
-    WITH_CPU_SSE3 = [ CheckBuildC++ "#include <intrin.h>"
-                                    "int main() {"
-                                    "__m128i v;"
-                                    "const __m128i r = _mm_lddqu_si128(&v);"
-                                    "return 0; }"
-                                    : /arch:SSE3 : "" ] ;
+    WITH_CPU_SSE3 = [ CheckBuildC++ $(WITH_CPU_SSE3_MSVC_SOURCE) : /arch:SSE3 : "" ] ;
     if $(WITH_CPU_SSE3)
     {
         CPU_SSE3_C++FLAGS = /arch:SSE3 [ FDefines __SSE3__ ] ;
@@ -95,12 +94,7 @@ if ! $(WITH_CPU_SSE3)
 
 if ! $(WITH_CPU_SSE3)
 {
-    WITH_CPU_SSE3 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "__m128i v;"
-                                    "const __m128i r = _mm_lddqu_si128(&v);"
-                                    "return 0; }"
-                                    : -msse3 : "" ] ;
+    WITH_CPU_SSE3 = [ CheckBuildC++ $(WITH_CPU_SSE3_GNU_SOURCE) : -msse3 : "" ] ;
     if $(WITH_CPU_SSE3)
     {
         CPU_SSE3_C++FLAGS = -msse3 ;
@@ -111,13 +105,20 @@ if ! $(WITH_CPU_SSE3)
 #############################################################################
 # SSSE3 instructions
 #############################################################################
+WITH_CPU_SSSE3_MSVC_SOURCE = "#include <intrin.h>"
+                             "int main() {"
+                             "__m128i v1, v2;"
+                             "const __m128i r = _mm_shuffle_epi8(v1, v2);"
+                             "return 0; }" ;
 
-WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m128i v1, v2;"
-                                "const __m128i r = _mm_shuffle_epi8(v1, v2);"
-                                "return 0; }"
-                                : "" : "" ] ;
+WITH_CPU_SSE3_GNU_SOURCE = "#include <x86intrin.h>"
+                           "int main() {"
+                           "__m128i v1, v2;"
+                           "const __m128i r = _mm_shuffle_epi8(v1, v2);"
+                           "return 0; }" ;
+
+
+WITH_CPU_SSSE3 = [ CheckBuildC++ $(WITH_CPU_SSSE3_MSVC_SOURCE) : "" : "" ] ;
 if $(WITH_CPU_SSSE3)
 {
     CPU_SSSE3_C++FLAGS = [ FDefines __SSSE3__ ] ;
@@ -126,12 +127,7 @@ if $(WITH_CPU_SSSE3)
 
 if ! $(WITH_CPU_SSSE3)
 {
-    WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <intrin.h>"
-                                    "int main() {"
-                                    "__m128i v1, v2;"
-                                    "const __m128i r = _mm_shuffle_epi8(v1, v2);"
-                                    "return 0; }"
-                                    : /arch:SSSE3 : "" ] ;
+    WITH_CPU_SSSE3 = [ CheckBuildC++ $(WITH_CPU_SSSE3_MSVC_SOURCE) : /arch:SSSE3 : "" ] ;
     if $(WITH_CPU_SSSE3)
     {
         CPU_SSSE3_C++FLAGS = /arch:SSSE3 [ FDefines __SSSE3__ ] ;
@@ -141,12 +137,7 @@ if ! $(WITH_CPU_SSSE3)
 
 if ! $(WITH_CPU_SSSE3)
 {
-    WITH_CPU_SSSE3 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                     "int main() {"
-                                     "__m128i v1, v2;"
-                                     "const __m128i r = _mm_shuffle_epi8(v1, v2);"
-                                     "return 0; }"
-                                     : -mssse3 : "" ] ;
+    WITH_CPU_SSSE3 = [ CheckBuildC++ $(WITH_CPU_SSE3_GNU_SOURCE) : -mssse3 : "" ] ;
 
     if $(WITH_CPU_SSSE3)
     {
@@ -158,12 +149,17 @@ if ! $(WITH_CPU_SSSE3)
 #############################################################################
 # SSE4.1 instructions
 #############################################################################
+WITH_CPU_SSE4_1_MSVC_SOURCE = "#include <intrin.h>"
+                              "int main() {"
+                              "const __m128i vec = _mm_set1_epi32(42);"
+                              "return 0; }" ;
+    
+WITH_CPU_SSE4_1_GNU_SOURCE = "#include <x86intrin.h>"
+                             "int main() {"
+                             "const __m128i vec = _mm_set1_epi32(42);"
+                             "return 0; }" ;
 
-WITH_CPU_SSE4_1 = [ CheckBuildC++ "#include <intrin.h>"
-                                   "int main() {"
-                                   "const __m128i vec = _mm_set1_epi32(42);"
-                                   "return 0; }"
-                                  : "" : "" ] ;
+WITH_CPU_SSE4_1 = [ CheckBuildC++ $(WITH_CPU_SSE4_1_MSVC_SOURCE) : "" : "" ] ;
 if $(WITH_CPU_SSE4_1)
 {
     CPU_SSE4_1_C++FLAGS = [ FDefines __SSE4_1__ ] ;
@@ -172,11 +168,7 @@ if $(WITH_CPU_SSE4_1)
 
 if ! $(WITH_CPU_SSE4_1)
 {
-    WITH_CPU_SSE4_1 = [ CheckBuildC++ "#include <intrin.h>"
-                                      "int main() {"
-                                      "const __m128i vec = _mm_set1_epi32(42);"
-                                      "return 0; }"
-                                      : /arch:SSE4.1 : "" ] ;
+    WITH_CPU_SSE4_1 = [ CheckBuildC++ $(WITH_CPU_SSE4_1_MSVC_SOURCE) : /arch:SSE4.1 : "" ] ;
     if $(WITH_CPU_SSE4_1)
     {
         CPU_SSE4_1_C++FLAGS = /arch:SSE4.1 [ FDefines __SSE4_1__ ] ;
@@ -186,11 +178,7 @@ if ! $(WITH_CPU_SSE4_1)
 
 if ! $(WITH_CPU_SSE4_1)
 {
-    WITH_CPU_SSE4_1 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                      "int main() {"
-                                      "const __m128i vec = _mm_set1_epi32(42);"
-                                      "return 0; }"
-                                      : -msse4.1 : "" ] ;
+    WITH_CPU_SSE4_1 = [ CheckBuildC++ $(WITH_CPU_SSE4_1_GNU_SOURCE) : -msse4.1 : "" ] ;
     if $(WITH_CPU_SSE4_1)
     {
         CPU_SSE4_1_C++FLAGS = -msse4.1 ;
@@ -201,13 +189,19 @@ if ! $(WITH_CPU_SSE4_1)
 #############################################################################
 # SSE4.2 instructions
 #############################################################################
+WITH_CPU_SSE4_2_MSVC_SOURCE = "#include <intrin.h>"
+                              "int main() {"
+                              "const __m128i vec = _mm_cmpgt_epi64(_mm_set1_epi64x(10), "
+                              "                                    _mm_set1_epi64x(5))"
+                              "return 0; }" ;
 
-WITH_CPU_SSE4_2 = [ CheckBuildC++ "#include <intrin.h>"
-                                  "int main() {"
-                                  "const __m128i vec = _mm_cmpgt_epi64(_mm_set1_epi64x(10), "
-                                  "                                    _mm_set1_epi64x(5))"
-                                  "return 0; }"
-                                  : "" : "" ] ;
+WITH_CPU_SSE4_2_GNU_SOURCE = "#include <x86intrin.h>"
+                             "int main() {"
+                             "const __m128i vec = _mm_cmpgt_epi64(_mm_set1_epi64x(10), "
+                             "                                    _mm_set1_epi64x(5))"
+                             "return 0; }" ;
+
+WITH_CPU_SSE4_2 = [ CheckBuildC++ $(WITH_CPU_SSE4_2_MSVC_SOURCE) : "" : "" ] ;
 if $(WITH_CPU_SSE4_2)
 {
     CPU_SSE4_2_C++FLAGS = [ FDefines __SSE4_2__ ] ;
@@ -216,12 +210,7 @@ if $(WITH_CPU_SSE4_2)
 
 if ! $(WITH_CPU_SSE4_2)
 {
-    WITH_CPU_SSE4_2 = [ CheckBuildC++ "#include <intrin.h>"
-                                       "int main() {"
-                                       "const __m128i vec = _mm_cmpgt_epi64(_mm_set1_epi64x(10), "
-                                       "                                    _mm_set1_epi64x(5))"
-                                       "return 0; }"
-                                       : /arch:SSE4.2 : "" ] ;
+    WITH_CPU_SSE4_2 = [ CheckBuildC++ $(WITH_CPU_SSE4_2_MSVC_SOURCE) : /arch:SSE4.2 : "" ] ;
     if $(WITH_CPU_SSE4_2)
     {
         CPU_SSE4_2_C++FLAGS = /arch:SSE4.2 [ FDefines __SSE4_2__ ] ;
@@ -231,12 +220,7 @@ if ! $(WITH_CPU_SSE4_2)
 
 if ! $(WITH_CPU_SSE4_2)
 {
-    WITH_CPU_SSE4_2 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                       "int main() {"
-                                       "const __m128i vec = _mm_cmpgt_epi64(_mm_set1_epi64x(10), "
-                                       "                                    _mm_set1_epi64x(5))"
-                                       "return 0; }"
-                                       : -msse4.2 -mpclmul : "" ] ;
+    WITH_CPU_SSE4_2 = [ CheckBuildC++ $(WITH_CPU_SSE4_2_GNU_SOURCE) : -msse4.2 -mpclmul : "" ] ;
     if $(WITH_CPU_SSE4_2)
     {
         CPU_SSE4_2_C++FLAGS = -msse4.2 -mpclmul ;
@@ -247,15 +231,20 @@ if ! $(WITH_CPU_SSE4_2)
 #############################################################################
 # AVX1 instructions
 #############################################################################
+WITH_CPU_AVX1_MSVC_SOURCE = "#include <intrin.h>"
+                            "int main() {"
+                            "__m256i v;"
+                            "const __m256i r = _mm256_lddqu_si256(&v);"
+                            "return 0; }" ;
 
-WITH_CPU_AVX1 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m256i v;"
-                                "const __m256i r = _mm256_lddqu_si256(&v);"
-                                "return 0; }"
-                                : "/arch:AVX"
-                                : "" ] ;
+WITH_CPU_AVX1_GNU_SOURCE = "#include <x86intrin.h>"
+                           "int main() {"
+                           "__m256i v;"
+                           "const __m256i r = _mm256_lddqu_si256(&v);"
+                           "return 0; }" ;
 
+
+WITH_CPU_AVX1 = [ CheckBuildC++ $(WITH_CPU_AVX1_MSVC_SOURCE) : "/arch:AVX" : "" ] ;
 if $(WITH_CPU_AVX1)
 {
     CPU_AVX1_C++FLAGS = /arch:AVX ;
@@ -264,14 +253,7 @@ if $(WITH_CPU_AVX1)
 
 if ! $(WITH_CPU_AVX1)
 {
-    WITH_CPU_AVX1 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "__m256i v;"
-                                    "const __m256i r = _mm256_lddqu_si256(&v);"
-                                    "return 0; }"
-                                    : "-mavx"
-                                    : "" ] ;
-
+    WITH_CPU_AVX1 = [ CheckBuildC++ $(WITH_CPU_AVX1_GNU_SOURCE) : "-mavx" : "" ] ;
     if $(WITH_CPU_AVX1)
     {
         CPU_AVX1_C++FLAGS = -mavx ;
@@ -282,15 +264,19 @@ if ! $(WITH_CPU_AVX1)
 #############################################################################
 # AVX2 instructions
 #############################################################################
+WITH_CPU_AVX2_MSVC_SOURCE = "#include <intrin.h>"
+                            "int main() {"
+                            "__m256i v1, v2;"
+                            "const __m256i r = _mm256_and_si256(v1, v2);"
+                            "return 0; }" ;
 
-WITH_CPU_AVX2 = [ CheckBuildC++ "#include <intrin.h>"
-                                "int main() {"
-                                "__m256i v1, v2;"
-                                "const __m256i r = _mm256_and_si256(v1, v2);"
-                                "return 0; }"
-                                : "/arch:AVX2"
-                                : "" ] ;
+WITH_CPU_AVX2_GNU_SOURCE = "#include <x86intrin.h>"
+                           "int main() {"
+                           "__m256i v1, v2;"
+                           "const __m256i r = _mm256_and_si256(v1, v2);"
+                           "return 0; }" ;
 
+WITH_CPU_AVX2 = [ CheckBuildC++ $(WITH_CPU_AVX2_MSVC_SOURCE) : "/arch:AVX2" : "" ] ;
 if $(WITH_CPU_AVX2)
 {
     CPU_AVX2_C++FLAGS = /arch:AVX2 ;
@@ -299,17 +285,12 @@ if $(WITH_CPU_AVX2)
 
 if ! $(WITH_CPU_AVX2)
 {
-    WITH_CPU_AVX2 = [ CheckBuildC++ "#include <x86intrin.h>"
-                                    "int main() {"
-                                    "__m256i v1, v2;"
-                                    "const __m256i r = _mm256_and_si256(v1, v2);"
-                                    "return 0; }"
-                                    : "-mavx2"
-                                    : "" ] ;
+    WITH_CPU_AVX2 = [ CheckBuildC++ $(WITH_CPU_AVX2_GNU_SOURCE) : "-mavx2" : "" ] ;
 
     if $(WITH_CPU_AVX2)
     {
-        CPU_AVX2_C++FLAGS = -mavx2 -mbmi -mbmi2 -mpopcnt -mpclmul ; # -mpclmul should come from -msse2
+        # -mpclmul should come from -msse2
+        CPU_AVX2_C++FLAGS = -mavx2 -mbmi -mbmi2 -mpopcnt -mpclmul ;
         CPU_AVX2_CFLAGS = -mavx2 -mbmi -mbmi2 -mpopcnt -mpclmul ;
 
         CPU_AVX2_FMA_C++FLAGS = -mfma ;
@@ -320,22 +301,16 @@ if ! $(WITH_CPU_AVX2)
 #############################################################################
 # NEON instructions
 #############################################################################
+WITH_CPU_NEON_GNU_SOURCE = "#include <arm_neon.h>"
+                           "int main() {"
+                           "int32x4_t v1, v2;"
+                           "int32x4_t r = vandq_s32(v1, v2);"
+                           "return 0; }" ;
 
-WITH_CPU_NEON = [ CheckBuildC++ "#include <arm_neon.h>"
-                                "int main() {"
-                                "int32x4_t v1, v2;"
-                                "int32x4_t r = vandq_s32(v1, v2);"
-                                "return 0; }"
-                                : "" : "" ] ;
-
+WITH_CPU_NEON = [ CheckBuildC++ $(WITH_CPU_NEON_GNU_SOURCE) : "" : "" ] ;
 if ! $(WITH_CPU_NEON)
 {
-    WITH_CPU_NEON = [ CheckBuildC++ "#include <arm_neon.h>"
-                                    "int main() {"
-                                    "int32x4_t v1, v2;"
-                                    "int32x4_t r = vandq_s32(v1, v2);"
-                                    "return 0; }"
-                                    : -mfpu=neon : "" ] ;
+    WITH_CPU_NEON = [ CheckBuildC++ $(WITH_CPU_NEON_GNU_SOURCE) : -mfpu=neon : "" ] ;
 
     if $(WITH_CPU_NEON)
     {
