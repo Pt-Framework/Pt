@@ -1039,6 +1039,10 @@ else if --with-sdl-raster in $(ARGV)
 {
     GUI ?= sdl ;
 }
+else if --with-photon in $(ARGV)
+{
+    GUI ?= photon ;
+}
 
 if ! $(GUI) || $(GUI:L) = "win32"
 {
@@ -1111,11 +1115,6 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     }
 }
 
-if $(GUI:L) = "sdl"
-{
-    PT_FORMS_IMPL = sdl ;
-}
-
 if ! $(GUI) || $(GUI:L) = "x11"
 {
     Load x11.jam ;
@@ -1147,69 +1146,15 @@ if ! $(GUI) || $(GUI:L) = "x11"
     }
 }
 
+if $(GUI:L) = "sdl"
+{
+    PT_FORMS_IMPL = sdl ;
+}
+
 if $(GUI:L) = "photon"
 {
-    GUI     ?= photon ;
     PT_FORMS_IMPL = photon ;
     GUILIBS = -lphrender -lph ;
-}
-
-if $(GUI:L) = "symbian-eikon"
-{
-    GUI = symbian-eikon ;
-    PT_FORMS_IMPL = symbian-eikon ;
-
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
-    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
-}
-
-if --with-egl-gbm in $(ARGV)
-{
-    GUI = egl-gbm ;
-    PT_FORMS_IMPL = egl-gbm ;
-
-    WITH_EGL_TEST = 1 ;
-    Configure WITH_EGL_TEST ;
-
-    if $(TARGET_OS:L) = nt
-    {
-	    GUI_INCLUDES = \"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\include\" ;
-	    GUI_INCLUDES = $(GUI_INCLUDES:J=" ") ;
-	    Configure GUI_INCLUDES ;
-
-	    EGL_LINKFLAGS = /LIBPATH:\"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\x86\" ;
-	    LINKFLAGS += $(EGL_LINKFLAGS:J=" ") ;
-	    Configure GUI_INCLUDES ;
-
-	    GUILIBS = libGLESv2.lib libEGL.lib gdi32.lib user32.lib ;
-	    Configure GUILIBS ;
-    }
-    else
-    {
-	    GUILIBS = -lGLESv2 -ldrm -lEGL -lgbm ;
-	    Configure GUILIBS ;
-
-	    LINARO_RPATH = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib ] ;
-	    LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH)\" ;
-
-	    LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
-	    LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
-	    Configure LINKFLAGS ;
-    }
-    
-    #GUI_INCLUDES = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf libc usr include libdrm ] ;
-    #Configure GUI_INCLUDES ;
 }
 
 Configure GUI ;
