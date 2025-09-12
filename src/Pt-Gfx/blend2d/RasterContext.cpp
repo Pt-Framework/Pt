@@ -302,15 +302,25 @@ void RasterContext::onFillRect(const Gfx::RectF& r)
 }
 
 
-void RasterContext::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void RasterContext::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 {
-    //_context.stroke_ellipse( topLeftF.x(), topLeftF.y(), sizeF.width(), sizeF.height() );
+    double radiusX = size.width() / 2.0;
+    double radiusY = size.height() / 2.0;
+    double centerX = topLeft.x() + radiusX;
+    double centerY = topLeft.y() + radiusY;
+
+    _context.stroke_ellipse( centerX, centerY, radiusX, radiusY );
 }
 
 
-void RasterContext::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void RasterContext::onFillEllipse(const PointF& topLeft, const SizeF& size)
 {
-    //_context.fill_ellipse( topLeftF.x(), topLeftF.y(), sizeF.width(), sizeF.height() );
+    double radiusX = size.width() / 2.0;
+    double radiusY = size.height() / 2.0;
+    double centerX = topLeft.x() + radiusX;
+    double centerY = topLeft.y() + radiusY;
+
+    _context.fill_ellipse( centerX, centerY, radiusX, radiusY );
 }
 
 
