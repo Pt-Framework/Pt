@@ -35,4 +35,23 @@ rule new ( class args * : * )
     return $(id) ;
 }
 
+rule class.test
+{
+    class MyClass
+    {
+        rule __init__ ( )
+        {
+            self.name = "class1" ;
+        }
+
+        rule name ( ) 
+        {
+            return "test" ;
+        }
+    }
+
+    obj = [ new MyClass ] ;
+    Echo [ $(obj).name ] ;
+}
+
 } # JAMBASE_CLASS_JAM_INCLUDED
