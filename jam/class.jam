@@ -1,0 +1,38 @@
+if ! $(JAMBASE_CLASS_JAM_INCLUDED) {
+JAMBASE_CLASS_JAM_INCLUDED = true ;
+
+rule class.xinit ( instance : class )
+{
+    module $(instance)
+    {
+        __class__ = $(2) ;
+        __name__ = $(1) ;
+    }
+}
+
+
+rule class.increment ( number )
+{
+    return [ CALC $(number) + 1 ] ;
+}
+
+
+rule new ( class args * : * )
+{
+    .next-instance ?= 1 ;
+    local id = object($(class))@$(.next-instance) ;
+
+    class.xinit $(id) : $(class) ;
+
+    INSTANCE $(id) : class@$(class) ;
+    IMPORT_MODULE $(id) ;
+    $(id).__init__ $(args) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
+
+    # Bump the next unique object name.
+    .next-instance = [ class.increment $(.next-instance) ] ;
+
+    # Return the name of the new instance.
+    return $(id) ;
+}
+
+} # JAMBASE_CLASS_JAM_INCLUDED
