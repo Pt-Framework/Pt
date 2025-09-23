@@ -351,9 +351,9 @@ void RasterContext::onDrawRect(const Gfx::RectF& r)
     if( _pen.style() ==  Gfx::Pen::Dash ||
         _pen.style() == Gfx::Pen::Dot )
     {
-        std::vector<double> _dashPattern2;
-        _dashPattern2.push_back( 45 );
-        _dashPattern2.push_back( 40 );
+        //std::vector<double> _dashPattern2;
+        //_dashPattern2.push_back( 45 );
+        //_dashPattern2.push_back( 40 );
 
         Path path;
         path.moveTo( r.topLeft() );
@@ -362,7 +362,7 @@ void RasterContext::onDrawRect(const Gfx::RectF& r)
         path.lineTo( r.bottomLeft() );
         path.lineTo( r.topLeft() );
 
-        Dasher dasher(_dashPattern2);
+        Dasher dasher(_dashPattern);
         std::vector<PointF> points;
         for(PathIterator it = path.begin(); it != path.end(); ++it)
         {
