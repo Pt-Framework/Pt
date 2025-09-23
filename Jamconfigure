@@ -619,7 +619,7 @@ if --with-blend2d in $(ARGV)
     if $(WITH_CPU_AVX2)
     {
         BLEND2D_C++FLAGS += [ FDefines BL_BUILD_OPT_AVX2 ] ;
-        BLEND2D_C++FLAGS += [ FDefines BL_TARGET_OPT_BMI2 BL_TARGET_OPT_POPCNT ] ;
+        #BLEND2D_C++FLAGS += [ FDefines BL_TARGET_OPT_BMI2 BL_TARGET_OPT_POPCNT ] ;
         BLEND2D_C++FLAGS += $(CPU_AVX2_C++FLAGS) ;
     }
     else if $(WITH_CPU_AVX1)
