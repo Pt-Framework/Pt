@@ -174,11 +174,17 @@ class PathElement
     protected:
         PathElement(const PathEntry* entry, const PointF* points)
         : _entry(entry)
+        , _pos(0.0, 0.0)
         , _points(points)
         {
         }
         
-        void set(const PathEntry* entry, const PointF* points)
+        void setPosition(const PointF& pos)
+        {
+            _pos = pos;
+        }
+
+        void setEntry(const PathEntry* entry, const PointF* points)
         {
             _entry = entry;
             _points =  points;
@@ -195,13 +201,21 @@ class PathElement
             return _entry->size();
         }
 
+        const PointF& position() const
+        {
+            return _pos;
+        }
+
         const PointF& point(std::size_t n) const
         {
             return _points[n];
         }
 
+        void flatten(std::vector<PointF>& points) const;
+
     private:
         const PathEntry*  _entry;
+        PointF            _pos;
         const PointF*     _points;
 };
 
@@ -242,10 +256,16 @@ class PathIterator
 
         PathIterator& operator++() 
         {
+            if( _entry->size() > 0)
+            {
+                const PointF& pos = _points[ _entry->size() - 1 ];
+                _element.setPosition(pos);
+            }
+
             _points += _entry->size();
             ++_entry;
             
-            _element.set(_entry, _points);
+            _element.setEntry(_entry, _points);
             return *this;
         }
 

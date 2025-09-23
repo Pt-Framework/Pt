@@ -29,10 +29,15 @@
 
 #include "RasterContext.h"
 #include "DrawText.h"
+#include "Dasher.h"
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/ImageSurface.h>
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
 
 namespace Pt {
 
@@ -134,7 +139,26 @@ void RasterContext::onSetPen(const Gfx::Pen& pen)
             break;
                 
         case Gfx::Pen::Dash:
+        {
+            BLArray<double> dash;
+
+            if(pen.capStyle() == Gfx::Pen::RoundCap ||
+               pen.capStyle() == Gfx::Pen::SquareCap)
+            {
+                dash.append( 2.0 * pen.size() ); // stroke
+                dash.append( 2.0 * pen.size() ); // gap
+            }
+            else
+            {
+                dash.append( 3.0 * pen.size() ); // stroke
+                dash.append( 1.0 * pen.size() ); // gap
+            }
+            
+            _context.set_stroke_style(strokecolor);
+            _context.set_stroke_dash_array(dash);
+            _context.set_stroke_dash_offset(0.0);
             break;
+        }
 
         case Gfx::Pen::Dot:
             break;
@@ -144,7 +168,39 @@ void RasterContext::onSetPen(const Gfx::Pen& pen)
 
 void RasterContext::onApplyPen(const Gfx::Pen& pen)
 {
+    _pen = pen;
     _text->setPen(pen);
+
+    _dashPattern.clear();
+
+    if(_pen.style() == Gfx::Pen::Dash)
+    {
+          if(_pen.capStyle() == Gfx::Pen::RoundCap ||
+              _pen.capStyle() == Gfx::Pen::SquareCap)
+          {
+              _dashPattern.push_back( 2.0 * _pen.size() );
+              _dashPattern.push_back( 2.0 * _pen.size() );
+          }
+          else
+          {
+              _dashPattern.push_back( 3.0 * _pen.size() );
+              _dashPattern.push_back( 1.0 * _pen.size() );
+          }
+    }
+    else if( _pen.style() == Gfx::Pen::Dot )
+    {
+          if(_pen.capStyle() == Gfx::Pen::RoundCap ||
+              _pen.capStyle() == Gfx::Pen::SquareCap)
+          {
+              _dashPattern.push_back( 1.0 );
+              _dashPattern.push_back( 2.0 * _pen.size() );
+          }
+          else
+          {
+              _dashPattern.push_back( _pen.size() );
+              _dashPattern.push_back( _pen.size() );
+          }
+    }
 }
 
 
@@ -292,6 +348,38 @@ void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 
 void RasterContext::onDrawRect(const Gfx::RectF& r)
 {
+    if( _pen.style() ==  Gfx::Pen::Dash ||
+        _pen.style() == Gfx::Pen::Dot )
+    {
+        std::vector<double> _dashPattern2;
+        _dashPattern2.push_back( 45 );
+        _dashPattern2.push_back( 40 );
+
+        Path path;
+        path.moveTo( r.topLeft() );
+        path.lineTo( r.topRight() );
+        path.lineTo( r.bottomRight() );
+        path.lineTo( r.bottomLeft() );
+        path.lineTo( r.topLeft() );
+
+        Dasher dasher(_dashPattern2);
+        std::vector<PointF> points;
+        for(PathIterator it = path.begin(); it != path.end(); ++it)
+        {
+            it->flatten(points);
+            dasher.push(points.data(), points.size());
+            points.clear();
+        }
+
+        dasher.finish();
+
+        std::vector<Dasher::Dash> dashes = dasher.getDashes();
+        for(Dasher::Dash dash : dashes)
+            onDrawPolyline(dash.data(), dash.size());
+      
+        return;
+    }
+
     _context.stroke_rect( r.x(), r.y(), r.width(),r.height() );
 }
 

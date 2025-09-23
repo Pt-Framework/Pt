@@ -528,6 +528,45 @@ void Path::transform(const Transform& tform)
 }
 
 
+void PathElement::flatten(std::vector<PointF>& points) const
+{
+    switch( _entry->type() )
+    {
+        case Path::LineTo:
+        {
+            points.push_back( position() );
+            points.push_back( point(0) );
+            break;
+        }
+
+        case Path::QuadTo:
+        {
+            const PointF& c1 = point(0);
+            const PointF& to = point(1);
+            quadraticBezierToPoints(points, position().x(), position().y(), 
+                                    c1.x(), c1.y(), 
+                                    to.x(), to.y(), 1);
+            break;
+        }
+
+        case Path::CubicTo:
+        {
+            const PointF& c1 = point(0);
+            const PointF& c2 = point(1);
+            const PointF& to = point(2);
+
+            cubicBezierToPoints(points, position().x(), position().y(), 
+                                c1.x(), c1.y(), c2.x(), c2.y(), 
+                                to.x(), to.y(), 1);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+
 void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
 {
     // State variables
@@ -586,7 +625,7 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
             {
                 const PointF& c1 = it->point(0);
                 const PointF& c2 = it->point(1);
-                const PointF& to = it->point(3);
+                const PointF& to = it->point(2);
 
                 cubicBezierToPoints(polygon.points(), curX, curY, 
                                     c1.x(), c1.y(), c2.x(), c2.y(), 

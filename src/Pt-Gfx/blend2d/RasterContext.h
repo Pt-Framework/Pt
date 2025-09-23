@@ -147,6 +147,8 @@ class RasterContext : public PaintContext
         BasicRect<Pt::ssize_t>  _currentClip;
         bool                    _hasClip;
         RectF                   _clip;
+        Gfx::Pen                _pen;
+        std::vector<double>     _dashPattern;
 };
 
 } //namespace

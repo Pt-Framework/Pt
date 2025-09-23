@@ -718,6 +718,7 @@
     <ClInclude Include="..\Pt-Db\ValueImpl.h" />
     <ClInclude Include="..\Pt-Forms\WorkspaceFrame.h" />
     <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h" />
+    <ClInclude Include="..\Pt-Gfx\blend2d\Dasher.h" />
     <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h" />
     <ClInclude Include="..\Pt-Gfx\blend2d\RasterSurface.h" />
     <ClInclude Include="..\Pt-Gfx\Fixed.h" />

@@ -2961,6 +2961,9 @@
     <ClInclude Include="..\Pt-Gfx\blend2d\RasterSurface.h">
       <Filter>Pt-Gfx\blend2d</Filter>
     </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\blend2d\Dasher.h">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
