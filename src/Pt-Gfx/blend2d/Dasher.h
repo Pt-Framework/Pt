@@ -45,15 +45,12 @@ namespace Gfx {
 class Dasher 
 {
     public:
-        typedef Polygon Dash;
-
-    public:
         Dasher(const std::vector<double>& pattern)
-            : _dashPattern(pattern)
-            , _patternIdx(0)
-            , _patternRemaining(0)
-            , _isDash(true)
-            , _isValid(false)
+        : _dashPattern(pattern)
+        , _patternIdx(0)
+        , _patternRemaining(0)
+        , _isDash(true)
+        , _isValid(false)
         {
             if (pattern.size() >= 2)
             {
@@ -125,7 +122,7 @@ class Dasher
 
         void finish() 
         {
-            if (! _currentDash.empty()) 
+            if( ! _currentDash.empty() ) 
             {
                 _dashes.push_back(_currentDash);
                 _currentDash.clear();
@@ -141,7 +138,7 @@ class Dasher
             _dashes.clear();
         }
 
-        const std::vector<Dash>& getDashes() const 
+        const std::vector<Polygon>& getDashes() const 
         {
             return _dashes;
         }
@@ -149,7 +146,8 @@ class Dasher
     private:
         PointF interpolate(const PointF& p1, const PointF& p2, double t) const 
         {
-            return PointF(p1.x() + t * (p2.x() - p1.x()), p1.y() + t * (p2.y() - p1.y()));
+            return PointF(p1.x() + t * (p2.x() - p1.x()), 
+                          p1.y() + t * (p2.y() - p1.y()));
         }
 
     private:
@@ -158,8 +156,8 @@ class Dasher
         double                _patternRemaining;
         bool                  _isDash;
         bool                  _isValid;
-        Dash                  _currentDash;
-        std::vector<Dash>     _dashes;
+        Polygon               _currentDash;
+        std::vector<Polygon>  _dashes;
 };
 
 } // namespace

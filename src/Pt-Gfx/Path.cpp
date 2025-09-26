@@ -31,7 +31,7 @@
 
 namespace {
 
-void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
+void quadraticBezierToPoints(Pt::Gfx::Polygon& dst,
                              double x1, double y1,
                              double x2, double y2,
                              double x3, double y3,
@@ -84,7 +84,7 @@ void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
 }
 
 
-void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
+void cubicBezierToPoints(Pt::Gfx::Polygon& dst,
                          double x1, double y1,
                          double x2, double y2,
                          double x3, double y3,
@@ -133,7 +133,7 @@ void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
 
 
 void getBezierPoint(double& x, double& y,
-                            const std::vector<double>& points, double t)
+                    const std::vector<double>& points, double t)
 {
     // Based on: How do I implement a Bezier curve in C++?
     // http://stackoverflow.com/questions/785097/how-do-i-implement-a-bézier-curve-in-c
@@ -527,7 +527,7 @@ void Path::transform(const Transform& tform)
 }
 
 
-void PathElement::flatten(std::vector<PointF>& points) const
+void PathElement::flatten(Polygon& points) const
 {
     switch( _entry->type() )
     {
@@ -612,7 +612,7 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
             {
                 const PointF& c1 = it->point(0);
                 const PointF& to = it->point(1);
-                quadraticBezierToPoints(polygon.impl(), curX, curY, 
+                quadraticBezierToPoints(polygon, curX, curY, 
                                         c1.x(), c1.y(), 
                                         to.x(), to.y(), smoothness);
                 curX = to.x();
@@ -626,7 +626,7 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
                 const PointF& c2 = it->point(1);
                 const PointF& to = it->point(2);
 
-                cubicBezierToPoints(polygon.impl(), curX, curY, 
+                cubicBezierToPoints(polygon, curX, curY, 
                                     c1.x(), c1.y(), c2.x(), c2.y(), 
                                     to.x(), to.y(), smoothness);
                 curX = to.x();

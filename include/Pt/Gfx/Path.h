@@ -211,7 +211,7 @@ class PathElement
             return _points[n];
         }
 
-        void flatten(std::vector<PointF>& points) const;
+        void flatten(Polygon& points) const;
 
     private:
         const PathEntry*  _entry;

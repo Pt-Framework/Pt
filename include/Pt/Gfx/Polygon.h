@@ -102,14 +102,9 @@ class Polygon
             _points.push_back(p);
         }
 
-        const std::vector<PointF>& impl() const
+        void pop_back()
         {
-            return _points;
-        }
-
-        std::vector<PointF>& impl()
-        {
-            return _points;
+            _points.pop_back();
         }
 
     private:

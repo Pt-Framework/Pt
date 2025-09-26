@@ -124,7 +124,7 @@ void RasterContext::onApplyCompositionMode(const Gfx::CompositionMode& mode)
 
 void RasterContext::onSetPen(const Gfx::Pen& pen)
 {
-    _context.set_stroke_width( pen.size() );
+    _context.set_stroke_width( static_cast<double>( pen.size() ) );
 
     Pt::Gfx::Color penColor = pen.color();
     BLRgba32 strokecolor(penColor.red() / 257, 
@@ -197,8 +197,8 @@ void RasterContext::onApplyPen(const Gfx::Pen& pen)
           }
           else
           {
-              _dashPattern.push_back( _pen.size() );
-              _dashPattern.push_back( _pen.size() );
+              _dashPattern.push_back( 1.0 * _pen.size() );
+              _dashPattern.push_back( 1.0 * _pen.size() );
           }
     }
 }
@@ -342,28 +342,26 @@ void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 void RasterContext::drawDashed(const Gfx::PointF* pts, const size_t n)
 {
     Dasher dasher(_dashPattern);
-    
-    _ptPoints.clear();
-    dasher.push( _ptPoints.data(), _ptPoints.size() );
+    dasher.push(pts, n);
     dasher.finish();
     
-    const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
-    for(const Dasher::Dash& dash : dashes)
+    const std::vector<Polygon>& dashes = dasher.getDashes();
+    for(const Polygon& dash : dashes)
         drawSolid( dash.points(), dash.size() );
 }
 
 
 void RasterContext::drawSolid(const Gfx::PointF* pts, const size_t n)
 {
-    _blPoints.resize(n);
+    _points.resize(n);
 
     for(unsigned i = 0; i < n; i++)
     {
         const Gfx::PointF& p = pts[i];
-        _blPoints[i] = BLPoint( p.x(), p.y() );
+        _points[i] = BLPoint( p.x(), p.y() );
     }
     
-    _context.stroke_polyline( _blPoints.data(), _blPoints.size() );
+    _context.stroke_polyline( _points.data(), _points.size() );
 }
 
 
@@ -372,15 +370,15 @@ void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
     if(n == 0)
         return;
 
-    _blPoints.resize(n);
+    _points.resize(n);
 
     for(unsigned i = 0; i < n; i++)
     {
         const Gfx::PointF& p = pts[i];
-        _blPoints[i] = BLPoint( p.x(), p.y() );
+        _points[i] = BLPoint( p.x(), p.y() );
     }
     
-    _context.fill_polygon( _blPoints.data(), _blPoints.size() );
+    _context.fill_polygon( _points.data(), _points.size() );
 }
 
 
@@ -524,7 +522,7 @@ void RasterContext::onDrawPath(const Path& path)
 void RasterContext::drawDashed(const Path& path)
 {
     Dasher dasher(_dashPattern);
-    _ptPoints.clear();
+    _polygon.clear();
 
     for(PathIterator it = path.begin(); it != path.end(); ++it)
     {
@@ -534,24 +532,24 @@ void RasterContext::drawDashed(const Path& path)
         }
         else
         {
-            if( ! _ptPoints.empty() )
-                _ptPoints.pop_back();
+            if( ! _polygon.empty() )
+                _polygon.pop_back();
 
-            it->flatten(_ptPoints);
-            dasher.push( _ptPoints.data(), _ptPoints.size() );
-            _ptPoints.clear();
+            it->flatten(_polygon);
+            dasher.push( _polygon.points(), _polygon.size() );
+            _polygon.clear();
         }
 
-        const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
-        for(const Dasher::Dash& dash : dashes)
+        const std::vector<Polygon>& dashes = dasher.getDashes();
+        for(const Polygon& dash : dashes)
             drawSolid( dash.points(), dash.size() );
 
         dasher.pop();
     }
 
     dasher.finish();
-    const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
-    for(const Dasher::Dash& dash : dashes)
+    const std::vector<Polygon>& dashes = dasher.getDashes();
+    for(const Polygon& dash : dashes)
         drawSolid( dash.points(), dash.size() );
 }
 

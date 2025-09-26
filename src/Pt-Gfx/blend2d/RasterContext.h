@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Polygon.h>
 
 #include <blend2d.h>
 
@@ -150,8 +151,8 @@ class RasterContext : public PaintContext
         std::vector<double>     _dashPattern;
         Path                    _ptPath;
         BLPath                  _blPath;
-        std::vector<PointF>     _ptPoints;
-        std::vector<BLPoint>    _blPoints;
+        Gfx::Polygon            _polygon;
+        std::vector<BLPoint>    _points;
 };
 
 } //namespace
