@@ -491,68 +491,38 @@ void RasterContext::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void RasterContext::onBeginPath()
-{
-    _flatPath.clear();
-}
-
-
-void RasterContext::onMoveTo(const PointF& to)
-{
-    _flatPath.clear();
-}
-
-
-void RasterContext::onLineTo(const PointF& to)
-{
-    _flatPath.clear();
-}
-
-
-void RasterContext::onCurveTo(const PointF &cp, const PointF& to)
-{
-    _flatPath.clear();
-}
-
-
-void RasterContext::onCurveTo(const PointF &cp1, const PointF &cp2, const PointF& to)
-{
-    _flatPath.clear();
-}
-
-
-void RasterContext::onClosePath()
-{
-    _flatPath.clear();
-}
-
-
 void RasterContext::onSetPath(const Gfx::Path& path)
 {
     _flatPath.clear();
+    path.toPolygons(_flatPath);
 }
 
 
-void RasterContext::onDrawPath(const Path& path)
+void RasterContext::onDrawPath()
 {
-    const std::vector<Polygon>& polygons = flattenPath(path);
-    strokePolygons(polygons, _currentClip);
+    strokePolygons(_flatPath, _currentClip);
 }
 
 
-void RasterContext::onFillPath(const Path& path)
+void RasterContext::onFillPath()
 {
-    const std::vector<Polygon>& polygons = flattenPath(path);
-    fillPolygons(polygons, _currentClip);
+    fillPolygons(_flatPath, _currentClip);
 }
 
 
-const std::vector<Polygon>& RasterContext::flattenPath(const Path& path)
+void RasterContext::onDrawPath(const Gfx::Path& path)
 {
-    if( _flatPath.empty() )
-        path.toPolygons(_flatPath);
+    std::vector<Polygon> flatPath;
+    path.toPolygons(flatPath);
+    strokePolygons(flatPath, _currentClip);
+}
 
-    return _flatPath;
+
+void RasterContext::onFillPath(const Gfx::Path& path)
+{
+    std::vector<Polygon> flatPath;
+    path.toPolygons(flatPath);
+    fillPolygons(flatPath, _currentClip);
 }
 
 

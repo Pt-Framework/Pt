@@ -290,53 +290,24 @@ void PaintContext::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& siz
 }
 
 
-void PaintContext::beginPath()
-{
-    if(_active)
-        onBeginPath();
-}
-
-
-void PaintContext::moveTo(const PointF& to)
-{
-    if(_active)
-        onMoveTo(to);
-}
-
-
-void PaintContext::lineTo(const PointF& to)
-{
-    if(_active)
-        onLineTo(to);
-}
-
-
-void PaintContext::curveTo(const PointF &cp, const PointF& to)
-{
-    if(_active)
-        onCurveTo(cp, to);
-}
-
-
-void PaintContext::curveTo(const PointF &cp1, const PointF &cp2, 
-                           const PointF& to)
-{
-    if(_active)
-        onCurveTo(cp1, cp2, to);
-}
-
-
-void PaintContext::closePath()
-{
-    if(_active)
-        onClosePath();
-}
-
-
 void PaintContext::setPath(const Path& path)
 {
     if(_active)
         onSetPath(path);
+}
+
+
+void PaintContext::drawPath()
+{
+    if(_active)
+        onDrawPath();
+}
+
+
+void PaintContext::fillPath()
+{
+    if(_active)
+        onFillPath();
 }
 
 

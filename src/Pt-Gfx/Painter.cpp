@@ -345,60 +345,6 @@ const Gfx::Path& Painter::path() const
 }
 
 
-void Painter::beginPath()
-{
-    _paint.setPath( Gfx::Path() );
-
-    if(_paintContext)
-        _paintContext->beginPath();
-}
-
-
-void Painter::moveTo(const PointF& to)
-{
-    _paint.path().moveTo(to);
-
-    if(_paintContext)
-        _paintContext->moveTo(to);
-}
-
-
-void Painter::lineTo(const PointF& to)
-{
-    _paint.path().lineTo(to);
-
-    if(_paintContext)
-        _paintContext->lineTo(to);
-}
-
-
-void Painter::curveTo(const PointF& cp, const PointF& to)
-{
-    _paint.path().curveTo(cp, to);
-
-    if(_paintContext)
-        _paintContext->curveTo(cp, to);
-}
-
-
-void Painter::curveTo(const PointF& cp1, const PointF& cp2, const PointF& to)
-{
-    _paint.path().curveTo(cp1, cp2, to);
-
-    if(_paintContext)
-        _paintContext->curveTo(cp1, cp2, to);
-}
-
-
-void Painter::closePath()
-{
-    _paint.path().close();
-
-    if(_paintContext)
-        _paintContext->closePath();
-}
-
-
 void Painter::setPath(const Path& path)
 {
     _paint.setPath(path);
@@ -411,14 +357,28 @@ void Painter::setPath(const Path& path)
 void Painter::drawPath()
 {
     if(_paintContext)
-        _paintContext->drawPath( _paint.path() );
+        _paintContext->drawPath();
 }
 
 
 void Painter::fillPath()
 {
     if(_paintContext)
-        _paintContext->fillPath( _paint.path() );
+        _paintContext->fillPath();
+}
+
+
+void Painter::drawPath(const Path& path)
+{
+    if(_paintContext)
+        _paintContext->drawPath(path);
+}
+
+
+void Painter::fillPath(const Path& path)
+{
+    if(_paintContext)
+        _paintContext->fillPath(path);
 }
 
 

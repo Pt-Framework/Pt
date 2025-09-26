@@ -113,11 +113,6 @@ class PaintContext : public Gfx::PaintContext
             return _hasClip ? &_clip : 0;
         }
 
-        const Gfx::Path& path() const
-        {
-            return _path;
-        }
-
         CGMutablePathRef cgpath()
         {
             return _cgPath;
@@ -246,74 +241,56 @@ class PaintContext : public Gfx::PaintContext
     protected:
         virtual void onSetPath(const Gfx::Path& path) override
         {
-            _path = path;
-
             if(_cgPath)
                 CGPathRelease(_cgPath);
 
             _cgPath = CGPathCreateMutable();
 
-            for(std::size_t n = 0; n < path.size(); ++n)
+            for(Gfx::PathIterator it = path.begin(); it != path.end(); ++it)
             {
-                const Gfx::Element& e = path.at(n);
-
-                switch( e.type )
+                switch( it->type() )
                 {
                     default:
                         break;
 
-                    case Gfx::Element::IT_Close:
+                    case Gfx::Path::Close:
                         CGPathCloseSubpath(_cgPath);
                         break;
 
-                    case Gfx::Element::IT_MoveTo:
+                    case Gfx::Path::MoveTo:
                     {
-                        CGFloat x = e.pxy.at(0);
-                        CGFloat y = e.pxy.at(1);
-                        CGPathMoveToPoint(_cgPath, NULL, x, y);
+                        const Gfx::PointF& to = it->point(0);
+                        CGPathMoveToPoint(_cgPath, NULL, to.x(), to.y());
                         break;
                     }
 
-                    case Gfx::Element::IT_LineTo:
+                    case Gfx::Path::LineTo:
                     {
-                        CGFloat x = e.pxy.at(0);
-                        CGFloat y = e.pxy.at(1);
-                        CGPathAddLineToPoint(_cgPath, NULL, x, y);
+                        const Gfx::PointF& to = it->point(0);
+                        CGPathAddLineToPoint(_cgPath, NULL, to.x(), to.y());
                         break;
                     }
 
-                    case Gfx::Element::IT_QuadBezierTo:
+                    case Gfx::Path::QuadTo:
                     {
-                        CGFloat cx = e.pxy.at(0);
-                        CGFloat cy = e.pxy.at(1);
+                        const Gfx::PointF& c1 = it->point(0);
+                        const Gfx::PointF& to = it->point(1);
 
-                        CGFloat x = e.pxy.at(2);
-                        CGFloat y = e.pxy.at(3);
-
-                        CGPathAddQuadCurveToPoint(_cgPath, NULL, cx, cy, x, y);
+                        CGPathAddQuadCurveToPoint(_cgPath, NULL, c1.x(), c1.y(),
+                                                  to.x(), to.y() );
                         break;
                     }
 
-                    case Gfx::Element::IT_CubicBezierTo:
+                    case Gfx::Path::CubicTo:
                     {
-                        CGFloat c1x = e.pxy.at(0);
-                        CGFloat c1y = e.pxy.at(1);
+                        const Gfx::PointF& c1 = it->point(0);
+                        const Gfx::PointF& c2 = it->point(1);
+                        const Gfx::PointF& to = it->point(2);
 
-                        CGFloat c2x = e.pxy.at(2);
-                        CGFloat c2y = e.pxy.at(3);
-
-                        CGFloat x = e.pxy.at(4);
-                        CGFloat y = e.pxy.at(5);
-
-                        CGPathAddCurveToPoint(_cgPath, NULL, c1x, c1y, c2x, c2y, x, y);
+                        CGPathAddCurveToPoint(_cgPath, NULL, c1.x(), c1.y(), 
+                                              c2.x(), c2.y(), to.x(), to.y());
                         break;
                     }
-            
-                    //case Element::IT_GenNBezierTo:
-                    //    bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
-                    //    curX = ins.pxy[ins.pxy.size() - 2];
-                    //    curY = ins.pxy[ins.pxy.size() - 1];
-                    //    break;
                 }
             }
         }
@@ -330,6 +307,14 @@ class PaintContext : public Gfx::PaintContext
                 _pixmapCanvas->fillPath(_cgPath);
         }
 
+        virtual void onDrawPath(const Gfx::Path& path) override
+        {
+        }
+
+        virtual void onFillPath(const Gfx::Path& path) override
+        {
+        }
+
     private:
         PixmapCanvas*             _pixmapCanvas;
         Gfx::CompositionMode      _compositionMode;
@@ -340,7 +325,6 @@ class PaintContext : public Gfx::PaintContext
         CGColorRef                _textColor;
         Gfx::RectF                _clip;
         bool                      _hasClip;
-        Gfx::Path                 _path;
         CGMutablePathRef          _cgPath;
 };
 

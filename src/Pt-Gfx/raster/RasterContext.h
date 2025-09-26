@@ -62,9 +62,6 @@ class RasterContext : public PaintContext
 
         void setImage(Image& image);
 
-    private:
-        const std::vector<Polygon>& flattenPath(const Path& path);
-
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
@@ -107,24 +104,15 @@ class RasterContext : public PaintContext
         virtual void onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
     
     protected:
-        virtual void onBeginPath() override;
-
-        virtual void onMoveTo(const PointF& to) override;
-
-        virtual void onLineTo(const PointF& to) override;
-
-        virtual void onCurveTo(const PointF &cp, const PointF& to) override;
-
-        virtual void onCurveTo(const PointF &cp1, const PointF &cp2,
-                               const PointF& to) override;
-
-        virtual void onClosePath() override;
-
         virtual void onSetPath(const Gfx::Path& path) override;
         
-        virtual void onDrawPath(const Path& path) override;
+        virtual void onDrawPath() override;
 
-        virtual void onFillPath(const Path& path) override;
+        virtual void onFillPath() override;
+
+        virtual void onDrawPath(const Gfx::Path& path) override;
+
+        virtual void onFillPath(const Gfx::Path& path) override;
 
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const;

@@ -324,21 +324,18 @@ void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
     if(n == 0)
         return;
 
-    if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
+    switch( _pen.style() )
     {
-        drawDashed(pts, n);
-        return;
-    }
+        default:
+        case Gfx::Pen::Solid:
+            drawSolid(pts, n);
+            break;
 
-    _blPoints.resize(n);
-
-    for(unsigned i = 0; i < n; i++)
-    {
-        const Gfx::PointF& p = pts[i];
-        _blPoints[i] = BLPoint( p.x(), p.y() );
+        case Gfx::Pen::Dash:
+        case Gfx::Pen::Dot:
+            drawDashed(pts, n);
+            break;
     }
-    
-    _context.stroke_polyline( _blPoints.data(), _blPoints.size() );
 }
 
 
@@ -352,7 +349,21 @@ void RasterContext::drawDashed(const Gfx::PointF* pts, const size_t n)
     
     const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
     for(const Dasher::Dash& dash : dashes)
-        onDrawPolyline( dash.points(), dash.size() );
+        drawSolid( dash.points(), dash.size() );
+}
+
+
+void RasterContext::drawSolid(const Gfx::PointF* pts, const size_t n)
+{
+    _blPoints.resize(n);
+
+    for(unsigned i = 0; i < n; i++)
+    {
+        const Gfx::PointF& p = pts[i];
+        _blPoints[i] = BLPoint( p.x(), p.y() );
+    }
+    
+    _context.stroke_polyline( _blPoints.data(), _blPoints.size() );
 }
 
 
@@ -426,46 +437,17 @@ void RasterContext::onFillEllipse(const PointF& topLeft, const SizeF& size)
 }
 
 
-void RasterContext::onBeginPath()
-{
-}
-
-
-void RasterContext::onMoveTo(const PointF& to)
-{
-}
-
-
-void RasterContext::onLineTo(const PointF& to)
-{
-}
-
-
-void RasterContext::onCurveTo(const PointF &cp, const PointF& to)
-{
-}
-
-
-void RasterContext::onCurveTo(const PointF &cp1, const PointF &cp2, const PointF& to)
-{
-}
-
-
-void RasterContext::onClosePath()
-{
-}
-
-
 void RasterContext::onSetPath(const Gfx::Path& path)
 {
-    _path.clear();
-    addPath(path);
+    _ptPath = path;
+    _blPath.clear();
+    addPath(_blPath, path);
 }
 
 
-void RasterContext::addPath(const Gfx::Path& path)
+void RasterContext::addPath(BLPath& path, const Gfx::Path& other)
 {
-    for(Gfx::PathIterator it = path.begin(); it != path.end(); ++it)
+    for(Gfx::PathIterator it = other.begin(); it != other.end(); ++it)
     {
         switch( it->type() )
         {
@@ -473,20 +455,20 @@ void RasterContext::addPath(const Gfx::Path& path)
                 break;
 
             case Gfx::Path::Close:
-                _path.close();
+                path.close();
                 break;
 
             case Gfx::Path::MoveTo:
             {
                 const Gfx::PointF& to = it->point(0);
-                _path.move_to( to.x(), to.y() );
+                path.move_to( to.x(), to.y() );
                 break;
             }
 
             case Gfx::Path::LineTo:
             {
                 const Gfx::PointF& to = it->point(0);
-                _path.line_to( to.x(), to.y() );
+                path.line_to( to.x(), to.y() );
                 break;
             }
 
@@ -495,7 +477,7 @@ void RasterContext::addPath(const Gfx::Path& path)
                 const Gfx::PointF& c1 = it->point(0);
                 const Gfx::PointF& to = it->point(1);
                 
-                _path.quad_to( c1.x(), c1.y(), to.x(), to.y() );
+                path.quad_to( c1.x(), c1.y(), to.x(), to.y() );
                 break;
             }
             
@@ -503,13 +485,25 @@ void RasterContext::addPath(const Gfx::Path& path)
             {
                 const Gfx::PointF& c1 = it->point(0);
                 const Gfx::PointF& c2 = it->point(1);
-                const Gfx::PointF& to = it->point(3);
+                const Gfx::PointF& to = it->point(2);
 
-                _path.cubic_to( c1.x(), c1.y(), c2.x(), c2.y(), to.x(), to.y() );
+                path.cubic_to( c1.x(), c1.y(), c2.x(), c2.y(), to.x(), to.y() );
                 break;
             }
         }
     }
+}
+
+
+void RasterContext::onDrawPath()
+{
+    if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
+    {
+        drawDashed(_ptPath);
+        return;
+    }
+
+    _context.stroke_path(_blPath);
 }
 
 
@@ -521,7 +515,9 @@ void RasterContext::onDrawPath(const Path& path)
         return;
     }
 
-    _context.stroke_path(_path);
+    BLPath blPath;
+    addPath(blPath, path);
+    _context.stroke_path(blPath);
 }
 
 
@@ -548,7 +544,7 @@ void RasterContext::drawDashed(const Path& path)
 
         const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
         for(const Dasher::Dash& dash : dashes)
-            onDrawPolyline( dash.points(), dash.size() );
+            drawSolid( dash.points(), dash.size() );
 
         dasher.pop();
     }
@@ -556,14 +552,23 @@ void RasterContext::drawDashed(const Path& path)
     dasher.finish();
     const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
     for(const Dasher::Dash& dash : dashes)
-        onDrawPolyline( dash.points(), dash.size() );
+        drawSolid( dash.points(), dash.size() );
 }
 
 
-void RasterContext::onFillPath(const Path& path)
+void RasterContext::onFillPath()
 {
-    _context.fill_path(_path);
+    _context.fill_path(_blPath);
 }
+
+
+void RasterContext::onFillPath(const Gfx::Path& path)
+{
+    BLPath blPath;
+    addPath(blPath, path);
+    _context.fill_path(blPath);
+}
+
 
 
 TextMetrics RasterContext::onGetTextMetrics(const String& text) const

@@ -208,18 +208,6 @@ class PT_GFX_API Painter
         */
         const Gfx::Path& path() const;
 
-        void beginPath();
-
-        void moveTo(const PointF& to);
-
-        void lineTo(const PointF& to);
-
-        void curveTo(const PointF& cp, const PointF& to);
-
-        void curveTo(const PointF& cp1, const PointF& cp2, const PointF& to);
-
-        void closePath();
-
         /** @brief Sets the current path.
         */
         void setPath(const Path& path);
@@ -231,6 +219,14 @@ class PT_GFX_API Painter
         /** @brief Fills the current path.
         */
         void fillPath();
+
+        /** @brief Draws the given path.
+        */
+        void drawPath(const Path& path);
+        
+        /** @brief Fills the given path.
+        */
+        void fillPath(const Path& path);
 
     public:
         /** @brief Returns the metrics of a line of text.

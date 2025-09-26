@@ -1169,39 +1169,32 @@ void PaintContext::onDrawImage(const Gfx::PointF& toF,
     }
 }
 
-void PaintContext::onBeginPath()
-{
-}
-
-
-void PaintContext::onMoveTo(const Gfx::PointF& to)
-{
-}
-
-
-void PaintContext::onLineTo(const Gfx::PointF& to)
-{
-}
-
-
-void PaintContext::onCurveTo(const Gfx::PointF &cp, const Gfx::PointF& to)
-{
-}
-
-
-void PaintContext::onCurveTo(const Gfx::PointF &cp1, const Gfx::PointF &cp2, 
-                             const Gfx::PointF& to)
-{
-}
-
-
-void PaintContext::onClosePath()
-{
-}
-
 
 void PaintContext::onSetPath(const Gfx::Path& path)
 {
+    _path = path;
+}
+
+
+void PaintContext::onDrawPath()
+{
+    if(_pixmap)
+    {
+        HDC dc = _pixmap->deviceContext();
+        addPath(dc, _path);
+        StrokePath(dc);
+    }
+}
+
+
+void PaintContext::onFillPath()
+{
+    if(_pixmap)
+    {
+        HDC dc = _pixmap->deviceContext();
+        addPath(dc, _path);
+        FillPath(dc);
+    }
 }
 
 
@@ -1210,7 +1203,7 @@ void PaintContext::onDrawPath(const Gfx::Path& path)
     if(_pixmap)
     {
         HDC dc = _pixmap->deviceContext();
-        buildPath(dc, path);
+        addPath(dc, path);
         StrokePath(dc);
     }
 }
@@ -1221,13 +1214,13 @@ void PaintContext::onFillPath(const Gfx::Path& path)
     if(_pixmap)
     {
         HDC dc = _pixmap->deviceContext();
-        buildPath(dc, path);
+        addPath(dc, path);
         FillPath(dc);
     }
 }
 
 
-void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
+void PaintContext::addPath(HDC dc, const Gfx::Path& path)
 {
     BeginPath(dc);
 
@@ -1291,7 +1284,7 @@ void PaintContext::buildPath(HDC dc, const Gfx::Path& path)
             {
                 const Gfx::PointF& c1 = it->point(0);
                 const Gfx::PointF& c2 = it->point(1);
-                const Gfx::PointF& to = it->point(3);
+                const Gfx::PointF& to = it->point(2);
 
                 POINT points[3];
                 points[0] = toContext(c1);
