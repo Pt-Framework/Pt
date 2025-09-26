@@ -140,8 +140,6 @@ class RasterContext : public PaintContext
             return pp;
         }
 
-        
-   
         Rect round(const RectF& r) const
         {
           Point pos( lround(r.x()),
