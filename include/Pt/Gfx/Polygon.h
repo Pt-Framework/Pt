@@ -77,6 +77,11 @@ class Polygon
             return _points[n];
         }
 
+        const PointF* points() const
+        {
+            return _points.empty() ? 0 : &_points[0];
+        }
+
         void clear()
         {
             _points.clear();
@@ -97,12 +102,12 @@ class Polygon
             _points.push_back(p);
         }
 
-        std::vector<PointF>& points()
+        const std::vector<PointF>& impl() const
         {
             return _points;
         }
 
-        const std::vector<PointF>& points() const
+        std::vector<PointF>& impl()
         {
             return _points;
         }

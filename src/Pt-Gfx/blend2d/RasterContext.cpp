@@ -233,8 +233,6 @@ void RasterContext::onSetBrush(const Gfx::Brush& brush)
         default:
             break;
     }
-
-    
 }
 
 
@@ -308,6 +306,15 @@ void RasterContext::onApplyClip(const Gfx::RectF* clip)
 
 void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
+    if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
+    {
+        Gfx::PointF pts[2];
+        pts[0] = from;
+        pts[1] = to;
+        drawDashed(pts, 2);
+        return;
+    }
+
     _context.stroke_line( from.x(), from.y(), to.x(), to.y() );
 }
 
@@ -317,15 +324,35 @@ void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
     if(n == 0)
         return;
 
-    std::vector<BLPoint> points(n);
+    if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
+    {
+        drawDashed(pts, n);
+        return;
+    }
+
+    _blPoints.resize(n);
 
     for(unsigned i = 0; i < n; i++)
     {
         const Gfx::PointF& p = pts[i];
-        points[i] = BLPoint( p.x(), p.y() );
+        _blPoints[i] = BLPoint( p.x(), p.y() );
     }
     
-    _context.stroke_polyline( points.data(), points.size() );
+    _context.stroke_polyline( _blPoints.data(), _blPoints.size() );
+}
+
+
+void RasterContext::drawDashed(const Gfx::PointF* pts, const size_t n)
+{
+    Dasher dasher(_dashPattern);
+    
+    _ptPoints.clear();
+    dasher.push( _ptPoints.data(), _ptPoints.size() );
+    dasher.finish();
+    
+    const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
+    for(const Dasher::Dash& dash : dashes)
+        onDrawPolyline( dash.points(), dash.size() );
 }
 
 
@@ -334,15 +361,15 @@ void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
     if(n == 0)
         return;
 
-    std::vector<BLPoint> points(n);
+    _blPoints.resize(n);
 
     for(unsigned i = 0; i < n; i++)
     {
         const Gfx::PointF& p = pts[i];
-        points[i] = BLPoint( p.x(), p.y() );
+        _blPoints[i] = BLPoint( p.x(), p.y() );
     }
     
-    _context.fill_polygon( points.data(), points.size() );
+    _context.fill_polygon( _blPoints.data(), _blPoints.size() );
 }
 
 
@@ -351,32 +378,10 @@ void RasterContext::onDrawRect(const Gfx::RectF& r)
     if( _pen.style() ==  Gfx::Pen::Dash ||
         _pen.style() == Gfx::Pen::Dot )
     {
-        //std::vector<double> _dashPattern2;
-        //_dashPattern2.push_back( 45 );
-        //_dashPattern2.push_back( 40 );
-
-        Path path;
-        path.moveTo( r.topLeft() );
-        path.lineTo( r.topRight() );
-        path.lineTo( r.bottomRight() );
-        path.lineTo( r.bottomLeft() );
-        path.lineTo( r.topLeft() );
-
-        Dasher dasher(_dashPattern);
-        std::vector<PointF> points;
-        for(PathIterator it = path.begin(); it != path.end(); ++it)
-        {
-            it->flatten(points);
-            dasher.push(points.data(), points.size());
-            points.clear();
-        }
-
-        dasher.finish();
-
-        std::vector<Dasher::Dash> dashes = dasher.getDashes();
-        for(Dasher::Dash dash : dashes)
-            onDrawPolyline(dash.data(), dash.size());
-      
+        Path rectPath;
+        rectPath.moveTo( r.topLeft() );
+        rectPath.addRect( r.size() );
+        drawDashed(rectPath);
         return;
     }
 
@@ -392,6 +397,15 @@ void RasterContext::onFillRect(const Gfx::RectF& r)
 
 void RasterContext::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 {
+    if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
+    {
+        Path ellipsePath;
+        ellipsePath.moveTo(topLeft);
+        ellipsePath.addEllipse(size);
+        drawDashed(ellipsePath);
+        return;
+    }
+
     double radiusX = size.width() / 2.0;
     double radiusY = size.height() / 2.0;
     double centerX = topLeft.x() + radiusX;
@@ -444,16 +458,111 @@ void RasterContext::onClosePath()
 
 void RasterContext::onSetPath(const Gfx::Path& path)
 {
+    _path.clear();
+    addPath(path);
+}
+
+
+void RasterContext::addPath(const Gfx::Path& path)
+{
+    for(Gfx::PathIterator it = path.begin(); it != path.end(); ++it)
+    {
+        switch( it->type() )
+        {
+            default:
+                break;
+
+            case Gfx::Path::Close:
+                _path.close();
+                break;
+
+            case Gfx::Path::MoveTo:
+            {
+                const Gfx::PointF& to = it->point(0);
+                _path.move_to( to.x(), to.y() );
+                break;
+            }
+
+            case Gfx::Path::LineTo:
+            {
+                const Gfx::PointF& to = it->point(0);
+                _path.line_to( to.x(), to.y() );
+                break;
+            }
+
+            case Gfx::Path::QuadTo:
+            {
+                const Gfx::PointF& c1 = it->point(0);
+                const Gfx::PointF& to = it->point(1);
+                
+                _path.quad_to( c1.x(), c1.y(), to.x(), to.y() );
+                break;
+            }
+            
+            case Gfx::Path::CubicTo:
+            {
+                const Gfx::PointF& c1 = it->point(0);
+                const Gfx::PointF& c2 = it->point(1);
+                const Gfx::PointF& to = it->point(3);
+
+                _path.cubic_to( c1.x(), c1.y(), c2.x(), c2.y(), to.x(), to.y() );
+                break;
+            }
+        }
+    }
 }
 
 
 void RasterContext::onDrawPath(const Path& path)
 {
+    if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
+    {
+        drawDashed(path);
+        return;
+    }
+
+    _context.stroke_path(_path);
+}
+
+
+void RasterContext::drawDashed(const Path& path)
+{
+    Dasher dasher(_dashPattern);
+    _ptPoints.clear();
+
+    for(PathIterator it = path.begin(); it != path.end(); ++it)
+    {
+        if(it->type() == Gfx::Path::Close)
+        {
+            dasher.finish();
+        }
+        else
+        {
+            if( ! _ptPoints.empty() )
+                _ptPoints.pop_back();
+
+            it->flatten(_ptPoints);
+            dasher.push( _ptPoints.data(), _ptPoints.size() );
+            _ptPoints.clear();
+        }
+
+        const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
+        for(const Dasher::Dash& dash : dashes)
+            onDrawPolyline( dash.points(), dash.size() );
+
+        dasher.pop();
+    }
+
+    dasher.finish();
+    const std::vector<Dasher::Dash>& dashes = dasher.getDashes();
+    for(const Dasher::Dash& dash : dashes)
+        onDrawPolyline( dash.points(), dash.size() );
 }
 
 
 void RasterContext::onFillPath(const Path& path)
 {
+    _context.fill_path(_path);
 }
 
 

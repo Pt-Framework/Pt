@@ -449,7 +449,6 @@ void Path::addRect(const SizeF& size)
     lineTo(Pt::Gfx::PointF(x, y + size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y+ size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y));
-    lineTo(Pt::Gfx::PointF(x, y));
     close();
 }
 
@@ -613,7 +612,7 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
             {
                 const PointF& c1 = it->point(0);
                 const PointF& to = it->point(1);
-                quadraticBezierToPoints(polygon.points(), curX, curY, 
+                quadraticBezierToPoints(polygon.impl(), curX, curY, 
                                         c1.x(), c1.y(), 
                                         to.x(), to.y(), smoothness);
                 curX = to.x();
@@ -627,7 +626,7 @@ void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
                 const PointF& c2 = it->point(1);
                 const PointF& to = it->point(2);
 
-                cubicBezierToPoints(polygon.points(), curX, curY, 
+                cubicBezierToPoints(polygon.impl(), curX, curY, 
                                     c1.x(), c1.y(), c2.x(), c2.y(), 
                                     to.x(), to.y(), smoothness);
                 curX = to.x();
@@ -659,7 +658,7 @@ void PathData::moveTo(const PointF& to)
 {
     _entries.push_back( PathEntry(Path::MoveTo, 1) );
     _points.push_back(to);
-    
+    _start = to;
     setCurrentPosition(to);
 }
 
@@ -708,6 +707,15 @@ void PathData::bezierTo(const PointF* cps, size_t cn, const PointF& to)
 
 void PathData::close()
 {
+    double epsilon = 0.001;
+    bool closeX = std::abs( _start.x() - _position.x() ) > epsilon;
+    bool closeY = std::abs( _start.y() - _position.y() ) > epsilon;
+
+    if( closeX || closeY )
+    {
+        lineTo(_start);
+    }
+
     _entries.push_back( PathEntry(Path::Close, 0) );
 }
 

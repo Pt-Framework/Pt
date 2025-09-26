@@ -342,6 +342,8 @@ class PathData
         {
             _entries.clear();
             _points.clear();
+            _start = PointF();
+            _position = PointF();
         }
 
         void append(const PathData& path);
@@ -363,6 +365,7 @@ class PathData
     private:
         std::vector<PathEntry> _entries;
         std::vector<PointF>    _points;
+        PointF                 _start;
         PointF                 _position;
 };
 

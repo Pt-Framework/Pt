@@ -138,6 +138,12 @@ class RasterContext : public PaintContext
 
       void putImage(const Point& to, const Image& image, const Rect& rect);
 
+      void addPath(const Gfx::Path& path);
+
+      void drawDashed(const Path& path);
+
+      void drawDashed(const Gfx::PointF* pts, const size_t n);
+
     private:
         BLContext               _context;
         BLImage*                _rasterImage;
@@ -149,6 +155,9 @@ class RasterContext : public PaintContext
         RectF                   _clip;
         Gfx::Pen                _pen;
         std::vector<double>     _dashPattern;
+        BLPath                  _path;
+        std::vector<PointF>     _ptPoints;
+        std::vector<BLPoint>    _blPoints;
 };
 
 } //namespace

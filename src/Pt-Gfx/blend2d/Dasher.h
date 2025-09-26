@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Polygon.h>
 
 #include <vector>
 #include <cmath>
@@ -44,7 +45,7 @@ namespace Gfx {
 class Dasher 
 {
     public:
-        typedef std::vector<PointF> Dash;
+        typedef Polygon Dash;
 
     public:
         Dasher(const std::vector<double>& pattern)
