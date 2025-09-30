@@ -130,14 +130,14 @@ void OverlappedIODeviceImpl::cancel(EventLoop& loop)
 {
     // CancelIO is enough, because we cancel in the same thread where the
     // operation was started
-    CancelIo( handle() );
+    BOOL isCanceled = CancelIo( handle() );
 
     DWORD bytes = 0;
 
-    if(_readOv.hEvent)
+    if(_readOv.hEvent && isCanceled)
         GetOverlappedResult( handle(), &_readOv, &bytes, TRUE );
 
-    if(_writeOv.hEvent)
+    if(_writeOv.hEvent && isCanceled)
         GetOverlappedResult( handle(), &_writeOv, &bytes, TRUE );
 
     if(_readOv.hEvent != NULL)
