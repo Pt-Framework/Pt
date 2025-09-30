@@ -1,46 +1,51 @@
 Load vswhere.jam ;
 
-rule ConfigureVisualC
+rule CheckToolset
 {
-    if ! $(VISUALC_CONFIGURED) 
-	{
-        VISUALC_CONFIGURED = 1 ;
-    
-        VISUALC ?= $(VISUALC:J=" ") ;
+    VISUALC ?= $(VISUALC:J=" ") ;
                 
-        if ! $(VISUALC) 
-        {
-            local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -version $(VS_VERSION)" ] ;						
-            VISUALC = $(result[2])"\\VC\\Tools\\MSVC\\" ;
+    if ! $(VISUALC) 
+    {
+        local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -version $(VS_VERSION)" ] ;
+        VISUALC = $(result[2])"\\VC\\Tools\\MSVC\\" ;
 
-            if ! $(MSVC_VERSION) 
+        if ! $(MSVC_VERSION) 
+        {
+            local versions = [ GLOB [ FDirName $(VISUALC) ] : *.*.* ] ;
+            for local v in $(versions:BS)
             {
-                local versions = [ GLOB [ FDirName $(VISUALC) ] : *.*.* ] ;
-                for local v in $(versions:BS)
+                if $(v) > $(MSVC_VERSION)
                 {
-                    if $(v) > $(MSVC_VERSION)
-                    {
-                        MSVC_VERSION = $(v:BS) ;
-                    } 
-                }
+                    MSVC_VERSION = $(v:BS) ;
+                } 
             }
-            Echo "Using MSVC..." $(MSVC_VERSION) ;
-            
-            VISUALC = $(VISUALC)\\$(MSVC_VERSION)\\ ;
-        }
-        
-        if ! $(VISUALC)
-        {
-            Exit "VISUALC not found" ;
         }
 
-        CCFLAGS  += /FS ;
-        C++FLAGS += /FS ;
-    
-        VISUALC_PATH = $(VISUALC) ;		
-        Echo "Checking for Visual Studio..." $(VISUALC) ;
-        Configure VISUALC_PATH ;
+        EchoOption MSVC_VERSION : "Using MSVC version" ;
+            
+        VISUALC = $(VISUALC)\\$(MSVC_VERSION)\\ ;
     }
+        
+    if ! $(VISUALC)
+    {
+        Exit "VISUALC not found" ;
+    }
+
+    EchoOption VISUALC : "Visual C Compiler" ;
+
+    CCFLAGS  += /FS ;
+    C++FLAGS += /FS ;
+
+    if $(TARGET_OSPLAT:L) = "x86_64"
+    {
+        TOOLSET_PATH += $(VISUALC)\\bin\\Hostx64\\x64 ;
+    }
+    else if $(TARGET_OSPLAT:L) = "x86"
+    {         
+        TOOLSET_PATH += $(VISUALC)\\bin\\Hostx86\\x86 ;
+    }
+
+    TOOLSET_PATH += $(VISUALC:J=" ") ;
 }
 
 
@@ -57,7 +62,7 @@ rule ConfigurePlatformSDK
             Exit "PLATFORMSDK not found" ;
         }
     
-        Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
+        EchoOption PLATFORMSDK : "Using Platform SDK" ;
 
         if ! $(WINKIT)
         {
@@ -79,7 +84,7 @@ rule ConfigurePlatformSDK
             Exit "WINKIT not found" ;
         }
 
-        Echo "Checking for Windows Kit..." $(WINKIT) ;
+        EchoOption WINKIT : "Using Windows Kit" ;
 
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\um\"" ;
         STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\ucrt\"" ;
@@ -125,8 +130,8 @@ rule ConfigurePlatformSDK
 
 rule TryBuild
 {
-    local _cc = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(1)\"" ;
-    local _link = "set PATH=$(VISUALC_PATH);%PATH% & " \""$(LINK)\"" ;
+    local _cc = $(TOOLSET_SET_PATH) $(1) ;
+    local _link = $(TOOLSET_SET_PATH) $(LINK) ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
@@ -169,27 +174,11 @@ rule TryBuildC++
 
 rule CheckCc
 {
-    ConfigureVisualC ;
-
-    if $(TARGET_OS:L) = "nt" || $(TARGET_OS:L) = "winrt"
-    {
-        LINKFLAGS += /MANIFEST ;
-
-        if $(TARGET_OSPLAT:L) = "x86_64"
-        {
-            AS   = $(VISUALC)\\bin\\Hostx64\\x64\\ml64 ;
-            AR   = $(VISUALC)\\bin\\Hostx64\\x64\\lib ;
-            CC   = $(VISUALC)\\bin\\Hostx64\\x64\\cl /nologo ;
-            LINK = $(VISUALC)\\bin\\Hostx64\\x64\\link /nologo ;
-        }
-        else if $(TARGET_OSPLAT:L) = "x86"
-        {         
-            AS   = $(VISUALC)\\bin\\Hostx86\\x86\\ml64 ;
-            AR   = $(VISUALC)\\bin\\Hostx86\\x86\\lib ;
-            CC   = $(VISUALC)\\bin\\Hostx86\\x86\\cl /nologo ;
-            LINK = $(VISUALC)\\bin\\Hostx86\\x86\\link /nologo ;			
-        }
-    }
+    AS   = ml64 ;
+    AR   = lib ;
+    CC   = cl /nologo ;
+    LINK = link /nologo ;
+    LINKFLAGS += /MANIFEST ;
 
     Configure AS : $(AS) ;  
     Configure AR : $(AR) ;
@@ -508,35 +497,30 @@ rule SharedLibrary-MakeLocate
 
 actions As
 {
-  set PATH=$(VISUALC_PATH);%PATH%
-  "$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+  $(TOOLSET_SET_PATH) $(AS) /Ml /p /v /w2 $(>) $(<) ,nul,nul;
 }
 
 
 actions Cc bind PDB
 {
-  set PATH=$(VISUALC_PATH);%PATH%
-  "$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+  $(TOOLSET_SET_PATH) $(CC) /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
 }
 
 
 actions C++ bind PDB
 { 
-  set PATH=$(VISUALC_PATH);%PATH%
-  "$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+  $(TOOLSET_SET_PATH) $(C++) /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
 
 actions updated together piecemeal Archive
 {
-  set PATH=$(VISUALC_PATH);%PATH%
-
   set JAM_OBJECTS=$(<:D)\archive-$(<:B).cmd
   echo "$(>)" > %JAM_OBJECTS%
 
   if exist $(<) set JAM_LIBRARY=$(<)
 
-  "$(AR)" /NOLOGO /out:$(<) %JAM_LIBRARY% @%JAM_OBJECTS%
+  $(TOOLSET_SET_PATH) $(AR) /NOLOGO /out:$(<) %JAM_LIBRARY% @%JAM_OBJECTS%
   set JAM_EXITCODE=%errorlevel%
 
   del %JAM_OBJECTS%
@@ -552,7 +536,6 @@ actions updated together piecemeal Archive
 
 actions together Link bind NEEDLIBS
 {
-  set PATH=$(VISUALC_PATH);%PATH%
-  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) $(WINMDFILE)$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+  $(TOOLSET_SET_PATH) $(LINK) $(LINKFLAGS) /PDB:$(<:S=.pdb) $(WINMDFILE)$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }
 

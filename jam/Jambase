@@ -53,6 +53,7 @@ if $(JAM_SWITCH) || $(JAM_CONFIGURE)
         ConfigureSwitch $(CONFIG) ;
     }
 
+    Echo "Configuring..." ;
     EchoOption JAMBASE : "Using Jambase" : $(JAMBASE) ;
     EchoOption OS : "Build Host OS" : $(OS:L) ;
     EchoOption OSPLAT : "Host Platform" ;

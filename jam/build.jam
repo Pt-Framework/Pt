@@ -1228,22 +1228,22 @@ rule FGristSourceFiles
 
 actions updated together piecemeal Archive
 {
-    $(AR) $(<) $(>) 
+    $(TOOLSET_SET_PATH) $(AR) $(<) $(>) 
 }
 
 actions As
 {
-    $(AS) $(ASFLAGS) -I$(HDRS) -o $(<) $(>)
+    $(TOOLSET_SET_PATH) $(AS) $(ASFLAGS) -I$(HDRS) -o $(<) $(>)
 }
 
 actions C++
 {
-    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>) 
+    $(TOOLSET_SET_PATH) $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>) 
 }
 
 actions Cc
 {
-    $(CC) -c $(CCFLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>)
+    $(TOOLSET_SET_PATH) $(CC) -c $(CCFLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>)
 }
 
 actions Chgrp
@@ -1309,7 +1309,7 @@ actions MkDir1
 
 actions together Ranlib
 {
-    $(RANLIB) $(<)
+    $(TOOLSET_SET_PATH) $(RANLIB) $(<)
 }
 
 actions quietly updated piecemeal together RmTemps
@@ -1325,17 +1325,17 @@ if $(RELOCATE)
 {
     actions C++
     {
-    $(C++) -c $(C++FLAGS) $(OPTIM) -I$(HDRS) $(>) 
+        $(TOOLSET_SET_PATH) $(C++) -c $(C++FLAGS) $(OPTIM) -I$(HDRS) $(>) 
     }
 
     actions Cc
     {
-    $(CC) -c $(CCFLAGS) $(OPTIM) -I$(HDRS) $(>) 
+        $(TOOLSET_SET_PATH) $(CC) -c $(CCFLAGS) $(OPTIM) -I$(HDRS) $(>) 
     }
 
     actions ignore CcMv
     {
-    [ $(<) != $(>:BS=$(SUFOBJ)) ] && $(MV) $(>:BS=$(SUFOBJ)) $(<)
+        [ $(<) != $(>:BS=$(SUFOBJ)) ] && $(MV) $(>:BS=$(SUFOBJ)) $(<)
     }
 }
 
@@ -1347,7 +1347,7 @@ if $(NOARUPDATE)
 {
     actions Archive
     {
-    $(AR) $(<) $(>)
+        $(TOOLSET_SET_PATH) $(AR) $(<) $(>)
     }
 }
 

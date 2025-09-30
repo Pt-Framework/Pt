@@ -56,7 +56,7 @@
 
 rule TryBuild
 {
-    local _cc = $(1) ;
+    local _cc = $(TOOLSET_SET_PATH) $(1) ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
@@ -96,18 +96,10 @@ rule TryBuildC++
 
 rule Gcc-CheckCc
 {
-    TOOLSET_ROOT ?= "" ;
-
-    if $(TOOLSET_ROOT) && $(OS:L) = nt
-    {
-      TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
-      TOOLSET_ROOT = \"$(TOOLSET_ROOT)\" ;
-    }
-
-    AS           ?= $(TOOLSET_ROOT)as ;
-    CC           ?= $(TOOLSET_ROOT)gcc ;
-    RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
-    AR           ?= $(TOOLSET_ROOT)ar ru ;
+    AS           ?= $(TOOLSET_PREFIX)as ;
+    CC           ?= $(TOOLSET_PREFIX)gcc ;
+    RANLIB       ?= $(TOOLSET_PREFIX)ranlib ;
+    AR           ?= $(TOOLSET_PREFIX)ar ru ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -174,7 +166,7 @@ rule Gcc-CheckCc
 
     WARN ?= -Wall ;
 
-	Configure STDHDRS ;
+    Configure STDHDRS ;
     Configure CCFLAGS ;
     Configure WARN ;
     Configure OPTIM ;
@@ -191,7 +183,7 @@ rule Gcc-CheckC++
 {
     ConfigureCc ;
 
-    C++ ?= $(TOOLSET_ROOT)g++ ;
+    C++ ?= $(TOOLSET_PREFIX)g++ ;
     Configure C++ ;
 
     LINK++ = $(C++) ;
@@ -356,6 +348,25 @@ rule Gcc-SharedLibrary-LinkSharedLibraries
 }
 
 
+#rule SharedLibrary-MakeLocate
+#{
+#    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+#
+#    Echo MakeLocate $(_target)  $(>) ;
+#
+#    if $(RPATH_LINKFLAGS)
+#    {
+#        local _rpath_link = $(>) ;
+#        if ! $(_rpath_link) in $(RPATHLIBS)
+#        {
+#            RPATHLIBS += $(_rpath_link) ;
+#        }
+#    }
+#
+#    MakeLocate $(_target) : $(>) ;
+#}
+
+
 rule Main-LinkSharedLibraries
 {
     Gcc-Main-LinkSharedLibraries $(1) : $(2) : $(3) ;
@@ -374,5 +385,5 @@ rule SharedLibrary-LinkSharedLibraries
 
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-    $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS),$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP)
+    $(TOOLSET_SET_PATH) $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS),$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP)
 }

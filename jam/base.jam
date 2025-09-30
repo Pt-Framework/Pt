@@ -165,7 +165,7 @@ rule EchoOption
         _vals = $(3) ;
     }
 
-    local _optname = $(2) [$(_opts:J=",")]":" ;
+    local _optname = "-" $(2) [$(_opts:J=",")]":" ;
 
     if ! $(_vals)
     {
@@ -175,17 +175,17 @@ rule EchoOption
     local _line ;
     for local _s in $(_vals)
     {
-        local _l = $(_line) $(_s) ;
-        local _result = [ MATCH ^(............................................................)(.*) : $(_l:J=" ") ] ;
-
-        if $(_result) # exceeds max line length
-        {
-            if $(_line)
-            {
-                Echo $(_optname) $(_line) ;
-                _line = ;
-            }
-        }
+        #local _l = $(_line) $(_s) ;
+        #local _result = [ MATCH ^(............................................................)(.*) : $(_l:J=" ") ] ;
+        #
+        #if $(_result) # exceeds max line length
+        #{
+        #    if $(_line)
+        #    {
+        #        Echo $(_optname) $(_line) ;
+        #        _line = ;
+        #    }
+        #}
 
         _line += $(_s) ;
     }

@@ -45,10 +45,10 @@ rule TryBuildC++
 rule CheckCc
 {
     TOOLSET_ROOT ?= "" ;
-    AS           ?= $(TOOLSET_ROOT)as ;
-    CC           ?= $(TOOLSET_ROOT)clang ;
-    RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
-    AR           ?= $(TOOLSET_ROOT)ar ru ;
+    AS           ?= $(TOOLSET_PREFIX)as ;
+    CC           ?= $(TOOLSET_PREFIX)clang ;
+    RANLIB       ?= $(TOOLSET_PREFIX)ranlib ;
+    AR           ?= $(TOOLSET_PREFIX)ar ru ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -129,7 +129,7 @@ rule CheckC++
 
     TOOLSET_ROOT ?= "" ;
 
-    C++ ?= $(TOOLSET_ROOT)clang++ ;
+    C++ ?= $(TOOLSET_PREFIX)clang++ ;
     Configure C++ ;
 
     LINK++ = $(C++) ;
@@ -262,6 +262,6 @@ rule SharedLibrary-LinkSharedLibraries
 
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-  $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
+  $(TOOLSET_SET_PATH) $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
 }
 
