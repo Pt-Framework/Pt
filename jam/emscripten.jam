@@ -4,7 +4,7 @@
 
 rule TryBuild
 {
-    local _cc = $(1) ;
+    local _cc = $(TOOLSET_SET_PATH) $(1) ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
@@ -44,33 +44,29 @@ rule TryBuildC++
 }
 
 
+rule CheckToolset
+{    
+    EMSDK ?= $(EMSDK:J=" ") ;
+    if ! $(EMSDK)
+    {
+        Exit "EMSDK not set" ;
+    }
+
+    EchoOption EMSDK : "Emscripten SDK" ;
+    TOOLSET_PATH += [ FDirName $(EMSDK:J=" ") upstream emscripten ] ;
+    
+    EMSDK_PYTHON_PATH ?= [ GLOB [ FDirName $(EMSDK) python ]  : * ] ;
+    EchoOption EMSDK_PYTHON_PATH : "Emscripten Python Path" ;
+    TOOLSET_PATH += $(EMSDK_PYTHON_PATH:J=" ") ;
+}
+
+
 rule CheckCc
 {
-    if $(EMSDK)
-    {
-        TOOLSET_ROOT ?= [ FDirName $(EMSDK) upstream emscripten ] ;
-        EMSDK_PYTHON_PATH ?= [ GLOB [ FDirName $(EMSDK) python ]  : * ] ;
-    }
-
-    if $(TOOLSET_ROOT) && $(OS:L) = nt
-    {
-      TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
-    }
-    
-    if $(EMSDK_PYTHON_PATH) && $(OS:L) = nt
-    {
-      EMSDK_PYTHON_PATH = $(EMSDK_PYTHON_PATH:J=" ") ;
-      EMSDK_SET_PATH = set PATH=$(EMSDK_PYTHON_PATH);%PATH% \& ;
-    }
-
-    EchoOption EMSDK : "Emscripten SDK" : $(EMSDK) ;
-    EchoOption TOOLSET_ROOT : "Emscripten toolset root" : $(TOOLSET_ROOT) ;
-    EchoOption EMSDK_PYTHON_PATH : "Emscripten Python Path" : $(EMSDK_PYTHON_PATH) ;
-
     AS           ?= "" ;
-    CC           ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) emcc\" ] ;
-    RANLIB       ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) emranlib\" ] ;
-    AR           ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) emar\" ] ru ;
+    CC           ?= $(TOOLSET_PREFIX)emcc ;
+    RANLIB       ?= $(TOOLSET_PREFIX)emranlib ;
+    AR           ?= $(TOOLSET_PREFIX)emar ru ;
     LINK         ?= $(CC) ;
 
     Configure AS ;
@@ -119,7 +115,7 @@ rule CheckC++
 {
     ConfigureCc ;
 
-    C++ ?= $(EMSDK_SET_PATH) [ FDirName \"$(TOOLSET_ROOT) em++\" ] ;
+    C++ ?= $(TOOLSET_PREFIX)em++ ;
     Configure C++ ;
 
     LINK++ = $(C++) ;
@@ -243,5 +239,5 @@ rule SharedLibrary-LinkSharedLibraries
 
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-  $(LINK) $(LINKFLAGS) -L$(SHLIBS:P) -l$(LINKSHLIBS:B) $(WARN) -o $(<) $(UNDEFS) $(>) $(LINKLIBS) $(NEEDLIBS) 
+  $(TOOLSET_SET_PATH) $(LINK) $(LINKFLAGS) -L$(SHLIBS:P) -l$(LINKSHLIBS:B) $(WARN) -o $(<) $(UNDEFS) $(>) $(LINKLIBS) $(NEEDLIBS) 
 }
