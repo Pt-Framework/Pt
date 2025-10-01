@@ -56,7 +56,7 @@
 
 rule TryBuild
 {
-    local _cc = $(TOOLSET_SET_PATH) $(1) ;
+    local _cc = [ FCommandAnd $(TOOLSET_SET_PATH) : $(1) ] ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
@@ -385,5 +385,6 @@ rule SharedLibrary-LinkSharedLibraries
 
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-    $(TOOLSET_SET_PATH) $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS),$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP)
+    $(TOOLSET_SET_PATH)
+    $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS),$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP)
 }

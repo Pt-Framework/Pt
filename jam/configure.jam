@@ -458,6 +458,41 @@ rule ConfigureDotSlash
 }
 
 
+rule ConfigureCmd
+{
+    if ! $(CMDSEP) && [ TryCommand "cd . ; cd ." ]
+    {
+        CMDSEP = ";" ;
+    }
+
+    if ! $(CMDSEP) && [ TryCommand "cd . & cd ." ]
+    {
+        CMDSEP = "&" ;
+    }
+
+    if ! $(CMDSEP)
+    {
+        Exit "Checking for command separator... FAILED!" ;
+    }
+
+    Configure CMDSEP : $(CMDSEP) ;
+    EchoOption CMDSEP : "Command separator" ;
+
+    if ! $(CMDAND) && [ TryCommand "cd . && cd ." ]
+    {
+        CMDAND = "&&" ;
+    }
+
+    if ! $(CMDAND)
+    {
+        Exit "Checking for command AND... FAILED!" ;
+    }
+    
+    Configure CMDAND : $(CMDAND) ;
+    EchoOption CMDAND : "Command and" ;
+}
+
+
 rule ConfigureTarget
 {
     TARGET_OS ?= $(OS:L) ;
@@ -483,59 +518,6 @@ rule ConfigureTarget
 
     EchoOption SUFDLL : "Shared library suffix" ;
     Configure SUFDLL ;
-}
-
-
-rule ConfigureToolsetPath
-{
-    TOOLSET_ROOT ?= "" ;
-    TOOLSET_PREFIX ?= "" ;
-    TOOLSET_PATH ?= "" ;
-    TOOLSET_SET_PATH = ;
-
-    local toolset_path = "" ;
-
-    if $(TOOLSET_PATH) || $(TOOLSET_ROOT)
-    {
-      if $(OS:L) = nt
-      {
-          toolset_path = $(TOOLSET_ROOT:J=" ") ;
-          
-          if $(toolset_path) && $(TOOLSET_PATH)
-          {
-              toolset_path += ";" ;
-          }
-
-          toolset_path += $(TOOLSET_PATH:J=" ") ;
-
-          TOOLSET_SET_PATH = set PATH=$(toolset_path:J="");%PATH% \&\& ;
-          TOOLSET_SET_PATH = $(TOOLSET_SET_PATH:J=" ") ;
-      }
-      else
-      {
-          toolset_path = $(TOOLSET_ROOT:J=" ") ;
-          
-          if $(toolset_path) && $(TOOLSET_PATH)
-          {
-              toolset_path += ":" ;
-          }
-
-          toolset_path += $(TOOLSET_PATH:J=" ") ;
-          
-          TOOLSET_SET_PATH = PATH=$(toolset_path):\$(PATH) \; ;
-          TOOLSET_SET_PATH = $(TOOLSET_SET_PATH:J=" ") ;
-      }
-    }
-
-    if $(TOOLSET_PREFIX)
-    {
-        Configure TOOLSET_PREFIX : $(TOOLSET_PREFIX) ;
-    }
-
-    if $(TOOLSET_SET_PATH)
-    {
-        Configure TOOLSET_SET_PATH : $(TOOLSET_SET_PATH) ;
-    }
 }
 
 
@@ -580,8 +562,7 @@ rule ConfigureToolset
               toolset_path += $(p) ;
           }
 
-          TOOLSET_SET_PATH = set PATH=$(toolset_path:J="");%PATH% \&\& ;
-          TOOLSET_SET_PATH = $(TOOLSET_SET_PATH:J=" ") ;
+          TOOLSET_SET_PATH = set PATH=$(toolset_path:J="");%PATH% ;
       }
       else
       {
@@ -597,8 +578,7 @@ rule ConfigureToolset
               toolset_path += $(p) ;
           }
           
-          TOOLSET_SET_PATH = PATH=$(toolset_path):\$(PATH) \; ;
-          TOOLSET_SET_PATH = $(TOOLSET_SET_PATH:J=" ") ;
+          TOOLSET_SET_PATH = PATH=$(toolset_path):\$PATH ;
       }
     }
 
@@ -620,6 +600,7 @@ rule ConfigureToolset
 
     if $(TOOLSET_SET_PATH)
     {
+        TOOLSET_SET_PATH = $(TOOLSET_SET_PATH:J=" ") ;
         Configure TOOLSET_SET_PATH : $(TOOLSET_SET_PATH) ;
     }
 }

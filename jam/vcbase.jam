@@ -130,8 +130,8 @@ rule ConfigurePlatformSDK
 
 rule TryBuild
 {
-    local _cc = $(TOOLSET_SET_PATH) $(1) ;
-    local _link = $(TOOLSET_SET_PATH) $(LINK) ;
+    local _cc = [ FCommandAnd $(TOOLSET_SET_PATH) : $(1) ] ;
+    local _link = [ FCommandAnd $(TOOLSET_SET_PATH) $(LINK) ] ;
     local _src = $(2) ;
     local _cflags = $(3) ;
     local _l = $(4) ;
@@ -497,19 +497,22 @@ rule SharedLibrary-MakeLocate
 
 actions As
 {
-  $(TOOLSET_SET_PATH) $(AS) /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+  $(TOOLSET_SET_PATH)
+  $(AS) /Ml /p /v /w2 $(>) $(<) ,nul,nul;
 }
 
 
 actions Cc bind PDB
 {
-  $(TOOLSET_SET_PATH) $(CC) /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+  $(TOOLSET_SET_PATH)
+  $(CC) /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
 }
 
 
 actions C++ bind PDB
 { 
-  $(TOOLSET_SET_PATH) $(C++) /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+  $(TOOLSET_SET_PATH)
+  $(C++) /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
 
@@ -520,13 +523,15 @@ actions updated together piecemeal Archive
 
   if exist $(<) set JAM_LIBRARY=$(<)
 
-  $(TOOLSET_SET_PATH) $(AR) /NOLOGO /out:$(<) %JAM_LIBRARY% @%JAM_OBJECTS%
+  $(TOOLSET_SET_PATH)
+  $(AR) /NOLOGO /out:$(<) %JAM_LIBRARY% @%JAM_OBJECTS%
   set JAM_EXITCODE=%errorlevel%
 
   del %JAM_OBJECTS%
 
   exit %JAM_EXITCODE%
 }
+
 # set PATH=$(VISUALC)\Common7/IDE;%PATH%
 # if exist $(<) set _$(<:B)_=$(<)
 # "$(AR)" /out:$(<) %_$(<:B)_% $(>)
@@ -536,6 +541,7 @@ actions updated together piecemeal Archive
 
 actions together Link bind NEEDLIBS
 {
-  $(TOOLSET_SET_PATH) $(LINK) $(LINKFLAGS) /PDB:$(<:S=.pdb) $(WINMDFILE)$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+  $(TOOLSET_SET_PATH)
+  $(LINK) $(LINKFLAGS) /PDB:$(<:S=.pdb) $(WINMDFILE)$(<:S=.winmd) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }
 

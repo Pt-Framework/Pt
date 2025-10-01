@@ -272,6 +272,40 @@ rule FConcat
 }
 
 
+rule FCommandConcat
+{
+    local _r ;
+
+    if $(1) && $(2)
+    {
+        _r = $(1) $(CMDSEP) $(2) ;
+    }
+    else
+    {
+        _r = $(1) $(2) ;
+    }
+
+    return $(_r) ;
+}
+
+
+rule FCommandAnd
+{
+    local _r ;
+
+    if $(1) && $(2)
+    {
+        _r = $(1) $(CMDAND) $(2) ;
+    }
+    else
+    {
+        _r = $(1) $(2) ;
+    }
+
+    return $(_r) ;
+}
+
+
 rule FSubDir
 {
     local _i _d ;
