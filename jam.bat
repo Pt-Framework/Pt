@@ -21,6 +21,6 @@ if not exist %JAMDIR%\jam.exe (
 call %JAMDIR%\jam.exe %*
 
 if ERRORLEVEL 1 (
-  exit /b 1
+  exit /b !ERRORLEVEL!
 )
 
