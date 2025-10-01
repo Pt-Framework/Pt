@@ -22,11 +22,6 @@ if --nlog in $(ARGV)
 # configure basic C compiler
 ConfigureCc ;
 
-if $(TOOLSET) = gcc
-{
-    C++FLAGS += -std=c++17 ;
-}
-
 # configure basic C++ compiler
 ConfigureC++ ;
 
@@ -597,7 +592,7 @@ EchoOption JPEG_LINKLIBS : "JPEG libs" ;
 if --with-blend2d in $(ARGV)
 {
     Load simd.jam ;
-
+    
     WITH_BLEND2D = yes ;
     Configure WITH_BLEND2D ;
     EchoOption --with-blend2d : "Blend2d library" : $(WITH_BLEND2D:E="no") ;
