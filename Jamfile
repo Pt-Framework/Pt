@@ -5,6 +5,21 @@ if $(PTHREAD_INCLUDES)
     SubDirHdrs $(PTHREAD_INCLUDES) ;
 }
 
+
+
+
+# import property-set ;
+#IMPORT_MODULE property-set2 ;
+#Echo property-set2 rules: [ RULENAMES property-set2 ] ;
+
+#IMPORT_MODULE property-set ;
+#Exit property-set rules: [ RULENAMES property-set ] ;
+#local props = [ property-set.create <variant>debug <optimization>off <define>DEBUG_MODE ] ;
+#Exit $(props) ;
+
+
+
+
 #############################################################################
 # Qt meta object compiler
 #############################################################################
