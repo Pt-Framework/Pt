@@ -640,7 +640,7 @@ void XmlReaderTest::ByteorderMarkGeneric32BE()
 void XmlReaderTest::DtdEmptyDocument()
 {
     XmlTestResolver resolver;
-    resolver.addInput(L"external.dtd", L"<!ENTITY e1 \"e1External\">");
+    resolver.addInput("external.dtd", "<!ENTITY e1 \"e1External\">");
 
     std::stringstream input;
     input << "<!DOCTYPE test SYSTEM \"external.dtd\" [\n";
@@ -655,8 +655,8 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::InputIterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
-    PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+    PT_UNIT_ASSERT_EQUALS(docType.publicId(), "");
+    PT_UNIT_ASSERT_EQUALS(docType.systemId(), "external.dtd");
     PT_UNIT_ASSERT_EQUALS(docType.isInternal(), true);
     
     ++it;
@@ -664,7 +664,7 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::EndDocType& endDocInternal = Pt::Xml::toEndDocType(*it);
     PT_UNIT_ASSERT_EQUALS(endDocInternal.isInternal(), true);
     PT_UNIT_ASSERT_EQUALS(endDocInternal.isExternal(), false);
-    PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), L"test");
+    PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), "test");
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
@@ -672,7 +672,7 @@ void XmlReaderTest::DtdEmptyDocument()
     Pt::Xml::EndDocType& endDocExternal = Pt::Xml::toEndDocType(*it);
     PT_UNIT_ASSERT_EQUALS(endDocExternal.isInternal(), false);
     PT_UNIT_ASSERT_EQUALS(endDocExternal.isExternal(), true);
-    PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), L"test");
+    PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), "test");
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
     ++it;
@@ -687,7 +687,7 @@ void XmlReaderTest::DtdEmptyDocument()
 void XmlReaderTest::DtdExternalSubsetPublicId()
 {
     XmlTestResolver resolver;
-    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
+    resolver.addInput("external.dtd", "<!ELEMENT test EMPTY>");
 
     std::stringstream input;
     input << "<!DOCTYPE test PUBLIC \"pubid\" \"external.dtd\">";
@@ -701,8 +701,8 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
     Pt::Xml::InputIterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"pubid");
-    PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+    PT_UNIT_ASSERT_EQUALS(docType.publicId(), "pubid");
+    PT_UNIT_ASSERT_EQUALS(docType.systemId(), "external.dtd");
     PT_UNIT_ASSERT_EQUALS(docType.isInternal(), false);
 
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
@@ -721,7 +721,7 @@ void XmlReaderTest::DtdExternalSubsetPublicId()
 void XmlReaderTest::DtdExternalSubsetSystemId()
 {
     XmlTestResolver resolver;
-    resolver.addInput(L"external.dtd", L"<!ELEMENT test EMPTY>");
+    resolver.addInput("external.dtd", "<!ELEMENT test EMPTY>");
 
     std::stringstream input;
     input << "<!DOCTYPE test SYSTEM \"external.dtd\">\n";
@@ -735,8 +735,8 @@ void XmlReaderTest::DtdExternalSubsetSystemId()
     Pt::Xml::InputIterator it = reader.current();
 
     Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-    PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
-    PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+    PT_UNIT_ASSERT_EQUALS(docType.publicId(), "");
+    PT_UNIT_ASSERT_EQUALS(docType.systemId(), "external.dtd");
     PT_UNIT_ASSERT_EQUALS(docType.isInternal(), false);
 
     PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
@@ -757,14 +757,14 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
     try
     {
         XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", L"<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
+        resolver.addInput("external.dtd", "<!ENTITY e1 \"e1External\">\n<!ENTITY e2 \"e2External\">\n");
 
         Pt::Xml::StringInputSource is(
-            L"<!DOCTYPE test SYSTEM \"external.dtd\" [\n"
-            L"<!ELEMENT test (#PCDATA)>\n"
-            L"<!ENTITY e1 \"e1Internal\">\n"
-            L"]>\n"
-            L"<test>&e1; &e2;</test>"
+            "<!DOCTYPE test SYSTEM \"external.dtd\" [\n"
+            "<!ELEMENT test (#PCDATA)>\n"
+            "<!ENTITY e1 \"e1Internal\">\n"
+            "]>\n"
+            "<test>&e1; &e2;</test>"
         );
 
         Pt::Xml::XmlReader reader(resolver, is);
@@ -773,17 +773,17 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
         Pt::Xml::InputIterator it = reader.current();
         
         Pt::Xml::DocType& docType = Pt::Xml::toDocType(*it);
-        PT_UNIT_ASSERT_EQUALS(docType.publicId(), L"");
-        PT_UNIT_ASSERT_EQUALS(docType.systemId(), L"external.dtd");
+        PT_UNIT_ASSERT_EQUALS(docType.publicId(), "");
+        PT_UNIT_ASSERT_EQUALS(docType.systemId(), "external.dtd");
         PT_UNIT_ASSERT_EQUALS(docType.isInternal(), true);
 
         ++it;
         
         Pt::Xml::EndDocType* endDoc = Pt::Xml::toEndDocType(&(*it));
         PT_UNIT_ASSERT(endDoc);
-        PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), L"test");
-        PT_UNIT_ASSERT( reader.dtd().findEntity(L"e1") );
-        PT_UNIT_ASSERT( reader.dtd().findEntity(L"e2") == 0 );
+        PT_UNIT_ASSERT_EQUALS(reader.dtd().rootName().name(), "test");
+        PT_UNIT_ASSERT( reader.dtd().findEntity("e1") );
+        PT_UNIT_ASSERT( reader.dtd().findEntity("e2") == 0 );
         PT_UNIT_ASSERT_EQUALS(reader.depth(), 0);
 
         Pt::String content;
@@ -794,7 +794,7 @@ void XmlReaderTest::DtdExternalAndInternalSubset()
                 content = chars->content();
         }
 
-        PT_UNIT_ASSERT_EQUALS(content, L"e1Internal e2External");
+        PT_UNIT_ASSERT_EQUALS(content, "e1Internal e2External");
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -831,10 +831,10 @@ void XmlReaderTest::DtdValidateAttributes()
             Pt::Xml::StartElement* se = toStartElement(&*it);
             if(se && se->name().name() == "test")
             {
-                PT_UNIT_ASSERT( se->attributes().has(L"a3") );
-                PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"A3def" );
+                PT_UNIT_ASSERT( se->attributes().has("a3") );
+                PT_UNIT_ASSERT( se->attributes().find("a3")->value() == "A3def" );
 
-                PT_UNIT_ASSERT( se->attributes().has(L"a4") );
+                PT_UNIT_ASSERT( se->attributes().has("a4") );
             }
         }
 
@@ -1097,7 +1097,7 @@ void XmlReaderTest::DtdValidateWithNamespace()
             Pt::Xml::StartElement* se = toStartElement(&*it);
             if(se && se->name().name() == "test" )
             {
-                PT_UNIT_ASSERT( se->attributes().has(L"a1") );
+                PT_UNIT_ASSERT( se->attributes().has("a1") );
             }
         }
 
@@ -1139,20 +1139,20 @@ void XmlReaderTest::DtdNotations()
     Pt::Xml::EndDocType* endDocType = Pt::Xml::toEndDocType(&*it);
     PT_UNIT_ASSERT(endDocType);
 
-    const Pt::Xml::Notation* notation = reader.dtd().findNotation(L"notation1");
+    const Pt::Xml::Notation* notation = reader.dtd().findNotation("notation1");
     PT_UNIT_ASSERT(notation);
-    PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"");
-    PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n1");
+    PT_UNIT_ASSERT_EQUALS(notation->publicId(), "");
+    PT_UNIT_ASSERT_EQUALS(notation->systemId(), "n1");
 
-    notation = reader.dtd().findNotation(L"notation2");
+    notation = reader.dtd().findNotation("notation2");
     PT_UNIT_ASSERT(notation);
-    PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n2");
-    PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"");
+    PT_UNIT_ASSERT_EQUALS(notation->publicId(), "http://www.pt-framework.org/n2");
+    PT_UNIT_ASSERT_EQUALS(notation->systemId(), "");
 
-    notation = reader.dtd().findNotation(L"notation3");
+    notation = reader.dtd().findNotation("notation3");
     PT_UNIT_ASSERT(notation);
-    PT_UNIT_ASSERT_EQUALS(notation->publicId(), L"http://www.pt-framework.org/n3");
-    PT_UNIT_ASSERT_EQUALS(notation->systemId(), L"n3");
+    PT_UNIT_ASSERT_EQUALS(notation->publicId(), "http://www.pt-framework.org/n3");
+    PT_UNIT_ASSERT_EQUALS(notation->systemId(), "n3");
 
     Pt::Xml::DocTypeValidator validator( reader.dtd() );
     for(; it != reader.end(); ++it)
@@ -1170,15 +1170,15 @@ void XmlReaderTest::DtdInclude()
     try
     {
         Pt::String externalDtd;
-        externalDtd += L"<![INCLUDE[]]>\n";
-        externalDtd += L"<![ INCLUDE [ ]]>\n";
-        externalDtd += L"<![%include;[\n";
-        externalDtd += L"<![INCLUDE[ <!ENTITY e2 \"entity2\"> ]]>";
-        externalDtd += L"  <!ENTITY e1 \"entity1\">\n";
-        externalDtd += L"]]>\n";
+        externalDtd += "<![INCLUDE[]]>\n";
+        externalDtd += "<![ INCLUDE [ ]]>\n";
+        externalDtd += "<![%include;[\n";
+        externalDtd += "<![INCLUDE[ <!ENTITY e2 \"entity2\"> ]]>";
+        externalDtd += "  <!ENTITY e1 \"entity1\">\n";
+        externalDtd += "]]>\n";
 
         XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", externalDtd);
+        resolver.addInput("external.dtd", externalDtd);
 
         std::stringstream input;
         input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -1196,13 +1196,13 @@ void XmlReaderTest::DtdInclude()
         for(; it != reader.end(); ++it)
             ;
 
-        const Pt::Xml::Entity* entity = reader.dtd().findEntity(L"e1");
+        const Pt::Xml::Entity* entity = reader.dtd().findEntity("e1");
         PT_UNIT_ASSERT(entity);
-        PT_UNIT_ASSERT_EQUALS(entity->value(), L"entity1");
+        PT_UNIT_ASSERT_EQUALS(entity->value(), "entity1");
 
-        entity = reader.dtd().findEntity(L"e2");
+        entity = reader.dtd().findEntity("e2");
         PT_UNIT_ASSERT(entity);
-        PT_UNIT_ASSERT_EQUALS(entity->value(), L"entity2");
+        PT_UNIT_ASSERT_EQUALS(entity->value(), "entity2");
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -1217,12 +1217,12 @@ void XmlReaderTest::DtdIgnore()
     try
     {
         Pt::String externalDtd;
-        externalDtd += L"<![IGNORE[]]>\n";
-        externalDtd += L"<![ IGNORE [ ]]>\n";
-        externalDtd += L"<![%ignore;[\n";
-        externalDtd += L"  <!ENTITY e1 \"entity1\">\n";
-        externalDtd += L"]]>\n";
-        externalDtd += L"<![IGNORE[ <!ENTITY e2 \"entity2\"> ]]>";
+        externalDtd += "<![IGNORE[]]>\n";
+        externalDtd += "<![ IGNORE [ ]]>\n";
+        externalDtd += "<![%ignore;[\n";
+        externalDtd += "  <!ENTITY e1 \"entity1\">\n";
+        externalDtd += "]]>\n";
+        externalDtd += "<![IGNORE[ <!ENTITY e2 \"entity2\"> ]]>";
 
         std::stringstream input;
         input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -1233,7 +1233,7 @@ void XmlReaderTest::DtdIgnore()
         input << "<test></test>";
 
         XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", externalDtd);
+        resolver.addInput("external.dtd", externalDtd);
 
         Pt::Xml::BinaryInputSource is(input);
         Pt::Xml::XmlReader reader( resolver, is );
@@ -1242,10 +1242,10 @@ void XmlReaderTest::DtdIgnore()
         for(; it != reader.end(); ++it)
             ;
 
-        const Pt::Xml::Entity* entity = reader.dtd().findEntity(L"e1");
+        const Pt::Xml::Entity* entity = reader.dtd().findEntity("e1");
         PT_UNIT_ASSERT( ! entity);
 
-        entity = reader.dtd().findEntity(L"e2");
+        entity = reader.dtd().findEntity("e2");
         PT_UNIT_ASSERT( ! entity);
     }
     catch(const Pt::Xml::SyntaxError& error)
@@ -1261,7 +1261,7 @@ void XmlReaderTest::DtdComment()
     try
     {
         XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", L"<!-- some comment external -->\n");
+        resolver.addInput("external.dtd", "<!-- some comment external -->\n");
 
         std::stringstream input;
         input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -1294,7 +1294,7 @@ void XmlReaderTest::DtdProcesssingInstruction()
     try
     {
         XmlTestResolver resolver;
-        resolver.addInput(L"external.dtd", L"<?pi2 external processing instruction?>\n");
+        resolver.addInput("external.dtd", "<?pi2 external processing instruction?>\n");
 
         std::stringstream input;
         input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -1311,14 +1311,14 @@ void XmlReaderTest::DtdProcesssingInstruction()
         Pt::Xml::InputIterator it = reader.current();
         const Pt::Xml::ProcessingInstruction* pi = Pt::Xml::toProcessingInstruction(&*it);
         PT_UNIT_ASSERT(pi);
-        PT_UNIT_ASSERT_EQUALS(pi->target(), L"pi1");
-        PT_UNIT_ASSERT_EQUALS(pi->data(), L"internal processing instruction");
+        PT_UNIT_ASSERT_EQUALS(pi->target(), "pi1");
+        PT_UNIT_ASSERT_EQUALS(pi->data(), "internal processing instruction");
 
         ++it;
         pi = Pt::Xml::toProcessingInstruction(&*it);
         PT_UNIT_ASSERT(pi);
-        PT_UNIT_ASSERT_EQUALS(pi->target(), L"pi2");
-        PT_UNIT_ASSERT_EQUALS(pi->data(), L"external processing instruction");
+        PT_UNIT_ASSERT_EQUALS(pi->target(), "pi2");
+        PT_UNIT_ASSERT_EQUALS(pi->data(), "external processing instruction");
         
         Pt::Xml::DocTypeValidator validator( reader.dtd() );
 
@@ -1490,7 +1490,7 @@ void XmlReaderTest::ElementWithContent()
     // b
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isSpace() == false);
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"?!:=b");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == "?!:=b");
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     // </a>
@@ -1522,12 +1522,12 @@ void XmlReaderTest::MaxCharacters()
     ++it;
     Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"01234");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), "01234");
 
     ++it;
     chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"56789");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), "56789");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -1554,11 +1554,11 @@ void XmlReaderTest::ElementWithNamespace()
     const Pt::Xml::StartElement& startA = Pt::Xml::toStartElement(*it);
     PT_UNIT_ASSERT(startA.name().prefix() == "my");
     PT_UNIT_ASSERT(startA.name().name() == "a");
-    PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(startA.namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT(startA.namespaceMapping().size() == 1);
     PT_UNIT_ASSERT(startA.namespaceMapping().begin()->isMapped() == true);
-    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->prefix() == L"my");
-    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->prefix() == "my");
+    PT_UNIT_ASSERT(startA.namespaceMapping().begin()->namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
@@ -1569,39 +1569,39 @@ void XmlReaderTest::ElementWithNamespace()
     PT_UNIT_ASSERT(startA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(startA2.namespaceMapping().size() == 1);
     PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->isMapped() == true);
-    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->prefix() == L"my");
-    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->namespaceUri() == L"http://www.my2.net");
+    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->prefix() == "my");
+    PT_UNIT_ASSERT(startA2.namespaceMapping().begin()->namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
     // b
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).isSpace() == false);
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"b");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == "b");
     PT_UNIT_ASSERT(reader.depth() == 2);
 
     // </my:a>
     ++it;
     const Pt::Xml::EndElement& endA2 = Pt::Xml::toEndElement(*it);
-    PT_UNIT_ASSERT(endA2.name().name() == L"a");
-    PT_UNIT_ASSERT(endA2.name().prefix() == L"my");
-    PT_UNIT_ASSERT(endA2.namespaceUri() == L"http://www.my2.net");
+    PT_UNIT_ASSERT(endA2.name().name() == "a");
+    PT_UNIT_ASSERT(endA2.name().prefix() == "my");
+    PT_UNIT_ASSERT(endA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(endA2.namespaceMapping().size() == 1);
     PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->isMapped() == true);
-    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->prefix() == L"my");
-    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->prefix() == "my");
+    PT_UNIT_ASSERT(endA2.namespaceMapping().begin()->namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // </my:a>
     ++it;
     const Pt::Xml::EndElement& endA = Pt::Xml::toEndElement(*it);
 
-    PT_UNIT_ASSERT(endA.name().name() == L"a");
-    PT_UNIT_ASSERT(endA.name().prefix() == L"my");
-    PT_UNIT_ASSERT(endA.namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(endA.name().name() == "a");
+    PT_UNIT_ASSERT(endA.name().prefix() == "my");
+    PT_UNIT_ASSERT(endA.namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT(endA.namespaceMapping().size() == 1);
     PT_UNIT_ASSERT(endA.namespaceMapping().begin()->isMapped() == false);
-    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->prefix() == L"my");
-    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->prefix() == "my");
+    PT_UNIT_ASSERT(endA.namespaceMapping().begin()->namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document
@@ -1628,15 +1628,15 @@ void XmlReaderTest::AttributeWithNamespace()
     // <a>
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
     PT_UNIT_ASSERT(Pt::Xml::toStartElement(&startNode)->name().name() == "a");
-    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().has(L"attr") );
-    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->name().prefix() == L"my" );
-    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->namespaceUri() == L"http://www.my.net");
+    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().has("attr") );
+    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->name().prefix() == "my" );
+    PT_UNIT_ASSERT( Pt::Xml::toStartElement(&startNode)->attributes().begin()->namespaceUri() == "http://www.my.net");
     PT_UNIT_ASSERT( reader.depth() == 1);
 
     // b
     ++it;
     const Pt::Xml::Characters& text = Pt::Xml::toCharacters(*it);
-    PT_UNIT_ASSERT(text.content() == L"b");
+    PT_UNIT_ASSERT(text.content() == "b");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // </a>
@@ -1644,8 +1644,8 @@ void XmlReaderTest::AttributeWithNamespace()
     const Pt::Xml::Node& endNodeA = *it;
 
     PT_UNIT_ASSERT(endNodeA.type() == Pt::Xml::Node::EndElement);
-    // TODO: PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeA)->name() == L"a");
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeA)->namespaceUri() == L"");
+    // TODO: PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeA)->name() == "a");
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::EndElement*>(&endNodeA)->namespaceUri() == "");
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document
@@ -1672,7 +1672,7 @@ void XmlReaderTest::DefaultNamespace()
     const Pt::Xml::StartElement& startA = Pt::Xml::toStartElement(*it);
     PT_UNIT_ASSERT(startA.name().prefix() == "");
     PT_UNIT_ASSERT(startA.name().name() == "a");
-    PT_UNIT_ASSERT(startA.namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(startA.namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // <my:a>
@@ -1687,7 +1687,7 @@ void XmlReaderTest::DefaultNamespace()
     ++it;
     const Pt::Xml::Node& charactersNode = *it;
     PT_UNIT_ASSERT(charactersNode.type() == Pt::Xml::Node::Characters);
-    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content() == L"b");
+    PT_UNIT_ASSERT(dynamic_cast<const Pt::Xml::Characters*>(&charactersNode)->content() == "b");
     PT_UNIT_ASSERT( reader.depth() == 2);
 
     // </my:a>
@@ -1695,7 +1695,7 @@ void XmlReaderTest::DefaultNamespace()
     const Pt::Xml::EndElement& endA2 = Pt::Xml::toEndElement(*it);
     PT_UNIT_ASSERT(endA2.name().prefix() == "");
     PT_UNIT_ASSERT(endA2.name().name() == "a");
-    PT_UNIT_ASSERT(endA2.namespaceUri() == L"http://www.my2.net");
+    PT_UNIT_ASSERT(endA2.namespaceUri() == "http://www.my2.net");
     PT_UNIT_ASSERT(reader.depth() == 1);
 
     // </my:a>
@@ -1704,7 +1704,7 @@ void XmlReaderTest::DefaultNamespace()
 
     PT_UNIT_ASSERT(endA.name().prefix() == "");
     PT_UNIT_ASSERT(endA.name().name() == "a");
-    PT_UNIT_ASSERT(endA.namespaceUri() == L"http://www.my1.net");
+    PT_UNIT_ASSERT(endA.namespaceUri() == "http://www.my1.net");
     PT_UNIT_ASSERT( reader.depth() == 0);
 
     // End of document
@@ -1798,8 +1798,8 @@ void XmlReaderTest::EmptyAttribute()
     PT_UNIT_ASSERT(node.type() == Pt::Xml::Node::StartElement);
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&node);
 
-    PT_UNIT_ASSERT(tag->attributes().has(L"b"));
-    PT_UNIT_ASSERT(tag->attributes().find(L"b")->value().narrow() == "");
+    PT_UNIT_ASSERT(tag->attributes().has("b"));
+    PT_UNIT_ASSERT(tag->attributes().find("b")->value().narrow() == "");
 }
 
 
@@ -1818,8 +1818,8 @@ void XmlReaderTest::AttributeWithSimpleText()
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&startNode);
 
-    PT_UNIT_ASSERT(tag->attributes().has(L"value"));
-    PT_UNIT_ASSERT(tag->attributes().find(L"value")->value().narrow() == "a bcdefghijklmnopqrstuvwxyz");
+    PT_UNIT_ASSERT(tag->attributes().has("value"));
+    PT_UNIT_ASSERT(tag->attributes().find("value")->value().narrow() == "a bcdefghijklmnopqrstuvwxyz");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -1848,12 +1848,12 @@ void XmlReaderTest::AttributeWithUTF8()
     PT_UNIT_ASSERT(startNode.type() == Pt::Xml::Node::StartElement);
     const Pt::Xml::StartElement* tag = dynamic_cast<const Pt::Xml::StartElement*>(&startNode);
 
-    PT_UNIT_ASSERT(tag->attributes().has(L"b"));
+    PT_UNIT_ASSERT(tag->attributes().has("b"));
 
     // This is the same 5-character word with greek characters as above, but this time not encoded but
     // directly in Unicode. If the UTF-8 decoding works this must be stored in the Attribute's String now.
     Pt::Char c[] = { 954, 8057, 963, 956, 949, 0 };
-    PT_UNIT_ASSERT(tag->attributes().find(L"b")->value() == c);
+    PT_UNIT_ASSERT(tag->attributes().find("b")->value() == c);
 }
 
 
@@ -1871,9 +1871,9 @@ void XmlReaderTest::MultipleAttributesIteration()
 
     const Pt::Xml::StartElement* tag = Pt::Xml::toStartElement(&startNode);
     PT_UNIT_ASSERT(tag);
-    PT_UNIT_ASSERT(tag->attributes().has(L"b"));
-    PT_UNIT_ASSERT(tag->attributes().has(L"c"));
-    PT_UNIT_ASSERT(tag->attributes().has(L"d"));
+    PT_UNIT_ASSERT(tag->attributes().has("b"));
+    PT_UNIT_ASSERT(tag->attributes().has("c"));
+    PT_UNIT_ASSERT(tag->attributes().has("d"));
 
     const Pt::Xml::AttributeList& attributes = tag->attributes();
     Pt::Xml::AttributeList::ConstIterator attributeIter = attributes.begin();
@@ -1881,21 +1881,21 @@ void XmlReaderTest::MultipleAttributesIteration()
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 
     Pt::Xml::Attribute attributeB = *attributeIter;
-    PT_UNIT_ASSERT(attributeB.name().name() == L"b");
+    PT_UNIT_ASSERT(attributeB.name().name() == "b");
     PT_UNIT_ASSERT(attributeB.value().narrow() == "123");
 
     attributeIter++;
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 
     Pt::Xml::Attribute attributeC = *attributeIter;
-    PT_UNIT_ASSERT(attributeC.name().name() == L"c");
+    PT_UNIT_ASSERT(attributeC.name().name() == "c");
     PT_UNIT_ASSERT(attributeC.value().narrow() == "456");
 
     attributeIter++;
     PT_UNIT_ASSERT(attributeIter != attributes.end());
 
     Pt::Xml::Attribute attributeD = *attributeIter;
-    PT_UNIT_ASSERT(attributeD.name().name() == L"d");
+    PT_UNIT_ASSERT(attributeD.name().name() == "d");
     PT_UNIT_ASSERT(attributeD.value().narrow() == "789");
 
     attributeIter++;
@@ -1932,20 +1932,20 @@ void XmlReaderTest::NormalizeAttributes()
         PT_UNIT_ASSERT(se);
         PT_UNIT_ASSERT( se->name().name() == "test" );
         
-        PT_UNIT_ASSERT( se->attributes().has(L"a1") );
-        PT_UNIT_ASSERT( se->attributes().find(L"a1")->value() == L" a " );
+        PT_UNIT_ASSERT( se->attributes().has("a1") );
+        PT_UNIT_ASSERT( se->attributes().find("a1")->value() == " a " );
 
-        PT_UNIT_ASSERT( se->attributes().has(L"a2") );
-        PT_UNIT_ASSERT( se->attributes().find(L"a2")->value() == L"" );
+        PT_UNIT_ASSERT( se->attributes().has("a2") );
+        PT_UNIT_ASSERT( se->attributes().find("a2")->value() == "" );
 
-        PT_UNIT_ASSERT( se->attributes().has(L"a3") );
-        PT_UNIT_ASSERT( se->attributes().find(L"a3")->value() == L"a" );
+        PT_UNIT_ASSERT( se->attributes().has("a3") );
+        PT_UNIT_ASSERT( se->attributes().find("a3")->value() == "a" );
 
-        PT_UNIT_ASSERT( se->attributes().has(L"a4") );
-        PT_UNIT_ASSERT( se->attributes().find(L"a4")->value() == L"a" );
+        PT_UNIT_ASSERT( se->attributes().has("a4") );
+        PT_UNIT_ASSERT( se->attributes().find("a4")->value() == "a" );
 
-        PT_UNIT_ASSERT( se->attributes().has(L"a5") );
-        PT_UNIT_ASSERT( se->attributes().find(L"a5")->value() == L"a b c" );
+        PT_UNIT_ASSERT( se->attributes().has("a5") );
+        PT_UNIT_ASSERT( se->attributes().find("a5")->value() == "a b c" );
     }
     catch(const Pt::Xml::SyntaxError& error)
     {
@@ -1969,7 +1969,7 @@ void XmlReaderTest::ProcessingInstructionInProlog()
     Pt::Xml::InputIterator it = reader.current();
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
     const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
-    PT_UNIT_ASSERT(pi.data() == L"type=\"text/css\" href=\"styles.css\"");
+    PT_UNIT_ASSERT(pi.data() == "type=\"text/css\" href=\"styles.css\"");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::StartElement);
@@ -2001,12 +2001,12 @@ void XmlReaderTest::ProcessingInstructionInElement()
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
     const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
-    PT_UNIT_ASSERT(pi.data() == L"type=\"text/css\" href=\"styles.css\"");
+    PT_UNIT_ASSERT(pi.data() == "type=\"text/css\" href=\"styles.css\"");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::Characters);
     const Pt::Xml::Characters& chars = dynamic_cast<const Pt::Xml::Characters&>(*it);
-    PT_UNIT_ASSERT(chars.content() == L"123456");
+    PT_UNIT_ASSERT(chars.content() == "123456");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -2037,7 +2037,7 @@ void XmlReaderTest::ProcessingInstructionInEpilog()
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::ProcessingInstruction);
     const Pt::Xml::ProcessingInstruction& pi = dynamic_cast<const Pt::Xml::ProcessingInstruction&>(*it);
-    PT_UNIT_ASSERT(pi.data() == L"type=\"text/css\" href=\"styles.css\"");
+    PT_UNIT_ASSERT(pi.data() == "type=\"text/css\" href=\"styles.css\"");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndDocument);
@@ -2096,7 +2096,7 @@ void XmlReaderTest::CDATAAsCharacters()
     ++it;
     Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"hello<Element>pure &gt; data</Element>world!");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), "hello<Element>pure &gt; data</Element>world!");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -2205,13 +2205,13 @@ void XmlReaderTest::MaxCDATA()
     Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
     PT_UNIT_ASSERT(chars->isCData());
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"01234");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), "01234");
 
     ++it;
     chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
     PT_UNIT_ASSERT(chars->isCData());
-    PT_UNIT_ASSERT_EQUALS(chars->content(), L"56789");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), "56789");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -2309,19 +2309,19 @@ void XmlReaderTest::CustomEntities()
     ++it;
     Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
-    PT_UNIT_ASSERT(ent->name() == L"undeclared" );
+    PT_UNIT_ASSERT(ent->name() == "undeclared" );
 
-    Pt::Xml::StringInputSource entval(L"resolved");
+    Pt::Xml::StringInputSource entval("resolved");
     reader.addInput(entval);
 
     ++it;
     ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
-    PT_UNIT_ASSERT(ent->name() == L"entity2" );
+    PT_UNIT_ASSERT(ent->name() == "entity2" );
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World! resolved");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == "Hello World! resolved");
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
@@ -2354,7 +2354,7 @@ void XmlReaderTest::EntitySelfReference()
 void XmlReaderTest::ExternalEntities()
 {
     XmlTestResolver resolver;
-    resolver.addInput(L"Pt-Xml-test-e2", L"World");
+    resolver.addInput("Pt-Xml-test-e2", "World");
 
     std::stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -2377,28 +2377,28 @@ void XmlReaderTest::ExternalEntities()
     ++it;
     Pt::Xml::EntityReference* ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
-    PT_UNIT_ASSERT(ent->name() == L"MyEntity1" );
+    PT_UNIT_ASSERT(ent->name() == "MyEntity1" );
     PT_UNIT_ASSERT(ent->get());
     PT_UNIT_ASSERT(ent->get()->publicId().empty());
-    PT_UNIT_ASSERT(ent->get()->systemId() == L"Pt-Xml-test-e1" );
+    PT_UNIT_ASSERT(ent->get()->systemId() == "Pt-Xml-test-e1" );
 
-    Pt::Xml::StringInputSource entval1( L"Hello");
+    Pt::Xml::StringInputSource entval1( "Hello");
     reader.addInput( entval1);
 
     ++it;
     ent = Pt::Xml::toEntityReference(&*it);
     PT_UNIT_ASSERT(ent);
-    PT_UNIT_ASSERT(ent->name() == L"MyEntity3" );
+    PT_UNIT_ASSERT(ent->name() == "MyEntity3" );
     PT_UNIT_ASSERT(ent->get());
-    PT_UNIT_ASSERT(ent->get()->publicId() == L"http://www.pt-framework.org/e3");
+    PT_UNIT_ASSERT(ent->get()->publicId() == "http://www.pt-framework.org/e3");
     PT_UNIT_ASSERT(ent->get()->systemId().empty() );
 
-    Pt::Xml::StringInputSource entval3( L"!");
+    Pt::Xml::StringInputSource entval3( "!");
     reader.addInput(entval3);
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"Hello World!");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == "Hello World!");
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
@@ -2433,7 +2433,7 @@ void XmlReaderTest::ParameterEntities()
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toCharacters(&*it));
-    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == L"This sample shows a complicated method.");
+    PT_UNIT_ASSERT(Pt::Xml::toCharacters(*it).content() == "This sample shows a complicated method.");
 
     ++it;
     PT_UNIT_ASSERT(Pt::Xml::toEndElement(&*it));
@@ -2537,7 +2537,7 @@ void XmlReaderTest::CommentInElement()
     ++it;
     const Pt::Xml::Characters* text = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(text);
-    PT_UNIT_ASSERT(text->content() == L"123456");
+    PT_UNIT_ASSERT(text->content() == "123456");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
