@@ -36,17 +36,17 @@
 
 #if defined(_MSC_VER) && defined(_WIN32_WCE) 
     // alternatively compile with /FORCE:multiple
-    template class PT_EXPORT std::basic_ios<char>;
-    template class PT_EXPORT std::basic_istream<char>;
-    template class PT_EXPORT std::basic_ostream<char>;
-    template class PT_EXPORT std::basic_iostream<char>; 
+    template class PT_API std::basic_ios<char>;
+    template class PT_API std::basic_istream<char>;
+    template class PT_API std::basic_ostream<char>;
+    template class PT_API std::basic_iostream<char>; 
 #endif
 
 #if defined(_MSC_VER)
-    template class PT_EXPORT std::basic_ios<Pt::Char>;
-    template class PT_EXPORT std::basic_istream<Pt::Char>;
-    template class PT_EXPORT std::basic_ostream<Pt::Char>;
-    template class PT_EXPORT std::basic_iostream<Pt::Char>; 
+    template class PT_API std::basic_ios<Pt::Char>;
+    template class PT_API std::basic_istream<Pt::Char>;
+    template class PT_API std::basic_ostream<Pt::Char>;
+    template class PT_API std::basic_iostream<Pt::Char>; 
 #endif
 
 namespace Pt {

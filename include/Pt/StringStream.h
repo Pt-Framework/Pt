@@ -33,120 +33,175 @@
 #include <Pt/String.h>
 #include <Pt/StreamBuffer.h>
 #include <Pt/IOStream.h>
-#include <Pt/String.h>
 #include <sstream>
 
-//namespace Pt {
+namespace Pt {
 
-//* @brief Unicode string stream buffer.
-//
-//    @ingroup Unicode
-//*/
-//class PT_API StringBuffer : public std::basic_stringbuf<Pt::Char>
-//{
-//    public:
-//        explicit StringBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
-//
-//        explicit StringBuffer(const Pt::String& str,
-//                              std::ios::openmode mode = std::ios::in | std::ios::out);
-//};
-//
-//} // namespace Pt
-//
-//namespace std {
-//
-//template<>
-//class PT_API basic_istringstream<Pt::Char> : public basic_istream<Pt::Char>
-//{
-//    public:
-//        typedef Pt::Char char_type;
-//        typedef std::char_traits<Pt::Char> traits_type;
-//        typedef std::allocator<Pt::Char> allocator_type;
-//        typedef traits_type::int_type int_type;
-//        typedef traits_type::pos_type pos_type;
-//        typedef traits_type::off_type off_type;
-//
-//    public:
-//        explicit basic_istringstream(ios_base::openmode mode = ios_base::in);
-//
-//        explicit basic_istringstream(const Pt::String& str,
-//                                    std::ios_base::openmode mode = std::ios_base::in);
-//
-//        basic_stringbuf<Pt::Char>* rdbuf() const
-//        { return const_cast<Pt::StringBuffer*>(&_buffer); }
-//
-//        Pt::String str() const
-//        { return _buffer.str(); }
-//
-//        void str(const Pt::String& str)
-//        { _buffer.str(str); }
-//
-//    private:
-//        Pt::StringBuffer _buffer;
-//};
-//
-//template<>
-//class PT_API basic_ostringstream<Pt::Char> : public basic_ostream<Pt::Char>
-//{
-//    public:
-//        typedef Pt::Char char_type;
-//        typedef std::char_traits<Pt::Char> traits_type;
-//        typedef std::allocator<Pt::Char> allocator_type;
-//        typedef traits_type::int_type int_type;
-//        typedef traits_type::pos_type pos_type;
-//        typedef traits_type::off_type off_type;
-//
-//    public:
-//        explicit basic_ostringstream(ios_base::openmode mode = ios_base::out);
-//
-//        explicit basic_ostringstream(const Pt::String& str,
-//                                    std::ios_base::openmode mode = std::ios_base::out);
-//
-//        basic_stringbuf<Pt::Char>* rdbuf() const
-//        { return const_cast<Pt::StringBuffer*>(&_buffer); }
-//
-//        Pt::String str() const
-//        { return _buffer.str(); }
-//
-//        void str(const Pt::String& str)
-//        { _buffer.str(str); }
-//
-//    private:
-//        Pt::StringBuffer _buffer;
-//};
-//
-//template<>
-//class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
-//{
-//    public:
-//        typedef Pt::Char char_type;
-//        typedef std::char_traits<Pt::Char> traits_type;
-//        typedef std::allocator<Pt::Char> allocator_type;
-//        typedef traits_type::int_type int_type;
-//        typedef traits_type::pos_type pos_type;
-//        typedef traits_type::off_type off_type;
-//
-//    public:
-//        explicit basic_stringstream(ios_base::openmode mode = ios_base::in | ios_base::out);
-//
-//        explicit basic_stringstream(const Pt::String& str,
-//                                    std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
-//
-//        basic_stringbuf<Pt::Char>* rdbuf() const
-//        { return const_cast<Pt::StringBuffer*>(&_buffer); }
-//
-//        Pt::String str() const
-//        { return _buffer.str(); }
-//
-//        void str(const Pt::String& str)
-//        { _buffer.str(str); }
-//
-//    private:
-//        Pt::StringBuffer _buffer;
-//};
-//
-//} // namespace std
+/** @brief Unicode string stream buffer.
 
+    @ingroup Unicode
+*/
+class PT_API StringBuffer : public BasicStreamBuffer<Char>
+{
+    public:
+        typedef BasicStreamBuffer<Char> Base;
+
+        //! @brief Internal character type
+        typedef Char char_type;
+
+        //! @brief Internal character traits
+        typedef typename std::char_traits<Char> traits_type;
+
+        //! @brief Integer type
+        typedef typename traits_type::int_type int_type;
+
+        //! @brief Stream position type
+        typedef typename traits_type::pos_type pos_type;
+
+        //! @brief Stream offset type
+        typedef typename traits_type::off_type off_type;
+
+    public:
+        explicit StringBuffer(std::ios::openmode mode = std::ios::in|std::ios::out);
+
+        explicit StringBuffer(const Pt::String& str,
+                              std::ios::openmode mode = std::ios::in|std::ios::out);
+
+        ~StringBuffer();
+
+        Pt::String str() const;
+
+        void str(const Pt::String& str);
+
+    protected:
+        virtual std::streamsize showfull() override;
+
+        virtual std::streamsize showmanyc() override;
+
+        virtual int sync() override;
+
+        virtual int_type pbackfail(int_type ch = traits_type::eof()) override;
+
+        virtual int_type underflow() override;
+
+        virtual int_type overflow( int_type ch = traits_type::eof() ) override;
+
+        virtual std::streamsize xsgetn(char_type* s, std::streamsize n) override;
+
+        virtual std::streamsize xsputn(const char_type* s, std::streamsize n) override;
+
+        virtual pos_type seekoff(off_type off, std::ios_base::seekdir way, 
+                                 std::ios_base::openmode m = std::ios_base::in|std::ios_base::out) override;
+
+        virtual pos_type seekpos(pos_type sp, 
+                                 std::ios_base::openmode m = std::ios_base::in|std::ios_base::out) override;
+
+    private:
+        std::ios_base::openmode _mode;
+        Pt::String              _str;
+        mutable char_type*      _hm = nullptr;
+};
+
+} // namespace Pt
+
+//#define PT_STRINGSTREAM_BUILTIN 1
+
+#if defined(_MSC_VER) && __cplusplus >= 202002L
+
+namespace Pt {
+
+class PT_API IStringStream : public std::basic_istream<Pt::Char>
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef std::char_traits<Pt::Char> traits_type;
+        typedef std::allocator<Pt::Char> allocator_type;
+        typedef traits_type::int_type int_type;
+        typedef traits_type::pos_type pos_type;
+        typedef traits_type::off_type off_type;
+
+    public:
+        explicit IStringStream(std::ios_base::openmode mode = ios_base::in);
+
+        explicit IStringStream(const Pt::String& str,
+                               std::ios_base::openmode mode = std::ios_base::in);
+
+        StringBuffer* rdbuf() const
+        { return const_cast<Pt::StringBuffer*>(&_buffer); }
+
+        Pt::String str() const
+        { return _buffer.str(); }
+
+        void str(const Pt::String& str)
+        { _buffer.str(str); }
+
+    private:
+        Pt::StringBuffer _buffer;
+};
+
+
+class PT_API OStringStream : public std::basic_ostream<Pt::Char>
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef std::char_traits<Pt::Char> traits_type;
+        typedef std::allocator<Pt::Char> allocator_type;
+        typedef traits_type::int_type int_type;
+        typedef traits_type::pos_type pos_type;
+        typedef traits_type::off_type off_type;
+
+    public:
+        explicit OStringStream(std::ios_base::openmode mode = ios_base::out);
+
+        explicit OStringStream(const Pt::String& str,
+                               std::ios_base::openmode mode = std::ios_base::out);
+
+        StringBuffer* rdbuf() const
+        { return const_cast<Pt::StringBuffer*>(&_buffer); }
+
+        Pt::String str() const
+        { return _buffer.str(); }
+
+        void str(const Pt::String& str)
+        { _buffer.str(str); }
+
+    private:
+        Pt::StringBuffer _buffer;
+};
+
+
+class PT_API StringStream : public std::basic_iostream<Pt::Char>
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef std::char_traits<Pt::Char> traits_type;
+        typedef std::allocator<Pt::Char> allocator_type;
+        typedef traits_type::int_type int_type;
+        typedef traits_type::pos_type pos_type;
+        typedef traits_type::off_type off_type;
+
+    public:
+        explicit StringStream(std::ios_base::openmode mode = ios_base::in | ios_base::out);
+
+        explicit StringStream(const Pt::String& str,
+                              std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
+
+        StringBuffer* rdbuf() const
+        { return const_cast<Pt::StringBuffer*>(&_buffer); }
+
+        Pt::String str() const
+        { return _buffer.str(); }
+
+        void str(const Pt::String& str)
+        { _buffer.str(str); }
+
+    private:
+        Pt::StringBuffer _buffer;
+};
+
+} // namespace Pt
+
+#else
 
 namespace Pt {
 
@@ -193,5 +248,7 @@ typedef std::basic_istringstream<Pt::Char> IStringStream;
 typedef std::basic_ostringstream<Pt::Char> OStringStream;
 
 } // namespace Pt
+
+#endif
 
 #endif

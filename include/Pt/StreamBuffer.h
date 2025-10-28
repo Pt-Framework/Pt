@@ -36,11 +36,11 @@
 
 #if defined(_MSC_VER) && defined(_WIN32_WCE) 
     // alternatively compile with /FORCE:multiple
-    template class PT_EXPORT std::basic_streambuf<char>; 
+    template class PT_API std::basic_streambuf<char>; 
 #endif
 
 #if defined(_MSC_VER)
-	template class PT_EXPORT std::basic_streambuf<Pt::Char>;
+	  template class PT_API std::basic_streambuf<Pt::Char>;
 #endif
 
 namespace Pt {
@@ -119,7 +119,8 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
 };
 
 #if defined(_MSC_VER)
-    template class PT_EXPORT BasicStreamBuffer<char>;
+    template class PT_API BasicStreamBuffer<char>;
+    template class PT_API BasicStreamBuffer<Char>;
 #endif
 
 } // namespace Pt

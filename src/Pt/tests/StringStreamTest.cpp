@@ -140,9 +140,9 @@ void StringStreamTest::rdbufTest()
     Pt::String str = L"hier ist noch ein Test";
     Pt::StringStream s(str);
 
-    std::basic_stringbuf<Pt::Char>* buffer = s.rdbuf();
+    Pt::String buffer = s.rdbuf()->str();
 
-    PT_UNIT_ASSERT(buffer->str() == L"hier ist noch ein Test");
+    PT_UNIT_ASSERT(buffer == L"hier ist noch ein Test");
 }
 
 

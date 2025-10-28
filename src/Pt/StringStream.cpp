@@ -30,66 +30,198 @@
 
 namespace Pt {
 
-//StringBuffer::StringBuffer(std::ios::openmode mode)
-//: std::basic_stringbuf<Pt::Char>(mode)
-//{
-//}
-//
-//StringBuffer::StringBuffer(const Pt::String& str, std::ios::openmode mode)
-//: std::basic_stringbuf<Pt::Char>(str, mode)
-//{
-//}
-//
-//} // namespace Pt
-//
-//
-//namespace std {
-//
-//basic_istringstream<Pt::Char>::basic_istringstream(ios_base::openmode mode)
-//: basic_istream<Pt::Char>(0)
-//, _buffer(mode)
-//{
-//    init(&_buffer);
-//}
-//
-//
-//basic_istringstream<Pt::Char>::basic_istringstream(const Pt::String& str, std::ios_base::openmode mode)
-//: basic_istream<Pt::Char>(0)
-//, _buffer(str, mode)
-//{
-//    init(&_buffer);
-//}
-//
-//
-//basic_ostringstream<Pt::Char>::basic_ostringstream(ios_base::openmode mode)
-//: basic_ostream<Pt::Char>(0)
-//, _buffer(mode)
-//{
-//    init(&_buffer);
-//}
-//
-//
-//basic_ostringstream<Pt::Char>::basic_ostringstream(const Pt::String& str, std::ios_base::openmode mode)
-//: basic_ostream<Pt::Char>(0)
-//, _buffer(str, mode)
-//{
-//    init(&_buffer);
-//}
-//
-//
-//basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
-//: basic_iostream<Pt::Char>(0)
-//, _buffer(mode)
-//{
-//    init(&_buffer);
-//}
-//
-//
-//basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
-//: basic_iostream<Pt::Char>(0)
-//, _buffer(str, mode)
-//{
-//    init(&_buffer);
-//}
+StringBuffer::StringBuffer(std::ios::openmode mode)
+: BasicStreamBuffer<Char>()
+, _mode(mode)
+{
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
+
+    str(_str);
+}
+
+
+StringBuffer::StringBuffer(const Pt::String& s, std::ios::openmode mode)
+: BasicStreamBuffer<Char>()
+, _mode(mode)
+, _str()
+{
+    this->setg(0, 0, 0);
+    this->setp(0, 0);
+
+    str(s);
+}
+
+
+StringBuffer::~StringBuffer()
+{
+}
+
+
+Pt::String StringBuffer::str() const
+{
+    return _str;
+}
+
+
+void StringBuffer::str(const Pt::String& str)
+{
+    _str = str;
+
+    char_type* base = const_cast<char_type*>( _str.data() );
+    std::streamsize size = static_cast<std::streamsize>( _str.size() );
+
+    if (_mode & std::ios::in)
+    {
+        this->setg(base, base, base + size);
+    }
+
+    if(_mode & std::ios::out) 
+    {
+        this->setp(base + size, base + size);
+    } 
+}
+
+
+std::streamsize StringBuffer::showfull()
+{
+    return Base::showfull();
+}
+
+
+std::streamsize StringBuffer::showmanyc()
+{
+    return Base::showmanyc();
+}
+
+
+int StringBuffer::sync()
+{   
+    if (this->pptr() > this->egptr())
+        this->setg(this->eback(), this->gptr(), this->pptr());
+    
+    return 0;
+}
+
+
+StringBuffer::int_type StringBuffer::pbackfail(int_type ch)
+{
+    return Base::pbackfail(ch);
+}
+
+
+StringBuffer::int_type StringBuffer::underflow() 
+{
+    if( this->pptr() > this->egptr() )
+        this->setg(this->eback(), this->gptr(), this->pptr());
+
+    if( this->gptr() < this->egptr() ) 
+        return traits_type::to_int_type(*this->gptr());
+
+    return traits_type::eof();
+}
+
+
+StringBuffer::int_type StringBuffer::overflow(int_type ch) 
+{
+    if( ! this->pptr() )
+        return traits_type::eof();
+
+    if( traits_type::eq_int_type(ch, traits_type::eof()) ) 
+        return traits_type::not_eof(ch);
+
+    if( this->pptr() == this->epptr() ) 
+    {
+        _str.push_back( traits_type::to_char_type(ch) );
+
+        char_type* base = const_cast<char_type*>( _str.data() );
+        this->setp(base + _str.size(), base + _str.size());
+    }
+
+    return ch;
+}
+
+
+std::streamsize StringBuffer::xsgetn(char_type* s, std::streamsize n)
+{
+    return Base::xsgetn(s, n);
+}
+
+
+std::streamsize StringBuffer::xsputn(const char_type* s, std::streamsize n)
+{
+    return Base::xsputn(s, n);
+}
+
+
+StringBuffer::pos_type StringBuffer::seekoff(off_type off, std::ios_base::seekdir way, 
+                                             std::ios_base::openmode m) 
+{
+    return Base::seekoff(off, way, m);
+}
+
+
+StringBuffer::pos_type StringBuffer::seekpos(pos_type sp, 
+                                             std::ios_base::openmode m) 
+{
+  return seekoff(sp, std::ios_base::beg, m);
+}
+
+} // namespace Pt
+
+
+#if defined(_MSC_VER) && __cplusplus >= 202002L
+
+namespace Pt {
+
+IStringStream::IStringStream(ios_base::openmode mode)
+: basic_istream<Pt::Char>(0)
+, _buffer(mode)
+{
+    init(&_buffer);
+}
+
+
+IStringStream::IStringStream(const Pt::String& str, std::ios_base::openmode mode)
+: basic_istream<Pt::Char>(0)
+, _buffer(str, mode)
+{
+    init(&_buffer);
+}
+
+
+OStringStream::OStringStream(ios_base::openmode mode)
+: basic_ostream<Pt::Char>(0)
+, _buffer(mode)
+{
+    init(&_buffer);
+}
+
+
+OStringStream::OStringStream(const Pt::String& str, std::ios_base::openmode mode)
+: basic_ostream<Pt::Char>(0)
+, _buffer(str, mode)
+{
+    init(&_buffer);
+}
+
+
+StringStream::StringStream(ios_base::openmode mode)
+: basic_iostream<Pt::Char>(0)
+, _buffer(mode)
+{
+    init(&_buffer);
+}
+
+
+StringStream::StringStream(const Pt::String& str, std::ios_base::openmode mode)
+: basic_iostream<Pt::Char>(0)
+, _buffer(str, mode)
+{
+    init(&_buffer);
+}
 
 } // namespace std
+
+#endif
+
