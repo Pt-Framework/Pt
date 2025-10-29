@@ -271,7 +271,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    return;   
+    //return;   
     
     const Gfx::RectF& rect = ev.rect();
  
@@ -292,7 +292,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //
     // Path
     //
-    painter.setPen( Pt::Gfx::Pen(Gfx::Color(10000, 0, 10000), 2) );
+    painter.setPen( Pt::Gfx::Pen(Gfx::Color(10000, 0, 10000), 2, Gfx::Pen::Dash) );
     painter.setBrush(Gfx::Color(65535, 65535, 0, 0));
 
     Pt::Gfx::Path pathW;
@@ -617,7 +617,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.setBrush(Gfx::Color(32767, 0, 65535, 0));
     imagePainter.fillChord(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 180, 270);
 
-    imagePainter.setPen(Gfx::Color(32767, 65535, 40000, 20000));
+    imagePainter.setPen( Gfx::Color(50000, 65535, 40000, 20000) );
     imagePainter.drawEllipse(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100));
 
     //fprintf(stderr, "AAAAA\n");
