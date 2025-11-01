@@ -1650,9 +1650,6 @@
     <ClInclude Include="..\Pt-Gfx\SIMDConfig.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\Span.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>

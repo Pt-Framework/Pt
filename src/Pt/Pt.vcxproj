@@ -742,7 +742,6 @@
     <ClInclude Include="..\Pt-Gfx\skia\ImageCanvas.h" />
     <ClInclude Include="..\Pt-Gfx\skia\SkiaBlitter.h" />
     <ClInclude Include="..\Pt-Gfx\skia\SkiaContext.h" />
-    <ClInclude Include="..\Pt-Gfx\Span.h" />
     <ClInclude Include="..\Pt-Forms\ArrowCursor.h" />
     <ClInclude Include="..\Pt-Forms\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\Pt-Forms\cocoa\CursorImpl.h" />
