@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -68,6 +69,63 @@ void PaintLayer::draw(PaintSurface& surface,
                       const Gfx::RectF* rect) const
 {
     onDraw(surface, paint, to, rect);
+}
+
+
+Canvas::Canvas(PaintSurface& surface)
+: _surface(&surface)
+, _painter(0)
+{
+}
+
+
+Canvas::Canvas(PaintLayer& layer)
+: _surface( layer.surface() )
+, _painter(0)
+{
+}
+
+
+Canvas::~Canvas()
+{
+    if(_painter)
+    {
+        _painter->onDetachCanvas(*this);
+    }
+
+    sync();
+}
+
+
+PaintSurface* Canvas::surface()
+{
+    return _surface;
+}
+
+
+void Canvas::sync()
+{
+    if(_surface)
+        _surface->sync();
+}
+
+
+void Canvas::attachPainter(Painter& painter)
+{
+    if(_painter)
+    {
+        _painter->onDetachCanvas(*this);
+        _painter = 0;
+    }
+
+    _painter = &painter;
+}
+
+
+void Canvas::detachPainter(Painter& painter)
+{
+    if(_painter)
+        _painter = 0;
 }
 
 } // namespace

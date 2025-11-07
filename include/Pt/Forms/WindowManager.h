@@ -96,6 +96,11 @@ class WindowManager : public Widget
         virtual void onRequestRelayout();
 
     protected:
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+    protected:
         virtual WindowFrame* onAttach(Window& w) = 0;
 
         virtual void onDetach(WindowFrame& w) = 0;

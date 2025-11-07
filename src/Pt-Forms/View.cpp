@@ -106,6 +106,12 @@ class ViewSurface : public Gfx::PaintSurface
 
         virtual void onReleaseContext() override
         {
+            // context is released by parent surface
+        }
+
+        virtual void onSync() override
+        {
+            // sync is done by parent surface
         }
 
     private:

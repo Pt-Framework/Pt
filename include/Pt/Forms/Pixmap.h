@@ -36,7 +36,6 @@
 #include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Path.h>
-#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
@@ -47,7 +46,6 @@ class PixmapImpl;
 /** @brief Back buffer drawing surface.
 */
 class PT_FORMS_API Pixmap : public Gfx::PaintLayer
-                          , private NonCopyable
 {
     public:
         Pixmap();

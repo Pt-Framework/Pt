@@ -182,6 +182,8 @@ class PixmapImpl : public Gfx::PaintSurface
 
         virtual void onReleaseContext() override;
 
+        virtual void onSync() override;
+
     public:
         static const std::string& defaultFont();
 

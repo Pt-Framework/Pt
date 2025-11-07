@@ -55,7 +55,7 @@ class RasterContext : public PaintContext
 
         ~RasterContext();
 
-        void init(BLImage& rasterImage, Image& image);
+        void init(BLContext& rasterContext, Image& image);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
@@ -139,8 +139,7 @@ class RasterContext : public PaintContext
       void drawDashed(const Gfx::PointF* pts, const size_t n);
 
     private:
-        BLContext               _context;
-        BLImage*                _rasterImage;
+        BLContext*              _context;
         Image*                  _image;
         class DrawText*         _text;
         CompositionMode         _compositionMode;

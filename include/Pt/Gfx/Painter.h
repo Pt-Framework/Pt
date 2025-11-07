@@ -44,8 +44,9 @@
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Paint.h>
 
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/FontMetrics.h> // remove
 
+#include <Pt/NonCopyable.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 
@@ -58,12 +59,14 @@ namespace Gfx {
 class PaintContext;
 class PaintSurface;
 class PaintLayer;
+class Canvas;
 
 /** @brief 2D painter interface.
 */
-class PT_GFX_API Painter
+class PT_GFX_API Painter : private NonCopyable
 {
     friend class PaintSurface;
+    friend class Canvas;
 
     public:
         /** @brief @brief Default constructor.
@@ -78,6 +81,10 @@ class PT_GFX_API Painter
         */
         explicit Painter(PaintLayer& layer);
 
+        /** @brief @brief Constructs using a canvas.
+        */
+        explicit Painter(Canvas& canvas);
+
         /** @brief @brief Destructor.
         */
         virtual ~Painter();
@@ -89,6 +96,10 @@ class PT_GFX_API Painter
         /** @brief @brief Begins painting to a paint layer.
         */
         void begin(PaintLayer& layer);
+
+        /** @brief @brief Begins painting to a canvas.
+        */
+        void begin(Canvas& canvas);
 
         /** @brief @brief Ends painting.
         */
@@ -267,14 +278,19 @@ class PT_GFX_API Painter
                        const Gfx::RectF& layerRect);
 
     private:
+        void onBeginPaint(PaintSurface& surface);
+
         void onDetachSurface(PaintSurface& surface);
+
+        void onDetachCanvas(Canvas& canvas);
 
     private:
         PaintSurface*        _surface;
+        Canvas*              _canvas;
         PaintContext*        _paintContext;
         Scaling              _scaling;
         Paint                _paint;
-        Path                 _path;
+        Path                 _maybe_not_from_paint;
 };
 
 } // namespace

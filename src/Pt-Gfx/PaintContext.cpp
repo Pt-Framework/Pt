@@ -143,6 +143,10 @@ void PaintContext::beginPaint(const Gfx::Paint& paint)
         // TODO: apply in draw* functions and keep a state which attributes
         //       are dirty and need to be applied
 
+        // TODO: currently scaling/transform is handled in onBeginPaint()
+        //       move this to:
+        //onApplyTransform();
+
         onApplyCompositionMode( paint.compositionMode() );
         onApplyPen( paint.pen() );
         onApplyBrush( paint.brush() );

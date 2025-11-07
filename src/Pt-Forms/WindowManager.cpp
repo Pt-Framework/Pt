@@ -70,6 +70,18 @@ void WindowManager::onDisconnect()
 }
 
 
+void WindowManager::onProcessPaintEvent(const PaintEvent& ev)
+{
+    Base::onProcessPaintEvent(ev);
+}
+
+
+void WindowManager::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
+}
+
+
 void WindowManager::onInit(WindowFrame& w)
 {
     Screen* screen = this->screen();

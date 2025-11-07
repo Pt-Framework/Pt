@@ -43,13 +43,13 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 RasterSurface::RasterSurface()
-: _context(0)
+: _rasterImage()
+, _rasterContext()
 {
 }
 
 
 RasterSurface::RasterSurface(const Gfx::SizeF& size, std::size_t stride)
-: _context(0)
 {
     reset(size, stride);
 }
@@ -82,9 +82,13 @@ void RasterSurface::reset(const Gfx::Image& image)
     _logicalSize = _scaling.toLogical( Gfx::SizeF( image.width(), 
                                                    image.height() ) );
 
-    _rasterImage.create_from_data( image.width(), image.height(), BL_FORMAT_PRGB32,
-                                   _image.data(), 0 );
-    //invalidate();
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
+    
+    std::size_t lineSize = _image.format().imageSize(image.width(), 1, image.padding());
+
+    _rasterImage.create_from_data( image.width(), image.height(), 
+                                   BL_FORMAT_PRGB32, _image.data(), lineSize );
 }
 
 
@@ -100,10 +104,11 @@ void RasterSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 
     std::size_t lineSize = _image.format().imageSize(width, 1, stride);
 
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
+    
     _rasterImage.create_from_data( _image.width(), _image.height(),
-                                   BL_FORMAT_PRGB32,
-                                   _image.data(), lineSize );
-    //invalidate();
+                                   BL_FORMAT_PRGB32, _image.data(), lineSize );
 }
 
 
@@ -126,8 +131,6 @@ void RasterSurface::setScaleFactor(double scaleFactor)
     _physicalSize.set( _image.width(), _image.height() );
     _logicalSize = _scaling.toLogical( Gfx::SizeF( _image.width(), 
                                                    _image.height() ) );
-
-    //invalidate();
 }
 
 
@@ -155,16 +158,29 @@ Gfx::PaintContext* RasterSurface::createContext(Gfx::PaintContext* context)
     if( ! paintContext )
         paintContext = new RasterContext();
 
-    paintContext->init(_rasterImage, _image);
-    
-    _context = paintContext;
-    return _context;
+    if( ! _rasterContext.target_image() )
+        _rasterContext.begin(_rasterImage);
+
+    _rasterContext.save(_stateCookie);
+
+    paintContext->init(_rasterContext, _image);
+    return paintContext;
 }
 
 
 void RasterSurface::releaseContext()
 {
-    _context = 0;
+    _rasterContext.restore(_stateCookie);
+
+    // only on sync()
+    //_rasterContext.end();
+}
+
+
+void RasterSurface::sync()
+{
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
 }
 
 } // namespace

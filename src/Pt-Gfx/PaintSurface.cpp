@@ -130,6 +130,12 @@ void PaintSurface::invalidate()
 }
 
 
+void PaintSurface::sync()
+{
+    onSync();
+}
+
+
 void PaintSurface::onDetachContext(PaintContext& context)
 {
     if(_context)

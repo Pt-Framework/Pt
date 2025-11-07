@@ -38,7 +38,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
-#include <Pt/NonCopyable.h>
 
 #include <string>
 #include <vector>
@@ -53,7 +52,6 @@ class RasterSurface;
 /** @brief Image drawing surface.
 */
 class PT_GFX_API ImageSurface : public PaintSurface
-                              , private NonCopyable
 {
   public:
     ImageSurface();
@@ -85,6 +83,8 @@ class PT_GFX_API ImageSurface : public PaintSurface
     virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
 
     virtual void onReleaseContext() override;
+
+    virtual void onSync() override;
 
   public:
     static void setFontDir(const System::Path& path);

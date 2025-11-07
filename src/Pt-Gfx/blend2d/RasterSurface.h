@@ -80,17 +80,20 @@ class PT_GFX_API RasterSurface : private NonCopyable
 
     const Scaling& scaling() const;
 
-    virtual Gfx::PaintContext* createContext(Gfx::PaintContext* context);
+    Gfx::PaintContext* createContext(Gfx::PaintContext* context);
 
-    virtual void releaseContext();
+    void releaseContext();
+
+    void sync();
 
   private:
-    BLImage        _rasterImage;
-    Image          _image;
-    Gfx::SizeF     _physicalSize;
-    Gfx::SizeF     _logicalSize;
-    Gfx::Scaling   _scaling;
-    RasterContext* _context;
+    BLImage         _rasterImage;
+    BLContext       _rasterContext;
+    BLContextCookie _stateCookie;
+    Image           _image;
+    Gfx::SizeF      _physicalSize;
+    Gfx::SizeF      _logicalSize;
+    Gfx::Scaling    _scaling;
 };
 
 } // namespace

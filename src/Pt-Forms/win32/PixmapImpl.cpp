@@ -341,6 +341,11 @@ void PixmapImpl::onReleaseContext()
 }
 
 
+void PixmapImpl::onSync()
+{
+}
+
+
 const std::string& PixmapImpl::defaultFont()
 {
     return getDefaultFont();

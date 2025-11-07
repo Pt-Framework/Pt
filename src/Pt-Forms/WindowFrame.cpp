@@ -104,6 +104,25 @@ void WindowFrame::onDisconnect()
 }
 
 
+void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
+{
+    Base::onProcessPaintEvent(ev);
+
+    Gfx::PaintSurface* surface = _pixmap.surface();
+    if(surface)
+    {
+      surface->sync();
+      _wm.surfaceChanged().send(_window);
+    }
+}
+
+
+void WindowFrame::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
+}
+
+
 void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     Base::onProcessRescaleEvent(ev);

@@ -38,6 +38,7 @@ namespace Gfx {
 
 Painter::Painter()
 : _surface(0)
+, _canvas(0)
 , _paintContext(0)
 {
 }
@@ -45,8 +46,8 @@ Painter::Painter()
 
 Painter::Painter(PaintSurface& surface)
 : _surface(0)
+, _canvas(0)
 , _paintContext(0)
-
 {
     begin(surface);
 }
@@ -54,23 +55,25 @@ Painter::Painter(PaintSurface& surface)
 
 Painter::Painter(PaintLayer& layer)
 : _surface(0)
+, _canvas(0)
 , _paintContext(0)
-
 {
     begin(layer);
 }
 
 
+Painter::Painter(Canvas& canvas)
+: _surface(0)
+, _canvas(0)
+, _paintContext(0)
+{
+    begin(canvas);
+}
+
+
 Painter::~Painter()
 {
-    // NOTE: finish() is also possible
-    //finish();
-    
-    if( _surface )
-    {
-        _surface->detachPainter(*this);
-        _surface = 0;
-    }
+    finish();
 
     delete _paintContext;
 }
@@ -78,11 +81,42 @@ Painter::~Painter()
 
 void Painter::begin(PaintSurface& surface)
 {
-    if(_surface == &surface)
+    if( ! _canvas && _surface == &surface )
         return;
 
     finish();
 
+    onBeginPaint(surface);
+}
+
+
+void Painter::begin(PaintLayer& layer)
+{
+    PaintSurface* surface = layer.surface();
+    if(surface)
+        begin(*surface);
+}
+
+
+void Painter::begin(Canvas& canvas)
+{
+    PaintSurface* surface = canvas.surface();
+  
+    if(_canvas == &canvas && _surface == surface)
+        return;
+
+    finish();
+
+    canvas.attachPainter(*this);
+    _canvas = &canvas;
+
+    if(surface)
+        onBeginPaint(*surface);
+}
+
+
+void Painter::onBeginPaint(PaintSurface& surface)
+{
     surface.attachPainter(*this);
     _surface = &surface;
    
@@ -115,23 +149,26 @@ void Painter::begin(PaintSurface& surface)
 }
 
 
-void Painter::begin(PaintLayer& layer)
-{
-    PaintSurface* surface = layer.surface();
-    if(surface)
-        begin(*surface);
-}
-
-
 void Painter::finish()
 {
     if(_paintContext)
         _paintContext->finishPaint();
 
+    if( ! _canvas && _surface)
+    {
+        _surface->sync();
+    }
+
     if( _surface )
     {
         _surface->detachPainter(*this);
         _surface = 0;
+    }
+
+    if( _canvas )
+    {
+        _canvas->detachPainter(*this);
+        _canvas = 0;
     }
 }
 
@@ -140,6 +177,15 @@ void Painter::onDetachSurface(PaintSurface& surface)
 {
     if(_surface)
         _surface = 0;
+}
+
+
+void Painter::onDetachCanvas(Canvas& canvas)
+{
+    finish();
+
+    if(_canvas)
+        _canvas = 0;
 }
 
 

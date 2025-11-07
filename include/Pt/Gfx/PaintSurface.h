@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Scaling.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
@@ -40,7 +41,7 @@ namespace Gfx {
 
 /** @brief Paint surface.
 */
-class PT_GFX_API PaintSurface
+class PT_GFX_API PaintSurface : private NonCopyable
 {
     friend class Painter;
     friend class PaintContext;
@@ -75,6 +76,10 @@ class PT_GFX_API PaintSurface
         */
         void invalidate();
 
+        /** @brief Synchronizes pending operations to the surface.
+        */
+        void sync();
+
     protected:
         /** @brief Returns the image format.
         */
@@ -100,6 +105,10 @@ class PT_GFX_API PaintSurface
         /** @brief Releases the current PaintContext.
         */
         virtual void onReleaseContext() = 0;
+
+        /** @brief Synchronizes pending operations to the surface.
+        */
+        virtual void onSync() = 0;
 
     private:
         //! @internal

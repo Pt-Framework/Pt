@@ -31,6 +31,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/NonCopyable.h>
 #include <vector>
 
 namespace Pt {
@@ -41,7 +43,7 @@ class PaintSurface;
 
 /** @brief Paint layer.
 */
-class PT_GFX_API PaintLayer
+class PT_GFX_API PaintLayer : private NonCopyable
 {
     protected:
         PaintLayer();
@@ -55,7 +57,7 @@ class PT_GFX_API PaintLayer
 
         const PaintSurface* surface() const;
 
-        void draw(PaintSurface& surface,
+        void draw(PaintSurface& target,
                   const Paint& paint,
                   const Gfx::PointF& to,
                   const Gfx::RectF* rect = 0) const;
@@ -68,6 +70,32 @@ class PT_GFX_API PaintLayer
 
     private:
         PaintSurface* _surface;
+};
+
+
+class PT_GFX_API Canvas : private NonCopyable
+{
+    friend class Painter;
+
+    public:
+        Canvas(PaintSurface& surface);
+
+        Canvas(PaintLayer& layer);
+
+        ~Canvas();
+
+        PaintSurface* surface();
+
+        void sync();
+
+    private:
+        void attachPainter(Painter& painter);
+
+        void detachPainter(Painter& painter);
+
+    private:
+        PaintSurface* _surface;
+        Painter*      _painter;
 };
 
 } // namespace

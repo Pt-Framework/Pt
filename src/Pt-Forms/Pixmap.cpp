@@ -52,6 +52,7 @@ Pixmap::~Pixmap()
 void Pixmap::set(const Gfx::Image& image)
 {
     _impl->set(image);
+    _impl->surface()->invalidate();
 }
 
 
@@ -70,6 +71,7 @@ const Gfx::SizeF& Pixmap::size() const
 void Pixmap::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);
+    _impl->surface()->invalidate();
 }
 
 
@@ -92,9 +94,9 @@ Gfx::Image Pixmap::toImage() const
 
 
 void Pixmap::onDraw(Gfx::PaintSurface& surface, 
-                           const Gfx::Paint& paint,
-                           const Gfx::PointF& to,
-                           const Gfx::RectF* rect) const
+                    const Gfx::Paint& paint,
+                    const Gfx::PointF& to,
+                    const Gfx::RectF* rect) const
 {
     _impl->draw(surface, paint, to, rect);
 }

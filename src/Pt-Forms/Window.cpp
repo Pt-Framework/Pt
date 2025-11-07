@@ -432,9 +432,6 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
         return;
 
     Base::onProcessPaintEvent(ev);
-
-    if(_wm)
-      _wm->surfaceChanged().send(*this);
 }
 
 

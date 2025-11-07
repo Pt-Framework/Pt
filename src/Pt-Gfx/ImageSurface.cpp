@@ -85,8 +85,6 @@ void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 }
 
 
-
-
 const SizeF& ImageSurface::physicalSize() const
 {
     return _rasterSurface->physicalSize();
@@ -133,6 +131,12 @@ Gfx::PaintContext* ImageSurface::onCreateContext(Gfx::PaintContext* context)
 void ImageSurface::onReleaseContext()
 {
     _rasterSurface->releaseContext();
+}
+
+
+void ImageSurface::onSync()
+{
+    _rasterSurface->sync();
 }
 
 

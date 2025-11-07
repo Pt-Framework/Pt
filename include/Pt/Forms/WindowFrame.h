@@ -71,6 +71,11 @@ class WindowFrame : public Widget
         virtual void onDisconnect();
 
         
+        virtual void onProcessPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+        
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescaleEvent(const RescaleEvent& ev);

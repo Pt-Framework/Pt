@@ -271,11 +271,15 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    //return;   
+    return;   
     
     const Gfx::RectF& rect = ev.rect();
  
-    Gfx::Painter painter( surface() );
+    Gfx::Painter painter;
+
+    Gfx::Canvas canvas( surface() );
+    
+    painter.begin(canvas);
     painter.setClip(rect);
 
     Pt::String text = "MgWjOy";

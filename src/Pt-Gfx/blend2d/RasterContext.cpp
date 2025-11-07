@@ -45,7 +45,6 @@ namespace Gfx {
 
 RasterContext::RasterContext()
 : PaintContext()
-, _rasterImage(0)
 , _image()
 , _text( new DrawText() )
 , _hasClip(false)
@@ -59,38 +58,32 @@ RasterContext::~RasterContext()
 }
 
 
-void RasterContext::init(BLImage& rasterImage, Image& image)
+void RasterContext::init(BLContext& rasterContext, Image& image)
 {
-    _rasterImage = &rasterImage;
+    _context = &rasterContext;
     _image = &image;
 }
 
 
 void RasterContext::onBeginPaint(const Gfx::Paint& paint)
 {
-    if( ! _rasterImage )
+    if( ! _context )
         return;
-
-    _context.begin(*_rasterImage);
     
     Transform tx = transform();
     BLMatrix2D m( tx.m11(), tx.m12(),
                   tx.m21(), tx.m22(), 
                   tx.dx(), tx.dy() );
 
-    _context.reset_transform();
-    _context.set_transform(m);
+    _context->reset_transform();
+    _context->set_transform(m);
 }
 
 
 void RasterContext::onResetPaint()
 {
-    // NOTE: this might be called from the attached canvas base class destructor
-
-    _context.end();
-
-    if(_rasterImage)
-        _rasterImage = 0;
+    if(_context)
+        _context = 0;
 
     if(_image)
         _image = 0;
@@ -98,6 +91,12 @@ void RasterContext::onResetPaint()
 
 
 void RasterContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+{
+    _compositionMode = mode;
+}
+
+
+void RasterContext::onApplyCompositionMode(const Gfx::CompositionMode& mode)
 {
     BLCompOp compOp = BL_COMP_OP_SRC_OVER;
     
@@ -110,66 +109,13 @@ void RasterContext::onSetCompositionMode(const Gfx::CompositionMode& mode)
         compOp = BL_COMP_OP_SRC_COPY;
     }
 
-    _context.set_comp_op(compOp);
-    
-    _compositionMode = mode;
-}
-
-
-void RasterContext::onApplyCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _compositionMode = mode;
+    _context->set_comp_op(compOp);
 }
 
 
 void RasterContext::onSetPen(const Gfx::Pen& pen)
 {
-    _context.set_stroke_width( static_cast<double>( pen.size() ) );
-
-    Pt::Gfx::Color penColor = pen.color();
-    BLRgba32 strokecolor(penColor.red() / 257, 
-                         penColor.green() / 257, 
-                         penColor.blue()  / 257, 
-                         penColor.alpha() / 257);
-
-    switch( pen.style() )
-    {
-        case Gfx::Pen::Solid:
-            _context.set_stroke_style(strokecolor);
-            break;
-                
-        case Gfx::Pen::Dash:
-        {
-            BLArray<double> dash;
-
-            if(pen.capStyle() == Gfx::Pen::RoundCap ||
-               pen.capStyle() == Gfx::Pen::SquareCap)
-            {
-                dash.append( 2.0 * pen.size() ); // stroke
-                dash.append( 2.0 * pen.size() ); // gap
-            }
-            else
-            {
-                dash.append( 3.0 * pen.size() ); // stroke
-                dash.append( 1.0 * pen.size() ); // gap
-            }
-            
-            _context.set_stroke_style(strokecolor);
-            _context.set_stroke_dash_array(dash);
-            _context.set_stroke_dash_offset(0.0);
-            break;
-        }
-
-        case Gfx::Pen::Dot:
-            break;
-    }
-}
-
-
-void RasterContext::onApplyPen(const Gfx::Pen& pen)
-{
     _pen = pen;
-    _text->setPen(pen);
 
     _dashPattern.clear();
 
@@ -204,7 +150,28 @@ void RasterContext::onApplyPen(const Gfx::Pen& pen)
 }
 
 
+void RasterContext::onApplyPen(const Gfx::Pen& pen)
+{
+    _text->setPen(pen);
+
+    _context->set_stroke_width( static_cast<double>( pen.size() ) );
+
+    Pt::Gfx::Color penColor = pen.color();
+    BLRgba32 strokecolor(penColor.red() / 257, 
+                         penColor.green() / 257, 
+                         penColor.blue()  / 257, 
+                         penColor.alpha() / 257);
+
+    _context->set_stroke_style(strokecolor);
+}
+
+
 void RasterContext::onSetBrush(const Gfx::Brush& brush)
+{
+}
+
+
+void RasterContext::onApplyBrush(const Gfx::Brush& brush)
 {
     Pt::Gfx::Color brushColor = brush.color();
     BLRgba32 fillColor(brushColor.red() / 257, 
@@ -216,7 +183,7 @@ void RasterContext::onSetBrush(const Gfx::Brush& brush)
     {
         case Gfx::Brush::Solid: 
         {
-            _context.set_fill_style(fillColor);
+            _context->set_fill_style(fillColor);
             break;
         }
 
@@ -236,12 +203,6 @@ void RasterContext::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void RasterContext::onApplyBrush(const Gfx::Brush& brush)
-{
-
-}
-
-
 void RasterContext::onSetFont(const Gfx::Font& font)
 {
 }
@@ -256,12 +217,20 @@ void RasterContext::onApplyFont(const Gfx::Font& font)
 
 void RasterContext::onSetClip(const Gfx::RectF* clip)
 {
+}
+
+
+void RasterContext::onApplyClip(const Gfx::RectF* clip) 
+{
+    if( ! _image )
+        return;
+
     _hasClip = clip != 0;
 
     if( ! clip )
-        _context.restore_clipping();
+        _context->restore_clipping();
     else
-        _context.clip_to_rect( clip->x(), clip->y(), 
+        _context->clip_to_rect( clip->x(), clip->y(), 
                                clip->width(), clip->height() );
 
     if(clip)
@@ -274,13 +243,6 @@ void RasterContext::onSetClip(const Gfx::RectF* clip)
     }
     else
         _clip.clear();
-}
-
-
-void RasterContext::onApplyClip(const Gfx::RectF* clip) 
-{
-    if( ! _image )
-        return;
 
     Rect imageRect;
     imageRect.setWidth( _image->width() );
@@ -315,7 +277,7 @@ void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
         return;
     }
 
-    _context.stroke_line( from.x(), from.y(), to.x(), to.y() );
+    _context->stroke_line( from.x(), from.y(), to.x(), to.y() );
 }
 
 
@@ -361,7 +323,7 @@ void RasterContext::drawSolid(const Gfx::PointF* pts, const size_t n)
         _points[i] = BLPoint( p.x(), p.y() );
     }
     
-    _context.stroke_polyline( _points.data(), _points.size() );
+    _context->stroke_polyline( _points.data(), _points.size() );
 }
 
 
@@ -378,7 +340,7 @@ void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
         _points[i] = BLPoint( p.x(), p.y() );
     }
     
-    _context.fill_polygon( _points.data(), _points.size() );
+    _context->fill_polygon( _points.data(), _points.size() );
 }
 
 
@@ -394,13 +356,13 @@ void RasterContext::onDrawRect(const Gfx::RectF& r)
         return;
     }
 
-    _context.stroke_rect( r.x(), r.y(), r.width(),r.height() );
+    _context->stroke_rect( r.x(), r.y(), r.width(),r.height() );
 }
 
 
 void RasterContext::onFillRect(const Gfx::RectF& r)
 {
-     _context.fill_rect( r.x(), r.y(), r.width(),r.height() );
+     _context->fill_rect( r.x(), r.y(), r.width(),r.height() );
 }
 
 
@@ -420,7 +382,7 @@ void RasterContext::onDrawEllipse(const PointF& topLeft, const SizeF& size)
     double centerX = topLeft.x() + radiusX;
     double centerY = topLeft.y() + radiusY;
 
-    _context.stroke_ellipse( centerX, centerY, radiusX, radiusY );
+    _context->stroke_ellipse( centerX, centerY, radiusX, radiusY );
 }
 
 
@@ -431,7 +393,7 @@ void RasterContext::onFillEllipse(const PointF& topLeft, const SizeF& size)
     double centerX = topLeft.x() + radiusX;
     double centerY = topLeft.y() + radiusY;
 
-    _context.fill_ellipse( centerX, centerY, radiusX, radiusY );
+    _context->fill_ellipse( centerX, centerY, radiusX, radiusY );
 }
 
 
@@ -501,7 +463,7 @@ void RasterContext::onDrawPath()
         return;
     }
 
-    _context.stroke_path(_blPath);
+    _context->stroke_path(_blPath);
 }
 
 
@@ -515,7 +477,7 @@ void RasterContext::onDrawPath(const Path& path)
 
     BLPath blPath;
     addPath(blPath, path);
-    _context.stroke_path(blPath);
+    _context->stroke_path(blPath);
 }
 
 
@@ -556,7 +518,7 @@ void RasterContext::drawDashed(const Path& path)
 
 void RasterContext::onFillPath()
 {
-    _context.fill_path(_blPath);
+    _context->fill_path(_blPath);
 }
 
 
@@ -564,7 +526,7 @@ void RasterContext::onFillPath(const Gfx::Path& path)
 {
     BLPath blPath;
     addPath(blPath, path);
-    _context.fill_path(blPath);
+    _context->fill_path(blPath);
 }
 
 
@@ -597,8 +559,8 @@ void RasterContext::onDrawText(const PointF& to, const Pt::String& text,
 void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
                                 const RectF* imageRect)
 {
-    _context.save();
-    _context.reset_transform();
+    _context->save();
+    _context->reset_transform();
 
     Gfx::PointF toP = transform() * toF;
     BLPoint pos( toP.x(), toP.y() );
@@ -629,14 +591,14 @@ void RasterContext::onDrawImage(const PointF& toF, const Image& image,
                         lround( imageRect->width() ),
                         lround( imageRect->height() ) );
 
-        _context.blit_image(pos, view, srcRect);
+        _context->blit_image(pos, view, srcRect);
     }
     else
     {
-        _context.blit_image(pos, view);
+        _context->blit_image(pos, view);
     }
     
-    _context.restore();
+    _context->restore();
 }
 
 #else

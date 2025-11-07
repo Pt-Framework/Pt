@@ -526,7 +526,7 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
     if( rect.isNull() )
         return;
 
-    Widget::onProcessPaintEvent(ev);
+    Base::onProcessPaintEvent(ev);
 
     //
     // paint child windows
