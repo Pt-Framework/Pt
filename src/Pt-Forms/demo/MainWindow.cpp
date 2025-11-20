@@ -33,7 +33,7 @@
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 //#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Argb32Format.h>
@@ -266,7 +266,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //p.begin(pm);
     //p.begin(pm2);
 
-    //Gfx::ImageSurface image( Gfx::SizeF(320, 240) );
+    //Gfx::Bitmap image( Gfx::SizeF(320, 240) );
     //p.begin(image);
     //}
     
@@ -398,7 +398,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 #endif
 
     Gfx::Painter imagePainter;
-    Gfx::ImageSurface imageSurface( Gfx::SizeF(600, 600) );
+    Gfx::Bitmap imageSurface( Gfx::SizeF(600, 600) );
     imagePainter.begin(imageSurface);
 
     Gfx::Painter imagePainter2(imageSurface);

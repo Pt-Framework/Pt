@@ -32,7 +32,7 @@
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/ResizeEvent.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 #include <Pt/DateTime.h>
@@ -67,13 +67,13 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
 {
-    Gfx::ImageSurface::setFontDir(dir);
+    Gfx::Bitmap::setFontDir(dir);
 }
 
 
 void ApplicationImpl::setDefaultFont(const std::string& fontName)
 {
-    Gfx::ImageSurface::setDefaultFont(fontName);
+    Gfx::Bitmap::setDefaultFont(fontName);
 }
 
 

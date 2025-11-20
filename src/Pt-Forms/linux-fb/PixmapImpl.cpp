@@ -29,9 +29,20 @@
 
 #include "PixmapImpl.h"
 
+#include <Pt/Forms/Pixmap.h>
+
 namespace Pt {
 
 namespace Forms {
+
+void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
+                            const Pixmap& pixmap,
+                            const Gfx::Paint& paint,
+                            const Gfx::RectF* rect)
+{
+    const Gfx::Bitmap& bitmap = pixmap.impl()->_image;
+    _image.drawBitmap(to, bitmap, paint, rect);
+}
 
 } // namespace
 

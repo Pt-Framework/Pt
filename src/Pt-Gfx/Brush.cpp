@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <stdexcept>
 
@@ -487,7 +487,7 @@ void BrushData::setTexture(const Image& texture,
     delete _texture;
     _texture = 0;
 
-    _texture = new ImageSurface;
+    _texture = new Bitmap;
 
     // The texture has no offset
     if( ! offsetX && ! offsetY )

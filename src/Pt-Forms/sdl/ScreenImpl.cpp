@@ -34,7 +34,7 @@
 #include <Pt/Forms/Cursor.h>
 #include <Pt/Forms/PaintEvent.h>
 #include <Pt/Forms/ResizeEvent.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Logger.h>
 

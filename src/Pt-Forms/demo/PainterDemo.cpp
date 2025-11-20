@@ -17,7 +17,7 @@
 #include <Pt/Forms/Label.h>
 #include <Pt/Gfx/Painter.h>
 //#include <Pt/Gfx/ImagePainter2.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/System/Logger.h>
 
 
@@ -44,7 +44,7 @@ class PaintView : public Pt::Forms::Control
             painter.fillRect(imageRect);
 
             Image image1( painter.format(), Size(imageWidth, imageHeight) );
-            ImageSurface imageSurface(image1);
+            Bitmap imageSurface(image1);
             Painter imagePainter(imageSurface);
             imagePainter.setBrush(background);
             imagePainter.fillRect(imageRect);

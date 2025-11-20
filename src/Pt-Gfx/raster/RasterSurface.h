@@ -88,10 +88,10 @@ class PT_GFX_API RasterSurface : private NonCopyable
 
     void sync();
 
-    void drawImage(const Pt::Gfx::PointF& to,
-                   const ImageSurface& bitmap,
-                   const Gfx::Paint& paint,
-                   const Gfx::RectF* rect);
+    void drawBitmap(const Pt::Gfx::PointF& to,
+                    const Bitmap& bitmap,
+                    const Gfx::Paint& paint,
+                    const Gfx::RectF* rect);
 
   private:   
     void putImage(const PointI& to, const Image& image, 

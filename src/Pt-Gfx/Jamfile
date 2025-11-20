@@ -67,12 +67,12 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Argb32.cpp
                        Argb32Format.cpp
                        Argb32Image.cpp
+                       Bitmap.cpp
                        Brush.cpp
                        Color.cpp
                        Font.cpp
                        Image.cpp
                        ImageFormat.cpp
-                       ImageSurface.cpp
                        JpegReader.cpp
                        Paint.cpp
                        PaintContext.cpp

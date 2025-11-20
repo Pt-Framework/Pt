@@ -36,6 +36,7 @@
 #include "ApplicationImpl.h"
 
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/ImageFormat.h>
 
 namespace Pt {
@@ -57,6 +58,16 @@ const Gfx::ImageFormat& getScreenFormat()
     }
 
     return Gfx::ImageFormat::argb32();
+}
+
+
+void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
+                            const Pixmap& pixmap,
+                            const Gfx::Paint& paint,
+                            const Gfx::RectF* rect)
+{
+    const Gfx::Bitmap& bitmap = pixmap.impl()->_image;
+    _image.drawBitmap(to, bitmap, paint, rect);
 }
 
 } // namespace

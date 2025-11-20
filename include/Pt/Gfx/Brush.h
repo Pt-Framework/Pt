@@ -40,7 +40,7 @@ namespace Pt {
 namespace Gfx {
 
 class BrushData;
-class ImageSurface;
+class Bitmap;
 
 class ColorStop
 {
@@ -352,7 +352,7 @@ class BrushData
 
         Pt::int32_t          _ofsX;
         Pt::int32_t          _ofsY;
-        ImageSurface*        _texture;
+        Bitmap*              _texture;
 };
 
 } // namespace

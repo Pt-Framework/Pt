@@ -33,7 +33,7 @@
 #include <Pt/Forms/Widget.h>
 #include <Pt/Forms/WindowType.h>
 #include <Pt/Forms/Pixmap.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 
 namespace Pt {
 
@@ -64,7 +64,7 @@ class WindowFrame : public Widget
 
         const Pixmap& pixmap() const;
 
-        void getImage(Gfx::ImageSurface& image);
+        void getImage(Gfx::Bitmap& image);
 
     protected:
         virtual void onConnect(Screen& screen);

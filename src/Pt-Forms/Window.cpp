@@ -32,7 +32,7 @@
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/WindowStateEvent.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
@@ -184,7 +184,7 @@ const WindowFrame* Window::frame() const
 }
 
 
-void Window::getImage(Gfx::ImageSurface& imageSurface) const
+void Window::getImage(Gfx::Bitmap& imageSurface) const
 {
     if(_frame)
         _frame->getImage(imageSurface);

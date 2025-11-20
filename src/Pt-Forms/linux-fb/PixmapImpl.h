@@ -31,7 +31,7 @@
 #define Pt_Forms_PixmapImpl_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 
 namespace Pt {
 
@@ -39,16 +39,11 @@ namespace Forms {
 
 class Pixmap;
 
-class PixmapImpl 
+class PixmapImpl
 {
     public:
         PixmapImpl()
         { }
-
-        void reset(const Gfx::SizeF& size, std::size_t stride)
-        {
-            _image.reset(size, stride);
-        }
 
         void set(const Gfx::Image& image)
         {
@@ -78,41 +73,63 @@ class PixmapImpl
             _image.setScaleFactor(scaleFactor);
         }
 
-        Gfx::PaintSurface* surface()
+        void drawPixmap(const Gfx::PointF& to,
+                        const Pixmap& pixmap,
+                        const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
+        
+        const Gfx::ImageFormat& format() const
         {
-            return _image.surface();
+            return _image.format();
         }
 
-        void draw(Gfx::PaintSurface& surface, 
-                  const Gfx::Paint& paint,
-                  const Gfx::PointF& to,
-                  const Gfx::RectF* rect) const
+        const Gfx::Scaling& scaling() const
         {
-            _image.draw(surface, paint, to, rect);
+            return _image.scaling();
         }
 
+        Gfx::PaintContext* getContext(Gfx::PaintContext* reuse)
+        {
+            return _image.getContext(reuse);
+        }
+
+        Gfx::PaintContext* createContext(Gfx::PaintContext* reuse)
+        {
+            return 0;
+        }
+
+        void releaseContext()
+        {
+        }
+
+        void sync()
+        {
+            _image.sync();
+        }
+
+    public:
         static const std::string& defaultFont()
         {
-            return Gfx::ImageSurface::defaultFont();
+            return Gfx::Bitmap::defaultFont();
         }
 
         static void setDefaultFont(const std::string& name)
         {
-            Gfx::ImageSurface::setDefaultFont(name);
+            Gfx::Bitmap::setDefaultFont(name);
         }
 
         static std::vector<std::string> fontNames()
         {
-            return Gfx::ImageSurface::fontNames();
+            return Gfx::Bitmap::fontNames();
         }
         
         static void setFontDir(const System::Path& path)
         {
-            Gfx::ImageSurface::setFontDir(path);
+            Gfx::Bitmap::setFontDir(path);
         }
     
     private:
-        Gfx::ImageLayer _image;
+        Gfx::Bitmap _image;
 };
 
 } // namespace

@@ -31,7 +31,7 @@
 #include "RasterContext.h"
 
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
 
@@ -40,7 +40,7 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// ImageSurface
+// RasterSurface
 ///////////////////////////////////////////////////////////////////////
 
 RasterSurface::RasterSurface()
@@ -213,10 +213,10 @@ void toPRGB(const Pt::Gfx::Image& image,
 }
 
 
-void RasterSurface::drawImage(const Pt::Gfx::PointF& toF,
-                              const ImageSurface& bitmap,
-                              const Gfx::Paint& paint,
-                              const Gfx::RectF* bitmapRect)
+void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
+                               const Bitmap& bitmap,
+                               const Gfx::Paint& paint,
+                               const Gfx::RectF* bitmapRect)
 {
     _rasterContext.save();
     _rasterContext.reset_transform();
@@ -283,10 +283,10 @@ void RasterSurface::drawImage(const Pt::Gfx::PointF& toF,
 
 #else
 
-void RasterSurface::drawImage(const Pt::Gfx::PointF& toF,
-                              const ImageSurface& bitmap,
-                              const Gfx::Paint& paint,
-                              const Gfx::RectF* bitmapRect)
+void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
+                               const Bitmap& bitmap,
+                               const Gfx::Paint& paint,
+                               const Gfx::RectF* bitmapRect)
 {
     const Scaling& scale = scaling();
     const Image& image = bitmap.image();

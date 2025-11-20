@@ -32,7 +32,7 @@
 #include "Dasher.h"
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 
 #include <vector>
 #include <cmath>

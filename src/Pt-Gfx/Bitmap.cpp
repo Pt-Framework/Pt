@@ -30,21 +30,21 @@
 #include "RasterSurface.h"
 #include "FontManager.h"
 
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-ImageSurface::ImageSurface()
+Bitmap::Bitmap()
 : _rasterSurface(0)
 {
     _rasterSurface = new RasterSurface();
 }
 
 
-ImageSurface::ImageSurface(const Gfx::SizeF& size, std::size_t stride)
+Bitmap::Bitmap(const Gfx::SizeF& size, std::size_t stride)
 : _rasterSurface(0)
 {
     _rasterSurface = new RasterSurface();
@@ -53,115 +53,113 @@ ImageSurface::ImageSurface(const Gfx::SizeF& size, std::size_t stride)
 }
 
 
-ImageSurface::~ImageSurface()
+Bitmap::~Bitmap()
 {
     delete _rasterSurface;
 }
 
 
-const Gfx::Image& ImageSurface::image() const
+const Gfx::Image& Bitmap::image() const
 {
     return _rasterSurface->image();
 }
 
 
-void ImageSurface::reset(const Gfx::Image& image)
+void Bitmap::reset(const Gfx::Image& image)
 {
     _rasterSurface->reset(image);
     invalidate();
 }
 
 
-void ImageSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
+void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
     _rasterSurface->reset(sizeF, stride);
     invalidate();
 }
 
 
-const SizeF& ImageSurface::physicalSize() const
+const SizeF& Bitmap::physicalSize() const
 {
     return _rasterSurface->physicalSize();
 }
 
 
-const SizeF& ImageSurface::logicalSize() const
+const SizeF& Bitmap::logicalSize() const
 {
     return _rasterSurface->logicalSize();
 }
 
 
-void ImageSurface::setScaleFactor(double scaleFactor)
+void Bitmap::setScaleFactor(double scaleFactor)
 {
     _rasterSurface->setScaleFactor(scaleFactor);
     invalidate();
 }
 
 
-void ImageSurface::drawImage(const Pt::Gfx::PointF& to,
-                             const ImageSurface& bitmap,
-                             const Gfx::Paint& paint,
-                             const Gfx::RectF* rect)
+void Bitmap::drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& bitmap,
+                        const Gfx::Paint& paint, const Gfx::RectF* rect)
 {
-    _rasterSurface->drawImage(to, bitmap, paint, rect);
+    _rasterSurface->drawBitmap(to, bitmap, paint, rect);
 }
 
 
-const Gfx::ImageFormat& ImageSurface::onGetFormat() const
+const Gfx::ImageFormat& Bitmap::onGetFormat() const
 {
     return _rasterSurface->format();
 }
 
 
-const Gfx::SizeF& ImageSurface::onGetSize() const
+const Gfx::SizeF& Bitmap::onGetSize() const
 {
     return _rasterSurface->size();
 }
 
 
-const Scaling& ImageSurface::onGetScaling() const
+const Scaling& Bitmap::onGetScaling() const
 {
     return _rasterSurface->scaling();
 }
 
 
-Gfx::PaintContext* ImageSurface::onCreateContext(Gfx::PaintContext* context)
+Gfx::PaintContext* Bitmap::onCreateContext(Gfx::PaintContext* context)
 {
     return _rasterSurface->createContext(context);
 }
 
 
-void ImageSurface::onReleaseContext()
+void Bitmap::onReleaseContext()
 {
     _rasterSurface->releaseContext();
 }
 
 
-void ImageSurface::onSync()
+void Bitmap::onSync()
 {
     _rasterSurface->sync();
 }
 
 
-void ImageSurface::setFontDir(const Pt::System::Path& path)
+void Bitmap::setFontDir(const Pt::System::Path& path)
 {
     FreeType::instance().setFontDir(path);
 }
 
 
-const std::string& ImageSurface::defaultFont()
+const std::string& Bitmap::defaultFont()
 {
     return  FreeType::instance().defaultFont();
 }
 
 
-void ImageSurface::setDefaultFont(const std::string& f)
+void Bitmap::setDefaultFont(const std::string& f)
 {
     FreeType::instance().setDefaultFont(f);
 }
 
 
-std::vector<std::string> ImageSurface::fontNames()
+std::vector<std::string> Bitmap::fontNames()
 {
     return FreeType::instance().fontNames();
 }

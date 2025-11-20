@@ -38,7 +38,7 @@
 
 #ifdef PT_FORMS_WIN32_RASTER
 
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 
 #else
 
@@ -134,26 +134,26 @@ class PixmapImpl
     public:
         static const std::string& defaultFont()
         {
-            return Gfx::ImageSurface::defaultFont();
+            return Gfx::Bitmap::defaultFont();
         }
 
         static void setDefaultFont(const std::string& name)
         {
-            Gfx::ImageSurface::setDefaultFont(name);
+            Gfx::Bitmap::setDefaultFont(name);
         }
 
         static std::vector<std::string> fontNames()
         {
-            return Gfx::ImageSurface::fontNames();
+            return Gfx::Bitmap::fontNames();
         }
         
         static void setFontDir(const System::Path& path)
         {
-            Gfx::ImageSurface::setFontDir(path);
+            Gfx::Bitmap::setFontDir(path);
         }
     
     private:
-        Gfx::ImageSurface _image;
+        Gfx::Bitmap _image;
 };
 
 #else // PT_FORMS_WIN32_RASTER

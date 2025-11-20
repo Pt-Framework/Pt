@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_ImageSurface_H
-#define PT_GFX_ImageSurface_H
+#ifndef PT_GFX_BITMAP_H
+#define PT_GFX_BITMAP_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PaintSurface.h>
@@ -50,14 +50,14 @@ class RasterSurface;
 
 /** @brief Image drawing surface.
 */
-class PT_GFX_API ImageSurface : public PaintSurface
+class PT_GFX_API Bitmap : public PaintSurface
 {
   public:
-    ImageSurface();
+    Bitmap();
 
-    ImageSurface(const Gfx::SizeF& size, std::size_t stride = 0);
+    Bitmap(const Gfx::SizeF& size, std::size_t stride = 0);
 
-    virtual ~ImageSurface();
+    virtual ~Bitmap();
 
     const Gfx::Image& image() const;
 
@@ -71,8 +71,8 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     void setScaleFactor(double scaleFactor);
 
-    void drawImage(const Pt::Gfx::PointF& to, const ImageSurface& image,
-                   const Gfx::Paint& paint, const Gfx::RectF* rect);
+    void drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& image,
+                    const Gfx::Paint& paint, const Gfx::RectF* rect = 0);
 
   protected:
     virtual const Gfx::ImageFormat& onGetFormat() const;

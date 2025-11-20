@@ -74,6 +74,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h" />
@@ -83,7 +84,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\ImageSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
@@ -1395,6 +1395,7 @@
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp" />
+    <ClCompile Include="..\Pt-Gfx\Bitmap.cpp" />
     <ClCompile Include="..\Pt-Gfx\blend2d\RasterContext.cpp" />
     <ClCompile Include="..\Pt-Gfx\blend2d\RasterSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\Brush.cpp" />
@@ -1404,7 +1405,6 @@
     <ClCompile Include="..\Pt-Gfx\freetype\FontManager.cpp" />
     <ClCompile Include="..\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\Pt-Gfx\ImageFormat.cpp" />
-    <ClCompile Include="..\Pt-Gfx\ImageSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\JpegReader.cpp" />
     <ClCompile Include="..\Pt-Gfx\Paint.cpp" />
     <ClCompile Include="..\Pt-Gfx\PaintContext.cpp" />

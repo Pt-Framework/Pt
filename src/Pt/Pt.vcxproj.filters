@@ -1575,9 +1575,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\ImageSurface.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -2960,6 +2957,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\PaintSurface.h">
       <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4625,9 +4625,6 @@
     <ClCompile Include="..\Pt-Gfx\ImageFormat.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\ImageSurface.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\JpegReader.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -5665,6 +5662,9 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\blend2d\RasterSurface.cpp">
       <Filter>Pt-Gfx\blend2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Bitmap.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -29,7 +29,7 @@
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/WindowStateEvent.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -75,7 +75,7 @@ const Pixmap& WindowFrame::pixmap() const
 }
 
 
-void WindowFrame::getImage(Gfx::ImageSurface& imageSurface)
+void WindowFrame::getImage(Gfx::Bitmap& imageSurface)
 {
     Gfx::SizeF size = scaling().toPhysical( _window.size() );
     imageSurface.reset(size);
@@ -84,7 +84,7 @@ void WindowFrame::getImage(Gfx::ImageSurface& imageSurface)
     Gfx::RectF contentRect( contentPos, _window.size() );
 
     //
-    // TODO: get Image directly to avoid copy into ImageSurface
+    // TODO: get Image directly to avoid copy into Bitmap
     //
 
     Gfx::Painter painter(imageSurface);

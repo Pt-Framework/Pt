@@ -1,6 +1,6 @@
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageSurface.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Point.h>
@@ -16,7 +16,7 @@ void PaintBenchmark()
     {
         for(int n = 0; n < 10 ; ++n)
         {
-            ImageSurface surface;
+            Bitmap surface;
 
             Pt::System::Clock clock;
             clock.start();

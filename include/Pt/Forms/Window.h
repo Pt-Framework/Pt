@@ -92,7 +92,7 @@ class PT_FORMS_API Window : public Form
         const WindowFrame* frame() const; 
 
     public:
-        void getImage(Gfx::ImageSurface& imageSurface) const;
+        void getImage(Gfx::Bitmap& imageSurface) const;
 
     public:
         void autoCenter();
