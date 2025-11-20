@@ -136,11 +136,6 @@ class PaintContext : public Gfx::PaintContext
 
         virtual void onFillPath(const Gfx::Path& path) override;
 
-    protected:
-        virtual bool onDrawLayer(const Gfx::PointF& to, 
-                                 const Gfx::PaintLayer& layer,
-                                 const Gfx::RectF* rect);
-
     private:
         void onDrawPixmap(const Gfx::PointF& toF, 
                           const PixmapImpl& surface,

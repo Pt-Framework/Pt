@@ -132,7 +132,7 @@ class PT_FORMS_API Form : public View
     // View
     //
     protected:
-        virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        virtual void onSetSurface(PaintSurface* surface, const Gfx::PointF& pos);
 
         virtual void onAttach(Control& control);
 

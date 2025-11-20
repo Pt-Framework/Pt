@@ -365,19 +365,6 @@ void PaintContext::drawImage(const Gfx::PointF& to,
     }
 }
 
-
-bool PaintContext::drawLayer(const Gfx::PointF& to,
-                             const Gfx::PaintLayer& layer,
-                             const Gfx::RectF* rect)
-{
-    if(_active)
-    {
-        onDrawLayer(to, layer, rect);
-    }
-
-    return true;
-}
-
 } // namespace
 
 } // namespace

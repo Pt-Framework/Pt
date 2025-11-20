@@ -296,9 +296,9 @@ void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
             break;
     }
 
-    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    painter.drawLayer(imagePosition, _picture);
-    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
+    Gfx::Paint paint;
+    paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    this->surface().drawPixmap(imagePosition, _picture, paint);
 }
 
 } // namespace

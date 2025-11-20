@@ -31,17 +31,11 @@
 #include "FontManager.h"
 
 #include <Pt/Gfx/ImageSurface.h>
-#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-///////////////////////////////////////////////////////////////////////
-// ImageSurface
-///////////////////////////////////////////////////////////////////////
 
 ImageSurface::ImageSurface()
 : _rasterSurface(0)
@@ -104,6 +98,15 @@ void ImageSurface::setScaleFactor(double scaleFactor)
 }
 
 
+void ImageSurface::drawImage(const Pt::Gfx::PointF& to,
+                             const ImageSurface& bitmap,
+                             const Gfx::Paint& paint,
+                             const Gfx::RectF* rect)
+{
+    _rasterSurface->drawImage(to, bitmap, paint, rect);
+}
+
+
 const Gfx::ImageFormat& ImageSurface::onGetFormat() const
 {
     return _rasterSurface->format();
@@ -161,78 +164,6 @@ void ImageSurface::setDefaultFont(const std::string& f)
 std::vector<std::string> ImageSurface::fontNames()
 {
     return FreeType::instance().fontNames();
-}
-
-///////////////////////////////////////////////////////////////////////
-// ImageLayer
-///////////////////////////////////////////////////////////////////////
-
-ImageLayer::ImageLayer()
-{
-    setSurface(&_surface);
-}
-
-
-ImageLayer::ImageLayer(const Gfx::SizeF& size, std::size_t stride)
-: _surface(size, stride)
-{
-    setSurface(&_surface);
-}
-
-
-ImageLayer::~ImageLayer()
-{
-}
-
-
-void ImageLayer::reset(const Gfx::Image& image)
-{
-    _surface.reset(image);
-}
-
-
-void ImageLayer::reset(const Gfx::SizeF& size, std::size_t stride)
-{
-    _surface.reset(size, stride);
-}
-
-
-const Gfx::Image& ImageLayer::image() const
-{
-    return _surface.image();
-}
-
-
-const Gfx::SizeF& ImageLayer::size() const
-{
-    return _surface.size();
-}
-
-
-void ImageLayer::setScaleFactor(double scaleFactor)
-{
-    _surface.setScaleFactor(scaleFactor);
-}
-
-
-void ImageLayer::onDraw(PaintSurface& surface,
-                        const Paint& paint, 
-                        const Gfx::PointF& to,
-                        const Gfx::RectF* rect) const
-{
-    Gfx::Painter painter(surface);
-    painter.setCompositionMode( paint.compositionMode() );
-    
-    const Gfx::Image& image = this->image();
-    if(rect)
-    {
-        Gfx::RectF imageRect = _surface.scaling().toPhysical(*rect);
-        painter.drawImage(to, image, imageRect);
-    }
-    else
-    {
-        painter.drawImage(to, image);
-    }
 }
 
 } // namespace

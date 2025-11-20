@@ -120,7 +120,7 @@ void Form::setContent(Control* control)
 //}
 
 
-void Form::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void Form::onSetSurface(PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 

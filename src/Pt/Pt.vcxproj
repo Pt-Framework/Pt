@@ -62,6 +62,7 @@
     <ClInclude Include="..\..\include\Pt\FixupInfo.h" />
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\Forms\CanvasLayout.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Workspace.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WorkspaceManager.h" />
@@ -88,7 +89,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintContext.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\PaintLayer.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
@@ -1409,7 +1409,6 @@
     <ClCompile Include="..\Pt-Gfx\Paint.cpp" />
     <ClCompile Include="..\Pt-Gfx\PaintContext.cpp" />
     <ClCompile Include="..\Pt-Gfx\Painter.cpp" />
-    <ClCompile Include="..\Pt-Gfx\PaintLayer.cpp" />
     <ClCompile Include="..\Pt-Gfx\PaintSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\Path.cpp" />
     <ClCompile Include="..\Pt-Gfx\Pen.cpp" />

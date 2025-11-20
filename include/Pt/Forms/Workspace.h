@@ -84,7 +84,7 @@ class PT_FORMS_API Workspace : public Control
     // Control
     //
     protected:
-        virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        virtual void onSetSurface(PaintSurface* surface, const Gfx::PointF& pos);
 
         virtual void onRemoveControl(Control& control);
 

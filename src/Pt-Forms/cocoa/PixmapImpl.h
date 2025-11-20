@@ -148,10 +148,6 @@ class PixmapCanvas : public Gfx::Canvas
                                  const Gfx::Image& image, 
                                  const Gfx::RectF* rect) override;
 
-        virtual bool onDrawLayer(const Gfx::PointF& to, 
-                                 const Gfx::PaintLayer& layer,
-                                 const Gfx::RectF* rect) override;
-
     private:
         void onDrawPixmap(const Gfx::PointF& toF, 
                           const PixmapImpl& surface,

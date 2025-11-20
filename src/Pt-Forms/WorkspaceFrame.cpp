@@ -458,9 +458,9 @@ WorkspaceFrame::~WorkspaceFrame()
 
 void WorkspaceFrame::onInit(Window& w)
 {
-    Gfx::PaintSurface* surface = pixmap().surface();
+    PaintSurface& surface = pixmap();
     Gfx::PointF surfacePos = _clientBounds.topLeft();
-    w.setSurface(surface, surfacePos);
+    w.setSurface(&surface, surfacePos);
 
     w.setNextResponder(this);
 
@@ -643,9 +643,9 @@ void WorkspaceFrame::setFrame(double bw, double th)
     Gfx::PointF clientBoundsPos(_borderWidth, _borderWidth + _titleHeight);
     _clientBounds.setOrigin(clientBoundsPos);
 
-    Gfx::PaintSurface* surface = pixmap().surface();
+    PaintSurface& surface = pixmap();
     Gfx::PointF surfacePos = _clientBounds.topLeft();
-    _window->setSurface(surface, surfacePos);
+    _window->setSurface(&surface, surfacePos);
 }
 
 
@@ -1685,7 +1685,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
         if( buttonUpdateRect.isNull() )
             continue;
 
-        button->paint(*pixmap().surface(), buttonUpdateRect);
+        button->paint(pixmap(), buttonUpdateRect);
     }
 }
 

@@ -531,7 +531,7 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaint(Gfx::PaintSurface& surface, 
+void Label::onPaint(Gfx::PaintSurface&, 
                     const Gfx::RectF& rect)
 {
     //std::clog << " paint " << _text.narrow() << this << std::endl;
@@ -541,7 +541,9 @@ void Label::onPaint(Gfx::PaintSurface& surface,
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Canvas canvas( surface() );
+
+    Gfx::Painter painter(canvas);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -575,10 +577,11 @@ void Label::onPaint(Gfx::PaintSurface& surface,
     }
     else
     {
-        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
         Pixmap& picture = getIconPixmap();
-        painter.drawLayer(_iconPos, picture);
-        painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+        Gfx::Paint paint;
+        paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        canvas.drawPixmap(_iconPos, picture, paint);
     }
 
     //if(pen)

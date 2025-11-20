@@ -31,95 +31,25 @@
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Application.h>
 
-#include <Pt/Gfx/PaintContext.h>
-
 namespace Pt {
 
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
-// ViewCanvas
+// ViewSurface
 ///////////////////////////////////////////////////////////////////////
 
-class ViewSurface : public Gfx::PaintSurface
+void ViewSurface::onDrawPixmap(const Gfx::PointF& to,
+                               const Pixmap& pixmap,
+                               const Gfx::Paint& paint,
+                               const Gfx::RectF* rect)
 {
-    public:
-        explicit ViewSurface(View& view)
-        : _view(&view)
-        , _surface(0)
-        {
-        }
+    if( ! _surface )
+        return;
 
-        Gfx::PaintSurface* surface()
-        {
-            return _surface;
-        }
-
-        const Gfx::PointF& position() const
-        {
-            return _position;
-        } 
-
-        void setSurface(Gfx::PaintSurface* surface, 
-                        const Gfx::PointF& pos)
-        {
-            _surface = surface;
-            _position = pos;
-        }
-
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const override
-        {
-            if (_surface)
-                return _surface->format();
-
-            return Gfx::ImageFormat::argb32();
-        }
-
-        const Gfx::SizeF& onGetSize() const
-        {
-            if(_surface)
-                return _surface->size();
-            
-            return _size;
-        }
-
-        virtual const Gfx::Scaling& onGetScaling() const override
-        {
-            return _view->scaling();
-        }
-
-        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* reuse) override
-        {
-            Gfx::PaintContext* context = _surface ? _surface->getContext(reuse)
-                                                  : 0;
-            if( ! context )
-                return context;
-   
-            Gfx::RectF region = context->region();
-            region.shift( _position.x(), _position.y() );
-            region.setSize( _view->size() );
-
-            context->setRegion(region);
-            return context;
-        }
-
-        virtual void onReleaseContext() override
-        {
-            // context is released by parent surface
-        }
-
-        virtual void onSync() override
-        {
-            // sync is done by parent surface
-        }
-
-    private:
-        View*                _view;
-        Gfx::PaintSurface*   _surface;
-        Gfx::PointF          _position;
-        Gfx::SizeF           _size;
-};
+    Gfx::PointF pos = _position + to;
+    _surface->drawPixmap(pos, pixmap, paint, rect);
+}
 
 ///////////////////////////////////////////////////////////////////////
 // View
@@ -138,19 +68,19 @@ View::~View()
 }
 
 
-Gfx::PaintSurface& View::surface()
+PaintSurface& View::surface()
 {
     return *_surface;
 }
 
 
-const Gfx::PaintSurface& View::surface() const
+const PaintSurface& View::surface() const
 {
     return *_surface;
 }
 
 
-void View::setSurface(Gfx::PaintSurface* surface, 
+void View::setSurface(PaintSurface* surface, 
                       const Gfx::PointF& pos)
 {
     _surface->setSurface(surface, pos);
@@ -159,7 +89,7 @@ void View::setSurface(Gfx::PaintSurface* surface,
 }
 
 
-void View::onSetSurface(Gfx::PaintSurface* surface, 
+void View::onSetSurface(PaintSurface* surface, 
                         const Gfx::PointF& pos)
 {
 }
@@ -207,7 +137,7 @@ void View::onDetach(Control& control)
 
 void View::onInit(Control& control)
 {
-    Gfx::PaintSurface* surface = _surface->surface();
+    PaintSurface* surface = _surface->surface();
     Gfx::PointF surfacePos = _surface->position() + control.position();
 
     control.setSurface(surface, surfacePos);
@@ -302,7 +232,7 @@ void View::onMoveRequest(Control& control, const Gfx::PointF& pos)
     //
     // update client surface
     //
-    Gfx::PaintSurface* surface = _surface->surface();
+    PaintSurface* surface = _surface->surface();
     Gfx::PointF surfacePos = _surface->position() + aligedPos;
 
     control.setSurface(surface, surfacePos);

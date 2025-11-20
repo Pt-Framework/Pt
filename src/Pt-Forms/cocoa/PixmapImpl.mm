@@ -769,22 +769,6 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toL,
 }
 
 
-bool PixmapCanvas::onDrawLayer(const Gfx::PointF& to,
-                               const Gfx::PaintLayer& layer,
-                               const Gfx::RectF* rect)
-{
-    const Gfx::PaintSurface* layerSurface = layer.surface();
-    const PixmapImpl* pixmap = dynamic_cast<const PixmapImpl*>(layerSurface);
-    if(pixmap)
-    {
-        onDrawPixmap(to, *pixmap, rect);
-        return true;
-    }
-
-    return false;
-}
-
-
 void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toL, 
                                 const PixmapImpl& pixmap,
                                 const Gfx::RectF* rectL)

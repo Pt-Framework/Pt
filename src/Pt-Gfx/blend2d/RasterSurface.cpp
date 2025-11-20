@@ -31,6 +31,7 @@
 #include "RasterContext.h"
 
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
 
@@ -182,6 +183,179 @@ void RasterSurface::sync()
     if( _rasterContext.target_image() )
         _rasterContext.end();
 }
+
+#if USE_BLEND2D_BLIT
+
+void toPRGB(const Pt::Gfx::Image& image, 
+            std::vector<Pt::uint8_t>& bitmapData)
+{
+    size_t _width = image.width();
+    size_t _height = image.height();
+
+    for (std::size_t y = 0; y < image.height(); ++y)
+    {
+        for (std::size_t x = 0; x < image.width(); ++x)
+        {
+            Pt::Gfx::ConstPixel pixel(image.view(), x, y);
+            Pt::Gfx::Color color = pixel.getColor();
+
+            const Pt::uint8_t r = color.red() / 257;
+            const Pt::uint8_t g = color.green() / 257;
+            const Pt::uint8_t b = color.blue() / 257;
+            const Pt::uint8_t a = color.alpha() / 257;
+
+            bitmapData.push_back((Pt::uint8_t) (a * b / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * g / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * r / 255));
+            bitmapData.push_back((Pt::uint8_t) (a));
+        }
+    }
+}
+
+
+void RasterSurface::drawImage(const Pt::Gfx::PointF& toF,
+                              const ImageSurface& bitmap,
+                              const Gfx::Paint& paint,
+                              const Gfx::RectF* bitmapRect)
+{
+    _rasterContext.save();
+    _rasterContext.reset_transform();
+
+    const Scaling& scale = scaling();
+    const Image& image = bitmap.image();
+
+    Gfx::PointF toP = scale.toPhysical(toF);
+    BLPoint pos( toP.x(), toP.y() );
+
+    if( image.empty() )
+        return;
+
+    void* data = const_cast<Pt::uint8_t*>( image.data() );
+    std::size_t stride = image.format().imageSize( image.width(), 1, image.padding() );
+
+    BLCompOp compOp = BL_COMP_OP_SRC_OVER;
+    
+    if(paint.compositionMode() == CompositionMode::SourceOver)
+    {
+        compOp = BL_COMP_OP_SRC_OVER;
+    }
+    else // CompositionMode::SourceCopy
+    {
+        compOp = BL_COMP_OP_SRC_COPY;
+    }
+
+    _rasterContext.set_comp_op(compOp);
+
+    BLImage view;
+    std::vector<Pt::uint8_t> bitmapData;
+
+    if(paint.compositionMode() == CompositionMode::SourceCopy)
+    {
+        view.create_from_data(image.width(), image.height(), BL_FORMAT_XRGB32,
+                              data, stride, BL_DATA_ACCESS_READ);
+    }
+    else
+    {
+        toPRGB(image, bitmapData);
+
+        view.create_from_data(image.width(), image.height(), BL_FORMAT_PRGB32,
+                              bitmapData.data(), stride, BL_DATA_ACCESS_READ);
+    }
+
+    if(bitmapRect)
+    {
+
+        Gfx::RectF imageRect = bitmap.scaling().toPhysical(*bitmapRect);
+        BLRectI srcRect(lround( imageRect.x() ),
+                        lround( imageRect.y() ), 
+                        lround( imageRect.width() ),
+                        lround( imageRect.height() ) );
+
+        _rasterContext.blit_image(pos, view, srcRect);
+    }
+    else
+    {
+        _rasterContext.blit_image(pos, view);
+    }
+
+    _rasterContext.restore();
+}
+
+#else
+
+void RasterSurface::drawImage(const Pt::Gfx::PointF& toF,
+                              const ImageSurface& bitmap,
+                              const Gfx::Paint& paint,
+                              const Gfx::RectF* bitmapRect)
+{
+    const Scaling& scale = scaling();
+    const Image& image = bitmap.image();
+
+    Gfx::PointF toP = scale.toPhysical(toF);
+    PointI to( toP.x(), toP.y() );
+
+    if( image.empty() )
+        return;
+
+    if(bitmapRect)
+    {
+        Gfx::RectF imageRect = bitmap.scaling().toPhysical(*bitmapRect);
+
+        RectI srcRect( PointI( lround( imageRect.x() ),
+                               lround( imageRect.y() ) ), 
+                       SizeI( lround( imageRect.width() ),
+                              lround( imageRect.height() ) ) );
+
+        putImage(to, image, paint, srcRect);
+    }
+    else
+    {
+        RectI srcRect;
+        srcRect.setWidth( image.width() );
+        srcRect.setHeight( image.height() );
+
+        putImage(to, image, paint, srcRect);
+    }
+}
+
+
+void RasterSurface::putImage(const PointI& to, const Image& image, 
+                             const Gfx::Paint& paint, const RectI& imageRect)
+{
+    // clip against source boundaries
+    RectI fromRect( image.width(), image.height() );
+    fromRect = fromRect.intersect(imageRect);
+
+    // update target position if rect got smaller
+    PointI toPos = to;
+    toPos += fromRect.topLeft() - imageRect.topLeft();
+
+    // clip against target boundaries
+    RectI currentClip;
+    currentClip.setWidth( _image.width() );
+    currentClip.setHeight( _image.height() );
+
+    RectI toRect( toPos, fromRect.size() );
+    toRect = toRect.intersect(currentClip);
+
+    // update source position if rect got smaller
+    PointI fromPos = fromRect.topLeft();
+    fromPos += toRect.topLeft() - toPos;
+    fromRect.setOrigin(fromPos);
+
+    // update source size if rect got smaller
+    fromRect.setSize( toRect.size() );
+
+    //std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
+    //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
+    //          << fromRect.width() << "x" << fromRect.height() << std::endl;
+
+    _image.view().copy(toRect.x(), toRect.y(), image.view(), 
+                       fromRect.x(), fromRect.y(), 
+                       fromRect.width(), fromRect.height(), paint.compositionMode());
+}
+
+#endif
 
 } // namespace
 

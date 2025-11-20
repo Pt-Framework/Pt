@@ -281,7 +281,7 @@ const std::vector<Control*>& Control::controls() const
 //}
 
 
-void Control::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void Control::onSetSurface(PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 

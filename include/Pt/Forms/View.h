@@ -32,8 +32,11 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Widget.h>
+#include <Pt/Forms/Pixmap.h>
+#include <Pt/Forms/PaintSurface.h>
 #include <Pt/Forms/Style.h>
 
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -48,6 +51,7 @@ class Control;
 class PT_FORMS_API View : public Widget
 {
     friend class Control;
+    friend class Canvas;
 
     typedef Widget Base;
 
@@ -73,15 +77,15 @@ class PT_FORMS_API View : public Widget
 
         void setStyleOptions(const StyleOptions& opts);
 
-        Gfx::PaintSurface& surface();
+        PaintSurface& surface();
 
-        const Gfx::PaintSurface& surface() const;
+        const PaintSurface& surface() const;
 
-        void setSurface(Gfx::PaintSurface* surface, 
+        void setSurface(PaintSurface* surface, 
                         const Gfx::PointF& pos = Gfx::PointF() );
 
     protected:
-        virtual void onSetSurface(Gfx::PaintSurface* surface, 
+        virtual void onSetSurface(PaintSurface* surface, 
                                   const Gfx::PointF& pos);
 
         virtual void onPaint(Gfx::PaintSurface& surface, 
@@ -138,6 +142,95 @@ class PT_FORMS_API View : public Widget
 
     private:
         class ViewSurface* _surface;
+};
+
+/** @internal
+*/
+class ViewSurface : public PaintSurface
+{
+    public:
+        explicit ViewSurface(View& view)
+        : _view(&view)
+        , _surface(0)
+        {
+        }
+
+        PaintSurface* surface()
+        {
+            return _surface;
+        }
+
+        const Gfx::PointF& position() const
+        {
+            return _position;
+        } 
+
+        void setSurface(PaintSurface* surface, 
+                        const Gfx::PointF& pos)
+        {
+            _surface = surface;
+            _position = pos;
+        }
+
+    protected:
+        virtual void onDrawPixmap(const Gfx::PointF& to,
+                                  const Pixmap& pm,
+                                  const Gfx::Paint& paint,
+                                  const Gfx::RectF* rect) override;
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const override
+        {
+            if (_surface )
+                return _surface->format();
+
+            return Gfx::ImageFormat::argb32();
+        }
+
+        const Gfx::SizeF& onGetSize() const
+        {
+            if(_surface)
+                return _surface->size();
+            
+            return _size;
+        }
+
+        virtual const Gfx::Scaling& onGetScaling() const override
+        {
+            return _view->scaling();
+        }
+
+        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* reuse) override
+        {
+            Gfx::PaintContext* context = _surface ? _surface->getContext(reuse) 
+                                                  : 0;
+
+            if( ! context )
+                return context;
+   
+            Gfx::RectF region = context->region();
+            region.shift( _position.x(), _position.y() );
+            region.setSize( _view->size() );
+
+            context->setRegion(region);
+            return context;
+        }
+
+        virtual void onReleaseContext() override
+        {
+            // context is released by parent surface
+        }
+
+        virtual void onSync() override
+        {
+            // sync is done by parent surface
+        }
+
+    private:
+        View*            _view;
+        PaintSurface*    _surface;
+        Gfx::PointF      _position;
+        Gfx::SizeF       _size;
 };
 
 } // namespace

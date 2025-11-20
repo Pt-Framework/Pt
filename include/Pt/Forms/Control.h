@@ -219,7 +219,7 @@ class PT_FORMS_API Control : public View
                                      const Gfx::SizeF& maxSize);
 
     protected:
-        virtual void onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
+        virtual void onSetSurface(PaintSurface* surface, const Gfx::PointF& pos);
 
         virtual void onAddControl(Control& control);
 

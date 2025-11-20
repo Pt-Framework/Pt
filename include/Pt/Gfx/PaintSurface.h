@@ -126,6 +126,31 @@ class PT_GFX_API PaintSurface : private NonCopyable
         Painter*       _painter;
 };
 
+/** @brief Paint canvas.
+*/
+class PT_GFX_API Canvas : private NonCopyable
+{
+    friend class Painter;
+
+    public:
+        Canvas(PaintSurface& surface);
+
+        ~Canvas();
+
+        PaintSurface* surface();
+
+        void sync();
+
+    private:
+        void attachPainter(Painter& painter);
+
+        void detachPainter(Painter& painter);
+
+    private:
+        PaintSurface* _surface;
+        Painter*      _painter;
+};
+
 } // namespace
 
 } // namespace

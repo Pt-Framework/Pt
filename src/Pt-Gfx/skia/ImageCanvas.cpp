@@ -35,7 +35,6 @@
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageSurface.h>
-#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
 #include <algorithm>
@@ -456,33 +455,6 @@ void ImageCanvas::onDrawImage(const PointF& toL, const Image& image,
     _image.format().copy(_image.view(), toRect.x(), toRect.y(),
                          image.view(), fromRect.x(), fromRect.y(), 
                          fromRect.width(), fromRect.height(), _compositionMode);
-}
-
-
-bool ImageCanvas::onDrawLayer(const Gfx::PointF& to,
-                              const Gfx::PaintLayer& layer,
-                              const Gfx::RectF* rect)
-{
-    const PaintSurface* layerSurface = layer.surface();
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
-    if(imageSurface)
-    {
-        const Gfx::Image& image = imageSurface->image();
-        
-        if(rect)
-        {
-            Gfx::RectF imageRect = scaling().toPhysical(*rect);
-            drawImage(to, image, &imageRect);
-        }
-        else
-        {
-            drawImage(to, image);
-        }
-        
-        return true;
-    }
-
-    return false;
 }
 
 

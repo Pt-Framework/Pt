@@ -58,7 +58,6 @@ namespace Gfx {
 
 class PaintContext;
 class PaintSurface;
-class PaintLayer;
 class Canvas;
 
 /** @brief 2D painter interface.
@@ -76,10 +75,6 @@ class PT_GFX_API Painter : private NonCopyable
         /** @brief @brief Constructs using a paint surface.
         */
         explicit Painter(PaintSurface& surface);
-        
-        /** @brief @brief Constructs using a paint layer.
-        */
-        explicit Painter(PaintLayer& layer);
 
         /** @brief @brief Constructs using a canvas.
         */
@@ -92,10 +87,6 @@ class PT_GFX_API Painter : private NonCopyable
         /** @brief @brief Begins painting to a paint surface.
         */
         void begin(PaintSurface& surface);
-        
-        /** @brief @brief Begins painting to a paint layer.
-        */
-        void begin(PaintLayer& layer);
 
         /** @brief @brief Begins painting to a canvas.
         */
@@ -267,15 +258,6 @@ class PT_GFX_API Painter : private NonCopyable
         /** @brief Draws a part of an image.
         */
         void drawImage(const PointF& to, const Image& im, const RectF& rect);
-
-        /** @brief Draws a layer.
-        */
-        void drawLayer(const Gfx::PointF& to, const PaintLayer& layer);
-
-        /** @brief Draws a part of a layer.
-        */
-        void drawLayer(const Gfx::PointF& to, const PaintLayer& layer, 
-                       const Gfx::RectF& layerRect);
 
     private:
         void onBeginPaint(PaintSurface& surface);

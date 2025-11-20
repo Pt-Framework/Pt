@@ -347,16 +347,22 @@ void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& paint
 
     if( ! _picture.empty() )
     {
-        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+        //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
         
         double pictureXOff = (pictureWidth - pictureSize.width()) / 2;
         double pictureYOff = (pictureHeight - pictureSize.height()) / 2;
 
         Gfx::PointF picturePos(pictureX + pictureXOff, 
                                pictureY + pictureYOff);
-        painter.drawLayer(picturePos, _picture);
-        
-        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
+        //painter.drawLayer(picturePos, _picture);
+        //
+        //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
+
+        Canvas canvas( this->surface() );
+
+        Gfx::Paint paint;
+        paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        canvas.drawPixmap(picturePos, _picture, paint);
     }
 
     //

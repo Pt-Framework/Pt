@@ -32,7 +32,8 @@
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Widget.h>
 #include <Pt/Forms/WindowType.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
+#include <Pt/Gfx/ImageSurface.h>
 
 namespace Pt {
 

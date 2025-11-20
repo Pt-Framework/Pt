@@ -28,6 +28,7 @@
 */
 
 #include "PixmapImpl.h"
+
 #include <Pt/Forms/Pixmap.h>
 
 namespace Pt {
@@ -38,8 +39,6 @@ Pixmap::Pixmap()
 : _impl(0)
 {
     _impl = new PixmapImpl();
-
-    setSurface( _impl->surface() );
 }
 
 
@@ -52,7 +51,7 @@ Pixmap::~Pixmap()
 void Pixmap::set(const Gfx::Image& image)
 {
     _impl->set(image);
-    _impl->surface()->invalidate();
+    invalidate();
 }
 
 
@@ -62,16 +61,10 @@ bool Pixmap::empty() const
 }
 
 
-const Gfx::SizeF& Pixmap::size() const
-{
-    return _impl->size();
-}
-
-
 void Pixmap::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);
-    _impl->surface()->invalidate();
+    invalidate();
 }
 
 
@@ -93,12 +86,56 @@ Gfx::Image Pixmap::toImage() const
 }
 
 
-void Pixmap::onDraw(Gfx::PaintSurface& surface, 
-                    const Gfx::Paint& paint,
-                    const Gfx::PointF& to,
-                    const Gfx::RectF* rect) const
+void Pixmap::onDrawPixmap(const Gfx::PointF& to, const Pixmap& pixmap, 
+                          const Gfx::Paint& paint, const Gfx::RectF* rect)
 {
-    _impl->draw(surface, paint, to, rect);
+    _impl->drawPixmap(to, pixmap, paint, rect);
+}
+
+
+const Gfx::ImageFormat& Pixmap::onGetFormat() const
+{
+    return _impl->format();
+}
+
+
+const Gfx::SizeF& Pixmap::onGetSize() const
+{
+    return _impl->size();
+}
+
+
+const Gfx::Scaling& Pixmap::onGetScaling() const
+{
+    return _impl->scaling();
+}
+
+
+Gfx::PaintContext* Pixmap::onGetContext(Gfx::PaintContext* reuse)
+{
+    Gfx::PaintContext* context = _impl->getContext(reuse);
+    if(context)
+        return context;
+
+    return PaintSurface::onGetContext(reuse);
+}
+
+
+Gfx::PaintContext* Pixmap::onCreateContext(Gfx::PaintContext* reuse)
+{
+    return _impl->createContext(reuse);
+}
+
+
+void Pixmap::onReleaseContext()
+{
+    _impl->releaseContext();
+}
+
+
+void Pixmap::onSync() 
+{
+    _impl->sync();
 }
 
 

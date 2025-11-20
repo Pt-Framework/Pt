@@ -1593,9 +1593,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\PaintLayer.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -2960,6 +2957,9 @@
     </ClInclude>
     <ClInclude Include="..\Pt-Gfx\blend2d\Dasher.h">
       <Filter>Pt-Gfx\blend2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\PaintSurface.h">
+      <Filter>Pt-Forms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4638,9 +4638,6 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Painter.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\PaintLayer.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\PaintSurface.cpp">

@@ -37,6 +37,10 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// Canvas
+///////////////////////////////////////////////////////////////////////
+
 PaintSurface::PaintSurface()
 : _context(0)
 , _painter(0)
@@ -159,6 +163,59 @@ void PaintSurface::attachPainter(Painter& painter)
 
 
 void PaintSurface::detachPainter(Painter& painter)
+{
+    if(_painter)
+        _painter = 0;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Canvas
+///////////////////////////////////////////////////////////////////////
+
+Canvas::Canvas(PaintSurface& surface)
+: _surface(&surface)
+, _painter(0)
+{
+}
+
+
+Canvas::~Canvas()
+{
+    if(_painter)
+    {
+        _painter->onDetachCanvas(*this);
+    }
+
+    sync();
+}
+
+
+PaintSurface* Canvas::surface()
+{
+    return _surface;
+}
+
+
+void Canvas::sync()
+{
+    if(_surface)
+        _surface->sync();
+}
+
+
+void Canvas::attachPainter(Painter& painter)
+{
+    if(_painter)
+    {
+        _painter->onDetachCanvas(*this);
+        _painter = 0;
+    }
+
+    _painter = &painter;
+}
+
+
+void Canvas::detachPainter(Painter& painter)
 {
     if(_painter)
         _painter = 0;

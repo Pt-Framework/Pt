@@ -154,10 +154,6 @@ class ImageCanvas : public Canvas
                              const Gfx::Image& image, 
                              const Gfx::RectF* imgRect) override;
 
-    virtual bool onDrawLayer(const Gfx::PointF& to,
-                             const Gfx::PaintLayer& layer,
-                             const Gfx::RectF* rect) override;
-
   public:
     static void setFontDir(const System::Path& path);
 

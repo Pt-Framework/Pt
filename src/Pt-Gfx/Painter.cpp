@@ -30,7 +30,6 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintLayer.h>
 
 namespace Pt {
 
@@ -50,15 +49,6 @@ Painter::Painter(PaintSurface& surface)
 , _paintContext(0)
 {
     begin(surface);
-}
-
-
-Painter::Painter(PaintLayer& layer)
-: _surface(0)
-, _canvas(0)
-, _paintContext(0)
-{
-    begin(layer);
 }
 
 
@@ -87,14 +77,6 @@ void Painter::begin(PaintSurface& surface)
     finish();
 
     onBeginPaint(surface);
-}
-
-
-void Painter::begin(PaintLayer& layer)
-{
-    PaintSurface* surface = layer.surface();
-    if(surface)
-        begin(*surface);
 }
 
 
@@ -466,39 +448,6 @@ void Painter::drawImage(const Gfx::PointF& to,
 {
     if(_paintContext)
         _paintContext->drawImage(to, image, &imageRect);
-}
-
-
-void Painter::drawLayer(const Gfx::PointF& to, 
-                        const PaintLayer& layer)
-{
-    if(_paintContext)
-    {
-        bool isCompatible = _paintContext->drawLayer(to, layer);
-        if( ! isCompatible )
-        {
-            PaintSurface* surface = _surface;
-            layer.draw(*surface, _paint, to);
-            begin(*surface);
-        }
-    }
-}
-
-
-void Painter::drawLayer(const Gfx::PointF& to, 
-                        const PaintLayer& layer, 
-                        const Gfx::RectF& rect)
-{
-    if(_paintContext)
-    {
-        bool isCompatible = _paintContext->drawLayer(to, layer, &rect);
-        if( ! isCompatible )
-        {
-            PaintSurface* surface = _surface;
-            layer.draw(*surface, _paint, to, &rect);
-            begin(*surface);
-        }
-    }
 }
 
 } // namespace

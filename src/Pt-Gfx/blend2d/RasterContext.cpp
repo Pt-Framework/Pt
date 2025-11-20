@@ -32,7 +32,6 @@
 #include "Dasher.h"
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/ImageSurface.h>
 
 #include <vector>
@@ -604,7 +603,7 @@ void RasterContext::onDrawImage(const PointF& toF, const Image& image,
 #else
 
 void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
-                               const RectF* imageRect)
+                                const RectF* imageRect)
 {
     Gfx::PointF toP = transform() * toF;
     Point to = Point( lround(toP.x()), lround(toP.y()) );
@@ -660,6 +659,12 @@ void RasterContext::putImage(const Point& to, const Image& image, const Rect& im
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
+
+    std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
+              << "from: " << fromRect.x() << ", " << fromRect.y() << " "
+              << fromRect.width() << "x" << fromRect.height() << std::endl;
+
+
     _image->view().copy(toRect.x(), toRect.y(),
                         image.view(), fromRect.x(), fromRect.y(), 
                         fromRect.width(), fromRect.height(), _compositionMode);
@@ -670,32 +675,6 @@ void RasterContext::putImage(const Point& to, const Image& image, const Rect& im
 }
 
 #endif // USE_BLEND2d_BLIT
-
-bool RasterContext::onDrawLayer(const Gfx::PointF& to,
-                                const Gfx::PaintLayer& layer,
-                                const Gfx::RectF* rect)
-{
-    const PaintSurface* layerSurface = layer.surface();
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
-    if(imageSurface)
-    {
-        const Gfx::Image& image = imageSurface->image();
-        
-        if(rect)
-        {
-            Gfx::RectF imageRect = scaling().toPhysical(*rect);
-            drawImage(to, image, &imageRect);
-        }
-        else
-        {
-            drawImage(to, image);
-        }
-        
-        return true;
-    }
-
-    return false;
-}
 
 } // namespace
 

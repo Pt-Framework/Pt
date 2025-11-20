@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageSurface.h>
 #include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
@@ -158,6 +159,84 @@ Gfx::PaintContext* RasterSurface::createContext(Gfx::PaintContext* context)
 void RasterSurface::releaseContext()
 {
     _context = 0;
+}
+
+
+void RasterSurface::sync()
+{
+}
+
+
+void RasterSurface::drawImage(const Pt::Gfx::PointF& toF,
+                              const ImageSurface& bitmap,
+                              const Gfx::Paint& paint,
+                              const Gfx::RectF* bitmapRect)
+{
+    const Scaling& scale = scaling();
+    const Image& image = bitmap.image();
+
+    Gfx::PointF toP = scale.toPhysical(toF);
+    PointI to( toP.x(), toP.y() );
+
+    if( image.empty() )
+        return;
+
+    if(bitmapRect)
+    {
+        Gfx::RectF imageRect = bitmap.scaling().toPhysical(*bitmapRect);
+
+        RectI srcRect( PointI( lround( imageRect.x() ),
+                               lround( imageRect.y() ) ), 
+                       SizeI( lround( imageRect.width() ),
+                              lround( imageRect.height() ) ) );
+
+        putImage(to, image, paint, srcRect);
+    }
+    else
+    {
+        RectI srcRect;
+        srcRect.setWidth( image.width() );
+        srcRect.setHeight( image.height() );
+
+        putImage(to, image, paint, srcRect);
+    }
+}
+
+
+void RasterSurface::putImage(const PointI& to, const Image& image, 
+                             const Gfx::Paint& paint, const RectI& imageRect)
+{
+    // clip against source boundaries
+    RectI fromRect( image.width(), image.height() );
+    fromRect = fromRect.intersect(imageRect);
+
+    // update target position if rect got smaller
+    PointI toPos = to;
+    toPos += fromRect.topLeft() - imageRect.topLeft();
+
+    // clip against target boundaries
+    RectI currentClip;
+    currentClip.setWidth( _image.width() );
+    currentClip.setHeight( _image.height() );
+
+    RectI toRect( toPos, fromRect.size() );
+    toRect = toRect.intersect(currentClip);
+
+    // update source position if rect got smaller
+    PointI fromPos = fromRect.topLeft();
+    fromPos += toRect.topLeft() - toPos;
+    fromRect.setOrigin(fromPos);
+
+    // update source size if rect got smaller
+    fromRect.setSize( toRect.size() );
+
+    //std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
+    //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
+    //          << fromRect.width() << "x" << fromRect.height() << std::endl;
+
+    _image.view().copy(toRect.x(), toRect.y(), image.view(), 
+                       fromRect.x(), fromRect.y(), 
+                       fromRect.width(), fromRect.height(), paint.compositionMode());
 }
 
 } // namespace

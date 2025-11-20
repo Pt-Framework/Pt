@@ -31,9 +31,9 @@
 #define Pt_Forms_Pixmap_h
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/System/Path.h>
 
@@ -45,7 +45,7 @@ class PixmapImpl;
 
 /** @brief Back buffer drawing surface.
 */
-class PT_FORMS_API Pixmap : public Gfx::PaintLayer
+class PT_FORMS_API Pixmap : public PaintSurface
 {
     public:
         Pixmap();
@@ -60,21 +60,32 @@ class PT_FORMS_API Pixmap : public Gfx::PaintLayer
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
-        /** @brief Returns the size in physical pixels. 
-        */
-        const Gfx::SizeF& size() const;
-
         /** @brief Resizes to a size in physical pixels. 
         */
         void resize(const Gfx::SizeF& size);
 
         void setScaleFactor(double v);
 
-   protected:
-        virtual void onDraw(Gfx::PaintSurface& surface,
-                            const Gfx::Paint& paint, 
-                            const Gfx::PointF& to,
-                            const Gfx::RectF* rect) const override;
+    protected:
+        virtual void onDrawPixmap(const Gfx::PointF& to,
+                                  const Pixmap& pixmap,
+                                  const Gfx::Paint& paint,
+                                  const Gfx::RectF* rect = 0) override;
+
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const override;
+
+        virtual const Gfx::SizeF& onGetSize() const override;
+
+        virtual const Gfx::Scaling& onGetScaling() const override;
+
+        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* reuse) override;
+
+        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* reuse) override;
+
+        virtual void onReleaseContext() override;
+
+        virtual void onSync() override;
 
     public:
         static void setFontDir(const System::Path& path);

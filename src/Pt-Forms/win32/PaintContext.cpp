@@ -30,8 +30,6 @@
 #include "PixmapImpl.h"
 #include "win32.h"
 
-#include <Pt/Gfx/PaintLayer.h>
-
 using std::max;
 using std::min;
 #include <Gdiplus.h>
@@ -270,10 +268,9 @@ PaintContext::PaintContext()
 
 PaintContext::~PaintContext()
 {
-    // TODO: remove objects from DC before deleting them
-
+    // remove objects from surface DC before deleting them
     if(_pixmap)
-        _pixmap->invalidate();
+        _pixmap->releaseContext();
 
     if(_pen)
         DeleteObject(_pen);
@@ -1298,22 +1295,6 @@ void PaintContext::addPath(HDC dc, const Gfx::Path& path)
     }
 
     EndPath(dc);
-}
-
-
-bool PaintContext::onDrawLayer(const Gfx::PointF& to,
-                               const Gfx::PaintLayer& layer,
-                               const Gfx::RectF* rect)
-{
-    const Gfx::PaintSurface* layerSurface = layer.surface();
-    const PixmapImpl* pixmap = dynamic_cast<const PixmapImpl*>(layerSurface);
-    if(pixmap)
-    {
-        onDrawPixmap(to, *pixmap, rect);
-        return true;
-    }
-
-    return false;
 }
 
 

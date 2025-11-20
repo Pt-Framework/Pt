@@ -295,10 +295,8 @@ void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF&
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
-
     Pt::Gfx::Painter painter(surface);
     painter.setClip(rect);
-
 
     // background
     if(_isHighlighted)
@@ -312,11 +310,11 @@ void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF&
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
 
-    Pt::Gfx::PointF iconPos(iconX, iconY);
-    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    painter.drawLayer(iconPos, _picture);
-    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
+    Gfx::Paint paint;
+    paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
 
+    Pt::Gfx::PointF iconPos(iconX, iconY);
+    this->surface().drawPixmap(iconPos, _picture, paint);
 
     // item text    
     painter.setFont(_font);

@@ -31,6 +31,9 @@
 #include "PixmapImpl.h"
 #include "PaintContext.h"
 
+#include <Pt/Forms/View.h>
+#include <Pt/Forms/Pixmap.h>
+
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 
@@ -108,6 +111,15 @@ namespace Pt {
 namespace Forms {
 
 #ifdef PT_FORMS_WIN32_RASTER
+
+void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
+                            const Pixmap& pixmap,
+                            const Gfx::Paint& paint,
+                            const Gfx::RectF* rect)
+{
+    const Gfx::ImageSurface& bitmap = pixmap.impl()->_image;
+    _image.drawImage(to, bitmap, paint, rect);
+}
 
 #else // PT_FORMS_WIN32_RASTER
 
@@ -226,7 +238,7 @@ void PixmapImpl::clear(const Gfx::Color& c)
 }
 
 
-const Gfx::SizeF& PixmapImpl::onGetSize() const
+const Gfx::SizeF& PixmapImpl::size() const
 {
     return physicalSize();
 }
@@ -275,46 +287,25 @@ void PixmapImpl::setScaleFactor(double scaleFactor)
 }
 
 
-void PixmapImpl::draw(Gfx::PaintSurface& surface,
-                      const Gfx::Paint& paint,
-                      const Gfx::PointF& to,
-                      const Gfx::RectF* rect) const
-{
-    Gfx::Painter painter(surface);
-    painter.setCompositionMode( paint.compositionMode() );
-    
-    Gfx::Image pixmapImage = toImage();
-    if(rect)
-    {
-        Gfx::RectF imageRect = scaling().toPhysical(*rect);
-        painter.drawImage(to, pixmapImage, imageRect);
-    }
-    else
-    {
-        painter.drawImage(to, pixmapImage);
-    }
-}
-
-
 HDC PixmapImpl::deviceContext() const
 {
     return _dc;
 }
 
 
-const Gfx::ImageFormat& PixmapImpl::onGetFormat() const
+const Gfx::ImageFormat& PixmapImpl::format() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
-const Gfx::Scaling& PixmapImpl::onGetScaling() const
+const Gfx::Scaling& PixmapImpl::scaling() const
 {
     return _scaling;
 }
 
 
-Gfx::PaintContext* PixmapImpl::onCreateContext(Gfx::PaintContext* context)
+Gfx::PaintContext* PixmapImpl::createContext(Gfx::PaintContext* context)
 {
     PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
     if( ! paintContext ) 
@@ -327,7 +318,7 @@ Gfx::PaintContext* PixmapImpl::onCreateContext(Gfx::PaintContext* context)
 }
 
 
-void PixmapImpl::onReleaseContext()
+void PixmapImpl::releaseContext()
 {
     // NOTE: this might be called from the attached context base class destructor
 
@@ -341,8 +332,61 @@ void PixmapImpl::onReleaseContext()
 }
 
 
-void PixmapImpl::onSync()
+void PixmapImpl::sync()
 {
+}
+
+
+void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
+                              const Pixmap& pm,
+                              const Gfx::Paint& paint,
+                              const Gfx::RectF* rect)
+{
+    const PixmapImpl* pixmap = pm.impl();
+    Gfx::PointF to = _scaling.toPhysical(toF);
+
+    int fromX = 0;
+    int fromY = 0;
+    int width = lround( pixmap->size().width() );
+    int height = lround( pixmap->size().height() );
+
+    if(rect)
+    {
+        const Gfx::Scaling& scaling = pixmap->scaling();
+        Gfx::RectF rectP = scaling.toPhysical(*rect);
+        
+        fromX = lround( rectP.x() );
+        fromY = lround( rectP.y()) ;
+        width = lround( rectP.width() );
+        height = lround( rectP.height() );
+    }
+
+    Gfx::CompositionMode compositionMode = paint.compositionMode();
+
+    switch(compositionMode)
+    {
+        case Gfx::CompositionMode::SourceCopy:
+        {
+            BitBlt(_dc, lround(to.x()), lround(to.y()), width, height,
+                   pixmap->deviceContext(), fromX, fromY, SRCCOPY);
+        }
+        break;
+
+        case Gfx::CompositionMode::SourceOver:
+        {
+            BLENDFUNCTION bf;
+            bf.BlendOp = AC_SRC_OVER;
+            bf.BlendFlags = 0;
+            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
+            bf.AlphaFormat = AC_SRC_ALPHA;
+
+            HDC pixmapDC = pixmap->deviceContext();
+
+            AlphaBlend(_dc, lround(to.x()), lround(to.y()), width, height,
+                       pixmapDC, fromX, fromY, width, height, bf);
+        }
+        break;
+    }
 }
 
 

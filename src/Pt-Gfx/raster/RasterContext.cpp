@@ -37,7 +37,6 @@
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageSurface.h>
-#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
 #include <algorithm>
@@ -560,33 +559,6 @@ void RasterContext::onDrawImage(const PointF& toF, const Image& image,
         putImage( to, image, round(*imageRect) );
     else
         putImage(to, image);
-}
-
-
-bool RasterContext::onDrawLayer(const Gfx::PointF& to,
-                                const Gfx::PaintLayer& layer,
-                                const Gfx::RectF* rect)
-{
-    const PaintSurface* layerSurface = layer.surface();
-    const ImageSurface* imageSurface = dynamic_cast<const ImageSurface*>(layerSurface);
-    if(imageSurface)
-    {
-        const Gfx::Image& image = imageSurface->image();
-        
-        if(rect)
-        {
-            Gfx::RectF imageRect = scaling().toPhysical(*rect);
-            drawImage(to, image, &imageRect);
-        }
-        else
-        {
-            drawImage(to, image);
-        }
-        
-        return true;
-    }
-
-    return false;
 }
 
 

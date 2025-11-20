@@ -141,10 +141,6 @@ class PT_GFX_API PaintContext
         void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
                        const Gfx::RectF* rect = 0);
-        
-        bool drawLayer(const Gfx::PointF& to,
-                       const Gfx::PaintLayer& layer,
-                       const Gfx::RectF* rect = 0);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint);
@@ -208,10 +204,6 @@ class PT_GFX_API PaintContext
     protected:
         virtual void onDrawImage(const Gfx::PointF& to, 
                                  const Gfx::Image& image, 
-                                 const Gfx::RectF* rect = 0) = 0;
-
-        virtual bool onDrawLayer(const Gfx::PointF& to,
-                                 const Gfx::PaintLayer& layer,
                                  const Gfx::RectF* rect = 0) = 0;
 
     private:

@@ -126,10 +126,6 @@ class RasterContext : public PaintContext
                                  const Gfx::Image& image, 
                                  const Gfx::RectF* rect = 0);
 
-        virtual bool onDrawLayer(const Gfx::PointF& to,
-                                 const Gfx::PaintLayer& layer,
-                                 const Gfx::RectF* rect = 0);
-
     private:
         Point toLocal(const Gfx::PointF& from) const
         {

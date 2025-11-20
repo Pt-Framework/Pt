@@ -32,7 +32,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PaintLayer.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -72,6 +71,9 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
     void setScaleFactor(double scaleFactor);
 
+    void drawImage(const Pt::Gfx::PointF& to, const ImageSurface& image,
+                   const Gfx::Paint& paint, const Gfx::RectF* rect);
+
   protected:
     virtual const Gfx::ImageFormat& onGetFormat() const;
 
@@ -97,38 +99,6 @@ class PT_GFX_API ImageSurface : public PaintSurface
 
   private:
     RasterSurface* _rasterSurface;
-};
-
-/** @brief Image drawing layer.
-*/
-class PT_GFX_API ImageLayer : public PaintLayer
-{
-    public:
-        ImageLayer();
-
-        ImageLayer(const Gfx::SizeF& size, std::size_t stride = 0);
-
-        virtual ~ImageLayer();
-
-        void reset(const Gfx::Image& image);
-
-        void reset(const Gfx::SizeF& size, std::size_t stride = 0);
-
-        const Gfx::Image& image() const;
-
-        /** @brief Returns the physical size.
-        */
-        const Gfx::SizeF& size() const;
-
-        void setScaleFactor(double scaleFactor);
-
-    protected:
-        virtual void onDraw(PaintSurface& surface,
-                            const Paint& paint,
-                            const Gfx::PointF& to,
-                            const Gfx::RectF* rect) const override;
-    private:
-        ImageSurface _surface;
 };
 
 } // namespace

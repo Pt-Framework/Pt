@@ -53,6 +53,10 @@ class RasterContext;
 */
 class PT_GFX_API RasterSurface : private NonCopyable
 {
+  typedef BasicPoint<Pt::ssize_t> PointI;
+  typedef BasicSize<Pt::ssize_t> SizeI;
+  typedef BasicRect<Pt::ssize_t> RectI;
+
   public:
     RasterSurface();
 
@@ -81,6 +85,17 @@ class PT_GFX_API RasterSurface : private NonCopyable
     virtual Gfx::PaintContext* createContext(Gfx::PaintContext* context);
 
     virtual void releaseContext();
+
+    void sync();
+
+    void drawImage(const Pt::Gfx::PointF& to,
+                   const ImageSurface& bitmap,
+                   const Gfx::Paint& paint,
+                   const Gfx::RectF* rect);
+
+  private:   
+    void putImage(const PointI& to, const Image& image, 
+                  const Gfx::Paint& paint, const RectI& imageRect);
 
   private:
     Image          _image;

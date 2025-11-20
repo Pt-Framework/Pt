@@ -31,8 +31,9 @@
 #define Pt_Forms_PixmapImpl_h
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Forms/PaintSurface.h>
 
-//#define PT_FORMS_WIN32_RASTER 1
+#define PT_FORMS_WIN32_RASTER 1
 //#define PT_FORMS_GDIPLUS 1
 
 #ifdef PT_FORMS_WIN32_RASTER
@@ -62,7 +63,7 @@ class Pixmap;
 
 #ifdef PT_FORMS_WIN32_RASTER
 
-class PixmapImpl 
+class PixmapImpl
 {
     public:
         PixmapImpl()
@@ -96,19 +97,41 @@ class PixmapImpl
             _image.setScaleFactor(scaleFactor);
         }
 
-        Gfx::PaintSurface* surface()
+        void drawPixmap(const Gfx::PointF& to,
+                        const Pixmap& pixmap,
+                        const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
+        
+        const Gfx::ImageFormat& format() const
         {
-            return _image.surface();
+            return _image.format();
         }
 
-        void draw(Gfx::PaintSurface& surface, 
-                  const Gfx::Paint& paint,
-                  const Gfx::PointF& to,
-                  const Gfx::RectF* rect) const
+        const Gfx::Scaling& scaling() const
         {
-            _image.draw(surface, paint, to, rect);
+            return _image.scaling();
         }
 
+        Gfx::PaintContext* getContext(Gfx::PaintContext* reuse)
+        {
+            return _image.getContext(reuse);
+        }
+
+        Gfx::PaintContext* createContext(Gfx::PaintContext* reuse)
+        {
+            return 0;
+        }
+
+        void releaseContext()
+        {
+        }
+
+        void sync()
+        {
+            _image.sync();
+        }
+
+    public:
         static const std::string& defaultFont()
         {
             return Gfx::ImageSurface::defaultFont();
@@ -130,14 +153,14 @@ class PixmapImpl
         }
     
     private:
-        Gfx::ImageLayer _image;
+        Gfx::ImageSurface _image;
 };
 
 #else // PT_FORMS_WIN32_RASTER
 
 class PaintContext;
 
-class PixmapImpl : public Gfx::PaintSurface
+class PixmapImpl
 {
     public:
         PixmapImpl();
@@ -157,32 +180,30 @@ class PixmapImpl : public Gfx::PaintSurface
         void resize(const Gfx::SizeF& size);
         
         void setScaleFactor(double scaleFactor);
-           
-        Gfx::PaintSurface* surface()
-        {
-            return this;
-        }
-
-        void draw(Gfx::PaintSurface& surface, 
-                  const Gfx::Paint& paint,
-                  const Gfx::PointF& to,
-                  const Gfx::RectF* rect) const;
 
         HDC deviceContext() const;
 
-    protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
+        void drawPixmap(const Gfx::PointF& to,
+                                const Pixmap& pm,
+                                const Gfx::Paint& paint,
+                                const Gfx::RectF* rect);
 
-        virtual const Gfx::SizeF& onGetSize() const override;
+        const Gfx::ImageFormat& format() const;
 
-        virtual const Gfx::Scaling& onGetScaling() const override;
+        const Gfx::SizeF& size() const;
 
-    protected:
-        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+        const Gfx::Scaling& scaling() const;
 
-        virtual void onReleaseContext() override;
+        Gfx::PaintContext* getContext(Gfx::PaintContext* reuse)
+        {
+            return 0;
+        }
 
-        virtual void onSync() override;
+        Gfx::PaintContext* createContext(Gfx::PaintContext* context);
+
+        void releaseContext();
+
+        void sync();
 
     public:
         static const std::string& defaultFont();

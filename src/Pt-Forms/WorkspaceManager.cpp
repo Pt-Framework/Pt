@@ -556,19 +556,10 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
 
         if(_parent)
         {
-            // TODO: work with clip instead of using a subrect of layer
-            //Gfx::Painter painter( _parent->surface() );
-            //painter.setClip(rect);
-            //painter.drawLayer( frame->position(), frame->pixmap() );
-
-            Gfx::Painter painter( _parent->surface() );
-            painter.drawLayer(frameRect.topLeft(), frame->pixmap(), surfaceRect);
-
-            //_parent->surface().drawPixmap(frameRect.topLeft(), frame->pixmap(), &surfaceRect);
+            Gfx::Paint paint;
+            _parent->surface().drawPixmap(frameRect.topLeft(), frame->pixmap(), 
+                                          paint, &surfaceRect);
         }
-        
-        //surface().drawPixmap(frameRect.topLeft(), frame->surface(), 
-        //                     surfaceRect, Gfx::CompositionMode::SourceCopy);
     }
 }
 

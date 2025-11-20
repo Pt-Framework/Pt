@@ -40,11 +40,17 @@ void MenuSubItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& 
     double iconY = (size().height() - icon().height()) / 2;
 
     Pt::Gfx::PointF iconPos(iconX, iconY);
-    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    painter.drawLayer(iconPos, _picture);
-    painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
-
+    //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+    //painter.drawLayer(iconPos, _picture);
+    //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     
+    Canvas canvas( this->surface() );
+
+    Gfx::Paint paint;
+    paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    canvas.drawPixmap(iconPos, _picture, paint);
+
+
     // item text    
     painter.setFont(_font);
     painter.setPen(_textPen);

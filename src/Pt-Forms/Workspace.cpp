@@ -117,7 +117,7 @@ void Workspace::setContent(Control* control)
 // Control
 ///////////////////////////////////////////////////////////////////////
 
-void Workspace::onSetSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
+void Workspace::onSetSurface(PaintSurface* surface, const Gfx::PointF& pos)
 {
     Base::onSetSurface(surface, pos);
 
