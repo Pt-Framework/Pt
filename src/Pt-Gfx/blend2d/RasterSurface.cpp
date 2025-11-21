@@ -292,7 +292,8 @@ void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
     const Image& image = bitmap.image();
 
     Gfx::PointF toP = scale.toPhysical(toF);
-    PointI to( toP.x(), toP.y() );
+    PointI to( lround( toP.x() ), 
+               lround( toP.y() ) );
 
     if( image.empty() )
         return;
@@ -346,9 +347,9 @@ void RasterSurface::putImage(const PointI& to, const Image& image,
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    //std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
-    //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
-    //          << fromRect.width() << "x" << fromRect.height() << std::endl;
+    std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
+              << "from: " << fromRect.x() << ", " << fromRect.y() << " "
+              << fromRect.width() << "x" << fromRect.height() << std::endl;
 
     _image.view().copy(toRect.x(), toRect.y(), image.view(), 
                        fromRect.x(), fromRect.y(), 

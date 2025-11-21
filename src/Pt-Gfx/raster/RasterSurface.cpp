@@ -176,7 +176,8 @@ void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
     const Image& image = bitmap.image();
 
     Gfx::PointF toP = scale.toPhysical(toF);
-    PointI to( toP.x(), toP.y() );
+    PointI to( lround( toP.x() ), 
+               lround( toP.y() ) );
 
     if( image.empty() )
         return;

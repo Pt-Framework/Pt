@@ -65,17 +65,13 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
                      _frameBuffer.height() );
     _pixmap.impl()->reset( size, _frameBuffer.strideSize() );
                              
-    Gfx::PaintSurface* surface = _pixmap.surface();
-    if(surface)
-    {
-      Gfx::Painter painter(*surface);
+    Gfx::Painter painter(_pixmap);
 
-      Gfx::RectF rect( Gfx::PointF(0, 0), _pixmap.size() );
-      painter.setBrush( Gfx::Color(0, 0, 0) );
-      painter.fillRect(rect);
-    }
+    Gfx::RectF rect( Gfx::PointF(0, 0), _pixmap.size() );
+    painter.setBrush( Gfx::Color(0, 0, 0) );
+    painter.fillRect(rect);
 
-    Form::setSurface(surface, Gfx::PointF(0, 0) );
+    Form::setSurface(&_pixmap, Gfx::PointF(0, 0) );
 
     setContent(&_workspace);
 
@@ -336,10 +332,7 @@ void ScreenImpl::onPaintEvent(const PaintEvent& ev)
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
-
-    Gfx::PaintSurface* surface = _pixmap.surface();
-    if(surface)
-        onPaint(*surface, rect);
+    onPaint(_pixmap, rect);
 }
 
 
@@ -370,7 +363,7 @@ void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
 const Gfx::Image& ScreenImpl::image() const
 {
-    return _pixmap.impl()->toImage();
+    return _pixmap.impl()->bitmap().image();
 }
 
 

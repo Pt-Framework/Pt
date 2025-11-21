@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/System/Path.h>
 
 namespace Pt {
@@ -54,7 +55,7 @@ class PT_FORMS_API Pixmap : public PaintSurface
 
         void set(const Gfx::Image& image);
 
-        Gfx::Image toImage() const;
+        void getBitmap(Gfx::Bitmap& image, const Gfx::RectF& rect);
 
         bool empty() const;
 

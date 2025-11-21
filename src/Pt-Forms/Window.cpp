@@ -184,10 +184,10 @@ const WindowFrame* Window::frame() const
 }
 
 
-void Window::getImage(Gfx::Bitmap& imageSurface) const
+void Window::getBitmap(Gfx::Bitmap& bitmap) const
 {
     if(_frame)
-        _frame->getImage(imageSurface);
+        _frame->getBitmap(bitmap);
 }
 
 

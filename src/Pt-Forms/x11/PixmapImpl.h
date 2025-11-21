@@ -54,12 +54,20 @@ class PixmapImpl
 
         void set(const Gfx::Image& image)
         {
-            _image.reset(image);
+            _bitmap.reset(image);
         }
 
-        const Gfx::Image& toImage() const
+        const Gfx::Bitmap& bitmap() const 
         {
-            return _image.image();
+            return _bitmap;
+        }
+
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+        {
+            bitmap.reset( rect.size() );
+
+            Gfx::Paint paint;
+            bitmap.drawBitmap(Gfx::PointF(0, 0), _bitmap, paint, &rect);
         }
 
         void clear(const Gfx::Color& c)
@@ -67,17 +75,17 @@ class PixmapImpl
 
         const Gfx::SizeF& size() const
         {
-            return _image.size();
+            return _bitmap.size();
         }
 
         void resize(const Gfx::SizeF& size)
         {
-            _image.reset(size);
+            _bitmap.reset(size);
         }
 
         void setScaleFactor(double scaleFactor)
         {
-            _image.setScaleFactor(scaleFactor);
+            _bitmap.setScaleFactor(scaleFactor);
         }
 
         void drawPixmap(const Gfx::PointF& to,
@@ -87,17 +95,17 @@ class PixmapImpl
         
         const Gfx::ImageFormat& format() const
         {
-            return _image.format();
+            return _bitmap.format();
         }
 
         const Gfx::Scaling& scaling() const
         {
-            return _image.scaling();
+            return _bitmap.scaling();
         }
 
         Gfx::PaintContext* getContext(Gfx::PaintContext* reuse)
         {
-            return _image.getContext(reuse);
+            return _bitmap.getContext(reuse);
         }
 
         Gfx::PaintContext* createContext(Gfx::PaintContext* reuse)
@@ -111,7 +119,7 @@ class PixmapImpl
 
         void sync()
         {
-            _image.sync();
+            _bitmap.sync();
         }
 
     public:
@@ -136,7 +144,7 @@ class PixmapImpl
         }
     
     private:
-        Gfx::Bitmap _image;
+        Gfx::Bitmap _bitmap;
 };
 
 } // namespace

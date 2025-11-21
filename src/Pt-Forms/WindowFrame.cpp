@@ -75,20 +75,14 @@ const Pixmap& WindowFrame::pixmap() const
 }
 
 
-void WindowFrame::getImage(Gfx::Bitmap& imageSurface)
+void WindowFrame::getBitmap(Gfx::Bitmap& bitmap)
 {
-    Gfx::SizeF size = scaling().toPhysical( _window.size() );
-    imageSurface.reset(size);
-
     Gfx::PointF contentPos = onFromWindow( _window, Gfx::PointF(0, 0) );
     Gfx::RectF contentRect( contentPos, _window.size() );
 
-    //
-    // TODO: get Image directly to avoid copy into Bitmap
-    //
+    contentRect = scaling().toPhysical(contentRect);
 
-    Gfx::Painter painter(imageSurface);
-    painter.drawImage(Gfx::PointF(0, 0), _pixmap.toImage(), contentRect);
+    _pixmap.getBitmap(bitmap, contentRect);
 }
 
 
@@ -112,9 +106,7 @@ void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
-    Gfx::PaintSurface& surface = _pixmap;
-    surface.sync();
-    
+    _pixmap.sync();
     _wm.surfaceChanged().send(_window);
 }
 

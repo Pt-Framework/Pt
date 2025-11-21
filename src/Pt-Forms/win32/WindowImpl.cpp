@@ -270,7 +270,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
 #ifdef PT_FORMS_WIN32_RASTER
-    const Pt::Gfx::Image& image = pixmap().impl()->toImage();
+    const Pt::Gfx::Image& image = pixmap().impl()->bitmap().image();
     
     const size_t depth = image.view().pixelStride() * 8;
     const Pt::uint8_t* data = image.data();

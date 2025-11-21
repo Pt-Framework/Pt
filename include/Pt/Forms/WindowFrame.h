@@ -64,7 +64,7 @@ class WindowFrame : public Widget
 
         const Pixmap& pixmap() const;
 
-        void getImage(Gfx::Bitmap& image);
+        void getBitmap(Gfx::Bitmap& bitmap);
 
     protected:
         virtual void onConnect(Screen& screen);

@@ -80,9 +80,9 @@ void Pixmap::clear(const Gfx::Color& c)
 }
 
 
-Gfx::Image Pixmap::toImage() const
+void Pixmap::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect)
 {
-    return _impl->toImage();
+     _impl->getBitmap(bitmap, rect);
 }
 
 

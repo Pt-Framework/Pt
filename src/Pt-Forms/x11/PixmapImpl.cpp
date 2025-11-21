@@ -66,8 +66,8 @@ void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
                             const Gfx::Paint& paint,
                             const Gfx::RectF* rect)
 {
-    const Gfx::Bitmap& bitmap = pixmap.impl()->_image;
-    _image.drawBitmap(to, bitmap, paint, rect);
+    const Gfx::Bitmap& bitmap = pixmap.impl()->_bitmap;
+    _bitmap.drawBitmap(to, bitmap, paint, rect);
 }
 
 } // namespace
