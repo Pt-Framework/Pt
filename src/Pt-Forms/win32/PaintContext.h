@@ -77,7 +77,7 @@ class PaintContext : public Gfx::PaintContext
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
-        virtual void onResetPaint() override;
+        virtual void onFinishPaint() override;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;

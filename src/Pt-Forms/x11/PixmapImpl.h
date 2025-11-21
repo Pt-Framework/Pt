@@ -117,9 +117,9 @@ class PixmapImpl
         {
         }
 
-        void sync()
+        void finish()
         {
-            _bitmap.sync();
+            _bitmap.finish();
         }
 
     public:

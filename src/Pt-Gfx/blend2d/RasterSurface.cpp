@@ -178,7 +178,7 @@ void RasterSurface::releaseContext()
 }
 
 
-void RasterSurface::sync()
+void RasterSurface::finish()
 {
     if( _rasterContext.target_image() )
         _rasterContext.end();

@@ -68,14 +68,14 @@ const Gfx::Image& Bitmap::image() const
 void Bitmap::reset(const Gfx::Image& image)
 {
     _rasterSurface->reset(image);
-    invalidate();
+    releaseContext();
 }
 
 
 void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
     _rasterSurface->reset(sizeF, stride);
-    invalidate();
+    releaseContext();
 }
 
 
@@ -94,7 +94,7 @@ const SizeF& Bitmap::logicalSize() const
 void Bitmap::setScaleFactor(double scaleFactor)
 {
     _rasterSurface->setScaleFactor(scaleFactor);
-    invalidate();
+    releaseContext();
 }
 
 
@@ -135,9 +135,9 @@ void Bitmap::onReleaseContext()
 }
 
 
-void Bitmap::onSync()
+void Bitmap::onFinish()
 {
-    _rasterSurface->sync();
+    _rasterSurface->finish();
 }
 
 

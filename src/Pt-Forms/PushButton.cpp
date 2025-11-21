@@ -488,7 +488,6 @@ void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
     }
 
     painter.setFont(_font);
-    //Gfx::TextMetrics fm = painter.textMetrics( text() );
 
     //
     // button icon
@@ -496,15 +495,9 @@ void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 
     if( ! _picture.empty() )
     {
-        //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-        //painter.drawLayer(_iconPos, _picture);
-        //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
-
-        Canvas canvas( this->surface() );
-
         Gfx::Paint paint;
         paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        canvas.drawPixmap(_iconPos, _picture, paint);
+        this->surface().drawPixmap(_iconPos, _picture, paint);
     }
 
     //

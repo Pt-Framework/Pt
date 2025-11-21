@@ -162,7 +162,7 @@ void RasterSurface::releaseContext()
 }
 
 
-void RasterSurface::sync()
+void RasterSurface::finish()
 {
 }
 

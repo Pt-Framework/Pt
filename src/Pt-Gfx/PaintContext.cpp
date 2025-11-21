@@ -65,7 +65,7 @@ void PaintContext::detachSurface(PaintSurface& surface)
 {
     if(_surface)
     {
-        onResetPaint();
+        onFinishPaint();
         _surface = 0;
         _active = 0;
     }
@@ -162,20 +162,10 @@ void PaintContext::finishPaint()
     {
         _surface->onDetachContext(*this);
 
-        onResetPaint();
+        onFinishPaint();
         _surface = 0;
         _active = 0;
     }
-}
-
-
-void PaintContext::onBeginPaint(const Gfx::Paint& paint)
-{
-}
-
-
-void PaintContext::onResetPaint()
-{
 }
 
 

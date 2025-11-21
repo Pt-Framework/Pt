@@ -143,9 +143,9 @@ class PT_GFX_API PaintContext
                        const Gfx::RectF* rect = 0);
 
     protected:
-        virtual void onBeginPaint(const Gfx::Paint& paint);
+        virtual void onBeginPaint(const Gfx::Paint& paint) = 0;
        
-        virtual void onResetPaint();
+        virtual void onFinishPaint() = 0;
 
     protected:
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;

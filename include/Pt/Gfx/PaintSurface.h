@@ -72,13 +72,13 @@ class PT_GFX_API PaintSurface : private NonCopyable
         */
         PaintContext* getContext(PaintContext* context);
 
-        /** @brief Resets the currently active paint context.
+        /** @brief Releases the currently active paint context.
         */
-        void invalidate();
+        void releaseContext();
 
         /** @brief Synchronizes pending operations to the surface.
         */
-        void sync();
+        void finish();
 
     protected:
         /** @brief Returns the image format.
@@ -108,7 +108,7 @@ class PT_GFX_API PaintSurface : private NonCopyable
 
         /** @brief Synchronizes pending operations to the surface.
         */
-        virtual void onSync() = 0;
+        virtual void onFinish() = 0;
 
     private:
         //! @internal
@@ -139,7 +139,7 @@ class PT_GFX_API Canvas : private NonCopyable
 
         PaintSurface* surface();
 
-        void sync();
+        void finish();
 
     private:
         void attachPainter(Painter& painter);

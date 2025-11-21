@@ -51,7 +51,7 @@ Pixmap::~Pixmap()
 void Pixmap::set(const Gfx::Image& image)
 {
     _impl->set(image);
-    invalidate();
+    releaseContext();
 }
 
 
@@ -64,7 +64,7 @@ bool Pixmap::empty() const
 void Pixmap::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);
-    invalidate();
+    releaseContext();
 }
 
 
@@ -133,9 +133,9 @@ void Pixmap::onReleaseContext()
 }
 
 
-void Pixmap::onSync() 
+void Pixmap::onFinish() 
 {
-    _impl->sync();
+    _impl->finish();
 }
 
 

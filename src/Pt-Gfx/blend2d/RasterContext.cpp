@@ -79,7 +79,7 @@ void RasterContext::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void RasterContext::onResetPaint()
+void RasterContext::onFinishPaint()
 {
     if(_context)
         _context = 0;

@@ -138,7 +138,7 @@ void Painter::finish()
 
     if( ! _canvas && _surface)
     {
-        _surface->sync();
+        _surface->finish();
     }
 
     if( _surface )

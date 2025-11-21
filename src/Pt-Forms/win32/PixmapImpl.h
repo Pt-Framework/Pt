@@ -134,9 +134,9 @@ class PixmapImpl
         {
         }
 
-        void sync()
+        void finish()
         {
-            _bitmap.sync();
+            _bitmap.finish();
         }
 
     public:
@@ -213,7 +213,7 @@ class PixmapImpl
 
         void releaseContext();
 
-        void sync();
+        void finish();
 
     public:
         static const std::string& defaultFont();

@@ -307,9 +307,9 @@ void PaintContext::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void PaintContext::onResetPaint()
+void PaintContext::onFinishPaint()
 {
-    // NOTE: this might be called from the attached canvas base class destructor
+    // NOTE: this might be called from the attached surface base class destructor
 
     if(_pixmap)
         _pixmap = 0;

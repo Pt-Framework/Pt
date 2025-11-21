@@ -62,22 +62,19 @@ MainWindow::MainWindow()
 {
     setContent(&_workspace);
     
-    Pt::Gfx::Image im;
+    Pt::Gfx::Image windowIcon;
 
     std::stringstream ss;
-
     ss.write((const char*)atesionIcon, atesionIconSize);
 
-
-
-    Pt::Gfx::PngReader reader(ss, im);
+    Pt::Gfx::PngReader reader(ss, windowIcon);
     
     setTitle("Main 1");
     move( Gfx::PointF(80, 80) );
     resize( Gfx::SizeF(900, 850) );
 
-    im = reader.get();    
-    setIcon(im);
+    windowIcon = reader.get();    
+    setIcon(windowIcon);
 
     //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(550, 600) );

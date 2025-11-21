@@ -221,7 +221,7 @@ class ViewSurface : public PaintSurface
             // context is released by parent surface
         }
 
-        virtual void onSync() override
+        virtual void onFinish() override
         {
             // sync is done by parent surface
         }

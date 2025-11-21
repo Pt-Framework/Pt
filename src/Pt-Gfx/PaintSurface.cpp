@@ -89,12 +89,7 @@ PaintContext* PaintSurface::getContext(PaintContext* reuse)
 
 Gfx::PaintContext* PaintSurface::onGetContext(Gfx::PaintContext* reuse)
 {
-    if(_context)
-    {
-        onReleaseContext();
-        _context->detachSurface(*this);
-        _context = 0;
-    }
+    releaseContext();
     
     _context = onCreateContext(reuse);
     _context->attachSurface(*this);
@@ -111,18 +106,7 @@ Gfx::PaintContext* PaintSurface::onGetContext(Gfx::PaintContext* reuse)
 }
 
 
-Gfx::PaintContext* PaintSurface::onCreateContext(Gfx::PaintContext* reuse)
-{
-    return 0;
-}
-
-
-void PaintSurface::onReleaseContext()
-{
-}
-
-
-void PaintSurface::invalidate()
+void PaintSurface::releaseContext()
 {
     if(_context)
     {
@@ -134,9 +118,21 @@ void PaintSurface::invalidate()
 }
 
 
-void PaintSurface::sync()
+Gfx::PaintContext* PaintSurface::onCreateContext(Gfx::PaintContext* reuse)
 {
-    onSync();
+    return 0;
+}
+
+
+void PaintSurface::onReleaseContext()
+{
+}
+
+
+void PaintSurface::finish()
+{
+    releaseContext();
+    onFinish();
 }
 
 
@@ -186,7 +182,7 @@ Canvas::~Canvas()
         _painter->onDetachCanvas(*this);
     }
 
-    sync();
+    finish();
 }
 
 
@@ -196,10 +192,10 @@ PaintSurface* Canvas::surface()
 }
 
 
-void Canvas::sync()
+void Canvas::finish()
 {
     if(_surface)
-        _surface->sync();
+        _surface->finish();
 }
 
 

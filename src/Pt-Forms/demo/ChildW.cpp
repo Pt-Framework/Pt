@@ -207,15 +207,15 @@ ChildW::ChildW(const std::string& title)
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.setPadding(5);
-    _buttonBar.addItem(_comboBox, DockingLayout::Bottom);
-    _buttonBar.addItem(_lineEdit, DockingLayout::Bottom);
-    _buttonBar.addItem(_checkBox, DockingLayout::Bottom);
-    _buttonBar.addItem(_closeButton, DockingLayout::Bottom);
-    _buttonBar.addItem(_dialogButton, DockingLayout::Bottom); 
-    _buttonBar.addItem(_toggleButton, DockingLayout::Bottom);
-    _buttonBar.addItem(_progressBar, DockingLayout::Bottom);
-    _buttonBar.addItem(_slider, DockingLayout::Bottom);
-    _buttonBar.addItem(_spinBox, DockingLayout::Bottom);
+    _buttonBar.addItem(_comboBox, DockingLayout::Top);
+    _buttonBar.addItem(_lineEdit, DockingLayout::Top);
+    _buttonBar.addItem(_checkBox, DockingLayout::Top);
+    _buttonBar.addItem(_closeButton, DockingLayout::Top);
+    _buttonBar.addItem(_dialogButton, DockingLayout::Top); 
+    _buttonBar.addItem(_toggleButton, DockingLayout::Top);
+    _buttonBar.addItem(_progressBar, DockingLayout::Top);
+    _buttonBar.addItem(_slider, DockingLayout::Top);
+    _buttonBar.addItem(_spinBox, DockingLayout::Top);
  
     _childView.setName("MainPanel");
     _childView.setPadding(20); 

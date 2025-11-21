@@ -175,9 +175,9 @@ void RasterContext::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void RasterContext::onResetPaint()
+void RasterContext::onFinishPaint()
 {
-    // NOTE: this might be called from the attached canvas base class destructor
+    // NOTE: this might be called from the attached surface base class destructor
 
     if(_image)
         _image = 0;

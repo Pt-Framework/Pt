@@ -88,7 +88,7 @@ class PT_GFX_API RasterSurface : private NonCopyable
 
     void releaseContext();
 
-    void sync();
+    void finish();
 
     void drawBitmap(const Pt::Gfx::PointF& to,
                     const Bitmap& bitmap,

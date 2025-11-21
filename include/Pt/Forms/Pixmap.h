@@ -86,7 +86,7 @@ class PT_FORMS_API Pixmap : public PaintSurface
 
         virtual void onReleaseContext() override;
 
-        virtual void onSync() override;
+        virtual void onFinish() override;
 
     public:
         static void setFontDir(const System::Path& path);

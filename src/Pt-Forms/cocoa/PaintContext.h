@@ -230,9 +230,9 @@ class PaintContext : public Gfx::PaintContext
             //std::clog << "\nonBeginPaint" << std::endl;
         }
 
-        virtual void onResetPaint() override
+        virtual void onFinishPaint() override
         {
-            //std::clog << "onResetPaint" << std::endl;
+            //std::clog << "onFinishPaint" << std::endl;
 
             if(_pixmapCanvas)
                 _pixmapCanvas = 0;

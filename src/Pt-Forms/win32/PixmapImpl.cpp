@@ -343,7 +343,7 @@ void PixmapImpl::releaseContext()
 }
 
 
-void PixmapImpl::sync()
+void PixmapImpl::finish()
 {
 }
 
