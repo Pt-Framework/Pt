@@ -178,8 +178,6 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     _height = height;
 
     _physicalSize.set(width, height);
-
-    _logicalSize = scaling().toLogical(_physicalSize);
 }
 
 
@@ -270,26 +268,13 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 
 const Gfx::SizeF& PixmapImpl::size() const
 {
-    return physicalSize();
-}
-
-
-const Gfx::SizeF& PixmapImpl::physicalSize() const
-{
     return _physicalSize;
-}
-
-
-const Gfx::SizeF& PixmapImpl::logicalSize() const
-{
-    return _logicalSize;
 }
 
 
 void PixmapImpl::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
-    _logicalSize = _scaling.toLogical(_physicalSize);
 }
 
 

@@ -70,10 +70,6 @@ class PT_GFX_API RasterSurface : private NonCopyable
 
     void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
-    const SizeF& physicalSize() const;
-
-    const SizeF& logicalSize() const;
-
     void setScaleFactor(double scaleFactor);
 
     const Gfx::ImageFormat& format() const;
@@ -100,7 +96,6 @@ class PT_GFX_API RasterSurface : private NonCopyable
   private:
     Image          _image;
     Gfx::SizeF     _physicalSize;
-    Gfx::SizeF     _logicalSize;
     Gfx::Scaling   _scaling;
     RasterContext* _context;
 };

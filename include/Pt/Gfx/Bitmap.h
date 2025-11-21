@@ -71,10 +71,6 @@ class PT_GFX_API Bitmap : public PaintSurface
 
         const Gfx::Image& image() const;
 
-        const SizeF& physicalSize() const;
-
-        const SizeF& logicalSize() const;
-
         void setScaleFactor(double scaleFactor);
 
         void drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& image,

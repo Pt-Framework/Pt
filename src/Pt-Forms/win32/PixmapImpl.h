@@ -180,10 +180,6 @@ class PixmapImpl
 
         void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
 
-        const Gfx::SizeF& physicalSize() const;
-
-        const Gfx::SizeF& logicalSize() const;
-
         void setScaleFactor(double scaleFactor);
 
         HDC deviceContext() const;
@@ -226,7 +222,6 @@ class PixmapImpl
 
     private:
         Gfx::SizeF     _physicalSize;
-        Gfx::SizeF     _logicalSize;
         Gfx::Scaling   _scaling;
 
         LONG           _width;

@@ -80,10 +80,6 @@ void RasterSurface::reset(const Gfx::Image& image)
     }
 
     _physicalSize.set( image.width(), image.height() );
-    _logicalSize = _scaling.toLogical( Gfx::SizeF( image.width(), 
-                                                   image.height() ) );
-
-    //invalidate();
 }
 
 
@@ -95,21 +91,6 @@ void RasterSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
     _image.reset( _image.format(), width, height, stride );
 
     _physicalSize.set(width, height);
-    _logicalSize = _scaling.toLogical( Gfx::SizeF(width, height) );
-
-    //invalidate();
-}
-
-
-const SizeF& RasterSurface::physicalSize() const
-{
-    return _physicalSize;
-}
-
-
-const SizeF& RasterSurface::logicalSize() const
-{
-    return _logicalSize;
 }
 
 
@@ -118,10 +99,6 @@ void RasterSurface::setScaleFactor(double scaleFactor)
     _scaling.setScaleFactor(scaleFactor);
 
     _physicalSize.set( _image.width(), _image.height() );
-    _logicalSize = _scaling.toLogical( Gfx::SizeF( _image.width(), 
-                                                   _image.height() ) );
-
-    //invalidate();
 }
 
 
@@ -133,7 +110,7 @@ const Gfx::ImageFormat& RasterSurface::format() const
 
 const Gfx::SizeF& RasterSurface::size() const
 {
-    return physicalSize();
+    return _physicalSize;
 }
 
 

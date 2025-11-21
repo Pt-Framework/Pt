@@ -85,18 +85,6 @@ const Gfx::Image& Bitmap::image() const
 }
 
 
-const SizeF& Bitmap::physicalSize() const
-{
-    return _rasterSurface->physicalSize();
-}
-
-
-const SizeF& Bitmap::logicalSize() const
-{
-    return _rasterSurface->logicalSize();
-}
-
-
 void Bitmap::setScaleFactor(double scaleFactor)
 {
     _rasterSurface->setScaleFactor(scaleFactor);
