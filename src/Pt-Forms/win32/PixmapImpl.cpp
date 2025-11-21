@@ -373,13 +373,18 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
     }
 
     Gfx::CompositionMode compositionMode = paint.compositionMode();
+    HDC pixmapDC = pixmap->deviceContext();
+
+    int state = SaveDC(_dc);
+    if(state == 0)
+        return;
 
     switch(compositionMode)
     {
         case Gfx::CompositionMode::SourceCopy:
         {
             BitBlt(_dc, lround(to.x()), lround(to.y()), width, height,
-                   pixmap->deviceContext(), fromX, fromY, SRCCOPY);
+                   pixmapDC, fromX, fromY, SRCCOPY);
         }
         break;
 
@@ -391,13 +396,15 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
             bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
             bf.AlphaFormat = AC_SRC_ALPHA;
 
-            HDC pixmapDC = pixmap->deviceContext();
+            
 
             AlphaBlend(_dc, lround(to.x()), lround(to.y()), width, height,
                        pixmapDC, fromX, fromY, width, height, bf);
         }
         break;
     }
+
+    RestoreDC(_dc, state);
 }
 
 

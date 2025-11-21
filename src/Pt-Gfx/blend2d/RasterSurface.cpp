@@ -172,9 +172,6 @@ Gfx::PaintContext* RasterSurface::createContext(Gfx::PaintContext* context)
 void RasterSurface::releaseContext()
 {
     _rasterContext.restore(_stateCookie);
-
-    // only on sync()
-    //_rasterContext.end();
 }
 
 
@@ -218,6 +215,9 @@ void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
                                const Gfx::Paint& paint,
                                const Gfx::RectF* bitmapRect)
 {
+    if( ! _rasterContext.target_image() )
+        _rasterContext.begin(_rasterImage);
+
     _rasterContext.save();
     _rasterContext.reset_transform();
 
@@ -347,9 +347,9 @@ void RasterSurface::putImage(const PointI& to, const Image& image,
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
-              << "from: " << fromRect.x() << ", " << fromRect.y() << " "
-              << fromRect.width() << "x" << fromRect.height() << std::endl;
+    //std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
+    //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
+    //          << fromRect.width() << "x" << fromRect.height() << std::endl;
 
     _image.view().copy(toRect.x(), toRect.y(), image.view(), 
                        fromRect.x(), fromRect.y(), 
