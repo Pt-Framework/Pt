@@ -81,9 +81,9 @@ class PT_FORMS_API Panel : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter);
+        virtual void onPaintContent(PaintSurface& surface, Gfx::Painter& painter);
 
     private:
         Control*                 _content;

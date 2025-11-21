@@ -161,7 +161,7 @@ class PT_FORMS_API Control : public View
 
         virtual void onPaintEvent(const PaintEvent& ev);
         
-        virtual void onPaint(Gfx::PaintSurface& surface, 
+        virtual void onPaint(PaintSurface& surface, 
                              const Gfx::RectF& rect);
 
     //

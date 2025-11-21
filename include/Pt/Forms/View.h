@@ -88,7 +88,7 @@ class PT_FORMS_API View : public Widget
         virtual void onSetSurface(PaintSurface* surface, 
                                   const Gfx::PointF& pos);
 
-        virtual void onPaint(Gfx::PaintSurface& surface, 
+        virtual void onPaint(PaintSurface& surface, 
                              const Gfx::RectF& rect);
     
     protected:

@@ -531,7 +531,7 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaint(Gfx::PaintSurface&, 
+void Label::onPaint(PaintSurface& surface, 
                     const Gfx::RectF& rect)
 {
     //std::clog << " paint " << _text.narrow() << this << std::endl;
@@ -541,7 +541,7 @@ void Label::onPaint(Gfx::PaintSurface&,
     if( ! _renderer)
         return;
 
-    Canvas canvas( surface() );
+    Canvas canvas(surface);
 
     Gfx::Painter painter(canvas);
     painter.setClip(rect);

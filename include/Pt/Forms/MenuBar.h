@@ -87,7 +87,7 @@ class PT_FORMS_API MenuBar : public Control
 
         virtual void onLayout(const Pt::Gfx::RectF& rect);
 
-        virtual void onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect);
+        virtual void onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect);
         
         virtual bool onMouseEvent(const Pt::Forms::MouseEvent& ev);
 

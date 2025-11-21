@@ -220,9 +220,9 @@ void Workspace::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Workspace::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void Workspace::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Control::onPaint(surface, rect);
+    Base::onPaint(surface, rect);
 }
 
 

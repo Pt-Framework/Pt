@@ -467,7 +467,7 @@ void PushButton::onInvalidate()
 }
 
 
-void PushButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

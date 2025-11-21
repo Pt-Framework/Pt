@@ -240,7 +240,7 @@ void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
 }
 
 
-void MenuBar::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuBar::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {
     Base::onPaint(surface, rect);
 

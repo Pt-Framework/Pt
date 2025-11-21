@@ -213,7 +213,7 @@ void Panel::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -241,7 +241,7 @@ void Panel::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
+void Panel::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
 {
     if(  _picture.empty() )
         return;

@@ -100,7 +100,7 @@ class PT_FORMS_API ProgressBar : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         Signal<int> _valueChanged;

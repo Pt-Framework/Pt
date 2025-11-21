@@ -98,7 +98,7 @@ class PT_FORMS_API Slider : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 

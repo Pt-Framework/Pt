@@ -17,7 +17,7 @@ MenuSubItem::~MenuSubItem()
 }
 
 
-void MenuSubItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuSubItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 

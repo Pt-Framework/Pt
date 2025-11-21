@@ -252,7 +252,7 @@ void Slider::onInvalidate()
 }
 
 
-void Slider::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

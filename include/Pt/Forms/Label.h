@@ -104,7 +104,7 @@ class PT_FORMS_API Label : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(Gfx::PaintSurface& surface, 
+        virtual void onPaint(PaintSurface& surface, 
                              const Gfx::RectF& rect);
 
     private:

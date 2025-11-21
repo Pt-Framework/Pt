@@ -60,7 +60,7 @@ Pt::Gfx::SizeF MenuBarItem::onMeasure(const  Pt::Forms::SizePolicy& policy)
 }
 
 
-void MenuBarItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuBarItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {    
     MenuBaseItem::onPaint(surface,rect);
     

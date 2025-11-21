@@ -292,7 +292,7 @@ void ListBoxItem::onInvalidate()
 }
 
 
-void ListBoxItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -311,7 +311,7 @@ void ListBoxItem::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void ListBoxItem::onPaintContent(Gfx::PaintSurface& surface, Gfx::Painter& painter)
+void ListBoxItem::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
 {   
     painter.setFont(_font);
     painter.setPen(_textPen);
@@ -629,7 +629,7 @@ void ListBox::onInvalidate()
 }
 
 
-void ListBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

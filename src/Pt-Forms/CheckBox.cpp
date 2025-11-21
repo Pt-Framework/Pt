@@ -229,7 +229,7 @@ void CheckBox::onInvalidate()
 }
 
 
-void CheckBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

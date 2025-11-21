@@ -140,7 +140,7 @@ void WindowButton::touchEvent(const TouchEvent& tev)
 }
 
 
-void WindowButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Gfx::Painter painter(surface);
     painter.setClip(rect);
@@ -222,7 +222,7 @@ MinimizeButton::~MinimizeButton()
 }
 
 
-void MinimizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
@@ -258,7 +258,7 @@ MaximizeButton::~MaximizeButton()
 }
 
 
-void MaximizeButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
@@ -300,7 +300,7 @@ CloseButton::~CloseButton()
 }
 
 
-void CloseButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
@@ -358,7 +358,7 @@ MenuButton::~MenuButton()
 }
 
 
-void MenuButton::paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Gfx::Painter painter(surface);
     painter.setClip(rect);

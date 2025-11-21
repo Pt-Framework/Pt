@@ -93,7 +93,7 @@ class WindowButton
 
         virtual void touchEvent(const TouchEvent& tev);
 
-        virtual void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
         Signal<>           _clicked;
@@ -110,7 +110,7 @@ class MinimizeButton : public WindowButton
 
         ~MinimizeButton();
 
-        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -121,7 +121,7 @@ class MaximizeButton : public WindowButton
 
         ~MaximizeButton();
 
-        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -132,7 +132,7 @@ class CloseButton : public WindowButton
 
         ~CloseButton();
 
-        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -143,7 +143,7 @@ class MenuButton : public WindowButton
 
         ~MenuButton();
 
-        void paint(Gfx::PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 

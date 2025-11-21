@@ -609,7 +609,7 @@ void Control::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Control::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
+void Control::onPaint(PaintSurface&, const Gfx::RectF&)
 {
 }
 

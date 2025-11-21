@@ -375,7 +375,7 @@ void ScreenImpl::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void ScreenImpl::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void ScreenImpl::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Gfx::Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);

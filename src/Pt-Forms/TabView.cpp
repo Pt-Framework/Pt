@@ -179,7 +179,7 @@ void TabBar::onLayout(const Gfx::RectF& rect)
 }
 
 
-void TabBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -395,7 +395,7 @@ void TabView::onLayout(const Gfx::RectF& rect)
 }
 
 
-void TabView::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void TabView::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Base::onPaint(surface, rect);
 

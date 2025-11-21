@@ -1407,7 +1407,7 @@ void PlatinumTabViewRenderer::onRender(const TabView& tv,
 }
 
 
-Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(Gfx::PaintSurface& surface,
+Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintSurface& surface,
                                                   const std::vector<TabItem>& tabs,
                                                   const Gfx::Font& font) const
 {
@@ -1430,7 +1430,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(Gfx::PaintSurface& surface,
 }
 
 
-void PlatinumTabViewRenderer::onLayoutTabs(Gfx::PaintSurface& surface,
+void PlatinumTabViewRenderer::onLayoutTabs(PaintSurface& surface,
                                            std::vector<TabItem>& tabs,
                                            const Gfx::RectF& rect, 
                                            const Gfx::Font& font) const

@@ -259,7 +259,7 @@ void ProgressBar::onInvalidate()
 }
 
 
-void ProgressBar::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void ProgressBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

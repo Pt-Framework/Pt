@@ -134,7 +134,7 @@ void SpinBoxButton::onInvalidate()
 }
 
 
-void SpinBoxButton::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBoxButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -605,7 +605,7 @@ void SpinBox::onInvalidate()
 }
 
 
-void SpinBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

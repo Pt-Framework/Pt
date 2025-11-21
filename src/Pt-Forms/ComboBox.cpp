@@ -396,7 +396,7 @@ void ComboBox::onInvalidate()
 }
 
 
-void ComboBox::onPaint(Gfx::PaintSurface& surface, const Gfx::RectF& rect)
+void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

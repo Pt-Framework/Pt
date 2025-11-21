@@ -187,7 +187,7 @@ void View::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void View::onPaint(Gfx::PaintSurface&, const Gfx::RectF&)
+void View::onPaint(PaintSurface&, const Gfx::RectF&)
 {
 }
 

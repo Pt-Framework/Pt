@@ -291,7 +291,7 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
 }
 
 
-void MenuBaseItem::onPaint(Pt::Gfx::PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuBaseItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 

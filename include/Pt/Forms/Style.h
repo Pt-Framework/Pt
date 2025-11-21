@@ -33,6 +33,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Spacing.h>
+#include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
@@ -1073,11 +1074,11 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
                     const Gfx::Brush& foreground,
                     const Gfx::Pen& contour) const;
 
-        Gfx::SizeF measureTabs(Gfx::PaintSurface& surface,
+        Gfx::SizeF measureTabs(PaintSurface& surface,
                                const std::vector<TabItem>& tabs,
                                const Gfx::Font& font) const;
 
-        void layoutTabs(Gfx::PaintSurface& surface,
+        void layoutTabs(PaintSurface& surface,
                         std::vector<TabItem>& tabs,
                         const Gfx::RectF& rect, 
                         const Gfx::Font& font) const;
@@ -1115,11 +1116,11 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
                               const Gfx::Brush& foreground,
                               const Gfx::Pen& contour) const = 0;
 
-        virtual Gfx::SizeF onMeasureTabs(Gfx::PaintSurface& surface,
+        virtual Gfx::SizeF onMeasureTabs(PaintSurface& surface,
                                          const std::vector<TabItem>& tabs,
                                          const Gfx::Font& font) const = 0;
 
-        virtual void onLayoutTabs(Gfx::PaintSurface& surface,
+        virtual void onLayoutTabs(PaintSurface& surface,
                                   std::vector<TabItem>& tabs,
                                   const Gfx::RectF& rect, 
                                   const Gfx::Font& font) const = 0;
