@@ -221,11 +221,11 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
             (*it) = color;
         }
 
-        picture.set(highlightIcon);
+        picture.reset(highlightIcon);
     }
     else
     {
-        picture.set(icon);
+        picture.reset(icon);
     }
 }
 
@@ -654,7 +654,7 @@ void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m,
                                          Gfx::Font& font,
                                          Gfx::Pen& textPen) const
 {
-    picture.set(icon);
+    picture.reset(icon);
 
     if( m.isHighlighted() )
         brush =  options.highlightColor();

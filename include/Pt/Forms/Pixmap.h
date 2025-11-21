@@ -53,17 +53,19 @@ class PT_FORMS_API Pixmap : public PaintSurface
 
         virtual ~Pixmap();
 
-        void set(const Gfx::Image& image);
+        void reset();
 
-        void getBitmap(Gfx::Bitmap& image, const Gfx::RectF& rect);
-
-        bool empty() const;
-
-        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
+        /** @brief Resets to an image. 
+        */
+        void reset(const Gfx::Image& image);
 
         /** @brief Resizes to a size in physical pixels. 
         */
-        void resize(const Gfx::SizeF& size);
+        void reset(const Gfx::SizeF& size);
+
+        bool empty() const;
+
+        void getBitmap(Gfx::Bitmap& image, const Gfx::RectF& rect);
 
         void setScaleFactor(double v);
 

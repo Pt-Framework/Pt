@@ -163,11 +163,11 @@ void Panel::onInvalidate()
     {
         const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _picture.set(iconImage);
+        _picture.reset(iconImage);
     }
     else
     {
-        _picture.set(Pt::Gfx::Image());
+        _picture.reset(Pt::Gfx::Image());
     }
 }
 

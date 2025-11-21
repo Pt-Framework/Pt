@@ -59,12 +59,6 @@ Bitmap::~Bitmap()
 }
 
 
-const Gfx::Image& Bitmap::image() const
-{
-    return _rasterSurface->image();
-}
-
-
 void Bitmap::reset(const Gfx::Image& image)
 {
     _rasterSurface->reset(image);
@@ -76,6 +70,18 @@ void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
     _rasterSurface->reset(sizeF, stride);
     releaseContext();
+}
+
+
+bool Bitmap::empty() const
+{
+    return _rasterSurface->image().empty();
+}
+
+
+const Gfx::Image& Bitmap::image() const
+{
+    return _rasterSurface->image();
 }
 
 

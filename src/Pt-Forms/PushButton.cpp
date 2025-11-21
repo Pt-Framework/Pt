@@ -424,7 +424,7 @@ void PushButton::onIconChanged()
     }
     else
     {
-        _picture.clear();
+        _picture.reset();
     }
 }
 
@@ -455,7 +455,7 @@ void PushButton::onInvalidate()
     }
     else
     {
-        _picture.clear();
+        _picture.reset();
     }
     //// onIconChanged()
 

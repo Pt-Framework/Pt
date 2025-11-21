@@ -159,13 +159,37 @@ PixmapImpl::~PixmapImpl()
 }
 
 
-void PixmapImpl::set(const Gfx::Image& image)
+void PixmapImpl::reset(const Gfx::SizeF& size)
+{
+    LONG width = lround( size.width() );
+    LONG height = lround( size.height() );
+
+    if( _width == width && _height == height )
+        return;
+    
+    HDC screenDC = GetDC(NULL);
+    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, width, height);
+    ReleaseDC(NULL, screenDC);
+
+    SelectObject(_dc, bitmap);
+    DeleteObject(_bitmap);
+    _bitmap = bitmap;
+    _width = width;
+    _height = height;
+
+    _physicalSize.set(width, height);
+
+    _logicalSize = scaling().toLogical(_physicalSize);
+}
+
+
+void PixmapImpl::reset(const Gfx::Image& image)
 {
     size_t width = image.width();
     size_t height = image.height();
 
     Gfx::SizeF size(width, height);
-    resize(size);
+    reset(size);
 
     std::vector<Pt::uint8_t> bitmapData;
     toPreMulAlpha(image, bitmapData);
@@ -233,11 +257,6 @@ Gfx::Image PixmapImpl::toImage() const
 }
 
 
-void PixmapImpl::clear(const Gfx::Color& c)
-{
-}
-
-
 void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
     bitmap.reset( rect.size() );
@@ -264,30 +283,6 @@ const Gfx::SizeF& PixmapImpl::physicalSize() const
 const Gfx::SizeF& PixmapImpl::logicalSize() const
 {
     return _logicalSize;
-}
-
-
-void PixmapImpl::resize(const Gfx::SizeF& size)
-{
-    LONG width = lround( size.width() );
-    LONG height = lround( size.height() );
-
-    if( _width == width && _height == height )
-        return;
-    
-    HDC screenDC = GetDC(NULL);
-    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, width, height);
-    ReleaseDC(NULL, screenDC);
-
-    SelectObject(_dc, bitmap);
-    DeleteObject(_bitmap);
-    _bitmap = bitmap;
-    _width = width;
-    _height = height;
-
-    _physicalSize.set(width, height);
-
-    _logicalSize = scaling().toLogical(_physicalSize);
 }
 
 

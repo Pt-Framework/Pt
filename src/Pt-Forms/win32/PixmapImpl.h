@@ -69,9 +69,14 @@ class PixmapImpl
         PixmapImpl()
         { }
 
-        void set(const Gfx::Image& image)
+        void reset(const Gfx::Image& image)
         {
             _bitmap.reset(image);
+        }
+
+        void reset(const Gfx::SizeF& size)
+        {
+            _bitmap.reset(size);
         }
 
         const Gfx::Bitmap& bitmap() const 
@@ -87,17 +92,9 @@ class PixmapImpl
             bitmap.drawBitmap(Gfx::PointF(0, 0), _bitmap, paint, &rect);
         }
 
-        void clear(const Gfx::Color& c)
-        { }
-
         const Gfx::SizeF& size() const
         {
             return _bitmap.size();
-        }
-
-        void resize(const Gfx::SizeF& size)
-        {
-            _bitmap.reset(size);
         }
 
         void setScaleFactor(double scaleFactor)
@@ -175,9 +172,9 @@ class PixmapImpl
 
         virtual ~PixmapImpl();
 
-        void set(const Gfx::Image& image);
-        
-        void clear(const Gfx::Color& c);
+        void reset(const Gfx::Image& image);
+
+        void reset(const Gfx::SizeF& size);
 
         Gfx::Image PixmapImpl::toImage() const;
 
@@ -187,8 +184,6 @@ class PixmapImpl
 
         const Gfx::SizeF& logicalSize() const;
 
-        void resize(const Gfx::SizeF& size);
-        
         void setScaleFactor(double scaleFactor);
 
         HDC deviceContext() const;

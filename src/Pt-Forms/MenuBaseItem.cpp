@@ -258,7 +258,7 @@ void MenuBaseItem::onInvalidate()
     _textPen = textColor();
     _font = Pt::Gfx::Font(font(), fontSize(), fontStyle());
 
-    _picture.set(_icon);
+    _picture.reset(_icon);
 
     if(_isHighlighted)
         _brush = options.highlightColor();

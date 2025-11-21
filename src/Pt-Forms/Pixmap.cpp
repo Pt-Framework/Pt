@@ -48,9 +48,23 @@ Pixmap::~Pixmap()
 }
 
 
-void Pixmap::set(const Gfx::Image& image)
+void Pixmap::reset()
 {
-    _impl->set(image);
+    releaseContext();
+    finish();
+}
+
+
+void Pixmap::reset(const Gfx::Image& image)
+{
+    _impl->reset(image);
+    releaseContext();
+}
+
+
+void Pixmap::reset(const Gfx::SizeF& size)
+{
+    _impl->reset(size);
     releaseContext();
 }
 
@@ -61,28 +75,15 @@ bool Pixmap::empty() const
 }
 
 
-void Pixmap::resize(const Gfx::SizeF& size)
+void Pixmap::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect)
 {
-    _impl->resize(size);
-    releaseContext();
+     _impl->getBitmap(bitmap, rect);
 }
 
 
 void Pixmap::setScaleFactor(double scaling)
 {
     _impl->setScaleFactor(scaling);
-}
-
-
-void Pixmap::clear(const Gfx::Color& c)
-{
-    _impl->clear(c);
-}
-
-
-void Pixmap::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect)
-{
-     _impl->getBitmap(bitmap, rect);
 }
 
 

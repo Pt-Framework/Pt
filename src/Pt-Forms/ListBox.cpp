@@ -279,13 +279,13 @@ void ListBoxItem::onInvalidate()
 
     if (_icon.empty())
     {
-        _picture.set(Gfx::Image());
+        _picture.reset(Gfx::Image());
     }
     else
     {
         const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _picture.set(iconImage);
+        _picture.reset(iconImage);
     }
 
     Base::onInvalidate();

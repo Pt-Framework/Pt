@@ -126,14 +126,11 @@ void WindowFrame::onProcessRescaleEvent(const RescaleEvent& ev)
 void WindowFrame::onRescaleEvent(const RescaleEvent& ev)
 {
     Base::onRescaleEvent(ev);
-  
-    // TODO: the reported scale factor divided by the application
-    //       scale factor is the window specific one
 
     _pixmap.setScaleFactor( ev.scaleFactor() );
 
     Gfx::SizeF pixmapSize = scaling().toPhysical( size() );
-    _pixmap.resize(pixmapSize);
+    _pixmap.reset(pixmapSize);
 }
 
 
@@ -148,7 +145,7 @@ void WindowFrame::onResizeEvent(const ResizeEvent& ev)
     Widget::onResizeEvent(ev);
 
     Gfx::SizeF pixmapSize = scaling().toPhysical( ev.size() );
-    _pixmap.resize(pixmapSize);
+    _pixmap.reset(pixmapSize);
 }
 
 

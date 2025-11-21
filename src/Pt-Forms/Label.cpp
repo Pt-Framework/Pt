@@ -84,7 +84,7 @@ void Label::setText(const Pt::String& text)
     _icon.clear();
     _iconSize.set(0, 0);
     
-    _pixmap.set( Pt::Gfx::Image() );
+    _pixmap.reset( Pt::Gfx::Image() );
 
     relayout();
 }
@@ -521,7 +521,7 @@ void Label::onInvalidate()
 
         Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _pixmap.set(iconImage);
+        _pixmap.reset(iconImage);
 
         needsRelayout = true;
     }

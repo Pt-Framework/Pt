@@ -52,53 +52,59 @@ class RasterSurface;
 */
 class PT_GFX_API Bitmap : public PaintSurface
 {
-  public:
-    Bitmap();
+    public:
+        Bitmap();
 
-    Bitmap(const Gfx::SizeF& size, std::size_t stride = 0);
+        Bitmap(const Gfx::SizeF& size, std::size_t stride = 0);
 
-    virtual ~Bitmap();
+        virtual ~Bitmap();
 
-    const Gfx::Image& image() const;
+        /** @brief Resets to an image. 
+        */
+        void reset(const Gfx::Image& image);
 
-    void reset(const Gfx::Image& image);
+        /** @brief Resizes to a size in physical pixels. 
+        */
+        void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
-    void reset(const Gfx::SizeF&, std::size_t stride = 0);
+        bool empty() const;
 
-    const SizeF& physicalSize() const;
+        const Gfx::Image& image() const;
 
-    const SizeF& logicalSize() const;
+        const SizeF& physicalSize() const;
 
-    void setScaleFactor(double scaleFactor);
+        const SizeF& logicalSize() const;
 
-    void drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& image,
-                    const Gfx::Paint& paint, const Gfx::RectF* rect = 0);
+        void setScaleFactor(double scaleFactor);
 
-  protected:
-    virtual const Gfx::ImageFormat& onGetFormat() const;
+        void drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& image,
+                        const Gfx::Paint& paint, const Gfx::RectF* rect = 0);
 
-    virtual const Gfx::SizeF& onGetSize() const;
+    protected:
+        virtual const Gfx::ImageFormat& onGetFormat() const;
 
-    virtual const Scaling& onGetScaling() const;
+        virtual const Gfx::SizeF& onGetSize() const;
 
-  protected:
-    virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+        virtual const Scaling& onGetScaling() const;
 
-    virtual void onReleaseContext() override;
+    protected:
+        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
 
-    virtual void onFinish() override;
+        virtual void onReleaseContext() override;
 
-  public:
-    static void setFontDir(const System::Path& path);
+        virtual void onFinish() override;
 
-    static const std::string& defaultFont();
+    public:
+        static void setFontDir(const System::Path& path);
 
-    static void setDefaultFont(const std::string& name);
+        static const std::string& defaultFont();
 
-    static std::vector<std::string> fontNames();
+        static void setDefaultFont(const std::string& name);
 
-  private:
-    RasterSurface* _rasterSurface;
+        static std::vector<std::string> fontNames();
+
+    private:
+        RasterSurface* _rasterSurface;
 };
 
 } // namespace
