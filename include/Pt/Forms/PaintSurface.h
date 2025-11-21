@@ -38,6 +38,8 @@ namespace Forms {
 
 class Pixmap;
 
+/** @brief Paint surface.
+*/
 class PT_FORMS_API PaintSurface : public Gfx::PaintSurface
 {
     public:
@@ -76,7 +78,8 @@ inline void PaintSurface::drawPixmap(const Gfx::PointF& to,
     onDrawPixmap(to,pixmap,paint,rect);
 }
 
-
+/** @brief Paint canvas.
+*/
 class PT_FORMS_API Canvas : public Gfx::Canvas
 {
     public:
