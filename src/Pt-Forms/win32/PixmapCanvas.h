@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_WIN32_PAINTCONTEXT_H
-#define PT_FORMS_WIN32_PAINTCONTEXT_H
+#ifndef PT_FORMS_WIN32_PIXMAP_CANVAS_H
+#define PT_FORMS_WIN32_PIXMAP_CANVAS_H
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Gfx/Rect.h>
