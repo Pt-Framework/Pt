@@ -188,10 +188,7 @@ class ViewSurface : public PaintSurface
 
         const Gfx::SizeF& onGetSize() const
         {
-            if(_surface)
-                return _surface->size();
-            
-            return _size;
+            return _view->size();
         }
 
         virtual const Gfx::Scaling& onGetScaling() const override
@@ -230,10 +227,9 @@ class ViewSurface : public PaintSurface
         }
 
     private:
-        View*            _view;
+        Widget*          _view;
         PaintSurface*    _surface;
         Gfx::PointF      _position;
-        Gfx::SizeF       _size;
 };
 
 } // namespace

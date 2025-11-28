@@ -106,7 +106,7 @@ void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
     Base::onProcessPaintEvent(ev);
 
-    _pixmap.finish();
+    _pixmap.sync();
     _wm.surfaceChanged().send(_window);
 }
 

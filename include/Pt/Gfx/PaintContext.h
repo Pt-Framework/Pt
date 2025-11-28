@@ -48,8 +48,12 @@ class PT_GFX_API PaintContext : private NonCopyable
     friend class Painter;
 
     public:
+        /** @brief Constructs a context using the paint surface.
+        */
         PaintContext(PaintSurface& surface);
 
+        /** @brief Destructor.
+        */
         ~PaintContext();
 
         /** @brief Returns the image format.
@@ -68,8 +72,12 @@ class PT_GFX_API PaintContext : private NonCopyable
         */
         Canvas* getCanvas(Canvas* canvas);
 
+        /** @brief Syncs the paint surface.
+        */
         void sync();
 
+        /** @brief Finishes painting on the surface.
+        */
         void finish();
 
     private:

@@ -31,6 +31,7 @@
 
 #include <Pt/Forms/WindowFrame.h>
 #include <Pt/Forms/Cursor.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -93,7 +94,7 @@ class WindowButton
 
         virtual void touchEvent(const TouchEvent& tev);
 
-        virtual void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void paint(PaintContext& context, const Gfx::RectF& rect);
 
     private:
         Signal<>           _clicked;
@@ -110,7 +111,7 @@ class MinimizeButton : public WindowButton
 
         ~MinimizeButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintContext& context, const Gfx::RectF& rect);
 };
 
 
@@ -121,7 +122,7 @@ class MaximizeButton : public WindowButton
 
         ~MaximizeButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintContext& context, const Gfx::RectF& rect);
 };
 
 
@@ -132,7 +133,7 @@ class CloseButton : public WindowButton
 
         ~CloseButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintContext& context, const Gfx::RectF& rect);
 };
 
 
@@ -143,7 +144,7 @@ class MenuButton : public WindowButton
 
         ~MenuButton();
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintContext& context, const Gfx::RectF& rect);
 };
 
 
@@ -362,6 +363,7 @@ class WorkspaceFrame : public WindowFrame
         bool           _isTopResizing;
         bool           _isBottomResizing;
 
+        PaintContext   _context;
         bool           _needsRepaint;
 
         FrameItem      _currentFrameItem;

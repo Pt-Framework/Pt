@@ -51,6 +51,8 @@ Pixmap::~Pixmap()
 void Pixmap::reset()
 {
     releaseCanvas();
+
+    // TODO: _impl->reset( Gfx::SizeF(0.1, 0.0) );
     finish();
 }
 

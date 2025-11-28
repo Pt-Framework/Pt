@@ -30,7 +30,6 @@
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Application.h>
-#include <Pt/Forms/PaintContext.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/TextMetrics.h>
 
@@ -542,9 +541,7 @@ void Label::onPaint(PaintSurface& surface,
     if( ! _renderer)
         return;
 
-    PaintContext context(surface);
-
-    Gfx::Painter painter(context);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -582,7 +579,7 @@ void Label::onPaint(PaintSurface& surface,
 
         Gfx::Paint paint;
         paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        context.drawPixmap(_iconPos, picture, paint);
+        surface.drawPixmap(_iconPos, picture, paint);
     }
 
     //if(pen)

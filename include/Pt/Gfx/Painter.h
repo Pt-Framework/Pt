@@ -72,27 +72,27 @@ class PT_GFX_API Painter : private NonCopyable
         */
         Painter();
 
-        /** @brief @brief Constructs using a paint surface.
+        /** @brief Constructs using a paint surface.
         */
         explicit Painter(PaintSurface& surface);
 
-        /** @brief @brief Constructs using a canvas.
+        /** @brief Constructs using a canvas.
         */
         explicit Painter(PaintContext& canvas);
 
-        /** @brief @brief Destructor.
+        /** @brief Destructor.
         */
         virtual ~Painter();
 
-        /** @brief @brief Begins painting to a paint surface.
+        /** @brief Begins painting to a paint surface.
         */
         void begin(PaintSurface& surface);
 
-        /** @brief @brief Begins painting to a canvas.
+        /** @brief Begins painting to a canvas.
         */
         void begin(PaintContext& canvas);
 
-        /** @brief @brief Ends painting.
+        /** @brief Ends painting.
         */
         void finish();
 
