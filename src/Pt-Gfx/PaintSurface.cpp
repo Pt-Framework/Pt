@@ -38,11 +38,11 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// Canvas
+// PaintSurface
 ///////////////////////////////////////////////////////////////////////
 
 PaintSurface::PaintSurface()
-: _context(0)
+: _canvas(0)
 , _painter(0)
 {
 }
@@ -50,10 +50,10 @@ PaintSurface::PaintSurface()
 
 PaintSurface::~PaintSurface()
 {
-    if(_context)
+    if(_canvas)
     {
-        _context->detachSurface(*this);
-        _context = 0;
+        _canvas->detachSurface(*this);
+        _canvas = 0;
     }
 
     if(_painter)
@@ -81,67 +81,68 @@ const Scaling& PaintSurface::scaling() const
 }
 
 
-PaintContext* PaintSurface::getContext(PaintContext* reuse)
+Canvas* PaintSurface::getCanvas(Canvas* reuse)
 {
-    return onGetContext(reuse);
+    return onGetCanvas(reuse);
 }
 
 
-Gfx::PaintContext* PaintSurface::onGetContext(Gfx::PaintContext* reuse)
+Gfx::Canvas* PaintSurface::onGetCanvas(Gfx::Canvas* reuse)
 {
-    releaseContext();
+    releaseCanvas();
     
-    _context = onCreateContext(reuse);
-    _context->attachSurface(*this);
+    _canvas = onCreateCanvas(reuse);
+    _canvas->attachSurface(*this);
 
     RectF nobounds(PointF(0, 0),
                    SizeF( std::numeric_limits<double>::max(), 
                           std::numeric_limits<double>::max() ) );
-    _context->setRegion(nobounds);
+    _canvas->setRegion(nobounds);
 
     const Scaling& scale = scaling();
-    _context->setScaling(scale);
+    _canvas->setScaling(scale);
 
-    return _context;
+    return _canvas;
 }
 
 
-void PaintSurface::releaseContext()
+void PaintSurface::releaseCanvas()
 {
-    if(_context)
+    if(_canvas)
     {
-        onReleaseContext();
+        onReleaseCanvas();
         
-        _context->detachSurface(*this);
-        _context = 0;
+        _canvas->detachSurface(*this);
+        _canvas = 0;
     }
 }
 
 
-Gfx::PaintContext* PaintSurface::onCreateContext(Gfx::PaintContext* reuse)
+Gfx::Canvas* PaintSurface::onCreateCanvas(Gfx::Canvas* reuse)
 {
     return 0;
 }
 
 
-void PaintSurface::onReleaseContext()
+void PaintSurface::sync()
 {
+    onSync();
 }
 
 
 void PaintSurface::finish()
 {
-    releaseContext();
+    releaseCanvas();
     onFinish();
 }
 
 
-void PaintSurface::onDetachContext(PaintContext& context)
+void PaintSurface::onDetachCanvas(Canvas& canvas)
 {
-    if(_context)
+    if(_canvas)
     {
-        onReleaseContext();
-        _context = 0;
+        onReleaseCanvas();
+        _canvas = 0;
     }
 }
 
@@ -165,45 +166,52 @@ void PaintSurface::detachPainter(Painter& painter)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Canvas
+// RenderContext
 ///////////////////////////////////////////////////////////////////////
 
-Canvas::Canvas(PaintSurface& surface)
+RenderContext::RenderContext(PaintSurface& surface)
 : _surface(&surface)
 , _painter(0)
 {
 }
 
 
-Canvas::~Canvas()
+RenderContext::~RenderContext()
 {
     if(_painter)
     {
-        _painter->onDetachCanvas(*this);
+        _painter->onDetachContext(*this);
     }
 
     finish();
 }
 
 
-PaintSurface* Canvas::surface()
+PaintSurface* RenderContext::surface()
 {
     return _surface;
 }
 
 
-void Canvas::finish()
+void RenderContext::sync()
+{
+    if(_surface)
+        _surface->sync();
+}
+
+
+void RenderContext::finish()
 {
     if(_surface)
         _surface->finish();
 }
 
 
-void Canvas::attachPainter(Painter& painter)
+void RenderContext::attachPainter(Painter& painter)
 {
     if(_painter)
     {
-        _painter->onDetachCanvas(*this);
+        _painter->onDetachContext(*this);
         _painter = 0;
     }
 
@@ -211,7 +219,7 @@ void Canvas::attachPainter(Painter& painter)
 }
 
 
-void Canvas::detachPainter(Painter& painter)
+void RenderContext::detachPainter(Painter& painter)
 {
     if(_painter)
         _painter = 0;

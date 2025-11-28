@@ -80,12 +80,12 @@ inline void PaintSurface::drawPixmap(const Gfx::PointF& to,
 
 /** @brief Paint canvas.
 */
-class PT_FORMS_API Canvas : public Gfx::Canvas
+class PT_FORMS_API RenderContext : public Gfx::RenderContext
 {
     public:
-        Canvas(PaintSurface& surface);
+        RenderContext(PaintSurface& surface);
 
-        ~Canvas();
+        ~RenderContext();
 
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
@@ -97,19 +97,19 @@ class PT_FORMS_API Canvas : public Gfx::Canvas
 };
 
 
-inline Canvas::Canvas(PaintSurface& surface)
-: Gfx::Canvas( surface )
+inline RenderContext::RenderContext(PaintSurface& surface)
+: Gfx::RenderContext( surface )
 , _surface(surface)
 {
 }
 
 
-inline Canvas::~Canvas()
+inline RenderContext::~RenderContext()
 {
 }
 
 
-inline void Canvas::drawPixmap(const Gfx::PointF& to,
+inline void RenderContext::drawPixmap(const Gfx::PointF& to,
                                const Pixmap& pixmap,
                                const Gfx::Paint& paint,
                                const Gfx::RectF* rect) const

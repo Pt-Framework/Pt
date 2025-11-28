@@ -136,9 +136,9 @@ const Scaling& RasterSurface::scaling() const
 }
 
 
-Gfx::PaintContext* RasterSurface::createContext(Gfx::PaintContext* context)
+Gfx::Canvas* RasterSurface::createCanvas(Gfx::Canvas* reuse)
 {
-    RasterContext* paintContext = dynamic_cast<RasterContext*>(context);
+    RasterContext* paintContext = dynamic_cast<RasterContext*>(reuse);
     if( ! paintContext )
         paintContext = new RasterContext();
 
@@ -152,9 +152,16 @@ Gfx::PaintContext* RasterSurface::createContext(Gfx::PaintContext* context)
 }
 
 
-void RasterSurface::releaseContext()
+void RasterSurface::releaseCanvas()
 {
     _rasterContext.restore(_stateCookie);
+}
+
+
+void RasterSurface::sync()
+{
+    if( _rasterContext.target_image() )
+        _rasterContext.flush(BL_CONTEXT_FLUSH_SYNC);
 }
 
 

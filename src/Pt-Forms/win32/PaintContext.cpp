@@ -252,8 +252,8 @@ namespace Forms {
 
 #ifndef PT_FORMS_WIN32_RASTER
 
-PaintContext::PaintContext()
-: Gfx::PaintContext()
+PixmapCanvas::PixmapCanvas()
+: Gfx::Canvas()
 , _pixmap(0)
 , _pen(0)
 , _penSize(1)
@@ -266,11 +266,11 @@ PaintContext::PaintContext()
 }
 
 
-PaintContext::~PaintContext()
+PixmapCanvas::~PixmapCanvas()
 {
     // remove objects from surface DC before deleting them
     if(_pixmap)
-        _pixmap->releaseContext();
+        _pixmap->releaseCanvas();
 
     if(_pen)
         DeleteObject(_pen);
@@ -286,13 +286,13 @@ PaintContext::~PaintContext()
 }
 
 
-void PaintContext::setPixmap(PixmapImpl& pixmap)
+void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 {
     _pixmap = &pixmap;
 }
 
 
-void PaintContext::onBeginPaint(const Gfx::Paint& paint)
+void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     double scaleFactor = scaling().scaleFactor();
 
@@ -307,7 +307,7 @@ void PaintContext::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void PaintContext::onFinishPaint()
+void PixmapCanvas::onFinishPaint()
 {
     // NOTE: this might be called from the attached surface base class destructor
 
@@ -316,37 +316,37 @@ void PaintContext::onFinishPaint()
 }
 
 
-const Gfx::CompositionMode& PaintContext::compositionMode() const
+const Gfx::CompositionMode& PixmapCanvas::compositionMode() const
 {
     return _compositionMode;
 }
 
 
-void PaintContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
 
 
-void PaintContext::onApplyCompositionMode(const Gfx::CompositionMode& mode) 
+void PixmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
 
 
-HPEN PaintContext::pen() const
+HPEN PixmapCanvas::pen() const
 {
     return _pen;
 }
 
 
-Gfx::Color PaintContext::penColor() const
+Gfx::Color PixmapCanvas::penColor() const
 {
     return _penColor;
 }
 
 
-void PaintContext::onSetPen(const Gfx::Pen& pen)
+void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     double scaleFactor = scaling().scaleFactor();
 
@@ -381,7 +381,7 @@ void PaintContext::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PaintContext::onApplyPen(const Gfx::Pen& pen)
+void PixmapCanvas::onApplyPen(const Gfx::Pen& pen)
 {
     if(_pixmap)
     {
@@ -398,37 +398,37 @@ void PaintContext::onApplyPen(const Gfx::Pen& pen)
 }
 
 
-HBRUSH PaintContext::brush() const
+HBRUSH PixmapCanvas::brush() const
 {
     return _brush;
 }
 
 
-bool PaintContext::gradientBrush() const
+bool PixmapCanvas::gradientBrush() const
 {
     return _gradientBrush;
 }
 
 
-const Gfx::Brush::GradientStyle& PaintContext::gradient() const
+const Gfx::Brush::GradientStyle& PixmapCanvas::gradient() const
 {
     return _gradient;
 }
 
         
-const Gfx::Color& PaintContext::gradientStart() const
+const Gfx::Color& PixmapCanvas::gradientStart() const
 {
     return _gradientStart;
 }
 
 
-const Gfx::Color& PaintContext::gradientStop() const
+const Gfx::Color& PixmapCanvas::gradientStop() const
 {
     return _gradientStop;
 }
 
 
-void PaintContext::onSetBrush(const Gfx::Brush& brush)
+void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     if(_brush)
     {
@@ -506,7 +506,7 @@ void PaintContext::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void PaintContext::onApplyBrush(const Gfx::Brush& brush)
+void PixmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 {
     if( ! _pixmap )
         return;
@@ -527,13 +527,13 @@ void PaintContext::onApplyBrush(const Gfx::Brush& brush)
 }
 
 
-HFONT PaintContext::font() const
+HFONT PixmapCanvas::font() const
 {
     return _font;
 }
 
 
-void PaintContext::onSetFont(const Gfx::Font& font)
+void PixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     if(_font)
     {
@@ -545,7 +545,7 @@ void PaintContext::onSetFont(const Gfx::Font& font)
 }
 
 
-void PaintContext::onApplyFont(const Gfx::Font& font)
+void PixmapCanvas::onApplyFont(const Gfx::Font& font)
 {
     if( ! _pixmap )
         return;
@@ -559,13 +559,13 @@ void PaintContext::onApplyFont(const Gfx::Font& font)
 }
 
 
-HRGN PaintContext::clipRect() const
+HRGN PixmapCanvas::clipRect() const
 {
     return _clipRect;
 }
 
 
-void PaintContext::onSetClip(const Gfx::RectF* rectF)
+void PixmapCanvas::onSetClip(const Gfx::RectF* rectF)
 {
     // TODO: reuse HRGN instead of always creating a new one
 
@@ -592,7 +592,7 @@ void PaintContext::onSetClip(const Gfx::RectF* rectF)
 }
 
 
-void PaintContext::onApplyClip(const Gfx::RectF* rectF)
+void PixmapCanvas::onApplyClip(const Gfx::RectF* rectF)
 {  
     if(_pixmap)
     {       
@@ -606,13 +606,13 @@ void PaintContext::onApplyClip(const Gfx::RectF* rectF)
 }
 
 
-POINT PaintContext::toContext(const Gfx::PointF& p)
+POINT PixmapCanvas::toContext(const Gfx::PointF& p)
 {
     return toContext(p.x(), p.y());
 }
 
 
-POINT PaintContext::toContext(double x, double y)
+POINT PixmapCanvas::toContext(double x, double y)
 {
     Gfx::PointF p = transform() * Gfx::PointF(x, y);
 
@@ -624,7 +624,7 @@ POINT PaintContext::toContext(double x, double y)
 }
 
 
-void PaintContext::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
+void PixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 {
     if( ! _pixmap )
         return;
@@ -638,7 +638,7 @@ void PaintContext::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 }
 
 
-void PaintContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if( ! _pixmap )
         return;
@@ -656,7 +656,7 @@ void PaintContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PaintContext::onFillPolygon(const Gfx::PointF* ps, const size_t n)
+void PixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     if( ! _pixmap )
         return;
@@ -719,7 +719,7 @@ void PaintContext::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 }
 
 
-void PaintContext::onDrawRect(const Gfx::RectF& r)
+void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
     if( ! _pixmap )
         return;
@@ -741,7 +741,7 @@ void PaintContext::onDrawRect(const Gfx::RectF& r)
 }
 
 
-void PaintContext::onFillRect(const Gfx::RectF& r)
+void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 {
     if( ! _pixmap )
         return;
@@ -778,7 +778,7 @@ void PaintContext::onFillRect(const Gfx::RectF& r)
 }
 
 
-void PaintContext::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap )
         return;
@@ -799,7 +799,7 @@ void PaintContext::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-void PaintContext::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap )
         return;
@@ -844,7 +844,7 @@ void PaintContext::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
 #ifndef PT_FORMS_GDIPLUS
 
-Gfx::TextMetrics PaintContext::onGetTextMetrics(const Pt::String& text) const
+Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     if( ! _pixmap )
         return Gfx::TextMetrics();
@@ -903,7 +903,7 @@ Gfx::TextMetrics PaintContext::onGetTextMetrics(const Pt::String& text) const
 
 #else
 
-Gfx::TextMetrics PaintContext::onGetTextMetrics(const Pt::String& text) const
+Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     if( ! _pixmap )
         return Gfx::TextMetrics();
@@ -962,7 +962,7 @@ Gfx::TextMetrics PaintContext::onGetTextMetrics(const Pt::String& text) const
 #endif
 
 
-void PaintContext::onDrawText(const Gfx::PointF& to, 
+void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
                               const Pt::String& text, 
                               const Gfx::Transform* tform)
 {
@@ -1049,7 +1049,7 @@ void PaintContext::onDrawText(const Gfx::PointF& to,
 }
 
 
-void PaintContext::onDrawImage(const Gfx::PointF& toF, 
+void PixmapCanvas::onDrawImage(const Gfx::PointF& toF, 
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
@@ -1167,13 +1167,13 @@ void PaintContext::onDrawImage(const Gfx::PointF& toF,
 }
 
 
-void PaintContext::onSetPath(const Gfx::Path& path)
+void PixmapCanvas::onSetPath(const Gfx::Path& path)
 {
     _path = path;
 }
 
 
-void PaintContext::onDrawPath()
+void PixmapCanvas::onDrawPath()
 {
     if(_pixmap)
     {
@@ -1184,7 +1184,7 @@ void PaintContext::onDrawPath()
 }
 
 
-void PaintContext::onFillPath()
+void PixmapCanvas::onFillPath()
 {
     if(_pixmap)
     {
@@ -1195,7 +1195,7 @@ void PaintContext::onFillPath()
 }
 
 
-void PaintContext::onDrawPath(const Gfx::Path& path)
+void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
     if(_pixmap)
     {
@@ -1206,7 +1206,7 @@ void PaintContext::onDrawPath(const Gfx::Path& path)
 }
 
 
-void PaintContext::onFillPath(const Gfx::Path& path)
+void PixmapCanvas::onFillPath(const Gfx::Path& path)
 {
     if(_pixmap)
     {
@@ -1217,7 +1217,7 @@ void PaintContext::onFillPath(const Gfx::Path& path)
 }
 
 
-void PaintContext::addPath(HDC dc, const Gfx::Path& path)
+void PixmapCanvas::addPath(HDC dc, const Gfx::Path& path)
 {
     BeginPath(dc);
 
@@ -1298,7 +1298,7 @@ void PaintContext::addPath(HDC dc, const Gfx::Path& path)
 }
 
 
-void PaintContext::onDrawPixmap(const Gfx::PointF& toF, 
+void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF, 
                                 const PixmapImpl& pixmap,
                                 const Gfx::RectF* rect)
 {

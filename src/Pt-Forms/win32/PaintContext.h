@@ -45,12 +45,12 @@ namespace Forms {
 
 class PixmapImpl;
 
-class PaintContext : public Gfx::PaintContext
+class PixmapCanvas : public Gfx::Canvas
 {
     public:
-        PaintContext();
+        PixmapCanvas();
 
-        ~PaintContext();
+        ~PixmapCanvas();
 
         void setPixmap(PixmapImpl& pixmap);
 

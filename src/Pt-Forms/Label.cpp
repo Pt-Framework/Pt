@@ -541,9 +541,9 @@ void Label::onPaint(PaintSurface& surface,
     if( ! _renderer)
         return;
 
-    Canvas canvas(surface);
+    RenderContext context(surface);
 
-    Gfx::Painter painter(canvas);
+    Gfx::Painter painter(context);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -581,7 +581,7 @@ void Label::onPaint(PaintSurface& surface,
 
         Gfx::Paint paint;
         paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        canvas.drawPixmap(_iconPos, picture, paint);
+        context.drawPixmap(_iconPos, picture, paint);
     }
 
     //if(pen)

@@ -84,9 +84,11 @@ class PT_GFX_API Bitmap : public PaintSurface
         virtual const Scaling& onGetScaling() const;
 
     protected:
-        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+        virtual Gfx::Canvas* onCreateCanvas(Gfx::Canvas* reuse) override;
 
-        virtual void onReleaseContext() override;
+        virtual void onReleaseCanvas() override;
+
+        virtual void onSync() override;
 
         virtual void onFinish() override;
 

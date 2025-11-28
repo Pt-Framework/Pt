@@ -54,23 +54,23 @@ namespace Gfx {
   TODO:
 
   drawLine etc in derived surface should apply the necessary attribute
-  for the current begin/finsh paint session, then Canvas needs no
-  public apply* methods, but the NVI drawLine of paint context updates
+  for the current begin/finsh paint session, then no public apply* 
+  methods are needed, but the NVI drawLine of paint context updates
   the required attributes
 
 */
 
 /** @brief Paint context.
 */
-class PT_GFX_API PaintContext
+class PT_GFX_API Canvas
 {
     friend class PaintSurface;
 
     protected:
-        PaintContext();
+        Canvas();
 
     public:
-        virtual ~PaintContext();
+        virtual ~Canvas();
 
         const PointF& origin() const;
 
@@ -82,15 +82,16 @@ class PT_GFX_API PaintContext
 
         void setScaling(const Scaling& scaling);
 
-        const Gfx::Transform& transform() const;
-
         const Gfx::ImageFormat& format() const;
 
-        bool isActive() const;
+        const Gfx::Transform& transform() const;
 
+    public:
         void beginPaint(const Gfx::Paint& paint);
 
         void finishPaint();
+
+        bool isActive() const;
 
     public:
         void setCompositionMode(const Gfx::CompositionMode& mode);

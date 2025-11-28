@@ -128,7 +128,7 @@ PixmapImpl::PixmapImpl()
 , _width(0)
 , _height(0)
 , _dc(0)
-, _paintContext(0)
+, _canvas(0)
 {
     Gfx::SizeF size = Gfx::SizeF(10, 10);
 
@@ -296,20 +296,20 @@ const Gfx::Scaling& PixmapImpl::scaling() const
 }
 
 
-Gfx::PaintContext* PixmapImpl::createContext(Gfx::PaintContext* context)
+Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    PaintContext* paintContext = dynamic_cast<PaintContext*>(context);
-    if( ! paintContext ) 
-        paintContext  = new PaintContext();
+    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
+    if( ! canvas ) 
+        canvas  = new PixmapCanvas();
     
-    paintContext->setPixmap(*this);
+    canvas->setPixmap(*this);
 
-    _paintContext = paintContext;
-    return _paintContext;
+    _canvas = canvas;
+    return _canvas;
 }
 
 
-void PixmapImpl::releaseContext()
+void PixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached context base class destructor
 
@@ -319,7 +319,12 @@ void PixmapImpl::releaseContext()
     SelectClipRgn(_dc, NULL);
     AbortPath(_dc);
 
-    _paintContext = 0;
+    _canvas = 0;
+}
+
+
+void PixmapImpl::sync()
+{
 }
 
 

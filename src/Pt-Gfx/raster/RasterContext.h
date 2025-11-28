@@ -47,7 +47,7 @@ class LineFace;
 class ActiveEdgeTable;
 class DrawText;
 
-class RasterContext : public PaintContext
+class RasterContext : public Canvas
 {
     public:
         typedef Image::pos_t       pos_t;

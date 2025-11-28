@@ -43,7 +43,7 @@ namespace Pt {
 namespace Gfx {
 
 RasterContext::RasterContext()
-: PaintContext()
+: Canvas()
 , _image()
 , _text( new DrawText() )
 , _hasClip(false)

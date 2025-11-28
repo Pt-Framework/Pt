@@ -62,14 +62,14 @@ Bitmap::~Bitmap()
 void Bitmap::reset(const Gfx::Image& image)
 {
     _rasterSurface->reset(image);
-    releaseContext();
+    releaseCanvas();
 }
 
 
 void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
     _rasterSurface->reset(sizeF, stride);
-    releaseContext();
+    releaseCanvas();
 }
 
 
@@ -88,7 +88,7 @@ const Gfx::Image& Bitmap::image() const
 void Bitmap::setScaleFactor(double scaleFactor)
 {
     _rasterSurface->setScaleFactor(scaleFactor);
-    releaseContext();
+    releaseCanvas();
 }
 
 
@@ -117,15 +117,21 @@ const Scaling& Bitmap::onGetScaling() const
 }
 
 
-Gfx::PaintContext* Bitmap::onCreateContext(Gfx::PaintContext* context)
+Gfx::Canvas* Bitmap::onCreateCanvas(Gfx::Canvas* reuse)
 {
-    return _rasterSurface->createContext(context);
+    return _rasterSurface->createCanvas(reuse);
 }
 
 
-void Bitmap::onReleaseContext()
+void Bitmap::onReleaseCanvas()
 {
-    _rasterSurface->releaseContext();
+    _rasterSurface->releaseCanvas();
+}
+
+
+void Bitmap::onSync()
+{
+    _rasterSurface->sync();
 }
 
 

@@ -44,7 +44,7 @@ namespace Gfx {
 class PT_GFX_API PaintSurface : private NonCopyable
 {
     friend class Painter;
-    friend class PaintContext;
+    friend class Canvas;
 
     protected:
         /** @brief Default constructor.
@@ -68,15 +68,19 @@ class PT_GFX_API PaintSurface : private NonCopyable
         */
         const Scaling& scaling() const;
 
-        /** @brief Get a PaintContext.
+        /** @brief Get a Canvas.
         */
-        PaintContext* getContext(PaintContext* context);
+        Canvas* getCanvas(Canvas* canvas);
 
-        /** @brief Releases the currently active paint context.
+        /** @brief Releases the currently active paint canvas.
         */
-        void releaseContext();
+        void releaseCanvas();
 
         /** @brief Synchronizes pending operations to the surface.
+        */
+        void sync();
+
+        /** @brief Finishes painting to the surface.
         */
         void finish();
 
@@ -94,19 +98,23 @@ class PT_GFX_API PaintSurface : private NonCopyable
         virtual const Scaling& onGetScaling() const = 0;
 
     protected:
-        /** @brief Get a PaintContext.
+        /** @brief Get a Canvas.
         */
-        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* context);
+        virtual Gfx::Canvas* onGetCanvas(Gfx::Canvas* reuse);
 
-        /** @brief Creates a PaintContext.
+        /** @brief Creates a Canvas.
         */
-        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context);
+        virtual Gfx::Canvas* onCreateCanvas(Gfx::Canvas* reuse);
         
-        /** @brief Releases the current PaintContext.
+        /** @brief Releases the current Canvas.
         */
-        virtual void onReleaseContext() = 0;
+        virtual void onReleaseCanvas() = 0;
 
         /** @brief Synchronizes pending operations to the surface.
+        */
+        virtual void onSync() = 0;
+
+        /** @brief Finishes painting to the surface.
         */
         virtual void onFinish() = 0;
 
@@ -119,25 +127,27 @@ class PT_GFX_API PaintSurface : private NonCopyable
 
     private:
         //! @internal
-        void onDetachContext(PaintContext& context);
+        void onDetachCanvas(Canvas& canvas);
 
     private:
-        PaintContext*  _context;
-        Painter*       _painter;
+        Canvas*   _canvas;
+        Painter*  _painter;
 };
 
-/** @brief Paint canvas.
+/** @brief Paint con.
 */
-class PT_GFX_API Canvas : private NonCopyable
+class PT_GFX_API RenderContext : private NonCopyable
 {
     friend class Painter;
 
     public:
-        Canvas(PaintSurface& surface);
+        RenderContext(PaintSurface& surface);
 
-        ~Canvas();
+        ~RenderContext();
 
         PaintSurface* surface();
+
+        void sync();
 
         void finish();
 

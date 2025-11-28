@@ -44,7 +44,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class RasterContext : public PaintContext
+class RasterContext : public Canvas
 {
     typedef BasicPoint<Pt::ssize_t> Point;
     typedef BasicSize<Pt::ssize_t> Size;

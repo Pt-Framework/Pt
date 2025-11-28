@@ -53,7 +53,7 @@ namespace Pt {
 
 namespace Forms {
 
-class PaintContext;
+class Canvas;
 class PixmapImpl;
 
 class PixmapCanvas : public Gfx::Canvas

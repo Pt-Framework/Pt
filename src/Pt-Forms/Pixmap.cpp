@@ -50,7 +50,7 @@ Pixmap::~Pixmap()
 
 void Pixmap::reset()
 {
-    releaseContext();
+    releaseCanvas();
     finish();
 }
 
@@ -58,14 +58,14 @@ void Pixmap::reset()
 void Pixmap::reset(const Gfx::Image& image)
 {
     _impl->reset(image);
-    releaseContext();
+    releaseCanvas();
 }
 
 
 void Pixmap::reset(const Gfx::SizeF& size)
 {
     _impl->reset(size);
-    releaseContext();
+    releaseCanvas();
 }
 
 
@@ -112,25 +112,31 @@ const Gfx::Scaling& Pixmap::onGetScaling() const
 }
 
 
-Gfx::PaintContext* Pixmap::onGetContext(Gfx::PaintContext* reuse)
+Gfx::Canvas* Pixmap::onGetCanvas(Gfx::Canvas* reuse)
 {
-    Gfx::PaintContext* context = _impl->getContext(reuse);
-    if(context)
-        return context;
+    Gfx::Canvas* canvas = _impl->getCanvas(reuse);
+    if(canvas)
+        return canvas;
 
-    return PaintSurface::onGetContext(reuse);
+    return PaintSurface::onGetCanvas(reuse);
 }
 
 
-Gfx::PaintContext* Pixmap::onCreateContext(Gfx::PaintContext* reuse)
+Gfx::Canvas* Pixmap::onCreateCanvas(Gfx::Canvas* reuse)
 {
-    return _impl->createContext(reuse);
+    return _impl->createCanvas(reuse);
 }
 
 
-void Pixmap::onReleaseContext()
+void Pixmap::onReleaseCanvas()
 {
-    _impl->releaseContext();
+    _impl->releaseCanvas();
+}
+
+
+void Pixmap::onSync() 
+{
+    _impl->sync();
 }
 
 

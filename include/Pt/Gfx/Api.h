@@ -53,9 +53,9 @@ namespace Pt {
 */
 namespace Gfx {
 
+class Canvas;
 class Paint;
 class Painter;
-class PaintContext;
 class PaintSurface;
 
 } // namespace

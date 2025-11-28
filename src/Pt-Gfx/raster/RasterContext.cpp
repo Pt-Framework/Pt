@@ -140,7 +140,7 @@ namespace Pt {
 namespace Gfx {
 
 RasterContext::RasterContext()
-: PaintContext()
+: Canvas()
 , _text( new DrawText() )
 , _image(0)
 , _lastScaleFactor(1.0)

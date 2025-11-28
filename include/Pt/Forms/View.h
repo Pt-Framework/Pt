@@ -51,7 +51,6 @@ class Control;
 class PT_FORMS_API View : public Widget
 {
     friend class Control;
-    friend class Canvas;
 
     typedef Widget Base;
 
@@ -200,25 +199,29 @@ class ViewSurface : public PaintSurface
             return _view->scaling();
         }
 
-        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* reuse) override
+        virtual Gfx::Canvas* onGetCanvas(Gfx::Canvas* reuse) override
         {
-            Gfx::PaintContext* context = _surface ? _surface->getContext(reuse) 
+            Gfx::Canvas* canvas = _surface ? _surface->getCanvas(reuse) 
                                                   : 0;
-
-            if( ! context )
-                return context;
+            if( ! canvas )
+                return canvas;
    
-            Gfx::RectF region = context->region();
+            Gfx::RectF region = canvas->region();
             region.shift( _position.x(), _position.y() );
             region.setSize( _view->size() );
 
-            context->setRegion(region);
-            return context;
+            canvas->setRegion(region);
+            return canvas;
         }
 
-        virtual void onReleaseContext() override
+        virtual void onReleaseCanvas() override
         {
             // context is released by parent surface
+        }
+
+        virtual void onSync() override
+        {
+            // sync is done by parent surface
         }
 
         virtual void onFinish() override

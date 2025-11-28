@@ -82,11 +82,13 @@ class PT_FORMS_API Pixmap : public PaintSurface
 
         virtual const Gfx::Scaling& onGetScaling() const override;
 
-        virtual Gfx::PaintContext* onGetContext(Gfx::PaintContext* reuse) override;
+        virtual Gfx::Canvas* onGetCanvas(Gfx::Canvas* reuse) override;
 
-        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* reuse) override;
+        virtual Gfx::Canvas* onCreateCanvas(Gfx::Canvas* reuse) override;
 
-        virtual void onReleaseContext() override;
+        virtual void onReleaseCanvas() override;
+
+        virtual void onSync() override;
 
         virtual void onFinish() override;
 

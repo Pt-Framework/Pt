@@ -78,9 +78,11 @@ class PT_GFX_API RasterSurface : private NonCopyable
 
     const Scaling& scaling() const;
 
-    virtual Gfx::PaintContext* createContext(Gfx::PaintContext* context);
+    virtual Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
 
-    virtual void releaseContext();
+    virtual void releaseCanvas();
+
+    void sync();
 
     void finish();
 

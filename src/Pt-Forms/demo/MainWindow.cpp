@@ -274,9 +274,9 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
  
     Gfx::Painter painter;
 
-    Gfx::Canvas canvas( surface() );
+    Gfx::RenderContext context( surface() );
     
-    painter.begin(canvas);
+    painter.begin(context);
     painter.setClip(rect);
 
     Pt::String text = "MgWjOy";

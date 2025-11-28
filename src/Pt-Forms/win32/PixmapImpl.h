@@ -117,18 +117,23 @@ class PixmapImpl
             return _bitmap.scaling();
         }
 
-        Gfx::PaintContext* getContext(Gfx::PaintContext* reuse)
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
         {
-            return _bitmap.getContext(reuse);
+            return _bitmap.getCanvas(reuse);
         }
 
-        Gfx::PaintContext* createContext(Gfx::PaintContext* reuse)
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse)
         {
             return 0;
         }
 
-        void releaseContext()
+        void releaseCanvas()
         {
+        }
+
+        void sync()
+        {
+            _bitmap.sync();
         }
 
         void finish()
@@ -163,7 +168,7 @@ class PixmapImpl
 
 #else // PT_FORMS_WIN32_RASTER
 
-class PaintContext;
+class PixmapCanvas;
 
 class PixmapImpl
 {
@@ -195,14 +200,16 @@ class PixmapImpl
 
         const Gfx::Scaling& scaling() const;
 
-        Gfx::PaintContext* getContext(Gfx::PaintContext* reuse)
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
         {
             return 0;
         }
 
-        Gfx::PaintContext* createContext(Gfx::PaintContext* context);
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
 
-        void releaseContext();
+        void releaseCanvas();
+
+        void sync();
 
         void finish();
 
@@ -233,7 +240,7 @@ class PixmapImpl
         HFONT          _oldFont;
         HBITMAP        _oldBitmap;
 
-        PaintContext*  _paintContext;
+        PixmapCanvas*  _canvas;
 };
 
 #endif // PT_FORMS_WIN32_RASTER
