@@ -40,34 +40,34 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// RasterSurface
+// BitmapSurface
 ///////////////////////////////////////////////////////////////////////
 
-RasterSurface::RasterSurface()
-: _context(0)
+BitmapSurface::BitmapSurface()
+: _canvas(0)
 {
 }
 
 
-RasterSurface::RasterSurface(const Gfx::SizeF& size, std::size_t stride)
-: _context(0)
+BitmapSurface::BitmapSurface(const Gfx::SizeF& size, std::size_t stride)
+: _canvas(0)
 {
     reset(size, stride);
 }
 
 
-RasterSurface::~RasterSurface()
+BitmapSurface::~BitmapSurface()
 {
 }
 
 
-const Gfx::Image& RasterSurface::image() const
+const Gfx::Image& BitmapSurface::image() const
 {
     return _image;
 }
 
 
-void RasterSurface::reset(const Gfx::Image& image)
+void BitmapSurface::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
     {
@@ -83,7 +83,7 @@ void RasterSurface::reset(const Gfx::Image& image)
 }
 
 
-void RasterSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
+void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
     long width = lround( sizeF.width() );
     long height = lround( sizeF.height() );
@@ -94,7 +94,7 @@ void RasterSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 }
 
 
-void RasterSurface::setScaleFactor(double scaleFactor)
+void BitmapSurface::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 
@@ -102,54 +102,54 @@ void RasterSurface::setScaleFactor(double scaleFactor)
 }
 
 
-const Gfx::ImageFormat& RasterSurface::format() const
+const Gfx::ImageFormat& BitmapSurface::format() const
 {
     return Gfx::ImageFormat::argb32();
 }
 
 
-const Gfx::SizeF& RasterSurface::size() const
+const Gfx::SizeF& BitmapSurface::size() const
 {
     return _physicalSize;
 }
 
 
-const Scaling& RasterSurface::scaling() const
+const Scaling& BitmapSurface::scaling() const
 {
     return _scaling;
 }
 
 
-Gfx::Canvas* RasterSurface::createCanvas(Gfx::Canvas* reuse)
+Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
 {
-    RasterContext* paintContext = dynamic_cast<RasterContext*>(reuse);
-    if( ! paintContext )
-        paintContext = new RasterContext();
+    BitmapCanvas* canvas = dynamic_cast<BitmapCanvas*>(reuse);
+    if( ! canvas )
+        canvas = new BitmapCanvas();
 
-    paintContext->setImage(_image);
+    canvas->init(_image);
     
-    _context = paintContext;
-    return _context;
+    _canvas = canvas;
+    return canvas;
 }
 
 
-void RasterSurface::releaseCanvas()
+void BitmapSurface::releaseCanvas()
 {
-    _context = 0;
+    _canvas = 0;
 }
 
 
-void RasterSurface::sync()
-{
-}
-
-
-void RasterSurface::finish()
+void BitmapSurface::sync()
 {
 }
 
 
-void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
+void BitmapSurface::finish()
+{
+}
+
+
+void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,
                                const Bitmap& bitmap,
                                const Gfx::Paint& paint,
                                const Gfx::RectF* bitmapRect)
@@ -186,7 +186,7 @@ void RasterSurface::drawBitmap(const Pt::Gfx::PointF& toF,
 }
 
 
-void RasterSurface::putImage(const PointI& to, const Image& image, 
+void BitmapSurface::putImage(const PointI& to, const Image& image, 
                              const Gfx::Paint& paint, const RectI& imageRect)
 {
     // clip against source boundaries

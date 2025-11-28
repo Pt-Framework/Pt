@@ -38,16 +38,16 @@ namespace Pt {
 namespace Gfx {
 
 Bitmap::Bitmap()
-: _rasterSurface(0)
+: _surface(0)
 {
-    _rasterSurface = new RasterSurface();
+    _surface = new BitmapSurface();
 }
 
 
 Bitmap::Bitmap(const Gfx::SizeF& size, std::size_t stride)
-: _rasterSurface(0)
+: _surface(0)
 {
-    _rasterSurface = new RasterSurface();
+    _surface = new BitmapSurface();
 
     reset(size, stride);
 }
@@ -55,39 +55,39 @@ Bitmap::Bitmap(const Gfx::SizeF& size, std::size_t stride)
 
 Bitmap::~Bitmap()
 {
-    delete _rasterSurface;
+    delete _surface;
 }
 
 
 void Bitmap::reset(const Gfx::Image& image)
 {
-    _rasterSurface->reset(image);
+    _surface->reset(image);
     releaseCanvas();
 }
 
 
 void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
-    _rasterSurface->reset(sizeF, stride);
+    _surface->reset(sizeF, stride);
     releaseCanvas();
 }
 
 
 bool Bitmap::empty() const
 {
-    return _rasterSurface->image().empty();
+    return _surface->image().empty();
 }
 
 
 const Gfx::Image& Bitmap::image() const
 {
-    return _rasterSurface->image();
+    return _surface->image();
 }
 
 
 void Bitmap::setScaleFactor(double scaleFactor)
 {
-    _rasterSurface->setScaleFactor(scaleFactor);
+    _surface->setScaleFactor(scaleFactor);
     releaseCanvas();
 }
 
@@ -95,49 +95,49 @@ void Bitmap::setScaleFactor(double scaleFactor)
 void Bitmap::drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& bitmap,
                         const Gfx::Paint& paint, const Gfx::RectF* rect)
 {
-    _rasterSurface->drawBitmap(to, bitmap, paint, rect);
+    _surface->drawBitmap(to, bitmap, paint, rect);
 }
 
 
 const Gfx::ImageFormat& Bitmap::onGetFormat() const
 {
-    return _rasterSurface->format();
+    return _surface->format();
 }
 
 
 const Gfx::SizeF& Bitmap::onGetSize() const
 {
-    return _rasterSurface->size();
+    return _surface->size();
 }
 
 
 const Scaling& Bitmap::onGetScaling() const
 {
-    return _rasterSurface->scaling();
+    return _surface->scaling();
 }
 
 
 Gfx::Canvas* Bitmap::onCreateCanvas(Gfx::Canvas* reuse)
 {
-    return _rasterSurface->createCanvas(reuse);
+    return _surface->createCanvas(reuse);
 }
 
 
 void Bitmap::onReleaseCanvas()
 {
-    _rasterSurface->releaseCanvas();
+    _surface->releaseCanvas();
 }
 
 
 void Bitmap::onSync()
 {
-    _rasterSurface->sync();
+    _surface->sync();
 }
 
 
 void Bitmap::onFinish()
 {
-    _rasterSurface->finish();
+    _surface->finish();
 }
 
 

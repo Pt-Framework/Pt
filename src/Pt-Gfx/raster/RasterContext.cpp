@@ -76,7 +76,7 @@ class EllipseSpan
 };
 
 
-inline void addPoint(int xx, int yy, Pt::Gfx::RasterContext::Point** ppt, int** pwidth, 
+inline void addPoint(int xx, int yy, Pt::Gfx::BitmapCanvas::Point** ppt, int** pwidth, 
                      int& numSpans, int& ycurr, bool& firstspan, int signdy)
 {
   if( !firstspan && yy == ycurr )
@@ -139,7 +139,7 @@ namespace Pt {
 
 namespace Gfx {
 
-RasterContext::RasterContext()
+BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _text( new DrawText() )
 , _image(0)
@@ -153,19 +153,19 @@ RasterContext::RasterContext()
 }
 
 
-RasterContext::~RasterContext()
+BitmapCanvas::~BitmapCanvas()
 {
     delete _text;
 }
 
 
-void RasterContext::setImage(Image& image)
+void BitmapCanvas::init(Image& image)
 {
     _image = &image;
 }
 
 
-void RasterContext::onBeginPaint(const Gfx::Paint& paint)
+void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     double scaleFactor = scaling().scaleFactor();
     if( std::abs(_lastScaleFactor - scaleFactor) < 0.0001 )
@@ -175,7 +175,7 @@ void RasterContext::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void RasterContext::onFinishPaint()
+void BitmapCanvas::onFinishPaint()
 {
     // NOTE: this might be called from the attached surface base class destructor
 
@@ -184,19 +184,19 @@ void RasterContext::onFinishPaint()
 }
 
 
-void RasterContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+void BitmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
 
 
-void RasterContext::onApplyCompositionMode(const Gfx::CompositionMode& mode)
+void BitmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
 }
 
 
-void RasterContext::onSetPen(const Gfx::Pen& pen)
+void BitmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     _lastScaleFactor = scaling().scaleFactor();
 
@@ -210,7 +210,7 @@ void RasterContext::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void RasterContext::onApplyPen(const Gfx::Pen& pen)
+void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 {
     if( ! _image )
         return;
@@ -224,13 +224,13 @@ void RasterContext::onApplyPen(const Gfx::Pen& pen)
 }
 
 
-void RasterContext::onSetBrush(const Gfx::Brush& brush)
+void BitmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
 }
 
 
-void RasterContext::onApplyBrush(const Gfx::Brush& brush)
+void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 {
     if( ! _image )
         return;
@@ -272,7 +272,7 @@ void RasterContext::onApplyBrush(const Gfx::Brush& brush)
 }
 
 
-void RasterContext::updateGradientBrush(int width, int height)
+void BitmapCanvas::updateGradientBrush(int width, int height)
 {
     if( ! _image )
         return;
@@ -326,19 +326,19 @@ void RasterContext::updateGradientBrush(int width, int height)
 }
 
 
-void RasterContext::onSetFont(const Gfx::Font& font)
+void BitmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
 }
 
 
-void RasterContext::onApplyFont(const Gfx::Font& font)
+void BitmapCanvas::onApplyFont(const Gfx::Font& font)
 {
     _text->setFont(font);
 }
 
 
-void RasterContext::onSetClip(const Gfx::RectF* clip)
+void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
     _hasClip = clip != 0;
 
@@ -355,7 +355,7 @@ void RasterContext::onSetClip(const Gfx::RectF* clip)
 }
 
 
-void RasterContext::onApplyClip(const Gfx::RectF* clip) 
+void BitmapCanvas::onApplyClip(const Gfx::RectF* clip) 
 {
     if( ! _image )
         return;
@@ -379,7 +379,7 @@ void RasterContext::onApplyClip(const Gfx::RectF* clip)
 }
 
 
-void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( ! _image )
         return;
@@ -393,7 +393,7 @@ void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 }
 
 
-void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     std::vector<Point> points(n);
 
@@ -407,7 +407,7 @@ void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
+void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
     std::vector<Point> points(n);
 
@@ -421,7 +421,7 @@ void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void RasterContext::onDrawRect(const Gfx::RectF& r)
+void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
     // TODO: this works only if the transform is simple 
     //       and the shape is stable
@@ -445,7 +445,7 @@ void RasterContext::onDrawRect(const Gfx::RectF& r)
 }
 
 
-void RasterContext::onFillRect(const Gfx::RectF& r)
+void BitmapCanvas::onFillRect(const Gfx::RectF& r)
 {
     // TODO: this works only if the transform is simple 
     //       and the shape is stable
@@ -463,7 +463,7 @@ void RasterContext::onFillRect(const Gfx::RectF& r)
 }
 
 
-void RasterContext::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void BitmapCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Gfx::PointF p = transform() * topLeftF;
     Gfx::SizeF s = transform() * sizeF;
@@ -478,7 +478,7 @@ void RasterContext::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void RasterContext::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
+void BitmapCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
     Gfx::PointF p = transform() * topLeftF;
     Gfx::SizeF s = transform() * sizeF;
@@ -490,26 +490,26 @@ void RasterContext::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 }
 
 
-void RasterContext::onSetPath(const Gfx::Path& path)
+void BitmapCanvas::onSetPath(const Gfx::Path& path)
 {
     _flatPath.clear();
     path.toPolygons(_flatPath);
 }
 
 
-void RasterContext::onDrawPath()
+void BitmapCanvas::onDrawPath()
 {
     strokePolygons(_flatPath, _currentClip);
 }
 
 
-void RasterContext::onFillPath()
+void BitmapCanvas::onFillPath()
 {
     fillPolygons(_flatPath, _currentClip);
 }
 
 
-void RasterContext::onDrawPath(const Gfx::Path& path)
+void BitmapCanvas::onDrawPath(const Gfx::Path& path)
 {
     std::vector<Polygon> flatPath;
     path.toPolygons(flatPath);
@@ -517,7 +517,7 @@ void RasterContext::onDrawPath(const Gfx::Path& path)
 }
 
 
-void RasterContext::onFillPath(const Gfx::Path& path)
+void BitmapCanvas::onFillPath(const Gfx::Path& path)
 {
     std::vector<Polygon> flatPath;
     path.toPolygons(flatPath);
@@ -525,13 +525,13 @@ void RasterContext::onFillPath(const Gfx::Path& path)
 }
 
 
-TextMetrics RasterContext::onGetTextMetrics(const String& text) const
+TextMetrics BitmapCanvas::onGetTextMetrics(const String& text) const
 {
     return _text->textMetrics(text);
 }
 
 
-void RasterContext::onDrawText(const PointF& to, const Pt::String& text, 
+void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text, 
                                const Transform* tform)
 {
     if( ! _image )
@@ -549,7 +549,7 @@ void RasterContext::onDrawText(const PointF& to, const Pt::String& text,
 }
 
 
-void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
+void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image, 
                                const RectF* imageRect)
 {
     Gfx::PointF toP = transform() * toF;
@@ -562,7 +562,7 @@ void RasterContext::onDrawImage(const PointF& toF, const Image& image,
 }
 
 
-void RasterContext::clipSpan(int& xpos, int& ypos, int& length, const Rect& clip)
+void BitmapCanvas::clipSpan(int& xpos, int& ypos, int& length, const Rect& clip)
 {
 
   if( ypos < clip.y() )
@@ -594,7 +594,7 @@ void RasterContext::clipSpan(int& xpos, int& ypos, int& length, const Rect& clip
 }
 
 
-void RasterContext::stroke(const Point* points,  size_t n, const Rect& currentClip)
+void BitmapCanvas::stroke(const Point* points,  size_t n, const Rect& currentClip)
 {
   switch( _pen.style() )
   {
@@ -623,13 +623,13 @@ void RasterContext::stroke(const Point* points,  size_t n, const Rect& currentCl
 }
 
 
-void RasterContext::stroke(const Point& pixel, const Rect& currentClip)
+void BitmapCanvas::stroke(const Point& pixel, const Rect& currentClip)
 {
   stroke( (int) pixel.x(),(int) pixel.y(), currentClip );
 }
 
 
-void RasterContext::stroke(int x, int y, const Rect& clip)
+void BitmapCanvas::stroke(int x, int y, const Rect& clip)
 {
     if( x < clip.x() || x >= clip.right() ||
         y < clip.y() || y >= clip.bottom() )
@@ -645,7 +645,7 @@ void RasterContext::stroke(int x, int y, const Rect& clip)
 }
 
 
-void RasterContext::stroke(int xpos, int ypos, int length, const Rect& currentClip)
+void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentClip)
 {
     if( ! _image )
         return;
@@ -669,7 +669,7 @@ void RasterContext::stroke(int xpos, int ypos, int length, const Rect& currentCl
 }
 
 
-void RasterContext::fill(const Point* pts, size_t pointCount, const Rect& currentClip)
+void BitmapCanvas::fill(const Point* pts, size_t pointCount, const Rect& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
@@ -821,7 +821,7 @@ void RasterContext::fill(const Point* pts, size_t pointCount, const Rect& curren
 }
 
 
-void RasterContext::fill(const Point& origin, const Point& pos, int length)
+void BitmapCanvas::fill(const Point& origin, const Point& pos, int length)
 {
   switch( _brush.fillStyle() )
   {
@@ -844,7 +844,7 @@ void RasterContext::fill(const Point& origin, const Point& pos, int length)
 }
 
 
-void RasterContext::fillRect(const Rect& rectIn, const Rect& currentClip)
+void BitmapCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
 {
     Rect rect = currentClip.intersect( rectIn );
 
@@ -866,7 +866,7 @@ void RasterContext::fillRect(const Rect& rectIn, const Rect& currentClip)
 }
 
 
-void RasterContext::fillSolid(const Point& pos, int length)
+void BitmapCanvas::fillSolid(const Point& pos, int length)
 {
     if( ! _image )
         return;
@@ -895,19 +895,19 @@ void RasterContext::fillSolid(const Point& pos, int length)
 }
 
 
-void RasterContext::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
+void BitmapCanvas::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
 {
     fillTexture(origin, pos, length);
 }
 
 
-void RasterContext::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
+void BitmapCanvas::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
 {
     fillTexture(origin, pos, length);
 }
 
 
-void RasterContext::fillTexture(const Point& origin, const Point& pos,  int length)
+void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int length)
 {
     if( ! _image )
         return;
@@ -945,7 +945,7 @@ void RasterContext::fillTexture(const Point& origin, const Point& pos,  int leng
 }
 
 
-void RasterContext::outputEdges(const ActiveEdgeTable& edges, const Point& origin, int scanLine)
+void BitmapCanvas::outputEdges(const ActiveEdgeTable& edges, const Point& origin, int scanLine)
 {
     // fill every even span, starting at even (even-odd-rule)
     for( size_t i = 1; i < edges.size(); i += 2 )
@@ -959,7 +959,7 @@ void RasterContext::outputEdges(const ActiveEdgeTable& edges, const Point& origi
 }
 
 
-void RasterContext::outputSpan( const Point& topLeft, int x, int y, int width )
+void BitmapCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
 {
     if( ! _image )
         return;
@@ -981,7 +981,7 @@ void RasterContext::outputSpan( const Point& topLeft, int x, int y, int width )
 }
 
 
-void RasterContext::strokePolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
+void BitmapCanvas::strokePolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
 {
     for(const Polygon& poly : polygons)
     {
@@ -1003,7 +1003,7 @@ void RasterContext::strokePolygons(const std::vector<Polygon>& polygons, const R
 }
 
 
-void RasterContext::fillPolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
+void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
@@ -1170,7 +1170,7 @@ void RasterContext::fillPolygons(const std::vector<Polygon>& polygons, const Rec
 }
 
 
-void RasterContext::strokeEllipse(const Point& topLeft, const Size& size, 
+void BitmapCanvas::strokeEllipse(const Point& topLeft, const Size& size, 
                                const Rect& currentClip)
 {
     if( size.width() <= 1 || size.height() <= 1 )
@@ -1247,7 +1247,7 @@ void RasterContext::strokeEllipse(const Point& topLeft, const Size& size,
 }
 
 
-void RasterContext::fillEllipse( const Point& topLeftIn, const Size& size, const Rect& currentClip)
+void BitmapCanvas::fillEllipse( const Point& topLeftIn, const Size& size, const Rect& currentClip)
 {
     const Point topLeft( (int) topLeftIn.x(), (int) topLeftIn.y() );
 
@@ -1337,7 +1337,7 @@ void RasterContext::fillEllipse( const Point& topLeftIn, const Size& size, const
 }
 
 
-void RasterContext::drawThinSolidPolyline(const Point* points, int pointCount, 
+void BitmapCanvas::drawThinSolidPolyline(const Point* points, int pointCount, 
                                           const Rect& currentClip)
 {
     const Point *ppt;
@@ -1455,7 +1455,7 @@ void RasterContext::drawThinSolidPolyline(const Point* points, int pointCount,
 }
 
 
-void RasterContext::drawThinDashPolyline(const Point* points,  int pointCount,
+void BitmapCanvas::drawThinDashPolyline(const Point* points,  int pointCount,
                                          int dashOn, int dashOff, const Rect& currentClip)
 {
     const Point* ppt = points;
@@ -1560,7 +1560,7 @@ void RasterContext::drawThinDashPolyline(const Point* points,  int pointCount,
 }
 
 
-void RasterContext::stepDash( int dist, int* pDashNum, int* pDashIndex, 
+void BitmapCanvas::stepDash( int dist, int* pDashNum, int* pDashIndex, 
                            const int* pDash, int numInDashList, int *pDashOffset )
 {
     int	dashNum, dashIndex, dashOffset;
@@ -1615,7 +1615,7 @@ void RasterContext::stepDash( int dist, int* pDashNum, int* pDashIndex,
 
 // Internal: draw dashed Bresenham line segment. Called by miZeroDash().
 // Endpoint semantics are used.
-void RasterContext::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const int *pDash, int numInDashList, int *pdashOffset, 
+void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const int *pDash, int numInDashList, int *pdashOffset, 
                                               bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1,
                                               int e, int e1, int e2, int len, const Rect& currentClip)
 {
@@ -1892,7 +1892,7 @@ void RasterContext::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, co
 }
 
 
-void RasterContext::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1,
+void BitmapCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1,
                                           int e, int e1, int e2, int len, const Rect& currentClip)
 {
     if (len == 0)
@@ -1982,7 +1982,7 @@ void RasterContext::bresenhamLineSegment( int signdx, int signdy, int axis, int 
 }
 
 
-int RasterContext::polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
+int BitmapCanvas::polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
 {
     int	    top, bottom;
     double  miny, maxy;
@@ -2101,7 +2101,7 @@ int RasterContext::polyBuildPoly( const Point *vertices, const LineSlope *slopes
 }
 
 
-int RasterContext::buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge )
+int BitmapCanvas::buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge )
 {
     int x, y, e;
     int xady;
@@ -2164,7 +2164,7 @@ int RasterContext::buildLineEdge( double x0, double y0, double k, int dx, int dy
 }
 
 
-void RasterContext::fillSpans(int x, int y,  int w,  int h, const Rect& currentClip)
+void BitmapCanvas::fillSpans(int x, int y,  int w,  int h, const Rect& currentClip)
 {
     int ypos = std::max( 0, y );
     int yend = 0;
@@ -2177,7 +2177,7 @@ void RasterContext::fillSpans(int x, int y,  int w,  int h, const Rect& currentC
 }
 
 
-void RasterContext::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip)
+void BitmapCanvas::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip)
 {
     int left_x		= 0;
     int left_e		= 0;
@@ -2276,7 +2276,7 @@ void RasterContext::fillLine(int y,  int overall_height, LineEdge *left, LineEdg
 
 /* From two line faces, construct clipping edges that will be used by
    miLineArcD when drawing a pie wedge.  The line faces may be modified. */
-void RasterContext::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
+void BitmapCanvas::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
 {
     int	denom;
 
@@ -2300,7 +2300,7 @@ void RasterContext::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *
 
 /* From a line face, construct a clipping edge that will be used by
    miLineArcD when drawing a half-disk.  */
-int RasterContext::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
+int BitmapCanvas::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
 {
     int	    y;
     int 	dx, dy;
@@ -2353,7 +2353,7 @@ int RasterContext::roundCapClip( const LineFace *face, bool isInt, LineEdge *edg
 }
 
 
-void RasterContext::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip)
+void BitmapCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip)
 {
     std::vector<Point>    points;
     std::vector<int>   widths;
@@ -2424,7 +2424,7 @@ void RasterContext::lineArc( LineFace *leftFace, LineFace *rightFace, double xor
 }
 
 
-int RasterContext::lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths )
+int BitmapCanvas::lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths )
 {
     Point *tpts, *bpts;
     int* twids, *bwids;
@@ -2496,7 +2496,7 @@ int RasterContext::lineArcI( int xorg, int yorg, std::vector<Point>& points, std
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-int RasterContext::lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int BitmapCanvas::lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
     Point *pts;
     int *wids;
@@ -2682,7 +2682,7 @@ int RasterContext::lineArcD( double xorg, double yorg, std::vector<Point>& point
 
 
 /* helper function called by the preceding */
-int RasterContext::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
+int BitmapCanvas::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
 {
     int	    y;
     int	    dx, dy;
@@ -2737,7 +2737,7 @@ int RasterContext::roundJoinFace( const LineFace *face, LineEdge *edge, bool *le
 /* Paint all types of line join: round/miter/bevel/triangular.  Called by
    both miWideLine() and miWideDash().  Left and right line faces are
    supplied, each with its own value of k.  They may be modified. */
-void RasterContext::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& currentClip)
+void BitmapCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& currentClip)
 {
     double	            mx = 0.0, my = 0.0;
     int		            denom = 0;
@@ -2959,7 +2959,7 @@ void RasterContext::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& cu
 
 /* Paint a projecting rectangular cap on a line face.  Called only by
    miWideDash (with isInt = true); not by miWideLine. */
-void RasterContext::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip)
+void BitmapCanvas::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip)
 {
     int		    xorgi = 0, yorgi = 0;
     int	       	lw;
@@ -3135,7 +3135,7 @@ void RasterContext::lineProjectingCap( const LineFace *face, bool isLeft, bool i
 }
 
 
-void RasterContext::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft )
+void BitmapCanvas::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft )
 {
   if (ybase != edgey)
       return;
@@ -3163,7 +3163,7 @@ void RasterContext::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  Li
 }
 
 
-void RasterContext::drawWideSolidPolyline( const  Point* pPts, int npt, const Rect& currentClip)
+void BitmapCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rect& currentClip)
 {
   int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -3269,7 +3269,7 @@ void RasterContext::drawWideSolidPolyline( const  Point* pPts, int npt, const Re
 }
 
 
-void RasterContext::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip)
+void BitmapCanvas::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip)
 {
     double	 l, L, r;
     double	 xa, ya;
@@ -3484,7 +3484,7 @@ void RasterContext::drawSegment( Point from, Point to, bool projectLeft, bool pr
 }
 
 
-void RasterContext::drawWideDashPolyline( const Point* pPts, int npt,
+void BitmapCanvas::drawWideDashPolyline( const Point* pPts, int npt,
                                          int dashOn, int dashOff, const Rect& currentClip)
 {
     int	      x1, y1, x2, y2;
@@ -3654,7 +3654,7 @@ void RasterContext::drawWideDashPolyline( const Point* pPts, int npt,
 }
 
 
-void RasterContext::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
+void BitmapCanvas::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
                                  bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip)
 {
   int		            dashNum, dashIndex, dashRemain;
@@ -4054,7 +4054,7 @@ void RasterContext::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffse
 }
 
 
-void RasterContext::putImage( const Point& to, const Image& img)
+void BitmapCanvas::putImage( const Point& to, const Image& img)
 {
     Rect imageRect;
     imageRect.setWidth( img.width() );
@@ -4064,7 +4064,7 @@ void RasterContext::putImage( const Point& to, const Image& img)
 }
 
 
-//void RasterContext::putImage(const Point& to, const Image& from, const Rect& fromRect)
+//void BitmapCanvas::putImage(const Point& to, const Image& from, const Rect& fromRect)
 //{
 //  // clip fromRect to fit into the clip/image rect
 //  Point d = _currentClip.topLeft() - to;
@@ -4083,7 +4083,7 @@ void RasterContext::putImage( const Point& to, const Image& img)
 //}
 
 
-void RasterContext::putImage(const Point& to, const Image& image, const Rect& imageRect)
+void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& imageRect)
 {
     if( ! _image )
         return;

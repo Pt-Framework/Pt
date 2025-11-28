@@ -42,7 +42,7 @@ namespace Pt {
 
 namespace Gfx {
 
-RasterContext::RasterContext()
+BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _image()
 , _text( new DrawText() )
@@ -51,20 +51,20 @@ RasterContext::RasterContext()
 }
 
 
-RasterContext::~RasterContext()
+BitmapCanvas::~BitmapCanvas()
 {
     delete _text;
 }
 
 
-void RasterContext::init(BLContext& rasterContext, Image& image)
+void BitmapCanvas::init(BLContext& rasterContext, Image& image)
 {
     _context = &rasterContext;
     _image = &image;
 }
 
 
-void RasterContext::onBeginPaint(const Gfx::Paint& paint)
+void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     if( ! _context )
         return;
@@ -79,7 +79,7 @@ void RasterContext::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void RasterContext::onFinishPaint()
+void BitmapCanvas::onFinishPaint()
 {
     if(_context)
         _context = 0;
@@ -89,13 +89,13 @@ void RasterContext::onFinishPaint()
 }
 
 
-void RasterContext::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+void BitmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
 
 
-void RasterContext::onApplyCompositionMode(const Gfx::CompositionMode& mode)
+void BitmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode)
 {
     BLCompOp compOp = BL_COMP_OP_SRC_OVER;
     
@@ -112,7 +112,7 @@ void RasterContext::onApplyCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void RasterContext::onSetPen(const Gfx::Pen& pen)
+void BitmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     _pen = pen;
 
@@ -149,7 +149,7 @@ void RasterContext::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void RasterContext::onApplyPen(const Gfx::Pen& pen)
+void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 {
     _text->setPen(pen);
 
@@ -165,12 +165,12 @@ void RasterContext::onApplyPen(const Gfx::Pen& pen)
 }
 
 
-void RasterContext::onSetBrush(const Gfx::Brush& brush)
+void BitmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
 }
 
 
-void RasterContext::onApplyBrush(const Gfx::Brush& brush)
+void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 {
     Pt::Gfx::Color brushColor = brush.color();
     BLRgba32 fillColor(brushColor.red() / 257, 
@@ -202,24 +202,24 @@ void RasterContext::onApplyBrush(const Gfx::Brush& brush)
 }
 
 
-void RasterContext::onSetFont(const Gfx::Font& font)
+void BitmapCanvas::onSetFont(const Gfx::Font& font)
 {
 }
 
 
-void RasterContext::onApplyFont(const Gfx::Font& font)
+void BitmapCanvas::onApplyFont(const Gfx::Font& font)
 {
     _text->setFont(font);
 }
 
 
 
-void RasterContext::onSetClip(const Gfx::RectF* clip)
+void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
 }
 
 
-void RasterContext::onApplyClip(const Gfx::RectF* clip) 
+void BitmapCanvas::onApplyClip(const Gfx::RectF* clip) 
 {
     if( ! _image )
         return;
@@ -265,7 +265,7 @@ void RasterContext::onApplyClip(const Gfx::RectF* clip)
 }
 
 
-void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
@@ -280,7 +280,7 @@ void RasterContext::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 }
 
 
-void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if(n == 0)
         return;
@@ -300,7 +300,7 @@ void RasterContext::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void RasterContext::drawDashed(const Gfx::PointF* pts, const size_t n)
+void BitmapCanvas::drawDashed(const Gfx::PointF* pts, const size_t n)
 {
     Dasher dasher(_dashPattern);
     dasher.push(pts, n);
@@ -312,7 +312,7 @@ void RasterContext::drawDashed(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void RasterContext::drawSolid(const Gfx::PointF* pts, const size_t n)
+void BitmapCanvas::drawSolid(const Gfx::PointF* pts, const size_t n)
 {
     _points.resize(n);
 
@@ -326,7 +326,7 @@ void RasterContext::drawSolid(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
+void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
     if(n == 0)
         return;
@@ -343,7 +343,7 @@ void RasterContext::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void RasterContext::onDrawRect(const Gfx::RectF& r)
+void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
     if( _pen.style() ==  Gfx::Pen::Dash ||
         _pen.style() == Gfx::Pen::Dot )
@@ -359,13 +359,13 @@ void RasterContext::onDrawRect(const Gfx::RectF& r)
 }
 
 
-void RasterContext::onFillRect(const Gfx::RectF& r)
+void BitmapCanvas::onFillRect(const Gfx::RectF& r)
 {
      _context->fill_rect( r.x(), r.y(), r.width(),r.height() );
 }
 
 
-void RasterContext::onDrawEllipse(const PointF& topLeft, const SizeF& size)
+void BitmapCanvas::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 {
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
@@ -385,7 +385,7 @@ void RasterContext::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 }
 
 
-void RasterContext::onFillEllipse(const PointF& topLeft, const SizeF& size)
+void BitmapCanvas::onFillEllipse(const PointF& topLeft, const SizeF& size)
 {
     double radiusX = size.width() / 2.0;
     double radiusY = size.height() / 2.0;
@@ -396,7 +396,7 @@ void RasterContext::onFillEllipse(const PointF& topLeft, const SizeF& size)
 }
 
 
-void RasterContext::onSetPath(const Gfx::Path& path)
+void BitmapCanvas::onSetPath(const Gfx::Path& path)
 {
     _ptPath = path;
     _blPath.clear();
@@ -404,7 +404,7 @@ void RasterContext::onSetPath(const Gfx::Path& path)
 }
 
 
-void RasterContext::addPath(BLPath& path, const Gfx::Path& other)
+void BitmapCanvas::addPath(BLPath& path, const Gfx::Path& other)
 {
     for(Gfx::PathIterator it = other.begin(); it != other.end(); ++it)
     {
@@ -454,7 +454,7 @@ void RasterContext::addPath(BLPath& path, const Gfx::Path& other)
 }
 
 
-void RasterContext::onDrawPath()
+void BitmapCanvas::onDrawPath()
 {
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
@@ -466,7 +466,7 @@ void RasterContext::onDrawPath()
 }
 
 
-void RasterContext::onDrawPath(const Path& path)
+void BitmapCanvas::onDrawPath(const Path& path)
 {
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
@@ -480,7 +480,7 @@ void RasterContext::onDrawPath(const Path& path)
 }
 
 
-void RasterContext::drawDashed(const Path& path)
+void BitmapCanvas::drawDashed(const Path& path)
 {
     Dasher dasher(_dashPattern);
     _polygon.clear();
@@ -515,13 +515,13 @@ void RasterContext::drawDashed(const Path& path)
 }
 
 
-void RasterContext::onFillPath()
+void BitmapCanvas::onFillPath()
 {
     _context->fill_path(_blPath);
 }
 
 
-void RasterContext::onFillPath(const Gfx::Path& path)
+void BitmapCanvas::onFillPath(const Gfx::Path& path)
 {
     BLPath blPath;
     addPath(blPath, path);
@@ -530,13 +530,13 @@ void RasterContext::onFillPath(const Gfx::Path& path)
 
 
 
-TextMetrics RasterContext::onGetTextMetrics(const String& text) const
+TextMetrics BitmapCanvas::onGetTextMetrics(const String& text) const
 {
     return _text->textMetrics(text);
 }
 
 
-void RasterContext::onDrawText(const PointF& to, const Pt::String& text, 
+void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text, 
                                const Transform* tform)
 {
     if( ! _image )
@@ -555,7 +555,7 @@ void RasterContext::onDrawText(const PointF& to, const Pt::String& text,
 
 #if USE_BLEND2D_BLIT
 
-void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
+void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image, 
                                 const RectF* imageRect)
 {
     _context->save();
@@ -602,7 +602,7 @@ void RasterContext::onDrawImage(const PointF& toF, const Image& image,
 
 #else
 
-void RasterContext::onDrawImage(const PointF& toF, const Image& image, 
+void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image, 
                                 const RectF* imageRect)
 {
     Gfx::PointF toP = transform() * toF;
@@ -624,7 +624,7 @@ void RasterContext::onDrawImage(const PointF& toF, const Image& image,
 }
 
 
-void RasterContext::putImage( const Point& to, const Image& img)
+void BitmapCanvas::putImage( const Point& to, const Image& img)
 {
     Rect imageRect;
     imageRect.setWidth( img.width() );
@@ -634,7 +634,7 @@ void RasterContext::putImage( const Point& to, const Image& img)
 }
 
 
-void RasterContext::putImage(const Point& to, const Image& image, const Rect& imageRect)
+void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& imageRect)
 {
     if( ! _image )
         return;

@@ -47,7 +47,7 @@ class LineFace;
 class ActiveEdgeTable;
 class DrawText;
 
-class RasterContext : public Canvas
+class BitmapCanvas : public Canvas
 {
     public:
         typedef Image::pos_t       pos_t;
@@ -56,11 +56,11 @@ class RasterContext : public Canvas
         typedef BasicRect<pos_t>   Rect;
 
     public:
-        RasterContext();
+        BitmapCanvas();
 
-        ~RasterContext();
+        ~BitmapCanvas();
 
-        void setImage(Image& image);
+        void init(Image& image);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;

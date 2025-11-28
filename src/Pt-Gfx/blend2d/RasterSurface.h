@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BLEND2D_RASTER_SURFACE_H
-#define PT_GFX_BLEND2D_RASTER_SURFACE_H
+#ifndef PT_GFX_BLEND2D_BITMAP_SURFACE_H
+#define PT_GFX_BLEND2D_BITMAP_SURFACE_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PaintSurface.h>
@@ -49,22 +49,22 @@ namespace Pt {
 
 namespace Gfx {
 
-class RasterContext;
+class BitmapCanvas;
 
 /** @brief Image drawing surface.
 */
-class PT_GFX_API RasterSurface : private NonCopyable
+class PT_GFX_API BitmapSurface : private NonCopyable
 {
   typedef BasicPoint<Pt::ssize_t> PointI;
   typedef BasicSize<Pt::ssize_t> SizeI;
   typedef BasicRect<Pt::ssize_t> RectI;
 
   public:
-    RasterSurface();
+    BitmapSurface();
 
-    RasterSurface(const Gfx::SizeF& size, std::size_t stride = 0);
+    BitmapSurface(const Gfx::SizeF& size, std::size_t stride = 0);
 
-    virtual ~RasterSurface();
+    virtual ~BitmapSurface();
 
     const Gfx::Image& image() const;
 

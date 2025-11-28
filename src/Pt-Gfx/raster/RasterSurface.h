@@ -47,22 +47,22 @@ namespace Pt {
 
 namespace Gfx {
 
-class RasterContext;
+class BitmapCanvas;
 
 /** @brief Image drawing surface.
 */
-class PT_GFX_API RasterSurface : private NonCopyable
+class PT_GFX_API BitmapSurface : private NonCopyable
 {
   typedef BasicPoint<Pt::ssize_t> PointI;
   typedef BasicSize<Pt::ssize_t> SizeI;
   typedef BasicRect<Pt::ssize_t> RectI;
 
   public:
-    RasterSurface();
+    BitmapSurface();
 
-    RasterSurface(const Gfx::SizeF& size, std::size_t stride = 0);
+    BitmapSurface(const Gfx::SizeF& size, std::size_t stride = 0);
 
-    virtual ~RasterSurface();
+    virtual ~BitmapSurface();
 
     const Gfx::Image& image() const;
 
@@ -99,7 +99,7 @@ class PT_GFX_API RasterSurface : private NonCopyable
     Image          _image;
     Gfx::SizeF     _physicalSize;
     Gfx::Scaling   _scaling;
-    RasterContext* _context;
+    BitmapCanvas*  _canvas;
 };
 
 } // namespace

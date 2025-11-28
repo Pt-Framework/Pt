@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BLEND2D_RASTER_CONTEXT_H
-#define PT_GFX_BLEND2D_RASTER_CONTEXT_H
+#ifndef PT_GFX_BLEND2D_BITMAP_CANVAS_H
+#define PT_GFX_BLEND2D_BITMAP_CANVAS_H
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
@@ -44,16 +44,16 @@ namespace Pt {
 
 namespace Gfx {
 
-class RasterContext : public Canvas
+class BitmapCanvas : public Canvas
 {
     typedef BasicPoint<Pt::ssize_t> Point;
     typedef BasicSize<Pt::ssize_t> Size;
     typedef BasicRect<Pt::ssize_t> Rect;
 
     public:
-        RasterContext();
+        BitmapCanvas();
 
-        ~RasterContext();
+        ~BitmapCanvas();
 
         void init(BLContext& rasterContext, Image& image);
 
