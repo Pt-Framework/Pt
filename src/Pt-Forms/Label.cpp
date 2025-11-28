@@ -30,6 +30,7 @@
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/TextMetrics.h>
 
@@ -541,7 +542,7 @@ void Label::onPaint(PaintSurface& surface,
     if( ! _renderer)
         return;
 
-    RenderContext context(surface);
+    PaintContext context(surface);
 
     Gfx::Painter painter(context);
     painter.setClip(rect);

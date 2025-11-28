@@ -60,11 +60,11 @@ class PT_GFX_API PaintSurface : private NonCopyable
         */
         const Gfx::ImageFormat& format() const;
 
-        /** @brief Returns the size in physical pixel.
+        /** @brief Returns the size in physical pixels.
         */
         const Gfx::SizeF& size() const;
 
-        /** @brief Returns the scaling fro logical to physical pixels.
+        /** @brief Returns the scaling from logical to physical pixels.
         */
         const Scaling& scaling() const;
 
@@ -132,33 +132,6 @@ class PT_GFX_API PaintSurface : private NonCopyable
     private:
         Canvas*   _canvas;
         Painter*  _painter;
-};
-
-/** @brief Paint con.
-*/
-class PT_GFX_API RenderContext : private NonCopyable
-{
-    friend class Painter;
-
-    public:
-        RenderContext(PaintSurface& surface);
-
-        ~RenderContext();
-
-        PaintSurface* surface();
-
-        void sync();
-
-        void finish();
-
-    private:
-        void attachPainter(Painter& painter);
-
-        void detachPainter(Painter& painter);
-
-    private:
-        PaintSurface* _surface;
-        Painter*      _painter;
 };
 
 } // namespace

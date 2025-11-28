@@ -1,10 +1,10 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-
+  
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,69 +14,75 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-
+  
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-
+  
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_PaintSurface_h
-#define Pt_Forms_PaintSurface_h
+#ifndef Pt_Gfx_PaintContext_h
+#define Pt_Gfx_PaintContext_h
 
-#include <Pt/Forms/Api.h>
-#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Scaling.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
-namespace Forms {
+namespace Gfx {
 
-class Pixmap;
+class Painter;
+class PaintSurface;
 
-/** @brief Paint surface.
+/** @brief Paint context.
 */
-class PT_FORMS_API PaintSurface : public Gfx::PaintSurface
+class PT_GFX_API PaintContext : private NonCopyable
 {
+    friend class Painter;
+
     public:
-        PaintSurface();
+        PaintContext(PaintSurface& surface);
 
-        ~PaintSurface();
+        ~PaintContext();
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pixmap,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect = 0);
+        /** @brief Returns the image format.
+        */
+        const Gfx::ImageFormat& format() const;
 
-    protected:
-        virtual void onDrawPixmap(const Gfx::PointF& to,
-                                  const Pixmap& pixmap,
-                                  const Gfx::Paint& paint,
-                                  const Gfx::RectF* rect = 0) = 0;
+        /** @brief Returns the size in physical pixels.
+        */
+        const Gfx::SizeF& size() const;
+
+        /** @brief Returns the scaling from logical to physical pixels.
+        */
+        const Scaling& scaling() const;
+
+        /** @brief Gets a Canvas.
+        */
+        Canvas* getCanvas(Canvas* canvas);
+
+        void sync();
+
+        void finish();
+
+    private:
+        PaintSurface* surface();
+
+        void attachPainter(Painter& painter);
+
+        void detachPainter(Painter& painter);
+
+    private:
+        PaintSurface* _surface;
+        Painter*      _painter;
 };
-
-
-inline PaintSurface::PaintSurface()
-{
-}
-
-
-inline PaintSurface::~PaintSurface()
-{
-}
-
-
-inline void PaintSurface::drawPixmap(const Gfx::PointF& to,
-                                     const Pixmap& pixmap,
-                                     const Gfx::Paint& paint,
-                                     const Gfx::RectF* rect)
-{
-    onDrawPixmap(to,pixmap,paint,rect);
-}
 
 } // namespace
 

@@ -77,6 +77,7 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        JpegReader.cpp
                        Paint.cpp
                        Painter.cpp
+                       PaintContext.cpp
                        PaintSurface.cpp
                        Path.cpp
                        Pen.cpp

@@ -30,6 +30,7 @@
 #include "AtesionIcon.h"
 #include <Pt/Forms/Application.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>
@@ -274,7 +275,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
  
     Gfx::Painter painter;
 
-    Gfx::RenderContext context( surface() );
+    Gfx::PaintContext context( surface() );
     
     painter.begin(context);
     painter.setClip(rect);

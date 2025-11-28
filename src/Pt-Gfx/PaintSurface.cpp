@@ -165,66 +165,6 @@ void PaintSurface::detachPainter(Painter& painter)
         _painter = 0;
 }
 
-///////////////////////////////////////////////////////////////////////
-// RenderContext
-///////////////////////////////////////////////////////////////////////
-
-RenderContext::RenderContext(PaintSurface& surface)
-: _surface(&surface)
-, _painter(0)
-{
-}
-
-
-RenderContext::~RenderContext()
-{
-    if(_painter)
-    {
-        _painter->onDetachContext(*this);
-    }
-
-    finish();
-}
-
-
-PaintSurface* RenderContext::surface()
-{
-    return _surface;
-}
-
-
-void RenderContext::sync()
-{
-    if(_surface)
-        _surface->sync();
-}
-
-
-void RenderContext::finish()
-{
-    if(_surface)
-        _surface->finish();
-}
-
-
-void RenderContext::attachPainter(Painter& painter)
-{
-    if(_painter)
-    {
-        _painter->onDetachContext(*this);
-        _painter = 0;
-    }
-
-    _painter = &painter;
-}
-
-
-void RenderContext::detachPainter(Painter& painter)
-{
-    if(_painter)
-        _painter = 0;
-}
-
 } // namespace
 
 } // namespace

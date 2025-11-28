@@ -26,56 +26,54 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_PaintSurface_h
-#define Pt_Forms_PaintSurface_h
+#ifndef Pt_Forms_PaintContext_h
+#define Pt_Forms_PaintContext_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Forms/PaintSurface.h>
+#include <Pt/Gfx/PaintContext.h>
 
 namespace Pt {
 
 namespace Forms {
 
-class Pixmap;
-
-/** @brief Paint surface.
+/** @brief Paint context.
 */
-class PT_FORMS_API PaintSurface : public Gfx::PaintSurface
+class PT_FORMS_API PaintContext : public Gfx::PaintContext
 {
     public:
-        PaintSurface();
+        PaintContext(PaintSurface& surface);
 
-        ~PaintSurface();
+        ~PaintContext();
 
         void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pixmap,
+                        const Pixmap& pm,
                         const Gfx::Paint& paint,
-                        const Gfx::RectF* rect = 0);
+                        const Gfx::RectF* rect = 0) const;
 
-    protected:
-        virtual void onDrawPixmap(const Gfx::PointF& to,
-                                  const Pixmap& pixmap,
-                                  const Gfx::Paint& paint,
-                                  const Gfx::RectF* rect = 0) = 0;
+    private:
+        PaintSurface&  _surface;
 };
 
 
-inline PaintSurface::PaintSurface()
+inline PaintContext::PaintContext(PaintSurface& surface)
+: Gfx::PaintContext( surface )
+, _surface(surface)
 {
 }
 
 
-inline PaintSurface::~PaintSurface()
+inline PaintContext::~PaintContext()
 {
 }
 
 
-inline void PaintSurface::drawPixmap(const Gfx::PointF& to,
-                                     const Pixmap& pixmap,
-                                     const Gfx::Paint& paint,
-                                     const Gfx::RectF* rect)
+inline void PaintContext::drawPixmap(const Gfx::PointF& to,
+                               const Pixmap& pixmap,
+                               const Gfx::Paint& paint,
+                               const Gfx::RectF* rect) const
 {
-    onDrawPixmap(to,pixmap,paint,rect);
+    _surface.drawPixmap(to, pixmap, paint, rect);
 }
 
 } // namespace

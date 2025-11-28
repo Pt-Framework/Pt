@@ -58,14 +58,14 @@ namespace Gfx {
 
 class Canvas;
 class PaintSurface;
-class RenderContext;
+class PaintContext;
 
 /** @brief 2D painter interface.
 */
 class PT_GFX_API Painter : private NonCopyable
 {
     friend class PaintSurface;
-    friend class RenderContext;
+    friend class PaintContext;
 
     public:
         /** @brief @brief Default constructor.
@@ -78,7 +78,7 @@ class PT_GFX_API Painter : private NonCopyable
 
         /** @brief @brief Constructs using a canvas.
         */
-        explicit Painter(RenderContext& canvas);
+        explicit Painter(PaintContext& canvas);
 
         /** @brief @brief Destructor.
         */
@@ -90,7 +90,7 @@ class PT_GFX_API Painter : private NonCopyable
 
         /** @brief @brief Begins painting to a canvas.
         */
-        void begin(RenderContext& canvas);
+        void begin(PaintContext& canvas);
 
         /** @brief @brief Ends painting.
         */
@@ -262,14 +262,16 @@ class PT_GFX_API Painter : private NonCopyable
     private:
         void onBeginPaint(PaintSurface& surface);
 
+        void onBeginPaint(Canvas& canvas);
+
         void onDetachSurface(PaintSurface& surface);
 
-        void onDetachContext(RenderContext& canvas);
+        void onDetachContext(PaintContext& canvas);
 
     private:
         PaintSurface*        _surface;
-        RenderContext*       _context;
-        Canvas*              _paintCanvas;
+        PaintContext*        _context;
+        Canvas*              _canvas;
         Scaling              _scaling;
         Paint                _paint;
         Path                 _maybe_not_from_paint;

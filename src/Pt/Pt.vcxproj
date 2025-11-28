@@ -62,6 +62,7 @@
     <ClInclude Include="..\..\include\Pt\FixupInfo.h" />
     <ClInclude Include="..\..\include\Pt\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\Forms\CanvasLayout.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\PaintContext.h" />
     <ClInclude Include="..\..\include\Pt\Forms\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Workspace.h" />

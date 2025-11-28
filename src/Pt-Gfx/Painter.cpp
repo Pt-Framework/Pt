@@ -30,6 +30,7 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/PaintContext.h>
 
 namespace Pt {
 
@@ -38,7 +39,7 @@ namespace Gfx {
 Painter::Painter()
 : _surface(0)
 , _context(0)
-, _paintCanvas(0)
+, _canvas(0)
 {
 }
 
@@ -46,16 +47,16 @@ Painter::Painter()
 Painter::Painter(PaintSurface& surface)
 : _surface(0)
 , _context(0)
-, _paintCanvas(0)
+, _canvas(0)
 {
     begin(surface);
 }
 
 
-Painter::Painter(RenderContext& canvas)
+Painter::Painter(PaintContext& canvas)
 : _surface(0)
 , _context(0)
-, _paintCanvas(0)
+, _canvas(0)
 {
     begin(canvas);
 }
@@ -65,7 +66,7 @@ Painter::~Painter()
 {
     finish();
 
-    delete _paintCanvas;
+    delete _canvas;
 }
 
 
@@ -80,7 +81,7 @@ void Painter::begin(PaintSurface& surface)
 }
 
 
-void Painter::begin(RenderContext& context)
+void Painter::begin(PaintContext& context)
 {
     PaintSurface* surface = context.surface();
   
@@ -102,39 +103,48 @@ void Painter::onBeginPaint(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
    
-    Canvas* reuse = _paintCanvas;
-    _paintCanvas = surface.getCanvas(reuse);
+    Canvas* reuse = _canvas;
+    Canvas* canvas = surface.getCanvas(reuse);
    
-    if(reuse != _paintCanvas)
+    onBeginPaint(*canvas);
+}
+
+
+void Painter::onBeginPaint(Canvas& canvas)
+{
+    Canvas* reuse = _canvas;
+    _canvas = &canvas;
+   
+    if(_canvas != reuse)
     {
         delete reuse;
 
-        // initialize new paint context
-        if(_paintCanvas)
+        // initialize new canvas
+        if(_canvas)
         {
-            _paintCanvas->setCompositionMode( _paint.compositionMode() );
-            _paintCanvas->setPen( _paint.pen() );
-            _paintCanvas->setBrush( _paint.brush() );
-            _paintCanvas->setFont( _paint.font() );
-            _paintCanvas->setPath( _paint.path() );
+            _canvas->setCompositionMode( _paint.compositionMode() );
+            _canvas->setPen( _paint.pen() );
+            _canvas->setBrush( _paint.brush() );
+            _canvas->setFont( _paint.font() );
+            _canvas->setPath( _paint.path() );
 
             const Gfx::RectF* clip = _paint.clip();
             if( ! clip )
-                _paintCanvas->resetClip();
+                _canvas->resetClip();
             else
-                _paintCanvas->setClip(*clip);
+                _canvas->setClip(*clip);
         }
     }
 
-    if(_paintCanvas)
-        _paintCanvas->beginPaint(_paint);
+    if(_canvas)
+        _canvas->beginPaint(_paint);
 }
 
 
 void Painter::finish()
 {
-    if(_paintCanvas)
-        _paintCanvas->finishPaint();
+    if(_canvas)
+        _canvas->finishPaint();
 
     if( ! _context && _surface)
     {
@@ -162,7 +172,7 @@ void Painter::onDetachSurface(PaintSurface& surface)
 }
 
 
-void Painter::onDetachContext(RenderContext& context)
+void Painter::onDetachContext(PaintContext& context)
 {
     finish();
 
@@ -173,8 +183,8 @@ void Painter::onDetachContext(RenderContext& context)
 
 const Gfx::ImageFormat& Painter::format() const
 {
-    if(_paintCanvas)
-        return _paintCanvas->format();
+    if(_canvas)
+        return _canvas->format();
 
     return ImageFormat::argb32();
 }
@@ -182,8 +192,8 @@ const Gfx::ImageFormat& Painter::format() const
 
 const Scaling& Painter::scaling() const
 {
-    if(_paintCanvas)
-        return _paintCanvas->scaling();
+    if(_canvas)
+        return _canvas->scaling();
 
     return _scaling;
 }
@@ -205,8 +215,8 @@ void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     _paint.setCompositionMode(mode);
 
-    if(_paintCanvas)
-        _paintCanvas->setCompositionMode(mode);
+    if(_canvas)
+        _canvas->setCompositionMode(mode);
 }
 
 
@@ -220,8 +230,8 @@ void Painter::setPen(const Gfx::Pen& pen)
 {
     _paint.setPen(pen);
 
-    if(_paintCanvas)
-        _paintCanvas->setPen(pen);
+    if(_canvas)
+        _canvas->setPen(pen);
 }
 
 
@@ -235,8 +245,8 @@ void Painter::setBrush(const Gfx::Brush& brush)
 {
     _paint.setBrush(brush);
 
-    if(_paintCanvas)
-        _paintCanvas->setBrush(brush);
+    if(_canvas)
+        _canvas->setBrush(brush);
 }
 
 
@@ -250,8 +260,8 @@ void Painter::setFont(const Gfx::Font& font)
 {
     _paint.setFont(font);
 
-    if(_paintCanvas)
-        _paintCanvas->setFont(font);
+    if(_canvas)
+        _canvas->setFont(font);
 }
 
 
@@ -265,12 +275,12 @@ void Painter::setClip(const Gfx::RectF& clip)
 {
     _paint.setClip(clip);
 
-    if(_paintCanvas)
+    if(_canvas)
     {
         if( clip.isNull() )
-            _paintCanvas->resetClip();
+            _canvas->resetClip();
         else
-            _paintCanvas->setClip(clip);
+            _canvas->setClip(clip);
     }
 }
 
@@ -279,8 +289,8 @@ void Painter::resetClip()
 {
     _paint.resetClip();
 
-    if(_paintCanvas)
-        _paintCanvas->resetClip();
+    if(_canvas)
+        _canvas->resetClip();
 }
 
 
@@ -289,8 +299,8 @@ void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
     if( _paint.pen().size() == 0 )
         return;
 
-    if(_paintCanvas)
-        _paintCanvas->drawLine(from, to);
+    if(_canvas)
+        _canvas->drawLine(from, to);
 }
 
 
@@ -299,29 +309,29 @@ void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
     if( _paint.pen().size() == 0 )
         return;
 
-    if(_paintCanvas)
-        _paintCanvas->drawPolyline(points, pointCount);
+    if(_canvas)
+        _canvas->drawPolyline(points, pointCount);
 }
 
 
 void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
-    if(_paintCanvas)
-        _paintCanvas->fillPolygon(points, pointCount);
+    if(_canvas)
+        _canvas->fillPolygon(points, pointCount);
 }
 
 
 void Painter::drawRect(const Gfx::RectF& rect)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawRect(rect);
+    if(_canvas)
+        _canvas->drawRect(rect);
 }
 
 
 void Painter::fillRect(const Gfx::RectF& rect)
 {
-    if(_paintCanvas)
-        _paintCanvas->fillRect(rect);
+    if(_canvas)
+        _canvas->fillRect(rect);
 }
 
 
@@ -339,15 +349,15 @@ void Painter::fillCircle(const PointF& topLeft, double diameter)
 
 void Painter::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawEllipse(topLeft, size);
+    if(_canvas)
+        _canvas->drawEllipse(topLeft, size);
 }
 
 
 void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    if(_paintCanvas)
-        _paintCanvas->fillEllipse(topLeft, size);
+    if(_canvas)
+        _canvas->fillEllipse(topLeft, size);
 }
 
 
@@ -376,43 +386,43 @@ void Painter::setPath(const Path& path)
 {
     _paint.setPath(path);
 
-    if(_paintCanvas)
-        _paintCanvas->setPath(path);
+    if(_canvas)
+        _canvas->setPath(path);
 }
 
 
 void Painter::drawPath()
 {
-    if(_paintCanvas)
-        _paintCanvas->drawPath();
+    if(_canvas)
+        _canvas->drawPath();
 }
 
 
 void Painter::fillPath()
 {
-    if(_paintCanvas)
-        _paintCanvas->fillPath();
+    if(_canvas)
+        _canvas->fillPath();
 }
 
 
 void Painter::drawPath(const Path& path)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawPath(path);
+    if(_canvas)
+        _canvas->drawPath(path);
 }
 
 
 void Painter::fillPath(const Path& path)
 {
-    if(_paintCanvas)
-        _paintCanvas->fillPath(path);
+    if(_canvas)
+        _canvas->fillPath(path);
 }
 
 
 Gfx::TextMetrics Painter::textMetrics(const Pt::String& text) const
 {
-    if(_paintCanvas)
-        return _paintCanvas->textMetrics(text);
+    if(_canvas)
+        return _canvas->textMetrics(text);
 
     return Gfx::TextMetrics();
 }
@@ -420,24 +430,24 @@ Gfx::TextMetrics Painter::textMetrics(const Pt::String& text) const
 
 void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawText(to, text);
+    if(_canvas)
+        _canvas->drawText(to, text);
 }
 
 
 void Painter::drawText(const Gfx::PointF& to, const Pt::String& text, 
                        const Gfx::Transform& transform)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawText(to, text, &transform);
+    if(_canvas)
+        _canvas->drawText(to, text, &transform);
 }
 
 
 void Painter::drawImage(const Gfx::PointF& to, 
                         const Gfx::Image& image)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawImage(to, image);
+    if(_canvas)
+        _canvas->drawImage(to, image);
 }
 
 
@@ -445,8 +455,8 @@ void Painter::drawImage(const Gfx::PointF& to,
                         const Gfx::Image& image, 
                         const Gfx::RectF& imageRect)
 {
-    if(_paintCanvas)
-        _paintCanvas->drawImage(to, image, &imageRect);
+    if(_canvas)
+        _canvas->drawImage(to, image, &imageRect);
 }
 
 } // namespace
