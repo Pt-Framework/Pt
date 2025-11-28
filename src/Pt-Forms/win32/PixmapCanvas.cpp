@@ -26,7 +26,7 @@
   MA 02110-1301 USA
 */
 
-#include "PaintContext.h"
+#include "PixmapCanvas.h"
 #include "PixmapImpl.h"
 #include "win32.h"
 

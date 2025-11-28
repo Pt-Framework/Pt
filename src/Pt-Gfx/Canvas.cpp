@@ -26,7 +26,7 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Algorithm.h>

@@ -29,7 +29,7 @@
 
 #include "win32.h"
 #include "PixmapImpl.h"
-#include "PaintContext.h"
+#include "PixmapCanvas.h"
 
 #include <Pt/Forms/View.h>
 #include <Pt/Forms/Pixmap.h>

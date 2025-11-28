@@ -35,7 +35,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/Canvas.h>
 
 #include <Windows.h>
 

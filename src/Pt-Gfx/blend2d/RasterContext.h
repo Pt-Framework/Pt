@@ -29,7 +29,7 @@
 #ifndef PT_GFX_BLEND2D_RASTER_CONTEXT_H
 #define PT_GFX_BLEND2D_RASTER_CONTEXT_H
 
-#include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>

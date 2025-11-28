@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_PAINTCONTEXT_H
-#define PT_GFX_PAINTCONTEXT_H
+#ifndef PT_GFX_CANVAS_H
+#define PT_GFX_CANVAS_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>

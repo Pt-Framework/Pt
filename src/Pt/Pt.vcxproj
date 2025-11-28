@@ -716,6 +716,7 @@
     <ClInclude Include="..\Pt-Db\sqlite\StmtRow.h" />
     <ClInclude Include="..\Pt-Db\sqlite\StmtValue.h" />
     <ClInclude Include="..\Pt-Db\ValueImpl.h" />
+    <ClInclude Include="..\Pt-Forms\win32\PixmapCanvas.h" />
     <ClInclude Include="..\Pt-Forms\WorkspaceFrame.h" />
     <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h" />
     <ClInclude Include="..\Pt-Gfx\blend2d\Dasher.h" />
@@ -799,7 +800,6 @@
     <ClInclude Include="..\Pt-Forms\WaitCursor.h" />
     <ClInclude Include="..\Pt-Forms\win32\ApplicationImpl.h" />
     <ClInclude Include="..\Pt-Forms\win32\KeyMap.h" />
-    <ClInclude Include="..\Pt-Forms\win32\PaintContext.h" />
     <ClInclude Include="..\Pt-Forms\win32\PixmapImpl.h" />
     <ClInclude Include="..\Pt-Forms\win32\ScreenImpl.h" />
     <ClInclude Include="..\Pt-Forms\win32\win32.h" />
@@ -1389,6 +1389,7 @@
     <ClCompile Include="..\Pt-Db\ValueImplTest.cpp" />
     <ClCompile Include="..\Pt-Forms\CanvasLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\Widget.cpp" />
+    <ClCompile Include="..\Pt-Forms\win32\PixmapCanvas.cpp" />
     <ClCompile Include="..\Pt-Forms\Workspace.cpp" />
     <ClCompile Include="..\Pt-Forms\WorkspaceFrame.cpp" />
     <ClCompile Include="..\Pt-Forms\WorkspaceManager.cpp" />
@@ -1514,7 +1515,6 @@
     <ClCompile Include="..\Pt-Forms\TextBlock.cpp" />
     <ClCompile Include="..\Pt-Forms\View.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\ApplicationImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\win32\PaintContext.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\PixmapImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\ScreenImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\WindowImpl.cpp" />

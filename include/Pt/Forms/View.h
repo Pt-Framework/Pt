@@ -36,7 +36,7 @@
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Forms/Style.h>
 
-#include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
