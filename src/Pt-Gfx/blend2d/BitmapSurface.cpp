@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2024 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,12 +26,12 @@
   02110-1301 USA
 */
 
-#include "RasterSurface.h"
-#include "RasterContext.h"
+#include "BitmapSurface.h"
+#include "BitmapCanvas.h"
 
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Bitmap.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
@@ -44,13 +43,13 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 BitmapSurface::BitmapSurface()
-: _canvas(0)
+: _rasterImage()
+, _rasterContext()
 {
 }
 
 
 BitmapSurface::BitmapSurface(const Gfx::SizeF& size, std::size_t stride)
-: _canvas(0)
 {
     reset(size, stride);
 }
@@ -80,6 +79,14 @@ void BitmapSurface::reset(const Gfx::Image& image)
     }
 
     _physicalSize.set( image.width(), image.height() );
+
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
+    
+    std::size_t lineSize = _image.format().imageSize(image.width(), 1, image.padding());
+
+    _rasterImage.create_from_data( image.width(), image.height(), 
+                                   BL_FORMAT_PRGB32, _image.data(), lineSize );
 }
 
 
@@ -91,6 +98,14 @@ void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
     _image.reset( _image.format(), width, height, stride );
 
     _physicalSize.set(width, height);
+
+    std::size_t lineSize = _image.format().imageSize(width, 1, stride);
+
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
+    
+    _rasterImage.create_from_data( _image.width(), _image.height(),
+                                   BL_FORMAT_PRGB32, _image.data(), lineSize );
 }
 
 
@@ -126,28 +141,136 @@ Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
     if( ! canvas )
         canvas = new BitmapCanvas();
 
-    canvas->init(_image);
-    
-    _canvas = canvas;
+    if( ! _rasterContext.target_image() )
+        _rasterContext.begin(_rasterImage);
+
+    _rasterContext.save(_stateCookie);
+
+    canvas->init(_rasterContext, _image);
     return canvas;
 }
 
 
 void BitmapSurface::releaseCanvas()
 {
-    _canvas = 0;
+    _rasterContext.restore(_stateCookie);
 }
 
 
 void BitmapSurface::sync()
 {
+    if( _rasterContext.target_image() )
+        _rasterContext.flush(BL_CONTEXT_FLUSH_SYNC);
 }
 
 
 void BitmapSurface::finish()
 {
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
 }
 
+#if USE_BLEND2D_BLIT
+
+void toPRGB(const Pt::Gfx::Image& image, 
+            std::vector<Pt::uint8_t>& bitmapData)
+{
+    size_t _width = image.width();
+    size_t _height = image.height();
+
+    for (std::size_t y = 0; y < image.height(); ++y)
+    {
+        for (std::size_t x = 0; x < image.width(); ++x)
+        {
+            Pt::Gfx::ConstPixel pixel(image.view(), x, y);
+            Pt::Gfx::Color color = pixel.getColor();
+
+            const Pt::uint8_t r = color.red() / 257;
+            const Pt::uint8_t g = color.green() / 257;
+            const Pt::uint8_t b = color.blue() / 257;
+            const Pt::uint8_t a = color.alpha() / 257;
+
+            bitmapData.push_back((Pt::uint8_t) (a * b / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * g / 255));
+            bitmapData.push_back((Pt::uint8_t) (a * r / 255));
+            bitmapData.push_back((Pt::uint8_t) (a));
+        }
+    }
+}
+
+
+void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,
+                               const Bitmap& bitmap,
+                               const Gfx::Paint& paint,
+                               const Gfx::RectF* bitmapRect)
+{
+    if( ! _rasterContext.target_image() )
+        _rasterContext.begin(_rasterImage);
+
+    _rasterContext.save();
+    _rasterContext.reset_transform();
+
+    const Scaling& scale = scaling();
+    const Image& image = bitmap.image();
+
+    Gfx::PointF toP = scale.toPhysical(toF);
+    BLPoint pos( toP.x(), toP.y() );
+
+    if( image.empty() )
+        return;
+
+    void* data = const_cast<Pt::uint8_t*>( image.data() );
+    std::size_t stride = image.format().imageSize( image.width(), 1, image.padding() );
+
+    BLCompOp compOp = BL_COMP_OP_SRC_OVER;
+    
+    if(paint.compositionMode() == CompositionMode::SourceOver)
+    {
+        compOp = BL_COMP_OP_SRC_OVER;
+    }
+    else // CompositionMode::SourceCopy
+    {
+        compOp = BL_COMP_OP_SRC_COPY;
+    }
+
+    _rasterContext.set_comp_op(compOp);
+
+    BLImage view;
+    std::vector<Pt::uint8_t> bitmapData;
+
+    if(paint.compositionMode() == CompositionMode::SourceCopy)
+    {
+        view.create_from_data(image.width(), image.height(), BL_FORMAT_XRGB32,
+                              data, stride, BL_DATA_ACCESS_READ);
+    }
+    else
+    {
+        toPRGB(image, bitmapData);
+
+        view.create_from_data(image.width(), image.height(), BL_FORMAT_PRGB32,
+                              bitmapData.data(), stride, BL_DATA_ACCESS_READ);
+    }
+
+    if(bitmapRect)
+    {
+
+        Gfx::RectF imageRect = bitmap.scaling().toPhysical(*bitmapRect);
+        BLRectI srcRect(lround( imageRect.x() ),
+                        lround( imageRect.y() ), 
+                        lround( imageRect.width() ),
+                        lround( imageRect.height() ) );
+
+        _rasterContext.blit_image(pos, view, srcRect);
+    }
+    else
+    {
+        _rasterContext.blit_image(pos, view);
+    }
+
+    _rasterContext.restore();
+}
+
+#else
 
 void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,
                                const Bitmap& bitmap,
@@ -221,6 +344,8 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
                        fromRect.x(), fromRect.y(), 
                        fromRect.width(), fromRect.height(), paint.compositionMode());
 }
+
+#endif
 
 } // namespace
 

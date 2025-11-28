@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_RasterSurface_H
-#define PT_GFX_RasterSurface_H
+#ifndef PT_GFX_RASTER_BITMAP_SURFACE_H
+#define PT_GFX_RASTER_BITMAP_SURFACE_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PaintSurface.h>

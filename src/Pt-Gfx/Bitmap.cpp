@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include "RasterSurface.h"
+#include "BitmapSurface.h"
 #include "FontManager.h"
 
 #include <Pt/Gfx/Bitmap.h>

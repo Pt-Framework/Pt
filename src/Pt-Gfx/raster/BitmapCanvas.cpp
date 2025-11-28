@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include "RasterContext.h"
+#include "BitmapCanvas.h"
 #include "ClipPolygon.h"
 #include "LineSlope.h"
 #include "LineEdge.h"

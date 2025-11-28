@@ -27,7 +27,6 @@
   02110-1301 USA
 */
 
-#include "Argb32SIMDOps.h"
 #include <Pt/Gfx/Argb32.h>
 
 namespace Pt {

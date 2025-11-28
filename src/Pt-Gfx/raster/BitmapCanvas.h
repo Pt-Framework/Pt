@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_RASTER_CONTEXT_H
-#define PT_GFX_RASTER_CONTEXT_H
+#ifndef PT_GFX_RASTER_BITMAP_CANVAS_H
+#define PT_GFX_RASTER_BITMAP_CANVAS_H
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>

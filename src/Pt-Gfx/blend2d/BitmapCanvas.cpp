@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 20234 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,7 +26,7 @@
   02110-1301 USA
 */
 
-#include "RasterContext.h"
+#include "BitmapCanvas.h"
 #include "DrawText.h"
 #include "Dasher.h"
 
