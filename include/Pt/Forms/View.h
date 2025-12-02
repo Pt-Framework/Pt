@@ -154,6 +154,12 @@ class ViewSurface : public PaintSurface
         {
         }
 
+        explicit ViewSurface(Widget& w)
+        : _view(&w)
+        , _surface(0)
+        {
+        }
+
         PaintSurface* surface()
         {
             return _surface;

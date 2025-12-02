@@ -39,7 +39,11 @@ namespace Forms {
 WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 : _wm(wm)
 , _window(window)
+, _surface(0)
 {
+    _surface = new ViewSurface(*this);
+    _surface->setSurface( &_pixmap, Gfx::PointF(0, 0) );
+
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessActivateEvent);
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessCloseEvent);
     eventReceived() += Pt::slot(*this, &WindowFrame::onProcessWindowStateEvent);
@@ -48,6 +52,7 @@ WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 
 WindowFrame::~WindowFrame()
 {
+    delete _surface;
 }
 
 
@@ -72,6 +77,12 @@ Pixmap& WindowFrame::pixmap()
 const Pixmap& WindowFrame::pixmap() const
 {
     return _pixmap;
+}
+
+
+PaintSurface& WindowFrame::surface()
+{
+    return *_surface;
 }
 
 

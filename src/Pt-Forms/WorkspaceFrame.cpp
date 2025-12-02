@@ -140,9 +140,9 @@ void WindowButton::touchEvent(const TouchEvent& tev)
 }
 
 
-void WindowButton::paint(PaintContext& context, const Gfx::RectF& rect)
+void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Gfx::Painter painter(context);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     Gfx::Color light = brighten(color(), 1.25f);
@@ -222,11 +222,11 @@ MinimizeButton::~MinimizeButton()
 }
 
 
-void MinimizeButton::paint(PaintContext& context, const Gfx::RectF& rect)
+void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    WindowButton::paint(context, rect);
+    WindowButton::paint(surface, rect);
 
-    Gfx::Painter painter(context);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -258,11 +258,11 @@ MaximizeButton::~MaximizeButton()
 }
 
 
-void MaximizeButton::paint(PaintContext& context, const Gfx::RectF& rect)
+void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    WindowButton::paint(context, rect);
+    WindowButton::paint(surface, rect);
 
-    Gfx::Painter painter(context);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -300,11 +300,11 @@ CloseButton::~CloseButton()
 }
 
 
-void CloseButton::paint(PaintContext& context, const Gfx::RectF& rect)
+void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    WindowButton::paint(context, rect);
+    WindowButton::paint(surface, rect);
 
-    Gfx::Painter painter(context);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -358,9 +358,9 @@ MenuButton::~MenuButton()
 }
 
 
-void MenuButton::paint(PaintContext& context, const Gfx::RectF& rect)
+void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Gfx::Painter painter(context);
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -416,7 +416,6 @@ WorkspaceFrame::WorkspaceFrame(WorkspaceManager& workspace, Window& window)
 , _isRightResizing(false)
 , _isTopResizing(false)
 , _isBottomResizing(false)
-, _context( pixmap() )
 , _needsRepaint(false)
 , _currentFrameItem(OnNone)
 {
@@ -1495,8 +1494,9 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
         return;
 
     const Gfx::RectF& rect = ev.rect();
+    PaintSurface& surface = this->surface();
 
-    Gfx::Painter painter( _context );
+    Gfx::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = this->scaling();
@@ -1686,7 +1686,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
         if( buttonUpdateRect.isNull() )
             continue;
 
-        button->paint(_context, buttonUpdateRect);
+        button->paint(surface, buttonUpdateRect);
     }
 }
 

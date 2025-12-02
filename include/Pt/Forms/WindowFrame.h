@@ -31,6 +31,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Widget.h>
+#include <Pt/Forms/View.h>
 #include <Pt/Forms/WindowType.h>
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Bitmap.h>
@@ -63,6 +64,8 @@ class WindowFrame : public Widget
         Pixmap& pixmap();
 
         const Pixmap& pixmap() const;
+
+        PaintSurface& surface();
 
         void getBitmap(Gfx::Bitmap& bitmap);
 
@@ -148,6 +151,7 @@ class WindowFrame : public Widget
         WindowManager& _wm;
         Window&        _window;
         PixmapSurface  _pixmap;
+        class ViewSurface* _surface;
 };
 
 } // namespace
