@@ -340,7 +340,7 @@ void InputDevice::onKey(const input_event& ev)
                 _shift = true;
                 keyCode = Key::ShiftKey;
             }
-            else
+            else if (ev.value == 0)
                 _shift = false;
 
             break; 
@@ -352,7 +352,7 @@ void InputDevice::onKey(const input_event& ev)
                 _control = true;
                 keyCode = Key::ControlKey;
             }
-            else
+            else if (ev.value == 0)
                 _control = false;
 
             break; 
@@ -364,7 +364,7 @@ void InputDevice::onKey(const input_event& ev)
                 _alt = true;
                 keyCode = Key::AltKey;
             }
-            else
+            else if (ev.value == 0)
                 _alt = false;
 
             break; 
@@ -376,10 +376,20 @@ void InputDevice::onKey(const input_event& ev)
                 _meta = true;
                 keyCode = Key::MetaKey;
             }
-            else
+            else if (ev.value == 0)
                 _meta = false;
 
-            break; 
+            break;
+
+        case KEY_TAB:
+            ch = 15;
+            keyCode = Key::Tab;
+            break;
+
+        case KEY_SPACE:
+            ch = 32;
+            keyCode = Key::Space;
+            break;
         
         default:
         {

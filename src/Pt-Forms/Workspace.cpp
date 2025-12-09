@@ -53,7 +53,7 @@ Workspace::Workspace()
 {
     _wm.setParent(this);
 
-    setFocusPolicy(Control::AcceptFocus);
+    setFocusPolicy(Control::NoFocus);
 }
 
 

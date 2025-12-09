@@ -331,7 +331,8 @@ void WorkspaceManager::onActivate(WorkspaceFrame& frame, bool active)
     ActivateEvent aev(frame, active);
     Application::instance().commitEvent(aev);
     
-    activate(active);
+    if(active)
+        activate(active);
 }
 
 

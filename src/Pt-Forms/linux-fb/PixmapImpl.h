@@ -98,7 +98,7 @@ class PixmapImpl
             return _bitmap.scaling();
         }
 
-        Gfx::Canvas* getContext(Gfx::Canvas* reuse)
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
         {
             return _bitmap.getCanvas(reuse);
         }
@@ -108,7 +108,7 @@ class PixmapImpl
             return 0;
         }
 
-        void releaseContext()
+        void releaseCanvas()
         {
         }
 
