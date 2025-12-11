@@ -47,17 +47,20 @@ rule TryBuildC++
 rule CheckToolset
 {    
     EMSDK ?= $(EMSDK:J=" ") ;
-    if ! $(EMSDK)
-    {
-        Exit "EMSDK not set" ;
-    }
 
     EchoOption EMSDK : "Emscripten SDK" ;
-    TOOLSET_PATH += [ FDirName $(EMSDK:J=" ") upstream emscripten ] ;
-    
-    EMSDK_PYTHON_PATH ?= [ GLOB [ FDirName $(EMSDK) python ]  : * ] ;
-    EchoOption EMSDK_PYTHON_PATH : "Emscripten Python Path" ;
-    TOOLSET_PATH += $(EMSDK_PYTHON_PATH:J=" ") ;
+
+    if $(EMSDK)
+    {
+        TOOLSET_PATH += [ FDirName $(EMSDK:J=" ") upstream emscripten ] ;
+        EMSDK_PYTHON_PATH ?= [ GLOB [ FDirName $(EMSDK) python ]  : * ] ;
+    }
+
+    if $(EMSDK_PYTHON_PATH)
+    {
+        EchoOption EMSDK_PYTHON_PATH : "Emscripten Python Path" ;
+        TOOLSET_PATH += $(EMSDK_PYTHON_PATH:J=" ") ;
+    }
 }
 
 
