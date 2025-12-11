@@ -14,4 +14,4 @@ SUFOBJ ?= .o ;
 ##############################################################################
 
 TARGET_OSPLAT ?= wasm32 ;
-TOOLSET ?= emscripten ;
+TOOLSET ?= emcc ;
