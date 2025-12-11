@@ -785,7 +785,6 @@
     <ClInclude Include="..\Pt-Forms\linux-fb\ApplicationImpl.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\FrameBuffer.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\InputDevice.h" />
-    <ClInclude Include="..\Pt-Forms\linux-fb\MainWindowImpl.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\MouseDevice.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\PixmapImpl.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\ScreenImpl.h" />
@@ -1480,7 +1479,6 @@
     <ClCompile Include="..\Pt-Forms\linux-fb\ApplicationImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\linux-fb\FrameBuffer.cpp" />
     <ClCompile Include="..\Pt-Forms\linux-fb\InputDevice.cpp" />
-    <ClCompile Include="..\Pt-Forms\linux-fb\MainWindowImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\linux-fb\MouseDevice.cpp" />
     <ClCompile Include="..\Pt-Forms\linux-fb\PixmapImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\linux-fb\ScreenImpl.cpp" />

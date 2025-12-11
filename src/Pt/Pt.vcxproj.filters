@@ -1941,9 +1941,6 @@
     <ClInclude Include="..\Pt-Forms\linux-fb\InputDevice.h">
       <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Forms\linux-fb\MainWindowImpl.h">
-      <Filter>Pt-Forms\linux-fb</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Forms\linux-fb\MouseDevice.h">
       <Filter>Pt-Forms\linux-fb</Filter>
     </ClInclude>
@@ -4884,9 +4881,6 @@
       <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\linux-fb\InputDevice.cpp">
-      <Filter>Pt-Forms\linux-fb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\linux-fb\MainWindowImpl.cpp">
       <Filter>Pt-Forms\linux-fb</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\linux-fb\MouseDevice.cpp">

@@ -31,7 +31,6 @@
 #include "ScreenImpl.h"
 #include "FrameBuffer.h"
 #include "ApplicationImpl.h"
-#include "MainWindowImpl.h"
 #include "PixmapImpl.h"
 
 #include <Pt/Forms/Application.h>
