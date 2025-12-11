@@ -1677,9 +1677,6 @@
     <ClInclude Include="..\Pt-Gfx\raster\LineSlope.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\RasterContext.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\skia\DrawText.h">
       <Filter>Pt-Gfx\skia</Filter>
     </ClInclude>
@@ -2098,9 +2095,6 @@
       <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\win32\KeyMap.h">
-      <Filter>Pt-Forms\win32</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\win32\PaintContext.h">
       <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\win32\PixmapImpl.h">
@@ -2940,17 +2934,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Polygon.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\blend2d\RasterContext.h">
-      <Filter>Pt-Gfx\blend2d</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\freetype\FontManager.h">
       <Filter>Pt-Gfx\freetype</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\RasterSurface.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\blend2d\RasterSurface.h">
-      <Filter>Pt-Gfx\blend2d</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Gfx\blend2d\Dasher.h">
       <Filter>Pt-Gfx\blend2d</Filter>
@@ -2960,6 +2945,24 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h">
       <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\blend2d\BitmapCanvas.h">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\blend2d\BitmapSurface.h">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\BitmapCanvas.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\raster\BitmapSurface.h">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\PaintContext.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\win32\PixmapCanvas.h">
+      <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4688,9 +4691,6 @@
     <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\raster\RasterContext.cpp">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\skia\DrawText.cpp">
       <Filter>Pt-Gfx\skia</Filter>
     </ClCompile>
@@ -4974,9 +4974,6 @@
       <Filter>Pt-Forms\gdiplus</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\win32\ApplicationImpl.cpp">
-      <Filter>Pt-Forms\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\win32\PaintContext.cpp">
       <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\win32\PixmapImpl.cpp">
@@ -5651,20 +5648,26 @@
     <ClCompile Include="..\Pt-JsonRpc\Responder.cpp">
       <Filter>Pt-JsonRpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\blend2d\RasterContext.cpp">
-      <Filter>Pt-Gfx\blend2d</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\freetype\FontManager.cpp">
       <Filter>Pt-Gfx\freetype</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\raster\RasterSurface.cpp">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\blend2d\RasterSurface.cpp">
-      <Filter>Pt-Gfx\blend2d</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Bitmap.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\blend2d\BitmapCanvas.cpp">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\blend2d\BitmapSurface.cpp">
+      <Filter>Pt-Gfx\blend2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\BitmapCanvas.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\raster\BitmapSurface.cpp">
+      <Filter>Pt-Gfx\raster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\win32\PixmapCanvas.cpp">
+      <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
