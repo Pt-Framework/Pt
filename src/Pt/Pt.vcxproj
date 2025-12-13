@@ -1866,7 +1866,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j8 -sPT_TOP=$(SolutionDir) Pt-test Pt-Forms-Demo</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j8 -sPT_TOP=$(SolutionDir)</NMakeBuildCommandLine>
     <OutDir>$(SolutionDir)build</OutDir>
     <IntDir>$(SolutionDir)build</IntDir>
     <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j8 -sPT_TOP=$(SolutionDir)</NMakeReBuildCommandLine>
