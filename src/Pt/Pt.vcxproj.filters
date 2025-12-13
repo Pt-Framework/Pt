@@ -5663,6 +5663,9 @@
     <ClCompile Include="..\Pt-Forms\win32\PixmapCanvas.cpp">
       <Filter>Pt-Forms\win32</Filter>
     </ClCompile>
+    <ClCompile Include="..\Pt-Forms\sdl\PixmapImpl.cpp">
+      <Filter>Pt-Forms\sdl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\jam\src\modules\readme.txt">

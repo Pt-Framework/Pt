@@ -140,7 +140,7 @@ void ApplicationImpl::onExit()
     _eventQueue.exit();
     wake();
 
-    std::clog << "emscripten_cancel_main_loop" << std::endl;
+    PT_LOG_DEBUG("emscripten_cancel_main_loop");
     emscripten_cancel_main_loop();
 }
 

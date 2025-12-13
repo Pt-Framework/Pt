@@ -9,13 +9,16 @@
 #include <Pt/Forms/CanvasLayout.h>
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/Panel.h>
+#include <Pt/SmartPtr.h>
 
 void fullApp(Pt::Forms::Application& app)
 {
-    Pt::Forms::Demo::MainWindow window;
-    window.setTitle("Pt Forms Demo");
-    window.show();
-    window.activate();
+    // on the heap for emscripten, because side modules have separate stacks
+    Pt::SmartPtr<Pt::Forms::Demo::MainWindow> window(new Pt::Forms::Demo::MainWindow);
+
+    window->setTitle("Pt Forms Demo");
+    window->show();
+    window->activate();
     
     app.run();
 }

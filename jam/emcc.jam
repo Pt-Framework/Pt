@@ -78,20 +78,23 @@ rule CheckCc
     Configure LINK ;
     Configure RANLIB ;
 
-    MAIN_LINKFLAGS = -s MAIN_MODULE=1 ;
-    DLL_LINKFLAGS = -s SIDE_MODULE=1 ;
+    MAIN_LINKFLAGS = --emrun -s EXPORT_ALL=1 -s MAIN_MODULE=1 ;
+    DLL_LINKFLAGS = -s EXPORT_ALL=1 -s SIDE_MODULE=1 ;
 
     CCFLAGS += -fPIC -sUSE_SDL=2 ;
 
     if $(WITH_DEBUG)
     {
+        # -gsource-map or -g
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
-        LINKFLAGS ?= "-sSTACK_SIZE=6MB" "-sSTACK_OVERFLOW_CHECK" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
+
+        # works only with static linking: -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK 
+        LINKFLAGS ?= -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
     }
     else
     {
         CCFLAGS += -DNDEBUG ;
-        LINKFLAGS ?= "-sSTACK_SIZE=6MB" -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
+        LINKFLAGS ?= -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
     }
 
     if $(WITH_OPTIM)
@@ -131,6 +134,7 @@ rule CheckC++
 
     if $(WITH_DEBUG)
     {
+        # -gsource-map or -g
         C++FLAGS += -DDEBUG -g ;
     }
     else
@@ -221,8 +225,6 @@ rule SharedLibrary-LinkSharedLibraries
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     local _deps = $(PRELIB)$(>)$(SUFDLL) ;
 
-    #Exit $(_target) ; 
-
     if $(3)
     {
         LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2:S=$(SUFDLL)) ;
@@ -243,5 +245,5 @@ rule SharedLibrary-LinkSharedLibraries
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
   $(TOOLSET_SET_PATH)
-  $(LINK) $(LINKFLAGS) -L$(SHLIBS:P) -l$(LINKSHLIBS:B) $(WARN) -o $(<) $(UNDEFS) $(>) $(LINKLIBS) $(NEEDLIBS) 
+  $(LINK) $(>) $(LINKFLAGS) -L$(SHLIBS:P) -l$(LINKSHLIBS:B) $(WARN) -o $(<) $(UNDEFS) $(LINKLIBS) $(NEEDLIBS) 
 }

@@ -70,8 +70,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);
 
-    Form::setSurface(&_pixmap, Gfx::PointF(0, 0) );
-
+    setSurface( &_pixmap, Gfx::PointF(0, 0) );
     setContent(&_workspace);
 
     updateScreen( RectI(PointI(0, 0), _frameBuffer.size()) );
@@ -135,6 +134,11 @@ WindowManager& ScreenImpl::windowManager()
 }
 
 
+void ScreenImpl::setCapture(Widget* capture)
+{
+}
+
+
 //double ScreenImpl::scaleFactor() const
 //{
 //    return _surface.scaleFactor();
@@ -185,11 +189,6 @@ void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 {
     if(_parent)
         _parent->repaint(rect);
-}
-
-
-void ScreenImpl::setCapture(Widget* capture)
-{
 }
 
 ///////////////////////////////////////////////////////////////////////

@@ -49,9 +49,9 @@ EM_BOOL onCanvasResized(int eventType, const void *reserved, void *obj)
 {
 	  double width, height;
 	  emscripten_get_element_css_size("canvas", &width, &height);
-    std::clog << "emscripten resize: " << width << " " << height << std::endl;
+    //std::clog << "emscripten resize: " << width << " " << height << std::endl;
 
-    std::clog << "pixel ratio: " << emscripten_get_device_pixel_ratio() << std::endl;
+    //std::clog << "pixel ratio: " << emscripten_get_device_pixel_ratio() << std::endl;
     emscripten_set_canvas_size( int(width), int(height) );
 
     return true;
@@ -84,12 +84,11 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
 	  double width, height;
 	  emscripten_get_element_css_size("canvas", &width, &height);
-    //std::clog << "size: " << width << " x " << height << std::endl;
 
     Gfx::SizeF size(width, height);
-    _pixmap.resize(size);
+    _pixmap.reset(size);
                              
-    const Gfx::Image& image = _pixmap.impl()->toImage();
+    const Gfx::Image& image = _pixmap.impl()->bitmap().image();
 
     _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
                                                          image.width(), image.height(), 
@@ -99,8 +98,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _screen = SDL_CreateWindow("Screen", 0, 0, width, height, 
                                SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
-    Gfx::PaintSurface* surface = _pixmap.surface();
-    setSurface(surface, Gfx::PointF(0, 0) );
+    setSurface( &_pixmap, Gfx::PointF(0, 0) );
     setContent(&_workspace);
 }
 
@@ -200,18 +198,19 @@ void ScreenImpl::onProcessEvent(const Event& ev)
 }
 
 
+void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
+{
+    if(_parent)
+        _parent->repaint(rect);
+}
+
+
 void ScreenImpl::onRequestResize(const Gfx::SizeF& s)
 {
     if(_parent)
         _parent->onResize(*this, s);
 }
 
-
-void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
-{
-    if(_parent)
-        _parent->repaint(rect);
-}
 
 ///////////////////////////////////////////////////////////////////////
 // Implementation
@@ -312,14 +311,16 @@ void ScreenImpl::onRescale(double scaling)
 void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 {
     if( size() == ev.size() )
+    {
         return;
+    }
 
     Base::onResizeEvent(ev);
 
     Gfx::SizeF size = scaling().toPhysical( ev.size() );
-    _pixmap.resize(size);
+    _pixmap.reset(size);
     
-    const Gfx::Image& image = _pixmap.impl()->toImage();
+    const Gfx::Image& image = _pixmap.impl()->bitmap().image();
 
     SDL_FreeSurface(_imageSurface);
     _imageSurface = 0; 
@@ -368,10 +369,7 @@ void ScreenImpl::onPaintEvent(const PaintEvent& ev)
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
-
-    Gfx::PaintSurface* surface = _pixmap.surface();
-    if(surface)
-        onPaint(*surface, rect);
+    onPaint(_pixmap, rect);
 }
 
 

@@ -36,58 +36,92 @@ namespace Pt {
 
 namespace Forms {
 
-class PixmapImpl 
+class Pixmap;
+
+class PixmapImpl
 {
     public:
         PixmapImpl()
         { }
 
+        void reset(const Gfx::Image& image)
+        {
+            _bitmap.reset(image);
+        }
+
+        void reset(const Gfx::SizeF& size)
+        {
+            _bitmap.reset(size);
+        }
+
         void reset(const Gfx::SizeF& size, std::size_t stride)
         {
-            _image.reset(size, stride);
+            _bitmap.reset(size, stride);
         }
 
-        void set(const Gfx::Image& image)
+        const Gfx::Bitmap& bitmap() const 
         {
-            _image.reset(image);
+            return _bitmap;
         }
 
-        const Gfx::Image& toImage() const
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
         {
-            return _image.image();
-        }
+            bitmap.reset( rect.size() );
 
-        void clear(const Gfx::Color& c)
-        { }
+            Gfx::Paint paint;
+            bitmap.drawBitmap(Gfx::PointF(0, 0), _bitmap, paint, &rect);
+        }
 
         const Gfx::SizeF& size() const
         {
-            return _image.size();
-        }
-
-        void resize(const Gfx::SizeF& size)
-        {
-            _image.reset(size);
+            return _bitmap.size();
         }
 
         void setScaleFactor(double scaleFactor)
         {
-            _image.setScaleFactor(scaleFactor);
+            _bitmap.setScaleFactor(scaleFactor);
         }
 
-        Gfx::PaintSurface* surface()
+        void drawPixmap(const Gfx::PointF& to,
+                        const Pixmap& pixmap,
+                        const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
+        
+        const Gfx::ImageFormat& format() const
         {
-            return _image.surface();
+            return _bitmap.format();
         }
 
-        void draw(Gfx::PaintSurface& surface, 
-                  const Gfx::Paint& paint,
-                  const Gfx::PointF& to,
-                  const Gfx::RectF* rect) const
+        const Gfx::Scaling& scaling() const
         {
-            _image.draw(surface, paint, to, rect);
+            return _bitmap.scaling();
         }
 
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
+        {
+            return _bitmap.getCanvas(reuse);
+        }
+
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse)
+        {
+            return 0;
+        }
+
+        void releaseCanvas()
+        {
+        }
+
+        void sync()
+        {
+            _bitmap.sync();
+        }
+
+        void finish()
+        {
+            _bitmap.finish();
+        }
+
+    public:
         static const std::string& defaultFont()
         {
             return Gfx::Bitmap::defaultFont();
@@ -109,7 +143,7 @@ class PixmapImpl
         }
     
     private:
-        Gfx::ImageLayer _image;
+        Gfx::Bitmap _bitmap;
 };
 
 } // namespace

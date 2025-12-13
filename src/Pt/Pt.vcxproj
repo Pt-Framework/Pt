@@ -1388,6 +1388,7 @@
     <ClCompile Include="..\Pt-Db\ValueImpl.cpp" />
     <ClCompile Include="..\Pt-Db\ValueImplTest.cpp" />
     <ClCompile Include="..\Pt-Forms\CanvasLayout.cpp" />
+    <ClCompile Include="..\Pt-Forms\sdl\PixmapImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\Widget.cpp" />
     <ClCompile Include="..\Pt-Forms\win32\PixmapCanvas.cpp" />
     <ClCompile Include="..\Pt-Forms\Workspace.cpp" />
@@ -1865,10 +1866,10 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Jam Build|x64'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j4 -sPT_TOP=$(SolutionDir)</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j8 -sPT_TOP=$(SolutionDir) Pt-test Pt-Forms-Demo</NMakeBuildCommandLine>
     <OutDir>$(SolutionDir)build</OutDir>
     <IntDir>$(SolutionDir)build</IntDir>
-    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j4 -sPT_TOP=$(SolutionDir)</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j8 -sPT_TOP=$(SolutionDir)</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;PT_API_EXPORT;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(PT_INCLUDE_SEARCH_PATH)</NMakeIncludeSearchPath>

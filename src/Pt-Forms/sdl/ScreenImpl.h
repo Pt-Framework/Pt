@@ -50,11 +50,7 @@ class ScreenImpl : public Form
 {
     typedef Form Base;
 
-  public:
-    // take typedefs from FramBuffer
-    typedef Gfx::ImageView::Point Point;
-    typedef Gfx::ImageView::Size Size;
-    typedef Gfx::ImageView::Rect Rect;
+    friend class Screen;
 
     public:
         ScreenImpl(ApplicationImpl& app);
@@ -149,7 +145,7 @@ class ScreenImpl : public Form
 
     private:
         Screen*      _parent;
-        Workspace        _workspace;
+        Workspace    _workspace;
 
         Pixmap       _pixmap;
 

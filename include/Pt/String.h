@@ -122,7 +122,7 @@ struct Char
 } // namespace Pt
 
 // workaround for partial c++11 implementations like macOS
-#if _LIBCPP_VERSION >= 5000
+#if _LIBCPP_VERSION >= 5000 && __cplusplus < 201103L
 
 namespace std {
 
