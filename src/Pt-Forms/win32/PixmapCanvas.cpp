@@ -316,12 +316,6 @@ void PixmapCanvas::onFinishPaint()
 }
 
 
-const Gfx::CompositionMode& PixmapCanvas::compositionMode() const
-{
-    return _compositionMode;
-}
-
-
 void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
@@ -331,18 +325,6 @@ void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 void PixmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
-}
-
-
-HPEN PixmapCanvas::pen() const
-{
-    return _pen;
-}
-
-
-Gfx::Color PixmapCanvas::penColor() const
-{
-    return _penColor;
 }
 
 
@@ -395,36 +377,6 @@ void PixmapCanvas::onApplyPen(const Gfx::Pen& pen)
 
         SetTextColor(dc, penColor);
     }
-}
-
-
-HBRUSH PixmapCanvas::brush() const
-{
-    return _brush;
-}
-
-
-bool PixmapCanvas::gradientBrush() const
-{
-    return _gradientBrush;
-}
-
-
-const Gfx::Brush::GradientStyle& PixmapCanvas::gradient() const
-{
-    return _gradient;
-}
-
-        
-const Gfx::Color& PixmapCanvas::gradientStart() const
-{
-    return _gradientStart;
-}
-
-
-const Gfx::Color& PixmapCanvas::gradientStop() const
-{
-    return _gradientStop;
 }
 
 
@@ -527,12 +479,6 @@ void PixmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 }
 
 
-HFONT PixmapCanvas::font() const
-{
-    return _font;
-}
-
-
 void PixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     if(_font)
@@ -556,12 +502,6 @@ void PixmapCanvas::onApplyFont(const Gfx::Font& font)
         SelectObject(dc, _font);
 
     SetTextAlign(dc, TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
-}
-
-
-HRGN PixmapCanvas::clipRect() const
-{
-    return _clipRect;
 }
 
 

@@ -54,26 +54,6 @@ class PixmapCanvas : public Gfx::Canvas
 
         void setPixmap(PixmapImpl& pixmap);
 
-        const Gfx::CompositionMode& compositionMode() const;
-
-        HPEN pen() const;
-
-        Gfx::Color penColor() const;
-
-        HBRUSH brush() const;
-
-        bool gradientBrush() const;
-
-        const Gfx::Brush::GradientStyle& gradient() const;
-        
-        const Gfx::Color& gradientStart() const;
-        
-        const Gfx::Color& gradientStop() const;
-
-        HFONT font() const;
-
-        HRGN clipRect() const;
-
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
