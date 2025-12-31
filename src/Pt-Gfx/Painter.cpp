@@ -146,18 +146,18 @@ void Painter::finish()
     if(_canvas)
         _canvas->finishPaint();
 
-    if( ! _context && _surface)
+    if( ! _context && _surface )
     {
         _surface->finish();
     }
 
-    if( _surface )
+    if(_surface)
     {
         _surface->detachPainter(*this);
         _surface = 0;
     }
 
-    if( _context )
+    if(_context)
     {
         _context->detachPainter(*this);
         _context = 0;
