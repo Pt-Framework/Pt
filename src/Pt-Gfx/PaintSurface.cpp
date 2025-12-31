@@ -44,6 +44,7 @@ namespace Gfx {
 PaintSurface::PaintSurface()
 : _canvas(0)
 , _painter(0)
+, _reserved(0)
 {
 }
 

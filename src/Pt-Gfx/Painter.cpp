@@ -100,12 +100,12 @@ void Painter::begin(PaintContext& context)
 
 void Painter::onBeginPaint(PaintSurface& surface)
 {
-    surface.attachPainter(*this);
-    _surface = &surface;
-   
     Canvas* reuse = _canvas;
     Canvas* canvas = surface.getCanvas(reuse);
    
+    surface.attachPainter(*this);
+    _surface = &surface;
+
     onBeginPaint(*canvas);
 }
 

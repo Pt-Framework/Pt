@@ -132,6 +132,7 @@ class PT_GFX_API PaintSurface : private NonCopyable
     private:
         Canvas*   _canvas;
         Painter*  _painter;
+        void*     _reserved;
 };
 
 } // namespace
