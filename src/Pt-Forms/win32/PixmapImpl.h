@@ -181,7 +181,7 @@ class PixmapImpl
 
         void reset(const Gfx::SizeF& size);
 
-        Gfx::Image PixmapImpl::toImage() const;
+        Gfx::Image toImage() const;
 
         void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
 
@@ -190,9 +190,9 @@ class PixmapImpl
         HDC deviceContext() const;
 
         void drawPixmap(const Gfx::PointF& to,
-                                const Pixmap& pm,
-                                const Gfx::Paint& paint,
-                                const Gfx::RectF* rect);
+                        const Pixmap& pm,
+                        const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
 
         const Gfx::ImageFormat& format() const;
 

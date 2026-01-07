@@ -95,12 +95,14 @@ class PixmapCanvas : public Gfx::Canvas
 
         virtual void onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) override;
 
+    protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
         virtual void onDrawText(const Gfx::PointF& to, 
                                 const Pt::String& text, 
                                 const Gfx::Transform* transform) override;
 
+    protected:
         virtual void onDrawImage(const Gfx::PointF& toF, 
                                  const Gfx::Image& image,
                                  const Gfx::RectF* rect) override;
@@ -115,11 +117,6 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onDrawPath(const Gfx::Path& path) override;
 
         virtual void onFillPath(const Gfx::Path& path) override;
-
-    private:
-        void onDrawPixmap(const Gfx::PointF& toF, 
-                          const PixmapImpl& surface,
-                          const Gfx::RectF* rect = 0);
 
     private:
         POINT toContext(double x, double y);

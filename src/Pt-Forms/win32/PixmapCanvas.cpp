@@ -1237,60 +1237,6 @@ void PixmapCanvas::addPath(HDC dc, const Gfx::Path& path)
     EndPath(dc);
 }
 
-
-void PixmapCanvas::onDrawPixmap(const Gfx::PointF& toF, 
-                                const PixmapImpl& pixmap,
-                                const Gfx::RectF* rect)
-{
-    if( ! _pixmap )
-        return;
-
-    HDC dc = _pixmap->deviceContext();
-
-    Gfx::PointF to = transform() * toF;
-
-    int fromX = 0;
-    int fromY = 0;
-    int width = lround( pixmap.size().width() );
-    int height = lround( pixmap.size().height() );
-
-    if(rect)
-    {
-        const Gfx::Scaling& scaling = pixmap.scaling();
-        Gfx::RectF rectP = scaling.toPhysical(*rect);
-        
-        fromX = lround( rectP.x() );
-        fromY = lround( rectP.y()) ;
-        width = lround( rectP.width() );
-        height = lround( rectP.height() );
-    }
-
-    switch (_compositionMode)
-    {
-        case Gfx::CompositionMode::SourceCopy:
-        {
-            BitBlt(dc, lround(to.x()), lround(to.y()), width, height,
-                   pixmap.deviceContext(), fromX, fromY, SRCCOPY);
-        }
-        break;
-
-        case Gfx::CompositionMode::SourceOver:
-        {
-            BLENDFUNCTION bf;
-            bf.BlendOp = AC_SRC_OVER;
-            bf.BlendFlags = 0;
-            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
-            bf.AlphaFormat = AC_SRC_ALPHA;
-
-            HDC pixmapDC = pixmap.deviceContext();
-
-            AlphaBlend(dc, lround(to.x()), lround(to.y()), width, height,
-                       pixmapDC, fromX, fromY, width, height, bf);
-        }
-        break;
-    }
-}
-
 #endif // PT_FORMS_WIN32_RASTER
 
 } // namespace

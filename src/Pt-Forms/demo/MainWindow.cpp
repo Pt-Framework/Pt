@@ -72,7 +72,7 @@ MainWindow::MainWindow()
     
     setTitle("Main 1");
     move( Gfx::PointF(80, 80) );
-    resize( Gfx::SizeF(900, 850) );
+    resize( Gfx::SizeF(900, 750) );
 
     windowIcon = reader.get();    
     setIcon(windowIcon);
@@ -269,7 +269,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    return;   
+    return;
     
     const Gfx::RectF& rect = ev.rect();
  

@@ -311,7 +311,7 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 
 void PixmapImpl::releaseCanvas()
 {
-    // NOTE: this might be called from the attached context base class destructor
+    // NOTE: this might be called from the attached canvas base class destructor
 
     SelectObject(_dc, _oldPen);
     SelectObject(_dc, _oldBrush);
@@ -380,8 +380,6 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
             bf.BlendFlags = 0;
             bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
             bf.AlphaFormat = AC_SRC_ALPHA;
-
-            
 
             AlphaBlend(_dc, lround(to.x()), lround(to.y()), width, height,
                        pixmapDC, fromX, fromY, width, height, bf);

@@ -75,7 +75,7 @@ inline void PaintSurface::drawPixmap(const Gfx::PointF& to,
                                      const Gfx::Paint& paint,
                                      const Gfx::RectF* rect)
 {
-    onDrawPixmap(to,pixmap,paint,rect);
+    onDrawPixmap(to, pixmap, paint, rect);
 }
 
 } // namespace
