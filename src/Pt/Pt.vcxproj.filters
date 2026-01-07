@@ -271,6 +271,9 @@
     <Filter Include="Pt-Gfx\freetype">
       <UniqueIdentifier>{f7243491-0fb6-4bf9-9108-31c11ff9e734}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Gfx\fonts">
+      <UniqueIdentifier>{6d988e65-71d6-4f80-873d-7e9827ac29ce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\freetype\include\ft2build.h">
@@ -1635,28 +1638,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\Argb32SIMDOps.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\Fixed.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\SIMDConfig.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSans.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansBold.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansBoldItalic.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\DejaVuSansItalic.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Gfx\raster\DrawText.h">
@@ -2961,6 +2943,18 @@
     <ClInclude Include="..\Pt-Forms\win32\PixmapCanvas.h">
       <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSans.h">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSansBold.h">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSansBoldItalic.h">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSansItalic.h">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -3090,9 +3084,6 @@
       <Filter>jam</Filter>
     </None>
     <None Include="..\..\jam\vswhere.jam">
-      <Filter>jam</Filter>
-    </None>
-    <None Include="..\..\jam\wasm.jam">
       <Filter>jam</Filter>
     </None>
     <None Include="..\..\jam\win32.jam">
@@ -3344,6 +3335,12 @@
     <None Include="..\..\Jamfile" />
     <None Include="..\Pt-JsonRpc\Jamfile">
       <Filter>Pt-JsonRpc</Filter>
+    </None>
+    <None Include="..\..\jam\class.jam">
+      <Filter>jam</Filter>
+    </None>
+    <None Include="..\..\jam\emcc.jam">
+      <Filter>jam</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

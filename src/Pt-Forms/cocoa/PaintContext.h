@@ -118,12 +118,12 @@ class PaintContext : public Gfx::PaintContext
             return _cgPath;
         }
 
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode)
         {
             _compositionMode = mode;
         }
 
-        virtual void onSetPen(const Gfx::Pen& pen) override
+        virtual void onSetPen(const Gfx::Pen& pen)
         {
             _pen = pen;
 

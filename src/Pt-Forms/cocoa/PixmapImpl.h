@@ -36,6 +36,7 @@
 #include <Pt/System/Path.h>
 
 #include <CoreGraphics/CGBitmapContext.h>
+#include <CoreText/CoreText.h>
 
 #ifdef __OBJC__
     #import <Foundation/NSGeometry.h>
@@ -54,66 +55,55 @@ namespace Pt {
 namespace Forms {
 
 class Canvas;
+class Pixmap;
 class PixmapImpl;
 
 class PixmapCanvas : public Gfx::Canvas
 {
     public:
-        PixmapCanvas(Gfx::PaintSurface& surface);            
+        PixmapCanvas();            
 
         virtual ~PixmapCanvas();
 
-        CGContextRef context() const
-        { return _context; }
+        void setPixmap(PixmapImpl& pixmap);
 
-        CGImageRef getCGImage() const;
+        void save();
 
-        void set(const Gfx::Image& image);
-        
-        Gfx::Image toImage() const;
-
-        const Gfx::SizeF& physicalSize() const;
-
-        const Gfx::SizeF& logicalSize() const;
-
-        void resize(const Gfx::SizeF& size);
-
-        void setScaleFactor(double scaleFactor);
-
-        void drawPath(CGMutablePathRef path);
-
-        void fillPath(CGMutablePathRef path);
+        void restore();
     
     protected:
-        virtual const Gfx::ImageFormat& onGetFormat() const override;
+        virtual void onBeginPaint(const Gfx::Paint& paint) override;
 
-        virtual const Gfx::SizeF& onGetSize() const override;
-
-        virtual const Gfx::Scaling& onGetScaling() const override;
+        virtual void onFinishPaint() override;
 
     protected:
-        virtual Gfx::PaintContext* onCreateContext(Gfx::PaintContext* context) override;
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+        
+        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode) override;
 
-        virtual void onReleasePaint() override;
+        virtual void onSetPen(const Gfx::Pen& pen) override;
 
-    protected:
-        virtual void onCompositionModeChanged() override;
+        virtual void onApplyPen(const Gfx::Pen& pen) override;
 
-        virtual void onPenChanged() override;
+        virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-        virtual void onBrushChanged() override;
+        virtual void onApplyBrush(const Gfx::Brush& brush) override;
 
-        virtual void onFontChanged() override;
+        virtual void onSetFont(const Gfx::Font& font) override;
 
-        virtual void onClipChanged() override;
+        virtual void onApplyFont(const Gfx::Font& font) override;
+
+        virtual void onSetClip(const Gfx::RectF* clip) override;
+
+        virtual void onApplyClip(const Gfx::RectF* clip) override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, 
                                 const Gfx::PointF& to) override;
 
-        virtual void onDrawPolyline(const Gfx::Polyline& line) override;
+        virtual void onDrawPolyline(const Gfx::PointF* pts, const size_t n) override;
 
-        virtual void onFillPolygon(const Gfx::Polyline& line) override;
+        virtual void onFillPolygon(const Gfx::PointF* pts, const size_t n) override;
 
         virtual void onDrawRect(const Gfx::RectF& rect) override;
 
@@ -124,18 +114,6 @@ class PixmapCanvas : public Gfx::Canvas
 
         virtual void onFillEllipse(const Gfx::PointF& topLeft, 
                                    const Gfx::SizeF& size) override;
-        
-        virtual void onDrawArc(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
-                               float degBegin, float degEnd) override
-        {}
-
-        virtual void onFillChord(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
-                                 float degBegin, float degEnd) override
-        {}
-
-        virtual void onFillPie(const Gfx::PointF& topLeft, const Gfx::SizeF& size, 
-                               float degBegin, float degEnd) override
-        {}
 
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
@@ -148,75 +126,87 @@ class PixmapCanvas : public Gfx::Canvas
                                  const Gfx::Image& image, 
                                  const Gfx::RectF* rect) override;
 
-    private:
-        void onDrawPixmap(const Gfx::PointF& toF, 
-                          const PixmapImpl& surface,
-                          const Gfx::RectF* rect = 0);
+    protected:
+        virtual void onSetPath(const Gfx::Path& path) override;
+
+        virtual void onDrawPath() override;
+
+        virtual void onFillPath() override;
+
+        virtual void onDrawPath(const Gfx::Path& path) override;
+
+        virtual void onFillPath(const Gfx::Path& path) override;
 
     private:
-        void create();
-    
-        void destroy();
-
-        void beginClip();
-
-        void endClip();
-
-        Pt::Gfx::PointF transform(const Pt::Gfx::PointF& p);
+        CGMutablePathRef makePath(const Gfx::Path& path);
 
     private:
-        Gfx::SizeF     _physicalSize;
-        Gfx::SizeF     _logicalSize;
-        Gfx::Scaling   _scaling;
+        PixmapImpl*             _pixmap;
+        Gfx::CompositionMode    _compositionMode;
+        CGRect                  _clipRect;
 
-        size_t         _width;
-        size_t         _height;
+        CGColorRef              _penColor;
+        CGFloat                 _penSize;
+        CGLineCap               _penCap;
+        CGLineJoin              _penJoin;
+        std::vector<CGFloat>    _dashes;
 
-        CGColorSpaceRef     _colorSpace;
-        CGContextRef        _context;
-        mutable CGImageRef _image;
-        mutable bool       _imageModified;
+        CGColorRef              _brushColor;
+        Gfx::Brush::FillStyle   _brushStyle;
 
-        PaintContext*   _paintContext;
-
-        Gfx::CompositionMode _compositionMode;
-        CGRect               _clipRect;
-
+        CTFontRef                     _font;
+        CFMutableDictionaryRef        _fontAttributes;
+        CFMutableAttributedStringRef  _attributedString;
+        
+        CGMutablePathRef        _cgPath;
 };
 
 
-class PixmapImpl : public Gfx::PaintSurface
+class PixmapImpl
 {
     public:
         PixmapImpl();
 
         virtual ~PixmapImpl();
 
-        void set(const Gfx::Image& image);
+        void reset(const Gfx::Image& image);
 
-        Gfx::Image toImage() const;
+        void reset(const Gfx::SizeF& size);
         
-        void clear(const Gfx::Color& c);
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
+        
+        void setScaleFactor(double scaleFactor);
+    
+        const Gfx::ImageFormat& format() const;
 
         const Gfx::SizeF& size() const;
 
-        void resize(const Gfx::SizeF& size);
-        
-        void setScaleFactor(double scaleFactor);
-           
-        Gfx::PaintSurface* surface()
+        const Gfx::Scaling& scaling() const;
+
+        void drawPixmap(const Gfx::PointF& to,
+                        const Pixmap& pm,
+                        const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
+
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
         {
-            return this;
+            return 0;
         }
 
-        void draw(Gfx::PaintSurface& surface, 
-                  const Gfx::Paint& paint,
-                  const Gfx::PointF& to,
-                  const Gfx::RectF* rect) const;
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
 
+        void releaseCanvas();
+
+        void sync();
+
+        void finish();
+
+    public:
         CGContextRef context() const;
 
         CGImageRef getCGImage() const;
+
+        void setModified();
 
     public:
         static const std::string& defaultFont();
@@ -232,8 +222,21 @@ class PixmapImpl : public Gfx::PaintSurface
 
         static std::string getSystemFont();
 
+        void create();
+    
+        void destroy();
+
     private:
-        PixmapCanvas*  _canvas;
+        Gfx::SizeF          _physicalSize;
+        Gfx::Scaling        _scaling;
+        size_t              _width;
+        size_t              _height;
+
+        CGContextRef        _context;
+        mutable CGImageRef  _image;
+        mutable bool        _imageModified;
+
+        PixmapCanvas*       _canvas;
 };
 
 } // namespace
