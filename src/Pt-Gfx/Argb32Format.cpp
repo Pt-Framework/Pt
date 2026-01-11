@@ -42,6 +42,14 @@ std::size_t Argb32Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
     return Argb32::imageSize(width, height, padding);
 }
 
+
+void Argb32Format::onGetSpan(const View& view, const Pt::uint8_t* base, 
+                             Pt::ssize_t x, Pt::ssize_t y, 
+                             Pt::uint32_t* to, std::size_t n) const
+{
+    memcpy(to, base, n * 4);
+}
+
 //
 // Get pixel color
 //

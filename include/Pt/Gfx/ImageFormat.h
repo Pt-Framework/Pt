@@ -238,6 +238,22 @@ class ImageFormat
         }
 
     public:
+        /** @brief Get span of pixels as ARGB-32.
+        */
+        void getSpan(const View& view, const PixelBase& p,
+                     Pt::uint32_t* to, std::size_t n) const
+        {
+            return onGetSpan( view, p.base(), p.x(), p.y(), to, n ); 
+        }
+
+        /** @brief Get span of pixels as ARGB-32.
+        */
+        void getSpan(const View& view, const ConstPixelBase& p,
+                     Pt::uint32_t* to, std::size_t n) const
+        {
+            return onGetSpan( view, p.base(), p.x(), p.y(), to, n ); 
+        }
+
         /** @brief Get pixel color.
         */
         Color getColor(const View& view, const PixelBase& p) const
@@ -250,6 +266,7 @@ class ImageFormat
             return onGetColor( view, p.base(), p.x(), p.y() ); 
         }
 
+    public:
         /** @brief Assign pixels.
         */
         void sourceCopy(View& view, PixelBase& to, 
@@ -347,9 +364,15 @@ class ImageFormat
                                         std::size_t padding) const = 0;
 
     protected:
+        virtual void onGetSpan(const View& view, const Pt::uint8_t* base, 
+                               Pt::ssize_t x, Pt::ssize_t y, 
+                               Pt::uint32_t* to, std::size_t n) const
+        { }
+
         virtual Color onGetColor(const View& view, const Pt::uint8_t* base, 
                                  Pt::ssize_t x, Pt::ssize_t y) const = 0;
 
+    protected:
         /** @brief Assign pixels.
         */
         virtual void onSourceCopy(View& view, PixelBase& to, const Color& c) const = 0;

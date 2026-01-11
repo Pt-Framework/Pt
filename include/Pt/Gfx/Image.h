@@ -57,6 +57,12 @@ class PT_GFX_API Image : public BasicImage<ImageView>
         virtual ~Image();
 
         const Image& operator=(const Image& image);
+
+        void getSpan(Pt::ssize_t x, Pt::ssize_t y, 
+                     Pt::uint32_t* to, Pt::ssize_t n)
+        {
+            view().getSpan(x, y, to, n);
+        }
 };
 
 } // namespace

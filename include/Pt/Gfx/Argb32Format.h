@@ -49,6 +49,10 @@ class PT_GFX_API Argb32Format : public ImageFormat
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const;
 
+        virtual void onGetSpan(const View& view, const Pt::uint8_t* base, 
+                               Pt::ssize_t x, Pt::ssize_t y, 
+                               Pt::uint32_t* to, std::size_t n) const;
+
     protected:
         virtual Color onGetColor(const View& view, const Pt::uint8_t* base, 
                                  Pt::ssize_t x, Pt::ssize_t y) const;
