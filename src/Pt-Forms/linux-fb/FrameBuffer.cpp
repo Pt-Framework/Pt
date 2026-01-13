@@ -93,7 +93,7 @@ FrameBuffer::FrameBuffer()
     switch(_screenInfo.bits_per_pixel)
     {
         case 15:
-            throw std::runtime_error("RGB 565 not supported");
+            throw std::runtime_error("RGB 555 not supported");
 
         case 16:
             _format = new Gfx::Rgb16Format();
