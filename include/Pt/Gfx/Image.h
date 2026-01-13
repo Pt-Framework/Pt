@@ -58,10 +58,18 @@ class PT_GFX_API Image : public BasicImage<ImageView>
 
         const Image& operator=(const Image& image);
 
-        void getSpan(Pt::ssize_t x, Pt::ssize_t y, 
-                     Pt::uint32_t* to, Pt::ssize_t n)
+        void getRect(Pt::ssize_t x, Pt::ssize_t y, 
+                     Pt::ssize_t width, Pt::ssize_t height,
+                     Pt::uint32_t* to, Pt::ssize_t toStride) const
         {
-            view().getSpan(x, y, to, n);
+            view().getRect(x, y, width, height, to, toStride);
+        }
+
+        void setRect(Pt::ssize_t x, Pt::ssize_t y, 
+                     Pt::ssize_t width, Pt::ssize_t height,
+                     const Pt::uint32_t* from, Pt::ssize_t fromStride)
+        {
+            view().setRect(x, y, width, height, from, fromStride);
         }
 };
 

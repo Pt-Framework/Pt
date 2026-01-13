@@ -175,26 +175,22 @@ void BitmapSurface::finish()
 void toPRGB(const Pt::Gfx::Image& image, 
             std::vector<Pt::uint8_t>& bitmapData)
 {
-    size_t _width = image.width();
-    size_t _height = image.height();
+    std::size_t width = image.width();
+    std::size_t height = image.height();
+    std::size_t size = width * height;
 
-    for (std::size_t y = 0; y < image.height(); ++y)
+    bitmapData.resize(size * 4);
+
+    Pt::uint32_t* data = reinterpret_cast<Pt::uint32_t*>( bitmapData.data() );
+    image.getRect(0, 0, width, height, data, width);
+
+    for(int n = 0; n < size; ++n)
     {
-        for (std::size_t x = 0; x < image.width(); ++x)
-        {
-            Pt::Gfx::ConstPixel pixel(image.view(), x, y);
-            Pt::Gfx::Color color = pixel.getColor();
-
-            const Pt::uint8_t r = color.red() / 257;
-            const Pt::uint8_t g = color.green() / 257;
-            const Pt::uint8_t b = color.blue() / 257;
-            const Pt::uint8_t a = color.alpha() / 257;
-
-            bitmapData.push_back((Pt::uint8_t) (a * b / 255));
-            bitmapData.push_back((Pt::uint8_t) (a * g / 255));
-            bitmapData.push_back((Pt::uint8_t) (a * r / 255));
-            bitmapData.push_back((Pt::uint8_t) (a));
-        }
+        const uint32_t argb = data[n];
+        int32_t a = argb >> 24;
+        uint32_t rb = (argb & 0x00FF00FF) * a;
+        uint32_t g  = ((argb >> 8) & 0xFF) * a;
+        data[n] = (argb & 0xFF000000) | ((rb >> 8) & 0x00FF00FF) | (g & 0xFF00);
     }
 }
 

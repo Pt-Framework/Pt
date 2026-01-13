@@ -329,7 +329,7 @@ TextMetrics Canvas::textMetrics(const Pt::String& text) const
 
 
 void Canvas::drawText(const PointF& to, const Pt::String& text, 
-                            const Transform* tform)
+                      const Transform* tform)
 {
     if(_active)
         onDrawText(to, text, tform);
@@ -337,20 +337,14 @@ void Canvas::drawText(const PointF& to, const Pt::String& text,
 
 
 void Canvas::drawImage(const Gfx::PointF& to, 
-                             const Gfx::Image& image, 
-                             const Gfx::RectF* rect)
+                       const Gfx::Image& image, 
+                       const Gfx::RectF* rect)
 {
     if(_active)
     {
         if( image.format() == _active->format() )
         {
             onDrawImage(to, image, rect);
-        }
-        else
-        {
-            Pt::Gfx::Image dest( _active->format(), image.width(), image.height() );
-            Pt::Gfx::copy( image.begin(), image.end(), dest.begin() );
-            onDrawImage(to, dest, rect);
         }
     }
 }

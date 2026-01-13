@@ -170,12 +170,12 @@ class ImageFormat
 
         bool operator==(const ImageFormat& a) const
         {
-          return _pixelStride == a._pixelStride;
+          return typeid(*this) == typeid(a);
         }
 
         bool operator!=(const ImageFormat& a) const
         {
-          return _pixelStride != a._pixelStride;
+          return typeid(*this) != typeid(a);
         }
 
     public:
@@ -187,6 +187,26 @@ class ImageFormat
             return onImageSize(width, height, padding); 
         }
 
+        bool hasAlpha() const
+        {
+            return onHasAlpha();
+        }
+
+        void getRect(const ViewBase& view, Pt::ssize_t x, Pt::ssize_t y,
+                     Pt::ssize_t width, Pt::ssize_t height,
+                     Pt::uint32_t* to, Pt::ssize_t toStride) const
+        {
+            onGetRect(view, x, y, width, height, to, toStride);
+        }
+
+        void setRect(ViewBase& view, Pt::ssize_t x, Pt::ssize_t y,
+                     Pt::ssize_t width, Pt::ssize_t height,
+                     const Pt::uint32_t* from, Pt::ssize_t fromStride) const
+        {
+            onSetRect(view, x, y, width, height, from, fromStride);
+        }
+
+    public:
         void advance(const View& view, PixelBase& p) const
         {
             if( ++p._x >= view.width() )
@@ -235,23 +255,6 @@ class ImageFormat
             p._x += dx;
             p._y += dy;
             p._base += dy * view.stride() + dx * view.pixelStride();
-        }
-
-    public:
-        /** @brief Get span of pixels as ARGB-32.
-        */
-        void getSpan(const View& view, const PixelBase& p,
-                     Pt::uint32_t* to, std::size_t n) const
-        {
-            return onGetSpan( view, p.base(), p.x(), p.y(), to, n ); 
-        }
-
-        /** @brief Get span of pixels as ARGB-32.
-        */
-        void getSpan(const View& view, const ConstPixelBase& p,
-                     Pt::uint32_t* to, std::size_t n) const
-        {
-            return onGetSpan( view, p.base(), p.x(), p.y(), to, n ); 
         }
 
         /** @brief Get pixel color.
@@ -363,12 +366,23 @@ class ImageFormat
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const = 0;
 
-    protected:
-        virtual void onGetSpan(const View& view, const Pt::uint8_t* base, 
-                               Pt::ssize_t x, Pt::ssize_t y, 
-                               Pt::uint32_t* to, std::size_t n) const
+        virtual bool onHasAlpha() const
+        {
+            return false;
+        }
+
+        virtual void onGetRect(const ViewBase& view, Pt::ssize_t x, Pt::ssize_t y,
+                               Pt::ssize_t width, Pt::ssize_t height,
+                               Pt::uint32_t* to, Pt::ssize_t toStride) const
         { }
 
+
+        virtual void onSetRect(ViewBase& view, Pt::ssize_t x, Pt::ssize_t y,
+                               Pt::ssize_t width, Pt::ssize_t height,
+                               const Pt::uint32_t* from, Pt::ssize_t fromStride) const
+        { }
+
+    protected:
         virtual Color onGetColor(const View& view, const Pt::uint8_t* base, 
                                  Pt::ssize_t x, Pt::ssize_t y) const = 0;
 

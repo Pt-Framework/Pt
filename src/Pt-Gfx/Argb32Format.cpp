@@ -43,11 +43,45 @@ std::size_t Argb32Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
-void Argb32Format::onGetSpan(const View& view, const Pt::uint8_t* base, 
-                             Pt::ssize_t x, Pt::ssize_t y, 
-                             Pt::uint32_t* to, std::size_t n) const
+bool Argb32Format::onHasAlpha() const
 {
-    memcpy(to, base, n * 4);
+    return true;
+}
+
+
+void Argb32Format::onGetRect(const ViewBase& view, Pt::ssize_t x, Pt::ssize_t y, 
+                             Pt::ssize_t width, Pt::ssize_t height,
+                             Pt::uint32_t* to, Pt::ssize_t toStride) const
+{
+    Pt::ssize_t xoff = y * x * 4;
+    Pt::ssize_t yoff = y * view.stride();
+    const Pt::uint8_t* from = view.data() + yoff + xoff;
+
+    for( ; y < height; ++y)
+    {
+        memcpy(to, from, width * 4);
+
+        to += toStride;
+        from += view.stride(); 
+    }
+}
+
+
+void Argb32Format::onSetRect(ViewBase& view, Pt::ssize_t x, Pt::ssize_t y, 
+                             Pt::ssize_t width, Pt::ssize_t height,
+                             const Pt::uint32_t* from, Pt::ssize_t fromStride) const
+{
+    Pt::ssize_t xoff = y * x * 4;
+    Pt::ssize_t yoff = y * view.stride();
+    Pt::uint8_t* to = view.data() + yoff + xoff;
+
+    for( ; y < height; ++y)
+    {
+        memcpy(to, from, width * 4);
+
+        from += fromStride;
+        to += view.stride(); 
+    }
 }
 
 //
