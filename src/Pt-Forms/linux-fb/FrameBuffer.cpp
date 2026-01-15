@@ -260,6 +260,67 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Rect& rect )
     }
 }
 
+
+void rotate90_argb(const uint8_t* src, int x, int y, int width, int height,
+                   uint8_t* dst, int dst_x, int dst_y,
+                   int image_width, int image_height, int stride_bytes)
+{
+    const int pixel_size = 4;
+    const int right  = x + width + 1;
+    const int bottom = y + height;
+
+    const uint8_t* src_base = src + y * stride_bytes + x * pixel_size;
+    uint8_t* dst_base = dst + dst_y * stride_bytes + dst_x * pixel_size;
+
+    for (int xoff = right; xoff >= x; --xoff)
+    {
+        uint32_t* src_ptr = (uint32_t*) src_base;
+        src_ptr += xoff;
+
+        uint32_t* dst_ptr = (uint32_t*) dst_base;
+        
+        for (int yoff = y; yoff < bottom; ++yoff)
+        {
+            *dst_ptr = *src_ptr;
+            
+            ++dst_ptr;
+            src_ptr += stride_bytes;
+        }
+
+        dst_base += stride_bytes;
+    }
+}
+
+
+void rotate90_argb_horiz(const uint8_t* src, int x, int y, int width, int height,
+                         uint8_t* dst, int dst_x, int dst_y,
+                         int image_width, int image_height, int stride_bytes)
+{
+    const int pixel_size = 4;
+
+    const int right  = x + width;
+    const int bottom = y + height;
+
+    uint8_t* dst_last_row = dst + (dst_y + width - 1) * stride_bytes;
+
+    for (int yoff = y; yoff < bottom; ++yoff)
+    {
+        const uint8_t* src_row = src + yoff * stride_bytes;
+        const uint32_t* src_ptr = ((const uint32_t*) src_row) + x;
+
+        uint8_t* dst_ptr = dst_last_row + (dst_x + (yoff - y)) * pixel_size;
+
+        for(int xoff = x; xoff < right; ++xoff)
+        {
+            uint32_t* d = (uint32_t*) dst_ptr;
+            *d = *src_ptr;
+
+            ++src_ptr;
+            dst_ptr -= stride_bytes;
+        }
+    }
+}
+
 } // namespace
 
 } // namespace
