@@ -25,6 +25,11 @@ if $(PT_FORMS_IMPL) = win32-raster
     SubDirC++Flags [ FDefines PT_FORMS_WIN32_RASTER ] ;
 }
 
+if $(PT_FORMS_C++FLAGS)
+{
+    SubDirC++Flags $(PT_FORMS_C++FLAGS) ;
+}
+
 if $(GUI_INCLUDES)
 {
     SubDirHdrs $(GUI_INCLUDES) ;

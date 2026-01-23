@@ -1107,6 +1107,14 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     if $(GUI)
     {
         PT_FORMS_IMPL = linux-fb ;
+
+        Load simd.jam ;
+        
+        if $(WITH_CPU_NEON)
+        {
+            PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WITH_CPU_NEON ] ;
+            PT_FORMS_C++FLAGS += $(CPU_NEON_C++FLAGS) ;
+        }
     }
 }
 
@@ -1162,4 +1170,7 @@ if $(GUI)
 
     Configure GUILIBS ;
     EchoOption GUILIBS : "UI platform linklibs" ;
+
+    Configure PT_FORMS_C++FLAGS ;
+    EchoOption PT_FORMS_C++FLAGS : "UI platform C++ flags" ;
 }

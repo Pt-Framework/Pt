@@ -37,11 +37,122 @@
 
 #include <sstream>
 
+#if defined(PT_FORMS_WITH_CPU_NEON)
+#include <arm_neon.h>
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#endif
+
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
 #include <stdio.h>
 #include <errno.h>
+
+namespace {
+
+#if defined(PT_FORMS_WITH_CPU_NEON)
+ 
+void rotate90_argb32(const uint8_t* __restrict src, int src_width, int /*src_height*/,
+                     int src_rect_x, int src_rect_y, int src_rect_w, int src_rect_h,
+                     uint8_t* __restrict dst, int dst_stride, int dst_x0, int dst_y0)
+{
+    const int TS = 4;
+   
+    const int pixel_size = 4;
+    const int src_stride = src_width * pixel_size;
+ 
+    for (int ty = 0; ty < src_rect_h; ty += TS)
+    {
+        for (int tx = 0; tx < src_rect_w; tx += TS)
+        {
+            int bh = std::min(TS, src_rect_h - ty);
+            int bw = std::min(TS, src_rect_w - tx);
+ 
+            int src_abs_y = src_rect_y + ty;
+            int src_abs_x = src_rect_x + tx;
+ 
+            // use scalar if not 4x4 block
+            if (bh < TS || bw < TS)
+            {
+                for (int y = 0; y < bh; ++y)
+                {
+                    const uint8_t* srow = src + (src_abs_y + y) * src_stride + src_abs_x * 4;
+ 
+                    for (int x = 0; x < bw; ++x)
+                    {
+                        int dst_x = dst_x0 + (ty + y);
+                        int dst_y = dst_y0 + (src_rect_w - 1 - (tx + x));
+ 
+                        uint32_t pixel = *(const uint32_t*)(srow + x * 4);
+                        *(uint32_t*)(dst + dst_y * dst_stride + dst_x * 4) = pixel;
+                    }
+                }
+                continue;
+            }
+ 
+            // use neon for 4x4 blocks
+            const uint32_t* src_ptr = (const uint32_t*)(src + (src_abs_y * src_stride + src_abs_x * 4));
+ 
+            uint32x4_t r0 = vld1q_u32(src_ptr + 0 * src_stride / 4);
+            uint32x4_t r1 = vld1q_u32(src_ptr + 1 * src_stride / 4);
+            uint32x4_t r2 = vld1q_u32(src_ptr + 2 * src_stride / 4);
+            uint32x4_t r3 = vld1q_u32(src_ptr + 3 * src_stride / 4);
+ 
+            uint32x4x2_t t01 = vtrnq_u32(r0, r1);
+            uint32x4x2_t t23 = vtrnq_u32(r2, r3);
+ 
+            uint32x4_t row0 = vcombine_u32(vget_low_u32(t01.val[0]),  vget_low_u32(t23.val[0]));
+            uint32x4_t row1 = vcombine_u32(vget_low_u32(t01.val[1]),  vget_low_u32(t23.val[1]));
+            uint32x4_t row2 = vcombine_u32(vget_high_u32(t01.val[0]), vget_high_u32(t23.val[0]));
+            uint32x4_t row3 = vcombine_u32(vget_high_u32(t01.val[1]), vget_high_u32(t23.val[1]));
+ 
+            uint32_t* dst_ptr = (uint32_t*)(dst + dst_y0 * dst_stride + dst_x0 * 4);
+ 
+            int dst_base_x_pix = ty;
+            int dst_base_y_pix = (src_rect_w - 1 - (tx + 3));
+ 
+            vst1q_u32(dst_ptr + (dst_base_y_pix + 0) * (dst_stride / 4) + dst_base_x_pix, row3);
+            vst1q_u32(dst_ptr + (dst_base_y_pix + 1) * (dst_stride / 4) + dst_base_x_pix, row2);
+            vst1q_u32(dst_ptr + (dst_base_y_pix + 2) * (dst_stride / 4) + dst_base_x_pix, row1);
+            vst1q_u32(dst_ptr + (dst_base_y_pix + 3) * (dst_stride / 4) + dst_base_x_pix, row0);
+        }
+    }
+}
+ 
+#else
+ 
+void rotate90_argb32(const uint8_t* src, int src_width, int src_height,
+                     int src_x, int src_y, int width, int height,
+                     uint8_t* dst, int dst_stride, int dst_x, int dst_y)
+{
+    const int pixel_size = 4;
+    const int src_stride = src_width * pixel_size;
+ 
+    const uint8_t* src_base = src + src_y * src_stride + (src_x + width - 1) * pixel_size;
+    uint8_t*       dst_base = dst + dst_y * dst_stride + dst_x * pixel_size;
+ 
+    for( int w = 0; w < width; ++w)
+    {
+        const uint8_t* src_ptr = src_base;
+        uint8_t* dst_ptr = dst_base;
+ 
+        for (int y = 0; y < height; ++y)
+        {
+            memcpy( dst_ptr, src_ptr, sizeof(uint32_t) );
+            dst_ptr += pixel_size;
+            src_ptr += src_stride;
+        }
+ 
+        src_base -= pixel_size;
+        dst_base += dst_stride;
+    }
+}
+ 
+#endif
+
+} // namespace
 
 namespace Pt {
 
@@ -223,7 +334,6 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Rect& rect )
       case Rotate0:
       {
         const Rect clipArea = rect.intersect(Rect( Point(0, 0), size() ));
-        const int clipRight  = clipArea.x() + clipArea.width();
         const int clipBottom = clipArea.y() + clipArea.height();
         const int widthInByte = clipArea.width()*_pixelSize;
 
@@ -238,86 +348,20 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Rect& rect )
 
       case Rotate90:
       {
-        const Rect clipArea = rect.intersect( Rect(Point(0,0), size()) );
-        const int clipRight = clipArea.x() + clipArea.width();
-        const int clipBottom = clipArea.y() + clipArea.height();
-        const Pt::ssize_t height = _screenInfo.yres - 1; 
-
-        for( Pt::ssize_t w = clipArea.x(); w < clipRight; ++w)
-        {
-           const Pt::ssize_t yPos =  height - w;
-
-           for(  Pt::ssize_t h = clipArea.y(); h < clipBottom; ++h)
-           {
-              Pt::uint32_t* dest = ( Pt::uint32_t*)pixelFB( h, yPos);
-
-              const  Pt::uint32_t* src = ( Pt::uint32_t*)pixelFrame(frame, w, h);
-              *dest =  *src;
-            }
-        }
-        break;
+        const Rect clipArea = areaIn.intersect( Rect(Point(0,0), size()) );
+        const int dst_x = clipArea.y();
+        const int dst_y = size().width() - clipArea.x() - clipArea.width();
+        const int dst_stride = size().height() * _pixelSize;
+ 
+        // std::clog << "Rotating block: " << clipArea.x() << " " << clipArea.y() << " "
+        //                                 << clipArea.width() << " " << clipArea.height()
+        //                                 << " -> " << dst_x << " " << dst_y << std::endl;
+ 
+        rotate90_argb32(frame, size().width(), size().height(),
+                        clipArea.x(), clipArea.y(), clipArea.width(), clipArea.height(),
+                        (Pt::uint8_t*)_buffer, dst_stride, dst_x, dst_y);
       }
-    }
-}
-
-
-void rotate90_argb(const uint8_t* src, int x, int y, int width, int height,
-                   uint8_t* dst, int dst_x, int dst_y,
-                   int image_width, int image_height, int stride_bytes)
-{
-    const int pixel_size = 4;
-    const int right  = x + width + 1;
-    const int bottom = y + height;
-
-    const uint8_t* src_base = src + y * stride_bytes + x * pixel_size;
-    uint8_t* dst_base = dst + dst_y * stride_bytes + dst_x * pixel_size;
-
-    for (int xoff = right; xoff >= x; --xoff)
-    {
-        uint32_t* src_ptr = (uint32_t*) src_base;
-        src_ptr += xoff;
-
-        uint32_t* dst_ptr = (uint32_t*) dst_base;
-        
-        for (int yoff = y; yoff < bottom; ++yoff)
-        {
-            *dst_ptr = *src_ptr;
-            
-            ++dst_ptr;
-            src_ptr += stride_bytes;
-        }
-
-        dst_base += stride_bytes;
-    }
-}
-
-
-void rotate90_argb_horiz(const uint8_t* src, int x, int y, int width, int height,
-                         uint8_t* dst, int dst_x, int dst_y,
-                         int image_width, int image_height, int stride_bytes)
-{
-    const int pixel_size = 4;
-
-    const int right  = x + width;
-    const int bottom = y + height;
-
-    uint8_t* dst_last_row = dst + (dst_y + width - 1) * stride_bytes;
-
-    for (int yoff = y; yoff < bottom; ++yoff)
-    {
-        const uint8_t* src_row = src + yoff * stride_bytes;
-        const uint32_t* src_ptr = ((const uint32_t*) src_row) + x;
-
-        uint8_t* dst_ptr = dst_last_row + (dst_x + (yoff - y)) * pixel_size;
-
-        for(int xoff = x; xoff < right; ++xoff)
-        {
-            uint32_t* d = (uint32_t*) dst_ptr;
-            *d = *src_ptr;
-
-            ++src_ptr;
-            dst_ptr -= stride_bytes;
-        }
+      break;
     }
 }
 
