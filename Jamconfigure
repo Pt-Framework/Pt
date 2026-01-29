@@ -510,6 +510,9 @@ Configure ZLIB ;
 # PNG support with libpng
 #############################################################################
 
+# --with-included-png   - for in source tree included variant
+# --with-png            - for system/SDK variant
+
 if --with-libpng in $(ARGV)
 {
     WITH_BUILTIN_LIBPNG = yes ;
