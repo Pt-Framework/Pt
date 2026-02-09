@@ -1,0 +1,97 @@
+/* Copyright (C) 2015 Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
+#ifndef PT_GFX_BASIC_PIXEL_VIEW_HPP
+#define PT_GFX_BASIC_PIXEL_VIEW_HPP
+
+#include <Pt/Gfx/BasicImage.h>
+
+namespace Pt {
+
+namespace Gfx {
+
+///////////////////////////////////////////////////////////////////////
+// BasicPixelView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename PixelT, typename ConstPixelT>
+inline BasicPixelView<FormatT, PixelT, ConstPixelT>::BasicPixelView(BasicImage<FormatT>& image)
+: BasicView<FormatT>(image)
+{ }
+
+
+template <typename FormatT, typename PixelT, typename ConstPixelT>
+template <typename OtherT>
+inline BasicPixelView<FormatT, PixelT, ConstPixelT>::BasicPixelView(BasicImage<OtherT>& image)
+: BasicView<FormatT>(image)
+{ }
+
+
+template <typename FormatT, typename PixelT, typename ConstPixelT>
+inline void BasicPixelView<FormatT, 
+                          PixelT, 
+                          ConstPixelT>::assign(Pt::ssize_t x, Pt::ssize_t y, 
+                                               const BasicConstPixelView<FormatT, PixelT, ConstPixelT>& view, 
+                                               Pt::ssize_t fromX, Pt::ssize_t fromY, 
+                                               Pt::ssize_t width, Pt::ssize_t height)
+{  
+    BasicConstPixelIterator<FormatT, ConstPixelT> from = view.pixel(fromX, fromY);
+    BasicPixelIterator<FormatT, PixelT> to = pixel(x, y);
+    
+    for( Pt::ssize_t y = 0; y < height; ++y )
+    {
+        to->assign(*from, width);
+        to += this->width();
+        from += view.width();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////
+// BasicConstPixelView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename PixelT, typename ConstPixelT>
+inline BasicConstPixelView<FormatT, 
+                           PixelT, 
+                           ConstPixelT>::BasicConstPixelView(const BasicImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+
+template <typename FormatT, typename PixelT, typename ConstPixelT>
+inline BasicConstPixelView<FormatT, 
+                           PixelT, 
+                           ConstPixelT>::BasicConstPixelView(const BasicConstImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+} // namespace
+
+} // namespace
+
+#endif
