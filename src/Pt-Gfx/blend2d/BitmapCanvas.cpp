@@ -30,7 +30,9 @@
 #include "DrawText.h"
 #include "Dasher.h"
 
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Bitmap.h>
 
 #include <vector>
@@ -60,6 +62,7 @@ void BitmapCanvas::init(BLContext& rasterContext, Image& image)
 {
     _context = &rasterContext;
     _image = &image;
+    _imageView.reset(*_image);
 }
 
 
@@ -657,20 +660,35 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
 
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
+  
+    Gfx::PixelView::PixelIterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
 
+    Gfx::ConstPixelView fromView(image);
+    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
 
-    std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
-              << "from: " << fromRect.x() << ", " << fromRect.y() << " "
-              << fromRect.width() << "x" << fromRect.height() << std::endl;
+    switch(_compositionMode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            Argb32::sourceCopy(toIter->base(), _imageView.stride(),
+                               fromIter->base(), fromView.stride(), 
+                               fromRect.width(), fromRect.height());
 
+            //Argb32::sourceCopy(toView.base(), toRect.x(), toRect.y(),
+            //                   fromView, fromRect.x(), fromRect.y(), 
+            //                   fromRect.width(), fromRect.height());
+            break;
 
-    _image->view().copy(toRect.x(), toRect.y(),
-                        image.view(), fromRect.x(), fromRect.y(), 
-                        fromRect.width(), fromRect.height(), _compositionMode);
+        case CompositionMode::SourceOver:
+            Argb32::sourceOver(toIter->base(), _imageView.stride(),
+                               fromIter->base(), fromView.stride(), 
+                               fromRect.width(), fromRect.height());
 
-    //_image.format().copy(_image.view(), toRect.x(), toRect.y(),
-    //                     image.view(), fromRect.x(), fromRect.y(), 
-    //                     fromRect.width(), fromRect.height(), _compositionMode);
+            //Argb32::sourceOver(toView.base(), toRect.x(), toRect.y(),
+            //                   fromView, fromRect.x(), fromRect.y(), 
+            //                   fromRect.width(), fromRect.height());
+            break;
+    }
 }
 
 #endif // USE_BLEND2d_BLIT

@@ -35,6 +35,7 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Math.h>
 #include <cassert>
 
@@ -272,7 +273,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 #ifdef PT_FORMS_WIN32_RASTER
     const Pt::Gfx::Image& image = pixmap().impl()->bitmap().image();
     
-    const size_t depth = image.view().pixelStride() * 8;
+    const size_t depth = pixelStride(image.format()) * 8;
     const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
@@ -514,6 +515,8 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
     const size_t planes = 4;
     std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
         
+    Gfx::ConstColorView view(icon);
+
     for(size_t y = 0; y < icon.height(); ++y)
     {
         const size_t offsetLine = y * (icon.width() * planes);
@@ -522,8 +525,8 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
         {
           const size_t index = offsetLine + (x*planes);
 
-          Gfx::ConstPixel pixel(icon.view(), x, y);
-          Gfx::Color color = pixel.getColor();
+          Gfx::ConstColorView::ConstPixel pixel(view, x, y);
+          Gfx::Color color = pixel.color();
                 
           bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());    
           bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());

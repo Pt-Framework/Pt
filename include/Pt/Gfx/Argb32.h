@@ -31,335 +31,325 @@
 #define PT_GFX_ARGB32_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
+class Argb32PixelBase;
+class Argb32ConstPixelBase;
+
 class Argb32;
 class Argb32Pixel;
 class Argb32ConstPixel;
 
-/** @brief ARGB-32 pixel reference.
+/** @brief ARGB-32 pixel.
 */
 class Argb32Pixel
 {
-    friend class Argb32;
+    friend class Argb32Format;
     friend class Argb32ConstPixel;
+    friend class Argb32;
+
+    protected:
+        Argb32Pixel(Pt::uint8_t* data, ViewBase& view, Pt::ssize_t x, Pt::ssize_t y);
 
     public:
-        typedef BasicView<Argb32> View;
+        Argb32Pixel(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-    public:
-        Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y);
+        Argb32Pixel(const Argb32Pixel& p) = default;
 
-        Argb32Pixel(const Argb32Pixel& p)
-        : _base(p._base)
-        , _x(p._x)
-        , _y(p._y)
-        {  }
+        ViewBase& view()
+        { return _view; }
 
-        Pt::ssize_t x() const
+        const ViewBase& view() const
+        { return _view; }
+
+        Pt::ssize_t xpos() const
         { return _x; }
 
-        Pt::ssize_t y() const
+        Pt::ssize_t ypos() const
         { return _y; }
 
-        Pt::uint8_t* base()
-        { return _base; }
-
-        const Pt::uint8_t* base() const
-        { return _base; }
+        Pt::uint8_t* base() const
+        { return _p; }
 
         Pt::uint8_t alpha() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return *val >> 24;
         }
 
         Pt::uint8_t red() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return (*val & 0x00FF0000) >> 16;
         }
 
         Pt::uint8_t green() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return (*val & 0x0000FF00) >> 8;
         }
 
         Pt::uint8_t blue() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return *val & 0x000000FF;
         }
 
         void setAlpha(Pt::uint8_t a)
         {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
             *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24);
         }
 
         void setRed(Pt::uint8_t r)
         {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
             *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16);
         }
 
         void setGreen(Pt::uint8_t g)
         {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
             *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8);
         }
 
         void setBlue(Pt::uint8_t b)
         {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_base);
+            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
             *val = (*val & 0xFFFFFF00) | uint32_t(b);
         }
 
-        bool operator==(const Argb32Pixel& p) const;
+        Argb32Color color() const;
 
-        bool operator==(const Argb32ConstPixel& p) const;
+        void operator =(const Gfx::Color& color);
+
+        void operator =(const Argb32Color& color);
+
+        void operator =(uint32_t color);
+
+        Argb32Pixel& operator =(const Argb32Pixel& p);
+
+        Argb32Pixel& operator =(const Argb32ConstPixel& p);
+
+        void copy(const Argb32Pixel& p, std::size_t length);
+
+        bool equals(const Argb32Pixel& p) const;
+
+        bool equals(const Argb32ConstPixel& p) const;
+
+        void advance()
+        {
+            if( ++_x >= _view.width() )
+            {
+                _x = 0;
+                ++_y;
+
+                _p += _view.padding();
+            }
+
+            _p += 4;
+        }
+
+        void advance(Pt::ssize_t n)
+        {
+            Pt::ssize_t off = _x + n;
+
+            std::size_t dy = off / _view.width();
+            std::size_t dx = off % _view.width() - _x;
+
+            _x += dx;
+            _y += dy;
+            _p += dy * _view.stride() + dx * 4;
+        }
 
     private:
-        Pt::uint8_t*  _base;
-        Pt::ssize_t   _x;
-        Pt::ssize_t   _y;
+        ViewBase&    _view;
+        Pt::ssize_t  _x;
+        Pt::ssize_t  _y;
+        Pt::uint8_t* _p;
 };
 
-/** @brief ARGB-32 const pixel reference.
+/** @brief ARGB-32 const pixel.
 */
 class Argb32ConstPixel
 {
-    friend class Argb32;
+    friend class Argb32Format;
     friend class Argb32Pixel;
-    
-    public:
-        typedef BasicView<Argb32> View;
+    friend class Argb32;
+
+    protected:
+        Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, Pt::ssize_t x, Pt::ssize_t y)
+        : _view(view)
+        , _x(x)
+        , _y(y)
+        , _p(data)
+        {
+            _p += x * 4;
+            _p += y * view.stride();
+        }
 
     public:
-        Argb32ConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y);
+        Argb32ConstPixel(BasicConstView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        Argb32ConstPixel(const Argb32ConstPixel& p)
-        : _base(p._base)
+        Argb32ConstPixel(const BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        Argb32ConstPixel(const Argb32ConstPixel& p) = default;
+
+        explicit Argb32ConstPixel(const Argb32Pixel& p)
+        : _view(p._view)
         , _x(p._x)
         , _y(p._y)
-        {  }
+        , _p(p._p)
+        { }
 
-        Argb32ConstPixel(const Argb32Pixel& p)
-        : _base(p.base())
-        , _x(p.x())
-        , _y(p.y())
-        {  }
+        const ViewBase& view() const
+        { return _view; }
 
-        Pt::ssize_t x() const
+        Pt::ssize_t xpos() const
         { return _x; }
 
-        Pt::ssize_t y() const
+        Pt::ssize_t ypos() const
         { return _y; }
 
         const Pt::uint8_t* base() const
-        { return _base; }
+        { return _p; }
 
         Pt::uint8_t alpha() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return *val >> 24;
         }
 
         Pt::uint8_t red() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return (*val & 0x00FF0000) >> 16;
         }
 
         Pt::uint8_t green() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return (*val & 0x0000FF00) >> 8;
         }
 
         Pt::uint8_t blue() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_base);
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
             return *val & 0x000000FF;
         }
 
-        bool operator==(const Argb32Pixel& p) const
-        { return _base == p._base; }
+        Argb32Color color() const;
 
-        bool operator==(const Argb32ConstPixel& p) const
-        { return _base == p._base; }
+        bool equals(const Argb32ConstPixel& p) const;
+        
+        bool equals(const Argb32Pixel& p) const;
+
+        void advance()
+        {
+            if( ++_x >= _view.width() )
+            {
+                _x = 0;
+                ++_y;
+
+                _p += _view.padding();
+            }
+
+            _p += 4;
+        }
+
+        void advance(Pt::ssize_t n)
+        {
+            Pt::ssize_t off = _x + n;
+
+            std::size_t dy = off / _view.width();
+            std::size_t dx = off % _view.width() - _x;
+
+            _x += dx;
+            _y += dy;
+            _p += dy * _view.stride() + dx * 4;
+        }
 
     private:
-        const Pt::uint8_t* _base;
-        Pt::ssize_t        _x;
-        Pt::ssize_t        _y;
+        const ViewBase&     _view;
+        Pt::ssize_t         _x;
+        Pt::ssize_t         _y;
+        const Pt::uint8_t*  _p;
 };
 
 /** @brief ARGB-32 image format.
 */
-class Argb32
+class PT_GFX_API Argb32 : public ImageFormat
 {
-    public:
-        typedef BasicView<Argb32>  View;
-        
-        typedef Argb32Pixel         Pixel;
-        typedef Argb32ConstPixel    ConstPixel;
+    static const unsigned PixelWidth = 4;
+
+    public:    
+        typedef Argb32Pixel Pixel;
+        typedef Argb32ConstPixel ConstPixel;
 
     public:
-        static const Argb32& instance();
+        Argb32()
+        : ImageFormat(PixelWidth)
+        { }
 
-        static Pt::ssize_t pixelStride()
+        /** @brief Returns the distance between two pixel base pointers in bytes.
+        */
+        std::size_t pixelStride() const
         {
-            return 4;
+            return PixelWidth;
         }
 
-        static std::size_t imageSize(std::size_t width, std::size_t height,
-                                     std::size_t padding)
+        std::size_t imageSize(std::size_t width, std::size_t height,
+                              std::size_t padding) const
         {
-            std::size_t l = (width * 4) + padding;
-            std::size_t n = l * height;
+            std::size_t stride = (width * 4) + padding;
+            std::size_t n = stride * height;
             return n;
         }
 
-        bool operator==(const Argb32& ) const
-        {
-            return true;
+    protected:
+        virtual ImageFormat* onClone() const override
+        {          
+            return new Argb32();
         }
 
-        bool operator!=(const Argb32& ) const
+        virtual void onRelease() const override
         {
-            return false;
+            delete this;
         }
 
-        // planes(), planeStride()
+        virtual const std::type_info& onGetType() const override
+        { 
+            return typeid(*this); 
+        }
+
+        virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                        std::size_t padding) const override;
+
+        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+                                         Pt::ssize_t x, Pt::ssize_t y, 
+                                         PixelStorage& store) const override;
+    
+        virtual ConstPixelBase* onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
+                                                    Pt::ssize_t x, Pt::ssize_t y, 
+                                                    PixelStorage& store) const override;
     
     public:
-        template <typename P>
-        void advance(const View& view, P& p) const
+        static void sourceCopy(Argb32Pixel& p, const Color& c)
         {
-            if( ++p._x >= view.width() )
-            {
-                p._x = 0;
-                ++p._y;
-
-                p._base += view.padding();
-            }
-
-            p._base += view.pixelStride();
+            sourceCopy(p.base(), c);
         }
-        
-        template <typename P>
-        void advance(const View& view, P& p, Pt::ssize_t n) const
+
+        static void sourceOver(Argb32Pixel& p, const Color& c)
         {
-            Pt::ssize_t off = p._x + n;
-
-            std::size_t dy = off / view.width();
-            std::size_t dx = off % view.width() - p._x;
-
-            p._x += dx;
-            p._y += dy;
-            p._base += dy * view.stride() + dx * view.pixelStride();
+            sourceOver(p.base(), c);
         }
-
-    public:
-        /** @brief Get pixel color.
-        */
-        template <typename P>
-        Color getColor(const View& view, const P& p) const
-        {
-            return Argb32::getColor( p.base() );
-        }
-
-        /** @brief Assign pixels.
-        */
-        template <typename P>
-        void sourceCopy(View& view, Pixel& to, 
-                        const View& from, const P& p) const
-        {
-            Argb32::sourceCopy( to.base(), p.base() );
-        }
-        
-        template <typename P>
-        void sourceOver(View& view, Pixel& to, 
-                        const View& from, const P& p) const
-        {
-            Argb32::sourceOver(to.base(), p.base());
-        }
-        
-        /** @brief Assign pixels.
-        */
-        void sourceCopy(View& view, Pixel& to, const Color& c) const
-        {
-            Argb32::sourceCopy(to.base(), c);
-        }
-        
-        void sourceOver(View& view, Pixel& to, const Color& c) const
-        {
-            Argb32::sourceOver(to.base(), c);
-        }
- 
-        /** @brief Fill pixels.
-        */
-        void sourceCopy(View& view, Pixel& to, std::size_t n, const Color& c) const
-        {
-            Argb32::sourceCopy(to.base(), n, c);
-        }
-
-        void sourceOver(View& view, Pixel& to, std::size_t n, const Color& c) const
-        {
-            Argb32::sourceOver(to.base(), n, c);
-        }
-    
-        /** @brief Fill pixels.
-        */
-        void sourceCopy(View& view, Pixel& to, std::size_t n, 
-                        const View& from, const ConstPixel& p) const
-        {
-            Argb32::sourceCopy(to.base(), n, p.base());
-        }
-
-
-        void sourceOver(View& view, Pixel& to, std::size_t n, 
-                        const View& from, const ConstPixel& p) const
-        {
-            Argb32::sourceOver(to.base(), n, p.base());
-        }
-
-        /** @brief Copy pixels.
-        */
-        void sourceCopy(View& view, Pixel& to, 
-                        const View& from, const ConstPixel& p, std::size_t n) const
-        { 
-            Argb32::sourceCopy(to.base(), p.base(), n);
-        }
-
-        void sourceOver(View& view, Pixel& to, 
-                        const View& from, const ConstPixel& p, std::size_t n) const
-        { 
-            Argb32::sourceOver(to.base(), p.base(), n);
-        }
-
-        //void sourceCopy(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-        //                const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-        //                Pt::ssize_t width, Pt::ssize_t height)
-        //{
-        //    Argb32::sourceCopy(to, toX, toY, from, fromX, fromY, width, height);
-        //}
-
-
-        //void sourceOver(View& to, Pt::ssize_t toX, Pt::ssize_t toY,
-        //                const View& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
-        //                Pt::ssize_t width, Pt::ssize_t height)
-        //{
-        //    Argb32::sourceOver(to, toX, toY, from, fromX, fromY, width, height);
-        //}
 
     public:
         static Color getColor(const Pt::uint8_t* p);
@@ -377,8 +367,8 @@ class Argb32
 
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length);
 
-        static void sourceCopy(ViewBase& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const ViewBase& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        static void sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
+                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
                                Pt::ssize_t width, Pt::ssize_t height);
 
         //
@@ -394,8 +384,8 @@ class Argb32
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length);
 
-        static void sourceOver(ViewBase& to, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const ViewBase& from, Pt::ssize_t fromX, Pt::ssize_t fromY,
+        static void sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
+                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
                                Pt::ssize_t width, Pt::ssize_t height);
 
     public:
@@ -443,51 +433,8 @@ class Argb32
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Argb32Pixel
-///////////////////////////////////////////////////////////////////////
-
-inline Argb32Pixel::Argb32Pixel(View& view, Pt::ssize_t x, Pt::ssize_t y)
-: _base(0)
-, _x(x)
-, _y(y)
-{
-    _base = view.data() + view.stride() * y + x * view.pixelStride();
-}
-
-
-inline bool Argb32Pixel::operator==(const Argb32Pixel& p) const
-{ 
-    return _base == p._base; 
-}
-
-
-inline bool Argb32Pixel::operator==(const Argb32ConstPixel& p) const
-{ 
-    return _base == p._base; 
-}
-
-///////////////////////////////////////////////////////////////////////
-// Argb32ConstPixel
-///////////////////////////////////////////////////////////////////////
-
-inline Argb32ConstPixel::Argb32ConstPixel(const View& view, Pt::ssize_t x, Pt::ssize_t y)
-: _base(0)
-, _x(x)
-, _y(y)
-{
-    _base = view.data() + view.stride() * y + x * view.pixelStride();
-}
-
-///////////////////////////////////////////////////////////////////////
 // Argb32
 ///////////////////////////////////////////////////////////////////////
-
-inline const Argb32& Argb32::instance()
-{
-    static const Argb32 argb32;
-    return argb32;
-}
-
 
 inline Color Argb32::getColor(const Pt::uint8_t* p)
 {
@@ -559,25 +506,16 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, size_t 
 }
 
 
-inline void Argb32::sourceCopy(ViewBase& toView, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const ViewBase& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
+inline void Argb32::sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
+                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
                                Pt::ssize_t width, Pt::ssize_t height)
 {
-    Pt::ssize_t bytesPerPixel = Argb32::pixelStride();
-    Pt::ssize_t n = width * bytesPerPixel;
-
-    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
-                                    + (toX * bytesPerPixel);
-    
-    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
-                                              + (fromX * bytesPerPixel);
-
     for(Pt::ssize_t y = 0; y < height; ++y)
     {
-        memcpy(to, from, n);
+        sourceCopy(to, from, width);
 
-        to += toView.stride();
-        from += fromView.stride();
+        to += toStride;
+        from += fromStride; 
     }
 }
 
@@ -678,34 +616,148 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, size_t 
 }
 
 
-inline void Argb32::sourceOver(ViewBase& toView, Pt::ssize_t toX, Pt::ssize_t toY,
-                               const ViewBase& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
+inline void Argb32::sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
+                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
                                Pt::ssize_t width, Pt::ssize_t height)
 {
-    Pt::ssize_t bytesPerPixel = Argb32::pixelStride();
-
-    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
-                                    + (toX * bytesPerPixel);
-    
-    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
-                                              + (fromX * bytesPerPixel);
-
-    for(int y = 0; y < height; ++y)
+    for(Pt::ssize_t y = 0; y < height; ++y)
     {
-        Pt::uint8_t* toLine = to;
-        const Pt::uint8_t* fromLine = from;
-    
-        for(int x = 0; x < width ; ++x)
-        {
-            Argb32::sourceOver(toLine, fromLine);
-            toLine += 4;
-            fromLine += 4;
-        }
+        sourceOver(to, from, width);
 
-        to += toView.stride();
-        from += fromView.stride();
+        to += toStride;
+        from += fromStride; 
     }
 }
+
+///////////////////////////////////////////////////////////////////////
+// Argb32Pixel
+///////////////////////////////////////////////////////////////////////
+
+inline Argb32Pixel::Argb32Pixel(BasicView<Argb32>& view, 
+                                Pt::ssize_t x, Pt::ssize_t y)
+: _view(view)
+, _x(x)
+, _y(y)
+, _p( view.data() )
+{
+    _p += y * _view.stride();
+    _p += x * 4;   
+}
+
+
+inline Argb32Pixel::Argb32Pixel(Pt::uint8_t* data, ViewBase& view, Pt::ssize_t x, Pt::ssize_t y)
+: _view(view)
+, _x(x)
+, _y(y)
+, _p(data)
+{
+    _p += y * _view.stride();
+    _p += x * 4;
+}
+
+
+inline bool Argb32Pixel::equals(const Argb32Pixel& p) const
+{
+    return _p == p._p;
+}
+
+
+inline bool Argb32Pixel::equals(const Argb32ConstPixel& p) const
+{
+    return _p == p._p;
+}
+
+
+inline void Argb32Pixel::copy(const Argb32Pixel& p, std::size_t length)
+{
+    Argb32::sourceCopy(_p, p._p, length);
+}
+
+
+inline void Argb32Pixel::operator =(const Gfx::Color& color)
+{ 
+    Argb32::sourceCopy(_p, color);
+}
+
+
+inline void Argb32Pixel::operator =(uint32_t color)
+{ 
+    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&color);
+    Argb32::sourceCopy(_p, p);
+}
+
+
+inline void Argb32Pixel::operator =(const Argb32Color& color)
+{ 
+    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
+    Argb32::sourceCopy(_p, p);
+}
+
+
+inline Argb32Pixel& Argb32Pixel::operator =(const Argb32Pixel& p)
+{
+    Argb32::sourceCopy( _p, p._p );
+    return *this;
+}
+
+
+inline Argb32Pixel& Argb32Pixel::operator =(const Argb32ConstPixel& p)
+{
+    Argb32::sourceCopy( _p, p._p );
+    return *this;
+}
+
+
+inline Argb32Color Argb32Pixel::color() const
+{
+    return Argb32Color(*_p);
+}
+
+
+inline Argb32Color Argb32ConstPixel::color() const
+{
+    return Argb32Color(*_p);
+}
+
+///////////////////////////////////////////////////////////////////////
+// Argb32ConstPixel
+///////////////////////////////////////////////////////////////////////
+
+inline Argb32ConstPixel::Argb32ConstPixel(BasicConstView<Argb32>& view,
+                                          Pt::ssize_t x, Pt::ssize_t y)
+: _view(view)
+, _x(x)
+, _y(y)
+, _p( view.data() )
+{
+    _p += x * 4;
+    _p += y * _view.stride();
+}
+
+
+inline Argb32ConstPixel::Argb32ConstPixel(const BasicView<Argb32>& view,
+                                          Pt::ssize_t x, Pt::ssize_t y)
+: _view(view)
+, _x(x)
+, _y(y)
+, _p( view.data() )
+{
+    _p += x * 4;
+    _p += y * _view.stride();
+}
+
+
+inline bool Argb32ConstPixel::equals(const Argb32ConstPixel& p) const
+{
+    return _p == p._p;
+}
+
+
+inline bool Argb32ConstPixel::equals(const Argb32Pixel& p) const
+{
+    return _p == p._p;
+}
+
 } // namespace
 
 } // namespace

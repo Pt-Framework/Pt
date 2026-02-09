@@ -117,8 +117,6 @@ ChildW::ChildW(const std::string& title)
 
     //Toggle button
     Pt::Forms::Key key(Pt::Forms::Key::Control, Pt::Forms::Key::I);
-    Pt::Gfx::Image toggleImage(Pt::Gfx::ImageFormat::argb32(), 10, 10);
-    Gfx::fill(toggleImage.begin(), toggleImage.end(), Gfx::Color());
     
     _toggleButton.setName("toggle");
     _toggleButton.setText("&Toggle Me [CTRL+I]" );

@@ -28,6 +28,7 @@
 
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/IOError.h>
 #include <iostream>
@@ -80,6 +81,7 @@ class PngReaderImpl
         {
             _target = &is;
             _image = &image;
+            _imageView.reset(*_image);
         }
 
         void detach()
@@ -292,14 +294,17 @@ class PngReaderImpl
 
             // resize target image
             if( _image->width() != _width || _image->height() != _height )
+            {
                 _image->reset( Pt::Gfx::ImageFormat::argb32(), _width, _height );
+                _imageView.reset(*_image);
+            }
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
     
             std::size_t n = 0;
             for( size_t x = 0; x < width; ++x)
             {
-                Pixel pixel(_image->view(), x, row);
+                PixelView::Pixel pixel(_imageView, x, row);
 
                 if( bitdepth == 8 && channels == 3)
                 {
@@ -308,7 +313,7 @@ class PngReaderImpl
                     unsigned char blue = data[n++];
 
                     Pt::Gfx::Color color(65535, red*257, green*257, blue*257);
-                    pixel.assign(color, CompositionMode::SourceCopy);
+                    pixel = color;
                 }
 
                 if( bitdepth == 8 && channels == 4)
@@ -319,9 +324,9 @@ class PngReaderImpl
                     unsigned char alpha = data[n++];
             
                     Pt::Gfx::Color color(alpha*257, red*257, green*257, blue*257);
-                    pixel.assign(color, CompositionMode::SourceCopy);
-			    }
-		    }
+                    pixel = color;
+			          }
+		        }
         }
 
         static void onPngEnd(png_structp png, png_infop info)
@@ -366,7 +371,8 @@ class PngReaderImpl
         png_infop    _pngInfo;
         char _buffer[2048];
         std::streamsize _bufferSize;
-        Image* _image;
+        Image*      _image;
+        PixelView   _imageView;
         std::size_t _width;
         std::size_t _height;
         std::size_t _depth;

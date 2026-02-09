@@ -30,6 +30,8 @@
 #include "PixmapImpl.h"
 #include "win32.h"
 
+#include <Pt/Gfx/ImageView.h>
+
 using std::max;
 using std::min;
 #include <Gdiplus.h>
@@ -218,25 +220,30 @@ HBRUSH getGradientBrush(HDC dc, int width, int height,
     return brush;
 }
 
+
 void toPreMulAlpha(const Pt::Gfx::Image& image, 
                    std::vector<Pt::uint8_t>& bitmapData)
 {
-    std::size_t width = image.width();
-    std::size_t height = image.height();
-    std::size_t size = width * height;
+    size_t _width = image.width();
+    size_t _height = image.height();
 
-    bitmapData.resize(size * 4);
+    Pt::Gfx::ConstColorView fromView(image);
+    Pt::Gfx::ConstColorView::ConstIterator it = fromView.begin();
+    Pt::Gfx::ConstColorView::ConstIterator end = fromView.end();
 
-    Pt::uint32_t* data = reinterpret_cast<Pt::uint32_t*>( bitmapData.data() );
-    image.getRect(0, 0, width, height, data, width);
-
-    for(int n = 0; n < size; ++n)
+    for( ; it != end; ++it)
     {
-        const uint32_t argb = data[n];
-        int32_t a = argb >> 24;
-        uint32_t rb = (argb & 0x00FF00FF) * a;
-        uint32_t g  = ((argb >> 8) & 0xFF) * a;
-        data[n] = (argb & 0xFF000000) | ((rb >> 8) & 0x00FF00FF) | (g & 0xFF00);
+        Pt::Gfx::Color color = it->color();
+
+        const Pt::uint8_t r = color.red() / 257;
+        const Pt::uint8_t g = color.green() / 257;
+        const Pt::uint8_t b = color.blue() / 257;
+        const Pt::uint8_t a = color.alpha() / 257;
+
+        bitmapData.push_back((Pt::uint8_t) (a * b / 255));
+        bitmapData.push_back((Pt::uint8_t) (a * g / 255));
+        bitmapData.push_back((Pt::uint8_t) (a * r / 255));
+        bitmapData.push_back((Pt::uint8_t) (a));
     }
 }
 
@@ -412,7 +419,8 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
             BITMAPINFO bi;
             ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-            std::size_t depth = texture.view().pixelStride() * 8;
+            std::size_t pixelSize = pixelStride( texture.format() );
+            std::size_t depth = pixelSize * 8;
 
             bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);    
             bi.bmiHeader.biWidth        = texture.width();
@@ -431,7 +439,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
                                               DIB_RGB_COLORS, &imageBits, NULL, 0);
             memcpy(imageBits, 
                     texture.data(), 
-                    texture.width() * texture.height() * texture.view().pixelStride());
+                    texture.width() * texture.height() * pixelSize);
 
             _brush = CreatePatternBrush(bitmap);
             DeleteObject(bitmap);
@@ -1014,8 +1022,8 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
         case Gfx::CompositionMode::SourceCopy:
         {
             const Pt::uint8_t* data = image.data();
-            size_t depth = image.view().pixelStride() * 8;
-            size_t pixelStride = image.view().pixelStride();
+            std::size_t pixelSize = pixelStride( image.format() );
+            size_t depth = pixelSize * 8;
 
             HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
                                           depth, (VOID*)data);
@@ -1037,7 +1045,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                 VOID* imageBits = 0;
                 bitmap = CreateDIBSection(dc, &bitmapInfo,
                                           DIB_RGB_COLORS, &imageBits, NULL, 0);
-                memcpy(imageBits, data, image.width() * image.height() * pixelStride);
+                memcpy(imageBits, data, image.width() * image.height() * pixelSize);
             }
 
             HDC bitmapDC = CreateCompatibleDC(NULL);
@@ -1057,8 +1065,8 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
             toPreMulAlpha(image, bitmapData);
 
             const Pt::uint8_t* data =  bitmapData.empty() ? 0 : &bitmapData[0];
-            size_t depth = image.view().pixelStride() * 8;
-            size_t pixelStride = image.view().pixelStride();
+            std::size_t pixelSize = pixelStride( image.format() );
+            size_t depth = pixelSize * 8;
 
             HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
                                           depth, (VOID*)data);
@@ -1080,7 +1088,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                 VOID* imageBits = 0;
                 bitmap = CreateDIBSection(dc, &bitmapInfo,
                                           DIB_RGB_COLORS, &imageBits, NULL, 0);
-                memcpy(imageBits, data, image.width() * image.height() * pixelStride);
+                memcpy(imageBits, data, image.width() * image.height() * pixelSize);
             }
 
             HDC bitmapDC = CreateCompatibleDC(NULL);

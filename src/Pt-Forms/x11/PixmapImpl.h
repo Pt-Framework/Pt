@@ -105,7 +105,7 @@ class PixmapImpl
             return _bitmap.getCanvas(reuse);
         }
 
-        Gfx::Canvas* createContext(Gfx::Canvas* reuse)
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse)
         {
             return 0;
         }

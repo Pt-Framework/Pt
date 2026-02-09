@@ -23,22 +23,116 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_GFX_COLOR_H
 #define PT_GFX_COLOR_H
 
-#include <Pt/Types.h>
 #include <Pt/Gfx/Api.h>
-#include <Pt/String.h>
-
+#include <Pt/Types.h>
+#include <cstring>
 
 namespace Pt {
+
 namespace Gfx {
 
+/** @brief Fast color type in ARGB-32 format.
+*/
+class Argb32Color
+{
+    public:
+        Argb32Color()
+        : _value(0)
+        { }
+        
+        Argb32Color(const Argb32Color& color)
+        : _value(color._value)
+        { }
 
+        explicit Argb32Color(uint32_t val)
+        : _value(val)
+        { }
+
+        explicit Argb32Color(const uint8_t* base)
+        : _value()
+        {
+            std::memcpy( &_value, base, sizeof(uint32_t) );
+        }
+
+        Argb32Color(Pt::uint8_t a, Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
+        : _value(0)
+        { 
+            setAlpha(a);
+            setRed(a);
+            setGreen(a);
+            setBlue(a);
+        }
+        
+        Argb32Color& operator=(const Argb32Color& color)
+        { 
+            _value = color._value;
+            return *this;
+        }
+        
+        Argb32Color& operator=(const Pt::uint8_t& value)
+        { 
+            _value = value;
+            return *this;
+        }
+
+        Pt::uint8_t alpha() const
+        {
+            return _value >> 24;
+        }
+
+        Pt::uint8_t red() const
+        {
+            return (_value & 0x00FF0000) >> 16;
+        }
+
+        Pt::uint8_t green() const
+        {
+            return (_value & 0x0000FF00) >> 8;
+        }
+
+        Pt::uint8_t blue() const
+        {
+            return _value & 0x000000FF;
+        }
+
+        void setAlpha(Pt::uint8_t a)
+        {
+            _value = (_value & 0x00FFFFFF) | (uint32_t(a) << 24);
+        }
+
+        void setRed(Pt::uint8_t r)
+        {
+            _value = (_value & 0xFF00FFFF) | (uint32_t(r) << 16);
+        }
+
+        void setGreen(Pt::uint8_t g)
+        {
+            _value = (_value & 0xFFFF00FF) | (uint32_t(g) << 8);
+        }
+
+        void setBlue(Pt::uint8_t b)
+        {
+            _value = (_value & 0xFFFFFF00) | uint32_t(b);
+        }
+
+        const uint32_t* value() const
+        {
+            return &_value;
+        }
+
+    private:
+        Pt::uint32_t _value;
+};
+
+/** High precision color type
+*/
 class Color
 {
     public:
@@ -136,8 +230,8 @@ class Color
         Pt::uint16_t _b;
 };
 
-
 } // namespace
+
 } // namespace
 
 #endif

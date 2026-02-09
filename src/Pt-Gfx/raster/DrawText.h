@@ -43,6 +43,7 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>

@@ -62,11 +62,14 @@ PT_GFX_IMPL_SOURCES += [ GLOB $(PT_GFX_IMPL_SUBDIR) : *.cpp  ] ;
 PT_GFX_FREETYPE_SUBDIR = [ FDirName $(PT_TOP) src Pt-Gfx freetype ] ;
 PT_GFX_FREETYPE_SOURCES += [ GLOB $(PT_GFX_FREETYPE_SUBDIR) : *.cpp  ] ;
 
+PT_GFX_FORMAT_SOURCES = Argb32.cpp
+                        Rgb32.cpp
+                        Rgb16.cpp
+                        Yuv12.cpp ;
+
 SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        $(PT_GFX_FREETYPE_SOURCES)
-                       Argb32.cpp
-                       Argb32Format.cpp
-                       Argb32Image.cpp
+                       $(PT_GFX_FORMAT_SOURCES)
                        Bitmap.cpp
                        Brush.cpp
                        Canvas.cpp
@@ -83,12 +86,8 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Pen.cpp
                        PngReader.cpp
                        PngWriter.cpp
-                       Rgb32Format.cpp
-                       Rgb16Format.cpp
                        TextMetrics.cpp
-                       Transform.cpp
-                       Yuv12Format.cpp
-                       ;
+                       Transform.cpp ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;

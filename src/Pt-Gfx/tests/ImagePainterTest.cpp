@@ -1,5 +1,7 @@
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
@@ -68,13 +70,16 @@ void BlockScale()
     {
         for(int n = 0; n < 10 ; ++n)
         {
-            Pt::Gfx::Image image(ImageFormat::argb32(), 1000, 1000 );
-            Pt::Gfx::Image image2(ImageFormat::argb32(), 900, 900 );
+            Pt::Gfx::Image image(Pt::Gfx::Argb32(), 1000, 1000 );
+            Pt::Gfx::PixelView imageView(image);
+
+            Pt::Gfx::Image image2(Pt::Gfx::Argb32(), 900, 900 );
+            Pt::Gfx::PixelView imageView2(image);
 
             Pt::System::Clock clock;
             clock.start();
-            Pt::Gfx::blockScale(image.begin(), image.width(), image.height(),
-                                image2.begin(), image2.width(), image2.height());
+            Pt::Gfx::blockScale(imageView.begin(), imageView.width(), imageView.height(),
+                                imageView2.begin(), imageView2.width(), imageView2.height());
 
             std::clog << "image scale: " << clock.stop().toUSecs() << std::endl;
         }

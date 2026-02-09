@@ -467,7 +467,7 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
         size_t lineOffset = y * _frameBuffer.lineSize() +
                             pos.x() * pixelSizeInByte;
 
-        Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
+        Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.stride();
         std::memcpy( pdata, &buffer[lineOffset], widthInByte );
     }
 }

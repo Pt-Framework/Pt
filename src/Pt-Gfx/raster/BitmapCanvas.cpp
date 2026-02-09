@@ -36,6 +36,7 @@
 #include "DrawText.h"
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
@@ -144,9 +145,10 @@ BitmapCanvas::BitmapCanvas()
 , _text( new DrawText() )
 , _image(0)
 , _lastScaleFactor(1.0)
-, _penPixel(_penBuffer.view(), 0, 0)
-, _brushImage(0)
-, _brushPixel(_brushBuffer.view(), 0, 0)
+, _penView(_penBuffer)
+, _penPixel(_penView, 0, 0)
+, _brushView(_brushBuffer)
+, _brushPixel(_brushView, 0, 0)
 , _isGradient(false)
 , _hasClip(false)
 {
@@ -162,6 +164,7 @@ BitmapCanvas::~BitmapCanvas()
 void BitmapCanvas::init(Image& image)
 {
     _image = &image;
+    _imageView.reset(*_image);
 }
 
 
@@ -216,9 +219,12 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
         return;
     
     _penBuffer.reset(_image->format(), 64, 1);
-    Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
-    _penPixel.reset(_penBuffer.view(), 0, 0);
+    Gfx::PixelView fillView(_penBuffer);
+    Gfx::fill( fillView.begin(), fillView.end(), pen.color() );
+
+    _penView.reset(_penBuffer);
+    _penPixel.reset(_penView, 0, 0);
 
     _text->setPen(pen);
 }
@@ -240,35 +246,39 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
     switch( brush.fillStyle() )
     {
         case Brush::Solid:
+        {
             _brushBuffer.reset( _image->format(), 64, 1);
-            Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
+            _brushView.reset(_brushBuffer);
 
-            _brushImage = &_brushBuffer;
+            Gfx::PixelView fillView(_brushBuffer);
+            Gfx::fill(fillView.begin(), fillView.end(), brush.color());
             break;
+        }
 
         case Brush::Texture:
             if( brush.texture().format() != _image->format() )
             {
                 _brushBuffer.reset( _image->format(), 
                                     brush.texture().width(), brush.texture().height() );
-                Gfx::copy( brush.texture().begin(), brush.texture().end(), 
-                           _brushBuffer.begin() );
+                _brushView.reset(_brushBuffer);
 
-                _brushImage = &_brushBuffer;
+                Gfx::ConstPixelView textureView( brush.texture() );
+                Gfx::PixelView brushView(_brushBuffer);
+                Gfx::copy( textureView.begin(), textureView.end(), brushView.begin() );
             }
             else
             {
-                _brushImage = &_brush.texture();
+                _brushView.reset( _brush.texture() );
             }
             break;
 
         case Brush::Gradient:
             _isGradient = true;
-            _brushImage = &_brushBuffer;
+            _brushView.reset(_brushBuffer);
             break;
     }
 
-    _brushPixel.reset(_brushImage->view(), 0, 0);
+    _brushPixel.reset(_brushView, 0, 0);
 }
 
 
@@ -638,10 +648,23 @@ void BitmapCanvas::stroke(int x, int y, const Rect& clip)
     if( ! _image )
         return;
 
-    Pixel pixel(_image->view(), x, y);
-    pixel.assign(_penPixel, _compositionMode);
+    std::size_t off = _image->size( _image->width(), y, _image->padding() );
+    off += x * pixelStride( _image->format() );
 
-    //_image.format().setPixels(pixel, _penPixel, 1, _compositionMode);
+    Pt::uint8_t* to = _image->data() + off;
+    const Pt::uint8_t* from = _penPixel.base();
+
+    switch(_compositionMode) 
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            Argb32::sourceCopy(to, from);
+            break;
+
+        case CompositionMode::SourceOver:
+            Argb32::sourceOver(to, from);
+            break;
+    }
 }
 
 
@@ -659,8 +682,19 @@ void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentCli
         int n = std::min(length, bufferWidth);
         if( n )
         {
-            Pixel destPixel( _image->view(), xpos, ypos);
-            _image->view().copy(destPixel, _penPixel, n, _compositionMode);
+            PixelView::Pixel destPixel( _imageView, xpos, ypos);
+
+            switch(_compositionMode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    Argb32::sourceCopy(destPixel.base(), _penPixel.base(), n);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    Argb32::sourceOver(destPixel.base(), _penPixel.base(), n);
+                    break;
+            }
         }
 
         length -= n;
@@ -877,7 +911,7 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
     if( length <= 0)
         return;
 
-    int bufferWidth = _brushImage->width();
+    int bufferWidth = _brushView.width();
 
     while(length > 0)
     {
@@ -885,8 +919,19 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
 
         if( n )
         {
-            Pixel destPixel(_image->view(), xpos,ypos);
-           _image->view().copy(destPixel, _brushPixel, n, _compositionMode);
+            PixelView::Pixel destPixel(_imageView, xpos, ypos);
+
+            switch(_compositionMode) 
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    Argb32::sourceCopy(destPixel.base(), _brushPixel.base(), n);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    Argb32::sourceOver(destPixel.base(), _brushPixel.base(), n);
+                    break;
+            }
         }
 
         length -= n;
@@ -912,7 +957,7 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
     if( ! _image )
         return;
 
-    const Image& texture = *_brushImage;
+    ConstPixelView& texture = _brushView;
     int xpos = pos.x();
     int ypos = pos.y();
     int originx =  origin.x();
@@ -932,10 +977,20 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
         // Copy pixels from textrure to image
         if(fillLength)
         {
-            ConstPixel sourcePixel(texture.view(),  textureXPos, textureYPos);
-            Pixel destPixel(_image->view(), xpos, ypos);
+            PixelView::ConstPixel sourcePixel(texture,  textureXPos, textureYPos);
+            PixelView::Pixel destPixel(_imageView, xpos, ypos);
 
-            _image->view().copy( destPixel, sourcePixel, fillLength, _compositionMode);
+            switch(_compositionMode)
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    Argb32::sourceCopy(destPixel.base(), sourcePixel.base(), fillLength);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    Argb32::sourceOver(destPixel.base(), sourcePixel.base(), fillLength);
+                    break;
+            }
         }
 
         // Remaining unfilled pixels of the span
@@ -4108,13 +4163,34 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    _image->view().copy(toRect.x(), toRect.y(),
-                        image.view(), fromRect.x(), fromRect.y(), 
-                        fromRect.width(), fromRect.height(), _compositionMode);
+    Gfx::PixelView::PixelIterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
 
-    //_image.format().copy(_image.view(), toRect.x(), toRect.y(),
-    //                     image.view(), fromRect.x(), fromRect.y(), 
-    //                     fromRect.width(), fromRect.height(), _compositionMode);
+    Gfx::ConstPixelView fromView(image);
+    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+
+    switch(_compositionMode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            Argb32::sourceCopy(toIter->base(), _imageView.stride(),
+                               fromIter->base(), fromView.stride(), 
+                               fromRect.width(), fromRect.height());
+
+            //Argb32::sourceCopy(toView.base(), toRect.x(), toRect.y(),
+            //                   fromView, fromRect.x(), fromRect.y(), 
+            //                   fromRect.width(), fromRect.height());
+            break;
+
+        case CompositionMode::SourceOver:
+            Argb32::sourceOver(toIter->base(), _imageView.stride(),
+                               fromIter->base(), fromView.stride(), 
+                               fromRect.width(), fromRect.height());
+
+            //Argb32::sourceOver(toView.base(), toRect.x(), toRect.y(),
+            //                   fromView, fromRect.x(), fromRect.y(), 
+            //                   fromRect.width(), fromRect.height());
+            break;
+    }
 }
 
 } // namespace

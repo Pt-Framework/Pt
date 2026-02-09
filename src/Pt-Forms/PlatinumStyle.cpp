@@ -30,7 +30,6 @@
 
 #include <Pt/Forms/PlatinumStyle.h>
 #include <Pt/Forms/StyleOptions.h>
-#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Panel.h>
 #include <Pt/Forms/Label.h>
@@ -47,6 +46,9 @@
 #include <Pt/Forms/ComboBox.h>
 #include <Pt/Forms/SpinBox.h>
 #include <Pt/Forms/TabView.h>
+
+#include <Pt/Gfx/PaintSurface.h>
+#include <Pt/Gfx/ImageView.h>
 
 #include <cmath>
 
@@ -209,10 +211,11 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
         Gfx::Color hightlightColor = button.accentColor();
 
         Gfx::Image highlightIcon = icon;
+        Gfx::ColorView iconView(highlightIcon);
 
-        for(Gfx::Image::PixelIterator it = highlightIcon.begin(); it != highlightIcon.end(); ++it)
+        for(Gfx::ColorView::Iterator it = iconView.begin(); it != iconView.end(); ++it)
         {
-            Gfx::Color color = it->getColor();
+            Gfx::Color color = it->color();
 
             color.setRed( hightlightColor.red() );
             color.setGreen( hightlightColor.green() ); 

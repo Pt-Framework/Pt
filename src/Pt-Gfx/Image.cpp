@@ -28,13 +28,15 @@
 */
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Argb32.h>
 
 namespace Pt {
 
 namespace Gfx {
 
 Image::Image()
-: BasicImage()
+: BasicImage( Argb32() )
 {
 }
 
@@ -60,9 +62,8 @@ Image::Image(const ImageFormat& format, Pt::uint8_t* data,
 
 
 Image::Image(const Image& image)
-: BasicImage()
+: BasicImage( image)
 {
-    *this = image;
 }
 
 
@@ -73,17 +74,60 @@ Image::~Image()
 
 const Image& Image::operator=(const Image& image)
 {
-    const ImageFormat& format = image.format();
+    BasicImage::operator=(image);
+    return *this;
+}
 
-    BasicImage::reset( format, image.width(), image.height() , image.padding() );
-    
-    Pt::ssize_t n = format.imageSize( image.width(), image.height(), image.padding() );  
-    if(n != 0)
-    {
-      const Pt::uint8_t* imageData = image.data();
-      std::memcpy(data(), imageData, n);
-    }
+//
+// ConstImage
+//
 
+ConstImage::ConstImage()
+: BasicConstImage( Argb32() )
+{
+}
+
+
+ConstImage::ConstImage(const ImageFormat& format)
+: BasicConstImage(format)
+{
+}
+
+
+ConstImage::ConstImage(const ImageFormat& format, Pt::uint8_t* data,
+                       Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+: BasicConstImage(format, data, width, height, padding)
+{
+}
+
+
+ConstImage::ConstImage(const ConstImage& image)
+: BasicConstImage(image)
+{
+}
+
+
+ConstImage::ConstImage(const Image& image)
+: BasicConstImage( image )
+{
+}
+
+
+ConstImage::~ConstImage()
+{
+}
+
+
+const ConstImage& ConstImage::operator=(const ConstImage& image)
+{
+    BasicConstImage::operator=(image);
+    return *this;
+}
+
+
+const ConstImage& ConstImage::operator=(const Image& image)
+{
+    BasicConstImage::operator=(image);
     return *this;
 }
 

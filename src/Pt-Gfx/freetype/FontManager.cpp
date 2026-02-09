@@ -35,7 +35,11 @@
 
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/Argb32Image.h>
+
 #include <Pt/System/Directory.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
@@ -535,7 +539,9 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const Color& color,
     dsy = ypos;
 
     Color pixelColor = color;
-
+    Argb32Image argbImage(image.data(), image.width(), image.height(), image.padding());
+    Argb32PixelView argbView(argbImage);
+    
     for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
     {
         yOffset = y * bmPitch;
@@ -556,7 +562,7 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const Color& color,
             if( dsx >= x2 )
                 break;
 
-            Pixel pixel(image.view(), dsx, dsy);
+            Argb32Pixel pixel(argbView, dsx, dsy);
 
             const int px = yOffset + x;
             unsigned char value = buffer[px];
@@ -568,17 +574,18 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const Color& color,
                     if(value != 255)
                     {
                         pixelColor.setAlpha(value * 257);
-                        pixel.assign(pixelColor, CompositionMode::SourceOver);
+ 
+                        Argb32::sourceOver(pixel, pixelColor);
                     }
                     else
                     {
-                        pixel.assign(color, CompositionMode::SourceCopy);
+                        Argb32::sourceCopy(pixel, color);
                     }
                     break;
 
                 case CompositionMode::SourceOver:
                     pixelColor.setAlpha(color.alpha() * value / 255);
-                    pixel.assign(pixelColor, CompositionMode::SourceOver);
+                    Argb32::sourceOver(pixel, pixelColor);
                     break;
             }
         }

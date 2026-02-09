@@ -30,7 +30,7 @@
 #define PT_GFX_IMAGE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
@@ -39,7 +39,7 @@ namespace Gfx {
 
 /** @brief Generic image.
 */
-class PT_GFX_API Image : public BasicImage<ImageView>
+class PT_GFX_API Image : public BasicImage<ImageFormat>
 {
     public:
         Image();
@@ -57,24 +57,35 @@ class PT_GFX_API Image : public BasicImage<ImageView>
         virtual ~Image();
 
         const Image& operator=(const Image& image);
+};
 
-        void getRect(Pt::ssize_t x, Pt::ssize_t y, 
-                     Pt::ssize_t width, Pt::ssize_t height,
-                     Pt::uint32_t* to, Pt::ssize_t toStride) const
-        {
-            view().getRect(x, y, width, height, to, toStride);
-        }
+/** @brief Generic const image.
+*/
+class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
+{
+    public:
+        ConstImage();
 
-        void setRect(Pt::ssize_t x, Pt::ssize_t y, 
-                     Pt::ssize_t width, Pt::ssize_t height,
-                     const Pt::uint32_t* from, Pt::ssize_t fromStride)
-        {
-            view().setRect(x, y, width, height, from, fromStride);
-        }
+        ConstImage(const ConstImage& image);
+
+        explicit ConstImage(const ImageFormat& format);
+
+        ConstImage(const ImageFormat& format, Pt::uint8_t* buffer,
+                   Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
+
+        explicit ConstImage(const Image& image);
+
+        virtual ~ConstImage();
+
+        const ConstImage& operator=(const ConstImage& image);
+
+        const ConstImage& operator=(const Image& image);
 };
 
 } // namespace
 
 } // namespace
+
+//#include <Pt/Gfx/ImageView.h> 
 
 #endif

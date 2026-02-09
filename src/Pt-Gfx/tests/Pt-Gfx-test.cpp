@@ -32,8 +32,7 @@
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Painter.h>
-//#include <Pt/Gfx/ImagePainter2.h>
-#include <Pt/Gfx/Argb32Format.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/PngWriter.h>
 
 #include <fstream>

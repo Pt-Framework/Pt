@@ -1,5 +1,4 @@
-/* Copyright (C) 2015-2017 Marc Boris Duerner
-   Copyright (C) 2016-2017 Aloysius Indrayanto
+/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,17 +22,33 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/Argb32Image.h>
+#ifndef PT_GFX_BASIC_IMAGE_HPP
+#define PT_GFX_BASIC_IMAGE_HPP
+
+#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/BasicView.h>
+#include <Pt/Types.h>
+#include <vector>
 
 namespace Pt {
 
 namespace Gfx {
 
+template <typename FormatT>
+inline BasicImage<FormatT>::BasicImage(const Format& format)
+: _format( clone(format) )
+, _data(0)
+, _width(0)
+, _height(0)
+, _padding(0)
+{ }
 
 } // namespace
 
 } // namespace
+
+#endif

@@ -30,7 +30,6 @@
 #define PT_GFX_BASIC_IMAGE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
 #include <Pt/Types.h>
 #include <vector>
 
@@ -38,168 +37,358 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename ViewT>
+//inline namespace v2 {
+
+template <typename FormatT>
+std::size_t pixelStride(const FormatT& format)
+{
+    return format.pixelStride();
+}
+
+
+template <typename FormatT>
+std::size_t imageSize(const FormatT& format, Pt::ssize_t width, Pt::ssize_t height,
+                      std::size_t padding)
+{
+    return format.imageSize(width, height, padding);
+}
+
+
+template <typename FormatT>
+FormatT* clone(const FormatT& format)
+{
+    return new FormatT(format);
+}
+
+
+template <typename FormatT>
+void release(const FormatT* format)
+{
+    delete format;
+}
+
+/** @brief Basic image.
+*/
+template <typename FormatT>
 class BasicImage
 {
     public:
-        typedef ViewT View;
-        
-        typedef typename View::pos_t               pos_t;
-        typedef typename View::length_t            length_t;
-        typedef typename View::Format              Format;
+        typedef FormatT Format;
 
-        typedef typename View::Pixel               Pixel;
-        typedef typename View::ConstPixel          ConstPixel;
-        typedef typename View::PixelIterator       PixelIterator;
-        typedef typename View::ConstPixelIterator  ConstPixelIterator;
+        typedef Pt::ssize_t pos_t;
+        typedef Pt::ssize_t length_t;
 
     public:
-        BasicImage()
-        : _view()
-        { }
-
-        BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
-        : _view()
-        { 
-            _buffer.resize( _view.format().imageSize(width, height, padding) );
-            
-            _view.reset( _buffer.empty() ? 0 : &_buffer[0], 
-                         width, height, padding );
-        }
-
-        BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
-        : _view()
-        {           
-            _view.reset(data, width, height, padding);
-        }
+        BasicImage(const Format& format);
 
         BasicImage(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
-        : _view(format)
-        { 
-            _buffer.resize( _view.format().imageSize(width, height, padding) );
-            
-            _view.reset( _buffer.empty() ? 0 : &_buffer[0], 
-                         width, height, padding );
+        : _format( clone(format) )
+        , _data(0)
+        , _width(width)
+        , _height(height)
+        ,  _padding(padding)
+        {
+            _buffer.resize( imageSize(*_format, width, height, padding) );
+            _data = _buffer.empty() ? 0 : &_buffer[0];
         }
 
         BasicImage(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        : _view(format)
-        {            
-            _view.reset(data, width, height, padding);
-        }
+        : _format( clone(format) )
+        , _data(data)
+        , _width(width)
+        , _height(height)
+        , _padding(padding)
+        { }
+
+        BasicImage(const BasicImage& image)
+        : _format( image._format->clone() )
+        , _buffer(image._buffer)
+        , _data(image._data)
+        , _width(image._width)
+        , _height(image._height)
+        , _padding(image._padding)
+        { }
 
         virtual ~BasicImage()
-        {}
+        { 
+            release(_format);
+        }
+
+        BasicImage& operator=(const BasicImage& image)
+        { 
+            Format* f = image.format().clone();
+            release(_format);
+            _format = f;
+            
+            _buffer = image._buffer;
+            _data = image._data;
+            
+            _width = image._width;
+            _height = image._height;
+            _padding = image._padding;
+
+            return *this;
+        }
 
         void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         { 
-            _buffer.resize( format().imageSize(width, height, padding) );
+            _buffer.resize( imageSize(*_format, width, height, padding) );
+            _data = _buffer.empty() ? 0 : &_buffer[0];
             
-            _view.reset( _buffer.empty() ? 0 : &_buffer[0], 
-                         width, height, padding );
+            _width = width;
+            _height = height;
+            _padding = padding;
         }
 
         void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
         {
             _buffer.clear();
-           _view.reset(data, width, height, padding);
+            _data = data;
+            
+            _width = width;
+            _height = height;
+            _padding = padding;
         }
 
         void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
         { 
-            _buffer.resize( format.imageSize(width, height, padding) );
+            Format* f = clone(format);
+            release(_format);
+            _format = f;
+
+            _buffer.resize( imageSize(*_format, width, height, padding) );
+            _data = _buffer.empty() ? 0 : &_buffer[0];
             
-            _view.reset( format, _buffer.empty() ? 0 : &_buffer[0], 
-                         width, height, padding );
+            _width = width;
+            _height = height;
+            _padding = _padding;
         }
 
         void reset(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
+            Format* f = clone(format);
+            release(_format);
+            _format = f;
+
             _buffer.clear();
-           _view.reset(format, data, width, height, padding);
+            _data = data;
+
+            _width = width;
+            _height = height;
+            _padding = padding;
         }
-
-        Pt::ssize_t width() const
-        { return _view.width(); }
-
-        Pt::ssize_t height() const
-        { return _view.height(); }
-
-        Pt::ssize_t padding() const
-        { return _view.padding(); }
-
-        Pt::uint8_t* data()
-        { return _view.data(); }
-
-        const Pt::uint8_t* data() const
-        { return _view.data(); }
-
-        bool empty() const
-        { return _view.empty(); }
 
         void clear()
         {
             _buffer.clear();
-            _view.clear();
+            _data = 0;
+            
+            _width = 0;
+            _height = 0;
+            _padding = 0;
         }
+        
+        bool empty() const
+        { return _width == 0 || _height == 0; }
 
-        View& view()
-        { return _view; }
+        Pt::uint8_t* data()
+        { return _data; }
 
-        const View& view() const
-        { return _view; }
-
-        /** @brief Returns the format of the image.
-        */
+        const Pt::uint8_t* data() const
+        { return _data; }
+        
         const Format& format() const
-        {
-            return view().format();
+        { return *_format; }
+
+        Pt::ssize_t width() const
+        { return _width; }
+
+        Pt::ssize_t height() const
+        { return _height; }
+
+        Pt::ssize_t padding() const
+        { return _padding; }
+
+        Pt::ssize_t stride() const
+        { 
+            return (_width * pixelStride(*_format)) + _padding; 
         }
 
-        /** @brief Returns an iterator to the pixel at the given position.
-        */
-        PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return _view.pixel(x, y); }
-
-        /** @brief Returns an iterator to the first pixel.
-        */
-        PixelIterator begin()
-        { return _view.begin(); }
-
-        /** @brief Returns an iterator to the end of the pixels.
-        */
-        PixelIterator end()
-        { return _view.end(); }
-
-        /** @brief Returns a const iterator to the pixel at the given position.
-        */
-        ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return _view.pixel(x, y); }
-
-        /** @brief Returns a const iterator to the first pixel.
-        */
-        ConstPixelIterator begin() const
-        { return _view.begin(); }
-
-        /** @brief Returns a const iterator to the end of the pixels.
-        */
-        ConstPixelIterator end() const
-        { return _view.end(); }
+        std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
+                         std::size_t padding) const
+        {
+            return imageSize(*_format, width, height, padding);
+        }
 
     private:
+        Format*                  _format;
         std::vector<Pt::uint8_t> _buffer;
-        View                     _view;
+        Pt::uint8_t*  _data;
+        Pt::ssize_t   _width;
+        Pt::ssize_t   _height;
+        Pt::ssize_t   _padding;
 };
 
+/** @brief Basic const image.
+*/
+template <typename FormatT>
+class BasicConstImage
+{
+    public:
+        typedef FormatT Format;
+
+        typedef Pt::ssize_t pos_t;
+        typedef Pt::ssize_t length_t;
+
+    public:
+        BasicConstImage(const Format& format)
+        : _format(clone(format))
+        , _data(0)
+        , _width(0)
+        , _height(0)
+        , _padding(0)
+        { }
+
+        BasicConstImage(const Format& format, const Pt::uint8_t* data, 
+                        Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        : _format(clone(format))
+        , _data(data)
+        , _width(width)
+        , _height(height)
+        , _padding(padding)
+        { }
+
+        BasicConstImage(const BasicImage<FormatT>& image)
+        : _format( image.format().clone() )
+        , _data( image.data() )
+        , _width( image.width() )
+        , _height( image.height() )
+        , _padding( image.padding() )
+        { }
+
+        BasicConstImage(const BasicConstImage& image)
+        : _format( image._format->clone() )
+        , _data(image._data)
+        , _width(image._width)
+        , _height(image._height)
+        , _padding(image._padding)
+        { }
+
+        virtual ~BasicConstImage()
+        {
+            release(_format);
+        }
+
+        BasicConstImage& operator=(const BasicConstImage& image)
+        { 
+            Format* f = image.format().clone();
+            release(_format);
+            _format = f;
+            
+            _data = image._data;
+            
+            _width = image._width;
+            _height = image._height;
+            _padding = image._padding;
+
+            return *this;
+        }
+
+        BasicConstImage& operator=(const BasicImage<FormatT>& image)
+        { 
+            Format* f = image.format().clone();
+            release(_format);
+            _format = f;
+            
+            _data = image.data();
+            
+            _width = image.width();
+            _height = image.height();
+            _padding = image.padding();
+
+            return *this;
+        }
+
+        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0)
+        {
+            _data = data;
+            
+            _width = width;
+            _height = height;
+            _padding = padding;
+        }
+
+        void reset(const Format& format, const Pt::uint8_t* data, 
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        {
+            Format* f = clone(format);
+            release(_format);
+            _format = f;
+
+            _data = data;
+            
+            _width = width;
+            _height = height;
+            _padding = padding;
+        }
+
+        void clear()
+        {
+            _data = 0;
+            _width = 0;
+            _height = 0;
+            _padding = 0;
+        }
+        
+        bool empty() const
+        { return _width == 0 || _height == 0; }
+
+        const Pt::uint8_t* data() const
+        { return _data; }
+        
+        const Format& format() const
+        { return *_format; }
+
+        Pt::ssize_t width() const
+        { return _width; }
+
+        Pt::ssize_t height() const
+        { return _height; }
+
+        Pt::ssize_t padding() const
+        { return _padding; }
+
+        Pt::ssize_t stride() const
+        { 
+            return (_width * pixelStride(*_format)) + _padding; 
+        }
+
+        std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
+                         std::size_t padding) const
+        {
+            return imageSize(*_format, width, height, padding);
+        }
+
+    private:
+        Format*            _format;
+        const Pt::uint8_t* _data;
+        Pt::ssize_t        _width;
+        Pt::ssize_t        _height;
+        Pt::ssize_t        _padding;
+};
+
+// } // namespace
+
 } // namespace
 
 } // namespace
+
+#include <Pt/Gfx/BasicImage.hpp>
 
 #endif

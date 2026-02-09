@@ -31,9 +31,8 @@
 #define PT_GFX_ARGB32_IMAGE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
@@ -41,43 +40,52 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief ARGB-32 image view.
+class Argb32Image;
+
+/** @brief ARGB-32 pixel view.
 */
-class Argb32View : public BasicView<Argb32>
+class Argb32PixelView : public BasicPixelView<Argb32, Argb32Pixel, Argb32ConstPixel>
 {
     public:
-        /** @brief Constructor.
-        */
-        Argb32View()
-        : BasicView( Argb32::instance() )
-        { 
-        }
+        Argb32PixelView()
+        : BasicPixelView( Argb32()  )
+        { }
 
-        /** @brief Constructor.
-        */
-        Argb32View(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
-        : BasicView( Argb32::instance(), data, width, height, padding )
-        { 
-        }
+        explicit Argb32PixelView(Argb32Image& image);
+
+        //explicit Argb32PixelView(const Argb32ConstImage& image);
+};
+
+/** @brief ARGB-32 pixel view.
+*/
+class Argb32ConstPixelView : public BasicConstPixelView<Argb32, Argb32Pixel, Argb32ConstPixel>
+{
+    public:
+        Argb32ConstPixelView()
+        : BasicConstPixelView( Argb32() )
+        { }
+
+        explicit Argb32ConstPixelView(const Argb32Image& image);
+
+        //explicit Argb32ConstPixelView(const Argb32ConstImage& image)
 };
 
 /** @brief ARGB-32 image.
 */
-class Argb32Image : public BasicImage<Argb32View>
+class Argb32Image : public BasicImage<Argb32>
 {
     public:
         /** @brief Constructor.
         */
         Argb32Image()
-        : BasicImage( )
-        { 
+        : BasicImage( Argb32() )
+        {
         }
 
         /** @brief Constructor.
         */
         Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage(width, height, padding)
+        : BasicImage(Argb32(), width, height, padding)
         { 
         }
 
@@ -85,10 +93,22 @@ class Argb32Image : public BasicImage<Argb32View>
         */
         Argb32Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                     size_t padding = 0)
-        : BasicImage(data, width, height, padding)
+        : BasicImage(Argb32(), data, width, height, padding)
         { 
         }
 };
+
+
+inline Argb32PixelView::Argb32PixelView(Argb32Image& image)
+: BasicPixelView(image)
+{ 
+}
+
+
+inline Argb32ConstPixelView::Argb32ConstPixelView(const Argb32Image& image)
+: BasicConstPixelView(image)
+{ 
+}
 
 } // namespace
 

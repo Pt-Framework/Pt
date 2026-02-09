@@ -37,6 +37,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>

@@ -69,7 +69,7 @@ class PT_GFX_API PngWriter
 
         /** @brief Begin compression of an image.
         */
-        void beginWrite(Image& image);
+        void beginWrite(const Image& image);
 
         /** @brief Advance compression af an image, returns true when finished.
         */
@@ -77,7 +77,7 @@ class PT_GFX_API PngWriter
 
         /** @brief Writes the whole image to the stream.
          */
-        void write(Image& image);
+        void write(const Image& image);
 
     private:
         class PngWriterImpl* _impl;

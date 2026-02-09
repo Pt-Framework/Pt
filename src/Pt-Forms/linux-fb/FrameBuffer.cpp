@@ -33,7 +33,7 @@
 #include <Pt/Forms/Application.h>
 #include <Pt/Gfx/Rgb16Format.h>
 #include <Pt/Gfx/Rgb32Format.h>
-#include <Pt/Gfx/Argb32Format.h>
+#include <Pt/Gfx/Argb32.h>
 
 #include <sstream>
 
@@ -62,7 +62,7 @@ void rotate90_argb32(const uint8_t* __restrict src, int src_width, int /*src_hei
    
     const int pixel_size = 4;
     const int src_stride = src_width * pixel_size;
- 
+
     for (int ty = 0; ty < src_rect_h; ty += TS)
     {
         for (int tx = 0; tx < src_rect_w; tx += TS)
@@ -123,24 +123,24 @@ void rotate90_argb32(const uint8_t* __restrict src, int src_width, int /*src_hei
  
 #else
  
-void rotate90_argb32(const uint8_t* src, int src_width, int src_height,
+void rotate90_argb32(const Pt::uint8_t* src, int src_width, int src_height,
                      int src_x, int src_y, int width, int height,
-                     uint8_t* dst, int dst_stride, int dst_x, int dst_y)
+                     Pt::uint8_t* dst, int dst_stride, int dst_x, int dst_y)
 {
     const int pixel_size = 4;
     const int src_stride = src_width * pixel_size;
  
-    const uint8_t* src_base = src + src_y * src_stride + (src_x + width - 1) * pixel_size;
-    uint8_t*       dst_base = dst + dst_y * dst_stride + dst_x * pixel_size;
+    const Pt::uint8_t* src_base = src + src_y * src_stride + (src_x + width - 1) * pixel_size;
+    Pt::uint8_t*       dst_base = dst + dst_y * dst_stride + dst_x * pixel_size;
  
     for( int w = 0; w < width; ++w)
     {
-        const uint8_t* src_ptr = src_base;
-        uint8_t* dst_ptr = dst_base;
+        const Pt::uint8_t* src_ptr = src_base;
+        Pt::uint8_t* dst_ptr = dst_base;
  
         for (int y = 0; y < height; ++y)
         {
-            memcpy( dst_ptr, src_ptr, sizeof(uint32_t) );
+            memcpy( dst_ptr, src_ptr, sizeof(Pt::uint32_t) );
             dst_ptr += pixel_size;
             src_ptr += src_stride;
         }
@@ -207,14 +207,15 @@ FrameBuffer::FrameBuffer()
             throw std::runtime_error("RGB 555 not supported");
 
         case 16:
-            _format = new Gfx::Rgb16Format();
+            throw std::runtime_error("RGB 565 not supported");
+            //_format = new Gfx::Rgb16Format();
             _pixelSize = 2;
             break;
 
         default:
         case 24:
         case 32:
-            _format =  new Gfx::Argb32Format();
+            _format =  new Gfx::Argb32();
             _pixelSize = 4;
             break;
     }
@@ -348,7 +349,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Rect& rect )
 
       case Rotate90:
       {
-        const Rect clipArea = areaIn.intersect( Rect(Point(0,0), size()) );
+        const Rect clipArea = rect.intersect( Rect(Point(0,0), size()) );
         const int dst_x = clipArea.y();
         const int dst_y = size().width() - clipArea.x() - clipArea.width();
         const int dst_stride = size().height() * _pixelSize;

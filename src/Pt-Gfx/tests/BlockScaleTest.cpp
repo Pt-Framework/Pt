@@ -27,8 +27,9 @@
 */
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/BlockScale.h>
-
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
@@ -64,19 +65,19 @@ class BlockScaleTest : public Pt::Unit::TestSuite
 
         void ScaleDown()
         {
-            Pt::Gfx::Image from( Pt::Gfx::ImageFormat::argb32(), 100, 100 );
+            Pt::Gfx::Image from( Pt::Gfx::Argb32(), 100, 100 );
+            Pt::Gfx::PixelView fromView(from);
 
-            std::memset(from.data(), 123, from.width() * from.height() *
-                                          from.format().pixelStride());
+            std::memset(from.data(), 123, from.stride() * from.height());
 
-            Pt::Gfx::Image to( Pt::Gfx::ImageFormat::argb32(), 20, 40 );
+            Pt::Gfx::Image to( Pt::Gfx::Argb32(), 20, 40 );
+            Pt::Gfx::PixelView toView(to);
 
-            Pt::Gfx::blockScale(from.begin(), from.width(), from.height(), 
-                                to.begin(), to.width(), to.height());
+            Pt::Gfx::blockScale(fromView.begin(), fromView.width(), fromView.height(), 
+                                toView.begin(), toView.width(), toView.height());
 
             PT_UNIT_ASSERT(0 == std::memcmp(to.data(), from.data(), 
-                                            to.width() * to.height() *
-                                            to.format().pixelStride()));
+                                            to.stride() * to.height()));
         }
 };
 

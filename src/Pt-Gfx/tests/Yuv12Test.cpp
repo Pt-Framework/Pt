@@ -27,8 +27,8 @@
 */
 
 #include <Pt/Gfx/Yuv12Image.h>
-#include <Pt/Gfx/Yuv12Format.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Color.h>
 
 #include <Pt/System/Clock.h>
@@ -71,8 +71,9 @@ class Yuv12Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Yuv12Image image(yuv12Data, 4, 4);
+            Yuv12PixelView imageView(image);
 
-            Yuv12Image::PixelIterator pixel = image.pixel(1, 3);
+            Yuv12PixelView::PixelIterator pixel = imageView.pixel(1, 3);
             
             Pt::uint8_t y = pixel->y();
             Pt::uint8_t u = pixel->u();
@@ -98,9 +99,10 @@ class Yuv12Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Yuv12Image image(yuv12Data, 4, 4);
+            Yuv12PixelView imageView(image);
 
-            Yuv12Image::PixelIterator it = image.begin();
-            Yuv12Image::ConstPixelIterator end = static_cast<const Yuv12Image&>(image).end();
+            Yuv12PixelView::PixelIterator it = imageView.begin();
+            Yuv12PixelView::PixelIterator end = imageView.end();
 
             Pt::uint32_t u = 0;
             Pt::uint32_t v = 0;
@@ -121,10 +123,12 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Pt::uint8_t yuv12[] = { 100, 100, 100 };
 
             Yuv12Image image(yuv12, 1, 1);
-            Yuv12Image::PixelIterator pixel = image.pixel(0, 0);
+            Yuv12PixelView imageView(image);
 
-            Pt::Gfx::Color c = pixel->getColor();
-            pixel->assign(c, CompositionMode::SourceCopy);
+            Yuv12PixelView::PixelIterator pixel = imageView.pixel(0, 0);
+
+            Pt::Gfx::Color c = pixel->color();
+            *pixel = c;
 
             PT_UNIT_ASSERT(yuv12[0] > 99 && yuv12[0] < 101);
             PT_UNIT_ASSERT(yuv12[1] > 99 && yuv12[1] < 101);
@@ -139,18 +143,23 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             for(int n = 0; n < 10; ++n)
             {
-                Yuv12Format format;
+                Yuv12 format;
                 Image image(format, 1000, 1000);
-                Image::PixelIterator it = image.begin();
-                Image::PixelIterator end = image.end();
+                PixelView imageView(image);
+
+                PixelView::PixelIterator it = imageView.begin();
+                PixelView::PixelIterator end = imageView.end();
             
-                Pt::Gfx::Color color(100, 100, 100);
+                Pt::Gfx::Argb32Color color(255, 100, 100, 100);
             
                 Pt::System::Clock clock;
                 clock.start();
             
                 for( ; it != end; ++it)
                 {
+                    color = it->color();
+                    color.setRed(99);
+
                     (*it) = color;
                 }
 
@@ -171,8 +180,10 @@ class Yuv12Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Yuv12Image image(1000, 1000);
-                Yuv12Image::PixelIterator it = image.begin();
-                Yuv12Image::PixelIterator end = image.end();
+                Yuv12PixelView imageView(image);
+
+                Yuv12PixelView::PixelIterator it = imageView.begin();
+                Yuv12PixelView::PixelIterator end = imageView.end();
             
                 Pt::Gfx::Color color(100, 100, 100);
             
@@ -181,6 +192,9 @@ class Yuv12Test : public Pt::Unit::TestSuite
             
                 for( ; it != end; ++it)
                 {
+                    color = it->color();
+                    color.setRed(99);
+
                     (*it) = color;
                 }
 

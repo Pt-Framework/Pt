@@ -36,6 +36,9 @@
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/Argb32Image.h>
 
 namespace {
 
@@ -81,22 +84,26 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* p
 void toPreMulAlpha(const Pt::Gfx::Image& image, 
                    std::vector<Pt::uint8_t>& bitmapData)
 {
-    std::size_t width = image.width();
-    std::size_t height = image.height();
-    std::size_t size = width * height;
+    size_t _width = image.width();
+    size_t _height = image.height();
 
-    bitmapData.resize(size * 4);
+    Pt::Gfx::ConstColorView fromView(image);
+    Pt::Gfx::ConstColorView::ConstIterator it = fromView.begin();
+    Pt::Gfx::ConstColorView::ConstIterator end = fromView.end();
 
-    Pt::uint32_t* data = reinterpret_cast<Pt::uint32_t*>( bitmapData.data() );
-    image.getRect(0, 0, width, height, data, width);
-
-    for(int n = 0; n < size; ++n)
+    for( ; it != end; ++it)
     {
-        const uint32_t argb = data[n];
-        int32_t a = argb >> 24;
-        uint32_t rb = (argb & 0x00FF00FF) * a;
-        uint32_t g  = ((argb >> 8) & 0xFF) * a;
-        data[n] = (argb & 0xFF000000) | ((rb >> 8) & 0x00FF00FF) | (g & 0xFF00);
+        Pt::Gfx::Color color = it->color();
+
+        const Pt::uint8_t r = color.red() / 257;
+        const Pt::uint8_t g = color.green() / 257;
+        const Pt::uint8_t b = color.blue() / 257;
+        const Pt::uint8_t a = color.alpha() / 257;
+
+        bitmapData.push_back((Pt::uint8_t) (a * b / 255));
+        bitmapData.push_back((Pt::uint8_t) (a * g / 255));
+        bitmapData.push_back((Pt::uint8_t) (a * r / 255));
+        bitmapData.push_back((Pt::uint8_t) (a));
     }
 }
 
@@ -241,7 +248,7 @@ Gfx::Image PixmapImpl::toImage() const
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
     bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    Pt::Gfx::Image image(Pt::Gfx::ImageFormat::argb32(), _width, _height);
+    Pt::Gfx::Image image(Pt::Gfx::Argb32(), _width, _height);
     Pt::uint8_t* data = image.data();
 
     int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 

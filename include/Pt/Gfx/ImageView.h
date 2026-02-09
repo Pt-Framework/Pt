@@ -30,55 +30,90 @@
 #define PT_GFX_IMAGE_VIEW_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-typedef BasicPixel<ImageFormat, 
-                   ImageFormat::Pixel> Pixel;
+class ImageView;
+class ConstImageView;
+class PixelView;
+class ColorView;
 
-typedef BasicConstPixel<ImageFormat, 
-                        ImageFormat::ConstPixel> ConstPixel;
-
-/** @brief View on image data.
-*/
-class ImageView : public BasicView<ImageFormat>
+class PixelView : public BasicPixelView<ImageFormat, 
+                                        Pixel<Argb32Color>,
+                                        ConstPixel<Argb32Color> >
 {
     public:
-        ImageView()
-        : BasicView( ImageFormat::argb32() )
+        PixelView()
+        : BasicPixelView( ImageFormat::argb32() )
         { }
 
-        explicit ImageView(const ImageFormat& format)
-        : BasicView(format)
+        explicit PixelView(Image& image)
+        : BasicPixelView(image)
         { }
 
-        ImageView(const ImageFormat& format, Pt::uint8_t* data,
-                  Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
-        : BasicView(format, data, width, height, padding)
-        { 
-        }
-
-        virtual ~ImageView()
+        template <typename OtherT>
+        explicit PixelView(BasicImage<OtherT>& image)
+        : BasicPixelView(image)
         { }
-       
-        void getRect(Pt::ssize_t x, Pt::ssize_t y, 
-                     Pt::ssize_t width, Pt::ssize_t height,
-                     Pt::uint32_t* to, Pt::ssize_t toStride) const
-        {
-            format().getRect(*this, x, y, width, height, to, toStride);
-        }
+};
 
-        void setRect(Pt::ssize_t x, Pt::ssize_t y, 
-                     Pt::ssize_t width, Pt::ssize_t height,
-                     const Pt::uint32_t* from, Pt::ssize_t fromStride)
-        {
-            format().setRect(*this, x, y, width, height, from, fromStride);
-        }
+
+class ConstPixelView : public BasicConstPixelView<ImageFormat,
+                                                  Pixel<Argb32Color>,
+                                                  ConstPixel<Argb32Color> >
+{
+    public:
+        ConstPixelView()
+        : BasicConstPixelView( ImageFormat::argb32() )
+        { }
+
+        explicit ConstPixelView(const Image& image)
+        : BasicConstPixelView(image)
+        { }
+
+        explicit ConstPixelView(const ConstImage& image)
+        : BasicConstPixelView(image)
+        { }
+};
+
+
+class ColorView : public BasicPixelView<ImageFormat, 
+                                        Pixel<Color>,
+                                        ConstPixel<Color> >
+{
+    public:
+        ColorView()
+        : BasicPixelView( ImageFormat::argb32() )
+        { }
+
+        explicit ColorView(Image& image)
+        : BasicPixelView(image)
+        { }
+};
+
+
+class ConstColorView : public BasicConstPixelView<ImageFormat,
+                                                  Pixel<Color>,
+                                                  ConstPixel<Color> >
+{
+    public:
+        ConstColorView()
+        : BasicConstPixelView( ImageFormat::argb32() )
+        { }
+
+        explicit ConstColorView(const Image& image)
+        : BasicConstPixelView(image)
+        { }
+
+        explicit ConstColorView(const ConstImage& image)
+        : BasicConstPixelView(image)
+        { }
 };
 
 } // namespace

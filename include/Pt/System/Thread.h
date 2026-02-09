@@ -305,6 +305,9 @@ class DetachedThread : public Thread
             Thread::detach();
         }
 
+        ~DetachedThread()
+        { }
+
         /** @brief Destroys a detached thread.
 
             This method is called after the thread has finished. The

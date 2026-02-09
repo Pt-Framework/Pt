@@ -32,7 +32,6 @@
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/PixmapSurface.h>
-#include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
 

@@ -30,9 +30,12 @@
 #define Pt_Forms_Cursor_h
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Types.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Types.h>
+
 #include <vector>
+#include <string>
 
 namespace Pt {
 

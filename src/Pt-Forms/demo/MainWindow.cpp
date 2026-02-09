@@ -37,7 +37,6 @@
 #include <Pt/Gfx/Bitmap.h>
 //#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <sstream>
 #include <fstream>
@@ -269,7 +268,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //}
     
     Window::onPaintEvent(ev);
-    return;
+    //return;
     
     const Gfx::RectF& rect = ev.rect();
  

@@ -29,9 +29,11 @@
 #include "BitmapSurface.h"
 #include "BitmapCanvas.h"
 
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
@@ -70,8 +72,11 @@ void BitmapSurface::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
     {
+        Gfx::ConstPixelView from(image);
+        Gfx::PixelView to(_image);
+
         _image.reset( format(), image.width(), image.height() );
-        Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
+        Pt::Gfx::copy( from.begin(), from.end(), to.begin() );
     }
     else
     {
@@ -82,11 +87,9 @@ void BitmapSurface::reset(const Gfx::Image& image)
 
     if( _rasterContext.target_image() )
         _rasterContext.end();
-    
-    std::size_t lineSize = _image.format().imageSize(image.width(), 1, image.padding());
-
+   
     _rasterImage.create_from_data( image.width(), image.height(), 
-                                   BL_FORMAT_PRGB32, _image.data(), lineSize );
+                                   BL_FORMAT_PRGB32, _image.data(), _image.stride() );
 }
 
 
@@ -99,13 +102,11 @@ void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 
     _physicalSize.set(width, height);
 
-    std::size_t lineSize = _image.format().imageSize(width, 1, stride);
-
     if( _rasterContext.target_image() )
         _rasterContext.end();
     
     _rasterImage.create_from_data( _image.width(), _image.height(),
-                                   BL_FORMAT_PRGB32, _image.data(), lineSize );
+                                   BL_FORMAT_PRGB32, _image.data(), _image.stride() );
 }
 
 
@@ -336,9 +337,35 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
     //          << fromRect.width() << "x" << fromRect.height() << std::endl;
 
-    _image.view().copy(toRect.x(), toRect.y(), image.view(), 
-                       fromRect.x(), fromRect.y(), 
-                       fromRect.width(), fromRect.height(), paint.compositionMode());
+    Gfx::PixelView toView(_image);
+    Gfx::PixelView::PixelIterator toIter = toView.pixel( toRect.x(), toRect.y() );
+
+    Gfx::ConstPixelView fromView(image);
+    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+
+    switch( paint.compositionMode() )
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            Argb32::sourceCopy(toIter->base(), toView.stride(),
+                               fromIter->base(), fromView.stride(), 
+                               fromRect.width(), fromRect.height());
+
+            //Argb32::sourceCopy(toView.base(), toRect.x(), toRect.y(),
+            //                   fromView, fromRect.x(), fromRect.y(), 
+            //                   fromRect.width(), fromRect.height());
+            break;
+
+        case CompositionMode::SourceOver:
+            Argb32::sourceOver(toIter->base(), toView.stride(),
+                               fromIter->base(), fromView.stride(), 
+                               fromRect.width(), fromRect.height());
+
+            //Argb32::sourceOver(toView.base(), toRect.x(), toRect.y(),
+            //                   fromView, fromRect.x(), fromRect.y(), 
+            //                   fromRect.width(), fromRect.height());
+            break;
+    }
 }
 
 #endif

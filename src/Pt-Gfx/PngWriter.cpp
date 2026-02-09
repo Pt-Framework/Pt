@@ -96,7 +96,7 @@ class PngWriterImpl
             detach();
         }
         
-        void beginWrite(Image& image)
+        void beginWrite(const Image& image)
         {
             if( ! _target || ! _target->rdbuf() )
                 return;
@@ -138,15 +138,15 @@ class PngWriterImpl
                 return true;
 
             //TODO: use ImageFormat API to convert to required output format
-            if( _image->format().pixelStride() != 4 )
+            if( _image->format() != ImageFormat::argb32() )
                 throw IOError("invalid image format");
 
             // allocate memory for one row (3 bytes per pixel - RGB)
             _rowBuffer.resize( 3 * _image->width() );
 
             // convert row from ARGB32 to RGB24
-            std::size_t imageWidth = _image->format().pixelStride() * _image->width();
-            Pt::uint8_t* from = _image->data() + _row * imageWidth;
+            std::size_t imageWidth = pixelStride( _image->format() ) * _image->width();
+            const Pt::uint8_t* from = _image->data() + _row * imageWidth;
             Pt::uint8_t* to = &_rowBuffer[0];
             
             for(int x = 0; x < _image->width(); ++x)
@@ -155,7 +155,7 @@ class PngWriterImpl
                 *to++ = from[1];
                 *to++ = from[0];
 
-                from += _image->format().pixelStride();
+                from += pixelStride( _image->format() );
             }
             
             png_write_row(_pngWrite, &_rowBuffer[0]);
@@ -170,7 +170,7 @@ class PngWriterImpl
             return true;
         }
 
-        void write(Image& image)
+        void write(const Image& image)
         {
             beginWrite(image);
             
@@ -228,7 +228,7 @@ class PngWriterImpl
         std::ios*             _target;
         png_structp           _pngWrite;
         png_infop             _pngInfo;
-        Image*                _image;
+        const Image*          _image;
         std::size_t           _row;
         std::vector<png_byte> _rowBuffer;
 };
@@ -270,7 +270,7 @@ void PngWriter::reset()
 }
 
 
-void PngWriter::beginWrite(Image& image)
+void PngWriter::beginWrite(const Image& image)
 {
     _impl->beginWrite(image);
 }
@@ -282,7 +282,7 @@ bool PngWriter::advance()
 }
 
 
-void PngWriter::write(Image& image)
+void PngWriter::write(const Image& image)
 {
     _impl->write(image);
 }

@@ -97,6 +97,10 @@ namespace Pt {
 //! @internal
 union varint_t
 {
+    varint_t()
+    : ptr(0)
+    {}
+
     void* ptr;
     bool b;
     int i;

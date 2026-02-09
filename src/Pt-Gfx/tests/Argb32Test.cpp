@@ -27,8 +27,9 @@
 */
 
 #include <Pt/Gfx/Argb32Image.h>
-#include <Pt/Gfx/Argb32Format.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Color.h>
 
 #include <Pt/System/Clock.h>
@@ -55,6 +56,8 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
             registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            registerMethod("BenchmarkC_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
+            registerMethod("BenchmarkD_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
         }
 
         void Pixel()
@@ -64,7 +67,9 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
             Argb32Image image(data, 2, 2);
-            Argb32Image::PixelIterator pixel = image.pixel(1, 1);
+            Argb32PixelView imageView(image);
+            
+            Argb32PixelView::PixelIterator pixel = imageView.pixel(1, 1);
             
             Pt::uint8_t a = pixel->alpha();
             Pt::uint8_t r = pixel->red();
@@ -84,9 +89,10 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
             Argb32Image image(data, 2, 2);
+            Argb32PixelView view(image);
 
-            Argb32Image::PixelIterator it = image.begin();
-            Argb32Image::PixelIterator end = image.end();
+            Argb32PixelView::PixelIterator it = view.begin();
+            Argb32PixelView::PixelIterator end = view.end();
 
             Pt::uint32_t blue = 0;
             for( ; it != end; ++it)
@@ -106,10 +112,11 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
             Argb32Image image(data, 1, 1);
-            Argb32Image::PixelIterator pixel = image.pixel(0, 0);
+            Argb32PixelView imageView(image);
+            Argb32PixelView::PixelIterator pixel = imageView.pixel(0, 0);
 
-            Pt::Gfx::Color c = pixel->getColor();
-            pixel->assign(c, CompositionMode::SourceCopy);
+            Pt::Gfx::Argb32Color c = pixel->color();
+            *pixel = c;
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
         }
@@ -122,26 +129,29 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Format format;
+                Argb32 format;
                 Image image( format, 1000, 1000 );
-                Image::PixelIterator it = image.begin();
-                Image::PixelIterator end = image.end();
+                
+                PixelView pixelView(image);
+                ColorView colorView(image);
+
+                PixelView::PixelIterator it = pixelView.begin();
+                PixelView::PixelIterator end = pixelView.end();
             
-                Pt::Gfx::Color color(100, 100, 100);
-            
-                Image::Pixel pixel = *image.begin();
-                Image::ConstPixel cpixel(pixel);
+                ConstPixelView::ConstPixel fromPixel( *pixelView.cbegin() );
 
                 Pt::System::Clock clock;
                 clock.start();
             
+                Pt::Gfx::Color color(100, 100, 100);
+
                 for( ; it != end; ++it)
                 {
-                    Pt::Gfx::Color c = it->getColor();
-                    c.setRed(99);
-                    
-                    //(*it) = c;
-                    (*it) = cpixel;
+                    //color = it->color();
+                    //color.setRed(99);
+                    //
+                    //(*it) = color;
+                    (*it) = fromPixel;
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -160,28 +170,100 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Format format;
-                Image image( format, 1000, 1000 );
+                Argb32Image image(1000, 1000);
+                Argb32PixelView imageView(image);
 
-                Argb32View argbView( image.data(), image.width(), image.height() );
-                Argb32View::PixelIterator it = argbView.begin();
-                Argb32View::PixelIterator end = argbView.end();
+                PixelView pixelView(image);
+                
+                Argb32PixelView::PixelIterator it = imageView.begin();
+                Argb32PixelView::PixelIterator end = imageView.end();
             
-                Pt::Gfx::Color color(100, 100, 100);
+                Pt::Gfx::Argb32Color color(255, 100, 100, 100);
             
-                Argb32View::Pixel pixel = *argbView.begin();
-                Argb32View::ConstPixel cpixel(pixel);
+                Argb32ConstPixelView constView(image);
+                Argb32Pixel cpixel = *imageView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
             
                 for( ; it != end; ++it)
                 {
-                    Pt::Gfx::Color c = it->getColor();
-                    c.setRed(99);
-                    
-                    //(*it) = c;
+                    //color = it->color();
+                    //color.setRed(99);
+                    //
+                    //(*it) = color;
                     (*it) = cpixel;
+                }
+
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
+            }
+
+            std::clog << "ARGB32: " << best << std::endl;
+        }
+
+        void BenchmarkCopyPixels()
+        {
+            using namespace Pt::Gfx;
+           
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+
+            Argb32 format;
+            Pt::Gfx::Color color(100, 100, 100);
+
+            for(int n = 0; n < 10; ++n)
+            {
+                Image fromImage(format, 48, 10000);
+                ConstPixelView fromView(fromImage);
+                ConstPixelView::ConstPixelIterator from = fromView.begin();
+
+                Image image(format, 48, 10000);
+                PixelView imageView(image);
+                PixelView::PixelIterator it = imageView.begin();
+                PixelView::PixelIterator end = imageView.end();
+
+                Pt::System::Clock clock;
+                clock.start();
+
+                for( ; it != end; it += image.width(), from += fromImage.width() )
+                {
+                    it->assign( *from, image.width() );
+                }
+
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
+            }
+
+            std::clog << "GENERIC: " << best << std::endl;
+        }
+
+        void BenchmarkCopyPixelsRaw()
+        {
+            using namespace Pt::Gfx;
+           
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+
+            Pt::Gfx::Color color(100, 100, 100);
+
+            for(int n = 0; n < 10; ++n)
+            {
+                Argb32Image fromImage(48, 10000);
+                Argb32PixelView fromView(fromImage);
+                Argb32PixelView::PixelIterator from = fromView.begin();
+
+                Argb32Image image(48, 10000);
+                Argb32PixelView imageView(image);
+                Argb32PixelView::PixelIterator it = imageView.begin();
+                Argb32PixelView::PixelIterator end = imageView.end();
+
+                Pt::System::Clock clock;
+                clock.start();
+
+                for( ; it != end; it += image.width(), from += fromImage.width() )
+                {
+                    it->copy( *from, image.width() );
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();

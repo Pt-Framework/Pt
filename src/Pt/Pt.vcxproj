@@ -71,10 +71,13 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
@@ -98,14 +101,14 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Polygon.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\TextMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\ViewBase.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ActivateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Adjustment.h" />
@@ -1393,7 +1396,6 @@
     <ClCompile Include="..\Pt-Forms\WorkspaceFrame.cpp" />
     <ClCompile Include="..\Pt-Forms\WorkspaceManager.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp" />
-    <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp" />
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp" />
     <ClCompile Include="..\Pt-Gfx\Bitmap.cpp" />
     <ClCompile Include="..\Pt-Gfx\blend2d\BitmapCanvas.cpp" />
@@ -1418,8 +1420,8 @@
     <ClCompile Include="..\Pt-Gfx\raster\BitmapSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\ClipPolygon.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp" />
-    <ClCompile Include="..\Pt-Gfx\Rgb16Format.cpp" />
-    <ClCompile Include="..\Pt-Gfx\Rgb32Format.cpp" />
+    <ClCompile Include="..\Pt-Gfx\Rgb16.cpp" />
+    <ClCompile Include="..\Pt-Gfx\Rgb32.cpp" />
     <ClCompile Include="..\Pt-Gfx\skia\DrawText.cpp" />
     <ClCompile Include="..\Pt-Gfx\skia\FreeType.cpp" />
     <ClCompile Include="..\Pt-Gfx\skia\ImageCanvas.cpp" />
@@ -1433,7 +1435,6 @@
     <ClCompile Include="..\Pt-Gfx\tests\Yuv12Test.cpp" />
     <ClCompile Include="..\Pt-Gfx\TextMetrics.cpp" />
     <ClCompile Include="..\Pt-Gfx\Transform.cpp" />
-    <ClCompile Include="..\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\Pt-Forms\Application.cpp" />
     <ClCompile Include="..\Pt-Forms\Button.cpp" />
     <ClCompile Include="..\Pt-Forms\CheckBox.cpp" />
@@ -1529,6 +1530,7 @@
     <ClCompile Include="..\Pt-Forms\x11\ScreenImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\x11\WindowImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\x11\X11Fd.cpp" />
+    <ClCompile Include="..\Pt-Gfx\Yuv12.cpp" />
     <ClCompile Include="..\Pt-Http\Authenticator.cpp" />
     <ClCompile Include="..\Pt-Http\Authorizer.cpp" />
     <ClCompile Include="..\Pt-Http\Client.cpp" />

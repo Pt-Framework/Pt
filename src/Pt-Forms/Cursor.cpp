@@ -25,12 +25,6 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  MA  02110-1301  USA
 */
-
-#include <Pt/Forms/Cursor.h>
-#include <Pt/Byteorder.h>
-#include <Pt/Gfx/PngReader.h>
-#include <fstream>
-#include <sstream>
 #include "ArrowCursor.h"
 #include "SizeWECursor.h"
 #include "SizeNSCursor.h"
@@ -38,6 +32,13 @@
 #include "SizeNESWCursor.h"
 #include "MoveCursor.h"
 #include "WaitCursor.h"
+
+#include <Pt/Forms/Cursor.h>
+#include <Pt/Gfx/PngReader.h>
+#include <Pt/Gfx/ImageView.h>
+
+#include <fstream>
+#include <sstream>
 
 namespace Pt {
 
@@ -83,25 +84,27 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 
   reader.get();
 
+	Gfx::ColorView imageView(image);
+
 	//Generate alpha channel
 	for( size_t y = 0;  y < image.height(); ++y )
 	{
 		  for( size_t x = 0;  x < image.width(); ++x )
 		  {
-          Gfx::Pixel pixel( image.view(), x, y);
-          Gfx::Color color = pixel.getColor();
+          Gfx::ColorView::Pixel pixel(imageView, x, y);
+          Gfx::Color color = pixel.color();
 				
 			    if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
 				    color.setAlpha(0);
 			    else
 				    color.setAlpha(65535);
 
-			    pixel.assign(color, Gfx::CompositionMode::SourceCopy);
+			    pixel = color;
 		  }
 	}
 
-  Gfx::Pixel pixel(image.view(), cursor.xHotspot(), cursor.yHotspot());
-	pixel.assign(Gfx::Color(0,65535,0), Gfx::CompositionMode::SourceCopy );
+  Gfx::ColorView::Pixel pixel(imageView, cursor.xHotspot(), cursor.yHotspot());
+	pixel = Gfx::Color(0, 65535, 0);
   
   fromImage(image, cursor);
 }
@@ -235,12 +238,14 @@ void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
 	cursor._height   = image.height();
 	cursor._width    = image.width();
 
+	Gfx::ConstColorView view(image);
+
 	for( size_t y = 0; y < cursor._height; ++y )
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-      Gfx::ConstPixel pixel(image.view(), x, y);      
-      Gfx::Color color = pixel.getColor();
+      Gfx::ConstColorView::ConstPixel pixel(view, x, y);      
+      Gfx::Color color = pixel.color();
 
 			if( color.alpha() == 0 )
 			{//Transparent

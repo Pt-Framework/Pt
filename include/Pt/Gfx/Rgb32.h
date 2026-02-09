@@ -1,4 +1,5 @@
 /* Copyright (C) 2015 Marc Boris Duerner
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,37 +27,45 @@
   MA 02110-1301 USA
 */
 
+#ifndef PT_GFX_RGB32_H
+#define PT_GFX_RGB32_H
+
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageView.h>
-#include <Pt/Gfx/Argb32.h>
-#include <Pt/Gfx/Rgb16.h>
-#include <Pt/Gfx/Rgb32.h>
-#include <cassert>
+#include <Pt/Gfx/Color.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-const ImageFormat& ImageFormat::rgb16()
+class PT_GFX_API Rgb32 : public ImageFormat
 {
-  static const Rgb16 _rgb16;
-	return _rgb16;
-}
+    public:
+        Rgb32();
 
+    protected:
+        virtual const std::type_info& onGetType() const override
+        { 
+            return typeid(*this); 
+        }
 
-const ImageFormat& ImageFormat::rgb32()
-{
-  static const Argb32 _rgb32;
-	return _rgb32;
-}
+        virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                                        std::size_t padding) const;
 
+        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+                                         Pt::ssize_t x, Pt::ssize_t y, 
+                                         PixelStorage& store) const override;
+    
+        virtual ConstPixelBase* onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
+                                                   Pt::ssize_t x, Pt::ssize_t y, 
+                                                   PixelStorage& store) const override;
 
-const ImageFormat& ImageFormat::argb32() 
-{
-  static const Argb32 _argb32;
-	return _argb32;
-}
+    public:
+        static Color onGetColor(const Pt::uint8_t* base);
+};
 
 } // namespace
 
 } // namespace
+
+#endif

@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -275,18 +276,20 @@ class BitmapCanvas : public Canvas
     private:
         DrawText*            _text;
         Image*               _image;
+        PixelView            _imageView;
         double               _lastScaleFactor;
 
         CompositionMode      _compositionMode;
         
         Pen                  _pen;
         Image                _penBuffer;
-        ConstPixel           _penPixel;
+        ConstPixelView       _penView;
+        ConstPixelView::ConstPixel _penPixel;
 
         Brush                _brush;
         Image                _brushBuffer;
-        const Image*         _brushImage;
-        ConstPixel           _brushPixel;
+        ConstPixelView       _brushView;
+        ConstPixelView::ConstPixel _brushPixel;
         bool                 _isGradient;
 
         Font                 _font;

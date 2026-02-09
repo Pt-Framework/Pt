@@ -1,4 +1,5 @@
 /* Copyright (C) 2015 Marc Boris Duerner
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,35 +27,56 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageView.h>
-#include <Pt/Gfx/Argb32.h>
-#include <Pt/Gfx/Rgb16.h>
 #include <Pt/Gfx/Rgb32.h>
-#include <cassert>
 
 namespace Pt {
 
 namespace Gfx {
 
-const ImageFormat& ImageFormat::rgb16()
+Rgb32::Rgb32()
+: ImageFormat(4)
 {
-  static const Rgb16 _rgb16;
-	return _rgb16;
 }
 
 
-const ImageFormat& ImageFormat::rgb32()
+std::size_t Rgb32::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
+                               std::size_t padding) const
 {
-  static const Argb32 _rgb32;
-	return _rgb32;
+    std::size_t l = (width * 4) + padding;
+    std::size_t n = l * height;
+    return n;
 }
 
 
-const ImageFormat& ImageFormat::argb32() 
+PixelBase* Rgb32::onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+                                  Pt::ssize_t x, Pt::ssize_t y, 
+                                  PixelStorage& store) const
+{ 
+    return 0; 
+}
+    
+ConstPixelBase* Rgb32::onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
+                                            Pt::ssize_t x, Pt::ssize_t y, 
+                                            PixelStorage& store) const
+{ 
+    return 0; 
+}
+
+
+Color Rgb32::onGetColor(const Pt::uint8_t* base)
 {
-  static const Argb32 _argb32;
-	return _argb32;
+    const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(base);
+
+    const Pt::uint16_t tr = (pixel & 0x00FF0000) >> 16;
+    const Pt::uint16_t tg = (pixel & 0x0000FF00) >>  8;
+    const Pt::uint16_t tb =  pixel & 0x000000FF;
+
+    Pt::uint16_t a = 0xFFFF;
+    Pt::uint16_t r = (tr << 8) + tr;
+    Pt::uint16_t g = (tg << 8) + tg;
+    Pt::uint16_t b = (tb << 8) + tb;
+
+    return Color(a, r, g, b);
 }
 
 } // namespace

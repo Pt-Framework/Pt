@@ -1539,9 +1539,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -1614,12 +1611,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -1630,9 +1621,6 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h">
@@ -2954,6 +2942,27 @@
     </ClInclude>
     <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSansItalic.h">
       <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ViewBase.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.hpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -4598,9 +4607,6 @@
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\Argb32Format.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -4649,16 +4655,7 @@
     <ClCompile Include="..\Pt-Gfx\PngWriter.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\Rgb16Format.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\Rgb32Format.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Transform.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\Yuv12Format.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\Argb32Test.cpp">
@@ -5662,6 +5659,15 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\sdl\PixmapImpl.cpp">
       <Filter>Pt-Forms\sdl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Rgb16.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Rgb32.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\Yuv12.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Yuv12.h>
+#include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
@@ -38,25 +39,40 @@ namespace Pt {
 
 namespace Gfx {
 
+class Yuv12Image;
+
 /** @brief YV-12 image view.
 */
-class Yuv12View : public BasicView<Yuv12>
+class Yuv12PixelView : public BasicPixelView<Yuv12>
 {
     public:
         /** @brief Constructor.
         */
-        Yuv12View()
-        : BasicView( Yuv12::instance() )
+        Yuv12PixelView()
+        : BasicPixelView( Yuv12() )
         { 
         }
 
         /** @brief Constructor.
         */
-        Yuv12View(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
-        : BasicView( Yuv12::instance(), data, width, height, padding )
+        explicit Yuv12PixelView(Yuv12Image& image);
+};
+
+/** @brief YV-12 const image view.
+*/
+class Yuv12ConstPixelView : public BasicConstPixelView<Yuv12>
+{
+    public:
+        /** @brief Constructor.
+        */
+        Yuv12ConstPixelView()
+        : BasicConstPixelView( Yuv12() )
         { 
         }
+
+        /** @brief Constructor.
+        */
+        explicit Yuv12ConstPixelView(Yuv12Image& image);
 };
 
 /** @brief YV-12 image.
@@ -65,13 +81,13 @@ class Yuv12View : public BasicView<Yuv12>
     half as many pad bytes after their rows. In other words, two U/V rows
     (including padding) is exactly as long as one Y row (including padding).
 */
-class Yuv12Image : public BasicImage<Yuv12View>
+class Yuv12Image : public BasicImage<Yuv12>
 {
     public:
         /** @brief Constructor.
         */
         Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage(width, height, padding)
+        : BasicImage(Yuv12(), width, height, padding)
         { 
         }
 
@@ -79,10 +95,22 @@ class Yuv12Image : public BasicImage<Yuv12View>
         */
         Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    size_t padding = 0)
-        : BasicImage(data, width, height, padding)
+        : BasicImage(Yuv12(), data, width, height, padding)
         { 
         }
 };
+
+
+inline Yuv12PixelView::Yuv12PixelView(Yuv12Image& image)
+: BasicPixelView(image)
+{ 
+}
+
+
+inline Yuv12ConstPixelView::Yuv12ConstPixelView(Yuv12Image& image)
+: BasicConstPixelView(image)
+{ 
+}
 
 } // namespace
 
