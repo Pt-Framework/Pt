@@ -46,13 +46,6 @@ inline BasicPixelView<FormatT, PixelT, ConstPixelT>::BasicPixelView(BasicImage<F
 
 
 template <typename FormatT, typename PixelT, typename ConstPixelT>
-template <typename OtherT>
-inline BasicPixelView<FormatT, PixelT, ConstPixelT>::BasicPixelView(BasicImage<OtherT>& image)
-: BasicView<FormatT>(image)
-{ }
-
-
-template <typename FormatT, typename PixelT, typename ConstPixelT>
 inline void BasicPixelView<FormatT, 
                           PixelT, 
                           ConstPixelT>::assign(Pt::ssize_t x, Pt::ssize_t y, 
@@ -65,6 +58,29 @@ inline void BasicPixelView<FormatT,
     
     for( Pt::ssize_t y = 0; y < height; ++y )
     {
+        to->assign(*from, width);
+        to += this->width();
+        from += view.width();
+    }
+}
+
+
+template <typename FormatT, typename PixelT, typename ConstPixelT>
+template <typename FormatT2, typename PixelT2, typename ConstPixelT2>
+inline void BasicPixelView<FormatT, 
+                          PixelT, 
+                          ConstPixelT>::convert(Pt::ssize_t x, Pt::ssize_t y, 
+                                               const BasicConstPixelView<FormatT2, 
+                                                                         PixelT2, 
+                                                                         ConstPixelT2>& view, 
+                                               Pt::ssize_t fromX, Pt::ssize_t fromY, 
+                                               Pt::ssize_t width, Pt::ssize_t height)
+{
+    auto from = view.pixel(fromX, fromY);
+
+    for( Pt::ssize_t y = 0; y < height; ++y )
+    {
+        from->color();
         to->assign(*from, width);
         to += this->width();
         from += view.width();
@@ -87,6 +103,27 @@ template <typename FormatT, typename PixelT, typename ConstPixelT>
 inline BasicConstPixelView<FormatT, 
                            PixelT, 
                            ConstPixelT>::BasicConstPixelView(const BasicConstImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+///////////////////////////////////////////////////////////////////////
+// BasicConstColorView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename PixelT, typename ConstPixelT, typename ColorT>
+inline BasicConstColorView<FormatT, 
+                           PixelT, 
+                           ConstPixelT,
+                           ColorT>::BasicConstColorView(const BasicImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+
+template <typename FormatT, typename PixelT, typename ConstPixelT, typename ColorT>
+inline BasicConstColorView<FormatT, 
+                           PixelT, 
+                           ConstPixelT,
+                           ColorT>::BasicConstColorView(const BasicConstImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 

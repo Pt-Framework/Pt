@@ -33,6 +33,9 @@
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Types.h>
 
+#include <iterator>
+#include <cstddef>
+
 namespace Pt {
 
 namespace Gfx {
@@ -60,6 +63,13 @@ class BasicPixelIterator
         typedef FormatT Format;
         typedef PixelT Pixel;
  
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = PixelT;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = PixelT*;
+        using reference         = PixelT&;
+
     public:
         BasicPixelIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _pixel(view, x, y)
@@ -121,6 +131,13 @@ class BasicConstPixelIterator
     public:
         typedef FormatT Format;
         typedef PixelT ConstPixel;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = PixelT;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = PixelT*;
+        using reference         = PixelT&;
 
     public:
         BasicConstPixelIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
@@ -201,9 +218,6 @@ class BasicPixelView : public BasicView<FormatT>
 
         explicit BasicPixelView(BasicImage<FormatT>& image);
 
-        template <typename OtherT>
-        explicit BasicPixelView(BasicImage<OtherT>& image);
-
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(*this, x, y); }
 
@@ -235,6 +249,11 @@ class BasicPixelView : public BasicView<FormatT>
         void assign(Pt::ssize_t x, Pt::ssize_t y, 
                     const BasicConstPixelView<FormatT, PixelT, ConstPixelT>& view, 
                     Pt::ssize_t fromX, Pt::ssize_t fromY, Pt::ssize_t width, Pt::ssize_t height);
+
+        template <typename FormatT2, typename PixelT2, typename ConstPixelT2>
+        void convert(Pt::ssize_t x, Pt::ssize_t y, 
+                     const BasicConstPixelView<FormatT2, PixelT2, ConstPixelT2>& view, 
+                     Pt::ssize_t fromX, Pt::ssize_t fromY, Pt::ssize_t width, Pt::ssize_t height);
 };
 
 
@@ -270,6 +289,119 @@ class BasicConstPixelView : public BasicConstView<FormatT>
 
         ConstPixelIterator end()
         { return ConstPixelIterator(*this, 0, this->height()); }
+};
+
+
+template <typename ColorT, typename PixelT> 
+ColorT toColor(const PixelT& p)
+{
+  return p.color();
+}
+
+
+template <typename FormatT, 
+          typename PixelT = typename FormatT::ConstPixel,
+          typename ColorT = typename PixelT::ColorType >
+class BasicConstColorIterator
+{
+    //template <typename F, typename P>
+    //friend class BasicPixelIterator;
+
+    public:
+        typedef FormatT Format;
+        typedef PixelT ConstPixel;
+        typedef ColorT Color;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = PixelT;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = PixelT*;
+        using reference         = PixelT&;
+
+    public:
+        BasicConstColorIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        : _pixel(view, x, y)
+        { }
+
+        BasicConstColorIterator(const BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        : _pixel(view, x, y)
+        { }
+
+        BasicConstColorIterator(const BasicConstColorIterator& it)
+        : _pixel(it._pixel)
+        { }
+
+        BasicConstColorIterator& operator=(const BasicConstColorIterator& it)
+        {
+            _pixel.reset(it._pixel);
+            return *this;
+        }
+
+        bool operator!=(const BasicConstColorIterator& it) const
+        { return ! _pixel.equals(it._pixel); }
+
+        //template <typename P>
+        //bool operator!=(const BasicPixelIterator<Format, P>& it) const
+        //{ return ! _pixel.equals(it._pixel); }
+
+        bool operator==(const BasicConstColorIterator& it) const
+        { return _pixel.equals(it._pixel); }
+
+        //template <typename P>
+        //bool operator==(const BasicPixelIterator<Format, P>& it) const
+        //{ return _pixel.equals(it._pixel); }
+
+        Color operator*() const
+        { return toColor<ColorT>( _pixel ); }
+
+        BasicConstColorIterator& operator++()
+        {
+            _pixel.advance();
+            return *this;
+        }
+
+        BasicConstColorIterator& operator+=(Pt::ssize_t n)
+        {
+            _pixel.advance(n);
+            return *this;
+        }
+
+    private:
+        ConstPixel _pixel;
+};
+
+
+template <typename FormatT,
+          typename PixelT = typename FormatT::Pixel, 
+          typename ConstPixelT = typename FormatT::ConstPixel,
+          typename ColorT = typename PixelT::ColorType>
+class BasicConstColorView : public BasicConstView<FormatT>
+{
+    public:
+        typedef FormatT Format;
+        typedef PixelT Pixel;
+        typedef ConstPixelT ConstPixel;
+
+        typedef BasicConstColorIterator<Format, ConstPixel, ColorT> Iterator;
+
+    public:
+        explicit BasicConstColorView(const Format& format)
+        : BasicConstView<FormatT>(format)
+        { }
+
+        explicit BasicConstColorView(const BasicImage<FormatT>& image);
+
+        explicit BasicConstColorView(const BasicConstImage<FormatT>& image);
+
+        Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
+        { return Iterator(*this, x, y); }
+
+        Iterator begin()
+        { return Iterator(*this, 0, 0); }
+
+        Iterator end()
+        { return Iterator(*this, 0, this->height()); }
 };
 
 } // namespace

@@ -70,7 +70,7 @@ namespace Gfx {
 // Argb32PixelBase
 ///////////////////////////////////////////////////////////////////////
 
-class Argb32PixelBase : public PixelBase
+class Argb32PixelBase final : public PixelBase
 {
     public:
         explicit Argb32PixelBase(Argb32Pixel& p)
@@ -79,13 +79,10 @@ class Argb32PixelBase : public PixelBase
         { }
 
     protected:
-        virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos) override
+        virtual Location& onAdvance() override
         {
             _p.advance();
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.base();
+            return _p.location();
         }
 
          virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
@@ -133,7 +130,7 @@ class Argb32PixelBase : public PixelBase
 // Argb32ConstPixelBase
 ///////////////////////////////////////////////////////////////////////
 
-class Argb32ConstPixelBase : public ConstPixelBase
+class Argb32ConstPixelBase final : public ConstPixelBase
 {
     public:
         explicit Argb32ConstPixelBase(const Argb32ConstPixel& p)

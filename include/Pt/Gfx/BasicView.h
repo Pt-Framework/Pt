@@ -55,9 +55,6 @@ class BasicView : public ViewBase
 
         explicit BasicView(BasicImage<FormatT>& image);
 
-        template <typename OtherT>
-        explicit BasicView(BasicImage<OtherT>& image);
-
         virtual ~BasicView()
         { }
 

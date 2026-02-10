@@ -38,6 +38,76 @@ namespace Pt {
 
 namespace Gfx {
 
+//
+// TODO:
+// return Location& in onAdvance()
+// 
+// TODO:
+// maintain x and y pos in Pixel/ConstPixel so PixelBase can be smaller
+// 
+// TODO:
+// Color template for 8bit und 16-bit pro kanal
+// Color Color8 Color32
+// 
+// TODO:
+// if a PixelView is assigned to a BasicImage<F>, then we can check if F == image.format()
+// and memcpy if equal, or convert if neccessary:
+// BasicImage<F> bi;
+// Image i;
+// PixelView v(i);
+// bi = v;
+// 
+// How could copy(iter, iter, iter) from image to basic image work?
+//
+
+class Location
+{
+    public:
+        Location()
+        : _base(0)
+        , _x(0)
+        , _y(0)
+        {}
+
+        Location(Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
+        : _base(base)
+        , _x(x)
+        , _y(y)
+        {}
+
+        ~Location()
+        {}
+
+        Pt::uint8_t* base() const
+        { return _base; }
+
+        void setBase(Pt::uint8_t* base)
+        {
+            _base = base;
+        }
+
+        Pt::ssize_t xpos() const
+        { return _x; }
+
+        void setXPos(Pt::ssize_t xpos)
+        {
+            _x = xpos;
+        }
+
+        Pt::ssize_t ypos() const
+        { return _y; }
+
+        void setYPos(Pt::ssize_t ypos)
+        {
+            _y = ypos;
+        }
+
+    private:
+        Pt::uint8_t*  _base;
+        Pt::ssize_t   _x;
+        Pt::ssize_t   _y;
+};
+
 ///////////////////////////////////////////////////////////////////////
 // PixelBase
 ///////////////////////////////////////////////////////////////////////
@@ -45,7 +115,8 @@ namespace Gfx {
 class PixelBase;
 class ConstPixelBase;
 
-
+/** @brief Pixel base class.
+*/
 class PixelBase
 {
     public:
@@ -69,7 +140,11 @@ class PixelBase
 
         Pt::uint8_t* advance()
         { 
-            _base =  onAdvance(_x, _y);
+            Location& loc = onAdvance();
+            _base = loc.base();
+            _x = loc.xpos();
+            _y = loc.ypos();
+
             return _base;
         }
 
@@ -103,7 +178,7 @@ class PixelBase
         }
 
     protected:
-        virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos) = 0;
+        virtual Location& onAdvance() = 0;
 
         virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
                                        Pt::ssize_t n) = 0;
@@ -147,6 +222,8 @@ inline Argb32Color PixelBase::getColor<Argb32Color>() const
 // ConstPixelBase
 ///////////////////////////////////////////////////////////////////////
 
+/** @brief Const pixel base class.
+*/
 class ConstPixelBase
 {
     public:
@@ -293,6 +370,9 @@ class Pixel
     friend class ConstPixel;
 
     public:
+        typedef ColorT ColorType;
+
+    public:
         Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Pixel(const Pixel& p);
@@ -375,6 +455,9 @@ class ConstPixel
     friend class Pixel;
 
     public:
+        typedef ColorT ColorType;
+
+    public:
         ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -438,6 +521,20 @@ class ConstPixel
         ConstPixelBase*     _pixel;
         const Pt::uint8_t*  _data;
 };
+
+
+template <typename PixelT> 
+Color toColor(const ConstPixel<Color>& p)
+{
+  return p.color();
+}
+
+
+template <typename PixelT> 
+Argb32Color toColor(const ConstPixel<Argb32Color>& p)
+{
+  return p.color();
+}
 
 ///////////////////////////////////////////////////////////////////////
 // ImageFormat

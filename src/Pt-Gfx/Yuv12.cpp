@@ -41,13 +41,11 @@ class Yuv12PixelBase : public PixelBase
         , _p(p)
         { }
 
-        virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos) override
+        virtual Location& onAdvance() override
         {
             _p.advance();
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.ybase();
+            _loc = Location(_p.ybase(), _p.xpos(), _p.ypos());
+            return _loc;
         }
 
          virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
@@ -75,8 +73,9 @@ class Yuv12PixelBase : public PixelBase
             //Yuv12::sourceCopy(_p.ybase(), n, color);        
         }
 
-    private:      
+    private:
         Yuv12Pixel _p;
+        Location  _loc;
 };
 
 
@@ -115,40 +114,6 @@ class Yuv12ConstPixelBase : public ConstPixelBase
     private:      
         Yuv12ConstPixel _p;
 };
-
-///////////////////////////////////////////////////////////////////////
-// Yuv12Format
-///////////////////////////////////////////////////////////////////////
-//
-//Yuv12Format::Yuv12Format()
-//: ImageFormat(1)
-//{
-//}
-//
-//
-//std::size_t Yuv12Format::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
-//                                     std::size_t padding) const
-//{
-//    return _yuv12.imageSize(width, height, padding);
-//}
-//
-//
-//PixelBase* Yuv12Format::onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
-//                                      Pt::ssize_t x, Pt::ssize_t y, 
-//                                      PixelStorage& store) const
-//{
-//    Yuv12Pixel p(data, view, x, y);;
-//    return store.create<Yuv12PixelBase>(p);
-//}
-//
-//
-//ConstPixelBase* Yuv12Format::onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
-//                                                Pt::ssize_t x, Pt::ssize_t y, 
-//                                                PixelStorage& store) const
-//{
-//    Yuv12ConstPixel p(data, view, x, y);
-//    return store.create<Yuv12ConstPixelBase>(p);
-//}
 
 ///////////////////////////////////////////////////////////////////////
 // Yuv12

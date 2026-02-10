@@ -31,12 +31,15 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Algorithm.h>
 
 #include <Pt/System/Clock.h>
 
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
+
+#include <algorithm>
 
 Pt::uint32_t argb32Data[] = 
 {
@@ -119,6 +122,29 @@ class Argb32Test : public Pt::Unit::TestSuite
             *pixel = c;
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
+
+            
+            
+            Image i(Argb32(), 2, 2);
+            PixelView iv(i);
+            Argb32Image a(2, 2);
+            Argb32PixelView av(a);
+            
+
+            Pt::Gfx::ConstColorView2<Pt::Gfx::Argb32Color>  colorView(i);
+
+            Pt::Gfx::copy( colorView.begin(), colorView.end(), av.begin() );
+            
+            std::transform(iv.begin(),iv.end(), av.begin(), 
+                           [](const PixelView::Pixel& p1)
+                           { return p1.color(); } );
+
+            Argb32PixelView::Iterator to = av.begin();
+            for(PixelView::Iterator it = iv.begin(); it != iv.end(); ++it)
+            {
+              *to = it->color();
+              ++to; 
+            }
         }
 
         void Benchmark()
@@ -172,8 +198,6 @@ class Argb32Test : public Pt::Unit::TestSuite
             {
                 Argb32Image image(1000, 1000);
                 Argb32PixelView imageView(image);
-
-                PixelView pixelView(image);
                 
                 Argb32PixelView::PixelIterator it = imageView.begin();
                 Argb32PixelView::PixelIterator end = imageView.end();

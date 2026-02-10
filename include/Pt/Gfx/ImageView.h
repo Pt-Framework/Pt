@@ -56,11 +56,6 @@ class PixelView : public BasicPixelView<ImageFormat,
         explicit PixelView(Image& image)
         : BasicPixelView(image)
         { }
-
-        template <typename OtherT>
-        explicit PixelView(BasicImage<OtherT>& image)
-        : BasicPixelView(image)
-        { }
 };
 
 
@@ -113,6 +108,26 @@ class ConstColorView : public BasicConstPixelView<ImageFormat,
 
         explicit ConstColorView(const ConstImage& image)
         : BasicConstPixelView(image)
+        { }
+};
+
+
+template <typename ColorT>
+class ConstColorView2 : public BasicConstColorView<ImageFormat,
+                                                  Pixel<ColorT>,
+                                                  ConstPixel<ColorT> >
+{
+    public:
+        ConstColorView2()
+        : BasicConstColorView( ImageFormat::argb32() )
+        { }
+
+        explicit ConstColorView2(const Image& image)
+        : BasicConstColorView(image)
+        { }
+
+        explicit ConstColorView2(const ConstImage& image)
+        : BasicConstColorView(image)
         { }
 };
 
