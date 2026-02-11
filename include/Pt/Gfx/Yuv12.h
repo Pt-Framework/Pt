@@ -115,6 +115,10 @@ class Yuv12Pixel
 
         Yuv12Pixel& operator=(const Color& color);
 
+        Yuv12Pixel& operator=(const Pixel& p);
+
+        Yuv12Pixel& operator=(const ConstPixel& p);
+
         bool equals(const Yuv12Pixel& p) const;
 
         bool equals(const Yuv12ConstPixel& p) const;
@@ -457,6 +461,20 @@ inline Color Yuv12Pixel::color() const
 inline Yuv12Pixel& Yuv12Pixel::operator=(const Color& color)
 {
     Yuv12::fromColor(_y, _u, _v, color);
+    return *this;
+}
+
+
+inline Yuv12Pixel& Yuv12Pixel::operator=(const Pixel& p)
+{
+    Yuv12::fromColor(_y, _u, _v, p.toColor() );
+    return *this;
+}
+
+
+inline Yuv12Pixel& Yuv12Pixel::operator=(const ConstPixel& p)
+{
+    Yuv12::fromColor(_y, _u, _v, p.toColor() );
     return *this;
 }
 

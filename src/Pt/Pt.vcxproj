@@ -72,6 +72,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicColorView.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicColorView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h" />
@@ -90,12 +92,14 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Location.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintContext.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />

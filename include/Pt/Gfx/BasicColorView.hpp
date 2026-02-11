@@ -26,27 +26,37 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_IMAGE_HPP
-#define PT_GFX_BASIC_IMAGE_HPP
+#ifndef PT_GFX_BASIC_COLOR_VIEW_HPP
+#define PT_GFX_BASIC_COLOR_VIEW_HPP
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Gfx/BasicColorView.h>
-#include <Pt/Types.h>
-#include <vector>
+#include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
-inline BasicImage<FormatT>::BasicImage(const Format& format)
-: _format( clone(format) )
-, _data(0)
-, _width(0)
-, _height(0)
-, _padding(0)
+///////////////////////////////////////////////////////////////////////
+// BasicColorView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename ColorT>
+inline BasicColorView<FormatT, ColorT>::BasicColorView(BasicImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+///////////////////////////////////////////////////////////////////////
+// BasicConstColorView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename ColorT>
+inline BasicConstColorView<FormatT, ColorT>::BasicConstColorView(const BasicImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+
+template <typename FormatT, typename ColorT>
+inline BasicConstColorView<FormatT, ColorT>::BasicConstColorView(const BasicConstImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
 { }
 
 } // namespace

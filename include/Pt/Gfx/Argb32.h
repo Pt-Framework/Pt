@@ -162,21 +162,7 @@ class Argb32Pixel
 
         void advance();
 
-        void advance(Pt::ssize_t n)
-        {
-            Pt::ssize_t _x = _loc.xpos();
-            Pt::ssize_t _y = _loc.ypos();
-            Pt::uint8_t* _p = _loc.base();
-
-            Pt::ssize_t off = _x + n;
-
-            std::size_t dy = off / _view->width();
-            std::size_t dx = off % _view->width() - _x;
-
-            _loc.setXPos(_x + dx);
-            _loc.setYPos(_y + dy);
-            _loc.setBase(_p + dy * _view->stride() + dx * 4);
-        }
+        void advance(Pt::ssize_t n);
 
     private:
         ViewBase*    _view;
@@ -263,42 +249,9 @@ class Argb32ConstPixel
         
         bool equals(const Argb32Pixel& p) const;
 
-        void advance()
-        {
-            Pt::ssize_t _x = _loc.xpos();
-            Pt::ssize_t _y = _loc.ypos();
-            const Pt::uint8_t* _p = _loc.base();
+        void advance();
 
-            if( ++_x >= _view.width() )
-            {
-                _x = 0;
-                ++_y;
-
-                _p += _view.padding();
-            }
-
-            _p += 4;
-
-            _loc.setXPos(_x);
-            _loc.setYPos(_y);
-            _loc.setBase(_p);
-        }
-
-        void advance(Pt::ssize_t n)
-        {
-            Pt::ssize_t _x = _loc.xpos();
-            Pt::ssize_t _y = _loc.ypos();
-            const Pt::uint8_t* _p = _loc.base();
-
-            Pt::ssize_t off = _x + n;
-
-            std::size_t dy = off / _view.width();
-            std::size_t dx = off % _view.width() - _x;
-
-            _loc.setXPos(_x + dx);
-            _loc.setYPos(_y + dy);
-            _loc.setBase(_p + dy * _view.stride() + dx * 4);
-        }
+        void advance(Pt::ssize_t n);
 
     private:
         const ViewBase&   _view;
@@ -776,6 +729,23 @@ inline void Argb32Pixel::advance()
 }
 
 
+inline void Argb32Pixel::advance(Pt::ssize_t n)
+{
+    Pt::ssize_t _x = _loc.xpos();
+    Pt::ssize_t _y = _loc.ypos();
+    Pt::uint8_t* _p = _loc.base();
+
+    Pt::ssize_t off = _x + n;
+
+    std::size_t dy = off / _view->width();
+    std::size_t dx = off % _view->width() - _x;
+
+    _loc.setXPos(_x + dx);
+    _loc.setYPos(_y + dy);
+    _loc.setBase(_p + dy * _view->stride() + dx * 4);
+}
+
+
 inline bool Argb32Pixel::equals(const Argb32Pixel& p) const
 {
     return base() == p.base();
@@ -873,6 +843,45 @@ inline Argb32ConstPixel::Argb32ConstPixel(const BasicView<Argb32>& view,
     _p += x * 4; 
     
     _loc = ConstLocation(_p, x, y);
+}
+
+
+inline void Argb32ConstPixel::advance()
+{
+    Pt::ssize_t _x = _loc.xpos();
+    Pt::ssize_t _y = _loc.ypos();
+    const Pt::uint8_t* _p = _loc.base();
+
+    if( ++_x >= _view.width() )
+    {
+        _x = 0;
+        ++_y;
+
+        _p += _view.padding();
+    }
+
+    _p += 4;
+
+    _loc.setXPos(_x);
+    _loc.setYPos(_y);
+    _loc.setBase(_p);
+}
+
+
+inline void Argb32ConstPixel::advance(Pt::ssize_t n)
+{
+    Pt::ssize_t _x = _loc.xpos();
+    Pt::ssize_t _y = _loc.ypos();
+    const Pt::uint8_t* _p = _loc.base();
+
+    Pt::ssize_t off = _x + n;
+
+    std::size_t dy = off / _view.width();
+    std::size_t dx = off % _view.width() - _x;
+
+    _loc.setXPos(_x + dx);
+    _loc.setYPos(_y + dy);
+    _loc.setBase(_p + dy * _view.stride() + dx * 4);
 }
 
 

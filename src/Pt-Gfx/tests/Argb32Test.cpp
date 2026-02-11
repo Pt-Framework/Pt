@@ -134,18 +134,18 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::Gfx::copy( pixelView.begin(), pixelView.end(), argb32View.begin() );
         }
         
+        static const std::size_t width = 64;
+        static const std::size_t height = 10000;
+
         void Benchmark()
         {
             using namespace Pt::Gfx;
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            Argb32 format;
-            const std::size_t width = 48;
-            const std::size_t height = 10000;
-
             for(int n = 0; n < 10; ++n)
             {
+                Argb32 format;
                 Image image(format, width, height);
                 
                 PixelView pixelView(image);
@@ -178,12 +178,10 @@ class Argb32Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
-            const std::size_t width = 48;
-            const std::size_t height = 10000;
 
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Image image(width, 10000);
+                Argb32Image image(width, height);
                 Argb32PixelView imageView(image);
                 
                 Argb32PixelView::PixelIterator it = imageView.begin();
@@ -199,10 +197,6 @@ class Argb32Test : public Pt::Unit::TestSuite
             
                 for( ; it != end; ++it)
                 {
-                    //color = it->color();
-                    //color.setRed(99);
-                    //
-                    //(*it) = color;
                     (*it) = cpixel;
                 }
 
@@ -220,17 +214,14 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            Argb32 format;
-            const std::size_t width = 48;
-            const std::size_t height = 10000;
-
             for(int n = 0; n < 10; ++n)
             {
-                Image fromImage(format, width, 10000);
+                Argb32 format;
+                Image fromImage(format, width, height);
                 ConstPixelView fromView(fromImage);
                 ConstPixelView::Iterator from = fromView.begin();
 
-                Image image(format, width, 10000);
+                Image image(format, width, height);
                 PixelView imageView(image);
                 PixelView::PixelIterator it = imageView.begin();
                 PixelView::PixelIterator end = imageView.end();
@@ -257,16 +248,13 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
             
-            const std::size_t width = 48;
-            const std::size_t height = 10000;
-
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Image fromImage(width, 10000);
+                Argb32Image fromImage(width, height);
                 Argb32PixelView fromView(fromImage);
                 Argb32PixelView::PixelIterator from = fromView.begin();
 
-                Argb32Image image(width, 10000);
+                Argb32Image image(width, height);
                 Argb32PixelView imageView(image);
                 Argb32PixelView::PixelIterator it = imageView.begin();
                 Argb32PixelView::PixelIterator end = imageView.end();
@@ -293,17 +281,14 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            Argb32 format;
-            const std::size_t width = 48;
-            const std::size_t height = 10000;
-
             for(int n = 0; n < 10; ++n)
             {
-                Image fromImage(format, width, 10000);
+                Argb32 format;
+                Image fromImage(format, width, height);
                 ConstPixelView fromView(fromImage);
                 ConstPixelView::Iterator from = fromView.begin();
 
-                Image image(format, width, 10000);
+                Image image(format, width, height);
                 PixelView imageView(image);
                 PixelView::PixelIterator it = imageView.begin();
                 PixelView::PixelIterator end = imageView.end();
@@ -311,7 +296,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Pt::System::Clock clock;
                 clock.start();
 
-                Argb32Color colors[48];
+                Argb32Color colors[width];
 
                 for( ; it != end; it += image.width(), from += fromImage.width() )
                 {
@@ -333,16 +318,13 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            const std::size_t width = 48;
-            const std::size_t height = 10000;
-
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Image fromImage(width, 10000);
+                Argb32Image fromImage(width, height);
                 Argb32PixelView fromView(fromImage);
                 Argb32PixelView::PixelIterator from = fromView.begin();
 
-                Argb32Image image(width, 10000);
+                Argb32Image image(width, height);
                 Argb32PixelView imageView(image);
                 Argb32PixelView::PixelIterator it = imageView.begin();
                 Argb32PixelView::PixelIterator end = imageView.end();

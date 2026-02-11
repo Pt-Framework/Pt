@@ -33,6 +33,20 @@
 #include <Pt/Gfx/Rgb32.h>
 #include <cassert>
 
+//
+// TODO:
+// Color template for 8bit und 16-bit pro kanal
+// Color Color8 Color32
+// 
+// TODO:
+// if a PixelView is assigned to a BasicImage<F>, then we can check if F == image.format()
+// and memcpy if equal, or convert if neccessary:
+// BasicImage<F> bi;
+// Image i;
+// PixelView v(i);
+// bi = v;
+//
+
 namespace Pt {
 
 namespace Gfx {

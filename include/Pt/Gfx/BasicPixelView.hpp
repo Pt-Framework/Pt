@@ -96,30 +96,6 @@ inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<F
 : BasicConstView<FormatT>(image)
 { }
 
-///////////////////////////////////////////////////////////////////////
-// BasicColorView
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT, typename ColorT>
-inline BasicColorView<FormatT, ColorT>::BasicColorView(BasicImage<FormatT>& image)
-: BasicConstView<FormatT>(image)
-{ }
-
-///////////////////////////////////////////////////////////////////////
-// BasicConstColorView
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT, typename ColorT>
-inline BasicConstColorView<FormatT, ColorT>::BasicConstColorView(const BasicImage<FormatT>& image)
-: BasicConstView<FormatT>(image)
-{ }
-
-
-template <typename FormatT, typename ColorT>
-inline BasicConstColorView<FormatT, ColorT>::BasicConstColorView(const BasicConstImage<FormatT>& image)
-: BasicConstView<FormatT>(image)
-{ }
-
 } // namespace
 
 } // namespace
