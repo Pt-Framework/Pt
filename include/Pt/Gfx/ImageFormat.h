@@ -179,6 +179,6 @@ inline std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::s
 
 } // namespace
 
-#endif
-
 #include <Pt/Gfx/Pixel.h>
+
+#endif
