@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Gfx {
 
-// 
+//
 // TODO:
 // Color template for 8bit und 16-bit pro kanal
 // Color Color8 Color32
@@ -207,6 +207,16 @@ class PixelBase
             return this->onGetArgb32Color();
         }
 
+        void getColors(Color* colors, std::size_t length) const
+        { 
+            onGetColors(colors, length); 
+        }
+
+        void getColors(Argb32Color* colors, std::size_t length) const
+        { 
+            onGetColors(colors, length); 
+        }
+
         void assign(const Color& color)
         { 
             onSetColor(color);
@@ -217,6 +227,16 @@ class PixelBase
             onSetColor(color);
         }
         
+        void assign(const Argb32Color* colors, std::size_t length)
+        { 
+            onAssign(colors, length); 
+        }
+
+        void assign(const Color* colors, std::size_t length)
+        { 
+            onAssign(colors, length); 
+        }
+
         bool assign(const ConstPixelBase& p, std::size_t length)
         {
             return onAssignPixels(p, length);
@@ -237,9 +257,24 @@ class PixelBase
         virtual Argb32Color onGetArgb32Color() const
         { return Argb32Color(); }
 
+        virtual void onGetColors(Color* colors, std::size_t length) const
+        { }
+
+        virtual void onGetColors(Argb32Color* colors, std::size_t length) const
+        { }
+
         virtual void onSetColor(const Color& color) = 0;
 
         virtual void onSetColor(const Argb32Color& color)
+        { }
+
+        virtual void onAssign(const Argb32Color* colors, std::size_t length)
+        { }
+
+        virtual void onAssign(const Color* colors, std::size_t length)
+        { }
+
+        virtual void onAssign(Argb32Color* colors, std::size_t length)
         { }
 
         virtual void onFillColor(std::size_t n, const Color& color) = 0;
@@ -294,6 +329,16 @@ class ConstPixelBase
             return this->onGetArgb32Color();
         }
 
+        void getColors(Color* colors, std::size_t length) const
+        { 
+            onGetColors(colors, length); 
+        }
+
+        void getColors(Argb32Color* colors, std::size_t length) const
+        { 
+            onGetColors(colors, length); 
+        }
+
         bool copy(PixelBase& p, std::size_t length) const
         {
             return onCopyPixels(p, length);
@@ -308,6 +353,12 @@ class ConstPixelBase
 
         virtual Argb32Color onGetArgb32Color() const
         { return Argb32Color(); }
+
+        virtual void onGetColors(Color* colors, std::size_t length) const
+        { }
+
+        virtual void onGetColors(Argb32Color* colors, std::size_t length) const
+        { }
 
         virtual bool onCopyPixels(PixelBase& p, std::size_t length) const
         { return false; }
@@ -442,6 +493,26 @@ class Pixel
             return _pixel->toArgb32Color();
         }
 
+        void getColors(Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        void getColors(Argb32Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        void assign(const Argb32Color* colors, std::size_t length)
+        { 
+            _pixel->assign(colors, length); 
+        }
+
+        void assign(const Color* colors, std::size_t length)
+        { 
+            _pixel->assign(colors, length); 
+        }
+
         void assign(const ConstPixel& p, std::size_t length);
 
         void fill(std::size_t n, const Color& color)
@@ -537,6 +608,16 @@ class ConstPixel
         Argb32Color toArgb32Color() const
         {
             return _pixel->toArgb32Color();
+        }
+
+        void getColors(Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        void getColors(Argb32Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
         }
 
         bool equals(const ConstPixel& p) const

@@ -59,8 +59,10 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
             registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
-            registerMethod("BenchmarkC_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
-            registerMethod("BenchmarkD_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
+            registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
+            registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
+            registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
+            registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
         }
 
         void Pixel()
@@ -138,10 +140,13 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
+            Argb32 format;
+            const std::size_t width = 48;
+            const std::size_t height = 10000;
+
             for(int n = 0; n < 10; ++n)
             {
-                Argb32 format;
-                Image image( format, 1000, 1000 );
+                Image image(format, width, height);
                 
                 PixelView pixelView(image);
                 PixelView::PixelIterator it = pixelView.begin();
@@ -165,7 +170,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC: " << best << std::endl;
+            std::clog << "GENERIC: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkRaw()
@@ -173,10 +178,12 @@ class Argb32Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+            const std::size_t width = 48;
+            const std::size_t height = 10000;
 
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Image image(1000, 1000);
+                Argb32Image image(width, 10000);
                 Argb32PixelView imageView(image);
                 
                 Argb32PixelView::PixelIterator it = imageView.begin();
@@ -204,7 +211,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "ARGB32: " << best << std::endl;
+            std::clog << "ARGB32: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkCopyPixels()
@@ -214,15 +221,16 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
             Argb32 format;
-            Pt::Gfx::Color color(100, 100, 100);
+            const std::size_t width = 48;
+            const std::size_t height = 10000;
 
             for(int n = 0; n < 10; ++n)
             {
-                Image fromImage(format, 48, 10000);
+                Image fromImage(format, width, 10000);
                 ConstPixelView fromView(fromImage);
                 ConstPixelView::Iterator from = fromView.begin();
 
-                Image image(format, 48, 10000);
+                Image image(format, width, 10000);
                 PixelView imageView(image);
                 PixelView::PixelIterator it = imageView.begin();
                 PixelView::PixelIterator end = imageView.end();
@@ -240,7 +248,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC: " << best << std::endl;
+            std::clog << "GENERIC: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkCopyPixelsRaw()
@@ -248,16 +256,17 @@ class Argb32Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
-
-            Pt::Gfx::Color color(100, 100, 100);
+            
+            const std::size_t width = 48;
+            const std::size_t height = 10000;
 
             for(int n = 0; n < 10; ++n)
             {
-                Argb32Image fromImage(48, 10000);
+                Argb32Image fromImage(width, 10000);
                 Argb32PixelView fromView(fromImage);
                 Argb32PixelView::PixelIterator from = fromView.begin();
 
-                Argb32Image image(48, 10000);
+                Argb32Image image(width, 10000);
                 Argb32PixelView imageView(image);
                 Argb32PixelView::PixelIterator it = imageView.begin();
                 Argb32PixelView::PixelIterator end = imageView.end();
@@ -275,8 +284,85 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "ARGB32: " << best << std::endl;
+            std::clog << "ARGB32: " << (width * height) / double(best) << std::endl;
         }
+
+        void BenchmarkCopyColors()
+        {
+            using namespace Pt::Gfx;
+           
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+
+            Argb32 format;
+            const std::size_t width = 48;
+            const std::size_t height = 10000;
+
+            for(int n = 0; n < 10; ++n)
+            {
+                Image fromImage(format, width, 10000);
+                ConstPixelView fromView(fromImage);
+                ConstPixelView::Iterator from = fromView.begin();
+
+                Image image(format, width, 10000);
+                PixelView imageView(image);
+                PixelView::PixelIterator it = imageView.begin();
+                PixelView::PixelIterator end = imageView.end();
+
+                Pt::System::Clock clock;
+                clock.start();
+
+                Argb32Color colors[48];
+
+                for( ; it != end; it += image.width(), from += fromImage.width() )
+                {
+                    it->getColors(colors, width);
+                    it->assign(colors, width);
+                }
+
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
+            }
+
+            std::clog << "GENERIC: " << (width * height) / double(best) << std::endl;
+        }
+
+        void BenchmarkCopyColorsRaw()
+        {
+            using namespace Pt::Gfx;
+           
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+
+            const std::size_t width = 48;
+            const std::size_t height = 10000;
+
+            for(int n = 0; n < 10; ++n)
+            {
+                Argb32Image fromImage(width, 10000);
+                Argb32PixelView fromView(fromImage);
+                Argb32PixelView::PixelIterator from = fromView.begin();
+
+                Argb32Image image(width, 10000);
+                Argb32PixelView imageView(image);
+                Argb32PixelView::PixelIterator it = imageView.begin();
+                Argb32PixelView::PixelIterator end = imageView.end();
+
+                Pt::System::Clock clock;
+                clock.start();
+
+                for( ; it != end; it += image.width(), from += fromImage.width() )
+                {
+                    it->copy( *from, image.width() );
+                }
+
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
+            }
+
+            std::clog << "ARGB32: " << (width * height) / double(best) << std::endl;
+        }
+
 };
 
 Pt::Unit::RegisterTest<Argb32Test> register_Argb32Test;

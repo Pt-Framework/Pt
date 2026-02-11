@@ -403,6 +403,12 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static Color getColor(const Pt::uint8_t* p);
 
+        static Argb32Color getArgb32Color(const Pt::uint8_t* p);
+
+        static void getColors(const Pt::uint8_t* p, Color* colors, std::size_t n);
+
+        static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
+
         //
         // SourceCopy
         //
@@ -410,11 +416,13 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static void sourceCopy(Pt::uint8_t* to, const Color& c);
 
-        static void sourceCopy(Pt::uint8_t* to, size_t length, const Color& c);
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Color& c);
 
-        static void sourceCopy(Pt::uint8_t* to, size_t length, const Pt::uint8_t* from);
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length);
+        static void sourceCopy(Pt::uint8_t* to, const Color* colors, std::size_t length);
+
+        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
         static void sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
                                const Pt::uint8_t* from, Pt::ssize_t fromStride,
@@ -427,11 +435,11 @@ class PT_GFX_API Argb32 final : public ImageFormat
         
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from);
 
-        static void sourceOver(Pt::uint8_t* to, size_t length, const Color& c);
+        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Color& c);
 
-        static void sourceOver(Pt::uint8_t* to, size_t length, const Pt::uint8_t* from);
+        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length);
+        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
         static void sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
                                const Pt::uint8_t* from, Pt::ssize_t fromStride,
@@ -502,6 +510,28 @@ inline Color Argb32::getColor(const Pt::uint8_t* p)
     return Color(a, r, g, b);
 }
 
+
+inline Argb32Color Argb32::getArgb32Color(const Pt::uint8_t* p)
+{
+    return Argb32Color(p);
+}
+
+
+inline void Argb32::getColors(const Pt::uint8_t* p, Color* colors, std::size_t n)
+{
+    for(int i = 0; i < n; ++i)
+    {
+        colors[i] = getColor(p);
+        p += PixelWidth;
+    }
+}
+
+
+inline void Argb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n)
+{
+    std::memcpy(colors, p, n * PixelWidth);
+}
+
 //
 // Implementation SourceCopy
 //
@@ -523,33 +553,43 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color& c)
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, size_t length, const Color& c)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Color& c)
 {
-    const Pt::uint32_t fromARGB = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-                                  ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                                  ( Pt::uint32_t(c.green() & 0xFF00)       ) |
-                                  ( Pt::uint32_t(c.blue ()         ) >>  8 );
+    const Pt::uint32_t value = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
+                               ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
+                               ( Pt::uint32_t(c.green() & 0xFF00)       ) |
+                               ( Pt::uint32_t(c.blue ()         ) >>  8 );
             
     //Argb32Ops::pixelOps_SourceCopy(to, fromARGB, length);
 
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
-    for(size_t i = 0; i < length; ++i) 
-        *dst++ = fromARGB;
+    for(std::size_t i = 0; i < length; ++i) 
+        *dst++ = value;
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, size_t length, const Pt::uint8_t* from)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
 {
     //Argb32Ops::pixelOps_SourceCopy(to, from, length);
 
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
     const Pt::uint32_t fromARGB = *reinterpret_cast<const Pt::uint32_t*>(from);
-    for(size_t i = 0; i < length; ++i) 
+    for(std::size_t i = 0; i < length; ++i) 
         *dst++ = fromARGB;
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color* colors, std::size_t length)
+{          
+    for(int n = 0; n < length; ++n)
+    {
+        Argb32::sourceCopy( to, 1, colors[n] );
+        to += Argb32::PixelWidth;
+    }
+}
+
+
+inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
 {
     memcpy(to, from, length * 4);
 }
@@ -597,7 +637,7 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
 }
 
 
-inline void Argb32::sourceOver(Pt::uint8_t* to, size_t length, const Color& c)
+inline void Argb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Color& c)
 {
     const Pt::uint32_t blend = c.alpha() >> 8;
     const Pt::uint32_t bfcI  = 255 - blend;
@@ -610,7 +650,7 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, size_t length, const Color& c)
 
     Pt::uint8_t* dst = to;
 
-    for(size_t i = 0; i < length; ++i) {
+    for(std::size_t i = 0; i < length; ++i) {
         dst[0] = (srcB + bfcI * dst[0]) >> 8;
         dst[1] = (srcG + bfcI * dst[1]) >> 8;
         dst[2] = (srcR + bfcI * dst[2]) >> 8;
@@ -620,7 +660,7 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, size_t length, const Color& c)
 }
 
 
-inline void Argb32::sourceOver(Pt::uint8_t* to, size_t length, const Pt::uint8_t* from)
+inline void Argb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
 {
     //Argb32Ops::pixelOps_SourceOver( to, from, length);
 
@@ -636,7 +676,7 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, size_t length, const Pt::uint8_t
     Pt::uint8_t* dst = to;
     Pt::uint32_t bfcI = blendInv;
 
-    for(size_t i = 0; i < length; ++i) {
+    for(std::size_t i = 0; i < length; ++i) {
         dst[0] = (srcB + bfcI * dst[0]) >> 8;
         dst[1] = (srcG + bfcI * dst[1]) >> 8;
         dst[2] = (srcR + bfcI * dst[2]) >> 8;
@@ -646,12 +686,12 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, size_t length, const Pt::uint8_t
 }
 
 
-inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length)
+inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
 {
     const Pt::uint8_t* src = from;
           Pt::uint8_t* dst = to;
 
-    for(size_t i = 0; i < length; ++i) 
+    for(std::size_t i = 0; i < length; ++i) 
     {
         const Pt::uint32_t alphaSrc = src[3];
         const Pt::uint32_t alphaInv = 255 - alphaSrc;
