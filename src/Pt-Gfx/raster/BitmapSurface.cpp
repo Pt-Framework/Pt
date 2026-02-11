@@ -72,10 +72,11 @@ void BitmapSurface::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
     {
-        Gfx::ConstPixelView from(image);
-        Gfx::PixelView to(_image);
-
         _image.reset( image.width(), image.height() );
+        
+        Gfx::ConstColorView<Argb32Color> from(image);
+        Gfx::PixelView to(_image);
+        
         Pt::Gfx::copy( from.begin(), from.end(), to.begin() );
     }
     else
@@ -225,7 +226,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     Gfx::PixelView::PixelIterator toIter = toView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
 
     switch( paint.compositionMode() )
     {

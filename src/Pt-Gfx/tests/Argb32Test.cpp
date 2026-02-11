@@ -123,30 +123,15 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
 
-            
-            
             Image i(Argb32(), 2, 2);
-            PixelView iv(i);
+            PixelView pixelView(i);
             Argb32Image a(2, 2);
-            Argb32PixelView av(a);
-            
+            Argb32PixelView argb32View(a);
 
-            Pt::Gfx::ConstColorView2<Pt::Gfx::Argb32Color>  colorView(i);
-
-            Pt::Gfx::copy( colorView.begin(), colorView.end(), av.begin() );
-            
-            std::transform(iv.begin(),iv.end(), av.begin(), 
-                           [](const PixelView::Pixel& p1)
-                           { return p1.color(); } );
-
-            Argb32PixelView::Iterator to = av.begin();
-            for(PixelView::Iterator it = iv.begin(); it != iv.end(); ++it)
-            {
-              *to = it->color();
-              ++to; 
-            }
+            //Pt::Gfx::ColorView<Pt::Gfx::Argb32Color> colorView(i);
+            Pt::Gfx::copy( pixelView.begin(), pixelView.end(), argb32View.begin() );
         }
-
+        
         void Benchmark()
         {
             using namespace Pt::Gfx;
@@ -159,12 +144,11 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Image image( format, 1000, 1000 );
                 
                 PixelView pixelView(image);
-                ColorView colorView(image);
-
                 PixelView::PixelIterator it = pixelView.begin();
                 PixelView::PixelIterator end = pixelView.end();
-            
-                ConstPixelView::ConstPixel fromPixel( *pixelView.cbegin() );
+
+                ConstColorView<Argb32Color>  colorView(image);
+                auto from = colorView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
@@ -173,11 +157,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 for( ; it != end; ++it)
                 {
-                    //color = it->color();
-                    //color.setRed(99);
-                    //
-                    //(*it) = color;
-                    (*it) = fromPixel;
+                    (*it) = *from;
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -240,7 +220,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             {
                 Image fromImage(format, 48, 10000);
                 ConstPixelView fromView(fromImage);
-                ConstPixelView::ConstPixelIterator from = fromView.begin();
+                ConstPixelView::Iterator from = fromView.begin();
 
                 Image image(format, 48, 10000);
                 PixelView imageView(image);

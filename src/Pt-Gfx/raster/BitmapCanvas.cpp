@@ -262,8 +262,9 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
                                     brush.texture().width(), brush.texture().height() );
                 _brushView.reset(_brushBuffer);
 
-                Gfx::ConstPixelView textureView( brush.texture() );
+                Gfx::ConstColorView<Argb32Color> textureView(brush.texture() );
                 Gfx::PixelView brushView(_brushBuffer);
+
                 Gfx::copy( textureView.begin(), textureView.end(), brushView.begin() );
             }
             else
@@ -4166,7 +4167,7 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
     Gfx::PixelView::PixelIterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
 
     switch(_compositionMode)
     {

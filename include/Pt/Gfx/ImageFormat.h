@@ -38,12 +38,6 @@ namespace Pt {
 
 namespace Gfx {
 
-//
-// TODO:
-// return Location& in onAdvance()
-// 
-// TODO:
-// maintain x and y pos in Pixel/ConstPixel so PixelBase can be smaller
 // 
 // TODO:
 // Color template for 8bit und 16-bit pro kanal
@@ -56,8 +50,6 @@ namespace Gfx {
 // Image i;
 // PixelView v(i);
 // bi = v;
-// 
-// How could copy(iter, iter, iter) from image to basic image work?
 //
 
 class Location
@@ -67,18 +59,21 @@ class Location
         : _base(0)
         , _x(0)
         , _y(0)
-        {}
+        { }
 
         Location(Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
         : _base(base)
         , _x(x)
         , _y(y)
-        {}
+        { }
 
         ~Location()
-        {}
+        { }
 
-        Pt::uint8_t* base() const
+        Pt::uint8_t* base()
+        { return _base; }
+
+        const Pt::uint8_t* base() const
         { return _base; }
 
         void setBase(Pt::uint8_t* base)
@@ -103,9 +98,64 @@ class Location
         }
 
     private:
-        Pt::uint8_t*  _base;
-        Pt::ssize_t   _x;
-        Pt::ssize_t   _y;
+        Pt::uint8_t* _base;
+        Pt::ssize_t  _x;
+        Pt::ssize_t  _y;
+};
+
+
+class ConstLocation
+{
+    public:
+        ConstLocation()
+        : _base(0)
+        , _x(0)
+        , _y(0)
+        { }
+
+        ConstLocation(const Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
+        : _base(base)
+        , _x(x)
+        , _y(y)
+        { }
+
+        ConstLocation(const Location& loc)
+        : _base( loc.base() )
+        , _x( loc.xpos() )
+        , _y( loc.ypos() )
+        { }
+
+        ~ConstLocation()
+        { }
+
+        const Pt::uint8_t* base() const
+        { return _base; }
+
+        void setBase(const Pt::uint8_t* base)
+        {
+            _base = base;
+        }
+
+        Pt::ssize_t xpos() const
+        { return _x; }
+
+        void setXPos(Pt::ssize_t xpos)
+        {
+            _x = xpos;
+        }
+
+        Pt::ssize_t ypos() const
+        { return _y; }
+
+        void setYPos(Pt::ssize_t ypos)
+        {
+            _y = ypos;
+        }
+
+    private:
+        const Pt::uint8_t* _base;
+        Pt::ssize_t        _x;
+        Pt::ssize_t        _y;
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -122,40 +172,40 @@ class PixelBase
     public:
         PixelBase(Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
         : _base(base)
-        , _x(x)
-        , _y(y)
         { }
 
         virtual ~PixelBase()
         { }
 
-        Pt::uint8_t* base() const
+        Pt::uint8_t* base()
         { return _base; }
 
-        Pt::ssize_t xpos() const
-        { return _x; }
+        const Pt::uint8_t* base() const
+        { return _base; }
 
-        Pt::ssize_t ypos() const
-        { return _y; }
-
-        Pt::uint8_t* advance()
+        Location& advance()
         { 
             Location& loc = onAdvance();
             _base = loc.base();
-            _x = loc.xpos();
-            _y = loc.ypos();
-
-            return _base;
+            return loc;
         }
 
-        Pt::uint8_t* advance(Pt::ssize_t n)
+        Location& advance(Pt::ssize_t n)
         { 
-            _base = onAdvance(_x, _y, n); 
-            return _base;
+            Location& loc = onAdvance(n); 
+            _base = loc.base();
+            return loc;
         }
 
-        template <typename ColorT>
-        ColorT getColor() const;
+        Color toColor() const
+        {
+            return this->onGetColor();
+        }
+
+        Argb32Color toArgb32Color() const
+        {
+            return this->onGetArgb32Color();
+        }
 
         void assign(const Color& color)
         { 
@@ -180,8 +230,7 @@ class PixelBase
     protected:
         virtual Location& onAdvance() = 0;
 
-        virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                                       Pt::ssize_t n) = 0;
+        virtual Location& onAdvance(Pt::ssize_t n) = 0;
 
         virtual Color onGetColor() const = 0;
 
@@ -200,23 +249,7 @@ class PixelBase
 
     private:
         Pt::uint8_t* _base;
-        Pt::ssize_t  _x;
-        Pt::ssize_t  _y;
 };
-
-
-template <>
-inline Color PixelBase::getColor<Color>() const
-{
-    return this->onGetColor();
-}
-
-
-template <>
-inline Argb32Color PixelBase::getColor<Argb32Color>() const
-{
-    return this->onGetArgb32Color();
-}
 
 ///////////////////////////////////////////////////////////////////////
 // ConstPixelBase
@@ -229,8 +262,6 @@ class ConstPixelBase
     public:
         ConstPixelBase(const Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
         : _base(base)
-        , _x(x)
-        , _y(y)
         { }
 
         virtual ~ConstPixelBase()
@@ -239,26 +270,29 @@ class ConstPixelBase
         const Pt::uint8_t* base() const
         { return _base; }
 
-        Pt::ssize_t xpos() const
-        { return _x; }
-
-        Pt::ssize_t ypos() const
-        { return _y; }
-
-        const Pt::uint8_t* advance()
+        const ConstLocation& advance()
         { 
-            _base =  onAdvance(_x, _y);
-            return _base;
+            const ConstLocation& loc = onAdvance();
+            _base = loc.base();
+            return loc;
         }
 
-        const Pt::uint8_t* advance(Pt::ssize_t n)
+        const ConstLocation& advance(Pt::ssize_t n)
         { 
-            _base = onAdvance(_x, _y, n); 
-            return _base;
+            const ConstLocation& loc = onAdvance(n); 
+            _base = loc.base();
+            return loc;
         }
 
-        template <typename ColorT>
-        ColorT getColor() const;
+        Color toColor() const
+        {
+            return this->onGetColor();
+        }
+
+        Argb32Color toArgb32Color() const
+        {
+            return this->onGetArgb32Color();
+        }
 
         bool copy(PixelBase& p, std::size_t length) const
         {
@@ -266,10 +300,9 @@ class ConstPixelBase
         }
 
     protected:
-        virtual const Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos) = 0;
+        virtual const ConstLocation& onAdvance() = 0;
 
-        virtual const Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                                             Pt::ssize_t n) = 0;
+        virtual const ConstLocation& onAdvance(Pt::ssize_t n) = 0;
 
         virtual Color onGetColor() const = 0;
 
@@ -281,23 +314,7 @@ class ConstPixelBase
 
     private:
         const Pt::uint8_t*   _base;
-        Pt::ssize_t          _x;
-        Pt::ssize_t          _y;
 };
-
-
-template <>
-inline Color ConstPixelBase::getColor<Color>() const
-{
-    return this->onGetColor();
-}
-
-
-template <>
-inline Argb32Color ConstPixelBase::getColor<Argb32Color>() const
-{
-    return this->onGetArgb32Color();
-}
 
 ///////////////////////////////////////////////////////////////////////
 // PixelStorage
@@ -355,22 +372,13 @@ class PixelStorage
 ///////////////////////////////////////////////////////////////////////
 
 class ImageFormat;
-
-template <typename ColorT>
 class Pixel;
-
-template <typename ColorT>
 class ConstPixel;
 
 
-template <typename ColorT>
 class Pixel
 {
-    template <typename C>
     friend class ConstPixel;
-
-    public:
-        typedef ColorT ColorType;
 
     public:
         Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -382,6 +390,14 @@ class Pixel
             if(_pixel)
                 _pixel->~PixelBase();
         }
+
+        Pixel& operator=(const Argb32Color& color);
+
+        Pixel& operator=(const Color& color);
+
+        Pixel& operator=(const Pixel& p);
+
+        Pixel& operator=(const ConstPixel& p);
 
         void reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
@@ -397,39 +413,43 @@ class Pixel
         { return _pixel->base(); }
 
         Pt::ssize_t xpos() const
-        { return _pixel->xpos(); }
+        { return _x; }
 
         Pt::ssize_t ypos() const
-        { return _pixel->ypos(); }
+        { return _y; }
 
         void advance()
         {
-            _pixel->advance();
+            Location& loc =_pixel->advance();
+            _x = loc.xpos();
+            _y = loc.ypos();
         }
 
         void advance(Pt::ssize_t n)
         {
-            _pixel->advance(n);
+            Location& loc =_pixel->advance(n);
+            _x = loc.xpos();
+            _y = loc.ypos();
         }
 
-        ColorT color() const;
+        Color toColor() const
+        {
+            return _pixel->toColor();
+        }
 
-        Pixel& operator=(const Argb32Color& color);
+        Argb32Color toArgb32Color() const
+        {
+            return _pixel->toArgb32Color();
+        }
 
-        Pixel& operator=(const Color& color);
+        void assign(const ConstPixel& p, std::size_t length);
 
-        Pixel& operator=(const Pixel& p);
-
-        Pixel& operator=(const ConstPixel<ColorT>& p);
-
-        void fill(std::size_t n, const ColorT& color)
+        void fill(std::size_t n, const Color& color)
         {   
             _pixel->fill(n, color);
         }
 
-        void assign(const ConstPixel<ColorT>& p, std::size_t length);
-
-        bool equals(const ConstPixel<ColorT>& p) const;
+        bool equals(const ConstPixel& p) const;
 
         bool equals(const Pixel& p) const
         {
@@ -438,24 +458,33 @@ class Pixel
 
     private:
         ViewBase*           _view;
+        Pt::ssize_t         _x;
+        Pt::ssize_t         _y;
         const ImageFormat*  _format;
         PixelStorage        _storage;
         PixelBase*          _pixel;
         Pt::uint8_t*        _data;
 };
 
+
+inline Color toColor(const Pixel& p, const Color* tag = 0)
+{
+  return p.toColor();
+}
+
+
+inline Argb32Color toColor(const Pixel& p, const Argb32Color* tag = 0)
+{
+  return p.toArgb32Color();
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
-template <typename ColorT>
 class ConstPixel
 {
-    template <typename C>
     friend class Pixel;
-
-    public:
-        typedef ColorT ColorType;
 
     public:
         ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -464,7 +493,7 @@ class ConstPixel
 
         ConstPixel(const ConstPixel& p);
 
-        explicit ConstPixel(const Pixel<ColorT>& p);
+        explicit ConstPixel(const Pixel& p);
 
         ~ConstPixel()
         {
@@ -485,10 +514,10 @@ class ConstPixel
         { return _pixel->base(); }
         
         Pt::ssize_t xpos() const
-        { return _pixel->xpos(); }
+        { return _x; }
 
         Pt::ssize_t ypos() const
-        { return _pixel->ypos(); }
+        { return _y; }
         
         void advance()
         {
@@ -500,22 +529,30 @@ class ConstPixel
             _pixel->advance(n);
         }
 
-        ColorT color() const;
+        Color toColor() const
+        {
+            return _pixel->toColor();
+        }
 
-        void copy(Pixel<ColorT>& p, std::size_t length) const;
+        Argb32Color toArgb32Color() const
+        {
+            return _pixel->toArgb32Color();
+        }
 
         bool equals(const ConstPixel& p) const
         {
             return _pixel->base() == p.base();
         }
 
-        bool equals(const Pixel<ColorT>& p) const
+        bool equals(const Pixel& p) const
         { 
             return _pixel->base() == p.base();
         }
 
     private:
         const ViewBase*     _view;
+        Pt::ssize_t         _x;
+        Pt::ssize_t         _y;
         const ImageFormat*  _format;
         PixelStorage        _storage;
         ConstPixelBase*     _pixel;
@@ -523,17 +560,15 @@ class ConstPixel
 };
 
 
-template <typename PixelT> 
-Color toColor(const ConstPixel<Color>& p)
+inline Color toColor(const ConstPixel& p, const Color* tag = 0)
 {
-  return p.color();
+  return p.toColor();
 }
 
 
-template <typename PixelT> 
-Argb32Color toColor(const ConstPixel<Argb32Color>& p)
+inline Argb32Color toColor(const ConstPixel& p, const Argb32Color* tag = 0)
 {
-  return p.color();
+  return p.toArgb32Color();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -552,6 +587,11 @@ class ImageFormat
   friend ImageFormat* clone(const ImageFormat& format);
 
   friend void release(const ImageFormat* format);
+
+    public:
+        typedef Pixel Pixel;
+        typedef ConstPixel ConstPixel;
+        typedef Color Color;
 
     public:
         PT_GFX_API static const ImageFormat& rgb16();
@@ -670,9 +710,10 @@ inline std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::s
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
-template <typename ColorT>
-inline Pixel<ColorT>::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline Pixel::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
+, _x(x)
+, _y(y)
 , _format( &view.format() )
 , _pixel(0)
 , _data( view.data() )
@@ -681,9 +722,10 @@ inline Pixel<ColorT>::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssi
 }
 
 
-template <typename ColorT>
-inline Pixel<ColorT>::Pixel(const Pixel& p)
+inline Pixel::Pixel(const Pixel& p)
 : _view(p._view)
+, _x(p._x)
+, _y(p._y)
 , _format(p._format)
 , _pixel(0)
 , _data(p._data)
@@ -695,56 +737,75 @@ inline Pixel<ColorT>::Pixel(const Pixel& p)
 }
 
 
-template <typename ColorT>
-inline void Pixel<ColorT>::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void Pixel::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
         _pixel->~PixelBase();
-        _data = 0;
-        _view = 0;
-        _format = 0;
         _pixel = 0;
     }
 
     _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
     _data = view.data();
     _view = &view;
+    _x = x;
+    _y = y;
     _format = &view.format();
 }
 
 
-template <typename ColorT>
-inline void Pixel<ColorT>::reset(const Pixel& p)
+inline void Pixel::reset(const Pixel& p)
 {
     if(_pixel)
     {
         _pixel->~PixelBase();
+        
+        _pixel = 0;
         _data = 0;
         _view = 0;
+        _x = 0;
+        _y = 0;
         _format = 0;
-        _pixel = 0;
     }
 
-    if(p._pixel)
-    {
-        _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
-        _data = p._data;
-        _view = p._view;
-        _format = p._format;
-    }
+    _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
+    _data = p._data;
+    _view = p._view;
+    _x = p._x;
+    _y = p._y;
+    _format = p._format;
 }
 
 
-template <typename ColorT>
-inline ColorT Pixel<ColorT>::color() const
-{ 
-    return _pixel->getColor<ColorT>();
+inline Pixel& Pixel::operator=(const Argb32Color& color)
+{
+    _pixel->assign(color);
+    return *this;
 }
 
 
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p, std::size_t length)
+inline Pixel& Pixel::operator=(const Color& color)
+{
+    _pixel->assign(color);
+    return *this;
+}
+
+
+inline Pixel& Pixel::operator=(const Pixel& p)
+{
+    _pixel->assign( p.toColor() );
+    return *this;
+}
+
+
+inline Pixel& Pixel::operator=(const ConstPixel& p)
+{
+    _pixel->assign( p.toColor() );
+    return *this;
+}
+
+
+inline void Pixel::assign(const ConstPixel& p, std::size_t length)
 {
     bool isCompatible = _pixel->assign(*p._pixel, length);
     if( isCompatible )
@@ -754,8 +815,13 @@ inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p, std::size_t lengt
     if( isCompatible )
         return;
 
+    //
+    // TODO: convert 16 ConstPixel to color buffer
+    //       convert buffer to Pixel
+    //
+
     Pixel to = *this;
-    ConstPixel<ColorT> from = p;
+    ConstPixel from = p;
     for(std::size_t n = 0; n < length; ++n)
     {
         to = from;
@@ -765,51 +831,19 @@ inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p, std::size_t lengt
 }
 
 
-template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Argb32Color& color)
-{
-    _pixel->assign(color);
-    return *this;
-}
-
-
-template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Color& color)
-{
-    _pixel->assign(color);
-    return *this;
-}
-
-
-template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel& p)
-{
-    _pixel->assign( p.color() );
-    return *this;
-}
-
-
-template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<ColorT>& p)
-{
-    _pixel->assign( p.color() );
-    return *this;
-}
-
-
-template <typename ColorT>
-inline bool Pixel<ColorT>::equals(const ConstPixel<ColorT>& p) const
+inline bool Pixel::equals(const ConstPixel& p) const
 { 
-    return _pixel->base() == p._base();
+    return _pixel->base() == p.base();
 }
 
 ///////////////////////////////////////////////////////////////////////
 // ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline ConstPixel::ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
+, _x(x)
+, _y(y)
 , _format( &view.format() )
 , _pixel(0)
 , _data( view.data() )
@@ -818,9 +852,10 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, P
 }
 
 
-template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline ConstPixel::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
+, _x(x)
+, _y(y)
 , _format( &view.format() )
 , _pixel(0)
 , _data( view.data() )
@@ -829,9 +864,10 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, Pt::ss
 }
 
 
-template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const ConstPixel& p)
+inline ConstPixel::ConstPixel(const ConstPixel& p)
 : _view(p._view)
+, _x(p._x)
+, _y(p._y)
 , _format(p._format)
 , _pixel(0)
 , _data(p._data)
@@ -843,9 +879,10 @@ inline ConstPixel<ColorT>::ConstPixel(const ConstPixel& p)
 }
 
 
-template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const Pixel<ColorT>& p)
+inline ConstPixel::ConstPixel(const Pixel& p)
 : _view(p._view)
+, _x(p._x)
+, _y(p._y)
 , _format(p._format)
 , _pixel(0)
 , _data(p._data)
@@ -854,27 +891,24 @@ inline ConstPixel<ColorT>::ConstPixel(const Pixel<ColorT>& p)
 }
 
 
-template <typename ColorT>
-inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void ConstPixel::reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
         _pixel->~ConstPixelBase();
-        _data = 0;
-        _view = 0;
-        _format = 0;
         _pixel = 0;
     }
 
     _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
     _data = view.data();
     _view = &view;
+    _x = x;
+    _y = y;
     _format = &view.format();
 }
 
 
-template <typename ColorT>
-inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
+inline void ConstPixel::reset(const ConstPixel& p)
 {
     if(_pixel)
     {
@@ -883,6 +917,8 @@ inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
         _pixel = 0;
         _data = 0;
         _view = 0;
+        _x = 0;
+        _y = 0;
         _format = 0;
     }
 
@@ -891,36 +927,9 @@ inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
         _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
         _data = p._data;
         _view = p._view;
+        _x = p._x;
+        _y = p._y;
         _format = p._format;
-    }
-}
-
-
-template <typename ColorT>
-inline ColorT ConstPixel<ColorT>::color() const
-{ 
-    return _pixel->getColor<ColorT>();
-}
-
-
-template <typename ColorT>
-inline void ConstPixel<ColorT>::copy(Pixel<ColorT>& p, std::size_t length) const
-{
-    bool isCompatible = _pixel->copy(*p._pixel, length);
-    if( isCompatible )
-        return;
-
-    isCompatible = p._pixel->assign(*_pixel, length);
-    if( isCompatible )
-        return;
-
-    Pixel<ColorT> to = p;
-    ConstPixel from = *this;
-    for(std::size_t n = 0; n < length; ++n)
-    {
-        to = from;
-        to.advance();
-        from.advance();
     }
 }
 

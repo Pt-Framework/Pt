@@ -105,7 +105,7 @@ class BasicImage
         BasicImage(const BasicImage& image)
         : _format( image._format->clone() )
         , _buffer(image._buffer)
-        , _data(image._data)
+        , _data( _buffer.empty() ? 0 : &_buffer[0] )
         , _width(image._width)
         , _height(image._height)
         , _padding(image._padding)
@@ -123,7 +123,7 @@ class BasicImage
             _format = f;
             
             _buffer = image._buffer;
-            _data = image._data;
+            _data = _buffer.empty() ? 0 : &_buffer[0];
             
             _width = image._width;
             _height = image._height;

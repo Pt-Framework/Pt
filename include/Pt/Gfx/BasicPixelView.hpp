@@ -39,19 +39,17 @@ namespace Gfx {
 // BasicPixelView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT, typename PixelT, typename ConstPixelT>
-inline BasicPixelView<FormatT, PixelT, ConstPixelT>::BasicPixelView(BasicImage<FormatT>& image)
+template <typename FormatT>
+inline BasicPixelView<FormatT>::BasicPixelView(BasicImage<FormatT>& image)
 : BasicView<FormatT>(image)
 { }
 
 
-template <typename FormatT, typename PixelT, typename ConstPixelT>
-inline void BasicPixelView<FormatT, 
-                          PixelT, 
-                          ConstPixelT>::assign(Pt::ssize_t x, Pt::ssize_t y, 
-                                               const BasicConstPixelView<FormatT, PixelT, ConstPixelT>& view, 
-                                               Pt::ssize_t fromX, Pt::ssize_t fromY, 
-                                               Pt::ssize_t width, Pt::ssize_t height)
+template <typename FormatT>
+inline void BasicPixelView<FormatT>::assign(Pt::ssize_t x, Pt::ssize_t y, 
+                                            const BasicConstPixelView<FormatT>& view, 
+                                            Pt::ssize_t fromX, Pt::ssize_t fromY, 
+                                            Pt::ssize_t width, Pt::ssize_t height)
 {  
     BasicConstPixelIterator<FormatT, ConstPixelT> from = view.pixel(fromX, fromY);
     BasicPixelIterator<FormatT, PixelT> to = pixel(x, y);
@@ -65,22 +63,18 @@ inline void BasicPixelView<FormatT,
 }
 
 
-template <typename FormatT, typename PixelT, typename ConstPixelT>
-template <typename FormatT2, typename PixelT2, typename ConstPixelT2>
-inline void BasicPixelView<FormatT, 
-                          PixelT, 
-                          ConstPixelT>::convert(Pt::ssize_t x, Pt::ssize_t y, 
-                                               const BasicConstPixelView<FormatT2, 
-                                                                         PixelT2, 
-                                                                         ConstPixelT2>& view, 
+template <typename FormatT>
+template <typename FormatT2>
+inline void BasicPixelView<FormatT>::convert(Pt::ssize_t x, Pt::ssize_t y, 
+                                               const BasicConstPixelView<FormatT2>& view, 
                                                Pt::ssize_t fromX, Pt::ssize_t fromY, 
                                                Pt::ssize_t width, Pt::ssize_t height)
 {
-    auto from = view.pixel(fromX, fromY);
+    BasicConstPixelView<FormatT2>::ConstIterator from = view.pixel(fromX, fromY);
+    BasicPixelIterator<FormatT, PixelT> to = pixel(x, y);
 
     for( Pt::ssize_t y = 0; y < height; ++y )
     {
-        from->color();
         to->assign(*from, width);
         to += this->width();
         from += view.width();
@@ -91,18 +85,23 @@ inline void BasicPixelView<FormatT,
 // BasicConstPixelView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT, typename PixelT, typename ConstPixelT>
-inline BasicConstPixelView<FormatT, 
-                           PixelT, 
-                           ConstPixelT>::BasicConstPixelView(const BasicImage<FormatT>& image)
+template <typename FormatT>
+inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
 
-template <typename FormatT, typename PixelT, typename ConstPixelT>
-inline BasicConstPixelView<FormatT, 
-                           PixelT, 
-                           ConstPixelT>::BasicConstPixelView(const BasicConstImage<FormatT>& image)
+template <typename FormatT>
+inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<FormatT>& image)
+: BasicConstView<FormatT>(image)
+{ }
+
+///////////////////////////////////////////////////////////////////////
+// BasicColorView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename ColorT>
+inline BasicColorView<FormatT, ColorT>::BasicColorView(BasicImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
@@ -110,20 +109,14 @@ inline BasicConstPixelView<FormatT,
 // BasicConstColorView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT, typename PixelT, typename ConstPixelT, typename ColorT>
-inline BasicConstColorView<FormatT, 
-                           PixelT, 
-                           ConstPixelT,
-                           ColorT>::BasicConstColorView(const BasicImage<FormatT>& image)
+template <typename FormatT, typename ColorT>
+inline BasicConstColorView<FormatT, ColorT>::BasicConstColorView(const BasicImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
 
-template <typename FormatT, typename PixelT, typename ConstPixelT, typename ColorT>
-inline BasicConstColorView<FormatT, 
-                           PixelT, 
-                           ConstPixelT,
-                           ColorT>::BasicConstColorView(const BasicConstImage<FormatT>& image)
+template <typename FormatT, typename ColorT>
+inline BasicConstColorView<FormatT, ColorT>::BasicConstColorView(const BasicConstImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 

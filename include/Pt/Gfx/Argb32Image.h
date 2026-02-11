@@ -44,7 +44,7 @@ class Argb32Image;
 
 /** @brief ARGB-32 pixel view.
 */
-class Argb32PixelView : public BasicPixelView<Argb32, Argb32Pixel, Argb32ConstPixel>
+class Argb32PixelView : public BasicPixelView<Argb32>
 {
     public:
         Argb32PixelView()
@@ -58,7 +58,7 @@ class Argb32PixelView : public BasicPixelView<Argb32, Argb32Pixel, Argb32ConstPi
 
 /** @brief ARGB-32 pixel view.
 */
-class Argb32ConstPixelView : public BasicConstPixelView<Argb32, Argb32Pixel, Argb32ConstPixel>
+class Argb32ConstPixelView : public BasicConstPixelView<Argb32>
 {
     public:
         Argb32ConstPixelView()

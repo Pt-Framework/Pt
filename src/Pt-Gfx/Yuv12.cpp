@@ -48,14 +48,11 @@ class Yuv12PixelBase : public PixelBase
             return _loc;
         }
 
-         virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                                        Pt::ssize_t n) override
+         virtual Location& onAdvance(Pt::ssize_t n) override
         {
             _p.advance(n);
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.ybase();
+            _loc = Location(_p.ybase(), _p.xpos(), _p.ypos());
+            return _loc;
         }
 
         virtual Color onGetColor() const override
@@ -87,23 +84,18 @@ class Yuv12ConstPixelBase : public ConstPixelBase
         , _p(p)
         { }
 
-        virtual const Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos) override
+        virtual const ConstLocation& onAdvance() override
         {
             _p.advance();
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.ybase();
+            _loc = ConstLocation(_p.ybase(), _p.xpos(), _p.ypos());
+            return _loc;
         }
 
-        virtual const Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                                             Pt::ssize_t n) override
+        virtual const ConstLocation& onAdvance(Pt::ssize_t n) override
         {
             _p.advance(n);
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.ybase();
+            _loc = ConstLocation(_p.ybase(), _p.xpos(), _p.ypos());
+            return _loc;
         }
 
         virtual Color onGetColor() const override
@@ -113,6 +105,7 @@ class Yuv12ConstPixelBase : public ConstPixelBase
 
     private:      
         Yuv12ConstPixel _p;
+        ConstLocation  _loc;
 };
 
 ///////////////////////////////////////////////////////////////////////

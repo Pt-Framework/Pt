@@ -143,6 +143,8 @@ class Color
         , _b(0)
         { }
 
+        Color(const Color&) = default;
+
         Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(a)
         , _r(r)

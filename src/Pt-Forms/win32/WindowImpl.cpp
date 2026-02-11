@@ -515,8 +515,6 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
     const size_t planes = 4;
     std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
         
-    Gfx::ConstColorView view(icon);
-
     for(size_t y = 0; y < icon.height(); ++y)
     {
         const size_t offsetLine = y * (icon.width() * planes);
@@ -525,8 +523,9 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
         {
           const size_t index = offsetLine + (x*planes);
 
-          Gfx::ConstColorView::ConstPixel pixel(view, x, y);
-          Gfx::Color color = pixel.color();
+          Gfx::ConstPixelView pixelView(icon);
+          Gfx::ConstPixelView::ConstPixel pixel(pixelView, x, y);
+          Gfx::Color color = pixel.toColor();
                 
           bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());    
           bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());
@@ -539,7 +538,7 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
     _iconHandle = ::CreateIcon(hInstance, icon.width(), icon.height(),
                                4, 8, 0, (BYTE*)&bitmapBuffer[0]);
 
-    SendMessage(_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)_iconHandle);    
+    SendMessage(_hwnd, WM_SETICON, ICON_SMALL, (LPARAM)_iconHandle);  
 }
 
 

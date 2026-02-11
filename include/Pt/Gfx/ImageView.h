@@ -39,14 +39,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class ImageView;
-class ConstImageView;
-class PixelView;
-class ColorView;
-
-class PixelView : public BasicPixelView<ImageFormat, 
-                                        Pixel<Argb32Color>,
-                                        ConstPixel<Argb32Color> >
+class PixelView : public BasicPixelView<ImageFormat>
 {
     public:
         PixelView()
@@ -59,9 +52,7 @@ class PixelView : public BasicPixelView<ImageFormat,
 };
 
 
-class ConstPixelView : public BasicConstPixelView<ImageFormat,
-                                                  Pixel<Argb32Color>,
-                                                  ConstPixel<Argb32Color> >
+class ConstPixelView : public BasicConstPixelView<ImageFormat>
 {
     public:
         ConstPixelView()
@@ -78,55 +69,33 @@ class ConstPixelView : public BasicConstPixelView<ImageFormat,
 };
 
 
-class ColorView : public BasicPixelView<ImageFormat, 
-                                        Pixel<Color>,
-                                        ConstPixel<Color> >
+template <typename ColorT>
+class ColorView : public BasicColorView<ImageFormat, ColorT>
 {
     public:
         ColorView()
-        : BasicPixelView( ImageFormat::argb32() )
+        : BasicColorView( ImageFormat::argb32() )
         { }
 
         explicit ColorView(Image& image)
-        : BasicPixelView(image)
-        { }
-};
-
-
-class ConstColorView : public BasicConstPixelView<ImageFormat,
-                                                  Pixel<Color>,
-                                                  ConstPixel<Color> >
-{
-    public:
-        ConstColorView()
-        : BasicConstPixelView( ImageFormat::argb32() )
-        { }
-
-        explicit ConstColorView(const Image& image)
-        : BasicConstPixelView(image)
-        { }
-
-        explicit ConstColorView(const ConstImage& image)
-        : BasicConstPixelView(image)
+        : BasicColorView(image)
         { }
 };
 
 
 template <typename ColorT>
-class ConstColorView2 : public BasicConstColorView<ImageFormat,
-                                                  Pixel<ColorT>,
-                                                  ConstPixel<ColorT> >
+class ConstColorView : public BasicConstColorView<ImageFormat, ColorT>
 {
     public:
-        ConstColorView2()
+        ConstColorView()
         : BasicConstColorView( ImageFormat::argb32() )
         { }
 
-        explicit ConstColorView2(const Image& image)
+        explicit ConstColorView(const Image& image)
         : BasicConstColorView(image)
         { }
 
-        explicit ConstColorView2(const ConstImage& image)
+        explicit ConstColorView(const ConstImage& image)
         : BasicConstColorView(image)
         { }
 };

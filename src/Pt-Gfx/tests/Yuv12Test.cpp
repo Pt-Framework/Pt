@@ -157,7 +157,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             
                 for( ; it != end; ++it)
                 {
-                    color = it->color();
+                    color = it->toArgb32Color();
                     color.setRed(99);
 
                     (*it) = color;

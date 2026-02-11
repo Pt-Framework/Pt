@@ -85,14 +85,10 @@ class Argb32PixelBase final : public PixelBase
             return _p.location();
         }
 
-         virtual Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                                        Pt::ssize_t n) override
+         virtual Location& onAdvance(Pt::ssize_t n) override
         {
             _p.advance(n);
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.base();
+            return _p.location();
         }
 
         virtual Color onGetColor() const override
@@ -112,7 +108,7 @@ class Argb32PixelBase final : public PixelBase
 
         virtual void onSetColor(const Argb32Color& color) override
         {
-            _p = *color.value();
+            _p = color;
         }
 
         virtual void onFillColor(std::size_t n, const Color& color) override
@@ -139,23 +135,16 @@ class Argb32ConstPixelBase final : public ConstPixelBase
         { }
 
     protected:
-        virtual const Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos) override
+        virtual const ConstLocation& onAdvance() override
         {
             _p.advance();
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.base();
+            return _p.location();
         }
 
-         virtual const Pt::uint8_t* onAdvance(Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                                              Pt::ssize_t n) override
+         virtual const ConstLocation& onAdvance(Pt::ssize_t n) override
         {
             _p.advance(n);
-            xpos = _p.xpos();
-            ypos = _p.ypos();
-
-            return _p.base();
+            return _p.location();
         }
 
         virtual Color onGetColor() const override
