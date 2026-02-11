@@ -251,14 +251,9 @@ class PT_GFX_API Yuv12 : public ImageFormat
         }
 
     protected:
-        virtual ImageFormat* onClone() const override
+        virtual std::unique_ptr<ImageFormat> onClone() const override
         {
-            return new Yuv12;;
-        }
-
-        virtual void onRelease() const override
-        {
-            delete this;
+            return std::unique_ptr<ImageFormat>(new Yuv12);
         }
 
         virtual const std::type_info& onGetType() const override

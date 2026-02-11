@@ -290,14 +290,9 @@ class PT_GFX_API Argb32 final : public ImageFormat
         }
 
     protected:
-        virtual ImageFormat* onClone() const override
+        virtual std::unique_ptr<ImageFormat> onClone() const override
         {          
-            return new Argb32();
-        }
-
-        virtual void onRelease() const override
-        {
-            delete this;
+            return std::unique_ptr<ImageFormat>(new Argb32);
         }
 
         virtual const std::type_info& onGetType() const override

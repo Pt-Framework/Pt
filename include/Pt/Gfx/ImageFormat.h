@@ -33,6 +33,7 @@
 #include <Pt/Gfx/ViewBase.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/TypeInfo.h>
+#include <memory>
 
 namespace Pt {
 
@@ -53,9 +54,7 @@ class ImageFormat
   friend std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, 
                                Pt::ssize_t height, std::size_t padding);
      
-  friend ImageFormat* clone(const ImageFormat& format);
-
-  friend void release(const ImageFormat* format);
+  friend std::unique_ptr<ImageFormat> clone(const ImageFormat& format);
 
     public:
         typedef Pixel Pixel;
@@ -101,24 +100,10 @@ class ImageFormat
             return ! (*this == a);
         }
 
-        ImageFormat* clone() const
-        {
-            return onClone();
-        }
-
-        void release() const
-        {
-            onRelease();
-        }
-
     protected:
-        virtual ImageFormat* onClone() const
+        virtual std::unique_ptr<ImageFormat> onClone() const
         {
             return 0;
-        }
-
-        virtual void onRelease() const
-        {
         }
 
         virtual const std::type_info& onGetType() const = 0;
@@ -151,15 +136,9 @@ class ImageFormat
 };
 
 
-inline ImageFormat* clone(const ImageFormat& format)
+inline std::unique_ptr<ImageFormat> clone(const ImageFormat& format)
 {
     return format.onClone();
-}
-
-
-inline void release(const ImageFormat* format)
-{
-     format->onRelease();
 }
 
 

@@ -44,14 +44,9 @@ class PT_GFX_API Rgb16 : public ImageFormat
         Rgb16();
 
     protected:
-        virtual ImageFormat* onClone() const override
+        virtual std::unique_ptr<ImageFormat> onClone() const override
         {
-            return new Rgb16();
-        }
-
-        virtual void onRelease() const override
-        {
-            delete this;
+            return std::unique_ptr<ImageFormat>(new Rgb16);
         }
 
         virtual const std::type_info& onGetType() const override

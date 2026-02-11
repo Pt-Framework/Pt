@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
 #include <vector>
+#include <memory>
 
 namespace Pt {
 
@@ -55,16 +56,9 @@ std::size_t imageSize(const FormatT& format, Pt::ssize_t width, Pt::ssize_t heig
 
 
 template <typename FormatT>
-FormatT* clone(const FormatT& format)
+std::unique_ptr<FormatT> clone(const FormatT& format)
 {
-    return new FormatT(format);
-}
-
-
-template <typename FormatT>
-void release(const FormatT* format)
-{
-    delete format;
+    return std::unique_ptr<FormatT>( new FormatT(format) );
 }
 
 /** @brief Basic image.
@@ -103,7 +97,7 @@ class BasicImage
         { }
 
         BasicImage(const BasicImage& image)
-        : _format( image._format->clone() )
+        : _format( clone( image.format() ) )
         , _buffer(image._buffer)
         , _data( _buffer.empty() ? 0 : &_buffer[0] )
         , _width(image._width)
@@ -112,15 +106,11 @@ class BasicImage
         { }
 
         virtual ~BasicImage()
-        { 
-            release(_format);
-        }
+        { }
 
         BasicImage& operator=(const BasicImage& image)
         { 
-            Format* f = image.format().clone();
-            release(_format);
-            _format = f;
+            _format = clone( image.format() );
             
             _buffer = image._buffer;
             _data = _buffer.empty() ? 0 : &_buffer[0];
@@ -156,9 +146,7 @@ class BasicImage
         void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
         { 
-            Format* f = clone(format);
-            release(_format);
-            _format = f;
+            _format =  clone(format);
 
             _buffer.resize( imageSize(*_format, width, height, padding) );
             _data = _buffer.empty() ? 0 : &_buffer[0];
@@ -171,9 +159,7 @@ class BasicImage
         void reset(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
-            Format* f = clone(format);
-            release(_format);
-            _format = f;
+            _format = clone(format);
 
             _buffer.clear();
             _data = data;
@@ -226,12 +212,12 @@ class BasicImage
         }
 
     private:
-        Format*                  _format;
+        std::unique_ptr<Format>  _format;
         std::vector<Pt::uint8_t> _buffer;
-        Pt::uint8_t*  _data;
-        Pt::ssize_t   _width;
-        Pt::ssize_t   _height;
-        Pt::ssize_t   _padding;
+        Pt::uint8_t*             _data;
+        Pt::ssize_t              _width;
+        Pt::ssize_t              _height;
+        Pt::ssize_t              _padding;
 };
 
 /** @brief Basic const image.
@@ -247,7 +233,7 @@ class BasicConstImage
 
     public:
         BasicConstImage(const Format& format)
-        : _format(clone(format))
+        : _format( clone(format) )
         , _data(0)
         , _width(0)
         , _height(0)
@@ -256,7 +242,7 @@ class BasicConstImage
 
         BasicConstImage(const Format& format, const Pt::uint8_t* data, 
                         Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        : _format(clone(format))
+        : _format( clone(format) )
         , _data(data)
         , _width(width)
         , _height(height)
@@ -264,7 +250,7 @@ class BasicConstImage
         { }
 
         BasicConstImage(const BasicImage<FormatT>& image)
-        : _format( image.format().clone() )
+        : _format( clone( image.format() ) )
         , _data( image.data() )
         , _width( image.width() )
         , _height( image.height() )
@@ -272,7 +258,7 @@ class BasicConstImage
         { }
 
         BasicConstImage(const BasicConstImage& image)
-        : _format( image._format->clone() )
+        : _format( clone( image.format() ) )
         , _data(image._data)
         , _width(image._width)
         , _height(image._height)
@@ -280,18 +266,13 @@ class BasicConstImage
         { }
 
         virtual ~BasicConstImage()
-        {
-            release(_format);
-        }
+        { }
 
         BasicConstImage& operator=(const BasicConstImage& image)
         { 
-            Format* f = image.format().clone();
-            release(_format);
-            _format = f;
+            _format = clone( image.format() );
             
             _data = image._data;
-            
             _width = image._width;
             _height = image._height;
             _padding = image._padding;
@@ -301,12 +282,9 @@ class BasicConstImage
 
         BasicConstImage& operator=(const BasicImage<FormatT>& image)
         { 
-            Format* f = image.format().clone();
-            release(_format);
-            _format = f;
+            _format = clone( image.format() );
             
             _data = image.data();
-            
             _width = image.width();
             _height = image.height();
             _padding = image.padding();
@@ -327,12 +305,9 @@ class BasicConstImage
         void reset(const Format& format, const Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
-            Format* f = clone(format);
-            release(_format);
-            _format = f;
+            _format = clone(format);
 
             _data = data;
-            
             _width = width;
             _height = height;
             _padding = padding;
@@ -376,11 +351,11 @@ class BasicConstImage
         }
 
     private:
-        Format*            _format;
-        const Pt::uint8_t* _data;
-        Pt::ssize_t        _width;
-        Pt::ssize_t        _height;
-        Pt::ssize_t        _padding;
+        std::unique_ptr<Format> _format;
+        const Pt::uint8_t*      _data;
+        Pt::ssize_t             _width;
+        Pt::ssize_t             _height;
+        Pt::ssize_t             _padding;
 };
 
 // } // namespace

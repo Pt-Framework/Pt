@@ -49,6 +49,11 @@ class PT_GFX_API Rgb32 : public ImageFormat
             return typeid(*this); 
         }
 
+        virtual std::unique_ptr<ImageFormat> onClone() const override
+        {
+            return std::unique_ptr<ImageFormat>(new Rgb32);
+        }
+
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const;
 
