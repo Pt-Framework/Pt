@@ -30,9 +30,9 @@
 #define PT_GFX_BASIC_IMAGE_HPP
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Gfx/BasicColorView.h>
+//#include <Pt/Gfx/BasicView.h>
+//#include <Pt/Gfx/BasicPixelView.h>
+//#include <Pt/Gfx/BasicColorView.h>
 #include <Pt/Types.h>
 #include <vector>
 

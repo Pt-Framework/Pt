@@ -99,6 +99,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Pixel.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Pixel.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />

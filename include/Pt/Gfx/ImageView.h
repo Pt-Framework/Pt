@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicColorView.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -74,11 +75,11 @@ class ColorView : public BasicColorView<ImageFormat, ColorT>
 {
     public:
         ColorView()
-        : BasicColorView( ImageFormat::argb32() )
+        : BasicColorView<ImageFormat, ColorT>( ImageFormat::argb32() )
         { }
 
         explicit ColorView(Image& image)
-        : BasicColorView(image)
+        : BasicColorView<ImageFormat, ColorT>(image)
         { }
 };
 
@@ -88,15 +89,15 @@ class ConstColorView : public BasicConstColorView<ImageFormat, ColorT>
 {
     public:
         ConstColorView()
-        : BasicConstColorView( ImageFormat::argb32() )
+        : BasicConstColorView<ImageFormat, ColorT>( ImageFormat::argb32() )
         { }
 
         explicit ConstColorView(const Image& image)
-        : BasicConstColorView(image)
+        : BasicConstColorView<ImageFormat, ColorT>(image)
         { }
 
         explicit ConstColorView(const ConstImage& image)
-        : BasicConstColorView(image)
+        : BasicConstColorView<ImageFormat, ColorT>(image)
         { }
 };
 

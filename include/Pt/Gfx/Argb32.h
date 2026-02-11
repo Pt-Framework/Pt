@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 

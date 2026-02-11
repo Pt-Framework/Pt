@@ -664,7 +664,7 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
     Gfx::PixelView::PixelIterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
 
     switch(_compositionMode)
     {

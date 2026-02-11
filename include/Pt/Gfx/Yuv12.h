@@ -467,6 +467,8 @@ inline Yuv12Pixel& Yuv12Pixel::operator=(const Color& color)
 
 inline Yuv12Pixel& Yuv12Pixel::operator=(const Pixel& p)
 {
+    // TODO: p.format() == Yuv12();
+
     Yuv12::fromColor(_y, _u, _v, p.toColor() );
     return *this;
 }

@@ -31,8 +31,8 @@
 #include "ScreenImpl.h"
 
 #include <Pt/Forms/Application.h>
-#include <Pt/Gfx/Rgb16Format.h>
-#include <Pt/Gfx/Rgb32Format.h>
+#include <Pt/Gfx/Rgb16.h>
+#include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/Argb32.h>
 
 #include <sstream>

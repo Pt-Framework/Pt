@@ -124,6 +124,6 @@ class BasicConstView : public ViewBase
 
 } // namespace
 
-#include <Pt/Gfx/BasicView.hpp>
-
 #endif
+
+#include <Pt/Gfx/BasicView.hpp>

@@ -341,7 +341,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     Gfx::PixelView::PixelIterator toIter = toView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::ConstPixelIterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
 
     switch( paint.compositionMode() )
     {

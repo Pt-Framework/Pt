@@ -50,9 +50,11 @@ inline void BasicPixelView<FormatT>::assign(Pt::ssize_t x, Pt::ssize_t y,
                                             const BasicConstPixelView<FormatT>& view, 
                                             Pt::ssize_t fromX, Pt::ssize_t fromY, 
                                             Pt::ssize_t width, Pt::ssize_t height)
-{  
-    BasicConstPixelIterator<FormatT, ConstPixelT> from = view.pixel(fromX, fromY);
-    BasicPixelIterator<FormatT, PixelT> to = pixel(x, y);
+{
+    
+
+    typename BasicConstPixelView<FormatT>::Iterator from = view.pixel(fromX, fromY);
+    BasicPixelView<FormatT>::Iterator to = pixel(x, y);
     
     for( Pt::ssize_t y = 0; y < height; ++y )
     {
@@ -70,8 +72,8 @@ inline void BasicPixelView<FormatT>::convert(Pt::ssize_t x, Pt::ssize_t y,
                                                Pt::ssize_t fromX, Pt::ssize_t fromY, 
                                                Pt::ssize_t width, Pt::ssize_t height)
 {
-    BasicConstPixelView<FormatT2>::ConstIterator from = view.pixel(fromX, fromY);
-    BasicPixelIterator<FormatT, PixelT> to = pixel(x, y);
+    typename BasicConstPixelView<FormatT2>::ConstIterator from = view.pixel(fromX, fromY);
+    BasicPixelView<FormatT>::Iterator to = pixel(x, y);
 
     for( Pt::ssize_t y = 0; y < height; ++y )
     {
