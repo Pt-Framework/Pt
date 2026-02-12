@@ -231,7 +231,7 @@ class Yuv12ConstPixel
 
 /** @brief YV-12 image format.
 */
-class PT_GFX_API Yuv12 : public ImageFormat
+class PT_GFX_API Yuv12 final : public ImageFormat
 {
     public:
         typedef Yuv12Pixel Pixel;

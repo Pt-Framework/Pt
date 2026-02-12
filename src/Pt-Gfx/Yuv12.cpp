@@ -34,7 +34,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class Yuv12PixelBase : public PixelBase
+class Yuv12PixelBase final : public PixelBase
 {
     public:
         explicit Yuv12PixelBase(Yuv12Pixel& p)
@@ -90,7 +90,7 @@ class Yuv12PixelBase : public PixelBase
 };
 
 
-class Yuv12ConstPixelBase : public ConstPixelBase
+class Yuv12ConstPixelBase final : public ConstPixelBase
 {
     public:
         explicit Yuv12ConstPixelBase(const Yuv12ConstPixel& p)
