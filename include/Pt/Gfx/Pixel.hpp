@@ -68,6 +68,13 @@ inline Pixel::Pixel(const Pixel& p)
 }
 
 
+inline Pixel::~Pixel()
+{
+    if(_pixel)
+        _pixel->~PixelBase();
+}
+
+
 inline void Pixel::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
@@ -140,7 +147,7 @@ inline Pixel& Pixel::operator=(const ConstPixel& p)
     //    _pixel->assign( p.toArgb32Color() );
     //else
     //    _pixel->assign( p.toColor() );
-    //
+
     _pixel->assign( p.toColor() );
     return *this;
 }

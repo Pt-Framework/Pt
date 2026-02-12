@@ -67,13 +67,19 @@ class Argb32Pixel
 
         Argb32Pixel(const Argb32Pixel& p) = default;
 
+        ~Argb32Pixel() = default;
+
+        Argb32Pixel& operator=(const Argb32Color& color);
+
+        Argb32Pixel& operator=(const Gfx::Color& color);
+
+        Argb32Pixel& operator=(const Argb32Pixel& p);
+
+        Argb32Pixel& operator=(const Argb32ConstPixel& p);
+
+        void reset(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+
         void reset(const Argb32Pixel& p);
-
-        ViewBase& view()
-        { return *_view; }
-
-        const ViewBase& view() const
-        { return *_view; }
 
         Location& location()
         { return _loc; }
@@ -81,11 +87,11 @@ class Argb32Pixel
         const Location& location() const
         { return _loc; }
 
-        Pt::ssize_t xpos() const
-        { return _loc.xpos(); }
+        ViewBase& view()
+        { return *_view; }
 
-        Pt::ssize_t ypos() const
-        { return _loc.ypos(); }
+        const ViewBase& view() const
+        { return *_view; }
 
         Pt::uint8_t* base()
         { return _loc.base(); }
@@ -93,73 +99,41 @@ class Argb32Pixel
         const Pt::uint8_t* base() const
         { return _loc.base(); }
 
-        Pt::uint8_t alpha() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return *val >> 24;
-        }
+        Pt::ssize_t xpos() const
+        { return _loc.xpos(); }
 
-        Pt::uint8_t red() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return (*val & 0x00FF0000) >> 16;
-        }
+        Pt::ssize_t ypos() const
+        { return _loc.ypos(); }
 
-        Pt::uint8_t green() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return (*val & 0x0000FF00) >> 8;
-        }
+        Pt::uint8_t alpha() const;
 
-        Pt::uint8_t blue() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return *val & 0x000000FF;
-        }
+        void setAlpha(Pt::uint8_t a);
 
-        void setAlpha(Pt::uint8_t a)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
-            *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24);
-        }
+        Pt::uint8_t red() const;
 
-        void setRed(Pt::uint8_t r)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
-            *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16);
-        }
+        void setRed(Pt::uint8_t r);
 
-        void setGreen(Pt::uint8_t g)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
-            *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8);
-        }
+        Pt::uint8_t green() const;
 
-        void setBlue(Pt::uint8_t b)
-        {
-            Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
-            *val = (*val & 0xFFFFFF00) | uint32_t(b);
-        }
+        void setGreen(Pt::uint8_t g);
 
-        Argb32Color color() const;
+        Pt::uint8_t blue() const;
 
-        Argb32Pixel& operator=(const Gfx::Color& color);
+        void setBlue(Pt::uint8_t b);
 
-        Argb32Pixel& operator=(const Argb32Color& color);
-
-        Argb32Pixel& operator=(const Argb32Pixel& p);
-
-        Argb32Pixel& operator=(const Argb32ConstPixel& p);
-
-        void copy(const Argb32Pixel& p, std::size_t length);
-
-        bool equals(const Argb32Pixel& p) const;
-
-        bool equals(const Argb32ConstPixel& p) const;
+        Argb32Color toColor() const;
 
         void advance();
 
         void advance(Pt::ssize_t n);
+
+        void assign(const Argb32Pixel& p, std::size_t length);
+
+        void fill(std::size_t n, const Argb32Color& color);
+
+        bool equals(const Argb32Pixel& p) const;
+
+        bool equals(const Argb32ConstPixel& p) const;
 
     private:
         ViewBase*    _view;
@@ -240,7 +214,7 @@ class Argb32ConstPixel
             return *val & 0x000000FF;
         }
 
-        Argb32Color color() const;
+        Argb32Color toColor() const;
 
         bool equals(const Argb32ConstPixel& p) const;
         
@@ -692,6 +666,18 @@ inline Argb32Pixel::Argb32Pixel(Pt::uint8_t* data, ViewBase& view, Pt::ssize_t x
 }
 
 
+inline void Argb32Pixel::reset(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y)
+{
+    _view = &view;
+    
+    Pt::uint8_t* _p = view.data();
+    _p += y * _view->stride();
+    _p += x * 4; 
+    
+    _loc = Location(_p, x, y);
+}
+
+
 inline void Argb32Pixel::reset(const Argb32Pixel& p)
 {
     _view = p._view;
@@ -750,9 +736,16 @@ inline bool Argb32Pixel::equals(const Argb32ConstPixel& p) const
 }
 
 
-inline void Argb32Pixel::copy(const Argb32Pixel& p, std::size_t length)
+inline void Argb32Pixel::assign(const Argb32Pixel& p, std::size_t length)
 {
     Argb32::sourceCopy(base(), p.base(), length);
+}
+
+
+inline void Argb32Pixel::fill(std::size_t n, const Argb32Color& color)
+{
+    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
+    Argb32::sourceCopy(base(), n, p);
 }
 
 
@@ -785,13 +778,69 @@ inline Argb32Pixel& Argb32Pixel::operator=(const Argb32ConstPixel& p)
 }
 
 
-inline Argb32Color Argb32Pixel::color() const
+inline Pt::uint8_t Argb32Pixel::alpha() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return *val >> 24;
+}
+
+
+inline void Argb32Pixel::setAlpha(Pt::uint8_t a)
+{
+    Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
+    *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24);
+}
+
+
+inline Pt::uint8_t Argb32Pixel::red() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return (*val & 0x00FF0000) >> 16;
+}
+
+
+inline void Argb32Pixel::setRed(Pt::uint8_t r)
+{
+    Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
+    *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16);
+}
+
+
+inline Pt::uint8_t Argb32Pixel::green() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return (*val & 0x0000FF00) >> 8;
+}
+
+
+inline void Argb32Pixel::setGreen(Pt::uint8_t g)
+{
+    Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
+    *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8);
+}
+
+
+inline Pt::uint8_t Argb32Pixel::blue() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return *val & 0x000000FF;
+}
+
+
+inline void Argb32Pixel::setBlue(Pt::uint8_t b)
+{
+    Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(base());
+    *val = (*val & 0xFFFFFF00) | uint32_t(b);
+}
+
+
+inline Argb32Color Argb32Pixel::toColor() const
 {
     return Argb32Color(*base());
 }
 
 
-inline Argb32Color Argb32ConstPixel::color() const
+inline Argb32Color Argb32ConstPixel::toColor() const
 {
     return Argb32Color(*base());
 }

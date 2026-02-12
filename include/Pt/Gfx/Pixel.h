@@ -57,11 +57,7 @@ class Pixel
 
         Pixel(const Pixel& p);
 
-        ~Pixel()
-        {
-            if(_pixel)
-                _pixel->~PixelBase();
-        }
+        ~Pixel();
 
         Pixel& operator=(const Argb32Color& color);
 
@@ -81,6 +77,12 @@ class Pixel
         const PixelBase* pixelBase() const
         { return _pixel; }
 
+        ViewBase& view()
+        { return *_view; }
+
+        const ViewBase& view() const
+        { return *_view; }
+
         Pt::uint8_t* base()
         { return _pixel->base(); }
 
@@ -92,6 +94,16 @@ class Pixel
 
         Pt::ssize_t ypos() const
         { return _y; }
+
+        Color toColor() const
+        {
+            return _pixel->toColor();
+        }
+
+        Argb32Color toArgb32Color() const
+        {
+            return _pixel->toArgb32Color();
+        }
 
         void advance()
         {
@@ -105,16 +117,6 @@ class Pixel
             Location& loc =_pixel->advance(n);
             _x = loc.xpos();
             _y = loc.ypos();
-        }
-
-        Color toColor() const
-        {
-            return _pixel->toColor();
-        }
-
-        Argb32Color toArgb32Color() const
-        {
-            return _pixel->toArgb32Color();
         }
 
         void getColors(Color* colors, std::size_t length) const
@@ -144,12 +146,12 @@ class Pixel
             _pixel->fill(n, color);
         }
 
-        bool equals(const ConstPixel& p) const;
-
         bool equals(const Pixel& p) const
         {
             return _pixel->base() == p.base();
         }
+
+        bool equals(const ConstPixel& p) const;
 
     private:
         ViewBase*           _view;

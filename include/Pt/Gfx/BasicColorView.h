@@ -130,7 +130,7 @@ class BasicColorIterator
 template <typename ColorT, typename PixelT> 
 ColorT toColor(const PixelT& p, const ColorT* tag = 0)
 {
-  return p.color();
+  return p.toColor();
 }
 
 

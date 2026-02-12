@@ -112,7 +112,7 @@ class PT_GFX_API Yuv12Pixel
         void setV(Pt::uint8_t v) const
         { *_v = v; }
 
-        Color color() const;
+        Color toColor() const;
 
         Yuv12Pixel& operator=(const Color& color);
 
@@ -207,7 +207,7 @@ class Yuv12ConstPixel
         Pt::uint8_t v() const
         { return *_v; }
 
-        Color color() const;
+        Color toColor() const;
 
         void advance();
 
@@ -454,7 +454,7 @@ inline bool Yuv12Pixel::equals(const Yuv12ConstPixel& p) const
 }
 
 
-inline Color Yuv12Pixel::color() const
+inline Color Yuv12Pixel::toColor() const
 { 
     return Yuv12::getColor(*_y, *_u, *_v);
 }
@@ -467,7 +467,7 @@ inline Yuv12Pixel& Yuv12Pixel::operator=(const Color& color)
 }
 
 
-Yuv12Pixel& Yuv12Pixel::operator=(const Argb32Color& color)
+inline Yuv12Pixel& Yuv12Pixel::operator=(const Argb32Color& color)
 {
     Yuv12::fromColor( _y, _u, _v, Color::fromRgb8(color.red(), color.green(), 
                                                  color.blue(), color.alpha() ) );
@@ -503,7 +503,7 @@ inline void convert(Yuv12Pixel& to, const Argb32ConstPixel& p, std::size_t lengt
 
     while(length-- > 0)
     {
-        toIter = fromIter.color();
+        toIter = fromIter.toColor();
         toIter.advance();
         fromIter.advance();
     }
@@ -561,7 +561,7 @@ inline Yuv12ConstPixel::Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline Color Yuv12ConstPixel::color() const
+inline Color Yuv12ConstPixel::toColor() const
 { 
     return Yuv12::getColor(*_y, *_u, *_v);
 }

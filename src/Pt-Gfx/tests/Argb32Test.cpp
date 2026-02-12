@@ -119,7 +119,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32PixelView imageView(image);
             Argb32PixelView::PixelIterator pixel = imageView.pixel(0, 0);
 
-            Pt::Gfx::Argb32Color c = pixel->color();
+            Pt::Gfx::Argb32Color c = pixel->toColor();
             *pixel = c;
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
@@ -259,7 +259,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 for( ; it != end; it += image.width(), from += fromImage.width() )
                 {
-                    it->copy( *from, image.width() );
+                    it->assign( *from, image.width() );
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -329,7 +329,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 for( ; it != end; it += image.width(), from += fromImage.width() )
                 {
-                    it->copy( *from, image.width() );
+                    it->assign( *from, image.width() );
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();

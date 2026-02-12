@@ -27,7 +27,6 @@
 */
 
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Rgb16.h>
 #include <Pt/Gfx/Rgb32.h>
