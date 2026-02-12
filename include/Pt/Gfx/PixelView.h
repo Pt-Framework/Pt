@@ -26,14 +26,13 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGE_VIEW_H
-#define PT_GFX_IMAGE_VIEW_H
+#ifndef PT_GFX_PIXEL_VIEW_H
+#define PT_GFX_PIXEL_VIEW_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 

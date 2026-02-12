@@ -35,7 +35,7 @@
 
 #include <Pt/Forms/Cursor.h>
 #include <Pt/Gfx/PngReader.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Image.h>
 
 #include <fstream>
 #include <sstream>

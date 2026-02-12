@@ -27,7 +27,6 @@
 */
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/BlockScale.h>
 #include <Pt/Unit/Assertion.h>

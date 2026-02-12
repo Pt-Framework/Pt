@@ -33,7 +33,6 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/BasicColorView.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 

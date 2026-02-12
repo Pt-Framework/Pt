@@ -28,7 +28,6 @@
 
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/IOError.h>
 #include <iostream>

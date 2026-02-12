@@ -30,8 +30,6 @@
 #include "PixmapImpl.h"
 #include "win32.h"
 
-#include <Pt/Gfx/ImageView.h>
-
 using std::max;
 using std::min;
 #include <Gdiplus.h>

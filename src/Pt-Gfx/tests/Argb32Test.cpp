@@ -29,7 +29,6 @@
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
 

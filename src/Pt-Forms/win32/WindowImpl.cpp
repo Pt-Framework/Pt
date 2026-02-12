@@ -35,7 +35,6 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/WindowStateEvent.h>
-#include <Pt/Gfx/ImageView.h>
 #include <Pt/Math.h>
 #include <cassert>
 

@@ -31,7 +31,6 @@
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>

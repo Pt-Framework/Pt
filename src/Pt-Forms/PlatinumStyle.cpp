@@ -48,7 +48,7 @@
 #include <Pt/Forms/TabView.h>
 
 #include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/Image.h>
 
 #include <cmath>
 
