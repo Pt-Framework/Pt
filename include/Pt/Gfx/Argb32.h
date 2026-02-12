@@ -152,16 +152,8 @@ class Argb32ConstPixel
         typedef Argb32Color ColorType;
 
     protected:
-        Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, Pt::ssize_t x, Pt::ssize_t y)
-        : _view(view)
-        , _loc()
-        {
-            const Pt::uint8_t* _p = data;
-            _p += y * _view.stride();
-            _p += x * 4; 
-
-            _loc = ConstLocation(_p, x, y);
-        }
+        Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
+                         Pt::ssize_t x, Pt::ssize_t y);
 
     public:
         Argb32ConstPixel(const BasicConstView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -170,16 +162,26 @@ class Argb32ConstPixel
 
         Argb32ConstPixel(const Argb32ConstPixel& p) = default;
 
-        explicit Argb32ConstPixel(const Argb32Pixel& p)
-        : _view(*p._view)
-        , _loc( p.location() )
-        { }
+        explicit Argb32ConstPixel(const Argb32Pixel& p);
 
-        const ViewBase& view() const
-        { return _view; }
+        ~Argb32ConstPixel() = default;
+
+        void reset(const BasicConstView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        void reset(const BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        void reset(const Argb32ConstPixel& p);
+
+        void reset(const Argb32Pixel& p);
 
         const ConstLocation& location() const
         { return _loc; }
+
+        const ViewBase& view() const
+        { return *_view; }
+
+        const Pt::uint8_t* base() const
+        { return _loc.base(); }
 
         Pt::ssize_t xpos() const
         { return _loc.xpos(); }
@@ -187,46 +189,27 @@ class Argb32ConstPixel
         Pt::ssize_t ypos() const
         { return _loc.ypos(); }
 
-        const Pt::uint8_t* base() const
-        { return _loc.base(); }
+        Pt::uint8_t alpha() const;
 
-        Pt::uint8_t alpha() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return *val >> 24;
-        }
+        Pt::uint8_t red() const;
 
-        Pt::uint8_t red() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return (*val & 0x00FF0000) >> 16;
-        }
+        Pt::uint8_t green() const;
 
-        Pt::uint8_t green() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return (*val & 0x0000FF00) >> 8;
-        }
-
-        Pt::uint8_t blue() const
-        {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
-            return *val & 0x000000FF;
-        }
+        Pt::uint8_t blue() const;
 
         Argb32Color toColor() const;
-
-        bool equals(const Argb32ConstPixel& p) const;
-        
-        bool equals(const Argb32Pixel& p) const;
 
         void advance();
 
         void advance(Pt::ssize_t n);
 
+        bool equals(const Argb32ConstPixel& p) const;
+        
+        bool equals(const Argb32Pixel& p) const;
+
     private:
-        const ViewBase&   _view;
-        ConstLocation     _loc;
+        const ViewBase* _view;
+        ConstLocation   _loc;
 };
 
 /** @brief ARGB-32 image format.
@@ -849,13 +832,26 @@ inline Argb32Color Argb32ConstPixel::toColor() const
 // Argb32ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
+inline Argb32ConstPixel::Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
+                                          Pt::ssize_t x, Pt::ssize_t y)
+: _view(&view)
+, _loc()
+{
+    const Pt::uint8_t* _p = data;
+    _p += y * _view->stride();
+    _p += x * 4; 
+
+    _loc = ConstLocation(_p, x, y);
+}
+
+
 inline Argb32ConstPixel::Argb32ConstPixel(const BasicConstView<Argb32>& view,
                                           Pt::ssize_t x, Pt::ssize_t y)
-: _view(view)
+: _view(&view)
 , _loc()
 {
     const Pt::uint8_t* _p = view.data();
-    _p += y * _view.stride();
+    _p += y * _view->stride();
     _p += x * 4; 
     
     _loc = ConstLocation(_p, x, y);
@@ -864,14 +860,60 @@ inline Argb32ConstPixel::Argb32ConstPixel(const BasicConstView<Argb32>& view,
 
 inline Argb32ConstPixel::Argb32ConstPixel(const BasicView<Argb32>& view,
                                           Pt::ssize_t x, Pt::ssize_t y)
-: _view(view)
+: _view(&view)
 , _loc()
 {
     const Pt::uint8_t* _p = view.data();
-    _p += y * _view.stride();
+    _p += y * _view->stride();
     _p += x * 4; 
     
     _loc = ConstLocation(_p, x, y);
+}
+
+
+inline Argb32ConstPixel::Argb32ConstPixel(const Argb32Pixel& p)
+: _view(p._view)
+, _loc( p.location() )
+{ }
+
+
+inline void Argb32ConstPixel::reset(const BasicConstView<Argb32>& view, 
+                                     Pt::ssize_t x, Pt::ssize_t y)
+{
+    _view = &view;
+    
+    const Pt::uint8_t* _p = view.data();
+    _p += y * _view->stride();
+    _p += x * 4; 
+    
+    _loc = ConstLocation(_p, x, y);
+}
+
+
+inline void Argb32ConstPixel::reset(const BasicView<Argb32>& view, 
+                                    Pt::ssize_t x, Pt::ssize_t y)
+{
+    _view = &view;
+    
+    const Pt::uint8_t* _p = view.data();
+    _p += y * _view->stride();
+    _p += x * 4; 
+    
+    _loc = ConstLocation(_p, x, y);
+}
+
+
+inline void Argb32ConstPixel::reset(const Argb32ConstPixel& p)
+{
+    _view = p._view;
+    _loc = p._loc;
+}
+
+
+inline void Argb32ConstPixel::reset(const Argb32Pixel& p)
+{
+    _view = p._view;
+    _loc = p._loc;
 }
 
 
@@ -881,12 +923,12 @@ inline void Argb32ConstPixel::advance()
     Pt::ssize_t _y = _loc.ypos();
     const Pt::uint8_t* _p = _loc.base();
 
-    if( ++_x >= _view.width() )
+    if( ++_x >= _view->width() )
     {
         _x = 0;
         ++_y;
 
-        _p += _view.padding();
+        _p += _view->padding();
     }
 
     _p += 4;
@@ -905,12 +947,12 @@ inline void Argb32ConstPixel::advance(Pt::ssize_t n)
 
     Pt::ssize_t off = _x + n;
 
-    std::size_t dy = off / _view.width();
-    std::size_t dx = off % _view.width() - _x;
+    std::size_t dy = off / _view->width();
+    std::size_t dx = off % _view->width() - _x;
 
     _loc.setXPos(_x + dx);
     _loc.setYPos(_y + dy);
-    _loc.setBase(_p + dy * _view.stride() + dx * 4);
+    _loc.setBase(_p + dy * _view->stride() + dx * 4);
 }
 
 
