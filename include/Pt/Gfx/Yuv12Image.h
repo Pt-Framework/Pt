@@ -32,48 +32,13 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Yuv12.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicColorView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-class Yuv12Image;
-
-/** @brief YV-12 image view.
-*/
-class Yuv12PixelView : public BasicPixelView<Yuv12>
-{
-    public:
-        /** @brief Constructor.
-        */
-        Yuv12PixelView()
-        : BasicPixelView( Yuv12() )
-        { 
-        }
-
-        /** @brief Constructor.
-        */
-        explicit Yuv12PixelView(Yuv12Image& image);
-};
-
-/** @brief YV-12 const image view.
-*/
-class Yuv12ConstPixelView : public BasicConstPixelView<Yuv12>
-{
-    public:
-        /** @brief Constructor.
-        */
-        Yuv12ConstPixelView()
-        : BasicConstPixelView( Yuv12() )
-        { 
-        }
-
-        /** @brief Constructor.
-        */
-        explicit Yuv12ConstPixelView(Yuv12Image& image);
-};
 
 /** @brief YV-12 image.
 
@@ -86,31 +51,78 @@ class Yuv12Image : public BasicImage<Yuv12>
     public:
         /** @brief Constructor.
         */
+        Yuv12Image()
+        : BasicImage( Yuv12() )
+        { }
+        
+        /** @brief Constructor.
+        */
+        Yuv12Image(const Yuv12Image& image)
+        : BasicImage( image )
+        { }
+
+        /** @brief Constructor.
+        */
         Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
         : BasicImage(Yuv12(), width, height, padding)
-        { 
-        }
+        { }
 
         /** @brief Construct from external buffer.
         */
         Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   size_t padding = 0)
+                    size_t padding = 0)
         : BasicImage(Yuv12(), data, width, height, padding)
-        { 
-        }
+        { }
+};
+
+/** @brief Yv-12 image.
+*/
+class Yuv12ConstImage : public BasicConstImage<Yuv12>
+{
+    public:
+        /** @brief Constructor.
+        */
+        Yuv12ConstImage()
+        : BasicConstImage( Yuv12() )
+        { }
+        
+        /** @brief Constructor.
+        */
+        Yuv12ConstImage(const Yuv12ConstImage& image)
+        : BasicConstImage( image )
+        { }
+
+        /** @brief Constructor.
+        */
+        Yuv12ConstImage(const Yuv12Image& image)
+        : BasicConstImage( image )
+        { }
+
+        /** @brief Construct from external buffer.
+        */
+        Yuv12ConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                    size_t padding = 0)
+        : BasicConstImage(Yuv12(), data, width, height, padding)
+        { }
 };
 
 
-inline Yuv12PixelView::Yuv12PixelView(Yuv12Image& image)
-: BasicPixelView(image)
-{ 
-}
 
+/** @brief YV-12 pixel view.
+*/
+typedef BasicPixelView<Yuv12> Yuv12PixelView;
 
-inline Yuv12ConstPixelView::Yuv12ConstPixelView(Yuv12Image& image)
-: BasicConstPixelView(image)
-{ 
-}
+/** @brief YV-12 const pixel view.
+*/
+typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
+
+/** @brief YV-12 color view.
+*/
+typedef BasicColorView<Yuv12> Yuv12ColorView;
+
+/** @brief YV-12 const color view.
+*/
+typedef BasicConstColorView<Yuv12> Yuv12ConstColorView;
 
 } // namespace
 

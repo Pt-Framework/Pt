@@ -44,6 +44,8 @@ class PT_GFX_API Image : public BasicImage<ImageFormat>
     public:
         Image();
 
+        Image(const Image& image);
+
         explicit Image(const ImageFormat& format);
 
         Image(const ImageFormat& format, 
@@ -51,8 +53,6 @@ class PT_GFX_API Image : public BasicImage<ImageFormat>
 
         Image(const ImageFormat& format, Pt::uint8_t* buffer,
               Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
-
-        Image(const Image& image);
 
         virtual ~Image();
 
@@ -68,12 +68,12 @@ class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
 
         ConstImage(const ConstImage& image);
 
+        explicit ConstImage(const Image& image);
+
         explicit ConstImage(const ImageFormat& format);
 
-        ConstImage(const ImageFormat& format, Pt::uint8_t* buffer,
+        ConstImage(const ImageFormat& format, const Pt::uint8_t* buffer,
                    Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
-
-        explicit ConstImage(const Image& image);
 
         virtual ~ConstImage();
 

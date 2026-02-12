@@ -28,14 +28,23 @@
 */
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Argb32.h>
 
 namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// Image
+///////////////////////////////////////////////////////////////////////
+
 Image::Image()
-: BasicImage( Argb32() )
+: BasicImage( ImageFormat::argb32() )
+{
+}
+
+
+Image::Image(const Image& image)
+: BasicImage( image)
 {
 }
 
@@ -44,7 +53,6 @@ Image::Image(const ImageFormat& format)
 : BasicImage(format, 0, 0)
 {
 }
-
 
 Image::Image(const ImageFormat& format, 
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
@@ -60,12 +68,6 @@ Image::Image(const ImageFormat& format, Pt::uint8_t* data,
 }
 
 
-Image::Image(const Image& image)
-: BasicImage( image)
-{
-}
-
-
 Image::~Image()
 {
 }
@@ -77,25 +79,12 @@ const Image& Image::operator=(const Image& image)
     return *this;
 }
 
-//
+///////////////////////////////////////////////////////////////////////
 // ConstImage
-//
+///////////////////////////////////////////////////////////////////////
 
 ConstImage::ConstImage()
-: BasicConstImage( Argb32() )
-{
-}
-
-
-ConstImage::ConstImage(const ImageFormat& format)
-: BasicConstImage(format)
-{
-}
-
-
-ConstImage::ConstImage(const ImageFormat& format, Pt::uint8_t* data,
-                       Pt::ssize_t width, Pt::ssize_t height, size_t padding)
-: BasicConstImage(format, data, width, height, padding)
+: BasicConstImage( ImageFormat::argb32() )
 {
 }
 
@@ -108,6 +97,19 @@ ConstImage::ConstImage(const ConstImage& image)
 
 ConstImage::ConstImage(const Image& image)
 : BasicConstImage( image )
+{
+}
+
+
+ConstImage::ConstImage(const ImageFormat& format)
+: BasicConstImage(format)
+{
+}
+
+
+ConstImage::ConstImage(const ImageFormat& format, const Pt::uint8_t* data,
+                       Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+: BasicConstImage(format, data, width, height, padding)
 {
 }
 

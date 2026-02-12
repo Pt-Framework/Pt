@@ -1,5 +1,4 @@
-/* Copyright (C) 2016-2016 Marc Boris Duerner
-   Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2016 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -33,42 +32,13 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicColorView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-class Argb32Image;
-
-/** @brief ARGB-32 pixel view.
-*/
-class Argb32PixelView : public BasicPixelView<Argb32>
-{
-    public:
-        Argb32PixelView()
-        : BasicPixelView( Argb32()  )
-        { }
-
-        explicit Argb32PixelView(Argb32Image& image);
-
-        //explicit Argb32PixelView(const Argb32ConstImage& image);
-};
-
-/** @brief ARGB-32 pixel view.
-*/
-class Argb32ConstPixelView : public BasicConstPixelView<Argb32>
-{
-    public:
-        Argb32ConstPixelView()
-        : BasicConstPixelView( Argb32() )
-        { }
-
-        explicit Argb32ConstPixelView(const Argb32Image& image);
-
-        //explicit Argb32ConstPixelView(const Argb32ConstImage& image)
-};
 
 /** @brief ARGB-32 image.
 */
@@ -79,36 +49,75 @@ class Argb32Image : public BasicImage<Argb32>
         */
         Argb32Image()
         : BasicImage( Argb32() )
-        {
-        }
+        { }
+
+        /** @brief Constructor.
+        */
+        Argb32Image(const Argb32Image& image)
+        : BasicImage( image )
+        { }
 
         /** @brief Constructor.
         */
         Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
         : BasicImage(Argb32(), width, height, padding)
-        { 
-        }
+        { }
 
         /** @brief Construct from external buffer.
         */
         Argb32Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                     size_t padding = 0)
         : BasicImage(Argb32(), data, width, height, padding)
-        { 
-        }
+        { }
 };
 
+/** @brief ARGB-32 image.
+*/
+class Argb32ConstImage : public BasicConstImage<Argb32>
+{
+    public:
+        /** @brief Constructor.
+        */
+        Argb32ConstImage()
+        : BasicConstImage( Argb32() )
+        { }
 
-inline Argb32PixelView::Argb32PixelView(Argb32Image& image)
-: BasicPixelView(image)
-{ 
-}
+        /** @brief Constructor.
+        */
+        Argb32ConstImage(const Argb32ConstImage& image)
+        : BasicConstImage( image )
+        { }
 
 
-inline Argb32ConstPixelView::Argb32ConstPixelView(const Argb32Image& image)
-: BasicConstPixelView(image)
-{ 
-}
+        /** @brief Constructor.
+        */
+        Argb32ConstImage(const Argb32Image& image)
+        : BasicConstImage( image )
+        { }
+
+        /** @brief Construct from external buffer.
+        */
+        Argb32ConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                    size_t padding = 0)
+        : BasicConstImage(Argb32(), data, width, height, padding)
+        { }
+};
+
+/** @brief ARGB-32 pixel view.
+*/
+typedef BasicPixelView<Argb32> Argb32PixelView;
+
+/** @brief ARGB-32 const pixel view.
+*/
+typedef BasicConstPixelView<Argb32> Argb32ConstPixelView;
+
+/** @brief ARGB-32 color view.
+*/
+typedef BasicColorView<Argb32> Argb32ColorView;
+
+/** @brief ARGB-32 const color view.
+*/
+typedef BasicConstColorView<Argb32> Argb32ConstColorView;
 
 } // namespace
 
