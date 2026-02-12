@@ -26,61 +26,62 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGE_VIEW_H
-#define PT_GFX_IMAGE_VIEW_H
+#ifndef PT_GFX_COLOR_VIEW_H
+#define PT_GFX_COLOR_VIEW_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicColorView.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class PixelView : public BasicPixelView<ImageFormat>
+template <typename ColorT>
+class ColorView : public BasicColorView<ImageFormat, ColorT>
 {
     public:
-        PixelView()
-        : BasicPixelView( ImageFormat::argb32() )
+        ColorView()
+        : BasicColorView<ImageFormat, ColorT>( ImageFormat::argb32() )
         { }
 
-        explicit PixelView(Image& image)
-        : BasicPixelView(image)
+        explicit ColorView(Image& image)
+        : BasicColorView<ImageFormat, ColorT>(image)
         { }
 
         template <typename FormatT>
-        explicit PixelView(BasicImage<FormatT>& image)
-        : BasicPixelView(image)
+        explicit ColorView(BasicImage<FormatT>& image)
+        : BasicColorView<ImageFormat, ColorT>(image)
         { }
 };
 
 
-class ConstPixelView : public BasicConstPixelView<ImageFormat>
+template <typename ColorT>
+class ConstColorView : public BasicConstColorView<ImageFormat, ColorT>
 {
     public:
-        ConstPixelView()
-        : BasicConstPixelView( ImageFormat::argb32() )
+        ConstColorView()
+        : BasicConstColorView<ImageFormat, ColorT>( ImageFormat::argb32() )
         { }
 
-        explicit ConstPixelView(const Image& image)
-        : BasicConstPixelView(image)
+        explicit ConstColorView(const Image& image)
+        : BasicConstColorView<ImageFormat, ColorT>(image)
         { }
 
-        explicit ConstPixelView(const ConstImage& image)
-        : BasicConstPixelView(image)
+        explicit ConstColorView(const ConstImage& image)
+        : BasicConstColorView<ImageFormat, ColorT>(image)
         { }
 
         template <typename FormatT>
-        explicit ConstPixelView(const BasicImage<FormatT>& image)
-        : BasicConstPixelView(image)
+        explicit ConstColorView(BasicImage<FormatT>& image)
+        : BasicConstColorView<ImageFormat, ColorT>(image)
         { }
 
-
         template <typename FormatT>
-        explicit ConstPixelView(const BasicConstImage<FormatT>& image)
-        : BasicConstPixelView(image)
+        explicit ConstColorView(BasicConstImage<FormatT>& image)
+        : BasicConstColorView<ImageFormat, ColorT>(image)
         { }
 };
 

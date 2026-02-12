@@ -85,6 +85,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Color.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\ColorView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
