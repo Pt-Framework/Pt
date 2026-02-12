@@ -253,7 +253,31 @@ inline ConstPixel::ConstPixel(const Pixel& p)
 }
 
 
+inline ConstPixel::~ConstPixel()
+{
+    if(_pixel)
+        _pixel->~ConstPixelBase();
+}
+
+
 inline void ConstPixel::reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+{
+    if(_pixel)
+    {
+        _pixel->~ConstPixelBase();
+        _pixel = 0;
+    }
+
+    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
+    _data = view.data();
+    _view = &view;
+    _x = x;
+    _y = y;
+    _format = &view.format();
+}
+
+
+inline void ConstPixel::reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -287,6 +311,33 @@ inline void ConstPixel::reset(const ConstPixel& p)
     if(p._pixel)
     {
         _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
+        _data = p._data;
+        _view = p._view;
+        _x = p._x;
+        _y = p._y;
+        _format = p._format;
+    }
+}
+
+
+inline void ConstPixel::reset(const Pixel& p)
+{
+    if(_pixel)
+    {
+        _pixel->~ConstPixelBase();
+        
+        _pixel = 0;
+        _data = 0;
+        _view = 0;
+        _x = 0;
+        _y = 0;
+        _format = 0;
+    }
+
+    if(p._pixel)
+    {
+        const Pt::uint8_t* data = p._data;
+        _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
         _data = p._data;
         _view = p._view;
         _x = p._x;

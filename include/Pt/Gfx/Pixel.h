@@ -192,15 +192,15 @@ class ConstPixel
 
         explicit ConstPixel(const Pixel& p);
 
-        ~ConstPixel()
-        {
-            if(_pixel)
-                _pixel->~ConstPixelBase();
-        }
+        ~ConstPixel();
 
         void reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
+        void reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
         void reset(const ConstPixel& p);
+
+        void reset(const Pixel& p);
 
         const ImageFormat& format() const
         {
@@ -209,6 +209,9 @@ class ConstPixel
 
         const ConstPixelBase* pixelBase() const
         { return _pixel; }
+
+        const ViewBase& view() const
+        { return *_view; }
 
         const Pt::uint8_t* base() const
         { return _pixel->base(); }
@@ -219,16 +222,6 @@ class ConstPixel
         Pt::ssize_t ypos() const
         { return _y; }
         
-        void advance()
-        {
-            _pixel->advance();
-        }
-
-        void advance(Pt::ssize_t n)
-        {
-            _pixel->advance(n);
-        }
-
         Color toColor() const
         {
             return _pixel->toColor();
@@ -237,6 +230,20 @@ class ConstPixel
         Argb32Color toArgb32Color() const
         {
             return _pixel->toArgb32Color();
+        }
+
+        void advance()
+        {
+            const ConstLocation& loc =_pixel->advance();
+            _x = loc.xpos();
+            _y = loc.ypos();
+        }
+
+        void advance(Pt::ssize_t n)
+        {
+            const ConstLocation& loc =_pixel->advance(n);
+            _x = loc.xpos();
+            _y = loc.ypos();
         }
 
         void getColors(Color* colors, std::size_t length) const
