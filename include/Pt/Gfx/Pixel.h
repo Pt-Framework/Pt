@@ -78,6 +78,9 @@ class Pixel
         const ImageFormat& format() const
         { return *_format; }
 
+        const PixelBase* pixelBase() const
+        { return _pixel; }
+
         Pt::uint8_t* base()
         { return _pixel->base(); }
 
@@ -201,6 +204,9 @@ class ConstPixel
         {
             return *_format;
         }
+
+        const ConstPixelBase* pixelBase() const
+        { return _pixel; }
 
         const Pt::uint8_t* base() const
         { return _pixel->base(); }

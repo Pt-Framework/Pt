@@ -134,10 +134,10 @@ class BasicConstPixelIterator
 
     public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type        = Pixel;
+        using value_type        = ConstPixel;
         using difference_type   = std::ptrdiff_t;
-        using pointer           = Pixel*;
-        using reference         = Pixel&;
+        using pointer           = ConstPixel*;
+        using reference         = ConstPixel&;
 
     public:
         BasicConstPixelIterator(const BasicConstView<Format>& view, 
@@ -216,6 +216,9 @@ class BasicPixelView : public BasicView<FormatT>
 
         explicit BasicPixelView(BasicImage<FormatT>& image);
 
+        template <typename OtherFormatT>
+        explicit BasicPixelView(BasicImage<OtherFormatT>& image);
+
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(*this, x, y); }
 
@@ -274,6 +277,12 @@ class BasicConstPixelView : public BasicConstView<FormatT>
         explicit BasicConstPixelView(const BasicImage<FormatT>& image);
 
         explicit BasicConstPixelView(const BasicConstImage<FormatT>& image);
+
+        template <typename OtherFormatT>
+        explicit BasicConstPixelView(const BasicImage<OtherFormatT>& image);
+
+        template <typename OtherFormatT>
+        explicit BasicConstPixelView(const BasicConstImage<OtherFormatT>& image);
 
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return Iterator(*this, x, y); }

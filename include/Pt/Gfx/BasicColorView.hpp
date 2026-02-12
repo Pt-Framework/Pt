@@ -41,7 +41,14 @@ namespace Gfx {
 
 template <typename FormatT, typename ColorT>
 inline BasicColorView<FormatT, ColorT>::BasicColorView(BasicImage<FormatT>& image)
-: BasicConstView<FormatT>(image)
+: BasicView<FormatT>(image)
+{ }
+
+
+template <typename FormatT, typename ColorT>
+template <typename OtherFormatT>
+inline BasicColorView<FormatT, ColorT>::BasicColorView(BasicImage<OtherFormatT>& image)
+: BasicView<FormatT>(image)
 { }
 
 ///////////////////////////////////////////////////////////////////////

@@ -69,7 +69,7 @@ class BasicColorIterator
                 : _p(p)
                 { }
 
-                PixelRef& operator=(const Color& color)
+                PixelRef& operator=(const ColorT& color)
                 {
                     assign(_pixel, color);
                     return *this;
@@ -84,7 +84,7 @@ class BasicColorIterator
         using value_type        = Pixel;
         using difference_type   = std::ptrdiff_t;
         using pointer           = Pixel*;
-        using reference         = Pixel&;
+        using reference         = PixelRef;
 
     public:
         BasicColorIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
@@ -107,7 +107,7 @@ class BasicColorIterator
         bool operator==(const BasicColorIterator& it) const
         { return _pixel.equals(it._pixel); }
 
-        PixelRef operator*() const
+        PixelRef operator*()
         { return PixelRef(_pixel); }
 
         BasicColorIterator& operator++()
@@ -212,6 +212,9 @@ class BasicColorView : public BasicView<FormatT>
         { }
 
         explicit BasicColorView(BasicImage<FormatT>& image);
+
+        template <typename OtherFormatT>
+        explicit BasicColorView(BasicImage<OtherFormatT>& image);
 
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return Iterator(*this, x, y); }

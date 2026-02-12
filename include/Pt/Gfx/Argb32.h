@@ -151,10 +151,6 @@ class Argb32Pixel
 
         Argb32Pixel& operator=(const Argb32ConstPixel& p);
 
-        Argb32Pixel& operator=(const Pixel& p);
-
-        Argb32Pixel& operator=(const ConstPixel& p);
-
         void copy(const Argb32Pixel& p, std::size_t length);
 
         bool equals(const Argb32Pixel& p) const;
@@ -194,7 +190,7 @@ class Argb32ConstPixel
         }
 
     public:
-        Argb32ConstPixel(BasicConstView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Argb32ConstPixel(const BasicConstView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Argb32ConstPixel(const BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
@@ -789,18 +785,6 @@ inline Argb32Pixel& Argb32Pixel::operator=(const Argb32ConstPixel& p)
 }
 
 
-inline Argb32Pixel& Argb32Pixel::operator=(const Pixel& p)
-{
-    return *this = p.toArgb32Color();
-}
-
-
-inline Argb32Pixel& Argb32Pixel::operator=(const ConstPixel& p)
-{
-    return *this = p.toArgb32Color();
-}
-
-
 inline Argb32Color Argb32Pixel::color() const
 {
     return Argb32Color(*base());
@@ -816,7 +800,7 @@ inline Argb32Color Argb32ConstPixel::color() const
 // Argb32ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Argb32ConstPixel::Argb32ConstPixel(BasicConstView<Argb32>& view,
+inline Argb32ConstPixel::Argb32ConstPixel(const BasicConstView<Argb32>& view,
                                           Pt::ssize_t x, Pt::ssize_t y)
 : _view(view)
 , _loc()

@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 
@@ -48,7 +49,7 @@ class Yuv12ConstPixel;
 
 /** @brief YV-12 pixel.
 */
-class Yuv12Pixel
+class PT_GFX_API Yuv12Pixel
 {
     friend class Yuv12;
     friend class Yuv12ConstPixel;
@@ -115,9 +116,12 @@ class Yuv12Pixel
 
         Yuv12Pixel& operator=(const Color& color);
 
-        Yuv12Pixel& operator=(const Pixel& p);
+        Yuv12Pixel& operator=(const Argb32Color& color);
 
-        Yuv12Pixel& operator=(const ConstPixel& p);
+        template <typename PixelT>
+        void assign(const PixelT& p, std::size_t length);
+
+        void assign(const Argb32Color* colors, std::size_t length);
 
         bool equals(const Yuv12Pixel& p) const;
 
@@ -271,8 +275,6 @@ class PT_GFX_API Yuv12 : public ImageFormat
         virtual ConstPixelBase* onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
                                                    Pt::ssize_t x, Pt::ssize_t y, 
                                                    PixelStorage& store) const override;
-    
-
 
     public:
         static Color getColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
@@ -397,6 +399,11 @@ class PT_GFX_API Yuv12 : public ImageFormat
             ypos = new_ypos;
         }
 
+        static void sourceCopy(Pt::uint8_t* y, Pt::uint8_t* u, Pt::uint8_t* v,
+                               const Pt::uint8_t* cy, const Pt::uint8_t* cu, const Pt::uint8_t* cv, 
+                               std::size_t length)
+        {
+        }
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -460,18 +467,10 @@ inline Yuv12Pixel& Yuv12Pixel::operator=(const Color& color)
 }
 
 
-inline Yuv12Pixel& Yuv12Pixel::operator=(const Pixel& p)
+Yuv12Pixel& Yuv12Pixel::operator=(const Argb32Color& color)
 {
-    // TODO: p.format() == Yuv12();
-
-    Yuv12::fromColor(_y, _u, _v, p.toColor() );
-    return *this;
-}
-
-
-inline Yuv12Pixel& Yuv12Pixel::operator=(const ConstPixel& p)
-{
-    Yuv12::fromColor(_y, _u, _v, p.toColor() );
+    Yuv12::fromColor( _y, _u, _v, Color::fromRgb8(color.red(), color.green(), 
+                                                 color.blue(), color.alpha() ) );
     return *this;
 }
 
@@ -487,6 +486,27 @@ inline void Yuv12Pixel::advance(Pt::ssize_t n)
 {
     Yuv12::advanceBy(_y, _u, _v, n, _xpos, _ypos,
                       _view.width(), _view.stride(), _subStride);
+}
+
+
+template <typename PixelT>
+void Yuv12Pixel::assign(const PixelT& p, std::size_t length)
+{
+    convert(*this, p, length); 
+}
+
+
+inline void convert(Yuv12Pixel& to, const Argb32ConstPixel& p, std::size_t length)
+{
+    Yuv12Pixel toIter(to);
+    Argb32ConstPixel fromIter(p);
+
+    while(length-- > 0)
+    {
+        toIter = fromIter.color();
+        toIter.advance();
+        fromIter.advance();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////

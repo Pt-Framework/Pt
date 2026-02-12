@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Gfx/Yuv12.h>
+#include <stdexcept>
 
 namespace Pt {
 
@@ -40,6 +41,17 @@ class Yuv12PixelBase : public PixelBase
         : PixelBase( p.ybase(), p.xpos(), p.ypos() )
         , _p(p)
         { }
+
+        const Pt::uint8_t* ybase() const
+        { return _p.ybase(); }
+
+        const Pt::uint8_t* ubase() const
+        { return _p.ubase(); }
+
+        const Pt::uint8_t* vbase() const
+        { return _p.vbase(); }
+
+    protected:
 
         virtual Location& onAdvance() override
         {
@@ -70,6 +82,8 @@ class Yuv12PixelBase : public PixelBase
             //Yuv12::sourceCopy(_p.ybase(), n, color);        
         }
 
+        virtual bool onAssignPixels(const ConstPixelBase& p, std::size_t length) override;
+
     private:
         Yuv12Pixel _p;
         Location  _loc;
@@ -84,6 +98,16 @@ class Yuv12ConstPixelBase : public ConstPixelBase
         , _p(p)
         { }
 
+        const Pt::uint8_t* ybase() const
+        { return _p.ybase(); }
+
+        const Pt::uint8_t* ubase() const
+        { return _p.ubase(); }
+
+        const Pt::uint8_t* vbase() const
+        { return _p.vbase(); }
+
+    protected:
         virtual const ConstLocation& onAdvance() override
         {
             _p.advance();
@@ -103,10 +127,44 @@ class Yuv12ConstPixelBase : public ConstPixelBase
             return Yuv12::getColor( _p.y(), _p.u(), _p.v() );
         }
 
+        virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;
+
     private:      
         Yuv12ConstPixel _p;
         ConstLocation  _loc;
 };
+
+///////////////////////////////////////////////////////////////////////
+// Argb32PixelBase
+///////////////////////////////////////////////////////////////////////
+
+inline bool Yuv12PixelBase::onAssignPixels(const ConstPixelBase& p, std::size_t length)
+{
+    if( typeid(p) == typeid(Yuv12ConstPixelBase) )
+    {
+        const Yuv12ConstPixelBase* yuv = static_cast<const Yuv12ConstPixelBase*>(&p);
+        Yuv12::sourceCopy(_p.ybase(), _p.ubase(), _p.vbase(), 
+                          yuv->ybase(), yuv->ubase(), yuv->vbase(), length);
+        return true;
+    }
+
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Argb32ConstPixelBase
+///////////////////////////////////////////////////////////////////////
+
+inline bool Yuv12ConstPixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
+{
+    if( typeid(p) == typeid(Yuv12PixelBase) )
+    {
+        Yuv12PixelBase* yuv12 = static_cast<Yuv12PixelBase*>(&p);
+        return true;
+    }
+
+    return false;
+}
 
 ///////////////////////////////////////////////////////////////////////
 // Yuv12
@@ -141,7 +199,6 @@ ConstPixelBase* Yuv12::onCreateConstPixel(const Pt::uint8_t* data, const ViewBas
     Yuv12ConstPixel p(data, view, x, y);
     return store.create<Yuv12ConstPixelBase>(p);
 }
-
 
 } // namespace
 

@@ -61,6 +61,17 @@ inline BasicView<FormatT>::BasicView(BasicImage<FormatT>& image)
 
 
 template <typename FormatT>
+template <typename OtherFormatT>
+inline BasicView<FormatT>::BasicView(BasicImage<OtherFormatT>& image)
+: ViewBase(image.width(), image.height(), 
+           image.stride(), image.padding())
+, _data( image.data() )
+, _format( &image.format() )
+{
+}
+
+
+template <typename FormatT>
 inline void BasicView<FormatT>::reset()
 {
     _data = 0;

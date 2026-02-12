@@ -61,16 +61,17 @@ class ImageFormat
         typedef ConstPixel ConstPixel;
         typedef Color Color;
 
+        enum class Quality : uint32_t
+        {
+            Normal,
+            High
+        };
+
     public:
-        PT_GFX_API static const ImageFormat& rgb16();
-
-        PT_GFX_API static const ImageFormat& rgb32();
-
-        PT_GFX_API static const ImageFormat& argb32();
-
-    public:
-        explicit ImageFormat(size_t pixelStride)
+        explicit ImageFormat(size_t pixelStride, 
+                             const Quality& quality = Quality::Normal)
         : _pixelStride(pixelStride)
+        , _quality(quality)
         { }
 
         virtual ~ImageFormat() 
@@ -99,6 +100,23 @@ class ImageFormat
         {
             return ! (*this == a);
         }
+
+        const Quality& quality() const
+        {
+            return _quality;
+        }
+
+        const std::type_info& type() const
+        {
+            return onGetType();
+        }
+
+    public:
+        PT_GFX_API static const ImageFormat& rgb16();
+
+        PT_GFX_API static const ImageFormat& rgb32();
+
+        PT_GFX_API static const ImageFormat& argb32();
 
     protected:
         virtual std::unique_ptr<ImageFormat> onClone() const
@@ -130,6 +148,7 @@ class ImageFormat
 
     private:
         const std::size_t  _pixelStride;
+        Quality            _quality;
         const varint_t     _r0;
         const varint_t     _r1;
         const varint_t     _r2;

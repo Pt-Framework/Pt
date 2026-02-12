@@ -50,6 +50,11 @@ class PixelView : public BasicPixelView<ImageFormat>
         explicit PixelView(Image& image)
         : BasicPixelView(image)
         { }
+
+        template <typename FormatT>
+        explicit PixelView(BasicImage<FormatT>& image)
+        : BasicPixelView(image)
+        { }
 };
 
 
@@ -67,9 +72,22 @@ class ConstPixelView : public BasicConstPixelView<ImageFormat>
         explicit ConstPixelView(const ConstImage& image)
         : BasicConstPixelView(image)
         { }
+
+        template <typename FormatT>
+        explicit ConstPixelView(const BasicImage<FormatT>& image)
+        : BasicConstPixelView(image)
+        { }
+
+
+        template <typename FormatT>
+        explicit ConstPixelView(const BasicConstImage<FormatT>& image)
+        : BasicConstPixelView(image)
+        { }
 };
 
-
+//
+// TODO: move to separate header
+//
 template <typename ColorT>
 class ColorView : public BasicColorView<ImageFormat, ColorT>
 {
@@ -79,6 +97,11 @@ class ColorView : public BasicColorView<ImageFormat, ColorT>
         { }
 
         explicit ColorView(Image& image)
+        : BasicColorView<ImageFormat, ColorT>(image)
+        { }
+
+        template <typename FormatT>
+        explicit ColorView(BasicImage<FormatT>& image)
         : BasicColorView<ImageFormat, ColorT>(image)
         { }
 };

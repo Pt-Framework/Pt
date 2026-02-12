@@ -124,6 +124,11 @@ inline Pixel& Pixel::operator=(const Color& color)
 
 inline Pixel& Pixel::operator=(const Pixel& p)
 {
+    //if(p.format().quality() == ImageFormat::Quality::Normal)
+    //    _pixel->assign( p.toArgb32Color() );
+    //else
+    //    _pixel->assign( p.toColor() );
+    
     _pixel->assign( p.toColor() );
     return *this;
 }
@@ -131,6 +136,11 @@ inline Pixel& Pixel::operator=(const Pixel& p)
 
 inline Pixel& Pixel::operator=(const ConstPixel& p)
 {
+    //if(p.format().quality() == ImageFormat::Quality::Normal)
+    //    _pixel->assign( p.toArgb32Color() );
+    //else
+    //    _pixel->assign( p.toColor() );
+    //
     _pixel->assign( p.toColor() );
     return *this;
 }
@@ -146,17 +156,32 @@ inline void Pixel::assign(const ConstPixel& p, std::size_t length)
     if( isCompatible )
         return;
 
-    const std::size_t colorsLength = 64;
-    Argb32Color colors[colorsLength];
-
-    std::size_t avail = length;
-
-    while(avail > 0)
+    if(p.format().quality() == ImageFormat::Quality::Normal ||
+       this->format().quality() == ImageFormat::Quality::Normal)
     {
-        std::size_t n = std::min(colorsLength, avail);
+        const std::size_t bufsize = 64;
+        Argb32Color colors[bufsize];
+
+        while(length > 0)
+        {
+            std::size_t n = std::min(length, bufsize);
+            p.getColors(colors, n);
+            this->assign(colors, n);
+            length -= n;
+        }
+
+        return;
+    }
+
+    const std::size_t bufsize = 64;
+    Gfx::Color colors[bufsize];
+
+    while(length > 0)
+    {
+        std::size_t n = std::min(length, bufsize);
         p.getColors(colors, n);
         this->assign(colors, n);
-        avail -= n;
+        length -= n;
     }
 }
 

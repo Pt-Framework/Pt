@@ -44,6 +44,28 @@ template <typename FormatT>
 class BasicConstImage;
 
 
+template <typename PixelT1, typename PixelT2>
+inline void convert(PixelT1& to, const PixelT2& p)
+{
+    to = p.color();
+}
+
+
+template <typename PixelT1, typename PixelT2>
+inline void convert(PixelT1& to, const PixelT2& p, std::size_t length)
+{
+    PixelT1 it(to);
+    PixelT2 from(p);
+
+    while(length-- > 0)
+    {
+        it = from.color();
+        it.advance();
+        from.advance();
+    }
+}
+
+
 template <typename FormatT>
 class BasicView : public ViewBase
 {
@@ -54,6 +76,9 @@ class BasicView : public ViewBase
         explicit BasicView(const Format& format);
 
         explicit BasicView(BasicImage<FormatT>& image);
+
+        template <typename OtherFormatT>
+        explicit BasicView(BasicImage<OtherFormatT>& image);
 
         virtual ~BasicView()
         { }

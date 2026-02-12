@@ -46,6 +46,14 @@ inline BasicPixelView<FormatT>::BasicPixelView(BasicImage<FormatT>& image)
 
 
 template <typename FormatT>
+template <typename OtherFormatT>
+inline BasicPixelView<FormatT>::BasicPixelView(BasicImage<OtherFormatT>& image)
+: BasicView<FormatT>(image)
+{
+}
+
+
+template <typename FormatT>
 inline void BasicPixelView<FormatT>::assign(Pt::ssize_t x, Pt::ssize_t y, 
                                             const BasicConstPixelView<FormatT>& view, 
                                             Pt::ssize_t fromX, Pt::ssize_t fromY, 
@@ -97,6 +105,22 @@ template <typename FormatT>
 inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
+
+
+template <typename FormatT>
+template <typename OtherFormatT>
+inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicImage<OtherFormatT>& image)
+: BasicView<FormatT>(image)
+{
+}
+
+
+template <typename FormatT>
+template <typename OtherFormatT>
+inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<OtherFormatT>& image)
+: BasicView<FormatT>(image)
+{
+}
 
 } // namespace
 

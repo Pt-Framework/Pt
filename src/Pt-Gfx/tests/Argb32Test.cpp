@@ -126,11 +126,11 @@ class Argb32Test : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
 
             Image i(Argb32(), 2, 2);
-            PixelView pixelView(i);
+            ConstColorView<Argb32Color> pixelView(i);
+
             Argb32Image a(2, 2);
             Argb32PixelView argb32View(a);
 
-            //Pt::Gfx::ColorView<Pt::Gfx::Argb32Color> colorView(i);
             Pt::Gfx::copy( pixelView.begin(), pixelView.end(), argb32View.begin() );
         }
         
@@ -157,8 +157,6 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 Pt::System::Clock clock;
                 clock.start();
-            
-                Pt::Gfx::Color color(100, 100, 100);
 
                 for( ; it != end; ++it)
                 {
@@ -182,13 +180,11 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Argb32Image image(width, height);
-                Argb32PixelView imageView(image);
                 
+                Argb32PixelView imageView(image);
                 Argb32PixelView::PixelIterator it = imageView.begin();
                 Argb32PixelView::PixelIterator end = imageView.end();
-            
-                Pt::Gfx::Argb32Color color(255, 100, 100, 100);
-            
+
                 Argb32ConstPixelView constView(image);
                 Argb32Pixel cpixel = *imageView.begin();
 
