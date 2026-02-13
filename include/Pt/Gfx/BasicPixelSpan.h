@@ -136,6 +136,12 @@ class BasicPixelSpan
             return BasicPixelSpan(*_view, _x + offset, _y, count);
         }
 
+        BasicPixelSpan slice(std::size_t start, std::size_t end) const
+        {
+            assert(start <= end && "invalid span slice");
+            return subspan(start, end - start);
+        }
+
     private:
         BasicView<Format>* _view;
         Pt::ssize_t        _x;

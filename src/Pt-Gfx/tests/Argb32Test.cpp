@@ -132,12 +132,14 @@ class Argb32Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Image i(Argb32(), 2, 2);
+            ColorView<Argb32Color> colorViewMutable(i);
             ConstColorView<Argb32Color> colorView(i);
 
             Argb32Image a(2, 2);
             Argb32PixelView argb32View(a);
 
-            BasicPixelSpan<Argb32> span(argb32View, 0, 0, 1);
+            BasicPixelSpan<Argb32> argb21Span(argb32View, 0, 0, 1);
+            BasicPixelSpan<ImageFormat> imageSpan(colorViewMutable, 0, 0, 1);
 
             Pt::Gfx::copy( colorView.begin(), colorView.end(), argb32View.begin() );
         }
