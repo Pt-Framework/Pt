@@ -40,8 +40,8 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
-inline BasicImage<FormatT>::BasicImage(const Format& format)
+template <typename FormatT, typename TraitsT>
+inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
 : _format( clone(format) )
 , _data(0)
 , _width(0)
