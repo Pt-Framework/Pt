@@ -2991,6 +2991,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelSpan.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelLineView.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">

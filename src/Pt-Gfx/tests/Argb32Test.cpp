@@ -31,7 +31,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/BasicPixelSpan.h>
+#include <Pt/Gfx/BasicPixelLineView.h>
 
 #include <Pt/System/Clock.h>
 
