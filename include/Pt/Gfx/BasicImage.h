@@ -30,6 +30,7 @@
 #define PT_GFX_BASIC_IMAGE_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Types.h>
 #include <vector>
 #include <memory>
@@ -40,34 +41,14 @@ namespace Gfx {
 
 //inline namespace v2 {
 
-template <typename FormatT>
-std::size_t pixelStride(const FormatT& format)
-{
-    return format.pixelStride();
-}
-
-
-template <typename FormatT>
-std::size_t imageSize(const FormatT& format, Pt::ssize_t width, Pt::ssize_t height,
-                      std::size_t padding)
-{
-    return format.imageSize(width, height, padding);
-}
-
-
-template <typename FormatT>
-std::unique_ptr<FormatT> clone(const FormatT& format)
-{
-    return std::unique_ptr<FormatT>( new FormatT(format) );
-}
-
 /** @brief Basic image.
 */
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicImage
 {
     public:
         typedef FormatT Format;
+        typedef TraitsT Traits;
 
         typedef Pt::ssize_t pos_t;
         typedef Pt::ssize_t length_t;
@@ -77,19 +58,19 @@ class BasicImage
 
         BasicImage(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
-        : _format( clone(format) )
+        : _format( Traits::clone(format) )
         , _data(0)
         , _width(width)
         , _height(height)
         ,  _padding(padding)
         {
-            _buffer.resize( imageSize(*_format, width, height, padding) );
+            _buffer.resize( Traits::imageSize(*_format, width, height, padding) );
             _data = _buffer.empty() ? 0 : &_buffer[0];
         }
 
         BasicImage(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        : _format( clone(format) )
+        : _format( Traits::clone(format) )
         , _data(data)
         , _width(width)
         , _height(height)
@@ -97,7 +78,7 @@ class BasicImage
         { }
 
         BasicImage(const BasicImage& image)
-        : _format( clone( image.format() ) )
+        : _format( Traits::clone( image.format() ) )
         , _buffer(image._buffer)
         , _data( _buffer.empty() ? 0 : &_buffer[0] )
         , _width(image._width)
@@ -110,7 +91,7 @@ class BasicImage
 
         BasicImage& operator=(const BasicImage& image)
         { 
-            _format = clone( image.format() );
+            _format = Traits::clone( image.format() );
             
             _buffer = image._buffer;
             _data = _buffer.empty() ? 0 : &_buffer[0];
@@ -124,7 +105,7 @@ class BasicImage
 
         void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         { 
-            _buffer.resize( imageSize(*_format, width, height, padding) );
+            _buffer.resize( Traits::imageSize(*_format, width, height, padding) );
             _data = _buffer.empty() ? 0 : &_buffer[0];
             
             _width = width;
@@ -146,9 +127,9 @@ class BasicImage
         void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
         { 
-            _format =  clone(format);
+            _format =  Traits::clone(format);
 
-            _buffer.resize( imageSize(*_format, width, height, padding) );
+            _buffer.resize( Traits::imageSize(*_format, width, height, padding) );
             _data = _buffer.empty() ? 0 : &_buffer[0];
             
             _width = width;
@@ -159,7 +140,7 @@ class BasicImage
         void reset(const Format& format, Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
-            _format = clone(format);
+            _format = Traits::clone(format);
 
             _buffer.clear();
             _data = data;
@@ -202,13 +183,13 @@ class BasicImage
 
         Pt::ssize_t stride() const
         { 
-            return (_width * pixelStride(*_format)) + _padding; 
+            return (_width * Traits::pixelStride(*_format)) + _padding; 
         }
 
         std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
                          std::size_t padding) const
         {
-            return imageSize(*_format, width, height, padding);
+            return Traits::imageSize(*_format, width, height, padding);
         }
 
     private:
@@ -222,7 +203,7 @@ class BasicImage
 
 /** @brief Basic const image.
 */
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicConstImage
 {
     public:

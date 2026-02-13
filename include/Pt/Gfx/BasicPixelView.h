@@ -41,12 +41,6 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT>
-class BasicImage;
-
-template <typename FormatT>
-class BasicConstImage;
-
-template <typename FormatT>
 class BasicConstPixelView;
 
 template <typename FormatT>

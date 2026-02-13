@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
+#include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/TypeInfo.h>
 #include <memory>
@@ -49,6 +50,10 @@ class ConstPixel;
 */
 class ImageFormat
 { 
+  friend struct MyImageTraits;
+  friend struct ImageTraits<ImageFormat>;
+
+  // image traits functions
   friend std::size_t pixelStride(const ImageFormat& format);
 
   friend std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, 
@@ -172,6 +177,46 @@ inline std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::s
 {
     return format.onImageSize(width, height, padding);
 }
+
+template <>
+struct ImageTraits<ImageFormat>
+{
+    static std::size_t pixelStride(const ImageFormat& format)
+    {
+        return format._pixelStride;
+    }
+
+    static std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::ssize_t height,
+                          std::size_t padding)
+    {
+        return format.onImageSize(width, height, padding);
+    }
+
+    static std::unique_ptr<ImageFormat> clone(const ImageFormat& format)
+    {
+        return format.onClone();
+    }
+};
+
+
+struct MyImageTraits
+{
+    static std::size_t pixelStride(const ImageFormat& format)
+    {
+        return format._pixelStride;
+    }
+
+    static std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::ssize_t height,
+                          std::size_t padding)
+    {
+        return format.onImageSize(width, height, padding);
+    }
+
+    static std::unique_ptr<ImageFormat> clone(const ImageFormat& format)
+    {
+        return format.onClone();
+    }
+};
 
 } // namespace
 

@@ -40,11 +40,11 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
-class BasicImage;
-
-template <typename FormatT>
-class BasicConstImage;
+template <typename ColorT, typename PixelT> 
+ColorT toColor(const PixelT& p, const ColorT* tag = 0)
+{
+  return p.toColor();
+}
 
 
 template <typename PixelT, typename ColorT> 
@@ -52,6 +52,7 @@ void assign(PixelT& p, const ColorT& color)
 {
   p = color;
 }
+
 
 template <typename FormatT,  typename ColorT>
 class BasicColorIterator
@@ -125,13 +126,6 @@ class BasicColorIterator
     private:
         Pixel _pixel;
 };
-
-
-template <typename ColorT, typename PixelT> 
-ColorT toColor(const PixelT& p, const ColorT* tag = 0)
-{
-  return p.toColor();
-}
 
 
 template <typename FormatT, typename ColorT>

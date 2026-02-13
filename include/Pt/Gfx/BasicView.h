@@ -31,18 +31,12 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
+#include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-template <typename FormatT>
-class BasicImage;
-
-template <typename FormatT>
-class BasicConstImage;
-
 
 template <typename PixelT1, typename PixelT2>
 inline void convert(PixelT1& to, const PixelT2& p)
