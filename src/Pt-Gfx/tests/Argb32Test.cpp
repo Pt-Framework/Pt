@@ -31,6 +31,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/BasicPixelSpan.h>
 
 #include <Pt/System/Clock.h>
 
@@ -55,6 +56,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Pixel",*this, &Argb32Test::Pixel);
             registerMethod("Iterator",*this, &Argb32Test::Iterator);
             registerMethod("Color",*this, &Argb32Test::Color);
+            registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
             registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
             registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
@@ -123,16 +125,23 @@ class Argb32Test : public Pt::Unit::TestSuite
             *pixel = c;
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
+        }
+        
+        void ColorCopy()
+        {
+            using namespace Pt::Gfx;
 
             Image i(Argb32(), 2, 2);
-            ConstColorView<Argb32Color> pixelView(i);
+            ConstColorView<Argb32Color> colorView(i);
 
             Argb32Image a(2, 2);
             Argb32PixelView argb32View(a);
 
-            Pt::Gfx::copy( pixelView.begin(), pixelView.end(), argb32View.begin() );
+            BasicPixelSpan<Argb32> span(argb32View, 0, 0, 1);
+
+            Pt::Gfx::copy( colorView.begin(), colorView.end(), argb32View.begin() );
         }
-        
+
         static const std::size_t width = 64;
         static const std::size_t height = 10000;
 

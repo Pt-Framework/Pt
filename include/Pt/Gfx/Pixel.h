@@ -288,6 +288,41 @@ inline Argb32Color toColor(const ConstPixel& p, const Argb32Color* tag = 0)
   return p.toArgb32Color();
 }
 
+
+///////////////////////////////////////////////////////////////////////
+// Span
+///////////////////////////////////////////////////////////////////////
+
+class Span
+{
+    public:
+        Span(BasicView<ImageFormat>& view, 
+             Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        : _p(view, x, y)
+        , _length(length)
+        {
+        }
+
+        void setLength(std::size_t length)
+        {
+            _length = length;
+        }
+
+        void advance(std::size_t n)
+        {
+            _p.advance(n);
+        }
+
+        Pixel& front()
+        {
+            return _p;
+        }
+
+    private:
+        Pixel       _p;
+        std::size_t _length;
+};
+
 } // namespace
 
 } // namespace

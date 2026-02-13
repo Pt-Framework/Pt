@@ -78,6 +78,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelSpan.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h" />
