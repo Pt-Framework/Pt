@@ -61,7 +61,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             registerMethod("Iterator", *this, &Yuv12Test::Iterator);
             registerMethod("Color", *this, &Yuv12Test::Color);
             registerMethod("ConvertGenericArgb32ToYuv12", *this, &Yuv12Test::ConvertGenericArgb32ToYuv12);
-            registerMethod("ConvertGenericYuv12ToYuv12", *this, &Yuv12Test::ConvertGenericYuv12ToYuv12);
+            registerMethod("ConvertYuv12ToGenericYuv12", *this, &Yuv12Test::ConvertYuv12ToGenericYuv12);
+            registerMethod("ConvertGenericYuv12ToGenericYuv12", *this, &Yuv12Test::ConvertGenericYuv12ToGenericYuv12);
             registerMethod("ConvertArgb32ToYuv12", *this, &Yuv12Test::ConvertArgb32ToYuv12);
             
             registerMethod("BenchmarkA_Generic", *this, &Yuv12Test::Benchmark);
@@ -161,7 +162,30 @@ class Yuv12Test : public Pt::Unit::TestSuite
             }
         }
 
-        void ConvertGenericYuv12ToYuv12()
+        void ConvertYuv12ToGenericYuv12()
+        {
+            using namespace Pt::Gfx;
+
+            Pt::uint8_t yuv12[] = { 100, 100, 100 };
+
+            // copy a concrete YUV-12 image...
+            Yuv12Image image(1, 1);
+            ConstPixelView imageView(image);
+            ConstPixelView::Iterator from = imageView.begin();
+
+            // ...to an image in YUV-12 image
+            Image yuv12Image(Yuv12(), yuv12, 1, 1);
+            PixelView yuv12View(yuv12Image);
+            PixelView::PixelIterator it = yuv12View.begin();
+            PixelView::PixelIterator end = yuv12View.end();
+
+            for( ; it != end; it += image.width(), from += image.width() )
+            {
+                it->assign( *from, image.width() );
+            }
+        }
+
+        void ConvertGenericYuv12ToGenericYuv12()
         {
             using namespace Pt::Gfx;
 
@@ -172,7 +196,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             ConstPixelView imageView(image);
             ConstPixelView::Iterator from = imageView.begin();
 
-            // ...to a concrete YUV-12 image
+            // ...to an image in YUV-12 image
             Image yuv12Image(Yuv12(), yuv12, 1, 1);
             PixelView yuv12View(yuv12Image);
             PixelView::PixelIterator it = yuv12View.begin();

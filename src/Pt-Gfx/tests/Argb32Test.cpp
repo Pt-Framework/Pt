@@ -132,6 +132,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Image i(Argb32(), 2, 2);
+            PixelView pixelView(i);
             ColorView<Argb32Color> colorViewMutable(i);
             ConstColorView<Argb32Color> colorView(i);
 
@@ -142,6 +143,8 @@ class Argb32Test : public Pt::Unit::TestSuite
             BasicPixelSpan<ImageFormat> imageSpan(colorViewMutable, 0, 0, 1);
 
             Pt::Gfx::copy( colorView.begin(), colorView.end(), argb32View.begin() );
+
+            Pt::Gfx::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
         }
 
         static const std::size_t width = 64;
@@ -162,15 +165,18 @@ class Argb32Test : public Pt::Unit::TestSuite
                 PixelView::PixelIterator it = pixelView.begin();
                 PixelView::PixelIterator end = pixelView.end();
 
+                //ConstPixelView cpixelView(image);
+                //ConstPixelView::Iterator pfrom = cpixelView.begin();
+                
                 ConstColorView<Argb32Color>  colorView(image);
-                auto from = colorView.begin();
+                ConstColorView<Argb32Color>::Iterator cfrom = colorView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
 
                 for( ; it != end; ++it)
                 {
-                    (*it) = *from;
+                    (*it) = *cfrom;
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();

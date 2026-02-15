@@ -42,7 +42,7 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT>
-class PixelSpanIterator
+class BasicPixelSpanIterator
 {
     public:
         typedef FormatT Format;
@@ -59,32 +59,100 @@ class PixelSpanIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        PixelSpanIterator(BasicView<Format>& view, 
-                          Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
-        : _view(&view)
-        , _span(view, _x, _y, _length)
+        BasicPixelSpanIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y, 
+                               std::size_t length)
+        : _span(view, x, y, length)
         { }
 
-        reference operator*() const
+        SpanType& operator*() const
         { return _span; }
 
-        PixelSpanIterator& operator++() noexcept
+        BasicPixelSpanIterator& operator++() noexcept
+        {
+            ++_span;
+            return *this;
+        }
+
+        BasicPixelSpanIterator operator++(int) noexcept
+        {
+            BasicPixelSpanIterator it(*this);
+            ++*this;
+            return it;
+        }
+
+        BasicPixelSpanIterator& operator+=(Pt::ssize_t n)
+        {
+            _span += n;
+            return *this;
+        }
+
+        bool operator==(const BasicPixelSpanIterator& other) const noexcept
+        {
+            return _span.front().equals( other.front() );
+        }
+
+        bool operator!=(const BasicPixelSpanIterator& other) const noexcept
+        {
+            return ! (*this == other);
+        }
+
+    private:
+        SpanType _span;
+};
+
+
+template <typename FormatT>
+class BasicPixelLineIterator
+{
+    public:
+        typedef FormatT Format;
+        typedef typename FormatT::Pixel Pixel;
+        typedef typename FormatT::ConstPixel ConstPixel;
+
+        using SpanType = BasicPixelSpan<FormatT>;
+
+    public:
+        using value_type        = SpanType;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = const SpanType*;
+        using reference         = SpanType&;
+        using iterator_category = std::forward_iterator_tag;
+
+    public:
+        BasicPixelLineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y, 
+                               std::size_t length)
+        : _view(&view)
+        , _span(view, x, y, length)
+        { }
+
+        SpanType& operator*() const
+        { return _span; }
+
+        BasicPixelLineIterator& operator++() noexcept
         {
             _span += _view->width();
             return *this;
         }
 
-        PixelSpanIterator operator++(int) noexcept
+        BasicPixelLineIterator operator++(int) noexcept
         {
-            return ++Iterator(*this);
+            BasicPixelLineIterator it(*this);
+            ++*this;
+            return it;
         }
 
-        bool operator==(const PixelSpanIterator& other) const noexcept
+        BasicPixelLineIterator& operator+=(Pt::ssize_t n)
+        {
+            _span += (_view->width() * n);
+            return *this;
+        }
+
+        bool operator==(const BasicPixelLineIterator& other) const noexcept
         {
             return _span.front().equals( other.front() );
         }
 
-        bool operator!=(const PixelSpanIterator& other) const noexcept
+        bool operator!=(const BasicPixelLineIterator& other) const noexcept
         {
             return ! (*this == other);
         }

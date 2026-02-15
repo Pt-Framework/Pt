@@ -53,7 +53,7 @@ class BasicPixelSpan
 
     public:
         BasicPixelSpan(BasicView<Format>& view, 
-             Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+                       Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
         , _y(y)
@@ -150,10 +150,105 @@ class BasicPixelSpan
         std::size_t        _length;
 };
 
-} // namespace
+
+template <typename FormatT>
+class BasicColorSpan
+{
+    public:
+        typedef FormatT Format;
+        typedef typename FormatT::Pixel Pixel;
+        typedef typename FormatT::ConstPixel ConstPixel;
+    
+        typedef BasicPixelIterator<Format> Iterator;
+        typedef BasicConstPixelIterator<Format> ConstIterator;
+
+    public:
+        BasicColorSpan(BasicView<Format>& view, 
+                       Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        : _view(&view)
+        , _x(x)
+        , _y(y)
+        , _p(view, x, y)
+        , _length(length)
+        { }
+
+        BasicColorSpan(const BasicColorSpan& span)
+        : _view(span._view)
+        , _x(span._x)
+        , _y(span._y)
+        , _p(span._p)
+        , _length(span._length)
+        {}
+
+        BasicColorSpan& operator=(const BasicColorSpan& span)
+        {
+            _view = span._view;
+            _x = span._x;
+            _y = span._y;
+            _p.reset(span._p);
+            _length = span.length;
+        }
+
+        void reset(BasicView<Format>& view, 
+                   Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        {
+            _view = &view;
+            _x = x;
+            _y = y;
+            _p.reset(view, x, y);
+            _length = length;
+        }
+
+        Pt::ssize_t xpos() const
+        { return _x; }
+
+        Pt::ssize_t ypos() const
+        { return _y; }
+
+        bool empty() const
+        { return _length == 0; }
+
+        std::size_t length() const
+        { return _length; }
+
+        void setLength(std::size_t length)
+        {
+            _length = length;
+        }
+
+        void advance(std::size_t n)
+        {
+            _p.advance(n);
+        }
+
+        Pixel& front()
+        { return _p; }
+
+        const Pixel& front() const
+        { return _p; }
+
+        Iterator begin()
+        { return Iterator(_view, _x, _y); }
+
+        Iterator end()
+        { return Iterator(_view, _x + _length, _y); }
+
+        ConstIterator cbegin() const
+        { return ConstIterator(_view, _x, _y); }
+
+        ConstIterator cend() const
+        { return ConstIterator(_view, _x + _length, _y); }
+
+    private:
+        BasicView<Format>* _view;
+        Pt::ssize_t        _x;
+        Pt::ssize_t        _y;
+        Pixel              _p;
+        std::size_t        _length;
+};
 
 } // namespace
 
-#include <Pt/Gfx/BasicPixelView.hpp>
+} // namespace
 
 #endif
