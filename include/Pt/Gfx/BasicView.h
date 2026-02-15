@@ -112,6 +112,12 @@ class BasicConstView : public ViewBase
 
         explicit BasicConstView(const BasicConstImage<FormatT>& image);
 
+        template <typename OtherFormatT>
+        explicit BasicConstView(const BasicImage<OtherFormatT>& image);
+
+        template <typename OtherFormatT>
+        explicit BasicConstView(const BasicConstImage<OtherFormatT>& image);
+
         virtual ~BasicConstView()
         { }
 

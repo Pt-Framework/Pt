@@ -122,6 +122,28 @@ inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<FormatT>& i
 
 
 template <typename FormatT>
+template <typename OtherFormatT>
+inline BasicConstView<FormatT>::BasicConstView(const BasicImage<OtherFormatT>& image)
+: ViewBase(image.width(), image.height(), 
+            image.stride(), image.padding())
+, _data( image.data() )
+, _format( &image.format() )
+{
+}
+
+
+template <typename FormatT>
+template <typename OtherFormatT>
+inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<OtherFormatT>& image)
+: ViewBase(image.width(), image.height(), 
+            image.stride(), image.padding())
+, _data( image.data() )
+, _format( &image.format() )
+{
+}
+
+
+template <typename FormatT>
 inline void BasicConstView<FormatT>::reset(const BasicImage<FormatT>& image)
 {
     _data = image.data();
