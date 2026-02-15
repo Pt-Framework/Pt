@@ -54,7 +54,7 @@ void assign(PixelT& p, const ColorT& color)
 }
 
 
-template <typename FormatT,  typename ColorT>
+template <typename FormatT, typename ColorT>
 class BasicColorIterator
 {
     public:
@@ -131,9 +131,6 @@ class BasicColorIterator
 template <typename FormatT, typename ColorT>
 class BasicConstColorIterator
 {
-    static const ColorT* colorTag()
-    { return 0; }
-
     public:
         typedef FormatT Format;
         typedef ColorT Color;
@@ -172,7 +169,10 @@ class BasicConstColorIterator
         { return _pixel.equals(it._pixel); }
 
         Color operator*() const
-        { return toColor( _pixel, colorTag() ); }
+        { 
+            const ColorT* tag = 0;
+            return toColor(_pixel, tag); 
+        }
 
         BasicConstColorIterator& operator++()
         {
