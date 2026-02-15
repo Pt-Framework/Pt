@@ -76,7 +76,6 @@ class ConstPixelView : public BasicConstPixelView<ImageFormat>
         : BasicConstPixelView(image)
         { }
 
-
         template <typename FormatT>
         explicit ConstPixelView(const BasicConstImage<FormatT>& image)
         : BasicConstPixelView(image)

@@ -110,7 +110,7 @@ inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<F
 template <typename FormatT>
 template <typename OtherFormatT>
 inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicImage<OtherFormatT>& image)
-: BasicView<FormatT>(image)
+: BasicConstView<FormatT>(image)
 {
 }
 
@@ -118,7 +118,7 @@ inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicImage<OtherF
 template <typename FormatT>
 template <typename OtherFormatT>
 inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<OtherFormatT>& image)
-: BasicView<FormatT>(image)
+: BasicConstView<FormatT>(image)
 {
 }
 
