@@ -68,6 +68,48 @@ void transform(IteratorT begin, IteratorT end, OperationT op)
         op(*begin);
 }
 
+
+template <typename T, typename U>
+struct IsSamePixel
+{ 
+    enum { value = 0 }; 
+};
+
+
+template <typename T>
+struct IsSamePixel<T, T>
+{ 
+    enum { value = 1 };
+};
+
+
+template <typename T1, typename T2, int isRelated>
+struct Converter 
+{
+    static void convert(const T1& p1, T2& p2) 
+    {
+        p2 = p1.toColor();
+    }
+};
+
+
+template <typename T1, typename T2>
+struct Converter<T1, T2, 1> 
+{
+    static void convert(const T1& p1, T2& p2) 
+    {
+        p2 = p1;
+    }
+};
+
+
+template <typename P1, typename P2> 
+void convert(const P1& p1, P2& p2)
+{
+    typedef typename P1::PixelType PixelType;
+    Converter<P1, P2, IsSamePixel<PixelType, P2>::value>::convert(p1, p2);
+}
+
 } // namespace
 
 } // namespace

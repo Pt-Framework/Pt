@@ -41,7 +41,8 @@ namespace Gfx {
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Pixel::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename ColorT>
+inline Pixel<ColorT>::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
@@ -53,7 +54,8 @@ inline Pixel::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 }
 
 
-inline Pixel::Pixel(const Pixel& p)
+template <typename ColorT>
+inline Pixel<ColorT>::Pixel(const Pixel& p)
 : _view(p._view)
 , _x(p._x)
 , _y(p._y)
@@ -68,14 +70,16 @@ inline Pixel::Pixel(const Pixel& p)
 }
 
 
-inline Pixel::~Pixel()
+template <typename ColorT>
+inline Pixel<ColorT>::~Pixel()
 {
     if(_pixel)
         _pixel->~PixelBase();
 }
 
 
-inline void Pixel::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename ColorT>
+inline void Pixel<ColorT>::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -92,7 +96,8 @@ inline void Pixel::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_
 }
 
 
-inline void Pixel::reset(const Pixel& p)
+template <typename ColorT>
+inline void Pixel<ColorT>::reset(const Pixel& p)
 {
     if(_pixel)
     {
@@ -115,21 +120,24 @@ inline void Pixel::reset(const Pixel& p)
 }
 
 
-inline Pixel& Pixel::operator=(const Argb32Color& color)
+template <typename ColorT>
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Argb32Color& color)
 {
     _pixel->assign(color);
     return *this;
 }
 
 
-inline Pixel& Pixel::operator=(const Color& color)
+template <typename ColorT>
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Color& color)
 {
     _pixel->assign(color);
     return *this;
 }
 
 
-inline Pixel& Pixel::operator=(const Pixel& p)
+template <typename ColorT>
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<ColorT>& p)
 {
     //if(p.format().quality() == ImageFormat::Quality::Normal)
     //    _pixel->assign( p.toArgb32Color() );
@@ -141,7 +149,8 @@ inline Pixel& Pixel::operator=(const Pixel& p)
 }
 
 
-inline Pixel& Pixel::operator=(const ConstPixel& p)
+template <typename ColorT>
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<ColorT>& p)
 {
     //if(p.format().quality() == ImageFormat::Quality::Normal)
     //    _pixel->assign( p.toArgb32Color() );
@@ -153,7 +162,8 @@ inline Pixel& Pixel::operator=(const ConstPixel& p)
 }
 
 
-inline void Pixel::assign(const ConstPixel& p, std::size_t length)
+template <typename ColorT>
+inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p, std::size_t length)
 {
     bool isCompatible = _pixel->assign(*p._pixel, length);
     if( isCompatible )
@@ -193,7 +203,8 @@ inline void Pixel::assign(const ConstPixel& p, std::size_t length)
 }
 
 
-inline bool Pixel::equals(const ConstPixel& p) const
+template <typename ColorT>
+inline bool Pixel<ColorT>::equals(const ConstPixel<ColorT>& p) const
 { 
     return _pixel->base() == p.base();
 }
@@ -202,7 +213,8 @@ inline bool Pixel::equals(const ConstPixel& p) const
 // ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-inline ConstPixel::ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename ColorT>
+inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
@@ -214,7 +226,8 @@ inline ConstPixel::ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize
 }
 
 
-inline ConstPixel::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename ColorT>
+inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
@@ -226,7 +239,8 @@ inline ConstPixel::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x,
 }
 
 
-inline ConstPixel::ConstPixel(const ConstPixel& p)
+template <typename ColorT>
+inline ConstPixel<ColorT>::ConstPixel(const ConstPixel& p)
 : _view(p._view)
 , _x(p._x)
 , _y(p._y)
@@ -241,7 +255,8 @@ inline ConstPixel::ConstPixel(const ConstPixel& p)
 }
 
 
-inline ConstPixel::ConstPixel(const Pixel& p)
+template <typename ColorT>
+inline ConstPixel<ColorT>::ConstPixel(const Pixel<ColorT>& p)
 : _view(p._view)
 , _x(p._x)
 , _y(p._y)
@@ -253,31 +268,16 @@ inline ConstPixel::ConstPixel(const Pixel& p)
 }
 
 
-inline ConstPixel::~ConstPixel()
+template <typename ColorT>
+inline ConstPixel<ColorT>::~ConstPixel()
 {
     if(_pixel)
         _pixel->~ConstPixelBase();
 }
 
 
-inline void ConstPixel::reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
-{
-    if(_pixel)
-    {
-        _pixel->~ConstPixelBase();
-        _pixel = 0;
-    }
-
-    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
-    _data = view.data();
-    _view = &view;
-    _x = x;
-    _y = y;
-    _format = &view.format();
-}
-
-
-inline void ConstPixel::reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename ColorT>
+inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -294,7 +294,26 @@ inline void ConstPixel::reset(const BasicView<ImageFormat>& view, Pt::ssize_t x,
 }
 
 
-inline void ConstPixel::reset(const ConstPixel& p)
+template <typename ColorT>
+inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+{
+    if(_pixel)
+    {
+        _pixel->~ConstPixelBase();
+        _pixel = 0;
+    }
+
+    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
+    _data = view.data();
+    _view = &view;
+    _x = x;
+    _y = y;
+    _format = &view.format();
+}
+
+
+template <typename ColorT>
+inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
 {
     if(_pixel)
     {
@@ -320,7 +339,8 @@ inline void ConstPixel::reset(const ConstPixel& p)
 }
 
 
-inline void ConstPixel::reset(const Pixel& p)
+template <typename ColorT>
+inline void ConstPixel<ColorT>::reset(const Pixel<ColorT>& p)
 {
     if(_pixel)
     {

@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Yuv12.h>
 #include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Gfx/BasicColorView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
@@ -115,14 +114,6 @@ typedef BasicPixelView<Yuv12> Yuv12PixelView;
 /** @brief YV-12 const pixel view.
 */
 typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
-
-/** @brief YV-12 color view.
-*/
-typedef BasicColorView<Yuv12> Yuv12ColorView;
-
-/** @brief YV-12 const color view.
-*/
-typedef BasicConstColorView<Yuv12> Yuv12ConstColorView;
 
 } // namespace
 

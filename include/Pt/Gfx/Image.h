@@ -87,6 +87,5 @@ class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
 } // namespace
 
 #include <Pt/Gfx/PixelView.h> 
-#include <Pt/Gfx/ColorView.h> 
 
 #endif

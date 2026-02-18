@@ -86,13 +86,13 @@ void toPreMulAlpha(const Pt::Gfx::Image& image,
     size_t _width = image.width();
     size_t _height = image.height();
 
-    Pt::Gfx::ConstColorView<Pt::Gfx::Color> fromView(image);
-    Pt::Gfx::ConstColorView<Pt::Gfx::Color>::Iterator it = fromView.begin();
-    Pt::Gfx::ConstColorView<Pt::Gfx::Color>::Iterator end = fromView.end();
+    Pt::Gfx::ConstPixelView fromView(image);
+    Pt::Gfx::ConstPixelView::Iterator it = fromView.begin();
+    Pt::Gfx::ConstPixelView::Iterator end = fromView.end();
 
     for( ; it != end; ++it)
     {
-        Pt::Gfx::Color color = *it;
+        Pt::Gfx::Color color = it->toColor();
 
         const Pt::uint8_t r = color.red() / 257;
         const Pt::uint8_t g = color.green() / 257;

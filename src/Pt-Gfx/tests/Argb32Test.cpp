@@ -133,18 +133,25 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Image i(Argb32(), 2, 2);
             PixelView pixelView(i);
-            ColorView<Argb32Color> colorViewMutable(i);
-            ConstColorView<Argb32Color> colorView(i);
+            ConstPixelView cpixelView(i);
 
             Argb32Image a(2, 2);
             Argb32PixelView argb32View(a);
+            Argb32ConstPixelView cargb32View(a);
 
-            BasicPixelSpan<Argb32> argb21Span(argb32View, 0, 0, 1);
-            BasicPixelSpan<ImageFormat> imageSpan(colorViewMutable, 0, 0, 1);
+            std::transform( cpixelView.begin(), cpixelView.end(), argb32View.begin(),
+                            [](const ConstPixelView::ConstPixel& p) 
+                            { return p.toColor(); });
 
-            Pt::Gfx::copy( colorView.begin(), colorView.end(), argb32View.begin() );
+            std::transform( argb32View.begin(), argb32View.end(), pixelView.begin(),
+                            [](const Argb32Pixel& p) 
+                            { return p.toColor(); });
 
             Pt::Gfx::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
+
+            copy(cpixelView, pixelView);
+            copy(cpixelView, argb32View);
+            copy(cargb32View, pixelView);
         }
 
         static const std::size_t width = 64;
@@ -165,18 +172,15 @@ class Argb32Test : public Pt::Unit::TestSuite
                 PixelView::PixelIterator it = pixelView.begin();
                 PixelView::PixelIterator end = pixelView.end();
 
-                //ConstPixelView cpixelView(image);
-                //ConstPixelView::Iterator pfrom = cpixelView.begin();
-                
-                ConstColorView<Argb32Color>  colorView(image);
-                ConstColorView<Argb32Color>::Iterator cfrom = colorView.begin();
+                ConstPixelView cpixelView(image);
+                ConstPixelView::Iterator pfrom = cpixelView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
 
                 for( ; it != end; ++it)
                 {
-                    (*it) = *cfrom;
+                    (*it) = *pfrom;
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();

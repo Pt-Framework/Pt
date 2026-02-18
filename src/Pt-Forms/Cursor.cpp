@@ -233,18 +233,18 @@ const Cursor& Cursor::sizeNSCursor()
 }
 
 
-void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
+void Cursor::fromImage(const Gfx::Image& image, Cursor& cursor)
 {
 	cursor._height   = image.height();
 	cursor._width    = image.width();
 
-	Gfx::ConstColorView<Gfx::Color> view(image);
+	Gfx::ConstPixelView view(image);
 
 	for( size_t y = 0; y < cursor._height; ++y )
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-      Gfx::ConstColorView<Gfx::Color>::Pixel pixel(view, x, y);      
+      Gfx::ConstPixelView::ConstPixel pixel(view, x, y);
       Gfx::Color color = pixel.toColor();
 
 			if( color.alpha() == 0 )

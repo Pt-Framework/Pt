@@ -40,6 +40,8 @@ namespace Pt {
 
 namespace Gfx {
 
+OBSOLETE obsolete;
+
 template <typename ColorT, typename PixelT> 
 ColorT toColor(const PixelT& p, const ColorT* tag = 0)
 {
@@ -54,7 +56,8 @@ void assign(PixelT& p, const ColorT& color)
 }
 
 
-template <typename FormatT, typename ColorT>
+template <typename FormatT, 
+          typename ColorT = typename FormatT::ColorType>
 class BasicColorIterator
 {
     public:
@@ -128,7 +131,8 @@ class BasicColorIterator
 };
 
 
-template <typename FormatT, typename ColorT>
+template <typename FormatT, 
+          typename ColorT = typename FormatT::ColorType>
 class BasicConstColorIterator
 {
     public:
@@ -192,7 +196,7 @@ class BasicConstColorIterator
 
 
 template <typename FormatT,
-          typename ColorT = typename FormatT::Color>
+          typename ColorT = typename FormatT::ColorType>
 class BasicColorView : public BasicView<FormatT>
 {
     public:
@@ -222,7 +226,7 @@ class BasicColorView : public BasicView<FormatT>
 
 
 template <typename FormatT,
-          typename ColorT = typename FormatT::Color>
+          typename ColorT = typename FormatT::ColorType>
 class BasicConstColorView : public BasicConstView<FormatT>
 {
     public:

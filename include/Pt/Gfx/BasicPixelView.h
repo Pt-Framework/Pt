@@ -152,6 +152,10 @@ class BasicConstPixelIterator
         : _pixel(p)
         { }
 
+        BasicConstPixelIterator(const Pixel& p)
+        : _pixel(p)
+        { }
+
         BasicConstPixelIterator(const BasicConstPixelIterator& it)
         : _pixel(it._pixel)
         { }
@@ -247,17 +251,6 @@ class BasicPixelView : public BasicView<FormatT>
 
         ConstPixelIterator cend() const
         { return ConstPixelIterator(*this, 0, this->height()); }
-
-    public:
-        void assign(Pt::ssize_t x, Pt::ssize_t y, 
-                    const BasicConstPixelView<FormatT>& view, 
-                    Pt::ssize_t fromX, Pt::ssize_t fromY, 
-                    Pt::ssize_t width, Pt::ssize_t height);
-
-        template <typename FormatT2>
-        void convert(Pt::ssize_t x, Pt::ssize_t y, 
-                     const BasicConstPixelView<FormatT2>& view, 
-                     Pt::ssize_t fromX, Pt::ssize_t fromY, Pt::ssize_t width, Pt::ssize_t height);
 };
 
 
@@ -275,6 +268,8 @@ class BasicConstPixelView : public BasicConstView<FormatT>
         explicit BasicConstPixelView(const Format& format)
         : BasicConstView<FormatT>(format)
         { }
+
+        explicit BasicConstPixelView(const BasicView<FormatT>& view);
 
         explicit BasicConstPixelView(const BasicImage<FormatT>& image);
 

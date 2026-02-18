@@ -123,7 +123,7 @@ class Argb32PixelBase final : public PixelBase
 
         virtual void onAssign(const Argb32Color* colors, std::size_t length) override
         {
-            const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&colors);
+            const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(colors);
             Argb32::sourceCopy(_p.base(), p, length);
         }
 

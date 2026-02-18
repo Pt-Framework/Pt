@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicImage.h>
+#include <Pt/Gfx/BasicPixelSpan.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -102,9 +103,19 @@ inline BasicConstView<FormatT>::BasicConstView(const Format& format)
 
 
 template <typename FormatT>
+inline BasicConstView<FormatT>::BasicConstView(const BasicView<FormatT>& view)
+: ViewBase(view.width(), view.height(), 
+           view.stride(), view.padding())
+, _data( view.data() )
+, _format( &view.format() )
+{
+}
+
+
+template <typename FormatT>
 inline BasicConstView<FormatT>::BasicConstView(const BasicImage<FormatT>& image)
 : ViewBase(image.width(), image.height(), 
-            image.stride(), image.padding())
+           image.stride(), image.padding())
 , _data( image.data() )
 , _format( &image.format() )
 {
@@ -114,7 +125,7 @@ inline BasicConstView<FormatT>::BasicConstView(const BasicImage<FormatT>& image)
 template <typename FormatT>
 inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<FormatT>& image)
 : ViewBase(image.width(), image.height(), 
-            image.stride(), image.padding())
+           image.stride(), image.padding())
 , _data( image.data() )
 , _format( &image.format() )
 {
@@ -125,7 +136,7 @@ template <typename FormatT>
 template <typename OtherFormatT>
 inline BasicConstView<FormatT>::BasicConstView(const BasicImage<OtherFormatT>& image)
 : ViewBase(image.width(), image.height(), 
-            image.stride(), image.padding())
+           image.stride(), image.padding())
 , _data( image.data() )
 , _format( &image.format() )
 {
@@ -136,7 +147,7 @@ template <typename FormatT>
 template <typename OtherFormatT>
 inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<OtherFormatT>& image)
 : ViewBase(image.width(), image.height(), 
-            image.stride(), image.padding())
+           image.stride(), image.padding())
 , _data( image.data() )
 , _format( &image.format() )
 {
@@ -159,6 +170,30 @@ inline void BasicConstView<FormatT>::reset(const BasicConstImage<FormatT>& image
     _format = &image.format();
     ViewBase::reset(image.width(), image.height(),
                     image.stride(), image.padding() );
+}
+
+///////////////////////////////////////////////////////////////////////
+// Copy
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT1, typename FormatT2>
+void copy(const BasicConstView<FormatT1>& fromView, BasicView<FormatT2>& toView)
+{
+    //
+    // TODO: use LineView and LineIterator
+    //
+
+
+    BasicConstPixelSpan<FormatT1> from(fromView, 0, 0, fromView.width());
+    BasicPixelSpan<FormatT2> to(toView, 0, 0, toView.width());
+
+    for( Pt::ssize_t y = 0; y < fromView.height(); ++y )
+    {
+        copy(from, to.begin());
+
+        from.advance( fromView.width() );
+        to.advance( toView.width() );
+    }
 }
 
 } // namespace

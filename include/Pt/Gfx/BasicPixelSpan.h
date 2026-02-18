@@ -30,7 +30,7 @@
 #define PT_GFX_BASIC_PIXEL_SPAN_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Types.h>
 
 #include <cstddef>
@@ -117,16 +117,16 @@ class BasicPixelSpan
         { return _p; }
 
         Iterator begin()
-        { return Iterator(_view, _x, _y); }
+        { return Iterator(*_view, _x, _y); }
 
         Iterator end()
-        { return Iterator(_view, _x + _length, _y); }
+        { return Iterator(*_view, _x + _length, _y); }
 
         ConstIterator cbegin() const
-        { return ConstIterator(_view, _x, _y); }
+        { return ConstIterator(*_view, _x, _y); }
 
         ConstIterator cend() const
-        { return ConstIterator(_view, _x + _length, _y); }
+        { return ConstIterator(*_view, _x + _length, _y); }
 
         BasicPixelSpan subspan(std::size_t offset, std::size_t count) const
         {
@@ -138,7 +138,6 @@ class BasicPixelSpan
 
         BasicPixelSpan slice(std::size_t start, std::size_t end) const
         {
-            assert(start <= end && "invalid span slice");
             return subspan(start, end - start);
         }
 
@@ -152,19 +151,19 @@ class BasicPixelSpan
 
 
 template <typename FormatT>
-class BasicColorSpan
+class BasicConstPixelSpan
 {
     public:
         typedef FormatT Format;
         typedef typename FormatT::Pixel Pixel;
         typedef typename FormatT::ConstPixel ConstPixel;
     
-        typedef BasicPixelIterator<Format> Iterator;
+        typedef BasicConstPixelIterator<Format> Iterator;
         typedef BasicConstPixelIterator<Format> ConstIterator;
 
     public:
-        BasicColorSpan(BasicView<Format>& view, 
-                       Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        BasicConstPixelSpan(const BasicConstView<Format>& view, 
+                            Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
         , _y(y)
@@ -172,7 +171,7 @@ class BasicColorSpan
         , _length(length)
         { }
 
-        BasicColorSpan(const BasicColorSpan& span)
+        BasicConstPixelSpan(const BasicConstPixelSpan& span)
         : _view(span._view)
         , _x(span._x)
         , _y(span._y)
@@ -180,16 +179,16 @@ class BasicColorSpan
         , _length(span._length)
         {}
 
-        BasicColorSpan& operator=(const BasicColorSpan& span)
+        BasicConstPixelSpan& operator=(const BasicConstPixelSpan& span)
         {
             _view = span._view;
             _x = span._x;
             _y = span._y;
             _p.reset(span._p);
-            _length = span.length;
+            _length = span.length();
         }
 
-        void reset(BasicView<Format>& view, 
+        void reset(BasicConstView<Format>& view, 
                    Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         {
             _view = &view;
@@ -221,31 +220,53 @@ class BasicColorSpan
             _p.advance(n);
         }
 
-        Pixel& front()
+        ConstPixel& front()
         { return _p; }
 
-        const Pixel& front() const
+        const ConstPixel& front() const
         { return _p; }
 
         Iterator begin()
-        { return Iterator(_view, _x, _y); }
+        { return Iterator(*_view, _x, _y); }
 
         Iterator end()
-        { return Iterator(_view, _x + _length, _y); }
+        { return Iterator(*_view, _x + _length, _y); }
 
         ConstIterator cbegin() const
-        { return ConstIterator(_view, _x, _y); }
+        { return ConstIterator(*_view, _x, _y); }
 
         ConstIterator cend() const
-        { return ConstIterator(_view, _x + _length, _y); }
+        { return ConstIterator(*_view, _x + _length, _y); }
+
+        BasicConstPixelSpan subspan(std::size_t offset, std::size_t count) const
+        {
+            assert(offset <= _length && "subspan out of range");
+            assert(count <= _length - offset && "subspan too large");
+
+            return BasicConstPixelSpan(*_view, _x + offset, _y, count);
+        }
+
+        BasicConstPixelSpan slice(std::size_t start, std::size_t end) const
+        {
+            return subspan(start, end - start);
+        }
 
     private:
-        BasicView<Format>* _view;
+        const BasicConstView<Format>* _view;
         Pt::ssize_t        _x;
         Pt::ssize_t        _y;
-        Pixel              _p;
+        ConstPixel         _p;
         std::size_t        _length;
 };
+
+
+template <typename FormatT1, typename FormatT2>
+BasicPixelIterator<FormatT2> copy(const BasicConstPixelSpan<FormatT1>& from, 
+                                  BasicPixelIterator<FormatT2> to)
+{
+    to->assign(from.front(), from.length());
+    return to += from.length();
+}
 
 } // namespace
 

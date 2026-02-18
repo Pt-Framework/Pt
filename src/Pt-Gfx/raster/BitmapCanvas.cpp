@@ -262,7 +262,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
                                     brush.texture().width(), brush.texture().height() );
                 _brushView.reset(_brushBuffer);
 
-                Gfx::ConstColorView<Argb32Color> textureView(brush.texture() );
+                Gfx::ConstPixelView textureView( brush.texture() );
                 Gfx::PixelView brushView(_brushBuffer);
 
                 Gfx::copy( textureView.begin(), textureView.end(), brushView.begin() );

@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Gfx {
 
+OBSOLETE obsolete;
+
 template <typename ColorT>
 class ColorView : public BasicColorView<ImageFormat, ColorT>
 {

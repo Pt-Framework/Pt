@@ -129,6 +129,8 @@ class Argb32Pixel
 
         void assign(const Argb32Pixel& p, std::size_t length);
 
+        void assign(const Argb32Color* colors, std::size_t length);
+
         void fill(std::size_t n, const Argb32Color& color);
 
         bool equals(const Argb32Pixel& p) const;
@@ -202,6 +204,8 @@ class Argb32ConstPixel
         void advance();
 
         void advance(Pt::ssize_t n);
+
+        void getColors(Argb32Color* colors, std::size_t length) const;
 
         bool equals(const Argb32ConstPixel& p) const;
         
@@ -307,7 +311,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static Argb32Color getArgb32Color(const Pt::uint8_t* p);
 
-        static void getColors(const Pt::uint8_t* p, Color* colors, std::size_t n);
+        static void getColors(const Pt::uint8_t* p, Gfx::Color* colors, std::size_t n);
 
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
@@ -725,6 +729,13 @@ inline void Argb32Pixel::assign(const Argb32Pixel& p, std::size_t length)
 }
 
 
+inline void Argb32Pixel::assign(const Argb32Color* colors, std::size_t length)
+{
+    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(colors);
+    Argb32::sourceCopy(base(), p, length);
+}
+
+
 inline void Argb32Pixel::fill(std::size_t n, const Argb32Color& color)
 {
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
@@ -953,6 +964,12 @@ inline void Argb32ConstPixel::advance(Pt::ssize_t n)
     _loc.setXPos(_x + dx);
     _loc.setYPos(_y + dy);
     _loc.setBase(_p + dy * _view->stride() + dx * 4);
+}
+
+
+inline void Argb32ConstPixel::getColors(Argb32Color* colors, std::size_t length) const
+{
+    Argb32::getColors(base(), colors, length);
 }
 
 

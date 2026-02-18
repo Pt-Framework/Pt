@@ -38,28 +38,6 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename PixelT1, typename PixelT2>
-inline void convert(PixelT1& to, const PixelT2& p)
-{
-    to = p.color();
-}
-
-
-template <typename PixelT1, typename PixelT2>
-inline void convert(PixelT1& to, const PixelT2& p, std::size_t length)
-{
-    PixelT1 it(to);
-    PixelT2 from(p);
-
-    while(length-- > 0)
-    {
-        it = from.color();
-        it.advance();
-        from.advance();
-    }
-}
-
-
 template <typename FormatT>
 class BasicView : public ViewBase
 {
@@ -108,6 +86,8 @@ class BasicConstView : public ViewBase
     public:
         explicit BasicConstView(const Format& format);
 
+        explicit BasicConstView(const BasicView<FormatT>& view);
+
         explicit BasicConstView(const BasicImage<FormatT>& image);
 
         explicit BasicConstView(const BasicConstImage<FormatT>& image);
@@ -144,6 +124,10 @@ class BasicConstView : public ViewBase
         const Pt::uint8_t*  _data;
         const Format*       _format;
 };
+
+
+template <typename FormatT1, typename FormatT2>
+void copy(const BasicConstView<FormatT1>& from, BasicView<FormatT2>& to);
 
 } // namespace
 

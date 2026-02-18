@@ -74,7 +74,7 @@ void BitmapSurface::reset(const Gfx::Image& image)
     {
         _image.reset( image.width(), image.height() );
         
-        Gfx::ConstColorView<Argb32Color> from(image);
+        Gfx::ConstPixelView from(image);
         Gfx::PixelView to(_image);
         
         Pt::Gfx::copy( from.begin(), from.end(), to.begin() );

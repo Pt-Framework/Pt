@@ -40,17 +40,26 @@ namespace Pt {
 
 namespace Gfx {
 
+template <typename ColorT>
 class Pixel;
+
+template <typename ColorT>
 class ConstPixel;
+
 class ImageFormat;
 
 ///////////////////////////////////////////////////////////////////////
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
+template <typename ColorT>
 class Pixel
 {
-    friend class ConstPixel;
+    friend class ConstPixel<ColorT>;
+        
+    public:
+        typedef Pixel<ColorT> PixelType;
+        typedef ConstPixel<ColorT> ConstPixelType;
 
     public:
         Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -65,7 +74,7 @@ class Pixel
 
         Pixel& operator=(const Pixel& p);
 
-        Pixel& operator=(const ConstPixel& p);
+        Pixel& operator=(const ConstPixel<ColorT>& p);
 
         void reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
@@ -139,7 +148,7 @@ class Pixel
             _pixel->assign(colors, length); 
         }
 
-        void assign(const ConstPixel& p, std::size_t length);
+        void assign(const ConstPixel<ColorT>& p, std::size_t length);
 
         void fill(std::size_t n, const Color& color)
         {   
@@ -151,7 +160,7 @@ class Pixel
             return _pixel->base() == p.base();
         }
 
-        bool equals(const ConstPixel& p) const;
+        bool equals(const ConstPixel<ColorT>& p) const;
 
     private:
         ViewBase*           _view;
@@ -164,13 +173,14 @@ class Pixel
 };
 
 
-inline Color toColor(const Pixel& p, const Color* tag = 0)
+template <typename ColorT>
+inline Color toColor(const Pixel<ColorT>& p, const Color* tag = 0)
 {
   return p.toColor();
 }
 
-
-inline Argb32Color toColor(const Pixel& p, const Argb32Color* tag = 0)
+template <typename ColorT>
+inline Argb32Color toColor(const Pixel<ColorT>& p, const Argb32Color* tag = 0)
 {
   return p.toArgb32Color();
 }
@@ -179,9 +189,14 @@ inline Argb32Color toColor(const Pixel& p, const Argb32Color* tag = 0)
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
+template <typename ColorT>
 class ConstPixel
 {
-    friend class Pixel;
+    friend class Pixel<ColorT>;
+
+    public:
+        typedef Pixel<ColorT> PixelType;
+        typedef ConstPixel<ColorT> ConstPixelType;
 
     public:
         ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -190,7 +205,7 @@ class ConstPixel
 
         ConstPixel(const ConstPixel& p);
 
-        explicit ConstPixel(const Pixel& p);
+        explicit ConstPixel(const Pixel<ColorT>& p);
 
         ~ConstPixel();
 
@@ -200,7 +215,7 @@ class ConstPixel
 
         void reset(const ConstPixel& p);
 
-        void reset(const Pixel& p);
+        void reset(const Pixel<ColorT>& p);
 
         const ImageFormat& format() const
         {
@@ -261,7 +276,7 @@ class ConstPixel
             return _pixel->base() == p.base();
         }
 
-        bool equals(const Pixel& p) const
+        bool equals(const Pixel<ColorT>& p) const
         { 
             return _pixel->base() == p.base();
         }
@@ -277,51 +292,17 @@ class ConstPixel
 };
 
 
-inline Color toColor(const ConstPixel& p, const Color* tag = 0)
+template <typename ColorT>
+inline Color toColor(const ConstPixel<ColorT>& p, const Color* tag = 0)
 {
   return p.toColor();
 }
 
-
-inline Argb32Color toColor(const ConstPixel& p, const Argb32Color* tag = 0)
+template <typename ColorT>
+inline Argb32Color toColor(const ConstPixel<ColorT>& p, const Argb32Color* tag = 0)
 {
   return p.toArgb32Color();
 }
-
-
-///////////////////////////////////////////////////////////////////////
-// Span
-///////////////////////////////////////////////////////////////////////
-
-class Span
-{
-    public:
-        Span(BasicView<ImageFormat>& view, 
-             Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
-        : _p(view, x, y)
-        , _length(length)
-        {
-        }
-
-        void setLength(std::size_t length)
-        {
-            _length = length;
-        }
-
-        void advance(std::size_t n)
-        {
-            _p.advance(n);
-        }
-
-        Pixel& front()
-        {
-            return _p;
-        }
-
-    private:
-        Pixel       _p;
-        std::size_t _length;
-};
 
 } // namespace
 
