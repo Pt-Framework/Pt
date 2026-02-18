@@ -76,10 +76,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicColorView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp" />
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelLineView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp" />
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelSpan.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicSpan.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h" />
@@ -95,6 +94,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageTraits.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\LineView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Location.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintContext.h" />
@@ -105,6 +105,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Pixel.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pixel.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\PixelTraits.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />

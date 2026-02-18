@@ -207,14 +207,14 @@ struct ImageTraits<ImageFormat>
 } // namespace
 
 #include <Pt/Gfx/Pixel.h>
-#include <Pt/Gfx/BasicPixelSpan.h>
+#include <Pt/Gfx/BasicSpan.h>
 
 namespace Pt {
 
 namespace Gfx {
 
 template <typename ColorT, typename FormatT1, typename FormatT2>
-BasicPixelIterator<FormatT2> copyColors(const BasicConstPixelSpan<FormatT1>& fromSpan, 
+BasicPixelIterator<FormatT2> copyColors(const BasicConstSpan<FormatT1>& fromSpan, 
                                         BasicPixelIterator<FormatT2> to)
 {
     const std::size_t bufsize = 64;
@@ -240,7 +240,7 @@ BasicPixelIterator<FormatT2> copyColors(const BasicConstPixelSpan<FormatT1>& fro
 }
 
 
-inline BasicPixelIterator<ImageFormat> copy(const BasicConstPixelSpan<ImageFormat>& from, 
+inline BasicPixelIterator<ImageFormat> copy(const BasicConstSpan<ImageFormat>& from, 
                                             BasicPixelIterator<ImageFormat> to)
 {    
     to->assign(from.front(), from.length());
@@ -249,7 +249,7 @@ inline BasicPixelIterator<ImageFormat> copy(const BasicConstPixelSpan<ImageForma
 
 
 template <typename FormatT>
-BasicPixelIterator<FormatT> copy(const BasicConstPixelSpan<ImageFormat>& from, 
+BasicPixelIterator<FormatT> copy(const BasicConstSpan<ImageFormat>& from, 
                                  BasicPixelIterator<FormatT> to)
 {
     return copyColors<ImageFormat::ColorType>(from, to);
@@ -257,7 +257,7 @@ BasicPixelIterator<FormatT> copy(const BasicConstPixelSpan<ImageFormat>& from,
 
 
 template <typename FormatT>
-BasicPixelIterator<ImageFormat> copy(const BasicConstPixelSpan<FormatT>& from, 
+BasicPixelIterator<ImageFormat> copy(const BasicConstSpan<FormatT>& from, 
                                      BasicPixelIterator<ImageFormat> to)
 {
     return copyColors<ImageFormat::ColorType>(from, to);

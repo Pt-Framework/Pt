@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_PIXEL_SPAN_H
-#define PT_GFX_BASIC_PIXEL_SPAN_H
+#ifndef PT_GFX_BASIC_SPAN_H
+#define PT_GFX_BASIC_SPAN_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicPixelView.h>
@@ -41,7 +41,7 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT>
-class BasicPixelSpan
+class BasicSpan
 {
     public:
         typedef FormatT Format;
@@ -52,7 +52,7 @@ class BasicPixelSpan
         typedef BasicConstPixelIterator<Format> ConstIterator;
 
     public:
-        BasicPixelSpan(BasicView<Format>& view, 
+        BasicSpan(BasicView<Format>& view, 
                        Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
@@ -61,7 +61,7 @@ class BasicPixelSpan
         , _length(length)
         { }
 
-        BasicPixelSpan(const BasicPixelSpan& span)
+        BasicSpan(const BasicSpan& span)
         : _view(span._view)
         , _x(span._x)
         , _y(span._y)
@@ -69,7 +69,7 @@ class BasicPixelSpan
         , _length(span._length)
         {}
 
-        BasicPixelSpan& operator=(const BasicPixelSpan& span)
+        BasicSpan& operator=(const BasicSpan& span)
         {
             _view = span._view;
             _x = span._x;
@@ -128,15 +128,15 @@ class BasicPixelSpan
         ConstIterator cend() const
         { return ConstIterator(*_view, _x + _length, _y); }
 
-        BasicPixelSpan subspan(std::size_t offset, std::size_t count) const
+        BasicSpan subspan(std::size_t offset, std::size_t count) const
         {
             assert(offset <= _length && "subspan out of range");
             assert(count <= _length - offset && "subspan too large");
 
-            return BasicPixelSpan(*_view, _x + offset, _y, count);
+            return BasicSpan(*_view, _x + offset, _y, count);
         }
 
-        BasicPixelSpan slice(std::size_t start, std::size_t end) const
+        BasicSpan slice(std::size_t start, std::size_t end) const
         {
             return subspan(start, end - start);
         }
@@ -151,7 +151,7 @@ class BasicPixelSpan
 
 
 template <typename FormatT>
-class BasicConstPixelSpan
+class BasicConstSpan
 {
     public:
         typedef FormatT Format;
@@ -162,7 +162,7 @@ class BasicConstPixelSpan
         typedef BasicConstPixelIterator<Format> ConstIterator;
 
     public:
-        BasicConstPixelSpan(const BasicConstView<Format>& view, 
+        BasicConstSpan(const BasicConstView<Format>& view, 
                             Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
@@ -171,7 +171,7 @@ class BasicConstPixelSpan
         , _length(length)
         { }
 
-        BasicConstPixelSpan(const BasicConstPixelSpan& span)
+        BasicConstSpan(const BasicConstSpan& span)
         : _view(span._view)
         , _x(span._x)
         , _y(span._y)
@@ -179,7 +179,7 @@ class BasicConstPixelSpan
         , _length(span._length)
         {}
 
-        BasicConstPixelSpan& operator=(const BasicConstPixelSpan& span)
+        BasicConstSpan& operator=(const BasicConstSpan& span)
         {
             _view = span._view;
             _x = span._x;
@@ -238,15 +238,15 @@ class BasicConstPixelSpan
         ConstIterator cend() const
         { return ConstIterator(*_view, _x + _length, _y); }
 
-        BasicConstPixelSpan subspan(std::size_t offset, std::size_t count) const
+        BasicConstSpan subspan(std::size_t offset, std::size_t count) const
         {
             assert(offset <= _length && "subspan out of range");
             assert(count <= _length - offset && "subspan too large");
 
-            return BasicConstPixelSpan(*_view, _x + offset, _y, count);
+            return BasicConstSpan(*_view, _x + offset, _y, count);
         }
 
-        BasicConstPixelSpan slice(std::size_t start, std::size_t end) const
+        BasicConstSpan slice(std::size_t start, std::size_t end) const
         {
             return subspan(start, end - start);
         }
@@ -261,7 +261,7 @@ class BasicConstPixelSpan
 
 
 template <typename FormatT1, typename FormatT2>
-BasicPixelIterator<FormatT2> copy(const BasicConstPixelSpan<FormatT1>& from, 
+BasicPixelIterator<FormatT2> copy(const BasicConstSpan<FormatT1>& from, 
                                   BasicPixelIterator<FormatT2> to)
 {
     to->assign(from.front(), from.length());

@@ -2988,10 +2988,13 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageTraits.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelSpan.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\LineView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelLineView.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicSpan.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PixelTraits.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>

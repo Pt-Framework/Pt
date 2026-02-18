@@ -60,6 +60,7 @@ class Pixel
     public:
         typedef Pixel<ColorT> PixelType;
         typedef ConstPixel<ColorT> ConstPixelType;
+        typedef ColorT ColorType;
 
     public:
         Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -197,6 +198,7 @@ class ConstPixel
     public:
         typedef Pixel<ColorT> PixelType;
         typedef ConstPixel<ColorT> ConstPixelType;
+        typedef ColorT ColorType;
 
     public:
         ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -297,6 +299,7 @@ inline Color toColor(const ConstPixel<ColorT>& p, const Color* tag = 0)
 {
   return p.toColor();
 }
+
 
 template <typename ColorT>
 inline Argb32Color toColor(const ConstPixel<ColorT>& p, const Argb32Color* tag = 0)

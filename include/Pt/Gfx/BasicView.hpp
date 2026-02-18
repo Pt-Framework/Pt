@@ -31,7 +31,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <Pt/Gfx/BasicPixelSpan.h>
+#include <Pt/Gfx/BasicSpan.h>
+#include <Pt/Gfx/LineView.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -179,20 +180,13 @@ inline void BasicConstView<FormatT>::reset(const BasicConstImage<FormatT>& image
 template <typename FormatT1, typename FormatT2>
 void copy(const BasicConstView<FormatT1>& fromView, BasicView<FormatT2>& toView)
 {
-    //
-    // TODO: use LineView and LineIterator
-    //
+    BasicLineView<FormatT2> toLines(toView);
+    BasicLineIterator<FormatT2> to = toLines.begin();
 
-
-    BasicConstPixelSpan<FormatT1> from(fromView, 0, 0, fromView.width());
-    BasicPixelSpan<FormatT2> to(toView, 0, 0, toView.width());
-
-    for( Pt::ssize_t y = 0; y < fromView.height(); ++y )
+    BasicConstLineView<FormatT1> fromLines(fromView);
+    for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
     {
-        copy(from, to.begin());
-
-        from.advance( fromView.width() );
-        to.advance( toView.width() );
+        copy(*from, to->begin());
     }
 }
 

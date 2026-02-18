@@ -57,6 +57,8 @@ class Argb32Pixel
     friend class Argb32;
 
     public:
+        typedef Argb32Pixel PixelType;
+        typedef Argb32ConstPixel ConstPixelType;
         typedef Argb32Color ColorType;
 
     protected:
@@ -151,6 +153,8 @@ class Argb32ConstPixel
     friend class Argb32;
 
     public:
+        typedef Argb32Pixel PixelType;
+        typedef Argb32ConstPixel ConstPixelType;
         typedef Argb32Color ColorType;
 
     protected:

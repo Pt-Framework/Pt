@@ -31,7 +31,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/BasicPixelLineView.h>
+#include <Pt/Gfx/LineView.h>
 
 #include <Pt/System/Clock.h>
 
@@ -147,11 +147,16 @@ class Argb32Test : public Pt::Unit::TestSuite
                             [](const Argb32Pixel& p) 
                             { return p.toColor(); });
 
-            Pt::Gfx::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
+            std::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
 
             copy(cpixelView, pixelView);
             copy(cpixelView, argb32View);
             copy(cargb32View, pixelView);
+
+            convert(*cpixelView.begin(), *pixelView.begin());
+            convert(*cpixelView.begin(), *argb32View.begin());
+            convert(*cargb32View.begin(), *pixelView.begin());
+            convert(*cargb32View.begin(), *argb32View.begin());
         }
 
         static const std::size_t width = 64;

@@ -34,6 +34,28 @@
 
 namespace Pt {
 
+struct FalseType
+{
+    enum { value = 0 };
+};
+
+
+struct TrueType
+{
+    enum { value = 1 };
+};
+
+
+template<class T, class U>
+struct IsSame : FalseType 
+{};
+ 
+
+template<class T>
+struct IsSame<T, T> : TrueType 
+{};
+
+
 template <typename T>
 struct TypeTraitsBase 
 {
