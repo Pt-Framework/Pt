@@ -30,9 +30,8 @@
 #define PT_GFX_YUV12_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 
@@ -47,13 +46,21 @@ class Yuv12;
 class Yuv12Pixel;
 class Yuv12ConstPixel;
 
+template <typename T>
+class BasicView;
+
+template <typename T>
+class BasicConstView;
+
 /** @brief YV-12 pixel.
 */
 class PT_GFX_API Yuv12Pixel
 {
     friend class Yuv12;
     friend class Yuv12ConstPixel;
-    friend class Yuv12Format;
+    
+    public:
+        typedef Yuv12 Format;
 
     protected:
         Yuv12Pixel(Pt::uint8_t* data, ViewBase& view, 
@@ -72,6 +79,10 @@ class PT_GFX_API Yuv12Pixel
         , _u(p._u)
         , _v(p._v)
         { }
+
+        Yuv12Pixel& operator=(const Color& color);
+
+        Yuv12Pixel& operator=(const Argb32Color& color);
 
         ViewBase& view()
         { return _view; }
@@ -114,22 +125,13 @@ class PT_GFX_API Yuv12Pixel
 
         Color toColor() const;
 
-        Yuv12Pixel& operator=(const Color& color);
+        void advance();
 
-        Yuv12Pixel& operator=(const Argb32Color& color);
-
-        template <typename PixelT>
-        void assign(const PixelT& p, std::size_t length);
-
-        void assign(const Argb32Color* colors, std::size_t length);
+        void advance(Pt::ssize_t n);
 
         bool equals(const Yuv12Pixel& p) const;
 
         bool equals(const Yuv12ConstPixel& p) const;
-
-        void advance();
-
-        void advance(Pt::ssize_t n);
 
     private:
         ViewBase&    _view;
@@ -147,8 +149,10 @@ class Yuv12ConstPixel
 {
     friend class Yuv12;
     friend class Yuv12Pixel;
-    friend class Yuv12Format;
-
+    
+    public:
+        typedef Yuv12 Format;
+    
     protected:
         Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
                         Pt::ssize_t xpos, Pt::ssize_t ypos);
@@ -233,9 +237,10 @@ class Yuv12ConstPixel
 */
 class PT_GFX_API Yuv12 final : public ImageFormat
 {
-    public:
-        typedef Yuv12Pixel Pixel;
-        typedef Yuv12ConstPixel ConstPixel;
+    public:    
+        typedef Yuv12Pixel PixelType;
+        typedef Yuv12ConstPixel ConstPixelType;
+        typedef Color ColorType;
 
     public:
         Yuv12();
@@ -406,6 +411,18 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         }
 };
 
+} // namespace
+
+} // namespace
+
+
+#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/Argb32.h>
+
+namespace Pt {
+
+namespace Gfx {
+
 ///////////////////////////////////////////////////////////////////////
 // Yuv12Pixel
 ///////////////////////////////////////////////////////////////////////
@@ -488,27 +505,6 @@ inline void Yuv12Pixel::advance(Pt::ssize_t n)
                       _view.width(), _view.stride(), _subStride);
 }
 
-
-template <typename PixelT>
-void Yuv12Pixel::assign(const PixelT& p, std::size_t length)
-{
-    convert(*this, p, length); 
-}
-
-
-inline void convert(Yuv12Pixel& to, const Argb32ConstPixel& p, std::size_t length)
-{
-    Yuv12Pixel toIter(to);
-    Argb32ConstPixel fromIter(p);
-
-    while(length-- > 0)
-    {
-        toIter = fromIter.toColor();
-        toIter.advance();
-        fromIter.advance();
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////
 // Yuv12ConstPixel
 ///////////////////////////////////////////////////////////////////////
@@ -579,6 +575,16 @@ inline void Yuv12ConstPixel::advance(Pt::ssize_t n)
     Yuv12::advanceBy(_y, _u, _v, n, _xpos, _ypos,
                       _view.width(), _view.stride(), _subStride);
 }
+
+
+//template <typename FormatT1, typename FormatT2,
+//         typename TraitsT1, typename TraitsT2>
+//BasicPixelIterator<FormatT2, TraitsT2> copy(const BasicConstSpan<FormatT1, TraitsT1>& from, 
+//                                            BasicPixelIterator<FormatT2, TraitsT2> to)
+//{
+//    to->assign(from.front(), from.length());
+//    return to += from.length();
+//}
 
 } // namespace
 

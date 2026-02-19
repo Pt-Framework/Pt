@@ -223,7 +223,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     //          << fromRect.width() << "x" << fromRect.height() << std::endl;
 
     Gfx::PixelView toView(_image);
-    Gfx::PixelView::PixelIterator toIter = toView.pixel( toRect.x(), toRect.y() );
+    Gfx::PixelView::Iterator toIter = toView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);
     Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );

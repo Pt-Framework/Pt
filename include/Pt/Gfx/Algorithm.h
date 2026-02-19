@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PixelTraits.h>
+#include <Pt/TypeTraits.h>
 
 namespace Pt {
 
@@ -92,7 +93,8 @@ struct DirectConverter<T1, T2, 1>
 
 template <typename P1, typename P2>
 struct Converter : public DirectConverter<P1, P2, 
-                                          IsSame<typename PixelTraits<P1>::PixelType, P2>::value> 
+                                          IsSame<typename PixelTraits<P1>::FormatType, 
+                                                 typename PixelTraits<P2>::FormatType>::value> 
 {
 };
 

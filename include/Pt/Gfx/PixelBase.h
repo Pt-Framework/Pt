@@ -31,20 +31,20 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
-#include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Location.h>
+#include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
+class PixelBase;
+class ConstPixelBase;
+
 ///////////////////////////////////////////////////////////////////////
 // PixelBase
 ///////////////////////////////////////////////////////////////////////
-
-class PixelBase;
-class ConstPixelBase;
 
 /** @brief Pixel base class.
 */

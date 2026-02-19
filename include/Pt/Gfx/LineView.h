@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/BasicSpan.h>
+#include <Pt/Gfx/PixelTraits.h>
 #include <Pt/Types.h>
 
 #include <cstddef>
@@ -41,15 +42,29 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
+class BasicLineIterator;
+
+template <typename FormatT, typename TraitsT>
+class BasicConstLineIterator;
+
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
+class BasicLineView; 
+
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
+class BasicConstLineView;
+
+
+template <typename FormatT, typename TraitsT>
 class BasicLineIterator
 {
     public:
         typedef FormatT Format;
-        typedef typename FormatT::Pixel Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
+        typedef TraitsT Traits;
+        typedef typename TraitsT::PixelType Pixel;
+        typedef typename TraitsT::ConstPixelType ConstPixel;
 
-        using SpanType = BasicSpan<FormatT>;
+        using SpanType = BasicSpan<Format, Traits>;
 
     public:
         using value_type        = SpanType;
@@ -111,15 +126,16 @@ class BasicLineIterator
 };
 
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicConstLineIterator
 {
     public:
         typedef FormatT Format;
-        typedef typename FormatT::Pixel Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
+        typedef TraitsT Traits;
+        typedef typename TraitsT::PixelType Pixel;
+        typedef typename TraitsT::ConstPixelType ConstPixel;
 
-        using SpanType = BasicConstSpan<FormatT>;
+        using SpanType = BasicConstSpan<Format, Traits>;
 
     public:
         using value_type        = SpanType;
@@ -171,20 +187,24 @@ class BasicConstLineIterator
 
     private:
         BasicConstView<Format>* _view;
-        SpanType           _span;
+        SpanType                _span;
 };
 
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicLineView : public BasicView<FormatT>
 {
     public:
         typedef FormatT Format;
-        typedef typename FormatT::Pixel Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
+        typedef TraitsT Traits;
 
-        typedef BasicLineIterator<Format> Iterator;
-        typedef BasicConstLineIterator<Format> ConstIterator;
+        typedef typename Traits::PixelType Pixel;
+        typedef typename Traits::ConstPixelType ConstPixel;
+
+        typedef PixelTraits<Pixel> PixelTraits;
+
+        typedef BasicLineIterator<Format, PixelTraits> Iterator;
+        typedef BasicConstLineIterator<Format, PixelTraits> ConstIterator;
 
     public:
         explicit BasicLineView(const Format& format)
@@ -193,10 +213,10 @@ class BasicLineView : public BasicView<FormatT>
 
         explicit BasicLineView(BasicView<FormatT>& view);
 
-        explicit BasicLineView(BasicImage<FormatT>& image);
+        explicit BasicLineView(BasicImage<FormatT, TraitsT>& image);
 
-        template <typename OtherFormatT>
-        explicit BasicLineView(BasicImage<OtherFormatT>& image);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicLineView(BasicImage<OtherFormatT, OtherTraitsT>& image);
 
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return Iterator(*this, x, y); }
@@ -218,15 +238,19 @@ class BasicLineView : public BasicView<FormatT>
 };
 
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicConstLineView : public BasicConstView<FormatT>
 {
     public:
         typedef FormatT Format;
-        typedef typename FormatT::Pixel Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
+        typedef TraitsT Traits;
 
-        typedef BasicConstLineIterator<Format> Iterator;
+        typedef typename Traits::PixelType Pixel;
+        typedef typename Traits::ConstPixelType ConstPixel;
+
+        typedef PixelTraits<Pixel> PixelTraits;
+
+        typedef BasicConstLineIterator<Format, PixelTraits> Iterator;
 
     public:
         explicit BasicConstLineView(const Format& format)
@@ -241,11 +265,11 @@ class BasicConstLineView : public BasicConstView<FormatT>
 
         explicit BasicConstLineView(const BasicConstImage<FormatT>& image);
 
-        template <typename OtherFormatT>
-        explicit BasicConstLineView(const BasicImage<OtherFormatT>& image);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image);
 
-        template <typename OtherFormatT>
-        explicit BasicConstLineView(const BasicConstImage<OtherFormatT>& image);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image);
 
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return Iterator(*this, x, y); }
@@ -270,21 +294,21 @@ namespace Gfx {
 // BasicLineView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT>
-inline BasicLineView<FormatT>::BasicLineView(BasicView<FormatT>& view)
+template <typename FormatT, typename TraitsT>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view)
 : BasicView<FormatT>(view)
 { }
 
 
-template <typename FormatT>
-inline BasicLineView<FormatT>::BasicLineView(BasicImage<FormatT>& image)
+template <typename FormatT, typename TraitsT>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<FormatT, TraitsT>& image)
 : BasicView<FormatT>(image)
 { }
 
 
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicLineView<FormatT>::BasicLineView(BasicImage<OtherFormatT>& image)
+template <typename FormatT, typename TraitsT>
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFormatT, OtherTraitsT>& image)
 : BasicView<FormatT>(image)
 {
 }
@@ -293,43 +317,43 @@ inline BasicLineView<FormatT>::BasicLineView(BasicImage<OtherFormatT>& image)
 // BasicConstLineView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT>
-inline BasicConstLineView<FormatT>::BasicConstLineView(const BasicView<FormatT>& view)
+template <typename FormatT, typename TraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<FormatT>& view)
 : BasicConstView<FormatT>(view)
 {
 }
 
 
-template <typename FormatT>
-inline BasicConstLineView<FormatT>::BasicConstLineView(const BasicConstView<FormatT>& view)
+template <typename FormatT, typename TraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<FormatT>& view)
 : BasicConstView<FormatT>(view)
 {
 }
 
 
-template <typename FormatT>
-inline BasicConstLineView<FormatT>::BasicConstLineView(const BasicImage<FormatT>& image)
+template <typename FormatT, typename TraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
 
-template <typename FormatT>
-inline BasicConstLineView<FormatT>::BasicConstLineView(const BasicConstImage<FormatT>& image)
+template <typename FormatT, typename TraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImage<FormatT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
 
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicConstLineView<FormatT>::BasicConstLineView(const BasicImage<OtherFormatT>& image)
+template <typename FormatT, typename TraitsT>
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image)
 : BasicConstView<FormatT>(image)
 {
 }
 
 
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicConstLineView<FormatT>::BasicConstLineView(const BasicConstImage<OtherFormatT>& image)
+template <typename FormatT, typename TraitsT>
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image)
 : BasicConstView<FormatT>(image)
 {
 }

@@ -56,6 +56,24 @@ class PixelView : public BasicPixelView<ImageFormat>
 };
 
 
+class ColorPixelView : public BasicPixelView<ImageFormat, ColorImageTraits>
+{
+    public:
+        ColorPixelView()
+        : BasicPixelView( ImageFormat::argb32() )
+        { }
+
+        explicit ColorPixelView(Image& image)
+        : BasicPixelView(image)
+        { }
+
+        template <typename FormatT>
+        explicit ColorPixelView(BasicImage<FormatT>& image)
+        : BasicPixelView(image)
+        { }
+};
+
+
 class ConstPixelView : public BasicConstPixelView<ImageFormat>
 {
     public:
@@ -78,6 +96,33 @@ class ConstPixelView : public BasicConstPixelView<ImageFormat>
 
         template <typename FormatT>
         explicit ConstPixelView(const BasicConstImage<FormatT>& image)
+        : BasicConstPixelView(image)
+        { }
+};
+
+
+class ConstColorPixelView : public BasicConstPixelView<ImageFormat, ColorImageTraits>
+{
+    public:
+        ConstColorPixelView()
+        : BasicConstPixelView( ImageFormat::argb32() )
+        { }
+
+        explicit ConstColorPixelView(const Image& image)
+        : BasicConstPixelView(image)
+        { }
+
+        explicit ConstColorPixelView(const ConstImage& image)
+        : BasicConstPixelView(image)
+        { }
+
+        template <typename FormatT>
+        explicit ConstColorPixelView(const BasicImage<FormatT>& image)
+        : BasicConstPixelView(image)
+        { }
+
+        template <typename FormatT>
+        explicit ConstColorPixelView(const BasicConstImage<FormatT>& image)
         : BasicConstPixelView(image)
         { }
 };

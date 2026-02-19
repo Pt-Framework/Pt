@@ -339,6 +339,12 @@ class BasicConstImage
         Pt::ssize_t             _padding;
 };
 
+
+template <typename FormatT1, typename FormatT2,
+          typename TraitsT1, typename TraitsT2>
+void copy(const BasicConstImage<FormatT1, TraitsT1>& from, 
+          BasicImage<FormatT2, TraitsT1>& to);
+
 // } // namespace
 
 } // namespace

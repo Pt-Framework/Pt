@@ -26,14 +26,15 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGEFORMAT_H
-#define PT_GFX_IMAGEFORMAT_H
+#ifndef PT_GFX_IMAGE_FORMAT_H
+#define PT_GFX_IMAGE_FORMAT_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
 #include <Pt/Gfx/ImageTraits.h>
+#include <Pt/Gfx/PixelTraits.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/TypeInfo.h>
+#include <typeinfo>
 #include <memory>
 
 namespace Pt {
@@ -55,6 +56,7 @@ class ConstPixel;
 class ImageFormat
 { 
   friend struct ImageTraits<ImageFormat>;
+  friend struct ColorImageTraits;
 
   // image traits functions
   friend std::size_t pixelStride(const ImageFormat& format);
@@ -65,10 +67,6 @@ class ImageFormat
   friend std::unique_ptr<ImageFormat> clone(const ImageFormat& format);
 
     public:
-        typedef Argb32Color ColorType;
-        typedef Pixel<Argb32Color> Pixel;
-        typedef ConstPixel<Argb32Color> ConstPixel;
-        
         enum class Quality : uint32_t
         {
             Normal,
@@ -181,10 +179,13 @@ inline std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::s
     return format.onImageSize(width, height, padding);
 }
 
-
 template <>
 struct ImageTraits<ImageFormat>
 {
+    typedef Argb32Color ColorType;
+    typedef Pixel<Argb32Color> PixelType;
+    typedef ConstPixel<Argb32Color> ConstPixelType;
+
     static std::size_t pixelStride(const ImageFormat& format)
     {
         return format._pixelStride;
@@ -202,6 +203,70 @@ struct ImageTraits<ImageFormat>
     }
 };
 
+
+struct ColorImageTraits
+{
+    typedef Color ColorType;
+    typedef Pixel<Color> PixelType;
+    typedef ConstPixel<Color> ConstPixelType;
+
+    static std::size_t pixelStride(const ImageFormat& format)
+    {
+        return format._pixelStride;
+    }
+
+    static std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::ssize_t height,
+                                 std::size_t padding)
+    {
+        return format.onImageSize(width, height, padding);
+    }
+
+    static std::unique_ptr<ImageFormat> clone(const ImageFormat& format)
+    {
+        return format.onClone();
+    }
+};
+
+
+template <>
+struct PixelTraits< Pixel<Argb32Color> >
+{
+    typedef ImageFormat FormatType;
+    typedef Pixel<Argb32Color> PixelType;
+    typedef ConstPixel<Argb32Color> ConstPixelType;
+    typedef Argb32Color ColorType;
+};
+
+
+template <>
+struct PixelTraits< Pixel<Color> >
+{
+    typedef ImageFormat FormatType;
+    typedef Pixel<Color> PixelType;
+    typedef ConstPixel<Color> ConstPixelType;
+    typedef Color ColorType;
+};
+
+
+template <>
+struct PixelTraits< ConstPixel<Argb32Color> >
+{
+    typedef ImageFormat FormatType;
+    typedef Pixel<Argb32Color> PixelType;
+    typedef ConstPixel<Argb32Color> ConstPixelType;
+    typedef Argb32Color ColorType;
+};
+
+
+template <>
+struct PixelTraits< ConstPixel<Color> >
+{
+    typedef ImageFormat FormatType;
+    typedef Pixel<Color> PixelType;
+    typedef ConstPixel<Color> ConstPixelType;
+    typedef Color ColorType;
+};
+
 } // namespace
 
 } // namespace
@@ -213,12 +278,15 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename ColorT, typename FormatT1, typename FormatT2>
-BasicPixelIterator<FormatT2> copyColors(const BasicConstSpan<FormatT1>& fromSpan, 
-                                        BasicPixelIterator<FormatT2> to)
+template <typename FormatT1, typename FormatT2, 
+          typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<FormatT2, TraitsT2> copyColors(const BasicConstSpan<FormatT1, TraitsT1>& fromSpan, 
+                                                  BasicPixelIterator<FormatT2, TraitsT2> to)
 {
+    typedef typename TraitsT2::ColorType ColorType;
+
     const std::size_t bufsize = 64;
-    ColorT colors[bufsize];
+    ColorType colors[bufsize];
 
     auto from = fromSpan.cbegin();
     std::size_t length = fromSpan.length();
@@ -240,27 +308,28 @@ BasicPixelIterator<FormatT2> copyColors(const BasicConstSpan<FormatT1>& fromSpan
 }
 
 
-inline BasicPixelIterator<ImageFormat> copy(const BasicConstSpan<ImageFormat>& from, 
-                                            BasicPixelIterator<ImageFormat> to)
+template <typename TraitsT1, typename TraitsT2>
+inline BasicPixelIterator<ImageFormat, TraitsT2> copy(const BasicConstSpan<ImageFormat, TraitsT1>& from, 
+                                                      BasicPixelIterator<ImageFormat, TraitsT2> to)
 {    
     to->assign(from.front(), from.length());
     return to += from.length();
 }
 
 
-template <typename FormatT>
-BasicPixelIterator<FormatT> copy(const BasicConstSpan<ImageFormat>& from, 
-                                 BasicPixelIterator<FormatT> to)
+template <typename FormatT, typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<FormatT, TraitsT2> copy(const BasicConstSpan<ImageFormat, TraitsT1>& from, 
+                                           BasicPixelIterator<FormatT, TraitsT2> to)
 {
-    return copyColors<ImageFormat::ColorType>(from, to);
+    return copyColors(from, to);
 }
 
 
-template <typename FormatT>
-BasicPixelIterator<ImageFormat> copy(const BasicConstSpan<FormatT>& from, 
-                                     BasicPixelIterator<ImageFormat> to)
+template <typename FormatT, typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<ImageFormat, TraitsT2> copy(const BasicConstSpan<FormatT, TraitsT1>& from, 
+                                                BasicPixelIterator<ImageFormat, TraitsT2> to)
 {
-    return copyColors<ImageFormat::ColorType>(from, to);
+    return copyColors(from, to);
 }
 
 } // namespace

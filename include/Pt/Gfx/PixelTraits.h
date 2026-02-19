@@ -31,7 +31,6 @@
 #define PT_GFX_PIXEL_TRAITS_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/TypeTraits.h>
 
 namespace Pt {
 
@@ -40,9 +39,10 @@ namespace Gfx {
 template <typename PixelT>
 struct PixelTraits
 {
-    typedef typename PixelT::PixelType PixelType;
-    typedef typename PixelT::ConstPixelType ConstPixelType;
-    typedef typename PixelT::ColorType ColorType;
+    typedef typename PixelT::Format FormatType;
+    typedef typename FormatType::PixelType PixelType;
+    typedef typename FormatType::ConstPixelType ConstPixelType;
+    typedef typename FormatType::ColorType ColorType;
 };
 
 } // namespace

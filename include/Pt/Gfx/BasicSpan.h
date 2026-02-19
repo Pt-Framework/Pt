@@ -40,16 +40,17 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicSpan
 {
     public:
         typedef FormatT Format;
-        typedef typename FormatT::Pixel Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
+        typedef TraitsT Traits;
+        typedef typename TraitsT::PixelType Pixel;
+        typedef typename TraitsT::ConstPixelType ConstPixel;
     
-        typedef BasicPixelIterator<Format> Iterator;
-        typedef BasicConstPixelIterator<Format> ConstIterator;
+        typedef BasicPixelIterator<Format, Traits> Iterator;
+        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         BasicSpan(BasicView<Format>& view, 
@@ -150,16 +151,17 @@ class BasicSpan
 };
 
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicConstSpan
 {
     public:
         typedef FormatT Format;
-        typedef typename FormatT::Pixel Pixel;
-        typedef typename FormatT::ConstPixel ConstPixel;
+        typedef TraitsT Traits;
+        typedef typename TraitsT::PixelType Pixel;
+        typedef typename TraitsT::ConstPixelType ConstPixel;
     
-        typedef BasicConstPixelIterator<Format> Iterator;
-        typedef BasicConstPixelIterator<Format> ConstIterator;
+        typedef BasicConstPixelIterator<Format, Traits> Iterator;
+        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         BasicConstSpan(const BasicConstView<Format>& view, 
@@ -260,9 +262,10 @@ class BasicConstSpan
 };
 
 
-template <typename FormatT1, typename FormatT2>
-BasicPixelIterator<FormatT2> copy(const BasicConstSpan<FormatT1>& from, 
-                                  BasicPixelIterator<FormatT2> to)
+template <typename FormatT1, typename FormatT2,
+         typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<FormatT2, TraitsT2> copy(const BasicConstSpan<FormatT1, TraitsT1>& from, 
+                                            BasicPixelIterator<FormatT2, TraitsT2> to)
 {
     to->assign(from.front(), from.length());
     return to += from.length();

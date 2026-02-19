@@ -32,13 +32,18 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/PixelBase.h>
-#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
+
+template <typename T>
+class BasicView;
+
+template <typename T>
+class BasicConstView;
 
 template <typename ColorT>
 class Pixel;
@@ -55,12 +60,11 @@ class ImageFormat;
 template <typename ColorT>
 class Pixel
 {
-    friend class ConstPixel<ColorT>;
+    template <typename C>
+    friend class ConstPixel;
         
     public:
-        typedef Pixel<ColorT> PixelType;
-        typedef ConstPixel<ColorT> ConstPixelType;
-        typedef ColorT ColorType;
+        typedef ImageFormat Format;
 
     public:
         Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -73,9 +77,13 @@ class Pixel
 
         Pixel& operator=(const Color& color);
 
-        Pixel& operator=(const Pixel& p);
+        Pixel& operator=(const Pixel<Color>& p);
 
-        Pixel& operator=(const ConstPixel<ColorT>& p);
+        Pixel& operator=(const Pixel<Argb32Color>& p);
+
+        Pixel& operator=(const ConstPixel<Color>& p);
+
+        Pixel& operator=(const ConstPixel<Argb32Color>& p);
 
         void reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
 
@@ -149,7 +157,9 @@ class Pixel
             _pixel->assign(colors, length); 
         }
 
-        void assign(const ConstPixel<ColorT>& p, std::size_t length);
+        void assign(const ConstPixel<Color>& p, std::size_t length);
+
+        void assign(const ConstPixel<Argb32Color>& p, std::size_t length);
 
         void fill(std::size_t n, const Color& color)
         {   
@@ -193,12 +203,11 @@ inline Argb32Color toColor(const Pixel<ColorT>& p, const Argb32Color* tag = 0)
 template <typename ColorT>
 class ConstPixel
 {
-    friend class Pixel<ColorT>;
+    template <typename C>
+    friend class Pixel;
 
     public:
-        typedef Pixel<ColorT> PixelType;
-        typedef ConstPixel<ColorT> ConstPixelType;
-        typedef ColorT ColorType;
+        typedef ImageFormat Format;
 
     public:
         ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);

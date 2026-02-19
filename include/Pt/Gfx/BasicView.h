@@ -47,17 +47,16 @@ class BasicView : public ViewBase
     public:
         explicit BasicView(const Format& format);
 
-        explicit BasicView(BasicImage<FormatT>& image);
-
-        template <typename OtherFormatT>
-        explicit BasicView(BasicImage<OtherFormatT>& image);
+        template <typename F, typename T>
+        explicit BasicView(BasicImage<F, T>& image);
 
         virtual ~BasicView()
         { }
 
         void reset();
 
-        void reset(BasicImage<FormatT>& image);
+        template <typename F, typename T>
+        void reset(BasicImage<F, T>& image);
 
         Pt::uint8_t* data()
         { return _data; }
@@ -86,17 +85,14 @@ class BasicConstView : public ViewBase
     public:
         explicit BasicConstView(const Format& format);
 
-        explicit BasicConstView(const BasicView<FormatT>& view);
+        template <typename F>
+        explicit BasicConstView(const BasicView<F>& view);
 
-        explicit BasicConstView(const BasicImage<FormatT>& image);
+        template <typename F, typename T>
+        explicit BasicConstView(const BasicImage<F, T>& image);
 
-        explicit BasicConstView(const BasicConstImage<FormatT>& image);
-
-        template <typename OtherFormatT>
-        explicit BasicConstView(const BasicImage<OtherFormatT>& image);
-
-        template <typename OtherFormatT>
-        explicit BasicConstView(const BasicConstImage<OtherFormatT>& image);
+        template <typename F, typename T>
+        explicit BasicConstView(const BasicConstImage<F, T>& image);
 
         virtual ~BasicConstView()
         { }
@@ -107,9 +103,11 @@ class BasicConstView : public ViewBase
             ViewBase::reset(0, 0, 0, 0);
         }
 
-        void reset(const BasicImage<FormatT>& image);
+        template <typename F, typename T>
+        void reset(const BasicImage<F, T>& image);
 
-        void reset(const BasicConstImage<FormatT>& image);
+        template <typename F, typename T>
+        void reset(const BasicConstImage<F, T>& image);
 
         const Pt::uint8_t* data() const
         { return _data; }
@@ -124,10 +122,6 @@ class BasicConstView : public ViewBase
         const Pt::uint8_t*  _data;
         const Format*       _format;
 };
-
-
-template <typename FormatT1, typename FormatT2>
-void copy(const BasicConstView<FormatT1>& from, BasicView<FormatT2>& to);
 
 } // namespace
 

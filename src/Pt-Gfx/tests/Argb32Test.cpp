@@ -26,8 +26,8 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
@@ -75,7 +75,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32Image image(data, 2, 2);
             Argb32PixelView imageView(image);
             
-            Argb32PixelView::PixelIterator pixel = imageView.pixel(1, 1);
+            Argb32PixelView::Iterator pixel = imageView.pixel(1, 1);
             
             Pt::uint8_t a = pixel->alpha();
             Pt::uint8_t r = pixel->red();
@@ -97,8 +97,8 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32Image image(data, 2, 2);
             Argb32PixelView view(image);
 
-            Argb32PixelView::PixelIterator it = view.begin();
-            Argb32PixelView::PixelIterator end = view.end();
+            Argb32PixelView::Iterator it = view.begin();
+            Argb32PixelView::Iterator end = view.end();
 
             Pt::uint32_t blue = 0;
             for( ; it != end; ++it)
@@ -119,7 +119,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Argb32Image image(data, 1, 1);
             Argb32PixelView imageView(image);
-            Argb32PixelView::PixelIterator pixel = imageView.pixel(0, 0);
+            Argb32PixelView::Iterator pixel = imageView.pixel(0, 0);
 
             Pt::Gfx::Argb32Color c = pixel->toColor();
             *pixel = c;
@@ -131,13 +131,15 @@ class Argb32Test : public Pt::Unit::TestSuite
         {
             using namespace Pt::Gfx;
 
-            Image i(Argb32(), 2, 2);
-            PixelView pixelView(i);
-            ConstPixelView cpixelView(i);
+            Image image(Argb32(), 2, 2);
+            ConstImage cimage(image);
+            PixelView pixelView(image);
+            ConstPixelView cpixelView(image);
 
-            Argb32Image a(2, 2);
-            Argb32PixelView argb32View(a);
-            Argb32ConstPixelView cargb32View(a);
+            Argb32Image argb32Image(2, 2);
+            Argb32ConstImage cargb32Image(argb32Image);
+            Argb32PixelView argb32View(argb32Image);
+            Argb32ConstPixelView cargb32View(argb32Image);
 
             std::transform( cpixelView.begin(), cpixelView.end(), argb32View.begin(),
                             [](const ConstPixelView::ConstPixel& p) 
@@ -149,9 +151,9 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             std::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
 
-            copy(cpixelView, pixelView);
-            copy(cpixelView, argb32View);
-            copy(cargb32View, pixelView);
+            copy(cimage, image);
+            copy(cimage, argb32Image);
+            copy(cargb32Image, image);
 
             convert(*cpixelView.begin(), *pixelView.begin());
             convert(*cpixelView.begin(), *argb32View.begin());
@@ -174,18 +176,18 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Image image(format, width, height);
                 
                 PixelView pixelView(image);
-                PixelView::PixelIterator it = pixelView.begin();
-                PixelView::PixelIterator end = pixelView.end();
+                PixelView::Iterator it = pixelView.begin();
+                PixelView::Iterator end = pixelView.end();
 
-                ConstPixelView cpixelView(image);
-                ConstPixelView::Iterator pfrom = cpixelView.begin();
+                PixelView cpixelView(image);
+                PixelView::Iterator pfrom = cpixelView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
 
                 for( ; it != end; ++it)
                 {
-                    (*it) = *pfrom;
+                    convert( *pfrom, *it);
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -207,8 +209,8 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Argb32Image image(width, height);
                 
                 Argb32PixelView imageView(image);
-                Argb32PixelView::PixelIterator it = imageView.begin();
-                Argb32PixelView::PixelIterator end = imageView.end();
+                Argb32PixelView::Iterator it = imageView.begin();
+                Argb32PixelView::Iterator end = imageView.end();
 
                 Argb32ConstPixelView constView(image);
                 Argb32Pixel cpixel = *imageView.begin();
@@ -244,8 +246,8 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 Image image(format, width, height);
                 PixelView imageView(image);
-                PixelView::PixelIterator it = imageView.begin();
-                PixelView::PixelIterator end = imageView.end();
+                PixelView::Iterator it = imageView.begin();
+                PixelView::Iterator end = imageView.end();
 
                 Pt::System::Clock clock;
                 clock.start();
@@ -273,12 +275,12 @@ class Argb32Test : public Pt::Unit::TestSuite
             {
                 Argb32Image fromImage(width, height);
                 Argb32PixelView fromView(fromImage);
-                Argb32PixelView::PixelIterator from = fromView.begin();
+                Argb32PixelView::Iterator from = fromView.begin();
 
                 Argb32Image image(width, height);
                 Argb32PixelView imageView(image);
-                Argb32PixelView::PixelIterator it = imageView.begin();
-                Argb32PixelView::PixelIterator end = imageView.end();
+                Argb32PixelView::Iterator it = imageView.begin();
+                Argb32PixelView::Iterator end = imageView.end();
 
                 Pt::System::Clock clock;
                 clock.start();
@@ -311,8 +313,8 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 Image image(format, width, height);
                 PixelView imageView(image);
-                PixelView::PixelIterator it = imageView.begin();
-                PixelView::PixelIterator end = imageView.end();
+                PixelView::Iterator it = imageView.begin();
+                PixelView::Iterator end = imageView.end();
 
                 Pt::System::Clock clock;
                 clock.start();
@@ -343,12 +345,12 @@ class Argb32Test : public Pt::Unit::TestSuite
             {
                 Argb32Image fromImage(width, height);
                 Argb32PixelView fromView(fromImage);
-                Argb32PixelView::PixelIterator from = fromView.begin();
+                Argb32PixelView::Iterator from = fromView.begin();
 
                 Argb32Image image(width, height);
                 Argb32PixelView imageView(image);
-                Argb32PixelView::PixelIterator it = imageView.begin();
-                Argb32PixelView::PixelIterator end = imageView.end();
+                Argb32PixelView::Iterator it = imageView.begin();
+                Argb32PixelView::Iterator end = imageView.end();
 
                 Pt::System::Clock clock;
                 clock.start();

@@ -77,7 +77,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Yuv12Image image(yuv12Data, 4, 4);
             Yuv12PixelView imageView(image);
 
-            Yuv12PixelView::PixelIterator pixel = imageView.pixel(1, 3);
+            Yuv12PixelView::Iterator pixel = imageView.pixel(1, 3);
             
             Pt::uint8_t y = pixel->y();
             Pt::uint8_t u = pixel->u();
@@ -105,8 +105,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Yuv12Image image(yuv12Data, 4, 4);
             Yuv12PixelView imageView(image);
 
-            Yuv12PixelView::PixelIterator it = imageView.begin();
-            Yuv12PixelView::PixelIterator end = imageView.end();
+            Yuv12PixelView::Iterator it = imageView.begin();
+            Yuv12PixelView::Iterator end = imageView.end();
 
             Pt::uint32_t u = 0;
             Pt::uint32_t v = 0;
@@ -129,7 +129,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Yuv12Image image(yuv12, 1, 1);
             Yuv12PixelView imageView(image);
 
-            Yuv12PixelView::PixelIterator pixel = imageView.pixel(0, 0);
+            Yuv12PixelView::Iterator pixel = imageView.pixel(0, 0);
 
             Pt::Gfx::Color c = pixel->toColor();
             *pixel = c;
@@ -153,8 +153,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             // ...to a concrete YUV-12 image
             Yuv12Image yuv12Image(yuv12, 1, 1);
             PixelView yuv12View(yuv12Image);
-            PixelView::PixelIterator it = yuv12View.begin();
-            PixelView::PixelIterator end = yuv12View.end();
+            PixelView::Iterator it = yuv12View.begin();
+            PixelView::Iterator end = yuv12View.end();
 
             for( ; it != end; it += image.width(), from += image.width() )
             {
@@ -176,8 +176,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             // ...to an image in YUV-12 image
             Image yuv12Image(Yuv12(), yuv12, 1, 1);
             PixelView yuv12View(yuv12Image);
-            PixelView::PixelIterator it = yuv12View.begin();
-            PixelView::PixelIterator end = yuv12View.end();
+            PixelView::Iterator it = yuv12View.begin();
+            PixelView::Iterator end = yuv12View.end();
 
             for( ; it != end; it += image.width(), from += image.width() )
             {
@@ -199,8 +199,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             // ...to an image in YUV-12 image
             Image yuv12Image(Yuv12(), yuv12, 1, 1);
             PixelView yuv12View(yuv12Image);
-            PixelView::PixelIterator it = yuv12View.begin();
-            PixelView::PixelIterator end = yuv12View.end();
+            PixelView::Iterator it = yuv12View.begin();
+            PixelView::Iterator end = yuv12View.end();
 
             for( ; it != end; it += image.width(), from += image.width() )
             {
@@ -223,13 +223,10 @@ class Yuv12Test : public Pt::Unit::TestSuite
             // ...to a concrete YUV-12 image
             Yuv12Image yuv12Image(yuv12, 1, 1);
             Yuv12PixelView yuv12View(yuv12Image);
-            Yuv12PixelView::PixelIterator it = yuv12View.begin();
-            Yuv12PixelView::PixelIterator end = yuv12View.end();
+            Yuv12PixelView::Iterator it = yuv12View.begin();
+            Yuv12PixelView::Iterator end = yuv12View.end();
 
-            for( ; it != end; it += image.width(), from += image.width() )
-            {
-                it->assign( *from, image.width() );
-            }
+            //copy(image, yuv12Image);
         }
 
         void Benchmark()
@@ -244,8 +241,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
                 Image image(format, 1000, 1000);
                 PixelView imageView(image);
 
-                PixelView::PixelIterator it = imageView.begin();
-                PixelView::PixelIterator end = imageView.end();
+                PixelView::Iterator it = imageView.begin();
+                PixelView::Iterator end = imageView.end();
             
                 Pt::Gfx::Argb32Color color(255, 100, 100, 100);
             
@@ -279,8 +276,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
                 Yuv12Image image(1000, 1000);
                 Yuv12PixelView imageView(image);
 
-                Yuv12PixelView::PixelIterator it = imageView.begin();
-                Yuv12PixelView::PixelIterator end = imageView.end();
+                Yuv12PixelView::Iterator it = imageView.begin();
+                Yuv12PixelView::Iterator end = imageView.end();
             
                 Pt::Gfx::Color color(100, 100, 100);
             

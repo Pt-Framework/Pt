@@ -31,8 +31,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <Pt/Gfx/BasicSpan.h>
-#include <Pt/Gfx/LineView.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -53,18 +51,8 @@ inline BasicView<FormatT>::BasicView(const Format& format)
 
 
 template <typename FormatT>
-inline BasicView<FormatT>::BasicView(BasicImage<FormatT>& image)
-: ViewBase(image.width(), image.height(), 
-           image.stride(), image.padding())
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicView<FormatT>::BasicView(BasicImage<OtherFormatT>& image)
+template <typename F, typename T>
+inline BasicView<FormatT>::BasicView(BasicImage<F, T>& image)
 : ViewBase(image.width(), image.height(), 
            image.stride(), image.padding())
 , _data( image.data() )
@@ -82,7 +70,8 @@ inline void BasicView<FormatT>::reset()
 
 
 template <typename FormatT>
-inline void BasicView<FormatT>::reset(BasicImage<FormatT>& image)
+template <typename F, typename T>
+inline void BasicView<FormatT>::reset(BasicImage<F, T>& image)
 {
     _data = image.data();
     _format = &image.format();
@@ -104,7 +93,8 @@ inline BasicConstView<FormatT>::BasicConstView(const Format& format)
 
 
 template <typename FormatT>
-inline BasicConstView<FormatT>::BasicConstView(const BasicView<FormatT>& view)
+template <typename F>
+inline BasicConstView<FormatT>::BasicConstView(const BasicView<F>& view)
 : ViewBase(view.width(), view.height(), 
            view.stride(), view.padding())
 , _data( view.data() )
@@ -114,7 +104,8 @@ inline BasicConstView<FormatT>::BasicConstView(const BasicView<FormatT>& view)
 
 
 template <typename FormatT>
-inline BasicConstView<FormatT>::BasicConstView(const BasicImage<FormatT>& image)
+template <typename F, typename T>
+inline BasicConstView<FormatT>::BasicConstView(const BasicImage<F, T>& image)
 : ViewBase(image.width(), image.height(), 
            image.stride(), image.padding())
 , _data( image.data() )
@@ -124,7 +115,8 @@ inline BasicConstView<FormatT>::BasicConstView(const BasicImage<FormatT>& image)
 
 
 template <typename FormatT>
-inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<FormatT>& image)
+template <typename F, typename T>
+inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<F, T>& image)
 : ViewBase(image.width(), image.height(), 
            image.stride(), image.padding())
 , _data( image.data() )
@@ -134,29 +126,8 @@ inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<FormatT>& i
 
 
 template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicConstView<FormatT>::BasicConstView(const BasicImage<OtherFormatT>& image)
-: ViewBase(image.width(), image.height(), 
-           image.stride(), image.padding())
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicConstView<FormatT>::BasicConstView(const BasicConstImage<OtherFormatT>& image)
-: ViewBase(image.width(), image.height(), 
-           image.stride(), image.padding())
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT>
-inline void BasicConstView<FormatT>::reset(const BasicImage<FormatT>& image)
+template <typename F, typename T>
+inline void BasicConstView<FormatT>::reset(const BasicImage<F, T>& image)
 {
     _data = image.data();
     _format = &image.format();
@@ -164,30 +135,15 @@ inline void BasicConstView<FormatT>::reset(const BasicImage<FormatT>& image)
                     image.stride(), image.padding() );
 }
 
+
 template <typename FormatT>
-inline void BasicConstView<FormatT>::reset(const BasicConstImage<FormatT>& image)
+template <typename F, typename T>
+inline void BasicConstView<FormatT>::reset(const BasicConstImage<F, T>& image)
 {
     _data = image.data();
     _format = &image.format();
     ViewBase::reset(image.width(), image.height(),
                     image.stride(), image.padding() );
-}
-
-///////////////////////////////////////////////////////////////////////
-// Copy
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT1, typename FormatT2>
-void copy(const BasicConstView<FormatT1>& fromView, BasicView<FormatT2>& toView)
-{
-    BasicLineView<FormatT2> toLines(toView);
-    BasicLineIterator<FormatT2> to = toLines.begin();
-
-    BasicConstLineView<FormatT1> fromLines(fromView);
-    for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
-    {
-        copy(*from, to->begin());
-    }
 }
 
 } // namespace

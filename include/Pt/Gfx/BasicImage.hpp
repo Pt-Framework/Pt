@@ -31,7 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 //#include <Pt/Gfx/BasicView.h>
-//#include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/LineView.h>
 #include <Pt/Types.h>
 #include <vector>
 
@@ -47,6 +47,38 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
 , _height(0)
 , _padding(0)
 { }
+
+
+template <typename FormatT1, typename FormatT2,
+          typename TraitsT1, typename TraitsT2>
+void copy(const BasicImage<FormatT1, TraitsT1>& fromImage, 
+          BasicImage<FormatT2, TraitsT2>& toImage)
+{
+    BasicLineView<FormatT2, TraitsT2> toLines(toImage);
+    auto to = toLines.begin();
+
+    BasicConstLineView<FormatT1, TraitsT1> fromLines(fromImage);
+    for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
+    {
+        copy(*from, to->begin());
+    }
+}
+
+
+template <typename FormatT1, typename FormatT2,
+          typename TraitsT1, typename TraitsT2>
+void copy(const BasicConstImage<FormatT1, TraitsT1>& fromImage, 
+          BasicImage<FormatT2, TraitsT2>& toImage)
+{
+    BasicLineView<FormatT2, TraitsT2> toLines(toImage);
+    auto to = toLines.begin();
+
+    BasicConstLineView<FormatT1, TraitsT1> fromLines(fromImage);
+    for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
+    {
+        copy(*from, to->begin());
+    }
+}
 
 } // namespace
 

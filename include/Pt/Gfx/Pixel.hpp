@@ -30,7 +30,7 @@
 #define PT_GFX_PIXEL_HPP
 
 #include <Pt/Gfx/Api.h>
-
+#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/ImageFormat.h>
 
 namespace Pt {
@@ -137,7 +137,7 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Color& color)
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<ColorT>& p)
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Color>& p)
 {
     //if(p.format().quality() == ImageFormat::Quality::Normal)
     //    _pixel->assign( p.toArgb32Color() );
@@ -150,7 +150,20 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<ColorT>& p)
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<ColorT>& p)
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Argb32Color>& p)
+{
+    //if(p.format().quality() == ImageFormat::Quality::Normal)
+    //    _pixel->assign( p.toArgb32Color() );
+    //else
+    //    _pixel->assign( p.toColor() );
+    
+    _pixel->assign( p.toArgb32Color() );
+    return *this;
+}
+
+
+template <typename ColorT>
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Color>& p)
 {
     //if(p.format().quality() == ImageFormat::Quality::Normal)
     //    _pixel->assign( p.toArgb32Color() );
@@ -163,7 +176,61 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<ColorT>& p)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p, std::size_t length)
+inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Argb32Color>& p)
+{
+    //if(p.format().quality() == ImageFormat::Quality::Normal)
+    //    _pixel->assign( p.toArgb32Color() );
+    //else
+    //    _pixel->assign( p.toColor() );
+
+    _pixel->assign( p.toArgb32Color() );
+    return *this;
+}
+
+
+template <typename ColorT>
+inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p, std::size_t length)
+{
+    bool isCompatible = _pixel->assign(*p._pixel, length);
+    if( isCompatible )
+        return;
+
+    isCompatible = p._pixel->copy(*_pixel, length);
+    if( isCompatible )
+        return;
+
+    if(p.format().quality() == ImageFormat::Quality::Normal ||
+       this->format().quality() == ImageFormat::Quality::Normal)
+    {
+        const std::size_t bufsize = 64;
+        Argb32Color colors[bufsize];
+
+        while(length > 0)
+        {
+            std::size_t n = std::min(length, bufsize);
+            p.getColors(colors, n);
+            this->assign(colors, n);
+            length -= n;
+        }
+
+        return;
+    }
+
+    const std::size_t bufsize = 64;
+    ColorT colors[bufsize];
+
+    while(length > 0)
+    {
+        std::size_t n = std::min(length, bufsize);
+        p.getColors(colors, n);
+        this->assign(colors, n);
+        length -= n;
+    }
+}
+
+
+template <typename ColorT>
+inline void Pixel<ColorT>::assign(const ConstPixel<Argb32Color>& p, std::size_t length)
 {
     bool isCompatible = _pixel->assign(*p._pixel, length);
     if( isCompatible )

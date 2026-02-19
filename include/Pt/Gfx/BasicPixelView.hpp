@@ -39,15 +39,15 @@ namespace Gfx {
 // BasicPixelView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT>
-inline BasicPixelView<FormatT>::BasicPixelView(BasicImage<FormatT>& image)
+template <typename FormatT, typename TraitsT>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<FormatT, TraitsT>& image)
 : BasicView<FormatT>(image)
 { }
 
 
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicPixelView<FormatT>::BasicPixelView(BasicImage<OtherFormatT>& image)
+template <typename FormatT, typename TraitsT>
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT, OtherTraitsT>& image)
 : BasicView<FormatT>(image)
 {
 }
@@ -56,36 +56,36 @@ inline BasicPixelView<FormatT>::BasicPixelView(BasicImage<OtherFormatT>& image)
 // BasicConstPixelView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FormatT>
-inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicView<FormatT>& view)
+template <typename FormatT, typename TraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<FormatT>& view)
 : BasicConstView<FormatT>(view)
 {
 }
 
 
-template <typename FormatT>
-inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicImage<FormatT>& image)
+template <typename FormatT, typename TraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<FormatT, TraitsT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
 
-template <typename FormatT>
-inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<FormatT>& image)
+template <typename FormatT, typename TraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<FormatT, TraitsT>& image)
 : BasicConstView<FormatT>(image)
 { }
 
 
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicImage<OtherFormatT>& image)
+template <typename FormatT, typename TraitsT>
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image)
 : BasicConstView<FormatT>(image)
 {
 }
 
 
-template <typename FormatT>
-template <typename OtherFormatT>
-inline BasicConstPixelView<FormatT>::BasicConstPixelView(const BasicConstImage<OtherFormatT>& image)
+template <typename FormatT, typename TraitsT>
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image)
 : BasicConstView<FormatT>(image)
 {
 }

@@ -660,7 +660,7 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
   
-    Gfx::PixelView::PixelIterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
+    Gfx::PixelView::Iterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);
     Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
