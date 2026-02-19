@@ -79,17 +79,8 @@ class ImageFormat
   friend std::unique_ptr<ImageFormat> clone(const ImageFormat& format);
 
     public:
-        enum class Quality : uint32_t
-        {
-            Normal,
-            High
-        };
-
-    public:
-        explicit ImageFormat(size_t pixelStride, 
-                             const Quality& quality = Quality::Normal)
+        explicit ImageFormat(size_t pixelStride)
         : _pixelStride(pixelStride)
-        , _quality(quality)
         { }
 
         virtual ~ImageFormat() 
@@ -117,11 +108,6 @@ class ImageFormat
         bool operator!=(const ImageFormat& a) const
         {
             return ! (*this == a);
-        }
-
-        const Quality& quality() const
-        {
-            return _quality;
         }
 
         const std::type_info& type() const
@@ -166,7 +152,6 @@ class ImageFormat
 
     private:
         const std::size_t  _pixelStride;
-        Quality            _quality;
         const varint_t     _r0;
         const varint_t     _r1;
         const varint_t     _r2;

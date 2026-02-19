@@ -118,10 +118,7 @@ inline Pixel<ColorT>::Pixel(const Pixel& p)
 , _pixel(0)
 , _data(p._data)
 { 
-    if(p._pixel)
-    {
-        _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
-    }
+    _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
 }
 
 
@@ -157,13 +154,7 @@ inline void Pixel<ColorT>::reset(const Pixel& p)
     if(_pixel)
     {
         _pixel->~PixelBase();
-        
         _pixel = 0;
-        _data = 0;
-        _view = 0;
-        _x = 0;
-        _y = 0;
-        _format = 0;
     }
 
     _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
@@ -235,23 +226,6 @@ inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p, std::size_t length
     if( isCompatible )
         return;
 
-    if(p.format().quality() == ImageFormat::Quality::Normal ||
-       this->format().quality() == ImageFormat::Quality::Normal)
-    {
-        const std::size_t bufsize = 64;
-        Argb32Color colors[bufsize];
-
-        while(length > 0)
-        {
-            std::size_t n = std::min(length, bufsize);
-            p.getColors(colors, n);
-            this->assign(colors, n);
-            length -= n;
-        }
-
-        return;
-    }
-
     const std::size_t bufsize = 64;
     ColorT colors[bufsize];
 
@@ -276,25 +250,8 @@ inline void Pixel<ColorT>::assign(const ConstPixel<Argb32Color>& p, std::size_t 
     if( isCompatible )
         return;
 
-    if(p.format().quality() == ImageFormat::Quality::Normal ||
-       this->format().quality() == ImageFormat::Quality::Normal)
-    {
-        const std::size_t bufsize = 64;
-        Argb32Color colors[bufsize];
-
-        while(length > 0)
-        {
-            std::size_t n = std::min(length, bufsize);
-            p.getColors(colors, n);
-            this->assign(colors, n);
-            length -= n;
-        }
-
-        return;
-    }
-
     const std::size_t bufsize = 64;
-    Gfx::Color colors[bufsize];
+    Argb32Color colors[bufsize];
 
     while(length > 0)
     {
@@ -351,10 +308,7 @@ inline ConstPixel<ColorT>::ConstPixel(const ConstPixel& p)
 , _pixel(0)
 , _data(p._data)
 { 
-    if(p._pixel)
-    {
-        _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
-    }
+    _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
 }
 
 
@@ -421,24 +375,15 @@ inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
     if(_pixel)
     {
         _pixel->~ConstPixelBase();
-        
         _pixel = 0;
-        _data = 0;
-        _view = 0;
-        _x = 0;
-        _y = 0;
-        _format = 0;
     }
 
-    if(p._pixel)
-    {
-        _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
-        _data = p._data;
-        _view = p._view;
-        _x = p._x;
-        _y = p._y;
-        _format = p._format;
-    }
+    _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
+    _data = p._data;
+    _view = p._view;
+    _x = p._x;
+    _y = p._y;
+    _format = p._format;
 }
 
 
@@ -448,25 +393,16 @@ inline void ConstPixel<ColorT>::reset(const Pixel<ColorT>& p)
     if(_pixel)
     {
         _pixel->~ConstPixelBase();
-        
         _pixel = 0;
-        _data = 0;
-        _view = 0;
-        _x = 0;
-        _y = 0;
-        _format = 0;
     }
 
-    if(p._pixel)
-    {
-        const Pt::uint8_t* data = p._data;
-        _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
-        _data = p._data;
-        _view = p._view;
-        _x = p._x;
-        _y = p._y;
-        _format = p._format;
-    }
+    const Pt::uint8_t* data = p._data;
+    _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
+    _data = p._data;
+    _view = p._view;
+    _x = p._x;
+    _y = p._y;
+    _format = p._format;
 }
 
 } // namespace
