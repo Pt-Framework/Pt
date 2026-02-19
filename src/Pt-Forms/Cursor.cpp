@@ -84,14 +84,14 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 
   reader.get();
 
-	Gfx::PixelView imageView(image);
+	Gfx::ColorPixelView imageView(image);
 
 	//Generate alpha channel
 	for( size_t y = 0;  y < image.height(); ++y )
 	{
 		  for( size_t x = 0;  x < image.width(); ++x )
 		  {
-          Gfx::PixelView::Pixel pixel(imageView, x, y);
+          Gfx::ColorPixelView::Pixel pixel(imageView, x, y);
           Gfx::Color color = pixel.toColor();
 				
 			    if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
@@ -238,13 +238,13 @@ void Cursor::fromImage(const Gfx::Image& image, Cursor& cursor)
 	cursor._height   = image.height();
 	cursor._width    = image.width();
 
-	Gfx::ConstPixelView view(image);
+	Gfx::ConstColorPixelView view(image);
 
 	for( size_t y = 0; y < cursor._height; ++y )
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-      Gfx::ConstPixelView::ConstPixel pixel(view, x, y);
+      Gfx::ConstColorPixelView::ConstPixel pixel(view, x, y);
       Gfx::Color color = pixel.toColor();
 
 			if( color.alpha() == 0 )

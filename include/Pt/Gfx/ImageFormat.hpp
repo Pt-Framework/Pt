@@ -194,11 +194,7 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Color& color)
 template <typename ColorT>
 inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Color>& p)
 {
-    //if(p.format().quality() == ImageFormat::Quality::Normal)
-    //    _pixel->assign( p.toArgb32Color() );
-    //else
-    //    _pixel->assign( p.toColor() );
-    
+   
     _pixel->assign( p.toColor() );
     return *this;
 }
@@ -206,13 +202,8 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Color>& p)
 
 template <typename ColorT>
 inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Argb32Color>& p)
-{
-    //if(p.format().quality() == ImageFormat::Quality::Normal)
-    //    _pixel->assign( p.toArgb32Color() );
-    //else
-    //    _pixel->assign( p.toColor() );
-    
-    _pixel->assign( p.toArgb32Color() );
+{ 
+    _pixel->assign( p.toColor() );
     return *this;
 }
 
@@ -220,11 +211,6 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Argb32Color>& p)
 template <typename ColorT>
 inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Color>& p)
 {
-    //if(p.format().quality() == ImageFormat::Quality::Normal)
-    //    _pixel->assign( p.toArgb32Color() );
-    //else
-    //    _pixel->assign( p.toColor() );
-
     _pixel->assign( p.toColor() );
     return *this;
 }
@@ -233,12 +219,7 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Color>& p)
 template <typename ColorT>
 inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Argb32Color>& p)
 {
-    //if(p.format().quality() == ImageFormat::Quality::Normal)
-    //    _pixel->assign( p.toArgb32Color() );
-    //else
-    //    _pixel->assign( p.toColor() );
-
-    _pixel->assign( p.toArgb32Color() );
+    _pixel->assign( p.toColor() );
     return *this;
 }
 

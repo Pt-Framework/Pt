@@ -524,7 +524,7 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 
           Gfx::ConstPixelView pixelView(icon);
           Gfx::ConstPixelView::ConstPixel pixel(pixelView, x, y);
-          Gfx::Color color = pixel.toColor();
+          Gfx::Argb32Color color = pixel.toColor();
                 
           bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());    
           bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());

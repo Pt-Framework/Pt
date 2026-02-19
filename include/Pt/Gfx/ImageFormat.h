@@ -303,14 +303,9 @@ class Pixel
         Pt::ssize_t ypos() const
         { return _y; }
 
-        Color toColor() const
+        ColorT toColor() const
         {
-            return _pixel->toColor();
-        }
-
-        Argb32Color toArgb32Color() const
-        {
-            return _pixel->toArgb32Color();
+            return _pixel->toColor<ColorT>();
         }
 
         void advance()
@@ -425,14 +420,9 @@ class ConstPixel
         Pt::ssize_t ypos() const
         { return _y; }
         
-        Color toColor() const
+        ColorT toColor() const
         {
-            return _pixel->toColor();
-        }
-
-        Argb32Color toArgb32Color() const
-        {
-            return _pixel->toArgb32Color();
+            return _pixel->toColor<ColorT>();
         }
 
         void advance()

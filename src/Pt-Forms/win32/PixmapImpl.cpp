@@ -92,12 +92,12 @@ void toPreMulAlpha(const Pt::Gfx::Image& image,
 
     for( ; it != end; ++it)
     {
-        Pt::Gfx::Color color = it->toColor();
+        Pt::Gfx::Argb32Color color = it->toColor();
 
-        const Pt::uint8_t r = color.red() / 257;
-        const Pt::uint8_t g = color.green() / 257;
-        const Pt::uint8_t b = color.blue() / 257;
-        const Pt::uint8_t a = color.alpha() / 257;
+        const Pt::uint8_t r = color.red();
+        const Pt::uint8_t g = color.green();
+        const Pt::uint8_t b = color.blue();
+        const Pt::uint8_t a = color.alpha();
 
         bitmapData.push_back((Pt::uint8_t) (a * b / 255));
         bitmapData.push_back((Pt::uint8_t) (a * g / 255));

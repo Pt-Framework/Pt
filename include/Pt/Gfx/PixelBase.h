@@ -78,15 +78,8 @@ class PixelBase
             return loc;
         }
 
-        Color toColor() const
-        {
-            return this->onGetColor();
-        }
-
-        Argb32Color toArgb32Color() const
-        {
-            return this->onGetArgb32Color();
-        }
+        template <typename ColorT>
+        ColorT toColor() const;
 
         void getColors(Color* colors, std::size_t length) const
         { 
@@ -167,6 +160,21 @@ class PixelBase
         Pt::uint8_t* _base;
 };
 
+
+template <typename ColorT>
+inline ColorT PixelBase::toColor() const
+{
+    return this->onGetColor();
+}
+
+
+template <>
+inline Argb32Color PixelBase::toColor<Argb32Color>() const
+{
+    return this->onGetArgb32Color();
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 // ConstPixelBase
 ///////////////////////////////////////////////////////////////////////
@@ -200,15 +208,8 @@ class ConstPixelBase
             return loc;
         }
 
-        Color toColor() const
-        {
-            return this->onGetColor();
-        }
-
-        Argb32Color toArgb32Color() const
-        {
-            return this->onGetArgb32Color();
-        }
+        template <typename ColorT>
+        ColorT toColor() const;
 
         void getColors(Color* colors, std::size_t length) const
         { 
@@ -247,6 +248,20 @@ class ConstPixelBase
     private:
         const Pt::uint8_t*   _base;
 };
+
+
+template <typename ColorT>
+inline ColorT ConstPixelBase::toColor() const
+{
+    return this->onGetColor();
+}
+
+
+template <>
+inline Argb32Color ConstPixelBase::toColor<Argb32Color>() const
+{
+    return this->onGetArgb32Color();
+}
 
 ///////////////////////////////////////////////////////////////////////
 // PixelStorage
