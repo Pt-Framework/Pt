@@ -187,7 +187,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 for( ; it != end; ++it)
                 {
-                    convert( *pfrom, *it);
+                    convert(*pfrom, *it);
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
