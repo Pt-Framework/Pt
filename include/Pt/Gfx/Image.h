@@ -76,10 +76,6 @@ class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
                    Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
 
         virtual ~ConstImage();
-
-        const ConstImage& operator=(const ConstImage& image);
-
-        const ConstImage& operator=(const Image& image);
 };
 
 } // namespace

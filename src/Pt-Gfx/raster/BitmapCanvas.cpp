@@ -650,7 +650,7 @@ void BitmapCanvas::stroke(int x, int y, const Rect& clip)
         return;
 
     std::size_t off = _image->size( _image->width(), y, _image->padding() );
-    off += x * pixelStride( _image->format() );
+    off += x * _image->pixelStride();
 
     Pt::uint8_t* to = _image->data() + off;
     const Pt::uint8_t* from = _penPixel.base();

@@ -67,16 +67,8 @@ class BasicConstView;
 */
 class ImageFormat
 { 
-  friend struct ImageTraits<ImageFormat>;
-  friend struct ColorImageTraits;
-
-  // image traits functions
-  friend std::size_t pixelStride(const ImageFormat& format);
-
-  friend std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, 
-                               Pt::ssize_t height, std::size_t padding);
-     
-  friend std::unique_ptr<ImageFormat> clone(const ImageFormat& format);
+    friend struct ImageTraits<ImageFormat>;
+    friend struct ColorImageTraits;
 
     public:
         explicit ImageFormat(size_t pixelStride)
@@ -156,25 +148,6 @@ class ImageFormat
         const varint_t     _r1;
         const varint_t     _r2;
 };
-
-
-inline std::unique_ptr<ImageFormat> clone(const ImageFormat& format)
-{
-    return format.onClone();
-}
-
-
-inline std::size_t pixelStride(const ImageFormat& format)
-{
-    return format._pixelStride;
-}
-
-
-inline std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::ssize_t height,
-                             std::size_t padding)
-{
-    return format.onImageSize(width, height, padding);
-}
 
 ///////////////////////////////////////////////////////////////////////
 // ImageTraits

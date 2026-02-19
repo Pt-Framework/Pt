@@ -118,20 +118,6 @@ ConstImage::~ConstImage()
 {
 }
 
-
-const ConstImage& ConstImage::operator=(const ConstImage& image)
-{
-    BasicConstImage::operator=(image);
-    return *this;
-}
-
-
-const ConstImage& ConstImage::operator=(const Image& image)
-{
-    BasicConstImage::operator=(image);
-    return *this;
-}
-
 } // namespace
 
 } // namespace

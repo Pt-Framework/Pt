@@ -181,6 +181,11 @@ class BasicImage
         Pt::ssize_t padding() const
         { return _padding; }
 
+        Pt::ssize_t pixelStride() const
+        { 
+            return Traits::pixelStride(*_format); 
+        }
+
         Pt::ssize_t stride() const
         { 
             return (_width * Traits::pixelStride(*_format)) + _padding; 
@@ -208,13 +213,14 @@ class BasicConstImage
 {
     public:
         typedef FormatT Format;
-
+        typedef TraitsT Traits;
+        
         typedef Pt::ssize_t pos_t;
         typedef Pt::ssize_t length_t;
 
     public:
         BasicConstImage(const Format& format)
-        : _format( clone(format) )
+        : _format( Traits::clone(format) )
         , _data(0)
         , _width(0)
         , _height(0)
@@ -223,23 +229,17 @@ class BasicConstImage
 
         BasicConstImage(const Format& format, const Pt::uint8_t* data, 
                         Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
-        : _format( clone(format) )
+        : _format( Traits::clone(format) )
         , _data(data)
         , _width(width)
         , _height(height)
         , _padding(padding)
         { }
 
-        BasicConstImage(const BasicImage<FormatT>& image)
-        : _format( clone( image.format() ) )
-        , _data( image.data() )
-        , _width( image.width() )
-        , _height( image.height() )
-        , _padding( image.padding() )
-        { }
+        BasicConstImage(const BasicImage<FormatT, TraitsT>& image);
 
         BasicConstImage(const BasicConstImage& image)
-        : _format( clone( image.format() ) )
+        : _format( Traits::clone( image.format() ) )
         , _data(image._data)
         , _width(image._width)
         , _height(image._height)
@@ -249,29 +249,17 @@ class BasicConstImage
         virtual ~BasicConstImage()
         { }
 
-        BasicConstImage& operator=(const BasicConstImage& image)
+        void reset(const BasicConstImage& image)
         { 
-            _format = clone( image.format() );
+            _format = Traits::clone( image.format() );
             
             _data = image._data;
             _width = image._width;
             _height = image._height;
             _padding = image._padding;
-
-            return *this;
         }
 
-        BasicConstImage& operator=(const BasicImage<FormatT>& image)
-        { 
-            _format = clone( image.format() );
-            
-            _data = image.data();
-            _width = image.width();
-            _height = image.height();
-            _padding = image.padding();
-
-            return *this;
-        }
+        void reset(const BasicImage<FormatT, TraitsT>& image);
 
         void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
@@ -286,7 +274,7 @@ class BasicConstImage
         void reset(const Format& format, const Pt::uint8_t* data, 
                    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         {
-            _format = clone(format);
+            _format = Traits::clone(format);
 
             _data = data;
             _width = width;
@@ -322,13 +310,18 @@ class BasicConstImage
 
         Pt::ssize_t stride() const
         { 
-            return (_width * pixelStride(*_format)) + _padding; 
+            return (_width * Traits::pixelStride(*_format)) + _padding; 
+        }
+        
+        Pt::ssize_t pixelStride() const
+        { 
+            return Traits::pixelStride(*_format); 
         }
 
         std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
                          std::size_t padding) const
         {
-            return imageSize(*_format, width, height, padding);
+            return Traits::imageSize(*_format, width, height, padding);
         }
 
     private:
@@ -338,6 +331,12 @@ class BasicConstImage
         Pt::ssize_t             _height;
         Pt::ssize_t             _padding;
 };
+
+
+template <typename FormatT1, typename FormatT2,
+          typename TraitsT1, typename TraitsT2>
+void copy(const BasicImage<FormatT1, TraitsT1>& fromImage, 
+          BasicImage<FormatT2, TraitsT2>& toImage);
 
 
 template <typename FormatT1, typename FormatT2,

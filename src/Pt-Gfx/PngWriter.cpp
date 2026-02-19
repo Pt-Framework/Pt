@@ -145,7 +145,7 @@ class PngWriterImpl
             _rowBuffer.resize( 3 * _image->width() );
 
             // convert row from ARGB32 to RGB24
-            std::size_t imageWidth = pixelStride( _image->format() ) * _image->width();
+            std::size_t imageWidth = _image->pixelStride() * _image->width();
             const Pt::uint8_t* from = _image->data() + _row * imageWidth;
             Pt::uint8_t* to = &_rowBuffer[0];
             
@@ -155,7 +155,7 @@ class PngWriterImpl
                 *to++ = from[1];
                 *to++ = from[0];
 
-                from += pixelStride( _image->format() );
+                from += _image->pixelStride();
             }
             
             png_write_row(_pngWrite, &_rowBuffer[0]);

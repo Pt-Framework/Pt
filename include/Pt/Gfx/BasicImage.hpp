@@ -30,7 +30,6 @@
 #define PT_GFX_BASIC_IMAGE_HPP
 
 #include <Pt/Gfx/Api.h>
-//#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/LineView.h>
 #include <Pt/Types.h>
 #include <vector>
@@ -41,12 +40,35 @@ namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
-: _format( clone(format) )
+: _format( Traits::clone(format) )
 , _data(0)
 , _width(0)
 , _height(0)
 , _padding(0)
 { }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const BasicImage<FormatT, TraitsT>& image)
+: _format( Traits::clone( image.format() ) )
+, _data( image.data() )
+, _width( image.width() )
+, _height( image.height() )
+, _padding( image.padding() )
+{ 
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, TraitsT>& image)
+{ 
+    _format = Traits::clone( image.format() );
+            
+    _data = image.data();
+    _width = image.width();
+    _height = image.height();
+    _padding = image.padding();
+}
 
 
 template <typename FormatT1, typename FormatT2,

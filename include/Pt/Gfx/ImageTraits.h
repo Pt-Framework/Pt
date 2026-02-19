@@ -69,31 +69,6 @@ class BasicImage;
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstImage;
 
-///////////////////////////////////////////////////////////////////////
-// Image traits functions.
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT>
-std::size_t pixelStride(const FormatT& format)
-{
-    return format.pixelStride();
-}
-
-
-template <typename FormatT>
-std::size_t imageSize(const FormatT& format, Pt::ssize_t width, Pt::ssize_t height,
-                      std::size_t padding)
-{
-    return format.imageSize(width, height, padding);
-}
-
-
-template <typename FormatT>
-std::unique_ptr<FormatT> clone(const FormatT& format)
-{
-    return std::unique_ptr<FormatT>( new FormatT(format) );
-}
-
 } // namespace
 
 } // namespace

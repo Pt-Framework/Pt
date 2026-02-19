@@ -417,7 +417,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
             BITMAPINFO bi;
             ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-            std::size_t pixelSize = pixelStride( texture.format() );
+            std::size_t pixelSize = texture.pixelStride();
             std::size_t depth = pixelSize * 8;
 
             bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);    
@@ -1020,7 +1020,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
         case Gfx::CompositionMode::SourceCopy:
         {
             const Pt::uint8_t* data = image.data();
-            std::size_t pixelSize = pixelStride( image.format() );
+            std::size_t pixelSize = image.pixelStride();
             size_t depth = pixelSize * 8;
 
             HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
@@ -1063,7 +1063,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
             toPreMulAlpha(image, bitmapData);
 
             const Pt::uint8_t* data =  bitmapData.empty() ? 0 : &bitmapData[0];
-            std::size_t pixelSize = pixelStride( image.format() );
+            std::size_t pixelSize = image.pixelStride();
             size_t depth = pixelSize * 8;
 
             HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
