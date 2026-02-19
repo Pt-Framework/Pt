@@ -92,6 +92,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageTraits.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\LineView.h" />
@@ -102,8 +103,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Pixel.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Pixel.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelTraits.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelView.h" />

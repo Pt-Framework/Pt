@@ -31,11 +31,66 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/BasicSpan.h>
+#include <Pt/Gfx/PixelBase.h>
 
 namespace Pt {
 
 namespace Gfx {
+
+template <typename FormatT1, typename FormatT2, 
+          typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<FormatT2, TraitsT2> copyColors(const BasicConstSpan<FormatT1, TraitsT1>& fromSpan, 
+                                                  BasicPixelIterator<FormatT2, TraitsT2> to)
+{
+    typedef typename TraitsT2::ColorType ColorType;
+
+    const std::size_t bufsize = 64;
+    ColorType colors[bufsize];
+
+    auto from = fromSpan.cbegin();
+    std::size_t length = fromSpan.length();
+
+    while(length > 0)
+    {
+        std::size_t n = std::min(length, bufsize);
+        
+        from->getColors(colors, n);
+        to->assign(colors, n);
+        
+        from += n;
+        to += n;
+
+        length -= n;
+    }
+
+    return to;
+}
+
+
+template <typename TraitsT1, typename TraitsT2>
+inline BasicPixelIterator<ImageFormat, TraitsT2> copy(const BasicConstSpan<ImageFormat, TraitsT1>& from, 
+                                                      BasicPixelIterator<ImageFormat, TraitsT2> to)
+{    
+    to->assign(from.front(), from.length());
+    return to += from.length();
+}
+
+
+template <typename FormatT, typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<FormatT, TraitsT2> copy(const BasicConstSpan<ImageFormat, TraitsT1>& from, 
+                                           BasicPixelIterator<FormatT, TraitsT2> to)
+{
+    return copyColors(from, to);
+}
+
+
+template <typename FormatT, typename TraitsT1, typename TraitsT2>
+BasicPixelIterator<ImageFormat, TraitsT2> copy(const BasicConstSpan<FormatT, TraitsT1>& from, 
+                                                BasicPixelIterator<ImageFormat, TraitsT2> to)
+{
+    return copyColors(from, to);
+}
 
 ///////////////////////////////////////////////////////////////////////
 // Pixel

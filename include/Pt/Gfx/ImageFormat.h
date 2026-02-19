@@ -33,7 +33,9 @@
 #include <Pt/Gfx/ViewBase.h>
 #include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Gfx/PixelTraits.h>
+#include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/Color.h>
+
 #include <typeinfo>
 #include <memory>
 
@@ -50,6 +52,16 @@ class Pixel;
 
 template <typename ColorT>
 class ConstPixel;
+
+template <typename T>
+class BasicView;
+
+template <typename T>
+class BasicConstView;
+
+///////////////////////////////////////////////////////////////////////
+// ImageFormat
+///////////////////////////////////////////////////////////////////////
 
 /** @brief %Image format.
 */
@@ -179,6 +191,10 @@ inline std::size_t imageSize(const ImageFormat& format, Pt::ssize_t width, Pt::s
     return format.onImageSize(width, height, padding);
 }
 
+///////////////////////////////////////////////////////////////////////
+// ImageTraits
+///////////////////////////////////////////////////////////////////////
+
 template <>
 struct ImageTraits<ImageFormat>
 {
@@ -227,6 +243,245 @@ struct ColorImageTraits
     }
 };
 
+///////////////////////////////////////////////////////////////////////
+// Pixel
+///////////////////////////////////////////////////////////////////////
+
+template <typename ColorT>
+class Pixel
+{
+    template <typename C>
+    friend class ConstPixel;
+        
+    public:
+        typedef ImageFormat Format;
+
+    public:
+        Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        Pixel(const Pixel& p);
+
+        ~Pixel();
+
+        Pixel& operator=(const Argb32Color& color);
+
+        Pixel& operator=(const Color& color);
+
+        Pixel& operator=(const Pixel<Color>& p);
+
+        Pixel& operator=(const Pixel<Argb32Color>& p);
+
+        Pixel& operator=(const ConstPixel<Color>& p);
+
+        Pixel& operator=(const ConstPixel<Argb32Color>& p);
+
+        void reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        void reset(const Pixel& p);
+
+        const ImageFormat& format() const
+        { return *_format; }
+
+        const PixelBase* pixelBase() const
+        { return _pixel; }
+
+        ViewBase& view()
+        { return *_view; }
+
+        const ViewBase& view() const
+        { return *_view; }
+
+        Pt::uint8_t* base()
+        { return _pixel->base(); }
+
+        const Pt::uint8_t* base() const
+        { return _pixel->base(); }
+
+        Pt::ssize_t xpos() const
+        { return _x; }
+
+        Pt::ssize_t ypos() const
+        { return _y; }
+
+        Color toColor() const
+        {
+            return _pixel->toColor();
+        }
+
+        Argb32Color toArgb32Color() const
+        {
+            return _pixel->toArgb32Color();
+        }
+
+        void advance()
+        {
+            Location& loc =_pixel->advance();
+            _x = loc.xpos();
+            _y = loc.ypos();
+        }
+
+        void advance(Pt::ssize_t n)
+        {
+            Location& loc =_pixel->advance(n);
+            _x = loc.xpos();
+            _y = loc.ypos();
+        }
+
+        void getColors(Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        void getColors(Argb32Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        void assign(const Argb32Color* colors, std::size_t length)
+        { 
+            _pixel->assign(colors, length); 
+        }
+
+        void assign(const Color* colors, std::size_t length)
+        { 
+            _pixel->assign(colors, length); 
+        }
+
+        void assign(const ConstPixel<Color>& p, std::size_t length);
+
+        void assign(const ConstPixel<Argb32Color>& p, std::size_t length);
+
+        void fill(std::size_t n, const Color& color)
+        {   
+            _pixel->fill(n, color);
+        }
+
+        bool equals(const Pixel& p) const
+        {
+            return _pixel->base() == p.base();
+        }
+
+        bool equals(const ConstPixel<ColorT>& p) const;
+
+    private:
+        ViewBase*           _view;
+        Pt::ssize_t         _x;
+        Pt::ssize_t         _y;
+        const ImageFormat*  _format;
+        PixelStorage        _storage;
+        PixelBase*          _pixel;
+        Pt::uint8_t*        _data;
+};
+
+///////////////////////////////////////////////////////////////////////
+// ConstPixel
+///////////////////////////////////////////////////////////////////////
+
+template <typename ColorT>
+class ConstPixel
+{
+    template <typename C>
+    friend class Pixel;
+
+    public:
+        typedef ImageFormat Format;
+
+    public:
+        ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        ConstPixel(const ConstPixel& p);
+
+        explicit ConstPixel(const Pixel<ColorT>& p);
+
+        ~ConstPixel();
+
+        void reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        void reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        void reset(const ConstPixel& p);
+
+        void reset(const Pixel<ColorT>& p);
+
+        const ImageFormat& format() const
+        {
+            return *_format;
+        }
+
+        const ConstPixelBase* pixelBase() const
+        { return _pixel; }
+
+        const ViewBase& view() const
+        { return *_view; }
+
+        const Pt::uint8_t* base() const
+        { return _pixel->base(); }
+        
+        Pt::ssize_t xpos() const
+        { return _x; }
+
+        Pt::ssize_t ypos() const
+        { return _y; }
+        
+        Color toColor() const
+        {
+            return _pixel->toColor();
+        }
+
+        Argb32Color toArgb32Color() const
+        {
+            return _pixel->toArgb32Color();
+        }
+
+        void advance()
+        {
+            const ConstLocation& loc =_pixel->advance();
+            _x = loc.xpos();
+            _y = loc.ypos();
+        }
+
+        void advance(Pt::ssize_t n)
+        {
+            const ConstLocation& loc =_pixel->advance(n);
+            _x = loc.xpos();
+            _y = loc.ypos();
+        }
+
+        void getColors(Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        void getColors(Argb32Color* colors, std::size_t length) const
+        { 
+            _pixel->getColors(colors, length); 
+        }
+
+        bool equals(const ConstPixel& p) const
+        {
+            return _pixel->base() == p.base();
+        }
+
+        bool equals(const Pixel<ColorT>& p) const
+        { 
+            return _pixel->base() == p.base();
+        }
+
+    private:
+        const ViewBase*     _view;
+        Pt::ssize_t         _x;
+        Pt::ssize_t         _y;
+        const ImageFormat*  _format;
+        PixelStorage        _storage;
+        ConstPixelBase*     _pixel;
+        const Pt::uint8_t*  _data;
+};
+
+///////////////////////////////////////////////////////////////////////
+// PixelTraits
+///////////////////////////////////////////////////////////////////////
 
 template <>
 struct PixelTraits< Pixel<Argb32Color> >
@@ -271,69 +526,6 @@ struct PixelTraits< ConstPixel<Color> >
 
 } // namespace
 
-#include <Pt/Gfx/Pixel.h>
-#include <Pt/Gfx/BasicSpan.h>
-
-namespace Pt {
-
-namespace Gfx {
-
-template <typename FormatT1, typename FormatT2, 
-          typename TraitsT1, typename TraitsT2>
-BasicPixelIterator<FormatT2, TraitsT2> copyColors(const BasicConstSpan<FormatT1, TraitsT1>& fromSpan, 
-                                                  BasicPixelIterator<FormatT2, TraitsT2> to)
-{
-    typedef typename TraitsT2::ColorType ColorType;
-
-    const std::size_t bufsize = 64;
-    ColorType colors[bufsize];
-
-    auto from = fromSpan.cbegin();
-    std::size_t length = fromSpan.length();
-
-    while(length > 0)
-    {
-        std::size_t n = std::min(length, bufsize);
-        
-        from->getColors(colors, n);
-        to->assign(colors, n);
-        
-        from += n;
-        to += n;
-
-        length -= n;
-    }
-
-    return to;
-}
-
-
-template <typename TraitsT1, typename TraitsT2>
-inline BasicPixelIterator<ImageFormat, TraitsT2> copy(const BasicConstSpan<ImageFormat, TraitsT1>& from, 
-                                                      BasicPixelIterator<ImageFormat, TraitsT2> to)
-{    
-    to->assign(from.front(), from.length());
-    return to += from.length();
-}
-
-
-template <typename FormatT, typename TraitsT1, typename TraitsT2>
-BasicPixelIterator<FormatT, TraitsT2> copy(const BasicConstSpan<ImageFormat, TraitsT1>& from, 
-                                           BasicPixelIterator<FormatT, TraitsT2> to)
-{
-    return copyColors(from, to);
-}
-
-
-template <typename FormatT, typename TraitsT1, typename TraitsT2>
-BasicPixelIterator<ImageFormat, TraitsT2> copy(const BasicConstSpan<FormatT, TraitsT1>& from, 
-                                                BasicPixelIterator<ImageFormat, TraitsT2> to)
-{
-    return copyColors(from, to);
-}
-
-} // namespace
-
-} // namespace
+#include  <Pt/Gfx/ImageFormat.hpp>
 
 #endif
