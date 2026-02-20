@@ -31,7 +31,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/LineView.h>
+#include <Pt/Gfx/BasicLineView.h>
 
 #include <Pt/System/Clock.h>
 
@@ -151,9 +151,9 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             std::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
 
-            copy(cimage, image);
-            copy(cimage, argb32Image);
-            copy(cargb32Image, image);
+            //copy(cimage, image);
+            //copy(cimage, argb32Image);
+            //copy(cargb32Image, image);
 
             convert(*cpixelView.begin(), *pixelView.begin());
             convert(*cpixelView.begin(), *argb32View.begin());
@@ -237,7 +237,7 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < 100; ++n)
             {
                 Argb32 format;
                 Image fromImage(format, width, height);
@@ -252,10 +252,20 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Pt::System::Clock clock;
                 clock.start();
 
-                for( ; it != end; it += image.width(), from += fromImage.width() )
+                BasicLineView<ImageFormat> lineView(fromImage);
+                auto lineIt = lineView.begin();
+                auto lineEnd = lineView.end();
+
+                for( ; lineIt != lineEnd; ++lineIt)
                 {
-                    it->assign( *from, image.width() );
+                    copySpan(*lineIt, it);
+                    it += lineIt->length();
                 }
+
+                //for( ; it != end; it += image.width(), from += fromImage.width() )
+                //{
+                //    it->assign( *from, image.width() );
+                //}
 
                 Pt::uint64_t time = clock.stop().toUSecs();
                 if(time < best)
@@ -271,7 +281,7 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
             
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < 100; ++n)
             {
                 Argb32Image fromImage(width, height);
                 Argb32PixelView fromView(fromImage);
@@ -285,10 +295,20 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Pt::System::Clock clock;
                 clock.start();
 
-                for( ; it != end; it += image.width(), from += fromImage.width() )
+                BasicLineView<Argb32> lineView(fromImage);
+                auto lineIt = lineView.begin();
+                auto lineEnd = lineView.end();
+
+                for( ; lineIt != lineEnd; ++lineIt)
                 {
-                    it->assign( *from, image.width() );
+                    copySpan(*lineIt, it);
+                    it += lineIt->length();
                 }
+
+                //for( ; it != end; it += image.width(), from += fromImage.width() )
+                //{
+                //    it->assign( *from, image.width() );
+                //}
 
                 Pt::uint64_t time = clock.stop().toUSecs();
                 if(time < best)

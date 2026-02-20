@@ -133,6 +133,8 @@ class Argb32Pixel
 
         void assign(const Argb32Pixel& p, std::size_t length);
 
+        void assign(const Argb32ConstPixel& p, std::size_t length);
+
         void assign(const Argb32Color* colors, std::size_t length);
 
         void fill(std::size_t n, const Argb32Color& color);
@@ -167,7 +169,7 @@ class Argb32ConstPixel
 
         Argb32ConstPixel(const Argb32ConstPixel& p) = default;
 
-        explicit Argb32ConstPixel(const Argb32Pixel& p);
+        Argb32ConstPixel(const Argb32Pixel& p);
 
         ~Argb32ConstPixel() = default;
 
@@ -749,6 +751,12 @@ inline void Argb32Pixel::assign(const Argb32Pixel& p, std::size_t length)
 }
 
 
+inline void Argb32Pixel::assign(const Argb32ConstPixel& p, std::size_t length)
+{
+    Argb32::sourceCopy(base(), p.base(), length);
+}
+
+
 inline void Argb32Pixel::assign(const Argb32Color* colors, std::size_t length)
 {
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(colors);
@@ -905,7 +913,8 @@ inline Argb32ConstPixel::Argb32ConstPixel(const BasicView<Argb32>& view,
 inline Argb32ConstPixel::Argb32ConstPixel(const Argb32Pixel& p)
 : _view(p._view)
 , _loc( p.location() )
-{ }
+{ 
+}
 
 
 inline void Argb32ConstPixel::reset(const BasicConstView<Argb32>& view, 

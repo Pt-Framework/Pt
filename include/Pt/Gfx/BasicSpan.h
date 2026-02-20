@@ -54,7 +54,7 @@ class BasicSpan
 
     public:
         BasicSpan(BasicView<Format>& view, 
-                       Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+                  Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
         , _y(y)
@@ -129,19 +129,6 @@ class BasicSpan
         ConstIterator cend() const
         { return ConstIterator(*_view, _x + _length, _y); }
 
-        BasicSpan subspan(std::size_t offset, std::size_t count) const
-        {
-            assert(offset <= _length && "subspan out of range");
-            assert(count <= _length - offset && "subspan too large");
-
-            return BasicSpan(*_view, _x + offset, _y, count);
-        }
-
-        BasicSpan slice(std::size_t start, std::size_t end) const
-        {
-            return subspan(start, end - start);
-        }
-
     private:
         BasicView<Format>* _view;
         Pt::ssize_t        _x;
@@ -165,7 +152,7 @@ class BasicConstSpan
 
     public:
         BasicConstSpan(const BasicConstView<Format>& view, 
-                            Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+                       Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
         , _y(y)
@@ -179,7 +166,16 @@ class BasicConstSpan
         , _y(span._y)
         , _p(span._p)
         , _length(span._length)
-        {}
+        { }
+
+        template <typename Fmt, typename Tr>
+        BasicConstSpan(const BasicSpan<Fmt, Tr>& span)
+        : _view(span._view)
+        , _x(span._x)
+        , _y(span._y)
+        , _p(span._p)
+        , _length(span._length)
+        { }
 
         BasicConstSpan& operator=(const BasicConstSpan& span)
         {
@@ -240,19 +236,6 @@ class BasicConstSpan
         ConstIterator cend() const
         { return ConstIterator(*_view, _x + _length, _y); }
 
-        BasicConstSpan subspan(std::size_t offset, std::size_t count) const
-        {
-            assert(offset <= _length && "subspan out of range");
-            assert(count <= _length - offset && "subspan too large");
-
-            return BasicConstSpan(*_view, _x + offset, _y, count);
-        }
-
-        BasicConstSpan slice(std::size_t start, std::size_t end) const
-        {
-            return subspan(start, end - start);
-        }
-
     private:
         const BasicConstView<Format>* _view;
         Pt::ssize_t        _x;
@@ -262,13 +245,17 @@ class BasicConstSpan
 };
 
 
-template <typename FormatT1, typename FormatT2,
-         typename TraitsT1, typename TraitsT2>
-BasicPixelIterator<FormatT2, TraitsT2> copy(const BasicConstSpan<FormatT1, TraitsT1>& from, 
-                                            BasicPixelIterator<FormatT2, TraitsT2> to)
+template <typename SpanT, typename FormatT, typename TraitsT>
+void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to)
 {
-    to->assign(from.front(), from.length());
-    return to += from.length();
+    to->assign( from.front(), from.length() );
+}
+
+
+template <typename SpanT, typename SpanT2>
+void copySpan(const SpanT& from, SpanT2& to)
+{
+    copySpan( from, to.begin() );
 }
 
 } // namespace

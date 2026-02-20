@@ -30,7 +30,7 @@
 #define PT_GFX_BASIC_IMAGE_HPP
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/LineView.h>
+#include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Types.h>
 #include <vector>
 
@@ -98,7 +98,7 @@ void copy(const BasicConstImage<FormatT1, TraitsT1>& fromImage,
     BasicConstLineView<FormatT1, TraitsT1> fromLines(fromImage);
     for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
     {
-        copy(*from, to->begin());
+        copySpan(*from, to->begin());
     }
 }
 

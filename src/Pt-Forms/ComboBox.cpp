@@ -548,17 +548,17 @@ bool ComboBox::onKeyEvent(const KeyEvent& ev)
 
 void ComboBox::onProcessMouseEvent(const MouseEvent& ev)
 {
-    const Gfx::PointF& screenPos = ev.position();
+    //if( _popup.isVisible() )
+    //{
+    //    const Gfx::PointF& screenPos = ev.position();
+    //    Widget* hit = Application::instance().screen().hitTest(screenPos);
 
-    if( _popup.isVisible() )
-    {
-        Gfx::RectF rect( _popup.position(), _popup.size() );
-        if( rect.contains(screenPos) )
-        {
-            _popup.processEvent(ev);
-            return;
-        }
-    }
+    //    if( hit && hit->isDescendantOf(_popup) )
+    //    {
+    //        _popup.processEvent(ev);
+    //        return;
+    //    }
+    //}
 
     Base::onProcessMouseEvent(ev);
 }

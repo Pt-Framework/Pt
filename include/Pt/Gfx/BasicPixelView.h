@@ -313,6 +313,6 @@ class BasicConstPixelView : public BasicConstView<FormatT>
 
 } // namespace
 
-#include <Pt/Gfx/BasicPixelView.hpp>
-
 #endif
+
+#include <Pt/Gfx/BasicPixelView.hpp>

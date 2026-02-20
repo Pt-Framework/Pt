@@ -221,9 +221,9 @@ class Pixel
 
         ~Pixel();
 
-        Pixel& operator=(const Argb32Color& color);
-
         Pixel& operator=(const Color& color);
+
+        Pixel& operator=(const Argb32Color& color);
 
         Pixel& operator=(const Pixel<Color>& p);
 
@@ -346,7 +346,7 @@ class ConstPixel
 
         ConstPixel(const ConstPixel& p);
 
-        explicit ConstPixel(const Pixel<ColorT>& p);
+        ConstPixel(const Pixel<ColorT>& p);
 
         ~ConstPixel();
 
