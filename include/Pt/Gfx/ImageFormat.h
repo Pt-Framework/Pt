@@ -33,6 +33,7 @@
 #include <Pt/Gfx/ViewBase.h>
 #include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Gfx/PixelTraits.h>
+#include <Pt/Gfx/PixelBase.h>
 #include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/Color.h>
 
@@ -42,10 +43,6 @@
 namespace Pt {
 
 namespace Gfx {
-
-class PixelBase;
-class ConstPixelBase;
-class PixelStorage;
 
 template <typename ColorT>
 class Pixel;
@@ -108,6 +105,8 @@ class ImageFormat
         }
 
     public:
+        PT_GFX_API static const ImageFormat& get(int type = 0);
+
         PT_GFX_API static const ImageFormat& rgb16();
 
         PT_GFX_API static const ImageFormat& rgb32();

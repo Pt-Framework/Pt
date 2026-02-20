@@ -31,6 +31,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
@@ -78,10 +80,25 @@ class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
         virtual ~ConstImage();
 };
 
-} // namespace
+
+typedef BasicPixelView<ImageFormat> PixelView;
+
+typedef BasicConstPixelView<ImageFormat> ConstPixelView;
+
+typedef BasicPixelView<ImageFormat, ColorImageTraits> ColorPixelView;
+
+typedef BasicConstPixelView<ImageFormat, ColorImageTraits> ConstColorPixelView;
+
+typedef BasicLineView<ImageFormat> LineView;
+
+typedef BasicConstLineView<ImageFormat> ConstLineView;
+
+typedef BasicLineView<ImageFormat, ColorImageTraits> ColorLineView;
+
+typedef BasicConstLineView<ImageFormat, ColorImageTraits> ConstColorLineView;
 
 } // namespace
 
-#include <Pt/Gfx/PixelView.h> 
+} // namespace
 
 #endif

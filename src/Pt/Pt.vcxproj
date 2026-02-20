@@ -72,8 +72,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicColorView.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicColorView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicLineView.h" />
@@ -88,7 +86,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Canvas.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Color.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\ColorView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
@@ -106,7 +103,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelTraits.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\PixelView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />

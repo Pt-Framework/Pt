@@ -26,12 +26,10 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/BasicLineView.h>
 
 #include <Pt/System/Clock.h>
 
@@ -252,7 +250,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Pt::System::Clock clock;
                 clock.start();
 
-                BasicLineView<ImageFormat> lineView(fromImage);
+                LineView lineView(fromImage);
                 auto lineIt = lineView.begin();
                 auto lineEnd = lineView.end();
 

@@ -144,6 +144,7 @@ BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _text( new DrawText() )
 , _image(0)
+, _imageView( ImageFormat::argb32() )
 , _lastScaleFactor(1.0)
 , _penView(_penBuffer)
 , _penPixel(_penView, 0, 0)
@@ -184,6 +185,8 @@ void BitmapCanvas::onFinishPaint()
 
     if(_image)
         _image = 0;
+
+    _imageView.reset();
 }
 
 

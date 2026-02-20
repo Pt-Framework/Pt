@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
@@ -109,6 +110,14 @@ typedef BasicPixelView<Argb32> Argb32PixelView;
 /** @brief ARGB-32 const pixel view.
 */
 typedef BasicConstPixelView<Argb32> Argb32ConstPixelView;
+
+/** @brief ARGB-32 line view.
+*/
+typedef BasicLineView<Argb32> Argb32LineView;
+
+/** @brief ARGB-32 const line view.
+*/
+typedef BasicConstLineView<Argb32> Argb32ConstLineView;
 
 } // namespace
 

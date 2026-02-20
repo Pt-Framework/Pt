@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/BasicSpan.h>
-#include <Pt/Gfx/PixelBase.h>
 
 namespace Pt {
 

@@ -50,6 +50,13 @@ namespace Pt {
 
 namespace Gfx {
 
+const ImageFormat& ImageFormat::get(int type) 
+{
+  static const Argb32 _argb32;
+	return _argb32;
+}
+
+
 const ImageFormat& ImageFormat::rgb16()
 {
   static const Rgb16 _rgb16;

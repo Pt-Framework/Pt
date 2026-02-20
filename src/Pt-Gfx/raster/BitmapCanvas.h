@@ -273,28 +273,28 @@ class BitmapCanvas : public Canvas
     void putImage(const Point& to, const Image& image, const Rect& imageRect);
 
     private:
-        DrawText*            _text;
-        Image*               _image;
-        PixelView            _imageView;
-        double               _lastScaleFactor;
+        DrawText*    _text;
+        Image*       _image;
+        PixelView    _imageView;
+        double       _lastScaleFactor;
 
-        CompositionMode      _compositionMode;
+        CompositionMode _compositionMode;
         
-        Pen                  _pen;
-        Image                _penBuffer;
-        ConstPixelView       _penView;
-        ConstPixelView::ConstPixel _penPixel;
+        Pen                         _pen;
+        Image                       _penBuffer;
+        ConstPixelView              _penView;
+        ConstPixelView::ConstPixel  _penPixel;
 
-        Brush                _brush;
-        Image                _brushBuffer;
-        ConstPixelView       _brushView;
-        ConstPixelView::ConstPixel _brushPixel;
-        bool                 _isGradient;
+        Brush                       _brush;
+        Image                       _brushBuffer;
+        ConstPixelView              _brushView;
+        ConstPixelView::ConstPixel  _brushPixel;
+        bool                        _isGradient;
 
-        Font                 _font;
-        RectF                _clip;
-        Rect                 _currentClip;
-        bool                 _hasClip;
+        Font   _font;
+        RectF  _clip;
+        Rect   _currentClip;
+        bool   _hasClip;
 
         std::vector<Polygon> _flatPath;      
 };

@@ -45,6 +45,7 @@ namespace Gfx {
 BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _image()
+, _imageView( ImageFormat::argb32() )
 , _text( new DrawText() )
 , _hasClip(false)
 {
@@ -87,6 +88,8 @@ void BitmapCanvas::onFinishPaint()
 
     if(_image)
         _image = 0;
+
+    _imageView.reset();
 }
 
 
