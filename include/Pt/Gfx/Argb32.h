@@ -53,6 +53,27 @@ class BasicView;
 template <typename T>
 class BasicConstView;
 
+class Argb32PixelInfo : public PixelData
+{
+    public:
+        Argb32PixelInfo()
+        : _p(0)
+        { }
+
+        explicit Argb32PixelInfo(const Pt::uint8_t* p)
+        : _p(p)
+        { }
+
+        const Pt::uint8_t* base() const
+        { return _p; }
+
+        void set(const Pt::uint8_t* p)
+        { _p = p; }
+        
+    private:
+        const Pt::uint8_t* _p;
+};
+
 /** @brief ARGB-32 pixel.
 */
 class Argb32Pixel
@@ -84,6 +105,11 @@ class Argb32Pixel
         void reset(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Argb32Pixel& p);
+
+        const PixelData* data() const
+        { 
+            return &_p; 
+        }
 
         Location& location()
         { return _loc; }
@@ -144,8 +170,9 @@ class Argb32Pixel
         bool equals(const Argb32ConstPixel& p) const;
 
     private:
-        ViewBase*    _view;
-        Location     _loc;
+        ViewBase*       _view;
+        Location        _loc;
+        Argb32PixelInfo _p;
 };
 
 /** @brief ARGB-32 const pixel.
@@ -180,6 +207,11 @@ class Argb32ConstPixel
         void reset(const Argb32ConstPixel& p);
 
         void reset(const Argb32Pixel& p);
+
+        const PixelData* data() const
+        { 
+            return &_p; 
+        }
 
         const ConstLocation& location() const
         { return _loc; }
@@ -219,6 +251,7 @@ class Argb32ConstPixel
     private:
         const ViewBase* _view;
         ConstLocation   _loc;
+        Argb32PixelInfo _p;
 };
 
 /** @brief ARGB-32 image format.
@@ -655,23 +688,26 @@ inline Argb32Pixel::Argb32Pixel(BasicView<Argb32>& view,
 : _view(&view)
 , _loc()
 {
-    Pt::uint8_t* _p = view.data();
-    _p += y * _view->stride();
-    _p += x * 4; 
+    Pt::uint8_t* p = view.data();
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = Location(_p, x, y);
+    _loc = Location(p, x, y);
+    _p.set(p);
 }
 
 
-inline Argb32Pixel::Argb32Pixel(Pt::uint8_t* data, ViewBase& view, Pt::ssize_t x, Pt::ssize_t y)
+inline Argb32Pixel::Argb32Pixel(Pt::uint8_t* data, ViewBase& view, 
+                                Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _loc()
 {
-    Pt::uint8_t* _p = data;
-    _p += y * _view->stride();
-    _p += x * 4; 
+    Pt::uint8_t* p = data;
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = Location(_p, x, y);
+    _loc = Location(p, x, y);
+    _p.set(p);
 }
 
 
@@ -679,11 +715,12 @@ inline void Argb32Pixel::reset(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize
 {
     _view = &view;
     
-    Pt::uint8_t* _p = view.data();
-    _p += y * _view->stride();
-    _p += x * 4; 
+    Pt::uint8_t* p = view.data();
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = Location(_p, x, y);
+    _loc = Location(p, x, y);
+    _p.set(p);
 }
 
 
@@ -691,6 +728,7 @@ inline void Argb32Pixel::reset(const Argb32Pixel& p)
 {
     _view = p._view;
     _loc = p._loc;
+    _p = p._p;
 }
 
 
@@ -698,21 +736,23 @@ inline void Argb32Pixel::advance()
 {
     Pt::ssize_t _x = _loc.xpos();
     Pt::ssize_t _y = _loc.ypos();
-    Pt::uint8_t* _p = _loc.base();
+    Pt::uint8_t* p = _loc.base();
 
     if( ++_x >= _view->width() )
     {
         _x = 0;
         ++_y;
 
-        _p += _view->padding();
+        p += _view->padding();
     }
 
-    _p += 4;
+    p += 4;
 
     _loc.setXPos(_x);
     _loc.setYPos(_y);
-    _loc.setBase(_p);
+    _loc.setBase(p);
+
+    _p.set(p);
 }
 
 
@@ -720,7 +760,7 @@ inline void Argb32Pixel::advance(Pt::ssize_t n)
 {
     Pt::ssize_t _x = _loc.xpos();
     Pt::ssize_t _y = _loc.ypos();
-    Pt::uint8_t* _p = _loc.base();
+    Pt::uint8_t* p = _loc.base();
 
     Pt::ssize_t off = _x + n;
 
@@ -729,7 +769,9 @@ inline void Argb32Pixel::advance(Pt::ssize_t n)
 
     _loc.setXPos(_x + dx);
     _loc.setYPos(_y + dy);
-    _loc.setBase(_p + dy * _view->stride() + dx * 4);
+    _loc.setBase(p + dy * _view->stride() + dx * 4);
+
+    _p.set( _loc.base() );
 }
 
 
@@ -876,11 +918,12 @@ inline Argb32ConstPixel::Argb32ConstPixel(const Pt::uint8_t* data, const ViewBas
 : _view(&view)
 , _loc()
 {
-    const Pt::uint8_t* _p = data;
-    _p += y * _view->stride();
-    _p += x * 4; 
-
-    _loc = ConstLocation(_p, x, y);
+    const Pt::uint8_t* p = data;
+    p += y * _view->stride();
+    p += x * 4; 
+    
+    _loc = ConstLocation(p, x, y);
+    _p.set(p);
 }
 
 
@@ -889,11 +932,12 @@ inline Argb32ConstPixel::Argb32ConstPixel(const BasicConstView<Argb32>& view,
 : _view(&view)
 , _loc()
 {
-    const Pt::uint8_t* _p = view.data();
-    _p += y * _view->stride();
-    _p += x * 4; 
+    const Pt::uint8_t* p = view.data();
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = ConstLocation(_p, x, y);
+    _loc = ConstLocation(p, x, y);
+    _p.set(p);
 }
 
 
@@ -902,17 +946,19 @@ inline Argb32ConstPixel::Argb32ConstPixel(const BasicView<Argb32>& view,
 : _view(&view)
 , _loc()
 {
-    const Pt::uint8_t* _p = view.data();
-    _p += y * _view->stride();
-    _p += x * 4; 
+    const Pt::uint8_t* p = view.data();
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = ConstLocation(_p, x, y);
+    _loc = ConstLocation(p, x, y);
+    _p.set(p);
 }
 
 
 inline Argb32ConstPixel::Argb32ConstPixel(const Argb32Pixel& p)
 : _view(p._view)
 , _loc( p.location() )
+, _p( p._p )
 { 
 }
 
@@ -922,11 +968,12 @@ inline void Argb32ConstPixel::reset(const BasicConstView<Argb32>& view,
 {
     _view = &view;
     
-    const Pt::uint8_t* _p = view.data();
-    _p += y * _view->stride();
-    _p += x * 4; 
+    const Pt::uint8_t* p = view.data();
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = ConstLocation(_p, x, y);
+    _loc = ConstLocation(p, x, y);
+    _p.set(p);
 }
 
 
@@ -935,11 +982,12 @@ inline void Argb32ConstPixel::reset(const BasicView<Argb32>& view,
 {
     _view = &view;
     
-    const Pt::uint8_t* _p = view.data();
-    _p += y * _view->stride();
-    _p += x * 4; 
+    const Pt::uint8_t* p = view.data();
+    p += y * _view->stride();
+    p += x * 4; 
     
-    _loc = ConstLocation(_p, x, y);
+    _loc = ConstLocation(p, x, y);
+    _p.set(p);
 }
 
 
@@ -947,6 +995,7 @@ inline void Argb32ConstPixel::reset(const Argb32ConstPixel& p)
 {
     _view = p._view;
     _loc = p._loc;
+    _p = p._p;
 }
 
 
@@ -954,6 +1003,7 @@ inline void Argb32ConstPixel::reset(const Argb32Pixel& p)
 {
     _view = p._view;
     _loc = p._loc;
+    _p = p._p;
 }
 
 
@@ -961,21 +1011,23 @@ inline void Argb32ConstPixel::advance()
 {
     Pt::ssize_t _x = _loc.xpos();
     Pt::ssize_t _y = _loc.ypos();
-    const Pt::uint8_t* _p = _loc.base();
+    const Pt::uint8_t* p = _loc.base();
 
     if( ++_x >= _view->width() )
     {
         _x = 0;
         ++_y;
 
-        _p += _view->padding();
+        p += _view->padding();
     }
 
-    _p += 4;
+    p += 4;
 
     _loc.setXPos(_x);
     _loc.setYPos(_y);
-    _loc.setBase(_p);
+    _loc.setBase(p);
+
+    _p.set(p);
 }
 
 
@@ -983,7 +1035,7 @@ inline void Argb32ConstPixel::advance(Pt::ssize_t n)
 {
     Pt::ssize_t _x = _loc.xpos();
     Pt::ssize_t _y = _loc.ypos();
-    const Pt::uint8_t* _p = _loc.base();
+    const Pt::uint8_t* p = _loc.base();
 
     Pt::ssize_t off = _x + n;
 
@@ -992,7 +1044,9 @@ inline void Argb32ConstPixel::advance(Pt::ssize_t n)
 
     _loc.setXPos(_x + dx);
     _loc.setYPos(_y + dy);
-    _loc.setBase(_p + dy * _view->stride() + dx * 4);
+    _loc.setBase(p + dy * _view->stride() + dx * 4);
+
+    _p.set(p);
 }
 
 

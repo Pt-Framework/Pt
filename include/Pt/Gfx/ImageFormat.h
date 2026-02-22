@@ -299,11 +299,16 @@ class Pixel
             _pixel->assign(colors, length); 
         }
 
+        //void assign(const Pixel<Color>& p, std::size_t length);
+
         void assign(const ConstPixel<Color>& p, std::size_t length);
+
+        //void assign(const Pixel<Argb32Color>& p, std::size_t length);
 
         void assign(const ConstPixel<Argb32Color>& p, std::size_t length);
 
         void fill(std::size_t n, const Color& color)
+
         {   
             _pixel->fill(n, color);
         }
@@ -314,6 +319,10 @@ class Pixel
         }
 
         bool equals(const ConstPixel<ColorT>& p) const;
+
+    private:
+        template <typename PixelT>
+        void assignPixels(const PixelT& p, std::size_t length);
 
     private:
         ViewBase*           _view;

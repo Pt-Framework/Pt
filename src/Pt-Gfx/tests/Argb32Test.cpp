@@ -250,7 +250,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Pt::System::Clock clock;
                 clock.start();
 
-                LineView lineView(fromImage);
+                ConstLineView lineView(fromImage);
                 auto lineIt = lineView.begin();
                 auto lineEnd = lineView.end();
 

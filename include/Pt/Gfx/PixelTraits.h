@@ -46,6 +46,9 @@ struct PixelTraits
     typedef typename FormatType::ColorType ColorType;
 };
 
+///////////////////////////////////////////////////////////////////////
+// convert with multistage converter
+///////////////////////////////////////////////////////////////////////
 
 template <typename T1, typename T2, int isDirect>
 struct DirectConverter 
@@ -68,17 +71,90 @@ struct DirectConverter<T1, T2, 1>
 
 
 template <typename P1, typename P2>
-struct Converter : public DirectConverter<P1, P2, 
-                                          IsSame<typename PixelTraits<P1>::FormatType, 
-                                                 typename PixelTraits<P2>::FormatType>::value> 
-{
-};
+struct Converter 
+    : public DirectConverter<P1, P2, 
+                             IsSame<typename PixelTraits<P1>::FormatType, 
+                                    typename PixelTraits<P2>::FormatType>::value> 
+{ };
 
 
 template <typename P1, typename P2> 
 void convert(const P1& p1, P2& p2)
 {
     Converter<P1, P2>::convert(p1, p2);
+}
+
+///////////////////////////////////////////////////////////////////////
+// copy single pixel
+///////////////////////////////////////////////////////////////////////
+
+template <typename P1, typename P2> 
+void copyPixelImpl(const P1& p1, P2& p2, FalseType)
+{
+    p2 = p1->toColor();
+}
+
+
+template <typename P1, typename P2> 
+void copyPixelImpl(const P1& p1, P2& p2, TrueType)
+{
+    p2 = p1;
+}
+
+
+template <typename P1, typename P2> 
+void copyPixel(const P1& p1, P2& p2)
+{
+    typedef PixelTraits<P1>::FormatType Fmt1;
+    typedef PixelTraits<P2>::FormatType Fmt2;
+
+    copyPixelImpl(p1, p2, IsSame<Fmt1, Fmt2>());
+}
+
+///////////////////////////////////////////////////////////////////////
+// copy pixels
+///////////////////////////////////////////////////////////////////////
+
+template <typename P1, typename P2> 
+void copyPixelsImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
+{
+    typedef typename PixelTraits<P2>::ColorType ColorType;
+
+    const std::size_t bufsize = 64;
+    ColorType colors[bufsize];
+
+    P1 from(p1);
+    P2 to(p2);
+
+    while(length > 0)
+    {
+        std::size_t n = std::min(length, bufsize);
+        
+        from.getColors(colors, n);
+        to.assign(colors, n);
+        
+        from.advance(n);
+        to.advance(n);
+
+        length -= n;
+    }
+}
+
+
+template <typename P1, typename P2> 
+void copyPixelsImpl(const P1& p1, P2& p2, std::size_t length, TrueType)
+{
+    p2.assign(p1, length);
+}
+
+
+template <typename P1, typename P2> 
+void copyPixels(const P1& p1, P2& p2, std::size_t length)
+{
+    typedef PixelTraits<P1>::FormatType Fmt1;
+    typedef PixelTraits<P2>::FormatType Fmt2;
+
+    copyPixelsImpl(p1, p2, length, IsSame<Fmt1, Fmt2>());
 }
 
 } // namespace

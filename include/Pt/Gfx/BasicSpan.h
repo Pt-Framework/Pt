@@ -118,16 +118,16 @@ class BasicSpan
         { return _p; }
 
         Iterator begin()
-        { return Iterator(*_view, _x, _y); }
+        { return Iterator(_p); }
 
         Iterator end()
-        { return Iterator(*_view, _x + _length, _y); }
+        { return Iterator(_p) += _length; }
 
         ConstIterator cbegin() const
-        { return ConstIterator(*_view, _x, _y); }
+        { return ConstIterator(_p); }
 
         ConstIterator cend() const
-        { return ConstIterator(*_view, _x + _length, _y); }
+        { return ConstIterator(_p) += _length; }
 
     private:
         BasicView<Format>* _view;
@@ -225,16 +225,16 @@ class BasicConstSpan
         { return _p; }
 
         Iterator begin()
-        { return Iterator(*_view, _x, _y); }
+        { return Iterator(_p); }
 
         Iterator end()
-        { return Iterator(*_view, _x + _length, _y); }
+        { return Iterator(_p) += _length; }
 
         ConstIterator cbegin() const
-        { return ConstIterator(*_view, _x, _y); }
+        { return ConstIterator(_p); }
 
         ConstIterator cend() const
-        { return ConstIterator(*_view, _x + _length, _y); }
+        { return ConstIterator(_p) += _length; }
 
     private:
         const BasicConstView<Format>* _view;
@@ -245,18 +245,45 @@ class BasicConstSpan
 };
 
 
+
+
 template <typename SpanT, typename FormatT, typename TraitsT>
 void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to)
 {
-    to->assign( from.front(), from.length() );
+    copyPixels(from.front(), *to, from.length());
 }
 
 
-template <typename SpanT, typename SpanT2>
-void copySpan(const SpanT& from, SpanT2& to)
+template <typename SpanT, typename FormatT, typename TraitsT>
+void copySpan(const SpanT& from, BasicSpan<FormatT, TraitsT>& to)
 {
-    copySpan( from, to.begin() );
+    copyPixels(from.front(), to.front(), from.length());
 }
+
+
+//template <typename SpanT, typename FormatT, typename TraitsT>
+//void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to);
+//
+//
+//template <typename Fmt, typename Tr1, typename Tr2>
+//void copySpan(const BasicSpan<Fmt, Tr1>& from, BasicPixelIterator<Fmt, Tr2>& to)
+//{
+//    to->assign( from.front(), from.length() );
+//}
+//
+//
+//template <typename Fmt, typename Tr1, typename Tr2>
+//void copySpan(const BasicConstSpan<Fmt, Tr1>& from, BasicPixelIterator<Fmt, Tr2>& to)
+//{
+//    to->assign( from.front(), from.length() );
+//}
+
+
+//template <typename SpanT, typename SpanT2>
+//void copySpan(const SpanT& from, SpanT2& to)
+//{
+//    copySpan( from, to.begin() );
+//}
 
 } // namespace
 

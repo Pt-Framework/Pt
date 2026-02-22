@@ -37,78 +37,81 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename SpanT, typename Fmt, typename Tr>
-void copySpanColors(const SpanT& fromSpan, BasicPixelIterator<Fmt, Tr> to)
-{
-    typedef typename Tr::ColorType ColorType;
+// Gfx TODO: use ColorType defined by the non-ImageFormat as conversion color
+//           or preferred quality
 
-    const std::size_t bufsize = 64;
-    ColorType colors[bufsize];
-
-    auto from = fromSpan.cbegin();
-    std::size_t length = fromSpan.length();
-
-    while(length > 0)
-    {
-        std::size_t n = std::min(length, bufsize);
-        
-        from->getColors(colors, n);
-        to->assign(colors, n);
-        
-        from += n;
-        to += n;
-
-        length -= n;
-    }
-}
-
-
-template <typename Tr1, typename Tr2>
-void copySpan(const BasicSpan<ImageFormat, Tr1>& from, 
-              BasicPixelIterator<ImageFormat, Tr2> to)
-{    
-    to->assign(from.front(), from.length());
-}
-
-
-template <typename Tr1, typename Tr2>
-void copySpan(const BasicConstSpan<ImageFormat, Tr1>& from, 
-              BasicPixelIterator<ImageFormat, Tr2> to)
-{    
-    to->assign(from.front(), from.length());
-}
-
-
-template <typename Fmt, typename Tr1, typename Tr2>
-void copySpan(const BasicSpan<ImageFormat, Tr1>& from, 
-              BasicPixelIterator<Fmt, Tr2> to)
-{
-    copySpanColors(from, to);
-}
-
-
-template <typename Fmt, typename Tr1, typename Tr2>
-void copySpan(const BasicConstSpan<ImageFormat, Tr1>& from, 
-              BasicPixelIterator<Fmt, Tr2> to)
-{
-    copySpanColors(from, to);
-}
-
-
-template <typename Fmt, typename Tr1, typename Tr2>
-void copySpan(const BasicSpan<Fmt, Tr1>& from, 
-              BasicPixelIterator<Fmt, Tr2> to)
-{
-    copySpanColors(from, to);
-}
-
-
-template <typename Fmt, typename Tr1, typename Tr2>
-void copySpan(const BasicConstSpan<Fmt, Tr1>& from, 
-              BasicPixelIterator<Fmt, Tr2> to)
-{
-    copySpanColors(from, to);
-}
+//template <typename SpanT, typename Fmt, typename Tr>
+//void copySpanColors(const SpanT& fromSpan, BasicPixelIterator<Fmt, Tr> to)
+//{
+//    typedef typename Tr::ColorType ColorType;
+//
+//    const std::size_t bufsize = 64;
+//    ColorType colors[bufsize];
+//
+//    auto from = fromSpan.cbegin();
+//    std::size_t length = fromSpan.length();
+//
+//    while(length > 0)
+//    {
+//        std::size_t n = std::min(length, bufsize);
+//        
+//        from->getColors(colors, n);
+//        to->assign(colors, n);
+//        
+//        from += n;
+//        to += n;
+//
+//        length -= n;
+//    }
+//}
+//
+//
+//template <typename Tr1, typename Tr2>
+//void copySpan(const BasicSpan<ImageFormat, Tr1>& from, 
+//              BasicPixelIterator<ImageFormat, Tr2>& to)
+//{    
+//    to->assign(from.front(), from.length());
+//}
+//
+//
+//template <typename Tr1, typename Tr2>
+//void copySpan(const BasicConstSpan<ImageFormat, Tr1>& from, 
+//              BasicPixelIterator<ImageFormat, Tr2>& to)
+//{    
+//    to->assign(from.front(), from.length());
+//}
+//
+//
+//template <typename Fmt, typename Tr1, typename Tr2>
+//void copySpan(const BasicSpan<ImageFormat, Tr1>& from, 
+//              BasicPixelIterator<Fmt, Tr2>& to)
+//{
+//    copySpanColors(from, to);
+//}
+//
+//
+//template <typename Fmt, typename Tr1, typename Tr2>
+//void copySpan(const BasicConstSpan<ImageFormat, Tr1>& from, 
+//              BasicPixelIterator<Fmt, Tr2>& to)
+//{
+//    copySpanColors(from, to);
+//}
+//
+//
+//template <typename Fmt, typename Tr1, typename Tr2>
+//void copySpan(const BasicSpan<Fmt, Tr1>& from, 
+//              BasicPixelIterator<ImageFormat, Tr2>& to)
+//{
+//    copySpanColors(from, to);
+//}
+//
+//
+//template <typename Fmt, typename Tr1, typename Tr2>
+//void copySpan(const BasicConstSpan<Fmt, Tr1>& from, 
+//              BasicPixelIterator<ImageFormat, Tr2>& to)
+//{
+//    copySpanColors(from, to);
+//}
 
 ///////////////////////////////////////////////////////////////////////
 // Pixel
@@ -234,7 +237,8 @@ inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Argb32Color>& p)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p, std::size_t length)
+template <typename PixelT>
+void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
 {
     bool isCompatible = _pixel->assign(*p._pixel, length);
     if( isCompatible )
@@ -244,40 +248,53 @@ inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p, std::size_t length
     if( isCompatible )
         return;
 
+    // TODO: use the precise color type only if both pixels require it
     const std::size_t bufsize = 64;
     ColorT colors[bufsize];
+
+    PixelT from(p);
+    Pixel<ColorT> to(*this);
 
     while(length > 0)
     {
         std::size_t n = std::min(length, bufsize);
-        p.getColors(colors, n);
-        this->assign(colors, n);
+        
+        from.getColors(colors, n);
+        to.assign(colors, n);
+        
+        from.advance(n);
+        to.advance(n);
+
         length -= n;
     }
+}
+
+
+//template <typename ColorT>
+//inline void Pixel<ColorT>::assign(const Pixel<Color>& p, std::size_t length)
+//{
+//    assignPixels(p, length);
+//}
+//
+//
+//template <typename ColorT>
+//inline void Pixel<ColorT>::assign(const Pixel<Argb32Color>& p, std::size_t length)
+//{
+//    assignPixels(p, length);
+//}
+
+
+template <typename ColorT>
+inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p, std::size_t length)
+{
+    assignPixels(p, length);
 }
 
 
 template <typename ColorT>
 inline void Pixel<ColorT>::assign(const ConstPixel<Argb32Color>& p, std::size_t length)
 {
-    bool isCompatible = _pixel->assign(*p._pixel, length);
-    if( isCompatible )
-        return;
-
-    isCompatible = p._pixel->copy(*_pixel, length);
-    if( isCompatible )
-        return;
-
-    const std::size_t bufsize = 64;
-    Argb32Color colors[bufsize];
-
-    while(length > 0)
-    {
-        std::size_t n = std::min(length, bufsize);
-        p.getColors(colors, n);
-        this->assign(colors, n);
-        length -= n;
-    }
+    assignPixels(p, length);
 }
 
 
