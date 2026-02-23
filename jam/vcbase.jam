@@ -6,7 +6,7 @@ rule CheckToolset
                 
     if ! $(VISUALC) 
     {
-        local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -version $(VS_VERSION)" ] ;
+        local result = [ EXEC $(VSWHERE)" -nologo -property installationPath -products * -version $(VS_VERSION)" ] ;
         VISUALC = $(result[2])"\\VC\\Tools\\MSVC\\" ;
 
         if ! $(MSVC_VERSION) 
