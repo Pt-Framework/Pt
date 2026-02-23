@@ -299,11 +299,11 @@ class Pixel
             _pixel->assign(colors, length); 
         }
 
-        //void assign(const Pixel<Color>& p, std::size_t length);
+        void assign(const Pixel<Color>& p, std::size_t length);
 
         void assign(const ConstPixel<Color>& p, std::size_t length);
 
-        //void assign(const Pixel<Argb32Color>& p, std::size_t length);
+        void assign(const Pixel<Argb32Color>& p, std::size_t length);
 
         void assign(const ConstPixel<Argb32Color>& p, std::size_t length);
 
