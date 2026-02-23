@@ -309,7 +309,8 @@ inline bool Pixel<ColorT>::equals(const ConstPixel<ColorT>& p) const
 ///////////////////////////////////////////////////////////////////////
 
 template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, 
+                                      Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
@@ -317,12 +318,14 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, P
 , _pixel(0)
 , _data( view.data() )
 { 
-    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>( view.data() );
+    _pixel = view.format().createPixel(data, view, x, y, _storage);
 }
 
 
 template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, 
+                                      Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
@@ -330,7 +333,8 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, Pt::ss
 , _pixel(0)
 , _data( view.data() )
 { 
-    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>( view.data() );
+    _pixel = view.format().createPixel(data, view, x, y, _storage);
 }
 
 
@@ -343,7 +347,8 @@ inline ConstPixel<ColorT>::ConstPixel(const ConstPixel& p)
 , _pixel(0)
 , _data(p._data)
 { 
-    _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(_data);
+    _pixel = _format->createPixel(data, *_view, p.xpos(), p.ypos(), _storage);
 }
 
 
@@ -356,7 +361,8 @@ inline ConstPixel<ColorT>::ConstPixel(const Pixel<ColorT>& p)
 , _pixel(0)
 , _data(p._data)
 { 
-    _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(_data);
+    _pixel = _format->createPixel(data, *_view, p.xpos(), p.ypos(), _storage);
 }
 
 
@@ -364,7 +370,7 @@ template <typename ColorT>
 inline ConstPixel<ColorT>::~ConstPixel()
 {
     if(_pixel)
-        _pixel->~ConstPixelBase();
+        _pixel->~PixelBase();
 }
 
 
@@ -373,11 +379,12 @@ inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, P
 {
     if(_pixel)
     {
-        _pixel->~ConstPixelBase();
+        _pixel->~PixelBase();
         _pixel = 0;
     }
 
-    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(view.data());
+    _pixel = view.format().createPixel(data, view, x, y, _storage);
     _data = view.data();
     _view = &view;
     _x = x;
@@ -391,11 +398,12 @@ inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat>& view, Pt::ss
 {
     if(_pixel)
     {
-        _pixel->~ConstPixelBase();
+        _pixel->~PixelBase();
         _pixel = 0;
     }
 
-    _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(view.data());
+    _pixel = view.format().createPixel(data, view, x, y, _storage);
     _data = view.data();
     _view = &view;
     _x = x;
@@ -409,11 +417,12 @@ inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
 {
     if(_pixel)
     {
-        _pixel->~ConstPixelBase();
+        _pixel->~PixelBase();
         _pixel = 0;
     }
 
-    _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
+    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(p._data);
+    _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
     _data = p._data;
     _view = p._view;
     _x = p._x;
@@ -427,11 +436,11 @@ inline void ConstPixel<ColorT>::reset(const Pixel<ColorT>& p)
 {
     if(_pixel)
     {
-        _pixel->~ConstPixelBase();
+        _pixel->~PixelBase();
         _pixel = 0;
     }
 
-    const Pt::uint8_t* data = p._data;
+    Pt::uint8_t* data = p._data;
     _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
     _data = p._data;
     _view = p._view;

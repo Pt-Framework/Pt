@@ -47,7 +47,7 @@ std::size_t Rgb16::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
     return n;
 }
 
-PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                   Pt::ssize_t x, Pt::ssize_t y, 
                                   PixelStorage& store) const
 { 

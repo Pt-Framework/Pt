@@ -82,7 +82,7 @@ class Yuv12PixelBase final : public PixelBase
             //Yuv12::sourceCopy(_p.ybase(), n, color);        
         }
 
-        virtual bool onAssignPixels(const ConstPixelBase& p, std::size_t length) override;
+        virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
 
     private:
         Yuv12Pixel _p;
@@ -138,11 +138,11 @@ class Yuv12ConstPixelBase final : public ConstPixelBase
 // Argb32PixelBase
 ///////////////////////////////////////////////////////////////////////
 
-inline bool Yuv12PixelBase::onAssignPixels(const ConstPixelBase& p, std::size_t length)
+inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if( typeid(p) == typeid(Yuv12ConstPixelBase) )
+    if( typeid(p) == typeid(Yuv12PixelBase) )
     {
-        const Yuv12ConstPixelBase* yuv = static_cast<const Yuv12ConstPixelBase*>(&p);
+        const Yuv12PixelBase* yuv = static_cast<const Yuv12PixelBase*>(&p);
         Yuv12::sourceCopy(_p.ybase(), _p.ubase(), _p.vbase(), 
                           yuv->ybase(), yuv->ubase(), yuv->vbase(), length);
         return true;
@@ -183,7 +183,7 @@ std::size_t Yuv12::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
-PixelBase* Yuv12::onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+PixelBase* Yuv12::onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                 Pt::ssize_t x, Pt::ssize_t y, 
                                 PixelStorage& store) const
 {

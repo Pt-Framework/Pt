@@ -48,7 +48,7 @@ std::size_t Rgb32::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
-PixelBase* Rgb32::onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+PixelBase* Rgb32::onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                   Pt::ssize_t x, Pt::ssize_t y, 
                                   PixelStorage& store) const
 { 

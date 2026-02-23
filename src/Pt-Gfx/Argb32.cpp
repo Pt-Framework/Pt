@@ -79,11 +79,6 @@ class Argb32PixelBase final : public PixelBase
         { }
 
     protected:
-        virtual const PixelData* onGetData() const
-        { 
-            return _p.data(); 
-        }
-
         virtual Location& onAdvance() override
         {
             _p.advance();
@@ -142,9 +137,7 @@ class Argb32PixelBase final : public PixelBase
             Argb32::sourceCopy(_p.base(), n, color);
         }
 
-        virtual bool onAssignPixels(const ConstPixelBase& p, std::size_t length) override;
-
-        virtual bool onAssignPixels(const PixelData* p, std::size_t length) override;
+        virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
 
     private:      
         Argb32Pixel _p;
@@ -163,11 +156,6 @@ class Argb32ConstPixelBase final : public ConstPixelBase
         { }
 
     protected:
-        virtual const PixelData* onGetData() const
-        { 
-            return _p.data(); 
-        }
-
         virtual const ConstLocation& onAdvance() override
         {
             _p.advance();
@@ -210,28 +198,11 @@ class Argb32ConstPixelBase final : public ConstPixelBase
 // Argb32PixelBase
 ///////////////////////////////////////////////////////////////////////
 
-inline bool Argb32PixelBase::onAssignPixels(const ConstPixelBase& p, std::size_t length)
+inline bool Argb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if( typeid(p) == typeid(Argb32ConstPixelBase) )
+    if( typeid(p) == typeid(Argb32PixelBase) )
     {
-        const Argb32ConstPixelBase* argb32 = static_cast<const Argb32ConstPixelBase*>(&p);
-
-        Pt::uint8_t* to = base();
-        const Pt::uint8_t* from = argb32->base();
-
-        Argb32::sourceCopy(to, from, length);
-        return true;
-    }
-
-    return false;
-}
-
-
-inline bool Argb32PixelBase::onAssignPixels(const PixelData* p, std::size_t length)
-{
-    if( typeid(*p) == typeid(Argb32PixelInfo) )
-    {
-        const Argb32PixelInfo* argb32 = static_cast<const Argb32PixelInfo*>(p);
+        const Argb32PixelBase* argb32 = static_cast<const Argb32PixelBase*>(&p);
 
         Pt::uint8_t* to = base();
         const Pt::uint8_t* from = argb32->base();
@@ -274,7 +245,7 @@ std::size_t Argb32::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
 }
 
 
-PixelBase* Argb32::onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+PixelBase* Argb32::onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                  Pt::ssize_t x, Pt::ssize_t y, 
                                  PixelStorage& store) const
 {

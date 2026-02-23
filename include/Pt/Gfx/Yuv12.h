@@ -63,7 +63,7 @@ class PT_GFX_API Yuv12Pixel
         typedef Yuv12 Format;
 
     protected:
-        Yuv12Pixel(Pt::uint8_t* data, ViewBase& view, 
+        Yuv12Pixel(Pt::uint8_t* data, const ViewBase& view, 
                    Pt::ssize_t x, Pt::ssize_t y);
 
     public:
@@ -83,9 +83,6 @@ class PT_GFX_API Yuv12Pixel
         Yuv12Pixel& operator=(const Color& color);
 
         Yuv12Pixel& operator=(const Argb32Color& color);
-
-        ViewBase& view()
-        { return _view; }
 
         const ViewBase& view() const
         { return _view; }
@@ -134,13 +131,13 @@ class PT_GFX_API Yuv12Pixel
         bool equals(const Yuv12ConstPixel& p) const;
 
     private:
-        ViewBase&    _view;
-        Pt::ssize_t  _xpos;
-        Pt::ssize_t  _ypos;
-        Pt::ssize_t  _subStride;
-        Pt::uint8_t* _y;
-        Pt::uint8_t* _u;
-        Pt::uint8_t* _v;
+        const ViewBase& _view;
+        Pt::ssize_t     _xpos;
+        Pt::ssize_t     _ypos;
+        Pt::ssize_t     _subStride;
+        Pt::uint8_t*    _y;
+        Pt::uint8_t*    _u;
+        Pt::uint8_t*    _v;
 };
 
 /** @brief YV12 const pixel.
@@ -273,7 +270,7 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const override;
 
-        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
     
@@ -443,7 +440,7 @@ inline Yuv12Pixel::Yuv12Pixel(BasicView<Yuv12>& view,
 }
 
 
-inline Yuv12Pixel::Yuv12Pixel(Pt::uint8_t* data, ViewBase& view, 
+inline Yuv12Pixel::Yuv12Pixel(Pt::uint8_t* data, const ViewBase& view, 
                               Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view(view)
 , _xpos(xpos)

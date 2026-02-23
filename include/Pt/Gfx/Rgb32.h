@@ -57,7 +57,7 @@ class PT_GFX_API Rgb32 : public ImageFormat
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const;
 
-        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
     

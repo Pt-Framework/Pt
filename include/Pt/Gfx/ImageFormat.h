@@ -75,7 +75,7 @@ class ImageFormat
         virtual ~ImageFormat() 
         { }
 
-        PixelBase* createPixel(Pt::uint8_t* data, ViewBase& view, 
+        PixelBase* createPixel(Pt::uint8_t* data, const ViewBase& view, 
                                Pt::ssize_t x, Pt::ssize_t y, 
                                PixelStorage& store) const
         {
@@ -124,7 +124,7 @@ class ImageFormat
         virtual std::size_t onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                         std::size_t padding) const = 0;
 
-        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, ViewBase& view, 
+        virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const = 0;
 
@@ -267,14 +267,14 @@ class Pixel
 
         void advance()
         {
-            Location& loc =_pixel->advance();
+            const Location& loc =_pixel->advance();
             _x = loc.xpos();
             _y = loc.ypos();
         }
 
         void advance(Pt::ssize_t n)
         {
-            Location& loc =_pixel->advance(n);
+            const Location& loc =_pixel->advance(n);
             _x = loc.xpos();
             _y = loc.ypos();
         }
@@ -367,11 +367,9 @@ class ConstPixel
         void reset(const Pixel<ColorT>& p);
 
         const ImageFormat& format() const
-        {
-            return *_format;
-        }
+        { return *_format; }
 
-        const ConstPixelBase* pixelBase() const
+        const PixelBase* pixelBase() const
         { return _pixel; }
 
         const ViewBase& view() const
@@ -393,14 +391,14 @@ class ConstPixel
 
         void advance()
         {
-            const ConstLocation& loc =_pixel->advance();
+            Location& loc =_pixel->advance();
             _x = loc.xpos();
             _y = loc.ypos();
         }
 
         void advance(Pt::ssize_t n)
         {
-            const ConstLocation& loc =_pixel->advance(n);
+            Location& loc =_pixel->advance(n);
             _x = loc.xpos();
             _y = loc.ypos();
         }
@@ -431,7 +429,7 @@ class ConstPixel
         Pt::ssize_t         _y;
         const ImageFormat*  _format;
         PixelStorage        _storage;
-        ConstPixelBase*     _pixel;
+        PixelBase*          _pixel;
         const Pt::uint8_t*  _data;
 };
 

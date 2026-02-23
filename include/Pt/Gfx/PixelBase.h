@@ -46,12 +46,6 @@ class ConstPixelBase;
 // PixelBase
 ///////////////////////////////////////////////////////////////////////
 
-class PixelData
-{
-    public:
-        virtual ~PixelData() = default;
-};
-
 /** @brief Pixel base class.
 */
 class PixelBase
@@ -61,17 +55,8 @@ class PixelBase
         : _base(base)
         { }
 
-        PixelBase(const Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
-        : _base( const_cast<Pt::uint8_t*>(base) )
-        { }
-
         virtual ~PixelBase()
         { }
-
-        const PixelData* data() const
-        { 
-            return onGetData(); 
-        }
 
         Pt::uint8_t* base()
         { return _base; }
@@ -128,10 +113,8 @@ class PixelBase
 
         bool assign(const PixelBase& p, std::size_t length)
         {
-            return onAssignPixels(p.data(), length);
+            return onAssignPixels(p, length);
         }
-
-        bool assign(const ConstPixelBase& p, std::size_t length);
 
         void fill(std::size_t n, const Color& color)
         {
@@ -144,9 +127,6 @@ class PixelBase
         }
 
     protected:
-        virtual const PixelData* onGetData() const
-        { return 0; }
-
         virtual Location& onAdvance() = 0;
 
         virtual Location& onAdvance(Pt::ssize_t n) = 0;
@@ -178,10 +158,7 @@ class PixelBase
 
         virtual void onFillColor(std::size_t n, const Color& color) = 0;
 
-        virtual bool onAssignPixels(const ConstPixelBase& p, std::size_t length)
-        { return false; }
-
-        virtual bool onAssignPixels(const PixelData* p, std::size_t length)
+        virtual bool onAssignPixels(const PixelBase& p, std::size_t length)
         { return false; }
 
         virtual bool onCopyPixels(PixelBase& p, std::size_t length) const
@@ -220,11 +197,6 @@ class ConstPixelBase
 
         virtual ~ConstPixelBase()
         {}
-        
-        const PixelData* data() const
-        { 
-            return onGetData(); 
-        }
 
         const Pt::uint8_t* base() const
         { return _base; }
@@ -262,9 +234,6 @@ class ConstPixelBase
         }
 
     protected:
-        virtual const PixelData* onGetData() const
-        { return 0; }
-
         virtual const ConstLocation& onAdvance() = 0;
 
         virtual const ConstLocation& onAdvance(Pt::ssize_t n) = 0;
@@ -299,12 +268,6 @@ template <>
 inline Argb32Color ConstPixelBase::toColor<Argb32Color>() const
 {
     return this->onGetArgb32Color();
-}
-
-
-inline bool PixelBase::assign(const ConstPixelBase& p, std::size_t length)
-{
-    return onAssignPixels(p.data(), length);
 }
 
 ///////////////////////////////////////////////////////////////////////
