@@ -73,126 +73,90 @@ namespace Gfx {
 class Argb32PixelBase final : public PixelBase
 {
     public:
-        explicit Argb32PixelBase(Argb32Pixel& p)
-        : PixelBase( p.base(), p.xpos(), p.ypos() )
-        , _p(p)
+        explicit Argb32PixelBase(Pt::uint8_t* data, const ViewBase& view, 
+                                 Pt::ssize_t x, Pt::ssize_t y)
+        : PixelBase(view, Argb32::getPixel(view, data, x, y), x, y )
         { }
 
     protected:
-        virtual Location& onAdvance() override
+        virtual PixelBase* onClone(PixelStorage& store) const
         {
-            _p.advance();
-            return _p.location();
+            return store.create<Argb32PixelBase>(*this);
         }
 
-         virtual Location& onAdvance(Pt::ssize_t n) override
+        virtual Pt::uint8_t* onAdvance() override
         {
-            _p.advance(n);
-            return _p.location();
+            return base() + 4;
+        }
+
+        virtual Pt::uint8_t* onAdvanceLine() override
+        {
+            return base() + view().padding();
+        }
+
+        virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) override
+        {
+            return base() + n * 4;
+        }
+
+        virtual Pt::uint8_t* onAdvanceLines(Pt::ssize_t n) override
+        {
+            Pt::ssize_t stride = view().stride();
+            return base() + n * stride;
         }
 
         virtual Color onGetColor() const override
         {
-            return Argb32::getColor( _p.base() );
+            return Argb32::getColor( base() );
         }
 
         virtual Argb32Color onGetArgb32Color() const override
         {
-            return Argb32Color( _p.base() );
+            return Argb32Color( base() );
         }
 
         virtual void onSetColor(const Color& color) override
         {
-            _p = color;
+            Argb32::sourceCopy( base(), color );
         }
 
         virtual void onSetColor(const Argb32Color& color) override
         {
-            _p = color;
+            const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
+            Argb32::sourceCopy(base(), p);
         }
 
         virtual void onGetColors(Color* colors, std::size_t length) const override
         {
-            Argb32::getColors(_p.base(), colors, length);
+            Argb32::getColors(base(), colors, length);
         }
 
         virtual void onGetColors(Argb32Color* colors, std::size_t length) const override
         {
-            Argb32::getColors(_p.base(), colors, length);
+            Argb32::getColors(base(), colors, length);
         }
 
         virtual void onAssign(const Argb32Color* colors, std::size_t length) override
         {
             const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(colors);
-            Argb32::sourceCopy(_p.base(), p, length);
+            Argb32::sourceCopy(base(), p, length);
         }
 
         virtual void onAssign(const Color* colors, std::size_t length) override
         {
-            Argb32::sourceCopy(_p.base(), colors, length);
+            Argb32::sourceCopy(base(), colors, length);
         }
 
         virtual void onFillColor(std::size_t n, const Color& color) override
         {
-            Argb32::sourceCopy(_p.base(), n, color);
+            Argb32::sourceCopy(base(), n, color);
         }
 
         virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
 
-    private:      
-        Argb32Pixel _p;
-};
-
-///////////////////////////////////////////////////////////////////////
-// Argb32ConstPixelBase
-///////////////////////////////////////////////////////////////////////
-
-class Argb32ConstPixelBase final : public ConstPixelBase
-{
-    public:
-        explicit Argb32ConstPixelBase(const Argb32ConstPixel& p)
-        : ConstPixelBase( p.base(), p.xpos(), p.ypos() )
-        , _p(p)
-        { }
-
-    protected:
-        virtual const ConstLocation& onAdvance() override
-        {
-            _p.advance();
-            return _p.location();
-        }
-
-         virtual const ConstLocation& onAdvance(Pt::ssize_t n) override
-        {
-            _p.advance(n);
-            return _p.location();
-        }
-
-        virtual Color onGetColor() const override
-        {
-            return Argb32::getColor( _p.base() );
-        }
-
-        virtual Argb32Color onGetArgb32Color() const override
-        {
-            return Argb32Color( _p.base() );
-        }
-
-        virtual void onGetColors(Color* colors, std::size_t length) const override
-        {
-            Argb32::getColors(_p.base(), colors, length);
-        }
-
-        virtual void onGetColors(Argb32Color* colors, std::size_t length) const override
-        {
-            Argb32::getColors(_p.base(), colors, length);
-        }
-
         virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;
-
-    private:      
-        Argb32ConstPixel _p;
 };
+
 
 ///////////////////////////////////////////////////////////////////////
 // Argb32PixelBase
@@ -214,18 +178,15 @@ inline bool Argb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t leng
     return false;
 }
 
-///////////////////////////////////////////////////////////////////////
-// Argb32ConstPixelBase
-///////////////////////////////////////////////////////////////////////
 
-inline bool Argb32ConstPixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
+inline bool Argb32PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
     if( typeid(p) == typeid(Argb32PixelBase) )
     {
         Argb32PixelBase* argb32 = static_cast<Argb32PixelBase*>(&p);
 
         Pt::uint8_t* to = argb32->base();
-        const Pt::uint8_t* from = _p.base();
+        const Pt::uint8_t* from = base();
 
         Argb32::sourceCopy(to, from, length);
         return true;
@@ -249,17 +210,7 @@ PixelBase* Argb32::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
                                  Pt::ssize_t x, Pt::ssize_t y, 
                                  PixelStorage& store) const
 {
-    Argb32Pixel p(data, view, x, y);
-    return store.create<Argb32PixelBase>(p);
-}
-
-
-ConstPixelBase* Argb32::onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
-                                           Pt::ssize_t x, Pt::ssize_t y, 
-                                           PixelStorage& store) const
-{
-    Argb32ConstPixel p(data, view, x, y);
-    return store.create<Argb32ConstPixelBase>(p);
+    return store.create<Argb32PixelBase>(data, view, x, y);
 }
 
 } // namespace

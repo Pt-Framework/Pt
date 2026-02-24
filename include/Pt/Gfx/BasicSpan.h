@@ -245,8 +245,6 @@ class BasicConstSpan
 };
 
 
-
-
 template <typename SpanT, typename FormatT, typename TraitsT>
 void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to)
 {

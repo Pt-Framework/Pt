@@ -54,13 +54,6 @@ PixelBase* Rgb32::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 { 
     return 0; 
 }
-    
-ConstPixelBase* Rgb32::onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
-                                            Pt::ssize_t x, Pt::ssize_t y, 
-                                            PixelStorage& store) const
-{ 
-    return 0; 
-}
 
 
 Color Rgb32::onGetColor(const Pt::uint8_t* base)

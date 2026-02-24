@@ -31,16 +31,15 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
-#include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
+#include <utility>
 
 namespace Pt {
 
 namespace Gfx {
 
-class PixelBase;
-class ConstPixelBase;
+class PixelStorage;
 
 ///////////////////////////////////////////////////////////////////////
 // PixelBase
@@ -51,12 +50,16 @@ class ConstPixelBase;
 class PixelBase
 {
     public:
-        PixelBase(Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
-        : _base(base)
+        PixelBase(const ViewBase& view, Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
+        : _view(&view)
+        , _base(base)
         { }
 
         virtual ~PixelBase()
         { }
+
+        const ViewBase& view() const
+        { return *_view; }
 
         Pt::uint8_t* base()
         { return _base; }
@@ -64,18 +67,24 @@ class PixelBase
         const Pt::uint8_t* base() const
         { return _base; }
 
-        Location& advance()
+        void advance()
         { 
-            Location& loc = onAdvance();
-            _base = loc.base();
-            return loc;
+            _base = onAdvance();
         }
 
-        Location& advance(Pt::ssize_t n)
+        void advance(Pt::ssize_t n)
         { 
-            Location& loc = onAdvance(n); 
-            _base = loc.base();
-            return loc;
+            _base = onAdvance(n);
+        }
+
+        void advanceLine()
+        {
+            _base = onAdvanceLine();
+        }
+
+        void advanceLines(Pt::ssize_t n)
+        {
+            _base = onAdvanceLines(n);
         }
 
         template <typename ColorT>
@@ -126,10 +135,24 @@ class PixelBase
             return onCopyPixels(p, length);
         }
 
-    protected:
-        virtual Location& onAdvance() = 0;
+        PixelBase* clone(PixelStorage& store) const
+        {
+            return onClone(store);
+        }
 
-        virtual Location& onAdvance(Pt::ssize_t n) = 0;
+    protected:
+        virtual PixelBase* onClone(PixelStorage& store) const
+        { return 0; }
+
+        virtual Pt::uint8_t* onAdvance() = 0;
+
+        virtual Pt::uint8_t* onAdvanceLine()
+        { return 0; }
+
+        virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) = 0;
+
+        virtual Pt::uint8_t* onAdvanceLines(Pt::ssize_t n)
+        { return 0; }
 
         virtual Color onGetColor() const = 0;
 
@@ -165,7 +188,8 @@ class PixelBase
         { return false; }
 
     private:
-        Pt::uint8_t* _base;
+        const ViewBase* _view;
+        Pt::uint8_t*    _base;
 };
 
 
@@ -183,128 +207,22 @@ inline Argb32Color PixelBase::toColor<Argb32Color>() const
 }
 
 ///////////////////////////////////////////////////////////////////////
-// ConstPixelBase
-///////////////////////////////////////////////////////////////////////
-
-/** @brief Const pixel base class.
-*/
-class ConstPixelBase
-{
-    public:
-        ConstPixelBase(const Pt::uint8_t* base, Pt::ssize_t x, Pt::ssize_t y)
-        : _base(base)
-        { }
-
-        virtual ~ConstPixelBase()
-        {}
-
-        const Pt::uint8_t* base() const
-        { return _base; }
-
-        const ConstLocation& advance()
-        { 
-            const ConstLocation& loc = onAdvance();
-            _base = loc.base();
-            return loc;
-        }
-
-        const ConstLocation& advance(Pt::ssize_t n)
-        { 
-            const ConstLocation& loc = onAdvance(n); 
-            _base = loc.base();
-            return loc;
-        }
-
-        template <typename ColorT>
-        ColorT toColor() const;
-
-        void getColors(Color* colors, std::size_t length) const
-        { 
-            onGetColors(colors, length); 
-        }
-
-        void getColors(Argb32Color* colors, std::size_t length) const
-        { 
-            onGetColors(colors, length); 
-        }
-
-        bool copy(PixelBase& p, std::size_t length) const
-        {
-            return onCopyPixels(p, length);
-        }
-
-    protected:
-        virtual const ConstLocation& onAdvance() = 0;
-
-        virtual const ConstLocation& onAdvance(Pt::ssize_t n) = 0;
-
-        virtual Color onGetColor() const = 0;
-
-        virtual Argb32Color onGetArgb32Color() const
-        { return Argb32Color(); }
-
-        virtual void onGetColors(Color* colors, std::size_t length) const
-        { }
-
-        virtual void onGetColors(Argb32Color* colors, std::size_t length) const
-        { }
-
-        virtual bool onCopyPixels(PixelBase& p, std::size_t length) const
-        { return false; }
-
-    private:
-        const Pt::uint8_t*   _base;
-};
-
-
-template <typename ColorT>
-inline ColorT ConstPixelBase::toColor() const
-{
-    return this->onGetColor();
-}
-
-
-template <>
-inline Argb32Color ConstPixelBase::toColor<Argb32Color>() const
-{
-    return this->onGetArgb32Color();
-}
-
-///////////////////////////////////////////////////////////////////////
 // PixelStorage
 ///////////////////////////////////////////////////////////////////////
 
 class PixelStorage
 {
     public:
-        static const std::size_t MaxSize = 128;
+        static const std::size_t MaxSize = sizeof(void*) * 16;
     
     public:
-        template <typename T>
-        T* create(Pt::uint8_t* data, ViewBase& view, Pt::ssize_t x, Pt::ssize_t y)
+        template <typename T, typename... Args>
+        T* create(Args&&... args)
         {
             static_assert(sizeof(T) <= PixelStorage::MaxSize,
                           "insufficient pixel storage");
 
-            return new (_data.mem) T(data, view, x, y);
-        }
-
-        template <typename T>
-        T* create(const Pt::uint8_t* data, const ViewBase& view, Pt::ssize_t x, Pt::ssize_t y)
-        {
-            static_assert(sizeof(T) <= PixelStorage::MaxSize,
-                          "insufficient pixel storage");
-
-            return new (_data.mem) T(data, view, x, y);
-        }
-
-        template <typename T, typename P>
-        T* create(P& p)
-        {
-            static_assert(sizeof(T) <= PixelStorage::MaxSize,
-                          "insufficient pixel storage");
-
-            return new (_data.mem) T(p);
+            return new (&_data.mem) T(std::forward<Args>(args)...);
         }
 
     private:
@@ -314,8 +232,9 @@ class PixelStorage
             : ptr(0)
             { }
 
-            char  mem[PixelStorage::MaxSize];
+            alignas(PixelBase) char mem[PixelStorage::MaxSize];
             void* ptr;
+            void (*_align0)();
             std::size_t _align1;
             long double _align2;
         } _data;

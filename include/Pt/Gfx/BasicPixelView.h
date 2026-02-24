@@ -53,6 +53,9 @@ class BasicPixelView;
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstPixelView;
 
+//
+// TODO GFX: PositionIterator with x/y, PixelIterator without
+//
 
 template <typename FormatT, typename TraitsT>
 class BasicPixelIterator
@@ -77,20 +80,22 @@ class BasicPixelIterator
 
     public:
         BasicPixelIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
-        : _pixel(view, x, y)
-        { }
-
-        BasicPixelIterator(const Pixel& p)
-        : _pixel(p)
+        : _x(x)
+        , _y(y)
+        , _pixel(view, x, y)
         { }
 
         BasicPixelIterator(const BasicPixelIterator& it)
-        : _pixel(it._pixel)
+        : _x(it._x)
+        , _y(it._y)
+        , _pixel(it._pixel)
         { }
 
         BasicPixelIterator& operator=(const BasicPixelIterator& it)
         {
             _pixel.reset(it._pixel);
+            _x = it._x;
+            _y = it._y;
             return *this;
         }
 
@@ -115,17 +120,40 @@ class BasicPixelIterator
         BasicPixelIterator& operator++()
         {
             _pixel.advance();
+
+            if( ++_x >= _pixel.view().width() )
+            {
+                _x = 0;
+                ++_y;
+
+                _pixel.advanceLine();
+            }
+
             return *this;
         }
 
         BasicPixelIterator& operator+=(Pt::ssize_t n)
         {
-            _pixel.advance(n);
+            Pt::ssize_t off = _x + n;
+            std::size_t dy = off / _pixel.view().width();
+            std::size_t dx = off % _pixel.view().width() - _x;
+            
+            if(dy > 0)
+            {
+                _pixel.advanceLines(dy);
+                _y += dy;
+            }
+
+            _pixel.advance(dx);
+            _x += dx;
+            
             return *this;
         }
 
     private:
-        Pixel _pixel;
+        Pt::ssize_t _x;
+        Pt::ssize_t _y;
+        Pixel       _pixel;
 };
 
 
@@ -153,29 +181,29 @@ class BasicConstPixelIterator
     public:
         BasicConstPixelIterator(const BasicConstView<Format>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
-        : _pixel(view, x, y)
+        : _x(x)
+        , _y(y)
+        , _pixel(view, x, y)
         { }
 
         BasicConstPixelIterator(const BasicView<Format>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
-        : _pixel(view, x, y)
-        { }
-
-        BasicConstPixelIterator(const ConstPixel& p)
-        : _pixel(p)
-        { }
-
-        BasicConstPixelIterator(const Pixel& p)
-        : _pixel(p)
+        : _x(x)
+        , _y(y)
+        , _pixel(view, x, y)
         { }
 
         BasicConstPixelIterator(const BasicConstPixelIterator& it)
-        : _pixel(it._pixel)
+        : _x(it._x)
+        , _y(it._y)
+        , _pixel(it._pixel)
         { }
 
         BasicConstPixelIterator& operator=(const BasicConstPixelIterator& it)
         {
             _pixel.reset(it._pixel);
+            _x = it._x;
+            _y = it._y;
             return *this;
         }
 
@@ -200,16 +228,39 @@ class BasicConstPixelIterator
         BasicConstPixelIterator& operator++()
         {
             _pixel.advance();
+            
+            if( ++_x >= _pixel.view().width() )
+            {
+                _x = 0;
+                ++_y;
+
+                _pixel.advanceLine();
+            }
+
             return *this;
         }
 
         BasicConstPixelIterator& operator+=(Pt::ssize_t n)
         {
-            _pixel.advance(n);
+            Pt::ssize_t off = _x + n;
+            std::size_t dy = off / _pixel.view().width();
+            std::size_t dx = off % _pixel.view().width() - _x;
+            
+            if(dy > 0)
+            {
+                _pixel.advanceLines(dy);
+                _y += dy;
+            }
+
+            _pixel.advance(dx);
+            _x += dx;
+            
             return *this;
         }
 
     private:
+        Pt::ssize_t _x;
+        Pt::ssize_t _y;
         ConstPixel _pixel;
 };
 

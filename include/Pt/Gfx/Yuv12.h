@@ -31,7 +31,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/Location.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
 
@@ -124,7 +123,11 @@ class PT_GFX_API Yuv12Pixel
 
         void advance();
 
+        void advanceLine();
+
         void advance(Pt::ssize_t n);
+
+        void advanceLines(Pt::ssize_t n);
 
         bool equals(const Yuv12Pixel& p) const;
 
@@ -212,7 +215,11 @@ class Yuv12ConstPixel
 
         void advance();
 
+        void advanceLine();
+
         void advance(Pt::ssize_t n);
+
+        void advanceLines(Pt::ssize_t n);
 
         bool equals(const Yuv12ConstPixel& p) const
         { return _y == p._y; }
@@ -273,10 +280,6 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
-    
-        virtual ConstPixelBase* onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
-                                                   Pt::ssize_t x, Pt::ssize_t y, 
-                                                   PixelStorage& store) const override;
 
     public:
         static Color getColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
@@ -496,9 +499,23 @@ inline void Yuv12Pixel::advance()
 }
 
 
+inline void Yuv12Pixel::advanceLine()
+{
+}
+
+
 inline void Yuv12Pixel::advance(Pt::ssize_t n)
 {
     Yuv12::advanceBy(_y, _u, _v, n, _xpos, _ypos,
+                      _view.width(), _view.stride(), _subStride);
+}
+
+
+inline void Yuv12Pixel::advanceLines(Pt::ssize_t n)
+{
+    Pt::ssize_t m = n * _view.width();
+
+    Yuv12::advanceBy(_y, _u, _v, m, _xpos, _ypos,
                       _view.width(), _view.stride(), _subStride);
 }
 
@@ -567,6 +584,11 @@ inline void Yuv12ConstPixel::advance()
 }
 
 
+inline void Yuv12ConstPixel::advanceLine()
+{
+}
+
+
 inline void Yuv12ConstPixel::advance(Pt::ssize_t n)
 {
     Yuv12::advanceBy(_y, _u, _v, n, _xpos, _ypos,
@@ -574,14 +596,13 @@ inline void Yuv12ConstPixel::advance(Pt::ssize_t n)
 }
 
 
-//template <typename FormatT1, typename FormatT2,
-//         typename TraitsT1, typename TraitsT2>
-//BasicPixelIterator<FormatT2, TraitsT2> copy(const BasicConstSpan<FormatT1, TraitsT1>& from, 
-//                                            BasicPixelIterator<FormatT2, TraitsT2> to)
-//{
-//    to->assign(from.front(), from.length());
-//    return to += from.length();
-//}
+inline void Yuv12ConstPixel::advanceLines(Pt::ssize_t n)
+{
+    Pt::ssize_t m = n * _view.width();
+
+    Yuv12::advanceBy(_y, _u, _v, m, _xpos, _ypos,
+                      _view.width(), _view.stride(), _subStride);
+}
 
 } // namespace
 

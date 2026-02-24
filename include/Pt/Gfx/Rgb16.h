@@ -60,10 +60,6 @@ class PT_GFX_API Rgb16 : public ImageFormat
         virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
-    
-        virtual ConstPixelBase* onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
-                                                   Pt::ssize_t x, Pt::ssize_t y, 
-                                                   PixelStorage& store) const override;
 };
 
 } // namespace

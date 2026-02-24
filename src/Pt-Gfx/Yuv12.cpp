@@ -37,8 +37,8 @@ namespace Gfx {
 class Yuv12PixelBase final : public PixelBase
 {
     public:
-        explicit Yuv12PixelBase(Yuv12Pixel& p)
-        : PixelBase( p.ybase(), p.xpos(), p.ypos() )
+        explicit Yuv12PixelBase(const Yuv12Pixel& p)
+        : PixelBase(p.view(), p.ybase(), p.xpos(), p.ypos() )
         , _p(p)
         { }
 
@@ -52,19 +52,34 @@ class Yuv12PixelBase final : public PixelBase
         { return _p.vbase(); }
 
     protected:
-
-        virtual Location& onAdvance() override
+        virtual PixelBase* onClone(PixelStorage& store) const
         {
-            _p.advance();
-            _loc = Location(_p.ybase(), _p.xpos(), _p.ypos());
-            return _loc;
+            const Yuv12PixelBase& c = *this;
+            return store.create<Yuv12PixelBase>(c);
         }
 
-         virtual Location& onAdvance(Pt::ssize_t n) override
+        virtual Pt::uint8_t* onAdvance() override
+        {
+            _p.advance();
+            return _p.ybase();
+        }
+
+        virtual Pt::uint8_t* onAdvanceLine() override
+        {
+            return _p.ybase();
+        }
+
+        virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) override
         {
             _p.advance(n);
-            _loc = Location(_p.ybase(), _p.xpos(), _p.ypos());
-            return _loc;
+            return _p.ybase();
+        }
+
+        virtual Pt::uint8_t* onAdvanceLines(Pt::ssize_t n) override
+        {
+            Pt::ssize_t m = n * _p.view().width();
+            _p.advance(m);
+            return _p.ybase();
         }
 
         virtual Color onGetColor() const override
@@ -84,58 +99,14 @@ class Yuv12PixelBase final : public PixelBase
 
         virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
 
-    private:
-        Yuv12Pixel _p;
-        Location  _loc;
-};
-
-
-class Yuv12ConstPixelBase final : public ConstPixelBase
-{
-    public:
-        explicit Yuv12ConstPixelBase(const Yuv12ConstPixel& p)
-        : ConstPixelBase( p.ybase(), p.xpos(), p.ypos() )
-        , _p(p)
-        { }
-
-        const Pt::uint8_t* ybase() const
-        { return _p.ybase(); }
-
-        const Pt::uint8_t* ubase() const
-        { return _p.ubase(); }
-
-        const Pt::uint8_t* vbase() const
-        { return _p.vbase(); }
-
-    protected:
-        virtual const ConstLocation& onAdvance() override
-        {
-            _p.advance();
-            _loc = ConstLocation(_p.ybase(), _p.xpos(), _p.ypos());
-            return _loc;
-        }
-
-        virtual const ConstLocation& onAdvance(Pt::ssize_t n) override
-        {
-            _p.advance(n);
-            _loc = ConstLocation(_p.ybase(), _p.xpos(), _p.ypos());
-            return _loc;
-        }
-
-        virtual Color onGetColor() const override
-        {
-            return Yuv12::getColor( _p.y(), _p.u(), _p.v() );
-        }
-
         virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;
 
-    private:      
-        Yuv12ConstPixel _p;
-        ConstLocation  _loc;
+    private:
+        Yuv12Pixel _p;
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Argb32PixelBase
+// Yuv12PixelBase
 ///////////////////////////////////////////////////////////////////////
 
 inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
@@ -151,11 +122,8 @@ inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
     return false;
 }
 
-///////////////////////////////////////////////////////////////////////
-// Argb32ConstPixelBase
-///////////////////////////////////////////////////////////////////////
 
-inline bool Yuv12ConstPixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
+inline bool Yuv12PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
     if( typeid(p) == typeid(Yuv12PixelBase) )
     {
@@ -189,15 +157,6 @@ PixelBase* Yuv12::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 {
     Yuv12Pixel p(data, view, x, y);;
     return store.create<Yuv12PixelBase>(p);
-}
-
-
-ConstPixelBase* Yuv12::onCreateConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
-                                          Pt::ssize_t x, Pt::ssize_t y, 
-                                          PixelStorage& store) const
-{
-    Yuv12ConstPixel p(data, view, x, y);
-    return store.create<Yuv12ConstPixelBase>(p);
 }
 
 } // namespace

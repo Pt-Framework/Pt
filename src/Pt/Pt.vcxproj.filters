@@ -2961,9 +2961,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Location.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>

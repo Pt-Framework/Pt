@@ -119,12 +119,8 @@ namespace Gfx {
 
 template <typename ColorT>
 inline Pixel<ColorT>::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
-: _view(&view)
-, _x(x)
-, _y(y)
+: _pixel(0)
 , _format( &view.format() )
-, _pixel(0)
-, _data( view.data() )
 { 
     _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
 }
@@ -132,14 +128,10 @@ inline Pixel<ColorT>::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssi
 
 template <typename ColorT>
 inline Pixel<ColorT>::Pixel(const Pixel& p)
-: _view(p._view)
-, _x(p._x)
-, _y(p._y)
+: _pixel(0)
 , _format(p._format)
-, _pixel(0)
-, _data(p._data)
 { 
-    _pixel = _format->createPixel(_data, *_view, p.xpos(), p.ypos(), _storage);
+    _pixel = p._pixel->clone(_storage);
 }
 
 
@@ -161,10 +153,6 @@ inline void Pixel<ColorT>::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt
     }
 
     _pixel = view.format().createPixel(view.data(), view, x, y, _storage);
-    _data = view.data();
-    _view = &view;
-    _x = x;
-    _y = y;
     _format = &view.format();
 }
 
@@ -178,11 +166,7 @@ inline void Pixel<ColorT>::reset(const Pixel& p)
         _pixel = 0;
     }
 
-    _pixel = p._format->createPixel(p._data, *p._view, p.xpos(), p.ypos(), _storage);
-    _data = p._data;
-    _view = p._view;
-    _x = p._x;
-    _y = p._y;
+    _pixel = p._pixel->clone(_storage);
     _format = p._format;
 }
 
@@ -311,12 +295,8 @@ inline bool Pixel<ColorT>::equals(const ConstPixel<ColorT>& p) const
 template <typename ColorT>
 inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
-: _view(&view)
-, _x(x)
-, _y(y)
+: _pixel(0)
 , _format( &view.format() )
-, _pixel(0)
-, _data( view.data() )
 { 
     Pt::uint8_t* data = const_cast<Pt::uint8_t*>( view.data() );
     _pixel = view.format().createPixel(data, view, x, y, _storage);
@@ -326,12 +306,8 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view,
 template <typename ColorT>
 inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
-: _view(&view)
-, _x(x)
-, _y(y)
+: _pixel(0)
 , _format( &view.format() )
-, _pixel(0)
-, _data( view.data() )
 { 
     Pt::uint8_t* data = const_cast<Pt::uint8_t*>( view.data() );
     _pixel = view.format().createPixel(data, view, x, y, _storage);
@@ -340,29 +316,19 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view,
 
 template <typename ColorT>
 inline ConstPixel<ColorT>::ConstPixel(const ConstPixel& p)
-: _view(p._view)
-, _x(p._x)
-, _y(p._y)
+: _pixel(0)
 , _format(p._format)
-, _pixel(0)
-, _data(p._data)
 { 
-    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(_data);
-    _pixel = _format->createPixel(data, *_view, p.xpos(), p.ypos(), _storage);
+    _pixel = p._pixel->clone(_storage);
 }
 
 
 template <typename ColorT>
 inline ConstPixel<ColorT>::ConstPixel(const Pixel<ColorT>& p)
-: _view(p._view)
-, _x(p._x)
-, _y(p._y)
+: _pixel(0)
 , _format(p._format)
-, _pixel(0)
-, _data(p._data)
 { 
-    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(_data);
-    _pixel = _format->createPixel(data, *_view, p.xpos(), p.ypos(), _storage);
+    _pixel = p._pixel->clone(_storage);
 }
 
 
@@ -375,7 +341,8 @@ inline ConstPixel<ColorT>::~ConstPixel()
 
 
 template <typename ColorT>
-inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, 
+                                      Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -385,16 +352,13 @@ inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, P
 
     Pt::uint8_t* data = const_cast<Pt::uint8_t*>(view.data());
     _pixel = view.format().createPixel(data, view, x, y, _storage);
-    _data = view.data();
-    _view = &view;
-    _x = x;
-    _y = y;
     _format = &view.format();
 }
 
 
 template <typename ColorT>
-inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat>& view, 
+                                      Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -404,10 +368,6 @@ inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat>& view, Pt::ss
 
     Pt::uint8_t* data = const_cast<Pt::uint8_t*>(view.data());
     _pixel = view.format().createPixel(data, view, x, y, _storage);
-    _data = view.data();
-    _view = &view;
-    _x = x;
-    _y = y;
     _format = &view.format();
 }
 
@@ -421,12 +381,7 @@ inline void ConstPixel<ColorT>::reset(const ConstPixel& p)
         _pixel = 0;
     }
 
-    Pt::uint8_t* data = const_cast<Pt::uint8_t*>(p._data);
-    _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
-    _data = p._data;
-    _view = p._view;
-    _x = p._x;
-    _y = p._y;
+    _pixel = p._pixel->clone(_storage);
     _format = p._format;
 }
 
@@ -440,12 +395,7 @@ inline void ConstPixel<ColorT>::reset(const Pixel<ColorT>& p)
         _pixel = 0;
     }
 
-    Pt::uint8_t* data = p._data;
-    _pixel = p._format->createPixel(data, *p._view, p.xpos(), p.ypos(), _storage);
-    _data = p._data;
-    _view = p._view;
-    _x = p._x;
-    _y = p._y;
+    _pixel = p._pixel->clone(_storage);
     _format = p._format;
 }
 

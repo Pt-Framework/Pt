@@ -94,7 +94,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageTraits.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Location.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Paint.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PaintContext.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />

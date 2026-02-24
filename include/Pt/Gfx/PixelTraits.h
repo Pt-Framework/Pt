@@ -50,6 +50,10 @@ struct PixelTraits
 // convert with multistage converter
 ///////////////////////////////////////////////////////////////////////
 
+//
+// TODO: GFX: converter or tag overload?
+//
+
 template <typename T1, typename T2, int isDirect>
 struct DirectConverter 
 {
@@ -105,8 +109,8 @@ void copyPixelImpl(const P1& p1, P2& p2, TrueType)
 template <typename P1, typename P2> 
 void copyPixel(const P1& p1, P2& p2)
 {
-    typedef PixelTraits<P1>::FormatType Fmt1;
-    typedef PixelTraits<P2>::FormatType Fmt2;
+    typedef typename PixelTraits<P1>::FormatType Fmt1;
+    typedef typename PixelTraits<P2>::FormatType Fmt2;
 
     copyPixelImpl(p1, p2, IsSame<Fmt1, Fmt2>());
 }
@@ -151,8 +155,8 @@ void copyPixelsImpl(const P1& p1, P2& p2, std::size_t length, TrueType)
 template <typename P1, typename P2> 
 void copyPixels(const P1& p1, P2& p2, std::size_t length)
 {
-    typedef PixelTraits<P1>::FormatType Fmt1;
-    typedef PixelTraits<P2>::FormatType Fmt2;
+    typedef typename PixelTraits<P1>::FormatType Fmt1;
+    typedef typename PixelTraits<P2>::FormatType Fmt2;
 
     copyPixelsImpl(p1, p2, length, IsSame<Fmt1, Fmt2>());
 }
