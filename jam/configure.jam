@@ -65,12 +65,16 @@ rule ConfigureSwitch
         {
             include Jamrules.$(_config) ;
             TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
-            Exit "Using " $(JAMRULES).$(_config) : 0 ;
+            Exit "Using" $(JAMRULES).$(_config) : 0 ;
         }
         else
         {
-            Exit "No such configuration." ;
+            Exit "No such configuration:" $(_config) ;
         }
+    }
+    else
+    {
+        Exit "No such configuration." ;
     }
 }
 

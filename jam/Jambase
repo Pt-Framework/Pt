@@ -24,18 +24,25 @@ rule Load
 Load base.jam ;
 
 ##########################################################################
-# Configure Step
+# Configuration Switch
 ##########################################################################
 
-if "switch" in $(ARGV)
+for local arg in $(ARGV)
 {
-    JAM_SWITCH = true ;
-
-    if ! $(CONFIG)
+    if $(JAM_SWITCH) && ! $(JAM_SWITCH_CONFIG)
     {
-        Exit "No configuration to switch. Use -sCONFIG" ;
+        JAM_SWITCH_CONFIG = $(arg) ;
+    }
+
+    if $(arg) = "switch"
+    {
+        JAM_SWITCH = true ;
     }
 }
+
+##########################################################################
+# Configure Step
+##########################################################################
 
 if configure in $(ARGV)
 {
@@ -50,7 +57,7 @@ if $(JAM_SWITCH) || $(JAM_CONFIGURE)
 
     if $(JAM_SWITCH)
     {
-        ConfigureSwitch $(CONFIG) ;
+        ConfigureSwitch $(JAM_SWITCH_CONFIG) ;
     }
 
     Echo "Configuring..." ;
