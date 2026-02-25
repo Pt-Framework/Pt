@@ -86,23 +86,22 @@ class Argb32PixelBase final : public PixelBase
 
         virtual Pt::uint8_t* onAdvance() override
         {
-            return base() + 4;
+            return Argb32::advance(view(), base());
         }
 
         virtual Pt::uint8_t* onAdvanceLine() override
         {
-            return base() + view().padding();
+            return Argb32::advanceLine(view(), base());
         }
 
         virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) override
         {
-            return base() + n * 4;
+            return Argb32::advance(view(), base(), n);
         }
 
         virtual Pt::uint8_t* onAdvanceLines(Pt::ssize_t n) override
         {
-            Pt::ssize_t stride = view().stride();
-            return base() + n * stride;
+            return Argb32::advanceLines(view(), base(), n);
         }
 
         virtual Color onGetColor() const override
@@ -122,8 +121,7 @@ class Argb32PixelBase final : public PixelBase
 
         virtual void onSetColor(const Argb32Color& color) override
         {
-            const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
-            Argb32::sourceCopy(base(), p);
+            Argb32::sourceCopy(base(), color);
         }
 
         virtual void onGetColors(Color* colors, std::size_t length) const override

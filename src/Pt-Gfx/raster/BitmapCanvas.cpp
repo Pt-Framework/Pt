@@ -165,7 +165,7 @@ BitmapCanvas::~BitmapCanvas()
 void BitmapCanvas::init(Image& image)
 {
     _image = &image;
-    _imageView.reset(*_image);
+    _imageView = PixelView(*_image);
 }
 
 
@@ -186,7 +186,7 @@ void BitmapCanvas::onFinishPaint()
     if(_image)
         _image = 0;
 
-    _imageView.reset();
+    _imageView = PixelView();
 }
 
 
@@ -226,7 +226,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
     Gfx::PixelView fillView(_penBuffer);
     Gfx::fill( fillView.begin(), fillView.end(), pen.color() );
 
-    _penView.reset(_penBuffer);
+    _penView = ConstPixelView(_penBuffer);
     _penPixel.reset(_penView, 0, 0);
 
     _text->setPen(pen);
@@ -251,7 +251,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
         case Brush::Solid:
         {
             _brushBuffer.reset( _image->format(), 64, 1);
-            _brushView.reset(_brushBuffer);
+            _brushView = ConstPixelView(_brushBuffer);
 
             Gfx::PixelView fillView(_brushBuffer);
             Gfx::fill(fillView.begin(), fillView.end(), brush.color());
@@ -263,7 +263,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
             {
                 _brushBuffer.reset( _image->format(), 
                                     brush.texture().width(), brush.texture().height() );
-                _brushView.reset(_brushBuffer);
+                _brushView = ConstPixelView(_brushBuffer);
 
                 Gfx::ConstPixelView textureView( brush.texture() );
                 Gfx::PixelView brushView(_brushBuffer);
@@ -272,13 +272,13 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
             }
             else
             {
-                _brushView.reset( _brush.texture() );
+                _brushView = ConstPixelView( _brush.texture() );
             }
             break;
 
         case Brush::Gradient:
             _isGradient = true;
-            _brushView.reset(_brushBuffer);
+            _brushView = ConstPixelView(_brushBuffer);
             break;
     }
 

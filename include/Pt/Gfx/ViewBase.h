@@ -44,7 +44,9 @@ class ViewBase
 
     public:
         ViewBase()
-        : _width(0)
+        : _xpos(0)
+        , _ypos(0)
+        , _width(0)
         , _height(0)
         , _padding(0)
         , _stride(0)
@@ -52,11 +54,30 @@ class ViewBase
 
         ViewBase(Pt::ssize_t width, Pt::ssize_t height, 
                  Pt::ssize_t stride, Pt::ssize_t padding = 0)
-        : _width(width)
+        : _xpos(0)
+        , _ypos(0)
+        , _width(width)
         , _height(height)
         , _padding(padding)
         , _stride(stride)
         { }
+
+        ViewBase(Pt::ssize_t xpos, Pt::ssize_t ypos,
+                 Pt::ssize_t width, Pt::ssize_t height, 
+                 Pt::ssize_t stride, Pt::ssize_t padding = 0)
+        : _xpos(xpos)
+        , _ypos(ypos)
+        , _width(width)
+        , _height(height)
+        , _padding(padding)
+        , _stride(stride)
+        { }
+
+        Pt::ssize_t xpos() const
+        { return _xpos; }
+
+        Pt::ssize_t ypos() const
+        { return _ypos; }
 
         Pt::ssize_t width() const
         { return _width; }
@@ -77,6 +98,20 @@ class ViewBase
         void reset(Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t stride, Pt::ssize_t padding)
         { 
+            _xpos = 0;
+            _ypos = 0;
+            _width = width;
+            _height = height;
+            _stride = stride;
+            _padding = padding;
+        }
+
+        void reset(Pt::ssize_t xpos, Pt::ssize_t ypos,
+                   Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t stride, Pt::ssize_t padding)
+        { 
+            _xpos = xpos;
+            _ypos = ypos;
             _width = width;
             _height = height;
             _stride = stride;
@@ -84,6 +119,8 @@ class ViewBase
         }
 
     private:      
+        Pt::ssize_t   _xpos;
+        Pt::ssize_t   _ypos;
         Pt::ssize_t   _width;
         Pt::ssize_t   _height;
         Pt::ssize_t   _padding;

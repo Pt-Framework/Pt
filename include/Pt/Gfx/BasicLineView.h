@@ -87,7 +87,7 @@ class BasicLineIterator
 
         BasicLineIterator& operator++() noexcept
         {
-            _span.advance( _view->width() );
+            _span.advanceLines(1);
             return *this;
         }
 
@@ -100,7 +100,7 @@ class BasicLineIterator
 
         BasicLineIterator& operator+=(Pt::ssize_t n)
         {
-            _span.advance(_view->width() * n);
+            _span.advanceLines(n);
             return *this;
         }
 
@@ -152,7 +152,7 @@ class BasicConstLineIterator
 
         BasicConstLineIterator& operator++() noexcept
         {
-            _span.advance( _view->width() );
+            _span.advanceLines(1);
             return *this;
         }
 
@@ -165,7 +165,7 @@ class BasicConstLineIterator
 
         BasicConstLineIterator& operator+=(Pt::ssize_t n)
         {
-            _span.advance( _view->width() * n );
+            _span.advanceLines(n);
             return *this;
         }
 
@@ -200,6 +200,9 @@ class BasicLineView : public BasicView<FormatT>
         typedef BasicLineIterator<Format, PixelTraits> Iterator;
         typedef BasicConstLineIterator<Format, PixelTraits> ConstIterator;
 
+        typedef BasicSpan<Format, PixelTraits> Span;
+        typedef BasicConstSpan<Format, PixelTraits> ConstSpan;
+
     public:
         explicit BasicLineView(const Format& format)
         : BasicView<FormatT>(format)
@@ -207,8 +210,15 @@ class BasicLineView : public BasicView<FormatT>
 
         explicit BasicLineView(BasicView<FormatT>& view);
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicLineView(BasicImage<OtherFormatT, OtherTraitsT>& image);
+        BasicLineView(BasicView<FormatT>& view,
+                      Int x, Int y, Int w, Int h);
+
+        template <typename OtherFmt, typename OtherTr>
+        explicit BasicLineView(BasicImage<OtherFmt, OtherTr>& image);
+
+        template <typename OtherFmt, typename OtherTr>
+        BasicLineView(BasicImage<OtherFmt, OtherTr>& image,
+                      Int x, Int y, Int w, Int h);
 
         Iterator line(Pt::ssize_t y)
         { return Iterator(*this, 0, y); }
@@ -253,13 +263,29 @@ class BasicConstLineView : public BasicConstView<FormatT>
         explicit BasicConstLineView(const BasicView<OtherFormatT>& view);
 
         template <typename OtherFormatT>
+        BasicConstLineView(const BasicView<OtherFormatT>& view,
+                           Int x, Int y, Int w, Int h);
+
+        template <typename OtherFormatT>
         explicit BasicConstLineView(const BasicConstView<OtherFormatT>& view);
+
+        template <typename OtherFormatT>
+        BasicConstLineView(const BasicConstView<OtherFormatT>& view,
+                           Int x, Int y, Int w, Int h);
 
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image);
 
         template <typename OtherFormatT, typename OtherTraitsT>
+        BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
+                           Int x, Int y, Int w, Int h);
+
+        template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image);
+
+        template <typename OtherFormatT, typename OtherTraitsT>
+        BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
+                           Int x, Int y, Int w, Int h);
 
         Iterator line(Pt::ssize_t y)
         { return Iterator(*this, 0, y); }

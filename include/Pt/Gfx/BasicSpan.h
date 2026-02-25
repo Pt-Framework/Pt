@@ -109,6 +109,19 @@ class BasicSpan
         void advance(std::size_t n)
         {
             _p.advance(n);
+            _x + n;
+        }
+
+        void advanceLine()
+        {
+            _p.advanceLine();
+            _x = 0;
+        }
+
+        void advanceLines(std::size_t n)
+        {
+            _p.advanceLines(n);
+            _y += n;
         }
 
         Pixel& front()
@@ -118,16 +131,16 @@ class BasicSpan
         { return _p; }
 
         Iterator begin()
-        { return Iterator(_p); }
+        { return Iterator(*_view, _x, _y); }
 
         Iterator end()
-        { return Iterator(_p) += _length; }
+        { return Iterator(*_view, _x + _length, _y); }
 
-        ConstIterator cbegin() const
-        { return ConstIterator(_p); }
+        ConstIterator begin() const
+        { return ConstIterator(*_view, _x, _y); }
 
-        ConstIterator cend() const
-        { return ConstIterator(_p) += _length; }
+        ConstIterator end() const
+        { return ConstIterator(*_view, _x + _length, _y); }
 
     private:
         BasicView<Format>* _view;
@@ -216,6 +229,19 @@ class BasicConstSpan
         void advance(std::size_t n)
         {
             _p.advance(n);
+            _x + n;
+        }
+
+        void advanceLine()
+        {
+            _p.advanceLine();
+            _x = 0;
+        }
+
+        void advanceLines(std::size_t n)
+        {
+            _p.advanceLines(n);
+            _y += n;
         }
 
         ConstPixel& front()
@@ -224,17 +250,11 @@ class BasicConstSpan
         const ConstPixel& front() const
         { return _p; }
 
-        Iterator begin()
-        { return Iterator(_p); }
+        ConstIterator begin() const
+        { return ConstIterator(*_view, _x, _y); }
 
-        Iterator end()
-        { return Iterator(_p) += _length; }
-
-        ConstIterator cbegin() const
-        { return ConstIterator(_p); }
-
-        ConstIterator cend() const
-        { return ConstIterator(_p) += _length; }
+        ConstIterator end() const
+        { return ConstIterator(*_view, _x + _length, _y); }
 
     private:
         const BasicConstView<Format>* _view;

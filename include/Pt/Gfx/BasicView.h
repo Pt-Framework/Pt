@@ -50,10 +50,28 @@ class BasicView : public ViewBase
         template <typename F, typename T>
         explicit BasicView(BasicImage<F, T>& image);
 
+        template <typename F, typename T>
+        BasicView(BasicImage<F, T>& image, Int x, Int y, Int w, Int h);
+
+        template <typename F>
+        explicit BasicView(BasicView<F>& view);
+
+        template <typename F>
+        BasicView(BasicView<F>& view, Int x, Int y, Int w, Int h);
+
         virtual ~BasicView()
         { }
 
-        void reset();
+        //
+        // TODO GFX: remove reset funktions and use ctor + op=
+        //
+
+        void reset( const Format& format = Format::get() )
+        {
+            _data = 0;
+            _format = &format;
+            ViewBase::reset(0, 0, 0, 0);
+        }
 
         template <typename F, typename T>
         void reset(BasicImage<F, T>& image);
@@ -75,7 +93,7 @@ class BasicView : public ViewBase
         const Format*  _format;
 };
 
-
+// Int x, Int y, Int w, Int h
 template <typename FormatT>
 class BasicConstView : public ViewBase
 {
@@ -88,18 +106,28 @@ class BasicConstView : public ViewBase
         template <typename F>
         explicit BasicConstView(const BasicView<F>& view);
 
+        template <typename F>
+        BasicConstView(const BasicView<F>& view, Int x, Int y, Int w, Int h);
+
         template <typename F, typename T>
         explicit BasicConstView(const BasicImage<F, T>& image);
+        
+        template <typename F, typename T>
+        BasicConstView(const BasicImage<F, T>& image, Int x, Int y, Int w, Int h);
 
         template <typename F, typename T>
         explicit BasicConstView(const BasicConstImage<F, T>& image);
 
+        template <typename F, typename T>
+        BasicConstView(const BasicConstImage<F, T>& image, Int x, Int y, Int w, Int h);
+
         virtual ~BasicConstView()
         { }
 
-        void reset()
+        void reset( const Format& format = Format::get() )
         {
             _data = 0;
+            _format = &format;
             ViewBase::reset(0, 0, 0, 0);
         }
 

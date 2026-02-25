@@ -261,49 +261,42 @@ class PT_GFX_API Argb32 final : public ImageFormat
         static void sourceOver(Argb32Pixel& p, const Color& c);
 
     public:
-       static Pt::uint8_t* getPixel(const ViewBase& view, Pt::uint8_t* data, 
-                                    Pt::ssize_t& xpos, Pt::ssize_t& ypos)
+        template <typename BasePtr>
+        static BasePtr getPixel(const ViewBase& view, BasePtr base, 
+                                Pt::ssize_t xpos, Pt::ssize_t ypos)
         {
-            Pt::uint8_t* p = data;
-            p += ypos * view.stride();
-            p += xpos * 4; 
-            return p;
+            ypos += view.ypos();
+            xpos += view.xpos();
+
+            base += ypos * view.stride();
+            base += xpos * PixelWidth; 
+            return base;
         }
 
-       static const Pt::uint8_t* getPixel(const ViewBase& view, const Pt::uint8_t* data, 
-                                          Pt::ssize_t& xpos, Pt::ssize_t& ypos)
+        template <typename BasePtr>
+        static BasePtr advance(const ViewBase& view, BasePtr base)
         {
-            const Pt::uint8_t* p = data;
-            p += ypos * view.stride();
-            p += xpos * 4; 
-            return p;
+            return base + PixelWidth;
         }
 
-        static void advance(const ViewBase& view, Pt::uint8_t*& p, 
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos)
+        template <typename BasePtr>
+        static BasePtr advance(const ViewBase& view, BasePtr base, Pt::ssize_t n)
         {
-            if( ++xpos >= view.width() )
-            {
-                xpos = 0;
-                ++ypos;
-
-                p += view.padding();
-            }
-
-            p += 4;
+            return base + n * PixelWidth;
         }
 
-        static void advance(const ViewBase& view, Pt::uint8_t*& p, Pt::ssize_t n,
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos)
+        template <typename BasePtr>
+        static BasePtr advanceLine(const ViewBase& view, BasePtr base)
         {
-            Pt::ssize_t off = xpos + n;
+            Pt::ssize_t w = view.width() * PixelWidth;
+            Pt::ssize_t off = view.stride() - w;
+            return base + off;
+        }
 
-            std::size_t dy = off / view.width();
-            std::size_t dx = off % view.width() - xpos;
-
-            xpos += dx;
-            ypos += dy;
-            p += dy * view.stride() + dx * 4;
+        template <typename BasePtr>
+        static BasePtr advanceLines(const ViewBase& view, BasePtr base, Pt::ssize_t n)
+        {
+            return base + n * view.stride();
         }
 
         static Color getColor(const Pt::uint8_t* p);
@@ -319,9 +312,13 @@ class PT_GFX_API Argb32 final : public ImageFormat
         //
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
 
+        static void sourceCopy(Pt::uint8_t* to, const Argb32Color& from);
+
         static void sourceCopy(Pt::uint8_t* to, const Color& c);
 
         static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Color& c);
+
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
         static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
@@ -457,15 +454,21 @@ inline void Argb32::sourceCopy(Argb32Pixel& p, const Color& c)
 }
 
 
+inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
+{
+    std::memcpy(to, from, PixelWidth);
+}
+
+
 inline void Argb32::sourceOver(Argb32Pixel& p, const Color& c)
 {
     sourceOver(p.base(), c);
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, const Argb32Color& from)
 {
-    *((Pt::uint32_t*) to) = *((const Pt::uint32_t*) from);
+    std::memcpy(to, &from.value(), PixelWidth);
 }
 
 
@@ -492,6 +495,13 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Color&
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
     for(std::size_t i = 0; i < length; ++i) 
         *dst++ = value;
+}
+
+
+inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
+{
+    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( &c.value() );
+    sourceCopy(to, length, p);
 }
 
 
@@ -674,33 +684,25 @@ inline void Argb32Pixel::reset(const Argb32Pixel& p)
 
 inline void Argb32Pixel::advance()
 {
-    _base += 4;
+    _base = Argb32::advance(*_view, _base);
 }
 
 
 inline void Argb32Pixel::advanceLine()
 {
-    _base +=_view->padding();
+    _base = Argb32::advanceLine(*_view, _base);
 }
 
 
 inline void Argb32Pixel::advance(Pt::ssize_t n)
 {
-    //Pt::ssize_t off = _x + n;
-
-    //std::size_t dy = off / _view->width();
-    //std::size_t dx = off % _view->width() - _x;
-
-    //_x += dx;
-    //_base += dy * _view->stride() + dx * 4;
-
-    _base += n * 4;
+    _base = Argb32::advance(*_view, _base, n);
 }
 
 
 inline void Argb32Pixel::advanceLines(Pt::ssize_t n)
 {
-    _base += n * _view->stride();
+    _base = Argb32::advanceLines(*_view, _base, n);
 }
 
 
@@ -737,8 +739,7 @@ inline void Argb32Pixel::assign(const Argb32Color* colors, std::size_t length)
 
 inline void Argb32Pixel::fill(std::size_t n, const Argb32Color& color)
 {
-    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
-    Argb32::sourceCopy(base(), n, p);
+    Argb32::sourceCopy(base(), n, color);
 }
 
 
@@ -751,8 +752,7 @@ inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::Color& color)
 
 inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Color& color)
 { 
-    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( color.value() );
-    Argb32::sourceCopy(base(), p);
+    Argb32::sourceCopy(base(), color);
     return *this;
 }
 
@@ -829,13 +829,13 @@ inline void Argb32Pixel::setBlue(Pt::uint8_t b)
 
 inline Argb32Color Argb32Pixel::toColor() const
 {
-    return Argb32Color(*base());
+    return Argb32Color( base() );
 }
 
 
 inline Argb32Color Argb32ConstPixel::toColor() const
 {
-    return Argb32Color(*base());
+    return Argb32Color( base() );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -905,34 +905,27 @@ inline void Argb32ConstPixel::reset(const Argb32Pixel& p)
 
 inline void Argb32ConstPixel::advance()
 {
-    _base += 4;
+    _base = Argb32::advance(*_view, _base);
 }
 
 
 inline void Argb32ConstPixel::advanceLine()
 {
-    _base +=_view->padding();
+    _base = Argb32::advanceLine(*_view, _base);
 }
 
 
 inline void Argb32ConstPixel::advance(Pt::ssize_t n)
 {
-    //Pt::ssize_t off = _x + n;
-
-    //std::size_t dy = off / _view->width();
-    //std::size_t dx = off % _view->width() - _x;
-
-    //_x += dx;
-    //_base += dy * _view->stride() + dx * 4;
-
-    _base += n * 4;
+    _base = Argb32::advance(*_view, _base, n);
 }
 
 
 inline void Argb32ConstPixel::advanceLines(Pt::ssize_t n)
 {
-    _base += n * _view->stride();
+    _base = Argb32::advanceLines(*_view, _base, n);
 }
+
 
 
 inline void Argb32ConstPixel::getColors(Argb32Color* colors, std::size_t length) const

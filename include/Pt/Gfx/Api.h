@@ -30,6 +30,7 @@
 #define PT_GFX_API_H
 
 #include <Pt/Api.h>
+#include <cstddef>
 
 #define PT_GFX_VERSION_MAJOR 1
 #define PT_GFX_VERSION_MINOR 3
@@ -53,6 +54,9 @@ namespace Pt {
 */
 namespace Gfx {
 
+typedef float Float;
+typedef std::ptrdiff_t Int;
+
 class Canvas;
 class Paint;
 class Painter;
@@ -62,8 +66,14 @@ class PaintSurface;
 // Images and views
 //
 
+class Color;
+class Argb32Color;
+
 template <typename FormatT>
 struct ImageTraits;
+
+template <typename PixelT>
+struct PixelTraits;
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicImage;
@@ -86,11 +96,24 @@ class BasicLineView;
 template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicConstLineView;
 
+template <typename FormatT, typename TraitsT>
+class BasicSpan; 
+
+template <typename FormatT, typename TraitsT>
+class BasicConstSpan;
+
 //
 // Generic images
 //
 
 class ImageFormat;
+
+template <typename ColorT>
+class Pixel;
+
+template <typename ColorT>
+class ConstPixel;
+
 struct ColorImageTraits;
 struct ColorFormatTraits;
 
@@ -116,11 +139,19 @@ typedef BasicLineView<ImageFormat, ColorFormatTraits> ColorLineView;
 
 typedef BasicConstLineView<ImageFormat, ColorFormatTraits> ConstColorLineView;
 
+typedef BasicSpan< ImageFormat, 
+                   PixelTraits<Pixel<Argb32Color> > > ImageSpan;
+
+typedef BasicConstSpan<ImageFormat, 
+                       PixelTraits<ConstPixel<Argb32Color> > > ConstImageSpan;
+
 //
 // ARGB-32
 //
 
 class Argb32;
+class Argb32Pixel;
+class Argb32ConstPixel;
 
 /** @brief ARGB-32 image.
 */
@@ -145,6 +176,14 @@ typedef BasicLineView<Argb32> Argb32LineView;
 /** @brief ARGB-32 const line view.
 */
 typedef BasicConstLineView<Argb32> Argb32ConstLineView;
+
+/** @brief ARGB-32 span.
+*/
+typedef BasicSpan<Argb32, PixelTraits<Argb32Pixel> > Argb32Span;
+
+/** @brief ARGB-32 const span.
+*/
+typedef BasicConstSpan<Argb32, PixelTraits<Argb32Pixel> > Argb32ConstSpan;
 
 } // namespace
 

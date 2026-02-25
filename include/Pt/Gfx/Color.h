@@ -122,14 +122,19 @@ class Argb32Color
             _value = (_value & 0xFFFFFF00) | uint32_t(b);
         }
 
-        const uint32_t* value() const
+        const uint32_t& value() const
         {
-            return &_value;
+            return _value;
         }
 
     private:
         Pt::uint32_t _value;
 };
+
+inline bool operator==(const Argb32Color& a, const Argb32Color b)
+{
+    return a.value() == b.value();
+}
 
 /** High precision color type
 */

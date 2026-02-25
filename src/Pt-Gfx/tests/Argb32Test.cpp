@@ -49,6 +49,7 @@ class Argb32Test : public Pt::Unit::TestSuite
         Argb32Test()
         : Pt::Unit::TestSuite("Argb32Test")
         {
+            registerMethod("A_SubView",*this, &Argb32Test::SubView);
             registerMethod("Pixel",*this, &Argb32Test::Pixel);
             registerMethod("Iterator",*this, &Argb32Test::Iterator);
             registerMethod("Color",*this, &Argb32Test::Color);
@@ -82,6 +83,29 @@ class Argb32Test : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUAL(r, 0x13);
             PT_UNIT_ASSERT_EQUAL(g, 0x14);
             PT_UNIT_ASSERT_EQUAL(b, 0x15);
+        }
+
+        void SubView()
+        {
+            using namespace Pt::Gfx;
+
+            Argb32Image image(8, 8, 4);
+            Argb32LineView subView(image, 1, 1, 2, 2);
+            Argb32LineView::Iterator line = subView.begin();
+            
+            Argb32Span::Iterator pixel = line->begin();
+            *pixel   = Argb32Color(0x11111111);
+            *++pixel = Argb32Color(0x22222222);
+
+            ++line;
+            pixel = line->begin();
+            *pixel = Argb32Color(0x33333333);
+            *++pixel = Argb32Color(0x44444444);
+
+            Argb32PixelView pixelView(image);
+            Argb32PixelView::Iterator pixel2 = pixelView.pixel(2, 2);
+            Argb32Color color = pixel2->toColor();
+            PT_UNIT_ASSERT(color == Argb32Color(0x44444444));
         }
 
         void Iterator()
@@ -201,7 +225,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < 1000; ++n)
             {
                 Argb32Image image(width, height);
                 
