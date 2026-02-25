@@ -211,6 +211,13 @@ class PT_GFX_API Argb32 final : public ImageFormat
         typedef Argb32Color ColorType;
 
     public:
+        static const Argb32& get()
+        {
+            static Argb32 _argb32;
+            return _argb32;
+        }
+
+    public:
         Argb32()
         : ImageFormat(PixelWidth)
         { }

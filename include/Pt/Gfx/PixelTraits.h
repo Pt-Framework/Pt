@@ -95,7 +95,7 @@ void convert(const P1& p1, P2& p2)
 template <typename P1, typename P2> 
 void copyPixelImpl(const P1& p1, P2& p2, FalseType)
 {
-    p2 = p1->toColor();
+    p2 = p1.toColor();
 }
 
 

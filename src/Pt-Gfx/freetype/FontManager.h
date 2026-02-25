@@ -35,6 +35,7 @@
 #include FT_CACHE_H
 
 #include <Pt/Types.h>
+#include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>

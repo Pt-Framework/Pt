@@ -48,12 +48,6 @@ class BasicLineIterator;
 template <typename FormatT, typename TraitsT>
 class BasicConstLineIterator;
 
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicLineView; 
-
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicConstLineView;
-
 
 template <typename FormatT, typename TraitsT>
 class BasicLineIterator
@@ -213,13 +207,11 @@ class BasicLineView : public BasicView<FormatT>
 
         explicit BasicLineView(BasicView<FormatT>& view);
 
-        explicit BasicLineView(BasicImage<FormatT, TraitsT>& image);
-
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicLineView(BasicImage<OtherFormatT, OtherTraitsT>& image);
 
-        Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return Iterator(*this, x, y); }
+        Iterator line(Pt::ssize_t y)
+        { return Iterator(*this, 0, y); }
 
         Iterator begin()
         { return Iterator(*this, 0, 0); }
@@ -227,8 +219,8 @@ class BasicLineView : public BasicView<FormatT>
         Iterator end()
         { return Iterator(*this, 0, this->height()); }
 
-        ConstIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return ConstIterator(*this, x, y); }
+        ConstIterator line(Pt::ssize_t y) const
+        { return ConstIterator(*this, 0, y); }
 
         ConstIterator begin() const
         { return ConstIterator(*this, 0, 0); }
@@ -257,13 +249,11 @@ class BasicConstLineView : public BasicConstView<FormatT>
         : BasicConstView<FormatT>(format)
         { }
 
-        explicit BasicConstLineView(const BasicView<FormatT>& view);
+        template <typename OtherFormatT>
+        explicit BasicConstLineView(const BasicView<OtherFormatT>& view);
 
-        explicit BasicConstLineView(const BasicConstView<FormatT>& view);
-
-        explicit BasicConstLineView(const BasicImage<FormatT>& image);
-
-        explicit BasicConstLineView(const BasicConstImage<FormatT>& image);
+        template <typename OtherFormatT>
+        explicit BasicConstLineView(const BasicConstView<OtherFormatT>& view);
 
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image);
@@ -271,8 +261,8 @@ class BasicConstLineView : public BasicConstView<FormatT>
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image);
 
-        Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return Iterator(*this, x, y); }
+        Iterator line(Pt::ssize_t y)
+        { return Iterator(*this, 0, y); }
 
         Iterator begin()
         { return Iterator(*this, 0, 0); }

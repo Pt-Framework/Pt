@@ -50,20 +50,20 @@ Image::Image(const Image& image)
 
 
 Image::Image(const ImageFormat& format)
-: BasicImage(format, 0, 0)
+: BasicImage(format)
 {
 }
 
 Image::Image(const ImageFormat& format, 
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
-: BasicImage(format, width, height, padding)
+: BasicImage(width, height, padding, format)
 {
 }
 
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* data,
              Pt::ssize_t width, Pt::ssize_t height, size_t padding)
-: BasicImage(format, data, width, height, padding)
+: BasicImage(data, width, height, padding, format)
 {
 }
 
@@ -83,40 +83,40 @@ const Image& Image::operator=(const Image& image)
 // ConstImage
 ///////////////////////////////////////////////////////////////////////
 
-ConstImage::ConstImage()
-: BasicConstImage( ImageFormat::argb32() )
-{
-}
-
-
-ConstImage::ConstImage(const ConstImage& image)
-: BasicConstImage(image)
-{
-}
-
-
-ConstImage::ConstImage(const Image& image)
-: BasicConstImage( image )
-{
-}
-
-
-ConstImage::ConstImage(const ImageFormat& format)
-: BasicConstImage(format)
-{
-}
-
-
-ConstImage::ConstImage(const ImageFormat& format, const Pt::uint8_t* data,
-                       Pt::ssize_t width, Pt::ssize_t height, size_t padding)
-: BasicConstImage(format, data, width, height, padding)
-{
-}
-
-
-ConstImage::~ConstImage()
-{
-}
+//ConstImage::ConstImage()
+//: BasicConstImage( ImageFormat::argb32() )
+//{
+//}
+//
+//
+//ConstImage::ConstImage(const ConstImage& image)
+//: BasicConstImage(image)
+//{
+//}
+//
+//
+//ConstImage::ConstImage(const Image& image)
+//: BasicConstImage( image )
+//{
+//}
+//
+//
+//ConstImage::ConstImage(const ImageFormat& format)
+//: BasicConstImage(format)
+//{
+//}
+//
+//
+//ConstImage::ConstImage(const ImageFormat& format, const Pt::uint8_t* data,
+//                       Pt::ssize_t width, Pt::ssize_t height, size_t padding)
+//: BasicConstImage(format, data, width, height, padding)
+//{
+//}
+//
+//
+//ConstImage::~ConstImage()
+//{
+//}
 
 } // namespace
 

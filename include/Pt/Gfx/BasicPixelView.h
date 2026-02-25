@@ -47,12 +47,6 @@ class BasicPixelIterator;
 template <typename FormatT, typename TraitsT>
 class BasicConstPixelIterator;
 
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicPixelView; 
-
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicConstPixelView;
-
 //
 // TODO GFX: PositionIterator with x/y, PixelIterator without
 //
@@ -285,8 +279,6 @@ class BasicPixelView : public BasicView<FormatT>
         : BasicView<FormatT>(format)
         { }
 
-        explicit BasicPixelView(BasicImage<FormatT, TraitsT>& image);
-
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicPixelView(BasicImage<OtherFormatT, OtherTraitsT>& image);
 
@@ -338,11 +330,11 @@ class BasicConstPixelView : public BasicConstView<FormatT>
         : BasicConstView<FormatT>(format)
         { }
 
-        explicit BasicConstPixelView(const BasicView<FormatT>& view);
+        template <typename OtherFormatT>
+        explicit BasicConstPixelView(const BasicView<OtherFormatT>& view);
 
-        explicit BasicConstPixelView(const BasicImage<FormatT, TraitsT>& image);
-
-        explicit BasicConstPixelView(const BasicConstImage<FormatT, TraitsT>& image);
+        template <typename OtherFormatT>
+        explicit BasicConstPixelView(const BasicConstView<OtherFormatT>& view);
 
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image);

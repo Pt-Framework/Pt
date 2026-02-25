@@ -61,41 +61,24 @@ class PT_GFX_API Image : public BasicImage<ImageFormat>
         const Image& operator=(const Image& image);
 };
 
-/** @brief Generic const image.
-*/
-class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
-{
-    public:
-        ConstImage();
-
-        ConstImage(const ConstImage& image);
-
-        explicit ConstImage(const Image& image);
-
-        explicit ConstImage(const ImageFormat& format);
-
-        ConstImage(const ImageFormat& format, const Pt::uint8_t* buffer,
-                   Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
-
-        virtual ~ConstImage();
-};
-
-
-typedef BasicPixelView<ImageFormat> PixelView;
-
-typedef BasicConstPixelView<ImageFormat> ConstPixelView;
-
-typedef BasicPixelView<ImageFormat, ColorImageTraits> ColorPixelView;
-
-typedef BasicConstPixelView<ImageFormat, ColorImageTraits> ConstColorPixelView;
-
-typedef BasicLineView<ImageFormat> LineView;
-
-typedef BasicConstLineView<ImageFormat> ConstLineView;
-
-typedef BasicLineView<ImageFormat, ColorImageTraits> ColorLineView;
-
-typedef BasicConstLineView<ImageFormat, ColorImageTraits> ConstColorLineView;
+///** @brief Generic const image.
+//*/
+//class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
+//{
+//    public:
+//        ConstImage();
+//
+//        ConstImage(const ConstImage& image);
+//
+//        explicit ConstImage(const Image& image);
+//
+//        explicit ConstImage(const ImageFormat& format);
+//
+//        ConstImage(const ImageFormat& format, const Pt::uint8_t* buffer,
+//                   Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
+//
+//        virtual ~ConstImage();
+//};
 
 } // namespace
 

@@ -29,6 +29,7 @@
 #ifndef PT_GFX_BASIC_PIXEL_VIEW_HPP
 #define PT_GFX_BASIC_PIXEL_VIEW_HPP
 
+#include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
@@ -38,12 +39,6 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 // BasicPixelView
 ///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT, typename TraitsT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<FormatT, TraitsT>& image)
-: BasicView<FormatT>(image)
-{ }
-
 
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
@@ -57,22 +52,19 @@ inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT,
 ///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<FormatT>& view)
+template <typename OtherFormatT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT>& view)
 : BasicConstView<FormatT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<FormatT, TraitsT>& image)
-: BasicConstView<FormatT>(image)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<FormatT, TraitsT>& image)
-: BasicConstView<FormatT>(image)
-{ }
+template <typename OtherFormatT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT>& view)
+: BasicConstView<FormatT>(view)
+{
+}
 
 
 template <typename FormatT, typename TraitsT>

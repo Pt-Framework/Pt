@@ -42,8 +42,7 @@ namespace Gfx {
 template <typename FormatT>
 struct ImageTraits
 {
-    typedef typename FormatT::PixelType PixelType;
-    typedef typename FormatT::ConstPixelType ConstPixelType;
+    typedef ViewTraits<FormatT> ViewTraitsType;
 
     static std::size_t pixelStride(const FormatT& format)
     {
@@ -51,7 +50,7 @@ struct ImageTraits
     }
 
     static std::size_t imageSize(const FormatT& format, Pt::ssize_t width, Pt::ssize_t height,
-                          std::size_t padding)
+                                 std::size_t padding)
     {
         return format.imageSize(width, height, padding);
     }
@@ -63,11 +62,13 @@ struct ImageTraits
 };
 
 
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicImage;
-
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicConstImage;
+template <typename FormatT>
+struct ViewTraits
+{
+    typedef typename FormatT::ColorType ColorType;
+    typedef typename FormatT::PixelType PixelType;
+    typedef typename FormatT::ConstPixelType ConstPixelType;
+};
 
 } // namespace
 

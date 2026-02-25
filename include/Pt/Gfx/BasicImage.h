@@ -54,10 +54,10 @@ class BasicImage
         typedef Pt::ssize_t length_t;
 
     public:
-        BasicImage(const Format& format);
+        BasicImage( const Format& format = FormatT::get() );
 
-        BasicImage(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0)
+        BasicImage(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0, 
+                   const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(0)
         , _width(width)
@@ -68,8 +68,8 @@ class BasicImage
             _data = _buffer.empty() ? 0 : &_buffer[0];
         }
 
-        BasicImage(const Format& format, Pt::uint8_t* data, 
-                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0, const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(data)
         , _width(width)
@@ -219,7 +219,7 @@ class BasicConstImage
         typedef Pt::ssize_t length_t;
 
     public:
-        BasicConstImage(const Format& format)
+        BasicConstImage( const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(0)
         , _width(0)
@@ -227,8 +227,8 @@ class BasicConstImage
         , _padding(0)
         { }
 
-        BasicConstImage(const Format& format, const Pt::uint8_t* data, 
-                        Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
+        BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                        Pt::ssize_t padding = 0, const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(data)
         , _width(width)
@@ -332,17 +332,8 @@ class BasicConstImage
         Pt::ssize_t             _padding;
 };
 
-
-template <typename FormatT1, typename FormatT2,
-          typename TraitsT1, typename TraitsT2>
-void copy(const BasicImage<FormatT1, TraitsT1>& fromImage, 
-          BasicImage<FormatT2, TraitsT2>& toImage);
-
-
-template <typename FormatT1, typename FormatT2,
-          typename TraitsT1, typename TraitsT2>
-void copy(const BasicConstImage<FormatT1, TraitsT1>& from, 
-          BasicImage<FormatT2, TraitsT1>& to);
+template <typename ImageT1, typename ImageT2>
+void copyImage(const ImageT1& fromImage, ImageT2& toImage);
 
 // } // namespace
 

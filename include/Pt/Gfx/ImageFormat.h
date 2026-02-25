@@ -143,9 +143,7 @@ class ImageFormat
 template <>
 struct ImageTraits<ImageFormat>
 {
-    typedef Argb32Color ColorType;
-    typedef Pixel<Argb32Color> PixelType;
-    typedef ConstPixel<Argb32Color> ConstPixelType;
+    typedef ViewTraits<ImageFormat> ViewTraitsType;
 
     static std::size_t pixelStride(const ImageFormat& format)
     {
@@ -167,9 +165,7 @@ struct ImageTraits<ImageFormat>
 
 struct ColorImageTraits
 {
-    typedef Color ColorType;
-    typedef Pixel<Color> PixelType;
-    typedef ConstPixel<Color> ConstPixelType;
+    typedef ColorFormatTraits ViewTraitsType;
 
     static std::size_t pixelStride(const ImageFormat& format)
     {
@@ -186,6 +182,23 @@ struct ColorImageTraits
     {
         return format.onClone();
     }
+};
+
+
+template <>
+struct ViewTraits<ImageFormat>
+{
+    typedef Argb32Color ColorType;
+    typedef Pixel<Argb32Color> PixelType;
+    typedef ConstPixel<Argb32Color> ConstPixelType;
+};
+
+
+struct ColorFormatTraits
+{
+    typedef Color ColorType;
+    typedef Pixel<Color> PixelType;
+    typedef ConstPixel<Color> ConstPixelType;
 };
 
 ///////////////////////////////////////////////////////////////////////

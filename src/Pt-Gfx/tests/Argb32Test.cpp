@@ -30,9 +30,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Algorithm.h>
-
 #include <Pt/System/Clock.h>
-
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
@@ -149,14 +147,15 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             std::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
 
-            //copy(cimage, image);
-            //copy(cimage, argb32Image);
-            //copy(cargb32Image, image);
+            copyImage(image, image);
+            copyImage(cimage, image);
+            copyImage(cimage, argb32Image);
+            copyImage(cargb32Image, image);
 
-            convert(*cpixelView.begin(), *pixelView.begin());
-            convert(*cpixelView.begin(), *argb32View.begin());
-            convert(*cargb32View.begin(), *pixelView.begin());
-            convert(*cargb32View.begin(), *argb32View.begin());
+            copyPixel(*cpixelView.begin(), *pixelView.begin());
+            copyPixel(*cpixelView.begin(), *argb32View.begin());
+            copyPixel(*cargb32View.begin(), *pixelView.begin());
+            copyPixel(*cargb32View.begin(), *argb32View.begin());
         }
 
         static const std::size_t width = 64;
@@ -280,7 +279,7 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
             
-            for(int n = 0; n < 2000; ++n)
+            for(int n = 0; n < 3000; ++n)
             {
                 Argb32Image fromImage(width, height);
                 Argb32PixelView fromView(fromImage);

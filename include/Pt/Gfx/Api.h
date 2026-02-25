@@ -58,6 +58,94 @@ class Paint;
 class Painter;
 class PaintSurface;
 
+//
+// Images and views
+//
+
+template <typename FormatT>
+struct ImageTraits;
+
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
+class BasicImage;
+
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
+class BasicConstImage;
+
+template <typename FormatT>
+struct ViewTraits;
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+class BasicPixelView; 
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+class BasicConstPixelView;
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+class BasicLineView; 
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+class BasicConstLineView;
+
+//
+// Generic images
+//
+
+class ImageFormat;
+struct ColorImageTraits;
+struct ColorFormatTraits;
+
+typedef BasicConstImage<ImageFormat> ConstImage;
+
+typedef BasicImage<ImageFormat, ColorImageTraits> ColorImage;
+
+typedef BasicConstImage<ImageFormat, ColorImageTraits> ConstColorImage;
+
+typedef BasicPixelView<ImageFormat> PixelView;
+
+typedef BasicConstPixelView<ImageFormat> ConstPixelView;
+
+typedef BasicPixelView<ImageFormat, ColorFormatTraits> ColorPixelView;
+
+typedef BasicConstPixelView<ImageFormat, ColorFormatTraits> ConstColorPixelView;
+
+typedef BasicLineView<ImageFormat> LineView;
+
+typedef BasicConstLineView<ImageFormat> ConstLineView;
+
+typedef BasicLineView<ImageFormat, ColorFormatTraits> ColorLineView;
+
+typedef BasicConstLineView<ImageFormat, ColorFormatTraits> ConstColorLineView;
+
+//
+// ARGB-32
+//
+
+class Argb32;
+
+/** @brief ARGB-32 image.
+*/
+typedef BasicImage<Argb32> Argb32Image;
+
+/** @brief ARGB-32 const image.
+*/
+typedef BasicConstImage<Argb32> Argb32ConstImage;
+
+/** @brief ARGB-32 pixel view.
+*/
+typedef BasicPixelView<Argb32> Argb32PixelView;
+
+/** @brief ARGB-32 const pixel view.
+*/
+typedef BasicConstPixelView<Argb32> Argb32ConstPixelView;
+
+/** @brief ARGB-32 line view.
+*/
+typedef BasicLineView<Argb32> Argb32LineView;
+
+/** @brief ARGB-32 const line view.
+*/
+typedef BasicConstLineView<Argb32> Argb32ConstLineView;
+
 } // namespace
 
 } // namespace

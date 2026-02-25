@@ -29,8 +29,6 @@
 #ifndef PT_GFX_BASIC_IMAGE_HPP
 #define PT_GFX_BASIC_IMAGE_HPP
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Types.h>
 #include <vector>
@@ -72,34 +70,50 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, T
 }
 
 
-template <typename FormatT1, typename FormatT2,
-          typename TraitsT1, typename TraitsT2>
-void copy(const BasicImage<FormatT1, TraitsT1>& fromImage, 
-          BasicImage<FormatT2, TraitsT2>& toImage)
+template <typename ImageT1, typename FormatT>
+void copyImage(const ImageT1& fromImage, BasicView<FormatT>& toImage)
 {
-    BasicLineView<FormatT2, TraitsT2> toLines(toImage);
+    typedef typename ImageT1::Format FormatT1;
+    typedef typename ImageT1::Traits ImageTraitsT1;
+    typedef typename ImageTraitsT1::ViewTraitsType ViewTraitsT1;
+    
+    //
+    // TODO GFX: BasicView needs ViewTraits
+    //
+    typedef FormatT FormatT2;
+    typedef typename ViewTraits<FormatT> ViewTraitsT2;
+
+    BasicLineView<FormatT2, ViewTraitsT2> toLines(toImage);
     auto to = toLines.begin();
 
-    BasicConstLineView<FormatT1, TraitsT1> fromLines(fromImage);
+    BasicConstLineView<FormatT1, ViewTraitsT1> fromLines(fromImage);
+
     for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
     {
-        copy(*from, to->begin());
+        copySpan(*from, *to);
     }
 }
 
 
-template <typename FormatT1, typename FormatT2,
-          typename TraitsT1, typename TraitsT2>
-void copy(const BasicConstImage<FormatT1, TraitsT1>& fromImage, 
-          BasicImage<FormatT2, TraitsT2>& toImage)
+template <typename ImageT1, typename ImageT2>
+void copyImage(const ImageT1& fromImage, ImageT2& toImage)
 {
-    BasicLineView<FormatT2, TraitsT2> toLines(toImage);
+    typedef typename ImageT1::Format FormatT1;
+    typedef typename ImageT1::Traits ImageTraitsT1;
+    typedef typename ImageTraitsT1::ViewTraitsType ViewTraitsT1;
+    
+    typedef typename ImageT2::Format FormatT2;
+    typedef typename ImageT2::Traits ImageTraitsT2;
+    typedef typename ImageTraitsT2::ViewTraitsType ViewTraitsT2;
+
+    BasicLineView<FormatT2, ViewTraitsT2> toLines(toImage);
     auto to = toLines.begin();
 
-    BasicConstLineView<FormatT1, TraitsT1> fromLines(fromImage);
+    BasicConstLineView<FormatT1, ViewTraitsT1> fromLines(fromImage);
+
     for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
     {
-        copySpan(*from, to->begin());
+        copySpan(*from, *to);
     }
 }
 

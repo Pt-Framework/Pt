@@ -30,6 +30,7 @@
 #define PT_GFX_LINE_VIEW_HPP
 
 #include <Pt/Gfx/BasicLineView.h>
+#include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
 
@@ -46,12 +47,6 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view)
 
 
 template <typename FormatT, typename TraitsT>
-inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<FormatT, TraitsT>& image)
-: BasicView<FormatT>(image)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFormatT, OtherTraitsT>& image)
 : BasicView<FormatT>(image)
@@ -63,29 +58,19 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFormatT, O
 ///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<FormatT>& view)
+template <typename OtherFormatT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT>& view)
 : BasicConstView<FormatT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<FormatT>& view)
+template <typename OtherFormatT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT>& view)
 : BasicConstView<FormatT>(view)
 {
 }
-
-
-template <typename FormatT, typename TraitsT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImage<FormatT>& image)
-: BasicConstView<FormatT>(image)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImage<FormatT>& image)
-: BasicConstView<FormatT>(image)
-{ }
 
 
 template <typename FormatT, typename TraitsT>

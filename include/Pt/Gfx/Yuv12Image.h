@@ -63,14 +63,14 @@ class Yuv12Image : public BasicImage<Yuv12>
         /** @brief Constructor.
         */
         Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage(Yuv12(), width, height, padding)
+        : BasicImage(width, height, padding, Yuv12())
         { }
 
         /** @brief Construct from external buffer.
         */
         Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                     size_t padding = 0)
-        : BasicImage(Yuv12(), data, width, height, padding)
+        : BasicImage(data, width, height, padding, Yuv12())
         { }
 };
 
@@ -101,11 +101,9 @@ class Yuv12ConstImage : public BasicConstImage<Yuv12>
         */
         Yuv12ConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                     size_t padding = 0)
-        : BasicConstImage(Yuv12(), data, width, height, padding)
+        : BasicConstImage(data, width, height, padding, Yuv12())
         { }
 };
-
-
 
 /** @brief YV-12 pixel view.
 */
