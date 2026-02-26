@@ -212,10 +212,10 @@ class BasicPixelView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraits;
+        typedef PixelTraits<Pixel> PixelTraitsType;
 
-        typedef BasicPixelIterator<Format, PixelTraits> Iterator;
-        typedef BasicConstPixelIterator<Format, PixelTraits> ConstIterator;
+        typedef BasicPixelIterator<Format, PixelTraitsType> Iterator;
+        typedef BasicConstPixelIterator<Format, PixelTraitsType> ConstIterator;
 
     public:
         explicit BasicPixelView(const Format& format = FormatT::get())
@@ -275,9 +275,9 @@ class BasicConstPixelView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraits;
+        typedef PixelTraits<Pixel> PixelTraitsType;
 
-        typedef BasicConstPixelIterator<Format, PixelTraits> Iterator;
+        typedef BasicConstPixelIterator<Format, PixelTraitsType> Iterator;
 
     public:
         explicit BasicConstPixelView(const Format& format)

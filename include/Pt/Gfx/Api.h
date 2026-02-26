@@ -228,7 +228,6 @@ typedef BasicConstSpan<Argb32, PixelTraits<Argb32ConstPixel> > Argb32ConstSpan;
 class Yuv12;
 class Yuv12Pixel;
 class Yuv12ConstPixel;
-
 /** @brief YUV-12 image.
 */
 typedef BasicImage<Yuv12> Yuv12Image;

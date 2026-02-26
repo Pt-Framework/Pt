@@ -127,7 +127,7 @@ inline bool Yuv12PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
     if( typeid(p) == typeid(Yuv12PixelBase) )
     {
-        Yuv12PixelBase* yuv12 = static_cast<Yuv12PixelBase*>(&p);
+        //Yuv12PixelBase* yuv12 = static_cast<Yuv12PixelBase*>(&p);
         return true;
     }
 

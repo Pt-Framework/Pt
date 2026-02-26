@@ -195,13 +195,13 @@ class BasicLineView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraits;
+        typedef PixelTraits<Pixel> PixelTraitsType;
 
-        typedef BasicLineIterator<Format, PixelTraits> Iterator;
-        typedef BasicConstLineIterator<Format, PixelTraits> ConstIterator;
+        typedef BasicLineIterator<Format, PixelTraitsType> Iterator;
+        typedef BasicConstLineIterator<Format, PixelTraitsType> ConstIterator;
 
-        typedef BasicSpan<Format, PixelTraits> Span;
-        typedef BasicConstSpan<Format, PixelTraits> ConstSpan;
+        typedef BasicSpan<Format, PixelTraitsType> Span;
+        typedef BasicConstSpan<Format, PixelTraitsType> ConstSpan;
 
     public:
         explicit BasicLineView(const Format& format)
@@ -250,9 +250,9 @@ class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraits;
+        typedef PixelTraits<Pixel> PixelTraitsType;
 
-        typedef BasicConstLineIterator<Format, PixelTraits> Iterator;
+        typedef BasicConstLineIterator<Format, PixelTraitsType> Iterator;
 
     public:
         explicit BasicConstLineView(const Format& format)

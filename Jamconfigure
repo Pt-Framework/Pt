@@ -25,6 +25,11 @@ ConfigureCc ;
 # configure basic C++ compiler
 ConfigureC++ ;
 
+if $(TOOLSET) = gcc
+{
+  WARN += -Wno-psabi ;
+}
+
 #############################################################################
 # Output directories used by MakeLocate and SubDirObjects
 #############################################################################

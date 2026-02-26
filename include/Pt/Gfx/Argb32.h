@@ -414,7 +414,7 @@ inline Argb32Color Argb32::getArgb32Color(const Pt::uint8_t* p)
 
 inline void Argb32::getColors(const Pt::uint8_t* p, Color* colors, std::size_t n)
 {
-    for(int i = 0; i < n; ++i)
+    for(std::size_t i = 0; i < n; ++i)
     {
         colors[i] = getColor(p);
         p += PixelWidth;
@@ -424,7 +424,8 @@ inline void Argb32::getColors(const Pt::uint8_t* p, Color* colors, std::size_t n
 
 inline void Argb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n)
 {
-    std::memcpy(colors, p, n * PixelWidth);
+    void* cp = reinterpret_cast<void*>(colors); 
+    std::memcpy(cp, p, n * PixelWidth);
 }
 
 //
@@ -489,7 +490,7 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::ui
 
 inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color* colors, std::size_t length)
 {          
-    for(int n = 0; n < length; ++n)
+    for(std::size_t n = 0; n < length; ++n)
     {
         Argb32::sourceCopy( to, 1, colors[n] );
         to += Argb32::PixelWidth;

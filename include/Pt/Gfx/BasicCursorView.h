@@ -269,10 +269,10 @@ class BasicCursorView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraits;
+        typedef PixelTraits<Pixel> PixelTraitsType;
 
-        typedef BasicCursorIterator<Format, PixelTraits> Iterator;
-        typedef BasicConstCursorIterator<Format, PixelTraits> ConstIterator;
+        typedef BasicCursorIterator<Format, PixelTraitsType> Iterator;
+        typedef BasicConstCursorIterator<Format, PixelTraitsType> ConstIterator;
 
     public:
         explicit BasicCursorView(const Format& format = FormatT::get())
@@ -332,9 +332,9 @@ class BasicConstCursorView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraits;
+        typedef PixelTraits<Pixel> PixelTraitsType;
 
-        typedef BasicConstCursorIterator<Format, PixelTraits> Iterator;
+        typedef BasicConstCursorIterator<Format, PixelTraitsType> Iterator;
 
     public:
         explicit BasicConstCursorView(const Format& format)
