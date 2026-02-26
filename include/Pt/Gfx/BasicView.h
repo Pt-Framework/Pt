@@ -159,6 +159,10 @@ class BasicConstView : public ViewBase
         const Format*       _format;
 };
 
+
+template <typename From, typename To>
+void copyArea(const From& from, To& to);
+
 } // namespace
 
 } // namespace

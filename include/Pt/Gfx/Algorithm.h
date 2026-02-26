@@ -38,6 +38,10 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// Generic algorithms
+///////////////////////////////////////////////////////////////////////
+
 template<typename InputIteratorT, typename OutputIteratorT>
 void copy(InputIteratorT from, InputIteratorT fromEnd, OutputIteratorT to)
 {
@@ -144,7 +148,7 @@ void copyPixel(const P1& p1, P2& p2)
 ///////////////////////////////////////////////////////////////////////
 
 template <typename P1, typename P2> 
-void copyPixelsImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
+void copyLineImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
 {
     typedef typename PixelTraits<P2>::ColorType ColorType;
 
@@ -170,19 +174,19 @@ void copyPixelsImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
 
 
 template <typename P1, typename P2> 
-void copyPixelsImpl(const P1& p1, P2& p2, std::size_t length, TrueType)
+void copyLineImpl(const P1& p1, P2& p2, std::size_t length, TrueType)
 {
     p2.assign(p1, length);
 }
 
 
 template <typename P1, typename P2> 
-void copyPixels(const P1& p1, P2& p2, std::size_t length)
+void copyLine(const P1& p1, P2& p2, std::size_t length)
 {
     typedef typename PixelTraits<P1>::FormatType Fmt1;
     typedef typename PixelTraits<P2>::FormatType Fmt2;
 
-    copyPixelsImpl(p1, p2, length, IsSame<Fmt1, Fmt2>());
+    copyLineImpl(p1, p2, length, IsSame<Fmt1, Fmt2>());
 }
 
 } // namespace

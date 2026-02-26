@@ -229,7 +229,7 @@ inline void BasicConstView<FormatT, TraitsT>::reset(const BasicConstImage<F, T>&
 
 
 template <typename LineIter1, typename LineIter2>
-void copyLines(LineIter1& from, LineIter1& fromEnd, LineIter2& to)
+void copyAreaImpl(LineIter1& from, LineIter1& fromEnd, LineIter2& to)
 {
     while(from != fromEnd)
     {
@@ -241,31 +241,31 @@ void copyLines(LineIter1& from, LineIter1& fromEnd, LineIter2& to)
 
 
 template <typename Fmt, typename Tr, typename ViewT>
-void copyLines(const BasicLineView<Fmt, Tr>& from, ViewT to)
+void copyAreaImpl(const BasicLineView<Fmt, Tr>& from, ViewT to)
 {
     typename BasicLineView<Fmt, Tr>::ConstIterator fromIter = from.begin();
     typename BasicLineView<Fmt, Tr>::ConstIterator fromEnd = from.end();
     typename ViewT::Iterator toIter = to.begin();
     
-    copyLines(fromIter, fromEnd, toIter);
+    copyAreaImpl(fromIter, fromEnd, toIter);
 }
 
 
 template <typename Fmt, typename Tr, typename ViewT>
-void copyLines(const BasicConstLineView<Fmt, Tr>& from, ViewT to)
+void copyAreaImpl(const BasicConstLineView<Fmt, Tr>& from, ViewT to)
 {
     typename BasicConstLineView<Fmt, Tr>::Iterator fromIter = from.begin();
     typename BasicConstLineView<Fmt, Tr>::Iterator fromEnd = from.end();
     typename ViewT::Iterator toIter = to.begin();
     
-    copyLines(fromIter, fromEnd, toIter);
+    copyAreaImpl(fromIter, fromEnd, toIter);
 }
 
 
 template <typename From, typename To>
 void copyArea(const From& from, To& to)
 {
-    copyLines( lineView(from), lineView(to) );
+    copyAreaImpl( lineView(from), lineView(to) );
 }
 
 } // namespace

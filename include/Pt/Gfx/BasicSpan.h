@@ -268,14 +268,14 @@ class BasicConstSpan
 template <typename SpanT, typename FormatT, typename TraitsT>
 void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to)
 {
-    copyPixels(from.front(), *to, from.length());
+    copyLine(from.front(), *to, from.length());
 }
 
 
 template <typename SpanT, typename FormatT, typename TraitsT>
 void copySpan(const SpanT& from, BasicSpan<FormatT, TraitsT>& to)
 {
-    copyPixels(from.front(), to.front(), from.length());
+    copyLine(from.front(), to.front(), from.length());
 }
 
 } // namespace
