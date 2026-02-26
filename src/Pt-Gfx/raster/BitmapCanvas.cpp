@@ -223,7 +223,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
     
     _penBuffer.reset(_image->format(), 64, 1);
 
-    Gfx::PixelView fillView(_penBuffer);
+    Gfx::CursorView fillView(_penBuffer);
     Gfx::fill( fillView.begin(), fillView.end(), pen.color() );
 
     _penView = ConstPixelView(_penBuffer);
@@ -265,9 +265,8 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
                                     brush.texture().width(), brush.texture().height() );
                 _brushView = ConstPixelView(_brushBuffer);
 
-                Gfx::ConstPixelView textureView( brush.texture() );
-                Gfx::PixelView brushView(_brushBuffer);
-
+                Gfx::ConstCursorView textureView( brush.texture() );
+                Gfx::CursorView brushView(_brushBuffer);
                 Gfx::copy( textureView.begin(), textureView.end(), brushView.begin() );
             }
             else

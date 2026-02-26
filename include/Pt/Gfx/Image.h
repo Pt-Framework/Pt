@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicCursorView.h>
 #include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Gfx/BasicImage.h>
 

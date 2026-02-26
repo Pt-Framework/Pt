@@ -55,6 +55,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Color",*this, &Argb32Test::Color);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
+            registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
             registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
             registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
             registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
@@ -180,6 +181,40 @@ class Argb32Test : public Pt::Unit::TestSuite
         static const std::size_t width = 64;
         static const std::size_t height = 10000;
 
+        void BenchmarkCursor()
+        {
+            using namespace Pt::Gfx;
+           
+            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
+
+            for(int n = 0; n < 10; ++n)
+            {
+                Argb32 format;
+                Image image(format, width, height);
+                
+                CursorView cursorView(image);
+                CursorView::Iterator it = cursorView.begin();
+                CursorView::Iterator end = cursorView.end();
+
+                CursorView ccursorView(image);
+                CursorView::Iterator pfrom = ccursorView.begin();
+
+                Pt::System::Clock clock;
+                clock.start();
+
+                for( ; it != end; ++it)
+                {
+                    copyPixel(*pfrom, *it);
+                }
+
+                Pt::uint64_t time = clock.stop().toUSecs();
+                if(time < best)
+                    best = time;
+            }
+
+            std::clog << "GENERIC CURSOR: " << (width * height) / double(best) << std::endl;
+        }
+
         void Benchmark()
         {
             using namespace Pt::Gfx;
@@ -211,7 +246,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC PIXEL: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkRaw()

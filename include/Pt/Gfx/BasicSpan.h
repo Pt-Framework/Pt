@@ -278,31 +278,6 @@ void copySpan(const SpanT& from, BasicSpan<FormatT, TraitsT>& to)
     copyPixels(from.front(), to.front(), from.length());
 }
 
-
-//template <typename SpanT, typename FormatT, typename TraitsT>
-//void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to);
-//
-//
-//template <typename Fmt, typename Tr1, typename Tr2>
-//void copySpan(const BasicSpan<Fmt, Tr1>& from, BasicPixelIterator<Fmt, Tr2>& to)
-//{
-//    to->assign( from.front(), from.length() );
-//}
-//
-//
-//template <typename Fmt, typename Tr1, typename Tr2>
-//void copySpan(const BasicConstSpan<Fmt, Tr1>& from, BasicPixelIterator<Fmt, Tr2>& to)
-//{
-//    to->assign( from.front(), from.length() );
-//}
-
-
-//template <typename SpanT, typename SpanT2>
-//void copySpan(const SpanT& from, SpanT2& to)
-//{
-//    copySpan( from, to.begin() );
-//}
-
 } // namespace
 
 } // namespace

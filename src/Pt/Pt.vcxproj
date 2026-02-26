@@ -72,6 +72,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicCursorView.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\BasicCursorView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicLineView.h" />

@@ -97,6 +97,12 @@ template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicConstPixelView;
 
 template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+class BasicCursorView; 
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+class BasicConstCursorView;
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicLineView; 
 
 template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
@@ -136,6 +142,14 @@ typedef BasicConstPixelView<ImageFormat> ConstPixelView;
 typedef BasicPixelView<ImageFormat, ColorFormatTraits> ColorPixelView;
 
 typedef BasicConstPixelView<ImageFormat, ColorFormatTraits> ConstColorPixelView;
+
+typedef BasicCursorView<ImageFormat> CursorView;
+
+typedef BasicConstCursorView<ImageFormat> ConstCursorView;
+
+typedef BasicCursorView<ImageFormat, ColorFormatTraits> ColorCursorView;
+
+typedef BasicConstCursorView<ImageFormat, ColorFormatTraits> ConstColorCursorView;
 
 typedef BasicLineView<ImageFormat> LineView;
 
@@ -182,6 +196,14 @@ typedef BasicPixelView<Argb32> Argb32PixelView;
 /** @brief ARGB-32 const pixel view.
 */
 typedef BasicConstPixelView<Argb32> Argb32ConstPixelView;
+
+/** @brief ARGB-32 cursor view.
+*/
+typedef BasicCursorView<Argb32> Argb32CursorView;
+
+/** @brief ARGB-32 const cursor view.
+*/
+typedef BasicConstCursorView<Argb32> Argb32ConstCursorView;
 
 /** @brief ARGB-32 line view.
 */
@@ -230,6 +252,14 @@ typedef BasicPixelView<Yuv12> Yuv12PixelView;
 /** @brief YUV-12 const pixel view.
 */
 typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
+
+/** @brief YUV-12 cursor view.
+*/
+typedef BasicCursorView<Yuv12> Yuv12CursorView;
+
+/** @brief YUV-12 const cursor view.
+*/
+typedef BasicConstCursorView<Yuv12> Yuv12ConstCursorView;
 
 /** @brief YUV-12 line view.
 */
