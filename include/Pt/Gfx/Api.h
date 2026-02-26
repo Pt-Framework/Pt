@@ -72,43 +72,40 @@ class Argb32Color;
 template <typename FormatT>
 struct ImageTraits;
 
-template <typename FormatT>
-struct ViewTraits;
-
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicImage;
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstImage;
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT>>
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT>>
 class BasicView; 
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT>>
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT>>
 class BasicConstView;
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicPixelView; 
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstPixelView;
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicCursorView; 
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstCursorView;
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicLineView; 
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstLineView;
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicSpan; 
 
-template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstSpan;
 
 //
@@ -124,7 +121,6 @@ template <typename ColorT>
 class ConstPixel;
 
 struct ColorImageTraits;
-struct ColorFormatTraits;
 
 typedef BasicConstImage<ImageFormat> ConstImage;
 
@@ -136,25 +132,25 @@ typedef BasicPixelView<ImageFormat> PixelView;
 
 typedef BasicConstPixelView<ImageFormat> ConstPixelView;
 
-typedef BasicPixelView<ImageFormat, ColorFormatTraits> ColorPixelView;
+typedef BasicPixelView<ImageFormat, ColorImageTraits> ColorPixelView;
 
-typedef BasicConstPixelView<ImageFormat, ColorFormatTraits> ConstColorPixelView;
+typedef BasicConstPixelView<ImageFormat, ColorImageTraits> ConstColorPixelView;
 
 typedef BasicCursorView<ImageFormat> CursorView;
 
 typedef BasicConstCursorView<ImageFormat> ConstCursorView;
 
-typedef BasicCursorView<ImageFormat, ColorFormatTraits> ColorCursorView;
+typedef BasicCursorView<ImageFormat, ColorImageTraits> ColorCursorView;
 
-typedef BasicConstCursorView<ImageFormat, ColorFormatTraits> ConstColorCursorView;
+typedef BasicConstCursorView<ImageFormat, ColorImageTraits> ConstColorCursorView;
 
 typedef BasicLineView<ImageFormat> LineView;
 
 typedef BasicConstLineView<ImageFormat> ConstLineView;
 
-typedef BasicLineView<ImageFormat, ColorFormatTraits> ColorLineView;
+typedef BasicLineView<ImageFormat, ColorImageTraits> ColorLineView;
 
-typedef BasicConstLineView<ImageFormat, ColorFormatTraits> ConstColorLineView;
+typedef BasicConstLineView<ImageFormat, ColorImageTraits> ConstColorLineView;
 
 typedef BasicSpan<ImageFormat> ImageSpan;
 

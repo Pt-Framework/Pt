@@ -70,16 +70,16 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, T
 
 
 template <typename Fmt, typename Tr>
-BasicLineView<Fmt, typename Tr::ViewTraitsType> lineView(BasicImage<Fmt, Tr>& image) 
+BasicLineView<Fmt> lineView(BasicImage<Fmt, Tr>& image) 
 {
-    return BasicLineView<Fmt, typename Tr::ViewTraitsType>(image);
+    return BasicLineView<Fmt, Tr>(image);
 }
 
 
 template <typename Fmt, typename Tr>
-BasicConstLineView<Fmt, typename Tr::ViewTraitsType> lineView(const BasicImage<Fmt, Tr>& image) 
+BasicConstLineView<Fmt> lineView(const BasicImage<Fmt, Tr>& image) 
 {
-    return BasicConstLineView<Fmt, typename Tr::ViewTraitsType>(image);
+    return BasicConstLineView<Fmt, Tr>(image);
 }
 
 } // namespace

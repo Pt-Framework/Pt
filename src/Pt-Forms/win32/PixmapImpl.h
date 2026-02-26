@@ -33,7 +33,7 @@
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/PaintSurface.h>
 
-//#define PT_FORMS_WIN32_RASTER 1
+#define PT_FORMS_WIN32_RASTER 1
 //#define PT_FORMS_GDIPLUS 1
 
 #ifdef PT_FORMS_WIN32_RASTER

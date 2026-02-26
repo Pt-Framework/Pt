@@ -272,7 +272,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 #ifdef PT_FORMS_WIN32_RASTER
     const Pt::Gfx::Image& image = pixmap().impl()->bitmap().image();
     
-    const size_t depth = pixelStride(image.format()) * 8;
+    const size_t depth = image.pixelStride() * 8;
     const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);

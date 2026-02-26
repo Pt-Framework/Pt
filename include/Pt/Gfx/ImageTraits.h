@@ -42,7 +42,9 @@ namespace Gfx {
 template <typename FormatT>
 struct ImageTraits
 {
-    typedef ViewTraits<FormatT> ViewTraitsType;
+    typedef typename FormatT::ColorType ColorType;
+    typedef typename FormatT::PixelType PixelType;
+    typedef typename FormatT::ConstPixelType ConstPixelType;
 
     static std::size_t pixelStride(const FormatT& format)
     {
@@ -59,15 +61,6 @@ struct ImageTraits
     {
         return std::unique_ptr<FormatT>( new FormatT(format) );
     }
-};
-
-
-template <typename FormatT>
-struct ViewTraits
-{
-    typedef typename FormatT::ColorType ColorType;
-    typedef typename FormatT::PixelType PixelType;
-    typedef typename FormatT::ConstPixelType ConstPixelType;
 };
 
 } // namespace

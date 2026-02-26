@@ -46,9 +46,6 @@ class BasicPixelIterator;
 template <typename FormatT, typename TraitsT>
 class BasicConstPixelIterator;
 
-//
-// TODO GFX: PositionIterator with x/y, PixelIterator without
-//
 
 template <typename FormatT, typename TraitsT>
 class BasicPixelIterator
