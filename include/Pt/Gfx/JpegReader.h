@@ -36,8 +36,6 @@ namespace Pt {
 
 namespace Gfx {
 
-class Image;
-
 // TODO: ImageIOHandler used by ImageReader and ImageWriter
 
 /** @brief Reader for JPEG images.

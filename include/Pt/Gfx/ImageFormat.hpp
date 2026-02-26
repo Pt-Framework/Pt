@@ -98,51 +98,45 @@ inline void Pixel<ColorT>::reset(const Pixel& p)
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Color& color)
+inline void Pixel<ColorT>::assign(const Color& color)
 {
     _pixel->assign(color);
-    return *this;
 }
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Argb32Color& color)
+inline void Pixel<ColorT>::assign(const Argb32Color& color)
 {
     _pixel->assign(color);
-    return *this;
 }
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Color>& p)
+inline void Pixel<ColorT>::assign(const Pixel<Color>& p)
 {
    
     _pixel->assign( p.toColor() );
-    return *this;
 }
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const Pixel<Argb32Color>& p)
+inline void Pixel<ColorT>::assign(const Pixel<Argb32Color>& p)
 { 
     _pixel->assign( p.toColor() );
-    return *this;
 }
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Color>& p)
+inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p)
 {
     _pixel->assign( p.toColor() );
-    return *this;
 }
 
 
 template <typename ColorT>
-inline Pixel<ColorT>& Pixel<ColorT>::operator=(const ConstPixel<Argb32Color>& p)
+inline void Pixel<ColorT>::assign(const ConstPixel<Argb32Color>& p)
 {
     _pixel->assign( p.toColor() );
-    return *this;
 }
 
 

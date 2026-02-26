@@ -40,46 +40,21 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Generic image.
+/** @brief Image class.
 */
-class PT_GFX_API Image : public BasicImage<ImageFormat>
+class Image : public BasicImage<ImageFormat> 
 {
     public:
-        Image();
-
-        Image(const Image& image);
-
-        explicit Image(const ImageFormat& format);
-
-        Image(const ImageFormat& format, 
-              Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
-
-        Image(const ImageFormat& format, Pt::uint8_t* buffer,
-              Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
-
-        virtual ~Image();
-
-        const Image& operator=(const Image& image);
+        using BasicImage<ImageFormat>::BasicImage;
 };
 
-///** @brief Generic const image.
-//*/
-//class PT_GFX_API ConstImage : public BasicConstImage<ImageFormat>
-//{
-//    public:
-//        ConstImage();
-//
-//        ConstImage(const ConstImage& image);
-//
-//        explicit ConstImage(const Image& image);
-//
-//        explicit ConstImage(const ImageFormat& format);
-//
-//        ConstImage(const ImageFormat& format, const Pt::uint8_t* buffer,
-//                   Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0);
-//
-//        virtual ~ConstImage();
-//};
+/** @brief Const image class.
+*/
+class ConstImage : public BasicConstImage<ImageFormat> 
+{
+    public:
+        using BasicConstImage<ImageFormat>::BasicConstImage;
+};
 
 } // namespace
 

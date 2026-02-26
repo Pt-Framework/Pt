@@ -62,7 +62,7 @@ void BitmapCanvas::init(BLContext& rasterContext, Image& image)
 {
     _context = &rasterContext;
     _image = &image;
-    _imageView.reset(*_image);
+    _imageView = PixelView(*_image);
 }
 
 
@@ -89,7 +89,7 @@ void BitmapCanvas::onFinishPaint()
     if(_image)
         _image = 0;
 
-    _imageView.reset();
+    _imageView = PixelView();
 }
 
 
@@ -662,7 +662,7 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
 
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
-  
+
     Gfx::PixelView::Iterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
 
     Gfx::ConstPixelView fromView(image);

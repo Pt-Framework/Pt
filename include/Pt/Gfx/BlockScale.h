@@ -31,13 +31,13 @@
 #define PT_GFX_BLOCKSCALE_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 #include <cstddef>
 
-
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 /** @brief Generic block scale implementation.
 */
@@ -56,7 +56,7 @@ void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
             Pt::ssize_t dw = 0;
             for(Pt::ssize_t x = 0; x < toWidth; ++x)
             {
-                *to = *from;
+                copyPixel(*from, *to);
                 ++to;
 
                 for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth)
@@ -75,7 +75,6 @@ void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
         }
     }
 }
-
 
 /** @brief Generic block scale implementation with a custom assignment function..
 */
@@ -115,8 +114,8 @@ void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     }
 }
 
-
 } // namespace
+
 } // namespace
 
 #endif

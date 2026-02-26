@@ -49,27 +49,31 @@ class BlockScaleTest : public Pt::Unit::TestSuite
         {
             std::size_t fromWidth = 10;
             std::size_t fromHeight = 10;
-            std::vector<Pt::uint32_t> from(fromWidth * fromHeight, 1);
-            
-            std::size_t toWidth = 20;
-            std::size_t toHeight = 40;
-            std::vector<Pt::uint32_t> to(toWidth * toHeight, 0);
-
-            Pt::Gfx::blockScale(from.begin(), fromWidth, fromHeight, 
-                                to.begin(), toWidth, toHeight);
-
-            PT_UNIT_ASSERT(to.front() == from.front());
-            PT_UNIT_ASSERT(to.back() == from.back());
-        }
-
-        void ScaleDown()
-        {
-            Pt::Gfx::Image from( Pt::Gfx::Argb32(), 100, 100 );
+            Pt::Gfx::Image from(fromWidth, fromHeight);
             Pt::Gfx::PixelView fromView(from);
 
             std::memset(from.data(), 123, from.stride() * from.height());
 
-            Pt::Gfx::Image to( Pt::Gfx::Argb32(), 20, 40 );
+            std::size_t toWidth = 20;
+            std::size_t toHeight = 40;
+            Pt::Gfx::Image to(toWidth, toHeight);
+            Pt::Gfx::PixelView toView(to);
+
+            Pt::Gfx::blockScale(fromView.begin(), fromWidth, fromHeight, 
+                                toView.begin(), toWidth, toHeight);
+
+            PT_UNIT_ASSERT(toView.begin()->toColor() == fromView.begin()->toColor());
+            PT_UNIT_ASSERT(toView.pixel(19, 39)->toColor() == fromView.pixel(9, 9)->toColor());
+        }
+
+        void ScaleDown()
+        {
+            Pt::Gfx::Image from( 100, 100, Pt::Gfx::Argb32() );
+            Pt::Gfx::PixelView fromView(from);
+
+            std::memset(from.data(), 123, from.stride() * from.height());
+
+            Pt::Gfx::Image to( 20, 40, Pt::Gfx::Argb32() );
             Pt::Gfx::PixelView toView(to);
 
             Pt::Gfx::blockScale(fromView.begin(), fromView.width(), fromView.height(), 

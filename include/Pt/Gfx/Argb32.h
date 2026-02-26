@@ -61,10 +61,6 @@ class Argb32Pixel
 
         Argb32Pixel& operator=(const Gfx::Color& color);
 
-        Argb32Pixel& operator=(const Argb32Pixel& p);
-
-        Argb32Pixel& operator=(const Argb32ConstPixel& p);
-
         void reset(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Argb32Pixel& p);
@@ -103,6 +99,10 @@ class Argb32Pixel
         void advance(Pt::ssize_t n);
 
         void advanceLines(Pt::ssize_t n);
+
+        void assign(const Argb32Pixel& p);
+
+        void assign(const Argb32ConstPixel& p);
 
         void assign(const Argb32Pixel& p, std::size_t length);
 
@@ -731,17 +731,15 @@ inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Color& color)
 }
 
 
-inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Pixel& p)
+inline void Argb32Pixel::assign(const Argb32Pixel& p)
 {
     Argb32::sourceCopy( base(), p.base() );
-    return *this;
 }
 
 
-inline Argb32Pixel& Argb32Pixel::operator=(const Argb32ConstPixel& p)
+inline void Argb32Pixel::assign(const Argb32ConstPixel& p)
 {
     Argb32::sourceCopy( base(), p.base() );
-    return *this;
 }
 
 

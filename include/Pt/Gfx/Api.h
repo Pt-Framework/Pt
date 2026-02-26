@@ -122,11 +122,17 @@ class ConstPixel;
 
 struct ColorImageTraits;
 
-typedef BasicConstImage<ImageFormat> ConstImage;
+class Image;
+
+class ConstImage;
 
 typedef BasicImage<ImageFormat, ColorImageTraits> ColorImage;
 
 typedef BasicConstImage<ImageFormat, ColorImageTraits> ConstColorImage;
+
+typedef BasicView<ImageFormat> ImageView; 
+
+typedef BasicConstView<ImageFormat> ConstImageView;
 
 typedef BasicPixelView<ImageFormat> PixelView;
 

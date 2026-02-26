@@ -36,8 +36,6 @@ namespace Pt {
 
 namespace Gfx {
 
-class Image;
-
 /** @brief Writer for PNG images.
 */
 class PT_GFX_API PngWriter

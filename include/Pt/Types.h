@@ -105,9 +105,11 @@ union varint_t
     bool b;
     int i;
     unsigned u;
-    long l;
-    unsigned long ul;
-    std::size_t s;
+    float f;
+    double d;
+    std::size_t us;
+    std::ptrdiff_t ss;
+    Pt::int64_t i64;
     Pt::uint64_t u64;
 };
 

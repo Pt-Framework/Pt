@@ -52,7 +52,6 @@ namespace Pt {
 namespace Gfx {
 
 class Color;
-class Image;
 class TextMetrics;
 class CompositionMode;
 class Transform;

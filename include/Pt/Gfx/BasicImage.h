@@ -54,9 +54,13 @@ class BasicImage
         typedef Pt::ssize_t length_t;
 
     public:
-        BasicImage( const Format& format = FormatT::get() );
+        /** @brief Constructor.
+        */
+        explicit BasicImage( const Format& format = FormatT::get() );
 
-        BasicImage(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0, 
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding, 
                    const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(0)
@@ -67,16 +71,45 @@ class BasicImage
             _buffer.resize( Traits::imageSize(*_format, width, height, padding) );
             _data = _buffer.empty() ? 0 : &_buffer[0];
         }
-
+        
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
+                   const Format& format = FormatT::get() )
+        : _format( Traits::clone(format) )
+        , _data(0)
+        , _width(width)
+        , _height(height)
+        ,  _padding(0)
+        {
+            _buffer.resize( Traits::imageSize(*_format, width, height, _padding) );
+            _data = _buffer.empty() ? 0 : &_buffer[0];
+        }
+        
+        /** @brief Constructor.
+        */
         BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0, const Format& format = FormatT::get() )
+                   Pt::ssize_t padding, const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(data)
         , _width(width)
         , _height(height)
         , _padding(padding)
         { }
-
+        
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   const Format& format = FormatT::get() )
+        : _format( Traits::clone(format) )
+        , _data(data)
+        , _width(width)
+        , _height(height)
+        , _padding(0)
+        { }
+        
+        /** @brief Copy constructor.
+        */
         BasicImage(const BasicImage& image)
         : _format( Traits::clone( image.format() ) )
         , _buffer(image._buffer)
@@ -85,7 +118,9 @@ class BasicImage
         , _height(image._height)
         , _padding(image._padding)
         { }
-
+        
+        /** @brief Destructor.
+        */
         virtual ~BasicImage()
         { }
 
@@ -102,7 +137,9 @@ class BasicImage
 
             return *this;
         }
-
+        
+        /** @brief Reset to new size.
+        */
         void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0)
         { 
             _buffer.resize( Traits::imageSize(*_format, width, height, padding) );
@@ -112,7 +149,9 @@ class BasicImage
             _height = height;
             _padding = padding;
         }
-
+        
+        /** @brief Reset to new data.
+        */
         void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding = 0)
         {
@@ -149,7 +188,9 @@ class BasicImage
             _height = height;
             _padding = padding;
         }
-
+        
+        /** @brief Clears the image.
+        */
         void clear()
         {
             _buffer.clear();
@@ -160,6 +201,8 @@ class BasicImage
             _padding = 0;
         }
         
+        /** @brief Returns true if image is empty.
+        */
         bool empty() const
         { return _width == 0 || _height == 0; }
 
@@ -219,7 +262,7 @@ class BasicConstImage
         typedef Pt::ssize_t length_t;
 
     public:
-        BasicConstImage( const Format& format = FormatT::get() )
+        explicit BasicConstImage( const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(0)
         , _width(0)
@@ -228,12 +271,21 @@ class BasicConstImage
         { }
 
         BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                        Pt::ssize_t padding = 0, const Format& format = FormatT::get() )
+                        Pt::ssize_t padding, const Format& format = FormatT::get() )
         : _format( Traits::clone(format) )
         , _data(data)
         , _width(width)
         , _height(height)
         , _padding(padding)
+        { }
+
+        BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                        const Format& format = FormatT::get() )
+        : _format( Traits::clone(format) )
+        , _data(data)
+        , _width(width)
+        , _height(height)
+        , _padding(0)
         { }
 
         BasicConstImage(const BasicImage<FormatT, TraitsT>& image);

@@ -38,42 +38,6 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// Generic algorithms
-///////////////////////////////////////////////////////////////////////
-
-template<typename InputIteratorT, typename OutputIteratorT>
-void copy(InputIteratorT from, InputIteratorT fromEnd, OutputIteratorT to)
-{
-    for( ; from != fromEnd; ++from, ++to)
-        *to = *from;
-}
-
-
-template<typename OutputIteratorT, typename T>
-void fill(OutputIteratorT to, OutputIteratorT toEnd, const T& value)
-{
-    for (; to != toEnd; ++to)
-        *to = value;
-}
-
-
-template<typename InputIteratorT, typename OutputIteratorT, typename OperationT>
-void transform(InputIteratorT from, InputIteratorT fromEnd, 
-               OutputIteratorT to, OperationT op)
-{
-    for( ; from != fromEnd; ++from, ++to)
-        op(*to, *from);
-}
-
-
-template<typename IteratorT, typename OperationT>
-void transform(IteratorT begin, IteratorT end, OperationT op)
-{
-    for( ; begin != end; ++begin) 
-        op(*begin);
-}
-
-///////////////////////////////////////////////////////////////////////
 // convert with multistage converter
 ///////////////////////////////////////////////////////////////////////
 
@@ -129,7 +93,7 @@ void copyPixelImpl(const P1& p1, P2& p2, FalseType)
 template <typename P1, typename P2> 
 void copyPixelImpl(const P1& p1, P2& p2, TrueType)
 {
-    p2 = p1;
+    p2.assign(p1);
 }
 
 

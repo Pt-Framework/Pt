@@ -197,21 +197,17 @@ class Pixel
 
         ~Pixel();
 
-        //
-        // TODO GFX: operator= assignment or shalwow copy?
-        //
+        Pixel& operator=(const Color& color)
+        { 
+            assign(color); 
+            return *this;
+        }
 
-        Pixel& operator=(const Color& color);
-
-        Pixel& operator=(const Argb32Color& color);
-
-        Pixel& operator=(const Pixel<Color>& p);
-
-        Pixel& operator=(const Pixel<Argb32Color>& p);
-
-        Pixel& operator=(const ConstPixel<Color>& p);
-
-        Pixel& operator=(const ConstPixel<Argb32Color>& p);
+        Pixel& operator=(const Argb32Color& color)
+        { 
+            assign(color); 
+            return *this;
+        }
 
         template <typename Tr>
         void reset(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -280,6 +276,18 @@ class Pixel
         { 
             _pixel->assign(colors, length); 
         }
+
+        void assign(const Color& color);
+
+        void assign(const Argb32Color& color);
+
+        void assign(const Pixel<Color>& p);
+
+        void assign(const Pixel<Argb32Color>& p);
+
+        void assign(const ConstPixel<Color>& p);
+
+        void assign(const ConstPixel<Argb32Color>& p);
 
         void assign(const Pixel<Color>& p, std::size_t length);
 

@@ -46,6 +46,9 @@ class BasicPixelIterator;
 template <typename FormatT, typename TraitsT>
 class BasicConstPixelIterator;
 
+//
+// TODO GFX: rename PixelItetaror
+//
 
 template <typename FormatT, typename TraitsT>
 class BasicPixelIterator

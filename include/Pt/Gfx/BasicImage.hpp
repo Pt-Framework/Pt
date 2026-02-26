@@ -36,6 +36,10 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// BasicImage
+///////////////////////////////////////////////////////////////////////
+
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
 : _format( Traits::clone(format) )
@@ -45,6 +49,9 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
 , _padding(0)
 { }
 
+///////////////////////////////////////////////////////////////////////
+// BasicConstImage
+///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const BasicImage<FormatT, TraitsT>& image)
@@ -70,14 +77,14 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, T
 
 
 template <typename Fmt, typename Tr>
-BasicLineView<Fmt> lineView(BasicImage<Fmt, Tr>& image) 
+BasicLineView<Fmt, Tr> lineView(BasicImage<Fmt, Tr>& image) 
 {
     return BasicLineView<Fmt, Tr>(image);
 }
 
 
 template <typename Fmt, typename Tr>
-BasicConstLineView<Fmt> lineView(const BasicImage<Fmt, Tr>& image) 
+BasicConstLineView<Fmt, Tr> lineView(const BasicImage<Fmt, Tr>& image) 
 {
     return BasicConstLineView<Fmt, Tr>(image);
 }

@@ -94,17 +94,6 @@ inline BasicView<FormatT, TraitsT>::BasicView(BasicImage<F, T>& image,
 {
 }
 
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline void BasicView<FormatT, TraitsT>::reset(BasicImage<F, T>& image)
-{
-    _data = image.data();
-    _format = &image.format();
-    ViewBase::reset(image.width(), image.height(),
-                    image.stride(), image.padding() );
-}
-
 ///////////////////////////////////////////////////////////////////////
 // BasicConstView
 ///////////////////////////////////////////////////////////////////////
@@ -205,28 +194,9 @@ inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstImage<F,
 {
 }
 
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline void BasicConstView<FormatT, TraitsT>::reset(const BasicImage<F, T>& image)
-{
-    _data = image.data();
-    _format = &image.format();
-    ViewBase::reset(image.width(), image.height(),
-                    image.stride(), image.padding() );
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline void BasicConstView<FormatT, TraitsT>::reset(const BasicConstImage<F, T>& image)
-{
-    _data = image.data();
-    _format = &image.format();
-    ViewBase::reset(image.width(), image.height(),
-                    image.stride(), image.padding() );
-}
-
+///////////////////////////////////////////////////////////////////////
+// copyArea
+///////////////////////////////////////////////////////////////////////
 
 template <typename LineIter1, typename LineIter2>
 void copyAreaImpl(LineIter1& from, LineIter1& fromEnd, LineIter2& to)

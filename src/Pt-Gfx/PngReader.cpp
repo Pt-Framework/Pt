@@ -82,7 +82,7 @@ class PngReaderImpl
         {
             _target = &is;
             _image = &image;
-            _imageView.reset(*_image);
+            _imageView = PixelView(*_image);
         }
 
         void detach()
@@ -297,7 +297,7 @@ class PngReaderImpl
             if( _image->width() != _width || _image->height() != _height )
             {
                 _image->reset( Pt::Gfx::ImageFormat::argb32(), _width, _height );
-                _imageView.reset(*_image);
+                _imageView = PixelView(*_image);
             }
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);

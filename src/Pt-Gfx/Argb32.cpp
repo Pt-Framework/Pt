@@ -28,40 +28,6 @@
 
 #include <Pt/Gfx/Argb32.h>
 
-/*
-<Format concept>
-
-class ViewBase;
-
-class BasicView : ViewBase
-class BasicPixelIterator
-
-class BasicConstView : ViewBase
-class BasicConstPixelIterator
-
-
-class ImageFormat <Format concept>
-class Argb32Format : ImageFormat
-class Rgb565Format : ImageFormat
-class ImageView : BasicView
-class ImageConstView : BasicView
-
-
-Argb32 <Format concept>
-class Argb32View : BasicView
-class Argb32ConstView : BasicView
-
-Yuv12 <Format concept>
-class Yuv12View : BasicView
-class Yuv12ConstView : BasicView
-
-
-class BasicImage
-class Image : BasicImage
-class Argb32Image : BasicImage
-class Yuv12Image : BasicImage
-*/
-
 namespace Pt {
 
 namespace Gfx {
@@ -155,10 +121,6 @@ class Argb32PixelBase final : public PixelBase
         virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;
 };
 
-
-///////////////////////////////////////////////////////////////////////
-// Argb32PixelBase
-///////////////////////////////////////////////////////////////////////
 
 inline bool Argb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {

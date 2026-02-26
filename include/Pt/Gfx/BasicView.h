@@ -63,20 +63,6 @@ class BasicView : public ViewBase
         virtual ~BasicView()
         { }
 
-        //
-        // TODO GFX: remove reset funktions and use ctor + op=
-        //
-
-        void reset( const Format& format = Format::get() )
-        {
-            _data = 0;
-            _format = &format;
-            ViewBase::reset(0, 0, 0, 0);
-        }
-
-        template <typename F, typename T>
-        void reset(BasicImage<F, T>& image);
-
         Pt::uint8_t* data()
         { return _data; }
 
@@ -85,9 +71,6 @@ class BasicView : public ViewBase
 
         const Format& format() const
         { return *_format; }
-
-    protected:
-        using ViewBase::reset;
 
     private:
         Pt::uint8_t*   _data;
@@ -132,27 +115,11 @@ class BasicConstView : public ViewBase
         virtual ~BasicConstView()
         { }
 
-        void reset( const Format& format = Format::get() )
-        {
-            _data = 0;
-            _format = &format;
-            ViewBase::reset(0, 0, 0, 0);
-        }
-
-        template <typename F, typename T>
-        void reset(const BasicImage<F, T>& image);
-
-        template <typename F, typename T>
-        void reset(const BasicConstImage<F, T>& image);
-
         const Pt::uint8_t* data() const
         { return _data; }
 
         const Format& format() const
         { return *_format; }
-    
-    protected:
-        using ViewBase::reset;
 
     private:
         const Pt::uint8_t*  _data;

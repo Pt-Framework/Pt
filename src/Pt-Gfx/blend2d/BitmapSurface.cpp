@@ -71,14 +71,8 @@ void BitmapSurface::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
     {
-        // TODO:
-        //copyArea(image, _image);
-
-        Gfx::ConstCursorView from(image);
-        Gfx::CursorView to(_image);
-
         _image.reset( format(), image.width(), image.height() );
-        Pt::Gfx::copy( from.begin(), from.end(), to.begin() );
+        copyArea(image, _image);
     }
     else
     {

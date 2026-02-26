@@ -147,7 +147,7 @@ class Argb32Test : public Pt::Unit::TestSuite
         {
             using namespace Pt::Gfx;
 
-            Image image(Argb32(), 2, 2);
+            Image image( 2, 2, Argb32() );
             ConstImage cimage(image);
             PixelView pixelView(image);
             ConstPixelView cpixelView(image);
@@ -190,7 +190,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Argb32 format;
-                Image image(format, width, height);
+                Image image(width, height, format);
                 
                 CursorView cursorView(image);
                 CursorView::Iterator it = cursorView.begin();
@@ -224,7 +224,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Argb32 format;
-                Image image(format, width, height);
+                Image image(width, height, format);
                 
                 PixelView pixelView(image);
                 PixelView::Iterator it = pixelView.begin();
@@ -292,11 +292,11 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Argb32 format;
-                Image fromImage(format, width, height);
+                Image fromImage(width, height, format);
                 ConstPixelView fromView(fromImage);
                 ConstPixelView::Iterator from = fromView.begin();
 
-                Image image(format, width, height);
+                Image image(width, height, format);
                 PixelView imageView(image);
                 PixelView::Iterator it = imageView.begin();
                 PixelView::Iterator end = imageView.end();
@@ -379,11 +379,11 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Argb32 format;
-                Image fromImage(format, width, height);
+                Image fromImage(width, height, format);
                 ConstPixelView fromView(fromImage);
                 ConstPixelView::Iterator from = fromView.begin();
 
-                Image image(format, width, height);
+                Image image(width, height, format);
                 PixelView imageView(image);
                 PixelView::Iterator it = imageView.begin();
                 PixelView::Iterator end = imageView.end();

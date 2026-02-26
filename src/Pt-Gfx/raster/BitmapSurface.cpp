@@ -73,11 +73,7 @@ void BitmapSurface::reset(const Gfx::Image& image)
     if( image.format() != _image.format() )
     {
         _image.reset( image.width(), image.height() );
-        
-        Gfx::ConstPixelView from(image);
-        Gfx::PixelView to(_image);
-        
-        Pt::Gfx::copy( from.begin(), from.end(), to.begin() );
+        copyArea(image, _image);
     }
     else
     {

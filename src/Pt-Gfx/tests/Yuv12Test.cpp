@@ -146,7 +146,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Pt::uint8_t yuv12[] = { 100, 100, 100 };
 
             // copy an image in unknown format...
-            Image image(ImageFormat::argb32(), 1, 1);
+            Image image(1, 1, ImageFormat::argb32());
             ConstPixelView imageView(image);
             ConstPixelView::Iterator from = imageView.begin();
 
@@ -174,7 +174,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             ConstPixelView::Iterator from = imageView.begin();
 
             // ...to an image in YUV-12 image
-            Image yuv12Image(Yuv12(), yuv12, 1, 1);
+            Image yuv12Image(yuv12, 1, 1, Yuv12());
             PixelView yuv12View(yuv12Image);
             PixelView::Iterator it = yuv12View.begin();
             PixelView::Iterator end = yuv12View.end();
@@ -192,12 +192,12 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Pt::uint8_t yuv12[] = { 100, 100, 100 };
 
             // copy an image in yuv12 format...
-            Image image(Yuv12(), 1, 1);
+            Image image(1, 1, Yuv12());
             ConstPixelView imageView(image);
             ConstPixelView::Iterator from = imageView.begin();
 
             // ...to an image in YUV-12 image
-            Image yuv12Image(Yuv12(), yuv12, 1, 1);
+            Image yuv12Image(yuv12, 1, 1, Yuv12());
             PixelView yuv12View(yuv12Image);
             PixelView::Iterator it = yuv12View.begin();
             PixelView::Iterator end = yuv12View.end();
@@ -238,7 +238,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 10; ++n)
             {
                 Yuv12 format;
-                Image image(format, 1000, 1000);
+                Image image(1000, 1000, format);
                 PixelView imageView(image);
 
                 PixelView::Iterator it = imageView.begin();

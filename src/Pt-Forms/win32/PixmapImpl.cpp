@@ -36,7 +36,6 @@
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Argb32Image.h>
 
 namespace {
@@ -247,7 +246,7 @@ Gfx::Image PixmapImpl::toImage() const
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
     bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    Pt::Gfx::Image image(Pt::Gfx::Argb32(), _width, _height);
+    Pt::Gfx::Image image(_width, _height, Pt::Gfx::Argb32());
     Pt::uint8_t* data = image.data();
 
     int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 

@@ -94,30 +94,6 @@ class ViewBase
         Pt::ssize_t padding() const
         { return _padding; }
 
-    protected:
-        void reset(Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t stride, Pt::ssize_t padding)
-        { 
-            _xpos = 0;
-            _ypos = 0;
-            _width = width;
-            _height = height;
-            _stride = stride;
-            _padding = padding;
-        }
-
-        void reset(Pt::ssize_t xpos, Pt::ssize_t ypos,
-                   Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t stride, Pt::ssize_t padding)
-        { 
-            _xpos = xpos;
-            _ypos = ypos;
-            _width = width;
-            _height = height;
-            _stride = stride;
-            _padding = padding;
-        }
-
     private:      
         Pt::ssize_t   _xpos;
         Pt::ssize_t   _ypos;
