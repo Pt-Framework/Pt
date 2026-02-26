@@ -32,8 +32,8 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Yuv12.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 
@@ -45,73 +45,73 @@ namespace Gfx {
     half as many pad bytes after their rows. In other words, two U/V rows
     (including padding) is exactly as long as one Y row (including padding).
 */
-class Yuv12Image : public BasicImage<Yuv12>
-{
-    public:
-        /** @brief Constructor.
-        */
-        Yuv12Image()
-        : BasicImage( Yuv12() )
-        { }
-        
-        /** @brief Constructor.
-        */
-        Yuv12Image(const Yuv12Image& image)
-        : BasicImage( image )
-        { }
-
-        /** @brief Constructor.
-        */
-        Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-        : BasicImage(width, height, padding, Yuv12())
-        { }
-
-        /** @brief Construct from external buffer.
-        */
-        Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                    size_t padding = 0)
-        : BasicImage(data, width, height, padding, Yuv12())
-        { }
-};
+//class Yuv12Image : public BasicImage<Yuv12>
+//{
+//    public:
+//        /** @brief Constructor.
+//        */
+//        Yuv12Image()
+//        : BasicImage( Yuv12() )
+//        { }
+//        
+//        /** @brief Constructor.
+//        */
+//        Yuv12Image(const Yuv12Image& image)
+//        : BasicImage( image )
+//        { }
+//
+//        /** @brief Constructor.
+//        */
+//        Yuv12Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
+//        : BasicImage(width, height, padding, Yuv12())
+//        { }
+//
+//        /** @brief Construct from external buffer.
+//        */
+//        Yuv12Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+//                    size_t padding = 0)
+//        : BasicImage(data, width, height, padding, Yuv12())
+//        { }
+//};
 
 /** @brief Yv-12 image.
 */
-class Yuv12ConstImage : public BasicConstImage<Yuv12>
-{
-    public:
-        /** @brief Constructor.
-        */
-        Yuv12ConstImage()
-        : BasicConstImage( Yuv12() )
-        { }
-        
-        /** @brief Constructor.
-        */
-        Yuv12ConstImage(const Yuv12ConstImage& image)
-        : BasicConstImage( image )
-        { }
-
-        /** @brief Constructor.
-        */
-        Yuv12ConstImage(const Yuv12Image& image)
-        : BasicConstImage( image )
-        { }
-
-        /** @brief Construct from external buffer.
-        */
-        Yuv12ConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                    size_t padding = 0)
-        : BasicConstImage(data, width, height, padding, Yuv12())
-        { }
-};
+//class Yuv12ConstImage : public BasicConstImage<Yuv12>
+//{
+//    public:
+//        /** @brief Constructor.
+//        */
+//        Yuv12ConstImage()
+//        : BasicConstImage( Yuv12() )
+//        { }
+//        
+//        /** @brief Constructor.
+//        */
+//        Yuv12ConstImage(const Yuv12ConstImage& image)
+//        : BasicConstImage( image )
+//        { }
+//
+//        /** @brief Constructor.
+//        */
+//        Yuv12ConstImage(const Yuv12Image& image)
+//        : BasicConstImage( image )
+//        { }
+//
+//        /** @brief Construct from external buffer.
+//        */
+//        Yuv12ConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+//                    size_t padding = 0)
+//        : BasicConstImage(data, width, height, padding, Yuv12())
+//        { }
+//};
 
 /** @brief YV-12 pixel view.
 */
-typedef BasicPixelView<Yuv12> Yuv12PixelView;
+//typedef BasicPixelView<Yuv12> Yuv12PixelView;
 
 /** @brief YV-12 const pixel view.
 */
-typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
+//typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
 
 } // namespace
 

@@ -37,88 +37,13 @@ namespace Pt {
 
 namespace Gfx {
 
-// Gfx TODO: use ColorType defined by the non-ImageFormat as conversion color
-//           or preferred quality
-
-//template <typename SpanT, typename Fmt, typename Tr>
-//void copySpanColors(const SpanT& fromSpan, BasicPixelIterator<Fmt, Tr> to)
-//{
-//    typedef typename Tr::ColorType ColorType;
-//
-//    const std::size_t bufsize = 64;
-//    ColorType colors[bufsize];
-//
-//    auto from = fromSpan.cbegin();
-//    std::size_t length = fromSpan.length();
-//
-//    while(length > 0)
-//    {
-//        std::size_t n = std::min(length, bufsize);
-//        
-//        from->getColors(colors, n);
-//        to->assign(colors, n);
-//        
-//        from += n;
-//        to += n;
-//
-//        length -= n;
-//    }
-//}
-//
-//
-//template <typename Tr1, typename Tr2>
-//void copySpan(const BasicSpan<ImageFormat, Tr1>& from, 
-//              BasicPixelIterator<ImageFormat, Tr2>& to)
-//{    
-//    to->assign(from.front(), from.length());
-//}
-//
-//
-//template <typename Tr1, typename Tr2>
-//void copySpan(const BasicConstSpan<ImageFormat, Tr1>& from, 
-//              BasicPixelIterator<ImageFormat, Tr2>& to)
-//{    
-//    to->assign(from.front(), from.length());
-//}
-//
-//
-//template <typename Fmt, typename Tr1, typename Tr2>
-//void copySpan(const BasicSpan<ImageFormat, Tr1>& from, 
-//              BasicPixelIterator<Fmt, Tr2>& to)
-//{
-//    copySpanColors(from, to);
-//}
-//
-//
-//template <typename Fmt, typename Tr1, typename Tr2>
-//void copySpan(const BasicConstSpan<ImageFormat, Tr1>& from, 
-//              BasicPixelIterator<Fmt, Tr2>& to)
-//{
-//    copySpanColors(from, to);
-//}
-//
-//
-//template <typename Fmt, typename Tr1, typename Tr2>
-//void copySpan(const BasicSpan<Fmt, Tr1>& from, 
-//              BasicPixelIterator<ImageFormat, Tr2>& to)
-//{
-//    copySpanColors(from, to);
-//}
-//
-//
-//template <typename Fmt, typename Tr1, typename Tr2>
-//void copySpan(const BasicConstSpan<Fmt, Tr1>& from, 
-//              BasicPixelIterator<ImageFormat, Tr2>& to)
-//{
-//    copySpanColors(from, to);
-//}
-
 ///////////////////////////////////////////////////////////////////////
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
 template <typename ColorT>
-inline Pixel<ColorT>::Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename Tr>
+inline Pixel<ColorT>::Pixel(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _pixel(0)
 , _format( &view.format() )
 { 
@@ -144,7 +69,8 @@ inline Pixel<ColorT>::~Pixel()
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename Tr>
+inline void Pixel<ColorT>::reset(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -232,7 +158,9 @@ void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
     if( isCompatible )
         return;
 
-    // TODO: use the precise color type only if both pixels require it
+    //
+    // TODO GFX: use the precise color type only if both pixels require it
+    //
     const std::size_t bufsize = 64;
     ColorT colors[bufsize];
 
@@ -293,7 +221,8 @@ inline bool Pixel<ColorT>::equals(const ConstPixel<ColorT>& p) const
 ///////////////////////////////////////////////////////////////////////
 
 template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view, 
+template <typename Tr>
+inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 : _pixel(0)
 , _format( &view.format() )
@@ -304,7 +233,8 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat>& view,
 
 
 template <typename ColorT>
-inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat>& view, 
+template <typename Tr>
+inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 : _pixel(0)
 , _format( &view.format() )
@@ -341,7 +271,8 @@ inline ConstPixel<ColorT>::~ConstPixel()
 
 
 template <typename ColorT>
-inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view, 
+template <typename Tr>
+inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
@@ -357,7 +288,8 @@ inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat>& view,
 
 
 template <typename ColorT>
-inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat>& view, 
+template <typename Tr>
+inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)

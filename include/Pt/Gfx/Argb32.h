@@ -40,22 +40,11 @@ namespace Pt {
 
 namespace Gfx {
 
-class Argb32;
-class Argb32Pixel;
-class Argb32ConstPixel;
-
-template <typename T>
-class BasicView;
-
-template <typename T>
-class BasicConstView;
-
 /** @brief ARGB-32 pixel.
 */
 class Argb32Pixel
 {
     friend class Argb32ConstPixel;
-    friend class Argb32;
 
     public:
         typedef Argb32 Format;
@@ -136,7 +125,6 @@ class Argb32Pixel
 class Argb32ConstPixel
 {
     friend class Argb32Pixel;
-    friend class Argb32;
 
     public:
         typedef Argb32 Format;
@@ -254,11 +242,6 @@ class PT_GFX_API Argb32 final : public ImageFormat
         virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
-    
-    public:
-        static void sourceCopy(Argb32Pixel& p, const Color& c);
-
-        static void sourceOver(Argb32Pixel& p, const Color& c);
 
     public:
         template <typename BasePtr>
@@ -448,21 +431,9 @@ inline void Argb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::si
 // Implementation SourceCopy
 //
 
-inline void Argb32::sourceCopy(Argb32Pixel& p, const Color& c)
-{
-    sourceCopy(p.base(), c);
-}
-
-
 inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
 {
     std::memcpy(to, from, PixelWidth);
-}
-
-
-inline void Argb32::sourceOver(Argb32Pixel& p, const Color& c)
-{
-    sourceOver(p.base(), c);
 }
 
 

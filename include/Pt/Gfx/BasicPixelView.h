@@ -73,7 +73,8 @@ class BasicPixelIterator
         using reference         = Pixel&;
 
     public:
-        BasicPixelIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        template <typename Tr>
+        BasicPixelIterator(BasicView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
         , _pixel(view, x, y)
@@ -173,14 +174,16 @@ class BasicConstPixelIterator
         using reference         = ConstPixel&;
 
     public:
-        BasicConstPixelIterator(const BasicConstView<Format>& view, 
+        template <typename Tr>
+        BasicConstPixelIterator(const BasicConstView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
         , _pixel(view, x, y)
         { }
 
-        BasicConstPixelIterator(const BasicView<Format>& view, 
+        template <typename Tr>
+        BasicConstPixelIterator(const BasicView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
@@ -260,7 +263,7 @@ class BasicConstPixelIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicPixelView : public BasicView<FormatT>
+class BasicPixelView : public BasicView<FormatT, TraitsT>
 {
     public:
         typedef FormatT Format;
@@ -279,11 +282,11 @@ class BasicPixelView : public BasicView<FormatT>
         : BasicView<FormatT>(format)
         { }
 
-        template <typename OtherFormatT>
-        explicit BasicPixelView(BasicView<OtherFormatT>& view);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicPixelView(BasicView<OtherFormatT, OtherTraitsT>& view);
 
-        template <typename OtherFormatT>
-        BasicPixelView(BasicView<OtherFormatT>& view,
+        template <typename OtherFormatT, typename OtherTraitsT>
+        BasicPixelView(BasicView<OtherFormatT, OtherTraitsT>& view,
                        Int x, Int y, Int w, Int h);
 
         template <typename OtherFormatT, typename OtherTraitsT>
@@ -323,7 +326,7 @@ class BasicPixelView : public BasicView<FormatT>
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstPixelView : public BasicConstView<FormatT>
+class BasicConstPixelView : public BasicConstView<FormatT, TraitsT>
 {
     public:
         typedef FormatT Format;
@@ -338,25 +341,22 @@ class BasicConstPixelView : public BasicConstView<FormatT>
 
     public:
         explicit BasicConstPixelView(const Format& format)
-        : BasicConstView<FormatT>(format)
+        : BasicConstView<FormatT, TraitsT>(format)
         { }
 
-        template <typename OtherFormatT>
-        explicit BasicConstPixelView(const BasicView<OtherFormatT>& view);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicConstPixelView(const BasicView<OtherFormatT, OtherTraitsT>& view);
 
-        template <typename OtherFormatT>
-        BasicConstPixelView(const BasicView<OtherFormatT>& view,
+        template <typename OtherFormatT, typename OtherTraitsT>
+        BasicConstPixelView(const BasicView<OtherFormatT, OtherTraitsT>& view,
                             Int x, Int y, Int w, Int h);
 
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicConstPixelView(const BasicConstView<OtherFormatT, OtherTraitsT>& view);
 
-        template <typename OtherFormatT>
-        explicit BasicConstPixelView(const BasicConstView<OtherFormatT>& view);
-
-        template <typename OtherFormatT>
-        BasicConstPixelView(const BasicConstView<OtherFormatT>& view,
+        template <typename OtherFormatT, typename OtherTraitsT>
+        BasicConstPixelView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
                             Int x, Int y, Int w, Int h);
-
-
 
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image);
@@ -364,7 +364,6 @@ class BasicConstPixelView : public BasicConstView<FormatT>
         template <typename OtherFormatT, typename OtherTraitsT>
         BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
                             Int x, Int y, Int w, Int h);
-
 
         template <typename OtherFormatT, typename OtherTraitsT>
         explicit BasicConstPixelView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image);

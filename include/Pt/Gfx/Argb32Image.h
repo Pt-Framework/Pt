@@ -34,7 +34,6 @@
 #include <Pt/Gfx/BasicPixelView.h>
 #include <Pt/Gfx/BasicLineView.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 

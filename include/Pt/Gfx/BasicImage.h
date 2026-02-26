@@ -332,9 +332,6 @@ class BasicConstImage
         Pt::ssize_t             _padding;
 };
 
-template <typename ImageT1, typename ImageT2>
-void copyImage(const ImageT1& fromImage, ImageT2& toImage);
-
 // } // namespace
 
 } // namespace

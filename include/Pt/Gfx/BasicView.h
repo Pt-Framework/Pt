@@ -38,26 +38,27 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename FormatT>
+template <typename FormatT, typename TraitsT>
 class BasicView : public ViewBase
 {
     public:
         typedef FormatT Format;
+        typedef TraitsT Traits;
 
     public:
         explicit BasicView(const Format& format);
+
+        template <typename F, typename T>
+        explicit BasicView(BasicView<F, T>& view);
+
+        template <typename F, typename T>
+        BasicView(BasicView<F, T>& view, Int x, Int y, Int w, Int h);
 
         template <typename F, typename T>
         explicit BasicView(BasicImage<F, T>& image);
 
         template <typename F, typename T>
         BasicView(BasicImage<F, T>& image, Int x, Int y, Int w, Int h);
-
-        template <typename F>
-        explicit BasicView(BasicView<F>& view);
-
-        template <typename F>
-        BasicView(BasicView<F>& view, Int x, Int y, Int w, Int h);
 
         virtual ~BasicView()
         { }
@@ -93,21 +94,28 @@ class BasicView : public ViewBase
         const Format*  _format;
 };
 
-// Int x, Int y, Int w, Int h
-template <typename FormatT>
+
+template <typename FormatT, typename TraitsT>
 class BasicConstView : public ViewBase
 {
     public:
         typedef FormatT Format;
+        typedef TraitsT Traits;
 
     public:
         explicit BasicConstView(const Format& format);
 
-        template <typename F>
-        explicit BasicConstView(const BasicView<F>& view);
+        template <typename F, typename T>
+        explicit BasicConstView(const BasicView<F, T>& view);
 
-        template <typename F>
-        BasicConstView(const BasicView<F>& view, Int x, Int y, Int w, Int h);
+        template <typename F, typename T>
+        BasicConstView(const BasicView<F, T>& view, Int x, Int y, Int w, Int h);
+
+        template <typename F, typename T>
+        explicit BasicConstView(const BasicConstView<F, T>& view);
+
+        template <typename F, typename T>
+        BasicConstView(const BasicConstView<F, T>& view, Int x, Int y, Int w, Int h);
 
         template <typename F, typename T>
         explicit BasicConstView(const BasicImage<F, T>& image);

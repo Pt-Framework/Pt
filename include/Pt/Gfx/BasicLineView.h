@@ -139,7 +139,7 @@ class BasicConstLineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        BasicConstLineIterator(BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        BasicConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _view(&view)
         , _span(view, x, y, view.width())
         { }
@@ -180,13 +180,13 @@ class BasicConstLineIterator
         }
 
     private:
-        BasicConstView<Format>* _view;
-        SpanType                _span;
+        const BasicConstView<Format>* _view;
+        SpanType                      _span;
 };
 
 
 template <typename FormatT, typename TraitsT>
-class BasicLineView : public BasicView<FormatT>
+class BasicLineView : public BasicView<FormatT, TraitsT>
 {
     public:
         typedef FormatT Format;
@@ -241,7 +241,7 @@ class BasicLineView : public BasicView<FormatT>
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstLineView : public BasicConstView<FormatT>
+class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
 {
     public:
         typedef FormatT Format;
@@ -287,15 +287,29 @@ class BasicConstLineView : public BasicConstView<FormatT>
         BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
                            Int x, Int y, Int w, Int h);
 
-        Iterator line(Pt::ssize_t y)
+        Iterator line(Pt::ssize_t y) const
         { return Iterator(*this, 0, y); }
 
-        Iterator begin()
+        Iterator begin() const
         { return Iterator(*this, 0, 0); }
 
-        Iterator end()
+        Iterator end() const
         { return Iterator(*this, 0, this->height()); }
 };
+
+
+template <typename Fmt, typename Tr>
+BasicLineView<Fmt, Tr> lineView(BasicView<Fmt, Tr>& view) 
+{
+    return BasicLineView<Fmt, Tr>(view);
+}
+
+
+template <typename Fmt, typename Tr>
+BasicConstLineView<Fmt, Tr> lineView(const BasicView<Fmt, Tr>& view) 
+{
+    return BasicConstLineView<Fmt, Tr>(view);
+}
 
 } // namespace
 

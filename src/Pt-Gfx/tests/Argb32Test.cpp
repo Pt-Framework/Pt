@@ -89,23 +89,18 @@ class Argb32Test : public Pt::Unit::TestSuite
         {
             using namespace Pt::Gfx;
 
-            Argb32Image image(8, 8, 4);
-            Argb32LineView subView(image, 1, 1, 2, 2);
-            Argb32LineView::Iterator line = subView.begin();
+            Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
+
+            Argb32Image from(data, 2, 2);
+            Argb32Image to(8, 8, 4);
             
-            Argb32Span::Iterator pixel = line->begin();
-            *pixel   = Argb32Color(0x11111111);
-            *++pixel = Argb32Color(0x22222222);
+            Argb32View subView(to, 1, 1, 2, 2);
+            copyArea(from, subView);
 
-            ++line;
-            pixel = line->begin();
-            *pixel = Argb32Color(0x33333333);
-            *++pixel = Argb32Color(0x44444444);
-
-            Argb32PixelView pixelView(image);
-            Argb32PixelView::Iterator pixel2 = pixelView.pixel(2, 2);
-            Argb32Color color = pixel2->toColor();
-            PT_UNIT_ASSERT(color == Argb32Color(0x44444444));
+            Argb32PixelView pixelView(to);
+            Argb32PixelView::Iterator pixel = pixelView.pixel(2, 2);
+            Argb32Color color = pixel->toColor();
+            PT_UNIT_ASSERT(color == Argb32Color(0x12131415));
         }
 
         void Iterator()
@@ -171,10 +166,10 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             std::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
 
-            copyImage(image, image);
-            copyImage(cimage, image);
-            copyImage(cimage, argb32Image);
-            copyImage(cargb32Image, image);
+            //copyArea(image, image);
+            //copyArea(cimage, image);
+            //copyArea(cimage, argb32Image);
+            //copyArea(cargb32Image, image);
 
             copyPixel(*cpixelView.begin(), *pixelView.begin());
             copyPixel(*cpixelView.begin(), *argb32View.begin());

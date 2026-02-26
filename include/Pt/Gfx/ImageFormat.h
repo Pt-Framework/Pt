@@ -43,18 +43,6 @@ namespace Pt {
 
 namespace Gfx {
 
-template <typename ColorT>
-class Pixel;
-
-template <typename ColorT>
-class ConstPixel;
-
-template <typename T>
-class BasicView;
-
-template <typename T>
-class BasicConstView;
-
 ///////////////////////////////////////////////////////////////////////
 // ImageFormat
 ///////////////////////////////////////////////////////////////////////
@@ -215,7 +203,8 @@ class Pixel
         typedef ImageFormat Format;
 
     public:
-        Pixel(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename Tr>
+        Pixel(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Pixel(const Pixel& p);
 
@@ -237,7 +226,8 @@ class Pixel
 
         Pixel& operator=(const ConstPixel<Argb32Color>& p);
 
-        void reset(BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename Tr>
+        void reset(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Pixel& p);
 
@@ -348,9 +338,11 @@ class ConstPixel
         typedef ImageFormat Format;
 
     public:
-        ConstPixel(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename Tr>
+        ConstPixel(const BasicConstView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        ConstPixel(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename Tr>
+        ConstPixel(const BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const ConstPixel& p);
 
@@ -358,9 +350,11 @@ class ConstPixel
 
         ~ConstPixel();
 
-        void reset(const BasicConstView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename Tr>
+        void reset(const BasicConstView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        void reset(const BasicView<ImageFormat>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename Tr>
+        void reset(const BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const ConstPixel& p);
 

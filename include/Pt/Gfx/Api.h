@@ -72,6 +72,9 @@ class Argb32Color;
 template <typename FormatT>
 struct ImageTraits;
 
+template <typename FormatT>
+struct ViewTraits;
+
 template <typename PixelT>
 struct PixelTraits;
 
@@ -81,8 +84,11 @@ class BasicImage;
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstImage;
 
-template <typename FormatT>
-struct ViewTraits;
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT>>
+class BasicView; 
+
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT>>
+class BasicConstView;
 
 template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicPixelView; 
@@ -161,6 +167,14 @@ typedef BasicImage<Argb32> Argb32Image;
 */
 typedef BasicConstImage<Argb32> Argb32ConstImage;
 
+/** @brief ARGB-32 view.
+*/
+typedef BasicView<Argb32> Argb32View; 
+
+/** @brief ARGB-32 conmst view.
+*/
+typedef BasicView<Argb32> Argb32ConstView;
+
 /** @brief ARGB-32 pixel view.
 */
 typedef BasicPixelView<Argb32> Argb32PixelView;
@@ -183,8 +197,55 @@ typedef BasicSpan<Argb32, PixelTraits<Argb32Pixel> > Argb32Span;
 
 /** @brief ARGB-32 const span.
 */
-typedef BasicConstSpan<Argb32, PixelTraits<Argb32Pixel> > Argb32ConstSpan;
+typedef BasicConstSpan<Argb32, PixelTraits<Argb32ConstPixel> > Argb32ConstSpan;
 
+//
+// YUV-12
+//
+
+class Yuv12;
+class Yuv12Pixel;
+class Yuv12ConstPixel;
+
+/** @brief YUV-12 image.
+*/
+typedef BasicImage<Yuv12> Yuv12Image;
+
+/** @brief YUV-12 const image.
+*/
+typedef BasicConstImage<Yuv12> Yuv12ConstImage;
+
+/** @brief YUV-12 view.
+*/
+typedef BasicView<Yuv12> Yuv12View; 
+
+/** @brief YUV-12 conmst view.
+*/
+typedef BasicView<Yuv12> Yuv12ConstView;
+
+/** @brief YUV-12 pixel view.
+*/
+typedef BasicPixelView<Yuv12> Yuv12PixelView;
+
+/** @brief YUV-12 const pixel view.
+*/
+typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
+
+/** @brief YUV-12 line view.
+*/
+typedef BasicLineView<Yuv12> Yuv12LineView;
+
+/** @brief YUV-12 const line view.
+*/
+typedef BasicConstLineView<Yuv12> Yuv12ConstLineView;
+
+/** @brief YUV-12 span.
+*/
+typedef BasicSpan<Yuv12, PixelTraits<Yuv12Pixel> > Yuv12Span;
+
+/** @brief YUV-12 const span.
+*/
+typedef BasicConstSpan<Yuv12, PixelTraits<Yuv12ConstPixel> > Yuv12ConstSpan;
 } // namespace
 
 } // namespace

@@ -42,18 +42,18 @@ namespace Gfx {
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT>& view)
-: BasicView<FormatT>(view)
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT, OtherTraitsT>& view)
+: BasicView<FormatT, TraitsT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT>& view,
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT, OtherTraitsT>& view,
                                                         Int x, Int y, Int w, Int h)
-: BasicView<FormatT>(view, x, y, w, h)
+: BasicView<FormatT, TraitsT>(view, x, y, w, h)
 {
 }
 
@@ -61,7 +61,7 @@ inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT>&
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicView<FormatT>(image)
+: BasicView<FormatT, TraitsT>(image)
 {
 }
 
@@ -70,7 +70,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT, OtherTraitsT>& image, 
                                                         Int x, Int y, Int w, Int h)
-: BasicView<FormatT>(image, x, y, w, h)
+: BasicView<FormatT, TraitsT>(image, x, y, w, h)
 {
 }
 
@@ -79,35 +79,35 @@ inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT,
 ///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT>& view)
-: BasicConstView<FormatT>(view)
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT, OtherTraitsT>& view)
+: BasicConstView<FormatT, TraitsT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT>& view,
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT, OtherTraitsT>& view,
                                                                   Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(view, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT>& view)
-: BasicConstView<FormatT>(view)
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT, OtherTraitsT>& view)
+: BasicConstView<FormatT, TraitsT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT>& view,
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
                                                                   Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(view, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
 {
 }
 
@@ -115,7 +115,7 @@ inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicCon
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT>(image)
+: BasicConstView<FormatT, TraitsT>(image)
 {
 }
 
@@ -124,7 +124,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
                                                                   Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(image, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
 {
 }
 
@@ -132,7 +132,7 @@ inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicIma
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT>(image)
+: BasicConstView<FormatT, TraitsT>(image)
 {
 }
 
@@ -141,7 +141,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
                                                                   Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(image, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
 {
 }
 

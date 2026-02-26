@@ -30,8 +30,7 @@
 #define PT_GFX_BASIC_IMAGE_HPP
 
 #include <Pt/Gfx/BasicLineView.h>
-#include <Pt/Types.h>
-#include <vector>
+#include <Pt/TypeTraits.h>
 
 namespace Pt {
 
@@ -70,51 +69,17 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, T
 }
 
 
-template <typename ImageT1, typename FormatT>
-void copyImage(const ImageT1& fromImage, BasicView<FormatT>& toImage)
+template <typename Fmt, typename Tr>
+BasicLineView<Fmt, typename Tr::ViewTraitsType> lineView(BasicImage<Fmt, Tr>& image) 
 {
-    typedef typename ImageT1::Format FormatT1;
-    typedef typename ImageT1::Traits ImageTraitsT1;
-    typedef typename ImageTraitsT1::ViewTraitsType ViewTraitsT1;
-    
-    //
-    // TODO GFX: BasicView needs ViewTraits
-    //
-    typedef FormatT FormatT2;
-    typedef typename ViewTraits<FormatT> ViewTraitsT2;
-
-    BasicLineView<FormatT2, ViewTraitsT2> toLines(toImage);
-    auto to = toLines.begin();
-
-    BasicConstLineView<FormatT1, ViewTraitsT1> fromLines(fromImage);
-
-    for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
-    {
-        copySpan(*from, *to);
-    }
+    return BasicLineView<Fmt, typename Tr::ViewTraitsType>(image);
 }
 
 
-template <typename ImageT1, typename ImageT2>
-void copyImage(const ImageT1& fromImage, ImageT2& toImage)
+template <typename Fmt, typename Tr>
+BasicConstLineView<Fmt, typename Tr::ViewTraitsType> lineView(const BasicImage<Fmt, Tr>& image) 
 {
-    typedef typename ImageT1::Format FormatT1;
-    typedef typename ImageT1::Traits ImageTraitsT1;
-    typedef typename ImageTraitsT1::ViewTraitsType ViewTraitsT1;
-    
-    typedef typename ImageT2::Format FormatT2;
-    typedef typename ImageT2::Traits ImageTraitsT2;
-    typedef typename ImageTraitsT2::ViewTraitsType ViewTraitsT2;
-
-    BasicLineView<FormatT2, ViewTraitsT2> toLines(toImage);
-    auto to = toLines.begin();
-
-    BasicConstLineView<FormatT1, ViewTraitsT1> fromLines(fromImage);
-
-    for(auto from = fromLines.begin(); from != fromLines.end(); ++from, ++to )
-    {
-        copySpan(*from, *to);
-    }
+    return BasicConstLineView<Fmt, typename Tr::ViewTraitsType>(image);
 }
 
 } // namespace

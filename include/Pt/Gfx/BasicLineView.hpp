@@ -42,7 +42,7 @@ namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view)
-: BasicView<FormatT>(view)
+: BasicView<FormatT, TraitsT>(view)
 { 
 }
 
@@ -50,7 +50,7 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view)
 template <typename FormatT, typename TraitsT>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view,
                                                       Int x, Int y, Int w, Int h)
-: BasicView<FormatT>(view, x, y, w, h)
+: BasicView<FormatT, TraitsT>(view, x, y, w, h)
 { 
 }
 
@@ -58,7 +58,7 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view,
 template <typename FormatT, typename TraitsT>
 template <typename OtherFmt, typename OtherTr>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFmt, OtherTr>& image)
-: BasicView<FormatT>(image)
+: BasicView<FormatT, TraitsT>(image)
 {
 }
 
@@ -67,7 +67,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFmt, typename OtherTr>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFmt, OtherTr>& image,
                                                       Int x, Int y, Int w, Int h)
-: BasicView<FormatT>(image, x, y, w, h)
+: BasicView<FormatT, TraitsT>(image, x, y, w, h)
 {
 }
 
@@ -78,7 +78,7 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFmt, Other
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT>& view)
-: BasicConstView<FormatT>(view)
+: BasicConstView<FormatT, TraitsT>(view)
 {
 }
 
@@ -87,7 +87,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT>& view,
                                                                 Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(view, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
 {
 }
 
@@ -95,7 +95,7 @@ inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT>& view)
-: BasicConstView<FormatT>(view)
+: BasicConstView<FormatT, TraitsT>(view)
 {
 }
 
@@ -104,7 +104,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT>& view,
                                                                 Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(view, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
 {
 }
 
@@ -112,7 +112,7 @@ inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConst
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT>(image)
+: BasicConstView<FormatT, TraitsT>(image)
 {
 }
 
@@ -121,7 +121,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
                                                                 Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(image, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
 {
 }
 
@@ -129,7 +129,7 @@ inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImage
 template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT>(image)
+: BasicConstView<FormatT, TraitsT>(image)
 {
 }
 
@@ -138,7 +138,7 @@ template <typename FormatT, typename TraitsT>
 template <typename OtherFormatT, typename OtherTraitsT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
                                                                 Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT>(image, x, y, w, h)
+: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
 {
 }
 

@@ -41,16 +41,6 @@ namespace Gfx {
 class Yuv12PixelBase;
 class Yuv12ConstPixelBase;
 
-class Yuv12;
-class Yuv12Pixel;
-class Yuv12ConstPixel;
-
-template <typename T>
-class BasicView;
-
-template <typename T>
-class BasicConstView;
-
 /** @brief YV-12 pixel.
 */
 class PT_GFX_API Yuv12Pixel
@@ -245,6 +235,13 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         typedef Yuv12Pixel PixelType;
         typedef Yuv12ConstPixel ConstPixelType;
         typedef Color ColorType;
+
+    public:
+        static const Yuv12& get()
+        {
+            static Yuv12 _yuv12;
+            return _yuv12;
+        }
 
     public:
         Yuv12();

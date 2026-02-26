@@ -575,17 +575,17 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const Color& color,
                     {
                         pixelColor.setAlpha(value * 257);
  
-                        Argb32::sourceOver(pixel, pixelColor);
+                        Argb32::sourceOver(pixel.base(), pixelColor);
                     }
                     else
                     {
-                        Argb32::sourceCopy(pixel, color);
+                        Argb32::sourceCopy(pixel.base(), color);
                     }
                     break;
 
                 case CompositionMode::SourceOver:
                     pixelColor.setAlpha(color.alpha() * value / 255);
-                    Argb32::sourceOver(pixel, pixelColor);
+                    Argb32::sourceOver(pixel.base(), pixelColor);
                     break;
             }
         }
