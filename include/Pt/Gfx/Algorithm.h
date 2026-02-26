@@ -31,7 +31,6 @@
 #define PT_GFX_ALGORITHM_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/PixelTraits.h>
 #include <Pt/TypeTraits.h>
 
 namespace Pt {
@@ -105,8 +104,8 @@ struct DirectConverter<T1, T2, 1>
 template <typename P1, typename P2>
 struct Converter 
     : public DirectConverter<P1, P2, 
-                             IsSame<typename PixelTraits<P1>::FormatType, 
-                                    typename PixelTraits<P2>::FormatType>::value> 
+                             IsSame<typename P1::FormatType, 
+                                    typename P2::FormatType>::value> 
 { };
 
 
@@ -137,8 +136,8 @@ void copyPixelImpl(const P1& p1, P2& p2, TrueType)
 template <typename P1, typename P2> 
 void copyPixel(const P1& p1, P2& p2)
 {
-    typedef typename PixelTraits<P1>::FormatType Fmt1;
-    typedef typename PixelTraits<P2>::FormatType Fmt2;
+    typedef typename P1::FormatType Fmt1;
+    typedef typename P2::FormatType Fmt2;
 
     copyPixelImpl(p1, p2, IsSame<Fmt1, Fmt2>());
 }
@@ -150,7 +149,7 @@ void copyPixel(const P1& p1, P2& p2)
 template <typename P1, typename P2> 
 void copyLineImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
 {
-    typedef typename PixelTraits<P2>::ColorType ColorType;
+    typedef typename P2::ColorType ColorType;
 
     const std::size_t bufsize = 64;
     ColorType colors[bufsize];
@@ -183,8 +182,8 @@ void copyLineImpl(const P1& p1, P2& p2, std::size_t length, TrueType)
 template <typename P1, typename P2> 
 void copyLine(const P1& p1, P2& p2, std::size_t length)
 {
-    typedef typename PixelTraits<P1>::FormatType Fmt1;
-    typedef typename PixelTraits<P2>::FormatType Fmt2;
+    typedef typename P1::FormatType Fmt1;
+    typedef typename P2::FormatType Fmt2;
 
     copyLineImpl(p1, p2, length, IsSame<Fmt1, Fmt2>());
 }

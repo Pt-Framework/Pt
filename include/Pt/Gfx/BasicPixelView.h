@@ -31,7 +31,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/PixelTraits.h>
 #include <Pt/Types.h>
 
 #include <iterator>
@@ -212,10 +211,8 @@ class BasicPixelView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraitsType;
-
-        typedef BasicPixelIterator<Format, PixelTraitsType> Iterator;
-        typedef BasicConstPixelIterator<Format, PixelTraitsType> ConstIterator;
+        typedef BasicPixelIterator<Format, Traits> Iterator;
+        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicPixelView(const Format& format = FormatT::get())
@@ -275,9 +272,8 @@ class BasicConstPixelView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraitsType;
-
-        typedef BasicConstPixelIterator<Format, PixelTraitsType> Iterator;
+        typedef BasicConstPixelIterator<Format, Traits> Iterator;
+        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicConstPixelView(const Format& format)

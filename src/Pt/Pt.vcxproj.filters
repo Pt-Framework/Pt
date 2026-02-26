@@ -2970,9 +2970,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicSpan.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\PixelTraits.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>

@@ -103,7 +103,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\PixelTraits.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngWriter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />

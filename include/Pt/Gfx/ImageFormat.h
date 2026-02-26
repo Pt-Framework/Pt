@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
 #include <Pt/Gfx/ImageTraits.h>
-#include <Pt/Gfx/PixelTraits.h>
 #include <Pt/Gfx/PixelBase.h>
 #include <Pt/Gfx/Color.h>
 
@@ -200,7 +199,8 @@ class Pixel
     friend class ConstPixel;
         
     public:
-        typedef ImageFormat Format;
+        typedef ImageFormat FormatType;
+        typedef ColorT ColorType;
 
     public:
         template <typename Tr>
@@ -335,7 +335,8 @@ class ConstPixel
     friend class Pixel;
 
     public:
-        typedef ImageFormat Format;
+        typedef ImageFormat FormatType;
+        typedef ColorT ColorType;
 
     public:
         template <typename Tr>
@@ -421,49 +422,6 @@ class ConstPixel
         PixelBase*          _pixel;
         PixelStorage        _storage;
         const ImageFormat*  _format;
-};
-
-///////////////////////////////////////////////////////////////////////
-// PixelTraits
-///////////////////////////////////////////////////////////////////////
-
-template <>
-struct PixelTraits< Pixel<Argb32Color> >
-{
-    typedef ImageFormat FormatType;
-    typedef Pixel<Argb32Color> PixelType;
-    typedef ConstPixel<Argb32Color> ConstPixelType;
-    typedef Argb32Color ColorType;
-};
-
-
-template <>
-struct PixelTraits< Pixel<Color> >
-{
-    typedef ImageFormat FormatType;
-    typedef Pixel<Color> PixelType;
-    typedef ConstPixel<Color> ConstPixelType;
-    typedef Color ColorType;
-};
-
-
-template <>
-struct PixelTraits< ConstPixel<Argb32Color> >
-{
-    typedef ImageFormat FormatType;
-    typedef Pixel<Argb32Color> PixelType;
-    typedef ConstPixel<Argb32Color> ConstPixelType;
-    typedef Argb32Color ColorType;
-};
-
-
-template <>
-struct PixelTraits< ConstPixel<Color> >
-{
-    typedef ImageFormat FormatType;
-    typedef Pixel<Color> PixelType;
-    typedef ConstPixel<Color> ConstPixelType;
-    typedef Color ColorType;
 };
 
 } // namespace

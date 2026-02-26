@@ -75,9 +75,6 @@ struct ImageTraits;
 template <typename FormatT>
 struct ViewTraits;
 
-template <typename PixelT>
-struct PixelTraits;
-
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicImage;
 
@@ -108,10 +105,10 @@ class BasicLineView;
 template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicConstLineView;
 
-template <typename FormatT, typename TraitsT>
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicSpan; 
 
-template <typename FormatT, typename TraitsT>
+template <typename FormatT, typename TraitsT = ViewTraits<FormatT> >
 class BasicConstSpan;
 
 //
@@ -159,11 +156,9 @@ typedef BasicLineView<ImageFormat, ColorFormatTraits> ColorLineView;
 
 typedef BasicConstLineView<ImageFormat, ColorFormatTraits> ConstColorLineView;
 
-typedef BasicSpan< ImageFormat, 
-                   PixelTraits<Pixel<Argb32Color> > > ImageSpan;
+typedef BasicSpan<ImageFormat> ImageSpan;
 
-typedef BasicConstSpan<ImageFormat, 
-                       PixelTraits<ConstPixel<Argb32Color> > > ConstImageSpan;
+typedef BasicConstSpan<ImageFormat> ConstImageSpan;
 
 //
 // ARGB-32
@@ -215,11 +210,11 @@ typedef BasicConstLineView<Argb32> Argb32ConstLineView;
 
 /** @brief ARGB-32 span.
 */
-typedef BasicSpan<Argb32, PixelTraits<Argb32Pixel> > Argb32Span;
+typedef BasicSpan<Argb32> Argb32Span;
 
 /** @brief ARGB-32 const span.
 */
-typedef BasicConstSpan<Argb32, PixelTraits<Argb32ConstPixel> > Argb32ConstSpan;
+typedef BasicConstSpan<Argb32 > Argb32ConstSpan;
 
 //
 // YUV-12
@@ -271,11 +266,11 @@ typedef BasicConstLineView<Yuv12> Yuv12ConstLineView;
 
 /** @brief YUV-12 span.
 */
-typedef BasicSpan<Yuv12, PixelTraits<Yuv12Pixel> > Yuv12Span;
+typedef BasicSpan<Yuv12> Yuv12Span;
 
 /** @brief YUV-12 const span.
 */
-typedef BasicConstSpan<Yuv12, PixelTraits<Yuv12ConstPixel> > Yuv12ConstSpan;
+typedef BasicConstSpan<Yuv12> Yuv12ConstSpan;
 } // namespace
 
 } // namespace

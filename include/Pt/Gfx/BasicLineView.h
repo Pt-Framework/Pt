@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/BasicSpan.h>
-#include <Pt/Gfx/PixelTraits.h>
 #include <Pt/Types.h>
 
 #include <cstddef>
@@ -195,13 +194,11 @@ class BasicLineView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraitsType;
+        typedef BasicLineIterator<Format, Traits> Iterator;
+        typedef BasicConstLineIterator<Format, Traits> ConstIterator;
 
-        typedef BasicLineIterator<Format, PixelTraitsType> Iterator;
-        typedef BasicConstLineIterator<Format, PixelTraitsType> ConstIterator;
-
-        typedef BasicSpan<Format, PixelTraitsType> Span;
-        typedef BasicConstSpan<Format, PixelTraitsType> ConstSpan;
+        typedef BasicSpan<Format, Traits> Span;
+        typedef BasicConstSpan<Format, Traits> ConstSpan;
 
     public:
         explicit BasicLineView(const Format& format)
@@ -250,9 +247,11 @@ class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef PixelTraits<Pixel> PixelTraitsType;
+        typedef BasicConstLineIterator<Format, Traits> Iterator;
+        typedef BasicConstLineIterator<Format, Traits> ConstIterator;
 
-        typedef BasicConstLineIterator<Format, PixelTraitsType> Iterator;
+        typedef BasicSpan<Format, Traits> Span;
+        typedef BasicConstSpan<Format, Traits> ConstSpan;
 
     public:
         explicit BasicConstLineView(const Format& format)

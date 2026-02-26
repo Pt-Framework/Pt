@@ -47,7 +47,8 @@ class Argb32Pixel
     friend class Argb32ConstPixel;
 
     public:
-        typedef Argb32 Format;
+        typedef Argb32 FormatType;
+        typedef Argb32Color ColorType;
 
     public:
         Argb32Pixel(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -127,7 +128,8 @@ class Argb32ConstPixel
     friend class Argb32Pixel;
 
     public:
-        typedef Argb32 Format;
+        typedef Argb32 FormatType;
+        typedef Argb32Color ColorType;
 
     protected:
         Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
