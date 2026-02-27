@@ -75,20 +75,6 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, T
     _padding = image.padding();
 }
 
-
-template <typename Fmt, typename Tr>
-BasicLineView<Fmt, Tr> lineView(BasicImage<Fmt, Tr>& image) 
-{
-    return BasicLineView<Fmt, Tr>(image);
-}
-
-
-template <typename Fmt, typename Tr>
-BasicConstLineView<Fmt, Tr> lineView(const BasicImage<Fmt, Tr>& image) 
-{
-    return BasicConstLineView<Fmt, Tr>(image);
-}
-
 } // namespace
 
 } // namespace

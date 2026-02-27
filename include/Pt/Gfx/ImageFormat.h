@@ -197,6 +197,8 @@ class Pixel
 
         ~Pixel();
 
+        Pixel& operator=(const Pixel&) = delete;
+
         Pixel& operator=(const ColorF& color)
         { 
             assign(color); 
@@ -345,6 +347,8 @@ class ConstPixel
         ConstPixel(const Pixel<ColorT>& p);
 
         ~ConstPixel();
+
+        ConstPixel& operator=(const ConstPixel&) = delete;
 
         template <typename Tr>
         void reset(const BasicConstView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);

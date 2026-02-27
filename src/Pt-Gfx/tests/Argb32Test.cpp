@@ -165,12 +165,10 @@ class Argb32Test : public Pt::Unit::TestSuite
                             [](const Argb32Pixel& p) 
                             { return p.toColor(); });
 
-            std::copy( pixelView.begin(), pixelView.end(), pixelView.begin() );
-
-            //copyArea(image, image);
-            //copyArea(cimage, image);
-            //copyArea(cimage, argb32Image);
-            //copyArea(cargb32Image, image);
+            copyArea(image, image);
+            copyArea(cimage, image);
+            copyArea(cimage, argb32Image);
+            copyArea(cargb32Image, image);
 
             copyPixel(*cpixelView.begin(), *pixelView.begin());
             copyPixel(*cpixelView.begin(), *argb32View.begin());

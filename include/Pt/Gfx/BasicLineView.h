@@ -288,16 +288,22 @@ class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
 };
 
 
-template <typename Fmt, typename Tr>
-BasicLineView<Fmt, Tr> lineView(BasicView<Fmt, Tr>& view) 
+template <typename T>
+BasicLineView<typename T::Format, typename T::Traits> lineView(T& view) 
 {
+    typedef typename T::Format Fmt;
+    typedef typename T::Traits Tr;
+    
     return BasicLineView<Fmt, Tr>(view);
 }
 
 
-template <typename Fmt, typename Tr>
-BasicConstLineView<Fmt, Tr> lineView(const BasicView<Fmt, Tr>& view) 
+template <typename T>
+BasicConstLineView<typename T::Format, typename T::Traits> lineView(const T& view) 
 {
+    typedef typename T::Format Fmt;
+    typedef typename T::Traits Tr;
+    
     return BasicConstLineView<Fmt, Tr>(view);
 }
 
