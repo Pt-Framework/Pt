@@ -2967,9 +2967,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageTraits.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicSpan.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -2983,6 +2980,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\BasicCursorView.hpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Span.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>

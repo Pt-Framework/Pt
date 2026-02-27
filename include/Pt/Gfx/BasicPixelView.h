@@ -41,17 +41,17 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
-class BasicPixelIterator;
+class PixelIterator;
 
 template <typename FormatT, typename TraitsT>
-class BasicConstPixelIterator;
+class ConstPixelIterator;
 
 
 template <typename FormatT, typename TraitsT>
-class BasicPixelIterator
+class PixelIterator
 {
     template <typename F, typename T>
-    friend class BasicConstPixelIterator;
+    friend class ConstPixelIterator;
 
     public:
         typedef FormatT Format;
@@ -59,7 +59,7 @@ class BasicPixelIterator
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
+        typedef ConstPixelIterator<Format, Traits> ConstIterator;
  
     public:
         using iterator_category = std::forward_iterator_tag;
@@ -70,27 +70,27 @@ class BasicPixelIterator
 
     public:
         template <typename Tr>
-        BasicPixelIterator(BasicView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
+        PixelIterator(BasicView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _pixel(view, x, y)
         { }
 
-        BasicPixelIterator(const BasicPixelIterator& it)
+        PixelIterator(const PixelIterator& it)
         : _pixel(it._pixel)
         { }
 
-        BasicPixelIterator& operator=(const BasicPixelIterator& it)
+        PixelIterator& operator=(const PixelIterator& it)
         {
             _pixel.reset(it._pixel);
             return *this;
         }
 
-        bool operator!=(const BasicPixelIterator& it) const
+        bool operator!=(const PixelIterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
         bool operator!=(const ConstIterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
-        bool operator==(const BasicPixelIterator& it) const
+        bool operator==(const PixelIterator& it) const
         { return _pixel.equals(it._pixel); }
 
         bool operator==(const ConstIterator& it) const
@@ -102,13 +102,13 @@ class BasicPixelIterator
         Pixel* operator->()
         { return &_pixel; }
 
-        BasicPixelIterator& operator++()
+        PixelIterator& operator++()
         {
             _pixel.advance();
             return *this;
         }
 
-        BasicPixelIterator& operator+=(Pt::ssize_t n)
+        PixelIterator& operator+=(Pt::ssize_t n)
         {
             _pixel.advance(n);
             return *this;
@@ -120,10 +120,10 @@ class BasicPixelIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstPixelIterator
+class ConstPixelIterator
 {
     template <typename F, typename T>
-    friend class BasicPixelIterator;
+    friend class PixelIterator;
 
     public:
         typedef FormatT Format;
@@ -131,7 +131,7 @@ class BasicConstPixelIterator
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicPixelIterator<Format, Traits> Iterator;
+        typedef PixelIterator<Format, Traits> Iterator;
 
     public:
         using iterator_category = std::forward_iterator_tag;
@@ -142,34 +142,34 @@ class BasicConstPixelIterator
 
     public:
         template <typename Tr>
-        BasicConstPixelIterator(const BasicConstView<Format, Tr>& view, 
+        ConstPixelIterator(const BasicConstView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _pixel(view, x, y)
         { }
 
         template <typename Tr>
-        BasicConstPixelIterator(const BasicView<Format, Tr>& view, 
+        ConstPixelIterator(const BasicView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _pixel(view, x, y)
         { }
 
-        BasicConstPixelIterator(const BasicConstPixelIterator& it)
+        ConstPixelIterator(const ConstPixelIterator& it)
         : _pixel(it._pixel)
         { }
 
-        BasicConstPixelIterator& operator=(const BasicConstPixelIterator& it)
+        ConstPixelIterator& operator=(const ConstPixelIterator& it)
         {
             _pixel.reset(it._pixel);
             return *this;
         }
 
-        bool operator!=(const BasicConstPixelIterator& it) const
+        bool operator!=(const ConstPixelIterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
         bool operator!=(const Iterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
-        bool operator==(const BasicConstPixelIterator& it) const
+        bool operator==(const ConstPixelIterator& it) const
         { return _pixel.equals(it._pixel); }
 
         bool operator==(const Iterator& it) const
@@ -181,13 +181,13 @@ class BasicConstPixelIterator
         const ConstPixel* operator->() const
         { return &_pixel; }
 
-        BasicConstPixelIterator& operator++()
+        ConstPixelIterator& operator++()
         {
             _pixel.advance();
             return *this;
         }
 
-        BasicConstPixelIterator& operator+=(Pt::ssize_t n)
+        ConstPixelIterator& operator+=(Pt::ssize_t n)
         {
             _pixel.advance(n);
             return *this;
@@ -208,8 +208,8 @@ class BasicPixelView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicPixelIterator<Format, Traits> Iterator;
-        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
+        typedef PixelIterator<Format, Traits> Iterator;
+        typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicPixelView(const Format& format = Format::get())
@@ -269,8 +269,8 @@ class BasicConstPixelView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicConstPixelIterator<Format, Traits> Iterator;
-        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
+        typedef ConstPixelIterator<Format, Traits> Iterator;
+        typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicConstPixelView(const Format& format)

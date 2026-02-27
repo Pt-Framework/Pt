@@ -31,7 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/BasicSpan.h>
+#include <Pt/Gfx/Span.h>
 #include <Pt/Types.h>
 
 #include <cstddef>
@@ -42,14 +42,14 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
-class BasicLineIterator;
+class LineIterator;
 
 template <typename FormatT, typename TraitsT>
-class BasicConstLineIterator;
+class ConstLineIterator;
 
 
 template <typename FormatT, typename TraitsT>
-class BasicLineIterator
+class LineIterator
 {
     public:
         typedef FormatT Format;
@@ -65,7 +65,7 @@ class BasicLineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        BasicLineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        LineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _view(&view)
         , _span(view, x, y, view.width())
         { }
@@ -82,31 +82,31 @@ class BasicLineIterator
         const value_type* operator->() const
         { return &_span; }
 
-        BasicLineIterator& operator++() noexcept
+        LineIterator& operator++() noexcept
         {
             _span.advanceLines(1);
             return *this;
         }
 
-        BasicLineIterator operator++(int) noexcept
+        LineIterator operator++(int) noexcept
         {
-            BasicLineIterator it(*this);
+            LineIterator it(*this);
             ++*this;
             return it;
         }
 
-        BasicLineIterator& operator+=(Pt::ssize_t n)
+        LineIterator& operator+=(Pt::ssize_t n)
         {
             _span.advanceLines(n);
             return *this;
         }
 
-        bool operator==(const BasicLineIterator& other) const noexcept
+        bool operator==(const LineIterator& other) const noexcept
         {
             return _span.front().equals( other->front() );
         }
 
-        bool operator!=(const BasicLineIterator& other) const noexcept
+        bool operator!=(const LineIterator& other) const noexcept
         {
             return ! (*this == other);
         }
@@ -118,7 +118,7 @@ class BasicLineIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstLineIterator
+class ConstLineIterator
 {
     public:
         typedef FormatT Format;
@@ -135,7 +135,7 @@ class BasicConstLineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        BasicConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        ConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _view(&view)
         , _span(view, x, y, view.width())
         { }
@@ -146,31 +146,31 @@ class BasicConstLineIterator
         const pointer operator->() const
         { return &_span; }
 
-        BasicConstLineIterator& operator++() noexcept
+        ConstLineIterator& operator++() noexcept
         {
             _span.advanceLines(1);
             return *this;
         }
 
-        BasicConstLineIterator operator++(int) noexcept
+        ConstLineIterator operator++(int) noexcept
         {
-            BasicConstLineIterator it(*this);
+            ConstLineIterator it(*this);
             ++*this;
             return it;
         }
 
-        BasicConstLineIterator& operator+=(Pt::ssize_t n)
+        ConstLineIterator& operator+=(Pt::ssize_t n)
         {
             _span.advanceLines(n);
             return *this;
         }
 
-        bool operator==(const BasicConstLineIterator& other) const noexcept
+        bool operator==(const ConstLineIterator& other) const noexcept
         {
             return _span.front().equals( other->front() );
         }
 
-        bool operator!=(const BasicConstLineIterator& other) const noexcept
+        bool operator!=(const ConstLineIterator& other) const noexcept
         {
             return ! (*this == other);
         }
@@ -191,8 +191,8 @@ class BasicLineView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicLineIterator<Format, Traits> Iterator;
-        typedef BasicConstLineIterator<Format, Traits> ConstIterator;
+        typedef LineIterator<Format, Traits> Iterator;
+        typedef ConstLineIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicLineView(const Format& format)
@@ -241,8 +241,8 @@ class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicConstLineIterator<Format, Traits> Iterator;
-        typedef BasicConstLineIterator<Format, Traits> ConstIterator;
+        typedef ConstLineIterator<Format, Traits> Iterator;
+        typedef ConstLineIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicConstLineView(const Format& format)

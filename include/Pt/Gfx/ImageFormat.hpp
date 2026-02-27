@@ -31,7 +31,6 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/BasicSpan.h>
 
 namespace Pt {
 

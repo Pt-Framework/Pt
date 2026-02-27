@@ -50,8 +50,8 @@ class Span
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
-        typedef BasicPixelIterator<Format, Traits> Iterator;
-        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
+        typedef PixelIterator<Format, Traits> Iterator;
+        typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         Span(BasicView<Format>& view, 
@@ -162,8 +162,8 @@ class ConstSpan
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
-        typedef BasicConstPixelIterator<Format, Traits> Iterator;
-        typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
+        typedef ConstPixelIterator<Format, Traits> Iterator;
+        typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         ConstSpan(const BasicConstView<Format>& view, 
@@ -268,7 +268,7 @@ class ConstSpan
 
 
 template <typename SpanT, typename FormatT, typename TraitsT>
-void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to)
+void copySpan(const SpanT& from, PixelIterator<FormatT, TraitsT>& to)
 {
     copyLine(from.front(), *to, from.length());
 }

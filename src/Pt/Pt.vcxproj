@@ -80,7 +80,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicLineView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp" />
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicSpan.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BasicView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h" />
@@ -112,6 +111,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Scaling.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Span.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\TextMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ViewBase.h" />
