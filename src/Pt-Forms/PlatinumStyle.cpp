@@ -54,7 +54,7 @@
 
 namespace {
 
-Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
+Pt::Gfx::ColorF brighten(const Pt::Gfx::ColorF& c, float factor)
 {
     float r = c.red() * factor;
     float g = c.green() * factor;
@@ -64,7 +64,7 @@ Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
     Pt::uint16_t g16 = g > 65535 ? 65535 : static_cast<Pt::uint16_t>(g);
     Pt::uint16_t b16 = b > 65535 ? 65535 : static_cast<Pt::uint16_t>(b);
 
-    return Pt::Gfx::Color(c.alpha(), r16, g16, b16);
+    return Pt::Gfx::ColorF(c.alpha(), r16, g16, b16);
 }
 
 } // namespace
@@ -208,14 +208,14 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
 
     if( button.isPressed() && button.isFlat() )
     {
-        Gfx::Color hightlightColor = button.accentColor();
+        Gfx::ColorF hightlightColor = button.accentColor();
 
         Gfx::Image highlightIcon = icon;
         Gfx::ColorPixelView iconView(highlightIcon);
 
         for(Gfx::ColorPixelView::Iterator it = iconView.begin(); it != iconView.end(); ++it)
         {
-            Gfx::Color color = it->toColor();
+            Gfx::ColorF color = it->toColor();
 
             color.setRed( hightlightColor.red() );
             color.setGreen( hightlightColor.green() ); 
@@ -630,7 +630,7 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
                               Gfx::SizeF(iconWidth, size.height()) );
                 
          Gfx::Brush brush = Gfx::Brush::verticalGradient(brush.color(),
-                                                         Gfx::Color(65000, 65000, 65000) );
+                                                         Gfx::ColorF(65000, 65000, 65000) );
 
         painter.setBrush(brush);
         painter.fillRect(iconStrip);

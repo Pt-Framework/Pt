@@ -36,7 +36,7 @@ class PaintView : public Pt::Forms::Control
             const int   imageWidth  = 200;
             const int   imageHeight = 440;
             const RectF imageRect   = RectF( PointF(0, 0), SizeF(imageWidth, imageHeight) );
-            const Color background  = Color::fromRgb8(0, 0, 0);
+            const ColorF background  = ColorF::fromRgb8(0, 0, 0);
 
             Painter painter(surface);
             painter.setClip(rect);
@@ -80,8 +80,8 @@ class LinesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue   = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue   = ColorF::fromRgb8(100, 100, 255);
 
             painter.setFont( Font("", 12) );
             painter.setPen( lightPurple );
@@ -127,7 +127,7 @@ class LinesView : public PaintView
             Pt::uint8_t dashes[] = { 1, 1, 3, 1 };
             std::vector<Pt::uint8_t> dashPattern( dashes, dashes + sizeof(dashes) );
 
-            Color red = Color::fromRgb8(255, 0, 0);
+            ColorF red = ColorF::fromRgb8(255, 0, 0);
 
             Pen pen(red, 1, style, cap);
 
@@ -165,8 +165,8 @@ class PolylinesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue   = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue   = ColorF::fromRgb8(100, 100, 255);
 
             painter.setFont( Font("", 12) );
             painter.setPen( lightPurple );
@@ -199,7 +199,7 @@ class PolylinesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color red = Color::fromRgb8(255,   0,   0);
+            ColorF red = ColorF::fromRgb8(255,   0,   0);
 
             Pen pen(red, 1, Pen::Solid, Pen::FlatCap, join);
 
@@ -258,8 +258,8 @@ class ShapesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue = ColorF::fromRgb8(100, 100, 255);
 
             painter.setFont(Font("", 12));
             painter.setPen(lightPurple);
@@ -311,8 +311,8 @@ class ShapesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue = ColorF::fromRgb8(100, 100, 255);
 
             painter.setPen(lightBlue);
             painter.setBrush(lightPurple);
@@ -340,8 +340,8 @@ class ShapesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue = ColorF::fromRgb8(100, 100, 255);
 
             painter.setPen(lightBlue);
             painter.setBrush(lightPurple);
@@ -369,8 +369,8 @@ class ShapesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue = ColorF::fromRgb8(100, 100, 255);
 
             painter.setPen(lightBlue);
             painter.setBrush(lightPurple);
@@ -447,8 +447,8 @@ class ShapesView : public PaintView
         {
             using namespace Pt::Gfx;
 
-            Color lightPurple = Color::fromRgb8(164, 100, 255);
-            Color lightBlue = Color::fromRgb8(100, 100, 255);
+            ColorF lightPurple = ColorF::fromRgb8(164, 100, 255);
+            ColorF lightBlue = ColorF::fromRgb8(100, 100, 255);
 
             painter.setPen(lightBlue);
             painter.setBrush(lightPurple);

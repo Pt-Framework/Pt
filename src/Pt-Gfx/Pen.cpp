@@ -35,22 +35,22 @@ namespace Pt {
 namespace Gfx {
 
 Pen::Pen()
-: _penData(new PenData(Color(0, 0, 0), 0, Solid, RoundCap, RoundJoin))
+: _penData(new PenData(ColorF(0, 0, 0), 0, Solid, RoundCap, RoundJoin))
 {}
 
 
-Pen::Pen(const Color& color)
+Pen::Pen(const ColorF& color)
 : _penData(new PenData(color, 1, Solid, RoundCap, RoundJoin))
 {}
 
 
-Pen::Pen(const Color& color, std::size_t size, 
+Pen::Pen(const ColorF& color, std::size_t size, 
          Style style, CapStyle cap, JoinStyle join)
 : _penData(new PenData(color, size, style, cap, join))
 {}
 
 
-Pen::Pen(const Color& color, std::size_t size, 
+Pen::Pen(const ColorF& color, std::size_t size, 
          const std::vector<Pt::uint8_t>& dashPattern, 
          CapStyle cap, JoinStyle join)
 : _penData(new PenData(color, size, DashPattern, dashPattern, cap, join))
@@ -63,7 +63,7 @@ bool Pen::isNull() const
 }
 
 
-void Pen::setColor(const Color& color)
+void Pen::setColor(const ColorF& color)
 {
     // COW
     if(_penData.refs() > 1) 
@@ -76,7 +76,7 @@ void Pen::setColor(const Color& color)
 }
 
 
-const Color& Pen::color() const
+const ColorF& Pen::color() const
 {
     return _penData->color();
 }

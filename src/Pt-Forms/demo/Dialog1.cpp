@@ -74,20 +74,20 @@ void Dialog1::init()
   _panel1.Dock = Docking::Bottom;
   addChild(&_panel1);
 
-  _panel2.BackColor =Gfx::Color(0, 1, 1,0);
+  _panel2.BackColor =Gfx::ColorF(0, 1, 1,0);
   _panel2.Dock = Docking::Left;
   addChild(&_panel2);
   
   
-  _panel3.BackColor =Gfx::Color(0, 0, 1,0);
+  _panel3.BackColor =Gfx::ColorF(0, 0, 1,0);
   _panel3.Dock = Docking::Right;
   addChild(&_panel3);
 
-  _panel4.BackColor =Gfx::Color(0, 1, 1,0);
+  _panel4.BackColor =Gfx::ColorF(0, 1, 1,0);
   _panel4.Dock = Docking::Top;
   addChild(&_panel4);
   
-  _panel5.BackColor =Gfx::Color(0, 1, 0,1);
+  _panel5.BackColor =Gfx::ColorF(0, 1, 0,1);
   _panel5.Dock = Docking::Fill;
   addChild(&_panel5);    */
 }

@@ -313,7 +313,7 @@ class PngReaderImpl
                     unsigned char green = data[n++];
                     unsigned char blue = data[n++];
 
-                    Pt::Gfx::Color color(65535, red*257, green*257, blue*257);
+                    Pt::Gfx::ColorF color(65535, red*257, green*257, blue*257);
                     pixel = color;
                 }
 
@@ -324,7 +324,7 @@ class PngReaderImpl
                     unsigned char blue = data[n++];
                     unsigned char alpha = data[n++];
             
-                    Pt::Gfx::Color color(alpha*257, red*257, green*257, blue*257);
+                    Pt::Gfx::ColorF color(alpha*257, red*257, green*257, blue*257);
                     pixel = color;
 			          }
 		        }

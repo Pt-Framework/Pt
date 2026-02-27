@@ -221,16 +221,16 @@ void LineEdit::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::Color& LineEdit::textColor() const
+const Gfx::ColorF& LineEdit::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void LineEdit::setTextColor(const Gfx::Color& color)
+void LineEdit::setTextColor(const Gfx::ColorF& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
+    _textColor.reset( new Gfx::ColorF(color) );
     invalidate();
 }
 

@@ -34,15 +34,15 @@ namespace Pt {
 namespace Forms {
 
 StyleOptions::StyleOptions()
-: _background(Pt::Gfx::Color::fromRgb8(229, 229, 229))
-, _foreground(Gfx::Color::fromRgb8(210, 210, 210))
-, _contour(Gfx::Color::fromRgb8(150, 150, 150))
-, _accentColor(Gfx::Color::fromRgb8(20, 140, 250))
-, _viewBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255))
-, _highlightColor(Gfx::Color::fromRgb8(190, 190, 190))
-, _textBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255))
-, _textColor(Gfx::Color::fromRgb8(0, 0, 0))
-, _highlightedTextColor(Gfx::Color::fromRgb8(0, 0, 0))
+: _background(Pt::Gfx::ColorF::fromRgb8(229, 229, 229))
+, _foreground(Gfx::ColorF::fromRgb8(210, 210, 210))
+, _contour(Gfx::ColorF::fromRgb8(150, 150, 150))
+, _accentColor(Gfx::ColorF::fromRgb8(20, 140, 250))
+, _viewBackground(Pt::Gfx::ColorF::fromRgb8(255, 255, 255))
+, _highlightColor(Gfx::ColorF::fromRgb8(190, 190, 190))
+, _textBackground(Pt::Gfx::ColorF::fromRgb8(255, 255, 255))
+, _textColor(Gfx::ColorF::fromRgb8(0, 0, 0))
+, _highlightedTextColor(Gfx::ColorF::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 10))
 {
 }

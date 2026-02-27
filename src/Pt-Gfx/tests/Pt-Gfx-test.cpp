@@ -55,13 +55,13 @@ class PtGfxTest : public Pt::Unit::TestSuite
 
             //imagePainter.setFont( Pt::Gfx::Font("", 32) );
             //
-            //imagePainter.setPen( Gfx::Color::fromRgb8(255, 0, 0) );
+            //imagePainter.setPen( Gfx::ColorF::fromRgb8(255, 0, 0) );
             //imagePainter.drawText(Pt::Gfx::PointF(200, 200), "rotated", trans);
 
-            //imagePainter.setPen( Gfx::Color::fromRgb8(0, 255, 0) );
+            //imagePainter.setPen( Gfx::ColorF::fromRgb8(0, 255, 0) );
             //imagePainter.drawText(Pt::Gfx::PointF(200, 50), "not rotated");
 
-            //imagePainter.setPen( Gfx::Color::fromRgb8(255, 255, 0) );
+            //imagePainter.setPen( Gfx::ColorF::fromRgb8(255, 255, 0) );
             //imagePainter.drawLine( Gfx::PointF(0,0), Gfx::PointF(200, 200) );
 
             //std::clog << "PtGfxTest: writing gfx-test-image.png" << std::endl;

@@ -87,17 +87,17 @@ class PT_FORMS_API PushButton : public Button
 
         void setContour(const Gfx::Pen& p);
 
-        const Gfx::Color& accentColor() const;
+        const Gfx::ColorF& accentColor() const;
         
-        void setAccentColor(const Gfx::Color& color);
+        void setAccentColor(const Gfx::ColorF& color);
 
-        const Gfx::Color& highlightColor() const;
+        const Gfx::ColorF& highlightColor() const;
 
-        void setHighlightColor(const Gfx::Color& c);
+        void setHighlightColor(const Gfx::ColorF& c);
 
-        const Gfx::Color& textColor() const;
+        const Gfx::ColorF& textColor() const;
 
-        void setTextColor(const Gfx::Color& color);
+        void setTextColor(const Gfx::ColorF& color);
 
         const std::string& font() const;
 
@@ -151,9 +151,9 @@ class PT_FORMS_API PushButton : public Button
 
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>       _accentColor;
-        AutoPtr<Gfx::Color>       _highlightColor;
-        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<Gfx::ColorF>       _accentColor;
+        AutoPtr<Gfx::ColorF>       _highlightColor;
+        AutoPtr<Gfx::ColorF>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
         AutoPtr<std::string>      _fontStyle;

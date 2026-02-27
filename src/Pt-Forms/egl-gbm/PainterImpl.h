@@ -114,7 +114,7 @@ class PainterImpl
 
         void flush();
         
-        void clear(const Gfx::Color& color);
+        void clear(const Gfx::ColorF& color);
 
     private:
         PaintSurfaceImpl*      _surface;

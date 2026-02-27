@@ -86,7 +86,7 @@ class SkiaContext : public PaintContext
         }
 
     private:
-        static SkColor toSkia(const Gfx::Color& c)
+        static SkColor toSkia(const Gfx::ColorF& c)
         {
             return SkColorSetARGB((U8CPU)(c.alpha() / 257),
                 (U8CPU)(c.red() / 257),

@@ -149,7 +149,7 @@ void staticApp(Pt::Forms::Application& app)
 {
     Pt::Forms::Label label;
     label.setName("Label");
-    label.setContour( Pt::Gfx::Color::fromRgb8(0, 0, 0) );
+    label.setContour( Pt::Gfx::ColorF::fromRgb8(0, 0, 0) );
     label.setText("Hello World!");
     label.setAlignment(Pt::Forms::Alignment::Center);
 

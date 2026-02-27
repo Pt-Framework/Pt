@@ -129,7 +129,7 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
-void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+void PixmapSurfaceImpl::clear(const Gfx::ColorF& c)
 {
 }
 
@@ -327,7 +327,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
 
     _graphics->SetTransform(&matrix);
 
-    const Gfx::Color& color = _painter->pen().color();
+    const Gfx::ColorF& color = _painter->pen().color();
     BYTE alpha = color.alpha() / 257;
     BYTE red   = color.red()   / 257;
     BYTE green = color.green() / 257; 
@@ -498,7 +498,7 @@ void PixmapSurfaceImpl::toPreMulAlpha(const Pt::Gfx::Image& image,
         for (std::size_t x = 0; x < image.width(); ++x)
         {
             Gfx::ConstPixel pixel(image.view(), x, y);
-            Gfx::Color color = image.format().getColor(pixel);
+            Gfx::ColorF color = image.format().getColor(pixel);
 
             const Pt::uint8_t r = color.red() / 257;
             const Pt::uint8_t g = color.green() / 257;

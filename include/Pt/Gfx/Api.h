@@ -66,7 +66,7 @@ class PaintSurface;
 // Images and views
 //
 
-class Color;
+class ColorF;
 class Argb32Color;
 
 template <typename FormatT>

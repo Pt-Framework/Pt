@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace Gfx {
 
-void ColorStops::calculateInterpolatedColor(Color& res, const float position) const
+void ColorStops::calculateInterpolatedColor(ColorF& res, const float position) const
 {
     // If the position is less than or equal to the first position,
     // then simply return the first color
@@ -82,7 +82,7 @@ void ColorStops::calculateInterpolatedColor(Color& res, const float position) co
     const float spos = (position - p1) / (p2 - p1);
 
     // Return the interpolated the color
-    res = Color(
+    res = ColorF(
         a1 + (a2 - a1) * spos,
         r1 + (r2 - r1) * spos,
         g1 + (g2 - g1) * spos,
@@ -96,7 +96,7 @@ Brush::Brush()
 {}
 
 
-Brush::Brush(const Color& color)
+Brush::Brush(const ColorF& color)
 : _brushData( new BrushData(color) )
 {}
 
@@ -113,14 +113,14 @@ Brush::Brush(BrushData* data)
 }
 
 
-Brush Brush::verticalGradient(const Color& from, const Color& to)
+Brush Brush::verticalGradient(const ColorF& from, const ColorF& to)
 {
     BrushData* data = new BrushData(from, to, Vertical);
     return Brush(data);
 }
 
 
-Brush Brush::horizontalGradient(const Color& from, const Color& to)
+Brush Brush::horizontalGradient(const ColorF& from, const ColorF& to)
 {
     BrushData* data = new BrushData(from, to, Horizontal);
     return Brush(data);
@@ -195,7 +195,7 @@ Brush::PositionMode Brush::positionMode() const
 }
 
 
-void Brush::setColor(const Color& color)
+void Brush::setColor(const ColorF& color)
 {
     // COW
     if(_brushData.refs() > 1) {
@@ -208,7 +208,7 @@ void Brush::setColor(const Color& color)
 }
 
 
-const Color& Brush::color() const
+const ColorF& Brush::color() const
 {
     return _brushData->color();
 }
@@ -220,7 +220,7 @@ Brush::GradientStyle Brush::gradient() const
 }
 
 
-const Color& Brush::gradientColor() const
+const ColorF& Brush::gradientColor() const
 {
     return _brushData->gradientColor();
 }
@@ -324,7 +324,7 @@ BrushData::BrushData(const Image& texture,
 }
 
 
-BrushData::BrushData(const Color& from, const Color& to,
+BrushData::BrushData(const ColorF& from, const ColorF& to,
                      Brush::GradientStyle g)
 : _isNull(false)
 , _fillStyle(Brush::Gradient)
@@ -356,7 +356,7 @@ BrushData::~BrushData()
 }
 
 
-void BrushData::setSolid(const Color& color)
+void BrushData::setSolid(const ColorF& color)
 {
     _fillStyle = Brush::Solid;
     _color     = color;

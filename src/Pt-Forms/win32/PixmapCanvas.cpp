@@ -154,8 +154,8 @@ HFONT getFont(const Pt::Gfx::Font& font)
 }
 
 HBRUSH getGradientBrush(HDC dc, int width, int height,
-                        Pt::Gfx::Color gradientStart, 
-                        Pt::Gfx::Color gradientStop, 
+                        Pt::Gfx::ColorF gradientStart, 
+                        Pt::Gfx::ColorF gradientStop, 
                         Pt::Gfx::Brush::GradientStyle gradient)
 {
 
@@ -975,7 +975,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     graphics.GetTransform(&oldMatrix);
     graphics.SetTransform(&matrix);
 
-    const Gfx::Color& color = _penColor;
+    const Gfx::ColorF& color = _penColor;
     BYTE alpha = color.alpha() / 257;
     BYTE red   = color.red()   / 257;
     BYTE green = color.green() / 257; 

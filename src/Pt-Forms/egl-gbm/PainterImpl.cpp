@@ -44,7 +44,7 @@ PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _surface(surface)
 , _origin(0.0f, 0.0f)
 , _pen(1)
-, _brush( Gfx::Color(0, 0, 0, 0) )
+, _brush( Gfx::ColorF(0, 0, 0, 0) )
 , _font( PaintSurfaceImpl::defaultFont() )
 {
 }
@@ -204,7 +204,7 @@ void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 }
 
 
-void PainterImpl::clear(const Gfx::Color& color)
+void PainterImpl::clear(const Gfx::ColorF& color)
 {
     Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   
     setBrush( Gfx::Brush(color) );

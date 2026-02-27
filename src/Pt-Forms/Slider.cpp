@@ -122,16 +122,16 @@ void Slider::setBackground(const Gfx::Brush& b)
 }
 
 
-const Gfx::Color& Slider::foreground() const
+const Gfx::ColorF& Slider::foreground() const
 {
     return _foreground ? *_foreground
                        : Application::instance().styleOptions().accentColor();
 }
 
 
-void Slider::setForeground(const Gfx::Color& b)
+void Slider::setForeground(const Gfx::ColorF& b)
 {
-    _foreground.reset( new Gfx::Color(b) );
+    _foreground.reset( new Gfx::ColorF(b) );
     repaint();
 }
 
@@ -150,16 +150,16 @@ void Slider::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::Color& Slider::textColor() const
+const Gfx::ColorF& Slider::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void Slider::setTextColor(const Gfx::Color& color)
+void Slider::setTextColor(const Gfx::ColorF& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
+    _textColor.reset( new Gfx::ColorF(color) );
     invalidate();
 }
 

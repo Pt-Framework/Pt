@@ -131,7 +131,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             Yuv12PixelView::Iterator pixel = imageView.pixel(0, 0);
 
-            Pt::Gfx::Color c = pixel->toColor();
+            Pt::Gfx::ColorF c = pixel->toColor();
             *pixel = c;
 
             PT_UNIT_ASSERT(yuv12[0] > 99 && yuv12[0] < 101);
@@ -279,7 +279,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
                 Yuv12PixelView::Iterator it = imageView.begin();
                 Yuv12PixelView::Iterator end = imageView.end();
             
-                Pt::Gfx::Color color(100, 100, 100);
+                Pt::Gfx::ColorF color(100, 100, 100);
             
                 Pt::System::Clock clock;
                 clock.start();

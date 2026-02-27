@@ -50,7 +50,7 @@ class PT_GFX_API Yuv12Pixel
     
     public:
         typedef Yuv12 FormatType;
-        typedef Color ColorType;
+        typedef ColorF ColorType;
 
     protected:
         Yuv12Pixel(Pt::uint8_t* data, const ViewBase& view, 
@@ -70,7 +70,7 @@ class PT_GFX_API Yuv12Pixel
         , _v(p._v)
         { }
 
-        Yuv12Pixel& operator=(const Color& color);
+        Yuv12Pixel& operator=(const ColorF& color);
 
         Yuv12Pixel& operator=(const Argb32Color& color);
 
@@ -110,7 +110,7 @@ class PT_GFX_API Yuv12Pixel
         void setV(Pt::uint8_t v) const
         { *_v = v; }
 
-        Color toColor() const;
+        ColorF toColor() const;
 
         void advance();
 
@@ -143,7 +143,7 @@ class Yuv12ConstPixel
     
     public:
         typedef Yuv12 FormatType;
-        typedef Color ColorType;
+        typedef ColorF ColorType;
     
     protected:
         Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -203,7 +203,7 @@ class Yuv12ConstPixel
         Pt::uint8_t v() const
         { return *_v; }
 
-        Color toColor() const;
+        ColorF toColor() const;
 
         void advance();
 
@@ -236,7 +236,7 @@ class PT_GFX_API Yuv12 final : public ImageFormat
     public:    
         typedef Yuv12Pixel PixelType;
         typedef Yuv12ConstPixel ConstPixelType;
-        typedef Color ColorType;
+        typedef ColorF ColorType;
 
     public:
         static const Yuv12& get()
@@ -281,7 +281,7 @@ class PT_GFX_API Yuv12 final : public ImageFormat
                                          PixelStorage& store) const override;
 
     public:
-        static Color getColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
+        static ColorF getColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
         {
             Pt::uint32_t rv = 298 * (y - 16)                   + 409 * (v - 128) + 128;
             Pt::uint32_t gv = 298 * (y - 16) - 100 * (u - 128) - 208 * (v - 128) + 128;
@@ -291,11 +291,11 @@ class PT_GFX_API Yuv12 final : public ImageFormat
             Pt::uint16_t g = gv > 65535 ? 65535 : static_cast<Pt::uint16_t>(gv);
             Pt::uint16_t b = bv > 65535 ? 65535 : static_cast<Pt::uint16_t>(bv);
 
-            return Color(r, g, b);
+            return ColorF(r, g, b);
         }
 
         static void fromColor(Pt::uint8_t* y, Pt::uint8_t* u, Pt::uint8_t* v,
-                              const Color& color)
+                              const ColorF& color)
         {
             Pt::int32_t r = color.red();
             Pt::int32_t g = color.green();
@@ -470,13 +470,13 @@ inline bool Yuv12Pixel::equals(const Yuv12ConstPixel& p) const
 }
 
 
-inline Color Yuv12Pixel::toColor() const
+inline ColorF Yuv12Pixel::toColor() const
 { 
     return Yuv12::getColor(*_y, *_u, *_v);
 }
 
 
-inline Yuv12Pixel& Yuv12Pixel::operator=(const Color& color)
+inline Yuv12Pixel& Yuv12Pixel::operator=(const ColorF& color)
 {
     Yuv12::fromColor(_y, _u, _v, color);
     return *this;
@@ -485,7 +485,7 @@ inline Yuv12Pixel& Yuv12Pixel::operator=(const Color& color)
 
 inline Yuv12Pixel& Yuv12Pixel::operator=(const Argb32Color& color)
 {
-    Yuv12::fromColor( _y, _u, _v, Color::fromRgb8(color.red(), color.green(), 
+    Yuv12::fromColor( _y, _u, _v, ColorF::fromRgb8(color.red(), color.green(), 
                                                  color.blue(), color.alpha() ) );
     return *this;
 }
@@ -570,7 +570,7 @@ inline Yuv12ConstPixel::Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline Color Yuv12ConstPixel::toColor() const
+inline ColorF Yuv12ConstPixel::toColor() const
 { 
     return Yuv12::getColor(*_y, *_u, *_v);
 }

@@ -159,7 +159,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 
     _context->set_stroke_width( static_cast<double>( pen.size() ) );
 
-    Pt::Gfx::Color penColor = pen.color();
+    Pt::Gfx::ColorF penColor = pen.color();
     BLRgba32 strokecolor(penColor.red() / 257, 
                          penColor.green() / 257, 
                          penColor.blue()  / 257, 
@@ -176,7 +176,7 @@ void BitmapCanvas::onSetBrush(const Gfx::Brush& brush)
 
 void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 {
-    Pt::Gfx::Color brushColor = brush.color();
+    Pt::Gfx::ColorF brushColor = brush.color();
     BLRgba32 fillColor(brushColor.red() / 257, 
                        brushColor.green() / 257, 
                        brushColor.blue()  / 257, 

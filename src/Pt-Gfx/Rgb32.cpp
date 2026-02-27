@@ -56,7 +56,7 @@ PixelBase* Rgb32::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 }
 
 
-Color Rgb32::onGetColor(const Pt::uint8_t* base)
+ColorF Rgb32::onGetColor(const Pt::uint8_t* base)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(base);
 
@@ -69,7 +69,7 @@ Color Rgb32::onGetColor(const Pt::uint8_t* base)
     Pt::uint16_t g = (tg << 8) + tg;
     Pt::uint16_t b = (tb << 8) + tb;
 
-    return Color(a, r, g, b);
+    return ColorF(a, r, g, b);
 }
 
 } // namespace

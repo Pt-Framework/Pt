@@ -171,16 +171,16 @@ void ListBoxItem::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::Color& ListBoxItem::textColor() const
+const Gfx::ColorF& ListBoxItem::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void ListBoxItem::setTextColor(const Gfx::Color& color)
+void ListBoxItem::setTextColor(const Gfx::ColorF& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
+    _textColor.reset( new Gfx::ColorF(color) );
     invalidate();
 }
 

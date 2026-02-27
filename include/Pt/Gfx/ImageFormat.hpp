@@ -98,7 +98,7 @@ inline void Pixel<ColorT>::reset(const Pixel& p)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Color& color)
+inline void Pixel<ColorT>::assign(const ColorF& color)
 {
     _pixel->assign(color);
 }
@@ -112,7 +112,7 @@ inline void Pixel<ColorT>::assign(const Argb32Color& color)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Pixel<Color>& p)
+inline void Pixel<ColorT>::assign(const Pixel<ColorF>& p)
 {
    
     _pixel->assign( p.toColor() );
@@ -127,7 +127,7 @@ inline void Pixel<ColorT>::assign(const Pixel<Argb32Color>& p)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p)
+inline void Pixel<ColorT>::assign(const ConstPixel<ColorF>& p)
 {
     _pixel->assign( p.toColor() );
 }
@@ -177,7 +177,7 @@ void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Pixel<Color>& p, std::size_t length)
+inline void Pixel<ColorT>::assign(const Pixel<ColorF>& p, std::size_t length)
 {
     assignPixels(p, length);
 }
@@ -191,7 +191,7 @@ inline void Pixel<ColorT>::assign(const Pixel<Argb32Color>& p, std::size_t lengt
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<Color>& p, std::size_t length)
+inline void Pixel<ColorT>::assign(const ConstPixel<ColorF>& p, std::size_t length)
 {
     assignPixels(p, length);
 }

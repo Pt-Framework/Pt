@@ -187,9 +187,9 @@ void benchmarkWideLines()
     Pt::Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
 
-    //imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 1 )  );
-    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8 )  );
-    //imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8, Pen::Dash )  );
+    //imagePainter.setPen( Pen( Pt::Gfx::ColorF::fromRgb8(255, 0, 0), 1 )  );
+    imagePainter.setPen( Pen( Pt::Gfx::ColorF::fromRgb8(255, 0, 0), 8 )  );
+    //imagePainter.setPen( Pen( Pt::Gfx::ColorF::fromRgb8(255, 0, 0), 8, Pen::Dash )  );
 
     std::vector<PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(50, 50) );
@@ -217,8 +217,8 @@ void benchmarkNarrowRoundedRect()
 
     Pt::Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
-    imagePainter.setPen( Pt::Gfx::Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0) ) );
-    imagePainter.setBrush( Pt::Gfx::Color::fromRgb8(0, 0, 255)  );
+    imagePainter.setPen( Pt::Gfx::Pen( Pt::Gfx::ColorF::fromRgb8(255, 0, 0) ) );
+    imagePainter.setBrush( Pt::Gfx::ColorF::fromRgb8(0, 0, 255)  );
 
     Pt::System::Clock clock;
     clock.start();
@@ -346,14 +346,14 @@ int main(int argc, char* args[])
     Painter* painter2 = dynamic_cast<Painter*>(&painter2obj);
 
     // Create the brushes used for drawing
-    const Brush brushSolid1   (Color::fromRgb8(0, 255, 0, 175));
-    const Brush brushGradient1 = Brush::verticalGradient(Color::fromRgb8(0, 255, 0, 175),
-                                                         Color::fromRgb8(0, 0, 0, 175));
+    const Brush brushSolid1   (ColorF::fromRgb8(0, 255, 0, 175));
+    const Brush brushGradient1 = Brush::verticalGradient(ColorF::fromRgb8(0, 255, 0, 175),
+                                                         ColorF::fromRgb8(0, 0, 0, 175));
     const Brush brushTexture1 (textureWithTransBackground);
 
-    const Brush brushSolid2   (Color::fromRgb8(0, 255, 255, 175));
-    const Brush brushGradient2 = Brush::horizontalGradient(Color::fromRgb8(0, 255, 255, 175),
-                                                           Color::fromRgb8(0, 0, 0, 175));
+    const Brush brushSolid2   (ColorF::fromRgb8(0, 255, 255, 175));
+    const Brush brushGradient2 = Brush::horizontalGradient(ColorF::fromRgb8(0, 255, 255, 175),
+                                                           ColorF::fromRgb8(0, 0, 0, 175));
     const Brush brushTexture2 (textureWithWhiteBackground);
 
     // benchmarkNarrowRoundedRect();
@@ -566,9 +566,9 @@ int main(int argc, char* args[])
     //}
 
     // Create the brushes used for benchmarking
-    bmBrushSolid     = Brush(Color::fromRgb8(255, 255, 255, 175));
-    bmBrushGradientH = Brush::horizontalGradient( Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175) );
-    bmBrushGradientV = Brush::verticalGradient( Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175) );
+    bmBrushSolid     = Brush(ColorF::fromRgb8(255, 255, 255, 175));
+    bmBrushGradientH = Brush::horizontalGradient( ColorF::fromRgb8(255, 255, 255, 175), ColorF::fromRgb8(0, 0, 0, 175) );
+    bmBrushGradientV = Brush::verticalGradient( ColorF::fromRgb8(255, 255, 255, 175), ColorF::fromRgb8(0, 0, 0, 175) );
     bmBrushTextureT  = Brush(textureWithTransBackground);
     bmBrushTextureW  = Brush(textureWithWhiteBackground);
 

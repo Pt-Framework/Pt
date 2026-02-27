@@ -82,17 +82,17 @@ class Yuv12PixelBase final : public PixelBase
             return _p.ybase();
         }
 
-        virtual Color onGetColor() const override
+        virtual ColorF onGetColor() const override
         {
             return Yuv12::getColor( _p.y(), _p.u(), _p.v() );
         }
 
-        virtual void onSetColor(const Color& color) override
+        virtual void onSetColor(const ColorF& color) override
         {
             _p = color;
         }
 
-        virtual void onFillColor(std::size_t n, const Color& color) override
+        virtual void onFillColor(std::size_t n, const ColorF& color) override
         {
             //Yuv12::sourceCopy(_p.ybase(), n, color);        
         }

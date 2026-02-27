@@ -106,9 +106,9 @@ class PT_FORMS_API ComboBox : public Control
 
         void setContour(const Gfx::Pen& p);
 
-        const Gfx::Color& textColor() const;
+        const Gfx::ColorF& textColor() const;
 
-        void setTextColor(const Gfx::Color& color);
+        void setTextColor(const Gfx::ColorF& color);
 
         const std::string& font() const;
 
@@ -175,7 +175,7 @@ class PT_FORMS_API ComboBox : public Control
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<Gfx::ColorF>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
         AutoPtr<std::string> _fontStyle;

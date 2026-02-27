@@ -87,9 +87,9 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         void setContour(const Pt::Gfx::Pen& p);
 
-        const Pt::Gfx::Color& textColor() const;
+        const Pt::Gfx::ColorF& textColor() const;
 
-        void setTextColor(const Pt::Gfx::Color& color);
+        void setTextColor(const Pt::Gfx::ColorF& color);
 
         const std::string& font() const;
 
@@ -132,7 +132,7 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         Pt::AutoPtr<Pt::Gfx::Brush>       _background;
         Pt::AutoPtr<Pt::Gfx::Pen>         _contour;
-        Pt::AutoPtr<Pt::Gfx::Color>       _textColor;
+        Pt::AutoPtr<Pt::Gfx::ColorF>       _textColor;
         Pt::AutoPtr<std::string>      _fontName;
         Pt::AutoPtr<std::size_t>      _fontSize;
         Pt::AutoPtr<std::string> _fontStyle;

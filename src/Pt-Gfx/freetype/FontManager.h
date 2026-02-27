@@ -51,7 +51,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class Color;
+class ColorF;
 class TextMetrics;
 class CompositionMode;
 class Transform;
@@ -96,7 +96,7 @@ class FreeType : public Pt::Singleton<FreeType>
         // TODO: use ImageView instead of clip
 
         void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
-                  const String& text, const Color& color, const Rect& clip,
+                  const String& text, const ColorF& color, const Rect& clip,
                   const CompositionMode& mode, FTC_FaceID faceId, 
                   std::size_t fontSize, const Transform* tf);
 
@@ -107,7 +107,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         // TODO: use ImageView instead of clip
 
-        void drawGlyph(Image& image, int xpos, int ypos, const Color& color, 
+        void drawGlyph(Image& image, int xpos, int ypos, const ColorF& color, 
                        int bmPitch, int height, int width, const unsigned char* buffer, 
                        const Rect& clip, const CompositionMode& mode);
 

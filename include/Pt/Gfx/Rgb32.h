@@ -62,7 +62,7 @@ class PT_GFX_API Rgb32 : public ImageFormat
                                          PixelStorage& store) const override;
 
     public:
-        static Color onGetColor(const Pt::uint8_t* base);
+        static ColorF onGetColor(const Pt::uint8_t* base);
 };
 
 } // namespace

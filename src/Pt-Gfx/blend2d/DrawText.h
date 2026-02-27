@@ -118,7 +118,7 @@ class DrawText
         std::size_t      _fontSize;
         FTC_ImageTypeRec _imageType;
         Transform        _transform;
-        Color            _textColor;
+        ColorF           _textColor;
         Rect             _clip;
 };
 

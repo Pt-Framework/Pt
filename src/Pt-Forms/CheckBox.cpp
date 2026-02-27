@@ -97,16 +97,16 @@ void CheckBox::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::Color& CheckBox::textColor() const
+const Gfx::ColorF& CheckBox::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void CheckBox::setTextColor(const Gfx::Color& color)
+void CheckBox::setTextColor(const Gfx::ColorF& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
+    _textColor.reset( new Gfx::ColorF(color) );
     invalidate();
 }
 

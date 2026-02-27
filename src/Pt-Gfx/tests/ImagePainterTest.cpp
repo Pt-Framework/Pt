@@ -25,10 +25,10 @@ void PaintBenchmark()
             Painter painter(surface);
             painter.setCompositionMode(CompositionMode::SourceOver);
 
-            Brush brush( Color(1, 1, 1) );
+            Brush brush( ColorF(1, 1, 1) );
             painter.setBrush(brush);
 
-            Pen pen( Color(1, 0, 0) );
+            Pen pen( ColorF(1, 0, 0) );
             painter.setPen(pen);
 
             for(int n = 0; n < 10; ++n)

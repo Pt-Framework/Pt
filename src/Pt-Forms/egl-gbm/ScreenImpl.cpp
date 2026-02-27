@@ -57,7 +57,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
     Painter painter(_surface);
-    painter.clear( Pt::Gfx::Color(65535*0.4f, 65535 *0.3f, 65535 *0.4f) );
+    painter.clear( Pt::Gfx::ColorF(65535*0.4f, 65535 *0.3f, 65535 *0.4f) );
 
     setCursor(0);
 }
@@ -175,7 +175,7 @@ void ScreenImpl::update(const Gfx::RectF& updateRect)
     //             image().pixel(0,0), CopyOp );
 
     Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
+    painter.setBrush( Pt::Gfx::ColorF(0.4f, 0.3f, 0.4f) );
     painter.fillRect(updateRect);
 
     _windowManager.render(_surface, updateRect);

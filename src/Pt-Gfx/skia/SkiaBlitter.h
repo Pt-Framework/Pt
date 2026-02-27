@@ -68,7 +68,7 @@ class SkiaBlitter : public SkBlitter
         const SkPixmap& _device;
 
         Pt::Gfx::Image& _image;
-        Pt::Gfx::Color  _color;
+        Pt::Gfx::ColorF  _color;
         Pt::uint32_t    _pmColor;
 };
 

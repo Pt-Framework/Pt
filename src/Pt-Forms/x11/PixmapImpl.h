@@ -206,7 +206,7 @@ class PaintData : public Gfx::PaintData
         
         void destroy();
 
-        long toXColor(const Gfx::Color& color);
+        long toXColor(const Gfx::ColorF& color);
 
     private:
         GC         _penGc;
@@ -223,7 +223,7 @@ class PixmapSurfaceImpl
         
         virtual ~PixmapSurfaceImpl();
 
-        void clear(const Gfx::Color& c);
+        void clear(const Gfx::ColorF& c);
 
         void resize(const Pt::Gfx::SizeF& size);
 

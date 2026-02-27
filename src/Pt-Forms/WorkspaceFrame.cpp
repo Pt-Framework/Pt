@@ -41,7 +41,7 @@
 
 namespace {
 
-Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
+Pt::Gfx::ColorF brighten(const Pt::Gfx::ColorF& c, float factor)
 {
     float rf = c.red() * factor;
     float gf = c.green() * factor;
@@ -51,7 +51,7 @@ Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
     Pt::uint16_t g = gf > 65535 ? 65535 : (Pt::uint16_t) gf ;
     Pt::uint16_t b = bf > 65535 ? 65535 : (Pt::uint16_t) bf ;
 
-    return Pt::Gfx::Color(c.alpha(), r, g, b);
+    return Pt::Gfx::ColorF(c.alpha(), r, g, b);
 }
 
 }
@@ -145,12 +145,12 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Painter painter(surface);
     painter.setClip(rect);
 
-    Gfx::Color light = brighten(color(), 1.25f);
-    Gfx::Color dark = brighten(color(), 0.75f);
+    Gfx::ColorF light = brighten(color(), 1.25f);
+    Gfx::ColorF dark = brighten(color(), 0.75f);
 
-    Gfx::Color backgroundColor = color();
-    Gfx::Color borderTopLeftColor = light;
-    Gfx::Color borderBottomRightColor = dark;
+    Gfx::ColorF backgroundColor = color();
+    Gfx::ColorF borderTopLeftColor = light;
+    Gfx::ColorF borderBottomRightColor = dark;
     
     if(_isPressed)
     {
@@ -213,7 +213,7 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 MinimizeButton::MinimizeButton()
 {
-    setColor( Gfx::Color(62258, 45874, 3276 ));
+    setColor( Gfx::ColorF(62258, 45874, 3276 ));
 }
 
 
@@ -239,7 +239,7 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
                             geometry().bottom() - inset - height,
                             geometry().bottom() - inset);
 
-    painter.setBrush( Gfx::Color(65535, 65535, 65535) );
+    painter.setBrush( Gfx::ColorF(65535, 65535, 65535) );
     painter.fillRect(frameSymbol);
 }
 
@@ -249,7 +249,7 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 MaximizeButton::MaximizeButton()
 {
-    setColor( Gfx::Color(22937, 42597, 16383) );
+    setColor( Gfx::ColorF(22937, 42597, 16383) );
 }
 
 
@@ -274,14 +274,14 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
                             geometry().top() + inset,
                             geometry().bottom() - inset);
      
-    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 
+    Pt::Gfx::Pen pen(Gfx::ColorF(65535, 65535, 65535), 
                      1, Gfx::Pen::Solid, Gfx::Pen::SquareCap, Gfx::Pen::MiterJoin);
     painter.setPen(pen);
     painter.drawRect(frameSymbol);
 
     frameSymbol.setHeight( scaling.align(2.0) );
     
-    painter.setBrush( Gfx::Color(65535, 65535, 65535) );
+    painter.setBrush( Gfx::ColorF(65535, 65535, 65535) );
     painter.fillRect(frameSymbol);
 }
 
@@ -291,7 +291,7 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 CloseButton::CloseButton()
 {
-    setColor( Gfx::Color(53738, 16383, 14417) );
+    setColor( Gfx::ColorF(53738, 16383, 14417) );
 }
 
 
@@ -339,7 +339,7 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
                             Gfx::PointF( buttonRect.bottomLeft().x() + margin + inset,
                                          buttonRect.bottomLeft().y() - offset - margin - inset) };
 
-    painter.setBrush( Gfx::Color(65535, 65535, 65535) );
+    painter.setBrush( Gfx::ColorF(65535, 65535, 65535) );
     painter.fillPolygon(line1, 4);
     painter.fillPolygon(line2, 4);
 }
@@ -390,11 +390,11 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
     triangle[3] = Gfx::PointF(x, y);
 
-    Gfx::Brush brush( Gfx::Color(65535, 65535, 65535) );
+    Gfx::Brush brush( Gfx::ColorF(65535, 65535, 65535) );
     painter.setBrush(brush);
     painter.fillPolygon(triangle, 3);
     
-    //painter.setPen(Gfx::Color::fromRgb8(255, 0, 0));
+    //painter.setPen(Gfx::ColorF::fromRgb8(255, 0, 0));
     //painter.drawPolyline(triangle, 4);
 }
 
@@ -1501,7 +1501,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
 
     const Gfx::Scaling& scaling = this->scaling();
 
-    Gfx::Color color = _window->isActive() ? _wm->activeColor()
+    Gfx::ColorF color = _window->isActive() ? _wm->activeColor()
                                            : _wm->inactiveColor();
     //
     // frame background
@@ -1552,7 +1552,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     //
     // light outer and inner border contour
     //
-    Gfx::Color borderLight = brighten(color, 1.25f);
+    Gfx::ColorF borderLight = brighten(color, 1.25f);
     Gfx::Pen borderPenLight(borderLight, penSize);
 
     painter.setPen(borderPenLight);
@@ -1584,7 +1584,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     // dark outer and inner border contour
     //
     
-    Gfx::Color borderDark = brighten(color, 0.75f);
+    Gfx::ColorF borderDark = brighten(color, 0.75f);
     Gfx::Pen borderPenDark(borderDark, penSize);
 
     painter.setPen(borderPenDark);
@@ -1627,7 +1627,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight,
                         pos.y() + textOffset + tm.ascent() );
 
-    Gfx::Color textColor = _window->isActive() ? _wm->textColor()
+    Gfx::ColorF textColor = _window->isActive() ? _wm->textColor()
                                                : _wm->inactiveTextColor();
     Gfx::Pen pen(textColor, 1);
     painter.setPen(pen);
@@ -1636,12 +1636,12 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     //
     // grip area on title bar
     //
-    Gfx::Color gripColorLight( (color.red() * 11) / 10,
+    Gfx::ColorF gripColorLight( (color.red() * 11) / 10,
                                (color.green() * 11) / 10,
                                (color.blue() * 11) / 10 );
     Gfx::Pen gripPenLight(gripColorLight, 1);
 
-    Gfx::Color gripColorDark( (color.red() * 9) / 10,
+    Gfx::ColorF gripColorDark( (color.red() * 9) / 10,
                               (color.green() * 9) / 10,
                               (color.blue() * 9) / 10 );
     Gfx::Pen gripPenDark(gripColorDark, 1);

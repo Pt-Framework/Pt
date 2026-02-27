@@ -59,7 +59,7 @@ class Argb32Pixel
 
         Argb32Pixel& operator=(const Argb32Color& color);
 
-        Argb32Pixel& operator=(const Gfx::Color& color);
+        Argb32Pixel& operator=(const Gfx::ColorF& color);
 
         void reset(BasicView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
@@ -284,11 +284,11 @@ class PT_GFX_API Argb32 final : public ImageFormat
             return base + n * view.stride();
         }
 
-        static Color getColor(const Pt::uint8_t* p);
+        static ColorF getColor(const Pt::uint8_t* p);
 
         static Argb32Color getArgb32Color(const Pt::uint8_t* p);
 
-        static void getColors(const Pt::uint8_t* p, Gfx::Color* colors, std::size_t n);
+        static void getColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
 
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
@@ -299,15 +299,15 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static void sourceCopy(Pt::uint8_t* to, const Argb32Color& from);
 
-        static void sourceCopy(Pt::uint8_t* to, const Color& c);
+        static void sourceCopy(Pt::uint8_t* to, const ColorF& c);
 
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Color& c);
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
         static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
         static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
-        static void sourceCopy(Pt::uint8_t* to, const Color* colors, std::size_t length);
+        static void sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
@@ -320,9 +320,9 @@ class PT_GFX_API Argb32 final : public ImageFormat
         //
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
         
-        static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from);
+        static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from);
 
-        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Color& c);
+        static void sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
         static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
@@ -333,7 +333,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
                                Pt::ssize_t width, Pt::ssize_t height);
 
     public:
-        static void blendSourceCopy(Pt::uint8_t* to, const Color& c, Pt::uint8_t alpha)
+        static void blendSourceCopy(Pt::uint8_t* to, const ColorF& c, Pt::uint8_t alpha)
         {
             const Pt::uint32_t blendAlphaSrc = alpha;
             const Pt::uint32_t blendAlphaInv = 255 - alpha;
@@ -343,7 +343,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
             to[3] = (blendAlphaSrc * (c.alpha() >> 8) + blendAlphaInv * to[3]) >> 8;
         }
         
-        static void blendSourceOver(Pt::uint8_t* to, const Color& c, Pt::uint8_t alpha)
+        static void blendSourceOver(Pt::uint8_t* to, const ColorF& c, Pt::uint8_t alpha)
         {
             const Pt::uint32_t colorAlpha    = c.alpha() >> 8;
             const Pt::uint32_t blendAlphaSrc = colorAlpha * alpha / 255;
@@ -390,7 +390,7 @@ namespace Gfx {
 // Argb32
 ///////////////////////////////////////////////////////////////////////
 
-inline Color Argb32::getColor(const Pt::uint8_t* p)
+inline ColorF Argb32::getColor(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
 
@@ -404,7 +404,7 @@ inline Color Argb32::getColor(const Pt::uint8_t* p)
     Pt::uint16_t g = (tg << 8) + tg;
     Pt::uint16_t b = (tb << 8) + tb;
 
-    return Color(a, r, g, b);
+    return ColorF(a, r, g, b);
 }
 
 
@@ -414,7 +414,7 @@ inline Argb32Color Argb32::getArgb32Color(const Pt::uint8_t* p)
 }
 
 
-inline void Argb32::getColors(const Pt::uint8_t* p, Color* colors, std::size_t n)
+inline void Argb32::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n)
 {
     for(std::size_t i = 0; i < n; ++i)
     {
@@ -446,7 +446,7 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, const Argb32Color& from)
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color& c)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, const ColorF& c)
 {
     Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
 
@@ -457,7 +457,7 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color& c)
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Color& c)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
     const Pt::uint32_t value = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
                                ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
@@ -490,7 +490,7 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::ui
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, const Color* colors, std::size_t length)
+inline void Argb32::sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length)
 {          
     for(std::size_t n = 0; n < length; ++n)
     {
@@ -535,7 +535,7 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
 }
 
 
-inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
+inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from)
 {
     const Pt::uint32_t alpha    = from.alpha() >> 8;
     const Pt::uint32_t alphaSrc = alpha;
@@ -548,7 +548,7 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
 }
 
 
-inline void Argb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Color& c)
+inline void Argb32::sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
     const Pt::uint32_t blend = c.alpha() >> 8;
     const Pt::uint32_t bfcI  = 255 - blend;
@@ -717,7 +717,7 @@ inline void Argb32Pixel::fill(std::size_t n, const Argb32Color& color)
 }
 
 
-inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::Color& color)
+inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::ColorF& color)
 { 
     Argb32::sourceCopy(base(), color);
     return *this;

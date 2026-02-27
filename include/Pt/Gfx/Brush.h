@@ -45,7 +45,7 @@ class Bitmap;
 class ColorStop
 {
     public:
-        ColorStop(float position, const Color& color)
+        ColorStop(float position, const ColorF& color)
         : _position(position)
         , _color(color)
         {}
@@ -53,12 +53,12 @@ class ColorStop
         float position() const
         { return _position; }
 
-        const Color& color() const
+        const ColorF& color() const
         { return _color; }
 
     private:
         float _position;
-        Color _color;
+        ColorF _color;
 };
 
 
@@ -82,7 +82,7 @@ class ColorStops
 
         // TODO: Throw exception if the position < 0.0 or position > 1.0
         // TODO: Throw exception if the positions are mixed up
-        void add(float position, const Color& color)
+        void add(float position, const ColorF& color)
         { _stops.push_back( ColorStop(position, color) ); }
 
         const ColorStop& operator[] (std::size_t n) const
@@ -94,7 +94,7 @@ class ColorStops
         const ColorStop& back() const
         { return _stops.back(); }
 
-        void calculateInterpolatedColor(Color& res, const float position) const;
+        void calculateInterpolatedColor(ColorF& res, const float position) const;
 
 
     private:
@@ -131,13 +131,13 @@ class PT_GFX_API Brush
         */
         Brush();
 
-        Brush(const Color& color);
+        Brush(const ColorF& color);
 
         Brush(const Image& texture, Pt::int32_t offX = 0, Pt::int32_t offY = 0);
 
-        static Brush verticalGradient(const Color& from, const Color& to);
+        static Brush verticalGradient(const ColorF& from, const ColorF& to);
 
-        static Brush horizontalGradient(const Color& from, const Color& to);
+        static Brush horizontalGradient(const ColorF& from, const ColorF& to);
 
         static Brush verticalGradient(const ColorStops& colorStops);
 
@@ -172,16 +172,16 @@ class PT_GFX_API Brush
 
         PositionMode positionMode() const;
 
-        void setColor(const Color& color);
+        void setColor(const ColorF& color);
 
-        const Color& color() const;
+        const ColorF& color() const;
 
         /** @brief Returns the gradient style.
         */
         GradientStyle gradient() const;
 
         // remove when linear gradients use color stops
-        const Color& gradientColor() const;
+        const ColorF& gradientColor() const;
 
         /** @brief Color stops of a gradient.
         */
@@ -242,7 +242,7 @@ class BrushData
         , _texture(0)
         {}
 
-        BrushData(const Color& color)
+        BrushData(const ColorF& color)
         : _isNull(false)
         , _fillStyle(Brush::Solid)
         , _color(color)
@@ -256,7 +256,7 @@ class BrushData
                   Pt::int32_t offsetX, Pt::int32_t offsetY);
 
         // only for old Painter
-        BrushData(const Color& from, const Color& to,
+        BrushData(const ColorF& from, const ColorF& to,
                   Brush::GradientStyle g);
 
         ~BrushData();
@@ -267,9 +267,9 @@ class BrushData
         Brush::PositionMode positionMode() const
         { return _positionMode; }
 
-        void setSolid(const Color& color);
+        void setSolid(const ColorF& color);
 
-        const Color& color() const
+        const ColorF& color() const
         { return _gradientStops.empty() ? _color : _gradientStops.front().color(); }
 
         // 1D gradient
@@ -299,7 +299,7 @@ class BrushData
         { return _gradient; }
 
         // remove when linear gradients use color stops
-        const Color& gradientColor() const
+        const ColorF& gradientColor() const
         { return _gradientStops.empty() ? _color : _gradientStops.back().color(); }
 
         const ColorStops& gradientStops() const
@@ -341,7 +341,7 @@ class BrushData
         bool                 _isNull;
         Brush::FillStyle     _fillStyle;
         Brush::PositionMode  _positionMode;
-        Color                _color;
+        ColorF                _color;
 
         Brush::GradientStyle _gradient;
         ColorStops           _gradientStops;

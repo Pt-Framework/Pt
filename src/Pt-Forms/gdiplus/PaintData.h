@@ -297,7 +297,7 @@ class PaintData : public Gfx::PaintData
             return fm;
         }
     
-        static Gdiplus::Color toGdi(const Gfx::Color& c)
+        static Gdiplus::Color toGdi(const Gfx::ColorF& c)
         {
             return Gdiplus::Color(c.alpha() / 257, c.red() / 257, c.green() / 257, c.blue() / 257);
         }

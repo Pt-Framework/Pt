@@ -101,12 +101,12 @@ class PT_FORMS_API StyleOptions
             _contour = p;
         }
 
-        const Gfx::Color& accentColor() const
+        const Gfx::ColorF& accentColor() const
         {
             return _accentColor;
         }
         
-        void setAccentColor(const Gfx::Color& color)
+        void setAccentColor(const Gfx::ColorF& color)
         {
             _accentColor = color;
         }
@@ -121,12 +121,12 @@ class PT_FORMS_API StyleOptions
             _viewBackground = b;
         }
 
-        const Gfx::Color& highlightColor() const
+        const Gfx::ColorF& highlightColor() const
         {
             return _highlightColor;
         }
 
-        void setHighlightColor(const Gfx::Color& c)
+        void setHighlightColor(const Gfx::ColorF& c)
         {
             _highlightColor = c;
         }
@@ -141,22 +141,22 @@ class PT_FORMS_API StyleOptions
             _textBackground = b;
         }
 
-        const Gfx::Color& textColor() const
+        const Gfx::ColorF& textColor() const
         {
             return _textColor;
         }
 
-        void setTextColor(const Gfx::Color& c)
+        void setTextColor(const Gfx::ColorF& c)
         {
             _textColor = c;
         }
 
-        const Gfx::Color& highlightedTextColor() const
+        const Gfx::ColorF& highlightedTextColor() const
         {
             return _highlightedTextColor;
         }
 
-        void setHighlightedTextColor(const Gfx::Color& c)
+        void setHighlightedTextColor(const Gfx::ColorF& c)
         {
             _highlightedTextColor = c;
         }
@@ -175,12 +175,12 @@ class PT_FORMS_API StyleOptions
       Gfx::Brush _background;
       Gfx::Brush _foreground;
       Gfx::Pen   _contour;
-      Gfx::Color _accentColor;
+      Gfx::ColorF _accentColor;
       Gfx::Brush _viewBackground;
-      Gfx::Color _highlightColor;
+      Gfx::ColorF _highlightColor;
       Gfx::Brush _textBackground;
-      Gfx::Color _textColor;
-      Gfx::Color _highlightedTextColor;
+      Gfx::ColorF _textColor;
+      Gfx::ColorF _highlightedTextColor;
       Gfx::Font  _font;
 };
 

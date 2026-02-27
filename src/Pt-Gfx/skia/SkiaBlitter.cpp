@@ -47,7 +47,7 @@ SkiaBlitter::SkiaBlitter(const SkPixmap& device, const SkPaint& paint, Gfx::Imag
     unsigned fSrcG = SkAlphaMul(SkColorGetG(color), scale);
     unsigned fSrcB = SkAlphaMul(SkColorGetB(color), scale);
     
-    _color = Pt::Gfx::Color::fromRgb8(SkColorGetR(color), SkColorGetG(color), SkColorGetB(color), fSrcA);
+    _color = Pt::Gfx::ColorF::fromRgb8(SkColorGetR(color), SkColorGetG(color), SkColorGetB(color), fSrcA);
 
     _pmColor = SkPackARGB32(fSrcA, fSrcR, fSrcG, fSrcB);
 }
@@ -105,7 +105,7 @@ void SkiaBlitter::blitV(int x, int y, int height, SkAlpha alpha)
 
     Pt::Gfx::Image::PixelIterator device = _image.pixel(x, y);
 
-    Pt::Gfx::Color color = _color;
+    Pt::Gfx::ColorF color = _color;
 
     color.setAlpha(alpha* 256);
     

@@ -208,7 +208,7 @@ void PaintData::destroy()
 }
 
 
-long PaintData::toXColor(const Gfx::Color& color)
+long PaintData::toXColor(const Gfx::ColorF& color)
 {
     Display* display = Application::instance().impl()->display();
     unsigned int screen = DefaultScreen(display);
@@ -468,7 +468,7 @@ void PixmapSurfaceImpl::destroy()
 }
 
 
-void PixmapSurfaceImpl::clear(const Gfx::Color& c)
+void PixmapSurfaceImpl::clear(const Gfx::ColorF& c)
 {
 }
 
@@ -604,7 +604,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
     int toX = lround( to.x() );
     int toY = lround( to.y() );
 
-    Gfx::Color penColor = _painter->pen().color();
+    Gfx::ColorF penColor = _painter->pen().color();
 
 #ifndef _AIX
     XftColor xftColor;

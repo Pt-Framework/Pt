@@ -58,7 +58,7 @@ PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 // Get pixel color
 //
 //
-//Color Rgb16Format::onGetColor(const View& view, const Pt::uint8_t* base, 
+//ColorF Rgb16Format::onGetColor(const View& view, const Pt::uint8_t* base, 
 //                              Pt::ssize_t x, Pt::ssize_t y) const
 //{
 //    const Pt::uint16_t* p = (const Pt::uint16_t*) base;
@@ -72,14 +72,14 @@ PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 //    uint16_t g = ((tg + !!tg) << 10) - !!tg;
 //    uint16_t b = ((tb + !!tb) << 11) - !!tb;
 //
-//    return Color(a, r, g, b);
+//    return ColorF(a, r, g, b);
 //}
 //
 ////
 //// Assign pixel
 ////
 //
-//void Rgb16Format::onSourceCopy(View& view, PixelBase& to, const Color& c) const
+//void Rgb16Format::onSourceCopy(View& view, PixelBase& to, const ColorF& c) const
 //{
 //    Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
 //                       ( uint32_t(c.green() & 0xFC00) >> 5 ) |
@@ -90,7 +90,7 @@ PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 //}
 //
 //
-//void Rgb16Format::onSourceOver(View& view, PixelBase& to, const Color& c) const
+//void Rgb16Format::onSourceOver(View& view, PixelBase& to, const ColorF& c) const
 //{
 //    Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
 //                       ( uint32_t(c.green() & 0xFC00) >> 5 ) |
@@ -127,14 +127,14 @@ PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, const ViewBase& view,
 ////
 //
 //void Rgb16Format::onSourceCopy(View& view, PixelBase& to, 
-//                                std::size_t n, const Color& c) const
+//                                std::size_t n, const ColorF& c) const
 //{
 //    // ### !!! TODO !!! ###
 //}
 //
 //
 //void Rgb16Format::onSourceOver(View& view, PixelBase& to, 
-//                                std::size_t n, const Color& c) const
+//                                std::size_t n, const ColorF& c) const
 //{
 //    // ### !!! TODO !!! ###
 //}

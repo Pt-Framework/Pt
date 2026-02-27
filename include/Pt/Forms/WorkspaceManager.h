@@ -86,22 +86,22 @@ class WorkspaceManager : public WindowManager
             return _titleHeight;
         }
 
-        const Gfx::Color& inactiveColor() const
+        const Gfx::ColorF& inactiveColor() const
         {
             return _inactiveColor;
         }
 
-        const Gfx::Color& activeColor() const
+        const Gfx::ColorF& activeColor() const
         {
             return _activeColor;
         }
 
-        const Gfx::Color& textColor() const
+        const Gfx::ColorF& textColor() const
         {
             return _textColor;
         }
 
-        const Gfx::Color& inactiveTextColor() const
+        const Gfx::ColorF& inactiveTextColor() const
         {
             return _inactiveTextColor;
         }
@@ -217,10 +217,10 @@ class WorkspaceManager : public WindowManager
 
         double                       _borderWidth;
         double                       _titleHeight;
-        Gfx::Color                   _activeColor;
-        Gfx::Color                   _inactiveColor;
-        Gfx::Color                   _textColor;
-        Gfx::Color                   _inactiveTextColor;  
+        Gfx::ColorF                   _activeColor;
+        Gfx::ColorF                   _inactiveColor;
+        Gfx::ColorF                   _textColor;
+        Gfx::ColorF                   _inactiveTextColor;  
 };
 
 } // namespace

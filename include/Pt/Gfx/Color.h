@@ -138,26 +138,26 @@ inline bool operator==(const Argb32Color& a, const Argb32Color b)
 
 /** High precision color type
 */
-class Color
+class ColorF
 {
     public:
-        Color()
+        ColorF()
         : _a(65535)
         , _r(0)
         , _g(0)
         , _b(0)
         { }
 
-        Color(const Color&) = default;
+        ColorF(const ColorF&) = default;
 
-        Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
+        ColorF(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(a)
         , _r(r)
         , _g(g)
         , _b(b)
         { }
 
-        Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
+        ColorF(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(65535)
         , _r(r)
         , _g(g)
@@ -204,7 +204,7 @@ class Color
               _b = c;
         }
 
-        Color toGray() const
+        ColorF toGray() const
         {
             const Pt::uint32_t rf = 77;
             const Pt::uint32_t gf = 128;
@@ -216,16 +216,16 @@ class Color
 
             const Pt::uint16_t s = static_cast<Pt::uint16_t>(v);
 
-            return Color(_a, s, s, s);
+            return ColorF(_a, s, s, s);
         }
 
-        static Color fromRgb8(Pt::uint8_t r, Pt::uint8_t g,
+        static ColorF fromRgb8(Pt::uint8_t r, Pt::uint8_t g,
                               Pt::uint8_t b, Pt::uint8_t a = 255)
         {
-            return Color(a * 257, r * 257, g * 257, b * 257);
+            return ColorF(a * 257, r * 257, g * 257, b * 257);
         }
 
-        bool operator==(const Color& c) const
+        bool operator==(const ColorF& c) const
         {
             return _a == c._a && _r == c._r && _g == c._g && _b == c._b;
         }

@@ -130,12 +130,12 @@ class PixmapCanvas : public Gfx::Canvas
         Gfx::CompositionMode      _compositionMode;
         HPEN                      _pen;
         DWORD                     _penSize;
-        Gfx::Color                _penColor;
+        Gfx::ColorF                _penColor;
         HBRUSH                    _brush;
         bool                      _gradientBrush;
         Gfx::Brush::GradientStyle _gradient;
-        Gfx::Color                _gradientStart;
-        Gfx::Color                _gradientStop;
+        Gfx::ColorF                _gradientStart;
+        Gfx::ColorF                _gradientStop;
         std::wstring              _text;
         HRGN                      _clipRect;
         HFONT                     _font;

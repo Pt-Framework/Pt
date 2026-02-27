@@ -288,8 +288,8 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
     if( ! _image )
         return;
 
-    Color gradientStart = _brush.color();
-    Color gradientStop = _brush.gradientColor();
+    ColorF gradientStart = _brush.color();
+    ColorF gradientStop = _brush.gradientColor();
 
     switch( _brush.gradient() )
     {
