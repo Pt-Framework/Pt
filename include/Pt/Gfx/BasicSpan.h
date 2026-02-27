@@ -41,7 +41,7 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
-class BasicSpan
+class Span
 {
     public:
         typedef FormatT Format;
@@ -54,7 +54,7 @@ class BasicSpan
         typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
-        BasicSpan(BasicView<Format>& view, 
+        Span(BasicView<Format>& view, 
                   Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
@@ -63,7 +63,7 @@ class BasicSpan
         , _length(length)
         { }
 
-        BasicSpan(const BasicSpan& span)
+        Span(const Span& span)
         : _view(span._view)
         , _x(span._x)
         , _y(span._y)
@@ -71,7 +71,7 @@ class BasicSpan
         , _length(span._length)
         {}
 
-        BasicSpan& operator=(const BasicSpan& span)
+        Span& operator=(const Span& span)
         {
             _view = span._view;
             _x = span._x;
@@ -153,7 +153,7 @@ class BasicSpan
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstSpan
+class ConstSpan
 {
     public:
         typedef FormatT Format;
@@ -166,7 +166,7 @@ class BasicConstSpan
         typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
-        BasicConstSpan(const BasicConstView<Format>& view, 
+        ConstSpan(const BasicConstView<Format>& view, 
                        Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _view(&view)
         , _x(x)
@@ -175,7 +175,7 @@ class BasicConstSpan
         , _length(length)
         { }
 
-        BasicConstSpan(const BasicConstSpan& span)
+        ConstSpan(const ConstSpan& span)
         : _view(span._view)
         , _x(span._x)
         , _y(span._y)
@@ -184,7 +184,7 @@ class BasicConstSpan
         { }
 
         template <typename Fmt, typename Tr>
-        BasicConstSpan(const BasicSpan<Fmt, Tr>& span)
+        ConstSpan(const Span<Fmt, Tr>& span)
         : _view(span._view)
         , _x(span._x)
         , _y(span._y)
@@ -192,7 +192,7 @@ class BasicConstSpan
         , _length(span._length)
         { }
 
-        BasicConstSpan& operator=(const BasicConstSpan& span)
+        ConstSpan& operator=(const ConstSpan& span)
         {
             _view = span._view;
             _x = span._x;
@@ -275,7 +275,7 @@ void copySpan(const SpanT& from, BasicPixelIterator<FormatT, TraitsT>& to)
 
 
 template <typename SpanT, typename FormatT, typename TraitsT>
-void copySpan(const SpanT& from, BasicSpan<FormatT, TraitsT>& to)
+void copySpan(const SpanT& from, Span<FormatT, TraitsT>& to)
 {
     copyLine(from.front(), to.front(), from.length());
 }

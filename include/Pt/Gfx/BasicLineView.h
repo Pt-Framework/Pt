@@ -57,13 +57,11 @@ class BasicLineIterator
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
 
-        using SpanType = BasicSpan<Format, Traits>;
-
     public:
-        using value_type        = SpanType;
+        using value_type        = Span<Format, Traits>;
         using difference_type   = std::ptrdiff_t;
-        using pointer           = SpanType*;
-        using reference         = SpanType&;
+        using pointer           = value_type*;
+        using reference         = value_type&;
         using iterator_category = std::forward_iterator_tag;
 
     public:
@@ -72,16 +70,16 @@ class BasicLineIterator
         , _span(view, x, y, view.width())
         { }
 
-        SpanType& operator*()
+        reference operator*()
         { return _span; }
 
-        const SpanType& operator*() const
+        const reference operator*() const
         { return _span; }
 
-        SpanType* operator->()
+        pointer operator->()
         { return &_span; }
 
-        const SpanType* operator->() const
+        const value_type* operator->() const
         { return &_span; }
 
         BasicLineIterator& operator++() noexcept
@@ -114,8 +112,8 @@ class BasicLineIterator
         }
 
     private:
-        BasicView<Format>* _view;
-        SpanType           _span;
+        BasicView<Format>*   _view;
+        Span<Format, Traits> _span;
 };
 
 
@@ -125,16 +123,15 @@ class BasicConstLineIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
+        
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
 
-        using SpanType = BasicConstSpan<Format, Traits>;
-
     public:
-        using value_type        = SpanType;
+        using value_type        = ConstSpan<Format, Traits>;
         using difference_type   = std::ptrdiff_t;
-        using pointer           = const SpanType*;
-        using reference         = const SpanType&;
+        using pointer           = const value_type*;
+        using reference         = const value_type&;
         using iterator_category = std::forward_iterator_tag;
 
     public:
@@ -143,10 +140,10 @@ class BasicConstLineIterator
         , _span(view, x, y, view.width())
         { }
 
-        const SpanType& operator*() const
+        const reference operator*() const
         { return _span; }
 
-        const SpanType* operator->() const
+        const pointer operator->() const
         { return &_span; }
 
         BasicConstLineIterator& operator++() noexcept
@@ -180,7 +177,7 @@ class BasicConstLineIterator
 
     private:
         const BasicConstView<Format>* _view;
-        SpanType                      _span;
+        ConstSpan<Format, Traits>     _span;
 };
 
 
@@ -196,9 +193,6 @@ class BasicLineView : public BasicView<FormatT, TraitsT>
 
         typedef BasicLineIterator<Format, Traits> Iterator;
         typedef BasicConstLineIterator<Format, Traits> ConstIterator;
-
-        typedef BasicSpan<Format, Traits> Span;
-        typedef BasicConstSpan<Format, Traits> ConstSpan;
 
     public:
         explicit BasicLineView(const Format& format)
@@ -249,9 +243,6 @@ class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
 
         typedef BasicConstLineIterator<Format, Traits> Iterator;
         typedef BasicConstLineIterator<Format, Traits> ConstIterator;
-
-        typedef BasicSpan<Format, Traits> Span;
-        typedef BasicConstSpan<Format, Traits> ConstSpan;
 
     public:
         explicit BasicConstLineView(const Format& format)
