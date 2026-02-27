@@ -187,7 +187,7 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < 100; ++n)
             {
                 Argb32 format;
                 Image image(width, height, format);
@@ -221,7 +221,7 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < 100; ++n)
             {
                 Argb32 format;
                 Image image(width, height, format);

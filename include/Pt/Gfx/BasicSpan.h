@@ -46,6 +46,7 @@ class BasicSpan
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
+        
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
@@ -157,6 +158,7 @@ class BasicConstSpan
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
+        
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     

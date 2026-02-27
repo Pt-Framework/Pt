@@ -46,9 +46,6 @@ class BasicPixelIterator;
 template <typename FormatT, typename TraitsT>
 class BasicConstPixelIterator;
 
-//
-// TODO GFX: rename PixelItetaror
-//
 
 template <typename FormatT, typename TraitsT>
 class BasicPixelIterator
@@ -215,7 +212,7 @@ class BasicPixelView : public BasicView<FormatT, TraitsT>
         typedef BasicConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicPixelView(const Format& format = FormatT::get())
+        explicit BasicPixelView(const Format& format = Format::get())
         : BasicView<FormatT>(format)
         { }
 
