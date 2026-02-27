@@ -61,9 +61,13 @@ class BlockScaleTest : public Pt::Unit::TestSuite
 
             Pt::Gfx::blockScale(fromView.begin(), fromWidth, fromHeight, 
                                 toView.begin(), toWidth, toHeight);
+                                 
+            auto ttt = toView.begin()->base();
 
-            PT_UNIT_ASSERT(toView.begin()->toColor() == fromView.begin()->toColor());
-            PT_UNIT_ASSERT(toView.pixel(19, 39)->toColor() == fromView.pixel(9, 9)->toColor());
+            PT_UNIT_ASSERT(0 == memcmp(toView.begin()->base(), 
+                                       fromView.begin()->base(), 4) );
+            PT_UNIT_ASSERT(0 == memcmp(toView.pixel(19, 39)->base(), 
+                                       fromView.pixel(9, 9)->base(), 4) );
         }
 
         void ScaleDown()

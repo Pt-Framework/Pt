@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Fast color type in ARGB-32 format.
+/** @brief Standard color type.
 */
 class Argb32Color
 {
@@ -131,15 +131,12 @@ class Argb32Color
         Pt::uint32_t _value;
 };
 
-inline bool operator==(const Argb32Color& a, const Argb32Color b)
-{
-    return a.value() == b.value();
-}
-
 /** High precision color type
 */
 class ColorF
 {
+    friend bool operator==(const ColorF& a, const ColorF b);
+
     public:
         ColorF()
         : _a(65535)
@@ -166,42 +163,42 @@ class ColorF
 
         Pt::uint16_t alpha() const
         {
-              return _a;
+            return _a;
         }
 
         Pt::uint16_t red() const
         {
-              return _r;
+             return _r;
         }
 
         Pt::uint16_t green() const
         {
-              return _g;
+            return _g;
         }
 
         Pt::uint16_t blue() const
         {
-              return _b;
+            return _b;
         }
 
         void setAlpha( Pt::uint16_t c)
         {
-              _a = c;
+            _a = c;
         }
 
         void setRed( Pt::uint16_t c)
         {
-              _r = c;
+            _r = c;
         }
 
         void setGreen( Pt::uint16_t c)
         {
-              _g = c;
+            _g = c;
         }
 
         void setBlue( Pt::uint16_t c)
         {
-              _b = c;
+            _b = c;
         }
 
         ColorF toGray() const
@@ -223,11 +220,6 @@ class ColorF
                               Pt::uint8_t b, Pt::uint8_t a = 255)
         {
             return ColorF(a * 257, r * 257, g * 257, b * 257);
-        }
-
-        bool operator==(const ColorF& c) const
-        {
-            return _a == c._a && _r == c._r && _g == c._g && _b == c._b;
         }
 
     private:

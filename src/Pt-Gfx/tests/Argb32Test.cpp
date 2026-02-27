@@ -101,7 +101,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32PixelView pixelView(to);
             Argb32PixelView::Iterator pixel = pixelView.pixel(2, 2);
             Argb32Color color = pixel->toColor();
-            PT_UNIT_ASSERT(color == Argb32Color(0x12131415));
+            PT_UNIT_ASSERT(color.value() == 0x12131415);
         }
 
         void Iterator()
