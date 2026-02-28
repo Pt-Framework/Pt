@@ -119,11 +119,16 @@ class PT_SYSTEM_API EventLoop : public Connectable
             on a parallel execution model e.g. using a worker thread.
         */
         void post(Selectable& s)
-        { this->onReady(s); }
+        { 
+            onReady(s);
+            wake();
+        }
 
         //! @internal Deprecated, use post() instead.
         void setReady(Selectable& s)
-        { this->onReady(s); }
+        { 
+            onReady(s); 
+        }
 
         //! @internal
         virtual Selector& selector() = 0;

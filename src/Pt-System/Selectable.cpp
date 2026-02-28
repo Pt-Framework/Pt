@@ -106,6 +106,13 @@ bool Selectable::run()
     return this->onRun(); 
 }
 
+
+void Selectable::post()
+{
+    if(_parent)
+        _parent->post(*this);
+}
+
 } // namespace System
 
 } // namespace Pt

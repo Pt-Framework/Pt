@@ -73,6 +73,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Default Constructor
         Selectable();
 
+        /** @brief Posts this selectable to its event loop from any thread.
+        */
+        void post();
+
         //! @brief Attached to loop
         virtual void onAttach(EventLoop& loop) = 0;
 
