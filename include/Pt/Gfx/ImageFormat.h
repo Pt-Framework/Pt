@@ -244,9 +244,9 @@ class Pixel
             _pixel->advance();
         }
 
-        void advanceLine()
+        void skipPadding()
         {
-            _pixel->advanceLine();
+            _pixel->skipPadding();
         }
 
         void advance(Pt::ssize_t n)
@@ -382,9 +382,9 @@ class ConstPixel
             _pixel->advance();
         }
 
-        void advanceLine()
+        void skipPadding()
         {
-            _pixel->advanceLine();
+            _pixel->skipPadding();
         }
 
         void advance(Pt::ssize_t n)

@@ -114,7 +114,7 @@ class PT_GFX_API Yuv12Pixel
 
         void advance();
 
-        void advanceLine();
+        void skipPadding();
 
         void advance(Pt::ssize_t n);
 
@@ -207,7 +207,7 @@ class Yuv12ConstPixel
 
         void advance();
 
-        void advanceLine();
+        void skipPadding();
 
         void advance(Pt::ssize_t n);
 
@@ -279,6 +279,75 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
+
+    public:
+        template <typename T>
+        static void advance(T*& y, T*& u, T*& v,
+                            Pt::ssize_t& xpos,
+                            Pt::ssize_t uvstride)
+        {
+            ++y;
+            ++xpos;
+
+            if(xpos % 2 == 0)
+            {
+                ++u;
+                ++v;
+            }
+        }
+
+        template <typename T>
+        static void advanceN(T*& y, T*& u, T*& v,
+                            Pt::ssize_t& xpos,
+                            Pt::ssize_t n)
+        {
+            Pt::ssize_t old_u_col = xpos / 2;
+            Pt::ssize_t new_u_col = (xpos + n) / 2;
+
+            y += n;
+            xpos += n;
+
+            Pt::ssize_t uv_diff = new_u_col - old_u_col;
+            u += uv_diff;
+            v += uv_diff;
+        }
+
+        template <typename T>
+        static void skipPadding(T*& y, T*& u, T*& v,
+                                Pt::ssize_t& xpos, Pt::ssize_t& ypos,
+                                Pt::ssize_t padding, Pt::ssize_t uvstride)
+        {
+            ++u;
+            ++v;
+
+            if(ypos % 2 == 0)
+            {
+                u -= uvstride;
+                v -= uvstride;
+            }
+
+            xpos = 0;
+            ++ypos;
+            y += padding;
+        }
+
+        template <typename T>
+        static void advanceLines(T*& y, T*& u, T*& v,
+                                 Pt::ssize_t& ypos,
+                                 Pt::ssize_t n,
+                                 Pt::ssize_t ystride,
+                                 Pt::ssize_t uvstride)
+        {
+            Pt::ssize_t old_u_row = ypos / 2;
+            Pt::ssize_t new_u_row = (ypos + n) / 2;
+
+            y += n * ystride;
+            ypos += n;
+
+            Pt::ssize_t uv_diff = (new_u_row - old_u_row) * uvstride;
+            u += uv_diff;
+            v += uv_diff;
+        }
 
     public:
         static ColorF getColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
@@ -498,7 +567,7 @@ inline void Yuv12Pixel::advance()
 }
 
 
-inline void Yuv12Pixel::advanceLine()
+inline void Yuv12Pixel::skipPadding()
 {
 }
 
@@ -583,7 +652,7 @@ inline void Yuv12ConstPixel::advance()
 }
 
 
-inline void Yuv12ConstPixel::advanceLine()
+inline void Yuv12ConstPixel::skipPadding()
 {
 }
 

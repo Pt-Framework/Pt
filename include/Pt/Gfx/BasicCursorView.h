@@ -41,17 +41,17 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
-class BasicCursorIterator;
+class CursorIterator;
 
 template <typename FormatT, typename TraitsT>
-class BasicConstCursorIterator;
+class ConstCursorIterator;
 
 
 template <typename FormatT, typename TraitsT>
-class BasicCursorIterator
+class CursorIterator
 {
     template <typename F, typename T>
-    friend class BasicConstCursorIterator;
+    friend class ConstCursorIterator;
 
     public:
         typedef FormatT Format;
@@ -59,7 +59,7 @@ class BasicCursorIterator
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicConstCursorIterator<Format, Traits> ConstIterator;
+        typedef ConstCursorIterator<Format, Traits> ConstIterator;
  
     public:
         using iterator_category = std::forward_iterator_tag;
@@ -70,19 +70,19 @@ class BasicCursorIterator
 
     public:
         template <typename Tr>
-        BasicCursorIterator(BasicView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
+        CursorIterator(BasicView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
         , _pixel(view, x, y)
         { }
 
-        BasicCursorIterator(const BasicCursorIterator& it)
+        CursorIterator(const CursorIterator& it)
         : _x(it._x)
         , _y(it._y)
         , _pixel(it._pixel)
         { }
 
-        BasicCursorIterator& operator=(const BasicCursorIterator& it)
+        CursorIterator& operator=(const CursorIterator& it)
         {
             _pixel.reset(it._pixel);
             _x = it._x;
@@ -90,13 +90,13 @@ class BasicCursorIterator
             return *this;
         }
 
-        bool operator!=(const BasicCursorIterator& it) const
+        bool operator!=(const CursorIterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
         bool operator!=(const ConstIterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
-        bool operator==(const BasicCursorIterator& it) const
+        bool operator==(const CursorIterator& it) const
         { return _pixel.equals(it._pixel); }
 
         bool operator==(const ConstIterator& it) const
@@ -108,7 +108,7 @@ class BasicCursorIterator
         Pixel* operator->()
         { return &_pixel; }
 
-        BasicCursorIterator& operator++()
+        CursorIterator& operator++()
         {
             _pixel.advance();
 
@@ -117,13 +117,13 @@ class BasicCursorIterator
                 _x = 0;
                 ++_y;
 
-                _pixel.advanceLine();
+                _pixel.skipPadding();
             }
 
             return *this;
         }
 
-        BasicCursorIterator& operator+=(Pt::ssize_t n)
+        CursorIterator& operator+=(Pt::ssize_t n)
         {
             Pt::ssize_t off = _x + n;
             std::size_t dy = off / _pixel.view().width();
@@ -149,10 +149,10 @@ class BasicCursorIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstCursorIterator
+class ConstCursorIterator
 {
     template <typename F, typename T>
-    friend class BasicCursorIterator;
+    friend class CursorIterator;
 
     public:
         typedef FormatT Format;
@@ -160,7 +160,7 @@ class BasicConstCursorIterator
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicCursorIterator<Format, Traits> Iterator;
+        typedef CursorIterator<Format, Traits> Iterator;
 
     public:
         using iterator_category = std::forward_iterator_tag;
@@ -171,7 +171,7 @@ class BasicConstCursorIterator
 
     public:
         template <typename Tr>
-        BasicConstCursorIterator(const BasicConstView<Format, Tr>& view, 
+        ConstCursorIterator(const BasicConstView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
@@ -179,20 +179,20 @@ class BasicConstCursorIterator
         { }
 
         template <typename Tr>
-        BasicConstCursorIterator(const BasicView<Format, Tr>& view, 
+        ConstCursorIterator(const BasicView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
         , _pixel(view, x, y)
         { }
 
-        BasicConstCursorIterator(const BasicConstCursorIterator& it)
+        ConstCursorIterator(const ConstCursorIterator& it)
         : _x(it._x)
         , _y(it._y)
         , _pixel(it._pixel)
         { }
 
-        BasicConstCursorIterator& operator=(const BasicConstCursorIterator& it)
+        ConstCursorIterator& operator=(const ConstCursorIterator& it)
         {
             _pixel.reset(it._pixel);
             _x = it._x;
@@ -200,13 +200,13 @@ class BasicConstCursorIterator
             return *this;
         }
 
-        bool operator!=(const BasicConstCursorIterator& it) const
+        bool operator!=(const ConstCursorIterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
         bool operator!=(const Iterator& it) const
         { return ! _pixel.equals(it._pixel); }
 
-        bool operator==(const BasicConstCursorIterator& it) const
+        bool operator==(const ConstCursorIterator& it) const
         { return _pixel.equals(it._pixel); }
 
         bool operator==(const Iterator& it) const
@@ -218,7 +218,7 @@ class BasicConstCursorIterator
         const ConstPixel* operator->() const
         { return &_pixel; }
 
-        BasicConstCursorIterator& operator++()
+        ConstCursorIterator& operator++()
         {
             _pixel.advance();
             
@@ -227,13 +227,13 @@ class BasicConstCursorIterator
                 _x = 0;
                 ++_y;
 
-                _pixel.advanceLine();
+                _pixel.skipPadding();
             }
 
             return *this;
         }
 
-        BasicConstCursorIterator& operator+=(Pt::ssize_t n)
+        ConstCursorIterator& operator+=(Pt::ssize_t n)
         {
             Pt::ssize_t off = _x + n;
             std::size_t dy = off / _pixel.view().width();
@@ -268,8 +268,8 @@ class BasicCursorView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicCursorIterator<Format, Traits> Iterator;
-        typedef BasicConstCursorIterator<Format, Traits> ConstIterator;
+        typedef CursorIterator<Format, Traits> Iterator;
+        typedef ConstCursorIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicCursorView(const Format& format = FormatT::get())
@@ -329,7 +329,7 @@ class BasicConstCursorView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::PixelType Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
-        typedef BasicConstCursorIterator<Format, Traits> Iterator;
+        typedef ConstCursorIterator<Format, Traits> Iterator;
 
     public:
         explicit BasicConstCursorView(const Format& format)

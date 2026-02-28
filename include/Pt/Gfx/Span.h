@@ -113,9 +113,9 @@ class Span
             _x + n;
         }
 
-        void advanceLine()
+        void skipPadding()
         {
-            _p.advanceLine();
+            _p.skipPadding();
             _x = 0;
         }
 
@@ -234,9 +234,9 @@ class ConstSpan
             _x + n;
         }
 
-        void advanceLine()
+        void skipPadding()
         {
-            _p.advanceLine();
+            _p.skipPadding();
             _x = 0;
         }
 

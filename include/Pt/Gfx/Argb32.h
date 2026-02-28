@@ -94,7 +94,7 @@ class Argb32Pixel
 
         void advance();
 
-        void advanceLine();
+        void skipPadding();
 
         void advance(Pt::ssize_t n);
 
@@ -172,7 +172,7 @@ class Argb32ConstPixel
 
         void advance();
 
-        void advanceLine();
+        void skipPadding();
 
         void advance(Pt::ssize_t n);
 
@@ -271,7 +271,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
         }
 
         template <typename BasePtr>
-        static BasePtr advanceLine(const ViewBase& view, BasePtr base)
+        static BasePtr skipPadding(const ViewBase& view, BasePtr base)
         {
             Pt::ssize_t w = view.width() * PixelWidth;
             Pt::ssize_t off = view.stride() - w;
@@ -662,9 +662,9 @@ inline void Argb32Pixel::advance()
 }
 
 
-inline void Argb32Pixel::advanceLine()
+inline void Argb32Pixel::skipPadding()
 {
-    _base = Argb32::advanceLine(*_view, _base);
+    _base = Argb32::skipPadding(*_view, _base);
 }
 
 
@@ -881,9 +881,9 @@ inline void Argb32ConstPixel::advance()
 }
 
 
-inline void Argb32ConstPixel::advanceLine()
+inline void Argb32ConstPixel::skipPadding()
 {
-    _base = Argb32::advanceLine(*_view, _base);
+    _base = Argb32::skipPadding(*_view, _base);
 }
 
 

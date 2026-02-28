@@ -37,47 +37,55 @@ namespace Pt {
 
 namespace Gfx {
 
-///////////////////////////////////////////////////////////////////////
-// convert with multistage converter
-///////////////////////////////////////////////////////////////////////
+struct SameFormat
+{};
 
-//
-// TODO: GFX: converter or tag overload?
-//
 
-template <typename T1, typename T2, int isDirect>
-struct DirectConverter 
+struct DifferentFormat
+{};
+
+
+struct FromImageFormat 
+{};
+
+
+struct ToImageFormat 
+{};
+
+
+template <typename Fmt1, typename Fmt2>
+struct MatchFormat
 {
-    static void convert(const T1& p1, T2& p2) 
-    {
-        p2 = p1.toColor();
-    }
+    typedef DifferentFormat Type;
 };
 
 
-template <typename T1, typename T2>
-struct DirectConverter<T1, T2, 1> 
+template <typename Fmt>
+struct MatchFormat<Fmt, Fmt>
 {
-    static void convert(const T1& p1, T2& p2) 
-    {
-        p2 = p1;
-    }
+    typedef SameFormat Type;
 };
 
 
-template <typename P1, typename P2>
-struct Converter 
-    : public DirectConverter<P1, P2, 
-                             IsSame<typename P1::FormatType, 
-                                    typename P2::FormatType>::value> 
-{ };
-
-
-template <typename P1, typename P2> 
-void convert(const P1& p1, P2& p2)
+template <typename Fmt2>
+struct MatchFormat<ImageFormat, Fmt2>
 {
-    Converter<P1, P2>::convert(p1, p2);
-}
+    typedef FromImageFormat Type;
+};
+
+
+template <typename Fmt1>
+struct MatchFormat<Fmt1, ImageFormat>
+{
+    typedef ToImageFormat Type;
+};
+
+
+template <>
+struct MatchFormat<ImageFormat, ImageFormat>
+{
+    typedef SameFormat Type;
+};
 
 ///////////////////////////////////////////////////////////////////////
 // copy single pixel
@@ -107,11 +115,18 @@ void copyPixel(const P1& p1, P2& p2)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// copy pixels
+// copy lines
 ///////////////////////////////////////////////////////////////////////
 
 template <typename P1, typename P2> 
-void copyLineImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
+void copyLineImpl(const P1& p1, P2& p2, std::size_t length, SameFormat)
+{
+    p2.assign(p1, length);
+}
+
+
+template <typename P1, typename P2> 
+void copyLineImpl(const P1& p1, P2& p2, std::size_t length, DifferentFormat)
 {
     typedef typename P2::ColorType ColorType;
 
@@ -137,9 +152,16 @@ void copyLineImpl(const P1& p1, P2& p2, std::size_t length, FalseType)
 
 
 template <typename P1, typename P2> 
-void copyLineImpl(const P1& p1, P2& p2, std::size_t length, TrueType)
+void copyLineImpl(const P1& p1, P2& p2, std::size_t length, FromImageFormat)
 {
-    p2.assign(p1, length);
+    copyLineImpl(p1, p2, length, DifferentFormat());
+}
+
+
+template <typename P1, typename P2> 
+void copyLineImpl(const P1& p1, P2& p2, std::size_t length, ToImageFormat)
+{
+    copyLineImpl(p1, p2, length, DifferentFormat());
 }
 
 
@@ -149,8 +171,46 @@ void copyLine(const P1& p1, P2& p2, std::size_t length)
     typedef typename P1::FormatType Fmt1;
     typedef typename P2::FormatType Fmt2;
 
-    copyLineImpl(p1, p2, length, IsSame<Fmt1, Fmt2>());
+    copyLineImpl(p1, p2, length, typename MatchFormat<Fmt1, Fmt2>::Type());
 }
+
+///////////////////////////////////////////////////////////////////////
+// convert with multistage converter
+///////////////////////////////////////////////////////////////////////
+
+//template <typename T1, typename T2, int isDirect>
+//struct DirectConverter 
+//{
+//    static void convert(const T1& p1, T2& p2) 
+//    {
+//        p2 = p1.toColor();
+//    }
+//};
+//
+//
+//template <typename T1, typename T2>
+//struct DirectConverter<T1, T2, 1> 
+//{
+//    static void convert(const T1& p1, T2& p2) 
+//    {
+//        p2 = p1;
+//    }
+//};
+//
+//
+//template <typename P1, typename P2>
+//struct Converter 
+//    : public DirectConverter<P1, P2, 
+//                             IsSame<typename P1::FormatType, 
+//                                    typename P2::FormatType>::value> 
+//{ };
+//
+//
+//template <typename P1, typename P2> 
+//void convert(const P1& p1, P2& p2)
+//{
+//    Converter<P1, P2>::convert(p1, p2);
+//}
 
 } // namespace
 

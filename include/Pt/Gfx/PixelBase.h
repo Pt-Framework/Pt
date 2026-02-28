@@ -77,7 +77,7 @@ class PixelBase
             _base = onAdvance(n);
         }
 
-        void advanceLine()
+        void skipPadding()
         {
             _base = onAdvanceLine();
         }
