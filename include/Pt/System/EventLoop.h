@@ -110,13 +110,12 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<>& exited()
         { return _exited; }
 
-        /** @brief Calls the selectables run function in the loop thread.
+        /** @brief Posts the loop to run a selectable.
 
             The event loop is woken up and the selectable's run function is 
-            called in the thread that called the event loop's run function. 
-            This function may be called from any thread, since it is meant to
-            return to the event loop thread from a selectable, that is based
-            on a parallel execution model e.g. using a worker thread.
+            called in the event loop thread. This function may be called from
+            any thread, especially from a selectable, that is based on a
+            parallel execution model e.g. using a worker thread.
         */
         void post(Selectable& s)
         { 
@@ -124,7 +123,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
             wake();
         }
 
-        //! @internal Deprecated, use post() instead.
+        //! @brief Sets the Selectable as ready without waking the loop.
         void setReady(Selectable& s)
         { 
             onReady(s); 
