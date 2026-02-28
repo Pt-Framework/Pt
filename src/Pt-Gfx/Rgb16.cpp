@@ -1,5 +1,4 @@
 /* Copyright (C) 2015 Marc Boris Duerner
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -29,204 +28,155 @@
 
 #include <Pt/Gfx/Rgb16.h>
 
- namespace Pt {
+namespace Pt {
 
- namespace Gfx {
+namespace Gfx {
 
-Rgb16::Rgb16()
-: ImageFormat(2)
+///////////////////////////////////////////////////////////////////////
+// Rgb16PixelBase
+///////////////////////////////////////////////////////////////////////
+
+class Rgb16PixelBase final : public PixelBase
 {
+    public:
+        explicit Rgb16PixelBase(Pt::uint8_t* data, const ViewBase& view, 
+                                Pt::ssize_t x, Pt::ssize_t y)
+        : PixelBase(view, Rgb16::getPixel(view, data, x, y), x, y)
+        { }
+
+    protected:
+        virtual PixelBase* onClone(PixelStorage& store) const override
+        {
+            return store.create<Rgb16PixelBase>(*this);
+        }
+
+        virtual Pt::uint8_t* onAdvance() override
+        {
+            return Rgb16::advance(view(), base());
+        }
+
+        virtual Pt::uint8_t* onSkipPadding() override
+        {
+            return Rgb16::skipPadding(view(), base());
+        }
+
+        virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) override
+        {
+            return Rgb16::advance(view(), base(), n);
+        }
+
+        virtual Pt::uint8_t* onAdvanceLines(Pt::ssize_t n) override
+        {
+            return Rgb16::advanceLines(view(), base(), n);
+        }
+
+        virtual ColorF onGetColor() const override
+        {
+            return Rgb16::getColor(base());
+        }
+
+        virtual Argb32Color onGetArgb32Color() const override
+        {
+            return Rgb16::getArgb32Color(base());
+        }
+
+        virtual void onSetColor(const ColorF& color) override
+        {
+            Rgb16::sourceCopy(base(), color);
+        }
+
+        virtual void onSetColor(const Argb32Color& color) override
+        {
+            Rgb16::sourceCopy(base(), color);
+        }
+
+        virtual void onGetColors(ColorF* colors, std::size_t length) const override
+        {
+            Rgb16::getColors(base(), colors, length);
+        }
+
+        virtual void onGetColors(Argb32Color* colors, std::size_t length) const override
+        {
+            Rgb16::getColors(base(), colors, length);
+        }
+
+        virtual void onAssign(const Argb32Color* colors, std::size_t length) override
+        {
+            Pt::uint8_t* p = base();
+            
+            for(std::size_t i = 0; i < length; ++i)
+            {
+                Rgb16::sourceCopy(p, colors[i]);
+                p += 2;
+            }
+        }
+
+        virtual void onAssign(const ColorF* colors, std::size_t length) override
+        {
+            Rgb16::sourceCopy(base(), colors, length);
+        }
+
+        virtual void onFillColor(std::size_t n, const ColorF& color) override
+        {
+            Rgb16::sourceCopy(base(), n, color);
+        }
+
+        virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
+
+        virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;
+};
+
+
+inline bool Rgb16PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
+{
+    if( typeid(p) == typeid(Rgb16PixelBase) )
+    {
+        const Rgb16PixelBase* rgb16 = static_cast<const Rgb16PixelBase*>(&p);
+
+        Pt::uint8_t* to = base();
+        const Pt::uint8_t* from = rgb16->base();
+
+        Rgb16::sourceCopy(to, from, length);
+        return true;
+    }
+
+    return false;
 }
 
+
+inline bool Rgb16PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
+{
+    if( typeid(p) == typeid(Rgb16PixelBase) )
+    {
+        Rgb16PixelBase* rgb16 = static_cast<Rgb16PixelBase*>(&p);
+
+        Pt::uint8_t* to = rgb16->base();
+        const Pt::uint8_t* from = base();
+
+        Rgb16::sourceCopy(to, from, length);
+        return true;
+    }
+
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Rgb16
+///////////////////////////////////////////////////////////////////////
 
 std::size_t Rgb16::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
-                                     std::size_t padding) const
+                               std::size_t padding) const
 {
-    std::size_t l = (width * 2) + padding;
-    std::size_t n = l * height;
-    return n;
+    return imageSize(width, height, padding);
 }
+
 
 PixelBase* Rgb16::onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
-                                  Pt::ssize_t x, Pt::ssize_t y, 
-                                  PixelStorage& store) const
-{ 
-    return 0; 
+                                Pt::ssize_t x, Pt::ssize_t y, 
+                                PixelStorage& store) const
+{
+    return store.create<Rgb16PixelBase>(data, view, x, y);
 }
-
-//
-// Get pixel color
-//
-//
-//ColorF Rgb16Format::onGetColor(const View& view, const Pt::uint8_t* base, 
-//                              Pt::ssize_t x, Pt::ssize_t y) const
-//{
-//    const Pt::uint16_t* p = (const Pt::uint16_t*) base;
-//
-//    const uint16_t tr = (*p & 0xF800) >> 11;
-//    const uint16_t tg = (*p & 0x07E0) >> 5;
-//    const uint16_t tb = *p & 0x001F;
-//
-//    uint16_t a = 0xFFFF;
-//    uint16_t r = ((tr + !!tr) << 11) - !!tr;
-//    uint16_t g = ((tg + !!tg) << 10) - !!tg;
-//    uint16_t b = ((tb + !!tb) << 11) - !!tb;
-//
-//    return ColorF(a, r, g, b);
-//}
-//
-////
-//// Assign pixel
-////
-//
-//void Rgb16Format::onSourceCopy(View& view, PixelBase& to, const ColorF& c) const
-//{
-//    Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
-//                       ( uint32_t(c.green() & 0xFC00) >> 5 ) |
-//                       ( uint32_t(c.blue () ) >> 11 );
-//
-//    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( to.base() );
-//    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)val);
-//}
-//
-//
-//void Rgb16Format::onSourceOver(View& view, PixelBase& to, const ColorF& c) const
-//{
-//    Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
-//                       ( uint32_t(c.green() & 0xFC00) >> 5 ) |
-//                       ( uint32_t(c.blue () ) >> 11 );
-//
-//    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( to.base() );
-//    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)val);
-//}
-//
-//
-//void Rgb16Format::onSourceCopy(View& to, PixelBase& pos,
-//                                const View& from, const Pt::uint8_t* base,
-//                                Pt::ssize_t x, Pt::ssize_t y) const
-//{
-//    Pt::uint8_t* dst = pos.base();
-//    const Pt::uint8_t* src = base;
-//
-//    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
-//}
-//
-//
-//void Rgb16Format::onSourceOver(View& to, PixelBase& pos,
-//                                const View& from, const Pt::uint8_t* base,
-//                                Pt::ssize_t x, Pt::ssize_t y) const
-//{
-//    Pt::uint8_t* dst = pos.base();
-//    const Pt::uint8_t* src = base;
-//
-//    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
-//}
-//
-////
-//// Fill pixels
-////
-//
-//void Rgb16Format::onSourceCopy(View& view, PixelBase& to, 
-//                                std::size_t n, const ColorF& c) const
-//{
-//    // ### !!! TODO !!! ###
-//}
-//
-//
-//void Rgb16Format::onSourceOver(View& view, PixelBase& to, 
-//                                std::size_t n, const ColorF& c) const
-//{
-//    // ### !!! TODO !!! ###
-//}
-//
-//
-//void Rgb16Format::onSourceCopy(View& view, PixelBase& to, std::size_t n, 
-//                                const View& from, const Pt::uint8_t* base,
-//                                Pt::ssize_t x, Pt::ssize_t y) const
-//{
-//    // ### !!! TODO !!! ###
-//}
-//
-//
-//void Rgb16Format::onSourceOver(View& view, PixelBase& to, std::size_t n, 
-//                                const View& from, const Pt::uint8_t* base,
-//                                Pt::ssize_t x, Pt::ssize_t y) const
-//{
-//    // ### !!! TODO !!! ###
-//}
-//
-////
-//// Copy pixels
-////
-//
-//void Rgb16Format::onSourceCopy(View& view, PixelBase& to, 
-//                                const View& from, const Pt::uint8_t* base,
-//                                Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const
-//{
-//    std::memcpy(to.base(), base, n * 2);
-//}
-//
-//
-//void Rgb16Format::onSourceOver(View& view, PixelBase& to, 
-//                                const View& from, const Pt::uint8_t* base,
-//                                Pt::ssize_t x, Pt::ssize_t y, std::size_t n) const
-//{
-//    std::memcpy(to.base(), base, n * 2);
-//}
-//
-//
-//void Rgb16Format::onSourceCopy(View& toView, Pt::ssize_t toX, Pt::ssize_t toY,
-//                               const View& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
-//                               Pt::ssize_t width, Pt::ssize_t height) const
-//{
-//    assert( toX >= 0 && toY >= 0 &&
-//            toX + width <= toView.width() &&
-//            toY + height<= toView.height() );
-//
-//    Pt::ssize_t bytesPerPixel = 2;
-//    Pt::ssize_t n = width * bytesPerPixel;
-//
-//    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
-//                                    + (toX * bytesPerPixel);
-//    
-//    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
-//                                              + (fromX * bytesPerPixel);
-//
-//    for(Pt::ssize_t y = 0; y < height; ++y)
-//    {
-//        memcpy(to, from, n);
-//
-//        to += toView.stride();
-//        from += fromView.stride();
-//    }
-//}
-//
-//
-//void Rgb16Format::onSourceOver(View& toView, Pt::ssize_t toX, Pt::ssize_t toY,
-//                               const View& fromView, Pt::ssize_t fromX, Pt::ssize_t fromY,
-//                               Pt::ssize_t width, Pt::ssize_t height) const
-//{
-//    assert( toX >= 0 && toY >= 0 &&
-//            toX + width <= toView.width() &&
-//            toY + height<= toView.height() );
-//
-//    Pt::ssize_t bytesPerPixel = 2;
-//    Pt::ssize_t n = width * bytesPerPixel;
-//
-//    Pt::uint8_t* to = toView.data() + (toY * toView.stride()) 
-//                                    + (toX * bytesPerPixel);
-//    
-//    const Pt::uint8_t* from = fromView.data() + (fromY * fromView.stride()) 
-//                                              + (fromX * bytesPerPixel);
-//
-//    for(Pt::ssize_t y = 0; y < height; ++y)
-//    {
-//        memcpy(to, from, n);
-//
-//        to += toView.stride();
-//        from += fromView.stride();
-//    }
-//}
 
 } // namespace
 

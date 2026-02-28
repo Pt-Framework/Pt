@@ -64,7 +64,7 @@ class Yuv12PixelBase final : public PixelBase
             return _p.ybase();
         }
 
-        virtual Pt::uint8_t* onAdvanceLine() override
+        virtual Pt::uint8_t* onSkipPadding() override
         {
             return _p.ybase();
         }

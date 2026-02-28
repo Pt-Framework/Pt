@@ -79,7 +79,7 @@ class PixelBase
 
         void skipPadding()
         {
-            _base = onAdvanceLine();
+            _base = onSkipPadding();
         }
 
         void advanceLines(Pt::ssize_t n)
@@ -146,7 +146,7 @@ class PixelBase
 
         virtual Pt::uint8_t* onAdvance() = 0;
 
-        virtual Pt::uint8_t* onAdvanceLine()
+        virtual Pt::uint8_t* onSkipPadding()
         { return 0; }
 
         virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) = 0;

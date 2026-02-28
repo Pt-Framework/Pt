@@ -680,15 +680,29 @@ inline void Argb32Pixel::advanceLines(Pt::ssize_t n)
 }
 
 
-inline bool Argb32Pixel::equals(const Argb32Pixel& p) const
-{
-    return base() == p.base();
+inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::ColorF& color)
+{ 
+    Argb32::sourceCopy(base(), color);
+    return *this;
 }
 
 
-inline bool Argb32Pixel::equals(const Argb32ConstPixel& p) const
+inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Color& color)
+{ 
+    Argb32::sourceCopy(base(), color);
+    return *this;
+}
+
+
+inline void Argb32Pixel::assign(const Argb32Pixel& p)
 {
-    return base() == p.base();
+    Argb32::sourceCopy( base(), p.base() );
+}
+
+
+inline void Argb32Pixel::assign(const Argb32ConstPixel& p)
+{
+    Argb32::sourceCopy( base(), p.base() );
 }
 
 
@@ -717,29 +731,15 @@ inline void Argb32Pixel::fill(std::size_t n, const Argb32Color& color)
 }
 
 
-inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::ColorF& color)
-{ 
-    Argb32::sourceCopy(base(), color);
-    return *this;
-}
-
-
-inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Color& color)
-{ 
-    Argb32::sourceCopy(base(), color);
-    return *this;
-}
-
-
-inline void Argb32Pixel::assign(const Argb32Pixel& p)
+inline bool Argb32Pixel::equals(const Argb32Pixel& p) const
 {
-    Argb32::sourceCopy( base(), p.base() );
+    return base() == p.base();
 }
 
 
-inline void Argb32Pixel::assign(const Argb32ConstPixel& p)
+inline bool Argb32Pixel::equals(const Argb32ConstPixel& p) const
 {
-    Argb32::sourceCopy( base(), p.base() );
+    return base() == p.base();
 }
 
 
@@ -804,11 +804,6 @@ inline Argb32Color Argb32Pixel::toColor() const
     return Argb32Color( base() );
 }
 
-
-inline Argb32Color Argb32ConstPixel::toColor() const
-{
-    return Argb32Color( base() );
-}
 
 ///////////////////////////////////////////////////////////////////////
 // Argb32ConstPixel
@@ -898,6 +893,39 @@ inline void Argb32ConstPixel::advanceLines(Pt::ssize_t n)
     _base = Argb32::advanceLines(*_view, _base, n);
 }
 
+
+inline Pt::uint8_t Argb32ConstPixel::alpha() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return *val >> 24;
+}
+
+
+inline Pt::uint8_t Argb32ConstPixel::red() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return (*val & 0x00FF0000) >> 16;
+}
+
+
+inline Pt::uint8_t Argb32ConstPixel::green() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return (*val & 0x0000FF00) >> 8;
+}
+
+
+inline Pt::uint8_t Argb32ConstPixel::blue() const
+{
+    const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(base());
+    return *val & 0x000000FF;
+}
+
+
+inline Argb32Color Argb32ConstPixel::toColor() const
+{
+    return Argb32Color( base() );
+}
 
 
 inline void Argb32ConstPixel::getColors(Argb32Color* colors, std::size_t length) const

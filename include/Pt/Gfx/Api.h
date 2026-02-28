@@ -219,6 +219,62 @@ typedef Span<Argb32> Argb32Span;
 typedef ConstSpan<Argb32 > Argb32ConstSpan;
 
 //
+// RGB-16
+//
+
+class Rgb16;
+class Rgb16Pixel;
+class Rgb16ConstPixel;
+
+/** @brief RGB-16 image.
+*/
+typedef BasicImage<Rgb16> Rgb16Image;
+
+/** @brief RGB-16 const image.
+*/
+typedef BasicConstImage<Rgb16> Rgb16ConstImage;
+
+/** @brief RGB-16 view.
+*/
+typedef BasicView<Rgb16> Rgb16View; 
+
+/** @brief RGB-16 const view.
+*/
+typedef BasicConstView<Rgb16> Rgb16ConstView;
+
+/** @brief RGB-16 pixel view.
+*/
+typedef BasicPixelView<Rgb16> Rgb16PixelView;
+
+/** @brief RGB-16 const pixel view.
+*/
+typedef BasicConstPixelView<Rgb16> Rgb16ConstPixelView;
+
+/** @brief RGB-16 cursor view.
+*/
+typedef BasicCursorView<Rgb16> Rgb16CursorView;
+
+/** @brief RGB-16 const cursor view.
+*/
+typedef BasicConstCursorView<Rgb16> Rgb16ConstCursorView;
+
+/** @brief RGB-16 line view.
+*/
+typedef BasicLineView<Rgb16> Rgb16LineView;
+
+/** @brief RGB-16 const line view.
+*/
+typedef BasicConstLineView<Rgb16> Rgb16ConstLineView;
+
+/** @brief RGB-16 span.
+*/
+typedef Span<Rgb16> Rgb16Span;
+
+/** @brief RGB-16 const span.
+*/
+typedef ConstSpan<Rgb16> Rgb16ConstSpan;
+
+//
 // YUV-12
 //
 

@@ -55,7 +55,7 @@ class Argb32PixelBase final : public PixelBase
             return Argb32::advance(view(), base());
         }
 
-        virtual Pt::uint8_t* onAdvanceLine() override
+        virtual Pt::uint8_t* onSkipPadding() override
         {
             return Argb32::skipPadding(view(), base());
         }
