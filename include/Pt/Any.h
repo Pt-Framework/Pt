@@ -417,7 +417,7 @@ class Any
         Value* _value;
 
         //! @internal Storage for small types.
-        char _data[sizeofData];
+        alignas(Value) char _data[sizeofData];
 };
 
 /** @internal Implementation of any_cast.
