@@ -1,3 +1,5 @@
+                  Platinum Framework License
+
 The Platinum Framework is licensed under the terms of the GNU LGPL
 with extra permissions for static linking and to incorporate inlined
 code from the library. The intent in licensing it in this way is to
@@ -27,3 +29,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 MA 02110-1301 USA
+
+SPDX-License-Identifier: LGPL-2.1-or-later
+(with additional permission for static linking and code inlining in proprietary applications)
+
