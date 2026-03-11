@@ -1,0 +1,106 @@
+# Build directories
+build/
+tmp/
+deploy/
+
+# Documentation (generated)
+doc/html/
+doc/htdocs/
+doc/latex/
+doxygen/
+
+# Compiled Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+*.la
+*.lo
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.sdf
+*.opensdf
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+ipch/
+x64/
+x86/
+Debug/
+Release/
+*.log
+*.tlog
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Backup files
+*~
+*.bak
+*.swp
+*.swo
+*.orig
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Core dumps
+core
+core.*
+vgcore.*
+
+# Profiling
+gmon.out
+*.gcov
+*.gcda
+*.gcno
