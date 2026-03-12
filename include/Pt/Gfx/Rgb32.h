@@ -177,11 +177,11 @@ class Rgb32Pixel
 
         void setBlue(Pt::uint8_t b);
 
-        /** @brief Returns the native premultiplied Rgb32Color.
+        /** @brief Returns the premultiplied RGB-32 color.
         */
         Rgb32Color color() const;
 
-        /** @brief Returns the pixel as straight (un-premultiplied) Argb32Color.
+        /** @brief Returns ARGB-32 color.
         */
         Argb32Color toColor() const;
 
@@ -202,6 +202,14 @@ class Rgb32Pixel
         void assign(const Rgb32ConstPixel& p, std::size_t length);
 
         void assign(const Argb32Color* colors, std::size_t length);
+
+        void assign(const Rgb32Color* colors, std::size_t length);
+
+        void getColors(Argb32Color* colors, std::size_t length) const;
+
+        /** @brief Get as premultiplied RGB-32 colors.
+        */
+        void getColors(Rgb32Color* colors, std::size_t length) const;
 
         void fill(std::size_t n, const Argb32Color& color);
 
@@ -263,11 +271,11 @@ class Rgb32ConstPixel
 
         Pt::uint8_t blue() const;
 
-        /** @brief Returns the native premultiplied Rgb32Color.
+        /** @brief Returns a premultiplied RGB-32 color.
         */
         Rgb32Color color() const;
 
-        /** @brief Returns the pixel as straight (un-premultiplied) Argb32Color.
+        /** @brief Returns a ARGB-32 color.
      */
         Argb32Color toColor() const;
 
@@ -280,6 +288,10 @@ class Rgb32ConstPixel
         void advanceLines(Pt::ssize_t n);
 
         void getColors(Argb32Color* colors, std::size_t length) const;
+
+        /** @brief Get as premultiplied RGB-32 colors.
+ */
+        void getColors(Rgb32Color* colors, std::size_t length) const;
 
         bool equals(const Rgb32ConstPixel& p) const;
 
@@ -390,37 +402,42 @@ class PT_GFX_API Rgb32 final : public ImageFormat
             return base + n * view.stride();
         }
 
-        /** @brief Read premultiplied pixel as ColorF (returns premultiplied values).
+    public:
+        /** @brief Read premultiplied RGB-32.
         */
-        static ColorF getColor(const Pt::uint8_t* p);
+        static Rgb32Color getColor(const Pt::uint8_t* p);
 
-        /** @brief Read premultiplied pixel as Argb32Color (returns premultiplied values).
+        /** @brief Convert to ARGB.
         */
-        static Argb32Color getArgb32Color(const Pt::uint8_t* p);
+        static ColorF toColor(const Pt::uint8_t* p);
 
+        /** @brief Convert to ARGB-32.
+        */
+        static Argb32Color toArgb32Color(const Pt::uint8_t* p);
+
+        /** @brief Get as ARGB colors.
+        */
         static void getColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
 
+        /** @brief Get as ARGB-32 colors.
+        */
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
-        /** @brief Read premultiplied pixel and un-premultiplied to straight ColorF.
-        */
-        static ColorF getStraightColor(const Pt::uint8_t* p);
-
-        /** @brief Read premultiplied pixel and un-premultiplied to straight Argb32Color.
-        */
-        static Argb32Color getStraightArgb32Color(const Pt::uint8_t* p);
-
-        static void getStraightColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
-
-        static void getStraightColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
+       /** @brief Get as premultiplied RGB-32 colors.
+      */
+        static void getColors(const Pt::uint8_t* p, Rgb32Color* colors, std::size_t n);
 
         //
-        // SourceCopy - writes premultiplied values
+        // SourceCopy
         //
-
+    public:
         /** @brief Copy raw premultiplied pixel data.
         */
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
+
+        /** @brief Copy premultiplied Rgb32Color.
+        */
+        static void sourceCopy(Pt::uint8_t* to, const Rgb32Color& from);
 
         /** @brief Write Argb32Color, premultiplying RGB by alpha.
         */
@@ -429,6 +446,10 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         /** @brief Write ColorF, premultiplying RGB by alpha.
         */
         static void sourceCopy(Pt::uint8_t* to, const ColorF& c);
+
+        /** @brief Fill with premultiplied Rgb32Color.
+        */
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c);
 
         /** @brief Fill with ColorF, premultiplying RGB by alpha.
         */
@@ -442,29 +463,30 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         */
         static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
-        /** @brief Write ColorF array, premultiplying each by alpha.
-        */
-        static void sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
-
         /** @brief Copy premultiplied pixel array.
         */
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
+
+        /** @brief Copy premultiplied Rgb32Color array.
+        */
+        static void sourceCopy(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t length);
+
+        /** @brief Write Color array, premultiplying each by alpha.
+        */
+        static void sourceCopy(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
+
+        /** @brief Write ColorF array, premultiplying each by alpha.
+        */
+        static void sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
         static void sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
                                const Pt::uint8_t* from, Pt::ssize_t fromStride,
                                Pt::ssize_t width, Pt::ssize_t height);
 
-        /** @brief Copy raw Rgb32Color data.
-        */
-        static void sourceCopy(Pt::uint8_t* to, const Rgb32Color& from);
-
-        /** @brief Fill with raw Rgb32Color.
-        */
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c);
-
         //
-        // SourceOver - premultiplied compositing: dst = src + dst * (1 - src_alpha)
+        // SourceOver
         //
+    public:
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
    
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from);
@@ -478,59 +500,6 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         static void sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
                                const Pt::uint8_t* from, Pt::ssize_t fromStride,
                                Pt::ssize_t width, Pt::ssize_t height);
-
-    public:
-        static void blendSourceCopy(Pt::uint8_t* to, const ColorF& c, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t a = c.alpha() >> 8;
-            const Pt::uint32_t blendAlphaSrc = alpha;
-            const Pt::uint32_t blendAlphaInv = 255 - alpha;
-            const Pt::uint32_t pr = (Pt::uint32_t)(c.red  () >> 8) * a / 255;
-            const Pt::uint32_t pg = (Pt::uint32_t)(c.green() >> 8) * a / 255;
-            const Pt::uint32_t pb = (Pt::uint32_t)(c.blue () >> 8) * a / 255;
-            to[0] = (blendAlphaSrc * pb + blendAlphaInv * to[0]) >> 8;
-            to[1] = (blendAlphaSrc * pg + blendAlphaInv * to[1]) >> 8;
-            to[2] = (blendAlphaSrc * pr + blendAlphaInv * to[2]) >> 8;
-            to[3] = (blendAlphaSrc * a  + blendAlphaInv * to[3]) >> 8;
-        }
-        
-        static void blendSourceOver(Pt::uint8_t* to, const ColorF& c, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t a = c.alpha() >> 8;
-            const Pt::uint32_t blendAlpha = a * alpha / 255;
-            const Pt::uint32_t blendAlphaInv = 255 - blendAlpha;
-            const Pt::uint32_t pr = (Pt::uint32_t)(c.red  () >> 8) * blendAlpha / 255;
-            const Pt::uint32_t pg = (Pt::uint32_t)(c.green() >> 8) * blendAlpha / 255;
-            const Pt::uint32_t pb = (Pt::uint32_t)(c.blue () >> 8) * blendAlpha / 255;
-            to[0] = (Pt::uint8_t)(pb + ((blendAlphaInv * to[0]) >> 8));
-            to[1] = (Pt::uint8_t)(pg + ((blendAlphaInv * to[1]) >> 8));
-            to[2] = (Pt::uint8_t)(pr + ((blendAlphaInv * to[2]) >> 8));
-            to[3] = (Pt::uint8_t)(blendAlpha + ((blendAlphaInv * to[3]) >> 8));
-        }
-
-        static void blendSourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t blendAlphaSrc = alpha;
-            const Pt::uint32_t blendAlphaInv = 255 - alpha;
-            to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
-            to[1] = (blendAlphaSrc * from[1] + blendAlphaInv * to[1]) >> 8;
-            to[2] = (blendAlphaSrc * from[2] + blendAlphaInv * to[2]) >> 8;
-            to[3] = (blendAlphaSrc * from[3] + blendAlphaInv * to[3]) >> 8;
-        }
-
-        static void blendSourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
-        {
-            // from[] is already premultiplied, scale by extra blend alpha
-            const Pt::uint32_t blendAlpha    = from[3] * alpha / 255;
-            const Pt::uint32_t blendAlphaInv = 255 - blendAlpha;
-            const Pt::uint32_t srcB = from[0] * alpha / 255;
-            const Pt::uint32_t srcG = from[1] * alpha / 255;
-            const Pt::uint32_t srcR = from[2] * alpha / 255;
-            to[0] = (Pt::uint8_t)(srcB + ((blendAlphaInv * to[0]) >> 8));
-            to[1] = (Pt::uint8_t)(srcG + ((blendAlphaInv * to[1]) >> 8));
-            to[2] = (Pt::uint8_t)(srcR + ((blendAlphaInv * to[2]) >> 8));
-            to[3] = (Pt::uint8_t)(blendAlpha + ((blendAlphaInv * to[3]) >> 8));
-        }
 
     private:
         /** @brief Premultiply 8-bit ARGB to a packed premultiplied uint32_t.
@@ -572,53 +541,16 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// Rgb32 - color conversion
+// Rgb32 
 ///////////////////////////////////////////////////////////////////////
 
-inline ColorF Rgb32::getColor(const Pt::uint8_t* p)
+inline Rgb32Color Rgb32::getColor(const Pt::uint8_t* p)
 {
-    // Returns premultiplied values as-is
-    const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
-
-    const Pt::uint16_t ta =  pixel               >> 24;
-    const Pt::uint16_t tr = (pixel & 0x00FF0000) >> 16;
-    const Pt::uint16_t tg = (pixel & 0x0000FF00) >>  8;
-    const Pt::uint16_t tb =  pixel & 0x000000FF;
-
-    Pt::uint16_t a = (ta << 8) + ta;
-    Pt::uint16_t r = (tr << 8) + tr;
-    Pt::uint16_t g = (tg << 8) + tg;
-    Pt::uint16_t b = (tb << 8) + tb;
-
-    return ColorF(a, r, g, b);
+    return Rgb32Color(p);
 }
 
 
-inline Argb32Color Rgb32::getArgb32Color(const Pt::uint8_t* p)
-{
-    // Returns premultiplied values as-is
-    return Argb32Color(p);
-}
-
-
-inline void Rgb32::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n)
-{
-    for(std::size_t i = 0; i < n; ++i)
-    {
-        colors[i] = getColor(p);
-        p += PixelWidth;
-    }
-}
-
-
-inline void Rgb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n)
-{
-    void* cp = reinterpret_cast<void*>(colors); 
-    std::memcpy(cp, p, n * PixelWidth);
-}
-
-
-inline ColorF Rgb32::getStraightColor(const Pt::uint8_t* p)
+inline ColorF Rgb32::toColor(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
     const Pt::uint32_t a = pixel >> 24;
@@ -639,7 +571,7 @@ inline ColorF Rgb32::getStraightColor(const Pt::uint8_t* p)
 }
 
 
-inline Argb32Color Rgb32::getStraightArgb32Color(const Pt::uint8_t* p)
+inline Argb32Color Rgb32::toArgb32Color(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
     const Pt::uint32_t a = pixel >> 24;
@@ -658,39 +590,49 @@ inline Argb32Color Rgb32::getStraightArgb32Color(const Pt::uint8_t* p)
 }
 
 
-inline void Rgb32::getStraightColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n)
+inline void Rgb32::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n)
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = getStraightColor(p);
+        colors[i] = toColor(p);
         p += PixelWidth;
     }
 }
 
 
-inline void Rgb32::getStraightColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n)
+inline void Rgb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n)
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = getStraightArgb32Color(p);
+        colors[i] = toArgb32Color(p);
         p += PixelWidth;
     }
+}
+
+
+inline void Rgb32::getColors(const Pt::uint8_t* p, Rgb32Color* colors, std::size_t n)
+{
+    std::memcpy(colors, p, n * PixelWidth);
 }
 
 //
-// Implementation SourceCopy - premultiplies when writing from straight-alpha sources
+// SourceCopy
 //
 
 inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
 {
-    // Raw copy: data is already premultiplied
     std::memcpy(to, from, PixelWidth);
+}
+
+
+inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Rgb32Color& from)
+{
+    std::memcpy(to, &from.value(), PixelWidth);
 }
 
 
 inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Argb32Color& from)
 {
-    // Premultiply straight-alpha Argb32Color
     Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
     *pixel = premultiply(from.alpha(), from.red(), from.green(), from.blue());
 }
@@ -698,9 +640,18 @@ inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Argb32Color& from)
 
 inline void Rgb32::sourceCopy(Pt::uint8_t* to, const ColorF& c)
 {
-    // Premultiply straight-alpha ColorF
     Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
     *pixel = premultiplyColorF(c);
+}
+
+
+inline void Rgb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c)
+{
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
+    const Pt::uint32_t value = c.value();
+    
+    for(std::size_t i = 0; i < length; ++i) 
+        *dst++ = value;
 }
 
 
@@ -726,11 +677,29 @@ inline void Rgb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Argb32C
 
 inline void Rgb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
 {
-    // Raw fill: data is already premultiplied
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
     const Pt::uint32_t fromValue = *reinterpret_cast<const Pt::uint32_t*>(from);
-    for(std::size_t i = 0; i < length; ++i) 
+    
+    for(std::size_t i = 0; i < length; ++i)
+    {
         *dst++ = fromValue;
+    }
+}
+
+
+inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t length)
+{
+    std::memcpy(to, colors, length * PixelWidth);
+}
+
+
+inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length)
+{
+    for(std::size_t i = 0; i < length; ++i)
+    {
+        Rgb32::sourceCopy(to, colors[i]);
+        to += Rgb32::PixelWidth;
+    }
 }
 
 
@@ -746,7 +715,6 @@ inline void Rgb32::sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t
 
 inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
 {
-    // Raw array copy: data is already premultiplied
     std::memcpy(to, from, length * 4);
 }
 
@@ -764,31 +732,12 @@ inline void Rgb32::sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
     }
 }
 
-
-inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Rgb32Color& from)
-{
-    // Raw copy: Rgb32Color is already premultiplied
-    std::memcpy(to, &from.value(), PixelWidth);
-}
-
-
-inline void Rgb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c)
-{
-    // Raw fill: Rgb32Color is already premultiplied
-    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
-    const Pt::uint32_t value = c.value();
-    for(std::size_t i = 0; i < length; ++i) 
-        *dst++ = value;
-}
-
 //
-// Implementation SourceOver - premultiplied compositing
-// Formula: dst = src + dst * (1 - src_alpha)
+// SourceOver
 //
 
 inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
 {
-    // from[] is already premultiplied
     const Pt::uint32_t alphaInv = 255 - from[3];
 
     to[0] = (Pt::uint8_t) ( from[0] + ((alphaInv * to[0]) >> 8) );
@@ -800,7 +749,6 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
 
 inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from)
 {
-    // Premultiply the straight-alpha ColorF, then composite
     const Pt::uint32_t alpha    = from.alpha() >> 8;
     const Pt::uint32_t alphaInv = 255 - alpha;
     const Pt::uint32_t srcR = (Pt::uint32_t)(from.red  () >> 8) * alpha / 255;
@@ -816,7 +764,6 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from)
 
 inline void Rgb32::sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
-    // Premultiply once, then apply to all pixels
     const Pt::uint32_t alpha = c.alpha() >> 8;
     const Pt::uint32_t alphaInv = 255 - alpha;
     const Pt::uint32_t srcR = (Pt::uint32_t)(c.red  () >> 8) * alpha / 255;
@@ -837,7 +784,6 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF&
 
 inline void Rgb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
 {
-    // from[] is already premultiplied, fill dst with same src pixel
     const Pt::uint32_t alphaInv = 255 - from[3];
 
     Pt::uint8_t* dst = to;
@@ -854,7 +800,6 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uin
 
 inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
 {
-    // from[] array is already premultiplied, each pixel has different alpha
     const Pt::uint8_t* src = from;
           Pt::uint8_t* dst = to;
 
@@ -974,13 +919,25 @@ inline void Rgb32Pixel::assign(const Rgb32ConstPixel& p, std::size_t length)
 
 inline void Rgb32Pixel::assign(const Argb32Color* colors, std::size_t length)
 {
-    // Premultiply each straight-alpha color individually
-    Pt::uint8_t* p = base();
-    for(std::size_t i = 0; i < length; ++i)
-    {
-        Rgb32::sourceCopy(p, colors[i]);
-        p += 4;
-    }
+    Rgb32::sourceCopy(base(), colors, length);
+}
+
+
+inline void Rgb32Pixel::assign(const Rgb32Color* colors, std::size_t length)
+{
+    Rgb32::sourceCopy(base(), colors, length);
+}
+
+
+inline void Rgb32Pixel::getColors(Argb32Color* colors, std::size_t length) const
+{
+  Rgb32::getColors(base(), colors, length);
+}
+
+
+inline void Rgb32Pixel::getColors(Rgb32Color* colors, std::size_t length) const
+{
+    Rgb32::getColors(base(), colors, length);
 }
 
 
@@ -1066,16 +1023,14 @@ inline void Rgb32Pixel::setBlue(Pt::uint8_t b)
 
 inline Rgb32Color Rgb32Pixel::color() const
 {
-    return Rgb32Color( base() );
+    return Rgb32::getColor( base() );
 }
 
 
 inline Argb32Color Rgb32Pixel::toColor() const
 {
-    // Un-premultiply to return straight Argb32Color
-    return Rgb32::getStraightArgb32Color( base() );
+    return Rgb32::toArgb32Color( base() );
 }
-
 
 ///////////////////////////////////////////////////////////////////////
 // Rgb32ConstPixel
@@ -1196,21 +1151,25 @@ inline Pt::uint8_t Rgb32ConstPixel::blue() const
 
 inline Rgb32Color Rgb32ConstPixel::color() const
 {
-    return Rgb32Color( base() );
+    return Rgb32::getColor( base() );
 }
 
 
 inline Argb32Color Rgb32ConstPixel::toColor() const
 {
-    // Un-premultiply to return straight Argb32Color
-    return Rgb32::getStraightArgb32Color( base() );
+    return Rgb32::toArgb32Color( base() );
 }
 
 
 inline void Rgb32ConstPixel::getColors(Argb32Color* colors, std::size_t length) const
 {
-    // Un-premultiply to return straight Argb32Color values
-    Rgb32::getStraightColors(base(), colors, length);
+    Rgb32::getColors(base(), colors, length);
+}
+
+
+inline void Rgb32ConstPixel::getColors(Rgb32Color* colors, std::size_t length) const
+{
+  Rgb32::getColors(base(), colors, length);
 }
 
 
