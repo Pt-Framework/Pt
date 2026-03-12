@@ -66,7 +66,7 @@ const ImageFormat& ImageFormat::rgb16()
 
 const ImageFormat& ImageFormat::rgb32()
 {
-  static const Argb32 _rgb32;
+  static const Rgb32 _rgb32;
 	return _rgb32;
 }
 

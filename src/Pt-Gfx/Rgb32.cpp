@@ -1,5 +1,4 @@
 /* Copyright (C) 2015 Marc Boris Duerner
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -33,43 +32,150 @@ namespace Pt {
 
 namespace Gfx {
 
-Rgb32::Rgb32()
-: ImageFormat(4)
+///////////////////////////////////////////////////////////////////////
+// Rgb32PixelBase
+///////////////////////////////////////////////////////////////////////
+
+class Rgb32PixelBase final : public PixelBase
 {
+    public:
+        explicit Rgb32PixelBase(Pt::uint8_t* data, const ViewBase& view, 
+                                Pt::ssize_t x, Pt::ssize_t y)
+        : PixelBase(view, Rgb32::getPixel(view, data, x, y), x, y)
+        { }
+
+    protected:
+        virtual PixelBase* onClone(PixelStorage& store) const override
+        {
+            return store.create<Rgb32PixelBase>(*this);
+        }
+
+        virtual Pt::uint8_t* onAdvance() override
+        {
+            return Rgb32::advance(view(), base());
+        }
+
+        virtual Pt::uint8_t* onSkipPadding() override
+        {
+            return Rgb32::skipPadding(view(), base());
+        }
+
+        virtual Pt::uint8_t* onAdvance(Pt::ssize_t n) override
+        {
+            return Rgb32::advance(view(), base(), n);
+        }
+
+        virtual Pt::uint8_t* onAdvanceLines(Pt::ssize_t n) override
+        {
+            return Rgb32::advanceLines(view(), base(), n);
+        }
+
+        virtual ColorF onGetColor() const override
+        {
+            return Rgb32::getStraightColor( base() );
+        }
+
+        virtual Argb32Color onGetArgb32Color() const override
+        {
+            return Rgb32::getStraightArgb32Color( base() );
+        }
+
+        virtual void onSetColor(const ColorF& color) override
+        {
+            Rgb32::sourceCopy( base(), color );
+        }
+
+        virtual void onSetColor(const Argb32Color& color) override
+        {
+            Rgb32::sourceCopy(base(), color);
+        }
+
+        virtual void onGetColors(ColorF* colors, std::size_t length) const override
+        {
+            Rgb32::getStraightColors(base(), colors, length);
+        }
+
+        virtual void onGetColors(Argb32Color* colors, std::size_t length) const override
+        {
+            Rgb32::getStraightColors(base(), colors, length);
+        }
+
+        virtual void onAssign(const Argb32Color* colors, std::size_t length) override
+        {
+            // Premultiply each straight-alpha color individually
+            Pt::uint8_t* p = base();
+            for(std::size_t i = 0; i < length; ++i)
+            {
+                Rgb32::sourceCopy(p, colors[i]);
+                p += 4;
+            }
+        }
+
+        virtual void onAssign(const ColorF* colors, std::size_t length) override
+        {
+            Rgb32::sourceCopy(base(), colors, length);
+        }
+
+        virtual void onFillColor(std::size_t n, const ColorF& color) override
+        {
+            Rgb32::sourceCopy(base(), n, color);
+        }
+
+        virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
+
+        virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;
+};
+
+
+inline bool Rgb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
+{
+    if( typeid(p) == typeid(Rgb32PixelBase) )
+    {
+        const Rgb32PixelBase* rgb32 = static_cast<const Rgb32PixelBase*>(&p);
+
+        Pt::uint8_t* to = base();
+        const Pt::uint8_t* from = rgb32->base();
+
+        Rgb32::sourceCopy(to, from, length);
+        return true;
+    }
+
+    return false;
 }
 
+
+inline bool Rgb32PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
+{
+    if( typeid(p) == typeid(Rgb32PixelBase) )
+    {
+        Rgb32PixelBase* rgb32 = static_cast<Rgb32PixelBase*>(&p);
+
+        Pt::uint8_t* to = rgb32->base();
+        const Pt::uint8_t* from = base();
+
+        Rgb32::sourceCopy(to, from, length);
+        return true;
+    }
+
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Rgb32
+///////////////////////////////////////////////////////////////////////
 
 std::size_t Rgb32::onImageSize(Pt::ssize_t width, Pt::ssize_t height,
                                std::size_t padding) const
 {
-    std::size_t l = (width * 4) + padding;
-    std::size_t n = l * height;
-    return n;
+    return imageSize(width, height, padding);
 }
 
 
 PixelBase* Rgb32::onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
-                                  Pt::ssize_t x, Pt::ssize_t y, 
-                                  PixelStorage& store) const
-{ 
-    return 0; 
-}
-
-
-ColorF Rgb32::onGetColor(const Pt::uint8_t* base)
+                                Pt::ssize_t x, Pt::ssize_t y, 
+                                PixelStorage& store) const
 {
-    const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(base);
-
-    const Pt::uint16_t tr = (pixel & 0x00FF0000) >> 16;
-    const Pt::uint16_t tg = (pixel & 0x0000FF00) >>  8;
-    const Pt::uint16_t tb =  pixel & 0x000000FF;
-
-    Pt::uint16_t a = 0xFFFF;
-    Pt::uint16_t r = (tr << 8) + tr;
-    Pt::uint16_t g = (tg << 8) + tg;
-    Pt::uint16_t b = (tb << 8) + tb;
-
-    return ColorF(a, r, g, b);
+    return store.create<Rgb32PixelBase>(data, view, x, y);
 }
 
 } // namespace

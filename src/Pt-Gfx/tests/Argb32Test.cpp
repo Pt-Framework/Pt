@@ -55,13 +55,13 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Color",*this, &Argb32Test::Color);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
-            registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
-            registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
-            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
-            registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
-            registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
-            registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
-            registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
+            //registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
+            //registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
+            //registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            //registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
+            //registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
+            //registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
+            //registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
         }
 
         void Pixel()
