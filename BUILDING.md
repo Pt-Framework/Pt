@@ -10,7 +10,6 @@ Possible build options include the following:
 Example:
 $ jam configure -sCONFIG=em-debug --optimize --debug -sTARGET\_OS=emscripten --with-sdl-raster -sEMSDK=path/to/emsdk
 
-
 Run the program with emrun, after emsdk\_env.bat/sh. 
 
 
