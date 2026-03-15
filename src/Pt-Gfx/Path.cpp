@@ -376,7 +376,7 @@ void Path::addRect(const RectF& rect)
     lineTo(PointF(x, y + h));
     lineTo(PointF(x + w, y + h));
     lineTo(PointF(x + w, y));
-close();
+    close();
 }
 
 
