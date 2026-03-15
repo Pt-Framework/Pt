@@ -581,8 +581,7 @@ class PathTest : public Pt::Unit::TestSuite
         void AddRect()
         {
             Path path;
-            path.moveTo(PointF(10.0, 20.0));
-            path.addRect(SizeF(100.0, 50.0));
+            path.addRect(RectF(PointF(10.0, 20.0), SizeF(100.0, 50.0)));
 
             Path::Iterator it = path.begin();
 

@@ -363,18 +363,20 @@ void Path::appendPath(const Path& p)
 }
 
 
-void Path::addRect(const SizeF& size)
+void Path::addRect(const RectF& rect)
 {
     detach();
 
-    const PointF& pos = _pathData->currentPosition();
-    double x = pos.x();
-    double y = pos.y();
+    const double x = rect.x();
+    const double y = rect.y();
+    const double w = rect.width();
+    const double h = rect.height();
 
-    lineTo(Pt::Gfx::PointF(x, y + size.height()));
-    lineTo(Pt::Gfx::PointF(x + size.width(), y+ size.height()));
-    lineTo(Pt::Gfx::PointF(x + size.width(), y));
-    close();
+    moveTo(PointF(x, y));
+    lineTo(PointF(x, y + h));
+    lineTo(PointF(x + w, y + h));
+    lineTo(PointF(x + w, y));
+close();
 }
 
 

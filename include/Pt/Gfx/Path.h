@@ -111,7 +111,7 @@ class PT_GFX_API Path
         */
         void appendPath(const Path& p);
 
-        void addRect(const SizeF& size);
+        void addRect(const RectF& rect);
 
         void addRoundedRect(const SizeF& size, float radius);
 
