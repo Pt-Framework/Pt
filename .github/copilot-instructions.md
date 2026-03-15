@@ -1,5 +1,10 @@
 # Coding Style
 
+## Comments
+
+ - Comments in english.
+ - Keep comments short and precise.
+
 ## Indentation
 
  - Use 4 spaces for indentation, no tabs.
