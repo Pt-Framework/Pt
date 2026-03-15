@@ -426,6 +426,66 @@ void Path::addEllipse(const SizeF& size)
 }
 
 
+void Path::addArc(const PointF& center, double radius,
+                  double startAngle, double endAngle,
+                  bool clockwise)
+{
+    detach();
+
+    const double pi = 3.14159265358979323846;
+
+    // Normalise sweep: CCW -> [0, 2pi), CW -> (-2pi, 0]
+    double sweep = endAngle - startAngle;
+    if(clockwise)
+    {
+        if (sweep > 0.0) sweep -= 2.0 * pi;
+    }
+    else
+    {
+        if (sweep < 0.0) sweep += 2.0 * pi;
+    }
+
+    // Arc start point
+    const PointF startPt(center.x() + radius * std::cos(startAngle),
+                         center.y() + radius * std::sin(startAngle));
+
+    // Implicit lineTo or moveTo to arc start
+    if (isEmpty())
+        moveTo(startPt);
+    else
+        lineTo(startPt);
+
+    if (sweep == 0.0)
+      return;
+
+    // Split into segments of at most pi/2 to keep bezier approximation error small
+    const int segments = static_cast<int>(std::ceil(std::fabs(sweep) / (pi * 0.5)));
+    const double segAngle = sweep / segments;
+
+    // k = (4/3) * tan(segAngle/4) — optimal control-point distance for a circular arc
+    const double k = (4.0 / 3.0) * std::tan(segAngle * 0.25);
+
+    double angle = startAngle;
+    for (int i = 0; i < segments; ++i)
+    {
+      const double cosA = std::cos(angle);
+      const double sinA = std::sin(angle);
+      const double cosB = std::cos(angle + segAngle);
+      const double sinB = std::sin(angle + segAngle);
+
+      const PointF cp1(center.x() + radius * (cosA - k * sinA),
+                       center.y() + radius * (sinA + k * cosA));
+      const PointF cp2(center.x() + radius * (cosB + k * sinB),
+                       center.y() + radius * (sinB - k * cosB));
+      const PointF end(center.x() + radius * cosB,
+                       center.y() + radius * sinB);
+
+      cubicTo(cp1, cp2, end);
+      angle += segAngle;
+    }
+}
+
+
 void Path::addPie(const SizeF& size, float degBegin, float degEnd)
 {
     detach();

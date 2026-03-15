@@ -65,8 +65,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             registerMethod("ConvertGenericYuv12ToGenericYuv12", *this, &Yuv12Test::ConvertGenericYuv12ToGenericYuv12);
             registerMethod("ConvertArgb32ToYuv12", *this, &Yuv12Test::ConvertArgb32ToYuv12);
             
-            registerMethod("BenchmarkA_Generic", *this, &Yuv12Test::Benchmark);
-            registerMethod("BenchmarkB_Direct", *this, &Yuv12Test::BenchmarkRaw);
+            //registerMethod("BenchmarkA_Generic", *this, &Yuv12Test::Benchmark);
+            //registerMethod("BenchmarkB_Direct", *this, &Yuv12Test::BenchmarkRaw);
         }
 
     protected:

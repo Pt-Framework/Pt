@@ -117,6 +117,10 @@ class PT_GFX_API Path
 
         void addEllipse(const SizeF& size);
 
+        void addArc(const PointF& center, double radius,
+                    double startAngle, double endAngle,
+                    bool clockwise);
+
         void addPie(const SizeF& size, float degBegin, float degEnd);
 
         void addChord(const SizeF& size,  float degBegin, float degEnd);

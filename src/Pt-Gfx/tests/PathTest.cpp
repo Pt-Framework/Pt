@@ -58,6 +58,7 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("AddRect",       *this, &PathTest::AddRect);
             registerMethod("AddPie",     *this, &PathTest::AddPie);
             registerMethod("AddChord",      *this, &PathTest::AddChord);
+            registerMethod("AddArc",        *this, &PathTest::AddArc);
         }
 
         void MoveTo()
@@ -703,10 +704,37 @@ class PathTest : public Pt::Unit::TestSuite
           ++it;
           PT_UNIT_ASSERT(it == path.end());
         }
+
+        void AddArc()
+        {
+            const double pi = 3.14159265358979323846;
+
+            Path path;
+            path.addArc(PointF(0.0, 0.0), 1.0, 0.0, pi * 0.5, false);
+
+            // moveTo(1,0) + cubicTo
+            PT_UNIT_ASSERT_EQUAL( path.size(), std::size_t(2) );
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
+
+            ++it;
+
+            // end point must be close to (cos(pi/2), sin(pi/2)) = (~0, 1)
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT(std::fabs(it->point(2).x()) < 0.001);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 1.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
 };
 
-} // namespace
+} // namespace Gfx
 
-} // namespace
+} // namespace Pt
 
 Pt::Unit::RegisterTest<Pt::Gfx::PathTest> register_PathTest;
