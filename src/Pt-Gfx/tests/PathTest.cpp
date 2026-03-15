@@ -546,11 +546,6 @@ class PathTest : public Pt::Unit::TestSuite
 
         void ArcTo()
         {
-            // arcTo(p2, r) draws an arc from the current position to p2 with
-            // bulge radius r, approximated by two cubic bezier curves.
-            // For a horizontal chord from (0,0) to (2,0) with r=1 the
-            // mid-arc-point is at (1,1) — the top of the semicircle.
-
             Path path;
             path.moveTo(PointF(0.0, 0.0));
             path.arcTo(PointF(2.0, 0.0), 1.0);
