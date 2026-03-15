@@ -9,9 +9,28 @@
 
  - Use 4 spaces for indentation, no tabs.
 
-## Language
+## Language Features
 
-- Prefer C++11 features where appropriate.
+- Use C++14 features where appropriate.
+
+# Project Structure
+
+## Headers
+
+- Public headers live in `include/Pt/<Module>/`, e.g. `include/Pt/Gfx/Path.h`.
+- Implementation files live in `src/<Module>/`, e.g. `src/Pt-Gfx/Path.cpp`.
+- Test files live in `src/<Module>/tests/`, e.g. `src/Pt-Gfx/tests/PathTest.cpp`.
+
+## Namespaces
+
+- All production code lives in namespace `Pt` with a nested module namespace, e.g. `Pt::Gfx`.
+- Namespace closing braces are commented: `} // namespace Gfx`
+
+# Build System
+
+- Build output is in the `build/debug` directory.
+- Object files are in `tmp/debug/<Module>/`.
+- To trigger a rebuild of a single file, touch it or make a whitespace change.
 
 # Unit Tests
 
@@ -32,7 +51,7 @@ Unit tests use the `Pt::Unit` framework. The relevant headers are:
   - `src/<Module>/tests/Jamfile` — in the `Main <target>` source list.
   - `src/Pt/Pt.vcxproj` and `src/Pt/Pt.vcxproj.filters` — as a `<ClCompile>` entry.
 
-## Class Structure
+## Test Structure
 
 - The test class inherits from `Pt::Unit::TestSuite`.
 - It lives in the same namespace as the class under test (e.g. `Pt::Gfx`).
@@ -49,15 +68,15 @@ namespace Gfx {
 class PathTest : public Pt::Unit::TestSuite
 {
     public:
-        PathTest()
-        : Pt::Unit::TestSuite("Pt::Gfx::PathTest")
-        {
-   registerMethod("MoveTo", *this, &PathTest::MoveTo);
+  PathTest()
+  : Pt::Unit::TestSuite("Pt::Gfx::PathTest")
+      {
+            registerMethod("MoveTo", *this, &PathTest::MoveTo);
    }
 
-  void MoveTo()
-        {
-     // ...
+        void MoveTo()
+     {
+      // ...
         }
 };
 
@@ -74,16 +93,20 @@ Pt::Unit::RegisterTest<Pt::Gfx::PathTest> register_PathTest;
 |---|---|
 | `PT_UNIT_ASSERT(cond)` | Fails if `cond` is false |
 | `PT_UNIT_ASSERT_EQUAL(a, b)` | Fails if `a != b`, prints both values |
+| `PT_UNIT_ASSERT_NEAR(a, b)` | Fails if `a` and `b` differ by more than epsilon (use for floating-point) |
 | `PT_UNIT_ASSERT_MSG(cond, msg)` | Fails with a custom message |
 | `PT_UNIT_ASSERT_THROW(expr, ExType)` | Fails if `expr` does not throw `ExType` |
 | `PT_UNIT_ASSERT_NOTHROW(expr)` | Fails if `expr` throws any exception |
 | `PT_UNIT_FAIL(msg)` | Unconditionally fails with a message |
+
+Use `PT_UNIT_ASSERT_NEAR` for all floating-point comparisons. Use `PT_UNIT_ASSERT_EQUAL` only for integers or exact types.
 
 ## Test Method Conventions
 
 - One test method per public method or behaviour being verified.
 - The method name matches the method under test (e.g. `MoveTo`, `LineTo`).
 - Test the initial/empty state first, then the expected behaviour, then edge cases.
+- Each test method creates its own local `Path` (or other object) — no shared state between methods.
 
 ```cpp
 void MoveTo()
@@ -96,38 +119,51 @@ void MoveTo()
     // expected behaviour
     path.moveTo(PointF(3.0, 7.0));
     PT_UNIT_ASSERT(!path.isEmpty());
-    PT_UNIT_ASSERT_EQUAL(path.currentPosition().x(), 3.0);
-    PT_UNIT_ASSERT_EQUAL(path.currentPosition().y(), 7.0);
+    PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 3.0);
+    PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 7.0);
 
     // calling again must update the state
     path.moveTo(PointF(5.0, 9.0));
-    PT_UNIT_ASSERT_EQUAL(path.currentPosition().x(), 5.0);
-    PT_UNIT_ASSERT_EQUAL(path.currentPosition().y(), 9.0);
+    PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 5.0);
+    PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 9.0);
 }
 ```
 
-## Jamfile Entry
+## Building Tests
 
 Add the file to the `Main` source list in `src/<Module>/tests/Jamfile`:
 
 ```
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
- Argb32Test.cpp
-       PathTest.cpp
-            Yuv12Test.cpp
-     ;
+         Argb32Test.cpp
+         PathTest.cpp
+           Yuv12Test.cpp
+          ;
 ```
 
-## Test Execution
+## Running Tests
 
-To run only a specific test suite, pass the suite name with the `-t` flag:
+- Tests are standalone executables in `build/debug/`. 
+- Run with no arguments to execute all suites.
+- pass `--test "<SuiteName>"` to run a single suite.
+
+- The suite name matches the string passed to `Pt::Unit::TestSuite` in the constructor.
+- The suite name should be the fully qualified class name (e.g. `"Pt::Gfx::PathTest"`).
 
 ```
-<Module>-test.exe -t "<SuiteName>"
+build\debug\Pt-Gfx-test.exe --test "Pt::Gfx::PathTest"
 ```
 
-The suite name matches the string passed to `Pt::Unit::TestSuite` in the constructor, which is the fully qualified class name (e.g. `"Pt::Gfx::PathTest"`).
+From PowerShell, capture stdout:
 
-**Example:**
+```powershell
+$p = New-Object System.Diagnostics.Process
+$p.StartInfo.FileName       = "C:\_Dev\Pt\build\debug\Pt-Gfx-test.exe"
+$p.StartInfo.RedirectStandardOutput = $true
+$p.StartInfo.RedirectStandardError  = $true
+$p.StartInfo.UseShellExecute = $false
+$p.StartInfo.WorkingDirectory = "C:\_Dev\Pt\build\debug"
+$p.Start() | Out-Null
+$p.StandardOutput.ReadToEnd()
+$p.WaitForExit()
 ```
-Pt-Gfx-test.exe -t "Pt::Gfx::PathTest"
