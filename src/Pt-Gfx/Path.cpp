@@ -419,17 +419,56 @@ void Path::addPie(const SizeF& size, float degBegin, float degEnd)
 {
     detach();
 
-    // TODO: decompose into 4 quadrants and use Trigonometry sin/cos to 
-    //       calculate the point coordinates
+    const double pi = 3.14159265358979323846;
+    const double toRad = pi / 180.0;
+
+    const PointF& pos = _pathData->currentPosition();
+    const double cx = pos.x() + size.width()  * 0.5;
+    const double cy = pos.y() + size.height() * 0.5;
+    const double rx = size.width()  * 0.5;
+    const double ry = size.height() * 0.5;
+
+    const double aBegin = degBegin * toRad;
+    const double aEnd   = degEnd   * toRad;
+
+    const double startX = cx + rx * std::cos(aBegin);
+    const double startY = cy + ry * std::sin(aBegin);
+    const double endX   = cx + rx * std::cos(aEnd);
+    const double endY   = cy + ry * std::sin(aEnd);
+
+    // start at center, line to arc start, arc to arc end, line back to center
+    moveTo(PointF(cx, cy));
+    lineTo(PointF(startX, startY));
+    arcTo(PointF(endX, endY), ry);
+    close();
 }
 
 
-void Path::addChord(const SizeF& size,  float degBegin, float degEnd)
+void Path::addChord(const SizeF& size, float degBegin, float degEnd)
 {
     detach();
 
-    // TODO: decompose into 4 quadrants and use Trigonometry sin/cos to 
-    //       calculate the point coordinates
+    const double pi = 3.14159265358979323846;
+    const double toRad = pi / 180.0;
+
+    const PointF& pos = _pathData->currentPosition();
+    const double cx = pos.x() + size.width()  * 0.5;
+    const double cy = pos.y() + size.height() * 0.5;
+    const double rx = size.width()* 0.5;
+    const double ry = size.height() * 0.5;
+
+    const double aBegin = degBegin * toRad;
+    const double aEnd   = degEnd   * toRad;
+
+    const double startX = cx + rx * std::cos(aBegin);
+    const double startY = cy + ry * std::sin(aBegin);
+    const double endX   = cx + rx * std::cos(aEnd);
+    const double endY   = cy + ry * std::sin(aEnd);
+
+    // arc from start to end, then straight line back to start (chord)
+    moveTo(PointF(startX, startY));
+    arcTo(PointF(endX, endY), ry);
+    close();
 }
 
 

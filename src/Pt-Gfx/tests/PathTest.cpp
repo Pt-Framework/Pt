@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Gfx/Path.h>
+
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
@@ -55,6 +56,8 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("BoundingRect",  *this, &PathTest::BoundingRect);
             registerMethod("ArcTo",         *this, &PathTest::ArcTo);
             registerMethod("AddRect",       *this, &PathTest::AddRect);
+            registerMethod("AddPie",     *this, &PathTest::AddPie);
+            registerMethod("AddChord",      *this, &PathTest::AddChord);
         }
 
         void MoveTo()
@@ -618,6 +621,75 @@ class PathTest : public Pt::Unit::TestSuite
             ++it;
             PT_UNIT_ASSERT(it == path.end());
         }
+
+        void AddPie()
+        {
+            Path path;
+            path.moveTo(PointF(0.0, 0.0));
+            path.addPie(SizeF(100.0, 100.0), 0.0f, 90.0f);
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 50.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
+
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
+
+            bool foundClose = false;
+            ++it;
+            while( it != path.end() )
+            {
+                if (it->type() == Path::Close)
+                {
+                    foundClose = true;
+                    break;
+                }
+                ++it;
+            }
+            PT_UNIT_ASSERT(foundClose);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+      }
+
+        void AddChord()
+        {
+          Path path;
+          path.moveTo(PointF(0.0, 0.0));
+          path.addChord(SizeF(100.0, 100.0), 0.0f, 90.0f);
+
+          PT_UNIT_ASSERT( ! path.isEmpty() );
+
+          Path::Iterator it = path.begin();
+          PT_UNIT_ASSERT(it != path.end());
+          PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
+          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
+
+          bool foundClose = false;
+          ++it;
+          while( it != path.end() )
+          {
+              if (it->type() == Path::Close)
+              {
+                foundClose = true;
+                break;
+              }
+              ++it;
+          }
+          PT_UNIT_ASSERT(foundClose);
+
+          ++it;
+          PT_UNIT_ASSERT(it == path.end());
+     }
 };
 
 } // namespace
