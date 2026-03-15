@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 #include <cstddef>
-
+#include "FontManager.h"
 #include <blend2d.h>
 
 namespace Pt {
@@ -103,6 +103,9 @@ class PT_GFX_API BitmapSurface : private NonCopyable
     Image           _image;
     Gfx::SizeF      _physicalSize;
     Gfx::Scaling    _scaling;
+    FTC_FaceID       _faceId;
+    std::size_t      _fontSize;
+    FTC_ImageTypeRec _imageType;
 };
 
 } // namespace

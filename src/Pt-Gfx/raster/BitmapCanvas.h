@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
+#include "FontManager.h"
 
 namespace Pt {
 
@@ -45,7 +46,6 @@ class LineSlope;
 class LineEdge;
 class LineFace;
 class ActiveEdgeTable;
-class DrawText;
 
 class BitmapCanvas : public Canvas
 {
@@ -273,7 +273,6 @@ class BitmapCanvas : public Canvas
     void putImage(const Point& to, const Image& image, const Rect& imageRect);
 
     private:
-        DrawText*    _text;
         Image*       _image;
         PixelView    _imageView;
         double       _lastScaleFactor;
@@ -297,6 +296,10 @@ class BitmapCanvas : public Canvas
         bool   _hasClip;
 
         std::vector<Polygon> _flatPath;      
+
+        FTC_FaceID              _faceId;
+        std::size_t             _fontSize;
+        FTC_ImageTypeRec        _imageType;
 };
 
 } //namespace

@@ -1626,9 +1626,6 @@
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\raster\DrawText.h">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\raster\Edge.h">
       <Filter>Pt-Gfx\raster</Filter>
     </ClInclude>
@@ -4701,9 +4698,6 @@
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\raster\ClipPolygon.cpp">
-      <Filter>Pt-Gfx\raster</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp">
       <Filter>Pt-Gfx\raster</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\skia\DrawText.cpp">

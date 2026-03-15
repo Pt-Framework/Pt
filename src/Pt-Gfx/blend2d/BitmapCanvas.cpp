@@ -46,7 +46,6 @@ BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _image()
 , _imageView( ImageFormat::argb32() )
-, _text( new DrawText() )
 , _hasClip(false)
 {
 }
@@ -54,7 +53,6 @@ BitmapCanvas::BitmapCanvas()
 
 BitmapCanvas::~BitmapCanvas()
 {
-    delete _text;
 }
 
 
@@ -155,7 +153,7 @@ void BitmapCanvas::onSetPen(const Gfx::Pen& pen)
 
 void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 {
-    _text->setPen(pen);
+    _pen = pen;
 
     _context->set_stroke_width( static_cast<double>( pen.size() ) );
 
@@ -213,7 +211,14 @@ void BitmapCanvas::onSetFont(const Gfx::Font& font)
 
 void BitmapCanvas::onApplyFont(const Gfx::Font& font)
 {
-    _text->setFont(font);
+    _faceId = FreeType::instance().findFaceId(font);
+    _fontSize =  font.size();
+
+    // setup the image type
+    _imageType.face_id = _faceId;
+    _imageType.width = font.size();
+    _imageType.height = font.size();
+    _imageType.flags = FT_LOAD_DEFAULT;
 }
 
 
@@ -536,7 +541,7 @@ void BitmapCanvas::onFillPath(const Gfx::Path& path)
 
 TextMetrics BitmapCanvas::onGetTextMetrics(const String& text) const
 {
-    return _text->textMetrics(text);
+    return FreeType::instance().textMetrics(text, _faceId, _fontSize);
 }
 
 
@@ -553,8 +558,8 @@ void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text,
     tf.translate( to.x(), to.y() );
     tf *= transform();
 
-    _text->setClip(_currentClip);
-    _text->draw(*_image, 0, 0, text, _compositionMode, &tf);
+    FreeType::instance().draw(*_image, 0,0, text, _pen.color(), _currentClip,
+                                _compositionMode, _faceId, _fontSize, &tf);
 }
 
 #if USE_BLEND2D_BLIT

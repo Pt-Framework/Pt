@@ -29,6 +29,9 @@
 #ifndef PT_GFX_BLEND2D_BITMAP_CANVAS_H
 #define PT_GFX_BLEND2D_BITMAP_CANVAS_H
 
+
+#include "FontManager.h"
+
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/CompositionMode.h>
@@ -137,8 +140,7 @@ class BitmapCanvas : public Canvas
     private:
         BLContext*              _context;
         Image*                  _image;
-        PixelView               _imageView;
-        class DrawText*         _text;
+        PixelView               _imageView;        
         CompositionMode         _compositionMode;
         BasicRect<Pt::ssize_t>  _currentClip;
         bool                    _hasClip;
@@ -149,6 +151,9 @@ class BitmapCanvas : public Canvas
         BLPath                  _blPath;
         Gfx::Polygon            _polygon;
         std::vector<BLPoint>    _points;
+        FTC_FaceID              _faceId;
+        std::size_t             _fontSize;
+        FTC_ImageTypeRec        _imageType;
 };
 
 } //namespace

@@ -740,7 +740,6 @@
     <ClInclude Include="..\Pt-Gfx\raster\BitmapCanvas.h" />
     <ClInclude Include="..\Pt-Gfx\raster\BitmapSurface.h" />
     <ClInclude Include="..\Pt-Gfx\raster\ClipPolygon.h" />
-    <ClInclude Include="..\Pt-Gfx\raster\DrawText.h" />
     <ClInclude Include="..\Pt-Gfx\raster\Edge.h" />
     <ClInclude Include="..\Pt-Gfx\raster\EdgeTable.h" />
     <ClInclude Include="..\Pt-Gfx\raster\LineEdge.h" />
@@ -1426,7 +1425,6 @@
     <ClCompile Include="..\Pt-Gfx\raster\BitmapCanvas.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\BitmapSurface.cpp" />
     <ClCompile Include="..\Pt-Gfx\raster\ClipPolygon.cpp" />
-    <ClCompile Include="..\Pt-Gfx\raster\DrawText.cpp" />
     <ClCompile Include="..\Pt-Gfx\Rgb16.cpp" />
     <ClCompile Include="..\Pt-Gfx\Rgb32.cpp" />
     <ClCompile Include="..\Pt-Gfx\skia\DrawText.cpp" />
