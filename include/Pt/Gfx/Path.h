@@ -89,17 +89,9 @@ class PT_GFX_API Path
 
         void lineTo(const PointF& p);
 
-        void curveTo(const PointF &cp, const PointF& to);
-
-        void curveTo(const PointF &cp1, const PointF &cp2, const PointF& to);
-
         void quadTo(const PointF &cp, const PointF& to);
 
         void cubicTo(const PointF &cp1, const PointF &cp2, const PointF& to);
-
-        /** @internal @brief Not implemented.
-        */
-        void bezierTo(const PointF* cps, size_t cn, const PointF& to);
 
         void arcTo(const PointF& p, double r);
 
@@ -127,7 +119,7 @@ class PT_GFX_API Path
 
         void transform(const Transform& transform);
 
-        void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const;
+        void toPolygons(std::vector<Polygon>& polygons, float tolerance = 0.25f) const;
 
     private:
         void detach();
@@ -211,7 +203,7 @@ class PathElement
             return _points[n];
         }
 
-        void flatten(Polygon& points) const;
+        void flatten(Polygon& points, double tolerance = 0.25) const;
 
     private:
         const PathEntry*  _entry;
@@ -355,8 +347,6 @@ class PathData
         void quadTo(const PointF& cp, const PointF& to);
 
         void cubicTo(const PointF& cp1, const PointF& cp2, const PointF& to);
-
-        void bezierTo(const PointF* cps, size_t cn, const PointF& to);
 
         void close();
 

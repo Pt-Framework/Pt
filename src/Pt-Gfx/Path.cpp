@@ -28,59 +28,100 @@
 */
 
 #include <Pt/Gfx/Path.h>
+#include <cmath>
 
 namespace {
+
+// Maximum recursion depth to prevent stack overflow on degenerate curves
+const int MaxSubdivisionDepth = 16;
+
+// Adaptive subdivision of a quadratic Bezier curve using de Casteljau.
+// Splits recursively until the curve is flat within the given tolerance.
+void quadraticBezierSubdivide(Pt::Gfx::Polygon& dst,
+                              double x1, double y1,
+                              double x2, double y2,
+                              double x3, double y3,
+                              double tolerance,
+                              int depth)
+{
+  // Flatness test: distance of control point P2 from line P1->P3.
+  // Using the cross-product magnitude (area of parallelogram / base length).
+  const double dx = x3 - x1;
+  const double dy = y3 - y1;
+  const double d = std::fabs((x2 - x3) * dy - (y2 - y3) * dx);
+  const double len = std::sqrt(dx * dx + dy * dy);
+
+  if (depth >= MaxSubdivisionDepth || d <= tolerance * len)
+  {
+    // Curve is flat enough, emit the endpoint
+    dst.push_back(Pt::Gfx::PointF(x3, y3));
+    return;
+  }
+
+  // de Casteljau split at t = 0.5
+  const double x12 = (x1 + x2) * 0.5;
+  const double y12 = (y1 + y2) * 0.5;
+  const double x23 = (x2 + x3) * 0.5;
+  const double y23 = (y2 + y3) * 0.5;
+  const double xm = (x12 + x23) * 0.5;
+  const double ym = (y12 + y23) * 0.5;
+
+  quadraticBezierSubdivide(dst, x1, y1, x12, y12, xm, ym, tolerance, depth + 1);
+  quadraticBezierSubdivide(dst, xm, ym, x23, y23, x3, y3, tolerance, depth + 1);
+}
+
 
 void quadraticBezierToPoints(Pt::Gfx::Polygon& dst,
                              double x1, double y1,
                              double x2, double y2,
                              double x3, double y3,
-                             double smoothness)
+                             double tolerance = 0.25)
 {
-    // checkfor a straight line
-    const double dx32 = x3 - x2;
-    const double dy32 = y3 - y2;
-    const double dx12 = x1 - x2;
-    const double dy12 = y1 - y2;
+  if (dst.empty())
+    dst.push_back(Pt::Gfx::PointF(x1, y1));
 
-    if( ! (dx12 * dy32 - dy12 * dx32) )
-    {
-        // curvature
-        if( dst.empty() )
-            dst.push_back( Pt::Gfx::PointF(x1, y1) );
+  quadraticBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, tolerance, 0);
+}
 
-        dst.push_back( Pt::Gfx::PointF(x3, y3) );
-        return;
-    }
 
-    // calculate the approximate length of the curve
-    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb  = l32 + l12;
+void cubicBezierSubdivide(Pt::Gfx::Polygon& dst,
+                          double x1, double y1,
+                          double x2, double y2,
+                          double x3, double y3,
+                          double x4, double y4,
+                          double tolerance,
+                          int depth)
+{
+  // Flatness test: sum of distances of P2 and P3 from line P1->P4.
+  const double dx = x4 - x1;
+  const double dy = y4 - y1;
+  const double len = std::sqrt(dx * dx + dy * dy);
+  const double d2 = std::fabs((x2 - x4) * dy - (y2 - y4) * dx);
+  const double d3 = std::fabs((x3 - x4) * dy - (y3 - y4) * dx);
 
-    // determine the number of segments
-    const Pt::int32_t nSegs = Pt::lround(lb * abs(smoothness) / 20) + 3 + 1;
+  if (depth >= MaxSubdivisionDepth || (d2 + d3) <= tolerance * len)
+  {
+    // Curve is flat enough, emit the endpoint
+    dst.push_back(Pt::Gfx::PointF(x4, y4));
+    return;
+  }
 
-    // calculate the inverse multiplication factor
-    const double nSegs1i = 1.0 / (nSegs - 1);
+  // de Casteljau split at t = 0.5
+  const double x12 = (x1 + x2) * 0.5;
+  const double y12 = (y1 + y2) * 0.5;
+  const double x23 = (x2 + x3) * 0.5;
+  const double y23 = (y2 + y3) * 0.5;
+  const double x34 = (x3 + x4) * 0.5;
+  const double y34 = (y3 + y4) * 0.5;
+  const double x123 = (x12 + x23) * 0.5;
+  const double y123 = (y12 + y23) * 0.5;
+  const double x234 = (x23 + x34) * 0.5;
+  const double y234 = (y23 + y34) * 0.5;
+  const double xm = (x123 + x234) * 0.5;
+  const double ym = (y123 + y234) * 0.5;
 
-    // generate the points
-    // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
-    //      -----------------        ---------------        -----
-    //      a                        b                      c
-    for(Pt::int32_t i = 0; i < nSegs; ++i)
-    {
-        const double t  = i * nSegs1i;
-        const double it = 1.0 - t;
-        const double a  = it * it;
-        const double b  = 2.0 * t * it;
-        const double c  = t * t;
-        const double x  = a * x1 + b * x2 + c * x3;
-        const double y  = a * y1 + b * y2 + c * y3;
-
-        if( i || dst.empty() )
-            dst.push_back( Pt::Gfx::PointF(x, y) );
-    }
+  cubicBezierSubdivide(dst, x1, y1, x12, y12, x123, y123, xm, ym, tolerance, depth + 1);
+  cubicBezierSubdivide(dst, xm, ym, x234, y234, x34, y34, x4, y4, tolerance, depth + 1);
 }
 
 
@@ -89,127 +130,12 @@ void cubicBezierToPoints(Pt::Gfx::Polygon& dst,
                          double x2, double y2,
                          double x3, double y3,
                          double x4, double y4,
-                         double smoothness)
+                         double tolerance = 0.25)
 {
-    // Calculate the approximate length of the curve
-    const double dx43 = x4 - x3;
-    const double dy43 = y4 - y3;
-    const double dx32 = x3 - x2;
-    const double dy32 = y3 - y2;
-    const double dx12 = x1 - x2;
-    const double dy12 = y1 - y2;
-    const double l43  = ::sqrt(dx43 * dx43 + dy43 * dy43);
-    const double l32  = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12  = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb   = l43 + l32 + l12;
+  if (dst.empty())
+    dst.push_back(Pt::Gfx::PointF(x1, y1));
 
-    // Determine the number of segments
-    const Pt::int32_t nSegs = Pt::lround(lb * abs(smoothness) / 20) + 4 + 1;
-
-    // Calculate the inverse multiplication factor
-    const double nSegs1i = 1.0 / (nSegs - 1);
-
-    // Generate the points
-    // PB = (1 - t) * (1 - t) * (1 - t) * P1 + 3 * t * (1 - t) * (1 - t) * P2 + 3 * t * t * (1 - t) * P3 + t * t * t * P4
-    //      ---------------------------        -------------------------        -------------------        ---------
-    //      a                                  b                                c                          d
-    for(Pt::int32_t i = 0; i < nSegs; ++i)
-    {
-        // Calculate the coordinates
-        const double t  = i * nSegs1i;
-        const double it = 1.0 - t;
-        const double a  = it * it * it;
-        const double b  = 3.0 * t * it * it;
-        const double c  = 3.0 * t * t * it;
-        const double d  = t * t * t;
-        const double x  = a * x1 + b * x2 + c * x3 + d * x4;
-        const double y  = a * y1 + b * y2 + c * y3 + d * y4;
-
-        // Store the coordinate as needed
-        if( i || dst.empty() )
-            dst.push_back( Pt::Gfx::PointF(x, y) );
-    }
-}
-
-
-void getBezierPoint(double& x, double& y,
-                    const std::vector<double>& points, double t)
-{
-    // Based on: How do I implement a Bezier curve in C++?
-    // http://stackoverflow.com/questions/785097/how-do-i-implement-a-bézier-curve-in-c
-    // Answer by iforce2d, 2014 (permalink: http://stackoverflow.com/a/21642962)
-
-    std::vector<double> tmp = points;
-
-    size_t i = points.size() / 2 - 1;
-
-    while(i > 0)
-    {
-        for(size_t k = 0; k < i; ++k)
-        {
-            const size_t cidx =  k      * 2;
-            const size_t nidx = (k + 1) * 2;
-            tmp[cidx + 0] = tmp[cidx + 0] + t * ( tmp[nidx + 0] - tmp[cidx + 0] ); // X
-            tmp[cidx + 1] = tmp[cidx + 1] + t * ( tmp[nidx + 1] - tmp[cidx + 1] ); // Y
-        }
-
-        --i;
-    }
-
-    x = tmp[0];
-    y = tmp[1];
-}
-
-
-void bezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
-                    double x1, double y1,
-                    const std::vector<double>& points,
-                    double smoothness)
-{
-    // Add the start coordinate to the point
-    std::vector<double> pts;
-    pts.reserve(points.size() + 2);
-
-    pts.push_back(x1);
-    pts.push_back(y1);
-
-    pts.insert(pts.end(), points.begin(), points.end());
-
-    // Calculate the approximate length of the curve
-    double clen = 0.0;
-    for(size_t i = 0; i < (points.size() / 2 - 1); ++i)
-    {
-        const size_t cidx =  i      * 2;
-        const size_t nidx = (i + 1) * 2;
-        const double x1   = pts[cidx + 0];
-        const double y1   = pts[cidx + 1];
-        const double x2   = pts[nidx + 0];
-        const double y2   = pts[nidx + 1];
-        const double dx   = x2 - x1;
-        const double dy   = y2 - y1;
-        clen += ::sqrt(dx * dx + dy * dy);
-    }
-
-    // Determine the number of segments
-    const Pt::int32_t nSegs = Pt::lround(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
-
-    // Calculate the inverse multiplication factor
-    const double nSegs1i = 1.0 / (nSegs - 1);
-
-    // Generate the points
-    for(Pt::int32_t i = 0; i < nSegs; ++i)
-    {
-        // Calculate the coordinates
-        const double t  = i * nSegs1i;
-
-        double x;
-        double y;
-        getBezierPoint(x, y, pts, t);
-
-        // Store the coordinate as needed
-        if( i || dst.empty() )
-            dst.push_back( Pt::Gfx::PointF(x, y) );
-    }
+  cubicBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, x4, y4, tolerance, 0);
 }
 
 } // namespace
@@ -302,22 +228,6 @@ void Path::lineTo(const PointF& to)
 }
 
 
-void Path::curveTo(const PointF &cp, const PointF& to)
-{
-    detach();
-
-    _pathData->quadTo(cp, to);
-}
-
-
-void Path::curveTo(const PointF &cp1, const PointF &cp2, const PointF& to)
-{
-    detach();
-
-    _pathData->cubicTo(cp1, cp2, to);
-}
-
-
 void Path::quadTo(const PointF &c, const PointF& to)
 {
     detach();
@@ -332,14 +242,6 @@ void Path::cubicTo(const PointF& c1, const PointF& c2, const PointF& to)
     detach();
 
     _pathData->cubicTo(c1, c2, to);
-}
-
-
-void Path::bezierTo(const PointF* cps, size_t cn, const PointF& to)
-{
-    detach();
-
-    _pathData->bezierTo(cps, cn, to);
 }
 
 
@@ -527,13 +429,15 @@ void Path::transform(const Transform& tform)
 }
 
 
-void PathElement::flatten(Polygon& points) const
+void PathElement::flatten(Polygon& points, double tolerance) const
 {
     switch( _entry->type() )
     {
         case Path::LineTo:
         {
-            points.push_back( position() );
+            if( points.empty() )
+                points.push_back( position() );
+
             points.push_back( point(0) );
             break;
         }
@@ -542,9 +446,9 @@ void PathElement::flatten(Polygon& points) const
         {
             const PointF& c1 = point(0);
             const PointF& to = point(1);
-            quadraticBezierToPoints(points, position().x(), position().y(), 
-                                    c1.x(), c1.y(), 
-                                    to.x(), to.y(), 1);
+            quadraticBezierToPoints(points, position().x(), position().y(),
+                                    c1.x(), c1.y(),
+                                    to.x(), to.y(), tolerance);
             break;
         }
 
@@ -554,9 +458,9 @@ void PathElement::flatten(Polygon& points) const
             const PointF& c2 = point(1);
             const PointF& to = point(2);
 
-            cubicBezierToPoints(points, position().x(), position().y(), 
-                                c1.x(), c1.y(), c2.x(), c2.y(), 
-                                to.x(), to.y(), 1);
+            cubicBezierToPoints(points, position().x(), position().y(),
+                                c1.x(), c1.y(), c2.x(), c2.y(),
+                                to.x(), to.y(), tolerance);
             break;
         }
 
@@ -566,76 +470,22 @@ void PathElement::flatten(Polygon& points) const
 }
 
 
-void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
+void Path::toPolygons(std::vector<Polygon>& polygons, float tolerance) const
 {
-    // State variables
-    double curX = 0.0;
-    double curY = 0.0;
-
     Polygon polygon;
 
     for(PathIterator it = _pathData->begin(); it != _pathData->end(); ++it)
     {
         const PathElement& elem = *it;
 
-        switch( elem.type() )
+        if( elem.type() == Path::Close )
         {
-            case Path::Close:
-            {
-                polygons.push_back(polygon);
-                polygon.clear();
-                break;
-            }
-
-            case Path::MoveTo:
-            {
-                const PointF& to = it->point(0);
-                curX = to.x();
-                curY = to.y();
-                break;
-            }
-
-            case Path::LineTo:
-            {
-                if( polygon.empty() )
-                    polygon.push_back( PointF(curX, curY) );
-
-                const PointF& to = it->point(0);
-                polygon.push_back(to);
-                
-                curX = to.x();
-                curY = to.y();
-                break;
-            }
-
-            case Path::QuadTo:
-            {
-                const PointF& c1 = it->point(0);
-                const PointF& to = it->point(1);
-                quadraticBezierToPoints(polygon, curX, curY, 
-                                        c1.x(), c1.y(), 
-                                        to.x(), to.y(), smoothness);
-                curX = to.x();
-                curY = to.y();
-                break;
-            }
-
-            case Path::CubicTo:
-            {
-                const PointF& c1 = it->point(0);
-                const PointF& c2 = it->point(1);
-                const PointF& to = it->point(2);
-
-                cubicBezierToPoints(polygon, curX, curY, 
-                                    c1.x(), c1.y(), c2.x(), c2.y(), 
-                                    to.x(), to.y(), smoothness);
-                curX = to.x();
-                curY = to.y();
-                break;
-            }
-
-            default:
-                break;
+            polygons.push_back(polygon);
+            polygon.clear();
+        }
+        else if( elem.type() != Path::MoveTo )
+        {
+            elem.flatten(polygon, tolerance);
         }
     }
 
@@ -688,18 +538,6 @@ void PathData::cubicTo(const PointF& cp1, const PointF& cp2, const PointF& to)
     _points.push_back(cp1);
     _points.push_back(cp2);
     _points.push_back(to);
-
-    setCurrentPosition(to);
-}
-
-void PathData::bezierTo(const PointF* cps, size_t cn, const PointF& to)
-{
-    //_entries.push_back( PathEntry(Path::BezierTo, n) );
-
-    //for(const PointF* c)
-    //    _points.push_back(*p);
-    //
-    //_points.push_back(to);
 
     setCurrentPosition(to);
 }
