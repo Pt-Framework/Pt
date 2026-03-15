@@ -32,6 +32,8 @@
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 #include <iostream>
+#include <cmath>
+#include <limits>
 
 namespace Pt {
 
@@ -125,6 +127,25 @@ namespace Unit {
             } \
         } while (::Pt::Unit::testCond)
 
+    #define PT_UNIT_ASSERT_NEAR(value1, value2)                                                            \
+        do {                                                                                              \
+            const double _pt_v1      = static_cast<double>(value1);                                      \
+            const double _pt_v2      = static_cast<double>(value2);                                      \
+            const double _pt_rel_eps = std::sqrt(std::numeric_limits<double>::epsilon());                \
+            const double _pt_abs_eps = std::numeric_limits<double>::min();                               \
+            const double _pt_scale   = std::fmax(std::fabs(_pt_v1), std::fabs(_pt_v2));                  \
+            const double _pt_eps     = std::fmax(_pt_rel_eps * _pt_scale, _pt_abs_eps);                  \
+            if( std::fabs(_pt_v1 - _pt_v2) > _pt_eps )                                                  \
+            {                                                                                             \
+                std::ostringstream _pt_msg;                                                               \
+                _pt_msg << "not near: (" #value1 ")=<" << _pt_v1                                         \
+                        << ">, (" #value2 ")=<" << _pt_v2                                                \
+                        << ">, eps=<" << _pt_eps                                                          \
+                        << ">, diff=<" << std::fabs(_pt_v1 - _pt_v2) << '>';                             \
+                throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO);                                  \
+            }                                                                                             \
+        } while (::Pt::Unit::testCond)
+
     #define PT_UNIT_ASSERT_THROW(cond, EX) \
         do { \
             struct _pt_ex { }; \
@@ -168,8 +189,8 @@ namespace Unit {
             throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
         } while (::Pt::Unit::testCond)
 
-} // namespace Unit
+} // namespace
 
-} // namespace Pt
+} // namespace
 
-#endif  // PTV_UNIT_ASSERTION_H
+#endif  // include guard
