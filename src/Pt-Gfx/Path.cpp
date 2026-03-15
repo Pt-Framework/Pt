@@ -33,22 +33,22 @@
 
 namespace {
 
-const int MaxSubdivisionDepth = 16;
+const int MaxBezierSplits = 16;
 
 
-void quadraticBezierSubdivide(Pt::Gfx::Polygon& dst,
-                              double x1, double y1,
-                              double x2, double y2,
-                              double x3, double y3,
-                              double tolerance,
-                              int depth)
+void quadraticBezierSplit(Pt::Gfx::Polygon& dst,
+                          double x1, double y1,
+                          double x2, double y2,
+                          double x3, double y3,
+                          double tolerance,
+                          int depth)
 {
     const double dx = x3 - x1;
     const double dy = y3 - y1;
     const double d = std::fabs((x2 - x3) * dy - (y2 - y3) * dx);
     const double len = std::sqrt(dx * dx + dy * dy);
 
-    if (depth >= MaxSubdivisionDepth || d <= tolerance * len)
+    if (depth >= MaxBezierSplits || d <= tolerance * len)
     {
         dst.push_back(Pt::Gfx::PointF(x3, y3));
         return;
@@ -61,8 +61,8 @@ void quadraticBezierSubdivide(Pt::Gfx::Polygon& dst,
     const double xm = (x12 + x23) * 0.5;
     const double ym = (y12 + y23) * 0.5;
 
-    quadraticBezierSubdivide(dst, x1, y1, x12, y12, xm, ym, tolerance, depth + 1);
-    quadraticBezierSubdivide(dst, xm, ym, x23, y23, x3, y3, tolerance, depth + 1);
+    quadraticBezierSplit(dst, x1, y1, x12, y12, xm, ym, tolerance, depth + 1);
+    quadraticBezierSplit(dst, xm, ym, x23, y23, x3, y3, tolerance, depth + 1);
 }
 
 
@@ -75,17 +75,17 @@ void quadraticBezierToPoints(Pt::Gfx::Polygon& dst,
       if (dst.empty())
         dst.push_back(Pt::Gfx::PointF(x1, y1));
 
-      quadraticBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, tolerance, 0);
+      quadraticBezierSplit(dst, x1, y1, x2, y2, x3, y3, tolerance, 0);
 }
 
 
-void cubicBezierSubdivide(Pt::Gfx::Polygon& dst,
-                          double x1, double y1,
-                          double x2, double y2,
-                          double x3, double y3,
-                          double x4, double y4,
-                          double tolerance,
-                          int depth)
+void cubicBezierSplit(Pt::Gfx::Polygon& dst,
+                      double x1, double y1,
+                      double x2, double y2,
+                      double x3, double y3,
+                      double x4, double y4,
+                      double tolerance,
+                      int depth)
 {
     const double dx = x4 - x1;
     const double dy = y4 - y1;
@@ -93,7 +93,7 @@ void cubicBezierSubdivide(Pt::Gfx::Polygon& dst,
     const double d2 = std::fabs((x2 - x4) * dy - (y2 - y4) * dx);
     const double d3 = std::fabs((x3 - x4) * dy - (y3 - y4) * dx);
     
-    if (depth >= MaxSubdivisionDepth || (d2 + d3) <= tolerance * len)
+    if (depth >= MaxBezierSplits || (d2 + d3) <= tolerance * len)
     {
         dst.push_back(Pt::Gfx::PointF(x4, y4));
         return;
@@ -112,8 +112,8 @@ void cubicBezierSubdivide(Pt::Gfx::Polygon& dst,
     const double xm = (x123 + x234) * 0.5;
     const double ym = (y123 + y234) * 0.5;
     
-    cubicBezierSubdivide(dst, x1, y1, x12, y12, x123, y123, xm, ym, tolerance, depth + 1);
-    cubicBezierSubdivide(dst, xm, ym, x234, y234, x34, y34, x4, y4, tolerance, depth + 1);
+    cubicBezierSplit(dst, x1, y1, x12, y12, x123, y123, xm, ym, tolerance, depth + 1);
+    cubicBezierSplit(dst, xm, ym, x234, y234, x34, y34, x4, y4, tolerance, depth + 1);
 }
 
 
@@ -124,10 +124,10 @@ void cubicBezierToPoints(Pt::Gfx::Polygon& dst,
                          double x4, double y4,
                          double tolerance = 0.25)
 {
-    if (dst.empty())
+    if( dst.empty() )
         dst.push_back(Pt::Gfx::PointF(x1, y1));
 
-    cubicBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, x4, y4, tolerance, 0);
+    cubicBezierSplit(dst, x1, y1, x2, y2, x3, y3, x4, y4, tolerance, 0);
 }
 
 } // namespace
@@ -139,6 +139,21 @@ namespace Gfx {
 Path::Path()
 : _pathData( new PathData() )
 {
+}
+
+
+Path::Path(const Path& other)
+: _pathData(other._pathData)
+{
+}
+
+
+Path& Path::operator=(const Path& other)
+{
+  if(this != &other)
+        _pathData = other._pathData;
+
+    return *this;
 }
 
 
@@ -265,10 +280,6 @@ void Path::arcTo(const PointF& p, double r)
     double y1 = _pathData->currentPosition().y();
     double x2 = p.x();
     double y2 = p.y();
-
-    // Based on How to create circle with Bézier curves?
-    // http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
-    // Answer by Kpym, 2015 (permalink: http://stackoverflow.com/a/27863181)
 
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -420,9 +431,8 @@ void Path::addPie(const SizeF& size, float degBegin, float degEnd)
     detach();
 
     const double pi = 3.14159265358979323846;
- const double toRad = pi / 180.0;
+    const double toRad = pi / 180.0;
 
-    // copy position before any moveTo changes it
     const double ox = _pathData->currentPosition().x();
     const double oy = _pathData->currentPosition().y();
     const double cx = ox + size.width()  * 0.5;
@@ -453,7 +463,6 @@ void Path::addChord(const SizeF& size, float degBegin, float degEnd)
     const double pi = 3.14159265358979323846;
     const double toRad = pi / 180.0;
 
-    // copy position before any moveTo changes it
     const double ox = _pathData->currentPosition().x();
     const double oy = _pathData->currentPosition().y();
     const double cx = ox + size.width()  * 0.5;
@@ -481,6 +490,30 @@ void Path::transform(const Transform& tform)
     detach();
 
     _pathData->transform(tform);
+}
+
+
+void Path::toPolygons(std::vector<Polygon>& polygons, float tolerance) const
+{
+    Polygon polygon;
+
+    for(PathIterator it = _pathData->begin(); it != _pathData->end(); ++it)
+    {
+        const PathElement& elem = *it;
+
+        if( elem.type() == Path::Close )
+        {
+            polygons.push_back(polygon);
+            polygon.clear();
+        }
+        else if( elem.type() != Path::MoveTo )
+        {
+            elem.flatten(polygon, tolerance);
+        }
+    }
+
+    if( ! polygon.empty() )
+        polygon.push_back( polygon.at(0) );
 }
 
 
@@ -522,30 +555,6 @@ void PathElement::flatten(Polygon& points, double tolerance) const
         default:
             break;
     }
-}
-
-
-void Path::toPolygons(std::vector<Polygon>& polygons, float tolerance) const
-{
-    Polygon polygon;
-
-    for(PathIterator it = _pathData->begin(); it != _pathData->end(); ++it)
-    {
-        const PathElement& elem = *it;
-
-        if( elem.type() == Path::Close )
-        {
-            polygons.push_back(polygon);
-            polygon.clear();
-        }
-        else if( elem.type() != Path::MoveTo )
-        {
-            elem.flatten(polygon, tolerance);
-        }
-    }
-
-    if( ! polygon.empty() )
-        polygon.push_back( polygon.at(0) );
 }
 
 

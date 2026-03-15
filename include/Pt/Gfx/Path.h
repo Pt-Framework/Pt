@@ -69,6 +69,10 @@ class PT_GFX_API Path
     public:
         Path();
 
+        Path(const Path& other);
+
+        Path& operator=(const Path& other);
+
         ~Path();
 
         std::size_t size() const;
