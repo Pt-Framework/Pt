@@ -624,41 +624,47 @@ class PathTest : public Pt::Unit::TestSuite
 
         void AddPie()
         {
-            Path path;
-            path.moveTo(PointF(0.0, 0.0));
-            path.addPie(SizeF(100.0, 100.0), 0.0f, 90.0f);
+          Path path;
+          path.moveTo(PointF(0.0, 0.0));
+          path.addPie(SizeF(100.0, 100.0), 0.0f, 90.0f);
 
-            PT_UNIT_ASSERT(!path.isEmpty());
+          PT_UNIT_ASSERT(!path.isEmpty());
 
-            Path::Iterator it = path.begin();
-            PT_UNIT_ASSERT(it != path.end());
-            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 50.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
+          Path::Iterator it = path.begin();
 
+          PT_UNIT_ASSERT(it != path.end());
+          PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
+          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
 
-            ++it;
-            PT_UNIT_ASSERT(it != path.end());
-            PT_UNIT_ASSERT(it->type() == Path::LineTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
+          ++it;
+          PT_UNIT_ASSERT(it != path.end());
+          PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 50.0);
+          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
 
-            bool foundClose = false;
-            ++it;
-            while( it != path.end() )
-            {
-                if (it->type() == Path::Close)
-                {
-                    foundClose = true;
-                    break;
-                }
-                ++it;
-            }
-            PT_UNIT_ASSERT(foundClose);
+          ++it;
+          PT_UNIT_ASSERT(it != path.end());
+          PT_UNIT_ASSERT(it->type() == Path::LineTo);
+          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
+          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
 
-            ++it;
-            PT_UNIT_ASSERT(it == path.end());
-      }
+          bool foundClose = false;
+          ++it;
+          while( it != path.end( ))
+          {
+              if (it->type() == Path::Close)
+              {
+                  foundClose = true;
+                  break;
+              }
+              ++it;
+          }
+          PT_UNIT_ASSERT(foundClose);
+
+          ++it;
+          PT_UNIT_ASSERT(it == path.end());
+        }
 
         void AddChord()
         {
@@ -666,9 +672,16 @@ class PathTest : public Pt::Unit::TestSuite
           path.moveTo(PointF(0.0, 0.0));
           path.addChord(SizeF(100.0, 100.0), 0.0f, 90.0f);
 
-          PT_UNIT_ASSERT( ! path.isEmpty() );
+          PT_UNIT_ASSERT(!path.isEmpty());
 
           Path::Iterator it = path.begin();
+
+          PT_UNIT_ASSERT(it != path.end());
+          PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
+          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
+
+          ++it;
           PT_UNIT_ASSERT(it != path.end());
           PT_UNIT_ASSERT(it->type() == Path::MoveTo);
           PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
@@ -680,8 +693,8 @@ class PathTest : public Pt::Unit::TestSuite
           {
               if (it->type() == Path::Close)
               {
-                foundClose = true;
-                break;
+                  foundClose = true;
+                  break;
               }
               ++it;
           }
@@ -689,7 +702,7 @@ class PathTest : public Pt::Unit::TestSuite
 
           ++it;
           PT_UNIT_ASSERT(it == path.end());
-     }
+        }
 };
 
 } // namespace
