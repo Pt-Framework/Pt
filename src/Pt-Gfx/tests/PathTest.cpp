@@ -54,6 +54,7 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("Transform",     *this, &PathTest::Transform);
             registerMethod("BoundingRect",  *this, &PathTest::BoundingRect);
             registerMethod("ArcTo",         *this, &PathTest::ArcTo);
+            registerMethod("AddRect",       *this, &PathTest::AddRect);
         }
 
         void MoveTo()
@@ -570,6 +571,62 @@ class PathTest : public Pt::Unit::TestSuite
 
             ++it;
             PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void AddRect()
+        {
+            Path path;
+
+            // initial state
+            PT_UNIT_ASSERT(path.isEmpty());
+
+            // move to origin, then add rect with given size
+            path.moveTo(PointF(10.0, 20.0));
+            path.addRect(SizeF(100.0, 50.0));
+
+            // path must not be empty after addRect
+            PT_UNIT_ASSERT(!path.isEmpty());
+
+            // addRect draws: 3x lineTo + close (which adds lineTo back to start)
+        // elements: MoveTo, LineTo, LineTo, LineTo, LineTo(back to start), Close
+            Path::Iterator it = path.begin();
+
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 10.0);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 20.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 10.0);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 70.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 110.0);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 70.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 110.0);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 20.0);
+
+            // close() adds a lineTo back to the start point (10, 20)
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 10.0);
+            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 20.0);
+
+          ++it;
+    PT_UNIT_ASSERT(it != path.end());
+     PT_UNIT_ASSERT(it->type() == Path::Close);
+
+    ++it;
+     PT_UNIT_ASSERT(it == path.end());
         }
 };
 
