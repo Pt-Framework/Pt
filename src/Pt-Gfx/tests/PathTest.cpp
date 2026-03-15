@@ -551,7 +551,8 @@ class PathTest : public Pt::Unit::TestSuite
             path.moveTo(PointF(0.0, 0.0));
             path.arcTo(PointF(2.0, 0.0), 1.0);
 
-            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(3)); // moveTo + 2x cubicTo
+             // moveTo + 2x cubicTo
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(3));
 
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
@@ -576,19 +577,9 @@ class PathTest : public Pt::Unit::TestSuite
         void AddRect()
         {
             Path path;
-
-            // initial state
-            PT_UNIT_ASSERT(path.isEmpty());
-
-            // move to origin, then add rect with given size
             path.moveTo(PointF(10.0, 20.0));
             path.addRect(SizeF(100.0, 50.0));
 
-            // path must not be empty after addRect
-            PT_UNIT_ASSERT(!path.isEmpty());
-
-            // addRect draws: 3x lineTo + close (which adds lineTo back to start)
-        // elements: MoveTo, LineTo, LineTo, LineTo, LineTo(back to start), Close
             Path::Iterator it = path.begin();
 
             PT_UNIT_ASSERT(it != path.end());
@@ -614,24 +605,23 @@ class PathTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 110.0);
             PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 20.0);
 
-            // close() adds a lineTo back to the start point (10, 20)
             ++it;
             PT_UNIT_ASSERT(it != path.end());
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 10.0);
             PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 20.0);
 
-          ++it;
-    PT_UNIT_ASSERT(it != path.end());
-     PT_UNIT_ASSERT(it->type() == Path::Close);
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::Close);
 
-    ++it;
-     PT_UNIT_ASSERT(it == path.end());
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
         }
 };
 
-} // namespace Gfx
+} // namespace
 
-} // namespace Pt
+} // namespace
 
 Pt::Unit::RegisterTest<Pt::Gfx::PathTest> register_PathTest;
