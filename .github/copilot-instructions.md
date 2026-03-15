@@ -8,6 +8,7 @@
 ## Indentation
 
  - Use 4 spaces for indentation, no tabs.
+ - Keep existing indentation style when modifying existing code.
 
 ## Language Features
 
@@ -137,33 +138,31 @@ Add the file to the `Main` source list in `src/<Module>/tests/Jamfile`:
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
          Argb32Test.cpp
          PathTest.cpp
-           Yuv12Test.cpp
-          ;
+         Yuv12Test.cpp
+         ;
 ```
 
 ## Running Tests
 
-- Tests are standalone executables in `build/debug/`. 
+- Tests are standalone executables in `build/debug/`.
 - Run with no arguments to execute all suites.
-- pass `--test "<SuiteName>"` to run a single suite.
-
+- Pass `--test "<SuiteName>"` to run a single suite.
 - The suite name matches the string passed to `Pt::Unit::TestSuite` in the constructor.
 - The suite name should be the fully qualified class name (e.g. `"Pt::Gfx::PathTest"`).
 
-```
-build\debug\Pt-Gfx-test.exe --test "Pt::Gfx::PathTest"
-```
-
-From PowerShell, capture stdout:
+Run all suites from PowerShell:
 
 ```powershell
-$p = New-Object System.Diagnostics.Process
-$p.StartInfo.FileName       = "C:\_Dev\Pt\build\debug\Pt-Gfx-test.exe"
-$p.StartInfo.RedirectStandardOutput = $true
-$p.StartInfo.RedirectStandardError  = $true
-$p.StartInfo.UseShellExecute = $false
-$p.StartInfo.WorkingDirectory = "C:\_Dev\Pt\build\debug"
-$p.Start() | Out-Null
-$p.StandardOutput.ReadToEnd()
-$p.WaitForExit()
+& "C:\_Dev\Pt\build\debug\Pt-Gfx-test.exe"
 ```
+
+Run a single suite from PowerShell:
+
+```powershell
+& "C:\_Dev\Pt\build\debug\Pt-Gfx-test.exe" --test "Pt::Gfx::PathTest"
+```
+
+Capture stdout and stderr from PowerShell:
+
+```powershell
+& "C:\_Dev\Pt\build\debug\Pt-Gfx-test.exe" 2>&1
