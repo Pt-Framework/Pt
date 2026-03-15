@@ -41,7 +41,19 @@ class PathTest : public Pt::Unit::TestSuite
         PathTest()
           : Pt::Unit::TestSuite("Pt::Gfx::PathTest")
         {
-            registerMethod("MoveTo", *this, &PathTest::MoveTo);
+            registerMethod("MoveTo",     *this, &PathTest::MoveTo);
+            registerMethod("LineTo",     *this, &PathTest::LineTo);
+            registerMethod("QuadTo",     *this, &PathTest::QuadTo);
+            registerMethod("CubicTo",    *this, &PathTest::CubicTo);
+            registerMethod("Close",      *this, &PathTest::Close);
+            registerMethod("Clear",      *this, &PathTest::Clear);
+            registerMethod("Size",       *this, &PathTest::Size);
+            registerMethod("AppendPath", *this, &PathTest::AppendPath);
+            registerMethod("AddPath",       *this, &PathTest::AddPath);
+            registerMethod("ToPolygons",    *this, &PathTest::ToPolygons);
+            registerMethod("Transform",     *this, &PathTest::Transform);
+            registerMethod("BoundingRect",  *this, &PathTest::BoundingRect);
+            registerMethod("ArcTo",         *this, &PathTest::ArcTo);
         }
 
         void MoveTo()
@@ -53,25 +65,513 @@ class PathTest : public Pt::Unit::TestSuite
             path.moveTo(PointF(3.0, 7.0));
 
             PT_UNIT_ASSERT(!path.isEmpty());
-            PT_UNIT_ASSERT_EQUAL(path.currentPosition().x(), 3.0);
-            PT_UNIT_ASSERT_EQUAL(path.currentPosition().y(), 7.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 3.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 7.0);
 
             path.moveTo(PointF(5.0, 9.0));
 
-            PT_UNIT_ASSERT_EQUAL(path.currentPosition().x(), 5.0);
-            PT_UNIT_ASSERT_EQUAL(path.currentPosition().y(), 9.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 9.0);
 
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it != path.end());
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 3.0);
-            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 7.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 3.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 7.0);
 
             ++it;
             PT_UNIT_ASSERT(it != path.end());
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_EQUAL(it->point(0).x(), 5.0);
-            PT_UNIT_ASSERT_EQUAL(it->point(0).y(), 9.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 9.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void LineTo()
+        {
+            Path path;
+
+            PT_UNIT_ASSERT(path.isEmpty());
+
+            path.moveTo(PointF(1.0, 2.0));
+            path.lineTo(PointF(4.0, 6.0));
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 4.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 6.0);
+
+            path.lineTo(PointF(7.0, 8.0));
+
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 7.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 8.0);
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 2.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 4.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 6.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 7.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 8.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void QuadTo()
+        {
+            Path path;
+
+            PT_UNIT_ASSERT(path.isEmpty());
+
+            path.moveTo(PointF(0.0, 0.0));
+            path.quadTo(PointF(5.0, 10.0), PointF(10.0, 0.0));
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 0.0);
+
+            path.quadTo(PointF(15.0, 10.0), PointF(20.0, 0.0));
+
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 20.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 0.0);
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
+            PT_UNIT_ASSERT_EQUAL(it->size(), std::size_t(2));
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 20.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void CubicTo()
+        {
+            Path path;
+
+            PT_UNIT_ASSERT(path.isEmpty());
+
+            path.moveTo(PointF(0.0, 0.0));
+            path.cubicTo(PointF(2.0, 8.0), PointF(8.0, 8.0), PointF(10.0, 0.0));
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 0.0);
+
+            path.cubicTo(PointF(12.0, 8.0), PointF(18.0, 8.0), PointF(20.0, 0.0));
+
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 20.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 0.0);
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_EQUAL(it->size(), std::size_t(3));
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 2.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 8.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 8.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 8.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 20.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void Close()
+        {
+            Path path;
+
+            path.moveTo(PointF(0.0, 0.0));
+            path.lineTo(PointF(5.0, 0.0));
+            path.lineTo(PointF(5.0, 5.0));
+            path.close();
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::Close);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+
+            Path path2;
+            path2.moveTo(PointF(1.0, 1.0));
+            path2.lineTo(PointF(4.0, 1.0));
+            path2.lineTo(PointF(1.0, 1.0));
+            path2.close();
+
+            Path::Iterator it2 = path2.begin();
+            PT_UNIT_ASSERT(it2->type() == Path::MoveTo);
+            ++it2;
+            PT_UNIT_ASSERT(it2->type() == Path::LineTo);
+            ++it2;
+            PT_UNIT_ASSERT(it2->type() == Path::LineTo);
+            ++it2;
+            PT_UNIT_ASSERT(it2->type() == Path::Close);
+            ++it2;
+            PT_UNIT_ASSERT(it2 == path2.end());
+        }
+
+        void Clear()
+        {
+            Path path;
+
+            path.moveTo(PointF(1.0, 2.0));
+            path.lineTo(PointF(3.0, 4.0));
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+            PT_UNIT_ASSERT(path.size() == 2);
+
+            path.clear();
+
+            PT_UNIT_ASSERT(path.isEmpty());
+            PT_UNIT_ASSERT(path.size() == 0);
+            PT_UNIT_ASSERT(path.begin() == path.end());
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().x(), 0.0);
+            PT_UNIT_ASSERT_NEAR(path.currentPosition().y(), 0.0);
+        }
+
+        void Size()
+        {
+            Path path;
+
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(0));
+
+            path.moveTo(PointF(0.0, 0.0));
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(1));
+
+            path.lineTo(PointF(1.0, 0.0));
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(2));
+
+            path.quadTo(PointF(2.0, 1.0), PointF(3.0, 0.0));
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(3));
+
+            path.cubicTo(PointF(4.0, 1.0), PointF(5.0, 1.0), PointF(6.0, 0.0));
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(4));
+        }
+
+        void AppendPath()
+        {
+            Path path;
+            path.moveTo(PointF(0.0, 0.0));
+            path.lineTo(PointF(1.0, 0.0));
+
+            Path other;
+            other.moveTo(PointF(2.0, 0.0));
+            other.lineTo(PointF(3.0, 0.0));
+
+            path.appendPath(other);
+
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(4));
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 2.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 3.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void AddPath()
+        {
+            Path path;
+            path.moveTo(PointF(0.0, 0.0));
+            path.lineTo(PointF(1.0, 0.0));
+
+            Path other;
+            other.moveTo(PointF(2.0, 0.0));
+            other.lineTo(PointF(3.0, 0.0));
+
+            path.addPath(other);
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::Close);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 2.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 3.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void ToPolygons()
+        {
+            {
+                Path path;
+                path.moveTo(PointF(0.0, 0.0));
+                path.lineTo(PointF(4.0, 0.0));
+                path.lineTo(PointF(4.0, 3.0));
+                path.close();
+
+                std::vector<Polygon> polygons;
+                path.toPolygons(polygons);
+
+                PT_UNIT_ASSERT_EQUAL(polygons.size(), std::size_t(1));
+
+                const Polygon& tri = polygons[0];
+                PT_UNIT_ASSERT_EQUAL(tri.size(), std::size_t(4));
+                PT_UNIT_ASSERT_NEAR(tri[0].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(tri[0].y(), 0.0);
+                PT_UNIT_ASSERT_NEAR(tri[1].x(), 4.0);
+                PT_UNIT_ASSERT_NEAR(tri[1].y(), 0.0);
+                PT_UNIT_ASSERT_NEAR(tri[2].x(), 4.0);
+                PT_UNIT_ASSERT_NEAR(tri[2].y(), 3.0);
+                PT_UNIT_ASSERT_NEAR(tri[3].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(tri[3].y(), 0.0);
+            }
+
+            {
+                Path path;
+                path.moveTo(PointF(0.0, 0.0));
+                path.lineTo(PointF(2.0, 0.0));
+                path.lineTo(PointF(2.0, 2.0));
+
+                std::vector<Polygon> polygons;
+                path.toPolygons(polygons);
+
+                PT_UNIT_ASSERT_EQUAL(polygons.size(), std::size_t(0));
+            }
+
+            {
+                Path path;
+                path.moveTo(PointF(0.0, 0.0));
+                path.lineTo(PointF(1.0, 0.0));
+                path.lineTo(PointF(0.0, 0.0));
+                path.close();
+
+                path.moveTo(PointF(5.0, 5.0));
+                path.lineTo(PointF(6.0, 5.0));
+                path.lineTo(PointF(5.0, 5.0));
+                path.close();
+
+                std::vector<Polygon> polygons;
+                path.toPolygons(polygons);
+
+                PT_UNIT_ASSERT_EQUAL(polygons.size(), std::size_t(2));
+
+                PT_UNIT_ASSERT_EQUAL(polygons[0].size(), std::size_t(3));
+                PT_UNIT_ASSERT_NEAR(polygons[0][0].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(polygons[0][1].x(), 1.0);
+                PT_UNIT_ASSERT_NEAR(polygons[0][2].x(), 0.0);
+
+                PT_UNIT_ASSERT_EQUAL(polygons[1].size(), std::size_t(3));
+                PT_UNIT_ASSERT_NEAR(polygons[1][0].x(), 5.0);
+                PT_UNIT_ASSERT_NEAR(polygons[1][1].x(), 6.0);
+                PT_UNIT_ASSERT_NEAR(polygons[1][2].x(), 5.0);
+            }
+        }
+
+        void Transform()
+        {
+            Path path;
+            path.moveTo(PointF(1.0, 2.0));
+            path.lineTo(PointF(4.0, 6.0));
+
+            Pt::Gfx::Transform t;
+            t.translate(3.0, 5.0);
+            path.transform(t);
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 4.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 7.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 7.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 11.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void BoundingRect()
+        {
+            // empty path returns null rect
+            {
+                Path path;
+                RectF r = path.boundingRect();
+                PT_UNIT_ASSERT(r.isNull());
+            }
+
+            // simple line path
+            {
+                Path path;
+                path.moveTo(PointF(1.0, 2.0));
+                path.lineTo(PointF(5.0, 8.0));
+
+                RectF r = path.boundingRect();
+                PT_UNIT_ASSERT_NEAR(r.left(),   1.0);
+                PT_UNIT_ASSERT_NEAR(r.top(),    2.0);
+                PT_UNIT_ASSERT_NEAR(r.right(),  5.0);
+                PT_UNIT_ASSERT_NEAR(r.bottom(), 8.0);
+                PT_UNIT_ASSERT_NEAR(r.width(),  4.0);
+                PT_UNIT_ASSERT_NEAR(r.height(), 6.0);
+            }
+
+            // triangle with negative coordinates
+            {
+                Path path;
+                path.moveTo(PointF(-3.0, -1.0));
+                path.lineTo(PointF(4.0, -1.0));
+                path.lineTo(PointF(0.0, 5.0));
+
+                RectF r = path.boundingRect();
+                PT_UNIT_ASSERT_NEAR(r.left(),   -3.0);
+                PT_UNIT_ASSERT_NEAR(r.top(),    -1.0);
+                PT_UNIT_ASSERT_NEAR(r.right(),   4.0);
+                PT_UNIT_ASSERT_NEAR(r.bottom(),  5.0);
+            }
+
+            // quad bezier: control point extends the bounding box
+            {
+                Path path;
+                path.moveTo(PointF(0.0, 0.0));
+                path.quadTo(PointF(5.0, 20.0), PointF(10.0, 0.0));
+
+                RectF r = path.boundingRect();
+                PT_UNIT_ASSERT_NEAR(r.left(),   0.0);
+                PT_UNIT_ASSERT_NEAR(r.top(),    0.0);
+                PT_UNIT_ASSERT_NEAR(r.right(),  10.0);
+                PT_UNIT_ASSERT_NEAR(r.bottom(), 20.0);
+            }
+
+            // cubic bezier: both control points extend the bounding box
+            {
+                Path path;
+                path.moveTo(PointF(0.0, 0.0));
+                path.cubicTo(PointF(-5.0, 10.0), PointF(15.0, 10.0), PointF(10.0, 0.0));
+
+                RectF r = path.boundingRect();
+                PT_UNIT_ASSERT_NEAR(r.left(),   -5.0);
+                PT_UNIT_ASSERT_NEAR(r.top(),     0.0);
+                PT_UNIT_ASSERT_NEAR(r.right(),  15.0);
+                PT_UNIT_ASSERT_NEAR(r.bottom(), 10.0);
+            }
+
+            // arc: bounding box contains both endpoints and the arc apex (1,1)
+            {
+                Path path;
+                path.moveTo(PointF(0.0, 0.0));
+                path.arcTo(PointF(2.0, 0.0), 1.0);
+
+                RectF r = path.boundingRect();
+                PT_UNIT_ASSERT(r.left()   <= 0.0);
+                PT_UNIT_ASSERT(r.right()  >= 2.0);
+                PT_UNIT_ASSERT(r.top()    <= 0.0);
+                PT_UNIT_ASSERT(r.bottom() >= 1.0);
+            }
+        }
+
+        void ArcTo()
+        {
+            // arcTo(p2, r) draws an arc from the current position to p2 with
+            // bulge radius r, approximated by two cubic bezier curves.
+            // For a horizontal chord from (0,0) to (2,0) with r=1 the
+            // mid-arc-point is at (1,1) — the top of the semicircle.
+
+            Path path;
+            path.moveTo(PointF(0.0, 0.0));
+            path.arcTo(PointF(2.0, 0.0), 1.0);
+
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(3)); // moveTo + 2x cubicTo
+
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_EQUAL(it->size(), std::size_t(3));
+            // curve 1 must end at the mid-arc-point (1, 1)
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 1.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            // curve 2 must end at the target point (2, 0)
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 2.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 0.0);
 
             ++it;
             PT_UNIT_ASSERT(it == path.end());

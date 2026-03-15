@@ -29,14 +29,13 @@
 
 #include <Pt/Gfx/Path.h>
 #include <cmath>
+#include <limits>
 
 namespace {
 
-// Maximum recursion depth to prevent stack overflow on degenerate curves
 const int MaxSubdivisionDepth = 16;
 
-// Adaptive subdivision of a quadratic Bezier curve using de Casteljau.
-// Splits recursively until the curve is flat within the given tolerance.
+
 void quadraticBezierSubdivide(Pt::Gfx::Polygon& dst,
                               double x1, double y1,
                               double x2, double y2,
@@ -44,30 +43,26 @@ void quadraticBezierSubdivide(Pt::Gfx::Polygon& dst,
                               double tolerance,
                               int depth)
 {
-  // Flatness test: distance of control point P2 from line P1->P3.
-  // Using the cross-product magnitude (area of parallelogram / base length).
-  const double dx = x3 - x1;
-  const double dy = y3 - y1;
-  const double d = std::fabs((x2 - x3) * dy - (y2 - y3) * dx);
-  const double len = std::sqrt(dx * dx + dy * dy);
+    const double dx = x3 - x1;
+    const double dy = y3 - y1;
+    const double d = std::fabs((x2 - x3) * dy - (y2 - y3) * dx);
+    const double len = std::sqrt(dx * dx + dy * dy);
 
-  if (depth >= MaxSubdivisionDepth || d <= tolerance * len)
-  {
-    // Curve is flat enough, emit the endpoint
-    dst.push_back(Pt::Gfx::PointF(x3, y3));
-    return;
-  }
+    if (depth >= MaxSubdivisionDepth || d <= tolerance * len)
+    {
+        dst.push_back(Pt::Gfx::PointF(x3, y3));
+        return;
+    }
 
-  // de Casteljau split at t = 0.5
-  const double x12 = (x1 + x2) * 0.5;
-  const double y12 = (y1 + y2) * 0.5;
-  const double x23 = (x2 + x3) * 0.5;
-  const double y23 = (y2 + y3) * 0.5;
-  const double xm = (x12 + x23) * 0.5;
-  const double ym = (y12 + y23) * 0.5;
+    const double x12 = (x1 + x2) * 0.5;
+    const double y12 = (y1 + y2) * 0.5;
+    const double x23 = (x2 + x3) * 0.5;
+    const double y23 = (y2 + y3) * 0.5;
+    const double xm = (x12 + x23) * 0.5;
+    const double ym = (y12 + y23) * 0.5;
 
-  quadraticBezierSubdivide(dst, x1, y1, x12, y12, xm, ym, tolerance, depth + 1);
-  quadraticBezierSubdivide(dst, xm, ym, x23, y23, x3, y3, tolerance, depth + 1);
+    quadraticBezierSubdivide(dst, x1, y1, x12, y12, xm, ym, tolerance, depth + 1);
+    quadraticBezierSubdivide(dst, xm, ym, x23, y23, x3, y3, tolerance, depth + 1);
 }
 
 
@@ -77,10 +72,10 @@ void quadraticBezierToPoints(Pt::Gfx::Polygon& dst,
                              double x3, double y3,
                              double tolerance = 0.25)
 {
-  if (dst.empty())
-    dst.push_back(Pt::Gfx::PointF(x1, y1));
+      if (dst.empty())
+        dst.push_back(Pt::Gfx::PointF(x1, y1));
 
-  quadraticBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, tolerance, 0);
+      quadraticBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, tolerance, 0);
 }
 
 
@@ -92,36 +87,33 @@ void cubicBezierSubdivide(Pt::Gfx::Polygon& dst,
                           double tolerance,
                           int depth)
 {
-  // Flatness test: sum of distances of P2 and P3 from line P1->P4.
-  const double dx = x4 - x1;
-  const double dy = y4 - y1;
-  const double len = std::sqrt(dx * dx + dy * dy);
-  const double d2 = std::fabs((x2 - x4) * dy - (y2 - y4) * dx);
-  const double d3 = std::fabs((x3 - x4) * dy - (y3 - y4) * dx);
-
-  if (depth >= MaxSubdivisionDepth || (d2 + d3) <= tolerance * len)
-  {
-    // Curve is flat enough, emit the endpoint
-    dst.push_back(Pt::Gfx::PointF(x4, y4));
-    return;
-  }
-
-  // de Casteljau split at t = 0.5
-  const double x12 = (x1 + x2) * 0.5;
-  const double y12 = (y1 + y2) * 0.5;
-  const double x23 = (x2 + x3) * 0.5;
-  const double y23 = (y2 + y3) * 0.5;
-  const double x34 = (x3 + x4) * 0.5;
-  const double y34 = (y3 + y4) * 0.5;
-  const double x123 = (x12 + x23) * 0.5;
-  const double y123 = (y12 + y23) * 0.5;
-  const double x234 = (x23 + x34) * 0.5;
-  const double y234 = (y23 + y34) * 0.5;
-  const double xm = (x123 + x234) * 0.5;
-  const double ym = (y123 + y234) * 0.5;
-
-  cubicBezierSubdivide(dst, x1, y1, x12, y12, x123, y123, xm, ym, tolerance, depth + 1);
-  cubicBezierSubdivide(dst, xm, ym, x234, y234, x34, y34, x4, y4, tolerance, depth + 1);
+    const double dx = x4 - x1;
+    const double dy = y4 - y1;
+    const double len = std::sqrt(dx * dx + dy * dy);
+    const double d2 = std::fabs((x2 - x4) * dy - (y2 - y4) * dx);
+    const double d3 = std::fabs((x3 - x4) * dy - (y3 - y4) * dx);
+    
+    if (depth >= MaxSubdivisionDepth || (d2 + d3) <= tolerance * len)
+    {
+        dst.push_back(Pt::Gfx::PointF(x4, y4));
+        return;
+    }
+    
+    const double x12 = (x1 + x2) * 0.5;
+    const double y12 = (y1 + y2) * 0.5;
+    const double x23 = (x2 + x3) * 0.5;
+    const double y23 = (y2 + y3) * 0.5;
+    const double x34 = (x3 + x4) * 0.5;
+    const double y34 = (y3 + y4) * 0.5;
+    const double x123 = (x12 + x23) * 0.5;
+    const double y123 = (y12 + y23) * 0.5;
+    const double x234 = (x23 + x34) * 0.5;
+    const double y234 = (y23 + y34) * 0.5;
+    const double xm = (x123 + x234) * 0.5;
+    const double ym = (y123 + y234) * 0.5;
+    
+    cubicBezierSubdivide(dst, x1, y1, x12, y12, x123, y123, xm, ym, tolerance, depth + 1);
+    cubicBezierSubdivide(dst, xm, ym, x234, y234, x34, y34, x4, y4, tolerance, depth + 1);
 }
 
 
@@ -132,10 +124,10 @@ void cubicBezierToPoints(Pt::Gfx::Polygon& dst,
                          double x4, double y4,
                          double tolerance = 0.25)
 {
-  if (dst.empty())
-    dst.push_back(Pt::Gfx::PointF(x1, y1));
+    if (dst.empty())
+        dst.push_back(Pt::Gfx::PointF(x1, y1));
 
-  cubicBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, x4, y4, tolerance, 0);
+    cubicBezierSubdivide(dst, x1, y1, x2, y2, x3, y3, x4, y4, tolerance, 0);
 }
 
 } // namespace
@@ -146,7 +138,8 @@ namespace Gfx {
 
 Path::Path()
 : _pathData( new PathData() )
-{}
+{
+}
 
 
 Path::~Path()
@@ -199,10 +192,29 @@ void Path::clear()
 
 RectF Path::boundingRect() const
 {
-    // TODO
-    RectF result;
-    assert(false);
-    return result;
+    if( _pathData->isEmpty() )
+        return RectF();
+
+    double minX =  std::numeric_limits<double>::max();
+    double minY =  std::numeric_limits<double>::max();
+    double maxX = -std::numeric_limits<double>::max();
+    double maxY = -std::numeric_limits<double>::max();
+
+    for( PathIterator it = _pathData->begin(); it != _pathData->end(); ++it )
+    {
+        const PathElement& elem = *it;
+
+        for( std::size_t i = 0; i < elem.size(); ++i )
+        {
+            const PointF& p = elem.point(i);
+            minX = std::min(minX, p.x());
+            minY = std::min(minY, p.y());
+            maxX = std::max(maxX, p.x());
+            maxY = std::max(maxY, p.y());
+        }
+    }
+
+    return RectF( PointF(minX, minY), PointF(maxX, maxY) );
 }
 
 
