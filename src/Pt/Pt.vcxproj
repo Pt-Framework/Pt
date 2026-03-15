@@ -1438,6 +1438,7 @@
     <ClCompile Include="..\Pt-Gfx\tests\BlockscaleTest.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest2.cpp" />
+    <ClCompile Include="..\Pt-Gfx\tests\PathTest.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\Yuv12Test.cpp" />
     <ClCompile Include="..\Pt-Gfx\TextMetrics.cpp" />

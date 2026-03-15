@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="freetype">
@@ -4680,6 +4680,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\Argb32Test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\PathTest.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\BlockscaleTest.cpp">
