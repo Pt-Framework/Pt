@@ -1,4 +1,14 @@
-# Unit Test Conventions
+# Coding Style
+
+## Indentation
+
+ - Use 4 spaces for indentation, no tabs.
+
+## Language
+
+- Prefer C++11 features where appropriate.
+
+# Unit Tests
 
 ## Framework
 
@@ -102,3 +112,17 @@ Main Pt-Gfx-test : Pt-Gfx-test.cpp
             Yuv12Test.cpp
      ;
 ```
+
+## Test Execution
+
+To run only a specific test suite, pass the suite name with the `-t` flag:
+
+```
+<Module>-test.exe -t "<SuiteName>"
+```
+
+The suite name matches the string passed to `Pt::Unit::TestSuite` in the constructor, which is the fully qualified class name (e.g. `"Pt::Gfx::PathTest"`).
+
+**Example:**
+```
+Pt-Gfx-test.exe -t "Pt::Gfx::PathTest"
