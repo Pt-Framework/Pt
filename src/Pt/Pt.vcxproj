@@ -915,6 +915,7 @@
     <ClInclude Include="Unicode.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\.github\copilot-instructions.md" />
     <None Include="..\..\include\Pt\Callable.tpp" />
     <None Include="..\..\include\Pt\ConstMethod.tpp" />
     <None Include="..\..\include\Pt\Delegate.tpp" />
