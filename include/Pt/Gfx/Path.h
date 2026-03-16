@@ -115,6 +115,9 @@ class PT_GFX_API Path
 
         void addRoundedRect(const SizeF& size, float radius);
 
+        /** TODO: Compare with HTML5 Canvas Path2D and CGPath. 
+                  What is missing, what is different, what can be removed?
+        */
         void addEllipse(const SizeF& size);
 
         void addArc(const PointF& center, double radius,
