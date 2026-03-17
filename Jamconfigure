@@ -678,6 +678,8 @@ if ! $(WITH_FREETYPE)
     FREETYPE_LINKLIBS ?= -lfreetype ;
     FREETYPE_INCLUDES ?= /usr/include/freetype2 ;
 
+    FREETYPE_INCLUDES = $(FREETYPE_INCLUDES:J=" ") ;
+    
     WITH_FREETYPE = [ CheckBuildC++ "#include <ft2build.h>"
                                     "#include FT_FREETYPE_H"
                                     "int main() {"
