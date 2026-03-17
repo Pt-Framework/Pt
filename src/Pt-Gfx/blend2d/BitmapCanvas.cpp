@@ -27,7 +27,6 @@
 */
 
 #include "BitmapCanvas.h"
-#include "DrawText.h"
 #include "Dasher.h"
 
 #include <Pt/Gfx/Argb32.h>
@@ -358,8 +357,7 @@ void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
         _pen.style() == Gfx::Pen::Dot )
     {
         Path rectPath;
-        rectPath.moveTo( r.topLeft() );
-        rectPath.addRect( r.size() );
+        rectPath.addRect(r);
         drawDashed(rectPath);
         return;
     }
