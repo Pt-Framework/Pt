@@ -2,23 +2,40 @@
     "version": "2.0.0",
     "inputs": [
         {
-            "id": "customConfig",
-            "type": "promptString",
-            "description": "Addtional configuration options",
-            "default": ""
+            "id": "configureOptions",
+            "type": "pickString",
+            "description": "Select configuration options",
+            "options": [
+                { "label": "Debug",   "value": "-sCONFIG=debug --debug" },
+                { "label": "Release", "value": "-sCONFIG=release --debug --optimize" }
+            ],
+            "default": "Debug"
         },
         {
-            "id": "switchConfig",
-            "type": "pickString",
-            "description": "Switch configuration",
-            "options": [
-                "debug",
-                "release",
-            ],
-            "default": "debug"
+            "id": "configureExtra",
+            "type": "promptString",
+            "description": "Additional configuration options",
+            "default": ""
         }
     ],
     "tasks": [
+        {
+            "label": "Configure...",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat configure ${input:configureOptions} ${input:configureExtra}"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "echo": true, "reveal": "always", "focus": false, "panel": "shared"
+            }
+        },
         {
             "label": "Configure Debug",
             "type": "shell",
@@ -27,8 +44,7 @@
                 "command": ".\\jam.bat"
             },
             "args": [
-                "configure", "-sCONFIG=debug", "--debug",
-                "${input:customConfig}"
+                "configure", "-sCONFIG=debug", "--debug"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -37,10 +53,7 @@
                 "kind": "build"
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+                "reveal": "always", "focus": false, "panel": "shared"
             }
         },
         {
@@ -51,8 +64,7 @@
                 "command": ".\\jam.bat"
             },
             "args": [
-                "configure", "-sCONFIG=release", "--debug", "--optimize",
-                "${input:customConfig}"
+                "configure", "-sCONFIG=release", "--debug", "--optimize"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -61,22 +73,18 @@
                 "kind": "build"
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+                "reveal": "always", "focus": false, "panel": "shared"
             }
         },
         {
-            "label": "Switch Configuration",
+            "label": "Switch Debug",
             "type": "shell",
             "command": "./jam.sh",
             "windows": {
                 "command": ".\\jam.bat"
             },
             "args": [
-                "switch",
-                "${input:switchConfig}"
+                "switch", "debug"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -85,10 +93,27 @@
                 "kind": "build"
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+                "reveal": "always", "focus": false, "panel": "shared"
+            }
+        },
+        {
+            "label": "Switch Release",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": [
+                "switch", "release"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always", "focus": false, "panel": "shared"
             }
         },
         {
@@ -109,10 +134,7 @@
                 "isDefault": true
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+                "reveal": "always", "focus": false, "panel": "shared"
             }
         },
         {
@@ -132,10 +154,7 @@
                 "kind": "build"
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
+                "reveal": "always", "focus": false, "panel": "shared"
             }
         }
     ]
