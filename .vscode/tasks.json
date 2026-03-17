@@ -51,7 +51,7 @@
                 "command": ".\\jam.bat"
             },
             "args": [
-                "configure", "-sCONFIG=release", "--debug", "--optim",
+                "configure", "-sCONFIG=release", "--debug", "--optimize",
                 "${input:customConfig}"
             ],
             "options": {
