@@ -1,0 +1,118 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "config",
+            "type": "pickString",
+            "description": "Select configuration",
+            "options": [
+                "-sCONFIG=debug --debug",
+                "-sCONFIG=release --debug --optim",
+            ],
+            "default": "-sCONFIG=debug --debug"
+        },
+        {
+            "id": "switch",
+            "type": "pickString",
+            "description": "Switch configuration",
+            "options": [
+                "debug",
+                "release",
+            ],
+            "default": "debug"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "Configure",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": ["configure", "${input:config}"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Switch",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": ["switch", "${input:switch}"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": ["-q", "-j4"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": ["clean"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

@@ -120,10 +120,21 @@
         {
             "path": "src/Pt-Forms",
             "name": "📁 Pt-Forms"
+        },
+        {
+            "path": ".",
+            "name": "🏠 Project Files"
         }
     ],
     "settings": {
         "files.exclude": {
+            "include": true,
+            "src": true,
+            "build": true,
+            "tmp": true,
+            ".vs": true,
+            "*.idb": true,
+            "*.pdb": true,   
             "Cma": true,
             "Db": true,
             "Forms": true,

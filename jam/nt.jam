@@ -17,6 +17,16 @@ SUFDBG ?= "" ;
 
 if ! $(TOOLSET)
 {
+	VSWHERE_RESULT = [ EXEC $(VSWHERE)" -nologo -property installationPath -version 17.0" ] ;
+
+	if $(VSWHERE_RESULT[2])
+	{
+		TOOLSET = vc17 ;
+	}
+}
+
+if ! $(TOOLSET)
+{
 	VSWHERE_RESULT = [ EXEC $(VSWHERE)" -nologo -property installationPath -version 16.0" ] ;
 
 	if $(VSWHERE_RESULT[2])
