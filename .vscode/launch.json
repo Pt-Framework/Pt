@@ -1,7 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
-        {
+          {
             "name": "Debug (Windows)",
             "type": "cppvsdbg",
             "request": "launch",
@@ -39,6 +39,45 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Remote Debug (GDB)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/tmp/Pt-test",
+            "args": [ "-t",  "AnyTest"],
+            "stopAtEntry": false,
+            "cwd": "/tmp",
+            "environment": [
+                 {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/tmp:/tmp/lib"
+                }
+            ],
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": false,
+                "trace": false,
+                "traceResponse": false
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "C:\\Windows\\System32\\OpenSSH\\ssh.exe",
+                "pipeArgs": [
+                    "-i",
+                    "${workspaceFolder}\\id_rsa_bravo",
+                    "-T",
+                    "root@192.168.0.229"
+                ],
+                "pipeCwd": ""
+            },
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }
