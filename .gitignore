@@ -2,6 +2,7 @@
 build/
 tmp/
 deploy/
+Jamrules*
 
 # Documentation (generated)
 doc/html/
