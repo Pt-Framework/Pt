@@ -87,6 +87,6 @@ Pt::Unit::RegisterTest<Pt::Module::FooTest> register_FooTest;
 
 - Executables are in `build/debug/`
 - Run with no arguments to execute all suites
-- Pass `--test "<SuiteName>"` to run a single suite in the constructor.
+- Pass `-t "<SuiteName>"` to run a single suite in the constructor.
 - The suite name should be the fully qualified class name (e.g. `"Pt::Gfx::PathTest"`).
 - Capture stdout from the test executable to see detailed results
