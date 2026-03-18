@@ -6,7 +6,7 @@
         },
         {
             "path": "src/Pt",
-            "name": "📁 Pt"
+            "name": "📙 Pt"
         },
         {
             "path": "include/Pt/Unit",
@@ -14,7 +14,7 @@
         },
         {
             "path": "src/Pt-Unit",
-            "name": "📁 Pt-Unit"
+            "name": "📙 Pt-Unit"
         },
         {
             "path": "include/Pt/System",
@@ -22,7 +22,7 @@
         },
         {
             "path": "src/Pt-System",
-            "name": "📁 Pt-System"
+            "name": "📙 Pt-System"
         },
         {
             "path": "include/Pt/Net",
@@ -30,7 +30,7 @@
         },
         {
             "path": "src/Pt-Net",
-            "name": "📁 Pt-Net"
+            "name": "📙 Pt-Net"
         },
         {
             "path": "include/Pt/Ssl",
@@ -38,7 +38,7 @@
         },
         {
             "path": "src/Pt-Ssl",
-            "name": "📁 Pt-Ssl"
+            "name": "📙 Pt-Ssl"
         },
         {
             "path": "include/Pt/Http",
@@ -46,7 +46,7 @@
         },
         {
             "path": "src/Pt-Http",
-            "name": "📁 Pt-Http"
+            "name": "📙 Pt-Http"
         },
         {
             "path": "include/Pt/Reflex",
@@ -54,7 +54,7 @@
         },
         {
             "path": "src/Pt-Reflex",
-            "name": "📁 Pt-Reflex"
+            "name": "📙 Pt-Reflex"
         },
         {
             "path": "include/Pt/Remoting",
@@ -62,7 +62,7 @@
         },
         {
             "path": "src/Pt-Remoting",
-            "name": "📁 Pt-Remoting"
+            "name": "📙 Pt-Remoting"
         },
         {
             "path": "include/Pt/Json",
@@ -70,7 +70,7 @@
         },
         {
             "path": "src/Pt-Json",
-            "name": "📁 Pt-Json"
+            "name": "📙 Pt-Json"
         },
         {
             "path": "include/Pt/JsonRpc",
@@ -78,7 +78,7 @@
         },
         {
             "path": "src/Pt-JsonRpc",
-            "name": "📁 Pt-JsonRpc"
+            "name": "📙 Pt-JsonRpc"
         },
         {
             "path": "include/Pt/Xml",
@@ -86,7 +86,7 @@
         },
         {
             "path": "src/Pt-Xml",
-            "name": "📁 Pt-Xml"
+            "name": "📙 Pt-Xml"
         },
         {
             "path": "include/Pt/XmlRpc",
@@ -94,7 +94,7 @@
         },
         {
             "path": "src/Pt-XmlRpc",
-            "name": "📁 Pt-XmlRpc"
+            "name": "📙 Pt-XmlRpc"
         },
         {
             "path": "include/Pt/Soap",
@@ -102,7 +102,7 @@
         },
         {
             "path": "src/Pt-Soap",
-            "name": "📁 Pt-Soap"
+            "name": "📙 Pt-Soap"
         },
 
         {
@@ -111,7 +111,7 @@
         },
         {
             "path": "src/Pt-Gfx",
-            "name": "📁 Pt-Gfx"
+            "name": "📙 Pt-Gfx"
         },
         {
             "path": "include/Pt/Forms",
@@ -119,45 +119,46 @@
         },
         {
             "path": "src/Pt-Forms",
-            "name": "📁 Pt-Forms"
+            "name": "📙 Pt-Forms"
         },
         {
             "path": ".",
-            "name": "🏠 Project Files"
+            "name": "📁 All Files"
         }
     ],
     "settings": {
         "files.exclude": {
-            "include": true,
-            "src": true,
             "build": true,
             "tmp": true,
             ".vs": true,
             "*.idb": true,
             "*.pdb": true,   
-            "Cma": true,
-            "Db": true,
-            "Forms": true,
-            "Gfx": true,
-            "Http": true,
-            "Json": true,
-            "JsonRpc": true,
-            "Mfc": true,
-            "Net": true,
-            "Qt": true,
-            "Reflex": true,
-            "Remoting": true,
-            "Soap": true,
-            "Ssl": true,
-            "System": true,
-            "Unit": true,
-            "WxWidgets": true,
-            "Xml": true,
-            "XmlRpc": true
+            "src/blend2d/**": true,
+            "src/freetype/**": true,
+            "src/skia/**": true,
+            "src/openssl/**": true
+        },
+        "search.exclude": {
+            "src/blend2d/**": true,
+            "src/freetype/**": true,
+            "src/skia/**": true,
+            "src/openssl/**": true
         },
         "C_Cpp.default.cppStandard": "c++14",
         "C_Cpp.default.includePath": [
             "${workspaceFolder}/../../include"
-        ]
+        ],
+        "chat.tools.terminal.autoApprove": {
+            "Rename-Item": true,
+            ".\\build\\debug\\Pt-Gfx-test.exe": true
+        },
+        "C_Cpp.files.exclude": {
+            "build": true,
+            "tmp": true,
+            "src/blend2d/**": true,
+            "src/freetype/**": true,
+            "src/skia/**": true,
+            "src/openssl/**": true
+        }
     }
 }
