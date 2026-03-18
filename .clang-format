@@ -1,0 +1,67 @@
+---
+Language:        Cpp
+BasedOnStyle:    LLVM
+Standard:        c++14
+
+# Indentation
+IndentWidth:               4
+TabWidth:                  4
+UseTab:                    Never
+AccessModifierOffset:      0
+IndentAccessModifiers:     true
+ConstructorInitializerIndentWidth: 0
+ContinuationIndentWidth:   4
+NamespaceIndentation:      None
+
+# Line length
+ColumnLimit:         100
+MaxEmptyLinesToKeep: 2
+
+# Braces (Allman style, except namespaces)
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass:            true
+    AfterControlStatement: Always
+    AfterEnum:             true
+    AfterFunction:         true
+    AfterNamespace:        false
+    AfterStruct:           true
+    AfterUnion:            true
+    AfterExternBlock:      true
+    BeforeCatch:           true
+    BeforeElse:            true
+    IndentBraces:          false
+    SplitEmptyFunction:    false
+    SplitEmptyRecord:      false
+    SplitEmptyNamespace:   false
+AllowShortFunctionsOnASingleLine:    None
+AllowShortBlocksOnASingleLine:       Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine:        false
+SpaceInEmptyBlock:                   true
+
+# Pointers and references
+PointerAlignment:    Left
+
+# Spacing
+SpaceBeforeParens:         Never
+SpacesInParentheses:       false
+SpaceInEmptyParentheses:   false
+SpacesInSquareBrackets:    false
+
+# Constructor initializers
+BreakConstructorInitializers:    BeforeComma
+PackConstructorInitializers:     Never
+
+# Templates
+AlwaysBreakTemplateDeclarations: MultiLine
+AlignAfterOpenBracket:           Align
+
+# Alignment
+AlignOperands:                true
+AlignTrailingComments:        true
+SpacesBeforeTrailingComments: 1
+
+# Includes
+SortIncludes:    Never
+IncludeBlocks:   Preserve

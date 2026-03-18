@@ -155,7 +155,7 @@
             "Xml": true,
             "XmlRpc": true
         },
-        "explorer.autoReveal": false,
+        "C_Cpp.default.cppStandard": "c++14",
         "C_Cpp.default.includePath": [
             "${workspaceFolder}/../../include"
         ]
