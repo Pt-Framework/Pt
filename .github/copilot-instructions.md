@@ -13,19 +13,20 @@ It provides a large amount of features and is still very easy to use.
 # Task Specific Instructions
 
 Before performing any task, identify which of the instruction files below are
-relevant to your task. Read each relevant instruction file completely before
-you perform the task.
+relevant to your task. You MUST read each relevant instruction file completely
+before you perform the task. Do NOT skip reading these files, even if you
+think you have all relevant information.
 
 - **Building**: Building the Pt project with jam.
-  Read this when asked about configuring, building, or cleaning the project.
+  You MUST read this when configuring, building, or cleaning the project.
   -> `.github/instructions/building.instructions.md`
 
 - **Coding Style**: Coding style and conventions for C++ files in the Pt project.
-  Read this when writing or reviewing C++ code.
+  You MUST read this when writing or reviewing C++ code.
   -> `.github/instructions/coding-style.instructions.md`
 
 - **Unit Testing**: Writing and structuring unit tests with the Pt::Unit framework.
-  Read this when asked to create tests, add test methods, or debug test failures.
+  You MUST read this when writing tests, adding test methods, or debugging test failures.
   -> `.github/instructions/testing.instructions.md`
 
 # Visual Code Issues

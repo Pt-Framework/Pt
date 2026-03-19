@@ -16,6 +16,8 @@ description: "Build system"
 - ALWAYS check the exit code after every build command — no exceptions. 
 - NEVER rely on build output alone.
 - ALWAYS run the build command without any further processing.
+- ALWAYS perform a full global build to verify that dependent modules are not broken. 
+- NEVER only build the local module or test target.
 
 ## Project Layout
 
