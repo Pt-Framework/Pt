@@ -5,9 +5,7 @@ description: "Unit test conventions for the Pt::Unit framework"
 
 # Unit Testing with Pt::Unit
 
-## Framework
-
-Use the `Pt::Unit` framework for all unit tests.
+- Use the `Pt::Unit` framework for all unit tests.
 
 ## Required Headers
 
