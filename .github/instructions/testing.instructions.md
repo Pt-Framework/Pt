@@ -1,6 +1,6 @@
 ---
-name: pt-testing
-description: Writing and structuring unit tests with the Pt::Unit framework. Use this when asked to create tests, add test methods, or debug test failures.
+applyTo: "**/tests/**"
+description: "Unit test conventions for the Pt::Unit framework"
 ---
 
 # Unit Testing with Pt::Unit
@@ -9,7 +9,7 @@ description: Writing and structuring unit tests with the Pt::Unit framework. Use
 
 Use the `Pt::Unit` framework for all unit tests.
 
-### Required Headers
+## Required Headers
 
 ```cpp
 #include <Pt/Unit/Assertion.h>    // PT_UNIT_ASSERT_* macros

@@ -1,6 +1,6 @@
 ---
-name: pt-building
-description: Building the Pt project with jam. Use this when asked about configuring, building or cleaning the project.
+applyTo: "**/Jamfile"
+description: "Build system conventions for the Pt project (jam-based)"
 ---
 
 # Building with Jam
@@ -10,6 +10,12 @@ description: Building the Pt project with jam. Use this when asked about configu
 - All platforms use the same basic jam arguments
 - some platforms may have additional platform-specific options
 - The examples below use `jam.bat`; substitute `jam.sh` accordingly
+
+- NEVER use VS Code tasks (run_task) to build.
+- ALWAYS check the exit code of the actual standalone build command to determine build success.
+- ALWAYS check the exit code after every build command with — no exceptions. 
+- NEVER rely on build output alone.
+- ALWAYS run the build command without any further processing.
 
 ## Project Layout
 

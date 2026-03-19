@@ -1,6 +1,6 @@
 ---
-name: pt-coding-style
-description: Coding style and conventions for the Pt project. Use this when writing or reviewing C++ code in the Pt project.
+applyTo: "**/*.{h,cpp}"
+description: "Coding style and conventions for C++ files in the Pt project"
 ---
 
 # Coding Style
