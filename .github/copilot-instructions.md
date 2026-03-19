@@ -7,6 +7,8 @@ It provides a large amount of features and is still very easy to use.
 # General Instructions
 
 - Do not add third-party dependencies without discussion.
+- At the end of every completed task, suggest improvements to the instruction
+  files if the task revealed missing, unclear, or incorrect instructions.
 
 # Task Specific Instructions
 

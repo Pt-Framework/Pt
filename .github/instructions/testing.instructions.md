@@ -1,13 +1,39 @@
 ---
 applyTo: "**/tests/**"
-description: "Unit test conventions for the Pt::Unit framework"
+description: "Unit testing"
 ---
 
-# Unit Testing with Pt::Unit
+# Unit Tests with Pt::Unit
 
 - Use the `Pt::Unit` framework for all unit tests.
+- `Pt::Unit` is a module of the Pt Framework itself.
+  - The header files are in `include/Pt/Unit` and contain documentation.
+  - The source files are in `src/Pt-Unit`
 
-## Required Headers
+- NEVER use VS Code tasks for unit tests.
+- ALWAYS check the exit code of the actual pure unit test program to determine overall test success.
+- ALWAYS check the exit code after every unit test execution — no exceptions. 
+- NEVER rely on test output alone, but look at test output for details.
+- ALWAYS run the unit test program without any further processing.
+
+## Writing a Unit Test
+
+- Class inherits from `Pt::Unit::TestSuite`
+- Lives in the same namespace as the class/unit under test (e.g. `Pt::Gfx`)
+- Class name = class/unit under test + `Test` (e.g. `PathTest`)
+- Suite name = fully qualified class name (e.g. `"Pt::Gfx::PathTest"`)
+- The suite name is passed to the `Pt::Unit::TestSuite` constructor.
+- Each test method registered via `registerMethod()` in constructor.
+- One test method per public method or behaviour of the unit under test.
+- Test method name matches the method under test
+- Avoid shared state between methods — each creates its own objects
+- File-scope `Pt::Unit::RegisterTest<>` for self-registration
+
+- Place test files in `src/<Module>/tests/`, e.g. `src/Pt-Gfx/tests/PathTest.cpp`
+- Register in `src/<Module>/tests/Jamfile` (source list)
+- Register in `src/Pt/Pt.vcxproj` and `src/Pt/Pt.vcxproj.filters`
+
+### Required Headers
 
 ```cpp
 #include <Pt/Unit/Assertion.h>    // PT_UNIT_ASSERT_* macros
@@ -15,22 +41,7 @@ description: "Unit test conventions for the Pt::Unit framework"
 #include <Pt/Unit/RegisterTest.h> // self-registration
 ```
 
-## Test File Location
-
-- Place test files in `src/<Module>/tests/`, e.g. `src/Pt-Gfx/tests/PathTest.cpp`
-- Register in `src/<Module>/tests/Jamfile` (source list)
-- Register in `src/Pt/Pt.vcxproj` and `src/Pt/Pt.vcxproj.filters`
-
-## Test Structure
-
-- Class inherits from `Pt::Unit::TestSuite`
-- Lives in the same namespace as the class under test (e.g. `Pt::Gfx`)
-- Class name = class under test + `Test` (e.g. `PathTest`)
-- Suite name = fully qualified class name (e.g. `"Pt::Gfx::PathTest"`)
-- Each test method registered via `registerMethod()` in constructor
-- File-scope `Pt::Unit::RegisterTest<>` for self-registration
-
-## Assertion Macros
+### Assertion Macros
 
 | Macro | Usage |
 |---|---|
@@ -42,13 +53,7 @@ description: "Unit test conventions for the Pt::Unit framework"
 | `PT_UNIT_ASSERT_NOTHROW(expr)` | Must not throw |
 | `PT_UNIT_FAIL(msg)` | Unconditional failure |
 
-## Conventions
-
-- One test method per public method or behaviour
-- Method name matches the method under test
-- No shared state between methods — each creates its own objects
-
-## Template
+### Unit Test Example
 
 ```cpp
 #include <Pt/Unit/Assertion.h>
@@ -70,7 +75,13 @@ class FooTest : public Pt::Unit::TestSuite
 
         void Bar()
         {
-            // test code here
+            Foo foo;
+            PT_UNIT_ASSERT( foo.isEmpty() );
+
+            Bar bar(foo);
+            PT_UNIT_ASSERT( bar.foo() == foo );
+
+            // use other assertion macros accordingly
         }
 };
 
@@ -83,8 +94,7 @@ Pt::Unit::RegisterTest<Pt::Module::FooTest> register_FooTest;
 
 ## Running Tests
 
-- Executables are in `build/debug/`
-- Run with no arguments to execute all suites
-- Pass `-t "<SuiteName>"` to run a single suite in the constructor.
-- The suite name should be the fully qualified class name (e.g. `"Pt::Gfx::PathTest"`).
-- Capture stdout from the test executable to see detailed results
+- Run unit tests with no arguments to execute all suites.
+- Pass `-t "<SuiteName>"` to run a single suite (`SuiteName` as passed to
+  Pt::Unit::TestSuite constructor).
+- Capture stdout from the test executable to see detailed results.
