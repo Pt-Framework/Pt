@@ -31,7 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <Pt/Gfx/BasicLineView.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -195,47 +195,19 @@ inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstImage<F,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// copyArea
+// copyView
 ///////////////////////////////////////////////////////////////////////
 
-template <typename LineIter1, typename LineIter2>
-void copyAreaImpl(LineIter1& from, LineIter1& fromEnd, LineIter2& to)
-{
-    while(from != fromEnd)
-    {
-        copySpan(*from, *to);
-        ++from;
-        ++to;
-    }
-}
-
-
-template <typename Fmt, typename Tr, typename ViewT>
-void copyAreaImpl(const BasicLineView<Fmt, Tr>& from, ViewT to)
-{
-    typename BasicLineView<Fmt, Tr>::ConstIterator fromIter = from.begin();
-    typename BasicLineView<Fmt, Tr>::ConstIterator fromEnd = from.end();
-    typename ViewT::Iterator toIter = to.begin();
-    
-    copyAreaImpl(fromIter, fromEnd, toIter);
-}
-
-
-template <typename Fmt, typename Tr, typename ViewT>
-void copyAreaImpl(const BasicConstLineView<Fmt, Tr>& from, ViewT to)
-{
-    typename BasicConstLineView<Fmt, Tr>::Iterator fromIter = from.begin();
-    typename BasicConstLineView<Fmt, Tr>::Iterator fromEnd = from.end();
-    typename ViewT::Iterator toIter = to.begin();
-    
-    copyAreaImpl(fromIter, fromEnd, toIter);
-}
-
-
 template <typename From, typename To>
-void copyArea(const From& from, To& to)
+void copyView(const From& from, To& to)
 {
-    copyAreaImpl( lineView(from), lineView(to) );
+    typedef typename From::Traits::ConstPixelType FromPixel;
+    typedef typename To::Traits::PixelType        ToPixel;
+
+    FromPixel fromPixel(from, 0, 0);
+    ToPixel   toPixel(to, 0, 0);
+
+    copyArea(fromPixel, toPixel, from.width(), from.height());
 }
 
 } // namespace

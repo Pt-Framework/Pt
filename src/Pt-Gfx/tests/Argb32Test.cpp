@@ -55,13 +55,13 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Color",*this, &Argb32Test::Color);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
-            //registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
-            //registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
-            //registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
-            //registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
-            //registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
-            //registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
-            //registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
+            registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
+            registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
+            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
+            registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
+            registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
+            registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
         }
 
         void Pixel()
@@ -96,7 +96,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32Image to(8, 8, 4);
             
             Argb32View subView(to, 1, 1, 2, 2);
-            copyArea(from, subView);
+            copyView(view(from), subView);
 
             Argb32PixelView pixelView(to);
             Argb32PixelView::Iterator pixel = pixelView.pixel(2, 2);
@@ -165,10 +165,12 @@ class Argb32Test : public Pt::Unit::TestSuite
                             [](const Argb32Pixel& p) 
                             { return p.toColor(); });
 
-            copyArea(image, image);
-            copyArea(cimage, image);
-            copyArea(cimage, argb32Image);
-            copyArea(cargb32Image, image);
+            ImageView imageView(image);
+
+            copyView(imageView, imageView);
+            copyView(constView(image), imageView);
+            copyView(constView(cimage), imageView);
+            copyView(constView(cargb32Image), imageView);
 
             copyPixel(*cpixelView.begin(), *pixelView.begin());
             copyPixel(*cpixelView.begin(), *argb32View.begin());

@@ -260,7 +260,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
                 _brushBuffer.reset( _image->format(), 
                                     brush.texture().width(), brush.texture().height() );
 
-                copyArea(brush.texture(), _brushBuffer);
+                copyView(constView(brush.texture()), view(_brushBuffer));
                 _brushView = ConstPixelView(_brushBuffer);
             }
             else

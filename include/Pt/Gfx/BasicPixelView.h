@@ -315,6 +315,20 @@ class BasicConstPixelView : public BasicConstView<FormatT, TraitsT>
         { return Iterator(*this, 0, this->height()); }
 };
 
+
+template <typename T>
+BasicPixelView<typename T::Format, typename T::Traits> pixelView(T& source)
+{ 
+    return BasicPixelView<typename T::Format, typename T::Traits>(source); 
+}
+
+
+template <typename T>
+BasicConstPixelView<typename T::Format, typename T::Traits> constPixelView(const T& source)
+{ 
+    return BasicConstPixelView<typename T::Format, typename T::Traits>(source); 
+}
+
 } // namespace
 
 } // namespace

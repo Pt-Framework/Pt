@@ -29,7 +29,6 @@
 #ifndef PT_GFX_BASIC_IMAGE_HPP
 #define PT_GFX_BASIC_IMAGE_HPP
 
-#include <Pt/Gfx/BasicLineView.h>
 #include <Pt/TypeTraits.h>
 
 namespace Pt {

@@ -374,6 +374,20 @@ class BasicConstCursorView : public BasicConstView<FormatT, TraitsT>
         { return Iterator(*this, 0, this->height()); }
 };
 
+
+template <typename T>
+BasicCursorView<typename T::Format, typename T::Traits> cursorView(T& source)
+{ 
+    return BasicCursorView<typename T::Format, typename T::Traits>(source);
+}
+
+
+template <typename T>
+BasicConstCursorView<typename T::Format, typename T::Traits> constCursorView(const T& source)
+{ 
+    return BasicConstCursorView<typename T::Format, typename T::Traits>(source);
+}
+
 } // namespace
 
 } // namespace

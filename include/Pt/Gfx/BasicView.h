@@ -127,8 +127,22 @@ class BasicConstView : public ViewBase
 };
 
 
+template <typename T>
+BasicConstView<typename T::Format, typename T::Traits> constView(const T& source)
+{ 
+    return BasicConstView<typename T::Format, typename T::Traits>(source); 
+}
+
+
+template <typename T>
+BasicView<typename T::Format, typename T::Traits> view(T& source)
+{ 
+    return BasicView<typename T::Format, typename T::Traits>(source); 
+}
+
+
 template <typename From, typename To>
-void copyArea(const From& from, To& to);
+void copyView(const From& from, To& to);
 
 } // namespace
 

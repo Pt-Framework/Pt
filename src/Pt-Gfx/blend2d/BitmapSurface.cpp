@@ -72,7 +72,7 @@ void BitmapSurface::reset(const Gfx::Image& image)
     if( image.format() != _image.format() )
     {
         _image.reset( format(), image.width(), image.height() );
-        copyArea(image, _image);
+        copyView(constView(image), view(_image));
     }
     else
     {
