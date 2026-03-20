@@ -2,128 +2,127 @@
     "folders": [
         {
             "path": "include/Pt",
-            "name": "📘 Pt (Includes)"
+            "name": "Pt (Includes)"
         },
         {
             "path": "src/Pt",
-            "name": "📙 Pt"
+            "name": "Pt"
         },
         {
             "path": "include/Pt/Unit",
-            "name": "📘 Pt / Unit (Includes)"
+            "name": "Pt-Unit (Includes)"
         },
         {
             "path": "src/Pt-Unit",
-            "name": "📙 Pt-Unit"
+            "name": "Pt-Unit"
         },
         {
             "path": "include/Pt/System",
-            "name": "📘 Pt / System (Includes)"
+            "name": "Pt-System (Includes)"
         },
         {
             "path": "src/Pt-System",
-            "name": "📙 Pt-System"
+            "name": "Pt-System"
         },
         {
             "path": "include/Pt/Net",
-            "name": "📘 Pt / Net (Includes)"
+            "name": "Pt-Net (Includes)"
         },
         {
             "path": "src/Pt-Net",
-            "name": "📙 Pt-Net"
+            "name": "Pt-Net"
         },
         {
             "path": "include/Pt/Ssl",
-            "name": "📘 Pt / Ssl (Includes)"
+            "name": "Pt-Ssl (Includes)"
         },
         {
             "path": "src/Pt-Ssl",
-            "name": "📙 Pt-Ssl"
+            "name": "Pt-Ssl"
         },
         {
             "path": "include/Pt/Http",
-            "name": "📘 Pt / Http (Includes)"
+            "name": "Pt-Http (Includes)"
         },
         {
             "path": "src/Pt-Http",
-            "name": "📙 Pt-Http"
+            "name": "Pt-Http"
         },
         {
             "path": "include/Pt/Reflex",
-            "name": "📘 Pt / Reflex (Includes)"
+            "name": "Pt-Reflex (Includes)"
         },
         {
             "path": "src/Pt-Reflex",
-            "name": "📙 Pt-Reflex"
+            "name": "Pt-Reflex"
         },
         {
             "path": "include/Pt/Remoting",
-            "name": "📘 Pt / Remoting (Includes)"
+            "name": "Pt-Remoting (Includes)"
         },
         {
             "path": "src/Pt-Remoting",
-            "name": "📙 Pt-Remoting"
+            "name": "Pt-Remoting"
         },
         {
             "path": "include/Pt/Json",
-            "name": "📘 Pt / Json (Includes)"
+            "name": "Pt-Json (Includes)"
         },
         {
             "path": "src/Pt-Json",
-            "name": "📙 Pt-Json"
+            "name": "Pt-Json"
         },
         {
             "path": "include/Pt/JsonRpc",
-            "name": "📘 Pt / JsonRpc (Includes)"
+            "name": "Pt-JsonRpc (Includes)"
         },
         {
             "path": "src/Pt-JsonRpc",
-            "name": "📙 Pt-JsonRpc"
+            "name": "Pt-JsonRpc"
         },
         {
             "path": "include/Pt/Xml",
-            "name": "📘 Pt / Xml (Includes)"
+            "name": "Pt-Xml (Includes)"
         },
         {
             "path": "src/Pt-Xml",
-            "name": "📙 Pt-Xml"
+            "name": "Pt-Xml"
         },
         {
             "path": "include/Pt/XmlRpc",
-            "name": "📘 Pt / Xml (Includes)"
+            "name": "Pt-XmlRpc (Includes)"
         },
         {
             "path": "src/Pt-XmlRpc",
-            "name": "📙 Pt-XmlRpc"
+            "name": "Pt-XmlRpc"
         },
         {
             "path": "include/Pt/Soap",
-            "name": "📘 Pt / Soap (Includes)"
+            "name": "Pt-Soap (Includes)"
         },
         {
             "path": "src/Pt-Soap",
-            "name": "📙 Pt-Soap"
+            "name": "Pt-Soap"
         },
-
         {
             "path": "include/Pt/Gfx",
-            "name": "📘 Pt / Gfx (Includes)"
+            "name": "Pt-Gfx (Includes)"
         },
         {
             "path": "src/Pt-Gfx",
-            "name": "📙 Pt-Gfx"
+            "name": "Pt-Gfx"
         },
         {
             "path": "include/Pt/Forms",
-            "name": "📘 Pt / Forms (Includes)"
+            "name": "Pt-Forms (Includes)"
         },
         {
             "path": "src/Pt-Forms",
-            "name": "📙 Pt-Forms"
+            "name": "Pt-Forms"
         },
         {
             "path": ".",
-            "name": "📁 All Files"
+            "name": "All Files"
         }
     ],
     "settings": {
