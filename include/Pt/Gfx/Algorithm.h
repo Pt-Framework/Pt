@@ -189,44 +189,6 @@ void copyArea(P1 from, P2 to, std::size_t width, std::size_t height)
     }
 }
 
-///////////////////////////////////////////////////////////////////////
-// convert with multistage converter
-///////////////////////////////////////////////////////////////////////
-
-//template <typename T1, typename T2, int isDirect>
-//struct DirectConverter 
-//{
-//    static void convert(const T1& p1, T2& p2) 
-//    {
-//        p2 = p1.toColor();
-//    }
-//};
-//
-//
-//template <typename T1, typename T2>
-//struct DirectConverter<T1, T2, 1> 
-//{
-//    static void convert(const T1& p1, T2& p2) 
-//    {
-//        p2 = p1;
-//    }
-//};
-//
-//
-//template <typename P1, typename P2>
-//struct Converter 
-//    : public DirectConverter<P1, P2, 
-//                             IsSame<typename P1::FormatType, 
-//                                    typename P2::FormatType>::value> 
-//{ };
-//
-//
-//template <typename P1, typename P2> 
-//void convert(const P1& p1, P2& p2)
-//{
-//    Converter<P1, P2>::convert(p1, p2);
-//}
-
 } // namespace
 
 } // namespace
