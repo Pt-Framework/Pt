@@ -149,7 +149,7 @@
         ],
         "chat.tools.terminal.autoApprove": {
             "Rename-Item": true,
-            ".\\build\\debug\\Pt-Gfx-test.exe": true
+            "ForEach-Object": true
         },
         "C_Cpp.files.exclude": {
             "build": true,
