@@ -135,7 +135,8 @@
             },
             "presentation": {
                 "reveal": "always", "focus": false, "panel": "shared"
-            }
+            },
+            "problemMatcher": ["$gcc", "$msCompile"]
         },
         {
             "label": "Clean All",
