@@ -74,6 +74,10 @@ class PixelIterator
         : _pixel(view, x, y)
         { }
 
+        explicit PixelIterator(const Pixel& pixel)
+        : _pixel(pixel)
+        { }
+
         PixelIterator(const PixelIterator& it)
         : _pixel(it._pixel)
         { }
@@ -151,6 +155,14 @@ class ConstPixelIterator
         ConstPixelIterator(const BasicView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _pixel(view, x, y)
+        { }
+
+        explicit ConstPixelIterator(const ConstPixel& pixel)
+        : _pixel(pixel)
+        { }
+
+        explicit ConstPixelIterator(const Pixel& pixel)
+        : _pixel(pixel)
         { }
 
         ConstPixelIterator(const ConstPixelIterator& it)

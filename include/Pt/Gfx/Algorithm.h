@@ -31,166 +31,131 @@
 #define PT_GFX_ALGORITHM_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Color.h>
 #include <Pt/TypeTraits.h>
+
+#include <algorithm>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
-struct SameFormat
-{};
-
-
-struct DifferentFormat
-{};
-
-
-struct FromImageFormat 
-{};
-
-
-struct ToImageFormat 
-{};
-
-
-template <typename Fmt1, typename Fmt2>
-struct MatchFormat
-{
-    typedef DifferentFormat Type;
-};
-
-
-template <typename Fmt>
-struct MatchFormat<Fmt, Fmt>
-{
-    typedef SameFormat Type;
-};
-
-
-template <typename Fmt2>
-struct MatchFormat<ImageFormat, Fmt2>
-{
-    typedef FromImageFormat Type;
-};
-
-
-template <typename Fmt1>
-struct MatchFormat<Fmt1, ImageFormat>
-{
-    typedef ToImageFormat Type;
-};
-
-
-template <>
-struct MatchFormat<ImageFormat, ImageFormat>
-{
-    typedef SameFormat Type;
-};
-
 ///////////////////////////////////////////////////////////////////////
-// copy single pixel
+// PixelConverter
 ///////////////////////////////////////////////////////////////////////
 
-template <typename P1, typename P2> 
-void copyPixelImpl(const P1& p1, P2& p2, FalseType)
+template <typename FromFmt, typename ToFmt>
+struct PixelConverter
 {
-    p2 = p1.toColor();
-}
-
-
-template <typename P1, typename P2> 
-void copyPixelImpl(const P1& p1, P2& p2, TrueType)
-{
-    p2.assign(p1);
-}
-
-
-template <typename P1, typename P2> 
-void copyPixel(const P1& p1, P2& p2)
-{
-    typedef typename P1::FormatType Fmt1;
-    typedef typename P2::FormatType Fmt2;
-
-    copyPixelImpl(p1, p2, IsSame<Fmt1, Fmt2>());
-}
-
-///////////////////////////////////////////////////////////////////////
-// copy lines
-///////////////////////////////////////////////////////////////////////
-
-template <typename P1, typename P2> 
-void copyLineImpl(const P1& p1, P2& p2, std::size_t length, SameFormat)
-{
-    p2.assign(p1, length);
-}
-
-
-template <typename P1, typename P2> 
-void copyLineImpl(const P1& p1, P2& p2, std::size_t length, DifferentFormat)
-{
-    typedef typename P2::ColorType ColorType;
-
-    const std::size_t bufsize = 64;
-    ColorType colors[bufsize];
-
-    P1 from(p1);
-    P2 to(p2);
-
-    while(length > 0)
+    template <typename P1, typename P2>
+    static void convert(const P1& from, P2& to)
     {
-        std::size_t n = std::min(length, bufsize);
-        
-        from.getColors(colors, n);
-        to.assign(colors, n);
-        
-        from.advance(n);
-        to.advance(n);
-
-        length -= n;
+        to = from.toColor();
     }
-}
 
-
-template <typename P1, typename P2> 
-void copyLineImpl(const P1& p1, P2& p2, std::size_t length, FromImageFormat)
-{
-    copyLineImpl(p1, p2, length, DifferentFormat());
-}
-
-
-template <typename P1, typename P2> 
-void copyLineImpl(const P1& p1, P2& p2, std::size_t length, ToImageFormat)
-{
-    copyLineImpl(p1, p2, length, DifferentFormat());
-}
-
-
-template <typename P1, typename P2> 
-void copyLine(const P1& p1, P2& p2, std::size_t length)
-{
-    typedef typename P1::FormatType Fmt1;
-    typedef typename P2::FormatType Fmt2;
-
-    copyLineImpl(p1, p2, length, typename MatchFormat<Fmt1, Fmt2>::Type());
-}
-
-///////////////////////////////////////////////////////////////////////
-// copy area
-///////////////////////////////////////////////////////////////////////
-
-template <typename P1, typename P2> 
-void copyArea(P1 from, P2 to, std::size_t width, std::size_t height)
-{
-    for(std::size_t y = 0; y < height; ++y)
+    template <typename P1, typename P2>
+    static void convert(const P1& from, P2& to, std::size_t length)
     {
-        copyLine(from, to, width);
-        from.advanceLines(1);
-        to.advanceLines(1);
+        typedef Argb32Color ColorType;
+
+        const std::size_t bufsize = 64;
+        ColorType colors[bufsize];
+
+        P1 f(from);
+        P2 t(to);
+
+        while(length > 0)
+        {
+            std::size_t n = std::min(length, bufsize);
+
+            f.getColors(colors, n);
+            t.assign(colors, n);
+
+            f.advance(n);
+            t.advance(n);
+
+            length -= n;
+        }
     }
+};
+
+///////////////////////////////////////////////////////////////////////
+// convert pixels
+///////////////////////////////////////////////////////////////////////
+
+template <typename P1, typename P2>
+void convertPixel(const P1& from, P2& to)
+{
+    typedef typename P1::FormatType FromFmt;
+    typedef typename P2::FormatType ToFmt;
+
+    PixelConverter<FromFmt, ToFmt>::convert(from, to);
 }
 
-} // namespace
 
-} // namespace
+template <typename P1, typename P2>
+void convertPixel(const P1& from, P2& to, std::size_t length)
+{
+    typedef typename P1::FormatType FromFmt;
+    typedef typename P2::FormatType ToFmt;
+
+    PixelConverter<FromFmt, ToFmt>::convert(from, to, length);
+}
+
+///////////////////////////////////////////////////////////////////////
+// copy pixels
+///////////////////////////////////////////////////////////////////////
+
+template <typename P1, typename P2>
+void copyPixelImpl(const P1& from, P2& to, TrueType)
+{
+    to.assign(from);
+}
+
+
+template <typename P1, typename P2>
+void copyPixelImpl(const P1& from, P2& to, FalseType)
+{
+    convertPixel(from, to);
+}
+
+
+template <typename P1, typename P2>
+void copyPixel(const P1& from, P2& to)
+{
+    typedef typename P1::FormatType FromFmt;
+    typedef typename P2::FormatType ToFmt;
+
+    copyPixelImpl(from, to, IsSame<FromFmt, ToFmt>());
+}
+
+
+template <typename P1, typename P2>
+void copyPixelImpl(const P1& from, P2& to, std::size_t length, TrueType)
+{
+    to.assign(from, length);
+}
+
+
+template <typename P1, typename P2>
+void copyPixelImpl(const P1& from, P2& to, std::size_t length, FalseType)
+{
+    convertPixel(from, to, length);
+}
+
+
+template <typename P1, typename P2>
+void copyPixel(const P1& from, P2& to, std::size_t length)
+{
+    typedef typename P1::FormatType FromFmt;
+    typedef typename P2::FormatType ToFmt;
+
+    copyPixelImpl(from, to, length, IsSame<FromFmt, ToFmt>());
+}
+
+} // namespace Gfx
+
+} // namespace Pt
 
 #endif

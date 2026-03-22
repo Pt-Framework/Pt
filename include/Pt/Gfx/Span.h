@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 
 #include <cstddef>
@@ -55,46 +56,22 @@ class Span
 
     public:
         Span(BasicView<Format>& view, 
-                  Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
-        : _view(&view)
-        , _x(x)
-        , _y(y)
-        , _p(view, x, y)
+             Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        : _p(view, x, y)
         , _length(length)
         { }
 
         Span(const Span& span)
-        : _view(span._view)
-        , _x(span._x)
-        , _y(span._y)
-        , _p(span._p)
+        : _p(span._p)
         , _length(span._length)
-        {}
+        { }
 
         Span& operator=(const Span& span)
         {
-            _view = span._view;
-            _x = span._x;
-            _y = span._y;
             _p.reset(span._p);
-            _length = span.length;
+            _length = span._length;
+            return *this;
         }
-
-        void reset(BasicView<Format>& view, 
-                   Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
-        {
-            _view = &view;
-            _x = x;
-            _y = y;
-            _p.reset(view, x, y);
-            _length = length;
-        }
-
-        Pt::ssize_t xpos() const
-        { return _x; }
-
-        Pt::ssize_t ypos() const
-        { return _y; }
 
         bool empty() const
         { return _length == 0; }
@@ -103,27 +80,16 @@ class Span
         { return _length; }
 
         void setLength(std::size_t length)
-        {
-            _length = length;
-        }
+        { _length = length; }
 
         void advance(std::size_t n)
-        {
-            _p.advance(n);
-            _x + n;
-        }
+        { _p.advance(n); }
 
         void skipPadding()
-        {
-            _p.skipPadding();
-            _x = 0;
-        }
+        { _p.skipPadding(); }
 
         void advanceLines(std::size_t n)
-        {
-            _p.advanceLines(n);
-            _y += n;
-        }
+        { _p.advanceLines(n); }
 
         Pixel& front()
         { return _p; }
@@ -132,23 +98,28 @@ class Span
         { return _p; }
 
         Iterator begin()
-        { return Iterator(*_view, _x, _y); }
+        { return Iterator(_p); }
 
         Iterator end()
-        { return Iterator(*_view, _x + _length, _y); }
+        {
+            Iterator it(_p);
+            it += _length;
+            return it;
+        }
 
         ConstIterator begin() const
-        { return ConstIterator(*_view, _x, _y); }
+        { return ConstIterator(_p); }
 
         ConstIterator end() const
-        { return ConstIterator(*_view, _x + _length, _y); }
+        {
+            ConstIterator it(_p);
+            it += _length;
+            return it;
+        }
 
     private:
-        BasicView<Format>* _view;
-        Pt::ssize_t        _x;
-        Pt::ssize_t        _y;
-        Pixel              _p;
-        std::size_t        _length;
+        Pixel       _p;
+        std::size_t _length;
 };
 
 
@@ -167,55 +138,33 @@ class ConstSpan
 
     public:
         ConstSpan(const BasicConstView<Format>& view, 
-                       Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
-        : _view(&view)
-        , _x(x)
-        , _y(y)
-        , _p(view, x, y)
+                  Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        : _p(view, x, y)
+        , _length(length)
+        { }
+
+        ConstSpan(const BasicView<Format>& view, 
+                  Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        : _p(view, x, y)
         , _length(length)
         { }
 
         ConstSpan(const ConstSpan& span)
-        : _view(span._view)
-        , _x(span._x)
-        , _y(span._y)
-        , _p(span._p)
+        : _p(span._p)
         , _length(span._length)
         { }
 
-        template <typename Fmt, typename Tr>
-        ConstSpan(const Span<Fmt, Tr>& span)
-        : _view(span._view)
-        , _x(span._x)
-        , _y(span._y)
-        , _p(span._p)
-        , _length(span._length)
+        ConstSpan(const Span<Format, Traits>& span)
+        : _p(span.front())
+        , _length(span.length())
         { }
 
         ConstSpan& operator=(const ConstSpan& span)
         {
-            _view = span._view;
-            _x = span._x;
-            _y = span._y;
             _p.reset(span._p);
-            _length = span.length();
+            _length = span._length;
+            return *this;
         }
-
-        void reset(BasicConstView<Format>& view, 
-                   Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
-        {
-            _view = &view;
-            _x = x;
-            _y = y;
-            _p.reset(view, x, y);
-            _length = length;
-        }
-
-        Pt::ssize_t xpos() const
-        { return _x; }
-
-        Pt::ssize_t ypos() const
-        { return _y; }
 
         bool empty() const
         { return _length == 0; }
@@ -224,27 +173,16 @@ class ConstSpan
         { return _length; }
 
         void setLength(std::size_t length)
-        {
-            _length = length;
-        }
+        { _length = length; }
 
         void advance(std::size_t n)
-        {
-            _p.advance(n);
-            _x + n;
-        }
+        { _p.advance(n); }
 
         void skipPadding()
-        {
-            _p.skipPadding();
-            _x = 0;
-        }
+        { _p.skipPadding(); }
 
         void advanceLines(std::size_t n)
-        {
-            _p.advanceLines(n);
-            _y += n;
-        }
+        { _p.advanceLines(n); }
 
         ConstPixel& front()
         { return _p; }
@@ -253,35 +191,29 @@ class ConstSpan
         { return _p; }
 
         ConstIterator begin() const
-        { return ConstIterator(*_view, _x, _y); }
+        { return ConstIterator(_p); }
 
         ConstIterator end() const
-        { return ConstIterator(*_view, _x + _length, _y); }
+        {
+            ConstIterator it(_p);
+            it += _length;
+            return it;
+        }
 
     private:
-        const BasicConstView<Format>* _view;
-        Pt::ssize_t        _x;
-        Pt::ssize_t        _y;
-        ConstPixel         _p;
-        std::size_t        _length;
+        ConstPixel  _p;
+        std::size_t _length;
 };
 
 
-template <typename SpanT, typename FormatT, typename TraitsT>
-void copySpan(const SpanT& from, PixelIterator<FormatT, TraitsT>& to)
+template <typename SpanT, typename P>
+void copySpan(const SpanT& from, P& to)
 {
-    copyLine(from.front(), *to, from.length());
+    copyPixel(from.front(), to, from.length());
 }
 
+} // namespace Gfx
 
-template <typename SpanT, typename FormatT, typename TraitsT>
-void copySpan(const SpanT& from, Span<FormatT, TraitsT>& to)
-{
-    copyLine(from.front(), to.front(), from.length());
-}
-
-} // namespace
-
-} // namespace
+} // namespace Pt
 
 #endif

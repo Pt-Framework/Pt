@@ -140,9 +140,24 @@ BasicView<typename T::Format, typename T::Traits> view(T& source)
     return BasicView<typename T::Format, typename T::Traits>(source); 
 }
 
-
+/** @brief Copies a view to another one.
+ */
 template <typename From, typename To>
-void copyView(const From& from, To to);
+void copyView(const From& from, To to)
+{
+    ConstSpan<typename From::Format, typename From::Traits>
+        fromSpan(from, 0, 0, from.width());
+
+    Span<typename To::Format, typename To::Traits>
+        toSpan(to, 0, 0, to.width());
+
+    for(Pt::ssize_t y = 0; y < from.height(); ++y)
+    {
+        copySpan(fromSpan, toSpan.front());
+        fromSpan.advanceLines(1);
+        toSpan.advanceLines(1);
+    }
+}
 
 } // namespace
 

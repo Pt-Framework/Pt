@@ -66,8 +66,7 @@ class LineIterator
 
     public:
         LineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
-        : _view(&view)
-        , _span(view, x, y, view.width())
+        : _span(view, x, y, view.width())
         { }
 
         reference operator*()
@@ -112,7 +111,6 @@ class LineIterator
         }
 
     private:
-        BasicView<Format>*   _view;
         Span<Format, Traits> _span;
 };
 
@@ -136,8 +134,7 @@ class ConstLineIterator
 
     public:
         ConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
-        : _view(&view)
-        , _span(view, x, y, view.width())
+        : _span(view, x, y, view.width())
         { }
 
         const reference operator*() const
@@ -176,8 +173,7 @@ class ConstLineIterator
         }
 
     private:
-        const BasicConstView<Format>* _view;
-        ConstSpan<Format, Traits>     _span;
+        ConstSpan<Format, Traits> _span;
 };
 
 

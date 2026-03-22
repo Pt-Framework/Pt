@@ -353,7 +353,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 for( ; lineIt != lineEnd; ++lineIt)
                 {
-                    copySpan(*lineIt, it);
+                    copySpan(*lineIt, *it);
                     it += lineIt->length();
                 }
 

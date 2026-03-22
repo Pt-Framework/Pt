@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/BasicImage.h>
+#include <Pt/Gfx/Span.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 
@@ -192,22 +193,6 @@ inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstImage<F,
 , _data( image.data() )
 , _format( &image.format() )
 {
-}
-
-///////////////////////////////////////////////////////////////////////
-// copyView
-///////////////////////////////////////////////////////////////////////
-
-template <typename From, typename To>
-void copyView(const From& from, To to)
-{
-    typedef typename From::Traits::ConstPixelType FromPixel;
-    typedef typename To::Traits::PixelType        ToPixel;
-
-    FromPixel fromPixel(from, 0, 0);
-    ToPixel   toPixel(to, 0, 0);
-
-    copyArea(fromPixel, toPixel, from.width(), from.height());
 }
 
 } // namespace
