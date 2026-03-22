@@ -1,5 +1,5 @@
 ---
-applyTo: "**/Jamfile"
+applyTo: "**/*.{h,cpp,Jamfile}"
 description: "Build system"
 ---
 
