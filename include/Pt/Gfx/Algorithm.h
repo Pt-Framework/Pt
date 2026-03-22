@@ -84,6 +84,8 @@ struct PixelConverter
 // convert pixels
 ///////////////////////////////////////////////////////////////////////
 
+/** @brief Converts a single pixel.
+ */
 template <typename P1, typename P2>
 void convertPixel(const P1& from, P2& to)
 {
@@ -93,7 +95,8 @@ void convertPixel(const P1& from, P2& to)
     PixelConverter<FromFmt, ToFmt>::convert(from, to);
 }
 
-
+/** @brief Converts a span of pixels.
+ */
 template <typename P1, typename P2>
 void convertPixel(const P1& from, P2& to, std::size_t length)
 {
@@ -120,7 +123,8 @@ void copyPixelImpl(const P1& from, P2& to, FalseType)
     convertPixel(from, to);
 }
 
-
+/** @brief Copies a single pixel.
+ */
 template <typename P1, typename P2>
 void copyPixel(const P1& from, P2& to)
 {
@@ -144,7 +148,8 @@ void copyPixelImpl(const P1& from, P2& to, std::size_t length, FalseType)
     convertPixel(from, to, length);
 }
 
-
+/** @brief Copies a span of pixels.
+ */
 template <typename P1, typename P2>
 void copyPixel(const P1& from, P2& to, std::size_t length)
 {

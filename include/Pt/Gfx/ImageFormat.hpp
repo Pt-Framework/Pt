@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageFormat.h>
 
 namespace Pt {
 
