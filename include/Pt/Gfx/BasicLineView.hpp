@@ -41,14 +41,16 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
-inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view)
+template <typename OtherFmt, typename OtherTr>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<OtherFmt, OtherTr>& view)
 : BasicView<FormatT, TraitsT>(view)
 { 
 }
 
 
 template <typename FormatT, typename TraitsT>
-inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<FormatT>& view,
+template <typename OtherFmt, typename OtherTr>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicView<OtherFmt, OtherTr>& view,
                                                       Int x, Int y, Int w, Int h)
 : BasicView<FormatT, TraitsT>(view, x, y, w, h)
 { 
@@ -76,16 +78,16 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImage<OtherFmt, Other
 ///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT>& view)
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT, OtherTraitsT>& view)
 : BasicConstView<FormatT, TraitsT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT>& view,
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<OtherFormatT, OtherTraitsT>& view,
                                                                 Int x, Int y, Int w, Int h)
 : BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
 {
@@ -93,16 +95,16 @@ inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicView<
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT>& view)
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT, OtherTraitsT>& view)
 : BasicConstView<FormatT, TraitsT>(view)
 {
 }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT>& view,
+template <typename OtherFormatT, typename OtherTraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
                                                                 Int x, Int y, Int w, Int h)
 : BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
 {

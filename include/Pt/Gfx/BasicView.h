@@ -140,7 +140,7 @@ BasicView<typename T::Format, typename T::Traits> view(T& source)
     return BasicView<typename T::Format, typename T::Traits>(source); 
 }
 
-/** @brief Copies a view to another one.
+/** @brief Copies the pixels of a view to another one.
  */
 template <typename From, typename To>
 void copyView(const From& from, To to)

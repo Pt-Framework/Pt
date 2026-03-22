@@ -205,7 +205,8 @@ class ConstSpan
         std::size_t _length;
 };
 
-
+/** @brief Copies the pixels of a span.
+ */
 template <typename SpanT, typename P>
 void copySpan(const SpanT& from, P& to)
 {

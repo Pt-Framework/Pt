@@ -195,9 +195,11 @@ class BasicLineView : public BasicView<FormatT, TraitsT>
         : BasicView<FormatT>(format)
         { }
 
-        explicit BasicLineView(BasicView<FormatT>& view);
+        template <typename OtherFmt, typename OtherTr>
+        explicit BasicLineView(BasicView<OtherFmt, OtherTr>& view);
 
-        BasicLineView(BasicView<FormatT>& view,
+        template <typename OtherFmt, typename OtherTr>
+        BasicLineView(BasicView<OtherFmt, OtherTr>& view,
                       Int x, Int y, Int w, Int h);
 
         template <typename OtherFmt, typename OtherTr>
@@ -245,18 +247,18 @@ class BasicConstLineView : public BasicConstView<FormatT, TraitsT>
         : BasicConstView<FormatT>(format)
         { }
 
-        template <typename OtherFormatT>
-        explicit BasicConstLineView(const BasicView<OtherFormatT>& view);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicConstLineView(const BasicView<OtherFormatT, OtherTraitsT>& view);
 
-        template <typename OtherFormatT>
-        BasicConstLineView(const BasicView<OtherFormatT>& view,
+        template <typename OtherFormatT, typename OtherTraitsT>
+        BasicConstLineView(const BasicView<OtherFormatT, OtherTraitsT>& view,
                            Int x, Int y, Int w, Int h);
 
-        template <typename OtherFormatT>
-        explicit BasicConstLineView(const BasicConstView<OtherFormatT>& view);
+        template <typename OtherFormatT, typename OtherTraitsT>
+        explicit BasicConstLineView(const BasicConstView<OtherFormatT, OtherTraitsT>& view);
 
-        template <typename OtherFormatT>
-        BasicConstLineView(const BasicConstView<OtherFormatT>& view,
+        template <typename OtherFormatT, typename OtherTraitsT>
+        BasicConstLineView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
                            Int x, Int y, Int w, Int h);
 
         template <typename OtherFormatT, typename OtherTraitsT>
