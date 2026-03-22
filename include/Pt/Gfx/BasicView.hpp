@@ -29,7 +29,7 @@
 #ifndef PT_GFX_BASIC_VIEW_HPP
 #define PT_GFX_BASIC_VIEW_HPP
 
-#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
@@ -199,7 +199,7 @@ inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstImage<F,
 ///////////////////////////////////////////////////////////////////////
 
 template <typename From, typename To>
-void copyView(const From& from, To& to)
+void copyView(const From& from, To to)
 {
     typedef typename From::Traits::ConstPixelType FromPixel;
     typedef typename To::Traits::PixelType        ToPixel;

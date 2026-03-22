@@ -142,7 +142,7 @@ BasicView<typename T::Format, typename T::Traits> view(T& source)
 
 
 template <typename From, typename To>
-void copyView(const From& from, To& to);
+void copyView(const From& from, To to);
 
 } // namespace
 
