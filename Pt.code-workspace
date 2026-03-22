@@ -145,7 +145,7 @@
         },
         "C_Cpp.default.cppStandard": "c++14",
         "C_Cpp.default.includePath": [
-            "${workspaceFolder}/../../include"
+            "${workspaceFolder:All Files}/include"
         ],
         "chat.tools.terminal.autoApprove": {
             "Rename-Item": true,
