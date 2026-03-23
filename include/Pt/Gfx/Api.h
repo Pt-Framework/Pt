@@ -92,12 +92,6 @@ template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstPixelView;
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicCursorView; 
-
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-class BasicConstCursorView;
-
-template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicLineView; 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
@@ -145,14 +139,6 @@ typedef BasicPixelView<ImageFormat, ColorImageTraits> ColorPixelView;
 
 typedef BasicConstPixelView<ImageFormat, ColorImageTraits> ConstColorPixelView;
 
-typedef BasicCursorView<ImageFormat> CursorView;
-
-typedef BasicConstCursorView<ImageFormat> ConstCursorView;
-
-typedef BasicCursorView<ImageFormat, ColorImageTraits> ColorCursorView;
-
-typedef BasicConstCursorView<ImageFormat, ColorImageTraits> ConstColorCursorView;
-
 typedef BasicLineView<ImageFormat> LineView;
 
 typedef BasicConstLineView<ImageFormat> ConstLineView;
@@ -196,14 +182,6 @@ typedef BasicPixelView<Argb32> Argb32PixelView;
 /** @brief ARGB-32 const pixel view.
 */
 typedef BasicConstPixelView<Argb32> Argb32ConstPixelView;
-
-/** @brief ARGB-32 cursor view.
-*/
-typedef BasicCursorView<Argb32> Argb32CursorView;
-
-/** @brief ARGB-32 const cursor view.
-*/
-typedef BasicConstCursorView<Argb32> Argb32ConstCursorView;
 
 /** @brief ARGB-32 line view.
 */
@@ -253,14 +231,6 @@ typedef BasicPixelView<Rgb16> Rgb16PixelView;
 */
 typedef BasicConstPixelView<Rgb16> Rgb16ConstPixelView;
 
-/** @brief RGB-16 cursor view.
-*/
-typedef BasicCursorView<Rgb16> Rgb16CursorView;
-
-/** @brief RGB-16 const cursor view.
-*/
-typedef BasicConstCursorView<Rgb16> Rgb16ConstCursorView;
-
 /** @brief RGB-16 line view.
 */
 typedef BasicLineView<Rgb16> Rgb16LineView;
@@ -309,14 +279,6 @@ typedef BasicPixelView<Rgb32> Rgb32PixelView;
 */
 typedef BasicConstPixelView<Rgb32> Rgb32ConstPixelView;
 
-/** @brief RGB-32 cursor view.
-*/
-typedef BasicCursorView<Rgb32> Rgb32CursorView;
-
-/** @brief RGB-32 const cursor view.
-*/
-typedef BasicConstCursorView<Rgb32> Rgb32ConstCursorView;
-
 /** @brief RGB-32 line view.
 */
 typedef BasicLineView<Rgb32> Rgb32LineView;
@@ -364,14 +326,6 @@ typedef BasicPixelView<Yuv12> Yuv12PixelView;
 /** @brief YUV-12 const pixel view.
 */
 typedef BasicConstPixelView<Yuv12> Yuv12ConstPixelView;
-
-/** @brief YUV-12 cursor view.
-*/
-typedef BasicCursorView<Yuv12> Yuv12CursorView;
-
-/** @brief YUV-12 const cursor view.
-*/
-typedef BasicConstCursorView<Yuv12> Yuv12ConstCursorView;
 
 /** @brief YUV-12 line view.
 */

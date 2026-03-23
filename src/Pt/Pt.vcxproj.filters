@@ -2973,12 +2973,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\BasicLineView.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicCursorView.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicCursorView.hpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Span.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>

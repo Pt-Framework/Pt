@@ -216,7 +216,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
     
     _penBuffer.reset(_image->format(), 64, 1);
 
-    Gfx::CursorView fillView(_penBuffer);
+    Gfx::PixelView fillView(_penBuffer);
     std::fill( fillView.begin(), fillView.end(), pen.color() );
 
     _penPixel.reset(_penBuffer, 0, 0);

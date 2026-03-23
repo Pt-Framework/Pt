@@ -55,8 +55,8 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Color",*this, &Argb32Test::Color);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
-            registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
-            registerMethod("BenchmarkB_Pixel", *this, &Argb32Test::BenchmarkPixel);
+            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::BenchmarkPixel);
+            registerMethod("BenchmarkB_SpanPixel", *this, &Argb32Test::BenchmarkSpanPixel);
             registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
             registerMethod("BenchmarkD_CopyView_Generic", *this, &Argb32Test::BenchmarkCopyView);
             registerMethod("BenchmarkE_CopyView_Argb32", *this, &Argb32Test::BenchmarkCopyViewArgb32);
@@ -178,7 +178,7 @@ class Argb32Test : public Pt::Unit::TestSuite
         static const std::size_t height = 10000;
         static const std::size_t runs = 2000;
 
-        void BenchmarkCursor()
+        void BenchmarkPixel()
         {
             using namespace Pt::Gfx;
            
@@ -190,12 +190,12 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Image from(width, height, format);
                 Image to(width, height, format);
 
-                ConstCursorView fromView(from);
-                ConstCursorView::Iterator it = fromView.begin();
-                ConstCursorView::Iterator end = fromView.end();
+                ConstPixelView fromView(from);
+                ConstPixelView::Iterator it = fromView.begin();
+                ConstPixelView::Iterator end = fromView.end();
 
-                CursorView toView(to);
-                CursorView::Iterator toIt = toView.begin();
+                PixelView toView(to);
+                PixelView::Iterator toIt = toView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
@@ -213,7 +213,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             std::clog << "GENERIC CURSOR pixel-wise: " << (width * height) / double(best) << std::endl;
         }
 
-        void BenchmarkPixel()
+        void BenchmarkSpanPixel()
         {
             using namespace Pt::Gfx;
            
