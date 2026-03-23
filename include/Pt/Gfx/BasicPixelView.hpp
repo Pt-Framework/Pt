@@ -30,120 +30,12 @@
 #define PT_GFX_BASIC_PIXEL_VIEW_HPP
 
 #include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-///////////////////////////////////////////////////////////////////////
-// BasicPixelView
-///////////////////////////////////////////////////////////////////////
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT, OtherTraitsT>& view)
-: BasicView<FormatT, TraitsT>(view)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicView<OtherFormatT, OtherTraitsT>& view,
-                                                        Int x, Int y, Int w, Int h)
-: BasicView<FormatT, TraitsT>(view, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicView<FormatT, TraitsT>(image)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImage<OtherFormatT, OtherTraitsT>& image, 
-                                                        Int x, Int y, Int w, Int h)
-: BasicView<FormatT, TraitsT>(image, x, y, w, h)
-{
-}
-
-///////////////////////////////////////////////////////////////////////
-// BasicConstPixelView
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT, OtherTraitsT>& view)
-: BasicConstView<FormatT, TraitsT>(view)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicView<OtherFormatT, OtherTraitsT>& view,
-                                                                  Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT, OtherTraitsT>& view)
-: BasicConstView<FormatT, TraitsT>(view)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
-                                                                  Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT, TraitsT>(image)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
-                                                                  Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT, TraitsT>(image)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
-                                                                  Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
-{
-}
+// All constructors are inline in BasicPixelView.h
 
 } // namespace
 

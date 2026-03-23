@@ -147,19 +147,12 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             // copy an image in unknown format...
             Image image(1, 1, ImageFormat::argb32());
-            ConstPixelView imageView(image);
-            ConstPixelView::Iterator from = imageView.begin();
 
             // ...to a concrete YUV-12 image
             Yuv12Image yuv12Image(yuv12, 1, 1);
-            PixelView yuv12View(yuv12Image);
-            PixelView::Iterator it = yuv12View.begin();
-            PixelView::Iterator end = yuv12View.end();
+            ImageView yuv12View(yuv12Image);
 
-            for( ; it != end; it += image.width(), from += image.width() )
-            {
-                it->assign( *from, image.width() );
-            }
+            copyView(image, yuv12View);
         }
 
         void ConvertYuv12ToGenericYuv12()
@@ -170,19 +163,12 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             // copy a concrete YUV-12 image...
             Yuv12Image image(1, 1);
-            ConstPixelView imageView(image);
-            ConstPixelView::Iterator from = imageView.begin();
+            ConstImageView imageView(image);
 
             // ...to an image in YUV-12 image
             Image yuv12Image(yuv12, 1, 1, Yuv12());
-            PixelView yuv12View(yuv12Image);
-            PixelView::Iterator it = yuv12View.begin();
-            PixelView::Iterator end = yuv12View.end();
 
-            for( ; it != end; it += image.width(), from += image.width() )
-            {
-                it->assign( *from, image.width() );
-            }
+            copyView(imageView, yuv12Image);
         }
 
         void ConvertGenericYuv12ToGenericYuv12()
@@ -193,19 +179,11 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             // copy an image in yuv12 format...
             Image image(1, 1, Yuv12());
-            ConstPixelView imageView(image);
-            ConstPixelView::Iterator from = imageView.begin();
 
             // ...to an image in YUV-12 image
             Image yuv12Image(yuv12, 1, 1, Yuv12());
-            PixelView yuv12View(yuv12Image);
-            PixelView::Iterator it = yuv12View.begin();
-            PixelView::Iterator end = yuv12View.end();
 
-            for( ; it != end; it += image.width(), from += image.width() )
-            {
-                it->assign( *from, image.width() );
-            }
+            copyView(image, yuv12Image);
         }
 
         void ConvertArgb32ToYuv12()
@@ -217,16 +195,11 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             // copy a concrete ARGB-32 image...
             Argb32Image image(argb32, 1, 1);
-            Argb32ConstPixelView imageView(image);
-            Argb32ConstPixelView::Iterator from = imageView.begin();
 
             // ...to a concrete YUV-12 image
             Yuv12Image yuv12Image(yuv12, 1, 1);
-            Yuv12PixelView yuv12View(yuv12Image);
-            Yuv12PixelView::Iterator it = yuv12View.begin();
-            Yuv12PixelView::Iterator end = yuv12View.end();
 
-            //copy(image, yuv12Image);
+            //copyView(image, yuv12Image);
         }
 
         void Benchmark()
@@ -239,10 +212,10 @@ class Yuv12Test : public Pt::Unit::TestSuite
             {
                 Yuv12 format;
                 Image image(1000, 1000, format);
-                PixelView imageView(image);
+                PixelView pixels = pixelView(image);
 
-                PixelView::Iterator it = imageView.begin();
-                PixelView::Iterator end = imageView.end();
+                PixelView::Iterator it = pixels.begin();
+                PixelView::Iterator end = pixels.end();
             
                 Pt::Gfx::Argb32Color color(255, 100, 100, 100);
             

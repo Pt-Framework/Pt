@@ -222,12 +222,9 @@ HBRUSH getGradientBrush(HDC dc, int width, int height,
 void toPreMulAlpha(const Pt::Gfx::Image& image, 
                    std::vector<Pt::uint8_t>& bitmapData)
 {
-    size_t _width = image.width();
-    size_t _height = image.height();
-
-    Pt::Gfx::ConstPixelView fromView(image);
-    Pt::Gfx::ConstPixelView::Iterator it = fromView.begin();
-    Pt::Gfx::ConstPixelView::Iterator end = fromView.end();
+    Pt::Gfx::ConstPixelView pixels = Pt::Gfx::pixelView(image);
+    Pt::Gfx::ConstPixelView::Iterator it = pixels.begin();
+    Pt::Gfx::ConstPixelView::Iterator end = pixels.end();
 
     for( ; it != end; ++it)
     {

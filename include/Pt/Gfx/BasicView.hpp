@@ -30,7 +30,6 @@
 #define PT_GFX_BASIC_VIEW_HPP
 
 #include <Pt/Gfx/BasicView.h>
-#include <Pt/Gfx/BasicImage.h>
 #include <Pt/Gfx/Span.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
@@ -69,29 +68,6 @@ inline BasicView<FormatT, TraitsT>::BasicView(BasicView<F, T>& view,
 : ViewBase( x, y, w, h, view.stride(), view.padding() )
 , _data( view.data() )
 , _format( &view.format() )
-{
-}
-
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicView<FormatT, TraitsT>::BasicView(BasicImage<F, T>& image)
-: ViewBase(image.width(), image.height(), 
-           image.stride(), image.padding())
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicView<FormatT, TraitsT>::BasicView(BasicImage<F, T>& image, 
-                                              Int x, Int y, Int w, Int h)
-: ViewBase( x, y, w, h, image.stride(), image.padding() )
-, _data( image.data() )
-, _format( &image.format() )
 {
 }
 
@@ -148,50 +124,6 @@ inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstView<F, 
 : ViewBase( x, y, w, h, view.stride(), view.padding() )
 , _data( view.data() )
 , _format( &view.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicImage<F, T>& image)
-: ViewBase(image.width(), image.height(), 
-           image.stride(), image.padding())
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicImage<F, T>& image, 
-                                                        Int x, Int y, Int w, Int h)
-: ViewBase( x, y, w, h, image.stride(), image.padding() )
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstImage<F, T>& image)
-: ViewBase(image.width(), image.height(), 
-           image.stride(), image.padding())
-, _data( image.data() )
-, _format( &image.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstImage<F, T>& image, 
-                                                        Int x, Int y, Int w, Int h)
-: ViewBase( x, y, w, h, image.stride(), image.padding() )
-, _data( image.data() )
-, _format( &image.format() )
 {
 }
 

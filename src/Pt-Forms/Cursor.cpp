@@ -84,29 +84,27 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::ColorF& alphaColor,
 
   reader.get();
 
-	Gfx::ColorPixelView imageView(image);
-
 	//Generate alpha channel
 	for( size_t y = 0;  y < image.height(); ++y )
 	{
-		  for( size_t x = 0;  x < image.width(); ++x )
-		  {
-          Gfx::ColorPixelView::Pixel pixel(imageView, x, y);
-          Gfx::ColorF color = pixel.toColor();
-				
-			    if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
-				    color.setAlpha(0);
-			    else
-				    color.setAlpha(65535);
+		for( size_t x = 0;  x < image.width(); ++x )
+		{
+			Gfx::ColorPixelView::Pixel pixel(image, x, y);
+			Gfx::ColorF color = pixel.toColor();
+			
+			if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
+				color.setAlpha(0);
+			else
+				color.setAlpha(65535);
 
-			    pixel = color;
-		  }
+			pixel = color;
+		}
 	}
 
-  Gfx::PixelView::Pixel pixel(imageView, cursor.xHotspot(), cursor.yHotspot());
+	Gfx::PixelView::Pixel pixel(image, cursor.xHotspot(), cursor.yHotspot());
 	pixel = Gfx::ColorF(0, 65535, 0);
-  
-  fromImage(image, cursor);
+
+	fromImage(image, cursor);
 }
 
 
@@ -238,13 +236,11 @@ void Cursor::fromImage(const Gfx::Image& image, Cursor& cursor)
 	cursor._height   = image.height();
 	cursor._width    = image.width();
 
-	Gfx::ConstColorPixelView view(image);
-
 	for( size_t y = 0; y < cursor._height; ++y )
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-      Gfx::ConstColorPixelView::ConstPixel pixel(view, x, y);
+      Gfx::ConstColorPixelView::ConstPixel pixel(image, x, y);
       Gfx::ColorF color = pixel.toColor();
 
 			if( color.alpha() == 0 )

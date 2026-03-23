@@ -259,7 +259,7 @@ class ConstCursorIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicCursorView : public BasicView<FormatT, TraitsT>
+class BasicCursorView
 {
     public:
         typedef FormatT Format;
@@ -269,58 +269,28 @@ class BasicCursorView : public BasicView<FormatT, TraitsT>
         typedef typename Traits::ConstPixelType ConstPixel;
 
         typedef CursorIterator<Format, Traits> Iterator;
-        typedef ConstCursorIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicCursorView(const Format& format = FormatT::get())
-        : BasicView<FormatT>(format)
+        explicit BasicCursorView(BasicView<FormatT, TraitsT>& view)
+        : _view(view)
         { }
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicCursorView(BasicView<OtherFormatT, OtherTraitsT>& view);
-
-        template <typename OtherFormatT, typename OtherTraitsT>
-        BasicCursorView(BasicView<OtherFormatT, OtherTraitsT>& view,
-                       Int x, Int y, Int w, Int h);
-
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicCursorView(BasicImage<OtherFormatT, OtherTraitsT>& image);
-
-        template <typename OtherFormatT, typename OtherTraitsT>
-        BasicCursorView(BasicImage<OtherFormatT, OtherTraitsT>& image,
-                       Int x, Int y, Int w, Int h);
-
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return Iterator(*this, x, y); }
+        { return Iterator(_view, x, y); }
 
         Iterator begin()
-        { return Iterator(*this, 0, 0); }
+        { return Iterator(_view, 0, 0); }
 
         Iterator end()
-        { return Iterator(*this, 0, this->height()); }
+        { return Iterator(_view, 0, _view.height()); }
 
-        ConstIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return ConstIterator(*this, x, y); }
-
-        ConstIterator begin() const
-        { return ConstIterator(*this, 0, 0); }
-
-        ConstIterator end() const
-        { return ConstIterator(*this, 0, this->height()); }
-
-        ConstIterator cpixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return ConstIterator(*this, x, y); }
-
-        ConstIterator cbegin() const
-        { return ConstIterator(*this, 0, 0); }
-
-        ConstIterator cend() const
-        { return ConstIterator(*this, 0, this->height()); }
+    private:
+        BasicView<FormatT, TraitsT> _view;
 };
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstCursorView : public BasicConstView<FormatT, TraitsT>
+class BasicConstCursorView
 {
     public:
         typedef FormatT Format;
@@ -330,48 +300,28 @@ class BasicConstCursorView : public BasicConstView<FormatT, TraitsT>
         typedef typename Traits::ConstPixelType ConstPixel;
 
         typedef ConstCursorIterator<Format, Traits> Iterator;
+        typedef ConstCursorIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicConstCursorView(const Format& format)
-        : BasicConstView<FormatT, TraitsT>(format)
+        explicit BasicConstCursorView(const BasicView<FormatT, TraitsT>& view)
+        : _view(view)
         { }
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicConstCursorView(const BasicView<OtherFormatT, OtherTraitsT>& view);
+        explicit BasicConstCursorView(const BasicConstView<FormatT, TraitsT>& view)
+        : _view(view)
+        { }
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        BasicConstCursorView(const BasicView<OtherFormatT, OtherTraitsT>& view,
-                            Int x, Int y, Int w, Int h);
+        Iterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
+        { return Iterator(_view, x, y); }
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicConstCursorView(const BasicConstView<OtherFormatT, OtherTraitsT>& view);
+        Iterator begin() const
+        { return Iterator(_view, 0, 0); }
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        BasicConstCursorView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
-                            Int x, Int y, Int w, Int h);
+        Iterator end() const
+        { return Iterator(_view, 0, _view.height()); }
 
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicConstCursorView(const BasicImage<OtherFormatT, OtherTraitsT>& image);
-
-        template <typename OtherFormatT, typename OtherTraitsT>
-        BasicConstCursorView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
-                            Int x, Int y, Int w, Int h);
-
-        template <typename OtherFormatT, typename OtherTraitsT>
-        explicit BasicConstCursorView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image);
-
-        template <typename OtherFormatT, typename OtherTraitsT>
-        BasicConstCursorView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
-                            Int x, Int y, Int w, Int h);
-
-        Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return Iterator(*this, x, y); }
-
-        Iterator begin()
-        { return Iterator(*this, 0, 0); }
-
-        Iterator end()
-        { return Iterator(*this, 0, this->height()); }
+    private:
+        const BasicConstView<FormatT, TraitsT> _view;
 };
 
 
@@ -383,8 +333,8 @@ BasicCursorView<typename T::Format, typename T::Traits> cursorView(T& source)
 
 
 template <typename T>
-BasicConstCursorView<typename T::Format, typename T::Traits> constCursorView(const T& source)
-{ 
+BasicConstCursorView<typename T::Format, typename T::Traits> cursorView(const T& source)
+{
     return BasicConstCursorView<typename T::Format, typename T::Traits>(source);
 }
 

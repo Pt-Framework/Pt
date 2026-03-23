@@ -54,12 +54,6 @@ class BasicView : public ViewBase
         template <typename F, typename T>
         BasicView(BasicView<F, T>& view, Int x, Int y, Int w, Int h);
 
-        template <typename F, typename T>
-        explicit BasicView(BasicImage<F, T>& image);
-
-        template <typename F, typename T>
-        BasicView(BasicImage<F, T>& image, Int x, Int y, Int w, Int h);
-
         virtual ~BasicView()
         { }
 
@@ -72,8 +66,15 @@ class BasicView : public ViewBase
         const Format& format() const
         { return *_format; }
 
+    protected:
+        void setData(Pt::uint8_t* data)
+        { _data = data; }
+
+        void setFormat(const Format& format)
+        { _format = &format; }
+
     private:
-        Pt::uint8_t*   _data;
+        Pt::uint8_t*   _data ;
         const Format*  _format;
 };
 
@@ -100,18 +101,6 @@ class BasicConstView : public ViewBase
         template <typename F, typename T>
         BasicConstView(const BasicConstView<F, T>& view, Int x, Int y, Int w, Int h);
 
-        template <typename F, typename T>
-        explicit BasicConstView(const BasicImage<F, T>& image);
-        
-        template <typename F, typename T>
-        BasicConstView(const BasicImage<F, T>& image, Int x, Int y, Int w, Int h);
-
-        template <typename F, typename T>
-        explicit BasicConstView(const BasicConstImage<F, T>& image);
-
-        template <typename F, typename T>
-        BasicConstView(const BasicConstImage<F, T>& image, Int x, Int y, Int w, Int h);
-
         virtual ~BasicConstView()
         { }
 
@@ -121,8 +110,15 @@ class BasicConstView : public ViewBase
         const Format& format() const
         { return *_format; }
 
+    protected:
+        void setData(const Pt::uint8_t* data)
+        { _data = data; }
+
+        void setFormat(const Format& format)
+        { _format = &format; }
+
     private:
-        const Pt::uint8_t*  _data;
+        const Pt::uint8_t*  _data ;
         const Format*       _format;
 };
 

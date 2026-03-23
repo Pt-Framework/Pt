@@ -333,33 +333,24 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
     //          << fromRect.width() << "x" << fromRect.height() << std::endl;
 
-    Gfx::PixelView toView(_image);
-    Gfx::PixelView::Iterator toIter = toView.pixel( toRect.x(), toRect.y() );
-
-    Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::PixelView::Iterator toIter(_image, toRect.x(), toRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter(image, fromRect.x(), fromRect.y() );
 
     switch( paint.compositionMode() )
     {
         default:
         case CompositionMode::SourceCopy:
-            Argb32::sourceCopy(toIter->base(), toView.stride(),
-                               fromIter->base(), fromView.stride(), 
+            Argb32::sourceCopy(toIter->base(), _image.stride(),
+                               fromIter->base(), image.stride(), 
                                fromRect.width(), fromRect.height());
 
-            //Argb32::sourceCopy(toView.base(), toRect.x(), toRect.y(),
-            //                   fromView, fromRect.x(), fromRect.y(), 
-            //                   fromRect.width(), fromRect.height());
             break;
 
         case CompositionMode::SourceOver:
-            Argb32::sourceOver(toIter->base(), toView.stride(),
-                               fromIter->base(), fromView.stride(), 
+            Argb32::sourceOver(toIter->base(), _image.stride(),
+                               fromIter->base(), image.stride(), 
                                fromRect.width(), fromRect.height());
 
-            //Argb32::sourceOver(toView.base(), toRect.x(), toRect.y(),
-            //                   fromView, fromRect.x(), fromRect.y(), 
-            //                   fromRect.width(), fromRect.height());
             break;
     }
 }

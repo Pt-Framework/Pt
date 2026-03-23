@@ -140,7 +140,6 @@ class BitmapCanvas : public Canvas
     private:
         BLContext*              _context;
         Image*                  _image;
-        PixelView               _imageView;        
         CompositionMode         _compositionMode;
         BasicRect<Pt::ssize_t>  _currentClip;
         bool                    _hasClip;

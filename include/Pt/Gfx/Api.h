@@ -135,6 +135,8 @@ typedef BasicView<ImageFormat> ImageView;
 
 typedef BasicConstView<ImageFormat> ConstImageView;
 
+typedef BasicView<ImageFormat, ColorImageTraits> ColorImageView; 
+
 typedef BasicPixelView<ImageFormat> PixelView;
 
 typedef BasicConstPixelView<ImageFormat> ConstPixelView;
@@ -183,9 +185,9 @@ typedef BasicConstImage<Argb32> Argb32ConstImage;
 */
 typedef BasicView<Argb32> Argb32View; 
 
-/** @brief ARGB-32 conmst view.
+/** @brief ARGB-32 const view.
 */
-typedef BasicView<Argb32> Argb32ConstView;
+typedef BasicConstView<Argb32> Argb32ConstView;
 
 /** @brief ARGB-32 pixel view.
 */

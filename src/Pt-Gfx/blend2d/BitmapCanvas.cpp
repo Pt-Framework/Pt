@@ -44,7 +44,6 @@ namespace Gfx {
 BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _image()
-, _imageView( ImageFormat::argb32() )
 , _hasClip(false)
 {
 }
@@ -59,7 +58,6 @@ void BitmapCanvas::init(BLContext& rasterContext, Image& image)
 {
     _context = &rasterContext;
     _image = &image;
-    _imageView = PixelView(*_image);
 }
 
 
@@ -85,8 +83,6 @@ void BitmapCanvas::onFinishPaint()
 
     if(_image)
         _image = 0;
-
-    _imageView = PixelView();
 }
 
 
@@ -666,32 +662,24 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    Gfx::PixelView::Iterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
-
-    Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::PixelView::Iterator toIter(*_image, toRect.x(), toRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter(image, fromRect.x(), fromRect.y() );
 
     switch(_compositionMode)
     {
         default:
         case CompositionMode::SourceCopy:
-            Argb32::sourceCopy(toIter->base(), _imageView.stride(),
-                               fromIter->base(), fromView.stride(), 
+            Argb32::sourceCopy(toIter->base(), _image->stride(),
+                               fromIter->base(), image.stride(), 
                                fromRect.width(), fromRect.height());
 
-            //Argb32::sourceCopy(toView.base(), toRect.x(), toRect.y(),
-            //                   fromView, fromRect.x(), fromRect.y(), 
-            //                   fromRect.width(), fromRect.height());
             break;
 
         case CompositionMode::SourceOver:
-            Argb32::sourceOver(toIter->base(), _imageView.stride(),
-                               fromIter->base(), fromView.stride(), 
+            Argb32::sourceOver(toIter->base(), _image->stride(),
+                               fromIter->base(), image.stride(), 
                                fromRect.width(), fromRect.height());
 
-            //Argb32::sourceOver(toView.base(), toRect.x(), toRect.y(),
-            //                   fromView, fromRect.x(), fromRect.y(), 
-            //                   fromRect.width(), fromRect.height());
             break;
     }
 }

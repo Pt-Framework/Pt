@@ -77,8 +77,8 @@ void BlockScale()
 
             Pt::System::Clock clock;
             clock.start();
-            Pt::Gfx::blockScale(imageView.begin(), imageView.width(), imageView.height(),
-                                imageView2.begin(), imageView2.width(), imageView2.height());
+            Pt::Gfx::blockScale(imageView.begin(), image.width(), image.height(),
+                                imageView2.begin(), image2.width(), image2.height());
 
             std::clog << "image scale: " << clock.stop().toUSecs() << std::endl;
         }

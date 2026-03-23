@@ -540,7 +540,7 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
 
     ColorF pixelColor = color;
     Argb32Image argbImage(image.data(), image.width(), image.height(), image.padding());
-    Argb32PixelView argbView(argbImage);
+    Argb32View argbView(argbImage);
     
     for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
     {

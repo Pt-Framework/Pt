@@ -274,19 +274,17 @@ class BitmapCanvas : public Canvas
 
     private:
         Image*       _image;
-        PixelView    _imageView;
         double       _lastScaleFactor;
 
         CompositionMode _compositionMode;
         
         Pen                         _pen;
         Image                       _penBuffer;
-        ConstPixelView              _penView;
         ConstPixelView::ConstPixel  _penPixel;
 
         Brush                       _brush;
         Image                       _brushBuffer;
-        ConstPixelView              _brushView;
+        ConstImageView              _brushView;
         ConstPixelView::ConstPixel  _brushPixel;
         bool                        _isGradient;
 

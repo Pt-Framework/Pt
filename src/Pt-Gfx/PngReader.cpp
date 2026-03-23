@@ -49,7 +49,6 @@ class PngReaderImpl
         , _pngInfo(0)
         , _bufferSize(0)
         , _image(0)
-        , _imageView( ImageFormat::argb32() )
         , _width(0)
         , _height(0)
         , _depth(0)
@@ -63,7 +62,6 @@ class PngReaderImpl
         , _pngInfo(0)
         , _bufferSize(0)
         , _image(&image)
-        , _imageView( ImageFormat::argb32() )
         , _width(0)
         , _height(0)
         , _depth(0)
@@ -82,7 +80,6 @@ class PngReaderImpl
         {
             _target = &is;
             _image = &image;
-            _imageView = PixelView(*_image);
         }
 
         void detach()
@@ -297,7 +294,6 @@ class PngReaderImpl
             if( _image->width() != _width || _image->height() != _height )
             {
                 _image->reset( Pt::Gfx::ImageFormat::argb32(), _width, _height );
-                _imageView = PixelView(*_image);
             }
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
@@ -305,7 +301,7 @@ class PngReaderImpl
             std::size_t n = 0;
             for( size_t x = 0; x < width; ++x)
             {
-                PixelView::Pixel pixel(_imageView, x, row);
+                PixelView::Pixel pixel(*_image, x, row);
 
                 if( bitdepth == 8 && channels == 3)
                 {
@@ -373,7 +369,6 @@ class PngReaderImpl
         char _buffer[2048];
         std::streamsize _bufferSize;
         Image*      _image;
-        PixelView   _imageView;
         std::size_t _width;
         std::size_t _height;
         std::size_t _depth;

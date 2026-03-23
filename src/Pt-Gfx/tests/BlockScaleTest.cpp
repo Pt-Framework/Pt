@@ -80,8 +80,8 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             Pt::Gfx::Image to( 20, 40, Pt::Gfx::Argb32() );
             Pt::Gfx::PixelView toView(to);
 
-            Pt::Gfx::blockScale(fromView.begin(), fromView.width(), fromView.height(), 
-                                toView.begin(), toView.width(), toView.height());
+            Pt::Gfx::blockScale(fromView.begin(), from.width(), from.height(), 
+                                toView.begin(), to.width(), to.height());
 
             PT_UNIT_ASSERT(0 == std::memcmp(to.data(), from.data(), 
                                             to.stride() * to.height()));

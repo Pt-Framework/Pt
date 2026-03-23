@@ -55,13 +55,13 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("Color",*this, &Argb32Test::Color);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
-            //registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
-            //registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
-            //registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
-            //registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
-            //registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
-            //registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
-            //registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
+            registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
+            registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
+            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
+            registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
+            registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
+            registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
         }
 
         void Pixel()
@@ -71,9 +71,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
             Argb32Image image(data, 2, 2);
-            Argb32PixelView imageView(image);
-            
-            Argb32PixelView::Iterator pixel = imageView.pixel(1, 1);
+            Argb32PixelView::Iterator pixel(image, 1, 1);
             
             Pt::uint8_t a = pixel->alpha();
             Pt::uint8_t r = pixel->red();

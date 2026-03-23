@@ -94,6 +94,18 @@ class ViewBase
         Pt::ssize_t padding() const
         { return _padding; }
 
+    protected:
+        void setDimensions(Pt::ssize_t w, Pt::ssize_t h,
+                           Pt::ssize_t s, Pt::ssize_t p)
+        {
+            _xpos = 0;
+            _ypos = 0;
+            _width = w;
+            _height = h;
+            _stride = s;
+            _padding = p;
+        }
+
     private:      
         Pt::ssize_t   _xpos;
         Pt::ssize_t   _ypos;

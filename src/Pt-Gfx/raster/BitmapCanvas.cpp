@@ -142,11 +142,9 @@ namespace Gfx {
 BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _image(0)
-, _imageView( ImageFormat::argb32() )
 , _lastScaleFactor(1.0)
-, _penView(_penBuffer)
-, _penPixel(_penView, 0, 0)
-, _brushView(_brushBuffer)
+, _penPixel(_penBuffer, 0, 0)
+, _brushView( _brushBuffer.format() )
 , _brushPixel(_brushView, 0, 0)
 , _isGradient(false)
 , _hasClip(false)
@@ -163,7 +161,6 @@ BitmapCanvas::~BitmapCanvas()
 void BitmapCanvas::init(Image& image)
 {
     _image = &image;
-    _imageView = PixelView(*_image);
 }
 
 
@@ -183,8 +180,6 @@ void BitmapCanvas::onFinishPaint()
 
     if(_image)
         _image = 0;
-
-    _imageView = PixelView();
 }
 
 
@@ -224,8 +219,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
     Gfx::CursorView fillView(_penBuffer);
     std::fill( fillView.begin(), fillView.end(), pen.color() );
 
-    _penView = ConstPixelView(_penBuffer);
-    _penPixel.reset(_penView, 0, 0);    
+    _penPixel.reset(_penBuffer, 0, 0);
 }
 
 
@@ -247,7 +241,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
         case Brush::Solid:
         {
             _brushBuffer.reset( _image->format(), 64, 1);
-            _brushView = ConstPixelView(_brushBuffer);
+            _brushView = constView(_brushBuffer);
 
             Gfx::PixelView fillView(_brushBuffer);
             std::fill(fillView.begin(), fillView.end(), brush.color());
@@ -261,17 +255,17 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
                                     brush.texture().width(), brush.texture().height() );
 
                 copyView(constView(brush.texture()), view(_brushBuffer));
-                _brushView = ConstPixelView(_brushBuffer);
+                _brushView = constView(_brushBuffer);
             }
             else
             {
-                _brushView = ConstPixelView( _brush.texture() );
+                _brushView = constView( _brush.texture() );
             }
             break;
 
         case Brush::Gradient:
             _isGradient = true;
-            _brushView = ConstPixelView(_brushBuffer);
+            _brushView = constView(_brushBuffer);
             break;
     }
 
@@ -687,7 +681,7 @@ void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentCli
         int n = std::min(length, bufferWidth);
         if( n )
         {
-            PixelView::Pixel destPixel( _imageView, xpos, ypos);
+            PixelView::Pixel destPixel( *_image, xpos, ypos);
 
             switch(_compositionMode) 
             {
@@ -924,7 +918,7 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
 
         if( n )
         {
-            PixelView::Pixel destPixel(_imageView, xpos, ypos);
+            PixelView::Pixel destPixel(*_image, xpos, ypos);
 
             switch(_compositionMode) 
             {
@@ -962,7 +956,7 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
     if( ! _image )
         return;
 
-    ConstPixelView& texture = _brushView;
+    ConstImageView& texture = _brushView;
     int xpos = pos.x();
     int ypos = pos.y();
     int originx =  origin.x();
@@ -983,7 +977,7 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
         if(fillLength)
         {
             PixelView::ConstPixel sourcePixel(texture,  textureXPos, textureYPos);
-            PixelView::Pixel destPixel(_imageView, xpos, ypos);
+            PixelView::Pixel destPixel(*_image, xpos, ypos);
 
             switch(_compositionMode)
             {
@@ -4168,32 +4162,24 @@ void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& ima
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    Gfx::PixelView::Iterator toIter = _imageView.pixel( toRect.x(), toRect.y() );
-
-    Gfx::ConstPixelView fromView(image);
-    Gfx::ConstPixelView::Iterator fromIter = fromView.pixel( fromRect.x(), fromRect.y() );
+    Gfx::PixelView::Iterator toIter(*_image, toRect.x(), toRect.y() );
+    Gfx::ConstPixelView::Iterator fromIter(image, fromRect.x(), fromRect.y() );
 
     switch(_compositionMode)
     {
         default:
         case CompositionMode::SourceCopy:
-            Argb32::sourceCopy(toIter->base(), _imageView.stride(),
-                               fromIter->base(), fromView.stride(), 
+            Argb32::sourceCopy(toIter->base(), _image->stride(),
+                               fromIter->base(), image.stride(), 
                                fromRect.width(), fromRect.height());
 
-            //Argb32::sourceCopy(toView.base(), toRect.x(), toRect.y(),
-            //                   fromView, fromRect.x(), fromRect.y(), 
-            //                   fromRect.width(), fromRect.height());
             break;
 
         case CompositionMode::SourceOver:
-            Argb32::sourceOver(toIter->base(), _imageView.stride(),
-                               fromIter->base(), fromView.stride(), 
+            Argb32::sourceOver(toIter->base(), _image->stride(),
+                               fromIter->base(), image.stride(), 
                                fromRect.width(), fromRect.height());
 
-            //Argb32::sourceOver(toView.base(), toRect.x(), toRect.y(),
-            //                   fromView, fromRect.x(), fromRect.y(), 
-            //                   fromRect.width(), fromRect.height());
             break;
     }
 }

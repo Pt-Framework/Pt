@@ -30,120 +30,12 @@
 #define PT_GFX_BASIC_CURESOR_VIEW_HPP
 
 #include <Pt/Gfx/BasicCursorView.h>
-#include <Pt/Gfx/BasicImage.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-///////////////////////////////////////////////////////////////////////
-// BasicCursorView
-///////////////////////////////////////////////////////////////////////
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicCursorView<FormatT, TraitsT>::BasicCursorView(BasicView<OtherFormatT, OtherTraitsT>& view)
-: BasicView<FormatT, TraitsT>(view)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicCursorView<FormatT, TraitsT>::BasicCursorView(BasicView<OtherFormatT, OtherTraitsT>& view,
-                                                          Int x, Int y, Int w, Int h)
-: BasicView<FormatT, TraitsT>(view, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicCursorView<FormatT, TraitsT>::BasicCursorView(BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicView<FormatT, TraitsT>(image)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicCursorView<FormatT, TraitsT>::BasicCursorView(BasicImage<OtherFormatT, OtherTraitsT>& image, 
-                                                          Int x, Int y, Int w, Int h)
-: BasicView<FormatT, TraitsT>(image, x, y, w, h)
-{
-}
-
-///////////////////////////////////////////////////////////////////////
-// BasicConstCursorView
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicView<OtherFormatT, OtherTraitsT>& view)
-: BasicConstView<FormatT, TraitsT>(view)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicView<OtherFormatT, OtherTraitsT>& view,
-                                                                    Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicConstView<OtherFormatT, OtherTraitsT>& view)
-: BasicConstView<FormatT, TraitsT>(view)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicConstView<OtherFormatT, OtherTraitsT>& view,
-                                                                    Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(view, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT, TraitsT>(image)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicImage<OtherFormatT, OtherTraitsT>& image,
-                                                                    Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image)
-: BasicConstView<FormatT, TraitsT>(image)
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename OtherFormatT, typename OtherTraitsT>
-inline BasicConstCursorView<FormatT, TraitsT>::BasicConstCursorView(const BasicConstImage<OtherFormatT, OtherTraitsT>& image,
-                                                                    Int x, Int y, Int w, Int h)
-: BasicConstView<FormatT, TraitsT>(image, x, y, w, h)
-{
-}
+// All constructors are inline in BasicCursorView.h
 
 } // namespace
 
