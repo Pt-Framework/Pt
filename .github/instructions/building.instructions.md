@@ -19,28 +19,6 @@ description: "Build system"
 - ALWAYS perform a full global build to verify that dependent modules are not broken. 
 - NEVER only build the local module or test target.
 
-## Project Layout
-
-- Public headers live in `include/Pt/<Module>/`
-- `<Module>` matches the module namespace, e.g.
-  - `include/Pt/` for `Pt`
-  - `include/Pt/System/` for `Pt::System`
-  - `include/Pt/Net/` for `Pt::Net`
-
-- Implementation files live in `src/<BaseName>/`
-- Each module has its `Jamfile` in `src/<BaseName>/`
-- `<BaseName>` is the library base name, e.g.
-  - Core Module: `src/Pt/` for `Pt.dll` / `libPt.so`
-  - System Module: `src/Pt-System/` for `Pt-System.dll` / `libPt-System.so`
-
-- Test sources live in `src/<BaseName>/tests`
-- Test have its `Jamfile` in `src/<BaseName>/tests/Jamfile`
-
-- Build output (binaries, libs) goes to `build/<CONFIG>/`
-- Object files go to `tmp/<CONFIG>/<BaseName>/`
-- `<CONFIG>` is the value of `-sCONFIG` passed to `jam.bat configure`
-- Test executables are located at `build/<CONFIG>/<test-executable-name>`.
-
 ## 1. Configuring the Build
 
 - Configure debug build: `jam.bat configure -sCONFIG=debug --debug`
@@ -78,7 +56,7 @@ description: "Build system"
 - Used in `src/<BaseName>/Jamfile` for normal executables.
 
 - The executable's base name is first argument for the the `Main` rule.
-- For windows the suffix `.exe` is added to the executable base name.
+- On Windows, the binary produced by the build automatically gets the `.exe` suffix.
 
 - Add the `.cpp` files to the `Main` source list after the `:`:
 
