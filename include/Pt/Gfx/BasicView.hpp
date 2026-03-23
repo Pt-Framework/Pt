@@ -65,7 +65,7 @@ template <typename FormatT, typename TraitsT>
 template <typename F, typename T>
 inline BasicView<FormatT, TraitsT>::BasicView(BasicView<F, T>& view, 
                                               Int x, Int y, Int w, Int h)
-: ViewBase( x, y, w, h, view.stride(), view.padding() )
+: ViewBase( view.xpos() + x, view.ypos() + y, w, h, view.stride(), view.padding() )
 , _data( view.data() )
 , _format( &view.format() )
 {
@@ -99,7 +99,7 @@ template <typename FormatT, typename TraitsT>
 template <typename F, typename T>
 inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicView<F, T>& view,
                                                         Int x, Int y, Int w, Int h)
-: ViewBase( x, y, w, h, view.stride(), view.padding() )
+: ViewBase( view.xpos() + x, view.ypos() + y, w, h, view.stride(), view.padding() )
 , _data( view.data() )
 , _format( &view.format() )
 {
@@ -121,7 +121,7 @@ template <typename FormatT, typename TraitsT>
 template <typename F, typename T>
 inline BasicConstView<FormatT, TraitsT>::BasicConstView(const BasicConstView<F, T>& view,
                                                         Int x, Int y, Int w, Int h)
-: ViewBase( x, y, w, h, view.stride(), view.padding() )
+: ViewBase( view.xpos() + x, view.ypos() + y, w, h, view.stride(), view.padding() )
 , _data( view.data() )
 , _format( &view.format() )
 {
