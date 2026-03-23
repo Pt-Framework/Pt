@@ -17,13 +17,17 @@ relevant to your task. You MUST read each relevant instruction file completely
 before you perform the task. Do NOT skip reading these files, even if you
 think you have all relevant information.
 
+- **Coding**: Coding instructions and code organization.
+  You MUST read this when writing or reviewing any code.
+  -> `.github/instructions/coding.instructions.md`
+
+- **Coding Style**: Coding style and conventions for source files.
+  You MUST read this when writing or reviewing any code.
+  -> `.github/instructions/coding-style.instructions.md`
+
 - **Building**: Building the Pt project with jam.
   You MUST read this when configuring, building, or cleaning the project.
   -> `.github/instructions/building.instructions.md`
-
-- **Coding Style**: Coding style and conventions for C++ files in the Pt project.
-  You MUST read this when writing or reviewing C++ code.
-  -> `.github/instructions/coding-style.instructions.md`
 
 - **Unit Testing**: Writing and structuring unit tests with the Pt::Unit framework.
   You MUST read this when writing tests, adding test methods, or debugging test failures.

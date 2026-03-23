@@ -1,13 +1,13 @@
 ---
 applyTo: "**/*.{h,cpp}"
-description: "Coding style and conventions for C++ files in the Pt project"
+description: "Coding style and conventions."
 ---
 
 # Coding Style
 
 ## Comments
 
-- Comments in english
+- All comments, identifiers, log messages and exception messages must be written in english
 - Keep comments short and precise
 
 ## Indentation
@@ -15,11 +15,7 @@ description: "Coding style and conventions for C++ files in the Pt project"
 - Use 4 spaces for indentation, no tabs
 - Keep existing indentation style when modifying existing code
 
-## Language Features
+## Formatting
 
-- Use C++14 features where appropriate
-
-## Namespaces
-
-- All production code lives in namespace `Pt` with a nested module namespace, e.g. `Pt::Gfx`
-- Namespace closing braces are commented: `} // namespace Gfx`
+- Keep existing formatting style when modifying existing code
+- Namespace closing braces are commented: `} // namespace`
