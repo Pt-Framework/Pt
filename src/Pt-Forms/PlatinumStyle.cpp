@@ -211,10 +211,10 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
         Gfx::ColorF hightlightColor = button.accentColor();
 
         Gfx::Image highlightIcon = icon;
-        Gfx::ColorImageView colors(highlightIcon);
-        Gfx::ColorPixelView iconView(colors);
+        Gfx::ImageViewF iconView(highlightIcon);
+        Gfx::PixelViewF pixelView(iconView);
 
-        for(Gfx::ColorPixelView::Iterator it = iconView.begin(); it != iconView.end(); ++it)
+        for(Gfx::PixelViewF::Iterator it = pixelView.begin(); it != pixelView.end(); ++it)
         {
             Gfx::ColorF color = it->toColor();
 

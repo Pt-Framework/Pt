@@ -51,7 +51,7 @@ namespace Gfx {
 class ImageFormat
 { 
     friend struct ImageTraits<ImageFormat>;
-    friend struct ColorImageTraits;
+    friend struct ImageTraitsF;
 
     public:
         explicit ImageFormat(size_t pixelStride)
@@ -152,7 +152,7 @@ struct ImageTraits<ImageFormat>
 };
 
 
-struct ColorImageTraits
+struct ImageTraitsF
 {
     typedef ColorF ColorType;
     typedef Pixel<ColorF> PixelType;

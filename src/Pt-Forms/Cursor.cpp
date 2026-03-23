@@ -89,7 +89,7 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::ColorF& alphaColor,
 	{
 		for( size_t x = 0;  x < image.width(); ++x )
 		{
-			Gfx::ColorPixelView::Pixel pixel(image, x, y);
+			Gfx::PixelViewF::Pixel pixel(image, x, y);
 			Gfx::ColorF color = pixel.toColor();
 			
 			if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
@@ -240,7 +240,7 @@ void Cursor::fromImage(const Gfx::Image& image, Cursor& cursor)
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-      Gfx::ConstColorPixelView::ConstPixel pixel(image, x, y);
+      Gfx::ConstPixelViewF::ConstPixel pixel(image, x, y);
       Gfx::ColorF color = pixel.toColor();
 
 			if( color.alpha() == 0 )

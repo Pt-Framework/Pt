@@ -115,41 +115,49 @@ class Pixel;
 template <typename ColorT>
 class ConstPixel;
 
-struct ColorImageTraits;
 
 class Image;
 
 class ConstImage;
 
-typedef BasicImage<ImageFormat, ColorImageTraits> ColorImage;
-
-typedef BasicConstImage<ImageFormat, ColorImageTraits> ConstColorImage;
-
 typedef BasicView<ImageFormat> ImageView; 
 
 typedef BasicConstView<ImageFormat> ConstImageView;
-
-typedef BasicView<ImageFormat, ColorImageTraits> ColorImageView; 
 
 typedef BasicPixelView<ImageFormat> PixelView;
 
 typedef BasicConstPixelView<ImageFormat> ConstPixelView;
 
-typedef BasicPixelView<ImageFormat, ColorImageTraits> ColorPixelView;
-
-typedef BasicConstPixelView<ImageFormat, ColorImageTraits> ConstColorPixelView;
-
 typedef BasicLineView<ImageFormat> LineView;
 
 typedef BasicConstLineView<ImageFormat> ConstLineView;
 
-typedef BasicLineView<ImageFormat, ColorImageTraits> ColorLineView;
-
-typedef BasicConstLineView<ImageFormat, ColorImageTraits> ConstColorLineView;
-
 typedef Span<ImageFormat> ImageSpan;
 
 typedef ConstSpan<ImageFormat> ConstImageSpan;
+
+
+struct ImageTraitsF;
+
+typedef BasicImage<ImageFormat, ImageTraitsF> ImageF;
+
+typedef BasicConstImage<ImageFormat, ImageTraitsF> ConstImageF;
+
+typedef BasicView<ImageFormat, ImageTraitsF> ImageViewF; 
+
+typedef BasicConstView<ImageFormat, ImageTraitsF> ConstImageViewF; 
+
+typedef BasicPixelView<ImageFormat, ImageTraitsF> PixelViewF;
+
+typedef BasicConstPixelView<ImageFormat, ImageTraitsF> ConstPixelViewF;
+
+typedef BasicLineView<ImageFormat, ImageTraitsF> LineViewF;
+
+typedef BasicConstLineView<ImageFormat, ImageTraitsF> ConstLineViewF;
+
+typedef Span<ImageFormat, ImageTraitsF> ImageSpanF;
+
+typedef ConstSpan<ImageFormat, ImageTraitsF> ConstImageSpanF;
 
 //
 // ARGB-32
