@@ -30,16 +30,170 @@
 #define PT_GFX_BASIC_SPAN_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/BasicView.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 
+#include <iterator>
 #include <cstddef>
 #include <cassert>
 
 namespace Pt {
 
 namespace Gfx {
+
+template <typename FormatT, typename TraitsT>
+class SpanIterator;
+
+template <typename FormatT, typename TraitsT>
+class ConstSpanIterator;
+
+
+template <typename FormatT, typename TraitsT>
+class SpanIterator
+{
+    template <typename F, typename T>
+    friend class ConstSpanIterator;
+
+    public:
+        typedef FormatT Format;
+        typedef TraitsT Traits;
+        typedef typename Traits::PixelType Pixel;
+        typedef typename Traits::ConstPixelType ConstPixel;
+
+        typedef ConstSpanIterator<Format, Traits> ConstIterator;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = Pixel;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = Pixel*;
+        using reference         = Pixel&;
+
+    public:
+        explicit SpanIterator(const Pixel& pixel)
+        : _pixel(pixel)
+        { }
+
+        SpanIterator(const SpanIterator& it)
+        : _pixel(it._pixel)
+        { }
+
+        SpanIterator& operator=(const SpanIterator& it)
+        {
+            _pixel.reset(it._pixel);
+            return *this;
+        }
+
+        bool operator!=(const SpanIterator& it) const
+        { return ! _pixel.equals(it._pixel); }
+
+        bool operator!=(const ConstIterator& it) const
+        { return ! _pixel.equals(it._pixel); }
+
+        bool operator==(const SpanIterator& it) const
+        { return _pixel.equals(it._pixel); }
+
+        bool operator==(const ConstIterator& it) const
+        { return _pixel.equals(it._pixel); }
+
+        Pixel& operator*()
+        { return _pixel; }
+
+        Pixel* operator->()
+        { return &_pixel; }
+
+        SpanIterator& operator++()
+        {
+            _pixel.advance();
+            return *this;
+        }
+
+        SpanIterator& operator+=(Pt::ssize_t n)
+        {
+            _pixel.advance(n);
+            return *this;
+        }
+
+    private:
+        Pixel _pixel;
+};
+
+
+template <typename FormatT, typename TraitsT>
+class ConstSpanIterator
+{
+    template <typename F, typename T>
+    friend class SpanIterator;
+
+    public:
+        typedef FormatT Format;
+        typedef TraitsT Traits;
+        typedef typename Traits::PixelType Pixel;
+        typedef typename Traits::ConstPixelType ConstPixel;
+
+        typedef SpanIterator<Format, Traits> Iterator;
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = ConstPixel;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = ConstPixel*;
+        using reference         = ConstPixel&;
+
+    public:
+        explicit ConstSpanIterator(const ConstPixel& pixel)
+        : _pixel(pixel)
+        { }
+
+        explicit ConstSpanIterator(const Pixel& pixel)
+        : _pixel(pixel)
+        { }
+
+        ConstSpanIterator(const ConstSpanIterator& it)
+        : _pixel(it._pixel)
+        { }
+
+        ConstSpanIterator& operator=(const ConstSpanIterator& it)
+        {
+            _pixel.reset(it._pixel);
+            return *this;
+        }
+
+        bool operator!=(const ConstSpanIterator& it) const
+        { return ! _pixel.equals(it._pixel); }
+
+        bool operator!=(const Iterator& it) const
+        { return ! _pixel.equals(it._pixel); }
+
+        bool operator==(const ConstSpanIterator& it) const
+        { return _pixel.equals(it._pixel); }
+
+        bool operator==(const Iterator& it) const
+        { return _pixel.equals(it._pixel); }
+
+        const ConstPixel& operator*() const
+        { return _pixel; }
+
+        const ConstPixel* operator->() const
+        { return &_pixel; }
+
+        ConstSpanIterator& operator++()
+        {
+            _pixel.advance();
+            return *this;
+        }
+
+        ConstSpanIterator& operator+=(Pt::ssize_t n)
+        {
+            _pixel.advance(n);
+            return *this;
+        }
+
+    private:
+        ConstPixel _pixel;
+};
+
 
 template <typename FormatT, typename TraitsT>
 class Span
@@ -51,8 +205,8 @@ class Span
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
-        typedef PixelIterator<Format, Traits> Iterator;
-        typedef ConstPixelIterator<Format, Traits> ConstIterator;
+        typedef SpanIterator<Format, Traits> Iterator;
+        typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
         Span(BasicView<Format>& view, 
@@ -133,8 +287,8 @@ class ConstSpan
         typedef typename TraitsT::PixelType Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
-        typedef ConstPixelIterator<Format, Traits> Iterator;
-        typedef ConstPixelIterator<Format, Traits> ConstIterator;
+        typedef ConstSpanIterator<Format, Traits> Iterator;
+        typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
         ConstSpan(const BasicConstView<Format>& view, 
