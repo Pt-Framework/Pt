@@ -240,7 +240,7 @@ class BasicConstLineView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        const BasicConstView<FormatT, TraitsT>& _view;
+        const BasicConstView<FormatT, TraitsT> _view;
 };
 
 

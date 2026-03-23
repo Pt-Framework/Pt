@@ -139,7 +139,7 @@ BasicView<typename T::Format, typename T::Traits> view(T& source)
 /** @brief Copies the pixels of a view to another one.
  */
 template <typename From, typename To>
-void copyView(const From& from, To to)
+void copyView(const From& from, To& to)
 {
     ConstSpan<typename From::Format, typename From::Traits>
         fromSpan(from, 0, 0, from.width());

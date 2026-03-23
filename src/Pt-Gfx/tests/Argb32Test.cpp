@@ -56,12 +56,10 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
             registerMethod("BenchmarkA_Cursor", *this, &Argb32Test::BenchmarkCursor);
-            registerMethod("BenchmarkA_Generic", *this, &Argb32Test::Benchmark);
-            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            registerMethod("BenchmarkB_Pixel", *this, &Argb32Test::BenchmarkPixel);
             registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
-            registerMethod("BenchmarkD_CopyColors_Direct", *this, &Argb32Test::BenchmarkCopyColorsRaw);
-            registerMethod("BenchmarkE_CopyPixels", *this, &Argb32Test::BenchmarkCopyPixels);
-            registerMethod("BenchmarkF_CopyPixels_Direct", *this, &Argb32Test::BenchmarkCopyPixelsRaw);
+            registerMethod("BenchmarkD_CopyView_Generic", *this, &Argb32Test::BenchmarkCopyView);
+            registerMethod("BenchmarkE_CopyView_Argb32", *this, &Argb32Test::BenchmarkCopyViewArgb32);
         }
 
         void Pixel()
@@ -178,6 +176,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
         static const std::size_t width = 64;
         static const std::size_t height = 10000;
+        static const std::size_t runs = 2000;
 
         void BenchmarkCursor()
         {
@@ -188,21 +187,22 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 100; ++n)
             {
                 Argb32 format;
-                Image image(width, height, format);
-                
-                CursorView cursorView(image);
-                CursorView::Iterator it = cursorView.begin();
-                CursorView::Iterator end = cursorView.end();
+                Image from(width, height, format);
+                Image to(width, height, format);
 
-                CursorView ccursorView(image);
-                CursorView::Iterator pfrom = ccursorView.begin();
+                ConstCursorView fromView(from);
+                ConstCursorView::Iterator it = fromView.begin();
+                ConstCursorView::Iterator end = fromView.end();
+
+                CursorView toView(to);
+                CursorView::Iterator toIt = toView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
 
-                for( ; it != end; ++it)
+                for( ; it != end; ++it, ++toIt)
                 {
-                    copyPixel(*pfrom, *it);
+                    copyPixel(*it, *toIt);
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -210,10 +210,10 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC CURSOR: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC CURSOR pixel-wise: " << (width * height) / double(best) << std::endl;
         }
 
-        void Benchmark()
+        void BenchmarkPixel()
         {
             using namespace Pt::Gfx;
            
@@ -222,21 +222,29 @@ class Argb32Test : public Pt::Unit::TestSuite
             for(int n = 0; n < 100; ++n)
             {
                 Argb32 format;
-                Image image(width, height, format);
-                
-                PixelView pixelView(image);
-                PixelView::Iterator it = pixelView.begin();
-                PixelView::Iterator end = pixelView.end();
+                Image from(width, height, format);
+                Image to(width, height, format);
 
-                PixelView cpixelView(image);
-                PixelView::Iterator pfrom = cpixelView.begin();
+                LineView fromLineView(from);
+                auto fromLine = fromLineView.begin();
+                auto fromEnd = fromLineView.end();
+
+                LineView toLineView(to);
+                auto toLine = toLineView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
-
-                for( ; it != end; ++it)
+                
+                for( ; fromLine != fromEnd; ++fromLine, ++toLine)
                 {
-                    copyPixel(*pfrom, *it);
+                    auto fromIt = fromLine->begin();
+                    auto fromPixelEnd = fromLine->end();
+                    auto toIt = toLine->begin();
+
+                    for( ; fromIt != fromPixelEnd; ++fromIt, ++toIt)
+                    {
+                        copyPixel(*fromIt, *toIt);
+                    }
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -244,128 +252,56 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC PIXEL: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC pixel-wise: " << (width * height) / double(best) << std::endl;
         }
 
-        void BenchmarkRaw()
+        void BenchmarkCopyViewArgb32()
         {
             using namespace Pt::Gfx;
 
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 1000; ++n)
+            for(int n = 0; n < runs; ++n)
             {
-                Argb32Image image(width, height);
-                
-                Argb32PixelView imageView(image);
-                Argb32PixelView::Iterator it = imageView.begin();
-                Argb32PixelView::Iterator end = imageView.end();
-
-                Argb32ConstPixelView constView(image);
-                Argb32Pixel cpixel = *imageView.begin();
+                Argb32Image fromImage(width, height);
+                Argb32Image toImage(width, height);
 
                 Pt::System::Clock clock;
                 clock.start();
             
-                for( ; it != end; ++it)
-                {
-                    //*it = cpixel;
-                    copyPixel(cpixel, *it);
-                }
+                copyView(fromImage, toImage);
 
                 Pt::uint64_t time = clock.stop().toUSecs();
                 if(time < best)
                     best = time;
             }
 
-            std::clog << "ARGB32: " << (width * height) / double(best) << std::endl;
+            std::clog << "ARGB32 copy view: " << (width * height) / double(best) << std::endl;
         }
 
-        void BenchmarkCopyPixels()
+        void BenchmarkCopyView()
         {
             using namespace Pt::Gfx;
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < runs; ++n)
             {
                 Argb32 format;
                 Image fromImage(width, height, format);
-                ConstPixelView fromView(fromImage);
-                ConstPixelView::Iterator from = fromView.begin();
-
-                Image image(width, height, format);
-                PixelView imageView(image);
-                PixelView::Iterator it = imageView.begin();
-                PixelView::Iterator end = imageView.end();
+                Image toImage(width, height, format);
 
                 Pt::System::Clock clock;
                 clock.start();
 
-                //LineView lineView(fromImage);
-                //auto lineIt = lineView.begin();
-                //auto lineEnd = lineView.end();
-
-                //for( ; lineIt != lineEnd; ++lineIt)
-                //{
-                //    copySpan(*lineIt, it);
-                //    it += lineIt->length();
-                //}
-
-                for( ; it != end; it += image.width(), from += fromImage.width() )
-                {
-                    it->assign( *from, image.width() );
-                }
+                copyView(fromImage, toImage);
 
                 Pt::uint64_t time = clock.stop().toUSecs();
                 if(time < best)
                     best = time;
             }
 
-            std::clog << "GENERIC: " << (width * height) / double(best) << std::endl;
-        }
-
-        void BenchmarkCopyPixelsRaw()
-        {
-            using namespace Pt::Gfx;
-           
-            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
-            
-            for(int n = 0; n < 3000; ++n)
-            {
-                Argb32Image fromImage(width, height);
-                Argb32PixelView fromView(fromImage);
-                Argb32PixelView::Iterator from = fromView.begin();
-
-                Argb32Image image(width, height);
-                Argb32PixelView imageView(image);
-                Argb32PixelView::Iterator it = imageView.begin();
-                Argb32PixelView::Iterator end = imageView.end();
-
-                Pt::System::Clock clock;
-                clock.start();
-
-                BasicLineView<Argb32> lineView(fromImage);
-                auto lineIt = lineView.begin();
-                auto lineEnd = lineView.end();
-
-                for( ; lineIt != lineEnd; ++lineIt)
-                {
-                    copySpan(*lineIt, *it);
-                    it += lineIt->length();
-                }
-
-                //for( ; it != end; it += image.width(), from += fromImage.width() )
-                //{
-                //    it->assign( *from, image.width() );
-                //}
-
-                Pt::uint64_t time = clock.stop().toUSecs();
-                if(time < best)
-                    best = time;
-            }
-
-            std::clog << "ARGB32: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC copy view: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkCopyColors()
@@ -374,27 +310,25 @@ class Argb32Test : public Pt::Unit::TestSuite
            
             Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
 
-            for(int n = 0; n < 10; ++n)
+            for(int n = 0; n < runs; ++n)
             {
                 Argb32 format;
                 Image fromImage(width, height, format);
-                ConstPixelView fromView(fromImage);
-                ConstPixelView::Iterator from = fromView.begin();
+                Image toImage(width, height, format);
 
-                Image image(width, height, format);
-                PixelView imageView(image);
-                PixelView::Iterator it = imageView.begin();
-                PixelView::Iterator end = imageView.end();
+                LineView toLineView(toImage);
+                auto toLine = toLineView.begin();
 
                 Pt::System::Clock clock;
                 clock.start();
 
                 Argb32Color colors[width];
 
-                for( ; it != end; it += image.width(), from += fromImage.width() )
+                for(const auto& fromSpan : lineView(fromImage))
                 {
-                    it->getColors(colors, width);
-                    it->assign(colors, width);
+                    fromSpan.front().getColors(colors, width);
+                    toLine->front().assign(colors, width);
+                    ++toLine;
                 }
 
                 Pt::uint64_t time = clock.stop().toUSecs();
@@ -402,42 +336,8 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC copy colors: " << (width * height) / double(best) << std::endl;
         }
-
-        void BenchmarkCopyColorsRaw()
-        {
-            using namespace Pt::Gfx;
-           
-            Pt::uint64_t best = std::numeric_limits<Pt::uint64_t>::max();
-
-            for(int n = 0; n < 10; ++n)
-            {
-                Argb32Image fromImage(width, height);
-                Argb32PixelView fromView(fromImage);
-                Argb32PixelView::Iterator from = fromView.begin();
-
-                Argb32Image image(width, height);
-                Argb32PixelView imageView(image);
-                Argb32PixelView::Iterator it = imageView.begin();
-                Argb32PixelView::Iterator end = imageView.end();
-
-                Pt::System::Clock clock;
-                clock.start();
-
-                for( ; it != end; it += image.width(), from += fromImage.width() )
-                {
-                    it->assign( *from, image.width() );
-                }
-
-                Pt::uint64_t time = clock.stop().toUSecs();
-                if(time < best)
-                    best = time;
-            }
-
-            std::clog << "ARGB32: " << (width * height) / double(best) << std::endl;
-        }
-
 };
 
 Pt::Unit::RegisterTest<Argb32Test> register_Argb32Test;
