@@ -1,0 +1,17 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  Windows-x64-Debug:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Debug
+        run: .\jam.bat configure -sCONFIG=debug --debug
+
+      - name: Build
+        run: .\jam.bat -q -j4
