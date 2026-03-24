@@ -131,9 +131,37 @@ BasicConstView<typename T::Format, typename T::Traits> constView(const T& source
 
 
 template <typename T>
+BasicConstView<typename T::Format, typename T::Traits> constView(const T& source, Int x, Int y, Int w, Int h)
+{ 
+    return BasicConstView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
+}
+
+
+template <typename T>
+BasicConstView<typename T::Format, typename T::Traits> view(const T& source)
+{ 
+    return BasicConstView<typename T::Format, typename T::Traits>(source); 
+}
+
+
+template <typename T>
+BasicConstView<typename T::Format, typename T::Traits> view(const T& source, Int x, Int y, Int w, Int h)
+{ 
+    return BasicConstView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
+}
+
+
+template <typename T>
 BasicView<typename T::Format, typename T::Traits> view(T& source)
 { 
     return BasicView<typename T::Format, typename T::Traits>(source); 
+}
+
+
+template <typename T>
+BasicView<typename T::Format, typename T::Traits> view(T& source, Int x, Int y, Int w, Int h)
+{ 
+    return BasicView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 /** @brief Copies the pixels of a view to another one.
