@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ALGORITHM_H
-#define PT_GFX_ALGORITHM_H
+#ifndef PT_GFX_COPYPIXEL_H
+#define PT_GFX_COPYPIXEL_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>

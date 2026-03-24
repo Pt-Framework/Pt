@@ -2975,10 +2975,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-System\win32\win32.h">
       <Filter>Pt-System\win32</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Algorithm.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Api.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Api.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\CopyPixel.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Argb32.h">

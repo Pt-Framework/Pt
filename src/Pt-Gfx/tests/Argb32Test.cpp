@@ -29,7 +29,7 @@
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/CopyPixel.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>

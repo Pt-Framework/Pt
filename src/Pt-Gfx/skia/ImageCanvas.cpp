@@ -35,7 +35,6 @@
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Bitmap.h>
-#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
 #include <algorithm>
 #include <cmath>

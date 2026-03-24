@@ -33,7 +33,6 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
 

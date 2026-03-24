@@ -31,7 +31,6 @@
 
 #include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Span.h>
-#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 
 namespace Pt {

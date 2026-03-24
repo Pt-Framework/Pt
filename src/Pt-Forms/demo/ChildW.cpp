@@ -1,7 +1,6 @@
 #include "ChildW.h"
 #include "Dialog1.h"
 #include <Pt/Forms/Application.h>
-#include <Pt/Gfx/Algorithm.h>
 
 #include <Pt/Gfx/PngWriter.h>
 #include <fstream>

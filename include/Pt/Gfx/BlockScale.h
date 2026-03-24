@@ -31,7 +31,7 @@
 #define PT_GFX_BLOCKSCALE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/CopyPixel.h>
 #include <Pt/Gfx/LineView.h>
 #include <Pt/Types.h>
 

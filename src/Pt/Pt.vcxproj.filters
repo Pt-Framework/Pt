@@ -1530,10 +1530,10 @@
     <ClInclude Include="..\Pt-Db\sqlite\StmtValue.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\Api.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Api.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\CopyPixel.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h">

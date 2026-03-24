@@ -37,7 +37,6 @@
 #include <Pt/Gfx/Bitmap.h>
 //#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Algorithm.h>
 #include <sstream>
 #include <fstream>
 

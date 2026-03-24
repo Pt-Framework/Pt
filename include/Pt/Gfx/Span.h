@@ -31,7 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageView.h>
-#include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/CopyPixel.h>
 #include <Pt/Types.h>
 
 #include <iterator>

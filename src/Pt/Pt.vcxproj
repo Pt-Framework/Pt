@@ -68,8 +68,8 @@
     <ClInclude Include="..\..\include\Pt\Forms\Workspace.h" />
     <ClInclude Include="..\..\include\Pt\Forms\WorkspaceManager.h" />
     <ClInclude Include="..\..\include\Pt\Function.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\CopyPixel.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\LineView.h" />

@@ -83,7 +83,6 @@ void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Algorithm.h>
 
 #include <cmath>
 

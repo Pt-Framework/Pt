@@ -837,8 +837,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\FixupInfo.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Formatter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Function.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Api.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\CopyPixel.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Argb32.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Argb32Format.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Argb32Image.h" />
