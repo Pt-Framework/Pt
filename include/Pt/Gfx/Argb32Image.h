@@ -29,94 +29,12 @@
 #ifndef PT_GFX_ARGB32_IMAGE_H
 #define PT_GFX_ARGB32_IMAGE_H
 
-#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Argb32.h>
-#include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Gfx/BasicLineView.h>
-#include <Pt/Gfx/BasicImage.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-///** @brief ARGB-32 image.
-//*/
-//class Argb32Image : public BasicImage<Argb32>
-//{
-//    public:
-//        /** @brief Constructor.
-//        */
-//        Argb32Image()
-//        : BasicImage( Argb32() )
-//        { }
-//
-//        /** @brief Constructor.
-//        */
-//        Argb32Image(const Argb32Image& image)
-//        : BasicImage( image )
-//        { }
-//
-//        /** @brief Constructor.
-//        */
-//        Argb32Image(Pt::ssize_t width, Pt::ssize_t height, size_t padding = 0)
-//        : BasicImage(width, height, padding, Argb32())
-//        { }
-//
-//        /** @brief Construct from external buffer.
-//        */
-//        Argb32Image(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-//                    size_t padding = 0)
-//        : BasicImage(data, width, height, padding, Argb32())
-//        { }
-//};
-//
-///** @brief ARGB-32 image.
-//*/
-//class Argb32ConstImage : public BasicConstImage<Argb32>
-//{
-//    public:
-//        /** @brief Constructor.
-//        */
-//        Argb32ConstImage()
-//        : BasicConstImage( Argb32() )
-//        { }
-//
-//        /** @brief Constructor.
-//        */
-//        Argb32ConstImage(const Argb32ConstImage& image)
-//        : BasicConstImage( image )
-//        { }
-//
-//
-//        /** @brief Constructor.
-//        */
-//        Argb32ConstImage(const Argb32Image& image)
-//        : BasicConstImage( image )
-//        { }
-//
-//        /** @brief Construct from external buffer.
-//        */
-//        Argb32ConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-//                    size_t padding = 0)
-//        : BasicConstImage(Argb32(), data, width, height, padding)
-//        { }
-//};
-//
-///** @brief ARGB-32 pixel view.
-//*/
-//typedef BasicPixelView<Argb32> Argb32PixelView;
-//
-///** @brief ARGB-32 const pixel view.
-//*/
-//typedef BasicConstPixelView<Argb32> Argb32ConstPixelView;
-//
-///** @brief ARGB-32 line view.
-//*/
-//typedef BasicLineView<Argb32> Argb32LineView;
-//
-///** @brief ARGB-32 const line view.
-//*/
-//typedef BasicConstLineView<Argb32> Argb32ConstLineView;
 
 } // namespace
 

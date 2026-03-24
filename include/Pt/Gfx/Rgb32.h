@@ -136,7 +136,7 @@ class Rgb32Pixel
         typedef Argb32Color ColorType;
 
     public:
-        Rgb32Pixel(BasicView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Rgb32Pixel(BasicImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Rgb32Pixel(const Rgb32Pixel& p) = default;
 
@@ -148,7 +148,7 @@ class Rgb32Pixel
 
         Rgb32Pixel& operator=(const Rgb32Color& color);
 
-        void reset(BasicView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(BasicImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Rgb32Pixel& p);
 
@@ -239,9 +239,9 @@ class Rgb32ConstPixel
                         Pt::ssize_t x, Pt::ssize_t y);
 
     public:
-        Rgb32ConstPixel(const BasicConstView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Rgb32ConstPixel(const BasicConstImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        Rgb32ConstPixel(const BasicView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Rgb32ConstPixel(const BasicImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Rgb32ConstPixel(const Rgb32ConstPixel& p) = default;
 
@@ -249,9 +249,9 @@ class Rgb32ConstPixel
 
         ~Rgb32ConstPixel() = default;
 
-        void reset(const BasicConstView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicConstImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        void reset(const BasicView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Rgb32ConstPixel& p);
 
@@ -534,7 +534,7 @@ class PT_GFX_API Rgb32 final : public ImageFormat
 
 } // namespace
 
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 
 namespace Pt {
 
@@ -833,7 +833,7 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
 // Rgb32Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Rgb32Pixel::Rgb32Pixel(BasicView<Rgb32>& view, 
+inline Rgb32Pixel::Rgb32Pixel(BasicImageView<Rgb32>& view, 
                               Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, view.data(), x, y) )
@@ -841,7 +841,7 @@ inline Rgb32Pixel::Rgb32Pixel(BasicView<Rgb32>& view,
 }
 
 
-inline void Rgb32Pixel::reset(BasicView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void Rgb32Pixel::reset(BasicImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb32::getPixel(view, view.data(), x, y);
@@ -1044,7 +1044,7 @@ inline Rgb32ConstPixel::Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicConstView<Rgb32>& view,
+inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicConstImageView<Rgb32>& view,
                                         Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, view.data(), x, y) )
@@ -1052,7 +1052,7 @@ inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicConstView<Rgb32>& view,
 }
 
 
-inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicView<Rgb32>& view,
+inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicImageView<Rgb32>& view,
                                         Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, view.data(), x, y) )
@@ -1067,7 +1067,7 @@ inline Rgb32ConstPixel::Rgb32ConstPixel(const Rgb32Pixel& p)
 }
 
 
-inline void Rgb32ConstPixel::reset(const BasicConstView<Rgb32>& view, 
+inline void Rgb32ConstPixel::reset(const BasicConstImageView<Rgb32>& view, 
                                    Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
@@ -1075,7 +1075,7 @@ inline void Rgb32ConstPixel::reset(const BasicConstView<Rgb32>& view,
 }
 
 
-inline void Rgb32ConstPixel::reset(const BasicView<Rgb32>& view, 
+inline void Rgb32ConstPixel::reset(const BasicImageView<Rgb32>& view, 
                                    Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;

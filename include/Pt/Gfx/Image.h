@@ -31,32 +31,158 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/BasicPixelView.h>
-#include <Pt/Gfx/BasicLineView.h>
-#include <Pt/Gfx/BasicImage.h>
+#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/PixelView.h>
+#include <Pt/Gfx/LineView.h>
+#include <Pt/Gfx/ImageTraits.h>
+#include <Pt/Types.h>
+#include <vector>
+#include <memory>
 
 namespace Pt {
 
 namespace Gfx {
 
-/** @brief Image class.
+//inline namespace v2 {
+
+/** @brief Owns a format.
 */
-class Image : public BasicImage<ImageFormat> 
+template <typename FormatT, typename TraitsT>
+class FormatPtr
 {
-    public:
-        using BasicImage<ImageFormat>::BasicImage;
+    protected:
+        explicit FormatPtr(const FormatT& format);
+
+        const FormatT& getFormat() const;
+
+        void resetFormat(const FormatT& format);
+
+    private:
+        std::unique_ptr<FormatT> _ownedFormat;
 };
 
-/** @brief Const image class.
+/** @brief Basic image.
 */
-class ConstImage : public BasicConstImage<ImageFormat> 
+template <typename FormatT, typename TraitsT>
+class BasicImage : private FormatPtr<FormatT, TraitsT>
+                 , public BasicImageView<FormatT, TraitsT>
 {
     public:
-        using BasicConstImage<ImageFormat>::BasicConstImage;
+        typedef FormatT Format;
+        typedef TraitsT Traits;
+
+    public:
+        /** @brief Constructor.
+        */
+        explicit BasicImage( const Format& format = FormatT::get() );
+
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding, 
+                   const Format& format = FormatT::get() );
+        
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
+                   const Format& format = FormatT::get() );
+        
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding, const Format& format = FormatT::get() );
+        
+        /** @brief Constructor.
+        */
+        BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   const Format& format = FormatT::get() );
+        
+        /** @brief Copy constructor.
+        */
+        BasicImage(const BasicImage& image);
+        
+        /** @brief Destructor.
+        */
+        virtual ~BasicImage();
+
+        BasicImage& operator=(const BasicImage& image);
+        
+        /** @brief Reset to new size.
+        */
+        void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0);
+        
+        /** @brief Reset to new data.
+        */
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0);
+
+        void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0);
+
+        void reset(const Format& format, Pt::uint8_t* data, 
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0);
+        
+        /** @brief Clears the image.
+        */
+        void clear();
+
+        Pt::ssize_t pixelStride() const;
+
+        std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
+                         std::size_t padding) const;
+
+    private:
+        std::vector<Pt::uint8_t> _buffer;
 };
+
+/** @brief Basic const image.
+*/
+template <typename FormatT, typename TraitsT>
+class BasicConstImage : private FormatPtr<FormatT, TraitsT>
+                      , public BasicConstImageView<FormatT, TraitsT>
+{
+    public:
+        typedef FormatT Format;
+        typedef TraitsT Traits;
+
+    public:
+        explicit BasicConstImage( const Format& format = FormatT::get() );
+
+        BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                        Pt::ssize_t padding, const Format& format = FormatT::get() );
+
+        BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                        const Format& format = FormatT::get() );
+
+        BasicConstImage(const BasicImage<FormatT, TraitsT>& image);
+
+        BasicConstImage(const BasicConstImage& image);
+
+        virtual ~BasicConstImage();
+
+        void reset(const BasicConstImage& image);
+
+        void reset(const BasicImage<FormatT, TraitsT>& image);
+
+        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
+                   Pt::ssize_t padding = 0);
+
+        void reset(const Format& format, const Pt::uint8_t* data, 
+                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0);
+
+        void clear();
+
+        Pt::ssize_t pixelStride() const;
+
+        std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
+                         std::size_t padding) const;
+};
+
+// } // namespace
 
 } // namespace
 
 } // namespace
+
+#include <Pt/Gfx/Image.hpp>
 
 #endif

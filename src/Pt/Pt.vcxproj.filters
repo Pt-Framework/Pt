@@ -1542,10 +1542,10 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h">
@@ -2940,7 +2940,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ViewBase.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\PixelView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb16.h">
@@ -2949,13 +2949,13 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.hpp">
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicView.hpp">
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageView.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicPixelView.hpp">
+    <ClInclude Include="..\..\include\Pt\Gfx\PixelView.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\PixelBase.h">
@@ -2967,10 +2967,10 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicLineView.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\LineView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicLineView.hpp">
+    <ClInclude Include="..\..\include\Pt\Gfx\LineView.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Span.h">

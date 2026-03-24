@@ -57,7 +57,7 @@ class PT_GFX_API Yuv12Pixel
                    Pt::ssize_t x, Pt::ssize_t y);
 
     public:
-        Yuv12Pixel(BasicView<Yuv12>& view, 
+        Yuv12Pixel(BasicImageView<Yuv12>& view, 
                    Pt::ssize_t xpos, Pt::ssize_t ypos);
 
         Yuv12Pixel(const Yuv12Pixel& p)
@@ -150,10 +150,10 @@ class Yuv12ConstPixel
                         Pt::ssize_t xpos, Pt::ssize_t ypos);
     
     public:
-        Yuv12ConstPixel(const BasicConstView<Yuv12>& view,
+        Yuv12ConstPixel(const BasicConstImageView<Yuv12>& view,
                         Pt::ssize_t xpos, Pt::ssize_t ypos);
 
-        Yuv12ConstPixel(const BasicView<Yuv12>& view, 
+        Yuv12ConstPixel(const BasicImageView<Yuv12>& view, 
                         Pt::ssize_t xpos, Pt::ssize_t ypos);
 
         Yuv12ConstPixel(const Yuv12ConstPixel& p)
@@ -484,7 +484,7 @@ class PT_GFX_API Yuv12 final : public ImageFormat
 } // namespace
 
 
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Argb32.h>
 
 namespace Pt {
@@ -495,7 +495,7 @@ namespace Gfx {
 // Yuv12Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Yuv12Pixel::Yuv12Pixel(BasicView<Yuv12>& view, 
+inline Yuv12Pixel::Yuv12Pixel(BasicImageView<Yuv12>& view, 
                               Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view(view)
 , _xpos(xpos)
@@ -591,7 +591,7 @@ inline void Yuv12Pixel::advanceLines(Pt::ssize_t n)
 // Yuv12ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicConstView<Yuv12>& view, 
+inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicConstImageView<Yuv12>& view, 
                                         Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view( view )
 , _xpos(xpos)
@@ -607,7 +607,7 @@ inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicConstView<Yuv12>& view,
 }
 
 
-inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicView<Yuv12>& view, 
+inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicImageView<Yuv12>& view, 
                                         Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view( view )
 , _xpos(xpos)

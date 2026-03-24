@@ -191,7 +191,7 @@ class Pixel
 
     public:
         template <typename Tr>
-        Pixel(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Pixel(BasicImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Pixel(const Pixel& p);
 
@@ -212,7 +212,7 @@ class Pixel
         }
 
         template <typename Tr>
-        void reset(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(BasicImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Pixel& p);
 
@@ -337,10 +337,10 @@ class ConstPixel
 
     public:
         template <typename Tr>
-        ConstPixel(const BasicConstView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
+        ConstPixel(const BasicConstImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         template <typename Tr>
-        ConstPixel(const BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
+        ConstPixel(const BasicImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         ConstPixel(const ConstPixel& p);
 
@@ -351,10 +351,10 @@ class ConstPixel
         ConstPixel& operator=(const ConstPixel&) = delete;
 
         template <typename Tr>
-        void reset(const BasicConstView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicConstImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         template <typename Tr>
-        void reset(const BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const ConstPixel& p);
 

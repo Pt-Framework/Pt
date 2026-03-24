@@ -30,7 +30,7 @@
 #define PT_GFX_BASIC_SPAN_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Types.h>
 
@@ -209,7 +209,7 @@ class Span
         typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
-        Span(BasicView<Format>& view, 
+        Span(BasicImageView<Format>& view, 
              Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _p(view, x, y)
         , _length(length)
@@ -291,13 +291,13 @@ class ConstSpan
         typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
-        ConstSpan(const BasicConstView<Format>& view, 
+        ConstSpan(const BasicConstImageView<Format>& view, 
                   Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _p(view, x, y)
         , _length(length)
         { }
 
-        ConstSpan(const BasicView<Format>& view, 
+        ConstSpan(const BasicImageView<Format>& view, 
                   Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _p(view, x, y)
         , _length(length)

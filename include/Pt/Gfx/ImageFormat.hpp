@@ -30,7 +30,7 @@
 #define PT_GFX_PIXEL_HPP
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/ImageFormat.h>
 
 namespace Pt {
@@ -43,7 +43,7 @@ namespace Gfx {
 
 template <typename ColorT>
 template <typename Tr>
-inline Pixel<ColorT>::Pixel(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline Pixel<ColorT>::Pixel(BasicImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
 : _pixel(0)
 , _format( &view.format() )
 { 
@@ -70,7 +70,7 @@ inline Pixel<ColorT>::~Pixel()
 
 template <typename ColorT>
 template <typename Tr>
-inline void Pixel<ColorT>::reset(BasicView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void Pixel<ColorT>::reset(BasicImageView<ImageFormat, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
     {
@@ -216,7 +216,7 @@ inline bool Pixel<ColorT>::equals(const ConstPixel<ColorT>& p) const
 
 template <typename ColorT>
 template <typename Tr>
-inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat, Tr>& view, 
+inline ConstPixel<ColorT>::ConstPixel(const BasicConstImageView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 : _pixel(0)
 , _format( &view.format() )
@@ -228,7 +228,7 @@ inline ConstPixel<ColorT>::ConstPixel(const BasicConstView<ImageFormat, Tr>& vie
 
 template <typename ColorT>
 template <typename Tr>
-inline ConstPixel<ColorT>::ConstPixel(const BasicView<ImageFormat, Tr>& view, 
+inline ConstPixel<ColorT>::ConstPixel(const BasicImageView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 : _pixel(0)
 , _format( &view.format() )
@@ -266,7 +266,7 @@ inline ConstPixel<ColorT>::~ConstPixel()
 
 template <typename ColorT>
 template <typename Tr>
-inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat, Tr>& view, 
+inline void ConstPixel<ColorT>::reset(const BasicConstImageView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)
@@ -283,7 +283,7 @@ inline void ConstPixel<ColorT>::reset(const BasicConstView<ImageFormat, Tr>& vie
 
 template <typename ColorT>
 template <typename Tr>
-inline void ConstPixel<ColorT>::reset(const BasicView<ImageFormat, Tr>& view, 
+inline void ConstPixel<ColorT>::reset(const BasicImageView<ImageFormat, Tr>& view, 
                                       Pt::ssize_t x, Pt::ssize_t y)
 {
     if(_pixel)

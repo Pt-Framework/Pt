@@ -2993,7 +2993,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BasicImage.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BasicView.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageView.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BlockScale.h">

@@ -50,7 +50,7 @@ class Rgb16Pixel
         typedef Argb32Color ColorType;
 
     public:
-        Rgb16Pixel(BasicView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Rgb16Pixel(BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Rgb16Pixel(const Rgb16Pixel& p) = default;
 
@@ -60,7 +60,7 @@ class Rgb16Pixel
 
         Rgb16Pixel& operator=(const Gfx::ColorF& color);
 
-        void reset(BasicView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Rgb16Pixel& p);
 
@@ -125,9 +125,9 @@ class Rgb16ConstPixel
                         Pt::ssize_t x, Pt::ssize_t y);
 
     public:
-        Rgb16ConstPixel(const BasicConstView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Rgb16ConstPixel(const BasicConstImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        Rgb16ConstPixel(const BasicView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        Rgb16ConstPixel(const BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Rgb16ConstPixel(const Rgb16ConstPixel& p) = default;
 
@@ -135,9 +135,9 @@ class Rgb16ConstPixel
 
         ~Rgb16ConstPixel() = default;
 
-        void reset(const BasicConstView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicConstImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        void reset(const BasicView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        void reset(const BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Rgb16ConstPixel& p);
 
@@ -326,7 +326,7 @@ class PT_GFX_API Rgb16 final : public ImageFormat
 
 } // namespace
 
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 
 namespace Pt {
 
@@ -476,7 +476,7 @@ inline void Rgb16::sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
 // Rgb16Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Rgb16Pixel::Rgb16Pixel(BasicView<Rgb16>& view, 
+inline Rgb16Pixel::Rgb16Pixel(BasicImageView<Rgb16>& view, 
                               Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb16::getPixel(view, view.data(), x, y) )
@@ -484,7 +484,7 @@ inline Rgb16Pixel::Rgb16Pixel(BasicView<Rgb16>& view,
 }
 
 
-inline void Rgb16Pixel::reset(BasicView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y)
+inline void Rgb16Pixel::reset(BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb16::getPixel(view, view.data(), x, y);
@@ -630,7 +630,7 @@ inline Rgb16ConstPixel::Rgb16ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicConstView<Rgb16>& view,
+inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicConstImageView<Rgb16>& view,
                                         Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb16::getPixel(view, view.data(), x, y) )
@@ -638,7 +638,7 @@ inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicConstView<Rgb16>& view,
 }
 
 
-inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicView<Rgb16>& view,
+inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicImageView<Rgb16>& view,
                                         Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb16::getPixel(view, view.data(), x, y) )
@@ -653,7 +653,7 @@ inline Rgb16ConstPixel::Rgb16ConstPixel(const Rgb16Pixel& p)
 }
 
 
-inline void Rgb16ConstPixel::reset(const BasicConstView<Rgb16>& view, 
+inline void Rgb16ConstPixel::reset(const BasicConstImageView<Rgb16>& view, 
                                    Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
@@ -661,7 +661,7 @@ inline void Rgb16ConstPixel::reset(const BasicConstView<Rgb16>& view,
 }
 
 
-inline void Rgb16ConstPixel::reset(const BasicView<Rgb16>& view, 
+inline void Rgb16ConstPixel::reset(const BasicImageView<Rgb16>& view, 
                                    Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;

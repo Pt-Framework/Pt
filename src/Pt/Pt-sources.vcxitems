@@ -843,7 +843,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Argb32Format.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Argb32Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BasicImage.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BasicView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageView.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Brush.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Canvas.h" />
