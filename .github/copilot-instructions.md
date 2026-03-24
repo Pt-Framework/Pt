@@ -26,7 +26,7 @@ think you have all relevant information.
   -> `.github/instructions/coding-style.instructions.md`
 
 - **Building**: Building the Pt project with jam.
-  You MUST read this when configuring, building, or cleaning the project.
+  You MUST read this when configuring, building, cleaning or verifying code changes.
   -> `.github/instructions/building.instructions.md`
 
 - **Unit Testing**: Writing and structuring unit tests with the Pt::Unit framework.
