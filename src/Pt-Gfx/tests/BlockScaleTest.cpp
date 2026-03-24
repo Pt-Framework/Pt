@@ -33,59 +33,100 @@
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
 
+namespace Pt {
+
+namespace Gfx {
 
 class BlockScaleTest : public Pt::Unit::TestSuite
 {
     public:
         BlockScaleTest()
-        : Pt::Unit::TestSuite("BlockScaleTest")
+        : Pt::Unit::TestSuite("Pt::Gfx::BlockScaleTest")
         {
-            Pt::Unit::TestSuite::registerMethod("ScaleUp", *this, &BlockScaleTest::ScaleUp);
-            Pt::Unit::TestSuite::registerMethod("ScaleDown", *this, &BlockScaleTest::ScaleDown);
+            registerMethod("ScaleUp", *this, &BlockScaleTest::ScaleUp);
+            registerMethod("ScaleDown", *this, &BlockScaleTest::ScaleDown);
         }
 
     protected:
         void ScaleUp()
         {
-            std::size_t fromWidth = 10;
-            std::size_t fromHeight = 10;
-            Pt::Gfx::Image from(fromWidth, fromHeight);
-            Pt::Gfx::PixelView fromView(from);
+            const Argb32Color A(255,  10,  20,  30);
+            const Argb32Color B(255,  40,  50,  60);
+            const Argb32Color C(255,  70,  80,  90);
+            const Argb32Color D(255, 100, 110, 120);
 
-            std::memset(from.data(), 123, from.stride() * from.height());
+            // 2x2 source
+            Argb32Image from(2, 2);
+            Argb32PixelView fromView(from);
+            *fromView.pixel(0, 0) = A;
+            *fromView.pixel(1, 0) = B;
+            *fromView.pixel(0, 1) = C;
+            *fromView.pixel(1, 1) = D;
 
-            std::size_t toWidth = 20;
-            std::size_t toHeight = 40;
-            Pt::Gfx::Image to(toWidth, toHeight);
-            Pt::Gfx::PixelView toView(to);
+            // Scale to 4x6
+            Argb32Image to(4, 6);
+            blockScale(from, to);
 
-            Pt::Gfx::blockScale(fromView.begin(), fromWidth, fromHeight, 
-                                toView.begin(), toWidth, toHeight);
-                                 
-            auto ttt = toView.begin()->base();
+            // Row-major expected result
+            const Argb32Color expected[] = {
+                A, A, B, B,
+                A, A, B, B,
+                A, A, B, B,
+                C, C, D, D,
+                C, C, D, D,
+                C, C, D, D,
+            };
 
-            PT_UNIT_ASSERT(0 == memcmp(toView.begin()->base(), 
-                                       fromView.begin()->base(), 4) );
-            PT_UNIT_ASSERT(0 == memcmp(toView.pixel(19, 39)->base(), 
-                                       fromView.pixel(9, 9)->base(), 4) );
+            Argb32PixelView toView(to);
+            const Argb32Color* exp = expected;
+            for(auto it = toView.begin(); it != toView.end(); ++it, ++exp)
+            {
+                PT_UNIT_ASSERT_EQUAL(it->toColor().value(), exp->value());
+            }
         }
 
         void ScaleDown()
         {
-            Pt::Gfx::Image from( 100, 100, Pt::Gfx::Argb32() );
-            Pt::Gfx::PixelView fromView(from);
+            const Argb32Color A(255,  10,  20,  30);
+            const Argb32Color B(255,  40,  50,  60);
+            const Argb32Color C(255,  70,  80,  90);
+            const Argb32Color D(255, 100, 110, 120);
+            const Argb32Color E(255, 130, 140, 150);
+            const Argb32Color F(255, 160, 170, 180);
+            const Argb32Color G(255,  11,  21,  31);
+            const Argb32Color H(255,  41,  51,  61);
 
-            std::memset(from.data(), 123, from.stride() * from.height());
+            // 4x2 source
+            const Argb32Color src[] = {
+                A, B, C, D,
+                E, F, G, H,
+            };
 
-            Pt::Gfx::Image to( 20, 40, Pt::Gfx::Argb32() );
-            Pt::Gfx::PixelView toView(to);
+            Argb32Image from(4, 2);
+            Argb32PixelView fromView(from);
+            const Argb32Color* s = src;
+            for(auto it = fromView.begin(); it != fromView.end(); ++it, ++s)
+                *it = *s;
 
-            Pt::Gfx::blockScale(fromView.begin(), from.width(), from.height(), 
-                                toView.begin(), to.width(), to.height());
+            // Scale to 2x1
+            Argb32Image to(2, 1);
+            blockScale(from, to);
 
-            PT_UNIT_ASSERT(0 == std::memcmp(to.data(), from.data(), 
-                                            to.stride() * to.height()));
+            const Argb32Color expected[] = {
+                A, C,
+            };
+
+            Argb32PixelView toView(to);
+            const Argb32Color* exp = expected;
+            for(auto it = toView.begin(); it != toView.end(); ++it, ++exp)
+            {
+                PT_UNIT_ASSERT_EQUAL(it->toColor().value(), exp->value());
+            }
         }
 };
 
-Pt::Unit::RegisterTest<BlockScaleTest> register_BlockScaleTest;
+} // namespace
+
+} // namespace
+
+Pt::Unit::RegisterTest<Pt::Gfx::BlockScaleTest> register_BlockScaleTest;

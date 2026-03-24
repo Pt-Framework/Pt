@@ -32,85 +32,55 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/LineView.h>
 #include <Pt/Types.h>
-#include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
-/** @brief Generic block scale implementation.
+/** @brief Block scale from a source view to a target view.
 */
-template<typename InIterT, typename OutIterT>
-void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
-                OutIterT to, Pt::ssize_t toWidth, Pt::ssize_t toHeight)
+template <typename FromView, typename ToView>
+void blockScale(const FromView& from, ToView& to)
 {
+    const Pt::ssize_t fromWidth  = from.width();
+    const Pt::ssize_t fromHeight = from.height();
+    const Pt::ssize_t toWidth    = to.width();
+    const Pt::ssize_t toHeight   = to.height();
+
+    auto fromLines = lineView(from);
+    auto toLines   = lineView(to);
+    auto fromLine  = fromLines.begin();
+    auto toLine    = toLines.begin();
+    auto toLineEnd = toLines.end();
+
     Pt::ssize_t dh = 0;
-    Pt::ssize_t y  = 0;
 
-    while(y < toHeight)
+    while(toLine != toLineEnd)
     {
-        InIterT pos = from;
-        do
-        {
-            Pt::ssize_t dw = 0;
-            for(Pt::ssize_t x = 0; x < toWidth; ++x)
-            {
-                copyPixel(*from, *to);
-                ++to;
+        Pt::ssize_t rows = (toHeight - dh + fromHeight - 1) / fromHeight;
 
-                for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth)
-                    ;
+        for(Pt::ssize_t i = 0; i < rows; ++i)
+        {
+            auto fromIt = fromLine->begin();
+
+            Pt::ssize_t dw = 0;
+            for(auto& toPixel : *toLine)
+            {
+                copyPixel(*fromIt, toPixel);
+
+                dw += fromWidth;
+                fromIt += dw / toWidth;
+                dw %= toWidth;
             }
 
-            from = pos;
-            y++;
+            ++toLine;
         }
-        while( (dh += fromHeight) < toHeight );
 
-        while(dh >= toHeight)
-        {
-            from += fromWidth;
-            dh -= toHeight;
-        }
-    }
-}
-
-/** @brief Generic block scale implementation with a custom assignment function..
-*/
-template<typename InIterT, typename OutIterT, typename AssignT>
-void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
-                OutIterT to, Pt::ssize_t toWidth, Pt::ssize_t toHeight,
-                AssignT assign)
-{
-    Pt::ssize_t dh = 0;
-    Pt::ssize_t y  = 0;
-
-    while(y < toHeight)
-    {
-        InIterT pos = from;
-        do
-        {
-            Pt::ssize_t dw = 0;
-            for(Pt::ssize_t x = 0; x < toWidth; ++x)
-            {
-                assign(*to, *from);
-                ++to;
-
-                for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth)
-                    ;
-            }
-
-            from = pos;
-            y++;
-        }
-        while( (dh += fromHeight) < toHeight );
-
-        while(dh >= toHeight)
-        {
-            from += fromWidth;
-            dh -= toHeight;
-        }
+        dh += rows * fromHeight;
+        fromLine += dh / toHeight;
+        dh %= toHeight;
     }
 }
 
