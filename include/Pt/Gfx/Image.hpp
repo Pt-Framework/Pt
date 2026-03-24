@@ -26,9 +26,10 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_IMAGE_HPP
-#define PT_GFX_BASIC_IMAGE_HPP
+#ifndef PT_GFX_IMAGE_HPP
+#define PT_GFX_IMAGE_HPP
 
+#include <Pt/Gfx/Image.h>
 #include <Pt/TypeTraits.h>
 
 namespace Pt {
@@ -61,14 +62,14 @@ inline void FormatPtr<FormatT, TraitsT>::resetFormat(const FormatT& format)
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicView<FormatT, TraitsT>( this->getFormat() )
+, BasicImageView<FormatT, TraitsT>( this->getFormat() )
 { }
 
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(
     Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding, const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicView<FormatT, TraitsT>( this->getFormat() )
+, BasicImageView<FormatT, TraitsT>( this->getFormat() )
 {
     _buffer.resize( Traits::imageSize(this->format(), width, height, padding) );
     
@@ -82,7 +83,7 @@ template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(
     Pt::ssize_t width, Pt::ssize_t height, const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicView<FormatT, TraitsT>( this->getFormat() )
+, BasicImageView<FormatT, TraitsT>( this->getFormat() )
 {
     _buffer.resize( Traits::imageSize(this->format(), width, height, 0) );
     
@@ -96,7 +97,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(
     Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
     Pt::ssize_t padding, const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicView<FormatT, TraitsT>( this->getFormat() )
+, BasicImageView<FormatT, TraitsT>( this->getFormat() )
 {
     this->setData(data);
     this->setDimensions(width, height,
@@ -108,7 +109,7 @@ template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(
     Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicView<FormatT, TraitsT>( this->getFormat() )
+, BasicImageView<FormatT, TraitsT>( this->getFormat() )
 {
     this->setData(data);
     this->setDimensions(width, height,
@@ -118,7 +119,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const BasicImage& image)
 : FormatPtr<FormatT, TraitsT>( image.format() )
-, BasicView<FormatT, TraitsT>( this->getFormat() )
+, BasicImageView<FormatT, TraitsT>( this->getFormat() )
 , _buffer(image._buffer)
 {
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
@@ -229,7 +230,7 @@ inline std::size_t BasicImage<FormatT, TraitsT>::size(
 template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicConstView<FormatT, TraitsT>( this->getFormat() )
+, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
 { }
 
 template <typename FormatT, typename TraitsT>
@@ -237,7 +238,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
     const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
     Pt::ssize_t padding, const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicConstView<FormatT, TraitsT>( this->getFormat() )
+, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
 {
     this->setData(data);
     this->setDimensions(width, height,
@@ -250,7 +251,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
     const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
     const Format& format)
 : FormatPtr<FormatT, TraitsT>(format)
-, BasicConstView<FormatT, TraitsT>( this->getFormat() )
+, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
 {
     this->setData(data);
     this->setDimensions(width, height,
@@ -261,7 +262,7 @@ template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
     const BasicImage<FormatT, TraitsT>& image)
 : FormatPtr<FormatT, TraitsT>(image.format())
-, BasicConstView<FormatT, TraitsT>( this->getFormat() )
+, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
 {
     this->setData(image.data());
     this->setDimensions(image.width(), image.height(),
@@ -271,7 +272,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
 template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const BasicConstImage& image)
 : FormatPtr<FormatT, TraitsT>(image.format())
-, BasicConstView<FormatT, TraitsT>( this->getFormat() )
+, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
 {
     this->setData(image.data());
     this->setDimensions(image.width(), image.height(),

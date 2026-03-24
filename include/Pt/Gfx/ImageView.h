@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_VIEW_H
-#define PT_GFX_BASIC_VIEW_H
+#ifndef PT_GFX_IMAGE_VIEW_H
+#define PT_GFX_IMAGE_VIEW_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ViewBase.h>
@@ -39,22 +39,22 @@ namespace Pt {
 namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
-class BasicView : public ViewBase
+class BasicImageView : public ViewBase
 {
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
 
     public:
-        explicit BasicView(const Format& format);
+        explicit BasicImageView(const Format& format);
 
         template <typename F, typename T>
-        explicit BasicView(BasicView<F, T>& view);
+        explicit BasicImageView(BasicImageView<F, T>& view);
 
         template <typename F, typename T>
-        BasicView(BasicView<F, T>& view, Int x, Int y, Int w, Int h);
+        BasicImageView(BasicImageView<F, T>& view, Int x, Int y, Int w, Int h);
 
-        virtual ~BasicView()
+        virtual ~BasicImageView()
         { }
 
         Pt::uint8_t* data()
@@ -80,28 +80,28 @@ class BasicView : public ViewBase
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstView : public ViewBase
+class BasicConstImageView : public ViewBase
 {
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
 
     public:
-        explicit BasicConstView(const Format& format);
+        explicit BasicConstImageView(const Format& format);
 
         template <typename F, typename T>
-        explicit BasicConstView(const BasicView<F, T>& view);
+        explicit BasicConstImageView(const BasicImageView<F, T>& view);
 
         template <typename F, typename T>
-        BasicConstView(const BasicView<F, T>& view, Int x, Int y, Int w, Int h);
+        BasicConstImageView(const BasicImageView<F, T>& view, Int x, Int y, Int w, Int h);
 
         template <typename F, typename T>
-        explicit BasicConstView(const BasicConstView<F, T>& view);
+        explicit BasicConstImageView(const BasicConstImageView<F, T>& view);
 
         template <typename F, typename T>
-        BasicConstView(const BasicConstView<F, T>& view, Int x, Int y, Int w, Int h);
+        BasicConstImageView(const BasicConstImageView<F, T>& view, Int x, Int y, Int w, Int h);
 
-        virtual ~BasicConstView()
+        virtual ~BasicConstImageView()
         { }
 
         const Pt::uint8_t* data() const
@@ -124,44 +124,44 @@ class BasicConstView : public ViewBase
 
 
 template <typename T>
-BasicConstView<typename T::Format, typename T::Traits> constView(const T& source)
+BasicConstImageView<typename T::Format, typename T::Traits> constView(const T& source)
 { 
-    return BasicConstView<typename T::Format, typename T::Traits>(source); 
+    return BasicConstImageView<typename T::Format, typename T::Traits>(source); 
 }
 
 
 template <typename T>
-BasicConstView<typename T::Format, typename T::Traits> constView(const T& source, Int x, Int y, Int w, Int h)
+BasicConstImageView<typename T::Format, typename T::Traits> constView(const T& source, Int x, Int y, Int w, Int h)
 { 
-    return BasicConstView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
+    return BasicConstImageView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 
 template <typename T>
-BasicConstView<typename T::Format, typename T::Traits> view(const T& source)
+BasicConstImageView<typename T::Format, typename T::Traits> view(const T& source)
 { 
-    return BasicConstView<typename T::Format, typename T::Traits>(source); 
+    return BasicConstImageView<typename T::Format, typename T::Traits>(source); 
 }
 
 
 template <typename T>
-BasicConstView<typename T::Format, typename T::Traits> view(const T& source, Int x, Int y, Int w, Int h)
+BasicConstImageView<typename T::Format, typename T::Traits> view(const T& source, Int x, Int y, Int w, Int h)
 { 
-    return BasicConstView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
+    return BasicConstImageView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 
 template <typename T>
-BasicView<typename T::Format, typename T::Traits> view(T& source)
+BasicImageView<typename T::Format, typename T::Traits> view(T& source)
 { 
-    return BasicView<typename T::Format, typename T::Traits>(source); 
+    return BasicImageView<typename T::Format, typename T::Traits>(source); 
 }
 
 
 template <typename T>
-BasicView<typename T::Format, typename T::Traits> view(T& source, Int x, Int y, Int w, Int h)
+BasicImageView<typename T::Format, typename T::Traits> view(T& source, Int x, Int y, Int w, Int h)
 { 
-    return BasicView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
+    return BasicImageView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 /** @brief Copies the pixels of a view to another one.
@@ -189,4 +189,4 @@ void copyView(const From& from, To& to)
 
 #endif
 
-#include <Pt/Gfx/BasicView.hpp>
+#include <Pt/Gfx/ImageView.hpp>

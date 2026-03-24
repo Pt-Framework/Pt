@@ -29,16 +29,11 @@
 #ifndef PT_GFX_LINE_VIEW_HPP
 #define PT_GFX_LINE_VIEW_HPP
 
-#include <Pt/Gfx/BasicLineView.h>
+#include <Pt/Gfx/LineView.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-///////////////////////////////////////////////////////////////////////
-// BasicLineView and BasicConstLineView
-// All constructors are inline in BasicLineView.h
-///////////////////////////////////////////////////////////////////////
 
 } // namespace
 

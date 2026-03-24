@@ -26,16 +26,14 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_PIXEL_VIEW_HPP
-#define PT_GFX_BASIC_PIXEL_VIEW_HPP
+#ifndef PT_GFX_PIXEL_VIEW_HPP
+#define PT_GFX_PIXEL_VIEW_HPP
 
-#include <Pt/Gfx/BasicPixelView.h>
+#include <Pt/Gfx/PixelView.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-// All constructors are inline in BasicPixelView.h
 
 } // namespace
 

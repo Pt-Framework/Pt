@@ -26,11 +26,11 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_PIXEL_VIEW_H
-#define PT_GFX_BASIC_PIXEL_VIEW_H
+#ifndef PT_GFX_PIXEL_VIEW_H
+#define PT_GFX_PIXEL_VIEW_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Types.h>
 
 #include <iterator>
@@ -70,7 +70,7 @@ class PixelIterator
 
     public:
         template <typename Tr>
-        PixelIterator(BasicView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
+        PixelIterator(BasicImageView<Format, Tr>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
         , _pixel(view, x, y)
@@ -171,7 +171,7 @@ class ConstPixelIterator
 
     public:
         template <typename Tr>
-        ConstPixelIterator(const BasicConstView<Format, Tr>& view, 
+        ConstPixelIterator(const BasicConstImageView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
@@ -179,7 +179,7 @@ class ConstPixelIterator
         { }
 
         template <typename Tr>
-        ConstPixelIterator(const BasicView<Format, Tr>& view, 
+        ConstPixelIterator(const BasicImageView<Format, Tr>& view, 
                                 Pt::ssize_t x, Pt::ssize_t y)
         : _x(x)
         , _y(y)
@@ -271,7 +271,7 @@ class BasicPixelView
         typedef PixelIterator<Format, Traits> Iterator;
 
     public:
-        explicit BasicPixelView(BasicView<FormatT, TraitsT>& view)
+        explicit BasicPixelView(BasicImageView<FormatT, TraitsT>& view)
         : _view(view)
         { }
 
@@ -285,7 +285,7 @@ class BasicPixelView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        BasicView<FormatT, TraitsT> _view;
+        BasicImageView<FormatT, TraitsT> _view;
 };
 
 
@@ -303,11 +303,11 @@ class BasicConstPixelView
         typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicConstPixelView(const BasicView<FormatT, TraitsT>& view)
+        explicit BasicConstPixelView(const BasicImageView<FormatT, TraitsT>& view)
         : _view(view)
         { }
 
-        explicit BasicConstPixelView(const BasicConstView<FormatT, TraitsT>& view)
+        explicit BasicConstPixelView(const BasicConstImageView<FormatT, TraitsT>& view)
         : _view(view)
         { }
 
@@ -321,7 +321,7 @@ class BasicConstPixelView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        const BasicConstView<FormatT, TraitsT> _view;
+        const BasicConstImageView<FormatT, TraitsT> _view;
 };
 
 
@@ -344,4 +344,4 @@ BasicConstPixelView<typename T::Format, typename T::Traits> pixelView(const T& s
 
 #endif
 
-#include <Pt/Gfx/BasicPixelView.hpp>
+#include <Pt/Gfx/PixelView.hpp>

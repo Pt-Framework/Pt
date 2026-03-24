@@ -30,7 +30,7 @@
 #define PT_GFX_LINE_VIEW_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicView.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Span.h>
 #include <Pt/Types.h>
 
@@ -65,7 +65,7 @@ class LineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        LineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        LineIterator(BasicImageView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _span(view, x, y, view.width())
         { }
 
@@ -133,7 +133,7 @@ class ConstLineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        ConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        ConstLineIterator(const BasicConstImageView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _span(view, x, y, view.width())
         { }
 
@@ -190,7 +190,7 @@ class BasicLineView
         typedef LineIterator<Format, Traits> Iterator;
 
     public:
-        explicit BasicLineView(BasicView<FormatT, TraitsT>& view)
+        explicit BasicLineView(BasicImageView<FormatT, TraitsT>& view)
         : _view(view)
         { }
 
@@ -204,7 +204,7 @@ class BasicLineView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        BasicView<FormatT, TraitsT> _view;
+        BasicImageView<FormatT, TraitsT> _view;
 };
 
 
@@ -222,11 +222,11 @@ class BasicConstLineView
         typedef ConstLineIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicConstLineView(const BasicView<FormatT, TraitsT>& view)
+        explicit BasicConstLineView(const BasicImageView<FormatT, TraitsT>& view)
         : _view(view)
         { }
 
-        explicit BasicConstLineView(const BasicConstView<FormatT, TraitsT>& view)
+        explicit BasicConstLineView(const BasicConstImageView<FormatT, TraitsT>& view)
         : _view(view)
         { }
 
@@ -240,7 +240,7 @@ class BasicConstLineView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        const BasicConstView<FormatT, TraitsT> _view;
+        const BasicConstImageView<FormatT, TraitsT> _view;
 };
 
 
@@ -263,4 +263,4 @@ BasicConstLineView<typename T::Format, typename T::Traits> lineView(const T& sou
 
 #endif
 
-#include <Pt/Gfx/BasicLineView.hpp>
+#include <Pt/Gfx/LineView.hpp>
