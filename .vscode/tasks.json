@@ -136,7 +136,16 @@
             "presentation": {
                 "reveal": "always", "focus": false, "panel": "shared"
             },
-            "problemMatcher": ["$gcc", "$msCompile"]
+            "problemMatcher": [
+                {
+                    "base": "$gcc",
+                    "fileLocation": ["relative", "${cwd}"]
+                },
+                {
+                    "base": "$msCompile",
+                    "fileLocation": ["relative", "${cwd}"]
+                }
+            ]
         },
         {
             "label": "Clean All",
