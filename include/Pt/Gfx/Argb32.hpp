@@ -157,19 +157,6 @@ inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::si
 }
 
 
-inline void Argb32::sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
-                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
-                               Pt::ssize_t width, Pt::ssize_t height)
-{
-    for(Pt::ssize_t y = 0; y < height; ++y)
-    {
-        sourceCopy(to, from, width);
-
-        to += toStride;
-        from += fromStride; 
-    }
-}
-
 //
 // Implementation SourceOver
 //
@@ -266,19 +253,6 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::si
     }
 }
 
-
-inline void Argb32::sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
-                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
-                               Pt::ssize_t width, Pt::ssize_t height)
-{
-    for(Pt::ssize_t y = 0; y < height; ++y)
-    {
-        sourceOver(to, from, width);
-
-        to += toStride;
-        from += fromStride; 
-    }
-}
 
 ///////////////////////////////////////////////////////////////////////
 // Argb32Pixel

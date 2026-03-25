@@ -71,7 +71,7 @@ void BitmapSurface::reset(const Gfx::Image& image)
     if( image.format() != _image.format() )
     {
         _image.reset( format(), image.width(), image.height() );
-        copyView(constView(image), view(_image));
+        copyView(image, _image);
     }
     else
     {
@@ -332,25 +332,35 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
     //          << fromRect.width() << "x" << fromRect.height() << std::endl;
 
-    Gfx::PixelView::Iterator toIter(_image, toRect.x(), toRect.y() );
-    Gfx::ConstPixelView::Iterator fromIter(image, fromRect.x(), fromRect.y() );
+    auto toView = view<Argb32>(_image.data(), _image.width(), _image.height(), _image.padding());
+    const auto fromView = view<Argb32>(image.data(), image.width(), image.height(), image.padding());
+
+    auto toLines = lineView(toView, toRect.x(), toRect.y(), toRect.width(), toRect.height());
+    auto fromLines = lineView(fromView, fromRect.x(), fromRect.y(), fromRect.width(), fromRect.height());
+    auto fromIt = fromLines.begin();
 
     switch( paint.compositionMode() )
     {
         default:
         case CompositionMode::SourceCopy:
-            Argb32::sourceCopy(toIter->base(), _image.stride(),
-                               fromIter->base(), image.stride(), 
-                               fromRect.width(), fromRect.height());
-
+        {
+            for(auto& toSpan : toLines)
+            {
+                Argb32::sourceCopy(toSpan.front().base(), fromIt->front().base(), toSpan.length());
+                ++fromIt;
+            }
             break;
+        }
 
         case CompositionMode::SourceOver:
-            Argb32::sourceOver(toIter->base(), _image.stride(),
-                               fromIter->base(), image.stride(), 
-                               fromRect.width(), fromRect.height());
-
+        {
+            for(auto& toSpan : toLines)
+            {
+                Argb32::sourceOver(toSpan.front().base(), fromIt->front().base(), toSpan.length());
+                ++fromIt;
+            }
             break;
+        }
     }
 }
 

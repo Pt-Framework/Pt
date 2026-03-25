@@ -144,12 +144,12 @@ class Argb32Test : public Pt::Unit::TestSuite
             using namespace Pt::Gfx;
 
             Image image( 2, 2, Argb32() );
-            ConstImage cimage(image);
+            const ConstImage cimage(image);
             PixelView pixelView(image);
             ConstPixelView cpixelView(image);
 
             Argb32Image argb32Image(2, 2);
-            Argb32ConstImage cargb32Image(argb32Image);
+            const Argb32ConstImage cargb32Image(argb32Image);
             Argb32PixelView argb32View(argb32Image);
             Argb32ConstPixelView cargb32View(argb32Image);
 
@@ -164,9 +164,9 @@ class Argb32Test : public Pt::Unit::TestSuite
             ImageView imageView(image);
 
             copyView(imageView, imageView);
-            copyView(constView(image), imageView);
-            copyView(constView(cimage), imageView);
-            copyView(constView(cargb32Image), imageView);
+            copyView(image, imageView);
+            copyView(cimage, imageView);
+            copyView(cargb32Image, imageView);
 
             copyPixel(*cpixelView.begin(), *pixelView.begin());
             copyPixel(*cpixelView.begin(), *argb32View.begin());

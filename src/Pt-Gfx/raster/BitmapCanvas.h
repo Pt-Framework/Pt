@@ -284,8 +284,7 @@ class BitmapCanvas : public Canvas
 
         Brush                       _brush;
         Image                       _brushBuffer;
-        ConstImageView              _brushView;
-        ConstPixelView::ConstPixel  _brushPixel;
+        const Image*                _brushSource;
         bool                        _isGradient;
 
         Font   _font;

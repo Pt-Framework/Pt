@@ -464,7 +464,7 @@ void Path::addArc(const PointF& center, double radius,
     const int segments = static_cast<int>(std::ceil(std::fabs(sweep) / (pi * 0.5)));
     const double segAngle = sweep / segments;
 
-    // k = (4/3) * tan(segAngle/4) — optimal control-point distance for a circular arc
+    // k = (4/3) * tan(segAngle/4) - optimal control-point distance for a circular arc
     const double k = (4.0 / 3.0) * std::tan(segAngle * 0.25);
 
     double angle = startAngle;

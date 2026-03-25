@@ -35,6 +35,88 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// BasicLineView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename TraitsT>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(const Format& format)
+: BasicImageView<FormatT, TraitsT>(format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(Pt::uint8_t* data, Pt::ssize_t width,
+                                                      Pt::ssize_t height, Pt::ssize_t padding,
+                                                      const Format& format)
+: BasicImageView<FormatT, TraitsT>(data, width, height, padding, format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImageView<F, T>& view)
+: BasicImageView<FormatT, TraitsT>(view)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImageView<F, T>& view,
+                                                      Int x, Int y, Int w, Int h)
+: BasicImageView<FormatT, TraitsT>(view, x, y, w, h)
+{ }
+
+///////////////////////////////////////////////////////////////////////
+// BasicConstLineView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const Format& format)
+: BasicConstImageView<FormatT, TraitsT>(format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const Pt::uint8_t* data,
+                                                                Pt::ssize_t width,
+                                                                Pt::ssize_t height,
+                                                                Pt::ssize_t padding,
+                                                                const Format& format)
+: BasicConstImageView<FormatT, TraitsT>(data, width, height, padding, format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImageView<F, T>& view)
+: BasicConstImageView<FormatT, TraitsT>(view)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImageView<F, T>& view,
+                                                                Int x, Int y, Int w, Int h)
+: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImageView<F, T>& view)
+: BasicConstImageView<FormatT, TraitsT>(view)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImageView<F, T>& view,
+                                                                Int x, Int y, Int w, Int h)
+: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
+{ }
+
+
 } // namespace
 
 } // namespace

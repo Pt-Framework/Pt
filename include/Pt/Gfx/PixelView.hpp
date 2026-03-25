@@ -35,6 +35,88 @@ namespace Pt {
 
 namespace Gfx {
 
+///////////////////////////////////////////////////////////////////////
+// BasicPixelView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename TraitsT>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(const Format& format)
+: BasicImageView<FormatT, TraitsT>(format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(Pt::uint8_t* data, Pt::ssize_t width,
+                                                        Pt::ssize_t height, Pt::ssize_t padding,
+                                                        const Format& format)
+: BasicImageView<FormatT, TraitsT>(data, width, height, padding, format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImageView<F, T>& view)
+: BasicImageView<FormatT, TraitsT>(view)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImageView<F, T>& view,
+                                                        Int x, Int y, Int w, Int h)
+: BasicImageView<FormatT, TraitsT>(view, x, y, w, h)
+{ }
+
+///////////////////////////////////////////////////////////////////////
+// BasicConstPixelView
+///////////////////////////////////////////////////////////////////////
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const Format& format)
+: BasicConstImageView<FormatT, TraitsT>(format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const Pt::uint8_t* data,
+                                                                  Pt::ssize_t width,
+                                                                  Pt::ssize_t height,
+                                                                  Pt::ssize_t padding,
+                                                                  const Format& format)
+: BasicConstImageView<FormatT, TraitsT>(data, width, height, padding, format)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImageView<F, T>& view)
+: BasicConstImageView<FormatT, TraitsT>(view)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImageView<F, T>& view,
+                                                                  Int x, Int y, Int w, Int h)
+: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImageView<F, T>& view)
+: BasicConstImageView<FormatT, TraitsT>(view)
+{ }
+
+
+template <typename FormatT, typename TraitsT>
+template <typename F, typename T>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImageView<F, T>& view,
+                                                                  Int x, Int y, Int w, Int h)
+: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
+{ }
+
+
 } // namespace
 
 } // namespace

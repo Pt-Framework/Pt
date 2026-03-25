@@ -479,10 +479,6 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         */
         static void sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
-        static void sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
-                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
-                               Pt::ssize_t width, Pt::ssize_t height);
-
         //
         // SourceOver
         //
@@ -496,10 +492,6 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-        static void sourceOver(Pt::uint8_t* to, Pt::ssize_t toStride,
-                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
-                               Pt::ssize_t width, Pt::ssize_t height);
 
     private:
         /** @brief Premultiply 8-bit ARGB to a packed premultiplied uint32_t.

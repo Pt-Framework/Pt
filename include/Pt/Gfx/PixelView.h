@@ -259,7 +259,7 @@ class ConstPixelIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicPixelView
+class BasicPixelView : public BasicImageView<FormatT, TraitsT>
 {
     public:
         typedef FormatT Format;
@@ -271,26 +271,30 @@ class BasicPixelView
         typedef PixelIterator<Format, Traits> Iterator;
 
     public:
-        explicit BasicPixelView(BasicImageView<FormatT, TraitsT>& view)
-        : _view(view)
-        { }
+        explicit BasicPixelView(const Format& format);
+
+        BasicPixelView(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+                       Pt::ssize_t padding, const Format& format);
+
+        template <typename F, typename T>
+        explicit BasicPixelView(BasicImageView<F, T>& view);
+
+        template <typename F, typename T>
+        BasicPixelView(BasicImageView<F, T>& view, Int x, Int y, Int w, Int h);
 
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return Iterator(_view, x, y); }
+        { return Iterator(*this, x, y); }
 
         Iterator begin()
-        { return Iterator(_view, 0, 0); }
+        { return Iterator(*this, 0, 0); }
 
         Iterator end()
-        { return Iterator(_view, 0, _view.height()); }
-
-    private:
-        BasicImageView<FormatT, TraitsT> _view;
+        { return Iterator(*this, 0, this->height()); }
 };
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstPixelView
+class BasicConstPixelView : public BasicConstImageView<FormatT, TraitsT>
 {
     public:
         typedef FormatT Format;
@@ -303,25 +307,31 @@ class BasicConstPixelView
         typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicConstPixelView(const BasicImageView<FormatT, TraitsT>& view)
-        : _view(view)
-        { }
+        explicit BasicConstPixelView(const Format& format);
 
-        explicit BasicConstPixelView(const BasicConstImageView<FormatT, TraitsT>& view)
-        : _view(view)
-        { }
+        BasicConstPixelView(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+                            Pt::ssize_t padding, const Format& format);
+
+        template <typename F, typename T>
+        explicit BasicConstPixelView(const BasicImageView<F, T>& view);
+
+        template <typename F, typename T>
+        BasicConstPixelView(const BasicImageView<F, T>& view, Int x, Int y, Int w, Int h);
+
+        template <typename F, typename T>
+        explicit BasicConstPixelView(const BasicConstImageView<F, T>& view);
+
+        template <typename F, typename T>
+        BasicConstPixelView(const BasicConstImageView<F, T>& view, Int x, Int y, Int w, Int h);
 
         Iterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return Iterator(_view, x, y); }
+        { return Iterator(*this, x, y); }
 
         Iterator begin() const
-        { return Iterator(_view, 0, 0); }
+        { return Iterator(*this, 0, 0); }
 
         Iterator end() const
-        { return Iterator(_view, 0, _view.height()); }
-
-    private:
-        const BasicConstImageView<FormatT, TraitsT> _view;
+        { return Iterator(*this, 0, this->height()); }
 };
 
 
@@ -331,11 +341,40 @@ BasicPixelView<typename T::Format, typename T::Traits> pixelView(T& source)
     return BasicPixelView<typename T::Format, typename T::Traits>(source); 
 }
 
-
 template <typename T>
 BasicConstPixelView<typename T::Format, typename T::Traits> pixelView(const T& source) 
 {
     return BasicConstPixelView<typename T::Format, typename T::Traits>(source);
+}
+
+
+template <typename T>
+BasicPixelView<typename T::Format, typename T::Traits> pixelView(T& source, Int x, Int y, Int w, Int h)
+{ 
+    return BasicPixelView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
+}
+
+
+template <typename T>
+BasicConstPixelView<typename T::Format, typename T::Traits> pixelView(const T& source, Int x, Int y, Int w, Int h) 
+{
+    return BasicConstPixelView<typename T::Format, typename T::Traits>(source, x, y, w, h);
+}
+
+
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
+BasicPixelView<FormatT, TraitsT> pixelView(Pt::uint8_t* data, Pt::ssize_t width,
+                                           Pt::ssize_t height, Pt::ssize_t padding = 0)
+{
+    return BasicPixelView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
+}
+
+
+template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
+BasicConstPixelView<FormatT, TraitsT> pixelView(const Pt::uint8_t* data, Pt::ssize_t width,
+                                                Pt::ssize_t height, Pt::ssize_t padding = 0)
+{
+    return BasicConstPixelView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
 } // namespace

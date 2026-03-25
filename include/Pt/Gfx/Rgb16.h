@@ -298,10 +298,6 @@ class PT_GFX_API Rgb16 final : public ImageFormat
 
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
-        static void sourceCopy(Pt::uint8_t* to, Pt::ssize_t toStride,
-                               const Pt::uint8_t* from, Pt::ssize_t fromStride,
-                               Pt::ssize_t width, Pt::ssize_t height);
-
     private:
         /** @brief Encode 8-bit r/g/b to a 16-bit RGB565 value.
         */
