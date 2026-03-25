@@ -44,40 +44,17 @@ class ViewBase
 
     public:
         ViewBase()
-        : _xpos(0)
-        , _ypos(0)
-        , _width(0)
+        : _width(0)
         , _height(0)
-        , _padding(0)
         , _stride(0)
         { }
 
         ViewBase(Pt::ssize_t width, Pt::ssize_t height, 
-                 Pt::ssize_t stride, Pt::ssize_t padding = 0)
-        : _xpos(0)
-        , _ypos(0)
-        , _width(width)
+                 Pt::ssize_t stride)
+        : _width(width)
         , _height(height)
-        , _padding(padding)
         , _stride(stride)
         { }
-
-        ViewBase(Pt::ssize_t xpos, Pt::ssize_t ypos,
-                 Pt::ssize_t width, Pt::ssize_t height, 
-                 Pt::ssize_t stride, Pt::ssize_t padding = 0)
-        : _xpos(xpos)
-        , _ypos(ypos)
-        , _width(width)
-        , _height(height)
-        , _padding(padding)
-        , _stride(stride)
-        { }
-
-        Pt::ssize_t xpos() const
-        { return _xpos; }
-
-        Pt::ssize_t ypos() const
-        { return _ypos; }
 
         Pt::ssize_t width() const
         { return _width; }
@@ -91,27 +68,18 @@ class ViewBase
         Pt::ssize_t stride() const
         { return _stride; }
 
-        Pt::ssize_t padding() const
-        { return _padding; }
-
     protected:
         void setDimensions(Pt::ssize_t w, Pt::ssize_t h,
-                           Pt::ssize_t s, Pt::ssize_t p)
+                           Pt::ssize_t s)
         {
-            _xpos = 0;
-            _ypos = 0;
             _width = w;
             _height = h;
             _stride = s;
-            _padding = p;
         }
 
-    private:      
-        Pt::ssize_t   _xpos;
-        Pt::ssize_t   _ypos;
+    private:
         Pt::ssize_t   _width;
         Pt::ssize_t   _height;
-        Pt::ssize_t   _padding;
         Pt::ssize_t   _stride;
 };
 

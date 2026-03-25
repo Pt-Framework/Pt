@@ -368,9 +368,6 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         static BasePtr getPixel(const ViewBase& view, BasePtr base, 
                                 Pt::ssize_t xpos, Pt::ssize_t ypos)
         {
-            ypos += view.ypos();
-            xpos += view.xpos();
-
             base += ypos * view.stride();
             base += xpos * PixelWidth; 
             return base;

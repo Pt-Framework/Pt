@@ -71,6 +71,12 @@ class BasicImageView : public ViewBase
         const Format& format() const
         { return *_format; }
 
+        Pt::ssize_t pixelStride() const
+        { return TraitsT::pixelStride(*_format); }
+
+        Pt::ssize_t padding() const
+        { return stride() - width() * pixelStride(); }
+
     protected:
         void setData(Pt::uint8_t* data)
         { _data = data; }
@@ -119,6 +125,12 @@ class BasicConstImageView : public ViewBase
 
         const Format& format() const
         { return *_format; }
+
+        Pt::ssize_t pixelStride() const
+        { return TraitsT::pixelStride(*_format); }
+
+        Pt::ssize_t padding() const
+        { return stride() - width() * pixelStride(); }
 
     protected:
         void setData(const Pt::uint8_t* data)

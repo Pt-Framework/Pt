@@ -75,8 +75,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(
     
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -89,7 +88,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(
     
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()), 0);
+                        width * Traits::pixelStride(this->format()));
 }
 
 template <typename FormatT, typename TraitsT>
@@ -101,8 +100,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(
 {
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -113,7 +111,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(
 {
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()), 0);
+                        width * Traits::pixelStride(this->format()));
 }
 
 template <typename FormatT, typename TraitsT>
@@ -124,7 +122,7 @@ inline BasicImage<FormatT, TraitsT>::BasicImage(const BasicImage& image)
 {
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
     this->setDimensions(image.width(), image.height(),
-                        image.stride(), image.padding());
+                        image.stride());
 }
 
 template <typename FormatT, typename TraitsT>
@@ -142,7 +140,7 @@ BasicImage<FormatT, TraitsT>::operator=(const BasicImage& image)
     this->setFormat( this->getFormat() );
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
     this->setDimensions(image.width(), image.height(),
-                        image.stride(), image.padding());
+                        image.stride());
     return *this;
 }
 
@@ -154,8 +152,7 @@ inline void BasicImage<FormatT, TraitsT>::reset(
 
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -166,8 +163,7 @@ inline void BasicImage<FormatT, TraitsT>::reset(
 
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -181,8 +177,7 @@ inline void BasicImage<FormatT, TraitsT>::reset(
     this->setFormat( this->getFormat() );
     this->setData( _buffer.empty() ? nullptr : _buffer.data() );
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -197,8 +192,7 @@ inline void BasicImage<FormatT, TraitsT>::reset(
     this->setFormat( this->getFormat() );
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -207,7 +201,7 @@ inline void BasicImage<FormatT, TraitsT>::clear()
     _buffer.clear();
 
     this->setData(nullptr);
-    this->setDimensions(0, 0, 0, 0);
+    this->setDimensions(0, 0, 0);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -242,8 +236,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
 {
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -255,7 +248,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
 {
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()), 0);
+                        width * Traits::pixelStride(this->format()));
 }
 
 template <typename FormatT, typename TraitsT>
@@ -266,7 +259,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
 {
     this->setData(image.data());
     this->setDimensions(image.width(), image.height(),
-                        image.stride(), image.padding());
+                        image.stride());
 }
 
 template <typename FormatT, typename TraitsT>
@@ -276,7 +269,7 @@ inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const BasicConstImage&
 {
     this->setData(image.data());
     this->setDimensions(image.width(), image.height(),
-                        image.stride(), image.padding());
+                        image.stride());
 }
 
 template <typename FormatT, typename TraitsT>
@@ -291,7 +284,7 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicConstImage& imag
     this->setFormat( this->getFormat() );
     this->setData(image.data());
     this->setDimensions(image.width(), image.height(),
-                        image.stride(), image.padding());
+                        image.stride());
 }
 
 template <typename FormatT, typename TraitsT>
@@ -302,7 +295,7 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(
     this->setFormat( this->getFormat() );
     this->setData( image.data() );
     this->setDimensions(image.width(), image.height(),
-                        image.stride(), image.padding());
+                        image.stride());
 }
 
 template <typename FormatT, typename TraitsT>
@@ -312,8 +305,7 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(
 {
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
@@ -326,15 +318,14 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(
     this->setFormat( this->getFormat() );
     this->setData(data);
     this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding,
-                        padding);
+                        width * Traits::pixelStride(this->format()) + padding);
 }
 
 template <typename FormatT, typename TraitsT>
 inline void BasicConstImage<FormatT, TraitsT>::clear()
 {
     this->setData(nullptr);
-    this->setDimensions(0, 0, 0, 0);
+    this->setDimensions(0, 0, 0);
 }
 
 template <typename FormatT, typename TraitsT>

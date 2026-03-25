@@ -563,7 +563,7 @@ inline Yuv12Pixel& Yuv12Pixel::operator=(const Argb32Color& color)
 inline void Yuv12Pixel::advance()
 {
     Yuv12::advance(_y, _u, _v, _xpos, _ypos,
-                   _view.width(), _view.padding(), _subStride);
+                   _view.width(), _view.stride() - _view.width(), _subStride);
 }
 
 
@@ -648,7 +648,7 @@ inline ColorF Yuv12ConstPixel::toColor() const
 inline void Yuv12ConstPixel::advance()
 {
     Yuv12::advance(_y, _u, _v, _xpos, _ypos,
-                   _view.width(), _view.padding(), _subStride);
+                   _view.width(), _view.stride() - _view.width(), _subStride);
 }
 
 
