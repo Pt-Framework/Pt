@@ -30,7 +30,7 @@
 #define PT_GFX_RGB16_HPP
 
 #include <Pt/Gfx/Rgb16.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 
 namespace Pt {
 

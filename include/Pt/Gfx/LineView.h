@@ -30,7 +30,7 @@
 #define PT_GFX_LINE_VIEW_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 #include <Pt/Gfx/Span.h>
 #include <Pt/Types.h>
 
@@ -65,7 +65,7 @@ class LineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        LineIterator(BasicImageView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        LineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _span(view, x, y, view.width())
         { }
 
@@ -133,7 +133,7 @@ class ConstLineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        ConstLineIterator(const BasicConstImageView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        ConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _span(view, x, y, view.width())
         { }
 
@@ -237,7 +237,7 @@ class BasicLineView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        BasicImageView<Format, Traits> _view;
+        BasicView<Format, Traits> _view;
 };
 
 
@@ -299,7 +299,7 @@ class BasicConstLineView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        BasicConstImageView<Format, Traits> _view;
+        BasicConstView<Format, Traits> _view;
 };
 
 

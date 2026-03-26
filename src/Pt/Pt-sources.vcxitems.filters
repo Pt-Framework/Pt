@@ -2993,7 +2993,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BasicImage.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageView.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\View.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\BlockScale.h">
@@ -3026,7 +3026,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageSurface.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageView.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\View.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\JpegReader.h">

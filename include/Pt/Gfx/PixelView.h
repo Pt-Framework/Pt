@@ -30,7 +30,7 @@
 #define PT_GFX_PIXEL_VIEW_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 #include <Pt/Types.h>
 
 #include <iterator>
@@ -318,7 +318,7 @@ class BasicPixelView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        BasicImageView<Format, Traits> _view;
+        BasicView<Format, Traits> _view;
 };
 
 
@@ -380,7 +380,7 @@ class BasicConstPixelView
         { return Iterator(_view, 0, _view.height()); }
 
     private:
-        BasicConstImageView<Format, Traits> _view;
+        BasicConstView<Format, Traits> _view;
 };
 
 

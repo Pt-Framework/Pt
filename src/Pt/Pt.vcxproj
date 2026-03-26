@@ -76,8 +76,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\LineView.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PixelView.hpp" />
-    <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\ImageView.hpp" />
+    <ClInclude Include="..\..\include\Pt\Gfx\View.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\View.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\Bitmap.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />

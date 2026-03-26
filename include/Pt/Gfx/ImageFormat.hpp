@@ -30,7 +30,7 @@
 #define PT_GFX_PIXEL_HPP
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 #include <Pt/Gfx/ImageFormat.h>
 
 namespace Pt {

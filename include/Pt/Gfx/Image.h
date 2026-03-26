@@ -31,7 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 #include <Pt/Gfx/PixelView.h>
 #include <Pt/Gfx/LineView.h>
 #include <Pt/Gfx/ImageTraits.h>

@@ -31,7 +31,7 @@
 #define PT_GFX_ARGB32_HPP
 
 #include <Pt/Gfx/Argb32.h>
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 
 namespace Pt {
 

@@ -80,10 +80,10 @@ template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicConstImage;
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT>>
-class BasicImageView; 
+class BasicView; 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT>>
-class BasicConstImageView;
+class BasicConstView;
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
 class BasicPixelView; 
@@ -120,9 +120,9 @@ typedef BasicImage<ImageFormat> Image;
 
 typedef BasicConstImage<ImageFormat> ConstImage;
 
-typedef BasicImageView<ImageFormat> ImageView;
+typedef BasicView<ImageFormat> ImageView;
 
-typedef BasicConstImageView<ImageFormat> ConstImageView;
+typedef BasicConstView<ImageFormat> ConstImageView;
 
 typedef BasicPixelView<ImageFormat> PixelView;
 
@@ -143,9 +143,9 @@ typedef BasicImage<ImageFormat, ImageTraitsF> ImageF;
 
 typedef BasicConstImage<ImageFormat, ImageTraitsF> ConstImageF;
 
-typedef BasicImageView<ImageFormat, ImageTraitsF> ImageViewF;
+typedef BasicView<ImageFormat, ImageTraitsF> ImageViewF;
 
-typedef BasicConstImageView<ImageFormat, ImageTraitsF> ConstImageViewF;
+typedef BasicConstView<ImageFormat, ImageTraitsF> ConstImageViewF;
 
 typedef BasicPixelView<ImageFormat, ImageTraitsF> PixelViewF;
 
@@ -177,11 +177,11 @@ typedef BasicConstImage<Argb32> Argb32ConstImage;
 
 /** @brief ARGB-32 view.
 */
-typedef BasicImageView<Argb32> Argb32View;
+typedef BasicView<Argb32> Argb32View;
 
 /** @brief ARGB-32 const view.
 */
-typedef BasicConstImageView<Argb32> Argb32ConstView;
+typedef BasicConstView<Argb32> Argb32ConstView;
 
 /** @brief ARGB-32 pixel view.
 */
@@ -225,11 +225,11 @@ typedef BasicConstImage<Rgb16> Rgb16ConstImage;
 
 /** @brief RGB-16 view.
 */
-typedef BasicImageView<Rgb16> Rgb16View; 
+typedef BasicView<Rgb16> Rgb16View; 
 
 /** @brief RGB-16 const view.
 */
-typedef BasicConstImageView<Rgb16> Rgb16ConstView;
+typedef BasicConstView<Rgb16> Rgb16ConstView;
 
 /** @brief RGB-16 pixel view.
 */
@@ -273,11 +273,11 @@ typedef BasicConstImage<Rgb32> Rgb32ConstImage;
 
 /** @brief RGB-32 view.
 */
-typedef BasicImageView<Rgb32> Rgb32View; 
+typedef BasicView<Rgb32> Rgb32View; 
 
 /** @brief RGB-32 const view.
 */
-typedef BasicConstImageView<Rgb32> Rgb32ConstView;
+typedef BasicConstView<Rgb32> Rgb32ConstView;
 
 /** @brief RGB-32 pixel view.
 */
@@ -321,11 +321,11 @@ typedef BasicConstImage<Yuv12> Yuv12ConstImage;
 
 /** @brief YUV-12 view.
 */
-typedef BasicImageView<Yuv12> Yuv12View; 
+typedef BasicView<Yuv12> Yuv12View; 
 
 /** @brief YUV-12 conmst view.
 */
-typedef BasicImageView<Yuv12> Yuv12ConstView;
+typedef BasicView<Yuv12> Yuv12ConstView;
 
 /** @brief YUV-12 pixel view.
 */

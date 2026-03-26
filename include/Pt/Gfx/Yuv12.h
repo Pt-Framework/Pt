@@ -484,7 +484,7 @@ class PT_GFX_API Yuv12 final : public ImageFormat
 } // namespace
 
 
-#include <Pt/Gfx/ImageView.h>
+#include <Pt/Gfx/View.h>
 #include <Pt/Gfx/Argb32.h>
 
 namespace Pt {
