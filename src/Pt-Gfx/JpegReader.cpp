@@ -177,8 +177,8 @@ class JpegReaderImpl
                  if(_decomp.output_components != 3)
                     throw IOError("jpeg error");
 
-                _image->reset(ImageFormat::rgb32(), 
-                              _decomp.output_width, _decomp.output_height);
+                _image->reset(_decomp.output_width, _decomp.output_height,
+                              ImageFormat::rgb32());
 
                 _state = OnData;
             }

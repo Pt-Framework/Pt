@@ -103,18 +103,19 @@ class BasicImage : public ViewBase
         
         /** @brief Reset to new size.
         */
-        void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0);
+        void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding,
+               const Format& format = FormatT::get() );
+
+        void reset(Pt::ssize_t width, Pt::ssize_t height,
+               const Format& format = FormatT::get() );
         
         /** @brief Reset to new data.
         */
-        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0);
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+               Pt::ssize_t padding, const Format& format = FormatT::get() );
 
-        void reset(const Format& format, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0);
-
-        void reset(const Format& format, Pt::uint8_t* data, 
-                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0);
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+               const Format& format = FormatT::get() );
         
         /** @brief Clears the image.
         */
@@ -168,11 +169,11 @@ class BasicConstImage : public ViewBase
 
         void reset(const BasicImage<FormatT, TraitsT>& image);
 
-        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
-                   Pt::ssize_t padding = 0);
+        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+               Pt::ssize_t padding, const Format& format = FormatT::get() );
 
-        void reset(const Format& format, const Pt::uint8_t* data, 
-                   Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding = 0);
+        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+               const Format& format = FormatT::get() );
 
         void clear();
 

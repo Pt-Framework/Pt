@@ -211,7 +211,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
     if( ! _image )
         return;
     
-    _penBuffer.reset(_image->format(), 64, 1);
+    _penBuffer.reset(64, 1, _image->format());
 
     Gfx::PixelView fillView(_penBuffer);
     std::fill( fillView.begin(), fillView.end(), pen.color() );
@@ -235,7 +235,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
     {
         case Brush::Solid:
         {
-            _brushBuffer.reset( _image->format(), 64, 1);
+            _brushBuffer.reset(64, 1, _image->format());
             _brushSource = &_brushBuffer;
 
             Gfx::PixelView fillView(_brushBuffer);
@@ -246,8 +246,8 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
         case Brush::Texture:
             if( brush.texture().format() != _image->format() )
             {
-                _brushBuffer.reset( _image->format(), 
-                                    brush.texture().width(), brush.texture().height() );
+                _brushBuffer.reset(brush.texture().width(), brush.texture().height(),
+                                   _image->format());
 
                 copyView(brush.texture(), _brushBuffer);
                 _brushSource = &_brushBuffer;
@@ -277,12 +277,12 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
     switch( _brush.gradient() )
     {
         case Pt::Gfx::Brush::Horizontal:
-          _brushBuffer.reset(_image->format(), width, 1);
+          _brushBuffer.reset(width, 1, _image->format());
           height = 1;
           break;
 
         case Pt::Gfx::Brush::Vertical:
-          _brushBuffer.reset(_image->format(), 1, height);
+          _brushBuffer.reset(1, height, _image->format());
           width = 1;
           std::swap(gradientStart, gradientStop);
           break;

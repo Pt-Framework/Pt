@@ -428,7 +428,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
     if( _cursorBackground.width() != static_cast<int>( cursor.width() ) ||
         _cursorBackground.height() != static_cast<int>( cursor.height() ) )
     {
-        _cursorBackground.reset(_frameBuffer.format(), cursor.width(), cursor.height() );
+        _cursorBackground.reset(cursor.width(), cursor.height(), _frameBuffer.format() );
     }
 
     // keep the of background of the cursor area

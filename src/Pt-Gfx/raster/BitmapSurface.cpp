@@ -88,7 +88,7 @@ void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
     long width = lround( sizeF.width() );
     long height = lround( sizeF.height() );
 
-    _image.reset( _image.format(), width, height, stride );
+    _image.reset( width, height, stride, _image.format() );
 
     _physicalSize.set(width, height);
 }

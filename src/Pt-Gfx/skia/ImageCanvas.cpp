@@ -71,7 +71,7 @@ void ImageCanvas::reset(const Gfx::Image& image)
 {
     if( image.format() != _image.format() )
     {
-        _image.reset( format(), image.width(), image.height() );
+        _image.reset( image.width(), image.height(), format() );
         Pt::Gfx::copy( image.begin(), image.end(), _image.begin() );
     }
     else
@@ -92,7 +92,7 @@ void ImageCanvas::reset(const Gfx::SizeF& sizeF, std::size_t stride)
     long width = lround( sizeF.width() );
     long height = lround( sizeF.height() );
 
-    _image.reset( _image.format(), width, height, stride );
+    _image.reset( width, height, stride, _image.format() );
 
     _physicalSize.set(width, height);
     _logicalSize = _scaling.toLogical( Gfx::SizeF(width, height) );
