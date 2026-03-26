@@ -303,15 +303,16 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::siz
 // Rgb32Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Rgb32Pixel::Rgb32Pixel(BasicImageView<Rgb32>& view, 
-                              Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Rgb32Pixel::Rgb32Pixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, view.data(), x, y) )
 {
 }
 
 
-inline void Rgb32Pixel::reset(BasicImageView<Rgb32>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Rgb32Pixel::reset(T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb32::getPixel(view, view.data(), x, y);
@@ -514,16 +515,16 @@ inline Rgb32ConstPixel::Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicConstImageView<Rgb32>& view,
-                                        Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Rgb32ConstPixel::Rgb32ConstPixel(const T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, view.data(), x, y) )
 {
 }
 
 
-inline Rgb32ConstPixel::Rgb32ConstPixel(const BasicImageView<Rgb32>& view,
-                                        Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Rgb32ConstPixel::Rgb32ConstPixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, view.data(), x, y) )
 {
@@ -537,16 +538,16 @@ inline Rgb32ConstPixel::Rgb32ConstPixel(const Rgb32Pixel& p)
 }
 
 
-inline void Rgb32ConstPixel::reset(const BasicConstImageView<Rgb32>& view, 
-                                   Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Rgb32ConstPixel::reset(const T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb32::getPixel(view, view.data(), x, y);
 }
 
 
-inline void Rgb32ConstPixel::reset(const BasicImageView<Rgb32>& view, 
-                                   Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Rgb32ConstPixel::reset(T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb32::getPixel(view, view.data(), x, y);

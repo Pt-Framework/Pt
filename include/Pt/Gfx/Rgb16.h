@@ -50,7 +50,8 @@ class Rgb16Pixel
         typedef Argb32Color ColorType;
 
     public:
-        Rgb16Pixel(BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename T>
+        Rgb16Pixel(T& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Rgb16Pixel(const Rgb16Pixel& p) = default;
 
@@ -60,7 +61,8 @@ class Rgb16Pixel
 
         Rgb16Pixel& operator=(const Gfx::ColorF& color);
 
-        void reset(BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename T>
+        void reset(T& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Rgb16Pixel& p);
 
@@ -125,9 +127,11 @@ class Rgb16ConstPixel
                         Pt::ssize_t x, Pt::ssize_t y);
 
     public:
-        Rgb16ConstPixel(const BasicConstImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename T>
+        Rgb16ConstPixel(const T& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        Rgb16ConstPixel(const BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename T>
+        Rgb16ConstPixel(T& view, Pt::ssize_t x, Pt::ssize_t y);
 
         Rgb16ConstPixel(const Rgb16ConstPixel& p) = default;
 
@@ -135,9 +139,11 @@ class Rgb16ConstPixel
 
         ~Rgb16ConstPixel() = default;
 
-        void reset(const BasicConstImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename T>
+        void reset(const T& view, Pt::ssize_t x, Pt::ssize_t y);
 
-        void reset(const BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y);
+        template <typename T>
+        void reset(T& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Rgb16ConstPixel& p);
 

@@ -168,15 +168,16 @@ inline void Rgb16::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::siz
 // Rgb16Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Rgb16Pixel::Rgb16Pixel(BasicImageView<Rgb16>& view, 
-                              Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Rgb16Pixel::Rgb16Pixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb16::getPixel(view, view.data(), x, y) )
 {
 }
 
 
-inline void Rgb16Pixel::reset(BasicImageView<Rgb16>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Rgb16Pixel::reset(T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb16::getPixel(view, view.data(), x, y);
@@ -322,16 +323,16 @@ inline Rgb16ConstPixel::Rgb16ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicConstImageView<Rgb16>& view,
-                                        Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Rgb16ConstPixel::Rgb16ConstPixel(const T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb16::getPixel(view, view.data(), x, y) )
 {
 }
 
 
-inline Rgb16ConstPixel::Rgb16ConstPixel(const BasicImageView<Rgb16>& view,
-                                        Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Rgb16ConstPixel::Rgb16ConstPixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb16::getPixel(view, view.data(), x, y) )
 {
@@ -345,16 +346,16 @@ inline Rgb16ConstPixel::Rgb16ConstPixel(const Rgb16Pixel& p)
 }
 
 
-inline void Rgb16ConstPixel::reset(const BasicConstImageView<Rgb16>& view, 
-                                   Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Rgb16ConstPixel::reset(const T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb16::getPixel(view, view.data(), x, y);
 }
 
 
-inline void Rgb16ConstPixel::reset(const BasicImageView<Rgb16>& view, 
-                                   Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Rgb16ConstPixel::reset(T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Rgb16::getPixel(view, view.data(), x, y);

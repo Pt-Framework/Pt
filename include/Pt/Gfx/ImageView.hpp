@@ -62,24 +62,22 @@ inline BasicImageView<FormatT, TraitsT>::BasicImageView(Pt::uint8_t* data, Pt::s
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicImageView<FormatT, TraitsT>::BasicImageView(BasicImageView<F, T>& view)
-: ViewBase(view)
-, _data( view.data() )
-, _format( &view.format() )
-{
-}
+template <typename T>
+inline BasicImageView<FormatT, TraitsT>::BasicImageView(T& source)
+: ViewBase(source.width(), source.height(), source.stride())
+, _data( source.data() )
+, _format( &source.format() )
+{ }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicImageView<FormatT, TraitsT>::BasicImageView(BasicImageView<F, T>& view, 
-                                                        Int x, Int y, Int w, Int h)
-: ViewBase( w, h, view.stride() )
-, _data( view.data() + y * view.stride() + x * view.pixelStride() )
-, _format( &view.format() )
-{
-}
+template <typename T>
+inline BasicImageView<FormatT, TraitsT>::BasicImageView(T& source,
+                            Int x, Int y, Int w, Int h)
+: ViewBase( w, h, source.stride() )
+, _data( source.data() + y * source.stride() + x * source.pixelStride() )
+, _format( &source.format() )
+{ }
 
 ///////////////////////////////////////////////////////////////////////
 // BasicConstImageView
@@ -106,47 +104,22 @@ inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const Pt::uint
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const BasicImageView<F, T>& view)
-: ViewBase(view.width(), view.height(), 
-           view.stride())
-, _data( view.data() )
-, _format( &view.format() )
-{
-}
+template <typename T>
+inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const T& source)
+: ViewBase(source.width(), source.height(), source.stride())
+, _data( source.data() )
+, _format( &source.format() )
+{ }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const BasicImageView<F, T>& view,
-                                                                  Int x, Int y, Int w, Int h)
-: ViewBase( w, h, view.stride() )
-, _data( view.data() + y * view.stride() + x * view.pixelStride() )
-, _format( &view.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const BasicConstImageView<F, T>& view)
-: ViewBase(view.width(), view.height(), 
-           view.stride())
-, _data( view.data() )
-, _format( &view.format() )
-{
-}
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const BasicConstImageView<F, T>& view,
-                                                                  Int x, Int y, Int w, Int h)
-: ViewBase( w, h, view.stride() )
-, _data( view.data() + y * view.stride() + x * view.pixelStride() )
-, _format( &view.format() )
-{
-}
+template <typename T>
+inline BasicConstImageView<FormatT, TraitsT>::BasicConstImageView(const T& source,
+                                  Int x, Int y, Int w, Int h)
+: ViewBase( w, h, source.stride() )
+, _data( source.data() + y * source.stride() + x * source.pixelStride() )
+, _format( &source.format() )
+{ }
 
 
 } // namespace

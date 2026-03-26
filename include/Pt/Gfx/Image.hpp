@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -37,182 +37,167 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// FormatPtr
-///////////////////////////////////////////////////////////////////////
-
-template <typename FormatT, typename TraitsT>
-inline FormatPtr<FormatT, TraitsT>::FormatPtr(const FormatT& format)
-: _ownedFormat( TraitsT::clone(format) )
-{ }
-
-template <typename FormatT, typename TraitsT>
-inline const FormatT& FormatPtr<FormatT, TraitsT>::getFormat() const
-{ return *_ownedFormat; }
-
-template <typename FormatT, typename TraitsT>
-inline void FormatPtr<FormatT, TraitsT>::resetFormat(const FormatT& format)
-{
-    _ownedFormat = TraitsT::clone(format);
-}
-
-///////////////////////////////////////////////////////////////////////
 // BasicImage
 ///////////////////////////////////////////////////////////////////////
 
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicImageView<FormatT, TraitsT>( this->getFormat() )
-{ }
+: ViewBase()
+, _format( TraitsT::clone(format) )
+, _data(nullptr)
+{
+}
+
 
 template <typename FormatT, typename TraitsT>
-inline BasicImage<FormatT, TraitsT>::BasicImage(
-    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding, const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicImageView<FormatT, TraitsT>( this->getFormat() )
+inline BasicImage<FormatT, TraitsT>::BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
+                                                Pt::ssize_t padding, const Format& format)
+: ViewBase(width, height, width * Traits::pixelStride(format) + padding)
+, _format( TraitsT::clone(format) )
+, _data(nullptr)
 {
     _buffer.resize( Traits::imageSize(this->format(), width, height, padding) );
-    
-    this->setData( _buffer.empty() ? nullptr : _buffer.data() );
-    this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding);
+    _data = _buffer.empty() ? nullptr : _buffer.data();
 }
 
+
 template <typename FormatT, typename TraitsT>
-inline BasicImage<FormatT, TraitsT>::BasicImage(
-    Pt::ssize_t width, Pt::ssize_t height, const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicImageView<FormatT, TraitsT>( this->getFormat() )
+inline BasicImage<FormatT, TraitsT>::BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
+                                                const Format& format)
+: ViewBase(width, height, width * Traits::pixelStride(format))
+, _format( TraitsT::clone(format) )
+, _data(nullptr)
 {
     _buffer.resize( Traits::imageSize(this->format(), width, height, 0) );
-    
-    this->setData( _buffer.empty() ? nullptr : _buffer.data() );
-    this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()));
+    _data = _buffer.empty() ? nullptr : _buffer.data();
 }
 
-template <typename FormatT, typename TraitsT>
-inline BasicImage<FormatT, TraitsT>::BasicImage(
-    Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-    Pt::ssize_t padding, const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicImageView<FormatT, TraitsT>( this->getFormat() )
-{
-    this->setData(data);
-    this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding);
-}
 
 template <typename FormatT, typename TraitsT>
-inline BasicImage<FormatT, TraitsT>::BasicImage(
-    Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicImageView<FormatT, TraitsT>( this->getFormat() )
+inline BasicImage<FormatT, TraitsT>::BasicImage(Pt::uint8_t* data, Pt::ssize_t width,
+                                                Pt::ssize_t height,Pt::ssize_t padding,
+                                                const Format& format)
+: ViewBase(width, height, width * Traits::pixelStride(format) + padding)
+, _format( TraitsT::clone(format) )
+, _data(data)
 {
-    this->setData(data);
-    this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()));
 }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicImage<FormatT, TraitsT>::BasicImage(Pt::uint8_t* data, Pt::ssize_t width,
+                                                Pt::ssize_t height, const Format& format)
+: ViewBase(width, height, width * Traits::pixelStride(format))
+, _format( TraitsT::clone(format) )
+, _data(data)
+{
+}
+
 
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const BasicImage& image)
-: FormatPtr<FormatT, TraitsT>( image.format() )
-, BasicImageView<FormatT, TraitsT>( this->getFormat() )
+: ViewBase(image.width(), image.height(), image.stride())
+, _format( TraitsT::clone(image.format()) )
 , _buffer(image._buffer)
+, _data(nullptr)
 {
-    this->setData( _buffer.empty() ? nullptr : _buffer.data() );
-    this->setDimensions(image.width(), image.height(),
-                        image.stride());
+    _data = _buffer.empty() ? const_cast<Pt::uint8_t*>(image.data()) : _buffer.data();
 }
+
 
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::~BasicImage()
-{ }
+{
+}
+
 
 template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>&
 BasicImage<FormatT, TraitsT>::operator=(const BasicImage& image)
-{ 
+{
     _buffer = image._buffer;
 
-    this->resetFormat( image.format() );
+    _format = TraitsT::clone(image.format());
 
-    this->setFormat( this->getFormat() );
-    this->setData( _buffer.empty() ? nullptr : _buffer.data() );
-    this->setDimensions(image.width(), image.height(),
-                        image.stride());
+    _data = _buffer.empty() ? const_cast<Pt::uint8_t*>(image.data()) : _buffer.data();
+    this->setDimensions(image.width(), image.height(), image.stride());
     return *this;
 }
 
+
 template <typename FormatT, typename TraitsT>
-inline void BasicImage<FormatT, TraitsT>::reset(
-    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
-{ 
+inline void BasicImage<FormatT, TraitsT>::reset(Pt::ssize_t width, Pt::ssize_t height, 
+                                                Pt::ssize_t padding)
+{
     _buffer.resize( Traits::imageSize(this->format(), width, height, padding) );
 
-    this->setData( _buffer.empty() ? nullptr : _buffer.data() );
+    _data = _buffer.empty() ? nullptr : _buffer.data();
     this->setDimensions(width, height,
                         width * Traits::pixelStride(this->format()) + padding);
 }
 
+
 template <typename FormatT, typename TraitsT>
-inline void BasicImage<FormatT, TraitsT>::reset(
-    Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
+inline void BasicImage<FormatT, TraitsT>::reset(Pt::uint8_t* data, Pt::ssize_t width, 
+                                                Pt::ssize_t height, Pt::ssize_t padding)
 {
     _buffer.clear();
 
-    this->setData(data);
+    _data = data;
     this->setDimensions(width, height,
                         width * Traits::pixelStride(this->format()) + padding);
 }
 
+
 template <typename FormatT, typename TraitsT>
-inline void BasicImage<FormatT, TraitsT>::reset(
-    const Format& format, Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
-{ 
+inline void BasicImage<FormatT, TraitsT>::reset(const Format& format, Pt::ssize_t width, 
+                                                Pt::ssize_t height, Pt::ssize_t padding)
+{
     _buffer.resize( Traits::imageSize(format, width, height, padding) );
 
-    this->resetFormat(format);
+    _format = TraitsT::clone(format);
 
-    this->setFormat( this->getFormat() );
-    this->setData( _buffer.empty() ? nullptr : _buffer.data() );
+    _data = _buffer.empty() ? nullptr : _buffer.data();
     this->setDimensions(width, height,
                         width * Traits::pixelStride(this->format()) + padding);
 }
 
+
 template <typename FormatT, typename TraitsT>
-inline void BasicImage<FormatT, TraitsT>::reset(
-    const Format& format, Pt::uint8_t* data,
-    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
+inline void BasicImage<FormatT, TraitsT>::reset(const Format& format, Pt::uint8_t* data,
+                                                Pt::ssize_t width, Pt::ssize_t height,
+                                                Pt::ssize_t padding)
 {
     _buffer.clear();
 
-    this->resetFormat(format);
+    _format = TraitsT::clone(format);
 
-    this->setFormat( this->getFormat() );
-    this->setData(data);
+    _data = data;
     this->setDimensions(width, height,
                         width * Traits::pixelStride(this->format()) + padding);
 }
+
 
 template <typename FormatT, typename TraitsT>
 inline void BasicImage<FormatT, TraitsT>::clear()
 {
     _buffer.clear();
 
-    this->setData(nullptr);
+    _data = nullptr;
     this->setDimensions(0, 0, 0);
 }
 
-template <typename FormatT, typename TraitsT>
-inline Pt::ssize_t BasicImage<FormatT, TraitsT>::pixelStride() const
-{ 
-    return Traits::pixelStride(this->format()); 
-}
 
 template <typename FormatT, typename TraitsT>
-inline std::size_t BasicImage<FormatT, TraitsT>::size(
-    Pt::ssize_t width, Pt::ssize_t height, std::size_t padding) const
+inline Pt::ssize_t BasicImage<FormatT, TraitsT>::pixelStride() const
+{
+    return Traits::pixelStride(this->format());
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline std::size_t BasicImage<FormatT, TraitsT>::size(Pt::ssize_t width, Pt::ssize_t height, 
+                                                      std::size_t padding) const
 {
     return Traits::imageSize(this->format(), width, height, padding);
 }
@@ -223,120 +208,119 @@ inline std::size_t BasicImage<FormatT, TraitsT>::size(
 
 template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
-{ }
-
-template <typename FormatT, typename TraitsT>
-inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
-    const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-    Pt::ssize_t padding, const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
+: ViewBase()
+, _format( TraitsT::clone(format) )
+, _data(nullptr)
 {
-    this->setData(data);
-    this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()) + padding);
 }
 
-template <typename FormatT, typename TraitsT>
-inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
-    const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-    const Format& format)
-: FormatPtr<FormatT, TraitsT>(format)
-, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
-{
-    this->setData(data);
-    this->setDimensions(width, height,
-                        width * Traits::pixelStride(this->format()));
-}
 
 template <typename FormatT, typename TraitsT>
-inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(
-    const BasicImage<FormatT, TraitsT>& image)
-: FormatPtr<FormatT, TraitsT>(image.format())
-, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
+inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width,
+                                                          Pt::ssize_t height, Pt::ssize_t padding, 
+                                                          const Format& format)
+: ViewBase(width, height, width * Traits::pixelStride(format) + padding)
+, _format( TraitsT::clone(format) )
+, _data(data)
 {
-    this->setData(image.data());
-    this->setDimensions(image.width(), image.height(),
-                        image.stride());
 }
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const Pt::uint8_t* data, Pt::ssize_t width, 
+                                                          Pt::ssize_t height,const Format& format)
+: ViewBase(width, height, width * Traits::pixelStride(format))
+, _format( TraitsT::clone(format) )
+, _data(data)
+{
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const BasicImage<FormatT, TraitsT>& image)
+: ViewBase(image.width(), image.height(), image.stride())
+, _format( TraitsT::clone(image.format()) )
+, _data(image.data())
+{
+}
+
 
 template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::BasicConstImage(const BasicConstImage& image)
-: FormatPtr<FormatT, TraitsT>(image.format())
-, BasicConstImageView<FormatT, TraitsT>( this->getFormat() )
+: ViewBase(image.width(), image.height(), image.stride())
+, _format( TraitsT::clone(image.format()) )
+, _data(image.data())
 {
-    this->setData(image.data());
-    this->setDimensions(image.width(), image.height(),
-                        image.stride());
 }
+
 
 template <typename FormatT, typename TraitsT>
 inline BasicConstImage<FormatT, TraitsT>::~BasicConstImage()
-{ }
+{
+}
+
 
 template <typename FormatT, typename TraitsT>
 inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicConstImage& image)
-{ 
-    this->resetFormat( image.format() );
-    
-    this->setFormat( this->getFormat() );
-    this->setData(image.data());
-    this->setDimensions(image.width(), image.height(),
-                        image.stride());
-}
-
-template <typename FormatT, typename TraitsT>
-inline void BasicConstImage<FormatT, TraitsT>::reset(
-    const BasicImage<FormatT, TraitsT>& image)
-{ 
-    this->resetFormat( image.format() );
-    this->setFormat( this->getFormat() );
-    this->setData( image.data() );
-    this->setDimensions(image.width(), image.height(),
-                        image.stride());
-}
-
-template <typename FormatT, typename TraitsT>
-inline void BasicConstImage<FormatT, TraitsT>::reset(
-    const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-    Pt::ssize_t padding)
 {
-    this->setData(data);
+    _format = TraitsT::clone(image.format());
+
+    _data = image.data();
+    this->setDimensions(image.width(), image.height(), image.stride());
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicConstImage<FormatT, TraitsT>::reset(const BasicImage<FormatT, TraitsT>& image)
+{
+    _format = TraitsT::clone(image.format());
+
+    _data = image.data();
+    this->setDimensions(image.width(), image.height(), image.stride());
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicConstImage<FormatT, TraitsT>::reset(const Pt::uint8_t* data, Pt::ssize_t width, 
+                                                     Pt::ssize_t height, Pt::ssize_t padding)
+{
+    _data = data;
     this->setDimensions(width, height,
                         width * Traits::pixelStride(this->format()) + padding);
 }
 
+
 template <typename FormatT, typename TraitsT>
-inline void BasicConstImage<FormatT, TraitsT>::reset(
-    const Format& format, const Pt::uint8_t* data,
-    Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding)
+inline void BasicConstImage<FormatT, TraitsT>::reset(const Format& format, const Pt::uint8_t* data,
+                                                     Pt::ssize_t width, Pt::ssize_t height,
+                                                     Pt::ssize_t padding)
 {
-    this->resetFormat(format);
-    
-    this->setFormat( this->getFormat() );
-    this->setData(data);
+    _format = TraitsT::clone(format);
+
+    _data = data;
     this->setDimensions(width, height,
                         width * Traits::pixelStride(this->format()) + padding);
 }
+
 
 template <typename FormatT, typename TraitsT>
 inline void BasicConstImage<FormatT, TraitsT>::clear()
 {
-    this->setData(nullptr);
+    _data = nullptr;
     this->setDimensions(0, 0, 0);
 }
 
-template <typename FormatT, typename TraitsT>
-inline Pt::ssize_t BasicConstImage<FormatT, TraitsT>::pixelStride() const
-{ 
-    return Traits::pixelStride(this->format()); 
-}
 
 template <typename FormatT, typename TraitsT>
-inline std::size_t BasicConstImage<FormatT, TraitsT>::size(
-    Pt::ssize_t width, Pt::ssize_t height, std::size_t padding) const
+inline Pt::ssize_t BasicConstImage<FormatT, TraitsT>::pixelStride() const
+{
+    return Traits::pixelStride(this->format());
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline std::size_t BasicConstImage<FormatT, TraitsT>::size(Pt::ssize_t width, Pt::ssize_t height,
+                                                           std::size_t padding) const
 {
     return Traits::imageSize(this->format(), width, height, padding);
 }

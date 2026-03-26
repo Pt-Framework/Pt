@@ -69,6 +69,10 @@ class ViewBase
         { return _stride; }
 
     protected:
+        ~ViewBase()
+        { }
+
+    protected:
         void setDimensions(Pt::ssize_t w, Pt::ssize_t h,
                            Pt::ssize_t s)
         {

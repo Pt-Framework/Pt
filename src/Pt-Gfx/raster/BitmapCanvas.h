@@ -280,7 +280,6 @@ class BitmapCanvas : public Canvas
         
         Pen                         _pen;
         Image                       _penBuffer;
-        ConstPixelView::ConstPixel  _penPixel;
 
         Brush                       _brush;
         Image                       _brushBuffer;

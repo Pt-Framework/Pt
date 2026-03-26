@@ -258,15 +258,16 @@ inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::si
 // Argb32Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Argb32Pixel::Argb32Pixel(BasicImageView<Argb32>& view, 
-                                Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Argb32Pixel::Argb32Pixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Argb32::getPixel(view, view.data(), x, y) )
 {
 }
 
 
-inline void Argb32Pixel::reset(BasicImageView<Argb32>& view, Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Argb32Pixel::reset(T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Argb32::getPixel(view, view.data(), x, y);
@@ -442,16 +443,16 @@ inline Argb32ConstPixel::Argb32ConstPixel(const Pt::uint8_t* data, const ViewBas
 }
 
 
-inline Argb32ConstPixel::Argb32ConstPixel(const BasicConstImageView<Argb32>& view,
-                                          Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Argb32ConstPixel::Argb32ConstPixel(const T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Argb32::getPixel(view, view.data(), x, y) )
 {
 }
 
 
-inline Argb32ConstPixel::Argb32ConstPixel(const BasicImageView<Argb32>& view,
-                                          Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline Argb32ConstPixel::Argb32ConstPixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Argb32::getPixel(view, view.data(), x, y) )
 {
@@ -465,16 +466,16 @@ inline Argb32ConstPixel::Argb32ConstPixel(const Argb32Pixel& p)
 }
 
 
-inline void Argb32ConstPixel::reset(const BasicConstImageView<Argb32>& view, 
-                                     Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Argb32ConstPixel::reset(const T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Argb32::getPixel(view, view.data(), x, y);
 }
 
 
-inline void Argb32ConstPixel::reset(const BasicImageView<Argb32>& view, 
-                                    Pt::ssize_t x, Pt::ssize_t y)
+template <typename T>
+inline void Argb32ConstPixel::reset(T& view, Pt::ssize_t x, Pt::ssize_t y)
 {
     _view = &view;
     _base = Argb32::getPixel(view, view.data(), x, y);

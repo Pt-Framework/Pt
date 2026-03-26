@@ -92,7 +92,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32Image to(8, 8, 4);
             
             Argb32View subView(to, 1, 1, 2, 2);
-            copyView(view(from), subView);
+            copyView(from, subView);
 
             Argb32PixelView pixelView(to);
             Argb32PixelView::Iterator pixel = pixelView.pixel(2, 2);
@@ -268,7 +268,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
                 Pt::System::Clock clock;
                 clock.start();
-            
+
                 copyView(fromImage, toImage);
 
                 Pt::uint64_t time = clock.stop().toUSecs();

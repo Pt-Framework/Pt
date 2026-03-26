@@ -25,6 +25,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  MA  02110-1301  USA
 */
+
 #include "ArrowCursor.h"
 #include "SizeWECursor.h"
 #include "SizeNSCursor.h"
@@ -66,43 +67,46 @@ const Cursor& Cursor::defaultCursor()
 }
 
 
-void Cursor::loadCursor( const char* pngFile, const Gfx::ColorF& alphaColor, Cursor& cursor )
+void Cursor::loadCursor(const char* pngFile, const Gfx::ColorF& alphaColor, Cursor& cursor)
 {
-  std::fstream fs( pngFile, std::ios::binary |  std::ios::in );
+    std::fstream fs(pngFile, std::ios::binary | std::ios::in);
+    if( ! fs )
+        throw std::invalid_argument( "File not found." );
 
-  if( !fs )
-    throw std::invalid_argument( "File not found." );
-
-  loadCursor( fs, alphaColor, cursor);
+    loadCursor( fs, alphaColor, cursor);
 }
 
 
-void Cursor::loadCursor( std::istream& pngStream, const Gfx::ColorF& alphaColor, Cursor& cursor )
+void Cursor::loadCursor(std::istream& pngStream, const Gfx::ColorF& alphaColor, Cursor& cursor)
 {
-  Gfx::Image image;
-  Gfx::PngReader reader(pngStream, image);
+    Gfx::Image image;
+    Gfx::PngReader reader(pngStream, image);
+    reader.get();
 
-  reader.get();
+    Gfx::PixelViewF pixels(image);
 
-    //Generate alpha channel
-    for( size_t y = 0;  y < image.height(); ++y )
+    // alpha channel from mask color
+    for(auto& pixel : pixels)
     {
-        for( size_t x = 0;  x < image.width(); ++x )
-        {
-            Gfx::PixelViewF::Pixel pixel(image, x, y);
-            Gfx::ColorF color = pixel.toColor();
-            
-            if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
-                color.setAlpha(0);
-            else
-                color.setAlpha(65535);
+        Gfx::ColorF color = pixel.toColor();
 
-            pixel = color;
+        if( color.red() == alphaColor.red()
+            && color.green() == alphaColor.green()
+            && color.blue() == alphaColor.blue() )
+        {
+            color.setAlpha(0);
         }
+        else
+        {
+            color.setAlpha(65535);
+        }
+
+        pixel = color;
     }
 
-    Gfx::PixelView::Pixel pixel(image, cursor.xHotspot(), cursor.yHotspot());
-    pixel = Gfx::ColorF(0, 65535, 0);
+    auto hotspot = pixels.pixel(cursor.xHotspot(), 
+                                cursor.yHotspot());
+    *hotspot = Gfx::ColorF(0, 65535, 0);
 
     fromImage(image, cursor);
 }
@@ -113,9 +117,9 @@ void Cursor::loadCursor( const Pt::uint8_t* pngStream, const size_t size, const 
     std::stringstream ms(std::ios::binary|std::ios::in|std::ios::out);
         
     ms.write((char*)pngStream, size);    
-  ms.seekg(0,std::ios::beg);
+    ms.seekg(0,std::ios::beg);
 
-  loadCursor(ms, alphaColor, cursor);
+    loadCursor(ms, alphaColor, cursor);
 }
 
 
@@ -233,40 +237,45 @@ const Cursor& Cursor::sizeNSCursor()
 
 void Cursor::fromImage(const Gfx::Image& image, Cursor& cursor)
 {
-    cursor._height   = image.height();
-    cursor._width    = image.width();
+    cursor._height = image.height();
+    cursor._width  = image.width();
+    cursor._andMask.clear();
+    cursor._xorMask.clear();
 
-    for( size_t y = 0; y < cursor._height; ++y )
+    const size_t maskSize = cursor._width * cursor._height * 4;
+    cursor._andMask.reserve(maskSize);
+    cursor._xorMask.reserve(maskSize);
+
+    Gfx::ConstPixelViewF pixels(image);
+
+    for(const auto& pixel : pixels)
     {
-        for( size_t x = 0; x < cursor._width; ++x )
+        Gfx::ColorF color = pixel.toColor();
+
+        if(color.alpha() == 0)
         {
-            Gfx::ConstPixelViewF::ConstPixel pixel(image, x, y);
-            Gfx::ColorF color = pixel.toColor();
+            // transparent
+            cursor._andMask.push_back(0xff);
+            cursor._andMask.push_back(0xff);
+            cursor._andMask.push_back(0xff);
+            cursor._andMask.push_back(0xff);
 
-            if( color.alpha() == 0 )
-            {//Transparent
-                cursor._andMask.push_back( 0xff );
-                cursor._andMask.push_back( 0xff );
-                cursor._andMask.push_back( 0xff );                
-                cursor._andMask.push_back( 0xff );    
+            cursor._xorMask.push_back(0);
+            cursor._xorMask.push_back(0);
+            cursor._xorMask.push_back(0);
+            cursor._xorMask.push_back(0);
+        }
+        else
+        {
+            cursor._andMask.push_back(0);
+            cursor._andMask.push_back(0);
+            cursor._andMask.push_back(0);
+            cursor._andMask.push_back(0);
 
-                cursor._xorMask.push_back( 0 );
-                cursor._xorMask.push_back( 0 );
-                cursor._xorMask.push_back( 0 );
-                cursor._xorMask.push_back( 0 );
-            }
-            else
-            {
-                cursor._andMask.push_back( 0 );
-                cursor._andMask.push_back( 0 );
-                cursor._andMask.push_back( 0 );
-                cursor._andMask.push_back( 0 );
-                    
-                cursor._xorMask.push_back( (Pt::uint8_t) (color.red() / 257) );
-                cursor._xorMask.push_back( (Pt::uint8_t) (color.green() / 257) );
-                cursor._xorMask.push_back( (Pt::uint8_t) (color.blue() / 257));
-                cursor._xorMask.push_back( 0xFF);
-            }
+            cursor._xorMask.push_back((Pt::uint8_t) (color.red() / 257));
+            cursor._xorMask.push_back((Pt::uint8_t) (color.green() / 257));
+            cursor._xorMask.push_back((Pt::uint8_t) (color.blue() / 257));
+            cursor._xorMask.push_back(0xFF);
         }
     }
 }

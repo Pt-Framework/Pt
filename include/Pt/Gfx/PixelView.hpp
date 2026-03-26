@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -41,7 +41,7 @@ namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
 inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(const Format& format)
-: BasicImageView<FormatT, TraitsT>(format)
+: _view(format)
 { }
 
 
@@ -49,22 +49,22 @@ template <typename FormatT, typename TraitsT>
 inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(Pt::uint8_t* data, Pt::ssize_t width,
                                                         Pt::ssize_t height, Pt::ssize_t padding,
                                                         const Format& format)
-: BasicImageView<FormatT, TraitsT>(data, width, height, padding, format)
+: _view(data, width, height, padding, format)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImageView<F, T>& view)
-: BasicImageView<FormatT, TraitsT>(view)
+template <typename T>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(T& source)
+: _view(source)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImageView<F, T>& view,
+template <typename T>
+inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(T& source,
                                                         Int x, Int y, Int w, Int h)
-: BasicImageView<FormatT, TraitsT>(view, x, y, w, h)
+: _view(source, x, y, w, h)
 { }
 
 ///////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ inline BasicPixelView<FormatT, TraitsT>::BasicPixelView(BasicImageView<F, T>& vi
 
 template <typename FormatT, typename TraitsT>
 inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const Format& format)
-: BasicConstImageView<FormatT, TraitsT>(format)
+: _view(format)
 { }
 
 
@@ -83,37 +83,22 @@ inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const Pt::uint
                                                                   Pt::ssize_t height,
                                                                   Pt::ssize_t padding,
                                                                   const Format& format)
-: BasicConstImageView<FormatT, TraitsT>(data, width, height, padding, format)
+: _view(data, width, height, padding, format)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImageView<F, T>& view)
-: BasicConstImageView<FormatT, TraitsT>(view)
+template <typename T>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const T& source)
+: _view(source)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicImageView<F, T>& view,
+template <typename T>
+inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const T& source,
                                                                   Int x, Int y, Int w, Int h)
-: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImageView<F, T>& view)
-: BasicConstImageView<FormatT, TraitsT>(view)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstPixelView<FormatT, TraitsT>::BasicConstPixelView(const BasicConstImageView<F, T>& view,
-                                                                  Int x, Int y, Int w, Int h)
-: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
+: _view(source, x, y, w, h)
 { }
 
 

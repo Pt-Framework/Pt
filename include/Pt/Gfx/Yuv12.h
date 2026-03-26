@@ -57,8 +57,8 @@ class PT_GFX_API Yuv12Pixel
                    Pt::ssize_t x, Pt::ssize_t y);
 
     public:
-        Yuv12Pixel(BasicImageView<Yuv12>& view, 
-                   Pt::ssize_t xpos, Pt::ssize_t ypos);
+        template <typename T>
+        Yuv12Pixel(T& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
 
         Yuv12Pixel(const Yuv12Pixel& p)
         : _view(p._view)
@@ -150,11 +150,11 @@ class Yuv12ConstPixel
                         Pt::ssize_t xpos, Pt::ssize_t ypos);
     
     public:
-        Yuv12ConstPixel(const BasicConstImageView<Yuv12>& view,
-                        Pt::ssize_t xpos, Pt::ssize_t ypos);
+        template <typename T>
+        Yuv12ConstPixel(const T& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
 
-        Yuv12ConstPixel(const BasicImageView<Yuv12>& view, 
-                        Pt::ssize_t xpos, Pt::ssize_t ypos);
+        template <typename T>
+        Yuv12ConstPixel(T& view, Pt::ssize_t xpos, Pt::ssize_t ypos);
 
         Yuv12ConstPixel(const Yuv12ConstPixel& p)
         : _view(p._view)
@@ -495,8 +495,8 @@ namespace Gfx {
 // Yuv12Pixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Yuv12Pixel::Yuv12Pixel(BasicImageView<Yuv12>& view, 
-                              Pt::ssize_t xpos, Pt::ssize_t ypos)
+template <typename T>
+inline Yuv12Pixel::Yuv12Pixel(T& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view(view)
 , _xpos(xpos)
 , _ypos(ypos)
@@ -591,8 +591,8 @@ inline void Yuv12Pixel::advanceLines(Pt::ssize_t n)
 // Yuv12ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicConstImageView<Yuv12>& view, 
-                                        Pt::ssize_t xpos, Pt::ssize_t ypos)
+template <typename T>
+inline Yuv12ConstPixel::Yuv12ConstPixel(const T& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view( view )
 , _xpos(xpos)
 , _ypos(ypos)
@@ -607,8 +607,8 @@ inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicConstImageView<Yuv12>& view,
 }
 
 
-inline Yuv12ConstPixel::Yuv12ConstPixel(const BasicImageView<Yuv12>& view, 
-                                        Pt::ssize_t xpos, Pt::ssize_t ypos)
+template <typename T>
+inline Yuv12ConstPixel::Yuv12ConstPixel(T& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
 : _view( view )
 , _xpos(xpos)
 , _ypos(ypos)

@@ -45,27 +45,10 @@ namespace Gfx {
 
 //inline namespace v2 {
 
-/** @brief Owns a format.
-*/
-template <typename FormatT, typename TraitsT>
-class FormatPtr
-{
-    protected:
-        explicit FormatPtr(const FormatT& format);
-
-        const FormatT& getFormat() const;
-
-        void resetFormat(const FormatT& format);
-
-    private:
-        std::unique_ptr<FormatT> _ownedFormat;
-};
-
 /** @brief Basic image.
 */
 template <typename FormatT, typename TraitsT>
-class BasicImage : private FormatPtr<FormatT, TraitsT>
-                 , public BasicImageView<FormatT, TraitsT>
+class BasicImage : public ViewBase
 {
     public:
         typedef FormatT Format;
@@ -105,6 +88,18 @@ class BasicImage : private FormatPtr<FormatT, TraitsT>
         virtual ~BasicImage();
 
         BasicImage& operator=(const BasicImage& image);
+
+        Pt::uint8_t* data()
+        { return _data; }
+
+        const Pt::uint8_t* data() const
+        { return _data; }
+
+        const Format& format() const
+        { return *_format; }
+
+        Pt::ssize_t padding() const
+        { return stride() - width() * pixelStride(); }
         
         /** @brief Reset to new size.
         */
@@ -131,14 +126,15 @@ class BasicImage : private FormatPtr<FormatT, TraitsT>
                          std::size_t padding) const;
 
     private:
+        std::unique_ptr<FormatT> _format;
         std::vector<Pt::uint8_t> _buffer;
+        Pt::uint8_t* _data;
 };
 
 /** @brief Basic const image.
 */
 template <typename FormatT, typename TraitsT>
-class BasicConstImage : private FormatPtr<FormatT, TraitsT>
-                      , public BasicConstImageView<FormatT, TraitsT>
+class BasicConstImage : public ViewBase
 {
     public:
         typedef FormatT Format;
@@ -159,6 +155,15 @@ class BasicConstImage : private FormatPtr<FormatT, TraitsT>
 
         virtual ~BasicConstImage();
 
+        const Pt::uint8_t* data() const
+        { return _data; }
+
+        const Format& format() const
+        { return *_format; }
+
+        Pt::ssize_t padding() const
+        { return stride() - width() * pixelStride(); }
+
         void reset(const BasicConstImage& image);
 
         void reset(const BasicImage<FormatT, TraitsT>& image);
@@ -175,6 +180,10 @@ class BasicConstImage : private FormatPtr<FormatT, TraitsT>
 
         std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
                          std::size_t padding) const;
+
+    private:
+        std::unique_ptr<FormatT> _format;
+        const Pt::uint8_t* _data;
 };
 
 // } // namespace

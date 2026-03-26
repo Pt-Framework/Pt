@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -41,7 +41,7 @@ namespace Gfx {
 
 template <typename FormatT, typename TraitsT>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(const Format& format)
-: BasicImageView<FormatT, TraitsT>(format)
+: _view(format)
 { }
 
 
@@ -49,22 +49,22 @@ template <typename FormatT, typename TraitsT>
 inline BasicLineView<FormatT, TraitsT>::BasicLineView(Pt::uint8_t* data, Pt::ssize_t width,
                                                       Pt::ssize_t height, Pt::ssize_t padding,
                                                       const Format& format)
-: BasicImageView<FormatT, TraitsT>(data, width, height, padding, format)
+: _view(data, width, height, padding, format)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImageView<F, T>& view)
-: BasicImageView<FormatT, TraitsT>(view)
+template <typename T>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(T& source)
+: _view(source)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImageView<F, T>& view,
+template <typename T>
+inline BasicLineView<FormatT, TraitsT>::BasicLineView(T& source,
                                                       Int x, Int y, Int w, Int h)
-: BasicImageView<FormatT, TraitsT>(view, x, y, w, h)
+: _view(source, x, y, w, h)
 { }
 
 ///////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ inline BasicLineView<FormatT, TraitsT>::BasicLineView(BasicImageView<F, T>& view
 
 template <typename FormatT, typename TraitsT>
 inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const Format& format)
-: BasicConstImageView<FormatT, TraitsT>(format)
+: _view(format)
 { }
 
 
@@ -83,37 +83,22 @@ inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const Pt::uint8_
                                                                 Pt::ssize_t height,
                                                                 Pt::ssize_t padding,
                                                                 const Format& format)
-: BasicConstImageView<FormatT, TraitsT>(data, width, height, padding, format)
+: _view(data, width, height, padding, format)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImageView<F, T>& view)
-: BasicConstImageView<FormatT, TraitsT>(view)
+template <typename T>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const T& source)
+: _view(source)
 { }
 
 
 template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicImageView<F, T>& view,
+template <typename T>
+inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const T& source,
                                                                 Int x, Int y, Int w, Int h)
-: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImageView<F, T>& view)
-: BasicConstImageView<FormatT, TraitsT>(view)
-{ }
-
-
-template <typename FormatT, typename TraitsT>
-template <typename F, typename T>
-inline BasicConstLineView<FormatT, TraitsT>::BasicConstLineView(const BasicConstImageView<F, T>& view,
-                                                                Int x, Int y, Int w, Int h)
-: BasicConstImageView<FormatT, TraitsT>(view, x, y, w, h)
+: _view(source, x, y, w, h)
 { }
 
 

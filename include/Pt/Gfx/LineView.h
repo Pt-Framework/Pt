@@ -178,7 +178,7 @@ class ConstLineIterator
 
 
 template <typename FormatT, typename TraitsT>
-class BasicLineView : public BasicImageView<FormatT, TraitsT>
+class BasicLineView
 {
     public:
         typedef FormatT Format;
@@ -190,30 +190,59 @@ class BasicLineView : public BasicImageView<FormatT, TraitsT>
         typedef LineIterator<Format, Traits> Iterator;
 
     public:
-        explicit BasicLineView(const Format& format);
+        explicit BasicLineView( const Format& format = FormatT::get() );
 
         BasicLineView(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
                       Pt::ssize_t padding, const Format& format);
 
-        template <typename F, typename T>
-        explicit BasicLineView(BasicImageView<F, T>& view);
+        template <typename T>
+        explicit BasicLineView(T& source);
 
-        template <typename F, typename T>
-        BasicLineView(BasicImageView<F, T>& view, Int x, Int y, Int w, Int h);
+        template <typename T>
+        BasicLineView(T& source, Int x, Int y, Int w, Int h);
+
+        BasicLineView& operator=(const BasicLineView&) = default;
+
+        Pt::uint8_t* data()
+        { return _view.data(); }
+
+        const Pt::uint8_t* data() const
+        { return _view.data(); }
+
+        Pt::ssize_t width() const
+        { return _view.width(); }
+
+        Pt::ssize_t height() const
+        { return _view.height(); }
+
+        Pt::ssize_t stride() const
+        { return _view.stride(); }
+
+        const Format& format() const
+        { return _view.format(); }
+
+        Pt::ssize_t pixelStride() const
+        { return _view.pixelStride(); }
+
+        Pt::ssize_t padding() const
+        { return _view.padding(); }
 
         Iterator line(Pt::ssize_t y)
-        { return Iterator(*this, 0, y); }
+        { return Iterator(_view, 0, y); }
 
         Iterator begin()
-        { return Iterator(*this, 0, 0); }
+        { return Iterator(_view, 0, 0); }
 
         Iterator end()
-        { return Iterator(*this, 0, this->height()); }
+        { return Iterator(_view, 0, _view.height()); }
+
+    private:
+        BasicImageView<Format, Traits> _view;
 };
 
 
 template <typename FormatT, typename TraitsT>
-class BasicConstLineView : public BasicConstImageView<FormatT, TraitsT>
+class BasicConstLineView
 {
     public:
         typedef FormatT Format;
@@ -226,31 +255,51 @@ class BasicConstLineView : public BasicConstImageView<FormatT, TraitsT>
         typedef ConstLineIterator<Format, Traits> ConstIterator;
 
     public:
-        explicit BasicConstLineView(const Format& format);
+        explicit BasicConstLineView( const Format& format = FormatT::get() );
 
         BasicConstLineView(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
                            Pt::ssize_t padding, const Format& format);
 
-        template <typename F, typename T>
-        explicit BasicConstLineView(const BasicImageView<F, T>& view);
+        template <typename T>
+        explicit BasicConstLineView(const T& source);
 
-        template <typename F, typename T>
-        BasicConstLineView(const BasicImageView<F, T>& view, Int x, Int y, Int w, Int h);
+        template <typename T>
+        BasicConstLineView(const T& source, Int x, Int y, Int w, Int h);
 
-        template <typename F, typename T>
-        explicit BasicConstLineView(const BasicConstImageView<F, T>& view);
+        BasicConstLineView& operator=(const BasicConstLineView&) = default;
 
-        template <typename F, typename T>
-        BasicConstLineView(const BasicConstImageView<F, T>& view, Int x, Int y, Int w, Int h);
+        const Pt::uint8_t* data() const
+        { return _view.data(); }
+
+        Pt::ssize_t width() const
+        { return _view.width(); }
+
+        Pt::ssize_t height() const
+        { return _view.height(); }
+
+        Pt::ssize_t stride() const
+        { return _view.stride(); }
+
+        const Format& format() const
+        { return _view.format(); }
+
+        Pt::ssize_t pixelStride() const
+        { return _view.pixelStride(); }
+
+        Pt::ssize_t padding() const
+        { return _view.padding(); }
 
         Iterator line(Pt::ssize_t y) const
-        { return Iterator(*this, 0, y); }
+        { return Iterator(_view, 0, y); }
 
         Iterator begin() const
-        { return Iterator(*this, 0, 0); }
+        { return Iterator(_view, 0, 0); }
 
         Iterator end() const
-        { return Iterator(*this, 0, this->height()); }
+        { return Iterator(_view, 0, _view.height()); }
+
+    private:
+        BasicConstImageView<Format, Traits> _view;
 };
 
 

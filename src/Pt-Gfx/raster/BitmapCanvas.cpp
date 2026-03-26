@@ -142,7 +142,6 @@ BitmapCanvas::BitmapCanvas()
 : Canvas()
 , _image(0)
 , _lastScaleFactor(1.0)
-, _penPixel(_penBuffer, 0, 0)
 , _brushSource(0)
 , _isGradient(false)
 , _hasClip(false)
@@ -216,8 +215,6 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 
     Gfx::PixelView fillView(_penBuffer);
     std::fill( fillView.begin(), fillView.end(), pen.color() );
-
-    _penPixel.reset(_penBuffer, 0, 0);
 }
 
 
@@ -252,7 +249,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
                 _brushBuffer.reset( _image->format(), 
                                     brush.texture().width(), brush.texture().height() );
 
-                copyView(view(brush.texture()), view(_brushBuffer));
+                copyView(brush.texture(), _brushBuffer);
                 _brushSource = &_brushBuffer;
             }
             else
@@ -647,7 +644,7 @@ void BitmapCanvas::stroke(int x, int y, const Rect& clip)
     off += x * _image->pixelStride();
 
     Pt::uint8_t* to = _image->data() + off;
-    const Pt::uint8_t* from = _penPixel.base();
+    const Pt::uint8_t* from = _penBuffer.data();
 
     switch(_compositionMode) 
     {
@@ -683,11 +680,11 @@ void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentCli
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Argb32::sourceCopy(destPixel.base(), _penPixel.base(), n);
+                    Argb32::sourceCopy(destPixel.base(), _penBuffer.data(), n);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Argb32::sourceOver(destPixel.base(), _penPixel.base(), n);
+                    Argb32::sourceOver(destPixel.base(), _penBuffer.data(), n);
                     break;
             }
         }

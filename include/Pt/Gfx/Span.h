@@ -209,8 +209,8 @@ class Span
         typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
-        Span(BasicImageView<Format>& view, 
-             Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        template <typename T>
+        Span(T& view, Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _p(view, x, y)
         , _length(length)
         { }
@@ -291,14 +291,14 @@ class ConstSpan
         typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
-        ConstSpan(const BasicConstImageView<Format>& view, 
-                  Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        template <typename T>
+        ConstSpan(const T& view, Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _p(view, x, y)
         , _length(length)
         { }
 
-        ConstSpan(const BasicImageView<Format>& view, 
-                  Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
+        template <typename T>
+        ConstSpan(T& view, Pt::ssize_t x, Pt::ssize_t y, std::size_t length)
         : _p(view, x, y)
         , _length(length)
         { }
