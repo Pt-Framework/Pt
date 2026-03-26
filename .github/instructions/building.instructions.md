@@ -10,8 +10,10 @@ description: "Build system"
 - All platforms use the same basic jam arguments
 - Some platforms may have additional platform-specific options
 - The examples below use `jam.bat`; substitute `jam.sh` accordingly
-- The build commands must be run from the project root
 
+- NEVER assume that the terminal starts in the correct project root.
+- ALWAYS change to the repository root that contains `jam.bat` before running
+  any configure, switch, build, clean, or verification command.
 - NEVER use VS Code tasks (run_task) to build.
 - ALWAYS check the exit code of the actual standalone build command to determine build success.
 - ALWAYS check the exit code after every build command — no exceptions. 
