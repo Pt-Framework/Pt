@@ -873,6 +873,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Size.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Transform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Yuv12.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Yuv12.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Hmi\ActivateEvent.h" />

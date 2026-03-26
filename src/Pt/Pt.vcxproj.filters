@@ -1620,6 +1620,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.hpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>

@@ -112,6 +112,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ViewBase.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12.hpp" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ActivateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Adjustment.h" />
