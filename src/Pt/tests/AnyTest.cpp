@@ -38,7 +38,7 @@
 
 struct LargeObject
 {
-    int data[64];
+    int data[64] = {};
 
     int* begin()                { return &data[0]; }
     int* end()                  { return &data[64]; }

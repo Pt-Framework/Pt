@@ -100,9 +100,8 @@ class Any
                 { return typeid(T); }
 
                 virtual Value* clone(char* data) const
-                { 
-                    return sizeof(BasicValue<T>) > Any::sizeofData ? new BasicValue(_value)
-                                                                   : new(data) BasicValue(_value); 
+                {
+                    return Any::cloneValue(_value, data);
                 }
 
                 virtual bool isRef() const
@@ -194,8 +193,7 @@ class Any
         Any(const T& type)
         : _value(0)
         {
-            _value = sizeof(BasicValue<T>) > Any::sizeofData ? new BasicValue<T>(type)
-                                                             : new(static_cast<void*>(_data)) BasicValue<T>(type);
+            _value = this->createValue(type);
         }
 
         /** @brief Construct with reference
@@ -334,8 +332,7 @@ class Any
         Any& operator=(const T& rhs)
         {
             clear();
-            _value = sizeof(BasicValue<T>) > Any::sizeofData ? new BasicValue<T>(rhs)
-                                                             : new(static_cast<void*>(_data)) BasicValue<T>(rhs);
+            _value = this->createValue(rhs);
             return *this;
         }
 
@@ -413,12 +410,72 @@ class Any
         //! @internal Size of the internal storage for small types.
         static const unsigned sizeofData = sizeof(RefValue);
 
+        template <typename T>
+        struct IsSmallObject : BoolConstant< sizeof(BasicValue<T>) <= Any::sizeofData >
+        {
+        };
+
+        template <typename T>
+        static Value* cloneValue(const T& value, char* data);
+
+        template <typename T>
+        static Value* cloneValue(const T& value, char* data, TrueType);
+
+        template <typename T>
+        static Value* cloneValue(const T& value, char* data, FalseType);
+
+        template <typename T>
+        Value* createValue(const T& value);
+
+        template <typename T>
+        Value* createValue(const T& value, TrueType);
+
+        template <typename T>
+        Value* createValue(const T& value, FalseType);
+
+    private:
         /** @internal */
         Value* _value;
 
         //! @internal Storage for small types.
         alignas(Value) char _data[sizeofData];
 };
+
+template <typename T>
+inline Any::Value* Any::cloneValue(const T& value, char* data)
+{
+    return Any::cloneValue(value, data, IsSmallObject<T>());
+}
+
+template <typename T>
+inline Any::Value* Any::cloneValue(const T& value, char* data, TrueType)
+{
+    return new(data) BasicValue<T>(value);
+}
+
+template <typename T>
+inline Any::Value* Any::cloneValue(const T& value, char*, FalseType)
+{
+    return new BasicValue<T>(value);
+}
+
+template <typename T>
+inline Any::Value* Any::createValue(const T& value)
+{
+    return this->createValue(value, IsSmallObject<T>());
+}
+
+template <typename T>
+inline Any::Value* Any::createValue(const T& value, TrueType)
+{
+    return new(static_cast<void*>(_data)) BasicValue<T>(value);
+}
+
+template <typename T>
+inline Any::Value* Any::createValue(const T& value, FalseType)
+{
+    return new BasicValue<T>(value);
+}
 
 /** @internal Implementation of any_cast.
 */
@@ -571,6 +628,6 @@ inline Any& Any::operator=(const Any& rhs)
     return *this;
 }
 
-} // namespace xxx
+} // namespace
 
 #endif

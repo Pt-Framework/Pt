@@ -47,18 +47,10 @@ struct IntegralConstant
 
 
 template <bool V>
-struct BoolConstant : IntegralConstant<bool, V>
-{};
+using BoolConstant = IntegralConstant<bool, V>;
 
-
-struct FalseType : BoolConstant<false>
-{
-};
-
-
-struct TrueType : BoolConstant<true>
-{
-};
+typedef BoolConstant<false> FalseType;
+typedef BoolConstant<true> TrueType;
 
 
 template<class T, class U>
