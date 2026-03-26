@@ -54,8 +54,6 @@ class LineIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        typedef typename TraitsT::PixelType Pixel;
-        typedef typename TraitsT::ConstPixelType ConstPixel;
 
     public:
         using value_type        = Span<Format, Traits>;
@@ -121,9 +119,6 @@ class ConstLineIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        
-        typedef typename TraitsT::PixelType Pixel;
-        typedef typename TraitsT::ConstPixelType ConstPixel;
 
     public:
         using value_type        = ConstSpan<Format, Traits>;
@@ -183,9 +178,6 @@ class BasicLineView
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-
-        typedef typename Traits::PixelType Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
 
         typedef LineIterator<Format, Traits> Iterator;
 
@@ -247,9 +239,6 @@ class BasicConstLineView
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-
-        typedef typename Traits::PixelType Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
 
         typedef ConstLineIterator<Format, Traits> Iterator;
         typedef ConstLineIterator<Format, Traits> ConstIterator;

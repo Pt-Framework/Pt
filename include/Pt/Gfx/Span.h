@@ -129,7 +129,7 @@ class ConstSpanIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        typedef typename Traits::PixelType Pixel;
+        typedef typename Traits::PixelType      Pixel;
         typedef typename Traits::ConstPixelType ConstPixel;
 
         typedef SpanIterator<Format, Traits> Iterator;
@@ -202,7 +202,7 @@ class Span
         typedef FormatT Format;
         typedef TraitsT Traits;
         
-        typedef typename TraitsT::PixelType Pixel;
+        typedef typename TraitsT::PixelType      Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
         typedef SpanIterator<Format, Traits> Iterator;

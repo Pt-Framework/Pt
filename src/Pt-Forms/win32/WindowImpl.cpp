@@ -514,23 +514,18 @@ void WindowImpl::onSetIcon(Window& w, const Gfx::Image& icon)
 
     const size_t planes = 4;
     std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
-        
-    for(size_t y = 0; y < icon.height(); ++y)
+
+    size_t index = 0;
+
+    for(const auto& pixel : pixelView(icon))
     {
-        const size_t offsetLine = y * (icon.width() * planes);
+        Gfx::Argb32Color color = pixel.toColor();
 
-        for(size_t x = 0; x < icon.width(); ++x)
-        {
-          const size_t index = offsetLine + (x*planes);
-
-          Gfx::ConstPixelView::ConstPixel pixel(icon, x, y);
-          Gfx::Argb32Color color = pixel.toColor();
-                
-          bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());    
-          bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());
-          bitmapBuffer[index + 2] = static_cast<unsigned char>(color.red());
-          bitmapBuffer[index + 3] = static_cast<unsigned char>(color.alpha());
-        }        
+        bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());
+        bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());
+        bitmapBuffer[index + 2] = static_cast<unsigned char>(color.red());
+        bitmapBuffer[index + 3] = static_cast<unsigned char>(color.alpha());
+        index += planes;
     }
 
     HINSTANCE hInstance = GetModuleHandle(NULL);

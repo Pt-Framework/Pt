@@ -385,13 +385,15 @@ class BasicConstPixelView
 
 
 template <typename T>
-BasicPixelView<typename T::Format, typename T::Traits> pixelView(T& source)
+BasicPixelView<typename T::Format, 
+               typename T::Traits> pixelView(T& source)
 { 
     return BasicPixelView<typename T::Format, typename T::Traits>(source); 
 }
 
 template <typename T>
-BasicConstPixelView<typename T::Format, typename T::Traits> pixelView(const T& source) 
+BasicConstPixelView<typename T::Format, 
+                    typename T::Traits> pixelView(const T& source) 
 {
     return BasicConstPixelView<typename T::Format, typename T::Traits>(source);
 }

@@ -131,6 +131,8 @@ class Argb32Color
         Pt::uint32_t _value;
 };
 
+typedef Argb32Color Color;
+
 /** High precision color type
 */
 class ColorF

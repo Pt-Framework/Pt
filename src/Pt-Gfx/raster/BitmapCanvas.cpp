@@ -667,30 +667,31 @@ void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentCli
 
     clipSpan(xpos, ypos, length, currentClip);
 
+    ImageSpan span(*_image, xpos, ypos, length);
+    ImageSpan::Iterator p = span.begin();
+
     int bufferWidth = _penBuffer.width();
 
     while(length > 0)
     {
         int n = std::min(length, bufferWidth);
-        if( n )
+        if(n > 0)
         {
-            PixelView::Pixel destPixel( *_image, xpos, ypos);
-
             switch(_compositionMode) 
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Argb32::sourceCopy(destPixel.base(), _penBuffer.data(), n);
+                    Argb32::sourceCopy(p->base(), _penBuffer.data(), n);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Argb32::sourceOver(destPixel.base(), _penBuffer.data(), n);
+                    Argb32::sourceOver(p->base(), _penBuffer.data(), n);
                     break;
             }
         }
 
         length -= n;
-        xpos   += n;
+        p += n;
     }
 }
 
@@ -903,6 +904,9 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
     if( length <= 0)
         return;
 
+    ImageSpan span(*_image, xpos, ypos, length);
+    ImageSpan::Iterator p = span.begin();
+
     int bufferWidth = _brushSource->width();
     const Pt::uint8_t* brushData = _brushSource->data();
 
@@ -912,23 +916,21 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
 
         if( n )
         {
-            PixelView::Pixel destPixel(*_image, xpos, ypos);
-
             switch(_compositionMode) 
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Argb32::sourceCopy(destPixel.base(), brushData, n);
+                    Argb32::sourceCopy(p->base(), brushData, n);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Argb32::sourceOver(destPixel.base(), brushData, n);
+                    Argb32::sourceOver(p->base(), brushData, n);
                     break;
             }
         }
 
         length -= n;
-        xpos   += n;
+        p += n;
     }
 }
 
@@ -956,6 +958,9 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
     int originx =  origin.x();
     int originy = origin.y();
 
+    ImageSpan destSpan(*_image, xpos, ypos, length);
+    ImageSpan::Iterator p = destSpan.begin();
+
     while(length)
     {
         // x position in the texture to copy from
@@ -970,25 +975,24 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
         // Copy pixels from textrure to image
         if(fillLength)
         {
-            PixelView::ConstPixel sourcePixel(texture,  textureXPos, textureYPos);
-            PixelView::Pixel destPixel(*_image, xpos, ypos);
+            ConstImageSpan sourceSpan(texture, textureXPos, textureYPos, fillLength);
 
             switch(_compositionMode)
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Argb32::sourceCopy(destPixel.base(), sourcePixel.base(), fillLength);
+                    Argb32::sourceCopy(p->base(), sourceSpan.front().base(), fillLength);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Argb32::sourceOver(destPixel.base(), sourcePixel.base(), fillLength);
+                    Argb32::sourceOver(p->base(), sourceSpan.front().base(), fillLength);
                     break;
             }
         }
 
         // Remaining unfilled pixels of the span
         length -= fillLength;
-        xpos   += fillLength;
+        p += fillLength;
     }
 }
 

@@ -297,20 +297,19 @@ class PngReaderImpl
             }
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
-    
-            std::size_t n = 0;
-            for( size_t x = 0; x < width; ++x)
-            {
-                PixelView::Pixel pixel(*_image, x, row);
 
+            ImageSpan imageRow(*_image, 0, row, width);
+
+            std::size_t n = 0;
+            for(auto& pixel : imageRow)
+            {
                 if( bitdepth == 8 && channels == 3)
                 {
                     unsigned char red = data[n++];
                     unsigned char green = data[n++];
                     unsigned char blue = data[n++];
 
-                    Pt::Gfx::ColorF color(65535, red*257, green*257, blue*257);
-                    pixel = color;
+                    pixel = Pt::Gfx::ColorF(65535, red*257, green*257, blue*257);
                 }
 
                 if( bitdepth == 8 && channels == 4)
@@ -319,11 +318,10 @@ class PngReaderImpl
                     unsigned char green = data[n++];
                     unsigned char blue = data[n++];
                     unsigned char alpha = data[n++];
-            
-                    Pt::Gfx::ColorF color(alpha*257, red*257, green*257, blue*257);
-                    pixel = color;
-			          }
-		        }
+
+                    pixel = Pt::Gfx::ColorF(alpha*257, red*257, green*257, blue*257);
+                }
+            }
         }
 
         static void onPngEnd(png_structp png, png_infop info)
