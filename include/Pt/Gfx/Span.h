@@ -273,7 +273,7 @@ class ConstSpan
         typedef FormatT Format;
         typedef TraitsT Traits;
         
-        typedef typename TraitsT::PixelType Pixel;
+        typedef typename TraitsT::PixelType      Pixel;
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
         typedef ConstSpanIterator<Format, Traits> Iterator;

@@ -57,7 +57,7 @@ struct PixelConverter
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to, std::size_t length)
     {
-        typedef Argb32Color ColorType;
+        typedef typename P2::ColorType ColorType;
 
         const std::size_t bufsize = 64;
         ColorType colors[bufsize];
