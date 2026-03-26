@@ -43,6 +43,7 @@ template <typename FormatT>
 struct ImageTraits
 {
     typedef typename FormatT::ColorType ColorType;
+    
     typedef typename FormatT::PixelType PixelType;
     typedef typename FormatT::ConstPixelType ConstPixelType;
 

@@ -206,7 +206,6 @@ class Span
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
         typedef SpanIterator<Format, Traits> Iterator;
-        typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
         template <typename T>
@@ -261,16 +260,6 @@ class Span
             return it;
         }
 
-        ConstIterator begin() const
-        { return ConstIterator(_p); }
-
-        ConstIterator end() const
-        {
-            ConstIterator it(_p);
-            it += _length;
-            return it;
-        }
-
     private:
         Pixel       _p;
         std::size_t _length;
@@ -288,7 +277,6 @@ class ConstSpan
         typedef typename TraitsT::ConstPixelType ConstPixel;
     
         typedef ConstSpanIterator<Format, Traits> Iterator;
-        typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
     public:
         template <typename T>
@@ -344,12 +332,12 @@ class ConstSpan
         const ConstPixel& front() const
         { return _p; }
 
-        ConstIterator begin() const
-        { return ConstIterator(_p); }
+        Iterator begin() const
+        { return Iterator(_p); }
 
-        ConstIterator end() const
+        Iterator end() const
         {
-            ConstIterator it(_p);
+            Iterator it(_p);
             it += _length;
             return it;
         }
@@ -358,6 +346,28 @@ class ConstSpan
         ConstPixel  _p;
         std::size_t _length;
 };
+
+
+template <typename T>
+Span<typename T::Format,
+     typename T::Traits> span(T& source,
+                              Pt::ssize_t x,
+                              Pt::ssize_t y,
+                              std::size_t length)
+{
+    return Span<typename T::Format, typename T::Traits>(source, x, y, length);
+}
+
+
+template <typename T>
+ConstSpan<typename T::Format,
+          typename T::Traits> span(const T& source,
+                                   Pt::ssize_t x,
+                                   Pt::ssize_t y,
+                                   std::size_t length)
+{
+    return ConstSpan<typename T::Format, typename T::Traits>(source, x, y, length);
+}
 
 /** @brief Copies the pixels of a span.
  */

@@ -241,7 +241,6 @@ class BasicConstLineView
         typedef TraitsT Traits;
 
         typedef ConstLineIterator<Format, Traits> Iterator;
-        typedef ConstLineIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicConstLineView( const Format& format = FormatT::get() );
@@ -293,44 +292,50 @@ class BasicConstLineView
 
 
 template <typename T>
-BasicLineView<typename T::Format, typename T::Traits> lineView(T& source) 
+BasicLineView<typename T::Format, 
+              typename T::Traits> lineView(T& source) 
 {
     return BasicLineView<typename T::Format, typename T::Traits>(source);
 }
 
 
 template <typename T>
-BasicConstLineView<typename T::Format, typename T::Traits> lineView(const T& source) 
+BasicConstLineView<typename T::Format,
+                   typename T::Traits> lineView(const T& source) 
 {
     return BasicConstLineView<typename T::Format, typename T::Traits>(source);
 }
 
 
 template <typename T>
-BasicLineView<typename T::Format, typename T::Traits> lineView(T& source, Int x, Int y, Int w, Int h) 
+BasicLineView<typename T::Format,
+              typename T::Traits> lineView(T& source, Int x, Int y, Int w, Int h) 
 {
     return BasicLineView<typename T::Format, typename T::Traits>(source, x, y, w, h);
 }
 
 
 template <typename T>
-BasicConstLineView<typename T::Format, typename T::Traits> lineView(const T& source, Int x, Int y, Int w, Int h) 
+BasicConstLineView<typename T::Format,
+                   typename T::Traits> lineView(const T& source, Int x, Int y, Int w, Int h) 
 {
     return BasicConstLineView<typename T::Format, typename T::Traits>(source, x, y, w, h);
 }
 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-BasicLineView<FormatT, TraitsT> lineView(Pt::uint8_t* data, Pt::ssize_t width,
-                                         Pt::ssize_t height, Pt::ssize_t padding = 0)
+BasicLineView<FormatT,
+              TraitsT> lineView(Pt::uint8_t* data, Pt::ssize_t width,
+                                Pt::ssize_t height, Pt::ssize_t padding = 0)
 {
     return BasicLineView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-BasicConstLineView<FormatT, TraitsT> lineView(const Pt::uint8_t* data, Pt::ssize_t width,
-                                              Pt::ssize_t height, Pt::ssize_t padding = 0)
+BasicConstLineView<FormatT,
+                   TraitsT> lineView(const Pt::uint8_t* data, Pt::ssize_t width,
+                                     Pt::ssize_t height, Pt::ssize_t padding = 0)
 {
     return BasicConstLineView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }

@@ -333,7 +333,6 @@ class BasicConstPixelView
         typedef typename Traits::ConstPixelType ConstPixel;
 
         typedef ConstPixelIterator<Format, Traits> Iterator;
-        typedef ConstPixelIterator<Format, Traits> ConstIterator;
 
     public:
         explicit BasicConstPixelView( const Format& format = FormatT::get() );
@@ -400,30 +399,34 @@ BasicConstPixelView<typename T::Format,
 
 
 template <typename T>
-BasicPixelView<typename T::Format, typename T::Traits> pixelView(T& source, Int x, Int y, Int w, Int h)
+BasicPixelView<typename T::Format,
+               typename T::Traits> pixelView(T& source, Int x, Int y, Int w, Int h)
 { 
     return BasicPixelView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 
 template <typename T>
-BasicConstPixelView<typename T::Format, typename T::Traits> pixelView(const T& source, Int x, Int y, Int w, Int h) 
+BasicConstPixelView<typename T::Format,
+                    typename T::Traits> pixelView(const T& source, Int x, Int y, Int w, Int h) 
 {
     return BasicConstPixelView<typename T::Format, typename T::Traits>(source, x, y, w, h);
 }
 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-BasicPixelView<FormatT, TraitsT> pixelView(Pt::uint8_t* data, Pt::ssize_t width,
-                                           Pt::ssize_t height, Pt::ssize_t padding = 0)
+BasicPixelView<FormatT,
+               TraitsT> pixelView(Pt::uint8_t* data, Pt::ssize_t width,
+                                  Pt::ssize_t height, Pt::ssize_t padding = 0)
 {
     return BasicPixelView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-BasicConstPixelView<FormatT, TraitsT> pixelView(const Pt::uint8_t* data, Pt::ssize_t width,
-                                                Pt::ssize_t height, Pt::ssize_t padding = 0)
+BasicConstPixelView<FormatT,
+                    TraitsT> pixelView(const Pt::uint8_t* data, Pt::ssize_t width,
+                                       Pt::ssize_t height, Pt::ssize_t padding = 0)
 {
     return BasicConstPixelView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }

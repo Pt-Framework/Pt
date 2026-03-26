@@ -141,44 +141,50 @@ class BasicConstView : public ViewBase
 
 
 template <typename T>
-BasicView<typename T::Format, typename T::Traits> view(T& source)
+BasicView<typename T::Format,
+          typename T::Traits> view(T& source)
 { 
     return BasicView<typename T::Format, typename T::Traits>(source); 
 }
 
 
 template <typename T>
-BasicConstView<typename T::Format, typename T::Traits> view(const T& source)
+BasicConstView<typename T::Format,
+               typename T::Traits> view(const T& source)
 { 
     return BasicConstView<typename T::Format, typename T::Traits>(source); 
 }
 
 
 template <typename T>
-BasicView<typename T::Format, typename T::Traits> view(T& source, Int x, Int y, Int w, Int h)
+BasicView<typename T::Format,
+          typename T::Traits> view(T& source, Int x, Int y, Int w, Int h)
 { 
     return BasicView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 
 template <typename T>
-BasicConstView<typename T::Format, typename T::Traits> view(const T& source, Int x, Int y, Int w, Int h)
+BasicConstView<typename T::Format,
+               typename T::Traits> view(const T& source, Int x, Int y, Int w, Int h)
 { 
     return BasicConstView<typename T::Format, typename T::Traits>(source, x, y, w, h); 
 }
 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-BasicView<FormatT, TraitsT> view(Pt::uint8_t* data, Pt::ssize_t width,
-                                 Pt::ssize_t height, Pt::ssize_t padding = 0)
+BasicView<FormatT,
+          TraitsT> view(Pt::uint8_t* data, Pt::ssize_t width,
+                        Pt::ssize_t height, Pt::ssize_t padding = 0)
 {
     return BasicView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
 
 template <typename FormatT, typename TraitsT = ImageTraits<FormatT> >
-BasicConstView<FormatT, TraitsT> view(const Pt::uint8_t* data, Pt::ssize_t width,
-                                      Pt::ssize_t height, Pt::ssize_t padding = 0)
+BasicConstView<FormatT,
+               TraitsT> view(const Pt::uint8_t* data, Pt::ssize_t width,
+                             Pt::ssize_t height, Pt::ssize_t padding = 0)
 {
     return BasicConstView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
