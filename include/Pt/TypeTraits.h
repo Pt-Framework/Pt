@@ -147,6 +147,34 @@ struct TypeTraits<void>
 };
 
 
+template <typename Base, typename Derived>
+class IsCompatible
+{
+    private:
+        struct YesType
+        {
+            char value;
+        };
+
+        struct NoType
+        {
+            char value[2];
+        };
+
+        typedef typename TypeTraits<Base>::Value BaseType;
+        typedef typename TypeTraits<Derived>::Value DerivedType;
+
+        static YesType test(BaseType*);
+        static NoType test(...);
+
+    public:
+        enum
+        {
+            value = sizeof(test(static_cast<DerivedType*>(0))) == sizeof(YesType)
+        };
+};
+
+
 template <typename T>
 struct IntTraits
 {};
