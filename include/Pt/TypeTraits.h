@@ -34,15 +34,30 @@
 
 namespace Pt {
 
-struct FalseType
+template <typename T, T V>
+struct IntegralConstant
 {
-    enum { value = 0 };
+    static const T value = V;
+    typedef T ValueType;
+    typedef IntegralConstant<T, V> Type;
+
+    operator ValueType() const
+    { return value; }
 };
 
 
-struct TrueType
+template <bool V>
+struct BoolConstant : IntegralConstant<bool, V>
+{};
+
+
+struct FalseType : BoolConstant<false>
 {
-    enum { value = 1 };
+};
+
+
+struct TrueType : BoolConstant<true>
+{
 };
 
 
@@ -148,7 +163,7 @@ struct TypeTraits<void>
 
 
 template <typename Base, typename Derived>
-class IsCompatible
+class IsCompatibleImpl
 {
     private:
         struct YesType
@@ -173,6 +188,12 @@ class IsCompatible
             value = sizeof(test(static_cast<DerivedType*>(0))) == sizeof(YesType)
         };
 };
+
+
+template <typename Base, typename Derived>
+class IsCompatible
+: public BoolConstant< IsCompatibleImpl<Base, Derived>::value >
+{};
 
 
 template <typename T>

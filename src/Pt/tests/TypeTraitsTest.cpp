@@ -42,6 +42,8 @@ class TypeTraitsTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("TypeTraitsTest")
         {
             this->registerMethod( "ConstTest", *this, &TypeTraitsTest::ConstTest );
+            this->registerMethod( "IntegralConstantTest", *this, &TypeTraitsTest::IntegralConstantTest );
+            this->registerMethod( "CompatibleTest", *this, &TypeTraitsTest::CompatibleTest );
             this->registerMethod( "BoolTest", *this, &TypeTraitsTest::BoolTest );
             this->registerMethod( "CharTest", *this, &TypeTraitsTest::CharTest );
             this->registerMethod( "IntTest", *this, &TypeTraitsTest::IntTest );
@@ -51,11 +53,44 @@ class TypeTraitsTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        struct Base
+        {
+        };
+
+        struct Derived : Base
+        {
+        };
+
+        struct Unrelated
+        {
+        };
+
         void ConstTest()
         {
             PT_UNIT_ASSERT( Pt::TypeTraits<const int>::isPointer == false );
             PT_UNIT_ASSERT( Pt::TypeTraits<const int>::isConst == true );
             PT_UNIT_ASSERT( Pt::TypeTraits<const int>::isReference == false );
+        }
+
+        void IntegralConstantTest()
+        {
+            bool value = Pt::TrueType();
+            PT_UNIT_ASSERT( value );
+
+            value = Pt::FalseType();
+            PT_UNIT_ASSERT( value );
+
+            int intValue = Pt::IntegralConstant<int, 42>();
+            PT_UNIT_ASSERT_EQUAL( intValue, 42 );
+        }
+
+        void CompatibleTest()
+        {
+            bool isCompatible = Pt::IsCompatible<Base, Derived>();
+            PT_UNIT_ASSERT( isCompatible );
+
+            isCompatible = Pt::IsCompatible<Base, Unrelated>();
+            PT_UNIT_ASSERT( ! isCompatible );
         }
 
         void BoolTest()
