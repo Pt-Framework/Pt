@@ -9,6 +9,7 @@ doc/html/
 doc/htdocs/
 doc/latex/
 doxygen/
+*.tag
 
 # Compiled Object files
 *.o
