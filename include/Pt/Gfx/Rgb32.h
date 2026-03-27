@@ -509,7 +509,7 @@ class PT_GFX_API Rgb32 final : public ImageFormat
 
         /** @brief Premultiply a ColorF to a packed premultiplied uint32_t.
         */
-        static Pt::uint32_t premultiplyColorF(const ColorF& c)
+        static Pt::uint32_t premultiply(const ColorF& c)
         {
             const Pt::uint32_t a = c.alpha() >> 8;
             const Pt::uint32_t r = (Pt::uint32_t)(c.red  () >> 8) * a / 255;

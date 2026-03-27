@@ -282,24 +282,21 @@ class PT_GFX_API Rgb16 final : public ImageFormat
 
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
-        //
-        // SourceCopy
-        //
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
+        static void setColor(Pt::uint8_t* to, const Argb32Color& from);
 
-        static void sourceCopy(Pt::uint8_t* to, const Argb32Color& from);
+        static void setColor(Pt::uint8_t* to, const ColorF& c);
 
-        static void sourceCopy(Pt::uint8_t* to, const ColorF& c);
+        static void setColor(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const ColorF& c);
+        static void setColor(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
+        static void setColors(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
 
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
+        static void setColors(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
-        static void sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
+        static void copy(Pt::uint8_t* to, const Pt::uint8_t* from);
 
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
+        static void copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
     private:
         /** @brief Encode 8-bit r/g/b to a 16-bit RGB565 value.
@@ -313,7 +310,7 @@ class PT_GFX_API Rgb16 final : public ImageFormat
 
         /** @brief Encode a ColorF (16-bit channels) to a 16-bit RGB565 value.
         */
-        static Pt::uint16_t encodeColorF(const ColorF& c)
+        static Pt::uint16_t encode(const ColorF& c)
         {
               return Pt::uint16_t(c.red  () & 0xF800)        |
                     (Pt::uint16_t(c.green() & 0xFC00) >> 5)  |

@@ -295,22 +295,28 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
+        static void setColor(Pt::uint8_t* to, const Argb32Color& from);
+
+        static void setColor(Pt::uint8_t* to, const ColorF& c);
+
+        static void setColor(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
+
+        static void setColor(Pt::uint8_t* to, std::size_t length, const ColorF& c);
+
+        static void setColors(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
+
+        static void setColors(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
+
+        static void copy(Pt::uint8_t* to, const Pt::uint8_t* from);
+
+        static void copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
+
         //
         // SourceCopy
         //
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
 
-        static void sourceCopy(Pt::uint8_t* to, const Argb32Color& from);
-
-        static void sourceCopy(Pt::uint8_t* to, const ColorF& c);
-
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const ColorF& c);
-
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
-
         static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        static void sourceCopy(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
         static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
@@ -319,56 +325,13 @@ class PT_GFX_API Argb32 final : public ImageFormat
         //
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
         
-        static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from);
+        //static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from);
 
-        static void sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF& c);
+        //static void sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
         static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-    public:
-        static void blendSourceCopy(Pt::uint8_t* to, const ColorF& c, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t blendAlphaSrc = alpha;
-            const Pt::uint32_t blendAlphaInv = 255 - alpha;
-            to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
-            to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
-            to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
-            to[3] = (blendAlphaSrc * (c.alpha() >> 8) + blendAlphaInv * to[3]) >> 8;
-        }
-        
-        static void blendSourceOver(Pt::uint8_t* to, const ColorF& c, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t colorAlpha    = c.alpha() >> 8;
-            const Pt::uint32_t blendAlphaSrc = colorAlpha * alpha / 255;
-            const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-            to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
-            to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
-            to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
-            to[3] = (blendAlphaSrc *  colorAlpha      + blendAlphaInv * to[3]) >> 8;
-        }
-
-        static void blendSourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t blendAlphaSrc = alpha;
-            const Pt::uint32_t blendAlphaInv = 255 - alpha;
-            to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
-            to[1] = (blendAlphaSrc * from[1] + blendAlphaInv * to[1]) >> 8;
-            to[2] = (blendAlphaSrc * from[2] + blendAlphaInv * to[2]) >> 8;
-            to[3] = (blendAlphaSrc * from[3] + blendAlphaInv * to[3]) >> 8;
-        }
-
-        static void blendSourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
-        {
-            const Pt::uint32_t colorAlpha    = from[3];
-            const Pt::uint32_t blendAlphaSrc = colorAlpha * alpha / 255;
-            const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-            to[0] = (blendAlphaSrc * from[0]    + blendAlphaInv * to[0]) >> 8;
-            to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
-            to[2] = (blendAlphaSrc * from[2]    + blendAlphaInv * to[2]) >> 8;
-            to[3] = (blendAlphaSrc * colorAlpha + blendAlphaInv * to[3]) >> 8;
-        }
 };
 
 } // namespace

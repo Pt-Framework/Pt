@@ -538,7 +538,8 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
 
     dsy = ypos;
 
-    ColorF pixelColor = color;
+    const Argb32Color argbColor(color);
+    Argb32Color pixelColor = argbColor;
     Argb32Image argbImage(image.data(), image.width(), image.height(), image.padding());
     Argb32View argbView(argbImage);
     
@@ -564,8 +565,10 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
 
             Argb32Pixel pixel(argbView, dsx, dsy);
 
-            const int px = yOffset + x;
+            const Int px = yOffset + x;
             unsigned char value = buffer[px];
+
+            const Pt::uint8_t* colorData = reinterpret_cast<const Pt::uint8_t*>(&argbColor.value());
 
             switch(mode)
             {
@@ -573,19 +576,20 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
                 case CompositionMode::SourceCopy:
                     if(value != 255)
                     {
-                        pixelColor.setAlpha(value * 257);
- 
-                        Argb32::sourceOver(pixel.base(), pixelColor);
+                        pixelColor.setAlpha(value);
+                        const Pt::uint8_t* pd = reinterpret_cast<const Pt::uint8_t*>(&pixelColor.value());
+                        Argb32::sourceOver(pixel.base(), pd);
                     }
                     else
                     {
-                        Argb32::sourceCopy(pixel.base(), color);
+                        Argb32::sourceCopy(pixel.base(), colorData);
                     }
                     break;
 
                 case CompositionMode::SourceOver:
-                    pixelColor.setAlpha(color.alpha() * value / 255);
-                    Argb32::sourceOver(pixel.base(), pixelColor);
+                    pixelColor.setAlpha( Pt::uint8_t(argbColor.alpha() * value / 255) );
+                    const Pt::uint8_t* pd = reinterpret_cast<const Pt::uint8_t*>(&pixelColor.value());
+                    Argb32::sourceOver(pixel.base(), pd);
                     break;
             }
         }

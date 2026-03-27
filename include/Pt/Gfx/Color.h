@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Gfx {
 
+class ColorF;
+
 /** @brief Standard color type.
 */
 class Argb32Color
@@ -47,9 +49,7 @@ class Argb32Color
         : _value(0)
         { }
         
-        Argb32Color(const Argb32Color& color)
-        : _value(color._value)
-        { }
+        Argb32Color(const Argb32Color& color) = default;
 
         explicit Argb32Color(uint32_t val)
         : _value(val)
@@ -70,11 +70,11 @@ class Argb32Color
             setBlue(a);
         }
         
-        Argb32Color& operator=(const Argb32Color& color)
-        { 
-            _value = color._value;
-            return *this;
-        }
+        Argb32Color(const ColorF& c);
+
+        Argb32Color& operator=(const Argb32Color& color) = default;
+
+        Argb32Color& operator=(const ColorF& c);
         
         Argb32Color& operator=(const Pt::uint8_t& value)
         { 
@@ -230,6 +230,24 @@ class ColorF
         Pt::uint16_t _g;
         Pt::uint16_t _b;
 };
+
+inline Argb32Color::Argb32Color(const ColorF& c)
+: _value( (Pt::uint32_t(c.alpha() >> 8) << 24) |
+         (Pt::uint32_t(c.red()   >> 8) << 16) |
+         (Pt::uint32_t(c.green() >> 8) <<  8) |
+          Pt::uint32_t(c.blue()  >> 8) )
+{
+}
+
+
+inline Argb32Color& Argb32Color::operator=(const ColorF& c)
+{
+    _value = (Pt::uint32_t(c.alpha() >> 8) << 24) |
+             (Pt::uint32_t(c.red()   >> 8) << 16) |
+             (Pt::uint32_t(c.green() >> 8) <<  8) |
+              Pt::uint32_t(c.blue()  >> 8);
+    return *this;
+}
 
 } // namespace
 

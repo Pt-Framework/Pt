@@ -122,7 +122,7 @@ inline void Rgb32::setColor(Pt::uint8_t* to, const Argb32Color& from)
 
 inline void Rgb32::setColor(Pt::uint8_t* to, const ColorF& c)
 {
-    const Pt::uint32_t value = premultiplyColorF(c);
+    const Pt::uint32_t value = premultiply(c);
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
     sourceCopy(to, p);
 }
@@ -145,7 +145,7 @@ inline void Rgb32::setColor(Pt::uint8_t* to, std::size_t length, const Argb32Col
 
 inline void Rgb32::setColor(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
-    const Pt::uint32_t value = premultiplyColorF(c);
+    const Pt::uint32_t value = premultiply(c);
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
     sourceCopy(to, length, p);
 }

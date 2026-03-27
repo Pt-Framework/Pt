@@ -82,12 +82,12 @@ class Rgb16PixelBase final : public PixelBase
 
         virtual void onSetColor(const ColorF& color) override
         {
-            Rgb16::sourceCopy(base(), color);
+            Rgb16::setColor(base(), color);
         }
 
         virtual void onSetColor(const Argb32Color& color) override
         {
-            Rgb16::sourceCopy(base(), color);
+            Rgb16::setColor(base(), color);
         }
 
         virtual void onGetColors(ColorF* colors, std::size_t length) const override
@@ -102,23 +102,17 @@ class Rgb16PixelBase final : public PixelBase
 
         virtual void onAssign(const Argb32Color* colors, std::size_t length) override
         {
-            Pt::uint8_t* p = base();
-            
-            for(std::size_t i = 0; i < length; ++i)
-            {
-                Rgb16::sourceCopy(p, colors[i]);
-                p += 2;
-            }
+            Rgb16::setColors(base(), colors, length);
         }
 
         virtual void onAssign(const ColorF* colors, std::size_t length) override
         {
-            Rgb16::sourceCopy(base(), colors, length);
+            Rgb16::setColors(base(), colors, length);
         }
 
         virtual void onFillColor(std::size_t n, const ColorF& color) override
         {
-            Rgb16::sourceCopy(base(), n, color);
+            Rgb16::setColor(base(), n, color);
         }
 
         virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
@@ -136,7 +130,7 @@ inline bool Rgb16PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
         Pt::uint8_t* to = base();
         const Pt::uint8_t* from = rgb16->base();
 
-        Rgb16::sourceCopy(to, from, length);
+        Rgb16::copy(to, from, length);
         return true;
     }
 
@@ -153,7 +147,7 @@ inline bool Rgb16PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
         Pt::uint8_t* to = rgb16->base();
         const Pt::uint8_t* from = base();
 
-        Rgb16::sourceCopy(to, from, length);
+        Rgb16::copy(to, from, length);
         return true;
     }
 

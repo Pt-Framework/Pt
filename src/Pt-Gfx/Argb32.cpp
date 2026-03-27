@@ -82,12 +82,12 @@ class Argb32PixelBase final : public PixelBase
 
         virtual void onSetColor(const ColorF& color) override
         {
-            Argb32::sourceCopy( base(), color );
+            Argb32::setColor( base(), color );
         }
 
         virtual void onSetColor(const Argb32Color& color) override
         {
-            Argb32::sourceCopy(base(), color);
+            Argb32::setColor(base(), color);
         }
 
         virtual void onGetColors(ColorF* colors, std::size_t length) const override
@@ -102,18 +102,17 @@ class Argb32PixelBase final : public PixelBase
 
         virtual void onAssign(const Argb32Color* colors, std::size_t length) override
         {
-            const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(colors);
-            Argb32::sourceCopy(base(), p, length);
+            Argb32::setColors(base(), colors, length);
         }
 
         virtual void onAssign(const ColorF* colors, std::size_t length) override
         {
-            Argb32::sourceCopy(base(), colors, length);
+            Argb32::setColors(base(), colors, length);
         }
 
         virtual void onFillColor(std::size_t n, const ColorF& color) override
         {
-            Argb32::sourceCopy(base(), n, color);
+            Argb32::setColor(base(), n, color);
         }
 
         virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
