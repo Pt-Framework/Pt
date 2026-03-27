@@ -252,6 +252,30 @@ class PT_GFX_API Argb32 final : public ImageFormat
                                          PixelStorage& store) const override;
 
     public:
+        //
+        // SourceCopy
+        //
+        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
+
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
+
+        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
+
+        //
+        // SourceOver
+        //
+        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
+
+        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
+
+        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
+
+    private:
+        friend class Argb32Pixel;
+        friend class Argb32ConstPixel;
+        friend class Argb32PixelBase;
+
+    private:
         template <typename BasePtr>
         static BasePtr getPixel(const ViewBase& view, BasePtr base, 
                                 Pt::ssize_t xpos, Pt::ssize_t ypos)
@@ -310,24 +334,6 @@ class PT_GFX_API Argb32 final : public ImageFormat
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from);
 
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-        //
-        // SourceCopy
-        //
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
-
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-        //
-        // SourceOver
-        //
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
-
-        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 };
 
 } // namespace
