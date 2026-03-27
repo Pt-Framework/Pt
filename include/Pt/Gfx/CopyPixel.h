@@ -57,7 +57,9 @@ struct PixelConverter
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to, std::size_t length)
     {
-        typedef typename P2::ColorType ColorType;
+        typedef typename IfElse<IsSame<typename P1::ColorType, ColorF>::value &&
+                                IsSame<typename P2::ColorType, ColorF>::value,
+                                ColorF, Argb32Color>::Type ColorType;
 
         const std::size_t bufsize = 64;
         ColorType colors[bufsize];

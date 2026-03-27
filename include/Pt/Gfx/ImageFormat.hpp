@@ -152,11 +152,12 @@ void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
     if( isCompatible )
         return;
 
-    //
-    // TODO GFX: use the precise color type only if both pixels require it
-    //
+    typedef typename IfElse<IsSame<typename PixelT::ColorType, ColorF>::value &&
+                            IsSame<ColorT, ColorF>::value,
+                            ColorF, Argb32Color>::Type ColorType;
+
     const std::size_t bufsize = 64;
-    ColorT colors[bufsize];
+    ColorType colors[bufsize];
 
     PixelT from(p);
     Pixel<ColorT> to(*this);

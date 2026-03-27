@@ -63,6 +63,20 @@ struct IsSame<T, T> : TrueType
 {};
 
 
+template <bool Condition, typename TrueT, typename FalseT>
+struct IfElse
+{
+    typedef TrueT Type;
+};
+
+
+template <typename TrueT, typename FalseT>
+struct IfElse<false, TrueT, FalseT>
+{
+    typedef FalseT Type;
+};
+
+
 template <typename T>
 struct TypeTraitsBase 
 {
