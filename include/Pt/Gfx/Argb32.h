@@ -324,10 +324,6 @@ class PT_GFX_API Argb32 final : public ImageFormat
         // SourceOver
         //
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
-        
-        //static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::ColorF& from);
-
-        //static void sourceOver(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
         static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
 
