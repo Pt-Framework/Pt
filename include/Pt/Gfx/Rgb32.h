@@ -360,6 +360,25 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         virtual PixelBase* onCreatePixel(Pt::uint8_t* data, const ViewBase& view, 
                                          Pt::ssize_t x, Pt::ssize_t y, 
                                          PixelStorage& store) const override;
+    
+    public:
+        //
+        // SourceCopy
+        //
+        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
+
+        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
+
+        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
+
+        //
+        // SourceOver
+        //
+        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
+
+        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
+
+        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
     public:
         template <typename BasePtr>
@@ -397,99 +416,40 @@ class PT_GFX_API Rgb32 final : public ImageFormat
             return base + n * view.stride();
         }
 
-    public:
-        /** @brief Read premultiplied RGB-32.
-        */
         static Rgb32Color getColor(const Pt::uint8_t* p);
 
-        /** @brief Convert to ARGB.
-        */
         static ColorF toColor(const Pt::uint8_t* p);
 
-        /** @brief Convert to ARGB-32.
-        */
         static Argb32Color toArgb32Color(const Pt::uint8_t* p);
 
-       /** @brief Get as premultiplied RGB-32 colors.
-      */
         static void getColors(const Pt::uint8_t* p, Rgb32Color* colors, std::size_t n);
 
-        /** @brief Get as ARGB-32 colors.
-        */
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
-        /** @brief Get as ARGB colors.
-        */
         static void getColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
 
-        /** @brief Write Argb32Color, premultiplying RGB by alpha.
-        */
         static void assign(Pt::uint8_t* to, const Argb32Color& from);
 
-        /** @brief Write ColorF, premultiplying RGB by alpha.
-        */
         static void assign(Pt::uint8_t* to, const ColorF& c);
 
-        /** @brief Fill with Argb32Color, premultiplying RGB by alpha.
-        */
         static void fill(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c);
 
-        /** @brief Fill with Argb32Color, premultiplying RGB by alpha.
-        */
         static void fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
-        /** @brief Fill with ColorF, premultiplying RGB by alpha.
-        */
         static void fill(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
-        /** @brief Write Color array, premultiplying each by alpha.
-        */
         static void assign(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t length);
 
-        /** @brief Write Color array, premultiplying each by alpha.
-        */
         static void assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
 
-        /** @brief Write ColorF array, premultiplying each by alpha.
-        */
         static void assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
-        /** @brief Copy raw premultiplied pixel data.
-        */
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from);
 
-        /** @brief Fill with premultiplied raw pixel.
-        */
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
-        //
-        // SourceCopy
-        //
-    public:
-        /** @brief Copy raw premultiplied pixel data.
-        */
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
-
-        /** @brief Fill with premultiplied raw pixel.
-        */
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        /** @brief Copy premultiplied pixel array.
-        */
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-        //
-        // SourceOver
-        //
-    public:
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
-
-        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
     private:
-        /** @brief Premultiply 8-bit ARGB to a packed premultiplied uint32_t.
+        /** @brief Premultiply 8-bit ARGB.
         */
         static Pt::uint32_t premultiply(Pt::uint8_t a, Pt::uint8_t r, 
                                         Pt::uint8_t g, Pt::uint8_t b)
@@ -504,7 +464,7 @@ class PT_GFX_API Rgb32 final : public ImageFormat
                     Pt::uint32_t(pb);
         }
 
-        /** @brief Premultiply a ColorF to a packed premultiplied uint32_t.
+        /** @brief Premultiply a ColorF.
         */
         static Pt::uint32_t premultiply(const ColorF& c)
         {

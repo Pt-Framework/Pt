@@ -268,12 +268,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 
-    private:
-        friend class Argb32Pixel;
-        friend class Argb32ConstPixel;
-        friend class Argb32PixelBase;
-
-    private:
+    public:
         template <typename BasePtr>
         static BasePtr getPixel(const ViewBase& view, BasePtr base, 
                                 Pt::ssize_t xpos, Pt::ssize_t ypos)
