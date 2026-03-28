@@ -47,7 +47,6 @@ class PT_GFX_API Yuv12Pixel
     
     public:
         typedef Yuv12 FormatType;
-        typedef ColorF ColorType;
 
     protected:
         Yuv12Pixel(Pt::uint8_t* data, const ViewBase& view, 
@@ -140,7 +139,6 @@ class Yuv12ConstPixel
     
     public:
         typedef Yuv12 FormatType;
-        typedef ColorF ColorType;
     
     protected:
         Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 

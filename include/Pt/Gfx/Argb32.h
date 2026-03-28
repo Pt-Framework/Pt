@@ -48,7 +48,6 @@ class Argb32Pixel
 
     public:
         typedef Argb32 FormatType;
-        typedef Argb32Color ColorType;
 
     public:
         template <typename T>
@@ -131,7 +130,6 @@ class Argb32ConstPixel
 
     public:
         typedef Argb32 FormatType;
-        typedef Argb32Color ColorType;
 
     protected:
         Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -319,17 +317,17 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
-        static void setColor(Pt::uint8_t* to, const Argb32Color& from);
+        static void assign(Pt::uint8_t* to, const Argb32Color& from);
 
-        static void setColor(Pt::uint8_t* to, const ColorF& c);
+        static void assign(Pt::uint8_t* to, const ColorF& c);
 
-        static void setColor(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
-        static void setColor(Pt::uint8_t* to, std::size_t length, const ColorF& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
-        static void setColors(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
 
-        static void setColors(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from);
 

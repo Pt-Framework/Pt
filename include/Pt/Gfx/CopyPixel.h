@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/ImageTraits.h>
 #include <Pt/TypeTraits.h>
 
 #include <algorithm>
@@ -45,7 +46,7 @@ namespace Gfx {
 // PixelConverter
 ///////////////////////////////////////////////////////////////////////
 
-template <typename FromFmt, typename ToFmt>
+template <typename Fmt1, typename Fmt2>
 struct PixelConverter
 {
     template <typename P1, typename P2>
@@ -57,8 +58,11 @@ struct PixelConverter
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to, std::size_t length)
     {
-        typedef typename IfElse<IsSame<typename P1::ColorType, ColorF>::value &&
-                                IsSame<typename P2::ColorType, ColorF>::value,
+        typedef typename ImageTraits<Fmt1>::ColorType ColorType1;
+        typedef typename ImageTraits<Fmt2>::ColorType ColorType2;
+
+        typedef typename IfElse<IsSame<ColorType1, ColorF>::value &&
+                                IsSame<ColorType2, ColorF>::value,
                                 ColorF, Argb32Color>::Type ColorType;
 
         const std::size_t bufsize = 64;

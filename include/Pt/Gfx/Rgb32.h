@@ -30,7 +30,6 @@
 #define PT_GFX_RGB32_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Compose.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
@@ -128,7 +127,6 @@ class Rgb32Pixel
 
     public:
         typedef Rgb32 FormatType;
-        typedef Argb32Color ColorType;
 
     public:
         template <typename T>
@@ -229,7 +227,6 @@ class Rgb32ConstPixel
 
     public:
         typedef Rgb32 FormatType;
-        typedef Argb32Color ColorType;
 
     protected:
         Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -427,35 +424,35 @@ class PT_GFX_API Rgb32 final : public ImageFormat
 
         /** @brief Write Argb32Color, premultiplying RGB by alpha.
         */
-        static void setColor(Pt::uint8_t* to, const Argb32Color& from);
+        static void assign(Pt::uint8_t* to, const Argb32Color& from);
 
         /** @brief Write ColorF, premultiplying RGB by alpha.
         */
-        static void setColor(Pt::uint8_t* to, const ColorF& c);
+        static void assign(Pt::uint8_t* to, const ColorF& c);
 
         /** @brief Fill with Argb32Color, premultiplying RGB by alpha.
         */
-        static void setColor(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c);
 
         /** @brief Fill with Argb32Color, premultiplying RGB by alpha.
         */
-        static void setColor(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
         /** @brief Fill with ColorF, premultiplying RGB by alpha.
         */
-        static void setColor(Pt::uint8_t* to, std::size_t length, const ColorF& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
         /** @brief Write Color array, premultiplying each by alpha.
         */
-        static void setColors(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t length);
 
         /** @brief Write Color array, premultiplying each by alpha.
         */
-        static void setColors(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
 
         /** @brief Write ColorF array, premultiplying each by alpha.
         */
-        static void setColors(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
         /** @brief Copy raw premultiplied pixel data.
         */

@@ -58,8 +58,9 @@ class SpanIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        typedef typename Traits::PixelType Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
+        
+        typedef typename Traits::Pixel      Pixel;
+        typedef typename Traits::ConstPixel ConstPixel;
 
         typedef ConstSpanIterator<Format, Traits> ConstIterator;
 
@@ -129,8 +130,9 @@ class ConstSpanIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        typedef typename Traits::PixelType      Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
+        
+        typedef typename Traits::Pixel      Pixel;
+        typedef typename Traits::ConstPixel ConstPixel;
 
         typedef SpanIterator<Format, Traits> Iterator;
 
@@ -202,8 +204,8 @@ class Span
         typedef FormatT Format;
         typedef TraitsT Traits;
         
-        typedef typename TraitsT::PixelType      Pixel;
-        typedef typename TraitsT::ConstPixelType ConstPixel;
+        typedef typename TraitsT::Pixel      Pixel;
+        typedef typename TraitsT::ConstPixel ConstPixel;
     
         typedef SpanIterator<Format, Traits> Iterator;
 
@@ -273,8 +275,8 @@ class ConstSpan
         typedef FormatT Format;
         typedef TraitsT Traits;
         
-        typedef typename TraitsT::PixelType      Pixel;
-        typedef typename TraitsT::ConstPixelType ConstPixel;
+        typedef typename TraitsT::Pixel      Pixel;
+        typedef typename TraitsT::ConstPixel ConstPixel;
     
         typedef ConstSpanIterator<Format, Traits> Iterator;
 

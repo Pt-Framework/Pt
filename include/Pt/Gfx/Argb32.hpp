@@ -81,13 +81,13 @@ inline void Argb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::si
     std::memcpy(cp, p, n * PixelWidth);
 }
 
-inline void Argb32::setColor(Pt::uint8_t* to, const Argb32Color& from)
+inline void Argb32::assign(Pt::uint8_t* to, const Argb32Color& from)
 {
     std::memcpy(to, &from.value(), PixelWidth);
 }
 
 
-inline void Argb32::setColor(Pt::uint8_t* to, const ColorF& c)
+inline void Argb32::assign(Pt::uint8_t* to, const ColorF& c)
 {
     Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
 
@@ -98,14 +98,14 @@ inline void Argb32::setColor(Pt::uint8_t* to, const ColorF& c)
 }
 
 
-inline void Argb32::setColor(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
+inline void Argb32::fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
 {
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( &c.value() );
     sourceCopy(to, length, p);
 }
 
 
-inline void Argb32::setColor(Pt::uint8_t* to, std::size_t length, const ColorF& c)
+inline void Argb32::fill(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
     const Pt::uint32_t value = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
                                ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
@@ -118,18 +118,18 @@ inline void Argb32::setColor(Pt::uint8_t* to, std::size_t length, const ColorF& 
 }
 
 
-inline void Argb32::setColors(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length)
+inline void Argb32::assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length)
 {
     const Pt::uint8_t* from = reinterpret_cast<const Pt::uint8_t*>(colors);
     sourceCopy(to, from, length);
 }
 
 
-inline void Argb32::setColors(Pt::uint8_t* to, const ColorF* colors, std::size_t length)
+inline void Argb32::assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length)
 {          
     for(std::size_t n = 0; n < length; ++n)
     {
-        setColor(to, colors[n]);
+        assign(to, colors[n]);
         to += Argb32::PixelWidth;
     }
 }
@@ -285,14 +285,14 @@ inline void Argb32Pixel::advanceLines(Pt::ssize_t n)
 
 inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::ColorF& color)
 { 
-    Argb32::setColor(base(), color);
+    Argb32::assign(base(), color);
     return *this;
 }
 
 
 inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Color& color)
 { 
-    Argb32::setColor(base(), color);
+    Argb32::assign(base(), color);
     return *this;
 }
 
@@ -323,13 +323,13 @@ inline void Argb32Pixel::assign(const Argb32ConstPixel& p, std::size_t length)
 
 inline void Argb32Pixel::assign(const Argb32Color* colors, std::size_t length)
 {
-    Argb32::setColors(base(), colors, length);
+    Argb32::assign(base(), colors, length);
 }
 
 
 inline void Argb32Pixel::fill(std::size_t n, const Argb32Color& color)
 {
-    Argb32::setColor(base(), n, color);
+    Argb32::fill(base(), n, color);
 }
 
 

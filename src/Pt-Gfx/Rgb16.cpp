@@ -82,12 +82,12 @@ class Rgb16PixelBase final : public PixelBase
 
         virtual void onSetColor(const ColorF& color) override
         {
-            Rgb16::setColor(base(), color);
+            Rgb16::assign(base(), color);
         }
 
         virtual void onSetColor(const Argb32Color& color) override
         {
-            Rgb16::setColor(base(), color);
+            Rgb16::assign(base(), color);
         }
 
         virtual void onGetColors(ColorF* colors, std::size_t length) const override
@@ -102,17 +102,17 @@ class Rgb16PixelBase final : public PixelBase
 
         virtual void onAssign(const Argb32Color* colors, std::size_t length) override
         {
-            Rgb16::setColors(base(), colors, length);
+            Rgb16::assign(base(), colors, length);
         }
 
         virtual void onAssign(const ColorF* colors, std::size_t length) override
         {
-            Rgb16::setColors(base(), colors, length);
+            Rgb16::assign(base(), colors, length);
         }
 
         virtual void onFillColor(std::size_t n, const ColorF& color) override
         {
-            Rgb16::setColor(base(), n, color);
+            Rgb16::fill(base(), n, color);
         }
 
         virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;

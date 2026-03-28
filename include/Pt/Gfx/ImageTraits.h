@@ -44,8 +44,8 @@ struct ImageTraits
 {
     typedef typename FormatT::ColorType ColorType;
     
-    typedef typename FormatT::PixelType PixelType;
-    typedef typename FormatT::ConstPixelType ConstPixelType;
+    typedef typename FormatT::PixelType      Pixel;
+    typedef typename FormatT::ConstPixelType ConstPixel;
 
     static std::size_t pixelStride(const FormatT& format)
     {

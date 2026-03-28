@@ -56,8 +56,9 @@ class PixelIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        typedef typename Traits::PixelType Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
+        
+        typedef typename Traits::Pixel      Pixel;
+        typedef typename Traits::ConstPixel ConstPixel;
 
         typedef ConstPixelIterator<Format, Traits> ConstIterator;
  
@@ -157,8 +158,9 @@ class ConstPixelIterator
     public:
         typedef FormatT Format;
         typedef TraitsT Traits;
-        typedef typename Traits::PixelType Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
+        
+        typedef typename Traits::Pixel      Pixel;
+        typedef typename Traits::ConstPixel ConstPixel;
 
         typedef PixelIterator<Format, Traits> Iterator;
 
@@ -265,8 +267,8 @@ class BasicPixelView
         typedef FormatT Format;
         typedef TraitsT Traits;
 
-        typedef typename Traits::PixelType      Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
+        typedef typename Traits::Pixel      Pixel;
+        typedef typename Traits::ConstPixel ConstPixel;
 
         typedef PixelIterator<Format, Traits> Iterator;
 
@@ -329,8 +331,8 @@ class BasicConstPixelView
         typedef FormatT Format;
         typedef TraitsT Traits;
 
-        typedef typename Traits::PixelType      Pixel;
-        typedef typename Traits::ConstPixelType ConstPixel;
+        typedef typename Traits::Pixel      Pixel;
+        typedef typename Traits::ConstPixel ConstPixel;
 
         typedef ConstPixelIterator<Format, Traits> Iterator;
 
