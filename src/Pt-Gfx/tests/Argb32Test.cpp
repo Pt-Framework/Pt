@@ -210,7 +210,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC CURSOR pixel-wise: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC pixel-wise: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkSpanPixel()
@@ -252,7 +252,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                     best = time;
             }
 
-            std::clog << "GENERIC pixel-wise: " << (width * height) / double(best) << std::endl;
+            std::clog << "GENERIC line-wise: " << (width * height) / double(best) << std::endl;
         }
 
         void BenchmarkCopyViewArgb32()

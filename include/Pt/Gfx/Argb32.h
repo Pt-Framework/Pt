@@ -250,25 +250,6 @@ class PT_GFX_API Argb32 final : public ImageFormat
                                          PixelStorage& store) const override;
 
     public:
-        //
-        // SourceCopy
-        //
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from);
-
-        static void sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        static void sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-        //
-        // SourceOver
-        //
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from);
-
-        static void sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from);
-
-        static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
-
-    public:
         template <typename BasePtr>
         static BasePtr getPixel(const ViewBase& view, BasePtr base, 
                                 Pt::ssize_t xpos, Pt::ssize_t ypos)
@@ -328,6 +309,22 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length);
 };
+
+/** @brief Copies one color to N destination pixels.
+*/
+inline void sourceCopy(Argb32Pixel& to, std::size_t length, const Argb32Color& from);
+
+/** @brief Blends one color over N destination pixels.
+*/
+inline void sourceOver(Argb32Pixel& to, std::size_t length, const Argb32Color& from);
+
+/** @brief Copies N source pixels to N destination pixels.
+*/
+inline void sourceCopy(Argb32Pixel& to, const Argb32ConstPixel& from, std::size_t length);
+
+/** @brief Blends N source pixels over N destination pixels.
+*/
+inline void sourceOver(Argb32Pixel& to, const Argb32ConstPixel& from, std::size_t length);
 
 } // namespace
 

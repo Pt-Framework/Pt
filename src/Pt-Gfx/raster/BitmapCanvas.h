@@ -278,6 +278,7 @@ class BitmapCanvas : public Canvas
         CompositionMode _compositionMode;
         
         Pen                         _pen;
+        Rgb32Color                  _penColor;
         Rgb32Image                  _penBuffer;
 
         Brush                       _brush;

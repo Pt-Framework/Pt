@@ -286,7 +286,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
         {
             for(auto& toSpan : toLines)
             {
-                Rgb32::sourceCopy(toSpan.front().base(), fromIt->front().base(), toSpan.length());
+                sourceCopy(toSpan.front(), fromIt->front(), fromIt->length());
                 ++fromIt;
             }
             break;
@@ -296,7 +296,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
         {
             for(auto& toSpan : toLines)
             {
-                Rgb32::sourceOver(toSpan.front().base(), fromIt->front().base(), toSpan.length());
+                sourceOver(toSpan.front(), fromIt->front(), fromIt->length());
                 ++fromIt;
             }
             break;

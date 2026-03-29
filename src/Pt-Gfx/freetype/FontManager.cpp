@@ -583,20 +583,18 @@ void FreeType::drawGlyph(Rgb32Image& image, int xpos, int ypos, const ColorF& co
                                    static_cast<Pt::uint8_t>(penColor.green() * value / 255),
                                    static_cast<Pt::uint8_t>(penColor.blue()  * value / 255) );
 
-            const Pt::uint8_t* pd = reinterpret_cast<const Pt::uint8_t*>(&glyphColor.value());
-
             switch(mode)
             {
                 default:
                 case CompositionMode::SourceCopy:
                     if(value == 255)
-                        Rgb32::sourceCopy(pixel.base(), pd);
+                        sourceCopy(pixel, 1, glyphColor);
                     else
-                        Rgb32::sourceOver(pixel.base(), pd);
+                        sourceOver(pixel, 1, glyphColor);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Rgb32::sourceOver(pixel.base(), pd);
+                    sourceOver(pixel, 1, glyphColor);
                     break;
             }
         }

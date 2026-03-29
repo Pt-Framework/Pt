@@ -216,11 +216,13 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 {
     if( ! _image )
         return;
-    
+
     _penBuffer.reset(64, 1);
 
     Gfx::Rgb32PixelView fillView(_penBuffer);
     std::fill( fillView.begin(), fillView.end(), pen.color() );
+
+    _penColor = fillView.begin()->color();
 }
 
 
@@ -642,21 +644,17 @@ void BitmapCanvas::stroke(int x, int y, const Rect& clip)
     if( ! _image )
         return;
 
-    std::size_t off = _image->size( _image->width(), y, _image->padding() );
-    off += x * _image->pixelStride();
-
-    Pt::uint8_t* to = _image->data() + off;
-    const Pt::uint8_t* from = _penBuffer.data();
+    Rgb32Pixel pixel(*_image, x, y);
 
     switch(_compositionMode) 
     {
         default:
         case CompositionMode::SourceCopy:
-            Rgb32::sourceCopy(to, from);
+            sourceCopy(pixel, 1, _penColor);
             break;
 
         case CompositionMode::SourceOver:
-            Rgb32::sourceOver(to, from);
+            sourceOver(pixel, 1, _penColor);
             break;
     }
 }
@@ -669,25 +667,25 @@ void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentCli
 
     clipSpan(xpos, ypos, length, currentClip);
 
-    Rgb32Span span(*_image, xpos, ypos, length);
-    Rgb32Span::Iterator p = span.begin();
+    Rgb32Span destSpan(*_image, xpos, ypos, length);
+    Rgb32ConstSpan penSpan(_penBuffer, 0, 0, _penBuffer.width());
 
-    int bufferWidth = _penBuffer.width();
+    Rgb32Span::Iterator p = destSpan.begin();
 
     while(length > 0)
     {
-        int n = std::min(length, bufferWidth);
+        int n = std::min(length, (int)penSpan.length());
         if(n > 0)
         {
             switch(_compositionMode) 
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Rgb32::sourceCopy(p->base(), _penBuffer.data(), n);
+                    sourceCopy(*p, penSpan.front(), n);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Rgb32::sourceOver(p->base(), _penBuffer.data(), n);
+                    sourceOver(*p, penSpan.front(), n);
                     break;
             }
         }
@@ -906,15 +904,14 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
     if( length <= 0)
         return;
 
-    Rgb32Span span(*_image, xpos, ypos, length);
-    Rgb32Span::Iterator p = span.begin();
+    Rgb32Span destSpan(*_image, xpos, ypos, length);
+    Rgb32ConstSpan brushSpan(*_brushSource, 0, 0, _brushSource->width());
 
-    int bufferWidth = _brushSource->width();
-    const Pt::uint8_t* brushData = _brushSource->data();
+    Rgb32Span::Iterator p = destSpan.begin();
 
     while(length > 0)
     {
-        int n = std::min(length, bufferWidth);
+        int n = std::min(length, (int)brushSpan.length());
 
         if( n )
         {
@@ -922,11 +919,11 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    Rgb32::sourceCopy(p->base(), brushData, n);
+                    sourceCopy(*p, brushSpan.front(), n);
                     break;
 
                 case CompositionMode::SourceOver:
-                    Rgb32::sourceOver(p->base(), brushData, n);
+                    sourceOver(*p, brushSpan.front(), n);
                     break;
             }
         }
@@ -960,6 +957,12 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
     int originx =  origin.x();
     int originy = origin.y();
 
+    if( texture.width() == 0 || texture.height() == 0 )
+        return;
+
+    // scanline of the texture to copy from
+    const int textureYPos = (int)( ypos - originy ) % texture.height();
+
     Rgb32Span destSpan(*_image, xpos, ypos, length);
     Rgb32Span::Iterator p = destSpan.begin();
 
@@ -968,32 +971,26 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
         // x position in the texture to copy from
         const int textureXPos = (int)( xpos - originx ) % texture.width();
 
-        // determine the scanline of the texture to copy from
-        const int textureYPos = (int) ( ypos - originy ) % texture.height();
-
         // number of pixels to copy from texture
         const int fillLength = std::min( length, (int)texture.width() - textureXPos );
 
-        // Copy pixels from textrure to image
-        if(fillLength)
+        Rgb32ConstSpan sourceSpan(texture, textureXPos, textureYPos, fillLength);
+
+        switch(_compositionMode)
         {
-            Rgb32ConstSpan sourceSpan(texture, textureXPos, textureYPos, fillLength);
+            default:
+            case CompositionMode::SourceCopy:
+                sourceCopy(*p, sourceSpan.front(), fillLength);
+                break;
 
-            switch(_compositionMode)
-            {
-                default:
-                case CompositionMode::SourceCopy:
-                    Rgb32::sourceCopy(p->base(), sourceSpan.front().base(), fillLength);
-                    break;
-
-                case CompositionMode::SourceOver:
-                    Rgb32::sourceOver(p->base(), sourceSpan.front().base(), fillLength);
-                    break;
-            }
+            case CompositionMode::SourceOver:
+                sourceOver(*p, sourceSpan.front(), fillLength);
+                break;
         }
 
-        // Remaining unfilled pixels of the span
+        // Remaining unfilled pixels
         length -= fillLength;
+        xpos += fillLength;
         p += fillLength;
     }
 }

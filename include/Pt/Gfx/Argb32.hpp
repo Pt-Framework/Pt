@@ -100,8 +100,11 @@ inline void Argb32::assign(Pt::uint8_t* to, const ColorF& c)
 
 inline void Argb32::fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
 {
-    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>( &c.value() );
-    sourceCopy(to, length, p);
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
+    const Pt::uint32_t value = c.value();
+
+    for(std::size_t i = 0; i < length; ++i)
+        *dst++ = value;
 }
 
 
@@ -121,7 +124,7 @@ inline void Argb32::fill(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 inline void Argb32::assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length)
 {
     const Pt::uint8_t* from = reinterpret_cast<const Pt::uint8_t*>(colors);
-    sourceCopy(to, from, length);
+    copy(to, from, length);
 }
 
 
@@ -137,98 +140,13 @@ inline void Argb32::assign(Pt::uint8_t* to, const ColorF* colors, std::size_t le
 
 inline void Argb32::copy(Pt::uint8_t* to, const Pt::uint8_t* from)
 {
-    sourceCopy(to, from);
+    std::memcpy(to, from, PixelWidth);
 }
 
 
 inline void Argb32::copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
 {
-    sourceCopy(to, from, length);
-}
-
-//
-// SourceCopy
-//
-
-inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
-{
-    std::memcpy(to, from, PixelWidth);
-}
-
-
-inline void Argb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
-{
-    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
-    const Pt::uint32_t fromARGB = *reinterpret_cast<const Pt::uint32_t*>(from);
-    for(std::size_t i = 0; i < length; ++i) 
-        *dst++ = fromARGB;
-}
-
-
-inline void Argb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
-{
-    std::memcpy(to, from, length * 4);
-}
-
-
-//
-// SourceOver
-//
-
-inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
-{
-    const Pt::uint32_t alphaSrc = from[3];
-    const Pt::uint32_t alphaInv = 255 - alphaSrc;
-
-    to[0] = (Pt::uint8_t) ( (alphaSrc * from[0]  + alphaInv * to[0]) >> 8 );
-    to[1] = (Pt::uint8_t) ( (alphaSrc * from[1]  + alphaInv * to[1]) >> 8 );
-    to[2] = (Pt::uint8_t) ( (alphaSrc * from[2]  + alphaInv * to[2]) >> 8 );
-    to[3] = (Pt::uint8_t) ( (alphaSrc * alphaSrc + alphaInv * to[3]) >> 8 );
-}
-
-
-inline void Argb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
-{
-    //Argb32Ops::pixelOps_SourceOver( to, from, length);
-
-    const Pt::uint32_t blend    = from[3];
-    const Pt::uint32_t blendInv = 255 - blend;
-    const Pt::uint32_t srcR     = from[2] * blend;
-    const Pt::uint32_t srcG     = from[1] * blend;
-    const Pt::uint32_t srcB     = from[0] * blend;
-    const Pt::uint32_t srcA     = blend   * blend;
-            
-    //Argb32::pixelOps_SourceOver(to, srcA, srcR, srcG, srcB, blendInv, length);
-
-    Pt::uint8_t* dst = to;
-    Pt::uint32_t bfcI = blendInv;
-
-    for(std::size_t i = 0; i < length; ++i) {
-        dst[0] = (srcB + bfcI * dst[0]) >> 8;
-        dst[1] = (srcG + bfcI * dst[1]) >> 8;
-        dst[2] = (srcR + bfcI * dst[2]) >> 8;
-        dst[3] = (srcA + bfcI * dst[3]) >> 8;
-        dst += 4;
-    }
-}
-
-
-inline void Argb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
-{
-    const Pt::uint8_t* src = from;
-          Pt::uint8_t* dst = to;
-
-    for(std::size_t i = 0; i < length; ++i) 
-    {
-        const Pt::uint32_t alphaSrc = src[3];
-        const Pt::uint32_t alphaInv = 255 - alphaSrc;
-        dst[0] = (Pt::uint8_t) ( (alphaSrc * src[0]   + alphaInv * dst[0]) >> 8 );
-        dst[1] = (Pt::uint8_t) ( (alphaSrc * src[1]   + alphaInv * dst[1]) >> 8 );
-        dst[2] = (Pt::uint8_t) ( (alphaSrc * src[2]   + alphaInv * dst[2]) >> 8 );
-        dst[3] = (Pt::uint8_t) ( (alphaSrc * alphaSrc + alphaInv * dst[3]) >> 8 );
-        src += 4;
-        dst += 4;
-    }
+    std::memcpy(to, from, length * PixelWidth);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -545,6 +463,58 @@ inline bool Argb32ConstPixel::equals(const Argb32ConstPixel& p) const
 inline bool Argb32ConstPixel::equals(const Argb32Pixel& p) const
 {
     return base() == p.base();
+}
+
+///////////////////////////////////////////////////////////////////////
+// Free compositing functions
+///////////////////////////////////////////////////////////////////////
+
+inline void sourceCopy(Argb32Pixel& to, std::size_t length, const Argb32Color& from)
+{
+    Argb32::fill( to.base(), length, from );
+}
+
+
+inline void sourceOver(Argb32Pixel& to, std::size_t length, const Argb32Color& from)
+{
+    const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(&from.value());
+    const Pt::uint32_t alphaSrc = src[3];
+    const Pt::uint32_t alphaInv = 255 - alphaSrc;
+
+    Pt::uint8_t* dst = to.base();
+
+    for(std::size_t i = 0; i < length; ++i) {
+        dst[0] = (Pt::uint8_t)((alphaSrc * src[0]   + alphaInv * dst[0]) >> 8);
+        dst[1] = (Pt::uint8_t)((alphaSrc * src[1]   + alphaInv * dst[1]) >> 8);
+        dst[2] = (Pt::uint8_t)((alphaSrc * src[2]   + alphaInv * dst[2]) >> 8);
+        dst[3] = (Pt::uint8_t)((alphaSrc * alphaSrc + alphaInv * dst[3]) >> 8);
+        dst += 4;
+    }
+}
+
+
+inline void sourceCopy(Argb32Pixel& to, const Argb32ConstPixel& from, std::size_t length)
+{
+    Argb32::copy( to.base(), from.base(), length );
+}
+
+
+inline void sourceOver(Argb32Pixel& to, const Argb32ConstPixel& from, std::size_t length)
+{
+    const Pt::uint8_t* src = from.base();
+          Pt::uint8_t* dst = to.base();
+
+    for(std::size_t i = 0; i < length; ++i)
+    {
+        const Pt::uint32_t alphaSrc = src[3];
+        const Pt::uint32_t alphaInv = 255 - alphaSrc;
+        dst[0] = (Pt::uint8_t)((alphaSrc * src[0]   + alphaInv * dst[0]) >> 8);
+        dst[1] = (Pt::uint8_t)((alphaSrc * src[1]   + alphaInv * dst[1]) >> 8);
+        dst[2] = (Pt::uint8_t)((alphaSrc * src[2]   + alphaInv * dst[2]) >> 8);
+        dst[3] = (Pt::uint8_t)((alphaSrc * alphaSrc + alphaInv * dst[3]) >> 8);
+        src += 4;
+        dst += 4;
+    }
 }
 
 } // namespace

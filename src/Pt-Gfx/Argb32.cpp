@@ -130,7 +130,7 @@ inline bool Argb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t leng
         Pt::uint8_t* to = base();
         const Pt::uint8_t* from = argb32->base();
 
-        Argb32::sourceCopy(to, from, length);
+        Argb32::copy(to, from, length);
         return true;
     }
 
@@ -147,7 +147,7 @@ inline bool Argb32PixelBase::onCopyPixels(PixelBase& p, std::size_t length) cons
         Pt::uint8_t* to = argb32->base();
         const Pt::uint8_t* from = base();
 
-        Argb32::sourceCopy(to, from, length);
+        Argb32::copy(to, from, length);
         return true;
     }
 

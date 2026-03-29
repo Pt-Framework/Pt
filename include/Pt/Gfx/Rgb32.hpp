@@ -116,7 +116,7 @@ inline void Rgb32::assign(Pt::uint8_t* to, const Argb32Color& from)
 {
     const Pt::uint32_t value = premultiply(from.alpha(), from.red(), from.green(), from.blue());
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
-    sourceCopy(to, p);
+    copy(to, p);
 }
 
 
@@ -124,30 +124,43 @@ inline void Rgb32::assign(Pt::uint8_t* to, const ColorF& c)
 {
     const Pt::uint32_t value = premultiply(c);
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
-    sourceCopy(to, p);
+    copy(to, p);
 }
 
 
 inline void Rgb32::fill(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c)
 {
-    const Pt::uint8_t* from = reinterpret_cast<const Pt::uint8_t*>(&c.value());
-    sourceCopy(to, length, from);
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
+    const Pt::uint32_t value = c.value();
+
+    for(std::size_t i = 0; i < length; ++i)
+    {
+        *dst++ = value;
+    }
 }
 
 
 inline void Rgb32::fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
 {
     const Pt::uint32_t value = premultiply(c.alpha(), c.red(), c.green(), c.blue());
-    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
-    sourceCopy(to, length, p);
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
+
+    for(std::size_t i = 0; i < length; ++i)
+    {
+        *dst++ = value;
+    }
 }
 
 
 inline void Rgb32::fill(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
     const Pt::uint32_t value = premultiply(c);
-    const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
-    sourceCopy(to, length, p);
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
+
+    for(std::size_t i = 0; i < length; ++i)
+    {
+        *dst++ = value;
+    }
 }
 
 
@@ -157,7 +170,7 @@ inline void Rgb32::assign(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t
                    "invalid Rgb32Color size" );
 
     const Pt::uint8_t* from = reinterpret_cast<const Pt::uint8_t*>(colors);
-    sourceCopy(to, from, length);
+    copy(to, from, length);
 }
 
 
@@ -183,77 +196,46 @@ inline void Rgb32::assign(Pt::uint8_t* to, const ColorF* colors, std::size_t len
 
 inline void Rgb32::copy(Pt::uint8_t* to, const Pt::uint8_t* from)
 {
-    sourceCopy(to, from);
+    std::memcpy(to, from, PixelWidth);
 }
 
 
 inline void Rgb32::copy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
 {
-    sourceCopy(to, from, length);
-}
-
-//
-// SourceCopy
-//
-
-inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from)
-{
-    std::memcpy(to, from, PixelWidth);
-}
-
-
-inline void Rgb32::sourceCopy(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
-{
-    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
-    const Pt::uint32_t fromValue = *reinterpret_cast<const Pt::uint32_t*>(from);
-    
-    for(std::size_t i = 0; i < length; ++i)
-    {
-        *dst++ = fromValue;
-    }
-}
-
-
-inline void Rgb32::sourceCopy(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
-{
     std::memcpy(to, from, length * PixelWidth);
 }
 
 //
-// SourceOver
+// Blend (SourceOver)
 //
 
-inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
+inline void sourceOver(Rgb32Pixel& to, std::size_t length, const Rgb32Color& from)
 {
-    const Pt::uint32_t alphaInv = 255 - from[3];
+    const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(&from.value());
+    const Pt::uint32_t alphaInv = 255 - src[3];
 
-    to[0] = (Pt::uint8_t) ( from[0] + ((alphaInv * to[0]) >> 8) );
-    to[1] = (Pt::uint8_t) ( from[1] + ((alphaInv * to[1]) >> 8) );
-    to[2] = (Pt::uint8_t) ( from[2] + ((alphaInv * to[2]) >> 8) );
-    to[3] = (Pt::uint8_t) ( from[3] + ((alphaInv * to[3]) >> 8) );
-}
-
-
-inline void Rgb32::sourceOver(Pt::uint8_t* to, std::size_t length, const Pt::uint8_t* from)
-{
-    const Pt::uint32_t alphaInv = 255 - from[3];
-
-    Pt::uint8_t* dst = to;
+    Pt::uint8_t* dst = to.base();
 
     for(std::size_t i = 0; i < length; ++i) {
-        dst[0] = (Pt::uint8_t)(from[0] + ((alphaInv * dst[0]) >> 8));
-        dst[1] = (Pt::uint8_t)(from[1] + ((alphaInv * dst[1]) >> 8));
-        dst[2] = (Pt::uint8_t)(from[2] + ((alphaInv * dst[2]) >> 8));
-        dst[3] = (Pt::uint8_t)(from[3] + ((alphaInv * dst[3]) >> 8));
+        dst[0] = (Pt::uint8_t)(src[0] + ((alphaInv * dst[0]) >> 8));
+        dst[1] = (Pt::uint8_t)(src[1] + ((alphaInv * dst[1]) >> 8));
+        dst[2] = (Pt::uint8_t)(src[2] + ((alphaInv * dst[2]) >> 8));
+        dst[3] = (Pt::uint8_t)(src[3] + ((alphaInv * dst[3]) >> 8));
         dst += 4;
     }
 }
 
 
-inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::size_t length)
+inline void sourceCopy(Rgb32Pixel& to, const Rgb32ConstPixel& from, std::size_t length)
 {
-    const Pt::uint8_t* src = from;
-          Pt::uint8_t* dst = to;
+    Rgb32::copy( to.base(), from.base(), length );
+}
+
+
+inline void sourceOver(Rgb32Pixel& to, const Rgb32ConstPixel& from, std::size_t length)
+{
+    const Pt::uint8_t* src = from.base();
+          Pt::uint8_t* dst = to.base();
 
     for(std::size_t i = 0; i < length; ++i) 
     {
@@ -266,10 +248,6 @@ inline void Rgb32::sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, std::siz
         dst += 4;
     }
 }
-
-///////////////////////////////////////////////////////////////////////
-// Rgb32Pixel
-///////////////////////////////////////////////////////////////////////
 
 template <typename T>
 inline Rgb32Pixel::Rgb32Pixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
@@ -328,6 +306,13 @@ inline Rgb32Pixel& Rgb32Pixel::operator=(const Gfx::ColorF& color)
 inline Rgb32Pixel& Rgb32Pixel::operator=(const Argb32Color& color)
 { 
     Rgb32::assign(base(), color);
+    return *this;
+}
+
+
+inline Rgb32Pixel& Rgb32Pixel::operator=(const Rgb32Color& color)
+{
+    Rgb32::copy( base(), reinterpret_cast<const Pt::uint8_t*>(&color.value()) );
     return *this;
 }
 
@@ -622,6 +607,20 @@ inline bool Rgb32ConstPixel::equals(const Rgb32Pixel& p) const
 {
     return base() == p.base();
 }
+
+///////////////////////////////////////////////////////////////////////
+// Free compositing functions
+///////////////////////////////////////////////////////////////////////
+
+inline void sourceCopy(Rgb32Pixel& to, std::size_t length, const Rgb32Color& from)
+{
+    Rgb32::fill( to.base(), length, from );
+}
+
+
+///////////////////////////////////////////////////////////////////////
+// Rgb32Pixel
+///////////////////////////////////////////////////////////////////////
 
 } // namespace
 
