@@ -345,6 +345,13 @@ void Canvas::drawImage(const Gfx::PointF& to,
         {
             onDrawImage(to, image, rect);
         }
+        else
+        {
+            // TODO Gfx: line-wise conversion in onDrawImage
+            Image conv( image.width(), image.height(), _active->format() );
+            copyView(image, conv);
+            onDrawImage(to, conv, rect);
+        }
     }
 }
 

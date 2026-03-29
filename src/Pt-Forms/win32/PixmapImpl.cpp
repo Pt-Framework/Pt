@@ -36,7 +36,7 @@
 
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Argb32Image.h>
+#include <Pt/Gfx/Rgb32.h>
 
 namespace {
 
@@ -79,33 +79,7 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* p
 
 #endif // PT_FORMS_WIN32_RASTER
 
-void toPreMulAlpha(const Pt::Gfx::Image& image, 
-                   std::vector<Pt::uint8_t>& bitmapData)
-{
-    size_t _width = image.width();
-    size_t _height = image.height();
-
-    Pt::Gfx::ConstPixelView fromView(image);
-    Pt::Gfx::ConstPixelView::Iterator it = fromView.begin();
-    Pt::Gfx::ConstPixelView::Iterator end = fromView.end();
-
-    for( ; it != end; ++it)
-    {
-        Pt::Gfx::Argb32Color color = it->toColor();
-
-        const Pt::uint8_t r = color.red();
-        const Pt::uint8_t g = color.green();
-        const Pt::uint8_t b = color.blue();
-        const Pt::uint8_t a = color.alpha();
-
-        bitmapData.push_back((Pt::uint8_t) (a * b / 255));
-        bitmapData.push_back((Pt::uint8_t) (a * g / 255));
-        bitmapData.push_back((Pt::uint8_t) (a * r / 255));
-        bitmapData.push_back((Pt::uint8_t) (a));
-    }
-}
-
-} // nasmespace
+} // namespace
 
 namespace Pt {
 
@@ -190,10 +164,15 @@ void PixmapImpl::reset(const Gfx::Image& image)
     Gfx::SizeF size(width, height);
     reset(size);
 
-    std::vector<Pt::uint8_t> bitmapData;
-    toPreMulAlpha(image, bitmapData);
+    const Pt::uint8_t* data = image.data();
+    Gfx::Rgb32Image rgb32Image;
 
-    const Pt::uint8_t* data = bitmapData.empty() ? 0 : &bitmapData[0];
+    if(image.format() != Gfx::ImageFormat::rgb32() || image.padding() != 0)
+    {
+        rgb32Image.reset(width, height);
+        Gfx::copyView(image, rgb32Image);
+        data = rgb32Image.data();
+    }
 
     const size_t depth = 32;
 
@@ -246,7 +225,7 @@ Gfx::Image PixmapImpl::toImage() const
     bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
     bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
 
-    Pt::Gfx::Image image(_width, _height, Pt::Gfx::Argb32());
+    Pt::Gfx::Image image(_width, _height, Pt::Gfx::Rgb32());
     Pt::uint8_t* data = image.data();
 
     int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
@@ -287,7 +266,7 @@ HDC PixmapImpl::deviceContext() const
 
 const Gfx::ImageFormat& PixmapImpl::format() const
 {
-    return Gfx::ImageFormat::argb32();
+    return Gfx::ImageFormat::rgb32();
 }
 
 

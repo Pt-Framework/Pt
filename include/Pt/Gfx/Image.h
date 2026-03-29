@@ -103,19 +103,33 @@ class BasicImage : public ViewBase
         
         /** @brief Reset to new size.
         */
-        void reset(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding,
-               const Format& format = FormatT::get() );
+        void reset(Pt::ssize_t width, Pt::ssize_t height,
+               Pt::ssize_t padding, const Format& format);
 
         void reset(Pt::ssize_t width, Pt::ssize_t height,
-               const Format& format = FormatT::get() );
+               const Format& format);
+
+        /** @brief Reset to new size, keep existing format.
+        */
+        void reset(Pt::ssize_t width, Pt::ssize_t height,
+               Pt::ssize_t padding);
+
+        void reset(Pt::ssize_t width, Pt::ssize_t height);
         
         /** @brief Reset to new data.
         */
         void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-               Pt::ssize_t padding, const Format& format = FormatT::get() );
+               Pt::ssize_t padding, const Format& format);
 
         void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-               const Format& format = FormatT::get() );
+               const Format& format);
+
+        /** @brief Reset to new data, keep existing format.
+        */
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+               Pt::ssize_t padding);
+
+        void reset(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height);
         
         /** @brief Clears the image.
         */
@@ -169,11 +183,20 @@ class BasicConstImage : public ViewBase
 
         void reset(const BasicImage<FormatT, TraitsT>& image);
 
+        /** @brief Reset to new data.
+        */
         void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-               Pt::ssize_t padding, const Format& format = FormatT::get() );
+               Pt::ssize_t padding, const Format& format);
 
         void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-               const Format& format = FormatT::get() );
+               const Format& format);
+
+        /** @brief Reset to new data, keep existing format.
+        */
+        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
+               Pt::ssize_t padding);
+
+        void reset(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height);
 
         void clear();
 

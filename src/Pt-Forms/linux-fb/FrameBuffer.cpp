@@ -215,7 +215,7 @@ FrameBuffer::FrameBuffer()
         default:
         case 24:
         case 32:
-            _format =  new Gfx::Argb32();
+            _format =  new Gfx::Rgb32();
             _pixelSize = 4;
             break;
     }

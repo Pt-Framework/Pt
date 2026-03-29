@@ -33,9 +33,12 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Paint.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rgb32.h>
 #include <Pt/System/Path.h>
 #include <Pt/NonCopyable.h>
 
@@ -66,6 +69,9 @@ class PT_GFX_API BitmapSurface : private NonCopyable
 
     const Gfx::Image& image() const;
 
+    Rgb32Image& rgb32Image()
+    { return _rgb32Image; }
+
     void reset(const Gfx::Image& image);
 
     void reset(const Gfx::SizeF&, std::size_t stride = 0);
@@ -91,11 +97,12 @@ class PT_GFX_API BitmapSurface : private NonCopyable
                     const Gfx::Paint& paint,
                     const Gfx::RectF* rect);
 
-  private:   
     void putImage(const PointI& to, const Image& image, 
-                  const Gfx::Paint& paint, const RectI& imageRect);
+                  const RectI& imageRect, const RectI& clip,
+                  const CompositionMode& mode);
 
   private:
+    Rgb32Image     _rgb32Image;
     Image          _image;
     Gfx::SizeF     _physicalSize;
     Gfx::Scaling   _scaling;

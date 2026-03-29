@@ -148,6 +148,25 @@ inline void BasicImage<FormatT, TraitsT>::reset(Pt::ssize_t width, Pt::ssize_t h
 
 
 template <typename FormatT, typename TraitsT>
+inline void BasicImage<FormatT, TraitsT>::reset(Pt::ssize_t width, Pt::ssize_t height,
+                                                Pt::ssize_t padding)
+{
+    _buffer.resize( Traits::imageSize(this->format(), width, height, padding) );
+
+    _data = _buffer.empty() ? nullptr : _buffer.data();
+    this->setDimensions(width, height,
+                        width * Traits::pixelStride(this->format()) + padding);
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicImage<FormatT, TraitsT>::reset(Pt::ssize_t width, Pt::ssize_t height)
+{
+    this->reset(width, height, 0);
+}
+
+
+template <typename FormatT, typename TraitsT>
 inline void BasicImage<FormatT, TraitsT>::reset(Pt::uint8_t* data, Pt::ssize_t width,
                                                 Pt::ssize_t height, Pt::ssize_t padding,
                                                 const Format& format)
@@ -167,6 +186,26 @@ inline void BasicImage<FormatT, TraitsT>::reset(Pt::uint8_t* data, Pt::ssize_t w
                                                 Pt::ssize_t height, const Format& format)
 {
     this->reset(data, width, height, 0, format);
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicImage<FormatT, TraitsT>::reset(Pt::uint8_t* data, Pt::ssize_t width,
+                                                Pt::ssize_t height, Pt::ssize_t padding)
+{
+    _buffer.clear();
+
+    _data = data;
+    this->setDimensions(width, height,
+                        width * Traits::pixelStride(this->format()) + padding);
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicImage<FormatT, TraitsT>::reset(Pt::uint8_t* data, Pt::ssize_t width,
+                                                Pt::ssize_t height)
+{
+    this->reset(data, width, height, 0);
 }
 
 
@@ -290,6 +329,24 @@ inline void BasicConstImage<FormatT, TraitsT>::reset(const Pt::uint8_t* data, Pt
                                                      Pt::ssize_t height, const Format& format)
 {
     this->reset(data, width, height, 0, format);
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicConstImage<FormatT, TraitsT>::reset(const Pt::uint8_t* data, Pt::ssize_t width,
+                                                     Pt::ssize_t height, Pt::ssize_t padding)
+{
+    _data = data;
+    this->setDimensions(width, height,
+                        width * Traits::pixelStride(this->format()) + padding);
+}
+
+
+template <typename FormatT, typename TraitsT>
+inline void BasicConstImage<FormatT, TraitsT>::reset(const Pt::uint8_t* data, Pt::ssize_t width,
+                                                     Pt::ssize_t height)
+{
+    this->reset(data, width, height, 0);
 }
 
 

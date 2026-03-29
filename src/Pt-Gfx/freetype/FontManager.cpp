@@ -37,8 +37,7 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Argb32.h>
-#include <Pt/Gfx/Argb32Image.h>
+#include <Pt/Gfx/Rgb32.h>
 
 #include <Pt/System/Directory.h>
 #include <Pt/System/FileInfo.h>
@@ -338,7 +337,7 @@ TextMetrics FreeType::textMetrics(const String& text,
 }
 
 
-void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+void FreeType::draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                     const String& text, const ColorF& color, const Rect& clip,
                     const CompositionMode& mode, FTC_FaceID faceId, 
                     std::size_t fontSize, const Transform* tf)
@@ -505,7 +504,7 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
 }
 
 
-void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
+void FreeType::drawGlyph(Rgb32Image& image, int xpos, int ypos, const ColorF& color,
                          int bmPitch, int height, int width, const unsigned char* buffer, 
                          const Rect& clip, const CompositionMode& mode)
 {
@@ -538,10 +537,17 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
 
     dsy = ypos;
 
-    const Argb32Color argbColor(color);
-    Argb32Color pixelColor = argbColor;
-    Argb32Image argbImage(image.data(), image.width(), image.height(), image.padding());
-    Argb32View argbView(argbImage);
+    // premultiply pen color
+    const Pt::uint8_t ca = static_cast<Pt::uint8_t>(color.alpha() >> 8);
+    const Pt::uint8_t cr = static_cast<Pt::uint8_t>(color.red()   >> 8);
+    const Pt::uint8_t cg = static_cast<Pt::uint8_t>(color.green() >> 8);
+    const Pt::uint8_t cb = static_cast<Pt::uint8_t>(color.blue()  >> 8);
+    const Rgb32Color penColor( ca,
+                               static_cast<Pt::uint8_t>((cr * ca + 127) / 255),
+                               static_cast<Pt::uint8_t>((cg * ca + 127) / 255),
+                               static_cast<Pt::uint8_t>((cb * ca + 127) / 255) );
+
+    Rgb32View rgb32View(image);
     
     for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
     {
@@ -563,33 +569,34 @@ void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
             if( dsx >= x2 )
                 break;
 
-            Argb32Pixel pixel(argbView, dsx, dsy);
+            Rgb32Pixel pixel(rgb32View, dsx, dsy);
 
             const Int px = yOffset + x;
             unsigned char value = buffer[px];
 
-            const Pt::uint8_t* colorData = reinterpret_cast<const Pt::uint8_t*>(&argbColor.value());
+            if( value == 0 )
+                continue;
+
+            // modulate premultiplied color by glyph coverage
+            Rgb32Color glyphColor( static_cast<Pt::uint8_t>(penColor.alpha() * value / 255),
+                                   static_cast<Pt::uint8_t>(penColor.red()   * value / 255),
+                                   static_cast<Pt::uint8_t>(penColor.green() * value / 255),
+                                   static_cast<Pt::uint8_t>(penColor.blue()  * value / 255) );
+
+            const Pt::uint8_t* pd = reinterpret_cast<const Pt::uint8_t*>(&glyphColor.value());
 
             switch(mode)
             {
                 default:
                 case CompositionMode::SourceCopy:
-                    if(value != 255)
-                    {
-                        pixelColor.setAlpha(value);
-                        const Pt::uint8_t* pd = reinterpret_cast<const Pt::uint8_t*>(&pixelColor.value());
-                        Argb32::sourceOver(pixel.base(), pd);
-                    }
+                    if(value == 255)
+                        Rgb32::sourceCopy(pixel.base(), pd);
                     else
-                    {
-                        Argb32::sourceCopy(pixel.base(), colorData);
-                    }
+                        Rgb32::sourceOver(pixel.base(), pd);
                     break;
 
                 case CompositionMode::SourceOver:
-                    pixelColor.setAlpha( Pt::uint8_t(argbColor.alpha() * value / 255) );
-                    const Pt::uint8_t* pd = reinterpret_cast<const Pt::uint8_t*>(&pixelColor.value());
-                    Argb32::sourceOver(pixel.base(), pd);
+                    Rgb32::sourceOver(pixel.base(), pd);
                     break;
             }
         }

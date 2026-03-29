@@ -656,7 +656,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
 
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaFirst;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst;
     
     CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
                                         8, 32, 4 * image.width(), 
@@ -901,7 +901,7 @@ void PixmapImpl::reset(const Gfx::Image& image)
 
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaFirst;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst;
     
     CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
                                         8, 32, 4 * image.width(), 
@@ -964,7 +964,7 @@ void PixmapImpl::setScaleFactor(double scaleFactor)
 
 const Gfx::ImageFormat& PixmapImpl::format() const
 {
-    return Gfx::ImageFormat::argb32();
+    return Gfx::ImageFormat::rgb32();
 }
 
 

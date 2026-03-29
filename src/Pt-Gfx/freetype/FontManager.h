@@ -38,6 +38,8 @@
 #include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rgb32.h>
 #include <Pt/System/Path.h>
 #include <Pt/Singleton.h>
 
@@ -93,9 +95,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         FTC_FaceID findFaceId(const Font& font);
 
-        // TODO: use ImageView instead of clip
-
-        void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
+        void draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                   const String& text, const ColorF& color, const Rect& clip,
                   const CompositionMode& mode, FTC_FaceID faceId, 
                   std::size_t fontSize, const Transform* tf);
@@ -105,9 +105,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
-        // TODO: use ImageView instead of clip
-
-        void drawGlyph(Image& image, int xpos, int ypos, const ColorF& color, 
+        void drawGlyph(Rgb32Image& image, int xpos, int ypos, const ColorF& color, 
                        int bmPitch, int height, int width, const unsigned char* buffer, 
                        const Rect& clip, const CompositionMode& mode);
 

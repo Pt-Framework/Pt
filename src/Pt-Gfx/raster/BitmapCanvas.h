@@ -31,6 +31,8 @@
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rgb32.h>
+#include "BitmapSurface.h"
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -50,7 +52,7 @@ class ActiveEdgeTable;
 class BitmapCanvas : public Canvas
 {
     public:
-        typedef Image::pos_t       pos_t;
+        typedef Rgb32Image::pos_t   pos_t;
         typedef BasicPoint<pos_t>  Point;
         typedef BasicSize<pos_t>   Size;
         typedef BasicRect<pos_t>   Rect;
@@ -60,7 +62,7 @@ class BitmapCanvas : public Canvas
 
         ~BitmapCanvas();
 
-        void init(Image& image);
+        void init(BitmapSurface& surface);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
@@ -268,22 +270,19 @@ class BitmapCanvas : public Canvas
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
                       bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip);
 
-    void putImage( const Point& to, const Image& image);
-
-    void putImage(const Point& to, const Image& image, const Rect& imageRect);
-
     private:
-        Image*       _image;
+        BitmapSurface* _surface;
+        Rgb32Image*    _image;
         double       _lastScaleFactor;
 
         CompositionMode _compositionMode;
         
         Pen                         _pen;
-        Image                       _penBuffer;
+        Rgb32Image                  _penBuffer;
 
         Brush                       _brush;
-        Image                       _brushBuffer;
-        const Image*                _brushSource;
+        Rgb32Image                  _brushBuffer;
+        const Rgb32Image*           _brushSource;
         bool                        _isGradient;
 
         Font   _font;

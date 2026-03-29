@@ -29,7 +29,7 @@
 #include "BitmapCanvas.h"
 #include "Dasher.h"
 
-#include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Bitmap.h>
 
@@ -43,7 +43,8 @@ namespace Gfx {
 
 BitmapCanvas::BitmapCanvas()
 : Canvas()
-, _image()
+, _surface(0)
+, _image(0)
 , _hasClip(false)
 {
 }
@@ -54,10 +55,11 @@ BitmapCanvas::~BitmapCanvas()
 }
 
 
-void BitmapCanvas::init(BLContext& rasterContext, Image& image)
+void BitmapCanvas::init(BitmapSurface& surface)
 {
-    _context = &rasterContext;
-    _image = &image;
+    _surface = &surface;
+    _context = &surface.rasterContext();
+    _image = &surface.rgb32Image();
 }
 
 
@@ -78,11 +80,9 @@ void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 
 void BitmapCanvas::onFinishPaint()
 {
-    if(_context)
-        _context = 0;
-
-    if(_image)
-        _image = 0;
+    _surface = 0;
+    _context = 0;
+    _image = 0;
 }
 
 
@@ -556,58 +556,12 @@ void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text,
                                 _compositionMode, _faceId, _fontSize, &tf);
 }
 
-#if USE_BLEND2D_BLIT
-
 void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image, 
                                 const RectF* imageRect)
 {
-    _context->save();
-    _context->reset_transform();
-
-    Gfx::PointF toP = transform() * toF;
-    BLPoint pos( toP.x(), toP.y() );
-
-    if( image.empty() )
+    if( ! _surface )
         return;
 
-    void* data = const_cast<Pt::uint8_t*>( image.data() );
-    std::size_t stride = image.format().imageSize( image.width(), 1, image.padding() );
-
-    BLImage view;
-
-    if(_compositionMode == CompositionMode::SourceCopy)
-    {
-        view.create_from_data(image.width(), image.height(), BL_FORMAT_XRGB32,
-                              data, stride, BL_DATA_ACCESS_READ);
-    }
-    else
-    {
-        view.create_from_data(image.width(), image.height(), BL_FORMAT_PRGB32,
-                              data, stride, BL_DATA_ACCESS_READ);
-    }
-
-    if(imageRect)
-    {
-        BLRectI srcRect(lround( imageRect->x() ),
-                        lround( imageRect->y() ), 
-                        lround( imageRect->width() ),
-                        lround( imageRect->height() ) );
-
-        _context->blit_image(pos, view, srcRect);
-    }
-    else
-    {
-        _context->blit_image(pos, view);
-    }
-    
-    _context->restore();
-}
-
-#else
-
-void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image, 
-                                const RectF* imageRect)
-{
     Gfx::PointF toP = transform() * toF;
     Point to = Point( lround(toP.x()), lround(toP.y()) );
 
@@ -618,83 +572,17 @@ void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image,
                              Size( lround( imageRect->width() ),
                                    lround( imageRect->height() ) ) );
 
-        putImage(to, image, srcRect);
+        _surface->putImage(to, image, srcRect, _currentClip, _compositionMode);
     }
     else
     {
-        putImage(to, image);
+        Rect srcRect;
+        srcRect.setWidth( image.width() );
+        srcRect.setHeight( image.height() );
+
+        _surface->putImage(to, image, srcRect, _currentClip, _compositionMode);
     }
 }
-
-
-void BitmapCanvas::putImage( const Point& to, const Image& img)
-{
-    Rect imageRect;
-    imageRect.setWidth( img.width() );
-    imageRect.setHeight( img.height() );
-
-    putImage(to, img, imageRect);
-}
-
-
-void BitmapCanvas::putImage(const Point& to, const Image& image, const Rect& imageRect)
-{
-    if( ! _image )
-        return;
-
-    // clip against source boundaries
-    Rect fromRect( image.width(), image.height() );
-    fromRect = fromRect.intersect(imageRect);
-
-    // update target position if rect got smaller
-    Point toPos = to;
-    toPos += fromRect.topLeft() - imageRect.topLeft();
-
-    // clip against target boundaries
-    Rect toRect = Rect( toPos, fromRect.size() );
-    toRect = toRect.intersect(_currentClip);
-
-    // update source position if rect got smaller
-    Point fromPos = fromRect.topLeft();
-    fromPos += toRect.topLeft() - toPos;
-    fromRect.setOrigin(fromPos);
-
-    // update source size if rect got smaller
-    fromRect.setSize( toRect.size() );
-
-    auto toView = view<Argb32>(_image->data(), _image->width(), _image->height(), _image->padding());
-    const auto fromView = view<Argb32>(image.data(), image.width(), image.height(), image.padding());
-
-    auto toLines = lineView(toView, toRect.x(), toRect.y(), toRect.width(), toRect.height());
-    auto fromLines = lineView(fromView, fromRect.x(), fromRect.y(), fromRect.width(), fromRect.height());
-    auto fromIt = fromLines.begin();
-
-    switch(_compositionMode)
-    {
-        default:
-        case CompositionMode::SourceCopy:
-        {
-            for(auto& toSpan : toLines)
-            {
-                Argb32::sourceCopy(toSpan.front().base(), fromIt->front().base(), toSpan.length());
-                ++fromIt;
-            }
-            break;
-        }
-
-        case CompositionMode::SourceOver:
-        {
-            for(auto& toSpan : toLines)
-            {
-                Argb32::sourceOver(toSpan.front().base(), fromIt->front().base(), toSpan.length());
-                ++fromIt;
-            }
-            break;
-        }
-    }
-}
-
-#endif // USE_BLEND2d_BLIT
 
 } // namespace
 

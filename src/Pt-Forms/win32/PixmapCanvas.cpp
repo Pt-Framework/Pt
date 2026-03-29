@@ -31,6 +31,7 @@
 #include "win32.h"
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rgb32.h>
 
 using std::max;
 using std::min;
@@ -160,18 +161,17 @@ HBRUSH getGradientBrush(HDC dc, int width, int height,
                         Pt::Gfx::ColorF gradientStop, 
                         Pt::Gfx::Brush::GradientStyle gradient)
 {
-
     BITMAPINFO bi;
     ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-    bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER); 
-    bi.bmiHeader.biPlanes       = 1;         // always 1
-    bi.bmiHeader.biBitCount     = 32;        // ARGB 32
-    bi.bmiHeader.biCompression  = BI_RGB;    // uncompressed RGB
-    bi.bmiHeader.biSizeImage    = 0;         // automatic
-    bi.bmiHeader.biClrUsed      = 0;         // no color table
-    bi.bmiHeader.biClrImportant = 0;         // no color table 
-    
+    bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+    bi.bmiHeader.biPlanes       = 1;
+    bi.bmiHeader.biBitCount     = 32;
+    bi.bmiHeader.biCompression  = BI_RGB;
+    bi.bmiHeader.biSizeImage    = 0;
+    bi.bmiHeader.biClrUsed      = 0;
+    bi.bmiHeader.biClrImportant = 0;
+
     if( gradient == Pt::Gfx::Brush::Horizontal )
     {
         bi.bmiHeader.biWidth    = width;
@@ -190,59 +190,32 @@ HBRUSH getGradientBrush(HDC dc, int width, int height,
     VOID* imageBits = NULL;
     HBITMAP bitmap = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
-    Pt::uint8_t* pixel = reinterpret_cast<Pt::uint8_t*>(imageBits);
-            
-    for(int n = 0; n < length; ++n)
+    Pt::Gfx::Rgb32Image brushBuffer(static_cast<Pt::uint8_t*>(imageBits),
+                                     bi.bmiHeader.biWidth,
+                                     std::abs(bi.bmiHeader.biHeight), 0);
+
+    Pt::Gfx::Rgb32PixelView pixelView(brushBuffer);
+    Pt::Gfx::Rgb32PixelView::Iterator pixel = pixelView.begin();
+
+    for(int n = 0; n < length; ++n, ++pixel)
     {
         float f1 = (length - n) / float(length);
         float f2 = n / float(length);
 
-        float r1 = gradientStart.red() * f1;
-        float r2 = gradientStop.red() * f2;
+        Pt::uint16_t a = static_cast<Pt::uint16_t>(gradientStart.alpha() * f1 + gradientStop.alpha() * f2);
+        Pt::uint16_t r = static_cast<Pt::uint16_t>(gradientStart.red()   * f1 + gradientStop.red()   * f2);
+        Pt::uint16_t g = static_cast<Pt::uint16_t>(gradientStart.green() * f1 + gradientStop.green() * f2);
+        Pt::uint16_t b = static_cast<Pt::uint16_t>(gradientStart.blue()  * f1 + gradientStop.blue()  * f2);
 
-        float g1 = gradientStart.green() * f1;
-        float g2 = gradientStop.green() * f2;
-
-        float b1 = gradientStart.blue() * f1;
-        float b2 = gradientStop.blue() * f2;
-                
-        pixel[0] = static_cast<Pt::uint8_t>( (b1 + b2) / 257 );
-        pixel[1] = static_cast<Pt::uint8_t>( (g1 + g2) / 257 );
-        pixel[2] = static_cast<Pt::uint8_t>( (r1 + r2) / 257 );
-        pixel[3] = 0;
-
-        pixel += 4;
+        *pixel = Pt::Gfx::ColorF(a, r, g, b);
     }
 
     HBRUSH brush = CreatePatternBrush(bitmap);
     DeleteObject(bitmap);
-    
+
     return brush;
 }
 
-
-void toPreMulAlpha(const Pt::Gfx::Image& image, 
-                   std::vector<Pt::uint8_t>& bitmapData)
-{
-    Pt::Gfx::ConstPixelView pixels = Pt::Gfx::pixelView(image);
-    Pt::Gfx::ConstPixelView::Iterator it = pixels.begin();
-    Pt::Gfx::ConstPixelView::Iterator end = pixels.end();
-
-    for( ; it != end; ++it)
-    {
-        Pt::Gfx::Argb32Color color = it->toColor();
-
-        const Pt::uint8_t r = color.red();
-        const Pt::uint8_t g = color.green();
-        const Pt::uint8_t b = color.blue();
-        const Pt::uint8_t a = color.alpha();
-
-        bitmapData.push_back((Pt::uint8_t) (a * b / 255));
-        bitmapData.push_back((Pt::uint8_t) (a * g / 255));
-        bitmapData.push_back((Pt::uint8_t) (a * r / 255));
-        bitmapData.push_back((Pt::uint8_t) (a));
-    }
-}
 
 } // namespace
 
@@ -416,8 +389,17 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
             BITMAPINFO bi;
             ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-            std::size_t pixelSize = texture.pixelStride();
-            std::size_t depth = pixelSize * 8;
+            const Pt::uint8_t* texData = texture.data();
+            Gfx::Rgb32Image rgb32Texture;
+
+            if(texture.format() != Gfx::ImageFormat::rgb32() || texture.padding() != 0)
+            {
+                rgb32Texture.reset(texture.width(), texture.height());
+                Gfx::copyView(texture, rgb32Texture);
+                texData = rgb32Texture.data();
+            }
+
+            const size_t depth = 32;
 
             bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);    
             bi.bmiHeader.biWidth        = texture.width();
@@ -434,9 +416,8 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
             VOID* imageBits;
             HBITMAP bitmap = CreateDIBSection(dc, &bi, 
                                               DIB_RGB_COLORS, &imageBits, NULL, 0);
-            memcpy(imageBits, 
-                    texture.data(), 
-                    texture.width() * texture.height() * pixelSize);
+            memcpy(imageBits, texData, 
+                    texture.width() * texture.height() * 4);
 
             _brush = CreatePatternBrush(bitmap);
             DeleteObject(bitmap);
@@ -1014,83 +995,42 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
         height = lround( rect->height() );
     }
 
+    const Pt::uint8_t* data = image.data();
+    std::size_t pixelSize = image.pixelStride();
+    size_t depth = pixelSize * 8;
+
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
+    bitmapInfo.bmiHeader.biWidth        = image.width();
+    bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
+    bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1
+    bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
+    bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
+    bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
+    bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
+    bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
+
+    VOID* imageBits = 0;
+    HBITMAP bitmap = CreateDIBSection(dc, &bitmapInfo,
+                                      DIB_RGB_COLORS, &imageBits, NULL, 0);
+    memcpy(imageBits, data, image.width() * image.height() * pixelSize);
+
+    HDC bitmapDC = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDC, bitmap);
+
     switch (_compositionMode)
     {
         case Gfx::CompositionMode::SourceCopy:
         {
-            const Pt::uint8_t* data = image.data();
-            std::size_t pixelSize = image.pixelStride();
-            size_t depth = pixelSize * 8;
-
-            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
-                                          depth, (VOID*)data);
-            if (bitmap == NULL)
-            {
-                BITMAPINFO bitmapInfo;
-                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
-                bitmapInfo.bmiHeader.biWidth        = image.width();
-                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
-                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
-                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
-                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
-                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
-                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
-                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
-
-                VOID* imageBits = 0;
-                bitmap = CreateDIBSection(dc, &bitmapInfo,
-                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
-                memcpy(imageBits, data, image.width() * image.height() * pixelSize);
-            }
-
-            HDC bitmapDC = CreateCompatibleDC(NULL);
-            SelectObject(bitmapDC, bitmap);
-
             BitBlt(dc, lround(to.x()), lround(to.y()), width, height,
                    bitmapDC, fromX, fromY, SRCCOPY);
-
-            DeleteDC(bitmapDC);
-            DeleteObject(bitmap);
             break;
         }
 
         case Gfx::CompositionMode::SourceOver:
         {
-            std::vector<Pt::uint8_t> bitmapData;
-            toPreMulAlpha(image, bitmapData);
-
-            const Pt::uint8_t* data =  bitmapData.empty() ? 0 : &bitmapData[0];
-            std::size_t pixelSize = image.pixelStride();
-            size_t depth = pixelSize * 8;
-
-            HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, 
-                                          depth, (VOID*)data);
-            if (bitmap == NULL)
-            {
-                BITMAPINFO bitmapInfo;
-                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-                bitmapInfo.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
-                bitmapInfo.bmiHeader.biWidth        = image.width();
-                bitmapInfo.bmiHeader.biHeight       = -(ssize_t)image.height(); // top-down image
-                bitmapInfo.bmiHeader.biPlanes       = 1;                        // always 1            
-                bitmapInfo.bmiHeader.biBitCount     = static_cast<WORD>(depth); // bits per pixel
-                bitmapInfo.bmiHeader.biCompression  = BI_RGB;                   // uncompressed RGB
-                bitmapInfo.bmiHeader.biSizeImage    = 0;                        // automatic
-                bitmapInfo.bmiHeader.biClrUsed      = 0;                        // no color table
-                bitmapInfo.bmiHeader.biClrImportant = 0;                        // no color table
-
-                VOID* imageBits = 0;
-                bitmap = CreateDIBSection(dc, &bitmapInfo,
-                                          DIB_RGB_COLORS, &imageBits, NULL, 0);
-                memcpy(imageBits, data, image.width() * image.height() * pixelSize);
-            }
-
-            HDC bitmapDC = CreateCompatibleDC(NULL);
-            SelectObject(bitmapDC, bitmap);
-
             BLENDFUNCTION bf;
             bf.BlendOp = AC_SRC_OVER;
             bf.BlendFlags = 0;
@@ -1099,12 +1039,12 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
 
             AlphaBlend(dc, lround(to.x()), lround(to.y()), width, height, 
                        bitmapDC, fromX, fromY, width, height, bf);
-
-            DeleteObject(bitmap);
-            DeleteDC(bitmapDC);
             break;
         }
     }
+
+    DeleteDC(bitmapDC);
+    DeleteObject(bitmap);
 }
 
 

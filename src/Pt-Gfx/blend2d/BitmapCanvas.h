@@ -30,10 +30,12 @@
 #define PT_GFX_BLEND2D_BITMAP_CANVAS_H
 
 
+#include "BitmapSurface.h"
 #include "FontManager.h"
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -58,7 +60,7 @@ class BitmapCanvas : public Canvas
 
         ~BitmapCanvas();
 
-        void init(BLContext& rasterContext, Image& image);
+        void init(BitmapSurface& surface);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
@@ -125,10 +127,6 @@ class BitmapCanvas : public Canvas
                                  const Gfx::RectF* rect = 0);
 
     private:
-      void putImage( const Point& to, const Image& img);
-
-      void putImage(const Point& to, const Image& image, const Rect& rect);
-
       void addPath(BLPath& to, const Gfx::Path& path);
 
       void drawSolid(const Gfx::PointF* pts, const size_t n);
@@ -138,8 +136,9 @@ class BitmapCanvas : public Canvas
       void drawDashed(const Gfx::PointF* pts, const size_t n);
 
     private:
+        BitmapSurface*          _surface;
         BLContext*              _context;
-        Image*                  _image;
+        Rgb32Image*             _image;
         CompositionMode         _compositionMode;
         BasicRect<Pt::ssize_t>  _currentClip;
         bool                    _hasClip;

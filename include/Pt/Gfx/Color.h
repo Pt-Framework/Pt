@@ -62,13 +62,8 @@ class Argb32Color
         }
 
         Argb32Color(Pt::uint8_t a, Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
-        : _value(0)
-        { 
-            setAlpha(a);
-            setRed(a);
-            setGreen(a);
-            setBlue(a);
-        }
+        : _value( (uint32_t(a) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) )
+        { }
         
         Argb32Color(const ColorF& c);
 

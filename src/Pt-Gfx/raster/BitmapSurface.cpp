@@ -30,7 +30,7 @@
 #include "BitmapSurface.h"
 #include "BitmapCanvas.h"
 
-#include <Pt/Gfx/Argb32.h>
+#include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Bitmap.h>
@@ -44,13 +44,15 @@ namespace Gfx {
 ///////////////////////////////////////////////////////////////////////
 
 BitmapSurface::BitmapSurface()
-: _canvas(0)
+: _image( Rgb32::get() )
+, _canvas(0)
 {
 }
 
 
 BitmapSurface::BitmapSurface(const Gfx::SizeF& size, std::size_t stride)
-: _canvas(0)
+: _image( Rgb32::get() )
+, _canvas(0)
 {
     reset(size, stride);
 }
@@ -69,15 +71,11 @@ const Gfx::Image& BitmapSurface::image() const
 
 void BitmapSurface::reset(const Gfx::Image& image)
 {
-    if( image.format() != _image.format() )
-    {
-        _image.reset( image.width(), image.height() );
-        copyView(image, _image);
-    }
-    else
-    {
-        _image = image;
-    }
+    _rgb32Image.reset( image.width(), image.height() );
+    copyView(image, _rgb32Image);
+
+    _image.reset( _rgb32Image.data(), _rgb32Image.width(), _rgb32Image.height(),
+                  _rgb32Image.padding() );
 
     _physicalSize.set( image.width(), image.height() );
 }
@@ -88,7 +86,10 @@ void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
     long width = lround( sizeF.width() );
     long height = lround( sizeF.height() );
 
-    _image.reset( width, height, stride, _image.format() );
+    _rgb32Image.reset( width, height, stride );
+
+    _image.reset( _rgb32Image.data(), _rgb32Image.width(), _rgb32Image.height(),
+                  _rgb32Image.padding() );
 
     _physicalSize.set(width, height);
 }
@@ -98,13 +99,13 @@ void BitmapSurface::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 
-    _physicalSize.set( _image.width(), _image.height() );
+    _physicalSize.set( _rgb32Image.width(), _rgb32Image.height() );
 }
 
 
 const Gfx::ImageFormat& BitmapSurface::format() const
 {
-    return Gfx::ImageFormat::argb32();
+    return Gfx::ImageFormat::rgb32();
 }
 
 
@@ -126,7 +127,7 @@ Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
     if( ! canvas )
         canvas = new BitmapCanvas();
 
-    canvas->init(_image);
+    canvas->init(*this);
     
     _canvas = canvas;
     return canvas;
@@ -164,6 +165,10 @@ void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,
     if( image.empty() )
         return;
 
+    RectI fullClip;
+    fullClip.setWidth( _rgb32Image.width() );
+    fullClip.setHeight( _rgb32Image.height() );
+
     if(bitmapRect)
     {
         Gfx::RectF imageRect = bitmap.scaling().toPhysical(*bitmapRect);
@@ -173,7 +178,7 @@ void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,
                        SizeI( lround( imageRect.width() ),
                               lround( imageRect.height() ) ) );
 
-        putImage(to, image, paint, srcRect);
+        putImage(to, image, srcRect, fullClip, paint.compositionMode());
     }
     else
     {
@@ -181,13 +186,14 @@ void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,
         srcRect.setWidth( image.width() );
         srcRect.setHeight( image.height() );
 
-        putImage(to, image, paint, srcRect);
+        putImage(to, image, srcRect, fullClip, paint.compositionMode());
     }
 }
 
 
 void BitmapSurface::putImage(const PointI& to, const Image& image, 
-                             const Gfx::Paint& paint, const RectI& imageRect)
+                             const RectI& imageRect, const RectI& clip,
+                             const CompositionMode& mode)
 {
     // clip against source boundaries
     RectI fromRect( image.width(), image.height() );
@@ -198,12 +204,8 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     toPos += fromRect.topLeft() - imageRect.topLeft();
 
     // clip against target boundaries
-    RectI currentClip;
-    currentClip.setWidth( _image.width() );
-    currentClip.setHeight( _image.height() );
-
     RectI toRect( toPos, fromRect.size() );
-    toRect = toRect.intersect(currentClip);
+    toRect = toRect.intersect(clip);
 
     // update source position if rect got smaller
     PointI fromPos = fromRect.topLeft();
@@ -213,25 +215,21 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
     // update source size if rect got smaller
     fromRect.setSize( toRect.size() );
 
-    //std::clog << "BLIT to: " << toRect.x() << ", " << toRect.y() << " "
-    //          << "from: " << fromRect.x() << ", " << fromRect.y() << " "
-    //          << fromRect.width() << "x" << fromRect.height() << std::endl;
-
-    auto toView = view<Argb32>(_image.data(), _image.width(), _image.height(), _image.padding());
-    const auto fromView = view<Argb32>(image.data(), image.width(), image.height(), image.padding());
+    auto toView = view<Rgb32>(_rgb32Image.data(), _rgb32Image.width(), _rgb32Image.height(), _rgb32Image.padding());
+    const auto fromView = view<Rgb32>(image.data(), image.width(), image.height(), image.padding());
 
     auto toLines = lineView(toView, toRect.x(), toRect.y(), toRect.width(), toRect.height());
     auto fromLines = lineView(fromView, fromRect.x(), fromRect.y(), fromRect.width(), fromRect.height());
     auto fromIt = fromLines.begin();
 
-    switch( paint.compositionMode() )
+    switch( mode )
     {
         default:
         case CompositionMode::SourceCopy:
         {
             for(auto& toSpan : toLines)
             {
-                Argb32::sourceCopy(toSpan.front().base(), fromIt->front().base(), toSpan.length());
+                Rgb32::sourceCopy(toSpan.front().base(), fromIt->front().base(), toSpan.length());
                 ++fromIt;
             }
             break;
@@ -241,7 +239,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
         {
             for(auto& toSpan : toLines)
             {
-                Argb32::sourceOver(toSpan.front().base(), fromIt->front().base(), toSpan.length());
+                Rgb32::sourceOver(toSpan.front().base(), fromIt->front().base(), toSpan.length());
                 ++fromIt;
             }
             break;
