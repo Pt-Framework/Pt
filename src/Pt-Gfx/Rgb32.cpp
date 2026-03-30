@@ -115,6 +115,11 @@ class Rgb32PixelBase final : public PixelBase
             Rgb32::fill(base(), n, color);
         }
 
+        virtual void onFillColor(std::size_t n, const Argb32Color& color) override
+        {
+            Rgb32::fill(base(), n, color);
+        }
+
         virtual bool onAssignPixels(const PixelBase& p, std::size_t length) override;
 
         virtual bool onCopyPixels(PixelBase& p, std::size_t length) const override;

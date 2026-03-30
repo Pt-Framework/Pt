@@ -306,6 +306,11 @@ class Pixel
             _pixel->fill(n, color);
         }
 
+        void fill(std::size_t n, const Argb32Color& color)
+        {
+            _pixel->fill(n, color);
+        }
+
         bool equals(const Pixel& p) const
         {
             return _pixel->base() == p.base();
