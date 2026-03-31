@@ -133,7 +133,7 @@ class Rgb32PixelBase final : public PixelBase
 
 inline bool Rgb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if(const auto* src = p.tryCast<Rgb32PixelBase>())
+    if(const Rgb32PixelBase* src = p.tryCast<Rgb32PixelBase>())
     {
         Rgb32::copy(base(), src->base(), length);
         return true;
@@ -145,7 +145,7 @@ inline bool Rgb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
 
 inline bool Rgb32PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
-    if(auto* dst = p.tryCast<Rgb32PixelBase>())
+    if(Rgb32PixelBase* dst = p.tryCast<Rgb32PixelBase>())
     {
         Rgb32::copy(dst->base(), base(), length);
         return true;

@@ -133,7 +133,7 @@ class Rgb16PixelBase final : public PixelBase
 
 inline bool Rgb16PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if(const auto* src = p.tryCast<Rgb16PixelBase>())
+    if(const Rgb16PixelBase* src = p.tryCast<Rgb16PixelBase>())
     {
         Rgb16::copy(base(), src->base(), length);
         return true;
@@ -145,7 +145,7 @@ inline bool Rgb16PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
 
 inline bool Rgb16PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
-    if(auto* dst = p.tryCast<Rgb16PixelBase>())
+    if(Rgb16PixelBase* dst = p.tryCast<Rgb16PixelBase>())
     {
         Rgb16::copy(dst->base(), base(), length);
         return true;

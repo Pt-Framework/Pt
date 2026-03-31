@@ -145,7 +145,7 @@ class Yuv12PixelBase final : public PixelBase
 
 inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if(const auto* src = p.tryCast<Yuv12PixelBase>())
+    if(const Yuv12PixelBase* src = p.tryCast<Yuv12PixelBase>())
     {
         return true;
     }
@@ -156,7 +156,7 @@ inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
 
 inline bool Yuv12PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
-    if(auto* dst = p.tryCast<Yuv12PixelBase>())
+    if(Yuv12PixelBase* dst = p.tryCast<Yuv12PixelBase>())
     {
         return true;
     }
