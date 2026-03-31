@@ -24,6 +24,9 @@ description: "Project directory structure and coding architecture for the Pt pro
     - `include/Pt/System/` for `Pt::System`
     - `include/Pt/Net/` for `Pt::Net`
 
+- Each module has a public `Api.h` header file with the forward declarations
+  of its classes.
+
 - Implementation files live in `src/<BaseName>/`
 - Each module has its `Jamfile` in `src/<BaseName>/`
 - `<BaseName>` is the library base name, e.g.
