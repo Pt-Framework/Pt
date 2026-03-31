@@ -47,6 +47,7 @@ class PT_GFX_API Yuv12Pixel
     
     public:
         typedef Yuv12 FormatType;
+        typedef ColorF ColorType;
 
     protected:
         Yuv12Pixel(Pt::uint8_t* data, const ViewBase& view, 
@@ -66,9 +67,9 @@ class PT_GFX_API Yuv12Pixel
         , _v(p._v)
         { }
 
-        Yuv12Pixel& operator=(const ColorF& color);
+        Yuv12Pixel& operator=(const Yuv12Pixel&) = delete;
 
-        Yuv12Pixel& operator=(const Argb32Color& color);
+        Yuv12Pixel& operator=(const ColorF& color);
 
         const ViewBase& view() const
         { return _view; }
@@ -139,6 +140,7 @@ class Yuv12ConstPixel
     
     public:
         typedef Yuv12 FormatType;
+        typedef ColorF ColorType;
     
     protected:
         Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -170,6 +172,8 @@ class Yuv12ConstPixel
         , _u(p._u)
         , _v(p._v)
         { }
+
+        Yuv12ConstPixel& operator=(const Yuv12ConstPixel&) = delete;
         
         const ViewBase& view() const
         { return _view; }
@@ -345,7 +349,7 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         }
 
     public:
-        static ColorF getColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
+        static ColorF getColorF(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
         {
             Pt::uint32_t rv = 298 * (y - 16)                   + 409 * (v - 128) + 128;
             Pt::uint32_t gv = 298 * (y - 16) - 100 * (u - 128) - 208 * (v - 128) + 128;

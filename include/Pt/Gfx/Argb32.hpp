@@ -41,7 +41,7 @@ namespace Gfx {
 // Argb32
 ///////////////////////////////////////////////////////////////////////
 
-inline ColorF Argb32::getColor(const Pt::uint8_t* p)
+inline ColorF Argb32::getColorF(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
 
@@ -69,7 +69,7 @@ inline void Argb32::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t 
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = getColor(p);
+        colors[i] = getColorF(p);
         p += PixelWidth;
     }
 }
@@ -201,13 +201,6 @@ inline void Argb32Pixel::advanceLines(Pt::ssize_t n)
 }
 
 
-inline Argb32Pixel& Argb32Pixel::operator=(const Gfx::ColorF& color)
-{ 
-    Argb32::assign(base(), color);
-    return *this;
-}
-
-
 inline Argb32Pixel& Argb32Pixel::operator=(const Argb32Color& color)
 { 
     Argb32::assign(base(), color);
@@ -236,6 +229,12 @@ inline void Argb32Pixel::assign(const Argb32Pixel& p, std::size_t length)
 inline void Argb32Pixel::assign(const Argb32ConstPixel& p, std::size_t length)
 {
     Argb32::copy(base(), p.base(), length);
+}
+
+
+inline void Argb32Pixel::getColors(Argb32Color* colors, std::size_t length) const
+{
+    Argb32::getColors(base(), colors, length);
 }
 
 

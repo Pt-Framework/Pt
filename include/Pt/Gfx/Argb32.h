@@ -48,6 +48,7 @@ class Argb32Pixel
 
     public:
         typedef Argb32 FormatType;
+        typedef Argb32Color ColorType;
 
     public:
         template <typename T>
@@ -57,9 +58,9 @@ class Argb32Pixel
 
         ~Argb32Pixel() = default;
 
-        Argb32Pixel& operator=(const Argb32Color& color);
+        Argb32Pixel& operator=(const Argb32Pixel&) = delete;
 
-        Argb32Pixel& operator=(const Gfx::ColorF& color);
+        Argb32Pixel& operator=(const Argb32Color& color);
 
         template <typename T>
         void reset(T& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -109,6 +110,8 @@ class Argb32Pixel
 
         void assign(const Argb32ConstPixel& p, std::size_t length);
 
+        void getColors(Argb32Color* colors, std::size_t length) const;
+
         void assign(const Argb32Color* colors, std::size_t length);
 
         void fill(std::size_t n, const Argb32Color& color);
@@ -130,6 +133,7 @@ class Argb32ConstPixel
 
     public:
         typedef Argb32 FormatType;
+        typedef Argb32Color ColorType;
 
     protected:
         Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -147,6 +151,8 @@ class Argb32ConstPixel
         Argb32ConstPixel(const Argb32Pixel& p);
 
         ~Argb32ConstPixel() = default;
+
+        Argb32ConstPixel& operator=(const Argb32ConstPixel&) = delete;
 
         template <typename T>
         void reset(const T& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -285,7 +291,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
             return base + n * view.stride();
         }
 
-        static ColorF getColor(const Pt::uint8_t* p);
+        static ColorF getColorF(const Pt::uint8_t* p);
 
         static Argb32Color getArgb32Color(const Pt::uint8_t* p);
 

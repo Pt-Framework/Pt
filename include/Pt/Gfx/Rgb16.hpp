@@ -40,7 +40,7 @@ namespace Gfx {
 // Rgb16 - color conversion
 ///////////////////////////////////////////////////////////////////////
 
-inline ColorF Rgb16::getColor(const Pt::uint8_t* p)
+inline ColorF Rgb16::getColorF(const Pt::uint8_t* p)
 {
     const Pt::uint16_t pixel = *reinterpret_cast<const Pt::uint16_t*>(p);
 
@@ -79,7 +79,7 @@ inline void Rgb16::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = getColor(p);
+        colors[i] = getColorF(p);
         p += PixelWidth;
     }
 }
@@ -92,6 +92,18 @@ inline void Rgb16::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::siz
         colors[i] = getArgb32Color(p);
         p += PixelWidth;
     }
+}
+
+
+inline Rgb16Color Rgb16::getRgb16Color(const Pt::uint8_t* p)
+{
+    return Rgb16Color(p);
+}
+
+
+inline void Rgb16::getColors(const Pt::uint8_t* p, Rgb16Color* colors, std::size_t n)
+{
+    std::memcpy(colors, p, n * PixelWidth);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -112,6 +124,12 @@ inline void Rgb16::assign(Pt::uint8_t* to, const ColorF& c)
 }
 
 
+inline void Rgb16::assign(Pt::uint8_t* to, const Rgb16Color& c)
+{
+    std::memcpy(to, &c, PixelWidth);
+}
+
+
 inline void Rgb16::fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
 {
     const Pt::uint16_t val = encode(c.red(), c.green(), c.blue());
@@ -125,6 +143,16 @@ inline void Rgb16::fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& 
 inline void Rgb16::fill(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
     const Pt::uint16_t val = encode(c);
+
+    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>(to);
+    for(std::size_t i = 0; i < length; ++i) 
+        *dst++ = val;
+}
+
+
+inline void Rgb16::fill(Pt::uint8_t* to, std::size_t length, const Rgb16Color& c)
+{
+    const Pt::uint16_t val = c.value();
 
     Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>(to);
     for(std::size_t i = 0; i < length; ++i) 
@@ -149,6 +177,12 @@ inline void Rgb16::assign(Pt::uint8_t* to, const ColorF* colors, std::size_t len
         assign(to, colors[n]);
         to += PixelWidth;
     }
+}
+
+
+inline void Rgb16::assign(Pt::uint8_t* to, const Rgb16Color* colors, std::size_t length)
+{
+    std::memcpy(to, colors, length * PixelWidth);
 }
 
 
@@ -215,14 +249,14 @@ inline void Rgb16Pixel::advanceLines(Pt::ssize_t n)
 }
 
 
-inline Rgb16Pixel& Rgb16Pixel::operator=(const Gfx::ColorF& color)
+inline Rgb16Pixel& Rgb16Pixel::operator=(const Argb32Color& color)
 { 
     Rgb16::assign(base(), color);
     return *this;
 }
 
 
-inline Rgb16Pixel& Rgb16Pixel::operator=(const Argb32Color& color)
+inline Rgb16Pixel& Rgb16Pixel::operator=(const Rgb16Color& color)
 { 
     Rgb16::assign(base(), color);
     return *this;
@@ -253,6 +287,12 @@ inline void Rgb16Pixel::assign(const Rgb16ConstPixel& p, std::size_t length)
 }
 
 
+inline void Rgb16Pixel::getColors(Argb32Color* colors, std::size_t length) const
+{
+    Rgb16::getColors(base(), colors, length);
+}
+
+
 inline void Rgb16Pixel::assign(const Argb32Color* colors, std::size_t length)
 {
     Rgb16::assign(base(), colors, length);
@@ -260,6 +300,30 @@ inline void Rgb16Pixel::assign(const Argb32Color* colors, std::size_t length)
 
 
 inline void Rgb16Pixel::fill(std::size_t n, const Argb32Color& color)
+{
+    Rgb16::fill(base(), n, color);
+}
+
+
+inline Rgb16Color Rgb16Pixel::color() const
+{
+    return Rgb16::getRgb16Color(base());
+}
+
+
+inline void Rgb16Pixel::getColors(Rgb16Color* colors, std::size_t length) const
+{
+    Rgb16::getColors(base(), colors, length);
+}
+
+
+inline void Rgb16Pixel::assign(const Rgb16Color* colors, std::size_t length)
+{
+    Rgb16::assign(base(), colors, length);
+}
+
+
+inline void Rgb16Pixel::fill(std::size_t n, const Rgb16Color& color)
 {
     Rgb16::fill(base(), n, color);
 }
@@ -426,6 +490,18 @@ inline Argb32Color Rgb16ConstPixel::toColor() const
 
 
 inline void Rgb16ConstPixel::getColors(Argb32Color* colors, std::size_t length) const
+{
+    Rgb16::getColors(base(), colors, length);
+}
+
+
+inline Rgb16Color Rgb16ConstPixel::color() const
+{
+    return Rgb16::getRgb16Color(base());
+}
+
+
+inline void Rgb16ConstPixel::getColors(Rgb16Color* colors, std::size_t length) const
 {
     Rgb16::getColors(base(), colors, length);
 }

@@ -33,6 +33,8 @@
 #include <Pt/Gfx/View.h>
 #include <Pt/Gfx/ImageFormat.h>
 
+#include <algorithm>
+
 namespace Pt {
 
 namespace Gfx {
@@ -98,45 +100,16 @@ inline void Pixel<ColorT>::reset(const Pixel& p)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ColorF& color)
+inline void Pixel<ColorT>::assign(const Pixel& p)
 {
-    _pixel->assign(color);
+    *this = p.toColor();
 }
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Argb32Color& color)
+inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p)
 {
-    _pixel->assign(color);
-}
-
-
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Pixel<ColorF>& p)
-{
-   
-    _pixel->assign( p.toColor() );
-}
-
-
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Pixel<Argb32Color>& p)
-{ 
-    _pixel->assign( p.toColor() );
-}
-
-
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<ColorF>& p)
-{
-    _pixel->assign( p.toColor() );
-}
-
-
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<Argb32Color>& p)
-{
-    _pixel->assign( p.toColor() );
+    *this = p.toColor();
 }
 
 
@@ -152,12 +125,8 @@ void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
     if( isCompatible )
         return;
 
-    typedef typename IfElse<IsSame<typename PixelT::ColorType, ColorF>::value &&
-                            IsSame<ColorT, ColorF>::value,
-                            ColorF, Argb32Color>::Type ColorType;
-
     const std::size_t bufsize = 64;
-    ColorType colors[bufsize];
+    ColorT colors[bufsize];
 
     PixelT from(p);
     Pixel<ColorT> to(*this);
@@ -165,10 +134,10 @@ void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
     while(length > 0)
     {
         std::size_t n = std::min(length, bufsize);
-        
+
         from.getColors(colors, n);
         to.assign(colors, n);
-        
+
         from.advance(n);
         to.advance(n);
 
@@ -178,28 +147,14 @@ void Pixel<ColorT>::assignPixels(const PixelT& p, std::size_t length)
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Pixel<ColorF>& p, std::size_t length)
+inline void Pixel<ColorT>::assign(const Pixel& p, std::size_t length)
 {
     assignPixels(p, length);
 }
 
 
 template <typename ColorT>
-inline void Pixel<ColorT>::assign(const Pixel<Argb32Color>& p, std::size_t length)
-{
-    assignPixels(p, length);
-}
-
-
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<ColorF>& p, std::size_t length)
-{
-    assignPixels(p, length);
-}
-
-
-template <typename ColorT>
-inline void Pixel<ColorT>::assign(const ConstPixel<Argb32Color>& p, std::size_t length)
+inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p, std::size_t length)
 {
     assignPixels(p, length);
 }

@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
+#include <cstddef>
 #include <cstring>
 
 namespace Pt {
@@ -51,8 +52,8 @@ class Argb32Color
         
         Argb32Color(const Argb32Color& color) = default;
 
-        explicit Argb32Color(uint32_t val)
-        : _value(val)
+        explicit Argb32Color(uint32_t value)
+        : _value(value)
         { }
 
         explicit Argb32Color(const uint8_t* base)
@@ -65,13 +66,13 @@ class Argb32Color
         : _value( (uint32_t(a) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) )
         { }
         
-        Argb32Color(const ColorF& c);
+        explicit Argb32Color(const ColorF& c);
 
         Argb32Color& operator=(const Argb32Color& color) = default;
 
         Argb32Color& operator=(const ColorF& c);
         
-        Argb32Color& operator=(const Pt::uint8_t& value)
+        Argb32Color& operator=(uint32_t value)
         { 
             _value = value;
             return *this;
@@ -143,6 +144,8 @@ class ColorF
         { }
 
         ColorF(const ColorF&) = default;
+
+        explicit ColorF(const Argb32Color& c);
 
         ColorF(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(a)
@@ -242,6 +245,15 @@ inline Argb32Color& Argb32Color::operator=(const ColorF& c)
              (Pt::uint32_t(c.green() >> 8) <<  8) |
               Pt::uint32_t(c.blue()  >> 8);
     return *this;
+}
+
+
+inline ColorF::ColorF(const Argb32Color& c)
+: _a(c.alpha() * 257)
+, _r(c.red()   * 257)
+, _g(c.green() * 257)
+, _b(c.blue()  * 257)
+{
 }
 
 } // namespace

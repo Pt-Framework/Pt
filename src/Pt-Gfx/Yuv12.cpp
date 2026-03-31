@@ -84,7 +84,7 @@ class Yuv12PixelBase final : public PixelBase
 
         virtual ColorF onGetColor() const override
         {
-            return Yuv12::getColor( _p.y(), _p.u(), _p.v() );
+            return Yuv12::getColorF( _p.y(), _p.u(), _p.v() );
         }
 
         virtual Argb32Color onGetArgb32Color() const override

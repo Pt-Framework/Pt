@@ -87,21 +87,13 @@ inline bool Yuv12Pixel::equals(const Yuv12ConstPixel& p) const
 
 inline ColorF Yuv12Pixel::toColor() const
 { 
-    return Yuv12::getColor(*_y, *_u, *_v);
+    return Yuv12::getColorF(*_y, *_u, *_v);
 }
 
 
 inline Yuv12Pixel& Yuv12Pixel::operator=(const ColorF& color)
 {
     Yuv12::fromColor(_y, _u, _v, color);
-    return *this;
-}
-
-
-inline Yuv12Pixel& Yuv12Pixel::operator=(const Argb32Color& color)
-{
-    Yuv12::fromColor( _y, _u, _v, ColorF::fromRgb8(color.red(), color.green(), 
-                                                   color.blue(), color.alpha() ) );
     return *this;
 }
 
@@ -187,7 +179,7 @@ inline Yuv12ConstPixel::Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase&
 
 inline ColorF Yuv12ConstPixel::toColor() const
 { 
-    return Yuv12::getColor(*_y, *_u, *_v);
+    return Yuv12::getColorF(*_y, *_u, *_v);
 }
 
 

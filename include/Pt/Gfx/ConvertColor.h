@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2016 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,41 +26,64 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_BASIC_IMAGE_TRAITS_H
-#define PT_GFX_BASIC_IMAGE_TRAITS_H
+#ifndef PT_GFX_CONVERTCOLOR_H
+#define PT_GFX_CONVERTCOLOR_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Types.h>
-#include <memory>
+#include <Pt/Gfx/Color.h>
+
+#include <algorithm>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
-/** @brief Image traits.
+/** @brief Converts between public color types.
 */
-template <typename FormatT>
-struct ImageTraits
+template <typename ToColorT, typename FromColorT>
+struct ColorConverter
 {
-    typedef typename FormatT::PixelType      Pixel;
-    typedef typename FormatT::ConstPixelType ConstPixel;
-
-    static std::size_t pixelStride(const FormatT& format)
+    static ToColorT convert(const FromColorT& color)
     {
-        return format.pixelStride();
+        return ToColorT(color);
     }
 
-    static std::size_t imageSize(const FormatT& format, Pt::ssize_t width, Pt::ssize_t height,
-                                 std::size_t padding)
+    static void convert(ToColorT* target, const FromColorT* source, std::size_t length)
     {
-        return format.imageSize(width, height, padding);
-    }
-
-    static std::unique_ptr<FormatT> clone(const FormatT& format)
-    {
-        return std::unique_ptr<FormatT>( new FormatT(format) );
+        for(std::size_t i = 0; i < length; ++i)
+            target[i] = convert(source[i]);
     }
 };
+
+
+template <typename ColorT>
+struct ColorConverter<ColorT, ColorT>
+{
+    static ColorT convert(const ColorT& color)
+    {
+        return color;
+    }
+
+    static void convert(ColorT* target, const ColorT* source, std::size_t length)
+    {
+        std::copy(source, source + length, target);
+    }
+};
+
+
+template <typename ToColorT, typename FromColorT>
+inline ToColorT convertColor(const FromColorT& color)
+{
+    return ColorConverter<ToColorT, FromColorT>::convert(color);
+}
+
+
+template <typename ToColorT, typename FromColorT>
+inline void convertColors(ToColorT* target, const FromColorT* source, std::size_t length)
+{
+    ColorConverter<ToColorT, FromColorT>::convert(target, source, length);
+}
 
 } // namespace
 

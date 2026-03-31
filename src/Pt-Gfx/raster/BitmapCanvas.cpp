@@ -220,7 +220,9 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
     _penBuffer.reset(64, 1);
 
     Gfx::Rgb32PixelView fillView(_penBuffer);
-    std::fill( fillView.begin(), fillView.end(), pen.color() );
+
+    Argb32Color penColor( pen.color() );
+    std::fill( fillView.begin(), fillView.end(), penColor);
 
     _penColor = fillView.begin()->color();
 }
@@ -247,7 +249,9 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
             _brushSource = &_brushBuffer;
 
             Gfx::Rgb32PixelView fillView(_brushBuffer);
-            std::fill(fillView.begin(), fillView.end(), brush.color());
+
+            Gfx::Argb32Color brushColor( brush.color() );
+            std::fill(fillView.begin(), fillView.end(), brushColor);
             break;
         }
 
@@ -301,12 +305,12 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
         float f1 = (length - n) / float(length);
         float f2 = n / float(length);
 
-        Pt::uint16_t a = static_cast<Pt::uint16_t>(gradientStart.alpha() * f1 + gradientStop.alpha() * f2);
-        Pt::uint16_t r = static_cast<Pt::uint16_t>(gradientStart.red()   * f1 + gradientStop.red()   * f2);
-        Pt::uint16_t g = static_cast<Pt::uint16_t>(gradientStart.green() * f1 + gradientStop.green() * f2);
-        Pt::uint16_t b = static_cast<Pt::uint16_t>(gradientStart.blue()  * f1 + gradientStop.blue()  * f2);
+        Pt::uint8_t a = static_cast<Pt::uint8_t>((gradientStart.alpha() * f1 + gradientStop.alpha() * f2) / 257.0f);
+        Pt::uint8_t r = static_cast<Pt::uint8_t>((gradientStart.red()   * f1 + gradientStop.red()   * f2) / 257.0f);
+        Pt::uint8_t g = static_cast<Pt::uint8_t>((gradientStart.green() * f1 + gradientStop.green() * f2) / 257.0f);
+        Pt::uint8_t b = static_cast<Pt::uint8_t>((gradientStart.blue()  * f1 + gradientStop.blue()  * f2) / 257.0f);
 
-        *pixel = ColorF(a, r, g, b);
+        *pixel = Argb32Color(a, r, g, b);
     }
 }
 

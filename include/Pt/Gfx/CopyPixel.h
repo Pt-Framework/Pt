@@ -31,7 +31,7 @@
 #define PT_GFX_COPYPIXEL_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/ConvertColor.h>
 #include <Pt/Gfx/ImageTraits.h>
 #include <Pt/TypeTraits.h>
 
@@ -52,18 +52,24 @@ struct PixelConverter
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to)
     {
-        to = from.toColor();
+        typedef typename P2::ColorType ToColorType;
+
+        to = convertColor<ToColorType>(from.toColor());
     }
 
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to, std::size_t length)
     {
-        typedef typename ImageTraits<Fmt1>::ColorType ColorType1;
-        typedef typename ImageTraits<Fmt2>::ColorType ColorType2;
+        typedef typename P1::ColorType SourceColorType;
+        typedef typename P2::ColorType TargetColorType;
 
-        typedef typename IfElse<IsSame<ColorType1, ColorF>::value &&
-                                IsSame<ColorType2, ColorF>::value,
-                                ColorF, Argb32Color>::Type ColorType;
+        convertImpl(from, to, length, IsSame<SourceColorType, TargetColorType>());
+    }
+
+    template <typename P1, typename P2>
+    static void convertImpl(const P1& from, P2& to, std::size_t length, TrueType)
+    {
+        typedef typename P1::ColorType ColorType;
 
         const std::size_t bufsize = 64;
         ColorType colors[bufsize];
@@ -84,50 +90,55 @@ struct PixelConverter
             length -= n;
         }
     }
+
+    template <typename P1, typename P2>
+    static void convertImpl(const P1& from, P2& to, std::size_t length, FalseType)
+    {
+        typedef typename P1::ColorType SourceColorType;
+        typedef typename P2::ColorType TargetColorType;
+
+        const std::size_t bufsize = 64;
+        SourceColorType sourceColors[bufsize];
+        TargetColorType targetColors[bufsize];
+
+        P1 f(from);
+        P2 t(to);
+
+        while(length > 0)
+        {
+            std::size_t n = std::min(length, bufsize);
+
+            f.getColors(sourceColors, n);
+            convertColors(targetColors, sourceColors, n);
+            t.assign(targetColors, n);
+
+            f.advance(n);
+            t.advance(n);
+
+            length -= n;
+        }
+    }
 };
 
-///////////////////////////////////////////////////////////////////////
-// convert pixels
-///////////////////////////////////////////////////////////////////////
-
-/** @brief Converts a single pixel.
- */
-template <typename P1, typename P2>
-void convertPixel(const P1& from, P2& to)
+template <typename Fmt>
+struct PixelConverter<Fmt, Fmt>
 {
-    typedef typename P1::FormatType FromFmt;
-    typedef typename P2::FormatType ToFmt;
+    template <typename P1, typename P2>
+    static void convert(const P1& from, P2& to)
+    {
+        to.assign(from);
+    }
 
-    PixelConverter<FromFmt, ToFmt>::convert(from, to);
-}
-
-/** @brief Converts a span of pixels.
- */
-template <typename P1, typename P2>
-void convertPixel(const P1& from, P2& to, std::size_t length)
-{
-    typedef typename P1::FormatType FromFmt;
-    typedef typename P2::FormatType ToFmt;
-
-    PixelConverter<FromFmt, ToFmt>::convert(from, to, length);
-}
+    template <typename P1, typename P2>
+    static void convert(const P1& from, P2& to, std::size_t length)
+    {
+        to.assign(from, length);
+    }
+};
 
 ///////////////////////////////////////////////////////////////////////
 // copy pixels
 ///////////////////////////////////////////////////////////////////////
-
-template <typename P1, typename P2>
-void copyPixelImpl(const P1& from, P2& to, TrueType)
-{
-    to.assign(from);
-}
-
-
-template <typename P1, typename P2>
-void copyPixelImpl(const P1& from, P2& to, FalseType)
-{
-    convertPixel(from, to);
-}
 
 /** @brief Copies a single pixel.
  */
@@ -137,21 +148,7 @@ void copyPixel(const P1& from, P2& to)
     typedef typename P1::FormatType FromFmt;
     typedef typename P2::FormatType ToFmt;
 
-    copyPixelImpl(from, to, IsSame<FromFmt, ToFmt>());
-}
-
-
-template <typename P1, typename P2>
-void copyPixelImpl(const P1& from, P2& to, std::size_t length, TrueType)
-{
-    to.assign(from, length);
-}
-
-
-template <typename P1, typename P2>
-void copyPixelImpl(const P1& from, P2& to, std::size_t length, FalseType)
-{
-    convertPixel(from, to, length);
+    PixelConverter<FromFmt, ToFmt>::convert(from, to);
 }
 
 /** @brief Copies a span of pixels.
@@ -162,7 +159,7 @@ void copyPixel(const P1& from, P2& to, std::size_t length)
     typedef typename P1::FormatType FromFmt;
     typedef typename P2::FormatType ToFmt;
 
-    copyPixelImpl(from, to, length, IsSame<FromFmt, ToFmt>());
+    PixelConverter<FromFmt, ToFmt>::convert(from, to, length);
 }
 
 } // namespace Gfx

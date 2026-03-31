@@ -34,6 +34,7 @@
 #include <Pt/Gfx/ImageTraits.h>
 #include <Pt/Gfx/PixelBase.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/TypeTraits.h>
 
 #include <typeinfo>
 #include <memory>
@@ -130,8 +131,6 @@ class ImageFormat
 template <>
 struct ImageTraits<ImageFormat>
 {
-    typedef Argb32Color ColorType;
-
     typedef Gfx::Pixel<Argb32Color>      Pixel;
     typedef Gfx::ConstPixel<Argb32Color> ConstPixel;
 
@@ -155,8 +154,6 @@ struct ImageTraits<ImageFormat>
 
 struct ImageTraitsF
 {
-    typedef ColorF ColorType;
-
     typedef Gfx::Pixel<ColorF>      Pixel;
     typedef Gfx::ConstPixel<ColorF> ConstPixel;
 
@@ -201,15 +198,9 @@ class Pixel
 
         Pixel& operator=(const Pixel&) = delete;
 
-        Pixel& operator=(const ColorF& color)
+        Pixel& operator=(const ColorT& color)
         { 
-            assign(color); 
-            return *this;
-        }
-
-        Pixel& operator=(const Argb32Color& color)
-        { 
-            assign(color); 
+            _pixel->assign(color);
             return *this;
         }
 
@@ -261,52 +252,25 @@ class Pixel
             _pixel->advanceLines(n);
         }
 
-        void getColors(ColorF* colors, std::size_t length) const
+        void getColors(ColorT* colors, std::size_t length) const
         { 
             _pixel->getColors(colors, length); 
         }
 
-        void getColors(Argb32Color* colors, std::size_t length) const
-        { 
-            _pixel->getColors(colors, length); 
-        }
-
-        void assign(const Argb32Color* colors, std::size_t length)
+        void assign(const ColorT* colors, std::size_t length)
         { 
             _pixel->assign(colors, length); 
         }
 
-        void assign(const ColorF* colors, std::size_t length)
-        { 
-            _pixel->assign(colors, length); 
-        }
+        void assign(const Pixel& p);
 
-        void assign(const ColorF& color);
+        void assign(const ConstPixel<ColorT>& p);
 
-        void assign(const Argb32Color& color);
+        void assign(const Pixel& p, std::size_t length);
 
-        void assign(const Pixel<ColorF>& p);
+        void assign(const ConstPixel<ColorT>& p, std::size_t length);
 
-        void assign(const Pixel<Argb32Color>& p);
-
-        void assign(const ConstPixel<ColorF>& p);
-
-        void assign(const ConstPixel<Argb32Color>& p);
-
-        void assign(const Pixel<ColorF>& p, std::size_t length);
-
-        void assign(const ConstPixel<ColorF>& p, std::size_t length);
-
-        void assign(const Pixel<Argb32Color>& p, std::size_t length);
-
-        void assign(const ConstPixel<Argb32Color>& p, std::size_t length);
-
-        void fill(std::size_t n, const ColorF& color)
-        {   
-            _pixel->fill(n, color);
-        }
-
-        void fill(std::size_t n, const Argb32Color& color)
+        void fill(std::size_t n, const ColorT& color)
         {
             _pixel->fill(n, color);
         }
@@ -404,12 +368,7 @@ class ConstPixel
             _pixel->advanceLines(n);
         }
 
-        void getColors(ColorF* colors, std::size_t length) const
-        { 
-            _pixel->getColors(colors, length); 
-        }
-
-        void getColors(Argb32Color* colors, std::size_t length) const
+        void getColors(ColorT* colors, std::size_t length) const
         { 
             _pixel->getColors(colors, length); 
         }

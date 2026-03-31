@@ -72,12 +72,12 @@ class Rgb32PixelBase final : public PixelBase
 
         virtual ColorF onGetColor() const override
         {
-            return Rgb32::toColor( base() );
+            return Rgb32::getColorF( base() );
         }
 
         virtual Argb32Color onGetArgb32Color() const override
         {
-            return Rgb32::toArgb32Color( base() );
+            return Rgb32::getArgb32Color( base() );
         }
 
         virtual void onSetColor(const ColorF& color) override

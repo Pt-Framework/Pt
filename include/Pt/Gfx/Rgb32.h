@@ -127,6 +127,7 @@ class Rgb32Pixel
 
     public:
         typedef Rgb32 FormatType;
+        typedef Argb32Color ColorType;
 
     public:
         template <typename T>
@@ -136,9 +137,9 @@ class Rgb32Pixel
 
         ~Rgb32Pixel() = default;
 
-        Rgb32Pixel& operator=(const Argb32Color& color);
+        Rgb32Pixel& operator=(const Rgb32Pixel&) = delete;
 
-        Rgb32Pixel& operator=(const Gfx::ColorF& color);
+        Rgb32Pixel& operator=(const Argb32Color& color);
 
         Rgb32Pixel& operator=(const Rgb32Color& color);
 
@@ -227,6 +228,7 @@ class Rgb32ConstPixel
 
     public:
         typedef Rgb32 FormatType;
+        typedef Argb32Color ColorType;
 
     protected:
         Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -244,6 +246,8 @@ class Rgb32ConstPixel
         Rgb32ConstPixel(const Rgb32Pixel& p);
 
         ~Rgb32ConstPixel() = default;
+
+        Rgb32ConstPixel& operator=(const Rgb32ConstPixel&) = delete;
 
         template <typename T>
         void reset(const T& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -397,11 +401,11 @@ class PT_GFX_API Rgb32 final : public ImageFormat
             return base + n * view.stride();
         }
 
-        static Rgb32Color getColor(const Pt::uint8_t* p);
+        static Rgb32Color getRgb32Color(const Pt::uint8_t* p);
 
-        static ColorF toColor(const Pt::uint8_t* p);
+        static ColorF getColorF(const Pt::uint8_t* p);
 
-        static Argb32Color toArgb32Color(const Pt::uint8_t* p);
+        static Argb32Color getArgb32Color(const Pt::uint8_t* p);
 
         static void getColors(const Pt::uint8_t* p, Rgb32Color* colors, std::size_t n);
 

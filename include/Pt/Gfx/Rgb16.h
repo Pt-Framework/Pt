@@ -39,6 +39,62 @@ namespace Pt {
 
 namespace Gfx {
 
+/** @brief Native RGB-565 color type.
+*/
+class Rgb16Color
+{
+    public:
+        Rgb16Color()
+        : _value(0)
+        { }
+
+        Rgb16Color(const Rgb16Color& color) = default;
+
+        explicit Rgb16Color(Pt::uint16_t value)
+        : _value(value)
+        { }
+
+        explicit Rgb16Color(const Pt::uint8_t* base)
+        : _value()
+        {
+            std::memcpy(&_value, base, sizeof(Pt::uint16_t));
+        }
+
+        Rgb16Color(Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
+        : _value( (Pt::uint16_t(r & 0xF8) << 8) |
+                  (Pt::uint16_t(g & 0xFC) << 3) |
+                  (Pt::uint16_t(b)        >> 3) )
+        { }
+
+        Rgb16Color& operator=(const Rgb16Color& color) = default;
+
+        Pt::uint8_t red() const
+        {
+            Pt::uint8_t r5 = (_value & 0xF800) >> 11;
+            return (r5 << 3) | (r5 >> 2);
+        }
+
+        Pt::uint8_t green() const
+        {
+            Pt::uint8_t g6 = (_value & 0x07E0) >> 5;
+            return (g6 << 2) | (g6 >> 4);
+        }
+
+        Pt::uint8_t blue() const
+        {
+            Pt::uint8_t b5 = _value & 0x001F;
+            return (b5 << 3) | (b5 >> 2);
+        }
+
+        Pt::uint16_t value() const
+        {
+            return _value;
+        }
+
+    private:
+        Pt::uint16_t _value;
+};
+
 /** @brief RGB-565 pixel.
 */
 class Rgb16Pixel
@@ -47,6 +103,7 @@ class Rgb16Pixel
 
     public:
         typedef Rgb16 FormatType;
+        typedef Argb32Color ColorType;
 
     public:
         template <typename T>
@@ -56,9 +113,11 @@ class Rgb16Pixel
 
         ~Rgb16Pixel() = default;
 
+        Rgb16Pixel& operator=(const Rgb16Pixel&) = delete;
+
         Rgb16Pixel& operator=(const Argb32Color& color);
 
-        Rgb16Pixel& operator=(const Gfx::ColorF& color);
+        Rgb16Pixel& operator=(const Rgb16Color& color);
 
         template <typename T>
         void reset(T& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -82,6 +141,10 @@ class Rgb16Pixel
 
         Argb32Color toColor() const;
 
+        /** @brief Returns the native RGB-565 color.
+        */
+        Rgb16Color color() const;
+
         void advance();
 
         void skipPadding();
@@ -98,9 +161,19 @@ class Rgb16Pixel
 
         void assign(const Rgb16ConstPixel& p, std::size_t length);
 
+        void getColors(Argb32Color* colors, std::size_t length) const;
+
+        /** @brief Get as native RGB-565 colors.
+        */
+        void getColors(Rgb16Color* colors, std::size_t length) const;
+
         void assign(const Argb32Color* colors, std::size_t length);
 
+        void assign(const Rgb16Color* colors, std::size_t length);
+
         void fill(std::size_t n, const Argb32Color& color);
+
+        void fill(std::size_t n, const Rgb16Color& color);
 
         bool equals(const Rgb16Pixel& p) const;
 
@@ -119,6 +192,7 @@ class Rgb16ConstPixel
 
     public:
         typedef Rgb16 FormatType;
+        typedef Argb32Color ColorType;
 
     protected:
         Rgb16ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -136,6 +210,8 @@ class Rgb16ConstPixel
         Rgb16ConstPixel(const Rgb16Pixel& p);
 
         ~Rgb16ConstPixel() = default;
+
+        Rgb16ConstPixel& operator=(const Rgb16ConstPixel&) = delete;
 
         template <typename T>
         void reset(const T& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -161,6 +237,10 @@ class Rgb16ConstPixel
 
         Argb32Color toColor() const;
 
+        /** @brief Returns the native RGB-565 color.
+        */
+        Rgb16Color color() const;
+
         void advance();
 
         void skipPadding();
@@ -170,6 +250,10 @@ class Rgb16ConstPixel
         void advanceLines(Pt::ssize_t n);
 
         void getColors(Argb32Color* colors, std::size_t length) const;
+
+        /** @brief Get as native RGB-565 colors.
+        */
+        void getColors(Rgb16Color* colors, std::size_t length) const;
 
         bool equals(const Rgb16ConstPixel& p) const;
 
@@ -272,25 +356,35 @@ class PT_GFX_API Rgb16 final : public ImageFormat
             return base + n * view.stride();
         }
 
-        static ColorF getColor(const Pt::uint8_t* p);
+        static ColorF getColorF(const Pt::uint8_t* p);
 
         static Argb32Color getArgb32Color(const Pt::uint8_t* p);
+
+        static Rgb16Color getRgb16Color(const Pt::uint8_t* p);
 
         static void getColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
 
         static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
 
+        static void getColors(const Pt::uint8_t* p, Rgb16Color* colors, std::size_t n);
+
         static void assign(Pt::uint8_t* to, const Argb32Color& from);
 
         static void assign(Pt::uint8_t* to, const ColorF& c);
+
+        static void assign(Pt::uint8_t* to, const Rgb16Color& c);
 
         static void fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
 
         static void fill(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
+        static void fill(Pt::uint8_t* to, std::size_t length, const Rgb16Color& c);
+
         static void assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
 
         static void assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
+
+        static void assign(Pt::uint8_t* to, const Rgb16Color* colors, std::size_t length);
 
         static void copy(Pt::uint8_t* to, const Pt::uint8_t* from);
 

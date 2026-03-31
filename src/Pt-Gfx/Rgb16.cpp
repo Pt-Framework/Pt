@@ -72,7 +72,7 @@ class Rgb16PixelBase final : public PixelBase
 
         virtual ColorF onGetColor() const override
         {
-            return Rgb16::getColor(base());
+            return Rgb16::getColorF(base());
         }
 
         virtual Argb32Color onGetArgb32Color() const override

@@ -40,13 +40,13 @@ namespace Gfx {
 // Rgb32 
 ///////////////////////////////////////////////////////////////////////
 
-inline Rgb32Color Rgb32::getColor(const Pt::uint8_t* p)
+inline Rgb32Color Rgb32::getRgb32Color(const Pt::uint8_t* p)
 {
     return Rgb32Color(p);
 }
 
 
-inline ColorF Rgb32::toColor(const Pt::uint8_t* p)
+inline ColorF Rgb32::getColorF(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
     const Pt::uint32_t a = pixel >> 24;
@@ -67,7 +67,7 @@ inline ColorF Rgb32::toColor(const Pt::uint8_t* p)
 }
 
 
-inline Argb32Color Rgb32::toArgb32Color(const Pt::uint8_t* p)
+inline Argb32Color Rgb32::getArgb32Color(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
     const Pt::uint32_t a = pixel >> 24;
@@ -96,7 +96,7 @@ inline void Rgb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::siz
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = toArgb32Color(p);
+        colors[i] = getArgb32Color(p);
         p += PixelWidth;
     }
 }
@@ -106,7 +106,7 @@ inline void Rgb32::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = toColor(p);
+        colors[i] = getColorF(p);
         p += PixelWidth;
     }
 }
@@ -296,13 +296,6 @@ inline void Rgb32Pixel::advanceLines(Pt::ssize_t n)
 }
 
 
-inline Rgb32Pixel& Rgb32Pixel::operator=(const Gfx::ColorF& color)
-{ 
-    Rgb32::assign(base(), color);
-    return *this;
-}
-
-
 inline Rgb32Pixel& Rgb32Pixel::operator=(const Argb32Color& color)
 { 
     Rgb32::assign(base(), color);
@@ -447,13 +440,13 @@ inline void Rgb32Pixel::setBlue(Pt::uint8_t b)
 
 inline Rgb32Color Rgb32Pixel::color() const
 {
-    return Rgb32::getColor( base() );
+    return Rgb32::getRgb32Color( base() );
 }
 
 
 inline Argb32Color Rgb32Pixel::toColor() const
 {
-    return Rgb32::toArgb32Color( base() );
+    return Rgb32::getArgb32Color( base() );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -575,13 +568,13 @@ inline Pt::uint8_t Rgb32ConstPixel::blue() const
 
 inline Rgb32Color Rgb32ConstPixel::color() const
 {
-    return Rgb32::getColor( base() );
+    return Rgb32::getRgb32Color( base() );
 }
 
 
 inline Argb32Color Rgb32ConstPixel::toColor() const
 {
-    return Rgb32::toArgb32Color( base() );
+    return Rgb32::getArgb32Color( base() );
 }
 
 
