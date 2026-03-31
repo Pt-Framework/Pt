@@ -29,16 +29,30 @@ think you have all relevant information.
   You MUST read this when configuring, building, cleaning or verifying code changes.
   -> `.github/instructions/building.instructions.md`
 
+- **Pt Gfx Concepts**: Conpets and patterns for the Pt-Gfx module.
+  You MUST read this when working with code in Pt::Gfx.
+  -> `.github/instructions/pt-gfx-concepts.instructions.md`
+
 - **Unit Testing**: Writing and structuring unit tests with the Pt::Unit framework.
   You MUST read this when writing tests, adding test methods, or debugging test failures.
   -> `.github/instructions/testing.instructions.md`
 
 # Visual Code Issues
 
-- **`grep_search` in this Multi-Root Workspace**: Due to overlapping workspace
-  folders, using specific relative paths in `includePattern` (e.g.,
-  `include/Pt/Gfx/Rect.h`) often fails to find files unless the file is actively
-   open in the editor.
-  - **Workaround 1**: Use only the filename or a generic glob (e.g., `Rect.h` or `**/Rect.h`).
-  - **Workaround 2**: Omit `includePattern` entirely and do a global search.
-  - **Workaround 3**: If the exact path is known, prefer the `read_file` tool.
+This is a multi-root workspace where subfolders (e.g. `include/Pt/Gfx`,
+`src/Pt-Gfx`) are added as separate workspace folders alongside the
+project root ("All Files"). This causes overlapping paths that confuse
+relative-path-based tool parameters.
+
+- **`grep_search`**: Relative paths in `includePattern` (e.g.
+  `include/Pt/Gfx/Rect.h`) often fail because they resolve against
+  the wrong workspace folder.
+  - **Preferred**: Use the absolute project root as `includePattern`.
+  - **Alternative**: Use only the filename (`Rect.h` or `**/Rect.h`).
+  - **Alternative**: Omit `includePattern` entirely for a global search.
+
+- **`file_search`**: Glob patterns work across all workspace folders.
+  Results may appear duplicated — this is expected and harmless.
+
+- **`read_file`**: Always use absolute paths. This is the most reliable
+  tool when the exact file path is known.
