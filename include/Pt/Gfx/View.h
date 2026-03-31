@@ -189,21 +189,44 @@ BasicConstView<FormatT,
     return BasicConstView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
+/** @brief Copies the pixels of a view to a pixel position.
 
-/** @brief Copies the pixels of a view to another one.
+    Copies from.width() x from.height() pixels without bounds checking.
+    The caller must ensure that enough space is available at 'to'.
  */
-template <typename From, typename To>
-void copyView(const From& from, To& to)
+template <typename From, typename P>
+void copyViewTo(const From& from, P& to)
 {
     ConstSpan<typename From::Format, 
               typename From::Traits> fromSpan( from, 0, 0, from.width() );
 
-    Span<typename To::Format, 
-         typename To::Traits> toSpan( to, 0, 0, to.width() );
-
     for(Pt::ssize_t y = 0; y < from.height(); ++y)
     {
-        copySpan(fromSpan, toSpan.front());
+        copySpanTo(fromSpan, to);
+        fromSpan.advanceLines(1);
+        to.advanceLines(1);
+    }
+}
+
+/** @brief Copies the pixels of a view to another one.
+
+    Copies min(widths) x min(heights) pixels.
+ */
+template <typename From, typename To>
+void copyView(const From& from, To& to)
+{
+    std::size_t w = std::min(from.width(), to.width());
+    Pt::ssize_t h = std::min(from.height(), to.height());
+
+    ConstSpan<typename From::Format, 
+              typename From::Traits> fromSpan( from, 0, 0, w );
+
+    Span<typename To::Format, 
+         typename To::Traits> toSpan( to, 0, 0, w );
+
+    for(Pt::ssize_t y = 0; y < h; ++y)
+    {
+        copySpanTo(fromSpan, toSpan.front());
         fromSpan.advanceLines(1);
         toSpan.advanceLines(1);
     }

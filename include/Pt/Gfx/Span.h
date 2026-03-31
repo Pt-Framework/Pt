@@ -371,12 +371,26 @@ ConstSpan<typename T::Format,
     return ConstSpan<typename T::Format, typename T::Traits>(source, x, y, length);
 }
 
-/** @brief Copies the pixels of a span.
+/** @brief Copies the pixels of a span to a pixel position.
+
+    Copies from.length() pixels without bounds checking.
+    The caller must ensure that enough space is available at 'to'.
  */
 template <typename SpanT, typename P>
-void copySpan(const SpanT& from, P& to)
+void copySpanTo(const SpanT& from, P& to)
 {
     copyPixel(from.front(), to, from.length());
+}
+
+/** @brief Copies the pixels of a span to another span.
+
+    Copies min(from.length(), to.length()) pixels.
+ */
+template <typename FromSpanT, typename ToSpanT>
+void copySpan(const FromSpanT& from, ToSpanT& to)
+{
+    std::size_t n = std::min(from.length(), to.length());
+    copyPixel(from.front(), to.front(), n);
 }
 
 } // namespace Gfx
