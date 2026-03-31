@@ -318,7 +318,7 @@ inline void Argb32Pixel::setBlue(Pt::uint8_t b)
 }
 
 
-inline Color Argb32Pixel::toColor() const
+inline Color Argb32Pixel::getColor() const
 {
     return Color( base() );
 }
@@ -441,7 +441,7 @@ inline Pt::uint8_t Argb32ConstPixel::blue() const
 }
 
 
-inline Color Argb32ConstPixel::toColor() const
+inline Color Argb32ConstPixel::getColor() const
 {
     return Color( base() );
 }

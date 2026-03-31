@@ -88,7 +88,7 @@ void Cursor::loadCursor(std::istream& pngStream, const Gfx::ColorF& alphaColor, 
     // alpha channel from mask color
     for(auto& pixel : pixels)
     {
-        Gfx::ColorF color = pixel.toColor();
+        Gfx::ColorF color = pixel.getColor();
 
         if( color.red() == alphaColor.red()
             && color.green() == alphaColor.green()
@@ -250,7 +250,7 @@ void Cursor::fromImage(const Gfx::Image& image, Cursor& cursor)
 
     for(const auto& pixel : pixels)
     {
-        Gfx::ColorF color = pixel.toColor();
+        Gfx::ColorF color = pixel.getColor();
 
         if(color.alpha() == 0)
         {

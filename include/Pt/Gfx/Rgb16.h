@@ -139,7 +139,7 @@ class Rgb16Pixel
 
         Pt::uint8_t blue() const;
 
-        Color toColor() const;
+        Color getColor() const;
 
         /** @brief Returns the native RGB-565 color.
         */
@@ -235,7 +235,7 @@ class Rgb16ConstPixel
 
         Pt::uint8_t blue() const;
 
-        Color toColor() const;
+        Color getColor() const;
 
         /** @brief Returns the native RGB-565 color.
         */
@@ -271,9 +271,8 @@ class PT_GFX_API Rgb16 final : public ImageFormat
     static const unsigned PixelWidth = 2;
 
     public:
-        typedef Rgb16Pixel PixelType;
-        typedef Rgb16ConstPixel ConstPixelType;
-        typedef Color ColorType;
+        typedef Rgb16Pixel      Pixel;
+        typedef Rgb16ConstPixel ConstPixel;
 
   public:
         static const Rgb16& get()

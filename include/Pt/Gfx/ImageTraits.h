@@ -42,8 +42,8 @@ namespace Gfx {
 template <typename FormatT>
 struct ImageTraits
 {
-    typedef typename FormatT::PixelType      Pixel;
-    typedef typename FormatT::ConstPixelType ConstPixel;
+    typedef typename FormatT::Pixel      Pixel;
+    typedef typename FormatT::ConstPixel ConstPixel;
 
     static std::size_t pixelStride(const FormatT& format)
     {

@@ -96,7 +96,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Argb32PixelView pixelView(to);
             Argb32PixelView::Iterator pixel = pixelView.pixel(2, 2);
-            Color color = pixel->toColor();
+            Color color = pixel->getColor();
             PT_UNIT_ASSERT(color.value() == 0x12131415);
         }
 
@@ -132,7 +132,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             Argb32PixelView imageView(image);
             Argb32PixelView::Iterator pixel = imageView.pixel(0, 0);
 
-            Color c = pixel->toColor();
+            Color c = pixel->getColor();
             *pixel = c;
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
@@ -154,11 +154,11 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             std::transform( cpixelView.begin(), cpixelView.end(), argb32View.begin(),
                             [](const ConstPixelView::ConstPixel& p) 
-                            { return p.toColor(); });
+                            { return p.getColor(); });
 
             std::transform( argb32View.begin(), argb32View.end(), pixelView.begin(),
                             [](const Argb32Pixel& p) 
-                            { return p.toColor(); });
+                            { return p.getColor(); });
 
             ImageView imageView(image);
 

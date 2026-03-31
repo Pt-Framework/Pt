@@ -89,7 +89,7 @@ class PixelBase
         }
 
         template <typename ColorT>
-        ColorT toColor() const;
+        ColorT getColor() const;
 
         void getColors(ColorF* colors, std::size_t length) const
         { 
@@ -214,21 +214,21 @@ class PixelBase
 
 
 template <typename ColorT>
-inline ColorT PixelBase::toColor() const
+inline ColorT PixelBase::getColor() const
 {
     return this->onGetColorF();
 }
 
 
 template <>
-inline ColorF PixelBase::toColor<ColorF>() const
+inline ColorF PixelBase::getColor<ColorF>() const
 {
     return this->onGetColorF();
 }
 
 
 template <>
-inline Color PixelBase::toColor<Color>() const
+inline Color PixelBase::getColor<Color>() const
 {
     return this->onGetColor();
 }

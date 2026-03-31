@@ -52,18 +52,18 @@ struct PixelConverter
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to)
     {
-        typedef typename P2::ColorType ToColorType;
+        typedef typename P2::ColorType ColorType;
 
-        to = convertColor<ToColorType>(from.toColor());
+        to = convertColor<ColorType>( from.getColor() );
     }
 
     template <typename P1, typename P2>
     static void convert(const P1& from, P2& to, std::size_t length)
     {
-        typedef typename P1::ColorType SourceColorType;
-        typedef typename P2::ColorType TargetColorType;
+        typedef typename P1::ColorType ColorT1;
+        typedef typename P2::ColorType ColorT2;
 
-        convertImpl(from, to, length, IsSame<SourceColorType, TargetColorType>());
+        convertImpl(from, to, length, IsSame<ColorT1, ColorT2>());
     }
 
     template <typename P1, typename P2>
@@ -94,12 +94,12 @@ struct PixelConverter
     template <typename P1, typename P2>
     static void convertImpl(const P1& from, P2& to, std::size_t length, FalseType)
     {
-        typedef typename P1::ColorType SourceColorType;
-        typedef typename P2::ColorType TargetColorType;
+        typedef typename P1::ColorType ColorT1;
+        typedef typename P2::ColorType ColorT2;
 
         const std::size_t bufsize = 64;
-        SourceColorType sourceColors[bufsize];
-        TargetColorType targetColors[bufsize];
+        ColorT1 fromColors[bufsize];
+        ColorT2 toColors[bufsize];
 
         P1 f(from);
         P2 t(to);
@@ -108,9 +108,9 @@ struct PixelConverter
         {
             std::size_t n = std::min(length, bufsize);
 
-            f.getColors(sourceColors, n);
-            convertColors(targetColors, sourceColors, n);
-            t.assign(targetColors, n);
+            f.getColors(fromColors, n);
+            convertColors(toColors, fromColors, n);
+            t.assign(toColors, n);
 
             f.advance(n);
             t.advance(n);
@@ -145,10 +145,10 @@ struct PixelConverter<Fmt, Fmt>
 template <typename P1, typename P2>
 void copyPixel(const P1& from, P2& to)
 {
-    typedef typename P1::FormatType FromFmt;
-    typedef typename P2::FormatType ToFmt;
+    typedef typename P1::FormatType Fmt1;
+    typedef typename P2::FormatType Fmt2;
 
-    PixelConverter<FromFmt, ToFmt>::convert(from, to);
+    PixelConverter<Fmt1, Fmt2>::convert(from, to);
 }
 
 /** @brief Copies a span of pixels.
@@ -156,10 +156,10 @@ void copyPixel(const P1& from, P2& to)
 template <typename P1, typename P2>
 void copyPixel(const P1& from, P2& to, std::size_t length)
 {
-    typedef typename P1::FormatType FromFmt;
-    typedef typename P2::FormatType ToFmt;
+    typedef typename P1::FormatType Fmt1;
+    typedef typename P2::FormatType Fmt2;
 
-    PixelConverter<FromFmt, ToFmt>::convert(from, to, length);
+    PixelConverter<Fmt1, Fmt2>::convert(from, to, length);
 }
 
 } // namespace Gfx

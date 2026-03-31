@@ -81,7 +81,7 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             const Color* exp = expected;
             for(auto it = toView.begin(); it != toView.end(); ++it, ++exp)
             {
-                PT_UNIT_ASSERT_EQUAL(it->toColor().value(), exp->value());
+                PT_UNIT_ASSERT_EQUAL(it->getColor().value(), exp->value());
             }
         }
 
@@ -120,7 +120,7 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             const Color* exp = expected;
             for(auto it = toView.begin(); it != toView.end(); ++it, ++exp)
             {
-                PT_UNIT_ASSERT_EQUAL(it->toColor().value(), exp->value());
+                PT_UNIT_ASSERT_EQUAL(it->getColor().value(), exp->value());
             }
         }
 };

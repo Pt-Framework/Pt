@@ -444,7 +444,7 @@ inline Rgb32Color Rgb32Pixel::color() const
 }
 
 
-inline Color Rgb32Pixel::toColor() const
+inline Color Rgb32Pixel::getColor() const
 {
     return Rgb32::getColor( base() );
 }
@@ -572,7 +572,7 @@ inline Rgb32Color Rgb32ConstPixel::color() const
 }
 
 
-inline Color Rgb32ConstPixel::toColor() const
+inline Color Rgb32ConstPixel::getColor() const
 {
     return Rgb32::getColor( base() );
 }

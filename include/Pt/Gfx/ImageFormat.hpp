@@ -102,14 +102,14 @@ inline void Pixel<ColorT>::reset(const Pixel& p)
 template <typename ColorT>
 inline void Pixel<ColorT>::assign(const Pixel& p)
 {
-    *this = p.toColor();
+    *this = p.getColor();
 }
 
 
 template <typename ColorT>
 inline void Pixel<ColorT>::assign(const ConstPixel<ColorT>& p)
 {
-    *this = p.toColor();
+    *this = p.getColor();
 }
 
 

@@ -179,7 +179,7 @@ class Rgb32Pixel
 
         /** @brief Returns ARGB-32 color.
         */
-        Color toColor() const;
+        Color getColor() const;
 
         void advance();
 
@@ -279,7 +279,7 @@ class Rgb32ConstPixel
 
         /** @brief Returns a ARGB-32 color.
      */
-        Color toColor() const;
+        Color getColor() const;
 
         void advance();
 
@@ -316,9 +316,8 @@ class PT_GFX_API Rgb32 final : public ImageFormat
     static const unsigned PixelWidth = 4;
 
     public:    
-        typedef Rgb32Pixel PixelType;
-        typedef Rgb32ConstPixel ConstPixelType;
-        typedef Color ColorType;
+        typedef Rgb32Pixel      Pixel;
+        typedef Rgb32ConstPixel ConstPixel;
 
     public:
         static const Rgb32& get()

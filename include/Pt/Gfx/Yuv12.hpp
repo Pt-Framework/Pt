@@ -85,7 +85,7 @@ inline bool Yuv12Pixel::equals(const Yuv12ConstPixel& p) const
 }
 
 
-inline ColorF Yuv12Pixel::toColor() const
+inline ColorF Yuv12Pixel::getColor() const
 { 
     return Yuv12::getColorF(*_y, *_u, *_v);
 }
@@ -177,7 +177,7 @@ inline Yuv12ConstPixel::Yuv12ConstPixel(const Pt::uint8_t* data, const ViewBase&
 }
 
 
-inline ColorF Yuv12ConstPixel::toColor() const
+inline ColorF Yuv12ConstPixel::getColor() const
 { 
     return Yuv12::getColorF(*_y, *_u, *_v);
 }

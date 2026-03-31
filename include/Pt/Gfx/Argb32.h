@@ -92,7 +92,7 @@ class Argb32Pixel
 
         void setBlue(Pt::uint8_t b);
 
-        Color toColor() const;
+        Color getColor() const;
 
         void advance();
 
@@ -178,7 +178,7 @@ class Argb32ConstPixel
 
         Pt::uint8_t blue() const;
 
-        Color toColor() const;
+        Color getColor() const;
 
         void advance();
 
@@ -206,9 +206,8 @@ class PT_GFX_API Argb32 final : public ImageFormat
     static const unsigned PixelWidth = 4;
 
     public:    
-        typedef Argb32Pixel PixelType;
-        typedef Argb32ConstPixel ConstPixelType;
-        typedef Color ColorType;
+        typedef Argb32Pixel      Pixel;
+        typedef Argb32ConstPixel ConstPixel;
 
     public:
         static const Argb32& get()

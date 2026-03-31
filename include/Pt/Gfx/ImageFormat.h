@@ -227,9 +227,9 @@ class Pixel
         const Pt::uint8_t* base() const
         { return _pixel->base(); }
 
-        ColorT toColor() const
+        ColorT getColor() const
         {
-            return _pixel->toColor<ColorT>();
+            return _pixel->getColor<ColorT>();
         }
 
         void advance()
@@ -343,9 +343,9 @@ class ConstPixel
         const Pt::uint8_t* base() const
         { return _pixel->base(); }
 
-        ColorT toColor() const
+        ColorT getColor() const
         {
-            return _pixel->toColor<ColorT>();
+            return _pixel->getColor<ColorT>();
         }
 
         void advance()

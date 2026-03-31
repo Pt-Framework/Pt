@@ -365,7 +365,7 @@ inline Pt::uint8_t Rgb16Pixel::blue() const
 }
 
 
-inline Color Rgb16Pixel::toColor() const
+inline Color Rgb16Pixel::getColor() const
 {
     return Rgb16::getColor(base());
 }
@@ -483,7 +483,7 @@ inline Pt::uint8_t Rgb16ConstPixel::blue() const
 }
 
 
-inline Color Rgb16ConstPixel::toColor() const
+inline Color Rgb16ConstPixel::getColor() const
 {
     return Rgb16::getColor(base());
 }

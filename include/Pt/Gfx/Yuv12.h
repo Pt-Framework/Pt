@@ -107,7 +107,7 @@ class PT_GFX_API Yuv12Pixel
         void setV(Pt::uint8_t v) const
         { *_v = v; }
 
-        ColorF toColor() const;
+        ColorF getColor() const;
 
         void advance();
 
@@ -202,7 +202,7 @@ class Yuv12ConstPixel
         Pt::uint8_t v() const
         { return *_v; }
 
-        ColorF toColor() const;
+        ColorF getColor() const;
 
         void advance();
 
@@ -233,9 +233,8 @@ class Yuv12ConstPixel
 class PT_GFX_API Yuv12 final : public ImageFormat
 {
     public:    
-        typedef Yuv12Pixel PixelType;
-        typedef Yuv12ConstPixel ConstPixelType;
-        typedef ColorF ColorType;
+        typedef Yuv12Pixel      Pixel;
+        typedef Yuv12ConstPixel ConstPixel;
 
     public:
         static const Yuv12& get()
