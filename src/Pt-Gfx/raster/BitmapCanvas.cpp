@@ -221,7 +221,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 
     Gfx::Rgb32PixelView fillView(_penBuffer);
 
-    Argb32Color penColor( pen.color() );
+    Color penColor( pen.color() );
     std::fill( fillView.begin(), fillView.end(), penColor);
 
     _penColor = fillView.begin()->color();
@@ -250,7 +250,7 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 
             Gfx::Rgb32PixelView fillView(_brushBuffer);
 
-            Gfx::Argb32Color brushColor( brush.color() );
+            Gfx::Color brushColor( brush.color() );
             std::fill(fillView.begin(), fillView.end(), brushColor);
             break;
         }
@@ -310,7 +310,7 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
         Pt::uint8_t g = static_cast<Pt::uint8_t>((gradientStart.green() * f1 + gradientStop.green() * f2) / 257.0f);
         Pt::uint8_t b = static_cast<Pt::uint8_t>((gradientStart.blue()  * f1 + gradientStop.blue()  * f2) / 257.0f);
 
-        *pixel = Argb32Color(a, r, g, b);
+        *pixel = Color(a, r, g, b);
     }
 }
 

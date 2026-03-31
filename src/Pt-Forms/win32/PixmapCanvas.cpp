@@ -207,7 +207,7 @@ HBRUSH getGradientBrush(HDC dc, int width, int height,
         Pt::uint8_t g = static_cast<Pt::uint8_t>((gradientStart.green() * f1 + gradientStop.green() * f2) / 257.0f);
         Pt::uint8_t b = static_cast<Pt::uint8_t>((gradientStart.blue()  * f1 + gradientStop.blue()  * f2) / 257.0f);
 
-        *pixel = Pt::Gfx::Argb32Color(a, r, g, b);
+        *pixel = Pt::Gfx::Color(a, r, g, b);
     }
 
     HBRUSH brush = CreatePatternBrush(bitmap);

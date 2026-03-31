@@ -87,21 +87,21 @@ class Yuv12PixelBase final : public PixelBase
             return _p.ybase();
         }
 
-        virtual ColorF onGetColor() const override
+        virtual ColorF onGetColorF() const override
         {
             return Yuv12::getColorF( _p.y(), _p.u(), _p.v() );
         }
 
-        virtual Argb32Color onGetArgb32Color() const override
+        virtual Color onGetColor() const override
         {
-            return Argb32Color();
+            return Color();
         }
 
         virtual void onGetColors(ColorF* colors, std::size_t length) const override
         {
         }
 
-        virtual void onGetColors(Argb32Color* colors, std::size_t length) const override
+        virtual void onGetColors(Color* colors, std::size_t length) const override
         {
         }
 
@@ -110,11 +110,11 @@ class Yuv12PixelBase final : public PixelBase
             _p = color;
         }
 
-        virtual void onSetColor(const Argb32Color& color) override
+        virtual void onSetColor(const Color& color) override
         {
         }
 
-        virtual void onAssign(const Argb32Color* colors, std::size_t length) override
+        virtual void onAssign(const Color* colors, std::size_t length) override
         {
         }
 
@@ -127,7 +127,7 @@ class Yuv12PixelBase final : public PixelBase
             //Yuv12::sourceCopy(_p.ybase(), n, color);        
         }
 
-        virtual void onFillColor(std::size_t n, const Argb32Color& color) override
+        virtual void onFillColor(std::size_t n, const Color& color) override
         {
         }
 

@@ -75,14 +75,14 @@ class Argb32PixelBase final : public PixelBase
             return Argb32::advanceLines(view(), base(), n);
         }
 
-        virtual ColorF onGetColor() const override
+        virtual ColorF onGetColorF() const override
         {
             return Argb32::getColorF( base() );
         }
 
-        virtual Argb32Color onGetArgb32Color() const override
+        virtual Color onGetColor() const override
         {
-            return Argb32Color( base() );
+            return Color( base() );
         }
 
         virtual void onSetColor(const ColorF& color) override
@@ -90,7 +90,7 @@ class Argb32PixelBase final : public PixelBase
             Argb32::assign( base(), color );
         }
 
-        virtual void onSetColor(const Argb32Color& color) override
+        virtual void onSetColor(const Color& color) override
         {
             Argb32::assign(base(), color);
         }
@@ -100,12 +100,12 @@ class Argb32PixelBase final : public PixelBase
             Argb32::getColors(base(), colors, length);
         }
 
-        virtual void onGetColors(Argb32Color* colors, std::size_t length) const override
+        virtual void onGetColors(Color* colors, std::size_t length) const override
         {
             Argb32::getColors(base(), colors, length);
         }
 
-        virtual void onAssign(const Argb32Color* colors, std::size_t length) override
+        virtual void onAssign(const Color* colors, std::size_t length) override
         {
             Argb32::assign(base(), colors, length);
         }
@@ -120,7 +120,7 @@ class Argb32PixelBase final : public PixelBase
             Argb32::fill(base(), n, color);
         }
 
-        virtual void onFillColor(std::size_t n, const Argb32Color& color) override
+        virtual void onFillColor(std::size_t n, const Color& color) override
         {
             Argb32::fill(base(), n, color);
         }

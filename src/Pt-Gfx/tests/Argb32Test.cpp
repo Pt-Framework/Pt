@@ -52,7 +52,7 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("A_SubView",*this, &Argb32Test::SubView);
             registerMethod("Pixel",*this, &Argb32Test::Pixel);
             registerMethod("Iterator",*this, &Argb32Test::Iterator);
-            registerMethod("Color",*this, &Argb32Test::Color);
+            registerMethod("ColorAssign",*this, &Argb32Test::ColorAssign);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
             registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::BenchmarkPixel);
@@ -96,7 +96,7 @@ class Argb32Test : public Pt::Unit::TestSuite
 
             Argb32PixelView pixelView(to);
             Argb32PixelView::Iterator pixel = pixelView.pixel(2, 2);
-            Argb32Color color = pixel->toColor();
+            Color color = pixel->toColor();
             PT_UNIT_ASSERT(color.value() == 0x12131415);
         }
 
@@ -121,19 +121,18 @@ class Argb32Test : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUAL(blue, 48);
         }
 
-        void Color()
+        void ColorAssign()
         {
             using namespace Pt::Gfx;
 
             Pt::uint32_t argb32[] = { 0xaabbccdd };
-
             Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
 
             Argb32Image image(data, 1, 1);
             Argb32PixelView imageView(image);
             Argb32PixelView::Iterator pixel = imageView.pixel(0, 0);
 
-            Pt::Gfx::Argb32Color c = pixel->toColor();
+            Color c = pixel->toColor();
             *pixel = c;
 
             PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
@@ -322,7 +321,7 @@ class Argb32Test : public Pt::Unit::TestSuite
                 Pt::System::Clock clock;
                 clock.start();
 
-                Argb32Color colors[width];
+                Color colors[width];
 
                 for(const auto& fromSpan : lineView(fromImage))
                 {

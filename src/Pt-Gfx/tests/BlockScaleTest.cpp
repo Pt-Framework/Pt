@@ -50,10 +50,10 @@ class BlockScaleTest : public Pt::Unit::TestSuite
     protected:
         void ScaleUp()
         {
-            const Argb32Color A(255,  10,  20,  30);
-            const Argb32Color B(255,  40,  50,  60);
-            const Argb32Color C(255,  70,  80,  90);
-            const Argb32Color D(255, 100, 110, 120);
+            const Color A(255,  10,  20,  30);
+            const Color B(255,  40,  50,  60);
+            const Color C(255,  70,  80,  90);
+            const Color D(255, 100, 110, 120);
 
             // 2x2 source
             Argb32Image from(2, 2);
@@ -68,7 +68,7 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             blockScale(from, to);
 
             // Row-major expected result
-            const Argb32Color expected[] = {
+            const Color expected[] = {
                 A, A, B, B,
                 A, A, B, B,
                 A, A, B, B,
@@ -78,7 +78,7 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             };
 
             Argb32PixelView toView(to);
-            const Argb32Color* exp = expected;
+            const Color* exp = expected;
             for(auto it = toView.begin(); it != toView.end(); ++it, ++exp)
             {
                 PT_UNIT_ASSERT_EQUAL(it->toColor().value(), exp->value());
@@ -87,24 +87,24 @@ class BlockScaleTest : public Pt::Unit::TestSuite
 
         void ScaleDown()
         {
-            const Argb32Color A(255,  10,  20,  30);
-            const Argb32Color B(255,  40,  50,  60);
-            const Argb32Color C(255,  70,  80,  90);
-            const Argb32Color D(255, 100, 110, 120);
-            const Argb32Color E(255, 130, 140, 150);
-            const Argb32Color F(255, 160, 170, 180);
-            const Argb32Color G(255,  11,  21,  31);
-            const Argb32Color H(255,  41,  51,  61);
+            const Color A(255,  10,  20,  30);
+            const Color B(255,  40,  50,  60);
+            const Color C(255,  70,  80,  90);
+            const Color D(255, 100, 110, 120);
+            const Color E(255, 130, 140, 150);
+            const Color F(255, 160, 170, 180);
+            const Color G(255,  11,  21,  31);
+            const Color H(255,  41,  51,  61);
 
             // 4x2 source
-            const Argb32Color src[] = {
+            const Color src[] = {
                 A, B, C, D,
                 E, F, G, H,
             };
 
             Argb32Image from(4, 2);
             Argb32PixelView fromView(from);
-            const Argb32Color* s = src;
+            const Color* s = src;
             for(auto it = fromView.begin(); it != fromView.end(); ++it, ++s)
                 *it = *s;
 
@@ -112,12 +112,12 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             Argb32Image to(2, 1);
             blockScale(from, to);
 
-            const Argb32Color expected[] = {
+            const Color expected[] = {
                 A, C,
             };
 
             Argb32PixelView toView(to);
-            const Argb32Color* exp = expected;
+            const Color* exp = expected;
             for(auto it = toView.begin(); it != toView.end(); ++it, ++exp)
             {
                 PT_UNIT_ASSERT_EQUAL(it->toColor().value(), exp->value());

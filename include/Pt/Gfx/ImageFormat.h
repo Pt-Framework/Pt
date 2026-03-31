@@ -131,8 +131,8 @@ class ImageFormat
 template <>
 struct ImageTraits<ImageFormat>
 {
-    typedef Gfx::Pixel<Argb32Color>      Pixel;
-    typedef Gfx::ConstPixel<Argb32Color> ConstPixel;
+    typedef Gfx::Pixel<Color>      Pixel;
+    typedef Gfx::ConstPixel<Color> ConstPixel;
 
     static std::size_t pixelStride(const ImageFormat& format)
     {

@@ -127,7 +127,7 @@ class Rgb32Pixel
 
     public:
         typedef Rgb32 FormatType;
-        typedef Argb32Color ColorType;
+        typedef Color ColorType;
 
     public:
         template <typename T>
@@ -139,7 +139,7 @@ class Rgb32Pixel
 
         Rgb32Pixel& operator=(const Rgb32Pixel&) = delete;
 
-        Rgb32Pixel& operator=(const Argb32Color& color);
+        Rgb32Pixel& operator=(const Color& color);
 
         Rgb32Pixel& operator=(const Rgb32Color& color);
 
@@ -179,7 +179,7 @@ class Rgb32Pixel
 
         /** @brief Returns ARGB-32 color.
         */
-        Argb32Color toColor() const;
+        Color toColor() const;
 
         void advance();
 
@@ -197,17 +197,17 @@ class Rgb32Pixel
 
         void assign(const Rgb32ConstPixel& p, std::size_t length);
 
-        void assign(const Argb32Color* colors, std::size_t length);
+        void assign(const Color* colors, std::size_t length);
 
         void assign(const Rgb32Color* colors, std::size_t length);
 
-        void getColors(Argb32Color* colors, std::size_t length) const;
+        void getColors(Color* colors, std::size_t length) const;
 
         /** @brief Get as premultiplied RGB-32 colors.
         */
         void getColors(Rgb32Color* colors, std::size_t length) const;
 
-        void fill(std::size_t n, const Argb32Color& color);
+        void fill(std::size_t n, const Color& color);
 
         void fill(std::size_t n, const Rgb32Color& color);
 
@@ -228,7 +228,7 @@ class Rgb32ConstPixel
 
     public:
         typedef Rgb32 FormatType;
-        typedef Argb32Color ColorType;
+        typedef Color ColorType;
 
     protected:
         Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -279,7 +279,7 @@ class Rgb32ConstPixel
 
         /** @brief Returns a ARGB-32 color.
      */
-        Argb32Color toColor() const;
+        Color toColor() const;
 
         void advance();
 
@@ -289,7 +289,7 @@ class Rgb32ConstPixel
 
         void advanceLines(Pt::ssize_t n);
 
-        void getColors(Argb32Color* colors, std::size_t length) const;
+        void getColors(Color* colors, std::size_t length) const;
 
         /** @brief Get as premultiplied RGB-32 colors.
  */
@@ -307,7 +307,7 @@ class Rgb32ConstPixel
 /** @brief Premultiplied ARGB-32 image format.
 
     Stores pixel data as premultiplied ARGB-32. When colors are written
-    from straight-alpha sources (ColorF, Argb32Color), the RGB channels
+    from straight-alpha sources (ColorF, Color), the RGB channels
     are premultiplied by alpha. The sourceOver compositing uses the
     simplified premultiplied formula: dst = src + dst * (1 - src_alpha).
 */
@@ -318,7 +318,7 @@ class PT_GFX_API Rgb32 final : public ImageFormat
     public:    
         typedef Rgb32Pixel PixelType;
         typedef Rgb32ConstPixel ConstPixelType;
-        typedef Argb32Color ColorType;
+        typedef Color ColorType;
 
     public:
         static const Rgb32& get()
@@ -405,27 +405,27 @@ class PT_GFX_API Rgb32 final : public ImageFormat
 
         static ColorF getColorF(const Pt::uint8_t* p);
 
-        static Argb32Color getArgb32Color(const Pt::uint8_t* p);
+        static Color getColor(const Pt::uint8_t* p);
 
         static void getColors(const Pt::uint8_t* p, Rgb32Color* colors, std::size_t n);
 
-        static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
+        static void getColors(const Pt::uint8_t* p, Color* colors, std::size_t n);
 
         static void getColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
 
-        static void assign(Pt::uint8_t* to, const Argb32Color& from);
+        static void assign(Pt::uint8_t* to, const Color& from);
 
         static void assign(Pt::uint8_t* to, const ColorF& c);
 
         static void fill(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c);
 
-        static void fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const Color& c);
 
         static void fill(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
         static void assign(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t length);
 
-        static void assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const Color* colors, std::size_t length);
 
         static void assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 

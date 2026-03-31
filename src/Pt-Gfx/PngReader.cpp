@@ -309,7 +309,7 @@ class PngReaderImpl
                     unsigned char green = data[n++];
                     unsigned char blue = data[n++];
 
-                    pixel = Pt::Gfx::Argb32Color(255, red, green, blue);
+                    pixel = Pt::Gfx::Color(255, red, green, blue);
                 }
 
                 if( bitdepth == 8 && channels == 4)
@@ -319,7 +319,7 @@ class PngReaderImpl
                     unsigned char blue = data[n++];
                     unsigned char alpha = data[n++];
 
-                    pixel = Pt::Gfx::Argb32Color(alpha, red, green, blue);
+                    pixel = Pt::Gfx::Color(alpha, red, green, blue);
                 }
             }
         }

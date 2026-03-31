@@ -217,7 +217,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
                 PixelView::Iterator it = pixels.begin();
                 PixelView::Iterator end = pixels.end();
             
-                Pt::Gfx::Argb32Color color(255, 100, 100, 100);
+                Pt::Gfx::Color color(255, 100, 100, 100);
             
                 Pt::System::Clock clock;
                 clock.start();

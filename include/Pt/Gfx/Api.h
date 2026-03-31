@@ -69,6 +69,7 @@ class PaintSurface;
 
 class ColorF;
 class Argb32Color;
+typedef Argb32Color Color;
 
 template <typename FormatT>
 struct ImageTraits;

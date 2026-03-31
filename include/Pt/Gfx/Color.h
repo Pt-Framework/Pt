@@ -145,7 +145,7 @@ class ColorF
 
         ColorF(const ColorF&) = default;
 
-        explicit ColorF(const Argb32Color& c);
+        explicit ColorF(const Color& c);
 
         ColorF(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(a)
@@ -248,7 +248,7 @@ inline Argb32Color& Argb32Color::operator=(const ColorF& c)
 }
 
 
-inline ColorF::ColorF(const Argb32Color& c)
+inline ColorF::ColorF(const Color& c)
 : _a(c.alpha() * 257)
 , _r(c.red()   * 257)
 , _g(c.green() * 257)

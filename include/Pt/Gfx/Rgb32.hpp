@@ -67,19 +67,19 @@ inline ColorF Rgb32::getColorF(const Pt::uint8_t* p)
 }
 
 
-inline Argb32Color Rgb32::getArgb32Color(const Pt::uint8_t* p)
+inline Color Rgb32::getColor(const Pt::uint8_t* p)
 {
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
     const Pt::uint32_t a = pixel >> 24;
 
     if (a == 0)
-        return Argb32Color(0, 0, 0, 0);
+        return Color(0, 0, 0, 0);
 
     const Pt::uint32_t r = ((pixel & 0x00FF0000) >> 16);
     const Pt::uint32_t g = ((pixel & 0x0000FF00) >>  8);
     const Pt::uint32_t b =  (pixel & 0x000000FF);
 
-    return Argb32Color( Pt::uint8_t(a), 
+    return Color( Pt::uint8_t(a), 
                         Pt::uint8_t((r * 255) / a), 
                         Pt::uint8_t((g * 255) / a), 
                         Pt::uint8_t((b * 255) / a) );
@@ -92,11 +92,11 @@ inline void Rgb32::getColors(const Pt::uint8_t* p, Rgb32Color* colors, std::size
 }
 
 
-inline void Rgb32::getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n)
+inline void Rgb32::getColors(const Pt::uint8_t* p, Color* colors, std::size_t n)
 {
     for(std::size_t i = 0; i < n; ++i)
     {
-        colors[i] = getArgb32Color(p);
+        colors[i] = getColor(p);
         p += PixelWidth;
     }
 }
@@ -112,7 +112,7 @@ inline void Rgb32::getColors(const Pt::uint8_t* p, ColorF* colors, std::size_t n
 }
 
 
-inline void Rgb32::assign(Pt::uint8_t* to, const Argb32Color& from)
+inline void Rgb32::assign(Pt::uint8_t* to, const Color& from)
 {
     const Pt::uint32_t value = premultiply(from.alpha(), from.red(), from.green(), from.blue());
     const Pt::uint8_t* p = reinterpret_cast<const Pt::uint8_t*>(&value);
@@ -140,7 +140,7 @@ inline void Rgb32::fill(Pt::uint8_t* to, std::size_t length, const Rgb32Color& c
 }
 
 
-inline void Rgb32::fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c)
+inline void Rgb32::fill(Pt::uint8_t* to, std::size_t length, const Color& c)
 {
     const Pt::uint32_t value = premultiply(c.alpha(), c.red(), c.green(), c.blue());
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
@@ -174,7 +174,7 @@ inline void Rgb32::assign(Pt::uint8_t* to, const Rgb32Color* colors, std::size_t
 }
 
 
-inline void Rgb32::assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length)
+inline void Rgb32::assign(Pt::uint8_t* to, const Color* colors, std::size_t length)
 {
     for(std::size_t i = 0; i < length; ++i)
     {
@@ -296,7 +296,7 @@ inline void Rgb32Pixel::advanceLines(Pt::ssize_t n)
 }
 
 
-inline Rgb32Pixel& Rgb32Pixel::operator=(const Argb32Color& color)
+inline Rgb32Pixel& Rgb32Pixel::operator=(const Color& color)
 { 
     Rgb32::assign(base(), color);
     return *this;
@@ -334,7 +334,7 @@ inline void Rgb32Pixel::assign(const Rgb32ConstPixel& p, std::size_t length)
 }
 
 
-inline void Rgb32Pixel::assign(const Argb32Color* colors, std::size_t length)
+inline void Rgb32Pixel::assign(const Color* colors, std::size_t length)
 {
     Rgb32::assign(base(), colors, length);
 }
@@ -346,7 +346,7 @@ inline void Rgb32Pixel::assign(const Rgb32Color* colors, std::size_t length)
 }
 
 
-inline void Rgb32Pixel::getColors(Argb32Color* colors, std::size_t length) const
+inline void Rgb32Pixel::getColors(Color* colors, std::size_t length) const
 {
   Rgb32::getColors(base(), colors, length);
 }
@@ -358,7 +358,7 @@ inline void Rgb32Pixel::getColors(Rgb32Color* colors, std::size_t length) const
 }
 
 
-inline void Rgb32Pixel::fill(std::size_t n, const Argb32Color& color)
+inline void Rgb32Pixel::fill(std::size_t n, const Color& color)
 {
     Rgb32::fill(base(), n, color);
 }
@@ -444,9 +444,9 @@ inline Rgb32Color Rgb32Pixel::color() const
 }
 
 
-inline Argb32Color Rgb32Pixel::toColor() const
+inline Color Rgb32Pixel::toColor() const
 {
-    return Rgb32::getArgb32Color( base() );
+    return Rgb32::getColor( base() );
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -572,13 +572,13 @@ inline Rgb32Color Rgb32ConstPixel::color() const
 }
 
 
-inline Argb32Color Rgb32ConstPixel::toColor() const
+inline Color Rgb32ConstPixel::toColor() const
 {
-    return Rgb32::getArgb32Color( base() );
+    return Rgb32::getColor( base() );
 }
 
 
-inline void Rgb32ConstPixel::getColors(Argb32Color* colors, std::size_t length) const
+inline void Rgb32ConstPixel::getColors(Color* colors, std::size_t length) const
 {
     Rgb32::getColors(base(), colors, length);
 }

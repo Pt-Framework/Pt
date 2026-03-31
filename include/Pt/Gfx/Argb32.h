@@ -48,7 +48,7 @@ class Argb32Pixel
 
     public:
         typedef Argb32 FormatType;
-        typedef Argb32Color ColorType;
+        typedef Color ColorType;
 
     public:
         template <typename T>
@@ -60,7 +60,7 @@ class Argb32Pixel
 
         Argb32Pixel& operator=(const Argb32Pixel&) = delete;
 
-        Argb32Pixel& operator=(const Argb32Color& color);
+        Argb32Pixel& operator=(const Color& color);
 
         template <typename T>
         void reset(T& view, Pt::ssize_t x, Pt::ssize_t y);
@@ -92,7 +92,7 @@ class Argb32Pixel
 
         void setBlue(Pt::uint8_t b);
 
-        Argb32Color toColor() const;
+        Color toColor() const;
 
         void advance();
 
@@ -110,11 +110,11 @@ class Argb32Pixel
 
         void assign(const Argb32ConstPixel& p, std::size_t length);
 
-        void getColors(Argb32Color* colors, std::size_t length) const;
+        void getColors(Color* colors, std::size_t length) const;
 
-        void assign(const Argb32Color* colors, std::size_t length);
+        void assign(const Color* colors, std::size_t length);
 
-        void fill(std::size_t n, const Argb32Color& color);
+        void fill(std::size_t n, const Color& color);
 
         bool equals(const Argb32Pixel& p) const;
 
@@ -133,7 +133,7 @@ class Argb32ConstPixel
 
     public:
         typedef Argb32 FormatType;
-        typedef Argb32Color ColorType;
+        typedef Color ColorType;
 
     protected:
         Argb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
@@ -178,7 +178,7 @@ class Argb32ConstPixel
 
         Pt::uint8_t blue() const;
 
-        Argb32Color toColor() const;
+        Color toColor() const;
 
         void advance();
 
@@ -188,7 +188,7 @@ class Argb32ConstPixel
 
         void advanceLines(Pt::ssize_t n);
 
-        void getColors(Argb32Color* colors, std::size_t length) const;
+        void getColors(Color* colors, std::size_t length) const;
 
         bool equals(const Argb32ConstPixel& p) const;
         
@@ -208,7 +208,7 @@ class PT_GFX_API Argb32 final : public ImageFormat
     public:    
         typedef Argb32Pixel PixelType;
         typedef Argb32ConstPixel ConstPixelType;
-        typedef Argb32Color ColorType;
+        typedef Color ColorType;
 
     public:
         static const Argb32& get()
@@ -293,21 +293,21 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
         static ColorF getColorF(const Pt::uint8_t* p);
 
-        static Argb32Color getArgb32Color(const Pt::uint8_t* p);
+        static Color getColor(const Pt::uint8_t* p);
 
         static void getColors(const Pt::uint8_t* p, Gfx::ColorF* colors, std::size_t n);
 
-        static void getColors(const Pt::uint8_t* p, Argb32Color* colors, std::size_t n);
+        static void getColors(const Pt::uint8_t* p, Color* colors, std::size_t n);
 
-        static void assign(Pt::uint8_t* to, const Argb32Color& from);
+        static void assign(Pt::uint8_t* to, const Color& from);
 
         static void assign(Pt::uint8_t* to, const ColorF& c);
 
-        static void fill(Pt::uint8_t* to, std::size_t length, const Argb32Color& c);
+        static void fill(Pt::uint8_t* to, std::size_t length, const Color& c);
 
         static void fill(Pt::uint8_t* to, std::size_t length, const ColorF& c);
 
-        static void assign(Pt::uint8_t* to, const Argb32Color* colors, std::size_t length);
+        static void assign(Pt::uint8_t* to, const Color* colors, std::size_t length);
 
         static void assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length);
 
@@ -318,11 +318,11 @@ class PT_GFX_API Argb32 final : public ImageFormat
 
 /** @brief Copies one color to N destination pixels.
 */
-inline void sourceCopy(Argb32Pixel& to, std::size_t length, const Argb32Color& from);
+inline void sourceCopy(Argb32Pixel& to, std::size_t length, const Color& from);
 
 /** @brief Blends one color over N destination pixels.
 */
-inline void sourceOver(Argb32Pixel& to, std::size_t length, const Argb32Color& from);
+inline void sourceOver(Argb32Pixel& to, std::size_t length, const Color& from);
 
 /** @brief Copies N source pixels to N destination pixels.
 */
