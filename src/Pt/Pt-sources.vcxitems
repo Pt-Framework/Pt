@@ -365,7 +365,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\Canvas.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\Color.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\Font.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\FontMetrics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\Image.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\ImageSurface.cpp" />
@@ -850,7 +849,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Color.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\CompositionMode.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Font.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\FontMetrics.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\ImageSurface.h" />

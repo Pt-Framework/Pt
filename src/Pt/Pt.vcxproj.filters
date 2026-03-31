@@ -1566,9 +1566,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>

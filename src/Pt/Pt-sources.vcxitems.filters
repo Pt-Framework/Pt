@@ -684,9 +684,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\Font.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\FontMetrics.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Gfx\Image.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -3012,9 +3009,6 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Font.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\FontMetrics.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Gfx\Image.h">

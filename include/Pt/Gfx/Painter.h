@@ -44,7 +44,7 @@
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Paint.h>
 
-#include <Pt/Gfx/FontMetrics.h> // remove
+#include <Pt/Gfx/TextMetrics.h>
 
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
@@ -234,13 +234,6 @@ class PT_GFX_API Painter : private NonCopyable
         /** @brief Returns the metrics of a line of text.
         */
         TextMetrics textMetrics(const Pt::String& text) const;
-
-        /** @internal TODO.
-        */
-        FontMetrics fontMetrics(const Pt::String& text) const
-        {
-            return textMetrics(text);
-        }
 
         /** @brief Draws a line of text.
         */
