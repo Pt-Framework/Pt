@@ -139,10 +139,11 @@
             "problemMatcher": [
                 {
                     "base": "$gcc",
-                    "fileLocation": "autoDetect"
+                    "fileLocation": ["relative", "${workspaceFolder:All Files}"]
                 },
                 {
-                    "base": "$msCompile"
+                    "base": "$msCompile",
+                    "fileLocation": ["relative", "${workspaceFolder:All Files}"]
                 }
             ]
         },
