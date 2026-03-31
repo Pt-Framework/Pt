@@ -227,11 +227,6 @@ class Pixel
         const Pt::uint8_t* base() const
         { return _pixel->base(); }
 
-        ColorT getColor() const
-        {
-            return _pixel->getColor<ColorT>();
-        }
-
         void advance()
         {
             _pixel->advance();
@@ -252,14 +247,14 @@ class Pixel
             _pixel->advanceLines(n);
         }
 
+        ColorT getColor() const
+        {
+            return _pixel->getColor<ColorT>();
+        }
+
         void getColors(ColorT* colors, std::size_t length) const
         { 
             _pixel->getColors(colors, length); 
-        }
-
-        void assign(const ColorT* colors, std::size_t length)
-        { 
-            _pixel->assign(colors, length); 
         }
 
         void assign(const Pixel& p);
@@ -269,6 +264,11 @@ class Pixel
         void assign(const Pixel& p, std::size_t length);
 
         void assign(const ConstPixel<ColorT>& p, std::size_t length);
+
+        void assign(const ColorT* colors, std::size_t length)
+        { 
+            _pixel->assign(colors, length); 
+        }
 
         void fill(std::size_t n, const ColorT& color)
         {
@@ -343,11 +343,6 @@ class ConstPixel
         const Pt::uint8_t* base() const
         { return _pixel->base(); }
 
-        ColorT getColor() const
-        {
-            return _pixel->getColor<ColorT>();
-        }
-
         void advance()
         {
             _pixel->advance();
@@ -366,6 +361,11 @@ class ConstPixel
         void advanceLines(Pt::ssize_t n)
         {
             _pixel->advanceLines(n);
+        }
+
+        ColorT getColor() const
+        {
+            return _pixel->getColor<ColorT>();
         }
 
         void getColors(ColorT* colors, std::size_t length) const
