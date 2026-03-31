@@ -138,16 +138,16 @@ concept ConstPixelLike = std::destructible<P> && requires {
 
 
 template <typename T>
-typename T::Traits::Pixel
-pixel(T& source, Pt::ssize_t x, Pt::ssize_t y)
+typename T::Traits::Pixel pixel(T& source, 
+                                Pt::ssize_t x, Pt::ssize_t y)
 {
     return typename T::Traits::Pixel(source, x, y);
 }
 
 
 template <typename T>
-typename T::Traits::ConstPixel
-pixel(const T& source, Pt::ssize_t x, Pt::ssize_t y)
+typename T::Traits::ConstPixel pixel(const T& source, 
+                                    Pt::ssize_t x, Pt::ssize_t y)
 {
     return typename T::Traits::ConstPixel(source, x, y);
 }
