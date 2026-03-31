@@ -50,6 +50,11 @@ class Argb32PixelBase final : public PixelBase
             return store.create<Argb32PixelBase>(*this);
         }
 
+        virtual const std::type_info& onGetType() const override
+        {
+            return typeid(Argb32PixelBase);
+        }
+
         virtual Pt::uint8_t* onAdvance() override
         {
             return Argb32::advance(view(), base());
@@ -128,14 +133,9 @@ class Argb32PixelBase final : public PixelBase
 
 inline bool Argb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if( typeid(p) == typeid(Argb32PixelBase) )
+    if(const auto* src = p.tryCast<Argb32PixelBase>())
     {
-        const Argb32PixelBase* argb32 = static_cast<const Argb32PixelBase*>(&p);
-
-        Pt::uint8_t* to = base();
-        const Pt::uint8_t* from = argb32->base();
-
-        Argb32::copy(to, from, length);
+        Argb32::copy(base(), src->base(), length);
         return true;
     }
 
@@ -145,14 +145,9 @@ inline bool Argb32PixelBase::onAssignPixels(const PixelBase& p, std::size_t leng
 
 inline bool Argb32PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
-    if( typeid(p) == typeid(Argb32PixelBase) )
+    if(auto* dst = p.tryCast<Argb32PixelBase>())
     {
-        Argb32PixelBase* argb32 = static_cast<Argb32PixelBase*>(&p);
-
-        Pt::uint8_t* to = argb32->base();
-        const Pt::uint8_t* from = base();
-
-        Argb32::copy(to, from, length);
+        Argb32::copy(dst->base(), base(), length);
         return true;
     }
 

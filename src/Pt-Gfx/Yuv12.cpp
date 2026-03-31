@@ -58,6 +58,11 @@ class Yuv12PixelBase final : public PixelBase
             return store.create<Yuv12PixelBase>(c);
         }
 
+        virtual const std::type_info& onGetType() const override
+        {
+            return typeid(Yuv12PixelBase);
+        }
+
         virtual Pt::uint8_t* onAdvance() override
         {
             _p.advance();
@@ -140,9 +145,8 @@ class Yuv12PixelBase final : public PixelBase
 
 inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if( typeid(p) == typeid(Yuv12PixelBase) )
+    if(const auto* src = p.tryCast<Yuv12PixelBase>())
     {
-        const Yuv12PixelBase* yuv = static_cast<const Yuv12PixelBase*>(&p);
         return true;
     }
 
@@ -152,9 +156,8 @@ inline bool Yuv12PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
 
 inline bool Yuv12PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
-    if( typeid(p) == typeid(Yuv12PixelBase) )
+    if(auto* dst = p.tryCast<Yuv12PixelBase>())
     {
-        //Yuv12PixelBase* yuv12 = static_cast<Yuv12PixelBase*>(&p);
         return true;
     }
 

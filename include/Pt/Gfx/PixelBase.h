@@ -33,6 +33,7 @@
 #include <Pt/Gfx/ViewBase.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Types.h>
+#include <typeinfo>
 #include <utility>
 
 namespace Pt {
@@ -145,9 +146,24 @@ class PixelBase
             return onClone(store);
         }
 
+        const std::type_info& getType() const
+        {
+            return onGetType();
+        }
+
+        template <typename T>
+        T* tryCast()
+        { return getType() == typeid(T) ? static_cast<T*>(this) : nullptr; }
+
+        template <typename T>
+        const T* tryCast() const
+        { return getType() == typeid(T) ? static_cast<const T*>(this) : nullptr; }
+
     protected:
         virtual PixelBase* onClone(PixelStorage& store) const
         { return 0; }
+
+        virtual const std::type_info& onGetType() const = 0;
 
         virtual Pt::uint8_t* onAdvance() = 0;
 

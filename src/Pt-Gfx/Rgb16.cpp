@@ -50,6 +50,11 @@ class Rgb16PixelBase final : public PixelBase
             return store.create<Rgb16PixelBase>(*this);
         }
 
+        virtual const std::type_info& onGetType() const override
+        {
+            return typeid(Rgb16PixelBase);
+        }
+
         virtual Pt::uint8_t* onAdvance() override
         {
             return Rgb16::advance(view(), base());
@@ -128,14 +133,9 @@ class Rgb16PixelBase final : public PixelBase
 
 inline bool Rgb16PixelBase::onAssignPixels(const PixelBase& p, std::size_t length)
 {
-    if( typeid(p) == typeid(Rgb16PixelBase) )
+    if(const auto* src = p.tryCast<Rgb16PixelBase>())
     {
-        const Rgb16PixelBase* rgb16 = static_cast<const Rgb16PixelBase*>(&p);
-
-        Pt::uint8_t* to = base();
-        const Pt::uint8_t* from = rgb16->base();
-
-        Rgb16::copy(to, from, length);
+        Rgb16::copy(base(), src->base(), length);
         return true;
     }
 
@@ -145,14 +145,9 @@ inline bool Rgb16PixelBase::onAssignPixels(const PixelBase& p, std::size_t lengt
 
 inline bool Rgb16PixelBase::onCopyPixels(PixelBase& p, std::size_t length) const
 {
-    if( typeid(p) == typeid(Rgb16PixelBase) )
+    if(auto* dst = p.tryCast<Rgb16PixelBase>())
     {
-        Rgb16PixelBase* rgb16 = static_cast<Rgb16PixelBase*>(&p);
-
-        Pt::uint8_t* to = rgb16->base();
-        const Pt::uint8_t* from = base();
-
-        Rgb16::copy(to, from, length);
+        Rgb16::copy(dst->base(), base(), length);
         return true;
     }
 
