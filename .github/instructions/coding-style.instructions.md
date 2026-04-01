@@ -19,3 +19,7 @@ description: "Coding style and conventions."
 
 - Keep existing formatting style when modifying existing code
 - Namespace closing braces are commented: `} // namespace`
+
+## Code Structure
+
+- assign lambdas to a local variable before using it in an algorithm
