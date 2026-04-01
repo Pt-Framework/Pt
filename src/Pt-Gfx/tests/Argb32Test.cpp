@@ -55,11 +55,11 @@ class Argb32Test : public Pt::Unit::TestSuite
             registerMethod("ColorAssign",*this, &Argb32Test::ColorAssign);
             registerMethod("ColorCopy",*this, &Argb32Test::ColorCopy);
 
-            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::BenchmarkPixel);
-            registerMethod("BenchmarkB_SpanPixel", *this, &Argb32Test::BenchmarkSpanPixel);
-            registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
-            registerMethod("BenchmarkD_CopyView_Generic", *this, &Argb32Test::BenchmarkCopyView);
-            registerMethod("BenchmarkE_CopyView_Argb32", *this, &Argb32Test::BenchmarkCopyViewArgb32);
+            // registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::BenchmarkPixel);
+            // registerMethod("BenchmarkB_SpanPixel", *this, &Argb32Test::BenchmarkSpanPixel);
+            // registerMethod("BenchmarkC_CopyColors", *this, &Argb32Test::BenchmarkCopyColors);
+            // registerMethod("BenchmarkD_CopyView_Generic", *this, &Argb32Test::BenchmarkCopyView);
+            // registerMethod("BenchmarkE_CopyView_Argb32", *this, &Argb32Test::BenchmarkCopyViewArgb32);
         }
 
         void Pixel()

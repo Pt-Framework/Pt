@@ -137,8 +137,7 @@ class BasicImage : public ViewBase
 
         Pt::ssize_t pixelStride() const;
 
-        std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
-                         std::size_t padding) const;
+        std::size_t size() const;
 
     private:
         std::unique_ptr<FormatT> _format;
@@ -202,8 +201,7 @@ class BasicConstImage : public ViewBase
 
         Pt::ssize_t pixelStride() const;
 
-        std::size_t size(Pt::ssize_t width, Pt::ssize_t height, 
-                         std::size_t padding) const;
+        std::size_t size() const;
 
     private:
         std::unique_ptr<FormatT> _format;

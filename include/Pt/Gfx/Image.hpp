@@ -227,10 +227,9 @@ inline Pt::ssize_t BasicImage<FormatT, TraitsT>::pixelStride() const
 
 
 template <typename FormatT, typename TraitsT>
-inline std::size_t BasicImage<FormatT, TraitsT>::size(Pt::ssize_t width, Pt::ssize_t height, 
-                                                      std::size_t padding) const
+inline std::size_t BasicImage<FormatT, TraitsT>::size() const
 {
-    return Traits::imageSize(this->format(), width, height, padding);
+    return Traits::imageSize(this->format(), this->width(), this->height(), this->padding());
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -366,10 +365,9 @@ inline Pt::ssize_t BasicConstImage<FormatT, TraitsT>::pixelStride() const
 
 
 template <typename FormatT, typename TraitsT>
-inline std::size_t BasicConstImage<FormatT, TraitsT>::size(Pt::ssize_t width, Pt::ssize_t height,
-                                                           std::size_t padding) const
+inline std::size_t BasicConstImage<FormatT, TraitsT>::size() const
 {
-    return Traits::imageSize(this->format(), width, height, padding);
+    return Traits::imageSize(this->format(), this->width(), this->height(), this->padding());
 }
 
 } // namespace
