@@ -26,6 +26,9 @@ description: "Unit testing"
 - Each test method registered via `registerMethod()` in constructor.
 - One test method per public method or behaviour of the unit under test.
 - Test method name matches the method under test
+- Prefer names that describe the tested public behaviour or API entry point.
+- Keep names short and specific, e.g. `ConstructFromValue`, `CopyAssign`, `SetChannels`.
+- Only use implementation terms such as `Constructor` when they are the clearest distinction.
 - Avoid shared state between methods — each creates its own objects
 - File-scope `Pt::Unit::RegisterTest<>` for self-registration
 
@@ -98,3 +101,4 @@ Pt::Unit::RegisterTest<Pt::Module::FooTest> register_FooTest;
 - Pass `-t "<SuiteName>"` to run a single suite (`SuiteName` as passed to
   Pt::Unit::TestSuite constructor).
 - Capture stdout from the test executable to see detailed results.
+- Pt::Unit executes test methods in alphabetical order.
