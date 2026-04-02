@@ -63,7 +63,7 @@ class LineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        LineIterator(BasicView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        LineIterator(BasicView<Format, Traits>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _span(view, x, y, view.width())
         { }
 
@@ -128,7 +128,7 @@ class ConstLineIterator
         using iterator_category = std::forward_iterator_tag;
 
     public:
-        ConstLineIterator(const BasicConstView<Format>& view, Pt::ssize_t x, Pt::ssize_t y)
+        ConstLineIterator(const BasicConstView<Format, Traits>& view, Pt::ssize_t x, Pt::ssize_t y)
         : _span(view, x, y, view.width())
         { }
 
