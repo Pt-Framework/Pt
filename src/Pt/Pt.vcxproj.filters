@@ -4689,6 +4689,9 @@
     <ClCompile Include="..\Pt-Gfx\tests\Pt-Gfx-test.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\Rgb32ColorTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\Yuv12Test.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
