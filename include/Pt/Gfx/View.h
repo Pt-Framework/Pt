@@ -50,7 +50,7 @@ class BasicView : public ViewBase
         explicit BasicView( const Format& format = FormatT::get() );
 
         BasicView(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-                  Pt::ssize_t padding, const Format& format);
+                  Pt::ssize_t padding, const Format& format = FormatT::get());
 
         template <typename T>
         explicit BasicView(T& source);
@@ -102,7 +102,7 @@ class BasicConstView : public ViewBase
         explicit BasicConstView( const Format& format = FormatT::get() );
 
         BasicConstView(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-                       Pt::ssize_t padding, const Format& format);
+                       Pt::ssize_t padding, const Format& format = FormatT::get());
 
         template <typename T>
         explicit BasicConstView(const T& source);

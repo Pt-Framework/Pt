@@ -185,7 +185,7 @@ class BasicLineView
         explicit BasicLineView( const Format& format = FormatT::get() );
 
         BasicLineView(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-                      Pt::ssize_t padding, const Format& format);
+                      Pt::ssize_t padding, const Format& format = FormatT::get());
 
         template <typename T>
         explicit BasicLineView(T& source);
@@ -246,7 +246,7 @@ class BasicConstLineView
         explicit BasicConstLineView( const Format& format = FormatT::get() );
 
         BasicConstLineView(const Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-                           Pt::ssize_t padding, const Format& format);
+                           Pt::ssize_t padding, const Format& format = FormatT::get());
 
         template <typename T>
         explicit BasicConstLineView(const T& source);
