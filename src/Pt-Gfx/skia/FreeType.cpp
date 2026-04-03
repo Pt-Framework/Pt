@@ -335,7 +335,7 @@ TextMetrics FreeType::textMetrics(const String& text,
 
 
 void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
-                    const String& text, const ColorF& color, const Rect& clip,
+                    const String& text, const ColorF& color, const RectI& clip,
                     const CompositionMode& mode, const Transform& tf, 
                     FTC_FaceID faceId, std::size_t fontSize)
 {
@@ -346,7 +346,7 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
     translatedPos.addX( tf.dx() );
     translatedPos.addY( tf.dy() );
     
-    Point pos = round(translatedPos);
+    PointI pos = round(translatedPos);
 
     FT_Matrix matrix;
     matrix.xx = tf.m11() * 0x10000L;
@@ -498,7 +498,7 @@ void FreeType::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y,
 
 void FreeType::drawGlyph(Image& image, int xpos, int ypos, const ColorF& color,
                          int bmPitch, int height, int width, const unsigned char* buffer, 
-                         const Rect& clip, const CompositionMode& mode)
+                         const RectI& clip, const CompositionMode& mode)
 {
     const int clipRight  = clip.x() + clip.width();
     const int clipBottom = clip.y() + clip.height();

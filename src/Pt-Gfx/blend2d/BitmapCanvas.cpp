@@ -247,7 +247,7 @@ void BitmapCanvas::onApplyClip(const Gfx::RectF* clip)
     else
         _clip.clear();
 
-    Rect imageRect;
+    RectI imageRect;
     imageRect.setWidth( _image->width() );
     imageRect.setHeight( _image->height() );
 
@@ -257,13 +257,13 @@ void BitmapCanvas::onApplyClip(const Gfx::RectF* clip)
         return;
     }
 
-    Rect clipRect = Rect( Point( lround( _clip.x() ),
+    RectI clipRect = RectI( PointI( lround( _clip.x() ),
                                  lround( _clip.y() ) ), 
-                          Size( lround( _clip.width() ),
+                          SizeI( lround( _clip.width() ),
                                 lround( _clip.height() ) ) );
 
     if( clipRect.isNull() ) // crashes otherwise
-        clipRect = Rect( Point(0, 0), Size(1, 1) );
+        clipRect = RectI( PointI(0, 0), SizeI(1, 1) );
 
     _currentClip =  clipRect.intersect(imageRect);
 }

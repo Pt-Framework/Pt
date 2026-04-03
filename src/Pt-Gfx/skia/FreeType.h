@@ -60,9 +60,6 @@ class FreeType : public Pt::Singleton<FreeType>
     friend class Pt::Singleton<FreeType>;
 
   public:
-    typedef BasicPoint<Pt::ssize_t> Point;
-    typedef BasicSize<Pt::ssize_t> Size;
-    typedef BasicRect<Pt::ssize_t> Rect;
 
     public:
         struct Init
@@ -95,7 +92,7 @@ class FreeType : public Pt::Singleton<FreeType>
         // TODO: use ImageView instead of clip
 
         void draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
-                  const String& text, const ColorF& color, const Rect& clip,
+                  const String& text, const ColorF& color, const RectI& clip,
                   const CompositionMode& mode, const Transform& tf, 
                   FTC_FaceID faceId, std::size_t fontSize);
 
@@ -108,7 +105,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void drawGlyph(Image& image, int xpos, int ypos, const ColorF& color, 
                        int bmPitch, int height, int width, const unsigned char* buffer, 
-                       const Rect& clip, const CompositionMode& mode);
+                       const RectI& clip, const CompositionMode& mode);
 
     private:
         typedef std::set<System::Path*> Files;

@@ -55,7 +55,7 @@ namespace Pt {
 */
 namespace Gfx {
 
-typedef float Float;
+typedef double Float;
 typedef std::ptrdiff_t Int;
 
 class Canvas;

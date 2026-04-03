@@ -57,10 +57,6 @@ class BitmapCanvas;
 */
 class PT_GFX_API BitmapSurface : private NonCopyable
 {
-  typedef BasicPoint<Pt::ssize_t> PointI;
-  typedef BasicSize<Pt::ssize_t> SizeI;
-  typedef BasicRect<Pt::ssize_t> RectI;
-
   public:
     BitmapSurface();
 

@@ -39,45 +39,42 @@ namespace Pt {
 
 namespace Gfx {
 
-
-template<typename T>
-class BasicRect
+/** @brief %Rect with floating-point coordinates.
+*/
+class Rect
 {
     public:
-        typedef T ValueT;
-
-    public:
-        explicit BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0),
-                            const BasicSize<T>& s = BasicSize<T>(0, 0) )
+        explicit Rect(const Point& p = Point(0, 0),
+                      const Size& s = Size(0, 0))
         : _p(p)
         , _s(s)
         {
         }
 
-        explicit BasicRect(const BasicSize<T>& s)
+        explicit Rect(const Size& s)
         : _p()
         , _s(s)
         {
         }
-        
-        BasicRect(const T& width, const T& height)
+
+        Rect(Float width, Float height)
         : _p()
         , _s(width, height)
         {
         }
-        
-        BasicRect(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
+
+        Rect(const Point& p1, const Point& p2)
         : _p(p1)
-        , _s( p2.x() - p1.x(), p2.y() - p1.y())
+        , _s(p2.x() - p1.x(), p2.y() - p1.y())
         {
         }
 
-        BasicRect(const T& left, const T& right, const T& top, const T& bottom)
+        Rect(Float left, Float right, Float top, Float bottom)
         {
             set(left, right, top, bottom);
         }
 
-        BasicRect(const BasicRect<T>& val)
+        Rect(const Rect& val)
         : _p(val._p)
         , _s(val._s)
         {
@@ -85,7 +82,7 @@ class BasicRect
 
         bool isNull() const
         {
-            return (_s.width() == 0 || _s.height() == 0 );
+            return (_s.width() == 0 || _s.height() == 0);
         }
 
         void clear()
@@ -94,195 +91,435 @@ class BasicRect
             _s.clear();
         }
 
-        void set(const BasicPoint<T>& p, const BasicSize<T>& s)
+        void set(const Point& p, const Size& s)
         {
             _p = p;
             _s = s;
         }
 
-        void set(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
+        void set(const Point& p1, const Point& p2)
         {
             this->setOrigin(p1);
-            this->setWidth( p2.x() - p1.x() );
-            this->setHeight( p2.y() - p1.y() );
+            this->setWidth(p2.x() - p1.x());
+            this->setHeight(p2.y() - p1.y());
         }
 
-        void set(const T& width, const T& height)
+        void set(Float width, Float height)
         {
             _p.clear();
             _s.set(width, height);
         }
 
-        void set(const T& left, const T& right, const T& top, const T& bottom)
+        void set(Float left, Float right, Float top, Float bottom)
         {
-            _p = BasicPoint<T>( left, top );
-            _s = BasicSize<T>(  right - left , bottom - top );
+            _p = Point(left, top);
+            _s = Size(right - left, bottom - top);
         }
 
-        const BasicPoint<T>& origin() const
+        const Point& origin() const
         {
             return _p;
         }
 
-        void setOrigin(const BasicPoint<T>& p)
+        void setOrigin(const Point& p)
         {
             _p = p;
         }
 
-        void setSize(const BasicSize<T>& s)
+        void setSize(const Size& s)
         {
             _s = s;
         }
 
-        void setWidth(T w)
+        void setWidth(Float w)
         {
             _s.setWidth(w);
         }
 
-        void setHeight(T h)
+        void setHeight(Float h)
         {
             _s.setHeight(h);
         }
 
-        T x() const
+        Float x() const
         {
             return _p.x();
         }
 
-        T y() const
+        Float y() const
         {
             return _p.y();
         }
 
-        const BasicSize<T>& size() const
+        const Size& size() const
         {
             return _s;
         }
 
-        T width() const
+        Float width() const
         {
             return _s.width();
         }
 
-        T height() const
+        Float height() const
         {
             return _s.height();
         }
 
-        T left() const
+        Float left() const
         {
             return _p.x();
         }
 
-        T top() const
+        Float top() const
         {
             return _p.y();
         }
 
-        T right() const
+        Float right() const
         {
             return _p.x() + _s.width();
         }
 
-        T bottom() const
+        Float bottom() const
         {
             return _p.y() + _s.height();
         }
 
-        const BasicPoint<T>& topLeft() const
+        const Point& topLeft() const
         {
             return _p;
         }
 
-        const BasicPoint<T> topRight() const
+        Point topRight() const
         {
-            return BasicPoint<T>(this->x() + this->width(), this->y());
+            return Point(this->x() + this->width(), this->y());
         }
 
-        const BasicPoint<T> bottomLeft() const
+        Point bottomLeft() const
         {
-            return BasicPoint<T>(this->x(), this->y() + this->height());
+            return Point(this->x(), this->y() + this->height());
         }
 
-        const BasicPoint<T> bottomRight() const
+        Point bottomRight() const
         {
-            return BasicPoint<T>(this->x() + this->width(),
-                                 this->y() + this->height() );
+            return Point(this->x() + this->width(),
+                         this->y() + this->height());
         }
 
-        bool operator==(const BasicRect& other) const
+        bool operator==(const Rect& other) const
         {
             return _p == other._p && _s == other._s;
         }
 
-        bool operator!=(const BasicRect& other) const
+        bool operator!=(const Rect& other) const
         {
             return _p != other._p || _s != other._s;
         }
 
-        void shift(T dx, T dy)
+        void shift(Float dx, Float dy)
         {
             _p.addX(dx);
             _p.addY(dy);
         }
 
-        void expand(T dw, T dh)
+        void expand(Float dw, Float dh)
         {
             _s.addWidth(dw);
             _s.addHeight(dh);
         }
 
-        void shrink(T dw, T dh)
+        void shrink(Float dw, Float dh)
         {
             _s.addWidth(-dw);
             _s.addHeight(-dh);
         }
 
-        void unify(const BasicRect<T>& rect)
+        void unify(const Rect& rect)
         {
-            if( rect.isNull() )
+            if(rect.isNull())
                 return;
 
-            if( this->isNull() )
+            if(this->isNull())
             {
                 _p = rect._p;
                 _s = rect._s;
                 return;
             }
 
-            const T l  = std::min( this->left(), rect.left() );
-            const T t  = std::min( this->top(), rect.top() );
-            const T r  = std::max( this->right(), rect.right() );
-            const T b  = std::max( this->bottom(), rect.bottom() );
+            const Float l = std::min(this->left(), rect.left());
+            const Float t = std::min(this->top(), rect.top());
+            const Float r = std::max(this->right(), rect.right());
+            const Float b = std::max(this->bottom(), rect.bottom());
 
             set(l, r, t, b);
         }
 
-        BasicRect<T> intersect(const BasicRect<T>& rect) const
+        Rect intersect(const Rect& rect) const
         {
-            const T l  = std::max( this->left(), rect.left() );
-            const T t  = std::max( this->top(), rect.top() );
-            const T r  = std::min( this->right(), rect.right() );
-            const T b  = std::min( this->bottom(), rect.bottom() );
+            const Float l = std::max(this->left(), rect.left());
+            const Float t = std::max(this->top(), rect.top());
+            const Float r = std::min(this->right(), rect.right());
+            const Float b = std::min(this->bottom(), rect.bottom());
 
-            return r >= l && b >= t ? BasicRect<T>(l, r, t, b)
-                                    : BasicRect<T>();
+            return r >= l && b >= t ? Rect(l, r, t, b)
+                                    : Rect();
         }
 
-        bool contains(const BasicPoint<T>& p) const
+        bool contains(const Point& p) const
         {
             return p.x() >= _p.x() &&
-                    p.x() < _p.x() + _s.width() &&
-                    p.y() >= _p.y() &&
-                    p.y() <  _p.y() + _s.height();
+                   p.x() < _p.x() + _s.width() &&
+                   p.y() >= _p.y() &&
+                   p.y() < _p.y() + _s.height();
         }
 
-    protected:
-        BasicPoint<T> _p;
-        BasicSize<T>  _s;
+    private:
+        Point _p;
+        Size  _s;
 };
 
-typedef BasicRect<double> RectF;
+typedef Rect RectF;
+
+/** @brief %Rect with integer coordinates.
+*/
+class RectI
+{
+    public:
+        explicit RectI(const PointI& p = PointI(0, 0),
+                       const SizeI& s = SizeI(0, 0))
+        : _p(p)
+        , _s(s)
+        {
+        }
+
+        explicit RectI(const SizeI& s)
+        : _p()
+        , _s(s)
+        {
+        }
+
+        RectI(Int width, Int height)
+        : _p()
+        , _s(width, height)
+        {
+        }
+
+        RectI(const PointI& p1, const PointI& p2)
+        : _p(p1)
+        , _s(p2.x() - p1.x(), p2.y() - p1.y())
+        {
+        }
+
+        RectI(Int left, Int right, Int top, Int bottom)
+        {
+            set(left, right, top, bottom);
+        }
+
+        RectI(const RectI& val)
+        : _p(val._p)
+        , _s(val._s)
+        {
+        }
+
+        bool isNull() const
+        {
+            return (_s.width() == 0 || _s.height() == 0);
+        }
+
+        void clear()
+        {
+            _p.clear();
+            _s.clear();
+        }
+
+        void set(const PointI& p, const SizeI& s)
+        {
+            _p = p;
+            _s = s;
+        }
+
+        void set(const PointI& p1, const PointI& p2)
+        {
+            this->setOrigin(p1);
+            this->setWidth(p2.x() - p1.x());
+            this->setHeight(p2.y() - p1.y());
+        }
+
+        void set(Int width, Int height)
+        {
+            _p.clear();
+            _s.set(width, height);
+        }
+
+        void set(Int left, Int right, Int top, Int bottom)
+        {
+            _p = PointI(left, top);
+            _s = SizeI(right - left, bottom - top);
+        }
+
+        const PointI& origin() const
+        {
+            return _p;
+        }
+
+        void setOrigin(const PointI& p)
+        {
+            _p = p;
+        }
+
+        void setSize(const SizeI& s)
+        {
+            _s = s;
+        }
+
+        void setWidth(Int w)
+        {
+            _s.setWidth(w);
+        }
+
+        void setHeight(Int h)
+        {
+            _s.setHeight(h);
+        }
+
+        Int x() const
+        {
+            return _p.x();
+        }
+
+        Int y() const
+        {
+            return _p.y();
+        }
+
+        const SizeI& size() const
+        {
+            return _s;
+        }
+
+        Int width() const
+        {
+            return _s.width();
+        }
+
+        Int height() const
+        {
+            return _s.height();
+        }
+
+        Int left() const
+        {
+            return _p.x();
+        }
+
+        Int top() const
+        {
+            return _p.y();
+        }
+
+        Int right() const
+        {
+            return _p.x() + _s.width();
+        }
+
+        Int bottom() const
+        {
+            return _p.y() + _s.height();
+        }
+
+        const PointI& topLeft() const
+        {
+            return _p;
+        }
+
+        PointI topRight() const
+        {
+            return PointI(this->x() + this->width(), this->y());
+        }
+
+        PointI bottomLeft() const
+        {
+            return PointI(this->x(), this->y() + this->height());
+        }
+
+        PointI bottomRight() const
+        {
+            return PointI(this->x() + this->width(),
+                          this->y() + this->height());
+        }
+
+        bool operator==(const RectI& other) const
+        {
+            return _p == other._p && _s == other._s;
+        }
+
+        bool operator!=(const RectI& other) const
+        {
+            return _p != other._p || _s != other._s;
+        }
+
+        void shift(Int dx, Int dy)
+        {
+            _p.addX(dx);
+            _p.addY(dy);
+        }
+
+        void expand(Int dw, Int dh)
+        {
+            _s.addWidth(dw);
+            _s.addHeight(dh);
+        }
+
+        void shrink(Int dw, Int dh)
+        {
+            _s.addWidth(-dw);
+            _s.addHeight(-dh);
+        }
+
+        void unify(const RectI& rect)
+        {
+            if(rect.isNull())
+                return;
+
+            if(this->isNull())
+            {
+                _p = rect._p;
+                _s = rect._s;
+                return;
+            }
+
+            const Int l = std::min(this->left(), rect.left());
+            const Int t = std::min(this->top(), rect.top());
+            const Int r = std::max(this->right(), rect.right());
+            const Int b = std::max(this->bottom(), rect.bottom());
+
+            set(l, r, t, b);
+        }
+
+        RectI intersect(const RectI& rect) const
+        {
+            const Int l = std::max(this->left(), rect.left());
+            const Int t = std::max(this->top(), rect.top());
+            const Int r = std::min(this->right(), rect.right());
+            const Int b = std::min(this->bottom(), rect.bottom());
+
+            return r >= l && b >= t ? RectI(l, r, t, b)
+                                    : RectI();
+        }
+
+        bool contains(const PointI& p) const
+        {
+            return p.x() >= _p.x() &&
+                   p.x() < _p.x() + _s.width() &&
+                   p.y() >= _p.y() &&
+                   p.y() < _p.y() + _s.height();
+        }
+
+    private:
+        PointI _p;
+        SizeI  _s;
+};
 
 }  // namespace
 

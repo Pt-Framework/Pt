@@ -53,9 +53,6 @@ class BitmapCanvas : public Canvas
 {
     public:
         typedef Rgb32Image::pos_t   pos_t;
-        typedef BasicPoint<pos_t>  Point;
-        typedef BasicSize<pos_t>   Size;
-        typedef BasicRect<pos_t>   Rect;
 
     public:
         BitmapCanvas();
@@ -129,37 +126,37 @@ class BitmapCanvas : public Canvas
                                  const Gfx::RectF* rect = 0);
 
     private:
-        Point toLocal(const Gfx::PointF& from) const
+        PointI toLocal(const Gfx::PointF& from) const
         {
             Gfx::PointF p = transform() * from;
 
-            Point pp( lround(p.x() - 0.4999),
+            PointI pp( lround(p.x() - 0.4999),
                       lround(p.y() - 0.4999) );
             return pp;
         }
 
-        Rect round(const RectF& r) const
+        RectI round(const RectF& r) const
         {
-          Point pos( lround(r.x()),
+          PointI pos( lround(r.x()),
                      lround(r.y()) );
       
-          Size size( lround(r.width()),
+          SizeI size( lround(r.width()),
                      lround(r.height()) );
       
-          return Rect(pos, size);
+          return RectI(pos, size);
         }
     
-        Point round(const PointF& p) const
+        PointI round(const PointF& p) const
         {
-          Point pos( lround(p.x()),
+          PointI pos( lround(p.x()),
                      lround(p.y()) );
            
           return pos;
         }
 
-        Size round(const SizeF& s) const
+        SizeI round(const SizeF& s) const
         {
-          Size size( lround(s.width()),
+          SizeI size( lround(s.width()),
                      lround(s.height()) );
       
           return size;
@@ -168,107 +165,107 @@ class BitmapCanvas : public Canvas
         void updateGradientBrush(int width, int height);
   
   private:
-    void stroke(const Point* points, size_t pointCount, const Rect& currentClip);
+    void stroke(const PointI* points, size_t pointCount, const RectI& currentClip);
 
-    void stroke(const Point& pixel, const Rect& currentClip);
+    void stroke(const PointI& pixel, const RectI& currentClip);
 
-    void stroke(int x, int y, const Rect& currentClip);
+    void stroke(int x, int y, const RectI& currentClip);
 
-    void stroke(int xpos, int ypos, int length, const Rect& currentClip);
+    void stroke(int xpos, int ypos, int length, const RectI& currentClip);
 
-    void clipSpan( int& x, int& y, int& length, const Rect& currentClip);
-
-  private:
-    void fill(const Point* points, size_t pointCount, const Rect& currentClip);
-
-    void fill( const Point& origin, const Point& pos, int length );
-
-    void fillRect(const Rect& r, const Rect& currentClip);
-
-    void fillSolid( const Point& pos,  int length );
-    
-    void fillVerticalGradient( const Point& origin, const Point& pos,  int length );
-    
-    void fillHorizontalGradient( const Point& origin, const Point& pos,  int length );
-    
-    void fillTexture( const Point& origin, const Point& pos,  int length );
-
-    void outputEdges(const ActiveEdgeTable& edges, const Point& origin, int scalLine);
-
-    void outputSpan( const Point& topLeft, int x, int y, int width );
+    void clipSpan( int& x, int& y, int& length, const RectI& currentClip);
 
   private:
-    void strokePolygons(const std::vector<Polygon>& polygons, const Rect& currentClip);
+    void fill(const PointI* points, size_t pointCount, const RectI& currentClip);
 
-    void fillPolygons(const std::vector<Polygon>& polygons, const Rect& currentClip);
+    void fill( const PointI& origin, const PointI& pos, int length );
 
-    void strokeEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
+    void fillRect(const RectI& r, const RectI& currentClip);
 
-    void fillEllipse( const Point& topLeft, const Size& size, const Rect& currentClip);
+    void fillSolid( const PointI& pos,  int length );
+    
+    void fillVerticalGradient( const PointI& origin, const PointI& pos,  int length );
+    
+    void fillHorizontalGradient( const PointI& origin, const PointI& pos,  int length );
+    
+    void fillTexture( const PointI& origin, const PointI& pos,  int length );
+
+    void outputEdges(const ActiveEdgeTable& edges, const PointI& origin, int scalLine);
+
+    void outputSpan( const PointI& topLeft, int x, int y, int width );
+
+  private:
+    void strokePolygons(const std::vector<Polygon>& polygons, const RectI& currentClip);
+
+    void fillPolygons(const std::vector<Polygon>& polygons, const RectI& currentClip);
+
+    void strokeEllipse( const PointI& topLeft, const SizeI& size, const RectI& currentClip);
+
+    void fillEllipse( const PointI& topLeft, const SizeI& size, const RectI& currentClip);
 
   // Thin polyline
   private:
     enum { xAxis, yAxis };
     
-    void drawThinSolidPolyline( const Point* points, int pointCount, const Rect& currentClip);
+    void drawThinSolidPolyline( const PointI* points, int pointCount, const RectI& currentClip);
     
-    void drawThinDashPolyline( const Point* points, int pointCount,
-                               int dashOn, int dashOff, const Rect& currentClip);
+    void drawThinDashPolyline( const PointI* points, int pointCount,
+                               int dashOn, int dashOff, const RectI& currentClip);
     
     void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
 
     void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, 
                                    bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, 
-                                   int e, int e1, int e2, int len, const Rect& currentClip);
+                                   int e, int e1, int e2, int len, const RectI& currentClip);
 
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, 
-                                int e, int e1, int e2, int len, const Rect& currentClip);
+                                int e, int e1, int e2, int len, const RectI& currentClip);
 
   // Wide polyline base
   protected:
-    int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
+    int polyBuildPoly( const PointI *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
     
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
     
-    void fillSpans(int x, int y,  int w,  int h, const Rect& currentClip);
+    void fillSpans(int x, int y,  int w,  int h, const RectI& currentClip);
     
-    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip);
+    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const RectI& currentClip);
 
     void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
     
     int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
     
-    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip);
+    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const RectI& currentClip);
     
-    int lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths);
+    int lineArcI( int xorg, int yorg, std::vector<PointI>& points, std::vector<int>& widths);
     
-    int lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
+    int lineArcD( double xorg, double yorg, std::vector<PointI>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
     
     int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
     
-    void lineJoin(LineFace *pLeft, LineFace *pRight, const Rect& currentClip);
+    void lineJoin(LineFace *pLeft, LineFace *pRight, const RectI& currentClip);
     
-    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip);
+    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt, const RectI& currentClip);
     
     void clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft );
 
 
   // Wide solid polyline
   private:
-    void drawWideSolidPolyline( const Point* points, int pointCount, 
-                                const Rect& currentClip);
+    void drawWideSolidPolyline( const PointI* points, int pointCount, 
+                                const RectI& currentClip);
     
-    void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip);
+    void drawSegment( PointI from, PointI to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const RectI& currentClip);
 
   // Wide dashed polyline
   private:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
 
-    void drawWideDashPolyline( const Point* points, int pointCount,
-                               int dashOn, int dashOff, const Rect& currentClip );
+    void drawWideDashPolyline( const PointI* points, int pointCount,
+                               int dashOn, int dashOff, const RectI& currentClip );
 
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
-                      bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip);
+                      bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const RectI& currentClip);
 
     private:
         BitmapSurface* _surface;
@@ -288,7 +285,7 @@ class BitmapCanvas : public Canvas
 
         Font   _font;
         RectF  _clip;
-        Rect   _currentClip;
+        RectI   _currentClip;
         bool   _hasClip;
 
         std::vector<Polygon> _flatPath;      

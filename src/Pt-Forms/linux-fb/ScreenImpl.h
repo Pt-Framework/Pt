@@ -55,11 +55,7 @@ class ScreenImpl : public Form
     friend class Screen;
 
   public:
-    // take typedefs from FramBuffer
     typedef Gfx::Image::pos_t      pos_t;
-    typedef Gfx::BasicPoint<pos_t> PointI;
-    typedef Gfx::BasicSize<pos_t>  SizeI;
-    typedef Gfx::BasicRect<pos_t>  RectI;
 
     public:
         ScreenImpl(ApplicationImpl& app);

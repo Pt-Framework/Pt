@@ -76,7 +76,7 @@ class EllipseSpan
 };
 
 
-inline void addPoint(int xx, int yy, Pt::Gfx::BitmapCanvas::Point** ppt, int** pwidth, 
+inline void addPoint(int xx, int yy, Pt::Gfx::PointI** ppt, int** pwidth, 
                      int& numSpans, int& ycurr, bool& firstspan, int signdy)
 {
   if( !firstspan && yy == ycurr )
@@ -357,7 +357,7 @@ void BitmapCanvas::onApplyClip(const Gfx::RectF* clip)
     if( ! _image )
         return;
 
-    Rect imageRect;
+    RectI imageRect;
     imageRect.setWidth( _image->width() );
     imageRect.setHeight( _image->height() );
 
@@ -367,10 +367,10 @@ void BitmapCanvas::onApplyClip(const Gfx::RectF* clip)
         return;
     }
 
-    Rect clipRect = round(_clip);
+    RectI clipRect = round(_clip);
 
     if( clipRect.isNull() ) // crashes otherwise
-        clipRect = Rect( Point(0, 0), Size(1, 1) );
+        clipRect = RectI( PointI(0, 0), SizeI(1, 1) );
 
     _currentClip =  clipRect.intersect(imageRect);
 }
@@ -381,7 +381,7 @@ void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
     if( ! _image )
         return;
 
-    Point points[2];
+    PointI points[2];
 
     points[0] = toLocal(from);
     points[1] = toLocal(to);
@@ -392,7 +392,7 @@ void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
-    std::vector<Point> points(n);
+    std::vector<PointI> points(n);
 
     for(size_t i = 0; i < n; ++i)
     {
@@ -406,7 +406,7 @@ void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 
 void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
-    std::vector<Point> points(n);
+    std::vector<PointI> points(n);
 
     for(size_t i = 0; i < n; ++i)
     {
@@ -427,12 +427,12 @@ void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
     Gfx::SizeF size =  transform() * r.size();
     Gfx::RectF rect(origin, size);
 
-    Rect rectangle( lround(rect.left()   - 0.4999), 
+    RectI rectangle( lround(rect.left()   - 0.4999), 
                     lround(rect.right()  - 0.4999),
                     lround(rect.top()    - 0.4999), 
                     lround(rect.bottom() - 0.4999)) ;
 
-    Point points[5] = { rectangle.topLeft(),
+    PointI points[5] = { rectangle.topLeft(),
                         rectangle.topRight(),
                         rectangle.bottomRight(),
                         rectangle.bottomLeft(),
@@ -451,7 +451,7 @@ void BitmapCanvas::onFillRect(const Gfx::RectF& r)
     Gfx::SizeF size =  transform() * r.size();
     Gfx::RectF rect(origin, size);
 
-    Rect rectangle( lround( rect.left() ),
+    RectI rectangle( lround( rect.left() ),
                     lround( rect.right() + 0.001 ), 
                     lround( rect.top() ),
                     lround( rect.bottom() + 0.001 ) );
@@ -465,10 +465,10 @@ void BitmapCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
     Gfx::PointF p = transform() * topLeftF;
     Gfx::SizeF s = transform() * sizeF;
 
-    Point topLeft( Pt::lround(p.x() - 0.5),
+    PointI topLeft( Pt::lround(p.x() - 0.5),
                    Pt::lround(p.y() - 0.5) );
 
-    Size size( lround(s.width() - 0.5),
+    SizeI size( lround(s.width() - 0.5),
                lround(s.height() - 0.5) );
 
     strokeEllipse(topLeft, size, _currentClip);
@@ -480,8 +480,8 @@ void BitmapCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
     Gfx::PointF p = transform() * topLeftF;
     Gfx::SizeF s = transform() * sizeF;
 
-    Point topLeft = round(p);
-    Size size = round(s);
+    PointI topLeft = round(p);
+    SizeI size = round(s);
 
     fillEllipse(topLeft, size, _currentClip);
 }
@@ -553,7 +553,7 @@ void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image,
         return;
 
     Gfx::PointF toP = transform() * toF;
-    Point to = round(toP);
+    PointI to = round(toP);
 
     if(imageRect)
     {
@@ -562,7 +562,7 @@ void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image,
     }
     else
     {
-        Rect srcRect;
+        RectI srcRect;
         srcRect.setWidth( image.width() );
         srcRect.setHeight( image.height() );
 
@@ -572,7 +572,7 @@ void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image,
 }
 
 
-void BitmapCanvas::clipSpan(int& xpos, int& ypos, int& length, const Rect& clip)
+void BitmapCanvas::clipSpan(int& xpos, int& ypos, int& length, const RectI& clip)
 {
 
   if( ypos < clip.y() )
@@ -604,7 +604,7 @@ void BitmapCanvas::clipSpan(int& xpos, int& ypos, int& length, const Rect& clip)
 }
 
 
-void BitmapCanvas::stroke(const Point* points,  size_t n, const Rect& currentClip)
+void BitmapCanvas::stroke(const PointI* points,  size_t n, const RectI& currentClip)
 {
   switch( _pen.style() )
   {
@@ -633,13 +633,13 @@ void BitmapCanvas::stroke(const Point* points,  size_t n, const Rect& currentCli
 }
 
 
-void BitmapCanvas::stroke(const Point& pixel, const Rect& currentClip)
+void BitmapCanvas::stroke(const PointI& pixel, const RectI& currentClip)
 {
   stroke( (int) pixel.x(),(int) pixel.y(), currentClip );
 }
 
 
-void BitmapCanvas::stroke(int x, int y, const Rect& clip)
+void BitmapCanvas::stroke(int x, int y, const RectI& clip)
 {
     if( x < clip.x() || x >= clip.right() ||
         y < clip.y() || y >= clip.bottom() )
@@ -664,7 +664,7 @@ void BitmapCanvas::stroke(int x, int y, const Rect& clip)
 }
 
 
-void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentClip)
+void BitmapCanvas::stroke(int xpos, int ypos, int length, const RectI& currentClip)
 {
     if( ! _image )
         return;
@@ -700,18 +700,18 @@ void BitmapCanvas::stroke(int xpos, int ypos, int length, const Rect& currentCli
 }
 
 
-void BitmapCanvas::fill(const Point* pts, size_t pointCount, const Rect& currentClip)
+void BitmapCanvas::fill(const PointI* pts, size_t pointCount, const RectI& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
     EdgeSet::iterator currentPos;
-    std::vector<Point> points( pts, pts + pointCount );
+    std::vector<PointI> points( pts, pts + pointCount );
 
     ClipPolygon clipper;
     clipper(points, currentClip);
 
     // find unclipped origin coordinates
-    Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
+    PointI origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
 
     int leftPos = std::numeric_limits<int>::max();
     int topPos = std::numeric_limits<int>::max();
@@ -720,7 +720,7 @@ void BitmapCanvas::fill(const Point* pts, size_t pointCount, const Rect& current
 
     for(size_t n = 0; n < points.size(); ++n)
     {
-        const Point& p = points[n];
+        const PointI& p = points[n];
         origin.setX( std::min( origin.x(), p.x() ) );
         origin.setY( std::min( origin.y(), p.y() ) );
 
@@ -754,8 +754,8 @@ void BitmapCanvas::fill(const Point* pts, size_t pointCount, const Rect& current
 
     // Fill the global edge table. Two points yield an edge.
     Edge   edge;
-    Point* bottom = 0;
-    Point* top = 0;
+    PointI* bottom = 0;
+    PointI* top = 0;
 
     for( size_t i = 1; i < points.size(); ++i )
     {
@@ -852,7 +852,7 @@ void BitmapCanvas::fill(const Point* pts, size_t pointCount, const Rect& current
 }
 
 
-void BitmapCanvas::fill(const Point& origin, const Point& pos, int length)
+void BitmapCanvas::fill(const PointI& origin, const PointI& pos, int length)
 {
   switch( _brush.fillStyle() )
   {
@@ -875,9 +875,9 @@ void BitmapCanvas::fill(const Point& origin, const Point& pos, int length)
 }
 
 
-void BitmapCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
+void BitmapCanvas::fillRect(const RectI& rectIn, const RectI& currentClip)
 {
-    Rect rect = currentClip.intersect( rectIn );
+    RectI rect = currentClip.intersect( rectIn );
 
     if( rect.isNull() )
         return;
@@ -887,7 +887,7 @@ void BitmapCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
 
     int length = rect.width();
 
-    Point linePos = rect.topLeft();
+    PointI linePos = rect.topLeft();
 
     for(int y = 0; y < rect.height(); y++)
     {
@@ -897,7 +897,7 @@ void BitmapCanvas::fillRect(const Rect& rectIn, const Rect& currentClip)
 }
 
 
-void BitmapCanvas::fillSolid(const Point& pos, int length)
+void BitmapCanvas::fillSolid(const PointI& pos, int length)
 {
     if( ! _image )
         return;
@@ -938,19 +938,19 @@ void BitmapCanvas::fillSolid(const Point& pos, int length)
 }
 
 
-void BitmapCanvas::fillVerticalGradient( const Point& origin, const Point& pos,  int length )
+void BitmapCanvas::fillVerticalGradient( const PointI& origin, const PointI& pos,  int length )
 {
     fillTexture(origin, pos, length);
 }
 
 
-void BitmapCanvas::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
+void BitmapCanvas::fillHorizontalGradient( const PointI& origin, const PointI& pos,  int length )
 {
     fillTexture(origin, pos, length);
 }
 
 
-void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int length)
+void BitmapCanvas::fillTexture(const PointI& origin, const PointI& pos,  int length)
 {
     if( ! _image )
         return;
@@ -1000,7 +1000,7 @@ void BitmapCanvas::fillTexture(const Point& origin, const Point& pos,  int lengt
 }
 
 
-void BitmapCanvas::outputEdges(const ActiveEdgeTable& edges, const Point& origin, int scanLine)
+void BitmapCanvas::outputEdges(const ActiveEdgeTable& edges, const PointI& origin, int scanLine)
 {
     // fill every even span, starting at even (even-odd-rule)
     for( size_t i = 1; i < edges.size(); i += 2 )
@@ -1009,12 +1009,12 @@ void BitmapCanvas::outputEdges(const ActiveEdgeTable& edges, const Point& origin
         const int xbegin  = std::min(edges[i].x, edges[i-1].x);
         const int length  = xend - xbegin;
 
-        fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
+        fill(PointI((int)origin.x(), (int)origin.y() ), PointI(xbegin, scanLine), length);
     }
 }
 
 
-void BitmapCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
+void BitmapCanvas::outputSpan( const PointI& topLeft, int x, int y, int width )
 {
     if( ! _image )
         return;
@@ -1032,16 +1032,16 @@ void BitmapCanvas::outputSpan( const Point& topLeft, int x, int y, int width )
     int       xpos = std::max( 0, x );
 
     if( xend > xpos )
-        fill( topLeft, Point(xpos, y), xend-xpos );
+        fill( topLeft, PointI(xpos, y), xend-xpos );
 }
 
 
-void BitmapCanvas::strokePolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
+void BitmapCanvas::strokePolygons(const std::vector<Polygon>& polygons, const RectI& currentClip)
 {
     for(const Polygon& poly : polygons)
     {
       std::size_t n = poly.size();
-      std::vector<Point> points(n);
+      std::vector<PointI> points(n);
 
       for(size_t i = 0; i < n; ++i)
       {
@@ -1049,7 +1049,7 @@ void BitmapCanvas::strokePolygons(const std::vector<Polygon>& polygons, const Re
           Gfx::PointF p = transform() * poly.at(i);
           //Gfx::PointF p = poly.at(i);
 
-          points[i] = Point( Pt::lround(p.x() - 0.4999),
+          points[i] = PointI( Pt::lround(p.x() - 0.4999),
                              Pt::lround(p.y() - 0.4999) );
       }
 
@@ -1058,14 +1058,14 @@ void BitmapCanvas::strokePolygons(const std::vector<Polygon>& polygons, const Re
 }
 
 
-void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect& currentClip)
+void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const RectI& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
     EdgeSet::iterator currentPos;
     
     // find unclipped origin coordinates
-    Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
+    PointI origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
 
     // might as well create a new table here...
     globalEdgeTable.clear();
@@ -1078,7 +1078,7 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
     for(const Polygon& poly : polygons)
     {
         std::size_t n = poly.size();
-        std::vector<Point> points(n);
+        std::vector<PointI> points(n);
 
         for (size_t i = 0; i < n; ++i)
         {
@@ -1086,7 +1086,7 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
             Gfx::PointF p = transform() * poly.at(i);
             //Gfx::PointF p = poly.at(i);
 
-            points[i] = Point( Pt::lround(p.x() - 0.4999),
+            points[i] = PointI( Pt::lround(p.x() - 0.4999),
                                Pt::lround(p.y() - 0.4999) );
         }
 
@@ -1095,7 +1095,7 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
 
         for(size_t n = 0; n < points.size(); ++n)
         {
-            const Point& p = points[n];
+            const PointI& p = points[n];
             origin.setX( std::min( origin.x(), p.x() ) );
             origin.setY( std::min( origin.y(), p.y() ) );
 
@@ -1123,8 +1123,8 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
 
         // Fill the global edge table. Two points yield an edge.
         Edge   edge;
-        Point* bottom = 0;
-        Point* top = 0;
+        PointI* bottom = 0;
+        PointI* top = 0;
 
         for( size_t i = 1; i < points.size(); ++i )
         {
@@ -1225,8 +1225,8 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
 }
 
 
-void BitmapCanvas::strokeEllipse(const Point& topLeft, const Size& size, 
-                               const Rect& currentClip)
+void BitmapCanvas::strokeEllipse(const PointI& topLeft, const SizeI& size, 
+                               const RectI& currentClip)
 {
     if( size.width() <= 1 || size.height() <= 1 )
         return;
@@ -1302,9 +1302,9 @@ void BitmapCanvas::strokeEllipse(const Point& topLeft, const Size& size,
 }
 
 
-void BitmapCanvas::fillEllipse( const Point& topLeftIn, const Size& size, const Rect& currentClip)
+void BitmapCanvas::fillEllipse( const PointI& topLeftIn, const SizeI& size, const RectI& currentClip)
 {
-    const Point topLeft( (int) topLeftIn.x(), (int) topLeftIn.y() );
+    const PointI topLeft( (int) topLeftIn.x(), (int) topLeftIn.y() );
 
     if( size.width() == 0 || size.height() == 0 )
         return;
@@ -1392,10 +1392,10 @@ void BitmapCanvas::fillEllipse( const Point& topLeftIn, const Size& size, const 
 }
 
 
-void BitmapCanvas::drawThinSolidPolyline(const Point* points, int pointCount, 
-                                          const Rect& currentClip)
+void BitmapCanvas::drawThinSolidPolyline(const PointI* points, int pointCount, 
+                                          const RectI& currentClip)
 {
-    const Point *ppt;
+    const PointI *ppt;
 
     int xstart;
     int ystart;
@@ -1510,10 +1510,10 @@ void BitmapCanvas::drawThinSolidPolyline(const Point* points, int pointCount,
 }
 
 
-void BitmapCanvas::drawThinDashPolyline(const Point* points,  int pointCount,
-                                         int dashOn, int dashOff, const Rect& currentClip)
+void BitmapCanvas::drawThinDashPolyline(const PointI* points,  int pointCount,
+                                         int dashOn, int dashOff, const RectI& currentClip)
 {
-    const Point* ppt = points;
+    const PointI* ppt = points;
     int xstart, ystart;
     int x1, x2, y1, y2;
 
@@ -1672,10 +1672,10 @@ void BitmapCanvas::stepDash( int dist, int* pDashNum, int* pDashIndex,
 // Endpoint semantics are used.
 void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const int *pDash, int numInDashList, int *pdashOffset, 
                                               bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1,
-                                              int e, int e1, int e2, int len, const Rect& currentClip)
+                                              int e, int e1, int e2, int len, const RectI& currentClip)
 {
-    std::vector<Point>  ptInit_bg;
-    Point *pptLast_fg,  *pptLast_bg = 0;
+    std::vector<PointI>  ptInit_bg;
+    PointI *pptLast_fg,  *pptLast_bg = 0;
     std::vector< int>  widthInit_bg;
      int *pwidthLast_fg, *pwidthLast_bg = 0;
     int		x, y;
@@ -1689,12 +1689,12 @@ void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, con
     int numSpans_fg, numSpans_bg = 0;
     int ycurr_fg, ycurr_bg = 0;
 
-    Point *ppt_fg, *ppt_bg = 0;
+    PointI *ppt_fg, *ppt_bg = 0;
      int *pwidth_fg, *pwidth_bg = 0;
     bool firstspan_fg, firstspan_bg = false;
 
     // Set up work arrays
-    std::vector<Point> ptInit_fg(len);
+    std::vector<PointI> ptInit_fg(len);
     std::vector< int> widthInit_fg(len);
 
     pptLast_fg = &ptInit_fg[len - 1];
@@ -1723,7 +1723,7 @@ void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, con
     e3 = e2-e1;
     e = e - e1;
 
-    //Point to first point
+    //PointI to first point
     x = x1;
     y = y1;
 
@@ -1873,7 +1873,7 @@ void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, con
 
         if (numSpans_fg > 0)
         { // Have a foreground dash to paint.
-            Point *pptStart_fg;
+            PointI *pptStart_fg;
              int *pwidthStart_fg;
 
             if (signdy >= 0)
@@ -1903,7 +1903,7 @@ void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, con
         if (isDoubleDash && numSpans_bg > 0)
         {// Have a background dash to paint.
 
-            Point *pptStart_bg;
+            PointI *pptStart_bg;
              int *pwidthStart_bg;
 
             if (signdy >= 0)
@@ -1948,22 +1948,22 @@ void BitmapCanvas::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, con
 
 
 void BitmapCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1,
-                                          int e, int e1, int e2, int len, const Rect& currentClip)
+                                          int e, int e1, int e2, int len, const RectI& currentClip)
 {
     if (len == 0)
         return;
 
-    std::vector<Point> ptInit(len);
+    std::vector<PointI> ptInit(len);
     std::vector< int> widthInit(len);
 
-    Point* pptLast     = &ptInit[len - 1];
+    PointI* pptLast     = &ptInit[len - 1];
      int *pwidthLast = &widthInit[len - 1];
 
     int x, y;
     int e3;
     int numSpans = 0;
     int ycurr = 0;
-    Point  *ppt = pptLast;
+    PointI  *ppt = pptLast;
      int *pwidth = pwidthLast;
     bool firstspan = true;
 
@@ -1976,7 +1976,7 @@ void BitmapCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x
     e3 = e2 - e1;
     e = e - e1;
 
-    // Point to first point, and generate len pixels.
+    // PointI to first point, and generate len pixels.
     x = x1;
     y = y1;
 
@@ -2017,8 +2017,8 @@ void BitmapCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x
     {
         if (signdy < 0)
         {// Spans are offset, so shift downward.
-            Point *ppt_src	 = pptLast - (numSpans - 1);
-            Point *ppt_dst	 = &ptInit[0];
+            PointI *ppt_src	 = pptLast - (numSpans - 1);
+            PointI *ppt_dst	 = &ptInit[0];
              int *pwidth_src = pwidthLast - (numSpans - 1);
              int *pwidth_dst = &widthInit[0];
 
@@ -2037,7 +2037,7 @@ void BitmapCanvas::bresenhamLineSegment( int signdx, int signdy, int axis, int x
 }
 
 
-int BitmapCanvas::polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
+int BitmapCanvas::polyBuildPoly( const PointI *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
 {
     int	    top, bottom;
     double  miny, maxy;
@@ -2219,7 +2219,7 @@ int BitmapCanvas::buildLineEdge( double x0, double y0, double k, int dx, int dy,
 }
 
 
-void BitmapCanvas::fillSpans(int x, int y,  int w,  int h, const Rect& currentClip)
+void BitmapCanvas::fillSpans(int x, int y,  int w,  int h, const RectI& currentClip)
 {
     int ypos = std::max( 0, y );
     int yend = 0;
@@ -2232,7 +2232,7 @@ void BitmapCanvas::fillSpans(int x, int y,  int w,  int h, const Rect& currentCl
 }
 
 
-void BitmapCanvas::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const Rect& currentClip)
+void BitmapCanvas::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count, const RectI& currentClip)
 {
     int left_x		= 0;
     int left_e		= 0;
@@ -2408,9 +2408,9 @@ int BitmapCanvas::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge
 }
 
 
-void BitmapCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const Rect& currentClip)
+void BitmapCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt, const RectI& currentClip)
 {
-    std::vector<Point>    points;
+    std::vector<PointI>    points;
     std::vector<int>   widths;
 
     int      xorgi = 0;
@@ -2479,9 +2479,9 @@ void BitmapCanvas::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg
 }
 
 
-int BitmapCanvas::lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths )
+int BitmapCanvas::lineArcI( int xorg, int yorg, std::vector<PointI>& points, std::vector<int>& widths )
 {
-    Point *tpts, *bpts;
+    PointI *tpts, *bpts;
     int* twids, *bwids;
     int x, y, e, ex;
     int slw;
@@ -2551,9 +2551,9 @@ int BitmapCanvas::lineArcI( int xorg, int yorg, std::vector<Point>& points, std:
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-int BitmapCanvas::lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int BitmapCanvas::lineArcD( double xorg, double yorg, std::vector<PointI>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
-    Point *pts;
+    PointI *pts;
     int *wids;
     double radius, x0, y0, el, er, yk, xlk, xrk, k;
     int xbase, ybase, y, boty, xl, xr, xcl, xcr;
@@ -2792,11 +2792,11 @@ int BitmapCanvas::roundJoinFace( const LineFace *face, LineEdge *edge, bool *lef
 /* Paint all types of line join: round/miter/bevel/triangular.  Called by
    both miWideLine() and miWideDash().  Left and right line faces are
    supplied, each with its own value of k.  They may be modified. */
-void BitmapCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& currentClip)
+void BitmapCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const RectI& currentClip)
 {
     double	            mx = 0.0, my = 0.0;
     int		            denom = 0;
-    Point    vertices[4];
+    PointI    vertices[4];
     LineSlope           slopes[4];
     int		            edgecount;
     LineEdge            left[4], right[4];
@@ -2913,7 +2913,7 @@ void BitmapCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& cur
 
         case Pen::BevelJoin: //join by adding a triangle
         {
-            Point midpoint;
+            PointI midpoint;
             edgecount = 3;
 
             // Third edge of triangle will pass through midpoint.
@@ -2949,7 +2949,7 @@ void BitmapCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& cur
         /*
         case Pen::TriangularJoin: // join by adding a stubby quadrilateral
         {
-            Point midpoint, newpoint;
+            PointI midpoint, newpoint;
             double mid2, mid, dx2, dy2, dx3, dy3;
 
             edgecount = 4;
@@ -3014,7 +3014,7 @@ void BitmapCanvas::lineJoin(  LineFace *pLeft, LineFace *pRight, const Rect& cur
 
 /* Paint a projecting rectangular cap on a line face.  Called only by
    miWideDash (with isInt = true); not by miWideLine. */
-void BitmapCanvas::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const Rect& currentClip)
+void BitmapCanvas::lineProjectingCap( const LineFace *face, bool isLeft, bool isInt, const RectI& currentClip)
 {
     int		    xorgi = 0, yorgi = 0;
     int	       	lw;
@@ -3218,7 +3218,7 @@ void BitmapCanvas::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  Lin
 }
 
 
-void BitmapCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rect& currentClip)
+void BitmapCanvas::drawWideSolidPolyline( const  PointI* pPts, int npt, const RectI& currentClip)
 {
   int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -3267,7 +3267,7 @@ void BitmapCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rec
                 projectRight = true;
 
             // Draw segment (pixel=1), returning faces.
-            drawSegment(  Point(x1, y1), Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace, currentClip );
+            drawSegment(  PointI(x1, y1), PointI(x2, y2), projectLeft, projectRight, &leftFace, &rightFace, currentClip );
 
             if (first)
             { //First line segment, draw round cap if needed.
@@ -3309,7 +3309,7 @@ void BitmapCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rec
     {
         projectLeft = (_pen.capStyle() == Pen::SquareCap );
 
-        drawSegment(  Point(x2, y2), Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace, currentClip );
+        drawSegment(  PointI(x2, y2), PointI(x2, y2), projectLeft, projectRight, &leftFace, &rightFace, currentClip );
 
         if( _pen.capStyle() == Pen::RoundCap /*|| _pen.capStyle() == Pen::TriangularCap*/ )
         {
@@ -3324,7 +3324,7 @@ void BitmapCanvas::drawWideSolidPolyline( const  Point* pPts, int npt, const Rec
 }
 
 
-void BitmapCanvas::drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const Rect& currentClip)
+void BitmapCanvas::drawSegment( PointI from, PointI to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace, const RectI& currentClip)
 {
     double	 l, L, r;
     double	 xa, ya;
@@ -3539,8 +3539,8 @@ void BitmapCanvas::drawSegment( Point from, Point to, bool projectLeft, bool pro
 }
 
 
-void BitmapCanvas::drawWideDashPolyline( const Point* pPts, int npt,
-                                         int dashOn, int dashOff, const Rect& currentClip)
+void BitmapCanvas::drawWideDashPolyline( const PointI* pPts, int npt,
+                                         int dashOn, int dashOff, const RectI& currentClip)
 {
     int	      x1, y1, x2, y2;
     int	      dashNum;					// Absolute number of dash, starts with 0
@@ -3710,13 +3710,13 @@ void BitmapCanvas::drawWideDashPolyline( const Point* pPts, int npt,
 
 
 void BitmapCanvas::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, 
-                                 bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const Rect& currentClip)
+                                 bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash, const RectI& currentClip)
 {
   int		            dashNum, dashIndex, dashRemain;
     double	            L, l;
     double	            k;
-    Point	vertices[4];
-    Point    saveRight, saveBottom;
+    PointI	vertices[4];
+    PointI    saveRight, saveBottom;
     LineSlope	        slopes[4];
     LineEdge	        left[2], right[2];
     LineFace	        lcapFace, rcapFace;

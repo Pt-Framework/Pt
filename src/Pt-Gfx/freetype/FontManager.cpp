@@ -338,7 +338,7 @@ TextMetrics FreeType::textMetrics(const String& text,
 
 
 void FreeType::draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y, 
-                    const String& text, const ColorF& color, const Rect& clip,
+                    const String& text, const ColorF& color, const RectI& clip,
                     const CompositionMode& mode, FTC_FaceID faceId, 
                     std::size_t fontSize, const Transform* tf)
 {
@@ -506,7 +506,7 @@ void FreeType::draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y,
 
 void FreeType::drawGlyph(Rgb32Image& image, int xpos, int ypos, const ColorF& color,
                          int bmPitch, int height, int width, const unsigned char* buffer, 
-                         const Rect& clip, const CompositionMode& mode)
+                         const RectI& clip, const CompositionMode& mode)
 {
     const int clipRight  = clip.x() + clip.width();
     const int clipBottom = clip.y() + clip.height();

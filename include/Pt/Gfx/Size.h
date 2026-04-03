@@ -39,28 +39,30 @@ namespace Pt {
 
 namespace Gfx {
 
-
-/** @brief %Size with width and height.
+/** @brief %Size with floating-point width and height.
 */
-template<typename T>
-class BasicSize {
+class Size
+{
     public:
-        typedef T ValueT;
+        Size()
+        : _w(0), _h(0)
+        {}
 
-    public:
-        /** @brief Construct with width and height.
-        */
-        explicit BasicSize(T w = 0, T h = 0)
+        Size(Float w, Float h)
         : _w(w), _h(h)
+        {}
+
+        Size(const Size& other)
+        : _w(other._w), _h(other._h)
         {}
 
         void clear()
         {
-          _w = T();
-          _h = T();
+            _w = 0;
+            _h = 0;
         }
 
-        void set(T w, T h)
+        void set(Float w, Float h)
         {
             _w = w;
             _h = h;
@@ -71,150 +73,284 @@ class BasicSize {
             return _w == 0 || _h == 0;
         }
 
-        //! @brief Returns the width
-        inline T width() const
+        Float width() const
         { return _w; }
 
-        //! @brief Returns the height
-        inline T height() const
+        Float height() const
         { return _h; }
 
-        //! @brief Sets the width
-        inline void setWidth(T w)
+        void setWidth(Float w)
         { _w = w; }
 
-        //! @brief Sets the height
-        inline void setHeight(T h)
+        void setHeight(Float h)
         { _h = h; }
 
-        //! @brief Sets the widht and height.
-        inline void setWidthHeight(T w, T h)
+        void setWidthHeight(Float w, Float h)
         {
             _w = w;
             _h = h;
         }
 
-        //! @brief Increment the width of the BasicSize by the given value
-        const BasicSize& addWidth(T w)
+        const Size& addWidth(Float w)
         {
             _w += w;
             return *this;
         }
 
-        //! @brief Decrement the width of the BasicSize by the given value
-        const BasicSize& subWidth(T w)
+        const Size& subWidth(Float w)
         {
             _w -= w;
             return *this;
         }
 
-        //! @brief Increment the height of the BasicSize by the given value
-        const BasicSize& addHeight(T h)
+        const Size& addHeight(Float h)
         {
             _h += h;
             return *this;
         }
 
-        //! @brief Decrement the height of the BasicSize by the given value
-        const BasicSize& subHeight(T h)
+        const Size& subHeight(Float h)
         {
             _h -= h;
             return *this;
         }
 
-        void add(const BasicSize& s)
+        void add(const Size& s)
         {
             _w += s._w;
             _h += s._h;
         }
 
-        BasicSize& operator=(const BasicSize& other)
+        Size& operator=(const Size& other)
         {
-            _w = other._w; _h = other._h;
+            _w = other._w;
+            _h = other._h;
             return *this;
         }
 
-        BasicSize& operator+=(const BasicSize& s)
+        Size& operator+=(const Size& s)
         {
             _w += s._w;
             _h += s._h;
             return *this;
         }
 
-        bool operator==(const BasicSize& other) const
+        bool operator==(const Size& other) const
         {
             return (_w == other._w && _h == other._h);
         }
 
-        bool operator!=(const BasicSize& other) const
+        bool operator!=(const Size& other) const
         {
             return (_w != other._w || _h != other._h);
         }
 
-        bool operator>(const BasicSize& other) const
-        {
-            return _h > other._h || (_h == other._h && _w > other._w);
-        }
-
-        bool operator<(const BasicSize& other) const
+        bool operator<(const Size& other) const
         {
             return _h < other._h || (_h == other._h && _w < other._w);
         }
 
-        BasicSize operator*(T v) const
+        Size operator*(Float v) const
         {
-            return BasicSize(_w *v, _h * v);
+            return Size(_w * v, _h * v);
         }
 
-        BasicSize operator/(T v) const
+        Size operator/(Float v) const
         {
-            return BasicSize(_w/v, _h/v);
+            return Size(_w / v, _h / v);
         }
 
-        BasicSize operator+(T v) const
+        Size operator+(Float v) const
         {
-            return BasicSize(_w +v, _h+v);
+            return Size(_w + v, _h + v);
         }
 
-        BasicSize operator-(T v) const
+        Size operator-(Float v) const
         {
-            return BasicSize(_w - v, _h - v);
+            return Size(_w - v, _h - v);
         }
 
-        BasicSize& operator*=(T v)
+        Size& operator*=(Float v)
         {
             _w *= v;
             _h *= v;
             return *this;
         }
 
-        BasicSize& operator/=(T v)
+        Size& operator/=(Float v)
         {
             _w /= v;
             _h /= v;
             return *this;
         }
 
-        BasicSize& operator+=(T v)
+        Size& operator+=(Float v)
         {
             _w += v;
             _h += v;
             return *this;
         }
 
-        BasicSize& operator-=(T v)
+        Size& operator-=(Float v)
         {
             _w -= v;
             _h -= v;
             return *this;
         }
 
-    protected:
-        T _w;
-        T _h;
+    private:
+        Float _w;
+        Float _h;
 };
 
-typedef BasicSize<double> SizeF;
+typedef Size SizeF;
+
+/** @brief %Size with integer width and height.
+*/
+class SizeI
+{
+    public:
+        SizeI()
+        : _w(0), _h(0)
+        {}
+
+        SizeI(Int w, Int h)
+        : _w(w), _h(h)
+        {}
+
+        SizeI(const SizeI& other)
+        : _w(other._w), _h(other._h)
+        {}
+
+        void clear()
+        {
+            _w = 0;
+            _h = 0;
+        }
+
+        void set(Int w, Int h)
+        {
+            _w = w;
+            _h = h;
+        }
+
+        bool isNull() const
+        {
+            return _w == 0 || _h == 0;
+        }
+
+        Int width() const
+        { return _w; }
+
+        Int height() const
+        { return _h; }
+
+        void setWidth(Int w)
+        { _w = w; }
+
+        void setHeight(Int h)
+        { _h = h; }
+
+        void setWidthHeight(Int w, Int h)
+        {
+            _w = w;
+            _h = h;
+        }
+
+        const SizeI& addWidth(Int w)
+        {
+            _w += w;
+            return *this;
+        }
+
+        const SizeI& subWidth(Int w)
+        {
+            _w -= w;
+            return *this;
+        }
+
+        const SizeI& addHeight(Int h)
+        {
+            _h += h;
+            return *this;
+        }
+
+        const SizeI& subHeight(Int h)
+        {
+            _h -= h;
+            return *this;
+        }
+
+        void add(const SizeI& s)
+        {
+            _w += s._w;
+            _h += s._h;
+        }
+
+        SizeI& operator=(const SizeI& other)
+        {
+            _w = other._w;
+            _h = other._h;
+            return *this;
+        }
+
+        SizeI& operator+=(const SizeI& s)
+        {
+            _w += s._w;
+            _h += s._h;
+            return *this;
+        }
+
+        bool operator==(const SizeI& other) const
+        {
+            return (_w == other._w && _h == other._h);
+        }
+
+        bool operator!=(const SizeI& other) const
+        {
+            return (_w != other._w || _h != other._h);
+        }
+
+        SizeI operator*(Int v) const
+        {
+            return SizeI(_w * v, _h * v);
+        }
+
+        SizeI operator+(Int v) const
+        {
+            return SizeI(_w + v, _h + v);
+        }
+
+        SizeI operator-(Int v) const
+        {
+            return SizeI(_w - v, _h - v);
+        }
+
+        SizeI& operator*=(Int v)
+        {
+            _w *= v;
+            _h *= v;
+            return *this;
+        }
+
+        SizeI& operator+=(Int v)
+        {
+            _w += v;
+            _h += v;
+            return *this;
+        }
+
+        SizeI& operator-=(Int v)
+        {
+            _w -= v;
+            _h -= v;
+            return *this;
+        }
+
+    private:
+        Int _w;
+        Int _h;
+};
 
 } //namespace
 

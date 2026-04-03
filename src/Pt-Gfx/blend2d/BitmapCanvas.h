@@ -51,10 +51,6 @@ namespace Gfx {
 
 class BitmapCanvas : public Canvas
 {
-    typedef BasicPoint<Pt::ssize_t> Point;
-    typedef BasicSize<Pt::ssize_t> Size;
-    typedef BasicRect<Pt::ssize_t> Rect;
-
     public:
         BitmapCanvas();
 
@@ -140,7 +136,7 @@ class BitmapCanvas : public Canvas
         BLContext*              _context;
         Rgb32Image*             _image;
         CompositionMode         _compositionMode;
-        BasicRect<Pt::ssize_t>  _currentClip;
+        RectI                   _currentClip;
         bool                    _hasClip;
         RectF                   _clip;
         Gfx::Pen                _pen;

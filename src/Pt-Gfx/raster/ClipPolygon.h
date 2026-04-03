@@ -51,9 +51,6 @@ class PT_GFX_API ClipPolygon
 {
   public:
     typedef Gfx::Image::pos_t      pos_t;
-    typedef Gfx::BasicPoint<pos_t> Point;
-    typedef Gfx::BasicSize<pos_t>  Size;
-    typedef Gfx::BasicRect<pos_t>  Rect;
 
     public:
         /** @brief Default constructor
@@ -65,8 +62,8 @@ class PT_GFX_API ClipPolygon
 
             @see ClipPolygon::clip
         */
-        void operator() (std::vector<Point>& in,
-                         const Rect& clippingArea )
+        void operator() (std::vector<PointI>& in,
+                         const RectI& clippingArea )
         { this-> clip(in, clippingArea); }
 
         /** @brief Perform clipping
@@ -79,23 +76,23 @@ class PT_GFX_API ClipPolygon
             @param clippingArea Rectangle to clip against
 
         */
-        void clip( std::vector<Point>& in,
-                   const Rect& clippingArea );
+        void clip( std::vector<PointI>& in,
+                   const RectI& clippingArea );
 
     private:
         enum Orientation{Left, Right, Top, Bottom} ;
 
-        void clipEdge( const std::vector<Point>& in,
-                       std::vector<Point>& out,
-                       Point edgePoint0, Point edgePoint1);
+        void clipEdge( const std::vector<PointI>& in,
+                       std::vector<PointI>& out,
+                       PointI edgePoint0, PointI edgePoint1);
 
-        Point intersect( const Point& from,
-                         const Point& to,
-                         const Point& edge0,
-                         const Point& edge1 );
+        PointI intersect( const PointI& from,
+                         const PointI& to,
+                         const PointI& edge0,
+                         const PointI& edge1 );
 
-        bool inside( const Point& p, const Point& edge0,
-                     const Point& edge1 );
+        bool inside( const PointI& p, const PointI& edge0,
+                     const PointI& edge1 );
 };
 
 } // namespace

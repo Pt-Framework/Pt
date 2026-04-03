@@ -49,9 +49,6 @@ class FrameBuffer
 {
   public:
     typedef Gfx::Image::pos_t      pos_t;
-    typedef Gfx::BasicPoint<pos_t> Point;
-    typedef Gfx::BasicSize<pos_t>  Size;
-    typedef Gfx::BasicRect<pos_t>  Rect;
 
     public:
         enum Rotation
@@ -81,9 +78,9 @@ class FrameBuffer
 
         size_t height() const;
 
-        Size size() const 
+        SizeI size() const 
         {
-            return Size( width(), height() );
+            return SizeI( width(), height() );
         }
 
         size_t depth() const
@@ -103,7 +100,7 @@ class FrameBuffer
 
         size_t strideSize() const;
 
-        void output( const Pt::uint8_t* frame, const Rect& area );
+        void output( const Pt::uint8_t* frame, const RectI& area );
 
     private:
       inline char* pixelFB(size_t w, size_t h)

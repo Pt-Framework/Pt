@@ -36,7 +36,7 @@ namespace Gfx{
 ClipPolygon::ClipPolygon()
 { }
 
-void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
+void ClipPolygon::clip( std::vector<PointI>& in, const RectI& clippingArea )
 {
     if( clippingArea.isNull())
     {
@@ -44,7 +44,7 @@ void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
         return;
     }
 
-    std::vector<Point> buffer;
+    std::vector<PointI> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );
 
@@ -59,15 +59,15 @@ void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
 }
 
 
-void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& out,
-                            Point edgePoint0, Point edgePoint1)
+void ClipPolygon::clipEdge( const std::vector<PointI>& in, std::vector<PointI>& out,
+                            PointI edgePoint0, PointI edgePoint1)
 {
     if( in.empty() )
         return;
 
-    Point p;
-    Point i;
-    Point s = in[ in.size() - 1 ];
+    PointI p;
+    PointI i;
+    PointI s = in[ in.size() - 1 ];
 
     for( size_t j = 0; j < in.size(); ++j )
     {
@@ -98,10 +98,10 @@ void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& ou
 }
 
 
-ClipPolygon::Point ClipPolygon::intersect(const Point& from, const Point& to, 
-                                          const Point& edge0, const Point& edge1)
+PointI ClipPolygon::intersect(const PointI& from, const PointI& to, 
+                                          const PointI& edge0, const PointI& edge1)
 {
-    Point p;
+    PointI p;
 
     if( edge0.y() == edge1.y() )
     {
@@ -141,7 +141,7 @@ ClipPolygon::Point ClipPolygon::intersect(const Point& from, const Point& to,
 }
 
 
-bool ClipPolygon::inside( const Point& p, const Point& edge0, const Point& edge1 )
+bool ClipPolygon::inside( const PointI& p, const PointI& edge0, const PointI& edge1 )
 {
     if( edge0.x() == edge1.x())
     {  //Vertical

@@ -39,213 +39,299 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief %Point with X ynd X coordinates.
+/** @brief %Point with floating-point X and Y coordinates.
 */
-template<typename T>
-class BasicPoint
+class Point
 {
     public:
-        typedef T ValueT;
-
-    public:
-        //! @brief Construct a BasicPoint of (0,0)
-        BasicPoint()
+        Point()
         : _x(0), _y(0)
         {}
 
-        //! @brief Construct a BasicPoint of (x,y)
-        BasicPoint(T x, T y)
+        Point(Float x, Float y)
         : _x(x), _y(y)
         {}
 
-        //! @brief Construct a BasicPoint from another BasicPoint
-        BasicPoint(const BasicPoint& pt)
+        Point(const Point& pt)
         : _x(pt._x), _y(pt._y)
-        { }
+        {}
 
         void clear()
         {
-          _x = T();
-          _y = T();
+            _x = 0;
+            _y = 0;
         }
 
-        //! @brief Set the X and Y components of the BasicPoint
-        void set(T xpos, T ypos)
+        void set(Float xpos, Float ypos)
         {
             _x = xpos;
             _y = ypos;
         }
 
-        //! @brief Set the X component of the BasicPoint
-        void setX(T xpos)
+        void setX(Float xpos)
         { _x = xpos; }
 
-        //! @brief Set the Y component of the BasicPoint
-        void setY(T ypos)
+        void setY(Float ypos)
         { _y = ypos; }
 
-        //! @brief Return the X component of the BasicPoint
-        T x() const
+        Float x() const
         { return _x; }
 
-        //! @brief Return the Y component of the BasicPoint
-        T y() const
+        Float y() const
         { return _y; }
 
-        //! @brief Increment the X component of the BasicPoint by the given value
-        const BasicPoint& addX(T x)
+        const Point& addX(Float x)
         {
-          _x +=  x;
-          return *this;
+            _x += x;
+            return *this;
         }
 
-        //! @brief Decrement the X component of the BasicPoint by the given value
-        const BasicPoint& subX(T x)
+        const Point& subX(Float x)
         {
-          _x -= x;
-          return *this;
-        }
-        //! @brief Increment the Y component of the BasicPoint by the given value
-        const BasicPoint& addY(T y)
-        {
-          _y += y;
-          return *this;
+            _x -= x;
+            return *this;
         }
 
-        //! @brief Decrement the Y component of the BasicPoint by the given value
-        const BasicPoint& subY(T y)
+        const Point& addY(Float y)
         {
-          _y -= y;
-          return *this;
+            _y += y;
+            return *this;
         }
 
-        //! @brief Move the BasicPoint as far as th given the X and Y distances
-        const BasicPoint& move(T dx, T dy)
+        const Point& subY(Float y)
+        {
+            _y -= y;
+            return *this;
+        }
+
+        const Point& move(Float dx, Float dy)
         {
             _x += dx;
             _y += dy;
             return *this;
         }
 
-        //! @brief Calculate distance between this BasicPoint and the given BasicPoint
-        template<typename T2>
-        T calcDistance(const BasicPoint<T2>& otherPoint) const
+        Float calcDistance(const Point& other) const
         {
-            if (*this == otherPoint)
-            {
+            if(*this == other)
                 return 0;
-            }
 
-            return (T)(hypot(this->x() - otherPoint.x(), this->y() - otherPoint.y()));
+            return hypot(_x - other._x, _y - other._y);
         }
 
-        const BasicPoint& operator=(const BasicPoint& pt)
+        Point& operator=(const Point& pt)
         {
-            _x = pt._x; _y = pt._y;
+            _x = pt._x;
+            _y = pt._y;
             return *this;
         }
 
-        bool operator==(const BasicPoint& pt) const
+        bool operator==(const Point& pt) const
         { return (_x == pt._x && _y == pt._y); }
 
-        bool operator!=(const BasicPoint& pt) const
+        bool operator!=(const Point& pt) const
         { return (_x != pt._x || _y != pt._y); }
 
-        bool operator>(const BasicPoint& pt) const
+        Point& operator+=(const Point& pt)
         {
-            if ( _x < pt._x || _y < pt._y)
-                return false;
-
-            return ( (*this) != pt );
-        }
-
-        bool operator<(const BasicPoint& pt) const
-        {
-            if ( _x > pt._x || _y > pt._y )
-                return false;
-
-            return ( pt != (*this) );
-        }
-
-        inline const BasicPoint operator+=(const BasicPoint<T>& pt)
-        {
-            _x += pt.x();
-            _y += pt.y();
+            _x += pt._x;
+            _y += pt._y;
             return *this;
         }
 
-        inline BasicPoint operator+(const BasicPoint<T>& pt) const
+        Point operator+(const Point& pt) const
         {
-            return BasicPoint( (_x+pt.x()), (_y+pt.y()) );
+            return Point(_x + pt._x, _y + pt._y);
         }
 
-        inline const BasicPoint operator-=(const BasicPoint<T>& pt)
+        Point& operator-=(const Point& pt)
         {
-            _x -= pt.x();
-            _y -= pt.y();
+            _x -= pt._x;
+            _y -= pt._y;
             return *this;
         }
 
-        BasicPoint operator-(const BasicPoint<T>& pt) const
+        Point operator-(const Point& pt) const
         {
-            return BasicPoint( (_x-pt.x()), (_y-pt.y()) );
+            return Point(_x - pt._x, _y - pt._y);
         }
 
-
-        BasicPoint operator*(T factor) const
+        Point operator*(Float factor) const
         {
-            return BasicPoint(_x * factor, _y * factor);
+            return Point(_x * factor, _y * factor);
         }
 
-        BasicPoint operator/(T factor) const
+        Point operator/(Float factor) const
         {
-            return BasicPoint(_x / factor, _y / factor);
+            return Point(_x / factor, _y / factor);
         }
 
-        BasicPoint operator+(T factor) const
+        Point operator+(Float factor) const
         {
-            return BasicPoint(_x + factor, _y + factor);
+            return Point(_x + factor, _y + factor);
         }
 
-        BasicPoint operator-(T factor) const
+        Point operator-(Float factor) const
         {
-            return BasicPoint(_x - factor, _y - factor);
+            return Point(_x - factor, _y - factor);
         }
 
-        BasicPoint& operator*=(T factor)
+        Point& operator*=(Float factor)
         {
             _x *= factor;
             _y *= factor;
             return *this;
         }
 
-        BasicPoint& operator/=(T factor)
+        Point& operator/=(Float factor)
         {
             _x /= factor;
             _y /= factor;
             return *this;
         }
 
-        BasicPoint& operator+(T factor)
-        {
-            _x += factor;
-            _y += factor;
-            return *this;
-        }
-
-        BasicPoint& operator-(T factor)
-        {
-            _x -= factor;
-            _y -= factor;
-            return *this;
-        }
-
-    protected:
-        T _x;
-        T _y;
+    private:
+        Float _x;
+        Float _y;
 };
 
-typedef BasicPoint<double> PointF;
+typedef Point PointF;
+
+/** @brief %Point with integer X and Y coordinates.
+*/
+class PointI
+{
+    public:
+        PointI()
+        : _x(0), _y(0)
+        {}
+
+        PointI(Int x, Int y)
+        : _x(x), _y(y)
+        {}
+
+        PointI(const PointI& pt)
+        : _x(pt._x), _y(pt._y)
+        {}
+
+        void clear()
+        {
+            _x = 0;
+            _y = 0;
+        }
+
+        void set(Int xpos, Int ypos)
+        {
+            _x = xpos;
+            _y = ypos;
+        }
+
+        void setX(Int xpos)
+        { _x = xpos; }
+
+        void setY(Int ypos)
+        { _y = ypos; }
+
+        Int x() const
+        { return _x; }
+
+        Int y() const
+        { return _y; }
+
+        const PointI& addX(Int x)
+        {
+            _x += x;
+            return *this;
+        }
+
+        const PointI& subX(Int x)
+        {
+            _x -= x;
+            return *this;
+        }
+
+        const PointI& addY(Int y)
+        {
+            _y += y;
+            return *this;
+        }
+
+        const PointI& subY(Int y)
+        {
+            _y -= y;
+            return *this;
+        }
+
+        const PointI& move(Int dx, Int dy)
+        {
+            _x += dx;
+            _y += dy;
+            return *this;
+        }
+
+        PointI& operator=(const PointI& pt)
+        {
+            _x = pt._x;
+            _y = pt._y;
+            return *this;
+        }
+
+        bool operator==(const PointI& pt) const
+        { return (_x == pt._x && _y == pt._y); }
+
+        bool operator!=(const PointI& pt) const
+        { return (_x != pt._x || _y != pt._y); }
+
+        PointI& operator+=(const PointI& pt)
+        {
+            _x += pt._x;
+            _y += pt._y;
+            return *this;
+        }
+
+        PointI operator+(const PointI& pt) const
+        {
+            return PointI(_x + pt._x, _y + pt._y);
+        }
+
+        PointI& operator-=(const PointI& pt)
+        {
+            _x -= pt._x;
+            _y -= pt._y;
+            return *this;
+        }
+
+        PointI operator-(const PointI& pt) const
+        {
+            return PointI(_x - pt._x, _y - pt._y);
+        }
+
+        PointI operator*(Int factor) const
+        {
+            return PointI(_x * factor, _y * factor);
+        }
+
+        PointI operator+(Int offset) const
+        {
+            return PointI(_x + offset, _y + offset);
+        }
+
+        PointI operator-(Int offset) const
+        {
+            return PointI(_x - offset, _y - offset);
+        }
+
+        PointI& operator*=(Int factor)
+        {
+            _x *= factor;
+            _y *= factor;
+            return *this;
+        }
+
+    private:
+        Int _x;
+        Int _y;
+};
 
 } // namespace
 
