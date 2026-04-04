@@ -126,27 +126,11 @@
         }
     ],
     "settings": {
-        "files.exclude": {
-            "build": true,
-            "tmp": true,
-            ".vs": true,
-            "*.idb": true,
-            "*.pdb": true,   
-            "src/blend2d/**": true,
-            "src/freetype/**": true,
-            "src/skia/**": true,
-            "src/openssl/**": true
-        },
-        "search.exclude": {
-            "src/blend2d/**": true,
-            "src/freetype/**": true,
-            "src/skia/**": true,
-            "src/openssl/**": true
-        },
         "C_Cpp.default.cppStandard": "c++14",
         "C_Cpp.default.includePath": [
             "${workspaceFolder:All Files}/include"
         ],
+        "C_Cpp.default.compilerPath": "",
         "C_Cpp.default.browse.path": [
             "${workspaceFolder:All Files}/include",
             "${workspaceFolder:All Files}/src"
@@ -156,14 +140,6 @@
             "ForEach-Object": true,
             ".\\build\\debug\\Pt-Gfx-test.exe": true
         },
-        "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
-        "C_Cpp.files.exclude": {
-            "build/**": true,
-            "tmp/**": true,
-            "src/blend2d/**": true,
-            "src/freetype/**": true,
-            "src/skia/**": true,
-            "src/openssl/**": true
-        }
+        "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false
     }
 }

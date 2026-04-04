@@ -1,0 +1,33 @@
+{
+    "files.exclude": {
+        "include": true,
+        "src": true,
+        "build": true,
+        "tmp": true,
+        ".vs": true,
+        "*.idb": true,
+        "*.pdb": true,
+        "src/blend2d/**": true,
+        "src/freetype/**": true,
+        "src/skia/**": true,
+        "src/openssl/**": true
+    },
+    "search.exclude": {
+        "include/**": true,
+        "src/**": true,
+        "src/blend2d/**": true,
+        "src/freetype/**": true,
+        "src/skia/**": true,
+        "src/openssl/**": true
+    },
+    "C_Cpp.files.exclude": {
+        "include/**": true,
+        "src/**": true,
+        "build/**": true,
+        "tmp/**": true,
+        "src/blend2d/**": true,
+        "src/freetype/**": true,
+        "src/skia/**": true,
+        "src/openssl/**": true
+    }
+}

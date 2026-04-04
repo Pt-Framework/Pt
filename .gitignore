@@ -76,8 +76,8 @@ Release/
 *.tlog
 
 # Visual Studio Code
-.vscode/
-*.code-workspace
+#.vscode/
+#*.code-workspace
 
 # Backup files
 *~
