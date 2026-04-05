@@ -122,6 +122,7 @@ void Painter::onBeginPaint(Canvas& canvas)
         // initialize new canvas
         if(_canvas)
         {
+            _canvas->setTransform( _paint.transform() );
             _canvas->setCompositionMode( _paint.compositionMode() );
             _canvas->setPen( _paint.pen() );
             _canvas->setBrush( _paint.brush() );
@@ -262,6 +263,30 @@ void Painter::setFont(const Gfx::Font& font)
 
     if(_canvas)
         _canvas->setFont(font);
+}
+
+
+const Gfx::Transform& Painter::transform() const
+{
+    return _paint.transform();
+}
+
+
+void Painter::setTransform(const Gfx::Transform& tx)
+{
+    _paint.setTransform(tx);
+
+    if(_canvas)
+        _canvas->setTransform(tx);
+}
+
+
+void Painter::resetTransform()
+{
+    _paint.resetTransform();
+
+    if(_canvas)
+        _canvas->resetTransform();
 }
 
 

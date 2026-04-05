@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
 
 namespace Pt {
@@ -94,6 +95,18 @@ class PT_GFX_API Paint
         */
         void setFont(const Font& font);
 
+        /** @brief Returns the user transform.
+        */
+        const Transform& transform() const;
+
+        /** @brief Sets the user transform.
+        */
+        void setTransform(const Transform& tx);
+
+        /** @brief Resets the user transform to identity.
+        */
+        void resetTransform();
+
         /** @brief Returns the current path.
         */
         Gfx::Path& path();
@@ -113,6 +126,7 @@ class PT_GFX_API Paint
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
+        Gfx::Transform       _transform;
         Gfx::Path            _path;
 };
 

@@ -133,6 +133,19 @@ inline int stepAround( int v, int incr, int max )
   return (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)));
 }
 
+
+double lineScaleFactor(const Pt::Gfx::Transform& tx)
+{
+        return std::sqrt( std::abs(tx.determinant()) );
+}
+
+
+std::size_t scalePenSize(std::size_t penSize, double scaleFactor)
+{
+        return scaleFactor < 1.0 ? penSize
+                                                         : static_cast<std::size_t>( penSize * scaleFactor );
+}
+
 } // namespace
 
 namespace Pt {
@@ -166,11 +179,6 @@ void BitmapCanvas::init(BitmapSurface& surface)
 
 void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
-    double scaleFactor = scaling().scaleFactor();
-    if( std::abs(_lastScaleFactor - scaleFactor) < 0.0001 )
-    {
-        onSetPen( paint.pen() );
-    }
 }
 
 
@@ -192,27 +200,40 @@ void BitmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void BitmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode)
+void BitmapCanvas::onApplyCompositionMode()
 {
-    _compositionMode = mode;
+}
+
+
+void BitmapCanvas::onApplyTransform()
+{
+}
+
+
+void BitmapCanvas::onSetTransform(const Gfx::Transform& tx)
+{
+    double scaleFactor = lineScaleFactor(tx);
+
+    if( std::abs(_lastScaleFactor - scaleFactor) >= 0.0001 )
+    {
+        _lastScaleFactor = scaleFactor;
+        onSetPen(_logicalPen);
+        invalidate(DirtyPen);
+    }
+
+    invalidate(DirtyClip);
 }
 
 
 void BitmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
-    _lastScaleFactor = scaling().scaleFactor();
-
-    size_t penSize = pen.size();
-
-    // keep pen size when downscaling
-    penSize = _lastScaleFactor < 1.0 ? penSize 
-                                     : static_cast<size_t>( penSize * _lastScaleFactor );
+    _logicalPen = pen;
     _pen = pen;
-    _pen.setSize(penSize);
+    _pen.setSize( scalePenSize(pen.size(), _lastScaleFactor) );
 }
 
 
-void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
+void BitmapCanvas::onApplyPen()
 {
     if( ! _image )
         return;
@@ -221,7 +242,7 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 
     Gfx::Rgb32PixelView fillView(_penBuffer);
 
-    Color penColor( pen.color() );
+    Color penColor( _pen.color() );
     std::fill( fillView.begin(), fillView.end(), penColor);
 
     _penColor = fillView.begin()->color();
@@ -234,14 +255,14 @@ void BitmapCanvas::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
+void BitmapCanvas::onApplyBrush()
 {
     if( ! _image )
         return;
 
     _isGradient = false;
 
-    switch( brush.fillStyle() )
+    switch( _brush.fillStyle() )
     {
         case Brush::Solid:
         {
@@ -250,14 +271,14 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 
             Gfx::Rgb32PixelView fillView(_brushBuffer);
 
-            Gfx::Color brushColor( brush.color() );
+            Gfx::Color brushColor( _brush.color() );
             std::fill(fillView.begin(), fillView.end(), brushColor);
             break;
         }
 
         case Brush::Texture:
-            _brushBuffer.reset(brush.texture().width(), brush.texture().height());
-            copyView(brush.texture(), _brushBuffer);
+            _brushBuffer.reset(_brush.texture().width(), _brush.texture().height());
+            copyView(_brush.texture(), _brushBuffer);
             _brushSource = &_brushBuffer;
             break;
 
@@ -321,15 +342,15 @@ void BitmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void BitmapCanvas::onApplyFont(const Gfx::Font& font)
+void BitmapCanvas::onApplyFont()
 {   
         // findFaceId returns default font for emtpy font names
-    _faceId = FreeType::instance().findFaceId(font);
+    _faceId = FreeType::instance().findFaceId(_font);
 
     // setup the image type
     _imageType.face_id = _faceId;
-    _imageType.width = font.size();
-    _imageType.height = font.size();
+    _imageType.width = _font.size();
+    _imageType.height = _font.size();
     _imageType.flags = FT_LOAD_DEFAULT;
     
 }
@@ -340,19 +361,13 @@ void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
     _hasClip = clip != 0;
 
     if(clip)
-    {
-        Gfx::PointF origin =  transform() * clip->origin();
-        Gfx::SizeF size =  transform() * clip->size();
-        Gfx::RectF clipP(origin, size);
-        
-        _clip = clipP;
-    }
+        _clip = *clip;
     else
         _clip.clear();
 }
 
 
-void BitmapCanvas::onApplyClip(const Gfx::RectF* clip) 
+void BitmapCanvas::onApplyClip() 
 {
     if( ! _image )
         return;
@@ -367,7 +382,10 @@ void BitmapCanvas::onApplyClip(const Gfx::RectF* clip)
         return;
     }
 
-    RectI clipRect = round(_clip);
+    Gfx::PointF origin = transform() * _clip.origin();
+    Gfx::SizeF size = transform() * _clip.size();
+    Gfx::RectF clipP(origin, size);
+    RectI clipRect = round(clipP);
 
     if( clipRect.isNull() ) // crashes otherwise
         clipRect = RectI( PointI(0, 0), SizeI(1, 1) );

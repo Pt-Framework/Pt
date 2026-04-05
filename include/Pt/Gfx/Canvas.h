@@ -51,16 +51,6 @@ namespace Pt {
 
 namespace Gfx {
 
-/*
-  TODO:
-
-  drawLine etc in derived surface should apply the necessary attribute
-  for the current begin/finsh paint session, then no public apply* 
-  methods are needed, but the NVI drawLine of paint context updates
-  the required attributes
-
-*/
-
 /** @brief Paint context.
 */
 class PT_GFX_API Canvas
@@ -69,6 +59,17 @@ class PT_GFX_API Canvas
 
     protected:
         Canvas();
+
+    public:
+        enum DirtyFlags : unsigned {
+            DirtyTransform   = 0x01,
+            DirtyComposition = 0x02,
+            DirtyPen         = 0x04,
+            DirtyBrush       = 0x08,
+            DirtyFont        = 0x10,
+            DirtyClip        = 0x20,
+            DirtyAll         = 0x3F
+        };
 
     public:
         virtual ~Canvas();
@@ -86,6 +87,10 @@ class PT_GFX_API Canvas
         const Gfx::ImageFormat& format() const;
 
         const Gfx::Transform& transform() const;
+
+        void setTransform(const Gfx::Transform& tx);
+
+        void resetTransform();
 
     public:
         void beginPaint(const Gfx::Paint& paint);
@@ -150,25 +155,32 @@ class PT_GFX_API Canvas
         virtual void onFinishPaint() = 0;
 
     protected:
+        virtual void onSetTransform(const Gfx::Transform& tx) = 0;
+
+        virtual void onApplyTransform() = 0;
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
-        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode) = 0;
+        virtual void onApplyCompositionMode() = 0;
 
         virtual void onSetPen(const Pen& pen) = 0;
 
-        virtual void onApplyPen(const Gfx::Pen& pen) = 0;
+        virtual void onApplyPen() = 0;
 
         virtual void onSetBrush(const Brush& pen) = 0;
 
-        virtual void onApplyBrush(const Brush& pen) = 0;
+        virtual void onApplyBrush() = 0;
 
         virtual void onSetFont(const Gfx::Font& font) = 0;
 
-        virtual void onApplyFont(const Gfx::Font& font) = 0;
+        virtual void onApplyFont() = 0;
 
         virtual void onSetClip(const Gfx::RectF* clip) = 0;
 
-        virtual void onApplyClip(const Gfx::RectF* clip) = 0;
+        virtual void onApplyClip() = 0;
+
+    protected:
+        void invalidate(unsigned flags);
 
     protected:
         virtual void onDrawLine(const PointF& from, const PointF& to) = 0;
@@ -213,12 +225,19 @@ class PT_GFX_API Canvas
 
         void detachSurface(PaintSurface& surface);
 
+        void applyState();
+
+        void updateTransform();
+
     private:
         PaintSurface*  _surface;
         PaintSurface*  _active;
         RectF          _region;
         Gfx::Scaling   _scaling;
+        Transform      _viewTx;
+        Transform      _userTx;
         Transform      _tx;
+        unsigned       _dirty;
 };
 
 } // namespace

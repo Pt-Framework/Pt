@@ -275,7 +275,7 @@ SizeF Transform::operator*(const SizeF& sz) const
 {
     SizeF result;
     PointF za(sz.width(), 0);
-    PointF zb(sz.height(), 0);
+    PointF zb(0, sz.height());
     PointF r(0, 0);
 
     za = *this * za;
@@ -318,7 +318,7 @@ Transform Transform::inverted() const
 {
     const double det = determinant();
 
-    if (det == 0.0)
+    if ( std::abs(det) < std::numeric_limits<double>::epsilon() )
         return Transform();
 
     const double invDet = 1.0 / det;

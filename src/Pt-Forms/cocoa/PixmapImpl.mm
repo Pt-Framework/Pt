@@ -88,66 +88,14 @@ void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 }
 
 
-void PixmapCanvas::save()
+void PixmapCanvas::reset()
 {
-}
-
-
-void PixmapCanvas::restore()
-{
-    CGContextRef context = _pixmap->context();
-
-    // transform
-    Gfx::Transform tx = transform();
-    double H = CGBitmapContextGetHeight(context);
-    CGAffineTransform tf = CGAffineTransformMake( tx.m11(), tx.m12(), 
-                                                  -tx.m21(), -tx.m22(),
-                                                  tx.dx(), H - tx.dy() );
-    CGContextConcatCTM(context, tf);
-
-    // clip
-    if( ! CGRectIsNull(_clipRect) )
-        CGContextClipToRect(context, _clipRect);
-
-    // pen
-    CGContextSetStrokeColorWithColor(context, _penColor);
-    CGContextSetLineWidth(context, _penSize);
-    CGContextSetLineCap(context, _penCap);
-
-    if( _dashes.empty() )
-    {
-        CGContextSetLineDash(context, 0, NULL, 0);
-    }
-    else
-    {
-        CGContextSetLineDash( context, 0, &_dashes[0], _dashes.size() );
-    }
-
-    // brush
-    switch(_brushStyle)
-    {
-        default:
-        case Pt::Gfx::Brush::Solid:
-            CGContextSetFillColorWithColor(context, _brushColor);
-            break;
-            
-        case Pt::Gfx::Brush::Texture:
-            // CGContextSetFillPattern
-            break;
-    }
+    invalidate(DirtyAll);
 }
 
 
 void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
-    CGContextRef context = _pixmap->context();
-
-    Gfx::Transform tx = transform();
-    double H = CGBitmapContextGetHeight(context);
-    CGAffineTransform tf = CGAffineTransformMake( tx.m11(), tx.m12(), 
-                                                  -tx.m21(), -tx.m22(),
-                                                  tx.dx(), H - tx.dy() );
-    CGContextConcatCTM(context, tf);
 }
 
 
@@ -166,9 +114,37 @@ void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void PixmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode) 
+void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
-    _compositionMode = mode;
+    if(_pixmap && isActive())
+    {
+        CGContextRef context = _pixmap->context();
+        CGContextRestoreGState(context);
+        CGContextSaveGState(context);
+        invalidate(DirtyAll & ~DirtyTransform);
+    }
+
+    _transform = tx;
+}
+
+
+void PixmapCanvas::onApplyTransform()
+{
+    if( ! _pixmap)
+        return;
+
+    CGContextRef context = _pixmap->context();
+
+    double H = CGBitmapContextGetHeight(context);
+    CGAffineTransform tf = CGAffineTransformMake( _transform.m11(), _transform.m12(), 
+                                                  -_transform.m21(), -_transform.m22(),
+                                                  _transform.dx(), H - _transform.dy() );
+    CGContextConcatCTM(context, tf);
+}
+
+
+void PixmapCanvas::onApplyCompositionMode() 
+{
 }
 
 
@@ -261,7 +237,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapCanvas::onApplyPen(const Gfx::Pen&)
+void PixmapCanvas::onApplyPen()
 {
     if( ! _pixmap)
         return;
@@ -310,8 +286,11 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void PixmapCanvas::onApplyBrush(const Gfx::Brush&)
+void PixmapCanvas::onApplyBrush()
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     switch(_brushStyle)
@@ -392,13 +371,24 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void PixmapCanvas::onApplyFont(const Gfx::Font& font)
+void PixmapCanvas::onApplyFont()
 {
 }
 
 
 void PixmapCanvas::onSetClip(const Gfx::RectF* clipRect)
 {
+    // Restore to the clean createCanvas state and save a new checkpoint,
+    // because CGContext clipping is cumulative and cannot be undone
+    // without restoring the graphics state.
+    if(_pixmap && isActive())
+    {
+        CGContextRef context = _pixmap->context();
+        CGContextRestoreGState(context);
+        CGContextSaveGState(context);
+        invalidate(DirtyAll & ~DirtyClip);
+    }
+
     if( ! clipRect )
     {
         _clipRect = CGRectNull;
@@ -411,12 +401,13 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* clipRect)
 }
 
 
-void PixmapCanvas::onApplyClip(const Gfx::RectF*)
+void PixmapCanvas::onApplyClip()
 {
-    CGContextRef context = _pixmap->context();
+    if( ! _pixmap)
+        return;
 
     if( ! CGRectIsNull(_clipRect) )
-        CGContextClipToRect(context, _clipRect);
+        CGContextClipToRect(_pixmap->context(), _clipRect);
 }
 
 
@@ -1027,10 +1018,12 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
    
     if(_canvas)
     {
-        _canvas->save();
+        _canvas->reset();
+
+        // Restore the Save from createCanvas to get a clean context
         CGContextRestoreGState(_context);
     }
-    
+
     if(rectF)
     {
         Gfx::RectF rect = _scaling.toPhysical(*rectF);
@@ -1060,11 +1053,9 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
         CGContextDrawImage(_context, destRect, image);
     }
 
+    // Re-Save so releaseCanvas can still Restore its own Save
     if(_canvas)
-    {
         CGContextSaveGState(_context);
-        _canvas->restore();
-    }
 
     _imageModified = true;
 }

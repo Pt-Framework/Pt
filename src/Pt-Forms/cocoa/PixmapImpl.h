@@ -67,9 +67,7 @@ class PixmapCanvas : public Gfx::Canvas
 
         void setPixmap(PixmapImpl& pixmap);
 
-        void save();
-
-        void restore();
+        void reset();
     
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
@@ -77,25 +75,29 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onFinishPaint() override;
 
     protected:
+        virtual void onSetTransform(const Gfx::Transform& tx) override;
+
+        virtual void onApplyTransform() override;
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
         
-        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode) override;
+        virtual void onApplyCompositionMode() override;
 
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
-        virtual void onApplyPen(const Gfx::Pen& pen) override;
+        virtual void onApplyPen() override;
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-        virtual void onApplyBrush(const Gfx::Brush& brush) override;
+        virtual void onApplyBrush() override;
 
         virtual void onSetFont(const Gfx::Font& font) override;
 
-        virtual void onApplyFont(const Gfx::Font& font) override;
+        virtual void onApplyFont() override;
 
         virtual void onSetClip(const Gfx::RectF* clip) override;
 
-        virtual void onApplyClip(const Gfx::RectF* clip) override;
+        virtual void onApplyClip() override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, 
@@ -142,6 +144,7 @@ class PixmapCanvas : public Gfx::Canvas
 
     private:
         PixmapImpl*             _pixmap;
+        Gfx::Transform          _transform;
         Gfx::CompositionMode    _compositionMode;
         CGRect                  _clipRect;
 

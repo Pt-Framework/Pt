@@ -64,25 +64,29 @@ class BitmapCanvas : public Canvas
         virtual void onFinishPaint() override;
 
     protected:
+        virtual void onSetTransform(const Gfx::Transform& tx) override;
+
+        virtual void onApplyTransform() override;
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
-        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode);
+        virtual void onApplyCompositionMode() override;
 
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
-        virtual void onApplyPen(const Gfx::Pen& pen) override;
+        virtual void onApplyPen() override;
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-        virtual void onApplyBrush(const Gfx::Brush& brush) override;
+        virtual void onApplyBrush() override;
 
         virtual void onSetFont(const Gfx::Font& font) override;
 
-        virtual void onApplyFont(const Gfx::Font& font);
+        virtual void onApplyFont() override;
 
         virtual void onSetClip(const Gfx::RectF* clip) override;
 
-        virtual void onApplyClip(const Gfx::RectF* clip);
+        virtual void onApplyClip() override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
@@ -140,6 +144,8 @@ class BitmapCanvas : public Canvas
         bool                    _hasClip;
         RectF                   _clip;
         Gfx::Pen                _pen;
+        Gfx::Brush              _brush;
+        Gfx::Font               _font;
         std::vector<double>     _dashPattern;
         Path                    _ptPath;
         BLPath                  _blPath;

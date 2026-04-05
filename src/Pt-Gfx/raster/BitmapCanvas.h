@@ -67,25 +67,29 @@ class BitmapCanvas : public Canvas
         virtual void onFinishPaint() override;
 
     protected:
+        virtual void onSetTransform(const Gfx::Transform& tx) override;
+
+        virtual void onApplyTransform() override;
+
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
 
-        virtual void onApplyCompositionMode(const Gfx::CompositionMode& mode);
+        virtual void onApplyCompositionMode() override;
 
         virtual void onSetPen(const Gfx::Pen& pen) override;
 
-        virtual void onApplyPen(const Gfx::Pen& pen) override;
+        virtual void onApplyPen() override;
 
         virtual void onSetBrush(const Gfx::Brush& brush) override;
 
-        virtual void onApplyBrush(const Gfx::Brush& brush) override;
+        virtual void onApplyBrush() override;
 
         virtual void onSetFont(const Gfx::Font& font) override;
 
-        virtual void onApplyFont(const Gfx::Font& font);
+        virtual void onApplyFont() override;
 
         virtual void onSetClip(const Gfx::RectF* clip) override;
 
-        virtual void onApplyClip(const Gfx::RectF* clip);
+        virtual void onApplyClip() override;
 
     protected:
         virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
@@ -270,10 +274,11 @@ class BitmapCanvas : public Canvas
     private:
         BitmapSurface* _surface;
         Rgb32Image*    _image;
-        double       _lastScaleFactor;
+      double         _lastScaleFactor;
 
         CompositionMode _compositionMode;
         
+      Pen                         _logicalPen;
         Pen                         _pen;
         Rgb32Color                  _penColor;
         Rgb32Image                  _penBuffer;
@@ -283,10 +288,10 @@ class BitmapCanvas : public Canvas
         const Rgb32Image*           _brushSource;
         bool                        _isGradient;
 
-        Font   _font;
-        RectF  _clip;
-        RectI   _currentClip;
-        bool   _hasClip;
+        Font                        _font;
+        RectF                       _clip;
+        RectI                       _currentClip;
+        bool                        _hasClip;
 
         std::vector<Polygon> _flatPath;      
 

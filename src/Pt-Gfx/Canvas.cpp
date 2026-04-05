@@ -37,6 +37,7 @@ namespace Gfx {
 Canvas::Canvas()
 : _surface(0)
 , _active(0)
+, _dirty(0)
 {
 }
 
@@ -85,12 +86,8 @@ const RectF& Canvas::region() const
 
 void Canvas::setRegion(const RectF& r)
 {
-    Gfx::Transform tx;
-    tx.translate( r.x(), r.y() );
-    tx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
-    
     _region = r;
-    _tx = tx;
+    updateTransform();
 }
 
 
@@ -102,12 +99,8 @@ const Scaling& Canvas::scaling() const
 
 void Canvas::setScaling(const Scaling& scaling)
 {
-    Gfx::Transform tx;
-    tx.translate( _region.x(), _region.y() );
-    tx.scale( scaling.scaleFactor(), scaling.scaleFactor() );
-
     _scaling = scaling;
-    _tx = tx;
+    updateTransform();
 }
 
 
@@ -126,25 +119,27 @@ const Gfx::Transform& Canvas::transform() const
 }
 
 
+void Canvas::setTransform(const Gfx::Transform& tx)
+{
+    _userTx = tx;
+    updateTransform();
+}
+
+
+void Canvas::resetTransform()
+{
+    _userTx = Transform();
+    updateTransform();
+}
+
+
 void Canvas::beginPaint(const Gfx::Paint& paint)
 {
     if(_surface)
     {       
         _active = _surface;
         onBeginPaint(paint);
-
-        // TODO: apply in draw* functions and keep a state which attributes
-        //       are dirty and need to be applied
-
-        // TODO: currently scaling/transform is handled in onBeginPaint()
-        //       move this to:
-        //onApplyTransform();
-
-        onApplyCompositionMode( paint.compositionMode() );
-        onApplyPen( paint.pen() );
-        onApplyBrush( paint.brush() );
-        onApplyFont( paint.font() );
-        onApplyClip( paint.clip() );
+        _dirty = DirtyAll;
     }
 }
 
@@ -158,6 +153,7 @@ void Canvas::finishPaint()
         onFinishPaint();
         _surface = 0;
         _active = 0;
+        _dirty = 0;
     }
 }
 
@@ -173,9 +169,7 @@ void Canvas::setCompositionMode(const Gfx::CompositionMode& mode)
     onSetCompositionMode(mode);
 
     if(_active)
-    {
-        onApplyCompositionMode(mode);
-    }
+        _dirty |= DirtyComposition;
 }
 
 
@@ -184,9 +178,7 @@ void Canvas::setPen(const Pen& pen)
     onSetPen(pen);
 
     if(_active)
-    {
-        onApplyPen(pen);
-    }
+        _dirty |= DirtyPen;
 }
 
 
@@ -195,9 +187,7 @@ void Canvas::setBrush(const Brush& brush)
     onSetBrush(brush);
 
     if(_active)
-    {
-        onApplyBrush(brush);
-    }
+        _dirty |= DirtyBrush;
 }
 
 
@@ -206,9 +196,7 @@ void Canvas::setFont(const Gfx::Font& font)
     onSetFont(font);
 
     if(_active)
-    {
-        onApplyFont(font);
-    }
+        _dirty |= DirtyFont;
 }
 
 
@@ -217,9 +205,7 @@ void Canvas::setClip(const RectF& rect)
     onSetClip(&rect);
 
     if(_active)
-    {
-        onApplyClip(&rect);
-    }
+        _dirty |= DirtyClip;
 }
 
 
@@ -228,58 +214,77 @@ void Canvas::resetClip()
     onSetClip(0);
 
     if(_active)
-    {
-        onApplyClip(0);
-    }
+        _dirty |= DirtyClip;
 }
 
 
 void Canvas::drawLine(const PointF& from, const PointF& to)
 {   
-    if( _active )
+    if(_active)
+    {
+        applyState();
         onDrawLine(from, to);
+    }
 }
 
 
 void Canvas::drawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if(_active)
+    {
+        applyState();
         onDrawPolyline(pts, n);
+    }
 }
 
 
 void Canvas::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     if(_active)
+    {
+        applyState();
         onFillPolygon(ps, n);
+    }
 }
 
 
 void Canvas::drawRect(const Gfx::RectF& rect)
 {
     if(_active)
+    {
+        applyState();
         onDrawRect(rect);
+    }
 }
 
         
 void Canvas::fillRect(const Gfx::RectF& rect)
 {
     if(_active)
+    {
+        applyState();
         onFillRect(rect);
+    }
 }
 
 
 void Canvas::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if(_active)
+    {
+        applyState();
         onDrawEllipse(topLeft, size);
+    }
 }
 
 
 void Canvas::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if(_active)
+    {
+        applyState();
         onFillEllipse(topLeft, size);
+    }
 }
 
 
@@ -293,28 +298,40 @@ void Canvas::setPath(const Path& path)
 void Canvas::drawPath()
 {
     if(_active)
+    {
+        applyState();
         onDrawPath();
+    }
 }
 
 
 void Canvas::fillPath()
 {
     if(_active)
+    {
+        applyState();
         onFillPath();
+    }
 }
 
 
 void Canvas::drawPath(const Path& path)
 {
     if(_active)
+    {
+        applyState();
         onDrawPath(path);
+    }
 }
 
 
 void Canvas::fillPath(const Path& path)
 {
     if(_active)
+    {
+        applyState();
         onFillPath(path);
+    }
 }
 
 
@@ -331,7 +348,10 @@ void Canvas::drawText(const PointF& to, const Pt::String& text,
                       const Transform* tform)
 {
     if(_active)
+    {
+        applyState();
         onDrawText(to, text, tform);
+    }
 }
 
 
@@ -341,6 +361,8 @@ void Canvas::drawImage(const Gfx::PointF& to,
 {
     if(_active)
     {
+        applyState();
+
         if( image.format() == _active->format() )
         {
             onDrawImage(to, image, rect);
@@ -353,6 +375,42 @@ void Canvas::drawImage(const Gfx::PointF& to,
             onDrawImage(to, conv, rect);
         }
     }
+}
+
+
+void Canvas::invalidate(unsigned flags)
+{
+    _dirty |= flags;
+}
+
+
+void Canvas::applyState()
+{
+    if( ! _dirty)
+        return;
+
+    if(_dirty & DirtyTransform)   { onApplyTransform();       _dirty &= ~DirtyTransform; }
+    if(_dirty & DirtyComposition) { onApplyCompositionMode();  _dirty &= ~DirtyComposition; }
+    if(_dirty & DirtyClip)        { onApplyClip();             _dirty &= ~DirtyClip; }
+    if(_dirty & DirtyPen)         { onApplyPen();              _dirty &= ~DirtyPen; }
+    if(_dirty & DirtyBrush)       { onApplyBrush();            _dirty &= ~DirtyBrush; }
+    if(_dirty & DirtyFont)        { onApplyFont();             _dirty &= ~DirtyFont; }
+}
+
+
+void Canvas::updateTransform()
+{
+    Gfx::Transform viewTx;
+    viewTx.translate( _region.x(), _region.y() );
+    viewTx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
+
+    _viewTx = viewTx;
+    _tx = _viewTx * _userTx;
+
+    onSetTransform(_tx);
+
+    if(_active)
+        _dirty |= DirtyTransform;
 }
 
 } // namespace

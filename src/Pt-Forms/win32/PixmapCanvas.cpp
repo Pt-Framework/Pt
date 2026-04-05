@@ -33,6 +33,8 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
 
+#include <cmath>
+
 using std::max;
 using std::min;
 #include <Gdiplus.h>
@@ -101,6 +103,19 @@ DWORD getPenStyle(const Pt::Gfx::Pen& pen)
 #endif
 
     return penStyle;
+}
+
+
+double lineScaleFactor(const Pt::Gfx::Transform& tx)
+{
+    return std::sqrt( std::abs(tx.determinant()) );
+}
+
+
+DWORD scalePenSize(DWORD penSize, double scaleFactor)
+{
+    return scaleFactor < 1.0 ? penSize
+                             : static_cast<DWORD>( penSize * scaleFactor );
 }
 
 
@@ -228,11 +243,13 @@ namespace Forms {
 PixmapCanvas::PixmapCanvas()
 : Gfx::Canvas()
 , _pixmap(0)
+, _lastScaleFactor(1.0)
 , _pen(0)
 , _penSize(1)
 , _penColor()
 , _brush(0)
 , _gradientBrush(false)
+, _hasClip(false)
 , _clipRect(0)
 , _font(0)
 {
@@ -267,16 +284,6 @@ void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 
 void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
-    double scaleFactor = scaling().scaleFactor();
-
-    size_t penSize = paint.pen().size();
-    
-    // keep pen size when downscaling
-    penSize = scaleFactor < 1.0 ? penSize
-                                : static_cast<size_t>( penSize * scaleFactor );
-
-    if(_penSize != penSize)
-        onSetPen( paint.pen() );
 }
 
 
@@ -295,19 +302,36 @@ void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void PixmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode) 
+void PixmapCanvas::onApplyCompositionMode() 
 {
-    _compositionMode = mode;
+}
+
+
+void PixmapCanvas::onApplyTransform()
+{
+}
+
+
+void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
+{
+    double scaleFactor = lineScaleFactor(tx);
+
+    if( std::abs(_lastScaleFactor - scaleFactor) >= 0.0001 )
+    {
+        _lastScaleFactor = scaleFactor;
+        onSetPen(_logicalPen);
+        invalidate(DirtyPen);
+    }
+
+    invalidate(DirtyClip);
 }
 
 
 void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
-    double scaleFactor = scaling().scaleFactor();
+    _logicalPen = pen;
 
-    // keep pen size when downscaling
-    size_t penSize = scaleFactor < 1.0 ? pen.size() 
-                                       : static_cast<size_t>( pen.size() * scaleFactor );
+    DWORD penSize = scalePenSize( static_cast<DWORD>( pen.size() ), _lastScaleFactor );
 
     if(_pen)
     {
@@ -336,7 +360,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapCanvas::onApplyPen(const Gfx::Pen& pen)
+void PixmapCanvas::onApplyPen()
 {
     if(_pixmap)
     {
@@ -440,7 +464,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void PixmapCanvas::onApplyBrush(const Gfx::Brush& brush)
+void PixmapCanvas::onApplyBrush()
 {
     if( ! _pixmap )
         return;
@@ -473,7 +497,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void PixmapCanvas::onApplyFont(const Gfx::Font& font)
+void PixmapCanvas::onApplyFont()
 {
     if( ! _pixmap )
         return;
@@ -489,36 +513,40 @@ void PixmapCanvas::onApplyFont(const Gfx::Font& font)
 
 void PixmapCanvas::onSetClip(const Gfx::RectF* rectF)
 {
-    // TODO: reuse HRGN instead of always creating a new one
+    _hasClip = rectF != 0;
 
-    if(_clipRect)
-    {
-        DeleteObject(_clipRect);
-        _clipRect = NULL;
-    }
-
-    if( ! rectF )
-        return;
-
-    Gfx::PointF origin =  transform() * rectF->origin();
-    Gfx::SizeF size =  transform() * rectF->size();
-    Gfx::RectF rectP(origin, size);
-               
-    long x = Pt::lround( rectP.x() );
-    long y = Pt::lround( rectP.y() );
-    long width = Pt::lround( rectP.width() );
-    long height = Pt::lround( rectP.height() );
-                            
-    // CreateRectRgn only includes the interior of the rect
-    _clipRect = CreateRectRgn(x , y, x + width, y + height);
+    if(rectF)
+        _clip = *rectF;
+    else
+        _clip.clear();
 }
 
 
-void PixmapCanvas::onApplyClip(const Gfx::RectF* rectF)
+void PixmapCanvas::onApplyClip()
 {  
     if(_pixmap)
-    {       
+    {
+        if(_clipRect)
+        {
+            DeleteObject(_clipRect);
+            _clipRect = NULL;
+        }
+
         HDC dc = _pixmap->deviceContext();
+
+        if(_hasClip)
+        {
+            Gfx::PointF origin = transform() * _clip.origin();
+            Gfx::SizeF size = transform() * _clip.size();
+            Gfx::RectF rectP(origin, size);
+
+            long x = Pt::lround( rectP.x() );
+            long y = Pt::lround( rectP.y() );
+            long width = Pt::lround( rectP.width() );
+            long height = Pt::lround( rectP.height() );
+
+            _clipRect = CreateRectRgn(x, y, x + width, y + height);
+        }
 
         if(_clipRect)
             SelectClipRgn(dc, _clipRect);
@@ -773,6 +801,9 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 
     HDC dc = _pixmap->deviceContext();
 
+    // select stored font into DC for measurement
+    HGDIOBJ oldFont = _font ? SelectObject(dc, _font) : 0;
+
     //
     // NOTE: transformation is neccessary because GDI scales the text
     //       by the given scale factor to measure it and then scales
@@ -812,6 +843,9 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     long exl = tm.tmExternalLeading;
     long lh = asc + des + exl;
 
+    if(oldFont)
+        SelectObject(dc, oldFont);
+
     Gfx::TextMetrics fm;
     fm.setAscent(asc);
     fm.setDescent(des);
@@ -831,6 +865,9 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
         return Gfx::TextMetrics();
 
     HDC dc = _pixmap->deviceContext();
+
+    // select stored font into DC for measurement
+    HGDIOBJ oldFont = _font ? SelectObject(dc, _font) : 0;
 
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
@@ -879,6 +916,10 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     tm.setCapHeight(cap * pixelRatio);
     tm.setLeading(exl * pixelRatio);
     tm.setWidth(textRect.Width * pixelRatio);
+
+    if(oldFont)
+        SelectObject(dc, oldFont);
+
     return tm;
 }
 #endif

@@ -111,6 +111,24 @@ void Paint::setFont(const Gfx::Font& font)
 }
 
 
+const Gfx::Transform& Paint::transform() const
+{
+    return _transform;
+}
+
+
+void Paint::setTransform(const Gfx::Transform& tx)
+{
+    _transform = tx;
+}
+
+
+void Paint::resetTransform()
+{
+    _transform = Gfx::Transform();
+}
+
+
 Gfx::Path& Paint::path()
 {
     return _path;

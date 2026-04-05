@@ -65,16 +65,6 @@ void BitmapCanvas::init(BitmapSurface& surface)
 
 void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
-    if( ! _context )
-        return;
-    
-    Transform tx = transform();
-    BLMatrix2D m( tx.m11(), tx.m12(),
-                  tx.m21(), tx.m22(), 
-                  tx.dx(), tx.dy() );
-
-    _context->reset_transform();
-    _context->set_transform(m);
 }
 
 
@@ -92,11 +82,11 @@ void BitmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 }
 
 
-void BitmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode)
+void BitmapCanvas::onApplyCompositionMode()
 {
     BLCompOp compOp = BL_COMP_OP_SRC_OVER;
     
-    if(mode == CompositionMode::SourceOver)
+    if(_compositionMode == CompositionMode::SourceOver)
     {
         compOp = BL_COMP_OP_SRC_OVER;
     }
@@ -106,6 +96,26 @@ void BitmapCanvas::onApplyCompositionMode(const Gfx::CompositionMode& mode)
     }
 
     _context->set_comp_op(compOp);
+}
+
+
+void BitmapCanvas::onApplyTransform()
+{
+    if( ! _context )
+        return;
+
+    Transform tx = transform();
+    BLMatrix2D m( tx.m11(), tx.m12(),
+                  tx.m21(), tx.m22(), 
+                  tx.dx(), tx.dy() );
+
+    _context->reset_transform();
+    _context->set_transform(m);
+}
+
+
+void BitmapCanvas::onSetTransform(const Gfx::Transform& tx)
+{
 }
 
 
@@ -146,13 +156,11 @@ void BitmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
+void BitmapCanvas::onApplyPen()
 {
-    _pen = pen;
+    _context->set_stroke_width( static_cast<double>( _pen.size() ) );
 
-    _context->set_stroke_width( static_cast<double>( pen.size() ) );
-
-    Pt::Gfx::ColorF penColor = pen.color();
+    Pt::Gfx::ColorF penColor = _pen.color();
     BLRgba32 strokecolor(penColor.red() / 257, 
                          penColor.green() / 257, 
                          penColor.blue()  / 257, 
@@ -164,18 +172,19 @@ void BitmapCanvas::onApplyPen(const Gfx::Pen& pen)
 
 void BitmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
+    _brush = brush;
 }
 
 
-void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
+void BitmapCanvas::onApplyBrush()
 {
-    Pt::Gfx::ColorF brushColor = brush.color();
+    Pt::Gfx::ColorF brushColor = _brush.color();
     BLRgba32 fillColor(brushColor.red() / 257, 
                        brushColor.green() / 257, 
                        brushColor.blue()  / 257, 
                        brushColor.alpha() / 257);
 
-    switch( brush.fillStyle() ) 
+    switch( _brush.fillStyle() ) 
     {
         case Gfx::Brush::Solid: 
         {
@@ -201,18 +210,19 @@ void BitmapCanvas::onApplyBrush(const Gfx::Brush& brush)
 
 void BitmapCanvas::onSetFont(const Gfx::Font& font)
 {
+    _font = font;
 }
 
 
-void BitmapCanvas::onApplyFont(const Gfx::Font& font)
+void BitmapCanvas::onApplyFont()
 {
-    _faceId = FreeType::instance().findFaceId(font);
-    _fontSize =  font.size();
+    _faceId = FreeType::instance().findFaceId(_font);
+    _fontSize =  _font.size();
 
     // setup the image type
     _imageType.face_id = _faceId;
-    _imageType.width = font.size();
-    _imageType.height = font.size();
+    _imageType.width = _font.size();
+    _imageType.height = _font.size();
     _imageType.flags = FT_LOAD_DEFAULT;
 }
 
@@ -220,32 +230,29 @@ void BitmapCanvas::onApplyFont(const Gfx::Font& font)
 
 void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
-}
-
-
-void BitmapCanvas::onApplyClip(const Gfx::RectF* clip) 
-{
-    if( ! _image )
-        return;
-
     _hasClip = clip != 0;
-
-    if( ! clip )
-        _context->restore_clipping();
-    else
-        _context->clip_to_rect( clip->x(), clip->y(), 
-                               clip->width(), clip->height() );
 
     if(clip)
     {
         Gfx::PointF origin =  transform() * clip->origin();
         Gfx::SizeF size =  transform() * clip->size();
-        Gfx::RectF clipP(origin, size);
-        
-        _clip = clipP;
+        _clip = Gfx::RectF(origin, size);
     }
     else
         _clip.clear();
+}
+
+
+void BitmapCanvas::onApplyClip() 
+{
+    if( ! _image )
+        return;
+
+    if( ! _hasClip )
+        _context->restore_clipping();
+    else
+        _context->clip_to_rect( _clip.x(), _clip.y(), 
+                               _clip.width(), _clip.height() );
 
     RectI imageRect;
     imageRect.setWidth( _image->width() );

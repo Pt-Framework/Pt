@@ -141,6 +141,18 @@ class PT_GFX_API Painter : private NonCopyable
         */
         void setFont(const Font& font);
 
+        /** @brief Returns the user transform.
+        */
+        const Transform& transform() const;
+
+        /** @brief Sets the user transform.
+        */
+        void setTransform(const Transform& tx);
+
+        /** @brief Resets the user transform to identity.
+        */
+        void resetTransform();
+
         /** @brief Returns the clipping rect or null if none.
         */
         const RectF* clip() const;
