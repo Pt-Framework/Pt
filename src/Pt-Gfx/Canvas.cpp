@@ -401,8 +401,8 @@ void Canvas::applyState()
 void Canvas::updateTransform()
 {
     Gfx::Transform viewTx;
-    viewTx.translate( _region.x(), _region.y() );
     viewTx.scale( _scaling.scaleFactor(), _scaling.scaleFactor() );
+    viewTx.translate( _region.x(), _region.y() );
 
     _viewTx = viewTx;
     _tx = _viewTx * _userTx;

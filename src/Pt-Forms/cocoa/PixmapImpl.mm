@@ -588,14 +588,16 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
 
     Gfx::PointF p = to;
 
-    //Gfx::PointF p = transform() * to;
+    // Gfx::Transform xform = transform();
+    // xform.translate(to.x(), to.y());
 
-    //Gfx::Transform xform = tx ? *tx : Gfx::Transform();
-    //xform.translate( p.x(), p.y() );
+    // if (tx)
+    //     xform *= *tx;
 
-    //CGAffineTransform tf = CGAffineTransformMake( xform.m11(), xform.m21(), 
-    //                                              xform.m12(), xform.m22(),
-    //                                              xform.dx(),  xform.dy());
+    // // CGAffineTransform: a, b, c, d, tx, ty
+    // CGAffineTransform tf = CGAffineTransformMake( xform.m11(), xform.m12(), 
+    //                                               xform.m21(), xform.m22(),
+    //                                               xform.dx(),  xform.dy() );
     
     CGContextSaveGState(context);
 

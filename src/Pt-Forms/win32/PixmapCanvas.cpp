@@ -937,12 +937,11 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     _text.clear();
     text.toUtf16( std::back_inserter(_text) );
 
-    Gfx::Transform tf;
+    Gfx::Transform tf = transform();
+    tf.translate( to.x(), to.y() );
+
     if(tform)
         tf *= *tform;
-
-    tf.translate( to.x(), to.y() );
-    tf *= transform();
 
 #ifndef PT_FORMS_GDIPLUS
     XFORM xform = { static_cast<FLOAT>( tf.m11() ), 

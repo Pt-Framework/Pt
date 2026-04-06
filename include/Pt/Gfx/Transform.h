@@ -104,12 +104,16 @@ class PT_GFX_API Transform
 
         double determinant() const;
 
+        bool isInvertible() const;
+
         Transform inverted() const;
 
     private:
       typedef double MatrixData[2][3];
 
-      void updateMatrix(const MatrixData& m);
+      void concat(const MatrixData& m);
+
+      void updateIdentity();
 
     private:
         MatrixData _mdata;

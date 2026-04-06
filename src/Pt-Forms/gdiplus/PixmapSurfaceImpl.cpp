@@ -287,13 +287,13 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to,
     _text.clear();
     text.toUtf16(std::back_inserter(_text));
 
-    Gfx::Transform tt = trans;    
-
     const int dpix = GetDeviceCaps(_dc, LOGPIXELSX);
     const double scaling = 96.0 / dpix;
 
-    tt.scale(scaling, scaling);
+    Gfx::Transform tt;
     tt.translate( to.x(), to.y());
+    tt.scale(scaling, scaling);
+    tt *= trans;
 
     const Gdiplus::Font& font = _paintData->font();
     const Gdiplus::FontFamily& family = _paintData->fontFamily();

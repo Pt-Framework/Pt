@@ -72,7 +72,7 @@ bool Transform::isSimple() const
     double a = std::abs( m12() );
     double b = std::abs( m21() );
 
-    const double eps = std::numeric_limits<double>::epsilon();
+    const double eps = 1e-6;
 
     return a < eps && b < eps;
 }
@@ -137,8 +137,19 @@ void Transform::set(double m11, double m12,
     _mdata[1][1] = m22;
     _mdata[1][2] = dy;
 
-    _isIdentity = _mdata[0][0] == 1 && _mdata[0][1] == 0 && _mdata[0][2] == 0 &&
-                  _mdata[1][0] == 0 && _mdata[1][1] == 1 && _mdata[1][2] == 0;
+    updateIdentity();
+}
+
+
+void Transform::updateIdentity()
+{
+    const double eps = 1e-6;
+    _isIdentity = std::abs(_mdata[0][0] - 1.0) < eps && 
+                  std::abs(_mdata[0][1]) < eps       && 
+                  std::abs(_mdata[0][2]) < eps       &&
+                  std::abs(_mdata[1][0]) < eps       && 
+                  std::abs(_mdata[1][1] - 1.0) < eps && 
+                  std::abs(_mdata[1][2]) < eps;
 }
 
 
@@ -149,8 +160,7 @@ void Transform::translate(double x, double y)
     n[0][0] = 1; n[0][1] = 0; n[0][2] = x;
     n[1][0] = 0; n[1][1] = 1; n[1][2] = y;
 
-    updateMatrix(n);
-    _isIdentity = false;
+    concat(n);
 }
 
 
@@ -164,8 +174,7 @@ void Transform::scale(double x, double y)
     n[0][0] = x; n[0][1] = 0; n[0][2] = 0;
     n[1][0] = 0; n[1][1] = y; n[1][2] = 0;
 
-    updateMatrix(n);
-    _isIdentity = false;
+    concat(n);
 }
 
 
@@ -190,8 +199,7 @@ void Transform::rotateRad(double r)
     n[1][1] = c;  //m22
     n[1][2] = 0;
 
-    updateMatrix(n);
-    _isIdentity = false;
+    concat(n);
 }
 
 
@@ -213,8 +221,7 @@ void Transform::shearX(double deg)
     n[0][0] = 1; n[0][1] = t; n[0][2] = 0;
     n[1][0] = 0; n[1][1] = 1; n[1][2] = 0;
 
-    updateMatrix(n);
-    _isIdentity = false;
+    concat(n);
 }
 
 
@@ -228,8 +235,7 @@ void Transform::shearY(double deg)
     n[0][0] = 1; n[0][1] = 0; n[0][2] = 0;
     n[1][0] = t; n[1][1] = 1; n[1][2] = 0;
 
-    updateMatrix(n);
-    _isIdentity = false;
+    concat(n);
 }
 
 
@@ -247,15 +253,15 @@ bool Transform::operator!=(const Transform& m) const
 
 Transform& Transform::operator*=(const Transform& rhs)
 {
-    updateMatrix(rhs._mdata);
+    concat(rhs._mdata);
     return *this;
 }
 
 
 Transform Transform::operator*(const Transform& rhs) const
 {
-    Transform result = rhs;
-    result.updateMatrix(_mdata);
+    Transform result = *this;
+    result.concat(rhs._mdata);
     return result;
 }
 
@@ -293,24 +299,31 @@ SizeF Transform::operator*(const SizeF& sz) const
 }
 
 
-void Transform::updateMatrix(const MatrixData& m)
+void Transform::concat(const MatrixData& m)
 {
     MatrixData result;
 
-    result[0][0] = m[0][0] * _mdata[0][0] + m[0][1] * _mdata[1][0] + m[0][2] * 0;
-    result[0][1] = m[0][0] * _mdata[0][1] + m[0][1] * _mdata[1][1] + m[0][2] * 0;
-    result[0][2] = m[0][0] * _mdata[0][2] + m[0][1] * _mdata[1][2] + m[0][2] * 1;
+    result[0][0] = _mdata[0][0] * m[0][0] + _mdata[0][1] * m[1][0];
+    result[0][1] = _mdata[0][0] * m[0][1] + _mdata[0][1] * m[1][1];
+    result[0][2] = _mdata[0][0] * m[0][2] + _mdata[0][1] * m[1][2] + _mdata[0][2];
 
-    result[1][0] = m[1][0] * _mdata[0][0] + m[1][1] * _mdata[1][0] + m[1][2] * 0;
-    result[1][1] = m[1][0] * _mdata[0][1] + m[1][1] * _mdata[1][1] + m[1][2] * 0;
-    result[1][2] = m[1][0] * _mdata[0][2] + m[1][1] * _mdata[1][2] + m[1][2] * 1;
+    result[1][0] = _mdata[1][0] * m[0][0] + _mdata[1][1] * m[1][0];
+    result[1][1] = _mdata[1][0] * m[0][1] + _mdata[1][1] * m[1][1];
+    result[1][2] = _mdata[1][0] * m[0][2] + _mdata[1][1] * m[1][2] + _mdata[1][2];
 
     memcpy(_mdata, result, sizeof(MatrixData));
+    updateIdentity();
 }
 
 double Transform::determinant() const
 {
     return m11() * m22() - m12() * m21();
+}
+
+
+bool Transform::isInvertible() const
+{
+    return std::abs(determinant()) >= std::numeric_limits<double>::epsilon();
 }
 
 
@@ -327,8 +340,8 @@ Transform Transform::inverted() const
         -m12() * invDet,
         -m21() * invDet,
         m11() * invDet,
-        (m21() * dy() - m22() * dx()) * invDet,
-        (m12() * dx() - m11() * dy()) * invDet);
+        (m12() * dy() - m22() * dx()) * invDet,
+        (m21() * dx() - m11() * dy()) * invDet);
 
 }
 

@@ -552,12 +552,11 @@ void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text,
     if( ! _image )
         return;
 
-    Gfx::Transform tf;
+    Gfx::Transform tf = transform();
+    tf.translate( to.x(), to.y() );
+
     if(tform)
         tf *= *tform;
-
-    tf.translate( to.x(), to.y() );
-    tf *= transform();
 
     FreeType::instance().draw(*_image, 0,0, text, _pen.color(), _currentClip,
                                 _compositionMode, _faceId, _fontSize, &tf);
