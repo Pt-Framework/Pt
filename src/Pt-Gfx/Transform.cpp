@@ -141,18 +141,6 @@ void Transform::set(double m11, double m12,
 }
 
 
-void Transform::updateIdentity()
-{
-    const double eps = 1e-6;
-    _isIdentity = std::abs(_mdata[0][0] - 1.0) < eps && 
-                  std::abs(_mdata[0][1]) < eps       && 
-                  std::abs(_mdata[0][2]) < eps       &&
-                  std::abs(_mdata[1][0]) < eps       && 
-                  std::abs(_mdata[1][1] - 1.0) < eps && 
-                  std::abs(_mdata[1][2]) < eps;
-}
-
-
 void Transform::translate(double x, double y)
 {
     MatrixData n;
@@ -299,22 +287,6 @@ SizeF Transform::operator*(const SizeF& sz) const
 }
 
 
-void Transform::concat(const MatrixData& m)
-{
-    MatrixData result;
-
-    result[0][0] = _mdata[0][0] * m[0][0] + _mdata[0][1] * m[1][0];
-    result[0][1] = _mdata[0][0] * m[0][1] + _mdata[0][1] * m[1][1];
-    result[0][2] = _mdata[0][0] * m[0][2] + _mdata[0][1] * m[1][2] + _mdata[0][2];
-
-    result[1][0] = _mdata[1][0] * m[0][0] + _mdata[1][1] * m[1][0];
-    result[1][1] = _mdata[1][0] * m[0][1] + _mdata[1][1] * m[1][1];
-    result[1][2] = _mdata[1][0] * m[0][2] + _mdata[1][1] * m[1][2] + _mdata[1][2];
-
-    memcpy(_mdata, result, sizeof(MatrixData));
-    updateIdentity();
-}
-
 double Transform::determinant() const
 {
     return m11() * m22() - m12() * m21();
@@ -343,6 +315,35 @@ Transform Transform::inverted() const
         (m12() * dy() - m22() * dx()) * invDet,
         (m21() * dx() - m11() * dy()) * invDet);
 
+}
+
+
+void Transform::concat(const MatrixData& m)
+{
+    MatrixData result;
+
+    result[0][0] = _mdata[0][0] * m[0][0] + _mdata[0][1] * m[1][0];
+    result[0][1] = _mdata[0][0] * m[0][1] + _mdata[0][1] * m[1][1];
+    result[0][2] = _mdata[0][0] * m[0][2] + _mdata[0][1] * m[1][2] + _mdata[0][2];
+
+    result[1][0] = _mdata[1][0] * m[0][0] + _mdata[1][1] * m[1][0];
+    result[1][1] = _mdata[1][0] * m[0][1] + _mdata[1][1] * m[1][1];
+    result[1][2] = _mdata[1][0] * m[0][2] + _mdata[1][1] * m[1][2] + _mdata[1][2];
+
+    memcpy(_mdata, result, sizeof(MatrixData));
+    updateIdentity();
+}
+
+
+void Transform::updateIdentity()
+{
+    const double eps = 1e-6;
+    _isIdentity = std::abs(_mdata[0][0] - 1.0) < eps && 
+                  std::abs(_mdata[0][1]) < eps       && 
+                  std::abs(_mdata[0][2]) < eps       &&
+                  std::abs(_mdata[1][0]) < eps       && 
+                  std::abs(_mdata[1][1] - 1.0) < eps && 
+                  std::abs(_mdata[1][2]) < eps;
 }
 
 } // namespace
