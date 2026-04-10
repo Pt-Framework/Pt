@@ -498,6 +498,10 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
         _keyEvent.setRelease(key, ch);
 
     _keyEvent.setWidget(&window);
+    
+    Application::instance().processEvent(_keyEvent);
+}
+
 
 void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
 {
