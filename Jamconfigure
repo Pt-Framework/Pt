@@ -18,7 +18,12 @@ ConfigureC++ ;
 
 if $(TOOLSET) = gcc
 {
-  WARN += -Wno-psabi ;
+    WARN += -Wno-psabi ;
+
+    if $(TARGET_OS) = macosx
+    {
+        C++FLAGS += -std=c++14 ;
+    }
 }
 
 #############################################################################
@@ -644,11 +649,6 @@ if --with-blend2d in $(ARGV)
 if --with-skia in $(ARGV)
 {
     WITH_BUILTIN_SKIA = yes ;
-
-    if $(TOOLSET) = gcc
-    {
-      C++FLAGS += -std=c++11 ;
-    }
 }
 
 Configure WITH_BUILTIN_SKIA ;
@@ -1015,14 +1015,6 @@ if --with-x11 in $(ARGV)
 {
     GUI ?= x11 ;
 }
-if --with-x11-raster in $(ARGV)
-{
-    GUI ?= x11 ;
-}
-else if --with-x11-core in $(ARGV)
-{
-    GUI ?= x11 ;
-}
 else if --with-win32-gdi in $(ARGV)
 {
     GUI ?= win32 ;
@@ -1063,6 +1055,30 @@ if ! $(GUI) || $(GUI:L) = "win32"
         {
             PT_FORMS_IMPL = win32-gdi ;
         }
+    }
+}
+
+if ! $(GUI) || $(GUI:L) = "x11"
+{
+    Load x11.jam ;
+
+    ConfigureX11 ;
+
+    if $(X11_LIBS)
+    {
+        ConfigureXExt ;
+        ConfigureXft ;
+
+        if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
+        {
+            GUI ?= x11 ;
+            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
+        }
+    }
+
+    if $(GUI)
+    {
+        PT_FORMS_IMPL = x11 ;
     }
 }
 
@@ -1115,37 +1131,6 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
         {
             PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WITH_CPU_NEON ] ;
             PT_FORMS_C++FLAGS += $(CPU_NEON_C++FLAGS) ;
-        }
-    }
-}
-
-if ! $(GUI) || $(GUI:L) = "x11"
-{
-    Load x11.jam ;
-
-    ConfigureX11 ;
-
-    if $(X11_LIBS)
-    {
-        ConfigureXExt ;
-        ConfigureXft ;
-
-        if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
-        {
-            GUI ?= x11 ;
-            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
-        }
-    }
-
-    if $(GUI)
-    {
-        if --with-x11-core in $(ARGV)
-        {
-            PT_FORMS_IMPL = x11-core ;
-        }
-        else
-        {
-            PT_FORMS_IMPL = x11-raster ;
         }
     }
 }

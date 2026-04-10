@@ -33,10 +33,6 @@
 #include "PixmapImpl.h"
 #include "KeyHandler.h"
 
-#ifdef PT_FORMS_X11_CORE
-#include <X11/Xft/Xft.h>
-#endif
-
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Screen.h>
 #include <Pt/IOError.h>
@@ -298,16 +294,6 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     PaintEvent pev(*frame, rect);
     frame->processEvent(pev);
 
-#ifdef PT_FORMS_X11_CORE
-    WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
-    ::Drawable from = windowImpl->surface().pixmapImpl()->drawable();
-    ::Window to = windowImpl->window();
-
-    XCopyArea( _display, from, to,
-               _paintGc, x, y, width, height, x, y);
-#endif
-
-#ifdef PT_FORMS_X11_RASTER
     WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
     const Gfx::Image& image = windowImpl->pixmap().impl()->bitmap().image();
     char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
@@ -328,7 +314,6 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     
     ximage->data = NULL;
     XDestroyImage(ximage); 
-#endif
 
     //XFlush(_display);
 }

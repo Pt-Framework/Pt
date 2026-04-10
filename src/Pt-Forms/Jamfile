@@ -5,16 +5,6 @@ SubDirHdrs $(PT_TOP)/src/Pt-Forms/$(GUI) ;
 SubDirC++Flags [ FDefines PT_FORMS_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms ;
 
-if $(PT_FORMS_IMPL) = x11-core
-{
-    SubDirC++Flags [ FDefines PT_FORMS_X11_CORE ] ;
-}
-
-if $(PT_FORMS_IMPL) = x11-raster
-{
-    SubDirC++Flags [ FDefines PT_FORMS_X11_RASTER ] ;
-}
-
 if $(PT_FORMS_IMPL) = win32-gdi
 {
     SubDirC++Flags [ FDefines PT_FORMS_WIN32_GDI ] ;
