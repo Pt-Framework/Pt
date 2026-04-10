@@ -60,12 +60,6 @@ const std::string& Font::family() const
 }
 
 
-const std::string& Font::name() const
-{
-    return _fontData->family();
-}
-
-
 size_t Font::size() const
 {
     return _fontData->size();

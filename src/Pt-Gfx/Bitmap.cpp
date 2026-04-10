@@ -146,9 +146,9 @@ const std::string& Bitmap::defaultFont()
 }
 
 
-void Bitmap::setDefaultFont(const std::string& f)
+void Bitmap::setDefaultFont(const std::string& family)
 {
-    BitmapSurface::setDefaultFont(f);
+    BitmapSurface::setDefaultFont(family);
 }
 
 

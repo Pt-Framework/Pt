@@ -154,9 +154,9 @@ std::string Pixmap::defaultFont()
 }
 
 
-void Pixmap::setDefaultFont(const std::string& name)
+void Pixmap::setDefaultFont(const std::string& family)
 {
-    PixmapImpl::setDefaultFont(name);
+    PixmapImpl::setDefaultFont(family);
 }
 
 

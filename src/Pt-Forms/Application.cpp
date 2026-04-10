@@ -241,9 +241,9 @@ std::string Application::defaultFont() const
 }
 
 
-void Application::setDefaultFont(const std::string& fontName)
+void Application::setDefaultFont(const std::string& family)
 {
-    PixmapImpl::setDefaultFont(fontName);
+    PixmapImpl::setDefaultFont(family);
 }
 
 

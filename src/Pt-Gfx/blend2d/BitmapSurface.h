@@ -100,7 +100,7 @@ class PT_GFX_API BitmapSurface : private NonCopyable
 
     static const std::string& defaultFont();
 
-    static void setDefaultFont(const std::string& name);
+    static void setDefaultFont(const std::string& family);
 
     static std::vector<std::string> fontFamilies();
 

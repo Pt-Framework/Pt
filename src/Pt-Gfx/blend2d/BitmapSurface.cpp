@@ -174,9 +174,9 @@ const std::string& BitmapSurface::defaultFont()
 }
 
 
-void BitmapSurface::setDefaultFont(const std::string& name)
+void BitmapSurface::setDefaultFont(const std::string& family)
 {
-    FreeTypeFontProvider::instance().setDefaultFont(name);
+    FreeTypeFontProvider::instance().setDefaultFont(family);
 }
 
 

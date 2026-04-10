@@ -336,9 +336,9 @@ const std::string& PixmapImpl::defaultFont()
 }
 
 
-void PixmapImpl::setDefaultFont(const std::string& f)
+void PixmapImpl::setDefaultFont(const std::string& family)
 {
-    GdiFontProvider::instance().setDefaultFont(f);
+    GdiFontProvider::instance().setDefaultFont(family);
 }
 
 

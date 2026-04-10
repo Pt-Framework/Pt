@@ -486,9 +486,9 @@ const std::string& ImageCanvas::defaultFont()
 }
 
 
-void ImageCanvas::setDefaultFont(const std::string& f)
+void ImageCanvas::setDefaultFont(const std::string& family)
 {
-    FreeType::instance().setDefaultFont(f);
+    FreeType::instance().setDefaultFont(family);
 }
 
 

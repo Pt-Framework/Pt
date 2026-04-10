@@ -132,7 +132,7 @@ class PT_FORMS_API Application : public Pt::System::Application
 
         std::string defaultFont() const;
 
-        void setDefaultFont(const std::string& fontName);
+        void setDefaultFont(const std::string& family);
 
         std::vector<std::string> fontFamilies() const;
 

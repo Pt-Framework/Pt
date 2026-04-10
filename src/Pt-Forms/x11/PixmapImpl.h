@@ -124,9 +124,9 @@ class PixmapImpl
             return Gfx::Bitmap::defaultFont();
         }
 
-        static void setDefaultFont(const std::string& name)
+        static void setDefaultFont(const std::string& family)
         {
-            Gfx::Bitmap::setDefaultFont(name);
+            Gfx::Bitmap::setDefaultFont(family);
         }
 
         static std::vector<std::string> fontFamilies()

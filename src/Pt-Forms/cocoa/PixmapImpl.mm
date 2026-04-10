@@ -1029,9 +1029,9 @@ const std::string& PixmapImpl::defaultFont()
 }
 
 
-void PixmapImpl::setDefaultFont(const std::string& f)
+void PixmapImpl::setDefaultFont(const std::string& family)
 {
-    CocoaFontProvider::instance().setDefaultFont(f);
+    CocoaFontProvider::instance().setDefaultFont(family);
 }
 
 

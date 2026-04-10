@@ -83,11 +83,11 @@ int CALLBACK GdiFontProvider::enumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTM
 {
     if(logFont->elfLogFont.lfFaceName[0] != '@')
     {
-        std::string name = Pt::win32::toMultiByte(logFont->elfLogFont.lfFaceName);
+        std::string family = Pt::win32::toMultiByte(logFont->elfLogFont.lfFaceName);
         std::string style = Pt::win32::toMultiByte(reinterpret_cast<LPCTSTR>(logFont->elfStyle));
         Gfx::FontFace::Weight weight = fontWeightFromLogFontWeight(logFont->elfLogFont.lfWeight);
         Gfx::FontFace::Slant slant = fontSlantFromLogFontItalic(logFont->elfLogFont.lfItalic);
-        reinterpret_cast<std::vector<Gfx::FontFace>*>(param)->push_back(Gfx::FontFace(name, weight, slant, style));
+        reinterpret_cast<std::vector<Gfx::FontFace>*>(param)->push_back(Gfx::FontFace(family, weight, slant, style));
     }
 
     return 1;
@@ -170,11 +170,11 @@ HFONT GdiFontProvider::lookupFont(const Gfx::Font& font) const
     lf.lfQuality        = DEFAULT_QUALITY;
     lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 
-    const std::string& fontName = font.family().empty() ? _defaultFont
-                                                        : font.family();
-    if( ! fontName.empty() )
+    const std::string& family = font.family().empty() ? _defaultFont
+                                                       : font.family();
+    if( ! family.empty() )
     {
-        std::basic_string<TCHAR> nativeFamily = Pt::win32::fromMultiByte(fontName);
+        std::basic_string<TCHAR> nativeFamily = Pt::win32::fromMultiByte(family);
         std::size_t copySize = std::min<std::size_t>(static_cast<std::size_t>(LF_FACESIZE), nativeFamily.size() + 1);
         memcpy(lf.lfFaceName, nativeFamily.c_str(), copySize * sizeof(TCHAR));
     }

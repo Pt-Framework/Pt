@@ -198,8 +198,8 @@ std::vector<FontFace> FreeTypeFontProvider::fontFaces(const std::string& family)
 
 FTC_FaceID FreeTypeFontProvider::findFaceId(const Font& font) const
 {
-    const std::string fontName = font.family().empty() ? _defaultFont : font.family();
-    const FaceEntry* entry = findFaceEntry(fontName, font.styleName(), font.weight(), font.slant());
+    const std::string family = font.family().empty() ? _defaultFont : font.family();
+    const FaceEntry* entry = findFaceEntry(family, font.styleName(), font.weight(), font.slant());
     if(entry)
         return reinterpret_cast<FTC_FaceID>(const_cast<FaceEntry*>(entry));
 

@@ -242,7 +242,7 @@ void FreeType::addFonts(const System::Path& path)
         Font::Weight weight = fontWeightFromStyleFlags(face->style_flags);
         Font::Slant slant = fontSlantFromStyleFlags(face->style_flags);
         Font font(face->family_name, DefaultFontSize, styleName, weight, slant);
-        PT_LOG_INFO( "loaded font: " << font.name() << (font.hasStyleName() ? std::string(" ") + font.styleName() : std::string()) );
+        PT_LOG_INFO( "loaded font: " << font.family() << (font.hasStyleName() ? std::string(" ") + font.styleName() : std::string()) );
 
         System::Path& fontPath = _fonts[font];
         fontPath = fontFile;
@@ -259,15 +259,15 @@ void FreeType::addFonts(const System::Path& path)
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
-    const std::string fontName = font.family().empty() ? _defaultFont : font.family();
-    if(fontName.empty())
+    const std::string family = font.family().empty() ? _defaultFont : font.family();
+    if(family.empty())
         return DefaultFaceId;
 
     Fonts::iterator it = _fonts.begin();
     System::Path* bestPath = 0;
     int bestScore = 0;
 
-    Font requested(fontName, font.size(), font.styleName(), font.weight(), font.slant());
+    Font requested(family, font.size(), font.styleName(), font.weight(), font.slant());
 
     if(requested.hasStyleName())
     {

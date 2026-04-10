@@ -63,10 +63,6 @@ class PT_GFX_API Font : public FontBase
         //! @brief Returns the family of the font.
         const std::string& family() const;
 
-        //! @brief Returns the family of the font.
-        //! Alias for family().
-        const std::string& name() const;
-
         //! @brief Returns the size of the font
         std::size_t size() const;
 

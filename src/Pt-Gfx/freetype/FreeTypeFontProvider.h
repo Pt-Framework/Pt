@@ -59,13 +59,12 @@ class FreeTypeFontProvider : public FontProvider
         struct FaceEntry
         {
           FaceEntry(const FontFace& face,
-                const System::Path& source,
-                long faceIndex)
+                    const System::Path& source,
+                    long faceIndex)
           : face(face)
           , source(source)
           , faceIndex(faceIndex)
-          {
-          }
+          { }
 
           FontFace face;
           System::Path source;
@@ -91,6 +90,14 @@ class FreeTypeFontProvider : public FontProvider
 
         std::vector<FontFace> fontFaces(const std::string& family) const;
 
+    public:
+        FTC_FaceID findFaceId(const Font& font) const;
+
+    protected:
+        virtual void onAddFont(const System::Path& path) override;
+
+        virtual void onRemoveFont(const System::Path& path) override;
+
     private:
         FreeTypeFontProvider();
 
@@ -100,29 +107,23 @@ class FreeTypeFontProvider : public FontProvider
 
         FTC_FaceID defaultFace() const;
 
-        FTC_FaceID findFaceId(const Font& font) const;
-
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library,
                                     FT_Pointer request_data, FT_Face* face);
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
         const FaceEntry* findFaceEntry(const std::string& family,
-               const std::string& styleName,
-               FontBase::Weight weight,
-               FontBase::Slant slant) const;
-
-        virtual void onAddFont(const System::Path& path) override;
-
-        virtual void onRemoveFont(const System::Path& path) override;
+                                       const std::string& styleName,
+                                       FontBase::Weight weight,
+                                       FontBase::Slant slant) const;
 
         static FontFace::Weight fontWeightFromStyleFlags(FT_Long styleFlags);
 
         static FontFace::Slant fontSlantFromStyleFlags(FT_Long styleFlags);
 
         static int fontMatchScore(FontBase::Weight weight,
-                FontBase::Slant slant,
-                const FontFace& face);
+                                  FontBase::Slant slant,
+                                  const FontFace& face);
 
         bool openFontFile(const System::Path& path);
 

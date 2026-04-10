@@ -237,17 +237,17 @@ CTFontRef CocoaFontProvider::lookupFont(const Pt::Gfx::Font& font) const
     if( ! descAttributes )
         return 0;
 
-    const std::string& fontName = font.family().empty() ? _defaultFont
-                                                        : font.family();
-    if( ! fontName.empty() )
+    const std::string& family = font.family().empty() ? _defaultFont
+                                                       : font.family();
+    if( ! family.empty() )
     {
-        CFStringRef name = CFStringCreateWithCString(kCFAllocatorDefault,
-                                                     fontName.c_str(),
-                                                     kCFStringEncodingUTF8);
-        if(name)
+        CFStringRef familyName = CFStringCreateWithCString(kCFAllocatorDefault,
+                                                           family.c_str(),
+                                                           kCFStringEncodingUTF8);
+        if(familyName)
         {
-            CFDictionarySetValue(descAttributes, kCTFontFamilyNameAttribute, name);
-            CFRelease(name);
+            CFDictionarySetValue(descAttributes, kCTFontFamilyNameAttribute, familyName);
+            CFRelease(familyName);
         }
     }
 

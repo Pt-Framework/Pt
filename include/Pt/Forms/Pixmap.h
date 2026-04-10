@@ -96,7 +96,7 @@ class PT_FORMS_API Pixmap : public PaintSurface
     public:
         static std::string defaultFont();
 
-        static void setDefaultFont(const std::string& name);
+        static void setDefaultFont(const std::string& family);
 
         static std::vector<std::string> fontFamilies();
 
