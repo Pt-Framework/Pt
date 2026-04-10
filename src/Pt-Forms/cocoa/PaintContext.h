@@ -177,13 +177,16 @@ class PaintContext : public Gfx::PaintContext
             if( ! descAttributes )
                 return;
 
-            const std::string& fontName = font.name().empty() ? PixmapImpl::defaultFont().c_str()
-                                                              : font.name().c_str();
-            CFStringRef name = CFStringCreateWithCStringNoCopy(0, fontName.c_str(), 
-                                                               kCFStringEncodingUTF8,
-                                                               kCFAllocatorNull);
-            CFDictionarySetValue(descAttributes, kCTFontFamilyNameAttribute, name);
-            CFRelease(name);
+            const std::string& fontName = font.name().empty() ? PixmapImpl::defaultFont()
+                                                              : font.name();
+            if( ! fontName.empty() )
+            {
+                CFStringRef name = CFStringCreateWithCStringNoCopy(0, fontName.c_str(), 
+                                                                   kCFStringEncodingUTF8,
+                                                                   kCFAllocatorNull);
+                CFDictionarySetValue(descAttributes, kCTFontFamilyNameAttribute, name);
+                CFRelease(name);
+            }
 
             // CoreText uses 96 points per inch, but the typographic convention
             // is 72 dots per inch, so scale the size by 96.0 / 72.0
