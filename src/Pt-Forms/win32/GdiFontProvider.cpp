@@ -79,29 +79,6 @@ Gfx::FontFace::Slant GdiFontProvider::fontSlantFromLogFontItalic(BYTE italic)
 }
 
 
-#ifdef _WIN32_WCE
-int CALLBACK GdiFontProvider::enumFontsProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param)
-{
-    if(logFont->lfFaceName[0] != '@')
-    {
-        std::string name = Pt::win32::toMultiByte(logFont->lfFaceName);
-        Gfx::FontFace::Weight weight = fontWeightFromLogFontWeight(logFont->lfWeight);
-        Gfx::FontFace::Slant slant = fontSlantFromLogFontItalic(logFont->lfItalic);
-        reinterpret_cast<std::vector<Gfx::FontFace>*>(param)->push_back(Gfx::FontFace(name, weight, slant));
-    }
-
-    return 1;
-}
-
-
-int CALLBACK GdiFontProvider::enumFontFamiliesProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param)
-{
-    if(logFont->lfFaceName[0] != '@')
-        reinterpret_cast<FontFamilyList*>(param)->families.push_back(Pt::win32::toMultiByte(logFont->lfFaceName));
-
-    return 1;
-}
-#else
 int CALLBACK GdiFontProvider::enumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* physFont, DWORD type, LPARAM param)
 {
     if(logFont->elfLogFont.lfFaceName[0] != '@')
@@ -124,7 +101,7 @@ int CALLBACK GdiFontProvider::enumFontFamilyNamesExProc(ENUMLOGFONTEX* logFont, 
 
     return 1;
 }
-#endif // _WIN32_WCE
+
 
 GdiFontProvider& GdiFontProvider::instance()
 {
@@ -211,15 +188,11 @@ std::vector<std::string> GdiFontProvider::fontFamilies() const
     FontFamilyList familyList;
     HDC dc = GetDC(NULL);
 
-#ifdef _WIN32_WCE
-    EnumFonts(dc, 0, (FONTENUMPROC)&enumFontFamiliesProc, (LPARAM)(&familyList));
-#else
     LOGFONT lf;
     ZeroMemory(&lf, sizeof(lf));
     lf.lfCharSet = DEFAULT_CHARSET;
 
     EnumFontFamiliesEx(dc, &lf, (FONTENUMPROC)&enumFontFamilyNamesExProc, (LPARAM)(&familyList), 0);
-#endif
 
     ReleaseDC(NULL, dc);
 
@@ -237,10 +210,6 @@ std::vector<Gfx::FontFace> GdiFontProvider::fontFaces(const std::string& family)
 
     HDC dc = GetDC(NULL);
 
-#ifdef _WIN32_WCE
-    std::basic_string<TCHAR> nativeFamily = Pt::win32::fromMultiByte(family);
-    EnumFonts(dc, nativeFamily.c_str(), (FONTENUMPROC)&enumFontsProc, (LPARAM)(&faces));
-#else
     LOGFONT lf;
     ZeroMemory(&lf, sizeof(lf));
     lf.lfCharSet = DEFAULT_CHARSET;
@@ -250,7 +219,6 @@ std::vector<Gfx::FontFace> GdiFontProvider::fontFaces(const std::string& family)
     memcpy(lf.lfFaceName, nativeFamily.c_str(), copySize * sizeof(TCHAR));
 
     EnumFontFamiliesEx(dc, &lf, (FONTENUMPROC)&enumFontFamExProc, (LPARAM)(&faces), 0);
-#endif
 
     ReleaseDC(NULL, dc);
 

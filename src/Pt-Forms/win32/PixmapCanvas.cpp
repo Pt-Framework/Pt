@@ -43,11 +43,7 @@ DWORD getPenStyle(const Pt::Gfx::Pen& pen)
 {
   using namespace Pt;
 
-#ifdef _WIN32_WCE
-    DWORD penStyle = 0;
-#else
     DWORD penStyle = PS_GEOMETRIC;
-#endif
 
     switch( pen.style() )
     {
@@ -60,15 +56,10 @@ DWORD getPenStyle(const Pt::Gfx::Pen& pen)
             break;
 
         case Gfx::Pen::Dot:
-#ifdef _WIN32_WCE
-            penStyle |= PS_DASH;
-#else
             penStyle |= PS_DOT;
-#endif
             break;
     }
 
-#ifndef _WIN32_WCE
     switch( pen.capStyle() )
     {
         case Gfx::Pen::FlatCap:
@@ -98,7 +89,6 @@ DWORD getPenStyle(const Pt::Gfx::Pen& pen)
               penStyle |= PS_JOIN_MITER;
               break;
     }
-#endif
 
     return penStyle;
 }
@@ -293,15 +283,11 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
                        _penColor.green() / 257, 
                        _penColor.blue()  / 257 );
                            
-#ifdef _WIN32_WCE
-    _pen = CreatePen(penStyle, penSize, color);
-#else
     LOGBRUSH brush;
     brush.lbStyle = BS_SOLID;
     brush.lbColor = color;
 
     _pen = ExtCreatePen(penStyle, penSize, &brush, 0, NULL);
-#endif
 }
 
 

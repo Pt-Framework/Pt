@@ -90,15 +90,9 @@ class GdiFontProvider : public Gfx::FontProvider
 
         static Gfx::FontFace::Slant fontSlantFromLogFontItalic(BYTE italic);
 
-#ifdef _WIN32_WCE
-        static int CALLBACK enumFontsProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param);
-
-        static int CALLBACK enumFontFamiliesProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param);
-#else
         static int CALLBACK enumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* physFont, DWORD type, LPARAM param);
 
         static int CALLBACK enumFontFamilyNamesExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* physFont, DWORD type, LPARAM param);
-#endif
 
     private:
         static bool registerFontFile(const System::Path& path);
