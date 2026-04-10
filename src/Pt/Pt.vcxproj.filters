@@ -151,9 +151,6 @@
     <Filter Include="Pt-Forms\Events">
       <UniqueIdentifier>{fce78a73-3874-4da3-9687-1fef15f5a3f4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Forms\gdiplus">
-      <UniqueIdentifier>{c234da96-682b-43ed-a984-7e0797e06784}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Forms\win32">
       <UniqueIdentifier>{e4bd9624-9814-4452-99e6-744f7fdd7c2e}</UniqueIdentifier>
     </Filter>
@@ -1994,27 +1991,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\WindowStateEvent.h">
       <Filter>Pt-Forms\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\ApplicationImpl.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\KeyMap.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\MainWindowImpl.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\PaintData.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\PixmapSurfaceImpl.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\ScreenImpl.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\gdiplus\win32.h">
-      <Filter>Pt-Forms\gdiplus</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\win32\ApplicationImpl.h">
       <Filter>Pt-Forms\win32</Filter>
@@ -4901,18 +4877,6 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\demo\PainterDemo.cpp">
       <Filter>Pt-Forms\demo</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\gdiplus\ApplicationImpl.cpp">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\gdiplus\MainWindowImpl.cpp">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\gdiplus\PixmapSurfaceImpl.cpp">
-      <Filter>Pt-Forms\gdiplus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\gdiplus\ScreenImpl.cpp">
-      <Filter>Pt-Forms\gdiplus</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\win32\ApplicationImpl.cpp">
       <Filter>Pt-Forms\win32</Filter>

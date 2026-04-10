@@ -772,13 +772,6 @@
     <ClInclude Include="..\Pt-Forms\demo\Dialog1.h" />
     <ClInclude Include="..\Pt-Forms\demo\Dialog2.h" />
     <ClInclude Include="..\Pt-Forms\demo\MainWindow.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\ApplicationImpl.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\KeyMap.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\MainWindowImpl.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\PaintData.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\PixmapSurfaceImpl.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\ScreenImpl.h" />
-    <ClInclude Include="..\Pt-Forms\gdiplus\win32.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\ApplicationImpl.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\FrameBuffer.h" />
     <ClInclude Include="..\Pt-Forms\linux-fb\InputDevice.h" />
@@ -1451,10 +1444,6 @@
     <ClCompile Include="..\Pt-Forms\DockingLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\FlowLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\Form.cpp" />
-    <ClCompile Include="..\Pt-Forms\gdiplus\ApplicationImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\gdiplus\MainWindowImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\gdiplus\PixmapSurfaceImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\gdiplus\ScreenImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\GridLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\Icon.cpp" />
     <ClCompile Include="..\Pt-Forms\InputMethod.cpp" />
