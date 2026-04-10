@@ -100,7 +100,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 {
     Gfx::SizeF size = Gfx::SizeF(10, 10);
     
-    //fontNames();
+    //fonts();
    
     HDC screenDC = GetDC(NULL);
     _dc = CreateCompatibleDC(screenDC);
@@ -723,9 +723,9 @@ std::string& PixmapSurfaceImpl::getDefaultFont()
 }
 
 
-std::vector<std::string> PixmapSurfaceImpl::fontNames()
+std::vector<Gfx::FontFace> PixmapSurfaceImpl::fonts()
 {
-    std::vector<std::string> fonts;
+    std::vector<Gfx::FontFace> faces;
     HDC dc = GetDC(NULL);
 
 #ifdef _WIN32_WCE
@@ -736,18 +736,17 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
     lf.lfFaceName[0] = '\0';
     lf.lfPitchAndFamily = 0;
 
+    std::vector<std::string> fonts;
     EnumFontFamiliesEx(dc, &lf, (FONTENUMPROC)&EnumFontFamExProc, (LPARAM)(&fonts), 0);
 #endif
 
     ReleaseDC(NULL, dc);
 
     fonts.erase(std::unique(fonts.begin(), fonts.end()), fonts.end());
-    return fonts;
-}
+    for(std::vector<std::string>::const_iterator it = fonts.begin(); it != fonts.end(); ++it)
+        faces.push_back(Gfx::FontFace(*it));
 
-
-void PixmapSurfaceImpl::setFontDir(const System::Path& path)
-{
+    return faces;
 }
 
 

@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include <SkPath.h>
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
@@ -105,13 +106,11 @@ namespace Forms {
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
 
     public:
-        static void setFontDir(const System::Path& path);
-
         static std::string defaultFont();
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<std::string> fontNames();
+        static std::vector<Gfx::FontFace> fonts();
 
         static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 

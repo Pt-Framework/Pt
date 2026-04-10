@@ -29,6 +29,7 @@
 */
 
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontFace.h>
 
 namespace Pt {
 
@@ -46,9 +47,9 @@ Font::Font(const std::string& name, std::size_t size, const std::string& style)
 }
 
 
-bool Font::isNull() const
+Font::Font(const FontFace& face, std::size_t size)
+: _fontData(new FontData(face.name(), size, face.style()))
 {
-    return size() == 0;
 }
 
 

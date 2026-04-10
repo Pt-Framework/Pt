@@ -32,6 +32,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/PaintSurface.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Image.h>
@@ -93,13 +94,11 @@ class PT_FORMS_API Pixmap : public PaintSurface
         virtual void onFinish() override;
 
     public:
-        static void setFontDir(const System::Path& path);
-
         static std::string defaultFont();
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<std::string> fontNames();
+        static std::vector<Gfx::FontFace> fonts();
 
     public:
         PixmapImpl* impl()

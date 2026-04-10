@@ -148,12 +148,6 @@ void Pixmap::onFinish()
 }
 
 
-void Pixmap::setFontDir(const System::Path& path)
-{
-    PixmapImpl::setFontDir(path);
-}
-
-
 std::string Pixmap::defaultFont()
 {
     return PixmapImpl::defaultFont();
@@ -166,9 +160,9 @@ void Pixmap::setDefaultFont(const std::string& name)
 }
 
 
-std::vector<std::string> Pixmap::fontNames()
+std::vector<Gfx::FontFace> Pixmap::fonts()
 {
-    return PixmapImpl::fontNames();
+    return PixmapImpl::fonts();
 }
 
 } // namespace

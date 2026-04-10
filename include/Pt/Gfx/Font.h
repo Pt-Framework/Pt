@@ -42,20 +42,20 @@ namespace Pt {
 namespace Gfx {
 
 class FontData;
+class FontFace;
 
 class PT_GFX_API Font
 {
     public:
-        //! @brief Constructa a null font.
+        //! @brief Default constructor.
         Font();
 
         //! @brief Construct a font.
         Font( const std::string& name, std::size_t size,
               const std::string& style = std::string() );
 
-        /** @brief Returns true if null.
-        */
-        bool isNull() const;
+          //! @brief Construct a font from a font face.
+          Font(const FontFace& face, std::size_t size);
 
         //! @brief Returns the name of the font
         const std::string& name() const;
@@ -84,6 +84,18 @@ inline bool operator!=(const Font& a, const Font& b)
     return a.name()  != b.name()  ||
            a.style() != b.style() ||
            a.size()  != b.size();
+}
+
+
+inline bool operator<(const Font& a, const Font& b)
+{
+    if(a.name() != b.name())
+        return a.name() < b.name();
+
+    if(a.style() != b.style())
+        return a.style() < b.style();
+
+    return a.size() < b.size();
 }
 
 

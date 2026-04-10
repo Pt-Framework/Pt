@@ -37,6 +37,7 @@
 
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
@@ -155,13 +156,11 @@ class ImageCanvas : public Canvas
                              const Gfx::RectF* imgRect) override;
 
   public:
-    static void setFontDir(const System::Path& path);
-
     static const std::string& defaultFont();
 
     static void setDefaultFont(const std::string& name);
 
-    static std::vector<std::string> fontNames();
+    static std::vector<FontFace> fonts();
 
     private:
         static SkPath toSkia(const Gfx::Path& p);

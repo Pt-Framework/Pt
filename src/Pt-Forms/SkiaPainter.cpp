@@ -403,12 +403,6 @@ void SkiaPainter::drawImage(const Gfx::PointF& to, const Gfx::Image& image, cons
     _imgPainter.drawImage(to, image, imageRect);
 }
 
-
-void SkiaPainter::setFontDir(const System::Path& path)
-{
-    Gfx::ImagePainter::setFontDir(path);
-}
-
 std::string SkiaPainter::defaultFont()
 {
     return Gfx::ImagePainter::defaultFont();
@@ -421,9 +415,9 @@ void SkiaPainter::setDefaultFont(const std::string& name)
 }
 
 
-std::vector<std::string> SkiaPainter::fontNames()
+std::vector<Gfx::FontFace> SkiaPainter::fonts()
 {
-    return Gfx::ImagePainter::fontNames();
+    return Gfx::ImagePainter::fonts();
 }
 
 

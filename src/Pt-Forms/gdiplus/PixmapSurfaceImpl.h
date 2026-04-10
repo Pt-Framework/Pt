@@ -37,6 +37,7 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/System/Path.h>
 
 using std::max;
@@ -128,9 +129,7 @@ class PixmapSurfaceImpl
 
         static std::string& getDefaultFont();
 
-        static std::vector<std::string> fontNames();
-
-        static void setFontDir(const System::Path& path);
+        static std::vector<Gfx::FontFace> fonts();
 
         static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 

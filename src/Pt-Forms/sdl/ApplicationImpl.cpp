@@ -64,19 +64,6 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 {
 }
 
-
-void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
-{
-    Gfx::Bitmap::setFontDir(dir);
-}
-
-
-void ApplicationImpl::setDefaultFont(const std::string& fontName)
-{
-    Gfx::Bitmap::setDefaultFont(fontName);
-}
-
-
 Pt::Timespan ApplicationImpl::inactivityTime() const
 {
     Pt::DateTime now = Pt::System::Clock::getSystemTime();

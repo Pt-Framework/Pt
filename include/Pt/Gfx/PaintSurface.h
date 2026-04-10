@@ -34,6 +34,9 @@
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Path.h>
+
+#include <vector>
 
 namespace Pt {
 
@@ -83,6 +86,15 @@ class PT_GFX_API PaintSurface : private NonCopyable
         /** @brief Finishes painting to the surface.
         */
         void finish();
+
+    public:
+        static void addFonts(const System::Path& path);
+
+        static bool addFont(const System::Path& path);
+
+        static bool removeFont(const System::Path& path);
+
+        static const std::vector<System::Path>& fontFiles();
 
     protected:
         /** @brief Returns the image format.

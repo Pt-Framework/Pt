@@ -110,18 +110,6 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 {
 }
 
-
-void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
-{
-    PixmapImpl::setFontDir(dir);
-}
-
-void ApplicationImpl::setDefaultFont(const std::string& fname)
-{
-    PixmapImpl::setDefaultFont(fname);
-}
-
-
 Pt::Timespan ApplicationImpl::inactivityTime() const
 {
   return Pt::Timespan(0);
@@ -525,10 +513,6 @@ void ApplicationImpl::onKeyEvent(Window& window, XEvent& xev)
         _keyEvent.setRelease(key, ch);
 
     _keyEvent.setWidget(&window);
-    
-    Application::instance().processEvent(_keyEvent);
-}
-
 
 void ApplicationImpl::onConfigureNotify(Window& window, XEvent& xev)
 {

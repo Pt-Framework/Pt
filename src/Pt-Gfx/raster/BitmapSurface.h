@@ -31,6 +31,7 @@
 #define PT_GFX_RASTER_BITMAP_SURFACE_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/CompositionMode.h>
@@ -92,6 +93,12 @@ class PT_GFX_API BitmapSurface : private NonCopyable
                     const Bitmap& bitmap,
                     const Gfx::Paint& paint,
                     const Gfx::RectF* rect);
+
+    static const std::string& defaultFont();
+
+    static void setDefaultFont(const std::string& name);
+
+    static std::vector<FontFace> fonts();
 
     void putImage(const PointI& to, const Image& image, 
                   const RectI& imageRect, const RectI& clip,

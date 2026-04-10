@@ -232,8 +232,6 @@ MainWindow::MainWindow()
     _zoomSubMenuItem.setText("Zoom");
     _zoomSubMenuItem.setMenu(&_zoomMenu);
     _menu.addItem(_zoomSubMenuItem);
-
-    Forms::PixmapSurface::fontNames();
 }
 
 

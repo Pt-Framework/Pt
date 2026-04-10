@@ -237,18 +237,6 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
     DeleteObject( xorMask );
 }
 
-
-void ApplicationImpl::setFontDir(const Pt::System::Path& dir)
-{
-}
-
-
-void ApplicationImpl::setDefaultFont(const std::string& fontName)
-{
-    PixmapImpl::setDefaultFont(fontName);
-}
-
-
 Pt::Timespan ApplicationImpl::inactivityTime() const
 {
 	LASTINPUTINFO info = { 0 };

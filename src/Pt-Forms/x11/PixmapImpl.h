@@ -31,6 +31,7 @@
 #define Pt_Forms_PixmapImpl_h
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Gfx/FontFace.h>
 
 #ifndef PT_FORMS_X11_CORE
 #define PT_FORMS_X11_RASTER 1
@@ -135,14 +136,9 @@ class PixmapImpl
             Gfx::Bitmap::setDefaultFont(name);
         }
 
-        static std::vector<std::string> fontNames()
+        static std::vector<Gfx::FontFace> fonts()
         {
-            return Gfx::Bitmap::fontNames();
-        }
-        
-        static void setFontDir(const System::Path& path)
-        {
-            Gfx::Bitmap::setFontDir(path);
+            return Gfx::Bitmap::fonts();
         }
     
     private:
@@ -160,6 +156,7 @@ class PixmapImpl
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/CompositionMode.h>
@@ -300,9 +297,7 @@ class PixmapSurfaceImpl
 
         static std::string& getDefaultFont();
 
-        static std::vector<std::string> fontNames();
-
-        static void setFontDir(const System::Path& path);
+        static std::vector<Gfx::FontFace> fonts();
 
         ::Drawable drawable()
         {

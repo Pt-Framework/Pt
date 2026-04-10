@@ -31,6 +31,7 @@
 #define Pt_Forms_PixmapImpl_h
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Bitmap.h>
 
 namespace Pt {
@@ -133,14 +134,9 @@ class PixmapImpl
             Gfx::Bitmap::setDefaultFont(name);
         }
 
-        static std::vector<std::string> fontNames()
+        static std::vector<Gfx::FontFace> fonts()
         {
-            return Gfx::Bitmap::fontNames();
-        }
-        
-        static void setFontDir(const System::Path& path)
-        {
-            Gfx::Bitmap::setFontDir(path);
+            return Gfx::Bitmap::fonts();
         }
     
     private:

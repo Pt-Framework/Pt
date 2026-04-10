@@ -38,7 +38,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
-#include "FontManager.h"
+#include "../freetype/FreeTypeRenderer.h"
 
 namespace Pt {
 
@@ -274,30 +274,28 @@ class BitmapCanvas : public Canvas
     private:
         BitmapSurface* _surface;
         Rgb32Image*    _image;
-      double         _lastScaleFactor;
+        double         _lastScaleFactor;
 
         CompositionMode _compositionMode;
         
-      Pen                         _logicalPen;
-        Pen                         _pen;
-        Rgb32Color                  _penColor;
-        Rgb32Image                  _penBuffer;
+        Pen                     _logicalPen;
+        Pen                     _pen;
+        Rgb32Color              _penColor;
+        Rgb32Image              _penBuffer;
 
-        Brush                       _brush;
-        Rgb32Image                  _brushBuffer;
-        const Rgb32Image*           _brushSource;
-        bool                        _isGradient;
+        Brush                   _brush;
+        Rgb32Image              _brushBuffer;
+        const Rgb32Image*       _brushSource;
+        bool                    _isGradient;
 
-        Font                        _font;
-        RectF                       _clip;
-        RectI                       _currentClip;
-        bool                        _hasClip;
+        Font                    _font;
+        RectF                   _clip;
+        RectI                   _currentClip;
+        bool                    _hasClip;
 
-        std::vector<Polygon> _flatPath;      
+        std::vector<Polygon>    _flatPath;
 
-        FTC_FaceID              _faceId;
-        std::size_t             _fontSize;
-        FTC_ImageTypeRec        _imageType;
+        FreeTypeRenderer        _fontRenderer;
 };
 
 } //namespace

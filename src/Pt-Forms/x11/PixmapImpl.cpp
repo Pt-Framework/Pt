@@ -936,11 +936,12 @@ std::string& PixmapSurfaceImpl::getDefaultFont()
 }
 
 
-std::vector<std::string> PixmapSurfaceImpl::fontNames()
+std::vector<Gfx::FontFace> PixmapSurfaceImpl::fonts()
 {
-    std::vector<std::string> fonts;
+    std::vector<Gfx::FontFace> faces;
 
 #ifndef _AIX
+    std::vector<std::string> fonts;
     Display* display = Application::instance().impl()->display();
     unsigned int screen = DefaultScreen(display);
     char* family = 0;
@@ -953,14 +954,13 @@ std::vector<std::string> PixmapSurfaceImpl::fontNames()
     }
     
     XftFontSetDestroy(fontSet);
+
+    fonts.erase(std::unique(fonts.begin(), fonts.end()), fonts.end());
+    for(std::vector<std::string>::const_iterator it = fonts.begin(); it != fonts.end(); ++it)
+        faces.push_back(Gfx::FontFace(*it));
 #endif
 
-    return fonts;
-}
-
-
-void PixmapSurfaceImpl::setFontDir(const System::Path& path)
-{
+    return faces;
 }
 
 } // namespace

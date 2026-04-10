@@ -221,12 +221,6 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::setDefaultFont(const std::string& fontName)
-{
-    PixmapSurfaceImpl::setDefaultFont(fontName);
-}
-
-
 Pt::Timespan ApplicationImpl::inactivityTime() const
 {
 	LASTINPUTINFO info = { 0 };

@@ -31,7 +31,7 @@
 
 
 #include "BitmapSurface.h"
-#include "FontManager.h"
+#include "../freetype/FreeTypeRenderer.h"
 
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
@@ -151,9 +151,7 @@ class BitmapCanvas : public Canvas
         BLPath                  _blPath;
         Gfx::Polygon            _polygon;
         std::vector<BLPoint>    _points;
-        FTC_FaceID              _faceId;
-        std::size_t             _fontSize;
-        FTC_ImageTypeRec        _imageType;
+        FreeTypeRenderer        _fontRenderer;
 };
 
 } //namespace

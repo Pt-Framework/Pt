@@ -60,6 +60,12 @@ namespace Pt {
 
 namespace Gfx {
 
+FreeType& FreeType::instance()
+{
+    static FreeType freetype;
+    return freetype;
+}
+
 FreeType::FreeType()
 : _defaultFace(DefaultFaceId)
 {
@@ -80,7 +86,7 @@ FreeType::FreeType()
 
     System::Path  path = System::Path( System::Path::curdir()) / "fonts";
     std::string lp = path.toLocal();
-    setFontDir(path);
+    addFonts(path);
 }
 
 
@@ -122,34 +128,28 @@ void FreeType::setDefaultFont(const std::string& font)
 }
 
 
-std::vector<std::string> FreeType::fontNames() const
+std::vector<FontFace> FreeType::fonts() const
 {
     // LOCK
 
-    std::vector<std::string> names;
-    names.push_back("DejaVu Sans");
+    std::vector<FontFace> faces;
+    faces.push_back(FontFace("DejaVu Sans"));
 
     Fonts::const_iterator it;
     for(it = _fonts.begin(); it != _fonts.end(); ++it)
-    {
-        if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
-            names.push_back( it->first.name() );
-    }
+        faces.push_back(FontFace(it->first.name(), it->first.style()));
 
     // UNLOCK
 
-    return names;
+    return faces;
 }
 
 
-void FreeType::setFontDir(const System::Path& path)
+void FreeType::addFonts(const System::Path& path)
 {
     // LOCK
 
     _fontDir = path;
-
-    _fonts.clear();
-    _files.clear();
 
     if( ! System::FileInfo::exists(_fontDir) )
         return;

@@ -29,6 +29,7 @@
 #ifndef PT_FORMS_COCOA_PIXMAP_IMPL_H
 #define PT_FORMS_COCOA_PIXMAP_IMPL_H
 
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
 
@@ -216,14 +217,7 @@ class PixmapImpl
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<std::string> fontNames();
-
-        static void setFontDir(const System::Path& path);
-
-    private: 
-        static std::string& getDefaultFont();
-
-        static std::string getSystemFont();
+        static std::vector<Gfx::FontFace> fonts();
 
         void create();
     

@@ -82,7 +82,9 @@ class PT_FORMS_API Application : public Pt::System::Application
 
         StyleOptions& styleOptions();
 
-        void setFontDir(const Pt::System::Path& dir);
+        void addFonts(const Pt::System::Path& dir);
+
+        std::string defaultFont() const;
 
         void setDefaultFont(const std::string& fontName);
 

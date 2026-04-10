@@ -36,9 +36,9 @@
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
-#include <Pt/Singleton.h>
 
 #include <string>
 #include <vector>
@@ -55,10 +55,8 @@ class TextMetrics;
 class CompositionMode;
 class Transform;
 
-class FreeType : public Pt::Singleton<FreeType>
+class FreeType
 {
-    friend class Pt::Singleton<FreeType>;
-
   public:
 
     public:
@@ -68,6 +66,8 @@ class FreeType : public Pt::Singleton<FreeType>
             { FreeType::instance(); }
         };
 
+                static FreeType& instance();
+
         ~FreeType();
 
         const std::string& defaultFont() const;
@@ -76,9 +76,9 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void setDefaultFont(const std::string& font);
 
-        std::vector<std::string> fontNames() const;
+        std::vector<FontFace> fonts() const;
 
-        void setFontDir(const System::Path& path);
+        void addFonts(const System::Path& path);
 
         TextMetrics textMetrics(const String& text,
                                 FTC_FaceID faceId, 
@@ -96,8 +96,12 @@ class FreeType : public Pt::Singleton<FreeType>
                   const CompositionMode& mode, const Transform& tf, 
                   FTC_FaceID faceId, std::size_t fontSize);
 
-    protected:
+    private:
         FreeType();
+
+        FreeType(const FreeType&) = delete;
+
+        FreeType& operator=(const FreeType&) = delete;
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 

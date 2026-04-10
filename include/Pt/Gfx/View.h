@@ -35,6 +35,8 @@
 #include <Pt/TypeTraits.h>
 #include <Pt/Types.h>
 
+#include <algorithm>
+
 namespace Pt {
 
 namespace Gfx {

@@ -339,20 +339,12 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
 void BitmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
+    _fontRenderer.setFont(_font);
 }
 
 
 void BitmapCanvas::onApplyFont()
-{   
-        // findFaceId returns default font for emtpy font names
-    _faceId = FreeType::instance().findFaceId(_font);
-
-    // setup the image type
-    _imageType.face_id = _faceId;
-    _imageType.width = _font.size();
-    _imageType.height = _font.size();
-    _imageType.flags = FT_LOAD_DEFAULT;
-    
+{
 }
 
 
@@ -542,7 +534,7 @@ void BitmapCanvas::onFillPath(const Gfx::Path& path)
 
 TextMetrics BitmapCanvas::onGetTextMetrics(const String& text) const
 {
-    return FreeType::instance().textMetrics(text, _faceId, _font.size());
+    return _fontRenderer.textMetrics(text);
 }
 
 
@@ -558,8 +550,8 @@ void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text,
     if(tform)
         tf *= *tform;
 
-    FreeType::instance().draw(*_image, 0, 0, text, _pen.color(), _currentClip,
-                              _compositionMode, _faceId, _font.size(), &tf);
+    _fontRenderer.draw(*_image, 0, 0, text, _pen.color(), _currentClip,
+                       _compositionMode, &tf);
 }
 
 

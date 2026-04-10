@@ -202,12 +202,6 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
-void ApplicationImpl::setDefaultFont(const std::string& fontName)
-{
-    PixmapImpl::setDefaultFont(fontName);
-}
-
-
 void ApplicationImpl::init()
 {
     [PtGuiApplication sharedApplication];

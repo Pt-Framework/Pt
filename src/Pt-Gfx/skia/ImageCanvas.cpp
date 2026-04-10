@@ -480,12 +480,6 @@ void ImageCanvas::onFillPath(const Gfx::Path& path, float smoothness)
 }
 
 
-void ImageCanvas::setFontDir(const Pt::System::Path& path)
-{
-    FreeType::instance().setFontDir(path);
-}
-
-
 const std::string& ImageCanvas::defaultFont()
 {
     return  FreeType::instance().defaultFont();
@@ -498,9 +492,9 @@ void ImageCanvas::setDefaultFont(const std::string& f)
 }
 
 
-std::vector<std::string> ImageCanvas::fontNames()
+std::vector<FontFace> ImageCanvas::fonts()
 {
-    return FreeType::instance().fontNames();
+    return FreeType::instance().fonts();
 }
 
 

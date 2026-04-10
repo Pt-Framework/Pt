@@ -77,12 +77,6 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void setCursor(const Cursor* cursor);
 
-        void setFontDir(const Pt::System::Path& dir)
-        {
-        }
-
-        void setDefaultFont(const std::string& fontName);
-
         Pt::Timespan inactivityTime() const;
 
         void grabPointer(Window& grabber);

@@ -32,6 +32,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/PaintSurface.h>
+#include <Pt/Gfx/FontFace.h>
 
 //#define PT_FORMS_WIN32_RASTER 1
 //#define PT_FORMS_GDIPLUS 1
@@ -152,14 +153,9 @@ class PixmapImpl
             Gfx::Bitmap::setDefaultFont(name);
         }
 
-        static std::vector<std::string> fontNames()
+        static std::vector<Gfx::FontFace> fonts()
         {
-            return Gfx::Bitmap::fontNames();
-        }
-        
-        static void setFontDir(const System::Path& path)
-        {
-            Gfx::Bitmap::setFontDir(path);
+            return Gfx::Bitmap::fonts();
         }
     
     private:
@@ -218,14 +214,7 @@ class PixmapImpl
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<std::string> fontNames();
-
-        static void setFontDir(const System::Path& path);
-
-    private: 
-        static std::string& getDefaultFont();
-
-        static std::string getSystemFont();
+        static std::vector<Gfx::FontFace> fonts();
 
     private:
         Gfx::SizeF     _physicalSize;

@@ -75,6 +75,9 @@ SharedLibrary Pt-Gfx : $(PT_GFX_IMPL_SOURCES)
                        Canvas.cpp
                        Color.cpp
                        Font.cpp
+                       FontFace.cpp
+                       FontProvider.cpp
+                       FontRegistry.cpp
                        Image.cpp
                        ImageFormat.cpp
                        JpegReader.cpp

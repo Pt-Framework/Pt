@@ -42,6 +42,7 @@
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/Forms/InvalidateEvent.h>
 #include <Pt/Forms/LayoutEvent.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/PaintEvent.h>
 #include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Forms/MoveEvent.h>
@@ -51,6 +52,7 @@
 #include <Pt/Forms/CloseEvent.h>
 #include <Pt/Forms/FocusEvent.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/System/FileInfo.h>
 
 #include <cmath>
@@ -209,15 +211,21 @@ StyleOptions& Application::styleOptions()
 }
 
 
-void Application::setFontDir(const Pt::System::Path& dir)
+void Application::addFonts(const Pt::System::Path& dir)
 {
-    _impl->setFontDir(dir);
+    Gfx::PaintSurface::addFonts(dir);
+}
+
+
+std::string Application::defaultFont() const
+{
+    return Pixmap::defaultFont();
 }
 
 
 void Application::setDefaultFont(const std::string& fontName)
 {
-    _impl->setDefaultFont(fontName);
+    Pixmap::setDefaultFont(fontName);
 }
 
 

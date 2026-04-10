@@ -148,14 +148,8 @@
     <Filter Include="Pt-Forms\demo">
       <UniqueIdentifier>{a671ee7a-b3c8-4a1b-91a0-ff01ecaa6b90}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Forms\egl-gbm">
-      <UniqueIdentifier>{2cf44f88-5fa7-4298-8220-2eee4dc4b1ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Forms\Events">
       <UniqueIdentifier>{fce78a73-3874-4da3-9687-1fef15f5a3f4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Forms\egl-test">
-      <UniqueIdentifier>{8e99da40-cf75-4986-8cea-761a5d784780}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pt-Forms\gdiplus">
       <UniqueIdentifier>{c234da96-682b-43ed-a984-7e0797e06784}</UniqueIdentifier>
@@ -1539,10 +1533,10 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb32Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\View.h">
@@ -1563,10 +1557,25 @@
     <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ConvertColor.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\FontFace.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\FontProvider.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\FontRegistry.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
@@ -1591,6 +1600,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Pixel.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h">
@@ -1932,24 +1944,6 @@
     <ClInclude Include="..\Pt-Forms\demo\MainWindow.h">
       <Filter>Pt-Forms\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-gbm\ApplicationImpl.h">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-gbm\InputDevice.h">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-gbm\MainWindowImpl.h">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-gbm\PainterImpl.h">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-gbm\PaintSurfaceImpl.h">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-gbm\ScreenImpl.h">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\ActivateEvent.h">
       <Filter>Pt-Forms\Events</Filter>
     </ClInclude>
@@ -2000,36 +1994,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\WindowStateEvent.h">
       <Filter>Pt-Forms\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\Display.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\Matrix.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\RenderScreen.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\ShaderProgram.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\Shaders.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\Shape.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\SolidRect.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\Texture.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\TextureRect.h">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\egl-test\Vector.h">
-      <Filter>Pt-Forms\egl-test</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\gdiplus\ApplicationImpl.h">
       <Filter>Pt-Forms\gdiplus</Filter>
@@ -2895,9 +2859,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Polygon.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Gfx\freetype\FontManager.h">
-      <Filter>Pt-Gfx\freetype</Filter>
-    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\blend2d\Dasher.h">
       <Filter>Pt-Gfx\blend2d</Filter>
     </ClInclude>
@@ -2925,6 +2886,9 @@
     <ClInclude Include="..\Pt-Forms\win32\PixmapCanvas.h">
       <Filter>Pt-Forms\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\FontRegistry.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
     <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSans.h">
       <Filter>Pt-Gfx\freetype</Filter>
     </ClInclude>
@@ -2937,6 +2901,12 @@
     <ClInclude Include="..\Pt-Gfx\freetype\DejaVuSansItalic.h">
       <Filter>Pt-Gfx\freetype</Filter>
     </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\FreeTypeFontProvider.h">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Gfx\freetype\FreeTypeRenderer.h">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ViewBase.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -2946,10 +2916,13 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb16.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16.hpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Image.hpp">
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32.hpp">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\View.hpp">
@@ -4620,9 +4593,6 @@
     <ClCompile Include="..\Pt-Gfx\Argb32.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\Argb32Image.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Brush.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -4634,6 +4604,21 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Font.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\FontFace.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\FontProvider.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\FontRegistry.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\freetype\FreeTypeFontProvider.cpp">
+      <Filter>Pt-Gfx\freetype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\freetype\FreeTypeRenderer.cpp">
+      <Filter>Pt-Gfx\freetype</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Image.cpp">
       <Filter>Pt-Gfx</Filter>
@@ -4677,19 +4662,16 @@
     <ClCompile Include="..\Pt-Gfx\tests\PathTest.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\tests\BlockscaleTest.cpp">
-      <Filter>Pt-Gfx\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest.cpp">
-      <Filter>Pt-Gfx\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\tests\ImagePainterTest2.cpp">
+    <ClCompile Include="..\Pt-Gfx\tests\BlockScaleTest.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\Pt-Gfx-test.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\Rgb32ColorTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\Rgb32Test.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\Yuv12Test.cpp">
@@ -4919,51 +4901,6 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\demo\PainterDemo.cpp">
       <Filter>Pt-Forms\demo</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-gbm\ApplicationImpl.cpp">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-gbm\InputDevice.cpp">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-gbm\MainWindowImpl.cpp">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-gbm\PainterImpl.cpp">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-gbm\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-gbm\ScreenImpl.cpp">
-      <Filter>Pt-Forms\egl-gbm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\Display.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\main.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\Matrix.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\RenderScreen.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\ShaderProgram.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\Shape.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\SolidRect.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\Texture.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\egl-test\TextureRect.cpp">
-      <Filter>Pt-Forms\egl-test</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\gdiplus\ApplicationImpl.cpp">
       <Filter>Pt-Forms\gdiplus</Filter>
@@ -5651,9 +5588,6 @@
     </ClCompile>
     <ClCompile Include="..\Pt-JsonRpc\Responder.cpp">
       <Filter>Pt-JsonRpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Gfx\freetype\FontManager.cpp">
-      <Filter>Pt-Gfx\freetype</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Bitmap.cpp">
       <Filter>Pt-Gfx</Filter>

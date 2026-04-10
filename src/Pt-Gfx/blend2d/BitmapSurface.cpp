@@ -28,6 +28,7 @@
 
 #include "BitmapSurface.h"
 #include "BitmapCanvas.h"
+#include "../freetype/FreeTypeFontProvider.h"
 
 #include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/Painter.h>
@@ -164,6 +165,24 @@ void BitmapSurface::finish()
 {
     if( _rasterContext.target_image() )
         _rasterContext.end();
+}
+
+
+const std::string& BitmapSurface::defaultFont()
+{
+    return FreeTypeFontProvider::instance().defaultFont();
+}
+
+
+void BitmapSurface::setDefaultFont(const std::string& name)
+{
+    FreeTypeFontProvider::instance().setDefaultFont(name);
+}
+
+
+std::vector<FontFace> BitmapSurface::fonts()
+{
+    return FreeTypeFontProvider::instance().fonts();
 }
 
 void BitmapSurface::drawBitmap(const Pt::Gfx::PointF& toF,

@@ -30,6 +30,7 @@
 #define PT_GFX_BLEND2D_BITMAP_SURFACE_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/CompositionMode.h>
@@ -44,7 +45,7 @@
 #include <string>
 #include <vector>
 #include <cstddef>
-#include "FontManager.h"
+
 #include <blend2d.h>
 
 namespace Pt {
@@ -97,6 +98,12 @@ class PT_GFX_API BitmapSurface : private NonCopyable
                     const Gfx::Paint& paint,
                     const Gfx::RectF* rect);
 
+    static const std::string& defaultFont();
+
+    static void setDefaultFont(const std::string& name);
+
+    static std::vector<FontFace> fonts();
+
     void putImage(const PointI& to, const Image& image,
                   const RectI& imageRect, const RectI& clip,
                   const CompositionMode& mode);
@@ -109,9 +116,6 @@ class PT_GFX_API BitmapSurface : private NonCopyable
     Image           _image;
     Gfx::SizeF      _physicalSize;
     Gfx::Scaling    _scaling;
-    FTC_FaceID       _faceId;
-    std::size_t      _fontSize;
-    FTC_ImageTypeRec _imageType;
 };
 
 } // namespace

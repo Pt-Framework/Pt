@@ -31,6 +31,7 @@
 #define PT_GFX_BITMAP_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/Point.h>
@@ -93,13 +94,11 @@ class PT_GFX_API Bitmap : public PaintSurface
         virtual void onFinish() override;
 
     public:
-        static void setFontDir(const System::Path& path);
-
         static const std::string& defaultFont();
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<std::string> fontNames();
+        static std::vector<FontFace> fonts();
 
     private:
         BitmapSurface* _surface;

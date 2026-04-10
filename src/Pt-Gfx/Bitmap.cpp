@@ -28,7 +28,6 @@
 */
 
 #include "BitmapSurface.h"
-#include "FontManager.h"
 
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
@@ -141,27 +140,21 @@ void Bitmap::onFinish()
 }
 
 
-void Bitmap::setFontDir(const Pt::System::Path& path)
-{
-    FreeType::instance().setFontDir(path);
-}
-
-
 const std::string& Bitmap::defaultFont()
 {
-    return  FreeType::instance().defaultFont();
+    return BitmapSurface::defaultFont();
 }
 
 
 void Bitmap::setDefaultFont(const std::string& f)
 {
-    FreeType::instance().setDefaultFont(f);
+    BitmapSurface::setDefaultFont(f);
 }
 
 
-std::vector<std::string> Bitmap::fontNames()
+std::vector<FontFace> Bitmap::fonts()
 {
-    return FreeType::instance().fontNames();
+    return BitmapSurface::fonts();
 }
 
 } // namespace
