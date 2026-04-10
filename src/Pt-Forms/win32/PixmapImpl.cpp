@@ -30,172 +30,15 @@
 #include "win32.h"
 #include "PixmapImpl.h"
 #include "PixmapCanvas.h"
+#include "GdiFontProvider.h"
 
 #include <Pt/Forms/View.h>
 #include <Pt/Forms/Pixmap.h>
 
 #include <Pt/Gfx/Bitmap.h>
-#include <Pt/Gfx/FontFace.h>
-#include <Pt/Gfx/FontProvider.h>
-#include <Pt/Gfx/FontRegistry.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
-#include <Pt/System/Directory.h>
-#include <Pt/System/FileInfo.h>
-
-#include <algorithm>
-#include <set>
-
-namespace {
-
-#ifdef PT_FORMS_WIN32_RASTER
-
-#else // PT_FORMS_WIN32_RASTER
-
-#ifdef _WIN32_WCE
-static int CALLBACK EnumFontsProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param);
-#else
-static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* physFont, DWORD type, LPARAM param);
-#endif
-
-class GdiFontProvider : public Pt::Gfx::FontProvider
-{
-    public:
-        struct Init
-        {
-            Init()
-            { GdiFontProvider::instance(); }
-        };
-
-        static GdiFontProvider& instance()
-        {
-            static GdiFontProvider provider;
-            return provider;
-        }
-
-        const std::string& defaultFont() const
-        {
-            return _defaultFont;
-        }
-
-        void setDefaultFont(const std::string& font)
-        {
-            _defaultFont = font;
-        }
-
-        std::vector<Pt::Gfx::FontFace> fonts() const
-        {
-            std::vector<Pt::Gfx::FontFace> faces;
-            HDC dc = GetDC(NULL);
-
-#ifdef _WIN32_WCE
-            EnumFonts(dc, 0, (FONTENUMPROC)&EnumFontsProc, (LPARAM)(&faces));
-#else
-            LOGFONT lf;
-            ZeroMemory(&lf, sizeof(lf));
-            lf.lfCharSet = DEFAULT_CHARSET;
-
-            EnumFontFamiliesEx(dc, &lf, (FONTENUMPROC)&EnumFontFamExProc, (LPARAM)(&faces), 0);
-#endif
-
-            ReleaseDC(NULL, dc);
-
-            std::sort(faces.begin(), faces.end());
-            faces.erase(std::unique(faces.begin(), faces.end()), faces.end());
-            return faces;
-        }
-
-    private:
-        GdiFontProvider()
-        {
-            const std::vector<Pt::System::Path>& fontFiles = Pt::Gfx::FontRegistry::instance().fontFiles();
-            for(std::vector<Pt::System::Path>::const_iterator it = fontFiles.begin(); it != fontFiles.end(); ++it)
-                addFont(*it);
-        }
-
-        GdiFontProvider(const GdiFontProvider&) = delete;
-
-        GdiFontProvider& operator=(const GdiFontProvider&) = delete;
-
-    public:
-        ~GdiFontProvider()
-        {
-            while( ! _files.empty() )
-            {
-                std::set<std::string>::const_iterator it = _files.begin();
-                RemoveFontResourceExA(it->c_str(), FR_PRIVATE, 0);
-                _files.erase(it);
-            }
-        }
-
-        virtual void onAddFont(const Pt::System::Path& path) override
-        {
-            if( ! Pt::System::FileInfo::exists(path) )
-                return;
-
-            std::string localPath = path.toLocal();
-            if(_files.find(localPath) != _files.end())
-                return;
-
-            if(AddFontResourceExA(localPath.c_str(), FR_PRIVATE, 0) == 0)
-                return;
-
-            _files.insert(localPath);
-        }
-
-        virtual void onRemoveFont(const Pt::System::Path& path) override
-        {
-            std::string localPath = path.toLocal();
-            std::set<std::string>::iterator pos = _files.find(localPath);
-            if(pos == _files.end())
-                return;
-
-            RemoveFontResourceExA(pos->c_str(), FR_PRIVATE, 0);
-            _files.erase(pos);
-        }
-
-    private:
-        std::set<std::string> _files;
-        std::string _defaultFont;
-};
-
-static GdiFontProvider::Init initGdiFontProvider;
-
-#ifdef _WIN32_WCE
-
-static int CALLBACK EnumFontsProc(LOGFONT* logFont, TEXTMETRIC* physFont, DWORD type, LPARAM param)
-{
-    // Ignore fonts with @ as first character.
-    if (logFont->lfFaceName[0] != '@')
-    {
-        std::string name = Pt::win32::toMultiByte(logFont->lfFaceName);
-        reinterpret_cast<std::vector<Pt::Gfx::FontFace>*>(param)->push_back(Pt::Gfx::FontFace(name));
-    }
-
-    return 1;
-}
-
-#else
-
-static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTMETRICEX* physFont, DWORD type, LPARAM param)
-{
-    // Ignore fonts with @ as first character.
-    if (logFont->elfLogFont.lfFaceName[0] != '@')
-    {
-        std::string name = Pt::win32::toMultiByte(logFont->elfLogFont.lfFaceName);
-        std::string style = Pt::win32::toMultiByte(reinterpret_cast<LPCTSTR>(logFont->elfStyle));
-        reinterpret_cast<std::vector<Pt::Gfx::FontFace>*>(param)->push_back(Pt::Gfx::FontFace(name, style));
-    }
-
-    return 1;
-}
-
-#endif // _WIN32_WCE
-
-#endif // PT_FORMS_WIN32_RASTER
-
-} // namespace
 
 namespace Pt {
 
@@ -499,9 +342,15 @@ void PixmapImpl::setDefaultFont(const std::string& f)
 }
 
 
-std::vector<Gfx::FontFace> PixmapImpl::fonts()
+std::vector<std::string> PixmapImpl::fontFamilies()
 {
-    return GdiFontProvider::instance().fonts();
+    return GdiFontProvider::instance().fontFamilies();
+}
+
+
+std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
+{
+    return GdiFontProvider::instance().fontFaces(family);
 }
 
 #endif // PT_FORMS_WIN32_RASTER

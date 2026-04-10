@@ -31,40 +31,56 @@
 #ifndef PT_GFX_FONT_H
 #define PT_GFX_FONT_H
 
-#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FontBase.h>
 #include <Pt/SmartPtr.h>
 
-#include <string>
 #include <cstddef>
+#include <string>
 
 namespace Pt {
 
 namespace Gfx {
 
 class FontData;
-class FontFace;
 
-class PT_GFX_API Font
+class PT_GFX_API Font : public FontBase
 {
     public:
         //! @brief Default constructor.
         Font();
 
-        //! @brief Construct a font.
-        Font( const std::string& name, std::size_t size,
-              const std::string& style = std::string() );
+        //! @brief Construct a font with an exact style name hint.
+        Font(const std::string& family, std::size_t size,
+             const std::string& styleName,
+             Weight weight = Weight::Normal,
+             Slant slant = Slant::Normal);
 
-        //! @brief Construct a font from a font face.
-        Font(const FontFace& face, std::size_t size);
+        //! @brief Construct a font with explicit weight and slant.
+        Font(const std::string& family, std::size_t size,
+             Weight weight = Weight::Normal,
+             Slant slant = Slant::Normal);
 
-        //! @brief Returns the name of the font
+        //! @brief Returns the family of the font.
+        const std::string& family() const;
+
+        //! @brief Returns the family of the font.
+        //! Alias for family().
         const std::string& name() const;
 
         //! @brief Returns the size of the font
         std::size_t size() const;
 
-        //! @brief Returns the style of the font
-        const std::string& style() const;
+        //! @brief Returns the optional exact style name hint.
+        const std::string& styleName() const;
+
+        //! @brief Returns true if an exact style name hint is set.
+        bool hasStyleName() const;
+
+        //! @brief Returns the weight of the font request.
+        Weight weight() const;
+
+        //! @brief Returns the slant of the font request.
+        Slant slant() const;
 
     private:
         SmartPtr<FontData> _fontData;
@@ -73,29 +89,39 @@ class PT_GFX_API Font
 
 inline bool operator==(const Font& a, const Font& b)
 {
-    return a.name()  == b.name()  &&
-           a.style() == b.style() &&
-           a.size()  == b.size();
+    return a.family() == b.family() &&
+           a.weight() == b.weight() &&
+           a.slant()  == b.slant()  &&
+           a.size()   == b.size()   &&
+           a.styleName() == b.styleName();
 }
 
 
 inline bool operator!=(const Font& a, const Font& b)
 {
-    return a.name()  != b.name()  ||
-           a.style() != b.style() ||
-           a.size()  != b.size();
+    return a.family() != b.family() ||
+           a.weight() != b.weight() ||
+           a.slant()  != b.slant()  ||
+           a.size()   != b.size()   ||
+           a.styleName() != b.styleName();
 }
 
 
 inline bool operator<(const Font& a, const Font& b)
 {
-    if(a.name() != b.name())
-        return a.name() < b.name();
+    if(a.family() != b.family())
+        return a.family() < b.family();
 
-    if(a.style() != b.style())
-        return a.style() < b.style();
+    if(a.weight() != b.weight())
+        return a.weight() < b.weight();
 
-    return a.size() < b.size();
+    if(a.slant() != b.slant())
+        return a.slant() < b.slant();
+
+    if(a.size() != b.size())
+        return a.size() < b.size();
+
+    return a.styleName() < b.styleName();
 }
 
 
@@ -103,29 +129,38 @@ class FontData
 {
     public:
         FontData()
-        : _name()
+        : _family()
         , _size(0)
+        , _styleName()
+        , _weight(FontBase::Weight::Normal)
+        , _slant(FontBase::Slant::Normal)
         {
         }
 
-        FontData( const std::string& name, std::size_t size,
-                  const std::string& style = std::string() )
-        : _name(name)
-        ,  _size(size)
-        ,  _style(style)
+        FontData(const std::string& family, std::size_t size,
+                 FontBase::Weight weight = FontBase::Weight::Normal,
+                 FontBase::Slant slant = FontBase::Slant::Normal,
+                 const std::string& styleName = std::string())
+        : _family(family)
+        , _size(size)
+        , _styleName(styleName)
+        , _weight(weight)
+        , _slant(slant)
         {
         }
 
-        FontData(const std::string& name, const FontData& font)
-        : _name(name)
+        FontData(const std::string& family, const FontData& font)
+        : _family(family)
         , _size(font._size)
-        , _style(font._style)
+        , _styleName(font._styleName)
+        , _weight(font._weight)
+        , _slant(font._slant)
         {
         }
 
-        const std::string& name() const
+        const std::string& family() const
         {
-            return _name;
+            return _family;
         }
 
         std::size_t size() const
@@ -133,15 +168,32 @@ class FontData
             return _size;
         }
 
-        const std::string& style() const
+        const std::string& styleName() const
         {
-            return _style;
+            return _styleName;
+        }
+
+        bool hasStyleName() const
+        {
+            return ! _styleName.empty();
+        }
+
+        FontBase::Weight weight() const
+        {
+            return _weight;
+        }
+
+        FontBase::Slant slant() const
+        {
+            return _slant;
         }
 
     private:
-        std::string _name;
+        std::string _family;
         std::size_t _size;
-        std::string _style;
+        std::string _styleName;
+        FontBase::Weight _weight;
+        FontBase::Slant _slant;
 };
 
 } //namespace

@@ -76,7 +76,9 @@ class FreeType
 
         void setDefaultFont(const std::string& font);
 
-        std::vector<FontFace> fonts() const;
+        std::vector<std::string> fontFamilies() const;
+
+        std::vector<FontFace> fontFaces(const std::string& family) const;
 
         void addFonts(const System::Path& path);
 
@@ -118,8 +120,19 @@ class FreeType
         {
             inline bool operator()(const Font& a, const Font& b) const
             {
-                return a.name() == b.name() ? a.style() < b.style()
-                                            : a.name() < b.name();
+                if(a.family() != b.family())
+                    return a.family() < b.family();
+
+                if(a.weight() != b.weight())
+                    return a.weight() < b.weight();
+
+                if(a.slant() != b.slant())
+                    return a.slant() < b.slant();
+
+                if(a.styleName() != b.styleName())
+                    return a.styleName() < b.styleName();
+
+                return false;
             }
         };
 

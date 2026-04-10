@@ -152,9 +152,15 @@ void Bitmap::setDefaultFont(const std::string& f)
 }
 
 
-std::vector<FontFace> Bitmap::fonts()
+std::vector<std::string> Bitmap::fontFamilies()
 {
-    return BitmapSurface::fonts();
+    return BitmapSurface::fontFamilies();
+}
+
+
+std::vector<FontFace> Bitmap::fontFaces(const std::string& family)
+{
+    return BitmapSurface::fontFaces(family);
 }
 
 } // namespace

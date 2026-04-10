@@ -220,7 +220,6 @@ void BitmapCanvas::onApplyFont()
 }
 
 
-
 void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
     _hasClip = clip != 0;

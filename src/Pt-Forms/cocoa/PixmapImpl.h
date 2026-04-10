@@ -217,7 +217,9 @@ class PixmapImpl
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<Gfx::FontFace> fonts();
+        static std::vector<std::string> fontFamilies();
+
+        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
 
         void create();
     

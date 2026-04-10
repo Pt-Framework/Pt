@@ -45,7 +45,7 @@ PushButton::PushButton()
 , _direction(Left)
 , _hasRenderer(false)
 {
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    _font = font();
 }
 
 
@@ -167,44 +167,16 @@ void PushButton::setTextColor(const Gfx::ColorF& color)
 }
 
 
-const std::string& PushButton::font() const
+const Gfx::Font& PushButton::font() const
 {
-    return _fontName ? *_fontName
-                     : Application::instance().styleOptions().font().name();
+    return _fontValue ? *_fontValue
+                      : Application::instance().styleOptions().font();
 }
 
 
-void PushButton::setFont(const std::string& fontName)
+void PushButton::setFont(const Gfx::Font& font)
 {
-    _fontName.reset( new std::string(fontName) );
-    invalidate();
-}
-
-
-std::size_t PushButton::fontSize() const
-{
-    return _fontSize ? *_fontSize
-                     : Application::instance().styleOptions().font().size();
-}
-
-
-void PushButton::setFontSize(const std::size_t s)
-{
-    _fontSize.reset( new std::size_t(s) );
-    invalidate();
-}
-
-
-const std::string& PushButton::fontStyle() const
-{
-    return _fontStyle ? *_fontStyle
-                      : Application::instance().styleOptions().font().style();
-}
-
-
-void PushButton::setFontStyle(const std::string& style)
-{
-    _fontStyle.reset( new std::string(style) );
+    _fontValue.reset( new Gfx::Font(font) );
     invalidate();
 }
 
@@ -284,9 +256,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
     _textColor.reset( new Gfx::ColorF( o.textColor() ) );
     _accentColor.reset( new Gfx::ColorF( o.accentColor() ) );
     _highlightColor.reset( new Gfx::ColorF( o.highlightColor() ) );
-    _fontName.reset( new std::string( o.font().name() ) );
-    _fontSize.reset( new std::size_t( o.font().size() ) );
-    _fontStyle.reset( new std::string( o.font().style() ) );
+    _fontValue.reset( new Gfx::Font( o.font() ) );
 }
 
 
@@ -438,7 +408,7 @@ void PushButton::onInvalidate()
     _brush = foreground();
     _pen = contour();
     _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    _font = font();
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<ButtonRenderer>() );

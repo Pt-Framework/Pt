@@ -87,7 +87,9 @@ class FreeTypeFontProvider : public FontProvider
 
         void setDefaultFont(const std::string& font);
 
-        std::vector<FontFace> fonts() const;
+        std::vector<std::string> fontFamilies() const;
+
+        std::vector<FontFace> fontFaces(const std::string& family) const;
 
     private:
         FreeTypeFontProvider();
@@ -105,11 +107,22 @@ class FreeTypeFontProvider : public FontProvider
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
-        const FaceEntry* findFaceEntry(const Font& font) const;
+        const FaceEntry* findFaceEntry(const std::string& family,
+               const std::string& styleName,
+               FontBase::Weight weight,
+               FontBase::Slant slant) const;
 
         virtual void onAddFont(const System::Path& path) override;
 
         virtual void onRemoveFont(const System::Path& path) override;
+
+        static FontFace::Weight fontWeightFromStyleFlags(FT_Long styleFlags);
+
+        static FontFace::Slant fontSlantFromStyleFlags(FT_Long styleFlags);
+
+        static int fontMatchScore(FontBase::Weight weight,
+                FontBase::Slant slant,
+                const FontFace& face);
 
         bool openFontFile(const System::Path& path);
 

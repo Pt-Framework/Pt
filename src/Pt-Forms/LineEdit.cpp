@@ -235,45 +235,16 @@ void LineEdit::setTextColor(const Gfx::ColorF& color)
 }
 
 
-const std::string& LineEdit::font() const
+const Gfx::Font& LineEdit::font() const
 {
-    return _fontName ? *_fontName
-                     : Application::instance().styleOptions().font().name();
+    return _fontValue ? *_fontValue
+                      : Application::instance().styleOptions().font();
 }
 
 
-void LineEdit::setFont(const std::string& fontName)
+void LineEdit::setFont(const Gfx::Font& font)
 {
-    _fontName.reset( new std::string(fontName) );
-    invalidate();
-}
-
-
-std::size_t LineEdit::fontSize() const
-{
-
-    return _fontSize ? *_fontSize
-                     : Application::instance().styleOptions().font().size();
-}
-
-
-void LineEdit::setFontSize(const std::size_t s)
-{
-    _fontSize.reset( new std::size_t(s) );
-    invalidate();
-}
-
-
-const std::string& LineEdit::fontStyle() const
-{
-    return _fontStyle ? *_fontStyle
-                      : Application::instance().styleOptions().font().style();
-}
-
-
-void LineEdit::setFontStyle(const std::string& style)
-{
-    _fontStyle.reset( new std::string(style) );
+    _fontValue.reset( new Gfx::Font(font) );
     invalidate();
 }
 
@@ -307,7 +278,7 @@ void LineEdit::onInvalidate()
     _brush = background();
     _pen = contour();
     _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    _font = font();
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<LineEditRenderer>() );

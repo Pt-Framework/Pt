@@ -29,7 +29,6 @@
 */
 
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontFace.h>
 
 namespace Pt {
 
@@ -41,21 +40,29 @@ Font::Font()
 }
 
 
-Font::Font(const std::string& name, std::size_t size, const std::string& style)
-: _fontData( new FontData(name, size, style) )
+Font::Font(const std::string& family, std::size_t size,
+           const std::string& styleName, Weight weight, Slant slant)
+: _fontData(new FontData(family, size, weight, slant, styleName))
 {
 }
 
 
-Font::Font(const FontFace& face, std::size_t size)
-: _fontData(new FontData(face.name(), size, face.style()))
+Font::Font(const std::string& family, std::size_t size,
+           Weight weight, Slant slant)
+: _fontData(new FontData(family, size, weight, slant))
 {
+}
+
+
+const std::string& Font::family() const
+{
+    return _fontData->family();
 }
 
 
 const std::string& Font::name() const
 {
-    return _fontData->name();
+    return _fontData->family();
 }
 
 
@@ -65,9 +72,27 @@ size_t Font::size() const
 }
 
 
-const std::string& Font::style() const
+const std::string& Font::styleName() const
 {
-    return _fontData->style();
+    return _fontData->styleName();
+}
+
+
+bool Font::hasStyleName() const
+{
+    return _fontData->hasStyleName();
+}
+
+
+Font::Weight Font::weight() const
+{
+    return _fontData->weight();
+}
+
+
+Font::Slant Font::slant() const
+{
+    return _fontData->slant();
 }
 
 } // namespace

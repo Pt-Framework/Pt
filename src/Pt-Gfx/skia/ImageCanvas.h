@@ -160,7 +160,9 @@ class ImageCanvas : public Canvas
 
     static void setDefaultFont(const std::string& name);
 
-    static std::vector<FontFace> fonts();
+    static std::vector<std::string> fontFamilies();
+
+    static std::vector<FontFace> fontFaces(const std::string& family);
 
     private:
         static SkPath toSkia(const Gfx::Path& p);

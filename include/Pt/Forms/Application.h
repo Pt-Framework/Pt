@@ -38,11 +38,13 @@
 #include <Pt/Forms/InputMethod.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/System/Application.h>
 #include <Pt/System/Path.h>
 
 #include <list>
+#include <vector>
 
 namespace Pt {
 
@@ -122,9 +124,19 @@ class PT_FORMS_API Application : public Pt::System::Application
     public:
         void addFonts(const Pt::System::Path& dir);
 
+        bool addFont(const Pt::System::Path& path);
+
+        bool removeFont(const Pt::System::Path& path);
+
+        const std::vector<Pt::System::Path>& fontFiles() const;
+
         std::string defaultFont() const;
 
         void setDefaultFont(const std::string& fontName);
+
+        std::vector<std::string> fontFamilies() const;
+
+        std::vector<Gfx::FontFace> fontFaces(const std::string& family) const;
 
     protected:
         void onSetPointer(Widget& widget, bool isPointer);

@@ -492,9 +492,15 @@ void ImageCanvas::setDefaultFont(const std::string& f)
 }
 
 
-std::vector<FontFace> ImageCanvas::fonts()
+std::vector<std::string> ImageCanvas::fontFamilies()
 {
-    return FreeType::instance().fonts();
+    return FreeType::instance().fontFamilies();
+}
+
+
+std::vector<FontFace> ImageCanvas::fontFaces(const std::string& family)
+{
+    return FreeType::instance().fontFaces(family);
 }
 
 

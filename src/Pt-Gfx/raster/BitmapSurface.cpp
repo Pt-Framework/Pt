@@ -163,9 +163,15 @@ void BitmapSurface::setDefaultFont(const std::string& name)
 }
 
 
-std::vector<FontFace> BitmapSurface::fonts()
+std::vector<std::string> BitmapSurface::fontFamilies()
 {
-    return FreeTypeFontProvider::instance().fonts();
+    return FreeTypeFontProvider::instance().fontFamilies();
+}
+
+
+std::vector<FontFace> BitmapSurface::fontFaces(const std::string& family)
+{
+    return FreeTypeFontProvider::instance().fontFaces(family);
 }
 
 

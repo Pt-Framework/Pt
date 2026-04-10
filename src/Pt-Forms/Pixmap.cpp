@@ -160,9 +160,15 @@ void Pixmap::setDefaultFont(const std::string& name)
 }
 
 
-std::vector<Gfx::FontFace> Pixmap::fonts()
+std::vector<std::string> Pixmap::fontFamilies()
 {
-    return PixmapImpl::fonts();
+    return PixmapImpl::fontFamilies();
+}
+
+
+std::vector<Gfx::FontFace> Pixmap::fontFaces(const std::string& family)
+{
+    return PixmapImpl::fontFaces(family);
 }
 
 } // namespace

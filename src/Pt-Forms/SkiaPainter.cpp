@@ -415,9 +415,15 @@ void SkiaPainter::setDefaultFont(const std::string& name)
 }
 
 
-std::vector<Gfx::FontFace> SkiaPainter::fonts()
+std::vector<std::string> SkiaPainter::fontFamilies()
 {
-    return Gfx::ImagePainter::fonts();
+    return Gfx::ImagePainter::fontFamilies();
+}
+
+
+std::vector<Gfx::FontFace> SkiaPainter::fontFaces(const std::string& family)
+{
+    return Gfx::ImagePainter::fontFaces(family);
 }
 
 

@@ -152,9 +152,14 @@ class PixmapImpl
             Gfx::Bitmap::setDefaultFont(name);
         }
 
-        static std::vector<Gfx::FontFace> fonts()
+        static std::vector<std::string> fontFamilies()
         {
-            return Gfx::Bitmap::fonts();
+            return Gfx::Bitmap::fontFamilies();
+        }
+
+        static std::vector<Gfx::FontFace> fontFaces(const std::string& family)
+        {
+            return Gfx::Bitmap::fontFaces(family);
         }
     
     private:
@@ -213,7 +218,9 @@ class PixmapImpl
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<Gfx::FontFace> fonts();
+        static std::vector<std::string> fontFamilies();
+
+        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
 
     private:
         Gfx::SizeF     _physicalSize;

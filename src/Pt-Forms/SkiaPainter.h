@@ -110,7 +110,9 @@ namespace Forms {
 
         static void setDefaultFont(const std::string& name);
 
-        static std::vector<Gfx::FontFace> fonts();
+        static std::vector<std::string> fontFamilies();
+
+        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
 
         static Gfx::TextMetrics textMetrics(const Gfx::Font& font, const Pt::String& text);
 

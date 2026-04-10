@@ -28,6 +28,7 @@
 */
 
 #include "ApplicationImpl.h"
+#include "PixmapImpl.h"
 #include "ScreenImpl.h"
 
 #include <Pt/Forms/Application.h>
@@ -42,7 +43,6 @@
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/Forms/InvalidateEvent.h>
 #include <Pt/Forms/LayoutEvent.h>
-#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/PaintEvent.h>
 #include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Forms/MoveEvent.h>
@@ -217,15 +217,45 @@ void Application::addFonts(const Pt::System::Path& dir)
 }
 
 
+bool Application::addFont(const Pt::System::Path& path)
+{
+    return Gfx::PaintSurface::addFont(path);
+}
+
+
+bool Application::removeFont(const Pt::System::Path& path)
+{
+    return Gfx::PaintSurface::removeFont(path);
+}
+
+
+const std::vector<Pt::System::Path>& Application::fontFiles() const
+{
+    return Gfx::PaintSurface::fontFiles();
+}
+
+
 std::string Application::defaultFont() const
 {
-    return Pixmap::defaultFont();
+    return PixmapImpl::defaultFont();
 }
 
 
 void Application::setDefaultFont(const std::string& fontName)
 {
-    Pixmap::setDefaultFont(fontName);
+    PixmapImpl::setDefaultFont(fontName);
+}
+
+
+std::vector<std::string> Application::fontFamilies() const
+{
+    return PixmapImpl::fontFamilies();
+}
+
+
+std::vector<Gfx::FontFace> Application::fontFaces(const std::string& family) const
+{
+    return PixmapImpl::fontFaces(family);
 }
 
 

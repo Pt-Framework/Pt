@@ -28,12 +28,14 @@
 
 #include "PixmapCanvas.h"
 #include "PixmapImpl.h"
+#include "GdiFontProvider.h"
 #include "win32.h"
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
 
 #include <cmath>
+#include <limits>
 
 namespace {
 
@@ -112,59 +114,6 @@ DWORD scalePenSize(DWORD penSize, double scaleFactor)
 {
     return scaleFactor < 1.0 ? penSize
                              : static_cast<DWORD>( penSize * scaleFactor );
-}
-
-
-HFONT getFont(const Pt::Gfx::Font& font)
-{
-    int fontWeight = FW_NORMAL;
-    
-    std::string style = font.style();
-    std::transform(style.begin(), style.end(),  style.begin(), ::tolower);
-
-    if(style == "bold" || style == "bold italic" || style == "bolditalic")
-        fontWeight = FW_BOLD;
-
-    BYTE italic = (style == "italic" || style == "bold italic" || style == "bolditalic");
-
-    //HDC dc = GetDC(NULL);
-    //int logicalPPI = GetDeviceCaps(dc, LOGPIXELSY);
-    int logicalPPI = 96;
-
-    int height = MulDiv(font.size(), logicalPPI, 72);
-    //ReleaseDC(NULL, dc);
-
-    // If a negative value is used for lfHeight, the font is
-    // looked up by character size, which is only the ascent.
-    // Looking up fonts by ascent seems to be more portable.
-
-    LOGFONT lf;
-    lf.lfHeight         = -height;                     // will be converted to device units    
-    lf.lfWidth          = 0;                           // default width of the font
-    lf.lfEscapement     = 0;                           // escapement angle
-    lf.lfOrientation    = 0;                           // orientation
-    lf.lfWeight         = fontWeight;                  // font weight
-    lf.lfItalic         = italic;                      // italic
-    lf.lfUnderline      = FALSE;                       // underline
-    lf.lfStrikeOut      = FALSE;                       // strikeout
-    lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
-    lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
-    lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
-    lf.lfQuality        = DEFAULT_QUALITY;             // default quality
-    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
-
-    if( font.name().empty() )
-    {
-        const std::string& fontName = Pt::Forms::PixmapImpl::defaultFont();
-        memcpy(lf.lfFaceName, fontName.c_str(), std::min<size_t>( LF_FACESIZE, fontName.size() + 1) );
-    }
-    else
-    {
-        memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
-    }
-
-    HFONT hf = CreateFontIndirect(&lf);
-    return hf;
 }
 
 HBRUSH getGradientBrush(HDC dc, int width, int height,
@@ -489,7 +438,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
         _font = 0;
     }
 
-    _font = getFont(font);
+    _font = GdiFontProvider::instance().lookupFont(font);
 }
 
 

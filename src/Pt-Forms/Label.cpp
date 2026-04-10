@@ -43,7 +43,7 @@ Label::Label()
 , _hasRenderer(false)
 , _styleInvalid(true)
 {
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    _font = font();
 }
 
 
@@ -162,49 +162,16 @@ void Label::setTextColor(const Gfx::ColorF& color)
 }
 
 
-const std::string& Label::font() const
+const Gfx::Font& Label::font() const
 {
-    return _fontName ? *_fontName
-                     : Application::instance().styleOptions().font().name();
+    return _fontValue ? *_fontValue
+                      : Application::instance().styleOptions().font();
 }
 
 
-void Label::setFont(const std::string& fontName)
+void Label::setFont(const Gfx::Font& font)
 {
-    _fontName.reset( new std::string(fontName) );
-
-    _styleInvalid = true;
-    invalidate();
-}
-
-
-std::size_t Label::fontSize() const
-{
-
-    return _fontSize ? *_fontSize
-                     : Application::instance().styleOptions().font().size();
-}
-
-
-void Label::setFontSize(const std::size_t s)
-{
-    _fontSize.reset( new std::size_t(s) );
-
-    _styleInvalid = true;
-    invalidate();
-}
-
-
-const std::string& Label::fontStyle() const
-{
-    return _fontStyle ? *_fontStyle
-                      : Application::instance().styleOptions().font().style();
-}
-
-
-void Label::setFontStyle(const std::string& style)
-{
-    _fontStyle.reset( new std::string(style) );
+    _fontValue.reset( new Gfx::Font(font) );
 
     _styleInvalid = true;
     invalidate();
@@ -485,9 +452,7 @@ void Label::onInvalidate()
     bool needsRelayout = false;
 
     // TODO: style changed notification
-    _styleInvalid |= _font.name() != font();
-    _styleInvalid |= _font.size() != fontSize();
-    _styleInvalid |= _font.style() != fontStyle();
+    _styleInvalid |= !(_font == font());
 
     if(_styleInvalid)
     {
@@ -497,7 +462,7 @@ void Label::onInvalidate()
         const Style& style = Application::instance().style();
 
         _textPen = textColor();
-        _font = Gfx::Font(font(), fontSize(), fontStyle());
+        _font = font();
 
         const Gfx::Pen* pen = contour();
         if(pen)

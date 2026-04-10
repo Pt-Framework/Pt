@@ -91,17 +91,9 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         void setTextColor(const Pt::Gfx::ColorF& color);
 
-        const std::string& font() const;
+        const Pt::Gfx::Font& font() const;
 
-        void setFont(const std::string& fontName);
-
-        std::size_t fontSize() const;
-
-        void setFontSize(const std::size_t n);
-
-        const std::string& fontStyle() const;
-
-        void setFontStyle(const std::string& style);
+        void setFont(const Pt::Gfx::Font& font);
 
     protected:
         static Pt::String shortcutText(const Pt::Forms::Key& key);
@@ -133,9 +125,7 @@ class PT_FORMS_API MenuBaseItem : public Control
         Pt::AutoPtr<Pt::Gfx::Brush>       _background;
         Pt::AutoPtr<Pt::Gfx::Pen>         _contour;
         Pt::AutoPtr<Pt::Gfx::ColorF>       _textColor;
-        Pt::AutoPtr<std::string>      _fontName;
-        Pt::AutoPtr<std::size_t>      _fontSize;
-        Pt::AutoPtr<std::string> _fontStyle;
+        Pt::AutoPtr<Pt::Gfx::Font> _fontValue;
 
         Pt::Forms::PixmapSurface     _picture;
         Pt::Gfx::Brush        _brush;

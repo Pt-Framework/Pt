@@ -29,7 +29,7 @@
 #ifndef PT_GFX_FONTFACE_H
 #define PT_GFX_FONTFACE_H
 
-#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FontBase.h>
 #include <Pt/SmartPtr.h>
 
 #include <string>
@@ -40,17 +40,29 @@ namespace Gfx {
 
 class FontFaceData;
 
-class PT_GFX_API FontFace
+class PT_GFX_API FontFace : public FontBase
 {
     public:
         FontFace();
 
-        FontFace(const std::string& name,
-                 const std::string& style = std::string());
+        FontFace(const std::string& family,
+                 Weight weight = Weight::Normal,
+                 Slant slant = Slant::Normal,
+                 const std::string& styleName = std::string());
 
+        const std::string& family() const;
+
+        //! @brief Returns the family of the font face.
+        //! Alias for family().
         const std::string& name() const;
 
+        const std::string& styleName() const;
+
         const std::string& style() const;
+
+        Weight weight() const;
+
+        Slant slant() const;
 
     private:
         SmartPtr<FontFaceData> _faceData;
@@ -59,20 +71,34 @@ class PT_GFX_API FontFace
 
 inline bool operator==(const FontFace& a, const FontFace& b)
 {
-    return a.name() == b.name() && a.style() == b.style();
+    return a.family() == b.family() &&
+           a.weight() == b.weight() &&
+           a.slant() == b.slant() &&
+           a.styleName() == b.styleName();
 }
 
 
 inline bool operator!=(const FontFace& a, const FontFace& b)
 {
-    return a.name() != b.name() || a.style() != b.style();
+    return a.family() != b.family() ||
+           a.weight() != b.weight() ||
+           a.slant() != b.slant() ||
+           a.styleName() != b.styleName();
 }
 
 
 inline bool operator<(const FontFace& a, const FontFace& b)
 {
-    return a.name() == b.name() ? a.style() < b.style()
-                                : a.name() < b.name();
+    if(a.family() != b.family())
+        return a.family() < b.family();
+
+    if(a.weight() != b.weight())
+        return a.weight() < b.weight();
+
+    if(a.slant() != b.slant())
+        return a.slant() < b.slant();
+
+    return a.styleName() < b.styleName();
 }
 
 
@@ -80,17 +106,32 @@ class FontFaceData
 {
     public:
         FontFaceData()
-        { }
-
-        FontFaceData(const std::string& name,
-                     const std::string& style = std::string())
-        : _name(name)
-        , _style(style)
-        { }
-
-        const std::string& name() const
+        : _family()
+        , _style()
+        , _weight(FontBase::Weight::Normal)
+        , _slant(FontBase::Slant::Normal)
         {
-            return _name;
+        }
+
+        FontFaceData(const std::string& family,
+                     FontBase::Weight weight = FontBase::Weight::Normal,
+                     FontBase::Slant slant = FontBase::Slant::Normal,
+                     const std::string& styleName = std::string())
+        : _family(family)
+        , _style(styleName)
+        , _weight(weight)
+        , _slant(slant)
+        {
+        }
+
+        const std::string& family() const
+        {
+            return _family;
+        }
+
+        const std::string& styleName() const
+        {
+            return _style;
         }
 
         const std::string& style() const
@@ -98,9 +139,21 @@ class FontFaceData
             return _style;
         }
 
+        FontBase::Weight weight() const
+        {
+            return _weight;
+        }
+
+        FontBase::Slant slant() const
+        {
+            return _slant;
+        }
+
     private:
-        std::string _name;
+        std::string _family;
         std::string _style;
+        FontBase::Weight _weight;
+        FontBase::Slant _slant;
 };
 
 } // namespace

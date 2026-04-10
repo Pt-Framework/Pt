@@ -478,44 +478,16 @@ void SpinBox::setTextColor(const Gfx::ColorF& color)
 }
 
 
-const std::string& SpinBox::font() const
+const Gfx::Font& SpinBox::font() const
 {
-    return _fontName ? *_fontName
-                     : Application::instance().styleOptions().font().name();
+    return _fontValue ? *_fontValue
+                      : Application::instance().styleOptions().font();
 }
 
 
-void SpinBox::setFont(const std::string& fontName)
+void SpinBox::setFont(const Gfx::Font& font)
 {
-    _fontName.reset( new std::string(fontName) );
-    invalidate();
-}
-
-
-std::size_t SpinBox::fontSize() const
-{
-    return _fontSize ? *_fontSize
-                     : Application::instance().styleOptions().font().size();
-}
-
-
-void SpinBox::setFontSize(const std::size_t s)
-{
-    _fontSize.reset( new std::size_t(s) );
-    invalidate();
-}
-
-
-const std::string& SpinBox::fontStyle() const
-{
-    return _fontStyle ? *_fontStyle
-                      : Application::instance().styleOptions().font().style();
-}
-
-
-void SpinBox::setFontStyle(const std::string& style)
-{
-    _fontStyle.reset( new std::string(style) );
+    _fontValue.reset( new Gfx::Font(font) );
     invalidate();
 }
 
@@ -593,7 +565,7 @@ void SpinBox::onInvalidate()
     _backgroundBrush = background();
     _pen = contour();
     _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    _font = font();
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<SpinBoxRenderer>() );

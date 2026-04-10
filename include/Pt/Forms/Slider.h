@@ -79,17 +79,9 @@ class PT_FORMS_API Slider : public Control
 
         void setTextColor(const Gfx::ColorF& color);
 
-        const std::string& font() const;
+        const Gfx::Font& font() const;
 
-        void setFont(const std::string& fontName);
-
-        std::size_t fontSize() const;
-
-        void setFontSize(const std::size_t n);
-
-        const std::string& fontStyle() const;
-
-        void setFontStyle(const std::string& style);
+        void setFont(const Gfx::Font& font);
 
         void setRenderer(SliderRenderer* renderer);
 
@@ -122,9 +114,7 @@ class PT_FORMS_API Slider : public Control
         AutoPtr<Gfx::ColorF>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::ColorF>       _textColor;
-        AutoPtr<std::string>      _fontName;
-        AutoPtr<std::size_t>      _fontSize;
-        AutoPtr<std::string> _fontStyle;
+        AutoPtr<Gfx::Font>        _fontValue;
         
         FacetPtr<SliderRenderer>  _renderer;
         bool                      _hasRenderer;

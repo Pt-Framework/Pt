@@ -85,17 +85,9 @@ class PT_FORMS_API ListBoxItem : public Button
 
         void setTextColor(const Gfx::ColorF& color);
 
-        const std::string& font() const;
+        const Gfx::Font& font() const;
 
-        void setFont(const std::string& fontName);
-
-        std::size_t fontSize() const;
-
-        void setFontSize(const std::size_t n);
-
-        const std::string& fontStyle() const;
-
-        void setFontStyle(const std::string& style);
+        void setFont(const Gfx::Font& font);
 
         void setRenderer(ListBoxRenderer* renderer);
 
@@ -138,9 +130,7 @@ class PT_FORMS_API ListBoxItem : public Button
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::ColorF>       _textColor;
-        AutoPtr<std::string>      _fontName;
-        AutoPtr<std::size_t>      _fontSize;
-        AutoPtr<std::string> _fontStyle;
+        AutoPtr<Gfx::Font>        _fontValue;
 
         Gfx::Pen   _textPen;
         Gfx::Font  _font;

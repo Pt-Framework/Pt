@@ -40,37 +40,9 @@
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
 
-#include <cctype>
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
-
-namespace {
-
-std::string normalizeFontToken(const std::string& text)
-{
-    std::string normalized;
-    normalized.reserve(text.size());
-
-    for(std::string::const_iterator it = text.begin(); it != text.end(); ++it)
-    {
-        unsigned char ch = static_cast<unsigned char>(*it);
-        if(std::isalnum(ch))
-            normalized += static_cast<char>(std::tolower(ch));
-    }
-
-    return normalized;
-}
-
-
-bool isRegularStyle(const std::string& style)
-{
-    return style.empty() ||
-           style == "regular" ||
-           style == "book" ||
-           style == "roman";
-}
-
-} // namespace
 
 PT_LOG_DEFINE("Pt.Gfx.FreeType");
 
@@ -82,6 +54,36 @@ static const FTC_FaceID DefaultFaceId = reinterpret_cast<FTC_FaceID>(1);
 namespace Pt {
 
 namespace Gfx {
+
+FontFace::Weight FreeTypeFontProvider::fontWeightFromStyleFlags(FT_Long styleFlags)
+{
+    return (styleFlags & FT_STYLE_FLAG_BOLD) != 0
+         ? FontFace::Weight::Bold
+         : FontFace::Weight::Normal;
+}
+
+
+FontFace::Slant FreeTypeFontProvider::fontSlantFromStyleFlags(FT_Long styleFlags)
+{
+    return (styleFlags & FT_STYLE_FLAG_ITALIC) != 0
+         ? FontFace::Slant::Italic
+         : FontFace::Slant::Normal;
+}
+
+
+int FreeTypeFontProvider::fontMatchScore(FontBase::Weight weight,
+                                         FontBase::Slant slant,
+                                         const FontFace& face)
+{
+    int score = static_cast<int>(face.weight()) - static_cast<int>(weight);
+    if(score < 0)
+        score = -score;
+
+    if(face.slant() != slant)
+        score += 1000;
+
+    return score;
+}
 
 FreeTypeFontProvider& FreeTypeFontProvider::instance()
 {
@@ -156,24 +158,48 @@ void FreeTypeFontProvider::setDefaultFont(const std::string& font)
 }
 
 
-std::vector<FontFace> FreeTypeFontProvider::fonts() const
+std::vector<std::string> FreeTypeFontProvider::fontFamilies() const
 {
-    std::vector<FontFace> faces;
-    faces.reserve(_faces.size() + 1);
+    std::vector<std::string> families;
+    families.reserve(_faces.size() + 1);
 
     for(std::list<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
-        faces.push_back(it->face);
+        families.push_back(it->face.family());
 
-    faces.push_back(FontFace("DejaVu Sans"));
+    families.push_back("DejaVu Sans");
+
+    std::sort(families.begin(), families.end());
+    families.erase(std::unique(families.begin(), families.end()), families.end());
+
+    return families;
+}
+
+
+std::vector<FontFace> FreeTypeFontProvider::fontFaces(const std::string& family) const
+{
+    std::vector<FontFace> faces;
+    if(family.empty())
+        return faces;
+
+    for(std::list<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+    {
+        if(it->face.family() == family)
+            faces.push_back(it->face);
+    }
+
+    if(family == "DejaVu Sans")
+        faces.push_back(FontFace("DejaVu Sans"));
+
+    std::sort(faces.begin(), faces.end());
+    faces.erase(std::unique(faces.begin(), faces.end()), faces.end());
     return faces;
 }
 
 
 FTC_FaceID FreeTypeFontProvider::findFaceId(const Font& font) const
 {
-    const std::string fontName = font.name().empty() ? _defaultFont : font.name();
-    Font requested(fontName, font.size(), font.style());
-    const FaceEntry* entry = findFaceEntry(requested);
+    const std::string fontName = font.family().empty() ? _defaultFont : font.family();
+    const FaceEntry* entry = findFaceEntry(fontName, font.styleName(), font.weight(), font.slant());
     if(entry)
         return reinterpret_cast<FTC_FaceID>(const_cast<FaceEntry*>(entry));
 
@@ -205,37 +231,58 @@ FT_Error FreeTypeFontProvider::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 }
 
 
-const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const Font& font) const
+const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const std::string& family,
+                                                                           const std::string& styleName,
+                                                                           FontBase::Weight weight,
+                                                                           FontBase::Slant slant) const
 {
-    if(font.name().empty())
+    if(family.empty())
         return 0;
 
-    const std::string fontName = normalizeFontToken(font.name());
-    const std::string fontStyle = normalizeFontToken(font.style());
+    if( ! styleName.empty() )
+    {
+        const FaceEntry* best = 0;
+        int bestScore = 0;
 
-    const FaceEntry* fallback = 0;
+        for(std::list<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+        {
+            if(it->face.family() != family)
+                continue;
+
+            if(it->face.styleName() != styleName)
+                continue;
+
+            const int score = fontMatchScore(weight, slant, it->face);
+            if(!best || score < bestScore)
+            {
+                best = &*it;
+                bestScore = score;
+            }
+        }
+
+        if(best)
+            return best;
+
+        return 0;
+    }
+
+    const FaceEntry* best = 0;
+    int bestScore = 0;
 
     for(std::list<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
     {
-        if(normalizeFontToken(it->face.name()) != fontName)
+        if(it->face.family() != family)
             continue;
 
-        const std::string faceStyle = normalizeFontToken(it->face.style());
-        if(fontStyle.empty())
+        const int score = fontMatchScore(weight, slant, it->face);
+        if(!best || score < bestScore)
         {
-            if(isRegularStyle(faceStyle))
-                return &*it;
-
-            if(!fallback)
-                fallback = &*it;
-        }
-        else if(faceStyle == fontStyle)
-        {
-            return &*it;
+            best = &*it;
+            bestScore = score;
         }
     }
 
-    return fontStyle.empty() ? fallback : 0;
+    return best;
 }
 
 
@@ -311,10 +358,12 @@ bool FreeTypeFontProvider::openFontFile(const System::Path& path)
 
         std::string family = face->family_name ? face->family_name : std::string();
         std::string style = face->style_name ? face->style_name : std::string();
+        FontFace::Weight weight = fontWeightFromStyleFlags(face->style_flags);
+        FontFace::Slant slant = fontSlantFromStyleFlags(face->style_flags);
 
         if( ! family.empty() )
         {
-            _faces.push_back(FaceEntry(FontFace(family, style), path, faceIndex));
+            _faces.push_back(FaceEntry(FontFace(family, weight, slant, style), path, faceIndex));
             _faceEntries.insert(&(_faces.back()));
             added = true;
 

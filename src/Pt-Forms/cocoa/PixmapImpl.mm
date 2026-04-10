@@ -28,219 +28,11 @@
 */
 
 #include "PixmapImpl.h"
+#include "CocoaFontProvider.h"
 
 #include <Pt/Forms/Pixmap.h>
-#include <Pt/Gfx/FontProvider.h>
-#include <Pt/Gfx/FontRegistry.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/System/FileInfo.h>
 #include <Pt/Utf8Codec.h>
-
-#include <algorithm>
-#include <set>
-
-namespace {
-
-std::string toUtf8String(CFStringRef text)
-{
-    if( ! text )
-        return std::string();
-
-    NSString* nsText = reinterpret_cast<NSString*>(text);
-    const char* utf8 = [nsText UTF8String];
-    return utf8 ? utf8 : std::string();
-}
-
-
-class CocoaFontProvider : public Pt::Gfx::FontProvider
-{
-    public:
-        struct Init
-        {
-            Init()
-            { CocoaFontProvider::instance(); }
-        };
-
-        static CocoaFontProvider& instance()
-        {
-            static CocoaFontProvider provider;
-            return provider;
-        }
-
-        const std::string& defaultFont() const
-        {
-            return _defaultFont;
-        }
-
-        void setDefaultFont(const std::string& font)
-        {
-            _defaultFont = font;
-        }
-
-        std::vector<Pt::Gfx::FontFace> fonts() const
-        {
-            std::vector<Pt::Gfx::FontFace> faces;
-
-            CFArrayRef familyNames = CTFontManagerCopyAvailableFontFamilyNames();
-            if( ! familyNames )
-                return faces;
-
-            CFIndex familyCount = CFArrayGetCount(familyNames);
-            for(CFIndex familyIndex = 0; familyIndex < familyCount; ++familyIndex)
-            {
-                CFStringRef familyName = reinterpret_cast<CFStringRef>(CFArrayGetValueAtIndex(familyNames, familyIndex));
-                if( ! familyName )
-                    continue;
-
-                CFMutableDictionaryRef attributes = CFDictionaryCreateMutable(kCFAllocatorDefault,
-                                                                              1,
-                                                                              &kCFTypeDictionaryKeyCallBacks,
-                                                                              &kCFTypeDictionaryValueCallBacks);
-                if( ! attributes )
-                    continue;
-
-                CFDictionarySetValue(attributes, kCTFontFamilyNameAttribute, familyName);
-
-                CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(attributes);
-                CFRelease(attributes);
-                if( ! descriptor )
-                    continue;
-
-                CFArrayRef descriptors = CTFontDescriptorCreateMatchingFontDescriptors(descriptor, 0);
-                CFRelease(descriptor);
-
-                const std::string name = toUtf8String(familyName);
-                if( ! descriptors )
-                {
-                    faces.push_back(Pt::Gfx::FontFace(name));
-                    continue;
-                }
-
-                CFIndex descriptorCount = CFArrayGetCount(descriptors);
-                if(descriptorCount == 0)
-                    faces.push_back(Pt::Gfx::FontFace(name));
-
-                for(CFIndex descriptorIndex = 0; descriptorIndex < descriptorCount; ++descriptorIndex)
-                {
-                    CTFontDescriptorRef match = reinterpret_cast<CTFontDescriptorRef>(CFArrayGetValueAtIndex(descriptors, descriptorIndex));
-                    CFTypeRef styleAttribute = CTFontDescriptorCopyAttribute(match, kCTFontStyleNameAttribute);
-                    std::string style;
-                    if(styleAttribute)
-                    {
-                        style = toUtf8String(reinterpret_cast<CFStringRef>(styleAttribute));
-                        CFRelease(styleAttribute);
-                    }
-
-                    faces.push_back(Pt::Gfx::FontFace(name, style));
-                }
-
-                CFRelease(descriptors);
-            }
-
-            CFRelease(familyNames);
-
-            std::sort(faces.begin(), faces.end());
-            faces.erase(std::unique(faces.begin(), faces.end()), faces.end());
-            return faces;
-        }
-
-    private:
-        CocoaFontProvider()
-        : _defaultFont()
-        {
-            const std::vector<Pt::System::Path>& fontFiles = Pt::Gfx::FontRegistry::instance().fontFiles();
-            for(std::vector<Pt::System::Path>::const_iterator it = fontFiles.begin(); it != fontFiles.end(); ++it)
-                addFont(*it);
-        }
-
-        CocoaFontProvider(const CocoaFontProvider&) = delete;
-
-        CocoaFontProvider& operator=(const CocoaFontProvider&) = delete;
-
-    public:
-        ~CocoaFontProvider()
-        {
-            while( ! _files.empty() )
-            {
-                std::set<std::string>::const_iterator it = _files.begin();
-                unregisterFontFile(*it);
-                _files.erase(it);
-            }
-        }
-
-        virtual void onAddFont(const Pt::System::Path& path) override
-        {
-            if( ! Pt::System::FileInfo::exists(path) )
-                return;
-
-            const std::string localPath = path.toLocal();
-            if(_files.find(localPath) != _files.end())
-                return;
-
-            if( ! registerFontFile(localPath) )
-                return;
-
-            _files.insert(localPath);
-        }
-
-        virtual void onRemoveFont(const Pt::System::Path& path) override
-        {
-            const std::string localPath = path.toLocal();
-            std::set<std::string>::iterator pos = _files.find(localPath);
-            if(pos == _files.end())
-                return;
-
-            unregisterFontFile(*pos);
-            _files.erase(pos);
-        }
-
-    private:
-        static bool registerFontFile(const std::string& localPath)
-        {
-            NSString* path = [NSString stringWithUTF8String:localPath.c_str()];
-            if( ! path )
-                return false;
-
-            NSURL* url = [NSURL fileURLWithPath:path];
-            if( ! url )
-                return false;
-
-            CFErrorRef error = 0;
-            bool ok = CTFontManagerRegisterFontsForURL(reinterpret_cast<CFURLRef>(url),
-                                                       kCTFontManagerScopeProcess,
-                                                       &error);
-            if(error)
-                CFRelease(error);
-
-            return ok;
-        }
-
-        static void unregisterFontFile(const std::string& localPath)
-        {
-            NSString* path = [NSString stringWithUTF8String:localPath.c_str()];
-            if( ! path )
-                return;
-
-            NSURL* url = [NSURL fileURLWithPath:path];
-            if( ! url )
-                return;
-
-            CFErrorRef error = 0;
-            CTFontManagerUnregisterFontsForURL(reinterpret_cast<CFURLRef>(url),
-                                               kCTFontManagerScopeProcess,
-                                               &error);
-            if(error)
-                CFRelease(error);
-        }
-
-    private:
-        std::set<std::string> _files;
-        std::string _defaultFont;
-};
-
-static CocoaFontProvider::Init initCocoaFontProvider;
-
-} // namespace
 
 namespace Pt {
 
@@ -531,47 +323,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
     {
         CFDictionarySetValue(_fontAttributes, kCTForegroundColorAttributeName, _penColor);
     }
-
-    CFMutableDictionaryRef descAttributes = 
-        CFDictionaryCreateMutable(kCFAllocatorDefault, 3, 
-                                  &kCFTypeDictionaryKeyCallBacks, 
-                                  &kCFTypeDictionaryValueCallBacks);
-    if( ! descAttributes )
-        return;
-
-    const std::string& fontName = font.name().empty() ? PixmapImpl::defaultFont()
-                                                      : font.name();
-    if( ! fontName.empty() )
-    {
-        CFStringRef name = CFStringCreateWithCStringNoCopy(0, fontName.c_str(), 
-                                                           kCFStringEncodingUTF8,
-                                                           kCFAllocatorNull);
-        CFDictionarySetValue(descAttributes, kCTFontFamilyNameAttribute, name);
-        CFRelease(name);
-    }
-
-    // CoreText uses 96 points per inch, but the typographic convention
-    // is 72 dots per inch, so scale the size by 96.0 / 72.0
-    float fontSize = static_cast<int>( font.size() * (96.0 / 72.0) );
-    CFNumberRef size = CFNumberCreate(kCFAllocatorDefault, kCFNumberFloatType, &fontSize);
-    CFDictionarySetValue(descAttributes, kCTFontSizeAttribute, size);
-    CFRelease(size);
-
-    CFStringRef style = CFStringCreateWithCStringNoCopy(0, font.style().c_str(), 
-                                                        kCFStringEncodingUTF8,
-                                                        kCFAllocatorNull);
-    CFDictionarySetValue(descAttributes, kCTFontStyleNameAttribute, style);
-    CFRelease(style);
-
-    CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(descAttributes);
-    CFRelease(descAttributes);
-
-    if( ! descriptor )
-        return;
-
-    CTFontRef fontRef = CTFontCreateWithFontDescriptor(descriptor, 0, 0);
-    CFRelease(descriptor);
-
+    CTFontRef fontRef = CocoaFontProvider::instance().lookupFont(font);
     if( ! fontRef )
         return;
 
@@ -1283,9 +1035,15 @@ void PixmapImpl::setDefaultFont(const std::string& f)
 }
 
 
-std::vector<Gfx::FontFace> PixmapImpl::fonts()
+std::vector<std::string> PixmapImpl::fontFamilies()
 {
-    return CocoaFontProvider::instance().fonts();
+    return CocoaFontProvider::instance().fontFamilies();
+}
+
+
+std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
+{
+    return CocoaFontProvider::instance().fontFaces(family);
 }
 
 } // namespace

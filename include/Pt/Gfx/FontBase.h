@@ -26,60 +26,50 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/FontFace.h>
+#ifndef PT_GFX_FONTBASE_H
+#define PT_GFX_FONTBASE_H
+
+#include <Pt/Gfx/Api.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-FontFace::FontFace()
-: _faceData(new FontFaceData())
+class PT_GFX_API FontBase
 {
-}
+    public:
+        enum class Weight
+        {
+            Thin = 100,
+            ExtraLight = 200,
+            Light = 300,
+            Normal = 400,
+            Medium = 500,
+            SemiBold = 600,
+            Bold = 700,
+            ExtraBold = 800,
+            Black = 900
+        };
 
+        enum class Slant
+        {
+            Normal,
+            Italic,
+            Oblique
+        };
 
-FontFace::FontFace(const std::string& family, Weight weight, Slant slant,
-                   const std::string& styleName)
-: _faceData(new FontFaceData(family, weight, slant, styleName))
-{
-}
+    protected:
+        FontBase()
+        {
+        }
 
-
-const std::string& FontFace::family() const
-{
-  return _faceData->family();
-}
-
-
-const std::string& FontFace::name() const
-{
-  return _faceData->family();
-}
-
-
-const std::string& FontFace::styleName() const
-{
-  return _faceData->styleName();
-}
-
-
-const std::string& FontFace::style() const
-{
-    return _faceData->style();
-}
-
-
-FontFace::Weight FontFace::weight() const
-{
-  return _faceData->weight();
-}
-
-
-FontFace::Slant FontFace::slant() const
-{
-  return _faceData->slant();
-}
+        virtual ~FontBase()
+        {
+        }
+};
 
 } // namespace
 
 } // namespace
+
+#endif

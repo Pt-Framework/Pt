@@ -54,6 +54,36 @@ static const unsigned DefaultFontSize = 12;
 // some versions of freetype do not work with NULL
 static const FTC_FaceID DefaultFaceId = reinterpret_cast<FTC_FaceID>(1);
 
+
+Pt::Gfx::Font::Weight fontWeightFromStyleFlags(FT_Long styleFlags)
+{
+    return (styleFlags & FT_STYLE_FLAG_BOLD) != 0
+         ? Pt::Gfx::Font::Weight::Bold
+         : Pt::Gfx::Font::Weight::Normal;
+}
+
+
+Pt::Gfx::Font::Slant fontSlantFromStyleFlags(FT_Long styleFlags)
+{
+    return (styleFlags & FT_STYLE_FLAG_ITALIC) != 0
+         ? Pt::Gfx::Font::Slant::Italic
+         : Pt::Gfx::Font::Slant::Normal;
+}
+
+
+int fontMatchScore(const Pt::Gfx::Font& requested,
+                   const Pt::Gfx::Font& candidate)
+{
+    int score = static_cast<int>(candidate.weight()) - static_cast<int>(requested.weight());
+    if(score < 0)
+        score = -score;
+
+    if(candidate.slant() != requested.slant())
+        score += 1000;
+
+    return score;
+}
+
 } // namespace
 
 namespace Pt {
@@ -128,19 +158,49 @@ void FreeType::setDefaultFont(const std::string& font)
 }
 
 
-std::vector<FontFace> FreeType::fonts() const
+std::vector<std::string> FreeType::fontFamilies() const
 {
     // LOCK
 
-    std::vector<FontFace> faces;
-    faces.push_back(FontFace("DejaVu Sans"));
+    std::vector<std::string> families;
+    families.push_back("DejaVu Sans");
 
     Fonts::const_iterator it;
     for(it = _fonts.begin(); it != _fonts.end(); ++it)
-        faces.push_back(FontFace(it->first.name(), it->first.style()));
+        families.push_back(it->first.family());
+
+    std::sort(families.begin(), families.end());
+    families.erase(std::unique(families.begin(), families.end()), families.end());
 
     // UNLOCK
 
+    return families;
+}
+
+
+std::vector<FontFace> FreeType::fontFaces(const std::string& family) const
+{
+    std::vector<FontFace> faces;
+    if(family.empty())
+        return faces;
+
+    if(family == "DejaVu Sans")
+        faces.push_back(FontFace("DejaVu Sans"));
+
+    Fonts::const_iterator it;
+    for(it = _fonts.begin(); it != _fonts.end(); ++it)
+    {
+        if(it->first.family() != family)
+            continue;
+
+        faces.push_back(FontFace(it->first.family(),
+                     it->first.weight(),
+                     it->first.slant(),
+                     it->first.styleName()));
+    }
+
+    std::sort(faces.begin(), faces.end());
+    faces.erase(std::unique(faces.begin(), faces.end()), faces.end());
     return faces;
 }
 
@@ -178,8 +238,11 @@ void FreeType::addFonts(const System::Path& path)
             continue;
         }
 
-        Font font(face->family_name, DefaultFontSize, face->style_name);
-        PT_LOG_INFO( "loaded font: " << font.name() << ' ' << font.style() );
+        std::string styleName = face->style_name ? face->style_name : std::string();
+        Font::Weight weight = fontWeightFromStyleFlags(face->style_flags);
+        Font::Slant slant = fontSlantFromStyleFlags(face->style_flags);
+        Font font(face->family_name, DefaultFontSize, styleName, weight, slant);
+        PT_LOG_INFO( "loaded font: " << font.name() << (font.hasStyleName() ? std::string(" ") + font.styleName() : std::string()) );
 
         System::Path& fontPath = _fonts[font];
         fontPath = fontFile;
@@ -196,18 +259,56 @@ void FreeType::addFonts(const System::Path& path)
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
-    const std::string fontName = font.name().empty() ? _defaultFont : font.name();
+    const std::string fontName = font.family().empty() ? _defaultFont : font.family();
+    if(fontName.empty())
+        return DefaultFaceId;
 
     Fonts::iterator it = _fonts.begin();
+    System::Path* bestPath = 0;
+    int bestScore = 0;
+
+    Font requested(fontName, font.size(), font.styleName(), font.weight(), font.slant());
+
+    if(requested.hasStyleName())
+    {
+        for(; it != _fonts.end(); ++it)
+        {
+            if(it->first.family() != requested.family())
+                continue;
+
+            if(it->first.styleName() != requested.styleName())
+                continue;
+
+            const int score = fontMatchScore(requested, it->first);
+            if(!bestPath || score < bestScore)
+            {
+                bestPath = &it->second;
+                bestScore = score;
+            }
+        }
+
+        if(bestPath)
+            return reinterpret_cast<FTC_FaceID>(bestPath);
+
+        return DefaultFaceId;
+
+    }
 
     for (; it != _fonts.end(); ++it)
     {
-        if (it->first.name() == fontName && it->first.style() == font.style())
+        if(it->first.family() != requested.family())
+            continue;
+
+        const int score = fontMatchScore(requested, it->first);
+        if(!bestPath || score < bestScore)
         {
-            System::Path* path = &it->second;
-            return reinterpret_cast<FTC_FaceID>(path);
+            bestPath = &it->second;
+            bestScore = score;
         }
     }
+
+    if(bestPath)
+        return reinterpret_cast<FTC_FaceID>(bestPath);
 
     return DefaultFaceId;
     // UNLOCK

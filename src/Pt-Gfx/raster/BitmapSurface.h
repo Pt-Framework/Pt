@@ -98,7 +98,9 @@ class PT_GFX_API BitmapSurface : private NonCopyable
 
     static void setDefaultFont(const std::string& name);
 
-    static std::vector<FontFace> fonts();
+    static std::vector<std::string> fontFamilies();
+
+    static std::vector<FontFace> fontFaces(const std::string& family);
 
     void putImage(const PointI& to, const Image& image, 
                   const RectI& imageRect, const RectI& clip,
