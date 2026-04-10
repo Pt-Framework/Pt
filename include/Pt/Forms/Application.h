@@ -82,12 +82,6 @@ class PT_FORMS_API Application : public Pt::System::Application
 
         StyleOptions& styleOptions();
 
-        void addFonts(const Pt::System::Path& dir);
-
-        std::string defaultFont() const;
-
-        void setDefaultFont(const std::string& fontName);
-
         void loadImage(const System::Path& path, Gfx::Image& image);
 
         void setScaleFactor(double scale);
@@ -124,6 +118,13 @@ class PT_FORMS_API Application : public Pt::System::Application
         void sendMouseEvent(const MouseEvent& ev);
 
         Widget* capture() const;
+
+    public:
+        void addFonts(const Pt::System::Path& dir);
+
+        std::string defaultFont() const;
+
+        void setDefaultFont(const std::string& fontName);
 
     protected:
         void onSetPointer(Widget& widget, bool isPointer);
