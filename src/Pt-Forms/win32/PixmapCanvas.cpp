@@ -35,10 +35,6 @@
 
 #include <cmath>
 
-using std::max;
-using std::min;
-#include <Gdiplus.h>
-
 namespace {
 
 DWORD getPenStyle(const Pt::Gfx::Pen& pen)
@@ -792,8 +788,6 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-#ifndef PT_FORMS_GDIPLUS
-
 Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     if( ! _pixmap )
@@ -857,73 +851,6 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     return fm;
 }
 
-#else
-
-Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
-{
-    if( ! _pixmap )
-        return Gfx::TextMetrics();
-
-    HDC dc = _pixmap->deviceContext();
-
-    // select stored font into DC for measurement
-    HGDIOBJ oldFont = _font ? SelectObject(dc, _font) : 0;
-
-    std::wstring wtext;
-    text.toUtf16( std::back_inserter(wtext) );
-
-    Gdiplus::Font gdiFont(dc);
-    Gdiplus::Graphics graphics(dc);
-    graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
-    graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
-
-    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
-
-    Gdiplus::FontFamily family;
-    gdiFont.GetFamily(&family);
-
-    Gdiplus::REAL lineSpacingF = gdiFont.GetHeight(graphics.GetDpiY());
-    Gdiplus::REAL sizeUnits = gdiFont.GetSize();
-
-    UINT16 ascentUnits = family.GetCellAscent(gdiFont.GetStyle());
-    UINT16 descentUnits = family.GetCellDescent(gdiFont.GetStyle());
-    UINT16 lineSpacingUnits = family.GetLineSpacing(gdiFont.GetStyle());
-    UINT16 emHeightUnits = family.GetEmHeight(gdiFont.GetStyle());
-
-    Gdiplus::REAL pixelsPerUnit = lineSpacingF / lineSpacingUnits;
-    Gdiplus::REAL ascentF = ascentUnits * pixelsPerUnit;
-    Gdiplus::REAL descentF = descentUnits * pixelsPerUnit;
-    Gdiplus::REAL heightF = ascentF + descentF;
-    Gdiplus::REAL emHeightF = emHeightUnits * pixelsPerUnit;
-
-    Gdiplus::REAL asc = ascentF;
-    Gdiplus::REAL des = descentF;
-    Gdiplus::REAL cap = emHeightF - descentF;
-    Gdiplus::REAL inl = ascentF - cap;
-    Gdiplus::REAL exl = lineSpacingF - heightF;
-    Gdiplus::REAL lh = asc + des + exl;
-
-    Gdiplus::RectF textRect;
-    graphics.MeasureString(wtext.c_str(), wtext.size(), &gdiFont, 
-                            Gdiplus::PointF(0, 0), format, &textRect);
-
-    int dpix = GetDeviceCaps(dc, LOGPIXELSX);
-    double pixelRatio = 96.0 / dpix;
-
-    Gfx::TextMetrics tm;
-    tm.setAscent(asc * pixelRatio);
-    tm.setDescent(des * pixelRatio);
-    tm.setCapHeight(cap * pixelRatio);
-    tm.setLeading(exl * pixelRatio);
-    tm.setWidth(textRect.Width * pixelRatio);
-
-    if(oldFont)
-        SelectObject(dc, oldFont);
-
-    return tm;
-}
-#endif
-
 
 void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
                               const Pt::String& text, 
@@ -943,7 +870,6 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     if(tform)
         tf *= *tform;
 
-#ifndef PT_FORMS_GDIPLUS
     XFORM xform = { static_cast<FLOAT>( tf.m11() ), 
                     static_cast<FLOAT>( tf.m12() ),
                     static_cast<FLOAT>( tf.m21() ), 
@@ -957,57 +883,6 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     SetWorldTransform(dc, &xform);
     TextOutW(dc, 0, 0, _text.c_str(), _text.size());
     SetWorldTransform(dc, &oldXForm);
-#else
-    Gdiplus::Matrix matrix;
-    matrix.SetElements( static_cast<Gdiplus::REAL>( tf.m11() ), 
-                        static_cast<Gdiplus::REAL>( tf.m12() ),
-                        static_cast<Gdiplus::REAL>( tf.m21() ), 
-                        static_cast<Gdiplus::REAL>( tf.m22() ),
-                        static_cast<Gdiplus::REAL>( tf.dx() ), 
-                        static_cast<Gdiplus::REAL>( tf.dy() ) );
-
-    Gdiplus::Graphics graphics(dc);
-    graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHalf);
-    graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
-
-    Gdiplus::Font font(dc);
-
-    Gdiplus::FontFamily family;
-    font.GetFamily(&family);
-
-    Gdiplus::REAL height = font.GetHeight( graphics.GetDpiY() );
-
-    UINT16 ascentUnits = family.GetCellAscent( font.GetStyle() );
-    UINT16 descentUnits = family.GetCellDescent( font.GetStyle() );
-    UINT16 heightUnits = family.GetLineSpacing( font.GetStyle() );
-    Gdiplus::REAL pixelsPerUnit = height / heightUnits;
-
-    Gdiplus::REAL ascent = ascentUnits * pixelsPerUnit;
-    Gdiplus::REAL descent = descentUnits * pixelsPerUnit;
-    Gdiplus::REAL spacing = height - ascent - descent;
-    Gdiplus::REAL offsetY = ascent + 0.5;
-    
-    Gdiplus::PointF origin( 0, -offsetY );
-    
-    const Gdiplus::StringFormat* format = Gdiplus::StringFormat::GenericTypographic();
-
-    Gdiplus::Matrix oldMatrix;
-    graphics.GetTransform(&oldMatrix);
-    graphics.SetTransform(&matrix);
-
-    const Gfx::ColorF& color = _penColor;
-    BYTE alpha = color.alpha() / 257;
-    BYTE red   = color.red()   / 257;
-    BYTE green = color.green() / 257; 
-    BYTE blue  = color.blue()  / 257;
-
-    Gdiplus::SolidBrush brush( Gdiplus::Color(alpha, red, green, blue) );
-
-    graphics.DrawString( _text.c_str(), _text.size(), &font, 
-                         origin, format, &brush);
-
-    graphics.SetTransform(&oldMatrix);
-#endif
 }
 
 

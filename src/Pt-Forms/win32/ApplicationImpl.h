@@ -144,7 +144,6 @@ class ApplicationImpl : public Pt::System::EventLoop
         Pt::Forms::Selector                _selector;
         std::vector<System::Selectable*> _avail;
         HINSTANCE                        _instanceHandle;
-        ULONG_PTR                        _gdiplusToken;
         MouseEvent                       _mouseEvent;
         KeyEvent                         _keyEvent;
         HWND                             _pointerWindow;
