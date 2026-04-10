@@ -54,8 +54,8 @@ class PT_GFX_API Font
         Font( const std::string& name, std::size_t size,
               const std::string& style = std::string() );
 
-          //! @brief Construct a font from a font face.
-          Font(const FontFace& face, std::size_t size);
+        //! @brief Construct a font from a font face.
+        Font(const FontFace& face, std::size_t size);
 
         //! @brief Returns the name of the font
         const std::string& name() const;
@@ -99,7 +99,7 @@ inline bool operator<(const Font& a, const Font& b)
 }
 
 
-class PT_GFX_API FontData
+class FontData
 {
     public:
         FontData()

@@ -76,7 +76,7 @@ inline bool operator<(const FontFace& a, const FontFace& b)
 }
 
 
-class PT_GFX_API FontFaceData
+class FontFaceData
 {
     public:
         FontFaceData()
