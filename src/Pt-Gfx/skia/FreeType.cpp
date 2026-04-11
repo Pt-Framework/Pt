@@ -33,6 +33,8 @@
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
 
+#include FT_TRUETYPE_TABLES_H
+
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Image.h>
@@ -71,12 +73,29 @@ Pt::Gfx::Font::Slant fontSlantFromStyleFlags(FT_Long styleFlags)
 }
 
 
+Pt::Gfx::Font::Stretch fontStretchFromOS2Width(FT_UShort widthClass)
+{
+    if(widthClass >= 9)
+        return Pt::Gfx::Font::Stretch::UltraExpanded;
+
+    if(widthClass >= 1 && widthClass <= 9)
+        return static_cast<Pt::Gfx::Font::Stretch>(widthClass);
+
+    return Pt::Gfx::Font::Stretch::Normal;
+}
+
+
 int fontMatchScore(const Pt::Gfx::Font& requested,
                    const Pt::Gfx::Font& candidate)
 {
     int score = static_cast<int>(candidate.weight()) - static_cast<int>(requested.weight());
     if(score < 0)
         score = -score;
+
+    int stretchDiff = static_cast<int>(candidate.stretch()) - static_cast<int>(requested.stretch());
+    if(stretchDiff < 0)
+        stretchDiff = -stretchDiff;
+    score += stretchDiff * 100;
 
     if(candidate.slant() != requested.slant())
         score += 1000;
@@ -196,6 +215,7 @@ std::vector<FontFace> FreeType::fontFaces(const std::string& family) const
         faces.push_back(FontFace(it->first.family(),
                      it->first.weight(),
                      it->first.slant(),
+                     it->first.stretch(),
                      it->first.styleName()));
     }
 
@@ -241,7 +261,13 @@ void FreeType::addFonts(const System::Path& path)
         std::string styleName = face->style_name ? face->style_name : std::string();
         Font::Weight weight = fontWeightFromStyleFlags(face->style_flags);
         Font::Slant slant = fontSlantFromStyleFlags(face->style_flags);
-        Font font(face->family_name, DefaultFontSize, styleName, weight, slant);
+
+        Font::Stretch stretch = Font::Stretch::Normal;
+        TT_OS2* os2 = static_cast<TT_OS2*>(FT_Get_Sfnt_Table(face, FT_SFNT_OS2));
+        if(os2)
+            stretch = fontStretchFromOS2Width(os2->usWidthClass);
+
+        Font font(face->family_name, DefaultFontSize, styleName, weight, slant, stretch);
         PT_LOG_INFO( "loaded font: " << font.family() << (font.hasStyleName() ? std::string(" ") + font.styleName() : std::string()) );
 
         System::Path& fontPath = _fonts[font];

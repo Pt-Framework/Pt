@@ -87,7 +87,7 @@ int CALLBACK GdiFontProvider::enumFontFamExProc(ENUMLOGFONTEX* logFont, NEWTEXTM
         std::string style = Pt::win32::toMultiByte(reinterpret_cast<LPCTSTR>(logFont->elfStyle));
         Gfx::FontFace::Weight weight = fontWeightFromLogFontWeight(logFont->elfLogFont.lfWeight);
         Gfx::FontFace::Slant slant = fontSlantFromLogFontItalic(logFont->elfLogFont.lfItalic);
-        reinterpret_cast<std::vector<Gfx::FontFace>*>(param)->push_back(Gfx::FontFace(family, weight, slant, style));
+        reinterpret_cast<std::vector<Gfx::FontFace>*>(param)->push_back(Gfx::FontFace(family, weight, slant, Gfx::FontFace::Stretch::Normal, style));
     }
 
     return 1;

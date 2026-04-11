@@ -152,12 +152,79 @@ Gfx::FontFace::Slant CocoaFontProvider::fontSlantFromCtTraits(float slant,
 }
 
 
+float CocoaFontProvider::ctFontStretch(Gfx::Font::Stretch stretch)
+{
+    switch(stretch)
+    {
+        case Gfx::Font::Stretch::UltraCondensed:
+            return -0.4f;
+
+        case Gfx::Font::Stretch::ExtraCondensed:
+            return -0.3f;
+
+        case Gfx::Font::Stretch::Condensed:
+            return -0.2f;
+
+        case Gfx::Font::Stretch::SemiCondensed:
+            return -0.1f;
+
+        case Gfx::Font::Stretch::Normal:
+            return 0.0f;
+
+        case Gfx::Font::Stretch::SemiExpanded:
+            return 0.1f;
+
+        case Gfx::Font::Stretch::Expanded:
+            return 0.2f;
+
+        case Gfx::Font::Stretch::ExtraExpanded:
+            return 0.3f;
+
+        case Gfx::Font::Stretch::UltraExpanded:
+            return 0.4f;
+    }
+
+    return 0.0f;
+}
+
+
+Gfx::FontFace::Stretch CocoaFontProvider::fontStretchFromCtWidth(float width)
+{
+    if(width <= -0.35f)
+        return Gfx::FontFace::Stretch::UltraCondensed;
+
+    if(width <= -0.25f)
+        return Gfx::FontFace::Stretch::ExtraCondensed;
+
+    if(width <= -0.15f)
+        return Gfx::FontFace::Stretch::Condensed;
+
+    if(width <= -0.05f)
+        return Gfx::FontFace::Stretch::SemiCondensed;
+
+    if(width <= 0.05f)
+        return Gfx::FontFace::Stretch::Normal;
+
+    if(width <= 0.15f)
+        return Gfx::FontFace::Stretch::SemiExpanded;
+
+    if(width <= 0.25f)
+        return Gfx::FontFace::Stretch::Expanded;
+
+    if(width <= 0.35f)
+        return Gfx::FontFace::Stretch::ExtraExpanded;
+
+    return Gfx::FontFace::Stretch::UltraExpanded;
+}
+
+
 Gfx::FontFace CocoaFontProvider::makeFontFace(const std::string& family,
                                               const std::string& style,
                                               CTFontDescriptorRef descriptor)
 {
     float weight = 0.0f;
     float slant = 0.0f;
+    float width = 0.0f;
     CTFontSymbolicTraits symbolicTraits = 0;
 
     CFTypeRef traitsAttribute = CTFontDescriptorCopyAttribute(descriptor, kCTFontTraitsAttribute);
@@ -173,6 +240,10 @@ Gfx::FontFace CocoaFontProvider::makeFontFace(const std::string& family,
         if(slantNumber)
             CFNumberGetValue(slantNumber, kCFNumberFloatType, &slant);
 
+        CFNumberRef widthNumber = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(traits, kCTFontWidthTrait));
+        if(widthNumber)
+            CFNumberGetValue(widthNumber, kCFNumberFloatType, &width);
+
         CFNumberRef symbolicTraitsNumber = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(traits, kCTFontSymbolicTrait));
         if(symbolicTraitsNumber)
         {
@@ -187,6 +258,7 @@ Gfx::FontFace CocoaFontProvider::makeFontFace(const std::string& family,
     return Gfx::FontFace(family,
                          fontWeightFromCtWeight(weight),
                          fontSlantFromCtTraits(slant, symbolicTraits),
+                         fontStretchFromCtWidth(width),
                          style);
 }
 
@@ -260,10 +332,11 @@ CTFontRef CocoaFontProvider::lookupFont(const Pt::Gfx::Font& font) const
     }
 
     if(font.weight() != Pt::Gfx::Font::Weight::Normal ||
-       font.slant() != Pt::Gfx::Font::Slant::Normal)
+       font.slant() != Pt::Gfx::Font::Slant::Normal ||
+       font.stretch() != Pt::Gfx::Font::Stretch::Normal)
     {
         CFMutableDictionaryRef traits = CFDictionaryCreateMutable(kCFAllocatorDefault,
-                                                                  3,
+                                                                  4,
                                                                   &kCFTypeDictionaryKeyCallBacks,
                                                                   &kCFTypeDictionaryValueCallBacks);
         if(traits)
@@ -294,12 +367,30 @@ CTFontRef CocoaFontProvider::lookupFont(const Pt::Gfx::Font& font) const
                 }
             }
 
+            if(font.stretch() != Pt::Gfx::Font::Stretch::Normal)
+            {
+                float width = ctFontStretch(font.stretch());
+                CFNumberRef widthNumber = CFNumberCreate(kCFAllocatorDefault,
+                                                         kCFNumberFloatType,
+                                                         &width);
+                if(widthNumber)
+                {
+                    CFDictionarySetValue(traits, kCTFontWidthTrait, widthNumber);
+                    CFRelease(widthNumber);
+                }
+            }
+
             CTFontSymbolicTraits symbolicTraits = 0;
             if(static_cast<int>(font.weight()) >= static_cast<int>(Pt::Gfx::Font::Weight::Bold))
                 symbolicTraits |= kCTFontBoldTrait;
 
             if(font.slant() != Pt::Gfx::Font::Slant::Normal)
                 symbolicTraits |= kCTFontItalicTrait;
+
+            if(font.stretch() < Pt::Gfx::Font::Stretch::Normal)
+                symbolicTraits |= kCTFontCondensedTrait;
+            else if(font.stretch() > Pt::Gfx::Font::Stretch::Normal)
+                symbolicTraits |= kCTFontExpandedTrait;
 
             if(symbolicTraits != 0)
             {

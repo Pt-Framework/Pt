@@ -33,6 +33,8 @@
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
 
+#include FT_TRUETYPE_TABLES_H
+
 #include <Pt/Gfx/FontRegistry.h>
 
 #include <Pt/System/Directory.h>
@@ -71,13 +73,31 @@ FontFace::Slant FreeTypeFontProvider::fontSlantFromStyleFlags(FT_Long styleFlags
 }
 
 
+FontFace::Stretch FreeTypeFontProvider::fontStretchFromOS2Width(FT_UShort widthClass)
+{
+    if(widthClass >= 9)
+        return FontFace::Stretch::UltraExpanded;
+
+    if(widthClass >= 1 && widthClass <= 9)
+        return static_cast<FontFace::Stretch>(widthClass);
+
+    return FontFace::Stretch::Normal;
+}
+
+
 int FreeTypeFontProvider::fontMatchScore(FontBase::Weight weight,
                                          FontBase::Slant slant,
+                                         FontBase::Stretch stretch,
                                          const FontFace& face)
 {
     int score = static_cast<int>(face.weight()) - static_cast<int>(weight);
     if(score < 0)
         score = -score;
+
+    int stretchDiff = static_cast<int>(face.stretch()) - static_cast<int>(stretch);
+    if(stretchDiff < 0)
+        stretchDiff = -stretchDiff;
+    score += stretchDiff * 100;
 
     if(face.slant() != slant)
         score += 1000;
@@ -199,7 +219,7 @@ std::vector<FontFace> FreeTypeFontProvider::fontFaces(const std::string& family)
 FTC_FaceID FreeTypeFontProvider::findFaceId(const Font& font) const
 {
     const std::string family = font.family().empty() ? _defaultFont : font.family();
-    const FaceEntry* entry = findFaceEntry(family, font.styleName(), font.weight(), font.slant());
+    const FaceEntry* entry = findFaceEntry(family, font.styleName(), font.weight(), font.slant(), font.stretch());
     if(entry)
         return reinterpret_cast<FTC_FaceID>(const_cast<FaceEntry*>(entry));
 
@@ -234,7 +254,8 @@ FT_Error FreeTypeFontProvider::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const std::string& family,
                                                                            const std::string& styleName,
                                                                            FontBase::Weight weight,
-                                                                           FontBase::Slant slant) const
+                                                                           FontBase::Slant slant,
+                                                                           FontBase::Stretch stretch) const
 {
     if(family.empty())
         return 0;
@@ -252,7 +273,7 @@ const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const
             if(it->face.styleName() != styleName)
                 continue;
 
-            const int score = fontMatchScore(weight, slant, it->face);
+            const int score = fontMatchScore(weight, slant, stretch, it->face);
             if(!best || score < bestScore)
             {
                 best = &*it;
@@ -274,7 +295,7 @@ const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const
         if(it->face.family() != family)
             continue;
 
-        const int score = fontMatchScore(weight, slant, it->face);
+        const int score = fontMatchScore(weight, slant, stretch, it->face);
         if(!best || score < bestScore)
         {
             best = &*it;
@@ -361,9 +382,14 @@ bool FreeTypeFontProvider::openFontFile(const System::Path& path)
         FontFace::Weight weight = fontWeightFromStyleFlags(face->style_flags);
         FontFace::Slant slant = fontSlantFromStyleFlags(face->style_flags);
 
+        FontFace::Stretch stretch = FontFace::Stretch::Normal;
+        TT_OS2* os2 = static_cast<TT_OS2*>(FT_Get_Sfnt_Table(face, FT_SFNT_OS2));
+        if(os2)
+            stretch = fontStretchFromOS2Width(os2->usWidthClass);
+
         if( ! family.empty() )
         {
-            _faces.push_back(FaceEntry(FontFace(family, weight, slant, style), path, faceIndex));
+            _faces.push_back(FaceEntry(FontFace(family, weight, slant, stretch, style), path, faceIndex));
             _faceEntries.insert(&(_faces.back()));
             added = true;
 

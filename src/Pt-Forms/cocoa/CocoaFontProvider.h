@@ -84,10 +84,14 @@ class CocoaFontProvider : public Gfx::FontProvider
 
         static float ctFontSlant(Gfx::Font::Slant slant);
 
+        static float ctFontStretch(Gfx::Font::Stretch stretch);
+
         static Gfx::FontFace::Weight fontWeightFromCtWeight(float weight);
 
         static Gfx::FontFace::Slant fontSlantFromCtTraits(float slant,
                                                           CTFontSymbolicTraits symbolicTraits);
+
+        static Gfx::FontFace::Stretch fontStretchFromCtWidth(float width);
 
         static Gfx::FontFace makeFontFace(const std::string& family,
                                           const std::string& style,

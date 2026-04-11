@@ -39,8 +39,8 @@ FontFace::FontFace()
 
 
 FontFace::FontFace(const std::string& family, Weight weight, Slant slant,
-                   const std::string& styleName)
-: _faceData(new FontFaceData(family, weight, slant, styleName))
+                   Stretch stretch, const std::string& styleName)
+: _faceData(new FontFaceData(family, weight, slant, stretch, styleName))
 {
 }
 
@@ -78,6 +78,12 @@ FontFace::Weight FontFace::weight() const
 FontFace::Slant FontFace::slant() const
 {
   return _faceData->slant();
+}
+
+
+FontFace::Stretch FontFace::stretch() const
+{
+  return _faceData->stretch();
 }
 
 } // namespace

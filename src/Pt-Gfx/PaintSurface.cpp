@@ -29,7 +29,6 @@
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
-#include <Pt/Gfx/FontRegistry.h>
 #include <Pt/Gfx/Painter.h>
 
 #include <limits>
@@ -136,30 +135,6 @@ void PaintSurface::finish()
 {
     releaseCanvas();
     onFinish();
-}
-
-
-void PaintSurface::addFonts(const System::Path& path)
-{
-    FontRegistry::instance().addFonts(path);
-}
-
-
-bool PaintSurface::addFont(const System::Path& path)
-{
-    return FontRegistry::instance().addFont(path);
-}
-
-
-bool PaintSurface::removeFont(const System::Path& path)
-{
-    return FontRegistry::instance().removeFont(path);
-}
-
-
-const std::vector<System::Path>& PaintSurface::fontFiles()
-{
-    return FontRegistry::instance().fontFiles();
 }
 
 

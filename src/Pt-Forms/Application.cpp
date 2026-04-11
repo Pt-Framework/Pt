@@ -213,25 +213,25 @@ StyleOptions& Application::styleOptions()
 
 void Application::addFonts(const Pt::System::Path& dir)
 {
-    Gfx::PaintSurface::addFonts(dir);
+    Gfx::Font::addFonts(dir);
 }
 
 
 bool Application::addFont(const Pt::System::Path& path)
 {
-    return Gfx::PaintSurface::addFont(path);
+    return Gfx::Font::addFont(path);
 }
 
 
 bool Application::removeFont(const Pt::System::Path& path)
 {
-    return Gfx::PaintSurface::removeFont(path);
+    return Gfx::Font::removeFont(path);
 }
 
 
 const std::vector<Pt::System::Path>& Application::fontFiles() const
 {
-    return Gfx::PaintSurface::fontFiles();
+    return Gfx::Font::fontFiles();
 }
 
 

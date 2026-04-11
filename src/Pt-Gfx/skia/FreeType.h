@@ -129,6 +129,9 @@ class FreeType
                 if(a.slant() != b.slant())
                     return a.slant() < b.slant();
 
+                if(a.stretch() != b.stretch())
+                    return a.stretch() < b.stretch();
+
                 if(a.styleName() != b.styleName())
                     return a.styleName() < b.styleName();
 

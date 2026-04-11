@@ -32,6 +32,7 @@
 #define PT_GFX_FONT_H
 
 #include <Pt/Gfx/FontBase.h>
+#include <Pt/System/Path.h>
 #include <Pt/SmartPtr.h>
 
 #include <cstddef>
@@ -53,12 +54,14 @@ class PT_GFX_API Font : public FontBase
         Font(const std::string& family, std::size_t size,
              const std::string& styleName,
              Weight weight = Weight::Normal,
-             Slant slant = Slant::Normal);
+             Slant slant = Slant::Normal,
+             Stretch stretch = Stretch::Normal);
 
         //! @brief Construct a font with explicit weight and slant.
         Font(const std::string& family, std::size_t size,
              Weight weight = Weight::Normal,
-             Slant slant = Slant::Normal);
+             Slant slant = Slant::Normal,
+             Stretch stretch = Stretch::Normal);
 
         //! @brief Returns the family of the font.
         const std::string& family() const;
@@ -78,6 +81,18 @@ class PT_GFX_API Font : public FontBase
         //! @brief Returns the slant of the font request.
         Slant slant() const;
 
+        //! @brief Returns the stretch of the font request.
+        Stretch stretch() const;
+
+    public:
+        static void addFonts(const System::Path& path);
+
+        static bool addFont(const System::Path& path);
+
+        static bool removeFont(const System::Path& path);
+
+        static const std::vector<System::Path>& fontFiles();
+
     private:
         SmartPtr<FontData> _fontData;
 };
@@ -88,6 +103,7 @@ inline bool operator==(const Font& a, const Font& b)
     return a.family() == b.family() &&
            a.weight() == b.weight() &&
            a.slant()  == b.slant()  &&
+           a.stretch() == b.stretch() &&
            a.size()   == b.size()   &&
            a.styleName() == b.styleName();
 }
@@ -98,6 +114,7 @@ inline bool operator!=(const Font& a, const Font& b)
     return a.family() != b.family() ||
            a.weight() != b.weight() ||
            a.slant()  != b.slant()  ||
+           a.stretch() != b.stretch() ||
            a.size()   != b.size()   ||
            a.styleName() != b.styleName();
 }
@@ -113,6 +130,9 @@ inline bool operator<(const Font& a, const Font& b)
 
     if(a.slant() != b.slant())
         return a.slant() < b.slant();
+
+    if(a.stretch() != b.stretch())
+        return a.stretch() < b.stretch();
 
     if(a.size() != b.size())
         return a.size() < b.size();
@@ -130,18 +150,21 @@ class FontData
         , _styleName()
         , _weight(FontBase::Weight::Normal)
         , _slant(FontBase::Slant::Normal)
+        , _stretch(FontBase::Stretch::Normal)
         {
         }
 
         FontData(const std::string& family, std::size_t size,
                  FontBase::Weight weight = FontBase::Weight::Normal,
                  FontBase::Slant slant = FontBase::Slant::Normal,
+                 FontBase::Stretch stretch = FontBase::Stretch::Normal,
                  const std::string& styleName = std::string())
         : _family(family)
         , _size(size)
         , _styleName(styleName)
         , _weight(weight)
         , _slant(slant)
+        , _stretch(stretch)
         {
         }
 
@@ -151,6 +174,7 @@ class FontData
         , _styleName(font._styleName)
         , _weight(font._weight)
         , _slant(font._slant)
+        , _stretch(font._stretch)
         {
         }
 
@@ -184,12 +208,18 @@ class FontData
             return _slant;
         }
 
+        FontBase::Stretch stretch() const
+        {
+            return _stretch;
+        }
+
     private:
         std::string _family;
         std::size_t _size;
         std::string _styleName;
         FontBase::Weight _weight;
         FontBase::Slant _slant;
+        FontBase::Stretch _stretch;
 };
 
 } //namespace

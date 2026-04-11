@@ -87,15 +87,6 @@ class PT_GFX_API PaintSurface : private NonCopyable
         */
         void finish();
 
-    public:
-        static void addFonts(const System::Path& path);
-
-        static bool addFont(const System::Path& path);
-
-        static bool removeFont(const System::Path& path);
-
-        static const std::vector<System::Path>& fontFiles();
-
     protected:
         /** @brief Returns the image format.
         */

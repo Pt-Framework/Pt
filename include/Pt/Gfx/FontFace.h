@@ -48,6 +48,7 @@ class PT_GFX_API FontFace : public FontBase
         FontFace(const std::string& family,
                  Weight weight = Weight::Normal,
                  Slant slant = Slant::Normal,
+                 Stretch stretch = Stretch::Normal,
                  const std::string& styleName = std::string());
 
         const std::string& family() const;
@@ -64,6 +65,8 @@ class PT_GFX_API FontFace : public FontBase
 
         Slant slant() const;
 
+        Stretch stretch() const;
+
     private:
         SmartPtr<FontFaceData> _faceData;
 };
@@ -74,6 +77,7 @@ inline bool operator==(const FontFace& a, const FontFace& b)
     return a.family() == b.family() &&
            a.weight() == b.weight() &&
            a.slant() == b.slant() &&
+           a.stretch() == b.stretch() &&
            a.styleName() == b.styleName();
 }
 
@@ -83,6 +87,7 @@ inline bool operator!=(const FontFace& a, const FontFace& b)
     return a.family() != b.family() ||
            a.weight() != b.weight() ||
            a.slant() != b.slant() ||
+           a.stretch() != b.stretch() ||
            a.styleName() != b.styleName();
 }
 
@@ -98,6 +103,9 @@ inline bool operator<(const FontFace& a, const FontFace& b)
     if(a.slant() != b.slant())
         return a.slant() < b.slant();
 
+    if(a.stretch() != b.stretch())
+        return a.stretch() < b.stretch();
+
     return a.styleName() < b.styleName();
 }
 
@@ -110,17 +118,20 @@ class FontFaceData
         , _style()
         , _weight(FontBase::Weight::Normal)
         , _slant(FontBase::Slant::Normal)
+        , _stretch(FontBase::Stretch::Normal)
         {
         }
 
         FontFaceData(const std::string& family,
                      FontBase::Weight weight = FontBase::Weight::Normal,
                      FontBase::Slant slant = FontBase::Slant::Normal,
+                     FontBase::Stretch stretch = FontBase::Stretch::Normal,
                      const std::string& styleName = std::string())
         : _family(family)
         , _style(styleName)
         , _weight(weight)
         , _slant(slant)
+        , _stretch(stretch)
         {
         }
 
@@ -149,11 +160,17 @@ class FontFaceData
             return _slant;
         }
 
+        FontBase::Stretch stretch() const
+        {
+            return _stretch;
+        }
+
     private:
         std::string _family;
         std::string _style;
         FontBase::Weight _weight;
         FontBase::Slant _slant;
+        FontBase::Stretch _stretch;
 };
 
 } // namespace

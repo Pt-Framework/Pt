@@ -115,14 +115,18 @@ class FreeTypeFontProvider : public FontProvider
         const FaceEntry* findFaceEntry(const std::string& family,
                                        const std::string& styleName,
                                        FontBase::Weight weight,
-                                       FontBase::Slant slant) const;
+                                       FontBase::Slant slant,
+                                       FontBase::Stretch stretch) const;
 
         static FontFace::Weight fontWeightFromStyleFlags(FT_Long styleFlags);
 
         static FontFace::Slant fontSlantFromStyleFlags(FT_Long styleFlags);
 
+        static FontFace::Stretch fontStretchFromOS2Width(FT_UShort widthClass);
+
         static int fontMatchScore(FontBase::Weight weight,
                                   FontBase::Slant slant,
+                                  FontBase::Stretch stretch,
                                   const FontFace& face);
 
         bool openFontFile(const System::Path& path);

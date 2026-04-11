@@ -29,6 +29,7 @@
 */
 
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontRegistry.h>
 
 namespace Pt {
 
@@ -41,15 +42,16 @@ Font::Font()
 
 
 Font::Font(const std::string& family, std::size_t size,
-           const std::string& styleName, Weight weight, Slant slant)
-: _fontData(new FontData(family, size, weight, slant, styleName))
+           const std::string& styleName, Weight weight, Slant slant,
+           Stretch stretch)
+: _fontData(new FontData(family, size, weight, slant, stretch, styleName))
 {
 }
 
 
 Font::Font(const std::string& family, std::size_t size,
-           Weight weight, Slant slant)
-: _fontData(new FontData(family, size, weight, slant))
+           Weight weight, Slant slant, Stretch stretch)
+: _fontData(new FontData(family, size, weight, slant, stretch))
 {
 }
 
@@ -87,6 +89,36 @@ Font::Weight Font::weight() const
 Font::Slant Font::slant() const
 {
     return _fontData->slant();
+}
+
+
+Font::Stretch Font::stretch() const
+{
+    return _fontData->stretch();
+}
+
+
+void Font::addFonts(const System::Path& path)
+{
+    FontRegistry::instance().addFonts(path);
+}
+
+
+bool Font::addFont(const System::Path& path)
+{
+    return FontRegistry::instance().addFont(path);
+}
+
+
+bool Font::removeFont(const System::Path& path)
+{
+    return FontRegistry::instance().removeFont(path);
+}
+
+
+const std::vector<System::Path>& Font::fontFiles()
+{
+    return FontRegistry::instance().fontFiles();
 }
 
 } // namespace
