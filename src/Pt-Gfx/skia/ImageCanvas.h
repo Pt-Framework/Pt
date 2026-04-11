@@ -146,6 +146,8 @@ class ImageCanvas : public Canvas
   protected:
     virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
+    virtual const Gfx::FontMetrics& onGetFontMetrics() const override;
+
     virtual void onDrawText(const Gfx::PointF& to, 
                             const Pt::String& text, 
                             const Gfx::Transform* trans) override;
@@ -183,6 +185,7 @@ class ImageCanvas : public Canvas
     sk_sp<SkSurface> _surface;
     SkCanvas*        _canvas;
     DrawText*        _text;
+    FontMetrics      _fontMetrics;
     CompositionMode  _compositionMode;
     RectF            _clip;
 };

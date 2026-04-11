@@ -32,6 +32,7 @@
 
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Utf8Codec.h>
 
 namespace Pt {
@@ -323,6 +324,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
     {
         CFDictionarySetValue(_fontAttributes, kCTForegroundColorAttributeName, _penColor);
     }
+
     CTFontRef fontRef = CocoaFontProvider::instance().lookupFont(font);
     if( ! fontRef )
         return;
@@ -332,6 +334,22 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 
     _font = fontRef;
     CFDictionarySetValue(_fontAttributes, kCTFontAttributeName, _font);
+
+    CGFloat ascent = CTFontGetAscent(_font);
+    CGFloat descent = CTFontGetDescent(_font);
+    CGFloat leading = CTFontGetLeading(_font);
+    CGFloat capHeight = CTFontGetCapHeight(_font);
+    CGFloat xHeight = CTFontGetXHeight(_font);
+    CGFloat underlinePos = CTFontGetUnderlinePosition(_font);
+    CGFloat underlineThickness = CTFontGetUnderlineThickness(_font);
+
+    _fontMetrics.setAscent(ascent);
+    _fontMetrics.setDescent(descent);
+    _fontMetrics.setCapHeight(capHeight);
+    _fontMetrics.setXHeight(xHeight);
+    _fontMetrics.setLeading(leading);
+    _fontMetrics.setUnderlinePos(underlinePos);
+    _fontMetrics.setUnderlineThickness(underlineThickness);
 }
 
 
@@ -483,8 +501,6 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
 Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
-    CGContextRef context = _pixmap->context();
-
     CFStringRef string = CFStringCreateWithBytesNoCopy(0, (const UInt8*) text.c_str(), 
                                                        text.length() * 4, 
                                                        kCFStringEncodingUTF32LE, 
@@ -506,20 +522,24 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     CTLineRef line = CTLineCreateWithAttributedString(attributedString);
     CFRelease(attributedString);
 
-    double width = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
-    CGFloat ascent = CTFontGetAscent(_font);
-    CGFloat descent = CTFontGetDescent(_font);
-    CGFloat leading = CTFontGetLeading(_font);
-    CGFloat capHeight = CTFontGetCapHeight(_font);
+    double advance = CTLineGetTypographicBounds(line, NULL, NULL, NULL);
+
+    CGRect bounds = CTLineGetBoundsWithOptions(line, 0);
     CFRelease(line);
 
     Gfx::TextMetrics fm;
-    fm.setAscent(ascent);
-    fm.setDescent(descent);
-    fm.setCapHeight(capHeight);
-    fm.setLeading(leading);
-    fm.setWidth(width);
+    fm.setAdvance(advance);
+    fm.setBearingX(bounds.origin.x);
+    fm.setBearingY(bounds.origin.y + bounds.size.height);
+    fm.setBoundingWidth(bounds.size.width);
+    fm.setBoundingHeight(bounds.size.height);
     return fm;
+}
+
+
+const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
+{
+    return _fontMetrics;
 }
 
 

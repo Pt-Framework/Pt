@@ -377,10 +377,12 @@ void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
 
     if( cb.hasFocus() )
     {       
+        Gfx::FontMetrics fm = painter.fontMetrics();
+
         Gfx::RectF focusRect( Gfx::PointF(textPos.x() - 2, 
-                                          textPos.y() - textMetric.ascent()), 
-                              Gfx::SizeF(textMetric.width() + 4, 
-                                         textMetric.height() ) );
+                                          textPos.y() - fm.ascent()), 
+                              Gfx::SizeF(textMetric.advance() + 4, 
+                                         fm.height() ) );
         
         Gfx::Pen pen(textPen.color(), 1, Gfx::Pen::Dash);
         painter.setPen(pen);
@@ -1427,7 +1429,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintSurface& surface,
     for(it = tabs.begin(); it != tabs.end(); ++it)
     {
         Gfx::TextMetrics fm = _painter.textMetrics( it->text() );
-        s.addWidth( fm.width() + spacing.leftRight() );
+        s.addWidth( fm.advance() + spacing.leftRight() );
     }
 
     return s;
@@ -1451,7 +1453,7 @@ void PlatinumTabViewRenderer::onLayoutTabs(PaintSurface& surface,
     {
         Gfx::TextMetrics fm = _painter.textMetrics( it->text() );
 
-        double tabWidth = fm.width() + spacing.leftRight();
+        double tabWidth = fm.advance() + spacing.leftRight();
         
         Gfx::RectF tabRect;
         tabRect.setOrigin(tabPos);
@@ -1499,9 +1501,10 @@ void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
         painter.setFont(font);
 
         Gfx::TextMetrics fm = painter.textMetrics( it->text() );
+        Gfx::FontMetrics fontMet = painter.fontMetrics();
         
         double textX = it->geometry().left() + spacing.left();
-        double textY = it->geometry().height() / 2 + fm.ascent() / 2;
+        double textY = it->geometry().height() / 2 + fontMet.ascent() / 2;
         Gfx::PointF textPos(textX, textY);
         painter.drawText( textPos, it->text() );
 

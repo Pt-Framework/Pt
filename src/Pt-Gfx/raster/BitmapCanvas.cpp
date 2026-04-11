@@ -340,6 +340,7 @@ void BitmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
     _fontRenderer.setFont(_font);
+    _fontMetrics = _fontRenderer.fontMetrics();
 }
 
 
@@ -529,6 +530,12 @@ void BitmapCanvas::onFillPath(const Gfx::Path& path)
     std::vector<Polygon> flatPath;
     path.toPolygons(flatPath);
     fillPolygons(flatPath, _currentClip);
+}
+
+
+const FontMetrics& BitmapCanvas::onGetFontMetrics() const
+{
+    return _fontMetrics;
 }
 
 

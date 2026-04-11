@@ -444,6 +444,16 @@ void Painter::fillPath(const Path& path)
 }
 
 
+const Gfx::FontMetrics& Painter::fontMetrics() const
+{
+    if(_canvas)
+        return _canvas->fontMetrics();
+
+    static const Gfx::FontMetrics empty;
+    return empty;
+}
+
+
 Gfx::TextMetrics Painter::textMetrics(const Pt::String& text) const
 {
     if(_canvas)

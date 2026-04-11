@@ -118,6 +118,8 @@ class BitmapCanvas : public Canvas
         virtual void onFillPath(const Gfx::Path& path) override;
 
     protected:
+        virtual const Gfx::FontMetrics& onGetFontMetrics() const;
+
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const;
 
         virtual void onDrawText(const Gfx::PointF& to, 
@@ -289,6 +291,7 @@ class BitmapCanvas : public Canvas
         bool                    _isGradient;
 
         Font                    _font;
+        FontMetrics             _fontMetrics;
         RectF                   _clip;
         RectI                   _currentClip;
         bool                    _hasClip;

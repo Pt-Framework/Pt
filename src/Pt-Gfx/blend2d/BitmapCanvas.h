@@ -115,6 +115,8 @@ class BitmapCanvas : public Canvas
         virtual void onFillPath(const Gfx::Path& path) override;
 
     protected:
+        virtual const Gfx::FontMetrics& onGetFontMetrics() const;
+
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const;
 
         virtual void onDrawText(const Gfx::PointF& to, 
@@ -146,6 +148,7 @@ class BitmapCanvas : public Canvas
         Gfx::Pen                _pen;
         Gfx::Brush              _brush;
         Gfx::Font               _font;
+        Gfx::FontMetrics        _fontMetrics;
         std::vector<double>     _dashPattern;
         Path                    _ptPath;
         BLPath                  _blPath;

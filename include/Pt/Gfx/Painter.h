@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -43,8 +44,6 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Paint.h>
-
-#include <Pt/Gfx/TextMetrics.h>
 
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
@@ -243,6 +242,10 @@ class PT_GFX_API Painter : private NonCopyable
         void fillPath(const Path& path);
 
     public:
+        /** @brief Returns the font metrics of the current font.
+        */
+        const FontMetrics& fontMetrics() const;
+
         /** @brief Returns the metrics of a line of text.
         */
         TextMetrics textMetrics(const Pt::String& text) const;

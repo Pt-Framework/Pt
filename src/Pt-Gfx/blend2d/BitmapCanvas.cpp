@@ -212,6 +212,7 @@ void BitmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
     _fontRenderer.setFont(_font);
+    _fontMetrics = _fontRenderer.fontMetrics();
 }
 
 
@@ -530,6 +531,12 @@ void BitmapCanvas::onFillPath(const Gfx::Path& path)
     _context->fill_path(blPath);
 }
 
+
+
+const FontMetrics& BitmapCanvas::onGetFontMetrics() const
+{
+    return _fontMetrics;
+}
 
 
 TextMetrics BitmapCanvas::onGetTextMetrics(const String& text) const

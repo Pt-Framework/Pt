@@ -59,9 +59,11 @@ typedef double Float;
 typedef std::ptrdiff_t Int;
 
 class Canvas;
+class FontMetrics;
 class Paint;
 class Painter;
 class PaintSurface;
+class TextMetrics;
 
 //
 // Images and views

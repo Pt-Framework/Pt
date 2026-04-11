@@ -137,6 +137,7 @@ class PT_FORMS_API PushButton : public Button
         Gfx::PointF               _iconPos;
         Gfx::PointF               _textPos;
         Gfx::TextMetrics          _textMetrics;
+        Gfx::FontMetrics          _fontMetrics;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _hasRenderer;

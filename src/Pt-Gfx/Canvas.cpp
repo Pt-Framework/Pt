@@ -335,6 +335,12 @@ void Canvas::fillPath(const Path& path)
 }
 
 
+const FontMetrics& Canvas::fontMetrics() const
+{
+    return onGetFontMetrics();
+}
+
+
 TextMetrics Canvas::textMetrics(const Pt::String& text) const
 {
     if(_active)

@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/TextBlock.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Screen.h>
@@ -71,31 +72,31 @@ void TextLine::setPosition(double x, double y)
 
 double TextLine::width() const
 {
-    return _textMetrics.width();
+    return _textMetrics.advance();
 }
 
 
 double TextLine::height() const
 {
-    return _textMetrics.height();
+    return _fontMetrics.height();
 }
 
 
 double TextLine::maxHeight() const
 {
-    return _textMetrics.ascent() + _textMetrics.descent();
+    return _fontMetrics.ascent() + _fontMetrics.descent();
 }
 
 
 double TextLine::ascent() const
 {
-    return _textMetrics.ascent();
+    return _fontMetrics.ascent();
 }
 
 
 double TextLine::descent() const
 {
-    return _textMetrics.descent();
+    return _fontMetrics.descent();
 }
 
 
@@ -114,10 +115,12 @@ const Pt::String& TextLine::text() const
 //}
 
 
-void TextLine::setText(const Pt::String& text, const Gfx::TextMetrics& tm)
+void TextLine::setText(const Pt::String& text, const Gfx::TextMetrics& tm,
+                      const Gfx::FontMetrics& fm)
 {
     _text = text;
     _textMetrics = tm;
+    _fontMetrics = fm;
 }
 
 
@@ -129,7 +132,7 @@ double TextLine::cursorToX(const Gfx::Painter& painter, std::size_t cursorPositi
 
     Gfx::TextMetrics fmLeft = painter.textMetrics(left);
 
-    return fmLeft.width();
+    return fmLeft.advance();
 }
 
 
@@ -144,7 +147,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
 
     // estimate cursor position
     Gfx::TextMetrics fm = painter.textMetrics(str);
-    std::size_t widthPerChar = fm.width() / str.size();
+    std::size_t widthPerChar = fm.advance() / str.size();
 
     if(widthPerChar == 0)
       return 0;
@@ -157,7 +160,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
     Pt::String left = str.substr(0, pos + 1);
     fm = painter.textMetrics(left);
 
-    if( textX < fm.width() )
+    if( textX < fm.advance() )
     {
         // cursor position was over estimated, so search left
         for( ; pos > 0; --pos)
@@ -165,7 +168,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
             left = str.substr(0, pos);
             fm = painter.textMetrics(left);
 
-            if( textX >= fm.width() )
+            if( textX >= fm.advance() )
                 break;
         }
     }
@@ -177,7 +180,7 @@ std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
             left = str.substr(0, pos + 1);
             fm = painter.textMetrics(left);
 
-            if( textX < fm.width() )
+            if( textX < fm.advance() )
                 break;
         }
     }
@@ -332,6 +335,7 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
     std::size_t prevWordEnd = 0;
     Pt::String segment;
     Gfx::TextMetrics lineMetrics;
+    Gfx::FontMetrics fm = painter.fontMetrics();
 
     Words::iterator it;
     for(it = words.begin(); it != words.end(); ++it)
@@ -342,13 +346,13 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
 
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
 
-        Gfx::TextMetrics fm = painter.textMetrics(segment);
-        double segmentWidth = fm.width();
+        Gfx::TextMetrics tm = painter.textMetrics(segment);
+        double segmentWidth = tm.advance();
 
         if(segmentWidth <= _maxWidth || lineLength == 0)
         {
             lineLength = segment.size();
-            lineMetrics = fm;
+            lineMetrics = tm;
             continue;
         }
 
@@ -360,7 +364,7 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
 
         Pt::String line(&text[lineBegin], lineLength);
         //line += ';';
-        addLine(line, lineMetrics);
+        addLine(line, lineMetrics, fm);
 
         lineBegin = wordBegin;
         lineLength = wordEnd - wordBegin;
@@ -372,15 +376,16 @@ void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
 
     Pt::String line(&text[lineBegin], lineLength);
     //line += ';';
-    addLine(line, lineMetrics);
+    addLine(line, lineMetrics, fm);
 }
 
 
 void TextBlock::addLine(const Pt::String& line,
-                        const Gfx::TextMetrics& tm)
+                        const Gfx::TextMetrics& tm,
+                        const Gfx::FontMetrics& fm)
 {
-    double lineWidth = tm.width();
-    double lineHeight = tm.height();
+    double lineWidth = tm.advance();
+    double lineHeight = fm.height();
 
     double lineX = 0;
     double lineY = _size.height();
@@ -393,7 +398,7 @@ void TextBlock::addLine(const Pt::String& line,
     _lines.resize(_lines.size() + 1);
     TextLine& textLine = _lines.back();
 
-    textLine.setText(line, tm);
+    textLine.setText(line, tm, fm);
 
     switch(_adjustment)
     {
@@ -403,11 +408,11 @@ void TextBlock::addLine(const Pt::String& line,
             break;
 
         case Adjustment::Right:
-            lineX = _maxWidth - tm.width();
+            lineX = _maxWidth - tm.advance();
             break;
 
         case Adjustment::Center:
-            lineX = (_maxWidth - tm.width()) / 2;
+            lineX = (_maxWidth - tm.advance()) / 2;
             break;
     }
 

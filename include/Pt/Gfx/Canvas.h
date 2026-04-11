@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
@@ -60,8 +61,8 @@ class PT_GFX_API Canvas
     protected:
         Canvas();
 
-    public:
-        enum DirtyFlags : unsigned {
+        enum DirtyFlags : unsigned
+        {
             DirtyTransform   = 0x01,
             DirtyComposition = 0x02,
             DirtyPen         = 0x04,
@@ -139,6 +140,8 @@ class PT_GFX_API Canvas
         void fillPath(const Path& path);
 
     public:
+        const FontMetrics& fontMetrics() const;
+
         TextMetrics textMetrics(const Pt::String& text) const;
 
         void drawText(const PointF& to, const Pt::String& text, 
@@ -209,6 +212,8 @@ class PT_GFX_API Canvas
         virtual void onFillPath(const Path& path) = 0;
 
     protected:
+        virtual const Gfx::FontMetrics& onGetFontMetrics() const = 0;
+
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const = 0;
 
         virtual void onDrawText(const Gfx::PointF& to, 

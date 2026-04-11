@@ -165,13 +165,14 @@ Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
     Gfx::Painter painter( surface() );
     painter.setFont(_font);
     Gfx::TextMetrics tm = painter.textMetrics( text() );
+    Gfx::FontMetrics fm = painter.fontMetrics();
 
     double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
     double boxWidth = _boxSize.width();
     double boxHeight = _boxSize.height();
 
-    double itemsWidth = space + boxWidth + space + tm.width();
-    double itemsHeight = std::max<double>(tm.lineHeight(), boxHeight);
+    double itemsWidth = space + boxWidth + space + tm.advance();
+    double itemsHeight = std::max<double>(fm.lineHeight(), boxHeight);
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
@@ -223,10 +224,11 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     painter.setFont(_font);
     Gfx::TextMetrics tm = painter.textMetrics( text() );
+    Gfx::FontMetrics fontMet = painter.fontMetrics();
 
     double textX = space + _boxSize.width() + space;
     //double textY = size().height() / 2.0 - tm.height() / 2.0 + tm.ascent();
-    double textY = scaling.align(size().height() / 2.0) + tm.capHeight() / 2.0;
+    double textY = scaling.align(size().height() / 2.0) + fontMet.capHeight() / 2.0;
 
     // NOTE: textY needs to be aligned to match the alignment of the box rect
 
@@ -247,10 +249,10 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
             mnemonicText = *m;
             Gfx::TextMetrics fmChar = painter.textMetrics(mnemonicText);
 
-            mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.width(), 
-                                          textPos.y() - fmChar.ascent()),
-                              Gfx::SizeF(fmChar.width(), 
-                                         fmChar.height()) );
+            mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.advance(), 
+                                          textPos.y() - fontMet.ascent()),
+                              Gfx::SizeF(fmChar.advance(), 
+                                         fontMet.height()) );
         }
     }
 

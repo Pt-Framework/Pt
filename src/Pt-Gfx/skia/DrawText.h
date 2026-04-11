@@ -44,6 +44,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/TextMetrics.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/String.h>
 
@@ -92,6 +93,8 @@ class DrawText
             @param text The text to calculate
         */
         TextMetrics textMetrics(const String& text);
+
+        FontMetrics fontMetrics() const;
 
         /** @brief Draw text on the image
 

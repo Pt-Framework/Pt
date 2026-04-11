@@ -213,14 +213,15 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
     Gfx::Painter _painter( surface() );
     _painter.setFont(_font);
 
-    Gfx::TextMetrics fm = _painter.textMetrics(_text);
+    Gfx::TextMetrics tm = _painter.textMetrics(_text);
+    Gfx::FontMetrics fm = _painter.fontMetrics();
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
 
     Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsWidth = tm.advance() + spacing + pictureWidth;
     double itemsHeight = std::max<double>(fm.height(), pictureHeight);
 
     return Gfx::SizeF( itemsWidth + padding().leftRight(),
@@ -291,7 +292,8 @@ void ListBoxItem::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
     // layout icon and text
     //
 
-    Gfx::TextMetrics fm = painter.textMetrics( _text );
+    Gfx::TextMetrics tm = painter.textMetrics( _text );
+    Gfx::FontMetrics fm = painter.fontMetrics();
 
     double pictureX = 0;
     double pictureY = 0;
@@ -303,7 +305,7 @@ void ListBoxItem::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
     Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsWidth = tm.advance() + spacing + pictureWidth;
     double itemsHeight = fm.height() + spacing + pictureHeight;
 
     pictureX = padding().left();

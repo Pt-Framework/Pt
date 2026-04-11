@@ -51,6 +51,7 @@ namespace Pt {
 namespace Gfx {
 
 class ColorF;
+class FontMetrics;
 class TextMetrics;
 class CompositionMode;
 class Transform;
@@ -84,6 +85,9 @@ class FreeType
 
         TextMetrics textMetrics(const String& text,
                                 FTC_FaceID faceId, 
+                                std::size_t fontSize);
+
+        FontMetrics fontMetrics(FTC_FaceID faceId,
                                 std::size_t fontSize);
 
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library,

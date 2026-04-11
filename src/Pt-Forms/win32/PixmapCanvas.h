@@ -102,6 +102,8 @@ class PixmapCanvas : public Gfx::Canvas
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
+        virtual const Gfx::FontMetrics& onGetFontMetrics() const override;
+
         virtual void onDrawText(const Gfx::PointF& to, 
                                 const Pt::String& text, 
                                 const Gfx::Transform* transform) override;
@@ -129,6 +131,8 @@ class PixmapCanvas : public Gfx::Canvas
 
         void addPath(HDC dc, const Gfx::Path& path);
 
+        Gfx::FontMetrics getFontMetrics() const;
+
     private:
         PixmapImpl*               _pixmap;
         Gfx::CompositionMode      _compositionMode;
@@ -147,6 +151,7 @@ class PixmapCanvas : public Gfx::Canvas
         bool                      _hasClip;
         HRGN                      _clipRect;
         HFONT                     _font;
+        Gfx::FontMetrics          _fontMetrics;
         Gfx::Path                 _path;
 };
 

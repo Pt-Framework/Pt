@@ -43,6 +43,7 @@ namespace Pt {
 namespace Gfx {
 
 class ColorF;
+class FontMetrics;
 class TextMetrics;
 class Transform;
 
@@ -52,6 +53,8 @@ class FreeTypeRenderer
         FreeTypeRenderer();
 
         void setFont(const Font& font);
+
+        FontMetrics fontMetrics() const;
 
         TextMetrics textMetrics(const String& text) const;
 

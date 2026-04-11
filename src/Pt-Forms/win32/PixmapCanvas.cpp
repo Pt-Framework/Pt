@@ -32,6 +32,7 @@
 #include "win32.h"
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Rgb32.h>
 
 #include <cmath>
@@ -259,6 +260,7 @@ void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
     }
 
     invalidate(DirtyClip);
+    _fontMetrics = getFontMetrics();
 }
 
 
@@ -425,6 +427,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
     }
 
     _font = GdiFontProvider::instance().lookupFont(font);
+    _fontMetrics = getFontMetrics();
 }
 
 
@@ -754,35 +757,85 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     GetWorldTransform(dc, &oldXForm);
     SetWorldTransform(dc, &xform);
 
-    TEXTMETRIC tm;
-    GetTextMetrics(dc, &tm);
-
     std::wstring wtext;
     text.toUtf16( std::back_inserter(wtext) );
 
     SIZE textSize;
     GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
 
-    SetWorldTransform(dc, &oldXForm);
+    TEXTMETRIC tm;
+    GetTextMetrics(dc, &tm);
 
-    long asc = tm.tmAscent;
-    long des = tm.tmDescent;
-    long inl = tm.tmInternalLeading;
-    long cap = tm.tmAscent - tm.tmInternalLeading;
-    long exl = tm.tmExternalLeading;
-    long lh = asc + des + exl;
+    Gfx::Float bearingX = 0;
+    Gfx::Float boundingWidth = textSize.cx;
+
+    if( ! wtext.empty() )
+    {
+        ABC abcFirst;
+        if( GetCharABCWidthsW(dc, wtext.front(), wtext.front(), &abcFirst) )
+            bearingX = abcFirst.abcA;
+
+        ABC abcLast;
+        if( GetCharABCWidthsW(dc, wtext.back(), wtext.back(), &abcLast) )
+            boundingWidth = textSize.cx - bearingX - abcLast.abcC;
+    }
+
+    SetWorldTransform(dc, &oldXForm);
 
     if(oldFont)
         SelectObject(dc, oldFont);
 
     Gfx::TextMetrics fm;
-    fm.setAscent(asc);
-    fm.setDescent(des);
-    fm.setCapHeight(cap);
-    fm.setLeading(exl);
-    fm.setWidth(textSize.cx);
+    fm.setAdvance(textSize.cx);
+    fm.setBearingX(bearingX);
+    fm.setBearingY(tm.tmAscent);
+    fm.setBoundingWidth(boundingWidth);
+    fm.setBoundingHeight(tm.tmAscent + tm.tmDescent);
+    return fm;
+}
 
-    //std::clog << "### " << text.narrow() << " " << fm.width() << std::endl;
+
+const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
+{
+    return _fontMetrics;
+}
+
+
+Gfx::FontMetrics PixmapCanvas::getFontMetrics() const
+{
+    if( ! _pixmap )
+        return Gfx::FontMetrics();
+
+    HDC dc = _pixmap->deviceContext();
+
+    HGDIOBJ oldFont = _font ? SelectObject(dc, _font) : 0;
+
+    const Gfx::Transform& tform = transform();
+
+    XFORM xform = { static_cast<FLOAT>( tform.m11() ), 
+                    static_cast<FLOAT>( tform.m12() ),
+                    static_cast<FLOAT>( tform.m21() ), 
+                    static_cast<FLOAT>( tform.m22() ),
+                    static_cast<FLOAT>( tform.dx() ),  
+                    static_cast<FLOAT>( tform.dy() ) };
+
+    XFORM oldXForm = { 1, 0, 0, 1, 0 , 0 };
+    GetWorldTransform(dc, &oldXForm);
+    SetWorldTransform(dc, &xform);
+
+    TEXTMETRIC tm;
+    GetTextMetrics(dc, &tm);
+
+    SetWorldTransform(dc, &oldXForm);
+
+    if(oldFont)
+        SelectObject(dc, oldFont);
+
+    Gfx::FontMetrics fm;
+    fm.setAscent(tm.tmAscent);
+    fm.setDescent(tm.tmDescent);
+    fm.setCapHeight(tm.tmAscent - tm.tmInternalLeading);
+    fm.setLeading(tm.tmExternalLeading);
     return fm;
 }
 

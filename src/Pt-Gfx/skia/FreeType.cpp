@@ -35,6 +35,7 @@
 
 #include FT_TRUETYPE_TABLES_H
 
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Image.h>
@@ -396,20 +397,16 @@ TextMetrics FreeType::textMetrics(const String& text,
         }
     }
 
-    FTC_ScalerRec scaler;
-    scaler.face_id = imageType.face_id;
-    scaler.width   = imageType.width;
-    scaler.height  = imageType.height;
-    scaler.pixel   = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
-
-    FT_Size size;
-    FTC_Manager_LookupSize(_manager, &scaler, &size);
-
     FT_UInt   previous = 0;
     FT_Vector delta;
     FT_Glyph  glyph;
 
-    int width = 0;
+    int penX = 0;
+    int bboxLeft = 0;
+    int bboxRight = 0;
+    int bboxTop = 0;
+    int bboxBottom = 0;
+    bool firstGlyph = true;
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
@@ -427,19 +424,70 @@ TextMetrics FreeType::textMetrics(const String& text,
         if( FTC_ImageCache_Lookup(_imageCache, &imageType, glyph_index, &glyph, &node) )
             continue;
 
-        // width is the sum of the advance of each character
-        width += glyph->advance.x >> 16;
-
-        // add kerning between previous and this character
         if( FT_HAS_KERNING(face) && previous )
         {
             FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
-
-            width += delta.x >> 16;
+            penX += delta.x >> 16;
         }
 
+        FT_BBox cbox;
+        FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_PIXELS, &cbox);
+
+        int glyphLeft = penX + static_cast<int>(cbox.xMin);
+        int glyphRight = penX + static_cast<int>(cbox.xMax);
+        int glyphTop = static_cast<int>(cbox.yMax);
+        int glyphBottom = static_cast<int>(cbox.yMin);
+
+        if(firstGlyph)
+        {
+            bboxLeft = glyphLeft;
+            bboxRight = glyphRight;
+            bboxTop = glyphTop;
+            bboxBottom = glyphBottom;
+            firstGlyph = false;
+        }
+        else
+        {
+            if(glyphLeft < bboxLeft) bboxLeft = glyphLeft;
+            if(glyphRight > bboxRight) bboxRight = glyphRight;
+            if(glyphTop > bboxTop) bboxTop = glyphTop;
+            if(glyphBottom < bboxBottom) bboxBottom = glyphBottom;
+        }
+
+        penX += glyph->advance.x >> 16;
         previous = glyph_index;
     }
+
+    Gfx::TextMetrics fm;
+    fm.setAdvance(penX);
+    fm.setBearingX(bboxLeft);
+    fm.setBearingY(bboxTop);
+    fm.setBoundingWidth(bboxRight - bboxLeft);
+    fm.setBoundingHeight(bboxTop - bboxBottom);
+    return fm;
+
+    // UNLOCK
+}
+
+
+FontMetrics FreeType::fontMetrics(FTC_FaceID faceId,
+                                  std::size_t fontSize)
+{
+    FT_Face face = 0;
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr)
+        return FontMetrics();
+
+    double fontHeight = (face->height / double(face->ascender)) * fontSize;
+
+    FTC_ScalerRec scaler;
+    scaler.face_id = faceId;
+    scaler.width   = static_cast<unsigned>(fontHeight + 0.1);
+    scaler.height  = scaler.width;
+    scaler.pixel   = 1;
+
+    FT_Size size;
+    FTC_Manager_LookupSize(_manager, &scaler, &size);
 
     double scaleY = size->metrics.y_scale / 65536.0;
     double asc = (face->ascender * scaleY) / 64.0;
@@ -449,15 +497,12 @@ TextMetrics FreeType::textMetrics(const String& text,
     double cap = emh - des;
     double exl = lih - (asc + des);
 
-    Gfx::TextMetrics fm;
+    FontMetrics fm;
     fm.setAscent(asc);
     fm.setDescent(des);
     fm.setCapHeight(cap);
     fm.setLeading(exl);
-    fm.setWidth(width);
     return fm;
-
-    // UNLOCK
 }
 
 

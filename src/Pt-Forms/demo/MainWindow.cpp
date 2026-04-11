@@ -285,7 +285,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     Gfx::TextMetrics fm = painter.textMetrics(text);
 
     painter.setPen( Gfx::ColorF::fromRgb8(255, 0, 0, 150) );
-    painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(10 + fm.width(), 15));
+    painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(10 + fm.advance(), 15));
 
     //
     // Path

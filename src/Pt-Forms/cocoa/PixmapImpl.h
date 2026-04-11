@@ -121,6 +121,8 @@ class PixmapCanvas : public Gfx::Canvas
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
+        virtual const Gfx::FontMetrics& onGetFontMetrics() const override;
+
         virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
                                 const Gfx::Transform* trans) override;
 
@@ -159,6 +161,7 @@ class PixmapCanvas : public Gfx::Canvas
         Gfx::Brush::FillStyle   _brushStyle;
 
         CTFontRef                     _font;
+        Gfx::FontMetrics              _fontMetrics;
         CFMutableDictionaryRef        _fontAttributes;
         CFMutableAttributedStringRef  _attributedString;
         

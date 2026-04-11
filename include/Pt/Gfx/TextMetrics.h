@@ -30,87 +30,94 @@
 #define PT_GFX_TEXTMETRICS_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Types.h>
-#include <cstddef>
 
 namespace Pt {
 
 namespace Gfx {
 
+/** @brief Metrics for a line of text.
+*/
 class PT_GFX_API TextMetrics
 {
     public:
-        typedef double ValueType;
-
-    public:
         TextMetrics();
 
-        ValueType ascent() const
+        /** @brief Returns the advance width of the text.
+        */
+        Float advance() const
         {
-            return _ascent;
+            return _advance;
         }
 
-        void setAscent(ValueType n)
+        /** @brief Sets the advance width of the text.
+        */
+        void setAdvance(Float n)
         {
-            _ascent = n;
+            _advance = n;
         }
 
-        ValueType descent() const
+        /** @brief Returns the horizontal bearing from origin to bounding box.
+        */
+        Float bearingX() const
         {
-            return _descent;
+            return _bearingX;
         }
 
-        void setDescent(ValueType n)
+        /** @brief Sets the horizontal bearing.
+        */
+        void setBearingX(Float n)
         {
-            _descent = n;
+            _bearingX = n;
         }
 
-        ValueType capHeight() const
+        /** @brief Returns the vertical bearing from baseline to top of bounding box.
+        */
+        Float bearingY() const
         {
-            return _capHeight;
+            return _bearingY;
         }
 
-        void setCapHeight(ValueType n)
+        /** @brief Sets the vertical bearing.
+        */
+        void setBearingY(Float n)
         {
-            _capHeight = n;
+            _bearingY = n;
         }
 
-        ValueType leading() const
+        /** @brief Returns the width of the bounding box.
+        */
+        Float boundingWidth() const
         {
-            return _leading;
+            return _boundingWidth;
         }
 
-        void setLeading(ValueType n)
+        /** @brief Sets the bounding box width.
+        */
+        void setBoundingWidth(Float n)
         {
-            _leading = n;
+            _boundingWidth = n;
         }
 
-        ValueType height() const
+        /** @brief Returns the height of the bounding box.
+        */
+        Float boundingHeight() const
         {
-            return _ascent + _descent;
+            return _boundingHeight;
         }
 
-        ValueType lineHeight() const
+        /** @brief Sets the bounding box height.
+        */
+        void setBoundingHeight(Float n)
         {
-            return _ascent + _descent + _leading;
-        }
-
-        ValueType width() const
-        {
-            return _width;
-        }
-
-        void setWidth(ValueType n)
-        {
-            _width = n;
+            _boundingHeight = n;
         }
 
     private:
-        ValueType _ascent;
-        ValueType _descent;
-        ValueType _capHeight;
-        ValueType _leading;
-        ValueType _width;
+        Float _advance;
+        Float _bearingX;
+        Float _bearingY;
+        Float _boundingWidth;
+        Float _boundingHeight;
 };
 
 } // namespace

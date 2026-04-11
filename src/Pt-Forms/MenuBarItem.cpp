@@ -54,9 +54,10 @@ Pt::Gfx::SizeF MenuBarItem::onMeasure(const  Pt::Forms::SizePolicy& policy)
     _painter.setFont(_font);
 
     Pt::Gfx::TextMetrics fm = _painter.textMetrics(_text);
+    Pt::Gfx::FontMetrics fontMet = _painter.fontMetrics();
 
-    return Pt::Gfx::SizeF(fm.width() + padding().leftRight(),
-        fm.height() + padding().topBottom());
+    return Pt::Gfx::SizeF(fm.advance() + padding().leftRight(),
+        fontMet.height() + padding().topBottom());
 }
 
 
@@ -93,9 +94,10 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
     // item text    
     painter.setFont(_font);
     Pt::Gfx::TextMetrics fm = painter.textMetrics(_text);
+    Pt::Gfx::FontMetrics fontMet = painter.fontMetrics();
     double textX = padding().left();
-    double textY = (size().height() - fm.height()) / 2;
-    textY += fm.ascent();
+    double textY = (size().height() - fontMet.height()) / 2;
+    textY += fontMet.ascent();
     Pt::Gfx::PointF textPos(textX, textY);
 
     Pt::Gfx::RectF mnemonicRect; // TODO

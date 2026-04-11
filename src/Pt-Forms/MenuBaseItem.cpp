@@ -243,16 +243,17 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
     _painter.setFont(_font);
 
     Pt::Gfx::TextMetrics fm = _painter.textMetrics(_text);
+    Pt::Gfx::FontMetrics fontMet = _painter.fontMetrics();
 
-    double contentHeight = std::max<Pt::ssize_t>(fm.height(), _icon.height());
-    double contentWidth = fm.width() + scaling().toLogical(_picture.size().width());
+    double contentHeight = std::max<Pt::ssize_t>(fontMet.height(), _icon.height());
+    double contentWidth = fm.advance() + scaling().toLogical(_picture.size().width());
 
     const Pt::Forms::Key* sk = shortcut();
     if (sk)
     {
         Pt::String text = shortcutText(*sk);
-        contentWidth += fm.height() * 2.5; // spacing towards shortcut text
-        contentWidth += _painter.textMetrics(text).width();
+        contentWidth += fontMet.height() * 2.5; // spacing towards shortcut text
+        contentWidth += _painter.textMetrics(text).advance();
     }
 
 //    if (_hasSubMenu)
@@ -293,9 +294,10 @@ void MenuBaseItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
     painter.setPen(_textPen);
 
     Pt::Gfx::TextMetrics fm = painter.textMetrics(_text);
+    Pt::Gfx::FontMetrics fontMet = painter.fontMetrics();
     double textX = padding().left() + _iconWidth;
-    double textY = (size().height() - fm.height()) / 2;
-    textY += fm.ascent();
+    double textY = (size().height() - fontMet.height()) / 2;
+    textY += fontMet.ascent();
     Pt::Gfx::PointF textPos(textX, textY);
 
     painter.drawText(textPos, _text);
@@ -317,9 +319,9 @@ void MenuBaseItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
         Pt::String skText = shortcutText(*sk);
         Pt::Gfx::TextMetrics skm = painter.textMetrics(skText);
 
-        double skX = size().width() - skm.width() - padding().right();
-        double skY = (size().height() - skm.height()) / 2;
-        skY += skm.ascent();
+        double skX = size().width() - skm.advance() - padding().right();
+        double skY = (size().height() - fontMet.height()) / 2;
+        skY += fontMet.ascent();
         Pt::Gfx::PointF skPos(skX, skY);
 
         painter.drawText(skPos, skText);

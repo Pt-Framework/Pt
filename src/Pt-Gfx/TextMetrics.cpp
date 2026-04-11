@@ -35,11 +35,11 @@ namespace Pt {
 namespace Gfx {
 
 TextMetrics::TextMetrics()
-: _ascent( 0)
-, _descent(0)
-, _capHeight(0)
-, _leading(0)
-, _width(0)
+: _advance(0)
+, _bearingX(0)
+, _bearingY(0)
+, _boundingWidth(0)
+, _boundingHeight(0)
 { }
 
 } // namespace

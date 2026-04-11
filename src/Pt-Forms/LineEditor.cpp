@@ -216,8 +216,9 @@ void LineEditor::layout(Gfx::Painter& painter, TextLine& line)
 
 void LineEditor::layout(Gfx::Painter& painter, const Pt::String& text, TextLine& line)
 {
-    Gfx::TextMetrics fm = painter.textMetrics(text);
-    line.setText(text, fm);
+    Gfx::TextMetrics tm = painter.textMetrics(text);
+    Gfx::FontMetrics fm = painter.fontMetrics();
+    line.setText(text, tm, fm);
 
     double lineX = 0;
     double lineY = (_size.height() - line.maxHeight()) / 2;

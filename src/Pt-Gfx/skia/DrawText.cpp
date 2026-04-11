@@ -83,6 +83,12 @@ TextMetrics DrawText::textMetrics(const String& text)
 }
 
 
+FontMetrics DrawText::fontMetrics() const
+{
+    return FreeType::instance().fontMetrics(_faceId, _fontSize);
+}
+
+
 void DrawText::draw(Image& image, Pt::ssize_t x, Pt::ssize_t y, 
                     const String& text, const CompositionMode& mode)
 {
