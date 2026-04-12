@@ -57,8 +57,9 @@ class PT_GFX_API FontFace
 
         const std::string& family() const;
 
-        //! @brief Returns the family of the font face.
-        //! Alias for family().
+        /** @brief Returns the family of the font face.
+            Alias for family().
+        */
         const std::string& name() const;
 
         const std::string& styleName() const;

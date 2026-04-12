@@ -90,50 +90,62 @@ class PT_GFX_API Font
             Fantasy
         };
 
-        //! @brief Default constructor.
+        /** @brief Default constructor.
+        */
         Font();
 
-        //! @brief Construct a font with an exact style name hint.
+        /** @brief Construct a font with an exact style name hint.
+        */
         Font(const std::string& family, std::size_t size,
              const std::string& styleName,
              Weight weight = Weight::Normal,
              Slant slant = Slant::Normal,
              Stretch stretch = Stretch::Normal);
 
-        //! @brief Construct a font with explicit weight and slant.
+        /** @brief Construct a font with explicit weight and slant.
+        */
         Font(const std::string& family, std::size_t size,
              Weight weight = Weight::Normal,
              Slant slant = Slant::Normal,
              Stretch stretch = Stretch::Normal);
 
-        //! @brief Construct a font from a generic category.
+        /** @brief Construct a font from a generic category.
+        */
         Font(Category category, std::size_t size,
              Weight weight = Weight::Normal,
              Slant slant = Slant::Normal,
              Stretch stretch = Stretch::Normal);
 
-        //! @brief Returns the family of the font.
+        /** @brief Returns the family of the font.
+        */
         const std::string& family() const;
 
-        //! @brief Returns the size of the font
+        /** @brief Returns the size of the font.
+        */
         std::size_t size() const;
 
-        //! @brief Returns the optional exact style name hint.
+        /** @brief Returns the optional exact style name hint.
+        */
         const std::string& styleName() const;
 
-        //! @brief Returns true if an exact style name hint is set.
+        /** @brief Returns true if an exact style name hint is set.
+        */
         bool hasStyleName() const;
 
-        //! @brief Returns the weight of the font request.
+        /** @brief Returns the weight of the font request.
+        */
         Weight weight() const;
 
-        //! @brief Returns the slant of the font request.
+        /** @brief Returns the slant of the font request.
+        */
         Slant slant() const;
 
-        //! @brief Returns the stretch of the font request.
+        /** @brief Returns the stretch of the font request.
+        */
         Stretch stretch() const;
 
-        //! @brief Returns the generic font category.
+        /** @brief Returns the generic font category.
+        */
         Category category() const;
 
     public:
