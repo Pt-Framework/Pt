@@ -68,6 +68,12 @@ void Bitmap::reset()
 
 void Bitmap::reset(const Gfx::Image& image)
 {
+    if( image.empty() )
+    {
+        reset();
+        return;
+    }
+
     invalidate();
     _surface->reset(image);
 }
@@ -75,6 +81,12 @@ void Bitmap::reset(const Gfx::Image& image)
 
 void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
+    if(sizeF.width() <= 0 || sizeF.height() <= 0)
+    {
+        reset();
+        return;
+    }
+
     invalidate();
     _surface->reset(sizeF, stride);
 }

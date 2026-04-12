@@ -925,12 +925,6 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     size_t width = lround( size.width() );
     size_t height = lround( size.height() );
     
-    if(width == 0 || height == 0)
-    {
-        reset();
-        return;
-    }
-    
     _width = width;
     _height = height;
     

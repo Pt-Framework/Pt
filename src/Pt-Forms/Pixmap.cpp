@@ -58,6 +58,12 @@ void Pixmap::reset()
 
 void Pixmap::reset(const Gfx::Image& image)
 {
+    if( image.empty() )
+    {
+        reset();
+        return;
+    }
+
     invalidate();
     _impl->reset(image);
 }
@@ -65,6 +71,12 @@ void Pixmap::reset(const Gfx::Image& image)
 
 void Pixmap::reset(const Gfx::SizeF& size)
 {
+    if(size.width() <= 0 || size.height() <= 0)
+    {
+        reset();
+        return;
+    }
+
     invalidate();
     _impl->reset(size);
 }

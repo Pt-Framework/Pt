@@ -93,12 +93,6 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     LONG width = lround( size.width() );
     LONG height = lround( size.height() );
 
-    if(width <= 0 || height <= 0)
-    {
-        reset();
-        return;
-    }
-
     if( _width == width && _height == height )
         return;
     
@@ -274,7 +268,7 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 void PixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached canvas base class destructor
-    
+
     SelectObject(_dc, GetStockObject(BLACK_PEN));
     SelectObject(_dc, GetStockObject(WHITE_BRUSH));
     SelectObject(_dc, GetStockObject(SYSTEM_FONT));
