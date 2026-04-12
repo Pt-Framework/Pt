@@ -75,10 +75,6 @@ class PT_GFX_API PaintSurface : private NonCopyable
         */
         Canvas* getCanvas(Canvas* canvas);
 
-        /** @brief Releases the currently active paint canvas.
-        */
-        void releaseCanvas();
-
         /** @brief Synchronizes pending operations to the surface.
         */
         void sync();
@@ -86,6 +82,11 @@ class PT_GFX_API PaintSurface : private NonCopyable
         /** @brief Finishes painting to the surface.
         */
         void finish();
+
+    protected:
+        /** @brief Invalidates the currently active paint canvas.
+        */
+        void invalidate();
 
     protected:
         /** @brief Returns the image format.

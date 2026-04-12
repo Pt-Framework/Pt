@@ -44,27 +44,28 @@ Pixmap::Pixmap()
 
 Pixmap::~Pixmap()
 {
+    invalidate();
     delete _impl;
 }
 
 
 void Pixmap::reset()
 {
-    releaseCanvas();
+    invalidate();
     _impl->reset();
 }
 
 
 void Pixmap::reset(const Gfx::Image& image)
 {
-    releaseCanvas();
+    invalidate();
     _impl->reset(image);
 }
 
 
 void Pixmap::reset(const Gfx::SizeF& size)
 {
-    releaseCanvas();
+    invalidate();
     _impl->reset(size);
 }
 

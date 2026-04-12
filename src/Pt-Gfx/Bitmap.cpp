@@ -54,27 +54,28 @@ Bitmap::Bitmap(const Gfx::SizeF& size, std::size_t stride)
 
 Bitmap::~Bitmap()
 {
+    invalidate();
     delete _surface;
 }
 
 
 void Bitmap::reset()
 {
-    releaseCanvas();
+    invalidate();
     _surface->clear();
 }
 
 
 void Bitmap::reset(const Gfx::Image& image)
 {
-    releaseCanvas();
+    invalidate();
     _surface->reset(image);
 }
 
 
 void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
-    releaseCanvas();
+    invalidate();
     _surface->reset(sizeF, stride);
 }
 
@@ -94,7 +95,7 @@ const Gfx::Image& Bitmap::image() const
 void Bitmap::setScaleFactor(double scaleFactor)
 {
     _surface->setScaleFactor(scaleFactor);
-    releaseCanvas();
+    invalidate();
 }
 
 

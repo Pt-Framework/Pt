@@ -90,7 +90,7 @@ Canvas* PaintSurface::getCanvas(Canvas* reuse)
 
 Gfx::Canvas* PaintSurface::onGetCanvas(Gfx::Canvas* reuse)
 {
-    releaseCanvas();
+    invalidate();
     
     _canvas = onCreateCanvas(reuse);
     if( ! _canvas)
@@ -110,18 +110,6 @@ Gfx::Canvas* PaintSurface::onGetCanvas(Gfx::Canvas* reuse)
 }
 
 
-void PaintSurface::releaseCanvas()
-{
-    if(_canvas)
-    {
-        onReleaseCanvas();
-        
-        _canvas->detachSurface(*this);
-        _canvas = 0;
-    }
-}
-
-
 Gfx::Canvas* PaintSurface::onCreateCanvas(Gfx::Canvas* reuse)
 {
     return 0;
@@ -136,8 +124,20 @@ void PaintSurface::sync()
 
 void PaintSurface::finish()
 {
-    releaseCanvas();
+    invalidate();
     onFinish();
+}
+
+
+void PaintSurface::invalidate()
+{
+    if(_canvas)
+    {
+        onReleaseCanvas();
+        
+        _canvas->detachSurface(*this);
+        _canvas = 0;
+    }
 }
 
 

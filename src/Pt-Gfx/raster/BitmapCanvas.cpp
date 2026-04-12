@@ -166,7 +166,6 @@ BitmapCanvas::BitmapCanvas()
 
 BitmapCanvas::~BitmapCanvas()
 {
-    
 }
 
 
