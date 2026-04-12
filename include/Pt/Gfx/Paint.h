@@ -30,13 +30,10 @@
 #define PT_GFX_PAINT_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Path.h>
 
 namespace Pt {
 
@@ -58,18 +55,6 @@ class PT_GFX_API Paint
         /** @brief Sets the composition mode.
         */
         void setCompositionMode(const CompositionMode& mode);
-
-        /** @brief Returns the clipping rect.
-        */
-        const RectF* clip() const;
-
-        /** @brief Sets the clipping rect.
-        */
-        void setClip(const RectF& clip);
-
-        /** @brief Resets the clipping rect.
-        */
-        void resetClip();
 
         /** @brief Returns the current pen.
         */
@@ -95,39 +80,11 @@ class PT_GFX_API Paint
         */
         void setFont(const Font& font);
 
-        /** @brief Returns the user transform.
-        */
-        const Transform& transform() const;
-
-        /** @brief Sets the user transform.
-        */
-        void setTransform(const Transform& tx);
-
-        /** @brief Resets the user transform to identity.
-        */
-        void resetTransform();
-
-        /** @brief Returns the current path.
-        */
-        Gfx::Path& path();
-
-        /** @brief Returns the current path.
-        */
-        const Gfx::Path& path() const;
-
-        /** @brief Sets the current path.
-        */
-        void setPath(const Path& path);
-
     private:
         Gfx::CompositionMode _compositionMode;
-        Gfx::RectF           _clip;
-        bool                 _hasClip;
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;
         Gfx::Font            _font;
-        Gfx::Transform       _transform;
-        Gfx::Path            _path;
 };
 
 } // namespace

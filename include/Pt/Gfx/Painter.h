@@ -43,6 +43,7 @@
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Paint.h>
 
 #include <Pt/NonCopyable.h>
@@ -104,10 +105,6 @@ class PT_GFX_API Painter : private NonCopyable
         const Scaling& scaling() const;
 
     public:
-        /** @brief Returns the paint attributes.
-        */
-        const Paint& paint() const;
-
         /** @brief Returns the current composition mode.
         */
         const CompositionMode& compositionMode() const;
@@ -282,7 +279,10 @@ class PT_GFX_API Painter : private NonCopyable
         Canvas*              _canvas;
         Scaling              _scaling;
         Paint                _paint;
-        Path                 _maybe_not_from_paint;
+        Transform            _transform;
+        RectF                _clip;
+        bool                 _hasClip;
+        Path                 _path;
 };
 
 } // namespace

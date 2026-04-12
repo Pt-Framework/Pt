@@ -33,7 +33,6 @@ namespace Pt {
 namespace Gfx {
 
 Paint::Paint()
-: _hasClip(false)
 {
 }
 
@@ -52,26 +51,6 @@ const Gfx::CompositionMode& Paint::compositionMode() const
 void Paint::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
-}
-
-
-const RectF* Paint::clip() const
-{
-    return _hasClip ? &_clip : 0;
-}
-
-
-void Paint::setClip(const Gfx::RectF& clip)
-{
-    _clip = clip;
-    _hasClip = true;
-}
-
-
-void Paint::resetClip()
-{
-    _clip = Gfx::RectF();
-    _hasClip = false;
 }
 
 
@@ -108,42 +87,6 @@ const Gfx::Font& Paint::font() const
 void Paint::setFont(const Gfx::Font& font)
 {
     _font = font;
-}
-
-
-const Gfx::Transform& Paint::transform() const
-{
-    return _transform;
-}
-
-
-void Paint::setTransform(const Gfx::Transform& tx)
-{
-    _transform = tx;
-}
-
-
-void Paint::resetTransform()
-{
-    _transform = Gfx::Transform();
-}
-
-
-Gfx::Path& Paint::path()
-{
-    return _path;
-}
-
-
-const Gfx::Path& Paint::path() const
-{
-    return _path;
-}
-
-
-void Paint::setPath(const Gfx::Path& path)
-{
-    _path = path;
 }
 
 } // namespace

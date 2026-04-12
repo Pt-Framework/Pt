@@ -40,6 +40,7 @@ Painter::Painter()
 : _surface(0)
 , _context(0)
 , _canvas(0)
+, _hasClip(false)
 {
 }
 
@@ -48,6 +49,7 @@ Painter::Painter(PaintSurface& surface)
 : _surface(0)
 , _context(0)
 , _canvas(0)
+, _hasClip(false)
 {
     begin(surface);
 }
@@ -57,6 +59,7 @@ Painter::Painter(PaintContext& canvas)
 : _surface(0)
 , _context(0)
 , _canvas(0)
+, _hasClip(false)
 {
     begin(canvas);
 }
@@ -122,18 +125,17 @@ void Painter::onBeginPaint(Canvas& canvas)
         // initialize new canvas
         if(_canvas)
         {
-            _canvas->setTransform( _paint.transform() );
+            _canvas->setTransform(_transform);
             _canvas->setCompositionMode( _paint.compositionMode() );
             _canvas->setPen( _paint.pen() );
             _canvas->setBrush( _paint.brush() );
             _canvas->setFont( _paint.font() );
-            _canvas->setPath( _paint.path() );
+            _canvas->setPath(_path);
 
-            const Gfx::RectF* clip = _paint.clip();
-            if( ! clip )
+            if( ! _hasClip )
                 _canvas->resetClip();
             else
-                _canvas->setClip(*clip);
+                _canvas->setClip(_clip);
         }
     }
 
@@ -200,12 +202,6 @@ const Scaling& Painter::scaling() const
 }
 
 
-const Paint& Painter::paint() const
-{
-    return _paint;
-}
-
-
 const Gfx::CompositionMode& Painter::compositionMode() const
 {
     return _paint.compositionMode();
@@ -268,13 +264,13 @@ void Painter::setFont(const Gfx::Font& font)
 
 const Gfx::Transform& Painter::transform() const
 {
-    return _paint.transform();
+    return _transform;
 }
 
 
 void Painter::setTransform(const Gfx::Transform& tx)
 {
-    _paint.setTransform(tx);
+    _transform = tx;
 
     if(_canvas)
         _canvas->setTransform(tx);
@@ -283,7 +279,7 @@ void Painter::setTransform(const Gfx::Transform& tx)
 
 void Painter::resetTransform()
 {
-    _paint.resetTransform();
+    _transform = Transform();
 
     if(_canvas)
         _canvas->resetTransform();
@@ -292,13 +288,14 @@ void Painter::resetTransform()
 
 const RectF* Painter::clip() const
 {
-    return _paint.clip();
+    return _hasClip ? &_clip : 0;
 }
 
 
 void Painter::setClip(const Gfx::RectF& clip)
 {
-    _paint.setClip(clip);
+    _clip = clip;
+    _hasClip = true;
 
     if(_canvas)
     {
@@ -312,7 +309,8 @@ void Painter::setClip(const Gfx::RectF& clip)
 
 void Painter::resetClip()
 {
-    _paint.resetClip();
+    _clip = Gfx::RectF();
+    _hasClip = false;
 
     if(_canvas)
         _canvas->resetClip();
@@ -403,13 +401,13 @@ void Painter::fillChord(const PointF& topLeft, const SizeF& size, float degBegin
 
 const Gfx::Path& Painter::path() const
 {
-    return _paint.path();
+    return _path;
 }
 
 
 void Painter::setPath(const Path& path)
 {
-    _paint.setPath(path);
+    _path = path;
 
     if(_canvas)
         _canvas->setPath(path);
