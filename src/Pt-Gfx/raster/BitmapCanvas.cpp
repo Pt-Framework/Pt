@@ -186,11 +186,8 @@ void BitmapCanvas::onFinishPaint()
 {
     // NOTE: this might be called from the attached surface base class destructor
 
-    if(_image)
-    {
-        _surface = 0;
-        _image = 0;
-    }
+    _surface = 0;
+    _image = 0;
 }
 
 
@@ -403,6 +400,9 @@ void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
+    if( ! _image )
+        return;
+
     std::vector<PointI> points(n);
 
     for(size_t i = 0; i < n; ++i)
@@ -417,6 +417,9 @@ void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 
 void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
+    if( ! _image )
+        return;
+
     std::vector<PointI> points(n);
 
     for(size_t i = 0; i < n; ++i)
@@ -431,6 +434,9 @@ void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 
 void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
+    if( ! _image )
+        return;
+
     // TODO: this works only if the transform is simple 
     //       and the shape is stable
     
@@ -455,6 +461,9 @@ void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
 
 void BitmapCanvas::onFillRect(const Gfx::RectF& r)
 {
+    if( ! _image )
+        return;
+
     // TODO: this works only if the transform is simple 
     //       and the shape is stable
 
@@ -473,6 +482,9 @@ void BitmapCanvas::onFillRect(const Gfx::RectF& r)
 
 void BitmapCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
+    if( ! _image )
+        return;
+
     Gfx::PointF p = transform() * topLeftF;
     Gfx::SizeF s = transform() * sizeF;
 
@@ -488,6 +500,9 @@ void BitmapCanvas::onDrawEllipse(const PointF& topLeftF, const SizeF& sizeF)
 
 void BitmapCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 {
+    if( ! _image )
+        return;
+
     Gfx::PointF p = transform() * topLeftF;
     Gfx::SizeF s = transform() * sizeF;
 
@@ -507,18 +522,27 @@ void BitmapCanvas::onSetPath(const Gfx::Path& path)
 
 void BitmapCanvas::onDrawPath()
 {
+    if( ! _image )
+        return;
+
     strokePolygons(_flatPath, _currentClip);
 }
 
 
 void BitmapCanvas::onFillPath()
 {
+    if( ! _image )
+        return;
+
     fillPolygons(_flatPath, _currentClip);
 }
 
 
 void BitmapCanvas::onDrawPath(const Gfx::Path& path)
 {
+    if( ! _image )
+        return;
+
     std::vector<Polygon> flatPath;
     path.toPolygons(flatPath);
     strokePolygons(flatPath, _currentClip);
@@ -527,6 +551,9 @@ void BitmapCanvas::onDrawPath(const Gfx::Path& path)
 
 void BitmapCanvas::onFillPath(const Gfx::Path& path)
 {
+    if( ! _image )
+        return;
+
     std::vector<Polygon> flatPath;
     path.toPolygons(flatPath);
     fillPolygons(flatPath, _currentClip);

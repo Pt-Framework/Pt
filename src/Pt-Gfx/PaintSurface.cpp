@@ -93,6 +93,9 @@ Gfx::Canvas* PaintSurface::onGetCanvas(Gfx::Canvas* reuse)
     releaseCanvas();
     
     _canvas = onCreateCanvas(reuse);
+    if( ! _canvas)
+        return 0;
+
     _canvas->attachSurface(*this);
 
     RectF nobounds(PointF(0, 0),

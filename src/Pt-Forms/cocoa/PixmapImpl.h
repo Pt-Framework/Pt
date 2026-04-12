@@ -179,6 +179,8 @@ class PixmapImpl
         void reset(const Gfx::Image& image);
 
         void reset(const Gfx::SizeF& size);
+
+        void reset();
         
         void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
         

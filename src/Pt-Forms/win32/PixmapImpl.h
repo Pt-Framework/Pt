@@ -79,6 +79,11 @@ class PixmapImpl
             _bitmap.reset(size);
         }
 
+        void reset()
+        {
+            _bitmap.reset();
+        }
+
         const Gfx::Bitmap& bitmap() const 
         {
             return _bitmap;
@@ -181,6 +186,8 @@ class PixmapImpl
 
         void reset(const Gfx::SizeF& size);
 
+        void reset();
+
         Gfx::Image toImage() const;
 
         void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
@@ -230,9 +237,6 @@ class PixmapImpl
         LONG           _height;
         HDC            _dc;
         HBITMAP        _bitmap;
-        HPEN           _oldPen;
-        HBRUSH         _oldBrush;
-        HFONT          _oldFont;
         HBITMAP        _oldBitmap;
 
         PixmapCanvas*  _canvas;

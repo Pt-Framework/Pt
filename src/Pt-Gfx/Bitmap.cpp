@@ -58,17 +58,24 @@ Bitmap::~Bitmap()
 }
 
 
+void Bitmap::reset()
+{
+    releaseCanvas();
+    _surface->clear();
+}
+
+
 void Bitmap::reset(const Gfx::Image& image)
 {
-    _surface->reset(image);
     releaseCanvas();
+    _surface->reset(image);
 }
 
 
 void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
-    _surface->reset(sizeF, stride);
     releaseCanvas();
+    _surface->reset(sizeF, stride);
 }
 
 

@@ -84,6 +84,9 @@ void BitmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 
 void BitmapCanvas::onApplyCompositionMode()
 {
+    if( ! _context )
+        return;
+
     BLCompOp compOp = BL_COMP_OP_SRC_OVER;
     
     if(_compositionMode == CompositionMode::SourceOver)
@@ -158,6 +161,9 @@ void BitmapCanvas::onSetPen(const Gfx::Pen& pen)
 
 void BitmapCanvas::onApplyPen()
 {
+    if( ! _context )
+        return;
+
     _context->set_stroke_width( static_cast<double>( _pen.size() ) );
 
     Pt::Gfx::ColorF penColor = _pen.color();
@@ -178,6 +184,9 @@ void BitmapCanvas::onSetBrush(const Gfx::Brush& brush)
 
 void BitmapCanvas::onApplyBrush()
 {
+    if( ! _context )
+        return;
+
     Pt::Gfx::ColorF brushColor = _brush.color();
     BLRgba32 fillColor(brushColor.red() / 257, 
                        brushColor.green() / 257, 
@@ -271,6 +280,9 @@ void BitmapCanvas::onApplyClip()
 
 void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
+    if( ! _context )
+        return;
+
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
         Gfx::PointF pts[2];
@@ -286,7 +298,7 @@ void BitmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void BitmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
-    if(n == 0)
+    if(n == 0 || ! _context)
         return;
 
     switch( _pen.style() )
@@ -332,7 +344,7 @@ void BitmapCanvas::drawSolid(const Gfx::PointF* pts, const size_t n)
 
 void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
-    if(n == 0)
+    if(n == 0 || ! _context)
         return;
 
     _points.resize(n);
@@ -349,6 +361,9 @@ void BitmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 
 void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
+    if( ! _context )
+        return;
+
     if( _pen.style() ==  Gfx::Pen::Dash ||
         _pen.style() == Gfx::Pen::Dot )
     {
@@ -364,12 +379,18 @@ void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
 
 void BitmapCanvas::onFillRect(const Gfx::RectF& r)
 {
+    if( ! _context )
+        return;
+
      _context->fill_rect( r.x(), r.y(), r.width(),r.height() );
 }
 
 
 void BitmapCanvas::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 {
+    if( ! _context )
+        return;
+
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
         Path ellipsePath;
@@ -390,6 +411,9 @@ void BitmapCanvas::onDrawEllipse(const PointF& topLeft, const SizeF& size)
 
 void BitmapCanvas::onFillEllipse(const PointF& topLeft, const SizeF& size)
 {
+    if( ! _context )
+        return;
+
     double radiusX = size.width() / 2.0;
     double radiusY = size.height() / 2.0;
     double centerX = topLeft.x() + radiusX;
@@ -459,6 +483,9 @@ void BitmapCanvas::addPath(BLPath& path, const Gfx::Path& other)
 
 void BitmapCanvas::onDrawPath()
 {
+    if( ! _context )
+        return;
+
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
         drawDashed(_ptPath);
@@ -471,6 +498,9 @@ void BitmapCanvas::onDrawPath()
 
 void BitmapCanvas::onDrawPath(const Path& path)
 {
+    if( ! _context )
+        return;
+
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
         drawDashed(path);
@@ -520,12 +550,18 @@ void BitmapCanvas::drawDashed(const Path& path)
 
 void BitmapCanvas::onFillPath()
 {
+    if( ! _context )
+        return;
+
     _context->fill_path(_blPath);
 }
 
 
 void BitmapCanvas::onFillPath(const Gfx::Path& path)
 {
+    if( ! _context )
+        return;
+
     BLPath blPath;
     addPath(blPath, path);
     _context->fill_path(blPath);

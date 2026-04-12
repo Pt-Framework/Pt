@@ -62,34 +62,29 @@ PixmapImpl::PixmapImpl()
 , _width(0)
 , _height(0)
 , _dc(0)
+, _bitmap(0)
 , _canvas(0)
 {
-    Gfx::SizeF size = Gfx::SizeF(10, 10);
-
     HDC screenDC = GetDC(NULL);
     _dc = CreateCompatibleDC(screenDC);
-    _bitmap = CreateCompatibleBitmap(screenDC, lround(size.width()), 
-                                               lround(size.height()));
     ReleaseDC(NULL, screenDC);
 
-    _oldPen    = (HPEN) GetCurrentObject(_dc, OBJ_PEN);
-    _oldBrush  = (HBRUSH) GetCurrentObject(_dc, OBJ_BRUSH);
-    _oldFont   = (HFONT) GetCurrentObject(_dc, OBJ_FONT);
     _oldBitmap = (HBITMAP) GetCurrentObject(_dc, OBJ_BITMAP);
-    
-    SelectObject(_dc, _bitmap);
-    SetBkMode(_dc, TRANSPARENT);
 
+    SetBkMode(_dc, TRANSPARENT);
     SetGraphicsMode(_dc, GM_ADVANCED);
 }
 
 
 PixmapImpl::~PixmapImpl()
 {
-    SelectObject(_dc, _oldBitmap);
+    if(_bitmap)
+    {
+        SelectObject(_dc, _oldBitmap);
+        DeleteObject(_bitmap);
+    }
 
     DeleteDC(_dc);
-    DeleteObject(_bitmap);
 }
 
 
@@ -97,6 +92,12 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
 {
     LONG width = lround( size.width() );
     LONG height = lround( size.height() );
+
+    if(width <= 0 || height <= 0)
+    {
+        reset();
+        return;
+    }
 
     if( _width == width && _height == height )
         return;
@@ -106,12 +107,31 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     ReleaseDC(NULL, screenDC);
 
     SelectObject(_dc, bitmap);
-    DeleteObject(_bitmap);
+
+    if(_bitmap)
+        DeleteObject(_bitmap);
+
     _bitmap = bitmap;
     _width = width;
     _height = height;
 
     _physicalSize.set(width, height);
+}
+
+
+void PixmapImpl::reset()
+{
+    if(_bitmap)
+    {
+        SelectObject(_dc, _oldBitmap);
+        DeleteObject(_bitmap);
+        _bitmap = 0;
+    }
+
+    _width = 0;
+    _height = 0;
+
+    _physicalSize.set(0, 0);
 }
 
 
@@ -237,6 +257,9 @@ const Gfx::Scaling& PixmapImpl::scaling() const
 
 Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
+    if( ! _bitmap)
+        return 0;
+
     PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
     if( ! canvas ) 
         canvas  = new PixmapCanvas();
@@ -251,10 +274,10 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 void PixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached canvas base class destructor
-
-    SelectObject(_dc, _oldPen);
-    SelectObject(_dc, _oldBrush);
-    SelectObject(_dc, _oldFont);
+    
+    SelectObject(_dc, GetStockObject(BLACK_PEN));
+    SelectObject(_dc, GetStockObject(WHITE_BRUSH));
+    SelectObject(_dc, GetStockObject(SYSTEM_FONT));
     SelectClipRgn(_dc, NULL);
     AbortPath(_dc);
 
@@ -277,6 +300,9 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
                               const Gfx::Paint& paint,
                               const Gfx::RectF* rect)
 {
+    if( ! _bitmap)
+        return;
+
     const PixmapImpl* pixmap = pm.impl();
     Gfx::PointF to = _scaling.toPhysical(toF);
 

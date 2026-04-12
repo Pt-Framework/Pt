@@ -51,23 +51,22 @@ Pixmap::~Pixmap()
 void Pixmap::reset()
 {
     releaseCanvas();
-
-    // TODO: _impl->reset( Gfx::SizeF(0.1, 0.0) );
+    _impl->reset();
     finish();
 }
 
 
 void Pixmap::reset(const Gfx::Image& image)
 {
-    _impl->reset(image);
     releaseCanvas();
+    _impl->reset(image);
 }
 
 
 void Pixmap::reset(const Gfx::SizeF& size)
 {
-    _impl->reset(size);
     releaseCanvas();
+    _impl->reset(size);
 }
 
 

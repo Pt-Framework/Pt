@@ -106,6 +106,18 @@ void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 }
 
 
+void BitmapSurface::clear()
+{
+    if( _rasterContext.target_image() )
+        _rasterContext.end();
+
+    _rasterImage.reset();
+    _rgb32Image.clear();
+    _image.clear();
+    _physicalSize.set(0, 0);
+}
+
+
 void BitmapSurface::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);

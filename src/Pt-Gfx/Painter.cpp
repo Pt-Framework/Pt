@@ -109,7 +109,8 @@ void Painter::onBeginPaint(PaintSurface& surface)
     surface.attachPainter(*this);
     _surface = &surface;
 
-    onBeginPaint(*canvas);
+    if(canvas)
+        onBeginPaint(*canvas);
 }
 
 

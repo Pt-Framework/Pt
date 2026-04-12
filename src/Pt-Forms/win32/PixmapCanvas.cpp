@@ -194,9 +194,14 @@ PixmapCanvas::PixmapCanvas()
 
 PixmapCanvas::~PixmapCanvas()
 {
-    // remove objects from surface DC before deleting them
     if(_pixmap)
-        _pixmap->releaseCanvas();
+    {
+        HDC dc = _pixmap->deviceContext();
+        SelectObject(dc, GetStockObject(BLACK_PEN));
+        SelectObject(dc, GetStockObject(WHITE_BRUSH));
+        SelectObject(dc, GetStockObject(SYSTEM_FONT));
+        SelectClipRgn(dc, NULL);
+    }
 
     if(_pen)
         DeleteObject(_pen);
@@ -225,10 +230,7 @@ void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 
 void PixmapCanvas::onFinishPaint()
 {
-    // NOTE: this might be called from the attached surface base class destructor
-
-    if(_pixmap)
-        _pixmap = 0;
+    _pixmap = 0;
 }
 
 

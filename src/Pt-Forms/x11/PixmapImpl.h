@@ -56,6 +56,11 @@ class PixmapImpl
             _bitmap.reset(size);
         }
 
+        void reset()
+        {
+            _bitmap.reset();
+        }
+
         const Gfx::Bitmap& bitmap() const 
         {
             return _bitmap;

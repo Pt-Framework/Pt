@@ -60,6 +60,10 @@ class PT_GFX_API Bitmap : public PaintSurface
 
         virtual ~Bitmap();
 
+        /** @brief Resets to empty state.
+        */
+        void reset();
+
         /** @brief Resets to an image. 
         */
         void reset(const Gfx::Image& image);

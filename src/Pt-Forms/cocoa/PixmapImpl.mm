@@ -64,9 +64,6 @@ PixmapCanvas::PixmapCanvas()
 
 PixmapCanvas::~PixmapCanvas()
 {
-    if(_pixmap)
-        _pixmap->releaseCanvas();
-
     if(_font)
       CFRelease(_font);
 
@@ -103,10 +100,7 @@ void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 
 void PixmapCanvas::onFinishPaint()
 {
-    // NOTE: this might be called from the attached surface base class destructor
-
-    if(_pixmap)
-        _pixmap = 0;
+    _pixmap = 0;
 }
 
 
@@ -395,6 +389,9 @@ void PixmapCanvas::onApplyClip()
 
 void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CGContextMoveToPoint(context, from.x(), from.y());
@@ -407,7 +404,7 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
-    if(n < 2)
+    if(n < 2 || ! _pixmap)
         return;
 
     CGContextRef context = _pixmap->context();
@@ -429,7 +426,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 
 void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
-    if(n < 2)
+    if(n < 2 || ! _pixmap)
         return;
 
     CGContextRef context = _pixmap->context();
@@ -451,6 +448,9 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 
 void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
     
     CGRect rect = CGRectMake( r.x(), r.y(), r.width(), r.height() );
@@ -462,6 +462,9 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
 
 void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CGRect rect = CGRectMake( r.x(), r.y(), r.width(), r.height() );
@@ -473,6 +476,9 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 
 void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CGRect rect = CGRectMake( topLeft.x(), topLeft.y(), 
@@ -487,6 +493,9 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
 void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CGRect rect = CGRectMake( topLeft.x(), topLeft.y(), 
@@ -547,6 +556,9 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
                               const Pt::String& text, 
                               const Gfx::Transform* tx)
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CFStringRef string = CFStringCreateWithBytesNoCopy(NULL, (const UInt8*) text.c_str(), 
@@ -613,7 +625,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
-    if( image.empty() )
+    if( image.empty() || ! _pixmap)
         return;
 
     CGContextRef context = _pixmap->context();
@@ -725,6 +737,9 @@ void PixmapCanvas::onSetPath(const Gfx::Path& path)
 
 void PixmapCanvas::onDrawPath()
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CGContextAddPath(context, _cgPath);
@@ -736,6 +751,9 @@ void PixmapCanvas::onDrawPath()
 
 void PixmapCanvas::onFillPath()
 {
+    if( ! _pixmap)
+        return;
+
     CGContextRef context = _pixmap->context();
 
     CGContextAddPath(context, _cgPath);
@@ -747,6 +765,9 @@ void PixmapCanvas::onFillPath()
 
 void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
+    if( ! _pixmap)
+        return;
+
     CGMutablePathRef cgPath = makePath(path);
 
     CGContextRef context = _pixmap->context();
@@ -762,6 +783,9 @@ void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 
 void PixmapCanvas::onFillPath(const Gfx::Path& path)
 {
+    if( ! _pixmap)
+        return;
+
     CGMutablePathRef cgPath = makePath(path);
 
     CGContextRef context = _pixmap->context();
@@ -787,7 +811,6 @@ PixmapImpl::PixmapImpl()
 , _imageModified(false)
 , _canvas(0)
 {
-    create();
 }
 
 
@@ -902,11 +925,11 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     size_t width = lround( size.width() );
     size_t height = lround( size.height() );
     
-    if(width == 0)
-        width = 10;
-    
-    if(height ==  0)
-        height = 10;
+    if(width == 0 || height == 0)
+    {
+        reset();
+        return;
+    }
     
     _width = width;
     _height = height;
@@ -915,6 +938,17 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
 
     destroy();
     create();
+}
+
+
+void PixmapImpl::reset()
+{
+    destroy();
+
+    _width = 0;
+    _height = 0;
+
+    _physicalSize.set(0, 0);
 }
 
 
@@ -955,6 +989,9 @@ const Gfx::Scaling& PixmapImpl::scaling() const
 
 Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
+    if( ! _context)
+        return 0;
+
     PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
     if( ! canvas ) 
         canvas  = new PixmapCanvas();
@@ -972,7 +1009,8 @@ void PixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached canvas base class destructor
 
-    CGContextRestoreGState(_context);
+    if(_context)
+        CGContextRestoreGState(_context);
 
     _canvas = 0;
 }
@@ -994,6 +1032,9 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
                             const Gfx::RectF* rectF)
 {
     const PixmapImpl* pixmap = pm.impl();
+
+    if( ! _context || ! pixmap->context())
+        return;
 
     Gfx::PointF to = _scaling.toPhysical(toF);
     CGImageRef image = pixmap->getCGImage();

@@ -77,6 +77,8 @@ class PT_GFX_API BitmapSurface : private NonCopyable
 
     void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
+    void clear();
+
     void setScaleFactor(double scaleFactor);
 
     const Gfx::ImageFormat& format() const;
