@@ -52,7 +52,6 @@ void Pixmap::reset()
 {
     releaseCanvas();
     _impl->reset();
-    finish();
 }
 
 
