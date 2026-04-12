@@ -63,6 +63,12 @@ class PT_GFX_API Font : public FontBase
              Slant slant = Slant::Normal,
              Stretch stretch = Stretch::Normal);
 
+        //! @brief Construct a font from a generic category.
+        Font(Category category, std::size_t size,
+             Weight weight = Weight::Normal,
+             Slant slant = Slant::Normal,
+             Stretch stretch = Stretch::Normal);
+
         //! @brief Returns the family of the font.
         const std::string& family() const;
 
@@ -84,6 +90,9 @@ class PT_GFX_API Font : public FontBase
         //! @brief Returns the stretch of the font request.
         Stretch stretch() const;
 
+        //! @brief Returns the generic font category.
+        Category category() const;
+
     public:
         static void addFonts(const System::Path& path);
 
@@ -104,6 +113,7 @@ inline bool operator==(const Font& a, const Font& b)
            a.weight() == b.weight() &&
            a.slant()  == b.slant()  &&
            a.stretch() == b.stretch() &&
+           a.category() == b.category() &&
            a.size()   == b.size()   &&
            a.styleName() == b.styleName();
 }
@@ -115,6 +125,7 @@ inline bool operator!=(const Font& a, const Font& b)
            a.weight() != b.weight() ||
            a.slant()  != b.slant()  ||
            a.stretch() != b.stretch() ||
+           a.category() != b.category() ||
            a.size()   != b.size()   ||
            a.styleName() != b.styleName();
 }
@@ -134,6 +145,9 @@ inline bool operator<(const Font& a, const Font& b)
     if(a.stretch() != b.stretch())
         return a.stretch() < b.stretch();
 
+    if(a.category() != b.category())
+        return a.category() < b.category();
+
     if(a.size() != b.size())
         return a.size() < b.size();
 
@@ -151,6 +165,7 @@ class FontData
         , _weight(FontBase::Weight::Normal)
         , _slant(FontBase::Slant::Normal)
         , _stretch(FontBase::Stretch::Normal)
+        , _category(FontBase::Category::None)
         {
         }
 
@@ -165,6 +180,21 @@ class FontData
         , _weight(weight)
         , _slant(slant)
         , _stretch(stretch)
+        , _category(FontBase::Category::None)
+        {
+        }
+
+        FontData(FontBase::Category category, std::size_t size,
+                 FontBase::Weight weight = FontBase::Weight::Normal,
+                 FontBase::Slant slant = FontBase::Slant::Normal,
+                 FontBase::Stretch stretch = FontBase::Stretch::Normal)
+        : _family()
+        , _size(size)
+        , _styleName()
+        , _weight(weight)
+        , _slant(slant)
+        , _stretch(stretch)
+        , _category(category)
         {
         }
 
@@ -175,6 +205,7 @@ class FontData
         , _weight(font._weight)
         , _slant(font._slant)
         , _stretch(font._stretch)
+        , _category(font._category)
         {
         }
 
@@ -213,6 +244,11 @@ class FontData
             return _stretch;
         }
 
+        FontBase::Category category() const
+        {
+            return _category;
+        }
+
     private:
         std::string _family;
         std::size_t _size;
@@ -220,6 +256,7 @@ class FontData
         FontBase::Weight _weight;
         FontBase::Slant _slant;
         FontBase::Stretch _stretch;
+        FontBase::Category _category;
 };
 
 } //namespace

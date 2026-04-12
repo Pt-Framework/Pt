@@ -218,7 +218,14 @@ std::vector<FontFace> FreeTypeFontProvider::fontFaces(const std::string& family)
 
 FTC_FaceID FreeTypeFontProvider::findFaceId(const Font& font) const
 {
-    const std::string family = font.family().empty() ? _defaultFont : font.family();
+    std::string family = font.family();
+
+    if(family.empty() && font.category() != Font::Category::None)
+        family = categoryDefaultFamily(font.category());
+
+    if(family.empty())
+        family = _defaultFont;
+
     const FaceEntry* entry = findFaceEntry(family, font.styleName(), font.weight(), font.slant(), font.stretch());
     if(entry)
         return reinterpret_cast<FTC_FaceID>(const_cast<FaceEntry*>(entry));
@@ -304,6 +311,20 @@ const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const
     }
 
     return best;
+}
+
+
+std::string FreeTypeFontProvider::categoryDefaultFamily(FontBase::Category category) const
+{
+    switch(category)
+    {
+        case FontBase::Category::Serif:     return "DejaVu Serif";
+        case FontBase::Category::SansSerif: return "DejaVu Sans";
+        case FontBase::Category::Monospace: return "DejaVu Sans Mono";
+        case FontBase::Category::Cursive:   return "DejaVu Sans";
+        case FontBase::Category::Fantasy:   return "DejaVu Sans";
+        default:                            return std::string();
+    }
 }
 
 

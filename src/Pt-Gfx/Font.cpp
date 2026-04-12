@@ -56,6 +56,13 @@ Font::Font(const std::string& family, std::size_t size,
 }
 
 
+Font::Font(Category category, std::size_t size,
+           Weight weight, Slant slant, Stretch stretch)
+: _fontData(new FontData(category, size, weight, slant, stretch))
+{
+}
+
+
 const std::string& Font::family() const
 {
     return _fontData->family();
@@ -95,6 +102,12 @@ Font::Slant Font::slant() const
 Font::Stretch Font::stretch() const
 {
     return _fontData->stretch();
+}
+
+
+Font::Category Font::category() const
+{
+    return _fontData->category();
 }
 
 

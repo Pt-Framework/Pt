@@ -129,6 +129,8 @@ class FreeTypeFontProvider : public FontProvider
                                   FontBase::Stretch stretch,
                                   const FontFace& face);
 
+        std::string categoryDefaultFamily(FontBase::Category category) const;
+
         bool openFontFile(const System::Path& path);
 
         FT_Library     _ft;

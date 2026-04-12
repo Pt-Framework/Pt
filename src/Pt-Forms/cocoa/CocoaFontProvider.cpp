@@ -311,10 +311,28 @@ CTFontRef CocoaFontProvider::lookupFont(const Pt::Gfx::Font& font) const
 
     const std::string& family = font.family().empty() ? _defaultFont
                                                        : font.family();
-    if( ! family.empty() )
+
+    std::string categoryFamily;
+
+    if(family.empty() && font.category() != Pt::Gfx::Font::Category::None)
+    {
+        switch(font.category())
+        {
+            case Pt::Gfx::Font::Category::Serif:     categoryFamily = "Times New Roman"; break;
+            case Pt::Gfx::Font::Category::SansSerif:  categoryFamily = "Helvetica"; break;
+            case Pt::Gfx::Font::Category::Monospace:  categoryFamily = "Menlo"; break;
+            case Pt::Gfx::Font::Category::Cursive:    categoryFamily = "Snell Roundhand"; break;
+            case Pt::Gfx::Font::Category::Fantasy:    categoryFamily = "Papyrus"; break;
+            default: break;
+        }
+    }
+
+    const std::string& resolvedFamily = categoryFamily.empty() ? family : categoryFamily;
+
+    if( ! resolvedFamily.empty() )
     {
         CFStringRef familyName = CFStringCreateWithCString(kCFAllocatorDefault,
-                                                           family.c_str(),
+                                                           resolvedFamily.c_str(),
                                                            kCFStringEncodingUTF8);
         if(familyName)
         {

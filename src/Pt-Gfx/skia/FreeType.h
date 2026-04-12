@@ -136,6 +136,9 @@ class FreeType
                 if(a.stretch() != b.stretch())
                     return a.stretch() < b.stretch();
 
+                if(a.category() != b.category())
+                    return a.category() < b.category();
+
                 if(a.styleName() != b.styleName())
                     return a.styleName() < b.styleName();
 

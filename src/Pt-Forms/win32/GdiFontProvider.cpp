@@ -170,6 +170,27 @@ HFONT GdiFontProvider::lookupFont(const Gfx::Font& font) const
     lf.lfQuality        = DEFAULT_QUALITY;
     lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 
+    switch( font.category() )
+    {
+        case Gfx::Font::Category::Serif:
+            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_ROMAN;
+            break;
+        case Gfx::Font::Category::SansSerif:
+            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
+            break;
+        case Gfx::Font::Category::Monospace:
+            lf.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
+            break;
+        case Gfx::Font::Category::Cursive:
+            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_SCRIPT;
+            break;
+        case Gfx::Font::Category::Fantasy:
+            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DECORATIVE;
+            break;
+        default:
+            break;
+    }
+
     const std::string& family = font.family().empty() ? _defaultFont
                                                        : font.family();
     if( ! family.empty() )

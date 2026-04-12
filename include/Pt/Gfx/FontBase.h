@@ -71,6 +71,16 @@ class PT_GFX_API FontBase
             UltraExpanded  = 9
         };
 
+        enum class Category
+        {
+            None,
+            Serif,
+            SansSerif,
+            Monospace,
+            Cursive,
+            Fantasy
+        };
+
     protected:
         FontBase()
         {
