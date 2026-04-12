@@ -85,9 +85,9 @@ FontFace::Stretch FreeTypeFontProvider::fontStretchFromOS2Width(FT_UShort widthC
 }
 
 
-int FreeTypeFontProvider::fontMatchScore(FontBase::Weight weight,
-                                         FontBase::Slant slant,
-                                         FontBase::Stretch stretch,
+int FreeTypeFontProvider::fontMatchScore(Font::Weight weight,
+                                         Font::Slant slant,
+                                         Font::Stretch stretch,
                                          const FontFace& face)
 {
     int score = static_cast<int>(face.weight()) - static_cast<int>(weight);
@@ -260,9 +260,9 @@ FT_Error FreeTypeFontProvider::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 
 const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const std::string& family,
                                                                            const std::string& styleName,
-                                                                           FontBase::Weight weight,
-                                                                           FontBase::Slant slant,
-                                                                           FontBase::Stretch stretch) const
+                                                                           Font::Weight weight,
+                                                                           Font::Slant slant,
+                                                                           Font::Stretch stretch) const
 {
     if(family.empty())
         return 0;
@@ -314,15 +314,15 @@ const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const
 }
 
 
-std::string FreeTypeFontProvider::categoryDefaultFamily(FontBase::Category category) const
+std::string FreeTypeFontProvider::categoryDefaultFamily(Font::Category category) const
 {
     switch(category)
     {
-        case FontBase::Category::Serif:     return "DejaVu Serif";
-        case FontBase::Category::SansSerif: return "DejaVu Sans";
-        case FontBase::Category::Monospace: return "DejaVu Sans Mono";
-        case FontBase::Category::Cursive:   return "DejaVu Sans";
-        case FontBase::Category::Fantasy:   return "DejaVu Sans";
+        case Font::Category::Serif:     return "DejaVu Serif";
+        case Font::Category::SansSerif: return "DejaVu Sans";
+        case Font::Category::Monospace: return "DejaVu Sans Mono";
+        case Font::Category::Cursive:   return "DejaVu Sans";
+        case Font::Category::Fantasy:   return "DejaVu Sans";
         default:                            return std::string();
     }
 }

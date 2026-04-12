@@ -29,7 +29,7 @@
 #ifndef PT_GFX_FONTFACE_H
 #define PT_GFX_FONTFACE_H
 
-#include <Pt/Gfx/FontBase.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/SmartPtr.h>
 
 #include <string>
@@ -40,9 +40,13 @@ namespace Gfx {
 
 class FontFaceData;
 
-class PT_GFX_API FontFace : public FontBase
+class PT_GFX_API FontFace
 {
     public:
+        typedef Font::Weight Weight;
+        typedef Font::Slant Slant;
+        typedef Font::Stretch Stretch;
+
         FontFace();
 
         FontFace(const std::string& family,
@@ -116,16 +120,16 @@ class FontFaceData
         FontFaceData()
         : _family()
         , _style()
-        , _weight(FontBase::Weight::Normal)
-        , _slant(FontBase::Slant::Normal)
-        , _stretch(FontBase::Stretch::Normal)
+        , _weight(Font::Weight::Normal)
+        , _slant(Font::Slant::Normal)
+        , _stretch(Font::Stretch::Normal)
         {
         }
 
         FontFaceData(const std::string& family,
-                     FontBase::Weight weight = FontBase::Weight::Normal,
-                     FontBase::Slant slant = FontBase::Slant::Normal,
-                     FontBase::Stretch stretch = FontBase::Stretch::Normal,
+                     Font::Weight weight = Font::Weight::Normal,
+                     Font::Slant slant = Font::Slant::Normal,
+                     Font::Stretch stretch = Font::Stretch::Normal,
                      const std::string& styleName = std::string())
         : _family(family)
         , _style(styleName)
@@ -150,17 +154,17 @@ class FontFaceData
             return _style;
         }
 
-        FontBase::Weight weight() const
+        Font::Weight weight() const
         {
             return _weight;
         }
 
-        FontBase::Slant slant() const
+        Font::Slant slant() const
         {
             return _slant;
         }
 
-        FontBase::Stretch stretch() const
+        Font::Stretch stretch() const
         {
             return _stretch;
         }
@@ -168,9 +172,9 @@ class FontFaceData
     private:
         std::string _family;
         std::string _style;
-        FontBase::Weight _weight;
-        FontBase::Slant _slant;
-        FontBase::Stretch _stretch;
+        Font::Weight _weight;
+        Font::Slant _slant;
+        Font::Stretch _stretch;
 };
 
 } // namespace

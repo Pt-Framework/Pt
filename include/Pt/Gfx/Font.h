@@ -31,7 +31,7 @@
 #ifndef PT_GFX_FONT_H
 #define PT_GFX_FONT_H
 
-#include <Pt/Gfx/FontBase.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/System/Path.h>
 #include <Pt/SmartPtr.h>
 
@@ -44,9 +44,52 @@ namespace Gfx {
 
 class FontData;
 
-class PT_GFX_API Font : public FontBase
+class PT_GFX_API Font
 {
     public:
+        enum class Weight
+        {
+            Thin = 100,
+            ExtraLight = 200,
+            Light = 300,
+            Normal = 400,
+            Medium = 500,
+            SemiBold = 600,
+            Bold = 700,
+            ExtraBold = 800,
+            Black = 900
+        };
+
+        enum class Slant
+        {
+            Normal,
+            Italic,
+            Oblique
+        };
+
+        enum class Stretch
+        {
+            UltraCondensed = 1,
+            ExtraCondensed = 2,
+            Condensed      = 3,
+            SemiCondensed  = 4,
+            Normal         = 5,
+            SemiExpanded   = 6,
+            Expanded       = 7,
+            ExtraExpanded  = 8,
+            UltraExpanded  = 9
+        };
+
+        enum class Category
+        {
+            None,
+            Serif,
+            SansSerif,
+            Monospace,
+            Cursive,
+            Fantasy
+        };
+
         //! @brief Default constructor.
         Font();
 
@@ -162,17 +205,17 @@ class FontData
         : _family()
         , _size(0)
         , _styleName()
-        , _weight(FontBase::Weight::Normal)
-        , _slant(FontBase::Slant::Normal)
-        , _stretch(FontBase::Stretch::Normal)
-        , _category(FontBase::Category::None)
+        , _weight(Font::Weight::Normal)
+        , _slant(Font::Slant::Normal)
+        , _stretch(Font::Stretch::Normal)
+        , _category(Font::Category::None)
         {
         }
 
         FontData(const std::string& family, std::size_t size,
-                 FontBase::Weight weight = FontBase::Weight::Normal,
-                 FontBase::Slant slant = FontBase::Slant::Normal,
-                 FontBase::Stretch stretch = FontBase::Stretch::Normal,
+                 Font::Weight weight = Font::Weight::Normal,
+                 Font::Slant slant = Font::Slant::Normal,
+                 Font::Stretch stretch = Font::Stretch::Normal,
                  const std::string& styleName = std::string())
         : _family(family)
         , _size(size)
@@ -180,14 +223,14 @@ class FontData
         , _weight(weight)
         , _slant(slant)
         , _stretch(stretch)
-        , _category(FontBase::Category::None)
+        , _category(Font::Category::None)
         {
         }
 
-        FontData(FontBase::Category category, std::size_t size,
-                 FontBase::Weight weight = FontBase::Weight::Normal,
-                 FontBase::Slant slant = FontBase::Slant::Normal,
-                 FontBase::Stretch stretch = FontBase::Stretch::Normal)
+        FontData(Font::Category category, std::size_t size,
+                 Font::Weight weight = Font::Weight::Normal,
+                 Font::Slant slant = Font::Slant::Normal,
+                 Font::Stretch stretch = Font::Stretch::Normal)
         : _family()
         , _size(size)
         , _styleName()
@@ -229,22 +272,22 @@ class FontData
             return ! _styleName.empty();
         }
 
-        FontBase::Weight weight() const
+        Font::Weight weight() const
         {
             return _weight;
         }
 
-        FontBase::Slant slant() const
+        Font::Slant slant() const
         {
             return _slant;
         }
 
-        FontBase::Stretch stretch() const
+        Font::Stretch stretch() const
         {
             return _stretch;
         }
 
-        FontBase::Category category() const
+        Font::Category category() const
         {
             return _category;
         }
@@ -253,10 +296,10 @@ class FontData
         std::string _family;
         std::size_t _size;
         std::string _styleName;
-        FontBase::Weight _weight;
-        FontBase::Slant _slant;
-        FontBase::Stretch _stretch;
-        FontBase::Category _category;
+        Font::Weight _weight;
+        Font::Slant _slant;
+        Font::Stretch _stretch;
+        Font::Category _category;
 };
 
 } //namespace
