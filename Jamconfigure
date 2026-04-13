@@ -1032,6 +1032,11 @@ else if --with-photon in $(ARGV)
     GUI ?= photon ;
 }
 
+if $(TARGET_OS) = "emscripten"
+{
+    GUI ?= emscripten ;
+}
+
 if ! $(GUI) || $(GUI:L) = "win32"
 {
     Load winui.jam ;
@@ -1135,9 +1140,9 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
     }
 }
 
-if $(GUI:L) = "sdl"
+if $(GUI:L) = "emscripten"
 {
-    PT_FORMS_IMPL = sdl ;
+    PT_FORMS_IMPL = emscripten ;
 }
 
 if $(GUI:L) = "photon"
