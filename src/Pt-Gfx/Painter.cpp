@@ -75,9 +75,6 @@ Painter::~Painter()
 
 void Painter::begin(PaintSurface& surface)
 {
-    if( ! _context && _surface == &surface )
-        return;
-
     finish();
 
     onBeginPaint(surface);
@@ -86,16 +83,12 @@ void Painter::begin(PaintSurface& surface)
 
 void Painter::begin(PaintContext& context)
 {
-    PaintSurface* surface = context.surface();
-  
-    if(_context == &context && _surface == surface)
-        return;
-
     finish();
 
     context.attachPainter(*this);
     _context = &context;
 
+    PaintSurface* surface = context.surface();
     if(surface)
         onBeginPaint(*surface);
 }

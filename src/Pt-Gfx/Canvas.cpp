@@ -63,7 +63,7 @@ void Canvas::attachSurface(PaintSurface& surface)
 
 void Canvas::detachSurface(PaintSurface& surface)
 {
-    if(_surface)
+    if(_surface == &surface)
     {
         onFinishPaint();
         _surface = 0;
@@ -148,9 +148,9 @@ void Canvas::finishPaint()
 {
     if(_surface)
     {
-        _surface->onDetachCanvas(*this);
-
         onFinishPaint();
+
+        _surface->onDetachCanvas(*this);
         _surface = 0;
         _active = 0;
         _dirty = 0;
@@ -290,8 +290,7 @@ void Canvas::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 
 void Canvas::setPath(const Path& path)
 {
-    if(_active)
-        onSetPath(path);
+    onSetPath(path);
 }
 
 
