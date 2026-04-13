@@ -223,13 +223,34 @@ void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 }
 
 
+void PixmapCanvas::suspend()
+{
+    invalidate(DirtyAll);
+
+    if(_pixmap)
+        RestoreDC(_pixmap->deviceContext(), -1);
+}
+
+
+void PixmapCanvas::resume()
+{
+    if(_pixmap)
+        SaveDC(_pixmap->deviceContext());
+}
+
+
 void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
+    if(_pixmap)
+        SaveDC(_pixmap->deviceContext());
 }
 
 
 void PixmapCanvas::onFinishPaint()
 {
+    if(_pixmap)
+        RestoreDC(_pixmap->deviceContext(), -1);
+
     _pixmap = 0;
 }
 
@@ -252,6 +273,14 @@ void PixmapCanvas::onApplyTransform()
 
 void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
+    if(_pixmap && isActive())
+    {
+        HDC dc = _pixmap->deviceContext();
+        RestoreDC(dc, -1);
+        SaveDC(dc);
+        invalidate(DirtyAll & ~DirtyTransform);
+    }
+
     double scaleFactor = lineScaleFactor(tx);
 
     if( std::abs(_lastScaleFactor - scaleFactor) >= 0.0001 )
@@ -261,7 +290,6 @@ void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
         invalidate(DirtyPen);
     }
 
-    invalidate(DirtyClip);
     _fontMetrics = getFontMetrics();
 }
 
@@ -449,6 +477,14 @@ void PixmapCanvas::onApplyFont()
 
 void PixmapCanvas::onSetClip(const Gfx::RectF* rectF)
 {
+    if(_pixmap && isActive())
+    {
+        HDC dc = _pixmap->deviceContext();
+        RestoreDC(dc, -1);
+        SaveDC(dc);
+        invalidate(DirtyAll & ~DirtyClip);
+    }
+
     _hasClip = rectF != 0;
 
     if(rectF)

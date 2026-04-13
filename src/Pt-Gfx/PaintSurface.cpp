@@ -110,12 +110,6 @@ Gfx::Canvas* PaintSurface::onGetCanvas(Gfx::Canvas* reuse)
 }
 
 
-Gfx::Canvas* PaintSurface::onCreateCanvas(Gfx::Canvas* reuse)
-{
-    return 0;
-}
-
-
 void PaintSurface::sync()
 {
     onSync();

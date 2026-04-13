@@ -1014,9 +1014,6 @@ const Gfx::Scaling& PixmapImpl::scaling() const
 
 Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    if( ! _context)
-        return 0;
-
     PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
     if( ! canvas ) 
         canvas  = new PixmapCanvas();

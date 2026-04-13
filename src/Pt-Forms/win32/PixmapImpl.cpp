@@ -251,9 +251,6 @@ const Gfx::Scaling& PixmapImpl::scaling() const
 
 Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    if( ! _bitmap)
-        return 0;
-
     PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
     if( ! canvas ) 
         canvas  = new PixmapCanvas();
@@ -269,6 +266,7 @@ void PixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached canvas base class destructor
 
+    ModifyWorldTransform(_dc, NULL, MWT_IDENTITY);
     SelectObject(_dc, GetStockObject(BLACK_PEN));
     SelectObject(_dc, GetStockObject(WHITE_BRUSH));
     SelectObject(_dc, GetStockObject(SYSTEM_FONT));
@@ -319,9 +317,8 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
     Gfx::CompositionMode compositionMode = paint.compositionMode();
     HDC pixmapDC = pixmap->deviceContext();
 
-    int state = SaveDC(_dc);
-    if(state == 0)
-        return;
+    if(_canvas)
+        _canvas->suspend();
 
     switch(compositionMode)
     {
@@ -346,7 +343,8 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
         break;
     }
 
-    RestoreDC(_dc, state);
+    if(_canvas)
+        _canvas->resume();
 }
 
 

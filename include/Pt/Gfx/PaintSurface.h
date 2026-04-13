@@ -108,7 +108,7 @@ class PT_GFX_API PaintSurface : private NonCopyable
 
         /** @brief Creates a Canvas.
         */
-        virtual Gfx::Canvas* onCreateCanvas(Gfx::Canvas* reuse);
+        virtual Gfx::Canvas* onCreateCanvas(Gfx::Canvas* reuse) = 0;
         
         /** @brief Releases the current Canvas.
         */

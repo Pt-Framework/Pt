@@ -42,6 +42,8 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 
+#include <cassert>
+
 namespace Pt {
 
 namespace Forms {
@@ -215,6 +217,12 @@ class ViewSurface : public PaintSurface
 
             canvas->setRegion(region);
             return canvas;
+        }
+
+        virtual Gfx::Canvas* onCreateCanvas(Gfx::Canvas* reuse) override
+        {
+            assert(false && "ViewSurface does not create its own canvas");
+            return 0;
         }
 
         virtual void onReleaseCanvas() override
