@@ -37,6 +37,7 @@
 #include <Pt/Forms/Workspace.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
@@ -163,15 +164,15 @@ class ScreenImpl : public Form
 
         const Gfx::Image& image() const;
         
-        void updateScreen(const RectI& area);
+        void updateScreen(const Gfx::RectI& area);
 
         void drawCursor(Pt::uint8_t* buffer);
         
-        void grabImage(const Pt::uint8_t* buffer, const PointI& pos,
+        void grabImage(const Pt::uint8_t* buffer, const Gfx::PointI& pos,
                        Gfx::Image& image);
  
         void bitBlit(const Pt::uint8_t* from, size_t width, size_t height, 
-                     const PointI& pos, Pt::uint8_t* buffer, BlitOp op);
+                     const Gfx::PointI& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
         FrameBuffer&                 _frameBuffer;
@@ -182,7 +183,7 @@ class ScreenImpl : public Form
         
         double                       _dpi;       
         Gfx::Image                   _cursorBackground;
-        PointI                       _cursorPos;
+        Gfx::PointI                  _cursorPos;
         bool                         _drawCursor;
 };
 

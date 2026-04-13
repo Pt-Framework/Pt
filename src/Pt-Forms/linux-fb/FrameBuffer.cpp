@@ -328,13 +328,13 @@ size_t FrameBuffer::strideSize() const
 }
 
 
-void FrameBuffer::output( const Pt::uint8_t* frame, const RectI& rect )
+void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::RectI& rect )
 {
     switch( _rotation)
     {
       case Rotate0:
       {
-        const RectI clipArea = rect.intersect(RectI( PointI(0, 0), size() ));
+        const Gfx::RectI clipArea = rect.intersect(Gfx::RectI( Gfx::PointI(0, 0), size() ));
         const int clipBottom = clipArea.y() + clipArea.height();
         const int widthInByte = clipArea.width()*_pixelSize;
 
@@ -349,7 +349,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const RectI& rect )
 
       case Rotate90:
       {
-        const RectI clipArea = rect.intersect( RectI(PointI(0,0), size()) );
+        const Gfx::RectI clipArea = rect.intersect( Gfx::RectI(Gfx::PointI(0,0), size()) );
         const int dst_x = clipArea.y();
         const int dst_y = size().width() - clipArea.x() - clipArea.width();
         const int dst_stride = size().height() * _pixelSize;

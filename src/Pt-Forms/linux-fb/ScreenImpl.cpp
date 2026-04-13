@@ -73,7 +73,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     setSurface( &_pixmap, Gfx::PointF(0, 0) );
     setContent(&_workspace);
 
-    updateScreen( RectI(PointI(0, 0), _frameBuffer.size()) );
+    updateScreen( Gfx::RectI(Gfx::PointI(0, 0), _frameBuffer.size()) );
 }
 
 
@@ -317,10 +317,10 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     //
     Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
     
-    RectI updateRect( PointI( lround(updateRectP.x()), 
-                              lround(updateRectP.y()) ),
-                      SizeI( lround(updateRectP.width()),
-                             lround(updateRectP.height()) ) );
+    Gfx::RectI updateRect( Gfx::PointI( lround(updateRectP.x()), 
+                                        lround(updateRectP.y()) ),
+                           Gfx::SizeI( lround(updateRectP.width()),
+                                       lround(updateRectP.height()) ) );
     updateScreen(updateRect);
 }
 
@@ -365,7 +365,7 @@ const Gfx::Image& ScreenImpl::image() const
 }
 
 
-void ScreenImpl::updateScreen(const RectI& r)
+void ScreenImpl::updateScreen(const Gfx::RectI& r)
 {
     if(_drawCursor)
         drawCursor( const_cast<uint8_t*>( image().data() ) );
@@ -391,8 +391,8 @@ void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
 
        // TODO: is this enough to clear the cursor area in the back buffer?
        _frameBuffer.output( image().data(), 
-                            RectI(_cursorPos, SizeI(_cursorBackground.width(),
-                                                    _cursorBackground.height() ) ) );
+                            Gfx::RectI(_cursorPos, Gfx::SizeI(_cursorBackground.width(),
+                                                              _cursorBackground.height() ) ) );
     }
 
     //
@@ -400,13 +400,13 @@ void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
     //
     const Cursor& cursor = Application::instance().impl()->cursor();
 
-    _cursorPos = PointI( pos.x() - cursor.xHotspot(),
+    _cursorPos = Gfx::PointI( pos.x() - cursor.xHotspot(),
                          pos.y() - cursor.yHotspot() );
 
     PT_LOG_DEBUG("cursor hotspot position: " << _cursorPos.x() << "," << _cursorPos.y());
 
-    RectI cursorArea = RectI( _cursorPos, SizeI(cursor.width(), 
-                                                cursor.height()) );
+    Gfx::RectI cursorArea = Gfx::RectI( _cursorPos, Gfx::SizeI(cursor.width(), 
+                                                               cursor.height()) );
 
     //
     // update the screen including the new cursor image
@@ -447,7 +447,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 
 
 void ScreenImpl::grabImage(const Pt::uint8_t* buffer, 
-                           const PointI& pos, 
+                           const Gfx::PointI& pos, 
                            Gfx::Image& image)
 {
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
@@ -474,7 +474,7 @@ void ScreenImpl::grabImage(const Pt::uint8_t* buffer,
 
 
 void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
-                          const PointI& pos, Pt::uint8_t* buffer, BlitOp op )
+                          const Gfx::PointI& pos, Pt::uint8_t* buffer, BlitOp op )
 {
     static const size_t planePixelSize = 4;
     const size_t bufferPixelSize = _frameBuffer.pixelSize();

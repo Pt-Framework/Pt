@@ -597,31 +597,29 @@ void BitmapCanvas::onDrawText(const PointF& to, const Pt::String& text,
                        _compositionMode, &tf);
 }
 
+
 void BitmapCanvas::onDrawImage(const PointF& toF, const Image& image, 
-                                const RectF* imageRect)
+                               const RectF* imageRect)
 {
     if( ! _surface )
         return;
 
     Gfx::PointF toP = transform() * toF;
-    Point to = Point( lround(toP.x()), lround(toP.y()) );
+    PointI to = round(toP);
 
     if(imageRect)
     {
-        Rect srcRect = Rect( Point( lround( imageRect->x() ),
-                                    lround( imageRect->y() ) ), 
-                             Size( lround( imageRect->width() ),
-                                   lround( imageRect->height() ) ) );
-
-        _surface->putImage(to, image, srcRect, _currentClip, _compositionMode);
+        _surface->putImage(to, image, round(*imageRect),
+                           _currentClip, _compositionMode);
     }
     else
     {
-        Rect srcRect;
+        RectI srcRect;
         srcRect.setWidth( image.width() );
         srcRect.setHeight( image.height() );
 
-        _surface->putImage(to, image, srcRect, _currentClip, _compositionMode);
+        _surface->putImage(to, image, srcRect,
+                           _currentClip, _compositionMode);
     }
 }
 

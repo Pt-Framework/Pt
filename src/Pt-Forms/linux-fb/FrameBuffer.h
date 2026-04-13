@@ -78,9 +78,9 @@ class FrameBuffer
 
         size_t height() const;
 
-        SizeI size() const 
+        Gfx::SizeI size() const 
         {
-            return SizeI( width(), height() );
+            return Gfx::SizeI( width(), height() );
         }
 
         size_t depth() const
@@ -100,7 +100,7 @@ class FrameBuffer
 
         size_t strideSize() const;
 
-        void output( const Pt::uint8_t* frame, const RectI& area );
+        void output( const Pt::uint8_t* frame, const Gfx::RectI& area );
 
     private:
       inline char* pixelFB(size_t w, size_t h)

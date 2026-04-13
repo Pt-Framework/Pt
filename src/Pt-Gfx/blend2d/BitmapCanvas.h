@@ -137,6 +137,25 @@ class BitmapCanvas : public Canvas
 
       void drawDashed(const Gfx::PointF* pts, const size_t n);
 
+        RectI round(const RectF& r) const
+        {
+          PointI pos( lround(r.x()),
+                     lround(r.y()) );
+      
+          SizeI size( lround(r.width()),
+                     lround(r.height()) );
+      
+          return RectI(pos, size);
+        }
+    
+        PointI round(const PointF& p) const
+        {
+          PointI pos( lround(p.x()),
+                     lround(p.y()) );
+           
+          return pos;
+        }
+
     private:
         BitmapSurface*          _surface;
         BLContext*              _context;
