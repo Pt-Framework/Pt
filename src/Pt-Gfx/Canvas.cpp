@@ -66,8 +66,10 @@ void Canvas::detachSurface(PaintSurface& surface)
     if(_surface == &surface)
     {
         onFinishPaint();
+        
         _surface = 0;
         _active = 0;
+        _dirty = 0;
     }
 }
 

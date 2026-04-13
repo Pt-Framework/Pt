@@ -153,8 +153,6 @@ Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
     if( ! _rasterContext.target_image() )
         _rasterContext.begin(_rasterImage);
 
-    _rasterContext.save(_stateCookie);
-
     canvas->init(*this);
     return canvas;
 }
@@ -162,7 +160,6 @@ Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
 
 void BitmapSurface::releaseCanvas()
 {
-    _rasterContext.restore(_stateCookie);
 }
 
 

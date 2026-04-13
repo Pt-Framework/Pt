@@ -84,29 +84,29 @@ const Scaling& PaintSurface::scaling() const
 
 Canvas* PaintSurface::getCanvas(Canvas* reuse)
 {
-    invalidate();
-    _canvas = onGetCanvas(reuse);
-    return _canvas;
+    return onGetCanvas(reuse);
 }
 
 
 Gfx::Canvas* PaintSurface::onGetCanvas(Gfx::Canvas* reuse)
 {
-    Canvas* canvas = onCreateCanvas(reuse);
-    if( ! canvas )
+    invalidate();
+
+    _canvas = onCreateCanvas(reuse);
+    if( ! _canvas )
         return 0;
 
-    canvas->attachSurface(*this);
+    _canvas->attachSurface(*this);
 
     RectF nobounds(PointF(0, 0),
                    SizeF( std::numeric_limits<double>::max(), 
                           std::numeric_limits<double>::max() ) );
-    canvas->setRegion(nobounds);
+    _canvas->setRegion(nobounds);
 
     const Scaling& scale = scaling();
-    canvas->setScaling(scale);
+    _canvas->setScaling(scale);
 
-    return canvas;
+    return _canvas;
 }
 
 

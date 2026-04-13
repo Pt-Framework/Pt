@@ -68,7 +68,9 @@ class PixmapCanvas : public Gfx::Canvas
 
         void setPixmap(PixmapImpl& pixmap);
 
-        void reset();
+        void suspend();
+
+        void resume();
     
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;

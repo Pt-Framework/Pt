@@ -115,7 +115,6 @@ class PT_GFX_API BitmapSurface : private NonCopyable
   private:
     BLImage         _rasterImage;
     BLContext       _rasterContext;
-    BLContextCookie _stateCookie;
     Rgb32Image      _rgb32Image;
     Image           _image;
     Gfx::SizeF      _physicalSize;

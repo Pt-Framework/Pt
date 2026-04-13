@@ -60,13 +60,13 @@ void BitmapCanvas::init(BitmapSurface& surface)
     _surface = &surface;
     _context = &surface.rasterContext();
     _image = &surface.rgb32Image();
-
-    _context->save(_cookie);
 }
 
 
 void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
+    if(_context)
+        _context->save(_cookie);
 }
 
 

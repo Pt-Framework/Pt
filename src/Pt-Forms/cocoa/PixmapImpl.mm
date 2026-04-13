@@ -87,19 +87,50 @@ void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 }
 
 
-void PixmapCanvas::reset()
+void PixmapCanvas::suspend()
 {
     invalidate(DirtyAll);
+
+    if(_pixmap)
+    {
+        CGContextRef context = _pixmap->context();
+        if(context)
+            CGContextRestoreGState(context);
+    }
+}
+
+
+void PixmapCanvas::resume()
+{
+    if(_pixmap)
+    {
+        CGContextRef context = _pixmap->context();
+        if(context)
+            CGContextSaveGState(context);
+    }
 }
 
 
 void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
+    if(_pixmap)
+    {
+        CGContextRef context = _pixmap->context();
+        if(context)
+            CGContextSaveGState(context);
+    }
 }
 
 
 void PixmapCanvas::onFinishPaint()
 {
+    if(_pixmap)
+    {
+        CGContextRef context = _pixmap->context();
+        if(context)
+            CGContextRestoreGState(context);
+    }
+
     _pixmap = 0;
 }
 
@@ -990,8 +1021,6 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
     if( ! canvas ) 
         canvas  = new PixmapCanvas();
 
-    CGContextSaveGState(_context);
-
     canvas->setPixmap(*this);
 
     _canvas = canvas;
@@ -1002,9 +1031,6 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 void PixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached canvas base class destructor
-
-    if(_context)
-        CGContextRestoreGState(_context);
 
     _canvas = 0;
 }
@@ -1034,12 +1060,7 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
     CGImageRef image = pixmap->getCGImage();
    
     if(_canvas)
-    {
-        _canvas->reset();
-
-        // Restore the Save from createCanvas to get a clean context
-        CGContextRestoreGState(_context);
-    }
+        _canvas->suspend();
 
     if(rectF)
     {
@@ -1070,9 +1091,8 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
         CGContextDrawImage(_context, destRect, image);
     }
 
-    // Re-Save so releaseCanvas can still Restore its own Save
     if(_canvas)
-        CGContextSaveGState(_context);
+        _canvas->resume();
 
     _imageModified = true;
 }

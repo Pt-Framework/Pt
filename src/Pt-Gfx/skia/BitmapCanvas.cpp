@@ -62,14 +62,13 @@ void BitmapCanvas::init(BitmapSurface& surface)
     _surface = &surface;
     _canvas = surface.skCanvas();
     _image = &surface.rgb32Image();
-
-    if(_canvas)
-        _canvas->save();
 }
 
 
 void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
+    if(_canvas)
+        _canvas->save();
 }
 
 

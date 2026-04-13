@@ -157,12 +157,6 @@ Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
     if( ! canvas )
         canvas = new BitmapCanvas();
 
-    if( _skSurface )
-    {
-        SkCanvas* skCanvas = _skSurface->getCanvas();
-        skCanvas->save();
-    }
-
     canvas->init(*this);
     return canvas;
 }
@@ -170,11 +164,6 @@ Gfx::Canvas* BitmapSurface::createCanvas(Gfx::Canvas* reuse)
 
 void BitmapSurface::releaseCanvas()
 {
-    if( _skSurface )
-    {
-        SkCanvas* skCanvas = _skSurface->getCanvas();
-        skCanvas->restore();
-    }
 }
 
 
