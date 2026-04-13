@@ -159,6 +159,7 @@ class BitmapCanvas : public Canvas
     private:
         BitmapSurface*          _surface;
         BLContext*              _context;
+        BLContextCookie         _cookie;
         Rgb32Image*             _image;
         CompositionMode         _compositionMode;
         RectI                   _currentClip;

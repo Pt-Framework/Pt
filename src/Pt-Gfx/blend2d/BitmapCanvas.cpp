@@ -60,6 +60,8 @@ void BitmapCanvas::init(BitmapSurface& surface)
     _surface = &surface;
     _context = &surface.rasterContext();
     _image = &surface.rgb32Image();
+
+    _context->save(_cookie);
 }
 
 
@@ -70,6 +72,9 @@ void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 
 void BitmapCanvas::onFinishPaint()
 {
+    if(_context)
+        _context->restore(_cookie);
+
     _surface = 0;
     _context = 0;
     _image = 0;
@@ -119,6 +124,12 @@ void BitmapCanvas::onApplyTransform()
 
 void BitmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
+    if(_context && isActive())
+    {
+        _context->restore(_cookie);
+        _context->save(_cookie);
+        invalidate(DirtyAll & ~DirtyTransform);
+    }
 }
 
 
@@ -232,14 +243,17 @@ void BitmapCanvas::onApplyFont()
 
 void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
+    if(_context && isActive())
+    {
+        _context->restore(_cookie);
+        _context->save(_cookie);
+        invalidate(DirtyAll & ~DirtyClip);
+    }
+
     _hasClip = clip != 0;
 
     if(clip)
-    {
-        Gfx::PointF origin =  transform() * clip->origin();
-        Gfx::SizeF size =  transform() * clip->size();
-        _clip = Gfx::RectF(origin, size);
-    }
+        _clip = *clip;
     else
         _clip.clear();
 }
@@ -250,9 +264,7 @@ void BitmapCanvas::onApplyClip()
     if( ! _image )
         return;
 
-    if( ! _hasClip )
-        _context->restore_clipping();
-    else
+    if(_hasClip)
         _context->clip_to_rect( _clip.x(), _clip.y(), 
                                _clip.width(), _clip.height() );
 
@@ -266,15 +278,19 @@ void BitmapCanvas::onApplyClip()
         return;
     }
 
-    RectI clipRect = RectI( PointI( lround( _clip.x() ),
-                                 lround( _clip.y() ) ), 
-                          SizeI( lround( _clip.width() ),
-                                lround( _clip.height() ) ) );
+    Gfx::PointF origin = transform() * _clip.origin();
+    Gfx::SizeF size = transform() * _clip.size();
+    Gfx::RectF clipP(origin, size);
+
+    RectI clipRect = RectI( PointI( lround( clipP.x() ),
+                                    lround( clipP.y() ) ), 
+                            SizeI( lround( clipP.width() ),
+                                   lround( clipP.height() ) ) );
 
     if( clipRect.isNull() ) // crashes otherwise
         clipRect = RectI( PointI(0, 0), SizeI(1, 1) );
 
-    _currentClip =  clipRect.intersect(imageRect);
+    _currentClip = clipRect.intersect(imageRect);
 }
 
 
