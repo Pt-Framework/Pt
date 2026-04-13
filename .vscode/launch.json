@@ -11,7 +11,18 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "integratedTerminal"
-        },
+          },
+          {
+            "name": "Debug Pt-Forms-Demo (Windows-Skia)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/skia-debug/Pt-Forms-Demo.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+          },
           {
             "name": "Debug Pt-Gfx-test (Windows)",
             "type": "cppvsdbg",
