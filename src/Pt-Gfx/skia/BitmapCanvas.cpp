@@ -62,6 +62,9 @@ void BitmapCanvas::init(BitmapSurface& surface)
     _surface = &surface;
     _canvas = surface.skCanvas();
     _image = &surface.rgb32Image();
+
+    if(_canvas)
+        _canvas->save();
 }
 
 
@@ -72,6 +75,9 @@ void BitmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 
 void BitmapCanvas::onFinishPaint()
 {
+    if(_canvas)
+        _canvas->restore();
+
     _surface = 0;
     _canvas = 0;
     _image = 0;
@@ -106,6 +112,12 @@ void BitmapCanvas::onApplyTransform()
 
 void BitmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
+    if(_canvas && isActive())
+    {
+        _canvas->restore();
+        _canvas->save();
+        invalidate(DirtyAll & ~DirtyTransform);
+    }
 }
 
 
@@ -198,14 +210,17 @@ void BitmapCanvas::onApplyFont()
 
 void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
+    if(_canvas && isActive())
+    {
+        _canvas->restore();
+        _canvas->save();
+        invalidate(DirtyAll & ~DirtyClip);
+    }
+
     _hasClip = clip != 0;
 
     if(clip)
-    {
-        Gfx::PointF origin = transform() * clip->origin();
-        Gfx::SizeF size = transform() * clip->size();
-        _clip = Gfx::RectF(origin, size);
-    }
+        _clip = *clip;
     else
         _clip.clear();
 }
@@ -215,10 +230,6 @@ void BitmapCanvas::onApplyClip()
 {
     if( ! _canvas || ! _image )
         return;
-
-    // restore/save resets the entire canvas state (matrix + clip)
-    _canvas->restore();
-    _canvas->save();
 
     RectI imageRect;
     imageRect.setWidth( _image->width() );
@@ -230,30 +241,27 @@ void BitmapCanvas::onApplyClip()
     }
     else
     {
-        // clip in device coordinates (identity matrix after restore)
+        // clip in logical coordinates, applied before the transform
         SkRect skClip = SkRect::MakeLTRB( _clip.x(), _clip.y(),
                                            _clip.x() + _clip.width(),
                                            _clip.y() + _clip.height() );
         _canvas->clipRect(skClip);
 
-        RectI clipRect = RectI( PointI( lround( _clip.x() ),
-                                        lround( _clip.y() ) ),
-                                SizeI( lround( _clip.width() ),
-                                       lround( _clip.height() ) ) );
+        // _currentClip in physical pixels for software blit/text
+        Gfx::PointF origin = transform() * _clip.origin();
+        Gfx::SizeF size = transform() * _clip.size();
+        Gfx::RectF clipP(origin, size);
+
+        RectI clipRect = RectI( PointI( lround( clipP.x() ),
+                                        lround( clipP.y() ) ),
+                                SizeI( lround( clipP.width() ),
+                                       lround( clipP.height() ) ) );
 
         if( clipRect.isNull() )
             clipRect = RectI( PointI(0, 0), SizeI(1, 1) );
 
         _currentClip = clipRect.intersect(imageRect);
     }
-
-    // apply the transform AFTER clipping in device space
-    Transform tx = transform();
-    SkMatrix m;
-    m.setAll( tx.m11(), tx.m12(), tx.dx(),
-              tx.m21(), tx.m22(), tx.dy(),
-              0, 0, 1 );
-    _canvas->setMatrix(m);
 }
 
 
