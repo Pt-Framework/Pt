@@ -128,7 +128,7 @@ InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Db ] : $(PT_INSTALL_INCLUDES:
 SubDir PT_TOP include Pt Gfx ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Gfx ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
-PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.hpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Gfx ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 SubDir PT_TOP include Pt Mfc ;
