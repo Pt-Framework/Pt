@@ -296,19 +296,15 @@ class Rgb32Test : public Pt::Unit::TestSuite
 
             Gfx::PixelView view(image);
 
-            auto isEqualColor = [](const auto& pixel, const Color& color) {
-                return pixel.getColor().value() == color.value();
-            };
-
-            const bool isEqual = std::equal(view.begin(), view.end(),
-                                        expectedColors.begin(), isEqualColor);
+            const bool isEqual = std::equal(view.begin(), view.end(), 
+                                            expectedColors.begin(), IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqual,
                                "unexpected: " << printBytes(image.data(), image.size()));
 
             Gfx::ConstPixelView cview(image);
 
-            const bool isEqualConst = std::equal(cview.begin(), cview.end(),
-                                            expectedColors.begin(), isEqualColor);
+            const bool isEqualConst = std::equal(cview.begin(), cview.end(), 
+                                                 expectedColors.begin(), IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqualConst,
                                "unexpected: " << printBytes(image.data(), image.size()));
         }
@@ -320,20 +316,16 @@ class Rgb32Test : public Pt::Unit::TestSuite
 
             auto view = Gfx::pixelView(image);
 
-            auto isEqualColor = [](const auto& pixel, const ColorF& color) {
-                return isEqualColorF(pixel.getColor(), color);
-            };
-
-            const bool isEqual = std::equal(view.begin(), view.end(),
-                                            expectedColorsF.begin(), isEqualColor);
+            const bool isEqual = std::equal(view.begin(), view.end(), expectedColorsF.begin(), 
+                                            IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqual,
                                "unexpected: " << printBytes(image.data(), image.size()));
 
             const Gfx::ConstImageF constImage(image);
             auto cview = Gfx::pixelView(constImage);
 
-            const bool isEqualConst = std::equal(cview.begin(), cview.end(),
-                                                 expectedColorsF.begin(), isEqualColor);
+            const bool isEqualConst = std::equal(cview.begin(), cview.end(),expectedColorsF.begin(), 
+                                                 IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqualConst,
                                "unexpected: " << printBytes(image.data(), image.size()));
         }
@@ -345,19 +337,15 @@ class Rgb32Test : public Pt::Unit::TestSuite
 
             Gfx::Rgb32PixelView view(image);
 
-            auto isEqualColor = [](const auto& pixel, const Color& color) {
-                return pixel.getColor().value() == color.value();
-            };
-
-            const bool isEqual = std::equal(view.begin(), view.end(),
-                                        expectedColors.begin(), isEqualColor);
+            const bool isEqual = std::equal(view.begin(), view.end(), expectedColors.begin(), 
+                                            IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqual,
                                "unexpected: " << printBytes(image.data(), image.size()));
 
             Gfx::Rgb32ConstPixelView cview(image);
 
-            const bool isEqualConst = std::equal(cview.begin(), cview.end(),
-                                            expectedColors.begin(), isEqualColor);
+            const bool isEqualConst = std::equal(cview.begin(), cview.end(), expectedColors.begin(), 
+                                                 IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqualConst,
                                "unexpected: " << printBytes(image.data(), image.size()));
         }
@@ -369,19 +357,15 @@ class Rgb32Test : public Pt::Unit::TestSuite
 
             Gfx::Rgb32PixelView view(image);
 
-            auto isEqualColor = [](const auto& pixel, const Gfx::Rgb32Color& color) {
-                return pixel.color().value() == color.value();
-            };
-
-            const bool isEqual = std::equal(view.begin(), view.end(),
-                                            rgb32Colors.begin(), isEqualColor);
+            const bool isEqual = std::equal(view.begin(), view.end(), rgb32Colors.begin(), 
+                                            IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqual,
                                "unexpected: " << printBytes(image.data(), image.size()));
 
             Gfx::Rgb32ConstPixelView cview(image);
 
-            const bool isEqualConst = std::equal(cview.begin(), cview.end(),
-                                                 rgb32Colors.begin(), isEqualColor);
+            const bool isEqualConst = std::equal(cview.begin(), cview.end(), rgb32Colors.begin(), 
+                                                 IsEqualColor() );
             PT_UNIT_ASSERT_MSG(isEqualConst,
                                "unexpected: " << printBytes(image.data(), image.size()));
         }
@@ -898,6 +882,34 @@ class Rgb32Test : public Pt::Unit::TestSuite
                             lineSize);
             }
         }
+
+        struct IsEqualColor {
+            template <typename PixelT>
+            bool operator()(const PixelT& pixel, const Color& color) const
+            {
+                return pixel.getColor().value() == color.value();
+            }
+
+            template <typename PixelT>
+            bool operator()(const PixelT& pixel, const ColorF& color) const
+            {
+                return isEqualColorF(pixel.getColor(), color);
+            }
+
+            template <typename PixelT>
+            bool operator()(const PixelT& pixel, const Gfx::Rgb32Color& color) const
+            {
+                return pixel.color().value() == color.value();
+            }
+
+            bool isEqualColorF(const ColorF& left, const ColorF& right) const
+            {
+                return left.alpha() == right.alpha()
+                    && left.red() == right.red()
+                    && left.green() == right.green()
+                    && left.blue() == right.blue();
+            }
+        };
 
         static bool isEqualColorF(const ColorF& left, const ColorF& right)
         {
