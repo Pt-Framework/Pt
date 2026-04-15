@@ -29,15 +29,6 @@
 #ifndef Pt_Forms_x11_ApplicationImpl_h
 #define Pt_Forms_x11_ApplicationImpl_h
 
-#include "X11Fd.h"
-
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
-
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Cursor.h>
 #include <Pt/Forms/Window.h>
@@ -49,6 +40,15 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Timespan.h>
+
+#include "X11Fd.h"
+
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
+#include <X11/cursorfont.h>
 
 namespace Pt {
 

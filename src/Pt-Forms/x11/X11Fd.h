@@ -30,17 +30,6 @@
 #ifndef Pt_Forms_X11Fd_ApplicationImpl_h
 #define Pt_Forms_X11Fd_ApplicationImpl_h
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
-
-// X11 defines conflict with enum values in Pt/Char.h
-#undef Above
-#undef Below
-
 #include "posix/Selector.h"
 
 #include <Pt/Forms/Api.h>
@@ -48,6 +37,16 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/Singleton.h>
 #include <Pt/Event.h>
+
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
+#include <X11/cursorfont.h>
+
+#undef Above
+#undef Below
 
 #include <map>
 #include <unistd.h>

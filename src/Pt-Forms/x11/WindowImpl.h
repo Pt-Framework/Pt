@@ -29,15 +29,15 @@
 #ifndef Pt_Forms_WindowImpl_h
 #define Pt_Forms_WindowImpl_h
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/WindowFrame.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
+
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
 
 namespace Pt {
 
