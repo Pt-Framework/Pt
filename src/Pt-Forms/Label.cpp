@@ -46,6 +46,7 @@ Label::Label()
 , _styleInvalid(true)
 {
     _font = Application::instance().styleOptions().font();
+    _styleGeneration = Application::instance().styleOptions().generation();
 }
 
 

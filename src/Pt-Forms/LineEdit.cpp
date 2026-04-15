@@ -43,6 +43,7 @@ LineEdit::LineEdit()
 , _echoMode(Normal)
 , _spacing(0)
 , _hasRenderer(false)
+, _fontOverride(0)
 {
     setFocusPolicy(Control::AcceptFocus);
 }
@@ -237,14 +238,75 @@ void LineEdit::setTextColor(const Gfx::ColorF& color)
 
 const Gfx::Font& LineEdit::font() const
 {
-    return _fontValue ? *_fontValue
-                      : Application::instance().styleOptions().font();
+    return _font;
 }
 
 
 void LineEdit::setFont(const Gfx::Font& font)
 {
-    _fontValue.reset( new Gfx::Font(font) );
+    _customFont = font;
+    _fontOverride = OverrideAll;
+
+    invalidate();
+}
+
+
+Gfx::Font LineEdit::getFont() const
+{
+    const Gfx::Font& base = Application::instance().styleOptions().font();
+
+    if( _fontOverride == 0 )
+        return base;
+
+    if( _fontOverride == OverrideAll )
+        return _customFont;
+
+    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
+                                                    : base.size();
+    Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
+                                                            : base.weight();
+    Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant()
+                                                          : base.slant();
+
+    if( base.hasStyleName() )
+        return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
+
+    if( base.category() != Gfx::Font::Category::None )
+        return Gfx::Font(base.category(), sz, wt, sl, base.stretch());
+
+    return Gfx::Font(base.family(), sz, wt, sl, base.stretch());
+}
+
+
+void LineEdit::setFontSize(std::size_t size)
+{
+    _customFont = Gfx::Font(_customFont.family(), size,
+                            _customFont.weight(), _customFont.slant(),
+                            _customFont.stretch());
+    _fontOverride |= OverrideSize;
+
+    invalidate();
+}
+
+
+void LineEdit::setFontWeight(Gfx::Font::Weight weight)
+{
+    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
+                            weight, _customFont.slant(),
+                            _customFont.stretch());
+    _fontOverride |= OverrideWeight;
+
+    invalidate();
+}
+
+
+void LineEdit::setFontSlant(Gfx::Font::Slant slant)
+{
+    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
+                            _customFont.weight(), slant,
+                            _customFont.stretch());
+    _fontOverride |= OverrideSlant;
+
     invalidate();
 }
 
@@ -278,7 +340,7 @@ void LineEdit::onInvalidate()
     _brush = background();
     _pen = contour();
     _textPen = textColor();
-    _font = font();
+    _font = getFont();
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<LineEditRenderer>() );

@@ -40,6 +40,7 @@ MenuBaseItem::MenuBaseItem()
 , _text("(empty)")
 , _hasSeparator(false)
 , _isHighlighted(false)
+, _fontOverride(0)
 {
     setFocusPolicy(Control::AcceptFocus);
     setPadding(Pt::Forms::Spacing(8, 8));
@@ -188,14 +189,75 @@ void MenuBaseItem::setTextColor(const Pt::Gfx::ColorF& color)
 
 const Pt::Gfx::Font& MenuBaseItem::font() const
 {
-    return _fontValue ? *_fontValue
-        : Pt::Forms::Application::instance().styleOptions().font();
+    return _font;
 }
 
 
 void MenuBaseItem::setFont(const Pt::Gfx::Font& font)
 {
-    _fontValue.reset(new Pt::Gfx::Font(font));
+    _customFont = font;
+    _fontOverride = OverrideAll;
+
+    invalidate();
+}
+
+
+Pt::Gfx::Font MenuBaseItem::getFont() const
+{
+    const Pt::Gfx::Font& base = Pt::Forms::Application::instance().styleOptions().font();
+
+    if( _fontOverride == 0 )
+        return base;
+
+    if( _fontOverride == OverrideAll )
+        return _customFont;
+
+    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
+                                                    : base.size();
+    Pt::Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
+                                                                : base.weight();
+    Pt::Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant()
+                                                              : base.slant();
+
+    if( base.hasStyleName() )
+        return Pt::Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
+
+    if( base.category() != Pt::Gfx::Font::Category::None )
+        return Pt::Gfx::Font(base.category(), sz, wt, sl, base.stretch());
+
+    return Pt::Gfx::Font(base.family(), sz, wt, sl, base.stretch());
+}
+
+
+void MenuBaseItem::setFontSize(std::size_t size)
+{
+    _customFont = Pt::Gfx::Font(_customFont.family(), size,
+                                _customFont.weight(), _customFont.slant(),
+                                _customFont.stretch());
+    _fontOverride |= OverrideSize;
+
+    invalidate();
+}
+
+
+void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
+{
+    _customFont = Pt::Gfx::Font(_customFont.family(), _customFont.size(),
+                                weight, _customFont.slant(),
+                                _customFont.stretch());
+    _fontOverride |= OverrideWeight;
+
+    invalidate();
+}
+
+
+void MenuBaseItem::setFontSlant(Pt::Gfx::Font::Slant slant)
+{
+    _customFont = Pt::Gfx::Font(_customFont.family(), _customFont.size(),
+                                _customFont.weight(), slant,
+                                _customFont.stretch());
+    _fontOverride |= OverrideSlant;
+
     invalidate();
 }
 
@@ -228,7 +290,7 @@ void MenuBaseItem::onInvalidate()
     _brush = background();
     _pen = contour();
     _textPen = textColor();
-    _font = font();
+    _font = getFont();
 
     _picture.reset(_icon);
 

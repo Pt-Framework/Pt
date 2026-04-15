@@ -85,6 +85,12 @@ class PT_FORMS_API ProgressBar : public Control
 
         void setFont(const Gfx::Font& font);
 
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        void setFontSlant(Gfx::Font::Slant slant);
+
         void setRenderer(ProgressBarRenderer* renderer);
 
     protected:
@@ -95,6 +101,17 @@ class PT_FORMS_API ProgressBar : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
+        Gfx::Font getFont() const;
+
+    private:
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
+
         Signal<int> _valueChanged;
         int _value;
         int _min;
@@ -104,7 +121,8 @@ class PT_FORMS_API ProgressBar : public Control
         AutoPtr<Gfx::ColorF>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::ColorF>       _textColor;
-        AutoPtr<Gfx::Font>        _fontValue;
+        Gfx::Font                 _customFont;
+        unsigned                  _fontOverride;
         
         FacetPtr<ProgressBarRenderer> _renderer;
         bool                          _hasRenderer;

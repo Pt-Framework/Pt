@@ -165,6 +165,12 @@ class PT_FORMS_API SpinBox : public Control
 
         void setFont(const Gfx::Font& font);
 
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        void setFontSlant(Gfx::Font::Slant slant);
+
         void setRenderer(SpinBoxRenderer* renderer);
 
     protected:
@@ -206,6 +212,16 @@ class PT_FORMS_API SpinBox : public Control
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
+        Gfx::Font getFont() const;
+
+    private:
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
         Pt::Signal<int>               _valueEdited; 
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
@@ -232,7 +248,8 @@ class PT_FORMS_API SpinBox : public Control
         AutoPtr<Gfx::Brush>           _background;
         AutoPtr<Gfx::Pen>             _contour;
         AutoPtr<Gfx::ColorF>           _textColor;
-        AutoPtr<Gfx::Font>            _fontValue;
+        Gfx::Font                     _customFont;
+        unsigned                      _fontOverride;
 
         Gfx::Brush                    _backgroundBrush;
         Gfx::Pen                      _pen;

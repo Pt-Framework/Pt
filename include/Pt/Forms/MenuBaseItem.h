@@ -95,6 +95,12 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         void setFont(const Pt::Gfx::Font& font);
 
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Pt::Gfx::Font::Weight weight);
+
+        void setFontSlant(Pt::Gfx::Font::Slant slant);
+
     protected:
         static Pt::String shortcutText(const Pt::Forms::Key& key);
 
@@ -116,6 +122,18 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         virtual bool onLeaveEvent(const Pt::Forms::LeaveEvent& ev);
 
+    private:
+        Pt::Gfx::Font getFont() const;
+
+    private:
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
+
     protected:
         Pt::Signal<MenuBaseItem&> _triggered;
         double            _iconWidth;
@@ -125,7 +143,8 @@ class PT_FORMS_API MenuBaseItem : public Control
         Pt::AutoPtr<Pt::Gfx::Brush>       _background;
         Pt::AutoPtr<Pt::Gfx::Pen>         _contour;
         Pt::AutoPtr<Pt::Gfx::ColorF>       _textColor;
-        Pt::AutoPtr<Pt::Gfx::Font> _fontValue;
+        Pt::Gfx::Font             _customFont;
+        unsigned                  _fontOverride;
 
         Pt::Forms::PixmapSurface     _picture;
         Pt::Gfx::Brush        _brush;

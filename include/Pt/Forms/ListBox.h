@@ -89,6 +89,12 @@ class PT_FORMS_API ListBoxItem : public Button
 
         void setFont(const Gfx::Font& font);
 
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        void setFontSlant(Gfx::Font::Slant slant);
+
         void setRenderer(ListBoxRenderer* renderer);
 
     protected:
@@ -116,6 +122,17 @@ class PT_FORMS_API ListBoxItem : public Button
         virtual void onPaintContent(PaintSurface& surface, Gfx::Painter& painter);
 
     private:
+        Gfx::Font getFont() const;
+
+    private:
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
+
         Pt::Signal<ListBoxItem&> _selected;
         bool                     _isSelectable;
         bool                     _isSelected;
@@ -130,7 +147,8 @@ class PT_FORMS_API ListBoxItem : public Button
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::ColorF>       _textColor;
-        AutoPtr<Gfx::Font>        _fontValue;
+        Gfx::Font                 _customFont;
+        unsigned                  _fontOverride;
 
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
