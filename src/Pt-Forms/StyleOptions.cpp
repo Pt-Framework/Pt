@@ -44,6 +44,7 @@ StyleOptions::StyleOptions()
 , _textColor(Gfx::ColorF::fromRgb8(0, 0, 0))
 , _highlightedTextColor(Gfx::ColorF::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 10))
+, _generation(0)
 {
 }
 
@@ -59,6 +60,7 @@ StyleOptions::StyleOptions(const StyleOptions& o)
 , _textColor(o._textColor)
 , _highlightedTextColor( o.highlightedTextColor() )
 , _font(o._font)
+, _generation(o._generation)
 {
 }
 
@@ -77,6 +79,7 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
     _highlightColor = o._highlightColor;
     _textColor = o._textColor;
     _font = o._font;
+    ++_generation;
     
     return *this;
 }

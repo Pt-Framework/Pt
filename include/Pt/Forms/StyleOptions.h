@@ -37,6 +37,8 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/NonCopyable.h>
 
+#include <cstddef>
+
 namespace Pt {
 
 namespace Forms {
@@ -79,6 +81,7 @@ class PT_FORMS_API StyleOptions
         void setBackground(const Gfx::Brush& b)
         {
             _background = b;
+            ++_generation;
         }
 
         const Gfx::Brush& foreground() const
@@ -89,6 +92,7 @@ class PT_FORMS_API StyleOptions
         void setForeground(const Gfx::Brush& c)
         {
             _foreground = c;
+            ++_generation;
         }
         
         const Gfx::Pen& contour() const
@@ -99,6 +103,7 @@ class PT_FORMS_API StyleOptions
         void setContour(const Gfx::Pen& p)
         {
             _contour = p;
+            ++_generation;
         }
 
         const Gfx::ColorF& accentColor() const
@@ -109,6 +114,7 @@ class PT_FORMS_API StyleOptions
         void setAccentColor(const Gfx::ColorF& color)
         {
             _accentColor = color;
+            ++_generation;
         }
 
         const Gfx::Brush& viewBackground() const
@@ -119,6 +125,7 @@ class PT_FORMS_API StyleOptions
         void setViewBackground(const Gfx::Brush& b)
         {
             _viewBackground = b;
+            ++_generation;
         }
 
         const Gfx::ColorF& highlightColor() const
@@ -129,6 +136,7 @@ class PT_FORMS_API StyleOptions
         void setHighlightColor(const Gfx::ColorF& c)
         {
             _highlightColor = c;
+            ++_generation;
         }
 
         const Gfx::Brush& textBackground() const
@@ -139,6 +147,7 @@ class PT_FORMS_API StyleOptions
         void setTextBackground(const Gfx::Brush& b)
         {
             _textBackground = b;
+            ++_generation;
         }
 
         const Gfx::ColorF& textColor() const
@@ -149,6 +158,7 @@ class PT_FORMS_API StyleOptions
         void setTextColor(const Gfx::ColorF& c)
         {
             _textColor = c;
+            ++_generation;
         }
 
         const Gfx::ColorF& highlightedTextColor() const
@@ -159,6 +169,7 @@ class PT_FORMS_API StyleOptions
         void setHighlightedTextColor(const Gfx::ColorF& c)
         {
             _highlightedTextColor = c;
+            ++_generation;
         }
 
         const Gfx::Font& font() const
@@ -169,6 +180,12 @@ class PT_FORMS_API StyleOptions
         void setFont(const Gfx::Font& c)
         {
             _font = c;
+            ++_generation;
+        }
+
+        std::size_t generation() const
+        {
+            return _generation;
         }
 
     private:
@@ -182,6 +199,7 @@ class PT_FORMS_API StyleOptions
       Gfx::ColorF _textColor;
       Gfx::ColorF _highlightedTextColor;
       Gfx::Font  _font;
+      std::size_t _generation;
 };
 
 } // namespace
