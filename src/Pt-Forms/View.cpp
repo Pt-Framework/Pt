@@ -51,6 +51,20 @@ void ViewSurface::onDrawPixmap(const Gfx::PointF& to,
     _surface->drawPixmap(pos, pixmap, paint, rect);
 }
 
+
+void ViewSurface::onDrawPixmap(Gfx::Canvas& canvas,
+                               const Gfx::PointF& to,
+                               const Pixmap& pixmap,
+                               const Gfx::RectF* rect)
+{
+    if( ! _surface )
+        return;
+
+    // no position offset needed — the canvas region already
+    // contains the view translation set in onGetCanvas
+    _surface->drawPixmap(canvas, to, pixmap, rect);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // View
 ///////////////////////////////////////////////////////////////////////

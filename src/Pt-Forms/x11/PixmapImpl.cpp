@@ -34,6 +34,9 @@
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Bitmap.h>
+#include <Pt/Gfx/Canvas.h>
+
+#include <cassert>
 
 namespace Pt {
 
@@ -64,6 +67,21 @@ void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
 {
     const Gfx::Bitmap& bitmap = pixmap.impl()->_bitmap;
     _bitmap.drawBitmap(to, bitmap, paint, rect);
+}
+
+
+void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+                            const Pt::Gfx::PointF& to,
+                            const Pixmap& pixmap,
+                            const Gfx::RectF* rect)
+{
+    assert(_canvas == &canvas);
+
+    if(_canvas == &canvas)
+    {
+        const Gfx::Image& image = pixmap.impl()->_bitmap.image();
+        _canvas->drawImage(to, image, rect);
+    }
 }
 
 } // namespace

@@ -107,6 +107,13 @@ void Pixmap::onDrawPixmap(const Gfx::PointF& to, const Pixmap& pixmap,
 }
 
 
+void Pixmap::onDrawPixmap(Gfx::Canvas& canvas, const Gfx::PointF& to,
+                          const Pixmap& pixmap, const Gfx::RectF* rect)
+{
+    _impl->drawPixmap(canvas, to, pixmap, rect);
+}
+
+
 const Gfx::ImageFormat& Pixmap::onGetFormat() const
 {
     return _impl->format();

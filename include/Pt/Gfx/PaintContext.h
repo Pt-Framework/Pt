@@ -38,14 +38,14 @@ namespace Pt {
 
 namespace Gfx {
 
-class Painter;
+class PainterBase;
 class PaintSurface;
 
 /** @brief Paint context.
 */
 class PT_GFX_API PaintContext : private NonCopyable
 {
-    friend class Painter;
+    friend class PainterBase;
 
     public:
         /** @brief Constructs a context using the paint surface.
@@ -83,13 +83,13 @@ class PT_GFX_API PaintContext : private NonCopyable
     private:
         PaintSurface* surface();
 
-        void attachPainter(Painter& painter);
+        void attachPainter(PainterBase& painter);
 
-        void detachPainter(Painter& painter);
+        void detachPainter(PainterBase& painter);
 
     private:
         PaintSurface* _surface;
-        Painter*      _painter;
+        PainterBase*  _painter;
 };
 
 } // namespace

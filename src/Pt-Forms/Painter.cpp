@@ -1,6 +1,5 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
 
-  
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -27,92 +26,72 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/PaintContext.h>
-#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/PainterBase.h>
+#include <Pt/Forms/Painter.h>
+#include <Pt/Forms/PaintContext.h>
 
 namespace Pt {
 
-namespace Gfx {
+namespace Forms {
 
-PaintContext::PaintContext(PaintSurface& surface)
-: _surface(&surface)
-, _painter(0)
+Painter::Painter()
+: _formsSurface(0)
 {
 }
 
 
-PaintContext::~PaintContext()
+Painter::Painter(PaintSurface& surface)
+: _formsSurface(0)
 {
-    if(_painter)
-    {
-        _painter->onDetachContext(*this);
-    }
-
-    finish();
+    begin(surface);
 }
 
 
-PaintSurface* PaintContext::surface()
+Painter::Painter(PaintContext& context)
+: _formsSurface(0)
 {
-    return _surface;
+    begin(context);
 }
 
 
-const Gfx::ImageFormat& PaintContext::format() const
+Painter::~Painter()
 {
-    return _surface->format();
 }
 
 
-const Gfx::SizeF& PaintContext::size() const
+void Painter::begin(PaintSurface& surface)
 {
-    return _surface->size();
+    beginPaint(surface);
+    _formsSurface = &surface;
 }
 
 
-const Scaling& PaintContext::scaling() const
+void Painter::begin(PaintContext& context)
 {
-    return _surface->scaling();
+    PaintSurface& surface = context.surface();
+    beginPaint(context);
+    _formsSurface = &surface;
 }
 
 
-Canvas* PaintContext::getCanvas(Canvas* reuse)
+void Painter::drawPixmap(const Gfx::PointF& to, const Pixmap& pixmap)
 {
-    return _surface->getCanvas(reuse);
+    if(_formsSurface && canvas())
+        _formsSurface->drawPixmap(*canvas(), to, pixmap);
 }
 
 
-void PaintContext::sync()
+void Painter::drawPixmap(const Gfx::PointF& to, const Pixmap& pixmap,
+                         const Gfx::RectF& rect)
 {
-    if(_surface)
-        _surface->sync();
+    if(_formsSurface && canvas())
+        _formsSurface->drawPixmap(*canvas(), to, pixmap, &rect);
 }
 
 
-void PaintContext::finish()
+void Painter::onDetachSurface(Gfx::PaintSurface& surface)
 {
-    if(_surface)
-        _surface->finish();
-}
-
-
-void PaintContext::attachPainter(PainterBase& painter)
-{
-    if(_painter)
-    {
-        _painter->onDetachContext(*this);
-        _painter = 0;
-    }
-
-    _painter = &painter;
-}
-
-
-void PaintContext::detachPainter(PainterBase& painter)
-{
-    if(_painter)
-        _painter = 0;
+    _formsSurface = 0;
+    PainterBase::onDetachSurface(surface);
 }
 
 } // namespace

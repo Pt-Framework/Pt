@@ -52,10 +52,20 @@ class PT_FORMS_API PaintSurface : public Gfx::PaintSurface
                         const Gfx::Paint& paint,
                         const Gfx::RectF* rect = 0);
 
+        void drawPixmap(Gfx::Canvas& canvas,
+                        const Gfx::PointF& to,
+                        const Pixmap& pixmap,
+                        const Gfx::RectF* rect = 0);
+
     protected:
         virtual void onDrawPixmap(const Gfx::PointF& to,
                                   const Pixmap& pixmap,
                                   const Gfx::Paint& paint,
+                                  const Gfx::RectF* rect = 0) = 0;
+
+        virtual void onDrawPixmap(Gfx::Canvas& canvas,
+                                  const Gfx::PointF& to,
+                                  const Pixmap& pixmap,
                                   const Gfx::RectF* rect = 0) = 0;
 };
 
@@ -76,6 +86,15 @@ inline void PaintSurface::drawPixmap(const Gfx::PointF& to,
                                      const Gfx::RectF* rect)
 {
     onDrawPixmap(to, pixmap, paint, rect);
+}
+
+
+inline void PaintSurface::drawPixmap(Gfx::Canvas& canvas,
+                                     const Gfx::PointF& to,
+                                     const Pixmap& pixmap,
+                                     const Gfx::RectF* rect)
+{
+    onDrawPixmap(canvas, to, pixmap, rect);
 }
 
 } // namespace

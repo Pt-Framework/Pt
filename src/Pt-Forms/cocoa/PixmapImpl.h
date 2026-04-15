@@ -71,6 +71,10 @@ class PixmapCanvas : public Gfx::Canvas
         void suspend();
 
         void resume();
+
+        void drawPixmap(const Gfx::PointF& to,
+                        const Pixmap& pm,
+                        const Gfx::RectF* rect);
     
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;
@@ -197,6 +201,11 @@ class PixmapImpl
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
                         const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
+
+        void drawPixmap(Gfx::Canvas& canvas,
+                        const Gfx::PointF& to,
+                        const Pixmap& pm,
                         const Gfx::RectF* rect);
 
         Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)

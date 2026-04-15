@@ -185,6 +185,11 @@ class ViewSurface : public PaintSurface
                                   const Gfx::Paint& paint,
                                   const Gfx::RectF* rect) override;
 
+        virtual void onDrawPixmap(Gfx::Canvas& canvas,
+                                  const Gfx::PointF& to,
+                                  const Pixmap& pm,
+                                  const Gfx::RectF* rect) override;
+
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const override
         {

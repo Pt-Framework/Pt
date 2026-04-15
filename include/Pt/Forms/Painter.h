@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,67 +26,64 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_PaintContext_h
-#define Pt_Forms_PaintContext_h
+#ifndef Pt_Forms_Painter_h
+#define Pt_Forms_Painter_h
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/PaintSurface.h>
-#include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/PainterBase.h>
 
 namespace Pt {
 
 namespace Forms {
 
-class Painter;
+class PaintContext;
+class Pixmap;
 
-/** @brief Paint context.
+/** @brief 2D painter for Forms paint surfaces.
 */
-class PT_FORMS_API PaintContext : public Gfx::PaintContext
+class PT_FORMS_API Painter : public Gfx::PainterBase
 {
-    friend class Painter;
-
     public:
-        PaintContext(PaintSurface& surface);
+        /** @brief Default constructor.
+        */
+        Painter();
 
-        ~PaintContext();
+        /** @brief Constructs using a Forms paint surface.
+        */
+        explicit Painter(PaintSurface& surface);
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect = 0) const;
+        /** @brief Constructs using a Forms paint context.
+        */
+        explicit Painter(PaintContext& context);
+
+        /** @brief Destructor.
+        */
+        virtual ~Painter();
+
+        /** @brief Begins painting to a Forms paint surface.
+        */
+        void begin(PaintSurface& surface);
+
+        /** @brief Begins painting to a Forms paint context.
+        */
+        void begin(PaintContext& context);
+
+        /** @brief Draws a pixmap.
+        */
+        void drawPixmap(const Gfx::PointF& to, const Pixmap& pixmap);
+
+        /** @brief Draws a part of a pixmap.
+        */
+        void drawPixmap(const Gfx::PointF& to, const Pixmap& pixmap,
+                        const Gfx::RectF& rect);
+
+    protected:
+        virtual void onDetachSurface(Gfx::PaintSurface& surface);
 
     private:
-        PaintSurface& surface();
-
-        PaintSurface&  _surface;
+        PaintSurface*  _formsSurface;
 };
-
-
-inline PaintContext::PaintContext(PaintSurface& surface)
-: Gfx::PaintContext( surface )
-, _surface(surface)
-{
-}
-
-
-inline PaintContext::~PaintContext()
-{
-}
-
-
-inline PaintSurface& PaintContext::surface()
-{
-    return _surface;
-}
-
-
-inline void PaintContext::drawPixmap(const Gfx::PointF& to,
-                               const Pixmap& pixmap,
-                               const Gfx::Paint& paint,
-                               const Gfx::RectF* rect) const
-{
-    _surface.drawPixmap(to, pixmap, paint, rect);
-}
 
 } // namespace
 

@@ -30,6 +30,7 @@
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/TextMetrics.h>
 
@@ -612,9 +613,13 @@ void Label::onPaint(PaintSurface& surface,
     {
         Pixmap& picture = getIconPixmap();
 
-        Gfx::Paint paint;
-        paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        surface.drawPixmap(_iconPos, picture, paint);
+        // Gfx::Paint paint;
+        // paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        // surface.drawPixmap(_iconPos, picture, paint);
+
+        Forms::Painter painter2(surface);
+        painter2.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        painter2.drawPixmap(_iconPos, picture);
     }
 
     //if(pen)

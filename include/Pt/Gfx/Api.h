@@ -61,6 +61,7 @@ typedef std::ptrdiff_t Int;
 class Canvas;
 class FontMetrics;
 class Paint;
+class PainterBase;
 class Painter;
 class PaintSurface;
 class TextMetrics;

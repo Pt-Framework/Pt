@@ -35,6 +35,8 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Utf8Codec.h>
 
+#include <cassert>
+
 namespace Pt {
 
 namespace Forms {
@@ -829,6 +831,57 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
         CGPathRelease(cgPath);
 }
 
+
+void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
+                               const Pixmap& pm,
+                               const Gfx::RectF* rectF)
+{
+    if( ! _pixmap )
+        return;
+
+    applyState();
+
+    const PixmapImpl* pixmap = pm.impl();
+    CGContextRef ctx = _pixmap->context();
+
+    if( ! ctx || ! pixmap->context())
+        return;
+
+    Gfx::PointF to = transform() * toF;
+    CGImageRef image = pixmap->getCGImage();
+
+    double H = CGBitmapContextGetHeight(ctx);
+
+    if(rectF)
+    {
+        CGRect subRect = CGRectMake(rectF->left(),
+                                    rectF->top(),
+                                    rectF->size().width(),
+                                    rectF->size().height());
+
+        CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
+
+        CGRect destRect = CGRectMake(to.x(),
+                                     H - to.y() - rectF->height(),
+                                     rectF->width(),
+                                     rectF->height());
+
+        CGContextDrawImage(ctx, destRect, subImage);
+        CGImageRelease(subImage);
+    }
+    else
+    {
+        CGRect destRect = CGRectMake(to.x(),
+                                     H - to.y() - pm.size().height(),
+                                     pixmap->size().width(),
+                                     pixmap->size().height());
+
+        CGContextDrawImage(ctx, destRect, image);
+    }
+
+    _pixmap->setModified();
+}
+
 ///////////////////////////////////////////////////////////////////////
 // PixmapImpl
 ///////////////////////////////////////////////////////////////////////
@@ -1092,6 +1145,18 @@ void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
         _canvas->resume();
 
     _imageModified = true;
+}
+
+
+void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+                            const Gfx::PointF& to,
+                            const Pixmap& pm,
+                            const Gfx::RectF* rect)
+{
+    assert(_canvas == &canvas);
+
+    if(_canvas == &canvas)
+        _canvas->drawPixmap(to, pm, rect);
 }
 
 

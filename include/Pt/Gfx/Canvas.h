@@ -225,12 +225,13 @@ class PT_GFX_API Canvas
                                  const Gfx::Image& image, 
                                  const Gfx::RectF* rect = 0) = 0;
 
+    protected:
+        void applyState();
+
     private:
         void attachSurface(PaintSurface& surface);
 
         void detachSurface(PaintSurface& surface);
-
-        void applyState();
 
         void updateTransform();
 

@@ -76,6 +76,11 @@ class PT_FORMS_API Pixmap : public PaintSurface
                                   const Gfx::Paint& paint,
                                   const Gfx::RectF* rect = 0) override;
 
+        virtual void onDrawPixmap(Gfx::Canvas& canvas,
+                                  const Gfx::PointF& to,
+                                  const Pixmap& pixmap,
+                                  const Gfx::RectF* rect = 0) override;
+
     protected:
         virtual const Gfx::ImageFormat& onGetFormat() const override;
 

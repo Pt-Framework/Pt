@@ -31,44 +31,18 @@
 #ifndef PT_GFX_PAINTER_H
 #define PT_GFX_PAINTER_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/TextMetrics.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Scaling.h>
-#include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/CompositionMode.h>
-#include <Pt/Gfx/Paint.h>
-
-#include <Pt/NonCopyable.h>
-#include <Pt/String.h>
-#include <Pt/Types.h>
-
-#include <cstddef>
+#include <Pt/Gfx/PainterBase.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class Canvas;
-class PaintSurface;
-class PaintContext;
-
-/** @brief 2D painter interface.
+/** @brief 2D painter for Gfx paint surfaces.
 */
-class PT_GFX_API Painter : private NonCopyable
+class PT_GFX_API Painter : public PainterBase
 {
-    friend class PaintSurface;
-    friend class PaintContext;
-
     public:
-        /** @brief @brief Default constructor.
+        /** @brief Default constructor.
         */
         Painter();
 
@@ -76,9 +50,9 @@ class PT_GFX_API Painter : private NonCopyable
         */
         explicit Painter(PaintSurface& surface);
 
-        /** @brief Constructs using a canvas.
+        /** @brief Constructs using a paint context.
         */
-        explicit Painter(PaintContext& canvas);
+        explicit Painter(PaintContext& context);
 
         /** @brief Destructor.
         */
@@ -88,201 +62,9 @@ class PT_GFX_API Painter : private NonCopyable
         */
         void begin(PaintSurface& surface);
 
-        /** @brief Begins painting to a canvas.
+        /** @brief Begins painting to a paint context.
         */
-        void begin(PaintContext& canvas);
-
-        /** @brief Ends painting.
-        */
-        void finish();
-
-        /** @brief Returns the image format.
-        */
-        const ImageFormat& format() const;
-
-        /** @brief Returns the paint scaling.
-        */
-        const Scaling& scaling() const;
-
-    public:
-        /** @brief Returns the current composition mode.
-        */
-        const CompositionMode& compositionMode() const;
-
-        /** @brief Sets the composition mode.
-        */
-        void setCompositionMode(const CompositionMode& mode);
-
-        /** @brief Returns the current pen.
-        */
-        const Pen& pen() const;
-
-        /** @brief Sets the pen used to stroke lines.
-        */
-        void setPen(const Pen& pen);
-
-        /** @brief Returns the current brush.
-        */
-        const Brush& brush() const;
-
-        /** @brief Sets the brush used to fill areas.
-        */
-        void setBrush(const Brush& brush);
-
-        /** @brief Returns the current font.
-        */
-        const Font& font() const;
-
-        /** @brief Sets the font used to draw text.
-        */
-        void setFont(const Font& font);
-
-        /** @brief Returns the user transform.
-        */
-        const Transform& transform() const;
-
-        /** @brief Sets the user transform.
-        */
-        void setTransform(const Transform& tx);
-
-        /** @brief Resets the user transform to identity.
-        */
-        void resetTransform();
-
-        /** @brief Returns the clipping rect or null if none.
-        */
-        const RectF* clip() const;
-
-        /** @brief Sets the clipping rect.
-        */
-        void setClip(const RectF& clip);
-
-        /** @brief Resets the clipping rect.
-        */
-        void resetClip();
-
-    public:
-        /** @brief Draws a line between two points.
-        */
-        void drawLine(const PointF& from, const PointF& to);
-
-        /** @brief Draws a polyline.
-        */
-        void drawPolyline(const PointF* points, const size_t pointCount);
-
-        /** @brief Fills a polygon.
-        */
-        void fillPolygon(const PointF* points, const size_t pointCount);
-
-        /** @brief Draws the outline of a rectangle.
-        */
-        void drawRect(const RectF& rect);
-
-        /** @brief Fills a rectangular area.
-        */
-        void fillRect(const RectF& rect);
-
-        /** @brief Draws the outline of a circle.
-          */
-        void drawCircle(const PointF& topLeft, double diameter);
-
-        /** @brief Fills a circular area.
-        */
-        void fillCircle(const PointF& topLeft, double diameter);
-
-        /** @brief Draws the outline of an ellipse.
-        */
-        void drawEllipse(const PointF& topLeft, const SizeF& size);
-
-        /** @brief Fills an elliptical area.
-        */
-        void fillEllipse(const PointF& topLeft, const SizeF& size);
-
-        /** @internal TODO.
-        */
-        void drawArc(const PointF& topLeft, const SizeF& size,
-                     float degBegin, float degEnd);
-        
-        /** @internal TODO.
-        */
-        void fillChord(const PointF& topLeft, const SizeF& size,
-                       float degBegin, float degEnd);
-        
-        /** @internal TODO.
-        */
-        void fillPie(const PointF& topLeft, const SizeF& size,
-                     float degBegin, float degEnd);
-
-    public:
-        /** @brief Returns the current path.
-        */
-        const Gfx::Path& path() const;
-
-        /** @brief Sets the current path.
-        */
-        void setPath(const Path& path);
-
-        /** @brief Draws the current path.
-        */
-        void drawPath();
-        
-        /** @brief Fills the current path.
-        */
-        void fillPath();
-
-        /** @brief Draws the given path.
-        */
-        void drawPath(const Path& path);
-        
-        /** @brief Fills the given path.
-        */
-        void fillPath(const Path& path);
-
-    public:
-        /** @brief Returns the font metrics of the current font.
-        */
-        const FontMetrics& fontMetrics() const;
-
-        /** @brief Returns the metrics of a line of text.
-        */
-        TextMetrics textMetrics(const Pt::String& text) const;
-
-        /** @brief Draws a line of text.
-        */
-        void drawText(const PointF& to, const Pt::String& text);
-
-        /** @brief Draws a line of text.
-        */
-        void drawText(const PointF& to, const Pt::String& text, const Transform& t);
-
-    public:
-        /** @brief Draws an image.
-        */
-        void drawImage(const PointF& to, const Image& im);
-
-        /** @brief Draws a part of an image.
-        */
-        void drawImage(const PointF& to, const Image& im, const RectF& rect);
-
-    private:
-        void onBeginPaint(PaintSurface& surface);
-
-        void onBeginPaint(Canvas& canvas);
-
-        void onDetachSurface(PaintSurface& surface);
-
-        void onDetachContext(PaintContext& canvas);
-
-    private:
-        PaintSurface*        _surface;
-        PaintContext*        _context;
-        Canvas*              _canvas;
-        Scaling              _scaling;
-        Paint                _paint;
-        Transform            _transform;
-        RectF                _clip;
-        bool                 _hasClip;
-        Path                 _path;
+        void begin(PaintContext& context);
 };
 
 } // namespace

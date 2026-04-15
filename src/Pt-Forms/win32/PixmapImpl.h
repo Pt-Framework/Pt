@@ -67,6 +67,7 @@ class PixmapImpl
 {
     public:
         PixmapImpl()
+        : _canvas(0)
         { }
 
         void reset(const Gfx::Image& image)
@@ -111,6 +112,11 @@ class PixmapImpl
                         const Pixmap& pixmap,
                         const Gfx::Paint& paint,
                         const Gfx::RectF* rect);
+
+        void drawPixmap(Gfx::Canvas& canvas,
+                        const Gfx::PointF& to,
+                        const Pixmap& pixmap,
+                        const Gfx::RectF* rect);
         
         const Gfx::ImageFormat& format() const
         {
@@ -124,7 +130,8 @@ class PixmapImpl
 
         Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
         {
-            return _bitmap.getCanvas(reuse);
+            _canvas = _bitmap.getCanvas(reuse);
+            return _canvas;
         }
 
         Gfx::Canvas* createCanvas(Gfx::Canvas* reuse)
@@ -134,6 +141,7 @@ class PixmapImpl
 
         void releaseCanvas()
         {
+            _canvas = 0;
         }
 
         void sync()
@@ -169,6 +177,7 @@ class PixmapImpl
     
     private:
         Gfx::Bitmap _bitmap;
+        Gfx::Canvas* _canvas;
 };
 
 #else // PT_FORMS_WIN32_RASTER
@@ -199,6 +208,11 @@ class PixmapImpl
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
                         const Gfx::Paint& paint,
+                        const Gfx::RectF* rect);
+
+        void drawPixmap(Gfx::Canvas& canvas,
+                        const Gfx::PointF& to,
+                        const Pixmap& pm,
                         const Gfx::RectF* rect);
 
         const Gfx::ImageFormat& format() const;

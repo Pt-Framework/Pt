@@ -43,6 +43,7 @@ namespace Pt {
 
 namespace Forms {
 
+class Pixmap;
 class PixmapImpl;
 
 class PixmapCanvas : public Gfx::Canvas
@@ -57,6 +58,10 @@ class PixmapCanvas : public Gfx::Canvas
         void suspend();
 
         void resume();
+
+        void drawPixmap(const Gfx::PointF& to,
+                        const Pixmap& pm,
+                        const Gfx::RectF* rect);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) override;

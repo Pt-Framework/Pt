@@ -29,7 +29,7 @@
 
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PainterBase.h>
 
 #include <limits>
 
@@ -151,7 +151,7 @@ void PaintSurface::onDetachCanvas(Canvas& canvas)
 }
 
 
-void PaintSurface::attachPainter(Painter& painter)
+void PaintSurface::attachPainter(PainterBase& painter)
 {
     if(_painter)
     {
@@ -163,7 +163,7 @@ void PaintSurface::attachPainter(Painter& painter)
 }
 
 
-void PaintSurface::detachPainter(Painter& painter)
+void PaintSurface::detachPainter(PainterBase& painter)
 {
     if(_painter)
         _painter = 0;

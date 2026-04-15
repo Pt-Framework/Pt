@@ -31,6 +31,7 @@
 #include "GdiFontProvider.h"
 #include "win32.h"
 
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Rgb32.h>
@@ -1117,6 +1118,62 @@ void PixmapCanvas::addPath(HDC dc, const Gfx::Path& path)
     }
 
     EndPath(dc);
+}
+
+
+void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
+                               const Pixmap& pm,
+                               const Gfx::RectF* rect)
+{
+    if( ! _pixmap )
+        return;
+
+    applyState();
+
+    const PixmapImpl* pixmap = pm.impl();
+    HDC dc = _pixmap->deviceContext();
+    HDC pixmapDC = pixmap->deviceContext();
+
+    Gfx::PointF to = transform() * toF;
+
+    int fromX = 0;
+    int fromY = 0;
+    int width = lround( pixmap->size().width() );
+    int height = lround( pixmap->size().height() );
+
+    if(rect)
+    {
+        const Gfx::Scaling& scaling = pixmap->scaling();
+        Gfx::RectF rectP = scaling.toPhysical(*rect);
+
+        fromX = lround( rectP.x() );
+        fromY = lround( rectP.y() );
+        width = lround( rectP.width() );
+        height = lround( rectP.height() );
+    }
+
+    switch(_compositionMode)
+    {
+        case Gfx::CompositionMode::SourceCopy:
+        {
+            BitBlt(dc, lround(to.x()), lround(to.y()), width, height,
+                   pixmapDC, fromX, fromY, SRCCOPY);
+            break;
+        }
+
+        case Gfx::CompositionMode::SourceOver:
+        {
+            BLENDFUNCTION bf;
+            bf.BlendOp = AC_SRC_OVER;
+            bf.BlendFlags = 0;
+            bf.SourceConstantAlpha = 0xFF;
+            bf.AlphaFormat = AC_SRC_ALPHA;
+
+            AlphaBlend(dc, lround(to.x()), lround(to.y()), width, height,
+                       pixmapDC, fromX, fromY, width, height, bf);
+            break;
+        }
+    }
 }
 
 #endif // PT_FORMS_WIN32_RASTER
