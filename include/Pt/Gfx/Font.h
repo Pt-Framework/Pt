@@ -148,6 +148,22 @@ class PT_GFX_API Font
         */
         Category category() const;
 
+        /** @brief Returns a copy of this font with a different size.
+        */
+        Font withSize(std::size_t size) const;
+
+        /** @brief Returns a copy of this font with a different weight.
+        */
+        Font withWeight(Weight weight) const;
+
+        /** @brief Returns a copy of this font with a different slant.
+        */
+        Font withSlant(Slant slant) const;
+
+        /** @brief Returns a copy of this font with a different stretch.
+        */
+        Font withStretch(Stretch stretch) const;
+
     public:
         static void addFonts(const System::Path& path);
 
@@ -207,6 +223,54 @@ inline bool operator<(const Font& a, const Font& b)
         return a.size() < b.size();
 
     return a.styleName() < b.styleName();
+}
+
+
+inline Font Font::withSize(std::size_t size) const
+{
+    if(category() != Category::None)
+        return Font(category(), size, weight(), slant(), stretch());
+
+    if(hasStyleName())
+        return Font(family(), size, styleName(), weight(), slant(), stretch());
+
+    return Font(family(), size, weight(), slant(), stretch());
+}
+
+
+inline Font Font::withWeight(Weight weight) const
+{
+    if(category() != Category::None)
+        return Font(category(), size(), weight, slant(), stretch());
+
+    if(hasStyleName())
+        return Font(family(), size(), styleName(), weight, slant(), stretch());
+
+    return Font(family(), size(), weight, slant(), stretch());
+}
+
+
+inline Font Font::withSlant(Slant slant) const
+{
+    if(category() != Category::None)
+        return Font(category(), size(), weight(), slant, stretch());
+
+    if(hasStyleName())
+        return Font(family(), size(), styleName(), weight(), slant, stretch());
+
+    return Font(family(), size(), weight(), slant, stretch());
+}
+
+
+inline Font Font::withStretch(Stretch stretch) const
+{
+    if(category() != Category::None)
+        return Font(category(), size(), weight(), slant(), stretch);
+
+    if(hasStyleName())
+        return Font(family(), size(), styleName(), weight(), slant(), stretch);
+
+    return Font(family(), size(), weight(), slant(), stretch);
 }
 
 
