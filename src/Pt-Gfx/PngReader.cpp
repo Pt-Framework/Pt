@@ -27,6 +27,7 @@
  */
 
 #include <Pt/Gfx/PngReader.h>
+#include <Pt/Gfx/Argb32.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/IOError.h>
@@ -298,28 +299,36 @@ class PngReaderImpl
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
 
-            ImageSpan imageRow(*_image, 0, row, width);
-
+            //ImageSpan imageRow(*_image, 0, row, width);
             std::size_t n = 0;
-            for(auto& pixel : imageRow)
+
+            if( bitdepth == 8 )
             {
-                if( bitdepth == 8 && channels == 3)
+                Argb32LineView lines( _image->data(), _image->width(), _image->height(), 0, Argb32::get() );
+                auto line = lines.line(row);
+  
+                if( channels == 3 )
                 {
-                    unsigned char red = data[n++];
-                    unsigned char green = data[n++];
-                    unsigned char blue = data[n++];
+                    for(auto& pixel : *line)
+                    {
+                        unsigned char red = data[n++];
+                        unsigned char green = data[n++];
+                        unsigned char blue = data[n++];
 
-                    pixel = Pt::Gfx::Color(255, red, green, blue);
+                        pixel = Pt::Gfx::Color(255, red, green, blue);
+                    }
                 }
-
-                if( bitdepth == 8 && channels == 4)
+                else if( channels == 4 )
                 {
-                    unsigned char red = data[n++];
-                    unsigned char green = data[n++];
-                    unsigned char blue = data[n++];
-                    unsigned char alpha = data[n++];
+                    for(auto& pixel : *line)
+                    {
+                        unsigned char red = data[n++];
+                        unsigned char green = data[n++];
+                        unsigned char blue = data[n++];
+                        unsigned char alpha = data[n++];
 
-                    pixel = Pt::Gfx::Color(alpha, red, green, blue);
+                        pixel = Pt::Gfx::Color(alpha, red, green, blue);
+                    }
                 }
             }
         }

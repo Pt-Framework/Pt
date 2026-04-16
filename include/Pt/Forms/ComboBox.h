@@ -114,6 +114,12 @@ class PT_FORMS_API ComboBox : public Control
 
         void setFont(const Gfx::Font& font);
 
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        void setFontSlant(Gfx::Font::Slant slant);
+
         void setRenderer(ComboBoxRenderer* renderer);
 
     protected:
@@ -146,7 +152,16 @@ class PT_FORMS_API ComboBox : public Control
         
         void processKeyEvent(const KeyEvent& ev);
 
+        Gfx::Font getFont() const;
+
     private:
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
         Pt::Signal<const Pt::String&> _textChanged;
         Pt::Signal<const Pt::String&> _textEdited;
         Pt::Signal<const Pt::String&> _returnPressed;
@@ -168,7 +183,8 @@ class PT_FORMS_API ComboBox : public Control
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::ColorF>       _textColor;
-        AutoPtr<Gfx::Font>        _fontValue;
+        Gfx::Font                 _customFont;
+        unsigned                  _fontOverride;
 
         FacetPtr<ComboBoxRenderer> _renderer;
         bool                       _hasRenderer;
