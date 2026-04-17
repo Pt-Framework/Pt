@@ -154,7 +154,8 @@ class FreeTypeFontProvider : public FontProvider
 
         bool getSyntheticInstances(FT_MM_Var* mmVar, const System::Path& path,
                                    long faceIndex, const std::string& family,
-                                   FontFace::Slant defaultSlant);
+                                   FontFace::Slant defaultSlant,
+                                   const std::set<int>& coveredWeights);
 
         static FontFace::Weight fontWeightFromAxis(FT_Fixed value);
 
@@ -162,6 +163,8 @@ class FreeTypeFontProvider : public FontProvider
                                                   const FT_Fixed* coords);
 
         static FontFace::Stretch fontStretchFromAxis(FT_Fixed value);
+
+        static std::string findSfntName(FT_Face face, FT_UInt nameId);
 
         FT_Library     _ft;
         FTC_Manager    _manager;

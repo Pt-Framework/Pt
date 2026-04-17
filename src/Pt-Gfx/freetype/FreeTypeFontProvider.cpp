@@ -34,6 +34,7 @@
 #include "DejaVuSansBoldItalic.h"
 
 #include FT_TRUETYPE_TABLES_H
+#include FT_SFNT_NAMES_H
 
 #include <Pt/Gfx/FontRegistry.h>
 
@@ -412,6 +413,42 @@ FontFace::Stretch FreeTypeFontProvider::fontStretchFromAxis(FT_Fixed value)
 }
 
 
+std::string FreeTypeFontProvider::findSfntName(FT_Face face, FT_UInt nameId)
+{
+    FT_UInt count = FT_Get_Sfnt_Name_Count(face);
+    std::string fallback;
+
+    for(FT_UInt i = 0; i < count; ++i)
+    {
+        FT_SfntName sfntName;
+        if(FT_Get_Sfnt_Name(face, i, &sfntName) != 0)
+            continue;
+
+        if(sfntName.name_id != nameId)
+            continue;
+
+        // prefer Windows Unicode BMP
+        if(sfntName.platform_id == 3 && sfntName.encoding_id == 1)
+        {
+            std::string result;
+            result.reserve(sfntName.string_len / 2);
+            for(FT_UInt b = 1; b < sfntName.string_len; b += 2)
+                result += static_cast<char>(sfntName.string[b]);
+            return result;
+        }
+
+        // store Mac Roman as fallback
+        if(fallback.empty() && sfntName.platform_id == 1 && sfntName.encoding_id == 0)
+        {
+            fallback.assign(reinterpret_cast<const char*>(sfntName.string),
+                            sfntName.string_len);
+        }
+    }
+
+    return fallback;
+}
+
+
 bool FreeTypeFontProvider::getNamedInstances(FT_Face face, const System::Path& path,
                                              long faceIndex, const std::string& family)
 {
@@ -420,16 +457,10 @@ bool FreeTypeFontProvider::getNamedInstances(FT_Face face, const System::Path& p
         return false;
 
     bool added = false;
+    std::set<int> coveredWeights;
 
     for(FT_UInt ni = 1; ni <= mmVar->num_namedstyles; ++ni)
     {
-        long instanceFaceIndex = faceIndex | (static_cast<long>(ni) << 16);
-
-        FT_Face instFace = nullptr;
-        FT_Error err = FT_New_Face(_ft, path.toLocal().c_str(), instanceFaceIndex, &instFace);
-        if(err != 0)
-            continue;
-
         const FT_Fixed* coords = mmVar->namedstyle[ni - 1].coords;
 
         FontFace::Weight weight = FontFace::Weight::Normal;
@@ -445,28 +476,24 @@ bool FreeTypeFontProvider::getNamedInstances(FT_Face face, const System::Path& p
 
         FontFace::Slant slant = fontSlantFromAxes(mmVar, coords);
 
-        std::string instFamily = instFace->family_name ? instFace->family_name : family;
-        std::string instStyle = instFace->style_name ? instFace->style_name : std::string();
+        std::string instStyle;
+        FT_UInt strid = mmVar->namedstyle[ni - 1].strid;
+        if(strid != 0 && strid != 0xFFFF)
+            instStyle = findSfntName(face, strid);
 
-        FT_Done_Face(instFace);
-
-        if(instFamily.empty())
-            continue;
-
-        _faces.push_back(FaceEntry(FontFace(instFamily, weight, slant, stretch, instStyle),
+        _faces.push_back(FaceEntry(FontFace(family, weight, slant, stretch, instStyle),
                                    path, faceIndex, ni));
         _faceEntries.insert(&(_faces.back()));
         added = true;
+        coveredWeights.insert(static_cast<int>(weight));
 
-        PT_LOG_INFO("loaded variable instance: " << instFamily << ' ' << instStyle);
+        PT_LOG_INFO("loaded variable instance: " << family << ' ' << instStyle);
     }
 
-    // generate synthetic instances if no named instances cover standard weights
-    if( ! added)
-    {
-        FontFace::Slant defaultSlant = fontSlantFromAxes(mmVar, mmVar->namedstyle[0].coords);
-        added = getSyntheticInstances(mmVar, path, faceIndex, family, defaultSlant);
-    }
+    // fill in missing standard weights with synthetic instances
+    FontFace::Slant defaultSlant = fontSlantFromStyleFlags(face->style_flags);
+    if(getSyntheticInstances(mmVar, path, faceIndex, family, defaultSlant, coveredWeights))
+        added = true;
 
     FT_Done_MM_Var(_ft, mmVar);
     return added;
@@ -475,7 +502,8 @@ bool FreeTypeFontProvider::getNamedInstances(FT_Face face, const System::Path& p
 
 bool FreeTypeFontProvider::getSyntheticInstances(FT_MM_Var* mmVar, const System::Path& path,
                                                  long faceIndex, const std::string& family,
-                                                 FontFace::Slant defaultSlant)
+                                                 FontFace::Slant defaultSlant,
+                                                 const std::set<int>& coveredWeights)
 {
     FT_UInt wghtAxis = mmVar->num_axis; // invalid sentinel
     FT_Fixed wghtMin = 0;
@@ -520,6 +548,9 @@ bool FreeTypeFontProvider::getSyntheticInstances(FT_MM_Var* mmVar, const System:
         if(wghtValue < wghtMin || wghtValue > wghtMax)
             continue;
 
+        if(coveredWeights.count(w))
+            continue;
+
         std::vector<FT_Fixed> coords = defaultCoords;
         coords[wghtAxis] = wghtValue;
 
@@ -541,26 +572,27 @@ bool FreeTypeFontProvider::openFontFile(const System::Path& path)
 {
     const std::string localPath = path.toLocal();
 
-    FT_Face probe = 0;
-    FT_Error err = FT_New_Face(_ft, localPath.c_str(), 0, &probe);
+    FT_Face face = 0;
+    FT_Error err = FT_New_Face(_ft, localPath.c_str(), 0, &face);
     if(err != 0)
     {
         PT_LOG_WARN("font error: " << localPath << ' ' << err);
         return false;
     }
 
-    long faceCount = probe->num_faces;
-    FT_Done_Face(probe);
+    long faceCount = face->num_faces;
 
     bool added = false;
     for(long faceIndex = 0; faceIndex < faceCount; ++faceIndex)
     {
-        FT_Face face = 0;
-        err = FT_New_Face(_ft, localPath.c_str(), faceIndex, &face);
-        if(err != 0)
+        if(faceIndex > 0)
         {
-            PT_LOG_WARN("font error: " << localPath << ' ' << err);
-            continue;
+            err = FT_New_Face(_ft, localPath.c_str(), faceIndex, &face);
+            if(err != 0)
+            {
+                PT_LOG_WARN("font error: " << localPath << ' ' << err);
+                continue;
+            }
         }
 
         if((face->face_flags & FT_FACE_FLAG_SCALABLE) == 0)
@@ -575,13 +607,14 @@ bool FreeTypeFontProvider::openFontFile(const System::Path& path)
         if((face->face_flags & FT_FACE_FLAG_MULTIPLE_MASTERS) != 0 && ! family.empty())
         {
             if(getNamedInstances(face, path, faceIndex, family))
+            {
                 added = true;
-
-            FT_Done_Face(face);
-            continue;
+                FT_Done_Face(face);
+                continue;
+            }
         }
 
-        // static font
+        // static font or variable font fallback
         std::string style = face->style_name ? face->style_name : std::string();
         FontFace::Weight weight = fontWeightFromStyleFlags(face->style_flags);
         FontFace::Slant slant = fontSlantFromStyleFlags(face->style_flags);
