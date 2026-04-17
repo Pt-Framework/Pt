@@ -28,6 +28,7 @@
 
 #include <Pt/Gfx/PngWriter.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Span.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/IOError.h>
 
@@ -118,8 +119,9 @@ class PngWriterImpl
                 png_set_write_fn(_pngWrite, this, &onPngWrite, &onPngFlush);
 
                 png_set_IHDR(_pngWrite, _pngInfo, 
-                             image.width(), image.height(), 8, 
-                             PNG_COLOR_TYPE_RGB, 
+                             static_cast<png_uint_32>(image.width()),
+                             static_cast<png_uint_32>(image.height()), 8, 
+                             PNG_COLOR_TYPE_RGBA, 
                              PNG_INTERLACE_NONE, 
                              PNG_COMPRESSION_TYPE_DEFAULT, 
                              PNG_FILTER_TYPE_DEFAULT);
@@ -137,27 +139,34 @@ class PngWriterImpl
                 ! _image || _row >= _image->height() )
                 return true;
 
-            //TODO: use ImageFormat API to convert to required output format
-            if( _image->format() != ImageFormat::argb32() )
-                throw IOError("invalid image format");
+            Pt::ssize_t w = _image->width();
+            _rowBuffer.resize( 4 * w );
 
-            // allocate memory for one row (3 bytes per pixel - RGB)
-            _rowBuffer.resize( 3 * _image->width() );
+            const std::size_t ChunkSize = 64;
+            Color colors[ChunkSize];
 
-            // convert row from ARGB32 to RGB24
-            std::size_t imageWidth = _image->pixelStride() * _image->width();
-            const Pt::uint8_t* from = _image->data() + _row * imageWidth;
+            ConstSpan<ImageFormat> cs(*_image, 0, _row, w);
             Pt::uint8_t* to = &_rowBuffer[0];
-            
-            for(int x = 0; x < _image->width(); ++x)
-            {
-                *to++ = from[2];
-                *to++ = from[1];
-                *to++ = from[0];
+            std::size_t remaining = static_cast<std::size_t>(w);
 
-                from += _image->pixelStride();
+            while(remaining > 0)
+            {
+                std::size_t n = remaining < ChunkSize ? remaining : ChunkSize;
+
+                cs.front().getColors(colors, n);
+
+                for(std::size_t i = 0; i < n; ++i)
+                {
+                    *to++ = colors[i].red();
+                    *to++ = colors[i].green();
+                    *to++ = colors[i].blue();
+                    *to++ = colors[i].alpha();
+                }
+
+                cs.advance(n);
+                remaining -= n;
             }
-            
+
             png_write_row(_pngWrite, &_rowBuffer[0]);
             ++_row;
 
@@ -165,7 +174,7 @@ class PngWriterImpl
                 return false;
 
             png_write_end(_pngWrite, _pngInfo);
-            _image  = 0;
+            _image = 0;
             _row = 0;
             return true;
         }
@@ -229,7 +238,7 @@ class PngWriterImpl
         png_structp           _pngWrite;
         png_infop             _pngInfo;
         const Image*          _image;
-        std::size_t           _row;
+        Pt::ssize_t           _row;
         std::vector<png_byte> _rowBuffer;
 };
 
