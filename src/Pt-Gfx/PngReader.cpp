@@ -299,7 +299,6 @@ class PngReaderImpl
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
 
-            //ImageSpan imageRow(*_image, 0, row, width);
             std::size_t n = 0;
 
             if( bitdepth == 8 )
