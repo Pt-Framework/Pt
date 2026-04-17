@@ -3,6 +3,7 @@ build/
 tmp/
 deploy/
 Jamrules*
+jam*.bin
 
 # Documentation (generated)
 doc/html/
