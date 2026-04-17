@@ -33,6 +33,7 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 #include FT_CACHE_H
+#include FT_MULTIPLE_MASTERS_H
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/FontFace.h>
@@ -60,15 +61,30 @@ class FreeTypeFontProvider : public FontProvider
         {
           FaceEntry(const FontFace& face,
                     const System::Path& source,
-                    long faceIndex)
+                    long faceIndex,
+                    long namedInstanceIndex = 0)
           : face(face)
           , source(source)
           , faceIndex(faceIndex)
+          , namedInstanceIndex(namedInstanceIndex)
+          { }
+
+          FaceEntry(const FontFace& face,
+                    const System::Path& source,
+                    long faceIndex,
+                    const std::vector<FT_Fixed>& coords)
+          : face(face)
+          , source(source)
+          , faceIndex(faceIndex)
+          , namedInstanceIndex(0)
+          , syntheticCoords(coords)
           { }
 
           FontFace face;
           System::Path source;
           long faceIndex;
+          long namedInstanceIndex;
+          std::vector<FT_Fixed> syntheticCoords;
         };
 
     public:
@@ -132,6 +148,20 @@ class FreeTypeFontProvider : public FontProvider
         std::string categoryDefaultFamily(Font::Category category) const;
 
         bool openFontFile(const System::Path& path);
+
+        bool getNamedInstances(FT_Face face, const System::Path& path,
+                               long faceIndex, const std::string& family);
+
+        bool getSyntheticInstances(FT_MM_Var* mmVar, const System::Path& path,
+                                   long faceIndex, const std::string& family,
+                                   FontFace::Slant defaultSlant);
+
+        static FontFace::Weight fontWeightFromAxis(FT_Fixed value);
+
+        static FontFace::Slant fontSlantFromAxes(FT_MM_Var* mmVar,
+                                                  const FT_Fixed* coords);
+
+        static FontFace::Stretch fontStretchFromAxis(FT_Fixed value);
 
         FT_Library     _ft;
         FTC_Manager    _manager;

@@ -254,7 +254,22 @@ FT_Error FreeTypeFontProvider::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     if( _faceEntries.find(entry) == _faceEntries.end() )
         return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
 
-    return FT_New_Face(_ft, entry->source.toLocal().c_str(), entry->faceIndex, face);
+    // named instance encoded in upper bits of face index
+    long faceIndex = entry->faceIndex;
+    if(entry->namedInstanceIndex > 0)
+        faceIndex |= (entry->namedInstanceIndex << 16);
+
+    FT_Error err = FT_New_Face(_ft, entry->source.toLocal().c_str(), faceIndex, face);
+
+    // synthetic instance with explicit axis coordinates
+    if(err == 0 && ! entry->syntheticCoords.empty())
+    {
+        FT_Set_Var_Design_Coordinates(*face,
+            static_cast<FT_UInt>(entry->syntheticCoords.size()),
+            const_cast<FT_Fixed*>(entry->syntheticCoords.data()));
+    }
+
+    return err;
 }
 
 
@@ -342,6 +357,186 @@ void FreeTypeFontProvider::onRemoveFont(const System::Path& path)
 }
 
 
+FontFace::Weight FreeTypeFontProvider::fontWeightFromAxis(FT_Fixed value)
+{
+    int wght = static_cast<int>(value >> 16);
+
+    if(wght <= 150)  return FontFace::Weight::Thin;
+    if(wght <= 250)  return FontFace::Weight::ExtraLight;
+    if(wght <= 350)  return FontFace::Weight::Light;
+    if(wght <= 450)  return FontFace::Weight::Normal;
+    if(wght <= 550)  return FontFace::Weight::Medium;
+    if(wght <= 650)  return FontFace::Weight::SemiBold;
+    if(wght <= 750)  return FontFace::Weight::Bold;
+    if(wght <= 850)  return FontFace::Weight::ExtraBold;
+
+    return FontFace::Weight::Black;
+}
+
+
+FontFace::Slant FreeTypeFontProvider::fontSlantFromAxes(FT_MM_Var* mmVar,
+                                                        const FT_Fixed* coords)
+{
+    for(FT_UInt a = 0; a < mmVar->num_axis; ++a)
+    {
+        if(mmVar->axis[a].tag == FT_MAKE_TAG('i','t','a','l'))
+        {
+            if((coords[a] >> 16) > 0)
+                return FontFace::Slant::Italic;
+        }
+        else if(mmVar->axis[a].tag == FT_MAKE_TAG('s','l','n','t'))
+        {
+            if((coords[a] >> 16) != 0)
+                return FontFace::Slant::Oblique;
+        }
+    }
+
+    return FontFace::Slant::Normal;
+}
+
+
+FontFace::Stretch FreeTypeFontProvider::fontStretchFromAxis(FT_Fixed value)
+{
+    int wdth = static_cast<int>(value >> 16);
+
+    if(wdth <= 50)  return FontFace::Stretch::UltraCondensed;
+    if(wdth <= 62)  return FontFace::Stretch::ExtraCondensed;
+    if(wdth <= 75)  return FontFace::Stretch::Condensed;
+    if(wdth <= 87)  return FontFace::Stretch::SemiCondensed;
+    if(wdth <= 100) return FontFace::Stretch::Normal;
+    if(wdth <= 112) return FontFace::Stretch::SemiExpanded;
+    if(wdth <= 125) return FontFace::Stretch::Expanded;
+    if(wdth <= 150) return FontFace::Stretch::ExtraExpanded;
+
+    return FontFace::Stretch::UltraExpanded;
+}
+
+
+bool FreeTypeFontProvider::getNamedInstances(FT_Face face, const System::Path& path,
+                                             long faceIndex, const std::string& family)
+{
+    FT_MM_Var* mmVar = nullptr;
+    if(FT_Get_MM_Var(face, &mmVar) != 0)
+        return false;
+
+    bool added = false;
+
+    for(FT_UInt ni = 1; ni <= mmVar->num_namedstyles; ++ni)
+    {
+        long instanceFaceIndex = faceIndex | (static_cast<long>(ni) << 16);
+
+        FT_Face instFace = nullptr;
+        FT_Error err = FT_New_Face(_ft, path.toLocal().c_str(), instanceFaceIndex, &instFace);
+        if(err != 0)
+            continue;
+
+        const FT_Fixed* coords = mmVar->namedstyle[ni - 1].coords;
+
+        FontFace::Weight weight = FontFace::Weight::Normal;
+        FontFace::Stretch stretch = FontFace::Stretch::Normal;
+
+        for(FT_UInt a = 0; a < mmVar->num_axis; ++a)
+        {
+            if(mmVar->axis[a].tag == FT_MAKE_TAG('w','g','h','t'))
+                weight = fontWeightFromAxis(coords[a]);
+            else if(mmVar->axis[a].tag == FT_MAKE_TAG('w','d','t','h'))
+                stretch = fontStretchFromAxis(coords[a]);
+        }
+
+        FontFace::Slant slant = fontSlantFromAxes(mmVar, coords);
+
+        std::string instFamily = instFace->family_name ? instFace->family_name : family;
+        std::string instStyle = instFace->style_name ? instFace->style_name : std::string();
+
+        FT_Done_Face(instFace);
+
+        if(instFamily.empty())
+            continue;
+
+        _faces.push_back(FaceEntry(FontFace(instFamily, weight, slant, stretch, instStyle),
+                                   path, faceIndex, ni));
+        _faceEntries.insert(&(_faces.back()));
+        added = true;
+
+        PT_LOG_INFO("loaded variable instance: " << instFamily << ' ' << instStyle);
+    }
+
+    // generate synthetic instances if no named instances cover standard weights
+    if( ! added)
+    {
+        FontFace::Slant defaultSlant = fontSlantFromAxes(mmVar, mmVar->namedstyle[0].coords);
+        added = getSyntheticInstances(mmVar, path, faceIndex, family, defaultSlant);
+    }
+
+    FT_Done_MM_Var(_ft, mmVar);
+    return added;
+}
+
+
+bool FreeTypeFontProvider::getSyntheticInstances(FT_MM_Var* mmVar, const System::Path& path,
+                                                 long faceIndex, const std::string& family,
+                                                 FontFace::Slant defaultSlant)
+{
+    FT_UInt wghtAxis = mmVar->num_axis; // invalid sentinel
+    FT_Fixed wghtMin = 0;
+    FT_Fixed wghtMax = 0;
+
+    for(FT_UInt a = 0; a < mmVar->num_axis; ++a)
+    {
+        if(mmVar->axis[a].tag == FT_MAKE_TAG('w','g','h','t'))
+        {
+            wghtAxis = a;
+            wghtMin = mmVar->axis[a].minimum;
+            wghtMax = mmVar->axis[a].maximum;
+            break;
+        }
+    }
+
+    if(wghtAxis >= mmVar->num_axis)
+        return false;
+
+    static const int standardWeights[] = {
+        static_cast<int>(Font::Weight::Thin),
+        static_cast<int>(Font::Weight::ExtraLight),
+        static_cast<int>(Font::Weight::Light),
+        static_cast<int>(Font::Weight::Normal),
+        static_cast<int>(Font::Weight::Medium),
+        static_cast<int>(Font::Weight::SemiBold),
+        static_cast<int>(Font::Weight::Bold),
+        static_cast<int>(Font::Weight::ExtraBold),
+        static_cast<int>(Font::Weight::Black)
+    };
+
+    // build default coordinates from axis defaults
+    std::vector<FT_Fixed> defaultCoords(mmVar->num_axis);
+    for(FT_UInt a = 0; a < mmVar->num_axis; ++a)
+        defaultCoords[a] = mmVar->axis[a].def;
+
+    bool added = false;
+
+    for(int w : standardWeights)
+    {
+        FT_Fixed wghtValue = static_cast<FT_Fixed>(w) << 16;
+        if(wghtValue < wghtMin || wghtValue > wghtMax)
+            continue;
+
+        std::vector<FT_Fixed> coords = defaultCoords;
+        coords[wghtAxis] = wghtValue;
+
+        FontFace::Weight weight = fontWeightFromAxis(wghtValue);
+
+        _faces.push_back(FaceEntry(FontFace(family, weight, defaultSlant, FontFace::Stretch::Normal),
+                                   path, faceIndex, coords));
+        _faceEntries.insert(&(_faces.back()));
+        added = true;
+
+        PT_LOG_INFO("loaded synthetic instance: " << family << " weight=" << w);
+    }
+
+    return added;
+}
+
+
 bool FreeTypeFontProvider::openFontFile(const System::Path& path)
 {
     const std::string localPath = path.toLocal();
@@ -375,6 +570,18 @@ bool FreeTypeFontProvider::openFontFile(const System::Path& path)
         }
 
         std::string family = face->family_name ? face->family_name : std::string();
+
+        // variable font with multiple masters
+        if((face->face_flags & FT_FACE_FLAG_MULTIPLE_MASTERS) != 0 && ! family.empty())
+        {
+            if(getNamedInstances(face, path, faceIndex, family))
+                added = true;
+
+            FT_Done_Face(face);
+            continue;
+        }
+
+        // static font
         std::string style = face->style_name ? face->style_name : std::string();
         FontFace::Weight weight = fontWeightFromStyleFlags(face->style_flags);
         FontFace::Slant slant = fontSlantFromStyleFlags(face->style_flags);
