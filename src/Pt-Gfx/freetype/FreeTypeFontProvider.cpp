@@ -267,39 +267,15 @@ const FreeTypeFontProvider::FaceEntry* FreeTypeFontProvider::findFaceEntry(const
     if(family.empty())
         return 0;
 
-    if( ! styleName.empty() )
-    {
-        const FaceEntry* best = 0;
-        int bestScore = 0;
-
-        for(std::list<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
-        {
-            if(it->face.family() != family)
-                continue;
-
-            if(it->face.styleName() != styleName)
-                continue;
-
-            const int score = fontMatchScore(weight, slant, stretch, it->face);
-            if(!best || score < bestScore)
-            {
-                best = &*it;
-                bestScore = score;
-            }
-        }
-
-        if(best)
-            return best;
-
-        return 0;
-    }
-
     const FaceEntry* best = 0;
     int bestScore = 0;
 
     for(std::list<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
     {
         if(it->face.family() != family)
+            continue;
+
+        if( ! styleName.empty() && it->face.styleName() != styleName)
             continue;
 
         const int score = fontMatchScore(weight, slant, stretch, it->face);
