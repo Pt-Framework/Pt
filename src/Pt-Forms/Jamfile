@@ -63,7 +63,9 @@ SharedLibrary Pt-Forms : Application.cpp
                          MenuBaseItem.cpp
                          MenuMenuItem.cpp
                          MenuSubItem.cpp
+                         PaintContext.cpp
                          Painter.cpp
+                         PaintSurface.cpp
                          Panel.cpp
                          Pixmap.cpp
                          PlatinumStyle.cpp

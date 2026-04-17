@@ -149,6 +149,18 @@ void PainterBase::finish()
 }
 
 
+const Paint& PainterBase::paint() const
+{
+    return _paint;
+}
+
+
+Canvas* PainterBase::canvas() const
+{
+    return _canvas;
+}
+
+
 void PainterBase::onDetachSurface(PaintSurface& surface)
 {
     if(_surface)

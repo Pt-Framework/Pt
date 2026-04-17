@@ -283,25 +283,13 @@ class PT_GFX_API PainterBase : private NonCopyable
         PaintSurface*        _surface;
         PaintContext*        _context;
         Canvas*              _canvas;
-        Scaling              _scaling;
         Paint                _paint;
+        Scaling              _scaling;
         Transform            _transform;
         RectF                _clip;
         bool                 _hasClip;
         Path                 _path;
 };
-
-
-inline const Paint& PainterBase::paint() const
-{
-    return _paint;
-}
-
-
-inline Canvas* PainterBase::canvas() const
-{
-    return _canvas;
-}
 
 } // namespace
 

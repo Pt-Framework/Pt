@@ -61,33 +61,6 @@ class PT_FORMS_API PaintContext : public Gfx::PaintContext
         PaintSurface&  _surface;
 };
 
-
-inline PaintContext::PaintContext(PaintSurface& surface)
-: Gfx::PaintContext( surface )
-, _surface(surface)
-{
-}
-
-
-inline PaintContext::~PaintContext()
-{
-}
-
-
-inline PaintSurface& PaintContext::surface()
-{
-    return _surface;
-}
-
-
-inline void PaintContext::drawPixmap(const Gfx::PointF& to,
-                               const Pixmap& pixmap,
-                               const Gfx::Paint& paint,
-                               const Gfx::RectF* rect) const
-{
-    _surface.drawPixmap(to, pixmap, paint, rect);
-}
-
 } // namespace
 
 } // namespace
