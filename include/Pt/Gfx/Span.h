@@ -371,6 +371,29 @@ ConstSpan<typename T::Format,
     return ConstSpan<typename T::Format, typename T::Traits>(source, x, y, length);
 }
 
+
+template <typename T>
+Span<typename T::Format,
+     ImageTraitsF> spanF(T& source,
+                         Pt::ssize_t x,
+                         Pt::ssize_t y,
+                         std::size_t length)
+{
+    return Span<typename T::Format, ImageTraitsF>(source, x, y, length);
+}
+
+
+template <typename T>
+ConstSpan<typename T::Format,
+          ImageTraitsF> spanF(const T& source,
+                              Pt::ssize_t x,
+                              Pt::ssize_t y,
+                              std::size_t length)
+{
+    return ConstSpan<typename T::Format, ImageTraitsF>(source, x, y, length);
+}
+
+
 /** @brief Copies the pixels of a span to a pixel position.
 
     Copies from.length() pixels without bounds checking.

@@ -340,6 +340,54 @@ BasicConstLineView<FormatT,
     return BasicConstLineView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
+
+template <typename T>
+BasicLineView<typename T::Format,
+              ImageTraitsF> lineViewF(T& source)
+{
+    return BasicLineView<typename T::Format, ImageTraitsF>(source);
+}
+
+
+template <typename T>
+BasicConstLineView<typename T::Format,
+                   ImageTraitsF> lineViewF(const T& source)
+{
+    return BasicConstLineView<typename T::Format, ImageTraitsF>(source);
+}
+
+
+template <typename T>
+BasicLineView<typename T::Format,
+              ImageTraitsF> lineViewF(T& source, Int x, Int y, Int w, Int h)
+{
+    return BasicLineView<typename T::Format, ImageTraitsF>(source, x, y, w, h);
+}
+
+
+template <typename T>
+BasicConstLineView<typename T::Format,
+                   ImageTraitsF> lineViewF(const T& source, Int x, Int y, Int w, Int h)
+{
+    return BasicConstLineView<typename T::Format, ImageTraitsF>(source, x, y, w, h);
+}
+
+
+inline LineViewF lineViewF(Pt::uint8_t* data, Pt::ssize_t width,
+                           Pt::ssize_t height, Pt::ssize_t padding,
+                           const ImageFormat& format)
+{
+    return LineViewF(data, width, height, padding, format);
+}
+
+
+inline ConstLineViewF lineViewF(const Pt::uint8_t* data, Pt::ssize_t width,
+                                Pt::ssize_t height, Pt::ssize_t padding,
+                                const ImageFormat& format)
+{
+    return ConstLineViewF(data, width, height, padding, format);
+}
+
 } // namespace
 
 } // namespace

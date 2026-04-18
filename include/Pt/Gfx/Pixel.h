@@ -152,6 +152,22 @@ typename T::Traits::ConstPixel pixel(const T& source,
     return typename T::Traits::ConstPixel(source, x, y);
 }
 
+
+template <typename T>
+Pixel<ColorF> pixelF(T& source,
+                    Pt::ssize_t x, Pt::ssize_t y)
+{
+    return Pixel<ColorF>(source, x, y);
+}
+
+
+template <typename T>
+ConstPixel<ColorF> pixelF(const T& source,
+                         Pt::ssize_t x, Pt::ssize_t y)
+{
+    return ConstPixel<ColorF>(source, x, y);
+}
+
 } // namespace
 
 } // namespace

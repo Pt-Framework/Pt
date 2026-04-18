@@ -433,6 +433,54 @@ BasicConstPixelView<FormatT,
     return BasicConstPixelView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
+
+template <typename T>
+BasicPixelView<typename T::Format,
+               ImageTraitsF> pixelViewF(T& source)
+{
+    return BasicPixelView<typename T::Format, ImageTraitsF>(source);
+}
+
+
+template <typename T>
+BasicConstPixelView<typename T::Format,
+                    ImageTraitsF> pixelViewF(const T& source)
+{
+    return BasicConstPixelView<typename T::Format, ImageTraitsF>(source);
+}
+
+
+template <typename T>
+BasicPixelView<typename T::Format,
+               ImageTraitsF> pixelViewF(T& source, Int x, Int y, Int w, Int h)
+{
+    return BasicPixelView<typename T::Format, ImageTraitsF>(source, x, y, w, h);
+}
+
+
+template <typename T>
+BasicConstPixelView<typename T::Format,
+                    ImageTraitsF> pixelViewF(const T& source, Int x, Int y, Int w, Int h)
+{
+    return BasicConstPixelView<typename T::Format, ImageTraitsF>(source, x, y, w, h);
+}
+
+
+inline PixelViewF pixelViewF(Pt::uint8_t* data, Pt::ssize_t width,
+                              Pt::ssize_t height, Pt::ssize_t padding,
+                              const ImageFormat& format)
+{
+    return PixelViewF(data, width, height, padding, format);
+}
+
+
+inline ConstPixelViewF pixelViewF(const Pt::uint8_t* data, Pt::ssize_t width,
+                                   Pt::ssize_t height, Pt::ssize_t padding,
+                                   const ImageFormat& format)
+{
+    return ConstPixelViewF(data, width, height, padding, format);
+}
+
 } // namespace
 
 } // namespace

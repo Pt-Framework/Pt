@@ -191,6 +191,55 @@ BasicConstView<FormatT,
     return BasicConstView<FormatT, TraitsT>(data, width, height, padding, FormatT::get());
 }
 
+
+template <typename T>
+BasicView<typename T::Format,
+          ImageTraitsF> viewF(T& source)
+{
+    return BasicView<typename T::Format, ImageTraitsF>(source);
+}
+
+
+template <typename T>
+BasicConstView<typename T::Format,
+               ImageTraitsF> viewF(const T& source)
+{
+    return BasicConstView<typename T::Format, ImageTraitsF>(source);
+}
+
+
+template <typename T>
+BasicView<typename T::Format,
+          ImageTraitsF> viewF(T& source, Int x, Int y, Int w, Int h)
+{
+    return BasicView<typename T::Format, ImageTraitsF>(source, x, y, w, h);
+}
+
+
+template <typename T>
+BasicConstView<typename T::Format,
+               ImageTraitsF> viewF(const T& source, Int x, Int y, Int w, Int h)
+{
+    return BasicConstView<typename T::Format, ImageTraitsF>(source, x, y, w, h);
+}
+
+
+inline ImageViewF viewF(Pt::uint8_t* data, Pt::ssize_t width,
+                         Pt::ssize_t height, Pt::ssize_t padding,
+                         const ImageFormat& format)
+{
+    return ImageViewF(data, width, height, padding, format);
+}
+
+
+inline ConstImageViewF viewF(const Pt::uint8_t* data, Pt::ssize_t width,
+                              Pt::ssize_t height, Pt::ssize_t padding,
+                              const ImageFormat& format)
+{
+    return ConstImageViewF(data, width, height, padding, format);
+}
+
+
 /** @brief Copies the pixels of a view to a pixel position.
 
     Copies from.width() x from.height() pixels without bounds checking.
