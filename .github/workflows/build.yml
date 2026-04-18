@@ -27,5 +27,13 @@ jobs:
       - name: Build
         run: ./jam.sh -q -j4
 
+  MacOS-Debug:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Configure Debug
+        run: ./jam.sh configure -sCONFIG=debug --debug
 
+      - name: Build
+        run: ./jam.sh -q -j4
