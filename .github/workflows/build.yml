@@ -1,17 +1,23 @@
-name: CI Build
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   Windows-x64-Debug:
-    runs-on: windows-2022
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run jam.bat
+        run: .\jam.bat
 
-      - name: Configure Debug
-        run: .\jam.bat configure -sCONFIG=debug --debug
-
-      - name: Build
-        run: .\jam.bat -q -j4
+  Ubuntu-2024-Debug:
+    runs-on: ubuntu-2024
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run jam.sh
+        run: ./jam.sh
