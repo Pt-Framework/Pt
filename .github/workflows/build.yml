@@ -17,7 +17,7 @@ jobs:
         run: .\jam.bat -q -j4
       
   Ubuntu-2024-Debug:
-    runs-on: ubuntu-2024
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
