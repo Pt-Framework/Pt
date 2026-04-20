@@ -98,10 +98,13 @@ template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>::BasicImage(const BasicImage& image)
 : ViewBase(image.width(), image.height(), image.stride())
 , _format( TraitsT::clone(image.format()) )
-, _buffer(image._buffer)
 , _data(nullptr)
 {
-    _data = _buffer.empty() ? const_cast<Pt::uint8_t*>(image.data()) : _buffer.data();
+    if( image.data() )
+    {
+        _buffer.assign(image.data(), image.data() + image.size());
+        _data = _buffer.data();
+    }
 }
 
 
@@ -115,11 +118,19 @@ template <typename FormatT, typename TraitsT>
 inline BasicImage<FormatT, TraitsT>&
 BasicImage<FormatT, TraitsT>::operator=(const BasicImage& image)
 {
-    _buffer = image._buffer;
-
     _format = TraitsT::clone(image.format());
 
-    _data = _buffer.empty() ? const_cast<Pt::uint8_t*>(image.data()) : _buffer.data();
+    if( image.data() )
+    {
+        _buffer.assign(image.data(), image.data() + image.size());
+        _data = _buffer.data();
+    }
+    else
+    {
+        _buffer.clear();
+        _data = nullptr;
+    }
+
     this->setDimensions(image.width(), image.height(), image.stride());
     return *this;
 }

@@ -218,13 +218,13 @@ class PngWriterImpl
 
         static void onPngError(png_structp png, png_const_charp msg)
         {
-            std::cerr << msg << std::endl;
+            std::cerr << "png error: " << msg << std::endl;
             throw Pt::IOError("png failure");
         }
 
         static void onPngWarning(png_structp png, png_const_charp msg)
         {
-            std::clog << msg << std::endl;
+            std::clog << "png warn: " << msg << std::endl;
         }
 
     private:
