@@ -59,6 +59,8 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("AddPie",     *this, &PathTest::AddPie);
             registerMethod("AddChord",      *this, &PathTest::AddChord);
             registerMethod("AddArc",        *this, &PathTest::AddArc);
+            registerMethod("AddRoundedRect", *this, &PathTest::AddRoundedRect);
+            registerMethod("AddEllipse",    *this, &PathTest::AddEllipse);
         }
 
         void MoveTo()
@@ -728,6 +730,133 @@ class PathTest : public Pt::Unit::TestSuite
 
             ++it;
             PT_UNIT_ASSERT(it == path.end());
+        }
+
+        void AddRoundedRect()
+        {
+            Path path;
+            path.addRoundedRect(RectF(PointF(10.0, 20.0), SizeF(100.0, 50.0)), 5.0f);
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+
+            // moveTo + 4x(quadTo + lineTo) + lineTo + close
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 25.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 20.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 105.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 20.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 110.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 25.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 110.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 65.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 105.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 70.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 70.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
+            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 65.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 25.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::Close);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
+
+            // bounding rect must match the input rect
+            RectF r = path.boundingRect();
+            PT_UNIT_ASSERT_NEAR(r.left(),   10.0);
+            PT_UNIT_ASSERT_NEAR(r.top(),    20.0);
+            PT_UNIT_ASSERT_NEAR(r.right(),  110.0);
+            PT_UNIT_ASSERT_NEAR(r.bottom(), 70.0);
+        }
+
+        void AddEllipse()
+        {
+            Path path;
+            path.addEllipse(PointF(10.0, 20.0), SizeF(80.0, 40.0));
+
+            PT_UNIT_ASSERT(!path.isEmpty());
+
+            // moveTo + 2x cubicTo (first half-arc) + moveTo + 2x cubicTo (second half-arc)
+            // + lineTo (close back) + Close
+            Path::Iterator it = path.begin();
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            // left mid-point: (10, 20 + 20) = (10, 40)
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 40.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            // right mid-point: (10 + 80, 20 + 20) = (90, 40)
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 90.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 40.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 90.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 40.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            // back to left mid-point
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 40.0);
+
+            // skip close elements
+            bool foundClose = false;
+            ++it;
+            while(it != path.end())
+            {
+                if(it->type() == Path::Close)
+                {
+                    foundClose = true;
+                    break;
+                }
+                ++it;
+            }
+            PT_UNIT_ASSERT(foundClose);
+
+            // bounding rect must enclose the ellipse area
+            RectF r = path.boundingRect();
+            PT_UNIT_ASSERT(r.left()   <= 10.0);
+            PT_UNIT_ASSERT(r.top()    <= 20.0);
+            PT_UNIT_ASSERT(r.right()  >= 90.0);
+            PT_UNIT_ASSERT(r.bottom() >= 60.0);
         }
 
 };

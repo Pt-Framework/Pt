@@ -410,8 +410,7 @@ void BitmapCanvas::onDrawEllipse(const PointF& topLeft, const SizeF& size)
     if( _pen.style() == Gfx::Pen::Dash || _pen.style() == Gfx::Pen::Dot )
     {
         Path ellipsePath;
-        ellipsePath.moveTo(topLeft);
-        ellipsePath.addEllipse(size);
+        ellipsePath.addEllipse(topLeft, size);
         drawDashed(ellipsePath);
         return;
     }

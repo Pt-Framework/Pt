@@ -294,11 +294,9 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     painter.setBrush(Gfx::ColorF(65535, 65535, 0, 0));
 
     Pt::Gfx::Path pathW;
-    pathW.moveTo( Pt::Gfx::PointF(10, size().height() - 210) );
-    pathW.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+    pathW.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(10, size().height() - 210), Pt::Gfx::SizeF(100, 100)), 10);
 
-    pathW.moveTo( Pt::Gfx::PointF(40, size().height() - 180) );
-    pathW.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+    pathW.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(40, size().height() - 180), Pt::Gfx::SizeF(100, 100)), 10);
 
     painter.setPath(pathW);
     painter.fillPath();
@@ -559,11 +557,9 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.setBrush(Gfx::ColorF(65535, 0, 0));
 
     Pt::Gfx::Path path;
-    path.moveTo( Pt::Gfx::PointF(20, 20) );
-    path.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+    path.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(20, 20), Pt::Gfx::SizeF(100, 100)), 10);
     
-    path.moveTo( Pt::Gfx::PointF(50, 50) );
-    path.addRoundedRect(Pt::Gfx::SizeF(100, 100), 10);
+    path.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(100, 100)), 10);
 
     //imagePainter.fillPath(path);
     //imagePainter.drawPath(path);

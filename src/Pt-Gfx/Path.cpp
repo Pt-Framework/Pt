@@ -380,28 +380,29 @@ void Path::addRect(const RectF& rect)
 }
 
 
-void Path::addRoundedRect(const SizeF& size, float radius)
+void Path::addRoundedRect(const RectF& rect, float radius)
 {
     detach();
 
-    const PointF& pos = _pathData->currentPosition();
-    double x = pos.x();
-    double y = pos.y();
+    double x = rect.x();
+    double y = rect.y();
+    double w = rect.width();
+    double h = rect.height();
 
-    moveTo(Pt::Gfx::PointF(x, y +  radius));
+    moveTo(Pt::Gfx::PointF(x, y + radius));
     quadTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));
 
-    lineTo(Pt::Gfx::PointF(x +  size.width() - radius, y));
-    quadTo(Pt::Gfx::PointF(x + size.width(), y),
-                      Pt::Gfx::PointF(x + size.width(), y + radius));
+    lineTo(Pt::Gfx::PointF(x + w - radius, y));
+    quadTo(Pt::Gfx::PointF(x + w, y),
+                      Pt::Gfx::PointF(x + w, y + radius));
 
-    lineTo(Pt::Gfx::PointF(x +  size.width(), y + size.height() - radius));
-    quadTo(Pt::Gfx::PointF(x + size.width(), y+ size.height() ),
-                      Pt::Gfx::PointF(x + size.width() - radius, y + size.height()));
+    lineTo(Pt::Gfx::PointF(x + w, y + h - radius));
+    quadTo(Pt::Gfx::PointF(x + w, y + h),
+                      Pt::Gfx::PointF(x + w - radius, y + h));
 
-    lineTo(Pt::Gfx::PointF(x +  radius, y + size.height()));
-    quadTo(Pt::Gfx::PointF(x, y + size.height()),
-                      Pt::Gfx::PointF(x, y + size.height() - radius));
+    lineTo(Pt::Gfx::PointF(x + radius, y + h));
+    quadTo(Pt::Gfx::PointF(x, y + h),
+                      Pt::Gfx::PointF(x, y + h - radius));
 
     lineTo(Pt::Gfx::PointF(x, y + radius));
 
@@ -409,14 +410,12 @@ void Path::addRoundedRect(const SizeF& size, float radius)
 }
 
 
-void Path::addEllipse(const SizeF& size)
+void Path::addEllipse(const PointF& topLeft, const SizeF& size)
 {
     detach();
 
-    const PointF& pos = _pathData->currentPosition();
-
-    const Pt::Gfx::PointF p1(pos.x(), pos.y() +  size.height() / 2);
-    const Pt::Gfx::PointF p2(pos.x() + size.width(), pos.y() + size.height() / 2);
+    const Pt::Gfx::PointF p1(topLeft.x(), topLeft.y() + size.height() / 2);
+    const Pt::Gfx::PointF p2(topLeft.x() + size.width(), topLeft.y() + size.height() / 2);
 
     moveTo(p1);
     arcTo( p2, size.height()/2 );
