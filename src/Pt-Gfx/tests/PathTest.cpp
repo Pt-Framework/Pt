@@ -537,15 +537,15 @@ class PathTest : public Pt::Unit::TestSuite
                 PT_UNIT_ASSERT_NEAR(r.bottom(), 10.0);
             }
 
-            // arc: bounding box contains both endpoints and the arc apex (1,1)
+            // arc: bounding box contains the arc
             {
                 Path path;
                 path.moveTo(PointF(0.0, 0.0));
-                path.arcTo(PointF(2.0, 0.0), 1.0);
+                path.arcTo(PointF(-1.0, -1.0), SizeF(2.0, 2.0), 0.0, 90.0);
 
                 RectF r = path.boundingRect();
                 PT_UNIT_ASSERT(r.left()   <= 0.0);
-                PT_UNIT_ASSERT(r.right()  >= 2.0);
+                PT_UNIT_ASSERT(r.right()  >= 1.0);
                 PT_UNIT_ASSERT(r.top()    <= 0.0);
                 PT_UNIT_ASSERT(r.bottom() >= 1.0);
             }
@@ -553,31 +553,51 @@ class PathTest : public Pt::Unit::TestSuite
 
         void ArcTo()
         {
+            // arcTo on empty path: moveTo(start) + arc segments
             Path path;
-            path.moveTo(PointF(0.0, 0.0));
-            path.arcTo(PointF(2.0, 0.0), 1.0);
+            path.arcTo(PointF(-1.0, -1.0), SizeF(2.0, 2.0), 0.0, 90.0);
 
-             // moveTo + 2x cubicTo
-            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(3));
+            // moveTo(1,0) + cubicTo
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(2));
 
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
 
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            PT_UNIT_ASSERT_EQUAL(it->size(), std::size_t(3));
-            // curve 1 must end at the mid-arc-point (1, 1)
-            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 1.0);
+            PT_UNIT_ASSERT(std::fabs(it->point(2).x()) < 0.001);
             PT_UNIT_ASSERT_NEAR(it->point(2).y(), 1.0);
 
             ++it;
-            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            // curve 2 must end at the target point (2, 0)
-            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 2.0);
-            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 0.0);
-
-            ++it;
             PT_UNIT_ASSERT(it == path.end());
+
+            // arcTo on non-empty path: lineTo(start) + arc segments
+            Path path2;
+            path2.moveTo(PointF(5.0, 5.0));
+            path2.arcTo(PointF(-1.0, -1.0), SizeF(2.0, 2.0), 0.0, 90.0);
+
+            // moveTo(5,5) + lineTo(1,0) + cubicTo
+            PT_UNIT_ASSERT_EQUAL(path2.size(), std::size_t(3));
+
+            Path::Iterator it2 = path2.begin();
+            PT_UNIT_ASSERT(it2->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it2->point(0).x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(it2->point(0).y(), 5.0);
+
+            ++it2;
+            PT_UNIT_ASSERT(it2->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it2->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it2->point(0).y(), 0.0);
+
+            ++it2;
+            PT_UNIT_ASSERT(it2->type() == Path::CubicTo);
+            PT_UNIT_ASSERT(std::fabs(it2->point(2).x()) < 0.001);
+            PT_UNIT_ASSERT_NEAR(it2->point(2).y(), 1.0);
+
+            ++it2;
+            PT_UNIT_ASSERT(it2 == path2.end());
         }
 
         void AddRect()
@@ -627,33 +647,33 @@ class PathTest : public Pt::Unit::TestSuite
         void AddPie()
         {
           Path path;
-          path.moveTo(PointF(0.0, 0.0));
-          path.addPie(SizeF(100.0, 100.0), 0.0f, 90.0f);
+          path.addPie(PointF(0.0, 0.0), SizeF(100.0, 100.0), 0.0, 90.0);
 
           PT_UNIT_ASSERT(!path.isEmpty());
 
           Path::Iterator it = path.begin();
 
+          // arc starts at (100, 50) = cos(0)*50+50, sin(0)*50+50
           PT_UNIT_ASSERT(it != path.end());
           PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
-          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
-
-          ++it;
-          PT_UNIT_ASSERT(it != path.end());
-          PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 50.0);
-          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
-
-          ++it;
-          PT_UNIT_ASSERT(it != path.end());
-          PT_UNIT_ASSERT(it->type() == Path::LineTo);
           PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
           PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
 
+          // skip arc segments
+          ++it;
+          while(it != path.end() && it->type() == Path::CubicTo)
+              ++it;
+
+          // lineTo center (50, 50)
+          PT_UNIT_ASSERT(it != path.end());
+          PT_UNIT_ASSERT(it->type() == Path::LineTo);
+          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 50.0);
+          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 50.0);
+
+          // lineTo back to arc start + Close
           bool foundClose = false;
           ++it;
-          while( it != path.end( ))
+          while(it != path.end())
           {
               if (it->type() == Path::Close)
               {
@@ -671,19 +691,12 @@ class PathTest : public Pt::Unit::TestSuite
         void AddChord()
         {
           Path path;
-          path.moveTo(PointF(0.0, 0.0));
-          path.addChord(SizeF(100.0, 100.0), 0.0f, 90.0f);
+          path.addChord(PointF(0.0, 0.0), SizeF(100.0, 100.0), 0.0, 90.0);
 
           PT_UNIT_ASSERT(!path.isEmpty());
 
           Path::Iterator it = path.begin();
 
-          PT_UNIT_ASSERT(it != path.end());
-          PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-          PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
-          PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
-
-          ++it;
           PT_UNIT_ASSERT(it != path.end());
           PT_UNIT_ASSERT(it->type() == Path::MoveTo);
           PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
@@ -708,10 +721,8 @@ class PathTest : public Pt::Unit::TestSuite
 
         void AddArc()
         {
-            const double pi = 3.14159265358979323846;
-
             Path path;
-            path.addArc(PointF(0.0, 0.0), 1.0, 0.0, pi * 0.5, false);
+            path.addArc(PointF(-1.0, -1.0), SizeF(2.0, 2.0), 0.0, 90.0);
 
             // moveTo(1,0) + cubicTo
             PT_UNIT_ASSERT_EQUAL( path.size(), std::size_t(2) );
@@ -723,7 +734,7 @@ class PathTest : public Pt::Unit::TestSuite
 
             ++it;
 
-            // end point must be close to (cos(pi/2), sin(pi/2)) = (~0, 1)
+            // end point must be close to (cos(90°), sin(90°)) = (~0, 1)
             PT_UNIT_ASSERT(it->type() == Path::CubicTo);
             PT_UNIT_ASSERT(std::fabs(it->point(2).x()) < 0.001);
             PT_UNIT_ASSERT_NEAR(it->point(2).y(), 1.0);
@@ -739,52 +750,60 @@ class PathTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(!path.isEmpty());
 
-            // moveTo + 4x(quadTo + lineTo) + lineTo + close
+            // moveTo + 4x(lineTo + cubicTo) + close
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it != path.end());
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 10.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 25.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 20.0);
 
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
-            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 15.0);
-            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 20.0);
-
+            // top edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 105.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 20.0);
 
+            // top-right corner
             ++it;
-            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
-            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 110.0);
-            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 25.0);
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 110.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 25.0);
 
+            // right edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 110.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 65.0);
 
+            // bottom-right corner
             ++it;
-            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
-            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 105.0);
-            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 70.0);
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 105.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 70.0);
 
+            // bottom edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 15.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 70.0);
 
+            // bottom-left corner
             ++it;
-            PT_UNIT_ASSERT(it->type() == Path::QuadTo);
-            PT_UNIT_ASSERT_NEAR(it->point(1).x(), 10.0);
-            PT_UNIT_ASSERT_NEAR(it->point(1).y(), 65.0);
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 10.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 65.0);
 
+            // left edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 10.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 25.0);
+
+            // top-left corner
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 20.0);
 
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::Close);
@@ -807,49 +826,31 @@ class PathTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(!path.isEmpty());
 
-            // moveTo + 2x cubicTo (first half-arc) + moveTo + 2x cubicTo (second half-arc)
-            // + lineTo (close back) + Close
+            // center = (50, 40), rx = 40, ry = 20
+            // moveTo at rightmost point (90, 40) + 4 cubicTo + close
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it != path.end());
-            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            // left mid-point: (10, 20 + 20) = (10, 40)
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 10.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 40.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            // right mid-point: (10 + 80, 20 + 20) = (90, 40)
-            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 90.0);
-            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 40.0);
-
-            ++it;
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 90.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 40.0);
 
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            // back to left mid-point
-            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 10.0);
+            for (int i = 0; i < 4; ++i)
+            {
+                ++it;
+                PT_UNIT_ASSERT(it != path.end());
+                PT_UNIT_ASSERT(it->type() == Path::CubicTo);
+            }
+
+            // last segment ends back near start
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 90.0);
             PT_UNIT_ASSERT_NEAR(it->point(2).y(), 40.0);
 
-            // skip close elements
-            bool foundClose = false;
             ++it;
-            while(it != path.end())
-            {
-                if(it->type() == Path::Close)
-                {
-                    foundClose = true;
-                    break;
-                }
-                ++it;
-            }
-            PT_UNIT_ASSERT(foundClose);
+            PT_UNIT_ASSERT(it != path.end());
+            PT_UNIT_ASSERT(it->type() == Path::Close);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path.end());
 
             // bounding rect must enclose the ellipse area
             RectF r = path.boundingRect();

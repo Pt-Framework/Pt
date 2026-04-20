@@ -130,6 +130,42 @@ void cubicBezierToPoints(Pt::Gfx::Polygon& dst,
     cubicBezierSplit(dst, x1, y1, x2, y2, x3, y3, x4, y4, tolerance, 0);
 }
 
+
+void appendArc(Pt::Gfx::Path& path,
+               double cx, double cy,
+               double rx, double ry,
+               double radBegin, double radEnd)
+{
+    const double pi = 3.14159265358979323846;
+    const double sweep = radEnd - radBegin;
+
+    if (sweep == 0.0)
+        return;
+
+    const int segments = static_cast<int>(std::ceil(std::fabs(sweep) / (pi * 0.5)));
+    const double segAngle = sweep / segments;
+    const double k = (4.0 / 3.0) * std::tan(segAngle * 0.25);
+
+    double angle = radBegin;
+    for (int i = 0; i < segments; ++i)
+    {
+        const double cosA = std::cos(angle);
+        const double sinA = std::sin(angle);
+        const double cosB = std::cos(angle + segAngle);
+        const double sinB = std::sin(angle + segAngle);
+
+        const Pt::Gfx::PointF cp1(cx + rx * (cosA - k * sinA),
+                                   cy + ry * (sinA + k * cosA));
+        const Pt::Gfx::PointF cp2(cx + rx * (cosB + k * sinB),
+                                   cy + ry * (sinB - k * cosB));
+        const Pt::Gfx::PointF end(cx + rx * cosB,
+                                   cy + ry * sinB);
+
+        path.cubicTo(cp1, cp2, end);
+        angle += segAngle;
+    }
+}
+
 } // namespace
 
 namespace Pt {
@@ -272,71 +308,31 @@ void Path::cubicTo(const PointF& c1, const PointF& c2, const PointF& to)
 }
 
 
-void Path::arcTo(const PointF& p, double r)
+void Path::arcTo(const PointF& topLeft, const SizeF& size,
+                 double degBegin, double degEnd)
 {
     detach();
 
-    double x1 = _pathData->currentPosition().x();
-    double y1 = _pathData->currentPosition().y();
-    double x2 = p.x();
-    double y2 = p.y();
+    const double pi = 3.14159265358979323846;
+    const double toRad = pi / 180.0;
 
-    // Line equation : 0 = aX + By + c
-    // Normal        : n = ai + bj
-    const double a = y2 - y1;
-    const double b = x1 - x2;
-   //const double c = -(x1 * y2 - x2 * y1);
+    const double cx = topLeft.x() + size.width()  * 0.5;
+    const double cy = topLeft.y() + size.height() * 0.5;
+    const double rx = size.width()  * 0.5;
+    const double ry = size.height() * 0.5;
 
-    // Middle point
-    const double xm = (x1 + x2) * 0.5;
-    const double ym = (y1 + y2) * 0.5;
+    const double radBegin = degBegin * toRad;
+    const double radEnd   = degEnd   * toRad;
 
-    // Radius
-    const double ab = sqrt(a * a + b * b);
-    const double rx = ab * 0.5f;
-    const double ry = r;
+    const PointF startPt(cx + rx * std::cos(radBegin),
+                         cy + ry * std::sin(radBegin));
 
-    // Normal vector
-    const double iz = -1.0 / ab;
-    const double nx = a * iz;
-    const double ny = b * iz;
+    if( isEmpty() )
+        moveTo(startPt);
+    else
+        lineTo(startPt);
 
-    // Circumference vectors
-    const double nxrx = nx * rx;
-    const double nxry = nx * ry;
-    const double nyrx = ny * rx;
-    const double nyry = ny * ry;
-
-    // Optimal distance to the control points for circle approximation
-    // using N segments of cubic bezier:
-    //    dist = (4 / 3) * tan(pi / 2 / N)
-    // If N = 4, then:
-    //    dist = (4 / 3) * tan(pi / 2 / 4) = 0.0822479912358
-    const double od = 0.552284749831;
-
-    // Curve #1
-    const double c1x1 = x1;
-    const double c1y1 = y1;
-    const double c1x4 = xm   + nxrx;
-    const double c1y4 = ym   + nyry;
-    const double c1x2 = c1x1 + nxrx * od;
-    const double c1y2 = c1y1 + nyry * od;
-    const double c1x3 = c1x4 - nyrx * od;
-    const double c1y3 = c1y4 - nxry * od;
-
-    cubicTo( PointF(c1x2, c1y2), PointF(c1x3, c1y3), PointF(c1x4, c1y4) );
-
-    // Curve #2
-    const double c2x1 = xm   + nxrx;
-    const double c2y1 = ym   + nyry;
-    const double c2x4 = x2;
-    const double c2y4 = y2;
-    const double c2x2 = c2x1 + nyrx * od;
-    const double c2y2 = c2y1 - nxry * od;
-    const double c2x3 = c2x4 - nxrx * od;
-    const double c2y3 = c2y4 + nyry * od;
-
-    cubicTo( PointF(c2x2, c2y2), PointF(c2x3, c2y3), PointF(c2x4, c2y4) );
+    appendArc(*this, cx, cy, rx, ry, radBegin, radEnd);
 }
 
 
@@ -382,166 +378,66 @@ void Path::addRect(const RectF& rect)
 
 void Path::addRoundedRect(const RectF& rect, float radius)
 {
-    detach();
-
     double x = rect.x();
     double y = rect.y();
     double w = rect.width();
     double h = rect.height();
+    double d = 2.0 * radius;
 
-    moveTo(Pt::Gfx::PointF(x, y + radius));
-    quadTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));
-
-    lineTo(Pt::Gfx::PointF(x + w - radius, y));
-    quadTo(Pt::Gfx::PointF(x + w, y),
-                      Pt::Gfx::PointF(x + w, y + radius));
-
-    lineTo(Pt::Gfx::PointF(x + w, y + h - radius));
-    quadTo(Pt::Gfx::PointF(x + w, y + h),
-                      Pt::Gfx::PointF(x + w - radius, y + h));
-
-    lineTo(Pt::Gfx::PointF(x + radius, y + h));
-    quadTo(Pt::Gfx::PointF(x, y + h),
-                      Pt::Gfx::PointF(x, y + h - radius));
-
-    lineTo(Pt::Gfx::PointF(x, y + radius));
-
+    moveTo(PointF(x + radius, y));
+    arcTo(PointF(x + w - d, y), SizeF(d, d), 270.0, 360.0);
+    arcTo(PointF(x + w - d, y + h - d), SizeF(d, d), 0.0, 90.0);
+    arcTo(PointF(x, y + h - d), SizeF(d, d), 90.0, 180.0);
+    arcTo(PointF(x, y), SizeF(d, d), 180.0, 270.0);
     close();
 }
 
 
 void Path::addEllipse(const PointF& topLeft, const SizeF& size)
 {
-    detach();
-
-    const Pt::Gfx::PointF p1(topLeft.x(), topLeft.y() + size.height() / 2);
-    const Pt::Gfx::PointF p2(topLeft.x() + size.width(), topLeft.y() + size.height() / 2);
-
-    moveTo(p1);
-    arcTo( p2, size.height()/2 );
-
-    moveTo(p2);
-    arcTo( p1, size.height()/2 );
-
-    close();
+    addChord(topLeft, size, 0.0, 360.0);
 }
 
 
-void Path::addArc(const PointF& center, double radius,
-                  double startAngle, double endAngle,
-                  bool clockwise)
-{
-    detach();
-
-    const double pi = 3.14159265358979323846;
-
-    // Normalise sweep: CCW -> [0, 2pi), CW -> (-2pi, 0]
-    double sweep = endAngle - startAngle;
-    if(clockwise)
-    {
-        if (sweep > 0.0) sweep -= 2.0 * pi;
-    }
-    else
-    {
-        if (sweep < 0.0) sweep += 2.0 * pi;
-    }
-
-    // Arc start point
-    const PointF startPt(center.x() + radius * std::cos(startAngle),
-                         center.y() + radius * std::sin(startAngle));
-
-    // Implicit lineTo or moveTo to arc start
-    if (isEmpty())
-        moveTo(startPt);
-    else
-        lineTo(startPt);
-
-    if (sweep == 0.0)
-      return;
-
-    // Split into segments of at most pi/2 to keep bezier approximation error small
-    const int segments = static_cast<int>(std::ceil(std::fabs(sweep) / (pi * 0.5)));
-    const double segAngle = sweep / segments;
-
-    // k = (4/3) * tan(segAngle/4) - optimal control-point distance for a circular arc
-    const double k = (4.0 / 3.0) * std::tan(segAngle * 0.25);
-
-    double angle = startAngle;
-    for (int i = 0; i < segments; ++i)
-    {
-      const double cosA = std::cos(angle);
-      const double sinA = std::sin(angle);
-      const double cosB = std::cos(angle + segAngle);
-      const double sinB = std::sin(angle + segAngle);
-
-      const PointF cp1(center.x() + radius * (cosA - k * sinA),
-                       center.y() + radius * (sinA + k * cosA));
-      const PointF cp2(center.x() + radius * (cosB + k * sinB),
-                       center.y() + radius * (sinB - k * cosB));
-      const PointF end(center.x() + radius * cosB,
-                       center.y() + radius * sinB);
-
-      cubicTo(cp1, cp2, end);
-      angle += segAngle;
-    }
-}
-
-
-void Path::addPie(const SizeF& size, float degBegin, float degEnd)
+void Path::addArc(const PointF& topLeft, const SizeF& size,
+                  double degBegin, double degEnd)
 {
     detach();
 
     const double pi = 3.14159265358979323846;
     const double toRad = pi / 180.0;
 
-    const double ox = _pathData->currentPosition().x();
-    const double oy = _pathData->currentPosition().y();
-    const double cx = ox + size.width()  * 0.5;
-    const double cy = oy + size.height() * 0.5;
+    const double cx = topLeft.x() + size.width()  * 0.5;
+    const double cy = topLeft.y() + size.height() * 0.5;
     const double rx = size.width()  * 0.5;
     const double ry = size.height() * 0.5;
 
-    const double aBegin = degBegin * toRad;
-    const double aEnd   = degEnd   * toRad;
+    const double radBegin = degBegin * toRad;
+    const double radEnd   = degEnd   * toRad;
 
-    const double startX = cx + rx * std::cos(aBegin);
-    const double startY = cy + ry * std::sin(aBegin);
-    const double endX   = cx + rx * std::cos(aEnd);
-    const double endY   = cy + ry * std::sin(aEnd);
+    moveTo(PointF(cx + rx * std::cos(radBegin),
+                  cy + ry * std::sin(radBegin)));
 
-    // start at center, line to arc start, arc to arc end, close back to center
-    moveTo(PointF(cx, cy));
-    lineTo(PointF(startX, startY));
-    arcTo(PointF(endX, endY), ry);
+    appendArc(*this, cx, cy, rx, ry, radBegin, radEnd);
+}
+
+
+void Path::addPie(const PointF& topLeft, const SizeF& size,
+                  double degBegin, double degEnd)
+{
+    const double cx = topLeft.x() + size.width()  * 0.5;
+    const double cy = topLeft.y() + size.height() * 0.5;
+
+    addArc(topLeft, size, degBegin, degEnd);
+    lineTo(PointF(cx, cy));
     close();
 }
 
 
-void Path::addChord(const SizeF& size, float degBegin, float degEnd)
+void Path::addChord(const PointF& topLeft, const SizeF& size,
+                    double degBegin, double degEnd)
 {
-    detach();
-
-    const double pi = 3.14159265358979323846;
-    const double toRad = pi / 180.0;
-
-    const double ox = _pathData->currentPosition().x();
-    const double oy = _pathData->currentPosition().y();
-    const double cx = ox + size.width()  * 0.5;
-    const double cy = oy + size.height() * 0.5;
-    const double rx = size.width()  * 0.5;
-    const double ry = size.height() * 0.5;
-
-    const double aBegin = degBegin * toRad;
-    const double aEnd   = degEnd   * toRad;
-
-    const double startX = cx + rx * std::cos(aBegin);
-    const double startY = cy + ry * std::sin(aBegin);
-    const double endX   = cx + rx * std::cos(aEnd);
-    const double endY   = cy + ry * std::sin(aEnd);
-
-    // arc from start to end, then close (straight line back to arc start)
-    moveTo(PointF(startX, startY));
-    arcTo(PointF(endX, endY), ry);
+    addArc(topLeft, size, degBegin, degEnd);
     close();
 }
 

@@ -97,7 +97,8 @@ class PT_GFX_API Path
 
         void cubicTo(const PointF &cp1, const PointF &cp2, const PointF& to);
 
-        void arcTo(const PointF& p, double r);
+        void arcTo(const PointF& topLeft, const SizeF& size,
+                   double degBegin, double degEnd);
 
         /** @brief closes the current subpath.
         */
@@ -115,18 +116,16 @@ class PT_GFX_API Path
 
         void addRoundedRect(const RectF& rect, float radius);
 
-        /** TODO: Compare with HTML5 Canvas Path2D and CGPath. 
-                  What is missing, what is different, what can be removed?
-        */
         void addEllipse(const PointF& topLeft, const SizeF& size);
 
-        void addArc(const PointF& center, double radius,
-                    double startAngle, double endAngle,
-                    bool clockwise);
+        void addArc(const PointF& topLeft, const SizeF& size,
+                    double degBegin, double degEnd);
 
-        void addPie(const SizeF& size, float degBegin, float degEnd);
+        void addPie(const PointF& topLeft, const SizeF& size,
+                    double degBegin, double degEnd);
 
-        void addChord(const SizeF& size,  float degBegin, float degEnd);
+        void addChord(const PointF& topLeft, const SizeF& size,
+                      double degBegin, double degEnd);
 
         void transform(const Transform& transform);
 
