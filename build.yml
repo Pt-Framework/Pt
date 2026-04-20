@@ -1,8 +1,0 @@
-jobs:
-  ubuntu-2024:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Run jam script
-        run: ./jam.sh
