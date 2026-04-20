@@ -5,13 +5,35 @@ on:
     branches: [ main ]
 
 jobs:
-  Windows-x64-Debug:
+  Windows-2022-Debug:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Configure Debug
         run: .\jam.bat configure -sCONFIG=debug --debug
 
       - name: Build
         run: .\jam.bat -q -j4
+      
+  Ubuntu-2024-Debug:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure Debug
+        run: ./jam.sh configure -sCONFIG=debug --debug
+
+      - name: Build
+        run: ./jam.sh -q -j4
+
+  MacOS-14-Debug:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure Debug
+        run: ./jam.sh configure -sCONFIG=debug --debug
+
+      - name: Build
+        run: ./jam.sh -q -j4
