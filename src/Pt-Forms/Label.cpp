@@ -297,23 +297,26 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     {
         Adjustment a = adjustment();
 
-        TextBlock block;
-        block.setAdjustment(a);
+        if( ! _text.empty() )
+        {
+            TextBlock block;
+            block.setAdjustment(a);
 
-        // TODO: set max width if text wrap is enabled
-        // NOTE: abbreviate text if text wrap is off and width is too small
-        Gfx::Painter _painter( surface() );
-        _painter.setFont(_font);
+            // TODO: set max width if text wrap is enabled
+            // NOTE: abbreviate text if text wrap is off and width is too small
+            Gfx::Painter _painter( surface() );
+            _painter.setFont(_font);
 
-        block.setMaxWidth(policy.size().width());
-        block.setLineSpacing(scaling.align(_font.size() / 3));
-        block.layout(_painter, _text);
+            block.setMaxWidth(policy.size().width());
+            block.setLineSpacing(scaling.align(_font.size() / 3));
+            block.layout(_painter, _text);
 
-        w = block.size().width() + scaling.toLogical(0.5);
-        h = block.size().height() + scaling.toLogical(0.5);
+            w = block.size().width() + scaling.toLogical(0.5);
+            h = block.size().height() + scaling.toLogical(0.5);
 
-        w = scaling.align(w);
-        h = scaling.align(h);
+            w = scaling.align(w);
+            h = scaling.align(h);
+        }
     }
     else
     {       
@@ -332,6 +335,9 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 
 void Label::layoutText()
 {
+    if( _text.empty() )
+        return;
+
     Adjustment a = adjustment();
 
     Gfx::Painter _painter( surface() );
