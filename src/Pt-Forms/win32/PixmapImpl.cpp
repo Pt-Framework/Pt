@@ -40,6 +40,7 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
+#include <Pt/Gfx/Argb32.h>
 
 #include <cassert>
 
@@ -221,6 +222,10 @@ Gfx::Image PixmapImpl::toImage() const
 
     int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
                         &bitmapInfo, DIB_RGB_COLORS);
+
+    Gfx::Argb32PixelView pixels(data, _width, _height);
+    for( Gfx::Argb32PixelView::Pixel& p : pixels )
+        p.setAlpha(255);
 
     return image;
 }

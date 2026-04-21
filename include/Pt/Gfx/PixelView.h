@@ -276,7 +276,7 @@ class BasicPixelView
         explicit BasicPixelView( const Format& format = FormatT::get() );
 
         BasicPixelView(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height,
-                       Pt::ssize_t padding, const Format& format = FormatT::get());
+                       Pt::ssize_t padding = 0, const Format& format = FormatT::get());
 
         template <typename T>
         explicit BasicPixelView(T& source);
