@@ -166,6 +166,46 @@
             "presentation": {
                 "reveal": "always", "focus": false, "panel": "shared"
             }
+        },
+        {
+            "label": "Clean All and Reset",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": [
+                "reset"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always", "focus": false, "panel": "shared"
+            }
+        },
+        {
+            "label": "Dist Clean All",
+            "type": "shell",
+            "command": "./jam.sh",
+            "windows": {
+                "command": ".\\jam.bat"
+            },
+            "args": [
+                "dist-clean"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always", "focus": false, "panel": "shared"
+            }
         }
     ]
 }
