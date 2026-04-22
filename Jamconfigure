@@ -460,6 +460,24 @@ if ! $(WITH_ATOMICS)
 }
 
 #############################################################################
+# Precompiled dependencies directories
+#############################################################################
+
+if $(VCPKG_ROOT)
+{
+    VCPKG_INCLUDES = [ FDirName $(VCPKG_ROOT) include ] ;
+
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
+    {
+        VCPKG_LIBDIR = [ FDirName $(VCPKG_ROOT) debug lib ] ;
+    }
+    else
+    {
+        VCPKG_LIBDIR = [ FDirName $(VCPKG_ROOT) lib ] ;
+    }
+}
+
+#############################################################################
 # zlib compression library
 #############################################################################
 
@@ -469,9 +487,40 @@ if --with-zlib in $(ARGV)
     WITH_ZLIB = yes ;
 }
 
+ZLIB = z ;
+
+if ! $(PRELIB)
+{
+    ZLIB = zlib ;
+}
+
+if ! $(WITH_ZLIB)
+{
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
+    {
+        ZLIB_LINKLIBS ?= $(ZLIB)d.lib ;
+    }
+    else
+    {
+        ZLIB_LINKLIBS ?= $(ZLIB).lib ;
+    }
+
+    ZLIB_INCLUDES ?= $(VCPKG_INCLUDES) ;
+    ZLIB_C++FLAGS ?= [ FIncludes $(ZLIB_INCLUDES) ] ;
+    ZLIB_LINKFLAGS ?= /LIBPATH:$(VCPKG_LIBDIR) ;
+
+    WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
+                                "int main() {"
+                                "z_stream zstream;"
+                                "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
+                                : $(ZLIB_C++FLAGS)
+                                : $(ZLIB_LINKLIBS) $(ZLIB_LINKFLAGS) ] ;
+}
+
 if ! $(WITH_ZLIB)
 {
     ZLIB_LINKLIBS ?= -lz ;
+    ZLIB_LINKFLAGS = "" ;
 
     WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
                                 "int main() {"
@@ -485,12 +534,17 @@ if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
 {
     WITH_BUILTIN_ZLIB = yes ;
     WITH_ZLIB = yes ;
+
     ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
     ZLIB_LINKLIBS = "" ;
+    ZLIB_LINKFLAGS = "" ;
 }
 
 Configure WITH_BUILTIN_ZLIB ;
 EchoOption --with-zlib : "Builtin zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+
+EchoOption ZLIB : "ZLib library name" ;
+Configure ZLIB ;
 
 Configure ZLIB_INCLUDES ;
 EchoOption ZLIB_INCLUDES : "ZLib includes" ;
@@ -498,14 +552,8 @@ EchoOption ZLIB_INCLUDES : "ZLib includes" ;
 Configure ZLIB_LINKLIBS ;
 EchoOption ZLIB_LINKLIBS : "ZLib libs" ;
 
-ZLIB = z ;
-
-if ! $(PRELIB)
-{
-    ZLIB = zlib ;
-}
-
-Configure ZLIB ;
+EchoOption ZLIB_LINKFLAGS : "ZLib link flags" ;
+Configure ZLIB_LINKFLAGS ;
 
 #############################################################################
 # PNG support with libpng
