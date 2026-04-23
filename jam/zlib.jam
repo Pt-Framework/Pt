@@ -1,0 +1,79 @@
+if ! $(JAMBASE_ZLIB_JAM_INCLUDED) {
+JAMBASE_ZLIB_JAM_INCLUDED = true ;
+
+rule CheckZLib
+{
+    local CHECK_INCLUDES  = $(1) ;
+    local CHECK_LIBDIR    = $(2) ;
+    local CHECK_LINKLIBS  = $(3) ;
+    local CHECK_LINKFLAGS = $(4) ;
+
+    local CHECK_C++FLAGS = [ FIncludes $(CHECK_INCLUDES) ] ;
+
+    local CODE = "#include <zlib.h>"
+                 "int main() {"
+                 "z_stream zstream;"
+                 "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }" ;
+
+    local result ;
+
+    # MSVC-style: .lib + /LIBPATH:
+    if ! $(result)
+    {
+        local MSVC_LIBS = $(CHECK_LINKLIBS) ;
+        if ! $(MSVC_LIBS)
+        {
+            if $(WITH_DEBUG) && ! $(WITH_OPTIM)
+            {
+                MSVC_LIBS = zlibd.lib ;
+            }
+            else
+            {
+                MSVC_LIBS = zlib.lib ;
+            }
+        }
+
+        local MSVC_LIBPATH = /LIBPATH:$(CHECK_LIBDIR) ;
+
+        result = [ CheckBuildC++ $(CODE)
+                                 : $(CHECK_C++FLAGS)
+                                 : $(MSVC_LIBS) $(MSVC_LIBPATH) $(CHECK_LINKFLAGS) ] ;
+        if $(result)
+        {
+            CHECK_LINKLIBS = $(MSVC_LIBS) ;
+            CHECK_LINKFLAGS = $(MSVC_LIBPATH) $(CHECK_LINKFLAGS) ;
+        }
+    }
+
+    # Unix-style: -lz + -L
+    if ! $(result)
+    {
+        local UNIX_LIBS = $(CHECK_LINKLIBS) ;
+        if ! $(UNIX_LIBS) 
+        { 
+            UNIX_LIBS = -lz ; 
+        }
+
+        local UNIX_LIBPATH = -L$(CHECK_LIBDIR) ;
+
+        result = [ CheckBuildC++ $(CODE)
+                                 : $(CHECK_C++FLAGS)
+                                 : $(UNIX_LIBS) $(UNIX_LIBPATH) $(CHECK_LINKFLAGS) ] ;
+        if $(result)
+        {
+            CHECK_LINKLIBS = $(UNIX_LIBS) ;
+            CHECK_LINKFLAGS = $(UNIX_LIBPATH) $(CHECK_LINKFLAGS) ;
+        }
+    }
+
+    if $(result)
+    {
+        ZLIB_INCLUDES  = $(CHECK_INCLUDES) ;
+        ZLIB_LINKLIBS  = $(CHECK_LINKLIBS) ;
+        ZLIB_LINKFLAGS = $(CHECK_LINKFLAGS) ;
+    }
+
+    return $(result) ;
+}
+
+} # JAMBASE_ZLIB_JAM_INCLUDED

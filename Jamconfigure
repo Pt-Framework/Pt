@@ -481,53 +481,26 @@ if $(VCPKG_ROOT)
 # zlib compression library
 #############################################################################
 
-if --with-zlib in $(ARGV)
+Load zlib.jam ;
+
+if --with-included-zlib in $(ARGV)
 {
     WITH_BUILTIN_ZLIB = yes ;
     WITH_ZLIB = yes ;
 }
 
-ZLIB = z ;
-
-if ! $(PRELIB)
-{
-    ZLIB = zlib ;
-}
-
 if ! $(WITH_ZLIB)
 {
-    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
+    if $(VCPKG_ROOT)
     {
-        ZLIB_LINKLIBS ?= $(ZLIB)d.lib ;
-    }
-    else
-    {
-        ZLIB_LINKLIBS ?= $(ZLIB).lib ;
+        ZLIB_INCLUDES ?= $(VCPKG_INCLUDES) ;
+        ZLIB_LIBDIR   ?= $(VCPKG_LIBDIR) ;
     }
 
-    ZLIB_INCLUDES ?= $(VCPKG_INCLUDES) ;
-    ZLIB_C++FLAGS ?= [ FIncludes $(ZLIB_INCLUDES) ] ;
-    ZLIB_LINKFLAGS ?= /LIBPATH:$(VCPKG_LIBDIR) ;
-
-    WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
-                                "int main() {"
-                                "z_stream zstream;"
-                                "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
-                                : $(ZLIB_C++FLAGS)
-                                : $(ZLIB_LINKLIBS) $(ZLIB_LINKFLAGS) ] ;
-}
-
-if ! $(WITH_ZLIB)
-{
-    ZLIB_LINKLIBS ?= -lz ;
-    ZLIB_LINKFLAGS = "" ;
-
-    WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
-                                "int main() {"
-                                "z_stream zstream;"
-                                "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
-                                : [ FIncludes $(ZLIB_INCLUDES) ]
-                                : $(ZLIB_LINKLIBS) ] ;
+    WITH_ZLIB = [ CheckZLib $(ZLIB_INCLUDES)
+                           : $(ZLIB_LIBDIR)
+                           : $(ZLIB_LINKLIBS)
+                           : $(ZLIB_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
@@ -538,13 +511,25 @@ if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
     ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
     ZLIB_LINKLIBS = "" ;
     ZLIB_LINKFLAGS = "" ;
+
+    if ! $(PRELIB)
+    {
+        ZLIB_LIBRARY = libz ;
+    }
+    else
+    {
+        ZLIB_LIBRARY = z ;
+    }
 }
 
 Configure WITH_BUILTIN_ZLIB ;
-EchoOption --with-zlib : "Builtin zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+EchoOption --with-included-zlib : "Included zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
 
-EchoOption ZLIB : "ZLib library name" ;
-Configure ZLIB ;
+if $(ZLIB_LIBRARY)
+{
+    EchoOption ZLIB_LIBRARY : "ZLib library name" ;
+    Configure ZLIB_LIBRARY ;
+}
 
 Configure ZLIB_INCLUDES ;
 EchoOption ZLIB_INCLUDES : "ZLib includes" ;

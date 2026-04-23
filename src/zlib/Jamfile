@@ -3,20 +3,20 @@ SubDirHdrs $(PT_TOP)/src/zlib ;
 #SubDirHdrs $(PT_TOP)/src/zlib/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) zlib ;
 
-Library $(ZLIB) : adler32.c
-                  compress.c
-                  crc32.c
-                  deflate.c
-                  # gzclose.c
-                  # gzlib.c
-                  # gzread.c
-                  # gzwrite.c
-                  infback.c
-                  inffast.c
-                  inflate.c
-                  inftrees.c
-                  trees.c
-                  uncompr.c
-                  zutil.c ;
+Library $(ZLIB_LIBRARY) : adler32.c
+                          compress.c
+                          crc32.c
+                          deflate.c
+                          # gzclose.c
+                          # gzlib.c
+                          # gzread.c
+                          # gzwrite.c
+                          infback.c
+                          inffast.c
+                          inflate.c
+                          inftrees.c
+                          trees.c
+                          uncompr.c
+                          zutil.c ;
 
-MakeLocate $(ZLIB) : $(PT_OUTPUT_TARGET) ;
+MakeLocate $(ZLIB_LIBRARY) : $(PT_OUTPUT_TARGET) ;

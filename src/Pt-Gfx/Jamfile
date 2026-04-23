@@ -130,7 +130,7 @@ else
 
 if $(WITH_BUILTIN_ZLIB)
 {
-    LinkLibraries Pt-Gfx : $(ZLIB) ;
+    LinkLibraries Pt-Gfx : $(ZLIB_LIBRARY) ;
 }
 else
 {
