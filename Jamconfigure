@@ -478,6 +478,41 @@ if $(VCPKG_ROOT)
 }
 
 #############################################################################
+# pkg-config
+#############################################################################
+
+PKGCONFIG ?= pkg-config ;
+
+rule UnescapePkgConfig
+{
+    local CLEAN ;
+
+    for item in $(1[1-])
+    {
+        local had_escape ;
+        local cleaned = [ SUBST $(item) "(.*)\\\\ (.*)" "$1 $2" ] ;
+
+        while $(cleaned)
+        {
+            had_escape = yes ;
+            item = $(cleaned) ;
+            cleaned = [ SUBST $(item) "(.*)\\\\ (.*)" "$1 $2" ] ;
+        }
+
+        if $(had_escape)
+        {
+            CLEAN += \"$(item)\" ;
+        }
+        else
+        {
+            CLEAN += $(item) ;
+        }
+    }
+
+    return $(CLEAN:J=" ") ;
+}
+
+#############################################################################
 # zlib compression library
 #############################################################################
 
@@ -496,9 +531,23 @@ if ! $(WITH_ZLIB)
         ZLIB_INCLUDES ?= $(VCPKG_INCLUDES) ;
         ZLIB_LIBDIR   ?= $(VCPKG_LIBDIR) ;
     }
+    else if ! $(ZLIB_LINKLIBS) && ! $(ZLIB_C++FLAGS)
+    {
+        # TODO --cflags-only-I --cflags-only-other --libs-only-l --libs-only-other
+
+        local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags zlib" ] ;
+        if $(PC_RESULT[1]) = 0 { ZLIB_C++FLAGS ?= [ UnescapePkgConfig $(PC_RESULT[2-]) ] ; }
+
+        PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l zlib" ] ;
+        if $(PC_RESULT[1]) = 0 { ZLIB_LINKLIBS ?= $(PC_RESULT[2-]) ; }
+
+        PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-L zlib" ] ;
+        if $(PC_RESULT[1]) = 0 { ZLIB_LINKFLAGS ?= [ UnescapePkgConfig $(PC_RESULT[2-]) ] ; }
+    }
 
     WITH_ZLIB = [ CheckZLib $(ZLIB_INCLUDES)
                            : $(ZLIB_LIBDIR)
+                           : $(ZLIB_C++FLAGS)
                            : $(ZLIB_LINKLIBS)
                            : $(ZLIB_LINKFLAGS) ] ;
 }
@@ -509,6 +558,7 @@ if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
     WITH_ZLIB = yes ;
 
     ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
+    ZLIB_C++FLAGS = "" ;
     ZLIB_LINKLIBS = "" ;
     ZLIB_LINKFLAGS = "" ;
 
@@ -533,6 +583,9 @@ if $(ZLIB_LIBRARY)
 
 Configure ZLIB_INCLUDES ;
 EchoOption ZLIB_INCLUDES : "ZLib includes" ;
+
+Configure ZLIB_C++FLAGS ;
+EchoOption ZLIB_C++FLAGS : "ZLib C++ flags" ;
 
 Configure ZLIB_LINKLIBS ;
 EchoOption ZLIB_LINKLIBS : "ZLib libs" ;

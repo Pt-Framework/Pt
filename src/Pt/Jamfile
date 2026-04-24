@@ -52,6 +52,7 @@ else
 {
     LinkFlags Pt : $(ZLIB_LINKFLAGS) ;
     LinkLibs Pt : $(ZLIB_LINKLIBS) ;
+    ObjectC++Flags ZBuffer.cpp : $(ZLIB_C++FLAGS) ;
 }
 
 SubInclude PT_TOP src Pt tests ;

@@ -5,10 +5,11 @@ rule CheckZLib
 {
     local CHECK_INCLUDES  = $(1) ;
     local CHECK_LIBDIR    = $(2) ;
-    local CHECK_LINKLIBS  = $(3) ;
-    local CHECK_LINKFLAGS = $(4) ;
+    local CHECK_C++FLAGS  = $(3) ;
+    local CHECK_LINKLIBS  = $(4) ;
+    local CHECK_LINKFLAGS = $(5) ;
 
-    local CHECK_C++FLAGS = [ FIncludes $(CHECK_INCLUDES) ] ;
+    CHECK_C++FLAGS += [ FIncludes $(CHECK_INCLUDES) ] ;
 
     local CODE = "#include <zlib.h>"
                  "int main() {"
@@ -69,6 +70,7 @@ rule CheckZLib
     if $(result)
     {
         ZLIB_INCLUDES  = $(CHECK_INCLUDES) ;
+        ZLIB_C++FLAGS  = $(CHECK_C++FLAGS) ;
         ZLIB_LINKLIBS  = $(CHECK_LINKLIBS) ;
         ZLIB_LINKFLAGS = $(CHECK_LINKFLAGS) ;
     }
