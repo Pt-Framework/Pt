@@ -29,6 +29,10 @@ think you have all relevant information.
   You MUST read this when configuring, building, cleaning or verifying code changes.
   -> `.github/instructions/building.instructions.md`
 
+- **Jam Scripting**: Writing and modifying Jam scripts.
+  You MUST read this when working with `.jam` or `Jamfile` files.
+  -> `.github/instructions/jam.instructions.md`
+
 - **Pt Gfx Concepts**: Conpets and patterns for the Pt-Gfx module.
   You MUST read this when working with code in Pt::Gfx.
   -> `.github/instructions/pt-gfx-concepts.instructions.md`
