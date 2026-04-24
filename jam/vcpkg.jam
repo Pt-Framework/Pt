@@ -1,0 +1,253 @@
+if ! $(VCPKG_JAM) {
+VCPKG_JAM = true ;
+
+# vcpkg.jam
+#
+# Reusable rules for working with vcpkg-style precompiled
+# dependency trees. Contains no project-specific knowledge.
+#
+# A vcpkg installation directory has the following layout:
+#
+#   <root>/include/        public headers
+#   <root>/lib/            release import / static libraries
+#   <root>/bin/            release shared libraries
+#   <root>/debug/lib/      debug import / static libraries
+#   <root>/debug/bin/      debug shared libraries
+#
+# Both build types are present in the same tree; the triplet
+# itself does not encode debug/release.
+#
+# Typical use:
+#
+#   Load vcpkg.jam ;
+#
+#   # Adopt an existing local vcpkg tree
+#   Vcpkg-Setup /path/to/vcpkg/installed/x64-windows ;
+#
+#   # Or download a prebuilt SDK and adopt it
+#   Vcpkg-Setup [ FDirName $(TOP) deps ] ;
+#   local sdk = [ Vcpkg-Fetch "https://example.com/releases/latest"
+#                           : "pt-deps-" ] ;
+#   Vcpkg-Setup $(sdk) ;
+#
+#   # Query individual paths as needed
+#   MY_INCLUDES = [ Vcpkg-Includes ] ;
+#   MY_LIBDIR   = [ Vcpkg-LibDir   ] ;
+
+Load fetch.jam ;
+
+# Vcpkg-Map-Arch <arch>
+#
+# Maps a Jam TARGET_OSPLAT value to the architecture token used
+# by vcpkg triplets (x64, x86, arm64, arm). Unknown values pass
+# through unchanged (lower-cased).
+#
+rule Vcpkg-Map-Arch ( arch )
+{
+    switch $(arch:L)
+    {
+        case x86_64  : return x64 ;
+        case amd64   : return x64 ;
+        case x86     : return x86 ;
+        case i386    : return x86 ;
+        case arm64   : return arm64 ;
+        case aarch64 : return arm64 ;
+        case arm     : return arm ;
+        case *       : return $(arch:L) ;
+    }
+}
+
+# Vcpkg-Map-Os <os>
+#
+# Maps a Jam TARGET_OS value to the OS token used by vcpkg
+# triplets (windows, uwp, osx, linux, ...). Unknown values pass
+# through unchanged (lower-cased).
+#
+rule Vcpkg-Map-Os ( os )
+{
+    switch $(os:L)
+    {
+        case win32      : return windows ;
+        case winrt      : return uwp ;
+        case macosx     : return osx ;
+        case ios        : return ios ;
+        case linux      : return linux ;
+        case freebsd    : return freebsd ;
+        case android    : return android ;
+        case emscripten : return emscripten ;
+        case *          : return $(os:L) ;
+    }
+}
+
+# Vcpkg-Triple [ <arch> : <os> ]
+#
+# Returns a vcpkg triplet name. Without arguments derives it from
+# TARGET_OSPLAT and TARGET_OS via Vcpkg-Map-Arch / Vcpkg-Map-Os.
+# The triplet does not encode debug/release; a vcpkg tree always
+# contains both.
+#
+rule Vcpkg-Triple ( arch ? : os ? )
+{
+    arch ?= [ Vcpkg-Map-Arch $(TARGET_OSPLAT) ] ;
+    os   ?= [ Vcpkg-Map-Os   $(TARGET_OS)     ] ;
+    return $(arch)-$(os) ;
+}
+
+# Vcpkg-Setup <root> [ : <cache-dir> ]
+#
+# Initialises the local vcpkg environment.
+#   <root>      directory of an installed vcpkg triplet tree.
+#   <cache-dir> optional directory used by Vcpkg-Fetch for
+#               downloads and extraction; defaults to
+#               <root>/.cache.
+#
+# Sets VCPKG_ROOT and VCPKG_CACHE_DIR. Does not derive any other
+# paths; use Vcpkg-Includes / Vcpkg-LibDir / ... for that.
+#
+rule Vcpkg-Setup ( root : cache ? )
+{
+    VCPKG_ROOT      = $(root) ;
+    VCPKG_CACHE_DIR = $(cache) ;
+    VCPKG_CACHE_DIR ?= [ FDirName $(root) .cache ] ;
+}
+
+# Vcpkg-Includes [ <root> ]
+#
+# Returns the include directory of a vcpkg installation.
+# Defaults to VCPKG_ROOT.
+#
+rule Vcpkg-Includes ( root ? )
+{
+    root ?= $(VCPKG_ROOT) ;
+    return [ FDirName $(root) include ] ;
+}
+
+# Vcpkg-LibDir [ <root> : debug ]
+#
+# Returns the library directory of a vcpkg installation.
+# Pass "debug" as second argument to get the debug library
+# directory; omit it for the release directory.
+# <root> defaults to VCPKG_ROOT.
+#
+rule Vcpkg-LibDir ( root ? : debug ? )
+{
+    root ?= $(VCPKG_ROOT) ;
+    if $(debug) = debug
+    {
+        return [ FDirName $(root) debug lib ] ;
+    }
+    else
+    {
+        return [ FDirName $(root) lib ] ;
+    }
+}
+
+# Vcpkg-BinDir [ <root> : debug ]
+#
+# Returns the binary directory of a vcpkg installation.
+# Pass "debug" as second argument to get the debug binary
+# directory; omit it for the release directory.
+# <root> defaults to VCPKG_ROOT.
+#
+rule Vcpkg-BinDir ( root ? : debug ? )
+{
+    root ?= $(VCPKG_ROOT) ;
+    if $(debug) = debug
+    {
+        return [ FDirName $(root) debug bin ] ;
+    }
+    else
+    {
+        return [ FDirName $(root) bin ] ;
+    }
+}
+
+# Vcpkg-Configure
+#
+# Configures the tools required by Vcpkg-Fetch. Currently this
+# means detecting curl and tar via Fetch-Configure. Repeated
+# calls are no-ops (guarded by Fetch-Configure internally).
+#
+# Called lazily by Vcpkg-Fetch; does not need to be invoked
+# manually.
+#
+rule Vcpkg-Configure
+{
+    Fetch-Configure ;
+}
+
+# Vcpkg-Fetch <base-url> [ : <prefix> : <triple> : <ext> ]
+#
+# Downloads a prebuilt vcpkg-style SDK from a release URL.
+#
+#   <base-url>  e.g. "https://example.com/releases/latest"
+#   <prefix>    archive name prefix; defaults to empty.
+#   <triple>    optional; defaults to [ Vcpkg-Triple ].
+#   <ext>       archive extension; defaults to ".zip".
+#
+# The archive URL is composed as:
+#   <base-url>/<prefix><triple><ext>
+#
+# Workflow:
+#   1. Downloads <base-url>/config.jam into the cache directory.
+#   2. Includes it; the file must define DEPS_VERSION.
+#   3. If the locally stored version differs, downloads the
+#      archive and extracts it into <cache>/<triple>, then writes
+#      the new version.
+#
+# Returns the extraction directory. Vcpkg-Setup is not called
+# implicitly; the caller decides whether to adopt the result as
+# the active VCPKG_ROOT.
+#
+# Requires Vcpkg-Setup to have been called first so that
+# VCPKG_CACHE_DIR is defined.
+#
+rule Vcpkg-Fetch ( baseUrl : prefix ? : triple ? : ext ? )
+{
+    if ! $(VCPKG_CACHE_DIR)
+    {
+        Exit "Error: Vcpkg-Fetch requires Vcpkg-Setup to be called first." ;
+    }
+
+    Vcpkg-Configure ;
+
+    triple ?= [ Vcpkg-Triple ] ;
+    ext    ?= .zip ;
+
+    local archive  = $(prefix)$(triple)$(ext) ;
+    local sdkDir   = [ FDirName $(VCPKG_CACHE_DIR) $(triple) ] ;
+    local zipLocal = [ FDirName $(VCPKG_CACHE_DIR) $(archive) ] ;
+    local cfgLocal = [ FDirName $(VCPKG_CACHE_DIR) config.jam ] ;
+    local fpLocal  = [ FDirName $(sdkDir) .fingerprint.jam ] ;
+
+    DEPS_VERSION = ;
+
+    if [ CHECK_IF_FILE $(fpLocal) ]
+    {
+        include $(fpLocal) ;       # provides DEPS_VERSION (cached)
+    }
+
+    local localVersion = $(DEPS_VERSION) ;
+
+    DEPS_VERSION = ;
+
+    Fetch-Url "$(baseUrl)/config.jam" : $(cfgLocal) ;
+    include $(cfgLocal) ;          # provides DEPS_VERSION (remote)
+
+    if ! $(DEPS_VERSION)
+    {
+        Exit "Error: $(cfgLocal) did not define DEPS_VERSION." ;
+    }
+
+    if $(DEPS_VERSION) != $(localVersion)
+    {
+        Fetch-Url   "$(baseUrl)/$(archive)" : $(zipLocal) ;
+        Fetch-Unzip $(zipLocal)             : $(sdkDir)   ;
+        WriteFile $(fpLocal)
+                : "DEPS_VERSION = \"$(DEPS_VERSION)\" ;" ;
+    }
+
+    return $(sdkDir) ;
+}
+
+} # VCPKG_JAM

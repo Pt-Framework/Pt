@@ -1,0 +1,108 @@
+if ! $(FETCH_JAM) {
+FETCH_JAM = true ;
+
+# fetch.jam
+#
+# Small toolbox for downloading and extracting files at jam parse
+# time. Intended to be reusable across projects; contains no
+# project-specific knowledge.
+#
+# Tools (curl + tar) are detected by Fetch-Configure, which must
+# be called before any other Fetch-* rule. Both are present out
+# of the box on modern Windows 10+, macOS and most Linux
+# distributions. tar transparently handles .zip and .tar.*
+# archives.
+#
+# Directory creation reuses the MKDIR variable configured by
+# ConfigureMkDir in configure.jam.
+
+# Fetch-Configure
+#
+# Detects curl and tar and stores their invocation in FETCH_CURL
+# and FETCH_TAR respectively. Aborts the build if a tool is not
+# available. Repeated calls are no-ops.
+#
+rule Fetch-Configure
+{
+    if ! $(FETCH_CONFIGURED)
+    {
+        if ! $(FETCH_CURL) && [ TryCommand "curl --version" ]
+        {
+            FETCH_CURL = "curl" ;
+        }
+
+        if ! $(FETCH_CURL)
+        {
+            Exit "Checking for curl... FAILED!" ;
+        }
+
+        Configure  FETCH_CURL : $(FETCH_CURL) ;
+        EchoOption FETCH_CURL : "Download tool" ;
+
+        if ! $(FETCH_TAR) && [ TryCommand "tar --version" ]
+        {
+            FETCH_TAR = "tar" ;
+        }
+
+        if ! $(FETCH_TAR)
+        {
+            Exit "Checking for tar... FAILED!" ;
+        }
+
+        Configure  FETCH_TAR : $(FETCH_TAR) ;
+        EchoOption FETCH_TAR : "Extract tool" ;
+
+        FETCH_CONFIGURED = 1 ;
+    }
+}
+
+# Fetch-MkDir <dir>
+#
+# Creates <dir>, including missing parents, using the MKDIR
+# command configured by ConfigureMkDir. Silent if it already
+# exists.
+#
+rule Fetch-MkDir ( dir )
+{
+    if ! [ TryCommand "$(MKDIR)" "\"$(dir)\"" ]
+    {
+        Exit "Error: failed to create directory:" $(dir) ;
+    }
+}
+
+# Fetch-Url <url> : <dest>
+#
+# Downloads <url> to <dest>, creating the parent directory if
+# necessary. Aborts the build with Exit on failure.
+#
+rule Fetch-Url ( url : dest )
+{
+    Fetch-MkDir $(dest:D) ;
+
+    local cmd = "$(FETCH_CURL) -fsSL -o \"$(dest)\" \"$(url)\"" ;
+
+    if ! [ TryCommand $(cmd) ]
+    {
+        Exit "Error: download failed:" $(url) ;
+    }
+}
+
+# Fetch-Unzip <archive> : <dest-dir>
+#
+# Extracts <archive> into <dest-dir>, creating it if necessary.
+# tar transparently handles .zip and .tar.* archives. Aborts the
+# build with Exit on failure.
+#
+rule Fetch-Unzip ( archive : dest )
+{
+    Fetch-MkDir $(dest) ;
+
+    local cmd = "$(FETCH_TAR) -xf \"$(archive)\" -C \"$(dest)\"" ;
+
+    if ! [ TryCommand $(cmd) ]
+    {
+        Exit "Error: extraction failed:" $(archive) ;
+    }
+}
+
+} # FETCH_JAM

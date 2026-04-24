@@ -1,0 +1,143 @@
+if ! $(PKGCONFIG_JAM) {
+PKGCONFIG_JAM = true ;
+
+PKGCONFIG ?= pkg-config ;
+
+# PkgConfig-Unescape <values>
+#
+# Unescapes backslash-escaped spaces in pkg-config output
+# and wraps affected items in quotes.
+#
+rule PkgConfig-Unescape
+{
+    local CLEAN ;
+
+    for item in $(1[1-])
+    {
+        local had_escape ;
+        local cleaned = [ SUBST $(item) "(.*)\\\\ (.*)" "$1 $2" ] ;
+
+        while $(cleaned)
+        {
+            had_escape = yes ;
+            item = $(cleaned) ;
+            cleaned = [ SUBST $(item) "(.*)\\\\ (.*)" "$1 $2" ] ;
+        }
+
+        if $(had_escape)
+        {
+            CLEAN += \"$(item)\" ;
+        }
+        else
+        {
+            CLEAN += $(item) ;
+        }
+    }
+
+    return $(CLEAN:J=" ") ;
+}
+
+# PkgConfig-Exists <package> [ : <min-version> ]
+#
+# Returns "yes" if the package is known to pkg-config
+# and optionally satisfies <min-version>.
+#
+rule PkgConfig-Exists
+{
+    local _package = $(1) ;
+    local _version = $(2) ;
+
+    local PC_RESULT ;
+    if $(_version)
+    {
+        PC_RESULT = [ EXEC "$(PKGCONFIG) --atleast-version=$(_version) $(_package)" ] ;
+    }
+    else
+    {
+        PC_RESULT = [ EXEC "$(PKGCONFIG) --exists $(_package)" ] ;
+    }
+
+    if $(PC_RESULT[1]) = 0
+    {
+        return yes ;
+    }
+}
+
+# PkgConfig-CFlags <package>
+#
+# Returns compiler flags (excluding -I) for <package>.
+# Uses --cflags-only-other.
+#
+rule PkgConfig-CFlags
+{
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags-only-other $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        return [ PkgConfig-Unescape $(PC_RESULT[2-]) ] ;
+    }
+}
+
+# PkgConfig-Includes <package>
+#
+# Returns include paths for <package> with -I prefix stripped.
+# Uses --cflags-only-I.
+#
+rule PkgConfig-Includes
+{
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags-only-I $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        local _result ;
+
+        for local _flag in $(PC_RESULT[2-])
+        {
+            local _path = [ SUBST $(_flag) "^-I(.*)" "$1" ] ;
+            if $(_path)
+            {
+                _result += $(_path) ;
+            }
+        }
+
+        return [ PkgConfig-Unescape $(_result) ] ;
+    }
+}
+
+# PkgConfig-LinkLibs <package>
+#
+# Returns link library flags (-l...) for <package>.
+# Uses --libs-only-l.
+#
+rule PkgConfig-LinkLibs
+{
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        return $(PC_RESULT[2-]) ;
+    }
+}
+
+# PkgConfig-LinkFlags <package>
+#
+# Returns linker flags for <package>, combining
+# --libs-only-L and --libs-only-other.
+#
+rule PkgConfig-LinkFlags
+{
+    local _result ;
+
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-L $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        _result = [ PkgConfig-Unescape $(PC_RESULT[2-]) ] ;
+    }
+
+    PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-other $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        _result += [ PkgConfig-Unescape $(PC_RESULT[2-]) ] ;
+    }
+
+    return $(_result) ;
+}
+
+} # PKGCONFIG_JAM
