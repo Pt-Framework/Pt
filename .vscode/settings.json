@@ -12,6 +12,9 @@
         "src/skia/**": true,
         "src/openssl/**": true
     },
+    "files.associations": {
+        "Jamconfigure": "Boost.Jam"
+    },
     "search.exclude": {
         "include/**": true,
         "src/**": true,

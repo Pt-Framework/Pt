@@ -531,9 +531,9 @@ if ! $(WITH_ZLIB)
         ZLIB_INCLUDES ?= $(VCPKG_INCLUDES) ;
         ZLIB_LIBDIR   ?= $(VCPKG_LIBDIR) ;
     }
-    else if ! $(ZLIB_LINKLIBS) && ! $(ZLIB_C++FLAGS)
+    else if ! $(ZLIB_C++FLAGS) && ! $(ZLIB_LINKLIBS) && ! $(ZLIB_LINKFLAGS)
     {
-        # TODO --cflags-only-I --cflags-only-other --libs-only-l --libs-only-other
+        # TODO --cflags-only-I --cflags-only-other
 
         local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags zlib" ] ;
         if $(PC_RESULT[1]) = 0 { ZLIB_C++FLAGS ?= [ UnescapePkgConfig $(PC_RESULT[2-]) ] ; }
@@ -543,6 +543,9 @@ if ! $(WITH_ZLIB)
 
         PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-L zlib" ] ;
         if $(PC_RESULT[1]) = 0 { ZLIB_LINKFLAGS ?= [ UnescapePkgConfig $(PC_RESULT[2-]) ] ; }
+
+        PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-other zlib" ] ;
+        if $(PC_RESULT[1]) = 0 { ZLIB_LINKFLAGS += [ UnescapePkgConfig $(PC_RESULT[2-]) ] ; }
     }
 
     WITH_ZLIB = [ CheckZLib $(ZLIB_INCLUDES)
