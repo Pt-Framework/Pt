@@ -467,7 +467,7 @@ Load vcpkg.jam ;
 
 if $(VCPKG_ROOT)
 {
-    Vcpkg-Setup $(VCPKG_ROOT) ;
+    Vcpkg-Setup $(VCPKG_ROOT) : deps ;
 
     if $(WITH_DEBUG) && ! $(WITH_OPTIM)
     {
