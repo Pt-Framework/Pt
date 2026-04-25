@@ -471,38 +471,36 @@ if --fetch-deps in $(ARGV)
     Fetch-Configure ;
 
     WITH_DEPS ?= deps ;
+    DEPS_TAG  ?= deps-latest ;
 
-    local targetTriple = [ Vcpkg-Triple ] ;
-    local archiveName  = pt-deps-$(targetTriple).zip ;
-    local baseUrl      = "https://github.com/Pt-Framework/PlatformSDK/releases/download/latest" ;
-    local depsDir      = [ FDirName $(WITH_DEPS) $(targetTriple) ] ;
-    local configLocal  = [ FDirName $(depsDir) config.jam ] ;
-    local configTmp    = [ FDirName $(depsDir) config.jam.tmp ] ;
-    local archiveTmp   = [ FDirName $(depsDir) $(archiveName).tmp ] ;
-    local fetched      = ;
+    local targetTriple  = [ Vcpkg-Triple ] ;
+    local archiveName   = pt-deps-$(targetTriple).zip ;
+    local manifestName  = $(archiveName).manifest ;
+    local baseUrl       = "https://github.com/Pt-Framework/Pt/releases/download/$(DEPS_TAG)" ;
+    local depsDir       = [ FDirName $(WITH_DEPS) $(targetTriple) ] ;
+    local manifestLocal = [ FDirName $(depsDir) $(manifestName) ] ;
+    local manifestTmp   = [ FDirName $(depsDir) $(manifestName).tmp ] ;
+    local archiveTmp    = [ FDirName $(depsDir) $(archiveName).tmp ] ;
+    local fetched       = ;
 
-    # Download remote config.jam as .tmp
-    Fetch-Url "$(baseUrl)/config.jam" : $(configTmp) ;
-
-    # Compare against local copy
-    local remoteContent = [ FILE_GET_CONTENTS $(configTmp) ] ;
+    Fetch-Url "$(baseUrl)/$(manifestName)" : $(manifestTmp) ;
+    local remoteContent = [ FILE_GET_CONTENTS $(manifestTmp) ] ;
+    
     local localContent = ;
-
-    if [ CHECK_IF_FILE $(configLocal) ]
+    if [ CHECK_IF_FILE $(manifestLocal) ]
     {
-        localContent = [ FILE_GET_CONTENTS $(configLocal) ] ;
+        localContent = [ FILE_GET_CONTENTS $(manifestLocal) ] ;
     }
 
     if $(remoteContent) != $(localContent)
     {
         Fetch-Url   "$(baseUrl)/$(archiveName)" : $(archiveTmp) ;
         Fetch-Unzip $(archiveTmp) : $(WITH_DEPS) ;
-        FILE_RENAME $(configTmp) : $(configLocal) ;
+        FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
         fetched = $(archiveName) ;
     }
 
-    # Clean up temporary files (no-op if already gone)
-    FILE_REMOVE $(configTmp) ;
+    FILE_REMOVE $(manifestTmp) ;
     FILE_REMOVE $(archiveTmp) ;
 
     EchoOption $(targetTriple) : "Fetch dependencies" : $(fetched:E="up to date") ;

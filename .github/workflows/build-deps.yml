@@ -1,0 +1,72 @@
+name: Build Pt Dependencies
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-2022
+            triplet: x64-windows
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: write
+
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_INSTALLED_DIR: ${{ github.workspace }}/vcpkg_installed
+      DEPS_EXPORT_DIR: ${{ github.workspace }}/exported
+      DEPS_BASENAME: pt-deps
+    
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup vcpkg tools
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgJsonGlob: '**/vcpkg.json'
+          vcpkgGitCommitId: 'c3867e714dd3a51c272826eea77267876517ed99'
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg' 
+
+      - name: Install packages
+        shell: pwsh
+        run: >
+          vcpkg install
+          --triplet=${{ matrix.triplet }}
+          --x-install-root="${{ env.VCPKG_INSTALLED_DIR }}"
+
+      - name: Export packages
+        shell: pwsh
+        run: >
+          vcpkg export --zip
+          --triplet=${{ matrix.triplet }}
+          --x-install-root="${{ env.VCPKG_INSTALLED_DIR }}"
+          --output-dir="${{ env.DEPS_EXPORT_DIR }}"
+          --output=${{ env.DEPS_BASENAME }}-${{ matrix.triplet }}
+
+      - name: Create manifest
+        shell: pwsh
+        run: |
+          $zip = "${{ env.DEPS_EXPORT_DIR }}/${{ env.DEPS_BASENAME }}-${{ matrix.triplet }}.zip"
+          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
+          $manifest = "$zip.manifest"
+          @(
+            "VersionCode: ${{ github.run_number }}"
+            "Sha256: $hash"
+            "VcpkgCommit: c3867e714dd3a51c272826eea77267876517ed99"
+            "Date: $(Get-Date -Format 'yyyy-MM-dd')"
+          ) -join "`n" | Out-File -FilePath $manifest -Encoding utf8 -NoNewline
+          
+      - name: Release packages
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: deps-latest
+          name: "Pt Dependencies (latest)"
+          body: Precompiled dependencies (libpng, freetype) for Pt
+          files: ${{ env.DEPS_EXPORT_DIR }}/*
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
