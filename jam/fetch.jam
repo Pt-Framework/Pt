@@ -132,45 +132,4 @@ rule Fetch-Copy ( src : dest )
     }
 }
 
-# Fetch-Compare <base-url> : <local-dir> : <file-name>
-#
-# Compares a remote version file against a local copy.
-# Downloads <base-url>/<file-name> into a temporary location
-# (.downloads) and includes it. The file must set DEPS_VERSION.
-# If <local-dir>/<file-name> exists, it is included first to
-# obtain the current version.
-#
-# Returns the new DEPS_VERSION when it differs from the current
-# version, or empty if both match (i.e. content is up to date).
-#
-rule Fetch-Compare ( baseUrl : localDir : fileName )
-{
-    local localFile = [ FDirName $(localDir) $(fileName) ] ;
-    local downloads = [ FDirName $(localDir) .downloads ] ;
-    local fetchFile = [ FDirName $(downloads) $(fileName) ] ;
-
-    DEPS_VERSION = ;
-
-    if [ CHECK_IF_FILE $(localFile) ]
-    {
-        include $(localFile) ;
-    }
-
-    local currentVersion = $(DEPS_VERSION) ;
-    DEPS_VERSION = ;
-
-    Fetch-Url "$(baseUrl)/$(fileName)" : $(fetchFile) ;
-    include $(fetchFile) ;
-
-    if ! $(DEPS_VERSION)
-    {
-        Exit "Error: $(fetchFile) did not define DEPS_VERSION." ;
-    }
-
-    if $(DEPS_VERSION) != $(currentVersion)
-    {
-        return $(DEPS_VERSION) ;
-    }
-}
-
 } # FETCH_JAM

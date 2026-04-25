@@ -66,6 +66,17 @@ LIST *builtin_makedir( FRAME * frame, int flags );
  */
 LIST *builtin_writefile(FRAME *args, int flags);
 
+/* Pt extension:
+ */
+LIST *builtin_readfile(FRAME *frame, int flags);
+
+/* Pt extension:
+ */
+LIST *builtin_file_is_dir(FRAME *frame, int flags);
+LIST *builtin_file_exists(FRAME *frame, int flags);
+LIST *builtin_file_remove(FRAME *frame, int flags);
+LIST *builtin_file_rename(FRAME *frame, int flags);
+
 /* Pt extension: OBSOLETE
  */
 LIST *builtin_escape(FRAME *args, int flags);
