@@ -6,13 +6,13 @@ VCPKG_JAM = true ;
 # Reusable rules for working with vcpkg-style precompiled
 # dependency trees. Contains no project-specific knowledge.
 #
-# A vcpkg installation directory has the following layout:
+# A vcpkg root directory has the following layout:
 #
-#   <root>/include/        public headers
-#   <root>/lib/            release import / static libraries
-#   <root>/bin/            release shared libraries
-#   <root>/debug/lib/      debug import / static libraries
-#   <root>/debug/bin/      debug shared libraries
+#   <root>/installed/<triple>/include/        public headers
+#   <root>/installed/<triple>/lib/            release libraries
+#   <root>/installed/<triple>/bin/            release shared libs
+#   <root>/installed/<triple>/debug/lib/      debug libraries
+#   <root>/installed/<triple>/debug/bin/      debug shared libs
 #
 # Both build types are present in the same tree; the triplet
 # itself does not encode debug/release.
@@ -21,14 +21,13 @@ VCPKG_JAM = true ;
 #
 #   Load vcpkg.jam ;
 #
-#   # Adopt an existing local vcpkg tree
-#   Vcpkg-Setup /path/to/vcpkg/installed/x64-windows ;
+#   # Use a real local vcpkg installation
+#   Vcpkg-Setup C:\vcpkg ;
 #
-#   # Or download a prebuilt SDK and adopt it
+#   # Or download a prebuilt SDK from a release URL
 #   Vcpkg-Setup [ FDirName $(TOP) deps ] ;
-#   local sdk = [ Vcpkg-Fetch "https://example.com/releases/latest"
-#                           : "pt-deps-" ] ;
-#   Vcpkg-Setup $(sdk) ;
+#   Vcpkg-Fetch "https://example.com/releases/latest"
+#             : "my-deps-" ;
 #
 #   # Query individual paths as needed
 #   MY_INCLUDES = [ Vcpkg-Includes ] ;
@@ -67,6 +66,7 @@ rule Vcpkg-Map-Os ( os )
 {
     switch $(os:L)
     {
+        case nt         : return windows ;
         case win32      : return windows ;
         case winrt      : return uwp ;
         case macosx     : return osx ;
@@ -93,161 +93,78 @@ rule Vcpkg-Triple ( arch ? : os ? )
     return $(arch)-$(os) ;
 }
 
-# Vcpkg-Setup <root> [ : <cache-dir> ]
+# Vcpkg-Setup <root> [ : <triple> ]
 #
 # Initialises the local vcpkg environment.
-#   <root>      directory of an installed vcpkg triplet tree.
-#   <cache-dir> optional directory used by Vcpkg-Fetch for
-#               downloads and extraction; defaults to
-#               <root>/.cache.
+#   <root>    vcpkg root directory (containing installed/).
+#   <triple>  optional; defaults to [ Vcpkg-Triple ].
 #
-# Sets VCPKG_ROOT and VCPKG_CACHE_DIR. Does not derive any other
-# paths; use Vcpkg-Includes / Vcpkg-LibDir / ... for that.
+# Sets VCPKG_ROOT and VCPKG_TRIPLE. Path rules like
+# Vcpkg-Includes and Vcpkg-LibDir use these to resolve
+# installed/<triple>/include, installed/<triple>/lib, etc.
 #
-rule Vcpkg-Setup ( root : cache ? )
+rule Vcpkg-Setup ( root : triple ? )
 {
-    VCPKG_ROOT      = $(root) ;
-    VCPKG_CACHE_DIR = $(cache) ;
-    VCPKG_CACHE_DIR ?= [ FDirName $(root) .cache ] ;
+    VCPKG_ROOT   = $(root) ;
+    VCPKG_TRIPLE = $(triple) ;
+    VCPKG_TRIPLE ?= [ Vcpkg-Triple ] ;
 }
 
-# Vcpkg-Includes [ <root> ]
+# Vcpkg-Installed [ <triple> ]
 #
-# Returns the include directory of a vcpkg installation.
-# Defaults to VCPKG_ROOT.
+# Returns the triplet installation directory of the active vcpkg
+# installation: <VCPKG_ROOT>/installed/<triple>/
+# <triple> defaults to VCPKG_TRIPLE.
 #
-rule Vcpkg-Includes ( root ? )
+rule Vcpkg-Installed ( triple ? )
 {
-    root ?= $(VCPKG_ROOT) ;
-    return [ FDirName $(root) include ] ;
+    triple ?= $(VCPKG_TRIPLE) ;
+    return [ FDirName $(VCPKG_ROOT) installed $(triple) ] ;
 }
 
-# Vcpkg-LibDir [ <root> : debug ]
+# Vcpkg-Includes
 #
-# Returns the library directory of a vcpkg installation.
-# Pass "debug" as second argument to get the debug library
-# directory; omit it for the release directory.
-# <root> defaults to VCPKG_ROOT.
+# Returns the include directory of the active vcpkg installation.
 #
-rule Vcpkg-LibDir ( root ? : debug ? )
+rule Vcpkg-Includes
 {
-    root ?= $(VCPKG_ROOT) ;
+    return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) include ] ;
+}
+
+# Vcpkg-LibDir [ debug ]
+#
+# Returns the library directory of the active vcpkg installation.
+# Pass "debug" to get the debug library directory; omit it for
+# the release directory.
+#
+rule Vcpkg-LibDir ( debug ? )
+{
     if $(debug) = debug
     {
-        return [ FDirName $(root) debug lib ] ;
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) debug lib ] ;
     }
     else
     {
-        return [ FDirName $(root) lib ] ;
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) lib ] ;
     }
 }
 
-# Vcpkg-BinDir [ <root> : debug ]
+# Vcpkg-BinDir [ debug ]
 #
-# Returns the binary directory of a vcpkg installation.
-# Pass "debug" as second argument to get the debug binary
-# directory; omit it for the release directory.
-# <root> defaults to VCPKG_ROOT.
+# Returns the binary directory of the active vcpkg installation.
+# Pass "debug" to get the debug binary directory; omit it for
+# the release directory.
 #
-rule Vcpkg-BinDir ( root ? : debug ? )
+rule Vcpkg-BinDir ( debug ? )
 {
-    root ?= $(VCPKG_ROOT) ;
     if $(debug) = debug
     {
-        return [ FDirName $(root) debug bin ] ;
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) debug bin ] ;
     }
     else
     {
-        return [ FDirName $(root) bin ] ;
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) bin ] ;
     }
-}
-
-# Vcpkg-Configure
-#
-# Configures the tools required by Vcpkg-Fetch. Currently this
-# means detecting curl and tar via Fetch-Configure. Repeated
-# calls are no-ops (guarded by Fetch-Configure internally).
-#
-# Called lazily by Vcpkg-Fetch; does not need to be invoked
-# manually.
-#
-rule Vcpkg-Configure
-{
-    Fetch-Configure ;
-}
-
-# Vcpkg-Fetch <base-url> [ : <prefix> : <triple> : <ext> ]
-#
-# Downloads a prebuilt vcpkg-style SDK from a release URL.
-#
-#   <base-url>  e.g. "https://example.com/releases/latest"
-#   <prefix>    archive name prefix; defaults to empty.
-#   <triple>    optional; defaults to [ Vcpkg-Triple ].
-#   <ext>       archive extension; defaults to ".zip".
-#
-# The archive URL is composed as:
-#   <base-url>/<prefix><triple><ext>
-#
-# Workflow:
-#   1. Downloads <base-url>/config.jam into the cache directory.
-#   2. Includes it; the file must define DEPS_VERSION.
-#   3. If the locally stored version differs, downloads the
-#      archive and extracts it into <cache>/<triple>, then writes
-#      the new version.
-#
-# Returns the extraction directory. Vcpkg-Setup is not called
-# implicitly; the caller decides whether to adopt the result as
-# the active VCPKG_ROOT.
-#
-# Requires Vcpkg-Setup to have been called first so that
-# VCPKG_CACHE_DIR is defined.
-#
-rule Vcpkg-Fetch ( baseUrl : prefix ? : triple ? : ext ? )
-{
-    if ! $(VCPKG_CACHE_DIR)
-    {
-        Exit "Error: Vcpkg-Fetch requires Vcpkg-Setup to be called first." ;
-    }
-
-    Vcpkg-Configure ;
-
-    triple ?= [ Vcpkg-Triple ] ;
-    ext    ?= .zip ;
-
-    local archive  = $(prefix)$(triple)$(ext) ;
-    local sdkDir   = [ FDirName $(VCPKG_CACHE_DIR) $(triple) ] ;
-    local zipLocal = [ FDirName $(VCPKG_CACHE_DIR) $(archive) ] ;
-    local cfgLocal = [ FDirName $(VCPKG_CACHE_DIR) config.jam ] ;
-    local fpLocal  = [ FDirName $(sdkDir) .fingerprint.jam ] ;
-
-    DEPS_VERSION = ;
-
-    if [ CHECK_IF_FILE $(fpLocal) ]
-    {
-        include $(fpLocal) ;       # provides DEPS_VERSION (cached)
-    }
-
-    local localVersion = $(DEPS_VERSION) ;
-
-    DEPS_VERSION = ;
-
-    Fetch-Url "$(baseUrl)/config.jam" : $(cfgLocal) ;
-    include $(cfgLocal) ;          # provides DEPS_VERSION (remote)
-
-    if ! $(DEPS_VERSION)
-    {
-        Exit "Error: $(cfgLocal) did not define DEPS_VERSION." ;
-    }
-
-    if $(DEPS_VERSION) != $(localVersion)
-    {
-        Fetch-Url   "$(baseUrl)/$(archive)" : $(zipLocal) ;
-        Fetch-Unzip $(zipLocal)             : $(sdkDir)   ;
-        WriteFile $(fpLocal)
-                : "DEPS_VERSION = \"$(DEPS_VERSION)\" ;" ;
-    }
-
-    return $(sdkDir) ;
 }
 
 } # VCPKG_JAM

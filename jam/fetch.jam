@@ -19,8 +19,9 @@ FETCH_JAM = true ;
 # Fetch-Configure
 #
 # Detects curl and tar and stores their invocation in FETCH_CURL
-# and FETCH_TAR respectively. Aborts the build if a tool is not
-# available. Repeated calls are no-ops.
+# and FETCH_TAR respectively. Tools that are not found are left
+# unset; Fetch-Url and Fetch-Unzip will abort if they are needed
+# but not available. Repeated calls are no-ops.
 #
 rule Fetch-Configure
 {
@@ -31,22 +32,18 @@ rule Fetch-Configure
             FETCH_CURL = "curl" ;
         }
 
-        if ! $(FETCH_CURL)
-        {
-            Exit "Checking for curl... FAILED!" ;
-        }
-
         Configure  FETCH_CURL : $(FETCH_CURL) ;
         EchoOption FETCH_CURL : "Download tool" ;
+
+        if ! $(FETCH_TAR) 
+            && [ TryCommand "C:\\Windows\\System32\\tar.exe --version" ]
+        {
+            FETCH_TAR = "C:\\Windows\\System32\\tar.exe" ;
+        }
 
         if ! $(FETCH_TAR) && [ TryCommand "tar --version" ]
         {
             FETCH_TAR = "tar" ;
-        }
-
-        if ! $(FETCH_TAR)
-        {
-            Exit "Checking for tar... FAILED!" ;
         }
 
         Configure  FETCH_TAR : $(FETCH_TAR) ;
@@ -59,14 +56,17 @@ rule Fetch-Configure
 # Fetch-MkDir <dir>
 #
 # Creates <dir>, including missing parents, using the MKDIR
-# command configured by ConfigureMkDir. Silent if it already
-# exists.
+# command configured by ConfigureMkDir. Skips creation if the
+# directory already exists. The GLOB check may return stale
+# results when directories are created by external commands
+# (tar, curl) during the same Jam run; mkdir failures are
+# therefore non-fatal.
 #
 rule Fetch-MkDir ( dir )
 {
-    if ! [ TryCommand "$(MKDIR)" "\"$(dir)\"" ]
+    if ! [ GLOB $(dir:P) : $(dir:BS) ]
     {
-        Exit "Error: failed to create directory:" $(dir) ;
+        TryCommand "$(MKDIR)" "\"$(dir)\"" ;
     }
 }
 
@@ -77,6 +77,11 @@ rule Fetch-MkDir ( dir )
 #
 rule Fetch-Url ( url : dest )
 {
+    if ! $(FETCH_CURL)
+    {
+        Exit "Error: curl is required to download" $(url) ;
+    }
+
     Fetch-MkDir $(dest:D) ;
 
     local cmd = "$(FETCH_CURL) -fsSL -o \"$(dest)\" \"$(url)\"" ;
@@ -95,6 +100,11 @@ rule Fetch-Url ( url : dest )
 #
 rule Fetch-Unzip ( archive : dest )
 {
+    if ! $(FETCH_TAR)
+    {
+        Exit "Error: tar is required to extract" $(archive) ;
+    }
+
     Fetch-MkDir $(dest) ;
 
     local cmd = "$(FETCH_TAR) -xf \"$(archive)\" -C \"$(dest)\"" ;
@@ -103,6 +113,79 @@ rule Fetch-Unzip ( archive : dest )
     {
         Exit "Error: extraction failed:" $(archive) ;
     }
+}
+
+# Fetch-Copy <src> : <dest>
+#
+# Copies <src> to <dest>, creating the parent directory if
+# necessary. Aborts the build with Exit on failure.
+#
+rule Fetch-Copy ( src : dest )
+{
+    Fetch-MkDir $(dest:D) ;
+
+    local cmd = "$(CP) \"$(src)\" \"$(dest)\"" ;
+
+    if ! [ TryCommand $(cmd) ]
+    {
+        Exit "Error: copy failed:" $(src) ;
+    }
+}
+
+# Fetch-Compare <base-url> : <local-dir> : <file-name>
+#
+# Compares a remote version file against a local copy.
+# Downloads <base-url>/<file-name> into a temporary location
+# (.downloads) and includes it. The file must set DEPS_VERSION.
+# If <local-dir>/<file-name> exists, it is included first to
+# obtain the current version.
+#
+# Returns the new DEPS_VERSION when it differs from the current
+# version, or empty if both match (i.e. content is up to date).
+#
+rule Fetch-Compare ( baseUrl : localDir : fileName )
+{
+    local localFile = [ FDirName $(localDir) $(fileName) ] ;
+    local downloads = [ FDirName $(localDir) .downloads ] ;
+    local fetchFile = [ FDirName $(downloads) $(fileName) ] ;
+
+    DEPS_VERSION = ;
+
+    if [ CHECK_IF_FILE $(localFile) ]
+    {
+        include $(localFile) ;
+    }
+
+    local currentVersion = $(DEPS_VERSION) ;
+    DEPS_VERSION = ;
+
+    Fetch-Url "$(baseUrl)/$(fileName)" : $(fetchFile) ;
+    include $(fetchFile) ;
+
+    if ! $(DEPS_VERSION)
+    {
+        Exit "Error: $(fetchFile) did not define DEPS_VERSION." ;
+    }
+
+    if $(DEPS_VERSION) != $(currentVersion)
+    {
+        return $(DEPS_VERSION) ;
+    }
+}
+
+# Fetch-Extract <url> : <dest-dir> : <downloads-dir>
+#
+# Downloads an archive from <url> into <downloads-dir> and
+# extracts it into <dest-dir>. The archive name is derived from
+# the URL.
+#
+rule Fetch-Extract ( url : destDir : downloads )
+{
+    local archiveName = $(url:BS) ;
+    local archive     = [ FDirName $(downloads) $(archiveName) ] ;
+
+    Fetch-Url   $(url)      : $(archive) ;
+    Fetch-Unzip $(archive)  : $(destDir) ;
 }
 
 } # FETCH_JAM

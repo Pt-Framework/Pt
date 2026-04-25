@@ -9,7 +9,7 @@ rule CheckZLib
     local CHECK_LINKLIBS  = $(4) ;
     local CHECK_LINKFLAGS = $(5) ;
 
-    CHECK_C++FLAGS += [ FIncludes $(CHECK_INCLUDES) ] ;
+    #CHECK_C++FLAGS += [ FIncludes $(CHECK_INCLUDES) ] ;
 
     local CODE = "#include <zlib.h>"
                  "int main() {"
@@ -37,7 +37,7 @@ rule CheckZLib
         local MSVC_LIBPATH = /LIBPATH:$(CHECK_LIBDIR) ;
 
         result = [ CheckBuildC++ $(CODE)
-                                 : $(CHECK_C++FLAGS)
+                                 : $(CHECK_C++FLAGS) [ FIncludes $(CHECK_INCLUDES) ]
                                  : $(MSVC_LIBS) $(MSVC_LIBPATH) $(CHECK_LINKFLAGS) ] ;
         if $(result)
         {
@@ -58,7 +58,7 @@ rule CheckZLib
         local UNIX_LIBPATH = -L$(CHECK_LIBDIR) ;
 
         result = [ CheckBuildC++ $(CODE)
-                                 : $(CHECK_C++FLAGS)
+                                 : $(CHECK_C++FLAGS) [ FIncludes $(CHECK_INCLUDES) ]
                                  : $(UNIX_LIBS) $(UNIX_LIBPATH) $(CHECK_LINKFLAGS) ] ;
         if $(result)
         {

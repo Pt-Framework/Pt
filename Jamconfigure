@@ -460,18 +460,43 @@ if ! $(WITH_ATOMICS)
 }
 
 #############################################################################
-# Precompiled dependencies directories
+# Precompiled dependencies
 #############################################################################
 
-Load vcpkg.jam ;
-
-if $(VCPKG_ROOT)
+if --fetch-deps in $(ARGV)
 {
-    Vcpkg-Setup $(VCPKG_ROOT) : deps ;
+    Load fetch.jam ;
+    Load vcpkg.jam ;
 
+    Fetch-Configure ;
+
+    WITH_DEPS ?= deps ;
+
+    local depsTriple  = [ Vcpkg-Triple ] ;
+    local archiveName = pt-deps-$(depsTriple).zip ;
+    local baseUrl     = "https://github.com/Pt-Framework/PlatformSDK/releases/download/latest" ;
+    local depsDir     = [ FDirName $(WITH_DEPS) $(depsTriple) ] ;
+    local downloads   = [ FDirName $(depsDir) .downloads ] ;
+    local archive     = [ FDirName $(downloads) $(archiveName) ] ;
+    local fetchConfig = [ FDirName $(downloads) config.jam ] ;
+    local fetched     = ;
+
+    if [ Fetch-Compare $(baseUrl) : $(depsDir) : config.jam ] 
+    {
+        Fetch-Url   "$(baseUrl)/$(archiveName)" : $(archive) ;
+        Fetch-Unzip $(archive) : $(WITH_DEPS) ;
+        Fetch-Copy  $(fetchConfig) : [ FDirName $(depsDir) config.jam ] ;
+        fetched = $(archiveName) ;
+    }
+
+    EchoOption $(depsTriple) : "Fetch dependencies" : $(fetched:E="up to date") ;
+
+    DEPS_INCLUDES = [ FDirName $(depsDir) include ] ;
+    DEPS_LIBDIR = [ FDirName $(depsDir) lib ] ;
+    
     if $(WITH_DEBUG) && ! $(WITH_OPTIM)
     {
-        VCPKG_DEBUG = debug ;
+        DEPS_LIBDIR = [ FDirName $(depsDir) debug lib ] ;
     }
 }
 
@@ -490,10 +515,10 @@ if --with-included-zlib in $(ARGV)
 
 if ! $(WITH_ZLIB)
 {
-    if $(VCPKG_ROOT)
+    if $(WITH_DEPS)
     {
-        ZLIB_INCLUDES ?= [ Vcpkg-Includes ] ;
-        ZLIB_LIBDIR   ?= [ Vcpkg-LibDir : $(VCPKG_DEBUG) ] ;
+        ZLIB_INCLUDES ?= $(DEPS_INCLUDES) ;
+        ZLIB_LIBDIR   ?= $(DEPS_LIBDIR) ;
     }
     else if [ PkgConfig-Exists zlib ]
     {
