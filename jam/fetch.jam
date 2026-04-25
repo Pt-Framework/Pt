@@ -173,19 +173,4 @@ rule Fetch-Compare ( baseUrl : localDir : fileName )
     }
 }
 
-# Fetch-Extract <url> : <dest-dir> : <downloads-dir>
-#
-# Downloads an archive from <url> into <downloads-dir> and
-# extracts it into <dest-dir>. The archive name is derived from
-# the URL.
-#
-rule Fetch-Extract ( url : destDir : downloads )
-{
-    local archiveName = $(url:BS) ;
-    local archive     = [ FDirName $(downloads) $(archiveName) ] ;
-
-    Fetch-Url   $(url)      : $(archive) ;
-    Fetch-Unzip $(archive)  : $(destDir) ;
-}
-
 } # FETCH_JAM
