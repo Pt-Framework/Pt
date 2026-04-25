@@ -38,14 +38,13 @@ jobs:
           --triplet=${{ matrix.triplet }}
           --x-install-root="${{ env.VCPKG_INSTALLED_DIR }}"
 
-      - name: Export packages
+      - name: Create archive
         shell: pwsh
-        run: >
-          vcpkg export --zip
-          --triplet=${{ matrix.triplet }}
-          --x-install-root="${{ env.VCPKG_INSTALLED_DIR }}"
-          --output-dir="${{ env.DEPS_EXPORT_DIR }}"
-          --output=${{ env.DEPS_BASENAME }}-${{ matrix.triplet }}
+        run: |
+          $src = "${{ env.VCPKG_INSTALLED_DIR }}/${{ matrix.triplet }}"
+          $zip = "${{ env.DEPS_EXPORT_DIR }}/${{ env.DEPS_BASENAME }}-${{ matrix.triplet }}.zip"
+          New-Item -ItemType Directory -Force -Path "${{ env.DEPS_EXPORT_DIR }}" | Out-Null
+          Compress-Archive -Path $src -DestinationPath $zip
 
       - name: Create manifest
         shell: pwsh
