@@ -477,8 +477,8 @@ if --fetch-deps in $(ARGV)
     local archiveName   = pt-deps-$(targetTriple).zip ;
     local manifestName  = $(archiveName).manifest ;
     local baseUrl       = "https://github.com/Pt-Framework/Pt/releases/download/$(DEPS_TAG)" ;
-    local depsDir       = [ FDirName $(WITH_DEPS) $(targetTriple) ] ;
-    local manifestLocal = [ FDirName $(depsDir) $(manifestName) ] ;
+    local targetDir      = [ FDirName $(WITH_DEPS) $(targetTriple) ] ;
+    local manifestLocal = [ FDirName $(targetDir) $(manifestName) ] ;
     local manifestTmp   = [ FDirName $(WITH_DEPS) $(manifestName).tmp ] ;
     local archiveTmp    = [ FDirName $(WITH_DEPS) $(archiveName).tmp ] ;
     local fetched       = ;
@@ -495,7 +495,7 @@ if --fetch-deps in $(ARGV)
     if $(remoteContent) != $(localContent)
     {
         Fetch-Url   "$(baseUrl)/$(archiveName)" : $(archiveTmp) ;
-        Fetch-RmDir $(depsDir) ;
+        Fetch-RmDir $(targetDir) ;
         Fetch-Unzip $(archiveTmp) : $(WITH_DEPS) ;
         FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
         fetched = $(archiveName) ;
@@ -506,12 +506,12 @@ if --fetch-deps in $(ARGV)
 
     EchoOption $(targetTriple) : "Fetch dependencies" : $(fetched:E="up to date") ;
 
-    DEPS_INCLUDES = [ FDirName $(depsDir) include ] ;
-    DEPS_LIBDIR = [ FDirName $(depsDir) lib ] ;
+    DEPS_INCLUDES = [ FDirName $(targetDir) include ] ;
+    DEPS_LIBDIR = [ FDirName $(targetDir) lib ] ;
     
     if $(WITH_DEBUG) && ! $(WITH_OPTIM)
     {
-        DEPS_LIBDIR = [ FDirName $(depsDir) debug lib ] ;
+        DEPS_LIBDIR = [ FDirName $(targetDir) debug lib ] ;
     }
 }
 
