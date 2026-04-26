@@ -43,6 +43,7 @@ void file_dirscan( OBJECT * dir, scanback func, void * closure );
 file_info_t * file_info( OBJECT * const path );
 int file_is_file( OBJECT * const path );
 int file_mkdir( char const * const path );
+int file_rmdir( char const * const path );
 file_info_t * file_query( OBJECT * const path );
 void file_remove_atexit( OBJECT * const path );
 void file_supported_fmt_resolution( timestamp * const );

@@ -490,6 +490,13 @@ void load_builtins()
                       builtin_file_mkdir, 0, args );
     }
 
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_RMDIR",
+                      builtin_file_rmdir, 0, args );
+    }
+
 
     /* Initialize builtin modules. */
     init_set();
@@ -2709,6 +2716,33 @@ LIST * builtin_file_mkdir( FRAME * frame, int flags )
     if ( file_mkdir( object_str( list_front( arg ) ) ) == 0 )
     {
         /* Invalidate cached file info so FILE_IS_DIR sees the new dir. */
+        file_info_t * ff = file_info( list_front( arg ) );
+        ff->is_file = 0;
+        ff->is_dir = 0;
+        timestamp_clear( &ff->time );
+        return list_new( object_copy( constant_true ) );
+    }
+
+    return L0;
+}
+
+
+/* Pt extension: FILE_RMDIR
+ *
+ * Removes an empty directory. Returns "true" on success, L0 on failure.
+ * Invalidates the file system cache so subsequent queries reflect
+ * the removal.
+ */
+LIST * builtin_file_rmdir( FRAME * frame, int flags )
+{
+    LIST * const arg = lol_get( frame->args, 0 );
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    if ( file_rmdir( object_str( list_front( arg ) ) ) == 0 )
+    {
+        /* Invalidate cached file info so FILE_IS_DIR sees the removal. */
         file_info_t * ff = file_info( list_front( arg ) );
         ff->is_file = 0;
         ff->is_dir = 0;

@@ -96,6 +96,36 @@ rule Fetch-Url ( url : dest )
     }
 }
 
+# Fetch-RmDir <dir>
+#
+# Recursively removes <dir> and all its contents. Files are
+# removed with FILE_REMOVE, subdirectories are descended into
+# first (bottom-up). Finally <dir> itself is removed with
+# FILE_RMDIR. Silently succeeds if <dir> does not exist.
+#
+rule Fetch-RmDir ( dir )
+{
+    if [ FILE_IS_DIR $(dir) ]
+    {
+        local entries = [ GLOB $(dir) : * ] ;
+
+        local i ;
+        for i in $(entries)
+        {
+            if [ FILE_IS_DIR $(i) ]
+            {
+                Fetch-RmDir $(i) ;
+            }
+            else
+            {
+                FILE_REMOVE $(i) ;
+            }
+        }
+
+        FILE_RMDIR $(dir) ;
+    }
+}
+
 # Fetch-Unzip <archive> : <dest-dir>
 #
 # Extracts <archive> into <dest-dir>, creating it if necessary.

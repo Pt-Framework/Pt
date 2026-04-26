@@ -818,6 +818,14 @@
     the parent directory does not exist or the directory already
     exists).
 
+    <P><DT><CODE>
+    FILE_RMDIR <I>path</I> ;
+    </CODE>
+
+    <DD> Removes the empty directory at <I>path</I>. Returns
+    <tt>"true"</tt> on success, an empty list on failure (e.g. if
+    the directory does not exist or is not empty).
+
     </DL></TABLE>
 
 <DT> <P> <H1> Built-in Variables </H1> <DD>
