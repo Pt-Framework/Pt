@@ -148,6 +148,50 @@ SPACE        ?= " " ;
 OSFULL = $(OS)$(OSVER)$(OSPLAT) $(OS)$(OSPLAT) $(OS)$(OSVER) $(OS) ;
 
 #
+# Echoes one indented option line, wrapping long values onto a continuation line.
+#
+rule EchoOptionLine
+{
+    local _rest = $(1:J=" ") ;
+    local _indent1 = " " ;
+    local _indent2 = "   " ;
+    local _indent = $(_indent1) ;
+
+    # 74/70 for first line (indent 2), 72/68 for continuation (indent 4)
+    local _threshold = ^(..........................................................................)(..+) ;
+    local _splitpos  = "^(........................................................................)(..+)" ;
+
+    while $(_rest)
+    {
+        local _toolong = [ MATCH $(_threshold) : $(_rest) ] ;
+
+        if $(_toolong)
+        {
+            local _split = [ MATCH $(_splitpos) : $(_rest) ] ;
+
+            if $(_split)
+            {
+                Echo $(_indent) $(_split[1]) ">" ;
+                _rest = $(_split[2]) ;
+                _indent = $(_indent2) ;
+                _threshold = ^(........................................................................)(..+) ;
+                _splitpos  = "^(......................................................................)(..+)" ;
+            }
+            else
+            {
+                Echo $(_indent) $(_rest) ;
+                _rest = ;
+            }
+        }
+        else
+        {
+            Echo $(_indent) $(_rest) ;
+            _rest = ;
+        }
+    }
+}
+
+#
 # EchoOption OS : "Host Operating system" [ : $(OS:L) ] ;
 #
 rule EchoOption
@@ -171,28 +215,22 @@ rule EchoOption
     {
         Echo $(_optname) ;
     }
-    
-    local _line ;
-    for local _s in $(_vals)
+    else
     {
-        #local _l = $(_line) $(_s) ;
-        #local _result = [ MATCH ^(............................................................)(.*) : $(_l:J=" ") ] ;
-        #
-        #if $(_result) # exceeds max line length
-        #{
-        #    if $(_line)
-        #    {
-        #        Echo $(_optname) $(_line) ;
-        #        _line = ;
-        #    }
-        #}
+        # Check if the full line exceeds ~76 characters
+        local _all = $(_optname) $(_vals) ;
+        local _toolong = [ MATCH ^(............................................................................)(.*) : $(_all:J=" ") ] ;
 
-        _line += $(_s) ;
-    }
-
-    if $(_line)
-    {
-        Echo $(_optname) $(_line) ;
+        if $(_toolong)
+        {
+            # Long output: header alone, then all values hard-split
+            Echo $(_optname) ;
+            EchoOptionLine $(_vals) ;
+        }
+        else
+        {
+            Echo $(_optname) $(_vals) ;
+        }
     }
 }
 
