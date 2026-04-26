@@ -55,18 +55,22 @@ rule Fetch-Configure
 
 # Fetch-MkDir <dir>
 #
-# Creates <dir>, including missing parents, using the MKDIR
-# command configured by ConfigureMkDir. Skips creation if the
-# directory already exists. The GLOB check may return stale
-# results when directories are created by external commands
-# (tar, curl) during the same Jam run; mkdir failures are
-# therefore non-fatal.
+# Creates <dir> and all missing parent directories. Recurses from
+# the root down so that each level is created before the next.
+# Skips creation if the directory already exists.
 #
 rule Fetch-MkDir ( dir )
 {
-    if ! [ GLOB $(dir:P) : $(dir:BS) ]
+    local parent = $(dir:P) ;
+    
+    if $(parent) && $(parent) != $(dir)
     {
-        TryCommand "$(MKDIR)" "\"$(dir)\"" ;
+        Fetch-MkDir $(parent) ;
+    }
+    
+    if ! [ FILE_IS_DIR $(dir) ]
+    {
+        FILE_MKDIR $(dir) ;
     }
 }
 
@@ -112,23 +116,6 @@ rule Fetch-Unzip ( archive : dest )
     if ! [ TryCommand $(cmd) ]
     {
         Exit "Error: extraction failed:" $(archive) ;
-    }
-}
-
-# Fetch-Copy <src> : <dest>
-#
-# Copies <src> to <dest>, creating the parent directory if
-# necessary. Aborts the build with Exit on failure.
-#
-rule Fetch-Copy ( src : dest )
-{
-    Fetch-MkDir $(dest:D) ;
-
-    local cmd = "$(CP) \"$(src)\" \"$(dest)\"" ;
-
-    if ! [ TryCommand $(cmd) ]
-    {
-        Exit "Error: copy failed:" $(src) ;
     }
 }
 

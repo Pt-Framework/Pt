@@ -808,6 +808,16 @@
     The rename may fail if <I>oldpath</I> and <I>newpath</I> are on
     different file systems.
 
+    <P><DT><CODE>
+    FILE_MKDIR <I>path</I> ;
+    </CODE>
+
+    <DD> Creates the directory <I>path</I>. Only creates the final
+    component; parent directories must already exist. Returns
+    <tt>"true"</tt> on success, an empty list on failure (e.g. if
+    the parent directory does not exist or the directory already
+    exists).
+
     </DL></TABLE>
 
 <DT> <P> <H1> Built-in Variables </H1> <DD>

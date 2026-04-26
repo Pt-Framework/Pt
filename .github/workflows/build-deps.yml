@@ -1,5 +1,17 @@
 name: Build Pt Dependencies
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      versionCode:
+        description: 'Version code'
+        required: false
+        default: '1'
+        type: string
+      replace:
+        description: 'Replace existing'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -20,9 +32,22 @@ jobs:
       VCPKG_INSTALLED_DIR: ${{ github.workspace }}/vcpkg_installed
       DEPS_EXPORT_DIR: ${{ github.workspace }}/exported
       DEPS_BASENAME: pt-deps
+      DEPS_TAG: deps-${{ inputs.versionCode }}
     
     steps:
       - uses: actions/checkout@v6
+
+      - name: Check tag does not exist
+        if: ${{ !inputs.replace }}
+        shell: pwsh
+        run: |
+          gh release view "${{ env.DEPS_TAG }}" 2>&1 | Out-Null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Error "Release ${{ env.DEPS_TAG }} already exists. Increment versionCode or enable replace."
+            exit 1
+          }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup vcpkg tools
         uses: lukka/run-vcpkg@v11
@@ -53,7 +78,7 @@ jobs:
           $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
           $manifest = "$zip.manifest"
           @(
-            "VersionCode: ${{ github.run_number }}"
+            "VersionCode: ${{ inputs.versionCode }}"
             "Sha256: $hash"
             "VcpkgCommit: c3867e714dd3a51c272826eea77267876517ed99"
             "Date: $(Get-Date -Format 'yyyy-MM-dd')"
@@ -62,8 +87,8 @@ jobs:
       - name: Release packages
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: deps-latest
-          name: "Pt Dependencies (latest)"
+          tag_name: ${{ env.DEPS_TAG }}
+          name: "Pt Dependencies (${{ env.DEPS_TAG }})"
           body: Precompiled dependencies (libpng, freetype) for Pt
           files: ${{ env.DEPS_EXPORT_DIR }}/*
           prerelease: true

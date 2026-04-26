@@ -76,6 +76,7 @@ LIST *builtin_file_is_dir(FRAME *frame, int flags);
 LIST *builtin_file_exists(FRAME *frame, int flags);
 LIST *builtin_file_remove(FRAME *frame, int flags);
 LIST *builtin_file_rename(FRAME *frame, int flags);
+LIST *builtin_file_mkdir(FRAME *frame, int flags);
 
 /* Pt extension: OBSOLETE
  */

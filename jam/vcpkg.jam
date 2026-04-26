@@ -79,14 +79,14 @@ rule Vcpkg-Map-Os ( os )
     }
 }
 
-# Vcpkg-Triple [ <arch> : <os> ]
+# Vcpkg-Triplet [ <arch> : <os> ]
 #
 # Returns a vcpkg triplet name. Without arguments derives it from
 # TARGET_OSPLAT and TARGET_OS via Vcpkg-Map-Arch / Vcpkg-Map-Os.
 # The triplet does not encode debug/release; a vcpkg tree always
 # contains both.
 #
-rule Vcpkg-Triple ( arch ? : os ? )
+rule Vcpkg-Triplet ( arch ? : os ? )
 {
     arch ?= [ Vcpkg-Map-Arch $(TARGET_OSPLAT) ] ;
     os   ?= [ Vcpkg-Map-Os   $(TARGET_OS)     ] ;
@@ -97,7 +97,7 @@ rule Vcpkg-Triple ( arch ? : os ? )
 #
 # Initialises the local vcpkg environment.
 #   <root>    vcpkg root directory (containing installed/).
-#   <triple>  optional; defaults to [ Vcpkg-Triple ].
+#   <triple>  optional; defaults to [ Vcpkg-Triplet ].
 #
 # Sets VCPKG_ROOT and VCPKG_TRIPLE. Path rules like
 # Vcpkg-Includes and Vcpkg-LibDir use these to resolve
@@ -107,7 +107,7 @@ rule Vcpkg-Setup ( root : triple ? )
 {
     VCPKG_ROOT   = $(root) ;
     VCPKG_TRIPLE = $(triple) ;
-    VCPKG_TRIPLE ?= [ Vcpkg-Triple ] ;
+    VCPKG_TRIPLE ?= [ Vcpkg-Triplet ] ;
 }
 
 # Vcpkg-Installed [ <triple> ]
