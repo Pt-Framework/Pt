@@ -543,7 +543,7 @@ if ! $(WITH_ZLIB)
         ZLIB_LINKFLAGS ?= [ PkgConfig-LinkFlags zlib ] ;
     }
 
-    WITH_ZLIB = [ CheckZLib $(ZLIB_INCLUDES)
+    WITH_ZLIB = [ ZLib-Check $(ZLIB_INCLUDES)
                            : $(ZLIB_LIBDIR)
                            : $(ZLIB_C++FLAGS)
                            : $(ZLIB_LINKLIBS)
