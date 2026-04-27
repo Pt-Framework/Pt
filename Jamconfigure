@@ -519,7 +519,6 @@ if --fetch-deps in $(ARGV)
 # zlib compression library
 #############################################################################
 
-Load pkgconfig.jam ;
 Load zlib.jam ;
 
 if --with-included-zlib in $(ARGV)
@@ -528,6 +527,9 @@ if --with-included-zlib in $(ARGV)
     WITH_ZLIB = yes ;
 }
 
+Configure WITH_BUILTIN_ZLIB ;
+EchoOption --with-included-zlib : "Included zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+
 if ! $(WITH_ZLIB)
 {
     if $(WITH_DEPS)
@@ -535,26 +537,21 @@ if ! $(WITH_ZLIB)
         ZLIB_INCLUDES ?= $(DEPS_INCLUDES) ;
         ZLIB_LIBDIR   ?= $(DEPS_LIBDIR) ;
     }
-    else if [ PkgConfig-Exists zlib ]
-    {
-        ZLIB_INCLUDES  ?= [ PkgConfig-Includes zlib ] ;
-        ZLIB_C++FLAGS  ?= [ PkgConfig-CFlags zlib ] ;
-        ZLIB_LINKLIBS  ?= [ PkgConfig-LinkLibs zlib ] ;
-        ZLIB_LINKFLAGS ?= [ PkgConfig-LinkFlags zlib ] ;
-    }
 
-    WITH_ZLIB = [ ZLib-Check $(ZLIB_INCLUDES)
-                           : $(ZLIB_LIBDIR)
-                           : $(ZLIB_C++FLAGS)
-                           : $(ZLIB_LINKLIBS)
-                           : $(ZLIB_LINKFLAGS) ] ;
+    WITH_ZLIB = [ ZLib-Configure ] ;
 }
 
-if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
+if ! $(WITH_ZLIB) 
 {
     WITH_BUILTIN_ZLIB = yes ;
     WITH_ZLIB = yes ;
 
+    Configure WITH_BUILTIN_ZLIB ;
+    EchoOption WITH_BUILTIN_ZLIB : "Included zlib library" : "(fallback)" ;
+}
+
+if $(WITH_BUILTIN_ZLIB)
+{
     ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
     ZLIB_C++FLAGS = "" ;
     ZLIB_LINKLIBS = "" ;
@@ -568,13 +565,7 @@ if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
     {
         ZLIB_LIBRARY = z ;
     }
-}
 
-Configure WITH_BUILTIN_ZLIB ;
-EchoOption --with-included-zlib : "Included zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
-
-if $(ZLIB_LIBRARY)
-{
     EchoOption ZLIB_LIBRARY : "ZLib library name" ;
     Configure ZLIB_LIBRARY ;
 }
