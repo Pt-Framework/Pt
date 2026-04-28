@@ -1,48 +1,144 @@
-if ! $(FREETYPE_JAM) {
-FREETYPE_JAM = true ;
+if ! $(JAMBASE_FREETYPE_JAM_INCLUDED) {
+JAMBASE_FREETYPE_JAM_INCLUDED = true ;
 
-FREETYPE_INCLUDE_PATHS = /usr/include
-                         /usr/sfw/include/ ;
+FREETYPE_CHECK_CODE = "#include <ft2build.h>"
+                     "#include FT_FREETYPE_H"
+                     "int main() {"
+                     "FT_Library ft;"
+                     "FT_Init_FreeType( &ft );"
+                     "return 0; }" ;
 
-rule FreeTypeIncludes
+rule Freetype-CheckCompile ( includes * : c++flags * )
 {
-    local incl = [ GLOB $(FREETYPE_INCLUDE_PATHS) : freetype2  ] ;
-    #Echo "Checking for freetype includes... " $(incl[0]) ;
-
-    # ft2build.h may be somewhere else
-    local incl2 = [ GLOB $(FREETYPE_INCLUDE_PATHS) : ft2build.h  ] ;
-
-    return $(incl2[0]:P) $(incl[0]) ;
+    return [ CheckDependencyCompileC++ FREETYPE : $(FREETYPE_CHECK_CODE)
+                                                : $(includes) : $(c++flags) ] ;
 }
 
-FREETYPE_LIBRARY_PATHS = /usr/lib
-                         /usr/lib/i386-linux-gnu
-                         /usr/sfw/lib ;
-
-rule FreeTypeLinkFlags
+rule Freetype-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
 {
-    local libs = [ GLOB $(FREETYPE_LIBRARY_PATHS) : *freetype.* ] ;
-    #Echo "Checking for freetype libraries... " $(libs[0]:P) ;
-
-    return -L$(libs[0]:P) ;
+    return [ CheckDependencyLinkC++ FREETYPE : $(FREETYPE_CHECK_CODE)
+                                             : $(includes) : $(c++flags)
+                                             : $(linklibs) : $(libdir) : $(linkflags) ] ;
 }
 
-rule ConfigureFreetype
+rule Freetype-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
 {
-    FREETYPE_INCLUDES  ?= [ FreeTypeIncludes ] ;
-    FREETYPE_LINKFLAGS ?= [ FreeTypeLinkFlags ] ;
+    return [ CheckDependencyC++ FREETYPE : $(FREETYPE_CHECK_CODE)
+                                        : $(includes) : $(c++flags)
+                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
 
-    if $(FREETYPE_INCLUDES) && $(FREETYPE_LINKFLAGS)
+rule Freetype-ConfigureInclude ( includes * : c++flags * )
+{
+    local result ;
+
+    # 1: caller-provided includes
+    if ! $(result)
     {
-        FREETYPE_LINKLIBS = -lfreetype ;
-        Configure FREETYPE_INCLUDES ;
-        Configure FREETYPE_LINKFLAGS ;
-        Configure FREETYPE_LINKLIBS ;
+        result = [ Freetype-CheckCompile $(includes) : $(c++flags) ] ;
     }
 
-    Echo "Checking for freetype includes..." $(FREETYPE_INCLUDES) ;
-    Echo "Checking for freetype linkflags..." $(FREETYPE_LINKFLAGS) ;
-    Echo "Checking for freetype linklibs..." $(FREETYPE_LINKLIBS) ;
+    # 2: /usr/include system path
+    if ! $(result) && ! $(includes)
+    {
+        result = [ Freetype-CheckCompile /usr/include/freetype2 /usr/include
+                                           : $(c++flags) ] ;
+    }
+
+    # 3: /usr/local/include system path
+    if ! $(result) && ! $(includes)
+    {
+        result = [ Freetype-CheckCompile /usr/local/include/freetype2 /usr/local/include
+                                           : $(c++flags) ] ;
+    }
+
+    return $(result) ;
 }
 
-} # FREETYPE_JAM
+rule Freetype-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    local is_debug ;
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
+
+    # 1: caller-provided libs
+    if ! $(result) && $(linklibs)
+    {
+        result = [ Freetype-CheckLink $(includes)
+                                     : $(c++flags)
+                                     : $(linklibs)
+                                     : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 2: debug lib (freetyped)
+    if ! $(result) && $(is_debug)
+    {
+        result = [ Freetype-CheckLink $(includes)
+                                     : $(c++flags)
+                                     : [ FLinkLibs freetyped ]
+                                     : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 3: normal lib (freetype)
+    if ! $(result)
+    {
+        result = [ Freetype-CheckLink $(includes)
+                                     : $(c++flags)
+                                     : [ FLinkLibs freetype ]
+                                     : $(libdir) : $(linkflags) ] ;
+    }
+
+    return $(result) ;
+}
+
+# Freetype-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+#
+# Probes for a system freetype installation by trying pkg-config first (if
+# no hints have been provided), then falling back to compile-probes with
+# toolset-neutral library flags.
+#
+# Returns "yes" on success; FREETYPE_INCLUDES, FREETYPE_C++FLAGS,
+# FREETYPE_LINKLIBS and FREETYPE_LINKFLAGS are set as a side-effect by
+# CheckDependencyCompileC++ and CheckDependencyLinkC++.
+
+rule Freetype-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    # Pkg-config (only when no hints are provided)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
+    {
+        Load pkgconfig.jam ;
+
+        if [ PkgConfig-Exists freetype2 ]
+        {
+            includes  = [ PkgConfig-Includes freetype2 ] ;
+            c++flags  = [ PkgConfig-CFlags freetype2 ] ;
+            linklibs  = [ PkgConfig-LinkLibs freetype2 ] ;
+            linkflags = [ PkgConfig-LinkFlags freetype2 ] ;
+
+            result = [ Freetype-Check $(includes)
+                                     : $(c++flags)
+                                     : $(linklibs)
+                                     : : $(linkflags) ] ;
+        }
+    }
+
+    # Include search, then link search
+    if ! $(result)
+    {
+        if [ Freetype-ConfigureInclude $(includes) : $(c++flags) ]
+        {
+            includes = $(FREETYPE_INCLUDES) ;
+            c++flags = $(FREETYPE_C++FLAGS) ;
+
+            result = [ Freetype-ConfigureLink $(includes) : $(c++flags)
+                                             : $(linklibs) : $(libdir) : $(linkflags) ] ;
+        }
+    }
+
+    return $(result) ;
+}
+
+} # JAMBASE_FREETYPE_JAM_INCLUDED

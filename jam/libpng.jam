@@ -1,0 +1,130 @@
+if ! $(JAMBASE_PNG_JAM_INCLUDED) {
+JAMBASE_PNG_JAM_INCLUDED = true ;
+
+LIBPNG_CHECK_CODE = "#include <png.h>"
+                    "int main() {"
+                    "png_structp pngPtr;"
+                    "return 0; }" ;
+
+rule Png-CheckCompile ( includes * : c++flags * )
+{
+    return [ CheckDependencyCompileC++ PNG : $(LIBPNG_CHECK_CODE)
+                                           : $(includes) : $(c++flags) ] ;
+}
+
+rule Png-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyLinkC++ PNG : $(LIBPNG_CHECK_CODE)
+                                        : $(includes) : $(c++flags)
+                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
+
+rule Png-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyC++ PNG : $(LIBPNG_CHECK_CODE)
+                                   : $(includes) : $(c++flags)
+                                   : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
+
+rule Png-ConfigureInclude ( includes * : c++flags * )
+{
+    local hdr_found = [ Png-CheckCompile $(includes) : $(c++flags) ] ;
+    return $(hdr_found) ;
+}
+
+rule Png-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    local is_debug ;
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
+
+    # 1: caller-provided libs
+    if ! $(result) && $(linklibs)
+    {
+        result = [ Png-CheckLink $(includes)
+                                : $(c++flags)
+                                : $(linklibs)
+                                : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 2: debug lib (libpng16d)
+    if ! $(result) && $(is_debug)
+    {
+        result = [ Png-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs libpng16d ]
+                                : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 3: MSVC-style lib name (libpng16)
+    if ! $(result)
+    {
+        result = [ Png-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs libpng16 ]
+                                : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 4: Unix-style lib name (png)
+    if ! $(result)
+    {
+        result = [ Png-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs png ]
+                                : $(libdir) : $(linkflags) ] ;
+    }
+
+    return $(result) ;
+}
+
+# Png-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+#
+# Probes for a system libpng installation by trying pkg-config first (if no
+# hints have been provided), then falling back to compile-probes with
+# toolset-neutral library flags.
+#
+# Returns "yes" on success; PNG_INCLUDES, PNG_C++FLAGS, PNG_LINKLIBS
+# and PNG_LINKFLAGS are set as a side-effect by CheckDependencyCompileC++
+# and CheckDependencyLinkC++.
+
+rule Png-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    # Pkg-config (only when no hints are provided)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
+    {
+        Load pkgconfig.jam ;
+
+        if [ PkgConfig-Exists libpng ]
+        {
+            includes  = [ PkgConfig-Includes libpng ] ;
+            c++flags  = [ PkgConfig-CFlags libpng ] ;
+            linklibs  = [ PkgConfig-LinkLibs libpng ] ;
+            linkflags = [ PkgConfig-LinkFlags libpng ] ;
+
+            result = [ Png-Check $(includes)
+                                : $(c++flags)
+                                : $(linklibs)
+                                : : $(linkflags) ] ;
+        }
+    }
+
+    # Include search, then link search
+    if ! $(result)
+    {
+        if [ Png-ConfigureInclude $(includes) : $(c++flags) ]
+        {
+            includes = $(PNG_INCLUDES) ;
+            c++flags = $(PNG_C++FLAGS) ;
+
+            result = [ Png-ConfigureLink $(includes) : $(c++flags)
+                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+        }
+    }
+
+    return $(result) ;
+}
+
+} # JAMBASE_PNG_JAM_INCLUDED

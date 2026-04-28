@@ -158,6 +158,14 @@ rule FIncludes
 { return -I$(<) ; }
 
 
+rule FLibPath
+{ return -L$(<) ; }
+
+
+rule FLinkLibs
+{ return -l$(<) ; }
+
+
 rule Main-Build
 {
     MainFromObjects $(<) : $(>) ;

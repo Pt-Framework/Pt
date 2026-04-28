@@ -1,117 +1,137 @@
 if ! $(JAMBASE_ZLIB_JAM_INCLUDED) {
 JAMBASE_ZLIB_JAM_INCLUDED = true ;
 
-rule ZLib-Check
+ZLIB_CHECK_CODE = "#include <zlib.h>"
+                  "int main() {"
+                  "z_stream zstream;"
+                  "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }" ;
+
+rule ZLib-CheckCompile ( includes * : c++flags * )
 {
-    local CHECK_INCLUDES  = $(1) ;
-    local CHECK_LIBDIR    = $(2) ;
-    local CHECK_C++FLAGS  = $(3) ;
-    local CHECK_LINKLIBS  = $(4) ;
-    local CHECK_LINKFLAGS = $(5) ;
+    return [ CheckDependencyCompileC++ ZLIB : $(ZLIB_CHECK_CODE)
+                                            : $(includes) : $(c++flags) ] ;
+}
 
-    #CHECK_C++FLAGS += [ FIncludes $(CHECK_INCLUDES) ] ;
+rule ZLib-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyLinkC++ ZLIB : $(ZLIB_CHECK_CODE)
+                                        : $(includes) : $(c++flags)
+                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
 
-    local CODE = "#include <zlib.h>"
-                 "int main() {"
-                 "z_stream zstream;"
-                 "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }" ;
+rule ZLib-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyC++ ZLIB : $(ZLIB_CHECK_CODE)
+                                    : $(includes) : $(c++flags)
+                                    : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
 
+rule ZLib-ConfigureInclude ( includes * : c++flags * )
+{
+    local hdr_found = [ ZLib-CheckCompile $(includes) : $(c++flags) ] ;
+    return $(hdr_found) ;
+}
+
+rule ZLib-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
     local result ;
 
-    # MSVC-style: .lib + /LIBPATH:
-    if ! $(result)
+    local is_debug ;
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
+
+    # 1: caller-provided libs
+    if ! $(result) && $(linklibs)
     {
-        local MSVC_LIBS = $(CHECK_LINKLIBS) ;
-        if ! $(MSVC_LIBS)
-        {
-            if $(WITH_DEBUG) && ! $(WITH_OPTIM)
-            {
-                MSVC_LIBS = zlibd.lib ;
-            }
-            else
-            {
-                MSVC_LIBS = zlib.lib ;
-            }
-        }
-
-        local MSVC_LIBPATH = /LIBPATH:$(CHECK_LIBDIR) ;
-
-        result = [ CheckBuildC++ $(CODE)
-                                 : $(CHECK_C++FLAGS) [ FIncludes $(CHECK_INCLUDES) ]
-                                 : $(MSVC_LIBS) $(MSVC_LIBPATH) $(CHECK_LINKFLAGS) ] ;
-        if $(result)
-        {
-            CHECK_LINKLIBS = $(MSVC_LIBS) ;
-            CHECK_LINKFLAGS = $(MSVC_LIBPATH) $(CHECK_LINKFLAGS) ;
-        }
+        result = [ ZLib-CheckLink $(includes)
+                                : $(c++flags)
+                                : $(linklibs)
+                                : $(libdir) : $(linkflags) ] ;
     }
 
-    # Unix-style: -lz + -L
-    if ! $(result)
+    # 2: debug lib (zlibd)
+    if ! $(result) && $(is_debug)
     {
-        local UNIX_LIBS = $(CHECK_LINKLIBS) ;
-        if ! $(UNIX_LIBS) 
-        { 
-            UNIX_LIBS = -lz ; 
-        }
-
-        local UNIX_LIBPATH = -L$(CHECK_LIBDIR) ;
-
-        result = [ CheckBuildC++ $(CODE)
-                                 : $(CHECK_C++FLAGS) [ FIncludes $(CHECK_INCLUDES) ]
-                                 : $(UNIX_LIBS) $(UNIX_LIBPATH) $(CHECK_LINKFLAGS) ] ;
-        if $(result)
-        {
-            CHECK_LINKLIBS = $(UNIX_LIBS) ;
-            CHECK_LINKFLAGS = $(UNIX_LIBPATH) $(CHECK_LINKFLAGS) ;
-        }
+        result = [ ZLib-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs zlibd ]
+                                : $(libdir) : $(linkflags) ] ;
     }
 
-    if $(result)
+    # 3: MSVC-style lib name (zlib)
+    if ! $(result)
     {
-        ZLIB_INCLUDES  = $(CHECK_INCLUDES) ;
-        ZLIB_C++FLAGS  = $(CHECK_C++FLAGS) ;
-        ZLIB_LINKLIBS  = $(CHECK_LINKLIBS) ;
-        ZLIB_LINKFLAGS = $(CHECK_LINKFLAGS) ;
+        result = [ ZLib-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs zlib ]
+                                : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 4: MSVC-style alternate lib name (zlib1)
+    if ! $(result)
+    {
+        result = [ ZLib-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs zlib1 ]
+                                : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 5: Unix-style lib name (z)
+    if ! $(result)
+    {
+        result = [ ZLib-CheckLink $(includes)
+                                : $(c++flags)
+                                : [ FLinkLibs z ]
+                                : $(libdir) : $(linkflags) ] ;
     }
 
     return $(result) ;
 }
 
-# ZLib-Configure
+# ZLib-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
 #
 # Probes for a system zlib installation by trying pkg-config first (if no
-# hints have been provided externally), then falling back to the generic
-# MSVC/Unix compile-probe in ZLib-Check.
-#
-# Callers set ZLIB_INCLUDES / ZLIB_LIBDIR before calling to skip the
-# pkg-config step (e.g. when using WITH_DEPS or cross-compiling).
+# hints have been provided), then falling back to compile-probes with
+# toolset-neutral library flags.
 #
 # Returns "yes" on success; ZLIB_INCLUDES, ZLIB_C++FLAGS, ZLIB_LINKLIBS
-# and ZLIB_LINKFLAGS are set as a side-effect by ZLib-Check.
+# and ZLIB_LINKFLAGS are set as a side-effect by CheckDependencyCompileC++
+# and CheckDependencyLinkC++.
 
-rule ZLib-Configure
+rule ZLib-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
 {
     local result ;
 
-    if ! $(ZLIB_INCLUDES) && ! $(ZLIB_LIBDIR) && ! $(ZLIB_LINKLIBS) && ! $(ZLIB_C++FLAGS) && ! $(ZLIB_LINKFLAGS)
+    # Pkg-config (only when no hints are provided)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
     {
         Load pkgconfig.jam ;
 
         if [ PkgConfig-Exists zlib ]
         {
-            ZLIB_INCLUDES  = [ PkgConfig-Includes zlib ] ;
-            ZLIB_C++FLAGS  = [ PkgConfig-CFlags zlib ] ;
-            ZLIB_LINKLIBS  = [ PkgConfig-LinkLibs zlib ] ;
-            ZLIB_LINKFLAGS = [ PkgConfig-LinkFlags zlib ] ;
+            includes  = [ PkgConfig-Includes zlib ] ;
+            c++flags  = [ PkgConfig-CFlags zlib ] ;
+            linklibs  = [ PkgConfig-LinkLibs zlib ] ;
+            linkflags = [ PkgConfig-LinkFlags zlib ] ;
+
+            result = [ ZLib-Check $(includes)
+                                : $(c++flags)
+                                : $(linklibs)
+                                : : $(linkflags) ] ;
         }
     }
 
-    result = [ ZLib-Check $(ZLIB_INCLUDES)
-                        : $(ZLIB_LIBDIR)
-                        : $(ZLIB_C++FLAGS)
-                        : $(ZLIB_LINKLIBS)
-                        : $(ZLIB_LINKFLAGS) ] ;
+    # Include search, then link search
+    if ! $(result)
+    {
+        if [ ZLib-ConfigureInclude $(includes) : $(c++flags) ]
+        {
+            includes = $(ZLIB_INCLUDES) ;
+            c++flags = $(ZLIB_C++FLAGS) ;
+
+            result = [ ZLib-ConfigureLink $(includes) : $(c++flags)
+                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+        }
+    }
 
     return $(result) ;
 }
