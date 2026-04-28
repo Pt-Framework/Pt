@@ -48,24 +48,39 @@ rule PkgConfig-Unescape
 # Returns "yes" if the package is known to pkg-config
 # and optionally satisfies <min-version>.
 #
+# pkg-config always produces -l link flags. If the active toolchain
+# uses a different format (e.g. MSVC produces foo.lib), the entire
+# pkg-config result set is unusable, so we treat it as "not found".
+#
 rule PkgConfig-Exists
 {
     local _package = $(1) ;
     local _version = $(2) ;
 
-    local PC_RESULT ;
-    if $(_version)
+    local is_compatible = ;
+
+    # pkg-config always returns -l flags; only proceed if the toolchain agrees.
+    if -lABC = [ FLinkLibs ABC ]
     {
-        PC_RESULT = [ EXEC "$(PKGCONFIG) --atleast-version=$(_version) $(_package)" ] ;
-    }
-    else
-    {
-        PC_RESULT = [ EXEC "$(PKGCONFIG) --exists $(_package)" ] ;
+        is_compatible = yes ;
     }
 
-    if $(PC_RESULT[1]) = 0
+    if $(is_compatible)
     {
-        return yes ;
+        local PC_RESULT ;
+        if $(_version)
+        {
+            PC_RESULT = [ EXEC "$(PKGCONFIG) --atleast-version=$(_version) $(_package)" ] ;
+        }
+        else
+        {
+            PC_RESULT = [ EXEC "$(PKGCONFIG) --exists $(_package)" ] ;
+        }
+
+        if $(PC_RESULT[1]) = 0
+        {
+            return yes ;
+        }
     }
 }
 
@@ -111,20 +126,12 @@ rule PkgConfig-Includes
 # Returns link library flags (-l...) for <package>.
 # Uses --libs-only-l.
 #
-# pkg-config always returns -l flags. If the active toolchain uses a
-# different format (e.g. MSVC produces foo.lib from FLinkLibs), the
-# flags are incompatible and this rule returns empty.
-#
 rule PkgConfig-LinkLibs
 {
-    # pkg-config always returns -l flags; check if the toolchain agrees.
-    if -lABC = [ FLinkLibs ABC ]
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
     {
-        local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l $(1)" ] ;
-        if $(PC_RESULT[1]) = 0
-        {
-            return $(PC_RESULT[2-]) ;
-        }
+        return $(PC_RESULT[2-]) ;
     }
 }
 
