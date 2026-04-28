@@ -528,8 +528,8 @@ if --with-included-zlib in $(ARGV)
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS)
-                                : $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
+    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
+                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_ZLIB) 
@@ -578,32 +578,28 @@ Load libpng.jam ;
 if --with-included-libpng in $(ARGV)
 {
     WITH_BUILTIN_LIBPNG = yes ;
-    WITH_PNG = yes ;
 }
 
-Configure WITH_BUILTIN_LIBPNG ;
-EchoOption --with-included-libpng : "Included libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
-
-if ! $(WITH_PNG)
+if ! $(WITH_BUILTIN_LIBPNG)
 {
-    WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) : $(PNG_LINKLIBS) : $(PNG_LIBDIR) : $(PNG_LINKFLAGS) ] ;
+    WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) :
+                               $(PNG_LINKLIBS) : $(PNG_LIBDIR) : $(PNG_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_PNG)
 {
     WITH_BUILTIN_LIBPNG = yes ;
-    WITH_PNG = yes ;
-
-    Configure WITH_BUILTIN_LIBPNG ;
-    EchoOption WITH_BUILTIN_LIBPNG : "Included libpng library" : "(fallback)" ;
 }
+
+Configure WITH_BUILTIN_LIBPNG ;
+EchoOption --with-included-libpng : "Included libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
 
 if $(WITH_BUILTIN_LIBPNG)
 {
     PNG_INCLUDES = [ FDirName $(PT_TOP) src libpng ] ;
-    PNG_C++FLAGS = "" ;
-    PNG_LINKLIBS = "" ;
-    PNG_LINKFLAGS = "" ;
+    PNG_C++FLAGS = ;
+    PNG_LINKLIBS = ;
+    PNG_LINKFLAGS = ;
 }
 
 Configure PNG_INCLUDES ;
@@ -627,32 +623,29 @@ Load libjpeg.jam ;
 if --with-included-libjpeg in $(ARGV)
 {
     WITH_BUILTIN_LIBJPEG = yes ;
-    WITH_JPEG = yes ;
 }
 
-Configure WITH_BUILTIN_LIBJPEG ;
-EchoOption --with-included-libjpeg : "Included libjpeg library" : $(WITH_BUILTIN_LIBJPEG:E="no") ;
-
-if ! $(WITH_JPEG)
+if ! $(WITH_BUILTIN_LIBJPEG)
 {
-    WITH_JPEG = [ Jpeg-Configure $(JPEG_INCLUDES) : $(JPEG_C++FLAGS) : $(JPEG_LINKLIBS) : $(JPEG_LIBDIR) : $(JPEG_LINKFLAGS) ] ;
+    WITH_JPEG = [ Jpeg-Configure $(JPEG_INCLUDES) : $(JPEG_C++FLAGS) :
+                                 $(JPEG_LINKLIBS) : $(JPEG_LIBDIR) : $(JPEG_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_JPEG)
 {
     WITH_BUILTIN_LIBJPEG = yes ;
-    WITH_JPEG = yes ;
-
-    Configure WITH_BUILTIN_LIBJPEG ;
-    EchoOption WITH_BUILTIN_LIBJPEG : "Included libjpeg library" : "(fallback)" ;
 }
+
+Configure WITH_BUILTIN_LIBJPEG ;
+EchoOption --with-included-libjpeg : "Included libjpeg library"
+                                   : $(WITH_BUILTIN_LIBJPEG:E="no") ;
 
 if $(WITH_BUILTIN_LIBJPEG)
 {
     JPEG_INCLUDES = [ FDirName $(PT_TOP) src libjpeg ] ;
-    JPEG_C++FLAGS = "" ;
-    JPEG_LINKLIBS = "" ;
-    JPEG_LINKFLAGS = "" ;
+    JPEG_C++FLAGS = ;
+    JPEG_LINKLIBS = ;
+    JPEG_LINKFLAGS = ;
 }
 
 Configure JPEG_INCLUDES ;
@@ -676,32 +669,28 @@ Load freetype.jam ;
 if --with-included-freetype in $(ARGV)
 {
     WITH_BUILTIN_FREETYPE = yes ;
-    WITH_FREETYPE = yes ;
 }
 
-Configure WITH_BUILTIN_FREETYPE ;
-EchoOption --with-included-freetype : "Included freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
-
-if ! $(WITH_FREETYPE)
+if ! $(WITH_BUILTIN_FREETYPE)
 {
-    WITH_FREETYPE = [ Freetype-Configure $(FREETYPE_INCLUDES) : $(FREETYPE_C++FLAGS) : $(FREETYPE_LINKLIBS) : $(FREETYPE_LIBDIR) : $(FREETYPE_LINKFLAGS) ] ;
+    WITH_FREETYPE = [ Freetype-Configure $(FREETYPE_INCLUDES) : $(FREETYPE_C++FLAGS) :
+                                         $(FREETYPE_LINKLIBS) : $(FREETYPE_LIBDIR) : $(FREETYPE_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_FREETYPE)
 {
     WITH_BUILTIN_FREETYPE = yes ;
-    WITH_FREETYPE = yes ;
-
-    Configure WITH_BUILTIN_FREETYPE ;
-    EchoOption WITH_BUILTIN_FREETYPE : "Included freetype library" : "(fallback)" ;
 }
+
+Configure WITH_BUILTIN_FREETYPE ;
+EchoOption --with-included-freetype : "Included freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
 
 if $(WITH_BUILTIN_FREETYPE)
 {
     FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
-    FREETYPE_C++FLAGS = "" ;
-    FREETYPE_LINKLIBS = "" ;
-    FREETYPE_LINKFLAGS = "" ;
+    FREETYPE_C++FLAGS = ;
+    FREETYPE_LINKLIBS = ;
+    FREETYPE_LINKFLAGS = ;
 }
 
 Configure FREETYPE_INCLUDES ;
@@ -715,16 +704,6 @@ EchoOption FREETYPE_LINKLIBS : "Freetype libs" ;
 
 Configure FREETYPE_LINKFLAGS ;
 EchoOption FREETYPE_LINKFLAGS : "Freetype link flags" ;
-
-#############################################################################
-# mbedTLS
-#############################################################################
-
-if --with-mbedtls in $(ARGV)
-{
-    WITH_MBEDTLS = "yes" ;
-    Configure WITH_MBEDTLS ;
-}
 
 #############################################################################
 # SSL libraries and includes
@@ -775,8 +754,8 @@ if ! $(WITH_SSL)
 
 if ! $(WITH_SSL)
 {
-    WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS)
-                                  : $(SSL_LINKLIBS) : $(SSL_LIBDIR) : $(SSL_LINKFLAGS) ] ;
+    WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS) :
+                                   $(SSL_LINKLIBS) : $(SSL_LIBDIR) : $(SSL_LINKFLAGS) ] ;
 
     if $(WITH_SSL)
     {
