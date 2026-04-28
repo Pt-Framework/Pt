@@ -93,13 +93,16 @@ rule PkgConfig-Includes
     local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags-only-I $(1)" ] ;
     if $(PC_RESULT[1]) = 0
     {
-        # Strip all -I prefixes from the raw string before unescaping.
         local _raw = $(PC_RESULT[2-]) ;
-        _raw = [ REPLACE $(_raw) : " -I" : " " ] ;
-        _raw = [ SUBST $(_raw) "^-I(.*)" "$1" ] ;
-        if ! $(_raw) { _raw = $(PC_RESULT[2-]) ; }
+        if $(_raw)
+        {
+            # Strip all -I prefixes from the raw string before unescaping.
+            _raw = [ REPLACE $(_raw) : " -I" : " " ] ;
+            _raw = [ SUBST $(_raw) "^-I(.*)" "$1" ] ;
+            if ! $(_raw) { _raw = $(PC_RESULT[2-]) ; }
 
-        return [ PkgConfig-Unescape $(_raw) ] ;
+            return [ PkgConfig-Unescape $(_raw) ] ;
+        }
     }
 }
 

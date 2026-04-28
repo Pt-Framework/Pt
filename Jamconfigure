@@ -582,7 +582,7 @@ if --with-included-libpng in $(ARGV)
 }
 
 Configure WITH_BUILTIN_LIBPNG ;
-EchoOption --with-libpng : "Included libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
+EchoOption --with-included-libpng : "Included libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
 
 if ! $(WITH_PNG)
 {
@@ -631,7 +631,7 @@ if --with-included-libjpeg in $(ARGV)
 }
 
 Configure WITH_BUILTIN_LIBJPEG ;
-EchoOption --with-libjpeg : "Included libjpeg library" : $(WITH_BUILTIN_LIBJPEG:E="no") ;
+EchoOption --with-included-libjpeg : "Included libjpeg library" : $(WITH_BUILTIN_LIBJPEG:E="no") ;
 
 if ! $(WITH_JPEG)
 {
@@ -680,7 +680,7 @@ if --with-included-freetype in $(ARGV)
 }
 
 Configure WITH_BUILTIN_FREETYPE ;
-EchoOption --with-freetype : "Included freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
+EchoOption --with-included-freetype : "Included freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
 
 if ! $(WITH_FREETYPE)
 {
