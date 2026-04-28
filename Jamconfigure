@@ -470,17 +470,17 @@ if --fetch-deps in $(ARGV)
 
     Fetch-Configure ;
 
-    WITH_DEPS ?= deps ;
-    DEPS_VERSION  ?= deps-1 ;
+    DEPS_DIR ?= deps ;
+    DEPS_VERSION ?= deps-1 ;
 
     local targetTriple  = [ Vcpkg-Triplet ] ;
     local archiveName   = pt-deps-$(targetTriple).zip ;
     local manifestName  = $(archiveName).manifest ;
     local baseUrl       = "https://github.com/Pt-Framework/Pt/releases/download/$(DEPS_VERSION)" ;
-    local targetDir      = [ FDirName $(WITH_DEPS) $(targetTriple) ] ;
+    local targetDir      = [ FDirName $(DEPS_DIR) $(targetTriple) ] ;
     local manifestLocal = [ FDirName $(targetDir) $(manifestName) ] ;
-    local manifestTmp   = [ FDirName $(WITH_DEPS) $(manifestName).tmp ] ;
-    local archiveTmp    = [ FDirName $(WITH_DEPS) $(archiveName).tmp ] ;
+    local manifestTmp   = [ FDirName $(DEPS_DIR) $(manifestName).tmp ] ;
+    local archiveTmp    = [ FDirName $(DEPS_DIR) $(archiveName).tmp ] ;
     local fetched       = ;
 
     Fetch-Url "$(baseUrl)/$(manifestName)" : $(manifestTmp) ;
@@ -496,7 +496,7 @@ if --fetch-deps in $(ARGV)
     {
         Fetch-Url   "$(baseUrl)/$(archiveName)" : $(archiveTmp) ;
         Fetch-RmDir $(targetDir) ;
-        Fetch-Unzip $(archiveTmp) : $(WITH_DEPS) ;
+        Fetch-Unzip $(archiveTmp) : $(DEPS_DIR) ;
         FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
         fetched = $(archiveName) ;
     }
@@ -506,13 +506,16 @@ if --fetch-deps in $(ARGV)
 
     EchoOption $(targetTriple) : "Fetch dependencies" : $(fetched:E="up to date") ;
 
-    DEPS_INCLUDES = [ FDirName $(targetDir) include ] ;
-    DEPS_LIBDIR = [ FDirName $(targetDir) lib ] ;
+    local depsRoot = [ FDirName $(DEPS_DIR) $(targetTriple) ] ;
+    local depsIncludes = [ FDirName $(depsRoot) include ] ;
+    local depsLibDir = [ FDirName $(depsRoot) lib ] ;
     
     if $(WITH_DEBUG) && ! $(WITH_OPTIM)
     {
-        DEPS_LIBDIR = [ FDirName $(targetDir) debug lib ] ;
+        depsLibDir = [ FDirName $(depsRoot) debug lib ] ;
     }
+
+    SetDependencyPath $(depsRoot) : $(depsIncludes) : $(depsLibDir) ;
 }
 
 #############################################################################

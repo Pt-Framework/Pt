@@ -731,6 +731,39 @@ rule CheckBuildC++
 }
 
 #!
+#! SetDependencyPath ROOT [ : INCLUDES : LIBDIR ] ;
+#!
+#! Configures the default search paths used by CheckDependencyCompileC++,
+#! CheckDependencyLinkC++ and CheckDependencyC++ when no explicit INCLUDES
+#! or LIBDIR are passed.
+#!
+#! If only ROOT is provided, DEPS_INCLUDES and DEPS_LIBDIR are derived
+#! from it using standard layout conventions (include/, lib/, debug/lib/).
+#!
+#! If INCLUDES and/or LIBDIR are provided, they are used directly.
+#!
+rule SetDependencyPath ( root * : includes * : libdir * )
+{
+    if $(includes)
+    {
+        DEPS_INCLUDES = $(includes) ;
+    }
+    else if $(root)
+    {
+        DEPS_INCLUDES = [ FDirName $(root) include ] ;
+    }
+
+    if $(libdir)
+    {
+        DEPS_LIBDIR = $(libdir) ;
+    }
+    else if $(root)
+    {
+        DEPS_LIBDIR = [ FDirName $(root) lib ] ;
+    }
+}
+
+#!
 #! CheckDependencyCompileC++ PREFIX : CODE : INCLUDES : C++FLAGS ;
 #!
 #! Compile-only probe for an external C++ dependency's headers.
