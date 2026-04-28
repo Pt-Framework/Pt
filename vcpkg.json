@@ -2,6 +2,7 @@
   "name": "pt-deps",
   "version": "0.0.1",
   "dependencies": [
+    "libjpeg-turbo",
     "libpng",
     "freetype"
   ],
