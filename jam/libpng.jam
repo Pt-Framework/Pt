@@ -3,7 +3,8 @@ JAMBASE_PNG_JAM_INCLUDED = true ;
 
 LIBPNG_CHECK_CODE = "#include <png.h>"
                     "int main() {"
-                    "png_structp pngPtr;"
+                    "png_structp p = png_create_read_struct("
+                    "PNG_LIBPNG_VER_STRING, 0, 0, 0);"
                     "return 0; }" ;
 
 rule Png-CheckCompile ( includes * : c++flags * )

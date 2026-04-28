@@ -5,36 +5,62 @@ PKGCONFIG ?= pkg-config ;
 
 # PkgConfig-Unescape <values>
 #
-# Unescapes backslash-escaped spaces in pkg-config output
-# and wraps affected items in quotes.
+# Unescapes backslash-escaped spaces in pkg-config output.
+#
+# EXEC returns each output line as a single Jam list element, so a
+# multi-flag line like
+#   -IC:/Program\ Files/Bravo\ SDKs/.../freetype2 -IC:/Program\ Files/...
+# arrives as ONE string.
+#
+# This rule replaces every '\ ' sequence with a placeholder, splits on
+# remaining (unescaped) spaces via SPLIT_BY_CHARACTERS, then restores the
+# real spaces and wraps affected items in quotes.
 #
 rule PkgConfig-Unescape
 {
+    local _placeholder = "^^" ;
     local CLEAN ;
 
-    for item in $(1[1-])
+    for local _raw in $(1[1-])
     {
-        local had_escape ;
-        local cleaned = [ SUBST $(item) "(.*)\\\\ (.*)" "$1 $2" ] ;
-
-        while $(cleaned)
+        # 1) Replace all '\ ' with placeholder (loop because SUBST is
+        #    single-match).
+        local _s = $(_raw) ;
+        local _prev ;
+        while $(_s) != $(_prev)
         {
-            had_escape = yes ;
-            item = $(cleaned) ;
-            cleaned = [ SUBST $(item) "(.*)\\\\ (.*)" "$1 $2" ] ;
+            _prev = $(_s) ;
+            _s = [ SUBST $(_s) "(.*)\\\\ (.*)" "$1$(_placeholder)$2" ] ;
+            if ! $(_s) { _s = $(_prev) ; }
         }
 
-        if $(had_escape)
+        # 2) Split on real spaces — each token is now a separate list item.
+        local _tokens = [ SPLIT_BY_CHARACTERS $(_s) : " " ] ;
+
+        # 3) Restore placeholder → real space, quote if needed.
+        for local _tok in $(_tokens)
         {
-            CLEAN += \"$(item)\" ;
-        }
-        else
-        {
-            CLEAN += $(item) ;
+            local _restored = $(_tok) ;
+            local _prev2 ;
+            while $(_restored) != $(_prev2)
+            {
+                _prev2 = $(_restored) ;
+                _restored = [ SUBST $(_restored) "(.*)(\\^\\^)(.*)" "$1 $3" ] ;
+                if ! $(_restored) { _restored = $(_prev2) ; }
+            }
+
+            if $(_restored) != $(_tok)
+            {
+                CLEAN += \"$(_restored)\" ;
+            }
+            else
+            {
+                CLEAN += $(_restored) ;
+            }
         }
     }
 
-    return $(CLEAN:J=" ") ;
+    return $(CLEAN) ;
 }
 
 # PkgConfig-Exists <package> [ : <min-version> ]
@@ -87,18 +113,22 @@ rule PkgConfig-Includes
     local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags-only-I $(1)" ] ;
     if $(PC_RESULT[1]) = 0
     {
-        local _result ;
+        # Strip all -I prefixes from the raw string before unescaping.
+        # First: leading -I
+        local _raw = $(PC_RESULT[2-]) ;
+        _raw = [ SUBST $(_raw) "^-I(.*)" "$1" ] ;
+        if ! $(_raw) { _raw = $(PC_RESULT[2-]) ; }
 
-        for local _flag in $(PC_RESULT[2-])
+        # Then: space-separated -I (loop for multiple occurrences)
+        local _prev ;
+        while $(_raw) != $(_prev)
         {
-            local _path = [ SUBST $(_flag) "^-I(.*)" "$1" ] ;
-            if $(_path)
-            {
-                _result += $(_path) ;
-            }
+            _prev = $(_raw) ;
+            _raw = [ SUBST $(_raw) "(.*) -I(.*)" "$1 $2" ] ;
+            if ! $(_raw) { _raw = $(_prev) ; }
         }
 
-        return [ PkgConfig-Unescape $(_result) ] ;
+        return [ PkgConfig-Unescape $(_raw) ] ;
     }
 }
 
@@ -107,12 +137,20 @@ rule PkgConfig-Includes
 # Returns link library flags (-l...) for <package>.
 # Uses --libs-only-l.
 #
+# pkg-config always returns -l flags. If the active toolchain uses a
+# different format (e.g. MSVC produces foo.lib from FLinkLibs), the
+# flags are incompatible and this rule returns empty.
+#
 rule PkgConfig-LinkLibs
 {
-    local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l $(1)" ] ;
-    if $(PC_RESULT[1]) = 0
+    # pkg-config always returns -l flags; check if the toolchain agrees.
+    if -lABC = [ FLinkLibs ABC ]
     {
-        return $(PC_RESULT[2-]) ;
+        local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l $(1)" ] ;
+        if $(PC_RESULT[1]) = 0
+        {
+            return $(PC_RESULT[2-]) ;
+        }
     }
 }
 
