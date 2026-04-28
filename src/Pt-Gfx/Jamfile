@@ -116,6 +116,7 @@ else
 {
     LinkFlags Pt-Gfx : $(PNG_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(PNG_LINKLIBS) ;
+    ObjectC++Flags PngReader.cpp PngWriter.cpp : $(PNG_C++FLAGS) ;
 }
 
 if $(WITH_BUILTIN_LIBJPEG)
@@ -126,6 +127,7 @@ else
 {
     LinkFlags Pt-Gfx : $(JPEG_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(JPEG_LINKLIBS) ;
+    ObjectC++Flags JpegReader.cpp : $(JPEG_C++FLAGS) ;
 }
 
 if $(WITH_BUILTIN_ZLIB)
@@ -146,6 +148,7 @@ else
 {
     LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
+    ObjectC++Flags $(PT_GFX_FREETYPE_SOURCES) : $(FREETYPE_C++FLAGS) ;
 }
 
 SubInclude PT_TOP src Pt-Gfx tests ;

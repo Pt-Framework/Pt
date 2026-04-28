@@ -78,6 +78,7 @@ LIST *builtin_file_remove(FRAME *frame, int flags);
 LIST *builtin_file_rename(FRAME *frame, int flags);
 LIST *builtin_file_mkdir(FRAME *frame, int flags);
 LIST *builtin_file_rmdir(FRAME *frame, int flags);
+LIST *builtin_replace(FRAME *frame, int flags);
 
 /* Pt extension: OBSOLETE
  */

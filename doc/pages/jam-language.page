@@ -738,6 +738,15 @@
     <I>regexps</I>.  Only useful within the <tt>[ ]</tt> construct,
     to change the result into a list.
 
+    <P><DT><CODE>
+    REPLACE <I>string</I> : <I>old</I> : <I>new</I> ;
+    </CODE>
+
+    <DD> Replaces all occurrences of the literal substring <I>old</I>
+    in <I>string</I> with <I>new</I>. Returns the modified string.
+    If <I>old</I> is empty, returns <I>string</I> unchanged. Only
+    useful within the <tt>[ ]</tt> construct.
+
     </DL></TABLE>
 
     <P> <H3> File System Rules </H3>

@@ -497,6 +497,13 @@ void load_builtins()
                       builtin_file_rmdir, 0, args );
     }
 
+    /* Pt extension */
+    {
+        char const * args[] = { "string", ":", "old", ":", "new", 0 };
+        bind_builtin( "REPLACE",
+                      builtin_replace, 0, args );
+    }
+
 
     /* Initialize builtin modules. */
     init_set();
@@ -2751,5 +2758,40 @@ LIST * builtin_file_rmdir( FRAME * frame, int flags )
     }
 
     return L0;
+}
+
+
+/* Pt extension: REPLACE
+ *
+ * REPLACE string : old : new
+ * Replaces all occurrences of 'old' in 'string' with 'new'.
+ */
+LIST * builtin_replace( FRAME * frame, int flags )
+{
+    char const * str = object_str( list_front( lol_get( frame->args, 0 ) ) );
+    char const * old = object_str( list_front( lol_get( frame->args, 1 ) ) );
+    char const * new_ = object_str( list_front( lol_get( frame->args, 2 ) ) );
+    int const old_len = (int)strlen( old );
+    char const * p;
+    string buf[ 1 ];
+
+    if ( old_len == 0 )
+        return list_new( object_new( str ) );
+
+    string_new( buf );
+
+    while ( ( p = strstr( str, old ) ) != NULL )
+    {
+        string_append_range( buf, str, p );
+        string_append( buf, new_ );
+        str = p + old_len;
+    }
+    string_append( buf, str );
+
+    {
+        LIST * result = list_new( object_new( buf->value ) );
+        string_free( buf );
+        return result;
+    }
 }
 
