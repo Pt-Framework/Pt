@@ -499,7 +499,7 @@ void load_builtins()
 
     /* Pt extension */
     {
-        char const * args[] = { "string", ":", "old", ":", "new", 0 };
+        char const * args[] = { "string", "?", ":", "old", "?", ":", "new", "?", 0 };
         bind_builtin( "REPLACE",
                       builtin_replace, 0, args );
     }
@@ -2768,12 +2768,23 @@ LIST * builtin_file_rmdir( FRAME * frame, int flags )
  */
 LIST * builtin_replace( FRAME * frame, int flags )
 {
-    char const * str = object_str( list_front( lol_get( frame->args, 0 ) ) );
-    char const * old = object_str( list_front( lol_get( frame->args, 1 ) ) );
-    char const * new_ = object_str( list_front( lol_get( frame->args, 2 ) ) );
-    int const old_len = (int)strlen( old );
+    LIST * const arg0 = lol_get( frame->args, 0 );
+    LIST * const arg1 = lol_get( frame->args, 1 );
+    LIST * const arg2 = lol_get( frame->args, 2 );
+    char const * str;
+    char const * old;
+    char const * new_;
+    int old_len;
     char const * p;
     string buf[ 1 ];
+
+    if ( list_empty( arg0 ) || list_empty( arg1 ) )
+        return L0;
+
+    str  = object_str( list_front( arg0 ) );
+    old  = object_str( list_front( arg1 ) );
+    new_ = list_empty( arg2 ) ? "" : object_str( list_front( arg2 ) );
+    old_len = (int)strlen( old );
 
     if ( old_len == 0 )
         return list_new( object_new( str ) );
