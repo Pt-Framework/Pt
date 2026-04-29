@@ -2,255 +2,237 @@
 # Configure Qt
 ###############################################################################
 
-rule CheckBuildQt
-{  
-    local _src = $(1) ;
-    local _includes = $(2) ;
-    local _cflags = $(3) ;
-    local _linkLibs = $(4) ;
-    local _linkFlags = $(5) ;
+# Qt version: set to 5 or 6 via -sQT_VERSION=... (default: 5)
+QT_VERSION ?= 5 ;
 
-    WITH_QT = [ CheckBuildC++ $(_src)
-                             : [ FIncludes $(_includes) ] $(_cflags)
-                             : $(_linkLibs) $(_linkFlags) ] ;
+# Unversioned module names (used for macOS frameworks)
+QT_CHECK_FRAMEWORKS = QtCore QtWidgets QtGui ;
 
-    if $(WITH_QT)
-    {
-        EchoOption WITH_QT : "Qt Support" ;
-        Configure WITH_QT ;
+# Versioned module names, derived from QT_VERSION
+QT_CHECK_LIBS = Qt$(QT_VERSION)Core Qt$(QT_VERSION)Widgets Qt$(QT_VERSION)Gui ;
 
-        QT_INCLUDES = $(_includes) ;
-        EchoOption QT_INCLUDES : "Qt Include Directory" ;
-        Configure QT_INCLUDES ;
+QT_CHECK_CODE = "#include <QtCore/QString>"
+                "int main() { QString qs; return 0; }" ;
 
-        QT_C++FLAGS = $(_cflags) ;
-        EchoOption QT_C++FLAGS : "Qt C++ Flags" ;
-        Configure QT_C++FLAGS ;
+QT_MOC_CHECK_CODE = "#include <QtCore/QObject>"
+                    "class moctest : public QObject{ Q_OBJECT };" ;
 
-        QT_LINKLIBS = $(_linkLibs) ;
-        EchoOption QT_LINKLIBS : "Qt Link Libraries" ;
-        Configure QT_LINKLIBS ;
+QT_RCC_CHECK_CODE = "<RCC></RCC>" ;
 
-        QT_LINKFLAGS = $(_linkFlags) ;
-        EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
-        Configure QT_LINKFLAGS ;
-    }
+QT_UIC_CHECK_CODE = "<ui version=""4.0""></ui>" ;
 
-    return $(WITH_QT) ;
-}
+# Qt-SetVersion VERSION
+#
+# Sets the Qt major version (5 or 6) and updates QT_CHECK_LIBS
+# accordingly. Call before Qt-Configure.
 
-
-rule QtLibName
+rule Qt-SetVersion ( version )
 {
-    local qtlibs ;
-
-    for local _l in $(1)
-    {
-        switch $(_l)
-        {
-            case core       : qtlibs += QtCore ;
-            case concurrent : qtlibs += QtConcurrent ;
-            case network    : qtlibs += QtNetwork ;
-            case widgets    : qtlibs += QtWidgets ;
-            case gui        : qtlibs += QtGui ;
-            case qml        : qtlibs += QtQml ;
-            case quick      : qtlibs += QtQuick ;
-        }
-    }
-
-    return $(qtlibs) ;
+    QT_VERSION = $(version) ;
+    QT_CHECK_LIBS = Qt$(QT_VERSION)Core Qt$(QT_VERSION)Widgets Qt$(QT_VERSION)Gui ;
 }
 
+# Qt-SetRoot ROOT
+#
+# Sets QTDIR to the given root directory. When QTDIR is set, Qt-Configure
+# derives include/lib paths from it and does not fall back to pkg-config
+# or DEPS_INCLUDES/DEPS_LIBDIR. The tool rules (Qt-ConfigureMoc, etc.)
+# also use QTDIR/bin/ as a fallback for tool lookup.
 
-rule Qt5LibName
+rule Qt-SetRoot ( root )
 {
-    local qtlibs ;
-
-    for local _l in $(1)
-    {
-        switch $(_l)
-        {
-            case core       : qtlibs += Qt5Core ;
-            case concurrent : qtlibs += Qt5Concurrent ;
-            case network    : qtlibs += Qt5Network ;
-            case widgets    : qtlibs += Qt5Widgets ;
-            case gui        : qtlibs += Qt5Gui ;
-            case qml        : qtlibs += Qt5Qml ;
-            case quick      : qtlibs += Qt5Quick ;
-        }
-    }
-    
-    return $(qtlibs) ;
+    QTDIR = $(root) ;
 }
 
+rule Qt-CheckCompile ( includes * : c++flags * )
+{
+    return [ CheckDependencyCompileC++ QT : $(QT_CHECK_CODE)
+                                          : $(includes) : $(c++flags) ] ;
+}
 
-rule QtLinkLibs_Windows
-{       
-    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
-    {   
-        return $(<:S="d.lib") ;
+rule Qt-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyLinkC++ QT : $(QT_CHECK_CODE)
+                                       : $(includes) : $(c++flags)
+                                       : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
+
+rule Qt-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyC++ QT : $(QT_CHECK_CODE)
+                                   : $(includes) : $(c++flags)
+                                   : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
+
+rule Qt-ConfigureInclude ( includes * : c++flags * )
+{
+    local result = [ Qt-CheckCompile $(includes) : $(c++flags) ] ;
+    return $(result) ;
+}
+
+rule Qt-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    local is_debug ;
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
+
+    # 1: caller-provided libs
+    if ! $(result) && $(linklibs)
+    {
+        result = [ Qt-CheckLink $(includes)
+                               : $(c++flags)
+                               : $(linklibs)
+                               : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 2: MSVC debug (Qt5Cored.lib / Qt6Cored.lib etc.)
+    if ! $(result) && $(is_debug)
+    {
+        result = [ Qt-CheckLink $(includes)
+                               : $(c++flags)
+                               : $(QT_CHECK_LIBS:S=d.lib)
+                               : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 3: MSVC release (Qt5Core.lib / Qt6Core.lib etc.)
+    if ! $(result)
+    {
+        result = [ Qt-CheckLink $(includes)
+                               : $(c++flags)
+                               : $(QT_CHECK_LIBS:S=.lib)
+                               : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 4: Unix-style -l flags (-lQt5Core / -lQt6Core etc.)
+    if ! $(result)
+    {
+        result = [ Qt-CheckLink $(includes)
+                               : $(c++flags)
+                               : [ FLinkLibs $(QT_CHECK_LIBS) ]
+                               : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 5: macOS frameworks (-framework QtCore -framework QtWidgets -framework QtGui)
+    if ! $(result)
+    {
+        local fw_c++flags  = -F$(libdir) ;
+        local fw_linkflags = -F$(libdir) ;
+        local fw_linklibs  = "-framework "$(QT_CHECK_FRAMEWORKS) ;
+
+        result = [ Qt-CheckLink $(includes)
+                               : $(fw_c++flags)
+                               : $(fw_linklibs)
+                               : : $(fw_linkflags) ] ;
+    }
+
+    return $(result) ;
+}
+
+# Qt-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+#
+# Probes for a system Qt installation (Qt5 or Qt6, depending on
+# QT_VERSION). The search order is:
+#
+#   1. Caller-provided hints (explicit INCLUDES, LIBDIR, etc.)
+#   2. QTDIR — if set, derives include/lib from it; no further fallback
+#   3. pkg-config
+#   4. DEPS_INCLUDES / DEPS_LIBDIR (global dependency path)
+#
+# When QTDIR is set (via Qt-SetRoot or -sQTDIR=...) and no explicit
+# hints are provided, QTDIR is authoritative: the search stops after
+# probing QTDIR-derived paths, regardless of success.
+#
+# Returns "yes" on success; QT_INCLUDES, QT_C++FLAGS, QT_LINKLIBS
+# and QT_LINKFLAGS are set as a side-effect.
+
+rule Qt-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    # QTDIR is authoritative when no explicit hints are provided
+    if ! $(includes) && ! $(libdir) && $(QTDIR)
+    {
+        includes = [ FDirName $(QTDIR) include ] ;
+        libdir   = [ FDirName $(QTDIR) lib ] ;
+
+        if [ Qt-ConfigureInclude $(includes) : $(c++flags) ]
+        {
+            includes = $(QT_INCLUDES) ;
+            c++flags = $(QT_C++FLAGS) ;
+
+            result = [ Qt-ConfigureLink $(includes) : $(c++flags)
+                                       : $(linklibs) : $(libdir) : $(linkflags) ] ;
+        }
     }
     else
     {
-        return $(<:S=".lib") ;
-    }
-}
-
-
-rule QtLinkLibs_Unix
-{       
-    return -l$(<) ;
-}
-
-
-rule QtLinkLibs_MacOSX
-{
-    return "-framework "$(<) ;
-}
-
-
-rule QtLinkLibs
-{
-    local qtlibs ;
-
-    for local _l in $(<)
-    {
-        qtlibs += [ $(QT_LIBNAME_RULE) $(_l) ] ;
-    }
-
-    return [ $(QT_LINKLIBS_RULE) $(qtlibs) ] ;
-}
-
-
-rule ConfigureQt
-{  
-    local qtlibs ;
-    local qt5libs ;
-
-    for local _l in $(1)
-    {
-        qt5libs += [ Qt5LibName $(_l) ] ;
-        qtlibs += [ QtLibName $(_l) ] ;
-    }
-
-    if $(QTDIR)
-    {
-      QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-      QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
-    }
-
-    #
-    # Windows
-    #
-    if ! $(WITH_QT)
-    {       
-        QT_SUFLIB = .lib ;
-
-        if $(WITH_DEBUG) && ! $(WITH_OPTIM)
-        {   
-            QT_SUFLIB = d.lib ;
-        }
-
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }" 
-                    : $(QT_INCLUDES) 
-                    : $(QT_C++FLAGS)
-                    : $(QT_LINKLIBS) $(qt5libs:S=$(QT_SUFLIB)) 
-                    : $(QT_LINKFLAGS) /LIBPATH:$(QT_LIBDIR) ;
-
-        if $(WITH_QT)
+        # Pkg-config (only when no hints are provided)
+        if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
         {
-            QT_LIBNAME_RULE = Qt5LibName ;
-            QT_LINKLIBS_RULE = QtLinkLibs_Windows ;
+            Load pkgconfig.jam ;
+
+            if [ PkgConfig-Exists $(QT_CHECK_LIBS[1]) ]
+            {
+                includes  = [ PkgConfig-Includes $(QT_CHECK_LIBS) ] ;
+                c++flags  = [ PkgConfig-CFlags $(QT_CHECK_LIBS) ] ;
+                linklibs  = [ PkgConfig-LinkLibs $(QT_CHECK_LIBS) ] ;
+                linkflags = [ PkgConfig-LinkFlags $(QT_CHECK_LIBS) ] ;
+
+                result = [ Qt-Check $(includes)
+                                   : $(c++flags)
+                                   : $(linklibs)
+                                   : : $(linkflags) ] ;
+            }
         }
-    }
 
-    #
-    # Unix
-    #
-    if ! $(WITH_QT)
-    {
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }" 
-                    : $(QT_INCLUDES) 
-                    : $(QT_C++FLAGS)
-                    : $(QT_LINKLIBS) -l$(qt5libs) 
-                    : $(QT_LINKFLAGS) -L$(QT_LIBDIR) ;
-
-        if $(WITH_QT)
+        # Include search, then link search (uses DEPS as last fallback)
+        if ! $(result)
         {
-            QT_LIBNAME_RULE = Qt5LibName ;
-            QT_LINKLIBS_RULE = QtLinkLibs_Unix ;
-        }
-    }
-    
-    #
-    # Mac OS-X
-    #
-    if ! $(WITH_QT)
-    {
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }" 
-                    : $(QT_INCLUDES) 
-                    : $(QT_C++FLAGS) -F$(QT_LIBDIR)
-                    : $(QT_LINKLIBS) "-framework "$(qtlibs)
-                    : $(QT_LINKFLAGS) -F$(QT_LIBDIR) ;
+            if [ Qt-ConfigureInclude $(includes) : $(c++flags) ]
+            {
+                includes = $(QT_INCLUDES) ;
+                c++flags = $(QT_C++FLAGS) ;
 
-        if $(WITH_QT)
-        {
-            QT_LIBNAME_RULE = QtLibName ;
-            QT_LINKLIBS_RULE = QtLinkLibs_MaxOSX ;
+                result = [ Qt-ConfigureLink $(includes) : $(c++flags)
+                                           : $(linklibs) : $(libdir) : $(linkflags) ] ;
+            }
         }
     }
 
-    return $(WITH_QT) ;
+    return $(result) ;
 }
 
-###############################################################################
-# Rules and Actions for the Qt Meta Object Compiler
+# Qt-ConfigureMoc
 #
-# Runs the moc on header files containing class definitions to generate a
-# source file that has to be compiled with the other source files.
+# Probes for the Qt meta object compiler (moc).
 #
-# Example usage:
+# Tool path priority:
+#   1. QT_MOC preset by user (e.g. -sQT_MOC=/path/to/moc)
+#   2. QTDIR/bin/moc (when QTDIR is set)
+#   3. "moc" on PATH
 #
-# Moc qtest.moc.cpp : qtest.h ;
-#
-# Main qtest : qtest.cpp qtest.moc.cpp ;
-#
-###############################################################################
-rule ConfigureMoc
+# On success, QT_MOC is set to the working moc path.
+# Returns "yes" on success.
+
+rule Qt-ConfigureMoc
 {
-    QT_MOC ?= moc ;
-
-    ConfigureLog "\n[ ConfigureMoc ]" ;
-    
-    local _in = check.h ;
-    local _out = check.moc.cpp ;
-    local _src = "#include <QtCore/QObject>\nclass moctest : public QObject{ Q_OBJECT };\n" ;
-    ConfigureLog $(_src) ;
-
-    WriteFile $(_in) : $(_src) ;
-    local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
-    WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
-
-    if ! $(WITH_QT_MOC)
+    if ! $(QT_MOC)
     {
-        QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
-        local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
-        WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
+        if $(QTDIR)
+        {
+            QT_MOC = [ FDirName $(QTDIR) bin moc ] ;
+        }
+        else
+        {
+            QT_MOC = moc ;
+        }
     }
-    
-    TryCommand $(RM) $(_in) ;
-    TryCommand $(RM) $(_out) ;
 
-    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
-    EchoOption WITH_QT_MOC : "Qt moc support" : $(WITH_QT_MOC:E="no")  ;
- 
-    if $(WITH_QT_MOC)
-    {
-        Configure QT_MOC : $(QT_MOC) ;
-    }
+    return [ CheckBuild $(QT_MOC) check.h -o check.moc.cpp
+                        : $(QT_MOC_CHECK_CODE)
+                        : check.h
+                        : check.moc.cpp ] ;
 }
 
 rule Moc
@@ -274,38 +256,37 @@ actions Moc1
 ###############################################################################
 # Rules and Actions for the Qt Resource Compiler
 ###############################################################################
-rule ConfigureRcc
+
+# Qt-ConfigureRcc
+#
+# Probes for the Qt resource compiler (rcc).
+#
+# Tool path priority:
+#   1. QT_RCC preset by user (e.g. -sQT_RCC=/path/to/rcc)
+#   2. QTDIR/bin/rcc (when QTDIR is set)
+#   3. "rcc" on PATH
+#
+# On success, QT_RCC is set to the working rcc path.
+# Returns "yes" on success.
+
+rule Qt-ConfigureRcc
 {
-    QT_RCC ?= rcc ;
-
-    ConfigureLog "\n[ ConfigureRcc ]" ;
-    
-    local _in = check.qrc ;
-    local _out = check.cpp ;
-    local _src = "<RCC></RCC>\n" ;
-    ConfigureLog $(_src) ;
-
-    WriteFile $(_in) : $(_src) ;
-    local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
-    WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
-
-    if ! $(WITH_QT_RCC)
+    if ! $(QT_RCC)
     {
-        QT_RCC = [ FDirName $(QTDIR) bin $(QT_RCC) ] ;
-        local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
-        WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
+        if $(QTDIR)
+        {
+            QT_RCC = [ FDirName $(QTDIR) bin rcc ] ;
+        }
+        else
+        {
+            QT_RCC = rcc ;
+        }
     }
-    
-    TryCommand $(RM) $(_in) ;
-    TryCommand $(RM) $(_out) ;
 
-    EchoOption QT_RCC : "Qt rcc tool" : $(QT_RCC) ;
-    EchoOption WITH_QT_RCC : "Qt rcc support" : $(WITH_QT_RCC:E="no")  ;
- 
-    if $(WITH_QT_RCC)
-    {
-        Configure QT_RCC : $(QT_RCC) ;
-    }
+    return [ CheckBuild $(QT_RCC) check.qrc -o check.cpp
+                        : $(QT_RCC_CHECK_CODE)
+                        : check.qrc
+                        : check.cpp ] ;
 }
 
 rule Rcc
@@ -329,38 +310,37 @@ actions Rcc1
 ###############################################################################
 # Rules and Actions for the User Interface Compiler
 ###############################################################################
-rule ConfigureUic
+
+# Qt-ConfigureUic
+#
+# Probes for the Qt user interface compiler (uic).
+#
+# Tool path priority:
+#   1. QT_UIC preset by user (e.g. -sQT_UIC=/path/to/uic)
+#   2. QTDIR/bin/uic (when QTDIR is set)
+#   3. "uic" on PATH
+#
+# On success, QT_UIC is set to the working uic path.
+# Returns "yes" on success.
+
+rule Qt-ConfigureUic
 {
-    QT_UIC ?= uic ;
-
-    ConfigureLog "\n[ ConfigureUic ]" ;
-    
-    local _in = check.ui ;
-    local _out = check.cpp ;
-    local _src = "<ui version="4.0"></ui>\n" ;
-    ConfigureLog $(_src) ;
-
-    WriteFile $(_in) : $(_src) ;
-    local _cmd = $(QT_UIC) $(_in) -o $(_out) ;
-    WITH_QT_UIC = [ TryCommand $(_cmd) ] ;
-
-    if ! $(WITH_QT_UIC)
+    if ! $(QT_UIC)
     {
-        QT_UIC = [ FDirName $(QTDIR) bin $(QT_UIC) ] ;
-        local _cmd = $(QT_UIC) $(_in) -o $(_out) ;
-        WITH_QT_UIC = [ TryCommand $(_cmd) ] ;
+        if $(QTDIR)
+        {
+            QT_UIC = [ FDirName $(QTDIR) bin uic ] ;
+        }
+        else
+        {
+            QT_UIC = uic ;
+        }
     }
-    
-    TryCommand $(RM) $(_in) ;
-    TryCommand $(RM) $(_out) ;
 
-    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC) ;
-    EchoOption WITH_QT_UIC : "Qt uic support" : $(WITH_QT_UIC:E="no")  ;
- 
-    if $(WITH_QT_UIC)
-    {
-        Configure QT_UIC : $(QT_UIC) ;
-    }
+    return [ CheckBuild $(QT_UIC) check.ui -o check.cpp
+                        : $(QT_UIC_CHECK_CODE)
+                        : check.ui
+                        : check.cpp ] ;
 }
 
 rule Uic

@@ -960,116 +960,61 @@ if --with-wxwidgets in $(ARGV)
 # Qt Support
 #############################################################################
 
+Load qt.jam ;
+
 if --with-qt5 in $(ARGV)
 {
-    QT5_SUPPORT = yes ;
-}
+    WITH_QT = [ Qt-Configure $(QT_INCLUDES) : $(QT_C++FLAGS) :
+                             $(QT_LINKLIBS) : $(QT_LIBDIR) : $(QT_LINKFLAGS) ] ;
 
-if $(QT5_SUPPORT)
-{
-	QT5_LIBS = Qt5Core Qt5Widgets Qt5Gui ;
-	QT_LIBS = QtCore QtWidgets QtGui ;
-
-	if $(QTDIR)
-	{
-		QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-		QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
-	}
-
-	QT_LINKLIBS ?= -l$(QT5_LIBS) ;
-	QT_LINKFLAGS ?= -L$(QT_LIBDIR) ;
-
-	WITH_QT = [ CheckBuildC++ "#include <QtCore/QString>"
-							  "int main() { QString qs; return 0; }"
-							: [ FIncludes $(QT_INCLUDES) ] $(QT_C++FLAGS)
-							: $(QT_LINKLIBS) $(QT_LINKFLAGS) ] ;
-
-	if ! $(WITH_QT)
-	{
-		QT_C++FLAGS = -F$(QT_LIBDIR) ;
-		QT_LINKLIBS = "-framework "$(QT_LIBS) ;
-		QT_LINKFLAGS = -F$(QT_LIBDIR) ;
-
-		WITH_QT = [ CheckBuildC++ "#include <QtCore/QString>"
-								  "int main() { QString qs; return 0; }"
-								: [ FIncludes $(QT_INCLUDES) ] $(QT_C++FLAGS)
-								: $(QT_LINKLIBS) $(QT_LINKFLAGS) ] ;
-	}
-
-	if ! $(WITH_QT)
-	{
-		if $(WITH_DEBUG) && ! $(WITH_OPTIM)
-		{
-			QT_SUFLIB = d.lib ;
-		}
-
-		QT_C++FLAGS = ;
-		QT_LINKLIBS = $(QT5_LIBS:S=$(QT_SUFLIB:E=".lib")) ;
-		QT_LINKFLAGS = /LIBPATH:$(QT_LIBDIR) ;
-
-		WITH_QT = [ CheckBuildC++ "#include <QtCore/QString>"
-								  "int main() { QString qs; return 0; }"
-								: [ FIncludes $(QT_INCLUDES) ] $(QT_C++FLAGS)
-								: $(QT_LINKLIBS) $(QT_LINKFLAGS) ] ;
-	}
-}
-
-EchoOption --with-qt5 : "Qt support" : $(QT5_SUPPORT:E="no") ;
-
-if $(QT5_SUPPORT)
-{
-    EchoOption QTDIR : "Qt directory" ;
-    Configure WITH_QT ;
-
-	EchoOption QT_INCLUDES : "Qt includes" ;
-	Configure QT_INCLUDES ;
-
-	EchoOption QT_C++FLAGS : "Qt C++ flags" ;
-	Configure QT_C++FLAGS ;
-
-	EchoOption QT_LINKLIBS : "Qt link libs" ;
-	Configure QT_LINKLIBS ;
-
-	EchoOption QT_LINKFLAGS : "Qt link flags" ;
-	Configure QT_LINKFLAGS ;
-
-	if ! $(WITH_QT)
-	{
-		Exit "Error: Qt headers and libraries not found." ;
-	}
-}
-
-#############################################################################
-# Qt meta object compiler
-#############################################################################
-
-if $(WITH_QT)
-{
-    QT_MOC ?= moc ;
-
-    WITH_QT_MOC = [ CheckBuild $(QT_MOC) check.h -o check.moc.cpp
-                             : "#include <QtCore/QObject>"
-                               "class moctest : public QObject{ Q_OBJECT };"
-                             : check.h
-                             : check.moc.cpp ] ;
-
-    if ! $(WITH_QT_MOC)
+    if ! $(WITH_QT)
     {
-        QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
-
-        WITH_QT_MOC = [ CheckBuild $(QT_MOC) check.h -o check.moc.cpp
-                                  : "#include <QtCore/QObject>"
-                                    "class moctest : public QObject{ Q_OBJECT };"
-                                  : check.h
-                                  : check.moc.cpp ] ;
+        Exit "Error: Qt headers and libraries not found." ;
     }
 
-    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
-    Configure QT_MOC : $(QT_MOC) ;
+    WITH_QT_MOC = [ Qt-ConfigureMoc ] ;
 
     if ! $(WITH_QT_MOC)
     {
         Exit "Error: Qt moc tool not found." ;
+    }
+
+    WITH_QT_RCC = [ Qt-ConfigureRcc ] ;
+    WITH_QT_UIC = [ Qt-ConfigureUic ] ;
+}
+
+EchoOption --with-qt5 : "Qt support" : $(WITH_QT:E="no") ;
+
+if $(WITH_QT)
+{
+    Configure WITH_QT ;
+    EchoOption QTDIR : "Qt directory" ;
+
+    Configure QT_INCLUDES ;
+    EchoOption QT_INCLUDES : "Qt includes" ;
+
+    Configure QT_C++FLAGS ;
+    EchoOption QT_C++FLAGS : "Qt C++ flags" ;
+
+    Configure QT_LINKLIBS ;
+    EchoOption QT_LINKLIBS : "Qt link libs" ;
+
+    Configure QT_LINKFLAGS ;
+    EchoOption QT_LINKFLAGS : "Qt link flags" ;
+
+    Configure QT_MOC ;
+    EchoOption QT_MOC : "Qt moc tool" ;
+
+    if $(WITH_QT_RCC)
+    {
+        Configure QT_RCC ;
+        EchoOption QT_RCC : "Qt rcc tool" ;
+    }
+
+    if $(WITH_QT_UIC)
+    {
+        Configure QT_UIC ;
+        EchoOption QT_UIC : "Qt uic tool" ;
     }
 }
 
