@@ -1,0 +1,43 @@
+if ! $(JAMBASE_WXWIDGETS_JAM_INCLUDED) {
+JAMBASE_WXWIDGETS_JAM_INCLUDED = true ;
+
+###############################################################################
+# Configure wxWidgets
+###############################################################################
+
+WXCONFIG ?= wx-config ;
+
+# WxWidgets-Configure
+#
+# Probes for wxWidgets using the wx-config tool.
+#
+# Tool path priority:
+#   1. WXCONFIG preset by user (e.g. -sWXCONFIG=/path/to/wx-config)
+#   2. "wx-config" on PATH
+#
+# On success, WX_C++FLAGS and WX_LINKLIBS are set.
+# Returns "yes" on success.
+
+rule WxWidgets-Configure
+{
+    local result ;
+
+    local _cxxResult = [ EXEC $(WXCONFIG) --cxxflags ] ;
+
+    if $(_cxxResult[1]) = 0
+    {
+        WX_C++FLAGS = $(_cxxResult[2-]) ;
+
+        local _libResult = [ EXEC $(WXCONFIG) --libs all ] ;
+
+        if $(_libResult[1]) = 0
+        {
+            WX_LINKLIBS = $(_libResult[2-]) ;
+            result = yes ;
+        }
+    }
+
+    return $(result) ;
+}
+
+} # JAMBASE_WXWIDGETS_JAM_INCLUDED
