@@ -101,6 +101,7 @@ if $(JAM_SWITCH) || $(JAM_CONFIGURE)
     include Jamconfigure ;
 
     # save configuration, so it can be reused
+    Configure CONFIG ;
     ConfigureSave $(CONFIG) ;
     EchoOption CONFIG : "Build configuration" ;
 
@@ -120,3 +121,17 @@ Load build.jam ;
 
 # Project root Jamfile
 include Jamfile ;
+
+##########################################################################
+# Reset Target
+##########################################################################
+
+if $(CONFIG)
+{
+    DEPENDS reset : clean ;
+    NOTFILE reset ;
+    ALWAYS reset ;
+
+    Clean reset : $(JAMRULES) ;
+    Clean reset : [ GLOB "" : Jamrules.$(CONFIG) ] ;
+}

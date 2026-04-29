@@ -16,7 +16,7 @@ UNDEFFLAG    ?= "-u _" ;
 
 DEPENDS all : files lib exe obj ;
 DEPENDS all files lib exe obj : first ;
-NOTFILE all first files lib exe obj dirs clean dist-clean install uninstall ;
+NOTFILE all first files lib exe obj dirs clean reset dist-clean install uninstall ;
 ALWAYS clean uninstall ;
 
 #

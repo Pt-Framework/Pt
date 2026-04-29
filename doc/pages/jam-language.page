@@ -564,11 +564,11 @@
 <DT> <P> <H1> Built-in Rules </H1> <DD>
 
     <P>
-    <B>Jam</b> has twelve built-in rules, all of which are pure
+    <B>Jam</b> has a number of built-in rules, all of which are pure
     procedure rules without updating actions.  They are in
-    three groups:  the first builds the dependency graph;
-    the second modifies it; and the third are just utility
-    rules.
+    four groups:  the first builds the dependency graph;
+    the second modifies it; the third are utility
+    rules; and the fourth provides file system access.
 
     <P> <H3> Dependency Building </H3> 
 
@@ -737,6 +737,103 @@
     each string in <I>list</I>, and for each regular expression in
     <I>regexps</I>.  Only useful within the <tt>[ ]</tt> construct,
     to change the result into a list.
+
+    <P><DT><CODE>
+    REPLACE <I>string</I> : <I>old</I> : <I>new</I> ;
+    </CODE>
+
+    <DD> Replaces all occurrences of the literal substring <I>old</I>
+    in <I>string</I> with <I>new</I>. Returns the modified string.
+    If <I>old</I> is empty, returns <I>string</I> unchanged. Only
+    useful within the <tt>[ ]</tt> construct.
+
+    </DL></TABLE>
+
+    <P> <H3> File System Rules </H3>
+
+    <P>
+
+    The following rules provide direct file system access during
+    <b>jam</b> script evaluation, without spawning external shell
+    commands. They are only useful within the <tt>[ ]</tt> construct,
+    to change the result into a list, except for FILE_WRITE and
+    FILE_REMOVE which are used as statements.
+
+    <P><TABLE WIDTH=75% ALIGN=CENTER><TR><TD><DL>
+
+    <P><DT><CODE>
+    FILE_GET_CONTENTS <I>filename</I> ;
+    </CODE>
+
+    <DD> Reads the contents of <I>filename</I> and returns it as a
+    list of lines. Line endings (<tt>\r\n</tt>, <tt>\n</tt> and bare
+    <tt>\r</tt>) are handled transparently. Returns an empty list if
+    the file cannot be opened.
+
+    <P><DT><CODE>
+    FILE_WRITE <I>filename</I> : <I>text</I> ;
+    </CODE>
+
+    <DD> Appends <I>text</I> followed by a newline to <I>filename</I>.
+    The file is created if it does not exist.
+
+    <P><DT><CODE>
+    FILE_EXISTS <I>path</I> ;
+    </CODE>
+
+    <DD> Returns <tt>"true"</tt> if <I>path</I> exists in the file
+    system, whether it is a regular file or a directory. Returns an
+    empty list otherwise.
+
+    <P><DT><CODE>
+    FILE_IS_FILE <I>path</I> ;
+    </CODE>
+
+    <DD> Returns <tt>"true"</tt> if <I>path</I> is an existing
+    regular file. Returns an empty list if the path does not exist
+    or is a directory.
+
+    <P><DT><CODE>
+    FILE_IS_DIR <I>path</I> ;
+    </CODE>
+
+    <DD> Returns <tt>"true"</tt> if <I>path</I> is an existing
+    directory. Returns an empty list if the path does not exist or
+    is a regular file.
+
+    <P><DT><CODE>
+    FILE_REMOVE <I>path</I> ;
+    </CODE>
+
+    <DD> Removes the file at <I>path</I>. Returns <tt>"true"</tt>
+    on success, an empty list on failure. Does not remove directories.
+
+    <P><DT><CODE>
+    FILE_RENAME <I>oldpath</I> : <I>newpath</I> ;
+    </CODE>
+
+    <DD> Renames (moves) the file <I>oldpath</I> to <I>newpath</I>.
+    Returns <tt>"true"</tt> on success, an empty list on failure.
+    The rename may fail if <I>oldpath</I> and <I>newpath</I> are on
+    different file systems.
+
+    <P><DT><CODE>
+    FILE_MKDIR <I>path</I> ;
+    </CODE>
+
+    <DD> Creates the directory <I>path</I>. Only creates the final
+    component; parent directories must already exist. Returns
+    <tt>"true"</tt> on success, an empty list on failure (e.g. if
+    the parent directory does not exist or the directory already
+    exists).
+
+    <P><DT><CODE>
+    FILE_RMDIR <I>path</I> ;
+    </CODE>
+
+    <DD> Removes the empty directory at <I>path</I>. Returns
+    <tt>"true"</tt> on success, an empty list on failure (e.g. if
+    the directory does not exist or is not empty).
 
     </DL></TABLE>
 

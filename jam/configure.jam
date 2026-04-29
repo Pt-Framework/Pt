@@ -729,3 +729,161 @@ rule CheckBuildC++
     TryCommand $(RM) check.cpp ;
     return $(_r) ;
 }
+
+#!
+#! SetDependencyPath ROOT [ : INCLUDES : LIBDIR ] ;
+#!
+#! Configures the default search paths used by CheckDependencyCompileC++,
+#! CheckDependencyLinkC++ and CheckDependencyC++ when no explicit INCLUDES
+#! or LIBDIR are passed.
+#!
+#! If only ROOT is provided, DEPS_INCLUDES and DEPS_LIBDIR are derived
+#! from it using standard layout conventions (include/, lib/, debug/lib/).
+#!
+#! If INCLUDES and/or LIBDIR are provided, they are used directly.
+#!
+rule SetDependencyPath ( root * : includes * : libdir * )
+{
+    if $(includes)
+    {
+        DEPS_INCLUDES = $(includes) ;
+    }
+    else if $(root)
+    {
+        DEPS_INCLUDES = [ FDirName $(root) include ] ;
+    }
+
+    if $(libdir)
+    {
+        DEPS_LIBDIR = $(libdir) ;
+    }
+    else if $(root)
+    {
+        DEPS_LIBDIR = [ FDirName $(root) lib ] ;
+    }
+}
+
+#!
+#! CheckDependencyCompileC++ PREFIX : CODE : INCLUDES : C++FLAGS ;
+#!
+#! Compile-only probe for an external C++ dependency's headers.
+#! Does not attempt to link. Falls back to DEPS_INCLUDES when no
+#! INCLUDES are provided.
+#!
+#! On success, the variables
+#!
+#!     <PREFIX>_INCLUDES
+#!     <PREFIX>_C++FLAGS
+#!
+#! are set as a side-effect so that the caller can pick them up.
+#!
+#! Returns "yes" on success.
+#!
+rule CheckDependencyCompileC++ ( prefix : code + : includes * : c++flags * )
+{
+    if ! $(includes) && $(DEPS_INCLUDES)
+    {
+        includes = $(DEPS_INCLUDES) ;
+    }
+
+    local _result = [ CheckBuildC++ $(code)
+                                  : $(c++flags) [ FIncludes $(includes) ] ] ;
+
+    if $(_result)
+    {
+        $(prefix)_INCLUDES = $(includes) ;
+        $(prefix)_C++FLAGS = $(c++flags) ;
+    }
+
+    return $(_result) ;
+}
+
+#!
+#! CheckDependencyLinkC++ PREFIX : CODE
+#!                               : INCLUDES : C++FLAGS
+#!                               : LINKLIBS : LIBDIR : LINKFLAGS ;
+#!
+#! Compile+link probe for an external C++ dependency's library.
+#! Unlike CheckDependencyC++, this does NOT fall back to DEPS_INCLUDES —
+#! the caller is expected to supply resolved INCLUDES (e.g. from a prior
+#! CheckDependencyCompileC++ call). Falls back to DEPS_LIBDIR when no
+#! LIBDIR is provided.
+#!
+#! On success, the variables
+#!
+#!     <PREFIX>_LINKLIBS
+#!     <PREFIX>_LINKFLAGS
+#!
+#! are set as a side-effect so that the caller can pick them up.
+#!
+#! Returns "yes" on success.
+#!
+rule CheckDependencyLinkC++ ( prefix : code + : includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    if ! $(libdir) && $(DEPS_LIBDIR)
+    {
+        libdir = $(DEPS_LIBDIR) ;
+    }
+
+    local _libpath = [ FLibPath $(libdir) ] ;
+
+    local _result = [ CheckBuildC++ $(code)
+                                  : $(c++flags) [ FIncludes $(includes) ]
+                                  : $(linklibs) $(_libpath) $(linkflags) ] ;
+
+    if $(_result)
+    {
+        $(prefix)_LINKLIBS  = $(linklibs) ;
+        $(prefix)_LINKFLAGS = $(_libpath) $(linkflags) ;
+    }
+
+    return $(_result) ;
+}
+
+#!
+#! CheckDependencyC++ PREFIX : CODE
+#!                           : INCLUDES : C++FLAGS
+#!                           : LINKLIBS : LIBDIR : LINKFLAGS ;
+#!
+#! Toolset-agnostic compile+link probe for an external C++ dependency.
+#! LINKLIBS should use FLinkLibs (e.g. [ FLinkLibs freetype ]) and
+#! LIBDIR should be a raw directory path — FLibPath is called internally.
+#! On success, the variables
+#!
+#!     <PREFIX>_INCLUDES
+#!     <PREFIX>_C++FLAGS
+#!     <PREFIX>_LINKLIBS
+#!     <PREFIX>_LINKFLAGS
+#!
+#! are set as a side-effect so that the caller can pick them up.
+#!
+#! Returns "yes" on success.
+#!
+rule CheckDependencyC++ ( prefix : code + : includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    if ! $(includes) && $(DEPS_INCLUDES)
+    {
+        includes = $(DEPS_INCLUDES) ;
+    }
+
+    if ! $(libdir) && $(DEPS_LIBDIR)
+    {
+        libdir = $(DEPS_LIBDIR) ;
+    }
+
+    local _libpath = [ FLibPath $(libdir) ] ;
+
+    local _result = [ CheckBuildC++ $(code)
+                                  : $(c++flags) [ FIncludes $(includes) ]
+                                  : $(linklibs) $(_libpath) $(linkflags) ] ;
+
+    if $(_result)
+    {
+        $(prefix)_INCLUDES  = $(includes) ;
+        $(prefix)_C++FLAGS  = $(c++flags) ;
+        $(prefix)_LINKLIBS  = $(linklibs) ;
+        $(prefix)_LINKFLAGS = $(_libpath) $(linkflags) ;
+    }
+
+    return $(_result) ;
+}

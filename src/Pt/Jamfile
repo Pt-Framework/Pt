@@ -46,15 +46,13 @@ MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
 
 if $(WITH_BUILTIN_ZLIB)
 {
-    LinkLibraries Pt : $(ZLIB) ;
+    LinkLibraries Pt : $(ZLIB_LIBRARY) ;
 }
 else
 {
     LinkFlags Pt : $(ZLIB_LINKFLAGS) ;
     LinkLibs Pt : $(ZLIB_LINKLIBS) ;
+    ObjectC++Flags ZBuffer.cpp : $(ZLIB_C++FLAGS) ;
 }
-
-#Main itest : itest.mm ;
-#Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
 
 SubInclude PT_TOP src Pt tests ;

@@ -1,0 +1,162 @@
+if ! $(PKGCONFIG_JAM) {
+PKGCONFIG_JAM = true ;
+
+PKGCONFIG ?= pkg-config ;
+
+# PkgConfig-Unescape <values>
+#
+# Unescapes backslash-escaped spaces in pkg-config output.
+#
+# EXEC returns each output line as a single Jam list element, so a
+# multi-flag line like
+#   -IC:/Program\ Files/Bravo\ SDKs/.../freetype2 -IC:/Program\ Files/...
+# arrives as ONE string.
+#
+# This rule replaces '\ ' with a placeholder, splits on remaining
+# (real) spaces, then restores the placeholder to a real space and
+# wraps affected items in quotes so the shell keeps them together.
+#
+rule PkgConfig-Unescape
+{
+    local _placeholder = "^^" ;
+    local CLEAN ;
+
+    for local _raw in $(1[1-])
+    {
+        # 1) Protect escaped spaces with placeholder.
+        local _s = [ REPLACE $(_raw) : "\\ " : $(_placeholder) ] ;
+
+        # 2) Split on real spaces.
+        local _tokens = [ SPLIT_BY_CHARACTERS $(_s) : " " ] ;
+
+        # 3) Restore placeholder → real space, quote if needed.
+        for local _tok in $(_tokens)
+        {
+            local _restored = [ REPLACE $(_tok) : $(_placeholder) : " " ] ;
+            if $(_restored) != $(_tok)
+            { CLEAN += \"$(_restored)\" ; }
+            else
+            { CLEAN += $(_restored) ; }
+        }
+    }
+
+    return $(CLEAN) ;
+}
+
+# PkgConfig-Exists <package> [ : <min-version> ]
+#
+# Returns "yes" if the package is known to pkg-config
+# and optionally satisfies <min-version>.
+#
+# pkg-config always produces -l link flags. If the active toolchain
+# uses a different format (e.g. MSVC produces foo.lib), the entire
+# pkg-config result set is unusable, so we treat it as "not found".
+#
+rule PkgConfig-Exists
+{
+    local _package = $(1) ;
+    local _version = $(2) ;
+
+    local is_compatible = ;
+
+    # pkg-config always returns -l flags; only proceed if the toolchain agrees.
+    if -lABC = [ FLinkLibs ABC ]
+    {
+        is_compatible = yes ;
+    }
+
+    if $(is_compatible)
+    {
+        local PC_RESULT ;
+        if $(_version)
+        {
+            PC_RESULT = [ EXEC "$(PKGCONFIG) --atleast-version=$(_version) $(_package)" ] ;
+        }
+        else
+        {
+            PC_RESULT = [ EXEC "$(PKGCONFIG) --exists $(_package)" ] ;
+        }
+
+        if $(PC_RESULT[1]) = 0
+        {
+            return yes ;
+        }
+    }
+}
+
+# PkgConfig-CFlags <package>
+#
+# Returns compiler flags (excluding -I) for <package>.
+# Uses --cflags-only-other.
+#
+rule PkgConfig-CFlags
+{
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags-only-other $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        return [ PkgConfig-Unescape $(PC_RESULT[2-]) ] ;
+    }
+}
+
+# PkgConfig-Includes <package>
+#
+# Returns include paths for <package> with -I prefix stripped.
+# Uses --cflags-only-I.
+#
+rule PkgConfig-Includes
+{
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --cflags-only-I $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        local _raw = $(PC_RESULT[2-]) ;
+        if $(_raw)
+        {
+            # Strip all -I prefixes from the raw string before unescaping.
+            _raw = [ REPLACE $(_raw) : " -I" : " " ] ;
+            _raw = [ SUBST $(_raw) "^-I(.*)" "$1" ] ;
+            if ! $(_raw) { _raw = $(PC_RESULT[2-]) ; }
+
+            return [ PkgConfig-Unescape $(_raw) ] ;
+        }
+    }
+}
+
+# PkgConfig-LinkLibs <package>
+#
+# Returns link library flags (-l...) for <package>.
+# Uses --libs-only-l.
+#
+rule PkgConfig-LinkLibs
+{
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-l $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        return $(PC_RESULT[2-]) ;
+    }
+}
+
+# PkgConfig-LinkFlags <package>
+#
+# Returns linker flags for <package>, combining
+# --libs-only-L and --libs-only-other.
+#
+rule PkgConfig-LinkFlags
+{
+    local _result ;
+
+    local PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-L $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        _result = [ PkgConfig-Unescape $(PC_RESULT[2-]) ] ;
+    }
+
+    PC_RESULT = [ EXEC "$(PKGCONFIG) --libs-only-other $(1)" ] ;
+    if $(PC_RESULT[1]) = 0
+    {
+        _result += [ PkgConfig-Unescape $(PC_RESULT[2-]) ] ;
+    }
+
+    return $(_result) ;
+}
+
+} # PKGCONFIG_JAM

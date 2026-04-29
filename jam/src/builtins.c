@@ -437,8 +437,72 @@ void load_builtins()
     }
 
     /* Pt extension */
-    bind_builtin( "WriteFile" ,
-                  builtin_writefile, 0, 0 );
+    duplicate_rule( "FILE_WRITE",
+      bind_builtin( "WriteFile" ,
+                    builtin_writefile, 0, 0 ) );
+
+    /* Pt extension */
+    {
+        char const * args[] = { "filename", 0 };
+        bind_builtin( "FILE_GET_CONTENTS",
+                      builtin_readfile, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_IS_FILE",
+                      builtin_check_if_file, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_IS_DIR",
+                      builtin_file_is_dir, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_EXISTS",
+                      builtin_file_exists, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_REMOVE",
+                      builtin_file_remove, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "old", ":", "new", 0 };
+        bind_builtin( "FILE_RENAME",
+                      builtin_file_rename, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_MKDIR",
+                      builtin_file_mkdir, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "path", 0 };
+        bind_builtin( "FILE_RMDIR",
+                      builtin_file_rmdir, 0, args );
+    }
+
+    /* Pt extension */
+    {
+        char const * args[] = { "string", "?", ":", "old", "?", ":", "new", "?", 0 };
+        bind_builtin( "REPLACE",
+                      builtin_replace, 0, args );
+    }
 
 
     /* Initialize builtin modules. */
@@ -2485,5 +2549,260 @@ LIST* builtin_writefile( FRAME * frame, int flags )
     }
 
     return L0;
+}
+
+
+/* Pt extension: FILE_GET_CONTENTS
+ *
+ * Reads a file and returns its contents as a list of lines. Handles \r\n, \n
+ * and bare \r line endings. Returns L0 if the file cannot be opened.
+ */
+LIST * builtin_readfile( FRAME * frame, int flags )
+{
+    LIST * arg = lol_get( frame->args, 0 );
+    char const * filename;
+    FILE * file;
+    LIST * result = L0;
+    string line[ 1 ];
+    int ch;
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    filename = object_str( list_front( arg ) );
+    file = fopen( filename, "rb" );
+    if ( !file )
+        return L0;
+
+    string_new( line );
+
+    while ( ( ch = fgetc( file ) ) != EOF )
+    {
+        if ( ch == '\r' )
+        {
+            /* Emit line, consume optional \n after \r. */
+            int next = fgetc( file );
+            if ( next != '\n' && next != EOF )
+                ungetc( next, file );
+
+            result = list_push_back( result, object_new( line->value ) );
+            string_truncate( line, 0 );
+        }
+        else if ( ch == '\n' )
+        {
+            result = list_push_back( result, object_new( line->value ) );
+            string_truncate( line, 0 );
+        }
+        else
+        {
+            string_push_back( line, (char)ch );
+        }
+    }
+
+    /* Last line without trailing newline. */
+    if ( line->size > 0 )
+        result = list_push_back( result, object_new( line->value ) );
+
+    string_free( line );
+    fclose( file );
+    return result;
+}
+
+
+/* Pt extension: FILE_IS_DIR
+ *
+ * Returns "true" if the path is an existing directory, L0 otherwise.
+ */
+LIST * builtin_file_is_dir( FRAME * frame, int flags )
+{
+    LIST * const arg = lol_get( frame->args, 0 );
+    file_info_t * ff;
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    ff = file_query( list_front( arg ) );
+    return ff && ff->is_dir
+        ? list_new( object_copy( constant_true ) )
+        : L0;
+}
+
+
+/* Pt extension: FILE_EXISTS
+ *
+ * Returns "true" if the path exists (file or directory), L0 otherwise.
+ */
+LIST * builtin_file_exists( FRAME * frame, int flags )
+{
+    LIST * const arg = lol_get( frame->args, 0 );
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    return file_query( list_front( arg ) ) != 0
+        ? list_new( object_copy( constant_true ) )
+        : L0;
+}
+
+
+/* Pt extension: FILE_REMOVE
+ *
+ * Removes a file. Returns "true" on success, L0 on failure.
+ * Invalidates the file system cache so subsequent FILE_EXISTS calls
+ * reflect the removal.
+ */
+LIST * builtin_file_remove( FRAME * frame, int flags )
+{
+    LIST * const arg = lol_get( frame->args, 0 );
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    if ( remove( object_str( list_front( arg ) ) ) == 0 )
+    {
+        /* Invalidate cached file info so FILE_EXISTS sees the removal. */
+        file_info_t * ff = file_info( list_front( arg ) );
+        ff->is_file = 0;
+        ff->is_dir = 0;
+        timestamp_clear( &ff->time );
+        return list_new( object_copy( constant_true ) );
+    }
+
+    return L0;
+}
+
+
+/* Pt extension: FILE_RENAME
+ *
+ * Renames (moves) a file. Returns "true" on success, L0 on failure.
+ * Invalidates the file system cache for both old and new paths.
+ */
+LIST * builtin_file_rename( FRAME * frame, int flags )
+{
+    LIST * const old_arg = lol_get( frame->args, 0 );
+    LIST * const new_arg = lol_get( frame->args, 1 );
+
+    if ( list_empty( old_arg ) || list_empty( new_arg ) )
+        return L0;
+
+    if ( rename( object_str( list_front( old_arg ) ),
+                 object_str( list_front( new_arg ) ) ) == 0 )
+    {
+        /* Invalidate cached file info for old path. */
+        file_info_t * ff = file_info( list_front( old_arg ) );
+        ff->is_file = 0;
+        ff->is_dir = 0;
+        timestamp_clear( &ff->time );
+
+        /* Invalidate cached file info for new path. */
+        ff = file_info( list_front( new_arg ) );
+        ff->is_file = 0;
+        ff->is_dir = 0;
+        timestamp_clear( &ff->time );
+
+        return list_new( object_copy( constant_true ) );
+    }
+
+    return L0;
+}
+
+
+/* Pt extension: FILE_MKDIR
+ *
+ * Creates a directory. Returns "true" on success, L0 on failure.
+ * Invalidates the file system cache so subsequent queries reflect
+ * the new directory.
+ */
+LIST * builtin_file_mkdir( FRAME * frame, int flags )
+{
+    LIST * const arg = lol_get( frame->args, 0 );
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    if ( file_mkdir( object_str( list_front( arg ) ) ) == 0 )
+    {
+        /* Invalidate cached file info so FILE_IS_DIR sees the new dir. */
+        file_info_t * ff = file_info( list_front( arg ) );
+        ff->is_file = 0;
+        ff->is_dir = 0;
+        timestamp_clear( &ff->time );
+        return list_new( object_copy( constant_true ) );
+    }
+
+    return L0;
+}
+
+
+/* Pt extension: FILE_RMDIR
+ *
+ * Removes an empty directory. Returns "true" on success, L0 on failure.
+ * Invalidates the file system cache so subsequent queries reflect
+ * the removal.
+ */
+LIST * builtin_file_rmdir( FRAME * frame, int flags )
+{
+    LIST * const arg = lol_get( frame->args, 0 );
+
+    if ( list_empty( arg ) )
+        return L0;
+
+    if ( file_rmdir( object_str( list_front( arg ) ) ) == 0 )
+    {
+        /* Invalidate cached file info so FILE_IS_DIR sees the removal. */
+        file_info_t * ff = file_info( list_front( arg ) );
+        ff->is_file = 0;
+        ff->is_dir = 0;
+        timestamp_clear( &ff->time );
+        return list_new( object_copy( constant_true ) );
+    }
+
+    return L0;
+}
+
+
+/* Pt extension: REPLACE
+ *
+ * REPLACE string : old : new
+ * Replaces all occurrences of 'old' in 'string' with 'new'.
+ */
+LIST * builtin_replace( FRAME * frame, int flags )
+{
+    LIST * const arg0 = lol_get( frame->args, 0 );
+    LIST * const arg1 = lol_get( frame->args, 1 );
+    LIST * const arg2 = lol_get( frame->args, 2 );
+    char const * str;
+    char const * old;
+    char const * new_;
+    int old_len;
+    char const * p;
+    string buf[ 1 ];
+
+    if ( list_empty( arg0 ) || list_empty( arg1 ) )
+        return L0;
+
+    str  = object_str( list_front( arg0 ) );
+    old  = object_str( list_front( arg1 ) );
+    new_ = list_empty( arg2 ) ? "" : object_str( list_front( arg2 ) );
+    old_len = (int)strlen( old );
+
+    if ( old_len == 0 )
+        return list_new( object_new( str ) );
+
+    string_new( buf );
+
+    while ( ( p = strstr( str, old ) ) != NULL )
+    {
+        string_append_range( buf, str, p );
+        string_append( buf, new_ );
+        str = p + old_len;
+    }
+    string_append( buf, str );
+
+    {
+        LIST * result = list_new( object_new( buf->value ) );
+        string_free( buf );
+        return result;
+    }
 }
 

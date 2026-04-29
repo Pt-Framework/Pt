@@ -177,6 +177,16 @@ int file_mkdir( char const * const path )
 
 
 /*
+ * file_rmdir() - remove an empty directory
+ */
+
+int file_rmdir( char const * const path )
+{
+    return rmdir( (char *)path );
+}
+
+
+/*
  * file_query_() - query information about a path from the OS
  */
 

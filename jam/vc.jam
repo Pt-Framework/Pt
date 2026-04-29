@@ -246,6 +246,18 @@ rule FIncludes
 }
 
 
+rule FLibPath 
+{ 
+  return /LIBPATH:$(<) ; 
+}
+
+
+rule FLinkLibs 
+{ 
+  return $(<:S=.lib) ; 
+}
+
+
 rule Library-Build
 {
     Objects $(>) ;

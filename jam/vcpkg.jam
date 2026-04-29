@@ -1,0 +1,170 @@
+if ! $(VCPKG_JAM) {
+VCPKG_JAM = true ;
+
+# vcpkg.jam
+#
+# Reusable rules for working with vcpkg-style precompiled
+# dependency trees. Contains no project-specific knowledge.
+#
+# A vcpkg root directory has the following layout:
+#
+#   <root>/installed/<triple>/include/        public headers
+#   <root>/installed/<triple>/lib/            release libraries
+#   <root>/installed/<triple>/bin/            release shared libs
+#   <root>/installed/<triple>/debug/lib/      debug libraries
+#   <root>/installed/<triple>/debug/bin/      debug shared libs
+#
+# Both build types are present in the same tree; the triplet
+# itself does not encode debug/release.
+#
+# Typical use:
+#
+#   Load vcpkg.jam ;
+#
+#   # Use a real local vcpkg installation
+#   Vcpkg-Setup C:\vcpkg ;
+#
+#   # Or download a prebuilt SDK from a release URL
+#   Vcpkg-Setup [ FDirName $(TOP) deps ] ;
+#   Vcpkg-Fetch "https://example.com/releases/latest"
+#             : "my-deps-" ;
+#
+#   # Query individual paths as needed
+#   MY_INCLUDES = [ Vcpkg-Includes ] ;
+#   MY_LIBDIR   = [ Vcpkg-LibDir   ] ;
+
+Load fetch.jam ;
+
+# Vcpkg-Map-Arch <arch>
+#
+# Maps a Jam TARGET_OSPLAT value to the architecture token used
+# by vcpkg triplets (x64, x86, arm64, arm). Unknown values pass
+# through unchanged (lower-cased).
+#
+rule Vcpkg-Map-Arch ( arch )
+{
+    switch $(arch:L)
+    {
+        case x86_64  : return x64 ;
+        case amd64   : return x64 ;
+        case x86     : return x86 ;
+        case i386    : return x86 ;
+        case arm64   : return arm64 ;
+        case aarch64 : return arm64 ;
+        case arm     : return arm ;
+        case *       : return $(arch:L) ;
+    }
+}
+
+# Vcpkg-Map-Os <os>
+#
+# Maps a Jam TARGET_OS value to the OS token used by vcpkg
+# triplets (windows, uwp, osx, linux, ...). Unknown values pass
+# through unchanged (lower-cased).
+#
+rule Vcpkg-Map-Os ( os )
+{
+    switch $(os:L)
+    {
+        case nt         : return windows ;
+        case win32      : return windows ;
+        case winrt      : return uwp ;
+        case macosx     : return osx ;
+        case ios        : return ios ;
+        case linux      : return linux ;
+        case freebsd    : return freebsd ;
+        case android    : return android ;
+        case emscripten : return emscripten ;
+        case *          : return $(os:L) ;
+    }
+}
+
+# Vcpkg-Triplet [ <arch> : <os> ]
+#
+# Returns a vcpkg triplet name. Without arguments derives it from
+# TARGET_OSPLAT and TARGET_OS via Vcpkg-Map-Arch / Vcpkg-Map-Os.
+# The triplet does not encode debug/release; a vcpkg tree always
+# contains both.
+#
+rule Vcpkg-Triplet ( arch ? : os ? )
+{
+    arch ?= [ Vcpkg-Map-Arch $(TARGET_OSPLAT) ] ;
+    os   ?= [ Vcpkg-Map-Os   $(TARGET_OS)     ] ;
+    return $(arch)-$(os) ;
+}
+
+# Vcpkg-Setup <root> [ : <triple> ]
+#
+# Initialises the local vcpkg environment.
+#   <root>    vcpkg root directory (containing installed/).
+#   <triple>  optional; defaults to [ Vcpkg-Triplet ].
+#
+# Sets VCPKG_ROOT and VCPKG_TRIPLE. Path rules like
+# Vcpkg-Includes and Vcpkg-LibDir use these to resolve
+# installed/<triple>/include, installed/<triple>/lib, etc.
+#
+rule Vcpkg-Setup ( root : triple ? )
+{
+    VCPKG_ROOT   = $(root) ;
+    VCPKG_TRIPLE = $(triple) ;
+    VCPKG_TRIPLE ?= [ Vcpkg-Triplet ] ;
+}
+
+# Vcpkg-Installed [ <triple> ]
+#
+# Returns the triplet installation directory of the active vcpkg
+# installation: <VCPKG_ROOT>/installed/<triple>/
+# <triple> defaults to VCPKG_TRIPLE.
+#
+rule Vcpkg-Installed ( triple ? )
+{
+    triple ?= $(VCPKG_TRIPLE) ;
+    return [ FDirName $(VCPKG_ROOT) installed $(triple) ] ;
+}
+
+# Vcpkg-Includes
+#
+# Returns the include directory of the active vcpkg installation.
+#
+rule Vcpkg-Includes
+{
+    return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) include ] ;
+}
+
+# Vcpkg-LibDir [ debug ]
+#
+# Returns the library directory of the active vcpkg installation.
+# Pass "debug" to get the debug library directory; omit it for
+# the release directory.
+#
+rule Vcpkg-LibDir ( debug ? )
+{
+    if $(debug) = debug
+    {
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) debug lib ] ;
+    }
+    else
+    {
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) lib ] ;
+    }
+}
+
+# Vcpkg-BinDir [ debug ]
+#
+# Returns the binary directory of the active vcpkg installation.
+# Pass "debug" to get the debug binary directory; omit it for
+# the release directory.
+#
+rule Vcpkg-BinDir ( debug ? )
+{
+    if $(debug) = debug
+    {
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) debug bin ] ;
+    }
+    else
+    {
+        return [ FDirName $(VCPKG_ROOT) installed $(VCPKG_TRIPLE) bin ] ;
+    }
+}
+
+} # VCPKG_JAM

@@ -460,134 +460,337 @@ if ! $(WITH_ATOMICS)
 }
 
 #############################################################################
+# Precompiled dependencies
+#############################################################################
+
+if --fetch-deps in $(ARGV)
+{
+    Load fetch.jam ;
+    Load vcpkg.jam ;
+
+    Fetch-Configure ;
+
+    DEPS_DIR ?= deps ;
+    DEPS_VERSION ?= deps-1 ;
+
+    local targetTriple  = [ Vcpkg-Triplet ] ;
+    local archiveName   = pt-deps-$(targetTriple).zip ;
+    local manifestName  = $(archiveName).manifest ;
+    local baseUrl       = "https://github.com/Pt-Framework/Pt/releases/download/$(DEPS_VERSION)" ;
+    local targetDir      = [ FDirName $(DEPS_DIR) $(targetTriple) ] ;
+    local manifestLocal = [ FDirName $(targetDir) $(manifestName) ] ;
+    local manifestTmp   = [ FDirName $(DEPS_DIR) $(manifestName).tmp ] ;
+    local archiveTmp    = [ FDirName $(DEPS_DIR) $(archiveName).tmp ] ;
+    local fetched       = ;
+
+    Fetch-Url "$(baseUrl)/$(manifestName)" : $(manifestTmp) ;
+    local remoteContent = [ FILE_GET_CONTENTS $(manifestTmp) ] ;
+    
+    local localContent = ;
+    if [ CHECK_IF_FILE $(manifestLocal) ]
+    {
+        localContent = [ FILE_GET_CONTENTS $(manifestLocal) ] ;
+    }
+
+    if $(remoteContent) != $(localContent)
+    {
+        Fetch-Url   "$(baseUrl)/$(archiveName)" : $(archiveTmp) ;
+        Fetch-RmDir $(targetDir) ;
+        Fetch-Unzip $(archiveTmp) : $(DEPS_DIR) ;
+        FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
+        fetched = $(archiveName) ;
+    }
+
+    FILE_REMOVE $(manifestTmp) ;
+    FILE_REMOVE $(archiveTmp) ;
+
+    EchoOption $(targetTriple) : "Fetch dependencies" : $(fetched:E="up to date") ;
+
+    local depsRoot = [ FDirName $(DEPS_DIR) $(targetTriple) ] ;
+    local depsIncludes = [ FDirName $(depsRoot) include ] ;
+    local depsLibDir = [ FDirName $(depsRoot) lib ] ;
+    
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
+    {
+        depsLibDir = [ FDirName $(depsRoot) debug lib ] ;
+    }
+
+    SetDependencyPath $(depsRoot) : $(depsIncludes) : $(depsLibDir) ;
+}
+
+#############################################################################
 # zlib compression library
 #############################################################################
 
-if --with-zlib in $(ARGV)
+Load zlib.jam ;
+
+if --with-included-zlib in $(ARGV)
 {
     WITH_BUILTIN_ZLIB = yes ;
-    WITH_ZLIB = yes ;
 }
 
-if ! $(WITH_ZLIB)
+if ! $(WITH_BUILTIN_ZLIB)
 {
-    ZLIB_LINKLIBS ?= -lz ;
-
-    WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
-                                "int main() {"
-                                "z_stream zstream;"
-                                "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
-                                : [ FIncludes $(ZLIB_INCLUDES) ]
-                                : $(ZLIB_LINKLIBS) ] ;
+    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
+                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
 }
 
-if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
+if ! $(WITH_ZLIB) 
 {
     WITH_BUILTIN_ZLIB = yes ;
-    WITH_ZLIB = yes ;
-    ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
-    ZLIB_LINKLIBS = "" ;
 }
 
 Configure WITH_BUILTIN_ZLIB ;
-EchoOption --with-zlib : "Builtin zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+EchoOption --with-included-zlib : "Included zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+
+if $(WITH_BUILTIN_ZLIB)
+{
+    ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
+    ZLIB_C++FLAGS = ;
+    ZLIB_LINKLIBS = ;
+    ZLIB_LINKFLAGS = ;
+    ZLIB_LIBRARY = z ;
+
+    if ! $(PRELIB)
+    {
+        ZLIB_LIBRARY = libz ;
+    }
+
+    EchoOption ZLIB_LIBRARY : "ZLib library name" ;
+    Configure ZLIB_LIBRARY ;
+}
 
 Configure ZLIB_INCLUDES ;
 EchoOption ZLIB_INCLUDES : "ZLib includes" ;
 
+Configure ZLIB_C++FLAGS ;
+EchoOption ZLIB_C++FLAGS : "ZLib C++ flags" ;
+
 Configure ZLIB_LINKLIBS ;
 EchoOption ZLIB_LINKLIBS : "ZLib libs" ;
 
-ZLIB = z ;
-
-if ! $(PRELIB)
-{
-    ZLIB = zlib ;
-}
-
-Configure ZLIB ;
+EchoOption ZLIB_LINKFLAGS : "ZLib link flags" ;
+Configure ZLIB_LINKFLAGS ;
 
 #############################################################################
 # PNG support with libpng
 #############################################################################
 
-# --with-included-png   - for in source tree included variant
-# --with-png            - for system/SDK variant
+Load libpng.jam ;
 
-if --with-libpng in $(ARGV)
+if --with-included-libpng in $(ARGV)
 {
     WITH_BUILTIN_LIBPNG = yes ;
-    WITH_PNG = yes ;
+}
+
+if ! $(WITH_BUILTIN_LIBPNG)
+{
+    WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) :
+                               $(PNG_LINKLIBS) : $(PNG_LIBDIR) : $(PNG_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_PNG)
 {
-    PNG_LINKLIBS ?= -lpng ;
-
-    WITH_PNG = [ CheckBuildC++ "#include <png.h>"
-                                "int main() {"
-                                "png_structp pngPtr;"
-                                "return 0; }"
-                                : [ FIncludes $(PNG_INCLUDES) ]
-                                : $(PNG_LINKLIBS) ] ;
-}
-
-if ! $(WITH_PNG) || $(WITH_BUILTIN_LIBPNG)
-{
     WITH_BUILTIN_LIBPNG = yes ;
-    WITH_PNG = yes ;
-    PNG_INCLUDES = [ FDirName $(PT_TOP) src libpng ] ;
-    PNG_LINKLIBS = "" ;
 }
 
 Configure WITH_BUILTIN_LIBPNG ;
-EchoOption --with-libpng : "Builtin libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
+EchoOption --with-included-libpng : "Included libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
+
+if $(WITH_BUILTIN_LIBPNG)
+{
+    PNG_INCLUDES = [ FDirName $(PT_TOP) src libpng ] ;
+    PNG_C++FLAGS = ;
+    PNG_LINKLIBS = ;
+    PNG_LINKFLAGS = ;
+}
 
 Configure PNG_INCLUDES ;
 EchoOption PNG_INCLUDES : "PNG includes" ;
 
+Configure PNG_C++FLAGS ;
+EchoOption PNG_C++FLAGS : "PNG C++ flags" ;
+
 Configure PNG_LINKLIBS ;
 EchoOption PNG_LINKLIBS : "PNG libs" ;
+
+Configure PNG_LINKFLAGS ;
+EchoOption PNG_LINKFLAGS : "PNG link flags" ;
 
 #############################################################################
 # JPEG support with libjpeg
 #############################################################################
 
-if --with-libjpeg in $(ARGV)
+Load libjpeg.jam ;
+
+if --with-included-libjpeg in $(ARGV)
 {
     WITH_BUILTIN_LIBJPEG = yes ;
-    WITH_JPEG = yes ;
+}
+
+if ! $(WITH_BUILTIN_LIBJPEG)
+{
+    WITH_JPEG = [ Jpeg-Configure $(JPEG_INCLUDES) : $(JPEG_C++FLAGS) :
+                                 $(JPEG_LINKLIBS) : $(JPEG_LIBDIR) : $(JPEG_LINKFLAGS) ] ;
 }
 
 if ! $(WITH_JPEG)
 {
-    JPEG_LINKLIBS ?= -ljpeg ;
-
-    WITH_JPEG = [ CheckBuildC++ "#include <stdio.h>"
-                                "#include <jpeglib.h>"
-                                "int main() {"
-                                "struct jpeg_compress_struct cinfo;"
-                                "return 0; }"
-                                : [ FIncludes $(JPEG_INCLUDES) ]
-                                : $(JPEG_LINKLIBS) ] ;
-}
-
-if ! $(WITH_JPEG) || $(WITH_BUILTIN_LIBJPEG)
-{
     WITH_BUILTIN_LIBJPEG = yes ;
-    WITH_JPEG = yes ;
-    JPEG_INCLUDES = [ FDirName $(PT_TOP) src libjpeg ] ;
-    JPEG_LINKLIBS = "" ;
 }
 
 Configure WITH_BUILTIN_LIBJPEG ;
-EchoOption --with-libjpeg : "Builtin libjpeg library" : $(WITH_BUILTIN_LIBJPEG:E="no") ;
+EchoOption --with-included-libjpeg : "Included libjpeg library"
+                                   : $(WITH_BUILTIN_LIBJPEG:E="no") ;
+
+if $(WITH_BUILTIN_LIBJPEG)
+{
+    JPEG_INCLUDES = [ FDirName $(PT_TOP) src libjpeg ] ;
+    JPEG_C++FLAGS = ;
+    JPEG_LINKLIBS = ;
+    JPEG_LINKFLAGS = ;
+}
 
 Configure JPEG_INCLUDES ;
 EchoOption JPEG_INCLUDES : "JPEG includes" ;
 
+Configure JPEG_C++FLAGS ;
+EchoOption JPEG_C++FLAGS : "JPEG C++ flags" ;
+
 Configure JPEG_LINKLIBS ;
 EchoOption JPEG_LINKLIBS : "JPEG libs" ;
+
+Configure JPEG_LINKFLAGS ;
+EchoOption JPEG_LINKFLAGS : "JPEG link flags" ;
+
+#############################################################################
+# Freetype support
+#############################################################################
+
+Load freetype.jam ;
+
+if --with-included-freetype in $(ARGV)
+{
+    WITH_BUILTIN_FREETYPE = yes ;
+}
+
+if ! $(WITH_BUILTIN_FREETYPE)
+{
+    WITH_FREETYPE = [ Freetype-Configure $(FREETYPE_INCLUDES) : $(FREETYPE_C++FLAGS) :
+                                         $(FREETYPE_LINKLIBS) : $(FREETYPE_LIBDIR) : $(FREETYPE_LINKFLAGS) ] ;
+}
+
+if ! $(WITH_FREETYPE)
+{
+    WITH_BUILTIN_FREETYPE = yes ;
+}
+
+Configure WITH_BUILTIN_FREETYPE ;
+EchoOption --with-included-freetype : "Included freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
+
+if $(WITH_BUILTIN_FREETYPE)
+{
+    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
+    FREETYPE_C++FLAGS = ;
+    FREETYPE_LINKLIBS = ;
+    FREETYPE_LINKFLAGS = ;
+}
+
+Configure FREETYPE_INCLUDES ;
+EchoOption FREETYPE_INCLUDES : "Freetype includes" ;
+
+Configure FREETYPE_C++FLAGS ;
+EchoOption FREETYPE_C++FLAGS : "Freetype C++ flags" ;
+
+Configure FREETYPE_LINKLIBS ;
+EchoOption FREETYPE_LINKLIBS : "Freetype libs" ;
+
+Configure FREETYPE_LINKFLAGS ;
+EchoOption FREETYPE_LINKFLAGS : "Freetype link flags" ;
+
+#############################################################################
+# SSL libraries and includes
+#############################################################################
+
+Load openssl.jam ;
+
+if --with-openssl in $(ARGV)
+{
+    include [ FDirName src openssl Jamconfigure ] ;
+
+    WITH_OPENSSL = "yes" ;
+    Configure WITH_OPENSSL ;
+
+    WITH_SSL = yes ;
+    PT_SSL_IMPL = "openssl" ;
+    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
+}
+
+if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
+{
+    WITH_MBEDTLS = "yes" ;
+    Configure WITH_MBEDTLS ;
+
+    WITH_SSL = yes ;
+    PT_SSL_IMPL = "mbedtls" ;
+    SSL_INCLUDES = [ FDirName $(PT_TOP) src mbedtls include ] ;
+}
+
+if ! $(WITH_SSL)
+{
+    SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-framework Foundation -framework Security") ;
+
+    WITH_SSL = [ CheckBuildC++ "#include <Security/Security.h>"
+                               "int main() {"
+                               "SSLContextRef context;"
+                               "SSLNewContext(false, &context);"
+                               "return 0; }"
+                               : [ FIncludes $(SSL_INCLUDES) ]
+                               : $(SSL_CHECK_LINKLIBS) ] ;
+
+    if $(WITH_SSL)
+    {
+        PT_SSL_IMPL = "applessl" ;
+        SSL_LINKLIBS = $(SSL_CHECK_LINKLIBS) ;
+    }
+}
+
+if ! $(WITH_SSL)
+{
+    WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS) :
+                                   $(SSL_LINKLIBS) : $(SSL_LIBDIR) : $(SSL_LINKFLAGS) ] ;
+
+    if $(WITH_SSL)
+    {
+        PT_SSL_IMPL = "openssl" ;
+    }
+}
+
+if ! $(WITH_SSL)
+{
+    PT_SSL_IMPL = "nossl" ;
+}
+
+EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
+EchoOption --with-mbedtls : "Builtin mbedTLS library" : $(WITH_MBEDTLS:E="no") ;
+
+Configure WITH_SSL ;
+EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
+
+Configure PT_SSL_IMPL ;
+EchoOption PT_SSL_IMPL : "SSL implementation" ;
+
+Configure SSL_INCLUDES ;
+EchoOption SSL_INCLUDES : "SSL includes" ;
+
+Configure SSL_C++FLAGS ;
+EchoOption SSL_C++FLAGS : "SSL C++ flags" ;
+
+Configure SSL_LINKLIBS ;
+EchoOption SSL_LINKLIBS : "SSL libs" ;
+
+Configure SSL_LINKFLAGS ;
+EchoOption SSL_LINKFLAGS : "SSL link flags" ;
 
 #############################################################################
 # blend2D graphics library
@@ -653,143 +856,6 @@ if --with-skia in $(ARGV)
 
 Configure WITH_BUILTIN_SKIA ;
 EchoOption --with-skia : "Builtin skia library" : $(WITH_BUILTIN_SKIA:E="no") ;
-
-#############################################################################
-# Freetype support
-#############################################################################
-
-if --with-freetype in $(ARGV)
-{
-    WITH_BUILTIN_FREETYPE = yes ;
-    WITH_FREETYPE = yes ;
-}
-
-if ! $(WITH_FREETYPE)
-{
-    FREETYPE_LINKLIBS ?= -lfreetype ;
-    FREETYPE_INCLUDES ?= /usr/include/freetype2 ;
-
-    FREETYPE_INCLUDES = $(FREETYPE_INCLUDES:J=" ") ;
-    
-    WITH_FREETYPE = [ CheckBuildC++ "#include <ft2build.h>"
-                                    "#include FT_FREETYPE_H"
-                                    "int main() {"
-                                    "FT_Library ft;"
-                                    "FT_Init_FreeType( &ft );"
-                                    "return 0; }"
-                                    : [ FIncludes $(FREETYPE_INCLUDES) ]
-                                    : $(FREETYPE_LINKLIBS) ] ;
-}
-
-if ! $(WITH_FREETYPE) || $(WITH_BUILTIN_FREETYPE)
-{
-    WITH_BUILTIN_FREETYPE = yes ;
-    WITH_FREETYPE = yes ;
-    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
-    FREETYPE_LINKLIBS = "" ;
-}
-
-Configure WITH_BUILTIN_FREETYPE ;
-EchoOption --with-freetype : "Builtin freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
-
-Configure FREETYPE_INCLUDES ;
-EchoOption FREETYPE_INCLUDES : "Freetype includes" ;
-
-Configure FREETYPE_LINKLIBS ;
-EchoOption FREETYPE_LINKLIBS : "Freetype libs" ;
-
-#############################################################################
-# mbedTLS
-#############################################################################
-
-if --with-mbedtls in $(ARGV)
-{
-    WITH_MBEDTLS = "yes" ;
-    Configure WITH_MBEDTLS ;
-}
-
-#############################################################################
-# SSL libraries and includes
-#############################################################################
-
-if --with-openssl in $(ARGV)
-{
-    include [ FDirName src openssl Jamconfigure ] ;
-
-    WITH_OPENSSL = "yes" ;
-    Configure WITH_OPENSSL ;
-
-    WITH_SSL = yes ;
-    PT_SSL_IMPL = "openssl" ;
-    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
-}
-
-if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
-{
-    WITH_MBEDTLS = "yes" ;
-    Configure WITH_MBEDTLS ;
-
-    WITH_SSL = yes ;
-    PT_SSL_IMPL = "mbedtls" ;
-    SSL_INCLUDES = [ FDirName $(PT_TOP) src mbedtls include ] ;
-}
-
-if ! $(WITH_SSL)
-{
-    SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-framework Foundation -framework Security") ;
-
-    WITH_SSL = [ CheckBuildC++ "#include <Security/Security.h>"
-                               "int main() {"
-                               "SSLContextRef context;"
-                               "SSLNewContext(false, &context);"
-                               "return 0; }"
-                               : [ FIncludes $(SSL_INCLUDES) ]
-                               : $(SSL_CHECK_LINKLIBS) ] ;
-
-    if $(WITH_SSL)
-    {
-        PT_SSL_IMPL = "applessl" ;
-        SSL_LINKLIBS = $(SSL_CHECK_LINKLIBS) ;
-    }
-}
-
-if ! $(WITH_SSL)
-{
-    SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-lssl -lcrypto") ;
-
-    WITH_SSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
-                               "int main() {"
-                               "SSL_library_init();"
-                                "return 0; }"
-                               : [ FIncludes $(SSL_INCLUDES) ]
-                               : $(SSL_CHECK_LINKLIBS) ] ;
-
-    if $(WITH_SSL)
-    {
-        PT_SSL_IMPL = "openssl" ;
-        SSL_LINKLIBS = $(SSL_CHECK_LINKLIBS) ;
-    }
-}
-
-if ! $(WITH_SSL)
-{
-    PT_SSL_IMPL = "nossl" ;
-}
-
-EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
-EchoOption --with-mbedtls : "Builtin mbedTLS library" : $(WITH_MBEDTLS:E="no") ;
-
-Configure WITH_SSL ;
-EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
-
-Configure PT_SSL_IMPL ;
-EchoOption PT_SSL_IMPL : "SSL implementation" ;
-
-Configure SSL_INCLUDES ;
-EchoOption SSL_INCLUDES : "SSL includes" ;
-
-Configure SSL_LINKLIBS ;
-EchoOption SSL_LINKLIBS : "SSL libs" ;
 
 #############################################################################
 # MFC Support

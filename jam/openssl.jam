@@ -1,0 +1,121 @@
+if ! $(JAMBASE_OPENSSL_JAM_INCLUDED) {
+JAMBASE_OPENSSL_JAM_INCLUDED = true ;
+
+OPENSSL_CHECK_CODE = "#include <openssl/ssl.h>"
+                     "int main() {"
+                     "OPENSSL_init_ssl(0, 0);"
+                     "return 0; }" ;
+
+rule OpenSsl-CheckCompile ( includes * : c++flags * )
+{
+    return [ CheckDependencyCompileC++ SSL : $(OPENSSL_CHECK_CODE)
+                                           : $(includes) : $(c++flags) ] ;
+}
+
+rule OpenSsl-CheckLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyLinkC++ SSL : $(OPENSSL_CHECK_CODE)
+                                        : $(includes) : $(c++flags)
+                                        : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
+
+rule OpenSsl-Check ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    return [ CheckDependencyC++ SSL : $(OPENSSL_CHECK_CODE)
+                                    : $(includes) : $(c++flags)
+                                    : $(linklibs) : $(libdir) : $(linkflags) ] ;
+}
+
+rule OpenSsl-ConfigureInclude ( includes * : c++flags * )
+{
+    local result = [ OpenSsl-CheckCompile $(includes) : $(c++flags) ] ;
+    return $(result) ;
+}
+
+rule OpenSsl-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    local is_debug ;
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
+
+    # 1: caller-provided libs
+    if ! $(result) && $(linklibs)
+    {
+        result = [ OpenSsl-CheckLink $(includes)
+                                    : $(c++flags)
+                                    : $(linklibs)
+                                    : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 2: Unix-style lib names (ssl + crypto)
+    if ! $(result)
+    {
+        result = [ OpenSsl-CheckLink $(includes)
+                                    : $(c++flags)
+                                    : [ FLinkLibs ssl crypto ]
+                                    : $(libdir) : $(linkflags) ] ;
+    }
+
+    # 3: MSVC-style lib names (libssl + libcrypto)
+    if ! $(result)
+    {
+        result = [ OpenSsl-CheckLink $(includes)
+                                    : $(c++flags)
+                                    : [ FLinkLibs libssl libcrypto ]
+                                    : $(libdir) : $(linkflags) ] ;
+    }
+
+    return $(result) ;
+}
+
+# OpenSsl-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+#
+# Probes for a system OpenSSL installation by trying pkg-config first (if
+# no hints have been provided), then falling back to compile-probes with
+# toolset-neutral library flags.
+#
+# Returns "yes" on success; SSL_INCLUDES, SSL_C++FLAGS, SSL_LINKLIBS
+# and SSL_LINKFLAGS are set as a side-effect by CheckDependencyCompileC++
+# and CheckDependencyLinkC++.
+
+rule OpenSsl-Configure ( includes * : c++flags * : linklibs * : libdir * : linkflags * )
+{
+    local result ;
+
+    # Pkg-config (only when no hints are provided)
+    if ! $(includes) && ! $(libdir) && ! $(linklibs) && ! $(c++flags) && ! $(linkflags)
+    {
+        Load pkgconfig.jam ;
+
+        if [ PkgConfig-Exists openssl ]
+        {
+            includes  = [ PkgConfig-Includes openssl ] ;
+            c++flags  = [ PkgConfig-CFlags openssl ] ;
+            linklibs  = [ PkgConfig-LinkLibs openssl ] ;
+            linkflags = [ PkgConfig-LinkFlags openssl ] ;
+
+            result = [ OpenSsl-Check $(includes)
+                                    : $(c++flags)
+                                    : $(linklibs)
+                                    : : $(linkflags) ] ;
+        }
+    }
+
+    # Include search, then link search
+    if ! $(result)
+    {
+        if [ OpenSsl-ConfigureInclude $(includes) : $(c++flags) ]
+        {
+            includes = $(SSL_INCLUDES) ;
+            c++flags = $(SSL_C++FLAGS) ;
+
+            result = [ OpenSsl-ConfigureLink $(includes) : $(c++flags)
+                                            : $(linklibs) : $(libdir) : $(linkflags) ] ;
+        }
+    }
+
+    return $(result) ;
+}
+
+} # JAMBASE_OPENSSL_JAM_INCLUDED
