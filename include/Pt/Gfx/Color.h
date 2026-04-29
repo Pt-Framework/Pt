@@ -43,36 +43,36 @@ class ColorF;
 
 /** @brief Standard color type.
 */
-class Argb32Color
+class Color
 {
     public:
-        Argb32Color()
+        Color()
         : _value(0)
         { }
         
-        Argb32Color(const Argb32Color& color) = default;
+        Color(const Color& color) = default;
 
-        explicit Argb32Color(uint32_t value)
+        explicit Color(uint32_t value)
         : _value(value)
         { }
 
-        explicit Argb32Color(const uint8_t* base)
+        explicit Color(const uint8_t* base)
         : _value()
         {
             std::memcpy( &_value, base, sizeof(uint32_t) );
         }
 
-        Argb32Color(Pt::uint8_t a, Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
+        Color(Pt::uint8_t a, Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
         : _value( (uint32_t(a) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) )
         { }
         
-        explicit Argb32Color(const ColorF& c);
+        explicit Color(const ColorF& c);
 
-        Argb32Color& operator=(const Argb32Color& color) = default;
+        Color& operator=(const Color& color) = default;
 
-        Argb32Color& operator=(const ColorF& c);
+        Color& operator=(const ColorF& c);
         
-        Argb32Color& operator=(uint32_t value)
+        Color& operator=(uint32_t value)
         { 
             _value = value;
             return *this;
@@ -126,8 +126,6 @@ class Argb32Color
     private:
         Pt::uint32_t _value;
 };
-
-typedef Argb32Color Color;
 
 /** High precision color type
 */
@@ -229,7 +227,7 @@ class ColorF
         Pt::uint16_t _b;
 };
 
-inline Argb32Color::Argb32Color(const ColorF& c)
+inline Color::Color(const ColorF& c)
 : _value( (Pt::uint32_t(c.alpha() >> 8) << 24) |
          (Pt::uint32_t(c.red()   >> 8) << 16) |
          (Pt::uint32_t(c.green() >> 8) <<  8) |
@@ -238,7 +236,7 @@ inline Argb32Color::Argb32Color(const ColorF& c)
 }
 
 
-inline Argb32Color& Argb32Color::operator=(const ColorF& c)
+inline Color& Color::operator=(const ColorF& c)
 {
     _value = (Pt::uint32_t(c.alpha() >> 8) << 24) |
              (Pt::uint32_t(c.red()   >> 8) << 16) |

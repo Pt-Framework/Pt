@@ -71,8 +71,8 @@ class TextMetrics;
 //
 
 class ColorF;
-class Argb32Color;
-typedef Argb32Color Color;
+class Color;
+typedef Color Color;
 
 template <typename FormatT>
 struct ImageTraits;
