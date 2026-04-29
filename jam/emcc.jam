@@ -81,7 +81,7 @@ rule CheckCc
     MAIN_LINKFLAGS = --emrun -s EXPORT_ALL=1 -s MAIN_MODULE=1 ;
     DLL_LINKFLAGS = -s EXPORT_ALL=1 -s SIDE_MODULE=1 ;
 
-    CCFLAGS += -fPIC -sUSE_SDL=2 ;
+    CCFLAGS += -fPIC -pthread -sUSE_SDL=2  ;
 
     if $(WITH_DEBUG)
     {
@@ -89,12 +89,12 @@ rule CheckCc
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
 
         # works only with static linking: -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK 
-        LINKFLAGS ?= -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
+        LINKFLAGS ?= -pthread  -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
     }
     else
     {
         CCFLAGS += -DNDEBUG ;
-        LINKFLAGS ?= -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 ;
+        LINKFLAGS ?= -pthread -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1  -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
     }
 
     if $(WITH_OPTIM)
@@ -130,7 +130,7 @@ rule CheckC++
     C++FLAGS += -fexceptions ;
     C++LINKFLAGS += -fexceptions ;
 
-    C++FLAGS += -fPIC -sUSE_SDL=2 ;
+    C++FLAGS += -fPIC -pthread -sUSE_SDL=2 ;
 
     if $(WITH_DEBUG)
     {
