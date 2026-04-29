@@ -62,6 +62,10 @@ class Color
             std::memcpy( &_value, base, sizeof(uint32_t) );
         }
 
+        Color(Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
+        : _value( (uint32_t(255) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) )
+        { }
+
         Color(Pt::uint8_t a, Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
         : _value( (uint32_t(a) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) )
         { }
@@ -82,35 +86,35 @@ class Color
         {
             return _value >> 24;
         }
-
-        Pt::uint8_t red() const
-        {
-            return (_value & 0x00FF0000) >> 16;
-        }
-
-        Pt::uint8_t green() const
-        {
-            return (_value & 0x0000FF00) >> 8;
-        }
-
-        Pt::uint8_t blue() const
-        {
-            return _value & 0x000000FF;
-        }
-
+        
         void setAlpha(Pt::uint8_t a)
         {
             _value = (_value & 0x00FFFFFF) | (uint32_t(a) << 24);
         }
-
+        
+        Pt::uint8_t red() const
+        {
+            return (_value & 0x00FF0000) >> 16;
+        }
+        
         void setRed(Pt::uint8_t r)
         {
             _value = (_value & 0xFF00FFFF) | (uint32_t(r) << 16);
         }
-
+        
+        Pt::uint8_t green() const
+        {
+            return (_value & 0x0000FF00) >> 8;
+        }
+        
         void setGreen(Pt::uint8_t g)
         {
             _value = (_value & 0xFFFF00FF) | (uint32_t(g) << 8);
+        }
+        
+        Pt::uint8_t blue() const
+        {
+            return _value & 0x000000FF;
         }
 
         void setBlue(Pt::uint8_t b)
@@ -131,8 +135,6 @@ class Color
 */
 class ColorF
 {
-    friend bool operator==(const ColorF& a, const ColorF b);
-
     public:
         ColorF()
         : _a(65535)
@@ -144,6 +146,10 @@ class ColorF
         ColorF(const ColorF&) = default;
 
         explicit ColorF(const Color& c);
+
+        ColorF& operator=(const ColorF&) = default;
+
+        ColorF& operator=(const Color& c);
 
         ColorF(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(a)
@@ -163,35 +169,35 @@ class ColorF
         {
             return _a;
         }
-
+        
+        void setAlpha( Pt::uint16_t c)
+        {
+            _a = c;
+        }
+        
         Pt::uint16_t red() const
         {
              return _r;
         }
-
+        
+        void setRed( Pt::uint16_t c)
+        {
+            _r = c;
+        }
+        
         Pt::uint16_t green() const
         {
             return _g;
         }
 
-        Pt::uint16_t blue() const
-        {
-            return _b;
-        }
-
-        void setAlpha( Pt::uint16_t c)
-        {
-            _a = c;
-        }
-
-        void setRed( Pt::uint16_t c)
-        {
-            _r = c;
-        }
-
         void setGreen( Pt::uint16_t c)
         {
             _g = c;
+        }
+        
+        Pt::uint16_t blue() const
+        {
+            return _b;
         }
 
         void setBlue( Pt::uint16_t c)
@@ -215,7 +221,7 @@ class ColorF
         }
 
         static ColorF fromRgb8(Pt::uint8_t r, Pt::uint8_t g,
-                              Pt::uint8_t b, Pt::uint8_t a = 255)
+                               Pt::uint8_t b, Pt::uint8_t a = 255)
         {
             return ColorF(a * 257, r * 257, g * 257, b * 257);
         }
@@ -226,6 +232,7 @@ class ColorF
         Pt::uint16_t _g;
         Pt::uint16_t _b;
 };
+
 
 inline Color::Color(const ColorF& c)
 : _value( (Pt::uint32_t(c.alpha() >> 8) << 24) |
@@ -252,6 +259,15 @@ inline ColorF::ColorF(const Color& c)
 , _g(c.green() * 257)
 , _b(c.blue()  * 257)
 {
+}
+
+inline ColorF& ColorF::operator=(const Color& c)
+{
+    _a = c.alpha() * 257;
+    _r = c.red()   * 257;
+    _g = c.green() * 257;
+    _b = c.blue()  * 257;
+    return *this;
 }
 
 } // namespace
