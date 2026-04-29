@@ -811,7 +811,7 @@ if --with-blend2d in $(ARGV)
     BLEND2D_INCLUDES  = [ FDirName $(PT_TOP) src blend2d src ] ;
     BLEND2D_C++FLAGS  = [ FDefines BL_STATIC BL_BUILD_NO_JIT ] ;
     BLEND2D_LINKLIBS  = $(PTHREAD_LINKLIBS) $(M_LINKLIBS) ;
-		BLEND2D_LINKFLAGS = ;
+	BLEND2D_LINKFLAGS = ;
 
     if $(PT_SYSTEM) = posix && ! $(WITH_M)
     {
@@ -860,61 +860,24 @@ EchoOption --with-skia : "Builtin skia library" : $(WITH_BUILTIN_SKIA:E="no") ;
 #############################################################################
 # MFC Support
 #############################################################################
+
+Load mfc.jam ;
+
 if --with-mfc in $(ARGV)
 {
-    WITH_MFC = yes ;
-    EchoOption WITH_MFC : "MFC Support" ;
-    Configure WITH_MFC ;
+    WITH_MFC = [ Mfc-Configure ] ;
 
-	if ! $(MFC_INCLUDES)
-	{
-		MFC_INCLUDES = [ GLOB $(VISUALC)\\VC\\atlmfc : include  ] ;
-	}
-	
-	if ! $(MFC_INCLUDES)
-	{
-		MFC_INCLUDES = [ GLOB $(VISUALC)\\atlmfc : include  ] ;
-	}
-	
-    if ! $(MFC_INCLUDES)
+    if ! $(WITH_MFC)
     {
-        Exit "Error: MFC includes not found." ;
+        Exit "Error: MFC includes or libraries not found." ;
     }
 
-    MFC_INCLUDES = \"$(MFC_INCLUDES)\" ;
+    Configure WITH_MFC ;
+    EchoOption WITH_MFC : "MFC Support" ;
+
     EchoOption MFC_INCLUDES : "MFC Include Directory" ;
     Configure MFC_INCLUDES ;
 
-	if ! $(MFC_LIBDIR)
-	{
-		if $(TARGET_OSPLAT:L) = "x86_64"
-		{	
-			MFC_LIBDIR = [ GLOB $(VISUALC)\\VC\\atlmfc\\lib : amd64  ] ;
-		}
-		else if $(TARGET_OSPLAT:L) = "x86"
-		{		
-			MFC_LIBDIR = [ GLOB $(VISUALC)\\VC\\atlmfc : lib  ] ;
-		}
-	}
-	
-	if ! $(MFC_LIBDIR)
-	{
-		if $(TARGET_OSPLAT:L) = "x86_64"
-		{	
-			MFC_LIBDIR = [ GLOB $(VISUALC)\\atlmfc\\lib : x64  ] ;
-		}
-		else if $(TARGET_OSPLAT:L) = "x86"
-		{		
-			MFC_LIBDIR = [ GLOB $(VISUALC)\\atlmfc\\lib : x86  ] ;
-		}
-	}
-
-	if ! $(MFC_LIBDIR)
-	{
-		Exit "Error: MFC libraries not found." ;
-	}
-
-    MFC_LINKFLAGS = /LIBPATH:\"$(MFC_LIBDIR)\" ;
     EchoOption MFC_LINKFLAGS : "MFC Linker Flags" ;
     Configure MFC_LINKFLAGS ;
 }
@@ -923,36 +886,26 @@ if --with-mfc in $(ARGV)
 # Wx Widgets Support
 #############################################################################
 
+Load wxwidgets.jam ;
+
 if --with-wxwidgets in $(ARGV)
 {
-    WITH_WXWIDGETS = yes ;
-    EchoOption WITH_WXWIDGETS : "Wx Widgets Support" ;
-    Configure WITH_WXWIDGETS ;
+    WITH_WXWIDGETS = [ WxWidgets-Configure ] ;
 
-    WXCONFIG ?= wx-config ;
-    EchoOption WXCONFIG : "Using wxconfig tool" ;
-
-    WXCONFIG_CXXFLAGS = $(WXCONFIG) --cxxflags ;
-    WXCONFIG_LIBS = $(WXCONFIG) --libs all ;
-
-    WXCONFIG_RESULT = [ EXEC $(WXCONFIG_CXXFLAGS:J=" ") ] ;
-    if $(WXCONFIG_RESULT[1]) != 0
+    if ! $(WITH_WXWIDGETS)
     {
-        Exit "Error:" $(WXCONFIG) "does not work" ;
+        Exit "Error: wxWidgets not found (" $(WXCONFIG) "does not work)." ;
     }
 
-    WX_C++FLAGS = $(WXCONFIG_RESULT[2-]) ;
+    Configure WITH_WXWIDGETS ;
+    EchoOption WITH_WXWIDGETS : "Wx Widgets Support" ;
+
+    EchoOption WXCONFIG : "Using wxconfig tool" ;
+
     EchoOption WX_C++FLAGS : "wx Widgets C++ flags" ;
     Configure WX_C++FLAGS ;
 
-    WXCONFIG_RESULT = [ EXEC $(WXCONFIG_LIBS:J=" ") ] ;
-    if $(WXCONFIG_RESULT[1]) != 0
-    {
-        Exit "Error:" $(WXCONFIG) "does not work" ;
-    }
-
-    WX_LINKLIBS = $(WXCONFIG_RESULT[2-]) ;
-    EchoOption WX_LINKLIBS : "wx Widgets link flags" ;
+    EchoOption WX_LINKLIBS : "wx Widgets link libs" ;
     Configure WX_LINKLIBS ;
 }
 
