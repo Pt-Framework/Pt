@@ -130,16 +130,16 @@ void ProgressBar::setBackground(const Gfx::Brush& b)
     repaint();
 }
 
-const Gfx::ColorF& ProgressBar::foreground() const
+const Gfx::Color& ProgressBar::foreground() const
 {
     return _foreground ? *_foreground
                        : Application::instance().styleOptions().accentColor();
 }
 
 
-void ProgressBar::setForeground(const Gfx::ColorF& b)
+void ProgressBar::setForeground(const Gfx::Color& b)
 {
-    _foreground.reset( new Gfx::ColorF(b) );
+    _foreground.reset( new Gfx::Color(b) );
     repaint();
 }
 
@@ -158,16 +158,16 @@ void ProgressBar::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::ColorF& ProgressBar::textColor() const
+const Gfx::Color& ProgressBar::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void ProgressBar::setTextColor(const Gfx::ColorF& color)
+void ProgressBar::setTextColor(const Gfx::Color& color)
 {
-    _textColor.reset( new Gfx::ColorF(color) );
+    _textColor.reset( new Gfx::Color(color) );
     invalidate();
 }
 

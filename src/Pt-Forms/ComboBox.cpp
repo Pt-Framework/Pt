@@ -280,16 +280,16 @@ void ComboBox::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::ColorF& ComboBox::textColor() const
+const Gfx::Color& ComboBox::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void ComboBox::setTextColor(const Gfx::ColorF& color)
+void ComboBox::setTextColor(const Gfx::Color& color)
 {
-    _textColor.reset( new Gfx::ColorF(color) );
+    _textColor.reset( new Gfx::Color(color) );
     invalidate();
 }
 

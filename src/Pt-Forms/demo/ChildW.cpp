@@ -16,9 +16,9 @@ void ChildW::checkInput(const Pt::String& s)
     _lineEdit.setAccepted(s.size() == 3);
 
     if( ! _lineEdit.isAccepted() )
-        _lineEdit.setTextColor( Gfx::ColorF::fromRgb8(255,0,0));
+        _lineEdit.setTextColor( Gfx::Color(255, 0, 0));
     else
-        _lineEdit.setTextColor( Gfx::ColorF::fromRgb8(0,0,0));
+        _lineEdit.setTextColor( Gfx::Color(0, 0, 0));
 }
 
 
@@ -27,9 +27,9 @@ void ChildW::checkSpinBox(int value)
     _spinBox.setAccepted( _spinBox.value() % 2 == 0);
 
     if( ! _spinBox.isAccepted() )
-        _spinBox.setTextColor( Gfx::ColorF::fromRgb8(255,0,0));
+        _spinBox.setTextColor( Gfx::Color(255, 0, 0));
     else
-        _spinBox.setTextColor( Gfx::ColorF::fromRgb8(0,0,0));
+        _spinBox.setTextColor( Gfx::Color(0, 0, 0));
 }
 
 
@@ -46,7 +46,7 @@ ChildW::ChildW(const std::string& title)
     _item2.setText("Op&en");
     _item2.setName("OpenItem");
     _item2.setSeperator(true);
-    _item2.setContour(Gfx::Pen(Pt::Gfx::ColorF::fromRgb8(0,0,0), 2));
+    _item2.setContour(Gfx::Pen(Pt::Gfx::Color(0, 0, 0), 2));
     _fileMenu.addItem(_item2);
 
     _item3.triggered() += Pt::slot(*this, &ChildW::onMenuExit);
@@ -109,10 +109,10 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setText("Platinum C++     Framework");
     _textLabel.setAlignment(Alignment::Bottom);
     _textLabel.setPadding(10);
-    _textLabel.setBackground( Gfx::ColorF::fromRgb8(240, 220, 70) );
+    _textLabel.setBackground( Gfx::Color(240, 220, 70) );
     _textLabel.setMnemonicControl(&_toggleButton);
     _textLabel.setCursor( &Forms::Cursor::waitCursor() ); 
-    _textLabel.setContour(Gfx::ColorF::fromRgb8(200, 190, 60));
+    _textLabel.setContour(Gfx::Color(200, 190, 60));
 
     //Toggle button
     Pt::Forms::Key key(Pt::Forms::Key::Control, Pt::Forms::Key::I);
@@ -138,10 +138,10 @@ ChildW::ChildW(const std::string& title)
     //Close button    
     Pt::Forms::Key xKey(Pt::Forms::Key::Control, Pt::Forms::Key::X);
 
-    _closeButton.setContour( Gfx::ColorF::fromRgb8(150, 30, 30) );
-    _closeButton.setForeground( Gfx::ColorF::fromRgb8(220, 80, 80) );
-    _closeButton.setAccentColor( Gfx::ColorF::fromRgb8(190, 30, 30) );
-    _closeButton.setHighlightColor( Gfx::ColorF::fromRgb8(200, 70, 70) );
+    _closeButton.setContour( Gfx::Color(150, 30, 30) );
+    _closeButton.setForeground( Gfx::Color(220, 80, 80) );
+    _closeButton.setAccentColor( Gfx::Color(190, 30, 30) );
+    _closeButton.setHighlightColor( Gfx::Color(200, 70, 70) );
     _closeButton.setMinimumHeight(40);
 
     _closeButton.setName("close"); 

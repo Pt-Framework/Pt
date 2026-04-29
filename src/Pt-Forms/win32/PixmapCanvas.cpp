@@ -109,8 +109,8 @@ DWORD scalePenSize(DWORD penSize, double scaleFactor)
 }
 
 HBRUSH getGradientBrush(HDC dc, int width, int height,
-                        Pt::Gfx::ColorF gradientStart, 
-                        Pt::Gfx::ColorF gradientStop, 
+                        Pt::Gfx::Color gradientStart, 
+                        Pt::Gfx::Color gradientStop, 
                         Pt::Gfx::Brush::GradientStyle gradient)
 {
     BITMAPINFO bi;
@@ -154,10 +154,10 @@ HBRUSH getGradientBrush(HDC dc, int width, int height,
         float f1 = (length - n) / float(length);
         float f2 = n / float(length);
 
-        Pt::uint8_t a = static_cast<Pt::uint8_t>((gradientStart.alpha() * f1 + gradientStop.alpha() * f2) / 257.0f);
-        Pt::uint8_t r = static_cast<Pt::uint8_t>((gradientStart.red()   * f1 + gradientStop.red()   * f2) / 257.0f);
-        Pt::uint8_t g = static_cast<Pt::uint8_t>((gradientStart.green() * f1 + gradientStop.green() * f2) / 257.0f);
-        Pt::uint8_t b = static_cast<Pt::uint8_t>((gradientStart.blue()  * f1 + gradientStop.blue()  * f2) / 257.0f);
+        Pt::uint8_t a = static_cast<Pt::uint8_t>(gradientStart.alpha() * f1 + gradientStop.alpha() * f2);
+        Pt::uint8_t r = static_cast<Pt::uint8_t>(gradientStart.red()   * f1 + gradientStop.red()   * f2);
+        Pt::uint8_t g = static_cast<Pt::uint8_t>(gradientStart.green() * f1 + gradientStop.green() * f2);
+        Pt::uint8_t b = static_cast<Pt::uint8_t>(gradientStart.blue()  * f1 + gradientStop.blue()  * f2);
 
         *pixel = Pt::Gfx::Color(a, r, g, b);
     }
@@ -312,9 +312,9 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 
     DWORD penStyle = getPenStyle(pen);
 
-    DWORD color = RGB( _penColor.red()  / 257, 
-                       _penColor.green() / 257, 
-                       _penColor.blue()  / 257 );
+    DWORD color = RGB( _penColor.red(), 
+                       _penColor.green(), 
+                       _penColor.blue() );
                            
     LOGBRUSH brush;
     brush.lbStyle = BS_SOLID;
@@ -328,9 +328,9 @@ void PixmapCanvas::onApplyPen()
 {
     if(_pixmap)
     {
-        DWORD penColor = RGB( _penColor.red()  / 257, 
-                              _penColor.green() / 257, 
-                              _penColor.blue()  / 257 );
+        DWORD penColor = RGB( _penColor.red(), 
+                              _penColor.green(), 
+                              _penColor.blue() );
         
         HDC dc = _pixmap->deviceContext();
         if(_pen)
@@ -351,9 +351,9 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
            
     _gradientBrush = false;
 
-    DWORD brushColor = RGB(brush.color().red() / 257, 
-                           brush.color().green() / 257, 
-                           brush.color().blue() / 257);
+    DWORD brushColor = RGB(brush.color().red(), 
+                           brush.color().green(), 
+                           brush.color().blue());
 
     switch( brush.fillStyle() ) 
     {

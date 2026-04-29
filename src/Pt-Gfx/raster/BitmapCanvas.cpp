@@ -291,8 +291,8 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
     if( ! _image )
         return;
 
-    ColorF gradientStart = _brush.color();
-    ColorF gradientStop = _brush.gradientColor();
+    Color gradientStart = _brush.color();
+    Color gradientStop = _brush.gradientColor();
 
     switch( _brush.gradient() )
     {
@@ -322,10 +322,10 @@ void BitmapCanvas::updateGradientBrush(int width, int height)
         float f1 = (length - n) / float(length);
         float f2 = n / float(length);
 
-        Pt::uint8_t a = static_cast<Pt::uint8_t>((gradientStart.alpha() * f1 + gradientStop.alpha() * f2) / 257.0f);
-        Pt::uint8_t r = static_cast<Pt::uint8_t>((gradientStart.red()   * f1 + gradientStop.red()   * f2) / 257.0f);
-        Pt::uint8_t g = static_cast<Pt::uint8_t>((gradientStart.green() * f1 + gradientStop.green() * f2) / 257.0f);
-        Pt::uint8_t b = static_cast<Pt::uint8_t>((gradientStart.blue()  * f1 + gradientStop.blue()  * f2) / 257.0f);
+        Pt::uint8_t a = static_cast<Pt::uint8_t>(gradientStart.alpha() * f1 + gradientStop.alpha() * f2);
+        Pt::uint8_t r = static_cast<Pt::uint8_t>(gradientStart.red()   * f1 + gradientStop.red()   * f2);
+        Pt::uint8_t g = static_cast<Pt::uint8_t>(gradientStart.green() * f1 + gradientStop.green() * f2);
+        Pt::uint8_t b = static_cast<Pt::uint8_t>(gradientStart.blue()  * f1 + gradientStop.blue()  * f2);
 
         *pixel = Color(a, r, g, b);
     }

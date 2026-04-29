@@ -67,17 +67,17 @@ class PT_FORMS_API Slider : public Control
 
         void setBackground(const Gfx::Brush& b);
 
-        const Gfx::ColorF& foreground() const;
+        const Gfx::Color& foreground() const;
 
-        void setForeground(const Gfx::ColorF& b);
+        void setForeground(const Gfx::Color& b);
 
         const Gfx::Pen& contour() const;
 
         void setContour(const Gfx::Pen& p);
 
-        const Gfx::ColorF& textColor() const;
+        const Gfx::Color& textColor() const;
 
-        void setTextColor(const Gfx::ColorF& color);
+        void setTextColor(const Gfx::Color& color);
 
         const Gfx::Font& font() const;
 
@@ -126,9 +126,9 @@ class PT_FORMS_API Slider : public Control
         bool        _isHighlighted;
 
         AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::ColorF>       _foreground;
+        AutoPtr<Gfx::Color>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::ColorF>       _textColor;
+        AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
         unsigned                  _fontOverride;
         

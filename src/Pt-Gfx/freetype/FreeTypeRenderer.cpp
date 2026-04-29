@@ -226,7 +226,7 @@ TextMetrics FreeTypeRenderer::textMetrics(const String& text) const
 
 
 void FreeTypeRenderer::draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y,
-                            const String& text, const ColorF& color,
+                            const String& text, const Color& color,
                             const RectI& clip, const CompositionMode& mode,
                             const Transform* tf) const
 {
@@ -384,7 +384,7 @@ void FreeTypeRenderer::draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y,
 
 
 void FreeTypeRenderer::drawGlyph(Rgb32Image& image, int xpos, int ypos,
-                                 const ColorF& color, int bmPitch, int height,
+                                 const Color& color, int bmPitch, int height,
                                  int width, const unsigned char* buffer,
                                  const RectI& clip,
                                  const CompositionMode& mode) const
@@ -418,10 +418,10 @@ void FreeTypeRenderer::drawGlyph(Rgb32Image& image, int xpos, int ypos,
 
     dsy = ypos;
 
-    const Pt::uint8_t ca = static_cast<Pt::uint8_t>(color.alpha() >> 8);
-    const Pt::uint8_t cr = static_cast<Pt::uint8_t>(color.red() >> 8);
-    const Pt::uint8_t cg = static_cast<Pt::uint8_t>(color.green() >> 8);
-    const Pt::uint8_t cb = static_cast<Pt::uint8_t>(color.blue() >> 8);
+    const Pt::uint8_t ca = color.alpha();
+    const Pt::uint8_t cr = color.red();
+    const Pt::uint8_t cg = color.green();
+    const Pt::uint8_t cb = color.blue();
     const Rgb32Color penColor(ca,
                               static_cast<Pt::uint8_t>((cr * ca + 127) / 255),
                               static_cast<Pt::uint8_t>((cg * ca + 127) / 255),

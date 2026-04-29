@@ -377,7 +377,7 @@ void ScreenImpl::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Gfx::Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    painter.setBrush( Gfx::ColorF::fromRgb8(40, 50, 80) );
+    painter.setBrush( Gfx::Color(40, 50, 80) );
     painter.fillRect(rect);
 }
 

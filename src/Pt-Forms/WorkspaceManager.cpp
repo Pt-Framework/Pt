@@ -45,10 +45,10 @@ WorkspaceManager::WorkspaceManager()
 , _topMostWindow(0)
 , _borderWidth(4.0)
 , _titleHeight(20.0)
-, _activeColor( Gfx::ColorF::fromRgb8(100, 128, 205) )
-, _inactiveColor( Gfx::ColorF::fromRgb8(173, 178, 191) )
-, _textColor( Gfx::ColorF::fromRgb8(255, 255, 255) )
-, _inactiveTextColor( Gfx::ColorF::fromRgb8(50, 50, 50) )
+, _activeColor(100, 128, 205)
+, _inactiveColor(173, 178, 191)
+, _textColor(255, 255, 255)
+, _inactiveTextColor(50, 50, 50)
 {
     eventReceived() += Pt::slot(*this, &WorkspaceManager::onProcessLayoutEvent);
 }

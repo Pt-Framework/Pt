@@ -133,7 +133,7 @@ class BitmapCanvas : public Canvas
     private:
         static SkPath toSkPath(const Gfx::Path& path);
 
-        static SkColor toSkColor(const Gfx::ColorF& c);
+        static SkColor toSkColor(const Gfx::Color& c);
 
         static SkPaint::Join toSkJoin(Gfx::Pen::JoinStyle s);
 

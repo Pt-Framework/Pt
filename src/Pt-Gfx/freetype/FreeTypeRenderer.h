@@ -42,7 +42,7 @@ namespace Pt {
 
 namespace Gfx {
 
-class ColorF;
+class Color;
 class FontMetrics;
 class TextMetrics;
 class Transform;
@@ -59,12 +59,12 @@ class FreeTypeRenderer
         TextMetrics textMetrics(const String& text) const;
 
         void draw(Rgb32Image& image, Pt::ssize_t x, Pt::ssize_t y,
-                  const String& text, const ColorF& color, const RectI& clip,
+                  const String& text, const Color& color, const RectI& clip,
                   const CompositionMode& mode, const Transform* tf) const;
 
     private:
         void drawGlyph(Rgb32Image& image, int xpos, int ypos,
-                       const ColorF& color, int bmPitch, int height,
+                       const Color& color, int bmPitch, int height,
                        int width, const unsigned char* buffer,
                        const RectI& clip, const CompositionMode& mode) const;
 

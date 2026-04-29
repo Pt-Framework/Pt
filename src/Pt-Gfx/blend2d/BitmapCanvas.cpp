@@ -177,11 +177,11 @@ void BitmapCanvas::onApplyPen()
 
     _context->set_stroke_width( static_cast<double>( _pen.size() ) );
 
-    Pt::Gfx::ColorF penColor = _pen.color();
-    BLRgba32 strokecolor(penColor.red() / 257, 
-                         penColor.green() / 257, 
-                         penColor.blue()  / 257, 
-                         penColor.alpha() / 257);
+    Pt::Gfx::Color penColor = _pen.color();
+    BLRgba32 strokecolor(penColor.red(), 
+                         penColor.green(), 
+                         penColor.blue(), 
+                         penColor.alpha());
 
     _context->set_stroke_style(strokecolor);
 }
@@ -198,11 +198,11 @@ void BitmapCanvas::onApplyBrush()
     if( ! _context )
         return;
 
-    Pt::Gfx::ColorF brushColor = _brush.color();
-    BLRgba32 fillColor(brushColor.red() / 257, 
-                       brushColor.green() / 257, 
-                       brushColor.blue()  / 257, 
-                       brushColor.alpha() / 257);
+    Pt::Gfx::Color brushColor = _brush.color();
+    BLRgba32 fillColor(brushColor.red(), 
+                       brushColor.green(), 
+                       brushColor.blue(), 
+                       brushColor.alpha());
 
     switch( _brush.fillStyle() ) 
     {

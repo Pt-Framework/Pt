@@ -79,7 +79,7 @@ void Dialog2::init()
   _okCancelPanel.PanelBorderStyle = Forms::BorderStyle::NoBorder;
   _okCancelPanel.FlowLayout = Forms::FlowLayout::Horizontal;
   _okCancelPanel.FlowDirection = Forms::FlowLayoutDirection::RightToLeftBottomToTop;
-	_okCancelPanel.BackColor =Gfx::ColorF(1,1,0,0);
+	_okCancelPanel.BackColor =Gfx::Color(0, 0, 0, 0);
 	addChild(&_okCancelPanel);
 
 	//Cancel button

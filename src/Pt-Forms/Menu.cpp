@@ -262,7 +262,7 @@ void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options,
             Pt::Gfx::SizeF(iconWidth, size.height()));
 
         Pt::Gfx::Brush brush = Pt::Gfx::Brush::verticalGradient(brush.color(),
-            Pt::Gfx::ColorF(65000, 65000, 65000));
+            Pt::Gfx::Color(253, 253, 253));
 
         painter.setBrush(brush);
         painter.fillRect(iconStrip);

@@ -150,16 +150,16 @@ void Label::setContour(const Gfx::Pen& p)
 }
 
 
-const Gfx::ColorF& Label::textColor() const
+const Gfx::Color& Label::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void Label::setTextColor(const Gfx::ColorF& color)
+void Label::setTextColor(const Gfx::Color& color)
 {
-    _textColor.reset( new Gfx::ColorF(color) );
+    _textColor.reset( new Gfx::Color(color) );
 
     _styleInvalid = true;
     invalidate();

@@ -155,17 +155,17 @@ MainWindow::MainWindow()
 
     _tabLabel1.setText("Tab Label 1");
     _tabLabel1.setAlignment(Alignment::Center);
-    _tabLabel1.setBackground( Gfx::ColorF::fromRgb8(200, 120, 100) );
-    _tabLabel1.setContour( Gfx::ColorF::fromRgb8(120, 50, 50) );
+    _tabLabel1.setBackground( Gfx::Color(200, 120, 100) );
+    _tabLabel1.setContour( Gfx::Color(120, 50, 50) );
     _tabLabel1.setMargin(5);
 
     _tabLabel2.setText("Tab Label 2");
     _tabLabel2.setAlignment(Alignment::Center);
-    _tabLabel2.setBackground( Gfx::ColorF::fromRgb8(100, 200, 120) );
+    _tabLabel2.setBackground( Gfx::Color(100, 200, 120) );
 
     _tabLabel3.setText("Tab Label 3");
     _tabLabel3.setAlignment(Alignment::Center);
-    _tabLabel3.setBackground( Gfx::ColorF::fromRgb8(100, 120, 200) );
+    _tabLabel3.setBackground( Gfx::Color(100, 120, 200) );
 
     _tabView.addTab(_tabLabel1, "Tab 1");
     _tabView.addTab(_tabLabel2, "Tab 2");
@@ -254,7 +254,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 {
     //{
     //Gfx::Painter p;
-    //p.setPen( Pt::Gfx::ColorF::fromRgb8(0,0,0));
+    //p.setPen( Pt::Gfx::Color(0, 0, 0));
     //PixmapSurface pm;
     //PixmapSurface pm2;
     //p.begin(pm);
@@ -284,14 +284,14 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 
     Gfx::TextMetrics fm = painter.textMetrics(text);
 
-    painter.setPen( Gfx::ColorF::fromRgb8(255, 0, 0, 150) );
+    painter.setPen( Gfx::Color(150, 255, 0, 0) );
     painter.drawLine(Pt::Gfx::PointF(10, 15), Pt::Gfx::PointF(10 + fm.advance(), 15));
 
     //
     // Path
     //
-    painter.setPen( Pt::Gfx::Pen(Gfx::ColorF(10000, 0, 10000), 2, Gfx::Pen::Dash) );
-    painter.setBrush(Gfx::ColorF(65535, 65535, 0, 0));
+    painter.setPen( Pt::Gfx::Pen(Gfx::Color(39, 0, 39), 2, Gfx::Pen::Dash) );
+    painter.setBrush(Gfx::Color(255, 255, 0, 0));
 
     Pt::Gfx::Path pathW;
     pathW.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(10, size().height() - 210), Pt::Gfx::SizeF(100, 100)), 10);
@@ -356,7 +356,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     // Image painter 2
     Pt::Gfx::ImagePainter2  painter2(img);
     
-    painter2.setPen(Gfx::Pen(Gfx::ColorF::fromRgb8(0, 255, 00), 10));
+    painter2.setPen(Gfx::Pen(Gfx::Color(0, 255, 00), 10));
 
     Gfx::PointF p3(40, 20);
     Gfx::PointF p4(190, 320);
@@ -375,7 +375,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     Gfx::PointF p5(60, 20);
     Gfx::PointF p6(210, 320);
 
-    painter.setPen(Gfx::Pen(Gfx::ColorF::fromRgb8(0, 0, 255), 10));
+    painter.setPen(Gfx::Pen(Gfx::Color(0, 0, 255), 10));
 
     clock.start();
 
@@ -396,7 +396,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     Gfx::Painter imagePainter2(imageSurface);
     imagePainter2.begin(imageSurface);
 
-    imagePainter2.setBrush(Gfx::ColorF(65535, 0, 0, 0));
+    imagePainter2.setBrush(Gfx::Color(255, 0, 0, 0));
     imagePainter2.fillRect( Gfx::RectF(Gfx::SizeF(600, 600)) );
     //
     //imagePainter.setAntiAliasing(true);
@@ -407,12 +407,12 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
 #ifdef TEST_POLYGON_RASTERIZER
 
     // this line begins at the same position as the next one, but is just longer
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2,
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2,
                                      Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(9, 9));
 
     // this line begins at the same position as the previous one, but is just shorter
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(32767, 65535, 0, 0), 2,
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(127, 255, 0, 0), 2,
                                      Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
     imagePainter.drawLine(Gfx::PointF(1, 1), Gfx::PointF(6, 6));
@@ -429,19 +429,19 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     linePolygon[3] = Pt::Gfx::PointF(528.35357666015625, 577.64642333984375);
     linePolygon[4] = Pt::Gfx::PointF(520.35357666015625, 569.64642333984375);
 
-    imagePainter.setBrush(Gfx::ColorF(65535, 65535, 65535));
+    imagePainter.setBrush(Gfx::Color(255, 255, 255));
     imagePainter.fillPolygon(linePolygon, 5);
 
     // NOTE: like X from window-close button/
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
     imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
     imagePainter.drawLine(Gfx::PointF(520 + 20, 520), Gfx::PointF(528 + 20, 528));
     imagePainter.drawLine(Gfx::PointF(528 + 20, 520), Gfx::PointF(520 + 20, 528));
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine(Gfx::PointF(520 + 40, 520), Gfx::PointF(528 + 40, 528));
     imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
 //*/
@@ -453,7 +453,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     // lines of various sizes
     //
 
-    Gfx::Pen pen1( Gfx::ColorF::fromRgb8(255, 200, 100), 1);
+    Gfx::Pen pen1( Gfx::Color(255, 200, 100), 1);
     imagePainter.setPen(pen1);
 
     imagePainter.begin(imageSurface);
@@ -465,12 +465,12 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.drawLine( Pt::Gfx::PointF(300, 450),
                            Pt::Gfx::PointF(400, 550) );
 
-    Gfx::Pen penb( Gfx::ColorF::fromRgb8(255, 255, 255), 1);
+    Gfx::Pen penb( Gfx::Color(255, 255, 255), 1);
     imagePainter.setPen(penb);
     imagePainter.drawLine( Pt::Gfx::PointF(250, 450),
                            Pt::Gfx::PointF(380, 550) );
 
-    Gfx::Pen pen2( Gfx::ColorF::fromRgb8(255, 200, 100), 2);
+    Gfx::Pen pen2( Gfx::Color(255, 200, 100), 2);
     imagePainter.setPen(pen2);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 320),
                            Pt::Gfx::PointF(450, 320) );
@@ -479,7 +479,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.drawLine( Pt::Gfx::PointF(320, 450),
                            Pt::Gfx::PointF(420, 550) );
 
-    Gfx::Pen pen3( Gfx::ColorF::fromRgb8(255, 200, 100), 3);
+    Gfx::Pen pen3( Gfx::Color(255, 200, 100), 3);
     imagePainter.setPen(pen3);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 340),
                            Pt::Gfx::PointF(450, 340) );
@@ -488,7 +488,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.drawLine( Pt::Gfx::PointF(340, 450),
                            Pt::Gfx::PointF(440, 550) );
 
-    Gfx::Pen pen4( Gfx::ColorF::fromRgb8(255, 200, 100), 4);
+    Gfx::Pen pen4( Gfx::Color(255, 200, 100), 4);
     imagePainter.setPen(pen4);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 360),
                            Pt::Gfx::PointF(450, 360) );
@@ -497,7 +497,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.drawLine( Pt::Gfx::PointF(360, 450),
                            Pt::Gfx::PointF(460, 550) );
 
-    Gfx::Pen pen5( Gfx::ColorF::fromRgb8(255, 200, 100), 5);
+    Gfx::Pen pen5( Gfx::Color(255, 200, 100), 5);
     imagePainter.setPen(pen5);
     imagePainter.drawLine( Pt::Gfx::PointF(300, 380),
                            Pt::Gfx::PointF(450, 380) );
@@ -507,38 +507,38 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
                            Pt::Gfx::PointF(480, 550) );
 
     // NOTE: RoundCap tests
-    imagePainter.setPen(Gfx::Pen( Gfx::ColorF::fromRgb8(255, 200, 100), 1, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(255, 200, 100), 1, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 300 - 200), Pt::Gfx::PointF(450, 300 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(300 - 200, 450), Pt::Gfx::PointF(400 - 200, 550) );
-    imagePainter.setPen(Gfx::Pen( Gfx::ColorF::fromRgb8(255, 200, 100), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(255, 200, 100), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 320 - 200), Pt::Gfx::PointF(450, 320 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(320 - 200, 450), Pt::Gfx::PointF(420 - 200, 550) );
-    imagePainter.setPen(Gfx::Pen( Gfx::ColorF::fromRgb8(255, 200, 100), 3, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(255, 200, 100), 3, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 340 - 200), Pt::Gfx::PointF(450, 340 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(340 - 200, 450), Pt::Gfx::PointF(440 - 200, 550) );
-    imagePainter.setPen(Gfx::Pen( Gfx::ColorF::fromRgb8(255, 200, 100), 4, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(255, 200, 100), 4, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 360 - 200), Pt::Gfx::PointF(450, 360 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(360 - 200, 450), Pt::Gfx::PointF(460 - 200, 550) );
-    imagePainter.setPen(Gfx::Pen( Gfx::ColorF::fromRgb8(255, 200, 100), 5, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(255, 200, 100), 5, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 380 - 200), Pt::Gfx::PointF(450, 380 - 200) );
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200, 450), Pt::Gfx::PointF(480 - 200, 550) );
 
     imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-    imagePainter.setPen(Gfx::Pen( Gfx::ColorF(32767, 65535, 65535, 65535), 5, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Gfx::Pen( Gfx::Color(127, 255, 255, 255), 5, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine( Pt::Gfx::PointF(300, 380 - 200 + 20), Pt::Gfx::PointF(450, 380 - 200 + 20) );
     imagePainter.drawLine( Pt::Gfx::PointF(380 - 200 + 20, 450), Pt::Gfx::PointF(480 - 200 + 20, 550) );
     imagePainter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     // NOTE: Like X from window-close button
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2, Gfx::Pen::Solid, Gfx::Pen::FlatCap));
     imagePainter.drawLine(Gfx::PointF(520, 520), Gfx::PointF(528, 528));
     imagePainter.drawLine(Gfx::PointF(528, 520), Gfx::PointF(520, 528));
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2, Gfx::Pen::Solid, Gfx::Pen::SquareCap));
     imagePainter.drawLine(Gfx::PointF(520 + 20, 520), Gfx::PointF(528 + 20, 528));
     imagePainter.drawLine(Gfx::PointF(528 + 20, 520), Gfx::PointF(520 + 20, 528));
 
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(65535, 65535, 65535), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(255, 255, 255), 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap));
     imagePainter.drawLine(Gfx::PointF(520 + 40, 520), Gfx::PointF(528 + 40, 528));
     imagePainter.drawLine(Gfx::PointF(528 + 40, 520), Gfx::PointF(520 + 40, 528));
 
@@ -546,15 +546,15 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     // Gradient filled path
     //
     Gfx::ColorStops stops;
-    stops.add(0, Gfx::ColorF::fromRgb8(255, 0, 0));
-    stops.add(1.0, Gfx::ColorF::fromRgb8(0, 255, 0));
+    stops.add(0, Gfx::Color(255, 0, 0));
+    stops.add(1.0, Gfx::Color(0, 255, 0));
 
     //Gfx::Brush brush = Gfx::Brush::horizontalGradient(stops);
     Gfx::Brush brush = Gfx::Brush::verticalGradient(stops);
     //Gfx::Brush brush = Gfx::Brush::linearGradient(0.0, 0.5, 1.0, 0.5, stops);
     //Gfx::Brush brush = Gfx::Brush::radialGradient(0.25, 0.25, 0, 0.5f, 0.5f, 0.5, stops);
     //imagePainter.setBrush(brush);
-    imagePainter.setBrush(Gfx::ColorF(65535, 0, 0));
+    imagePainter.setBrush(Gfx::Color(255, 0, 0));
 
     Pt::Gfx::Path path;
     path.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(20, 20), Pt::Gfx::SizeF(100, 100)), 10);
@@ -597,25 +597,25 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //imagePainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
     //imagePainter.setAntiAliasing(false);
 
-    imagePainter.setBrush(Gfx::ColorF(32767, 65535, 0, 0));
+    imagePainter.setBrush(Gfx::Color(127, 255, 0, 0));
     imagePainter.fillPolygon(triangle, 4);
 
-    imagePainter.setBrush(Gfx::ColorF(32767, 65535, 65535, 65535));
+    imagePainter.setBrush(Gfx::Color(127, 255, 255, 255));
     imagePainter.fillRect( Pt::Gfx::RectF( Pt::Gfx::PointF(220, 250), Pt::Gfx::SizeF(25.0, 6.0) ) );
     imagePainter.fillCircle( Pt::Gfx::PointF(250, 250), 6.0);
 
-    imagePainter.setBrush(Gfx::ColorF(32767, 65535, 0, 0));
+    imagePainter.setBrush(Gfx::Color(127, 255, 0, 0));
     imagePainter.fillEllipse(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100));
-    imagePainter.setBrush(Gfx::ColorF(32767, 65535, 65535, 0));
+    imagePainter.setBrush(Gfx::Color(127, 255, 255, 0));
     imagePainter.fillPie(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 0, 90);
-    imagePainter.setBrush(Gfx::ColorF(32767, 0, 65535, 0));
+    imagePainter.setBrush(Gfx::Color(127, 0, 255, 0));
     imagePainter.fillChord(Pt::Gfx::PointF(200, 300), Pt::Gfx::SizeF(50, 100), 180, 270);
 
-    imagePainter.setPen( Gfx::ColorF(50000, 65535, 40000, 20000) );
+    imagePainter.setPen( Gfx::Color(194, 255, 155, 77) );
     imagePainter.drawEllipse(Pt::Gfx::PointF(200 + 300, 300 - 200), Pt::Gfx::SizeF(50, 100));
 
     //fprintf(stderr, "AAAAA\n");
-    imagePainter.setPen(Pt::Gfx::Pen(Gfx::ColorF(32757, 65535, 65535, 65535), 1) );
+    imagePainter.setPen(Pt::Gfx::Pen(Gfx::Color(127, 255, 255, 255), 1) );
     imagePainter.drawCircle( Pt::Gfx::PointF(260, 250), 6.0);
     imagePainter.drawCircle( Pt::Gfx::PointF(270, 250), 7.0);
     imagePainter.drawCircle( Pt::Gfx::PointF(280, 250), 8.0);

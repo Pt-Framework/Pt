@@ -123,9 +123,9 @@ class PT_FORMS_API Cursor
   
     public:
         static void fromImage( const Gfx::Image& image, Cursor& cursor );    
-        static void loadCursor( const char* pngFile, const Gfx::ColorF& alphaColor, Cursor& cursor );
-        static void loadCursor( std::istream& pngStream, const Gfx::ColorF& alphaColor, Cursor& cursor );
-        static void loadCursor( const Pt::uint8_t* pngBuffer, const size_t streamSize, const Gfx::ColorF& alphaColor, Cursor& cursor );
+        static void loadCursor( const char* pngFile, const Gfx::Color& alphaColor, Cursor& cursor );
+        static void loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, Cursor& cursor );
+        static void loadCursor( const Pt::uint8_t* pngBuffer, const size_t streamSize, const Gfx::Color& alphaColor, Cursor& cursor );
 
     private:
         std::vector<Pt::uint8_t> _andMask;

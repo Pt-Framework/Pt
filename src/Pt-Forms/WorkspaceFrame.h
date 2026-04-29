@@ -70,10 +70,10 @@ class WindowButton
         const Gfx::RectF&  geometry() const
         { return _geometry; }
 
-        void setColor(const Gfx::ColorF& c)
+        void setColor(const Gfx::Color& c)
         { _color = c; }
 
-        const Gfx::ColorF& color() const
+        const Gfx::Color& color() const
         { return _color; }
 
         Signal<>& clicked()
@@ -99,7 +99,7 @@ class WindowButton
         Signal<>           _clicked;
         WorkspaceFrame*  _frame;
         Gfx::RectF         _geometry;
-        Gfx::ColorF         _color;
+        Gfx::Color          _color;
         bool               _isPressed;
 };
 

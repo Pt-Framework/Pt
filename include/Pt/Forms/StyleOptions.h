@@ -106,12 +106,12 @@ class PT_FORMS_API StyleOptions
             ++_generation;
         }
 
-        const Gfx::ColorF& accentColor() const
+        const Gfx::Color& accentColor() const
         {
             return _accentColor;
         }
         
-        void setAccentColor(const Gfx::ColorF& color)
+        void setAccentColor(const Gfx::Color& color)
         {
             _accentColor = color;
             ++_generation;
@@ -128,12 +128,12 @@ class PT_FORMS_API StyleOptions
             ++_generation;
         }
 
-        const Gfx::ColorF& highlightColor() const
+        const Gfx::Color& highlightColor() const
         {
             return _highlightColor;
         }
 
-        void setHighlightColor(const Gfx::ColorF& c)
+        void setHighlightColor(const Gfx::Color& c)
         {
             _highlightColor = c;
             ++_generation;
@@ -150,23 +150,23 @@ class PT_FORMS_API StyleOptions
             ++_generation;
         }
 
-        const Gfx::ColorF& textColor() const
+        const Gfx::Color& textColor() const
         {
             return _textColor;
         }
 
-        void setTextColor(const Gfx::ColorF& c)
+        void setTextColor(const Gfx::Color& c)
         {
             _textColor = c;
             ++_generation;
         }
 
-        const Gfx::ColorF& highlightedTextColor() const
+        const Gfx::Color& highlightedTextColor() const
         {
             return _highlightedTextColor;
         }
 
-        void setHighlightedTextColor(const Gfx::ColorF& c)
+        void setHighlightedTextColor(const Gfx::Color& c)
         {
             _highlightedTextColor = c;
             ++_generation;
@@ -192,12 +192,12 @@ class PT_FORMS_API StyleOptions
       Gfx::Brush _background;
       Gfx::Brush _foreground;
       Gfx::Pen   _contour;
-      Gfx::ColorF _accentColor;
+      Gfx::Color _accentColor;
       Gfx::Brush _viewBackground;
-      Gfx::ColorF _highlightColor;
+      Gfx::Color _highlightColor;
       Gfx::Brush _textBackground;
-      Gfx::ColorF _textColor;
-      Gfx::ColorF _highlightedTextColor;
+      Gfx::Color _textColor;
+      Gfx::Color _highlightedTextColor;
       Gfx::Font  _font;
       std::size_t _generation;
 };

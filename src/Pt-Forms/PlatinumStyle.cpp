@@ -54,17 +54,17 @@
 
 namespace {
 
-Pt::Gfx::ColorF brighten(const Pt::Gfx::ColorF& c, float factor)
+Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
 {
     float r = c.red() * factor;
     float g = c.green() * factor;
     float b = c.blue() * factor;
 
-    Pt::uint16_t r16 = r > 65535 ? 65535 : static_cast<Pt::uint16_t>(r);
-    Pt::uint16_t g16 = g > 65535 ? 65535 : static_cast<Pt::uint16_t>(g);
-    Pt::uint16_t b16 = b > 65535 ? 65535 : static_cast<Pt::uint16_t>(b);
+    Pt::uint8_t r8 = r > 255 ? 255 : static_cast<Pt::uint8_t>(r);
+    Pt::uint8_t g8 = g > 255 ? 255 : static_cast<Pt::uint8_t>(g);
+    Pt::uint8_t b8 = b > 255 ? 255 : static_cast<Pt::uint8_t>(b);
 
-    return Pt::Gfx::ColorF(c.alpha(), r16, g16, b16);
+    return Pt::Gfx::Color(c.alpha(), r8, g8, b8);
 }
 
 } // namespace
@@ -208,18 +208,18 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
 
     if( button.isPressed() && button.isFlat() )
     {
-        Gfx::ColorF hightlightColor = button.accentColor();
+        Gfx::Color highlightColor = button.accentColor();
 
         Gfx::Image highlightIcon = icon;
-        Gfx::PixelViewF pixelView(highlightIcon);
+        Gfx::PixelView pixelView(highlightIcon);
 
-        for(Gfx::PixelViewF::Iterator it = pixelView.begin(); it != pixelView.end(); ++it)
+        for(Gfx::PixelView::Iterator it = pixelView.begin(); it != pixelView.end(); ++it)
         {
-            Gfx::ColorF color = it->getColor();
+            Gfx::Color color = it->getColor();
 
-            color.setRed( hightlightColor.red() );
-            color.setGreen( hightlightColor.green() ); 
-            color.setBlue( hightlightColor.blue() ); 
+            color.setRed( highlightColor.red() );
+            color.setGreen( highlightColor.green() ); 
+            color.setBlue( highlightColor.blue() ); 
 
             (*it) = color;
         }
@@ -632,7 +632,7 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
                               Gfx::SizeF(iconWidth, size.height()) );
                 
          Gfx::Brush brush = Gfx::Brush::verticalGradient(brush.color(),
-                                                         Gfx::ColorF(65000, 65000, 65000) );
+                                                         Gfx::Color(253, 253, 253) );
 
         painter.setBrush(brush);
         painter.fillRect(iconStrip);

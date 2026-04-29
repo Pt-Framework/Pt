@@ -173,16 +173,16 @@ void MenuBaseItem::setContour(const Pt::Gfx::Pen& p)
 }
 
 
-const Pt::Gfx::ColorF& MenuBaseItem::textColor() const
+const Pt::Gfx::Color& MenuBaseItem::textColor() const
 {
     return _textColor ? *_textColor
         : Pt::Forms::Application::instance().styleOptions().textColor();
 }
 
 
-void MenuBaseItem::setTextColor(const Pt::Gfx::ColorF& color)
+void MenuBaseItem::setTextColor(const Pt::Gfx::Color& color)
 {
-    _textColor.reset(new Pt::Gfx::ColorF(color));
+    _textColor.reset(new Pt::Gfx::Color(color));
     invalidate();
 }
 

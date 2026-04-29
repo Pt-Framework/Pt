@@ -149,12 +149,12 @@ class PixmapCanvas : public Gfx::Canvas
         Gfx::Pen                  _logicalPen;
         HPEN                      _pen;
         DWORD                     _penSize;
-        Gfx::ColorF               _penColor;
+        Gfx::Color                _penColor;
         HBRUSH                    _brush;
         bool                      _gradientBrush;
         Gfx::Brush::GradientStyle _gradient;
-        Gfx::ColorF               _gradientStart;
-        Gfx::ColorF               _gradientStop;
+        Gfx::Color                _gradientStart;
+        Gfx::Color                _gradientStop;
         std::wstring              _text;
         Gfx::RectF                _clip;
         bool                      _hasClip;

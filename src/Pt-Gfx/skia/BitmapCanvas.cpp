@@ -504,12 +504,12 @@ SkPath BitmapCanvas::toSkPath(const Gfx::Path& path)
 }
 
 
-SkColor BitmapCanvas::toSkColor(const Gfx::ColorF& c)
+SkColor BitmapCanvas::toSkColor(const Gfx::Color& c)
 {
-    return SkColorSetARGB( static_cast<U8CPU>(c.alpha() / 257),
-                           static_cast<U8CPU>(c.red() / 257),
-                           static_cast<U8CPU>(c.green() / 257),
-                           static_cast<U8CPU>(c.blue() / 257) );
+    return SkColorSetARGB( static_cast<U8CPU>(c.alpha()),
+                           static_cast<U8CPU>(c.red()),
+                           static_cast<U8CPU>(c.green()),
+                           static_cast<U8CPU>(c.blue()) );
 }
 
 
