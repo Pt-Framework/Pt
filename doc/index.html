@@ -17,12 +17,14 @@
             font-weight:bold;
             text-align: left;
         }
-        #download-link {
+		#download a {
+			text-decoration: none;
+        }
+		#download-link {
             border-top:1px solid #CCCCCC;
             color:black;
             font-size:20px;
             font-weight:normal;
-            margin-right:70px;
             margin-top:2px;
             padding:13px 0 0;
             text-align:left;
@@ -97,13 +99,19 @@
 <div class="contents">
 
     <div class="sidebar">
-
+<!--
         <div id="download">Latest Download
             <div id="download-link">
                 <a href="http://pt-framework.net/Pt-1.0.2.zip">Platinum 1.0.2</a>
             </div>
         </div>
-
+-->
+		<div id="download">Get Platinum
+		    <div id="download-link">
+		        <a href="https://github.com/Pt-Framework/Pt" target="_blank" rel="noopener">🔗 GitHub Repository</a>
+		    </div>
+		</div>
+				
         <div class="sidebar-header">Topics</div>
 
         <div class="sidebar-entry-title"> <a href="htdocs/sigslot.html">Signals and Delegates</a> </div>
@@ -131,7 +139,6 @@
 
         <div class="sidebar-header">Resources</div>
 
-        <div class="sidebar-entry-title"> <a href="http://svn.code.sf.net/p/pt-framework/svn/trunk">Subversion Repository </a> </div> 
         <div class="sidebar-entry-title"> <a href="https://lists.sourceforge.net/lists/listinfo/pt-framework-general">Mailing List</a> </div>
         <div class="sidebar-entry-title"> <a href="htdocs/license.html">License</a> </div>
         <div class="sidebar-entry-title"> <a href="htdocs/faq.html">Frequently Askes Questions</a> </div>
@@ -202,7 +209,7 @@
             </div>
             <div class="infobox-body" style="background:url(htdocs/news-normal.png) no-repeat left 14px;">
                 The website has been significantly improved and moved to a
-                new domain http://www.pt-framwork.net. We hope you enjoy the
+                new domain http://www.pt-framwork.org. We hope you enjoy the
                 new layout and would like to thank Bernd Goseberg for his
                 support. The old sourceforge address will continue to work
                 and refer to the new address.
@@ -237,7 +244,7 @@
 <div class="clear">&nbsp;</div>
 
 <div id="footer">
-    <div style="float:left;">Copyright &copy; 2003-2014 The Pt Development Team</div>
+    <div style="float:left;">Copyright &copy; 2003-2026 The Pt Development Team</div>
 </div>
 
 </div>
