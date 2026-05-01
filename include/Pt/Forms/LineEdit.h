@@ -125,6 +125,8 @@ class PT_FORMS_API LineEdit : public Control
     protected:
         virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
 
+        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
+
         virtual void onInvalidate();
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
@@ -167,6 +169,7 @@ class PT_FORMS_API LineEdit : public Control
         bool                          _isAccepted;
         bool                          _isTextChanged;
         bool                          _isHighlighted;
+        double                        _pendingCursorX;
         EchoMode                      _echoMode;
         double                        _spacing;
 

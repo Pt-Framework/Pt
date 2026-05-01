@@ -232,6 +232,7 @@ class PT_FORMS_API SpinBox : public Control
         bool                          _isAccepted;
         bool                          _isTextChanged;
         bool                          _isHighlighted;
+        double                        _pendingCursorX;
         int                           _value;
         int                           _minimum;
         int                           _maximum;

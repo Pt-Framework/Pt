@@ -42,6 +42,7 @@ LineEdit::LineEdit()
 , _isAccepted(true)
 , _isTextChanged(false)
 , _isHighlighted(false)
+, _pendingCursorX(-1)
 , _echoMode(Normal)
 , _spacing(0)
 , _hasRenderer(false)
@@ -332,6 +333,29 @@ Gfx::SizeF LineEdit::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
+void LineEdit::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+{
+    Base::onLayout(ctx, rect);
+
+    Painter painter(ctx);
+    painter.setFont(_font);
+
+    if( _editor.isEmpty() && ! hasFocus() )
+        _editor.layout(painter, _placeholderText, _line);
+    else
+        _editor.layout(painter, _line);
+
+    if(_pendingCursorX >= 0)
+    {
+        std::size_t n = _line.xToCursor(painter, _pendingCursorX);
+        _editor.setCursorPosition(n);
+        _pendingCursorX = -1;
+    }
+
+    repaint( bounds() );
+}
+
+
 void LineEdit::onInvalidate()
 {
     Base::onInvalidate();
@@ -351,14 +375,6 @@ void LineEdit::onInvalidate()
         return;
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
-
-    Painter _painter( surface() );
-    _painter.setFont(_font);
-
-    if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(_painter, _placeholderText, _line);
-    else
-        _editor.layout(_painter, _line);
 }
 
 
@@ -438,14 +454,6 @@ void LineEdit::onResizeEvent(const ResizeEvent& ev)
     Gfx::SizeF editSize = ev.size();
     editSize.addWidth(-3 * _spacing);
     _editor.setSize(editSize);
-
-    Painter _painter( surface() );
-    _painter.setFont(_font);
-
-    if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(_painter, _placeholderText, _line);
-    else
-        _editor.layout(_painter, _line);
 }
 
 
@@ -518,12 +526,8 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
 
     if(_isEditable)
     {
-        Painter _painter( surface() );
-        _painter.setFont(_font);
-
-        std::size_t n = _line.xToCursor( _painter, mev.x() );
-        _editor.setCursorPosition(n);
-        repaint();
+        _pendingCursorX = mev.x();
+        relayout();
 
         Application::instance().inputMethod().begin(*this);
     }
@@ -544,12 +548,8 @@ bool LineEdit::onTouchEvent(const TouchEvent& tev)
 
     if(_isEditable)
     {
-        Painter _painter( surface() );
-        _painter.setFont(_font);
-
-        std::size_t n = _line.xToCursor( _painter, tev.x() );
-        _editor.setCursorPosition(n);
-        repaint();
+        _pendingCursorX = tev.x();
+        relayout();
 
         Application::instance().inputMethod().begin(*this);
     }

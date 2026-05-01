@@ -45,6 +45,7 @@ ComboBox::ComboBox()
 , _isHighlighted(false)
 , _hasRenderer(false)
 , _fontOverride(0)
+, _pendingCursorX(-1)
 {
     setFocusPolicy(Control::AcceptFocus);
 
@@ -403,6 +404,26 @@ Gfx::SizeF ComboBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
+void ComboBox::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+{
+    Base::onLayout(ctx, rect);
+
+    Painter painter(ctx);
+    painter.setFont(_font);
+
+    _editor.layout(painter, _line);
+
+    if(_pendingCursorX >= 0)
+    {
+        std::size_t n = _line.xToCursor(painter, _pendingCursorX);
+        _editor.setCursorPosition(n);
+        _pendingCursorX = -1;
+    }
+
+    repaint( bounds() );
+}
+
+
 void ComboBox::onInvalidate()
 {
     Base::onInvalidate();
@@ -424,10 +445,6 @@ void ComboBox::onInvalidate()
 
     _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
                        _pen, _font, _textPen);
-    
-    Painter _painter( surface() );
-    _painter.setFont(_font);
-    _editor.layout(_painter, _line);
 }
 
 
@@ -510,11 +527,6 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     editSize.addWidth( - _buttonSize.width() );
     editSize.addWidth(-3 * _spacing); // left, right, cursor
     _editor.setSize(editSize);
-
-    Painter _painter( surface() );
-    _painter.setFont(_font);
-
-    _editor.layout(_painter, _line);
 }
 
 
@@ -624,12 +636,8 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     }
     else if(_isEditable)
     {
-        Painter _painter( surface() );
-        _painter.setFont(_font);
-
-        std::size_t n = _line.xToCursor( _painter, ev.x() );
-        _editor.setCursorPosition(n);
-        repaint( bounds() );
+        _pendingCursorX = ev.x();
+        relayout();
             
         Application::instance().inputMethod().begin(*this);
     }
@@ -653,12 +661,8 @@ bool ComboBox::onTouchEvent(const TouchEvent& ev)
     }
     else if(_isEditable)
     {
-        Painter _painter( surface() );
-        _painter.setFont(_font);
-
-        std::size_t n = _line.xToCursor( _painter, ev.x() );
-        _editor.setCursorPosition(n);
-        repaint( bounds() );
+        _pendingCursorX = ev.x();
+        relayout();
 
         Application::instance().inputMethod().begin(*this);
     }

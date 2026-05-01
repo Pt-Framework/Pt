@@ -158,6 +158,7 @@ SpinBox::SpinBox()
 , _isAccepted(true)
 , _isTextChanged(false)
 , _isHighlighted(false)
+, _pendingCursorX(-1)
 , _value(0)
 , _minimum(-20000)
 , _maximum(10000)
@@ -616,6 +617,13 @@ void SpinBox::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
     _editor.setPosition( _textBox.topLeft() );
     _editor.setSize( _textBox.size() );
     _editor.layout(_painter, _line);
+
+    if(_pendingCursorX >= 0)
+    {
+        std::size_t n = _line.xToCursor(_painter, _pendingCursorX);
+        _editor.setCursorPosition(n);
+        _pendingCursorX = -1;
+    }
 }
 
 
@@ -799,12 +807,8 @@ bool SpinBox::onMouseEvent(const MouseEvent& ev)
 
     if(_isEditable)
     {
-        Painter _painter( surface() );
-        _painter.setFont(_font);
-
-        std::size_t n = _line.xToCursor( _painter, ev.x() );
-        _editor.setCursorPosition(n);
-        repaint();
+        _pendingCursorX = ev.x();
+        relayout();
             
         Application::instance().inputMethod().begin(*this);
     }
@@ -822,12 +826,8 @@ bool SpinBox::onTouchEvent(const TouchEvent& ev)
 
     if(_isEditable)
     {
-        Painter _painter( surface() );
-        _painter.setFont(_font);
-
-        std::size_t n = _line.xToCursor( _painter, ev.x() );
-        _editor.setCursorPosition(n);
-        repaint();
+        _pendingCursorX = ev.x();
+        relayout();
 
         Application::instance().inputMethod().begin(*this);
     }
