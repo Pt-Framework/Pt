@@ -100,13 +100,6 @@ void Pixmap::setScaleFactor(double scaling)
 }
 
 
-void Pixmap::onDrawPixmap(const Gfx::PointF& to, const Pixmap& pixmap, 
-                          const Gfx::Paint& paint, const Gfx::RectF* rect)
-{
-    _impl->drawPixmap(to, pixmap, paint, rect);
-}
-
-
 void Pixmap::onDrawPixmap(Gfx::Canvas& canvas, const Gfx::PointF& to,
                           const Pixmap& pixmap, const Gfx::RectF* rect)
 {

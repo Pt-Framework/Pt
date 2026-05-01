@@ -198,11 +198,6 @@ class PixmapImpl
 
         const Gfx::Scaling& scaling() const;
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect);
-
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pm,

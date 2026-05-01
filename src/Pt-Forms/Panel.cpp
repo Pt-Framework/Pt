@@ -29,7 +29,7 @@
 
 #include <Pt/Forms/Panel.h>
 #include <Pt/Forms/Application.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/BlockScale.h>
@@ -220,7 +220,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Forms::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -241,7 +241,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
+void Panel::onPaintContent(PaintSurface& surface, Painter& painter)
 {
     if(  _picture.empty() )
         return;
@@ -296,9 +296,8 @@ void Panel::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
             break;
     }
 
-    Gfx::Paint paint;
-    paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-    this->surface().drawPixmap(imagePosition, _picture, paint);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    painter.drawPixmap(imagePosition, _picture);
 }
 
 } // namespace

@@ -29,6 +29,7 @@
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 

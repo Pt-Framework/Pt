@@ -33,6 +33,7 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>
 
 namespace Pt {
@@ -529,6 +530,9 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
 
     Base::onProcessPaintEvent(ev);
 
+    if( ! _parent )
+        return;
+
     //
     // paint child windows
     //
@@ -555,12 +559,9 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
-        if(_parent)
-        {
-            Gfx::Paint paint;
-            _parent->surface().drawPixmap(frameRect.topLeft(), frame->pixmap(), 
-                                          paint, &surfaceRect);
-        }
+        _painter.begin(_parent->surface());
+        _painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+        _painter.drawPixmap(frameRect.topLeft(), frame->pixmap(), surfaceRect);
     }
 }
 

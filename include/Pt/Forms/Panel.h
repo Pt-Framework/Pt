@@ -42,6 +42,8 @@ namespace Pt {
 
 namespace Forms {
 
+class Painter;
+
 class PT_FORMS_API Panel : public Control
 {
     typedef Control Base;
@@ -83,7 +85,7 @@ class PT_FORMS_API Panel : public Control
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(PaintSurface& surface, Gfx::Painter& painter);
+        virtual void onPaintContent(PaintSurface& surface, Painter& painter);
 
     private:
         Control*                 _content;

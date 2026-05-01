@@ -32,6 +32,7 @@
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/Forms/LayoutEvent.h> // RescaleEvent
 #include <Pt/Forms/PaintEvent.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>

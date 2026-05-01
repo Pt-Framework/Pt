@@ -92,7 +92,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 
         virtual bool onLeaveEvent(const Pt::Forms::LeaveEvent& ev);
 
-        virtual void onRenderBackground( const Pt::Forms::StyleOptions& options, Pt::Gfx::Painter& painter,
+        virtual void onRenderBackground( const Pt::Forms::StyleOptions& options, Pt::Forms::Painter& painter,
                                          const Pt::Gfx::RectF& rect) const;
        
        //MenuBase
@@ -114,7 +114,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
     private:
         void onItemTriggered(MenuBaseItem& m);
 
-        void drawBorder(Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& borderRect) const;
+        void drawBorder(Pt::Forms::Painter& painter, const Pt::Gfx::RectF& borderRect) const;
 
     private:
         MenuBaseItem*          _currentItem;

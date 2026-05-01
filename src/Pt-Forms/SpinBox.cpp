@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/SpinBox.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Convert.h>
 
@@ -141,7 +142,7 @@ void SpinBoxButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->renderButton(*this, options, painter, rect, _brush, _pen);
@@ -608,7 +609,7 @@ void SpinBox::onLayout(const Gfx::RectF& rect)
     Gfx::SizeF editSize = _textBox.size();
     editSize.subWidth(5);  // TODO: cursor
 
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     _editor.setPosition( _textBox.topLeft() );
@@ -646,7 +647,7 @@ void SpinBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -797,7 +798,7 @@ bool SpinBox::onMouseEvent(const MouseEvent& ev)
 
     if(_isEditable)
     {
-        Gfx::Painter _painter( surface() );
+        Painter _painter( surface() );
         _painter.setFont(_font);
 
         std::size_t n = _line.xToCursor( _painter, ev.x() );
@@ -820,7 +821,7 @@ bool SpinBox::onTouchEvent(const TouchEvent& ev)
 
     if(_isEditable)
     {
-        Gfx::Painter _painter( surface() );
+        Painter _painter( surface() );
         _painter.setFont(_font);
 
         std::size_t n = _line.xToCursor( _painter, ev.x() );

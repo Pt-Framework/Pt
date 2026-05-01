@@ -394,7 +394,7 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     imagePainter.begin(imageSurface);
 
     Gfx::Painter imagePainter2(imageSurface);
-    imagePainter2.begin(imageSurface);
+    //imagePainter2.begin(imageSurface);
 
     imagePainter2.setBrush(Gfx::Color(255, 0, 0, 0));
     imagePainter2.fillRect( Gfx::RectF(Gfx::SizeF(600, 600)) );

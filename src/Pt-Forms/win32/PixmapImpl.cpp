@@ -50,16 +50,6 @@ namespace Forms {
 
 #ifdef PT_FORMS_WIN32_RASTER
 
-void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
-                            const Pixmap& pixmap,
-                            const Gfx::Paint& paint,
-                            const Gfx::RectF* rect)
-{
-    const Gfx::Bitmap& bitmap = pixmap.impl()->_bitmap;
-    _bitmap.drawBitmap(to, bitmap, paint, rect);
-}
-
-
 void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
                             const Pt::Gfx::PointF& to,
                             const Pixmap& pixmap,
@@ -69,8 +59,7 @@ void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
 
     if(_canvas == &canvas)
     {
-        const Gfx::Image& image = pixmap.impl()->_bitmap.image();
-        _canvas->drawImage(to, image, rect);
+        _canvas->drawBitmap(to, pixmap.impl()->_bitmap, rect);
     }
 }
 
@@ -307,67 +296,6 @@ void PixmapImpl::sync()
 
 void PixmapImpl::finish()
 {
-}
-
-
-void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
-                              const Pixmap& pm,
-                              const Gfx::Paint& paint,
-                              const Gfx::RectF* rect)
-{
-    if( ! _bitmap)
-        return;
-
-    const PixmapImpl* pixmap = pm.impl();
-    Gfx::PointF to = _scaling.toPhysical(toF);
-
-    int fromX = 0;
-    int fromY = 0;
-    int width = lround( pixmap->size().width() );
-    int height = lround( pixmap->size().height() );
-
-    if(rect)
-    {
-        const Gfx::Scaling& scaling = pixmap->scaling();
-        Gfx::RectF rectP = scaling.toPhysical(*rect);
-        
-        fromX = lround( rectP.x() );
-        fromY = lround( rectP.y()) ;
-        width = lround( rectP.width() );
-        height = lround( rectP.height() );
-    }
-
-    Gfx::CompositionMode compositionMode = paint.compositionMode();
-    HDC pixmapDC = pixmap->deviceContext();
-
-    if(_canvas)
-        _canvas->suspend();
-
-    switch(compositionMode)
-    {
-        case Gfx::CompositionMode::SourceCopy:
-        {
-            BitBlt(_dc, lround(to.x()), lround(to.y()), width, height,
-                   pixmapDC, fromX, fromY, SRCCOPY);
-        }
-        break;
-
-        case Gfx::CompositionMode::SourceOver:
-        {
-            BLENDFUNCTION bf;
-            bf.BlendOp = AC_SRC_OVER;
-            bf.BlendFlags = 0;
-            bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
-            bf.AlphaFormat = AC_SRC_ALPHA;
-
-            AlphaBlend(_dc, lround(to.x()), lround(to.y()), width, height,
-                       pixmapDC, fromX, fromY, width, height, bf);
-        }
-        break;
-    }
-
-    if(_canvas)
-        _canvas->resume();
 }
 
 

@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/ListBox.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -272,7 +273,7 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 
 Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     Gfx::TextMetrics tm = _painter.textMetrics(_text);
@@ -333,7 +334,7 @@ void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter(surface);
+    Forms::Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -345,7 +346,7 @@ void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void ListBoxItem::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
+void ListBoxItem::onPaintContent(PaintSurface& surface, Painter& painter)
 {   
     painter.setFont(_font);
     painter.setPen(_textPen);
@@ -388,9 +389,10 @@ void ListBoxItem::onPaintContent(PaintSurface& surface, Gfx::Painter& painter)
         Gfx::PointF picturePos(pictureX + pictureXOff, 
                                pictureY + pictureYOff);
 
-        Gfx::Paint paint;
-        paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        this->surface().drawPixmap(picturePos, _picture, paint);
+        const Gfx::CompositionMode prevMode = painter.compositionMode();
+        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        painter.drawPixmap(picturePos, _picture);
+        painter.setCompositionMode(prevMode);
     }
 
     //
@@ -671,7 +673,7 @@ void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     if(_hasBackground)

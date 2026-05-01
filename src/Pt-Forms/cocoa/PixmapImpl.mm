@@ -1096,58 +1096,6 @@ void PixmapImpl::finish()
 }
 
 
-void PixmapImpl::drawPixmap(const Gfx::PointF& toF,
-                            const Pixmap& pm,
-                            const Gfx::Paint& paint,
-                            const Gfx::RectF* rectF)
-{
-    const PixmapImpl* pixmap = pm.impl();
-
-    if( ! _context || ! pixmap->context())
-        return;
-
-    Gfx::PointF to = _scaling.toPhysical(toF);
-    CGImageRef image = pixmap->getCGImage();
-   
-    if(_canvas)
-        _canvas->suspend();
-
-    if(rectF)
-    {
-        Gfx::RectF rect = _scaling.toPhysical(*rectF);
-
-        CGRect subRect = CGRectMake(rect.left(), 
-                                    rect.top(), 
-                                    rect.size().width(), 
-                                    rect.size().height());
-
-        CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
-
-        CGRect destRect = CGRectMake(to.x(), 
-                                     _height - to.y() - rect.height(), 
-                                     rect.width(), 
-                                     rect.height());
-
-        CGContextDrawImage(_context, destRect, subImage);
-        CGImageRelease(subImage);
-    }
-    else
-    {
-        CGRect destRect = CGRectMake(to.x(), 
-                                     _height - to.y() - pm.size().height(), 
-                                     pixmap->size().width(), 
-                                     pixmap->size().height());
-
-        CGContextDrawImage(_context, destRect, image);
-    }
-
-    if(_canvas)
-        _canvas->resume();
-
-    _imageModified = true;
-}
-
-
 void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
                             const Gfx::PointF& to,
                             const Pixmap& pm,

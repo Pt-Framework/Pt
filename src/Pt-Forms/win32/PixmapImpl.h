@@ -108,11 +108,6 @@ class PixmapImpl
             _bitmap.setScaleFactor(scaleFactor);
         }
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pixmap,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect);
-
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pixmap,
@@ -204,11 +199,6 @@ class PixmapImpl
         void setScaleFactor(double scaleFactor);
 
         HDC deviceContext() const;
-
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect);
 
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,

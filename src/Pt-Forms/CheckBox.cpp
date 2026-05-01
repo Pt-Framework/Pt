@@ -32,6 +32,7 @@
 #include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -224,7 +225,7 @@ Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
     //Gfx::TextMetrics tm = PixmapSurface::textMetrics( _font, text() );
 
-    Gfx::Painter painter( surface() );
+    Painter painter( surface() );
     painter.setFont(_font);
     Gfx::TextMetrics tm = painter.textMetrics( text() );
     Gfx::FontMetrics fm = painter.fontMetrics();
@@ -270,7 +271,7 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = this->scaling();

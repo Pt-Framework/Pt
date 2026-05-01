@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/TabView.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -186,7 +187,7 @@ void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->renderTabs(_tabs, options, painter, rect,
@@ -404,7 +405,7 @@ void TabView::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect,

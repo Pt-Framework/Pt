@@ -2,6 +2,7 @@
 #include <Pt/Forms/MenuSubItem.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -22,7 +23,7 @@ void MenuSubItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
     
-    Pt::Gfx::Painter painter(surface);
+    Forms::Painter painter(surface);
     painter.setClip(rect);
     
     
@@ -41,9 +42,10 @@ void MenuSubItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
 
     Pt::Gfx::PointF iconPos(iconX, iconY);
 
-    Gfx::Paint paint;
-    paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-    this->surface().drawPixmap(iconPos, _picture, paint);
+    const Gfx::CompositionMode prevMode = painter.compositionMode();
+    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    painter.drawPixmap(iconPos, _picture);
+    painter.setCompositionMode(prevMode);
 
 
     // item text    

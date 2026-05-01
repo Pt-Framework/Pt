@@ -29,6 +29,7 @@
 #include <Pt/Forms/MenuItem.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 

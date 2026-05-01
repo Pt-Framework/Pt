@@ -44,6 +44,8 @@ namespace Pt {
 
 namespace Forms {
 
+class Painter;
+
 class PT_FORMS_API ListBoxItem : public Button
 {
     typedef Button Base;
@@ -119,7 +121,7 @@ class PT_FORMS_API ListBoxItem : public Button
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         // TODO: why pass PaintSurface?
-        virtual void onPaintContent(PaintSurface& surface, Gfx::Painter& painter);
+        virtual void onPaintContent(PaintSurface& surface, Painter& painter);
 
     private:
         Gfx::Font getFont() const;

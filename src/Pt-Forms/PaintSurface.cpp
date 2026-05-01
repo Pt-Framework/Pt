@@ -14,15 +14,6 @@ PaintSurface::~PaintSurface()
 }
 
 
-void PaintSurface::drawPixmap(const Gfx::PointF& to,
-                               const Pixmap& pixmap,
-                               const Gfx::Paint& paint,
-                               const Gfx::RectF* rect)
-{
-    onDrawPixmap(to, pixmap, paint, rect);
-}
-
-
 void PaintSurface::drawPixmap(Gfx::Canvas& canvas,
                                const Gfx::PointF& to,
                                const Pixmap& pixmap,

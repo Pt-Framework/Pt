@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/Slider.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -292,7 +293,7 @@ void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect, 

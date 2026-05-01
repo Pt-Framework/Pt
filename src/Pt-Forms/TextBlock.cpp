@@ -32,6 +32,7 @@
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Screen.h>
+#include <Pt/Forms/Painter.h>
 #include <cassert>
 
 namespace Pt {
@@ -124,7 +125,7 @@ void TextLine::setText(const Pt::String& text, const Gfx::TextMetrics& tm,
 }
 
 
-double TextLine::cursorToX(const Gfx::Painter& painter, std::size_t cursorPosition) const
+double TextLine::cursorToX(const Painter& painter, std::size_t cursorPosition) const
 {
     Pt::String left;
     if( cursorPosition <= _text.size() && ! _text.empty() )
@@ -136,7 +137,7 @@ double TextLine::cursorToX(const Gfx::Painter& painter, std::size_t cursorPositi
 }
 
 
-std::size_t TextLine::xToCursor(const Gfx::Painter& painter, double x) const
+std::size_t TextLine::xToCursor(const Painter& painter, double x) const
 {
     const Pt::String& str = _text;
 
@@ -289,7 +290,7 @@ TextBlock::ConstIterator TextBlock::end() const
 }
 
 
-void TextBlock::layout(const Gfx::Painter& painter, const Pt::String& text)
+void TextBlock::layout(const Painter& painter, const Pt::String& text)
 {
     _lines.clear();
     _size.set(0, 0);

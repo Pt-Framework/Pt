@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/LineEdit.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -350,7 +351,7 @@ void LineEdit::onInvalidate()
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     if( _editor.isEmpty() && ! hasFocus() )
@@ -367,7 +368,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -437,7 +438,7 @@ void LineEdit::onResizeEvent(const ResizeEvent& ev)
     editSize.addWidth(-3 * _spacing);
     _editor.setSize(editSize);
 
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     if( _editor.isEmpty() && ! hasFocus() )
@@ -516,7 +517,7 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
 
     if(_isEditable)
     {
-        Gfx::Painter _painter( surface() );
+        Painter _painter( surface() );
         _painter.setFont(_font);
 
         std::size_t n = _line.xToCursor( _painter, mev.x() );
@@ -542,7 +543,7 @@ bool LineEdit::onTouchEvent(const TouchEvent& tev)
 
     if(_isEditable)
     {
-        Gfx::Painter _painter( surface() );
+        Painter _painter( surface() );
         _painter.setFont(_font);
 
         std::size_t n = _line.xToCursor( _painter, tev.x() );

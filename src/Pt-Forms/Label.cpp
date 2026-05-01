@@ -304,7 +304,7 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 
             // TODO: set max width if text wrap is enabled
             // NOTE: abbreviate text if text wrap is off and width is too small
-            Gfx::Painter _painter( surface() );
+            Painter _painter( surface() );
             _painter.setFont(_font);
 
             block.setMaxWidth(policy.size().width());
@@ -340,7 +340,7 @@ void Label::layoutText()
 
     Adjustment a = adjustment();
 
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     const Gfx::Scaling& scaling = this->scaling();
@@ -583,7 +583,7 @@ void Label::onPaint(PaintSurface& surface,
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Forms::Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -619,13 +619,8 @@ void Label::onPaint(PaintSurface& surface,
     {
         Pixmap& picture = getIconPixmap();
 
-        // Gfx::Paint paint;
-        // paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        // surface.drawPixmap(_iconPos, picture, paint);
-
-        Forms::Painter painter2(surface);
-        painter2.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        painter2.drawPixmap(_iconPos, picture);
+        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        painter.drawPixmap(_iconPos, picture);
     }
 
     //if(pen)

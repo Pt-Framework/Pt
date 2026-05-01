@@ -29,6 +29,7 @@
 
 #include "MenuImpl.h"
 #include <Pt/Forms/Menu.h>
+#include <Pt/Forms/Painter.h>
 
 namespace Pt {
 

@@ -180,11 +180,6 @@ class ViewSurface : public PaintSurface
         }
 
     protected:
-        virtual void onDrawPixmap(const Gfx::PointF& to,
-                                  const Pixmap& pm,
-                                  const Gfx::Paint& paint,
-                                  const Gfx::RectF* rect) override;
-
         virtual void onDrawPixmap(Gfx::Canvas& canvas,
                                   const Gfx::PointF& to,
                                   const Pixmap& pm,

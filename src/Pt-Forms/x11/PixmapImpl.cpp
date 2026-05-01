@@ -60,16 +60,6 @@ const Gfx::ImageFormat& getScreenFormat()
 }
 
 
-void PixmapImpl::drawPixmap(const Pt::Gfx::PointF& to,
-                            const Pixmap& pixmap,
-                            const Gfx::Paint& paint,
-                            const Gfx::RectF* rect)
-{
-    const Gfx::Bitmap& bitmap = pixmap.impl()->_bitmap;
-    _bitmap.drawBitmap(to, bitmap, paint, rect);
-}
-
-
 void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
                             const Pt::Gfx::PointF& to,
                             const Pixmap& pixmap,
@@ -79,8 +69,7 @@ void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
 
     if(_canvas == &canvas)
     {
-        const Gfx::Image& image = pixmap.impl()->_bitmap.image();
-        _canvas->drawImage(to, image, rect);
+        _canvas->drawBitmap(to, pixmap.impl()->_bitmap, rect);
     }
 }
 

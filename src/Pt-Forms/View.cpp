@@ -39,19 +39,6 @@ namespace Forms {
 // ViewSurface
 ///////////////////////////////////////////////////////////////////////
 
-void ViewSurface::onDrawPixmap(const Gfx::PointF& to,
-                               const Pixmap& pixmap,
-                               const Gfx::Paint& paint,
-                               const Gfx::RectF* rect)
-{
-    if( ! _surface )
-        return;
-
-    Gfx::PointF pos = _position + to;
-    _surface->drawPixmap(pos, pixmap, paint, rect);
-}
-
-
 void ViewSurface::onDrawPixmap(Gfx::Canvas& canvas,
                                const Gfx::PointF& to,
                                const Pixmap& pixmap,

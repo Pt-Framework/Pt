@@ -90,11 +90,6 @@ class PixmapImpl
             _bitmap.setScaleFactor(scaleFactor);
         }
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pixmap,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect);
-
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pixmap,

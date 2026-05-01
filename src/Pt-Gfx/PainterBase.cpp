@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/PainterBase.h>
 #include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/PaintContext.h>
 
@@ -55,7 +56,7 @@ PainterBase::~PainterBase()
 
 void PainterBase::beginPaint(PaintSurface& surface)
 {
-    if( ! _context && _surface == &surface )
+    if( ! _context && _surface == &surface && _canvas && _canvas->isActive() )
         return;
 
     finish();
@@ -68,7 +69,7 @@ void PainterBase::beginPaint(PaintContext& context)
 {
     PaintSurface* surface = context.surface();
 
-    if(_context == &context && _surface == surface)
+    if(_context == &context && _surface == surface && _canvas && _canvas->isActive())
         return;
 
     finish();
@@ -483,6 +484,23 @@ void PainterBase::drawImage(const Gfx::PointF& to,
 {
     if(_canvas)
         _canvas->drawImage(to, image, &imageRect);
+}
+
+
+void PainterBase::drawBitmap(const Gfx::PointF& to, 
+                             const Gfx::Bitmap& bitmap)
+{
+    if(_canvas)
+        _canvas->drawBitmap(to, bitmap);
+}
+
+
+void PainterBase::drawBitmap(const Gfx::PointF& to,
+                             const Gfx::Bitmap& bitmap, 
+                             const Gfx::RectF& rect)
+{
+    if(_canvas)
+        _canvas->drawBitmap(to, bitmap, &rect);
 }
 
 } // namespace

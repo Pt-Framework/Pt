@@ -50,11 +50,6 @@ class PT_FORMS_API PaintContext : public Gfx::PaintContext
 
         ~PaintContext();
 
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::Paint& paint,
-                        const Gfx::RectF* rect = 0) const;
-
     private:
         PaintSurface& surface();
 

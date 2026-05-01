@@ -30,7 +30,7 @@
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Forms/Application.h>
 
 namespace Pt {
@@ -328,7 +328,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
     const Gfx::Scaling& scal = this->scaling();
 
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     _textMetrics = _painter.textMetrics( text() );
@@ -337,7 +337,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     double spacing = _picture.empty() || text().empty() ? 0 : _fontMetrics.height() * 0.5;
 
     // use descent as additional spacing
-    double textHeight = _fontMetrics.height() + _fontMetrics.descent(); 
+    double textHeight = _fontMetrics.height() + _fontMetrics.descent();
 
     Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
     double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
@@ -509,7 +509,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -530,9 +530,10 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     if( ! _picture.empty() )
     {
-        Gfx::Paint paint;
-        paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        this->surface().drawPixmap(_iconPos, _picture, paint);
+        const Gfx::CompositionMode prevMode = painter.compositionMode();
+        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        painter.drawPixmap(_iconPos, _picture);
+        painter.setCompositionMode(prevMode);
     }
 
     //

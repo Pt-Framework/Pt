@@ -31,6 +31,7 @@
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Bitmap.h>
 
@@ -441,7 +442,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    Gfx::Painter painter( surface() );
+    Painter painter( surface() );
     painter.setBrush(_backgroundBrush);
     painter.fillRect( ev.rect() );
 }

@@ -43,6 +43,8 @@ namespace Pt {
 
 namespace Forms {
 
+class Painter;
+
 class PT_FORMS_API TextLine
 {
     public:
@@ -73,9 +75,9 @@ class PT_FORMS_API TextLine
         void setText(const Pt::String& text, const Gfx::TextMetrics& tm,
                     const Gfx::FontMetrics& fm);
 
-        double cursorToX(const Gfx::Painter& painter, std::size_t n) const;
+        double cursorToX(const Painter& painter, std::size_t n) const;
 
-        std::size_t xToCursor(const Gfx::Painter& painter, double x) const;
+        std::size_t xToCursor(const Painter& painter, double x) const;
 
     private:
         Gfx::PointF       _position;
@@ -131,7 +133,7 @@ class PT_FORMS_API TextBlock
 
         ConstIterator end() const;
 
-        void layout(const Gfx::Painter& painter, const Pt::String& text);
+        void layout(const Painter& painter, const Pt::String& text);
 
     private:
         void addLine(const Pt::String& line, const Gfx::TextMetrics& tm,

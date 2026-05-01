@@ -37,6 +37,7 @@
 #include <Pt/Forms/WindowStateEvent.h>
 #include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Forms/MoveEvent.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <algorithm>
 
@@ -143,7 +144,7 @@ void WindowButton::touchEvent(const TouchEvent& tev)
 
 void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     Gfx::Color light = brighten(color(), 1.25f);
@@ -227,7 +228,7 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -263,7 +264,7 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -305,7 +306,7 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     WindowButton::paint(surface, rect);
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -361,7 +362,7 @@ MenuButton::~MenuButton()
 
 void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = painter.scaling();
@@ -1497,7 +1498,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     const Gfx::RectF& rect = ev.rect();
     PaintSurface& surface = this->surface();
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = this->scaling();

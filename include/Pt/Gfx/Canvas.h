@@ -52,6 +52,8 @@ namespace Pt {
 
 namespace Gfx {
 
+class Bitmap;
+
 /** @brief Paint context.
 */
 class PT_GFX_API Canvas
@@ -151,6 +153,10 @@ class PT_GFX_API Canvas
         void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
                        const Gfx::RectF* rect = 0);
+
+        void drawBitmap(const Gfx::PointF& to, 
+                        const Gfx::Bitmap& bitmap, 
+                        const Gfx::RectF* rect = 0);
 
     protected:
         virtual void onBeginPaint(const Gfx::Paint& paint) = 0;

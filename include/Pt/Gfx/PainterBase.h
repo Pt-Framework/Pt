@@ -57,6 +57,7 @@ namespace Pt {
 namespace Gfx {
 
 class Canvas;
+class Bitmap;
 class PaintSurface;
 class PaintContext;
 
@@ -248,6 +249,15 @@ class PT_GFX_API PainterBase : private NonCopyable
         /** @brief Draws a part of an image.
         */
         void drawImage(const PointF& to, const Image& im, const RectF& rect);
+
+    public:
+        /** @brief Draws a bitmap.
+        */
+        void drawBitmap(const PointF& to, const Bitmap& bm);
+
+        /** @brief Draws a part of a bitmap.
+        */
+        void drawBitmap(const PointF& to, const Bitmap& bm, const RectF& rect);
 
     protected:
         /** @brief Begins painting to a paint surface.

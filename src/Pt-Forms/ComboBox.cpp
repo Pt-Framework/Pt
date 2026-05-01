@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/ComboBox.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
@@ -423,7 +424,7 @@ void ComboBox::onInvalidate()
     _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
                        _pen, _font, _textPen);
     
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
     _editor.layout(_painter, _line);
 }
@@ -436,7 +437,7 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _renderer)
         return;
 
-    Gfx::Painter painter(surface);
+    Painter painter(surface);
     painter.setClip(rect);
 
     //
@@ -509,7 +510,7 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     editSize.addWidth(-3 * _spacing); // left, right, cursor
     _editor.setSize(editSize);
 
-    Gfx::Painter _painter( surface() );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     _editor.layout(_painter, _line);
@@ -622,7 +623,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     }
     else if(_isEditable)
     {
-        Gfx::Painter _painter( surface() );
+        Painter _painter( surface() );
         _painter.setFont(_font);
 
         std::size_t n = _line.xToCursor( _painter, ev.x() );
@@ -651,7 +652,7 @@ bool ComboBox::onTouchEvent(const TouchEvent& ev)
     }
     else if(_isEditable)
     {
-        Gfx::Painter _painter( surface() );
+        Painter _painter( surface() );
         _painter.setFont(_font);
 
         std::size_t n = _line.xToCursor( _painter, ev.x() );

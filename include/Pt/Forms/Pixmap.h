@@ -71,11 +71,6 @@ class PT_FORMS_API Pixmap : public PaintSurface
         void setScaleFactor(double v);
 
     protected:
-        virtual void onDrawPixmap(const Gfx::PointF& to,
-                                  const Pixmap& pixmap,
-                                  const Gfx::Paint& paint,
-                                  const Gfx::RectF* rect = 0) override;
-
         virtual void onDrawPixmap(Gfx::Canvas& canvas,
                                   const Gfx::PointF& to,
                                   const Pixmap& pixmap,

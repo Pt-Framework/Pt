@@ -29,6 +29,7 @@
 #include <Pt/Forms/MenuBaseItem.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
 
@@ -301,7 +302,7 @@ void MenuBaseItem::onInvalidate()
 
 Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
 {
-    Pt::Gfx::Painter _painter(surface());
+    Painter _painter(surface());
     _painter.setFont(_font);
 
     Pt::Gfx::TextMetrics fm = _painter.textMetrics(_text);
@@ -330,7 +331,7 @@ void MenuBaseItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
-    Pt::Gfx::Painter painter(surface);
+    Forms::Painter painter(surface);
     painter.setClip(rect);
 
     // background
@@ -345,11 +346,12 @@ void MenuBaseItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
 
-    Gfx::Paint paint;
-    paint.setCompositionMode(Gfx::CompositionMode::SourceOver);
-
     Pt::Gfx::PointF iconPos(iconX, iconY);
-    this->surface().drawPixmap(iconPos, _picture, paint);
+
+    const Gfx::CompositionMode prevMode = painter.compositionMode();
+    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    painter.drawPixmap(iconPos, _picture);
+    painter.setCompositionMode(prevMode);
 
     // item text    
     painter.setFont(_font);

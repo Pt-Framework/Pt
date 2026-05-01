@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Paint.h>
 #include <Pt/Gfx/PaintSurface.h>
 
@@ -381,6 +382,23 @@ void Canvas::drawImage(const Gfx::PointF& to,
             copyView(image, conv);
             onDrawImage(to, conv, rect);
         }
+    }
+}
+
+
+void Canvas::drawBitmap(const Gfx::PointF& to, 
+                        const Gfx::Bitmap& bitmap, 
+                        const Gfx::RectF* rect)
+{
+    if(rect)
+    {
+        const Scaling& srcScaling = bitmap.scaling();
+        RectF physRect = srcScaling.toPhysical(*rect);
+        drawImage(to, bitmap.image(), &physRect);
+    }
+    else
+    {
+        drawImage(to, bitmap.image());
     }
 }
 

@@ -32,6 +32,7 @@
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/Widget.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -214,6 +215,8 @@ class WorkspaceManager : public WindowManager
         Window*                        _activeWindow;
         Window*                        _topMostWindow;
         std::map<Window*, Gfx::RectF>  _autoCenter;
+
+        Forms::Painter                 _painter;
 
         double                       _borderWidth;
         double                       _titleHeight;

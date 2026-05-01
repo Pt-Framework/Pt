@@ -33,6 +33,7 @@
 #include <Pt/Forms/MenuBarItem.h>
 #include <Pt/Forms/MenuMenuItem.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <assert.h>
 
@@ -197,13 +198,13 @@ void Menu::onPaintEvent(const Pt::Forms::PaintEvent& ev)
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
 
-    Pt::Gfx::Painter painter( surface() );
+    Painter painter( surface() );
     painter.setClip( ev.rect() );
 
     onRenderBackground(options, painter, ev.rect());
 }
 
-void Menu::drawBorder(Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& borderRect) const
+void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
 {
     const MenuBaseItem* p = parentItem();
 
@@ -243,7 +244,7 @@ void Menu::drawBorder(Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& borderRec
 }
 
 void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options, 
-                              Pt::Gfx::Painter& painter, const Pt::Gfx::RectF& rect) const
+                              Painter& painter, const Pt::Gfx::RectF& rect) const
 {    
     Pt::Gfx::SizeF size = this->size();
 
