@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Forms/TableLayout.h>
+#include <Pt/Forms/PaintContext.h>
 #include <algorithm>
 #include <cmath>
 
@@ -124,7 +125,7 @@ void TableLayout::setRow(std::size_t row, SizeMode mode, double size)
 }
 
 
-Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF TableLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     double itemsWidth = policy.width() - padding().leftRight();
     double itemsHeight = policy.height() - padding().topBottom();
@@ -186,9 +187,9 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void TableLayout::onLayout(const Gfx::RectF& rect)
+void TableLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     //
     // calculate row sizes

@@ -173,7 +173,7 @@ void Panel::onInvalidate()
 }
 
 
-Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Panel::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     if(_content)
     { 
@@ -192,9 +192,9 @@ Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 }
 
 
-void Panel::onLayout(const Gfx::RectF& rect)
+void Panel::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
     
     if(_content)
     {

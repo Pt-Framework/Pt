@@ -30,6 +30,7 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/LayoutEvent.h>
+#include <Pt/Forms/PaintContext.h>
 
 namespace {
 
@@ -199,7 +200,8 @@ Gfx::SizeF Form::onProcessMeasure()
 
 void Form::onProcessLayout(const Gfx::RectF& rect)
 {
-    onLayout(rect);
+    PaintContext ctx( surface() );
+    onLayout(ctx, rect);
 
     LayoutEvent lev(*_mainControl, bounds());
     Application::instance().commitEvent(lev);
@@ -208,11 +210,12 @@ void Form::onProcessLayout(const Gfx::RectF& rect)
 
 Gfx::SizeF Form::measure(const SizePolicy& policy)
 {
-    return onMeasure(policy);
+    PaintContext ctx( surface() );
+    return onMeasure(ctx, policy);
 }
 
 
-Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Form::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     Gfx::SizeF size = _mainControl ? _mainControl->measure(policy)
                                    : policy.size();
@@ -220,7 +223,7 @@ Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
 }
 
 
-void Form::onLayout(const Gfx::RectF& rect)
+void Form::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
     if( _mainControl )
     {

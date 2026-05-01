@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Forms/ScrollView.h>
+#include <Pt/Forms/PaintContext.h>
 #include <algorithm>
 #include <cmath>
 
@@ -139,7 +140,7 @@ void ScrollView::onScrolledY(double n)
 }
 
 
-Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
+Gfx::SizeF ScrollView::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {   
     double width = policy.size().width();
     double height = policy.size().height();
@@ -178,9 +179,9 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 }
 
 
-void ScrollView::onLayout(const Gfx::RectF& rect)
+void ScrollView::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     _scrollLayout.move( Gfx::PointF(0, 0) );
     _scrollLayout.resize( rect.size() );

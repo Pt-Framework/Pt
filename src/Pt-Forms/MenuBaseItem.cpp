@@ -301,9 +301,9 @@ void MenuBaseItem::onInvalidate()
 }
 
 
-Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
+Pt::Gfx::SizeF MenuBaseItem::onMeasure(PaintContext& ctx, const Pt::Forms::SizePolicy& policy)
 {
-    Painter _painter(surface());
+    Painter _painter(ctx);
     _painter.setFont(_font);
 
     Pt::Gfx::TextMetrics fm = _painter.textMetrics(_text);

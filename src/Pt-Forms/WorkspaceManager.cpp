@@ -33,6 +33,7 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/PaintSurface.h>
 
@@ -465,11 +466,12 @@ void WorkspaceManager::onProcessLayoutEvent(const LayoutEvent& ev)
 
 void WorkspaceManager::onLayoutEvent(const LayoutEvent& ev)
 {
-    onLayout( ev.rect() );
+    PaintContext ctx( _parent->surface() );
+    onLayout( ctx, ev.rect() );
 }
 
 
-void WorkspaceManager::onLayout(const Gfx::RectF& rect)
+void WorkspaceManager::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
     std::map<Window*, Gfx::RectF>::iterator wit;
     for(wit = _autoCenter.begin(); wit != _autoCenter.end(); ++wit)

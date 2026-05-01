@@ -392,7 +392,7 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
+Gfx::SizeF ComboBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     // TODO: width of widest item?
     double itemsWidth = policy.width();

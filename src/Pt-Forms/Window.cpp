@@ -332,9 +332,9 @@ void Window::onProcessLayout(const Gfx::RectF& rect)
 }
 
 
-Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Window::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
-    Gfx::SizeF size = Base::onMeasure(policy);
+    Gfx::SizeF size = Base::onMeasure(ctx, policy);
     
     //std::clog << "measure: " << title() << " " 
     //          << size.width() << "x" << size.height() << std::endl;
@@ -343,12 +343,12 @@ Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
 }
 
 
-void Window::onLayout(const Gfx::RectF& rect)
+void Window::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
     //std::clog << "layout: " << title() << " " 
     //          << rect.width() << "x" << rect.height() << std::endl;
 
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 }
 
 ///////////////////////////////////////////////////////////////////////

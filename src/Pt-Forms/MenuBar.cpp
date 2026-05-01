@@ -208,7 +208,7 @@ void MenuBar::onInvalidate()
 }
 
 
-Pt::Gfx::SizeF MenuBar::onMeasure(const Pt::Forms::SizePolicy& policy)
+Pt::Gfx::SizeF MenuBar::onMeasure(PaintContext& ctx, const Pt::Forms::SizePolicy& policy)
 {
     double hspace = padding().leftRight() + _layout.margin().leftRight();
     double vspace = padding().topBottom() + _layout.margin().topBottom();
@@ -222,9 +222,9 @@ Pt::Gfx::SizeF MenuBar::onMeasure(const Pt::Forms::SizePolicy& policy)
 }
 
 
-void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
+void MenuBar::onLayout(PaintContext& ctx, const Pt::Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
     
 
     Pt::Gfx::PointF pos(padding().left() + _layout.margin().left(), 

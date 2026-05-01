@@ -285,7 +285,7 @@ Adjustment Label::adjustment() const
 }
 
 
-Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Label::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     //std::clog << "label measure " << _text.narrow() << std::endl;
 
@@ -305,7 +305,7 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 
             // TODO: set max width if text wrap is enabled
             // NOTE: abbreviate text if text wrap is off and width is too small
-            Painter _painter( surface() );
+            Painter _painter( ctx );
             _painter.setFont(_font);
 
             block.setMaxWidth(policy.size().width());
@@ -334,14 +334,14 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 }
 
 
-void Label::layoutText()
+void Label::layoutText(PaintContext& ctx)
 {
     if( _text.empty() )
         return;
 
     Adjustment a = adjustment();
 
-    Painter _painter( surface() );
+    Painter _painter( ctx );
     _painter.setFont(_font);
 
     const Gfx::Scaling& scaling = this->scaling();
@@ -483,14 +483,14 @@ void Label::layoutImage()
 }
 
 
-void Label::onLayout(const Gfx::RectF& rect)
+void Label::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
     //std::clog  << " layout " << _text.narrow()<< this << std::endl;
 
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
     
     if( _icon.empty() )
-        layoutText();
+        layoutText(ctx);
     else
         layoutImage();
 

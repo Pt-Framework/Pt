@@ -101,7 +101,7 @@ class PT_FORMS_API ScrollBar : public Control
 
     protected:
 
-        Gfx::SizeF onMeasure(const SizePolicy& s);;
+        Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& s);;
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 

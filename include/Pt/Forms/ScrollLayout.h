@@ -72,9 +72,9 @@ class PT_FORMS_API ScrollLayout : public Layout
         void setContentMode(SizePolicy::Mode hmode, SizePolicy::Mode vmode);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);

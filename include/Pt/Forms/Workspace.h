@@ -88,9 +88,9 @@ class PT_FORMS_API Workspace : public Control
 
         virtual void onRemoveControl(Control& control);
 
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext&, const Gfx::RectF&);
 

@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Forms/Workspace.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/KeyEvent.h>
@@ -178,7 +179,7 @@ void Workspace::onRelayoutRequest(WorkspaceManager& wm)
 }
 
 
-Gfx::SizeF Workspace::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Workspace::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     if(_content)
         return _content->measure(policy);
@@ -197,11 +198,11 @@ void Workspace::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
-void Workspace::onLayout(const Gfx::RectF& rect)
+void Workspace::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
     //std::clog << "WORKSPACE LAYOUT: " << rect.width() << "x" << rect.height() << std::endl;
 
-    Control::onLayout(rect);
+    Control::onLayout(ctx, rect);
 
     if(_content)
     {

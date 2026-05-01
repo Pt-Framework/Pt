@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Forms/FlowLayout.h>
+#include <Pt/Forms/PaintContext.h>
 
 namespace Pt {
 
@@ -78,27 +79,27 @@ void FlowLayout::setReverse(bool b)
 }
 
 
-Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF FlowLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
-    Base::onMeasure(policy);
+    Base::onMeasure(ctx, policy);
 
     switch(_direction)
     {
         default:
         case Left:
-            return onMeasureHorizontal(policy);
+            return onMeasureHorizontal(ctx, policy);
             break;
 
         case Right:
-            return onMeasureHorizontal(policy);
+            return onMeasureHorizontal(ctx, policy);
             break;
 
         case Top:
-            return onMeasureVertical(policy);
+            return onMeasureVertical(ctx, policy);
             break;
 
         case Bottom:
-            return onMeasureVertical(policy);
+            return onMeasureVertical(ctx, policy);
             break;
     }
 
@@ -106,9 +107,9 @@ Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void FlowLayout::onLayout(const Gfx::RectF& rect)
+void FlowLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     switch(_direction)
     {
@@ -132,7 +133,7 @@ void FlowLayout::onLayout(const Gfx::RectF& rect)
 }
 
 
-Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
+Gfx::SizeF FlowLayout::onMeasureHorizontal(PaintContext& ctx, const SizePolicy& policy)
 {
     std::vector<Control*>::const_iterator it = controls().begin();
     std::vector<Control*>::const_iterator end = controls().end();
@@ -170,7 +171,7 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
+Gfx::SizeF FlowLayout::onMeasureVertical(PaintContext& ctx, const SizePolicy& policy)
 {
     std::vector<Control*>::const_iterator it = controls().begin();
     std::vector<Control*>::const_iterator end = controls().end();

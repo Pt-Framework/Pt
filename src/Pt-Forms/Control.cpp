@@ -30,6 +30,7 @@
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Form.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/String.h>
 
 #include <cmath>
@@ -704,8 +705,15 @@ Gfx::SizeF Control::measure(const SizePolicy& policy)
                        contentPolicy.horizontal() == SizePolicy::Fixed &&
                        controls().empty();
 
-        _preferredSize = isFixed ? contentPolicy.size()
-                                 : onMeasure(contentPolicy);
+        if(isFixed)
+        {
+            _preferredSize = contentPolicy.size();
+        }
+        else
+        {
+            PaintContext ctx( surface() );
+            _preferredSize = onMeasure(ctx, contentPolicy);
+        }
 
         // use fixed height, if size mode is fixed
         if(contentPolicy.vertical() == SizePolicy::Fixed)
@@ -735,7 +743,7 @@ Gfx::SizeF Control::measure(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF Control::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Control::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
 }
@@ -783,14 +791,15 @@ void Control::onProcessLayoutEvent(const LayoutEvent& ev)
 
 void Control::onLayoutEvent(const LayoutEvent& ev)
 {
-    onLayout( ev.rect() );
+    PaintContext ctx( surface() );
+    onLayout( ctx, ev.rect() );
 
      // TODO: repaint only if required in derived class
      repaint();
 }
 
 
-void Control::onLayout(const Gfx::RectF& rect)
+void Control::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
 }
 

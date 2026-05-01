@@ -50,9 +50,9 @@ MenuBarItem::~MenuBarItem()
 
 
 
-Pt::Gfx::SizeF MenuBarItem::onMeasure(const  Pt::Forms::SizePolicy& policy)
+Pt::Gfx::SizeF MenuBarItem::onMeasure(PaintContext& ctx, const  Pt::Forms::SizePolicy& policy)
 {
-    Painter _painter(surface());
+    Painter _painter(ctx);
     _painter.setFont(_font);
 
     Pt::Gfx::TextMetrics fm = _painter.textMetrics(_text);

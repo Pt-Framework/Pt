@@ -73,9 +73,9 @@ class PT_FORMS_API StackLayout : public Layout
     protected:
         virtual void onRemoveControl(Control& control);
 
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
 
     private:
         Pt::Signal<std::size_t> _controlRemoved;

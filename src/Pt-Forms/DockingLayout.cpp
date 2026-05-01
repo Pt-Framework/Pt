@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Forms/DockingLayout.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Application.h>
 
 namespace Pt {
@@ -80,7 +81,7 @@ void DockingLayout::onRemoveControl(Control& control)
 }
 
 
-Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF DockingLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     Gfx::SizeF fillSize = policy.size();
     fillSize.subWidth( padding().leftRight() );
@@ -210,9 +211,9 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void DockingLayout::onLayout(const Gfx::RectF& rect)
+void DockingLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     std::vector<Control*>::const_iterator it = this->controls().begin();
     std::vector<Control*>::const_iterator end = this->controls().end();

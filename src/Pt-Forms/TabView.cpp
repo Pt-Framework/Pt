@@ -161,7 +161,7 @@ void TabBar::onInvalidate()
 }
 
 
-Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
+Gfx::SizeF TabBar::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     if( ! _renderer)
         return Gfx::SizeF();
@@ -170,9 +170,9 @@ Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
 }
 
 
-void TabBar::onLayout(const Gfx::RectF& rect)
+void TabBar::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     if( ! _renderer )
         return;
@@ -369,18 +369,18 @@ void TabView::onInvalidate()
 }
 
 
-Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
+Gfx::SizeF TabView::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
-    Base::onMeasure(policy);
+    Base::onMeasure(ctx, policy);
 
     _layout.measure(policy);
     return _layout.preferredSize();
 }
 
 
-void TabView::onLayout(const Gfx::RectF& rect)
+void TabView::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     Gfx::PointF pos(padding().left() + _layout.margin().left(), 
                     padding().top()  + _layout.margin().top());

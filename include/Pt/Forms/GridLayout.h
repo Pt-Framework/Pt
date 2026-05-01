@@ -57,14 +57,14 @@ class PT_FORMS_API GridLayout : public Layout
         void removeItem(Control& control);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-        
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
+
+        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
 
     private:
-        Gfx::SizeF onMeasureVertical(const SizePolicy& policy);
+        Gfx::SizeF onMeasureVertical(PaintContext& ctx, const SizePolicy& policy);
 
-        Gfx::SizeF onMeasureHorizontal(const SizePolicy& policy);
+        Gfx::SizeF onMeasureHorizontal(PaintContext& ctx, const SizePolicy& policy);
 
         void onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& rect);
 

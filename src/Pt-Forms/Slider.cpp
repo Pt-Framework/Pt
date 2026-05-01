@@ -251,7 +251,7 @@ void Slider::setRenderer(SliderRenderer* renderer)
 }
 
 
-Gfx::SizeF Slider::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Slider::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
 

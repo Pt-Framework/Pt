@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Forms/GridLayout.h>
+#include <Pt/Forms/PaintContext.h>
 #include <algorithm>
 #include <cmath>
 
@@ -65,7 +66,7 @@ void GridLayout::removeItem(Control& control)
 }
 
 
-Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
     Gfx::SizeF contentSize;
 
@@ -73,11 +74,11 @@ Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
     {
         default:
         case Vertical:
-            contentSize = onMeasureVertical(policy);
+            contentSize = onMeasureVertical(ctx, policy);
             break;
 
         case Horizontal:
-            contentSize = onMeasureHorizontal(policy);
+            contentSize = onMeasureHorizontal(ctx, policy);
             break;
     }
 
@@ -85,7 +86,7 @@ Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasureVertical(PaintContext& ctx, const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight();
     double itemsHeight = policy.size().height() - padding().topBottom();
@@ -165,7 +166,7 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasureHorizontal(PaintContext& ctx, const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight();
     double itemsHeight = policy.size().height() - padding().topBottom();
@@ -245,9 +246,9 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 }
 
 
-void GridLayout::onLayout(const Gfx::RectF& rect)
+void GridLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Layout::onLayout(rect);
+    Layout::onLayout(ctx, rect);
 
     //
     // determine the cell size from maximum item width and height

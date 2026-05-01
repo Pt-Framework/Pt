@@ -115,7 +115,7 @@ class WorkspaceManager : public WindowManager
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
 
     //
     // WindowManager

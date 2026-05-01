@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Forms/CanvasLayout.h>
+#include <Pt/Forms/PaintContext.h>
 
 namespace Pt {
 
@@ -71,9 +72,9 @@ void CanvasLayout::onRemoveControl(Control& control)
 }
 
 
-Gfx::SizeF CanvasLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF CanvasLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 {
-    Base::onMeasure(policy);
+    Base::onMeasure(ctx, policy);
 
     Gfx::SizeF size;
 
@@ -111,9 +112,9 @@ Gfx::SizeF CanvasLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void CanvasLayout::onLayout(const Gfx::RectF& rect)
+void CanvasLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    Base::onLayout(ctx, rect);
 
     ItemMap::iterator it;
     for(it = _items.begin(); it != _items.end(); ++it)
