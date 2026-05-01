@@ -92,7 +92,7 @@ class PT_FORMS_API Workspace : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(PaintSurface&, const Gfx::RectF&);
+        virtual void onPaint(PaintContext&, const Gfx::RectF&);
 
     protected:
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);

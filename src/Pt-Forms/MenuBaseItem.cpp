@@ -29,6 +29,7 @@
 #include <Pt/Forms/MenuBaseItem.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -327,11 +328,11 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
 }
 
 
-void MenuBaseItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuBaseItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
-    Forms::Painter painter(surface);
+    Forms::Painter painter(context);
     painter.setClip(rect);
 
     // background

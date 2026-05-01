@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/SpinBox.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Convert.h>
@@ -135,14 +136,14 @@ void SpinBoxButton::onInvalidate()
 }
 
 
-void SpinBoxButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBoxButton::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     _renderer->renderButton(*this, options, painter, rect, _brush, _pen);
@@ -640,14 +641,14 @@ void SpinBox::onInvalidate()
 }
 
 
-void SpinBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     //

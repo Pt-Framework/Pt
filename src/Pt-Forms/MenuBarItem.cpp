@@ -33,6 +33,7 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 
 namespace Pt {
@@ -62,14 +63,14 @@ Pt::Gfx::SizeF MenuBarItem::onMeasure(const  Pt::Forms::SizePolicy& policy)
 }
 
 
-void MenuBarItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuBarItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {    
-    MenuBaseItem::onPaint(surface,rect);
+    MenuBaseItem::onPaint(context,rect);
     
     const  Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     if (isHighlighted())

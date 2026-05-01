@@ -127,7 +127,7 @@ class PT_FORMS_API ComboBox : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);

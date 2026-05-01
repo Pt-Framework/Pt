@@ -35,6 +35,7 @@
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Cursor.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/PaintEvent.h>
 #include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Gfx/Bitmap.h>
@@ -330,11 +331,12 @@ void ScreenImpl::onPaintEvent(const PaintEvent& ev)
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
-    onPaint(_pixmap, rect);
+    PaintContext ctx(_pixmap);
+    onPaint(ctx, rect);
 }
 
 
-void ScreenImpl::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ScreenImpl::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     //
     // erase previous cursor area in back buffer
@@ -352,7 +354,7 @@ void ScreenImpl::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // repaint the update area
     // TODO: unless full screen window covers the whole screen
     //
-    Gfx::Painter painter(surface);
+    Gfx::Painter painter(context);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     painter.setBrush( Pt::Gfx::Color(0, 0, 0) );
     painter.fillRect(rect);

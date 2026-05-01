@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/Slider.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -286,14 +287,14 @@ void Slider::onInvalidate()
 }
 
 
-void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void Slider::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect, 

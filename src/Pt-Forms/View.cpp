@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/View.h>
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Application.h>
 
 namespace Pt {
@@ -184,11 +185,12 @@ void View::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    onPaint( *_surface, ev.rect() );
+    PaintContext ctx( *_surface );
+    onPaint( ctx, ev.rect() );
 }
 
 
-void View::onPaint(PaintSurface&, const Gfx::RectF&)
+void View::onPaint(PaintContext&, const Gfx::RectF&)
 {
 }
 

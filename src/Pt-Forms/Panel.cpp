@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/Panel.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
@@ -213,14 +214,14 @@ void Panel::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void Panel::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Forms::Painter painter(surface);
+    Forms::Painter painter(context);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();
@@ -230,7 +231,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                     painter, rect, *brush);
     }
 
-    onPaintContent(surface, painter);
+    onPaintContent(context, painter);
 
     const Gfx::Pen* pen = contour();
     if(pen)
@@ -241,7 +242,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void Panel::onPaintContent(PaintSurface& surface, Painter& painter)
+void Panel::onPaintContent(PaintContext& context, Painter& painter)
 {
     if(  _picture.empty() )
         return;

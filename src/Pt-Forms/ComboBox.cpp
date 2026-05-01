@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/ComboBox.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -430,14 +431,14 @@ void ComboBox::onInvalidate()
 }
 
 
-void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ComboBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     //

@@ -32,6 +32,7 @@
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 
 namespace Pt {
@@ -241,13 +242,13 @@ void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
 }
 
 
-void MenuBar::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuBar::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {
-    Base::onPaint(surface, rect);
+    Base::onPaint(context, rect);
 
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     painter.setBrush(_brush);

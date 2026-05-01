@@ -112,7 +112,7 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         virtual Pt::Gfx::SizeF onMeasure(const Pt::Forms::SizePolicy& policy);
 
-        virtual void onPaint(PaintSurface& surface, const Pt::Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& updateRect);
 
         virtual bool onMouseEvent(const Pt::Forms::MouseEvent& ev);
 

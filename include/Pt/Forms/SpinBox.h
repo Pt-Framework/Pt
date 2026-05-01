@@ -80,7 +80,7 @@ class PT_FORMS_API SpinBoxButton : public Button
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
 
     private:
         Type                      _type;
@@ -196,7 +196,7 @@ class PT_FORMS_API SpinBox : public Control
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
 
     protected:
         virtual bool onKeyEvent(const KeyEvent& ev);

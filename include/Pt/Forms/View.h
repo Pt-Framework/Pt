@@ -49,6 +49,7 @@ namespace Pt {
 namespace Forms {
 
 class Control;
+class PaintContext;
 
 class PT_FORMS_API View : public Widget
 {
@@ -89,7 +90,7 @@ class PT_FORMS_API View : public Widget
         virtual void onSetSurface(PaintSurface* surface, 
                                   const Gfx::PointF& pos);
 
-        virtual void onPaint(PaintSurface& surface, 
+        virtual void onPaint(PaintContext& context, 
                              const Gfx::RectF& rect);
     
     protected:

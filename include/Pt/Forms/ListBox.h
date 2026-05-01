@@ -118,10 +118,9 @@ class PT_FORMS_API ListBoxItem : public Button
 
         virtual void onInvalidate();
     
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
-        // TODO: why pass PaintSurface?
-        virtual void onPaintContent(PaintSurface& surface, Painter& painter);
+        virtual void onPaintContent(PaintContext& context, Painter& painter);
 
     private:
         Gfx::Font getFont() const;
@@ -230,7 +229,7 @@ class PT_FORMS_API ListBox : public Control
     protected:
         virtual void onInvalidate();
     
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 

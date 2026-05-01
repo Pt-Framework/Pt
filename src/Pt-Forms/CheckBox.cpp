@@ -32,6 +32,7 @@
 #include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -264,14 +265,14 @@ void CheckBox::onInvalidate()
 }
 
 
-void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void CheckBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer )
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     const Gfx::Scaling& scaling = this->scaling();

@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/LineEdit.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -361,14 +362,14 @@ void LineEdit::onInvalidate()
 }
 
 
-void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void LineEdit::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     //

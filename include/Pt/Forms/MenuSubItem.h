@@ -54,7 +54,7 @@ class PT_FORMS_API MenuSubItem : public MenuMenuItem
         virtual ~MenuSubItem();
    
    protected:
-        virtual void onPaint(PaintSurface& surface, const Pt::Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& updateRect);
 
    
 };

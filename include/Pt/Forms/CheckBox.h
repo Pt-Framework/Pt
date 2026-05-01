@@ -99,7 +99,7 @@ class PT_FORMS_API CheckBox : public Button
         virtual void onCanceled();
     
     protected:       
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     private:
         Gfx::Font getFont() const;

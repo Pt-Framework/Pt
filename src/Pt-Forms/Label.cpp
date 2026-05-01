@@ -30,6 +30,7 @@
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/TextMetrics.h>
@@ -573,7 +574,7 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaint(PaintSurface& surface, 
+void Label::onPaint(PaintContext& context, 
                     const Gfx::RectF& rect)
 {
     //std::clog << " paint " << _text.narrow() << this << std::endl;
@@ -583,7 +584,7 @@ void Label::onPaint(PaintSurface& surface,
     if( ! _renderer)
         return;
 
-    Forms::Painter painter(surface);
+    Forms::Painter painter(context);
     painter.setClip(rect);
 
     const Gfx::Brush* brush = background();

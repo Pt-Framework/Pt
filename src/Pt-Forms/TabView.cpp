@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/TabView.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -180,14 +181,14 @@ void TabBar::onLayout(const Gfx::RectF& rect)
 }
 
 
-void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void TabBar::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     _renderer->renderTabs(_tabs, options, painter, rect,
@@ -396,16 +397,16 @@ void TabView::onLayout(const Gfx::RectF& rect)
 }
 
 
-void TabView::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void TabView::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
-    Base::onPaint(surface, rect);
+    Base::onPaint(context, rect);
 
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( ! _renderer)
         return;
 
-    Painter painter(surface);
+    Painter painter(context);
     painter.setClip(rect);
 
     _renderer->render(*this, options, painter, rect,

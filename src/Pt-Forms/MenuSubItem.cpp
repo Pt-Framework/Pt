@@ -2,6 +2,7 @@
 #include <Pt/Forms/MenuSubItem.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -18,12 +19,12 @@ MenuSubItem::~MenuSubItem()
 }
 
 
-void MenuSubItem::onPaint(PaintSurface& surface, const Pt::Gfx::RectF& rect)
+void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
     
-    Forms::Painter painter(surface);
+    Forms::Painter painter(context);
     painter.setClip(rect);
     
     

@@ -32,6 +32,7 @@
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Cursor.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/PaintEvent.h>
 #include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Gfx/Bitmap.h>
@@ -369,13 +370,14 @@ void ScreenImpl::onPaintEvent(const PaintEvent& ev)
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
-    onPaint(_pixmap, rect);
+    PaintContext ctx(_pixmap);
+    onPaint(ctx, rect);
 }
 
 
-void ScreenImpl::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ScreenImpl::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
-    Gfx::Painter painter(surface);
+    Gfx::Painter painter(context);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     painter.setBrush( Gfx::Color(40, 50, 80) );
     painter.fillRect(rect);
