@@ -206,7 +206,7 @@ class PT_FORMS_API Window : public Form
     protected:
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
 
     //
     // scaling

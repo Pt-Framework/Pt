@@ -31,6 +31,7 @@
 #include <Pt/Forms/WindowManager.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/WindowStateEvent.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Bitmap.h>
@@ -435,16 +436,11 @@ void Window::onProcessPaintEvent(const PaintEvent& ev)
 }
 
 
-void Window::onPaintEvent(const PaintEvent& ev)
-{    
-    //static int nnn = 0;
-    //std::clog << "PAINT EVENT: " << typeid(*this).name() << " " << ++nnn << std::endl;
-
-    Base::onPaintEvent(ev);
-
-    Painter painter( surface() );
+void Window::onPaint(PaintContext& context, const Gfx::RectF& rect)
+{
+    Painter painter(context);
     painter.setBrush(_backgroundBrush);
-    painter.fillRect( ev.rect() );
+    painter.fillRect(rect);
 }
 
 ///////////////////////////////////////////////////////////////////////
