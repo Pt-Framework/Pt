@@ -42,6 +42,8 @@ namespace Pt {
 
 namespace Gfx {
 
+class PaintContext;
+
 /** @brief Paint surface.
 */
 class PT_GFX_API PaintSurface : private NonCopyable
