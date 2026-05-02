@@ -538,6 +538,10 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
     //
     // paint child windows
     //
+    PaintContext ctx( _parent->surface() );
+    _painter.begin(ctx);
+    _painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
     std::vector<Window*>::iterator wit;
     for(wit = _windowStack.begin(); wit != _windowStack.end(); ++wit)
     {
@@ -561,8 +565,6 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
-        _painter.begin(_parent->surface());
-        _painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
         _painter.drawPixmap(frameRect.topLeft(), frame->pixmap(), surfaceRect);
     }
 }
