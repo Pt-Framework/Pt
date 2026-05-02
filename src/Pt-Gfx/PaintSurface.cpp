@@ -30,6 +30,7 @@
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/PainterBase.h>
+#include <Pt/Gfx/PaintContext.h>
 
 #include <limits>
 
@@ -44,6 +45,7 @@ namespace Gfx {
 PaintSurface::PaintSurface()
 : _canvas(0)
 , _painter(0)
+, _context(0)
 , _reserved(0)
 {
 }
@@ -60,6 +62,13 @@ PaintSurface::~PaintSurface()
     if(_painter)
     {
         _painter->onDetachSurface(*this);
+        _painter = 0;
+    }
+
+    if(_context)
+    {
+        _context->onDetachSurface(*this);
+        _context = 0;
     }
 }
 
@@ -167,6 +176,25 @@ void PaintSurface::detachPainter(PainterBase& painter)
 {
     if(_painter)
         _painter = 0;
+}
+
+
+void PaintSurface::attachContext(PaintContext& context)
+{
+    if(_context)
+    {
+        _context->onDetachSurface(*this);
+        _context = 0;
+    }
+
+    _context = &context;
+}
+
+
+void PaintSurface::detachContext(PaintContext& context)
+{
+    if(_context)
+        _context = 0;
 }
 
 } // namespace

@@ -39,6 +39,7 @@ PaintContext::PaintContext(PaintSurface& surface)
 : _surface(&surface)
 , _painter(0)
 {
+    _surface->attachContext(*this);
 }
 
 
@@ -47,9 +48,15 @@ PaintContext::~PaintContext()
     if(_painter)
     {
         _painter->onDetachContext(*this);
+        _painter = 0;
     }
 
-    finish();
+    if(_surface)
+    {
+        _surface->detachContext(*this);
+        _surface->finish();
+        _surface = 0;
+    }
 }
 
 
@@ -61,25 +68,39 @@ PaintSurface* PaintContext::surface()
 
 const Gfx::ImageFormat& PaintContext::format() const
 {
-    return _surface->format();
+    if(_surface)
+        return _surface->format();
+
+    return ImageFormat::argb32();
 }
 
 
 const Gfx::SizeF& PaintContext::size() const
 {
-    return _surface->size();
+    if(_surface)
+        return _surface->size();
+
+    static const SizeF empty(0, 0);
+    return empty;
 }
 
 
 const Scaling& PaintContext::scaling() const
 {
-    return _surface->scaling();
+    if(_surface)
+        return _surface->scaling();
+
+    static const Scaling identity;
+    return identity;
 }
 
 
 Canvas* PaintContext::getCanvas(Canvas* reuse)
 {
-    return _surface->getCanvas(reuse);
+    if(_surface)
+        return _surface->getCanvas(reuse);
+
+    return 0;
 }
 
 
@@ -113,6 +134,18 @@ void PaintContext::detachPainter(PainterBase& painter)
 {
     if(_painter)
         _painter = 0;
+}
+
+
+void PaintContext::onDetachSurface(PaintSurface& surface)
+{
+    if(_painter)
+    {
+        _painter->onDetachContext(*this);
+        _painter = 0;
+    }
+
+    _surface = 0;
 }
 
 } // namespace

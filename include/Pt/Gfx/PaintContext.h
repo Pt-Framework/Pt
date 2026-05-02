@@ -46,6 +46,7 @@ class PaintSurface;
 class PT_GFX_API PaintContext : private NonCopyable
 {
     friend class PainterBase;
+    friend class PaintSurface;
 
     public:
         /** @brief Constructs a context using the paint surface.
@@ -54,7 +55,7 @@ class PT_GFX_API PaintContext : private NonCopyable
 
         /** @brief Destructor.
         */
-        ~PaintContext();
+        virtual ~PaintContext();
 
         /** @brief Returns the image format.
         */
@@ -79,6 +80,11 @@ class PT_GFX_API PaintContext : private NonCopyable
         /** @brief Finishes painting on the surface.
         */
         void finish();
+
+    protected:
+        /** @brief Called when the surface is detached.
+        */
+        virtual void onDetachSurface(PaintSurface& surface);
 
     private:
         PaintSurface* surface();

@@ -47,6 +47,7 @@ namespace Gfx {
 class PT_GFX_API PaintSurface : private NonCopyable
 {
     friend class PainterBase;
+    friend class PaintContext;
     friend class Canvas;
 
     protected:
@@ -129,6 +130,12 @@ class PT_GFX_API PaintSurface : private NonCopyable
         //! @internal
         void detachPainter(PainterBase& painter);
 
+        //! @internal
+        void attachContext(PaintContext& context);
+
+        //! @internal
+        void detachContext(PaintContext& context);
+
     private:
         //! @internal
         void onDetachCanvas(Canvas& canvas);
@@ -136,6 +143,7 @@ class PT_GFX_API PaintSurface : private NonCopyable
     private:
         Canvas*       _canvas;
         PainterBase*  _painter;
+        PaintContext* _context;
         void*     _reserved;
 };
 
