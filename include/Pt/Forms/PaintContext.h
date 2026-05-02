@@ -54,8 +54,9 @@ class PT_FORMS_API PaintContext : public Gfx::PaintContext
         virtual void onDetachSurface(Gfx::PaintSurface& surface) override;
 
     private:
-        PaintSurface& surface();
+        PaintSurface* surface();
 
+    private:
         PaintSurface*  _surface;
 };
 

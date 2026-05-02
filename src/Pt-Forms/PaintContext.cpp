@@ -16,9 +16,9 @@ PaintContext::~PaintContext()
 }
 
 
-PaintSurface& PaintContext::surface()
+PaintSurface* PaintContext::surface()
 {
-    return *_surface;
+    return _surface;
 }
 
 

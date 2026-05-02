@@ -67,9 +67,8 @@ void Painter::begin(PaintSurface& surface)
 
 void Painter::begin(PaintContext& context)
 {
-    PaintSurface& surface = context.surface();
     beginPaint(context);
-    _formsSurface = &surface;
+    _formsSurface = context.surface();
 }
 
 
