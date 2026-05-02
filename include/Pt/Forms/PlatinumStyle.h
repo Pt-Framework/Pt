@@ -602,11 +602,11 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
                               const Gfx::Brush& foreground,
                               const Gfx::Pen& contour) const;
 
-        virtual Gfx::SizeF onMeasureTabs(PaintSurface& surface,
+        virtual Gfx::SizeF onMeasureTabs(PaintContext& ctx,
                                          const std::vector<TabItem>& tabs,
                                          const Gfx::Font& font) const;
 
-        virtual void onLayoutTabs(PaintSurface& surface,
+        virtual void onLayoutTabs(PaintContext& ctx,
                                   std::vector<TabItem>& tabs,
                                   const Gfx::RectF& rect, 
                                   const Gfx::Font& font) const;

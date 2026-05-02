@@ -51,7 +51,7 @@ class PT_FORMS_API Painter : public Gfx::PainterBase
 
         /** @brief Constructs using a Forms paint surface.
         */
-        explicit Painter(PaintSurface& surface);
+        //explicit Painter(PaintSurface& surface);
 
         /** @brief Constructs using a Forms paint context.
         */
@@ -63,7 +63,7 @@ class PT_FORMS_API Painter : public Gfx::PainterBase
 
         /** @brief Begins painting to a Forms paint surface.
         */
-        void begin(PaintSurface& surface);
+        //void begin(PaintSurface& surface);
 
         /** @brief Begins painting to a Forms paint context.
         */

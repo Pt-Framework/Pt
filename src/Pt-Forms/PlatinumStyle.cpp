@@ -46,6 +46,7 @@
 #include <Pt/Forms/ComboBox.h>
 #include <Pt/Forms/SpinBox.h>
 #include <Pt/Forms/TabView.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 
 #include <Pt/Gfx/Painter.h>
@@ -1414,7 +1415,7 @@ void PlatinumTabViewRenderer::onRender(const TabView& tv,
 }
 
 
-Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintSurface& surface,
+Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintContext& ctx,
                                                   const std::vector<TabItem>& tabs,
                                                   const Gfx::Font& font) const
 {
@@ -1423,7 +1424,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintSurface& surface,
     Gfx::SizeF s;
     s.setHeight(font.size() * 2.4);
 
-    Painter _painter(surface);
+    Painter _painter(ctx);
     _painter.setFont(font);
 
     std::vector<TabItem>::const_iterator it;
@@ -1437,7 +1438,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintSurface& surface,
 }
 
 
-void PlatinumTabViewRenderer::onLayoutTabs(PaintSurface& surface,
+void PlatinumTabViewRenderer::onLayoutTabs(PaintContext& ctx,
                                            std::vector<TabItem>& tabs,
                                            const Gfx::RectF& rect, 
                                            const Gfx::Font& font) const
@@ -1446,7 +1447,7 @@ void PlatinumTabViewRenderer::onLayoutTabs(PaintSurface& surface,
 
     Gfx::PointF tabPos;
 
-    Painter _painter(surface);
+    Painter _painter(ctx);
     _painter.setFont(font);
 
     std::vector<TabItem>::iterator it;
