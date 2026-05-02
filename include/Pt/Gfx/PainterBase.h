@@ -285,8 +285,6 @@ class PT_GFX_API PainterBase : private NonCopyable
         virtual void onDetachContext(PaintContext& context);
 
     private:
-        void onBeginPaint(PaintSurface& surface);
-
         void onBeginPaint(Canvas& canvas);
 
     private:

@@ -56,20 +56,24 @@ PainterBase::~PainterBase()
 
 void PainterBase::beginPaint(PaintSurface& surface)
 {
-    if( ! _context && _surface == &surface && _canvas && _canvas->isActive() )
+    if(_surface == &surface && _canvas && _canvas->isActive())
         return;
 
     finish();
 
-    onBeginPaint(surface);
+    Canvas* canvas = surface.getCanvas(_canvas);
+
+    surface.attachPainter(*this);
+    _surface = &surface;
+
+    if(canvas)
+        onBeginPaint(*canvas);
 }
 
 
 void PainterBase::beginPaint(PaintContext& context)
 {
-    PaintSurface* surface = context.surface();
-
-    if(_context == &context && _surface == surface && _canvas && _canvas->isActive())
+    if(_context == &context && _canvas && _canvas->isActive())
         return;
 
     finish();
@@ -77,19 +81,7 @@ void PainterBase::beginPaint(PaintContext& context)
     context.attachPainter(*this);
     _context = &context;
 
-    if(surface)
-        onBeginPaint(*surface);
-}
-
-
-void PainterBase::onBeginPaint(PaintSurface& surface)
-{
-    Canvas* reuse = _canvas;
-    Canvas* canvas = surface.getCanvas(reuse);
-   
-    surface.attachPainter(*this);
-    _surface = &surface;
-
+    Canvas* canvas = context.getCanvas(_canvas);
     if(canvas)
         onBeginPaint(*canvas);
 }
@@ -131,13 +123,9 @@ void PainterBase::finish()
     if(_canvas)
         _canvas->finishPaint();
 
-    if( ! _context && _surface )
-    {
-        _surface->finish();
-    }
-
     if(_surface)
     {
+        _surface->finish();
         _surface->detachPainter(*this);
         _surface = 0;
     }

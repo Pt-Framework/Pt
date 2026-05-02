@@ -39,11 +39,11 @@ Painter::Painter()
 }
 
 
-// Painter::Painter(PaintSurface& surface)
-// : _formsSurface(0)
-// {
-//     begin(surface);
-// }
+Painter::Painter(PaintSurface& surface)
+: _formsSurface(0)
+{
+    begin(surface);
+}
 
 
 Painter::Painter(PaintContext& context)
@@ -58,11 +58,11 @@ Painter::~Painter()
 }
 
 
-// void Painter::begin(PaintSurface& surface)
-// {
-//     beginPaint(surface);
-//     _formsSurface = &surface;
-// }
+void Painter::begin(PaintSurface& surface)
+{
+    beginPaint(surface);
+    _formsSurface = &surface;
+}
 
 
 void Painter::begin(PaintContext& context)
