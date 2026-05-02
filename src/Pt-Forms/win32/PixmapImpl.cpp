@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/Argb32.h>
@@ -226,7 +227,8 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 
     Gfx::Image image = this->toImage();
 
-    Gfx::Painter painter(bitmap);
+    Gfx::PaintContext ctx(bitmap);
+    Gfx::Painter painter(ctx);
     painter.drawImage(Gfx::PointF(0, 0), image, rect);
 }
 

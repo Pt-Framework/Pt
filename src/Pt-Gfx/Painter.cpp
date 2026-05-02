@@ -40,10 +40,10 @@ Painter::Painter()
 }
 
 
-Painter::Painter(PaintSurface& surface)
-{
-    begin(surface);
-}
+// Painter::Painter(PaintSurface& surface)
+// {
+//     begin(surface);
+// }
 
 
 Painter::Painter(PaintContext& context)
@@ -57,10 +57,10 @@ Painter::~Painter()
 }
 
 
-void Painter::begin(PaintSurface& surface)
-{
-    beginPaint(surface);
-}
+// void Painter::begin(PaintSurface& surface)
+// {
+//     beginPaint(surface);
+// }
 
 
 void Painter::begin(PaintContext& context)

@@ -384,11 +384,14 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
     return;
 #endif
 
-    Gfx::Painter imagePainter;
+    
     Gfx::Bitmap imageSurface( Gfx::SizeF(600, 600) );
-    imagePainter.begin(imageSurface);
+    Gfx::PaintContext imageContext(imageSurface);
 
-    Gfx::Painter imagePainter2(imageSurface);
+    Gfx::Painter imagePainter;
+    imagePainter.begin(imageContext);
+
+    Gfx::Painter imagePainter2(imageContext);
     //imagePainter2.begin(imageSurface);
 
     imagePainter2.setBrush(Gfx::Color(255, 0, 0, 0));
@@ -451,7 +454,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
     Gfx::Pen pen1( Gfx::Color(255, 200, 100), 1);
     imagePainter.setPen(pen1);
 
-    imagePainter.begin(imageSurface);
+    imagePainter.begin(imageContext);
 
     imagePainter.drawLine( Pt::Gfx::PointF(300, 300),
                            Pt::Gfx::PointF(450, 300) );

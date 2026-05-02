@@ -48,7 +48,7 @@ class PT_GFX_API Painter : public PainterBase
 
         /** @brief Constructs using a paint surface.
         */
-        explicit Painter(PaintSurface& surface);
+        //explicit Painter(PaintSurface& surface);
 
         /** @brief Constructs using a paint context.
         */
@@ -60,7 +60,7 @@ class PT_GFX_API Painter : public PainterBase
 
         /** @brief Begins painting to a paint surface.
         */
-        void begin(PaintSurface& surface);
+        //void begin(PaintSurface& surface);
 
         /** @brief Begins painting to a paint context.
         */

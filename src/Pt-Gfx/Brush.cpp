@@ -30,6 +30,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <stdexcept>
 
 namespace Pt {
@@ -499,7 +500,8 @@ void BrushData::setTexture(const Image& texture,
         // Prepare the destination texture
         _texture->reset( SizeF(texture.width(), texture.height()) );
 
-        Painter painter(*_texture);
+        PaintContext ctx(*_texture);
+        Painter painter(ctx);
         painter.setCompositionMode(CompositionMode::SourceCopy);
 
         // Calculate the source and destination coordinate
