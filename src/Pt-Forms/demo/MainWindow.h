@@ -55,7 +55,7 @@ class MainWindow : public Pt::Forms::Window
         void onZoom(MenuBaseItem&);
 
     protected:
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void onPaint(PaintContext& ctx, const Gfx::RectF& rect);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 

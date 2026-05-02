@@ -33,6 +33,7 @@
 #include <Pt/Forms/MenuBarItem.h>
 #include <Pt/Forms/MenuMenuItem.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
 #include <assert.h>
@@ -191,17 +192,16 @@ void Menu::onInvalidate()
     _pen = contour();
 }
 
-void Menu::onPaintEvent(const Pt::Forms::PaintEvent& ev)
+void Menu::onPaint(PaintContext& ctx, const Pt::Gfx::RectF& rect)
 {
-    Pt::Forms::Popup::onPaintEvent(ev);
+    Pt::Forms::Popup::onPaint(ctx, rect);
 
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
+    Painter painter( ctx );
+    painter.setClip( rect );
 
-    Painter painter( surface() );
-    painter.setClip( ev.rect() );
-
-    onRenderBackground(options, painter, ev.rect());
+    onRenderBackground(options, painter, rect);
 }
 
 void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const

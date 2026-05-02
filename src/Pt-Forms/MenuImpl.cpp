@@ -29,6 +29,7 @@
 
 #include "MenuImpl.h"
 #include <Pt/Forms/Menu.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 
 namespace Pt {
@@ -240,17 +241,11 @@ void MenuImpl::onContentChanged()
 }
 
 
-void MenuImpl::onPaintEvent(const PaintEvent& ev)
+void MenuImpl::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 {
-    BaseType::onPaintEvent(ev);
-}
+    BaseType::onPaint(ctx, rect);
 
-
-void MenuImpl::onPaintBackground(const Gfx::RectF& rect)
-{
-    BaseType::onPaintBackground(rect);
-
-    Painter painter( surface() );
+    Painter painter( ctx );
 
     //
     // icon strip on the left side

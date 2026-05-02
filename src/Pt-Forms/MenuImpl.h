@@ -101,9 +101,7 @@ class PT_FORMS_API MenuImpl : public Window
         void onContentChanged();
     
     protected:
-        virtual void onPaintEvent(const PaintEvent& ev);
-
-        virtual void onPaintBackground(const Gfx::RectF& rect);
+        virtual void onPaint(PaintContext& ctx, const Gfx::RectF& rect);
         
         virtual void onCloseEvent(const CloseEvent& ev);
 

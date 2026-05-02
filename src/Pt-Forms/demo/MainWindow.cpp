@@ -29,8 +29,8 @@
 #include "MainWindow.h"
 #include "AtesionIcon.h"
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/PaintContext.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>
@@ -250,8 +250,10 @@ void MainWindow::onZoom(MenuBaseItem& item)
 }
 
 
-void MainWindow::onPaintEvent(const PaintEvent& ev)
+void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 {
+    Window::onPaint(ctx, rect);
+
     //{
     //Gfx::Painter p;
     //p.setPen( Pt::Gfx::Color(0, 0, 0));
@@ -263,17 +265,10 @@ void MainWindow::onPaintEvent(const PaintEvent& ev)
     //Gfx::Bitmap image( Gfx::SizeF(320, 240) );
     //p.begin(image);
     //}
-    
-    Window::onPaintEvent(ev);
-    //return;
-    
-    const Gfx::RectF& rect = ev.rect();
  
     Gfx::Painter painter;
 
-    Gfx::PaintContext context( surface() );
-    
-    painter.begin(context);
+    painter.begin(ctx);
     painter.setClip(rect);
 
     Pt::String text = "MgWjOy";

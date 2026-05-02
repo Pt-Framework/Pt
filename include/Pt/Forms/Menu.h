@@ -80,7 +80,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
         //Pt::Forms::Popup
         virtual void onInvalidate();
 
-        virtual void onPaintEvent(const Pt::Forms::PaintEvent& ev);
+        virtual void onPaint(PaintContext& ctx, const Pt::Gfx::RectF& rect);
 
         virtual void onCloseEvent(const Pt::Forms::CloseEvent& ev);
 
