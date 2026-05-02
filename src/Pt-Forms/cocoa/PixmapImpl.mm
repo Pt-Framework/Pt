@@ -32,6 +32,7 @@
 
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Utf8Codec.h>
 
@@ -1036,7 +1037,8 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 
     Gfx::Image image;
 
-    Gfx::Painter painter(bitmap);
+    Gfx::PaintContext ctx(bitmap);
+    Gfx::Painter painter(ctx);
     painter.drawImage(Gfx::PointF(0, 0), image, rect);
 }
 

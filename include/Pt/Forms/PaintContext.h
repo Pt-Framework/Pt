@@ -46,7 +46,7 @@ class PT_FORMS_API PaintContext : public Gfx::PaintContext
     friend class Painter;
 
     public:
-        PaintContext(PaintSurface& surface);
+        explicit PaintContext(PaintSurface& surface);
 
         ~PaintContext();
 

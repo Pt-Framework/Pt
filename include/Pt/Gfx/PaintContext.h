@@ -51,7 +51,7 @@ class PT_GFX_API PaintContext : private NonCopyable
     public:
         /** @brief Constructs a context using the paint surface.
         */
-        PaintContext(PaintSurface& surface);
+        explicit PaintContext(PaintSurface& surface);
 
         /** @brief Destructor.
         */

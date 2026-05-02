@@ -65,7 +65,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
                      _frameBuffer.height() );
     _pixmap.impl()->reset( size, _frameBuffer.strideSize() );
                              
-    Gfx::Painter painter(_pixmap);
+    Gfx::PaintContext ctx(_pixmap);
+    Gfx::Painter painter(ctx);
 
     Gfx::RectF rect( Gfx::PointF(0, 0), _pixmap.size() );
     painter.setBrush( Gfx::Color(0, 0, 0) );
