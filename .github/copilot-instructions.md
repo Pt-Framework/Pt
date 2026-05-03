@@ -25,9 +25,17 @@ think you have all relevant information.
   You MUST read this when writing or reviewing any code.
   -> `.github/instructions/coding-style.instructions.md`
 
+- **Documenting**: Doxygen documentation conventions for public headers.
+  You MUST read this when writing or updating Doxygen comments.
+  -> `.github/instructions/documenting.instructions.md`
+
 - **Building**: Building the Pt project with jam.
   You MUST read this when configuring, building, cleaning or verifying code changes.
   -> `.github/instructions/building.instructions.md`
+
+- **Unit Testing**: Writing and structuring unit tests with the Pt::Unit framework.
+  You MUST read this when writing tests, adding test methods, or debugging test failures.
+  -> `.github/instructions/testing.instructions.md`
 
 - **Jam Scripting**: Writing and modifying Jam scripts.
   You MUST read this when working with `.jam` or `Jamfile` files.
@@ -38,13 +46,14 @@ think you have all relevant information.
   You MUST read this when extending the jam build tool itself.
   -> `.github/instructions/jam-internals.instructions.md`
 
-- **Pt Gfx Concepts**: Conpets and patterns for the Pt-Gfx module.
+- **Pt Gfx Concepts**: Concepts and patterns for the Pt-Gfx module.
   You MUST read this when working with code in Pt::Gfx.
   -> `.github/instructions/pt-gfx-concepts.instructions.md`
 
-- **Unit Testing**: Writing and structuring unit tests with the Pt::Unit framework.
-  You MUST read this when writing tests, adding test methods, or debugging test failures.
-  -> `.github/instructions/testing.instructions.md`
+- **Pt Signals & Slots**: Using signals, slots, delegates and events in Pt.
+  You MUST read this when connecting signals to slots, emitting events,
+  using delegates, or implementing observable patterns.
+  -> `.github/instructions/pt-api-sigslot.instructions.md`
 
 # Visual Code Issues
 

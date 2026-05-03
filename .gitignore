@@ -8,7 +8,7 @@ jam*.bin
 
 # Documentation (generated)
 doc/html/
-doc/htdocs/
+doc/website/htdocs/
 doc/latex/
 doxygen/
 *.tag

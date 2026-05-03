@@ -195,41 +195,6 @@
     form the high-level interface for the serialization of a set of types.
 */
 
-/** @defgroup sigslot Signals and Delegates
-
-    Callback mechanisms for event handling have become ubiqitous in todays 
-    application frameworks. Older examples are the use of function pointers as
-    callbacks or the message maps found in the MFC toolkit. More modern approaches
-    include the .NET delegates and so-called signal-slot techniques. When signals
-    and slots are used, objects can communicate with each other by connecting a
-    signal of one object to the slot of another object. In most cases connection
-    management features are built-in so that an object closes all it connections
-    automatically when it gets destroyed. Once the connection has been established,
-    all connected slots are called when a signal is send. Connecting signals to 
-    slots is type-safe i.e. a signal can only be connected to a slot that matches
-    the signal's signature. At the same time it allows a great deal of flexibility
-    (loose coupling), since the caller has no intimite knowledge of the callee. A
-    simple but real example might look like this:
-
-    @code
-    int main()
-    {
-        Pt::System::Application app;
-    
-        Pt::System::Timer timer;
-        timer.setActive( app.loop() );
-        timer.start(1000);
-        timer.timeout() += Pt::slot(app, &Pt::System::Application::exit);
-
-        return app.run();
-    }
-    @endcode
-
-    This program will simply exit, when the timer expires after 1000 ms. The
-    application object is the callee and the member function Application::exit
-    serves as a slot. The timer is the caller, which has a signal called timeout.
-*/
-
 /** @namespace Pt
     @brief Core module.
 
