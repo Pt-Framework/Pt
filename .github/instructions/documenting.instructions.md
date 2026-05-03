@@ -14,10 +14,14 @@ description: "Doxygen documentation conventions for public headers."
 
 ## Doxygen Style
 
-- Use `/** ... */` block comments for classes and standalone functions.
-- Use `@brief` for the one-line summary.
+- ALWAYS Use `/** ... */` block comments for namespaces, classes, member functions and standalone functions.
+- Place the closing `*/` of block comments on the next line.
+- Do not use leading asterisks (*) on intermediate lines inside block comments.
+- Do not document forward declarations.
+- Use `@brief` for the one-line summary. Place it right after `/**`
 - Use `@ingroup <group>` to assign the class/function to a module group.
-- Use `//!` for short inline member documentation.
+- Use `@related <ClassName>` to associate operators and free functions with a class when appropriate.
+- Do not use structural keywords like `@class` when the context is already unambiguously clear to Doxygen.
 - Module groups are defined with `@defgroup` in the module's `Api.h`.
 
 ## Example
@@ -29,10 +33,12 @@ description: "Doxygen documentation conventions for public headers."
 class PT_API Connection
 {
     public:
-        //! Returns true if the connection is open.
+        /** @brief Returns true if the connection is open.
+        */
         bool isValid() const;
 
-        //! Closes the connection.
+        /** @brief Closes the connection.
+        */
         void close();
 };
 ```
