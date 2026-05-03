@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.{h,cpp}"
+applyTo: "**/*.h"
 description: "Doxygen documentation conventions for public headers."
 ---
 

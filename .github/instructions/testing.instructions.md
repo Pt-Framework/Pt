@@ -1,5 +1,5 @@
 ---
-applyTo: "**/tests/**"
+applyTo: "**/tests/**/*.{h,cpp}"
 description: "Unit testing"
 ---
 

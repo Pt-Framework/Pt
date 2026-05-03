@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.{h,cpp,Jamfile}"
+applyTo: "**/*.{h,cpp,Jamfile,Jamconfigure}"
 description: "Project directory structure and coding architecture for the Pt project"
 ---
 

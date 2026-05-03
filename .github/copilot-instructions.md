@@ -46,14 +46,14 @@ think you have all relevant information.
   You MUST read this when extending the jam build tool itself.
   -> `.github/instructions/jam-internals.instructions.md`
 
-- **Pt Gfx Concepts**: Concepts and patterns for the Pt-Gfx module.
-  You MUST read this when working with code in Pt::Gfx.
-  -> `.github/instructions/pt-gfx-concepts.instructions.md`
-
 - **Pt Signals & Slots**: Using signals, slots, delegates and events in Pt.
   You MUST read this when connecting signals to slots, emitting events,
   using delegates, or implementing observable patterns.
   -> `.github/instructions/pt-api-sigslot.instructions.md`
+
+- **Pt-Gfx Images**: Pixel types, image formats, and image access patterns.
+  You MUST read this when working with pixels, images, or image formats.
+  -> `.github/instructions/pt-gfx-api-images.instructions.md`
 
 # Visual Code Issues
 

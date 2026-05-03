@@ -1,6 +1,5 @@
 ---
-applyTo: "**/*.{h,cpp}"
-description: "Pt Gfx Concepts."
+description: "Pixel types, image formats, and image access patterns in Pt::Gfx."
 ---
 
 # Pixel Types
