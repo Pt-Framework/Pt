@@ -37,6 +37,11 @@ think you have all relevant information.
   You MUST read this when writing tests, adding test methods, or debugging test failures.
   -> `.github/instructions/testing.instructions.md`
 
+- **Pt::Unit API**: Using the Pt::Unit API for test suites, assertions, and test registration.
+  You MUST read this when working with `Pt::Unit::TestSuite`, assertion macros,
+  or `Pt::Unit::RegisterTest`.
+  -> `.github/instructions/pt-unit-api.instructions.md`
+
 - **Jam Scripting**: Writing and modifying Jam scripts.
   You MUST read this when working with `.jam` or `Jamfile` files.
   -> `.github/instructions/jam.instructions.md`
