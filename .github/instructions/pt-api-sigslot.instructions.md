@@ -7,7 +7,7 @@ description: "Using Pt signals, slots, delegates, and events for type-safe callb
 The Pt signal/slot system provides type-safe, lifetime-managed callbacks.
 
 For detailed documentation with examples, read:
-- `include/Pt/Api.h` — `@defgroup sigslot` overview with conceptual introduction
+- `doc/groups/sigslot.dox` — Conceptual overview and introduction
 - `doc/include/Pt/Signal.h` — Signal usage, connecting, emitting, disconnecting
 - `doc/include/Pt/Delegate.h` — Delegate usage, call() vs invoke()
 - `doc/include/Pt/Slot.h` — Slot concept and creation helpers
@@ -46,4 +46,3 @@ Use `Pt::slot()` to create slot objects:
 - `<Pt/Signal.h>` includes `<Pt/Signal.tpp>` inside `namespace Pt`.
 - All slot-creation headers (`Method.h`, `Function.h`, `ConstMethod.h`) are
   included transitively by `<Pt/Signal.h>` and `<Pt/Delegate.h>`.
-- The Doxygen group overview is in `include/Pt/Api.h` (`@defgroup sigslot`).
