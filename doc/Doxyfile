@@ -218,7 +218,7 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # use: inc=Fortran f=C. Note that for custom extensions you also need to set
 # FILE_PATTERNS otherwise the files are not read by doxygen.
 
-EXTENSION_MAPPING      = 
+EXTENSION_MAPPING      = page=C++ dox=C++
 
 # If you use STL classes (i.e. std::string, std::vector, etc.) but do not want 
 # to include (a tag file for) the STL sources as input, then you should 
@@ -812,6 +812,10 @@ HTML_FOOTER            = pt_footer.html
 # stylesheet in the HTML output directory as well, or it will be erased!
 
 HTML_STYLESHEET        = doxygen.css
+
+# The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
+# other source files which should be copied to the HTML output directory.
+HTML_EXTRA_FILES       = images/atesion_logo.gif images/box_header_bg.gif images/db_logo.gif images/download90.gif images/header_bg.gif images/mailinglist.gif images/navpath_arrow.gif images/platinum-logo.gif images/ptv_logo.gif images/pt_logo_bg.gif images/apple.png images/apple_48.png
 
 # If the HTML_TIMESTAMP tag is set to YES then the footer of each generated HTML 
 # page will contain the date and time when the page was generated. Setting 
