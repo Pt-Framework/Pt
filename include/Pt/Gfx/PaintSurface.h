@@ -44,7 +44,12 @@ namespace Gfx {
 
 class PaintContext;
 
-/** @brief Paint surface.
+/** @brief Abstract target for drawing operations.
+    @ingroup Drawing
+
+    %PaintSurface supplies the backend-specific resources needed for painting.
+    It reports target format, size and scaling, creates a %Canvas on demand and
+    coordinates %PainterBase and %PaintContext while drawing is active.
 */
 class PT_GFX_API PaintSurface : private NonCopyable
 {
@@ -74,7 +79,7 @@ class PT_GFX_API PaintSurface : private NonCopyable
         */
         const Scaling& scaling() const;
 
-        /** @brief Get a Canvas.
+        /** @brief Returns a canvas for backend drawing.
         */
         Canvas* getCanvas(Canvas* canvas);
 
@@ -105,7 +110,7 @@ class PT_GFX_API PaintSurface : private NonCopyable
         virtual const Scaling& onGetScaling() const = 0;
 
     protected:
-        /** @brief Get a Canvas.
+        /** @brief Returns a reusable canvas instance.
         */
         virtual Gfx::Canvas* onGetCanvas(Gfx::Canvas* reuse);
 
@@ -126,20 +131,25 @@ class PT_GFX_API PaintSurface : private NonCopyable
         virtual void onFinish() = 0;
 
     private:
-        //! @internal
+        /** @internal
+        */
         void attachPainter(PainterBase& painter);
 
-        //! @internal
+        /** @internal
+        */
         void detachPainter(PainterBase& painter);
 
-        //! @internal
+        /** @internal
+        */
         void attachContext(PaintContext& context);
 
-        //! @internal
+        /** @internal
+        */
         void detachContext(PaintContext& context);
 
     private:
-        //! @internal
+        /** @internal
+        */
         void onDetachCanvas(Canvas& canvas);
 
     private:

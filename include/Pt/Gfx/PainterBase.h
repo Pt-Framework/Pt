@@ -61,7 +61,13 @@ class Bitmap;
 class PaintSurface;
 class PaintContext;
 
-/** @brief Base class for 2D painters.
+/** @brief Base class for drawing commands and paint state.
+    @ingroup Drawing
+
+    %PainterBase stores the state used by drawing operations and forwards the
+    resulting commands to a %Canvas supplied by a %PaintSurface or %PaintContext.
+    It provides the common API for lines, filled shapes, paths, text and image
+    rendering, while concrete painters only need to manage how painting begins.
 */
 class PT_GFX_API PainterBase : private NonCopyable
 {
@@ -78,15 +84,15 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         virtual ~PainterBase();
 
-        /** @brief Ends painting.
+        /** @brief Ends the current painting operation.
         */
         void finish();
 
-        /** @brief Returns the image format.
+        /** @brief Returns the pixel format of the current target.
         */
         const ImageFormat& format() const;
 
-        /** @brief Returns the paint scaling.
+        /** @brief Returns the logical-to-physical scaling of the target.
         */
         const Scaling& scaling() const;
 
@@ -135,7 +141,7 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         void resetTransform();
 
-        /** @brief Returns the clipping rect or null if none.
+        /** @brief Returns the current clip rectangle or null if clipping is disabled.
         */
         const RectF* clip() const;
 
@@ -152,11 +158,11 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         void drawLine(const PointF& from, const PointF& to);
 
-        /** @brief Draws a polyline.
+        /** @brief Draws a connected sequence of line segments.
         */
         void drawPolyline(const PointF* points, const size_t pointCount);
 
-        /** @brief Fills a polygon.
+        /** @brief Fills a polygon defined by the given points.
         */
         void fillPolygon(const PointF* points, const size_t pointCount);
 
@@ -184,17 +190,17 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        /** @internal TODO.
+        /** @brief Draws an arc on an ellipse.
         */
         void drawArc(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
         
-        /** @internal TODO.
+        /** @brief Fills a chord on an ellipse.
         */
         void fillChord(const PointF& topLeft, const SizeF& size,
                        float degBegin, float degEnd);
         
-        /** @internal TODO.
+        /** @brief Fills a pie segment on an ellipse.
         */
         void fillPie(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
@@ -229,15 +235,15 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         const FontMetrics& fontMetrics() const;
 
-        /** @brief Returns the metrics of a line of text.
+        /** @brief Measures a line of text using the current font.
         */
         TextMetrics textMetrics(const Pt::String& text) const;
 
-        /** @brief Draws a line of text.
+        /** @brief Draws a line of text at the given position.
         */
         void drawText(const PointF& to, const Pt::String& text);
 
-        /** @brief Draws a line of text.
+        /** @brief Draws a line of text using an additional text transform.
         */
         void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
@@ -246,7 +252,7 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         void drawImage(const PointF& to, const Image& im);
 
-        /** @brief Draws a part of an image.
+        /** @brief Draws a rectangular part of an image.
         */
         void drawImage(const PointF& to, const Image& im, const RectF& rect);
 
@@ -255,7 +261,7 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         void drawBitmap(const PointF& to, const Bitmap& bm);
 
-        /** @brief Draws a part of a bitmap.
+        /** @brief Draws a rectangular part of a bitmap.
         */
         void drawBitmap(const PointF& to, const Bitmap& bm, const RectF& rect);
 

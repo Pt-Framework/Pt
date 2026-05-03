@@ -38,7 +38,12 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Surface scaling.
+/** @brief Logical-to-physical unit conversion.
+    @ingroup Drawing
+
+    Scaling converts coordinates, sizes and rectangles between logical drawing
+    units and physical device pixels. It also provides alignment helpers that
+    snap geometry to pixel boundaries for crisp rendering.
 */
 class Scaling
 {
@@ -46,36 +51,50 @@ class Scaling
     friend bool operator <(const Scaling&, const Scaling&);
 
     public:
+        /** @brief Constructs a scaling with the given factor.
+        */
         Scaling(double scaleFactor = 1.0)
         : _scaleFactor(scaleFactor)
         { }
 
+        /** @brief Returns the scale factor.
+        */
         double scaleFactor() const
         {
             return _scaleFactor;
         }
         
+        /** @brief Sets the scale factor.
+        */
         void setScaleFactor(double scaleFactor)
         {
             _scaleFactor = scaleFactor;
         }
 
     public:
+        /** @brief Converts a scalar value to physical units.
+        */
         double toPhysical(double n) const
         {
             return n * scaleFactor();
         }
 
+        /** @brief Converts a point to physical units.
+        */
         Gfx::PointF toPhysical(const Gfx::PointF& p) const
         {
             return p * scaleFactor();
         }
 
+        /** @brief Converts a size to physical units.
+        */
         Gfx::SizeF toPhysical(const Gfx::SizeF& s) const
         {
             return s * scaleFactor();
         }
 
+        /** @brief Converts a rectangle to physical units.
+        */
         Gfx::RectF toPhysical(const Gfx::RectF& r) const
         {
             Gfx::PointF p = toPhysical( r.topLeft() );
@@ -83,21 +102,29 @@ class Scaling
             return Gfx::RectF(p, s);
         }
 
+        /** @brief Converts a scalar value to logical units.
+        */
         double toLogical(double n) const
         {
             return n / scaleFactor();
         }
 
+        /** @brief Converts a point to logical units.
+        */
         Gfx::PointF toLogical(const Gfx::PointF& p) const
         {
             return p / scaleFactor();
         }
 
+        /** @brief Converts a size to logical units.
+        */
         Gfx::SizeF toLogical(const Gfx::SizeF& s) const
         {
             return s / scaleFactor();
         }
 
+        /** @brief Converts a rectangle to logical units.
+        */
         Gfx::RectF toLogical(const Gfx::RectF& r) const
         {
             Gfx::PointF p = toLogical( r.topLeft() );
@@ -106,6 +133,8 @@ class Scaling
         }
 
     public:
+        /** @brief Aligns a scalar value to the nearest physical pixel.
+        */
         double align(double n) const
         {
             // better name: alignGrid()
@@ -115,6 +144,8 @@ class Scaling
             return toLogical(p);
         }
 
+        /** @brief Aligns a scalar value to a pixel center.
+        */
         double alignPixel(double n) const
         {
             double p = toPhysical(n);
@@ -122,6 +153,8 @@ class Scaling
             return toLogical(p);
         }
 
+        /** @brief Aligns a contour width while preserving visible thickness.
+        */
         double alignContour(size_t n) const
         {
             // keep contour size when downscaling
@@ -133,6 +166,8 @@ class Scaling
             return toLogical( static_cast<double>(s) );
         }
 
+        /** @brief Aligns a point to physical pixels.
+        */
         Gfx::PointF align(const Gfx::PointF& p) const
         {
             Gfx::PointF pos = toPhysical(p);
@@ -141,6 +176,8 @@ class Scaling
             return toLogical(pos);
         }
 
+        /** @brief Aligns a size to physical pixels.
+        */
         Gfx::SizeF align(const Gfx::SizeF& s) const
         {
             Gfx::SizeF size = toPhysical(s);
@@ -149,6 +186,8 @@ class Scaling
             return toLogical(size);
         }
 
+        /** @brief Aligns a rectangle to physical pixels.
+        */
         Gfx::RectF align(const Gfx::RectF& rect) const
         {
             Gfx::PointF pos = toPhysical(rect.topLeft());
@@ -167,18 +206,27 @@ class Scaling
 };
 
 
+/** @brief Returns true if both scalings are equal.
+    @related Scaling
+*/
 inline bool operator == (const Scaling& a, const Scaling& b)
 {
     return a._scaleFactor == b._scaleFactor;
 }
 
 
+/** @brief Returns true if both scalings are different.
+    @related Scaling
+*/
 inline bool operator != (const Scaling& a, const Scaling& b)
 {
     return ! (a == b);
 }
 
 
+/** @brief Returns true if one scaling sorts before another.
+    @related Scaling
+*/
 inline bool operator < (const Scaling& a, const Scaling& b)
 {
     return a._scaleFactor < b._scaleFactor;

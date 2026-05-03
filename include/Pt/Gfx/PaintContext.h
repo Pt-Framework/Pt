@@ -41,7 +41,12 @@ namespace Gfx {
 class PainterBase;
 class PaintSurface;
 
-/** @brief Paint context.
+/** @brief Active painting session for a surface.
+    @ingroup Drawing
+
+    %PaintContext represents a prepared drawing session on a %PaintSurface. It
+    exposes target properties, provides access to a backend canvas and keeps
+    painter and surface lifetime in sync while painting is active.
 */
 class PT_GFX_API PaintContext : private NonCopyable
 {
@@ -69,11 +74,11 @@ class PT_GFX_API PaintContext : private NonCopyable
         */
         const Scaling& scaling() const;
 
-        /** @brief Gets a Canvas.
+        /** @brief Returns a canvas for backend drawing.
         */
         Canvas* getCanvas(Canvas* canvas);
 
-        /** @brief Syncs the paint surface.
+        /** @brief Synchronizes pending drawing operations.
         */
         void sync();
 
@@ -82,7 +87,7 @@ class PT_GFX_API PaintContext : private NonCopyable
         void finish();
 
     protected:
-        /** @brief Called when the surface is detached.
+        /** @brief Handles detachment from the surface.
         */
         virtual void onDetachSurface(PaintSurface& surface);
 

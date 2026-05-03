@@ -21,13 +21,15 @@ description: "Doxygen documentation conventions for public headers."
 - Use `@brief` for the one-line summary. Place it right after `/**`
 - Use `@ingroup <group>` to assign the class/function to a module group.
 - Use `@related <ClassName>` to associate operators and free functions with a class when appropriate.
+- Escape class names, namespace-qualified names, and function names in prose with `%` unless an explicit Doxygen link is desired.
+  - Examples: `%Signal`, `%Pt::Gfx::Painter`, `%Painter::begin()`
 - Do not use structural keywords like `@class` when the context is already unambiguously clear to Doxygen.
-- Module groups are defined with `@defgroup` in the module's `Api.h`.
+- Module groups are defined with `@defgroup` in `doc/groups/*.dox`.
 
 ## Example
 
 ```cpp
-/** @brief Represents a connection between a Signal and a Slot.
+/** @brief Represents a connection between a %Signal and a %Slot.
     @ingroup sigslot
 */
 class PT_API Connection

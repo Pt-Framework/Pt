@@ -49,11 +49,18 @@ class PathData;
 class PathElement;
 class PathIterator;
 
-/* @brief Graphics path.
+/** @brief Vector path for drawing outlines and filled shapes.
+    @ingroup Drawing
+
+    %Path stores a sequence of drawing commands such as moves, lines and curves.
+    Painters can stroke or fill the current path directly, while helper
+    functions make it easy to append rectangles, ellipses and arc segments.
 */
 class PT_GFX_API Path
 {
     public:
+        /** @brief Identifies the command stored in a path element.
+        */
         enum ElementType
         {
             MoveTo,
@@ -67,40 +74,72 @@ class PT_GFX_API Path
         typedef PathElement Element;
 
     public:
+        /** @brief Constructs an empty path.
+        */
         Path();
 
+        /** @brief Copies another path.
+        */
         Path(const Path& other);
 
+        /** @brief Replaces the path contents.
+        */
         Path& operator=(const Path& other);
 
+        /** @brief Destroys the path.
+        */
         ~Path();
 
+        /** @brief Returns the number of path elements.
+        */
         std::size_t size() const;
 
+        /** @brief Returns true if the path has no elements.
+        */
         bool isEmpty() const;
 
+        /** @brief Returns an iterator to the first element.
+        */
         Iterator begin() const;
 
+        /** @brief Returns an iterator past the last element.
+        */
         Iterator end() const;
 
+        /** @brief Removes all path elements.
+        */
         void clear();
 
+        /** @brief Returns the bounding rectangle of the path.
+        */
         RectF boundingRect() const;
 
+        /** @brief Returns the current drawing position.
+        */
         const PointF& currentPosition() const;
 
+        /** @brief Starts a new subpath at the given point.
+        */
         void moveTo(const PointF& p);
 
+        /** @brief Adds a straight line to the given point.
+        */
         void lineTo(const PointF& p);
 
+        /** @brief Adds a quadratic Bezier segment.
+        */
         void quadTo(const PointF &cp, const PointF& to);
 
+        /** @brief Adds a cubic Bezier segment.
+        */
         void cubicTo(const PointF &cp1, const PointF &cp2, const PointF& to);
 
+        /** @brief Adds an arc segment to the current subpath.
+        */
         void arcTo(const PointF& topLeft, const SizeF& size,
                    double degBegin, double degEnd);
 
-        /** @brief closes the current subpath.
+        /** @brief Closes the current subpath.
         */
         void close();
 
@@ -112,23 +151,39 @@ class PT_GFX_API Path
         */
         void appendPath(const Path& p);
 
+        /** @brief Adds a rectangle as a new subpath.
+        */
         void addRect(const RectF& rect);
 
+        /** @brief Adds a rounded rectangle as a new subpath.
+        */
         void addRoundedRect(const RectF& rect, float radius);
 
+        /** @brief Adds an ellipse as a new subpath.
+        */
         void addEllipse(const PointF& topLeft, const SizeF& size);
 
+        /** @brief Adds an arc as a new subpath.
+        */
         void addArc(const PointF& topLeft, const SizeF& size,
                     double degBegin, double degEnd);
 
+        /** @brief Adds a pie segment as a new subpath.
+        */
         void addPie(const PointF& topLeft, const SizeF& size,
                     double degBegin, double degEnd);
 
+        /** @brief Adds a chord as a new subpath.
+        */
         void addChord(const PointF& topLeft, const SizeF& size,
                       double degBegin, double degEnd);
 
+        /** @brief Applies a transform to all path coordinates.
+        */
         void transform(const Transform& transform);
 
+        /** @brief Flattens the path into polygons.
+        */
         void toPolygons(std::vector<Polygon>& polygons, float tolerance = 0.25f) const;
 
     private:
@@ -167,7 +222,8 @@ class PathEntry
         std::size_t  _size;
 };
 
-/* @brief Path element.
+/** @brief Read-only view of a path element.
+    @ingroup Drawing
 */
 class PathElement 
 {
@@ -193,26 +249,36 @@ class PathElement
         }
     
     public:
+        /** @brief Returns the element type.
+        */
         Path::ElementType type() const
         {
             return _entry->type();
         }
         
+        /** @brief Returns the number of points stored in the element.
+        */
         std::size_t size() const
         {
             return _entry->size();
         }
 
+        /** @brief Returns the current path position before the element.
+        */
         const PointF& position() const
         {
             return _pos;
         }
 
+        /** @brief Returns one point of the element.
+        */
         const PointF& point(std::size_t n) const
         {
             return _points[n];
         }
 
+        /** @brief Flattens the element into polygon points.
+        */
         void flatten(Polygon& points, double tolerance = 0.25) const;
 
     private:
@@ -221,7 +287,8 @@ class PathElement
         const PointF*     _points;
 };
 
-/* @brief Iterator for path elements.
+/** @brief Forward iterator over path elements.
+    @ingroup Drawing
 */
 class PathIterator
 {
@@ -232,6 +299,8 @@ class PathIterator
         using pointer = const Path::Element*;
         using reference = const Path::Element&;
 
+        /** @brief Constructs an end iterator.
+        */
         PathIterator()
         : _entry(0)
         , _points(0)
@@ -239,6 +308,8 @@ class PathIterator
         {
         }
 
+        /** @brief Constructs an iterator for the given storage pointers.
+        */
         PathIterator(const PathEntry* entry, const PointF* points)
         : _entry(entry)
         , _points(points)
@@ -246,16 +317,22 @@ class PathIterator
         {
         }
 
+        /** @brief Returns the current path element.
+        */
         const Path::Element& operator*() const 
         {
             return _element;
         }
 
+        /** @brief Returns a pointer to the current path element.
+        */
         const Path::Element* operator->() const 
         {
             return &_element;
         }
 
+        /** @brief Advances to the next path element.
+        */
         PathIterator& operator++() 
         {
             if( _entry->size() > 0)
@@ -271,6 +348,8 @@ class PathIterator
             return *this;
         }
 
+        /** @brief Advances to the next path element and returns the previous iterator.
+        */
         PathIterator operator++(int) 
         {
             PathIterator tmp = *this;
@@ -278,16 +357,22 @@ class PathIterator
             return tmp;
         }
 
+        /** @brief Returns true if both iterators refer to the same element.
+        */
         bool operator == (const PathIterator& other) const 
         { 
             return _entry == other._entry; 
         }
         
+        /** @brief Returns true if both iterators refer to different elements.
+        */
         bool operator != (const PathIterator& other) const 
         { 
             return _entry != other._entry; 
         }
 
+        /** @brief Returns true if this iterator precedes the other iterator.
+        */
         bool operator < (const PathIterator & other) const
         {
           return _entry < other._entry;

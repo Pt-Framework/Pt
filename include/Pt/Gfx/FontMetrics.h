@@ -35,11 +35,18 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Font-level metrics.
+/** @brief Metrics that describe a font face at a given size.
+    @ingroup Drawing
+
+    FontMetrics contains values such as ascent, descent and underline geometry
+    for the font selected by a painter. These metrics can be used to align
+    text, compute line spacing and position decorative lines.
 */
 class PT_GFX_API FontMetrics
 {
     public:
+        /** @brief Constructs empty font metrics.
+        */
         FontMetrics();
 
         /** @brief Returns the ascent above the baseline.

@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
+﻿/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
    Copyright (C) 2006-2015 Marc Boris Duerner
    Copyright (C) 2010 Aloysius Indrayanto
 
@@ -44,9 +44,19 @@ namespace Gfx {
 
 class FontData;
 
+/** @brief Font request used for text drawing and measurement.
+    @ingroup Drawing
+
+    %Font describes the family, size and style attributes that painters use to
+    select a concrete typeface. The same description can be used both for text
+    measurement and for actual rendering, which keeps layout and drawing in
+    sync across paint targets.
+*/
 class PT_GFX_API Font
 {
     public:
+        /** @brief Describes the requested font weight.
+        */
         enum class Weight
         {
             Thin = 100,
@@ -60,6 +70,8 @@ class PT_GFX_API Font
             Black = 900
         };
 
+        /** @brief Describes the requested font slant.
+        */
         enum class Slant
         {
             Normal,
@@ -67,6 +79,8 @@ class PT_GFX_API Font
             Oblique
         };
 
+        /** @brief Describes the requested font stretch.
+        */
         enum class Stretch
         {
             UltraCondensed = 1,
@@ -80,6 +94,8 @@ class PT_GFX_API Font
             UltraExpanded  = 9
         };
 
+        /** @brief Describes a generic fallback font category.
+        */
         enum class Category
         {
             None,
@@ -165,12 +181,20 @@ class PT_GFX_API Font
         Font withStretch(Stretch stretch) const;
 
     public:
+        /** @brief Adds all fonts found at the given path.
+        */
         static void addFonts(const System::Path& path);
 
+        /** @brief Adds one font file.
+        */
         static bool addFont(const System::Path& path);
 
+        /** @brief Removes one font file.
+        */
         static bool removeFont(const System::Path& path);
 
+        /** @brief Returns the registered font files.
+        */
         static const std::vector<System::Path>& fontFiles();
 
     private:
@@ -178,6 +202,9 @@ class PT_GFX_API Font
 };
 
 
+/** @brief Returns true if two font requests are equal.
+    @related Font
+*/
 inline bool operator==(const Font& a, const Font& b)
 {
     return a.family() == b.family() &&
@@ -190,6 +217,9 @@ inline bool operator==(const Font& a, const Font& b)
 }
 
 
+/** @brief Returns true if two font requests are different.
+    @related Font
+*/
 inline bool operator!=(const Font& a, const Font& b)
 {
     return a.family() != b.family() ||
@@ -202,6 +232,9 @@ inline bool operator!=(const Font& a, const Font& b)
 }
 
 
+/** @brief Returns true if one font request sorts before another.
+    @related Font
+*/
 inline bool operator<(const Font& a, const Font& b)
 {
     if(a.family() != b.family())

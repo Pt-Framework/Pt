@@ -42,17 +42,26 @@ namespace Gfx {
 class BrushData;
 class Bitmap;
 
+/** @brief Color stop for a gradient brush.
+    @ingroup Drawing
+*/
 class ColorStop
 {
     public:
+        /** @brief Constructs a color stop.
+        */
         ColorStop(float position, const Color& color)
         : _position(position)
         , _color(color)
         {}
 
+        /** @brief Returns the normalized stop position.
+        */
         float position() const
         { return _position; }
 
+        /** @brief Returns the stop color.
+        */
         const Color& color() const
         { return _color; }
 
@@ -62,38 +71,61 @@ class ColorStop
 };
 
 
+/** @brief Ordered collection of gradient color stops.
+    @ingroup Drawing
+*/
 class ColorStops
 {
     public:
+        /** @brief Constructs an empty collection.
+        */
         ColorStops()
         {}
 
+        /** @brief Destroys the collection.
+        */
         ~ColorStops()
         {}
 
+        /** @brief Returns true if no stops are stored.
+        */
         bool empty() const
         { return _stops.empty(); }
 
+        /** @brief Returns the number of stored stops.
+        */
         std::size_t size() const
         { return _stops.size(); }
 
+        /** @brief Removes all stored stops.
+        */
         void clear()
         { _stops.clear(); }
 
         // TODO: Throw exception if the position < 0.0 or position > 1.0
         // TODO: Throw exception if the positions are mixed up
+        /** @brief Appends a color stop.
+        */
         void add(float position, const Color& color)
         { _stops.push_back( ColorStop(position, color) ); }
 
+        /** @brief Returns the stop at the given index.
+        */
         const ColorStop& operator[] (std::size_t n) const
         { return _stops[n]; }
 
+        /** @brief Returns the first stop.
+        */
         const ColorStop& front() const
         { return _stops.front(); }
 
+        /** @brief Returns the last stop.
+        */
         const ColorStop& back() const
         { return _stops.back(); }
 
+        /** @brief Calculates the interpolated color for a position.
+        */
         void calculateInterpolatedColor(Color& res, const float position) const;
 
 
@@ -102,9 +134,18 @@ class ColorStops
 };
 
 
+/** @brief Fill description for shapes and text.
+    @ingroup Drawing
+
+    Brush describes how closed geometry is filled. It can represent solid
+    colors, textures and gradients with absolute or relative coordinates so
+    that painters can reuse the same fill definition across targets.
+*/
 class PT_GFX_API Brush
 {
     public:
+        /** @brief Identifies the fill source used by the brush.
+        */
         enum FillStyle
         {
             Solid     = 0,
@@ -112,12 +153,16 @@ class PT_GFX_API Brush
             Gradient  = 2,
         };
 
+        /** @brief Identifies how brush coordinates are interpreted.
+        */
         enum PositionMode
         {
             Absolute = 0,
             Relative = 1
         };
 
+        /** @brief Identifies the gradient variant used by the brush.
+        */
         enum GradientStyle
         {
             Horizontal  = 0, // only for old painters
@@ -131,16 +176,28 @@ class PT_GFX_API Brush
         */
         Brush();
 
+        /** @brief Constructs a solid brush.
+        */
         Brush(const Color& color);
 
+        /** @brief Constructs a texture brush.
+        */
         Brush(const Image& texture, Pt::int32_t offX = 0, Pt::int32_t offY = 0);
 
+        /** @brief Constructs a vertical gradient brush from two colors.
+        */
         static Brush verticalGradient(const Color& from, const Color& to);
 
+        /** @brief Constructs a horizontal gradient brush from two colors.
+        */
         static Brush horizontalGradient(const Color& from, const Color& to);
 
+        /** @brief Constructs a vertical gradient brush from color stops.
+        */
         static Brush verticalGradient(const ColorStops& colorStops);
 
+        /** @brief Constructs a horizontal gradient brush from color stops.
+        */
         static Brush horizontalGradient(const ColorStops& colorStops);
 
         /** @brief Constructs an absolute positioned linear gradient.
@@ -170,10 +227,16 @@ class PT_GFX_API Brush
         */
         FillStyle fillStyle() const;
 
+        /** @brief Returns how brush coordinates are interpreted.
+        */
         PositionMode positionMode() const;
 
+        /** @brief Sets the solid fill color.
+        */
         void setColor(const Color& color);
 
+        /** @brief Returns the solid or first gradient color.
+        */
         const Color& color() const;
 
         /** @brief Returns the gradient style.
@@ -181,6 +244,8 @@ class PT_GFX_API Brush
         GradientStyle gradient() const;
 
         // remove when linear gradients use color stops
+        /** @brief Returns the legacy secondary gradient color.
+        */
         const Color& gradientColor() const;
 
         /** @brief Color stops of a gradient.
@@ -203,22 +268,36 @@ class PT_GFX_API Brush
         */
         float gradientEndRadius() const;
 
+        /** @brief Sets the texture image and offset.
+        */
         void setTexture(const Image& texture,
                         Pt::int32_t offX = 0, Pt::int32_t offY = 0);
 
+        /** @brief Returns the texture image.
+        */
         const Image& texture() const;
 
         // TODO: offset for textures is the origin and needs to be
         //       handled diferently in the painters
 
+        /** @brief Returns the horizontal texture offset.
+        */
         Pt::int32_t offsetX() const;
 
+        /** @brief Returns the vertical texture offset.
+        */
         Pt::int32_t offsetY() const;
 
+        /** @brief Returns true if the brush uses a gradient.
+        */
         bool isGradient() const;
 
+        /** @brief Returns true if the brush uses a texture.
+        */
         bool isTexture() const;
 
+        /** @brief Returns true if the brush is null.
+        */
         bool isNull() const;
 
     private:

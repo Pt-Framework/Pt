@@ -1,0 +1,29 @@
+/** \page drawing Graphics Drawing System
+
+@copydetails Drawing
+
+@section drawing_Painter Painters and Paint Surfaces
+
+@copydetails Pt::Gfx::Painter
+
+@copydetails Pt::Gfx::PaintSurface
+
+@copydetails Pt::Gfx::PaintContext
+
+@copydetails Pt::Gfx::Paint
+
+@section drawing_paths Paths and Transforms
+
+@copydetails Pt::Gfx::Path
+
+@copydetails Pt::Gfx::Transform
+
+@section drawing_text Text and Metrics
+
+@copydetails Pt::Gfx::Font
+
+@copydetails Pt::Gfx::FontMetrics
+
+@copydetails Pt::Gfx::TextMetrics
+
+*/

@@ -46,12 +46,12 @@
 namespace Pt {
 
 /** @namespace Pt::Gfx
-    @brief Graphics and Imaging
+    @brief Graphics and imaging services.
 
-    A 2D painting API is provided that can be implemented to
-    draw on different output targets with an implementation to
-    draw on off-screen images. Image classes support planar
-    and interleaved images and algorithms to manipulate them.
+  %Pt::Gfx provides APIs for drawing 2D shapes and text on different paint
+  surfaces, such as in-memory bitmaps. It also provides image, view and pixel
+  classes for storing image data, accessing pixels and working with image
+  formats.
 */
 namespace Gfx {
 

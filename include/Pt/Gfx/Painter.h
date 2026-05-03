@@ -37,20 +37,26 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief 2D painter for Gfx paint surfaces.
+/** @brief Concrete painter for Pt::Gfx paint targets.
+    @ingroup Drawing
+
+    %Painter is the entry point for issuing drawing commands against a
+    %PaintSurface or an existing %PaintContext. It owns no rendering backend
+    itself and instead binds %PainterBase to the target supplied through begin
+    or the corresponding constructor.
 */
 class PT_GFX_API Painter : public PainterBase
 {
     public:
-        /** @brief Default constructor.
+        /** @brief Constructs an inactive painter.
         */
         Painter();
 
-        /** @brief Constructs using a paint surface.
+        /** @brief Constructs and begins painting on a surface.
         */
         explicit Painter(PaintSurface& surface);
 
-        /** @brief Constructs using a paint context.
+        /** @brief Constructs and begins painting on a context.
         */
         explicit Painter(PaintContext& context);
 
@@ -58,11 +64,11 @@ class PT_GFX_API Painter : public PainterBase
         */
         virtual ~Painter();
 
-        /** @brief Begins painting to a paint surface.
+        /** @brief Begins painting on a surface.
         */
         void begin(PaintSurface& surface);
 
-        /** @brief Begins painting to a paint context.
+        /** @brief Begins painting on a context.
         */
         void begin(PaintContext& context);
 };

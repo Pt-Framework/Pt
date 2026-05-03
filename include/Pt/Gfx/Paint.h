@@ -39,13 +39,22 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Paint context.
+/** @brief Paint state used by drawing operations.
+  @ingroup Drawing
+
+  %Paint bundles the composition mode, pen, brush and font that define how a
+  painter renders geometry and text. It can be reused to apply the same
+  drawing state to multiple painting operations.
 */
 class PT_GFX_API Paint
 {
     public:
+    /** @brief Constructs the default paint state.
+    */
         Paint();
 
+    /** @brief Destroys the paint state.
+    */
         ~Paint();
 
         /** @brief Returns the current composition mode.

@@ -49,35 +49,54 @@ namespace Gfx {
 
 class BitmapSurface;
 
-/** @brief Image drawing surface.
+/** @brief Off-screen drawing surface backed by an image.
+    @ingroup Drawing
+
+    %Bitmap is the standard in-memory %PaintSurface implementation. It can be
+    used as a rendering target for %Painter and also exposes the rendered image
+    so that drawing results can be copied, inspected or reused by image APIs.
 */
 class PT_GFX_API Bitmap : public PaintSurface
 {
     public:
+        /** @brief Constructs an empty bitmap.
+        */
         Bitmap();
 
+        /** @brief Constructs a bitmap with the given size and optional stride.
+        */
         Bitmap(const Gfx::SizeF& size, std::size_t stride = 0);
 
+        /** @brief Destroys the bitmap.
+        */
         virtual ~Bitmap();
 
         /** @brief Resets to empty state.
         */
         void reset();
 
-        /** @brief Resets to an image. 
+        /** @brief Replaces the bitmap with an existing image.
         */
         void reset(const Gfx::Image& image);
 
-        /** @brief Resizes to a size in physical pixels. 
+        /** @brief Resets the bitmap to a new size in physical pixels.
         */
         void reset(const Gfx::SizeF&, std::size_t stride = 0);
 
+        /** @brief Returns true if no image data is available.
+        */
         bool empty() const;
 
+        /** @brief Returns the underlying image.
+        */
         const Gfx::Image& image() const;
 
+        /** @brief Sets the target scale factor.
+        */
         void setScaleFactor(double scaleFactor);
 
+        /** @brief Draws another bitmap into this bitmap.
+        */
         void drawBitmap(const Pt::Gfx::PointF& to, const Bitmap& image,
                         const Gfx::Paint& paint, const Gfx::RectF* rect = 0);
 
@@ -98,12 +117,20 @@ class PT_GFX_API Bitmap : public PaintSurface
         virtual void onFinish() override;
 
     public:
+        /** @brief Returns the default font family used by the backend.
+        */
         static const std::string& defaultFont();
 
+        /** @brief Sets the default font family used by the backend.
+        */
         static void setDefaultFont(const std::string& family);
 
+        /** @brief Returns the available font families.
+        */
         static std::vector<std::string> fontFamilies();
 
+        /** @brief Returns the font faces of a family.
+        */
         static std::vector<FontFace> fontFaces(const std::string& family);
 
     private:

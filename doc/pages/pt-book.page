@@ -80,6 +80,17 @@
     </ul>
 </ul>
 
+@section pt_gfx Graphics
+
+<ul>
+    <li> @ref drawing </li>
+    <ul>
+        <li> @ref drawing_Painter </li>
+        <li> @ref drawing_paths </li>
+        <li> @ref drawing_text </li>
+    </ul>
+</ul>
+
 @section pt_http HTTP Clients and Servers
 
 <ul>

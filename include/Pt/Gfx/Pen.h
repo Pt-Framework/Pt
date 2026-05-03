@@ -43,16 +43,17 @@ namespace Gfx {
 class PenData;
 
 /** @brief Attributes for the drawing of outlines.
+    @ingroup Drawing
 
-    Pen objects are used as container of drawing attributes for Painter
+    %Pen objects are used as container of drawing attributes for %Painter
     objects. A size and a color can be specified per pen. The size and
-    color are used to draw outlined shapes by the Painter. Outlined shapes
+    color are used to draw outlined shapes by the %Painter. Outlined shapes
     for example are lines, outlined rectangles or ellipses and text.
 */
 class PT_GFX_API Pen
 {
     public:
-        /** @brief Pen line style.
+        /** @brief Identifies how outlines are stroked.
         */
         enum Style 
         { 
@@ -62,7 +63,7 @@ class PT_GFX_API Pen
             DashPattern = 3
         };
 
-        /** @brief Pen cap style.
+        /** @brief Identifies how open line ends are rendered.
         */
         enum CapStyle 
         { 
@@ -71,7 +72,7 @@ class PT_GFX_API Pen
             RoundCap  = 2
         };
 
-        /** @brief Pen join style.
+        /** @brief Identifies how connected line segments are joined.
         */
         enum JoinStyle 
         { 
@@ -87,19 +88,19 @@ class PT_GFX_API Pen
         */
         Pen();
 
-        /** @brief Constructs a Pen with the specified color.
+        /** @brief Constructs a pen with the specified color.
 
             The pen size is 1, the style is solid and the cap and join
             styles are round.
         */
         Pen(const Color& color);
 
-        /** @brief Constructs a Pen with the specified size, color and styles.
+        /** @brief Constructs a pen with the specified size, color and styles.
         */
         Pen(const Color& color, std::size_t width, Style style = Solid,
             CapStyle cap = FlatCap, JoinStyle join = BevelJoin);
 
-        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        /** @brief Constructs a pen with a custom dash pattern.
         */
         Pen(const Color& color, std::size_t width,
             const std::vector<Pt::uint8_t>& dashPattern,
@@ -162,6 +163,8 @@ class PT_GFX_API Pen
         */
         JoinStyle joinStyle() const;
 
+        /** @brief Returns an implementation-specific pen instance.
+        */
         const void* instance() const
         {
             return _penData.get();

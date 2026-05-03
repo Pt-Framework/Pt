@@ -35,11 +35,18 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Metrics for a line of text.
+/** @brief Metrics for a measured line of text.
+    @ingroup Drawing
+
+    TextMetrics stores the horizontal advance and bounding-box information of
+    a rendered text run. Painters return this structure when text needs to be
+    aligned before it is drawn.
 */
 class PT_GFX_API TextMetrics
 {
     public:
+        /** @brief Constructs empty text metrics.
+        */
         TextMetrics();
 
         /** @brief Returns the advance width of the text.

@@ -37,25 +37,44 @@ namespace Pt {
 
 namespace Gfx {
 
+/** @brief Blend mode used for drawing operations.
+    @ingroup Drawing
+
+    %CompositionMode selects how new drawing results are combined with the
+    existing pixels of a target.
+*/
 class CompositionMode
 {
     public:
+        /** @brief Supported composition operators.
+        */
         enum Mode
         {
-            SourceCopy = 0, //! @brief Use source pixel as is
-            SourceOver = 1  //! @brief Use alpha of source pixel to control blending
+            /** @brief Copies source pixels without blending.
+            */
+            SourceCopy = 0,
+
+            /** @brief Blends source pixels over the destination using source alpha.
+            */
+            SourceOver = 1
         };
 
+        /** @brief Constructs a composition mode.
+        */
         CompositionMode(Mode m = SourceCopy)
         : _mode(m)
         {}
 
+        /** @brief Assigns a new composition operator.
+        */
         CompositionMode& operator=(Mode m)
         {
             _mode = m;
             return *this;
         }
 
+        /** @brief Converts the mode to its integral representation.
+        */
         operator Pt::uint32_t() const
         {
             return _mode;

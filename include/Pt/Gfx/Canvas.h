@@ -54,7 +54,13 @@ namespace Gfx {
 
 class Bitmap;
 
-/** @brief Paint context.
+/** @brief Backend canvas for drawing commands.
+    @ingroup Drawing
+
+    %Canvas is implemented by paint backends and executes the drawing commands
+    emitted by %PainterBase. It manages the active drawing state for a target,
+    exposes target geometry and scaling, and translates high-level operations
+    such as path, text and bitmap drawing into backend-specific primitives.
 */
 class PT_GFX_API Canvas
 {
@@ -75,85 +81,157 @@ class PT_GFX_API Canvas
         };
 
     public:
+        /** @brief Destroys the canvas.
+        */
         virtual ~Canvas();
 
+        /** @brief Returns the logical origin of the current region.
+        */
         const PointF& origin() const;
 
+        /** @brief Returns the current paint region.
+        */
         const RectF& region() const;
 
+        /** @brief Sets the paint region.
+        */
         void setRegion(const RectF& r);
 
+        /** @brief Returns the logical-to-physical scaling.
+        */
         const Scaling& scaling() const;
 
+        /** @brief Sets the logical-to-physical scaling.
+        */
         void setScaling(const Scaling& scaling);
 
+        /** @brief Returns the pixel format of the target.
+        */
         const Gfx::ImageFormat& format() const;
 
+        /** @brief Returns the current transform.
+        */
         const Gfx::Transform& transform() const;
 
+        /** @brief Sets the current transform.
+        */
         void setTransform(const Gfx::Transform& tx);
 
+        /** @brief Resets the transform to the identity matrix.
+        */
         void resetTransform();
 
     public:
+        /** @brief Begins painting with the given paint state.
+        */
         void beginPaint(const Gfx::Paint& paint);
 
+        /** @brief Ends the current painting operation.
+        */
         void finishPaint();
 
+        /** @brief Returns true if painting is currently active.
+        */
         bool isActive() const;
 
     public:
+        /** @brief Sets the current composition mode.
+        */
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
+        /** @brief Sets the current pen.
+        */
         void setPen(const Pen& pen);
 
+        /** @brief Sets the current brush.
+        */
         void setBrush(const Brush& brush);
 
+        /** @brief Sets the current font.
+        */
         void setFont(const Gfx::Font& font);
 
+        /** @brief Sets the clip rectangle.
+        */
         void setClip(const RectF& clip);
 
+        /** @brief Clears the clip rectangle.
+        */
         void resetClip();
 
     public:
+        /** @brief Draws a line between two points.
+        */
         void drawLine(const PointF& from, const PointF& to);
 
+        /** @brief Draws a connected sequence of line segments.
+        */
         void drawPolyline(const Gfx::PointF* ps, const size_t n);
 
+        /** @brief Fills a polygon.
+        */
         void fillPolygon(const Gfx::PointF* ps, const size_t n);
 
+        /** @brief Draws the outline of a rectangle.
+        */
         void drawRect(const Gfx::RectF& rectangle);
 
+        /** @brief Fills a rectangle.
+        */
         void fillRect(const Gfx::RectF& rectangle);
 
+        /** @brief Draws the outline of an ellipse.
+        */
         void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
+        /** @brief Fills an ellipse.
+        */
         void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
     public:
+        /** @brief Sets the current path.
+        */
         void setPath(const Path& path);
 
+        /** @brief Draws the current path.
+        */
         void drawPath();
 
+        /** @brief Fills the current path.
+        */
         void fillPath();
 
+        /** @brief Draws the given path.
+        */
         void drawPath(const Path& path);
 
+        /** @brief Fills the given path.
+        */
         void fillPath(const Path& path);
 
     public:
+        /** @brief Returns metrics for the current font.
+        */
         const FontMetrics& fontMetrics() const;
 
+        /** @brief Measures a line of text.
+        */
         TextMetrics textMetrics(const Pt::String& text) const;
 
+        /** @brief Draws a line of text.
+        */
         void drawText(const PointF& to, const Pt::String& text, 
                       const Transform* tform = 0);
 
     public:
+        /** @brief Draws an image.
+        */
         void drawImage(const Gfx::PointF& to, 
                        const Gfx::Image& image, 
                        const Gfx::RectF* rect = 0);
 
+        /** @brief Draws a bitmap.
+        */
         void drawBitmap(const Gfx::PointF& to, 
                         const Gfx::Bitmap& bitmap, 
                         const Gfx::RectF* rect = 0);
