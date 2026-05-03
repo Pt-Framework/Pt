@@ -59,7 +59,7 @@ think you have all relevant information.
   You MUST read this when working with pixels, images, or image formats.
   -> `.github/instructions/pt-gfx-api-images.instructions.md`
 
-- **Pt-Gfx Drawing**: Painter, paint surface, path, text, and drawing state APIs.
+- **Pt-Gfx Drawing**: Painter, paint surface, path, text, and 2D drawing APIs.
   You MUST read this when working with Pt::Gfx drawing, painting, paths,
   text rendering, transforms, brushes, pens, or paint surfaces.
   -> `.github/instructions/pt-gfx-api-drawing.instructions.md`
