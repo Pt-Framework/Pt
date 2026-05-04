@@ -21,10 +21,6 @@ think you have all relevant information.
   You MUST read this when writing or reviewing any code.
   -> `.github/instructions/coding.instructions.md`
 
-- **Coding Style**: Coding style and conventions for source files.
-  You MUST read this when writing or reviewing any code.
-  -> `.github/instructions/coding-style.instructions.md`
-
 - **Documenting**: Doxygen documentation conventions for public headers.
   You MUST read this when writing or updating Doxygen comments.
   -> `.github/instructions/documenting.instructions.md`

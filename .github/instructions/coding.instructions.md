@@ -1,7 +1,28 @@
 ---
-applyTo: "**/*.{h,cpp,Jamfile,Jamconfigure}"
+applyTo: "**/*.{h,cpp}"
 description: "Project directory structure and coding architecture for the Pt project"
 ---
+
+# Coding Style
+
+## Comments
+
+- All comments, identifiers, log messages and exception messages must be written in english
+- Keep comments short and precise
+
+## Indentation
+
+- Use 4 spaces for indentation, no tabs
+- Keep existing indentation style when modifying existing code
+
+## Formatting
+
+- Keep existing formatting style when modifying existing code
+- Namespace closing braces are commented: `} // namespace`
+
+## Code Structure
+
+- assign lambdas to a local variable before using it in an algorithm
 
 # Coding Guidelines
 
@@ -98,4 +119,3 @@ class SignalBase : public Connectable { /* ... */ };
 
 For the Pt core module, omit the `<Module>` path segment (e.g. `include/Pt/NewClass.h`,
 `src/Pt/NewClass.cpp`, export macro `PT_API`).
-
