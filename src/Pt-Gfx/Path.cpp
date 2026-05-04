@@ -528,10 +528,6 @@ int pathCubicHit(const Pt::Gfx::PointF p[4], double px, double py)
     return winding;
 }
 
-// ---------------------------------------------------------------------------
-// Rect-edge intersection helpers for contains(RectF).
-// ---------------------------------------------------------------------------
-
 // Returns true if line segment [p0→p1] crosses the horizontal edge y=hy
 // within x in [xMin, xMax].
 inline bool pathLineIntersectsH(double x0, double y0, double x1, double y1,
