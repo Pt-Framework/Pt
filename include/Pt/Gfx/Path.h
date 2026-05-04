@@ -131,6 +131,15 @@ class PT_GFX_API Path
         */
         bool contains(const RectF& rect, FillRule rule = FillRule::NonZero) const;
 
+        /** @brief Returns true if the filled area of the path overlaps @a rect.
+
+            Returns true if any part of the filled path area shares at least
+            one point with the interior of @a rect.  The test covers three
+            cases: a corner of @a rect lies inside the path, a path segment
+            crosses a rect edge, or the entire path lies inside @a rect.
+        */
+        bool intersects(const RectF& rect, FillRule rule = FillRule::NonZero) const;
+
         /** @brief Returns the current drawing position.
         */
         const PointF& currentPosition() const;

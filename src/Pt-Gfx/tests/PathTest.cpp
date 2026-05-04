@@ -74,6 +74,11 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("ContainsRectLarger",        *this, &PathTest::ContainsRectLarger);
             registerMethod("ContainsRectInEllipse",     *this, &PathTest::ContainsRectInEllipse);
             registerMethod("ContainsRectCrossing",      *this, &PathTest::ContainsRectCrossing);
+            registerMethod("IntersectsRectPartial",      *this, &PathTest::IntersectsRectPartial);
+            registerMethod("IntersectsRectOutside",      *this, &PathTest::IntersectsRectOutside);
+            registerMethod("IntersectsRectContains",     *this, &PathTest::IntersectsRectContains);
+            registerMethod("IntersectsPathInsideRect",   *this, &PathTest::IntersectsPathInsideRect);
+            registerMethod("IntersectsRectEllipse",      *this, &PathTest::IntersectsRectEllipse);
         }
 
         void MoveTo()
@@ -1092,6 +1097,58 @@ class PathTest : public Pt::Unit::TestSuite
 
             // Rect straddling the bottom edge (y=60).
             PT_UNIT_ASSERT(!path.contains(RectF(PointF(10.0, 45.0), PointF(90.0, 65.0))));
+        }
+
+        void IntersectsRectPartial()
+        {
+            // Two overlapping rects.
+            Path path;
+            path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
+
+            // Partially overlapping — corner (50,50) is inside path.
+            PT_UNIT_ASSERT( path.intersects(RectF(PointF(50.0, 50.0), PointF(150.0, 150.0))));
+            // Same with EvenOdd.
+            PT_UNIT_ASSERT( path.intersects(RectF(PointF(50.0, 50.0), PointF(150.0, 150.0)), FillRule::EvenOdd));
+        }
+
+        void IntersectsRectOutside()
+        {
+            Path path;
+            path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
+
+            PT_UNIT_ASSERT(!path.intersects(RectF(PointF(200.0, 0.0),   PointF(300.0, 100.0))));
+            PT_UNIT_ASSERT(!path.intersects(RectF(PointF(-100.0, -50.0), PointF(-10.0, 50.0))));
+        }
+
+        void IntersectsRectContains()
+        {
+            // Rect is small and fully inside the path — rect corners are inside path.
+            Path path;
+            path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
+
+            PT_UNIT_ASSERT( path.intersects(RectF(PointF(20.0, 20.0), PointF(80.0, 80.0))));
+        }
+
+        void IntersectsPathInsideRect()
+        {
+            // Path is entirely inside the test rect — no rect corners inside path,
+            // no crossings, but bbox subset of rect triggers true.
+            Path path;
+            path.addRect(RectF(PointF(20.0, 20.0), PointF(80.0, 80.0)));
+
+            PT_UNIT_ASSERT( path.intersects(RectF(PointF(10.0, 10.0), PointF(90.0, 90.0))));
+        }
+
+        void IntersectsRectEllipse()
+        {
+            // Rect crossing the ellipse boundary.
+            Path path;
+            path.addEllipse(PointF(0.0, 0.0), SizeF(100.0, 100.0));
+
+            // Rect partly inside — corner (45,45) is inside the circle.
+            PT_UNIT_ASSERT( path.intersects(RectF(PointF(45.0, 45.0), PointF(150.0, 150.0))));
+            // Rect entirely outside the circle.
+            PT_UNIT_ASSERT(!path.intersects(RectF(PointF(200.0, 200.0), PointF(300.0, 300.0))));
         }
 
 };

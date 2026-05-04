@@ -1005,6 +1005,125 @@ bool Path::contains(const RectF& rect, FillRule rule) const
 }
 
 
+bool Path::intersects(const RectF& rect, FillRule rule) const
+{
+    if( _pathData->isEmpty() || rect.isNull() )
+        return false;
+
+    // BBox fast reject.
+    const RectF bbox = boundingRect();
+    if( bbox.isNull() )
+        return false;
+
+    if( bbox.right()  < rect.left()  || rect.right()  < bbox.left() ||
+        bbox.bottom() < rect.top()   || rect.bottom() < bbox.top() )
+        return false;
+
+    // If any corner of the rect lies inside the filled area → intersects.
+    if( contains(rect.topLeft(),     rule) ) return true;
+    if( contains(rect.topRight(),    rule) ) return true;
+    if( contains(rect.bottomLeft(),  rule) ) return true;
+    if( contains(rect.bottomRight(), rule) ) return true;
+
+    const double xMin = rect.left();
+    const double xMax = rect.right();
+    const double yMin = rect.top();
+    const double yMax = rect.bottom();
+
+    // If any path segment crosses a rect edge → intersects.
+    bool hasMoveTo = false;
+    PointF start;
+    PointF lastPos;
+
+    for( PathIterator it = _pathData->begin(); it != _pathData->end(); ++it )
+    {
+        const PathElement& elem = *it;
+
+        switch( elem.type() )
+        {
+            case Path::MoveTo:
+            {
+                if( hasMoveTo )
+                {
+                    if( pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMin, xMin, xMax) ||
+                        pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMax, xMin, xMax) ||
+                        pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMin, yMin, yMax) ||
+                        pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMax, yMin, yMax) )
+                        return true;
+                }
+
+                start     = elem.point(0);
+                lastPos   = elem.point(0);
+                hasMoveTo = true;
+                break;
+            }
+
+            case Path::LineTo:
+            {
+                const PointF& from = elem.position();
+                const PointF& to   = elem.point(0);
+
+                if( pathLineIntersectsH(from.x(), from.y(), to.x(), to.y(), yMin, xMin, xMax) ||
+                    pathLineIntersectsH(from.x(), from.y(), to.x(), to.y(), yMax, xMin, xMax) ||
+                    pathLineIntersectsV(from.x(), from.y(), to.x(), to.y(), xMin, yMin, yMax) ||
+                    pathLineIntersectsV(from.x(), from.y(), to.x(), to.y(), xMax, yMin, yMax) )
+                    return true;
+
+                lastPos = to;
+                break;
+            }
+
+            case Path::QuadTo:
+            {
+                const PointF q[3] = { elem.position(), elem.point(0), elem.point(1) };
+
+                if( pathQuadIntersectsRect(q, xMin, yMin, xMax, yMax) )
+                    return true;
+
+                lastPos = elem.point(1);
+                break;
+            }
+
+            case Path::CubicTo:
+            {
+                const PointF c[4] = { elem.position(), elem.point(0), elem.point(1), elem.point(2) };
+
+                if( pathCubicIntersectsRect(c, xMin, yMin, xMax, yMax) )
+                    return true;
+
+                lastPos = elem.point(2);
+                break;
+            }
+
+            case Path::Close:
+            {
+                hasMoveTo = false;
+                lastPos   = start;
+                break;
+            }
+        }
+    }
+
+    // Implicitly close any open trailing subpath.
+    if( hasMoveTo )
+    {
+        if( pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMin, xMin, xMax) ||
+            pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMax, xMin, xMax) ||
+            pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMin, yMin, yMax) ||
+            pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMax, yMin, yMax) )
+            return true;
+    }
+
+    // If the entire path lies within the rect (no crossings, no rect corners
+    // inside path), the path area overlaps the rect.
+    if( rect.left() <= bbox.left()  && bbox.right()  <= rect.right() &&
+        rect.top()  <= bbox.top()   && bbox.bottom() <= rect.bottom() )
+        return true;
+
+    return false;
+}
+
+
 const PointF& Path::currentPosition() const
 {
     return _pathData->currentPosition();
