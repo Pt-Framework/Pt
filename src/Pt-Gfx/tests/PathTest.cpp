@@ -69,6 +69,11 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("ContainsEllipse",           *this, &PathTest::ContainsEllipse);
             registerMethod("ContainsOnEdge",            *this, &PathTest::ContainsOnEdge);
             registerMethod("ContainsConcentricCircles", *this, &PathTest::ContainsConcentricCircles);
+            registerMethod("ContainsRectInRect",        *this, &PathTest::ContainsRectInRect);
+            registerMethod("ContainsRectOutside",       *this, &PathTest::ContainsRectOutside);
+            registerMethod("ContainsRectLarger",        *this, &PathTest::ContainsRectLarger);
+            registerMethod("ContainsRectInEllipse",     *this, &PathTest::ContainsRectInEllipse);
+            registerMethod("ContainsRectCrossing",      *this, &PathTest::ContainsRectCrossing);
         }
 
         void MoveTo()
@@ -1032,6 +1037,61 @@ class PathTest : public Pt::Unit::TestSuite
             // Point in the outer ring but outside the inner ellipse.
             PT_UNIT_ASSERT( path.contains(PointF(15.0, 48.0), FillRule::NonZero));
             PT_UNIT_ASSERT( path.contains(PointF(15.0, 48.0), FillRule::EvenOdd));
+        }
+
+        void ContainsRectInRect()
+        {
+            // Small rect fully inside a larger rect path.
+            Path path;
+            path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
+
+            PT_UNIT_ASSERT( path.contains(RectF(PointF(20.0, 20.0), PointF(80.0, 80.0))));
+        }
+
+        void ContainsRectOutside()
+        {
+            Path path;
+            path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
+
+            PT_UNIT_ASSERT(!path.contains(RectF(PointF(200.0, 200.0), PointF(300.0, 300.0))));
+            PT_UNIT_ASSERT(!path.contains(RectF(PointF(-50.0, -50.0), PointF(-10.0, -10.0))));
+        }
+
+        void ContainsRectLarger()
+        {
+            // Rect larger than the path: corners lie outside the path.
+            Path path;
+            path.addRect(RectF(PointF(10.0, 10.0), PointF(90.0, 90.0)));
+
+            PT_UNIT_ASSERT(!path.contains(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0))));
+        }
+
+        void ContainsRectInEllipse()
+        {
+            // Small rect near centre of an ellipse.
+            Path path;
+            path.addEllipse(PointF(0.0, 0.0), SizeF(100.0, 100.0));
+
+            // Small rect well inside the circle.
+            PT_UNIT_ASSERT( path.contains(RectF(PointF(40.0, 40.0), PointF(60.0, 60.0))));
+            // Rect extending below the ellipse (bottom at y=110, ellipse bottom at y=100).
+            PT_UNIT_ASSERT(!path.contains(RectF(PointF(40.0, 40.0), PointF(60.0, 110.0))));
+        }
+
+        void ContainsRectCrossing()
+        {
+            // Path: horizontal band (0,40)→(100,60).
+            Path path;
+            path.addRect(RectF(PointF(0.0, 40.0), PointF(100.0, 60.0)));
+
+            // Rect fully inside the band.
+            PT_UNIT_ASSERT( path.contains(RectF(PointF(10.0, 42.0), PointF(90.0, 58.0))));
+
+            // Rect straddling the top edge (y=40): top corners outside.
+            PT_UNIT_ASSERT(!path.contains(RectF(PointF(10.0, 35.0), PointF(90.0, 55.0))));
+
+            // Rect straddling the bottom edge (y=60).
+            PT_UNIT_ASSERT(!path.contains(RectF(PointF(10.0, 45.0), PointF(90.0, 65.0))));
         }
 
 };

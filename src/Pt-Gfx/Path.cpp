@@ -528,6 +528,180 @@ int pathCubicHit(const Pt::Gfx::PointF p[4], double px, double py)
     return winding;
 }
 
+// ---------------------------------------------------------------------------
+// Rect-edge intersection helpers for contains(RectF).
+// ---------------------------------------------------------------------------
+
+// Returns true if line segment [p0→p1] crosses the horizontal edge y=hy
+// within x in [xMin, xMax].
+inline bool pathLineIntersectsH(double x0, double y0, double x1, double y1,
+                                 double hy, double xMin, double xMax)
+{
+    const double dy = y1 - y0;
+    if (pathIsNear(dy, 0.0))
+        return false;
+    const double t = (hy - y0) / dy;
+    if (t < 0.0 || t > 1.0)
+        return false;
+    const double ix = x0 + t * (x1 - x0);
+    return ix >= xMin && ix <= xMax;
+}
+
+// Returns true if line segment [p0→p1] crosses the vertical edge x=vx
+// within y in [yMin, yMax].
+inline bool pathLineIntersectsV(double x0, double y0, double x1, double y1,
+                                 double vx, double yMin, double yMax)
+{
+    const double dx = x1 - x0;
+    if (pathIsNear(dx, 0.0))
+        return false;
+    const double t = (vx - x0) / dx;
+    if (t < 0.0 || t > 1.0)
+        return false;
+    const double iy = y0 + t * (y1 - y0);
+    return iy >= yMin && iy <= yMax;
+}
+
+// Returns true if the quadratic segment p[3] crosses any of the four
+// axis-aligned edges of the rect [xMin,xMax] x [yMin,yMax].
+bool pathQuadIntersectsRect(const Pt::Gfx::PointF p[3],
+                             double xMin, double yMin,
+                             double xMax, double yMax)
+{
+    // Control-polygon BBox fast reject.
+    const double qMinX = std::min({p[0].x(), p[1].x(), p[2].x()});
+    const double qMaxX = std::max({p[0].x(), p[1].x(), p[2].x()});
+    const double qMinY = std::min({p[0].y(), p[1].y(), p[2].y()});
+    const double qMaxY = std::max({p[0].y(), p[1].y(), p[2].y()});
+
+    if (qMaxX < xMin || qMinX > xMax || qMaxY < yMin || qMinY > yMax)
+        return false;
+
+    // Quadratic polynomial coefficients: curve(t) = A*t^2 + B*t + C.
+    const double ax = p[2].x() - 2.0 * p[1].x() + p[0].x();
+    const double bx = 2.0 * (p[1].x() - p[0].x());
+    const double cx = p[0].x();
+
+    const double ay = p[2].y() - 2.0 * p[1].y() + p[0].y();
+    const double by = 2.0 * (p[1].y() - p[0].y());
+    const double cy = p[0].y();
+
+    double ti[2];
+    std::size_t n;
+
+    // Top edge: curve.y(t) = yMin  →  check curve.x(t) in [xMin, xMax].
+    n = pathQuadRoots(ti, ay, by, cy - yMin, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double ix = (ax * ti[i] + bx) * ti[i] + cx;
+        if (ix >= xMin && ix <= xMax)
+            return true;
+    }
+
+    // Bottom edge: curve.y(t) = yMax.
+    n = pathQuadRoots(ti, ay, by, cy - yMax, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double ix = (ax * ti[i] + bx) * ti[i] + cx;
+        if (ix >= xMin && ix <= xMax)
+            return true;
+    }
+
+    // Left edge: curve.x(t) = xMin  →  check curve.y(t) in [yMin, yMax].
+    n = pathQuadRoots(ti, ax, bx, cx - xMin, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double iy = (ay * ti[i] + by) * ti[i] + cy;
+        if (iy >= yMin && iy <= yMax)
+            return true;
+    }
+
+    // Right edge: curve.x(t) = xMax.
+    n = pathQuadRoots(ti, ax, bx, cx - xMax, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double iy = (ay * ti[i] + by) * ti[i] + cy;
+        if (iy >= yMin && iy <= yMax)
+            return true;
+    }
+
+    return false;
+}
+
+// Returns true if the cubic segment p[4] crosses any of the four
+// axis-aligned edges of the rect [xMin,xMax] x [yMin,yMax].
+bool pathCubicIntersectsRect(const Pt::Gfx::PointF p[4],
+                              double xMin, double yMin,
+                              double xMax, double yMax)
+{
+    // Control-polygon BBox fast reject.
+    const double qMinX = std::min({p[0].x(), p[1].x(), p[2].x(), p[3].x()});
+    const double qMaxX = std::max({p[0].x(), p[1].x(), p[2].x(), p[3].x()});
+    const double qMinY = std::min({p[0].y(), p[1].y(), p[2].y(), p[3].y()});
+    const double qMaxY = std::max({p[0].y(), p[1].y(), p[2].y(), p[3].y()});
+
+    if (qMaxX < xMin || qMinX > xMax || qMaxY < yMin || qMinY > yMax)
+        return false;
+
+    // Cubic polynomial coefficients: curve(t) = A*t^3 + B*t^2 + C*t + D.
+    const double v1x = p[1].x() - p[0].x();
+    const double v2x = p[2].x() - p[1].x();
+    const double v3x = p[3].x() - p[2].x();
+    const double ax  = v3x - v2x - v2x + v1x;
+    const double bx  = 3.0 * (v2x - v1x);
+    const double cx  = 3.0 * v1x;
+    const double dx  = p[0].x();
+
+    const double v1y = p[1].y() - p[0].y();
+    const double v2y = p[2].y() - p[1].y();
+    const double v3y = p[3].y() - p[2].y();
+    const double ay  = v3y - v2y - v2y + v1y;
+    const double by  = 3.0 * (v2y - v1y);
+    const double cy  = 3.0 * v1y;
+    const double dy  = p[0].y();
+
+    double ti[3];
+    std::size_t n;
+
+    // Top edge: curve.y(t) = yMin.
+    n = pathCubicRoots(ti, ay, by, cy, dy - yMin, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double ix = ((ax * ti[i] + bx) * ti[i] + cx) * ti[i] + dx;
+        if (ix >= xMin && ix <= xMax)
+            return true;
+    }
+
+    // Bottom edge: curve.y(t) = yMax.
+    n = pathCubicRoots(ti, ay, by, cy, dy - yMax, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double ix = ((ax * ti[i] + bx) * ti[i] + cx) * ti[i] + dx;
+        if (ix >= xMin && ix <= xMax)
+            return true;
+    }
+
+    // Left edge: curve.x(t) = xMin.
+    n = pathCubicRoots(ti, ax, bx, cx, dx - xMin, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double iy = ((ay * ti[i] + by) * ti[i] + cy) * ti[i] + dy;
+        if (iy >= yMin && iy <= yMax)
+            return true;
+    }
+
+    // Right edge: curve.x(t) = xMax.
+    n = pathCubicRoots(ti, ax, bx, cx, dx - xMax, 0.0, 1.0);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        const double iy = ((ay * ti[i] + by) * ti[i] + cy) * ti[i] + dy;
+        if (iy >= yMin && iy <= yMax)
+            return true;
+    }
+
+    return false;
+}
+
 } // namespace
 
 namespace Pt {
@@ -722,6 +896,116 @@ bool Path::contains(const PointF& point, FillRule rule) const
         return (winding & 1) != 0;
 
     return winding != 0;
+}
+
+
+bool Path::contains(const RectF& rect, FillRule rule) const
+{
+    if( _pathData->isEmpty() || rect.isNull() )
+        return false;
+
+    // BBox fast reject: path and rect must overlap.
+    const RectF bbox = boundingRect();
+    if( bbox.right()  < rect.left()  || rect.right()  < bbox.left() ||
+        bbox.bottom() < rect.top()   || rect.bottom() < bbox.top() )
+        return false;
+
+    // All 4 corners of the rect must lie inside the filled area.
+    if( !contains(rect.topLeft(),     rule) ) return false;
+    if( !contains(rect.topRight(),    rule) ) return false;
+    if( !contains(rect.bottomLeft(),  rule) ) return false;
+    if( !contains(rect.bottomRight(), rule) ) return false;
+
+    const double xMin = rect.left();
+    const double xMax = rect.right();
+    const double yMin = rect.top();
+    const double yMax = rect.bottom();
+
+    // No path segment may cross a rect edge.
+    bool hasMoveTo = false;
+    PointF start;
+    PointF lastPos;
+
+    for( PathIterator it = _pathData->begin(); it != _pathData->end(); ++it )
+    {
+        const PathElement& elem = *it;
+
+        switch( elem.type() )
+        {
+            case Path::MoveTo:
+            {
+                if( hasMoveTo )
+                {
+                    if( pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMin, xMin, xMax) ||
+                        pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMax, xMin, xMax) ||
+                        pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMin, yMin, yMax) ||
+                        pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMax, yMin, yMax) )
+                        return false;
+                }
+
+                start     = elem.point(0);
+                lastPos   = elem.point(0);
+                hasMoveTo = true;
+                break;
+            }
+
+            case Path::LineTo:
+            {
+                const PointF& from = elem.position();
+                const PointF& to   = elem.point(0);
+
+                if( pathLineIntersectsH(from.x(), from.y(), to.x(), to.y(), yMin, xMin, xMax) ||
+                    pathLineIntersectsH(from.x(), from.y(), to.x(), to.y(), yMax, xMin, xMax) ||
+                    pathLineIntersectsV(from.x(), from.y(), to.x(), to.y(), xMin, yMin, yMax) ||
+                    pathLineIntersectsV(from.x(), from.y(), to.x(), to.y(), xMax, yMin, yMax) )
+                    return false;
+
+                lastPos = to;
+                break;
+            }
+
+            case Path::QuadTo:
+            {
+                const PointF q[3] = { elem.position(), elem.point(0), elem.point(1) };
+
+                if( pathQuadIntersectsRect(q, xMin, yMin, xMax, yMax) )
+                    return false;
+
+                lastPos = elem.point(1);
+                break;
+            }
+
+            case Path::CubicTo:
+            {
+                const PointF c[4] = { elem.position(), elem.point(0), elem.point(1), elem.point(2) };
+
+                if( pathCubicIntersectsRect(c, xMin, yMin, xMax, yMax) )
+                    return false;
+
+                lastPos = elem.point(2);
+                break;
+            }
+
+            case Path::Close:
+            {
+                hasMoveTo = false;
+                lastPos   = start;
+                break;
+            }
+        }
+    }
+
+    // Implicitly close any open trailing subpath.
+    if( hasMoveTo )
+    {
+        if( pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMin, xMin, xMax) ||
+            pathLineIntersectsH(lastPos.x(), lastPos.y(), start.x(), start.y(), yMax, xMin, xMax) ||
+            pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMin, yMin, yMax) ||
+            pathLineIntersectsV(lastPos.x(), lastPos.y(), start.x(), start.y(), xMax, yMin, yMax) )
+            return false;
+    }
+
+    return true;
 }
 
 

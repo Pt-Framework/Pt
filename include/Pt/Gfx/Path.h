@@ -123,6 +123,14 @@ class PT_GFX_API Path
         */
         bool contains(const PointF& point, FillRule rule = FillRule::NonZero) const;
 
+        /** @brief Returns true if the rectangle lies entirely inside the filled area.
+
+            Every point of @a rect must be covered by the filled area of the path.
+            Returns false if any path segment crosses a rectangle edge or any
+            corner of @a rect is outside the filled area.
+        */
+        bool contains(const RectF& rect, FillRule rule = FillRule::NonZero) const;
+
         /** @brief Returns the current drawing position.
         */
         const PointF& currentPosition() const;
