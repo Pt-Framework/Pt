@@ -1201,13 +1201,6 @@ void Path::close()
 
 void Path::addPath(const Path& p)
 {
-    close();
-    appendPath(p);
-}
-
-
-void Path::appendPath(const Path& p)
-{
     detach();
 
     _pathData->append(*p._pathData);
@@ -1231,19 +1224,26 @@ void Path::addRect(const RectF& rect)
 }
 
 
-void Path::addRoundedRect(const RectF& rect, float radius)
+void Path::addRoundedRect(const RectF& rect, double radius)
 {
-    double x = rect.x();
-    double y = rect.y();
-    double w = rect.width();
-    double h = rect.height();
-    double d = 2.0 * radius;
+    addRoundedRect(rect, radius, radius);
+}
 
-    moveTo(PointF(x + radius, y));
-    arcTo(PointF(x + w - d, y), SizeF(d, d), 270.0, 360.0);
-    arcTo(PointF(x + w - d, y + h - d), SizeF(d, d), 0.0, 90.0);
-    arcTo(PointF(x, y + h - d), SizeF(d, d), 90.0, 180.0);
-    arcTo(PointF(x, y), SizeF(d, d), 180.0, 270.0);
+
+void Path::addRoundedRect(const RectF& rect, double rx, double ry)
+{
+    double x  = rect.x();
+    double y  = rect.y();
+    double w  = rect.width();
+    double h  = rect.height();
+    double dx = 2.0 * rx;
+    double dy = 2.0 * ry;
+
+    moveTo(PointF(x + rx, y));
+    arcTo(PointF(x + w - dx, y),          SizeF(dx, dy), 270.0, 360.0);
+    arcTo(PointF(x + w - dx, y + h - dy), SizeF(dx, dy),   0.0,  90.0);
+    arcTo(PointF(x,          y + h - dy), SizeF(dx, dy),  90.0, 180.0);
+    arcTo(PointF(x,          y),          SizeF(dx, dy), 180.0, 270.0);
     close();
 }
 

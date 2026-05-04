@@ -161,6 +161,12 @@ class PT_GFX_API Path
         void cubicTo(const PointF &cp1, const PointF &cp2, const PointF& to);
 
         /** @brief Adds an arc segment to the current subpath.
+
+            The arc is drawn inside the ellipse bounded by @a topLeft and
+            @a size.  Angles are measured clockwise from the positive
+            x-axis.  A positive sweep (@a degEnd > @a degBegin) is
+            clockwise; a negative sweep is counter-clockwise.  If the
+            path is empty a %MoveTo is added, otherwise a %LineTo.
         */
         void arcTo(const PointF& topLeft, const SizeF& size,
                    double degBegin, double degEnd);
@@ -169,13 +175,9 @@ class PT_GFX_API Path
         */
         void close();
 
-        /** @brief Adds a path as a new subpath.
+        /** @brief Appends all elements of @a p to this path.
         */
         void addPath(const Path& p);
-
-        /** @brief Appends a path into the current subpath.
-        */
-        void appendPath(const Path& p);
 
         /** @brief Adds a rectangle as a new subpath.
         */
@@ -183,13 +185,22 @@ class PT_GFX_API Path
 
         /** @brief Adds a rounded rectangle as a new subpath.
         */
-        void addRoundedRect(const RectF& rect, float radius);
+        void addRoundedRect(const RectF& rect, double radius);
+
+        /** @brief Adds a rounded rectangle with elliptical corners as a new subpath.
+
+            @a rx is the horizontal corner radius, @a ry the vertical corner radius.
+        */
+        void addRoundedRect(const RectF& rect, double rx, double ry);
 
         /** @brief Adds an ellipse as a new subpath.
         */
         void addEllipse(const PointF& topLeft, const SizeF& size);
 
         /** @brief Adds an arc as a new subpath.
+
+            Starts a new subpath at the arc start point.  Angle and
+            sweep-direction semantics are identical to %arcTo().
         */
         void addArc(const PointF& topLeft, const SizeF& size,
                     double degBegin, double degEnd);

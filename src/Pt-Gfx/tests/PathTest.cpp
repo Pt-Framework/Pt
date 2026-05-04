@@ -49,7 +49,6 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("Close",      *this, &PathTest::Close);
             registerMethod("Clear",      *this, &PathTest::Clear);
             registerMethod("Size",       *this, &PathTest::Size);
-            registerMethod("AppendPath", *this, &PathTest::AppendPath);
             registerMethod("AddPath",       *this, &PathTest::AddPath);
             registerMethod("ToPolygons",    *this, &PathTest::ToPolygons);
             registerMethod("Transform",     *this, &PathTest::Transform);
@@ -327,40 +326,6 @@ class PathTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(4));
         }
 
-        void AppendPath()
-        {
-            Path path;
-            path.moveTo(PointF(0.0, 0.0));
-            path.lineTo(PointF(1.0, 0.0));
-
-            Path other;
-            other.moveTo(PointF(2.0, 0.0));
-            other.lineTo(PointF(3.0, 0.0));
-
-            path.appendPath(other);
-
-            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(4));
-
-            Path::Iterator it = path.begin();
-            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::LineTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 2.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::LineTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 3.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it == path.end());
-        }
-
         void AddPath()
         {
             Path path;
@@ -373,20 +338,15 @@ class PathTest : public Pt::Unit::TestSuite
 
             path.addPath(other);
 
+            PT_UNIT_ASSERT_EQUAL(path.size(), std::size_t(4));
+
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
 
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::LineTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 0.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 0.0);
-
-            ++it;
-            PT_UNIT_ASSERT(it->type() == Path::Close);
 
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
@@ -793,8 +753,9 @@ class PathTest : public Pt::Unit::TestSuite
 
         void AddRoundedRect()
         {
+            // rx=10, ry=5 produces elliptical corners
             Path path;
-            path.addRoundedRect(RectF(PointF(10.0, 20.0), SizeF(100.0, 50.0)), 5.0f);
+            path.addRoundedRect(RectF(PointF(10.0, 20.0), SizeF(100.0, 50.0)), 10.0, 5.0);
 
             PT_UNIT_ASSERT(!path.isEmpty());
 
@@ -802,37 +763,37 @@ class PathTest : public Pt::Unit::TestSuite
             Path::Iterator it = path.begin();
             PT_UNIT_ASSERT(it != path.end());
             PT_UNIT_ASSERT(it->type() == Path::MoveTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 20.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 20.0);
 
             // top edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 105.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 20.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 100.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(),  20.0);
 
             // top-right corner
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::CubicTo);
             PT_UNIT_ASSERT_NEAR(it->point(2).x(), 110.0);
-            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 25.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(),  25.0);
 
             // right edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
             PT_UNIT_ASSERT_NEAR(it->point(0).x(), 110.0);
-            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 65.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(),  65.0);
 
             // bottom-right corner
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 105.0);
-            PT_UNIT_ASSERT_NEAR(it->point(2).y(), 70.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 100.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).y(),  70.0);
 
             // bottom edge
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::LineTo);
-            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 20.0);
             PT_UNIT_ASSERT_NEAR(it->point(0).y(), 70.0);
 
             // bottom-left corner
@@ -850,7 +811,7 @@ class PathTest : public Pt::Unit::TestSuite
             // top-left corner
             ++it;
             PT_UNIT_ASSERT(it->type() == Path::CubicTo);
-            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 15.0);
+            PT_UNIT_ASSERT_NEAR(it->point(2).x(), 20.0);
             PT_UNIT_ASSERT_NEAR(it->point(2).y(), 20.0);
 
             ++it;
