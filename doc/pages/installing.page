@@ -125,6 +125,25 @@ on a windows host to build for QNX on PowerPC CPUs:
 jam.bat configure -sTARGET_OS=qnxnto -sTARGET_OSPLAT=ppc
 @endcode
 
+WebAssembly targets are built by cross-compiling with the Emscripten toolchain.
+Set TARGET_OS to 'emscripten' when configuring. The optional EMSDK variable
+can be used to point to the Emscripten SDK installation if it is not already
+set up in the environment:
+
+@code
+./jam.sh configure -sTARGET_OS=emscripten -sEMSDK=path/to/emsdk
+@endcode
+
+After building, run the resulting program with @c emrun. Make sure the
+Emscripten environment is active first by sourcing @c emsdk_env.sh (or
+@c emsdk_env.bat on Windows) from the SDK directory.
+
+@note WebAssembly builds require all objects to be heap-allocated. SIDE
+modules and MAIN modules have separate stacks that are not properly synced,
+so objects must not be allocated on the stack across module boundaries.
+The Emscripten flags @c -sASSERTIONS=2, @c -sSAFE_HEAP=1 and
+@c -sSTACK_OVERFLOW_CHECK are only supported with static linking.
+
 
 @section building Building
 
