@@ -442,11 +442,46 @@ void Path::addChord(const PointF& topLeft, const SizeF& size,
 }
 
 
+void Path::addPolyline(const PointF* points, std::size_t count)
+{
+    if (count == 0)
+        return;
+
+    moveTo(points[0]);
+    for (std::size_t i = 1; i < count; ++i)
+    {
+        lineTo(points[i]);
+    }
+}
+
+
+void Path::addPolygon(const PointF* points, std::size_t count)
+{
+    if (count == 0)
+        return;
+
+    moveTo(points[0]);
+    for (std::size_t i = 1; i < count; ++i)
+    {
+        lineTo(points[i]);
+    }
+    close();
+}
+
+
 void Path::transform(const Transform& tform)
 {
     detach();
 
     _pathData->transform(tform);
+}
+
+
+Path Path::toTransformed(const Transform& tform) const
+{
+    Path result = *this;
+    result.transform(tform);
+    return result;
 }
 
 

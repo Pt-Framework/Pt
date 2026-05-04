@@ -53,6 +53,7 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("AddPath",       *this, &PathTest::AddPath);
             registerMethod("ToPolygons",    *this, &PathTest::ToPolygons);
             registerMethod("Transform",     *this, &PathTest::Transform);
+            registerMethod("ToTransformed", *this, &PathTest::ToTransformed);
             registerMethod("BoundingRect",  *this, &PathTest::BoundingRect);
             registerMethod("ArcTo",         *this, &PathTest::ArcTo);
             registerMethod("AddRect",       *this, &PathTest::AddRect);
@@ -61,6 +62,8 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("AddArc",        *this, &PathTest::AddArc);
             registerMethod("AddRoundedRect", *this, &PathTest::AddRoundedRect);
             registerMethod("AddEllipse",    *this, &PathTest::AddEllipse);
+            registerMethod("AddPolyline",   *this, &PathTest::AddPolyline);
+            registerMethod("AddPolygon",    *this, &PathTest::AddPolygon);
         }
 
         void MoveTo()
@@ -473,6 +476,36 @@ class PathTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(it == path.end());
         }
 
+        void ToTransformed()
+        {
+            Path path;
+            path.moveTo(PointF(1.0, 2.0));
+            path.lineTo(PointF(4.0, 6.0));
+
+            Pt::Gfx::Transform t;
+            t.translate(3.0, 5.0);
+            Path transformedPath = path.toTransformed(t);
+
+            Path::Iterator it = transformedPath.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 4.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 7.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 7.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 11.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == transformedPath.end());
+
+            // Check original path is unmodified
+            Path::Iterator origIt = path.begin();
+            PT_UNIT_ASSERT(origIt->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(origIt->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(origIt->point(0).y(), 2.0);
+        }
+
         void BoundingRect()
         {
             // empty path returns null rect
@@ -858,6 +891,72 @@ class PathTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(r.top()    <= 20.0);
             PT_UNIT_ASSERT(r.right()  >= 90.0);
             PT_UNIT_ASSERT(r.bottom() >= 60.0);
+        }
+
+        void AddPolyline()
+        {
+            PointF pts[] = { PointF(1.0, 2.0), PointF(3.0, 4.0), PointF(5.0, 6.0) };
+            
+            Path path1;
+            path1.addPolyline(pts, 3);
+            
+            PT_UNIT_ASSERT(!path1.isEmpty());
+            PT_UNIT_ASSERT_NEAR(path1.currentPosition().x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(path1.currentPosition().y(), 6.0);
+
+            Path::Iterator it = path1.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 2.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 3.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 4.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 6.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path1.end());
+        }
+
+        void AddPolygon()
+        {
+            PointF pts[] = { PointF(1.0, 2.0), PointF(3.0, 4.0), PointF(5.0, 6.0) };
+            
+            Path path1;
+            path1.addPolygon(pts, 3);
+            
+            PT_UNIT_ASSERT(!path1.isEmpty());
+
+            Path::Iterator it = path1.begin();
+            PT_UNIT_ASSERT(it->type() == Path::MoveTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 2.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 3.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 4.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 5.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 6.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::LineTo);
+            PT_UNIT_ASSERT_NEAR(it->point(0).x(), 1.0);
+            PT_UNIT_ASSERT_NEAR(it->point(0).y(), 2.0);
+
+            ++it;
+            PT_UNIT_ASSERT(it->type() == Path::Close);
+
+            ++it;
+            PT_UNIT_ASSERT(it == path1.end());
         }
 
 };

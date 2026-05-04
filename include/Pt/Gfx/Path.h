@@ -178,9 +178,21 @@ class PT_GFX_API Path
         void addChord(const PointF& topLeft, const SizeF& size,
                       double degBegin, double degEnd);
 
+        /** @brief Adds a polyline as a new subpath.
+        */
+        void addPolyline(const PointF* points, std::size_t count);
+
+        /** @brief Adds a polygon as a new closed subpath.
+        */
+        void addPolygon(const PointF* points, std::size_t count);
+
         /** @brief Applies a transform to all path coordinates.
         */
         void transform(const Transform& transform);
+
+        /** @brief Returns a copy of the path with the transform applied.
+        */
+        Path toTransformed(const Transform& transform) const;
 
         /** @brief Flattens the path into polygons.
         */
