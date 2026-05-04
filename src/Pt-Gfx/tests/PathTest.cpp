@@ -64,6 +64,11 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("AddEllipse",    *this, &PathTest::AddEllipse);
             registerMethod("AddPolyline",   *this, &PathTest::AddPolyline);
             registerMethod("AddPolygon",    *this, &PathTest::AddPolygon);
+            registerMethod("ContainsEmpty",             *this, &PathTest::ContainsEmpty);
+            registerMethod("ContainsRect",              *this, &PathTest::ContainsRect);
+            registerMethod("ContainsEllipse",           *this, &PathTest::ContainsEllipse);
+            registerMethod("ContainsOnEdge",            *this, &PathTest::ContainsOnEdge);
+            registerMethod("ContainsConcentricCircles", *this, &PathTest::ContainsConcentricCircles);
         }
 
         void MoveTo()
@@ -957,6 +962,76 @@ class PathTest : public Pt::Unit::TestSuite
 
             ++it;
             PT_UNIT_ASSERT(it == path1.end());
+        }
+
+        void ContainsEmpty()
+        {
+            Path path;
+            PT_UNIT_ASSERT(!path.contains(PointF(0.0, 0.0)));
+            PT_UNIT_ASSERT(!path.contains(PointF(0.0, 0.0), FillRule::EvenOdd));
+        }
+
+        void ContainsRect()
+        {
+            // Rectangle from (10,10) to (90,90).
+            Path path;
+            path.addRect(RectF(PointF(10.0, 10.0), PointF(80.0, 80.0)));
+
+            // Clearly inside.
+            PT_UNIT_ASSERT( path.contains(PointF(50.0, 50.0), FillRule::NonZero));
+            PT_UNIT_ASSERT( path.contains(PointF(50.0, 50.0), FillRule::EvenOdd));
+
+            // Clearly outside.
+            PT_UNIT_ASSERT(!path.contains(PointF(0.0,  0.0),  FillRule::NonZero));
+            PT_UNIT_ASSERT(!path.contains(PointF(0.0,  0.0),  FillRule::EvenOdd));
+            PT_UNIT_ASSERT(!path.contains(PointF(100.0, 50.0), FillRule::NonZero));
+            PT_UNIT_ASSERT(!path.contains(PointF(50.0, 100.0), FillRule::NonZero));
+        }
+
+        void ContainsEllipse()
+        {
+            // Ellipse centred at (50,50), radii 40x30.
+            Path path;
+            path.addEllipse(PointF(10.0, 20.0), SizeF(80.0, 60.0));
+
+            // Centre: inside.
+            PT_UNIT_ASSERT( path.contains(PointF(50.0, 50.0), FillRule::NonZero));
+            // Far outside.
+            PT_UNIT_ASSERT(!path.contains(PointF(0.0,   0.0),  FillRule::NonZero));
+            PT_UNIT_ASSERT(!path.contains(PointF(200.0, 50.0), FillRule::NonZero));
+            // Just beyond the right edge (centre.x + rx + 1).
+            PT_UNIT_ASSERT(!path.contains(PointF(91.0,  50.0), FillRule::NonZero));
+        }
+
+        void ContainsOnEdge()
+        {
+            // Horizontal ray originates from a point exactly on a bottom edge.
+            // With a half-open [y0,y1) interval the point is outside.
+            Path path;
+            path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
+
+            // Bottom edge y=100 — half-open interval means outside.
+            PT_UNIT_ASSERT(!path.contains(PointF(50.0, 100.0), FillRule::NonZero));
+            // Top edge y=0 — inside by half-open convention.
+            PT_UNIT_ASSERT( path.contains(PointF(50.0, 0.0),   FillRule::NonZero));
+        }
+
+        void ContainsConcentricCircles()
+        {
+            // Two concentric ellipses wound in the same direction.
+            // NonZero: inner region winding=2 -> inside.
+            // EvenOdd: inner region crossings=2 (even) -> outside.
+            Path path;
+            path.addEllipse(PointF(10.0, 10.0), SizeF(80.0, 80.0));  // outer
+            path.addEllipse(PointF(30.0, 30.0), SizeF(40.0, 40.0));  // inner
+
+            // Point in the inner ring.
+            PT_UNIT_ASSERT( path.contains(PointF(50.0, 50.0), FillRule::NonZero));
+            PT_UNIT_ASSERT(!path.contains(PointF(50.0, 50.0), FillRule::EvenOdd));
+
+            // Point in the outer ring but outside the inner ellipse.
+            PT_UNIT_ASSERT( path.contains(PointF(15.0, 48.0), FillRule::NonZero));
+            PT_UNIT_ASSERT( path.contains(PointF(15.0, 48.0), FillRule::EvenOdd));
         }
 
 };

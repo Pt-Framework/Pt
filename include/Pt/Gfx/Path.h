@@ -31,6 +31,7 @@
 #define PT_GFX_PATH_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/FillRule.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Polygon.h>
@@ -113,6 +114,14 @@ class PT_GFX_API Path
         /** @brief Returns the bounding rectangle of the path.
         */
         RectF boundingRect() const;
+
+        /** @brief Returns true if the point lies inside the filled area of the path.
+
+            The test uses a horizontal ray cast from the point. The @a rule
+            parameter controls how overlapping subpaths are handled.
+            A point exactly on an upward-crossing edge is considered outside.
+        */
+        bool contains(const PointF& point, FillRule rule = FillRule::NonZero) const;
 
         /** @brief Returns the current drawing position.
         */

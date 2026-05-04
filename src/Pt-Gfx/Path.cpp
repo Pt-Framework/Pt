@@ -30,6 +30,7 @@
 #include <Pt/Gfx/Path.h>
 #include <cmath>
 #include <limits>
+#include <algorithm>
 
 namespace {
 
@@ -166,6 +167,367 @@ void appendArc(Pt::Gfx::Path& path,
     }
 }
 
+// Returns true if two doubles are close enough to be treated as equal.
+inline bool pathIsNear(double a, double b)
+{
+    return std::fabs(a - b) < 1e-10;
+}
+
+// Tests a single line segment [x0,y0]->[x1,y1] against a horizontal ray
+// cast from pt=(px,py) to the right.  Returns the signed winding delta
+// (+1 upward, -1 downward, 0 no crossing). Uses a half-open y-interval
+// so shared endpoints between adjacent segments are counted exactly once.
+inline int pathLineRayCast(double x0, double y0, double x1, double y1,
+                           double px, double py)
+{
+    const double dx = x1 - x0;
+    const double dy = y1 - y0;
+
+    if (dy > 0.0)
+    {
+        if (py >= y0 && py < y1)
+        {
+            const double ix = x0 + (py - y0) * dx / dy;
+            return (px >= ix) ? 1 : 0;
+        }
+    }
+    else if (dy < 0.0)
+    {
+        if (py >= y1 && py < y0)
+        {
+            const double ix = x0 + (py - y0) * dx / dy;
+            return (px >= ix) ? -1 : 0;
+        }
+    }
+
+    return 0;
+}
+
+// Numerically stable quadratic root solver.
+// Returns roots in [tMin, tMax], sorted ascending, count in return value.
+// Based on the stable form: q = -0.5*(b + sign(b)*sqrt(disc)); roots q/a, c/q.
+inline std::size_t pathQuadRoots(double dst[2],
+                                  double a, double b, double c,
+                                  double tMin, double tMax)
+{
+    const double disc = b * b - 4.0 * a * c;
+    if (disc < 0.0)
+        return 0;
+
+    const double s = std::sqrt(disc);
+    const double q = -0.5 * (b + (b >= 0.0 ? s : -s));
+
+    double t0 = (a != 0.0) ? q / a : tMax + 1.0;
+    double t1 = (q != 0.0) ? c / q : tMax + 1.0;
+
+    if (t0 > t1)
+        std::swap(t0, t1);
+
+    std::size_t n = 0;
+    if (t0 >= tMin && t0 <= tMax)
+        dst[n++] = t0;
+    if (t1 > t0 && t1 >= tMin && t1 <= tMax)
+        dst[n++] = t1;
+
+    return n;
+}
+
+// Cubic root solver using Cardano's formula.
+// Returns roots in [tMin, tMax], count in return value (0-3).
+std::size_t pathCubicRoots(double dst[3],
+                            double a, double b, double c, double d,
+                            double tMin, double tMax)
+{
+    // Degenerate to quadratic when leading coefficient is zero.
+    if (pathIsNear(a, 0.0))
+        return pathQuadRoots(dst, b, c, d, tMin, tMax);
+
+    const double k1Div3  = 1.0 / 3.0;
+    const double k1Div6  = 1.0 / 6.0;
+    const double k1Div9  = 1.0 / 9.0;
+    const double k1Div27 = 1.0 / 27.0;
+
+    // Normalize to x^3 + Ax^2 + Bx + C = 0.
+    const double na = b / a;
+    const double nb = c / a;
+    const double nc = d / a;
+
+    // Eliminate quadratic term via x = y - A/3.
+    const double sa = na * na;
+    const double p  = -k1Div9  * sa + k1Div3 * nb;
+    const double q  = (k1Div27 * sa - k1Div6 * nb) * na + 0.5 * nc;
+
+    const double p3 = p * p * p;
+    const double disc = q * q + p3;
+    const double sub  = -k1Div3 * na;
+
+    double roots[3];
+    std::size_t nRoots = 0;
+
+    if (pathIsNear(disc, 0.0))
+    {
+        if (pathIsNear(q, 0.0))
+        {
+            roots[0] = sub;
+            nRoots = 1;
+        }
+        else
+        {
+            const double u = std::cbrt(-q);
+            roots[0] = sub + 2.0 * u;
+            roots[1] = sub - u;
+            nRoots = 2;
+            if (roots[0] > roots[1])
+                std::swap(roots[0], roots[1]);
+        }
+    }
+    else if (disc < 0.0)
+    {
+        const double phi = k1Div3 * std::acos(-q / std::sqrt(-p3));
+        const double t   = 2.0 * std::sqrt(-p);
+        const double pi  = 3.14159265358979323846;
+
+        roots[0] = sub + t * std::cos(phi);
+        roots[1] = sub - t * std::cos(phi + pi / 3.0);
+        roots[2] = sub - t * std::cos(phi - pi / 3.0);
+        nRoots = 3;
+
+        if (roots[0] > roots[1]) std::swap(roots[0], roots[1]);
+        if (roots[1] > roots[2]) std::swap(roots[1], roots[2]);
+        if (roots[0] > roots[1]) std::swap(roots[0], roots[1]);
+    }
+    else
+    {
+        const double sqrtDisc = std::sqrt(disc);
+        const double u =  std::cbrt(sqrtDisc - q);
+        const double v = -std::cbrt(sqrtDisc + q);
+        roots[0] = sub + u + v;
+        nRoots = 1;
+    }
+
+    std::size_t n = 0;
+    for (std::size_t i = 0; i < nRoots; ++i)
+    {
+        if (roots[i] >= tMin && roots[i] <= tMax)
+            dst[n++] = roots[i];
+    }
+    return n;
+}
+
+// De Casteljau split of a quadratic at parameter t.
+inline void splitQuadAt(const Pt::Gfx::PointF p[3], double t,
+                         Pt::Gfx::PointF left[3], Pt::Gfx::PointF right[3])
+{
+    const Pt::Gfx::PointF p01(p[0].x() + t * (p[1].x() - p[0].x()),
+                               p[0].y() + t * (p[1].y() - p[0].y()));
+    const Pt::Gfx::PointF p12(p[1].x() + t * (p[2].x() - p[1].x()),
+                               p[1].y() + t * (p[2].y() - p[1].y()));
+    const Pt::Gfx::PointF pm( p01.x() + t * (p12.x() - p01.x()),
+                               p01.y() + t * (p12.y() - p01.y()));
+
+    left[0]  = p[0];  left[1]  = p01;  left[2]  = pm;
+    right[0] = pm;    right[1] = p12;  right[2] = p[2];
+}
+
+// De Casteljau split of a cubic at parameter t.
+inline void splitCubicAt(const Pt::Gfx::PointF p[4], double t,
+                          Pt::Gfx::PointF left[4], Pt::Gfx::PointF right[4])
+{
+    const Pt::Gfx::PointF p01(p[0].x() + t * (p[1].x() - p[0].x()),
+                               p[0].y() + t * (p[1].y() - p[0].y()));
+    const Pt::Gfx::PointF p12(p[1].x() + t * (p[2].x() - p[1].x()),
+                               p[1].y() + t * (p[2].y() - p[1].y()));
+    const Pt::Gfx::PointF p23(p[2].x() + t * (p[3].x() - p[2].x()),
+                               p[2].y() + t * (p[3].y() - p[2].y()));
+
+    const Pt::Gfx::PointF p012(p01.x() + t * (p12.x() - p01.x()),
+                                p01.y() + t * (p12.y() - p01.y()));
+    const Pt::Gfx::PointF p123(p12.x() + t * (p23.x() - p12.x()),
+                                p12.y() + t * (p23.y() - p12.y()));
+    const Pt::Gfx::PointF pm(  p012.x() + t * (p123.x() - p012.x()),
+                                p012.y() + t * (p123.y() - p012.y()));
+
+    left[0]  = p[0];   left[1]  = p01;   left[2]  = p012;  left[3]  = pm;
+    right[0] = pm;     right[1] = p123;  right[2] = p23;   right[3] = p[3];
+}
+
+// Ray-cast a single monotone (in Y) quadratic segment.
+// q[0] and q[2] must bracket px.y with q[0].y <= q[2].y (or vice versa).
+inline int pathMonotoneQuadRayCast(const Pt::Gfx::PointF q[3],
+                                    double px, double py)
+{
+    const double minY = std::min(q[0].y(), q[2].y());
+    const double maxY = std::max(q[0].y(), q[2].y());
+
+    if (py < minY || py >= maxY)
+        return 0;
+
+    const int dir = (q[0].y() < q[2].y()) ? 1 : -1;
+
+    // Quadratic coefficients for Y: A*t^2 + B*t + C - py = 0.
+    const double ay = q[2].y() - 2.0 * q[1].y() + q[0].y();
+    const double by = 2.0 * (q[1].y() - q[0].y());
+    const double cy = q[0].y() - py;
+
+    double ti[2];
+    double ix;
+    if (pathQuadRoots(ti, ay, by, cy, 0.0, 1.0) >= 1)
+    {
+        const double ax = q[2].x() - 2.0 * q[1].x() + q[0].x();
+        const double bx = 2.0 * (q[1].x() - q[0].x());
+        ix = (ax * ti[0] + bx) * ti[0] + q[0].x();
+    }
+    else
+    {
+        // Fallback: use endpoint whose y is nearest to py.
+        ix = (py - minY < maxY - py) ? q[0].x() : q[2].x();
+    }
+
+    return (px >= ix) ? dir : 0;
+}
+
+// Ray-cast a single monotone (in Y) cubic segment.
+inline int pathMonotoneCubicRayCast(const Pt::Gfx::PointF c[4],
+                                     double px, double py)
+{
+    const double minY = std::min(c[0].y(), c[3].y());
+    const double maxY = std::max(c[0].y(), c[3].y());
+
+    if (py < minY || py >= maxY)
+        return 0;
+
+    const int dir = (c[0].y() < c[3].y()) ? 1 : -1;
+
+    // Cubic coefficients: A*t^3 + B*t^2 + C*t + D - py = 0.
+    const double v1y = c[1].y() - c[0].y();
+    const double v2y = c[2].y() - c[1].y();
+    const double v3y = c[3].y() - c[2].y();
+    const double ay  = v3y - v2y - v2y + v1y;
+    const double by  = 3.0 * (v2y - v1y);
+    const double cy  = 3.0 * v1y;
+    const double dy  = c[0].y() - py;
+
+    double ti[3];
+    double ix;
+    if (pathCubicRoots(ti, ay, by, cy, dy, 0.0, 1.0) >= 1)
+    {
+        const double v1x = c[1].x() - c[0].x();
+        const double v2x = c[2].x() - c[1].x();
+        const double v3x = c[3].x() - c[2].x();
+        const double ax  = v3x - v2x - v2x + v1x;
+        const double bx  = 3.0 * (v2x - v1x);
+        const double cx  = 3.0 * v1x;
+        ix = ((ax * ti[0] + bx) * ti[0] + cx) * ti[0] + c[0].x();
+    }
+    else
+    {
+        ix = (py - minY < maxY - py) ? c[0].x() : c[3].x();
+    }
+
+    return (px >= ix) ? dir : 0;
+}
+
+// Ray-cast a full (possibly non-monotone) quadratic.
+// Splits at Y-extremum if present, then calls pathMonotoneQuadRayCast.
+int pathQuadHit(const Pt::Gfx::PointF p[3], double px, double py)
+{
+    const double minY = std::min({p[0].y(), p[1].y(), p[2].y()});
+    const double maxY = std::max({p[0].y(), p[1].y(), p[2].y()});
+
+    if (py < minY || py > maxY)
+        return 0;
+
+    // Degenerate: all y-values nearly equal -> treat as line.
+    if (pathIsNear(p[0].y(), p[1].y()) && pathIsNear(p[1].y(), p[2].y()))
+        return pathLineRayCast(p[0].x(), p[0].y(), p[2].x(), p[2].y(), px, py);
+
+    // Find Y-extremum parameter: t = (p0.y - p1.y) / (p0.y - 2*p1.y + p2.y).
+    const double denom = p[0].y() - 2.0 * p[1].y() + p[2].y();
+    int winding = 0;
+
+    if (!pathIsNear(denom, 0.0))
+    {
+        const double tExt = (p[0].y() - p[1].y()) / denom;
+        if (tExt > 0.0 && tExt < 1.0)
+        {
+            // Split into two monotone sub-quads on the stack.
+            Pt::Gfx::PointF left[3];
+            Pt::Gfx::PointF right[3];
+            splitQuadAt(p, tExt, left, right);
+            winding += pathMonotoneQuadRayCast(left,  px, py);
+            winding += pathMonotoneQuadRayCast(right, px, py);
+            return winding;
+        }
+    }
+
+    // Already monotone.
+    winding += pathMonotoneQuadRayCast(p, px, py);
+    return winding;
+}
+
+// Ray-cast a full (possibly non-monotone) cubic.
+// Splits at Y-extrema (up to 2), then calls pathMonotoneCubicRayCast.
+int pathCubicHit(const Pt::Gfx::PointF p[4], double px, double py)
+{
+    const double minY = std::min({p[0].y(), p[1].y(), p[2].y(), p[3].y()});
+    const double maxY = std::max({p[0].y(), p[1].y(), p[2].y(), p[3].y()});
+
+    if (py < minY || py > maxY)
+        return 0;
+
+    // Degenerate: all y-values nearly equal -> treat as line.
+    if (pathIsNear(p[0].y(), p[1].y()) &&
+        pathIsNear(p[1].y(), p[2].y()) &&
+        pathIsNear(p[2].y(), p[3].y()))
+    {
+        return pathLineRayCast(p[0].x(), p[0].y(), p[3].x(), p[3].y(), px, py);
+    }
+
+    // Derivative coefficients (quadratic): 3A*t^2 + 2B*t + C.
+    const double v1y = p[1].y() - p[0].y();
+    const double v2y = p[2].y() - p[1].y();
+    const double v3y = p[3].y() - p[2].y();
+    const double da  = 3.0 * (v3y - v2y - v2y + v1y);
+    const double db  = 6.0 * (v2y - v1y);
+    const double dc  = 3.0 * v1y;
+
+    double ts[2];
+    const std::size_t nExt = pathQuadRoots(ts, da, db, dc, 0.0, 1.0);
+
+    if (nExt == 0)
+        return pathMonotoneCubicRayCast(p, px, py);
+
+    int winding = 0;
+
+    if (nExt == 1)
+    {
+        Pt::Gfx::PointF left[4];
+        Pt::Gfx::PointF right[4];
+        splitCubicAt(p, ts[0], left, right);
+        winding += pathMonotoneCubicRayCast(left,  px, py);
+        winding += pathMonotoneCubicRayCast(right, px, py);
+    }
+    else
+    {
+        // Two extrema: split into three monotone segments.
+        Pt::Gfx::PointF seg0[4];
+        Pt::Gfx::PointF seg1[4];
+        Pt::Gfx::PointF seg2[4];
+        Pt::Gfx::PointF tmp[4];
+
+        splitCubicAt(p, ts[0], seg0, tmp);
+        // Reparametrise ts[1] relative to the right part.
+        const double t1rel = (ts[1] - ts[0]) / (1.0 - ts[0]);
+        splitCubicAt(tmp, t1rel, seg1, seg2);
+
+        winding += pathMonotoneCubicRayCast(seg0, px, py);
+        winding += pathMonotoneCubicRayCast(seg1, px, py);
+        winding += pathMonotoneCubicRayCast(seg2, px, py);
+    }
+
+    return winding;
+}
+
 } // namespace
 
 namespace Pt {
@@ -266,6 +628,100 @@ RectF Path::boundingRect() const
     }
 
     return RectF( PointF(minX, minY), PointF(maxX, maxY) );
+}
+
+
+bool Path::contains(const PointF& point, FillRule rule) const
+{
+    if( _pathData->isEmpty() )
+        return false;
+
+    const double px = point.x();
+    const double py = point.y();
+
+    int winding = 0;
+
+    bool hasMoveTo = false;
+    PointF start;
+    PointF lastPos;
+
+    for( PathIterator it = _pathData->begin(); it != _pathData->end(); ++it )
+    {
+        const PathElement& elem = *it;
+
+        switch( elem.type() )
+        {
+            case Path::MoveTo:
+            {
+                if( hasMoveTo )
+                {
+                    // Implicitly close the previous subpath.
+                    winding += pathLineRayCast(lastPos.x(), lastPos.y(),
+                                               start.x(),   start.y(),
+                                               px, py);
+                }
+
+                start   = elem.point(0);
+                lastPos = elem.point(0);
+                hasMoveTo = true;
+                break;
+            }
+
+            case Path::LineTo:
+            {
+                const PointF& to = elem.point(0);
+                winding += pathLineRayCast(elem.position().x(), elem.position().y(),
+                                           to.x(), to.y(),
+                                           px, py);
+                lastPos = to;
+                break;
+            }
+
+            case Path::QuadTo:
+            {
+                const Pt::Gfx::PointF q[3] = {
+                    elem.position(), elem.point(0), elem.point(1)
+                };
+                winding += pathQuadHit(q, px, py);
+                lastPos = elem.point(1);
+                break;
+            }
+
+            case Path::CubicTo:
+            {
+                const Pt::Gfx::PointF c[4] = {
+                    elem.position(), elem.point(0), elem.point(1), elem.point(2)
+                };
+                winding += pathCubicHit(c, px, py);
+                lastPos = elem.point(2);
+                break;
+            }
+
+            case Path::Close:
+            {
+                // PathData::close() already inserts a LineTo(_start) before the
+                // Close entry, so the closing segment has been counted above.
+                // Reset hasMoveTo so the next MoveTo does not add a duplicate
+                // implicit-close line.
+                hasMoveTo = false;
+                lastPos   = start;
+                break;
+            }
+        }
+    }
+
+    // Implicitly close any open trailing subpath.
+    if( hasMoveTo )
+    {
+        winding += pathLineRayCast(lastPos.x(), lastPos.y(),
+                                   start.x(),   start.y(),
+                                   px, py);
+    }
+
+    if( rule == FillRule::EvenOdd )
+        return (winding & 1) != 0;
+
+    return winding != 0;
 }
 
 
