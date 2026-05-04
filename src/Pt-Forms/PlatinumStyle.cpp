@@ -97,7 +97,7 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 {
     double inset = painter.scaling().alignContour( pen.size() ) / 2;
 
-    Gfx::Polygon polygon = toPolygon(rect, inset, corner);
+    Gfx::Polygon polygon = getPolygon(rect, inset, corner);
 
     painter.setPen(pen);
     painter.drawPolyline(&polygon[0], polygon.size());
@@ -112,14 +112,14 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
 {
     double inset = painter.scaling().toLogical(0.5);
 
-    Gfx::Polygon polygon = toPolygon(rect, inset, corner);
+    Gfx::Polygon polygon = getPolygon(rect, inset, corner);
 
     painter.setBrush(brush);
     painter.fillPolygon(&polygon[0], polygon.size());
 }
 
 
-Gfx::Polygon PlatinumRendererBase::toPolygon(const Gfx::RectF& rect, 
+Gfx::Polygon PlatinumRendererBase::getPolygon(const Gfx::RectF& rect, 
                                              double inset, double corner)
 {
     Gfx::Polygon polygon;    

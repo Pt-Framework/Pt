@@ -231,9 +231,16 @@ class PT_GFX_API Path
         */
         Path toTransformed(const Transform& transform) const;
 
-        /** @brief Flattens the path into polygons.
+        /** @brief Flattens one subpath into @a polygon starting at @a it.
+
+            Skips a leading MoveTo, then flattens elements into @a polygon
+            until a Close command, the next MoveTo, or end() is reached.
+            No closing point is appended. The caller must clear @a polygon
+            before each call.
+
+            @returns iterator to the start of the next subpath, or end().
         */
-        void toPolygons(std::vector<Polygon>& polygons, float tolerance = 0.25f) const;
+        Iterator getPolygon(Iterator it, Polygon& polygon, float tolerance = 0.25f) const;
 
     private:
         void detach();

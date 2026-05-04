@@ -65,7 +65,7 @@ class PlatinumRendererBase
                          double corner) const;
 
     private:
-        static Gfx::Polygon toPolygon(const Gfx::RectF& rect, double inset, double corner);
+        static Gfx::Polygon getPolygon(const Gfx::RectF& rect, double inset, double corner);
 };
 
 

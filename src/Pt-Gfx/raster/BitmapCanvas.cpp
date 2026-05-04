@@ -514,8 +514,7 @@ void BitmapCanvas::onFillEllipse(const PointF& topLeftF, const SizeF& sizeF)
 
 void BitmapCanvas::onSetPath(const Gfx::Path& path)
 {
-    _flatPath.clear();
-    path.toPolygons(_flatPath);
+    _currentPath = path;
 }
 
 
@@ -524,7 +523,7 @@ void BitmapCanvas::onDrawPath()
     if( ! _image )
         return;
 
-    strokePolygons(_flatPath, _currentClip);
+    strokePath(_currentPath, _currentClip);
 }
 
 
@@ -533,7 +532,7 @@ void BitmapCanvas::onFillPath()
     if( ! _image )
         return;
 
-    fillPolygons(_flatPath, _currentClip);
+    fillPath(_currentPath, _currentClip);
 }
 
 
@@ -542,9 +541,7 @@ void BitmapCanvas::onDrawPath(const Gfx::Path& path)
     if( ! _image )
         return;
 
-    std::vector<Polygon> flatPath;
-    path.toPolygons(flatPath);
-    strokePolygons(flatPath, _currentClip);
+    strokePath(path, _currentClip);
 }
 
 
@@ -553,9 +550,7 @@ void BitmapCanvas::onFillPath(const Gfx::Path& path)
     if( ! _image )
         return;
 
-    std::vector<Polygon> flatPath;
-    path.toPolygons(flatPath);
-    fillPolygons(flatPath, _currentClip);
+    fillPath(path, _currentClip);
 }
 
 
@@ -1078,38 +1073,41 @@ void BitmapCanvas::outputSpan( const PointI& topLeft, int x, int y, int width )
 }
 
 
-void BitmapCanvas::strokePolygons(const std::vector<Polygon>& polygons, const RectI& currentClip)
+void BitmapCanvas::strokePath(const Gfx::Path& path, const RectI& currentClip)
 {
-    for(const Polygon& poly : polygons)
+    Polygon polygon;
+    std::vector<PointI> points;
+
+    for(PathIterator it = path.begin(); it != path.end(); )
     {
-      std::size_t n = poly.size();
-      std::vector<PointI> points(n);
+        polygon.clear();
+        it = path.getPolygon(it, polygon);
 
-      for(size_t i = 0; i < n; ++i)
-      {
-          //Gfx::PointF pComp = scaling().toPhysical( _paint->origin() + poly.at(i) );
-          Gfx::PointF p = transform() * poly.at(i);
-          //Gfx::PointF p = poly.at(i);
+        std::size_t n = polygon.size();
+        if( n == 0 )
+            continue;
 
-          points[i] = PointI( Pt::lround(p.x() - 0.4999),
-                             Pt::lround(p.y() - 0.4999) );
-      }
+        points.resize(n);
+        for(std::size_t i = 0; i < n; ++i)
+        {
+            Gfx::PointF p = transform() * polygon.at(i);
+            points[i] = PointI( Pt::lround(p.x() - 0.4999),
+                                Pt::lround(p.y() - 0.4999) );
+        }
 
-      stroke(&points[0], points.size(), currentClip);
+        stroke(&points[0], points.size(), currentClip);
     }
 }
 
 
-void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const RectI& currentClip)
+void BitmapCanvas::fillPath(const Gfx::Path& path, const RectI& currentClip)
 {
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
-    EdgeSet::iterator currentPos;
-    
+
     // find unclipped origin coordinates
     PointI origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
 
-    // might as well create a new table here...
     globalEdgeTable.clear();
 
     int leftPosG = std::numeric_limits<int>::max();
@@ -1117,43 +1115,46 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
     int rightPosG = 0;
     int bottomPosG = 0;
 
-    for(const Polygon& poly : polygons)
+    Polygon polygon;
+    std::vector<PointI> points;
+
+    for(PathIterator it = path.begin(); it != path.end(); )
     {
-        std::size_t n = poly.size();
-        std::vector<PointI> points(n);
+        polygon.clear();
+        it = path.getPolygon(it, polygon);
 
-        for (size_t i = 0; i < n; ++i)
+        std::size_t n = polygon.size();
+        points.resize(n);
+
+        for(std::size_t i = 0; i < n; ++i)
         {
-            //Gfx::PointF pComp = scaling().toPhysical( _paint->origin() + poly.at(i) );
-            Gfx::PointF p = transform() * poly.at(i);
-            //Gfx::PointF p = poly.at(i);
-
+            Gfx::PointF p = transform() * polygon.at(i);
             points[i] = PointI( Pt::lround(p.x() - 0.4999),
-                               Pt::lround(p.y() - 0.4999) );
+                                Pt::lround(p.y() - 0.4999) );
         }
 
         ClipPolygon clipper;
         clipper(points, currentClip);
 
-        for(size_t n = 0; n < points.size(); ++n)
+        for(std::size_t j = 0; j < points.size(); ++j)
         {
-            const PointI& p = points[n];
+            const PointI& p = points[j];
             origin.setX( std::min( origin.x(), p.x() ) );
             origin.setY( std::min( origin.y(), p.y() ) );
 
             if( ! _isGradient )
-              continue;
+                continue;
 
-            if( p.y() < topPosG)
+            if( p.y() < topPosG )
                 topPosG = p.y();
 
-            if( p.y() > bottomPosG)
+            if( p.y() > bottomPosG )
                 bottomPosG = p.y();
 
-            if( p.x() < leftPosG)
+            if( p.x() < leftPosG )
                 leftPosG = p.x();
 
-            if( p.x() > rightPosG)
+            if( p.x() > rightPosG )
                 rightPosG = p.x();
         }
 
@@ -1168,10 +1169,10 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
         PointI* bottom = 0;
         PointI* top = 0;
 
-        for( size_t i = 1; i < points.size(); ++i )
+        for(std::size_t i = 1; i < points.size(); ++i)
         {
             // Find out which point is above and which is below
-            if ( points[i-1].y() > points[i].y() )
+            if( points[i-1].y() > points[i].y() )
             {
                 bottom = &( points[i-1] );
                 top = &( points[i] );
@@ -1183,10 +1184,10 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
             }
 
             // Omit horizontal edges, add others to global edge table. The GET
-            // is sorted by primarily by the edges ymin and secondarily by
+            // is sorted primarily by the edge's ymin and secondarily by
             // the x value of the edge
 
-            if( top->y() != bottom->y())
+            if( top->y() != bottom->y() )
             {
                 const int dy   = (int)bottom->y() - (int)top->y();
                 const int dx   = (int)bottom->x() - (int)top->x();
@@ -1196,7 +1197,7 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
                 edge.x    = (int)top->x();
 
                 // Bresenham stuff...
-                if (dx < 0)
+                if( dx < 0 )
                 {
                     edge.m = dx / dy;
                     edge.m1 = edge.m - 1;
@@ -1235,12 +1236,8 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
     for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
         activeEdgeTable.addEdge( *it );
 
-    ///ActiveEdgeTable last;
-
     do
     {
-        ///last = activeEdgeTable;
-
         // fill every even span, starting at even (even-odd-rule)
         outputEdges(activeEdgeTable, origin, scanLine);
 
@@ -1260,10 +1257,6 @@ void BitmapCanvas::fillPolygons(const std::vector<Polygon>& polygons, const Rect
         activeEdgeTable.sort();
     }
     while( ! activeEdgeTable.empty() );
-
-    //last.update();
-
-    //outputEdges(last, origin, scanLine);
 }
 
 

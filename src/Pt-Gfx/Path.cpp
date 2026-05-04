@@ -1340,27 +1340,35 @@ Path Path::toTransformed(const Transform& tform) const
 }
 
 
-void Path::toPolygons(std::vector<Polygon>& polygons, float tolerance) const
+PathIterator Path::getPolygon(PathIterator it, Polygon& polygon, float tolerance) const
 {
-    Polygon polygon;
+    PathIterator last = _pathData->end();
 
-    for(PathIterator it = _pathData->begin(); it != _pathData->end(); ++it)
+    // Skip the leading MoveTo that begins this subpath
+    if( it != last && it->type() == Path::MoveTo )
+        ++it;
+
+    while( it != last )
     {
         const PathElement& elem = *it;
 
         if( elem.type() == Path::Close )
         {
-            polygons.push_back(polygon);
-            polygon.clear();
+            ++it;
+            return it;
         }
-        else if( elem.type() != Path::MoveTo )
+
+        if( elem.type() == Path::MoveTo )
         {
-            elem.flatten(polygon, tolerance);
+            // Next subpath begins — do not consume
+            return it;
         }
+
+        elem.flatten(polygon, tolerance);
+        ++it;
     }
 
-    if( ! polygon.empty() )
-        polygon.push_back( polygon.at(0) );
+    return it;
 }
 
 

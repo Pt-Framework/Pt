@@ -201,9 +201,9 @@ class BitmapCanvas : public Canvas
     void outputSpan( const PointI& topLeft, int x, int y, int width );
 
   private:
-    void strokePolygons(const std::vector<Polygon>& polygons, const RectI& currentClip);
+    void strokePath(const Gfx::Path& path, const RectI& currentClip);
 
-    void fillPolygons(const std::vector<Polygon>& polygons, const RectI& currentClip);
+    void fillPath(const Gfx::Path& path, const RectI& currentClip);
 
     void strokeEllipse( const PointI& topLeft, const SizeI& size, const RectI& currentClip);
 
@@ -296,7 +296,7 @@ class BitmapCanvas : public Canvas
         RectI                   _currentClip;
         bool                    _hasClip;
 
-        std::vector<Polygon>    _flatPath;
+        Gfx::Path               _currentPath;
 
         FreeTypeRenderer        _fontRenderer;
 };

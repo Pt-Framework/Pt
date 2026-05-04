@@ -50,7 +50,7 @@ class PathTest : public Pt::Unit::TestSuite
             registerMethod("Clear",      *this, &PathTest::Clear);
             registerMethod("Size",       *this, &PathTest::Size);
             registerMethod("AddPath",       *this, &PathTest::AddPath);
-            registerMethod("ToPolygons",    *this, &PathTest::ToPolygons);
+            registerMethod("ToPolygon",     *this, &PathTest::ToPolygon);
             registerMethod("Transform",     *this, &PathTest::Transform);
             registerMethod("ToTransformed", *this, &PathTest::ToTransformed);
             registerMethod("BoundingRect",  *this, &PathTest::BoundingRect);
@@ -360,45 +360,52 @@ class PathTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(it == path.end());
         }
 
-        void ToPolygons()
+        void ToPolygon()
         {
             {
+                // Closed triangle: getPolygon returns the 4 flattened points
+                // (start + 2 explicit corners + closing lineTo back to start)
                 Path path;
                 path.moveTo(PointF(0.0, 0.0));
                 path.lineTo(PointF(4.0, 0.0));
                 path.lineTo(PointF(4.0, 3.0));
                 path.close();
 
-                std::vector<Polygon> polygons;
-                path.toPolygons(polygons);
+                Polygon poly;
+                PathIterator it = path.getPolygon(path.begin(), poly);
 
-                PT_UNIT_ASSERT_EQUAL(polygons.size(), std::size_t(1));
-
-                const Polygon& tri = polygons[0];
-                PT_UNIT_ASSERT_EQUAL(tri.size(), std::size_t(4));
-                PT_UNIT_ASSERT_NEAR(tri[0].x(), 0.0);
-                PT_UNIT_ASSERT_NEAR(tri[0].y(), 0.0);
-                PT_UNIT_ASSERT_NEAR(tri[1].x(), 4.0);
-                PT_UNIT_ASSERT_NEAR(tri[1].y(), 0.0);
-                PT_UNIT_ASSERT_NEAR(tri[2].x(), 4.0);
-                PT_UNIT_ASSERT_NEAR(tri[2].y(), 3.0);
-                PT_UNIT_ASSERT_NEAR(tri[3].x(), 0.0);
-                PT_UNIT_ASSERT_NEAR(tri[3].y(), 0.0);
+                PT_UNIT_ASSERT(it == path.end());
+                PT_UNIT_ASSERT_EQUAL(poly.size(), std::size_t(4));
+                PT_UNIT_ASSERT_NEAR(poly[0].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(poly[0].y(), 0.0);
+                PT_UNIT_ASSERT_NEAR(poly[1].x(), 4.0);
+                PT_UNIT_ASSERT_NEAR(poly[1].y(), 0.0);
+                PT_UNIT_ASSERT_NEAR(poly[2].x(), 4.0);
+                PT_UNIT_ASSERT_NEAR(poly[2].y(), 3.0);
+                PT_UNIT_ASSERT_NEAR(poly[3].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(poly[3].y(), 0.0);
             }
 
             {
+                // Unclosed path: getPolygon returns the open polyline
                 Path path;
                 path.moveTo(PointF(0.0, 0.0));
                 path.lineTo(PointF(2.0, 0.0));
                 path.lineTo(PointF(2.0, 2.0));
 
-                std::vector<Polygon> polygons;
-                path.toPolygons(polygons);
+                Polygon poly;
+                PathIterator it = path.getPolygon(path.begin(), poly);
 
-                PT_UNIT_ASSERT_EQUAL(polygons.size(), std::size_t(0));
+                PT_UNIT_ASSERT(it == path.end());
+                PT_UNIT_ASSERT_EQUAL(poly.size(), std::size_t(3));
+                PT_UNIT_ASSERT_NEAR(poly[0].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(poly[1].x(), 2.0);
+                PT_UNIT_ASSERT_NEAR(poly[2].x(), 2.0);
+                PT_UNIT_ASSERT_NEAR(poly[2].y(), 2.0);
             }
 
             {
+                // Two closed subpaths: iterate with getPolygon
                 Path path;
                 path.moveTo(PointF(0.0, 0.0));
                 path.lineTo(PointF(1.0, 0.0));
@@ -410,20 +417,22 @@ class PathTest : public Pt::Unit::TestSuite
                 path.lineTo(PointF(5.0, 5.0));
                 path.close();
 
-                std::vector<Polygon> polygons;
-                path.toPolygons(polygons);
+                Polygon poly;
 
-                PT_UNIT_ASSERT_EQUAL(polygons.size(), std::size_t(2));
+                PathIterator it = path.getPolygon(path.begin(), poly);
+                PT_UNIT_ASSERT_EQUAL(poly.size(), std::size_t(3));
+                PT_UNIT_ASSERT_NEAR(poly[0].x(), 0.0);
+                PT_UNIT_ASSERT_NEAR(poly[1].x(), 1.0);
+                PT_UNIT_ASSERT_NEAR(poly[2].x(), 0.0);
 
-                PT_UNIT_ASSERT_EQUAL(polygons[0].size(), std::size_t(3));
-                PT_UNIT_ASSERT_NEAR(polygons[0][0].x(), 0.0);
-                PT_UNIT_ASSERT_NEAR(polygons[0][1].x(), 1.0);
-                PT_UNIT_ASSERT_NEAR(polygons[0][2].x(), 0.0);
+                poly.clear();
+                it = path.getPolygon(it, poly);
+                PT_UNIT_ASSERT_EQUAL(poly.size(), std::size_t(3));
+                PT_UNIT_ASSERT_NEAR(poly[0].x(), 5.0);
+                PT_UNIT_ASSERT_NEAR(poly[1].x(), 6.0);
+                PT_UNIT_ASSERT_NEAR(poly[2].x(), 5.0);
 
-                PT_UNIT_ASSERT_EQUAL(polygons[1].size(), std::size_t(3));
-                PT_UNIT_ASSERT_NEAR(polygons[1][0].x(), 5.0);
-                PT_UNIT_ASSERT_NEAR(polygons[1][1].x(), 6.0);
-                PT_UNIT_ASSERT_NEAR(polygons[1][2].x(), 5.0);
+                PT_UNIT_ASSERT(it == path.end());
             }
         }
 
