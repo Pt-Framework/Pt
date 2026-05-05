@@ -110,7 +110,7 @@ class PT_FORMS_API MenuBaseItem : public Control
 
         virtual void onInvalidate();
 
-        virtual Pt::Gfx::SizeF onMeasure(PaintContext& ctx, const Pt::Forms::SizePolicy& policy);
+        virtual Pt::Gfx::SizeF onMeasure(const Pt::Forms::SizePolicy& policy);
 
         virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& updateRect);
 

@@ -181,13 +181,13 @@ class PT_FORMS_API Control : public View
         void relayout();
 
     protected:
-        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
        
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
 
-        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
     public:
         // outer spacing

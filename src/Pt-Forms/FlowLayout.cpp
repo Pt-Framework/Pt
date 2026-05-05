@@ -79,27 +79,27 @@ void FlowLayout::setReverse(bool b)
 }
 
 
-Gfx::SizeF FlowLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
 {
-    Base::onMeasure(ctx, policy);
+    Base::onMeasure(policy);
 
     switch(_direction)
     {
         default:
         case Left:
-            return onMeasureHorizontal(ctx, policy);
+            return onMeasureHorizontal(policy);
             break;
 
         case Right:
-            return onMeasureHorizontal(ctx, policy);
+            return onMeasureHorizontal(policy);
             break;
 
         case Top:
-            return onMeasureVertical(ctx, policy);
+            return onMeasureVertical(policy);
             break;
 
         case Bottom:
-            return onMeasureVertical(ctx, policy);
+            return onMeasureVertical(policy);
             break;
     }
 
@@ -107,9 +107,9 @@ Gfx::SizeF FlowLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void FlowLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void FlowLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     switch(_direction)
     {
@@ -133,7 +133,7 @@ void FlowLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
 }
 
 
-Gfx::SizeF FlowLayout::onMeasureHorizontal(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
     std::vector<Control*>::const_iterator it = controls().begin();
     std::vector<Control*>::const_iterator end = controls().end();
@@ -171,7 +171,7 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(PaintContext& ctx, const SizePolicy& 
 }
 
 
-Gfx::SizeF FlowLayout::onMeasureVertical(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 {
     std::vector<Control*>::const_iterator it = controls().begin();
     std::vector<Control*>::const_iterator end = controls().end();

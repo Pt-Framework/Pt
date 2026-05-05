@@ -325,11 +325,11 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-Gfx::SizeF PushButton::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
     const Gfx::Scaling& scal = this->scaling();
 
-    Painter _painter( ctx );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     _textMetrics = _painter.textMetrics( text() );
@@ -367,9 +367,9 @@ Gfx::SizeF PushButton::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void PushButton::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void PushButton::onLayout(const Gfx::RectF& rect)
 {    
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     const Gfx::Scaling& scaling = this->scaling();
 

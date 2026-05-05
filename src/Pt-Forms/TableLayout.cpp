@@ -125,7 +125,7 @@ void TableLayout::setRow(std::size_t row, SizeMode mode, double size)
 }
 
 
-Gfx::SizeF TableLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width() - padding().leftRight();
     double itemsHeight = policy.height() - padding().topBottom();
@@ -187,9 +187,9 @@ Gfx::SizeF TableLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void TableLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void TableLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     //
     // calculate row sizes

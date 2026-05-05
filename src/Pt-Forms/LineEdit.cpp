@@ -323,7 +323,7 @@ void LineEdit::setRenderer(LineEditRenderer* renderer)
 }
 
 
-Gfx::SizeF LineEdit::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
     double itemsHeight = _font.size() * 2.5;
@@ -333,11 +333,11 @@ Gfx::SizeF LineEdit::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void LineEdit::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void LineEdit::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
-    Painter painter(ctx);
+    Painter painter(surface());
     painter.setFont(_font);
 
     if( _editor.isEmpty() && ! hasFocus() )

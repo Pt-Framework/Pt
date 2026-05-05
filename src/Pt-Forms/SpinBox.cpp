@@ -571,7 +571,7 @@ void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 }
 
 
-Gfx::SizeF SpinBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
     double itemsHeight = _font.size() * 2.5;
@@ -584,9 +584,9 @@ Gfx::SizeF SpinBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void SpinBox::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void SpinBox::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     if( ! _renderer )
     {
@@ -611,7 +611,7 @@ void SpinBox::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
     Gfx::SizeF editSize = _textBox.size();
     editSize.subWidth(5);  // TODO: cursor
 
-    Painter _painter( ctx );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     _editor.setPosition( _textBox.topLeft() );

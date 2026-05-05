@@ -125,9 +125,12 @@ void PainterBase::finish()
 
     if(_surface)
     {
-        _surface->finish();
+        PaintSurface* surface = _surface;
+        
         _surface->detachPainter(*this);
         _surface = 0;
+
+        surface->finish();
     }
 
     if(_context)

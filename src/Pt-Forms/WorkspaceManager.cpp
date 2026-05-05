@@ -466,12 +466,11 @@ void WorkspaceManager::onProcessLayoutEvent(const LayoutEvent& ev)
 
 void WorkspaceManager::onLayoutEvent(const LayoutEvent& ev)
 {
-    PaintContext ctx( _parent->surface() );
-    onLayout( ctx, ev.rect() );
+    onLayout( ev.rect() );
 }
 
 
-void WorkspaceManager::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void WorkspaceManager::onLayout(const Gfx::RectF& rect)
 {
     std::map<Window*, Gfx::RectF>::iterator wit;
     for(wit = _autoCenter.begin(); wit != _autoCenter.end(); ++wit)

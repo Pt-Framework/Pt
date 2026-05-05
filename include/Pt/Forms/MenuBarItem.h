@@ -50,7 +50,7 @@ class PT_FORMS_API MenuBarItem : public MenuMenuItem
         virtual ~MenuBarItem();
 
     protected:
-        virtual Pt::Gfx::SizeF onMeasure(PaintContext& ctx, const Pt::Forms::SizePolicy& policy);
+        virtual Pt::Gfx::SizeF onMeasure(const Pt::Forms::SizePolicy& policy);
 
         virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& updateRect);
 };

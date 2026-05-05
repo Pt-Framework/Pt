@@ -94,7 +94,7 @@ class PT_FORMS_API ProgressBar : public Control
         void setRenderer(ProgressBarRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
 

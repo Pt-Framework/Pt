@@ -272,9 +272,9 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 }
 
 
-Gfx::SizeF ListBoxItem::onMeasure(PaintContext& ctx, const SizePolicy& p)
+Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
-    Painter _painter( ctx );
+    Painter _painter( surface() );
     _painter.setFont(_font);
 
     Gfx::TextMetrics tm = _painter.textMetrics(_text);
@@ -601,7 +601,7 @@ int ListBox::maximumY() const
 }
 
 
-Gfx::SizeF ListBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 {
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();
     double vspace = padding().topBottom() + _scrollView.margin().topBottom();
@@ -622,9 +622,9 @@ Gfx::SizeF ListBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void ListBox::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void ListBox::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
     
     Gfx::PointF pos(padding().left() + _scrollView.margin().left(), 
                     padding().top()  + _scrollView.margin().top());

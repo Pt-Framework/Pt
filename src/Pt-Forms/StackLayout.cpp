@@ -131,9 +131,9 @@ void StackLayout::setCurrent(std::size_t n)
 }
 
 
-Gfx::SizeF StackLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF StackLayout::onMeasure(const SizePolicy& policy)
 {
-    Base::onMeasure(ctx, policy);
+    Base::onMeasure(policy);
 
     Gfx::SizeF s;
 
@@ -154,9 +154,9 @@ Gfx::SizeF StackLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void StackLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void StackLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     Control* control = controlAt(_current);
 

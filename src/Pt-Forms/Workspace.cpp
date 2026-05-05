@@ -179,7 +179,7 @@ void Workspace::onRelayoutRequest(WorkspaceManager& wm)
 }
 
 
-Gfx::SizeF Workspace::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF Workspace::onMeasure(const SizePolicy& policy)
 {
     if(_content)
         return _content->measure(policy);
@@ -198,11 +198,11 @@ void Workspace::onProcessLayoutEvent(const LayoutEvent& ev)
 }
 
 
-void Workspace::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void Workspace::onLayout(const Gfx::RectF& rect)
 {
     //std::clog << "WORKSPACE LAYOUT: " << rect.width() << "x" << rect.height() << std::endl;
 
-    Control::onLayout(ctx, rect);
+    Control::onLayout(rect);
 
     if(_content)
     {

@@ -81,7 +81,7 @@ void DockingLayout::onRemoveControl(Control& control)
 }
 
 
-Gfx::SizeF DockingLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF fillSize = policy.size();
     fillSize.subWidth( padding().leftRight() );
@@ -211,9 +211,9 @@ Gfx::SizeF DockingLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void DockingLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void DockingLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     std::vector<Control*>::const_iterator it = this->controls().begin();
     std::vector<Control*>::const_iterator end = this->controls().end();

@@ -222,11 +222,11 @@ void CheckBox::onCanceled()
 }
 
 
-Gfx::SizeF CheckBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
     //Gfx::TextMetrics tm = PixmapSurface::textMetrics( _font, text() );
 
-    Painter painter( ctx );
+    Painter painter( surface() );
     painter.setFont(_font);
     Gfx::TextMetrics tm = painter.textMetrics( text() );
     Gfx::FontMetrics fm = painter.fontMetrics();

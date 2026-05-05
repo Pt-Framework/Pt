@@ -198,7 +198,7 @@ void ScrollLayout::setContentMode(SizePolicy::Mode horizontal,
 }
 
 
-Gfx::SizeF ScrollLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 {
     std::vector<Control*>::const_iterator it;
     for(it = controls().begin() ; it != controls().end(); ++it)
@@ -236,9 +236,9 @@ Gfx::SizeF ScrollLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void ScrollLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void ScrollLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
 #ifdef PT_SCROLL_LAYOUT_OLD
     std::vector<Control*>::const_iterator it;

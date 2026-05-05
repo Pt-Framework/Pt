@@ -66,7 +66,7 @@ void GridLayout::removeItem(Control& control)
 }
 
 
-Gfx::SizeF GridLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF contentSize;
 
@@ -74,11 +74,11 @@ Gfx::SizeF GridLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
     {
         default:
         case Vertical:
-            contentSize = onMeasureVertical(ctx, policy);
+            contentSize = onMeasureVertical(policy);
             break;
 
         case Horizontal:
-            contentSize = onMeasureHorizontal(ctx, policy);
+            contentSize = onMeasureHorizontal(policy);
             break;
     }
 
@@ -86,7 +86,7 @@ Gfx::SizeF GridLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-Gfx::SizeF GridLayout::onMeasureVertical(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight();
     double itemsHeight = policy.size().height() - padding().topBottom();
@@ -166,7 +166,7 @@ Gfx::SizeF GridLayout::onMeasureVertical(PaintContext& ctx, const SizePolicy& po
 }
 
 
-Gfx::SizeF GridLayout::onMeasureHorizontal(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight();
     double itemsHeight = policy.size().height() - padding().topBottom();
@@ -246,9 +246,9 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(PaintContext& ctx, const SizePolicy& 
 }
 
 
-void GridLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void GridLayout::onLayout(const Gfx::RectF& rect)
 {
-    Layout::onLayout(ctx, rect);
+    Layout::onLayout(rect);
 
     //
     // determine the cell size from maximum item width and height

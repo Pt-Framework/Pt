@@ -110,9 +110,9 @@ class PT_FORMS_API TabBar : public Control
     protected:
         virtual void onInvalidate();
 
-        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
@@ -168,9 +168,9 @@ class PT_FORMS_API TabView : public Control
     protected:
         virtual void onInvalidate();
 
-        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 

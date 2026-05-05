@@ -114,7 +114,7 @@ class PT_FORMS_API ListBoxItem : public Button
         virtual void onCanceled();
 
     protected:
-        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& p);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
         virtual void onInvalidate();
     
@@ -231,9 +231,9 @@ class PT_FORMS_API ListBox : public Control
     
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
-        virtual Gfx::SizeF onMeasure(PaintContext& ctx, const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(PaintContext& ctx, const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
     
     private:
         ScrollView                _scrollView;

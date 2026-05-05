@@ -258,7 +258,7 @@ void ProgressBar::setRenderer(ProgressBarRenderer* renderer)
 }
 
 
-Gfx::SizeF ProgressBar::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
 

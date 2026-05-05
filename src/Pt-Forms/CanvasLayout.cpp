@@ -72,9 +72,9 @@ void CanvasLayout::onRemoveControl(Control& control)
 }
 
 
-Gfx::SizeF CanvasLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF CanvasLayout::onMeasure(const SizePolicy& policy)
 {
-    Base::onMeasure(ctx, policy);
+    Base::onMeasure(policy);
 
     Gfx::SizeF size;
 
@@ -112,9 +112,9 @@ Gfx::SizeF CanvasLayout::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void CanvasLayout::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void CanvasLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     ItemMap::iterator it;
     for(it = _items.begin(); it != _items.end(); ++it)

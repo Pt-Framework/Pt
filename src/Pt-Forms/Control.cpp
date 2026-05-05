@@ -711,8 +711,7 @@ Gfx::SizeF Control::measure(const SizePolicy& policy)
         }
         else
         {
-            PaintContext ctx( surface() );
-            _preferredSize = onMeasure(ctx, contentPolicy);
+            _preferredSize = onMeasure(contentPolicy);
         }
 
         // use fixed height, if size mode is fixed
@@ -743,7 +742,7 @@ Gfx::SizeF Control::measure(const SizePolicy& policy)
 }
 
 
-Gfx::SizeF Control::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF Control::onMeasure(const SizePolicy& policy)
 {
    return Gfx::SizeF(0, 0);
 }
@@ -791,15 +790,14 @@ void Control::onProcessLayoutEvent(const LayoutEvent& ev)
 
 void Control::onLayoutEvent(const LayoutEvent& ev)
 {
-    PaintContext ctx( surface() );
-    onLayout( ctx, ev.rect() );
+    onLayout( ev.rect() );
 
      // TODO: repaint only if required in derived class
      repaint();
 }
 
 
-void Control::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void Control::onLayout(const Gfx::RectF& rect)
 {
 }
 

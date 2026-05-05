@@ -393,7 +393,7 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
 {
     // TODO: width of widest item?
     double itemsWidth = policy.width();
@@ -404,11 +404,11 @@ Gfx::SizeF ComboBox::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void ComboBox::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void ComboBox::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
-    Painter painter(ctx);
+    Painter painter(surface());
     painter.setFont(_font);
 
     _editor.layout(painter, _line);

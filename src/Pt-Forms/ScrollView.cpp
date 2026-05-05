@@ -140,7 +140,7 @@ void ScrollView::onScrolledY(double n)
 }
 
 
-Gfx::SizeF ScrollView::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 {   
     double width = policy.size().width();
     double height = policy.size().height();
@@ -179,9 +179,9 @@ Gfx::SizeF ScrollView::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void ScrollView::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void ScrollView::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout(ctx, rect);
+    Base::onLayout(rect);
 
     _scrollLayout.move( Gfx::PointF(0, 0) );
     _scrollLayout.resize( rect.size() );

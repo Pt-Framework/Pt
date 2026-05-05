@@ -200,8 +200,7 @@ Gfx::SizeF Form::onProcessMeasure()
 
 void Form::onProcessLayout(const Gfx::RectF& rect)
 {
-    PaintContext ctx( surface() );
-    onLayout(ctx, rect);
+    onLayout(rect);
 
     LayoutEvent lev(*_mainControl, bounds());
     Application::instance().commitEvent(lev);
@@ -210,12 +209,11 @@ void Form::onProcessLayout(const Gfx::RectF& rect)
 
 Gfx::SizeF Form::measure(const SizePolicy& policy)
 {
-    PaintContext ctx( surface() );
-    return onMeasure(ctx, policy);
+    return onMeasure(policy);
 }
 
 
-Gfx::SizeF Form::onMeasure(PaintContext& ctx, const SizePolicy& policy)
+Gfx::SizeF Form::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF size = _mainControl ? _mainControl->measure(policy)
                                    : policy.size();
@@ -223,7 +221,7 @@ Gfx::SizeF Form::onMeasure(PaintContext& ctx, const SizePolicy& policy)
 }
 
 
-void Form::onLayout(PaintContext& ctx, const Gfx::RectF& rect)
+void Form::onLayout(const Gfx::RectF& rect)
 {
     if( _mainControl )
     {

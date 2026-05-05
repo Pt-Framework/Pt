@@ -50,7 +50,6 @@ namespace Pt {
 
 namespace Forms {
 
-class PaintContext;
 class Painter;
 class Pixmap;
 class StyleOptions;
@@ -1075,11 +1074,11 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
                     const Gfx::Brush& foreground,
                     const Gfx::Pen& contour) const;
 
-        Gfx::SizeF measureTabs(PaintContext& ctx,
+        Gfx::SizeF measureTabs(PaintSurface& surface,
                                const std::vector<TabItem>& tabs,
                                const Gfx::Font& font) const;
 
-        void layoutTabs(PaintContext& ctx,
+        void layoutTabs(PaintSurface& surface,
                         std::vector<TabItem>& tabs,
                         const Gfx::RectF& rect, 
                         const Gfx::Font& font) const;
@@ -1117,11 +1116,11 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
                               const Gfx::Brush& foreground,
                               const Gfx::Pen& contour) const = 0;
 
-        virtual Gfx::SizeF onMeasureTabs(PaintContext& ctx,
+        virtual Gfx::SizeF onMeasureTabs(PaintSurface& surface,
                                          const std::vector<TabItem>& tabs,
                                          const Gfx::Font& font) const = 0;
 
-        virtual void onLayoutTabs(PaintContext& ctx,
+        virtual void onLayoutTabs(PaintSurface& surface,
                                   std::vector<TabItem>& tabs,
                                   const Gfx::RectF& rect, 
                                   const Gfx::Font& font) const = 0;
