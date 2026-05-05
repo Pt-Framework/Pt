@@ -138,7 +138,7 @@ void PainterBase::finish()
         _context->detachPainter(*this);
         _context = 0;
     }
-}
+}  
 
 
 const Paint& PainterBase::paint() const
