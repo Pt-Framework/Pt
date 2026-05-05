@@ -8,8 +8,7 @@ The Pt::Gfx drawing API provides the high-level types used to render 2D
 graphics, text, images and bitmaps on paint surfaces and off-screen bitmaps.
 
 For detailed documentation with examples, read:
-- `doc/groups/drawing.dox` — Drawing concepts, painter lifecycle and API boundaries
-- `doc/pages/drawing.page` — Composed drawing overview page
+- `doc/groups/pt-gfx-drawing.dox` — Drawing concepts, painter lifecycle and API boundaries
 - `include/Pt/Gfx/Painter.h` — Concrete painter entry point
 - `include/Pt/Gfx/PainterBase.h` — Shared drawing operations and paint state
 - `include/Pt/Gfx/PaintSurface.h` — Abstract drawing target

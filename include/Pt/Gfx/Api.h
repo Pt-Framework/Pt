@@ -171,8 +171,6 @@ class Argb32;
 class Argb32Pixel;
 class Argb32ConstPixel;
 
-/** @brief ARGB-32 image.
-*/
 typedef BasicImage<Argb32> Argb32Image;
 
 /** @brief ARGB-32 const image.
@@ -267,8 +265,6 @@ class Rgb32;
 class Rgb32Pixel;
 class Rgb32ConstPixel;
 
-/** @brief RGB-32 image.
-*/
 typedef BasicImage<Rgb32> Rgb32Image;
 
 /** @brief RGB-32 const image.

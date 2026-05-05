@@ -62,7 +62,7 @@ class PaintSurface;
 class PaintContext;
 
 /** @brief Base class for drawing commands and paint state.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %PainterBase stores the state used by drawing operations and forwards the
     resulting commands to a %Canvas supplied by a %PaintSurface or %PaintContext.

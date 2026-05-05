@@ -45,7 +45,7 @@ namespace Gfx {
 class PaintContext;
 
 /** @brief Abstract target for drawing operations.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %PaintSurface supplies the backend-specific resources needed for painting.
     It reports target format, size and scaling, creates a %Canvas on demand and

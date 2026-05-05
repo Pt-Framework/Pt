@@ -43,7 +43,7 @@ class BrushData;
 class Bitmap;
 
 /** @brief Color stop for a gradient brush.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 */
 class ColorStop
 {
@@ -72,7 +72,7 @@ class ColorStop
 
 
 /** @brief Ordered collection of gradient color stops.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 */
 class ColorStops
 {
@@ -135,7 +135,7 @@ class ColorStops
 
 
 /** @brief Fill description for shapes and text.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     Brush describes how closed geometry is filled. It can represent solid
     colors, textures and gradients with absolute or relative coordinates so

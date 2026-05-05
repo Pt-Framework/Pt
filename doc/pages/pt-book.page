@@ -83,11 +83,11 @@
 @section pt_gfx Graphics
 
 <ul>
-    <li> @ref drawing </li>
+    <li> @ref Pt-Gfx-Drawing-Page </li>
     <ul>
-        <li> @ref drawing_Painter </li>
-        <li> @ref drawing_paths </li>
-        <li> @ref drawing_text </li>
+        <li> @ref Pt-Gfx-Drawing-Page-Painter </li>
+        <li> @ref Pt-Gfx-Drawing-Page-Paths </li>
+        <li> @ref Pt-Gfx-Drawing-Page-Text </li>
     </ul>
 </ul>
 

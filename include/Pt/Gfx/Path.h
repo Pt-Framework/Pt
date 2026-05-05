@@ -51,7 +51,7 @@ class PathElement;
 class PathIterator;
 
 /** @brief Vector path for drawing outlines and filled shapes.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %Path stores a sequence of drawing commands such as moves, lines and curves.
     Painters can stroke or fill the current path directly, while helper
@@ -279,7 +279,7 @@ class PathEntry
 };
 
 /** @brief Read-only view of a path element.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 */
 class PathElement 
 {
@@ -344,7 +344,7 @@ class PathElement
 };
 
 /** @brief Forward iterator over path elements.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 */
 class PathIterator
 {

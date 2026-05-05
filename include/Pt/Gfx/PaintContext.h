@@ -42,7 +42,7 @@ class PainterBase;
 class PaintSurface;
 
 /** @brief Active painting session for a surface.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %PaintContext represents a prepared drawing session on a %PaintSurface. It
     exposes target properties, provides access to a backend canvas and keeps

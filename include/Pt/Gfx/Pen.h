@@ -43,7 +43,7 @@ namespace Gfx {
 class PenData;
 
 /** @brief Attributes for the drawing of outlines.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %Pen objects are used as container of drawing attributes for %Painter
     objects. A size and a color can be specified per pen. The size and

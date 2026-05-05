@@ -36,7 +36,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Metrics for a measured line of text.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     TextMetrics stores the horizontal advance and bounding-box information of
     a rendered text run. Painters return this structure when text needs to be

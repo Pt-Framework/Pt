@@ -38,7 +38,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Affine transform for drawing coordinates.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     Transform stores the matrix used to map logical drawing coordinates to the
     coordinate system of the target. It can be composed from translation,

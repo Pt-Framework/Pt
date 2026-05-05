@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
    Copyright (C) 2006-2015 Marc Boris Duerner
    Copyright (C) 2010 Aloysius Indrayanto
 
@@ -45,7 +45,7 @@ namespace Gfx {
 class FontData;
 
 /** @brief Font request used for text drawing and measurement.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %Font describes the family, size and style attributes that painters use to
     select a concrete typeface. The same description can be used both for text

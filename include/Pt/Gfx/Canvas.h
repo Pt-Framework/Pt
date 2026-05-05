@@ -55,7 +55,7 @@ namespace Gfx {
 class Bitmap;
 
 /** @brief Backend canvas for drawing commands.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %Canvas is implemented by paint backends and executes the drawing commands
     emitted by %PainterBase. It manages the active drawing state for a target,

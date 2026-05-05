@@ -38,7 +38,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Blend mode used for drawing operations.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %CompositionMode selects how new drawing results are combined with the
     existing pixels of a target.

@@ -40,7 +40,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Paint state used by drawing operations.
-  @ingroup Drawing
+  @ingroup Pt-Gfx-Drawing
 
   %Paint bundles the composition mode, pen, brush and font that define how a
   painter renders geometry and text. It can be reused to apply the same

@@ -38,7 +38,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Concrete painter for Pt::Gfx paint targets.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %Painter is the entry point for issuing drawing commands against a
     %PaintSurface or an existing %PaintContext. It owns no rendering backend

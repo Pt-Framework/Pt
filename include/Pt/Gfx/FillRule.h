@@ -36,7 +36,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Determines how overlapping subpaths of a filled shape are painted.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     When a %Path contains overlapping subpaths, %FillRule controls which
     enclosed regions are considered inside and therefore filled.

@@ -1,8 +1,8 @@
-/** \page drawing Graphics Drawing System
+/** \page Pt-Gfx-Drawing-Page Drawing Graphics and Text
 
-@copydetails Drawing
+@copydetails Pt-Gfx-Drawing
 
-@section drawing_Painter Painters and Paint Surfaces
+@section Pt-Gfx-Drawing-Page-Painter Painters and Paint Surfaces
 
 @copydetails Pt::Gfx::Painter
 
@@ -12,13 +12,13 @@
 
 @copydetails Pt::Gfx::Paint
 
-@section drawing_paths Paths and Transforms
+@section Pt-Gfx-Drawing-Page-Paths Paths and Transforms
 
 @copydetails Pt::Gfx::Path
 
 @copydetails Pt::Gfx::Transform
 
-@section drawing_text Text and Metrics
+@section Pt-Gfx-Drawing-Page-Text Text and FontMetrics
 
 @copydetails Pt::Gfx::Font
 

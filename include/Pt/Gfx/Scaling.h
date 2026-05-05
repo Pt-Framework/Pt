@@ -39,7 +39,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Logical-to-physical unit conversion.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     Scaling converts coordinates, sizes and rectangles between logical drawing
     units and physical device pixels. It also provides alignment helpers that

@@ -50,7 +50,7 @@ namespace Gfx {
 class BitmapSurface;
 
 /** @brief Off-screen drawing surface backed by an image.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     %Bitmap is the standard in-memory %PaintSurface implementation. It can be
     used as a rendering target for %Painter and also exposes the rendered image

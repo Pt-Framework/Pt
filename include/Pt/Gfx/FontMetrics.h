@@ -36,7 +36,7 @@ namespace Pt {
 namespace Gfx {
 
 /** @brief Metrics that describe a font face at a given size.
-    @ingroup Drawing
+    @ingroup Pt-Gfx-Drawing
 
     FontMetrics contains values such as ascent, descent and underline geometry
     for the font selected by a painter. These metrics can be used to align

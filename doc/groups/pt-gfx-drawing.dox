@@ -1,4 +1,4 @@
-/** @defgroup Drawing Graphics Drawing System
+/** @defgroup Pt-Gfx-Drawing Drawing Graphics and Text
 
     The %Pt::Gfx drawing API provides the abstractions needed to render 2D
     content on different paint surfaces. A %Painter can be used
