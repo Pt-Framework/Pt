@@ -9,6 +9,10 @@ description: "Doxygen documentation conventions for public headers."
 
 - All public API documentation belongs in the **public header files**
   (`include/Pt/` or `include/Pt/<Module>/`), not in `.cpp` files.
+- Module-level concepts belong in the `@namespace` comment in the
+  module's `Api.h` (e.g. `include/Pt/Unit/Api.h`).
+- Class-specific documentation belongs in the class comment in its header.
+- Do not duplicate information between namespace and class documentation.
 - Internal helpers in `.cpp` files may use brief comments but do not
   need Doxygen markup.
 
