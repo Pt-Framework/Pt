@@ -32,4 +32,6 @@ description: "Repository-specific unit test conventions."
 - NEVER rely on test output alone, but inspect it for details.
 - ALWAYS run the test executable without any further processing.
 - Run unit tests with no arguments to execute all suites.
+- Pass `-t "<SuiteName>"` to run a single suite.
+- Test methods execute in alphabetical order.
 - Capture stdout from the test executable to see detailed results.

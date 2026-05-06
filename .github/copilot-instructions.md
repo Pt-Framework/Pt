@@ -17,48 +17,27 @@ relevant to your task. You MUST read each relevant instruction file completely
 before you perform the task. Do NOT skip reading these files, even if you
 think you have all relevant information.
 
-- **Coding**: Coding instructions and code organization.
-  You MUST read this when writing or reviewing any code.
-  -> `.github/instructions/coding.instructions.md`
-
-- **Documenting**: Doxygen documentation conventions for public headers.
-  You MUST read this when writing or updating Doxygen comments.
-  -> `.github/instructions/documenting.instructions.md`
-
-- **Building**: Building the Pt project with jam.
-  You MUST read this when configuring, building, cleaning or verifying code changes.
-  -> `.github/instructions/building.instructions.md`
-
-- **Unit Testing**: Writing and structuring unit tests.
-  You MUST read this when writing tests, adding test methods, or debugging test failures.
-  -> `.github/instructions/testing.instructions.md`
-
-- **Pt::Unit API**: Using the Pt::Unit API for test suites, assertions, and test registration.
-  You MUST read this when writing tests with Pt::Unit.
-  -> `.github/instructions/pt-unit-api.instructions.md`
-
-- **Jam Scripting**: Writing and modifying Jam scripts.
-  You MUST read this when working with `.jam` or `Jamfile` files.
-  -> `.github/instructions/jam.instructions.md`
-
-- **Jam Internals**: Architecture and extension patterns for the jam executable
-  and the Jam-script layer (`jam/src/` C code and `jam/*.jam` scripts).
-  You MUST read this when extending the jam build tool itself.
-  -> `.github/instructions/jam-internals.instructions.md`
-
-- **Pt Signals & Slots**: Using signals, slots, delegates and events in Pt.
-  You MUST read this when connecting signals to slots, emitting events,
-  using delegates, or implementing observable patterns.
-  -> `.github/instructions/pt-api-sigslot.instructions.md`
-
-- **Pt-Gfx Images**: Pixel types, image formats, and image access patterns.
-  You MUST read this when working with pixels, images, or image formats.
-  -> `.github/instructions/pt-gfx-api-images.instructions.md`
-
-- **Pt-Gfx Drawing**: Painter, paint surface, path, text, and 2D drawing APIs.
-  You MUST read this when working with Pt::Gfx drawing, painting, paths,
-  text rendering, transforms, brushes, pens, or paint surfaces.
-  -> `.github/instructions/pt-gfx-api-drawing.instructions.md`
+- Write code, review code, code organization, naming, style:
+  `.github/instructions/coding.instructions.md`
+- Doxygen comments, document public headers, API docs:
+  `.github/instructions/documenting.instructions.md`
+- Configure, build, clean, verify code changes, jam build:
+  `.github/instructions/building.instructions.md`
+- Write tests, run tests, add test methods, debug test failures,
+  test suites, assertions, test registration:
+  `.github/instructions/testing.instructions.md`
+  `.github/instructions/pt-unit-api.instructions.md`
+- Jam scripts, Jamfile, .jam files:
+  `.github/instructions/jam.instructions.md`
+- Jam executable internals, jam C code, Jambase boot, toolset .jam:
+  `.github/instructions/jam-internals.instructions.md`
+- Signals, slots, delegates, events, connect, emit, observable:
+  `.github/instructions/pt-api-sigslot.instructions.md`
+- Pixel types, image formats, image access, pixel iteration:
+  `.github/instructions/pt-gfx-api-images.instructions.md`
+- Draw shapes, paths, text, bitmaps, stroke, fill, gradient,
+  transform, blend mode, font, paint surface:
+  `.github/instructions/pt-gfx-api-drawing.instructions.md`
 
 # Visual Code Issues
 
