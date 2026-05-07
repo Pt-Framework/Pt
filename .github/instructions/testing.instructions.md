@@ -6,10 +6,6 @@ description: "Repository-specific unit test conventions."
 # Unit Testing
 
 - Use the `Pt::Unit` framework for all unit tests.
-- For Pt::Unit API details, read `.github/instructions/pt-unit-api.instructions.md`.
-
-## Repository Conventions
-
 - Place test files in `src/<Module>/tests/`, e.g. `src/Pt-Gfx/tests/PathTest.cpp`.
 - Tests live in the same namespace as the class or unit under test (e.g. `Pt::Gfx`).
 - Class name = class or unit under test + `Test` (e.g. `PathTest`).
@@ -32,6 +28,10 @@ description: "Repository-specific unit test conventions."
 - NEVER rely on test output alone, but inspect it for details.
 - ALWAYS run the test executable without any further processing.
 - Run unit tests with no arguments to execute all suites.
-- Pass `-t "<SuiteName>"` to run a single suite.
-- Test methods execute in alphabetical order.
+
+- Pass `-t "<SuiteName>"` to run a single suite, where `<SuiteName>` is the string
+  passed to the `Pt::Unit::TestSuite` constructor (e.g., `"AverageTest"`).
+- Test methods execute in the order their names are registered via `registerMethod`.
+
+
 - Capture stdout from the test executable to see detailed results.
