@@ -14,3 +14,5 @@ description: "Unit Testing"
   `include/Pt/Unit/Reporter.h`
 - Test runner, find test, run all, attach reporter:
   `include/Pt/Unit/Application.h`
+- Provides `main()` for the test executable (include in exactly one `.cpp` per test binary):
+  `include/Pt/Unit/TestMain.h`
