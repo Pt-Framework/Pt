@@ -4,14 +4,13 @@ description: "Build system"
 
 # Building with Jam
 
-- The Pt project uses a custom jam-based build
-- Windows: `jam.bat`, Linux/macOS: `jam.sh`
-- All platforms use the same basic jam arguments
-- Some platforms may have additional platform-specific options
-- The examples below use `jam.bat`; substitute `jam.sh` accordingly
-
+- The Pt project uses a custom jam-based build.
+- Windows: `jam.bat`, Linux/macOS: `jam.sh`.
+- All platforms use the same basic jam arguments.
+- Some platforms may have additional platform-specific options.
+- The examples below use `jam.bat`; substitute `jam.sh` accordingly.
 - NEVER assume that the terminal starts in the correct project root.
-- ALWAYS change to the repository root that contains `jam.bat` before running
+- ALWAYS change to the repository root that contains `jam.bat` before running.
   any configure, switch, build, clean, or verification command.
 - NEVER use VS Code tasks (run_task) to build.
 - ALWAYS check the exit code of the actual standalone build command to determine build success.
@@ -21,36 +20,53 @@ description: "Build system"
 - ALWAYS perform a full global build to verify that dependent modules are not broken. 
 - NEVER only build the local module or test target.
 
-## 1. Configuring the Build
+## Build Commands
 
-- Configure debug build: `jam.bat configure -sCONFIG=debug --debug`
-- Configure release vuild: `jam.bat configure -sCONFIG=release --debug --optimize`
-- Switch to debug configuration: `jam.bat switch debug`
-- Switch to release configuration: `jam.bat switch release`
+- `jam.bat` is located in the top level directory.
+
+### Configuring the Build
+
+- Configure debug build: 
+  `jam.bat configure -sCONFIG=debug --debug`
+
+- Configure release vuild: 
+  `jam.bat configure -sCONFIG=release --debug --optimize`
+
+- Switch to debug configuration: 
+  `jam.bat switch debug`
+
+- Switch to release configuration: 
+  `jam.bat switch release`
 
 - `jam.bat configure` always creates a new build configuration
 - `jam.bat switch` changes to an existing, previously configured build configuration
 - `configure` and `switch` are arguments to the jam command
-- `-sCONFIG=<name>` sets configuration name, determines the output subdirectory
-  under `build/<name>/` and `tmp/<name>/`
-- Run `jam.bat switch <name>` before building to confirm the active configuration.
+- `-sCONFIG=<Config>` sets configuration name, determines the output subdirectory
+  under `build/<Config>/` and `tmp/<Config>/`
+- Run `jam.bat switch <Config>` before building to confirm the active configuration.
 - `--debug` — enable debug symbols
 - `--optimize` — enable compiler optimizations
 
-## 2. Build
+### Building the Artifacts
 
-- Build all: `jam.bat -q -j4`
+- To build the currently selected configuration:
+  - `jam.bat -q -j4`
+  - `-j4` for parallel compilation (4 parallel tasks)
+  - `-q` to stop on first error
 
-- `-j4` for parallel compilation
-- `-q` to stop on first error
-
+- use higher numbers for `-j` to increase build speed or omit `-j` when analyzing build errors
 - jam uses file timestamps to determine which files need to be rebuild
 
-## 3. Clean
+### Cleaning the Build
 
-- Remove all build artifacts: `jam.bat clean`
+- Remove all build artifacts: 
+  `jam.bat clean`
 
-## Adding Files to the Build
+
+
+
+
+## Build Setup
 
 ### Adding to an Executable (Main rule)
 
