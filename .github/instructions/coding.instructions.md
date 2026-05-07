@@ -1,121 +1,112 @@
 ---
-applyTo: "**/*.{h,cpp}"
-description: "Project directory structure and coding architecture for the Pt project"
+applyTo: "**/*.cpp,**/*.h"
+description: "Coding Styles and Guidelines"
 ---
+
+# Directory Layout
+
+- **Namespaces & Hierarchy:**
+  - Directory hierarchy must mirror namespace hierarchy.
+  - Root namespace: `<Project>` (Note: The project itself can act as a module).
+  - Sub-namespaces: `<Project>::<Module>`.
+  - The project itself can act as a module.
+
+- **Header & Public API:**
+  - Core module headers: `include/<Project>/`.
+  - Sub-module public headers: `include/<Project>/<Module>/`.
+
+- **Implementation Files:**
+  - Core module sources: `src/<Project>/`
+  - Sub-module sources: `src/<Project>-<Module>`
+
+- **Private API headers:**
+  - live next to source files
+  - Core module: `src/<Project>/`
+  - Sub-module: `src/<Project>-<Module>`
+
+- **Template Implementations:**
+  - in `NewClass.hpp` alongside `NewClass.h`, included at the end inside the namespace.
+
+- **Testing:**
+  - Core module: `src/<Project>/tests`
+  - Sub-module: `src/<Project>-<Module>`/tests
+
+-  **Build Output:**
+  - Build output: `build/<Config>/`.
+  - Object file: `tmp/<Config>/`.
+
 
 # Coding Style
 
-## Comments
+- When modifying existing code, match surrounding style
+- All comments, identifiers, log messages and exception messages in English
+- Comments short and precise
 
-- All comments, identifiers, log messages and exception messages must be written in english
-- Keep comments short and precise
+- **Naming Conventions:**
+  - Classes/Structs: `PascalCase`
+  - Only Cosmo Component Interfaces: `I` prefix (e.g., `ISystem`)
+  - Functions/Methods: `camelCase`
+  - Member variables: `_` prefix (e.g., `_member`)
+  - Virtual Methods/Callbacks: `on` prefix (e.g., `onActivate`)
 
-## Indentation
+- **Braces & Control Flow:**
+  - Style: Allman-style (always new line for all braces, including `else`).
+  - Else: Must always be on a new line (not attached to the closing brace).
+  - Lambdas: Assign to a local variable before passing to an algorithm.
 
-- Use 4 spaces for indentation, no tabs
-- Keep existing indentation style when modifying existing code
+- **Indentation & Layout:**
+  - Base: 4 spaces, no tabs.
+  - Namespaces: No brace wrap, no indentation (content stays at column 0).
+  - Class Layout: Indent `public`/`private` by 2 spaces from the `class` brace.
+  - Initializers: Break constructor initializers before commas; do not pack them.
 
-## Formatting
+- **Types & Symbols:**
+  - Pointers/References: Left-aligned (e.g., `Type* ptr`).
+  - Unused Parameters: Comment out names: `void f(int /*unused*/) {}`.
+  - Header Guards: Use `#ifndef PROJECT_MODULE_FILENAME_H` format.
 
-- Keep existing formatting style when modifying existing code
-- Namespace closing braces are commented: `} // namespace`
+- **Spacing:**
+  - General: No space before parentheses (e.g., `if(cond)`, `func()`).
+  - Logical Not: Always add a space after `!` (e.g., `! isValid`).
+  - Inner Spacing: Add spaces inside parentheses when expressions are complex:
+    - `if( x.isValid() )`
+    - `::system( cmd.c_str() );`
+    - `if( ! ptr )`
+  - No inner spaces for trivial expressions:
+    - `for(std::size_t i = 0; i < n; ++i)`
+    - `if(byte < 256)`
 
-## Code Structure
-
-- assign lambdas to a local variable before using it in an algorithm
+- **Formatting:**
+  - Line Length: Limit to 100 columns.
+  - Templates: Always break declarations into multiple lines.
+ 
 
 # Coding Guidelines
 
-## Language Features
+- **Copyright Header:** 
+  - Start every file with the copyright header from `include/<Project>/Api.h`.
+  - Fill in the current year, leaving the author list intact.
 
-- Use C++14 features where appropriate
+- **C++ Standard**: Use C++14 features where appropriate.
 
-## Project Namespaces
+- **API Macros**: Use the module's API macro (uppercase) from `Api.h` for non-inline symbols.
+  - Core: `<PROJECT>_API` from `<Project>/Api.h`.
+  - Sub-module: `<PROJECT>_<MODULE>_API` from `<Project>/<Module>/Api.h`.
+  - Private classes: no export macro.
+  ```cpp
+  class MODULE_API MyClass { /*...*/ };
+  MODULE_API void myFunction();
+  ```
 
-- The project namespace and the namespace of the core module is Pt
-- Each Module has its own namespace e.g. Pt::System, Pt::Net, Pt::Xml, Pt::Gfx
+- **Include Guards:**
+  - Derived from `<Project>`, `<Module>` and filename in uppercase:
+    - Core: `<PROJECT>_<FILENAME>_H` (e.g. `MYPROJECT_MYCLASS_H`).
+    - Sub-module: `<PROJECT>_<MODULE>_<FILENAME>_H` (e.g. `MYPROJECT_MYMODULE_MYCLASS_H`).
 
-## Directory Layout
+- **Includes:**
+  - Keep original order (SortIncludes: Never).
+  - Public headers (in `include/`): angle brackets `<...>`.
+  - Private/local headers (in `src/`): quotes `"..."`.
 
-- Public headers live in `include/Pt/`
-    - `include/Pt/` for `Pt` core module
-
-- Public module headers live in  `include/Pt/<Module>\`
-  - `<Module>` matches the module namespace, e.g.
-    - `include/Pt/System/` for `Pt::System`
-    - `include/Pt/Net/` for `Pt::Net`
-
-- Each module has a public `Api.h` header file with the forward declarations
-  of its classes.
-
-- Implementation files live in `src/<BaseName>/`
-- Each module has its `Jamfile` in `src/<BaseName>/`
-- `<BaseName>` is the library base name, e.g.
-  - Core Module: `src/Pt/` for `Pt.dll` / `libPt.so`
-  - System Module: `src/Pt-System/` for `Pt-System.dll` / `libPt-System.so`
-
-- Test sources live in `src/<BaseName>/tests`
-- Test have its `Jamfile` in `src/<BaseName>/tests/Jamfile`
-
-- Build output (binaries, libs) goes to `build/<CONFIG>/`
-- Object files go to `tmp/<CONFIG>/<BaseName>/`
-- `<CONFIG>` is the value of `-sCONFIG` passed to `jam.bat configure`
-- Test executables are located at `build/<CONFIG>/<test-executable-name>`.
-
-## Export Macros
-
-All classes with out-of-line methods must be exported with the module's
-API macro (e.g. `PT_API` for the core module, `PT_SYSTEM_API` for Pt-System):
-
-```cpp
-class PT_API MyClass {
-    // ...
-};
-```
-
-The macro is defined in the module's `Api.h` header:
-- `PT_API_EXPORT` defined → `PT_API` expands to `PT_EXPORT` (building the library)
-- Otherwise → `PT_API` expands to `PT_IMPORT` (consuming the library)
-
-Pure template classes and inline-only classes do not need the export macro.
-
-## Template Implementation Pattern
-
-Separate template implementations into `.tpp` files. Include the `.tpp`
-at the end of the `.h` file, inside the namespace:
-
-```cpp
-// Signal.h
-namespace Pt {
-
-class SignalBase : public Connectable { /* ... */ };
-
-#include <Pt/Signal.tpp>
-
-} // namespace Pt
-```
-
-## Adding a New Public Class
-
-1. **Header**: Create `include/Pt/<Module>/NewClass.h`
-   - Include guard: `#ifndef Pt_<Module>_NewClass_h` / `#define ...`
-   - Add `#include <Pt/<Module>/Api.h>` if using the export macro
-   - Add Doxygen `@brief` and `@ingroup`
-
-2. **Implementation**: Create `src/Pt-<Module>/NewClass.cpp`
-   - Include the public header: `#include <Pt/<Module>/NewClass.h>`
-
-3. **Build**: Add `NewClass.cpp` to the source list in `src/Pt-<Module>/Jamfile`
-
-4. **Forward declaration**: Add to `include/Pt/<Module>/Api.h` if other
-   modules need the forward declaration
-
-5. **Template code** (if applicable): Create `include/Pt/<Module>/NewClass.tpp`,
-   include it at the end of `NewClass.h` inside the namespace
-
-6. **Tests**: Add a test class in `src/Pt-<Module>/tests/NewClassTest.cpp`,
-   register in `src/Pt-<Module>/tests/Jamfile`
-   (see `testing.instructions.md` for the test pattern)
-
-For the Pt core module, omit the `<Module>` path segment (e.g. `include/Pt/NewClass.h`,
-`src/Pt/NewClass.cpp`, export macro `PT_API`).
+- **Visual Studio Projects:** 
+  - Register new files also in the module's `.vcxproj` and `.vcxproj.filters` if they exist.

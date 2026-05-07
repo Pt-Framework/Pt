@@ -62,49 +62,115 @@ description: "Build system"
 - Remove all build artifacts: 
   `jam.bat clean`
 
-
-
-
-
 ## Build Setup
 
-### Adding to an Executable (Main rule)
+- Jamfiles live next to the source files in their module directory (`src/<Module>/Jamfile`).
+- Spaces around `:` and before `;` are required by the Jamfile syntax.
+- Comments in Jamfiles use `#`.
 
-- Used in `src/<BaseName>/tests/Jamfile` for test executables.
-- Used in `src/<BaseName>/Jamfile` for normal executables.
+### Output Directories
 
-- The executable's base name is first argument for the the `Main` rule.
+The following Jam variables control where build artifacts are placed:
+  - Use `MakeLocate <target> : <dir>` in Jamfiles to set the output directory,
+  - and `MakeInstall <target> : <dir>` in Jamfiles to set the install destination.
+
+| Use for                      | Build path                        | Variable                  |
+|------------------------------|-----------------------------------|---------------------------|
+| Object files                 | `tmp/<Config>/`                   | `PT_OUTPUT_OBJECT`        |
+| Executables                  | `build/<Config>/bin/`             | `PT_OUTPUT_TARGET`        |
+| Shared libraries             | `build/<Config>/bin/`             | `PT_OUTPUT_TARGET`        |
+| Install dest for executables | `deploy/<Config>/bin/`            | `PT_INSTALL_BINDIR`       |
+| Install dest for libraries   | `deploy/<Config>/lib/`            | `PT_INSTALL_LIBDIR`       |
+
+### Sub-Directory Specific Setup
+
+Every module Jamfile starts with:
+
+```Jamfile
+SubDir PT_TOP src <Module-Name> ;
+
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(<DEP>_INCLUDES) ; # repeat for each dependency
+SubDirObjects $(PT_OUTPUT_OBJECT) <Module-Name> ;
+```
+
+- `SubDir` declares the current directory relative to the project root.
+- `SubDirHdrs` adds include search paths
+- `SubDirObjects` directs object files to `$(PT_OUTPUT_OBJECT)/<Module-Name>/`.
+
+For shared libraries that export a public API, also add:
+
+```Jamfile
+SubDirC++Flags [ FDefines <MODULE_NAME>_API_EXPORT ] ;
+```
+
+### Executables (Main rule)
+
+Add the `.cpp` files to the `Main` source list after the `:`:
+
+```Jamfile
+Main <executable-name> : Source.cpp
+                         NewFile.cpp ;
+```
+
+- The executable's base name is the first argument for the `Main` rule.
 - On Windows, the binary produced by the build automatically gets the `.exe` suffix.
 
-- Add the `.cpp` files to the `Main` source list after the `:`:
+### Shared Libraries (SharedLibrary rule)
+
+Add the `.cpp` files to the `SharedLibrary` source list after the `:`:
 
 ```Jamfile
-Main Pt-Gfx-test : Pt-Gfx-test.cpp
-                   Argb32Test.cpp
-                   NewFile.cpp ;
+SharedLibrary <library-name> : Source.cpp
+                               NewFile.cpp
+                               ;
 ```
 
-- Spaces around `:` and before `;` are required by the Jamfile syntax.
+- The library's base name is the first argument for the `SharedLibrary` rule.
 
-### Adding to a Shared Library (SharedLibrary rule)
+### Static Libraries (Library rule)
 
-- Used in `src/<BaseName>/Jamfile` for module libraries
-- Add the `.cpp` file to the `SharedLibrary` source list:
+Add the `.cpp` files to the `Library` source list after the `:`:
 
 ```Jamfile
-SharedLibrary Pt : Atomicity.cpp
-                   Connection.cpp
-                   NewFile.cpp
-                   ;
+Library <library-name> : Source1.cpp
+                         Source2.cpp
+                         NewFile.cpp
+                         ;
 ```
 
-### Adding to a Static Library (Library rule)
+- The library's base name is the first argument for the `Library` rule.
 
-- Add the `.cpp` file to the `Library` source list:
+### Linking Against Internal Libraries (LinkSharedLibraries)
+
+Use `LinkSharedLibraries` to link libraries built within this project:
 
 ```Jamfile
-Library MyLib : Source1.cpp
-               Source2.cpp
-               NewFile.cpp
-               ;
+LinkSharedLibraries <target-name> : <Dep1> <Dep2> ;
+```
+
+- `<target-name>` is the name of a `Main` or `SharedLibrary` target defined in the build.
+- `<Dep1>`, `<Dep2>` are `SharedLibrary` target names from this project.
+- NEVER use `LinkSharedLibraries` for external/third-party libraries.
+
+### Linking Against External Libraries (LinkLibs / LinkFlags)
+
+Use `LinkLibs` and `LinkFlags` for pre-built external libraries and frameworks:
+
+```Jamfile
+LinkLibs <target-name> : $(<DEP>_LINKLIBS) ;
+LinkFlags <target-name> : $(<DEP>_LINKFLAGS) ;
+```
+
+- The build system provides ready-made variables for each supported external dependency.
+- Look up the available variables in the existing Jamfiles or in `Jamconfigure`.
+- Only include variables for dependencies the module actually uses.
+
+### Registering a Jamfile
+
+A new module's Jamfile is not discovered automatically. Add a `SubInclude` line
+next to the other `SubInclude` lines in the top-level `Jamfile`:
+
+```Jamfile
+SubInclude PT_TOP src <Module-Name> ;
 ```
