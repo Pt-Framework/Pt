@@ -189,12 +189,12 @@ int main(int argc, char* args[])
         Pt::Forms::Application app(argc, args);
         app.setScaleFactor(1);
 
-        //fullApp(app);
+        fullApp(app);
         
         //SimpleApp simpleApp;
         //simpleApp.run(app);
         
-        staticApp(app);
+        //staticApp(app);
     }
     catch(const std::exception& ex)
     {
