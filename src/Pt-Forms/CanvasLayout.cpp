@@ -81,19 +81,8 @@ Gfx::SizeF CanvasLayout::onMeasure(const SizePolicy& policy)
     ItemMap::iterator it;
     for(it = _items.begin(); it != _items.end(); ++it)
     {
-        //
-        // TODO: A bug in Control::measure prevents passing the policy
-        //       directly to the children. Control::measure optimizes
-        //       layouting of fixed children away, although internal
-        //       changes might require a measure, as in case of button
-        //       text metrics.
-        //
-        SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
-        itemPolicy.setWidth( policy.size().width() );
-        itemPolicy.setHeight( policy.size().height() );
-        
         Control* control = it->first;
-        control->measure(itemPolicy);
+        control->measure(policy);
 
         const LayoutParams& params = it->second;
         double w = params.position().x() + params.size().width();

@@ -701,7 +701,8 @@ Gfx::SizeF Control::measure(const SizePolicy& policy)
         //static int mmm = 0;
         //std::clog << "MEASURE: " << name() << " " << ++mmm << std::endl;
 
-        bool isFixed = contentPolicy.vertical() == SizePolicy::Fixed &&
+        bool isFixed = ! _isMeasureInvalid &&
+                       contentPolicy.vertical() == SizePolicy::Fixed &&
                        contentPolicy.horizontal() == SizePolicy::Fixed &&
                        controls().empty();
 
