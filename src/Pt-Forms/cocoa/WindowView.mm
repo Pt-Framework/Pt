@@ -121,6 +121,12 @@
 }
 
 
+- (BOOL) isOpaque 
+{ 
+    return YES; 
+}
+
+
 - (void) setNeedsDisplay: (BOOL) needsDisplay
 {
     //_invalidRect = NSMakeRect(0.0, 0.0 ,1000.0 ,1000.0);
@@ -205,11 +211,15 @@
     //std::clog << "_invalidRect: " << _invalidRect.size.width << "x" 
     //                              << _invalidRect.size.height << std::endl;
 
-    //_windowImpl->onViewPaint(_invalidRect);
-    _windowImpl->onViewPaint(_invalidRect);
-    _invalidRect = NSMakeRect(0.0, 0.0, 0.0, 0.0);
-    //std::clog << "drawRect END" << std::endl;
 
+    //_windowImpl->onViewPaint(_invalidRect);
+    //_invalidRect = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+
+    NSRect r = NSUnionRect(_invalidRect, rect);
+    _windowImpl->onViewPaint(r);
+    _invalidRect = NSMakeRect(0, 0, 0, 0);
+
+    //std::clog << "drawRect END" << std::endl;
     [ super drawRect:rect ];
 }
 

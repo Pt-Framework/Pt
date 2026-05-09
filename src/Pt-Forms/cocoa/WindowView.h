@@ -49,6 +49,8 @@
 
 - (BOOL) resignFirstResponder;
 
+- (BOOL) isOpaque;
+
 - (void) setNeedsDisplay: (BOOL) b;
 
 - (void) setNeedsDisplayInRect: (NSRect) rect;

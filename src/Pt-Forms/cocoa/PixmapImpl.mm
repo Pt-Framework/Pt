@@ -1,5 +1,5 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -180,10 +180,10 @@ void PixmapCanvas::onApplyCompositionMode()
 
 void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
-    CGColorRef color = CGColorCreateGenericRGB(pen.color().red() / 65535.0,
-                                                   pen.color().green() / 65535.0,
-                                                   pen.color().blue() / 65535.0,
-                                                   pen.color().alpha() / 65535.0);
+    CGColorRef color = CGColorCreateGenericRGB( pen.color().red() / 255.0,
+                                                pen.color().green() / 255.0,
+                                                pen.color().blue() / 255.0,
+                                                pen.color().alpha() / 255.0 );
     if(_penColor)
       CFRelease(_penColor);
 
@@ -299,10 +299,10 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
         default:
         case Pt::Gfx::Brush::Solid:
         {
-            CGColorRef color = CGColorCreateGenericRGB(brush.color().red() / 65535.0,
-                                                       brush.color().green() / 65535.0,
-                                                       brush.color().blue() / 65535.0,
-                                                       brush.color().alpha() / 65535.0);
+            CGColorRef color = CGColorCreateGenericRGB( brush.color().red() / 255.0,
+                                                        brush.color().green() / 255.0,
+                                                        brush.color().blue() / 255.0,
+                                                        brush.color().alpha() / 255.0 );
             if(_brushColor)
               CFRelease(_brushColor);
 
@@ -834,8 +834,8 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
 
 
 void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
-                               const Pixmap& pm,
-                               const Gfx::RectF* rectF)
+                              const Pixmap& pm,
+                              const Gfx::RectF* rectF)
 {
     if( ! _pixmap )
         return;
@@ -848,37 +848,41 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     if( ! ctx || ! pixmap->context())
         return;
 
-    Gfx::PointF to = transform() * toF;
     CGImageRef image = pixmap->getCGImage();
 
-    double H = CGBitmapContextGetHeight(ctx);
+    CGContextSaveGState(ctx);
 
     if(rectF)
     {
-        CGRect subRect = CGRectMake(rectF->left(),
-                                    rectF->top(),
-                                    rectF->size().width(),
-                                    rectF->size().height());
+        const Gfx::Scaling& srcScaling = pixmap->scaling();
+        Gfx::RectF physRect = srcScaling.toPhysical(*rectF);
+
+        CGRect subRect = CGRectMake(physRect.left(),
+                                    physRect.top(),
+                                    physRect.size().width(),
+                                    physRect.size().height());
 
         CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
-        CGRect destRect = CGRectMake(to.x(),
-                                     H - to.y() - rectF->height(),
-                                     rectF->width(),
-                                     rectF->height());
+        // Flip Y locally at the destination point to prevent
+        // CGContextDrawImage from drawing the image upside down.
+        CGContextTranslateCTM(ctx, toF.x(), toF.y() + rectF->height());
+        CGContextScaleCTM(ctx, 1.0, -1.0);
+        CGContextDrawImage(ctx, CGRectMake(0, 0, rectF->width(), rectF->height()), subImage);
 
-        CGContextDrawImage(ctx, destRect, subImage);
         CGImageRelease(subImage);
     }
     else
     {
-        CGRect destRect = CGRectMake(to.x(),
-                                     H - to.y() - pm.size().height(),
-                                     pixmap->size().width(),
-                                     pixmap->size().height());
+        double logW = scaling().toLogical( pixmap->size().width() );
+        double logH = scaling().toLogical( pixmap->size().height() );
 
-        CGContextDrawImage(ctx, destRect, image);
+        CGContextTranslateCTM(ctx, toF.x(), toF.y() + logH);
+        CGContextScaleCTM(ctx, 1.0, -1.0);
+        CGContextDrawImage(ctx, CGRectMake(0, 0, logW, logH), image);
     }
+
+    CGContextRestoreGState(ctx);
 
     _pixmap->setModified();
 }
