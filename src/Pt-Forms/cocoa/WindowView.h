@@ -35,7 +35,6 @@
 @interface WindowView : NSView<NSWindowDelegate>
 {
     Pt::Forms::WindowImpl* _windowImpl;
-    NSRect _invalidRect;
 }
     
 - (WindowView*) initWithImpl: (Pt::Forms::WindowImpl*) window 
@@ -50,10 +49,6 @@
 - (BOOL) resignFirstResponder;
 
 - (BOOL) isOpaque;
-
-- (void) setNeedsDisplay: (BOOL) b;
-
-- (void) setNeedsDisplayInRect: (NSRect) rect;
 
 - (void) drawRect: (NSRect) rect;
 

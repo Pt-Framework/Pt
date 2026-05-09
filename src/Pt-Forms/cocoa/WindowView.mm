@@ -44,7 +44,6 @@
                 frame: (NSRect) frame
 {
     _windowImpl = window;
-    _invalidRect = frame;
 
     self = [super initWithFrame: frame];
     [self setWantsLayer:NO];
@@ -127,25 +126,6 @@
 }
 
 
-- (void) setNeedsDisplay: (BOOL) needsDisplay
-{
-    //_invalidRect = NSMakeRect(0.0, 0.0 ,1000.0 ,1000.0);
-    //std::clog << "setNeedsDisplay" << std::endl;
-    NSRect rect = [self bounds];
-    _invalidRect = NSUnionRect(_invalidRect, rect);
-
-    [super setNeedsDisplay: needsDisplay];
-}
-
-
-- (void) setNeedsDisplayInRect: (NSRect) rect
-{
-    _invalidRect = NSUnionRect(_invalidRect, rect);
-
-    [super setNeedsDisplayInRect: rect];
-}
-
-
 - (void) keyDown: (NSEvent*) ev
 {
     NSString* chars = [ev characters];
@@ -211,16 +191,12 @@
     //std::clog << "_invalidRect: " << _invalidRect.size.width << "x" 
     //                              << _invalidRect.size.height << std::endl;
 
+    // NSRect r = NSUnionRect(_invalidRect, rect);
+    // r = NSIntersectionRect(r, [self bounds]);
+    // _windowImpl->onViewPaint(r);
+    // _invalidRect = NSMakeRect(0, 0, 0, 0);
 
-    //_windowImpl->onViewPaint(_invalidRect);
-    //_invalidRect = NSMakeRect(0.0, 0.0, 0.0, 0.0);
-
-    NSRect r = NSUnionRect(_invalidRect, rect);
-    _windowImpl->onViewPaint(r);
-    _invalidRect = NSMakeRect(0, 0, 0, 0);
-
-    //std::clog << "drawRect END" << std::endl;
-    [ super drawRect:rect ];
+    _windowImpl->onViewPaint(rect);
 }
 
 
