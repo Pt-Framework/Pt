@@ -431,8 +431,6 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
     CGContextMoveToPoint(context, from.x(), from.y());
     CGContextAddLineToPoint(context, to.x(), to.y());
     CGContextStrokePath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -453,8 +451,6 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
     }
 
     CGContextStrokePath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -475,8 +471,6 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
     }
  
     CGContextFillPath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -489,8 +483,6 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
     
     CGRect rect = CGRectMake( r.x(), r.y(), r.width(), r.height() );
     CGContextStrokeRect(context, rect);
-
-    _pixmap->setModified();
 }
 
 
@@ -503,8 +495,6 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 
     CGRect rect = CGRectMake( r.x(), r.y(), r.width(), r.height() );
     CGContextFillRect(context, rect);
-
-    _pixmap->setModified();
 }
 
 
@@ -520,8 +510,6 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
     CGContextAddEllipseInRect(context, rect);
     CGContextStrokePath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -537,8 +525,6 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
     CGContextAddEllipseInRect(context, rect);
     CGContextFillPath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -650,8 +636,6 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     CGContextRestoreGState(context);
 
     // ALTERNATIVE: CTRunDraw
-
-    _pixmap->setModified();
 }
 
 
@@ -699,8 +683,6 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
     CFRelease(provider);
 
     CGContextRestoreGState(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -778,8 +760,6 @@ void PixmapCanvas::onDrawPath()
 
     CGContextAddPath(context, _cgPath);
     CGContextStrokePath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -792,8 +772,6 @@ void PixmapCanvas::onFillPath()
 
     CGContextAddPath(context, _cgPath);
     CGContextFillPath(context);
-
-    _pixmap->setModified();
 }
 
 
@@ -807,8 +785,6 @@ void PixmapCanvas::onDrawPath(const Gfx::Path& path)
     CGContextRef context = _pixmap->context();
     CGContextAddPath(context, cgPath);
     CGContextStrokePath(context);
-
-    _pixmap->setModified();
 
     if(cgPath)
         CGPathRelease(cgPath);
@@ -825,8 +801,6 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
     CGContextRef context = _pixmap->context();
     CGContextAddPath(context, cgPath);
     CGContextFillPath(context);
-
-    _pixmap->setModified();
 
     if(cgPath)
         CGPathRelease(cgPath);
@@ -883,8 +857,6 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     }
 
     CGContextRestoreGState(ctx);
-
-    _pixmap->setModified();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -897,7 +869,6 @@ PixmapImpl::PixmapImpl()
 , _height(0)
 , _context(0)
 , _image(0)
-, _imageModified(false)
 , _canvas(0)
 {
 }
@@ -922,8 +893,6 @@ void PixmapImpl::create()
     //CGContextSetShouldAntialias(_context, false);
     //CGContextSetBlendMode(_context, kCGBlendModeNormal);
     //CGContextSetBlendMode(_context, kCGBlendModeCopy)
-
-    _imageModified = true;
 }
 
 
@@ -948,23 +917,24 @@ CGContextRef PixmapImpl::context() const
 
 CGImageRef PixmapImpl::getCGImage() const
 {
-    //return CGBitmapContextCreateImage(_context);
-    if(_imageModified)
+    if( ! _image && _context)
     {
-        if(_image)
-            CGImageRelease(_image);
+        void* data = CGBitmapContextGetData(_context);
+        size_t bytesPerRow = CGBitmapContextGetBytesPerRow(_context);
+        size_t dataSize = bytesPerRow * _height;
 
-        _image = CGBitmapContextCreateImage(_context);
-        _imageModified = false;
+        CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
+        CGColorSpaceRef colorSpace = CGBitmapContextGetColorSpace(_context);
+        CGBitmapInfo bitmapInfo = CGBitmapContextGetBitmapInfo(_context);
+
+        _image = CGImageCreate(_width, _height, 8, 32,
+                               bytesPerRow, colorSpace, bitmapInfo, provider,
+                               NULL, false, kCGRenderingIntentDefault);
+
+        CGDataProviderRelease(provider);
     }
 
     return _image;
-}
-
-
-void PixmapImpl::setModified()
-{
-    _imageModified = true;
 }
 
 
@@ -1004,8 +974,6 @@ void PixmapImpl::reset(const Gfx::Image& image)
     CFRelease(imageRef);
     CFRelease(colorSpace);
     CFRelease(provider);
-
-    _imageModified = true;
 }
 
 

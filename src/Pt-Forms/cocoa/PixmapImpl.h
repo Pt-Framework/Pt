@@ -221,8 +221,6 @@ class PixmapImpl
 
         CGImageRef getCGImage() const;
 
-        void setModified();
-
     public:
         static const std::string& defaultFont();
 
@@ -244,7 +242,6 @@ class PixmapImpl
 
         CGContextRef        _context;
         mutable CGImageRef  _image;
-        mutable bool        _imageModified;
 
         PixmapCanvas*       _canvas;
 };
