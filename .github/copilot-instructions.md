@@ -49,20 +49,12 @@ think you have all relevant information.
 
 # Visual Code Issues
 
-This is a multi-root workspace where subfolders (e.g. `include/Pt/Gfx`,
-`src/Pt-Gfx`) are added as separate workspace folders alongside the
-project root ("All Files"). This causes overlapping paths that confuse
-relative-path-based tool parameters.
+Multi-root workspace: subfolders (e.g. `include/Pt/Gfx`, `src/Pt-Gfx`) are
+added alongside the project root ("All Files"), causing overlapping paths that
+confuse relative-path-based tool parameters.
 
-- **`grep_search`**: Relative paths in `includePattern` (e.g.
-  `include/Pt/Gfx/Rect.h`) often fail because they resolve against
-  the wrong workspace folder.
-  - **Preferred**: Use the absolute project root as `includePattern`.
-  - **Alternative**: Use only the filename (`Rect.h` or `**/Rect.h`).
-  - **Alternative**: Omit `includePattern` entirely for a global search.
-
-- **`file_search`**: Glob patterns work across all workspace folders.
-  Results may appear duplicated — this is expected and harmless.
-
-- **`read_file`**: Always use absolute paths. This is the most reliable
-  tool when the exact file path is known.
+- **`grep_search`** `includePattern`: relative paths often fail; prefer the
+  absolute project root, a filename glob (`**/Rect.h`), or omit entirely.
+- **`file_search`**: works across all folders; duplicate results are expected.
+- **`read_file`**: always use absolute paths.
+- **`vscode_listCodeUsages`**: `filePath` fails; always use `uri` with an absolute URI.
