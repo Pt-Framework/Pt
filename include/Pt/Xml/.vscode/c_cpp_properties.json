@@ -21,6 +21,26 @@
             "cStandard": "c17",
             "cppStandard": "c++14",
             "intelliSenseMode": "windows-msvc-x64"
+        },
+        {
+            "name": "MacOS",
+            "includePath": [
+                "${default}"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/../../../src/Pt-Xml"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "defines": [
+                "_DEBUG"
+            ],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "macos-clang-x64"
         }
     ],
     "version": 4
