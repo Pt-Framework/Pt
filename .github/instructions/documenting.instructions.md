@@ -1,74 +1,145 @@
 ---
 applyTo: "**/*.h"
-description: "Doxygen documentation conventions for public headers."
+description: "API Documentation"
 ---
 
-# Documenting
+# Documentation Structure
 
-## Where to Document
+Doxygen documentation for classes/functions/groups is the foundation. 
+Pages and agent instructions build on top of it. Pages assemble the
+Doxygen content for human readers, and instructions files index it by
+features for agents.
 
-- All public API documentation belongs in the **public header files**
-  (`include/Pt/` or `include/Pt/<Module>/`), not in `.cpp` files.
-- Module-level concepts belong in the `@namespace` comment in the
-  module's `Api.h` (e.g. `include/Pt/Unit/Api.h`).
+# API Documentation
+
+- All API documentation (namespaces, classes, methods, enums, free 
+  functions) belongs in the public header files, not in `.cpp` files.
+- Document every public namespace, class, funtions using Doxygen.
+- Assign each class/interface/function to a Doxygen group using `@ingroup`.
+- Internal helpers in `.cpp` files may use brief comments but do not need
+  Doxygen markup.
 - Class-specific documentation belongs in the class comment in its header.
-- Do not duplicate information between namespace and class documentation.
-- Internal helpers in `.cpp` files may use brief comments but do not
-  need Doxygen markup.
+- Cross-cutting concepts, patterns, and examples that span multiple
+  classes belong in a doxygen group.
+- Module-level concepts belong in the `@namespace` comment in the
+  module's `Api.h`.
+- Group IDs are derived from the C++ namespace by replacing `::` with `-`:
+  `Ns::` -> `Ns-<Feature>`, `Ns::Sub::` -> `Ns-Sub-<Feature>`.
+- Doxygen Group files live in `doc/groups/*.dox`, one per feature group, named
+  after the group ID, e.g. `doc/groups/<GroupId>.dox`.
+- Each `.dox` file contains exactly one `@defgroup` block and uses Doxygen
+  syntax.
 
-## Doxygen Style
+# User Documentation Pages
 
-- ALWAYS Use `/** ... */` block comments for namespaces, classes, member functions and standalone functions.
+- Doxygen Page files live in `doc/pages/`. Pages compose the Doxygen API and
+  Groups
+  Documentation into readable user documentation.
+- Pages contain **no new content** — only `@copydetails` references.
+- Use `@copydetails <GroupId>` in a page to pull in group documentation.
+- Use `@section <anchor> <Title>` to introduce page subsections.
+- Use `@copydetails <Qualified::Name>` in a page to pull in class or function
+  documentation.
+
+# Agent Instructions
+
+- One `.instructions.md` file per **high-level feature set** (covering one 
+  or more related groups), e.g. `<Module>.instructions.md` covers all
+  `<Module>-*` groups.
+- These files index the Doxygen foundation for agents: they map features
+  and tasks to the relevant headers and `doc/groups/*.dox` files.
+- They do not contain documentation or explanations — those belong in
+  headers and group files.
+
+# Doxygen Style
+
+- ALWAYS use `/** ... */` block comments for namespaces, classes, member
+  functions and standalone functions.
 - Place the closing `*/` of block comments on the next line.
 - Do not use leading asterisks (*) on intermediate lines inside block comments.
 - Do not document forward declarations.
 - Use `@brief` for the one-line summary. Place it right after `/**`.
 - Place the detailed description after a blank line following `@brief`,
   indented to align flush with the `@brief` command (4 spaces from `/**`).
-- If Doxygen commands (e.g. `@ingroup`, `@param`, `@return`) follow the detailed description, separate them with a blank line.
+- If Doxygen commands (e.g. `@ingroup`, `@param`, `@return`) follow the
+  detailed description, separate them with a blank line.
 - Use `@ingroup <group>` to assign the class/function to a module group.
-- Use `@related <ClassName>` to associate operators and free functions with a class when appropriate.
-- Escape class names, namespace-qualified names, and function names in prose with `%` unless an explicit Doxygen link is desired.
-  - Examples: `%Signal`, `%Pt::Gfx::Painter`, `%Painter::begin()`
-- Do not use structural keywords like `@class` when the context is already unambiguously clear to Doxygen.
-- Module groups are defined with `@defgroup` in `doc/groups/*.dox`.
+- Use `@related <ClassName>` to associate operators and free functions with
+  a class when appropriate.
+- Escape class names, namespace-qualified names, and function names in
+  prose with `%` unless an explicit Doxygen link is desired.
+  - Examples: `%MyClass`, `%MyNamespace::MyModule::MyClass`, `%MyClass::begin()`
+- Do not use structural keywords like `@class` when the context is already
+  unambiguously clear to Doxygen.
+- Feature groups are defined with `@defgroup`.
+- Each `@defgroup` block contains:
+  - `@brief` one-line summary
+  - Detailed description of the feature area
+  - Usage rules and design guidance that apply to the whole group
+  - `@code` / `@endcode` example(s) showing the canonical usage pattern
 
-## Example
+# Header Example
 
 ```cpp
-/** @brief Represents a connection between a %Signal and a %Slot.
 
-    A %Connection object is returned by %Signal::connect() and can be
-    used to close the connection at a later time.
+namespace Ns {
 
-    @ingroup sigslot
+/** @brief Brief description of the class.
+
+    Detailed description of the %MyClass class.
+
+    @ingroup Ns-MyFeature
 */
-class PT_API Connection
+class MyClass
 {
-    public:
-        /** @brief Returns true if the connection is open.
-        */
-        bool isValid() const;
+  public:
+    /** @brief Constructor.
+    */
+    MyClass();
 
-        /** @brief Closes the connection.
+    /** @brief No copy constructor.
+    */
+    MyClass(const MyClass&) = delete;
 
-            After calling this method the connection is no longer active
-            and the associated slot will not receive any further signals.
-        */
-        void close();
+    /** @brief Destructor.
+    */
+    virtual ~MyClass();
+
+    /** @brief Brief description of the method.
+
+        The detailed description of the method.
+
+        @param a Description of parameter a.
+        @param b Description of parameter b.
+    */
+    void doSomething(int a, int b);
 };
+
+}
 ```
 
-## Group Naming
+# Group Example
 
-Group IDs follow a namespace-derived prefix convention using hyphens:
+```cpp
+/** @defgroup Ns-MyFeature Feature Name
 
-- All groups use the `Pt-<Module>-` prefix scheme.
-- `Pt` core module uses `Pt-` prefix — e.g. `Pt-SigSlot`, `Pt-Allocator`, `Pt-BasicTypes`
-- Sub-modules use `Pt-<Module>-` prefix — e.g. `Pt-Gfx-Types`, `Pt-Gfx-Paint`, `Pt-System-Logging`
+    @brief Brief description of the feature group.
 
-| Module | Group examples |
-|--------|---------------|
-| Pt (core) | `Pt-SigSlot`, `Pt-Allocator`, `Pt-BasicTypes`, `Pt-Serialization` |
-| Pt::Gfx | `Pt-Gfx-Types`, `Pt-Gfx-Paint` |
-| Pt::System | `Pt-System-Logging`, `Pt-System-FileSystem` |
+    Detailed description of the feature area, usage rules, and design guidance.
+*/
+```
+
+# Page Example
+
+```
+/** \page Cosmo-Activation-Page Activation
+
+    @copydetails Cosmo-Activation
+
+    @section Cosmo-Activation-Page-IActivate IActivate
+    @copydetails Cosmo::IActivate
+
+    @section Cosmo-Activation-Page-IActivator IActivator
+    @copydetails Cosmo::IActivator
+*/
+```

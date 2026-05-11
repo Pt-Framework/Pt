@@ -5,36 +5,35 @@ description: "Coding Styles and Guidelines"
 
 # Directory Layout
 
-- **Namespaces & Hierarchy:**
-  - Directory hierarchy must mirror namespace hierarchy.
-  - Root namespace: `<Project>` (Note: The project itself can act as a module).
-  - Sub-namespaces: `<Project>::<Module>`.
-  - The project itself can act as a module.
+- Namespaces & Hierarchy:
+  - Directory hierarchy must mirror namespace hierarchy
+  - Root namespace: `<Project>` (Note: The project itself can act as a module)
+  - Sub-namespaces: `<Project>::<Module>`
+  - The project itself can act as a module
 
-- **Header & Public API:**
-  - Core module headers: `include/<Project>/`.
-  - Sub-module public headers: `include/<Project>/<Module>/`.
+- Header & Public API:
+  - Core module headers: `include/<Project>/`
+  - Sub-module public headers: `include/<Project>/<Module>/`
 
-- **Implementation Files:**
+- Implementation Files:
   - Core module sources: `src/<Project>/`
   - Sub-module sources: `src/<Project>-<Module>`
 
-- **Private API headers:**
+- Private API headers:
   - live next to source files
   - Core module: `src/<Project>/`
   - Sub-module: `src/<Project>-<Module>`
 
-- **Template Implementations:**
-  - in `NewClass.hpp` alongside `NewClass.h`, included at the end inside the namespace.
+- Template Implementations:
+  - in `NewClass.hpp` alongside `NewClass.h`, included at the end inside the namespace
 
-- **Testing:**
+- Tests:
   - Core module: `src/<Project>/tests`
   - Sub-module: `src/<Project>-<Module>`/tests
 
--  **Build Output:**
-  - Build output: `build/<Config>/`.
-  - Object file: `tmp/<Config>/`.
-
+-  Build Output:
+  - Build output: `build/<Config>/`
+  - Object file: `tmp/<Config>/`
 
 # Coding Style
 
@@ -42,30 +41,30 @@ description: "Coding Styles and Guidelines"
 - All comments, identifiers, log messages and exception messages in English
 - Comments short and precise
 
-- **Naming Conventions:**
+- Naming Conventions:
   - Classes/Structs: `PascalCase`
   - Only Cosmo Component Interfaces: `I` prefix (e.g., `ISystem`)
   - Functions/Methods: `camelCase`
   - Member variables: `_` prefix (e.g., `_member`)
   - Virtual Methods/Callbacks: `on` prefix (e.g., `onActivate`)
 
-- **Braces & Control Flow:**
+- Braces & Control Flow:
   - Style: Allman-style (always new line for all braces, including `else`).
   - Else: Must always be on a new line (not attached to the closing brace).
   - Lambdas: Assign to a local variable before passing to an algorithm.
 
-- **Indentation & Layout:**
+- Indentation & Layout:
   - Base: 4 spaces, no tabs.
   - Namespaces: No brace wrap, no indentation (content stays at column 0).
   - Class Layout: Indent `public`/`private` by 2 spaces from the `class` brace.
   - Initializers: Break constructor initializers before commas; do not pack them.
 
-- **Types & Symbols:**
+- Types & Symbols:
   - Pointers/References: Left-aligned (e.g., `Type* ptr`).
   - Unused Parameters: Comment out names: `void f(int /*unused*/) {}`.
   - Header Guards: Use `#ifndef PROJECT_MODULE_FILENAME_H` format.
 
-- **Spacing:**
+- Spacing:
   - General: No space before parentheses (e.g., `if(cond)`, `func()`).
   - Logical Not: Always add a space after `!` (e.g., `! isValid`).
   - Inner Spacing: Add spaces inside parentheses when expressions are complex:
@@ -76,20 +75,19 @@ description: "Coding Styles and Guidelines"
     - `for(std::size_t i = 0; i < n; ++i)`
     - `if(byte < 256)`
 
-- **Formatting:**
+- Formatting:
   - Line Length: Limit to 100 columns.
   - Templates: Always break declarations into multiple lines.
  
-
 # Coding Guidelines
 
-- **Copyright Header:** 
+- Copyright Header:
   - Start every file with the copyright header from `include/<Project>/Api.h`.
   - Fill in the current year, leaving the author list intact.
 
-- **C++ Standard**: Use C++14 features where appropriate.
+- C++ Standard: Use C++14 features where appropriate.
 
-- **API Macros**: Use the module's API macro (uppercase) from `Api.h` for non-inline symbols.
+- API Macros: Use the module's API macro (uppercase) from `Api.h` for non-inline symbols.
   - Core: `<PROJECT>_API` from `<Project>/Api.h`.
   - Sub-module: `<PROJECT>_<MODULE>_API` from `<Project>/<Module>/Api.h`.
   - Private classes: no export macro.
@@ -98,16 +96,16 @@ description: "Coding Styles and Guidelines"
   MODULE_API void myFunction();
   ```
 
-- **Include Guards:**
+- Include Guards:
   - Derived from `<Project>`, `<Module>` and filename in uppercase:
     - Core: `<PROJECT>_<FILENAME>_H` (e.g. `MYPROJECT_MYCLASS_H`).
     - Sub-module: `<PROJECT>_<MODULE>_<FILENAME>_H` (e.g. `MYPROJECT_MYMODULE_MYCLASS_H`).
 
-- **Includes:**
+- Includes:
   - Keep original order (SortIncludes: Never).
   - Public headers (in `include/`): angle brackets `<...>`.
   - Private/local headers (in `src/`): quotes `"..."`.
 
-- **Visual Studio Projects:** 
+- Visual Studio Projects: 
   - Register new files also in the `.vcxproj` and `.vcxproj.filters` if they exist.
   - Filter structure in `.vcxproj.filters` mirrors the directory structure.

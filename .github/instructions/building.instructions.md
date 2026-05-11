@@ -6,6 +6,7 @@ description: "Build system"
 
 - The Pt project uses a custom jam-based build.
 - Windows: `jam.bat`, Linux/macOS: `jam.sh`.
+- `jam.bat` is located in the top level directory.
 - All platforms use the same basic jam arguments.
 - Some platforms may have additional platform-specific options.
 - The examples below use `jam.bat`; substitute `jam.sh` accordingly.
@@ -20,11 +21,7 @@ description: "Build system"
 - ALWAYS perform a full global build to verify that dependent modules are not broken. 
 - NEVER only build the local module or test target.
 
-## Build Commands
-
-- `jam.bat` is located in the top level directory.
-
-### Configuring the Build
+# Configuring the Build
 
 - Configure debug build: 
   `jam.bat configure -sCONFIG=debug --debug`
@@ -47,7 +44,7 @@ description: "Build system"
 - `--debug` — enable debug symbols
 - `--optimize` — enable compiler optimizations
 
-### Building the Artifacts
+# Building the Artifacts
 
 - To build the currently selected configuration:
   - `jam.bat -q -j4`
@@ -57,18 +54,16 @@ description: "Build system"
 - use higher numbers for `-j` to increase build speed or omit `-j` when analyzing build errors
 - jam uses file timestamps to determine which files need to be rebuild
 
-### Cleaning the Build
+# Cleaning the Build
 
 - Remove all build artifacts: 
   `jam.bat clean`
 
-## Build Setup
+# Build Setup
 
 - Jamfiles live next to the source files in their module directory (`src/<Module>/Jamfile`).
 - Spaces around `:` and before `;` are required by the Jamfile syntax.
 - Comments in Jamfiles use `#`.
-
-### Output Directories
 
 The following Jam variables control where build artifacts are placed:
   - Use `MakeLocate <target> : <dir>` in Jamfiles to set the output directory,
@@ -82,7 +77,7 @@ The following Jam variables control where build artifacts are placed:
 | Install dest for executables | `deploy/<Config>/`                | `PT_INSTALL_BINDIR`       |
 | Install dest for libraries   | `deploy/<Config>/`                | `PT_INSTALL_LIBDIR`       |
 
-### Sub-Directory Specific Setup
+# Sub-Directory Specific Setup
 
 Every module Jamfile starts with:
 
@@ -104,7 +99,7 @@ For shared libraries that export a public API, also add:
 SubDirC++Flags [ FDefines <MODULE_NAME>_API_EXPORT ] ;
 ```
 
-### Executables (Main rule)
+# Executables (Main rule)
 
 Add the `.cpp` files to the `Main` source list after the `:`:
 
@@ -116,7 +111,7 @@ Main <executable-name> : Source.cpp
 - The executable's base name is the first argument for the `Main` rule.
 - On Windows, the binary produced by the build automatically gets the `.exe` suffix.
 
-### Shared Libraries (SharedLibrary rule)
+# Shared Libraries (SharedLibrary rule)
 
 Add the `.cpp` files to the `SharedLibrary` source list after the `:`:
 
@@ -128,7 +123,7 @@ SharedLibrary <library-name> : Source.cpp
 
 - The library's base name is the first argument for the `SharedLibrary` rule.
 
-### Static Libraries (Library rule)
+# Static Libraries (Library rule)
 
 Add the `.cpp` files to the `Library` source list after the `:`:
 
@@ -141,7 +136,7 @@ Library <library-name> : Source1.cpp
 
 - The library's base name is the first argument for the `Library` rule.
 
-### Linking Against Internal Libraries (LinkSharedLibraries)
+# Linking Against Internal Libraries (LinkSharedLibraries)
 
 Use `LinkSharedLibraries` to link libraries built within this project:
 
@@ -153,7 +148,7 @@ LinkSharedLibraries <target-name> : <Dep1> <Dep2> ;
 - `<Dep1>`, `<Dep2>` are `SharedLibrary` target names from this project.
 - NEVER use `LinkSharedLibraries` for external/third-party libraries.
 
-### Linking Against External Libraries (LinkLibs / LinkFlags)
+# Linking Against External Libraries (LinkLibs / LinkFlags)
 
 Use `LinkLibs` and `LinkFlags` for pre-built external libraries and frameworks:
 
@@ -166,7 +161,7 @@ LinkFlags <target-name> : $(<DEP>_LINKFLAGS) ;
 - Look up the available variables in the existing Jamfiles or in `Jamconfigure`.
 - Only include variables for dependencies the module actually uses.
 
-### Registering a Jamfile
+# Registering a Jamfile
 
 A new module's Jamfile is not discovered automatically. Add a `SubInclude` line
 next to the other `SubInclude` lines in the top-level `Jamfile`:
