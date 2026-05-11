@@ -77,10 +77,10 @@ The following Jam variables control where build artifacts are placed:
 | Use for                      | Build path                        | Variable                  |
 |------------------------------|-----------------------------------|---------------------------|
 | Object files                 | `tmp/<Config>/`                   | `PT_OUTPUT_OBJECT`        |
-| Executables                  | `build/<Config>/bin/`             | `PT_OUTPUT_TARGET`        |
-| Shared libraries             | `build/<Config>/bin/`             | `PT_OUTPUT_TARGET`        |
-| Install dest for executables | `deploy/<Config>/bin/`            | `PT_INSTALL_BINDIR`       |
-| Install dest for libraries   | `deploy/<Config>/lib/`            | `PT_INSTALL_LIBDIR`       |
+| Executables                  | `build/<Config>/`                 | `PT_OUTPUT_TARGET`        |
+| Shared libraries             | `build/<Config>/`                 | `PT_OUTPUT_TARGET`        |
+| Install dest for executables | `deploy/<Config>/`                | `PT_INSTALL_BINDIR`       |
+| Install dest for libraries   | `deploy/<Config>/`                | `PT_INSTALL_LIBDIR`       |
 
 ### Sub-Directory Specific Setup
 
@@ -173,4 +173,11 @@ next to the other `SubInclude` lines in the top-level `Jamfile`:
 
 ```Jamfile
 SubInclude PT_TOP src <Module-Name> ;
+```
+
+Sub-directories (e.g. `tests/`) within a module are registered the same way,
+but the `SubInclude` goes into the module's own Jamfile, not the top-level one:
+
+```Jamfile
+SubInclude PT_TOP src <Module-Name> tests ;
 ```

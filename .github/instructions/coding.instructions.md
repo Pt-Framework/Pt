@@ -109,4 +109,5 @@ description: "Coding Styles and Guidelines"
   - Private/local headers (in `src/`): quotes `"..."`.
 
 - **Visual Studio Projects:** 
-  - Register new files also in the module's `.vcxproj` and `.vcxproj.filters` if they exist.
+  - Register new files also in the `.vcxproj` and `.vcxproj.filters` if they exist.
+  - Filter structure in `.vcxproj.filters` mirrors the directory structure.
