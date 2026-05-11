@@ -135,10 +135,12 @@
 @section pt_unit Unit Testing
 
 <ul>
-    <li> @ref unittest_SimpleTests </li>
-    <li> @ref unittest_BuildSystemIntegration </li>
-    <li> @ref unittest_DataDrivenTesting </li>
-    <li> @ref unittest_ProtocolDrivenTesting </li>
-    <li> @ref unittest_RunningTests </li>
+    <li> @ref Pt-Unit-Page-TestCase </li>
+    <li> @ref Pt-Unit-Page-TestSuite </li>
+    <li> @ref Pt-Unit-Page-Assertion </li>
+    <li> @ref Pt-Unit-Page-TestProtocol </li>
+    <li> @ref Pt-Unit-Page-RegisterTest </li>
+    <li> @ref Pt-Unit-Page-Application </li>
+    <li> @ref Pt-Unit-Page-Reporter </li>
 </ul>
 */

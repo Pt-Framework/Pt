@@ -49,15 +49,31 @@ namespace Unit {
         a SourceInfo object. It is recommended to use the PT_UNIT_ASSERT
         for easy creation from a source info object.
 
+        The following assertion macros are available:
+
+        - PT_UNIT_ASSERT(cond) — asserts that the condition is true.
+        - PT_UNIT_ASSERT_MSG(cond, msg) — asserts with a custom message.
+        - PT_UNIT_ASSERT_EQUAL(a, b) — asserts that a == b, printing
+          both values on failure.
+        - PT_UNIT_ASSERT_NEAR(a, b) — asserts that two floating-point
+          values are approximately equal within a relative tolerance.
+        - PT_UNIT_ASSERT_THROW(expr, ExType) — asserts that expr throws
+          an exception of type ExType.
+        - PT_UNIT_ASSERT_NOTHROW(expr) — asserts that expr does not throw.
+        - PT_UNIT_FAIL(msg) — fails unconditionally with a message.
+
         @code
-            void myTest()
-            {
-                int ten = 5 + 5;
-                PT_UNIT_ASSERT(ten == 10)
-            }
+        void myTest()
+        {
+            PT_UNIT_ASSERT(5 + 5 == 10);
+            PT_UNIT_ASSERT_EQUAL(std::stoi("42"), 42);
+            PT_UNIT_ASSERT_NEAR(1.0 / 3.0, 0.333333);
+            PT_UNIT_ASSERT_THROW(std::stoi("abc"), std::exception);
+            PT_UNIT_ASSERT_NOTHROW(std::stoi("7"));
+        }
         @endcode
 
-        @ingroup unittest
+        @ingroup Pt-Unit
     */
     class PT_UNIT_API Assertion
     {
@@ -90,12 +106,31 @@ namespace Unit {
     inline bool getFalse()
     { return testCond; }
 
+    /** @brief Asserts that a condition is true.
+
+        Throws %Assertion with the stringified condition and source
+        location if \a cond evaluates to false.
+
+        @param cond The condition to verify.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_ASSERT(cond) \
         do { \
             if( !(cond) ) \
                 throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO); \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Asserts that a condition is true with a custom message.
+
+        Throws %Assertion with the given message and source location
+        if \a cond evaluates to false.
+
+        @param cond The condition to verify.
+        @param what A message or stream expression describing the failure.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_ASSERT_MSG(cond, what) \
         do { \
             if( !(cond) ) \
@@ -106,6 +141,10 @@ namespace Unit {
             } \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Deprecated. Use PT_UNIT_ASSERT_EQUAL instead.
+
+        @ingroup Pt-Unit
+    */
     // TODO: deprecated
     #define PT_UNIT_ASSERT_EQUALS(value1, value2) \
         do { \
@@ -117,6 +156,16 @@ namespace Unit {
             } \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Asserts that two values are equal.
+
+        Throws %Assertion if \a value1 and \a value2 are not equal.
+        Both values are printed in the failure message.
+
+        @param value1 The first value.
+        @param value2 The second value.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_ASSERT_EQUAL(value1, value2) \
         do { \
             if( ! ((value1) == (value2)) ) \
@@ -127,6 +176,17 @@ namespace Unit {
             } \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Asserts that two floating-point values are approximately equal.
+
+        Throws %Assertion if the absolute difference between \a value1
+        and \a value2 exceeds a relative tolerance derived from
+        machine epsilon.
+
+        @param value1 The first value.
+        @param value2 The second value.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_ASSERT_NEAR(value1, value2)                                                            \
         do {                                                                                              \
             const double _pt_v1      = static_cast<double>(value1);                                      \
@@ -146,6 +206,16 @@ namespace Unit {
             }                                                                                             \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Asserts that an expression throws a specific exception.
+
+        Throws %Assertion if \a cond does not throw an exception of
+        type \a EX.
+
+        @param cond The expression to evaluate.
+        @param EX The expected exception type.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_ASSERT_THROW(cond, EX) \
         do { \
             struct _pt_ex { }; \
@@ -164,6 +234,14 @@ namespace Unit {
             {} \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Asserts that an expression does not throw.
+
+        Throws %Assertion if \a cond throws any exception.
+
+        @param cond The expression to evaluate.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_ASSERT_NOTHROW(cond) \
         do { \
             try { \
@@ -182,6 +260,14 @@ namespace Unit {
             } \
         } while (::Pt::Unit::testCond)
 
+    /** @brief Fails unconditionally with a message.
+
+        Throws %Assertion with the given message.
+
+        @param what A message or stream expression describing the failure.
+
+        @ingroup Pt-Unit
+    */
     #define PT_UNIT_FAIL(what) \
         do { \
             std::ostringstream _pt_msg; \

@@ -35,7 +35,8 @@ namespace Pt {
 namespace Unit {
 
 /** @brief Fixture interface for tests.
-    @ingroup unittest
+
+    @ingroup Pt-Unit
 */
 class TestFixture
 {

@@ -50,7 +50,7 @@ class Test;
     on perticular events during the test. Reporters can be made to print
     information to the console or write XML logs.
 
-    @ingroup unittest
+    @ingroup Pt-Unit
 */
 class PT_UNIT_API Reporter : protected NonCopyable
 {

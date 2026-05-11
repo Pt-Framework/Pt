@@ -46,34 +46,36 @@ namespace Unit {
         will be called first, then 'test' and finally 'tearDown'.
 
         @code
-            class MyTest : public TestCase
+        class MyTest : public Pt::Unit::TestCase
+        {
+          public:
+            MyTest()
+            : Pt::Unit::TestCase("MyTest")
+            {}
+
+            virtual void setUp()
             {
-                public:
-                    MyTest()
-                    : TestCase("MyTest")
-                    {}
+                // init resource
+            }
 
-                    virtual void setUp()
-                    {
-                        // init resource
-                    }
+            virtual void tearDown()
+            {
+                // release resource
+            }
 
-                    virtual void tearDown()
-                    {
-                        // release resource
-                    }
+            void test()
+            {
+                // test code using a resource
+            }
+        };
 
-                    void test()
-                    {
-                        // test code using a resourc
-                    }
-            };
+        static Pt::Unit::RegisterTest<MyTest> _reg;
         @endcode
 
         Once the test is written it can be registered to an application by
-        using the RegisterTest class template.
+        using the %RegisterTest class template.
 
-        @ingroup unittest
+        @ingroup Pt-Unit
     */
     class PT_UNIT_API TestCase : public Test
                                , public TestFixture

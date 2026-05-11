@@ -39,27 +39,43 @@ namespace Unit {
 
     /** @brief Run registered tests
 
-        The application class serves as an environment for a number of tests
-        to be run. An application object is usually created in the main loop
-        of a program and the return value of Unit::Application::run returned.
-        A reporter can be set for the application to process test events.
-        Reporters can be made to print information to the console or write
-        XML logs. A typical example may look like this:
+        The %Application class serves as the environment for running unit
+        tests. Tests are registered at program start using
+        %Pt::Unit::RegisterTest. A %Reporter can be attached to process
+        test events such as printing results to the console or writing
+        log files.
+
+        The simplest way to provide a %main() function is to include
+        TestMain.h in exactly one source file of the test executable.
+        It creates an %Application, attaches a %BriefReporter for console
+        output and supports the following command line arguments:
+
+        - \c -h — prints a list of all registered tests.
+        - \c -t \c \<name\> — runs only the test with the given name.
+        - \c -f \c \<file\> — additionally writes test output to a log file.
+
+        When executed without arguments, all registered tests are run.
+        The exit code equals the number of errors, so a successful run
+        returns 0.
+
+        For more control over reporter setup or test execution, a custom
+        %main() function can be written instead of including TestMain.h.
 
         @code
-            int main()
-            {
-                Pt::Unit::Reporter reporter;
-                Pt::Unit::Application app;
-                app.setReporter(reporter);
-                return app.run();
-            }
+        #include <Pt/Unit/Application.h>
+        #include <Pt/Unit/Reporter.h>
+
+        int main()
+        {
+            Pt::Unit::Application app;
+            Pt::Unit::BriefReporter reporter;
+            app.attachReporter(reporter);
+            app.run();
+            return app.errors() > 0 ? 1 : 0;
+        }
         @endcode
 
-        The TestMain.h include already defines a main loop with an application
-        for the common use case.
-
-        @ingroup unittest
+        @ingroup Pt-Unit
     */
     class PT_UNIT_API Application : private Test
     {

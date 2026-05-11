@@ -46,6 +46,8 @@
 
 /** @defgroup Logging Logging
 
+    @brief Efficient multi-threaded logging with configurable output channels.
+
     The logging framework offers an efficient, extensible system to
     log messages from programs with multiple threads to a number of
     channels. Logging can be completely disabled at compile time, when the
@@ -58,7 +60,9 @@
 */
 
 /** @defgroup FileSystem File System Access
-    
+
+    @brief File and directory operations with iterator-based traversal.
+
     The systems programming library (Pt::System) provides functionality to
     identify, create, rename, move or remove files and directories. An iterator
     based API can be used to traverse through the entries in a directory. It
@@ -68,7 +72,9 @@
 */
 
 /** @defgroup Plugins Dynamic Libraries and Plugins
-    
+
+    @brief Loading dynamic libraries and creating plugin instances at runtime.
+
     Dynamic libraries can be loaded at runtime and symbols can be resolved
     using the Pt::System::Library class. Additionally, the plugin API provides
     a more advanced way of creating classes, that implement a common interface,

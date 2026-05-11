@@ -1,4 +1,4 @@
-/* Copyright (C) 2026 Marc Boris Duerner
+/* Copyright (C) 2008 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -99,6 +99,8 @@
 
 /** @defgroup Allocator Allocators
 
+    @brief Custom allocation strategies for optimized memory management.
+
     The Pt::Allocator interface can be used to optimize or customize allocation
     strategies. Two allocators are provided, which can be approached by the
     Allocator interface, a pool based allocator and a page based allocator.
@@ -111,6 +113,8 @@
 */
 
 /** @defgroup BasicTypes Basic Types
+
+    @brief Fixed-size integers, date and time types, and type-erased values.
 
     The %Pt framework defines a number of signed and unsigned,
     @link basictypes_FixedInt fixed-size integer@endlink types. These
@@ -129,6 +133,8 @@
 
 /** @defgroup Concurrency Concurrency
 
+    @brief Threads, mutexes, semaphores, condition variables and atomic operations.
+
     The classes and functions in this group make it possible to write
     multi-threaded programs. Access to shared resources can be serialized
     by various types of mutexes, semaphores and condition variables. The most
@@ -137,7 +143,9 @@
 */
 
 /** @defgroup Utilities Utilities
-    
+
+    @brief Conversion utilities, program options and type information.
+
     The conversion utilities of the Platinum core library include functions
     to convert @link utilities_ByteOrder byte orders@endlink, to format and
     parse @link utilities_StringConv numbers@endlink, and to perform checked
@@ -159,6 +167,8 @@
 
 /** @defgroup Unicode Text Processing
 
+    @brief Unicode characters, strings, encodings and regular expressions.
+
     This set of classes and functions extends the string and localization
     support of the C++ standard library to work with unicode characters and
     strings. A unicode character type and string class (a specialization of
@@ -171,6 +181,8 @@
 */
 
 /** @defgroup Serialization Serialization
+
+    @brief Composing and decomposing types to text or binary formats.
 
     Data structures and types can be serialized to text or binary formats using
     %Pt's serialization. This is used within the framework to load and store

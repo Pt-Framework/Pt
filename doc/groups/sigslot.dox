@@ -1,5 +1,7 @@
 /** @defgroup sigslot Signals and Delegates
 
+    @brief Type-safe callback mechanism for connecting signals to slots and delegates.
+
     Callback mechanisms for event handling have become ubiqitous in todays 
     application frameworks. Older examples are the use of function pointers as
     callbacks or the message maps found in the MFC toolkit. More modern approaches

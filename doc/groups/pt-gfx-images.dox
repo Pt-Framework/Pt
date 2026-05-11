@@ -1,5 +1,7 @@
 /** @defgroup Pt-Gfx-Images Images and Image Views
 
+    @brief Images, image formats and image views.
+
     The %Pt::Gfx image API provides classes for storing image data, accessing
     pixels and working with image formats. Images own their pixel data and
     support a range of pixel formats such as %Argb32, %Rgb32, %Rgb16 and

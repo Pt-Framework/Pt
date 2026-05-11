@@ -49,7 +49,7 @@ namespace Unit {
         is overriden by the derived classes and signals to inform about
         events that occur while the test is run.
 
-        @ingroup unittest
+        @ingroup Pt-Unit
     */
     class PT_UNIT_API Test : protected NonCopyable
     {

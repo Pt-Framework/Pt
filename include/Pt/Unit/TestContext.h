@@ -41,7 +41,7 @@ class TestFixture;
 
 /** @brief Context in which test are run.
 
-    @ingroup unittest
+    @ingroup Pt-Unit
 */
 class PT_UNIT_API TestContext
 {

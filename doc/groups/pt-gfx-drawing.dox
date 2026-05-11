@@ -1,5 +1,7 @@
 /** @defgroup Pt-Gfx-Drawing Drawing Graphics and Text
 
+    @brief Rendering 2D shapes, text and images on paint surfaces.
+
     The %Pt::Gfx drawing API provides the abstractions needed to render 2D
     content on different paint surfaces. A %Painter can be used
     to draw lines, rectangles, ellipses, paths, text, images and bitmaps on

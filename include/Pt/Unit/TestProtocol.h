@@ -44,9 +44,50 @@ class TestSuite;
     This is the base class for protocols that can be used to run a test
     suite. The default implementation will simply run each registered
     test of the test suite without passing it any data. Implementors
-    need to override the method TestProtocol::run.
+    need to override the method %TestProtocol::run to control the order
+    and frequency of test method execution. This is useful to repeat
+    tests, interleave them with waits, or implement stress-test patterns.
 
-    @ingroup unittest
+    A protocol is assigned to a %TestSuite through the constructor or
+    via %TestSuite::setProtocol().
+
+    @code
+    class RetryProtocol : public Pt::Unit::TestProtocol
+    {
+      public:
+        void run(Pt::Unit::TestSuite& suite)
+        {
+            suite.runTest("Connect");
+            suite.runTest("Connect");
+            suite.runTest("Connect");
+        }
+    };
+    @endcode
+
+    Test methods in a %TestSuite can also take arguments for data-driven
+    testing. The protocol calls %TestSuite::runTest() with
+    %Pt::SerializationInfo objects to pass different data each time.
+
+    @code
+    class MathProtocol : public Pt::Unit::TestProtocol
+    {
+      public:
+        void run(Pt::Unit::TestSuite& suite)
+        {
+            Pt::SerializationInfo data[2];
+
+            data[0] <<= 4;
+            data[1] <<= 9;
+            suite.runTest("MathTest::Addition", data, 2);
+
+            data[0] <<= 13;
+            data[1] <<= 2;
+            suite.runTest("MathTest::Addition", data, 2);
+        }
+    };
+    @endcode
+
+    @ingroup Pt-Unit
 */
 class PT_UNIT_API TestProtocol
 {

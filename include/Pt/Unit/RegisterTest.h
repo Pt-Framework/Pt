@@ -52,7 +52,7 @@ namespace Unit {
     register an instance of its template parameter to the
     application.
 
-    @ingroup unittest
+    @ingroup Pt-Unit
 */
 template <class TestT>
 struct RegisterTest

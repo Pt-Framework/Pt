@@ -37,7 +37,7 @@
 
 namespace Pt {
 
-    class SerializationInfo;
+class SerializationInfo;
 
 namespace Unit {
 
@@ -49,29 +49,35 @@ namespace Unit {
         required test methods on construction.
 
         @code
-            class MyTest : public TestSuite
+        class MyTest : public Pt::Unit::TestSuite
+        {
+          public:
+            MyTest()
+            : Pt::Unit::TestSuite("MyTest")
             {
-                public:
-                    MyTest()
-                    : TestSuite("MyTest")
-                    {
-                        this->registerMethod("test1", *this, &MyTest::test1);
-                    }
+                this->registerMethod("Run", *this, &MyTest::Run);
+            }
 
-                    void test1();
-            };
+            void Run()
+            {
+                PT_UNIT_ASSERT(true);
+            }
+        };
+
+        static Pt::Unit::RegisterTest<MyTest> _reg;
         @endcode
 
         Once the test is written it can be registered to an application by
-        using the RegisterTest class template.
+        using the %RegisterTest class template. Include %TestMain.h in
+        exactly one source file to provide a %main() function.
 
         The default protocol will run each registered test method when the
-        test is run. Before each test method setUp is called and tearDown
-        after each test. The TestProtocol can be replaced with a customised
-        one and reflection can be used to call any method multiple times with
-        the required data.
+        test is run. Before each test method %setUp() is called and
+        %tearDown() after each test. The %TestProtocol can be replaced
+        with a customised one and reflection can be used to call any
+        method multiple times with the required data.
 
-        @ingroup unittest
+        @ingroup Pt-Unit
     */
     class PT_UNIT_API TestSuite : public Test
                                 , public TestFixture
