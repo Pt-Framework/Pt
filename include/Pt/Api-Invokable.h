@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Invokable_h
-#define Pt_Invokable_h
+#ifndef PT_API_INVOKABLE_H
+#define PT_API_INVOKABLE_H
 
 #include <Pt/Api.h>
 #include <Pt/Void.h>
@@ -30,6 +30,7 @@ namespace Pt {
     number of arguments, but does not provide a return value. It serves as
     a base type for other types in the Pt signals/slots framework.
 
+    @headerfile Invokable.h <Pt/Invokable.h>
     @ingroup sigslot
 */
 template <typename ARGUMENTS>

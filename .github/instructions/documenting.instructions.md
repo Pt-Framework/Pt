@@ -25,10 +25,15 @@ features for agents.
   module's `Api.h`.
 - Group IDs are derived from the C++ namespace by replacing `::` with `-`:
   `Ns::` -> `Ns-<Feature>`, `Ns::Sub::` -> `Ns-Sub-<Feature>`.
-- Doxygen Group files live in `doc/groups/*.dox`, one per feature group, named
-  after the group ID, e.g. `doc/groups/<GroupId>.dox`.
-- Each `.dox` file contains exactly one `@defgroup` block and uses Doxygen
-  syntax.
+- Doxygen Group headers live in the module's public include directory, named
+  `Api-<Feature>.h`, e.g. `include/<Project>/<Module>/Api-<Feature>.h`.
+  Core module groups live in `include/<Project>/Api-<Feature>.h`.
+- Each `Api-<Feature>.h` file contains exactly one `@defgroup` block,
+  wrapped in include guards (`#ifndef PT[_MODULE]_API_FEATURE_H`).
+- Class-doc overrides use `Api-<ClassName>.h` in the same include directory
+  as the real header. These provide Doxygen documentation for classes that
+  are typedefs or template specializations where Doxygen generates poor
+  output from the real declaration.
 
 # User Documentation Pages
 
@@ -47,7 +52,7 @@ features for agents.
   or more related groups), e.g. `<Module>.instructions.md` covers all
   `<Module>-*` groups.
 - These files index the Doxygen foundation for agents: they map features
-  and tasks to the relevant headers and `doc/groups/*.dox` files.
+  and tasks to the relevant headers and `Api-<Feature>.h` group files.
 - They do not contain documentation or explanations — those belong in
   headers and group files.
 

@@ -1,5 +1,5 @@
-#ifndef Pt_TextCodec_h
-#define Pt_TextCodec_h
+#ifndef PT_API_TEXTCODEC_H
+#define PT_API_TEXTCODEC_H
 
 #include <Pt/Api.h>
 #include <Pt/Locale.h>
@@ -32,6 +32,7 @@ namespace Pt {
     Pt::TextOStream tos(&codec);
     @endcode
 
+    @headerfile TextCodec.h <Pt/TextCodec.h>
     @ingroup Unicode
 */
 template <typename CharT, typename ByteT>

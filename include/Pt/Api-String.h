@@ -1,5 +1,5 @@
-#ifndef PT_STRING_H
-#define PT_STRING_H
+#ifndef PT_API_STRING_H
+#define PT_API_STRING_H
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
@@ -37,6 +37,7 @@ namespace Pt {
     Additional methods make it easier to work with other character types. For
     example, the relational operators are also overloaded for char and wchar_t.  
 
+    @headerfile String.h <Pt/String.h>
     @ingroup Unicode
 */
 class String 

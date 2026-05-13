@@ -1,5 +1,5 @@
-#ifndef PT_REMOTING_REMOTEPROCEDURE_H
-#define PT_REMOTING_REMOTEPROCEDURE_H
+#ifndef PT_REMOTING_API_REMOTEPROCEDURE_H
+#define PT_REMOTING_API_REMOTEPROCEDURE_H
 
 namespace Pt {
 
@@ -25,6 +25,8 @@ namespace Remoting {
     many cases this will be a HttpClient, but other transport protocols can
     be supported by other types of clients. The Client must live longer than
     the remote procedures using it.
+
+    @headerfile RemoteProcedure.h <Pt/Remoting/RemoteProcedure.h>
 */
 template <typename R, typename... ARGUMENTS>
 class RemoteProcedure
@@ -83,4 +85,4 @@ class RemoteProcedure
 
 }
 
-#endif // PT_REMOTING_REMOTEPROCEDURE_TPP
+#endif

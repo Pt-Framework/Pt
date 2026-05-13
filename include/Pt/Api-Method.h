@@ -1,5 +1,5 @@
-#ifndef Pt_Method_h
-#define Pt_Method_h
+#ifndef PT_API_METHOD_H
+#define PT_API_METHOD_H
 
 #include <Pt/Callable.h>
 #include <Pt/Connectable.h>
@@ -13,6 +13,7 @@ namespace Pt {
     so that they can be used with the signals/slots framework. There are
     partial specializations of this class template for up to ten arguments.
 
+    @headerfile Method.h <Pt/Method.h>
     @ingroup sigslot
 */
 template <typename R, class ClassT, typename ARGUMENTS>
@@ -52,6 +53,8 @@ class Method : public Callable<R, ARGUMENTS>
 
 
 /** @brief Wraps %Method objects so that they can act as Slots.
+
+    @headerfile Method.h <Pt/Method.h>
     @ingroup sigslot
 */
 template < typename R, typename ClassT,class ARGUMENTS>

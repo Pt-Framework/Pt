@@ -1,3 +1,5 @@
+#ifndef PT_API_CONSTMETHOD_H
+#define PT_API_CONSTMETHOD_H
 
 namespace Pt {
 
@@ -7,6 +9,7 @@ namespace Pt {
     so that they can be used with the signals/slots framework. There are 
     partial specializations of this class template for up to ten arguments.
 
+    @headerfile ConstMethod.h <Pt/ConstMethod.h>
     @ingroup sigslot
 */
 template < typename R,typename ClassT, typename ARGUMENTS>
@@ -54,6 +57,8 @@ class ConstMethod : public Callable<R, ARGUMENTS>
 
 
 /** @brief Wraps %ConstMethod objects so that they can act as Slots.
+
+    @headerfile ConstMethod.h <Pt/ConstMethod.h>
     @ingroup sigslot
 */
 template < typename R, typename ClassT,class ARGUMENTS>
@@ -100,5 +105,7 @@ template <class R, class BaseT, class C, typename ARGS>
 ConstMethodSlot<R, C, ARGS> slot( C & obj, R (BaseT::*memFunc)(ARGS) const );
 
 } //namespace Pt
+
+#endif
 
 

@@ -1,5 +1,5 @@
-#ifndef Pt_Remoting_ServiceDefinition_h
-#define Pt_Remoting_ServiceDefinition_h
+#ifndef PT_REMOTING_API_SERVICEDEFINITION_H
+#define PT_REMOTING_API_SERVICEDEFINITION_H
 
 namespace Pt {
 
@@ -15,6 +15,8 @@ namespace Remoting {
     example by supporting serialization to a SerializationInfo. The service
     supports synchronous and asynchronous procedures, where the latter ones
     are factories for %ActiveProcedure objects.
+
+    @headerfile ServiceDefinition.h <Pt/Remoting/ServiceDefinition.h>
 */
 class ServiceDefinition : private NonCopyable
 {

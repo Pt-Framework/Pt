@@ -3,7 +3,7 @@ description: "Drawing Graphics and Text"
 ---
 
 - Concepts, painter lifecycle, API boundaries:
-  `doc/groups/pt-gfx-drawing.dox`
+  `include/Pt/Gfx/Api-Drawing.h`
 - Draw lines, rectangles, circles, ellipses, arcs, pie, chord, polygon:
   `include/Pt/Gfx/PainterBase.h`
 - Draw and fill paths, draw text, draw images, set clip, set pen/brush/font:

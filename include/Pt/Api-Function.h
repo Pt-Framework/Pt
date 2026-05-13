@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Function_h
-#define Pt_Function_h
+#ifndef PT_API_FUNCTION_H
+#define PT_API_FUNCTION_H
 
 #include <Pt/Callable.h>
 #include <Pt/Connectable.h>
@@ -30,6 +30,7 @@ namespace Pt {
     The %Function class wraps free functions in the form of a Callable,
     for use with the signals/slots framework.
 
+    @headerfile Function.h <Pt/Function.h>
     @ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>
@@ -61,6 +62,8 @@ class Function : public Callable<R, ARGUMENTS>
 
 
 /** @brief Wraps %Function objects so that they can act as slots.
+
+    @headerfile Function.h <Pt/Function.h>
     @ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>

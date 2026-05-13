@@ -1,5 +1,5 @@
-#ifndef Pt_Slot_h
-#define Pt_Slot_h
+#ifndef PT_API_SLOT_H
+#define PT_API_SLOT_H
 
 #include <Pt/Api.h>
 #include <Pt/Void.h>
@@ -16,6 +16,7 @@ class Connection;
     example is the Pt::MethodSlot, which allows to use a member function as a
     slot. 
 
+    @headerfile Slot.h <Pt/Slot.h>
     @ingroup sigslot
 */
 class Slot
@@ -41,6 +42,8 @@ class Slot
 };
 
 /** @brief Base type for various "slot" types.
+
+    @headerfile Slot.h <Pt/Slot.h>
     @ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>

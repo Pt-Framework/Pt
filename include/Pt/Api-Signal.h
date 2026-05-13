@@ -1,5 +1,5 @@
-#ifndef Pt_Signal_h
-#define Pt_Signal_h
+#ifndef PT_API_SIGNAL_H
+#define PT_API_SIGNAL_H
 
 namespace Pt {
 
@@ -103,6 +103,7 @@ namespace Pt {
     and does not depend on an event loop. If multiple slots are connected to
     a signal, the slots will be called one after another.
 
+    @headerfile Signal.h <Pt/Signal.h>
     @ingroup sigslot
 */
 template <typename ARGUMENTS>
@@ -156,6 +157,7 @@ class Signal : public Connectable
     can be used as the target of another %Signal. This allows chaining of
     %Signals.
 
+    @headerfile Signal.h <Pt/Signal.h>
     @ingroup sigslot
 */
 template <typename ARGUMENTS>

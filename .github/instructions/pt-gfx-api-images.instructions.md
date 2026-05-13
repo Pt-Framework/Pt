@@ -2,6 +2,12 @@
 description: "Pixel types, image formats, and image access patterns in Pt::Gfx."
 ---
 
+# Doxygen Group and Class-Doc Overrides
+
+- Group definition: `include/Pt/Gfx/Api-Images.h` — `@defgroup Pt-Gfx-Images`
+- Class-doc override: `include/Pt/Gfx/Api-Argb32Image.h` — `Argb32Image` (typedef)
+- Class-doc override: `include/Pt/Gfx/Api-Rgb32Image.h` — `Rgb32Image` (typedef)
+
 # Pixel Types
 
 Pixel types provide access to pixel data in an image. They come in

@@ -1,5 +1,5 @@
-#ifndef Pt_TypeTraits_h
-#define Pt_TypeTraits_h
+#ifndef PT_API_TYPETRAITS_H
+#define PT_API_TYPETRAITS_H
 
 #include <Pt/Api.h>
 #include <cstddef>
@@ -12,6 +12,7 @@ namespace Pt {
     is a reference or is a pointer. This is useful for template programming,
     where code can branch differently depending on the type traits.
 
+    @headerfile TypeTraits.h <Pt/TypeTraits.h>
     @ingroup Utilities
 */
 template <typename T>
@@ -47,4 +48,4 @@ struct TypeTraits
 
 } // namespace Pt
 
-#endif // Pt_TypeTraits_h
+#endif

@@ -1,3 +1,5 @@
+#ifndef PT_API_CALLABLE_H
+#define PT_API_CALLABLE_H
 
 namespace Pt {
 
@@ -7,6 +9,7 @@ namespace Pt {
     return values. There are partial specializations of this class
     template for up to ten arguments.
 
+    @headerfile Callable.h <Pt/Callable.h>
     @ingroup sigslot
 */
 template <typename R, typename ARGUMENTS>
@@ -41,3 +44,5 @@ class Callable : public Invokable<ARGUMENTS>
 };
 
 }
+
+#endif

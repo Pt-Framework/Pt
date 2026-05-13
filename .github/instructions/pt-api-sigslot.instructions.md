@@ -2,18 +2,30 @@
 description: "Using Pt signals, slots, delegates, and events for type-safe callbacks."
 ---
 
+# Doxygen Group and Class-Doc Overrides
+
+- Group definition: `include/Pt/Api-sigslot.h` — `@defgroup sigslot`
+- Class-doc override: `include/Pt/Api-Signal.h` — `Signal`, `SignalSlot`
+- Class-doc override: `include/Pt/Api-Delegate.h` — `Delegate`, `DelegateSlot`
+- Class-doc override: `include/Pt/Api-Slot.h` — `Slot`, `BasicSlot`
+- Class-doc override: `include/Pt/Api-Callable.h` — `Callable`
+- Class-doc override: `include/Pt/Api-Invokable.h` — `Invokable`
+- Class-doc override: `include/Pt/Api-Function.h` — `Function`, `FunctionSlot`
+- Class-doc override: `include/Pt/Api-Method.h` — `Method`, `MethodSlot`
+- Class-doc override: `include/Pt/Api-ConstMethod.h` — `ConstMethod`, `ConstMethodSlot`
+
 # Signals, Slots and Delegates
 
 The Pt signal/slot system provides type-safe, lifetime-managed callbacks.
 
 For detailed documentation with examples, read:
-- `doc/groups/sigslot.dox` — Conceptual overview and introduction
-- `doc/include/Pt/Signal.h` — Signal usage, connecting, emitting, disconnecting
-- `doc/include/Pt/Delegate.h` — Delegate usage, call() vs invoke()
-- `doc/include/Pt/Slot.h` — Slot concept and creation helpers
-- `doc/include/Pt/Method.h` — Method slots (member function wrappers)
-- `doc/include/Pt/Function.h` — Function slots (free function wrappers)
-- `doc/include/Pt/ConstMethod.h` — Const method slots
+- `include/Pt/Api-sigslot.h` — Conceptual overview and introduction
+- `include/Pt/Signal.h` — Signal usage, connecting, emitting, disconnecting
+- `include/Pt/Delegate.h` — Delegate usage, call() vs invoke()
+- `include/Pt/Slot.h` — Slot concept and creation helpers
+- `include/Pt/Method.h` — Method slots (member function wrappers)
+- `include/Pt/Function.h` — Function slots (free function wrappers)
+- `include/Pt/ConstMethod.h` — Const method slots
 
 ## Key Classes
 

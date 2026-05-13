@@ -1,3 +1,5 @@
+#ifndef PT_API_DELEGATE_H
+#define PT_API_DELEGATE_H
 
 namespace Pt {
 
@@ -83,6 +85,7 @@ namespace Pt {
     connection was closed, the delegate is invoked, which has no effect. Finally,
     when the delegate is called again, an exception is thrown and catched.
 
+    @headerfile Delegate.h <Pt/Delegate.h>
     \ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>
@@ -137,6 +140,7 @@ class Delegate : public Connectable
     can be used as the target of another %Delegate. This allows chaining of
     delegates.
 
+    @headerfile Delegate.h <Pt/Delegate.h>
     @ingroup sigslot
 */
 template < typename R, typename ARGUMENTS>
@@ -174,3 +178,5 @@ template <typename R, typename ARGS>
 Connection operator+=(Delegate<R, ARGS>& delegate, const BasicSlot<R, ARGS>& slot);
 
 } // namespace Pt
+
+#endif

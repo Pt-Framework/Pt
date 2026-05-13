@@ -1,5 +1,5 @@
-#ifndef PT_REMOTING_ACTIVEPROCEDURE_H
-#define PT_REMOTING_ACTIVEPROCEDURE_H
+#ifndef PT_REMOTING_API_ACTIVEPROCEDURE_H
+#define PT_REMOTING_API_ACTIVEPROCEDURE_H
 
 namespace Pt {
 
@@ -24,6 +24,7 @@ namespace Remoting {
     completion and call onResult() to get the result and serialize it. Both
     methods may throw exceptions of type Fault to indicate failure.
 
+    @headerfile ActiveProcedure.h <Pt/Remoting/ActiveProcedure.h>
 */
 template < typename R, typename... ARGS>
 class ActiveProcedure : public ServiceProcedure
@@ -61,4 +62,4 @@ class ActiveProcedure : public ServiceProcedure
 
 } // namespace Pt
 
-#endif // PT_REMOTING_ACTIVEPROCEDURE_H
+#endif

@@ -44,47 +44,6 @@
 
 #endif
 
-/** @defgroup Logging Logging
-
-    @brief Efficient multi-threaded logging with configurable output channels.
-
-    The logging framework offers an efficient, extensible system to
-    log messages from programs with multiple threads to a number of
-    channels. Logging can be completely disabled at compile time, when the
-    logging macros are used. At runtime, log messages are filtered by
-    a level of severity. Filtering is very efficient, because log messages
-    are not even built if their log level is too low.
-    Currently three types of output channels exist, logging to files
-    with file rolling, to the console and to the serial port. The logging
-    framework can be extended by new channels.
-*/
-
-/** @defgroup FileSystem File System Access
-
-    @brief File and directory operations with iterator-based traversal.
-
-    The systems programming library (Pt::System) provides functionality to
-    identify, create, rename, move or remove files and directories. An iterator
-    based API can be used to traverse through the entries in a directory. It
-    can be used with the iterator based algorithms in the C++ standard library.
-    The FileDevice is an implementation of the IODevice to read and write
-    files. 
-*/
-
-/** @defgroup Plugins Dynamic Libraries and Plugins
-
-    @brief Loading dynamic libraries and creating plugin instances at runtime.
-
-    Dynamic libraries can be loaded at runtime and symbols can be resolved
-    using the Pt::System::Library class. Additionally, the plugin API provides
-    a more advanced way of creating classes, that implement a common interface,
-    from a dynamically loadable library or module. The mechanism is
-    non-intrusive and can be used with an existing class hierachy. Plugins can
-    be loaded and unloded by client application code. The concrete type of the
-    created class is opaque to the application that uses the plugin, it only
-    needs to know the interface.
-*/
-
 namespace Pt {
 
 /** @namespace Pt::System

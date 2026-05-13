@@ -1,5 +1,5 @@
-#ifndef Pt_SerializationContext_h
-#define Pt_SerializationContext_h
+#ifndef PT_API_SERIALIZATIONCONTEXT_H
+#define PT_API_SERIALIZATIONCONTEXT_H
 
 #include <Pt/Api.h>
 #include <Pt/TypeInfo.h>
@@ -15,6 +15,7 @@ class SerializationContextImpl;
 
 /** @brief Context for the serialization of types.
 
+    @headerfile SerializationContext.h <Pt/SerializationContext.h>
     @ingroup Serialization
 */
 class PT_API SerializationContext
@@ -197,4 +198,4 @@ class PT_API SerializationContext
 
 } // namespace Pt
 
-#endif // Pt_SerializationContext_h
+#endif
