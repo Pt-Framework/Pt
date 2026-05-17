@@ -30,9 +30,13 @@
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/StyleFlags.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Forms/Application.h>
+
+#include <algorithm>
+#include <cmath>
 
 namespace Pt {
 
@@ -43,12 +47,10 @@ PushButton::PushButton()
 , _isPressed(false)
 , _isBeingToggled(false)
 , _isFlat(false)
-, _direction(Left)
+, _direction(Direction::Left)
 , _hasRenderer(false)
 , _fontOverride(0)
-, _styleGeneration(0)
 {
-    _font = Application::instance().styleOptions().font();
 }
 
 
@@ -172,7 +174,10 @@ void PushButton::setTextColor(const Gfx::Color& color)
 
 const Gfx::Font& PushButton::font() const
 {
-    return _font;
+    if( _renderer )
+        return _renderer->font();
+
+    return Application::instance().styleOptions().font();
 }
 
 
@@ -250,7 +255,55 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
     _renderer.reset(renderer);
     _hasRenderer = renderer != 0;
 
+    if( renderer )
+    {
+        if( _foreground )
+            renderer->setForeground(*_foreground);
+
+        if( _contour )
+            renderer->setContour(*_contour);
+
+        if( _accentColor )
+            renderer->setAccentColor(*_accentColor);
+
+        if( _highlightColor )
+            renderer->setHighlightColor(*_highlightColor);
+
+        if( _textColor )
+            renderer->setTextColor( Gfx::Pen(*_textColor) );
+
+        if( _fontOverride )
+            renderer->setFont( getFont() );
+    }
+
     invalidate();
+}
+
+
+ButtonStyleFlags PushButton::buttonStyleFlags() const
+{
+    StyleFlags common;
+
+    if( isEnabled() )
+        common.set(StyleFlags::Enabled);
+    else
+        common.set(StyleFlags::Disabled);
+
+    if( isHighlighted() )
+        common.set(StyleFlags::Highlighted);
+
+    if( hasFocus() )
+        common.set(StyleFlags::Focused);
+
+    ButtonStyleFlags state(common);
+
+    if( _isPressed )
+        state.set(ButtonStyleFlags::Pressed);
+
+    if( _isFlat )
+        state.set(ButtonStyleFlags::Flat);
+
+    return state;
 }
 
 
@@ -325,126 +378,9 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
-{
-    const Gfx::Scaling& scal = this->scaling();
-
-    Painter _painter( surface() );
-    _painter.setFont(_font);
-
-    _textMetrics = _painter.textMetrics( text() );
-    _fontMetrics = _painter.fontMetrics();
-
-    double spacing = _picture.empty() || text().empty() ? 0 : _fontMetrics.height() * 0.5;
-
-    // use descent as additional spacing
-    double textHeight = _fontMetrics.height() + _fontMetrics.descent();
-
-    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
-    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-    double itemsWidth = 0;
-    double itemsHeight = 0;
-
-    switch(_direction)
-    {
-        default:
-        case Left:
-        case Right:
-            itemsWidth = _textMetrics.advance() + spacing + pictureWidth;
-            itemsHeight = std::max<double>(textHeight, pictureHeight);
-            break;
-
-        case Top:
-        case Bottom:
-            itemsWidth = std::max<double>(_textMetrics.advance(), pictureWidth);
-            itemsHeight = textHeight + spacing + pictureHeight;
-            break;  
-    }
-
-    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
-                       itemsHeight + padding().topBottom() );
-}
-
-
-void PushButton::onLayout(const Gfx::RectF& rect)
-{    
-    Base::onLayout(rect);
-
-    const Gfx::Scaling& scaling = this->scaling();
-
-    double spacing = _picture.empty() || text().empty() ? 0 : _fontMetrics.height() * 0.5;
-    
-    Gfx::SizeF pictureSize = scaling.toLogical( _picture.size() );
-    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-    double itemsWidth = _textMetrics.advance() + spacing + pictureWidth;
-    double itemsHeight = _fontMetrics.height() + spacing + pictureHeight;
-
-    double pictureX = 0;
-    double pictureY = 0;
-    double textX = 0;
-    double textY = 0;
-
-    switch(_direction)
-    {
-        default:
-        case Left:
-            pictureX = (size().width() - itemsWidth) / 2;
-            pictureY = (size().height() - pictureHeight) / 2;
-    
-            textX = pictureX + pictureWidth + spacing;
-            textY = ((size().height() - _fontMetrics.height()) / 2) + _fontMetrics.ascent();
-            break;
-
-        case Right:
-            textX = (size().width() - itemsWidth) / 2;
-            textY = ((size().height() - _fontMetrics.height()) / 2) + _fontMetrics.ascent();
-            
-            pictureX = textX + _textMetrics.advance() + spacing;
-            pictureY = (size().height() - pictureHeight) / 2;
-            break;
-
-        case Top:
-            pictureX = (size().width() - pictureWidth) / 2;
-            pictureY = (size().height() - itemsHeight) / 2;
-    
-            textX = (size().width() - _textMetrics.advance()) / 2;
-            textY = pictureY + pictureHeight + spacing + _fontMetrics.ascent();
-            break;  
-
-        case Bottom:
-            textX = (size().width() - _textMetrics.advance()) / 2;
-            textY = ((size().height() - itemsHeight) / 2) + _fontMetrics.ascent();
-
-            pictureX = (size().width() - pictureWidth) / 2;
-            pictureY = textY + _fontMetrics.descent() + spacing;
-            break;  
-    }
-
-    if( ! _picture.empty() )
-    {
-        double pictureXOff = (pictureWidth - pictureSize.width()) / 2;
-        double pictureYOff = (pictureHeight - pictureSize.height()) / 2;
-
-        _iconPos.set(pictureX + pictureXOff, 
-                     pictureY + pictureYOff);
-
-        _iconPos = scaling.align(_iconPos);
-    }
-
-    _textPos.set(textX, textY);
-    _textPos = scaling.align(_textPos);
-
-    repaint();
-}
-
-
 void PushButton::onIconChanged()
 {
-    Application& app = Application::instance();
-    const StyleOptions& options = app.styleOptions();
-    const Style& style = app.style();
+    const Style& style = Application::instance().style();
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<ButtonRenderer>() );
@@ -452,11 +388,13 @@ void PushButton::onIconChanged()
     if( ! _renderer )
         return;
 
+    ButtonStyleFlags state = buttonStyleFlags();
+
     if( ! _icon.empty() )
     {
         const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _renderer->prepareIcon(*this, options, iconImage, _picture);
+        _renderer->prepareIcon(iconImage, _picture, state);
     }
     else
     {
@@ -467,35 +405,54 @@ void PushButton::onIconChanged()
 
 void PushButton::onInvalidate()
 {
-    Application& app = Application::instance();
-    const StyleOptions& options = app.styleOptions();
-    const Style& style = app.style();
-
-    _brush = foreground();
-    _pen = contour();
-    _textPen = textColor();
-    _font = getFont();
+    const Style& style = Application::instance().style();
 
     if( ! _hasRenderer )
-        _renderer.reset( style.get<ButtonRenderer>() );
+    {
+        ButtonRenderer* base = style.get<ButtonRenderer>();
+        if( ! base )
+            return;
+
+        if( _foreground || _contour || _accentColor || _highlightColor ||
+            _textColor || _fontOverride )
+        {
+            ButtonRenderer* clone = base->create();
+            _renderer.reset(clone);
+
+            if( _foreground )
+                clone->setForeground(*_foreground);
+            if( _contour )
+                clone->setContour(*_contour);
+            if( _accentColor )
+                clone->setAccentColor(*_accentColor);
+            if( _highlightColor )
+                clone->setHighlightColor(*_highlightColor);
+            if( _textColor )
+                clone->setTextColor( Gfx::Pen(*_textColor) );
+            if( _fontOverride )
+                clone->setFont( getFont() );
+        }
+        else
+        {
+            _renderer.reset(base);
+        }
+    }
 
     if( ! _renderer )
         return;
 
-    //// onIconChanged()
+    ButtonStyleFlags state = buttonStyleFlags();
+
     if( ! _icon.empty() )
     {
         const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
         const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _renderer->prepareIcon(*this, options, iconImage, _picture);
+        _renderer->prepareIcon(iconImage, _picture, state);
     }
     else
     {
         _picture.reset();
     }
-    //// onIconChanged()
-
-    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
     Base::onInvalidate();
 
@@ -503,68 +460,162 @@ void PushButton::onInvalidate()
 }
 
 
-void PushButton::onPaint(PaintContext& context, const Gfx::RectF& rect)
+Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
+    if( ! _renderer )
+        return Gfx::SizeF(0, 0);
+
+    const Painter& painter = _renderer->textPainter( surface() );
+    _textMetrics = painter.textMetrics( text() );
+    _fontMetrics = painter.fontMetrics();
+    Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
+
+    if( _picture.empty() )
+        _measuredIconSize = Gfx::SizeF();
+    else if( _iconSize.isNull() )
+        _measuredIconSize = surface().scaling().toLogical( _picture.size() );
+    else
+        _measuredIconSize = _iconSize;
+
+    double spacing = _picture.empty() || text().empty()
+                   ? 0 : std::ceil(_fontMetrics.height() / 2.0);
+
+    double itemsWidth = 0;
+    double itemsHeight = 0;
+
+    switch(_direction)
+    {
+        default:
+        case Direction::Left:
+        case Direction::Right:
+            itemsWidth = textSize.width() + spacing + _measuredIconSize.width();
+            itemsHeight = std::max(textSize.height(), _measuredIconSize.height());
+            break;
+
+        case Direction::Top:
+        case Direction::Bottom:
+            itemsWidth = std::max(textSize.width(), _measuredIconSize.width());
+            itemsHeight = textSize.height() + spacing + _measuredIconSize.height();
+            break;
+    }
+
+    Gfx::SizeF contentSize(itemsWidth + padding().leftRight(),
+                           itemsHeight + padding().topBottom());
+
+    return _renderer->measureSurface( surface(), contentSize );
+}
+
+
+void PushButton::onLayout(const Gfx::RectF& rect)
+{    
+    Base::onLayout(rect);
 
     if( ! _renderer )
         return;
 
-    Painter painter(context);
-    painter.setClip(rect);
+    const Gfx::Scaling& scaling = surface().scaling();
 
-    //
-    // button shape
-    //
+    Gfx::RectF contentRect = _renderer->layoutSurface( surface(),
+                                                       Gfx::RectF(size()) );
 
-    if( ! _isFlat )
+    Gfx::RectF iconRect = contentRect;
+    Gfx::RectF textRect = contentRect;
+
+    if( ! _picture.empty() && ! text().empty() )
     {
-        _renderer->renderBackground(*this, options, painter, rect, 
-                                    _brush, _pen);
-    }
+        double spacing = std::ceil(_fontMetrics.height() / 2.0);
+        double pw = _measuredIconSize.width();
+        double ph = _measuredIconSize.height();
+        Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
 
-    painter.setFont(_font);
+        bool horizontal = (_direction == Direction::Left || _direction == Direction::Right);
+        bool iconFirst  = (_direction == Direction::Left || _direction == Direction::Top);
 
-    //
-    // button icon
-    //
-
-    if( ! _picture.empty() )
-    {
-        const Gfx::CompositionMode prevMode = painter.compositionMode();
-        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        painter.drawPixmap(_iconPos, _picture);
-        painter.setCompositionMode(prevMode);
-    }
-
-    //
-    // button text including menomnic
-    //
-
-    Gfx::RectF mnemonicRect;
-    const Char* m = mnemonic();
-    if(m)
-    {
-        String::size_type n = text().find(*m);
-        if(n != String::npos)
+        if( horizontal )
         {
-            Pt::String mnemonicText(text(), 0, n);
-            Gfx::TextMetrics fmLeft = painter.textMetrics(mnemonicText);
+            double groupW = pw + spacing + textSize.width();
+            double gx = contentRect.left() + (contentRect.width() - groupW) / 2;
+            double y = contentRect.top();
+            double h = contentRect.height();
 
-            mnemonicText = *m;
-            Gfx::TextMetrics fmChar = painter.textMetrics(mnemonicText);
-            Gfx::FontMetrics fontMet = painter.fontMetrics();
+            double iconX = iconFirst ? gx : gx + textSize.width() + spacing;
+            double textX = iconFirst ? gx + pw + spacing : gx;
 
-            mnemonicRect.set( Gfx::PointF(_textPos.x() + fmLeft.advance(), 
-                                          _textPos.y() - fontMet.ascent()),
-                              Gfx::SizeF(fmChar.advance(), 
-                                         fontMet.height()) );
+            iconRect.set( Gfx::PointF(iconX, y), Gfx::SizeF(pw, h) );
+            textRect.set( Gfx::PointF(textX, y), Gfx::SizeF(textSize.width(), h) );
+        }
+        else
+        {
+            double groupH = ph + spacing + textSize.height();
+            double x = contentRect.left();
+            double gy = contentRect.top() + (contentRect.height() - groupH) / 2;
+            double w = contentRect.width();
+
+            double iconY = iconFirst ? gy : gy + textSize.height() + spacing;
+            double textY = iconFirst ? gy + ph + spacing : gy;
+
+            iconRect.set( Gfx::PointF(x, iconY), Gfx::SizeF(w, ph) );
+            textRect.set( Gfx::PointF(x, textY), Gfx::SizeF(w, textSize.height()) );
         }
     }
 
-    _renderer->renderText(*this, options, painter, rect,
-                          text(), _textPos, _font, _textPen,
-                          mnemonicRect);
+    if( ! _picture.empty() )
+    {
+        double pw = _measuredIconSize.width();
+        double ph = _measuredIconSize.height();
+        double x = iconRect.left() + (iconRect.width() - pw) / 2;
+        double y = iconRect.top() + (iconRect.height() - ph) / 2;
+
+        Gfx::SizeF pictureSize = scaling.toLogical( _picture.size() );
+        double xOff = (pw - pictureSize.width()) / 2;
+        double yOff = (ph - pictureSize.height()) / 2;
+
+        _iconPos = scaling.align( Gfx::PointF(x + xOff, y + yOff) );
+    }
+
+    if( ! text().empty() )
+    {
+        double tx = textRect.left()
+                    + (textRect.width() - _textMetrics.advance()) / 2;
+        double ty = textRect.top()
+                    + ((textRect.height() - _fontMetrics.height()) / 2)
+                    + _fontMetrics.ascent();
+
+        _textPos = scaling.align( Gfx::PointF(tx, ty) );
+
+        String::size_type mnIdx = String::npos;
+        const Char* m = mnemonic();
+        if(m)
+            mnIdx = text().find(*m);
+
+        _mnemonicRect = _renderer->layoutMnemonic(surface(), text(), _textPos,
+                                                  _fontMetrics, mnIdx);
+    }
+
+    repaint();
+}
+
+
+void PushButton::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
+{
+    if( ! _renderer )
+        return;
+
+    Gfx::RectF widgetRect( size() );
+    ButtonStyleFlags state = buttonStyleFlags();
+
+    if( ! _isFlat )
+    {
+        _renderer->renderSurface(context, widgetRect, state);
+    }
+
+    if( ! _picture.empty() )
+    {
+        _renderer->renderIcon(context, widgetRect, _picture, _iconPos, state);
+    }
+
+    _renderer->renderText(context, widgetRect, text(), _textPos, state);
+    _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
 }
 
 

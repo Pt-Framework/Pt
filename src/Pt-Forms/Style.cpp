@@ -29,7 +29,13 @@
 */
 
 #include <Pt/Forms/Style.h>
+#include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Application.h>
 #include <Pt/Forms/Painter.h>
+#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/TextBlock.h>
+
+#include <algorithm>
 
 namespace Pt {
 
@@ -138,64 +144,371 @@ Style::Facet* Style::find(const std::type_info& ti) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// LabelRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+LabelRenderer::LabelRenderer(std::size_t refs)
+: Style::Facet( typeid(LabelRenderer), refs )
+, _styleGeneration( std::size_t(-1) )
+{
+}
+
+
+LabelRenderer::~LabelRenderer()
+{
+}
+
+
+LabelRenderer* LabelRenderer::create() const
+{
+    return onCreate();
+}
+
+
+const Gfx::Brush* LabelRenderer::background() const
+{
+    return _background.get();
+}
+
+
+void LabelRenderer::setBackground(const Gfx::Brush& b)
+{
+    _background.reset( new Gfx::Brush(b) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Pen* LabelRenderer::contour() const
+{
+    return _contour.get();
+}
+
+
+void LabelRenderer::setContour(const Gfx::Pen& p)
+{
+    _contour.reset( new Gfx::Pen(p) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Font& LabelRenderer::font() const
+{
+    if( _font )
+        return *_font;
+
+    return Application::instance().styleOptions().font();
+}
+
+
+void LabelRenderer::setFont(const Gfx::Font& f)
+{
+    _font.reset( new Gfx::Font(f) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+Gfx::Pen LabelRenderer::textColor() const
+{
+    if( _textColor )
+        return *_textColor;
+
+    return Gfx::Pen( Application::instance().styleOptions().textColor() );
+}
+
+
+void LabelRenderer::setTextColor(const Gfx::Pen& p)
+{
+    _textColor.reset( new Gfx::Pen(p) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const StyleOptions& LabelRenderer::prepare()
+{
+    const StyleOptions& opts = Application::instance().styleOptions();
+
+    if( _styleGeneration != opts.generation() )
+    {
+        _styleGeneration = opts.generation();
+        onPrepare(opts);
+    }
+
+    return opts;
+}
+
+
+void LabelRenderer::renderBackground(PaintContext& context,
+                                     const Gfx::RectF& rect,
+                                     StyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderBackground(context, rect, opts, state);
+}
+
+
+Gfx::SizeF LabelRenderer::measureFrame(PaintSurface& surface,
+                                        const Gfx::SizeF& contentSize)
+{
+    return onMeasureFrame(surface, contentSize);
+}
+
+
+Gfx::RectF LabelRenderer::layoutFrame(PaintSurface& surface,
+                                       const Gfx::RectF& frameRect)
+{
+    return onLayoutFrame(surface, frameRect);
+}
+
+
+void LabelRenderer::renderFrame(PaintContext& context,
+                                const Gfx::RectF& rect,
+                                StyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderFrame(context, rect, opts, state);
+}
+
+
+const Painter& LabelRenderer::textPainter(PaintSurface& surface)
+{
+    prepare();
+    return onGetTextPainter(surface);
+}
+
+
+void LabelRenderer::renderText(PaintContext& context,
+                               const Gfx::RectF& rect,
+                               const String& text,
+                               const Gfx::PointF& pos,
+                               StyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderText(context, rect, opts, text, pos, state);
+}
+
+
+void LabelRenderer::renderIcon(PaintContext& context,
+                               const Gfx::RectF& rect,
+                               const Pixmap& picture,
+                               const Gfx::PointF& pos,
+                               StyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderIcon(context, rect, opts, picture, pos, state);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // ButtonRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
 ButtonRenderer::ButtonRenderer(std::size_t refs)
 : Style::Facet( typeid(ButtonRenderer), refs )
+, _styleGeneration( std::size_t(-1) )
 {
 }
 
-    
+
 ButtonRenderer::~ButtonRenderer()
 {
 }
 
 
-void ButtonRenderer::prepare(const PushButton& button,
-                             const StyleOptions& options,
-                             Gfx::Brush& brush,
-                             Gfx::Pen& contour,
-                             Gfx::Font& font,
-                             Gfx::Pen& textPen) const
+ButtonRenderer* ButtonRenderer::create() const
 {
-    onPrepare(button, options, brush, contour, font, textPen); 
+    return onCreate();
 }
 
 
-void ButtonRenderer::prepareIcon(const PushButton& button,
-                                 const StyleOptions& options,
-                                 const Gfx::Image& icon,
-                                 Pixmap& picture) const
+const Gfx::Brush& ButtonRenderer::foreground() const
 {
-    onPrepareIcon(button, options, icon, picture); 
+    if( _foreground )
+        return *_foreground;
+
+    return Application::instance().styleOptions().foreground();
 }
 
 
-void ButtonRenderer::renderBackground(const PushButton& button,
-                                      const StyleOptions& options,
-                                      Painter& painter, 
-                                      const Gfx::RectF& rect,
-                                      const Gfx::Brush& brush,
-                                      const Gfx::Pen& pen) const
-{ 
-    onRenderBackground(button, options, painter, rect, brush, pen); 
-}  
+void ButtonRenderer::setForeground(const Gfx::Brush& b)
+{
+    _foreground.reset( new Gfx::Brush(b) );
+    _styleGeneration = std::size_t(-1);
+}
 
 
-void ButtonRenderer::renderText(const PushButton& button,
-                                const StyleOptions& options,
-                                Painter& painter, 
+const Gfx::Pen& ButtonRenderer::contour() const
+{
+    if( _contour )
+        return *_contour;
+
+    return Application::instance().styleOptions().contour();
+}
+
+
+void ButtonRenderer::setContour(const Gfx::Pen& p)
+{
+    _contour.reset( new Gfx::Pen(p) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Color& ButtonRenderer::accentColor() const
+{
+    if( _accentColor )
+        return *_accentColor;
+
+    return Application::instance().styleOptions().accentColor();
+}
+
+
+void ButtonRenderer::setAccentColor(const Gfx::Color& c)
+{
+    _accentColor.reset( new Gfx::Color(c) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Color& ButtonRenderer::highlightColor() const
+{
+    if( _highlightColor )
+        return *_highlightColor;
+
+    return Application::instance().styleOptions().highlightColor();
+}
+
+
+void ButtonRenderer::setHighlightColor(const Gfx::Color& c)
+{
+    _highlightColor.reset( new Gfx::Color(c) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Font& ButtonRenderer::font() const
+{
+    if( _font )
+        return *_font;
+
+    return Application::instance().styleOptions().font();
+}
+
+
+void ButtonRenderer::setFont(const Gfx::Font& f)
+{
+    _font.reset( new Gfx::Font(f) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+Gfx::Pen ButtonRenderer::textColor() const
+{
+    if( _textColor )
+        return *_textColor;
+
+    return Gfx::Pen( Application::instance().styleOptions().textColor() );
+}
+
+
+void ButtonRenderer::setTextColor(const Gfx::Pen& p)
+{
+    _textColor.reset( new Gfx::Pen(p) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const StyleOptions& ButtonRenderer::prepare()
+{
+    const StyleOptions& opts = Application::instance().styleOptions();
+
+    if( _styleGeneration != opts.generation() )
+    {
+        _styleGeneration = opts.generation();
+        onPrepare(opts);
+    }
+
+    return opts;
+}
+
+
+Gfx::SizeF ButtonRenderer::measureSurface(PaintSurface& surface,
+                                           const Gfx::SizeF& contentSize)
+{
+    return onMeasureSurface(surface, contentSize);
+}
+
+
+Gfx::RectF ButtonRenderer::layoutSurface(PaintSurface& surface,
+                                          const Gfx::RectF& surfaceRect)
+{
+    return onLayoutSurface(surface, surfaceRect);
+}
+
+
+void ButtonRenderer::renderSurface(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   ButtonStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderSurface(context, rect, opts, state);
+}
+
+
+const Painter& ButtonRenderer::textPainter(PaintSurface& surface)
+{
+    prepare();
+    return onGetTextPainter(surface);
+}
+
+
+void ButtonRenderer::renderText(PaintContext& context,
                                 const Gfx::RectF& rect,
                                 const String& text,
-                                const Gfx::PointF& textPos,
-                                const Gfx::Font& font, 
-                                const Gfx::Pen& textPen,
-                                const Gfx::RectF& mnemonic) const
-{ 
-    onRenderText(button, options, painter, rect, 
-                 text, textPos, font, textPen, mnemonic); 
-}  
+                                const Gfx::PointF& pos,
+                                ButtonStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderText(context, rect, opts, text, pos, state);
+}
+
+
+Gfx::RectF ButtonRenderer::layoutMnemonic(PaintSurface& surface,
+                                          const String& text,
+                                          const Gfx::PointF& textPos,
+                                          const Gfx::FontMetrics& fontMetrics,
+                                          String::size_type mnemonicIndex)
+{
+    prepare();
+    return onLayoutMnemonic(surface, text, textPos, fontMetrics, mnemonicIndex);
+}
+
+
+void ButtonRenderer::renderMnemonic(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& mnemonic,
+                                    ButtonStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderMnemonic(context, rect, opts, mnemonic, state);
+}
+
+
+void ButtonRenderer::prepareIcon(const Gfx::Image& icon,
+                                 Pixmap& picture,
+                                 ButtonStyleFlags state) const
+{
+    const StyleOptions& opts = Application::instance().styleOptions();
+    onPrepareIcon(opts, icon, picture, state);
+}
+
+
+void ButtonRenderer::renderIcon(PaintContext& context,
+                                const Gfx::RectF& rect,
+                                const Pixmap& picture,
+                                const Gfx::PointF& pos,
+                                ButtonStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderIcon(context, rect, opts, picture, pos, state);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // CheckBoxRenderer
@@ -285,63 +598,6 @@ void PanelRenderer::renderFrame(const Panel& p,
                                 const Gfx::Pen& pen) const
 {
     onRenderFrame(p, options, painter, rect, pen);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// LabelRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-LabelRenderer::LabelRenderer(std::size_t refs)
-: Style::Facet( typeid(LabelRenderer), refs )
-{
-}
-
-    
-LabelRenderer::~LabelRenderer()
-{
-}
-
-
-void LabelRenderer::prepare(const Label& l,
-                            const StyleOptions& options,
-                            Gfx::Font& font,
-                            Gfx::Pen& contour,
-                            Gfx::Pen& textPen) const
-{
-    onPrepare(l, options, font, contour, textPen);
-}
-
-
-void LabelRenderer::renderBackground(const Label& l,
-                                     const StyleOptions& options,
-                                     Painter& p, 
-                                     const Gfx::RectF& rect,
-                                     const Gfx::Brush& brush) const
-{
-    onRenderBackground(l, options, p, rect, brush);
-}
-
-
-void LabelRenderer::renderFrame(const Label& l,
-                                const StyleOptions& options,
-                                Painter& p, 
-                                const Gfx::RectF& rect, 
-                                const Gfx::Pen& contour) const
-{
-    onRenderFrame(l, options, p, rect, contour);
-}
-
-
-void LabelRenderer::renderText(const Label& l,
-                               const StyleOptions& options,
-                               Painter& p, 
-                               const Gfx::RectF& rect,
-                               const String& text,
-                               const Gfx::PointF& textPos,
-                               const Gfx::Font& font, 
-                               const Gfx::Pen& textPen) const
-{
-    onRenderText(l, options, p, rect, text, textPos, font, textPen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

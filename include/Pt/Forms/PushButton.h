@@ -33,6 +33,9 @@
 #include <Pt/Forms/Button.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Direction.h>
+#include <Pt/Forms/StyleFlags.h>
+#include <Pt/Forms/Style.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
@@ -48,14 +51,6 @@ class PT_FORMS_API PushButton : public Button
 {
     public:
         typedef Button Base;
-
-        enum Direction
-        {
-            Left,
-            Right,
-            Top,
-            Bottom
-        };
 
     public:
         PushButton();
@@ -111,6 +106,8 @@ class PT_FORMS_API PushButton : public Button
 
         void setRenderer(ButtonRenderer* renderer);
 
+        ButtonStyleFlags buttonStyleFlags() const;
+
     protected:
         virtual void onPressed();
 
@@ -151,27 +148,24 @@ class PT_FORMS_API PushButton : public Button
         Direction                 _direction;
         Icon                      _icon;
         Gfx::SizeF                _iconSize;
-        Gfx::PointF               _iconPos;
         Gfx::PointF               _textPos;
+        Gfx::PointF               _iconPos;
+        Gfx::RectF                _mnemonicRect;
         Gfx::TextMetrics          _textMetrics;
         Gfx::FontMetrics          _fontMetrics;
+        Gfx::SizeF                _measuredIconSize;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _hasRenderer;
 
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>      _accentColor;
-        AutoPtr<Gfx::Color>      _highlightColor;
-        AutoPtr<Gfx::Color>      _textColor;
+        AutoPtr<Gfx::Color>       _accentColor;
+        AutoPtr<Gfx::Color>       _highlightColor;
+        AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
         unsigned                  _fontOverride;
-        std::size_t               _styleGeneration;
 
-        Gfx::Brush _brush;
-        Gfx::Pen   _pen;
-        Gfx::Pen   _textPen;
-        Gfx::Font  _font;
         PixmapSurface    _picture;
 };
 

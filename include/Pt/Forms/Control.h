@@ -33,6 +33,7 @@
 #include <Pt/Forms/View.h>
 #include <Pt/Forms/SizePolicy.h>
 #include <Pt/Forms/Spacing.h>
+#include <Pt/Forms/StyleFlags.h>
 
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/TouchEvent.h>
@@ -142,6 +143,9 @@ class PT_FORMS_API Control : public View
         // TODO: obsolete when processEvent return true/false if consumed
         bool acceptsInput() const;
 
+        /** @brief Returns the current widget state flags.
+        */
+        StyleFlags styleFlags() const;
 
         void raise();
 

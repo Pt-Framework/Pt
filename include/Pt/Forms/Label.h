@@ -33,6 +33,7 @@
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Alignment.h>
 #include <Pt/Forms/Adjustment.h>
+#include <Pt/Forms/Style.h>
 #include <Pt/Forms/TextBlock.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Icon.h>
@@ -110,10 +111,6 @@ class PT_FORMS_API Label : public Control
 
         Adjustment adjustment() const;
 
-        void layoutText();
-
-        void layoutImage();
-
         Gfx::Font getFont() const;
 
     private:
@@ -135,6 +132,7 @@ class PT_FORMS_API Label : public Control
         Icon        _icon;
         Gfx::PointF _iconPos;
         Gfx::SizeF  _iconSize;
+        Gfx::SizeF  _measuredIconSize;
         bool        _iconInvalid;
 
         FacetPtr<LabelRenderer>   _renderer;
@@ -142,15 +140,12 @@ class PT_FORMS_API Label : public Control
 
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>      _textColor;
+        AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
         unsigned                  _fontOverride;
         std::size_t               _styleGeneration;
         bool                      _styleInvalid;
-        
-        Gfx::Pen       _textPen;
-        Gfx::Pen       _pen;
-        Gfx::Font      _font;
+
         Pixmap         _pixmap;
 };
 

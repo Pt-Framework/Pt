@@ -100,7 +100,7 @@ class SimpleApp : public Pt::Connectable
             Pt::Gfx::SizeF buttonSize = Pt::Gfx::SizeF( static_cast<double>(buttonImage.width()), 
                                                         static_cast<double>(buttonImage.height()) );
             button.setIcon(buttonIcon, buttonSize);
-            button.setLayout(Pt::Forms::PushButton::Top);
+            button.setLayout(Pt::Forms::Direction::Top);
             button.setText("AUTO LAYOUT");
             button.setPadding(10);
             button.setMargin(10);

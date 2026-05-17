@@ -32,6 +32,7 @@
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
+#include <Pt/Forms/TextBlock.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/TextMetrics.h>
 
@@ -47,7 +48,6 @@ Label::Label()
 , _styleGeneration(0)
 , _styleInvalid(true)
 {
-    _font = Application::instance().styleOptions().font();
     _styleGeneration = Application::instance().styleOptions().generation();
 }
 
@@ -132,6 +132,13 @@ const Gfx::Brush* Label::background() const
 void Label::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+
+    if( _renderer )
+    {
+        _renderer.reset( _renderer->create() );
+        _renderer->setBackground(b);
+    }
+
     repaint();
 }
 
@@ -145,6 +152,12 @@ const Gfx::Pen* Label::contour() const
 void Label::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+
+    if( _renderer )
+    {
+        _renderer.reset( _renderer->create() );
+        _renderer->setContour(p);
+    }
 
     _styleInvalid = true;
     invalidate();
@@ -162,6 +175,12 @@ void Label::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
 
+    if( _renderer )
+    {
+        _renderer.reset( _renderer->create() );
+        _renderer->setTextColor( Gfx::Pen(color) );
+    }
+
     _styleInvalid = true;
     invalidate();
 }
@@ -169,7 +188,10 @@ void Label::setTextColor(const Gfx::Color& color)
 
 const Gfx::Font& Label::font() const
 {
-    return _font;
+    if( _renderer )
+        return _renderer->font();
+
+    return Application::instance().styleOptions().font();
 }
 
 
@@ -177,6 +199,12 @@ void Label::setFont(const Gfx::Font& font)
 {
     _customFont = font;
     _fontOverride = OverrideAll;
+
+    if( _renderer )
+    {
+        _renderer.reset( _renderer->create() );
+        _renderer->setFont(font);
+    }
 
     _styleInvalid = true;
     invalidate();
@@ -251,6 +279,21 @@ void Label::setRenderer(LabelRenderer* renderer)
     _renderer.reset(renderer);
     _hasRenderer = renderer != 0;
 
+    if( renderer )
+    {
+        if( _background )
+            renderer->setBackground(*_background);
+
+        if( _contour )
+            renderer->setContour(*_contour);
+
+        if( _textColor )
+            renderer->setTextColor( Gfx::Pen(*_textColor) );
+
+        if( _fontOverride )
+            renderer->setFont( getFont() );
+    }
+
     _styleInvalid = true;
     invalidate();
 }
@@ -282,219 +325,6 @@ Adjustment Label::adjustment() const
     }
 
     return adjustment;
-}
-
-
-Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
-{
-    //std::clog << "label measure " << _text.narrow() << std::endl;
-
-    double w = 0;
-    double h = 0;
-
-    const Gfx::Scaling& scaling = this->scaling();
-
-    if( _icon.empty() )
-    {
-        Adjustment a = adjustment();
-
-        if( ! _text.empty() )
-        {
-            TextBlock block;
-            block.setAdjustment(a);
-
-            // TODO: set max width if text wrap is enabled
-            // NOTE: abbreviate text if text wrap is off and width is too small
-            Painter _painter( surface() );
-            _painter.setFont(_font);
-
-            block.setMaxWidth(policy.size().width());
-            block.setLineSpacing(scaling.align(_font.size() / 3));
-            block.layout(_painter, _text);
-
-            w = block.size().width() + scaling.toLogical(0.5);
-            h = block.size().height() + scaling.toLogical(0.5);
-
-            w = scaling.align(w);
-            h = scaling.align(h);
-        }
-    }
-    else
-    {       
-        Pixmap& picture = getIconPixmap();
-
-        Gfx::SizeF pictureSize = scaling.toLogical( picture.size() );
-
-        w = static_cast<double>( pictureSize.width() );
-        h = static_cast<double>( pictureSize.height() );
-    }
-
-    return Gfx::SizeF( w + padding().leftRight(), 
-                       h + padding().topBottom() );
-}
-
-
-void Label::layoutText()
-{
-    if( _text.empty() )
-        return;
-
-    Adjustment a = adjustment();
-
-    Painter _painter( surface() );
-    _painter.setFont(_font);
-
-    const Gfx::Scaling& scaling = this->scaling();
-
-    _textBlock.setMaxWidth( size().width() - padding().leftRight() );
-    _textBlock.setAdjustment(a);
-    _textBlock.setLineSpacing(scaling.align(_font.size() / 3.0));
-    _textBlock.layout(_painter, _text);
-
-    Gfx::PointF pos;
-
-    switch( _alignment )
-    {
-        default:
-        case Alignment::TopLeft:
-        case Alignment::Top:
-        case Alignment::TopRight:
-        {
-            pos.set(padding().left(), padding().top());
-            break;
-        }
-
-        case Alignment::Left:
-        case Alignment::Center:
-        case Alignment::Right:
-        {
-            double height = size().height() - padding().topBottom();
-            double y = (height - scaling.align( _textBlock.height())) / 2;
-            pos.set(padding().left(), y + padding().top());
-            break;
-        }
-
-        case Alignment::BottomLeft:
-        case Alignment::Bottom:
-        case Alignment::BottomRight:
-        {
-            double height = size().height() - padding().topBottom();
-            double y = height - scaling.align(_textBlock.height());
-
-            pos.set( padding().left(), padding().top() + y);
-            break;
-        }
-    }
-
-    _textBlock.setPosition(pos);
-}
-
-
-void Label::layoutImage()
-{
-    Pixmap& picture = getIconPixmap();
-    Gfx::SizeF pictureSize = scaling().toLogical( picture.size() );
-
-    switch( _alignment )
-    {
-        default:
-        case Alignment::TopLeft:
-        {
-            _iconPos.set(padding().left(), padding().top());
-            break;
-        }
-        case Alignment::Top:
-        {
-            double width = size().width() - padding().leftRight();
-            double x = (width - pictureSize.width()) / 2;
-
-            _iconPos.set( padding().left() + x, padding().top() );
-            break;
-        }
-        case Alignment::TopRight:
-        {
-            double width = size().width() - padding().leftRight();
-            double x = width - pictureSize.width();
-
-            _iconPos.set( padding().left() + x, padding().top() );
-            break;
-        }
-        case Alignment::Left:
-        {
-            double height = size().height() - padding().topBottom();
-            double y = (height - pictureSize.height()) / 2;
-
-            _iconPos.set( padding().left(), padding().top() + y);
-            break;
-        }
-        case Alignment::Center:
-        {
-            double width = size().width() - padding().leftRight();
-            double x = (width - pictureSize.width()) / 2;
-            
-            double height = size().height() - padding().topBottom();
-            double y = (height - pictureSize.height()) / 2;
-
-            _iconPos.set( padding().left() + x, padding().top() + y);
-            break;
-        }
-        case Alignment::Right:
-        {
-            double width = size().width() - padding().leftRight();
-            double x = width - pictureSize.width();
-
-            double height = size().height() - padding().topBottom();
-            double y = (height - pictureSize.height()) / 2;
-
-            _iconPos.set( padding().left() + x, padding().top() + y);
-            break;
-        }
-        case Alignment::BottomLeft:
-        {
-            double height = size().height() - padding().topBottom();
-            double y = height - pictureSize.height();
-
-            _iconPos.set(padding().left(), padding().top() + y);
-            break;
-        }
-        case Alignment::Bottom:
-        {
-            double width = size().width() - padding().leftRight();
-            double x = (width - pictureSize.width()) / 2;
-
-            double height = size().height() - padding().topBottom();
-            double y = height - pictureSize.height();
-
-            _iconPos.set( padding().left() + x, padding().top() + y);
-            break;
-        }
-        case Alignment::BottomRight:
-        {
-            double width = size().width() - padding().leftRight();
-            double x = width - pictureSize.width();
-
-            double height = size().height() - padding().topBottom();
-            double y = height - pictureSize.height();
-
-            _iconPos.set( padding().left() + x, padding().top() + y);
-            break;
-        }
-    }
-}
-
-
-void Label::onLayout(const Gfx::RectF& rect)
-{
-    //std::clog  << " layout " << _text.narrow()<< this << std::endl;
-
-    Base::onLayout(rect);
-    
-    if( _icon.empty() )
-        layoutText();
-    else
-        layoutImage();
-
-    repaint();
 }
 
 
@@ -536,23 +366,34 @@ void Label::onInvalidate()
     {
         _styleInvalid = false;
 
-        const StyleOptions& options = Application::instance().styleOptions();
-        const Style& style = Application::instance().style();
-
-        _textPen = textColor();
-        _font = getFont();
-
-        const Gfx::Pen* pen = contour();
-        if(pen)
-        {
-            _pen = *pen;
-        }
-
         if( ! _hasRenderer )
+        {
+            const Style& style = Application::instance().style();
+
             _renderer.reset( style.get<LabelRenderer>() );
 
-        if( _renderer )
-            _renderer->prepare(*this, options, _font, _pen, _textPen);
+            if( _renderer )
+            {
+                bool needsClone = _background || _contour || _textColor || _fontOverride;
+
+                if( needsClone )
+                {
+                    _renderer.reset( _renderer->create() );
+
+                    if( _background )
+                        _renderer->setBackground(*_background);
+
+                    if( _contour )
+                        _renderer->setContour(*_contour);
+
+                    if( _textColor )
+                        _renderer->setTextColor( Gfx::Pen(*_textColor) );
+
+                    if( _fontOverride )
+                        _renderer->setFont( getFont() );
+                }
+            }
+        }
 
         needsRelayout = true;
     }
@@ -574,37 +415,173 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaint(PaintContext& context, 
-                    const Gfx::RectF& rect)
+Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
-    //std::clog << " paint " << _text.narrow() << this << std::endl;
+    if( ! _renderer )
+        return Gfx::SizeF(0, 0);
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    Pixmap& picture = getIconPixmap();
+    Gfx::SizeF contentSize;
 
-    if( ! _renderer)
+    if( _text.empty() )
+    {
+        if( _iconSize.isNull() )
+            _measuredIconSize = surface().scaling().toLogical( picture.size() );
+        else
+            _measuredIconSize = _iconSize;
+
+        contentSize = _measuredIconSize;
+    }
+    else
+    {
+        const Gfx::Scaling& scaling = surface().scaling();
+
+        const Painter& painter = _renderer->textPainter( surface() );
+
+        TextBlock block;
+        block.setAdjustment( adjustment() );
+        block.setMaxWidth( policy.size().width() );
+        block.setLineSpacing( scaling.align( _renderer->font().size() / 3.0 ) );
+        block.layout(painter, _text);
+
+        double w = block.size().width() + scaling.toLogical(0.5);
+        double h = block.size().height() + scaling.toLogical(0.5);
+
+        _measuredIconSize = Gfx::SizeF();
+        contentSize = Gfx::SizeF( scaling.align(w), scaling.align(h) );
+    }
+
+    Gfx::SizeF paddedSize( contentSize.width() + padding().leftRight(),
+                           contentSize.height() + padding().topBottom() );
+
+    return _renderer->measureFrame( surface(), paddedSize );
+}
+
+
+void Label::onLayout(const Gfx::RectF& rect)
+{
+    Base::onLayout(rect);
+
+    if( ! _renderer )
         return;
 
-    Forms::Painter painter(context);
-    painter.setClip(rect);
+    Gfx::RectF contentRect = _renderer->layoutFrame( surface(),
+                                                     Gfx::RectF(size()) );
 
-    const Gfx::Brush* brush = background();
-    if(brush)
+    double left = contentRect.left() + padding().left();
+    double top = contentRect.top() + padding().top();
+    double contentWidth = contentRect.width() - padding().leftRight();
+    double contentHeight = contentRect.height() - padding().topBottom();
+
+    Gfx::RectF innerRect( Gfx::PointF(left, top),
+                          Gfx::SizeF(contentWidth, contentHeight) );
+
+    if( _text.empty() )
     {
-        _renderer->renderBackground(*this, options,
-                                    painter, rect, *brush);
+        double picW = _measuredIconSize.width();
+        double picH = _measuredIconSize.height();
+        double x = 0;
+        double y = 0;
+
+        switch( static_cast<Pt::uint32_t>(_alignment) )
+        {
+            default:
+            case Alignment::TopLeft:
+                x = 0; y = 0;
+                break;
+            case Alignment::Top:
+                x = (innerRect.width() - picW) / 2; y = 0;
+                break;
+            case Alignment::TopRight:
+                x = innerRect.width() - picW; y = 0;
+                break;
+            case Alignment::Left:
+                x = 0; y = (innerRect.height() - picH) / 2;
+                break;
+            case Alignment::Center:
+                x = (innerRect.width() - picW) / 2;
+                y = (innerRect.height() - picH) / 2;
+                break;
+            case Alignment::Right:
+                x = innerRect.width() - picW;
+                y = (innerRect.height() - picH) / 2;
+                break;
+            case Alignment::BottomLeft:
+                x = 0; y = innerRect.height() - picH;
+                break;
+            case Alignment::Bottom:
+                x = (innerRect.width() - picW) / 2;
+                y = innerRect.height() - picH;
+                break;
+            case Alignment::BottomRight:
+                x = innerRect.width() - picW;
+                y = innerRect.height() - picH;
+                break;
+        }
+
+        _iconPos = surface().scaling().align( Gfx::PointF(innerRect.left() + x, 
+                                                          innerRect.top() + y) );
+    }
+    else
+    {
+        const Gfx::Scaling& scaling = surface().scaling();
+
+        const Painter& painter = _renderer->textPainter( surface() );
+
+        _textBlock.setMaxWidth( innerRect.width() );
+        _textBlock.setAdjustment( adjustment() );
+        _textBlock.setLineSpacing( scaling.align(
+            _renderer->font().size() / 3.0 ) );
+        _textBlock.layout(painter, _text);
+
+        double blockH = scaling.align( _textBlock.height() );
+        double y = 0;
+
+        switch( static_cast<Pt::uint32_t>(_alignment) )
+        {
+            default:
+            case Alignment::TopLeft:
+            case Alignment::Top:
+            case Alignment::TopRight:
+                y = 0;
+                break;
+
+            case Alignment::Left:
+            case Alignment::Center:
+            case Alignment::Right:
+                y = (innerRect.height() - blockH) / 2;
+                break;
+
+            case Alignment::BottomLeft:
+            case Alignment::Bottom:
+            case Alignment::BottomRight:
+                y = innerRect.height() - blockH;
+                break;
+        }
+
+        Gfx::PointF pos( innerRect.left(), innerRect.top() + y );
+        _textBlock.setPosition(pos);
     }
 
-    const Gfx::Pen* pen = contour();
-    if( pen )
-    {
-        _renderer->renderFrame(*this, options,
-                               painter, rect, _pen);
-    }
-    
-    if(_icon.empty())
+    repaint();
+}
+
+
+void Label::onPaint(PaintContext& context, 
+                    const Gfx::RectF& /*rect*/)
+{
+    if( ! _renderer )
+        return;
+
+    Gfx::RectF widgetRect( size() );
+
+    _renderer->renderBackground(context, widgetRect, styleFlags());
+    _renderer->renderFrame(context, widgetRect, styleFlags());
+
+    if( _icon.empty() )
     {
         TextBlock::ConstIterator it;
-        for (it = _textBlock.begin(); it != _textBlock.end(); ++it)
+        for(it = _textBlock.begin(); it != _textBlock.end(); ++it)
         {
             const Pt::String& lineText = it->text();
             double ascent = it->ascent();
@@ -612,29 +589,16 @@ void Label::onPaint(PaintContext& context,
             Gfx::PointF pos = _textBlock.position() + it->position();
             pos.addY(ascent);
 
-            _renderer->renderText(*this, options, painter, rect,
-                lineText, pos, _font, _textPen);
+            _renderer->renderText(context, widgetRect, lineText, pos,
+                                  styleFlags());
         }
     }
     else
     {
         Pixmap& picture = getIconPixmap();
-
-        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-        painter.drawPixmap(_iconPos, picture);
+        _renderer->renderIcon(context, widgetRect, picture, _iconPos,
+                              styleFlags());
     }
-
-    //if(pen)
-    //{
-    //    painter.beginPath();
-    //    painter.moveTo( Gfx::PointF(0, 0) );
-    //    painter.lineTo( Gfx::PointF(size().width(), size().height() - 1) );
-    //    painter.lineTo( Gfx::PointF(0, size().height() - 1) );
-    //    painter.lineTo( Gfx::PointF(0, 0) );
-    //    painter.closePath();
-    //    painter.fillPath();
-    //    painter.drawPath();
-    //}
 }
 
 } // namespace

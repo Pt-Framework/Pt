@@ -411,7 +411,7 @@ void ListBoxItem::onPaintContent(PaintContext& context, Painter& painter)
 /////////////////////////////////////////////////////////////////////////////
 
 ListBoxLayout::ListBoxLayout()
-: FlowLayout(FlowLayout::Top)
+: FlowLayout(Direction::Top)
 {
 }
 

@@ -30,6 +30,7 @@
 
 #include <Pt/Forms/PlatinumStyle.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Application.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Panel.h>
 #include <Pt/Forms/Label.h>
@@ -104,6 +105,19 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 }
 
 
+void PlatinumRendererBase::renderFrame(Painter& painter,
+                                       const Gfx::RectF& rect,
+                                       double penSize,
+                                       double corner) const
+{
+    double inset = painter.scaling().alignContour(penSize) / 2;
+
+    Gfx::Polygon polygon = getPolygon(rect, inset, corner);
+
+    painter.drawPolyline(&polygon[0], polygon.size());
+}
+
+
 void PlatinumRendererBase::renderPlane(Painter& painter,
                                        const Gfx::RectF& rect,
                                        const Gfx::Brush& brush,
@@ -115,6 +129,18 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
     Gfx::Polygon polygon = getPolygon(rect, inset, corner);
 
     painter.setBrush(brush);
+    painter.fillPolygon(&polygon[0], polygon.size());
+}
+
+
+void PlatinumRendererBase::renderPlane(Painter& painter,
+                                       const Gfx::RectF& rect,
+                                       double corner) const
+{
+    double inset = painter.scaling().toLogical(0.5);
+
+    Gfx::Polygon polygon = getPolygon(rect, inset, corner);
+
     painter.fillPolygon(&polygon[0], polygon.size());
 }
 
@@ -162,6 +188,123 @@ Gfx::Polygon PlatinumRendererBase::getPolygon(const Gfx::RectF& rect,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumLabelRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumLabelRenderer::PlatinumLabelRenderer(std::size_t refs)
+: LabelRenderer(refs)
+{
+}
+
+
+PlatinumLabelRenderer::~PlatinumLabelRenderer()
+{
+}
+
+
+LabelRenderer* PlatinumLabelRenderer::onCreate() const
+{
+    return new PlatinumLabelRenderer();
+}
+
+
+void PlatinumLabelRenderer::onPrepare(const StyleOptions& options)
+{
+    const Gfx::Brush* bg = background();
+    if( bg )
+        _bgPainter.setBrush(*bg);
+
+    const Gfx::Pen* pen = contour();
+    if( pen )
+    {
+        Gfx::Pen framePen = *pen;
+        framePen.setJoinStyle(Gfx::Pen::BevelJoin);
+        _framePainter.setPen(framePen);
+    }
+
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+void PlatinumLabelRenderer::onRenderBackground(PaintContext& context,
+                                               const Gfx::RectF& rect,
+                                               const StyleOptions& options,
+                                               StyleFlags /*state*/)
+{
+    if( ! background() )
+        return;
+
+    _bgPainter.begin(context);
+    _baseRenderer.renderPlane(_bgPainter, rect, options.cornerRadius());
+}
+
+
+Gfx::SizeF PlatinumLabelRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                  const Gfx::SizeF& contentSize)
+{
+    return contentSize;
+}
+
+
+Gfx::RectF PlatinumLabelRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                                 const Gfx::RectF& frameRect)
+{
+    return frameRect;
+}
+
+
+void PlatinumLabelRenderer::onRenderFrame(PaintContext& context,
+                                          const Gfx::RectF& rect,
+                                          const StyleOptions& options,
+                                          StyleFlags /*state*/)
+{
+    if( ! contour() )
+        return;
+
+    _framePainter.begin(context);
+    _baseRenderer.renderFrame(_framePainter, rect,
+                              _framePainter.pen().size(),
+                              options.cornerRadius());
+}
+
+
+const Painter& PlatinumLabelRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+void PlatinumLabelRenderer::onRenderText(PaintContext& context,
+                                         const Gfx::RectF& rect,
+                                         const StyleOptions& /*options*/,
+                                         const String& text,
+                                         const Gfx::PointF& pos,
+                                         StyleFlags /*state*/)
+{
+    _textPainter.begin(context);
+    _textPainter.setClip(rect);
+    _textPainter.drawText(pos, text);
+}
+
+
+void PlatinumLabelRenderer::onRenderIcon(PaintContext& context,
+                                         const Gfx::RectF& rect,
+                                         const StyleOptions& /*options*/,
+                                         const Pixmap& picture,
+                                         const Gfx::PointF& pos,
+                                         StyleFlags /*state*/)
+{
+    _bgPainter.begin(context);
+    _bgPainter.setClip(rect);
+    Gfx::CompositionMode prev = _bgPainter.compositionMode();
+    _bgPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    _bgPainter.drawPixmap(pos, picture);
+    _bgPainter.setCompositionMode(prev);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumButtonRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -170,64 +313,190 @@ PlatinumButtonRenderer::PlatinumButtonRenderer(std::size_t refs)
 {
 }
 
-    
+
 PlatinumButtonRenderer::~PlatinumButtonRenderer()
 {
 }
 
 
-void PlatinumButtonRenderer::onPrepare(const PushButton& button,
-                                       const StyleOptions& options,
-                                       Gfx::Brush& foreground,
-                                       Gfx::Pen& contour,
-                                       Gfx::Font& font,
-                                       Gfx::Pen& textPen) const 
+ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 {
-    contour.setJoinStyle(Gfx::Pen::BevelJoin);
+    return new PlatinumButtonRenderer(1);
+}
 
-    if( button.isEnabled() )
+
+void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
+{
+    Gfx::Pen cPen = contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    _normalPainter.setBrush( foreground() );
+    _normalPainter.setPen( cPen );
+
+    Gfx::Brush pressedBrush( accentColor() );
+    _pressedPainter.setBrush( pressedBrush );
+    _pressedPainter.setPen( cPen );
+
+    Gfx::Brush highlightBrush( highlightColor() );
+    _highlightPainter.setBrush( highlightBrush );
+    _highlightPainter.setPen( cPen );
+
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+Gfx::SizeF PlatinumButtonRenderer::onMeasureSurface(PaintSurface& /*surface*/,
+                                                     const Gfx::SizeF& contentSize)
+{
+    Spacing ins(3);
+    return Gfx::SizeF(contentSize.width() + ins.leftRight(),
+                      contentSize.height() + ins.topBottom());
+}
+
+
+Gfx::RectF PlatinumButtonRenderer::onLayoutSurface(PaintSurface& /*surface*/,
+                                                    const Gfx::RectF& surfaceRect)
+{
+    Spacing ins(3);
+    return Gfx::RectF(Gfx::PointF(ins.left(), ins.top()),
+                       Gfx::SizeF(surfaceRect.width() - ins.leftRight(),
+                                  surfaceRect.height() - ins.topBottom()));
+}
+
+
+void PlatinumButtonRenderer::onRenderSurface(PaintContext& context,
+                                             const Gfx::RectF& rect,
+                                             const StyleOptions& options,
+                                             ButtonStyleFlags state)
+{
+    Painter* painter = 0;
+
+    if( state.has(ButtonStyleFlags::Pressed) )
+        painter = &_pressedPainter;
+    else if( state.has(StyleFlags::Highlighted) )
+        painter = &_highlightPainter;
+    else
+        painter = &_normalPainter;
+
+    painter->begin(context);
+
+    const Gfx::Scaling& scaling = painter->scaling();
+    double corner = scaling.align(1.0);
+
+    _baseRenderer.renderPlane(*painter, rect, painter->brush(), corner);
+
+    _baseRenderer.renderFrame(*painter, rect, painter->pen(), corner);
+
+    if( state.has(StyleFlags::Focused) )
     {
-        if( button.isPressed() )
-        {
-            if( button.isFlat() )
-                textPen = button.accentColor();
-            else
-                foreground = button.accentColor();
-        }
-        else if( button.isHighlighted() )
-        {
-            if( ! button.isFlat() )
-                foreground = button.highlightColor();
-        }
+        double inset = scaling.toLogical(0.5);
+        double focusOffset = scaling.align(2.0) + inset;
+
+        Gfx::RectF focusRect(rect);
+        focusRect.shift(focusOffset, focusOffset);
+        focusRect.expand(-2 * focusOffset, -2 * focusOffset);
+
+        Gfx::Pen savedPen = painter->pen();
+        Gfx::Pen focusPen( savedPen.color(), 1, Gfx::Pen::Dash );
+        painter->setPen(focusPen);
+        painter->drawRect(focusRect);
+        painter->setPen(savedPen);
     }
 }
 
 
-void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
-                                           const StyleOptions& options,
-                                           const Gfx::Image& icon,
-                                           PixmapSurface& picture) const
+const Painter& PlatinumButtonRenderer::onGetTextPainter(PaintSurface& surface)
 {
+    _textPainter.begin(surface);
+    return _textPainter;
+}
 
-    if( button.isPressed() && button.isFlat() )
+
+void PlatinumButtonRenderer::onRenderText(PaintContext& context,
+                                          const Gfx::RectF& rect,
+                                          const StyleOptions& options,
+                                          const String& text,
+                                          const Gfx::PointF& pos,
+                                          ButtonStyleFlags state)
+{
+    if( state.has(ButtonStyleFlags::Pressed) && state.has(ButtonStyleFlags::Flat) )
     {
-        Gfx::Color highlightColor = button.accentColor();
+        Gfx::Pen accentPen( accentColor() );
+        _textPainter.setPen(accentPen);
+    }
 
-        Gfx::Image highlightIcon = icon;
-        Gfx::PixelView pixelView(highlightIcon);
+    _textPainter.begin(context);
+    _textPainter.setClip(rect);
+    _textPainter.drawText(pos, text);
+}
+
+
+Gfx::RectF PlatinumButtonRenderer::onLayoutMnemonic(PaintSurface& surface,
+                                                    const String& text,
+                                                    const Gfx::PointF& textPos,
+                                                    const Gfx::FontMetrics& fontMet,
+                                                    String::size_type mnemonicIndex)
+{
+    if( mnemonicIndex == String::npos || mnemonicIndex >= text.size() )
+        return Gfx::RectF();
+
+    _textPainter.begin(surface);
+
+    Pt::String leftText(text, 0, mnemonicIndex);
+    Gfx::TextMetrics fmLeft = _textPainter.textMetrics(leftText);
+
+    Pt::String charText(1, text[mnemonicIndex]);
+    Gfx::TextMetrics fmChar = _textPainter.textMetrics(charText);
+
+    return Gfx::RectF(
+        Gfx::PointF(textPos.x() + fmLeft.advance(), textPos.y()),
+        Gfx::SizeF(fmChar.advance(), fontMet.descent()) );
+}
+
+
+void PlatinumButtonRenderer::onRenderMnemonic(PaintContext& context,
+                                              const Gfx::RectF& rect,
+                                              const StyleOptions& options,
+                                              const Gfx::RectF& mnemonic,
+                                              ButtonStyleFlags state)
+{
+    if( mnemonic.isNull() )
+        return;
+
+    _textPainter.begin(context);
+    _textPainter.setClip(rect);
+
+    double mnemonicY = mnemonic.top() + 1;
+    _textPainter.drawLine( Gfx::PointF(mnemonic.left(), mnemonicY),
+                           Gfx::PointF(mnemonic.right(), mnemonicY) );
+}
+
+
+void PlatinumButtonRenderer::onPrepareIcon(const StyleOptions& options,
+                                           const Gfx::Image& icon,
+                                           Pixmap& picture,
+                                           ButtonStyleFlags state) const
+{
+    if( state.has(ButtonStyleFlags::Pressed) && state.has(ButtonStyleFlags::Flat) )
+    {
+        Gfx::Color tintColor = accentColor();
+
+        Gfx::Image tintedIcon = icon;
+        Gfx::PixelView pixelView(tintedIcon);
 
         for(Gfx::PixelView::Iterator it = pixelView.begin(); it != pixelView.end(); ++it)
         {
             Gfx::Color color = it->getColor();
 
-            color.setRed( highlightColor.red() );
-            color.setGreen( highlightColor.green() ); 
-            color.setBlue( highlightColor.blue() ); 
+            color.setRed( tintColor.red() );
+            color.setGreen( tintColor.green() );
+            color.setBlue( tintColor.blue() );
 
             (*it) = color;
         }
 
-        picture.reset(highlightIcon);
+        picture.reset(tintedIcon);
     }
     else
     {
@@ -236,62 +505,23 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
 }
 
 
-void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
-                                                const StyleOptions& options,
-                                                Painter& painter, 
-                                                const Gfx::RectF& rect,
-                                                const Gfx::Brush& brush,
-                                                const Gfx::Pen& pen) const 
-{
-    const Gfx::Scaling& scaling = painter.scaling();
-
-    double corner = scaling.align(1.0);
-    
-    Gfx::RectF borderRect( button.size() );
-    _baseRenderer.renderPlane(painter, borderRect, brush, corner);
-
-    if( button.hasFocus() )
-    {
-        double inset = scaling.toLogical(0.5);
-        double focusOffset = scaling.align(2.0) + inset;
-
-        Gfx::RectF focusRect( button.size() );
-        focusRect.shift(focusOffset, focusOffset);
-        focusRect.expand(-2 * focusOffset, -2 * focusOffset);
-
-        Gfx::Pen focusPen(pen.color(), 1, Gfx::Pen::Dash);
-        painter.setPen(focusPen);
-        painter.drawRect(focusRect);
-    }
-
-    _baseRenderer.renderFrame(painter, borderRect, pen, corner);
-}
-
-
-void PlatinumButtonRenderer::onRenderText(const PushButton& button,
-                                          const StyleOptions& options,
-                                          Painter& painter, 
+void PlatinumButtonRenderer::onRenderIcon(PaintContext& context,
                                           const Gfx::RectF& rect,
-                                          const String& text,
-                                          const Gfx::PointF& textPos,
-                                          const Gfx::Font& font, 
-                                          const Gfx::Pen& textPen,
-                                          const Gfx::RectF& mnemonic) const 
+                                          const StyleOptions& options,
+                                          const Pixmap& picture,
+                                          const Gfx::PointF& pos,
+                                          ButtonStyleFlags state)
 {
-    painter.setFont(font);
-    painter.setPen(textPen);
-    painter.drawText(textPos, text);
-
-    if( ! mnemonic.isNull() )
-    {
-        double mnemonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), mnemonicY), 
-                          Gfx::PointF(mnemonic.right(), mnemonicY) );
-    }
+    _normalPainter.begin(context);
+    _normalPainter.setClip(rect);
+    Gfx::CompositionMode prev = _normalPainter.compositionMode();
+    _normalPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    _normalPainter.drawPixmap(pos, picture);
+    _normalPainter.setCompositionMode(prev);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PlatinumButtonRenderer
+// PlatinumCheckBoxRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
 PlatinumCheckBoxRenderer::PlatinumCheckBoxRenderer(std::size_t refs)
@@ -432,70 +662,6 @@ void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
     _baseRenderer.renderFrame(painter, borderRect, pen, corner);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// PlatinumLabelRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-PlatinumLabelRenderer::PlatinumLabelRenderer(std::size_t refs)
-: LabelRenderer(refs)
-{
-}
-
-
-PlatinumLabelRenderer::~PlatinumLabelRenderer()
-{
-}
-
-
-void PlatinumLabelRenderer::onPrepare(const Label& l,
-                                      const StyleOptions& options,
-                                      Gfx::Font& font,
-                                      Gfx::Pen& contour,
-                                      Gfx::Pen& textPen) const 
-{
-    contour.setJoinStyle(Gfx::Pen::BevelJoin);
-}
-
-
-void PlatinumLabelRenderer::onRenderBackground(const Label& label,
-                                               const StyleOptions& options,
-                                               Painter& painter, 
-                                               const Gfx::RectF& rect,
-                                               const Gfx::Brush& brush) const 
-{
-    Gfx::RectF borderRect( label.size() );
-    double corner = painter.scaling().align(1.0);
-
-    _baseRenderer.renderPlane(painter, borderRect, brush, corner);
-}
-
-
-void PlatinumLabelRenderer::onRenderFrame(const Label& label,
-                                          const StyleOptions& options,
-                                          Painter& painter, 
-                                          const Gfx::RectF& rect,
-                                          const Gfx::Pen& contour) const 
-{
-    Gfx::RectF borderRect( label.size() );
-    double corner = painter.scaling().align(1.0); 
-
-    _baseRenderer.renderFrame(painter, borderRect, contour, corner);
-}
-
-
-void PlatinumLabelRenderer::onRenderText(const Label& l,
-                                         const StyleOptions& options,
-                                         Painter& painter, 
-                                         const Gfx::RectF& rect,
-                                         const String& text,
-                                         const Gfx::PointF& textPos,
-                                         const Gfx::Font& font, 
-                                         const Gfx::Pen& textPen) const 
-{
-    painter.setFont(font);
-    painter.setPen(textPen);
-    painter.drawText(textPos, text);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumLineEditRenderer

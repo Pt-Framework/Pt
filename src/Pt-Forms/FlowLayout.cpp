@@ -86,19 +86,19 @@ Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
     switch(_direction)
     {
         default:
-        case Left:
+        case Direction::Left:
             return onMeasureHorizontal(policy);
             break;
 
-        case Right:
+        case Direction::Right:
             return onMeasureHorizontal(policy);
             break;
 
-        case Top:
+        case Direction::Top:
             return onMeasureVertical(policy);
             break;
 
-        case Bottom:
+        case Direction::Bottom:
             return onMeasureVertical(policy);
             break;
     }
@@ -114,19 +114,19 @@ void FlowLayout::onLayout(const Gfx::RectF& rect)
     switch(_direction)
     {
         default:
-        case Left:
+        case Direction::Left:
             onLayoutLeft(rect, _center);
             break;
 
-        case Right:
+        case Direction::Right:
             onLayoutRight(rect, _center);
             break;
 
-        case Top:
+        case Direction::Top:
             onLayoutTop(rect, _center);
             break;
 
-        case Bottom:
+        case Direction::Bottom:
             onLayoutBottom(rect, _center);
             break;
     }

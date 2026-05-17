@@ -33,6 +33,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Style.h>
+#include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Rect.h>
@@ -59,13 +60,74 @@ class PlatinumRendererBase
                          const Gfx::Pen& pen,
                          double corner) const;
 
+        void renderFrame(Painter& painter,
+                         const Gfx::RectF& rect,
+                         double penSize,
+                         double corner) const;
+
         void renderPlane(Painter& painter,
                          const Gfx::RectF& rect,
                          const Gfx::Brush& brush,
                          double corner) const;
 
+        void renderPlane(Painter& painter,
+                         const Gfx::RectF& rect,
+                         double corner) const;
+
     private:
         static Gfx::Polygon getPolygon(const Gfx::RectF& rect, double inset, double corner);
+};
+
+
+class PT_FORMS_API PlatinumLabelRenderer : public LabelRenderer
+{
+    public:
+        PlatinumLabelRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumLabelRenderer();
+
+    protected:
+        virtual LabelRenderer* onCreate() const;
+
+        virtual void onPrepare(const StyleOptions& options);
+
+        virtual void onRenderBackground(PaintContext& context,
+                                        const Gfx::RectF& rect,
+                                        const StyleOptions& options,
+                                        StyleFlags state);
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize);
+
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& frameRect);
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   StyleFlags state);
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface);
+
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const String& text,
+                                  const Gfx::PointF& pos,
+                                  StyleFlags state);
+
+        virtual void onRenderIcon(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const Pixmap& picture,
+                                  const Gfx::PointF& pos,
+                                  StyleFlags state);
+
+    private:
+        PlatinumRendererBase _baseRenderer;
+        Painter              _bgPainter;
+        Painter              _framePainter;
+        Painter              _textPainter;
 };
 
 
@@ -77,37 +139,60 @@ class PT_FORMS_API PlatinumButtonRenderer : public ButtonRenderer
         virtual ~PlatinumButtonRenderer();
 
     protected:
-        virtual void onPrepare(const PushButton& button,
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen) const;
+        virtual ButtonRenderer* onCreate() const;
 
-        virtual void onPrepareIcon(const PushButton& button,
-                                   const StyleOptions& options,
-                                   const Gfx::Image& icon,
-                                   Pixmap& picture) const;
+        virtual void onPrepare(const StyleOptions& options);
 
-        virtual void onRenderBackground(const PushButton& button,
-                                        const StyleOptions& options,
-                                        Painter& painter,
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush,
-                                        const Gfx::Pen& color) const;
+        virtual Gfx::SizeF onMeasureSurface(PaintSurface& surface,
+                                            const Gfx::SizeF& contentSize);
 
-        virtual void onRenderText(const PushButton& button,
-                                  const StyleOptions& options,
-                                  Painter& painter,
+        virtual Gfx::RectF onLayoutSurface(PaintSurface& surface,
+                                           const Gfx::RectF& surfaceRect);
+
+        virtual void onRenderSurface(PaintContext& context,
+                                     const Gfx::RectF& rect,
+                                     const StyleOptions& options,
+                                     ButtonStyleFlags state);
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface);
+
+        virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
+                                  const StyleOptions& options,
                                   const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& mnemonic) const;
+                                  const Gfx::PointF& pos,
+                                  ButtonStyleFlags state);
+
+        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& fontMetrics,
+                                            String::size_type mnemonicIndex);
+
+        virtual void onRenderMnemonic(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const StyleOptions& options,
+                                      const Gfx::RectF& mnemonic,
+                                      ButtonStyleFlags state);
+
+        virtual void onPrepareIcon(const StyleOptions& options,
+                                   const Gfx::Image& icon,
+                                   Pixmap& picture,
+                                   ButtonStyleFlags state) const;
+
+        virtual void onRenderIcon(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const Pixmap& picture,
+                                  const Gfx::PointF& pos,
+                                  ButtonStyleFlags state);
 
     private:
         PlatinumRendererBase _baseRenderer;
+        Painter _normalPainter;
+        Painter _pressedPainter;
+        Painter _highlightPainter;
+        Painter _textPainter;
 };
 
 
@@ -170,46 +255,6 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& pen) const;
     
-    private:
-        PlatinumRendererBase _baseRenderer;
-};
-
-
-class PT_FORMS_API PlatinumLabelRenderer : public LabelRenderer
-{
-    public:
-        PlatinumLabelRenderer(std::size_t refs = 0);
-
-        virtual ~PlatinumLabelRenderer();
-
-    protected:
-        virtual void onPrepare(const Label& l,
-                               const StyleOptions& options,
-                               Gfx::Font& font,
-                               Gfx::Pen& contour,
-                               Gfx::Pen& textPen) const;
-
-        virtual void onRenderBackground(const Label& l,
-                                        const StyleOptions& options,
-                                        Painter& p, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush) const;
-
-        virtual void onRenderFrame(const Label& l,
-                                   const StyleOptions& options,
-                                   Painter& p, 
-                                   const Gfx::RectF& rect, 
-                                   const Gfx::Pen& contour) const;
-
-        virtual void onRenderText(const Label& l,
-                                  const StyleOptions& options,
-                                  Painter& p, 
-                                  const Gfx::RectF& rect,
-                                  const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen) const;
-
     private:
         PlatinumRendererBase _baseRenderer;
 };

@@ -188,6 +188,39 @@ class PT_FORMS_API StyleOptions
             return _generation;
         }
 
+        double cornerRadius() const
+        {
+            return _cornerRadius;
+        }
+
+        void setCornerRadius(double r)
+        {
+            _cornerRadius = r;
+            ++_generation;
+        }
+
+        double borderWidth() const
+        {
+            return _borderWidth;
+        }
+
+        void setBorderWidth(double w)
+        {
+            _borderWidth = w;
+            ++_generation;
+        }
+
+        double focusWidth() const
+        {
+            return _focusWidth;
+        }
+
+        void setFocusWidth(double w)
+        {
+            _focusWidth = w;
+            ++_generation;
+        }
+
     private:
       Gfx::Brush _background;
       Gfx::Brush _foreground;
@@ -199,6 +232,9 @@ class PT_FORMS_API StyleOptions
       Gfx::Color _textColor;
       Gfx::Color _highlightedTextColor;
       Gfx::Font  _font;
+      double _cornerRadius;
+      double _borderWidth;
+      double _focusWidth;
       std::size_t _generation;
 };
 

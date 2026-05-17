@@ -43,7 +43,7 @@ namespace Forms {
 MenuImpl::MenuImpl(Menu& self)
 : _self(self)
 , _currentMenu(0)
-, _layout(FlowLayout::Top)
+, _layout(Direction::Top)
 , _iconWidth(0)
 {
     setBorder(false);

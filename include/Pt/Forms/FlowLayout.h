@@ -31,6 +31,7 @@
 #define Pt_Forms_FlowLayout_H
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Forms/Direction.h>
 #include <Pt/Forms/Layout.h>
 
 namespace Pt {
@@ -46,17 +47,9 @@ class PT_FORMS_API FlowLayout : public Layout
         // HorizontalCenter    place elements accoring to size
         // Vertical            use all space in row, same size for elements
         // VerticalCenter      place elements accoring to size
-        
-        enum Direction
-        {
-            Left,
-            Right,
-            Top,
-            Bottom
-        };
 
     public:
-        explicit FlowLayout(Direction d = Left);
+        explicit FlowLayout(Direction d = Direction::Left);
 
         virtual ~FlowLayout();
 

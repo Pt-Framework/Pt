@@ -43,7 +43,7 @@ namespace Forms {
 
 Menu::Menu()
 : _currentItem(0)
-, _layout(Pt::Forms::FlowLayout::Top)
+, _layout(Direction::Top)
 , _iconWidth(0)
 {
     setContent(&_layout);    

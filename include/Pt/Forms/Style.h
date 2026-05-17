@@ -32,13 +32,16 @@
 #define Pt_Forms_Style_h
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Forms/Alignment.h>
 #include <Pt/Forms/Spacing.h>
+#include <Pt/Forms/StyleFlags.h>
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/NonCopyable.h>
@@ -50,8 +53,10 @@ namespace Pt {
 
 namespace Forms {
 
+class PaintContext;
 class Painter;
 class Pixmap;
+class TextBlock;
 class StyleOptions;
 class Panel;
 class Label;
@@ -222,71 +227,256 @@ class PT_FORMS_API Style
 };
 
 
+class PT_FORMS_API LabelRenderer : public Style::Facet
+{
+    public:
+        explicit LabelRenderer(std::size_t refs = 0);
+
+        virtual ~LabelRenderer();
+
+        LabelRenderer* create() const;
+
+    public:
+        const Gfx::Brush* background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen* contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Font& font() const;
+
+        void setFont(const Gfx::Font& f);
+
+        Gfx::Pen textColor() const;
+
+        void setTextColor(const Gfx::Pen& p);
+
+    protected:
+        const StyleOptions& prepare();
+
+        virtual LabelRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+    public:
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              StyleFlags state);
+
+    protected:
+        virtual void onRenderBackground(PaintContext& context,
+                                        const Gfx::RectF& rect,
+                                        const StyleOptions& options,
+                                        StyleFlags state) = 0;
+
+    public:
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect);
+
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         StyleFlags state);
+
+    protected:
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& frameRect) = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   StyleFlags state) = 0;
+
+    public:
+        const Painter& textPainter(PaintSurface& surface);
+
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        StyleFlags state);
+
+    protected:
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const String& text,
+                                  const Gfx::PointF& pos,
+                                  StyleFlags state) = 0;
+
+    public:
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        StyleFlags state);
+
+    protected:
+        virtual void onRenderIcon(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const Pixmap& picture,
+                                  const Gfx::PointF& pos,
+                                  StyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
+};
+
+
 class PT_FORMS_API ButtonRenderer : public Style::Facet
 {
     public:
-        ButtonRenderer(std::size_t refs = 0);
+        explicit ButtonRenderer(std::size_t refs = 0);
 
         virtual ~ButtonRenderer();
 
-        void prepare(const PushButton& button,
-                     const StyleOptions& options,
-                     Gfx::Brush& brush,
-                     Gfx::Pen& contour,
-                     Gfx::Font& font,
-                     Gfx::Pen& textPen) const;
+        ButtonRenderer* create() const;
 
-        void prepareIcon(const PushButton& button,
-                         const StyleOptions& options,
-                         const Gfx::Image& icon,
-                         Pixmap& picture) const;
+    public: 
+        const Gfx::Brush& foreground() const;
 
-        void renderBackground(const PushButton& button,
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& brush,
-                              const Gfx::Pen& pen) const;
-        
-        void renderText(const PushButton& button,
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& textPos,
-                        const Gfx::Font& font, 
-                        const Gfx::Pen& textPen,
-                        const Gfx::RectF& mnemonic) const;
+        void setForeground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Color& accentColor() const;
+
+        void setAccentColor(const Gfx::Color& c);
+
+        const Gfx::Color& highlightColor() const;
+
+        void setHighlightColor(const Gfx::Color& c);
+
+        const Gfx::Font& font() const;
+
+        void setFont(const Gfx::Font& f);
+
+        Gfx::Pen textColor() const;
+
+        void setTextColor(const Gfx::Pen& p);
 
     protected:
-        virtual void onPrepare(const PushButton& button,
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen) const = 0;
+        const StyleOptions& prepare();
 
-        virtual void onPrepareIcon(const PushButton& button,
-                                   const StyleOptions& options,
-                                   const Gfx::Image& icon,
-                                   Pixmap& picture) const = 0;
+        virtual ButtonRenderer* onCreate() const = 0;
 
-        virtual void onRenderBackground(const PushButton& button,
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush,
-                                        const Gfx::Pen& pen) const = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
-        virtual void onRenderText(const PushButton& button,
-                                  const StyleOptions& options,
-                                  Painter& painter, 
+    public:
+        Gfx::SizeF measureSurface(PaintSurface& surface,
+                                  const Gfx::SizeF& contentSize);
+
+        Gfx::RectF layoutSurface(PaintSurface& surface,
+                                 const Gfx::RectF& surfaceRect);
+
+        void renderSurface(PaintContext& context,
+                           const Gfx::RectF& rect,
+                           ButtonStyleFlags state);
+
+    protected:
+        virtual Gfx::SizeF onMeasureSurface(PaintSurface& surface,
+                                            const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::RectF onLayoutSurface(PaintSurface& surface,
+                                           const Gfx::RectF& surfaceRect) = 0;
+
+        virtual void onRenderSurface(PaintContext& context,
+                                     const Gfx::RectF& rect,
+                                     const StyleOptions& options,
+                                     ButtonStyleFlags state) = 0;
+
+    public:
+        const Painter& textPainter(PaintSurface& surface);
+
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        ButtonStyleFlags state);
+
+    protected:
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const String& text,
+                                  const Gfx::PointF& pos,
+                                  ButtonStyleFlags state) = 0;
+
+    public:
+        Gfx::RectF layoutMnemonic(PaintSurface& surface,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& mnemonic) const = 0;
+                                  const Gfx::FontMetrics& fontMetrics,
+                                  String::size_type mnemonicIndex);
+
+        void renderMnemonic(PaintContext& context,
+                            const Gfx::RectF& rect,
+                            const Gfx::RectF& mnemonic,
+                            ButtonStyleFlags state);
+
+    protected:
+        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& fontMetrics,
+                                            String::size_type mnemonicIndex) = 0;
+
+        virtual void onRenderMnemonic(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const StyleOptions& options,
+                                      const Gfx::RectF& mnemonic,
+                                      ButtonStyleFlags state) = 0;
+
+    public:
+        void prepareIcon(const Gfx::Image& icon,
+                         Pixmap& picture,
+                         ButtonStyleFlags state) const;
+
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        ButtonStyleFlags state);
+
+    protected:
+        virtual void onPrepareIcon(const StyleOptions& options,
+                                   const Gfx::Image& icon,
+                                   Pixmap& picture,
+                                   ButtonStyleFlags state) const = 0;
+
+        virtual void onRenderIcon(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const Pixmap& picture,
+                                  const Gfx::PointF& pos,
+                                  ButtonStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _foreground;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Color> _accentColor;
+        AutoPtr<Gfx::Color> _highlightColor;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
 };
 
 
@@ -385,70 +575,6 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
                                    Painter& painter, 
                                    const Gfx::RectF& rect, 
                                    const Gfx::Pen& pen) const = 0;
-};
-
-
-class PT_FORMS_API LabelRenderer : public Style::Facet
-{
-    public:
-        LabelRenderer(std::size_t refs = 0);
-
-        virtual ~LabelRenderer();
-
-        void prepare(const Label& l,
-                     const StyleOptions& options,
-                     Gfx::Font& font,
-                     Gfx::Pen& contour,
-                     Gfx::Pen& textPen) const;
-        
-        void renderBackground(const Label& l,
-                              const StyleOptions& options,
-                              Painter& p, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& brush) const;
-
-        void renderFrame(const Label& l,
-                         const StyleOptions& options,
-                         Painter& p, 
-                         const Gfx::RectF& rect, 
-                         const Gfx::Pen& contour) const;
-
-        void renderText(const Label& l,
-                        const StyleOptions& options,
-                        Painter& p, 
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& textPos,
-                        const Gfx::Font& font, 
-                        const Gfx::Pen& textPen) const;
-
-    protected:
-        virtual void onPrepare(const Label& l,
-                               const StyleOptions& options,
-                               Gfx::Font& font,
-                               Gfx::Pen& contour,
-                               Gfx::Pen& textPen) const = 0;
-
-        virtual void onRenderBackground(const Label& l,
-                                        const StyleOptions& options,
-                                        Painter& p, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush) const = 0;
-
-        virtual void onRenderFrame(const Label& l,
-                                   const StyleOptions& options,
-                                   Painter& p, 
-                                   const Gfx::RectF& rect, 
-                                   const Gfx::Pen& contour) const = 0;
-
-        virtual void onRenderText(const Label& l,
-                                  const StyleOptions& options,
-                                  Painter& p, 
-                                  const Gfx::RectF& rect,
-                                  const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen) const = 0;
 };
 
 class PT_FORMS_API LineEditRenderer : public Style::Facet

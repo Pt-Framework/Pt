@@ -44,6 +44,9 @@ StyleOptions::StyleOptions()
 , _textColor(0, 0, 0)
 , _highlightedTextColor(0, 0, 0)
 , _font(Gfx::Font("", 10))
+, _cornerRadius(1.0)
+, _borderWidth(1.0)
+, _focusWidth(1.0)
 , _generation(0)
 {
 }
@@ -60,6 +63,9 @@ StyleOptions::StyleOptions(const StyleOptions& o)
 , _textColor(o._textColor)
 , _highlightedTextColor( o.highlightedTextColor() )
 , _font(o._font)
+, _cornerRadius(o._cornerRadius)
+, _borderWidth(o._borderWidth)
+, _focusWidth(o._focusWidth)
 , _generation(o._generation)
 {
 }
@@ -79,6 +85,9 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
     _highlightColor = o._highlightColor;
     _textColor = o._textColor;
     _font = o._font;
+    _cornerRadius = o._cornerRadius;
+    _borderWidth = o._borderWidth;
+    _focusWidth = o._focusWidth;
     ++_generation;
     
     return *this;

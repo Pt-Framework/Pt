@@ -56,8 +56,8 @@ namespace Demo {
 
 MainWindow::MainWindow()
 : _child1("Child 1")
-, _scrollContainer(Forms::FlowLayout::Top)
-, _scrollContainer2(Forms::FlowLayout::Top)
+, _scrollContainer(Forms::Direction::Top)
+, _scrollContainer2(Forms::Direction::Top)
 {
     setContent(&_workspace);
     

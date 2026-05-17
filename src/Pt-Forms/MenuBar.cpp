@@ -39,7 +39,7 @@ namespace Pt {
 namespace Forms {
 
 MenuBar::MenuBar()
-: _layout(Pt::Forms::FlowLayout::Left)
+: _layout(Direction::Left)
 , _currentItem(0)
 {
     Base::add(_layout);
