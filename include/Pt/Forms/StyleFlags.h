@@ -43,26 +43,27 @@ namespace Forms {
 class StyleFlags
 {
   public:
-    struct Flag { unsigned value; };
-
-    static constexpr Flag Enabled     = {0x01};
-    static constexpr Flag Disabled    = {0x02};
-    static constexpr Flag Highlighted = {0x04};
-    static constexpr Flag Focused     = {0x08};
-    static constexpr Flag Checked     = {0x10};
-    static constexpr Flag ReadOnly    = {0x20};
-    static constexpr Flag Selected    = {0x40};
-    static constexpr Flag Expanded    = {0x80};
+    enum Flag
+    {
+        Enabled     = 0x01,
+        Disabled    = 0x02,
+        Highlighted = 0x04,
+        Focused     = 0x08,
+        Checked     = 0x10,
+        ReadOnly    = 0x20,
+        Selected    = 0x40,
+        Expanded    = 0x80
+    };
 
     StyleFlags()
     : _value(0)
     {}
 
     bool has(Flag mask) const
-    { return (_value & mask.value) != 0; }
+    { return (_value & mask) != 0; }
 
     void set(Flag mask)
-    { _value |= mask.value; }
+    { _value |= mask; }
 
   private:
     unsigned _value;
@@ -77,10 +78,11 @@ class StyleFlags
 class ButtonStyleFlags
 {
   public:
-    struct Flag { unsigned value; };
-
-    static constexpr Flag Pressed = {0x01};
-    static constexpr Flag Flat    = {0x02};
+    enum Flag
+    {
+        Pressed = 0x01,
+        Flat    = 0x02
+    };
 
     ButtonStyleFlags()
     : _state()
@@ -96,13 +98,13 @@ class ButtonStyleFlags
     { return _state.has(mask); }
 
     bool has(Flag mask) const
-    { return (_value & mask.value) != 0; }
+    { return (_value & mask) != 0; }
 
     void set(StyleFlags::Flag mask)
     { _state.set(mask); }
 
     void set(Flag mask)
-    { _value |= mask.value; }
+    { _value |= mask; }
 
   private:
     StyleFlags _state;
