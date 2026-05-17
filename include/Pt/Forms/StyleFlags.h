@@ -48,11 +48,7 @@ class StyleFlags
         Enabled     = 0x01,
         Disabled    = 0x02,
         Highlighted = 0x04,
-        Focused     = 0x08,
-        Checked     = 0x10,
-        ReadOnly    = 0x20,
-        Selected    = 0x40,
-        Expanded    = 0x80
+        Focused     = 0x08
     };
 
     StyleFlags()
