@@ -516,6 +516,7 @@ void ButtonRenderer::renderIcon(PaintContext& context,
 
 CheckBoxRenderer::CheckBoxRenderer(std::size_t refs)
 : Style::Facet( typeid(CheckBoxRenderer), refs )
+, _styleGeneration( std::size_t(-1) )
 {
 }
 
@@ -525,48 +526,138 @@ CheckBoxRenderer::~CheckBoxRenderer()
 }
 
 
-void CheckBoxRenderer::prepare(const CheckBox& cb,
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen,
-                               Gfx::SizeF& boxSize) const
+CheckBoxRenderer* CheckBoxRenderer::create() const
 {
-    onPrepare(cb, options, brush, contour, font, textPen, boxSize); 
+    return onCreate();
 }
 
 
-void CheckBoxRenderer::renderBox(const CheckBox& cb,
-                                 const StyleOptions& options,
-                                 Painter& painter, 
+const Gfx::Brush* CheckBoxRenderer::background() const
+{
+    return _background.get();
+}
+
+
+void CheckBoxRenderer::setBackground(const Gfx::Brush& b)
+{
+    _background.reset( new Gfx::Brush(b) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Pen* CheckBoxRenderer::contour() const
+{
+    return _contour.get();
+}
+
+
+void CheckBoxRenderer::setContour(const Gfx::Pen& p)
+{
+    _contour.reset( new Gfx::Pen(p) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Font& CheckBoxRenderer::font() const
+{
+    if( _font )
+        return *_font;
+
+    return Application::instance().styleOptions().font();
+}
+
+
+void CheckBoxRenderer::setFont(const Gfx::Font& f)
+{
+    _font.reset( new Gfx::Font(f) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const Gfx::Color& CheckBoxRenderer::textColor() const
+{
+    if( _textColor )
+        return _textColor->color();
+
+    return Application::instance().styleOptions().textColor();
+}
+
+
+void CheckBoxRenderer::setTextColor(const Gfx::Pen& p)
+{
+    _textColor.reset( new Gfx::Pen(p) );
+    _styleGeneration = std::size_t(-1);
+}
+
+
+const StyleOptions& CheckBoxRenderer::prepare()
+{
+    const StyleOptions& opts = Application::instance().styleOptions();
+
+    if( _styleGeneration != opts.generation() )
+    {
+        _styleGeneration = opts.generation();
+        onPrepare(opts);
+    }
+
+    return opts;
+}
+
+
+Gfx::SizeF CheckBoxRenderer::measureBox(PaintSurface& surface)
+{
+    prepare();
+    return onMeasureBox(surface);
+}
+
+
+void CheckBoxRenderer::renderBox(PaintContext& context,
                                  const Gfx::RectF& rect,
                                  const Gfx::RectF& boxRect,
-                                 const Gfx::Brush& brush,
-                                 const Gfx::Pen& pen) const
-{ 
-    onRenderBox(cb, options, painter, rect, 
-                boxRect, brush, pen); 
-}  
+                                 CheckBoxStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderBox(context, rect, opts, boxRect, state);
+}
 
 
-void CheckBoxRenderer::renderText(const CheckBox& cb,
-                                  const StyleOptions& options,
-                                  Painter& painter, 
+const Painter& CheckBoxRenderer::textPainter(PaintSurface& surface)
+{
+    prepare();
+    return onGetTextPainter(surface);
+}
+
+
+void CheckBoxRenderer::renderText(PaintContext& context,
                                   const Gfx::RectF& rect,
                                   const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::TextMetrics& textMetric,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& mnemonic) const
-{ 
-    onRenderText(cb, options, painter, rect, 
-                 text, textPos, textMetric, font, textPen, mnemonic); 
-}  
+                                  const Gfx::PointF& pos,
+                                  CheckBoxStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderText(context, rect, opts, text, pos, state);
+}
 
 
+Gfx::RectF CheckBoxRenderer::layoutMnemonic(PaintSurface& surface,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& fontMetrics,
+                                            String::size_type mnemonicIndex)
+{
+    prepare();
+    return onLayoutMnemonic(surface, text, textPos, fontMetrics, mnemonicIndex);
+}
 
+
+void CheckBoxRenderer::renderMnemonic(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const Gfx::RectF& mnemonic,
+                                      CheckBoxStyleFlags state)
+{
+    const StyleOptions& opts = prepare();
+    onRenderMnemonic(context, rect, opts, mnemonic, state);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // LineEditRenderer

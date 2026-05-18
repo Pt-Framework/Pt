@@ -60,7 +60,6 @@ class TextBlock;
 class StyleOptions;
 class LineEdit;
 class PushButton;
-class CheckBox;
 class ComboBox;
 class Menu;
 class MenuItem;
@@ -481,67 +480,104 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
 class PT_FORMS_API CheckBoxRenderer : public Style::Facet
 {
     public:
-        CheckBoxRenderer(std::size_t refs = 0);
+        explicit CheckBoxRenderer(std::size_t refs = 0);
 
         virtual ~CheckBoxRenderer();
 
-        void prepare(const CheckBox& cb,
-                     const StyleOptions& options,
-                     Gfx::Brush& brush,
-                     Gfx::Pen& contour,
-                     Gfx::Font& font,
-                     Gfx::Pen& textPen,
-                     Gfx::SizeF& boxSize) const;
+        CheckBoxRenderer* create() const;
 
-        void renderBox(const CheckBox& cb,
-                       const StyleOptions& options,
-                       Painter& painter, 
-                       const Gfx::RectF& rect,
-                       const Gfx::RectF& boxRect,
-                       const Gfx::Brush& brush,
-                       const Gfx::Pen& pen) const;
+    public:
+        const Gfx::Brush* background() const;
 
-        void renderText(const CheckBox& cb,
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& textPos,
-                        const Gfx::TextMetrics& textMetric,
-                        const Gfx::Font& font, 
-                        const Gfx::Pen& textPen,
-                        const Gfx::RectF& mnemonic) const;
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen* contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Font& font() const;
+
+        void setFont(const Gfx::Font& f);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Pen& p);
 
     protected:
-        virtual void onPrepare(const CheckBox& cb,
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen,
-                               Gfx::SizeF& boxSize) const = 0;
+        const StyleOptions& prepare();
 
-        virtual void onRenderBox(const CheckBox& cb,
-                                 const StyleOptions& options,
-                                 Painter& painter, 
+        virtual CheckBoxRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+    public:
+        Gfx::SizeF measureBox(PaintSurface& surface);
+
+        void renderBox(PaintContext& context,
+                       const Gfx::RectF& rect,
+                       const Gfx::RectF& boxRect,
+                       CheckBoxStyleFlags state);
+
+    protected:
+        virtual Gfx::SizeF onMeasureBox(PaintSurface& surface) = 0;
+
+        virtual void onRenderBox(PaintContext& context,
                                  const Gfx::RectF& rect,
+                                 const StyleOptions& options,
                                  const Gfx::RectF& boxRect,
-                                 const Gfx::Brush& brush,
-                                 const Gfx::Pen& pen) const = 0;
+                                 CheckBoxStyleFlags state) = 0;
 
-        virtual void onRenderText(const CheckBox& cb,
-                                  const StyleOptions& options,
-                                  Painter& painter, 
+    public:
+        const Painter& textPainter(PaintSurface& surface);
+
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        CheckBoxStyleFlags state);
+
+    protected:
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
+                                  const StyleOptions& options,
+                                  const String& text,
+                                  const Gfx::PointF& pos,
+                                  CheckBoxStyleFlags state) = 0;
+
+    public:
+        Gfx::RectF layoutMnemonic(PaintSurface& surface,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  const Gfx::TextMetrics& textMetric,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& mnemonic) const = 0;
+                                  const Gfx::FontMetrics& fontMetrics,
+                                  String::size_type mnemonicIndex);
+
+        void renderMnemonic(PaintContext& context,
+                            const Gfx::RectF& rect,
+                            const Gfx::RectF& mnemonic,
+                            CheckBoxStyleFlags state);
+
+    protected:
+        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& fontMetrics,
+                                            String::size_type mnemonicIndex) = 0;
+
+        virtual void onRenderMnemonic(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const StyleOptions& options,
+                                      const Gfx::RectF& mnemonic,
+                                      CheckBoxStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
 };
-
-
 
 
 class PT_FORMS_API LineEditRenderer : public Style::Facet

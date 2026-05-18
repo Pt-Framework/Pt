@@ -107,6 +107,47 @@ class ButtonStyleFlags
     unsigned _value;
 };
 
+
+/** @brief State flags for check box rendering.
+
+    Extends StyleFlags with check-box-specific flags such as
+    Checked.
+*/
+class CheckBoxStyleFlags
+{
+  public:
+    enum Flag
+    {
+        Checked = 0x01
+    };
+
+    CheckBoxStyleFlags()
+    : _state()
+    , _value(0)
+    {}
+
+    CheckBoxStyleFlags(StyleFlags s)
+    : _state(s)
+    , _value(0)
+    {}
+
+    bool has(StyleFlags::Flag mask) const
+    { return _state.has(mask); }
+
+    bool has(Flag mask) const
+    { return (_value & mask) != 0; }
+
+    void set(StyleFlags::Flag mask)
+    { _state.set(mask); }
+
+    void set(Flag mask)
+    { _value |= mask; }
+
+  private:
+    StyleFlags _state;
+    unsigned _value;
+};
+
 } // namespace Forms
 
 } // namespace Pt

@@ -32,6 +32,9 @@
 #define Pt_Forms_CheckBox_h
 
 #include <Pt/Forms/Button.h>
+#include <Pt/Forms/StyleFlags.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/TextMetrics.h>
 #include <Pt/SmartPtr.h>
 
 namespace Pt {
@@ -86,9 +89,11 @@ class PT_FORMS_API CheckBox : public Button
         void setFontSlant(Gfx::Font::Slant slant);
 
         void setRenderer(CheckBoxRenderer* renderer);
-    
+
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onInvalidate();
 
@@ -97,12 +102,18 @@ class PT_FORMS_API CheckBox : public Button
         virtual void onReleased();
 
         virtual void onCanceled();
-    
-    protected:       
+
+    protected:
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     private:
         Gfx::Font getFont() const;
+
+        CheckBoxRenderer* getRenderer();
+
+        void applyRenderer(CheckBoxRenderer* renderer);
+
+        CheckBoxStyleFlags checkBoxStyleFlags() const;
 
     private:
         enum FontOverride : unsigned
@@ -113,22 +124,23 @@ class PT_FORMS_API CheckBox : public Button
             OverrideAll    = 0xFF
         };
 
-        State                    _state;
+        State                      _state;
 
         FacetPtr<CheckBoxRenderer> _renderer;
         bool                       _customRenderer;
 
-        AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>      _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _fontOverride;
+        AutoPtr<Gfx::Brush>        _background;
+        AutoPtr<Gfx::Pen>          _contour;
+        AutoPtr<Gfx::Color>        _textColor;
+        Gfx::Font                  _customFont;
+        unsigned                   _fontOverride;
 
-        Gfx::Brush               _brush;
-        Gfx::Pen                 _pen;
-        Gfx::Pen                 _textPen;
-        Gfx::Font                _font;
-        Gfx::SizeF               _boxSize;
+        Gfx::SizeF                 _boxSize;
+        Gfx::RectF                 _boxRect;
+        Gfx::PointF                _textPos;
+        Gfx::RectF                 _mnemonicRect;
+        Gfx::TextMetrics           _textMetrics;
+        Gfx::FontMetrics           _fontMetrics;
 };
 
 } // namespace

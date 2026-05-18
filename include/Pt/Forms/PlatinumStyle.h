@@ -204,38 +204,44 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
         virtual ~PlatinumCheckBoxRenderer();
 
     protected:
-        virtual void onPrepare(const CheckBox& cb,
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen,
-                               Gfx::SizeF& boxRect) const;
+        virtual CheckBoxRenderer* onCreate() const;
 
-        virtual void onRenderBox(const CheckBox& cb,
-                                 const StyleOptions& options,
-                                 Painter& painter,
+        virtual void onPrepare(const StyleOptions& options);
+
+        virtual Gfx::SizeF onMeasureBox(PaintSurface& surface);
+
+        virtual void onRenderBox(PaintContext& context,
                                  const Gfx::RectF& rect,
+                                 const StyleOptions& options,
                                  const Gfx::RectF& boxRect,
-                                 const Gfx::Brush& brush,
-                                 const Gfx::Pen& pen) const;
+                                 CheckBoxStyleFlags state);
 
-        virtual void onRenderText(const CheckBox& cb,
-                                  const StyleOptions& options,
-                                  Painter& painter,
+        virtual const Painter& onGetTextPainter(PaintSurface& surface);
+
+        virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
+                                  const StyleOptions& options,
                                   const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::TextMetrics& textMetric,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& mnemonic) const;
+                                  const Gfx::PointF& pos,
+                                  CheckBoxStyleFlags state);
+
+        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& fontMetrics,
+                                            String::size_type mnemonicIndex);
+
+        virtual void onRenderMnemonic(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const StyleOptions& options,
+                                      const Gfx::RectF& mnemonic,
+                                      CheckBoxStyleFlags state);
 
     private:
         PlatinumRendererBase _baseRenderer;
+        Painter _boxPainter;
+        Painter _textPainter;
 };
-
-
 
 
 class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer

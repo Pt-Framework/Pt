@@ -36,7 +36,6 @@
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/LineEdit.h>
 #include <Pt/Forms/PushButton.h>
-#include <Pt/Forms/CheckBox.h>
 #include <Pt/Forms/MenuBar.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/MenuItem.h>
@@ -69,6 +68,47 @@ Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
     Pt::uint8_t b8 = b > 255 ? 255 : static_cast<Pt::uint8_t>(b);
 
     return Pt::Gfx::Color(c.alpha(), r8, g8, b8);
+}
+
+
+Pt::Gfx::RectF layoutMnemonicImpl(Pt::Forms::Painter& painter,
+                                  Pt::Forms::PaintSurface& surface,
+                                  const Pt::String& text,
+                                  const Pt::Gfx::PointF& textPos,
+                                  const Pt::Gfx::FontMetrics& fontMet,
+                                  Pt::String::size_type mnemonicIndex)
+{
+    if( mnemonicIndex == Pt::String::npos || mnemonicIndex >= text.size() )
+        return Pt::Gfx::RectF();
+
+    painter.begin(surface);
+
+    Pt::String leftText(text, 0, mnemonicIndex);
+    Pt::Gfx::TextMetrics fmLeft = painter.textMetrics(leftText);
+
+    Pt::String charText(1, text[mnemonicIndex]);
+    Pt::Gfx::TextMetrics fmChar = painter.textMetrics(charText);
+
+    return Pt::Gfx::RectF(
+        Pt::Gfx::PointF(textPos.x() + fmLeft.advance(), textPos.y()),
+        Pt::Gfx::SizeF(fmChar.advance(), fontMet.descent()) );
+}
+
+
+void renderMnemonicImpl(Pt::Forms::Painter& painter,
+                        Pt::Forms::PaintContext& context,
+                        const Pt::Gfx::RectF& rect,
+                        const Pt::Gfx::RectF& mnemonic)
+{
+    if( mnemonic.isNull() )
+        return;
+
+    painter.begin(context);
+    painter.setClip(rect);
+
+    double mnemonicY = mnemonic.top() + 1;
+    painter.drawLine( Pt::Gfx::PointF(mnemonic.left(), mnemonicY),
+                      Pt::Gfx::PointF(mnemonic.right(), mnemonicY) );
 }
 
 } // namespace
@@ -438,38 +478,17 @@ Gfx::RectF PlatinumButtonRenderer::onLayoutMnemonic(PaintSurface& surface,
                                                     const Gfx::FontMetrics& fontMet,
                                                     String::size_type mnemonicIndex)
 {
-    if( mnemonicIndex == String::npos || mnemonicIndex >= text.size() )
-        return Gfx::RectF();
-
-    _textPainter.begin(surface);
-
-    Pt::String leftText(text, 0, mnemonicIndex);
-    Gfx::TextMetrics fmLeft = _textPainter.textMetrics(leftText);
-
-    Pt::String charText(1, text[mnemonicIndex]);
-    Gfx::TextMetrics fmChar = _textPainter.textMetrics(charText);
-
-    return Gfx::RectF(
-        Gfx::PointF(textPos.x() + fmLeft.advance(), textPos.y()),
-        Gfx::SizeF(fmChar.advance(), fontMet.descent()) );
+    return layoutMnemonicImpl(_textPainter, surface, text, textPos, fontMet, mnemonicIndex);
 }
 
 
 void PlatinumButtonRenderer::onRenderMnemonic(PaintContext& context,
                                               const Gfx::RectF& rect,
-                                              const StyleOptions& options,
+                                              const StyleOptions& /*options*/,
                                               const Gfx::RectF& mnemonic,
-                                              ButtonStyleFlags state)
+                                              ButtonStyleFlags /*state*/)
 {
-    if( mnemonic.isNull() )
-        return;
-
-    _textPainter.begin(context);
-    _textPainter.setClip(rect);
-
-    double mnemonicY = mnemonic.top() + 1;
-    _textPainter.drawLine( Gfx::PointF(mnemonic.left(), mnemonicY),
-                           Gfx::PointF(mnemonic.right(), mnemonicY) );
+    renderMnemonicImpl(_textPainter, context, rect, mnemonic);
 }
 
 
@@ -535,29 +554,46 @@ PlatinumCheckBoxRenderer::~PlatinumCheckBoxRenderer()
 }
 
 
-void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
-                                         const StyleOptions& options,
-                                         Gfx::Brush& brush,
-                                         Gfx::Pen& contour,
-                                         Gfx::Font& font,
-                                         Gfx::Pen& textPen,
-                                         Gfx::SizeF& boxSize) const 
+CheckBoxRenderer* PlatinumCheckBoxRenderer::onCreate() const
 {
-    contour.setJoinStyle(Gfx::Pen::BevelJoin);
-
-    boxSize.set( font.size() * 1.2, font.size() * 1.2 );
+    return new PlatinumCheckBoxRenderer(1);
 }
 
 
-void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
-                                           const StyleOptions& options,
-                                           Painter& painter, 
-                                           const Gfx::RectF& rect,
-                                           const Gfx::RectF& box,
-                                           const Gfx::Brush& brush,
-                                           const Gfx::Pen& pen) const
+void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options)
 {
-    const Gfx::Scaling& scaling = painter.scaling();
+    Gfx::Brush bg = background() ? *background()
+                                 : Gfx::Brush( options.textBackground() );
+
+    Gfx::Pen cPen = contour() ? *contour()
+                               : options.contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    _boxPainter.setBrush( bg );
+    _boxPainter.setPen( cPen );
+
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureBox(PaintSurface& /*surface*/)
+{
+    double sz = font().size() * 1.2;
+    return Gfx::SizeF(sz, sz);
+}
+
+
+void PlatinumCheckBoxRenderer::onRenderBox(PaintContext& context,
+                                           const Gfx::RectF& rect,
+                                           const StyleOptions& options,
+                                           const Gfx::RectF& box,
+                                           CheckBoxStyleFlags state)
+{
+    _boxPainter.begin(context);
+    _boxPainter.setClip(rect);
+
+    const Gfx::Scaling& scaling = _boxPainter.scaling();
 
     Gfx::RectF boxRect = scaling.align(box);
     double inset = scaling.toLogical(0.5);
@@ -571,55 +607,71 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
     borderRect.shift(inset, inset);
     borderRect.shrink(2 * inset, 2 * inset);
 
-    painter.setBrush(brush);
-    painter.fillRect(boxRect);
+    _boxPainter.fillRect(boxRect);
+    _boxPainter.drawRect(borderRect);
 
-    painter.setPen(pen);
-    painter.drawRect(borderRect);
-
-    if( cb.isChecked() )
+    if( state.has(CheckBoxStyleFlags::Checked) )
     {
-        painter.setBrush( options.textColor() );
-        painter.fillRect(checkRect);
+        Gfx::Brush savedBrush = _boxPainter.brush();
+        _boxPainter.setBrush( options.textColor() );
+        _boxPainter.fillRect(checkRect);
+        _boxPainter.setBrush( savedBrush );
     }
 }
 
 
-void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
-                                            const StyleOptions& options,
-                                            Painter& painter, 
-                                            const Gfx::RectF& rect,
-                                            const String& text,
-                                            const Gfx::PointF& textPos,
-                                            const Gfx::TextMetrics& textMetric,
-                                            const Gfx::Font& font, 
-                                            const Gfx::Pen& textPen,
-                                            const Gfx::RectF& mnemonic) const 
+const Painter& PlatinumCheckBoxRenderer::onGetTextPainter(PaintSurface& surface)
 {
-    painter.setFont(font);
-    painter.setPen(textPen);
-    painter.drawText(textPos, text);
+    _textPainter.begin(surface);
+    return _textPainter;
+}
 
-    if( ! mnemonic.isNull() )
+
+void PlatinumCheckBoxRenderer::onRenderText(PaintContext& context,
+                                            const Gfx::RectF& rect,
+                                            const StyleOptions& /*options*/,
+                                            const String& text,
+                                            const Gfx::PointF& pos,
+                                            CheckBoxStyleFlags state)
+{
+    _textPainter.begin(context);
+    _textPainter.setClip(rect);
+    _textPainter.drawText(pos, text);
+
+    if( state.has(StyleFlags::Focused) )
     {
-        double menmonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
-                          Gfx::PointF(mnemonic.right(), menmonicY) );
-    }
+        Gfx::FontMetrics fm = _textPainter.fontMetrics();
+        Gfx::TextMetrics tm = _textPainter.textMetrics(text);
 
-    if( cb.hasFocus() )
-    {       
-        Gfx::FontMetrics fm = painter.fontMetrics();
+        Gfx::RectF focusRect( Gfx::PointF(pos.x() - 2, pos.y() - fm.ascent()),
+                              Gfx::SizeF(tm.advance() + 4, fm.height()) );
 
-        Gfx::RectF focusRect( Gfx::PointF(textPos.x() - 2, 
-                                          textPos.y() - fm.ascent()), 
-                              Gfx::SizeF(textMetric.advance() + 4, 
-                                         fm.height() ) );
-        
-        Gfx::Pen pen(textPen.color(), 1, Gfx::Pen::Dash);
-        painter.setPen(pen);
-        painter.drawRect(focusRect);
+        Gfx::Pen savedPen = _textPainter.pen();
+        Gfx::Pen focusPen(savedPen.color(), 1, Gfx::Pen::Dash);
+        _textPainter.setPen(focusPen);
+        _textPainter.drawRect(focusRect);
+        _textPainter.setPen(savedPen);
     }
+}
+
+
+Gfx::RectF PlatinumCheckBoxRenderer::onLayoutMnemonic(PaintSurface& surface,
+                                                      const String& text,
+                                                      const Gfx::PointF& textPos,
+                                                      const Gfx::FontMetrics& fontMetrics,
+                                                      String::size_type mnemonicIndex)
+{
+    return layoutMnemonicImpl(_textPainter, surface, text, textPos, fontMetrics, mnemonicIndex);
+}
+
+
+void PlatinumCheckBoxRenderer::onRenderMnemonic(PaintContext& context,
+                                                const Gfx::RectF& rect,
+                                                const StyleOptions& /*options*/,
+                                                const Gfx::RectF& mnemonic,
+                                                CheckBoxStyleFlags /*state*/)
+{
+    renderMnemonicImpl(_textPainter, context, rect, mnemonic);
 }
 
 
