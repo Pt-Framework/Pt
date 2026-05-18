@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+﻿/* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2017 Ilja Maier
 
@@ -144,54 +144,54 @@ Style::Facet* Style::find(const std::type_info& ti) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// LabelRenderer
+// PanelRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
-LabelRenderer::LabelRenderer(std::size_t refs)
-: Style::Facet( typeid(LabelRenderer), refs )
+PanelRenderer::PanelRenderer(std::size_t refs)
+: Style::Facet( typeid(PanelRenderer), refs )
 , _styleGeneration( std::size_t(-1) )
 {
 }
 
 
-LabelRenderer::~LabelRenderer()
+PanelRenderer::~PanelRenderer()
 {
 }
 
 
-LabelRenderer* LabelRenderer::create() const
+PanelRenderer* PanelRenderer::create() const
 {
     return onCreate();
 }
 
 
-const Gfx::Brush* LabelRenderer::background() const
+const Gfx::Brush* PanelRenderer::background() const
 {
     return _background.get();
 }
 
 
-void LabelRenderer::setBackground(const Gfx::Brush& b)
+void PanelRenderer::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
     _styleGeneration = std::size_t(-1);
 }
 
 
-const Gfx::Pen* LabelRenderer::contour() const
+const Gfx::Pen* PanelRenderer::contour() const
 {
     return _contour.get();
 }
 
 
-void LabelRenderer::setContour(const Gfx::Pen& p)
+void PanelRenderer::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
     _styleGeneration = std::size_t(-1);
 }
 
 
-const Gfx::Font& LabelRenderer::font() const
+const Gfx::Font& PanelRenderer::font() const
 {
     if( _font )
         return *_font;
@@ -200,30 +200,30 @@ const Gfx::Font& LabelRenderer::font() const
 }
 
 
-void LabelRenderer::setFont(const Gfx::Font& f)
+void PanelRenderer::setFont(const Gfx::Font& f)
 {
     _font.reset( new Gfx::Font(f) );
     _styleGeneration = std::size_t(-1);
 }
 
 
-Gfx::Pen LabelRenderer::textColor() const
+const Gfx::Color& PanelRenderer::textColor() const
 {
     if( _textColor )
-        return *_textColor;
+        return _textColor->color();
 
-    return Gfx::Pen( Application::instance().styleOptions().textColor() );
+    return Application::instance().styleOptions().textColor();
 }
 
 
-void LabelRenderer::setTextColor(const Gfx::Pen& p)
+void PanelRenderer::setTextColor(const Gfx::Pen& p)
 {
     _textColor.reset( new Gfx::Pen(p) );
     _styleGeneration = std::size_t(-1);
 }
 
 
-const StyleOptions& LabelRenderer::prepare()
+const StyleOptions& PanelRenderer::prepare()
 {
     const StyleOptions& opts = Application::instance().styleOptions();
 
@@ -237,7 +237,7 @@ const StyleOptions& LabelRenderer::prepare()
 }
 
 
-void LabelRenderer::renderBackground(PaintContext& context,
+void PanelRenderer::renderBackground(PaintContext& context,
                                      const Gfx::RectF& rect,
                                      StyleFlags state)
 {
@@ -246,21 +246,21 @@ void LabelRenderer::renderBackground(PaintContext& context,
 }
 
 
-Gfx::SizeF LabelRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF PanelRenderer::measureFrame(PaintSurface& surface,
                                         const Gfx::SizeF& contentSize)
 {
     return onMeasureFrame(surface, contentSize);
 }
 
 
-Gfx::RectF LabelRenderer::layoutFrame(PaintSurface& surface,
+Gfx::RectF PanelRenderer::layoutFrame(PaintSurface& surface,
                                        const Gfx::RectF& frameRect)
 {
     return onLayoutFrame(surface, frameRect);
 }
 
 
-void LabelRenderer::renderFrame(PaintContext& context,
+void PanelRenderer::renderFrame(PaintContext& context,
                                 const Gfx::RectF& rect,
                                 StyleFlags state)
 {
@@ -269,14 +269,14 @@ void LabelRenderer::renderFrame(PaintContext& context,
 }
 
 
-const Painter& LabelRenderer::textPainter(PaintSurface& surface)
+const Painter& PanelRenderer::textPainter(PaintSurface& surface)
 {
     prepare();
     return onGetTextPainter(surface);
 }
 
 
-void LabelRenderer::renderText(PaintContext& context,
+void PanelRenderer::renderText(PaintContext& context,
                                const Gfx::RectF& rect,
                                const String& text,
                                const Gfx::PointF& pos,
@@ -287,7 +287,7 @@ void LabelRenderer::renderText(PaintContext& context,
 }
 
 
-void LabelRenderer::renderIcon(PaintContext& context,
+void PanelRenderer::renderIcon(PaintContext& context,
                                const Gfx::RectF& rect,
                                const Pixmap& picture,
                                const Gfx::PointF& pos,
@@ -399,12 +399,12 @@ void ButtonRenderer::setFont(const Gfx::Font& f)
 }
 
 
-Gfx::Pen ButtonRenderer::textColor() const
+const Gfx::Color& ButtonRenderer::textColor() const
 {
     if( _textColor )
-        return *_textColor;
+        return _textColor->color();
 
-    return Gfx::Pen( Application::instance().styleOptions().textColor() );
+    return Application::instance().styleOptions().textColor();
 }
 
 
@@ -566,39 +566,7 @@ void CheckBoxRenderer::renderText(const CheckBox& cb,
 }  
 
 
-///////////////////////////////////////////////////////////////////////////////
-// PanelRenderer
-///////////////////////////////////////////////////////////////////////////////
 
-PanelRenderer::PanelRenderer(std::size_t refs)
-: Style::Facet( typeid(PanelRenderer), refs )
-{
-}
-
-    
-PanelRenderer::~PanelRenderer()
-{
-}
-
-
-void PanelRenderer::renderBackground(const Panel& p,
-                                     const StyleOptions& options,
-                                     Painter& painter, 
-                                     const Gfx::RectF& rect,
-                                     const Gfx::Brush& brush) const
-{
-    onRenderBackground(p, options, painter, rect, brush);
-}
-
-
-void PanelRenderer::renderFrame(const Panel& p,
-                                const StyleOptions& options,
-                                Painter& painter, 
-                                const Gfx::RectF& rect, 
-                                const Gfx::Pen& pen) const
-{
-    onRenderFrame(p, options, painter, rect, pen);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // LineEditRenderer

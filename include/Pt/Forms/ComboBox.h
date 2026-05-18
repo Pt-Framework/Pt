@@ -190,7 +190,7 @@ class PT_FORMS_API ComboBox : public Control
         unsigned                  _fontOverride;
 
         FacetPtr<ComboBoxRenderer> _renderer;
-        bool                       _hasRenderer;
+        bool                       _customRenderer;
 
         Gfx::Brush _backgroundBrush;
         Gfx::Brush _foregroundBrush;

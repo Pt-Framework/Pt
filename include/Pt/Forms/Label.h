@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+﻿/* Copyright (C) 2015 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
@@ -69,9 +69,13 @@ class PT_FORMS_API Label : public Control
 
         void setBackground(const Gfx::Brush& b);
 
+        void setBackground(bool b);
+
         const Gfx::Pen* contour() const;
 
         void setContour(const Gfx::Pen& p);
+
+        void setFrame(bool b);
 
         const Gfx::Color& textColor() const;
 
@@ -87,7 +91,7 @@ class PT_FORMS_API Label : public Control
 
         void setFontSlant(Gfx::Font::Slant slant);
 
-        void setRenderer(LabelRenderer* renderer);
+        void setRenderer(PanelRenderer* renderer);
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
@@ -107,7 +111,9 @@ class PT_FORMS_API Label : public Control
                              const Gfx::RectF& rect);
 
     private:
-        Pixmap& getIconPixmap();
+        PanelRenderer* getRenderer();
+
+        void applyRenderer(PanelRenderer* renderer);
 
         Adjustment adjustment() const;
 
@@ -135,11 +141,13 @@ class PT_FORMS_API Label : public Control
         Gfx::SizeF  _measuredIconSize;
         bool        _iconInvalid;
 
-        FacetPtr<LabelRenderer>   _renderer;
-        bool                      _hasRenderer;
+        FacetPtr<PanelRenderer>   _renderer;
+        bool                      _customRenderer;
 
         AutoPtr<Gfx::Brush>       _background;
+        bool                      _hasBackground;
         AutoPtr<Gfx::Pen>         _contour;
+        bool                      _hasFrame;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
         unsigned                  _fontOverride;

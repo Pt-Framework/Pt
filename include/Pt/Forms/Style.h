@@ -58,8 +58,6 @@ class Painter;
 class Pixmap;
 class TextBlock;
 class StyleOptions;
-class Panel;
-class Label;
 class LineEdit;
 class PushButton;
 class CheckBox;
@@ -227,14 +225,14 @@ class PT_FORMS_API Style
 };
 
 
-class PT_FORMS_API LabelRenderer : public Style::Facet
+class PT_FORMS_API PanelRenderer : public Style::Facet
 {
     public:
-        explicit LabelRenderer(std::size_t refs = 0);
+        explicit PanelRenderer(std::size_t refs = 0);
 
-        virtual ~LabelRenderer();
+        virtual ~PanelRenderer();
 
-        LabelRenderer* create() const;
+        PanelRenderer* create() const;
 
     public:
         const Gfx::Brush* background() const;
@@ -249,14 +247,14 @@ class PT_FORMS_API LabelRenderer : public Style::Facet
 
         void setFont(const Gfx::Font& f);
 
-        Gfx::Pen textColor() const;
+        const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Pen& p);
 
     protected:
         const StyleOptions& prepare();
 
-        virtual LabelRenderer* onCreate() const = 0;
+        virtual PanelRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options) = 0;
 
@@ -367,7 +365,7 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
 
         void setFont(const Gfx::Font& f);
 
-        Gfx::Pen textColor() const;
+        const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Pen& p);
 
@@ -544,38 +542,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API PanelRenderer : public Style::Facet
-{
-    public:
-        PanelRenderer(std::size_t refs = 0);
 
-        virtual ~PanelRenderer();
-
-        void renderBackground(const Panel& p,
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& brush) const;
-
-        void renderFrame(const Panel& p,
-                         const StyleOptions& options,
-                         Painter& painter, 
-                         const Gfx::RectF& rect, 
-                         const Gfx::Pen& pen) const;
-
-    protected:
-        virtual void onRenderBackground(const Panel& p,
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush) const = 0;
-
-        virtual void onRenderFrame(const Panel& p,
-                                   const StyleOptions& options,
-                                   Painter& painter, 
-                                   const Gfx::RectF& rect, 
-                                   const Gfx::Pen& pen) const = 0;
-};
 
 class PT_FORMS_API LineEditRenderer : public Style::Facet
 {

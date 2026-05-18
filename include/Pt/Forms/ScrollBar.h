@@ -132,7 +132,7 @@ class PT_FORMS_API ScrollBar : public Control
         Signal<double> _changed;
 
         FacetPtr<ScrollBarRenderer>  _renderer;
-        bool                         _hasRenderer;
+        bool                         _customRenderer;
 
         AutoPtr<Gfx::Brush>          _background;
         AutoPtr<Gfx::Brush>          _foreground;

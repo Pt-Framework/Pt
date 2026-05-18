@@ -43,7 +43,7 @@ namespace Forms {
 
 SpinBoxButton::SpinBoxButton(Type type)
 : _type(type)
-, _hasRenderer(false)
+, _customRenderer(false)
 {
 }
 
@@ -90,7 +90,7 @@ void SpinBoxButton::setContour(const Gfx::Pen& p)
 void SpinBoxButton::setRenderer(SpinBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -124,7 +124,7 @@ void SpinBoxButton::onInvalidate()
     _brush = foreground();
     _pen = contour();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<SpinBoxRenderer>() );
     
     if( ! _renderer )
@@ -165,7 +165,7 @@ SpinBox::SpinBox()
 , _downButton(SpinBoxButton::Down)
 , _upButton(SpinBoxButton::Up)
 , _spacing(0)
-, _hasRenderer(false)
+, _customRenderer(false)
 , _fontOverride(0)
 {
     setFocusPolicy(Control::AcceptFocus);
@@ -560,7 +560,7 @@ void SpinBox::setFontSlant(Gfx::Font::Slant slant)
 void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     _upButton.setRenderer(renderer);
     _downButton.setRenderer(renderer);
@@ -639,7 +639,7 @@ void SpinBox::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<SpinBoxRenderer>() );
     
     if( ! _renderer )

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+﻿/* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2017 Ilja Maier
  
@@ -79,15 +79,15 @@ class PlatinumRendererBase
 };
 
 
-class PT_FORMS_API PlatinumLabelRenderer : public LabelRenderer
+class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
 {
     public:
-        PlatinumLabelRenderer(std::size_t refs = 0);
+        PlatinumPanelRenderer(std::size_t refs = 0);
 
-        virtual ~PlatinumLabelRenderer();
+        virtual ~PlatinumPanelRenderer();
 
     protected:
-        virtual LabelRenderer* onCreate() const;
+        virtual PanelRenderer* onCreate() const;
 
         virtual void onPrepare(const StyleOptions& options);
 
@@ -235,29 +235,7 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
         PlatinumRendererBase _baseRenderer;
 };
 
-class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
-{
-    public:
-        PlatinumPanelRenderer(std::size_t refs = 0);
 
-        virtual ~PlatinumPanelRenderer();
-
-    protected:
-        virtual void onRenderBackground(const Panel& p,
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush) const;
-
-        virtual void onRenderFrame(const Panel& p,
-                                   const StyleOptions& options,
-                                   Painter& painter, 
-                                   const Gfx::RectF& rect, 
-                                   const Gfx::Pen& pen) const;
-    
-    private:
-        PlatinumRendererBase _baseRenderer;
-};
 
 
 class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer

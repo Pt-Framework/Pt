@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
+﻿/* Copyright (C) 2013 Marc Boris Duerner 
    Copyright (C) 2013 Laurentiu-Gheorghe Crisan
    Copyright (C) 2017 Ilja Maier
 
@@ -188,27 +188,27 @@ Gfx::Polygon PlatinumRendererBase::getPolygon(const Gfx::RectF& rect,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PlatinumLabelRenderer
+// PlatinumPanelRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
-PlatinumLabelRenderer::PlatinumLabelRenderer(std::size_t refs)
-: LabelRenderer(refs)
+PlatinumPanelRenderer::PlatinumPanelRenderer(std::size_t refs)
+: PanelRenderer(refs)
 {
 }
 
 
-PlatinumLabelRenderer::~PlatinumLabelRenderer()
+PlatinumPanelRenderer::~PlatinumPanelRenderer()
 {
 }
 
 
-LabelRenderer* PlatinumLabelRenderer::onCreate() const
+PanelRenderer* PlatinumPanelRenderer::onCreate() const
 {
-    return new PlatinumLabelRenderer();
+    return new PlatinumPanelRenderer();
 }
 
 
-void PlatinumLabelRenderer::onPrepare(const StyleOptions& options)
+void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
 {
     const Gfx::Brush* bg = background();
     if( bg )
@@ -227,7 +227,7 @@ void PlatinumLabelRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-void PlatinumLabelRenderer::onRenderBackground(PaintContext& context,
+void PlatinumPanelRenderer::onRenderBackground(PaintContext& context,
                                                const Gfx::RectF& rect,
                                                const StyleOptions& options,
                                                StyleFlags /*state*/)
@@ -240,21 +240,21 @@ void PlatinumLabelRenderer::onRenderBackground(PaintContext& context,
 }
 
 
-Gfx::SizeF PlatinumLabelRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumPanelRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                   const Gfx::SizeF& contentSize)
 {
     return contentSize;
 }
 
 
-Gfx::RectF PlatinumLabelRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+Gfx::RectF PlatinumPanelRenderer::onLayoutFrame(PaintSurface& /*surface*/,
                                                  const Gfx::RectF& frameRect)
 {
     return frameRect;
 }
 
 
-void PlatinumLabelRenderer::onRenderFrame(PaintContext& context,
+void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
                                           const Gfx::RectF& rect,
                                           const StyleOptions& options,
                                           StyleFlags /*state*/)
@@ -269,14 +269,14 @@ void PlatinumLabelRenderer::onRenderFrame(PaintContext& context,
 }
 
 
-const Painter& PlatinumLabelRenderer::onGetTextPainter(PaintSurface& surface)
+const Painter& PlatinumPanelRenderer::onGetTextPainter(PaintSurface& surface)
 {
     _textPainter.begin(surface);
     return _textPainter;
 }
 
 
-void PlatinumLabelRenderer::onRenderText(PaintContext& context,
+void PlatinumPanelRenderer::onRenderText(PaintContext& context,
                                          const Gfx::RectF& rect,
                                          const StyleOptions& /*options*/,
                                          const String& text,
@@ -289,7 +289,7 @@ void PlatinumLabelRenderer::onRenderText(PaintContext& context,
 }
 
 
-void PlatinumLabelRenderer::onRenderIcon(PaintContext& context,
+void PlatinumPanelRenderer::onRenderIcon(PaintContext& context,
                                          const Gfx::RectF& rect,
                                          const StyleOptions& /*options*/,
                                          const Pixmap& picture,
@@ -622,45 +622,7 @@ void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// PlatinumPanelRenderer
-///////////////////////////////////////////////////////////////////////////////
 
-PlatinumPanelRenderer::PlatinumPanelRenderer(std::size_t refs)
-: PanelRenderer(refs)
-{
-}
-
-    
-PlatinumPanelRenderer::~PlatinumPanelRenderer()
-{
-}
-
-
-void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
-                                               const StyleOptions& options,
-                                               Painter& painter, 
-                                               const Gfx::RectF& rect,
-                                               const Gfx::Brush& brush) const 
-{
-    Gfx::RectF borderRect( p.size() );
-    double corner = painter.scaling().align(1.0);
-
-    _baseRenderer.renderPlane(painter, borderRect, brush, corner);
-}
-
-
-void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
-                                          const StyleOptions& options,
-                                          Painter& painter, 
-                                          const Gfx::RectF& rect,
-                                          const Gfx::Pen& pen) const 
-{
-    Gfx::RectF borderRect( p.size() );
-    double corner = painter.scaling().align(1.0);
-
-    _baseRenderer.renderFrame(painter, borderRect, pen, corner);
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1698,7 +1660,6 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumButtonRenderer);
     set(new PlatinumCheckBoxRenderer);
     set(new PlatinumPanelRenderer);
-    set(new PlatinumLabelRenderer);
     set(new PlatinumLineEditRenderer);
     set(new PlatinumMenuRenderer);
     set(new PlatinumMenuBarRenderer);

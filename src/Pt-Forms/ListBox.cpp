@@ -41,7 +41,7 @@ namespace Forms {
 /////////////////////////////////////////////////////////////////////////////
 
 ListBoxItem::ListBoxItem()
-: _hasRenderer(false)
+: _customRenderer(false)
 , _isSelectable(false)
 , _isSelected(false)
 , _fontOverride(0)
@@ -266,7 +266,7 @@ void ListBoxItem::setFontSlant(Gfx::Font::Slant slant)
 void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -305,7 +305,7 @@ void ListBoxItem::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<ListBoxRenderer>() );
     
     if( ! _renderer )
@@ -343,12 +343,13 @@ void ListBoxItem::onPaint(PaintContext& context, const Gfx::RectF& rect)
     //
     _renderer->renderItem(*this, options, painter, rect, _brush, _pen);
 
-    onPaintContent(context, painter);
+    onPaintContent(context);
 }
 
 
-void ListBoxItem::onPaintContent(PaintContext& context, Painter& painter)
-{   
+void ListBoxItem::onPaintContent(PaintContext& context)
+{
+    Painter painter(context);
     painter.setFont(_font);
     painter.setPen(_textPen);
     
@@ -469,7 +470,7 @@ ListBox::ListBox()
 : _layout()
 , _hasBackground(true)
 , _hasFrame(true)
-, _hasRenderer(false)
+, _customRenderer(false)
 {
     //setAcceptInput(false);
 
@@ -571,7 +572,7 @@ void ListBox::setFrame(bool b)
 void ListBox::setRenderer(ListBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -656,7 +657,7 @@ void ListBox::onInvalidate()
     if(pen)
         _pen = *pen;
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<ListBoxRenderer>() );
 
     if( ! _renderer)

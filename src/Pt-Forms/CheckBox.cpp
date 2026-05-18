@@ -42,7 +42,7 @@ namespace Forms {
 
 CheckBox::CheckBox()
 : _state(Unchecked)
-, _hasRenderer(false)
+, _customRenderer(false)
 , _fontOverride(0)
 {
 }
@@ -192,7 +192,7 @@ void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 void CheckBox::setRenderer(CheckBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -255,7 +255,7 @@ void CheckBox::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<CheckBoxRenderer>() );
     
     if( ! _renderer )

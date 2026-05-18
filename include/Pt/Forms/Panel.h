@@ -79,23 +79,30 @@ class PT_FORMS_API Panel : public Control
 
         virtual void onInvalidate();
 
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(PaintContext& context, Painter& painter);
+        virtual void onPaintContent(PaintContext& context);
+
+    private:
+        PanelRenderer* getRenderer();
+
+        void applyRenderer(PanelRenderer* renderer);
 
     private:
         Control*                 _content;
 
         FacetPtr<PanelRenderer> _renderer;
-        bool                    _hasRenderer;
+        bool                    _customRenderer;
 
         AutoPtr<Gfx::Brush>     _background;
         bool                    _hasBackground;
-                                
+
         AutoPtr<Gfx::Pen>       _contour;
         bool                    _hasFrame;
 
@@ -103,6 +110,7 @@ class PT_FORMS_API Panel : public Control
         Gfx::SizeF              _iconSize;
         PixmapSurface           _picture;
         Alignment               _imageAlignment;
+        bool                    _iconInvalid;
 };
 
 } // namespace

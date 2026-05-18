@@ -41,7 +41,7 @@ ProgressBar::ProgressBar()
 : _value(50)
 , _min(0)
 , _max(100)
-, _hasRenderer(false)
+, _customRenderer(false)
 , _fontOverride(0)
 {
 }
@@ -252,7 +252,7 @@ void ProgressBar::setFontSlant(Gfx::Font::Slant slant)
 void ProgressBar::setRenderer(ProgressBarRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -283,7 +283,7 @@ void ProgressBar::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<ProgressBarRenderer>() );
     
     if( ! _renderer )

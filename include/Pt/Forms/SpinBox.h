@@ -86,7 +86,7 @@ class PT_FORMS_API SpinBoxButton : public Button
         Type                      _type;
         
         FacetPtr<SpinBoxRenderer> _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
 
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
@@ -244,7 +244,7 @@ class PT_FORMS_API SpinBox : public Control
         double                        _spacing;
 
         FacetPtr<SpinBoxRenderer>     _renderer;
-        bool                          _hasRenderer;
+        bool                          _customRenderer;
 
         AutoPtr<Gfx::Brush>           _background;
         AutoPtr<Gfx::Pen>             _contour;

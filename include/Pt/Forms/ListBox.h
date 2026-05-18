@@ -120,7 +120,7 @@ class PT_FORMS_API ListBoxItem : public Button
     
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(PaintContext& context, Painter& painter);
+        virtual void onPaintContent(PaintContext& context);
 
     private:
         Gfx::Font getFont() const;
@@ -143,7 +143,7 @@ class PT_FORMS_API ListBoxItem : public Button
         Gfx::SizeF               _iconSize;
 
         FacetPtr<ListBoxRenderer> _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
 
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
@@ -239,7 +239,7 @@ class PT_FORMS_API ListBox : public Control
         ScrollView                _scrollView;
         ListBoxLayout             _layout;        
         FacetPtr<ListBoxRenderer> _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
         AutoPtr<Gfx::Brush>       _background;
         bool                      _hasBackground;       
         AutoPtr<Gfx::Pen>         _contour;

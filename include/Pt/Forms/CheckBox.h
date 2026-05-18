@@ -116,7 +116,7 @@ class PT_FORMS_API CheckBox : public Button
         State                    _state;
 
         FacetPtr<CheckBoxRenderer> _renderer;
-        bool                       _hasRenderer;
+        bool                       _customRenderer;
 
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;

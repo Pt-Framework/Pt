@@ -127,7 +127,7 @@ class PT_FORMS_API TabBar : public Control
         std::size_t             _current;
 
         FacetPtr<TabViewRenderer> _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
 
         Gfx::Brush  _backgroundBrush;
         Gfx::Brush  _foregroundBrush;
@@ -180,7 +180,7 @@ class PT_FORMS_API TabView : public Control
         StackLayout               _stack;
 
         FacetPtr<TabViewRenderer> _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
 
         Gfx::Brush                _backgroundBrush;
         Gfx::Brush                _foregroundBrush;

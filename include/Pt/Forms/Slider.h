@@ -133,7 +133,7 @@ class PT_FORMS_API Slider : public Control
         unsigned                  _fontOverride;
         
         FacetPtr<SliderRenderer>  _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
 
         Gfx::Brush  _backgroundBrush;
         Gfx::Brush  _foregroundBrush;

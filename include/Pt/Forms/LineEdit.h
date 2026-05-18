@@ -174,7 +174,7 @@ class PT_FORMS_API LineEdit : public Control
         double                        _spacing;
 
         FacetPtr<LineEditRenderer>     _renderer;
-        bool                           _hasRenderer;
+        bool                           _customRenderer;
 
         AutoPtr<Gfx::Brush>            _background;
         AutoPtr<Gfx::Pen>              _contour;

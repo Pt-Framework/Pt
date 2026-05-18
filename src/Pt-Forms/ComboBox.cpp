@@ -43,7 +43,7 @@ ComboBox::ComboBox()
 , _isAccepted(true)
 , _isTextChanged(false)
 , _isHighlighted(false)
-, _hasRenderer(false)
+, _customRenderer(false)
 , _fontOverride(0)
 , _pendingCursorX(-1)
 {
@@ -375,7 +375,7 @@ void ComboBox::setFontSlant(Gfx::Font::Slant slant)
 void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -437,7 +437,7 @@ void ComboBox::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<ComboBoxRenderer>() );
     
     if( ! _renderer )

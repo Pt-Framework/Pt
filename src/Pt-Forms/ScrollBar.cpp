@@ -50,7 +50,7 @@ ScrollBar::ScrollBar(Orientation o)
 , _offsetPixel(0)
 , _factorPosition(1)
 , _offsetPosition(0)
-, _hasRenderer(false)
+, _customRenderer(false)
 {
     //setAcceptInput(true);
 }
@@ -180,7 +180,7 @@ void ScrollBar::setContour(const Gfx::Pen& p)
 void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -197,7 +197,7 @@ void ScrollBar::onInvalidate()
     _foregroundBrush = foreground();
     _contourPen = contour();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<ScrollBarRenderer>() );
     
     if( ! _renderer )

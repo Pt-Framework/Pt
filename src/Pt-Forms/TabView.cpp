@@ -42,7 +42,7 @@ namespace Forms {
 
 TabBar::TabBar()
 : _current( static_cast<std::size_t>(-1) )
-, _hasRenderer(false)
+, _customRenderer(false)
 {
 }
 
@@ -130,7 +130,7 @@ void TabBar::setText(std::size_t n, const Pt::String& title)
 void TabBar::setRenderer(TabViewRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -149,7 +149,7 @@ void TabBar::onInvalidate()
     _textPen = options.textColor();
     _font = options.font();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<TabViewRenderer>() );
     
     if( ! _renderer )
@@ -271,7 +271,7 @@ bool TabBar::onTouchEvent(const TouchEvent& ev)
 //////////////////////////////////////////////////////////////////////////
 
 TabView::TabView()
-: _hasRenderer(false)
+: _customRenderer(false)
 {
     _tabBar.currentChanged() += Pt::slot(_stack, &StackLayout::setCurrent);
     _stack.controlRemoved() += Pt::slot(_tabBar, &TabBar::removeTab);
@@ -341,7 +341,7 @@ void TabView::setText(std::size_t n, const Pt::String& title)
 void TabView::setRenderer(TabViewRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -358,7 +358,7 @@ void TabView::onInvalidate()
     _foregroundBrush = options.foreground();
     _contourPen = options.contour();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<TabViewRenderer>() );
 
     if( ! _renderer )

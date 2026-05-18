@@ -83,7 +83,7 @@ class PT_FORMS_API PushButton : public Button
         void setContour(const Gfx::Pen& p);
 
         const Gfx::Color& accentColor() const;
-        
+
         void setAccentColor(const Gfx::Color& color);
 
         const Gfx::Color& highlightColor() const;
@@ -124,10 +124,14 @@ class PT_FORMS_API PushButton : public Button
 
         virtual void onInvalidate();
 
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     private:
-        void onIconChanged();
+        ButtonRenderer* getRenderer();
+
+        void applyRenderer(ButtonRenderer* renderer);
 
         Gfx::Font getFont() const;
 
@@ -156,7 +160,8 @@ class PT_FORMS_API PushButton : public Button
         Gfx::SizeF                _measuredIconSize;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
-        bool                      _hasRenderer;
+        bool                      _customRenderer;
+        bool                      _iconInvalid;
 
         AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;

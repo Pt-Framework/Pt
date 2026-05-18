@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+﻿/* Copyright (C) 2015 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -43,10 +43,12 @@ namespace Forms {
 Label::Label()
 : _alignment(Alignment::Left)
 , _iconInvalid(false)
-, _hasRenderer(false)
+, _customRenderer(false)
+, _hasBackground(false)
+, _hasFrame(false)
 , _fontOverride(0)
 , _styleGeneration(0)
-, _styleInvalid(true)
+, _styleInvalid(false)
 {
     _styleGeneration = Application::instance().styleOptions().generation();
 }
@@ -101,73 +103,78 @@ void Label::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
     _iconSize = iconSize;
     _iconInvalid = true;
 
-    // ICON-UPDATE
     invalidate();
-    ////relayout();
-}
-
-
-Pixmap& Label::getIconPixmap()
-{
-    // ICON-UPDATE
-    //if(_iconInvalid)
-    //{
-    //    Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
-    //    const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-    //    _pixmap.set(iconImage);
-
-    //    _iconInvalid = false;
-    //}
-
-    return _pixmap;
 }
 
 
 const Gfx::Brush* Label::background() const
 {
-    return _background ? _background.get() : 0;
+    if( ! _hasBackground )
+        return 0;
+
+    if( _renderer )
+        return _renderer->background();
+
+    return &Application::instance().styleOptions().background();
 }
 
 
 void Label::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+    _hasBackground = true;
 
-    if( _renderer )
-    {
-        _renderer.reset( _renderer->create() );
-        _renderer->setBackground(b);
-    }
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setBackground(*_background);
 
-    repaint();
+    invalidate();
+}
+
+
+void Label::setBackground(bool b)
+{
+    _hasBackground = b;
+    invalidate();
 }
 
 
 const Gfx::Pen* Label::contour() const
 {
-    return _contour ? _contour.get() : 0;
+    if( ! _hasFrame )
+        return 0;
+
+    if( _renderer )
+        return _renderer->contour();
+
+    return &Application::instance().styleOptions().contour();
 }
 
 
 void Label::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _hasFrame = true;
 
-    if( _renderer )
-    {
-        _renderer.reset( _renderer->create() );
-        _renderer->setContour(p);
-    }
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setContour(*_contour);
 
-    _styleInvalid = true;
+    invalidate();
+}
+
+
+void Label::setFrame(bool b)
+{
+    _hasFrame = b;
     invalidate();
 }
 
 
 const Gfx::Color& Label::textColor() const
 {
-    return _textColor ? *_textColor
-                      : Application::instance().styleOptions().textColor();
+    if( _renderer )
+        return _renderer->textColor();
+
+    return Application::instance().styleOptions().textColor();
 }
 
 
@@ -175,13 +182,9 @@ void Label::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
 
-    if( _renderer )
-    {
-        _renderer.reset( _renderer->create() );
-        _renderer->setTextColor( Gfx::Pen(color) );
-    }
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    _styleInvalid = true;
     invalidate();
 }
 
@@ -200,13 +203,9 @@ void Label::setFont(const Gfx::Font& font)
     _customFont = font;
     _fontOverride = OverrideAll;
 
-    if( _renderer )
-    {
-        _renderer.reset( _renderer->create() );
-        _renderer->setFont(font);
-    }
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
 
-    _styleInvalid = true;
     invalidate();
 }
 
@@ -245,7 +244,9 @@ void Label::setFontSize(std::size_t size)
                               _customFont.stretch());
     _fontOverride |= OverrideSize;
 
-    _styleInvalid = true;
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
+
     invalidate();
 }
 
@@ -257,7 +258,9 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
                               _customFont.stretch());
     _fontOverride |= OverrideWeight;
 
-    _styleInvalid = true;
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
+
     invalidate();
 }
 
@@ -269,33 +272,55 @@ void Label::setFontSlant(Gfx::Font::Slant slant)
                               _customFont.stretch());
     _fontOverride |= OverrideSlant;
 
-    _styleInvalid = true;
+    if( PanelRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
+
     invalidate();
 }
 
 
-void Label::setRenderer(LabelRenderer* renderer)
+void Label::setRenderer(PanelRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     if( renderer )
+        applyRenderer(renderer);
+
+    invalidate();
+}
+
+
+PanelRenderer* Label::getRenderer()
+{
+    if( ! _customRenderer )
     {
-        if( _background )
-            renderer->setBackground(*_background);
+        const Style& style = Application::instance().style();
+        PanelRenderer* proto = style.get<PanelRenderer>();
+        if( ! proto )
+            return 0;
 
-        if( _contour )
-            renderer->setContour(*_contour);
-
-        if( _textColor )
-            renderer->setTextColor( Gfx::Pen(*_textColor) );
-
-        if( _fontOverride )
-            renderer->setFont( getFont() );
+        _renderer.reset( proto->create() );
+        _customRenderer = true;
     }
 
-    _styleInvalid = true;
-    invalidate();
+    return _renderer.get();
+}
+
+
+void Label::applyRenderer(PanelRenderer* renderer)
+{
+    if( _background )
+        renderer->setBackground( *_background );
+
+    if( _contour )
+        renderer->setContour( *_contour );
+
+    if( _textColor )
+        renderer->setTextColor( Gfx::Pen(*_textColor) );
+
+    if( _fontOverride )
+        renderer->setFont( getFont() );
 }
 
 
@@ -336,8 +361,6 @@ void Label::onRescaleEvent(const RescaleEvent& ev)
     {
         _iconInvalid = true;
         relayout();
-        
-        ////invalidate();
     }
 }
 
@@ -353,59 +376,39 @@ void Label::onInvalidate()
 {
     Base::onInvalidate();
 
-    bool needsRelayout = false;
+    if( ! _renderer )
+    {
+        bool hasOverride = _background || _contour || _textColor || _fontOverride;
+        if(hasOverride)
+        {
+            if( PanelRenderer* renderer = getRenderer() )
+                applyRenderer(renderer);
+        }
+        else
+        {
+            _renderer.reset( Application::instance().style().get<PanelRenderer>() );
+        }
+    }
 
     std::size_t gen = Application::instance().styleOptions().generation();
-    if(_styleGeneration != gen)
-    {
-        _styleGeneration = gen;
-        _styleInvalid = true;
-    }
+    _styleGeneration = gen;
 
-    if(_styleInvalid)
-    {
-        _styleInvalid = false;
+    bool needsRelayout = _styleGeneration != gen;
 
-        if( ! _hasRenderer )
-        {
-            const Style& style = Application::instance().style();
-
-            _renderer.reset( style.get<LabelRenderer>() );
-
-            if( _renderer )
-            {
-                bool needsClone = _background || _contour || _textColor || _fontOverride;
-
-                if( needsClone )
-                {
-                    _renderer.reset( _renderer->create() );
-
-                    if( _background )
-                        _renderer->setBackground(*_background);
-
-                    if( _contour )
-                        _renderer->setContour(*_contour);
-
-                    if( _textColor )
-                        _renderer->setTextColor( Gfx::Pen(*_textColor) );
-
-                    if( _fontOverride )
-                        _renderer->setFont( getFont() );
-                }
-            }
-        }
-
-        needsRelayout = true;
-    }
-
-    // ICON-UPDATE
     if(_iconInvalid)
     {
         _iconInvalid = false;
 
-        Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
-        const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-        _pixmap.reset(iconImage);
+        if( ! _icon.empty() )
+        {
+            Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
+            const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+            _pixmap.reset(iconImage);
+        }
+        else
+        {
+            _pixmap.reset( Pt::Gfx::Image() );
+        }
 
         needsRelayout = true;
     }
@@ -420,13 +423,12 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     if( ! _renderer )
         return Gfx::SizeF(0, 0);
 
-    Pixmap& picture = getIconPixmap();
     Gfx::SizeF contentSize;
 
     if( _text.empty() )
     {
         if( _iconSize.isNull() )
-            _measuredIconSize = surface().scaling().toLogical( picture.size() );
+            _measuredIconSize = surface().scaling().toLogical( _pixmap.size() );
         else
             _measuredIconSize = _iconSize;
 
@@ -575,8 +577,11 @@ void Label::onPaint(PaintContext& context,
 
     Gfx::RectF widgetRect( size() );
 
-    _renderer->renderBackground(context, widgetRect, styleFlags());
-    _renderer->renderFrame(context, widgetRect, styleFlags());
+    if( _hasBackground )
+        _renderer->renderBackground(context, widgetRect, styleFlags());
+
+    if( _hasFrame )
+        _renderer->renderFrame(context, widgetRect, styleFlags());
 
     if( _icon.empty() )
     {
@@ -595,8 +600,7 @@ void Label::onPaint(PaintContext& context,
     }
     else
     {
-        Pixmap& picture = getIconPixmap();
-        _renderer->renderIcon(context, widgetRect, picture, _iconPos,
+        _renderer->renderIcon(context, widgetRect, _pixmap, _iconPos,
                               styleFlags());
     }
 }

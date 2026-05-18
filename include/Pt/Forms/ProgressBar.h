@@ -125,7 +125,7 @@ class PT_FORMS_API ProgressBar : public Control
         unsigned                  _fontOverride;
         
         FacetPtr<ProgressBarRenderer> _renderer;
-        bool                          _hasRenderer;
+        bool                          _customRenderer;
 
         Gfx::Brush  _backgroundBrush;
         Gfx::Brush  _foregroundBrush;

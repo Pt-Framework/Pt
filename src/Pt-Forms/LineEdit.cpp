@@ -45,7 +45,7 @@ LineEdit::LineEdit()
 , _pendingCursorX(-1)
 , _echoMode(Normal)
 , _spacing(0)
-, _hasRenderer(false)
+, _customRenderer(false)
 , _fontOverride(0)
 {
     setFocusPolicy(Control::AcceptFocus);
@@ -317,7 +317,7 @@ void LineEdit::setFontSlant(Gfx::Font::Slant slant)
 void LineEdit::setRenderer(LineEditRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -368,7 +368,7 @@ void LineEdit::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<LineEditRenderer>() );
     
     if( ! _renderer )

@@ -42,7 +42,7 @@ Slider::Slider()
 , _min(0)
 , _max(100)
 , _isHighlighted(false)
-, _hasRenderer(false)
+, _customRenderer(false)
 , _fontOverride(0)
 {
 }
@@ -245,7 +245,7 @@ void Slider::setFontSlant(Gfx::Font::Slant slant)
 void Slider::setRenderer(SliderRenderer* renderer)
 {
     _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
+    _customRenderer = renderer != 0;
 
     invalidate();
 }
@@ -276,7 +276,7 @@ void Slider::onInvalidate()
     _textPen = textColor();
     _font = getFont();
 
-    if( ! _hasRenderer )
+    if( ! _customRenderer )
         _renderer.reset( style.get<SliderRenderer>() );
     
     if( ! _renderer )
