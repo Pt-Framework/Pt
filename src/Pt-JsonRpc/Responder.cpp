@@ -1,38 +1,41 @@
-/* Copyright (C) 2020 Marc Boris Duerner
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  
-  As a special exception, you may use this file as part of a free
-  software library without restriction. Specifically, if other files
-  instantiate templates or use macros or inline functions from this
-  file, or you compile this file and link it with other files to
-  produce an executable, this file does not by itself cause the
-  resulting executable to be covered by the GNU General Public
-  License. This exception does not however invalidate any other
-  reasons why the executable file might be covered by the GNU Library
-  General Public License.
-  
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA 02110-1301 USA
-*/
+/*
+ * Copyright (C) 2020-2026 by Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA
+ */
 
 #include <Pt/JsonRpc/Responder.h>
 #include <Pt/JsonRpc/Fault.h>
+#include <Pt/JsonRpc/ServiceDeclaration.h>
+#include <Pt/JsonRpc/ProcedureDeclaration.h>
+#include <Pt/Json/Node.h>
+#include <Pt/Json/Member.h>
+#include <Pt/Json/Integer.h>
+#include <Pt/Json/String.h>
 #include <Pt/Remoting/ServiceDefinition.h>
-//#include <Pt/Xml/XmlError.h>
-//#include <Pt/Xml/StartElement.h>
-//#include <Pt/Xml/Characters.h>
-//#include <Pt/Xml/EndElement.h>
 #include <Pt/System/Logger.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/Convert.h>
@@ -44,24 +47,11 @@ namespace Pt {
 
 namespace JsonRpc {
 
-static const Pt::Char JSONRPC_MESSAGE_BEGIN[] = 
-{ '{', '"', 'j', 's', 'o', 'n', 'r', 'p', 'c', '"', ':', ' ', '"', '2', '.', '0', '"', ',' };
-
-static const Pt::Char JSONRPC_ERROR_BEGIN[] = 
-{ '"', 'e', 'r', 'r', 'o', 'r', '"', ':', ' ', '{', ' ' };
-
-static const Pt::Char JSONRPC_ERROR_CODE[] = 
-{ '"', 'c', 'o', 'd', 'e', '"', ':', ' ' };
-
-static const Pt::Char JSONRPC_ERROR_MESSAGE[]  = 
-{ ',', ' ', '"', 'm', 'e', 's', 's', 'a', 'g', 'e','"', ':', ' ' };
-
-static const Pt::Char JSONRPC_MESSAGE_ID[] = 
-{ '"', 'i', 'd', '"', ':', ' ' };
-
-Responder::Responder(Remoting::ServiceDefinition& def)
+Responder::Responder(const ServiceDeclaration& decl,
+                     Remoting::ServiceDefinition& def)
 : Remoting::Responder(def)
-
+, _decl(&decl)
+, _procedure(0)
 , _utf8(1)
 , _tis(&_utf8)
 , _reader(_tis)
@@ -77,6 +67,7 @@ Responder::Responder(Remoting::ServiceDefinition& def)
 , _r1()
 , _r2()
 {
+    _writer.setFormatting(false);
 }
 
 
@@ -88,7 +79,7 @@ Responder::~Responder()
 
 bool Responder::isFailed() const
 {
-    return  _isFault;
+    return _isFault;
 }
 
 
@@ -100,15 +91,18 @@ void Responder::onCancel()
 
     _args = 0;
     _result = 0;
+    _procedure = 0;
     _isFault = false;
+    _methodName.clear();
 }
 
 
 void Responder::beginMessage(std::istream& is)
 {
     cancel();
-
     _tis.reset(is);
+    _tis.clear();
+    _tis.textBuffer().import();
 }
 
 
@@ -118,44 +112,40 @@ bool Responder::parseMessage()
     {
         if( this->isFailed() )
             return true;
-        
+
         for(;;)
         {
             const Json::Node* node = _reader.advance();
             if( ! node )
-            {
                 break;
-            }
-            
+
             bool done = this->advance(*node);
             if(done)
-            {
                 return true;
-            }
         }
 
         return false;
     }
     catch(const Json::JsonError& error)
     {
-        setFault(Fault::ParseError, error.what() );
+        setFault(Fault::ParseError, error.what());
     }
     catch(const SerializationError& error)
     {
-        setFault(Fault::ParseError, error.what() );
+        setFault(Fault::ParseError, error.what());
     }
     catch(const ConversionError& error)
     {
-        setFault(Fault::ParseError, error.what() );
+        setFault(Fault::ParseError, error.what());
     }
     catch(const Fault& fault)
     {
-        setFault(fault.code(), fault.what() );
+        setFault(fault.code(), fault.what());
     }
     catch(const Remoting::Fault& fault)
     {
-        setFault( Fault::InternalError, fault.what() );
-    } 
+        setFault(Fault::InternalError, fault.what());
+    }
 
     return true;
 }
@@ -163,7 +153,7 @@ bool Responder::parseMessage()
 
 void Responder::finishMessage(System::EventLoop& loop)
 {
-    if(  this->isFailed()  )
+    if( this->isFailed() )
     {
         onFault(_fault);
         return;
@@ -180,57 +170,70 @@ void Responder::finishMessage(System::EventLoop& loop)
     }
     catch(const Fault& fault)
     {
-        setFault(fault.code(), fault.what() );
+        setFault(fault.code(), fault.what());
         onFault(_fault);
     }
     catch(const Remoting::Fault& fault)
     {
-        setFault( Fault::InternalError, fault.what() );
+        setFault(Fault::InternalError, fault.what());
         onFault(_fault);
-    } 
+    }
 }
 
 
-void Responder::onReady()
-{    
+void Responder::finishMessage()
+{
+    if( this->isFailed() )
+    {
+        onFault(_fault);
+        return;
+    }
+
     try
-    {       
-        _result = endCall(); // throws Fault
+    {
+        if( _args && *_args )
+        {
+            throw Fault("expected more arguments", Fault::InvalidParameters);
+        }
+
+        _result = call();
         onResult();
     }
     catch(const Fault& fault)
     {
-        setFault( fault.code(), fault.what() );
+        setFault(fault.code(), fault.what());
         onFault(_fault);
-    } 
+    }
     catch(const Remoting::Fault& fault)
     {
-        setFault( Fault::InternalError, fault.what() );
+        setFault(Fault::InternalError, fault.what());
         onFault(_fault);
-    } 
+    }
+}
+
+
+void Responder::onReady()
+{
+    try
+    {
+        _result = endCall();
+        onResult();
+    }
+    catch(const Fault& fault)
+    {
+        setFault(fault.code(), fault.what());
+        onFault(_fault);
+    }
+    catch(const Remoting::Fault& fault)
+    {
+        setFault(Fault::InternalError, fault.what());
+        onFault(_fault);
+    }
 }
 
 
 void Responder::beginResult(std::ostream& os)
 {
-    _tos.clear();
-    _tos.discard();
-    _tos.attach(os);
-
-    //_ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-
-    //assert(_result);
-    //_ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
-
-    //_result->beginFormat(_formatter);
-}
-
-
-void Responder::beginFault(std::ostream& os, const Fault& fault)
-{
-    int ec = fault.code();
-    const char* msg = fault.what();
-
     // text stream might still have bytes in text buffer
     _tos.flush();
 
@@ -238,23 +241,48 @@ void Responder::beginFault(std::ostream& os, const Fault& fault)
     _tos.discard();
     _tos.attach(os);
 
-    // {"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}, "id": 42}
+    // {"jsonrpc":"2.0","result":
+    _writer.writeObject();
+    _writer.writeMember("jsonrpc");
+    _writer.writeString(L"2.0");
+    _writer.writeMember("result");
 
-    _tos.write( JSONRPC_MESSAGE_BEGIN, sizeof(JSONRPC_MESSAGE_BEGIN)/sizeof(Char) );
-    _tos.write( JSONRPC_ERROR_BEGIN, sizeof(JSONRPC_ERROR_BEGIN)/sizeof(Char) );
-    
-    _tos.write( JSONRPC_ERROR_CODE, sizeof(JSONRPC_ERROR_CODE)/sizeof(Char) );
-    _tos << ec;
-    
-    _tos.write( JSONRPC_ERROR_MESSAGE, sizeof(JSONRPC_ERROR_MESSAGE)/sizeof(Char) );
-    _tos << Char('"');
-    for(const char* str = msg; *str != '\0'; ++str)
-        _tos << Char(*str);
-    _tos << Char('"');
+    assert(_result);
+    _result->beginFormat(_formatter);
+}
 
-    _tos.write( JSONRPC_MESSAGE_ID, sizeof(JSONRPC_MESSAGE_ID)/sizeof(Char) );
-    _tos << ec;
-    _tos << Char('}');
+
+void Responder::beginFault(std::ostream& os, const Fault& fault)
+{
+    // text stream might still have bytes in text buffer
+    _tos.flush();
+
+    _tos.clear();
+    _tos.discard();
+    _tos.attach(os);
+
+    // {"jsonrpc":"2.0","error":{"code":<code>,"message":"<msg>"},"id":<id>}
+    _writer.writeObject();
+    _writer.writeMember("jsonrpc");
+    _writer.writeString(L"2.0");
+
+    _writer.writeMember("error");
+    _writer.writeObject();
+    _writer.writeMember("code");
+    _writer.writeInt( fault.code() );
+    _writer.writeMember("message");
+
+    const char* msg = fault.what();
+    Pt::String wmsg;
+    for(const char* p = msg; *p != '\0'; ++p)
+        wmsg += Pt::Char(*p);
+    _writer.writeString( wmsg.c_str() );
+
+    _writer.writeObjectEnd(); // end error object
+
+    _writer.writeMember("id");
+    _writer.writeInt(_id);
+    _writer.writeObjectEnd(); // end response object
 
     _tos.flush();
 }
@@ -262,10 +290,10 @@ void Responder::beginFault(std::ostream& os, const Fault& fault)
 
 bool Responder::advanceResult()
 {
-    //for(unsigned n = 0; _result && n < 10; ++n)
-    //{
-    //    _result = _result->advanceFormat(_formatter);
-    //}
+    for(unsigned n = 0; _result && n < 10; ++n)
+    {
+        _result = _result->advanceFormat(_formatter);
+    }
 
     return _result == 0;
 }
@@ -275,7 +303,10 @@ void Responder::finishResult()
 {
     if( ! this->isFailed() )
     {
-        //_ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
+        // ,"id":<id>}
+        _writer.writeMember("id");
+        _writer.writeInt(_id);
+        _writer.writeObjectEnd();
         _tos.flush();
     }
 }
@@ -287,150 +318,182 @@ void Responder::setFault(int rc, const char* msg)
     _isFault = true;
 }
 
-// {"jsonrpc": "2.0", "method": "foobar", "id": "1"}
-bool Responder::advance(const Pt::Json::Node& node)
+
+// JSON-RPC 2.0 request:
+// {"jsonrpc": "2.0", "method": "name", "params": [...] or {...}, "id": 1}
+// Members can appear in any order.
+
+bool Responder::advance(const Json::Node& node)
 {
-    throw Fault("no such method", Fault::MethodNotFound);
+    switch(_state)
+    {
+        case OnBegin:
+        {
+            if(node.type() == Json::Node::StartObject)
+            {
+                _state = OnRequestObject;
+            }
+            else
+            {
+                throw Fault("expected JSON object", Fault::InvalidRequest);
+            }
+            break;
+        }
 
-    //switch(_state)
-    //{
-    //    case OnBegin:
-    //    { //std::cerr << "OnBegin" << std::endl;
-    //        if(node.type() == Xml::Node::StartElement)
-    //        {
-    //            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-    //            if( se.name().name() != L"methodCall" )
-    //                throw SerializationError("invalid XML-RPC methodCall");
+        case OnRequestObject:
+        {
+            if(node.type() == Json::Node::Member)
+            {
+                const Json::Member& m = static_cast<const Json::Member&>(node);
+                std::string name = m.name().narrow();
 
-    //            _state = OnMethodCallBegin;
-    //        }
+                if(name == "method")
+                {
+                    _state = OnMethod;
+                }
+                else if(name == "params")
+                {
+                    _state = OnParams;
+                }
+                else if(name == "id")
+                {
+                    _state = OnId;
+                }
+                // skip "jsonrpc" and unknown members
+            }
+            else if(node.type() == Json::Node::EndObject)
+            {
+                _state = OnEnd;
+                return true;
+            }
+            // Scalar values of skipped members
+            break;
+        }
 
-    //        break;
-    //    }
+        case OnMethod:
+        {
+            if(node.type() == Json::Node::String)
+            {
+                const Json::String& s = static_cast<const Json::String&>(node);
+                _methodName = s.value().narrow();
 
-    //    case OnMethodCallBegin:
-    //    { //std::cerr << "OnMethodCallBegin" << std::endl;
-    //        if(node.type() == Xml::Node::StartElement)
-    //        {
-    //            _state = OnMethodNameBegin;
-    //        }
-    //        break;
-    //    }
+                _args = setProcedure(_methodName);
+                if( ! _args )
+                    throw Fault("method not found", Fault::MethodNotFound);
 
-    //    case OnMethodNameBegin:
-    //    { //std::cerr << "OnMethodNameBegin" << std::endl;
-    //        if(node.type() == Xml::Node::Characters)
-    //        {
-    //            const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
+                _procedure = _decl->getProcedure(_methodName);
+            }
+            else
+            {
+                throw Fault("method must be a string", Fault::InvalidRequest);
+            }
 
-    //            _args = setProcedure( chars.content().narrow() );
-    //            if( ! _args )
-    //                throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
+            _state = OnRequestObject;
+            break;
+        }
 
-    //            //std::cerr << "-> Found Procedure: " << chars.content().narrow() << std::endl;
+        case OnParams:
+        {
+            if(node.type() == Json::Node::StartArray)
+            {
+                _state = OnParam;
+            }
+            else if(node.type() == Json::Node::StartObject)
+            {
+                if( ! _procedure )
+                    throw Fault("named params require a procedure declaration", Fault::InvalidParameters);
 
-    //            _state = OnMethodName;
-    //        }
-    //        break;
-    //    }
+                _state = OnNamedParams;
+            }
+            else
+            {
+                throw Fault("params must be array or object", Fault::InvalidRequest);
+            }
+            break;
+        }
 
-    //    case OnMethodName:
-    //    { //std::cerr << "OnMethodName" << std::endl;
-    //        if(node.type() == Xml::Node::EndElement)
-    //        {
-    //            //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-    //            //if( ee.name() != L"methodName" )
-    //            //    throw std::runtime_error("invalid XML-RPC methodCall");
+        case OnParam:
+        {
+            if(node.type() == Json::Node::EndArray)
+            {
+                _state = OnRequestObject;
+                break;
+            }
 
-    //            _state = OnMethodNameEnd;
-    //        }
-    //        break;
-    //    }
+            if( ! _args || ! *_args )
+                throw Fault("too many arguments", Fault::InvalidParameters);
 
-    //    case OnMethodNameEnd:
-    //    { //std::cerr << "OnMethodNameEnd" << std::endl;
-    //        if(node.type() == Xml::Node::StartElement)
-    //        {
-    //            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-    //            if( se.name().name() != L"params" )
-    //                throw SerializationError("invalid XML-RPC methodCall");
+            _formatter.beginParse(**_args);
+            bool done = _formatter.advance(node);
 
-    //            _state = OnParams;
-    //        }
-    //        break;
-    //    }
+            if(done)
+                ++_args;
 
-    //    case OnParams:
-    //    { //std::cerr << "OnParams" << std::endl;
-    //        if(node.type() == Xml::Node::EndElement) // </params>
-    //        {
-    //            //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-    //            //if( ee.name() != L"params" )
-    //            //    throw std::runtime_error("invalid XML-RPC methodCall");
+            break;
+        }
 
-    //            _state = OnParamsEnd;
-    //            break;
-    //        }
+        case OnNamedParams:
+        {
+            if(node.type() == Json::Node::EndObject)
+            {
+                // Advance _args past all entries so finishMessage
+                // does not report "expected more arguments"
+                while(_args && *_args)
+                    ++_args;
 
-    //        if(node.type() == Xml::Node::StartElement)
-    //        {
-    //            const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-    //            
-    //            if( se.name().name() != L"param" )
-    //                throw SerializationError("invalid XML-RPC methodCall");
+                _state = OnRequestObject;
+                break;
+            }
 
-    //            if( ! *_args )
-    //                throw SerializationError("too many arguments");
+            if(node.type() == Json::Node::Member)
+            {
+                const Json::Member& m = static_cast<const Json::Member&>(node);
+                std::string paramName = m.name().narrow();
 
-    //            _formatter.beginParse(**_args);
-    //            _state = OnParam;
-    //            break;
-    //        }
+                int index = _procedure->getParamIndex(paramName);
+                if(index < 0)
+                    throw Fault("unknown parameter name", Fault::InvalidParameters);
 
-    //        break;
-    //    }
+                if( ! _args || ! _args[index] )
+                    throw Fault("invalid parameter index", Fault::InvalidParameters);
 
-    //    case OnParam:
-    //    { //std::cerr << "S: OnParam" << std::endl;
-    //        bool finished = _formatter.advance(node);
-    //        if(finished)
-    //        {
-    //            ++_args;
-    //            //std::cerr << "-> param finished" << std::endl; // node is </param>
-    //            _state = OnParams;
-    //        }
+                _formatter.beginParse( *_args[index] );
+                _state = OnNamedParam;
+            }
+            break;
+        }
 
-    //        break;
-    //    }
+        case OnNamedParam:
+        {
+            bool done = _formatter.advance(node);
+            if(done)
+                _state = OnNamedParams;
 
-    //    case OnParamsEnd:
-    //    { //std::cerr << "OnParamsEnd" << std::endl;
-    //        if(node.type() == Xml::Node::EndElement) // </methodCall>
-    //        {
-    //            //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-    //            //if( ee.name() != L"methodCall" )
-    //            //    throw std::runtime_error("invalid XML-RPC methodCall");
+            break;
+        }
 
-    //            _state = OnMethodCallEnd;
-    //        }
-    //        
-    //        break;
-    //    }
+        case OnId:
+        {
+            if(node.type() == Json::Node::Integer)
+            {
+                const Json::Integer& i = static_cast<const Json::Integer&>(node);
+                _id = i.value();
+            }
 
-    //    case OnMethodCallEnd:
-    //    {
-    //        if(node.type() == Xml::Node::EndDocument)
-    //        {
-    //            _state = OnMethodCallEnd;
-    //        }
-    //        
-    //        break;
-    //    }
-    //}
+            _state = OnRequestObject;
+            break;
+        }
 
-    return _state == OnMethodCallEnd;
+        case OnParamsEnd:
+        case OnEnd:
+        {
+            break;
+        }
+    }
+
+    return _state == OnEnd;
 }
 
-} // namespace XmlRpc
+} // namespace JsonRpc
 
 } // namespace Pt

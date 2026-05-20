@@ -8,6 +8,7 @@
         "Json": true,
         "JsonRpc": true,
         "Mfc": true,
+        "Mcp": true,
         "Net": true,
         "Qt": true,
         "Reflex": true,

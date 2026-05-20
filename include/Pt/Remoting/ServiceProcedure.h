@@ -66,6 +66,10 @@ class ServiceProcedure
         Decomposer* endCall()
         { return onEndCall(); }
 
+        //! @internal Synchronous call without EventLoop.
+        Decomposer* call()
+        { return onEndCall(); }
+
     protected:
         /** @brief Constructor.
         */

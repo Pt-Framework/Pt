@@ -1,0 +1,7 @@
+SubDir PT_TOP src Pt-Mcp tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mcp-test ;
+
+Main Pt-Mcp-test : Pt-Mcp-test.cpp ;
+LinkSharedLibraries Pt-Mcp-test : Pt-Mcp Pt-JsonRpc Pt-Json Pt-Http Pt-Net Pt-Remoting Pt-System Pt Pt-Unit ;
+MakeLocate Pt-Mcp-test : $(PT_OUTPUT_TARGET) ;

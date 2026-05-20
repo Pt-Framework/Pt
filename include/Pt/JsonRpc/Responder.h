@@ -1,42 +1,41 @@
-/* Copyright (C) 2020 Marc Boris Duerner
+/*
+ * Copyright (C) 2020-2026 by Marc Boris Duerner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA
+ */
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  
-  As a special exception, you may use this file as part of a free
-  software library without restriction. Specifically, if other files
-  instantiate templates or use macros or inline functions from this
-  file, or you compile this file and link it with other files to
-  produce an executable, this file does not by itself cause the
-  resulting executable to be covered by the GNU General Public
-  License. This exception does not however invalidate any other
-  reasons why the executable file might be covered by the GNU Library
-  General Public License.
-  
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA 02110-1301 USA
-*/
-
-#ifndef Pt_JsonRpc_Responder_h
-#define Pt_JsonRpc_Responder_h
+#ifndef PT_JSONRPC_RESPONDER_H
+#define PT_JSONRPC_RESPONDER_H
 
 #include <Pt/JsonRpc/Api.h>
 #include <Pt/JsonRpc/Fault.h>
-//#include <Pt/XmlRpc/Formatter.h>
+#include <Pt/JsonRpc/Formatter.h>
 #include <Pt/Remoting/Responder.h>
-//#include <Pt/Xml/InputSource.h>
 #include <Pt/Json/JsonReader.h>
 #include <Pt/Json/JsonWriter.h>
-#include <Pt/Json/JsonFormatter.h>
 #include <Pt/TextStream.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Utf8Codec.h>
@@ -46,145 +45,134 @@ namespace Pt {
 
 namespace JsonRpc {
 
-/** @brief Dispatches requests to a service procedure.
+class ProcedureDeclaration;
+class ServiceDeclaration;
+
+/** @brief Dispatches JSON-RPC requests to a service procedure.
 */
 class PT_JSONRPC_API Responder : public Remoting::Responder
 {
-    public:
-        /** @brief Construct with Service.
-        */
-        Responder(Remoting::ServiceDefinition& service);
+  public:
+    /** @brief Construct with ServiceDeclaration and ServiceDefinition.
+    */
+    Responder(const ServiceDeclaration& decl,
+              Remoting::ServiceDefinition& def);
 
-        /** @brief Destructor.
-        */
-        virtual ~Responder();
+    /** @brief Destructor.
+    */
+    virtual ~Responder();
 
-        /** @brief Indicates if the procedure has failed.
-        */
-        bool isFailed() const;
+    /** @brief Indicates if the procedure has failed.
+    */
+    bool isFailed() const;
 
-    protected:
-        // inheritdoc
-        virtual void onReady();
+  protected:
+    // inheritdoc
+    virtual void onReady();
 
-        // inheritdoc
-        virtual void onCancel();
+    // inheritdoc
+    virtual void onCancel();
 
-        /** @brief The service procedure has failed.
+    /** @brief The service procedure has failed.
 
-            Derived responders implement this method to format and send the
-            XML-RPC fault result. It is called when the service procedure has
-            failed. Use beginResult(), advanceResult() and finishResult()
-            to format the XML-RPC result.
-        */
-        virtual void onFault(const Fault& fault) = 0;
+        Derived responders implement this method to format and send the
+        JSON-RPC error response. Use beginFault() to format the response.
+    */
+    virtual void onFault(const Fault& fault) = 0;
 
-        /** @brief The service procedure has finished.
+    /** @brief The service procedure has finished.
 
-            Derived responders implement this method to format and send the
-            XML-RPC result. It is called when the service procedure has
-            finished. Use beginResult(), advanceResult() and finishResult()
-            to format the XML-RPC result.
-        */
-        virtual void onResult() = 0;
+        Derived responders implement this method to format and send the
+        JSON-RPC result. Use beginResult(), advanceResult() and
+        finishResult() to format the response.
+    */
+    virtual void onResult() = 0;
 
-    protected:
-        /** @brief Parses the XML-RPC message.
+  protected:
+    /** @brief Begin parsing a JSON-RPC request from a stream.
+    */
+    void beginMessage(std::istream& is);
 
-            This method is used by derived responders to begin parsing a
-            XML-RPC message from a std::istream.
-        */
-        void beginMessage(std::istream& is);
+    /** @brief Parse available data from the input stream.
 
-        /** @brief Parses the XML-RPC message.
+        Each call consumes available data. Returns true if parsing is
+        complete (success or error).
+    */
+    bool parseMessage();
 
-            This method is used by derived responders to parse a XML-RPC
-            message. Each call consumes the available data from the 
-            std::istream set with beginMessage() and returns true if no more
-            message data needs to be parsed, either because the message is
-            complete or an error occured.
-        */
-        bool parseMessage();
+    /** @brief Execute the service procedure after parsing completes.
+    */
+    void finishMessage(System::EventLoop& loop);
 
-        /** @brief Parses the XML-RPC message.
+    /** @brief Execute the service procedure synchronously.
+    */
+    void finishMessage();
 
-            This method is used by derived responders after the XML-RPC message 
-            has been parsed by parseMessage(). This will execute the service
-            procedure.
-        */
-        void finishMessage(System::EventLoop& loop);
+    /** @brief Begin formatting a JSON-RPC success response.
+    */
+    void beginResult(std::ostream& os);
 
-        /** @brief Formats the XML-RPC result.
+    /** @brief Begin formatting a JSON-RPC error response.
+    */
+    void beginFault(std::ostream& os, const Fault& fault);
 
-            This method is used by derived responders in onResult() and onError()
-            to begin formatting a XML-RPC result to a std::ostream.
-        */
-        void beginResult(std::ostream& os);
+    /** @brief Continue formatting the result.
 
-        void beginFault(std::ostream& os, const Fault& fault);
+        @return true if the result is fully formatted.
+    */
+    bool advanceResult();
 
-        /** @brief Formats the XML-RPC message.
+    /** @brief Finish formatting the result response.
+    */
+    void finishResult();
 
-            This method is used by derived responders in onResult() and onError()
-            to format a XML-RPC result. Each call generates a chunk of the
-            result and returns true if the message is complete.
-        */
-        bool advanceResult();
+    /** @brief Mark the procedure as failed.
+    */
+    void setFault(int rc, const char* msg);
 
-        /** @brief Formats the XML-RPC message.
+  private:
+    //! @internal
+    bool advance(const Json::Node& node);
 
-            This method is used by derived responders in onResult() and onError()
-            to format the end of a XML-RPC result. It is called after 
-            advanceResult() returns true.
-        */
-        void finishResult();
+  private:
+    enum State
+    {
+        OnBegin,
+        OnRequestObject,
+        OnMethod,
+        OnParams,
+        OnParam,
+        OnNamedParams,
+        OnNamedParam,
+        OnParamsEnd,
+        OnId,
+        OnEnd
+    };
 
-        /** @brief Fails the service procedure.
+    const ServiceDeclaration*    _decl;
+    const ProcedureDeclaration*  _procedure;
 
-            This method is used by derived responders to indicate that the
-            service procedure should not be executed, but a fault result 
-            be generated instead.
-        */
-        void setFault(int rc, const char* msg);
+    Utf8Codec        _utf8;
+    TextIStream      _tis;
+    Json::JsonReader _reader;
+    Composer**       _args;
+    State            _state;
+    long long        _id;
+    std::string      _methodName;
 
-    private:
-        //! @internal
-        bool advance(const Pt::Json::Node& node);
+    TextOStream      _tos;
+    Json::JsonWriter _writer;
+    Formatter        _formatter;
+    Decomposer*      _result;
 
-    private:
-        enum State
-        {
-            OnBegin,
-            OnMethodCallBegin,
-            OnMethodNameBegin,
-            OnMethodName,
-            OnMethodNameEnd,
-            OnParams,
-            OnParam,
-            OnParamsEnd,
-            OnMethodCallEnd
-        };
-
-        Utf8Codec        _utf8;
-        TextIStream      _tis;
-        Json::JsonReader _reader;
-        Composer**       _args;
-        State            _state;
-        long long        _id;
-
-        TextOStream         _tos;
-        Json::JsonWriter    _writer;
-        Json::JsonFormatter _formatter;
-        Decomposer*         _result;
-
-        Fault _fault;
-        bool _isFault;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
+    Fault _fault;
+    bool  _isFault;
+    Pt::varint_t _r1;
+    Pt::varint_t _r2;
 };
 
-} // namespace XmlRpc
+} // namespace JsonRpc
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_Responder_h
+#endif // PT_JSONRPC_RESPONDER_H

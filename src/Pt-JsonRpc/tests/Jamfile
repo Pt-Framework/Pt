@@ -1,0 +1,7 @@
+SubDir PT_TOP src Pt-JsonRpc tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-JsonRpc-test ;
+
+Main Pt-JsonRpc-test : Pt-JsonRpc-test.cpp ;
+LinkSharedLibraries Pt-JsonRpc-test : Pt-JsonRpc Pt-Json Pt-Http Pt-Net Pt-Remoting Pt-System Pt Pt-Unit ;
+MakeLocate Pt-JsonRpc-test : $(PT_OUTPUT_TARGET) ;

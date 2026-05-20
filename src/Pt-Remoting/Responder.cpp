@@ -92,6 +92,17 @@ Pt::Decomposer* Responder::endCall()
 }
 
 
+Pt::Decomposer* Responder::call()
+{
+    if( ! _proc )
+    {
+        throw Fault("invalid JSON-RPC");
+    }
+
+    return _proc->call();
+}
+
+
 void Responder::cancel()
 {
     this->onCancel();

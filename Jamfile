@@ -113,6 +113,12 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Soap ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir PT_TOP include Pt Mcp ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Mcp ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Mcp ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 SubDir PT_TOP include Pt Unit ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Unit ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -208,6 +214,7 @@ if $(PT_SYSTEM)
     SubInclude PT_TOP src Pt-Http ;
     SubInclude PT_TOP src Pt-Remoting ;
     SubInclude PT_TOP src Pt-JsonRpc ;
+    SubInclude PT_TOP src Pt-Mcp ;
     SubInclude PT_TOP src Pt-XmlRpc ;
     SubInclude PT_TOP src Pt-Soap ;
     SubInclude PT_TOP src Pt-Ssl ;

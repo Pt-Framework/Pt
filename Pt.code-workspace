@@ -81,6 +81,14 @@
             "name": "Pt-JsonRpc"
         },
         {
+            "path": "include/Pt/Mcp",
+            "name": "Pt-Mcp (Includes)"
+        },
+        {
+            "path": "src/Pt-Mcp",
+            "name": "Pt-Mcp"
+        },
+        {
             "path": "include/Pt/Xml",
             "name": "Pt-Xml (Includes)"
         },
@@ -138,7 +146,9 @@
         "chat.tools.terminal.autoApprove": {
             "Rename-Item": true,
             "ForEach-Object": true,
-            ".\\build\\debug\\Pt-Gfx-test.exe": true
+            ".\\build\\": true,
+            "jam": true,
+            ".\\jam.bat": true
         },
         "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false
     }

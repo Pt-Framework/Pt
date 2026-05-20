@@ -89,6 +89,10 @@ class PT_REMOTING_API Responder : private NonCopyable
         */
         Pt::Decomposer* endCall();
 
+        /** @brief Synchronous call without EventLoop.
+        */
+        Pt::Decomposer* call();
+
     protected:
         /** @brief Cancels all operations.
 

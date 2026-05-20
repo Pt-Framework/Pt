@@ -1,0 +1,7 @@
+SubDir PT_TOP src Pt-Mcp demo ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mcp-Demo ;
+
+Main Pt-Mcp-Demo : Pt-Mcp-Demo.cpp ;
+LinkSharedLibraries Pt-Mcp-Demo : Pt-Mcp Pt-JsonRpc Pt-Json Pt-Remoting Pt-System Pt ;
+MakeLocate Pt-Mcp-Demo : $(PT_OUTPUT_TARGET) ;

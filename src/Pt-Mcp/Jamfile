@@ -1,0 +1,20 @@
+SubDir PT_TOP src Pt-Mcp ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_MCP_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mcp ;
+
+PT_MCP_SOURCES = HttpResponder.cpp
+                 HttpService.cpp
+                 Responder.cpp
+                 StdioService.cpp
+                 TextFormatter.cpp
+                 ToolDeclaration.cpp
+                 Type.cpp ;
+
+SharedLibrary Pt-Mcp : $(PT_MCP_SOURCES) ;
+LinkSharedLibraries Pt-Mcp : Pt-JsonRpc Pt-Json Pt-Http Pt-Net Pt-Remoting Pt-System Pt ;
+MakeLocate Pt-Mcp : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Mcp : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-Mcp demo ;
+SubInclude PT_TOP src Pt-Mcp tests ;

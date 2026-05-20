@@ -3,12 +3,12 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_JSONRPC_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-JsonRpc ;
 
-PT_JSONRPC_SOURCES = #Client.cpp
+PT_JSONRPC_SOURCES = Client.cpp
                     Fault.cpp
-                    #Formatter.cpp
-                    #HttpClient.cpp
-                    #HttpResponder.cpp
-                    #HttpService.cpp
+                    Formatter.cpp
+                    HttpClient.cpp
+                    HttpResponder.cpp
+                    HttpService.cpp
                     Responder.cpp
                     ;
 
@@ -17,4 +17,4 @@ LinkSharedLibraries Pt-JsonRpc :  Pt-Json Pt-Http Pt-Net Pt-Remoting Pt-System P
 MakeLocate Pt-JsonRpc : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-JsonRpc : $(PT_INSTALL_LIBDIR) ;
 
-#SubInclude PT_TOP src Pt-JsonRpc tests ;
+SubInclude PT_TOP src Pt-JsonRpc tests ;
