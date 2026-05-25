@@ -43,11 +43,11 @@ ScrollView::ScrollView()
 , _scrollBarY(ScrollBar::Vertical)
 {
     SizePolicy barPolicyX(SizePolicy::Preferred, SizePolicy::Fixed);
-    barPolicyX.setHeight(32);
+    barPolicyX.setHeight(16);
     _scrollBarX.setSizePolicy(barPolicyX);
 
     SizePolicy barPolicyY(SizePolicy::Fixed, SizePolicy::Preferred);
-    barPolicyY.setWidth(32);
+    barPolicyY.setWidth(16);
     _scrollBarY.setSizePolicy(barPolicyY);
 
     _scrollBarX.changed() += Pt::slot(*this, &ScrollView::onScrollBarX);

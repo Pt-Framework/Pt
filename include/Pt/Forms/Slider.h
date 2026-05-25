@@ -31,6 +31,7 @@
 #define Pt_Forms_Slider_H
 
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/StyleFlags.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
 
@@ -91,10 +92,14 @@ class PT_FORMS_API Slider : public Control
 
         void setRenderer(SliderRenderer* renderer);
 
+        SliderStyleFlags sliderStyleFlags() const;
+
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
@@ -105,11 +110,17 @@ class PT_FORMS_API Slider : public Control
         virtual bool onEnterEvent(const EnterEvent& ev);
 
         virtual bool onLeaveEvent(const LeaveEvent& ev);
-        
+
     private:
-        Gfx::PointF textPosition() const;
+        SliderRenderer* getRenderer();
+
+        void applyRenderer(SliderRenderer* renderer);
 
         Gfx::Font getFont() const;
+
+        float toFraction() const;
+
+        int toPosition(double x) const;
 
     private:
         enum FontOverride : unsigned
@@ -132,14 +143,10 @@ class PT_FORMS_API Slider : public Control
         Gfx::Font                 _customFont;
         unsigned                  _fontOverride;
         
+        Gfx::RectF                _trackRect;
+        Gfx::RectF                _handleRect;
         FacetPtr<SliderRenderer>  _renderer;
         bool                      _customRenderer;
-
-        Gfx::Brush  _backgroundBrush;
-        Gfx::Brush  _foregroundBrush;
-        Gfx::Pen    _contourPen;
-        Gfx::Pen    _textPen;
-        Gfx::Font   _font;
 };
 
 } // namespace

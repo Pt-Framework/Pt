@@ -33,6 +33,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Alignment.h>
+#include <Pt/Forms/Direction.h>
 #include <Pt/Forms/Spacing.h>
 #include <Pt/Forms/StyleFlags.h>
 #include <Pt/Forms/PaintSurface.h>
@@ -58,23 +59,15 @@ class Painter;
 class Pixmap;
 class TextBlock;
 class StyleOptions;
-class LineEdit;
 class PushButton;
-class ComboBox;
 class Menu;
 class MenuItem;
 class MenuBar;
 class MenuBarItem;
-class ScrollBar;
 class Slider;
 class SpinBox;
 class SpinBoxButton;
 class ProgressBar;
-class ListBox;
-class ListBoxItem;
-class TabView;
-class TabBar;
-class TabItem;
 
 template <typename T>
 class FacetPtr
@@ -159,6 +152,32 @@ class FacetPtr
         T* _facet;
 };
 
+/** @brief Style for widgets.
+    Renderer design:
+    - each renderer works in layers
+    - primitives are grouped into layers
+    - each layer may have a measure<Layer>, layout<Layer> and render<Layer>
+      unless its not layoutable like a background layer.
+    - primitives are in the same layer if the cannot be handled separately
+        - e.g. SpinBox Buttons can either be inside the entry or somewhere outside.
+          This is transparent to the user, so we need to measure, layout and 
+          render them together
+
+    - measure<Layer> may add space to a given contained content
+    - layout<Layer> returns the remaining space for contained content
+    - render<Layer> takes values from the layout<Layer> call
+
+    - render<Layer> might be a template method for a virtual function for its primitives
+        - onRender<Layer> calls onRender<PrimitiveA> + onRender<PrimitiveB>
+        - onRender<Layer> can optionally be implemented by style writers
+
+    - render<Layer> might not be necessary, e.g. if render<Primitive> exists and
+      the primitive is optional
+
+    - measure<Layer> and layout<Layer> might be template method for a virtual function
+      for its primitives, but this is less common because competing ways of layouting
+      do not show a clear picture. So mostly it just calls onMeasure<Layer> or onLayout<Layer>
+ */
 class PT_FORMS_API Style
 {
     public:
@@ -223,7 +242,11 @@ class PT_FORMS_API Style
         FacetMap _facets;
 };
 
+/** @brief Renders the visual appearance of a panel widget.
 
+    Provides rendering primitives for panel backgrounds, frames, text,
+    and icons. Subclasses override the protected virtuals.
+*/
 class PT_FORMS_API PanelRenderer : public Style::Facet
 {
     public:
@@ -231,24 +254,85 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
 
         virtual ~PanelRenderer();
 
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
         PanelRenderer* create() const;
 
     public:
+        /** @brief Returns the custom background brush, or null if unset.
+        */
         const Gfx::Brush* background() const;
 
+        /** @brief Sets the background brush for filling the panel area.
+        */
         void setBackground(const Gfx::Brush& b);
 
+        /** @brief Returns the custom contour pen, or null if unset.
+        */
         const Gfx::Pen* contour() const;
 
+        /** @brief Sets the pen for the panel outline.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Returns the font used for text rendering.
+        */
         const Gfx::Font& font() const;
 
+        /** @brief Sets the font for text rendering.
+        */
         void setFont(const Gfx::Font& f);
 
+        /** @brief Returns the text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the text color from a pen.
+        */
         void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the outer size including frame for the given contentSize on surface.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the inner content rectangle within the outer frameRect on surface.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect);
+
+        /** @brief Returns a painter with the current font and text color applied for surface.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Paints the panel background within the widget rect.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              StyleFlags state);
+
+        /** @brief Paints the frame border within the outer frame rect.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         StyleFlags state);
+
+        /** @brief Draws text at pos, clipped to the widget rect.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        StyleFlags state);
+
+        /** @brief Draws picture at pos, clipped to the widget rect.
+        */
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        StyleFlags state);
 
     protected:
         const StyleOptions& prepare();
@@ -257,51 +341,23 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
 
         virtual void onPrepare(const StyleOptions& options) = 0;
 
-    public:
-        void renderBackground(PaintContext& context,
-                              const Gfx::RectF& rect,
-                              StyleFlags state);
-
-    protected:
-        virtual void onRenderBackground(PaintContext& context,
-                                        const Gfx::RectF& rect,
-                                        const StyleOptions& options,
-                                        StyleFlags state) = 0;
-
-    public:
-        Gfx::SizeF measureFrame(PaintSurface& surface,
-                                const Gfx::SizeF& contentSize);
-
-        Gfx::RectF layoutFrame(PaintSurface& surface,
-                               const Gfx::RectF& frameRect);
-
-        void renderFrame(PaintContext& context,
-                         const Gfx::RectF& rect,
-                         StyleFlags state);
-
-    protected:
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
         virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
                                          const Gfx::RectF& frameRect) = 0;
 
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderBackground(PaintContext& context,
+                                        const Gfx::RectF& rect,
+                                        const StyleOptions& options,
+                                        StyleFlags state) = 0;
+
         virtual void onRenderFrame(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const StyleOptions& options,
                                    StyleFlags state) = 0;
-
-    public:
-        const Painter& textPainter(PaintSurface& surface);
-
-        void renderText(PaintContext& context,
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& pos,
-                        StyleFlags state);
-
-    protected:
-        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
@@ -310,14 +366,6 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
                                   const Gfx::PointF& pos,
                                   StyleFlags state) = 0;
 
-    public:
-        void renderIcon(PaintContext& context,
-                        const Gfx::RectF& rect,
-                        const Pixmap& picture,
-                        const Gfx::PointF& pos,
-                        StyleFlags state);
-
-    protected:
         virtual void onRenderIcon(PaintContext& context,
                                   const Gfx::RectF& rect,
                                   const StyleOptions& options,
@@ -333,7 +381,11 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
         std::size_t          _styleGeneration;
 };
 
+/** @brief Renders the visual appearance of a push button.
 
+    Provides rendering primitives for button surfaces, text, mnemonic
+    underlines, and icons. Subclasses override the protected virtuals.
+*/
 class PT_FORMS_API ButtonRenderer : public Style::Facet
 {
     public:
@@ -341,32 +393,148 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
         ButtonRenderer* create() const;
 
     public: 
+        /** @brief Returns the foreground brush for the button face.
+        */
         const Gfx::Brush& foreground() const;
 
+        /** @brief Sets the foreground brush for the button face.
+        */
         void setForeground(const Gfx::Brush& b);
 
+        /** @brief Returns the contour pen for the button border.
+        */
         const Gfx::Pen& contour() const;
 
+        /** @brief Sets the contour pen for the button border.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Returns the accent color for active state emphasis.
+        */
         const Gfx::Color& accentColor() const;
 
+        /** @brief Sets the accent color for active state emphasis.
+        */
         void setAccentColor(const Gfx::Color& c);
 
+        /** @brief Returns the highlight color for hover emphasis.
+        */
         const Gfx::Color& highlightColor() const;
 
+        /** @brief Sets the highlight color for hover emphasis.
+        */
         void setHighlightColor(const Gfx::Color& c);
 
+        /** @brief Returns the font used for button text.
+        */
         const Gfx::Font& font() const;
 
+        /** @brief Sets the font for button text.
+        */
         void setFont(const Gfx::Font& f);
 
+        /** @brief Returns the text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the text color from a pen.
+        */
         void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the combined content size for icon and text arranged by direction.
+
+            Computes the space needed for icon, text, and spacing between them.
+            Does not include surface decoration (borders/padding).
+        */
+        Gfx::SizeF measureContent(PaintSurface& surface,
+                                  Direction direction,
+                                  const Gfx::SizeF& iconSize,
+                                  const Gfx::SizeF& textSize);
+
+        /** @brief Returns the outer size including button decoration for contentSize on surface.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the inner content rectangle within the outer frameRect on surface.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect);
+
+        /** @brief Computes the underline rectangle for the mnemonic character at mnemonicIndex.
+        */
+        Gfx::RectF layoutMnemonic(PaintSurface& surface,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::FontMetrics& fontMetrics,
+                                  String::size_type mnemonicIndex);
+
+        /** @brief Returns a painter with the current font and text color applied for surface.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Computes the icon and text sub-rectangles within the content rect.
+
+            The content rect is the output of layoutFrame (decoration already
+            stripped). This method partitions it based on direction and sizes.
+        */
+        void layoutContent(PaintSurface& surface,
+                           const Gfx::RectF& contentRect,
+                           Direction direction,
+                           const Gfx::SizeF& iconSize,
+                           const Gfx::SizeF& textSize,
+                           Gfx::RectF& iconRect,
+                           Gfx::RectF& textRect);
+
+        /** @brief Converts icon to a state-appropriate pixmap written to picture.
+        */
+        void prepareIcon(const Gfx::Image& icon,
+                         Pixmap& picture,
+                         ButtonStyleFlags state) const;
+
+        /** @brief Paints the background fill within the widget rect.
+
+            Only fills if an explicit background is needed.
+            Otherwise the call is a no-op, leaving the widget transparent.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              ButtonStyleFlags state);
+
+        /** @brief Paints the button background and border within the button bounding rect.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         ButtonStyleFlags state);
+
+        /** @brief Draws text at pos, clipped to the button bounding rect.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        ButtonStyleFlags state);
+
+        /** @brief Draws the mnemonic underline within mnemonic, clipped to the button bounding rect.
+        */
+        void renderMnemonic(PaintContext& context,
+                            const Gfx::RectF& rect,
+                            const Gfx::RectF& mnemonic,
+                            ButtonStyleFlags state);
+
+        /** @brief Draws picture at pos, clipped to the button bounding rect.
+        */
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        ButtonStyleFlags state);
 
     protected:
         const StyleOptions& prepare();
@@ -375,40 +543,47 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
 
         virtual void onPrepare(const StyleOptions& options) = 0;
 
-    public:
-        Gfx::SizeF measureSurface(PaintSurface& surface,
-                                  const Gfx::SizeF& contentSize);
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
 
-        Gfx::RectF layoutSurface(PaintSurface& surface,
-                                 const Gfx::RectF& surfaceRect);
+        virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
+                                            Direction direction,
+                                            const Gfx::SizeF& iconSize,
+                                            const Gfx::SizeF& textSize) = 0;
 
-        void renderSurface(PaintContext& context,
-                           const Gfx::RectF& rect,
-                           ButtonStyleFlags state);
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& frameRect) = 0;
 
-    protected:
-        virtual Gfx::SizeF onMeasureSurface(PaintSurface& surface,
-                                            const Gfx::SizeF& contentSize) = 0;
+        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& fontMetrics,
+                                            String::size_type mnemonicIndex) = 0;
 
-        virtual Gfx::RectF onLayoutSurface(PaintSurface& surface,
-                                           const Gfx::RectF& surfaceRect) = 0;
-
-        virtual void onRenderSurface(PaintContext& context,
-                                     const Gfx::RectF& rect,
-                                     const StyleOptions& options,
-                                     ButtonStyleFlags state) = 0;
-
-    public:
-        const Painter& textPainter(PaintSurface& surface);
-
-        void renderText(PaintContext& context,
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& pos,
-                        ButtonStyleFlags state);
-
-    protected:
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onLayoutContent(PaintSurface& surface,
+                                     const Gfx::RectF& contentRect,
+                                     Direction direction,
+                                     const Gfx::SizeF& iconSize,
+                                     const Gfx::SizeF& textSize,
+                                     Gfx::RectF& iconRect,
+                                     Gfx::RectF& textRect) = 0;
+
+        virtual void onRenderBackground(PaintContext& context,
+                                        const Gfx::RectF& rect,
+                                        const StyleOptions& options,
+                                        ButtonStyleFlags state) = 0;
+
+        virtual void onPrepareIcon(const StyleOptions& options,
+                                   const Gfx::Image& icon,
+                                   Pixmap& picture,
+                                   ButtonStyleFlags state) const = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   ButtonStyleFlags state) = 0;
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
@@ -417,47 +592,11 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
                                   const Gfx::PointF& pos,
                                   ButtonStyleFlags state) = 0;
 
-    public:
-        Gfx::RectF layoutMnemonic(PaintSurface& surface,
-                                  const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::FontMetrics& fontMetrics,
-                                  String::size_type mnemonicIndex);
-
-        void renderMnemonic(PaintContext& context,
-                            const Gfx::RectF& rect,
-                            const Gfx::RectF& mnemonic,
-                            ButtonStyleFlags state);
-
-    protected:
-        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
-                                            const String& text,
-                                            const Gfx::PointF& textPos,
-                                            const Gfx::FontMetrics& fontMetrics,
-                                            String::size_type mnemonicIndex) = 0;
-
         virtual void onRenderMnemonic(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const StyleOptions& options,
                                       const Gfx::RectF& mnemonic,
                                       ButtonStyleFlags state) = 0;
-
-    public:
-        void prepareIcon(const Gfx::Image& icon,
-                         Pixmap& picture,
-                         ButtonStyleFlags state) const;
-
-        void renderIcon(PaintContext& context,
-                        const Gfx::RectF& rect,
-                        const Pixmap& picture,
-                        const Gfx::PointF& pos,
-                        ButtonStyleFlags state);
-
-    protected:
-        virtual void onPrepareIcon(const StyleOptions& options,
-                                   const Gfx::Image& icon,
-                                   Pixmap& picture,
-                                   ButtonStyleFlags state) const = 0;
 
         virtual void onRenderIcon(PaintContext& context,
                                   const Gfx::RectF& rect,
@@ -476,7 +615,11 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
         std::size_t          _styleGeneration;
 };
 
+/** @brief Renders the visual appearance of a checkbox widget.
 
+    Provides rendering primitives for the check indicator, label text,
+    and mnemonic underline. Subclasses override the protected virtuals.
+*/
 class PT_FORMS_API CheckBoxRenderer : public Style::Facet
 {
     public:
@@ -484,24 +627,109 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
 
         virtual ~CheckBoxRenderer();
 
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
         CheckBoxRenderer* create() const;
 
     public:
+        /** @brief Returns the custom background brush, or null if unset.
+        */
         const Gfx::Brush* background() const;
 
+        /** @brief Sets the background brush for the check indicator area.
+        */
         void setBackground(const Gfx::Brush& b);
 
+        /** @brief Returns the custom contour pen, or null if unset.
+        */
         const Gfx::Pen* contour() const;
 
+        /** @brief Sets the pen for the check indicator border.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Returns the font used for label text.
+        */
         const Gfx::Font& font() const;
 
+        /** @brief Sets the font for label text.
+        */
         void setFont(const Gfx::Font& f);
 
+        /** @brief Returns the text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the text color from a pen.
+        */
         void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the natural size of the check indicator on surface.
+        */
+        Gfx::SizeF measureIndicator(PaintSurface& surface);
+
+        /** @brief Returns the combined content size for indicator and text.
+
+            Computes the space needed for indicator, text, and spacing between them.
+            Does not include frame decoration.
+        */
+        Gfx::SizeF measureContent(PaintSurface& surface,
+                                  const Gfx::SizeF& indicatorSize,
+                                  const Gfx::SizeF& textSize);
+
+        /** @brief Returns the outer size including frame for the given contentSize on surface.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the inner content rectangle within the outer frameRect on surface.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect);
+
+        /** @brief Partitions the content rect into indicator and text sub-rectangles.
+        */
+        void layoutContent(PaintSurface& surface,
+                           const Gfx::RectF& contentRect,
+                           const Gfx::SizeF& indicatorSize,
+                           const Gfx::SizeF& textSize,
+                           Gfx::RectF& indicatorRect,
+                           Gfx::RectF& textRect);
+
+        /** @brief Computes the underline rectangle for the mnemonic character at mnemonicIndex.
+        */
+        Gfx::RectF layoutMnemonic(PaintSurface& surface,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::FontMetrics& fontMetrics,
+                                  String::size_type mnemonicIndex);
+
+        /** @brief Returns a painter with the current font and text color applied for surface.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Draws the check indicator within boxRect, clipped to the widget rect.
+        */
+        void renderIndicator(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const Gfx::RectF& boxRect,
+                             CheckBoxStyleFlags state);
+
+        /** @brief Draws text at pos, clipped to the textRect.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        CheckBoxStyleFlags state);
+
+        /** @brief Draws the mnemonic underline within mnemonic, clipped to the widget rect.
+        */
+        void renderMnemonic(PaintContext& context,
+                            const Gfx::RectF& rect,
+                            const Gfx::RectF& mnemonic,
+                            CheckBoxStyleFlags state);
 
     protected:
         const StyleOptions& prepare();
@@ -510,60 +738,45 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
 
         virtual void onPrepare(const StyleOptions& options) = 0;
 
-    public:
-        Gfx::SizeF measureBox(PaintSurface& surface);
+        virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
 
-        void renderBox(PaintContext& context,
-                       const Gfx::RectF& rect,
-                       const Gfx::RectF& boxRect,
-                       CheckBoxStyleFlags state);
+        virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
+                                            const Gfx::SizeF& indicatorSize,
+                                            const Gfx::SizeF& textSize) = 0;
 
-    protected:
-        virtual Gfx::SizeF onMeasureBox(PaintSurface& surface) = 0;
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
 
-        virtual void onRenderBox(PaintContext& context,
-                                 const Gfx::RectF& rect,
-                                 const StyleOptions& options,
-                                 const Gfx::RectF& boxRect,
-                                 CheckBoxStyleFlags state) = 0;
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& frameRect) = 0;
 
-    public:
-        const Painter& textPainter(PaintSurface& surface);
+        virtual void onLayoutContent(PaintSurface& surface,
+                                     const Gfx::RectF& contentRect,
+                                     const Gfx::SizeF& indicatorSize,
+                                     const Gfx::SizeF& textSize,
+                                     Gfx::RectF& indicatorRect,
+                                     Gfx::RectF& textRect) = 0;
 
-        void renderText(PaintContext& context,
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& pos,
-                        CheckBoxStyleFlags state);
-
-    protected:
-        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
-
-        virtual void onRenderText(PaintContext& context,
-                                  const Gfx::RectF& rect,
-                                  const StyleOptions& options,
-                                  const String& text,
-                                  const Gfx::PointF& pos,
-                                  CheckBoxStyleFlags state) = 0;
-
-    public:
-        Gfx::RectF layoutMnemonic(PaintSurface& surface,
-                                  const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::FontMetrics& fontMetrics,
-                                  String::size_type mnemonicIndex);
-
-        void renderMnemonic(PaintContext& context,
-                            const Gfx::RectF& rect,
-                            const Gfx::RectF& mnemonic,
-                            CheckBoxStyleFlags state);
-
-    protected:
         virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
                                             const String& text,
                                             const Gfx::PointF& textPos,
                                             const Gfx::FontMetrics& fontMetrics,
                                             String::size_type mnemonicIndex) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderIndicator(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const StyleOptions& options,
+                                       const Gfx::RectF& boxRect,
+                                       CheckBoxStyleFlags state) = 0;
+
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& textRect,
+                                  const StyleOptions& options,
+                                  const String& text,
+                                  const Gfx::PointF& pos,
+                                  CheckBoxStyleFlags state) = 0;
 
         virtual void onRenderMnemonic(PaintContext& context,
                                       const Gfx::RectF& rect,
@@ -579,698 +792,1347 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
         std::size_t          _styleGeneration;
 };
 
+/** @brief Renders the visual appearance of a spin box widget.
+
+    This renderer exists primarily for the highly-integrated case where
+    the entire spin box is drawn as a single visual unit. The default
+    implementation breaks down rendering into entry, buttons, indicators,
+    and text, which serves as a template for other renderers. A native
+    style can override the top-level render() to paint the widget as one
+    cohesive element.
+*/
+class PT_FORMS_API SpinBoxRenderer : public Style::Facet
+{
+    public:
+        explicit SpinBoxRenderer(std::size_t refs = 0);
+
+        virtual ~SpinBoxRenderer();
+
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
+        SpinBoxRenderer* create() const;
+
+    public:
+        /** @brief Returns the custom background brush, or null if unset.
+        */
+        const Gfx::Brush* background() const;
+
+        /** @brief Sets the background brush for the entry area.
+        */
+        void setBackground(const Gfx::Brush& b);
+
+        /** @brief Returns the custom contour pen, or null if unset.
+        */
+        const Gfx::Pen* contour() const;
+
+        /** @brief Sets the pen for entry and button borders.
+        */
+        void setContour(const Gfx::Pen& p);
+
+        /** @brief Returns the custom foreground brush, or null if unset.
+        */
+        const Gfx::Brush* foreground() const;
+
+        /** @brief Sets the foreground brush for the buttons.
+        */
+        void setForeground(const Gfx::Brush& b);
+
+        /** @brief Returns the font used for text rendering.
+        */
+        const Gfx::Font& font() const;
+
+        /** @brief Sets the font for text rendering.
+        */
+        void setFont(const Gfx::Font& f);
+
+        /** @brief Returns the text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the text color from a pen.
+        */
+        void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the total widget size for the given contentSize hint.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the entry area size for the given text content size.
+
+            Useful for custom widgets that only need the entry box dimensions
+            without the full spin-box layout.
+        */
+        Gfx::SizeF measureEntry(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the preferred size of a single indicator arrow.
+        */
+        Gfx::SizeF measureIndicator(PaintSurface& surface);
+
+        /** @brief Partitions the widget bounding rect into sub-rectangles.
+
+            The theme decides the placement of buttons and entry area.
+            The returned textRect is the usable area for text rendering.
+        */
+        void layoutFrame(PaintSurface& surface,
+                         const Gfx::RectF& rect,
+                         Gfx::RectF& entryRect,
+                         Gfx::RectF& upButtonRect,
+                         Gfx::RectF& downButtonRect,
+                         Gfx::RectF& textRect);
+
+        /** @brief Returns the inner text rectangle for the given entry rect.
+
+            Useful for custom widgets that only use the entry area without
+            the full spin-box layout.
+        */
+        Gfx::RectF layoutEntry(PaintSurface& surface,
+                               const Gfx::RectF& entryRect);
+
+        /** @brief Returns a painter with the current font applied for surface.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Paints the frame chrome: entry border, buttons, and indicators.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const Gfx::RectF& entryRect,
+                         const Gfx::RectF& upButtonRect,
+                         const Gfx::RectF& downButtonRect,
+                         SpinBoxStyleFlags state,
+                         ButtonStyleFlags upButtonState,
+                         ButtonStyleFlags downButtonState);
+
+        /** @brief Paints only the entry background and border.
+        */
+        void renderEntry(PaintContext& context,
+                         const Gfx::RectF& entryRect,
+                         SpinBoxStyleFlags state);
+
+        /** @brief Paints the text and cursor within the text area.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::RectF& cursor,
+                        SpinBoxStyleFlags state);
+
+    protected:
+        const StyleOptions& prepare();
+
+        virtual SpinBoxRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::SizeF onMeasureEntry(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
+
+        virtual void onLayoutFrame(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   Gfx::RectF& entryRect,
+                                   Gfx::RectF& upButtonRect,
+                                   Gfx::RectF& downButtonRect,
+                                   Gfx::RectF& textRect) = 0;
+
+        virtual Gfx::RectF onLayoutEntry(PaintSurface& surface,
+                                         const Gfx::RectF& entryRect) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   const Gfx::RectF& entryRect,
+                                   const Gfx::RectF& upButtonRect,
+                                   const Gfx::RectF& downButtonRect,
+                                   SpinBoxStyleFlags state,
+                                   ButtonStyleFlags upButtonState,
+                                   ButtonStyleFlags downButtonState);
+
+        virtual void onRenderEntry(PaintContext& context,
+                                   const Gfx::RectF& entryRect,
+                                   const StyleOptions& options,
+                                   SpinBoxStyleFlags state) = 0;
+
+        virtual void onRenderUpButton(PaintContext& context,
+                                      const Gfx::RectF& buttonRect,
+                                      const StyleOptions& options,
+                                      SpinBoxStyleFlags state,
+                                      ButtonStyleFlags buttonState) = 0;
+
+        virtual void onRenderDownButton(PaintContext& context,
+                                        const Gfx::RectF& buttonRect,
+                                        const StyleOptions& options,
+                                        SpinBoxStyleFlags state,
+                                        ButtonStyleFlags buttonState) = 0;
+
+        virtual void onRenderText(PaintContext& context,
+                                  const StyleOptions& options,
+                                  const Gfx::RectF& textRect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::RectF& cursor,
+                                  SpinBoxStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Brush> _foreground;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
+};
+
 
 class PT_FORMS_API LineEditRenderer : public Style::Facet
 {
     public:
-        LineEditRenderer(std::size_t refs = 0);
+        explicit LineEditRenderer(std::size_t refs = 0);
 
         virtual ~LineEditRenderer();
 
-        void prepare(const LineEdit& le, 
-                     const StyleOptions& options,
-                     Gfx::Brush& brush,
-                     Gfx::Pen& contour,
-                     Gfx::Font& font,
-                     Gfx::Pen& textPen) const;
-        
-        void renderBackground(const LineEdit& le, 
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Pen& contour,
-                              const Gfx::Brush& brush) const;
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
+        LineEditRenderer* create() const;
 
-        void renderText(const LineEdit& le, 
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
+    public:
+        /** @brief Returns the background brush for the entry area.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the background brush for the entry area.
+        */
+        void setBackground(const Gfx::Brush& b);
+
+        /** @brief Returns the contour pen for the entry border.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the pen for the entry border.
+        */
+        void setContour(const Gfx::Pen& p);
+
+        /** @brief Returns the font used for text rendering.
+        */
+        const Gfx::Font& font() const;
+
+        /** @brief Sets the font for text rendering.
+        */
+        void setFont(const Gfx::Font& f);
+
+        /** @brief Returns the text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the text color from a pen.
+        */
+        void setTextColor(const Gfx::Pen& p);
+
+        /** @brief Returns the selection background brush, or null if unset.
+        */
+        const Gfx::Brush* selectionBackground() const;
+
+        /** @brief Sets the background brush for selected text.
+        */
+        void setSelectionBackground(const Gfx::Brush& b);
+
+        /** @brief Returns the selection text color pen, or null if unset.
+        */
+        const Gfx::Pen* selectionTextColor() const;
+
+        /** @brief Sets the text color pen for selected text.
+        */
+        void setSelectionTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the total widget size for the given contentSize hint on surface.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                            const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the inner text rectangle for the given widget rect.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                           const Gfx::RectF& rect);
+
+        /** @brief Returns a painter with the current font applied for surface.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Paints the complete line edit.
+
+            The default implementation calls onRenderEntry,
+            onRenderSelection, onRenderText, and onRenderCursor.
+        */
+        void renderFrame(PaintContext& context,
+                    const Gfx::RectF& rect,
+                    const Gfx::RectF& textRect,
+                    const String& text,
+                    const Gfx::PointF& textPos,
+                    const Gfx::RectF& cursor,
+                    const Gfx::RectF& selection,
+                    LineEditStyleFlags state);
+
+        /** @brief Paints only the background and border frame.
+
+            Useful for custom widgets that reuse the line-edit box appearance
+            (e.g. IP editors, search boxes).
+        */
+        void renderEntry(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              LineEditStyleFlags state);
+
+        /** @brief Paints the selection highlight behind selected text.
+        */
+        void renderSelection(PaintContext& context,
+                             const Gfx::RectF& textRect,
+                             const Gfx::RectF& selection,
+                             LineEditStyleFlags state);
+
+        /** @brief Paints only the text content.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
                         const String& text,
                         const Gfx::PointF& textPos,
-                        const Gfx::Font& font,
-                        const Gfx::Pen& textPen) const;
+                        LineEditStyleFlags state);
 
-        void renderCursor(const LineEdit& le, 
-                          const StyleOptions& options,
-                          Painter& painter, 
-                          const Gfx::RectF& rect,
-                          const Gfx::RectF& cursorRect ) const;
-    
+        /** @brief Paints the cursor caret.
+        */
+        void renderCursor(PaintContext& context,
+                          const Gfx::RectF& textRect,
+                          const Gfx::RectF& cursor,
+                          LineEditStyleFlags state);
+
     protected:
-        virtual void onPrepare(const LineEdit& le, 
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen) const = 0;
+        const StyleOptions& prepare();
 
-        virtual void onRenderBackground(const LineEdit& le, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
+        virtual LineEditRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                     const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                    const Gfx::RectF& rect) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        /** @brief Paints the entire line edit as one integrated element.
+
+            The default implementation decomposes into onRenderEntry,
+            onRenderSelection, onRenderText, and onRenderCursor.
+        */
+        virtual void onRenderFrame(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const Gfx::RectF& textRect,
+                              const StyleOptions& options,
+                              const String& text,
+                              const Gfx::PointF& textPos,
+                              const Gfx::RectF& cursor,
+                              const Gfx::RectF& selection,
+                              LineEditStyleFlags state);
+
+        virtual void onRenderEntry(PaintContext& context,
                                         const Gfx::RectF& rect,
-                                        const Gfx::Pen& contour,
-                                        const Gfx::Brush& brush) const = 0;
+                                        const StyleOptions& options,
+                                        LineEditStyleFlags state) = 0;
 
-        virtual void onRenderText(const LineEdit& le, 
+        virtual void onRenderSelection(PaintContext& context,
+                                       const Gfx::RectF& textRect,
+                                       const StyleOptions& options,
+                                       const Gfx::RectF& selection,
+                                       LineEditStyleFlags state) = 0;
+
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& textRect,
                                   const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  const Gfx::Font& font,
-                                  const Gfx::Pen& textPen) const = 0;
+                                  LineEditStyleFlags state) = 0;
 
-        virtual void onRenderCursor(const LineEdit& le, 
+        virtual void onRenderCursor(PaintContext& context,
+                                    const Gfx::RectF& textRect,
                                     const StyleOptions& options,
-                                    Painter& painter, 
-                                    const Gfx::RectF& rect,
-                                    const Gfx::RectF& cursorRect ) const = 0;
-};
+                                    const Gfx::RectF& cursor,
+                                    LineEditStyleFlags state) = 0;
 
-class PT_FORMS_API MenuRenderer : public Style::Facet
-{
-    public:
-        MenuRenderer(std::size_t refs = 0);
-
-        virtual ~MenuRenderer();
-
-        void prepare(const Menu& m, 
-                     const StyleOptions& options,
-                     Gfx::Brush& brush,
-                     Gfx::Pen& contour) const;
-
-        void prepareItem(const MenuItem& m, 
-                         const StyleOptions& options,
-                         const Gfx::Image& icon,
-                         Pixmap& picture,
-                         Gfx::Brush& brush,
-                         Gfx::Pen& contour,
-                         Gfx::Font& font,
-                         Gfx::Pen& textPen) const;
-
-        void renderBackground(const Menu& m, 
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& brush,
-                              const Gfx::Pen& contour) const;
-
-        void renderItem(const MenuItem& m, 
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
-                        Gfx::Brush& brush,
-                        Gfx::Pen& contour) const;
-        
-        void renderIndicator(const MenuItem& m, 
-                             const StyleOptions& options,
-                             Painter& painter, 
-                             const Gfx::RectF& rect) const;
-    
-    protected:
-        virtual void onPrepare(const Menu& m, 
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour) const = 0;
-
-        virtual void onPrepareItem(const MenuItem& m, 
-                                   const StyleOptions& options,
-                                   const Gfx::Image& icon,
-                                   Pixmap& picture,
-                                   Gfx::Brush& brush,
-                                   Gfx::Pen& contour,
-                                   Gfx::Font& font,
-                                   Gfx::Pen& textPen) const = 0;
-
-        virtual void onRenderBackground(const Menu& m, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush,
-                                        const Gfx::Pen& contour) const = 0;
-
-        virtual void onRenderItem(const MenuItem& m, 
-                                  const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
-                                  Gfx::Brush& brush,
-                                  Gfx::Pen& contour) const = 0;
-        
-        virtual void onRenderIndicator(const MenuItem& m, 
-                                       const StyleOptions& options,
-                                       Painter& painter, 
-                                       const Gfx::RectF& rect) const = 0;
-};
-
-class PT_FORMS_API MenuBarRenderer : public Style::Facet
-{
-    public:
-        MenuBarRenderer(std::size_t refs = 0);
-
-        virtual ~MenuBarRenderer();
-
-        void prepare(const MenuBar& m, 
-                     const StyleOptions& options,
-                     Gfx::Brush& brush,
-                     Gfx::Pen& contour) const;
-
-        void renderBackground(const MenuBar& m, 
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& brush,
-                              const Gfx::Pen& contour) const;
-
-        void prepareItem(const MenuBarItem& m, 
-                         const StyleOptions& options, 
-                         Gfx::Brush& brush,
-                         Gfx::Pen& contour,
-                         Gfx::Font& font,
-                         Gfx::Pen& textPen) const;
-
-        void renderItem(const MenuBarItem& m, 
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
-                        const Gfx::Brush& brush,
-                        const Gfx::Pen& contour) const;
-
-        void renderItemText(const MenuBarItem& m,
-                            const StyleOptions& options,
-                            Painter& painter, 
-                            const Gfx::RectF& rect,
-                            const String& text,
-                            const Gfx::PointF& textPos,
-                            const Gfx::Font& font, 
-                            const Gfx::Pen& textPen,
-                            const Gfx::RectF& mnemonic) const;
-
-    protected:
-        virtual void onPrepare(const MenuBar& m, 
-                               const StyleOptions& options,
-                               Gfx::Brush& brush,
-                               Gfx::Pen& contour) const = 0;
-
-        virtual void onRenderBackground(const MenuBar& m, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush,
-                                        const Gfx::Pen& contour) const = 0;
-
-        virtual void onPrepareItem(const MenuBarItem& m, 
-                                   const StyleOptions& options, 
-                                   Gfx::Brush& brush,
-                                   Gfx::Pen& contour,
-                                   Gfx::Font& font,
-                                   Gfx::Pen& textPen) const = 0;
-
-        virtual void onRenderItem(const MenuBarItem& m, 
-                                  const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
-                                  const Gfx::Brush& brush,
-                                  const Gfx::Pen& contour) const = 0;
-
-        virtual void onRenderItemText(const MenuBarItem& m,
-                                      const StyleOptions& options,
-                                      Painter& painter, 
-                                      const Gfx::RectF& rect,
-                                      const String& text,
-                                      const Gfx::PointF& textPos,
-                                      const Gfx::Font& font, 
-                                      const Gfx::Pen& textPen,
-                                      const Gfx::RectF& mnemonic) const = 0;
-};
-
-
-class PT_FORMS_API ScrollBarRenderer : public Style::Facet
-{
-    public:
-        ScrollBarRenderer(std::size_t refs = 0);
-
-        virtual ~ScrollBarRenderer();
-
-        void prepare(const ScrollBar& s,
-                     const StyleOptions& options,
-                     Gfx::Brush& background,
-                     Gfx::Brush& foreground,
-                     Gfx::Pen& contour) const;
-        
-        void render(const ScrollBar& s,
-                    const StyleOptions& options,
-                    Painter& painter,
-                    const Gfx::RectF& rect,
-                    const Gfx::RectF& handleRect,
-                    const Gfx::Brush& background,
-                    const Gfx::Brush& foreground,
-                    const Gfx::Pen& contour) const;
-    
-    protected:
-        virtual void onPrepare(const ScrollBar& s,
-                               const StyleOptions& options,
-                               Gfx::Brush& background,
-                               Gfx::Brush& foreground,
-                               Gfx::Pen& contour) const = 0;
-        
-        virtual void onRender(const ScrollBar& s,
-                              const StyleOptions& options,
-                              Painter& painter,
-                              const Gfx::RectF& rect,
-                              const Gfx::RectF& handleRect,
-                              const Gfx::Brush& background,
-                              const Gfx::Brush& foreground,
-                              const Gfx::Pen& contour) const = 0;
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        AutoPtr<Gfx::Brush> _selectionBackground;
+        AutoPtr<Gfx::Pen>   _selectionTextColor;
+        std::size_t          _styleGeneration;
 };
 
 
 class PT_FORMS_API ProgressBarRenderer : public Style::Facet
 {
     public:
-        ProgressBarRenderer(std::size_t refs = 0);
+        explicit ProgressBarRenderer(std::size_t refs = 0);
 
         virtual ~ProgressBarRenderer();
 
-        void prepare(const ProgressBar&    p,
-                     const StyleOptions&  options,
-                     Gfx::Brush&          background,
-                     Gfx::Brush&          foreground,
-                     Gfx::Pen&            contour,
-                     Gfx::Pen&            textPen,
-                     Gfx::Font&            font
-                     ) const;
+        ProgressBarRenderer* create() const;
 
-       void render( const ProgressBar& p,
-                               const StyleOptions& options,
-                              Painter& painter,
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& background,
-                              const Gfx::Brush& foreground,
-                              const Gfx::Pen& contour,
-                              const Gfx::Pen&            textPen,
-                              const Gfx::Font&            font
-                                         ) const;
+    public:
+        const Gfx::Brush& background() const;
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Brush& foreground() const;
+        void setForeground(const Gfx::Brush& b);
+
+        const Gfx::Font& font() const;
+        void setFont(const Gfx::Font& f);
+
+        const Gfx::Color& textColor() const;
+        void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns total outer size based on the layouted content constraints. */
+        Gfx::SizeF measureFrame(PaintSurface& surface, const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the intrinsic total size of the empty progress bar (without text). */
+        Gfx::SizeF measureBar(PaintSurface& surface);
+
+        /** @brief Partitions the full widget rect into the general bar area and the text area. */
+        void layoutFrame(PaintSurface& surface,
+                         const Gfx::RectF& rect,
+                         const Gfx::SizeF& barSize,
+                         const Gfx::SizeF& textSize,
+                         Gfx::RectF& barRect,
+                         Gfx::RectF& textRect);
+
+        /** @brief Evaluates the precise sub-rectangles for track and chunk based on the progress.
+            @param progressRatio Normalized value [0.0 - 1.0] representing the progress.
+        */
+        void layoutBar(PaintSurface& surface,
+                       const Gfx::RectF& barRect,
+                       float progressRatio,
+                       Gfx::RectF& trackRect,
+                       Gfx::RectF& chunkRect);
+
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Paints the frame chrome: bar and text. Orchestrates text color inversion. */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const Gfx::RectF& trackRect,
+                         const Gfx::RectF& chunkRect,
+                         const Gfx::RectF& textRect,
+                         const String& text,
+                         const Gfx::PointF& textPos,
+                         ProgressBarStyleFlags state);
+
+        /** @brief Paints the progress bar (track + chunk combined) for native themes. */
+        void renderBar(PaintContext& context,
+                       const Gfx::RectF& trackRect,
+                       const Gfx::RectF& chunkRect,
+                       ProgressBarStyleFlags state);
+
+        /** @brief Paints only the empty background track. */
+        void renderTrack(PaintContext& context,
+                         const Gfx::RectF& trackRect,
+                         ProgressBarStyleFlags state);
+
+        /** @brief Paints only the colored progress chunk. */
+        void renderChunk(PaintContext& context,
+                         const Gfx::RectF& chunkRect,
+                         ProgressBarStyleFlags state);
+
+        /** @brief Paints only the text content. Requires chunkRect to handle potential text color inversion. */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const Gfx::RectF& chunkRect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        ProgressBarStyleFlags state);
 
     protected:
-        virtual void onPrepare(const ProgressBar&    p,
-                               const StyleOptions&  options,
-                               Gfx::Brush&          background,
-                               Gfx::Brush&          foreground,
-                               Gfx::Pen&            contour,
-                               Gfx::Pen&            textPen,
-                               Gfx::Font&            font
-                               ) const = 0;
+        const StyleOptions& prepare();
 
-        virtual void onRender( const ProgressBar& p,
-                               const StyleOptions& options,
-                              Painter& painter,
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& background,
-                              const Gfx::Brush& foreground,
-                              const Gfx::Pen& contour,
-                              const Gfx::Pen&            textPen,
-                              const Gfx::Font&            font
-                                         ) const = 0;
+        virtual ProgressBarRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::SizeF onMeasureBar(PaintSurface& surface) = 0;
+
+        virtual void onLayoutFrame(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::SizeF& barSize,
+                                   const Gfx::SizeF& textSize,
+                                   Gfx::RectF& barRect,
+                                   Gfx::RectF& textRect) = 0;
+
+        virtual void onLayoutBar(PaintSurface& surface,
+                                 const Gfx::RectF& barRect,
+                                 float progressRatio,
+                                 Gfx::RectF& trackRect,
+                                 Gfx::RectF& chunkRect) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& chunkRect,
+                                   const Gfx::RectF& textRect,
+                                   const String& text,
+                                   const Gfx::PointF& textPos,
+                                   ProgressBarStyleFlags state);
+
+        virtual void onRenderBar(PaintContext& context,
+                                 const Gfx::RectF& trackRect,
+                                 const Gfx::RectF& chunkRect,
+                                 const StyleOptions& options,
+                                 ProgressBarStyleFlags state);
+
+        virtual void onRenderTrack(PaintContext& context,
+                                   const Gfx::RectF& trackRect,
+                                   const StyleOptions& options,
+                                   ProgressBarStyleFlags state) = 0;
+
+        virtual void onRenderChunk(PaintContext& context,
+                                   const Gfx::RectF& chunkRect,
+                                   const StyleOptions& options,
+                                   ProgressBarStyleFlags state) = 0;
+
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& textRect,
+                                  const Gfx::RectF& chunkRect,
+                                  const StyleOptions& options,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  ProgressBarStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Brush> _foreground;
+        Gfx::Brush           _defaultForeground;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
 };
 
 
 class PT_FORMS_API SliderRenderer : public Style::Facet
 {
     public:
-        SliderRenderer(std::size_t refs = 0);
+        explicit SliderRenderer(std::size_t refs = 0);
 
         virtual ~SliderRenderer();
 
-        void prepare(  const Slider&        s,
-                      const StyleOptions&  options,
-                      Gfx::Brush&          background,
-                      Gfx::Brush&          foreground,
-                      Gfx::Pen&            contour,
-                      Gfx::Pen&            textPen,
-                      Gfx::Font&          font
-                     ) const;
+        SliderRenderer* create() const;
 
-       void render( const Slider&        s,
-                    const StyleOptions& options,
-                    Painter&            painter,
-                    const Gfx::RectF&    rect,
-                    const Gfx::Brush&    background,
-                    const Gfx::Brush&    foreground,
-                    const Gfx::Pen&      contour,
-                    const Gfx::Pen&      textPen,
-                    const Gfx::Font&    font
-                  ) const;
+    public:
+        const Gfx::Brush& background() const;
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Brush& foreground() const;
+        void setForeground(const Gfx::Brush& b);
+
+        const Gfx::Font& font() const;
+        void setFont(const Gfx::Font& f);
+
+        const Gfx::Color& textColor() const;
+        void setTextColor(const Gfx::Pen& p);
+
+    public:
+        Gfx::SizeF measureFrame(PaintSurface& surface, const Gfx::SizeF& contentSize);
+
+        Gfx::SizeF measureTrack(PaintSurface& surface);
+
+        Gfx::SizeF measureHandle(PaintSurface& surface);
+
+        void layoutFrame(PaintSurface& surface,
+                         const Gfx::RectF& rect,
+                         const Gfx::SizeF& trackSize,
+                         const Gfx::SizeF& handleSize,
+                         Gfx::RectF& trackRect,
+                         Gfx::RectF& handleRect);
+
+        void layoutHandle(PaintSurface& surface,
+                          const Gfx::RectF& trackRect,
+                          float fraction,
+                          Gfx::RectF& handleRect);
+
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const Gfx::RectF& trackRect,
+                         const Gfx::RectF& handleRect,
+                         SliderStyleFlags state);
+
+        void renderTrack(PaintContext& context,
+                         const Gfx::RectF& trackRect,
+                         SliderStyleFlags state);
+
+        void renderHandle(PaintContext& context,
+                          const Gfx::RectF& handleRect,
+                          SliderStyleFlags state);
 
     protected:
-        virtual void onPrepare( const Slider&        s,
-                                const StyleOptions&  options,
-                                Gfx::Brush&          background,
-                                Gfx::Brush&          foreground,
-                                Gfx::Pen&            contour,
-                                Gfx::Pen&            textPen,
-                                Gfx::Font&          font
-                              ) const = 0;
+        const StyleOptions& prepare();
 
-        virtual void onRender( const Slider&         s,
-                               const StyleOptions&   options,
-                               Painter&               painter,
-                               const Gfx::RectF&     rect,
-                               const Gfx::Brush&     background,
-                               const Gfx::Brush&     foreground,
-                               const Gfx::Pen&       contour,
-                               const Gfx::Pen&       textPen,
-                               const Gfx::Font&       font
-                             ) const = 0;
+        virtual SliderRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::SizeF onMeasureTrack(PaintSurface& surface) = 0;
+
+        virtual Gfx::SizeF onMeasureHandle(PaintSurface& surface) = 0;
+
+        virtual void onLayoutFrame(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::SizeF& trackSize,
+                                   const Gfx::SizeF& handleSize,
+                                   Gfx::RectF& trackRect,
+                                   Gfx::RectF& handleRect) = 0;
+
+        virtual void onLayoutHandle(PaintSurface& surface,
+                                    const Gfx::RectF& trackRect,
+                                    float fraction,
+                                    Gfx::RectF& handleRect) = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& handleRect,
+                                   SliderStyleFlags state);
+
+        virtual void onRenderTrack(PaintContext& context,
+                                   const Gfx::RectF& trackRect,
+                                   const StyleOptions& options,
+                                   SliderStyleFlags state) = 0;
+
+        virtual void onRenderHandle(PaintContext& context,
+                                    const Gfx::RectF& handleRect,
+                                    const StyleOptions& options,
+                                    SliderStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Brush> _foreground;
+        Gfx::Brush           _defaultForeground;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
+};
+
+
+class PT_FORMS_API ScrollBarRenderer : public Style::Facet
+{
+    public:
+        explicit ScrollBarRenderer(std::size_t refs = 0);
+
+        virtual ~ScrollBarRenderer();
+
+        ScrollBarRenderer* create() const;
+
+    public:
+        const Gfx::Brush& background() const;
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Brush& foreground() const;
+        void setForeground(const Gfx::Brush& b);
+
+    public:
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                 const Gfx::SizeF& contentSize,
+                                 Direction direction);
+
+        Gfx::SizeF measureTrack(PaintSurface& surface,
+                                 Direction direction);
+
+        Gfx::SizeF measureHandle(PaintSurface& surface,
+                                  Direction direction);
+
+        Gfx::SizeF measureButton(PaintSurface& surface,
+                                  Direction direction);
+
+        void layoutFrame(PaintSurface& surface,
+                         const Gfx::RectF& rect,
+                         Direction direction,
+                         const Gfx::SizeF& buttonSize,
+                         Gfx::RectF& trackRect,
+                         Gfx::RectF& decreaseRect,
+                         Gfx::RectF& increaseRect);
+
+        void layoutHandle(PaintSurface& surface,
+                          const Gfx::RectF& trackRect,
+                          Direction direction,
+                          float fraction,
+                          float viewProportion,
+                          Gfx::RectF& handleRect);
+
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         Direction direction,
+                         const Gfx::RectF& trackRect,
+                         const Gfx::RectF& handleRect,
+                         const Gfx::RectF& decreaseRect,
+                         const Gfx::RectF& increaseRect,
+                         ScrollBarStyleFlags state,
+                         ButtonStyleFlags decreaseState,
+                         ButtonStyleFlags increaseState);
+
+        void renderTrack(PaintContext& context,
+                         const Gfx::RectF& trackRect,
+                         Direction direction,
+                         ScrollBarStyleFlags state);
+
+        void renderHandle(PaintContext& context,
+                          const Gfx::RectF& handleRect,
+                          Direction direction,
+                          ScrollBarStyleFlags state);
+
+        void renderDecreaseButton(PaintContext& context,
+                                  const Gfx::RectF& buttonRect,
+                                  Direction direction,
+                                  ScrollBarStyleFlags state,
+                                  ButtonStyleFlags buttonState);
+
+        void renderIncreaseButton(PaintContext& context,
+                                  const Gfx::RectF& buttonRect,
+                                  Direction direction,
+                                  ScrollBarStyleFlags state,
+                                  ButtonStyleFlags buttonState);
+
+    protected:
+        const StyleOptions& prepare();
+
+        virtual ScrollBarRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                           const Gfx::SizeF& contentSize,
+                                           Direction direction) = 0;
+
+        virtual Gfx::SizeF onMeasureTrack(PaintSurface& surface,
+                                           Direction direction) = 0;
+
+        virtual Gfx::SizeF onMeasureHandle(PaintSurface& surface,
+                                            Direction direction) = 0;
+
+        virtual Gfx::SizeF onMeasureButton(PaintSurface& surface,
+                                            Direction direction) = 0;
+
+        virtual void onLayoutFrame(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   Direction direction,
+                                   const Gfx::SizeF& buttonSize,
+                                   Gfx::RectF& trackRect,
+                                   Gfx::RectF& decreaseRect,
+                                   Gfx::RectF& increaseRect) = 0;
+
+        virtual void onLayoutHandle(PaintSurface& surface,
+                                    const Gfx::RectF& trackRect,
+                                    Direction direction,
+                                    float fraction,
+                                    float viewProportion,
+                                    Gfx::RectF& handleRect) = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const StyleOptions& options,
+                                   Direction direction,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& handleRect,
+                                   const Gfx::RectF& decreaseRect,
+                                   const Gfx::RectF& increaseRect,
+                                   ScrollBarStyleFlags state,
+                                   ButtonStyleFlags decreaseState,
+                                   ButtonStyleFlags increaseState);
+
+        virtual void onRenderTrack(PaintContext& context,
+                                   const Gfx::RectF& trackRect,
+                                   const StyleOptions& options,
+                                   Direction direction,
+                                   ScrollBarStyleFlags state) = 0;
+
+        virtual void onRenderHandle(PaintContext& context,
+                                    const Gfx::RectF& handleRect,
+                                    const StyleOptions& options,
+                                    Direction direction,
+                                    ScrollBarStyleFlags state) = 0;
+
+        virtual void onRenderDecreaseButton(PaintContext& context,
+                                            const Gfx::RectF& buttonRect,
+                                            const StyleOptions& options,
+                                            Direction direction,
+                                            ScrollBarStyleFlags state,
+                                            ButtonStyleFlags buttonState) = 0;
+
+        virtual void onRenderIncreaseButton(PaintContext& context,
+                                            const Gfx::RectF& buttonRect,
+                                            const StyleOptions& options,
+                                            Direction direction,
+                                            ScrollBarStyleFlags state,
+                                            ButtonStyleFlags buttonState) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Brush> _foreground;
+        Gfx::Brush           _defaultForeground;
+        std::size_t          _styleGeneration;
 };
 
 
 class PT_FORMS_API ListBoxRenderer : public Style::Facet
 {
     public:
-        ListBoxRenderer(std::size_t refs = 0);
+        explicit ListBoxRenderer(std::size_t refs = 0);
 
         virtual ~ListBoxRenderer();
 
-        void prepareLayout(Spacing& frameSize);
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
+        ListBoxRenderer* create() const;
 
-        void renderBackground(const ListBox& lb,
-                              const StyleOptions& options,
-                              Painter& painter, 
+    public:
+        /** @brief Returns the custom background brush, or null if unset.
+        */
+        const Gfx::Brush* background() const;
+
+        /** @brief Sets the background brush for the list box area.
+        */
+        void setBackground(const Gfx::Brush& b);
+
+        /** @brief Returns the custom contour pen, or null if unset.
+        */
+        const Gfx::Pen* contour() const;
+
+        /** @brief Sets the pen for the list box border.
+        */
+        void setContour(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the outer size including frame for the given contentSize on surface.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the inner content rectangle within the outer frameRect on surface.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect);
+
+        /** @brief Paints the list box background within the widget rect.
+        */
+        void renderBackground(PaintContext& context,
                               const Gfx::RectF& rect,
-                              const Gfx::Brush& brush) const;
+                              ListBoxStyleFlags state);
 
-        void renderFrame(const ListBox& lb,
-                         const StyleOptions& options,
-                         Painter& painter, 
-                         const Gfx::RectF& rect, 
-                         const Gfx::Pen& pen) const;
-
-        void prepareItem(const ListBoxItem& item, 
-                         const StyleOptions& options, 
-                         Gfx::Brush& brush,
-                         Gfx::Pen& contour,
-                         Gfx::Font& font,
-                         Gfx::Pen& textPen) const;
-
-        void renderItem(const ListBoxItem& item, 
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
-                        Gfx::Brush& brush,
-                        Gfx::Pen& contour) const;
+        /** @brief Paints the frame border within the outer frame rect.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         ListBoxStyleFlags state);
 
     protected:
-        virtual void onPrepareLayout(Spacing& frameSize) = 0;
+        const StyleOptions& prepare();
 
-        virtual void onRenderBackground(const ListBox& lb,
-                                        const StyleOptions& options,
-                                        Painter& painter, 
+        virtual ListBoxRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& frameRect) = 0;
+
+        virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush) const = 0;
+                                        const StyleOptions& options,
+                                        ListBoxStyleFlags state) = 0;
 
-        virtual void onRenderFrame(const ListBox& lb,
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
                                    const StyleOptions& options,
-                                   Painter& painter, 
-                                   const Gfx::RectF& rect, 
-                                   const Gfx::Pen& pen) const = 0;
+                                   ListBoxStyleFlags state) = 0;
 
-        virtual void onPrepareItem(const ListBoxItem& item, 
-                                   const StyleOptions& options, 
-                                   Gfx::Brush& brush,
-                                   Gfx::Pen& contour,
-                                   Gfx::Font& font,
-                                   Gfx::Pen& textPen) const = 0;
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        std::size_t          _styleGeneration;
+};
 
-        virtual void onRenderItem(const ListBoxItem& item, 
+
+/** @brief Renders the visual appearance of a list item.
+
+    Provides rendering primitives for item backgrounds, text, and icons.
+    Widgets pass pre-calculated bounds and typed flags; the renderer never
+    sees widget internals.
+*/
+class PT_FORMS_API ListItemRenderer : public Style::Facet
+{
+    public:
+        explicit ListItemRenderer(std::size_t refs = 0);
+
+        virtual ~ListItemRenderer();
+
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
+        ListItemRenderer* create() const;
+
+    public:
+        /** @brief Returns the custom background brush, or null if unset.
+        */
+        const Gfx::Brush* background() const;
+
+        /** @brief Sets the background brush for normal item state.
+        */
+        void setBackground(const Gfx::Brush& b);
+
+        /** @brief Returns the custom foreground brush, or null if unset.
+        */
+        const Gfx::Brush* foreground() const;
+
+        /** @brief Sets the foreground brush for highlighted/selected state.
+        */
+        void setForeground(const Gfx::Brush& b);
+
+        /** @brief Returns the font used for item text.
+        */
+        const Gfx::Font& font() const;
+
+        /** @brief Sets the font for item text.
+        */
+        void setFont(const Gfx::Font& f);
+
+        /** @brief Returns the text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the text color from a pen.
+        */
+        void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the combined content size for icon and text.
+        */
+        Gfx::SizeF measureContent(PaintSurface& surface,
+                                  const Gfx::SizeF& iconSize,
+                                  const Gfx::SizeF& textSize);
+
+        /** @brief Returns the outer size including frame for the given contentSize on surface.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns a painter with the current font and text color applied.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Returns the inner content rectangle within the outer frameRect on surface.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect);
+
+        /** @brief Partitions the content rect into icon and text sub-rectangles.
+        */
+        void layoutContent(PaintSurface& surface,
+                           const Gfx::RectF& contentRect,
+                           const Gfx::SizeF& iconSize,
+                           const Gfx::SizeF& textSize,
+                           Gfx::RectF& iconRect,
+                           Gfx::RectF& textRect);
+
+        /** @brief Paints the item background fill within the item rect.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              ListItemStyleFlags state);
+
+        /** @brief Draws text at pos, clipped to textRect.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        ListItemStyleFlags state);
+
+        /** @brief Draws picture at pos, clipped to iconRect.
+        */
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& iconRect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        ListItemStyleFlags state);
+
+    protected:
+        const StyleOptions& prepare();
+
+        virtual ListItemRenderer* onCreate() const = 0;
+
+        virtual void onPrepare(const StyleOptions& options) = 0;
+
+        virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
+                                            const Gfx::SizeF& iconSize,
+                                            const Gfx::SizeF& textSize) = 0;
+
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& frameRect) = 0;
+
+        virtual void onLayoutContent(PaintSurface& surface,
+                                     const Gfx::RectF& contentRect,
+                                     const Gfx::SizeF& iconSize,
+                                     const Gfx::SizeF& textSize,
+                                     Gfx::RectF& iconRect,
+                                     Gfx::RectF& textRect) = 0;
+
+        virtual void onRenderBackground(PaintContext& context,
+                                        const Gfx::RectF& rect,
+                                        const StyleOptions& options,
+                                        ListItemStyleFlags state) = 0;
+
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& textRect,
                                   const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
-                                  Gfx::Brush& brush,
-                                  Gfx::Pen& contour) const = 0;
+                                  const String& text,
+                                  const Gfx::PointF& pos,
+                                  ListItemStyleFlags state) = 0;
+
+        virtual void onRenderIcon(PaintContext& context,
+                                  const Gfx::RectF& iconRect,
+                                  const StyleOptions& options,
+                                  const Pixmap& picture,
+                                  const Gfx::PointF& pos,
+                                  ListItemStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Brush> _foreground;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
 };
 
 
 class PT_FORMS_API ComboBoxRenderer : public Style::Facet
 {
     public:
-        ComboBoxRenderer(std::size_t refs = 0);
+        explicit ComboBoxRenderer(std::size_t refs = 0);
 
         virtual ~ComboBoxRenderer();
 
-        void prepare(const ComboBox& cb, 
-                     const StyleOptions& options,
-                     Gfx::Brush& background,
-                     Gfx::Brush& foreground,
-                     Gfx::Pen& contour,
-                     Gfx::Font& font,
-                     Gfx::Pen& textPen) const;
-        
-        void prepareLayout(const ComboBox& cb,
-                           Gfx::SizeF& buttonSize) const;
-        
-        void renderBackground(const ComboBox& cb, 
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Pen& contour,
-                              const Gfx::Brush& brush) const;
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
+        ComboBoxRenderer* create() const;
 
-        void renderButton(const ComboBox& cb, 
-                          const StyleOptions& options,
-                          Painter& painter, 
-                          const Gfx::RectF& rect,
-                          const Gfx::Pen& contour,
-                          const Gfx::Brush& foreground) const;
-
-        void renderText(const ComboBox& cb,
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
-                        const String& text,
-                        const Gfx::PointF& textPos,
-                        const Gfx::Font& font, 
-                        const Gfx::Pen& textPen,
-                        const Gfx::RectF& cursor) const;
-    
-    protected:
-        virtual void onPrepare(const ComboBox& cb, 
-                               const StyleOptions& options,
-                               Gfx::Brush& background,
-                               Gfx::Brush& foreground,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen) const = 0;
-
-        virtual void onPrepareLayout(const ComboBox& cb,
-                                     Gfx::SizeF& buttonSize) const = 0;
-
-        virtual void onRenderBackground(const ComboBox& cb, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Pen& contour,
-                                        const Gfx::Brush& brush) const = 0;
-
-        virtual void onRenderButton(const ComboBox& cb, 
-                                    const StyleOptions& options,
-                                    Painter& painter, 
-                                    const Gfx::RectF& rect,
-                                    const Gfx::Pen& contour,
-                                    const Gfx::Brush& foreground) const = 0;
-
-        virtual void onRenderText(const ComboBox& cb,
-                                  const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
-                                  const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& cursor) const = 0;
-};
-
-
-class PT_FORMS_API SpinBoxRenderer : public Style::Facet
-{
     public:
-        SpinBoxRenderer(std::size_t refs = 0);
+        /** @brief Returns the background brush.
+        */
+        const Gfx::Brush& background() const;
 
-        virtual ~SpinBoxRenderer();
+        /** @brief Sets the background brush for the entry area.
+        */
+        void setBackground(const Gfx::Brush& b);
 
-        void prepare(const SpinBox& sb, 
-                     const StyleOptions& options,
-                     Gfx::Brush& background,
-                     Gfx::Pen& contour,
-                     Gfx::Font& font,
-                     Gfx::Pen& textPen) const;
-        
-        void prepareButton(const SpinBoxButton& sb, 
-                           const StyleOptions& options,
-                           Gfx::Brush& foreground,
-                           Gfx::Pen& contour) const;
+        /** @brief Returns the contour pen.
+        */
+        const Gfx::Pen& contour() const;
 
-        void layout(const SpinBox& sb,
-                    Gfx::RectF& downButton,
-                    Gfx::RectF& upButton,
-                    Gfx::RectF& textBox) const;
-        
-        void renderBackground(const SpinBox& sb, 
-                              const StyleOptions& options,
-                              Painter& painter, 
-                              const Gfx::RectF& rect,
-                              const Gfx::Pen& contour,
-                              const Gfx::Brush& brush) const;
+        /** @brief Sets the pen for entry and button borders.
+        */
+        void setContour(const Gfx::Pen& p);
 
-        void renderButton(const SpinBoxButton& sb, 
-                          const StyleOptions& options,
-                          Painter& painter, 
-                          const Gfx::RectF& rect,
-                          const Gfx::Brush& foreground,
-                          const Gfx::Pen& contour) const;
+        /** @brief Returns the foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
 
-        void renderText(const SpinBox& sb,
-                        const StyleOptions& options,
-                        Painter& painter, 
-                        const Gfx::RectF& rect,
+        /** @brief Sets the foreground brush for the button indicator.
+        */
+        void setForeground(const Gfx::Brush& b);
+
+        /** @brief Returns the font used for text rendering.
+        */
+        const Gfx::Font& font() const;
+
+        /** @brief Sets the font for text rendering.
+        */
+        void setFont(const Gfx::Font& f);
+
+        /** @brief Returns the text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the text color from a pen.
+        */
+        void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Returns the total widget size for the given contentSize hint.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the preferred size of the drop button.
+        */
+        Gfx::SizeF measureButton(PaintSurface& surface);
+
+        /** @brief Partitions the widget bounding rect into sub-rectangles.
+
+            The returned textRect is the usable area for text rendering.
+        */
+        void layoutFrame(PaintSurface& surface,
+                         const Gfx::RectF& rect,
+                         Gfx::RectF& entryRect,
+                         Gfx::RectF& buttonRect,
+                         Gfx::RectF& textRect);
+
+        /** @brief Returns a painter with the current font applied for surface.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Paints the frame chrome: entry border and drop button.
+
+            The default implementation calls onRenderEntry and onRenderButton.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const Gfx::RectF& entryRect,
+                         const Gfx::RectF& buttonRect,
+                         ComboBoxStyleFlags state,
+                         ButtonStyleFlags buttonState);
+
+        /** @brief Paints the drop button.
+
+            Public primitive for custom widgets that want to reuse the
+            combo-box drop button appearance.
+        */
+        void renderButton(PaintContext& context,
+                          const Gfx::RectF& buttonRect,
+                          ComboBoxStyleFlags state,
+                          ButtonStyleFlags buttonState);
+
+        /** @brief Paints the text and cursor within the text area.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
                         const String& text,
                         const Gfx::PointF& textPos,
-                        const Gfx::Font& font, 
-                        const Gfx::Pen& textPen,
-                        const Gfx::RectF& cursor) const;
-    
+                        const Gfx::RectF& cursor,
+                        ComboBoxStyleFlags state);
+
     protected:
-        virtual void onPrepare(const SpinBox& sb, 
-                               const StyleOptions& options,
-                               Gfx::Brush& background,
-                               Gfx::Pen& contour,
-                               Gfx::Font& font,
-                               Gfx::Pen& textPen) const = 0;
+        const StyleOptions& prepare();
 
-        virtual void onPrepareButton(const SpinBoxButton& sb, 
-                                     const StyleOptions& options,
-                                     Gfx::Brush& foreground,
-                                     Gfx::Pen& contour) const = 0;
+        virtual ComboBoxRenderer* onCreate() const = 0;
 
-        virtual void onLayout(const SpinBox& sb,
-                              Gfx::RectF& downButton,
-                              Gfx::RectF& upButton,
-                              Gfx::RectF& textBox) const = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
-        virtual void onRenderBackground(const SpinBox& sb, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Pen& contour,
-                                        const Gfx::Brush& brush) const = 0;
+        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize) = 0;
 
-        virtual void onRenderButton(const SpinBoxButton& sb, 
+        virtual Gfx::SizeF onMeasureButton(PaintSurface& surface) = 0;
+
+        virtual void onLayoutFrame(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   Gfx::RectF& entryRect,
+                                   Gfx::RectF& buttonRect,
+                                   Gfx::RectF& textRect) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        /** @brief Paints the entire frame as one integrated element.
+
+            The default implementation calls onRenderEntry then onRenderButton.
+        */
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& entryRect,
+                                   const Gfx::RectF& buttonRect,
+                                   const StyleOptions& options,
+                                   ComboBoxStyleFlags state,
+                                   ButtonStyleFlags buttonState);
+
+        virtual void onRenderEntry(PaintContext& context,
+                                   const Gfx::RectF& entryRect,
+                                   const StyleOptions& options,
+                                   ComboBoxStyleFlags state) = 0;
+
+        virtual void onRenderButton(PaintContext& context,
+                                    const Gfx::RectF& buttonRect,
                                     const StyleOptions& options,
-                                    Painter& painter, 
-                                    const Gfx::RectF& rect,
-                                    const Gfx::Brush& foreground,
-                                    const Gfx::Pen& contour) const = 0;
+                                    ComboBoxStyleFlags state,
+                                    ButtonStyleFlags buttonState) = 0;
 
-        virtual void onRenderText(const SpinBox& sb,
+        virtual void onRenderText(PaintContext& context,
+                                  const Gfx::RectF& textRect,
                                   const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen,
-                                  const Gfx::RectF& cursor) const = 0;
+                                  const Gfx::RectF& cursor,
+                                  ComboBoxStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Brush> _foreground;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
 };
 
 
 class PT_FORMS_API TabViewRenderer : public Style::Facet
 {
     public:
-        TabViewRenderer(std::size_t refs = 0);
+        explicit TabViewRenderer(std::size_t refs = 0);
 
         virtual ~TabViewRenderer();
 
-        void prepare(const TabView& tv,
-                     const StyleOptions& options,
-                     Gfx::Brush& background,
-                     Gfx::Brush& foreground,
-                     Gfx::Pen& contour) const;
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
+        TabViewRenderer* create() const;
 
-        void render(const TabView& tv,
-                    const StyleOptions& options,
-                    Painter& painter,
-                    const Gfx::RectF& rect,
-                    const Gfx::Brush& background,
-                    const Gfx::Brush& foreground,
-                    const Gfx::Pen& contour) const;
+    public:
+        /** @brief Returns the background brush, or null if unset.
+        */
+        const Gfx::Brush* background() const;
 
-        Gfx::SizeF measureTabs(PaintSurface& surface,
-                               const std::vector<TabItem>& tabs,
-                               const Gfx::Font& font) const;
+        /** @brief Sets the background brush for the content panel.
+        */
+        void setBackground(const Gfx::Brush& b);
 
-        void layoutTabs(PaintSurface& surface,
-                        std::vector<TabItem>& tabs,
-                        const Gfx::RectF& rect, 
-                        const Gfx::Font& font) const;
+        /** @brief Returns the contour pen, or null if unset.
+        */
+        const Gfx::Pen* contour() const;
 
-        void prepareTabs(const TabBar& tabs,
-                         const StyleOptions& options,
-                         const Gfx::Brush& background,
-                         const Gfx::Brush& foreground,
-                         const Gfx::Pen& contour,
-                         const Gfx::Font& font, 
-                         const Gfx::Pen& textPen) const;
+        /** @brief Sets the contour pen for the content panel border.
+        */
+        void setContour(const Gfx::Pen& p);
 
-        void renderTabs(const std::vector<TabItem>& tabs,
-                        const StyleOptions& options,
-                        Painter& painter,
-                        const Gfx::RectF& rect,
-                        const Gfx::Brush& background,
-                        const Gfx::Brush& foreground,
-                        const Gfx::Pen& contour,
-                        const Gfx::Font& font, 
-                        const Gfx::Pen& textPen) const;
-        
+        /** @brief Returns the font used for tab labels.
+        */
+        const Gfx::Font& font() const;
+
+        /** @brief Sets the font for tab labels.
+        */
+        void setFont(const Gfx::Font& f);
+
+        /** @brief Returns the text color for tab labels.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the text color for tab labels.
+        */
+        void setTextColor(const Gfx::Pen& p);
+
+    public:
+        /** @brief Measures one tab for the given text.
+        */
+        Gfx::SizeF measureTab(PaintSurface& surface,
+                               const Pt::String& text);
+
+        /** @brief Returns the text rect within a tab cell.
+        */
+        Gfx::RectF layoutTab(PaintSurface& surface,
+                              const Gfx::RectF& tabRect);
+
+        /** @brief Returns a painter configured for tab label text.
+        */
+        const Painter& textPainter(PaintSurface& surface);
+
+        /** @brief Renders the content panel background.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& contentRect,
+                              TabViewStyleFlags state);
+
+        /** @brief Renders the content panel border possibly accounting for the active tab.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& contentRect,
+                         const Gfx::RectF& activeTabRect,
+                         TabViewStyleFlags state);
+
+        /** @brief Renders a single tab.
+        */
+        void renderTab(PaintContext& context,
+                       const Gfx::RectF& tabRect,
+                       const Pt::String& text,
+                       const Gfx::PointF& textPos,
+                       TabItemStyleFlags state);
+
     protected:
-        virtual void onPrepare(const TabView& tv,
-                               const StyleOptions& options,
-                               Gfx::Brush& background,
-                               Gfx::Brush& foreground,
-                               Gfx::Pen& contour) const = 0;
+        void prepare();
 
-        virtual void onRender(const TabView& tv,
-                              const StyleOptions& options,
-                              Painter& painter,
-                              const Gfx::RectF& rect,
-                              const Gfx::Brush& background,
-                              const Gfx::Brush& foreground,
-                              const Gfx::Pen& contour) const = 0;
+        virtual TabViewRenderer* onCreate() const = 0;
 
-        virtual Gfx::SizeF onMeasureTabs(PaintSurface& surface,
-                                         const std::vector<TabItem>& tabs,
-                                         const Gfx::Font& font) const = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
-        virtual void onLayoutTabs(PaintSurface& surface,
-                                  std::vector<TabItem>& tabs,
-                                  const Gfx::RectF& rect, 
-                                  const Gfx::Font& font) const = 0;
-        
-        virtual void onPrepareTabs(const TabBar& tabs,
+        virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
+                                         const Pt::String& text) = 0;
+
+        virtual Gfx::RectF onLayoutTab(PaintSurface& surface,
+                                        const Gfx::RectF& tabRect) = 0;
+
+        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
+
+        virtual void onRenderBackground(PaintContext& context,
+                                        const Gfx::RectF& contentRect,
+                                        const StyleOptions& options,
+                                        TabViewStyleFlags state) = 0;
+
+        virtual void onRenderFrame(PaintContext& context,
+                                   const Gfx::RectF& contentRect,
+                                   const Gfx::RectF& activeTabRect,
                                    const StyleOptions& options,
-                                   const Gfx::Brush& background,
-                                   const Gfx::Brush& foreground,
-                                   const Gfx::Pen& contour,
-                                   const Gfx::Font& font, 
-                                   const Gfx::Pen& textPen) const = 0;
+                                   TabViewStyleFlags state) = 0;
 
-        virtual void onRenderTabs(const std::vector<TabItem>& tabs,
-                                  const StyleOptions& options,
-                                  Painter& painter,
-                                  const Gfx::RectF& rect,
-                                  const Gfx::Brush& background,
-                                  const Gfx::Brush& foreground,
-                                  const Gfx::Pen& contour,
-                                  const Gfx::Font& font, 
-                                  const Gfx::Pen& textPen) const = 0;
+        virtual void onRenderTab(PaintContext& context,
+                                 const Gfx::RectF& tabRect,
+                                 const Pt::String& text,
+                                 const Gfx::PointF& textPos,
+                                 const StyleOptions& options,
+                                 TabItemStyleFlags state) = 0;
+
+    private:
+        AutoPtr<Gfx::Brush> _background;
+        AutoPtr<Gfx::Pen>   _contour;
+        AutoPtr<Gfx::Font>  _font;
+        AutoPtr<Gfx::Pen>   _textColor;
+        std::size_t          _styleGeneration;
 };
 
 } // namespace

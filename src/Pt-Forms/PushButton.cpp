@@ -252,9 +252,7 @@ Gfx::Font PushButton::getFont() const
 
 void PushButton::setFontSize(std::size_t size)
 {
-    _customFont = Gfx::Font(_customFont.family(), size,
-                            _customFont.weight(), _customFont.slant(),
-                            _customFont.stretch());
+    _customFont = _customFont.withSize(size);
     _fontOverride |= OverrideSize;
 
     if( ButtonRenderer* renderer = getRenderer() )
@@ -266,9 +264,7 @@ void PushButton::setFontSize(std::size_t size)
 
 void PushButton::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                            weight, _customFont.slant(),
-                            _customFont.stretch());
+    _customFont = _customFont.withWeight(weight);
     _fontOverride |= OverrideWeight;
 
     if( ButtonRenderer* renderer = getRenderer() )
@@ -280,9 +276,7 @@ void PushButton::setFontWeight(Gfx::Font::Weight weight)
 
 void PushButton::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                            _customFont.weight(), slant,
-                            _customFont.stretch());
+    _customFont = _customFont.withSlant(slant);
     _fontOverride |= OverrideSlant;
 
     if( ButtonRenderer* renderer = getRenderer() )
@@ -515,32 +509,13 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     else
         _measuredIconSize = _iconSize;
 
-    double spacing = _picture.empty() || text().empty()
-                   ? 0 : std::ceil(_fontMetrics.height() / 2.0);
+    Gfx::SizeF itemsSize = _renderer->measureContent(surface(), _direction,
+                                                      _measuredIconSize, textSize);
 
-    double itemsWidth = 0;
-    double itemsHeight = 0;
+    Gfx::SizeF contentSize(itemsSize.width() + padding().leftRight(),
+                           itemsSize.height() + padding().topBottom());
 
-    switch(_direction)
-    {
-        default:
-        case Direction::Left:
-        case Direction::Right:
-            itemsWidth = textSize.width() + spacing + _measuredIconSize.width();
-            itemsHeight = std::max(textSize.height(), _measuredIconSize.height());
-            break;
-
-        case Direction::Top:
-        case Direction::Bottom:
-            itemsWidth = std::max(textSize.width(), _measuredIconSize.width());
-            itemsHeight = textSize.height() + spacing + _measuredIconSize.height();
-            break;
-    }
-
-    Gfx::SizeF contentSize(itemsWidth + padding().leftRight(),
-                           itemsHeight + padding().topBottom());
-
-    return _renderer->measureSurface( surface(), contentSize );
+    return _renderer->measureFrame( surface(), contentSize );
 }
 
 
@@ -553,56 +528,21 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
     const Gfx::Scaling& scaling = surface().scaling();
 
-    Gfx::RectF contentRect = _renderer->layoutSurface( surface(),
-                                                       Gfx::RectF(size()) );
+    Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
 
-    Gfx::RectF iconRect = contentRect;
-    Gfx::RectF textRect = contentRect;
+    _contentRect = _renderer->layoutFrame( surface(),
+                                              Gfx::RectF(size()) );
 
-    if( ! _picture.empty() && ! text().empty() )
-    {
-        double spacing = std::ceil(_fontMetrics.height() / 2.0);
-        double pw = _measuredIconSize.width();
-        double ph = _measuredIconSize.height();
-        Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
-
-        bool horizontal = (_direction == Direction::Left || _direction == Direction::Right);
-        bool iconFirst  = (_direction == Direction::Left || _direction == Direction::Top);
-
-        if( horizontal )
-        {
-            double groupW = pw + spacing + textSize.width();
-            double gx = contentRect.left() + (contentRect.width() - groupW) / 2;
-            double y = contentRect.top();
-            double h = contentRect.height();
-
-            double iconX = iconFirst ? gx : gx + textSize.width() + spacing;
-            double textX = iconFirst ? gx + pw + spacing : gx;
-
-            iconRect.set( Gfx::PointF(iconX, y), Gfx::SizeF(pw, h) );
-            textRect.set( Gfx::PointF(textX, y), Gfx::SizeF(textSize.width(), h) );
-        }
-        else
-        {
-            double groupH = ph + spacing + textSize.height();
-            double x = contentRect.left();
-            double gy = contentRect.top() + (contentRect.height() - groupH) / 2;
-            double w = contentRect.width();
-
-            double iconY = iconFirst ? gy : gy + textSize.height() + spacing;
-            double textY = iconFirst ? gy + ph + spacing : gy;
-
-            iconRect.set( Gfx::PointF(x, iconY), Gfx::SizeF(w, ph) );
-            textRect.set( Gfx::PointF(x, textY), Gfx::SizeF(w, textSize.height()) );
-        }
-    }
+    _renderer->layoutContent(surface(), _contentRect, _direction,
+                             _measuredIconSize, textSize,
+                             _iconRect, _textRect);
 
     if( ! _picture.empty() )
     {
         double pw = _measuredIconSize.width();
         double ph = _measuredIconSize.height();
-        double x = iconRect.left() + (iconRect.width() - pw) / 2;
-        double y = iconRect.top() + (iconRect.height() - ph) / 2;
+        double x = _iconRect.left() + (_iconRect.width() - pw) / 2;
+        double y = _iconRect.top() + (_iconRect.height() - ph) / 2;
 
         Gfx::SizeF pictureSize = scaling.toLogical( _picture.size() );
         double xOff = (pw - pictureSize.width()) / 2;
@@ -613,10 +553,10 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
     if( ! text().empty() )
     {
-        double tx = textRect.left()
-                    + (textRect.width() - _textMetrics.advance()) / 2;
-        double ty = textRect.top()
-                    + ((textRect.height() - _fontMetrics.height()) / 2)
+        double tx = _textRect.left()
+                    + (_textRect.width() - _textMetrics.advance()) / 2;
+        double ty = _textRect.top()
+                    + ((_textRect.height() - _fontMetrics.height()) / 2)
                     + _fontMetrics.ascent();
 
         _textPos = scaling.align( Gfx::PointF(tx, ty) );
@@ -642,18 +582,23 @@ void PushButton::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     Gfx::RectF widgetRect( size() );
     ButtonStyleFlags state = buttonStyleFlags();
 
+    _renderer->renderBackground(context, widgetRect, state);
+
     if( ! _isFlat )
     {
-        _renderer->renderSurface(context, widgetRect, state);
+        _renderer->renderFrame(context, widgetRect, state);
     }
 
     if( ! _picture.empty() )
     {
-        _renderer->renderIcon(context, widgetRect, _picture, _iconPos, state);
+        _renderer->renderIcon(context, _contentRect, _picture, _iconPos, state);
     }
 
-    _renderer->renderText(context, widgetRect, text(), _textPos, state);
-    _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
+    if( ! text().empty() )
+    {
+        _renderer->renderText(context, _contentRect, text(), _textPos, state);
+        _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
+    }
 }
 
 } // namespace

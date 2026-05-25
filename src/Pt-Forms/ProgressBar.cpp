@@ -29,6 +29,8 @@
 
 #include <Pt/Forms/ProgressBar.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Style.h>
+#include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Painter.h>
@@ -121,62 +123,89 @@ Signal<int>& ProgressBar::valueChanged()
 
 const Gfx::Brush& ProgressBar::background() const
 {
-    return _background ? *_background
-                       : Application::instance().styleOptions().foreground();
+    if( _renderer )
+        return _renderer->background();
+
+    return Application::instance().styleOptions().background();
 }
 
 
 void ProgressBar::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    repaint();
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setBackground(*_background);
+
+    invalidate();
 }
 
 const Gfx::Color& ProgressBar::foreground() const
 {
-    return _foreground ? *_foreground
-                       : Application::instance().styleOptions().accentColor();
+    if( _renderer )
+        return _renderer->foreground().color();
+
+    return Application::instance().styleOptions().accentColor();
 }
 
 
 void ProgressBar::setForeground(const Gfx::Color& b)
 {
     _foreground.reset( new Gfx::Color(b) );
-    repaint();
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setForeground( Gfx::Brush(*_foreground) );
+
+    invalidate();
 }
 
 
 const Gfx::Pen& ProgressBar::contour() const
 {
-    return _contour ? *_contour 
-                    : Application::instance().styleOptions().contour();
+    if( _renderer )
+        return _renderer->contour();
+
+    return Application::instance().styleOptions().contour();
 }
 
 
 void ProgressBar::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    repaint();
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setContour(*_contour);
+
+    invalidate();
 }
 
 
 const Gfx::Color& ProgressBar::textColor() const
 {
-    return _textColor ? *_textColor
-                      : Application::instance().styleOptions().textColor();
+    if( _renderer )
+        return _renderer->textColor();
+
+    return Application::instance().styleOptions().textColor();
 }
 
 
 void ProgressBar::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setTextColor( Gfx::Pen(*_textColor) );
+
     invalidate();
 }
 
 
 const Gfx::Font& ProgressBar::font() const
 {
-    return _font;
+    if( _renderer )
+        return _renderer->font();
+
+    return Application::instance().styleOptions().font();
 }
 
 
@@ -184,6 +213,9 @@ void ProgressBar::setFont(const Gfx::Font& font)
 {
     _customFont = font;
     _fontOverride = OverrideAll;
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
 
     invalidate();
 }
@@ -218,10 +250,11 @@ Gfx::Font ProgressBar::getFont() const
 
 void ProgressBar::setFontSize(std::size_t size)
 {
-    _customFont = Gfx::Font(_customFont.family(), size,
-                            _customFont.weight(), _customFont.slant(),
-                            _customFont.stretch());
+    _customFont = _customFont.withSize(size);
     _fontOverride |= OverrideSize;
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
 
     invalidate();
 }
@@ -229,10 +262,11 @@ void ProgressBar::setFontSize(std::size_t size)
 
 void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                            weight, _customFont.slant(),
-                            _customFont.stretch());
+    _customFont = _customFont.withWeight(weight);
     _fontOverride |= OverrideWeight;
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
 
     invalidate();
 }
@@ -240,10 +274,11 @@ void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 
 void ProgressBar::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                            _customFont.weight(), slant,
-                            _customFont.stretch());
+    _customFont = _customFont.withSlant(slant);
     _fontOverride |= OverrideSlant;
+
+    if( ProgressBarRenderer* renderer = getRenderer() )
+        renderer->setFont( getFont() );
 
     invalidate();
 }
@@ -254,58 +289,128 @@ void ProgressBar::setRenderer(ProgressBarRenderer* renderer)
     _renderer.reset(renderer);
     _customRenderer = renderer != 0;
 
+    if( renderer )
+        applyRenderer(renderer);
+
     invalidate();
+}
+
+
+ProgressBarRenderer* ProgressBar::getRenderer()
+{
+    if( ! _customRenderer )
+    {
+        const Style& style = Application::instance().style();
+        ProgressBarRenderer* proto = style.get<ProgressBarRenderer>();
+        if( ! proto )
+            return 0;
+
+        _renderer.reset( proto->create() );
+        _customRenderer = true;
+    }
+
+    return _renderer.get();
+}
+
+
+void ProgressBar::applyRenderer(ProgressBarRenderer* renderer)
+{
+    if( _background )
+        renderer->setBackground( *_background );
+
+    if( _foreground )
+        renderer->setForeground( Gfx::Brush(*_foreground) );
+
+    if( _contour )
+        renderer->setContour( *_contour );
+
+    if( _textColor )
+        renderer->setTextColor( Gfx::Pen(*_textColor) );
+
+    if( _fontOverride )
+        renderer->setFont( getFont() );
+}
+
+
+ProgressBarStyleFlags ProgressBar::progressBarStyleFlags() const
+{
+    StyleFlags common;
+
+    if( isEnabled() )
+        common.set(StyleFlags::Enabled);
+    else
+        common.set(StyleFlags::Disabled);
+
+    if( hasFocus() )
+        common.set(StyleFlags::Focused);
+
+    return ProgressBarStyleFlags(common);
 }
 
 
 Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
 {
-    double itemsWidth = policy.width();
+    if( ! _renderer )
+        return Gfx::SizeF(0, 0);
 
-    // TODO: get requred height from renderer
-    double itemsHeight = 15;
+    Gfx::SizeF contentSize(policy.width(), 0);
+    Gfx::SizeF sz = _renderer->measureFrame(surface(), contentSize);
 
-    return Gfx::SizeF(policy.width(), 
-                      itemsHeight + padding().topBottom() );
+    return Gfx::SizeF( sz.width() + padding().leftRight(), 
+                       sz.height() + padding().topBottom() );
 }
 
 
 void ProgressBar::onInvalidate()
 {
-    Base::onInvalidate();
+    if( ! _renderer )
+    {
+        bool hasOverride = _background || _foreground || _contour ||
+                           _textColor || _fontOverride;
+        if(hasOverride)
+        {
+            if( ProgressBarRenderer* renderer = getRenderer() )
+                applyRenderer(renderer);
+        }
+        else
+        {
+            _renderer.reset( Application::instance().style().get<ProgressBarRenderer>() );
+        }
+    }
 
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    _backgroundBrush = background();
-    _foregroundBrush = foreground();
-    _contourPen = contour();
-    _textPen = textColor();
-    _font = getFont();
-
-    if( ! _customRenderer )
-        _renderer.reset( style.get<ProgressBarRenderer>() );
-    
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
-                       _contourPen, _textPen, _font);
+    Base::onInvalidate();
+
+    relayout();
 }
 
 
-void ProgressBar::onPaint(PaintContext& context, const Gfx::RectF& rect)
+void ProgressBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-
     if( ! _renderer)
         return;
 
-    Painter painter(context);
-    painter.setClip(rect);
+    Gfx::RectF trackRect;
+    Gfx::RectF chunkRect;
+    Gfx::RectF barRect;
+    Gfx::RectF textRect;
+    
+    Gfx::SizeF barSize = _renderer->measureBar(surface());
+    
+    String txt;
+    Gfx::SizeF textSize(0, 0);
+    
+    _renderer->layoutFrame(surface(), Gfx::RectF(size()), barSize, textSize, barRect, textRect);
+    
+    float ratio = progress();
+    
+    _renderer->layoutBar(surface(), barRect, ratio, trackRect, chunkRect);
 
-    _renderer->render(*this, options, painter, rect, 
-                       _backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
+    ProgressBarStyleFlags state = progressBarStyleFlags();
+
+    _renderer->renderFrame(context, Gfx::RectF(size()), trackRect, chunkRect, textRect, txt, Gfx::PointF(), state);
 }
 
 } // namespace

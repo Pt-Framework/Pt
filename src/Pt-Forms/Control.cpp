@@ -561,6 +561,10 @@ void Control::onRepaintRequest(Control& control, const Gfx::RectF& rect)
     Gfx::PointF controlPos = fromControl( control, rect.topLeft() );
     Gfx::RectF controlRect( controlPos, rect.size() );
 
+    controlRect = controlRect.intersect( bounds() );
+    if( controlRect.isNull() )
+        return;
+
     repaint(controlRect);
 }
 

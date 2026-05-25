@@ -135,12 +135,10 @@ class PT_FORMS_API CheckBox : public Button
         Gfx::Font                  _customFont;
         unsigned                   _fontOverride;
 
-        Gfx::SizeF                 _boxSize;
         Gfx::RectF                 _boxRect;
+        Gfx::RectF                 _textRect;
         Gfx::PointF                _textPos;
         Gfx::RectF                 _mnemonicRect;
-        Gfx::TextMetrics           _textMetrics;
-        Gfx::FontMetrics           _fontMetrics;
 };
 
 } // namespace

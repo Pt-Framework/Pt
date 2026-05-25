@@ -46,7 +46,7 @@ class PT_FORMS_API ComboBox : public Control
 
 	public:
         ComboBox();
-		
+
         virtual ~ComboBox();
 
         void addItem(ListBoxItem& item);
@@ -98,13 +98,13 @@ class PT_FORMS_API ComboBox : public Control
 
         void setBackground(const Gfx::Brush& b);
 
-        const Gfx::Brush& foreground() const;
-
-        void setForeground(const Gfx::Brush& b);
-
         const Gfx::Pen& contour() const;
 
         void setContour(const Gfx::Pen& p);
+
+        const Gfx::Brush& foreground() const;
+
+        void setForeground(const Gfx::Brush& b);
 
         const Gfx::Color& textColor() const;
 
@@ -156,6 +156,12 @@ class PT_FORMS_API ComboBox : public Control
 
         Gfx::Font getFont() const;
 
+        ComboBoxRenderer* getRenderer();
+
+        void applyRenderer(ComboBoxRenderer* renderer);
+
+        ComboBoxStyleFlags comboBoxStyleFlags() const;
+
     private:
         enum FontOverride : unsigned
         {
@@ -173,14 +179,16 @@ class PT_FORMS_API ComboBox : public Control
         TextLine      _line;
         Popup         _popup;
         ListBox       _items;
-        Gfx::SizeF    _buttonSize;
+        Gfx::RectF    _entryRect;
+        Gfx::RectF    _buttonRect;
+        Gfx::RectF    _textRect;
         double        _maxHeight;
-        double        _spacing;
         bool          _isEditable;
         bool          _isAccepted;
         bool          _isTextChanged;
-        bool         _isHighlighted;
-        double       _pendingCursorX;
+        bool          _isHighlighted;
+        bool          _isButtonHighlighted;
+        double        _pendingCursorX;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Brush>       _foreground;
@@ -191,12 +199,6 @@ class PT_FORMS_API ComboBox : public Control
 
         FacetPtr<ComboBoxRenderer> _renderer;
         bool                       _customRenderer;
-
-        Gfx::Brush _backgroundBrush;
-        Gfx::Brush _foregroundBrush;
-        Gfx::Pen   _pen;
-        Gfx::Pen   _textPen;
-        Gfx::Font  _font;
 };
 
 } // namespace

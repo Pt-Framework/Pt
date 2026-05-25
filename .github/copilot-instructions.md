@@ -46,6 +46,10 @@ think you have all relevant information.
   transform, blend mode, font, paint surface:
   `.github/instructions/pt-gfx-api-drawing.instructions.md`
 
+- Develop Forms UI, styling, widget renderers, custom controls, layout,
+  measure, rendering primitives, PlatinumStyle:
+  `.github/instructions/pt-forms-dev-styles.instructions.md`
+
 # Visual Code Issues
 
 Multi-root workspace: subfolders (e.g. `include/Pt/Gfx`, `src/Pt-Gfx`) are

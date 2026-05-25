@@ -87,9 +87,9 @@ class LineEditor
 
         void backspace();
 
-        void layout(Painter& painter, TextLine& line);
+        void layout(const Painter& painter, TextLine& line);
 
-        void layout(Painter& painter, const Pt::String& text, TextLine& line);
+        void layout(const Painter& painter, const Pt::String& text, TextLine& line);
 
     private:
         Gfx::PointF _position;

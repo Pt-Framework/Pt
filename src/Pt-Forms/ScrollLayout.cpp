@@ -232,6 +232,12 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
     _maxX = maxWidth;
     _maxY = maxHeight;
 
+    if(_hmode == SizePolicy::Fixed)
+        _maxX = std::min(_maxX, policy.size().width());
+
+    if(_vmode == SizePolicy::Fixed)
+        _maxY = std::min(_maxY, policy.size().height());
+
     return policy.size();
 }
 
@@ -255,7 +261,7 @@ void ScrollLayout::onLayout(const Gfx::RectF& rect)
 
 
         Gfx::PointF pos = control->position();
-        pos.subY(_scrollByX);
+        pos.subX(_scrollByX);
         pos.subY(_scrollByY);
 
         control->move(pos);

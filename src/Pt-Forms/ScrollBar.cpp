@@ -28,11 +28,10 @@
 */
 
 #include <Pt/Forms/ScrollBar.h>
-#include <Pt/Gfx/Painter.h>
 #include <Pt/Forms/Application.h>
+#include <Pt/Forms/Style.h>
+#include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>
-#include <Pt/Forms/Painter.h>
-#include <Pt/Gfx/Brush.h>
 
 namespace Pt {
 
@@ -46,13 +45,10 @@ ScrollBar::ScrollBar(Orientation o)
 , _scrollStep(1)
 , _position(0)
 , _dragging(false)
-, _factorPixel(1)
-, _offsetPixel(0)
-, _factorPosition(1)
-, _offsetPosition(0)
+, _hoveredZone(NoZone)
+, _pressedZone(NoZone)
 , _customRenderer(false)
 {
-    //setAcceptInput(true);
 }
 
 
@@ -65,14 +61,14 @@ void ScrollBar::setRange(double minpos, double maxpos)
 {
     _minPos = minpos;
     _maxPos = maxpos;
-    
+
     if(_position < minpos)
         scroll(minpos);
 
     if(_position > maxpos)
         scroll(maxpos);
 
-    updateScroll();
+    repaint();
 }
 
 
@@ -80,6 +76,7 @@ void ScrollBar::setStepping(double scroll, double page)
 {
     _scrollStep = scroll;
     _pageStep = page;
+    repaint();
 }
 
 
@@ -112,18 +109,6 @@ void ScrollBar::setPosition(double pos)
         pos = _maxPos;
 
     _position = pos;
-
-    double buttonLength = _orientation == Vertical ? size().width()
-                                                   : size().height();
-    double pixpos = positionToPixel(_position);
-
-    Gfx::PointF pt = _orientation == Vertical ? Gfx::PointF(0, pixpos)
-                                               : Gfx::PointF(pixpos, 0);
-    
-    Gfx::SizeF size(buttonLength, buttonLength);
-    
-    _handleRect.set(pt, size);
-
     repaint();
 }
 
@@ -131,48 +116,65 @@ void ScrollBar::setPosition(double pos)
 void ScrollBar::scroll(double pos)
 {
     setPosition(pos);
-
     _changed.send(_position);
 }
 
 
 const Gfx::Brush& ScrollBar::background() const
 {
-    return _background ? *_background
-                       : Application::instance().styleOptions().background();
+    if( _renderer )
+        return _renderer->background();
+
+    return Application::instance().styleOptions().background();
 }
 
 
 void ScrollBar::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+
+    if( ScrollBarRenderer* renderer = getRenderer() )
+        renderer->setBackground(*_background);
+
     invalidate();
 }
 
 
 const Gfx::Brush& ScrollBar::foreground() const
 {
-    return _foreground ? *_foreground.get()
-                       : Application::instance().styleOptions().foreground();
+    if( _renderer )
+        return _renderer->foreground();
+
+    return Application::instance().styleOptions().foreground();
 }
 
 void ScrollBar::setForeground(const Gfx::Brush& b)
 {
     _foreground.reset( new Gfx::Brush(b) );
+
+    if( ScrollBarRenderer* renderer = getRenderer() )
+        renderer->setForeground(*_foreground);
+
     invalidate();
 }
 
 
 const Gfx::Pen& ScrollBar::contour() const
 {
-    return _contour ? *_contour
-                    : Application::instance().styleOptions().contour();
+    if( _renderer )
+        return _renderer->contour();
+
+    return Application::instance().styleOptions().contour();
 }
 
 
 void ScrollBar::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+
+    if( ScrollBarRenderer* renderer = getRenderer() )
+        renderer->setContour(*_contour);
+
     invalidate();
 }
 
@@ -182,45 +184,205 @@ void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
     _renderer.reset(renderer);
     _customRenderer = renderer != 0;
 
+    if( renderer )
+        applyRenderer(renderer);
+
     invalidate();
+}
+
+
+ScrollBarRenderer* ScrollBar::getRenderer()
+{
+    if( ! _customRenderer )
+    {
+        const Style& style = Application::instance().style();
+        ScrollBarRenderer* proto = style.get<ScrollBarRenderer>();
+        if( ! proto )
+            return 0;
+
+        _renderer.reset( proto->create() );
+        _customRenderer = true;
+    }
+
+    return _renderer.get();
+}
+
+
+void ScrollBar::applyRenderer(ScrollBarRenderer* renderer)
+{
+    if( _background )
+        renderer->setBackground(*_background);
+
+    if( _foreground )
+        renderer->setForeground(*_foreground);
+
+    if( _contour )
+        renderer->setContour(*_contour);
+}
+
+
+ScrollBarStyleFlags ScrollBar::scrollBarStyleFlags() const
+{
+    StyleFlags common;
+
+    if( isEnabled() )
+        common.set(StyleFlags::Enabled);
+    else
+        common.set(StyleFlags::Disabled);
+
+    if( hasFocus() )
+        common.set(StyleFlags::Focused);
+
+    ScrollBarStyleFlags state(common);
+
+    if( _hoveredZone == HandleZone )
+        state.set(ScrollBarStyleFlags::HandleHovered);
+
+    if( _pressedZone == HandleZone )
+        state.set(ScrollBarStyleFlags::HandlePressed);
+
+    return state;
+}
+
+
+ButtonStyleFlags ScrollBar::decreaseButtonFlags() const
+{
+    StyleFlags common;
+
+    if( isEnabled() )
+        common.set(StyleFlags::Enabled);
+    else
+        common.set(StyleFlags::Disabled);
+
+    if( _hoveredZone == DecreaseZone )
+        common.set(StyleFlags::Highlighted);
+
+    ButtonStyleFlags state(common);
+
+    if( _pressedZone == DecreaseZone )
+        state.set(ButtonStyleFlags::Pressed);
+
+    return state;
+}
+
+
+ButtonStyleFlags ScrollBar::increaseButtonFlags() const
+{
+    StyleFlags common;
+
+    if( isEnabled() )
+        common.set(StyleFlags::Enabled);
+    else
+        common.set(StyleFlags::Disabled);
+
+    if( _hoveredZone == IncreaseZone )
+        common.set(StyleFlags::Highlighted);
+
+    ButtonStyleFlags state(common);
+
+    if( _pressedZone == IncreaseZone )
+        state.set(ButtonStyleFlags::Pressed);
+
+    return state;
+}
+
+
+Direction ScrollBar::direction() const
+{
+    if( _orientation == Vertical )
+        return Direction(Direction::Top);
+
+    return Direction(Direction::Left);
+}
+
+
+float ScrollBar::fraction() const
+{
+    if( _maxPos <= _minPos )
+        return 0.0f;
+
+    float f = static_cast<float>( (_position - _minPos) / (_maxPos - _minPos) );
+
+    if( f < 0.0f ) f = 0.0f;
+    if( f > 1.0f ) f = 1.0f;
+
+    return f;
+}
+
+
+float ScrollBar::viewProportion() const
+{
+    if( _maxPos <= _minPos )
+        return 1.0f;
+
+    double range = _maxPos - _minPos;
+    float vp = static_cast<float>( _pageStep / (range + _pageStep) );
+
+    if( vp < 0.0f ) vp = 0.0f;
+    if( vp > 1.0f ) vp = 1.0f;
+
+    return vp;
 }
 
 
 void ScrollBar::onInvalidate()
 {
-    Base::onInvalidate();
+    if( ! _renderer )
+    {
+        bool hasOverride = _background || _foreground || _contour;
+        if( hasOverride )
+        {
+            if( ScrollBarRenderer* renderer = getRenderer() )
+                applyRenderer(renderer);
+        }
+        else
+        {
+            _renderer.reset( Application::instance().style().get<ScrollBarRenderer>() );
+        }
+    }
 
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    _backgroundBrush = background();
-    _foregroundBrush = foreground();
-    _contourPen = contour();
-
-    if( ! _customRenderer )
-        _renderer.reset( style.get<ScrollBarRenderer>() );
-    
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, 
-                       _backgroundBrush, _foregroundBrush, _contourPen);
+    Base::onInvalidate();
+    relayout();
 }
 
 
-void ScrollBar::onPaint(PaintContext& context, const Gfx::RectF& rect)
+void ScrollBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-
     if( ! _renderer )
         return;
 
-    Painter painter(context);
-    painter.setClip(rect);
+    Direction dir = direction();
+    Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
 
-    _renderer->render(*this, options, painter, rect, _handleRect,
-                      _backgroundBrush, _foregroundBrush, _contourPen);
+    Gfx::RectF handleRect = currentHandleRect();
 
+    ScrollBarStyleFlags state = scrollBarStyleFlags();
+    ButtonStyleFlags decreaseState = decreaseButtonFlags();
+    ButtonStyleFlags increaseState = increaseButtonFlags();
+
+    _renderer->renderFrame(context, widgetRect, dir,
+                           _trackRect, handleRect,
+                           _decreaseRect, _increaseRect,
+                           state, decreaseState, increaseState);
+}
+
+
+Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
+{
+    if( ! _renderer )
+    {
+        if( _orientation == Vertical )
+            return Gfx::SizeF(16.0, policy.size().height());
+
+        return Gfx::SizeF(policy.size().width(), 16.0);
+    }
+
+    Direction dir = direction();
+    Gfx::SizeF contentSize = policy.size();
+    return _renderer->measureFrame(surface(), contentSize, dir);
 }
 
 
@@ -228,28 +390,79 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
+    if( ! _renderer )
+        return true;
+
+    HotZone zone = hitTest( ev.position() );
+
     if( ev.isPress(MouseEvent::Left) )
     {
-        if(_handleRect.contains( ev.position() ) )
+        _pressedZone = zone;
+
+        if( zone == HandleZone )
         {
-            //this->grabPointer();
             _dragging = true;
         }
+        else if( zone == DecreaseZone )
+        {
+            scroll(_position - _scrollStep);
+        }
+        else if( zone == IncreaseZone )
+        {
+            scroll(_position + _scrollStep);
+        }
+        else if( zone == TrackZone )
+        {
+            Gfx::RectF handleRect = currentHandleRect();
+            bool vertical = (_orientation == Vertical);
+            double clickPos = vertical ? ev.position().y() : ev.position().x();
+            double handleCenter = vertical ? (handleRect.y() + handleRect.height() / 2)
+                                           : (handleRect.x() + handleRect.width() / 2);
+
+            if( clickPos < handleCenter )
+                scroll(_position - _pageStep);
+            else
+                scroll(_position + _pageStep);
+        }
+
+        repaint();
     }
     else if( ev.isRelease(MouseEvent::Left) )
     {
         _dragging = false;
-        //this->releasePointer();
+        _pressedZone = NoZone;
+        repaint();
+    }
+    else
+    {
+        HotZone prevHover = _hoveredZone;
+        _hoveredZone = zone;
+
+        if( prevHover != _hoveredZone )
+            repaint();
     }
 
-    if(_dragging)
+    if( _dragging )
     {
-        double pixPos = _orientation == Vertical ? ev.position().y() 
-                                                 : ev.position().x();
-        double pos = pixelToPosition(pixPos);
+        bool vertical = (_orientation == Vertical);
+        double trackStart = vertical ? _trackRect.y() : _trackRect.x();
+        double trackLen = vertical ? _trackRect.height() : _trackRect.width();
 
-        if( pos >= _minPos && pos <= _maxPos)
-          scroll(pos);
+        Gfx::RectF handleRect = currentHandleRect();
+        double handleLen = vertical ? handleRect.height() : handleRect.width();
+        double travel = trackLen - handleLen;
+
+        if( travel > 0.0 )
+        {
+            double pixPos = vertical ? ev.position().y() : ev.position().x();
+            double rel = (pixPos - trackStart - handleLen / 2) / travel;
+
+            if( rel < 0.0 ) rel = 0.0;
+            if( rel > 1.0 ) rel = 1.0;
+
+            double pos = _minPos + rel * (_maxPos - _minPos);
+            scroll(pos);
+        }
     }
 
     return true;
@@ -260,94 +473,150 @@ bool ScrollBar::onTouchEvent(const TouchEvent& tev)
 {
     Base::onTouchEvent(tev);
 
+    if( ! _renderer )
+        return true;
+
+    HotZone zone = hitTest( tev.position() );
+
     if( tev.isPress() )
     {
-        if(_handleRect.contains( tev.position() ) )
+        _pressedZone = zone;
+
+        if( zone == HandleZone )
         {
-            // TODO: need grabPointer
-            //this->grabMouse();
-            
             _dragging = true;
         }
+        else if( zone == DecreaseZone )
+        {
+            scroll(_position - _scrollStep);
+        }
+        else if( zone == IncreaseZone )
+        {
+            scroll(_position + _scrollStep);
+        }
+        else if( zone == TrackZone )
+        {
+            Gfx::RectF handleRect = currentHandleRect();
+            bool vertical = (_orientation == Vertical);
+            double tapPos = vertical ? tev.position().y() : tev.position().x();
+            double handleCenter = vertical ? (handleRect.y() + handleRect.height() / 2)
+                                           : (handleRect.x() + handleRect.width() / 2);
+
+            if( tapPos < handleCenter )
+                scroll(_position - _pageStep);
+            else
+                scroll(_position + _pageStep);
+        }
+
+        repaint();
     }
     else if( tev.isRelease() )
     {
         _dragging = false;
-
-        // TODO: need grabPointer
-        //this->releaseMouse();
+        _pressedZone = NoZone;
+        repaint();
     }
 
-    if(_dragging)
+    if( _dragging )
     {
-        double pixPos = _orientation == Vertical ? tev.position().y() 
-                                                 : tev.position().x();
-        double pos = pixelToPosition(pixPos);
+        bool vertical = (_orientation == Vertical);
+        double trackStart = vertical ? _trackRect.y() : _trackRect.x();
+        double trackLen = vertical ? _trackRect.height() : _trackRect.width();
 
-        if( pos >= _minPos && pos <= _maxPos)
-          scroll(pos);
+        Gfx::RectF handleRect = currentHandleRect();
+        double handleLen = vertical ? handleRect.height() : handleRect.width();
+        double travel = trackLen - handleLen;
+
+        if( travel > 0.0 )
+        {
+            double pixPos = vertical ? tev.position().y() : tev.position().x();
+            double rel = (pixPos - trackStart - handleLen / 2) / travel;
+
+            if( rel < 0.0 ) rel = 0.0;
+            if( rel > 1.0 ) rel = 1.0;
+
+            double pos = _minPos + rel * (_maxPos - _minPos);
+            scroll(pos);
+        }
     }
 
     return true;
 }
 
 
-void ScrollBar::onResizeEvent(const ResizeEvent& ev)
+void ScrollBar::onLayout(const Gfx::RectF& rect)
 {
-    Base::onResizeEvent(ev);
+    Base::onLayout(rect);
 
-    updateScroll();
+    if( ! _renderer )
+        return;
+
+    Direction dir = direction();
+    Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
+
+    Gfx::SizeF buttonSize = _renderer->measureButton(surface(), dir);
+
+    _renderer->layoutFrame(surface(), widgetRect, dir, buttonSize,
+                           _trackRect, _decreaseRect, _increaseRect);
+
+    repaint();
 }
 
 
-double ScrollBar::pixelToPosition(double pix)
+Gfx::RectF ScrollBar::currentHandleRect()
 {
-    return pix * _factorPosition + _offsetPosition;
+    if( ! _renderer )
+        return Gfx::RectF();
+
+    Direction dir = direction();
+    Gfx::RectF handleRect;
+    _renderer->layoutHandle(surface(), _trackRect, dir,
+                            fraction(), viewProportion(), handleRect);
+
+    return handleRect;
 }
 
 
-double ScrollBar::positionToPixel(double pos)
+ScrollBar::HotZone ScrollBar::hitTest(const Gfx::PointF& pos)
 {
-    return pos * _factorPixel + _offsetPixel;
+    Gfx::RectF handleRect = currentHandleRect();
+
+    if( handleRect.contains(pos) )
+        return HandleZone;
+
+    if( _decreaseRect.contains(pos) )
+        return DecreaseZone;
+
+    if( _increaseRect.contains(pos) )
+        return IncreaseZone;
+
+    if( _trackRect.contains(pos) )
+        return TrackZone;
+
+    return NoZone;
 }
 
 
-Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
+bool ScrollBar::onEnterEvent(const EnterEvent& ev)
 {
-    if( _orientation == Vertical)
-      return Gfx::SizeF( sizePolicy().width(), policy.size().height() );
-
-    return Gfx::SizeF( policy.size().width(), sizePolicy().height() );
+    Base::onEnterEvent(ev);
+    return true;
 }
 
 
-void ScrollBar::updateScroll()
+bool ScrollBar::onLeaveEvent(const LeaveEvent& ev)
 {
-    double buttonLength = _orientation == Vertical ? size().width()
-                                                   : size().height();
+    Base::onLeaveEvent(ev);
 
-    double length = _orientation == Vertical ? size().height()
-                                             : size().width(); 
+    if( _hoveredZone != NoZone )
+    {
+        _hoveredZone = NoZone;
+        repaint();
+    }
 
-    const double pixMin = buttonLength;
-    const double pixMax = length - buttonLength * 2;
-
-    _factorPixel = (pixMax  - pixMin) / (_maxPos -_minPos);
-    _offsetPixel = (pixMin * _maxPos - pixMax *_minPos) / (_maxPos - _minPos);
-       
-    _factorPosition = (_maxPos -_minPos) / (pixMax - pixMin);
-    _offsetPosition = (_minPos * pixMax - _maxPos *pixMin) / (pixMax - pixMin);  
-
-    double pixpos = positionToPixel(_position);
-
-    Gfx::PointF pos = _orientation == Vertical ? Gfx::PointF(0, pixpos)
-                                               : Gfx::PointF(pixpos, 0);
-    
-     Gfx::SizeF size(buttonLength, buttonLength);
-    
-    _handleRect.set( pos, size );
+    return true;
 }
 
-} // namespace
+} // namespace Forms
 
-} // namespace
+} // namespace Pt

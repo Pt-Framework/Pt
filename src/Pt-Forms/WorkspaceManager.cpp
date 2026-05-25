@@ -553,10 +553,11 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::RectF frameRect( frame->position(), frame->size() );
         frameRect = rect.intersect(frameRect);
 
-        // TODO: skip/continue if no intersection
+        if( frameRect.isNull() )
+            continue;
 
         Gfx::PointF winPos = toFrame( *frame, frameRect.topLeft() );
-        Gfx::RectF winRect( winPos, rect.size() );
+        Gfx::RectF winRect( winPos, frameRect.size() );
 
         PaintEvent pev( *frame, winRect );
         frame->processEvent(pev);

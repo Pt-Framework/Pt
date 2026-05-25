@@ -233,9 +233,7 @@ Pt::Gfx::Font MenuBaseItem::getFont() const
 
 void MenuBaseItem::setFontSize(std::size_t size)
 {
-    _customFont = Pt::Gfx::Font(_customFont.family(), size,
-                                _customFont.weight(), _customFont.slant(),
-                                _customFont.stretch());
+    _customFont = _customFont.withSize(size);
     _fontOverride |= OverrideSize;
 
     invalidate();
@@ -244,9 +242,7 @@ void MenuBaseItem::setFontSize(std::size_t size)
 
 void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
 {
-    _customFont = Pt::Gfx::Font(_customFont.family(), _customFont.size(),
-                                weight, _customFont.slant(),
-                                _customFont.stretch());
+    _customFont = _customFont.withWeight(weight);
     _fontOverride |= OverrideWeight;
 
     invalidate();
@@ -255,9 +251,7 @@ void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
 
 void MenuBaseItem::setFontSlant(Pt::Gfx::Font::Slant slant)
 {
-    _customFont = Pt::Gfx::Font(_customFont.family(), _customFont.size(),
-                                _customFont.weight(), slant,
-                                _customFont.stretch());
+    _customFont = _customFont.withSlant(slant);
     _fontOverride |= OverrideSlant;
 
     invalidate();

@@ -124,7 +124,7 @@
                 "command": ".\\jam.bat"
             },
             "args": [
-                "-q", "-j4"
+                "-q", "-j8"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

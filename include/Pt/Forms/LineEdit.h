@@ -122,6 +122,8 @@ class PT_FORMS_API LineEdit : public Control
 
         void setRenderer(LineEditRenderer* renderer);
 
+        LineEditStyleFlags lineEditStyleFlags() const;
+
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
@@ -148,6 +150,10 @@ class PT_FORMS_API LineEdit : public Control
 
     private:
         Gfx::Font getFont() const;
+
+        LineEditRenderer* getRenderer();
+
+        void applyRenderer(LineEditRenderer* renderer);
 
     private:
         enum FontOverride : unsigned
@@ -182,10 +188,7 @@ class PT_FORMS_API LineEdit : public Control
         Gfx::Font                       _customFont;
         unsigned                        _fontOverride;
 
-        Gfx::Brush                    _brush;
-        Gfx::Pen                      _pen;
-        Gfx::Pen                      _textPen;
-        Gfx::Font                     _font;
+        Gfx::RectF                    _textRect;
 };
 
 } // namespace

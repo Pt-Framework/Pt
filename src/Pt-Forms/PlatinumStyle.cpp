@@ -1,6 +1,5 @@
 ﻿/* Copyright (C) 2013 Marc Boris Duerner 
    Copyright (C) 2013 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2017 Ilja Maier
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -34,14 +33,12 @@
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Panel.h>
 #include <Pt/Forms/Label.h>
-#include <Pt/Forms/LineEdit.h>
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/MenuBar.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/MenuItem.h>
 #include <Pt/Forms/ScrollBar.h>
 #include <Pt/Forms/ProgressBar.h>
-#include <Pt/Forms/Slider.h>
 #include <Pt/Forms/ListBox.h>
 #include <Pt/Forms/ComboBox.h>
 #include <Pt/Forms/SpinBox.h>
@@ -136,6 +133,9 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
                                        const Gfx::Pen& pen,
                                        double corner) const
 {
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
     double inset = painter.scaling().alignContour( pen.size() ) / 2;
 
     Gfx::Polygon polygon = getPolygon(rect, inset, corner);
@@ -150,6 +150,9 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
                                        double penSize,
                                        double corner) const
 {
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
     double inset = painter.scaling().alignContour(penSize) / 2;
 
     Gfx::Polygon polygon = getPolygon(rect, inset, corner);
@@ -164,6 +167,9 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
                                        double corner) const
 
 {
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
     double inset = painter.scaling().toLogical(0.5);
 
     Gfx::Polygon polygon = getPolygon(rect, inset, corner);
@@ -177,6 +183,9 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
                                        const Gfx::RectF& rect,
                                        double corner) const
 {
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
     double inset = painter.scaling().toLogical(0.5);
 
     Gfx::Polygon polygon = getPolygon(rect, inset, corner);
@@ -188,6 +197,18 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
 Gfx::Polygon PlatinumRendererBase::getPolygon(const Gfx::RectF& rect, 
                                              double inset, double corner)
 {
+    // Clamp inset so polygon coordinates never invert
+    double maxInset = std::min(rect.width(), rect.height()) / 2.0;
+    if( inset > maxInset )
+        inset = maxInset;
+
+    // Clamp corner against remaining available space
+    double maxCorner = std::min(rect.width(), rect.height()) / 2.0 - inset;
+    if( maxCorner < 0 )
+        maxCorner = 0;
+    if( corner > maxCorner )
+        corner = maxCorner;
+
     Gfx::Polygon polygon;    
     Gfx::PointF outline[9] = {};
 
@@ -267,19 +288,6 @@ void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-void PlatinumPanelRenderer::onRenderBackground(PaintContext& context,
-                                               const Gfx::RectF& rect,
-                                               const StyleOptions& options,
-                                               StyleFlags /*state*/)
-{
-    if( ! background() )
-        return;
-
-    _bgPainter.begin(context);
-    _baseRenderer.renderPlane(_bgPainter, rect, options.cornerRadius());
-}
-
-
 Gfx::SizeF PlatinumPanelRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                   const Gfx::SizeF& contentSize)
 {
@@ -294,6 +302,29 @@ Gfx::RectF PlatinumPanelRenderer::onLayoutFrame(PaintSurface& /*surface*/,
 }
 
 
+const Painter& PlatinumPanelRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+void PlatinumPanelRenderer::onRenderBackground(PaintContext& context,
+                                               const Gfx::RectF& rect,
+                                               const StyleOptions& options,
+                                               StyleFlags /*state*/)
+{
+    if( ! background() )
+        return;
+
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _bgPainter.begin(context);
+    _baseRenderer.renderPlane(_bgPainter, rect, options.cornerRadius());
+}
+
+
 void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
                                           const Gfx::RectF& rect,
                                           const StyleOptions& options,
@@ -302,17 +333,13 @@ void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
     if( ! contour() )
         return;
 
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
     _framePainter.begin(context);
     _baseRenderer.renderFrame(_framePainter, rect,
                               _framePainter.pen().size(),
                               options.cornerRadius());
-}
-
-
-const Painter& PlatinumPanelRenderer::onGetTextPainter(PaintSurface& surface)
-{
-    _textPainter.begin(surface);
-    return _textPainter;
 }
 
 
@@ -323,6 +350,9 @@ void PlatinumPanelRenderer::onRenderText(PaintContext& context,
                                          const Gfx::PointF& pos,
                                          StyleFlags /*state*/)
 {
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
     _textPainter.begin(context);
     _textPainter.setClip(rect);
     _textPainter.drawText(pos, text);
@@ -336,12 +366,13 @@ void PlatinumPanelRenderer::onRenderIcon(PaintContext& context,
                                          const Gfx::PointF& pos,
                                          StyleFlags /*state*/)
 {
-    _bgPainter.begin(context);
-    _bgPainter.setClip(rect);
-    Gfx::CompositionMode prev = _bgPainter.compositionMode();
-    _bgPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-    _bgPainter.drawPixmap(pos, picture);
-    _bgPainter.setCompositionMode(prev);
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _iconPainter.begin(context);
+    _iconPainter.setClip(rect);
+    _iconPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    _iconPainter.drawPixmap(pos, picture);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -361,7 +392,7 @@ PlatinumButtonRenderer::~PlatinumButtonRenderer()
 
 ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 {
-    return new PlatinumButtonRenderer(1);
+    return new PlatinumButtonRenderer();
 }
 
 
@@ -386,8 +417,8 @@ void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumButtonRenderer::onMeasureSurface(PaintSurface& /*surface*/,
-                                                     const Gfx::SizeF& contentSize)
+Gfx::SizeF PlatinumButtonRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                   const Gfx::SizeF& contentSize)
 {
     Spacing ins(3);
     return Gfx::SizeF(contentSize.width() + ins.leftRight(),
@@ -395,80 +426,55 @@ Gfx::SizeF PlatinumButtonRenderer::onMeasureSurface(PaintSurface& /*surface*/,
 }
 
 
-Gfx::RectF PlatinumButtonRenderer::onLayoutSurface(PaintSurface& /*surface*/,
-                                                    const Gfx::RectF& surfaceRect)
+Gfx::SizeF PlatinumButtonRenderer::onMeasureContent(PaintSurface& /*surface*/,
+                                                     Direction direction,
+                                                     const Gfx::SizeF& iconSize,
+                                                     const Gfx::SizeF& textSize)
+{
+    bool hasIcon = iconSize.width() > 0 && iconSize.height() > 0;
+    bool hasText = textSize.width() > 0;
+
+    if( hasIcon && hasText )
+    {
+        Gfx::FontMetrics fm = _textPainter.fontMetrics();
+        double spacing = std::ceil(fm.height() / 2.0);
+
+        bool horizontal = (direction == Direction::Left || direction == Direction::Right);
+
+        if( horizontal )
+        {
+            double w = iconSize.width() + spacing + textSize.width();
+            double h = std::max(iconSize.height(), textSize.height());
+            return Gfx::SizeF(w, h);
+        }
+        else
+        {
+            double w = std::max(iconSize.width(), textSize.width());
+            double h = iconSize.height() + spacing + textSize.height();
+            return Gfx::SizeF(w, h);
+        }
+    }
+    else if( hasIcon )
+    {
+        return iconSize;
+    }
+    else
+    {
+        return textSize;
+    }
+}
+
+
+Gfx::RectF PlatinumButtonRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                                  const Gfx::RectF& frameRect)
 {
     Spacing ins(3);
+    double w = frameRect.width() - ins.leftRight();
+    double h = frameRect.height() - ins.topBottom();
+    if( w < 0 ) w = 0;
+    if( h < 0 ) h = 0;
     return Gfx::RectF(Gfx::PointF(ins.left(), ins.top()),
-                       Gfx::SizeF(surfaceRect.width() - ins.leftRight(),
-                                  surfaceRect.height() - ins.topBottom()));
-}
-
-
-void PlatinumButtonRenderer::onRenderSurface(PaintContext& context,
-                                             const Gfx::RectF& rect,
-                                             const StyleOptions& options,
-                                             ButtonStyleFlags state)
-{
-    Painter* painter = 0;
-
-    if( state.has(ButtonStyleFlags::Pressed) )
-        painter = &_pressedPainter;
-    else if( state.has(StyleFlags::Highlighted) )
-        painter = &_highlightPainter;
-    else
-        painter = &_normalPainter;
-
-    painter->begin(context);
-
-    const Gfx::Scaling& scaling = painter->scaling();
-    double corner = scaling.align(1.0);
-
-    _baseRenderer.renderPlane(*painter, rect, painter->brush(), corner);
-
-    _baseRenderer.renderFrame(*painter, rect, painter->pen(), corner);
-
-    if( state.has(StyleFlags::Focused) )
-    {
-        double inset = scaling.toLogical(0.5);
-        double focusOffset = scaling.align(2.0) + inset;
-
-        Gfx::RectF focusRect(rect);
-        focusRect.shift(focusOffset, focusOffset);
-        focusRect.expand(-2 * focusOffset, -2 * focusOffset);
-
-        Gfx::Pen savedPen = painter->pen();
-        Gfx::Pen focusPen( savedPen.color(), 1, Gfx::Pen::Dash );
-        painter->setPen(focusPen);
-        painter->drawRect(focusRect);
-        painter->setPen(savedPen);
-    }
-}
-
-
-const Painter& PlatinumButtonRenderer::onGetTextPainter(PaintSurface& surface)
-{
-    _textPainter.begin(surface);
-    return _textPainter;
-}
-
-
-void PlatinumButtonRenderer::onRenderText(PaintContext& context,
-                                          const Gfx::RectF& rect,
-                                          const StyleOptions& options,
-                                          const String& text,
-                                          const Gfx::PointF& pos,
-                                          ButtonStyleFlags state)
-{
-    if( state.has(ButtonStyleFlags::Pressed) && state.has(ButtonStyleFlags::Flat) )
-    {
-        Gfx::Pen accentPen( accentColor() );
-        _textPainter.setPen(accentPen);
-    }
-
-    _textPainter.begin(context);
-    _textPainter.setClip(rect);
-    _textPainter.drawText(pos, text);
+                       Gfx::SizeF(w, h));
 }
 
 
@@ -482,13 +488,77 @@ Gfx::RectF PlatinumButtonRenderer::onLayoutMnemonic(PaintSurface& surface,
 }
 
 
-void PlatinumButtonRenderer::onRenderMnemonic(PaintContext& context,
-                                              const Gfx::RectF& rect,
-                                              const StyleOptions& /*options*/,
-                                              const Gfx::RectF& mnemonic,
-                                              ButtonStyleFlags /*state*/)
+const Painter& PlatinumButtonRenderer::onGetTextPainter(PaintSurface& surface)
 {
-    renderMnemonicImpl(_textPainter, context, rect, mnemonic);
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+void PlatinumButtonRenderer::onLayoutContent(PaintSurface& /*surface*/,
+                                             const Gfx::RectF& contentRect,
+                                             Direction direction,
+                                             const Gfx::SizeF& iconSize,
+                                             const Gfx::SizeF& textSize,
+                                             Gfx::RectF& iconRect,
+                                             Gfx::RectF& textRect)
+{
+    bool hasIcon = iconSize.width() > 0 && iconSize.height() > 0;
+    bool hasText = textSize.width() > 0;
+
+    if( hasIcon && hasText )
+    {
+        Gfx::FontMetrics fm = _textPainter.fontMetrics();
+        double spacing = std::ceil(fm.height() / 2.0);
+
+        bool horizontal = (direction == Direction::Left || direction == Direction::Right);
+        bool iconFirst  = (direction == Direction::Left || direction == Direction::Top);
+
+        if( horizontal )
+        {
+            double groupW = iconSize.width() + spacing + textSize.width();
+            double gx = contentRect.x() + (contentRect.width() - groupW) / 2;
+
+            double iconX = iconFirst ? gx : gx + textSize.width() + spacing;
+            double textX = iconFirst ? gx + iconSize.width() + spacing : gx;
+
+            iconRect.set( Gfx::PointF(iconX, contentRect.y()),
+                          Gfx::SizeF(iconSize.width(), contentRect.height()) );
+            textRect.set( Gfx::PointF(textX, contentRect.y()),
+                          Gfx::SizeF(textSize.width(), contentRect.height()) );
+        }
+        else
+        {
+            double groupH = iconSize.height() + spacing + textSize.height();
+            double gy = contentRect.y() + (contentRect.height() - groupH) / 2;
+
+            double iconY = iconFirst ? gy : gy + textSize.height() + spacing;
+            double textY = iconFirst ? gy + iconSize.height() + spacing : gy;
+
+            iconRect.set( Gfx::PointF(contentRect.x(), iconY),
+                          Gfx::SizeF(contentRect.width(), iconSize.height()) );
+            textRect.set( Gfx::PointF(contentRect.x(), textY),
+                          Gfx::SizeF(contentRect.width(), textSize.height()) );
+        }
+    }
+    else if( hasIcon )
+    {
+        iconRect = contentRect;
+        textRect = Gfx::RectF();
+    }
+    else
+    {
+        iconRect = Gfx::RectF();
+        textRect = contentRect;
+    }
+}
+
+
+void PlatinumButtonRenderer::onRenderBackground(PaintContext& /*context*/,
+                                                const Gfx::RectF& /*rect*/,
+                                                const StyleOptions& /*options*/,
+                                                ButtonStyleFlags /*state*/)
+{
 }
 
 
@@ -524,6 +594,88 @@ void PlatinumButtonRenderer::onPrepareIcon(const StyleOptions& options,
 }
 
 
+void PlatinumButtonRenderer::onRenderFrame(PaintContext& context,
+                                           const Gfx::RectF& rect,
+                                           const StyleOptions& options,
+                                           ButtonStyleFlags state)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    Painter* painter = 0;
+
+    if( state.has(ButtonStyleFlags::Pressed) )
+        painter = &_pressedPainter;
+    else if( state.has(StyleFlags::Highlighted) )
+        painter = &_highlightPainter;
+    else
+        painter = &_normalPainter;
+
+    painter->resetClip();
+    painter->begin(context);
+
+    const Gfx::Scaling& scaling = painter->scaling();
+    double corner = scaling.align(1.0);
+
+    _baseRenderer.renderPlane(*painter, rect, painter->brush(), corner);
+
+    _baseRenderer.renderFrame(*painter, rect, painter->pen(), corner);
+
+    if( state.has(StyleFlags::Focused) )
+    {
+        double inset = scaling.toLogical(0.5);
+        double focusOffset = scaling.align(2.0) + inset;
+
+        double fw = rect.width() - 2 * focusOffset;
+        double fh = rect.height() - 2 * focusOffset;
+
+        if( fw > 0 && fh > 0 )
+        {
+            Gfx::RectF focusRect(
+                Gfx::PointF(rect.x() + focusOffset, rect.y() + focusOffset),
+                Gfx::SizeF(fw, fh));
+
+            Gfx::Pen savedPen = painter->pen();
+            Gfx::Pen focusPen( savedPen.color(), 1, Gfx::Pen::Dash );
+            painter->setPen(focusPen);
+            painter->drawRect(focusRect);
+            painter->setPen(savedPen);
+        }
+    }
+}
+
+
+void PlatinumButtonRenderer::onRenderText(PaintContext& context,
+                                          const Gfx::RectF& rect,
+                                          const StyleOptions& options,
+                                          const String& text,
+                                          const Gfx::PointF& pos,
+                                          ButtonStyleFlags state)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    if( state.has(ButtonStyleFlags::Pressed) && state.has(ButtonStyleFlags::Flat) )
+        _textPainter.setPen( Gfx::Pen( accentColor() ) );
+    else
+        _textPainter.setPen( textColor() );
+
+    _textPainter.begin(context);
+    _textPainter.setClip(rect);
+    _textPainter.drawText(pos, text);
+}
+
+
+void PlatinumButtonRenderer::onRenderMnemonic(PaintContext& context,
+                                              const Gfx::RectF& rect,
+                                              const StyleOptions& /*options*/,
+                                              const Gfx::RectF& mnemonic,
+                                              ButtonStyleFlags /*state*/)
+{
+    renderMnemonicImpl(_textPainter, context, rect, mnemonic);
+}
+
+
 void PlatinumButtonRenderer::onRenderIcon(PaintContext& context,
                                           const Gfx::RectF& rect,
                                           const StyleOptions& options,
@@ -531,12 +683,13 @@ void PlatinumButtonRenderer::onRenderIcon(PaintContext& context,
                                           const Gfx::PointF& pos,
                                           ButtonStyleFlags state)
 {
-    _normalPainter.begin(context);
-    _normalPainter.setClip(rect);
-    Gfx::CompositionMode prev = _normalPainter.compositionMode();
-    _normalPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-    _normalPainter.drawPixmap(pos, picture);
-    _normalPainter.setCompositionMode(prev);
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _iconPainter.begin(context);
+    _iconPainter.setClip(rect);
+    _iconPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    _iconPainter.drawPixmap(pos, picture);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -556,7 +709,7 @@ PlatinumCheckBoxRenderer::~PlatinumCheckBoxRenderer()
 
 CheckBoxRenderer* PlatinumCheckBoxRenderer::onCreate() const
 {
-    return new PlatinumCheckBoxRenderer(1);
+    return new PlatinumCheckBoxRenderer();
 }
 
 
@@ -577,81 +730,73 @@ void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureBox(PaintSurface& /*surface*/)
+Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureIndicator(PaintSurface& /*surface*/)
 {
     double sz = font().size() * 1.2;
     return Gfx::SizeF(sz, sz);
 }
 
 
-void PlatinumCheckBoxRenderer::onRenderBox(PaintContext& context,
-                                           const Gfx::RectF& rect,
-                                           const StyleOptions& options,
-                                           const Gfx::RectF& box,
-                                           CheckBoxStyleFlags state)
+Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureContent(PaintSurface& /*surface*/,
+                                                      const Gfx::SizeF& indicatorSize,
+                                                      const Gfx::SizeF& textSize)
 {
-    _boxPainter.begin(context);
-    _boxPainter.setClip(rect);
+    double space = std::min<double>(indicatorSize.width() / 2, textSize.height() / 2);
+    double focusPad = 2.0;
+    double strokeInset = 1.0;
 
-    const Gfx::Scaling& scaling = _boxPainter.scaling();
+    double extraWidth = 2 * (focusPad + strokeInset);
+    double w = indicatorSize.width() + space + textSize.width() + extraWidth;
 
-    Gfx::RectF boxRect = scaling.align(box);
-    double inset = scaling.toLogical(0.5);
-    double checkOffset = scaling.alignContour(3);
+    double h = std::max<double>(indicatorSize.height(), textSize.height());
+    h += 2 * strokeInset;
 
-    Gfx::RectF checkRect = boxRect;
-    checkRect.shift(checkOffset, checkOffset);
-    checkRect.shrink(2 * checkOffset, 2 * checkOffset);
-
-    Gfx::RectF borderRect = boxRect;
-    borderRect.shift(inset, inset);
-    borderRect.shrink(2 * inset, 2 * inset);
-
-    _boxPainter.fillRect(boxRect);
-    _boxPainter.drawRect(borderRect);
-
-    if( state.has(CheckBoxStyleFlags::Checked) )
-    {
-        Gfx::Brush savedBrush = _boxPainter.brush();
-        _boxPainter.setBrush( options.textColor() );
-        _boxPainter.fillRect(checkRect);
-        _boxPainter.setBrush( savedBrush );
-    }
+    return Gfx::SizeF(w, h);
 }
 
 
-const Painter& PlatinumCheckBoxRenderer::onGetTextPainter(PaintSurface& surface)
+Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                    const Gfx::SizeF& contentSize)
 {
-    _textPainter.begin(surface);
-    return _textPainter;
+    return contentSize;
 }
 
 
-void PlatinumCheckBoxRenderer::onRenderText(PaintContext& context,
-                                            const Gfx::RectF& rect,
-                                            const StyleOptions& /*options*/,
-                                            const String& text,
-                                            const Gfx::PointF& pos,
-                                            CheckBoxStyleFlags state)
+Gfx::RectF PlatinumCheckBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                                   const Gfx::RectF& frameRect)
 {
-    _textPainter.begin(context);
-    _textPainter.setClip(rect);
-    _textPainter.drawText(pos, text);
+    return frameRect;
+}
 
-    if( state.has(StyleFlags::Focused) )
-    {
-        Gfx::FontMetrics fm = _textPainter.fontMetrics();
-        Gfx::TextMetrics tm = _textPainter.textMetrics(text);
 
-        Gfx::RectF focusRect( Gfx::PointF(pos.x() - 2, pos.y() - fm.ascent()),
-                              Gfx::SizeF(tm.advance() + 4, fm.height()) );
+void PlatinumCheckBoxRenderer::onLayoutContent(PaintSurface& /*surface*/,
+                                               const Gfx::RectF& contentRect,
+                                               const Gfx::SizeF& indicatorSize,
+                                               const Gfx::SizeF& textSize,
+                                               Gfx::RectF& indicatorRect,
+                                               Gfx::RectF& textRect)
+{
+    double indW = indicatorSize.width();
+    if( indW > contentRect.width() )
+        indW = contentRect.width();
 
-        Gfx::Pen savedPen = _textPainter.pen();
-        Gfx::Pen focusPen(savedPen.color(), 1, Gfx::Pen::Dash);
-        _textPainter.setPen(focusPen);
-        _textPainter.drawRect(focusRect);
-        _textPainter.setPen(savedPen);
-    }
+    double indH = indicatorSize.height();
+    if( indH > contentRect.height() )
+        indH = contentRect.height();
+
+    double space = std::min<double>(indW / 2, textSize.height() / 2);
+
+    double boxX = contentRect.x();
+    double boxY = contentRect.y() + (contentRect.height() - indH) / 2.0;
+    indicatorRect.set( Gfx::PointF(boxX, boxY), Gfx::SizeF(indW, indH) );
+
+    double textX = contentRect.x() + indW + space;
+    double textW = contentRect.width() - indW - space;
+    if( textW < 0 )
+        textW = 0;
+
+    textRect.set( Gfx::PointF(textX, contentRect.y()),
+                  Gfx::SizeF(textW, contentRect.height()) );
 }
 
 
@@ -662,6 +807,97 @@ Gfx::RectF PlatinumCheckBoxRenderer::onLayoutMnemonic(PaintSurface& surface,
                                                       String::size_type mnemonicIndex)
 {
     return layoutMnemonicImpl(_textPainter, surface, text, textPos, fontMetrics, mnemonicIndex);
+}
+
+
+const Painter& PlatinumCheckBoxRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+void PlatinumCheckBoxRenderer::onRenderIndicator(PaintContext& context,
+                                                 const Gfx::RectF& rect,
+                                                 const StyleOptions& options,
+                                                 const Gfx::RectF& box,
+                                                 CheckBoxStyleFlags state)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    if( box.width() <= 0 || box.height() <= 0 )
+        return;
+
+    _boxPainter.begin(context);
+    _boxPainter.setClip(rect);
+
+    const Gfx::Scaling& scaling = _boxPainter.scaling();
+
+    Gfx::RectF boxRect = scaling.align(box);
+    double inset = scaling.toLogical(0.5);
+    double checkOffset = scaling.alignContour(3);
+
+    double cw = boxRect.width() - 2 * checkOffset;
+    double ch = boxRect.height() - 2 * checkOffset;
+    double bw = boxRect.width() - 2 * inset;
+    double bh = boxRect.height() - 2 * inset;
+
+    _boxPainter.fillRect(boxRect);
+
+    if( bw > 0 && bh > 0 )
+    {
+        Gfx::RectF borderRect(Gfx::PointF(boxRect.x() + inset, boxRect.y() + inset),
+                              Gfx::SizeF(bw, bh));
+        _boxPainter.drawRect(borderRect);
+    }
+
+    if( state.has(CheckBoxStyleFlags::Checked) && cw > 0 && ch > 0 )
+    {
+        Gfx::RectF checkRect(Gfx::PointF(boxRect.x() + checkOffset, boxRect.y() + checkOffset),
+                             Gfx::SizeF(cw, ch));
+
+        Gfx::Brush savedBrush = _boxPainter.brush();
+        _boxPainter.setBrush( options.textColor() );
+        _boxPainter.fillRect(checkRect);
+        _boxPainter.setBrush( savedBrush );
+    }
+}
+
+
+void PlatinumCheckBoxRenderer::onRenderText(PaintContext& context,
+                                            const Gfx::RectF& textRect,
+                                            const StyleOptions& /*options*/,
+                                            const String& text,
+                                            const Gfx::PointF& pos,
+                                            CheckBoxStyleFlags state)
+{
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
+
+    double focusPad = 2.0;
+    double strokeInset = 1.0;
+
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
+
+    Gfx::PointF renderPos(pos.x() + focusPad + strokeInset, pos.y());
+    _textPainter.drawText(renderPos, text);
+
+    if( state.has(StyleFlags::Focused) )
+    {
+        Gfx::FontMetrics fm = _textPainter.fontMetrics();
+        Gfx::TextMetrics tm = _textPainter.textMetrics(text);
+
+        Gfx::RectF focusRect( Gfx::PointF(renderPos.x() - focusPad, renderPos.y() - fm.ascent()),
+                              Gfx::SizeF(tm.advance() + 2 * focusPad, fm.height()) );
+
+        Gfx::Pen savedPen = _textPainter.pen();
+        Gfx::Pen focusPen(savedPen.color(), 1, Gfx::Pen::Dash);
+        _textPainter.setPen(focusPen);
+        _textPainter.drawRect(focusRect);
+        _textPainter.setPen(savedPen);
+    }
 }
 
 
@@ -676,6 +912,320 @@ void PlatinumCheckBoxRenderer::onRenderMnemonic(PaintContext& context,
 
 
 
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumSpinBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumSpinBoxRenderer::PlatinumSpinBoxRenderer(std::size_t refs)
+: SpinBoxRenderer(refs)
+, _inset(5)
+{
+}
+
+    
+PlatinumSpinBoxRenderer::~PlatinumSpinBoxRenderer()
+{
+}
+
+
+SpinBoxRenderer* PlatinumSpinBoxRenderer::onCreate() const
+{
+    return new PlatinumSpinBoxRenderer();
+}
+
+
+void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& /*options*/)
+{
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureFrame(PaintSurface& surface,
+                                                    const Gfx::SizeF& contentSize)
+{
+    _textPainter.begin(surface);
+    _textPainter.setFont( font() );
+
+    double entryHeight = font().size() * 2.5;
+    double buttonHeight = entryHeight;
+
+    double entryWidth = contentSize.width() + 2 * _inset;
+
+    double height = entryHeight;
+
+    if(buttonHeight > height)
+        height = buttonHeight;
+
+    double width = entryWidth + 2 * height;
+
+    return Gfx::SizeF(width, height);
+}
+
+
+Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureEntry(PaintSurface& surface,
+                                                    const Gfx::SizeF& contentSize)
+{
+    _textPainter.begin(surface);
+    _textPainter.setFont( font() );
+
+    double entryHeight = font().size() * 2.5;
+    double entryWidth = contentSize.width() + 2 * _inset;
+
+    return Gfx::SizeF(entryWidth, entryHeight);
+}
+
+
+Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureIndicator(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    _textPainter.setFont( font() );
+
+    double h = font().size() * 2.5;
+    return Gfx::SizeF(h, h);
+}
+
+
+void PlatinumSpinBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                            const Gfx::RectF& rect,
+                                            Gfx::RectF& entryRect,
+                                            Gfx::RectF& upButtonRect,
+                                            Gfx::RectF& downButtonRect,
+                                            Gfx::RectF& textRect)
+{
+    double buttonWidth = rect.height();
+    if( 2 * buttonWidth > rect.width() )
+        buttonWidth = rect.width() / 2.0;
+
+    double entryW = rect.width() - 2 * buttonWidth;
+    if( entryW < 0 )
+        entryW = 0;
+
+    entryRect.setOrigin( Gfx::PointF(rect.x() + buttonWidth, rect.y()) );
+    entryRect.setSize( Gfx::SizeF(entryW, rect.height()) );
+
+    downButtonRect.setOrigin( Gfx::PointF(rect.x(), rect.y()) );
+    downButtonRect.setSize( Gfx::SizeF(buttonWidth, rect.height()) );
+
+    upButtonRect.setOrigin( Gfx::PointF(entryRect.x() + entryW, rect.y()) );
+    upButtonRect.setSize( Gfx::SizeF(buttonWidth, rect.height()) );
+
+    double textW = entryW - 2 * _inset;
+    if( textW < 0 )
+        textW = 0;
+
+    textRect.setOrigin( Gfx::PointF(entryRect.x() + _inset, entryRect.y()) );
+    textRect.setSize( Gfx::SizeF(textW, entryRect.height()) );
+}
+
+
+Gfx::RectF PlatinumSpinBoxRenderer::onLayoutEntry(PaintSurface& /*surface*/,
+                                                   const Gfx::RectF& entryRect)
+{
+    double textW = entryRect.width() - 2 * _inset;
+    if( textW < 0 )
+        textW = 0;
+
+    Gfx::RectF textRect;
+    textRect.setOrigin( Gfx::PointF(entryRect.x() + _inset, entryRect.y()) );
+    textRect.setSize( Gfx::SizeF(textW, entryRect.height()) );
+    return textRect;
+}
+
+
+const Painter& PlatinumSpinBoxRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    _textPainter.setFont( font() );
+    return _textPainter;
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderFrame(PaintContext& context,
+                                            const Gfx::RectF& /*rect*/,
+                                            const StyleOptions& options,
+                                            const Gfx::RectF& entryRect,
+                                            const Gfx::RectF& upButtonRect,
+                                            const Gfx::RectF& downButtonRect,
+                                            SpinBoxStyleFlags state,
+                                            ButtonStyleFlags upButtonState,
+                                            ButtonStyleFlags downButtonState)
+{
+    if( entryRect.width() <= 0 || entryRect.height() <= 0 )
+        return;
+
+    _bgPainter.begin(context);
+
+    Gfx::Brush bg = background() ? *background()
+                                 : Gfx::Brush( options.textBackground() );
+    _bgPainter.setBrush(bg);
+    _bgPainter.fillRect(entryRect);
+
+    Gfx::Pen cPen = contour() ? *contour()
+                               : options.contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    if( state.has(StyleFlags::Enabled) )
+    {
+        if( state.has(StyleFlags::Highlighted) || state.has(StyleFlags::Focused) )
+        {
+            cPen = Gfx::Pen( options.accentColor(), 
+                             cPen.size(), cPen.style(), 
+                             cPen.capStyle(), cPen.joinStyle() );
+        }
+    }
+
+    _bgPainter.setPen(cPen);
+
+    const double inset = _bgPainter.scaling().alignContour( cPen.size() ) / 2;
+
+    double bw = entryRect.width() - 2 * inset;
+    double bh = entryRect.height() - 2 * inset;
+    if( bw > 0 && bh > 0 )
+    {
+        Gfx::RectF borderRect( Gfx::PointF(entryRect.x() + inset, entryRect.y() + inset), 
+                               Gfx::SizeF(bw, bh) );
+        _bgPainter.drawRect(borderRect);
+    }
+
+    // Render indicators
+    _buttonPainter.begin(context);
+
+    Gfx::Pen indicatorPen = cPen;
+    _buttonPainter.setPen(indicatorPen);
+    _buttonPainter.setBrush( indicatorPen.color() );
+
+    if( downButtonRect.width() > 0 && downButtonRect.height() > 0 )
+        renderIndicator(_buttonPainter, downButtonRect, false, downButtonState, options);
+
+    if( upButtonRect.width() > 0 && upButtonRect.height() > 0 )
+        renderIndicator(_buttonPainter, upButtonRect, true, upButtonState, options);
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderEntry(PaintContext& /*context*/,
+                                            const Gfx::RectF& /*entryRect*/,
+                                            const StyleOptions& /*options*/,
+                                            SpinBoxStyleFlags /*state*/)
+{
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderUpButton(PaintContext& /*context*/,
+                                               const Gfx::RectF& /*buttonRect*/,
+                                               const StyleOptions& /*options*/,
+                                               SpinBoxStyleFlags /*state*/,
+                                               ButtonStyleFlags /*buttonState*/)
+{
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderDownButton(PaintContext& /*context*/,
+                                                 const Gfx::RectF& /*buttonRect*/,
+                                                 const StyleOptions& /*options*/,
+                                                 SpinBoxStyleFlags /*state*/,
+                                                 ButtonStyleFlags /*buttonState*/)
+{
+}
+
+
+void PlatinumSpinBoxRenderer::renderIndicator(Painter& painter,
+                                              const Gfx::RectF& rect,
+                                              bool up,
+                                              ButtonStyleFlags state,
+                                              const StyleOptions& options)
+{
+    painter.setClip(rect);
+
+    Gfx::Pen cPen = contour() ? *contour()
+                               : options.contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    if( state.has(StyleFlags::Highlighted) )
+    {
+        cPen = Gfx::Pen( options.accentColor(), 
+                         cPen.size(), cPen.style(), 
+                         cPen.capStyle(), cPen.joinStyle() );
+    }
+
+    painter.setPen(cPen);
+    painter.setBrush( cPen.color() );
+
+    const Gfx::Scaling& scaling = painter.scaling();
+
+    double buttonWidth = rect.width();
+    double buttonHeight = rect.height();
+    double pixelWidth = scaling.toLogical(1.0);
+
+    double triangleWidth = buttonWidth / 3;
+    triangleWidth = scaling.align(triangleWidth);
+
+    if( triangleWidth < pixelWidth * 2 )
+        return;
+
+    // even number of pixels
+    int widthPixels = Pt::lround(triangleWidth / pixelWidth);
+    if(widthPixels % 2 != 0)
+      triangleWidth += pixelWidth;
+
+    double triangleHeight = triangleWidth / 2.0;
+    triangleHeight = scaling.align(triangleHeight);
+
+    double x = (buttonWidth - triangleWidth) / 2;
+    x = scaling.align(x);
+    
+    double y = (buttonHeight - triangleHeight) / 2;
+    y = scaling.align(y);
+
+    x += rect.x();
+    y += rect.y();
+
+    Gfx::PointF triangle[4];
+
+    if( ! up )
+    {
+        triangle[0] = Gfx::PointF(x, y);
+        triangle[1] = Gfx::PointF(x + triangleWidth, y);
+        triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
+    }
+    else
+    {
+        triangle[0] = Gfx::PointF(x + triangleHeight, y);
+        triangle[1] = Gfx::PointF(x + triangleWidth, y + triangleHeight);
+        triangle[2] = Gfx::PointF(x, y + triangleHeight);
+    }
+
+    triangle[3] = triangle[0];
+
+    painter.fillPolygon(triangle, 3);
+    painter.drawPolyline(triangle, 4);
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderText(PaintContext& context,
+                                           const StyleOptions& /*options*/,
+                                           const Gfx::RectF& textRect,
+                                           const String& text,
+                                           const Gfx::PointF& textPos,
+                                           const Gfx::RectF& cursor,
+                                           SpinBoxStyleFlags state)
+{
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
+
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
+
+    _textPainter.drawText(textPos, text);
+
+    if( state.has(SpinBoxStyleFlags::Editable) && state.has(StyleFlags::Focused) )
+    {
+        Gfx::PointF top = cursor.topLeft();
+        Gfx::PointF bottom = cursor.bottomLeft();
+        _textPainter.drawLine(top, bottom);
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumLineEditRenderer
@@ -683,6 +1233,7 @@ void PlatinumCheckBoxRenderer::onRenderMnemonic(PaintContext& context,
 
 PlatinumLineEditRenderer::PlatinumLineEditRenderer(std::size_t refs)
 : LineEditRenderer(refs)
+, _inset(5)
 {
 }
 
@@ -692,336 +1243,159 @@ PlatinumLineEditRenderer::~PlatinumLineEditRenderer()
 }
 
 
-void PlatinumLineEditRenderer::onPrepare(const LineEdit& le, 
-                                         const StyleOptions& options,
-                                         Gfx::Brush& brush,
-                                         Gfx::Pen& contour,
-                                         Gfx::Font& font,
-                                         Gfx::Pen& textPen) const
+LineEditRenderer* PlatinumLineEditRenderer::onCreate() const
 {
+    return new PlatinumLineEditRenderer();
+}
 
-    if( ! le.hasFocus() && le.isEmpty() )
-    {
-        textPen = contour;
-    }
 
-    if( le.isEnabled() )
+void PlatinumLineEditRenderer::onPrepare(const StyleOptions& /*options*/)
+{
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+Gfx::SizeF PlatinumLineEditRenderer::onMeasureFrame(PaintSurface& surface,
+                                                const Gfx::SizeF& contentSize)
+{
+    _textPainter.begin(surface);
+    _textPainter.setFont( font() );
+
+    double entryHeight = font().size() * 2.5;
+    double entryWidth = contentSize.width() + 2 * _inset;
+    return Gfx::SizeF(entryWidth, entryHeight);
+}
+
+
+Gfx::RectF PlatinumLineEditRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                               const Gfx::RectF& rect)
+{
+    double w = rect.width() - 2 * _inset;
+    double h = rect.height() - 2 * _inset;
+    if( w < 0 ) w = 0;
+    if( h < 0 ) h = 0;
+
+    Gfx::RectF textRect(rect);
+    textRect.setOrigin( Gfx::PointF(rect.x() + _inset, rect.y() + _inset) );
+    textRect.setSize( Gfx::SizeF(w, h) );
+    return textRect;
+}
+
+
+const Painter& PlatinumLineEditRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    _textPainter.setFont( font() );
+    return _textPainter;
+}
+
+
+void PlatinumLineEditRenderer::onRenderEntry(PaintContext& context,
+                                                   const Gfx::RectF& rect,
+                                                   const StyleOptions& options,
+                                                   LineEditStyleFlags state)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _bgPainter.begin(context);
+
+    Gfx::Brush bg = background();
+
+    Gfx::Pen cPen = contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    if( state.has(StyleFlags::Enabled) )
     {
-        if( le.isHighlighted() || le.hasFocus() )
+        if( state.has(StyleFlags::Highlighted) || state.has(StyleFlags::Focused) )
         {
-            contour = Gfx::Pen( options.accentColor(), 
-                                contour.size(), contour.style(), 
-                                contour.capStyle(), contour.joinStyle() );
+            cPen = Gfx::Pen( options.accentColor(), 
+                             cPen.size(), cPen.style(), 
+                             cPen.capStyle(), cPen.joinStyle() );
         }
     }
+
+    _bgPainter.setBrush(bg);
+    _bgPainter.setPen(cPen);
+
+    const double inset = _bgPainter.scaling().alignContour( cPen.size() ) / 2;
+
+    double bw = rect.width() - 2 * inset;
+    double bh = rect.height() - 2 * inset;
+
+    _bgPainter.fillRect(rect);
+
+    if( bw > 0 && bh > 0 )
+    {
+        Gfx::RectF borderRect( Gfx::PointF(rect.x() + inset, rect.y() + inset), 
+                               Gfx::SizeF(bw, bh) );
+        _bgPainter.drawRect(borderRect);
+    }
 }
 
 
-void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le, 
+void PlatinumLineEditRenderer::onRenderSelection(PaintContext& context,
+                                                  const Gfx::RectF& textRect,
                                                   const StyleOptions& options,
-                                                  Painter& painter, 
-                                                  const Gfx::RectF& rect,
-                                                  const Gfx::Pen& contour,
-                                                  const Gfx::Brush& brush) const
+                                                  const Gfx::RectF& selection,
+                                                  LineEditStyleFlags /*state*/)
 {
-    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
+    if( selection.width() <= 0 || textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
 
-    Gfx::RectF borderRect( le.size() );
-    borderRect.shift(inset, inset);
-    borderRect.shrink(2 * inset, 2 * inset);
+    Gfx::Brush selBg = selectionBackground() ? *selectionBackground()
+                                             : Gfx::Brush( options.accentColor() );
 
-    painter.setBrush(brush);
-    painter.fillRect(borderRect);
-
-    painter.setPen(contour);
-    painter.drawRect(borderRect);
+    _selectionPainter.begin(context);
+    _selectionPainter.setClip(textRect);
+    _selectionPainter.setBrush(selBg);
+    _selectionPainter.fillRect(selection);
 }
 
 
-void PlatinumLineEditRenderer::onRenderText(const LineEdit& le, 
+void PlatinumLineEditRenderer::onRenderText(PaintContext& context,
+                                            const Gfx::RectF& textRect,
                                             const StyleOptions& options,
-                                            Painter& painter, 
-                                            const Gfx::RectF& rect,
                                             const String& text,
                                             const Gfx::PointF& textPos,
-                                            const Gfx::Font& font,
-                                            const Gfx::Pen& textPen) const
+                                            LineEditStyleFlags state)
 {
-    painter.setPen(textPen);
-    painter.setFont(font);
-    painter.drawText(textPos, text);
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
+
+    if( state.has(LineEditStyleFlags::Placeholder) )
+        _textPainter.setPen( contour() );
+    else
+        _textPainter.setPen( textColor() );
+
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
+    _textPainter.setFont( font() );
+    _textPainter.drawText(textPos, text);
 }
 
 
-void PlatinumLineEditRenderer::onRenderCursor(const LineEdit& le, 
-                                              const StyleOptions& options,
-                                              Painter& painter, 
-                                              const Gfx::RectF& rect,
-                                              const Gfx::RectF& cursorRect ) const
+void PlatinumLineEditRenderer::onRenderCursor(PaintContext& context,
+                                              const Gfx::RectF& textRect,
+                                              const StyleOptions& /*options*/,
+                                              const Gfx::RectF& cursor,
+                                              LineEditStyleFlags state)
 {
-    painter.setPen( options.textColor() );
-    
-    painter.drawLine( cursorRect.topLeft(),
-                      cursorRect.bottomLeft() );
-}
+    if( ! state.has(LineEditStyleFlags::Editable) )
+        return;
 
-///////////////////////////////////////////////////////////////////////////////
-// PlatinumMenuRenderer
-///////////////////////////////////////////////////////////////////////////////
+    if( ! state.has(StyleFlags::Focused) )
+        return;
 
-PlatinumMenuRenderer::PlatinumMenuRenderer(std::size_t refs)
-: MenuRenderer(refs)
-{
-}
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
 
-    
-PlatinumMenuRenderer::~PlatinumMenuRenderer()
-{
-}
+    _textPainter.setPen( textColor() );
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
 
-
-void PlatinumMenuRenderer::onPrepare(const Menu& m, 
-                                     const StyleOptions& options,
-                                     Gfx::Brush& brush,
-                                     Gfx::Pen& contour) const
-{
-}
-
-
-void PlatinumMenuRenderer::onRenderBackground(const Menu& m, 
-                                              const StyleOptions& options,
-                                              Painter& painter, 
-                                              const Gfx::RectF& rect,
-                                              const Gfx::Brush& brush,
-                                              const Gfx::Pen& contour) const
-{
-    Gfx::SizeF size = m.size();
-
-    size -= 1;
-
-    double inset = painter.scaling().alignContour( contour.size() ) / 2;
-
-    //
-    // icon strip on the left side
-    //
-    
-    // TODO: use separate render funtion for iconstrip
-
-    Pt::ssize_t iconWidth = m.iconWidth();
-
-    if(iconWidth > 0)
-    {
-        Gfx::RectF iconStrip( Gfx::PointF(0, 0),
-                              Gfx::SizeF(iconWidth, size.height()) );
-                
-         Gfx::Brush brush = Gfx::Brush::verticalGradient(brush.color(),
-                                                         Gfx::Color(253, 253, 253) );
-
-        painter.setBrush(brush);
-        painter.fillRect(iconStrip);
-    }
-
-    //
-    // menu border
-    //
-    Gfx::RectF borderRect( m.size() );
-    borderRect.shift(inset, inset);
-    borderRect.shrink(2 * inset, 2 * inset);
-
-    painter.setPen(contour);
-    painter.drawRect(borderRect);
-}
-
-
-void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m, 
-                                         const StyleOptions& options,
-                                         const Gfx::Image& icon,
-                                         PixmapSurface& picture,
-                                         Gfx::Brush& brush,
-                                         Gfx::Pen& contour,
-                                         Gfx::Font& font,
-                                         Gfx::Pen& textPen) const
-{
-    picture.reset(icon);
-
-    if( m.isHighlighted() )
-        brush =  options.highlightColor();
-}
-
-
-void PlatinumMenuRenderer::onRenderItem(const MenuItem& m, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        Gfx::Brush& brush,
-                                        Gfx::Pen& contour) const
-{
-    bool highlight = m.isHighlighted();
-    if(highlight)
-    {
-        painter.setBrush(brush);
-        painter.fillRect(rect);
-    }
-}
-
-
-void PlatinumMenuRenderer::onRenderIndicator(const MenuItem& m, 
-                                             const StyleOptions& options,
-                                             Painter& painter, 
-                                             const Gfx::RectF& rect) const
-{
-    static const double indicatorWidth = 5.0;
-
-    double x = m.size().width() - indicatorWidth - m.padding().right();
-    double y = m.size().height() / 2;
-
-    Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
-                                 Gfx::PointF(x + 1, y),
-                                 Gfx::PointF(x - 3, y + 4) };
-  
-    Gfx::Brush brush( m.textColor() );
-    painter.setBrush(brush);
-    painter.fillPolygon(indicator, 3);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PlatinumMenuBarRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-PlatinumMenuBarRenderer::PlatinumMenuBarRenderer(std::size_t refs)
-: MenuBarRenderer(refs)
-{
-}
-
-    
-PlatinumMenuBarRenderer::~PlatinumMenuBarRenderer()
-{
-}
-
-
-void PlatinumMenuBarRenderer::onPrepare(const MenuBar& m, 
-                                        const StyleOptions& options,
-                                        Gfx::Brush& brush,
-                                        Gfx::Pen& contour) const
-{
-}
-
-
-void PlatinumMenuBarRenderer::onRenderBackground(const MenuBar& m, 
-                                                 const StyleOptions& options,
-                                                 Painter& painter, 
-                                                 const Gfx::RectF& rect,
-                                                 const Gfx::Brush& brush,
-                                                 const Gfx::Pen& contour) const
-{
-    painter.setBrush(brush);
-    painter.fillRect(rect);
-}
-
-
-void PlatinumMenuBarRenderer::onPrepareItem(const MenuBarItem& m, 
-                                            const StyleOptions& options, 
-                                            Gfx::Brush& brush,
-                                            Gfx::Pen& contour,
-                                            Gfx::Font& font,
-                                            Gfx::Pen& textPen) const
-{
-    if( m.isHighlighted() )
-        brush = options.highlightColor();
-}
-
-
-void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m, 
-                                           const StyleOptions& options,
-                                           Painter& painter, 
-                                           const Gfx::RectF& rect,
-                                           const Gfx::Brush& brush,
-                                           const Gfx::Pen& contour) const
-{
-    if( m.isHighlighted() )
-    {
-        painter.setBrush(brush);
-        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), m.size()) );
-    }
-}
-
-
-void PlatinumMenuBarRenderer::onRenderItemText(const MenuBarItem& m,
-                                               const StyleOptions& options,
-                                               Painter& painter, 
-                                               const Gfx::RectF& rect,
-                                               const String& text,
-                                               const Gfx::PointF& textPos,
-                                               const Gfx::Font& font, 
-                                               const Gfx::Pen& textPen,
-                                               const Gfx::RectF& mnemonic) const 
-{
-    painter.setFont(font);
-    painter.setPen(textPen);
-    painter.drawText(textPos, text);
-
-    if( ! mnemonic.isNull() )
-    {
-        double menmonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
-                          Gfx::PointF(mnemonic.right(), menmonicY) );
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PlatinumScrollBarRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-PlatinumScrollBarRenderer::PlatinumScrollBarRenderer(std::size_t refs)
-: ScrollBarRenderer(refs)
-{
-}
-
-    
-PlatinumScrollBarRenderer::~PlatinumScrollBarRenderer()
-{
-}
-
-
-void PlatinumScrollBarRenderer::onPrepare(const ScrollBar& s,
-                                          const StyleOptions& options,
-                                          Gfx::Brush& background,
-                                          Gfx::Brush& foreground,
-                                          Gfx::Pen& contour) const
-{
-}
-
-
-void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
-                                         const StyleOptions& options,
-                                         Painter& painter,
-                                         const Gfx::RectF& rect,
-                                         const Gfx::RectF& handleRect,
-                                         const Gfx::Brush& background,
-                                         const Gfx::Brush& foreground,
-                                         const Gfx::Pen& contour) const
-{
-    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
-
-    Gfx::RectF borderRect = Gfx::RectF( s.size() );
-    borderRect.shift(inset, inset);
-    borderRect.shrink(2 * inset, 2 * inset);
-
-    Gfx::RectF gripRect =  handleRect;
-    gripRect.shift(inset, inset);
-    gripRect.shrink(2 * inset, 2 * inset);
-
-    painter.setBrush(background);
-    painter.fillRect(rect);
-
-    painter.setPen(contour);
-    painter.drawRect(borderRect);
-
-    painter.setBrush(foreground);
-    painter.fillRect(gripRect);
-
-    painter.setPen(contour);
-    painter.drawRect(gripRect);
+    _textPainter.drawLine( cursor.topLeft(), cursor.bottomLeft() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1039,54 +1413,149 @@ PlatinumProgressBarRenderer::~PlatinumProgressBarRenderer()
 }
 
 
-void PlatinumProgressBarRenderer::onPrepare(const ProgressBar&    p,
-                                            const StyleOptions&  options,
-                                            Gfx::Brush&          background,
-                                            Gfx::Brush&          foreground,
-                                            Gfx::Pen&            contour,
-                                            Gfx::Pen&            textPen,
-                                            Gfx::Font&            font
-                                            ) const
+ProgressBarRenderer* PlatinumProgressBarRenderer::onCreate() const
 {
+    return new PlatinumProgressBarRenderer();
 }
 
-void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
-                                            const StyleOptions& options,
-                                            Painter& painter,
-                                            const Gfx::RectF& rect,
-                                            const Gfx::Brush& background,
-                                            const Gfx::Brush& foreground,
-                                            const Gfx::Pen& contour,
-                                            const Gfx::Pen& textPen,
-                                            const Gfx::Font& font
-                                         ) const
+void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options)
 {
-    const Gfx::Scaling& scaling = painter.scaling();
+    _trackPainter.setBrush( options.foreground() );
 
-    double barHeight = scaling.align(3.0);
-    
-    double boxY = p.size().height() / 2 - barHeight / 2;
-    boxY = scaling.align(boxY);
+    _chunkPainter.setBrush( foreground() );
 
-    Gfx::PointF barPos(0.0, boxY);
-    Gfx::SizeF barSize(p.size().width(), barHeight);
-    Gfx::RectF barRect(barPos, barSize);
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
 
-    Gfx::SizeF progressSize( barSize.width() * p.progress(), barHeight );
-    Gfx::RectF progressRect(barPos, progressSize);
-
-    painter.setBrush(background);
-    painter.fillRect(barRect);
-
-    painter.setBrush(foreground);
-    painter.fillRect(progressRect);
-
-    painter.fillEllipse( Gfx::PointF(progressRect.width() - barHeight / 2, 
-                                     progressRect.y()),
-                         Gfx::SizeF(progressRect.height(), 
-                                    progressRect.height()) );
+    _invertTextPainter.setFont( font() );
+    _invertTextPainter.setPen( Gfx::Pen(options.textBackground().color()) );
 }
 
+Gfx::SizeF PlatinumProgressBarRenderer::onMeasureFrame(PaintSurface& surface,
+                                                       const Gfx::SizeF& contentSize)
+{
+    _textPainter.begin(surface);
+
+    Gfx::SizeF barSz = onMeasureBar(surface);
+    Gfx::SizeF outerSz = barSz;
+
+    if (contentSize.width() > outerSz.width())
+        outerSz.setWidth(contentSize.width());
+    if (contentSize.height() > outerSz.height())
+        outerSz.setHeight(contentSize.height());
+
+    return outerSz;
+}
+
+Gfx::SizeF PlatinumProgressBarRenderer::onMeasureBar(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    double barHeight = _textPainter.scaling().align(3.0);
+    return Gfx::SizeF(100.0, barHeight); // arbitrary width for measure
+}
+
+void PlatinumProgressBarRenderer::onLayoutFrame(PaintSurface& surface,
+                                                const Gfx::RectF& rect,
+                                                const Gfx::SizeF& barSize,
+                                                const Gfx::SizeF& textSize,
+                                                Gfx::RectF& barRect,
+                                                Gfx::RectF& textRect)
+{
+    _textPainter.begin(surface);
+    double barHeight = _textPainter.scaling().align(3.0);
+    if( barHeight > rect.height() )
+        barHeight = rect.height();
+
+    double boxY = (rect.height() - barHeight) / 2.0;
+    if( boxY < 0 )
+        boxY = 0;
+    boxY = _textPainter.scaling().align(boxY);
+
+    barRect = Gfx::RectF(Gfx::PointF(rect.x(), rect.y() + boxY), Gfx::SizeF(rect.width(), barHeight));
+    textRect = rect;
+}
+
+void PlatinumProgressBarRenderer::onLayoutBar(PaintSurface& surface,
+                                              const Gfx::RectF& barRect,
+                                              float progressRatio,
+                                              Gfx::RectF& trackRect,
+                                              Gfx::RectF& chunkRect)
+{
+    trackRect = barRect;
+    chunkRect = Gfx::RectF(Gfx::PointF(barRect.x(), barRect.y()), 
+                           Gfx::SizeF(barRect.width() * progressRatio, barRect.height()));
+}
+
+const Painter& PlatinumProgressBarRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+void PlatinumProgressBarRenderer::onRenderTrack(PaintContext& context,
+                                                const Gfx::RectF& trackRect,
+                                                const StyleOptions& options,
+                                                ProgressBarStyleFlags state)
+{
+    if( trackRect.width() <= 0 || trackRect.height() <= 0 )
+        return;
+
+    _trackPainter.begin(context);
+    _trackPainter.fillRect(trackRect);
+}
+
+void PlatinumProgressBarRenderer::onRenderChunk(PaintContext& context,
+                                                const Gfx::RectF& chunkRect,
+                                                const StyleOptions& options,
+                                                ProgressBarStyleFlags state)
+{
+    if( chunkRect.width() <= 0 || chunkRect.height() <= 0 )
+        return;
+
+    _chunkPainter.begin(context);
+    _chunkPainter.setClip(chunkRect);
+    _chunkPainter.fillRect(chunkRect);
+
+    double d = chunkRect.height();
+    _chunkPainter.fillEllipse( Gfx::PointF(chunkRect.x() + chunkRect.width() - d / 2, 
+                                           chunkRect.y()),
+                               Gfx::SizeF(d, d) );
+}
+
+void PlatinumProgressBarRenderer::onRenderText(PaintContext& context,
+                                               const Gfx::RectF& textRect,
+                                               const Gfx::RectF& chunkRect,
+                                               const StyleOptions& options,
+                                               const String& text,
+                                               const Gfx::PointF& textPos,
+                                               ProgressBarStyleFlags state)
+{
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
+
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
+    _textPainter.drawText(textPos, text);
+
+    bool intersects = chunkRect.left() < textRect.right() && chunkRect.right() > textRect.left() &&
+                      chunkRect.top() < textRect.bottom() && chunkRect.bottom() > textRect.top();
+
+    // Overwrite the text with the inverted color, clipped to intersection of chunk and text area
+    if( chunkRect.width() > 0 && chunkRect.height() > 0 && intersects )
+    {
+        double clipL = std::max(chunkRect.left(), textRect.left());
+        double clipT = std::max(chunkRect.top(), textRect.top());
+        double clipR = std::min(chunkRect.right(), textRect.right());
+        double clipB = std::min(chunkRect.bottom(), textRect.bottom());
+
+        Gfx::RectF clipRect(Gfx::PointF(clipL, clipT),
+                            Gfx::SizeF(clipR - clipL, clipB - clipT));
+
+        _invertTextPainter.begin(context);
+        _invertTextPainter.setClip(clipRect);
+        _invertTextPainter.drawText(textPos, text);
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumSliderRenderer
@@ -1103,57 +1572,529 @@ PlatinumSliderRenderer::~PlatinumSliderRenderer()
 }
 
 
-void PlatinumSliderRenderer::onPrepare( const Slider& s,
-                                        const StyleOptions& options,
-                                        Gfx::Brush& background,
-                                        Gfx::Brush& foreground,
-                                        Gfx::Pen& contour,
-                                        Gfx::Pen& textPen,
-                                        Gfx::Font& font) const
+SliderRenderer* PlatinumSliderRenderer::onCreate() const
 {
-    bool highlight = s.isHighlighted() && s.isEnabled();
-
-    foreground = highlight ? options.accentColor() 
-                           : options.contour().color();
+    return new PlatinumSliderRenderer();
 }
 
 
-void PlatinumSliderRenderer::onRender( const Slider& s,
-                                       const StyleOptions& options,
-                                       Painter& painter,
-                                       const Gfx::RectF& rect,
-                                       const Gfx::Brush& background,
-                                       const Gfx::Brush& foreground,
-                                       const Gfx::Pen& contour,
-                                       const Gfx::Pen& textPen,
-                                       const Gfx::Font& font) const
+void PlatinumSliderRenderer::onPrepare(const StyleOptions& options)
 {
-    double handleWidth = 7.0;
+    _trackPainter.setBrush( options.foreground() );
+    _handlePainter.setBrush( foreground() );
+}
+
+
+Gfx::SizeF PlatinumSliderRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                   const Gfx::SizeF& contentSize)
+{
     double handleHeight = 17.0;
-    double sliderHeight = 5.0;
+    return Gfx::SizeF(contentSize.width(), handleHeight);
+}
 
-    double sliderX = handleWidth / 2;
-    double sliderY = s.size().height() / 2 - sliderHeight / 2;
-    double sliderWidth = s.size().width() - handleWidth;
 
-    Gfx::RectF boxRect( Gfx::PointF(sliderX, sliderY),
-                        Gfx::SizeF(sliderWidth, sliderHeight) );
+Gfx::SizeF PlatinumSliderRenderer::onMeasureTrack(PaintSurface& /*surface*/)
+{
+    double trackHeight = 5.0;
+    return Gfx::SizeF(0.0, trackHeight);
+}
 
-    painter.setBrush(background);
-    painter.fillRect(boxRect);
 
-    int range = s.maximum() - s.minimum();
-    int offset = s.position() - s.minimum();
-    double handleOffset = sliderWidth * offset / range;
+Gfx::SizeF PlatinumSliderRenderer::onMeasureHandle(PaintSurface& /*surface*/)
+{
+    return Gfx::SizeF(7.0, 17.0);
+}
 
-    double handleX = handleOffset;
-    double handleY = s.size().height() / 2 - handleHeight / 2;
 
-    Gfx::RectF handleRect( Gfx::PointF(handleX, handleY),
-                           Gfx::SizeF(handleWidth, handleHeight) );
+void PlatinumSliderRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                           const Gfx::RectF& rect,
+                                           const Gfx::SizeF& trackSize,
+                                           const Gfx::SizeF& handleSize,
+                                           Gfx::RectF& trackRect,
+                                           Gfx::RectF& handleRect)
+{
+    double handleWidth = handleSize.width();
+    if( handleWidth > rect.width() )
+        handleWidth = rect.width();
 
-    painter.setBrush(foreground);
-    painter.fillRect(handleRect);
+    double trackHeight = trackSize.height();
+    if( trackHeight > rect.height() )
+        trackHeight = rect.height();
+
+    double trackX = rect.x() + handleWidth / 2;
+    double trackY = rect.y() + (rect.height() - trackHeight) / 2.0;
+    if( trackY < rect.y() )
+        trackY = rect.y();
+
+    double trackWidth = rect.width() - handleWidth;
+    if( trackWidth < 0.0 )
+        trackWidth = 0.0;
+
+    trackRect = Gfx::RectF( Gfx::PointF(trackX, trackY),
+                            Gfx::SizeF(trackWidth, trackHeight) );
+
+    double handleH = handleSize.height();
+    if( handleH > rect.height() )
+        handleH = rect.height();
+
+    handleRect = Gfx::RectF( Gfx::PointF(rect.x(), rect.y()),
+                             Gfx::SizeF(handleWidth, handleH) );
+}
+
+
+void PlatinumSliderRenderer::onLayoutHandle(PaintSurface& /*surface*/,
+                                            const Gfx::RectF& trackRect,
+                                            float fraction,
+                                            Gfx::RectF& handleRect)
+{
+    double handleWidth = handleRect.width();
+    double handleHeight = handleRect.height();
+
+    double handleX = trackRect.x() + trackRect.width() * fraction - handleWidth / 2;
+    double handleY = trackRect.y() + trackRect.height() / 2 - handleHeight / 2;
+
+    handleRect = Gfx::RectF( Gfx::PointF(handleX, handleY),
+                             Gfx::SizeF(handleWidth, handleHeight) );
+}
+
+
+void PlatinumSliderRenderer::onRenderTrack(PaintContext& context,
+                                           const Gfx::RectF& trackRect,
+                                           const StyleOptions& /*options*/,
+                                           SliderStyleFlags /*state*/)
+{
+    if( trackRect.width() <= 0 || trackRect.height() <= 0 )
+        return;
+
+    _trackPainter.begin(context);
+    _trackPainter.fillRect(trackRect);
+}
+
+
+void PlatinumSliderRenderer::onRenderHandle(PaintContext& context,
+                                            const Gfx::RectF& handleRect,
+                                            const StyleOptions& /*options*/,
+                                            SliderStyleFlags state)
+{
+    if( handleRect.width() <= 0 || handleRect.height() <= 0 )
+        return;
+
+    if( state.has(StyleFlags::Highlighted) )
+        _handlePainter.setBrush( foreground() );
+    else
+        _handlePainter.setBrush( Gfx::Brush(contour().color()) );
+
+    _handlePainter.begin(context);
+    _handlePainter.fillRect(handleRect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumScrollBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumScrollBarRenderer::PlatinumScrollBarRenderer(std::size_t refs)
+: ScrollBarRenderer(refs)
+{
+}
+
+    
+PlatinumScrollBarRenderer::~PlatinumScrollBarRenderer()
+{
+}
+
+
+ScrollBarRenderer* PlatinumScrollBarRenderer::onCreate() const
+{
+    return new PlatinumScrollBarRenderer();
+}
+
+
+void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& /*options*/)
+{
+    _trackPainter.setBrush( background() );
+    _trackPainter.setPen( contour() );
+    _handlePainter.setBrush( Gfx::Brush(contour().color()) );
+    _handlePainter.setPen( contour() );
+    _buttonPainter.setBrush( background() );
+    _buttonPainter.setPen( contour() );
+}
+
+
+Gfx::SizeF PlatinumScrollBarRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                      const Gfx::SizeF& contentSize,
+                                                      Direction direction)
+{
+    double thickness = 16.0;
+
+    if( direction == Direction::Top || direction == Direction::Bottom )
+        return Gfx::SizeF(thickness, contentSize.height());
+
+    return Gfx::SizeF(contentSize.width(), thickness);
+}
+
+
+Gfx::SizeF PlatinumScrollBarRenderer::onMeasureTrack(PaintSurface& /*surface*/,
+                                                      Direction direction)
+{
+    double thickness = 16.0;
+
+    if( direction == Direction::Top || direction == Direction::Bottom )
+        return Gfx::SizeF(thickness, 0.0);
+
+    return Gfx::SizeF(0.0, thickness);
+}
+
+
+Gfx::SizeF PlatinumScrollBarRenderer::onMeasureHandle(PaintSurface& /*surface*/,
+                                                       Direction direction)
+{
+    double minLength = 16.0;
+    double thickness = 16.0;
+
+    if( direction == Direction::Top || direction == Direction::Bottom )
+        return Gfx::SizeF(thickness, minLength);
+
+    return Gfx::SizeF(minLength, thickness);
+}
+
+
+Gfx::SizeF PlatinumScrollBarRenderer::onMeasureButton(PaintSurface& /*surface*/,
+                                                       Direction direction)
+{
+    double thickness = 16.0;
+
+    if( direction == Direction::Top || direction == Direction::Bottom )
+        return Gfx::SizeF(thickness, thickness);
+
+    return Gfx::SizeF(thickness, thickness);
+}
+
+
+void PlatinumScrollBarRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                              const Gfx::RectF& rect,
+                                              Direction direction,
+                                              const Gfx::SizeF& buttonSize,
+                                              Gfx::RectF& trackRect,
+                                              Gfx::RectF& decreaseRect,
+                                              Gfx::RectF& increaseRect)
+{
+    // Degenerate case: no space at all
+    if( rect.width() <= 0 || rect.height() <= 0 )
+    {
+        decreaseRect = Gfx::RectF();
+        increaseRect = Gfx::RectF();
+        trackRect = Gfx::RectF();
+        return;
+    }
+
+    bool vertical = (direction == Direction::Top || direction == Direction::Bottom);
+
+    if( vertical )
+    {
+        double totalLen = rect.height();
+        double btnH = buttonSize.height();
+        double minThumb = btnH; // minimum useful thumb length
+
+        if( totalLen >= 2 * btnH + minThumb )
+        {
+            // Normal case: two buttons plus track
+            decreaseRect = Gfx::RectF( Gfx::PointF(rect.x(), rect.y()),
+                                       Gfx::SizeF(rect.width(), btnH) );
+
+            increaseRect = Gfx::RectF( Gfx::PointF(rect.x(), rect.y() + totalLen - btnH),
+                                       Gfx::SizeF(rect.width(), btnH) );
+
+            double trackY = rect.y() + btnH;
+            double trackH = totalLen - 2 * btnH;
+
+            trackRect = Gfx::RectF( Gfx::PointF(rect.x(), trackY),
+                                    Gfx::SizeF(rect.width(), trackH) );
+        }
+        else
+        {
+            // Tight case: buttons collapse, entire rect becomes track
+            decreaseRect = Gfx::RectF();
+            increaseRect = Gfx::RectF();
+            trackRect = rect;
+        }
+    }
+    else
+    {
+        double totalLen = rect.width();
+        double btnW = buttonSize.width();
+        double minThumb = btnW;
+
+        if( totalLen >= 2 * btnW + minThumb )
+        {
+            // Normal case: two buttons plus track
+            decreaseRect = Gfx::RectF( Gfx::PointF(rect.x(), rect.y()),
+                                       Gfx::SizeF(btnW, rect.height()) );
+
+            increaseRect = Gfx::RectF( Gfx::PointF(rect.x() + totalLen - btnW, rect.y()),
+                                       Gfx::SizeF(btnW, rect.height()) );
+
+            double trackX = rect.x() + btnW;
+            double trackW = totalLen - 2 * btnW;
+
+            trackRect = Gfx::RectF( Gfx::PointF(trackX, rect.y()),
+                                    Gfx::SizeF(trackW, rect.height()) );
+        }
+        else
+        {
+            // Tight case: buttons collapse, entire rect becomes track
+            decreaseRect = Gfx::RectF();
+            increaseRect = Gfx::RectF();
+            trackRect = rect;
+        }
+    }
+}
+
+
+void PlatinumScrollBarRenderer::onLayoutHandle(PaintSurface& /*surface*/,
+                                               const Gfx::RectF& trackRect,
+                                               Direction direction,
+                                               float fraction,
+                                               float viewProportion,
+                                               Gfx::RectF& handleRect)
+{
+    bool vertical = (direction == Direction::Top || direction == Direction::Bottom);
+
+    double minHandleLen = 16.0;
+
+    if( vertical )
+    {
+        double trackLen = trackRect.height();
+        double handleLen = trackLen * viewProportion;
+        if( handleLen < minHandleLen )
+            handleLen = minHandleLen;
+        if( handleLen > trackLen )
+            handleLen = trackLen;
+
+        double travel = trackLen - handleLen;
+        double handleY = trackRect.y() + travel * fraction;
+
+        handleRect = Gfx::RectF( Gfx::PointF(trackRect.x(), handleY),
+                                 Gfx::SizeF(trackRect.width(), handleLen) );
+    }
+    else
+    {
+        double trackLen = trackRect.width();
+        double handleLen = trackLen * viewProportion;
+        if( handleLen < minHandleLen )
+            handleLen = minHandleLen;
+        if( handleLen > trackLen )
+            handleLen = trackLen;
+
+        double travel = trackLen - handleLen;
+        double handleX = trackRect.x() + travel * fraction;
+
+        handleRect = Gfx::RectF( Gfx::PointF(handleX, trackRect.y()),
+                                 Gfx::SizeF(handleLen, trackRect.height()) );
+    }
+}
+
+
+void PlatinumScrollBarRenderer::onRenderTrack(PaintContext& context,
+                                              const Gfx::RectF& trackRect,
+                                              const StyleOptions& /*options*/,
+                                              Direction /*direction*/,
+                                              ScrollBarStyleFlags /*state*/)
+{
+    if( trackRect.width() <= 0 || trackRect.height() <= 0 )
+        return;
+
+    _trackPainter.begin(context);
+    _trackPainter.fillRect(trackRect);
+}
+
+
+void PlatinumScrollBarRenderer::onRenderHandle(PaintContext& context,
+                                               const Gfx::RectF& handleRect,
+                                               const StyleOptions& options,
+                                               Direction /*direction*/,
+                                               ScrollBarStyleFlags state)
+{
+    if( handleRect.width() <= 0 || handleRect.height() <= 0 )
+        return;
+
+    if( state.has(ScrollBarStyleFlags::HandleHovered) ||
+        state.has(ScrollBarStyleFlags::HandlePressed) )
+        _handlePainter.setBrush( Gfx::Brush(options.accentColor()) );
+    else
+        _handlePainter.setBrush( Gfx::Brush(contour().color()) );
+
+    _handlePainter.begin(context);
+    _handlePainter.fillRect(handleRect);
+}
+
+
+void PlatinumScrollBarRenderer::onRenderDecreaseButton(PaintContext& context,
+                                                       const Gfx::RectF& buttonRect,
+                                                       const StyleOptions& options,
+                                                       Direction direction,
+                                                       ScrollBarStyleFlags /*state*/,
+                                                       ButtonStyleFlags buttonState)
+{
+    if( buttonRect.width() <= 0 || buttonRect.height() <= 0 )
+        return;
+
+    _trackPainter.begin(context);
+    _trackPainter.fillRect(buttonRect);
+
+    _buttonPainter.begin(context);
+    _buttonPainter.setClip(buttonRect);
+
+    Gfx::Pen cPen = contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    if( buttonState.has(StyleFlags::Highlighted) ||
+        buttonState.has(ButtonStyleFlags::Pressed) )
+    {
+        cPen = Gfx::Pen( options.accentColor(), cPen.size(), cPen.style(),
+                         cPen.capStyle(), cPen.joinStyle() );
+    }
+
+    _buttonPainter.setPen(cPen);
+    _buttonPainter.setBrush( cPen.color() );
+
+    const Gfx::Scaling& scaling = _buttonPainter.scaling();
+    double pixelWidth = scaling.toLogical(1.0);
+    bool vertical = (direction == Direction::Top || direction == Direction::Bottom);
+
+    double dim = vertical ? buttonRect.width() : buttonRect.height();
+
+    double triangleWidth = dim / 2.0;
+    triangleWidth = scaling.align(triangleWidth);
+
+    if( triangleWidth < pixelWidth * 2 )
+        return;
+
+    int widthPixels = Pt::lround(triangleWidth / pixelWidth);
+    if( widthPixels % 2 != 0 )
+        triangleWidth += pixelWidth;
+
+    double triangleHeight = triangleWidth / 2.0;
+    triangleHeight = scaling.align(triangleHeight);
+
+    double x = (buttonRect.width() - triangleWidth) / 2.0;
+    x = scaling.align(x);
+
+    double y = (buttonRect.height() - triangleHeight) / 2.0;
+    y = scaling.align(y);
+
+    x += buttonRect.x();
+    y += buttonRect.y();
+
+    Gfx::PointF triangle[4];
+
+    if( vertical )
+    {
+        // Up arrow
+        triangle[0] = Gfx::PointF(x + triangleHeight, y);
+        triangle[1] = Gfx::PointF(x + triangleWidth, y + triangleHeight);
+        triangle[2] = Gfx::PointF(x, y + triangleHeight);
+    }
+    else
+    {
+        // Left arrow
+        double lx = buttonRect.x() + (buttonRect.width() - triangleHeight) / 2.0;
+        double ly = buttonRect.y() + (buttonRect.height() - triangleWidth) / 2.0;
+        lx = scaling.align(lx);
+        ly = scaling.align(ly);
+
+        triangle[0] = Gfx::PointF(lx, ly + triangleWidth / 2.0);
+        triangle[1] = Gfx::PointF(lx + triangleHeight, ly);
+        triangle[2] = Gfx::PointF(lx + triangleHeight, ly + triangleWidth);
+    }
+
+    triangle[3] = triangle[0];
+    _buttonPainter.fillPolygon(triangle, 3);
+    _buttonPainter.drawPolyline(triangle, 4);
+}
+
+
+void PlatinumScrollBarRenderer::onRenderIncreaseButton(PaintContext& context,
+                                                       const Gfx::RectF& buttonRect,
+                                                       const StyleOptions& options,
+                                                       Direction direction,
+                                                       ScrollBarStyleFlags /*state*/,
+                                                       ButtonStyleFlags buttonState)
+{
+    if( buttonRect.width() <= 0 || buttonRect.height() <= 0 )
+        return;
+
+    _trackPainter.begin(context);
+    _trackPainter.fillRect(buttonRect);
+
+    _buttonPainter.begin(context);
+    _buttonPainter.setClip(buttonRect);
+
+    Gfx::Pen cPen = contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    if( buttonState.has(StyleFlags::Highlighted) ||
+        buttonState.has(ButtonStyleFlags::Pressed) )
+    {
+        cPen = Gfx::Pen( options.accentColor(), cPen.size(), cPen.style(),
+                         cPen.capStyle(), cPen.joinStyle() );
+    }
+
+    _buttonPainter.setPen(cPen);
+    _buttonPainter.setBrush( cPen.color() );
+
+    const Gfx::Scaling& scaling = _buttonPainter.scaling();
+    double pixelWidth = scaling.toLogical(1.0);
+    bool vertical = (direction == Direction::Top || direction == Direction::Bottom);
+
+    double dim = vertical ? buttonRect.width() : buttonRect.height();
+
+    double triangleWidth = dim / 2.0;
+    triangleWidth = scaling.align(triangleWidth);
+
+    if( triangleWidth < pixelWidth * 2 )
+        return;
+
+    int widthPixels = Pt::lround(triangleWidth / pixelWidth);
+    if( widthPixels % 2 != 0 )
+        triangleWidth += pixelWidth;
+
+    double triangleHeight = triangleWidth / 2.0;
+    triangleHeight = scaling.align(triangleHeight);
+
+    double x = (buttonRect.width() - triangleWidth) / 2.0;
+    x = scaling.align(x);
+
+    double y = (buttonRect.height() - triangleHeight) / 2.0;
+    y = scaling.align(y);
+
+    x += buttonRect.x();
+    y += buttonRect.y();
+
+    Gfx::PointF triangle[4];
+
+    if( vertical )
+    {
+        // Down arrow
+        triangle[0] = Gfx::PointF(x, y);
+        triangle[1] = Gfx::PointF(x + triangleWidth, y);
+        triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
+    }
+    else
+    {
+        // Right arrow
+        double lx = buttonRect.x() + (buttonRect.width() - triangleHeight) / 2.0;
+        double ly = buttonRect.y() + (buttonRect.height() - triangleWidth) / 2.0;
+        lx = scaling.align(lx);
+        ly = scaling.align(ly);
+
+        triangle[0] = Gfx::PointF(lx, ly);
+        triangle[1] = Gfx::PointF(lx + triangleHeight, ly + triangleWidth / 2.0);
+        triangle[2] = Gfx::PointF(lx, ly + triangleWidth);
+    }
+
+    triangle[3] = triangle[0];
+    _buttonPainter.fillPolygon(triangle, 3);
+    _buttonPainter.drawPolyline(triangle, 4);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1171,67 +2112,255 @@ PlatinumListBoxRenderer::~PlatinumListBoxRenderer()
 }
 
 
-void PlatinumListBoxRenderer::onPrepareLayout(Spacing& frameSize)
+ListBoxRenderer* PlatinumListBoxRenderer::onCreate() const
 {
-    frameSize = Spacing(1);
+    return new PlatinumListBoxRenderer();
 }
 
 
-void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
-                                                 const StyleOptions& options,
-                                                 Painter& painter, 
+void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options)
+{
+    const Gfx::Brush* bg = background();
+    if( bg )
+        _bgPainter.setBrush(*bg);
+    else
+        _bgPainter.setBrush( options.viewBackground() );
+
+    const Gfx::Pen* pen = contour();
+    if( pen )
+    {
+        Gfx::Pen framePen = *pen;
+        framePen.setJoinStyle(Gfx::Pen::BevelJoin);
+        _framePainter.setPen(framePen);
+    }
+    else
+    {
+        Gfx::Pen framePen = options.contour();
+        framePen.setJoinStyle(Gfx::Pen::BevelJoin);
+        _framePainter.setPen(framePen);
+    }
+}
+
+
+Gfx::SizeF PlatinumListBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                   const Gfx::SizeF& contentSize)
+{
+    double inset = _framePainter.pen().size();
+    return Gfx::SizeF(contentSize.width() + 2 * inset,
+                      contentSize.height() + 2 * inset);
+}
+
+
+Gfx::RectF PlatinumListBoxRenderer::onLayoutFrame(PaintSurface& surface,
+                                                  const Gfx::RectF& frameRect)
+{
+    double inset = surface.scaling().alignContour( _framePainter.pen().size() );
+    double w = frameRect.width() - 2 * inset;
+    double h = frameRect.height() - 2 * inset;
+    if( w < 0 ) w = 0;
+    if( h < 0 ) h = 0;
+
+    return Gfx::RectF(Gfx::PointF(frameRect.x() + inset, frameRect.y() + inset),
+                      Gfx::SizeF(w, h));
+}
+
+
+void PlatinumListBoxRenderer::onRenderBackground(PaintContext& context,
                                                  const Gfx::RectF& rect,
-                                                 const Gfx::Brush& brush) const 
-{   
-    painter.setBrush(brush);
-    painter.fillRect(rect);
+                                                 const StyleOptions& /*options*/,
+                                                 ListBoxStyleFlags /*state*/)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _bgPainter.begin(context);
+    _bgPainter.fillRect(rect);
 }
 
 
-void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
-                                            const StyleOptions& options,
-                                            Painter& painter, 
+void PlatinumListBoxRenderer::onRenderFrame(PaintContext& context,
                                             const Gfx::RectF& rect,
-                                            const Gfx::Pen& pen) const 
+                                            const StyleOptions& /*options*/,
+                                            ListBoxStyleFlags /*state*/)
 {
-    const double inset = painter.scaling().alignContour( pen.size() ) / 2;
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
 
-    Gfx::RectF borderRect = Gfx::RectF( lb.size() );
-    borderRect.shift(inset, inset);
-    borderRect.shrink(2 * inset, 2 * inset);
-    
-    painter.setPen(pen);
-    painter.drawRect(borderRect);
+    _framePainter.begin(context);
+
+    double inset = _framePainter.scaling().alignContour( _framePainter.pen().size() ) / 2;
+
+    double bw = rect.width() - 2 * inset;
+    double bh = rect.height() - 2 * inset;
+    if( bw <= 0 || bh <= 0 )
+        return;
+
+    Gfx::RectF borderRect(Gfx::PointF(rect.x() + inset, rect.y() + inset),
+                          Gfx::SizeF(bw, bh));
+
+    _framePainter.drawRect(borderRect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumListItemRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumListItemRenderer::PlatinumListItemRenderer(std::size_t refs)
+: ListItemRenderer(refs)
+{
 }
 
 
-void PlatinumListBoxRenderer::onPrepareItem(const ListBoxItem& item, 
+PlatinumListItemRenderer::~PlatinumListItemRenderer()
+{
+}
+
+
+ListItemRenderer* PlatinumListItemRenderer::onCreate() const
+{
+    return new PlatinumListItemRenderer();
+}
+
+
+void PlatinumListItemRenderer::onPrepare(const StyleOptions& options)
+{
+    const Gfx::Brush* fg = foreground();
+    if( fg )
+        _bgPainter.setBrush(*fg);
+    else
+        _bgPainter.setBrush( options.highlightColor() );
+
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+Gfx::SizeF PlatinumListItemRenderer::onMeasureContent(PaintSurface& /*surface*/,
+                                                      const Gfx::SizeF& iconSize,
+                                                      const Gfx::SizeF& textSize)
+{
+    double spacing = (iconSize.isNull() || textSize.isNull()) ? 0
+                   : font().size() * 0.5;
+
+    double w = iconSize.width() + spacing + textSize.width();
+    double h = std::max<double>(iconSize.height(), textSize.height());
+
+    return Gfx::SizeF(w, h);
+}
+
+
+Gfx::SizeF PlatinumListItemRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+                                                    const Gfx::SizeF& contentSize)
+{
+    return contentSize;
+}
+
+
+const Painter& PlatinumListItemRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+Gfx::RectF PlatinumListItemRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                                   const Gfx::RectF& frameRect)
+{
+    return frameRect;
+}
+
+
+void PlatinumListItemRenderer::onLayoutContent(PaintSurface& /*surface*/,
+                                               const Gfx::RectF& contentRect,
+                                               const Gfx::SizeF& iconSize,
+                                               const Gfx::SizeF& textSize,
+                                               Gfx::RectF& iconRect,
+                                               Gfx::RectF& textRect)
+{
+    double spacing = (iconSize.isNull() || textSize.isNull()) ? 0
+                   : font().size() * 0.5;
+
+    double iconX = contentRect.x();
+    double iconH = iconSize.height();
+    if( iconH > contentRect.height() )
+        iconH = contentRect.height();
+
+    double iconW = iconSize.width();
+    if( iconW > contentRect.width() )
+        iconW = contentRect.width();
+
+    double iconY = contentRect.y() + (contentRect.height() - iconH) / 2.0;
+    iconRect.set( Gfx::PointF(iconX, iconY), Gfx::SizeF(iconW, iconH) );
+
+    double textX = contentRect.x() + iconSize.width() + spacing;
+    double textW = contentRect.width() - iconSize.width() - spacing;
+    if( textW < 0 )
+        textW = 0;
+
+    textRect.set( Gfx::PointF(textX, contentRect.y()),
+                  Gfx::SizeF(textW, contentRect.height()) );
+}
+
+
+void PlatinumListItemRenderer::onRenderBackground(PaintContext& context,
+                                                  const Gfx::RectF& rect,
+                                                  const StyleOptions& options,
+                                                  ListItemStyleFlags state)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    if( state.has(ListItemStyleFlags::Selected) || state.has(StyleFlags::Highlighted) )
+    {
+        const Gfx::Brush* fg = foreground();
+        _bgPainter.setBrush( fg ? *fg : Gfx::Brush( options.highlightColor() ) );
+        _bgPainter.begin(context);
+        _bgPainter.fillRect(rect);
+    }
+    else if( background() )
+    {
+        _bgPainter.setBrush( *background() );
+        _bgPainter.begin(context);
+        _bgPainter.fillRect(rect);
+    }
+}
+
+
+void PlatinumListItemRenderer::onRenderText(PaintContext& context,
+                                            const Gfx::RectF& textRect,
                                             const StyleOptions& options,
-                                            Gfx::Brush& brush,
-                                            Gfx::Pen& contour,
-                                            Gfx::Font& font,
-                                            Gfx::Pen& textPen) const
+                                            const String& text,
+                                            const Gfx::PointF& pos,
+                                            ListItemStyleFlags state)
 {
-    if( item.isHighlighted() || item.isSelected() )
-    {
-        brush =  options.highlightColor();
-        textPen = options.highlightedTextColor();
-    }
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
+
+    if( state.has(ListItemStyleFlags::Selected) || state.has(StyleFlags::Highlighted) )
+        _textPainter.setPen( options.highlightedTextColor() );
+    else
+        _textPainter.setPen( textColor() );
+
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
+    _textPainter.drawText(pos, text);
 }
 
 
-void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item, 
-                                           const StyleOptions& options,
-                                           Painter& painter, 
-                                           const Gfx::RectF& rect,
-                                           Gfx::Brush& brush,
-                                           Gfx::Pen& contour) const
+void PlatinumListItemRenderer::onRenderIcon(PaintContext& context,
+                                            const Gfx::RectF& iconRect,
+                                            const StyleOptions& /*options*/,
+                                            const Pixmap& picture,
+                                            const Gfx::PointF& pos,
+                                            ListItemStyleFlags /*state*/)
 {
-    if( item.isHighlighted() || item.isSelected() )
-    {
-        painter.setBrush(brush);
-        painter.fillRect(rect);
-    }
+    if( iconRect.width() <= 0 || iconRect.height() <= 0 )
+        return;
+
+    _iconPainter.begin(context);
+    _iconPainter.setClip(iconRect);
+    _iconPainter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    _iconPainter.drawPixmap(pos, picture);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1240,6 +2369,7 @@ void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item,
 
 PlatinumComboBoxRenderer::PlatinumComboBoxRenderer(std::size_t refs)
 : ComboBoxRenderer(refs)
+, _inset(5)
 {
 }
 
@@ -1249,314 +2379,228 @@ PlatinumComboBoxRenderer::~PlatinumComboBoxRenderer()
 }
 
 
-void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb, 
-                                         const StyleOptions& options,
-                                         Gfx::Brush& background,
-                                         Gfx::Brush& foreground,
-                                         Gfx::Pen& contour,
-                                         Gfx::Font& font,
-                                         Gfx::Pen& textPen) const
+ComboBoxRenderer* PlatinumComboBoxRenderer::onCreate() const
 {
-    if( cb.isEnabled() )
+    return new PlatinumComboBoxRenderer();
+}
+
+
+void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options)
+{
+    Gfx::Brush bg = background();
+
+    Gfx::Pen cPen = contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    _bgPainter.setBrush(bg);
+    _bgPainter.setPen(cPen);
+
+    Gfx::Brush fg = foreground();
+    _buttonPainter.setBrush(fg);
+    _buttonPainter.setPen(cPen);
+
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+}
+
+
+Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
+                                                     const Gfx::SizeF& contentSize)
+{
+    _textPainter.begin(surface);
+
+    double entryHeight = font().size() * 2.5;
+    double buttonWidth = entryHeight;
+    double entryWidth = contentSize.width() + 2 * _inset;
+
+    double width = entryWidth + buttonWidth;
+    double height = entryHeight;
+
+    return Gfx::SizeF(width, height);
+}
+
+
+Gfx::SizeF PlatinumComboBoxRenderer::onMeasureButton(PaintSurface& /*surface*/)
+{
+    double h = font().size() * 2.5;
+    return Gfx::SizeF(h, h);
+}
+
+
+void PlatinumComboBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+                                             const Gfx::RectF& rect,
+                                             Gfx::RectF& entryRect,
+                                             Gfx::RectF& buttonRect,
+                                             Gfx::RectF& textRect)
+{
+    double buttonWidth = rect.height();
+    if( buttonWidth > rect.width() )
+        buttonWidth = rect.width();
+
+    double entryW = rect.width() - buttonWidth;
+    if( entryW < 0 )
+        entryW = 0;
+
+    entryRect.set( Gfx::PointF(rect.x(), rect.y()),
+                   Gfx::SizeF(entryW, rect.height()) );
+
+    buttonRect.set( Gfx::PointF(rect.x() + entryW, rect.y()),
+                    Gfx::SizeF(buttonWidth, rect.height()) );
+
+    double textW = entryW - 2 * _inset;
+    if( textW < 0 )
+        textW = 0;
+
+    textRect.set( Gfx::PointF(entryRect.x() + _inset, entryRect.y()),
+                  Gfx::SizeF(textW, entryRect.height()) );
+}
+
+
+const Painter& PlatinumComboBoxRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+void PlatinumComboBoxRenderer::onRenderEntry(PaintContext& context,
+                                             const Gfx::RectF& entryRect,
+                                             const StyleOptions& options,
+                                             ComboBoxStyleFlags state)
+{
+    // Not used — onRenderFrame draws the integrated frame
+}
+
+
+void PlatinumComboBoxRenderer::onRenderButton(PaintContext& context,
+                                              const Gfx::RectF& buttonRect,
+                                              const StyleOptions& options,
+                                              ComboBoxStyleFlags state,
+                                              ButtonStyleFlags buttonState)
+{
+    // Not used — onRenderFrame draws the integrated frame
+}
+
+
+void PlatinumComboBoxRenderer::onRenderFrame(PaintContext& context,
+                                             const Gfx::RectF& rect,
+                                             const Gfx::RectF& /*entryRect*/,
+                                             const Gfx::RectF& buttonRect,
+                                             const StyleOptions& options,
+                                             ComboBoxStyleFlags state,
+                                             ButtonStyleFlags buttonState)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _bgPainter.begin(context);
+
+    Gfx::Pen cPen = contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    if( state.has(StyleFlags::Enabled) )
     {
-        if( cb.isHighlighted() || cb.hasFocus() )
+        if( state.has(StyleFlags::Highlighted) || state.has(StyleFlags::Focused) )
         {
-            contour = Gfx::Pen( options.accentColor(), 
-                                contour.size(), contour.style(), 
-                                contour.capStyle(), contour.joinStyle() );
+            cPen = Gfx::Pen( options.accentColor(),
+                             cPen.size(), cPen.style(),
+                             cPen.capStyle(), cPen.joinStyle() );
         }
     }
 
-    foreground = contour.color();
-}
+    _bgPainter.setPen(cPen);
 
+    const double inset = _bgPainter.scaling().alignContour( cPen.size() ) / 2;
 
-void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb, 
-                                                  const StyleOptions& options,
-                                                  Painter& painter, 
-                                                  const Gfx::RectF& rect,
-                                                  const Gfx::Pen& contour,
-                                                  const Gfx::Brush& background) const
-{
-    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
+    double bw = rect.width() - 2 * inset;
+    double bh = rect.height() - 2 * inset;
+    if( bw <= 0 || bh <= 0 )
+        return;
 
-    Gfx::RectF borderRect = Gfx::RectF( cb.size() );
-    borderRect.shift(inset, inset);
-    borderRect.shrink(2 * inset, 2 * inset);
+    Gfx::RectF borderRect( Gfx::PointF(rect.x() + inset, rect.y() + inset),
+                           Gfx::SizeF(bw, bh) );
 
-    painter.setBrush(background);
-    painter.fillRect(borderRect);
+    _bgPainter.fillRect(rect);
+    _bgPainter.drawRect(borderRect);
 
-    painter.setPen(contour);
-    painter.drawRect(borderRect);
-}
+    // Button separator and indicator
+    if( buttonRect.width() <= 0 || buttonRect.height() <= 0 )
+        return;
 
+    _buttonPainter.begin(context);
+    _buttonPainter.setClip(buttonRect);
 
-void PlatinumComboBoxRenderer::onPrepareLayout(const ComboBox& cb,
-                                               Gfx::SizeF& buttonSize) const
-{
-    double buttonWidth = cb.size().height();
-    double buttonHeight = cb.size().height();
-    buttonSize = Gfx::SizeF(buttonWidth, buttonHeight);
-}
-
-
-void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb, 
-                                              const StyleOptions& options,
-                                              Painter& painter, 
-                                              const Gfx::RectF& rect,
-                                              const Gfx::Pen& contour,
-                                              const Gfx::Brush& foreground) const
-{
-    const Gfx::Scaling& scaling = painter.scaling();
-
+    const Gfx::Scaling& scaling = _buttonPainter.scaling();
     double pixelWidth = scaling.toLogical(1.0);
-    
-    double buttonX = cb.size().width() - cb.size().height();
-    double buttonWidth = cb.size().height();
-    double buttonHeight = cb.size().height();
-    
-    double gap = scaling.align(5);
 
-    painter.setPen(contour);
-    painter.drawLine( Gfx::PointF(buttonX + pixelWidth, gap),
-                      Gfx::PointF(buttonX + pixelWidth, cb.size().height() - gap) );
+    Gfx::Pen btnPen = cPen;
+
+    if( buttonState.has(StyleFlags::Highlighted) ||
+        buttonState.has(ButtonStyleFlags::Pressed) )
+    {
+        btnPen = Gfx::Pen( options.accentColor(),
+                           btnPen.size(), btnPen.style(),
+                           btnPen.capStyle(), btnPen.joinStyle() );
+    }
+
+    _buttonPainter.setPen(btnPen);
+    _buttonPainter.setBrush( btnPen.color() );
+
+    // separator line
+    double gap = scaling.align(5);
+    _buttonPainter.drawLine( Gfx::PointF(buttonRect.x() + pixelWidth, buttonRect.y() + gap),
+                             Gfx::PointF(buttonRect.x() + pixelWidth, buttonRect.y() + buttonRect.height() - gap) );
+
+    // triangle indicator — only if button area is large enough
+    double buttonWidth = buttonRect.width();
+    double buttonHeight = buttonRect.height();
 
     double triangleWidth = buttonWidth / 3.0;
     triangleWidth = scaling.align(triangleWidth);
 
-    // even number of pixels
+    if( triangleWidth < pixelWidth * 2 )
+        return;
+
     int widthPixels = Pt::lround(triangleWidth / pixelWidth);
     if(widthPixels % 2 != 0)
-      triangleWidth += pixelWidth;
+        triangleWidth += pixelWidth;
 
     double triangleHeight = triangleWidth / 2.0;
     triangleHeight = scaling.align(triangleHeight);
 
     double x = (buttonWidth - triangleWidth) / 2;
-    x = buttonX + scaling.align(x);
-    
+    x = buttonRect.x() + scaling.align(x);
+
     double y = (buttonHeight - triangleHeight) / 2;
-    y = scaling.align(y);
+    y = buttonRect.y() + scaling.align(y);
 
     Gfx::PointF triangle[3];
     triangle[0] = Gfx::PointF(x, y);
     triangle[1] = Gfx::PointF(x + triangleWidth, y);
     triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
 
-    painter.setBrush(foreground);
-    painter.fillPolygon(triangle, 3);
+    _buttonPainter.fillPolygon(triangle, 3);
 }
 
 
-void PlatinumComboBoxRenderer::onRenderText(const ComboBox& cb,
-                                            const StyleOptions& options,
-                                            Painter& painter, 
-                                            const Gfx::RectF& rect,
+void PlatinumComboBoxRenderer::onRenderText(PaintContext& context,
+                                            const Gfx::RectF& textRect,
+                                            const StyleOptions& /*options*/,
                                             const String& text,
                                             const Gfx::PointF& textPos,
-                                            const Gfx::Font& font, 
-                                            const Gfx::Pen& textPen,
-                                            const Gfx::RectF& cursor) const
+                                            const Gfx::RectF& cursor,
+                                            ComboBoxStyleFlags state)
 {
-    //
-    // text
-    //
-    painter.setPen(textPen);
-    painter.setFont(font);
-    painter.drawText(textPos, text);
+    if( textRect.width() <= 0 || textRect.height() <= 0 )
+        return;
 
-    //
-    // cursor
-    //
-    if( cb.isEditable() && cb.hasFocus() )
+    _textPainter.begin(context);
+    _textPainter.setClip(textRect);
+    _textPainter.drawText(textPos, text);
+
+    if( state.has(ComboBoxStyleFlags::Editable) && state.has(StyleFlags::Focused) )
     {
-        painter.drawLine( cursor.topLeft(),
-                          cursor.bottomLeft() );
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PlatinumSpinBoxRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-PlatinumSpinBoxRenderer::PlatinumSpinBoxRenderer(std::size_t refs)
-: SpinBoxRenderer(refs)
-{
-}
-
-    
-PlatinumSpinBoxRenderer::~PlatinumSpinBoxRenderer()
-{
-}
-
-
-void PlatinumSpinBoxRenderer::onPrepare(const SpinBox& sb, 
-                                        const StyleOptions& options,
-                                        Gfx::Brush& background,
-                                        Gfx::Pen& contour,
-                                        Gfx::Font& font,
-                                        Gfx::Pen& textPen) const
-{
-    contour.setJoinStyle(Gfx::Pen::BevelJoin);
-
-    if( sb.isEnabled() )
-    {
-        if( sb.isHighlighted() || sb.hasFocus() )
-        {
-            contour = Gfx::Pen( options.accentColor(), 
-                                contour.size(), contour.style(), 
-                                contour.capStyle(), contour.joinStyle() );
-        }
-    }
-}
-
-
-void PlatinumSpinBoxRenderer::onPrepareButton(const SpinBoxButton& sb, 
-                                              const StyleOptions& options,
-                                              Gfx::Brush& foreground,
-                                              Gfx::Pen& contour) const
-{
-    if( sb.isEnabled() )
-    {
-        if( sb.isHighlighted() )
-        {
-            contour = Gfx::Pen( options.accentColor(), 
-                                contour.size(), contour.style(), 
-                                contour.capStyle(), contour.joinStyle() );
-        }
-    }
-
-    foreground = contour.color();
-}
-
-
-void PlatinumSpinBoxRenderer::onLayout(const SpinBox& sb,
-                                       Gfx::RectF& downButton,
-                                       Gfx::RectF& upButton,
-                                       Gfx::RectF& textBox) const
-{   
-    double cursorWidth = 5; // TODO: cursor
-    double buttonWidth = sb.size().height();
-
-    textBox.setOrigin( Gfx::PointF(buttonWidth + cursorWidth, 0) );
-
-    textBox.setSize( Gfx::SizeF(sb.size().width() - 2 * buttonWidth - 2 * cursorWidth, 
-                                sb.size().height()) );
-
-    downButton.setOrigin( Gfx::PointF(0, 0) );
-    downButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
-
-    upButton.setOrigin( Gfx::PointF(sb.size().width() - buttonWidth, 0) );
-    upButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
-}
-
-
-void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb, 
-                                                 const StyleOptions& options,
-                                                 Painter& painter, 
-                                                 const Gfx::RectF& rect,
-                                                 const Gfx::Pen& contour,
-                                                 const Gfx::Brush& background) const
-{
-    double buttonWidth = sb.size().height();
-    double boxWidth = sb.size().width() - 2 * buttonWidth;
-
-    const double inset = painter.scaling().alignContour( contour.size() ) / 2;
-
-    Gfx::RectF boxRect( Gfx::PointF(buttonWidth, 0), 
-                        Gfx::SizeF(boxWidth, sb.size().height() ) );
-
-    Gfx::RectF borderRect( Gfx::PointF(buttonWidth, inset), 
-                           Gfx::SizeF(boxWidth, sb.size().height() - 2 * inset ) );
-
-    painter.setBrush(background);
-    painter.fillRect(boxRect);
-
-    painter.setPen(contour);
-    painter.drawRect(borderRect);
-}
-
-
-void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb, 
-                                             const StyleOptions& options,
-                                             Painter& painter, 
-                                             const Gfx::RectF& rect,
-                                             const Gfx::Brush& foreground,
-                                             const Gfx::Pen& contour) const
-{
-    const Gfx::Scaling& scaling = painter.scaling();
-
-    double buttonWidth = sb.size().height();
-    double buttonHeight = sb.size().height();
-    double pixelWidth = scaling.toLogical(1.0);
-
-    double triangleWidth = buttonWidth / 3;
-    triangleWidth = scaling.align(triangleWidth);
-
-    // even number of pixels
-    int widthPixels = Pt::lround(triangleWidth / pixelWidth);
-    if(widthPixels % 2 != 0)
-      triangleWidth += pixelWidth;
-
-    double triangleHeight = triangleWidth / 2.0;
-    triangleHeight = scaling.align(triangleHeight);
-
-    double x = (buttonWidth - triangleWidth) / 2;
-    x = scaling.align(x);
-    
-    double y = (buttonHeight - triangleHeight) / 2;
-    y = scaling.align(y);
-
-    Gfx::PointF triangle[4];
-
-    if( sb.type() == sb.Down)
-    {
-        triangle[0] = Gfx::PointF(x, y);
-        triangle[1] = Gfx::PointF(x + triangleWidth, y);
-        triangle[2] = Gfx::PointF(x + triangleHeight, y + triangleHeight);
-    }
-    else
-    {
-        triangle[0] = Gfx::PointF(x + triangleHeight, y);
-        triangle[1] = Gfx::PointF(x + triangleWidth, y + triangleHeight);
-        triangle[2] = Gfx::PointF(x, y + triangleHeight);
-    }
-
-    triangle[3] = triangle[0];
-
-    painter.setBrush(foreground);
-    painter.fillPolygon(triangle, 3);
-    
-    painter.setPen(contour);
-    painter.drawPolyline(triangle, 4);
-}
-
-
-void PlatinumSpinBoxRenderer::onRenderText(const SpinBox& sb,
-                                           const StyleOptions& options,
-                                           Painter& painter, 
-                                           const Gfx::RectF& rect,
-                                           const String& text,
-                                           const Gfx::PointF& textPos,
-                                           const Gfx::Font& font, 
-                                           const Gfx::Pen& textPen,
-                                           const Gfx::RectF& cursor) const
-{
-    //
-    // text
-    //
-    painter.setPen(textPen);
-    painter.setFont(font);
-    painter.drawText(textPos, text);
-
-    //
-    // cursor
-    //
-    if( sb.isEditable() && sb.hasFocus() )
-    {
-        painter.drawLine( cursor.topLeft(),
-                          cursor.bottomLeft() );
+        _textPainter.drawLine( cursor.topLeft(), cursor.bottomLeft() );
     }
 }
 
@@ -1566,6 +2610,7 @@ void PlatinumSpinBoxRenderer::onRenderText(const SpinBox& sb,
 
 PlatinumTabViewRenderer::PlatinumTabViewRenderer(std::size_t refs)
 : TabViewRenderer(refs)
+, _inset(0)
 {
 }
 
@@ -1575,132 +2620,140 @@ PlatinumTabViewRenderer::~PlatinumTabViewRenderer()
 }
 
 
-void PlatinumTabViewRenderer::onPrepare(const TabView& tv,
-                                        const StyleOptions& options,
-                                        Gfx::Brush& background,
-                                        Gfx::Brush& foreground,
-                                        Gfx::Pen& contour) const
+TabViewRenderer* PlatinumTabViewRenderer::onCreate() const
 {
+    return new PlatinumTabViewRenderer();
 }
 
 
-void PlatinumTabViewRenderer::onRender(const TabView& tv,
-                                       const StyleOptions& options,
-                                       Painter& painter,
-                                       const Gfx::RectF& rect,
-                                       const Gfx::Brush& background,
-                                       const Gfx::Brush& foreground,
-                                       const Gfx::Pen& contour) const
+void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options)
 {
+    _inset = font().size() / 2.0;
+
+    Gfx::Pen cPen = contour() ? *contour()
+                               : options.contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    Gfx::Brush bg = background() ? *background()
+                                  : options.background();
+
+    _bgPainter.setBrush(bg);
+
+    _framePainter.setPen(cPen);
+
+    _textPainter.setFont( font() );
+    _textPainter.setPen( textColor() );
+
+    _activeTextPainter.setFont( font() );
+    _activeTextPainter.setPen( options.accentColor() );
 }
 
 
-Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(PaintSurface& surface,
-                                                  const std::vector<TabItem>& tabs,
-                                                  const Gfx::Font& font) const
+Gfx::SizeF PlatinumTabViewRenderer::onMeasureTab(PaintSurface& surface,
+                                                   const Pt::String& text)
 {
-    Spacing spacing(font.size() / 2, font.size() / 2 );
-
     Gfx::SizeF s;
-    s.setHeight(font.size() * 2.4);
+    s.setHeight( font().size() * 2.4 );
 
-    Painter _painter(surface);
-    _painter.setFont(font);
-
-    std::vector<TabItem>::const_iterator it;
-    for(it = tabs.begin(); it != tabs.end(); ++it)
-    {
-        Gfx::TextMetrics fm = _painter.textMetrics( it->text() );
-        s.addWidth( fm.advance() + spacing.leftRight() );
-    }
+    _textPainter.begin(surface);
+    Gfx::TextMetrics tm = _textPainter.textMetrics(text);
+    s.setWidth( tm.advance() + _inset * 2.0 );
 
     return s;
 }
 
 
-void PlatinumTabViewRenderer::onLayoutTabs(PaintSurface& surface,
-                                           std::vector<TabItem>& tabs,
-                                           const Gfx::RectF& rect, 
-                                           const Gfx::Font& font) const
+Gfx::RectF PlatinumTabViewRenderer::onLayoutTab(PaintSurface& surface,
+                                                  const Gfx::RectF& tabRect)
 {
-    Spacing spacing(font.size() / 2, font.size() / 2 );
+    double w = tabRect.width() - _inset * 2.0;
+    if( w < 0 )
+        w = 0;
 
-    Gfx::PointF tabPos;
-
-    Painter _painter(surface);
-    _painter.setFont(font);
-
-    std::vector<TabItem>::iterator it;
-    for(it = tabs.begin(); it != tabs.end(); ++it)
-    {
-        Gfx::TextMetrics fm = _painter.textMetrics( it->text() );
-
-        double tabWidth = fm.advance() + spacing.leftRight();
-        
-        Gfx::RectF tabRect;
-        tabRect.setOrigin(tabPos);
-        tabRect.setWidth(tabWidth);
-        tabRect.setHeight( rect.height() );
-
-        it->setGeometry(tabRect);
-
-        tabPos.addX(tabWidth);
-    }
+    return Gfx::RectF(
+        Gfx::PointF(tabRect.x() + _inset, tabRect.y()),
+        Gfx::SizeF(w, tabRect.height()) );
 }
 
 
-void PlatinumTabViewRenderer::onPrepareTabs(const TabBar& tabs,
+const Painter& PlatinumTabViewRenderer::onGetTextPainter(PaintSurface& surface)
+{
+    _textPainter.begin(surface);
+    return _textPainter;
+}
+
+
+void PlatinumTabViewRenderer::onRenderBackground(PaintContext& context,
+                                                  const Gfx::RectF& contentRect,
+                                                  const StyleOptions& options,
+                                                  TabViewStyleFlags /*state*/)
+{
+    if( contentRect.width() <= 0 || contentRect.height() <= 0 )
+        return;
+
+    Gfx::Brush bg = background() ? *background()
+                                  : options.background();
+
+    _bgPainter.begin(context);
+    _bgPainter.setBrush(bg);
+    _bgPainter.fillRect(contentRect);
+}
+
+
+void PlatinumTabViewRenderer::onRenderFrame(PaintContext& context,
+                                            const Gfx::RectF& contentRect,
+                                            const Gfx::RectF& /*activeTabRect*/,
                                             const StyleOptions& options,
-                                            const Gfx::Brush& background,
-                                            const Gfx::Brush& foreground,
-                                            const Gfx::Pen& contour,
-                                            const Gfx::Font& font, 
-                                            const Gfx::Pen& textPen) const
+                                            TabViewStyleFlags /*state*/)
 {
+    if( contentRect.width() <= 0 || contentRect.height() <= 0 )
+        return;
+
+    // Re-establish contour pen since onRenderTab may have set accent color
+    Gfx::Pen cPen = contour() ? *contour()
+                               : options.contour();
+    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    _framePainter.begin(context);
+    _framePainter.setPen(cPen);
+    _framePainter.drawRect(contentRect);
 }
 
 
-void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
-                                           const StyleOptions& options,
-                                           Painter& painter,
-                                           const Gfx::RectF& rect,
-                                           const Gfx::Brush& background,
-                                           const Gfx::Brush& foreground,
-                                           const Gfx::Pen& contour,
-                                           const Gfx::Font& font, 
-                                           const Gfx::Pen& textPen) const
+void PlatinumTabViewRenderer::onRenderTab(PaintContext& context,
+                                          const Gfx::RectF& tabRect,
+                                          const Pt::String& text,
+                                          const Gfx::PointF& textPos,
+                                          const StyleOptions& options,
+                                          TabItemStyleFlags state)
 {
-    Spacing spacing(font.size() / 2, font.size() / 2 );
+    if( tabRect.width() <= 0 || tabRect.height() <= 0 )
+        return;
 
-    std::vector<TabItem>::const_iterator it;
-    for(it = tabs.begin(); it != tabs.end(); ++it)
-    {
-        if( it->isPressed() )
-            painter.setPen( options.accentColor() );
-        else
-            painter.setPen(textPen);
+    bool active = state.has(TabItemStyleFlags::Active);
 
-        painter.setFont(font);
+    Painter& textPainter = active ? _activeTextPainter : _textPainter;
+    textPainter.begin(context);
+    textPainter.setClip(tabRect);
+    textPainter.drawText(textPos, text);
 
-        Gfx::TextMetrics fm = painter.textMetrics( it->text() );
-        Gfx::FontMetrics fontMet = painter.fontMetrics();
-        
-        double textX = it->geometry().left() + spacing.left();
-        double textY = it->geometry().height() / 2 + fontMet.ascent() / 2;
-        Gfx::PointF textPos(textX, textY);
-        painter.drawText( textPos, it->text() );
+    // Draw underline indicator
+    _framePainter.begin(context);
 
-        if( it->isPressed() )
-            painter.setPen( options.accentColor() );
-        else
-            painter.setPen(contour);
+    if( active )
+        _framePainter.setPen( Gfx::Pen( options.accentColor() ) );
+    else
+        _framePainter.setPen( contour() ? *contour()
+                                        : Gfx::Pen( options.contour() ) );
 
-        Gfx::PointF from(it->geometry().left() + spacing.left() / 2, 
-                          it->geometry().height() - 1);
-        Gfx::PointF to(it->geometry().left() + it->geometry().width() - spacing.right() / 2,
-                        it->geometry().height() - 1);
-        painter.drawLine(from, to);
-    }
+    double halfInset = _inset / 2.0;
+    Gfx::PointF from(tabRect.left() + halfInset,
+                      tabRect.bottom() - 1.0);
+    Gfx::PointF to(tabRect.right() - halfInset,
+                    tabRect.bottom() - 1.0);
+
+    if( to.x() > from.x() )
+        _framePainter.drawLine(from, to);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1713,12 +2766,11 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumCheckBoxRenderer);
     set(new PlatinumPanelRenderer);
     set(new PlatinumLineEditRenderer);
-    set(new PlatinumMenuRenderer);
-    set(new PlatinumMenuBarRenderer);
     set(new PlatinumScrollBarRenderer);
     set(new PlatinumProgressBarRenderer);
     set(new PlatinumSliderRenderer);
     set(new PlatinumListBoxRenderer);
+    set(new PlatinumListItemRenderer);
     set(new PlatinumComboBoxRenderer);
     set(new PlatinumSpinBoxRenderer);
     set(new PlatinumTabViewRenderer);

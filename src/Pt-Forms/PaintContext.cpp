@@ -22,6 +22,12 @@ PaintSurface* PaintContext::surface()
 }
 
 
+PaintSurface& PaintContext::paintSurface()
+{
+    return *_surface;
+}
+
+
 void PaintContext::onDetachSurface(Gfx::PaintSurface& surface)
 {
     _surface = 0;

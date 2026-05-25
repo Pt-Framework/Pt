@@ -184,9 +184,7 @@ Gfx::Font CheckBox::getFont() const
 
 void CheckBox::setFontSize(std::size_t size)
 {
-    _customFont = Gfx::Font(_customFont.family(), size,
-                            _customFont.weight(), _customFont.slant(),
-                            _customFont.stretch());
+    _customFont = _customFont.withSize(size);
     _fontOverride |= OverrideSize;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
@@ -198,9 +196,7 @@ void CheckBox::setFontSize(std::size_t size)
 
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                            weight, _customFont.slant(),
-                            _customFont.stretch());
+    _customFont = _customFont.withWeight(weight);
     _fontOverride |= OverrideWeight;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
@@ -212,9 +208,7 @@ void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                            _customFont.weight(), slant,
-                            _customFont.stretch());
+    _customFont = _customFont.withSlant(slant);
     _fontOverride |= OverrideSlant;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
@@ -348,17 +342,16 @@ Gfx::SizeF CheckBox::onMeasure(const SizePolicy& /*policy*/)
         return Gfx::SizeF(0, 0);
 
     const Painter& painter = _renderer->textPainter( surface() );
-    _textMetrics = painter.textMetrics( text() );
-    _fontMetrics = painter.fontMetrics();
+    Gfx::TextMetrics tm = painter.textMetrics( text() );
+    Gfx::FontMetrics fm = painter.fontMetrics();
 
-    _boxSize = _renderer->measureBox( surface() );
+    Gfx::SizeF textSize(tm.advance(), fm.lineHeight());
+    Gfx::SizeF indicatorSize = _renderer->measureIndicator(surface());
+    Gfx::SizeF contentSize = _renderer->measureContent(surface(), indicatorSize, textSize);
+    Gfx::SizeF totalSize = _renderer->measureFrame(surface(), contentSize);
 
-    double space = std::min<double>(_boxSize.width() / 2, _fontMetrics.height() / 2);
-    double itemsWidth = space + _boxSize.width() + space + _textMetrics.advance();
-    double itemsHeight = std::max<double>(_fontMetrics.lineHeight(), _boxSize.height());
-
-    return Gfx::SizeF(itemsWidth + padding().leftRight(),
-                      itemsHeight + padding().topBottom());
+    return Gfx::SizeF(totalSize.width() + padding().leftRight(),
+                      totalSize.height() + padding().topBottom());
 }
 
 
@@ -369,20 +362,26 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
+    Gfx::RectF insetRect( Gfx::PointF(padding().left(), padding().top()),
+                          Gfx::SizeF(size().width() - padding().leftRight(),
+                                     size().height() - padding().topBottom()) );
+
+    Gfx::RectF contentRect = _renderer->layoutFrame(surface(), insetRect);
+
+    const Painter& painter = _renderer->textPainter(surface());
+    Gfx::FontMetrics fm = painter.fontMetrics();
+    Gfx::TextMetrics tm = painter.textMetrics( text() );
+
+    Gfx::SizeF textSize(tm.advance(), fm.lineHeight());
+    Gfx::SizeF indicatorSize = _renderer->measureIndicator(surface());
+
+    _renderer->layoutContent(surface(), contentRect, indicatorSize, textSize,
+                             _boxRect, _textRect);
+
     const Gfx::Scaling& scaling = surface().scaling();
+    double textY = scaling.align(_textRect.y() + _textRect.height() / 2.0) + fm.capHeight() / 2.0;
 
-    double space = std::min<double>(_boxSize.width() / 2,
-                                    _fontMetrics.height() / 2);
-
-    double boxX = space;
-    double boxY = size().height() / 2.0 - _boxSize.height() / 2.0;
-    _boxRect.set( Gfx::PointF(boxX, boxY), _boxSize );
-
-    double textX = space + _boxSize.width() + space;
-    double textY = scaling.align(size().height() / 2.0)
-                   + _fontMetrics.capHeight() / 2.0;
-
-    _textPos = scaling.align( Gfx::PointF(textX, textY) );
+    _textPos = scaling.align( Gfx::PointF(_textRect.x(), textY) );
 
     String::size_type mnIdx = String::npos;
     const Char* m = mnemonic();
@@ -390,7 +389,7 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
         mnIdx = text().find(*m);
 
     _mnemonicRect = _renderer->layoutMnemonic(surface(), text(), _textPos,
-                                               _fontMetrics, mnIdx);
+                                               fm, mnIdx);
 
     repaint();
 }
@@ -404,8 +403,8 @@ void CheckBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     Gfx::RectF widgetRect( size() );
     CheckBoxStyleFlags state = checkBoxStyleFlags();
 
-    _renderer->renderBox(context, widgetRect, _boxRect, state);
-    _renderer->renderText(context, widgetRect, text(), _textPos, state);
+    _renderer->renderIndicator(context, widgetRect, _boxRect, state);
+    _renderer->renderText(context, _textRect, text(), _textPos, state);
     _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
 }
 

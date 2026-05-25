@@ -31,6 +31,7 @@
 #define Pt_Forms_ProgressBar_H
 
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/StyleFlags.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
 
@@ -93,6 +94,8 @@ class PT_FORMS_API ProgressBar : public Control
 
         void setRenderer(ProgressBarRenderer* renderer);
 
+        ProgressBarStyleFlags progressBarStyleFlags() const;
+
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
@@ -101,6 +104,10 @@ class PT_FORMS_API ProgressBar : public Control
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     private:
+        ProgressBarRenderer* getRenderer();
+
+        void applyRenderer(ProgressBarRenderer* renderer);
+
         Gfx::Font getFont() const;
 
     private:
@@ -126,12 +133,6 @@ class PT_FORMS_API ProgressBar : public Control
         
         FacetPtr<ProgressBarRenderer> _renderer;
         bool                          _customRenderer;
-
-        Gfx::Brush  _backgroundBrush;
-        Gfx::Brush  _foregroundBrush;
-        Gfx::Pen    _contourPen;
-        Gfx::Pen    _textPen;
-        Gfx::Font   _font;
 };
 
 } // namespace

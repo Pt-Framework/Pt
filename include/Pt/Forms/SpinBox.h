@@ -34,6 +34,7 @@
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Adjustment.h>
+#include <Pt/Forms/Style.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
@@ -60,13 +61,7 @@ class PT_FORMS_API SpinBoxButton : public Button
 
         Type type() const;
 
-        const Gfx::Brush& foreground() const;
-
-        void setForeground(const Gfx::Brush& b);
-
-        const Gfx::Pen& contour() const;
-
-        void setContour(const Gfx::Pen& p);
+        bool isPressed() const;
 
         void setRenderer(SpinBoxRenderer* renderer);
 
@@ -84,15 +79,8 @@ class PT_FORMS_API SpinBoxButton : public Button
 
     private:
         Type                      _type;
-        
         FacetPtr<SpinBoxRenderer> _renderer;
-        bool                      _customRenderer;
-
-        AutoPtr<Gfx::Brush>       _foreground;
-        AutoPtr<Gfx::Pen>         _contour;
-
-        Gfx::Brush                _brush;
-        Gfx::Pen                  _pen;
+        bool                      _isPressed;
 };
 
 
@@ -214,6 +202,14 @@ class PT_FORMS_API SpinBox : public Control
     private:
         Gfx::Font getFont() const;
 
+        SpinBoxRenderer* getRenderer();
+
+        void applyRenderer(SpinBoxRenderer* renderer);
+
+        SpinBoxStyleFlags spinBoxStyleFlags() const;
+
+        ButtonStyleFlags buttonStyleFlags(const SpinBoxButton& button) const;
+
     private:
         enum FontOverride : unsigned
         {
@@ -239,23 +235,20 @@ class PT_FORMS_API SpinBox : public Control
 
         SpinBoxButton                 _downButton;
         SpinBoxButton                 _upButton;
-        Gfx::RectF                    _textBox;
-        Gfx::SizeF                    _buttonSize;
-        double                        _spacing;
+        Gfx::RectF                    _entryRect;
+        Gfx::RectF                    _upButtonRect;
+        Gfx::RectF                    _downButtonRect;
+        Gfx::RectF                    _textRect;
 
         FacetPtr<SpinBoxRenderer>     _renderer;
         bool                          _customRenderer;
 
         AutoPtr<Gfx::Brush>           _background;
+        AutoPtr<Gfx::Brush>           _foreground;
         AutoPtr<Gfx::Pen>             _contour;
         AutoPtr<Gfx::Color>           _textColor;
         Gfx::Font                     _customFont;
         unsigned                      _fontOverride;
-
-        Gfx::Brush                    _backgroundBrush;
-        Gfx::Pen                      _pen;
-        Gfx::Pen                      _textPen;
-        Gfx::Font                     _font;
 };
 
 } // namespace

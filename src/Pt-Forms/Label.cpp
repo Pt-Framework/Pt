@@ -239,9 +239,7 @@ Gfx::Font Label::getFont() const
 
 void Label::setFontSize(std::size_t size)
 {
-    _customFont = Gfx::Font(_customFont.family(), size,
-                              _customFont.weight(), _customFont.slant(),
-                              _customFont.stretch());
+    _customFont = _customFont.withSize(size);
     _fontOverride |= OverrideSize;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -253,9 +251,7 @@ void Label::setFontSize(std::size_t size)
 
 void Label::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                              weight, _customFont.slant(),
-                              _customFont.stretch());
+    _customFont = _customFont.withWeight(weight);
     _fontOverride |= OverrideWeight;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -267,9 +263,7 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
 
 void Label::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = Gfx::Font(_customFont.family(), _customFont.size(),
-                              _customFont.weight(), slant,
-                              _customFont.stretch());
+    _customFont = _customFont.withSlant(slant);
     _fontOverride |= OverrideSlant;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -391,9 +385,9 @@ void Label::onInvalidate()
     }
 
     std::size_t gen = Application::instance().styleOptions().generation();
-    _styleGeneration = gen;
 
     bool needsRelayout = _styleGeneration != gen;
+    _styleGeneration = gen;
 
     if(_iconInvalid)
     {

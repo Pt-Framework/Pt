@@ -101,10 +101,22 @@ class PT_FORMS_API TabBar : public Control
 
         void setText(std::size_t n, const Pt::String& title);
 
+        const Gfx::RectF& currentTabRect() const;
+
         Pt::Signal<std::size_t>& currentChanged()
         { return _currentChanged; }
 
     public:
+        void setFont(const Gfx::Font& font);
+
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        void setTextColor(const Gfx::Color& color);
+
         void setRenderer(TabViewRenderer* renderer);
 
     protected:
@@ -122,6 +134,13 @@ class PT_FORMS_API TabBar : public Control
         virtual bool onTouchEvent(const TouchEvent& ev);
 
     private:
+        TabViewRenderer* getRenderer();
+
+        void applyRenderer(TabViewRenderer* renderer);
+
+        Gfx::Font getFont() const;
+
+    private:
         Pt::Signal<std::size_t> _currentChanged;
         std::vector<TabItem>    _tabs;
         std::size_t             _current;
@@ -129,11 +148,17 @@ class PT_FORMS_API TabBar : public Control
         FacetPtr<TabViewRenderer> _renderer;
         bool                      _customRenderer;
 
-        Gfx::Brush  _backgroundBrush;
-        Gfx::Brush  _foregroundBrush;
-        Gfx::Pen    _contourPen;
-        Gfx::Pen    _textPen;
-        Gfx::Font   _font;
+        AutoPtr<Gfx::Font>    _customFont;
+        AutoPtr<Gfx::Color>   _textColor;
+        unsigned              _fontOverride;
+
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
 };
 
 /** @brief Tabbed view for controls.
@@ -163,6 +188,24 @@ class PT_FORMS_API TabView : public Control
         void setText(std::size_t n, const Pt::String& title);
 
     public:
+        void setBackground(const Gfx::Brush& b);
+
+        void setBackground(bool enable);
+
+        void setContour(const Gfx::Pen& p);
+
+        void setFrame(bool enable);
+
+        void setFont(const Gfx::Font& font);
+
+        void setFontSize(std::size_t size);
+
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        void setTextColor(const Gfx::Color& color);
+
         void setRenderer(TabViewRenderer* renderer);
 
     protected:
@@ -175,6 +218,15 @@ class PT_FORMS_API TabView : public Control
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     private:
+        TabViewRenderer* getRenderer();
+
+        void applyRenderer(TabViewRenderer* renderer);
+
+        Gfx::Font getFont() const;
+
+        TabViewStyleFlags tabViewStyleFlags() const;
+
+    private:
         DockingLayout             _layout;
         TabBar                    _tabBar;
         StackLayout               _stack;
@@ -182,9 +234,21 @@ class PT_FORMS_API TabView : public Control
         FacetPtr<TabViewRenderer> _renderer;
         bool                      _customRenderer;
 
-        Gfx::Brush                _backgroundBrush;
-        Gfx::Brush                _foregroundBrush;
-        Gfx::Pen                  _contourPen;
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Font>        _customFont;
+        AutoPtr<Gfx::Color>       _textColor;
+        unsigned                  _fontOverride;
+        bool                      _hasBackground;
+        bool                      _hasFrame;
+
+        enum FontOverride : unsigned
+        {
+            OverrideSize   = 0x01,
+            OverrideWeight = 0x02,
+            OverrideSlant  = 0x04,
+            OverrideAll    = 0xFF
+        };
 };
 
 } // namespace

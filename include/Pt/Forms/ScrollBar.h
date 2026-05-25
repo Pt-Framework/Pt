@@ -32,6 +32,8 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/Direction.h>
+#include <Pt/Forms/StyleFlags.h>
 #include <Pt/SmartPtr.h>
 
 namespace Pt {
@@ -53,13 +55,8 @@ class PT_FORMS_API ScrollBar : public Control
 
         ~ScrollBar();
 
-        const Pt::Gfx::RectF& handleRect() const
-        {
-          return _handleRect;
-        }
-
         void setRange(double minpos, double maxpos);
-        
+
         void setStepping(double scroll, double page);
 
         double minimumPosition() const;
@@ -78,7 +75,7 @@ class PT_FORMS_API ScrollBar : public Control
 
         Signal<double>& changed()
         { return _changed; }
-        
+
     public:
         const Gfx::Brush& background() const;
 
@@ -97,24 +94,49 @@ class PT_FORMS_API ScrollBar : public Control
     protected:
         virtual void onInvalidate();
 
+        virtual void onLayout(const Gfx::RectF& rect);
+
         virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
 
-    protected:
-
-        Gfx::SizeF onMeasure(const SizePolicy& s);;
+        Gfx::SizeF onMeasure(const SizePolicy& s);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
 
-        virtual void onResizeEvent(const ResizeEvent& ev);
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        double pixelToPosition(double pix);
-        
-        double positionToPixel(double pos);
+        enum HotZone
+        {
+            NoZone = 0,
+            TrackZone,
+            HandleZone,
+            DecreaseZone,
+            IncreaseZone
+        };
 
-        void updateScroll();
+        ScrollBarStyleFlags scrollBarStyleFlags() const;
+
+        ButtonStyleFlags decreaseButtonFlags() const;
+
+        ButtonStyleFlags increaseButtonFlags() const;
+
+        Direction direction() const;
+
+        float fraction() const;
+
+        float viewProportion() const;
+
+        HotZone hitTest(const Gfx::PointF& pos);
+
+        Gfx::RectF currentHandleRect();
+
+        ScrollBarRenderer* getRenderer();
+
+        void applyRenderer(ScrollBarRenderer* renderer);
 
     private:
         Orientation    _orientation;
@@ -124,12 +146,13 @@ class PT_FORMS_API ScrollBar : public Control
         double         _scrollStep;
         double         _position;
         bool           _dragging;
-        double         _factorPixel;
-        double         _offsetPixel;
-        double         _factorPosition;
-        double         _offsetPosition;
-        Gfx::RectF     _handleRect;
         Signal<double> _changed;
+
+        Gfx::RectF               _trackRect;
+        Gfx::RectF               _decreaseRect;
+        Gfx::RectF               _increaseRect;
+        HotZone                  _hoveredZone;
+        HotZone                  _pressedZone;
 
         FacetPtr<ScrollBarRenderer>  _renderer;
         bool                         _customRenderer;
@@ -137,10 +160,6 @@ class PT_FORMS_API ScrollBar : public Control
         AutoPtr<Gfx::Brush>          _background;
         AutoPtr<Gfx::Brush>          _foreground;
         AutoPtr<Gfx::Pen>            _contour;
-        
-        Gfx::Brush                   _backgroundBrush;
-        Gfx::Brush                   _foregroundBrush;
-        Gfx::Pen                     _contourPen;
 };
 
 } // namespace

@@ -208,13 +208,13 @@ void LineEditor::backspace()
 }
 
 
-void LineEditor::layout(Painter& painter, TextLine& line)
+void LineEditor::layout(const Painter& painter, TextLine& line)
 {
     layout( painter, displayText(), line );
 }
 
 
-void LineEditor::layout(Painter& painter, const Pt::String& text, TextLine& line)
+void LineEditor::layout(const Painter& painter, const Pt::String& text, TextLine& line)
 {
     Gfx::TextMetrics tm = painter.textMetrics(text);
     Gfx::FontMetrics fm = painter.fontMetrics();

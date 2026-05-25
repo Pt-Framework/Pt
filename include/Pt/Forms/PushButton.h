@@ -154,6 +154,9 @@ class PT_FORMS_API PushButton : public Button
         Gfx::SizeF                _iconSize;
         Gfx::PointF               _textPos;
         Gfx::PointF               _iconPos;
+        Gfx::RectF                _contentRect;
+        Gfx::RectF                _iconRect;
+        Gfx::RectF                _textRect;
         Gfx::RectF                _mnemonicRect;
         Gfx::TextMetrics          _textMetrics;
         Gfx::FontMetrics          _fontMetrics;

@@ -73,6 +73,10 @@ void StackLayout::onRemoveControl(Control& control)
     {
         _current = NoIndex;
     }
+    else if(_current != NoIndex && n < _current)
+    {
+        --_current;
+    }
 
     _controls.erase(it);
     _controlRemoved.send(n);

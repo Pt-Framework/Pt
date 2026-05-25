@@ -30,6 +30,7 @@
 #define Pt_Forms_ListBox_H
 
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/Style.h>
 #include <Pt/Forms/Button.h>
 #include <Pt/Forms/ScrollView.h>
 #include <Pt/Forms/FlowLayout.h>
@@ -52,7 +53,7 @@ class PT_FORMS_API ListBoxItem : public Button
 
       public:
         ListBoxItem();
-        
+
         virtual ~ListBoxItem();
 
         bool isSelectable() const;
@@ -62,7 +63,7 @@ class PT_FORMS_API ListBoxItem : public Button
         bool isSelected() const;
 
         void setSelected(bool b);
-        
+
         void setText(const Pt::String& t);
 
         const Pt::String& text() const;
@@ -75,18 +76,6 @@ class PT_FORMS_API ListBoxItem : public Button
         Pt::Signal<ListBoxItem&>& selected();
 
     public:
-        const Gfx::Brush& background() const;
-
-        void setBackground(const Gfx::Brush& b);
-
-        const Gfx::Pen& contour() const;
-
-        void setContour(const Gfx::Pen& p);
-
-        const Gfx::Color& textColor() const;
-
-        void setTextColor(const Gfx::Color& color);
-
         const Gfx::Font& font() const;
 
         void setFont(const Gfx::Font& font);
@@ -97,14 +86,11 @@ class PT_FORMS_API ListBoxItem : public Button
 
         void setFontSlant(Gfx::Font::Slant slant);
 
-        void setRenderer(ListBoxRenderer* renderer);
+        void setBackground(const Gfx::Brush& b);
 
-    protected:
-        const PixmapSurface& picture() const
-        { return _picture; }
+        void setTextColor(const Gfx::Color& color);
 
-        const Gfx::Font& currentFont() const
-        { return _font; }
+        void setRenderer(ListItemRenderer* renderer);
 
     protected:
         virtual void onPressed();
@@ -117,13 +103,19 @@ class PT_FORMS_API ListBoxItem : public Button
         virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
         virtual void onInvalidate();
-    
+
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintContext& context);
 
     private:
+        ListItemStyleFlags listItemStyleFlags() const;
+
         Gfx::Font getFont() const;
+
+        ListItemRenderer* getRenderer();
+
+        void applyRenderer(ListItemRenderer* renderer);
 
     private:
         enum FontOverride : unsigned
@@ -138,24 +130,19 @@ class PT_FORMS_API ListBoxItem : public Button
         bool                     _isSelectable;
         bool                     _isSelected;
         String                   _text;
-        
+
         Icon                     _icon;
         Gfx::SizeF               _iconSize;
 
-        FacetPtr<ListBoxRenderer> _renderer;
-        bool                      _customRenderer;
+        FacetPtr<ListItemRenderer> _renderer;
+        bool                       _customRenderer;
 
         AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
         unsigned                  _fontOverride;
 
-        Gfx::Pen   _textPen;
-        Gfx::Font  _font;
-        Gfx::Brush _brush;
-        Gfx::Pen   _pen;
-        PixmapSurface    _picture;
+        PixmapSurface             _picture;
 };
 
 
@@ -172,7 +159,7 @@ class ListBoxLayout : public FlowLayout
 
     protected:
         virtual void onAddControl(Control& control);
-        
+
         virtual void onRemoveControl(Control& control);
 
     private:
@@ -190,7 +177,7 @@ class PT_FORMS_API ListBox : public Control
 
     public:
         ListBox();
-        
+
         virtual ~ListBox();
 
         void setScrollBars(bool hasScrollBars);
@@ -228,26 +215,29 @@ class PT_FORMS_API ListBox : public Control
 
     protected:
         virtual void onInvalidate();
-    
+
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
-    
+
+    private:
+        ListBoxStyleFlags listBoxStyleFlags() const;
+
+        ListBoxRenderer* getRenderer();
+
+        void applyRenderer(ListBoxRenderer* renderer);
+
     private:
         ScrollView                _scrollView;
-        ListBoxLayout             _layout;        
+        ListBoxLayout             _layout;
         FacetPtr<ListBoxRenderer> _renderer;
         bool                      _customRenderer;
         AutoPtr<Gfx::Brush>       _background;
-        bool                      _hasBackground;       
+        bool                      _hasBackground;
         AutoPtr<Gfx::Pen>         _contour;
         bool                      _hasFrame;
-                        
-        Spacing    _frameSize;          
-        Gfx::Brush _brush;
-        Gfx::Pen   _pen;
 };
 
 } // namespace
