@@ -56,8 +56,10 @@ description: "Coding Styles and Guidelines"
 - Indentation & Layout:
   - Base: 4 spaces, no tabs.
   - Namespaces: No brace wrap, no indentation (content stays at column 0).
-  - Class Layout: Indent `public`/`private` by 2 spaces from the `class` brace.
+  - Class Layout: Indent `public`/`private` by 4 spaces from the `class` brace.
   - Initializers: Break constructor initializers before commas; do not pack them.
+  - separate member function definitions in .cpp files by two lines. #
+  - separate classes in header files by two lines if they have no class docs. #
 
 - Types & Symbols:
   - Pointers/References: Left-aligned (e.g., `Type* ptr`).
