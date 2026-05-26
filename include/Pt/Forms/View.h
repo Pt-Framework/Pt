@@ -77,8 +77,6 @@ class PT_FORMS_API View : public Widget
         Gfx::PointF fromControl(const Control& control,
                                 const Gfx::PointF& pos) const;
 
-        void setStyleOptions(const StyleOptions& opts);
-
         PaintSurface& surface();
 
         const PaintSurface& surface() const;
@@ -107,8 +105,6 @@ class PT_FORMS_API View : public Widget
 
         virtual Gfx::PointF onFromControl(const Control& control, 
                                           const Gfx::PointF& pos) const;
-
-        virtual void onSetStyleOptions(const StyleOptions& o);
 
     protected:
         virtual void onRepaintRequest(Control& control, const Gfx::RectF& rect);

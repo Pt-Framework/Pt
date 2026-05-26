@@ -116,8 +116,6 @@ class PT_FORMS_API PushButton : public Button
         virtual void onCanceled();
 
     protected:
-        virtual void onSetStyleOptions(const StyleOptions& options);
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);

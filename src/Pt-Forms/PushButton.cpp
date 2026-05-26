@@ -429,19 +429,6 @@ void PushButton::onCanceled()
 }
 
 
-void PushButton::onSetStyleOptions(const StyleOptions& o)
-{
-    _foreground.reset( new Gfx::Brush(o.foreground()) );
-    _contour.reset( new Gfx::Pen( o.contour() ) );
-    _textColor.reset( new Gfx::Color( o.textColor() ) );
-    _accentColor.reset( new Gfx::Color( o.accentColor() ) );
-    _highlightColor.reset( new Gfx::Color( o.highlightColor() ) );
-    _customFont = o.font();
-    _overrideFlags = OverrideForeground | OverrideContour | OverrideAccentColor
-                   | OverrideHighlightColor | OverrideTextColor | OverrideFontAll;
-}
-
-
 void PushButton::onInvalidate()
 {
     std::size_t gen = Application::instance().styleOptions().generation();

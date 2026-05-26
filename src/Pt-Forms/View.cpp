@@ -110,18 +110,6 @@ Gfx::PointF View::fromControl(const Control& control,
     return onFromControl(control, pos);
 }
 
-
-void View::setStyleOptions(const StyleOptions& o)
-{
-    onSetStyleOptions(o);
-    invalidate();
-}
-
-
-void View::onSetStyleOptions(const StyleOptions& o)
-{
-}
-
 //
 // TODO: maintain a list of child controls in onAttach() and onDetach(). 
 //       This way View::onSetSurface() can setup client surfaces.
