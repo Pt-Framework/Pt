@@ -132,7 +132,8 @@ SpinBox::SpinBox()
 , _downButton(SpinBoxButton::Down)
 , _upButton(SpinBoxButton::Up)
 , _customRenderer(false)
-, _fontOverride(0)
+, _styleGeneration(0)
+, _overrideFlags(0)
 {
     setFocusPolicy(Control::AcceptFocus);
     
@@ -397,6 +398,7 @@ const Gfx::Brush& SpinBox::background() const
 void SpinBox::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideBackground;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setBackground(b);
@@ -417,6 +419,7 @@ const Gfx::Brush& SpinBox::foreground() const
 void SpinBox::setForeground(const Gfx::Brush& b)
 {
     _foreground.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideForeground;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setForeground(b);
@@ -435,6 +438,7 @@ const Gfx::Pen& SpinBox::contour() const
 void SpinBox::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _overrideFlags |= OverrideContour;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setContour(p);
@@ -453,6 +457,7 @@ const Gfx::Color& SpinBox::textColor() const
 void SpinBox::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideTextColor;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setTextColor( Gfx::Pen(color) );
@@ -473,7 +478,7 @@ const Gfx::Font& SpinBox::font() const
 void SpinBox::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _fontOverride = OverrideAll;
+    _overrideFlags |= OverrideFontAll;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setFont(font);
@@ -486,18 +491,18 @@ Gfx::Font SpinBox::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( _fontOverride == 0 )
+    if( ! (_overrideFlags & OverrideFontAny) )
         return base;
 
-    if( _fontOverride == OverrideAll )
+    if( _overrideFlags & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
-                                                    : base.size();
-    Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
-                                                            : base.weight();
-    Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant()
-                                                          : base.slant();
+    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+                                                        : base.size();
+    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+                                                                 : base.weight();
+    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
+                                                               : base.slant();
 
     if( base.hasStyleName() )
         return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
@@ -512,7 +517,7 @@ Gfx::Font SpinBox::getFont() const
 void SpinBox::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _fontOverride |= OverrideSize;
+    _overrideFlags |= OverrideFontSize;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -524,7 +529,7 @@ void SpinBox::setFontSize(std::size_t size)
 void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _fontOverride |= OverrideWeight;
+    _overrideFlags |= OverrideFontWeight;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -536,7 +541,7 @@ void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 void SpinBox::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _fontOverride |= OverrideSlant;
+    _overrideFlags |= OverrideFontSlant;
 
     if( SpinBoxRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -561,7 +566,7 @@ void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 
 SpinBoxRenderer* SpinBox::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         SpinBoxRenderer* proto = style.get<SpinBoxRenderer>();
@@ -569,7 +574,6 @@ SpinBoxRenderer* SpinBox::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
 
         _upButton.setRenderer( _renderer.get() );
         _downButton.setRenderer( _renderer.get() );
@@ -581,19 +585,19 @@ SpinBoxRenderer* SpinBox::getRenderer()
 
 void SpinBox::applyRenderer(SpinBoxRenderer* renderer)
 {
-    if( _background )
+    if( _overrideFlags & OverrideBackground )
         renderer->setBackground(*_background);
 
-    if( _foreground )
+    if( _overrideFlags & OverrideForeground )
         renderer->setForeground(*_foreground);
 
-    if( _contour )
+    if( _overrideFlags & OverrideContour )
         renderer->setContour(*_contour);
 
-    if( _textColor )
+    if( _overrideFlags & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _fontOverride )
+    if( _overrideFlags & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -643,10 +647,17 @@ void SpinBox::onInvalidate()
 {
     Base::onInvalidate();
 
+    std::size_t gen = Application::instance().styleOptions().generation();
+    if( _styleGeneration != gen )
+    {
+        _styleGeneration = gen;
+        if( ! _customRenderer )
+            _renderer.reset();
+    }
+
     if( ! _renderer )
     {
-        bool hasOverride = _background || _foreground || _contour ||
-                           _textColor || _fontOverride;
+        bool hasOverride = (_overrideFlags != 0);
         if(hasOverride)
         {
             if( SpinBoxRenderer* renderer = getRenderer() )

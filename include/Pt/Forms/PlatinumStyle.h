@@ -48,10 +48,10 @@ namespace Pt {
 
 namespace Forms {
 
-class PlatinumRendererBase
+class PlatinumRendererBase : public Style::Facet
 {
     public:
-        PlatinumRendererBase();
+        PlatinumRendererBase(std::size_t refs = 0);
 
         virtual ~PlatinumRendererBase();
 
@@ -82,7 +82,8 @@ class PlatinumRendererBase
 class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
 {
     public:
-        PlatinumPanelRenderer(std::size_t refs = 0);
+        PlatinumPanelRenderer(FacetPtr<PlatinumRendererBase> base,
+                              std::size_t refs = 0);
 
         virtual ~PlatinumPanelRenderer();
 
@@ -124,7 +125,7 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
                                   StyleFlags state);
 
     private:
-        PlatinumRendererBase _baseRenderer;
+        FacetPtr<PlatinumRendererBase> _base;
         Painter              _bgPainter;
         Painter              _framePainter;
         Painter              _textPainter;
@@ -135,7 +136,8 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
 class PT_FORMS_API PlatinumButtonRenderer : public ButtonRenderer
 {
     public:
-        PlatinumButtonRenderer(std::size_t refs = 0);
+        PlatinumButtonRenderer(FacetPtr<PlatinumRendererBase> base,
+                               std::size_t refs = 0);
 
         virtual ~PlatinumButtonRenderer();
 
@@ -207,7 +209,7 @@ class PT_FORMS_API PlatinumButtonRenderer : public ButtonRenderer
                                   ButtonStyleFlags state);
 
     private:
-        PlatinumRendererBase _baseRenderer;
+        FacetPtr<PlatinumRendererBase> _base;
         Painter _normalPainter;
         Painter _pressedPainter;
         Painter _highlightPainter;
@@ -275,7 +277,6 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
                                       CheckBoxStyleFlags state);
 
     private:
-        PlatinumRendererBase _baseRenderer;
         Painter _boxPainter;
         Painter _textPainter;
 };
@@ -355,7 +356,6 @@ class PT_FORMS_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
                              ButtonStyleFlags state,
                              const StyleOptions& options);
 
-        PlatinumRendererBase _baseRenderer;
         Painter _bgPainter;
         Painter _buttonPainter;
         Painter _textPainter;
@@ -408,7 +408,6 @@ class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer
                                     LineEditStyleFlags state);
 
     private:
-        PlatinumRendererBase _baseRenderer;
         Painter _bgPainter;
         Painter _selectionPainter;
         Painter _textPainter;
@@ -622,7 +621,6 @@ class PT_FORMS_API PlatinumListBoxRenderer : public ListBoxRenderer
                                    ListBoxStyleFlags state);
 
     private:
-        PlatinumRendererBase _baseRenderer;
         Painter              _bgPainter;
         Painter              _framePainter;
 };
@@ -738,7 +736,6 @@ class PT_FORMS_API PlatinumComboBoxRenderer : public ComboBoxRenderer
                                   ComboBoxStyleFlags state);
 
     private:
-        PlatinumRendererBase _baseRenderer;
         double _inset;
         Painter _bgPainter;
         Painter _buttonPainter;

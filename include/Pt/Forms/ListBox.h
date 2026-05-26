@@ -106,7 +106,29 @@ class PT_FORMS_API ListBoxItem : public Button
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        /** @brief Paints the list item background layer.
+
+            The default implementation delegates to the current %ListItemRenderer.
+        */
+        virtual void onPaintBackground(PaintContext& context);
+
+        /** @brief Paints the list item content layers.
+
+            The default implementation sequences icon and text painting.
+        */
         virtual void onPaintContent(PaintContext& context);
+
+        /** @brief Paints the list item icon layer.
+
+            The default implementation does nothing if no prepared icon pixmap exists.
+        */
+        virtual void onPaintIcon(PaintContext& context);
+
+        /** @brief Paints the list item text layer.
+
+            The default implementation does nothing if the item text is empty.
+        */
+        virtual void onPaintText(PaintContext& context);
 
     private:
         ListItemStyleFlags listItemStyleFlags() const;
@@ -118,12 +140,16 @@ class PT_FORMS_API ListBoxItem : public Button
         void applyRenderer(ListItemRenderer* renderer);
 
     private:
-        enum FontOverride : unsigned
+        enum OverrideFlags : unsigned
         {
-            OverrideSize   = 0x01,
-            OverrideWeight = 0x02,
-            OverrideSlant  = 0x04,
-            OverrideAll    = 0xFF
+            OverrideBackground = 0x01,
+            OverrideTextColor  = 0x02,
+            OverrideFontAll    = 0x04,
+            OverrideFontSize   = 0x08,
+            OverrideFontWeight = 0x10,
+            OverrideFontSlant  = 0x20,
+            OverrideFontAny    = OverrideFontAll | OverrideFontSize
+                               | OverrideFontWeight | OverrideFontSlant
         };
 
         Pt::Signal<ListBoxItem&> _selected;
@@ -136,11 +162,12 @@ class PT_FORMS_API ListBoxItem : public Button
 
         FacetPtr<ListItemRenderer> _renderer;
         bool                       _customRenderer;
+        std::size_t                _styleGeneration;
 
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _fontOverride;
+        unsigned                  _overrideFlags;
 
         PixmapSurface             _picture;
 };
@@ -230,14 +257,22 @@ class PT_FORMS_API ListBox : public Control
         void applyRenderer(ListBoxRenderer* renderer);
 
     private:
+        enum OverrideFlags : unsigned
+        {
+            OverrideBackground = 0x01,
+            OverrideContour    = 0x02
+        };
+
         ScrollView                _scrollView;
         ListBoxLayout             _layout;
         FacetPtr<ListBoxRenderer> _renderer;
         bool                      _customRenderer;
+        std::size_t               _styleGeneration;
         AutoPtr<Gfx::Brush>       _background;
         bool                      _hasBackground;
         AutoPtr<Gfx::Pen>         _contour;
         bool                      _hasFrame;
+        unsigned                  _overrideFlags;
 };
 
 } // namespace

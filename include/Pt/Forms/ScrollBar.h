@@ -139,6 +139,13 @@ class PT_FORMS_API ScrollBar : public Control
         void applyRenderer(ScrollBarRenderer* renderer);
 
     private:
+        enum OverrideFlags : unsigned
+        {
+            OverrideBackground = 0x01,
+            OverrideForeground = 0x02,
+            OverrideContour    = 0x04
+        };
+
         Orientation    _orientation;
         double         _minPos;
         double         _maxPos;
@@ -156,10 +163,12 @@ class PT_FORMS_API ScrollBar : public Control
 
         FacetPtr<ScrollBarRenderer>  _renderer;
         bool                         _customRenderer;
+        std::size_t                  _styleGeneration;
 
         AutoPtr<Gfx::Brush>          _background;
         AutoPtr<Gfx::Brush>          _foreground;
         AutoPtr<Gfx::Pen>            _contour;
+        unsigned                     _overrideFlags;
 };
 
 } // namespace

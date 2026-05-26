@@ -48,7 +48,8 @@ LineEdit::LineEdit()
 , _echoMode(Normal)
 , _spacing(0)
 , _customRenderer(false)
-, _fontOverride(0)
+, _styleGeneration(0)
+, _overrideFlags(0)
 {
     setFocusPolicy(Control::AcceptFocus);
 }
@@ -211,6 +212,7 @@ const Gfx::Brush& LineEdit::background() const
 void LineEdit::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideBackground;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setBackground(*_background);
@@ -231,6 +233,7 @@ const Gfx::Pen& LineEdit::contour() const
 void LineEdit::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _overrideFlags |= OverrideContour;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setContour(*_contour);
@@ -251,6 +254,7 @@ const Gfx::Color& LineEdit::textColor() const
 void LineEdit::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideTextColor;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setTextColor( Gfx::Pen(*_textColor) );
@@ -271,7 +275,7 @@ const Gfx::Font& LineEdit::font() const
 void LineEdit::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _fontOverride = OverrideAll;
+    _overrideFlags |= OverrideFontAll;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -284,18 +288,18 @@ Gfx::Font LineEdit::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( _fontOverride == 0 )
+    if( ! (_overrideFlags & OverrideFontAny) )
         return base;
 
-    if( _fontOverride == OverrideAll )
+    if( _overrideFlags & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
-                                                    : base.size();
-    Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
-                                                            : base.weight();
-    Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant()
-                                                          : base.slant();
+    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+                                                        : base.size();
+    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+                                                                 : base.weight();
+    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
+                                                               : base.slant();
 
     if( base.hasStyleName() )
         return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
@@ -310,7 +314,7 @@ Gfx::Font LineEdit::getFont() const
 void LineEdit::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _fontOverride |= OverrideSize;
+    _overrideFlags |= OverrideFontSize;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -322,7 +326,7 @@ void LineEdit::setFontSize(std::size_t size)
 void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _fontOverride |= OverrideWeight;
+    _overrideFlags |= OverrideFontWeight;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -334,7 +338,7 @@ void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 void LineEdit::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _fontOverride |= OverrideSlant;
+    _overrideFlags |= OverrideFontSlant;
 
     if( LineEditRenderer* r = getRenderer() )
         r->setFont( getFont() );
@@ -428,7 +432,7 @@ void LineEdit::onLayout(const Gfx::RectF& rect)
 
 LineEditRenderer* LineEdit::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         LineEditRenderer* proto = style.get<LineEditRenderer>();
@@ -436,7 +440,6 @@ LineEditRenderer* LineEdit::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
     }
 
     return _renderer.get();
@@ -445,16 +448,16 @@ LineEditRenderer* LineEdit::getRenderer()
 
 void LineEdit::applyRenderer(LineEditRenderer* renderer)
 {
-    if( _background )
+    if( _overrideFlags & OverrideBackground )
         renderer->setBackground(*_background);
 
-    if( _contour )
+    if( _overrideFlags & OverrideContour )
         renderer->setContour(*_contour);
 
-    if( _textColor )
+    if( _overrideFlags & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _fontOverride )
+    if( _overrideFlags & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -463,10 +466,17 @@ void LineEdit::onInvalidate()
 {
     Base::onInvalidate();
 
+    std::size_t gen = Application::instance().styleOptions().generation();
+    if( _styleGeneration != gen )
+    {
+        _styleGeneration = gen;
+        if( ! _customRenderer )
+            _renderer.reset();
+    }
+
     if( ! _renderer )
     {
-        bool hasOverride = _background || _contour ||
-                           _textColor || _fontOverride;
+        bool hasOverride = (_overrideFlags != 0);
         if(hasOverride)
         {
             if( LineEditRenderer* renderer = getRenderer() )

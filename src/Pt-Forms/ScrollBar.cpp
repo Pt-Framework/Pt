@@ -48,6 +48,8 @@ ScrollBar::ScrollBar(Orientation o)
 , _hoveredZone(NoZone)
 , _pressedZone(NoZone)
 , _customRenderer(false)
+, _styleGeneration(0)
+, _overrideFlags(0)
 {
 }
 
@@ -132,6 +134,7 @@ const Gfx::Brush& ScrollBar::background() const
 void ScrollBar::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideBackground;
 
     if( ScrollBarRenderer* renderer = getRenderer() )
         renderer->setBackground(*_background);
@@ -151,6 +154,7 @@ const Gfx::Brush& ScrollBar::foreground() const
 void ScrollBar::setForeground(const Gfx::Brush& b)
 {
     _foreground.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideForeground;
 
     if( ScrollBarRenderer* renderer = getRenderer() )
         renderer->setForeground(*_foreground);
@@ -171,6 +175,7 @@ const Gfx::Pen& ScrollBar::contour() const
 void ScrollBar::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _overrideFlags |= OverrideContour;
 
     if( ScrollBarRenderer* renderer = getRenderer() )
         renderer->setContour(*_contour);
@@ -193,7 +198,7 @@ void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
 
 ScrollBarRenderer* ScrollBar::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         ScrollBarRenderer* proto = style.get<ScrollBarRenderer>();
@@ -201,7 +206,6 @@ ScrollBarRenderer* ScrollBar::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
     }
 
     return _renderer.get();
@@ -210,13 +214,13 @@ ScrollBarRenderer* ScrollBar::getRenderer()
 
 void ScrollBar::applyRenderer(ScrollBarRenderer* renderer)
 {
-    if( _background )
+    if( _overrideFlags & OverrideBackground )
         renderer->setBackground(*_background);
 
-    if( _foreground )
+    if( _overrideFlags & OverrideForeground )
         renderer->setForeground(*_foreground);
 
-    if( _contour )
+    if( _overrideFlags & OverrideContour )
         renderer->setContour(*_contour);
 }
 
@@ -327,9 +331,17 @@ float ScrollBar::viewProportion() const
 
 void ScrollBar::onInvalidate()
 {
+    std::size_t gen = Application::instance().styleOptions().generation();
+    if( _styleGeneration != gen )
+    {
+        _styleGeneration = gen;
+        if( ! _customRenderer )
+            _renderer.reset();
+    }
+
     if( ! _renderer )
     {
-        bool hasOverride = _background || _foreground || _contour;
+        bool hasOverride = (_overrideFlags != 0);
         if( hasOverride )
         {
             if( ScrollBarRenderer* renderer = getRenderer() )

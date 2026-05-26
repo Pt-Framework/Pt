@@ -259,17 +259,17 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
         PanelRenderer* create() const;
 
     public:
-        /** @brief Returns the custom background brush, or null if unset.
+        /** @brief Returns the background brush, or the style default if unset.
         */
-        const Gfx::Brush* background() const;
+        const Gfx::Brush& background() const;
 
         /** @brief Sets the background brush for filling the panel area.
         */
         void setBackground(const Gfx::Brush& b);
 
-        /** @brief Returns the custom contour pen, or null if unset.
+        /** @brief Returns the contour pen, or the style default if unset.
         */
-        const Gfx::Pen* contour() const;
+        const Gfx::Pen& contour() const;
 
         /** @brief Sets the pen for the panel outline.
         */

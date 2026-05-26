@@ -49,8 +49,9 @@ PushButton::PushButton()
 , _isFlat(false)
 , _direction(Direction::Left)
 , _customRenderer(false)
+, _styleGeneration(0)
 , _iconInvalid(false)
-, _fontOverride(0)
+, _overrideFlags(0)
 {
 }
 
@@ -114,6 +115,7 @@ const Gfx::Brush& PushButton::foreground() const
 void PushButton::setForeground(const Gfx::Brush& b)
 {
     _foreground.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideForeground;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setForeground(*_foreground);
@@ -134,6 +136,7 @@ const Gfx::Pen& PushButton::contour() const
 void PushButton::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _overrideFlags |= OverrideContour;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setContour(*_contour);
@@ -154,6 +157,7 @@ const Gfx::Color& PushButton::accentColor() const
 void PushButton::setAccentColor(const Gfx::Color& color)
 {
     _accentColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideAccentColor;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setAccentColor(*_accentColor);
@@ -174,6 +178,7 @@ const Gfx::Color& PushButton::highlightColor() const
 void PushButton::setHighlightColor(const Gfx::Color& color)
 {
     _highlightColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideHighlightColor;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setHighlightColor(*_highlightColor);
@@ -194,6 +199,7 @@ const Gfx::Color& PushButton::textColor() const
 void PushButton::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideTextColor;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
@@ -214,7 +220,7 @@ const Gfx::Font& PushButton::font() const
 void PushButton::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _fontOverride = OverrideAll;
+    _overrideFlags |= OverrideFontAll;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -227,18 +233,18 @@ Gfx::Font PushButton::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( _fontOverride == 0 )
+    if( ! (_overrideFlags & OverrideFontAny) )
         return base;
 
-    if( _fontOverride == OverrideAll )
+    if( _overrideFlags & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
-                                                    : base.size();
-    Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
-                                                            : base.weight();
-    Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant()
-                                                          : base.slant();
+    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+                                                        : base.size();
+    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+                                                                 : base.weight();
+    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
+                                                               : base.slant();
 
     if( base.hasStyleName() )
         return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
@@ -253,7 +259,7 @@ Gfx::Font PushButton::getFont() const
 void PushButton::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _fontOverride |= OverrideSize;
+    _overrideFlags |= OverrideFontSize;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -265,7 +271,7 @@ void PushButton::setFontSize(std::size_t size)
 void PushButton::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _fontOverride |= OverrideWeight;
+    _overrideFlags |= OverrideFontWeight;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -277,7 +283,7 @@ void PushButton::setFontWeight(Gfx::Font::Weight weight)
 void PushButton::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _fontOverride |= OverrideSlant;
+    _overrideFlags |= OverrideFontSlant;
 
     if( ButtonRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -300,7 +306,7 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
 
 ButtonRenderer* PushButton::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         ButtonRenderer* proto = style.get<ButtonRenderer>();
@@ -308,7 +314,6 @@ ButtonRenderer* PushButton::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
     }
 
     return _renderer.get();
@@ -317,22 +322,22 @@ ButtonRenderer* PushButton::getRenderer()
 
 void PushButton::applyRenderer(ButtonRenderer* renderer)
 {
-    if( _foreground )
+    if( _overrideFlags & OverrideForeground )
         renderer->setForeground( *_foreground );
 
-    if( _contour )
+    if( _overrideFlags & OverrideContour )
         renderer->setContour( *_contour );
 
-    if( _accentColor )
+    if( _overrideFlags & OverrideAccentColor )
         renderer->setAccentColor( *_accentColor );
 
-    if( _highlightColor )
+    if( _overrideFlags & OverrideHighlightColor )
         renderer->setHighlightColor( *_highlightColor );
 
-    if( _textColor )
+    if( _overrideFlags & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _fontOverride )
+    if( _overrideFlags & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -432,16 +437,24 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
     _accentColor.reset( new Gfx::Color( o.accentColor() ) );
     _highlightColor.reset( new Gfx::Color( o.highlightColor() ) );
     _customFont = o.font();
-    _fontOverride = OverrideAll;
+    _overrideFlags = OverrideForeground | OverrideContour | OverrideAccentColor
+                   | OverrideHighlightColor | OverrideTextColor | OverrideFontAll;
 }
 
 
 void PushButton::onInvalidate()
 {
+    std::size_t gen = Application::instance().styleOptions().generation();
+    if( _styleGeneration != gen )
+    {
+        _styleGeneration = gen;
+        if( ! _customRenderer )
+            _renderer.reset();
+    }
+
     if( ! _renderer )
     {
-        bool hasOverride = _foreground || _contour || _accentColor ||
-                           _highlightColor || _textColor || _fontOverride;
+        bool hasOverride = (_overrideFlags != 0);
         if(hasOverride)
         {
             if( ButtonRenderer* renderer = getRenderer() )
@@ -579,26 +592,73 @@ void PushButton::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     if( ! _renderer )
         return;
 
+    onPaintBackground(context);
+    onPaintFrame(context);
+    onPaintIcon(context);
+    onPaintText(context);
+    onPaintMnemonic(context);
+}
+
+
+void PushButton::onPaintBackground(PaintContext& context)
+{
+    if( ! _renderer )
+        return;
+
     Gfx::RectF widgetRect( size() );
     ButtonStyleFlags state = buttonStyleFlags();
 
     _renderer->renderBackground(context, widgetRect, state);
+}
 
-    if( ! _isFlat )
-    {
-        _renderer->renderFrame(context, widgetRect, state);
-    }
 
-    if( ! _picture.empty() )
-    {
-        _renderer->renderIcon(context, _contentRect, _picture, _iconPos, state);
-    }
+void PushButton::onPaintFrame(PaintContext& context)
+{
+    if( ! _renderer || _isFlat )
+        return;
 
-    if( ! text().empty() )
-    {
-        _renderer->renderText(context, _contentRect, text(), _textPos, state);
-        _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
-    }
+    Gfx::RectF widgetRect( size() );
+    ButtonStyleFlags state = buttonStyleFlags();
+
+    _renderer->renderFrame(context, widgetRect, state);
+}
+
+
+void PushButton::onPaintIcon(PaintContext& context)
+{
+    if( ! _renderer || _picture.empty() )
+        return;
+
+    ButtonStyleFlags state = buttonStyleFlags();
+
+    _renderer->renderIcon(context, _contentRect, _picture, _iconPos, state);
+}
+
+
+void PushButton::onPaintText(PaintContext& context)
+{
+    if( ! _renderer )
+        return;
+
+    const String& buttonText = text();
+    if( buttonText.empty() )
+        return;
+
+    ButtonStyleFlags state = buttonStyleFlags();
+
+    _renderer->renderText(context, _contentRect, buttonText, _textPos, state);
+}
+
+
+void PushButton::onPaintMnemonic(PaintContext& context)
+{
+    if( ! _renderer || text().empty() )
+        return;
+
+    Gfx::RectF widgetRect( size() );
+    ButtonStyleFlags state = buttonStyleFlags();
+
+    _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
 }
 
 } // namespace

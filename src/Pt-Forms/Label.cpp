@@ -46,7 +46,7 @@ Label::Label()
 , _customRenderer(false)
 , _hasBackground(false)
 , _hasFrame(false)
-, _fontOverride(0)
+, _overrideFlags(0)
 , _styleGeneration(0)
 , _styleInvalid(false)
 {
@@ -113,7 +113,7 @@ const Gfx::Brush* Label::background() const
         return 0;
 
     if( _renderer )
-        return _renderer->background();
+        return &_renderer->background();
 
     return &Application::instance().styleOptions().background();
 }
@@ -122,6 +122,7 @@ const Gfx::Brush* Label::background() const
 void Label::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideBackground;
     _hasBackground = true;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -144,7 +145,7 @@ const Gfx::Pen* Label::contour() const
         return 0;
 
     if( _renderer )
-        return _renderer->contour();
+        return &_renderer->contour();
 
     return &Application::instance().styleOptions().contour();
 }
@@ -153,6 +154,7 @@ const Gfx::Pen* Label::contour() const
 void Label::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _overrideFlags |= OverrideContour;
     _hasFrame = true;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -181,6 +183,7 @@ const Gfx::Color& Label::textColor() const
 void Label::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideTextColor;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
@@ -201,7 +204,7 @@ const Gfx::Font& Label::font() const
 void Label::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _fontOverride = OverrideAll;
+    _overrideFlags = (_overrideFlags & ~OverrideFontAny) | OverrideFontAll;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -214,18 +217,18 @@ Gfx::Font Label::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( _fontOverride == 0 )
+    if( ! (_overrideFlags & OverrideFontAny) )
         return base;
 
-    if( _fontOverride == OverrideAll )
+    if( _overrideFlags & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
-                                                    : base.size();
-    Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
-                                                            : base.weight();
-    Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant() 
-                                                          : base.slant();
+    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+                                                        : base.size();
+    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+                                                                 : base.weight();
+    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant() 
+                                                               : base.slant();
 
     if( base.hasStyleName() )
         return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
@@ -240,7 +243,7 @@ Gfx::Font Label::getFont() const
 void Label::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _fontOverride |= OverrideSize;
+    _overrideFlags |= OverrideFontSize;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -252,7 +255,7 @@ void Label::setFontSize(std::size_t size)
 void Label::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _fontOverride |= OverrideWeight;
+    _overrideFlags |= OverrideFontWeight;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -264,7 +267,7 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
 void Label::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _fontOverride |= OverrideSlant;
+    _overrideFlags |= OverrideFontSlant;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -287,7 +290,7 @@ void Label::setRenderer(PanelRenderer* renderer)
 
 PanelRenderer* Label::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         PanelRenderer* proto = style.get<PanelRenderer>();
@@ -295,7 +298,6 @@ PanelRenderer* Label::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
     }
 
     return _renderer.get();
@@ -304,16 +306,16 @@ PanelRenderer* Label::getRenderer()
 
 void Label::applyRenderer(PanelRenderer* renderer)
 {
-    if( _background )
+    if( _overrideFlags & OverrideBackground )
         renderer->setBackground( *_background );
 
-    if( _contour )
+    if( _overrideFlags & OverrideContour )
         renderer->setContour( *_contour );
 
-    if( _textColor )
+    if( _overrideFlags & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _fontOverride )
+    if( _overrideFlags & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -370,9 +372,17 @@ void Label::onInvalidate()
 {
     Base::onInvalidate();
 
+    std::size_t gen = Application::instance().styleOptions().generation();
+
+    bool needsRelayout = _styleGeneration != gen;
+    _styleGeneration = gen;
+
+    if( needsRelayout && ! _customRenderer )
+        _renderer.reset();
+
     if( ! _renderer )
     {
-        bool hasOverride = _background || _contour || _textColor || _fontOverride;
+        bool hasOverride = (_overrideFlags != 0);
         if(hasOverride)
         {
             if( PanelRenderer* renderer = getRenderer() )
@@ -383,11 +393,6 @@ void Label::onInvalidate()
             _renderer.reset( Application::instance().style().get<PanelRenderer>() );
         }
     }
-
-    std::size_t gen = Application::instance().styleOptions().generation();
-
-    bool needsRelayout = _styleGeneration != gen;
-    _styleGeneration = gen;
 
     if(_iconInvalid)
     {

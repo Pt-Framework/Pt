@@ -44,6 +44,7 @@ Panel::Panel()
 , _hasBackground(false)
 , _hasFrame(false)
 , _customRenderer(false)
+, _styleGeneration(0)
 , _iconInvalid(false)
 {
 }
@@ -97,7 +98,7 @@ const Gfx::Brush* Panel::background() const
         return 0;
 
     if( _renderer )
-        return _renderer->background();
+        return &_renderer->background();
 
     return &Application::instance().styleOptions().background();
 }
@@ -128,7 +129,7 @@ const Gfx::Pen* Panel::contour() const
         return 0;
 
     if( _renderer )
-        return _renderer->contour();
+        return &_renderer->contour();
 
     return &Application::instance().styleOptions().contour();
 }
@@ -167,7 +168,7 @@ void Panel::setRenderer(PanelRenderer* renderer)
 
 PanelRenderer* Panel::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         PanelRenderer* proto = style.get<PanelRenderer>();
@@ -175,7 +176,6 @@ PanelRenderer* Panel::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
     }
 
     return _renderer.get();
@@ -195,6 +195,14 @@ void Panel::applyRenderer(PanelRenderer* renderer)
 void Panel::onInvalidate()
 {
     Base::onInvalidate();
+
+    std::size_t gen = Application::instance().styleOptions().generation();
+    if( _styleGeneration != gen )
+    {
+        _styleGeneration = gen;
+        if( ! _customRenderer )
+            _renderer.reset();
+    }
 
     if( ! _renderer )
     {
@@ -288,16 +296,18 @@ void Panel::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     if( ! _renderer)
         return;
 
-    Gfx::RectF widgetRect( size() );
-
-    if( _hasBackground )
-        _renderer->renderBackground(context, widgetRect, styleFlags());
-
-    Forms::Painter painter(context);
+    onPaintBackground(context);
     onPaintContent(context);
+    onPaintFrame(context);
+}
 
-    if( _hasFrame )
-        _renderer->renderFrame(context, widgetRect, styleFlags());
+void Panel::onPaintBackground(PaintContext& context)
+{
+    if( ! _renderer || ! _hasBackground )
+        return;
+
+    Gfx::RectF widgetRect( size() );
+    _renderer->renderBackground(context, widgetRect, styleFlags());
 }
 
 
@@ -359,6 +369,16 @@ void Panel::onPaintContent(PaintContext& context)
     Gfx::RectF widgetRect( size() );
     _renderer->renderIcon(context, widgetRect, _picture, imagePosition,
                           styleFlags());
+}
+
+
+void Panel::onPaintFrame(PaintContext& context)
+{
+    if( ! _renderer || ! _hasFrame )
+        return;
+
+    Gfx::RectF widgetRect( size() );
+    _renderer->renderFrame(context, widgetRect, styleFlags());
 }
 
 } // namespace

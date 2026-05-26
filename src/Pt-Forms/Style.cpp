@@ -166,9 +166,12 @@ PanelRenderer* PanelRenderer::create() const
 }
 
 
-const Gfx::Brush* PanelRenderer::background() const
+const Gfx::Brush& PanelRenderer::background() const
 {
-    return _background.get();
+    if( _background )
+        return *_background;
+
+    return Application::instance().styleOptions().background();
 }
 
 
@@ -179,9 +182,12 @@ void PanelRenderer::setBackground(const Gfx::Brush& b)
 }
 
 
-const Gfx::Pen* PanelRenderer::contour() const
+const Gfx::Pen& PanelRenderer::contour() const
 {
-    return _contour.get();
+    if( _contour )
+        return *_contour;
+
+    return Application::instance().styleOptions().contour();
 }
 
 

@@ -120,12 +120,17 @@ class PT_FORMS_API Label : public Control
         Gfx::Font getFont() const;
 
     private:
-        enum FontOverride : unsigned
+        enum OverrideFlags : unsigned
         {
-            OverrideSize   = 0x01,
-            OverrideWeight = 0x02,
-            OverrideSlant  = 0x04,
-            OverrideAll    = 0xFF
+            OverrideBackground = 0x01,
+            OverrideContour    = 0x02,
+            OverrideTextColor  = 0x04,
+            OverrideFontAll    = 0x08,
+            OverrideFontSize   = 0x10,
+            OverrideFontWeight = 0x20,
+            OverrideFontSlant  = 0x40,
+            OverrideFontAny    = OverrideFontAll | OverrideFontSize
+                               | OverrideFontWeight | OverrideFontSlant
         };
 
     private:
@@ -150,7 +155,7 @@ class PT_FORMS_API Label : public Control
         bool                      _hasFrame;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _fontOverride;
+        unsigned                  _overrideFlags;
         std::size_t               _styleGeneration;
         bool                      _styleInvalid;
 

@@ -128,6 +128,36 @@ class PT_FORMS_API PushButton : public Button
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        /** @brief Paints the button background layer.
+
+            The default implementation delegates to the current %ButtonRenderer.
+        */
+        virtual void onPaintBackground(PaintContext& context);
+
+        /** @brief Paints the button frame layer.
+
+            The default implementation does nothing for flat buttons.
+        */
+        virtual void onPaintFrame(PaintContext& context);
+
+        /** @brief Paints the button icon layer.
+
+            The default implementation does nothing if no prepared icon pixmap exists.
+        */
+        virtual void onPaintIcon(PaintContext& context);
+
+        /** @brief Paints the button text layer.
+
+            The default implementation does nothing if the button text is empty.
+        */
+        virtual void onPaintText(PaintContext& context);
+
+        /** @brief Paints the button mnemonic layer.
+
+            The default implementation does nothing if the button text is empty.
+        */
+        virtual void onPaintMnemonic(PaintContext& context);
+
     private:
         ButtonRenderer* getRenderer();
 
@@ -136,12 +166,19 @@ class PT_FORMS_API PushButton : public Button
         Gfx::Font getFont() const;
 
     private:
-        enum FontOverride : unsigned
+        enum OverrideFlags : unsigned
         {
-            OverrideSize   = 0x01,
-            OverrideWeight = 0x02,
-            OverrideSlant  = 0x04,
-            OverrideAll    = 0xFF
+            OverrideForeground    = 0x01,
+            OverrideContour       = 0x02,
+            OverrideAccentColor   = 0x04,
+            OverrideHighlightColor= 0x08,
+            OverrideTextColor     = 0x10,
+            OverrideFontAll       = 0x20,
+            OverrideFontSize      = 0x40,
+            OverrideFontWeight    = 0x80,
+            OverrideFontSlant     = 0x100,
+            OverrideFontAny       = OverrideFontAll | OverrideFontSize
+                                  | OverrideFontWeight | OverrideFontSlant
         };
 
     private:
@@ -164,6 +201,7 @@ class PT_FORMS_API PushButton : public Button
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _customRenderer;
+        std::size_t               _styleGeneration;
         bool                      _iconInvalid;
 
         AutoPtr<Gfx::Brush>       _foreground;
@@ -172,7 +210,7 @@ class PT_FORMS_API PushButton : public Button
         AutoPtr<Gfx::Color>       _highlightColor;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _fontOverride;
+        unsigned                  _overrideFlags;
 
         PixmapSurface    _picture;
 };

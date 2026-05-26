@@ -44,7 +44,8 @@ ProgressBar::ProgressBar()
 , _min(0)
 , _max(100)
 , _customRenderer(false)
-, _fontOverride(0)
+, _styleGeneration(0)
+, _overrideFlags(0)
 {
 }
 
@@ -133,6 +134,7 @@ const Gfx::Brush& ProgressBar::background() const
 void ProgressBar::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
+    _overrideFlags |= OverrideBackground;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setBackground(*_background);
@@ -152,6 +154,7 @@ const Gfx::Color& ProgressBar::foreground() const
 void ProgressBar::setForeground(const Gfx::Color& b)
 {
     _foreground.reset( new Gfx::Color(b) );
+    _overrideFlags |= OverrideForeground;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setForeground( Gfx::Brush(*_foreground) );
@@ -172,6 +175,7 @@ const Gfx::Pen& ProgressBar::contour() const
 void ProgressBar::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
+    _overrideFlags |= OverrideContour;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setContour(*_contour);
@@ -192,6 +196,7 @@ const Gfx::Color& ProgressBar::textColor() const
 void ProgressBar::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
+    _overrideFlags |= OverrideTextColor;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
@@ -212,7 +217,7 @@ const Gfx::Font& ProgressBar::font() const
 void ProgressBar::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _fontOverride = OverrideAll;
+    _overrideFlags |= OverrideFontAll;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -225,18 +230,18 @@ Gfx::Font ProgressBar::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( _fontOverride == 0 )
+    if( ! (_overrideFlags & OverrideFontAny) )
         return base;
 
-    if( _fontOverride == OverrideAll )
+    if( _overrideFlags & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_fontOverride & OverrideSize) ? _customFont.size()
-                                                    : base.size();
-    Gfx::Font::Weight wt = (_fontOverride & OverrideWeight) ? _customFont.weight()
-                                                            : base.weight();
-    Gfx::Font::Slant sl = (_fontOverride & OverrideSlant) ? _customFont.slant()
-                                                          : base.slant();
+    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+                                                        : base.size();
+    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+                                                                 : base.weight();
+    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
+                                                               : base.slant();
 
     if( base.hasStyleName() )
         return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
@@ -251,7 +256,7 @@ Gfx::Font ProgressBar::getFont() const
 void ProgressBar::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _fontOverride |= OverrideSize;
+    _overrideFlags |= OverrideFontSize;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -263,7 +268,7 @@ void ProgressBar::setFontSize(std::size_t size)
 void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _fontOverride |= OverrideWeight;
+    _overrideFlags |= OverrideFontWeight;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -275,7 +280,7 @@ void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 void ProgressBar::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _fontOverride |= OverrideSlant;
+    _overrideFlags |= OverrideFontSlant;
 
     if( ProgressBarRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -298,7 +303,7 @@ void ProgressBar::setRenderer(ProgressBarRenderer* renderer)
 
 ProgressBarRenderer* ProgressBar::getRenderer()
 {
-    if( ! _customRenderer )
+    if( ! _renderer )
     {
         const Style& style = Application::instance().style();
         ProgressBarRenderer* proto = style.get<ProgressBarRenderer>();
@@ -306,7 +311,6 @@ ProgressBarRenderer* ProgressBar::getRenderer()
             return 0;
 
         _renderer.reset( proto->create() );
-        _customRenderer = true;
     }
 
     return _renderer.get();
@@ -315,19 +319,19 @@ ProgressBarRenderer* ProgressBar::getRenderer()
 
 void ProgressBar::applyRenderer(ProgressBarRenderer* renderer)
 {
-    if( _background )
+    if( _overrideFlags & OverrideBackground )
         renderer->setBackground( *_background );
 
-    if( _foreground )
+    if( _overrideFlags & OverrideForeground )
         renderer->setForeground( Gfx::Brush(*_foreground) );
 
-    if( _contour )
+    if( _overrideFlags & OverrideContour )
         renderer->setContour( *_contour );
 
-    if( _textColor )
+    if( _overrideFlags & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _fontOverride )
+    if( _overrideFlags & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -363,10 +367,17 @@ Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
 
 void ProgressBar::onInvalidate()
 {
+    std::size_t gen = Application::instance().styleOptions().generation();
+    if( _styleGeneration != gen )
+    {
+        _styleGeneration = gen;
+        if( ! _customRenderer )
+            _renderer.reset();
+    }
+
     if( ! _renderer )
     {
-        bool hasOverride = _background || _foreground || _contour ||
-                           _textColor || _fontOverride;
+        bool hasOverride = (_overrideFlags != 0);
         if(hasOverride)
         {
             if( ProgressBarRenderer* renderer = getRenderer() )

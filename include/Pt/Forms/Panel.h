@@ -87,7 +87,23 @@ class PT_FORMS_API Panel : public Control
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        /** @brief Paints the panel background layer.
+
+            The default implementation does nothing if the panel has no background.
+        */
+        virtual void onPaintBackground(PaintContext& context);
+
+        /** @brief Paints the panel content layer.
+
+            The default implementation paints the optional panel icon.
+        */
         virtual void onPaintContent(PaintContext& context);
+
+        /** @brief Paints the panel frame layer.
+
+            The default implementation does nothing if the panel has no frame.
+        */
+        virtual void onPaintFrame(PaintContext& context);
 
     private:
         PanelRenderer* getRenderer();
@@ -99,6 +115,7 @@ class PT_FORMS_API Panel : public Control
 
         FacetPtr<PanelRenderer> _renderer;
         bool                    _customRenderer;
+        std::size_t             _styleGeneration;
 
         AutoPtr<Gfx::Brush>     _background;
         bool                    _hasBackground;

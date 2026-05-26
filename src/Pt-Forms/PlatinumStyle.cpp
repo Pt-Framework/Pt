@@ -118,7 +118,8 @@ namespace Forms {
 // PlatinumRendererBase
 ///////////////////////////////////////////////////////////////////////////////
 
-PlatinumRendererBase::PlatinumRendererBase()
+PlatinumRendererBase::PlatinumRendererBase(std::size_t refs)
+: Style::Facet( typeid(PlatinumRendererBase), refs )
 {
 }
 
@@ -252,8 +253,10 @@ Gfx::Polygon PlatinumRendererBase::getPolygon(const Gfx::RectF& rect,
 // PlatinumPanelRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
-PlatinumPanelRenderer::PlatinumPanelRenderer(std::size_t refs)
+PlatinumPanelRenderer::PlatinumPanelRenderer(FacetPtr<PlatinumRendererBase> base,
+                                             std::size_t refs)
 : PanelRenderer(refs)
+, _base(base)
 {
 }
 
@@ -265,23 +268,17 @@ PlatinumPanelRenderer::~PlatinumPanelRenderer()
 
 PanelRenderer* PlatinumPanelRenderer::onCreate() const
 {
-    return new PlatinumPanelRenderer();
+    return new PlatinumPanelRenderer(_base);
 }
 
 
 void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
 {
-    const Gfx::Brush* bg = background();
-    if( bg )
-        _bgPainter.setBrush(*bg);
+    _bgPainter.setBrush( background() );
 
-    const Gfx::Pen* pen = contour();
-    if( pen )
-    {
-        Gfx::Pen framePen = *pen;
-        framePen.setJoinStyle(Gfx::Pen::BevelJoin);
-        _framePainter.setPen(framePen);
-    }
+    Gfx::Pen framePen = contour();
+    framePen.setJoinStyle(Gfx::Pen::BevelJoin);
+    _framePainter.setPen(framePen);
 
     _textPainter.setFont( font() );
     _textPainter.setPen( textColor() );
@@ -314,14 +311,11 @@ void PlatinumPanelRenderer::onRenderBackground(PaintContext& context,
                                                const StyleOptions& options,
                                                StyleFlags /*state*/)
 {
-    if( ! background() )
-        return;
-
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     _bgPainter.begin(context);
-    _baseRenderer.renderPlane(_bgPainter, rect, options.cornerRadius());
+    _base->renderPlane(_bgPainter, rect, options.cornerRadius());
 }
 
 
@@ -330,16 +324,13 @@ void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
                                           const StyleOptions& options,
                                           StyleFlags /*state*/)
 {
-    if( ! contour() )
-        return;
-
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     _framePainter.begin(context);
-    _baseRenderer.renderFrame(_framePainter, rect,
-                              _framePainter.pen().size(),
-                              options.cornerRadius());
+    _base->renderFrame(_framePainter, rect,
+                       _framePainter.pen().size(),
+                       options.cornerRadius());
 }
 
 
@@ -379,8 +370,10 @@ void PlatinumPanelRenderer::onRenderIcon(PaintContext& context,
 // PlatinumButtonRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
-PlatinumButtonRenderer::PlatinumButtonRenderer(std::size_t refs)
+PlatinumButtonRenderer::PlatinumButtonRenderer(FacetPtr<PlatinumRendererBase> base,
+                                               std::size_t refs)
 : ButtonRenderer(refs)
+, _base(base)
 {
 }
 
@@ -392,7 +385,7 @@ PlatinumButtonRenderer::~PlatinumButtonRenderer()
 
 ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 {
-    return new PlatinumButtonRenderer();
+    return new PlatinumButtonRenderer(_base);
 }
 
 
@@ -617,9 +610,9 @@ void PlatinumButtonRenderer::onRenderFrame(PaintContext& context,
     const Gfx::Scaling& scaling = painter->scaling();
     double corner = scaling.align(1.0);
 
-    _baseRenderer.renderPlane(*painter, rect, painter->brush(), corner);
+    _base->renderPlane(*painter, rect, painter->brush(), corner);
 
-    _baseRenderer.renderFrame(*painter, rect, painter->pen(), corner);
+    _base->renderFrame(*painter, rect, painter->pen(), corner);
 
     if( state.has(StyleFlags::Focused) )
     {
@@ -2762,9 +2755,11 @@ void PlatinumTabViewRenderer::onRenderTab(PaintContext& context,
 
 PlatinumStyle::PlatinumStyle()
 {
-    set(new PlatinumButtonRenderer);
+    FacetPtr<PlatinumRendererBase> base(new PlatinumRendererBase);
+    set(base.get());
+    set(new PlatinumButtonRenderer(base));
     set(new PlatinumCheckBoxRenderer);
-    set(new PlatinumPanelRenderer);
+    set(new PlatinumPanelRenderer(base));
     set(new PlatinumLineEditRenderer);
     set(new PlatinumScrollBarRenderer);
     set(new PlatinumProgressBarRenderer);

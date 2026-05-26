@@ -111,12 +111,18 @@ class PT_FORMS_API ProgressBar : public Control
         Gfx::Font getFont() const;
 
     private:
-        enum FontOverride : unsigned
+        enum OverrideFlags : unsigned
         {
-            OverrideSize   = 0x01,
-            OverrideWeight = 0x02,
-            OverrideSlant  = 0x04,
-            OverrideAll    = 0xFF
+            OverrideBackground = 0x01,
+            OverrideForeground = 0x02,
+            OverrideContour    = 0x04,
+            OverrideTextColor  = 0x08,
+            OverrideFontAll    = 0x10,
+            OverrideFontSize   = 0x20,
+            OverrideFontWeight = 0x40,
+            OverrideFontSlant  = 0x80,
+            OverrideFontAny    = OverrideFontAll | OverrideFontSize
+                               | OverrideFontWeight | OverrideFontSlant
         };
 
         Signal<int> _valueChanged;
@@ -129,10 +135,11 @@ class PT_FORMS_API ProgressBar : public Control
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _fontOverride;
+        unsigned                  _overrideFlags;
         
         FacetPtr<ProgressBarRenderer> _renderer;
         bool                          _customRenderer;
+        std::size_t                   _styleGeneration;
 };
 
 } // namespace
