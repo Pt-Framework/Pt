@@ -225,7 +225,7 @@ void Canvas::drawLine(const PointF& from, const PointF& to)
 {   
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawLine(from, to);
     }
 }
@@ -235,7 +235,7 @@ void Canvas::drawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawPolyline(pts, n);
     }
 }
@@ -245,7 +245,7 @@ void Canvas::fillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onFillPolygon(ps, n);
     }
 }
@@ -255,7 +255,7 @@ void Canvas::drawRect(const Gfx::RectF& rect)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawRect(rect);
     }
 }
@@ -265,7 +265,7 @@ void Canvas::fillRect(const Gfx::RectF& rect)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onFillRect(rect);
     }
 }
@@ -275,7 +275,7 @@ void Canvas::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawEllipse(topLeft, size);
     }
 }
@@ -285,7 +285,7 @@ void Canvas::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onFillEllipse(topLeft, size);
     }
 }
@@ -301,7 +301,7 @@ void Canvas::drawPath()
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawPath();
     }
 }
@@ -311,7 +311,7 @@ void Canvas::fillPath()
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onFillPath();
     }
 }
@@ -321,7 +321,7 @@ void Canvas::drawPath(const Path& path)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawPath(path);
     }
 }
@@ -331,7 +331,7 @@ void Canvas::fillPath(const Path& path)
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onFillPath(path);
     }
 }
@@ -357,7 +357,7 @@ void Canvas::drawText(const PointF& to, const Pt::String& text,
 {
     if(_active)
     {
-        prepare();
+        applyState();
         onDrawText(to, text, tform);
     }
 }
@@ -369,7 +369,7 @@ void Canvas::drawImage(const Gfx::PointF& to,
 {
     if(_active)
     {
-        prepare();
+        applyState();
 
         if( image.format() == _active->format() )
         {
@@ -409,7 +409,7 @@ void Canvas::invalidate(unsigned flags)
 }
 
 
-void Canvas::prepare()
+void Canvas::applyState()
 {
     if( ! _dirty)
         return;

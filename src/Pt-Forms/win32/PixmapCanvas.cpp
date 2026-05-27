@@ -1128,7 +1128,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     if( ! _pixmap )
         return;
 
-    prepare();
+    applyState();
 
     const PixmapImpl* pixmap = pm.impl();
     HDC dc = _pixmap->deviceContext();
