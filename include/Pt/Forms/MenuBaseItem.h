@@ -149,7 +149,7 @@ class PT_FORMS_API MenuBaseItem : public Control
         Pt::AutoPtr<Pt::Gfx::Pen>         _contour;
         Pt::AutoPtr<Pt::Gfx::Color>       _textColor;
         Pt::Gfx::Font             _customFont;
-        unsigned                  _overrideFlags;
+        unsigned                  _overrides;
 
         Pt::Forms::PixmapSurface     _picture;
         Pt::Gfx::Brush        _brush;

@@ -139,7 +139,7 @@ class PT_FORMS_API CheckBox : public Button
         AutoPtr<Gfx::Pen>          _contour;
         AutoPtr<Gfx::Color>        _textColor;
         Gfx::Font                  _customFont;
-        unsigned                   _overrideFlags;
+        unsigned                   _overrides;
 
         Gfx::RectF                 _boxRect;
         Gfx::RectF                 _textRect;

@@ -88,164 +88,34 @@ description: "Guidelines and architecture for Forms Style and Renderer implement
 
 ## Widget Attribute Lifecycle and Renderer Management
 
-Widgets that expose style attributes (background, foreground, contour, textColor, font, etc.) follow a strict lifecycle pattern to keep the renderer in sync with per-widget overrides.
+Forms currently uses two renderer-management patterns. Preserve the established pattern of the touched widget and do not mix them.
 
-### Proxy Getters
+### Direct Override Pattern
 
-Public getters on the widget proxy through the renderer first, then fall back to global `StyleOptions`:
+- Some widgets still keep renderer-local overrides directly on the widget and lazily clone a private renderer on the first override.
+- In that pattern, public getters proxy through the active renderer first and fall back to global `StyleOptions` when no renderer-local override is available.
+- Setters may lazily create a private renderer clone, push the override into that renderer immediately, and then call `invalidate()`.
+- `onInvalidate()` may either acquire a private clone when local overrides exist or reuse the shared style prototype when no overrides exist.
+- Never call individual `renderer->setXxx()` unconditionally during every invalidate pass. Either push a changed local override from the setter or perform one explicit bulk transfer when a private renderer is first acquired.
 
-```cpp
-const Gfx::Pen& MyWidget::contour() const
-{
-    if( _renderer )
-        return _renderer->contour();   // or dereference pointer if renderer returns ptr
+### Button Slice Binding Model
 
-    return Application::instance().styleOptions().contour();
-}
-```
+- `%PushButton` does **not** use the direct override pattern above. Its styling flow is centered on `%ButtonStyleOptions`, `%ButtonState`, `%ButtonRenderer`, and `%ButtonStyle`.
+- `%ButtonStyleOptions` owns only widget-local override tokens and its own generation. It must not be merged into `%ButtonState`, and `%ButtonStyle` must not keep its own copy. The widget stores the current `%ButtonStyleOptions` object and passes it explicitly into `%ButtonStyle::bind(...)` and `%ButtonStyle::rebind(...)`.
+- `%ButtonState` carries only transient interaction state (`enabled`, `hovered`, `focused`, `pressed`, `flat`). Render-time hooks and icon preparation may observe `%ButtonState`, but they must not receive `%ButtonStyleOptions`, `%StyleOptions`, or widget-local override tokens directly.
+- `%ButtonRenderer::prepare(const StyleOptions&, const ButtonStyleOptions&)` is the explicit synchronization point for the button slice. Concrete button renderers resolve global defaults plus local override tokens during `%onPrepare(...)` and cache all state needed later by render and icon hooks.
+- Button render and icon hooks must work from prepared renderer state plus `%ButtonState` only. If a concrete renderer needs theme data from `%StyleOptions`, resolve and cache it during `%onPrepare(...)` instead of re-fetching it during render.
+- `%ButtonStyle` is the renderer-binding controller only. It owns the currently bound `%ButtonRenderer`, tracks the active binding mode (`Style`, `Override`, `Custom`), and tracks the generations needed to decide whether a renderer must be rebound or merely re-prepared. Measure/layout/render/icon code should use the currently bound `%ButtonRenderer` directly instead of forwarding through `%ButtonStyle`.
+- `%ButtonStyle::bind(const Pt::Forms::Style&, ...)` is the style-path bind. It must always switch the controller to `%Style` or `%Override`, never keep a previous `%Custom` binding alive, and it must use `%Style::generation()` to detect when the renderer source changed.
+- `%ButtonStyle::bind(const Pt::Forms::Style&, ...)` must also use `%StyleOptions::generation()` and `%ButtonStyleOptions::generation()` to decide whether `%ButtonRenderer::prepare(...)` must run even when the bound renderer source stays the same.
+- `%ButtonStyle::bind(ButtonRenderer*, ...)` is only the explicit custom-renderer assignment path, typically from `%PushButton::setRenderer(...)`. Do not use pointer identity checks during invalidation to detect whether a custom renderer changed.
+- `%ButtonStyle::rebind(...)` only re-prepares the already assigned custom renderer when `%StyleOptions::generation()` or `%ButtonStyleOptions::generation()` changed. `%PushButton::onInvalidate()` should call `%rebind(...)` only when `%isCustom()` is true; otherwise it should stay on the style-path `%bind(style, ...)` call.
+- When a bind or rebind path cannot obtain a renderer, keep the cached prepare generations invalid. Only store the current prepare generations after a successful `%ButtonRenderer::prepare(...)` call.
+- For button widgets, prefer `%ButtonState` as the single source of truth for render-relevant booleans such as `pressed` and `flat`. Keep pure control-flow bookkeeping outside `%ButtonState`.
 
-- If the renderer returns a **pointer** (`const Gfx::Brush*`), check for null before dereferencing.
-- If the renderer returns a **reference** (`const Gfx::Font&`), use it directly.
-- The widget never caches a "resolved" value itself; the renderer is the single source of truth once instantiated.
+### State Collection
 
-### Setters Update the Renderer Immediately
-
-Every attribute setter must:
-1. Store the value locally in its `AutoPtr` member.
-2. Call `getRenderer()` to obtain (or lazily create) the widget's own renderer clone.
-3. Push the value into the renderer.
-4. Call `invalidate()`.
-
-```cpp
-void MyWidget::setContour(const Gfx::Pen& p)
-{
-    _contour.reset( new Gfx::Pen(p) );
-
-    if( MyRenderer* renderer = getRenderer() )
-        renderer->setContour(*_contour);
-
-    invalidate();
-}
-```
-
-### `getRenderer()` – Lazy Clone on First Override
-
-`getRenderer()` creates a private renderer clone from the style prototype the first time a property is overridden. It sets `_customRenderer = true` so subsequent calls skip cloning:
-
-```cpp
-MyRenderer* MyWidget::getRenderer()
-{
-    if( ! _customRenderer )
-    {
-        const Style& style = Application::instance().style();
-        MyRenderer* proto = style.get<MyRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-        _customRenderer = true;
-    }
-
-    return _renderer.get();
-}
-```
-
-### `applyRenderer()` – Bulk Transfer of Local Overrides
-
-Transfers all locally stored `AutoPtr` overrides into a given renderer. Called from `setRenderer()` and `onInvalidate()`:
-
-```cpp
-void MyWidget::applyRenderer(MyRenderer* renderer)
-{
-    if( _background )
-        renderer->setBackground(*_background);
-
-    if( _contour )
-        renderer->setContour(*_contour);
-
-    if( _textColor )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
-    if( _fontOverride )
-        renderer->setFont( getFont() );
-}
-```
-
-### `setRenderer()` – Custom Renderer Assignment
-
-When the user assigns an external renderer, apply all existing overrides to it:
-
-```cpp
-void MyWidget::setRenderer(MyRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
-
-    if( renderer )
-        applyRenderer(renderer);
-
-    invalidate();
-}
-```
-
-### `onInvalidate()` – Deferred Renderer Acquisition
-
-Follows a two-branch pattern:
-- **No renderer yet + overrides exist:** Clone a private renderer and apply overrides.
-- **No renderer yet + no overrides:** Use the shared style prototype directly (no clone needed).
-
-```cpp
-void MyWidget::onInvalidate()
-{
-    if( ! _renderer )
-    {
-        bool hasOverride = _background || _contour || _textColor || _fontOverride;
-        if( hasOverride )
-        {
-            if( MyRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<MyRenderer>() );
-        }
-    }
-
-    if( ! _renderer )
-        return;
-
-    Base::onInvalidate();
-    relayout();
-}
-```
-
-**Key rules:**
-- Never call individual `renderer->setXxx()` inside `onInvalidate()` unconditionally. That defeats the purpose of having `onPrepare()` in the renderer fill defaults from `StyleOptions`.
-- The shared prototype (no clone) is sufficient when the widget has zero local overrides—its renderer's `onPrepare()` will resolve everything from global options.
-- Public widget getters must remain coherent with this contract: if a renderer exists, its getters still need to expose themed defaults when no local override is present.
-
-### StyleFlags Helper Method
-
-Each widget provides a dedicated helper to collect its current interaction state into the appropriate typed flags class:
-
-```cpp
-MyStyleFlags MyWidget::myStyleFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( hasFocus() )
-        common.set(StyleFlags::Focused);
-
-    // Widget-specific flags:
-    MyStyleFlags state(common);
-    // state.set(MyStyleFlags::SomeFlag);
-    return state;
-}
-```
-
-This keeps `onPaint()` clean and testable.
+- Each widget should expose one helper that packages only the render-time state expected by its renderer API.
+- Use typed flag classes where the renderer API is flag-based.
+- Use a dedicated state object where the renderer API is object-based, as in `%ButtonState`.
+- Keep widget control-flow bookkeeping and non-visual transient internals out of the renderer state helper.

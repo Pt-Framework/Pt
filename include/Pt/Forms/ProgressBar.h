@@ -135,7 +135,7 @@ class PT_FORMS_API ProgressBar : public Control
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _overrideFlags;
+        unsigned                  _overrides;
         
         FacetPtr<ProgressBarRenderer> _renderer;
         bool                          _customRenderer;

@@ -147,7 +147,7 @@ class PT_FORMS_API Slider : public Control
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _overrideFlags;
+        unsigned                  _overrides;
         
         Gfx::RectF                _trackRect;
         Gfx::RectF                _handleRect;

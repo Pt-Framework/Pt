@@ -42,11 +42,22 @@ namespace Pt {
 
 namespace Forms {
 
+namespace {
+
+std::size_t nextStyleGeneration()
+{
+    static std::size_t generation = 0;
+    return ++generation;
+}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Style
 ///////////////////////////////////////////////////////////////////////////////
 
 Style::Style()
+: _generation( nextStyleGeneration() )
 {
 }
 
@@ -90,6 +101,7 @@ void Style::assign(const Style& style)
     }
 
     _facets.clear();
+    _generation = nextStyleGeneration();
 
     FacetMap::const_iterator cit;
     for(cit = style._facets.begin(); cit != style._facets.end(); ++cit)
@@ -105,6 +117,7 @@ void Style::combine(const Style& style)
         return;
 
     _facets.clear();
+    _generation = nextStyleGeneration();
 
     FacetMap::const_iterator it;
     for(it = style._facets.begin(); it != style._facets.end(); ++it)
@@ -132,6 +145,7 @@ void Style::set(Facet* facet)
     }
 
     facet->ref();
+    _generation = nextStyleGeneration();
 }
 
 
@@ -231,7 +245,7 @@ void PanelRenderer::setTextColor(const Gfx::Pen& p)
 
 
 Gfx::SizeF PanelRenderer::measureFrame(PaintSurface& surface,
-                                        const Gfx::SizeF& contentSize)
+                                       const Gfx::SizeF& contentSize)
 {
     return onMeasureFrame(surface, contentSize);
 }
@@ -308,9 +322,256 @@ const StyleOptions& PanelRenderer::prepare()
 // ButtonRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
+ButtonStyleOptions::ButtonStyleOptions()
+: _generation(0)
+, _overrides(0)
+{
+}
+
+
+bool ButtonStyleOptions::hasOverrides() const
+{
+    return _overrides != 0;
+}
+
+
+std::size_t ButtonStyleOptions::generation() const
+{
+    return _generation;
+}
+
+
+bool ButtonStyleOptions::hasOverride(StyleOverride mask) const
+{
+    return (_overrides & mask) != 0;
+}
+
+
+void ButtonStyleOptions::setOverride(StyleOverride mask)
+{
+    _overrides |= mask;
+    ++_generation;
+}
+
+
+const Gfx::Brush* ButtonStyleOptions::foreground() const
+{
+    if( _foreground )
+        return _foreground.get();
+
+    return 0;
+}
+
+
+void ButtonStyleOptions::setForeground(const Gfx::Brush& brush)
+{
+    _foreground.reset( new Gfx::Brush(brush) );
+    setOverride(ButtonStyleOptions::Foreground);
+}
+
+
+const Gfx::Pen* ButtonStyleOptions::contour() const
+{
+    if( _contour )
+        return _contour.get();
+
+    return 0;
+}
+
+
+void ButtonStyleOptions::setContour(const Gfx::Pen& pen)
+{
+    _contour.reset( new Gfx::Pen(pen) );
+    setOverride(ButtonStyleOptions::Contour);
+}
+
+
+const Gfx::Color* ButtonStyleOptions::accentColor() const
+{
+    if( _accentColor )
+        return _accentColor.get();
+
+    return 0;
+}
+
+
+void ButtonStyleOptions::setAccentColor(const Gfx::Color& color)
+{
+    _accentColor.reset( new Gfx::Color(color) );
+    setOverride(ButtonStyleOptions::AccentColor);
+}
+
+
+const Gfx::Color* ButtonStyleOptions::highlightColor() const
+{
+    if( _highlightColor )
+        return _highlightColor.get();
+
+    return 0;
+}
+
+
+void ButtonStyleOptions::setHighlightColor(const Gfx::Color& color)
+{
+    _highlightColor.reset( new Gfx::Color(color) );
+    setOverride(ButtonStyleOptions::HighlightColor);
+}
+
+
+const Gfx::Color* ButtonStyleOptions::textColor() const
+{
+    if( _textColor )
+        return _textColor.get();
+
+    return 0;
+}
+
+
+void ButtonStyleOptions::setTextColor(const Gfx::Color& color)
+{
+    _textColor.reset( new Gfx::Color(color) );
+    setOverride(ButtonStyleOptions::TextColor);
+}
+
+
+const Gfx::Font* ButtonStyleOptions::font() const
+{
+    return _font.get();
+}
+
+
+void ButtonStyleOptions::setFont(const Gfx::Font& font)
+{
+    _font.reset( new Gfx::Font(font) );
+    setOverride(ButtonStyleOptions::FontAll);
+}
+
+
+void ButtonStyleOptions::setFontSize(std::size_t size)
+{
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    *_font = _font->withSize(size);
+    setOverride(ButtonStyleOptions::FontSize);
+}
+
+
+void ButtonStyleOptions::setFontWeight(Gfx::Font::Weight weight)
+{
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    *_font = _font->withWeight(weight);
+    setOverride(ButtonStyleOptions::FontWeight);
+}
+
+
+void ButtonStyleOptions::setFontSlant(Gfx::Font::Slant slant)
+{
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    *_font = _font->withSlant(slant);
+    setOverride(ButtonStyleOptions::FontSlant);
+}
+
+
+Gfx::Font ButtonStyleOptions::getFont(const Gfx::Font& base) const
+{
+    if( ! _font )
+        return base;
+
+    if( hasOverride(FontAll) )
+        return *_font;
+
+    Gfx::Font font(base);
+
+    if( hasOverride(FontSize) )
+        font = font.withSize(_font->size());
+
+    if( hasOverride(FontWeight) )
+        font = font.withWeight(_font->weight());
+
+    if( hasOverride(FontSlant) )
+        font = font.withSlant(_font->slant());
+
+    return font;
+}
+
+
+ButtonState::ButtonState()
+: _enabled(false)
+, _hovered(false)
+, _focused(false)
+, _pressed(false)
+, _flat(false)
+{
+}
+
+
+bool ButtonState::isEnabled() const
+{
+    return _enabled;
+}
+
+
+void ButtonState::setEnabled(bool value)
+{
+    _enabled = value;
+}
+
+
+bool ButtonState::isHovered() const
+{
+    return _hovered;
+}
+
+
+void ButtonState::setHovered(bool value)
+{
+    _hovered = value;
+}
+
+
+bool ButtonState::isFocused() const
+{
+    return _focused;
+}
+
+
+void ButtonState::setFocused(bool value)
+{
+    _focused = value;
+}
+
+
+bool ButtonState::isPressed() const
+{
+    return _pressed;
+}
+
+
+void ButtonState::setPressed(bool value)
+{
+    _pressed = value;
+}
+
+
+bool ButtonState::isFlat() const
+{
+    return _flat;
+}
+
+
+void ButtonState::setFlat(bool value)
+{
+    _flat = value;
+}
+
+
 ButtonRenderer::ButtonRenderer(std::size_t refs)
 : Style::Facet( typeid(ButtonRenderer), refs )
-, _styleGeneration( std::size_t(-1) )
 {
 }
 
@@ -326,99 +587,10 @@ ButtonRenderer* ButtonRenderer::create() const
 }
 
 
-const Gfx::Brush& ButtonRenderer::foreground() const
+void ButtonRenderer::prepare(const StyleOptions& options,
+                             const ButtonStyleOptions& buttonOptions)
 {
-    if( _foreground )
-        return *_foreground;
-
-    return Application::instance().styleOptions().foreground();
-}
-
-
-void ButtonRenderer::setForeground(const Gfx::Brush& b)
-{
-    _foreground.reset( new Gfx::Brush(b) );
-    _styleGeneration = std::size_t(-1);
-}
-
-
-const Gfx::Pen& ButtonRenderer::contour() const
-{
-    if( _contour )
-        return *_contour;
-
-    return Application::instance().styleOptions().contour();
-}
-
-
-void ButtonRenderer::setContour(const Gfx::Pen& p)
-{
-    _contour.reset( new Gfx::Pen(p) );
-    _styleGeneration = std::size_t(-1);
-}
-
-
-const Gfx::Color& ButtonRenderer::accentColor() const
-{
-    if( _accentColor )
-        return *_accentColor;
-
-    return Application::instance().styleOptions().accentColor();
-}
-
-
-void ButtonRenderer::setAccentColor(const Gfx::Color& c)
-{
-    _accentColor.reset( new Gfx::Color(c) );
-    _styleGeneration = std::size_t(-1);
-}
-
-
-const Gfx::Color& ButtonRenderer::highlightColor() const
-{
-    if( _highlightColor )
-        return *_highlightColor;
-
-    return Application::instance().styleOptions().highlightColor();
-}
-
-
-void ButtonRenderer::setHighlightColor(const Gfx::Color& c)
-{
-    _highlightColor.reset( new Gfx::Color(c) );
-    _styleGeneration = std::size_t(-1);
-}
-
-
-const Gfx::Font& ButtonRenderer::font() const
-{
-    if( _font )
-        return *_font;
-
-    return Application::instance().styleOptions().font();
-}
-
-
-void ButtonRenderer::setFont(const Gfx::Font& f)
-{
-    _font.reset( new Gfx::Font(f) );
-    _styleGeneration = std::size_t(-1);
-}
-
-
-const Gfx::Color& ButtonRenderer::textColor() const
-{
-    if( _textColor )
-        return _textColor->color();
-
-    return Application::instance().styleOptions().textColor();
-}
-
-
-void ButtonRenderer::setTextColor(const Gfx::Pen& p)
-{
-    _textColor.reset( new Gfx::Pen(p) );
-    _styleGeneration = std::size_t(-1);
+    onPrepare(options, buttonOptions);
 }
 
 
@@ -427,22 +599,21 @@ Gfx::SizeF ButtonRenderer::measureContent(PaintSurface& surface,
                                            const Gfx::SizeF& iconSize,
                                            const Gfx::SizeF& textSize)
 {
-    prepare();
     return onMeasureContent(surface, direction, iconSize, textSize);
 }
 
 
-Gfx::SizeF ButtonRenderer::measureFrame(PaintSurface& surface,
-                                        const Gfx::SizeF& contentSize)
+Gfx::SizeF ButtonRenderer::measureChrome(PaintSurface& surface,
+                                         const Gfx::SizeF& contentSize)
 {
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
-Gfx::RectF ButtonRenderer::layoutFrame(PaintSurface& surface,
-                                       const Gfx::RectF& frameRect)
+Gfx::RectF ButtonRenderer::layoutChrome(PaintSurface& surface,
+                                        const Gfx::RectF& frameRect)
 {
-    return onLayoutFrame(surface, frameRect);
+    return onLayoutChrome(surface, frameRect);
 }
 
 
@@ -452,14 +623,12 @@ Gfx::RectF ButtonRenderer::layoutMnemonic(PaintSurface& surface,
                                           const Gfx::FontMetrics& fontMetrics,
                                           String::size_type mnemonicIndex)
 {
-    prepare();
     return onLayoutMnemonic(surface, text, textPos, fontMetrics, mnemonicIndex);
 }
 
 
 const Painter& ButtonRenderer::textPainter(PaintSurface& surface)
 {
-    prepare();
     return onGetTextPainter(surface);
 }
 
@@ -472,35 +641,31 @@ void ButtonRenderer::layoutContent(PaintSurface& surface,
                                    Gfx::RectF& iconRect,
                                    Gfx::RectF& textRect)
 {
-    prepare();
     onLayoutContent(surface, rect, direction, iconSize, textSize, iconRect, textRect);
 }
 
 
 void ButtonRenderer::renderBackground(PaintContext& context,
                                       const Gfx::RectF& rect,
-                                      ButtonStyleFlags state)
+                                      const ButtonState& state)
 {
-    const StyleOptions& opts = prepare();
-    onRenderBackground(context, rect, opts, state);
+    onRenderBackground(context, rect, state);
 }
 
 
 void ButtonRenderer::prepareIcon(const Gfx::Image& icon,
                                  Pixmap& picture,
-                                 ButtonStyleFlags state) const
+                                 const ButtonState& state) const
 {
-    const StyleOptions& opts = Application::instance().styleOptions();
-    onPrepareIcon(opts, icon, picture, state);
+    onPrepareIcon(icon, picture, state);
 }
 
 
-void ButtonRenderer::renderFrame(PaintContext& context,
-                                 const Gfx::RectF& rect,
-                                 ButtonStyleFlags state)
+void ButtonRenderer::renderChrome(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const ButtonState& state)
 {
-    const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, opts, state);
+    onRenderChrome(context, rect, state);
 }
 
 
@@ -508,20 +673,18 @@ void ButtonRenderer::renderText(PaintContext& context,
                                 const Gfx::RectF& rect,
                                 const String& text,
                                 const Gfx::PointF& pos,
-                                ButtonStyleFlags state)
+                                const ButtonState& state)
 {
-    const StyleOptions& opts = prepare();
-    onRenderText(context, rect, opts, text, pos, state);
+    onRenderText(context, rect, text, pos, state);
 }
 
 
 void ButtonRenderer::renderMnemonic(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& mnemonic,
-                                    ButtonStyleFlags state)
+                                    const ButtonState& state)
 {
-    const StyleOptions& opts = prepare();
-    onRenderMnemonic(context, rect, opts, mnemonic, state);
+    onRenderMnemonic(context, rect, mnemonic, state);
 }
 
 
@@ -529,24 +692,132 @@ void ButtonRenderer::renderIcon(PaintContext& context,
                                 const Gfx::RectF& rect,
                                 const Pixmap& picture,
                                 const Gfx::PointF& pos,
-                                ButtonStyleFlags state)
+                                const ButtonState& state)
 {
-    const StyleOptions& opts = prepare();
-    onRenderIcon(context, rect, opts, picture, pos, state);
+    onRenderIcon(context, rect, picture, pos, state);
 }
 
 
-const StyleOptions& ButtonRenderer::prepare()
+ButtonStyle::ButtonStyle()
+: _binding(Style)
+, _boundStyleGeneration( std::size_t(-1) )
+, _styleOptionsGeneration( std::size_t(-1) )
+, _buttonOptionsGeneration( std::size_t(-1) )
 {
-    const StyleOptions& opts = Application::instance().styleOptions();
+}
 
-    if( _styleGeneration != opts.generation() )
+
+bool ButtonStyle::isBound() const
+{
+    return _renderer != 0;
+}
+
+
+bool ButtonStyle::isCustom() const
+{
+    return _binding == Custom;
+}
+
+
+ButtonRenderer* ButtonStyle::bind(const Pt::Forms::Style& style,
+                                  const StyleOptions& options,
+                                  const ButtonStyleOptions& buttonOptions)
+{
+    const bool hasOverrides = buttonOptions.hasOverrides();
+    const Binding targetBinding = hasOverrides ? Override : Style;
+
+    const bool needsRebind = ! _renderer ||
+                             _binding != targetBinding ||
+                             _boundStyleGeneration != style.generation();
+
+    const bool needsPrepare = needsRebind ||
+                              _styleOptionsGeneration != options.generation() ||
+                              _buttonOptionsGeneration != buttonOptions.generation();
+
+    if(needsRebind)
     {
-        _styleGeneration = opts.generation();
-        onPrepare(opts);
+        ButtonRenderer* renderer = style.get<ButtonRenderer>();
+
+        if( hasOverrides && renderer )
+            renderer = renderer->create();
+
+        _renderer.reset(renderer);
     }
 
-    return opts;
+    _boundStyleGeneration = style.generation();
+
+    if( ! _renderer )
+    {
+        _binding = Style;
+        return 0;
+    }
+
+    _binding = targetBinding;
+
+    if( needsPrepare )
+        _renderer->prepare(options, buttonOptions);
+
+    _styleOptionsGeneration = options.generation();
+    _buttonOptionsGeneration = buttonOptions.generation();
+
+    return _renderer.get();
+}
+
+
+ButtonRenderer* ButtonStyle::bind(ButtonRenderer* renderer,
+                                  const StyleOptions& options,
+                                  const ButtonStyleOptions& buttonOptions)
+{
+    _renderer.reset(renderer);
+    _boundStyleGeneration = std::size_t(-1);
+
+    if( ! _renderer )
+    {
+        _binding = Style;
+        _styleOptionsGeneration = std::size_t(-1);
+        _buttonOptionsGeneration = std::size_t(-1);
+        return 0;
+    }
+
+    _binding = Custom;
+
+    _renderer->prepare(options, buttonOptions);
+
+    _styleOptionsGeneration = options.generation();
+    _buttonOptionsGeneration = buttonOptions.generation();
+
+    return _renderer.get();
+}
+
+
+ButtonRenderer* ButtonStyle::rebind(const StyleOptions& options,
+                                    const ButtonStyleOptions& buttonOptions)
+{
+    if( ! _renderer || _binding != Custom )
+        return 0;
+
+    const bool needsPrepare = _styleOptionsGeneration != options.generation() ||
+                              _buttonOptionsGeneration != buttonOptions.generation();
+
+    if( needsPrepare )
+        _renderer->prepare(options, buttonOptions);
+
+    _styleOptionsGeneration = options.generation();
+    _buttonOptionsGeneration = buttonOptions.generation();
+
+    return _renderer.get();
+}
+
+
+ButtonRenderer* ButtonStyle::renderer()
+{
+    return _renderer.get();
+}
+
+
+const ButtonRenderer* ButtonStyle::renderer() const
+{
+    return _renderer.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -645,19 +916,19 @@ Gfx::SizeF CheckBoxRenderer::measureContent(PaintSurface& surface,
 }
 
 
-Gfx::SizeF CheckBoxRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF CheckBoxRenderer::measureChrome(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
-Gfx::RectF CheckBoxRenderer::layoutFrame(PaintSurface& surface,
+Gfx::RectF CheckBoxRenderer::layoutChrome(PaintSurface& surface,
                                          const Gfx::RectF& frameRect)
 {
     prepare();
-    return onLayoutFrame(surface, frameRect);
+    return onLayoutChrome(surface, frameRect);
 }
 
 
@@ -829,11 +1100,11 @@ void SpinBoxRenderer::setTextColor(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF SpinBoxRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF SpinBoxRenderer::measureChrome(PaintSurface& surface,
                                          const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
@@ -852,15 +1123,15 @@ Gfx::SizeF SpinBoxRenderer::measureIndicator(PaintSurface& surface)
 }
 
 
-void SpinBoxRenderer::layoutFrame(PaintSurface& surface,
-                                  const Gfx::RectF& rect,
-                                  Gfx::RectF& entryRect,
-                                  Gfx::RectF& upButtonRect,
-                                  Gfx::RectF& downButtonRect,
-                                  Gfx::RectF& textRect)
+void SpinBoxRenderer::layoutControl(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   Gfx::RectF& entryRect,
+                                   Gfx::RectF& upButtonRect,
+                                   Gfx::RectF& downButtonRect,
+                                   Gfx::RectF& textRect)
 {
     prepare();
-    onLayoutFrame(surface, rect, entryRect, upButtonRect, downButtonRect, textRect);
+    onLayoutControl(surface, rect, entryRect, upButtonRect, downButtonRect, textRect);
 }
 
 
@@ -879,18 +1150,18 @@ const Painter& SpinBoxRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void SpinBoxRenderer::renderFrame(PaintContext& context,
-                                  const Gfx::RectF& rect,
-                                  const Gfx::RectF& entryRect,
-                                  const Gfx::RectF& upButtonRect,
-                                  const Gfx::RectF& downButtonRect,
-                                  SpinBoxStyleFlags state,
-                                  ButtonStyleFlags upButtonState,
-                                  ButtonStyleFlags downButtonState)
+void SpinBoxRenderer::renderControl(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& entryRect,
+                                    const Gfx::RectF& upButtonRect,
+                                    const Gfx::RectF& downButtonRect,
+                                    SpinBoxStyleFlags state,
+                                    ButtonStyleFlags upButtonState,
+                                    ButtonStyleFlags downButtonState)
 {
     const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, opts, entryRect, upButtonRect, downButtonRect,
-                  state, upButtonState, downButtonState);
+    onRenderControl(context, rect, opts, entryRect, upButtonRect, downButtonRect,
+                    state, upButtonState, downButtonState);
 }
 
 
@@ -915,15 +1186,15 @@ void SpinBoxRenderer::renderEntry(PaintContext& context,
 }
 
 
-void SpinBoxRenderer::onRenderFrame(PaintContext& context,
-                                    const Gfx::RectF& /*rect*/,
-                                    const StyleOptions& options,
-                                    const Gfx::RectF& entryRect,
-                                    const Gfx::RectF& upButtonRect,
-                                    const Gfx::RectF& downButtonRect,
-                                    SpinBoxStyleFlags state,
-                                    ButtonStyleFlags upButtonState,
-                                    ButtonStyleFlags downButtonState)
+void SpinBoxRenderer::onRenderControl(PaintContext& context,
+                                      const Gfx::RectF& /*rect*/,
+                                      const StyleOptions& options,
+                                      const Gfx::RectF& entryRect,
+                                      const Gfx::RectF& upButtonRect,
+                                      const Gfx::RectF& downButtonRect,
+                                      SpinBoxStyleFlags state,
+                                      ButtonStyleFlags upButtonState,
+                                      ButtonStyleFlags downButtonState)
 {
     onRenderEntry(context, entryRect, options, state);
     onRenderUpButton(context, upButtonRect, options, state, upButtonState);
@@ -1056,19 +1327,19 @@ void LineEditRenderer::setSelectionTextColor(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF LineEditRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF LineEditRenderer::measureChrome(PaintSurface& surface,
                                      const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
-Gfx::RectF LineEditRenderer::layoutFrame(PaintSurface& surface,
+Gfx::RectF LineEditRenderer::layoutChrome(PaintSurface& surface,
                                     const Gfx::RectF& rect)
 {
     prepare();
-    return onLayoutFrame(surface, rect);
+    return onLayoutChrome(surface, rect);
 }
 
 
@@ -1079,7 +1350,7 @@ const Painter& LineEditRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void LineEditRenderer::renderFrame(PaintContext& context,
+void LineEditRenderer::renderControl(PaintContext& context,
                               const Gfx::RectF& rect,
                               const Gfx::RectF& textRect,
                               const String& text,
@@ -1089,7 +1360,7 @@ void LineEditRenderer::renderFrame(PaintContext& context,
                               LineEditStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, textRect, opts, text, textPos,
+    onRenderControl(context, rect, textRect, opts, text, textPos,
              cursor, selection, state);
 }
 
@@ -1134,7 +1405,7 @@ void LineEditRenderer::renderCursor(PaintContext& context,
 }
 
 
-void LineEditRenderer::onRenderFrame(PaintContext& context,
+void LineEditRenderer::onRenderControl(PaintContext& context,
                                 const Gfx::RectF& rect,
                                 const Gfx::RectF& textRect,
                                 const StyleOptions& options,
@@ -1255,11 +1526,11 @@ void ProgressBarRenderer::setTextColor(const Gfx::Pen& p)
     _styleGeneration = std::size_t(-1);
 }
 
-Gfx::SizeF ProgressBarRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF ProgressBarRenderer::measureControl(PaintSurface& surface,
                                              const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureControl(surface, contentSize);
 }
 
 Gfx::SizeF ProgressBarRenderer::measureBar(PaintSurface& surface)
@@ -1268,7 +1539,7 @@ Gfx::SizeF ProgressBarRenderer::measureBar(PaintSurface& surface)
     return onMeasureBar(surface);
 }
 
-void ProgressBarRenderer::layoutFrame(PaintSurface& surface,
+void ProgressBarRenderer::layoutControl(PaintSurface& surface,
                                       const Gfx::RectF& rect,
                                       const Gfx::SizeF& barSize,
                                       const Gfx::SizeF& textSize,
@@ -1276,7 +1547,7 @@ void ProgressBarRenderer::layoutFrame(PaintSurface& surface,
                                       Gfx::RectF& textRect)
 {
     prepare();
-    onLayoutFrame(surface, rect, barSize, textSize, barRect, textRect);
+    onLayoutControl(surface, rect, barSize, textSize, barRect, textRect);
 }
 
 void ProgressBarRenderer::layoutBar(PaintSurface& surface,
@@ -1295,7 +1566,7 @@ const Painter& ProgressBarRenderer::textPainter(PaintSurface& surface)
     return onGetTextPainter(surface);
 }
 
-void ProgressBarRenderer::renderFrame(PaintContext& context,
+void ProgressBarRenderer::renderControl(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const Gfx::RectF& trackRect,
                                       const Gfx::RectF& chunkRect,
@@ -1305,7 +1576,7 @@ void ProgressBarRenderer::renderFrame(PaintContext& context,
                                       ProgressBarStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, opts, trackRect, chunkRect, textRect, text, textPos, state);
+    onRenderControl(context, rect, opts, trackRect, chunkRect, textRect, text, textPos, state);
 }
 
 void ProgressBarRenderer::renderBar(PaintContext& context,
@@ -1358,7 +1629,7 @@ const StyleOptions& ProgressBarRenderer::prepare()
     return opts;
 }
 
-void ProgressBarRenderer::onRenderFrame(PaintContext& context,
+void ProgressBarRenderer::onRenderControl(PaintContext& context,
                                         const Gfx::RectF& rect,
                                         const StyleOptions& options,
                                         const Gfx::RectF& trackRect,
@@ -1480,11 +1751,11 @@ void SliderRenderer::setTextColor(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF SliderRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF SliderRenderer::measureChrome(PaintSurface& surface,
                                          const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
@@ -1502,7 +1773,7 @@ Gfx::SizeF SliderRenderer::measureHandle(PaintSurface& surface)
 }
 
 
-void SliderRenderer::layoutFrame(PaintSurface& surface,
+void SliderRenderer::layoutControl(PaintSurface& surface,
                                  const Gfx::RectF& rect,
                                  const Gfx::SizeF& trackSize,
                                  const Gfx::SizeF& handleSize,
@@ -1510,7 +1781,7 @@ void SliderRenderer::layoutFrame(PaintSurface& surface,
                                  Gfx::RectF& handleRect)
 {
     prepare();
-    onLayoutFrame(surface, rect, trackSize, handleSize, trackRect, handleRect);
+    onLayoutControl(surface, rect, trackSize, handleSize, trackRect, handleRect);
 }
 
 
@@ -1524,14 +1795,14 @@ void SliderRenderer::layoutHandle(PaintSurface& surface,
 }
 
 
-void SliderRenderer::renderFrame(PaintContext& context,
+void SliderRenderer::renderChrome(PaintContext& context,
                                  const Gfx::RectF& rect,
                                  const Gfx::RectF& trackRect,
                                  const Gfx::RectF& handleRect,
                                  SliderStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, opts, trackRect, handleRect, state);
+    onRenderChrome(context, rect, opts, trackRect, handleRect, state);
 }
 
 
@@ -1568,7 +1839,7 @@ const StyleOptions& SliderRenderer::prepare()
 }
 
 
-void SliderRenderer::onRenderFrame(PaintContext& context,
+void SliderRenderer::onRenderChrome(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const StyleOptions& options,
                                    const Gfx::RectF& trackRect,
@@ -1649,12 +1920,12 @@ void ScrollBarRenderer::setForeground(const Gfx::Brush& b)
 }
 
 
-Gfx::SizeF ScrollBarRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF ScrollBarRenderer::measureChrome(PaintSurface& surface,
                                             const Gfx::SizeF& contentSize,
                                             Direction direction)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize, direction);
+    return onMeasureChrome(surface, contentSize, direction);
 }
 
 
@@ -1682,7 +1953,7 @@ Gfx::SizeF ScrollBarRenderer::measureButton(PaintSurface& surface,
 }
 
 
-void ScrollBarRenderer::layoutFrame(PaintSurface& surface,
+void ScrollBarRenderer::layoutControl(PaintSurface& surface,
                                     const Gfx::RectF& rect,
                                     Direction direction,
                                     const Gfx::SizeF& buttonSize,
@@ -1691,7 +1962,7 @@ void ScrollBarRenderer::layoutFrame(PaintSurface& surface,
                                     Gfx::RectF& increaseRect)
 {
     prepare();
-    onLayoutFrame(surface, rect, direction, buttonSize, trackRect, decreaseRect, increaseRect);
+    onLayoutControl(surface, rect, direction, buttonSize, trackRect, decreaseRect, increaseRect);
 }
 
 
@@ -1707,7 +1978,7 @@ void ScrollBarRenderer::layoutHandle(PaintSurface& surface,
 }
 
 
-void ScrollBarRenderer::renderFrame(PaintContext& context,
+void ScrollBarRenderer::renderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     Direction direction,
                                     const Gfx::RectF& trackRect,
@@ -1719,7 +1990,7 @@ void ScrollBarRenderer::renderFrame(PaintContext& context,
                                     ButtonStyleFlags increaseState)
 {
     const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, opts, direction, trackRect, handleRect,
+    onRenderChrome(context, rect, opts, direction, trackRect, handleRect,
                   decreaseRect, increaseRect, state, decreaseState, increaseState);
 }
 
@@ -1781,7 +2052,7 @@ const StyleOptions& ScrollBarRenderer::prepare()
 }
 
 
-void ScrollBarRenderer::onRenderFrame(PaintContext& context,
+void ScrollBarRenderer::onRenderChrome(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const StyleOptions& options,
                                       Direction direction,
@@ -1847,19 +2118,19 @@ void ListBoxRenderer::setContour(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF ListBoxRenderer::measureFrame(PaintSurface& surface,
-                                         const Gfx::SizeF& contentSize)
+Gfx::SizeF ListBoxRenderer::measureChrome(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
-Gfx::RectF ListBoxRenderer::layoutFrame(PaintSurface& surface,
-                                        const Gfx::RectF& frameRect)
+Gfx::RectF ListBoxRenderer::layoutChrome(PaintSurface& surface,
+                                         const Gfx::RectF& rect)
 {
     prepare();
-    return onLayoutFrame(surface, frameRect);
+    return onLayoutChrome(surface, rect);
 }
 
 
@@ -1872,12 +2143,12 @@ void ListBoxRenderer::renderBackground(PaintContext& context,
 }
 
 
-void ListBoxRenderer::renderFrame(PaintContext& context,
-                                  const Gfx::RectF& rect,
-                                  ListBoxStyleFlags state)
+void ListBoxRenderer::renderChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   ListBoxStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderFrame(context, rect, opts, state);
+    onRenderChrome(context, rect, opts, state);
 }
 
 
@@ -1983,11 +2254,11 @@ Gfx::SizeF ListItemRenderer::measureContent(PaintSurface& surface,
 }
 
 
-Gfx::SizeF ListItemRenderer::measureFrame(PaintSurface& surface,
-                                          const Gfx::SizeF& contentSize)
+Gfx::SizeF ListItemRenderer::measureChrome(PaintSurface& surface,
+                                           const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
@@ -1998,11 +2269,11 @@ const Painter& ListItemRenderer::textPainter(PaintSurface& surface)
 }
 
 
-Gfx::RectF ListItemRenderer::layoutFrame(PaintSurface& surface,
-                                         const Gfx::RectF& frameRect)
+Gfx::RectF ListItemRenderer::layoutChrome(PaintSurface& surface,
+                                          const Gfx::RectF& rect)
 {
     prepare();
-    return onLayoutFrame(surface, frameRect);
+    return onLayoutChrome(surface, rect);
 }
 
 
@@ -2178,11 +2449,11 @@ const StyleOptions& ComboBoxRenderer::prepare()
 }
 
 
-Gfx::SizeF ComboBoxRenderer::measureFrame(PaintSurface& surface,
+Gfx::SizeF ComboBoxRenderer::measureChrome(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureFrame(surface, contentSize);
+    return onMeasureChrome(surface, contentSize);
 }
 
 
@@ -2193,14 +2464,14 @@ Gfx::SizeF ComboBoxRenderer::measureButton(PaintSurface& surface)
 }
 
 
-void ComboBoxRenderer::layoutFrame(PaintSurface& surface,
+void ComboBoxRenderer::layoutControl(PaintSurface& surface,
                                    const Gfx::RectF& rect,
                                    Gfx::RectF& entryRect,
                                    Gfx::RectF& buttonRect,
                                    Gfx::RectF& textRect)
 {
     prepare();
-    onLayoutFrame(surface, rect, entryRect, buttonRect, textRect);
+    onLayoutControl(surface, rect, entryRect, buttonRect, textRect);
 }
 
 
@@ -2211,15 +2482,15 @@ const Painter& ComboBoxRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void ComboBoxRenderer::renderFrame(PaintContext& context,
-                                   const Gfx::RectF& rect,
-                                   const Gfx::RectF& entryRect,
-                                   const Gfx::RectF& buttonRect,
-                                   ComboBoxStyleFlags state,
-                                   ButtonStyleFlags buttonState)
+void ComboBoxRenderer::renderControl(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& entryRect,
+                                    const Gfx::RectF& buttonRect,
+                                    ComboBoxStyleFlags state,
+                                    ButtonStyleFlags buttonState)
 {
     const StyleOptions& options = prepare();
-    onRenderFrame(context, rect, entryRect, buttonRect, options, state, buttonState);
+    onRenderControl(context, rect, entryRect, buttonRect, options, state, buttonState);
 }
 
 
@@ -2245,13 +2516,13 @@ void ComboBoxRenderer::renderText(PaintContext& context,
 }
 
 
-void ComboBoxRenderer::onRenderFrame(PaintContext& context,
-                                     const Gfx::RectF& rect,
-                                     const Gfx::RectF& entryRect,
-                                     const Gfx::RectF& buttonRect,
-                                     const StyleOptions& options,
-                                     ComboBoxStyleFlags state,
-                                     ButtonStyleFlags buttonState)
+void ComboBoxRenderer::onRenderControl(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const Gfx::RectF& entryRect,
+                                      const Gfx::RectF& buttonRect,
+                                      const StyleOptions& options,
+                                      ComboBoxStyleFlags state,
+                                      ButtonStyleFlags buttonState)
 {
     onRenderEntry(context, entryRect, options, state);
     onRenderButton(context, buttonRect, options, state, buttonState);
@@ -2382,14 +2653,14 @@ void TabViewRenderer::renderBackground(PaintContext& context,
 }
 
 
-void TabViewRenderer::renderFrame(PaintContext& context,
-                                  const Gfx::RectF& contentRect,
-                                  const Gfx::RectF& activeTabRect,
-                                  TabViewStyleFlags state)
+void TabViewRenderer::renderChrome(PaintContext& context,
+                                   const Gfx::RectF& contentRect,
+                                   const Gfx::RectF& activeTabRect,
+                                   TabViewStyleFlags state)
 {
     prepare();
     const StyleOptions& options = Application::instance().styleOptions();
-    onRenderFrame(context, contentRect, activeTabRect, options, state);
+    onRenderChrome(context, contentRect, activeTabRect, options, state);
 }
 
 

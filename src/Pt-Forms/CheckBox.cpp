@@ -46,7 +46,7 @@ CheckBox::CheckBox()
 : _state(Unchecked)
 , _customRenderer(false)
 , _styleGeneration(0)
-, _overrideFlags(0)
+, _overrides(0)
 {
 }
 
@@ -87,7 +87,7 @@ const Gfx::Brush& CheckBox::background() const
 void CheckBox::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    _overrideFlags |= OverrideBackground;
+    _overrides |= OverrideBackground;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setBackground(*_background);
@@ -108,7 +108,7 @@ const Gfx::Pen& CheckBox::contour() const
 void CheckBox::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    _overrideFlags |= OverrideContour;
+    _overrides |= OverrideContour;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setContour(*_contour);
@@ -129,7 +129,7 @@ const Gfx::Color& CheckBox::textColor() const
 void CheckBox::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
-    _overrideFlags |= OverrideTextColor;
+    _overrides |= OverrideTextColor;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
@@ -150,7 +150,7 @@ const Gfx::Font& CheckBox::font() const
 void CheckBox::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _overrideFlags |= OverrideFontAll;
+    _overrides |= OverrideFontAll;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -163,17 +163,17 @@ Gfx::Font CheckBox::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( ! (_overrideFlags & OverrideFontAny) )
+    if( ! (_overrides & OverrideFontAny) )
         return base;
 
-    if( _overrideFlags & OverrideFontAll )
+    if( _overrides & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont.size()
                                                         : base.size();
-    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+    Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont.weight()
                                                                  : base.weight();
-    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
+    Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont.slant()
                                                                : base.slant();
 
     if( base.hasStyleName() )
@@ -189,7 +189,7 @@ Gfx::Font CheckBox::getFont() const
 void CheckBox::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _overrideFlags |= OverrideFontSize;
+    _overrides |= OverrideFontSize;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -201,7 +201,7 @@ void CheckBox::setFontSize(std::size_t size)
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _overrideFlags |= OverrideFontWeight;
+    _overrides |= OverrideFontWeight;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -213,7 +213,7 @@ void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _overrideFlags |= OverrideFontSlant;
+    _overrides |= OverrideFontSlant;
 
     if( CheckBoxRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -252,16 +252,16 @@ CheckBoxRenderer* CheckBox::getRenderer()
 
 void CheckBox::applyRenderer(CheckBoxRenderer* renderer)
 {
-    if( _overrideFlags & OverrideBackground )
+    if( _overrides & OverrideBackground )
         renderer->setBackground(*_background);
 
-    if( _overrideFlags & OverrideContour )
+    if( _overrides & OverrideContour )
         renderer->setContour(*_contour);
 
-    if( _overrideFlags & OverrideTextColor )
+    if( _overrides & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _overrideFlags & OverrideFontAny )
+    if( _overrides & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -275,7 +275,7 @@ CheckBoxStyleFlags CheckBox::checkBoxStyleFlags() const
     else
         common.set(StyleFlags::Disabled);
 
-    if( isHighlighted() )
+    if( isHovered() )
         common.set(StyleFlags::Highlighted);
 
     if( hasFocus() )
@@ -326,7 +326,7 @@ void CheckBox::onInvalidate()
 
     if( ! _renderer )
     {
-        bool hasOverride = (_overrideFlags != 0);
+        bool hasOverride = (_overrides != 0);
         if( hasOverride )
         {
             if( CheckBoxRenderer* renderer = getRenderer() )
@@ -359,7 +359,7 @@ Gfx::SizeF CheckBox::onMeasure(const SizePolicy& /*policy*/)
     Gfx::SizeF textSize(tm.advance(), fm.lineHeight());
     Gfx::SizeF indicatorSize = _renderer->measureIndicator(surface());
     Gfx::SizeF contentSize = _renderer->measureContent(surface(), indicatorSize, textSize);
-    Gfx::SizeF totalSize = _renderer->measureFrame(surface(), contentSize);
+    Gfx::SizeF totalSize = _renderer->measureChrome(surface(), contentSize);
 
     return Gfx::SizeF(totalSize.width() + padding().leftRight(),
                       totalSize.height() + padding().topBottom());
@@ -377,7 +377,7 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
                           Gfx::SizeF(size().width() - padding().leftRight(),
                                      size().height() - padding().topBottom()) );
 
-    Gfx::RectF contentRect = _renderer->layoutFrame(surface(), insetRect);
+    Gfx::RectF contentRect = _renderer->layoutChrome(surface(), insetRect);
 
     const Painter& painter = _renderer->textPainter(surface());
     Gfx::FontMetrics fm = painter.fontMetrics();

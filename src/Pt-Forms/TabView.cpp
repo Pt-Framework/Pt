@@ -44,7 +44,7 @@ TabBar::TabBar()
 : _current( static_cast<std::size_t>(-1) )
 , _customRenderer(false)
 , _styleGeneration(0)
-, _overrideFlags(0)
+, _overrides(0)
 {
 }
 
@@ -145,7 +145,7 @@ const Gfx::RectF& TabBar::currentTabRect() const
 void TabBar::setFont(const Gfx::Font& font)
 {
     _customFont.reset( new Gfx::Font(font) );
-    _overrideFlags |= OverrideFontAll;
+    _overrides |= OverrideFontAll;
 
     if( TabViewRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -156,7 +156,7 @@ void TabBar::setFont(const Gfx::Font& font)
 
 void TabBar::setFontSize(std::size_t size)
 {
-    _overrideFlags |= OverrideFontSize;
+    _overrides |= OverrideFontSize;
 
     Gfx::Font f = _customFont ? *_customFont
                                : Application::instance().styleOptions().font();
@@ -171,7 +171,7 @@ void TabBar::setFontSize(std::size_t size)
 
 void TabBar::setFontWeight(Gfx::Font::Weight weight)
 {
-    _overrideFlags |= OverrideFontWeight;
+    _overrides |= OverrideFontWeight;
 
     Gfx::Font f = _customFont ? *_customFont
                                : Application::instance().styleOptions().font();
@@ -186,7 +186,7 @@ void TabBar::setFontWeight(Gfx::Font::Weight weight)
 
 void TabBar::setFontSlant(Gfx::Font::Slant slant)
 {
-    _overrideFlags |= OverrideFontSlant;
+    _overrides |= OverrideFontSlant;
 
     Gfx::Font f = _customFont ? *_customFont
                                : Application::instance().styleOptions().font();
@@ -202,7 +202,7 @@ void TabBar::setFontSlant(Gfx::Font::Slant slant)
 void TabBar::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
-    _overrideFlags |= OverrideTextColor;
+    _overrides |= OverrideTextColor;
 
     if( TabViewRenderer* renderer = getRenderer() )
         renderer->setTextColor( Gfx::Pen(color) );
@@ -244,10 +244,10 @@ void TabBar::applyRenderer(TabViewRenderer* renderer)
     if( ! renderer )
         return;
 
-    if( _overrideFlags & OverrideFontAny )
+    if( _overrides & OverrideFontAny )
         renderer->setFont( getFont() );
 
-    if( _overrideFlags & OverrideTextColor )
+    if( _overrides & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 }
 
@@ -256,17 +256,17 @@ Gfx::Font TabBar::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( ! (_overrideFlags & OverrideFontAny) )
+    if( ! (_overrides & OverrideFontAny) )
         return base;
 
-    if( _overrideFlags & OverrideFontAll )
+    if( _overrides & OverrideFontAll )
         return *_customFont;
 
-    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont->size()
+    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont->size()
                                                         : base.size();
-    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont->weight()
+    Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont->weight()
                                                                  : base.weight();
-    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont->slant()
+    Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont->slant()
                                                                : base.slant();
 
     if( base.hasStyleName() )
@@ -291,7 +291,7 @@ void TabBar::onInvalidate()
 
     if( ! _renderer )
     {
-        bool hasOverride = (_overrideFlags != 0);
+        bool hasOverride = (_overrides != 0);
         if( hasOverride )
         {
             if( TabViewRenderer* renderer = getRenderer() )
@@ -465,7 +465,7 @@ bool TabBar::onTouchEvent(const TouchEvent& ev)
 TabView::TabView()
 : _customRenderer(false)
 , _styleGeneration(0)
-, _overrideFlags(0)
+, _overrides(0)
 , _hasBackground(false)
 , _hasFrame(false)
 {
@@ -539,7 +539,7 @@ void TabView::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
     _hasBackground = true;
-    _overrideFlags |= OverrideBackground;
+    _overrides |= OverrideBackground;
 
     if( TabViewRenderer* renderer = getRenderer() )
         renderer->setBackground(*_background);
@@ -559,7 +559,7 @@ void TabView::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
     _hasFrame = true;
-    _overrideFlags |= OverrideContour;
+    _overrides |= OverrideContour;
 
     if( TabViewRenderer* renderer = getRenderer() )
         renderer->setContour(*_contour);
@@ -578,7 +578,7 @@ void TabView::setFrame(bool enable)
 void TabView::setFont(const Gfx::Font& font)
 {
     _customFont.reset( new Gfx::Font(font) );
-    _overrideFlags |= OverrideFontAll;
+    _overrides |= OverrideFontAll;
 
     _tabBar.setFont(font);
     invalidate();
@@ -587,7 +587,7 @@ void TabView::setFont(const Gfx::Font& font)
 
 void TabView::setFontSize(std::size_t size)
 {
-    _overrideFlags |= OverrideFontSize;
+    _overrides |= OverrideFontSize;
 
     Gfx::Font f = _customFont ? *_customFont
                                : Application::instance().styleOptions().font();
@@ -600,7 +600,7 @@ void TabView::setFontSize(std::size_t size)
 
 void TabView::setFontWeight(Gfx::Font::Weight weight)
 {
-    _overrideFlags |= OverrideFontWeight;
+    _overrides |= OverrideFontWeight;
 
     Gfx::Font f = _customFont ? *_customFont
                                : Application::instance().styleOptions().font();
@@ -613,7 +613,7 @@ void TabView::setFontWeight(Gfx::Font::Weight weight)
 
 void TabView::setFontSlant(Gfx::Font::Slant slant)
 {
-    _overrideFlags |= OverrideFontSlant;
+    _overrides |= OverrideFontSlant;
 
     Gfx::Font f = _customFont ? *_customFont
                                : Application::instance().styleOptions().font();
@@ -627,7 +627,7 @@ void TabView::setFontSlant(Gfx::Font::Slant slant)
 void TabView::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
-    _overrideFlags |= OverrideTextColor;
+    _overrides |= OverrideTextColor;
 
     _tabBar.setTextColor(color);
     invalidate();
@@ -668,16 +668,16 @@ void TabView::applyRenderer(TabViewRenderer* renderer)
     if( ! renderer )
         return;
 
-    if( _overrideFlags & OverrideBackground )
+    if( _overrides & OverrideBackground )
         renderer->setBackground(*_background);
 
-    if( _overrideFlags & OverrideContour )
+    if( _overrides & OverrideContour )
         renderer->setContour(*_contour);
 
-    if( _overrideFlags & OverrideFontAny )
+    if( _overrides & OverrideFontAny )
         renderer->setFont( getFont() );
 
-    if( _overrideFlags & OverrideTextColor )
+    if( _overrides & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 }
 
@@ -686,17 +686,17 @@ Gfx::Font TabView::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( ! (_overrideFlags & OverrideFontAny) )
+    if( ! (_overrides & OverrideFontAny) )
         return base;
 
-    if( _overrideFlags & OverrideFontAll )
+    if( _overrides & OverrideFontAll )
         return *_customFont;
 
-    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont->size()
+    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont->size()
                                                         : base.size();
-    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont->weight()
+    Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont->weight()
                                                                  : base.weight();
-    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont->slant()
+    Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont->slant()
                                                                : base.slant();
 
     if( base.hasStyleName() )
@@ -737,7 +737,7 @@ void TabView::onInvalidate()
 
     if( ! _renderer )
     {
-        bool hasOverride = (_overrideFlags != 0);
+        bool hasOverride = (_overrides != 0);
         if( hasOverride )
         {
             if( TabViewRenderer* renderer = getRenderer() )
@@ -801,7 +801,7 @@ void TabView::onPaint(PaintContext& context, const Gfx::RectF& rect)
         _renderer->renderBackground(context, contentRect, state);
 
     if( _hasFrame )
-        _renderer->renderFrame(context, contentRect, _tabBar.currentTabRect(), state);
+        _renderer->renderChrome(context, contentRect, _tabBar.currentTabRect(), state);
 }
 
 } // namespace

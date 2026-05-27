@@ -151,7 +151,7 @@ class PT_FORMS_API TabBar : public Control
 
         AutoPtr<Gfx::Font>    _customFont;
         AutoPtr<Gfx::Color>   _textColor;
-        unsigned              _overrideFlags;
+        unsigned              _overrides;
 
         enum OverrideFlags : unsigned
         {
@@ -243,7 +243,7 @@ class PT_FORMS_API TabView : public Control
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Font>        _customFont;
         AutoPtr<Gfx::Color>       _textColor;
-        unsigned                  _overrideFlags;
+        unsigned                  _overrides;
         bool                      _hasBackground;
         bool                      _hasFrame;
 

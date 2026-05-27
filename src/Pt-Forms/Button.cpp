@@ -38,7 +38,7 @@ namespace Forms {
 
 Button::Button()
 : _onClickBegin(false)
-, _isHighlighted(false)
+, _isHovered(false)
 {
     setFocusPolicy(Control::AcceptFocus);
 }
@@ -62,9 +62,9 @@ void Button::setText(const Pt::String& text)
 }
 
 
-bool Button::isHighlighted() const
+bool Button::isHovered() const
 {
-    return _isHighlighted;
+    return _isHovered;
 }
 
 
@@ -129,7 +129,7 @@ bool Button::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
 
-    _isHighlighted = true;
+    _isHovered = true;
     
     invalidate();
     return true;
@@ -140,7 +140,7 @@ bool Button::onLeaveEvent(const LeaveEvent& ev)
 {
     Base::onLeaveEvent(ev);
 
-    _isHighlighted = false;
+    _isHovered = false;
 
     invalidate();
     return true;

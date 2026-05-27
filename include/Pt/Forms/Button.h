@@ -50,7 +50,7 @@ class PT_FORMS_API Button : public Control
 
         void setText(const Pt::String& t);
 
-        bool isHighlighted() const;
+        bool isHovered() const;
 
         void click();
 
@@ -87,7 +87,7 @@ class PT_FORMS_API Button : public Control
         Signal<>   _clicked;
         bool       _onClickBegin;
         Pt::String _text;
-        bool       _isHighlighted;
+        bool       _isHovered;
 };
 
 } // namespace

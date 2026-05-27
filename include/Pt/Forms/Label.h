@@ -155,7 +155,7 @@ class PT_FORMS_API Label : public Control
         bool                      _hasFrame;
         AutoPtr<Gfx::Color>       _textColor;
         Gfx::Font                 _customFont;
-        unsigned                  _overrideFlags;
+        unsigned                  _overrides;
         std::size_t               _styleGeneration;
         bool                      _styleInvalid;
 

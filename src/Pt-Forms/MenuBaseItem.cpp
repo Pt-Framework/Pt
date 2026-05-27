@@ -42,7 +42,7 @@ MenuBaseItem::MenuBaseItem()
 , _text("(empty)")
 , _hasSeparator(false)
 , _isHighlighted(false)
-, _overrideFlags(0)
+, _overrides(0)
 {
     setFocusPolicy(Control::AcceptFocus);
     setPadding(Pt::Forms::Spacing(8, 8));
@@ -157,7 +157,7 @@ const Pt::Gfx::Brush& MenuBaseItem::background() const
 void MenuBaseItem::setBackground(const Pt::Gfx::Brush& b)
 {
     _background.reset(new Pt::Gfx::Brush(b));
-    _overrideFlags |= OverrideBackground;
+    _overrides |= OverrideBackground;
     invalidate();
 }
 
@@ -172,7 +172,7 @@ const Pt::Gfx::Pen& MenuBaseItem::contour() const
 void MenuBaseItem::setContour(const Pt::Gfx::Pen& p)
 {
     _contour.reset(new Pt::Gfx::Pen(p));
-    _overrideFlags |= OverrideContour;
+    _overrides |= OverrideContour;
     invalidate();
 }
 
@@ -187,7 +187,7 @@ const Pt::Gfx::Color& MenuBaseItem::textColor() const
 void MenuBaseItem::setTextColor(const Pt::Gfx::Color& color)
 {
     _textColor.reset(new Pt::Gfx::Color(color));
-    _overrideFlags |= OverrideTextColor;
+    _overrides |= OverrideTextColor;
     invalidate();
 }
 
@@ -201,7 +201,7 @@ const Pt::Gfx::Font& MenuBaseItem::font() const
 void MenuBaseItem::setFont(const Pt::Gfx::Font& font)
 {
     _customFont = font;
-    _overrideFlags |= OverrideFontAll;
+    _overrides |= OverrideFontAll;
 
     invalidate();
 }
@@ -211,17 +211,17 @@ Pt::Gfx::Font MenuBaseItem::getFont() const
 {
     const Pt::Gfx::Font& base = Pt::Forms::Application::instance().styleOptions().font();
 
-    if( ! (_overrideFlags & OverrideFontAny) )
+    if( ! (_overrides & OverrideFontAny) )
         return base;
 
-    if( _overrideFlags & OverrideFontAll )
+    if( _overrides & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont.size()
                                                         : base.size();
-    Pt::Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+    Pt::Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont.weight()
                                                                      : base.weight();
-    Pt::Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
+    Pt::Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont.slant()
                                                                    : base.slant();
 
     if( base.hasStyleName() )
@@ -237,7 +237,7 @@ Pt::Gfx::Font MenuBaseItem::getFont() const
 void MenuBaseItem::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _overrideFlags |= OverrideFontSize;
+    _overrides |= OverrideFontSize;
 
     invalidate();
 }
@@ -246,7 +246,7 @@ void MenuBaseItem::setFontSize(std::size_t size)
 void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _overrideFlags |= OverrideFontWeight;
+    _overrides |= OverrideFontWeight;
 
     invalidate();
 }
@@ -255,7 +255,7 @@ void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
 void MenuBaseItem::setFontSlant(Pt::Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _overrideFlags |= OverrideFontSlant;
+    _overrides |= OverrideFontSlant;
 
     invalidate();
 }

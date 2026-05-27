@@ -310,7 +310,7 @@ class PT_GFX_API Canvas
                                  const Gfx::RectF* rect = 0) = 0;
 
     protected:
-        void applyState();
+        void prepare();
 
     private:
         void attachSurface(PaintSurface& surface);

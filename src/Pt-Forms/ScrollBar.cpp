@@ -49,7 +49,7 @@ ScrollBar::ScrollBar(Orientation o)
 , _pressedZone(NoZone)
 , _customRenderer(false)
 , _styleGeneration(0)
-, _overrideFlags(0)
+, _overrides(0)
 {
 }
 
@@ -134,7 +134,7 @@ const Gfx::Brush& ScrollBar::background() const
 void ScrollBar::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    _overrideFlags |= OverrideBackground;
+    _overrides |= OverrideBackground;
 
     if( ScrollBarRenderer* renderer = getRenderer() )
         renderer->setBackground(*_background);
@@ -154,7 +154,7 @@ const Gfx::Brush& ScrollBar::foreground() const
 void ScrollBar::setForeground(const Gfx::Brush& b)
 {
     _foreground.reset( new Gfx::Brush(b) );
-    _overrideFlags |= OverrideForeground;
+    _overrides |= OverrideForeground;
 
     if( ScrollBarRenderer* renderer = getRenderer() )
         renderer->setForeground(*_foreground);
@@ -175,7 +175,7 @@ const Gfx::Pen& ScrollBar::contour() const
 void ScrollBar::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    _overrideFlags |= OverrideContour;
+    _overrides |= OverrideContour;
 
     if( ScrollBarRenderer* renderer = getRenderer() )
         renderer->setContour(*_contour);
@@ -214,13 +214,13 @@ ScrollBarRenderer* ScrollBar::getRenderer()
 
 void ScrollBar::applyRenderer(ScrollBarRenderer* renderer)
 {
-    if( _overrideFlags & OverrideBackground )
+    if( _overrides & OverrideBackground )
         renderer->setBackground(*_background);
 
-    if( _overrideFlags & OverrideForeground )
+    if( _overrides & OverrideForeground )
         renderer->setForeground(*_foreground);
 
-    if( _overrideFlags & OverrideContour )
+    if( _overrides & OverrideContour )
         renderer->setContour(*_contour);
 }
 
@@ -341,7 +341,7 @@ void ScrollBar::onInvalidate()
 
     if( ! _renderer )
     {
-        bool hasOverride = (_overrideFlags != 0);
+        bool hasOverride = (_overrides != 0);
         if( hasOverride )
         {
             if( ScrollBarRenderer* renderer = getRenderer() )
@@ -375,7 +375,7 @@ void ScrollBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
     ButtonStyleFlags decreaseState = decreaseButtonFlags();
     ButtonStyleFlags increaseState = increaseButtonFlags();
 
-    _renderer->renderFrame(context, widgetRect, dir,
+    _renderer->renderChrome(context, widgetRect, dir,
                            _trackRect, handleRect,
                            _decreaseRect, _increaseRect,
                            state, decreaseState, increaseState);
@@ -394,7 +394,7 @@ Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
 
     Direction dir = direction();
     Gfx::SizeF contentSize = policy.size();
-    return _renderer->measureFrame(surface(), contentSize, dir);
+    return _renderer->measureChrome(surface(), contentSize, dir);
 }
 
 
@@ -568,7 +568,7 @@ void ScrollBar::onLayout(const Gfx::RectF& rect)
 
     Gfx::SizeF buttonSize = _renderer->measureButton(surface(), dir);
 
-    _renderer->layoutFrame(surface(), widgetRect, dir, buttonSize,
+    _renderer->layoutControl(surface(), widgetRect, dir, buttonSize,
                            _trackRect, _decreaseRect, _increaseRect);
 
     repaint();

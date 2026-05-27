@@ -34,7 +34,6 @@
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Direction.h>
-#include <Pt/Forms/StyleFlags.h>
 #include <Pt/Forms/Style.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
@@ -94,7 +93,7 @@ class PT_FORMS_API PushButton : public Button
 
         void setTextColor(const Gfx::Color& color);
 
-        const Gfx::Font& font() const;
+        Gfx::Font font() const;
 
         void setFont(const Gfx::Font& font);
 
@@ -105,8 +104,6 @@ class PT_FORMS_API PushButton : public Button
         void setFontSlant(Gfx::Font::Slant slant);
 
         void setRenderer(ButtonRenderer* renderer);
-
-        ButtonStyleFlags buttonStyleFlags() const;
 
     protected:
         virtual void onPressed();
@@ -157,35 +154,20 @@ class PT_FORMS_API PushButton : public Button
         virtual void onPaintMnemonic(PaintContext& context);
 
     private:
-        ButtonRenderer* getRenderer();
-
-        void applyRenderer(ButtonRenderer* renderer);
-
-        Gfx::Font getFont() const;
-
-    private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideForeground    = 0x01,
-            OverrideContour       = 0x02,
-            OverrideAccentColor   = 0x04,
-            OverrideHighlightColor= 0x08,
-            OverrideTextColor     = 0x10,
-            OverrideFontAll       = 0x20,
-            OverrideFontSize      = 0x40,
-            OverrideFontWeight    = 0x80,
-            OverrideFontSlant     = 0x100,
-            OverrideFontAny       = OverrideFontAll | OverrideFontSize
-                                  | OverrideFontWeight | OverrideFontSlant
-        };
+        const ButtonState& buttonState();
 
     private:
         bool                      _isToggle;
-        bool                      _isPressed;
         bool                      _isBeingToggled;
-        bool                      _isFlat;
         Direction                 _direction;
         Icon                      _icon;
+        bool                      _iconInvalid;
+        PixmapSurface             _picture;
+
+        ButtonState               _buttonState;
+        ButtonStyleOptions        _buttonStyleOptions;
+        ButtonStyle               _buttonStyle;
+
         Gfx::SizeF                _iconSize;
         Gfx::PointF               _textPos;
         Gfx::PointF               _iconPos;
@@ -196,21 +178,6 @@ class PT_FORMS_API PushButton : public Button
         Gfx::TextMetrics          _textMetrics;
         Gfx::FontMetrics          _fontMetrics;
         Gfx::SizeF                _measuredIconSize;
-                                  
-        FacetPtr<ButtonRenderer>  _renderer;
-        bool                      _customRenderer;
-        std::size_t               _styleGeneration;
-        bool                      _iconInvalid;
-
-        AutoPtr<Gfx::Brush>       _foreground;
-        AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>       _accentColor;
-        AutoPtr<Gfx::Color>       _highlightColor;
-        AutoPtr<Gfx::Color>       _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _overrideFlags;
-
-        PixmapSurface    _picture;
 };
 
 } // namespace

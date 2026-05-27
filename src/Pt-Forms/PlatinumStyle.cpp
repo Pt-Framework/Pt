@@ -114,6 +114,66 @@ namespace Pt {
 
 namespace Forms {
 
+namespace {
+
+const Gfx::Brush& resolveButtonForeground(const StyleOptions& options,
+                                          const ButtonStyleOptions& buttonOptions)
+{
+    if( const Gfx::Brush* foreground = buttonOptions.foreground() )
+        return *foreground;
+
+    return options.foreground();
+}
+
+
+const Gfx::Pen& resolveButtonContour(const StyleOptions& options,
+                                     const ButtonStyleOptions& buttonOptions)
+{
+    if( const Gfx::Pen* contour = buttonOptions.contour() )
+        return *contour;
+
+    return options.contour();
+}
+
+
+const Gfx::Color& resolveButtonAccentColor(const StyleOptions& options,
+                                           const ButtonStyleOptions& buttonOptions)
+{
+    if( const Gfx::Color* accentColor = buttonOptions.accentColor() )
+        return *accentColor;
+
+    return options.accentColor();
+}
+
+
+const Gfx::Color& resolveButtonHighlightColor(const StyleOptions& options,
+                                              const ButtonStyleOptions& buttonOptions)
+{
+    if( const Gfx::Color* highlightColor = buttonOptions.highlightColor() )
+        return *highlightColor;
+
+    return options.highlightColor();
+}
+
+
+const Gfx::Color& resolveButtonTextColor(const StyleOptions& options,
+                                         const ButtonStyleOptions& buttonOptions)
+{
+    if( const Gfx::Color* textColor = buttonOptions.textColor() )
+        return *textColor;
+
+    return options.textColor();
+}
+
+
+Gfx::Font resolveButtonFont(const StyleOptions& options,
+                            const ButtonStyleOptions& buttonOptions)
+{
+    return buttonOptions.getFont(options.font());
+}
+
+} // anonymous namespace
+
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumRendererBase
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,10 +189,10 @@ PlatinumRendererBase::~PlatinumRendererBase()
 }
 
 
-void PlatinumRendererBase::renderFrame(Painter& painter,
-                                       const Gfx::RectF& rect,
-                                       const Gfx::Pen& pen,
-                                       double corner) const
+void PlatinumRendererBase::renderChrome(Painter& painter,
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& pen,
+                                        double corner) const
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -146,10 +206,10 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 }
 
 
-void PlatinumRendererBase::renderFrame(Painter& painter,
-                                       const Gfx::RectF& rect,
-                                       double penSize,
-                                       double corner) const
+void PlatinumRendererBase::renderChrome(Painter& painter,
+                                        const Gfx::RectF& rect,
+                                        double penSize,
+                                        double corner) const
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -286,14 +346,14 @@ void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
 
 
 Gfx::SizeF PlatinumPanelRenderer::onMeasureFrame(PaintSurface& /*surface*/,
-                                                  const Gfx::SizeF& contentSize)
+                                                 const Gfx::SizeF& contentSize)
 {
     return contentSize;
 }
 
 
 Gfx::RectF PlatinumPanelRenderer::onLayoutFrame(PaintSurface& /*surface*/,
-                                                 const Gfx::RectF& frameRect)
+                                                const Gfx::RectF& frameRect)
 {
     return frameRect;
 }
@@ -320,15 +380,15 @@ void PlatinumPanelRenderer::onRenderBackground(PaintContext& context,
 
 
 void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
-                                          const Gfx::RectF& rect,
-                                          const StyleOptions& options,
-                                          StyleFlags /*state*/)
+                                         const Gfx::RectF& rect,
+                                         const StyleOptions& options,
+                                         StyleFlags /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     _framePainter.begin(context);
-    _base->renderFrame(_framePainter, rect,
+    _base->renderChrome(_framePainter, rect,
                        _framePainter.pen().size(),
                        options.cornerRadius());
 }
@@ -389,28 +449,32 @@ ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 }
 
 
-void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
+void PlatinumButtonRenderer::onPrepare(const StyleOptions& options,
+                                       const ButtonStyleOptions& buttonOptions)
 {
-    Gfx::Pen cPen = contour();
+    Gfx::Pen cPen = resolveButtonContour(options, buttonOptions);
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    _normalPainter.setBrush( foreground() );
+    _accentColor = resolveButtonAccentColor(options, buttonOptions);
+    _textColor = resolveButtonTextColor(options, buttonOptions);
+
+    _normalPainter.setBrush( resolveButtonForeground(options, buttonOptions) );
     _normalPainter.setPen( cPen );
 
-    Gfx::Brush pressedBrush( accentColor() );
+    Gfx::Brush pressedBrush(_accentColor);
     _pressedPainter.setBrush( pressedBrush );
     _pressedPainter.setPen( cPen );
 
-    Gfx::Brush highlightBrush( highlightColor() );
+    Gfx::Brush highlightBrush( resolveButtonHighlightColor(options, buttonOptions) );
     _highlightPainter.setBrush( highlightBrush );
     _highlightPainter.setPen( cPen );
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    _textPainter.setFont( resolveButtonFont(options, buttonOptions) );
+    _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 
 
-Gfx::SizeF PlatinumButtonRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumButtonRenderer::onMeasureChrome(PaintSurface& /*surface*/,
                                                    const Gfx::SizeF& contentSize)
 {
     Spacing ins(3);
@@ -458,8 +522,8 @@ Gfx::SizeF PlatinumButtonRenderer::onMeasureContent(PaintSurface& /*surface*/,
 }
 
 
-Gfx::RectF PlatinumButtonRenderer::onLayoutFrame(PaintSurface& /*surface*/,
-                                                  const Gfx::RectF& frameRect)
+Gfx::RectF PlatinumButtonRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+                                                   const Gfx::RectF& frameRect)
 {
     Spacing ins(3);
     double w = frameRect.width() - ins.leftRight();
@@ -549,21 +613,17 @@ void PlatinumButtonRenderer::onLayoutContent(PaintSurface& /*surface*/,
 
 void PlatinumButtonRenderer::onRenderBackground(PaintContext& /*context*/,
                                                 const Gfx::RectF& /*rect*/,
-                                                const StyleOptions& /*options*/,
-                                                ButtonStyleFlags /*state*/)
+                                                const ButtonState& /*state*/)
 {
 }
 
 
-void PlatinumButtonRenderer::onPrepareIcon(const StyleOptions& options,
-                                           const Gfx::Image& icon,
+void PlatinumButtonRenderer::onPrepareIcon(const Gfx::Image& icon,
                                            Pixmap& picture,
-                                           ButtonStyleFlags state) const
+                                           const ButtonState& state) const
 {
-    if( state.has(ButtonStyleFlags::Pressed) && state.has(ButtonStyleFlags::Flat) )
+    if( state.isPressed() && state.isFlat() )
     {
-        Gfx::Color tintColor = accentColor();
-
         Gfx::Image tintedIcon = icon;
         Gfx::PixelView pixelView(tintedIcon);
 
@@ -571,9 +631,9 @@ void PlatinumButtonRenderer::onPrepareIcon(const StyleOptions& options,
         {
             Gfx::Color color = it->getColor();
 
-            color.setRed( tintColor.red() );
-            color.setGreen( tintColor.green() );
-            color.setBlue( tintColor.blue() );
+            color.setRed( _accentColor.red() );
+            color.setGreen( _accentColor.green() );
+            color.setBlue( _accentColor.blue() );
 
             (*it) = color;
         }
@@ -587,19 +647,18 @@ void PlatinumButtonRenderer::onPrepareIcon(const StyleOptions& options,
 }
 
 
-void PlatinumButtonRenderer::onRenderFrame(PaintContext& context,
+void PlatinumButtonRenderer::onRenderChrome(PaintContext& context,
                                            const Gfx::RectF& rect,
-                                           const StyleOptions& options,
-                                           ButtonStyleFlags state)
+                                           const ButtonState& state)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     Painter* painter = 0;
 
-    if( state.has(ButtonStyleFlags::Pressed) )
+    if( state.isPressed() )
         painter = &_pressedPainter;
-    else if( state.has(StyleFlags::Highlighted) )
+    else if( state.isHovered() )
         painter = &_highlightPainter;
     else
         painter = &_normalPainter;
@@ -612,9 +671,9 @@ void PlatinumButtonRenderer::onRenderFrame(PaintContext& context,
 
     _base->renderPlane(*painter, rect, painter->brush(), corner);
 
-    _base->renderFrame(*painter, rect, painter->pen(), corner);
+    _base->renderChrome(*painter, rect, painter->pen(), corner);
 
-    if( state.has(StyleFlags::Focused) )
+    if( state.isFocused() )
     {
         double inset = scaling.toLogical(0.5);
         double focusOffset = scaling.align(2.0) + inset;
@@ -640,18 +699,17 @@ void PlatinumButtonRenderer::onRenderFrame(PaintContext& context,
 
 void PlatinumButtonRenderer::onRenderText(PaintContext& context,
                                           const Gfx::RectF& rect,
-                                          const StyleOptions& options,
                                           const String& text,
                                           const Gfx::PointF& pos,
-                                          ButtonStyleFlags state)
+                                          const ButtonState& state)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
-    if( state.has(ButtonStyleFlags::Pressed) && state.has(ButtonStyleFlags::Flat) )
-        _textPainter.setPen( Gfx::Pen( accentColor() ) );
+    if( state.isPressed() && state.isFlat() )
+        _textPainter.setPen( Gfx::Pen(_accentColor) );
     else
-        _textPainter.setPen( textColor() );
+        _textPainter.setPen( Gfx::Pen(_textColor) );
 
     _textPainter.begin(context);
     _textPainter.setClip(rect);
@@ -661,9 +719,8 @@ void PlatinumButtonRenderer::onRenderText(PaintContext& context,
 
 void PlatinumButtonRenderer::onRenderMnemonic(PaintContext& context,
                                               const Gfx::RectF& rect,
-                                              const StyleOptions& /*options*/,
                                               const Gfx::RectF& mnemonic,
-                                              ButtonStyleFlags /*state*/)
+                                              const ButtonState& /*state*/)
 {
     renderMnemonicImpl(_textPainter, context, rect, mnemonic);
 }
@@ -671,10 +728,9 @@ void PlatinumButtonRenderer::onRenderMnemonic(PaintContext& context,
 
 void PlatinumButtonRenderer::onRenderIcon(PaintContext& context,
                                           const Gfx::RectF& rect,
-                                          const StyleOptions& options,
                                           const Pixmap& picture,
                                           const Gfx::PointF& pos,
-                                          ButtonStyleFlags state)
+                                          const ButtonState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -748,15 +804,15 @@ Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureContent(PaintSurface& /*surface*/,
 }
 
 
-Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
-                                                    const Gfx::SizeF& contentSize)
+Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+                                                     const Gfx::SizeF& contentSize)
 {
     return contentSize;
 }
 
 
-Gfx::RectF PlatinumCheckBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
-                                                   const Gfx::RectF& frameRect)
+Gfx::RectF PlatinumCheckBoxRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+                                                    const Gfx::RectF& frameRect)
 {
     return frameRect;
 }
@@ -934,8 +990,8 @@ void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& /*options*/)
 }
 
 
-Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureFrame(PaintSurface& surface,
-                                                    const Gfx::SizeF& contentSize)
+Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureChrome(PaintSurface& surface,
+                                                   const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
     _textPainter.setFont( font() );
@@ -979,12 +1035,12 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureIndicator(PaintSurface& surface)
 }
 
 
-void PlatinumSpinBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
-                                            const Gfx::RectF& rect,
-                                            Gfx::RectF& entryRect,
-                                            Gfx::RectF& upButtonRect,
-                                            Gfx::RectF& downButtonRect,
-                                            Gfx::RectF& textRect)
+void PlatinumSpinBoxRenderer::onLayoutControl(PaintSurface& /*surface*/,
+                                               const Gfx::RectF& rect,
+                                               Gfx::RectF& entryRect,
+                                               Gfx::RectF& upButtonRect,
+                                               Gfx::RectF& downButtonRect,
+                                               Gfx::RectF& textRect)
 {
     double buttonWidth = rect.height();
     if( 2 * buttonWidth > rect.width() )
@@ -1034,15 +1090,15 @@ const Painter& PlatinumSpinBoxRenderer::onGetTextPainter(PaintSurface& surface)
 }
 
 
-void PlatinumSpinBoxRenderer::onRenderFrame(PaintContext& context,
-                                            const Gfx::RectF& /*rect*/,
-                                            const StyleOptions& options,
-                                            const Gfx::RectF& entryRect,
-                                            const Gfx::RectF& upButtonRect,
-                                            const Gfx::RectF& downButtonRect,
-                                            SpinBoxStyleFlags state,
-                                            ButtonStyleFlags upButtonState,
-                                            ButtonStyleFlags downButtonState)
+void PlatinumSpinBoxRenderer::onRenderControl(PaintContext& context,
+                                              const Gfx::RectF& /*rect*/,
+                                              const StyleOptions& options,
+                                              const Gfx::RectF& entryRect,
+                                              const Gfx::RectF& upButtonRect,
+                                              const Gfx::RectF& downButtonRect,
+                                              SpinBoxStyleFlags state,
+                                              ButtonStyleFlags upButtonState,
+                                              ButtonStyleFlags downButtonState)
 {
     if( entryRect.width() <= 0 || entryRect.height() <= 0 )
         return;
@@ -1249,8 +1305,8 @@ void PlatinumLineEditRenderer::onPrepare(const StyleOptions& /*options*/)
 }
 
 
-Gfx::SizeF PlatinumLineEditRenderer::onMeasureFrame(PaintSurface& surface,
-                                                const Gfx::SizeF& contentSize)
+Gfx::SizeF PlatinumLineEditRenderer::onMeasureChrome(PaintSurface& surface,
+                                                 const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
     _textPainter.setFont( font() );
@@ -1261,8 +1317,8 @@ Gfx::SizeF PlatinumLineEditRenderer::onMeasureFrame(PaintSurface& surface,
 }
 
 
-Gfx::RectF PlatinumLineEditRenderer::onLayoutFrame(PaintSurface& /*surface*/,
-                                               const Gfx::RectF& rect)
+Gfx::RectF PlatinumLineEditRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+                                                const Gfx::RectF& rect)
 {
     double w = rect.width() - 2 * _inset;
     double h = rect.height() - 2 * _inset;
@@ -1424,8 +1480,8 @@ void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options)
     _invertTextPainter.setPen( Gfx::Pen(options.textBackground().color()) );
 }
 
-Gfx::SizeF PlatinumProgressBarRenderer::onMeasureFrame(PaintSurface& surface,
-                                                       const Gfx::SizeF& contentSize)
+Gfx::SizeF PlatinumProgressBarRenderer::onMeasureControl(PaintSurface& surface,
+                                                        const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
 
@@ -1447,12 +1503,12 @@ Gfx::SizeF PlatinumProgressBarRenderer::onMeasureBar(PaintSurface& surface)
     return Gfx::SizeF(100.0, barHeight); // arbitrary width for measure
 }
 
-void PlatinumProgressBarRenderer::onLayoutFrame(PaintSurface& surface,
-                                                const Gfx::RectF& rect,
-                                                const Gfx::SizeF& barSize,
-                                                const Gfx::SizeF& textSize,
-                                                Gfx::RectF& barRect,
-                                                Gfx::RectF& textRect)
+void PlatinumProgressBarRenderer::onLayoutControl(PaintSurface& surface,
+                                                 const Gfx::RectF& rect,
+                                                 const Gfx::SizeF& barSize,
+                                                 const Gfx::SizeF& textSize,
+                                                 Gfx::RectF& barRect,
+                                                 Gfx::RectF& textRect)
 {
     _textPainter.begin(surface);
     double barHeight = _textPainter.scaling().align(3.0);
@@ -1578,7 +1634,7 @@ void PlatinumSliderRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumSliderRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumSliderRenderer::onMeasureChrome(PaintSurface& /*surface*/,
                                                    const Gfx::SizeF& contentSize)
 {
     double handleHeight = 17.0;
@@ -1599,7 +1655,7 @@ Gfx::SizeF PlatinumSliderRenderer::onMeasureHandle(PaintSurface& /*surface*/)
 }
 
 
-void PlatinumSliderRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+void PlatinumSliderRenderer::onLayoutControl(PaintSurface& /*surface*/,
                                            const Gfx::RectF& rect,
                                            const Gfx::SizeF& trackSize,
                                            const Gfx::SizeF& handleSize,
@@ -1713,7 +1769,7 @@ void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& /*options*/)
 }
 
 
-Gfx::SizeF PlatinumScrollBarRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumScrollBarRenderer::onMeasureChrome(PaintSurface& /*surface*/,
                                                       const Gfx::SizeF& contentSize,
                                                       Direction direction)
 {
@@ -1763,7 +1819,7 @@ Gfx::SizeF PlatinumScrollBarRenderer::onMeasureButton(PaintSurface& /*surface*/,
 }
 
 
-void PlatinumScrollBarRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+void PlatinumScrollBarRenderer::onLayoutControl(PaintSurface& /*surface*/,
                                               const Gfx::RectF& rect,
                                               Direction direction,
                                               const Gfx::SizeF& buttonSize,
@@ -2135,7 +2191,7 @@ void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumListBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumListBoxRenderer::onMeasureChrome(PaintSurface& /*surface*/,
                                                    const Gfx::SizeF& contentSize)
 {
     double inset = _framePainter.pen().size();
@@ -2144,7 +2200,7 @@ Gfx::SizeF PlatinumListBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
 }
 
 
-Gfx::RectF PlatinumListBoxRenderer::onLayoutFrame(PaintSurface& surface,
+Gfx::RectF PlatinumListBoxRenderer::onLayoutChrome(PaintSurface& surface,
                                                   const Gfx::RectF& frameRect)
 {
     double inset = surface.scaling().alignContour( _framePainter.pen().size() );
@@ -2171,7 +2227,7 @@ void PlatinumListBoxRenderer::onRenderBackground(PaintContext& context,
 }
 
 
-void PlatinumListBoxRenderer::onRenderFrame(PaintContext& context,
+void PlatinumListBoxRenderer::onRenderChrome(PaintContext& context,
                                             const Gfx::RectF& rect,
                                             const StyleOptions& /*options*/,
                                             ListBoxStyleFlags /*state*/)
@@ -2242,7 +2298,7 @@ Gfx::SizeF PlatinumListItemRenderer::onMeasureContent(PaintSurface& /*surface*/,
 }
 
 
-Gfx::SizeF PlatinumListItemRenderer::onMeasureFrame(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumListItemRenderer::onMeasureChrome(PaintSurface& /*surface*/,
                                                     const Gfx::SizeF& contentSize)
 {
     return contentSize;
@@ -2256,10 +2312,10 @@ const Painter& PlatinumListItemRenderer::onGetTextPainter(PaintSurface& surface)
 }
 
 
-Gfx::RectF PlatinumListItemRenderer::onLayoutFrame(PaintSurface& /*surface*/,
-                                                   const Gfx::RectF& frameRect)
+Gfx::RectF PlatinumListItemRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+                                                   const Gfx::RectF& rect)
 {
-    return frameRect;
+    return rect;
 }
 
 
@@ -2397,7 +2453,7 @@ void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
+Gfx::SizeF PlatinumComboBoxRenderer::onMeasureChrome(PaintSurface& surface,
                                                      const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
@@ -2420,7 +2476,7 @@ Gfx::SizeF PlatinumComboBoxRenderer::onMeasureButton(PaintSurface& /*surface*/)
 }
 
 
-void PlatinumComboBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
+void PlatinumComboBoxRenderer::onLayoutControl(PaintSurface& /*surface*/,
                                              const Gfx::RectF& rect,
                                              Gfx::RectF& entryRect,
                                              Gfx::RectF& buttonRect,
@@ -2461,7 +2517,7 @@ void PlatinumComboBoxRenderer::onRenderEntry(PaintContext& context,
                                              const StyleOptions& options,
                                              ComboBoxStyleFlags state)
 {
-    // Not used — onRenderFrame draws the integrated frame
+    // Not used — onRenderChrome draws the integrated chrome
 }
 
 
@@ -2471,17 +2527,17 @@ void PlatinumComboBoxRenderer::onRenderButton(PaintContext& context,
                                               ComboBoxStyleFlags state,
                                               ButtonStyleFlags buttonState)
 {
-    // Not used — onRenderFrame draws the integrated frame
+    // Not used — onRenderChrome draws the integrated chrome
 }
 
 
-void PlatinumComboBoxRenderer::onRenderFrame(PaintContext& context,
-                                             const Gfx::RectF& rect,
-                                             const Gfx::RectF& /*entryRect*/,
-                                             const Gfx::RectF& buttonRect,
-                                             const StyleOptions& options,
-                                             ComboBoxStyleFlags state,
-                                             ButtonStyleFlags buttonState)
+void PlatinumComboBoxRenderer::onRenderControl(PaintContext& context,
+                                              const Gfx::RectF& rect,
+                                              const Gfx::RectF& /*entryRect*/,
+                                              const Gfx::RectF& buttonRect,
+                                              const StyleOptions& options,
+                                              ComboBoxStyleFlags state,
+                                              ButtonStyleFlags buttonState)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -2693,11 +2749,11 @@ void PlatinumTabViewRenderer::onRenderBackground(PaintContext& context,
 }
 
 
-void PlatinumTabViewRenderer::onRenderFrame(PaintContext& context,
-                                            const Gfx::RectF& contentRect,
-                                            const Gfx::RectF& /*activeTabRect*/,
-                                            const StyleOptions& options,
-                                            TabViewStyleFlags /*state*/)
+void PlatinumTabViewRenderer::onRenderChrome(PaintContext& context,
+                                             const Gfx::RectF& contentRect,
+                                             const Gfx::RectF& /*activeTabRect*/,
+                                             const StyleOptions& options,
+                                             TabViewStyleFlags /*state*/)
 {
     if( contentRect.width() <= 0 || contentRect.height() <= 0 )
         return;

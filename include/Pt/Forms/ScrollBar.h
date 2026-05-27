@@ -168,7 +168,7 @@ class PT_FORMS_API ScrollBar : public Control
         AutoPtr<Gfx::Brush>          _background;
         AutoPtr<Gfx::Brush>          _foreground;
         AutoPtr<Gfx::Pen>            _contour;
-        unsigned                     _overrideFlags;
+        unsigned                     _overrides;
 };
 
 } // namespace

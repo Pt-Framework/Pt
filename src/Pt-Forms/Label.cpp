@@ -46,7 +46,7 @@ Label::Label()
 , _customRenderer(false)
 , _hasBackground(false)
 , _hasFrame(false)
-, _overrideFlags(0)
+, _overrides(0)
 , _styleGeneration(0)
 , _styleInvalid(false)
 {
@@ -122,7 +122,7 @@ const Gfx::Brush* Label::background() const
 void Label::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
-    _overrideFlags |= OverrideBackground;
+    _overrides |= OverrideBackground;
     _hasBackground = true;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -154,7 +154,7 @@ const Gfx::Pen* Label::contour() const
 void Label::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
-    _overrideFlags |= OverrideContour;
+    _overrides |= OverrideContour;
     _hasFrame = true;
 
     if( PanelRenderer* renderer = getRenderer() )
@@ -183,7 +183,7 @@ const Gfx::Color& Label::textColor() const
 void Label::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
-    _overrideFlags |= OverrideTextColor;
+    _overrides |= OverrideTextColor;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
@@ -204,7 +204,7 @@ const Gfx::Font& Label::font() const
 void Label::setFont(const Gfx::Font& font)
 {
     _customFont = font;
-    _overrideFlags = (_overrideFlags & ~OverrideFontAny) | OverrideFontAll;
+    _overrides = (_overrides & ~OverrideFontAny) | OverrideFontAll;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -217,17 +217,17 @@ Gfx::Font Label::getFont() const
 {
     const Gfx::Font& base = Application::instance().styleOptions().font();
 
-    if( ! (_overrideFlags & OverrideFontAny) )
+    if( ! (_overrides & OverrideFontAny) )
         return base;
 
-    if( _overrideFlags & OverrideFontAll )
+    if( _overrides & OverrideFontAll )
         return _customFont;
 
-    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
+    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont.size()
                                                         : base.size();
-    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
+    Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont.weight()
                                                                  : base.weight();
-    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant() 
+    Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont.slant() 
                                                                : base.slant();
 
     if( base.hasStyleName() )
@@ -243,7 +243,7 @@ Gfx::Font Label::getFont() const
 void Label::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
-    _overrideFlags |= OverrideFontSize;
+    _overrides |= OverrideFontSize;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -255,7 +255,7 @@ void Label::setFontSize(std::size_t size)
 void Label::setFontWeight(Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
-    _overrideFlags |= OverrideFontWeight;
+    _overrides |= OverrideFontWeight;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -267,7 +267,7 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
 void Label::setFontSlant(Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
-    _overrideFlags |= OverrideFontSlant;
+    _overrides |= OverrideFontSlant;
 
     if( PanelRenderer* renderer = getRenderer() )
         renderer->setFont( getFont() );
@@ -306,16 +306,16 @@ PanelRenderer* Label::getRenderer()
 
 void Label::applyRenderer(PanelRenderer* renderer)
 {
-    if( _overrideFlags & OverrideBackground )
+    if( _overrides & OverrideBackground )
         renderer->setBackground( *_background );
 
-    if( _overrideFlags & OverrideContour )
+    if( _overrides & OverrideContour )
         renderer->setContour( *_contour );
 
-    if( _overrideFlags & OverrideTextColor )
+    if( _overrides & OverrideTextColor )
         renderer->setTextColor( Gfx::Pen(*_textColor) );
 
-    if( _overrideFlags & OverrideFontAny )
+    if( _overrides & OverrideFontAny )
         renderer->setFont( getFont() );
 }
 
@@ -382,7 +382,7 @@ void Label::onInvalidate()
 
     if( ! _renderer )
     {
-        bool hasOverride = (_overrideFlags != 0);
+        bool hasOverride = (_overrides != 0);
         if(hasOverride)
         {
             if( PanelRenderer* renderer = getRenderer() )
