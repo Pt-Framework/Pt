@@ -78,12 +78,18 @@ StyleOptions::~StyleOptions()
 
 StyleOptions& StyleOptions::operator=(const StyleOptions& o)
 {
+    if(this == &o)
+        return *this;
+
     _background = o._background;
     _foreground = o._foreground;
     _contour = o._contour;
+    _accentColor = o._accentColor;
+    _viewBackground = o._viewBackground;
     _textBackground = o._textBackground ;
     _highlightColor = o._highlightColor;
     _textColor = o._textColor;
+    _highlightedTextColor = o._highlightedTextColor;
     _font = o._font;
     _cornerRadius = o._cornerRadius;
     _borderWidth = o._borderWidth;

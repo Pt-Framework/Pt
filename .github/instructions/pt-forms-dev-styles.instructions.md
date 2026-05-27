@@ -119,3 +119,12 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 - Use typed flag classes where the renderer API is flag-based.
 - Use a dedicated state object where the renderer API is object-based, as in `%ButtonState`.
 - Keep widget control-flow bookkeeping and non-visual transient internals out of the renderer state helper.
+
+## Global Theme Contract
+
+- `%Application` is the only official mutator for global theme data (`%Style` and `%StyleOptions`).
+- Global theme changes must go through `%Application::setStyle(...)` or `%Application::setStyleOptions(...)`.
+- Do not expose or reintroduce a public mutable `%StyleOptions&` path.
+- `%Style` and `%StyleOptions` stay passive data/cache objects with generation counters for cheap pull checks.
+- Global theme changes propagate by `%Application::invalidate()` and the existing `%onInvalidate()` flow. Do not add a second update path that mutates renderers directly from a theme observer or setter.
+- If a future theme-changed hook is introduced, it may only hang off the same `%Application` mutation path and must not become a separate propagation mechanism.

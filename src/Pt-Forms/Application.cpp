@@ -196,6 +196,7 @@ const Style& Application::style() const
 void Application::setStyle(const Style& s)
 {
     _style = s;
+    invalidate();
 }
 
 
@@ -205,9 +206,10 @@ const StyleOptions& Application::styleOptions() const
 }
 
 
-StyleOptions& Application::styleOptions()
+void Application::setStyleOptions(const StyleOptions& options)
 {
-    return _styleOptions;
+    _styleOptions = options;
+    invalidate();
 }
 
 

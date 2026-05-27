@@ -43,6 +43,12 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Stores the global theme option values.
+
+    %Application owns the live global %StyleOptions object. Widgets use the
+    generation counter during invalidation to decide whether cached theme data
+    must be refreshed.
+*/
 class PT_FORMS_API StyleOptions
 {
     public:
@@ -183,6 +189,8 @@ class PT_FORMS_API StyleOptions
             ++_generation;
         }
 
+        /** @brief Returns the current change generation.
+        */
         std::size_t generation() const
         {
             return _generation;
