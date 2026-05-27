@@ -603,17 +603,17 @@ Gfx::SizeF ButtonRenderer::measureContent(PaintSurface& surface,
 }
 
 
-Gfx::SizeF ButtonRenderer::measureChrome(PaintSurface& surface,
-                                         const Gfx::SizeF& contentSize)
+Gfx::SizeF ButtonRenderer::measureFrame(PaintSurface& surface,
+                                        const Gfx::SizeF& contentSize)
 {
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
-Gfx::RectF ButtonRenderer::layoutChrome(PaintSurface& surface,
+Gfx::RectF ButtonRenderer::layoutFrame(PaintSurface& surface,
                                         const Gfx::RectF& frameRect)
 {
-    return onLayoutChrome(surface, frameRect);
+    return onLayoutFrame(surface, frameRect);
 }
 
 
@@ -916,19 +916,19 @@ Gfx::SizeF CheckBoxRenderer::measureContent(PaintSurface& surface,
 }
 
 
-Gfx::SizeF CheckBoxRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF CheckBoxRenderer::measureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
-Gfx::RectF CheckBoxRenderer::layoutChrome(PaintSurface& surface,
+Gfx::RectF CheckBoxRenderer::layoutFrame(PaintSurface& surface,
                                          const Gfx::RectF& frameRect)
 {
     prepare();
-    return onLayoutChrome(surface, frameRect);
+    return onLayoutFrame(surface, frameRect);
 }
 
 
@@ -963,13 +963,13 @@ const Painter& CheckBoxRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void CheckBoxRenderer::renderIndicator(PaintContext& context,
+void CheckBoxRenderer::renderChrome(PaintContext& context,
                                        const Gfx::RectF& rect,
                                        const Gfx::RectF& boxRect,
                                        CheckBoxStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderIndicator(context, rect, opts, boxRect, state);
+    onRenderChrome(context, rect, opts, boxRect, state);
 }
 
 
@@ -1100,11 +1100,11 @@ void SpinBoxRenderer::setTextColor(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF SpinBoxRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF SpinBoxRenderer::measureFrame(PaintSurface& surface,
                                          const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
@@ -1123,7 +1123,7 @@ Gfx::SizeF SpinBoxRenderer::measureIndicator(PaintSurface& surface)
 }
 
 
-void SpinBoxRenderer::layoutControl(PaintSurface& surface,
+void SpinBoxRenderer::layoutChrome(PaintSurface& surface,
                                    const Gfx::RectF& rect,
                                    Gfx::RectF& entryRect,
                                    Gfx::RectF& upButtonRect,
@@ -1131,7 +1131,7 @@ void SpinBoxRenderer::layoutControl(PaintSurface& surface,
                                    Gfx::RectF& textRect)
 {
     prepare();
-    onLayoutControl(surface, rect, entryRect, upButtonRect, downButtonRect, textRect);
+    onLayoutChrome(surface, rect, entryRect, upButtonRect, downButtonRect, textRect);
 }
 
 
@@ -1150,7 +1150,7 @@ const Painter& SpinBoxRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void SpinBoxRenderer::renderControl(PaintContext& context,
+void SpinBoxRenderer::renderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& entryRect,
                                     const Gfx::RectF& upButtonRect,
@@ -1160,7 +1160,7 @@ void SpinBoxRenderer::renderControl(PaintContext& context,
                                     ButtonStyleFlags downButtonState)
 {
     const StyleOptions& opts = prepare();
-    onRenderControl(context, rect, opts, entryRect, upButtonRect, downButtonRect,
+    onRenderChrome(context, rect, opts, entryRect, upButtonRect, downButtonRect,
                     state, upButtonState, downButtonState);
 }
 
@@ -1186,7 +1186,7 @@ void SpinBoxRenderer::renderEntry(PaintContext& context,
 }
 
 
-void SpinBoxRenderer::onRenderControl(PaintContext& context,
+void SpinBoxRenderer::onRenderChrome(PaintContext& context,
                                       const Gfx::RectF& /*rect*/,
                                       const StyleOptions& options,
                                       const Gfx::RectF& entryRect,
@@ -1327,19 +1327,19 @@ void LineEditRenderer::setSelectionTextColor(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF LineEditRenderer::measureChrome(PaintSurface& surface,
-                                     const Gfx::SizeF& contentSize)
+Gfx::SizeF LineEditRenderer::measureFrame(PaintSurface& surface,
+                                          const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
-Gfx::RectF LineEditRenderer::layoutChrome(PaintSurface& surface,
-                                    const Gfx::RectF& rect)
+Gfx::RectF LineEditRenderer::layoutFrame(PaintSurface& surface,
+                                         const Gfx::RectF& rect)
 {
     prepare();
-    return onLayoutChrome(surface, rect);
+    return onLayoutFrame(surface, rect);
 }
 
 
@@ -1350,7 +1350,7 @@ const Painter& LineEditRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void LineEditRenderer::renderControl(PaintContext& context,
+void LineEditRenderer::renderChrome(PaintContext& context,
                               const Gfx::RectF& rect,
                               const Gfx::RectF& textRect,
                               const String& text,
@@ -1360,7 +1360,7 @@ void LineEditRenderer::renderControl(PaintContext& context,
                               LineEditStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderControl(context, rect, textRect, opts, text, textPos,
+    onRenderChrome(context, rect, textRect, opts, text, textPos,
              cursor, selection, state);
 }
 
@@ -1405,7 +1405,7 @@ void LineEditRenderer::renderCursor(PaintContext& context,
 }
 
 
-void LineEditRenderer::onRenderControl(PaintContext& context,
+void LineEditRenderer::onRenderChrome(PaintContext& context,
                                 const Gfx::RectF& rect,
                                 const Gfx::RectF& textRect,
                                 const StyleOptions& options,
@@ -1526,11 +1526,11 @@ void ProgressBarRenderer::setTextColor(const Gfx::Pen& p)
     _styleGeneration = std::size_t(-1);
 }
 
-Gfx::SizeF ProgressBarRenderer::measureControl(PaintSurface& surface,
+Gfx::SizeF ProgressBarRenderer::measureFrame(PaintSurface& surface,
                                              const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureControl(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 Gfx::SizeF ProgressBarRenderer::measureBar(PaintSurface& surface)
@@ -1539,7 +1539,7 @@ Gfx::SizeF ProgressBarRenderer::measureBar(PaintSurface& surface)
     return onMeasureBar(surface);
 }
 
-void ProgressBarRenderer::layoutControl(PaintSurface& surface,
+void ProgressBarRenderer::layoutChrome(PaintSurface& surface,
                                       const Gfx::RectF& rect,
                                       const Gfx::SizeF& barSize,
                                       const Gfx::SizeF& textSize,
@@ -1547,7 +1547,7 @@ void ProgressBarRenderer::layoutControl(PaintSurface& surface,
                                       Gfx::RectF& textRect)
 {
     prepare();
-    onLayoutControl(surface, rect, barSize, textSize, barRect, textRect);
+    onLayoutChrome(surface, rect, barSize, textSize, barRect, textRect);
 }
 
 void ProgressBarRenderer::layoutBar(PaintSurface& surface,
@@ -1566,7 +1566,7 @@ const Painter& ProgressBarRenderer::textPainter(PaintSurface& surface)
     return onGetTextPainter(surface);
 }
 
-void ProgressBarRenderer::renderControl(PaintContext& context,
+void ProgressBarRenderer::renderChrome(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const Gfx::RectF& trackRect,
                                       const Gfx::RectF& chunkRect,
@@ -1576,7 +1576,7 @@ void ProgressBarRenderer::renderControl(PaintContext& context,
                                       ProgressBarStyleFlags state)
 {
     const StyleOptions& opts = prepare();
-    onRenderControl(context, rect, opts, trackRect, chunkRect, textRect, text, textPos, state);
+    onRenderChrome(context, rect, opts, trackRect, chunkRect, textRect, text, textPos, state);
 }
 
 void ProgressBarRenderer::renderBar(PaintContext& context,
@@ -1629,7 +1629,7 @@ const StyleOptions& ProgressBarRenderer::prepare()
     return opts;
 }
 
-void ProgressBarRenderer::onRenderControl(PaintContext& context,
+void ProgressBarRenderer::onRenderChrome(PaintContext& context,
                                         const Gfx::RectF& rect,
                                         const StyleOptions& options,
                                         const Gfx::RectF& trackRect,
@@ -1751,11 +1751,11 @@ void SliderRenderer::setTextColor(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF SliderRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF SliderRenderer::measureFrame(PaintSurface& surface,
                                          const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
@@ -1773,7 +1773,7 @@ Gfx::SizeF SliderRenderer::measureHandle(PaintSurface& surface)
 }
 
 
-void SliderRenderer::layoutControl(PaintSurface& surface,
+void SliderRenderer::layoutChrome(PaintSurface& surface,
                                  const Gfx::RectF& rect,
                                  const Gfx::SizeF& trackSize,
                                  const Gfx::SizeF& handleSize,
@@ -1781,7 +1781,7 @@ void SliderRenderer::layoutControl(PaintSurface& surface,
                                  Gfx::RectF& handleRect)
 {
     prepare();
-    onLayoutControl(surface, rect, trackSize, handleSize, trackRect, handleRect);
+    onLayoutChrome(surface, rect, trackSize, handleSize, trackRect, handleRect);
 }
 
 
@@ -1920,12 +1920,12 @@ void ScrollBarRenderer::setForeground(const Gfx::Brush& b)
 }
 
 
-Gfx::SizeF ScrollBarRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF ScrollBarRenderer::measureFrame(PaintSurface& surface,
                                             const Gfx::SizeF& contentSize,
                                             Direction direction)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize, direction);
+    return onMeasureFrame(surface, contentSize, direction);
 }
 
 
@@ -1953,7 +1953,7 @@ Gfx::SizeF ScrollBarRenderer::measureButton(PaintSurface& surface,
 }
 
 
-void ScrollBarRenderer::layoutControl(PaintSurface& surface,
+void ScrollBarRenderer::layoutChrome(PaintSurface& surface,
                                     const Gfx::RectF& rect,
                                     Direction direction,
                                     const Gfx::SizeF& buttonSize,
@@ -1962,7 +1962,7 @@ void ScrollBarRenderer::layoutControl(PaintSurface& surface,
                                     Gfx::RectF& increaseRect)
 {
     prepare();
-    onLayoutControl(surface, rect, direction, buttonSize, trackRect, decreaseRect, increaseRect);
+    onLayoutChrome(surface, rect, direction, buttonSize, trackRect, decreaseRect, increaseRect);
 }
 
 
@@ -2118,19 +2118,19 @@ void ListBoxRenderer::setContour(const Gfx::Pen& p)
 }
 
 
-Gfx::SizeF ListBoxRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF ListBoxRenderer::measureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
-Gfx::RectF ListBoxRenderer::layoutChrome(PaintSurface& surface,
+Gfx::RectF ListBoxRenderer::layoutFrame(PaintSurface& surface,
                                          const Gfx::RectF& rect)
 {
     prepare();
-    return onLayoutChrome(surface, rect);
+    return onLayoutFrame(surface, rect);
 }
 
 
@@ -2254,11 +2254,11 @@ Gfx::SizeF ListItemRenderer::measureContent(PaintSurface& surface,
 }
 
 
-Gfx::SizeF ListItemRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF ListItemRenderer::measureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
@@ -2269,11 +2269,11 @@ const Painter& ListItemRenderer::textPainter(PaintSurface& surface)
 }
 
 
-Gfx::RectF ListItemRenderer::layoutChrome(PaintSurface& surface,
+Gfx::RectF ListItemRenderer::layoutFrame(PaintSurface& surface,
                                           const Gfx::RectF& rect)
 {
     prepare();
-    return onLayoutChrome(surface, rect);
+    return onLayoutFrame(surface, rect);
 }
 
 
@@ -2449,11 +2449,11 @@ const StyleOptions& ComboBoxRenderer::prepare()
 }
 
 
-Gfx::SizeF ComboBoxRenderer::measureChrome(PaintSurface& surface,
+Gfx::SizeF ComboBoxRenderer::measureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize)
 {
     prepare();
-    return onMeasureChrome(surface, contentSize);
+    return onMeasureFrame(surface, contentSize);
 }
 
 
@@ -2464,14 +2464,14 @@ Gfx::SizeF ComboBoxRenderer::measureButton(PaintSurface& surface)
 }
 
 
-void ComboBoxRenderer::layoutControl(PaintSurface& surface,
+void ComboBoxRenderer::layoutChrome(PaintSurface& surface,
                                    const Gfx::RectF& rect,
                                    Gfx::RectF& entryRect,
                                    Gfx::RectF& buttonRect,
                                    Gfx::RectF& textRect)
 {
     prepare();
-    onLayoutControl(surface, rect, entryRect, buttonRect, textRect);
+    onLayoutChrome(surface, rect, entryRect, buttonRect, textRect);
 }
 
 
@@ -2482,7 +2482,7 @@ const Painter& ComboBoxRenderer::textPainter(PaintSurface& surface)
 }
 
 
-void ComboBoxRenderer::renderControl(PaintContext& context,
+void ComboBoxRenderer::renderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& entryRect,
                                     const Gfx::RectF& buttonRect,
@@ -2490,7 +2490,7 @@ void ComboBoxRenderer::renderControl(PaintContext& context,
                                     ButtonStyleFlags buttonState)
 {
     const StyleOptions& options = prepare();
-    onRenderControl(context, rect, entryRect, buttonRect, options, state, buttonState);
+    onRenderChrome(context, rect, entryRect, buttonRect, options, state, buttonState);
 }
 
 
@@ -2516,7 +2516,7 @@ void ComboBoxRenderer::renderText(PaintContext& context,
 }
 
 
-void ComboBoxRenderer::onRenderControl(PaintContext& context,
+void ComboBoxRenderer::onRenderChrome(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const Gfx::RectF& entryRect,
                                       const Gfx::RectF& buttonRect,

@@ -336,7 +336,7 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& /*p*/)
     Gfx::SizeF textSz(tm.advance(), fm.height());
 
     Gfx::SizeF contentSize = _renderer->measureContent(surface(), iconSz, textSz);
-    Gfx::SizeF frameSize = _renderer->measureChrome(surface(), contentSize);
+    Gfx::SizeF frameSize = _renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( frameSize.width() + padding().leftRight(),
                        frameSize.height() + padding().topBottom() );
@@ -440,7 +440,7 @@ void ListBoxItem::onPaintIcon(PaintContext& context)
                            Gfx::SizeF(size().width() - padding().leftRight(),
                                       size().height() - padding().topBottom()) );
 
-    Gfx::RectF innerRect = _renderer->layoutChrome(surface(), contentRect);
+    Gfx::RectF innerRect = _renderer->layoutFrame(surface(), contentRect);
 
     Gfx::RectF iconRect;
     Gfx::RectF textRect;
@@ -480,7 +480,7 @@ void ListBoxItem::onPaintText(PaintContext& context)
                            Gfx::SizeF(size().width() - padding().leftRight(),
                                       size().height() - padding().topBottom()) );
 
-    Gfx::RectF innerRect = _renderer->layoutChrome(surface(), contentRect);
+    Gfx::RectF innerRect = _renderer->layoutFrame(surface(), contentRect);
 
     Gfx::RectF iconRect;
     Gfx::RectF textRect;
@@ -752,7 +752,7 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 
     if( _renderer && _hasFrame )
     {
-        Gfx::SizeF frameSize = _renderer->measureChrome(surface(), Gfx::SizeF(0, 0));
+        Gfx::SizeF frameSize = _renderer->measureFrame(surface(), Gfx::SizeF(0, 0));
         hspace += frameSize.width();
         vspace += frameSize.height();
     }
@@ -779,7 +779,7 @@ void ListBox::onLayout(const Gfx::RectF& rect)
     Gfx::RectF contentRect = widgetRect;
 
     if( _renderer && _hasFrame )
-        contentRect = _renderer->layoutChrome(surface(), widgetRect);
+        contentRect = _renderer->layoutFrame(surface(), widgetRect);
 
     Gfx::PointF pos(contentRect.x() + _scrollView.margin().left(),
                     contentRect.y() + _scrollView.margin().top());

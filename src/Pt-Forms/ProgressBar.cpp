@@ -358,7 +358,7 @@ Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
         return Gfx::SizeF(0, 0);
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF sz = _renderer->measureControl(surface(), contentSize);
+    Gfx::SizeF sz = _renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( sz.width() + padding().leftRight(), 
                        sz.height() + padding().topBottom() );
@@ -413,7 +413,7 @@ void ProgressBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*
     String txt;
     Gfx::SizeF textSize(0, 0);
     
-    _renderer->layoutControl(surface(), Gfx::RectF(size()), barSize, textSize, barRect, textRect);
+    _renderer->layoutChrome(surface(), Gfx::RectF(size()), barSize, textSize, barRect, textRect);
     
     float ratio = progress();
     
@@ -421,7 +421,7 @@ void ProgressBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*
 
     ProgressBarStyleFlags state = progressBarStyleFlags();
 
-    _renderer->renderControl(context, Gfx::RectF(size()), trackRect, chunkRect, textRect, txt, Gfx::PointF(), state);
+    _renderer->renderChrome(context, Gfx::RectF(size()), trackRect, chunkRect, textRect, txt, Gfx::PointF(), state);
 }
 
 } // namespace

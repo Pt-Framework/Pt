@@ -390,7 +390,7 @@ Gfx::SizeF Slider::onMeasure(const SizePolicy& policy)
         return Gfx::SizeF(0, 0);
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF sz = _renderer->measureChrome(surface(), contentSize);
+    Gfx::SizeF sz = _renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( sz.width() + padding().leftRight(),
                        sz.height() + padding().topBottom() );
@@ -407,7 +407,7 @@ void Slider::onLayout(const Gfx::RectF& rect)
     Gfx::SizeF trackSize  = _renderer->measureTrack(surface());
     Gfx::SizeF handleSize = _renderer->measureHandle(surface());
 
-    _renderer->layoutControl(surface(), Gfx::RectF(size()),
+    _renderer->layoutChrome(surface(), Gfx::RectF(size()),
                            trackSize, handleSize, _trackRect, _handleRect);
 
     repaint();

@@ -379,7 +379,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     Gfx::SizeF contentSize(itemsSize.width() + padding().leftRight(),
                            itemsSize.height() + padding().topBottom());
 
-    return renderer->measureChrome( surface(), contentSize );
+    return renderer->measureFrame( surface(), contentSize );
 }
 
 
@@ -395,7 +395,7 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
     Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
 
-    _contentRect = renderer->layoutChrome( surface(), Gfx::RectF(size()) );
+    _contentRect = renderer->layoutFrame( surface(), Gfx::RectF(size()) );
 
     renderer->layoutContent(surface(),
                             _contentRect,

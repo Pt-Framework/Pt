@@ -441,7 +441,7 @@ Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
                           padding().topBottom());
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF chromeSize = _renderer->measureChrome(surface(), contentSize);
+    Gfx::SizeF chromeSize = _renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( chromeSize.width() + padding().leftRight(),
                        chromeSize.height() + padding().topBottom() );
@@ -456,7 +456,7 @@ void ComboBox::onLayout(const Gfx::RectF& rect)
         return;
 
     Gfx::RectF contentRect( Gfx::PointF(0, 0), size() );
-    _renderer->layoutControl(surface(), contentRect, _entryRect, _buttonRect, _textRect);
+    _renderer->layoutChrome(surface(), contentRect, _entryRect, _buttonRect, _textRect);
 
     const Painter& painter = _renderer->textPainter( surface() );
 
@@ -521,7 +521,7 @@ void ComboBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
         buttonState.set(ButtonStyleFlags::Pressed);
 
     // frame: entry + button
-    _renderer->renderControl(context, Gfx::RectF(Gfx::PointF(0,0), size()),
+    _renderer->renderChrome(context, Gfx::RectF(Gfx::PointF(0,0), size()),
                              _entryRect, _buttonRect, state, buttonState);
 
     // cursor
@@ -555,7 +555,7 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
         return;
 
     Gfx::RectF contentRect( Gfx::PointF(0, 0), ev.size() );
-    _renderer->layoutControl(surface(), contentRect, _entryRect, _buttonRect, _textRect);
+    _renderer->layoutChrome(surface(), contentRect, _entryRect, _buttonRect, _textRect);
 
     _editor.setPosition( _textRect.topLeft() );
     _editor.setSize( _textRect.size() );

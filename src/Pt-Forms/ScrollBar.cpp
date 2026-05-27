@@ -394,7 +394,7 @@ Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
 
     Direction dir = direction();
     Gfx::SizeF contentSize = policy.size();
-    return _renderer->measureChrome(surface(), contentSize, dir);
+    return _renderer->measureFrame(surface(), contentSize, dir);
 }
 
 
@@ -568,7 +568,7 @@ void ScrollBar::onLayout(const Gfx::RectF& rect)
 
     Gfx::SizeF buttonSize = _renderer->measureButton(surface(), dir);
 
-    _renderer->layoutControl(surface(), widgetRect, dir, buttonSize,
+    _renderer->layoutChrome(surface(), widgetRect, dir, buttonSize,
                            _trackRect, _decreaseRect, _increaseRect);
 
     repaint();

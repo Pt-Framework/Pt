@@ -681,7 +681,7 @@ Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
         return Gfx::SizeF();
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF totalSize = _renderer->measureChrome( surface(), contentSize );
+    Gfx::SizeF totalSize = _renderer->measureFrame( surface(), contentSize );
 
     return Gfx::SizeF( totalSize.width() + padding().leftRight(), 
                        totalSize.height() + padding().topBottom() );
@@ -695,7 +695,7 @@ void SpinBox::onLayout(const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    _renderer->layoutControl(surface(),
+    _renderer->layoutChrome(surface(),
                            Gfx::RectF( Gfx::PointF(padding().left(), padding().top()),
                                        Gfx::SizeF(size().width() - padding().leftRight(),
                                                   size().height() - padding().topBottom()) ),
@@ -747,7 +747,7 @@ void SpinBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
         cursor = Gfx::RectF(top, bottom);
     }
 
-    _renderer->renderControl(context,
+    _renderer->renderChrome(context,
                            Gfx::RectF( Gfx::PointF(padding().left(), padding().top()),
                                        Gfx::SizeF(size().width() - padding().leftRight(),
                                                   size().height() - padding().topBottom()) ),

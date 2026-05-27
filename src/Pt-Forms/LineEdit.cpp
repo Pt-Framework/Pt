@@ -393,7 +393,7 @@ Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
         return Gfx::SizeF(0, 0);
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF sz = _renderer->measureChrome(surface(), contentSize);
+    Gfx::SizeF sz = _renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( sz.width() + padding().leftRight(), 
                        sz.height() + padding().topBottom() );
@@ -407,7 +407,7 @@ void LineEdit::onLayout(const Gfx::RectF& rect)
     if( ! _renderer )
         return;
 
-    _textRect = _renderer->layoutChrome( surface(), Gfx::RectF(size()) );
+    _textRect = _renderer->layoutFrame( surface(), Gfx::RectF(size()) );
 
     _editor.setPosition( _textRect.topLeft() );
     _editor.setSize( _textRect.size() );
@@ -528,7 +528,7 @@ void LineEdit::onPaint(PaintContext& context, const Gfx::RectF& rect)
 
     Gfx::RectF selection;
 
-    _renderer->renderControl(context, Gfx::RectF(size()), _textRect,
+    _renderer->renderChrome(context, Gfx::RectF(size()), _textRect,
                       text, textPos, cursor, selection, state);
 }
 

@@ -359,7 +359,7 @@ Gfx::SizeF CheckBox::onMeasure(const SizePolicy& /*policy*/)
     Gfx::SizeF textSize(tm.advance(), fm.lineHeight());
     Gfx::SizeF indicatorSize = _renderer->measureIndicator(surface());
     Gfx::SizeF contentSize = _renderer->measureContent(surface(), indicatorSize, textSize);
-    Gfx::SizeF totalSize = _renderer->measureChrome(surface(), contentSize);
+    Gfx::SizeF totalSize = _renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF(totalSize.width() + padding().leftRight(),
                       totalSize.height() + padding().topBottom());
@@ -377,7 +377,7 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
                           Gfx::SizeF(size().width() - padding().leftRight(),
                                      size().height() - padding().topBottom()) );
 
-    Gfx::RectF contentRect = _renderer->layoutChrome(surface(), insetRect);
+    Gfx::RectF contentRect = _renderer->layoutFrame(surface(), insetRect);
 
     const Painter& painter = _renderer->textPainter(surface());
     Gfx::FontMetrics fm = painter.fontMetrics();
@@ -414,7 +414,7 @@ void CheckBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     Gfx::RectF widgetRect( size() );
     CheckBoxStyleFlags state = checkBoxStyleFlags();
 
-    _renderer->renderIndicator(context, widgetRect, _boxRect, state);
+    _renderer->renderChrome(context, widgetRect, _boxRect, state);
     _renderer->renderText(context, _textRect, text(), _textPos, state);
     _renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
 }

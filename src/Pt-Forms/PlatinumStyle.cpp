@@ -474,7 +474,7 @@ void PlatinumButtonRenderer::onPrepare(const StyleOptions& options,
 }
 
 
-Gfx::SizeF PlatinumButtonRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumButtonRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                    const Gfx::SizeF& contentSize)
 {
     Spacing ins(3);
@@ -522,7 +522,7 @@ Gfx::SizeF PlatinumButtonRenderer::onMeasureContent(PaintSurface& /*surface*/,
 }
 
 
-Gfx::RectF PlatinumButtonRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+Gfx::RectF PlatinumButtonRenderer::onLayoutFrame(PaintSurface& /*surface*/,
                                                    const Gfx::RectF& frameRect)
 {
     Spacing ins(3);
@@ -804,14 +804,14 @@ Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureContent(PaintSurface& /*surface*/,
 }
 
 
-Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                      const Gfx::SizeF& contentSize)
 {
     return contentSize;
 }
 
 
-Gfx::RectF PlatinumCheckBoxRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+Gfx::RectF PlatinumCheckBoxRenderer::onLayoutFrame(PaintSurface& /*surface*/,
                                                     const Gfx::RectF& frameRect)
 {
     return frameRect;
@@ -866,7 +866,7 @@ const Painter& PlatinumCheckBoxRenderer::onGetTextPainter(PaintSurface& surface)
 }
 
 
-void PlatinumCheckBoxRenderer::onRenderIndicator(PaintContext& context,
+void PlatinumCheckBoxRenderer::onRenderChrome(PaintContext& context,
                                                  const Gfx::RectF& rect,
                                                  const StyleOptions& options,
                                                  const Gfx::RectF& box,
@@ -990,7 +990,7 @@ void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& /*options*/)
 }
 
 
-Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureChrome(PaintSurface& surface,
+Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureFrame(PaintSurface& surface,
                                                    const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
@@ -1035,7 +1035,7 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureIndicator(PaintSurface& surface)
 }
 
 
-void PlatinumSpinBoxRenderer::onLayoutControl(PaintSurface& /*surface*/,
+void PlatinumSpinBoxRenderer::onLayoutChrome(PaintSurface& /*surface*/,
                                                const Gfx::RectF& rect,
                                                Gfx::RectF& entryRect,
                                                Gfx::RectF& upButtonRect,
@@ -1090,7 +1090,7 @@ const Painter& PlatinumSpinBoxRenderer::onGetTextPainter(PaintSurface& surface)
 }
 
 
-void PlatinumSpinBoxRenderer::onRenderControl(PaintContext& context,
+void PlatinumSpinBoxRenderer::onRenderChrome(PaintContext& context,
                                               const Gfx::RectF& /*rect*/,
                                               const StyleOptions& options,
                                               const Gfx::RectF& entryRect,
@@ -1305,7 +1305,7 @@ void PlatinumLineEditRenderer::onPrepare(const StyleOptions& /*options*/)
 }
 
 
-Gfx::SizeF PlatinumLineEditRenderer::onMeasureChrome(PaintSurface& surface,
+Gfx::SizeF PlatinumLineEditRenderer::onMeasureFrame(PaintSurface& surface,
                                                  const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
@@ -1317,7 +1317,7 @@ Gfx::SizeF PlatinumLineEditRenderer::onMeasureChrome(PaintSurface& surface,
 }
 
 
-Gfx::RectF PlatinumLineEditRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+Gfx::RectF PlatinumLineEditRenderer::onLayoutFrame(PaintSurface& /*surface*/,
                                                 const Gfx::RectF& rect)
 {
     double w = rect.width() - 2 * _inset;
@@ -1480,7 +1480,7 @@ void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options)
     _invertTextPainter.setPen( Gfx::Pen(options.textBackground().color()) );
 }
 
-Gfx::SizeF PlatinumProgressBarRenderer::onMeasureControl(PaintSurface& surface,
+Gfx::SizeF PlatinumProgressBarRenderer::onMeasureFrame(PaintSurface& surface,
                                                         const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
@@ -1503,7 +1503,7 @@ Gfx::SizeF PlatinumProgressBarRenderer::onMeasureBar(PaintSurface& surface)
     return Gfx::SizeF(100.0, barHeight); // arbitrary width for measure
 }
 
-void PlatinumProgressBarRenderer::onLayoutControl(PaintSurface& surface,
+void PlatinumProgressBarRenderer::onLayoutChrome(PaintSurface& surface,
                                                  const Gfx::RectF& rect,
                                                  const Gfx::SizeF& barSize,
                                                  const Gfx::SizeF& textSize,
@@ -1634,7 +1634,7 @@ void PlatinumSliderRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumSliderRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumSliderRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                    const Gfx::SizeF& contentSize)
 {
     double handleHeight = 17.0;
@@ -1655,7 +1655,7 @@ Gfx::SizeF PlatinumSliderRenderer::onMeasureHandle(PaintSurface& /*surface*/)
 }
 
 
-void PlatinumSliderRenderer::onLayoutControl(PaintSurface& /*surface*/,
+void PlatinumSliderRenderer::onLayoutChrome(PaintSurface& /*surface*/,
                                            const Gfx::RectF& rect,
                                            const Gfx::SizeF& trackSize,
                                            const Gfx::SizeF& handleSize,
@@ -1769,7 +1769,7 @@ void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& /*options*/)
 }
 
 
-Gfx::SizeF PlatinumScrollBarRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumScrollBarRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                       const Gfx::SizeF& contentSize,
                                                       Direction direction)
 {
@@ -1819,7 +1819,7 @@ Gfx::SizeF PlatinumScrollBarRenderer::onMeasureButton(PaintSurface& /*surface*/,
 }
 
 
-void PlatinumScrollBarRenderer::onLayoutControl(PaintSurface& /*surface*/,
+void PlatinumScrollBarRenderer::onLayoutChrome(PaintSurface& /*surface*/,
                                               const Gfx::RectF& rect,
                                               Direction direction,
                                               const Gfx::SizeF& buttonSize,
@@ -2191,7 +2191,7 @@ void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumListBoxRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumListBoxRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                    const Gfx::SizeF& contentSize)
 {
     double inset = _framePainter.pen().size();
@@ -2200,7 +2200,7 @@ Gfx::SizeF PlatinumListBoxRenderer::onMeasureChrome(PaintSurface& /*surface*/,
 }
 
 
-Gfx::RectF PlatinumListBoxRenderer::onLayoutChrome(PaintSurface& surface,
+Gfx::RectF PlatinumListBoxRenderer::onLayoutFrame(PaintSurface& surface,
                                                   const Gfx::RectF& frameRect)
 {
     double inset = surface.scaling().alignContour( _framePainter.pen().size() );
@@ -2298,7 +2298,7 @@ Gfx::SizeF PlatinumListItemRenderer::onMeasureContent(PaintSurface& /*surface*/,
 }
 
 
-Gfx::SizeF PlatinumListItemRenderer::onMeasureChrome(PaintSurface& /*surface*/,
+Gfx::SizeF PlatinumListItemRenderer::onMeasureFrame(PaintSurface& /*surface*/,
                                                     const Gfx::SizeF& contentSize)
 {
     return contentSize;
@@ -2312,7 +2312,7 @@ const Painter& PlatinumListItemRenderer::onGetTextPainter(PaintSurface& surface)
 }
 
 
-Gfx::RectF PlatinumListItemRenderer::onLayoutChrome(PaintSurface& /*surface*/,
+Gfx::RectF PlatinumListItemRenderer::onLayoutFrame(PaintSurface& /*surface*/,
                                                    const Gfx::RectF& rect)
 {
     return rect;
@@ -2453,7 +2453,7 @@ void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options)
 }
 
 
-Gfx::SizeF PlatinumComboBoxRenderer::onMeasureChrome(PaintSurface& surface,
+Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
                                                      const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
@@ -2476,7 +2476,7 @@ Gfx::SizeF PlatinumComboBoxRenderer::onMeasureButton(PaintSurface& /*surface*/)
 }
 
 
-void PlatinumComboBoxRenderer::onLayoutControl(PaintSurface& /*surface*/,
+void PlatinumComboBoxRenderer::onLayoutChrome(PaintSurface& /*surface*/,
                                              const Gfx::RectF& rect,
                                              Gfx::RectF& entryRect,
                                              Gfx::RectF& buttonRect,
@@ -2531,7 +2531,7 @@ void PlatinumComboBoxRenderer::onRenderButton(PaintContext& context,
 }
 
 
-void PlatinumComboBoxRenderer::onRenderControl(PaintContext& context,
+void PlatinumComboBoxRenderer::onRenderChrome(PaintContext& context,
                                               const Gfx::RectF& rect,
                                               const Gfx::RectF& /*entryRect*/,
                                               const Gfx::RectF& buttonRect,
