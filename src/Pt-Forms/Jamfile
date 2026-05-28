@@ -77,6 +77,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          Responder.cpp
                          Screen.cpp 
                          ScrollBar.cpp
+                         ScrollBarStyle.cpp
                          ScrollView.cpp
                          ScrollLayout.cpp
                          Slider.cpp

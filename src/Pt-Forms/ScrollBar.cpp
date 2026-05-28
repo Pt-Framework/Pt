@@ -28,8 +28,8 @@
 */
 
 #include <Pt/Forms/ScrollBar.h>
+#include <Pt/Forms/ScrollBarStyle.h>
 #include <Pt/Forms/Application.h>
-#include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>
 
@@ -47,9 +47,6 @@ ScrollBar::ScrollBar(Orientation o)
 , _dragging(false)
 , _hoveredZone(NoZone)
 , _pressedZone(NoZone)
-, _customRenderer(false)
-, _styleGeneration(0)
-, _overrides(0)
 {
 }
 
@@ -124,8 +121,8 @@ void ScrollBar::scroll(double pos)
 
 const Gfx::Brush& ScrollBar::background() const
 {
-    if( _renderer )
-        return _renderer->background();
+    if( const Gfx::Brush* b = _scrollBarOptions.background() )
+        return *b;
 
     return Application::instance().styleOptions().background();
 }
@@ -133,40 +130,30 @@ const Gfx::Brush& ScrollBar::background() const
 
 void ScrollBar::setBackground(const Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
-    _overrides |= OverrideBackground;
-
-    if( ScrollBarRenderer* renderer = getRenderer() )
-        renderer->setBackground(*_background);
-
+    _scrollBarOptions.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Brush& ScrollBar::foreground() const
 {
-    if( _renderer )
-        return _renderer->foreground();
+    if( const Gfx::Brush* b = _scrollBarOptions.foreground() )
+        return *b;
 
     return Application::instance().styleOptions().foreground();
 }
 
 void ScrollBar::setForeground(const Gfx::Brush& b)
 {
-    _foreground.reset( new Gfx::Brush(b) );
-    _overrides |= OverrideForeground;
-
-    if( ScrollBarRenderer* renderer = getRenderer() )
-        renderer->setForeground(*_foreground);
-
+    _scrollBarOptions.setForeground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& ScrollBar::contour() const
 {
-    if( _renderer )
-        return _renderer->contour();
+    if( const Gfx::Pen* p = _scrollBarOptions.contour() )
+        return *p;
 
     return Application::instance().styleOptions().contour();
 }
@@ -174,119 +161,35 @@ const Gfx::Pen& ScrollBar::contour() const
 
 void ScrollBar::setContour(const Gfx::Pen& p)
 {
-    _contour.reset( new Gfx::Pen(p) );
-    _overrides |= OverrideContour;
-
-    if( ScrollBarRenderer* renderer = getRenderer() )
-        renderer->setContour(*_contour);
-
+    _scrollBarOptions.setContour(p);
     invalidate();
 }
 
 
 void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
 {
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    if( renderer )
-        applyRenderer(renderer);
+    if(renderer)
+        _scrollBarStyle.bind(*renderer, options, _scrollBarOptions);
+    else
+        _scrollBarStyle.bind(Application::instance().style(), options, _scrollBarOptions);
 
     invalidate();
 }
 
 
-ScrollBarRenderer* ScrollBar::getRenderer()
+ScrollBarState ScrollBar::scrollBarState() const
 {
-    if( ! _renderer )
-    {
-        const Style& style = Application::instance().style();
-        ScrollBarRenderer* proto = style.get<ScrollBarRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-    }
-
-    return _renderer.get();
-}
-
-
-void ScrollBar::applyRenderer(ScrollBarRenderer* renderer)
-{
-    if( _overrides & OverrideBackground )
-        renderer->setBackground(*_background);
-
-    if( _overrides & OverrideForeground )
-        renderer->setForeground(*_foreground);
-
-    if( _overrides & OverrideContour )
-        renderer->setContour(*_contour);
-}
-
-
-ScrollBarStyleFlags ScrollBar::scrollBarStyleFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( hasFocus() )
-        common.set(StyleFlags::Focused);
-
-    ScrollBarStyleFlags state(common);
-
-    if( _hoveredZone == HandleZone )
-        state.set(ScrollBarStyleFlags::HandleHovered);
-
-    if( _pressedZone == HandleZone )
-        state.set(ScrollBarStyleFlags::HandlePressed);
-
-    return state;
-}
-
-
-ButtonStyleFlags ScrollBar::decreaseButtonFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( _hoveredZone == DecreaseZone )
-        common.set(StyleFlags::Highlighted);
-
-    ButtonStyleFlags state(common);
-
-    if( _pressedZone == DecreaseZone )
-        state.set(ButtonStyleFlags::Pressed);
-
-    return state;
-}
-
-
-ButtonStyleFlags ScrollBar::increaseButtonFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( _hoveredZone == IncreaseZone )
-        common.set(StyleFlags::Highlighted);
-
-    ButtonStyleFlags state(common);
-
-    if( _pressedZone == IncreaseZone )
-        state.set(ButtonStyleFlags::Pressed);
-
+    ScrollBarState state;
+    state.setEnabled( isEnabled() );
+    state.setFocused( hasFocus() );
+    state.setHandleHovered( _hoveredZone == HandleZone );
+    state.setHandlePressed( _pressedZone == HandleZone );
+    state.setDecreaseHovered( _hoveredZone == DecreaseZone );
+    state.setDecreasePressed( _pressedZone == DecreaseZone );
+    state.setIncreaseHovered( _hoveredZone == IncreaseZone );
+    state.setIncreasePressed( _pressedZone == IncreaseZone );
     return state;
 }
 
@@ -331,39 +234,20 @@ float ScrollBar::viewProportion() const
 
 void ScrollBar::onInvalidate()
 {
-    std::size_t gen = Application::instance().styleOptions().generation();
-    if( _styleGeneration != gen )
-    {
-        _styleGeneration = gen;
-        if( ! _customRenderer )
-            _renderer.reset();
-    }
-
-    if( ! _renderer )
-    {
-        bool hasOverride = (_overrides != 0);
-        if( hasOverride )
-        {
-            if( ScrollBarRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<ScrollBarRenderer>() );
-        }
-    }
-
-    if( ! _renderer )
-        return;
-
     Base::onInvalidate();
+
+    const Style& style = Application::instance().style();
+    const StyleOptions& options = Application::instance().styleOptions();
+    _scrollBarStyle.rebind(style, options, _scrollBarOptions);
+
     relayout();
 }
 
 
 void ScrollBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
 {
-    if( ! _renderer )
+    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
+    if( ! renderer )
         return;
 
     Direction dir = direction();
@@ -371,20 +255,35 @@ void ScrollBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
 
     Gfx::RectF handleRect = currentHandleRect();
 
-    ScrollBarStyleFlags state = scrollBarStyleFlags();
-    ButtonStyleFlags decreaseState = decreaseButtonFlags();
-    ButtonStyleFlags increaseState = increaseButtonFlags();
+    ScrollBarState state = scrollBarState();
 
-    _renderer->renderChrome(context, widgetRect, dir,
-                           _trackRect, handleRect,
-                           _decreaseRect, _increaseRect,
-                           state, decreaseState, increaseState);
+    onPaintChrome(context, widgetRect, dir, _trackRect, handleRect,
+                  _decreaseRect, _increaseRect, state);
+}
+
+
+void ScrollBar::onPaintChrome(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              Direction direction,
+                              const Gfx::RectF& trackRect,
+                              const Gfx::RectF& handleRect,
+                              const Gfx::RectF& decreaseRect,
+                              const Gfx::RectF& increaseRect,
+                              const ScrollBarState& state)
+{
+    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
+    if( ! renderer )
+        return;
+
+    renderer->renderChrome(context, rect, direction, trackRect, handleRect,
+                           decreaseRect, increaseRect, state);
 }
 
 
 Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
 {
-    if( ! _renderer )
+    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
+    if( ! renderer )
     {
         if( _orientation == Vertical )
             return Gfx::SizeF(16.0, policy.size().height());
@@ -394,7 +293,7 @@ Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
 
     Direction dir = direction();
     Gfx::SizeF contentSize = policy.size();
-    return _renderer->measureFrame(surface(), contentSize, dir);
+    return renderer->measureFrame(surface(), contentSize, dir);
 }
 
 
@@ -402,7 +301,7 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    if( ! _renderer )
+    if( ! _scrollBarStyle.renderer() )
         return true;
 
     HotZone zone = hitTest( ev.position() );
@@ -485,7 +384,7 @@ bool ScrollBar::onTouchEvent(const TouchEvent& tev)
 {
     Base::onTouchEvent(tev);
 
-    if( ! _renderer )
+    if( ! _scrollBarStyle.renderer() )
         return true;
 
     HotZone zone = hitTest( tev.position() );
@@ -560,30 +459,30 @@ void ScrollBar::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    if( ! _renderer )
+    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
+    if( ! renderer )
         return;
 
     Direction dir = direction();
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
 
-    Gfx::SizeF buttonSize = _renderer->measureButton(surface(), dir);
+    Gfx::SizeF buttonSize = renderer->measureButton(surface(), dir);
 
-    _renderer->layoutChrome(surface(), widgetRect, dir, buttonSize,
+    renderer->layoutChrome(surface(), widgetRect, dir, buttonSize,
                            _trackRect, _decreaseRect, _increaseRect);
-
-    repaint();
 }
 
 
 Gfx::RectF ScrollBar::currentHandleRect()
 {
-    if( ! _renderer )
+    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
+    if( ! renderer )
         return Gfx::RectF();
 
     Direction dir = direction();
     Gfx::RectF handleRect;
-    _renderer->layoutHandle(surface(), _trackRect, dir,
-                            fraction(), viewProportion(), handleRect);
+    renderer->layoutHandle(surface(), _trackRect, dir,
+                           fraction(), viewProportion(), handleRect);
 
     return handleRect;
 }

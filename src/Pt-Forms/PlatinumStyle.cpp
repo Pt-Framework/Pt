@@ -1812,14 +1812,23 @@ ScrollBarRenderer* PlatinumScrollBarRenderer::onCreate() const
 }
 
 
-void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& /*options*/)
+void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& options,
+                                          const ScrollBarStyleOptions& scrollBarOptions)
 {
-    _trackPainter.setBrush( background() );
-    _trackPainter.setPen( contour() );
-    _handlePainter.setBrush( Gfx::Brush(contour().color()) );
-    _handlePainter.setPen( contour() );
-    _buttonPainter.setBrush( background() );
-    _buttonPainter.setPen( contour() );
+    const Gfx::Brush* bg = scrollBarOptions.background();
+    _background = bg ? *bg : options.background();
+
+    const Gfx::Pen* ct = scrollBarOptions.contour();
+    _contour = ct ? *ct : options.contour();
+
+    _accentColor = options.accentColor();
+
+    _trackPainter.setBrush( _background );
+    _trackPainter.setPen( _contour );
+    _handlePainter.setBrush( Gfx::Brush(_contour.color()) );
+    _handlePainter.setPen( _contour );
+    _buttonPainter.setBrush( _background );
+    _buttonPainter.setPen( _contour );
 }
 
 
@@ -1999,9 +2008,8 @@ void PlatinumScrollBarRenderer::onLayoutHandle(PaintSurface& /*surface*/,
 
 void PlatinumScrollBarRenderer::onRenderTrack(PaintContext& context,
                                               const Gfx::RectF& trackRect,
-                                              const StyleOptions& /*options*/,
                                               Direction /*direction*/,
-                                              ScrollBarStyleFlags /*state*/)
+                                              const ScrollBarState& /*state*/)
 {
     if( trackRect.width() <= 0 || trackRect.height() <= 0 )
         return;
@@ -2013,18 +2021,16 @@ void PlatinumScrollBarRenderer::onRenderTrack(PaintContext& context,
 
 void PlatinumScrollBarRenderer::onRenderHandle(PaintContext& context,
                                                const Gfx::RectF& handleRect,
-                                               const StyleOptions& options,
                                                Direction /*direction*/,
-                                               ScrollBarStyleFlags state)
+                                               const ScrollBarState& state)
 {
     if( handleRect.width() <= 0 || handleRect.height() <= 0 )
         return;
 
-    if( state.has(ScrollBarStyleFlags::HandleHovered) ||
-        state.has(ScrollBarStyleFlags::HandlePressed) )
-        _handlePainter.setBrush( Gfx::Brush(options.accentColor()) );
+    if( state.isHandleHovered() || state.isHandlePressed() )
+        _handlePainter.setBrush( Gfx::Brush(_accentColor) );
     else
-        _handlePainter.setBrush( Gfx::Brush(contour().color()) );
+        _handlePainter.setBrush( Gfx::Brush(_contour.color()) );
 
     _handlePainter.begin(context);
     _handlePainter.fillRect(handleRect);
@@ -2033,10 +2039,8 @@ void PlatinumScrollBarRenderer::onRenderHandle(PaintContext& context,
 
 void PlatinumScrollBarRenderer::onRenderDecreaseButton(PaintContext& context,
                                                        const Gfx::RectF& buttonRect,
-                                                       const StyleOptions& options,
                                                        Direction direction,
-                                                       ScrollBarStyleFlags /*state*/,
-                                                       ButtonStyleFlags buttonState)
+                                                       const ScrollBarState& state)
 {
     if( buttonRect.width() <= 0 || buttonRect.height() <= 0 )
         return;
@@ -2047,13 +2051,12 @@ void PlatinumScrollBarRenderer::onRenderDecreaseButton(PaintContext& context,
     _buttonPainter.begin(context);
     _buttonPainter.setClip(buttonRect);
 
-    Gfx::Pen cPen = contour();
+    Gfx::Pen cPen = _contour;
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    if( buttonState.has(StyleFlags::Highlighted) ||
-        buttonState.has(ButtonStyleFlags::Pressed) )
+    if( state.isDecreaseHovered() || state.isDecreasePressed() )
     {
-        cPen = Gfx::Pen( options.accentColor(), cPen.size(), cPen.style(),
+        cPen = Gfx::Pen( _accentColor, cPen.size(), cPen.style(),
                          cPen.capStyle(), cPen.joinStyle() );
     }
 
@@ -2118,10 +2121,8 @@ void PlatinumScrollBarRenderer::onRenderDecreaseButton(PaintContext& context,
 
 void PlatinumScrollBarRenderer::onRenderIncreaseButton(PaintContext& context,
                                                        const Gfx::RectF& buttonRect,
-                                                       const StyleOptions& options,
                                                        Direction direction,
-                                                       ScrollBarStyleFlags /*state*/,
-                                                       ButtonStyleFlags buttonState)
+                                                       const ScrollBarState& state)
 {
     if( buttonRect.width() <= 0 || buttonRect.height() <= 0 )
         return;
@@ -2132,13 +2133,12 @@ void PlatinumScrollBarRenderer::onRenderIncreaseButton(PaintContext& context,
     _buttonPainter.begin(context);
     _buttonPainter.setClip(buttonRect);
 
-    Gfx::Pen cPen = contour();
+    Gfx::Pen cPen = _contour;
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    if( buttonState.has(StyleFlags::Highlighted) ||
-        buttonState.has(ButtonStyleFlags::Pressed) )
+    if( state.isIncreaseHovered() || state.isIncreasePressed() )
     {
-        cPen = Gfx::Pen( options.accentColor(), cPen.size(), cPen.style(),
+        cPen = Gfx::Pen( _accentColor, cPen.size(), cPen.style(),
                          cPen.capStyle(), cPen.joinStyle() );
     }
 

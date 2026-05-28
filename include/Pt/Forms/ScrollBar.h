@@ -33,8 +33,7 @@
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Direction.h>
-#include <Pt/Forms/StyleFlags.h>
-#include <Pt/SmartPtr.h>
+#include <Pt/Forms/ScrollBarStyle.h>
 
 namespace Pt {
 
@@ -65,12 +64,8 @@ class PT_FORMS_API ScrollBar : public Control
 
         double position() const;
 
-        /** @brief Updates the position without scrolling.
-        */
         void setPosition(double pos);
 
-        /** @brief Scrolls to an absolute position.
-        */
         void scroll(double pos);
 
         Signal<double>& changed()
@@ -91,12 +86,23 @@ class PT_FORMS_API ScrollBar : public Control
 
         void setRenderer(ScrollBarRenderer* renderer);
 
+        ScrollBarState scrollBarState() const;
+
     protected:
         virtual void onInvalidate();
 
         virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
+
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   Direction direction,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& handleRect,
+                                   const Gfx::RectF& decreaseRect,
+                                   const Gfx::RectF& increaseRect,
+                                   const ScrollBarState& state);
 
         Gfx::SizeF onMeasure(const SizePolicy& s);
 
@@ -118,12 +124,6 @@ class PT_FORMS_API ScrollBar : public Control
             IncreaseZone
         };
 
-        ScrollBarStyleFlags scrollBarStyleFlags() const;
-
-        ButtonStyleFlags decreaseButtonFlags() const;
-
-        ButtonStyleFlags increaseButtonFlags() const;
-
         Direction direction() const;
 
         float fraction() const;
@@ -134,41 +134,23 @@ class PT_FORMS_API ScrollBar : public Control
 
         Gfx::RectF currentHandleRect();
 
-        ScrollBarRenderer* getRenderer();
-
-        void applyRenderer(ScrollBarRenderer* renderer);
-
     private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideForeground = 0x02,
-            OverrideContour    = 0x04
-        };
+        Orientation              _orientation;
+        double                   _minPos;
+        double                   _maxPos;
+        double                   _pageStep;
+        double                   _scrollStep;
+        double                   _position;
+        bool                     _dragging;
+        Signal<double>           _changed;
 
-        Orientation    _orientation;
-        double         _minPos;
-        double         _maxPos;
-        double         _pageStep;
-        double         _scrollStep;
-        double         _position;
-        bool           _dragging;
-        Signal<double> _changed;
-
-        Gfx::RectF               _trackRect;
-        Gfx::RectF               _decreaseRect;
-        Gfx::RectF               _increaseRect;
+        ScrollBarStyle           _scrollBarStyle;
+        ScrollBarStyleOptions    _scrollBarOptions;
+        Gfx::RectF              _trackRect;
+        Gfx::RectF              _decreaseRect;
+        Gfx::RectF              _increaseRect;
         HotZone                  _hoveredZone;
         HotZone                  _pressedZone;
-
-        FacetPtr<ScrollBarRenderer>  _renderer;
-        bool                         _customRenderer;
-        std::size_t                  _styleGeneration;
-
-        AutoPtr<Gfx::Brush>          _background;
-        AutoPtr<Gfx::Brush>          _foreground;
-        AutoPtr<Gfx::Pen>            _contour;
-        unsigned                     _overrides;
 };
 
 } // namespace

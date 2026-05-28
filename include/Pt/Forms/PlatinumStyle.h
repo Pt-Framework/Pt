@@ -37,6 +37,7 @@
 #include <Pt/Forms/CheckBoxStyle.h>
 #include <Pt/Forms/SpinBoxStyle.h>
 #include <Pt/Forms/SliderStyle.h>
+#include <Pt/Forms/ScrollBarStyle.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -527,7 +528,8 @@ class PT_FORMS_API PlatinumScrollBarRenderer : public ScrollBarRenderer
     protected:
         virtual ScrollBarRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const ScrollBarStyleOptions& scrollBarOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize,
@@ -559,31 +561,28 @@ class PT_FORMS_API PlatinumScrollBarRenderer : public ScrollBarRenderer
 
         virtual void onRenderTrack(PaintContext& context,
                                    const Gfx::RectF& trackRect,
-                                   const StyleOptions& options,
                                    Direction direction,
-                                   ScrollBarStyleFlags state);
+                                   const ScrollBarState& state);
 
         virtual void onRenderHandle(PaintContext& context,
                                     const Gfx::RectF& handleRect,
-                                    const StyleOptions& options,
                                     Direction direction,
-                                    ScrollBarStyleFlags state);
+                                    const ScrollBarState& state);
 
         virtual void onRenderDecreaseButton(PaintContext& context,
                                             const Gfx::RectF& buttonRect,
-                                            const StyleOptions& options,
                                             Direction direction,
-                                            ScrollBarStyleFlags state,
-                                            ButtonStyleFlags buttonState);
+                                            const ScrollBarState& state);
 
         virtual void onRenderIncreaseButton(PaintContext& context,
                                             const Gfx::RectF& buttonRect,
-                                            const StyleOptions& options,
                                             Direction direction,
-                                            ScrollBarStyleFlags state,
-                                            ButtonStyleFlags buttonState);
+                                            const ScrollBarState& state);
 
     private:
+        Gfx::Brush _background;
+        Gfx::Pen   _contour;
+        Gfx::Color _accentColor;
         Painter _trackPainter;
         Painter _handlePainter;
         Painter _buttonPainter;
