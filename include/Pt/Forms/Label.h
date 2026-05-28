@@ -33,10 +33,11 @@
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Alignment.h>
 #include <Pt/Forms/Adjustment.h>
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/PanelStyle.h>
 #include <Pt/Forms/TextBlock.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Icon.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
@@ -81,7 +82,7 @@ class PT_FORMS_API Label : public Control
 
         void setTextColor(const Gfx::Color& color);
 
-        const Gfx::Font& font() const;
+        Gfx::Font font() const;
 
         void setFont(const Gfx::Font& font);
 
@@ -110,28 +111,34 @@ class PT_FORMS_API Label : public Control
         virtual void onPaint(PaintContext& context, 
                              const Gfx::RectF& rect);
 
+        /** @brief Paints the label background layer.
+
+            The default implementation does nothing if the label has no background.
+        */
+        virtual void onPaintBackground(PaintContext& context);
+
+        /** @brief Paints the label frame layer.
+
+            The default implementation does nothing if the label has no frame.
+        */
+        virtual void onPaintFrame(PaintContext& context);
+
+        /** @brief Paints the label icon layer.
+
+            The default implementation does nothing if no prepared icon pixmap exists.
+        */
+        virtual void onPaintIcon(PaintContext& context);
+
+        /** @brief Paints the label text layer.
+
+            The default implementation does nothing while the label is in icon mode.
+        */
+        virtual void onPaintText(PaintContext& context);
+
     private:
-        PanelRenderer* getRenderer();
-
-        void applyRenderer(PanelRenderer* renderer);
-
         Adjustment adjustment() const;
 
-        Gfx::Font getFont() const;
-
-    private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideContour    = 0x02,
-            OverrideTextColor  = 0x04,
-            OverrideFontAll    = 0x08,
-            OverrideFontSize   = 0x10,
-            OverrideFontWeight = 0x20,
-            OverrideFontSlant  = 0x40,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
+        PanelState panelState() const;
 
     private:
         Alignment   _alignment;
@@ -146,20 +153,12 @@ class PT_FORMS_API Label : public Control
         Gfx::SizeF  _measuredIconSize;
         bool        _iconInvalid;
 
-        FacetPtr<PanelRenderer>   _renderer;
-        bool                      _customRenderer;
-
-        AutoPtr<Gfx::Brush>       _background;
-        bool                      _hasBackground;
-        AutoPtr<Gfx::Pen>         _contour;
-        bool                      _hasFrame;
-        AutoPtr<Gfx::Color>       _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _overrides;
-        std::size_t               _styleGeneration;
-        bool                      _styleInvalid;
-
-        Pixmap         _pixmap;
+        PanelStyle        _panelStyle;
+        PanelStyleOptions _panelStyleOptions;
+        bool              _hasBackground;
+        bool              _hasFrame;
+        Gfx::RectF        _contentRect;
+        Pixmap            _pixmap;
 };
 
 } // namespace

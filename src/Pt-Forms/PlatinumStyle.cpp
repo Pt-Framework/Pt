@@ -116,6 +116,42 @@ namespace Forms {
 
 namespace {
 
+const Gfx::Brush& resolvePanelBackground(const StyleOptions& options,
+                                         const PanelStyleOptions& panelOptions)
+{
+    if( const Gfx::Brush* background = panelOptions.background() )
+        return *background;
+
+    return options.background();
+}
+
+
+const Gfx::Pen& resolvePanelContour(const StyleOptions& options,
+                                    const PanelStyleOptions& panelOptions)
+{
+    if( const Gfx::Pen* contour = panelOptions.contour() )
+        return *contour;
+
+    return options.contour();
+}
+
+
+const Gfx::Color& resolvePanelTextColor(const StyleOptions& options,
+                                        const PanelStyleOptions& panelOptions)
+{
+    if( const Gfx::Color* textColor = panelOptions.textColor() )
+        return *textColor;
+
+    return options.textColor();
+}
+
+
+Gfx::Font resolvePanelFont(const StyleOptions& options,
+                           const PanelStyleOptions& panelOptions)
+{
+    return panelOptions.getFont(options.font());
+}
+
 const Gfx::Brush& resolveButtonForeground(const StyleOptions& options,
                                           const ButtonStyleOptions& buttonOptions)
 {
@@ -317,6 +353,7 @@ PlatinumPanelRenderer::PlatinumPanelRenderer(FacetPtr<PlatinumRendererBase> base
                                              std::size_t refs)
 : PanelRenderer(refs)
 , _base(base)
+, _cornerRadius(0.0)
 {
 }
 
@@ -332,16 +369,19 @@ PanelRenderer* PlatinumPanelRenderer::onCreate() const
 }
 
 
-void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
+void PlatinumPanelRenderer::onPrepare(const StyleOptions& options,
+                                      const PanelStyleOptions& panelOptions)
 {
-    _bgPainter.setBrush( background() );
+    _cornerRadius = options.cornerRadius();
 
-    Gfx::Pen framePen = contour();
+    _bgPainter.setBrush( resolvePanelBackground(options, panelOptions) );
+
+    Gfx::Pen framePen( resolvePanelContour(options, panelOptions) );
     framePen.setJoinStyle(Gfx::Pen::BevelJoin);
     _framePainter.setPen(framePen);
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    _textPainter.setFont( resolvePanelFont(options, panelOptions) );
+    _textPainter.setPen( Gfx::Pen( resolvePanelTextColor(options, panelOptions) ) );
 }
 
 
@@ -368,21 +408,19 @@ const Painter& PlatinumPanelRenderer::onGetTextPainter(PaintSurface& surface)
 
 void PlatinumPanelRenderer::onRenderBackground(PaintContext& context,
                                                const Gfx::RectF& rect,
-                                               const StyleOptions& options,
-                                               StyleFlags /*state*/)
+                                               const PanelState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     _bgPainter.begin(context);
-    _base->renderPlane(_bgPainter, rect, options.cornerRadius());
+    _base->renderPlane(_bgPainter, rect, _cornerRadius);
 }
 
 
 void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
-                                         const Gfx::RectF& rect,
-                                         const StyleOptions& options,
-                                         StyleFlags /*state*/)
+                                          const Gfx::RectF& rect,
+                                          const PanelState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -390,16 +428,15 @@ void PlatinumPanelRenderer::onRenderFrame(PaintContext& context,
     _framePainter.begin(context);
     _base->renderChrome(_framePainter, rect,
                        _framePainter.pen().size(),
-                       options.cornerRadius());
+                       _cornerRadius);
 }
 
 
 void PlatinumPanelRenderer::onRenderText(PaintContext& context,
                                          const Gfx::RectF& rect,
-                                         const StyleOptions& /*options*/,
                                          const String& text,
                                          const Gfx::PointF& pos,
-                                         StyleFlags /*state*/)
+                                         const PanelState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -412,10 +449,9 @@ void PlatinumPanelRenderer::onRenderText(PaintContext& context,
 
 void PlatinumPanelRenderer::onRenderIcon(PaintContext& context,
                                          const Gfx::RectF& rect,
-                                         const StyleOptions& /*options*/,
                                          const Pixmap& picture,
                                          const Gfx::PointF& pos,
-                                         StyleFlags /*state*/)
+                                         const PanelState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;

@@ -77,6 +77,7 @@ Application::Application(int argc, char** argv)
 
     // default style with default options
     _style = PlatinumStyle();
+    _style.reset(_styleOptions);
 
     _mainScreen = new Screen(*_impl);
 
@@ -196,6 +197,7 @@ const Style& Application::style() const
 void Application::setStyle(const Style& s)
 {
     _style = s;
+    _style.reset(_styleOptions);
     invalidate();
 }
 
@@ -209,6 +211,7 @@ const StyleOptions& Application::styleOptions() const
 void Application::setStyleOptions(const StyleOptions& options)
 {
     _styleOptions = options;
+    _style.reset(_styleOptions);
     invalidate();
 }
 

@@ -76,26 +76,19 @@ class PT_FORMS_API Application : public Pt::System::Application
 
         void setCursor(const Cursor* cursor = 0);
 
-        /** @brief Returns the global renderer facet set.
+        /** @brief Returns the current style.
         */
         const Style& style() const;
 
-        /** @brief Replaces the global renderer facet set.
-
-            The application invalidates all registered widgets after the
-            replacement so that the existing invalidate cycle can pick up the
-            new style generation.
+        /** @brief Sets the global style for all widgets.
         */
         void setStyle(const Style& s);
 
-        /** @brief Returns the current global theme options.
+        /** @brief Returns the current style options.
         */
         const StyleOptions& styleOptions() const;
 
-        /** @brief Replaces the global theme options.
-
-            Global theme options must be updated through %Application so that
-            the change is propagated through the existing invalidate cycle.
+        /** @brief Replaces the style options for all widgets.
         */
         void setStyleOptions(const StyleOptions& options);
 

@@ -32,10 +32,12 @@
 
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Alignment.h>
+#include <Pt/Forms/PanelStyle.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/SmartPtr.h>
 
 namespace Pt {
@@ -53,7 +55,8 @@ class PT_FORMS_API Panel : public Control
 
         virtual ~Panel();
 
-        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize, Alignment align = Alignment::Center);
+        void setIcon(const Icon& icon, const Gfx::SizeF& iconSize,
+                     Alignment align = Alignment::Center);
 
         Control* content() const;
 
@@ -106,28 +109,20 @@ class PT_FORMS_API Panel : public Control
         virtual void onPaintFrame(PaintContext& context);
 
     private:
-        PanelRenderer* getRenderer();
-
-        void applyRenderer(PanelRenderer* renderer);
+        PanelState panelState() const;
 
     private:
-        Control*                 _content;
-
-        FacetPtr<PanelRenderer> _renderer;
-        bool                    _customRenderer;
-        std::size_t             _styleGeneration;
-
-        AutoPtr<Gfx::Brush>     _background;
-        bool                    _hasBackground;
-
-        AutoPtr<Gfx::Pen>       _contour;
-        bool                    _hasFrame;
-
-        Icon                    _icon;
-        Gfx::SizeF              _iconSize;
-        PixmapSurface           _picture;
-        Alignment               _imageAlignment;
-        bool                    _iconInvalid;
+        Control*          _content;
+        PanelStyle        _panelStyle;
+        PanelStyleOptions _panelStyleOptions;
+        bool              _hasBackground;
+        bool              _hasFrame;
+        Icon              _icon;
+        Gfx::SizeF        _iconSize;
+        Gfx::RectF        _contentRect;
+        PixmapSurface     _picture;
+        Alignment         _imageAlignment;
+        bool              _iconInvalid;
 };
 
 } // namespace

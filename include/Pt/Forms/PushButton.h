@@ -31,10 +31,10 @@
 #define Pt_Forms_PushButton_H
 
 #include <Pt/Forms/Button.h>
+#include <Pt/Forms/ButtonStyle.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Direction.h>
-#include <Pt/Forms/Style.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
@@ -43,8 +43,6 @@
 namespace Pt {
 
 namespace Forms {
-
-class ButtonRenderer;
 
 class PT_FORMS_API PushButton : public Button
 {

@@ -1,6 +1,5 @@
 ﻿/* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
-   Copyright (C) 2017 Ilja Maier
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -90,7 +89,8 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
     protected:
         virtual PanelRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const PanelStyleOptions& panelOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                          const Gfx::SizeF& contentSize);
@@ -102,27 +102,23 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
 
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& rect,
-                                        const StyleOptions& options,
-                                        StyleFlags state);
+                                        const PanelState& state);
 
         virtual void onRenderFrame(PaintContext& context,
-                       const Gfx::RectF& rect,
-                       const StyleOptions& options,
-                       StyleFlags state);
+                                   const Gfx::RectF& rect,
+                                   const PanelState& state);
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
-                                  const StyleOptions& options,
                                   const String& text,
                                   const Gfx::PointF& pos,
-                                  StyleFlags state);
+                                  const PanelState& state);
 
         virtual void onRenderIcon(PaintContext& context,
                                   const Gfx::RectF& rect,
-                                  const StyleOptions& options,
                                   const Pixmap& picture,
                                   const Gfx::PointF& pos,
-                                  StyleFlags state);
+                                  const PanelState& state);
 
     private:
         FacetPtr<PlatinumRendererBase> _base;
@@ -130,6 +126,7 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
         Painter              _framePainter;
         Painter              _textPainter;
         Painter              _iconPainter;
+        double               _cornerRadius;
 };
 
 

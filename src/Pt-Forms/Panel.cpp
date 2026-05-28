@@ -43,8 +43,7 @@ Panel::Panel()
 : _content(0)
 , _hasBackground(false)
 , _hasFrame(false)
-, _customRenderer(false)
-, _styleGeneration(0)
+, _imageAlignment(Alignment::Center)
 , _iconInvalid(false)
 {
 }
@@ -97,8 +96,8 @@ const Gfx::Brush* Panel::background() const
     if( ! _hasBackground )
         return 0;
 
-    if( _renderer )
-        return &_renderer->background();
+    if( const Gfx::Brush* background = _panelStyleOptions.background() )
+        return background;
 
     return &Application::instance().styleOptions().background();
 }
@@ -106,20 +105,17 @@ const Gfx::Brush* Panel::background() const
 
 void Panel::setBackground(const Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
+    _panelStyleOptions.setBackground(b);
     _hasBackground = true;
 
-    if( PanelRenderer* renderer = getRenderer() )
-        renderer->setBackground(*_background);
-
-    repaint();
+    invalidate();
 }
 
 
 void Panel::setBackground(bool b)
 {
     _hasBackground = b;
-    repaint();
+    invalidate();
 }
 
 
@@ -128,8 +124,8 @@ const Gfx::Pen* Panel::contour() const
     if( ! _hasFrame )
         return 0;
 
-    if( _renderer )
-        return &_renderer->contour();
+    if( const Gfx::Pen* contour = _panelStyleOptions.contour() )
+        return contour;
 
     return &Application::instance().styleOptions().contour();
 }
@@ -137,11 +133,8 @@ const Gfx::Pen* Panel::contour() const
 
 void Panel::setContour(const Gfx::Pen& pen)
 {
-    _contour.reset( new Gfx::Pen(pen) );
+    _panelStyleOptions.setContour(pen);
     _hasFrame = true;
-
-    if( PanelRenderer* renderer = getRenderer() )
-        renderer->setContour(*_contour);
 
     invalidate();
 }
@@ -150,91 +143,7 @@ void Panel::setContour(const Gfx::Pen& pen)
 void Panel::setFrame(bool b)
 {
     _hasFrame = b;
-    repaint();
-}
-
-
-void Panel::setRenderer(PanelRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
-
-    if( renderer )
-        applyRenderer(renderer);
-
     invalidate();
-}
-
-
-PanelRenderer* Panel::getRenderer()
-{
-    if( ! _renderer )
-    {
-        const Style& style = Application::instance().style();
-        PanelRenderer* proto = style.get<PanelRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-    }
-
-    return _renderer.get();
-}
-
-
-void Panel::applyRenderer(PanelRenderer* renderer)
-{
-    if( _background )
-        renderer->setBackground( *_background );
-
-    if( _contour )
-        renderer->setContour( *_contour );
-}
-
-
-void Panel::onInvalidate()
-{
-    Base::onInvalidate();
-
-    std::size_t gen = Application::instance().styleOptions().generation();
-    if( _styleGeneration != gen )
-    {
-        _styleGeneration = gen;
-        if( ! _customRenderer )
-            _renderer.reset();
-    }
-
-    if( ! _renderer )
-    {
-        bool hasOverride = _background || _contour;
-        if(hasOverride)
-        {
-            if( PanelRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<PanelRenderer>() );
-        }
-    }
-
-    if(_iconInvalid)
-    {
-        _iconInvalid = false;
-
-        if( ! _icon.empty() )
-        {
-            const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
-            const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-            _picture.reset(iconImage);
-        }
-        else
-        {
-            _picture.reset(Pt::Gfx::Image());
-        }
-
-        relayout();
-    }
 }
 
 
@@ -250,50 +159,132 @@ void Panel::onRescaleEvent(const RescaleEvent& ev)
 }
 
 
+void Panel::setRenderer(PanelRenderer* renderer)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( renderer )
+        _panelStyle.bind(*renderer, options, _panelStyleOptions);
+    else
+        _panelStyle.bind(Application::instance().style(), options,
+                         _panelStyleOptions);
+
+    invalidate();
+}
+
+
+void Panel::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    PanelRenderer* renderer = _panelStyle.rebind(style, options,
+                                                 _panelStyleOptions);
+    if( ! renderer )
+        return;
+
+    if(_iconInvalid)
+    {
+        _iconInvalid = false;
+
+        if( ! _icon.empty() )
+        {
+            const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
+            const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+            _picture.reset(iconImage);
+        }
+        else
+        {
+            _picture.reset(Pt::Gfx::Image());
+        }
+    }
+
+    relayout();
+}
+
+
 Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 {
-    if(_content)
-    { 
+    PanelRenderer* renderer = _panelStyle.renderer();
+    if( ! renderer )
+        return Gfx::SizeF(0, 0);
+
+    Gfx::SizeF contentSize;
+
+    if( _content )
+    {
         double hspace = padding().leftRight() + _content->margin().leftRight();
         double vspace = padding().topBottom() + _content->margin().topBottom();
 
         SizePolicy contentPolicy = policy;
         contentPolicy.setWidth( policy.size().width() - hspace );
         contentPolicy.setHeight( policy.size().height() - vspace );
-        
+
         _content->measure(contentPolicy);
-        return _content->preferredSize();
+        contentSize.setWidth( _content->preferredSize().width() + hspace );
+        contentSize.setHeight( _content->preferredSize().height() + vspace );
+    }
+    else
+    {
+        contentSize.setWidth( padding().leftRight() );
+        contentSize.setHeight( padding().topBottom() );
     }
 
-    return Gfx::SizeF(0, 0);
+    if( ! _picture.empty() )
+    {
+        Gfx::SizeF iconSize = _iconSize.isNull()
+                            ? surface().scaling().toLogical( _picture.size() )
+                            : _iconSize;
+
+        double iconWidth = iconSize.width() + padding().leftRight();
+        double iconHeight = iconSize.height() + padding().topBottom();
+
+        if( contentSize.width() < iconWidth )
+            contentSize.setWidth(iconWidth);
+
+        if( contentSize.height() < iconHeight )
+            contentSize.setHeight(iconHeight);
+    }
+
+    return renderer->measureFrame( surface(), contentSize );
 }
 
 
 void Panel::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
-    
-    if(_content)
+
+    PanelRenderer* renderer = _panelStyle.renderer();
+    if( ! renderer )
+        return;
+
+    _contentRect = renderer->layoutFrame( surface(), Gfx::RectF(size()) );
+
+    if( _content )
     {
-        Gfx::PointF pos(padding().left() + _content->margin().left(), 
-                        padding().top()  + _content->margin().top());
-        
+        Gfx::PointF pos(_contentRect.left() + padding().left() + _content->margin().left(), 
+                        _contentRect.top() + padding().top() + _content->margin().top());
+
         double hspace = padding().leftRight() + _content->margin().leftRight();
         double vspace = padding().topBottom() + _content->margin().topBottom();
 
         Gfx::SizeF size;
-        size.setWidth( rect.width() - hspace );
-        size.setHeight( rect.height() - vspace );
+        size.setWidth( _contentRect.width() - hspace );
+        size.setHeight( _contentRect.height() - vspace );
 
         _content->move(pos);
         _content->resize(size);
     }
+
+    repaint();
 }
 
 
 void Panel::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _renderer)
+    if( ! _panelStyle.renderer() )
         return;
 
     onPaintBackground(context);
@@ -303,23 +294,25 @@ void Panel::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 
 void Panel::onPaintBackground(PaintContext& context)
 {
-    if( ! _renderer || ! _hasBackground )
+    PanelRenderer* renderer = _panelStyle.renderer();
+    if( ! renderer || ! _hasBackground )
         return;
 
     Gfx::RectF widgetRect( size() );
-    _renderer->renderBackground(context, widgetRect, styleFlags());
+    renderer->renderBackground(context, widgetRect, panelState());
 }
 
 
 void Panel::onPaintContent(PaintContext& context)
 {
-    if( _picture.empty() )
+    PanelRenderer* renderer = _panelStyle.renderer();
+    if( ! renderer || _picture.empty() )
         return;
 
     const Gfx::Scaling& scaling = this->scaling();
 
-    double rightX = size().width() - scaling.toLogical( _picture.size().width() );
-    double bottomY = size().height() - scaling.toLogical( _picture.size().height() );
+    double rightX = _contentRect.width() - scaling.toLogical( _picture.size().width() );
+    double bottomY = _contentRect.height() - scaling.toLogical( _picture.size().height() );
 
     double centerX = rightX / 2;
     double centerY = bottomY / 2;
@@ -329,56 +322,69 @@ void Panel::onPaintContent(PaintContext& context)
     switch(_imageAlignment)
     {
         case Alignment::TopLeft:
-            imagePosition.set(0.0, 0.0);
+            imagePosition.set(_contentRect.left(), _contentRect.top());
             break;
 
         case Alignment::Top:
-            imagePosition.set(centerX, 0.0);
+            imagePosition.set(_contentRect.left() + centerX, _contentRect.top());
             break;
 
         case Alignment::TopRight:
-            imagePosition.set(rightX, 0.0);
+            imagePosition.set(_contentRect.left() + rightX, _contentRect.top());
             break;
 
         case Alignment::Left:
-            imagePosition.set(0.0, centerY);
+            imagePosition.set(_contentRect.left(), _contentRect.top() + centerY);
             break;
 
         default:
         case Alignment::Center:
-            imagePosition.set(centerX, centerY);
+            imagePosition.set(_contentRect.left() + centerX,
+                              _contentRect.top() + centerY);
             break;
 
         case Alignment::Right:
-            imagePosition.set(rightX, centerY);
+            imagePosition.set(_contentRect.left() + rightX,
+                              _contentRect.top() + centerY);
             break;
 
         case Alignment::BottomLeft:
-            imagePosition.set(0.0, bottomY);
+            imagePosition.set(_contentRect.left(), _contentRect.top() + bottomY);
             break;
 
         case Alignment::Bottom:
-            imagePosition.set(centerX, bottomY);
+            imagePosition.set(_contentRect.left() + centerX,
+                              _contentRect.top() + bottomY);
             break;
 
         case Alignment::BottomRight:
-            imagePosition.set(rightX, bottomY);
+            imagePosition.set(_contentRect.left() + rightX,
+                              _contentRect.top() + bottomY);
             break;
     }
 
-    Gfx::RectF widgetRect( size() );
-    _renderer->renderIcon(context, widgetRect, _picture, imagePosition,
-                          styleFlags());
+    renderer->renderIcon(context, _contentRect, _picture, imagePosition,
+                         panelState());
 }
 
 
 void Panel::onPaintFrame(PaintContext& context)
 {
-    if( ! _renderer || ! _hasFrame )
+    PanelRenderer* renderer = _panelStyle.renderer();
+    if( ! renderer || ! _hasFrame )
         return;
 
     Gfx::RectF widgetRect( size() );
-    _renderer->renderFrame(context, widgetRect, styleFlags());
+    renderer->renderFrame(context, widgetRect, panelState());
+}
+
+
+PanelState Panel::panelState() const
+{
+    PanelState state;
+    state.setEnabled( isEnabled() );
+    state.setFocused( hasFocus() );
+    return state;
 }
 
 } // namespace

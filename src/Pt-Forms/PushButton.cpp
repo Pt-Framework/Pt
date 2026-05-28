@@ -28,7 +28,6 @@
 */
 
 #include <Pt/Forms/PushButton.h>
-#include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
@@ -72,6 +71,7 @@ void PushButton::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 {
     _icon = icon;
     _iconSize = iconSize;
+    _iconInvalid = true;
 
     invalidate();
 }
@@ -185,7 +185,8 @@ void PushButton::setTextColor(const Gfx::Color& color)
 
 Gfx::Font PushButton::font() const
 {
-    return _buttonStyleOptions.getFont(Application::instance().styleOptions().font());
+    const StyleOptions& options = Application::instance().styleOptions();
+    return _buttonStyleOptions.getFont(options.font());
 }
 
 
@@ -308,7 +309,7 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( renderer )
-        _buttonStyle.bind(renderer, options, _buttonStyleOptions);
+        _buttonStyle.bind(*renderer, options, _buttonStyleOptions);
     else
         _buttonStyle.bind(Application::instance().style(), options, _buttonStyleOptions);
 
@@ -318,15 +319,13 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
 
 void PushButton::onInvalidate()
 {
+    Base::onInvalidate();
+
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
-    ButtonRenderer* renderer = 0;
 
-    if( _buttonStyle.isCustom() )
-        renderer = _buttonStyle.rebind(options, _buttonStyleOptions);
-    else
-        renderer = _buttonStyle.bind(style, options, _buttonStyleOptions);
-
+    ButtonRenderer* renderer = _buttonStyle.rebind(style, options,
+                                                   _buttonStyleOptions);
     if( ! renderer )
         return;
 
@@ -346,8 +345,6 @@ void PushButton::onInvalidate()
             _picture.reset();
         }
     }
-
-    Base::onInvalidate();
 
     relayout();
 }
