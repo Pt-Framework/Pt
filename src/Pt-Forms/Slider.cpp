@@ -28,8 +28,8 @@
 */
 
 #include <Pt/Forms/Slider.h>
+#include <Pt/Forms/SliderStyle.h>
 #include <Pt/Forms/Application.h>
-#include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
@@ -44,9 +44,6 @@ Slider::Slider()
 , _min(0)
 , _max(100)
 , _isHighlighted(false)
-, _customRenderer(false)
-, _styleGeneration(0)
-, _overrides(0)
 {
 }
 
@@ -119,8 +116,8 @@ Signal<int>& Slider::positionChanged()
 
 const Gfx::Brush& Slider::background() const
 {
-    if( _renderer )
-        return _renderer->background();
+    if( const Gfx::Brush* b = _sliderOptions.background() )
+        return *b;
 
     return Application::instance().styleOptions().background();
 }
@@ -128,20 +125,15 @@ const Gfx::Brush& Slider::background() const
 
 void Slider::setBackground(const Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
-    _overrides |= OverrideBackground;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setBackground(*_background);
-
+    _sliderOptions.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Color& Slider::foreground() const
 {
-    if( _renderer )
-        return _renderer->foreground().color();
+    if( const Gfx::Color* c = _sliderOptions.foreground() )
+        return *c;
 
     return Application::instance().styleOptions().accentColor();
 }
@@ -149,20 +141,15 @@ const Gfx::Color& Slider::foreground() const
 
 void Slider::setForeground(const Gfx::Color& b)
 {
-    _foreground.reset( new Gfx::Color(b) );
-    _overrides |= OverrideForeground;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setForeground( Gfx::Brush(*_foreground) );
-
+    _sliderOptions.setForeground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& Slider::contour() const
 {
-    if( _renderer )
-        return _renderer->contour();
+    if( const Gfx::Pen* p = _sliderOptions.contour() )
+        return *p;
 
     return Application::instance().styleOptions().contour();
 }
@@ -170,20 +157,15 @@ const Gfx::Pen& Slider::contour() const
 
 void Slider::setContour(const Gfx::Pen& p)
 {
-    _contour.reset( new Gfx::Pen(p) );
-    _overrides |= OverrideContour;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setContour(*_contour);
-
+    _sliderOptions.setContour(p);
     invalidate();
 }
 
 
 const Gfx::Color& Slider::textColor() const
 {
-    if( _renderer )
-        return _renderer->textColor();
+    if( const Gfx::Color* c = _sliderOptions.textColor() )
+        return *c;
 
     return Application::instance().styleOptions().textColor();
 }
@@ -191,20 +173,15 @@ const Gfx::Color& Slider::textColor() const
 
 void Slider::setTextColor(const Gfx::Color& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
-    _overrides |= OverrideTextColor;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
+    _sliderOptions.setTextColor(color);
     invalidate();
 }
 
 
 const Gfx::Font& Slider::font() const
 {
-    if( _renderer )
-        return _renderer->font();
+    if( const Gfx::Font* f = _sliderOptions.font() )
+        return *f;
 
     return Application::instance().styleOptions().font();
 }
@@ -212,173 +189,62 @@ const Gfx::Font& Slider::font() const
 
 void Slider::setFont(const Gfx::Font& font)
 {
-    _customFont = font;
-    _overrides |= OverrideFontAll;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _sliderOptions.setFont(font);
     invalidate();
-}
-
-
-Gfx::Font Slider::getFont() const
-{
-    const Gfx::Font& base = Application::instance().styleOptions().font();
-
-    if( ! (_overrides & OverrideFontAny) )
-        return base;
-
-    if( _overrides & OverrideFontAll )
-        return _customFont;
-
-    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont.size()
-                                                        : base.size();
-    Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont.weight()
-                                                                 : base.weight();
-    Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont.slant()
-                                                               : base.slant();
-
-    if( base.hasStyleName() )
-        return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
-
-    if( base.category() != Gfx::Font::Category::None )
-        return Gfx::Font(base.category(), sz, wt, sl, base.stretch());
-
-    return Gfx::Font(base.family(), sz, wt, sl, base.stretch());
 }
 
 
 void Slider::setFontSize(std::size_t size)
 {
-    _customFont = _customFont.withSize(size);
-    _overrides |= OverrideFontSize;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _sliderOptions.setFontSize(size);
     invalidate();
 }
 
 
 void Slider::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = _customFont.withWeight(weight);
-    _overrides |= OverrideFontWeight;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _sliderOptions.setFontWeight(weight);
     invalidate();
 }
 
 
 void Slider::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = _customFont.withSlant(slant);
-    _overrides |= OverrideFontSlant;
-
-    if( SliderRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _sliderOptions.setFontSlant(slant);
     invalidate();
 }
 
 
 void Slider::setRenderer(SliderRenderer* renderer)
 {
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    if( renderer )
-        applyRenderer(renderer);
+    if(renderer)
+        _sliderStyle.bind(*renderer, options, _sliderOptions);
+    else
+        _sliderStyle.bind(Application::instance().style(), options, _sliderOptions);
 
     invalidate();
 }
 
 
-SliderRenderer* Slider::getRenderer()
+SliderState Slider::sliderState() const
 {
-    if( ! _renderer )
-    {
-        const Style& style = Application::instance().style();
-        SliderRenderer* proto = style.get<SliderRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-    }
-
-    return _renderer.get();
-}
-
-
-void Slider::applyRenderer(SliderRenderer* renderer)
-{
-    if( _overrides & OverrideBackground )
-        renderer->setBackground( *_background );
-
-    if( _overrides & OverrideForeground )
-        renderer->setForeground( Gfx::Brush(*_foreground) );
-
-    if( _overrides & OverrideContour )
-        renderer->setContour( *_contour );
-
-    if( _overrides & OverrideTextColor )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
-    if( _overrides & OverrideFontAny )
-        renderer->setFont( getFont() );
-}
-
-
-SliderStyleFlags Slider::sliderStyleFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( hasFocus() )
-        common.set(StyleFlags::Focused);
-
-    if( _isHighlighted && isEnabled() )
-        common.set(StyleFlags::Highlighted);
-
-    return SliderStyleFlags(common);
+    SliderState state;
+    state.setEnabled( isEnabled() );
+    state.setHovered( _isHighlighted && isEnabled() );
+    state.setFocused( hasFocus() );
+    return state;
 }
 
 
 void Slider::onInvalidate()
 {
-    std::size_t gen = Application::instance().styleOptions().generation();
-    if( _styleGeneration != gen )
-    {
-        _styleGeneration = gen;
-        if( ! _customRenderer )
-            _renderer.reset();
-    }
-
-    if( ! _renderer )
-    {
-        bool hasOverride = (_overrides != 0);
-        if( hasOverride )
-        {
-            if( SliderRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<SliderRenderer>() );
-        }
-    }
-
-    if( ! _renderer )
-        return;
-
     Base::onInvalidate();
+
+    const Style& style = Application::instance().style();
+    const StyleOptions& options = Application::instance().styleOptions();
+    _sliderStyle.rebind(style, options, _sliderOptions);
 
     relayout();
 }
@@ -386,11 +252,12 @@ void Slider::onInvalidate()
 
 Gfx::SizeF Slider::onMeasure(const SizePolicy& policy)
 {
-    if( ! _renderer )
-        return Gfx::SizeF(0, 0);
+    SliderRenderer* renderer = _sliderStyle.renderer();
+    if( ! renderer )
+        return Gfx::SizeF();
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF sz = _renderer->measureFrame(surface(), contentSize);
+    Gfx::SizeF sz = renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( sz.width() + padding().leftRight(),
                        sz.height() + padding().topBottom() );
@@ -401,31 +268,44 @@ void Slider::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    if( ! _renderer )
+    SliderRenderer* renderer = _sliderStyle.renderer();
+    if( ! renderer )
         return;
 
-    Gfx::SizeF trackSize  = _renderer->measureTrack(surface());
-    Gfx::SizeF handleSize = _renderer->measureHandle(surface());
+    Gfx::SizeF trackSize  = renderer->measureTrack(surface());
+    Gfx::SizeF handleSize = renderer->measureHandle(surface());
 
-    _renderer->layoutChrome(surface(), Gfx::RectF(size()),
+    renderer->layoutChrome(surface(), Gfx::RectF(size()),
                            trackSize, handleSize, _trackRect, _handleRect);
-
-    repaint();
 }
 
 
 void Slider::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
 {
-    if( ! _renderer )
+    SliderRenderer* renderer = _sliderStyle.renderer();
+    if( ! renderer )
         return;
 
     Gfx::RectF handleRect = _handleRect;
-    _renderer->layoutHandle(surface(), _trackRect, toFraction(), handleRect);
+    renderer->layoutHandle(surface(), _trackRect, toFraction(), handleRect);
 
-    SliderStyleFlags state = sliderStyleFlags();
+    SliderState state = sliderState();
 
-    _renderer->renderChrome(context, Gfx::RectF(size()),
-                           _trackRect, handleRect, state);
+    onPaintChrome(context, Gfx::RectF(size()), _trackRect, handleRect, state);
+}
+
+
+void Slider::onPaintChrome(PaintContext& context,
+                           const Gfx::RectF& rect,
+                           const Gfx::RectF& trackRect,
+                           const Gfx::RectF& handleRect,
+                           const SliderState& state)
+{
+    SliderRenderer* renderer = _sliderStyle.renderer();
+    if( ! renderer )
+        return;
+
+    renderer->renderChrome(context, rect, trackRect, handleRect, state);
 }
 
 

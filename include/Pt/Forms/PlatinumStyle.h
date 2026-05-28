@@ -36,6 +36,7 @@
 #include <Pt/Forms/PanelStyle.h>
 #include <Pt/Forms/CheckBoxStyle.h>
 #include <Pt/Forms/SpinBoxStyle.h>
+#include <Pt/Forms/SliderStyle.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -478,7 +479,8 @@ class PT_FORMS_API PlatinumSliderRenderer : public SliderRenderer
     protected:
         virtual SliderRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const SliderStyleOptions& sliderOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize);
@@ -501,15 +503,15 @@ class PT_FORMS_API PlatinumSliderRenderer : public SliderRenderer
 
         virtual void onRenderTrack(PaintContext& context,
                                    const Gfx::RectF& trackRect,
-                                   const StyleOptions& options,
-                                   SliderStyleFlags state);
+                                   const SliderState& state);
 
         virtual void onRenderHandle(PaintContext& context,
                                     const Gfx::RectF& handleRect,
-                                    const StyleOptions& options,
-                                    SliderStyleFlags state);
+                                    const SliderState& state);
 
     private:
+        Gfx::Brush _foreground;
+        Gfx::Brush _contourBrush;
         Painter _trackPainter;
         Painter _handlePainter;
 };

@@ -1676,10 +1676,17 @@ SliderRenderer* PlatinumSliderRenderer::onCreate() const
 }
 
 
-void PlatinumSliderRenderer::onPrepare(const StyleOptions& options)
+void PlatinumSliderRenderer::onPrepare(const StyleOptions& options,
+                                       const SliderStyleOptions& sliderOptions)
 {
+    const Gfx::Color* fg = sliderOptions.foreground();
+    _foreground = Gfx::Brush( fg ? *fg : options.accentColor() );
+
+    const Gfx::Pen* ct = sliderOptions.contour();
+    _contourBrush = Gfx::Brush( ct ? ct->color() : options.contour().color() );
+
     _trackPainter.setBrush( options.foreground() );
-    _handlePainter.setBrush( foreground() );
+    _handlePainter.setBrush( _foreground );
 }
 
 
@@ -1758,8 +1765,7 @@ void PlatinumSliderRenderer::onLayoutHandle(PaintSurface& /*surface*/,
 
 void PlatinumSliderRenderer::onRenderTrack(PaintContext& context,
                                            const Gfx::RectF& trackRect,
-                                           const StyleOptions& /*options*/,
-                                           SliderStyleFlags /*state*/)
+                                           const SliderState& /*state*/)
 {
     if( trackRect.width() <= 0 || trackRect.height() <= 0 )
         return;
@@ -1771,16 +1777,15 @@ void PlatinumSliderRenderer::onRenderTrack(PaintContext& context,
 
 void PlatinumSliderRenderer::onRenderHandle(PaintContext& context,
                                             const Gfx::RectF& handleRect,
-                                            const StyleOptions& /*options*/,
-                                            SliderStyleFlags state)
+                                            const SliderState& state)
 {
     if( handleRect.width() <= 0 || handleRect.height() <= 0 )
         return;
 
-    if( state.has(StyleFlags::Highlighted) )
-        _handlePainter.setBrush( foreground() );
+    if( state.isHovered() )
+        _handlePainter.setBrush( _foreground );
     else
-        _handlePainter.setBrush( Gfx::Brush(contour().color()) );
+        _handlePainter.setBrush( _contourBrush );
 
     _handlePainter.begin(context);
     _handlePainter.fillRect(handleRect);

@@ -64,7 +64,6 @@ class Menu;
 class MenuItem;
 class MenuBar;
 class MenuBarItem;
-class Slider;
 class ProgressBar;
 
 template <typename T>
@@ -807,118 +806,6 @@ class PT_FORMS_API ProgressBarRenderer : public Style::Facet
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   ProgressBarStyleFlags state) = 0;
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Brush> _foreground;
-        Gfx::Brush           _defaultForeground;
-        AutoPtr<Gfx::Font>  _font;
-        AutoPtr<Gfx::Pen>   _textColor;
-        std::size_t          _styleGeneration;
-};
-
-
-class PT_FORMS_API SliderRenderer : public Style::Facet
-{
-    public:
-        explicit SliderRenderer(std::size_t refs = 0);
-
-        virtual ~SliderRenderer();
-
-        SliderRenderer* create() const;
-
-    public:
-        const Gfx::Brush& background() const;
-        void setBackground(const Gfx::Brush& b);
-
-        const Gfx::Pen& contour() const;
-        void setContour(const Gfx::Pen& p);
-
-        const Gfx::Brush& foreground() const;
-        void setForeground(const Gfx::Brush& b);
-
-        const Gfx::Font& font() const;
-        void setFont(const Gfx::Font& f);
-
-        const Gfx::Color& textColor() const;
-        void setTextColor(const Gfx::Pen& p);
-
-    public:
-        Gfx::SizeF measureFrame(PaintSurface& surface, const Gfx::SizeF& contentSize);
-
-        Gfx::SizeF measureTrack(PaintSurface& surface);
-
-        Gfx::SizeF measureHandle(PaintSurface& surface);
-
-        void layoutChrome(PaintSurface& surface,
-                          const Gfx::RectF& rect,
-                          const Gfx::SizeF& trackSize,
-                          const Gfx::SizeF& handleSize,
-                          Gfx::RectF& trackRect,
-                          Gfx::RectF& handleRect);
-
-        void layoutHandle(PaintSurface& surface,
-                          const Gfx::RectF& trackRect,
-                          float fraction,
-                          Gfx::RectF& handleRect);
-
-        void renderChrome(PaintContext& context,
-                          const Gfx::RectF& rect,
-                          const Gfx::RectF& trackRect,
-                          const Gfx::RectF& handleRect,
-                          SliderStyleFlags state);
-
-        void renderTrack(PaintContext& context,
-                         const Gfx::RectF& trackRect,
-                         SliderStyleFlags state);
-
-        void renderHandle(PaintContext& context,
-                          const Gfx::RectF& handleRect,
-                          SliderStyleFlags state);
-
-    protected:
-        const StyleOptions& prepare();
-
-        virtual SliderRenderer* onCreate() const = 0;
-
-        virtual void onPrepare(const StyleOptions& options) = 0;
-
-        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
-                                           const Gfx::SizeF& contentSize) = 0;
-
-        virtual Gfx::SizeF onMeasureTrack(PaintSurface& surface) = 0;
-
-        virtual Gfx::SizeF onMeasureHandle(PaintSurface& surface) = 0;
-
-        virtual void onLayoutChrome(PaintSurface& surface,
-                                    const Gfx::RectF& rect,
-                                    const Gfx::SizeF& trackSize,
-                                    const Gfx::SizeF& handleSize,
-                                    Gfx::RectF& trackRect,
-                                    Gfx::RectF& handleRect) = 0;
-
-        virtual void onLayoutHandle(PaintSurface& surface,
-                                    const Gfx::RectF& trackRect,
-                                    float fraction,
-                                    Gfx::RectF& handleRect) = 0;
-
-        virtual void onRenderChrome(PaintContext& context,
-                                    const Gfx::RectF& rect,
-                                    const StyleOptions& options,
-                                    const Gfx::RectF& trackRect,
-                                    const Gfx::RectF& handleRect,
-                                    SliderStyleFlags state);
-
-        virtual void onRenderTrack(PaintContext& context,
-                                   const Gfx::RectF& trackRect,
-                                   const StyleOptions& options,
-                                   SliderStyleFlags state) = 0;
-
-        virtual void onRenderHandle(PaintContext& context,
-                                    const Gfx::RectF& handleRect,
-                                    const StyleOptions& options,
-                                    SliderStyleFlags state) = 0;
 
     private:
         AutoPtr<Gfx::Brush> _background;

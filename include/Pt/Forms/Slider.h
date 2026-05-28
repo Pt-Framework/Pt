@@ -31,8 +31,7 @@
 #define Pt_Forms_Slider_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/StyleFlags.h>
-#include <Pt/SmartPtr.h>
+#include <Pt/Forms/SliderStyle.h>
 #include <Pt/Signal.h>
 
 namespace Pt {
@@ -92,7 +91,7 @@ class PT_FORMS_API Slider : public Control
 
         void setRenderer(SliderRenderer* renderer);
 
-        SliderStyleFlags sliderStyleFlags() const;
+        SliderState sliderState() const;
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
@@ -103,6 +102,12 @@ class PT_FORMS_API Slider : public Control
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& handleRect,
+                                   const SliderState& state);
+
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
@@ -112,48 +117,20 @@ class PT_FORMS_API Slider : public Control
         virtual bool onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        SliderRenderer* getRenderer();
-
-        void applyRenderer(SliderRenderer* renderer);
-
-        Gfx::Font getFont() const;
-
         float toFraction() const;
 
         int toPosition(double x) const;
 
     private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideForeground = 0x02,
-            OverrideContour    = 0x04,
-            OverrideTextColor  = 0x08,
-            OverrideFontAll    = 0x10,
-            OverrideFontSize   = 0x20,
-            OverrideFontWeight = 0x40,
-            OverrideFontSlant  = 0x80,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
-        Signal<int>  _positionChanged;
-        int          _position;
-        int          _min;
-        int          _max;
-        bool        _isHighlighted;
-
-        AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Color>       _foreground;
-        AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>       _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _overrides;
-        
-        Gfx::RectF                _trackRect;
-        Gfx::RectF                _handleRect;
-        FacetPtr<SliderRenderer>  _renderer;
-        bool                      _customRenderer;
-        std::size_t               _styleGeneration;
+        Signal<int>           _positionChanged;
+        SliderStyle           _sliderStyle;
+        SliderStyleOptions    _sliderOptions;
+        int                   _position;
+        int                   _min;
+        int                   _max;
+        bool                  _isHighlighted;
+        Gfx::RectF           _trackRect;
+        Gfx::RectF           _handleRect;
 };
 
 } // namespace

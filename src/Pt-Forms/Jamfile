@@ -80,6 +80,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          ScrollView.cpp
                          ScrollLayout.cpp
                          Slider.cpp
+                         SliderStyle.cpp
                          SpinBox.cpp
                          SpinBoxStyle.cpp
                          StackLayout.cpp
