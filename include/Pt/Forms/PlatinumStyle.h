@@ -35,6 +35,7 @@
 #include <Pt/Forms/ButtonStyle.h>
 #include <Pt/Forms/PanelStyle.h>
 #include <Pt/Forms/CheckBoxStyle.h>
+#include <Pt/Forms/SpinBoxStyle.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -290,7 +291,8 @@ class PT_FORMS_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
     protected:
         virtual SpinBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const SpinBoxStyleOptions& spinBoxOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);
@@ -314,50 +316,46 @@ class PT_FORMS_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
 
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
-                                    const StyleOptions& options,
                                     const Gfx::RectF& entryRect,
                                     const Gfx::RectF& upButtonRect,
                                     const Gfx::RectF& downButtonRect,
-                                    SpinBoxStyleFlags state,
-                                     ButtonStyleFlags upButtonState,
-                                     ButtonStyleFlags downButtonState);
+                                    const SpinBoxState& state);
 
         virtual void onRenderEntry(PaintContext& context,
                                    const Gfx::RectF& entryRect,
-                                   const StyleOptions& options,
-                                   SpinBoxStyleFlags state);
+                                   const SpinBoxState& state);
 
         virtual void onRenderUpButton(PaintContext& context,
                                       const Gfx::RectF& buttonRect,
-                                      const StyleOptions& options,
-                                      SpinBoxStyleFlags state,
-                                      ButtonStyleFlags buttonState);
+                                      const SpinBoxState& state);
 
         virtual void onRenderDownButton(PaintContext& context,
                                         const Gfx::RectF& buttonRect,
-                                        const StyleOptions& options,
-                                        SpinBoxStyleFlags state,
-                                        ButtonStyleFlags buttonState);
+                                        const SpinBoxState& state);
 
         virtual void onRenderText(PaintContext& context,
-                                  const StyleOptions& options,
                                   const Gfx::RectF& textRect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::RectF& cursor,
-                                  SpinBoxStyleFlags state);
+                                  const SpinBoxState& state);
 
     private:
         void renderIndicator(Painter& painter,
                              const Gfx::RectF& rect,
                              bool up,
-                             ButtonStyleFlags state,
-                             const StyleOptions& options);
+                             bool hovered);
 
-        Painter _bgPainter;
-        Painter _buttonPainter;
-        Painter _textPainter;
-        double _inset;
+        Gfx::Brush   _background;
+        Gfx::Pen     _contour;
+        Gfx::Brush   _foreground;
+        Gfx::Font    _font;
+        Gfx::Color   _textColor;
+        Gfx::Color   _accentColor;
+        Painter       _bgPainter;
+        Painter       _buttonPainter;
+        Painter       _textPainter;
+        double        _inset;
 };
 
 

@@ -1030,10 +1030,29 @@ SpinBoxRenderer* PlatinumSpinBoxRenderer::onCreate() const
 }
 
 
-void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& /*options*/)
+void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& options,
+                                        const SpinBoxStyleOptions& spinBoxOptions)
 {
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    _background = spinBoxOptions.background() ? *spinBoxOptions.background()
+                                              : Gfx::Brush( options.textBackground() );
+
+    _contour = spinBoxOptions.contour() ? *spinBoxOptions.contour()
+                                        : options.contour();
+    _contour.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    _foreground = spinBoxOptions.foreground() ? *spinBoxOptions.foreground()
+                                              : options.foreground();
+
+    _font = spinBoxOptions.font() ? spinBoxOptions.getFont( options.font() )
+                                  : options.font();
+
+    _textColor = spinBoxOptions.textColor() ? *spinBoxOptions.textColor()
+                                            : options.textColor();
+
+    _accentColor = options.accentColor();
+
+    _textPainter.setFont(_font);
+    _textPainter.setPen(_textColor);
 }
 
 
@@ -1041,9 +1060,9 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureFrame(PaintSurface& surface,
                                                    const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
-    _textPainter.setFont( font() );
+    _textPainter.setFont(_font);
 
-    double entryHeight = font().size() * 2.5;
+    double entryHeight = _font.size() * 2.5;
     double buttonHeight = entryHeight;
 
     double entryWidth = contentSize.width() + 2 * _inset;
@@ -1063,9 +1082,9 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureEntry(PaintSurface& surface,
                                                     const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
-    _textPainter.setFont( font() );
+    _textPainter.setFont(_font);
 
-    double entryHeight = font().size() * 2.5;
+    double entryHeight = _font.size() * 2.5;
     double entryWidth = contentSize.width() + 2 * _inset;
 
     return Gfx::SizeF(entryWidth, entryHeight);
@@ -1075,9 +1094,9 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureEntry(PaintSurface& surface,
 Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureIndicator(PaintSurface& surface)
 {
     _textPainter.begin(surface);
-    _textPainter.setFont( font() );
+    _textPainter.setFont(_font);
 
-    double h = font().size() * 2.5;
+    double h = _font.size() * 2.5;
     return Gfx::SizeF(h, h);
 }
 
@@ -1132,40 +1151,32 @@ Gfx::RectF PlatinumSpinBoxRenderer::onLayoutEntry(PaintSurface& /*surface*/,
 const Painter& PlatinumSpinBoxRenderer::onGetTextPainter(PaintSurface& surface)
 {
     _textPainter.begin(surface);
-    _textPainter.setFont( font() );
+    _textPainter.setFont(_font);
     return _textPainter;
 }
 
 
 void PlatinumSpinBoxRenderer::onRenderChrome(PaintContext& context,
                                               const Gfx::RectF& /*rect*/,
-                                              const StyleOptions& options,
                                               const Gfx::RectF& entryRect,
                                               const Gfx::RectF& upButtonRect,
                                               const Gfx::RectF& downButtonRect,
-                                              SpinBoxStyleFlags state,
-                                              ButtonStyleFlags upButtonState,
-                                              ButtonStyleFlags downButtonState)
+                                              const SpinBoxState& state)
 {
     if( entryRect.width() <= 0 || entryRect.height() <= 0 )
         return;
 
     _bgPainter.begin(context);
-
-    Gfx::Brush bg = background() ? *background()
-                                 : Gfx::Brush( options.textBackground() );
-    _bgPainter.setBrush(bg);
+    _bgPainter.setBrush(_background);
     _bgPainter.fillRect(entryRect);
 
-    Gfx::Pen cPen = contour() ? *contour()
-                               : options.contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+    Gfx::Pen cPen = _contour;
 
-    if( state.has(StyleFlags::Enabled) )
+    if( state.isEnabled() )
     {
-        if( state.has(StyleFlags::Highlighted) || state.has(StyleFlags::Focused) )
+        if( state.isHovered() || state.isFocused() )
         {
-            cPen = Gfx::Pen( options.accentColor(), 
+            cPen = Gfx::Pen( _accentColor, 
                              cPen.size(), cPen.style(), 
                              cPen.capStyle(), cPen.joinStyle() );
         }
@@ -1192,35 +1203,30 @@ void PlatinumSpinBoxRenderer::onRenderChrome(PaintContext& context,
     _buttonPainter.setBrush( indicatorPen.color() );
 
     if( downButtonRect.width() > 0 && downButtonRect.height() > 0 )
-        renderIndicator(_buttonPainter, downButtonRect, false, downButtonState, options);
+        renderIndicator(_buttonPainter, downButtonRect, false, state.isDownHovered());
 
     if( upButtonRect.width() > 0 && upButtonRect.height() > 0 )
-        renderIndicator(_buttonPainter, upButtonRect, true, upButtonState, options);
+        renderIndicator(_buttonPainter, upButtonRect, true, state.isUpHovered());
 }
 
 
 void PlatinumSpinBoxRenderer::onRenderEntry(PaintContext& /*context*/,
                                             const Gfx::RectF& /*entryRect*/,
-                                            const StyleOptions& /*options*/,
-                                            SpinBoxStyleFlags /*state*/)
+                                            const SpinBoxState& /*state*/)
 {
 }
 
 
 void PlatinumSpinBoxRenderer::onRenderUpButton(PaintContext& /*context*/,
                                                const Gfx::RectF& /*buttonRect*/,
-                                               const StyleOptions& /*options*/,
-                                               SpinBoxStyleFlags /*state*/,
-                                               ButtonStyleFlags /*buttonState*/)
+                                               const SpinBoxState& /*state*/)
 {
 }
 
 
 void PlatinumSpinBoxRenderer::onRenderDownButton(PaintContext& /*context*/,
                                                  const Gfx::RectF& /*buttonRect*/,
-                                                 const StyleOptions& /*options*/,
-                                                 SpinBoxStyleFlags /*state*/,
-                                                 ButtonStyleFlags /*buttonState*/)
+                                                 const SpinBoxState& /*state*/)
 {
 }
 
@@ -1228,18 +1234,15 @@ void PlatinumSpinBoxRenderer::onRenderDownButton(PaintContext& /*context*/,
 void PlatinumSpinBoxRenderer::renderIndicator(Painter& painter,
                                               const Gfx::RectF& rect,
                                               bool up,
-                                              ButtonStyleFlags state,
-                                              const StyleOptions& options)
+                                              bool hovered)
 {
     painter.setClip(rect);
 
-    Gfx::Pen cPen = contour() ? *contour()
-                               : options.contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+    Gfx::Pen cPen = _contour;
 
-    if( state.has(StyleFlags::Highlighted) )
+    if(hovered)
     {
-        cPen = Gfx::Pen( options.accentColor(), 
+        cPen = Gfx::Pen( _accentColor, 
                          cPen.size(), cPen.style(), 
                          cPen.capStyle(), cPen.joinStyle() );
     }
@@ -1299,12 +1302,11 @@ void PlatinumSpinBoxRenderer::renderIndicator(Painter& painter,
 
 
 void PlatinumSpinBoxRenderer::onRenderText(PaintContext& context,
-                                           const StyleOptions& /*options*/,
                                            const Gfx::RectF& textRect,
                                            const String& text,
                                            const Gfx::PointF& textPos,
                                            const Gfx::RectF& cursor,
-                                           SpinBoxStyleFlags state)
+                                           const SpinBoxState& state)
 {
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;
@@ -1314,7 +1316,7 @@ void PlatinumSpinBoxRenderer::onRenderText(PaintContext& context,
 
     _textPainter.drawText(textPos, text);
 
-    if( state.has(SpinBoxStyleFlags::Editable) && state.has(StyleFlags::Focused) )
+    if( state.isEditable() && state.isFocused() )
     {
         Gfx::PointF top = cursor.topLeft();
         Gfx::PointF bottom = cursor.bottomLeft();

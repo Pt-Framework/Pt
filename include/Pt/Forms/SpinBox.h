@@ -34,7 +34,7 @@
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Adjustment.h>
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/SpinBoxStyle.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
@@ -63,8 +63,6 @@ class PT_FORMS_API SpinBoxButton : public Button
 
         bool isPressed() const;
 
-        void setRenderer(SpinBoxRenderer* renderer);
-
     protected:
         virtual void onPressed();
 
@@ -78,9 +76,8 @@ class PT_FORMS_API SpinBoxButton : public Button
         virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
 
     private:
-        Type                      _type;
-        FacetPtr<SpinBoxRenderer> _renderer;
-        bool                      _isPressed;
+        Type _type;
+        bool _isPressed;
 };
 
 
@@ -186,6 +183,20 @@ class PT_FORMS_API SpinBox : public Control
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
 
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& entryRect,
+                                   const Gfx::RectF& upButtonRect,
+                                   const Gfx::RectF& downButtonRect,
+                                   const SpinBoxState& state);
+
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& textRect,
+                                 const String& text,
+                                 const Gfx::PointF& textPos,
+                                 const Gfx::RectF& cursor,
+                                 const SpinBoxState& state);
+
     protected:
         virtual bool onKeyEvent(const KeyEvent& ev);
 
@@ -200,30 +211,9 @@ class PT_FORMS_API SpinBox : public Control
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
-        Gfx::Font getFont() const;
-
-        SpinBoxRenderer* getRenderer();
-
-        void applyRenderer(SpinBoxRenderer* renderer);
-
-        SpinBoxStyleFlags spinBoxStyleFlags() const;
-
-        ButtonStyleFlags buttonStyleFlags(const SpinBoxButton& button) const;
+        SpinBoxState spinBoxState() const;
 
     private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideForeground = 0x02,
-            OverrideContour    = 0x04,
-            OverrideTextColor  = 0x08,
-            OverrideFontAll    = 0x10,
-            OverrideFontSize   = 0x20,
-            OverrideFontWeight = 0x40,
-            OverrideFontSlant  = 0x80,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
         Pt::Signal<int>               _valueEdited; 
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
@@ -246,16 +236,8 @@ class PT_FORMS_API SpinBox : public Control
         Gfx::RectF                    _downButtonRect;
         Gfx::RectF                    _textRect;
 
-        FacetPtr<SpinBoxRenderer>     _renderer;
-        bool                          _customRenderer;
-        std::size_t                   _styleGeneration;
-
-        AutoPtr<Gfx::Brush>           _background;
-        AutoPtr<Gfx::Brush>           _foreground;
-        AutoPtr<Gfx::Pen>             _contour;
-        AutoPtr<Gfx::Color>           _textColor;
-        Gfx::Font                     _customFont;
-        unsigned                      _overrides;
+        SpinBoxStyle                  _spinBoxStyle;
+        SpinBoxStyleOptions           _spinBoxOptions;
 };
 
 } // namespace

@@ -10,11 +10,9 @@ description: "Guidelines and current architecture for Pt::Forms styles, renderer
 - Flatten API parameters: pass primitives and explicitly calculated bounds (e.g., `const Gfx::RectF& textRect`) directly into the rendering functions.
 - Renderer APIs must not mutate widget-owned geometry, collections, or model objects. Layout methods return sizes/rectangles; the widget applies them to its own storage.
 
-## Target Architecture vs. Legacy
-- New or refactored renderer APIs must accept only primitives, pre-calculated bounds, scalars, enums, and typed style flags.
-- Legacy widget-bound renderer APIs may remain for compatibility, but do not copy that pattern into new facets.
+## Renderer API Shape
+- All renderer APIs accept only primitives, pre-calculated bounds, scalars, enums, and typed style flags. No renderer takes widget references or pointers.
 - Legacy `prepare(...)` / `prepareLayout(...)` patterns that fill mutable `Brush`, `Pen`, or `Font` out-parameters are transitional only. Do not introduce that shape in new APIs.
-- When touching a legacy renderer that still takes the widget itself, prefer moving the touched slice to the primitive-only model instead of extending the widget-bound contract with new methods, new out-parameters, or new widget leaks.
 
 ## Parameter Shape
 - Prefer flat primitive parameters as the default API shape.
@@ -160,6 +158,37 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 - `%PanelRenderer` provides the prepared panel-like primitives `measureFrame()`, `layoutFrame()`, `textPainter()`, `renderBackground()`, `renderFrame()`, `renderText()`, and `renderIcon()`.
 - `%Panel::setRenderer(PanelRenderer*)` and `%Label::setRenderer(PanelRenderer*)` keep `nullptr` as the public style-fallback API. Their `%onInvalidate()` paths reacquire the active renderer through `%PanelStyle::rebind(...)`, refresh widget-owned icon caches afterwards, and then request relayout.
 - Prefer reusing `%PanelRenderer` for generic framed/background/text/icon container chrome before introducing a new dedicated renderer family. Keep a dedicated renderer only when the new widget needs genuinely different primitives, metrics, or native integration.
+
+### onPaint Hook Pattern
+
+- Widgets that use the extracted slice pattern decompose `onPaint` into explicit per-layer virtual hooks (e.g., `onPaintBackground`, `onPaintFrame`, `onPaintText`, `onPaintIcon`, `onPaintMnemonic`, `onPaintChrome`, `onPaintContent`).
+- **Signature rule:** Each hook's parameter list mirrors the corresponding renderer render method 1:1. If `renderer->renderFrame(context, rect, state)` is the target call, then `onPaintFrame(PaintContext& context, const Gfx::RectF& rect, const XState& state)` is the hook signature.
+- **State computed once:** The top-level `onPaint` computes `widgetRect` (from `size()`), `contentRect` (from layout cache), and the typed state object once. It passes these to every hook — hooks never call `panelState()` or `buttonState()` themselves.
+- **Null-check in hooks:** Each hook fetches the renderer via `_xStyle.renderer()`, null-checks, and then delegates to the corresponding render method.
+- **Feature guards stay in hooks:** Early returns for disabled features (e.g., `! _hasBackground`, `_picture.empty()`, `! _icon.empty()`) remain inside the hook body, not in `onPaint`.
+- **Complex internal logic stays in hooks:** Image alignment switches, TextBlock line iteration, and similar widget-internal calculations stay inside the hook body. The hook receives the content rect and state; it computes positions internally before calling the renderer.
+- **Subclass use cases:** Subclasses can skip a layer (empty override), decorate (call Base then add custom drawing), or completely replace a layer. They receive all data needed without accessing private members or the renderer directly.
+- **No renderer access for subclasses:** Hooks do not expose the renderer pointer to subclasses. The base hook fetches the renderer privately and delegates; subclasses that override skip calling `Base::onPaintX(...)` if they want full replacement.
+
+#### Current Widget Hook Signatures
+
+| Widget | Hook | Parameters (after `PaintContext&`) |
+|--------|------|------------------------------------|
+| `PushButton` | `onPaintBackground` | `rect, state` |
+| `PushButton` | `onPaintFrame` | `rect, state` |
+| `PushButton` | `onPaintIcon` | `rect, picture, pos, state` |
+| `PushButton` | `onPaintText` | `rect, text, pos, state` |
+| `PushButton` | `onPaintMnemonic` | `rect, mnemonic, state` |
+| `Panel` | `onPaintBackground` | `rect, state` |
+| `Panel` | `onPaintContent` | `contentRect, state` |
+| `Panel` | `onPaintFrame` | `rect, state` |
+| `Label` | `onPaintBackground` | `rect, state` |
+| `Label` | `onPaintFrame` | `rect, state` |
+| `Label` | `onPaintIcon` | `contentRect, state` |
+| `Label` | `onPaintText` | `contentRect, state` |
+| `CheckBox` | `onPaintChrome` | `rect, boxRect, state` |
+| `CheckBox` | `onPaintText` | `textRect, text, pos, state` |
+| `CheckBox` | `onPaintMnemonic` | `rect, mnemonic, state` |
 
 ### State Collection
 
