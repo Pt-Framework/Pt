@@ -274,77 +274,13 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
     Keeps the active renderer binding for the shared style renderer, a private
     override clone, or an explicitly assigned custom renderer.
 */
-class PT_FORMS_API PanelStyle : private NonCopyable
+class PT_FORMS_API PanelStyle : public StyleBinder<PanelRenderer, 
+                                                   PanelStyleOptions>
 {
     public:
         /** @brief Constructs an unbound panel style controller.
         */
         PanelStyle();
-
-        /** @brief Returns true if a renderer is currently bound.
-        */
-        bool isBound() const;
-
-        /** @brief Returns true if a custom renderer is currently bound.
-        */
-        bool isCustom() const;
-
-        /** @brief Binds the widget to the current style renderer path.
-
-            Selects either the shared style renderer or a private override
-            clone. Shared style renderers are synchronized through
-            %Style::reset() and are therefore not prepared locally here.
-            Private override clones are prepared immediately with the current
-            style and panel options. This call always leaves custom renderer
-            mode.
-        */
-        PanelRenderer* bind(const Pt::Forms::Style& style,
-                            const StyleOptions& options,
-                            const PanelStyleOptions& panelOptions);
-
-        /** @brief Binds the widget to an externally assigned renderer.
-
-            Assigns a custom renderer explicitly and prepares it with the
-            current options.
-        */
-        PanelRenderer* bind(PanelRenderer& renderer,
-                            const StyleOptions& options,
-                            const PanelStyleOptions& panelOptions);
-
-        /** @brief Refreshes the current panel renderer binding.
-
-            Re-prepares the current custom renderer when the local prepare
-            inputs changed. Shared style renderers are reacquired through the
-            current %Style and rely on the style reset path for shared
-            synchronization, while local override clones are prepared during
-            the style-path bind.
-        */
-        PanelRenderer* rebind(const Pt::Forms::Style& style,
-                              const StyleOptions& options,
-                              const PanelStyleOptions& panelOptions);
-
-        /** @brief Returns the currently bound renderer or 0 if none is available.
-        */
-        PanelRenderer* renderer();
-
-        /** @brief Returns the currently bound renderer or 0 if none is available.
-        */
-        const PanelRenderer* renderer() const;
-
-    private:
-        enum Binding
-        {
-            Style,
-            Override,
-            Custom
-        };
-
-    private:
-        FacetPtr<PanelRenderer> _renderer;
-        Binding                 _binding;
-        std::size_t             _boundStyleGeneration;
-        std::size_t             _styleOptionsGeneration;
-        std::size_t             _panelOptionsGeneration;
 };
 
 } // namespace

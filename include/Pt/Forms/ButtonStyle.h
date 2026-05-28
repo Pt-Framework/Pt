@@ -406,77 +406,13 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
     shared style renderer, private override clone, and externally assigned
     custom renderer.
 */
-class PT_FORMS_API ButtonStyle : private NonCopyable
+class PT_FORMS_API ButtonStyle : public StyleBinder<ButtonRenderer, 
+                                                    ButtonStyleOptions>
 {
     public:
         /** @brief Constructs an unbound button style controller.
         */
         ButtonStyle();
-
-        /** @brief Returns true if a renderer is currently bound.
-        */
-        bool isBound() const;
-
-        /** @brief Returns true if a custom renderer is currently bound.
-        */
-        bool isCustom() const;
-
-        /** @brief Binds the button to the current style renderer path.
-
-            Selects either the shared style renderer or a private override
-            clone. Shared style renderers are synchronized through
-            %Style::reset() and are therefore not prepared locally here.
-            Private override clones are prepared immediately with the current
-            style and button options. This call always leaves custom renderer
-            mode.
-        */
-        ButtonRenderer* bind(const Pt::Forms::Style& style,
-                             const StyleOptions& options,
-                             const ButtonStyleOptions& buttonOptions);
-
-        /** @brief Binds the button to an externally assigned renderer.
-
-            Assigns a custom renderer explicitly and prepares it with the
-            current options.
-        */
-        ButtonRenderer* bind(ButtonRenderer& renderer,
-                             const StyleOptions& options,
-                             const ButtonStyleOptions& buttonOptions);
-
-        /** @brief Refreshes the current button renderer binding.
-
-            Re-prepares the current custom renderer when the local prepare
-            inputs changed. Shared style renderers are reacquired through the
-            current %Style and rely on the style reset path for shared
-            synchronization, while local override clones are prepared during
-            the style-path bind.
-        */
-        ButtonRenderer* rebind(const Pt::Forms::Style& style,
-                               const StyleOptions& options,
-                               const ButtonStyleOptions& buttonOptions);
-
-        /** @brief Returns the currently bound renderer or 0 if none is available.
-        */
-        ButtonRenderer* renderer();
-
-        /** @brief Returns the currently bound renderer or 0 if none is available.
-        */
-        const ButtonRenderer* renderer() const;
-
-    private:
-        enum Binding
-        {
-            Style,
-            Override,
-            Custom
-        };
-
-    private:
-        FacetPtr<ButtonRenderer> _renderer;
-        Binding                  _binding;
-        std::size_t              _boundStyleGeneration;
-        std::size_t              _styleOptionsGeneration;
-        std::size_t              _buttonOptionsGeneration;
 };
 
 } // namespace

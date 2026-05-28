@@ -35,6 +35,7 @@
 #include <Pt/Forms/Direction.h>
 #include <Pt/Forms/Spacing.h>
 #include <Pt/Forms/StyleFlags.h>
+#include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
@@ -58,7 +59,6 @@ class PaintContext;
 class Painter;
 class Pixmap;
 class TextBlock;
-class StyleOptions;
 class PushButton;
 class Menu;
 class MenuItem;
@@ -285,6 +285,220 @@ class PT_FORMS_API Style
         FacetMap _facets;
         std::size_t _generation;
 };
+
+
+/** @brief Common renderer-binding controller for %Forms style slices.
+
+    Manages the active renderer, binding mode, and generation counters
+    needed for local prepare bookkeeping. All %Forms style controllers
+    that follow the extracted-slice pattern derive from this template.
+
+    @tparam RendererT     Concrete %Style::Facet renderer type. Must expose
+                          %create() and %prepare(const StyleOptions&, const OptionsT&).
+    @tparam OptionsT      Widget-local style options type. Must expose
+                          %hasOverrides() and %generation() const.
+*/
+template <typename RendererT,
+          typename OptionsT>
+class StyleBinder : private NonCopyable
+{
+    public:
+        /** @brief Constructs an unbound style controller.
+        */
+        StyleBinder();
+
+        /** @brief Returns true if a renderer is currently bound.
+        */
+        bool isBound() const;
+
+        /** @brief Returns true if a custom renderer is currently bound.
+        */
+        bool isCustom() const;
+
+        /** @brief Binds to the current style renderer path.
+
+            Selects either the shared style renderer (%SharedRenderer) or a
+            private override clone (%CustomOverrides). Shared style renderers
+            are synchronized through %Style::reset() and are therefore not
+            prepared locally here. Private override clones are prepared
+            immediately with the current style and local options. This call
+            always leaves custom renderer mode.
+        */
+        RendererT* bind(const Pt::Forms::Style& style,
+                        const StyleOptions& options,
+                        const OptionsT& localOptions);
+
+        /** @brief Binds to an externally assigned renderer.
+
+            Assigns a custom renderer explicitly and prepares it with the
+            current options.
+        */
+        RendererT* bind(RendererT& renderer,
+                        const StyleOptions& options,
+                        const OptionsT& localOptions);
+
+        /** @brief Refreshes the current renderer binding.
+
+            Re-prepares the current custom renderer when the local prepare
+            inputs changed. Shared style renderers and override clones are
+            reacquired through the current %Style by delegating to the
+            style-path bind.
+        */
+        RendererT* rebind(const Pt::Forms::Style& style,
+                          const StyleOptions& options,
+                          const OptionsT& localOptions);
+
+        /** @brief Returns the currently bound renderer or 0 if none is available.
+        */
+        RendererT* renderer();
+
+        /** @brief Returns the currently bound renderer or 0 if none is available.
+        */
+        const RendererT* renderer() const;
+
+    protected:
+        enum Binding
+        {
+            SharedRenderer,
+            CustomOverrides,
+            CustomRenderer
+        };
+
+    private:
+        FacetPtr<RendererT> _renderer;
+        Binding             _binding;
+        std::size_t         _boundStyleGeneration;
+        std::size_t         _styleOptionsGeneration;
+        std::size_t         _localOptionsGeneration;
+};
+
+
+template <typename RendererT,
+          typename OptionsT>
+StyleBinder<RendererT, OptionsT>::StyleBinder()
+: _binding(SharedRenderer)
+, _boundStyleGeneration( std::size_t(-1) )
+, _styleOptionsGeneration( std::size_t(-1) )
+, _localOptionsGeneration( std::size_t(-1) )
+{
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+bool StyleBinder<RendererT, OptionsT>::isBound() const
+{
+    return _renderer != 0;
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+bool StyleBinder<RendererT, OptionsT>::isCustom() const
+{
+    return _binding == CustomRenderer;
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+RendererT*
+StyleBinder<RendererT, OptionsT>::bind(const Pt::Forms::Style& style,
+                                       const StyleOptions& options,
+                                       const OptionsT& localOptions)
+{
+    _styleOptionsGeneration = std::size_t(-1);
+    _localOptionsGeneration = std::size_t(-1);
+
+    if( localOptions.hasOverrides() )
+    {
+        RendererT* renderer = style.get<RendererT>();
+        if( renderer )
+            renderer = renderer->create();
+
+        _renderer.reset(renderer);
+        _binding = CustomOverrides;
+
+        if( _renderer )
+        {
+            _renderer->prepare(options, localOptions);
+            _styleOptionsGeneration = options.generation();
+            _localOptionsGeneration = localOptions.generation();
+        }
+    }
+    else
+    {
+        _renderer.reset( style.get<RendererT>() );
+        _binding = SharedRenderer;
+    }
+
+    _boundStyleGeneration = style.generation();
+
+    return _renderer.get();
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+RendererT*
+StyleBinder<RendererT, OptionsT>::bind(RendererT& renderer,
+                                       const StyleOptions& options,
+                                       const OptionsT& localOptions)
+{
+    _renderer.reset(&renderer);
+
+    _binding = CustomRenderer;
+    _boundStyleGeneration = std::size_t(-1);
+    _styleOptionsGeneration = std::size_t(-1);
+    _localOptionsGeneration = std::size_t(-1);
+
+    _renderer->prepare(options, localOptions);
+
+    _styleOptionsGeneration = options.generation();
+    _localOptionsGeneration = localOptions.generation();
+
+    return _renderer.get();
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+RendererT*
+StyleBinder<RendererT, OptionsT>::rebind(const Pt::Forms::Style& style,
+                                         const StyleOptions& options,
+                                         const OptionsT& localOptions)
+{
+    if( ! _renderer || _binding != CustomRenderer )
+        return bind(style, options, localOptions);
+
+    bool needsPrepare = _styleOptionsGeneration != options.generation() ||
+                        _localOptionsGeneration != localOptions.generation();
+
+    if( needsPrepare )
+        _renderer->prepare(options, localOptions);
+
+    _styleOptionsGeneration = options.generation();
+    _localOptionsGeneration = localOptions.generation();
+
+    return _renderer.get();
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+RendererT* StyleBinder<RendererT, OptionsT>::renderer()
+{
+    return _renderer.get();
+}
+
+
+template <typename RendererT,
+          typename OptionsT>
+const RendererT* StyleBinder<RendererT, OptionsT>::renderer() const
+{
+    return _renderer.get();
+}
+
 
 /** @brief Renders the visual appearance of a checkbox widget.
 
