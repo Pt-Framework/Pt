@@ -32,6 +32,9 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Style.h>
+#include <Pt/Forms/ButtonStyle.h>
+#include <Pt/Forms/PanelStyle.h>
+#include <Pt/Forms/CheckBoxStyle.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -222,7 +225,10 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
     protected:
         virtual CheckBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
+
+        virtual void onPrepare(const StyleOptions& options,
+                               const CheckBoxStyleOptions& checkBoxOptions);
 
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface);
 
@@ -253,26 +259,24 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
 
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
-                                    const StyleOptions& options,
                                     const Gfx::RectF& boxRect,
-                                    CheckBoxStyleFlags state);
+                                    const CheckBoxState& state);
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
-                                  const StyleOptions& options,
                                   const String& text,
                                   const Gfx::PointF& pos,
-                                  CheckBoxStyleFlags state);
+                                  const CheckBoxState& state);
 
         virtual void onRenderMnemonic(PaintContext& context,
                                       const Gfx::RectF& rect,
-                                      const StyleOptions& options,
                                       const Gfx::RectF& mnemonic,
-                                      CheckBoxStyleFlags state);
+                                      const CheckBoxState& state);
 
     private:
         Painter _boxPainter;
         Painter _textPainter;
+        Gfx::Color _checkColor;
 };
 
 

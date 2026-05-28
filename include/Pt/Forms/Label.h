@@ -115,25 +115,33 @@ class PT_FORMS_API Label : public Control
 
             The default implementation does nothing if the label has no background.
         */
-        virtual void onPaintBackground(PaintContext& context);
+        virtual void onPaintBackground(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const PanelState& state);
 
         /** @brief Paints the label frame layer.
 
             The default implementation does nothing if the label has no frame.
         */
-        virtual void onPaintFrame(PaintContext& context);
+        virtual void onPaintFrame(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const PanelState& state);
 
         /** @brief Paints the label icon layer.
 
             The default implementation does nothing if no prepared icon pixmap exists.
         */
-        virtual void onPaintIcon(PaintContext& context);
+        virtual void onPaintIcon(PaintContext& context,
+                                 const Gfx::RectF& contentRect,
+                                 const PanelState& state);
 
         /** @brief Paints the label text layer.
 
             The default implementation does nothing while the label is in icon mode.
         */
-        virtual void onPaintText(PaintContext& context);
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& contentRect,
+                                 const PanelState& state);
 
     private:
         Adjustment adjustment() const;

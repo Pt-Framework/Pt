@@ -110,10 +110,7 @@ class PT_FORMS_API PanelStyleOptions
             Background = 0x01,
             Contour    = 0x02,
             TextColor  = 0x04,
-            FontAll    = 0x08,
-            FontSize   = 0x10,
-            FontWeight = 0x20,
-            FontSlant  = 0x40
+            Font       = 0x08
         };
 
         bool hasOverride(StyleOverride mask) const;
@@ -124,11 +121,10 @@ class PT_FORMS_API PanelStyleOptions
         AutoPtr<Gfx::Brush> _background;
         AutoPtr<Gfx::Pen>   _contour;
         AutoPtr<Gfx::Color> _textColor;
-        AutoPtr<Gfx::Font>  _font;
+        FontOption          _font;
         std::size_t         _generation;
         unsigned            _overrides;
 };
-
 
 /** @brief Stores the transient render state for panel-like widgets.
 
@@ -161,7 +157,6 @@ class PT_FORMS_API PanelState
         bool _enabled;
         bool _focused;
 };
-
 
 /** @brief Renders the visual appearance of a panel-like widget.
 
@@ -267,7 +262,6 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
                                   const Gfx::PointF& pos,
                                   const PanelState& state) = 0;
 };
-
 
 /** @brief Binds a panel-like widget to the currently active renderer.
 

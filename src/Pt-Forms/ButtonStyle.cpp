@@ -34,6 +34,10 @@ namespace Pt {
 
 namespace Forms {
 
+///////////////////////////////////////////////////////////////////////
+// ButtonStyleOptions
+///////////////////////////////////////////////////////////////////////
+
 ButtonStyleOptions::ButtonStyleOptions()
 : _generation(0)
 , _overrides(0)
@@ -148,69 +152,46 @@ void ButtonStyleOptions::setTextColor(const Gfx::Color& color)
 
 const Gfx::Font* ButtonStyleOptions::font() const
 {
-    return _font.get();
+    return _font.font();
 }
 
 
 void ButtonStyleOptions::setFont(const Gfx::Font& font)
 {
-    _font.reset( new Gfx::Font(font) );
-    setOverride(ButtonStyleOptions::FontAll);
+    _font.setFont(font);
+    setOverride(Font);
 }
 
 
 void ButtonStyleOptions::setFontSize(std::size_t size)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withSize(size);
-    setOverride(ButtonStyleOptions::FontSize);
+    _font.setSize(size);
+    setOverride(Font);
 }
 
 
 void ButtonStyleOptions::setFontWeight(Gfx::Font::Weight weight)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withWeight(weight);
-    setOverride(ButtonStyleOptions::FontWeight);
+    _font.setWeight(weight);
+    setOverride(Font);
 }
 
 
 void ButtonStyleOptions::setFontSlant(Gfx::Font::Slant slant)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withSlant(slant);
-    setOverride(ButtonStyleOptions::FontSlant);
+    _font.setSlant(slant);
+    setOverride(Font);
 }
 
 
 Gfx::Font ButtonStyleOptions::getFont(const Gfx::Font& base) const
 {
-    if( ! _font )
-        return base;
-
-    if( hasOverride(FontAll) )
-        return *_font;
-
-    Gfx::Font font(base);
-
-    if( hasOverride(FontSize) )
-        font = font.withSize(_font->size());
-
-    if( hasOverride(FontWeight) )
-        font = font.withWeight(_font->weight());
-
-    if( hasOverride(FontSlant) )
-        font = font.withSlant(_font->slant());
-
-    return font;
+    return _font.getFont(base);
 }
 
+///////////////////////////////////////////////////////////////////////
+// ButtonState
+///////////////////////////////////////////////////////////////////////
 
 ButtonState::ButtonState()
 : _enabled(false)
@@ -281,6 +262,9 @@ void ButtonState::setFlat(bool value)
     _flat = value;
 }
 
+///////////////////////////////////////////////////////////////////////
+// ButtonRenderer
+///////////////////////////////////////////////////////////////////////
 
 ButtonRenderer::ButtonRenderer(std::size_t refs)
 : Style::Facet( typeid(ButtonRenderer), refs )
@@ -417,6 +401,9 @@ void ButtonRenderer::renderIcon(PaintContext& context,
     onRenderIcon(context, rect, picture, pos, state);
 }
 
+///////////////////////////////////////////////////////////////////////
+// ButtonStyle
+///////////////////////////////////////////////////////////////////////
 
 ButtonStyle::ButtonStyle()
 {

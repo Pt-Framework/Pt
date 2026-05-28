@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/SmartPtr.h>
 
 #include <cstddef>
 
@@ -244,6 +245,66 @@ class PT_FORMS_API StyleOptions
       double _borderWidth;
       double _focusWidth;
       std::size_t _generation;
+};
+
+/** @brief Composable font override slice for widget-local style options.
+
+    Stores an optional local font plus four partial-override bits (%All,
+    %Size, %Weight, %Slant). Enclosing widget-local options classes
+    delegate their font setters and resolver to this helper and bump
+    their own override bit after each mutation.
+*/
+class PT_FORMS_API FontOption
+{
+    public:
+        /** @brief Constructs an empty font option.
+        */
+        FontOption();
+
+        /** @brief Returns true if any font override is set.
+        */
+        bool hasOverride() const;
+
+        /** @brief Returns the local font override or 0 if none is set.
+        */
+        const Gfx::Font* font() const;
+
+        /** @brief Replaces the complete local font override.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the local font size override.
+        */
+        void setSize(std::size_t size);
+
+        /** @brief Sets the local font weight override.
+        */
+        void setWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the local font slant override.
+        */
+        void setSlant(Gfx::Font::Slant slant);
+
+        /** @brief Resolves the effective font against the given base font.
+
+            Returns %base unchanged when no override is set. A full font
+            override replaces %base entirely; partial overrides for size,
+            weight, and slant are merged into %base.
+        */
+        Gfx::Font getFont(const Gfx::Font& base) const;
+
+    private:
+        enum Override
+        {
+            All    = 0x1,
+            Size   = 0x2,
+            Weight = 0x4,
+            Slant  = 0x8
+        };
+
+    private:
+        AutoPtr<Gfx::Font> _font;
+        unsigned           _overrides;
 };
 
 } // namespace

@@ -287,23 +287,29 @@ void Panel::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     if( ! _panelStyle.renderer() )
         return;
 
-    onPaintBackground(context);
-    onPaintContent(context);
-    onPaintFrame(context);
+    Gfx::RectF widgetRect( size() );
+    PanelState state = panelState();
+
+    onPaintBackground(context, widgetRect, state);
+    onPaintContent(context, _contentRect, state);
+    onPaintFrame(context, widgetRect, state);
 }
 
-void Panel::onPaintBackground(PaintContext& context)
+void Panel::onPaintBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || ! _hasBackground )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    renderer->renderBackground(context, widgetRect, panelState());
+    renderer->renderBackground(context, rect, state);
 }
 
 
-void Panel::onPaintContent(PaintContext& context)
+void Panel::onPaintContent(PaintContext& context,
+                           const Gfx::RectF& contentRect,
+                           const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || _picture.empty() )
@@ -311,8 +317,8 @@ void Panel::onPaintContent(PaintContext& context)
 
     const Gfx::Scaling& scaling = this->scaling();
 
-    double rightX = _contentRect.width() - scaling.toLogical( _picture.size().width() );
-    double bottomY = _contentRect.height() - scaling.toLogical( _picture.size().height() );
+    double rightX = contentRect.width() - scaling.toLogical( _picture.size().width() );
+    double bottomY = contentRect.height() - scaling.toLogical( _picture.size().height() );
 
     double centerX = rightX / 2;
     double centerY = bottomY / 2;
@@ -322,60 +328,61 @@ void Panel::onPaintContent(PaintContext& context)
     switch(_imageAlignment)
     {
         case Alignment::TopLeft:
-            imagePosition.set(_contentRect.left(), _contentRect.top());
+            imagePosition.set(contentRect.left(), contentRect.top());
             break;
 
         case Alignment::Top:
-            imagePosition.set(_contentRect.left() + centerX, _contentRect.top());
+            imagePosition.set(contentRect.left() + centerX, contentRect.top());
             break;
 
         case Alignment::TopRight:
-            imagePosition.set(_contentRect.left() + rightX, _contentRect.top());
+            imagePosition.set(contentRect.left() + rightX, contentRect.top());
             break;
 
         case Alignment::Left:
-            imagePosition.set(_contentRect.left(), _contentRect.top() + centerY);
+            imagePosition.set(contentRect.left(), contentRect.top() + centerY);
             break;
 
         default:
         case Alignment::Center:
-            imagePosition.set(_contentRect.left() + centerX,
-                              _contentRect.top() + centerY);
+            imagePosition.set(contentRect.left() + centerX,
+                              contentRect.top() + centerY);
             break;
 
         case Alignment::Right:
-            imagePosition.set(_contentRect.left() + rightX,
-                              _contentRect.top() + centerY);
+            imagePosition.set(contentRect.left() + rightX,
+                              contentRect.top() + centerY);
             break;
 
         case Alignment::BottomLeft:
-            imagePosition.set(_contentRect.left(), _contentRect.top() + bottomY);
+            imagePosition.set(contentRect.left(), contentRect.top() + bottomY);
             break;
 
         case Alignment::Bottom:
-            imagePosition.set(_contentRect.left() + centerX,
-                              _contentRect.top() + bottomY);
+            imagePosition.set(contentRect.left() + centerX,
+                              contentRect.top() + bottomY);
             break;
 
         case Alignment::BottomRight:
-            imagePosition.set(_contentRect.left() + rightX,
-                              _contentRect.top() + bottomY);
+            imagePosition.set(contentRect.left() + rightX,
+                              contentRect.top() + bottomY);
             break;
     }
 
-    renderer->renderIcon(context, _contentRect, _picture, imagePosition,
-                         panelState());
+    renderer->renderIcon(context, contentRect, _picture, imagePosition,
+                         state);
 }
 
 
-void Panel::onPaintFrame(PaintContext& context)
+void Panel::onPaintFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || ! _hasFrame )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    renderer->renderFrame(context, widgetRect, panelState());
+    renderer->renderFrame(context, rect, state);
 }
 
 

@@ -134,10 +134,7 @@ class PT_FORMS_API ButtonStyleOptions
             AccentColor    = 0x04,
             HighlightColor = 0x08,
             TextColor      = 0x10,
-            FontAll        = 0x20,
-            FontSize       = 0x40,
-            FontWeight     = 0x80,
-            FontSlant      = 0x100
+            Font           = 0x20
         };
 
         bool hasOverride(StyleOverride mask) const;
@@ -150,11 +147,10 @@ class PT_FORMS_API ButtonStyleOptions
         AutoPtr<Gfx::Color> _accentColor;
         AutoPtr<Gfx::Color> _highlightColor;
         AutoPtr<Gfx::Color> _textColor;
-        AutoPtr<Gfx::Font>  _font;
+        FontOption          _font;
         std::size_t         _generation;
         unsigned            _overrides;
 };
-
 
 /** @brief Stores the widget-local visual state for a push button.
 
@@ -215,7 +211,6 @@ class PT_FORMS_API ButtonState
         bool _pressed;
         bool _flat;
 };
-
 
 /** @brief Renders the visual appearance of a push button.
 
@@ -398,7 +393,6 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
                                   const Gfx::PointF& pos,
                                   const ButtonState& state) = 0;
 };
-
 
 /** @brief Binds a push button to the currently active renderer.
 

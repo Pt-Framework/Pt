@@ -109,25 +109,43 @@ Forms currently uses two renderer-management patterns. Preserve the established 
   - `XStyleOptions`: widget-local override tokens plus a generation counter only.
   - `XState`: transient render state only.
   - `XRenderer`: prepared drawing state, measure/layout/render primitives, and optional icon preparation.
-  - `XStyle`: renderer-binding controller only.
+  - `XStyle`: renderer-binding controller — a thin subclass of `StyleBinder<XRenderer, XStyleOptions>`.
   - Widget: owns control flow, geometry, text/icon caches, local `XStyleOptions`, and the helper that produces `XState`.
 - `XStyleOptions` must not absorb transient interaction flags, and `XState` must not absorb style tokens. Keep local override data and transient render state separate.
 - `XRenderer::prepare(const StyleOptions&, const XStyleOptions&)` is the explicit synchronization point for extracted slices. Resolve global defaults plus local override tokens during `%onPrepare(...)` and cache all data needed later by painters, measure/layout hooks, render hooks, and optional icon preparation.
 - Render hooks must consume prepared renderer state plus `XState` only. If a renderer needs information from `%StyleOptions`, resolve and cache it during `%onPrepare(...)` or shared-facet `%onReset(...)` instead of re-fetching it during render.
-- `XStyle` owns the currently bound renderer, the active binding mode (`Style`, `Override`, `Custom`), and the generation fields needed for local prepare bookkeeping. Measure/layout/render code should use `XStyle::renderer()` directly instead of forwarding through the binder.
-- `XStyle::bind(const Pt::Forms::Style&, ...)` is the style-path bind. It must always leave custom mode and switch to `Style` or `Override`.
-- In the style-path bind, clone and locally prepare a private renderer only when local `XStyleOptions` actually contain overrides. If there are no local overrides, bind the shared renderer from `%Style` directly and do not prepare it locally.
-- `XStyle::bind(XRenderer&, ...)` is only the explicit custom-renderer assignment path, typically from a widget `setRenderer(XRenderer*)` API. Do not use pointer-identity checks during invalidation to detect whether a custom renderer changed.
-- `XStyle::rebind(const Pt::Forms::Style&, ...)` re-prepares only the currently assigned custom renderer when the local prepare generations changed. For `Style` and `Override`, it delegates back through `bind(style, ...)` so the active renderer source is reacquired centrally.
-- When a bind or rebind path cannot obtain a renderer, keep the cached prepare generations invalid. Only store the current prepare generations after a successful `%XRenderer::prepare(...)` call.
+
+#### StyleBinder Template
+
+- `StyleBinder<RendererT, LocalOptionsT>` is the common base class for all extracted-slice binders. It lives fully inline in `Style.h`, immediately after the `Style` class definition.
+- Concrete binders such as `ButtonStyle` and `PanelStyle` publicly inherit `StyleBinder<XRenderer, XStyleOptions>` and add only a default constructor. Do not duplicate bind/rebind/renderer logic in subclasses.
+- `StyleBinder` owns the currently bound renderer (`FacetPtr<RendererT>`), the active binding mode, and three generation fields (`_boundStyleGeneration`, `_styleOptionsGeneration`, `_localOptionsGeneration`) for local prepare bookkeeping.
+- The binding enum uses the names `SharedRenderer`, `CustomOverrides`, `CustomRenderer` to avoid shadowing the outer `Pt::Forms::Style` type. Old code that referenced `Style`/`Override`/`Custom` must be updated.
+- Measure/layout/render code should call `XStyle::renderer()` directly.
+- `StyleBinder::bind(const Pt::Forms::Style&, const StyleOptions&, const LocalOptionsT&)` is the style-path bind. It always leaves custom mode and switches to `SharedRenderer` or `CustomOverrides`.
+- In the style-path bind, clone and locally prepare a private renderer only when `localOptions.hasOverrides()` is true. If there are no local overrides, bind the shared renderer from `%Style` directly and do not prepare it locally.
+- `StyleBinder::bind(RendererT&, const StyleOptions&, const LocalOptionsT&)` is only the explicit custom-renderer assignment path, typically from a widget `setRenderer(XRenderer*)` API.
+- `StyleBinder::rebind(const Pt::Forms::Style&, const StyleOptions&, const LocalOptionsT&)` re-prepares only the currently assigned custom renderer when the local prepare generations changed. For `SharedRenderer` and `CustomOverrides`, it delegates back through `bind(style, ...)` so the active renderer source is reacquired centrally.
+- When a bind or rebind path cannot obtain a renderer, keep the cached prepare generations invalid. Only store the current prepare generations after a successful `prepare(...)` call.
+- When introducing a new style slice, create a minimal `XStyle` class that publicly inherits `StyleBinder<XRenderer, XStyleOptions>` with only a default constructor.
 - Widgets that use an extracted slice should keep `setRenderer(T* renderer)` pointer-based when `nullptr` is part of the public API contract for falling back to the current style. Non-null pointers map to `bind(*renderer, ...)`; null maps to `bind(Application::instance().style(), ...)`.
 - Widgets that use an extracted slice may call `rebind(style, options, localOptions)` uniformly during `%onInvalidate()`. The binder keeps the custom path local and routes style and override paths back through `bind(style, ...)`.
 - In `%onInvalidate()`, call the base implementation first, reacquire the renderer through the slice binder, then refresh widget-owned derived caches such as icon pixmaps, and finally request relayout.
 
+#### FontOption Helper
+
+- `FontOption` is a composable font-override helper defined in `StyleOptions.h` alongside the global `StyleOptions` class.
+- It stores an optional local `AutoPtr<Gfx::Font>` and four internal partial-override bits (`All`, `Size`, `Weight`, `Slant`).
+- `FontOption` has no generation counter of its own. The enclosing `XStyleOptions` class bumps its own generation via `setOverride(Font)` after each delegate call.
+- `XStyleOptions` classes store a `FontOption _font;` private member and expose the standard public font API (`font()`, `setFont()`, `setFontSize()`, `setFontWeight()`, `setFontSlant()`, `getFont(base)`) by one-line delegation to `_font`.
+- The enclosing `enum StyleOverride` only needs a single `Font` bit. The partial merge logic (full vs. size/weight/slant) is handled internally by `FontOption::getFont(base)`.
+- When creating a new `XStyleOptions` class, include a `FontOption _font;` member and follow the delegation pattern in `ButtonStyleOptions` or `PanelStyleOptions`.
+
 ### Button Slice
 
 - `%PushButton` uses the extracted slice pattern with `%ButtonStyleOptions`, `%ButtonState`, `%ButtonRenderer`, and `%ButtonStyle`.
-- `%ButtonStyleOptions` owns only widget-local override tokens such as foreground, contour, accent/highlight colors, text color, and font overrides, plus its own generation counter.
+- `%ButtonStyle` publicly inherits `StyleBinder<ButtonRenderer, ButtonStyleOptions>` and adds only a default constructor. All bind/rebind/renderer logic is inherited.
+- `%ButtonStyleOptions` owns only widget-local override tokens such as foreground, contour, accent/highlight colors, text color, and font overrides, plus its own generation counter. Font overrides delegate to a `FontOption _font;` member with a single `Font` bit in `enum StyleOverride`.
 - `%ButtonState` owns only transient interaction flags: `enabled`, `hovered`, `focused`, `pressed`, and `flat`.
 - `%ButtonRenderer` provides the prepared button-specific primitives `measureContent()`, `measureFrame()`, `layoutFrame()`, `layoutContent()`, `layoutMnemonic()`, `textPainter()`, `prepareIcon()`, `renderBackground()`, `renderChrome()`, `renderText()`, `renderMnemonic()`, and `renderIcon()`.
 - `%PushButton::setRenderer(ButtonRenderer*)` keeps `nullptr` as the public style-fallback API. `%PushButton::onInvalidate()` reacquires the active renderer through `%ButtonStyle::rebind(...)`, refreshes the widget-owned icon picture through `%ButtonRenderer::prepareIcon(...)`, and then requests relayout.
@@ -136,7 +154,8 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 ### Panel Slice
 
 - `%Panel` and `%Label` share the extracted slice pattern with `%PanelStyleOptions`, `%PanelState`, `%PanelRenderer`, and `%PanelStyle`.
-- `%PanelStyleOptions` owns only widget-local panel override tokens such as background, contour, text color, and font overrides, plus its own generation counter.
+- `%PanelStyle` publicly inherits `StyleBinder<PanelRenderer, PanelStyleOptions>` and adds only a default constructor.
+- `%PanelStyleOptions` owns only widget-local panel override tokens such as background, contour, text color, and font overrides, plus its own generation counter. Font overrides delegate to a `FontOption _font;` member with a single `Font` bit in `enum StyleOverride`.
 - `%PanelState` currently owns only the transient render flags `enabled` and `focused`.
 - `%PanelRenderer` provides the prepared panel-like primitives `measureFrame()`, `layoutFrame()`, `textPainter()`, `renderBackground()`, `renderFrame()`, `renderText()`, and `renderIcon()`.
 - `%Panel::setRenderer(PanelRenderer*)` and `%Label::setRenderer(PanelRenderer*)` keep `nullptr` as the public style-fallback API. Their `%onInvalidate()` paths reacquire the active renderer through `%PanelStyle::rebind(...)`, refresh widget-owned icon caches afterwards, and then request relayout.

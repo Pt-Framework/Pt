@@ -95,8 +95,86 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
     _borderWidth = o._borderWidth;
     _focusWidth = o._focusWidth;
     ++_generation;
-    
+
     return *this;
+}
+
+
+FontOption::FontOption()
+: _overrides(0)
+{
+}
+
+
+bool FontOption::hasOverride() const
+{
+    return _overrides != 0;
+}
+
+
+const Gfx::Font* FontOption::font() const
+{
+    return _font.get();
+}
+
+
+void FontOption::setFont(const Gfx::Font& font)
+{
+    _font.reset( new Gfx::Font(font) );
+    _overrides |= All;
+}
+
+
+void FontOption::setSize(std::size_t size)
+{
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    *_font = _font->withSize(size);
+    _overrides |= Size;
+}
+
+
+void FontOption::setWeight(Gfx::Font::Weight weight)
+{
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    *_font = _font->withWeight(weight);
+    _overrides |= Weight;
+}
+
+
+void FontOption::setSlant(Gfx::Font::Slant slant)
+{
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    *_font = _font->withSlant(slant);
+    _overrides |= Slant;
+}
+
+
+Gfx::Font FontOption::getFont(const Gfx::Font& base) const
+{
+    if( ! _font )
+        return base;
+
+    if( _overrides & All )
+        return *_font;
+
+    Gfx::Font font(base);
+
+    if( _overrides & Size )
+        font = font.withSize(_font->size());
+
+    if( _overrides & Weight )
+        font = font.withWeight(_font->weight());
+
+    if( _overrides & Slant )
+        font = font.withSlant(_font->slant());
+
+    return font;
 }
 
 } // namespace

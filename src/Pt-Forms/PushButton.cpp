@@ -447,78 +447,82 @@ void PushButton::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
     if( ! _buttonStyle.renderer() )
         return;
 
-    onPaintBackground(context);
-    onPaintFrame(context);
-    onPaintIcon(context);
-    onPaintText(context);
-    onPaintMnemonic(context);
+    Gfx::RectF widgetRect( size() );
+    const ButtonState& state = buttonState();
+
+    onPaintBackground(context, widgetRect, state);
+    onPaintFrame(context, widgetRect, state);
+    onPaintIcon(context, _contentRect, _picture, _iconPos, state);
+    onPaintText(context, _contentRect, text(), _textPos, state);
+    onPaintMnemonic(context, widgetRect, _mnemonicRect, state);
 }
 
 
-void PushButton::onPaintBackground(PaintContext& context)
+void PushButton::onPaintBackground(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const ButtonState& state)
 {
     ButtonRenderer* renderer = _buttonStyle.renderer();
     if( ! renderer )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    const ButtonState& state = buttonState();
-
-    renderer->renderBackground(context, widgetRect, state);
+    renderer->renderBackground(context, rect, state);
 }
 
 
-void PushButton::onPaintFrame(PaintContext& context)
+void PushButton::onPaintFrame(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const ButtonState& state)
 {
     ButtonRenderer* renderer = _buttonStyle.renderer();
     if( ! renderer || _buttonState.isFlat() )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    const ButtonState& state = buttonState();
-
-    renderer->renderChrome(context, widgetRect, state);
+    renderer->renderChrome(context, rect, state);
 }
 
 
-void PushButton::onPaintIcon(PaintContext& context)
+void PushButton::onPaintIcon(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const Pixmap& picture,
+                             const Gfx::PointF& pos,
+                             const ButtonState& state)
 {
     ButtonRenderer* renderer = _buttonStyle.renderer();
-    if( ! renderer || _picture.empty() )
+    if( ! renderer || picture.empty() )
         return;
 
-    const ButtonState& state = buttonState();
-
-    renderer->renderIcon(context, _contentRect, _picture, _iconPos, state);
+    renderer->renderIcon(context, rect, picture, pos, state);
 }
 
 
-void PushButton::onPaintText(PaintContext& context)
+void PushButton::onPaintText(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const String& text,
+                             const Gfx::PointF& pos,
+                             const ButtonState& state)
 {
     ButtonRenderer* renderer = _buttonStyle.renderer();
     if( ! renderer )
         return;
 
-    const String& buttonText = text();
-    if( buttonText.empty() )
+    if( text.empty() )
         return;
 
-    const ButtonState& state = buttonState();
-
-    renderer->renderText(context, _contentRect, buttonText, _textPos, state);
+    renderer->renderText(context, rect, text, pos, state);
 }
 
 
-void PushButton::onPaintMnemonic(PaintContext& context)
+void PushButton::onPaintMnemonic(PaintContext& context,
+                                const Gfx::RectF& rect,
+                                const Gfx::RectF& mnemonic,
+                                const ButtonState& state)
 {
     ButtonRenderer* renderer = _buttonStyle.renderer();
     if( ! renderer || text().empty() )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    const ButtonState& state = buttonState();
-
-    renderer->renderMnemonic(context, widgetRect, _mnemonicRect, state);
+    renderer->renderMnemonic(context, rect, mnemonic, state);
 }
 
 } // namespace

@@ -798,26 +798,40 @@ CheckBoxRenderer* PlatinumCheckBoxRenderer::onCreate() const
 }
 
 
-void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumCheckBoxRenderer::onReset(const StyleOptions& options)
 {
-    Gfx::Brush bg = background() ? *background()
-                                 : Gfx::Brush( options.textBackground() );
+    CheckBoxStyleOptions empty;
+    onPrepare(options, empty);
+}
 
-    Gfx::Pen cPen = contour() ? *contour()
-                               : options.contour();
+
+void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options,
+                                         const CheckBoxStyleOptions& cbOptions)
+{
+    Gfx::Brush bg = cbOptions.background() ? *cbOptions.background()
+                                           : Gfx::Brush( options.textBackground() );
+
+    Gfx::Pen cPen = cbOptions.contour() ? *cbOptions.contour()
+                                        : options.contour();
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
     _boxPainter.setBrush( bg );
     _boxPainter.setPen( cPen );
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    Gfx::Font f = cbOptions.getFont( options.font() );
+    Gfx::Color tc = cbOptions.textColor() ? *cbOptions.textColor()
+                                          : options.textColor();
+
+    _textPainter.setFont( f );
+    _textPainter.setPen( tc );
+
+    _checkColor = tc;
 }
 
 
 Gfx::SizeF PlatinumCheckBoxRenderer::onMeasureIndicator(PaintSurface& /*surface*/)
 {
-    double sz = font().size() * 1.2;
+    double sz = _textPainter.font().size() * 1.2;
     return Gfx::SizeF(sz, sz);
 }
 
@@ -904,9 +918,8 @@ const Painter& PlatinumCheckBoxRenderer::onGetTextPainter(PaintSurface& surface)
 
 void PlatinumCheckBoxRenderer::onRenderChrome(PaintContext& context,
                                                  const Gfx::RectF& rect,
-                                                 const StyleOptions& options,
                                                  const Gfx::RectF& box,
-                                                 CheckBoxStyleFlags state)
+                                                 const CheckBoxState& state)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -937,13 +950,13 @@ void PlatinumCheckBoxRenderer::onRenderChrome(PaintContext& context,
         _boxPainter.drawRect(borderRect);
     }
 
-    if( state.has(CheckBoxStyleFlags::Checked) && cw > 0 && ch > 0 )
+    if( state.isChecked() && cw > 0 && ch > 0 )
     {
         Gfx::RectF checkRect(Gfx::PointF(boxRect.x() + checkOffset, boxRect.y() + checkOffset),
                              Gfx::SizeF(cw, ch));
 
         Gfx::Brush savedBrush = _boxPainter.brush();
-        _boxPainter.setBrush( options.textColor() );
+        _boxPainter.setBrush( _checkColor );
         _boxPainter.fillRect(checkRect);
         _boxPainter.setBrush( savedBrush );
     }
@@ -952,10 +965,9 @@ void PlatinumCheckBoxRenderer::onRenderChrome(PaintContext& context,
 
 void PlatinumCheckBoxRenderer::onRenderText(PaintContext& context,
                                             const Gfx::RectF& textRect,
-                                            const StyleOptions& /*options*/,
                                             const String& text,
                                             const Gfx::PointF& pos,
-                                            CheckBoxStyleFlags state)
+                                            const CheckBoxState& state)
 {
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;
@@ -969,7 +981,7 @@ void PlatinumCheckBoxRenderer::onRenderText(PaintContext& context,
     Gfx::PointF renderPos(pos.x() + focusPad + strokeInset, pos.y());
     _textPainter.drawText(renderPos, text);
 
-    if( state.has(StyleFlags::Focused) )
+    if( state.isFocused() )
     {
         Gfx::FontMetrics fm = _textPainter.fontMetrics();
         Gfx::TextMetrics tm = _textPainter.textMetrics(text);
@@ -988,9 +1000,8 @@ void PlatinumCheckBoxRenderer::onRenderText(PaintContext& context,
 
 void PlatinumCheckBoxRenderer::onRenderMnemonic(PaintContext& context,
                                                 const Gfx::RectF& rect,
-                                                const StyleOptions& /*options*/,
                                                 const Gfx::RectF& mnemonic,
-                                                CheckBoxStyleFlags /*state*/)
+                                                const CheckBoxState& /*state*/)
 {
     renderMnemonicImpl(_textPainter, context, rect, mnemonic);
 }

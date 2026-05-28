@@ -94,19 +94,25 @@ class PT_FORMS_API Panel : public Control
 
             The default implementation does nothing if the panel has no background.
         */
-        virtual void onPaintBackground(PaintContext& context);
+        virtual void onPaintBackground(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const PanelState& state);
 
         /** @brief Paints the panel content layer.
 
             The default implementation paints the optional panel icon.
         */
-        virtual void onPaintContent(PaintContext& context);
+        virtual void onPaintContent(PaintContext& context,
+                                    const Gfx::RectF& contentRect,
+                                    const PanelState& state);
 
         /** @brief Paints the panel frame layer.
 
             The default implementation does nothing if the panel has no frame.
         */
-        virtual void onPaintFrame(PaintContext& context);
+        virtual void onPaintFrame(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const PanelState& state);
 
     private:
         PanelState panelState() const;

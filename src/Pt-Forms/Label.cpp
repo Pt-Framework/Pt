@@ -467,44 +467,53 @@ void Label::onPaint(PaintContext& context,
     if( ! _panelStyle.renderer() )
         return;
 
-    onPaintBackground(context);
-    onPaintFrame(context);
-    onPaintIcon(context);
-    onPaintText(context);
+    Gfx::RectF widgetRect( size() );
+    PanelState state = panelState();
+
+    onPaintBackground(context, widgetRect, state);
+    onPaintFrame(context, widgetRect, state);
+    onPaintIcon(context, _contentRect, state);
+    onPaintText(context, _contentRect, state);
 }
 
-void Label::onPaintBackground(PaintContext& context)
+void Label::onPaintBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || ! _hasBackground )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    renderer->renderBackground(context, widgetRect, panelState());
+    renderer->renderBackground(context, rect, state);
 }
 
-void Label::onPaintFrame(PaintContext& context)
+void Label::onPaintFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || ! _hasFrame )
         return;
 
-    Gfx::RectF widgetRect( size() );
-    renderer->renderFrame(context, widgetRect, panelState());
+    renderer->renderFrame(context, rect, state);
 }
 
-void Label::onPaintIcon(PaintContext& context)
+void Label::onPaintIcon(PaintContext& context,
+                        const Gfx::RectF& contentRect,
+                        const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || _icon.empty() || _pixmap.empty() )
         return;
 
-    renderer->renderIcon(context, _contentRect, _pixmap, _iconPos,
-                         panelState());
+    renderer->renderIcon(context, contentRect, _pixmap, _iconPos,
+                         state);
 }
 
 
-void Label::onPaintText(PaintContext& context)
+void Label::onPaintText(PaintContext& context,
+                        const Gfx::RectF& contentRect,
+                        const PanelState& state)
 {
     PanelRenderer* renderer = _panelStyle.renderer();
     if( ! renderer || ! _icon.empty() )
@@ -519,8 +528,8 @@ void Label::onPaintText(PaintContext& context)
         Gfx::PointF pos = _textBlock.position() + it->position();
         pos.addY(ascent);
 
-        renderer->renderText(context, _contentRect, lineText, pos,
-                             panelState());
+        renderer->renderText(context, contentRect, lineText, pos,
+                             state);
     }
 }
 

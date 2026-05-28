@@ -34,6 +34,10 @@ namespace Pt {
 
 namespace Forms {
 
+///////////////////////////////////////////////////////////////////////
+// PanelStyleOptions
+///////////////////////////////////////////////////////////////////////
+
 PanelStyleOptions::PanelStyleOptions()
 : _generation(0)
 , _overrides(0)
@@ -107,69 +111,46 @@ void PanelStyleOptions::setTextColor(const Gfx::Color& color)
 
 const Gfx::Font* PanelStyleOptions::font() const
 {
-    return _font.get();
+    return _font.font();
 }
 
 
 void PanelStyleOptions::setFont(const Gfx::Font& font)
 {
-    _font.reset( new Gfx::Font(font) );
-    setOverride(FontAll);
+    _font.setFont(font);
+    setOverride(Font);
 }
 
 
 void PanelStyleOptions::setFontSize(std::size_t size)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withSize(size);
-    setOverride(FontSize);
+    _font.setSize(size);
+    setOverride(Font);
 }
 
 
 void PanelStyleOptions::setFontWeight(Gfx::Font::Weight weight)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withWeight(weight);
-    setOverride(FontWeight);
+    _font.setWeight(weight);
+    setOverride(Font);
 }
 
 
 void PanelStyleOptions::setFontSlant(Gfx::Font::Slant slant)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withSlant(slant);
-    setOverride(FontSlant);
+    _font.setSlant(slant);
+    setOverride(Font);
 }
 
 
 Gfx::Font PanelStyleOptions::getFont(const Gfx::Font& base) const
 {
-    if( ! _font )
-        return base;
-
-    if( hasOverride(FontAll) )
-        return *_font;
-
-    Gfx::Font font(base);
-
-    if( hasOverride(FontSize) )
-        font = font.withSize(_font->size());
-
-    if( hasOverride(FontWeight) )
-        font = font.withWeight(_font->weight());
-
-    if( hasOverride(FontSlant) )
-        font = font.withSlant(_font->slant());
-
-    return font;
+    return _font.getFont(base);
 }
 
+///////////////////////////////////////////////////////////////////////
+// PanelState
+///////////////////////////////////////////////////////////////////////
 
 PanelState::PanelState()
 : _enabled(false)
@@ -201,6 +182,9 @@ void PanelState::setFocused(bool value)
     _focused = value;
 }
 
+///////////////////////////////////////////////////////////////////////
+// PanelRenderer
+///////////////////////////////////////////////////////////////////////
 
 PanelRenderer::PanelRenderer(std::size_t refs)
 : Style::Facet( typeid(PanelRenderer), refs )
@@ -287,6 +271,11 @@ void PanelRenderer::renderIcon(PaintContext& context,
 {
     onRenderIcon(context, rect, picture, pos, state);
 }
+
+///////////////////////////////////////////////////////////////////////
+// PanelStyle
+///////////////////////////////////////////////////////////////////////
+
 PanelStyle::PanelStyle()
 {
 }

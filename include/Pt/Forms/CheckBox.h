@@ -32,10 +32,9 @@
 #define Pt_Forms_CheckBox_h
 
 #include <Pt/Forms/Button.h>
-#include <Pt/Forms/StyleFlags.h>
+#include <Pt/Forms/CheckBoxStyle.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/TextMetrics.h>
-#include <Pt/SmartPtr.h>
 
 namespace Pt {
 
@@ -106,40 +105,29 @@ class PT_FORMS_API CheckBox : public Button
     protected:
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& boxRect,
+                                   const CheckBoxState& state);
+
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& textRect,
+                                 const String& text,
+                                 const Gfx::PointF& pos,
+                                 const CheckBoxState& state);
+
+        virtual void onPaintMnemonic(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& mnemonic,
+                                    const CheckBoxState& state);
+
     private:
-        Gfx::Font getFont() const;
-
-        CheckBoxRenderer* getRenderer();
-
-        void applyRenderer(CheckBoxRenderer* renderer);
-
-        CheckBoxStyleFlags checkBoxStyleFlags() const;
+        CheckBoxState checkBoxState() const;
 
     private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideContour    = 0x02,
-            OverrideTextColor  = 0x04,
-            OverrideFontAll    = 0x08,
-            OverrideFontSize   = 0x10,
-            OverrideFontWeight = 0x20,
-            OverrideFontSlant  = 0x40,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
-
         State                      _state;
-
-        FacetPtr<CheckBoxRenderer> _renderer;
-        bool                       _customRenderer;
-        std::size_t                _styleGeneration;
-
-        AutoPtr<Gfx::Brush>        _background;
-        AutoPtr<Gfx::Pen>          _contour;
-        AutoPtr<Gfx::Color>        _textColor;
-        Gfx::Font                  _customFont;
-        unsigned                   _overrides;
+        CheckBoxStyle              _checkBoxStyle;
+        CheckBoxStyleOptions       _checkBoxOptions;
 
         Gfx::RectF                 _boxRect;
         Gfx::RectF                 _textRect;

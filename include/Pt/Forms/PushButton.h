@@ -125,31 +125,46 @@ class PT_FORMS_API PushButton : public Button
 
             The default implementation delegates to the current %ButtonRenderer.
         */
-        virtual void onPaintBackground(PaintContext& context);
+        virtual void onPaintBackground(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const ButtonState& state);
 
         /** @brief Paints the button frame layer.
 
             The default implementation does nothing for flat buttons.
         */
-        virtual void onPaintFrame(PaintContext& context);
+        virtual void onPaintFrame(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const ButtonState& state);
 
         /** @brief Paints the button icon layer.
 
             The default implementation does nothing if no prepared icon pixmap exists.
         */
-        virtual void onPaintIcon(PaintContext& context);
+        virtual void onPaintIcon(PaintContext& context,
+                                 const Gfx::RectF& rect,
+                                 const Pixmap& picture,
+                                 const Gfx::PointF& pos,
+                                 const ButtonState& state);
 
         /** @brief Paints the button text layer.
 
             The default implementation does nothing if the button text is empty.
         */
-        virtual void onPaintText(PaintContext& context);
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& rect,
+                                 const String& text,
+                                 const Gfx::PointF& pos,
+                                 const ButtonState& state);
 
         /** @brief Paints the button mnemonic layer.
 
             The default implementation does nothing if the button text is empty.
         */
-        virtual void onPaintMnemonic(PaintContext& context);
+        virtual void onPaintMnemonic(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& mnemonic,
+                                    const ButtonState& state);
 
     private:
         const ButtonState& buttonState();

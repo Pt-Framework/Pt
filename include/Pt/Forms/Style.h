@@ -1,30 +1,30 @@
 /* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- As a special exception, you may use this file as part of a free
- software library without restriction. Specifically, if other files
- instantiate templates or use macros or inline functions from this
- file, or you compile this file and link it with other files to
- produce an executable, this file does not by itself cause the
- resulting executable to be covered by the GNU General Public
- License. This exception does not however invalidate any other
- reasons why the executable file might be covered by the GNU Library
- General Public License.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- MA 02110-1301 USA
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef Pt_Forms_Style_h
@@ -153,30 +153,6 @@ class FacetPtr
 };
 
 /** @brief Style for widgets.
-    Renderer design:
-    - each renderer works in layers
-    - primitives are grouped into layers
-    - each layer may have a measure<Layer>, layout<Layer> and render<Layer>
-      unless its not layoutable like a background layer.
-    - primitives are in the same layer if the cannot be handled separately
-        - e.g. SpinBox Buttons can either be inside the entry or somewhere outside.
-          This is transparent to the user, so we need to measure, layout and 
-          render them together
-
-    - measure<Layer> may add space to a given contained content
-    - layout<Layer> returns the remaining space for contained content
-    - render<Layer> takes values from the layout<Layer> call
-
-    - render<Layer> might be a template method for a virtual function for its primitives
-        - onRender<Layer> calls onRender<PrimitiveA> + onRender<PrimitiveB>
-        - onRender<Layer> can optionally be implemented by style writers
-
-    - render<Layer> might not be necessary, e.g. if render<Primitive> exists and
-      the primitive is optional
-
-    - measure<Layer> and layout<Layer> might be template method for a virtual function
-      for its primitives, but this is less common because competing ways of layouting
-      do not show a clear picture. So mostly it just calls onMeasure<Layer> or onLayout<Layer>
  */
 class PT_FORMS_API Style
 {
@@ -499,183 +475,6 @@ const RendererT* StyleBinder<RendererT, OptionsT>::renderer() const
     return _renderer.get();
 }
 
-
-/** @brief Renders the visual appearance of a checkbox widget.
-
-    Provides rendering primitives for the check indicator, label text,
-    and mnemonic underline. Subclasses override the protected virtuals.
-*/
-class PT_FORMS_API CheckBoxRenderer : public Style::Facet
-{
-    public:
-        explicit CheckBoxRenderer(std::size_t refs = 0);
-
-        virtual ~CheckBoxRenderer();
-
-        /** @brief Creates a new default-constructed instance that the caller owns.
-        */
-        CheckBoxRenderer* create() const;
-
-    public:
-        /** @brief Returns the custom background brush, or null if unset.
-        */
-        const Gfx::Brush* background() const;
-
-        /** @brief Sets the background brush for the check indicator area.
-        */
-        void setBackground(const Gfx::Brush& b);
-
-        /** @brief Returns the custom contour pen, or null if unset.
-        */
-        const Gfx::Pen* contour() const;
-
-        /** @brief Sets the pen for the check indicator border.
-        */
-        void setContour(const Gfx::Pen& p);
-
-        /** @brief Returns the font used for label text.
-        */
-        const Gfx::Font& font() const;
-
-        /** @brief Sets the font for label text.
-        */
-        void setFont(const Gfx::Font& f);
-
-        /** @brief Returns the text color.
-        */
-        const Gfx::Color& textColor() const;
-
-        /** @brief Sets the text color from a pen.
-        */
-        void setTextColor(const Gfx::Pen& p);
-
-    public:
-        /** @brief Returns the natural size of the check indicator on surface.
-        */
-        Gfx::SizeF measureIndicator(PaintSurface& surface);
-
-        /** @brief Returns the combined content size for indicator and text.
-
-            Computes the space needed for indicator, text, and spacing between them.
-            Does not include frame decoration.
-        */
-        Gfx::SizeF measureContent(PaintSurface& surface,
-                                  const Gfx::SizeF& indicatorSize,
-                                  const Gfx::SizeF& textSize);
-
-        /** @brief Returns the outer size including frame for the given contentSize.
-        */
-        Gfx::SizeF measureFrame(PaintSurface& surface,
-                                const Gfx::SizeF& contentSize);
-
-        /** @brief Returns the content rectangle within the outer frameRect.
-        */
-        Gfx::RectF layoutFrame(PaintSurface& surface,
-                               const Gfx::RectF& frameRect);
-
-        /** @brief Partitions the content rect into indicator and text sub-rectangles.
-        */
-        void layoutContent(PaintSurface& surface,
-                           const Gfx::RectF& contentRect,
-                           const Gfx::SizeF& indicatorSize,
-                           const Gfx::SizeF& textSize,
-                           Gfx::RectF& indicatorRect,
-                           Gfx::RectF& textRect);
-
-        /** @brief Computes the underline rectangle for the mnemonic character at mnemonicIndex.
-        */
-        Gfx::RectF layoutMnemonic(PaintSurface& surface,
-                                  const String& text,
-                                  const Gfx::PointF& textPos,
-                                  const Gfx::FontMetrics& fontMetrics,
-                                  String::size_type mnemonicIndex);
-
-        /** @brief Returns a painter with the current font and text color applied for surface.
-        */
-        const Painter& textPainter(PaintSurface& surface);
-
-        /** @brief Draws the check indicator within boxRect.
-        */
-        void renderChrome(PaintContext& context,
-                          const Gfx::RectF& rect,
-                          const Gfx::RectF& boxRect,
-                          CheckBoxStyleFlags state);
-
-        /** @brief Draws text at pos, clipped to the textRect.
-        */
-        void renderText(PaintContext& context,
-                        const Gfx::RectF& textRect,
-                        const String& text,
-                        const Gfx::PointF& pos,
-                        CheckBoxStyleFlags state);
-
-        /** @brief Draws the mnemonic underline within mnemonic, clipped to the widget rect.
-        */
-        void renderMnemonic(PaintContext& context,
-                            const Gfx::RectF& rect,
-                            const Gfx::RectF& mnemonic,
-                            CheckBoxStyleFlags state);
-
-    protected:
-        const StyleOptions& prepare();
-
-        virtual CheckBoxRenderer* onCreate() const = 0;
-
-        virtual void onPrepare(const StyleOptions& options) = 0;
-
-        virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
-
-        virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
-                                            const Gfx::SizeF& indicatorSize,
-                                            const Gfx::SizeF& textSize) = 0;
-
-        virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
-                                          const Gfx::SizeF& contentSize) = 0;
-
-        virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
-                                         const Gfx::RectF& frameRect) = 0;
-
-        virtual void onLayoutContent(PaintSurface& surface,
-                                     const Gfx::RectF& contentRect,
-                                     const Gfx::SizeF& indicatorSize,
-                                     const Gfx::SizeF& textSize,
-                                     Gfx::RectF& indicatorRect,
-                                     Gfx::RectF& textRect) = 0;
-
-        virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
-                                            const String& text,
-                                            const Gfx::PointF& textPos,
-                                            const Gfx::FontMetrics& fontMetrics,
-                                            String::size_type mnemonicIndex) = 0;
-
-        virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
-
-        virtual void onRenderChrome(PaintContext& context,
-                                    const Gfx::RectF& rect,
-                                    const StyleOptions& options,
-                                    const Gfx::RectF& boxRect,
-                                    CheckBoxStyleFlags state) = 0;
-
-        virtual void onRenderText(PaintContext& context,
-                                  const Gfx::RectF& textRect,
-                                  const StyleOptions& options,
-                                  const String& text,
-                                  const Gfx::PointF& pos,
-                                  CheckBoxStyleFlags state) = 0;
-
-        virtual void onRenderMnemonic(PaintContext& context,
-                                      const Gfx::RectF& rect,
-                                      const StyleOptions& options,
-                                      const Gfx::RectF& mnemonic,
-                                      CheckBoxStyleFlags state) = 0;
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Font>  _font;
-        AutoPtr<Gfx::Pen>   _textColor;
-        std::size_t          _styleGeneration;
-};
 
 /** @brief Renders the visual appearance of a spin box widget.
 
@@ -2026,8 +1825,5 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
 } // namespace
 
 } // namespace
-
-#include <Pt/Forms/ButtonStyle.h>
-#include <Pt/Forms/PanelStyle.h>
 
 #endif
