@@ -43,9 +43,6 @@ ComboBox::ComboBox()
 , _isTextChanged(false)
 , _isHighlighted(false)
 , _isButtonHighlighted(false)
-, _customRenderer(false)
-, _styleGeneration(0)
-, _overrides(0)
 , _pendingCursorX(-1)
 {
     setFocusPolicy(Control::AcceptFocus);
@@ -244,8 +241,9 @@ Pt::Signal<ListBoxItem&>& ComboBox::selected()
 
 const Gfx::Brush& ComboBox::background() const
 {
-    if( _renderer )
-        return _renderer->background();
+    const Gfx::Brush* b = _comboBoxOptions.background();
+    if(b)
+        return *b;
 
     return Application::instance().styleOptions().textBackground();
 }
@@ -253,20 +251,16 @@ const Gfx::Brush& ComboBox::background() const
 
 void ComboBox::setBackground(const Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
-    _overrides |= OverrideBackground;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setBackground(*_background);
-
+    _comboBoxOptions.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Brush& ComboBox::foreground() const
 {
-    if( _renderer )
-        return _renderer->foreground();
+    const Gfx::Brush* b = _comboBoxOptions.foreground();
+    if(b)
+        return *b;
 
     return Application::instance().styleOptions().foreground();
 }
@@ -274,20 +268,16 @@ const Gfx::Brush& ComboBox::foreground() const
 
 void ComboBox::setForeground(const Gfx::Brush& b)
 {
-    _foreground.reset( new Gfx::Brush(b) );
-    _overrides |= OverrideForeground;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setForeground(*_foreground);
-
+    _comboBoxOptions.setForeground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& ComboBox::contour() const
 {
-    if( _renderer )
-        return _renderer->contour();
+    const Gfx::Pen* p = _comboBoxOptions.contour();
+    if(p)
+        return *p;
 
     return Application::instance().styleOptions().contour();
 }
@@ -295,20 +285,16 @@ const Gfx::Pen& ComboBox::contour() const
 
 void ComboBox::setContour(const Gfx::Pen& p)
 {
-    _contour.reset( new Gfx::Pen(p) );
-    _overrides |= OverrideContour;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setContour(*_contour);
-
+    _comboBoxOptions.setContour(p);
     invalidate();
 }
 
 
 const Gfx::Color& ComboBox::textColor() const
 {
-    if( _renderer )
-        return _renderer->textColor();
+    const Gfx::Color* c = _comboBoxOptions.textColor();
+    if(c)
+        return *c;
 
     return Application::instance().styleOptions().textColor();
 }
@@ -316,20 +302,16 @@ const Gfx::Color& ComboBox::textColor() const
 
 void ComboBox::setTextColor(const Gfx::Color& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
-    _overrides |= OverrideTextColor;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
+    _comboBoxOptions.setTextColor(color);
     invalidate();
 }
 
 
 const Gfx::Font& ComboBox::font() const
 {
-    if( _renderer )
-        return _renderer->font();
+    const Gfx::Font* f = _comboBoxOptions.font();
+    if(f)
+        return *f;
 
     return Application::instance().styleOptions().font();
 }
@@ -337,86 +319,40 @@ const Gfx::Font& ComboBox::font() const
 
 void ComboBox::setFont(const Gfx::Font& font)
 {
-    _customFont = font;
-    _overrides |= OverrideFontAll;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _comboBoxOptions.setFont(font);
     invalidate();
-}
-
-
-Gfx::Font ComboBox::getFont() const
-{
-    const Gfx::Font& base = Application::instance().styleOptions().font();
-
-    if( ! (_overrides & OverrideFontAny) )
-        return base;
-
-    if( _overrides & OverrideFontAll )
-        return _customFont;
-
-    std::size_t sz = (_overrides & OverrideFontSize) ? _customFont.size()
-                                                        : base.size();
-    Gfx::Font::Weight wt = (_overrides & OverrideFontWeight) ? _customFont.weight()
-                                                                 : base.weight();
-    Gfx::Font::Slant sl = (_overrides & OverrideFontSlant) ? _customFont.slant()
-                                                               : base.slant();
-
-    if( base.hasStyleName() )
-        return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
-
-    if( base.category() != Gfx::Font::Category::None )
-        return Gfx::Font(base.category(), sz, wt, sl, base.stretch());
-
-    return Gfx::Font(base.family(), sz, wt, sl, base.stretch());
 }
 
 
 void ComboBox::setFontSize(std::size_t size)
 {
-    _customFont = _customFont.withSize(size);
-    _overrides |= OverrideFontSize;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _comboBoxOptions.setFontSize(size);
     invalidate();
 }
 
 
 void ComboBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = _customFont.withWeight(weight);
-    _overrides |= OverrideFontWeight;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _comboBoxOptions.setFontWeight(weight);
     invalidate();
 }
 
 
 void ComboBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = _customFont.withSlant(slant);
-    _overrides |= OverrideFontSlant;
-
-    if( ComboBoxRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _comboBoxOptions.setFontSlant(slant);
     invalidate();
 }
 
 
 void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 {
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    if( renderer )
-        applyRenderer(renderer);
+    if(renderer)
+        _comboBoxStyle.bind(*renderer, options, _comboBoxOptions);
+    else
+        _comboBoxStyle.bind(Application::instance().style(), options, _comboBoxOptions);
 
     invalidate();
 }
@@ -434,14 +370,31 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 }
 
 
+void ComboBox::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _comboBoxStyle.rebind(style, options, _comboBoxOptions);
+
+    if( ! _comboBoxStyle.isBound() )
+        return;
+
+    relayout();
+}
+
+
 Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
 {
-    if( ! _renderer )
+    ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
+    if( ! renderer )
         return Gfx::SizeF(policy.width() + padding().leftRight(),
                           padding().topBottom());
 
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF chromeSize = _renderer->measureFrame(surface(), contentSize);
+    Gfx::SizeF chromeSize = renderer->measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( chromeSize.width() + padding().leftRight(),
                        chromeSize.height() + padding().topBottom() );
@@ -452,13 +405,14 @@ void ComboBox::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    if( ! _renderer )
+    ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
+    if( ! renderer )
         return;
 
     Gfx::RectF contentRect( Gfx::PointF(0, 0), size() );
-    _renderer->layoutChrome(surface(), contentRect, _entryRect, _buttonRect, _textRect);
+    renderer->layoutChrome(surface(), contentRect, _entryRect, _buttonRect, _textRect);
 
-    const Painter& painter = _renderer->textPainter( surface() );
+    const Painter& painter = renderer->textPainter( surface() );
 
     _editor.setPosition( _textRect.topLeft() );
     _editor.setSize( _textRect.size() );
@@ -471,79 +425,82 @@ void ComboBox::onLayout(const Gfx::RectF& rect)
         _pendingCursorX = -1;
     }
 
+    if( _isEditable && hasFocus() )
+    {
+        double cursorX = _line.cursorToX(painter, _editor.cursorPosition());
+        cursorX += _line.position().x();
+
+        double cursorWidth = 1;
+        _cursorRect.set( Gfx::PointF(cursorX, _line.position().y()),
+                         Gfx::SizeF(cursorWidth, _line.maxHeight()) );
+    }
+    else
+    {
+        _cursorRect = Gfx::RectF();
+    }
+
     repaint( bounds() );
-}
-
-
-void ComboBox::onInvalidate()
-{
-    std::size_t gen = Application::instance().styleOptions().generation();
-    if( _styleGeneration != gen )
-    {
-        _styleGeneration = gen;
-        if( ! _customRenderer )
-            _renderer.reset();
-    }
-
-    if( ! _renderer )
-    {
-        bool hasOverride = (_overrides != 0);
-        if( hasOverride )
-        {
-            if( ComboBoxRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<ComboBoxRenderer>() );
-        }
-    }
-
-    if( ! _renderer )
-        return;
-
-    Base::onInvalidate();
-    relayout();
 }
 
 
 void ComboBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
-    if( ! _renderer )
+    ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
+    if( ! renderer )
         return;
 
-    ComboBoxStyleFlags state = comboBoxStyleFlags();
+    ComboBoxState state;
+    state.setEnabled( isEnabled() );
+    state.setFocused( hasFocus() );
+    state.setHighlighted( _isHighlighted );
+    state.setEditable( _isEditable );
+    state.setPopupVisible( _popup.isVisible() );
 
-    ButtonStyleFlags buttonState;
-    if( _isButtonHighlighted )
-        buttonState.set(StyleFlags::Highlighted);
-    if( _popup.isVisible() )
-        buttonState.set(ButtonStyleFlags::Pressed);
+    ComboBoxButtonState buttonState;
+    buttonState.setHighlighted( _isButtonHighlighted );
+    buttonState.setPressed( _popup.isVisible() );
 
-    // frame: entry + button
-    _renderer->renderChrome(context, Gfx::RectF(Gfx::PointF(0,0), size()),
-                             _entryRect, _buttonRect, state, buttonState);
+    Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
 
-    // cursor
-    Gfx::RectF cursorRect;
+    onPaintChrome(context, widgetRect, _entryRect, _buttonRect,
+                  state, buttonState);
 
-    if( _isEditable && hasFocus() )
-    {
-        const Painter& painter = _renderer->textPainter( surface() );
-        double cursorX = _line.cursorToX(painter, _editor.cursorPosition());
-        cursorX += _line.position().x();
-
-        double cursorWidth = 1;
-        cursorRect.set( Gfx::PointF(cursorX, _line.position().y()),
-                        Gfx::SizeF(cursorWidth, _line.maxHeight()) );
-    }
-
-    // text
     Gfx::PointF textPos = _line.position();
     textPos.addY( _line.ascent() );
 
-    _renderer->renderText(context, _textRect, _editor.text(),
-                          textPos, cursorRect, state);
+    onPaintText(context, _textRect, _editor.text(),
+                textPos, _cursorRect, state);
+}
+
+
+void ComboBox::onPaintChrome(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const Gfx::RectF& entryRect,
+                             const Gfx::RectF& buttonRect,
+                             const ComboBoxState& state,
+                             const ComboBoxButtonState& buttonState)
+{
+    ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
+    if( ! renderer )
+        return;
+
+    renderer->renderChrome(context, rect, entryRect, buttonRect,
+                           state, buttonState);
+}
+
+
+void ComboBox::onPaintText(PaintContext& context,
+                           const Gfx::RectF& textRect,
+                           const String& text,
+                           const Gfx::PointF& textPos,
+                           const Gfx::RectF& cursor,
+                           const ComboBoxState& state)
+{
+    ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
+    if( ! renderer )
+        return;
+
+    renderer->renderText(context, textRect, text, textPos, cursor, state);
 }
 
 
@@ -551,11 +508,12 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
     
-    if( ! _renderer )
+    ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
+    if( ! renderer )
         return;
 
     Gfx::RectF contentRect( Gfx::PointF(0, 0), ev.size() );
-    _renderer->layoutChrome(surface(), contentRect, _entryRect, _buttonRect, _textRect);
+    renderer->layoutChrome(surface(), contentRect, _entryRect, _buttonRect, _textRect);
 
     _editor.setPosition( _textRect.topLeft() );
     _editor.setSize( _textRect.size() );
@@ -739,67 +697,6 @@ void ComboBox::onFocusEvent(const FocusEvent& ev)
     }
 }
 
-
-ComboBoxRenderer* ComboBox::getRenderer()
-{
-    if( ! _renderer )
-    {
-        const Style& style = Application::instance().style();
-        ComboBoxRenderer* proto = style.get<ComboBoxRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-    }
-
-    return _renderer.get();
-}
-
-
-void ComboBox::applyRenderer(ComboBoxRenderer* renderer)
-{
-    if( _overrides & OverrideBackground )
-        renderer->setBackground(*_background);
-
-    if( _overrides & OverrideForeground )
-        renderer->setForeground(*_foreground);
-
-    if( _overrides & OverrideContour )
-        renderer->setContour(*_contour);
-
-    if( _overrides & OverrideTextColor )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
-    if( _overrides & OverrideFontAny )
-        renderer->setFont( getFont() );
-}
-
-
-ComboBoxStyleFlags ComboBox::comboBoxStyleFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( hasFocus() )
-        common.set(StyleFlags::Focused);
-
-    if( _isHighlighted )
-        common.set(StyleFlags::Highlighted);
-
-    ComboBoxStyleFlags state(common);
-
-    if( _isEditable )
-        state.set(ComboBoxStyleFlags::Editable);
-
-    if( _popup.isVisible() )
-        state.set(ComboBoxStyleFlags::PopupVisible);
-
-    return state;
-}
 
 } // namespace
 

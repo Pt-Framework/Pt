@@ -30,7 +30,7 @@
 #define Pt_Forms_ListBox_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/ListBoxStyle.h>
 #include <Pt/Forms/Button.h>
 #include <Pt/Forms/ScrollView.h>
 #include <Pt/Forms/FlowLayout.h>
@@ -102,6 +102,8 @@ class PT_FORMS_API ListBoxItem : public Button
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
+        virtual void onLayout(const Gfx::RectF& rect);
+
         virtual void onInvalidate();
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
@@ -130,28 +132,52 @@ class PT_FORMS_API ListBoxItem : public Button
         */
         virtual void onPaintText(PaintContext& context);
 
+        /** @brief Measures the icon content size.
+
+            The default implementation returns the logical picture size
+            or the configured icon size. Override to provide a custom
+            content size or return (0,0) to exclude the icon from layout.
+        */
+        virtual Gfx::SizeF onMeasureIcon();
+
+        /** @brief Measures the text content size.
+
+            The default implementation returns the text advance and font
+            height from the renderer's text painter. Override to provide
+            a custom content size or return (0,0) to exclude text from layout.
+        */
+        virtual Gfx::SizeF onMeasureText();
+
+        /** @brief Aggregates icon and text sizes into total content size.
+
+            The default implementation delegates to the renderer's
+            measureContent method. Override to provide a custom aggregation
+            when icon and text are arranged differently than the renderer assumes.
+        */
+        virtual Gfx::SizeF onMeasureContent(const Gfx::SizeF& iconSz,
+                                            const Gfx::SizeF& textSz);
+
+        /** @brief Computes icon layout within the inner rect.
+
+            The default implementation calls layoutContent on the renderer
+            and caches the icon rect and position. Override with an empty
+            body to skip icon layout when not needed.
+        */
+        virtual void onLayoutIcon(const Gfx::RectF& innerRect,
+                                  const Gfx::SizeF& iconSz,
+                                  const Gfx::SizeF& textSz);
+
+        /** @brief Computes text layout within the inner rect.
+
+            The default implementation calls layoutContent on the renderer
+            and caches the text rect and position. Override with an empty
+            body to skip text layout when not needed.
+        */
+        virtual void onLayoutText(const Gfx::RectF& innerRect,
+                                  const Gfx::SizeF& iconSz,
+                                  const Gfx::SizeF& textSz);
+
     private:
-        ListItemStyleFlags listItemStyleFlags() const;
-
-        Gfx::Font getFont() const;
-
-        ListItemRenderer* getRenderer();
-
-        void applyRenderer(ListItemRenderer* renderer);
-
-    private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideTextColor  = 0x02,
-            OverrideFontAll    = 0x04,
-            OverrideFontSize   = 0x08,
-            OverrideFontWeight = 0x10,
-            OverrideFontSlant  = 0x20,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
-
         Pt::Signal<ListBoxItem&> _selected;
         bool                     _isSelectable;
         bool                     _isSelected;
@@ -160,16 +186,18 @@ class PT_FORMS_API ListBoxItem : public Button
         Icon                     _icon;
         Gfx::SizeF               _iconSize;
 
-        FacetPtr<ListItemRenderer> _renderer;
-        bool                       _customRenderer;
-        std::size_t                _styleGeneration;
+        ListItemStyle        _listItemStyle;
+        ListItemStyleOptions _listItemOptions;
 
-        AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Color>       _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _overrideFlags;
+        PixmapSurface        _picture;
 
-        PixmapSurface             _picture;
+        Gfx::SizeF           _measuredIconSz;
+        Gfx::SizeF           _measuredTextSz;
+
+        Gfx::RectF           _iconRect;
+        Gfx::RectF           _textRect;
+        Gfx::PointF          _iconPos;
+        Gfx::PointF          _textPos;
 };
 
 
@@ -243,36 +271,19 @@ class PT_FORMS_API ListBox : public Control
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-    private:
-        ListBoxStyleFlags listBoxStyleFlags() const;
-
-        ListBoxRenderer* getRenderer();
-
-        void applyRenderer(ListBoxRenderer* renderer);
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
     private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideContour    = 0x02
-        };
-
         ScrollView                _scrollView;
         ListBoxLayout             _layout;
-        FacetPtr<ListBoxRenderer> _renderer;
-        bool                      _customRenderer;
-        std::size_t               _styleGeneration;
-        AutoPtr<Gfx::Brush>       _background;
+        ListBoxStyle              _listBoxStyle;
+        ListBoxStyleOptions       _listBoxOptions;
         bool                      _hasBackground;
-        AutoPtr<Gfx::Pen>         _contour;
         bool                      _hasFrame;
-        unsigned                  _overrideFlags;
 };
 
 } // namespace

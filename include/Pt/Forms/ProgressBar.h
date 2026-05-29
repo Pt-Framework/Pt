@@ -1,11 +1,10 @@
 /* Copyright (C) 2017 Marc Boris Duerner 
-   Copyright (C) 2017 Ilja Maier
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -96,13 +95,14 @@ class PT_FORMS_API ProgressBar : public Control
         ProgressBarState progressBarState() const;
 
     protected:
+        virtual void onInvalidate();
+
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onInvalidate();
-
-        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintContext& context, 
+                            const Gfx::RectF& updateRect);
 
         virtual void onPaintChrome(PaintContext& context,
                                    const Gfx::RectF& rect,

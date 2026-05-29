@@ -44,6 +44,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          CheckBox.cpp
                          CheckBoxStyle.cpp
                          ComboBox.cpp
+                         ComboBoxStyle.cpp
                          Control.cpp
                          Cursor.cpp
                          DockingLayout.cpp
@@ -54,8 +55,10 @@ SharedLibrary Pt-Forms : Application.cpp
                          InputMethod.cpp
                          Layout.cpp
                          LineEdit.cpp
+                         LineEditStyle.cpp
                          LineEditor.cpp
                          ListBox.cpp
+                         ListBoxStyle.cpp
                          Label.cpp
                          Menu.cpp
                          MenuBar.cpp
@@ -91,6 +94,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          StyleOptions.cpp
                          TableLayout.cpp
                          TabView.cpp
+                         TabViewStyle.cpp
                          TextBlock.cpp
                          View.cpp
                          Widget.cpp

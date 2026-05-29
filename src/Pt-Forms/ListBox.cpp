@@ -42,11 +42,8 @@ namespace Forms {
 /////////////////////////////////////////////////////////////////////////////
 
 ListBoxItem::ListBoxItem()
-: _customRenderer(false)
-, _styleGeneration(0)
-, _isSelectable(false)
+: _isSelectable(false)
 , _isSelected(false)
-, _overrideFlags(0)
 {
     setPadding(8);
 }
@@ -147,8 +144,9 @@ void ListBoxItem::onCanceled()
 
 const Gfx::Font& ListBoxItem::font() const
 {
-    if( _renderer )
-        return _renderer->font();
+    const Gfx::Font* f = _listItemOptions.font();
+    if(f)
+        return *f;
 
     return Application::instance().styleOptions().font();
 }
@@ -156,218 +154,66 @@ const Gfx::Font& ListBoxItem::font() const
 
 void ListBoxItem::setFont(const Gfx::Font& f)
 {
-    _customFont = f;
-    _overrideFlags |= OverrideFontAll;
-
-    if( ListItemRenderer* renderer = getRenderer() )
-        renderer->setFont(f);
-
+    _listItemOptions.setFont(f);
     invalidate();
-}
-
-
-Gfx::Font ListBoxItem::getFont() const
-{
-    const Gfx::Font& base = Application::instance().styleOptions().font();
-
-    if( ! (_overrideFlags & OverrideFontAny) )
-        return base;
-
-    if( _overrideFlags & OverrideFontAll )
-        return _customFont;
-
-    std::size_t sz = (_overrideFlags & OverrideFontSize) ? _customFont.size()
-                                                        : base.size();
-    Gfx::Font::Weight wt = (_overrideFlags & OverrideFontWeight) ? _customFont.weight()
-                                                                 : base.weight();
-    Gfx::Font::Slant sl = (_overrideFlags & OverrideFontSlant) ? _customFont.slant()
-                                                               : base.slant();
-
-    if( base.hasStyleName() )
-        return Gfx::Font(base.family(), sz, base.styleName(), wt, sl, base.stretch());
-
-    if( base.category() != Gfx::Font::Category::None )
-        return Gfx::Font(base.category(), sz, wt, sl, base.stretch());
-
-    return Gfx::Font(base.family(), sz, wt, sl, base.stretch());
 }
 
 
 void ListBoxItem::setFontSize(std::size_t size)
 {
-    _customFont = _customFont.withSize(size);
-    _overrideFlags |= OverrideFontSize;
-
-    if( ListItemRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _listItemOptions.setFontSize(size);
     invalidate();
 }
 
 
 void ListBoxItem::setFontWeight(Gfx::Font::Weight weight)
 {
-    _customFont = _customFont.withWeight(weight);
-    _overrideFlags |= OverrideFontWeight;
-
-    if( ListItemRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _listItemOptions.setFontWeight(weight);
     invalidate();
 }
 
 
 void ListBoxItem::setFontSlant(Gfx::Font::Slant slant)
 {
-    _customFont = _customFont.withSlant(slant);
-    _overrideFlags |= OverrideFontSlant;
-
-    if( ListItemRenderer* renderer = getRenderer() )
-        renderer->setFont( getFont() );
-
+    _listItemOptions.setFontSlant(slant);
     invalidate();
 }
 
 
 void ListBoxItem::setBackground(const Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
-    _overrideFlags |= OverrideBackground;
-
-    if( ListItemRenderer* renderer = getRenderer() )
-        renderer->setBackground(*_background);
-
+    _listItemOptions.setBackground(b);
     invalidate();
 }
 
 
 void ListBoxItem::setTextColor(const Gfx::Color& color)
 {
-    _textColor.reset( new Gfx::Color(color) );
-    _overrideFlags |= OverrideTextColor;
-
-    if( ListItemRenderer* renderer = getRenderer() )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
+    _listItemOptions.setTextColor(color);
     invalidate();
 }
 
 
 void ListBoxItem::setRenderer(ListItemRenderer* renderer)
 {
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    if( renderer )
-        applyRenderer(renderer);
+    if(renderer)
+        _listItemStyle.bind(*renderer, options, _listItemOptions);
+    else
+        _listItemStyle.bind(Application::instance().style(), options, _listItemOptions);
 
     invalidate();
 }
 
 
-ListItemRenderer* ListBoxItem::getRenderer()
-{
-    if( ! _renderer )
-    {
-        const Style& style = Application::instance().style();
-        ListItemRenderer* proto = style.get<ListItemRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-    }
-
-    return _renderer.get();
-}
-
-
-void ListBoxItem::applyRenderer(ListItemRenderer* renderer)
-{
-    if( _overrideFlags & OverrideBackground )
-        renderer->setBackground(*_background);
-
-    if( _overrideFlags & OverrideTextColor )
-        renderer->setTextColor( Gfx::Pen(*_textColor) );
-
-    if( _overrideFlags & OverrideFontAny )
-        renderer->setFont( getFont() );
-}
-
-
-ListItemStyleFlags ListBoxItem::listItemStyleFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( isHovered() )
-        common.set(StyleFlags::Highlighted);
-
-    if( hasFocus() )
-        common.set(StyleFlags::Focused);
-
-    ListItemStyleFlags state(common);
-
-    if( _isSelected )
-        state.set(ListItemStyleFlags::Selected);
-
-    return state;
-}
-
-
-Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& /*p*/)
-{
-    if( ! _renderer )
-        return Gfx::SizeF(0, 0);
-
-    const Painter& painter = _renderer->textPainter( surface() );
-
-    Gfx::TextMetrics tm = painter.textMetrics(_text);
-    Gfx::FontMetrics fm = painter.fontMetrics();
-
-    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
-    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-
-    Gfx::SizeF iconSz(pictureWidth, pictureHeight);
-    Gfx::SizeF textSz(tm.advance(), fm.height());
-
-    Gfx::SizeF contentSize = _renderer->measureContent(surface(), iconSz, textSz);
-    Gfx::SizeF frameSize = _renderer->measureFrame(surface(), contentSize);
-
-    return Gfx::SizeF( frameSize.width() + padding().leftRight(),
-                       frameSize.height() + padding().topBottom() );
-}
-
-
 void ListBoxItem::onInvalidate()
 {
-    std::size_t gen = Application::instance().styleOptions().generation();
-    if( _styleGeneration != gen )
-    {
-        _styleGeneration = gen;
-        if( ! _customRenderer )
-            _renderer.reset();
-    }
+    const StyleOptions& options = Application::instance().styleOptions();
+    _listItemStyle.rebind(Application::instance().style(), options, _listItemOptions);
 
-    if( ! _renderer )
-    {
-        bool hasOverride = (_overrideFlags != 0);
-        if( hasOverride )
-        {
-            if( ListItemRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<ListItemRenderer>() );
-        }
-    }
-
-    if( ! _renderer )
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
         return;
 
     if( _icon.empty() )
@@ -385,9 +231,138 @@ void ListBoxItem::onInvalidate()
 }
 
 
+Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& /*p*/)
+{
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
+        return Gfx::SizeF(0, 0);
+
+    _measuredIconSz = onMeasureIcon();
+    _measuredTextSz = onMeasureText();
+
+    Gfx::SizeF contentSize = onMeasureContent(_measuredIconSz, _measuredTextSz);
+    Gfx::SizeF frameSize = renderer->measureFrame(surface(), contentSize);
+
+    return Gfx::SizeF( frameSize.width() + padding().leftRight(),
+                       frameSize.height() + padding().topBottom() );
+}
+
+
+Gfx::SizeF ListBoxItem::onMeasureIcon()
+{
+    if( _picture.empty() )
+        return Gfx::SizeF(0, 0);
+
+    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
+    double w = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
+    double h = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
+    return Gfx::SizeF(w, h);
+}
+
+
+Gfx::SizeF ListBoxItem::onMeasureText()
+{
+    if( _text.empty() )
+        return Gfx::SizeF(0, 0);
+
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
+        return Gfx::SizeF(0, 0);
+
+    const Painter& painter = renderer->textPainter( surface() );
+    Gfx::TextMetrics tm = painter.textMetrics(_text);
+    Gfx::FontMetrics fm = painter.fontMetrics();
+    return Gfx::SizeF(tm.advance(), fm.height());
+}
+
+
+Gfx::SizeF ListBoxItem::onMeasureContent(const Gfx::SizeF& iconSz,
+                                          const Gfx::SizeF& textSz)
+{
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
+        return Gfx::SizeF(0, 0);
+
+    return renderer->measureContent(surface(), iconSz, textSz);
+}
+
+
+void ListBoxItem::onLayout(const Gfx::RectF& rect)
+{
+    Base::onLayout(rect);
+
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
+        return;
+
+    Gfx::RectF contentRect( Gfx::PointF(padding().left(), padding().top()),
+                           Gfx::SizeF(rect.width() - padding().leftRight(),
+                                      rect.height() - padding().topBottom()) );
+
+    Gfx::RectF innerRect = renderer->layoutFrame(surface(), contentRect);
+
+    onLayoutIcon(innerRect, _measuredIconSz, _measuredTextSz);
+    onLayoutText(innerRect, _measuredIconSz, _measuredTextSz);
+}
+
+
+void ListBoxItem::onLayoutIcon(const Gfx::RectF& innerRect,
+                               const Gfx::SizeF& iconSz,
+                               const Gfx::SizeF& textSz)
+{
+    if( _picture.empty() )
+        return;
+
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
+        return;
+
+    Gfx::RectF iconRect;
+    Gfx::RectF textRect;
+    renderer->layoutContent(surface(), innerRect, iconSz, textSz,
+                             iconRect, textRect);
+
+    _iconRect = iconRect;
+
+    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
+    double pictureXOff = (iconRect.width() - pictureSize.width()) / 2;
+    double pictureYOff = (iconRect.height() - pictureSize.height()) / 2;
+
+    _iconPos.setX(iconRect.x() + pictureXOff);
+    _iconPos.setY(iconRect.y() + pictureYOff);
+}
+
+
+void ListBoxItem::onLayoutText(const Gfx::RectF& innerRect,
+                               const Gfx::SizeF& iconSz,
+                               const Gfx::SizeF& textSz)
+{
+    if( _text.empty() )
+        return;
+
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
+        return;
+
+    Gfx::RectF iconRect;
+    Gfx::RectF textRect;
+    renderer->layoutContent(surface(), innerRect, iconSz, textSz,
+                             iconRect, textRect);
+
+    _textRect = textRect;
+
+    const Painter& painter = renderer->textPainter( surface() );
+    Gfx::FontMetrics fm = painter.fontMetrics();
+
+    double textY = textRect.y() + (textRect.height() - fm.height()) / 2.0 + fm.ascent();
+    _textPos.setX(textRect.x());
+    _textPos.setY(textY);
+}
+
+
 void ListBoxItem::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
-                        {
-    if( ! _renderer )
+{
+    if( ! _listItemStyle.renderer() )
         return;
 
     onPaintBackground(context);
@@ -397,19 +372,24 @@ void ListBoxItem::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 
 void ListBoxItem::onPaintBackground(PaintContext& context)
 {
-    if( ! _renderer )
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer )
         return;
 
-    ListItemStyleFlags state = listItemStyleFlags();
+    ListItemState state;
+    state.setEnabled( isEnabled() );
+    state.setHighlighted( isHovered() );
+    state.setFocused( hasFocus() );
+    state.setSelected( _isSelected );
 
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
-    _renderer->renderBackground(context, widgetRect, state);
+    renderer->renderBackground(context, widgetRect, state);
 }
 
 
 void ListBoxItem::onPaintContent(PaintContext& context)
 {
-    if( ! _renderer )
+    if( ! _listItemStyle.renderer() )
         return;
 
     onPaintIcon(context);
@@ -419,78 +399,33 @@ void ListBoxItem::onPaintContent(PaintContext& context)
 
 void ListBoxItem::onPaintIcon(PaintContext& context)
 {
-    if( ! _renderer || _picture.empty() )
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer || _picture.empty() )
         return;
 
-    ListItemStyleFlags state = listItemStyleFlags();
+    ListItemState state;
+    state.setEnabled( isEnabled() );
+    state.setHighlighted( isHovered() );
+    state.setFocused( hasFocus() );
+    state.setSelected( _isSelected );
 
-    const Painter& painter = _renderer->textPainter( surface() );
-
-    Gfx::TextMetrics tm = painter.textMetrics(_text);
-    Gfx::FontMetrics fm = painter.fontMetrics();
-
-    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
-    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-
-    Gfx::SizeF iconSz(pictureWidth, pictureHeight);
-    Gfx::SizeF textSz(tm.advance(), fm.height());
-
-    Gfx::RectF contentRect( Gfx::PointF(padding().left(), padding().top()),
-                           Gfx::SizeF(size().width() - padding().leftRight(),
-                                      size().height() - padding().topBottom()) );
-
-    Gfx::RectF innerRect = _renderer->layoutFrame(surface(), contentRect);
-
-    Gfx::RectF iconRect;
-    Gfx::RectF textRect;
-    _renderer->layoutContent(surface(), innerRect, iconSz, textSz,
-                             iconRect, textRect);
-
-    double pictureXOff = (iconRect.width() - pictureSize.width()) / 2;
-    double pictureYOff = (iconRect.height() - pictureSize.height()) / 2;
-
-    Gfx::PointF picturePos(iconRect.x() + pictureXOff,
-                           iconRect.y() + pictureYOff);
-
-    _renderer->renderIcon(context, iconRect, _picture, picturePos, state);
+    renderer->renderIcon(context, _iconRect, _picture, _iconPos, state);
 }
 
 
 void ListBoxItem::onPaintText(PaintContext& context)
 {
-    if( ! _renderer || _text.empty() )
+    ListItemRenderer* renderer = _listItemStyle.renderer();
+    if( ! renderer || _text.empty() )
         return;
 
-    ListItemStyleFlags state = listItemStyleFlags();
+    ListItemState state;
+    state.setEnabled( isEnabled() );
+    state.setHighlighted( isHovered() );
+    state.setFocused( hasFocus() );
+    state.setSelected( _isSelected );
 
-    const Painter& painter = _renderer->textPainter( surface() );
-
-    Gfx::TextMetrics tm = painter.textMetrics(_text);
-    Gfx::FontMetrics fm = painter.fontMetrics();
-
-    Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
-    double pictureWidth = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
-
-    Gfx::SizeF iconSz(pictureWidth, pictureHeight);
-    Gfx::SizeF textSz(tm.advance(), fm.height());
-
-    Gfx::RectF contentRect( Gfx::PointF(padding().left(), padding().top()),
-                           Gfx::SizeF(size().width() - padding().leftRight(),
-                                      size().height() - padding().topBottom()) );
-
-    Gfx::RectF innerRect = _renderer->layoutFrame(surface(), contentRect);
-
-    Gfx::RectF iconRect;
-    Gfx::RectF textRect;
-    _renderer->layoutContent(surface(), innerRect, iconSz, textSz,
-                             iconRect, textRect);
-
-    double textY = textRect.y() + (textRect.height() - fm.height()) / 2.0 + fm.ascent();
-    Gfx::PointF textPos(textRect.x(), textY);
-
-    _renderer->renderText(context, textRect, _text, textPos, state);
+    renderer->renderText(context, _textRect, _text, _textPos, state);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -556,9 +491,6 @@ ListBox::ListBox()
 : _layout()
 , _hasBackground(true)
 , _hasFrame(true)
-, _customRenderer(false)
-, _styleGeneration(0)
-, _overrideFlags(0)
 {
     _scrollView.setContent(_layout);
     _scrollView.setContentMode(SizePolicy::Fixed, SizePolicy::Preferred);
@@ -608,8 +540,9 @@ const Gfx::Brush* ListBox::background() const
     if( ! _hasBackground )
         return 0;
 
-    if( _renderer )
-        return _renderer->background();
+    const Gfx::Brush* b = _listBoxOptions.background();
+    if(b)
+        return b;
 
     return &Application::instance().styleOptions().viewBackground();
 }
@@ -617,13 +550,8 @@ const Gfx::Brush* ListBox::background() const
 
 void ListBox::setBackground(const Gfx::Brush& b)
 {
-    _background.reset( new Gfx::Brush(b) );
+    _listBoxOptions.setBackground(b);
     _hasBackground = true;
-    _overrideFlags |= OverrideBackground;
-
-    if( ListBoxRenderer* renderer = getRenderer() )
-        renderer->setBackground(*_background);
-
     invalidate();
 }
 
@@ -640,8 +568,9 @@ const Gfx::Pen* ListBox::contour() const
     if( ! _hasFrame )
         return 0;
 
-    if( _renderer )
-        return _renderer->contour();
+    const Gfx::Pen* p = _listBoxOptions.contour();
+    if(p)
+        return p;
 
     return &Application::instance().styleOptions().contour();
 }
@@ -649,13 +578,8 @@ const Gfx::Pen* ListBox::contour() const
 
 void ListBox::setContour(const Gfx::Pen& pen)
 {
-    _contour.reset( new Gfx::Pen(pen) );
+    _listBoxOptions.setContour(pen);
     _hasFrame = true;
-    _overrideFlags |= OverrideContour;
-
-    if( ListBoxRenderer* renderer = getRenderer() )
-        renderer->setContour(*_contour);
-
     invalidate();
 }
 
@@ -664,60 +588,6 @@ void ListBox::setFrame(bool b)
 {
     _hasFrame = b;
     repaint();
-}
-
-
-void ListBox::setRenderer(ListBoxRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _customRenderer = renderer != 0;
-
-    if( renderer )
-        applyRenderer(renderer);
-
-    invalidate();
-}
-
-
-ListBoxRenderer* ListBox::getRenderer()
-{
-    if( ! _renderer )
-    {
-        const Style& style = Application::instance().style();
-        ListBoxRenderer* proto = style.get<ListBoxRenderer>();
-        if( ! proto )
-            return 0;
-
-        _renderer.reset( proto->create() );
-    }
-
-    return _renderer.get();
-}
-
-
-void ListBox::applyRenderer(ListBoxRenderer* renderer)
-{
-    if( _overrideFlags & OverrideBackground )
-        renderer->setBackground(*_background);
-
-    if( _overrideFlags & OverrideContour )
-        renderer->setContour(*_contour);
-}
-
-
-ListBoxStyleFlags ListBox::listBoxStyleFlags() const
-{
-    StyleFlags common;
-
-    if( isEnabled() )
-        common.set(StyleFlags::Enabled);
-    else
-        common.set(StyleFlags::Disabled);
-
-    if( hasFocus() )
-        common.set(StyleFlags::Focused);
-
-    return ListBoxStyleFlags(common);
 }
 
 
@@ -745,14 +615,43 @@ int ListBox::maximumY() const
 }
 
 
+void ListBox::setRenderer(ListBoxRenderer* renderer)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if(renderer)
+        _listBoxStyle.bind(*renderer, options, _listBoxOptions);
+    else
+        _listBoxStyle.bind(Application::instance().style(), options, _listBoxOptions);
+
+    invalidate();
+}
+
+
+void ListBox::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    _listBoxStyle.rebind(Application::instance().style(), options, _listBoxOptions);
+
+    if( ! _listBoxStyle.renderer() )
+        return;
+
+    relayout();
+}
+
+
 Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 {
+    ListBoxRenderer* renderer = _listBoxStyle.renderer();
+
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();
     double vspace = padding().topBottom() + _scrollView.margin().topBottom();
 
-    if( _renderer && _hasFrame )
+    if( renderer && _hasFrame )
     {
-        Gfx::SizeF frameSize = _renderer->measureFrame(surface(), Gfx::SizeF(0, 0));
+        Gfx::SizeF frameSize = renderer->measureFrame(surface(), Gfx::SizeF(0, 0));
         hspace += frameSize.width();
         vspace += frameSize.height();
     }
@@ -775,11 +674,13 @@ void ListBox::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
+    ListBoxRenderer* renderer = _listBoxStyle.renderer();
+
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
     Gfx::RectF contentRect = widgetRect;
 
-    if( _renderer && _hasFrame )
-        contentRect = _renderer->layoutFrame(surface(), widgetRect);
+    if( renderer && _hasFrame )
+        contentRect = renderer->layoutFrame(surface(), widgetRect);
 
     Gfx::PointF pos(contentRect.x() + _scrollView.margin().left(),
                     contentRect.y() + _scrollView.margin().top());
@@ -792,56 +693,26 @@ void ListBox::onLayout(const Gfx::RectF& rect)
 }
 
 
-void ListBox::onInvalidate()
-{
-    Base::onInvalidate();
-
-    std::size_t gen = Application::instance().styleOptions().generation();
-    if( _styleGeneration != gen )
-    {
-        _styleGeneration = gen;
-        if( ! _customRenderer )
-            _renderer.reset();
-    }
-
-    if( ! _renderer )
-    {
-        bool hasOverride = (_overrideFlags != 0);
-        if( hasOverride )
-        {
-            if( ListBoxRenderer* renderer = getRenderer() )
-                applyRenderer(renderer);
-        }
-        else
-        {
-            _renderer.reset( Application::instance().style().get<ListBoxRenderer>() );
-        }
-    }
-
-    if( ! _renderer )
-        return;
-
-    relayout();
-}
-
-
 void ListBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _renderer )
+    ListBoxRenderer* renderer = _listBoxStyle.renderer();
+    if( ! renderer )
         return;
 
-    ListBoxStyleFlags state = listBoxStyleFlags();
+    ListBoxState state;
+    state.setEnabled( isEnabled() );
+    state.setFocused( hasFocus() );
 
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
 
     if( _hasBackground )
     {
-        _renderer->renderBackground(context, widgetRect, state);
+        renderer->renderBackground(context, widgetRect, state);
     }
 
     if( _hasFrame )
     {
-        _renderer->renderChrome(context, widgetRect, state);
+        renderer->renderChrome(context, widgetRect, state);
     }
 }
 

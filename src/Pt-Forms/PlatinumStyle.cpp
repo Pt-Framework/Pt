@@ -1347,10 +1347,28 @@ LineEditRenderer* PlatinumLineEditRenderer::onCreate() const
 }
 
 
-void PlatinumLineEditRenderer::onPrepare(const StyleOptions& /*options*/)
+void PlatinumLineEditRenderer::onPrepare(const StyleOptions& options,
+                                         const LineEditStyleOptions& lineEditOptions)
 {
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    const Gfx::Brush* bg = lineEditOptions.background();
+    _background = bg ? *bg : Gfx::Brush( options.textBackground() );
+
+    const Gfx::Pen* cp = lineEditOptions.contour();
+    _contour = cp ? *cp : options.contour();
+    _contour.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    const Gfx::Font* fp = lineEditOptions.font();
+    _font = fp ? *fp : lineEditOptions.getFont( options.font() );
+
+    const Gfx::Color* tc = lineEditOptions.textColor();
+    _textColor = tc ? *tc : options.textColor();
+
+    _accentColor = options.accentColor();
+    _selectionBackground = options.accentColor();
+    _selectionTextColor = options.textBackground().color();
+
+    _textPainter.setFont( _font );
+    _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 
 
@@ -1358,9 +1376,9 @@ Gfx::SizeF PlatinumLineEditRenderer::onMeasureFrame(PaintSurface& surface,
                                                  const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
-    _textPainter.setFont( font() );
+    _textPainter.setFont( _font );
 
-    double entryHeight = font().size() * 2.5;
+    double entryHeight = _font.size() * 2.5;
     double entryWidth = contentSize.width() + 2 * _inset;
     return Gfx::SizeF(entryWidth, entryHeight);
 }
@@ -1384,31 +1402,29 @@ Gfx::RectF PlatinumLineEditRenderer::onLayoutFrame(PaintSurface& /*surface*/,
 const Painter& PlatinumLineEditRenderer::onGetTextPainter(PaintSurface& surface)
 {
     _textPainter.begin(surface);
-    _textPainter.setFont( font() );
+    _textPainter.setFont( _font );
     return _textPainter;
 }
 
 
 void PlatinumLineEditRenderer::onRenderEntry(PaintContext& context,
-                                                   const Gfx::RectF& rect,
-                                                   const StyleOptions& options,
-                                                   LineEditStyleFlags state)
+                                             const Gfx::RectF& rect,
+                                             const LineEditState& state)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     _bgPainter.begin(context);
 
-    Gfx::Brush bg = background();
+    Gfx::Brush bg = _background;
 
-    Gfx::Pen cPen = contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+    Gfx::Pen cPen = _contour;
 
-    if( state.has(StyleFlags::Enabled) )
+    if( state.isEnabled() )
     {
-        if( state.has(StyleFlags::Highlighted) || state.has(StyleFlags::Focused) )
+        if( state.isHighlighted() || state.isFocused() )
         {
-            cPen = Gfx::Pen( options.accentColor(), 
+            cPen = Gfx::Pen( _accentColor, 
                              cPen.size(), cPen.style(), 
                              cPen.capStyle(), cPen.joinStyle() );
         }
@@ -1435,15 +1451,13 @@ void PlatinumLineEditRenderer::onRenderEntry(PaintContext& context,
 
 void PlatinumLineEditRenderer::onRenderSelection(PaintContext& context,
                                                   const Gfx::RectF& textRect,
-                                                  const StyleOptions& options,
                                                   const Gfx::RectF& selection,
-                                                  LineEditStyleFlags /*state*/)
+                                                  const LineEditState& /*state*/)
 {
     if( selection.width() <= 0 || textRect.width() <= 0 || textRect.height() <= 0 )
         return;
 
-    Gfx::Brush selBg = selectionBackground() ? *selectionBackground()
-                                             : Gfx::Brush( options.accentColor() );
+    Gfx::Brush selBg( _selectionBackground );
 
     _selectionPainter.begin(context);
     _selectionPainter.setClip(textRect);
@@ -1454,42 +1468,40 @@ void PlatinumLineEditRenderer::onRenderSelection(PaintContext& context,
 
 void PlatinumLineEditRenderer::onRenderText(PaintContext& context,
                                             const Gfx::RectF& textRect,
-                                            const StyleOptions& options,
                                             const String& text,
                                             const Gfx::PointF& textPos,
-                                            LineEditStyleFlags state)
+                                            const LineEditState& state)
 {
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;
 
-    if( state.has(LineEditStyleFlags::Placeholder) )
-        _textPainter.setPen( contour() );
+    if( state.isPlaceholder() )
+        _textPainter.setPen( _contour );
     else
-        _textPainter.setPen( textColor() );
+        _textPainter.setPen( Gfx::Pen(_textColor) );
 
     _textPainter.begin(context);
     _textPainter.setClip(textRect);
-    _textPainter.setFont( font() );
+    _textPainter.setFont( _font );
     _textPainter.drawText(textPos, text);
 }
 
 
 void PlatinumLineEditRenderer::onRenderCursor(PaintContext& context,
                                               const Gfx::RectF& textRect,
-                                              const StyleOptions& /*options*/,
                                               const Gfx::RectF& cursor,
-                                              LineEditStyleFlags state)
+                                              const LineEditState& state)
 {
-    if( ! state.has(LineEditStyleFlags::Editable) )
+    if( ! state.isEditable() )
         return;
 
-    if( ! state.has(StyleFlags::Focused) )
+    if( ! state.isFocused() )
         return;
 
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;
 
-    _textPainter.setPen( textColor() );
+    _textPainter.setPen( Gfx::Pen(_textColor) );
     _textPainter.begin(context);
     _textPainter.setClip(textRect);
 
@@ -2228,27 +2240,18 @@ ListBoxRenderer* PlatinumListBoxRenderer::onCreate() const
 }
 
 
-void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options,
+                                        const ListBoxStyleOptions& listBoxOptions)
 {
-    const Gfx::Brush* bg = background();
-    if( bg )
-        _bgPainter.setBrush(*bg);
-    else
-        _bgPainter.setBrush( options.viewBackground() );
+    const Gfx::Brush* bg = listBoxOptions.background();
+    _viewBackground = bg ? *bg : options.viewBackground();
 
-    const Gfx::Pen* pen = contour();
-    if( pen )
-    {
-        Gfx::Pen framePen = *pen;
-        framePen.setJoinStyle(Gfx::Pen::BevelJoin);
-        _framePainter.setPen(framePen);
-    }
-    else
-    {
-        Gfx::Pen framePen = options.contour();
-        framePen.setJoinStyle(Gfx::Pen::BevelJoin);
-        _framePainter.setPen(framePen);
-    }
+    const Gfx::Pen* pen = listBoxOptions.contour();
+    _contour = pen ? *pen : options.contour();
+    _contour.setJoinStyle(Gfx::Pen::BevelJoin);
+
+    _bgPainter.setBrush(_viewBackground);
+    _framePainter.setPen(_contour);
 }
 
 
@@ -2277,8 +2280,7 @@ Gfx::RectF PlatinumListBoxRenderer::onLayoutFrame(PaintSurface& surface,
 
 void PlatinumListBoxRenderer::onRenderBackground(PaintContext& context,
                                                  const Gfx::RectF& rect,
-                                                 const StyleOptions& /*options*/,
-                                                 ListBoxStyleFlags /*state*/)
+                                                 const ListBoxState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -2290,8 +2292,7 @@ void PlatinumListBoxRenderer::onRenderBackground(PaintContext& context,
 
 void PlatinumListBoxRenderer::onRenderChrome(PaintContext& context,
                                             const Gfx::RectF& rect,
-                                            const StyleOptions& /*options*/,
-                                            ListBoxStyleFlags /*state*/)
+                                            const ListBoxState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
@@ -2317,6 +2318,7 @@ void PlatinumListBoxRenderer::onRenderChrome(PaintContext& context,
 
 PlatinumListItemRenderer::PlatinumListItemRenderer(std::size_t refs)
 : ListItemRenderer(refs)
+, _hasBackground(false)
 {
 }
 
@@ -2332,16 +2334,24 @@ ListItemRenderer* PlatinumListItemRenderer::onCreate() const
 }
 
 
-void PlatinumListItemRenderer::onPrepare(const StyleOptions& options)
+void PlatinumListItemRenderer::onPrepare(const StyleOptions& options,
+                                         const ListItemStyleOptions& listItemOptions)
 {
-    const Gfx::Brush* fg = foreground();
-    if( fg )
-        _bgPainter.setBrush(*fg);
-    else
-        _bgPainter.setBrush( options.highlightColor() );
+    _highlightBrush = Gfx::Brush( options.highlightColor() );
+    _highlightedTextColor = options.highlightedTextColor();
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    const Gfx::Brush* bg = listItemOptions.background();
+    _hasBackground = (bg != 0);
+    if(bg)
+        _background = *bg;
+
+    _font = listItemOptions.getFont(options.font());
+
+    const Gfx::Color* tc = listItemOptions.textColor();
+    _textColor = tc ? *tc : options.textColor();
+
+    _textPainter.setFont(_font);
+    _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 
 
@@ -2350,7 +2360,7 @@ Gfx::SizeF PlatinumListItemRenderer::onMeasureContent(PaintSurface& /*surface*/,
                                                       const Gfx::SizeF& textSize)
 {
     double spacing = (iconSize.isNull() || textSize.isNull()) ? 0
-                   : font().size() * 0.5;
+                   : _font.size() * 0.5;
 
     double w = iconSize.width() + spacing + textSize.width();
     double h = std::max<double>(iconSize.height(), textSize.height());
@@ -2388,7 +2398,7 @@ void PlatinumListItemRenderer::onLayoutContent(PaintSurface& /*surface*/,
                                                Gfx::RectF& textRect)
 {
     double spacing = (iconSize.isNull() || textSize.isNull()) ? 0
-                   : font().size() * 0.5;
+                   : _font.size() * 0.5;
 
     double iconX = contentRect.x();
     double iconH = iconSize.height();
@@ -2414,22 +2424,20 @@ void PlatinumListItemRenderer::onLayoutContent(PaintSurface& /*surface*/,
 
 void PlatinumListItemRenderer::onRenderBackground(PaintContext& context,
                                                   const Gfx::RectF& rect,
-                                                  const StyleOptions& options,
-                                                  ListItemStyleFlags state)
+                                                  const ListItemState& state)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
-    if( state.has(ListItemStyleFlags::Selected) || state.has(StyleFlags::Highlighted) )
+    if( state.isSelected() || state.isHighlighted() )
     {
-        const Gfx::Brush* fg = foreground();
-        _bgPainter.setBrush( fg ? *fg : Gfx::Brush( options.highlightColor() ) );
+        _bgPainter.setBrush(_highlightBrush);
         _bgPainter.begin(context);
         _bgPainter.fillRect(rect);
     }
-    else if( background() )
+    else if( _hasBackground )
     {
-        _bgPainter.setBrush( *background() );
+        _bgPainter.setBrush(_background);
         _bgPainter.begin(context);
         _bgPainter.fillRect(rect);
     }
@@ -2438,18 +2446,17 @@ void PlatinumListItemRenderer::onRenderBackground(PaintContext& context,
 
 void PlatinumListItemRenderer::onRenderText(PaintContext& context,
                                             const Gfx::RectF& textRect,
-                                            const StyleOptions& options,
                                             const String& text,
                                             const Gfx::PointF& pos,
-                                            ListItemStyleFlags state)
+                                            const ListItemState& state)
 {
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;
 
-    if( state.has(ListItemStyleFlags::Selected) || state.has(StyleFlags::Highlighted) )
-        _textPainter.setPen( options.highlightedTextColor() );
+    if( state.isSelected() || state.isHighlighted() )
+        _textPainter.setPen( Gfx::Pen(_highlightedTextColor) );
     else
-        _textPainter.setPen( textColor() );
+        _textPainter.setPen( Gfx::Pen(_textColor) );
 
     _textPainter.begin(context);
     _textPainter.setClip(textRect);
@@ -2459,10 +2466,9 @@ void PlatinumListItemRenderer::onRenderText(PaintContext& context,
 
 void PlatinumListItemRenderer::onRenderIcon(PaintContext& context,
                                             const Gfx::RectF& iconRect,
-                                            const StyleOptions& /*options*/,
                                             const Pixmap& picture,
                                             const Gfx::PointF& pos,
-                                            ListItemStyleFlags /*state*/)
+                                            const ListItemState& /*state*/)
 {
     if( iconRect.width() <= 0 || iconRect.height() <= 0 )
         return;
@@ -2495,22 +2501,34 @@ ComboBoxRenderer* PlatinumComboBoxRenderer::onCreate() const
 }
 
 
-void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options,
+                                         const ComboBoxStyleOptions& comboBoxOptions)
 {
-    Gfx::Brush bg = background();
+    const Gfx::Brush* bg = comboBoxOptions.background();
+    _background = bg ? *bg : options.textBackground();
 
-    Gfx::Pen cPen = contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+    const Gfx::Pen* cp = comboBoxOptions.contour();
+    _contour = cp ? *cp : options.contour();
+    _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    _bgPainter.setBrush(bg);
-    _bgPainter.setPen(cPen);
+    const Gfx::Brush* fg = comboBoxOptions.foreground();
+    _foreground = fg ? *fg : options.foreground();
 
-    Gfx::Brush fg = foreground();
-    _buttonPainter.setBrush(fg);
-    _buttonPainter.setPen(cPen);
+    _font = comboBoxOptions.getFont(options.font());
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    const Gfx::Color* tc = comboBoxOptions.textColor();
+    _textColor = tc ? *tc : options.textColor();
+
+    _accentColor = options.accentColor();
+
+    _bgPainter.setBrush(_background);
+    _bgPainter.setPen(_contour);
+
+    _buttonPainter.setBrush(_foreground);
+    _buttonPainter.setPen(_contour);
+
+    _textPainter.setFont(_font);
+    _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 
 
@@ -2519,7 +2537,7 @@ Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
 {
     _textPainter.begin(surface);
 
-    double entryHeight = font().size() * 2.5;
+    double entryHeight = _font.size() * 2.5;
     double buttonWidth = entryHeight;
     double entryWidth = contentSize.width() + 2 * _inset;
 
@@ -2532,7 +2550,7 @@ Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
 
 Gfx::SizeF PlatinumComboBoxRenderer::onMeasureButton(PaintSurface& /*surface*/)
 {
-    double h = font().size() * 2.5;
+    double h = _font.size() * 2.5;
     return Gfx::SizeF(h, h);
 }
 
@@ -2575,8 +2593,7 @@ const Painter& PlatinumComboBoxRenderer::onGetTextPainter(PaintSurface& surface)
 
 void PlatinumComboBoxRenderer::onRenderEntry(PaintContext& context,
                                              const Gfx::RectF& entryRect,
-                                             const StyleOptions& options,
-                                             ComboBoxStyleFlags state)
+                                             const ComboBoxState& state)
 {
     // Not used — onRenderChrome draws the integrated chrome
 }
@@ -2584,9 +2601,8 @@ void PlatinumComboBoxRenderer::onRenderEntry(PaintContext& context,
 
 void PlatinumComboBoxRenderer::onRenderButton(PaintContext& context,
                                               const Gfx::RectF& buttonRect,
-                                              const StyleOptions& options,
-                                              ComboBoxStyleFlags state,
-                                              ButtonStyleFlags buttonState)
+                                              const ComboBoxState& state,
+                                              const ComboBoxButtonState& buttonState)
 {
     // Not used — onRenderChrome draws the integrated chrome
 }
@@ -2596,23 +2612,21 @@ void PlatinumComboBoxRenderer::onRenderChrome(PaintContext& context,
                                               const Gfx::RectF& rect,
                                               const Gfx::RectF& /*entryRect*/,
                                               const Gfx::RectF& buttonRect,
-                                              const StyleOptions& options,
-                                              ComboBoxStyleFlags state,
-                                              ButtonStyleFlags buttonState)
+                                              const ComboBoxState& state,
+                                              const ComboBoxButtonState& buttonState)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
     _bgPainter.begin(context);
 
-    Gfx::Pen cPen = contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+    Gfx::Pen cPen = _contour;
 
-    if( state.has(StyleFlags::Enabled) )
+    if( state.isEnabled() )
     {
-        if( state.has(StyleFlags::Highlighted) || state.has(StyleFlags::Focused) )
+        if( state.isHighlighted() || state.isFocused() )
         {
-            cPen = Gfx::Pen( options.accentColor(),
+            cPen = Gfx::Pen( _accentColor,
                              cPen.size(), cPen.style(),
                              cPen.capStyle(), cPen.joinStyle() );
         }
@@ -2645,10 +2659,10 @@ void PlatinumComboBoxRenderer::onRenderChrome(PaintContext& context,
 
     Gfx::Pen btnPen = cPen;
 
-    if( buttonState.has(StyleFlags::Highlighted) ||
-        buttonState.has(ButtonStyleFlags::Pressed) )
+    if( buttonState.isHighlighted() ||
+        buttonState.isPressed() )
     {
-        btnPen = Gfx::Pen( options.accentColor(),
+        btnPen = Gfx::Pen( _accentColor,
                            btnPen.size(), btnPen.style(),
                            btnPen.capStyle(), btnPen.joinStyle() );
     }
@@ -2695,11 +2709,10 @@ void PlatinumComboBoxRenderer::onRenderChrome(PaintContext& context,
 
 void PlatinumComboBoxRenderer::onRenderText(PaintContext& context,
                                             const Gfx::RectF& textRect,
-                                            const StyleOptions& /*options*/,
                                             const String& text,
                                             const Gfx::PointF& textPos,
                                             const Gfx::RectF& cursor,
-                                            ComboBoxStyleFlags state)
+                                            const ComboBoxState& state)
 {
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;
@@ -2708,7 +2721,7 @@ void PlatinumComboBoxRenderer::onRenderText(PaintContext& context,
     _textPainter.setClip(textRect);
     _textPainter.drawText(textPos, text);
 
-    if( state.has(ComboBoxStyleFlags::Editable) && state.has(StyleFlags::Focused) )
+    if( state.isEditable() && state.isFocused() )
     {
         _textPainter.drawLine( cursor.topLeft(), cursor.bottomLeft() );
     }
@@ -2736,26 +2749,32 @@ TabViewRenderer* PlatinumTabViewRenderer::onCreate() const
 }
 
 
-void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options)
+void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options,
+                                        const TabViewStyleOptions& tabViewOptions)
 {
-    _inset = font().size() / 2.0;
+    _font = tabViewOptions.getFont(options.font());
+    _inset = _font.size() / 2.0;
 
-    Gfx::Pen cPen = contour() ? *contour()
-                               : options.contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
+    const Gfx::Pen* cp = tabViewOptions.contour();
+    _contour = cp ? *cp : options.contour();
+    _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    Gfx::Brush bg = background() ? *background()
-                                  : options.background();
+    const Gfx::Brush* bg = tabViewOptions.background();
+    _background = bg ? *bg : options.background();
 
-    _bgPainter.setBrush(bg);
+    const Gfx::Color* tc = tabViewOptions.textColor();
+    _textColor = tc ? *tc : options.textColor();
 
-    _framePainter.setPen(cPen);
+    _accentColor = options.accentColor();
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    _bgPainter.setBrush(_background);
+    _framePainter.setPen(_contour);
 
-    _activeTextPainter.setFont( font() );
-    _activeTextPainter.setPen( options.accentColor() );
+    _textPainter.setFont(_font);
+    _textPainter.setPen( Gfx::Pen(_textColor) );
+
+    _activeTextPainter.setFont(_font);
+    _activeTextPainter.setPen( Gfx::Pen(_accentColor) );
 }
 
 
@@ -2763,7 +2782,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTab(PaintSurface& surface,
                                                    const Pt::String& text)
 {
     Gfx::SizeF s;
-    s.setHeight( font().size() * 2.4 );
+    s.setHeight( _font.size() * 2.4 );
 
     _textPainter.begin(surface);
     Gfx::TextMetrics tm = _textPainter.textMetrics(text);
@@ -2795,17 +2814,13 @@ const Painter& PlatinumTabViewRenderer::onGetTextPainter(PaintSurface& surface)
 
 void PlatinumTabViewRenderer::onRenderBackground(PaintContext& context,
                                                   const Gfx::RectF& contentRect,
-                                                  const StyleOptions& options,
-                                                  TabViewStyleFlags /*state*/)
+                                                  const TabViewState& /*state*/)
 {
     if( contentRect.width() <= 0 || contentRect.height() <= 0 )
         return;
 
-    Gfx::Brush bg = background() ? *background()
-                                  : options.background();
-
     _bgPainter.begin(context);
-    _bgPainter.setBrush(bg);
+    _bgPainter.setBrush(_background);
     _bgPainter.fillRect(contentRect);
 }
 
@@ -2813,19 +2828,13 @@ void PlatinumTabViewRenderer::onRenderBackground(PaintContext& context,
 void PlatinumTabViewRenderer::onRenderChrome(PaintContext& context,
                                              const Gfx::RectF& contentRect,
                                              const Gfx::RectF& /*activeTabRect*/,
-                                             const StyleOptions& options,
-                                             TabViewStyleFlags /*state*/)
+                                             const TabViewState& /*state*/)
 {
     if( contentRect.width() <= 0 || contentRect.height() <= 0 )
         return;
 
-    // Re-establish contour pen since onRenderTab may have set accent color
-    Gfx::Pen cPen = contour() ? *contour()
-                               : options.contour();
-    cPen.setJoinStyle(Gfx::Pen::BevelJoin);
-
     _framePainter.begin(context);
-    _framePainter.setPen(cPen);
+    _framePainter.setPen(_contour);
     _framePainter.drawRect(contentRect);
 }
 
@@ -2834,13 +2843,12 @@ void PlatinumTabViewRenderer::onRenderTab(PaintContext& context,
                                           const Gfx::RectF& tabRect,
                                           const Pt::String& text,
                                           const Gfx::PointF& textPos,
-                                          const StyleOptions& options,
-                                          TabItemStyleFlags state)
+                                          const TabItemState& state)
 {
     if( tabRect.width() <= 0 || tabRect.height() <= 0 )
         return;
 
-    bool active = state.has(TabItemStyleFlags::Active);
+    bool active = state.isActive();
 
     Painter& textPainter = active ? _activeTextPainter : _textPainter;
     textPainter.begin(context);
@@ -2851,10 +2859,9 @@ void PlatinumTabViewRenderer::onRenderTab(PaintContext& context,
     _framePainter.begin(context);
 
     if( active )
-        _framePainter.setPen( Gfx::Pen( options.accentColor() ) );
+        _framePainter.setPen( Gfx::Pen(_accentColor) );
     else
-        _framePainter.setPen( contour() ? *contour()
-                                        : Gfx::Pen( options.contour() ) );
+        _framePainter.setPen( Gfx::Pen(_contour) );
 
     double halfInset = _inset / 2.0;
     Gfx::PointF from(tabRect.left() + halfInset,

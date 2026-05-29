@@ -1,5 +1,4 @@
 /* Copyright (C) 2017 Marc Boris Duerner 
-   Copyright (C) 2017 Ilja Maier
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -86,7 +85,7 @@ void ProgressBar::setValue(int n)
 
     if( n > _max )
         n = _max;
-        
+
     _value = n;
 
     invalidate();
@@ -231,6 +230,18 @@ ProgressBarState ProgressBar::progressBarState() const
 }
 
 
+void ProgressBar::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const Style& style = Application::instance().style();
+    const StyleOptions& options = Application::instance().styleOptions();
+    _progressBarStyle.rebind(style, options, _progressBarOptions);
+
+    relayout();
+}
+
+
 Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
 {
     ProgressBarRenderer* renderer = _progressBarStyle.renderer();
@@ -242,18 +253,6 @@ Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
 
     return Gfx::SizeF( sz.width() + padding().leftRight(), 
                        sz.height() + padding().topBottom() );
-}
-
-
-void ProgressBar::onInvalidate()
-{
-    Base::onInvalidate();
-
-    const Style& style = Application::instance().style();
-    const StyleOptions& options = Application::instance().styleOptions();
-    _progressBarStyle.rebind(style, options, _progressBarOptions);
-
-    relayout();
 }
 
 

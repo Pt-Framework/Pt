@@ -39,6 +39,10 @@
 #include <Pt/Forms/SliderStyle.h>
 #include <Pt/Forms/ScrollBarStyle.h>
 #include <Pt/Forms/ProgressBarStyle.h>
+#include <Pt/Forms/LineEditStyle.h>
+#include <Pt/Forms/ComboBoxStyle.h>
+#include <Pt/Forms/ListBoxStyle.h>
+#include <Pt/Forms/TabViewStyle.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -372,7 +376,8 @@ class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer
     protected:
         virtual LineEditRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const LineEditStyleOptions& lineEditOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                       const Gfx::SizeF& contentSize);
@@ -383,34 +388,38 @@ class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer
         virtual const Painter& onGetTextPainter(PaintSurface& surface);
 
         virtual void onRenderEntry(PaintContext& context,
-                                        const Gfx::RectF& rect,
-                                        const StyleOptions& options,
-                                        LineEditStyleFlags state);
+                                   const Gfx::RectF& rect,
+                                   const LineEditState& state);
 
         virtual void onRenderSelection(PaintContext& context,
                                        const Gfx::RectF& textRect,
-                                       const StyleOptions& options,
                                        const Gfx::RectF& selection,
-                                       LineEditStyleFlags state);
+                                       const LineEditState& state);
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
-                                  const StyleOptions& options,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  LineEditStyleFlags state);
+                                  const LineEditState& state);
 
         virtual void onRenderCursor(PaintContext& context,
                                     const Gfx::RectF& textRect,
-                                    const StyleOptions& options,
                                     const Gfx::RectF& cursor,
-                                    LineEditStyleFlags state);
+                                    const LineEditState& state);
 
     private:
-        Painter _bgPainter;
-        Painter _selectionPainter;
-        Painter _textPainter;
-        double  _inset;
+        Painter    _bgPainter;
+        Painter    _selectionPainter;
+        Painter    _textPainter;
+        double     _inset;
+
+        Gfx::Brush _background;
+        Gfx::Pen   _contour;
+        Gfx::Font  _font;
+        Gfx::Color _textColor;
+        Gfx::Color _accentColor;
+        Gfx::Color _selectionBackground;
+        Gfx::Color _selectionTextColor;
 };
 
 
@@ -600,7 +609,8 @@ class PT_FORMS_API PlatinumListBoxRenderer : public ListBoxRenderer
     protected:
         virtual ListBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const ListBoxStyleOptions& listBoxOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);
@@ -610,17 +620,17 @@ class PT_FORMS_API PlatinumListBoxRenderer : public ListBoxRenderer
 
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& rect,
-                                        const StyleOptions& options,
-                                        ListBoxStyleFlags state);
+                                        const ListBoxState& state);
 
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
-                                    const StyleOptions& options,
-                                    ListBoxStyleFlags state);
+                                    const ListBoxState& state);
 
     private:
-        Painter              _bgPainter;
-        Painter              _framePainter;
+        Gfx::Brush  _viewBackground;
+        Gfx::Pen    _contour;
+        Painter     _bgPainter;
+        Painter     _framePainter;
 };
 
 
@@ -634,7 +644,8 @@ class PT_FORMS_API PlatinumListItemRenderer : public ListItemRenderer
     protected:
         virtual ListItemRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const ListItemStyleOptions& listItemOptions);
 
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& iconSize,
@@ -657,27 +668,30 @@ class PT_FORMS_API PlatinumListItemRenderer : public ListItemRenderer
 
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& rect,
-                                        const StyleOptions& options,
-                                        ListItemStyleFlags state);
+                                        const ListItemState& state);
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
-                                  const StyleOptions& options,
                                   const String& text,
                                   const Gfx::PointF& pos,
-                                  ListItemStyleFlags state);
+                                  const ListItemState& state);
 
         virtual void onRenderIcon(PaintContext& context,
                                   const Gfx::RectF& iconRect,
-                                  const StyleOptions& options,
                                   const Pixmap& picture,
                                   const Gfx::PointF& pos,
-                                  ListItemStyleFlags state);
+                                  const ListItemState& state);
 
     private:
-        Painter _bgPainter;
-        Painter _iconPainter;
-        Painter _textPainter;
+        Gfx::Brush  _background;
+        bool        _hasBackground;
+        Gfx::Font   _font;
+        Gfx::Color  _textColor;
+        Gfx::Brush  _highlightBrush;
+        Gfx::Color  _highlightedTextColor;
+        Painter     _bgPainter;
+        Painter     _iconPainter;
+        Painter     _textPainter;
 };
 
 
@@ -691,7 +705,8 @@ class PT_FORMS_API PlatinumComboBoxRenderer : public ComboBoxRenderer
     protected:
         virtual ComboBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const ComboBoxStyleOptions& comboBoxOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);
@@ -710,34 +725,36 @@ class PT_FORMS_API PlatinumComboBoxRenderer : public ComboBoxRenderer
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& entryRect,
                                     const Gfx::RectF& buttonRect,
-                                    const StyleOptions& options,
-                                    ComboBoxStyleFlags state,
-                                    ButtonStyleFlags buttonState);
+                                    const ComboBoxState& state,
+                                    const ComboBoxButtonState& buttonState);
 
         virtual void onRenderEntry(PaintContext& context,
                                    const Gfx::RectF& entryRect,
-                                   const StyleOptions& options,
-                                   ComboBoxStyleFlags state);
+                                   const ComboBoxState& state);
 
         virtual void onRenderButton(PaintContext& context,
                                     const Gfx::RectF& buttonRect,
-                                    const StyleOptions& options,
-                                    ComboBoxStyleFlags state,
-                                    ButtonStyleFlags buttonState);
+                                    const ComboBoxState& state,
+                                    const ComboBoxButtonState& buttonState);
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
-                                  const StyleOptions& options,
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::RectF& cursor,
-                                  ComboBoxStyleFlags state);
+                                  const ComboBoxState& state);
 
     private:
-        double _inset;
-        Painter _bgPainter;
-        Painter _buttonPainter;
-        Painter _textPainter;
+        Gfx::Brush  _background;
+        Gfx::Pen    _contour;
+        Gfx::Brush  _foreground;
+        Gfx::Font   _font;
+        Gfx::Color  _textColor;
+        Gfx::Color  _accentColor;
+        double      _inset;
+        Painter     _bgPainter;
+        Painter     _buttonPainter;
+        Painter     _textPainter;
 };
 
 
@@ -751,7 +768,8 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
     protected:
         virtual TabViewRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const TabViewStyleOptions& tabViewOptions);
 
         virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
                                          const Pt::String& text);
@@ -763,28 +781,30 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
 
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& contentRect,
-                                        const StyleOptions& options,
-                                        TabViewStyleFlags state);
+                                        const TabViewState& state);
 
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& contentRect,
                                     const Gfx::RectF& activeTabRect,
-                                    const StyleOptions& options,
-                                    TabViewStyleFlags state);
+                                    const TabViewState& state);
 
         virtual void onRenderTab(PaintContext& context,
                                  const Gfx::RectF& tabRect,
                                  const Pt::String& text,
                                  const Gfx::PointF& textPos,
-                                 const StyleOptions& options,
-                                 TabItemStyleFlags state);
+                                 const TabItemState& state);
 
     private:
-        double  _inset;
-        Painter _bgPainter;
-        Painter _framePainter;
-        Painter _textPainter;
-        Painter _activeTextPainter;
+        Gfx::Brush  _background;
+        Gfx::Pen    _contour;
+        Gfx::Font   _font;
+        Gfx::Color  _textColor;
+        Gfx::Color  _accentColor;
+        double      _inset;
+        Painter     _bgPainter;
+        Painter     _framePainter;
+        Painter     _textPainter;
+        Painter     _activeTextPainter;
 };
 
 

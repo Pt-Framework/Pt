@@ -31,6 +31,7 @@
 #define PT_FORMS_LINEEDIT_H
 
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/LineEditStyle.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Adjustment.h>
 #include <Pt/SmartPtr.h>
@@ -122,7 +123,7 @@ class PT_FORMS_API LineEdit : public Control
 
         void setRenderer(LineEditRenderer* renderer);
 
-        LineEditStyleFlags lineEditStyleFlags() const;
+        LineEditState lineEditState() const;
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
@@ -132,6 +133,15 @@ class PT_FORMS_API LineEdit : public Control
         virtual void onInvalidate();
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& rect);
+
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& textRect,
+                                   const String& text,
+                                   const Gfx::PointF& textPos,
+                                   const Gfx::RectF& cursor,
+                                   const Gfx::RectF& selection,
+                                   const LineEditState& state);
 
     protected:
         virtual bool onEnterEvent(const EnterEvent& ev);
@@ -149,26 +159,6 @@ class PT_FORMS_API LineEdit : public Control
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
-        Gfx::Font getFont() const;
-
-        LineEditRenderer* getRenderer();
-
-        void applyRenderer(LineEditRenderer* renderer);
-
-    private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideContour    = 0x02,
-            OverrideTextColor  = 0x04,
-            OverrideFontAll    = 0x08,
-            OverrideFontSize   = 0x10,
-            OverrideFontWeight = 0x20,
-            OverrideFontSlant  = 0x40,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
-
         Pt::Signal<const Pt::String&> _textEdited;
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
@@ -184,17 +174,11 @@ class PT_FORMS_API LineEdit : public Control
         EchoMode                      _echoMode;
         double                        _spacing;
 
-        FacetPtr<LineEditRenderer>     _renderer;
-        bool                           _customRenderer;
-        std::size_t                    _styleGeneration;
-
-        AutoPtr<Gfx::Brush>            _background;
-        AutoPtr<Gfx::Pen>              _contour;
-        AutoPtr<Gfx::Color>           _textColor;
-        Gfx::Font                       _customFont;
-        unsigned                        _overrides;
+        LineEditStyle                  _lineEditStyle;
+        LineEditStyleOptions           _lineEditOptions;
 
         Gfx::RectF                    _textRect;
+        Gfx::RectF                    _cursorRect;
 };
 
 } // namespace

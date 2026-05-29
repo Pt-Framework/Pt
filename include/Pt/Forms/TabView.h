@@ -30,6 +30,7 @@
 #define Pt_Forms_TabView_H
 
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/TabViewStyle.h>
 #include <Pt/Forms/StackLayout.h>
 #include <Pt/Forms/DockingLayout.h>
 #include <Pt/SmartPtr.h>
@@ -63,6 +64,18 @@ class TabItem
         void setGeometry(const Gfx::RectF& r)
         { _geometry = r; }
 
+        const Gfx::SizeF& measuredSize() const
+        { return _measuredSize; }
+
+        void setMeasuredSize(const Gfx::SizeF& s)
+        { _measuredSize = s; }
+
+        const Gfx::PointF& textPos() const
+        { return _textPos; }
+
+        void setTextPos(const Gfx::PointF& p)
+        { _textPos = p; }
+
         bool isPressed() const
         { return _isPressed; }
 
@@ -70,9 +83,11 @@ class TabItem
         { _isPressed = b; }
 
     private:
-        String     _text;
-        Gfx::RectF _geometry;
-        bool       _isPressed;
+        String      _text;
+        Gfx::SizeF  _measuredSize;
+        Gfx::RectF  _geometry;
+        Gfx::PointF _textPos;
+        bool        _isPressed;
 };
 
 /** @brief Tab bar for all tabbed controls.
@@ -128,41 +143,24 @@ class PT_FORMS_API TabBar : public Control
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        virtual void onPaintTab(PaintContext& context,
+                                const Gfx::RectF& tabRect,
+                                const Pt::String& text,
+                                const Gfx::PointF& textPos,
+                                const TabItemState& state);
+
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent(const TouchEvent& ev);
 
     private:
-        TabViewRenderer* getRenderer();
-
-        void applyRenderer(TabViewRenderer* renderer);
-
-        Gfx::Font getFont() const;
-
-    private:
         Pt::Signal<std::size_t> _currentChanged;
         std::vector<TabItem>    _tabs;
         std::size_t             _current;
 
-        FacetPtr<TabViewRenderer> _renderer;
-        bool                      _customRenderer;
-        std::size_t               _styleGeneration;
-
-        AutoPtr<Gfx::Font>    _customFont;
-        AutoPtr<Gfx::Color>   _textColor;
-        unsigned              _overrides;
-
-        enum OverrideFlags : unsigned
-        {
-            OverrideTextColor  = 0x01,
-            OverrideFontAll    = 0x02,
-            OverrideFontSize   = 0x04,
-            OverrideFontWeight = 0x08,
-            OverrideFontSlant  = 0x10,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
+        TabViewStyle        _tabBarStyle;
+        TabViewStyleOptions _tabBarOptions;
 };
 
 /** @brief Tabbed view for controls.
@@ -221,44 +219,24 @@ class PT_FORMS_API TabView : public Control
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
-    private:
-        TabViewRenderer* getRenderer();
+        virtual void onPaintBackground(PaintContext& context,
+                                       const Gfx::RectF& contentRect,
+                                       const TabViewState& state);
 
-        void applyRenderer(TabViewRenderer* renderer);
-
-        Gfx::Font getFont() const;
-
-        TabViewStyleFlags tabViewStyleFlags() const;
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& contentRect,
+                                   const Gfx::RectF& activeTabRect,
+                                   const TabViewState& state);
 
     private:
         DockingLayout             _layout;
         TabBar                    _tabBar;
         StackLayout               _stack;
 
-        FacetPtr<TabViewRenderer> _renderer;
-        bool                      _customRenderer;
-        std::size_t               _styleGeneration;
-
-        AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Font>        _customFont;
-        AutoPtr<Gfx::Color>       _textColor;
-        unsigned                  _overrides;
+        TabViewStyle         _tabViewStyle;
+        TabViewStyleOptions  _tabViewOptions;
         bool                      _hasBackground;
         bool                      _hasFrame;
-
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideContour    = 0x02,
-            OverrideTextColor  = 0x04,
-            OverrideFontAll    = 0x08,
-            OverrideFontSize   = 0x10,
-            OverrideFontWeight = 0x20,
-            OverrideFontSlant  = 0x40,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
 };
 
 } // namespace

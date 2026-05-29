@@ -30,6 +30,7 @@
 #define Pt_Forms_ComboBox_H
 
 #include <Pt/Forms/Control.h>
+#include <Pt/Forms/ComboBoxStyle.h>
 #include <Pt/Forms/Popup.h>
 #include <Pt/Forms/ListBox.h>
 #include <Pt/Forms/LineEditor.h>
@@ -131,6 +132,20 @@ class PT_FORMS_API ComboBox : public Control
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& entryRect,
+                                   const Gfx::RectF& buttonRect,
+                                   const ComboBoxState& state,
+                                   const ComboBoxButtonState& buttonState);
+
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& textRect,
+                                 const String& text,
+                                 const Gfx::PointF& textPos,
+                                 const Gfx::RectF& cursor,
+                                 const ComboBoxState& state);
+
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
 
@@ -154,28 +169,7 @@ class PT_FORMS_API ComboBox : public Control
         
         void processKeyEvent(const KeyEvent& ev);
 
-        Gfx::Font getFont() const;
-
-        ComboBoxRenderer* getRenderer();
-
-        void applyRenderer(ComboBoxRenderer* renderer);
-
-        ComboBoxStyleFlags comboBoxStyleFlags() const;
-
     private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideForeground = 0x02,
-            OverrideContour    = 0x04,
-            OverrideTextColor  = 0x08,
-            OverrideFontAll    = 0x10,
-            OverrideFontSize   = 0x20,
-            OverrideFontWeight = 0x40,
-            OverrideFontSlant  = 0x80,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
         Pt::Signal<const Pt::String&> _textChanged;
         Pt::Signal<const Pt::String&> _textEdited;
         Pt::Signal<const Pt::String&> _returnPressed;
@@ -188,6 +182,7 @@ class PT_FORMS_API ComboBox : public Control
         Gfx::RectF    _entryRect;
         Gfx::RectF    _buttonRect;
         Gfx::RectF    _textRect;
+        Gfx::RectF    _cursorRect;
         double        _maxHeight;
         bool          _isEditable;
         bool          _isAccepted;
@@ -195,17 +190,9 @@ class PT_FORMS_API ComboBox : public Control
         bool          _isHighlighted;
         bool          _isButtonHighlighted;
         double        _pendingCursorX;
-        
-        AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Brush>       _foreground;
-        AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>       _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _overrides;
 
-        FacetPtr<ComboBoxRenderer> _renderer;
-        bool                       _customRenderer;
-        std::size_t                _styleGeneration;
+        ComboBoxStyle        _comboBoxStyle;
+        ComboBoxStyleOptions _comboBoxOptions;
 };
 
 } // namespace
