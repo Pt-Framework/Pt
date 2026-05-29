@@ -31,8 +31,7 @@
 #define Pt_Forms_ProgressBar_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/StyleFlags.h>
-#include <Pt/SmartPtr.h>
+#include <Pt/Forms/ProgressBarStyle.h>
 #include <Pt/Signal.h>
 
 namespace Pt {
@@ -94,52 +93,39 @@ class PT_FORMS_API ProgressBar : public Control
 
         void setRenderer(ProgressBarRenderer* renderer);
 
-        ProgressBarStyleFlags progressBarStyleFlags() const;
+        ProgressBarState progressBarState() const;
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onInvalidate();
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        virtual void onPaintChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& chunkRect,
+                                   const Gfx::RectF& textRect,
+                                   const String& text,
+                                   const Gfx::PointF& textPos,
+                                   const ProgressBarState& state);
+
     private:
-        ProgressBarRenderer* getRenderer();
-
-        void applyRenderer(ProgressBarRenderer* renderer);
-
-        Gfx::Font getFont() const;
-
-    private:
-        enum OverrideFlags : unsigned
-        {
-            OverrideBackground = 0x01,
-            OverrideForeground = 0x02,
-            OverrideContour    = 0x04,
-            OverrideTextColor  = 0x08,
-            OverrideFontAll    = 0x10,
-            OverrideFontSize   = 0x20,
-            OverrideFontWeight = 0x40,
-            OverrideFontSlant  = 0x80,
-            OverrideFontAny    = OverrideFontAll | OverrideFontSize
-                               | OverrideFontWeight | OverrideFontSlant
-        };
-
         Signal<int> _valueChanged;
         int _value;
         int _min;
         int _max;
 
-        AutoPtr<Gfx::Brush>       _background;
-        AutoPtr<Gfx::Color>       _foreground;
-        AutoPtr<Gfx::Pen>         _contour;
-        AutoPtr<Gfx::Color>       _textColor;
-        Gfx::Font                 _customFont;
-        unsigned                  _overrides;
-        
-        FacetPtr<ProgressBarRenderer> _renderer;
-        bool                          _customRenderer;
-        std::size_t                   _styleGeneration;
+        Gfx::RectF _barRect;
+        Gfx::RectF _textRect;
+        Gfx::RectF _trackRect;
+        Gfx::RectF _chunkRect;
+
+        ProgressBarStyle        _progressBarStyle;
+        ProgressBarStyleOptions _progressBarOptions;
 };
 
 } // namespace

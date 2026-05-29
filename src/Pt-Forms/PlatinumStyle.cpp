@@ -1516,17 +1516,27 @@ ProgressBarRenderer* PlatinumProgressBarRenderer::onCreate() const
     return new PlatinumProgressBarRenderer();
 }
 
-void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options)
+void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options,
+                                            const ProgressBarStyleOptions& progressBarOptions)
 {
+    const Gfx::Color* fg = progressBarOptions.foreground();
+    _foreground = Gfx::Brush( fg ? *fg : options.accentColor() );
+
+    _textBackground = options.textBackground().color();
+
     _trackPainter.setBrush( options.foreground() );
+    _chunkPainter.setBrush( _foreground );
 
-    _chunkPainter.setBrush( foreground() );
+    Gfx::Font resolvedFont = progressBarOptions.getFont(options.font());
 
-    _textPainter.setFont( font() );
-    _textPainter.setPen( textColor() );
+    const Gfx::Color* tc = progressBarOptions.textColor();
+    Gfx::Color textCol = tc ? *tc : options.textColor();
 
-    _invertTextPainter.setFont( font() );
-    _invertTextPainter.setPen( Gfx::Pen(options.textBackground().color()) );
+    _textPainter.setFont( resolvedFont );
+    _textPainter.setPen( Gfx::Pen(textCol) );
+
+    _invertTextPainter.setFont( resolvedFont );
+    _invertTextPainter.setPen( Gfx::Pen(_textBackground) );
 }
 
 Gfx::SizeF PlatinumProgressBarRenderer::onMeasureFrame(PaintSurface& surface,
@@ -1592,8 +1602,7 @@ const Painter& PlatinumProgressBarRenderer::onGetTextPainter(PaintSurface& surfa
 
 void PlatinumProgressBarRenderer::onRenderTrack(PaintContext& context,
                                                 const Gfx::RectF& trackRect,
-                                                const StyleOptions& options,
-                                                ProgressBarStyleFlags state)
+                                                const ProgressBarState& /*state*/)
 {
     if( trackRect.width() <= 0 || trackRect.height() <= 0 )
         return;
@@ -1604,8 +1613,7 @@ void PlatinumProgressBarRenderer::onRenderTrack(PaintContext& context,
 
 void PlatinumProgressBarRenderer::onRenderChunk(PaintContext& context,
                                                 const Gfx::RectF& chunkRect,
-                                                const StyleOptions& options,
-                                                ProgressBarStyleFlags state)
+                                                const ProgressBarState& /*state*/)
 {
     if( chunkRect.width() <= 0 || chunkRect.height() <= 0 )
         return;
@@ -1623,10 +1631,9 @@ void PlatinumProgressBarRenderer::onRenderChunk(PaintContext& context,
 void PlatinumProgressBarRenderer::onRenderText(PaintContext& context,
                                                const Gfx::RectF& textRect,
                                                const Gfx::RectF& chunkRect,
-                                               const StyleOptions& options,
                                                const String& text,
                                                const Gfx::PointF& textPos,
-                                               ProgressBarStyleFlags state)
+                                               const ProgressBarState& /*state*/)
 {
     if( textRect.width() <= 0 || textRect.height() <= 0 )
         return;

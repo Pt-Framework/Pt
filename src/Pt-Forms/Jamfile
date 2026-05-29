@@ -73,6 +73,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          PlatinumStyle.cpp
                          Popup.cpp
                          ProgressBar.cpp
+                         ProgressBarStyle.cpp
                          PushButton.cpp
                          Responder.cpp
                          Screen.cpp 

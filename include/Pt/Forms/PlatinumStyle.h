@@ -38,6 +38,7 @@
 #include <Pt/Forms/SpinBoxStyle.h>
 #include <Pt/Forms/SliderStyle.h>
 #include <Pt/Forms/ScrollBarStyle.h>
+#include <Pt/Forms/ProgressBarStyle.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>
@@ -423,7 +424,8 @@ class PT_FORMS_API PlatinumProgressBarRenderer : public ProgressBarRenderer
     protected:
         virtual ProgressBarRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onPrepare(const StyleOptions& options,
+                               const ProgressBarStyleOptions& progressBarOptions);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                             const Gfx::SizeF& contentSize);
@@ -447,23 +449,22 @@ class PT_FORMS_API PlatinumProgressBarRenderer : public ProgressBarRenderer
 
         virtual void onRenderTrack(PaintContext& context,
                                    const Gfx::RectF& trackRect,
-                                   const StyleOptions& options,
-                                   ProgressBarStyleFlags state);
+                                   const ProgressBarState& state);
 
         virtual void onRenderChunk(PaintContext& context,
                                    const Gfx::RectF& chunkRect,
-                                   const StyleOptions& options,
-                                   ProgressBarStyleFlags state);
+                                   const ProgressBarState& state);
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const Gfx::RectF& chunkRect,
-                                  const StyleOptions& options,
                                   const String& text,
                                   const Gfx::PointF& textPos,
-                                  ProgressBarStyleFlags state);
+                                  const ProgressBarState& state);
 
     private:
+        Gfx::Brush  _foreground;
+        Gfx::Color  _textBackground;
         Painter _trackPainter;
         Painter _chunkPainter;
         Painter _textPainter;
