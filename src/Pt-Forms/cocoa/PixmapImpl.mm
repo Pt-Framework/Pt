@@ -90,30 +90,6 @@ void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 }
 
 
-void PixmapCanvas::suspend()
-{
-    invalidate(DirtyAll);
-
-    if(_pixmap)
-    {
-        CGContextRef context = _pixmap->context();
-        if(context)
-            CGContextRestoreGState(context);
-    }
-}
-
-
-void PixmapCanvas::resume()
-{
-    if(_pixmap)
-    {
-        CGContextRef context = _pixmap->context();
-        if(context)
-            CGContextSaveGState(context);
-    }
-}
-
-
 void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_pixmap)

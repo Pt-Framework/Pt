@@ -68,10 +68,6 @@ class PixmapCanvas : public Gfx::Canvas
 
         void setPixmap(PixmapImpl& pixmap);
 
-        void suspend();
-
-        void resume();
-
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
                         const Gfx::RectF* rect);
