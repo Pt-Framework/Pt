@@ -54,6 +54,8 @@
 
 namespace {
 
+const double platinumPanelCornerRadius = 2.0;
+
 Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
 {
     float r = c.red() * factor;
@@ -369,10 +371,12 @@ PanelRenderer* PlatinumPanelRenderer::onCreate() const
 }
 
 
-void PlatinumPanelRenderer::onPrepare(const StyleOptions& options,
+void PlatinumPanelRenderer::onPrepare(const StyleOptions& /*options*/,
                                       const PanelStyleOptions& panelOptions)
 {
-    _cornerRadius = options.cornerRadius();
+    _cornerRadius = platinumPanelCornerRadius;
+
+    const StyleOptions& options = Application::instance().styleOptions();
 
     _bgPainter.setBrush( resolvePanelBackground(options, panelOptions) );
 
@@ -703,7 +707,7 @@ void PlatinumButtonRenderer::onRenderChrome(PaintContext& context,
     painter->begin(context);
 
     const Gfx::Scaling& scaling = painter->scaling();
-    double corner = scaling.align(1.0);
+    double corner = scaling.align(platinumPanelCornerRadius);
 
     _base->renderPlane(*painter, rect, painter->brush(), corner);
 
@@ -934,7 +938,7 @@ void PlatinumCheckBoxRenderer::onRenderChrome(PaintContext& context,
 
     Gfx::RectF boxRect = scaling.align(box);
     double inset = scaling.toLogical(0.5);
-    double checkOffset = scaling.alignContour(3);
+    double checkOffset = scaling.alignContour(platinumPanelCornerRadius);
 
     double cw = boxRect.width() - 2 * checkOffset;
     double ch = boxRect.height() - 2 * checkOffset;

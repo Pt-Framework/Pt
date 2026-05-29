@@ -154,6 +154,8 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 - `%Application` is the only official mutator for global theme data (`%Style` and `%StyleOptions`).
 - Global theme changes must go through `%Application::setStyle(...)` or `%Application::setStyleOptions(...)`.
 - Those mutation paths must call `%Style::reset(const StyleOptions&)` before invalidation so that shared renderer facets are synchronized with the new global defaults.
+- `%StyleOptions` stores only cross-theme tokens that multiple style families can reasonably honor as part of a shared contract.
+- Theme-specific geometry or look details that do not have such a shared contract belong in the concrete derived style or renderer implementation, not in `%StyleOptions` and not in `%Style` itself.
 - Do not expose or reintroduce a public mutable `%StyleOptions&` path.
 - `%Style` and `%StyleOptions` stay passive data/cache objects with generation counters for cheap pull checks.
 - Global theme changes propagate by `%Application::invalidate()` and the existing `%onInvalidate()` flow after the shared-facet reset. Do not add a second update path that mutates renderers directly from a theme observer or setter.

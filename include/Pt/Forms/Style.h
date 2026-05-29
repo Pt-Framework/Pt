@@ -219,10 +219,6 @@ class PT_FORMS_API Style
         */
         void assign(const Style& style);
 
-        /** @brief Replaces the current facets with those from another style.
-        */
-        void combine(const Style& style);
-
         /** @brief Registers or replaces a facet.
         */
         void set(Facet* facet);

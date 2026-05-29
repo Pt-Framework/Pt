@@ -108,24 +108,6 @@ void Style::assign(const Style& style)
         set(cit->second);
     }
 }
-
-
-void Style::combine(const Style& style)
-{
-    if(this == &style)
-        return;
-
-    _facets.clear();
-    _generation = nextStyleGeneration();
-
-    FacetMap::const_iterator it;
-    for(it = style._facets.begin(); it != style._facets.end(); ++it)
-    {
-        set(it->second);
-    }
-}
-
-
 void Style::set(Facet* facet)
 {
     if( ! facet )
