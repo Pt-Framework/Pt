@@ -108,6 +108,13 @@ description: "Coding Styles and Guidelines"
   - Public headers (in `include/`): angle brackets `<...>`.
   - Private/local headers (in `src/`): quotes `"..."`.
 
+- Local Variables for Long Expressions:
+  - Extract repeated or deeply chained expressions into a local variable
+  - Especially accessor chains like `Application::instance().style()` or
+    `Application::instance().styleOptions()` should be stored in a local
+    reference (e.g., `const Style& style = Application::instance().style();`).
+  - Improves readability and avoids repeated evaluation of the same chain.
+
 - Visual Studio Projects: 
   - Register new files also in the `.vcxproj` and `.vcxproj.filters` if they exist.
   - Filter structure in `.vcxproj.filters` mirrors the directory structure.
