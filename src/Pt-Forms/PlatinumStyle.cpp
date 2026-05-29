@@ -1066,7 +1066,9 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureFrame(PaintSurface& surface,
     _textPainter.begin(surface);
     _textPainter.setFont(_font);
 
-    double entryHeight = _font.size() * 2.5;
+    Gfx::FontMetrics fm = _textPainter.fontMetrics();
+    double textHeight = fm.ascent() + fm.descent();
+    double entryHeight = textHeight + 2 * _inset;
     double buttonHeight = entryHeight;
 
     double entryWidth = contentSize.width() + 2 * _inset;
@@ -1088,7 +1090,9 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureEntry(PaintSurface& surface,
     _textPainter.begin(surface);
     _textPainter.setFont(_font);
 
-    double entryHeight = _font.size() * 2.5;
+    Gfx::FontMetrics fm = _textPainter.fontMetrics();
+    double textHeight = fm.ascent() + fm.descent();
+    double entryHeight = textHeight + 2 * _inset;
     double entryWidth = contentSize.width() + 2 * _inset;
 
     return Gfx::SizeF(entryWidth, entryHeight);
@@ -1100,7 +1104,9 @@ Gfx::SizeF PlatinumSpinBoxRenderer::onMeasureIndicator(PaintSurface& surface)
     _textPainter.begin(surface);
     _textPainter.setFont(_font);
 
-    double h = _font.size() * 2.5;
+    Gfx::FontMetrics fm = _textPainter.fontMetrics();
+    double textHeight = fm.ascent() + fm.descent();
+    double h = textHeight + 2 * _inset;
     return Gfx::SizeF(h, h);
 }
 
@@ -1382,7 +1388,9 @@ Gfx::SizeF PlatinumLineEditRenderer::onMeasureFrame(PaintSurface& surface,
     _textPainter.begin(surface);
     _textPainter.setFont( _font );
 
-    double entryHeight = _font.size() * 2.5;
+    Gfx::FontMetrics fm = _textPainter.fontMetrics();
+    double textHeight = fm.ascent() + fm.descent();
+    double entryHeight = textHeight + 2 * _inset;
     double entryWidth = contentSize.width() + 2 * _inset;
     return Gfx::SizeF(entryWidth, entryHeight);
 }
@@ -2540,8 +2548,11 @@ Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
                                                      const Gfx::SizeF& contentSize)
 {
     _textPainter.begin(surface);
+    _textPainter.setFont(_font);
 
-    double entryHeight = _font.size() * 2.5;
+    Gfx::FontMetrics fm = _textPainter.fontMetrics();
+    double textHeight = fm.ascent() + fm.descent();
+    double entryHeight = textHeight + 2 * _inset;
     double buttonWidth = entryHeight;
     double entryWidth = contentSize.width() + 2 * _inset;
 
@@ -2552,9 +2563,14 @@ Gfx::SizeF PlatinumComboBoxRenderer::onMeasureFrame(PaintSurface& surface,
 }
 
 
-Gfx::SizeF PlatinumComboBoxRenderer::onMeasureButton(PaintSurface& /*surface*/)
+Gfx::SizeF PlatinumComboBoxRenderer::onMeasureButton(PaintSurface& surface)
 {
-    double h = _font.size() * 2.5;
+    _textPainter.begin(surface);
+    _textPainter.setFont(_font);
+
+    Gfx::FontMetrics fm = _textPainter.fontMetrics();
+    double textHeight = fm.ascent() + fm.descent();
+    double h = textHeight + 2 * _inset;
     return Gfx::SizeF(h, h);
 }
 
