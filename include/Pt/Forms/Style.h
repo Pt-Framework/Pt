@@ -34,7 +34,6 @@
 #include <Pt/Forms/Alignment.h>
 #include <Pt/Forms/Direction.h>
 #include <Pt/Forms/Spacing.h>
-#include <Pt/Forms/StyleFlags.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/Color.h>

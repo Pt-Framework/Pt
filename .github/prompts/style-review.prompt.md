@@ -6,7 +6,7 @@ agent: "agent"
 ---
 Du bist der Reviewer, Architekt und Ratgeber. Die Style API und Implementierung soll verbessert werden um konsistenter, klarer und sicherer zu werden. 
 
-Sieh dir den Widget update Zyklus in onInavlidate, onMeasure, onLayout, onPaint und wie er architekturell funktioniert. Dann sieh dir an wie die Renderer in Label, PushButton, SpinBox, LineEdit, CheckBox im update cycle benutzt werden. Sieh dir an die der Style und seine Facetten funktionieren. Sie dir die StyleOptions und die StyleFlags an. Sieh dir an wie der Style von der Application bis in die Widgets/Controls durchdringt.
+Sieh dir den Widget update Zyklus in onInavlidate, onMeasure, onLayout, onPaint und wie er architekturell funktioniert. Dann sieh dir an wie die Renderer in Label, PushButton, SpinBox, LineEdit, CheckBox im update cycle benutzt werden. Sieh dir an wie der Style und seine Facetten funktionieren. Sieh dir die StyleOptions sowie die extrahierten Slice-Zustandsobjekte und lokalen StyleOptions an. Sieh dir an wie der Style von der Application bis in die Widgets und Controls durchdringt.
 
 Recherchiere wie andere populäre UI Frameworks das Styling, Look and Feel oder Theming machen um eine Vergleichsbasis zu haben. 
 

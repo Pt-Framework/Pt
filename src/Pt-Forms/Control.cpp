@@ -962,22 +962,6 @@ bool Control::acceptsInput() const
 }
 
 
-StyleFlags Control::styleFlags() const
-{
-    StyleFlags state;
-
-    if( isEnabled() )
-        state.set(StyleFlags::Enabled);
-    else
-        state.set(StyleFlags::Disabled);
-
-    if( hasFocus() )
-        state.set(StyleFlags::Focused);
-
-    return state;
-}
-
-
 void Control::onRequestShow(bool isShown)
 {
     _show = isShown;
