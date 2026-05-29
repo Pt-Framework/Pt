@@ -124,6 +124,14 @@ void BitmapCanvas::onApplyTransform()
 
 void BitmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
+    /*  TODO: 
+    if(_context && isActive())
+    {
+        _context->restore_clipping();
+        invalidate(DirtyClip);  // apply clip with new transform
+    }
+    */
+
     if(_context && isActive())
     {
         _context->restore(_cookie);
@@ -243,6 +251,8 @@ void BitmapCanvas::onApplyFont()
 
 void BitmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
+    // TODO: _context->restore_clipping(); could be enough
+
     if(_context && isActive())
     {
         _context->restore(_cookie);
