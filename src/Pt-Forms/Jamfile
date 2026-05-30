@@ -15,6 +15,11 @@ if $(PT_FORMS_IMPL) = win32-raster
     SubDirC++Flags [ FDefines PT_FORMS_WIN32_RASTER ] ;
 }
 
+if $(PT_FORMS_IMPL) = win32-direct2d
+{
+    SubDirC++Flags [ FDefines PT_FORMS_WIN32_DIRECT2D ] ;
+}
+
 if $(PT_FORMS_C++FLAGS)
 {
     SubDirC++Flags $(PT_FORMS_C++FLAGS) ;

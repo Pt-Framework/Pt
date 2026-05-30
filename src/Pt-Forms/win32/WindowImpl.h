@@ -37,6 +37,11 @@
 #include <Pt/Gfx/Size.h>
 #include <Windows.h>
 
+#ifdef PT_FORMS_WIN32_DIRECT2D
+#include <d2d1_1.h>
+#include <dxgi1_2.h>
+#endif
+
 namespace Pt {
 
 namespace Forms {
@@ -160,6 +165,14 @@ class WindowImpl : public WindowFrame
         Window&        _window;
         HWND           _hwnd;
         HICON          _iconHandle;
+
+#ifdef PT_FORMS_WIN32_DIRECT2D
+        IDXGISwapChain1*   _swapChain;
+        ID2D1DeviceContext* _presentCtx;
+
+        void createSwapChain();
+        void resizeSwapChain(LONG width, LONG height);
+#endif
 };
 
 } // namespace

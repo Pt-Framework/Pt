@@ -31,6 +31,11 @@
 #include "ScreenImpl.h"
 #include "PixmapImpl.h"
 
+#ifdef PT_FORMS_WIN32_DIRECT2D
+#include "D2DDevice.h"
+#include "ApplicationImpl.h"
+#endif
+
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/WindowManager.h>
@@ -49,6 +54,10 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _window(w)
 , _hwnd(0)
 , _iconHandle(0)
+#ifdef PT_FORMS_WIN32_DIRECT2D
+, _swapChain(0)
+, _presentCtx(0)
+#endif
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
@@ -79,6 +88,20 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 
 WindowImpl::~WindowImpl()
 {
+#ifdef PT_FORMS_WIN32_DIRECT2D
+    if(_presentCtx)
+    {
+        _presentCtx->Release();
+        _presentCtx = 0;
+    }
+
+    if(_swapChain)
+    {
+        _swapChain->Release();
+        _swapChain = 0;
+    }
+#endif
+
     DestroyWindow( _hwnd);
 
     if(_iconHandle != 0)
@@ -309,7 +332,39 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
     DeleteDC(bitmapDC);
     DeleteObject(bitmap);
-#elif PT_FORMS_WIN32_GDI
+#elif defined(PT_FORMS_WIN32_DIRECT2D)
+    pixmap().impl()->finish();
+
+    createSwapChain();
+
+    ID2D1Bitmap1* d2dBmp = pixmap().impl()->bitmap();
+    if(d2dBmp && _swapChain && _presentCtx)
+    {
+        IDXGISurface* surface = 0;
+        HRESULT hr = _swapChain->GetBuffer(0, __uuidof(IDXGISurface),
+                                           reinterpret_cast<void**>(&surface));
+        if(SUCCEEDED(hr) && surface)
+        {
+            D2D1_BITMAP_PROPERTIES1 bmpProps = D2D1::BitmapProperties1(
+                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                                  D2D1_ALPHA_MODE_PREMULTIPLIED));
+
+            ID2D1Bitmap1* targetBmp = 0;
+            hr = _presentCtx->CreateBitmapFromDxgiSurface(surface, bmpProps,
+                                                          &targetBmp);
+            if(SUCCEEDED(hr) && targetBmp)
+            {
+                targetBmp->CopyFromBitmap(nullptr, d2dBmp, nullptr);
+                targetBmp->Release();
+            }
+
+            surface->Release();
+        }
+
+        _swapChain->Present(0, 0);
+    }
+#elif defined(PT_FORMS_WIN32_GDI)
     HDC bitmapContext = pixmap().impl()->deviceContext();
 
     BitBlt(windowContext, updateRect.x(), updateRect.y(), 
@@ -588,6 +643,10 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
                  SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 
+#ifdef PT_FORMS_WIN32_DIRECT2D
+    resizeSwapChain(lround(size.width()), lround(size.height()));
+#endif
+
     return alignedSize;
 }
 
@@ -619,6 +678,66 @@ void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
 void WindowImpl::onCloseEvent(const CloseEvent& ev)
 {
 }
+
+
+#ifdef PT_FORMS_WIN32_DIRECT2D
+
+void WindowImpl::createSwapChain()
+{
+    if(_swapChain)
+        return;
+
+    D2DDevice& d2d = Application::instance().impl()->d2d();
+
+    IDXGIFactory2* dxgiFactory = d2d.dxgiFactory();
+    if( ! dxgiFactory)
+        return;
+
+    IDXGIDevice* dxgiDevice = d2d.dxgiDevice();
+    if( ! dxgiDevice)
+        return;
+
+    DXGI_SWAP_CHAIN_DESC1 desc = {};
+    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    desc.BufferCount = 2;
+    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+
+    HRESULT hr = dxgiFactory->CreateSwapChainForHwnd(
+        dxgiDevice, _hwnd, &desc, nullptr, nullptr, &_swapChain);
+
+    if(FAILED(hr))
+        _swapChain = 0;
+
+    if( ! _presentCtx)
+    {
+        d2d.d2dDevice()->CreateDeviceContext(
+            D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &_presentCtx);
+    }
+}
+
+
+void WindowImpl::resizeSwapChain(LONG width, LONG height)
+{
+    if( ! _swapChain)
+        return;
+
+    if(width <= 0 || height <= 0)
+        return;
+
+    HRESULT hr = _swapChain->ResizeBuffers(
+        0, static_cast<UINT>(width), static_cast<UINT>(height),
+        DXGI_FORMAT_UNKNOWN, 0);
+
+    if(FAILED(hr))
+    {
+        _swapChain->Release();
+        _swapChain = 0;
+    }
+}
+
+#endif // PT_FORMS_WIN32_DIRECT2D
 
 } // namespace
 

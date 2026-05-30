@@ -1020,6 +1020,11 @@ if ! $(GUI) || $(GUI:L) = "win32"
         {
             PT_FORMS_IMPL = win32-raster ;
         }
+        else if --with-win32-direct2d in $(ARGV)
+        {
+            PT_FORMS_IMPL = win32-direct2d ;
+            GUILIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "windowscodecs.lib" "dxguid.lib" ;
+        }
         else
         {
             PT_FORMS_IMPL = win32-gdi ;

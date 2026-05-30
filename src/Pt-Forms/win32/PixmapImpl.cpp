@@ -30,7 +30,15 @@
 #include "win32.h"
 #include "PixmapImpl.h"
 #include "PixmapCanvas.h"
+
+#ifdef PT_FORMS_WIN32_DIRECT2D
+#include "D2DDevice.h"
+#include "DWriteFontProvider.h"
+#include "ApplicationImpl.h"
+#include <Pt/Forms/Application.h>
+#elif !defined(PT_FORMS_WIN32_RASTER)
 #include "GdiFontProvider.h"
+#endif
 
 #include <Pt/Forms/View.h>
 #include <Pt/Forms/Pixmap.h>
@@ -64,7 +72,281 @@ void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
     }
 }
 
-#else // PT_FORMS_WIN32_RASTER
+#elif defined(PT_FORMS_WIN32_DIRECT2D)
+
+PixmapImpl::PixmapImpl()
+: _physicalSize(0, 0)
+, _width(0)
+, _height(0)
+, _d2dBitmap(0)
+, _canvas(0)
+{
+}
+
+
+PixmapImpl::~PixmapImpl()
+{
+    destroyBitmap();
+}
+
+
+void PixmapImpl::createBitmap(LONG width, LONG height)
+{
+    destroyBitmap();
+
+    if(width == 0 || height == 0)
+        return;
+
+    ID2D1DeviceContext* ctx = 0;
+    Application::instance().impl()->d2d().d2dDevice()->CreateDeviceContext(
+        D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &ctx);
+    if( ! ctx)
+        return;
+
+    D2D1_BITMAP_PROPERTIES1 bmpProps = D2D1::BitmapProperties1(
+        D2D1_BITMAP_OPTIONS_TARGET,
+        D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                          D2D1_ALPHA_MODE_PREMULTIPLIED),
+        0, 0);
+
+    HRESULT hr = ctx->CreateBitmap(
+        D2D1::SizeU(static_cast<UINT32>(width), static_cast<UINT32>(height)),
+        nullptr, 0, bmpProps, &_d2dBitmap);
+
+    ctx->Release();
+
+    if(FAILED(hr))
+    {
+        _d2dBitmap = 0;
+        return;
+    }
+
+    _width = width;
+    _height = height;
+    _physicalSize.set(width, height);
+}
+
+
+void PixmapImpl::destroyBitmap()
+{
+    if(_d2dBitmap)
+    {
+        _d2dBitmap->Release();
+        _d2dBitmap = 0;
+    }
+
+    _width = 0;
+    _height = 0;
+    _physicalSize.set(0, 0);
+}
+
+
+void PixmapImpl::reset(const Gfx::SizeF& size)
+{
+    LONG width = lround( size.width() );
+    LONG height = lround( size.height() );
+
+    if(_width == width && _height == height)
+        return;
+
+    createBitmap(width, height);
+}
+
+
+void PixmapImpl::reset()
+{
+    destroyBitmap();
+}
+
+
+void PixmapImpl::reset(const Gfx::Image& image)
+{
+    size_t width = image.width();
+    size_t height = image.height();
+
+    Gfx::SizeF size(width, height);
+    reset(size);
+
+    if( ! _d2dBitmap)
+        return;
+
+    // Upload image pixels into D2D bitmap (BGRA premultiplied)
+    const Pt::uint8_t* src = image.data();
+
+    Gfx::Rgb32Image rgb32Image;
+    if(image.format() != Gfx::ImageFormat::rgb32() || image.padding() != 0)
+    {
+        rgb32Image.reset(width, height);
+        Gfx::copyView(image, rgb32Image);
+        src = rgb32Image.data();
+    }
+
+    D2D1_RECT_U destRect = D2D1::RectU(0, 0,
+        static_cast<UINT32>(width), static_cast<UINT32>(height));
+    _d2dBitmap->CopyFromMemory(&destRect, src,
+        static_cast<UINT32>(width * 4));
+}
+
+
+Gfx::Image PixmapImpl::toImage() const
+{
+    if(_width == 0 || _height == 0 || ! _d2dBitmap)
+        return Gfx::Image();
+
+    // Map the bitmap to read pixels (create a CPU-readable copy)
+    ID2D1DeviceContext* ctx = 0;
+    Application::instance().impl()->d2d().d2dDevice()->CreateDeviceContext(
+        D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &ctx);
+    if( ! ctx)
+        return Gfx::Image();
+
+    // Create a CPU-readable bitmap
+    D2D1_BITMAP_PROPERTIES1 readProps = D2D1::BitmapProperties1(
+        D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+        D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                          D2D1_ALPHA_MODE_PREMULTIPLIED),
+        0, 0);
+
+    ID2D1Bitmap1* readBitmap = 0;
+    HRESULT hr = ctx->CreateBitmap(
+        D2D1::SizeU(static_cast<UINT32>(_width), static_cast<UINT32>(_height)),
+        nullptr, 0, readProps, &readBitmap);
+
+    if(FAILED(hr) || ! readBitmap)
+    {
+        ctx->Release();
+        return Gfx::Image();
+    }
+
+    D2D1_POINT_2U destPoint = D2D1::Point2U(0, 0);
+    D2D1_RECT_U srcRect = D2D1::RectU(0, 0,
+        static_cast<UINT32>(_width), static_cast<UINT32>(_height));
+    hr = readBitmap->CopyFromBitmap(&destPoint, _d2dBitmap, &srcRect);
+
+    Gfx::Image image;
+    if(SUCCEEDED(hr))
+    {
+        D2D1_MAPPED_RECT mapped;
+        hr = readBitmap->Map(D2D1_MAP_OPTIONS_READ, &mapped);
+        if(SUCCEEDED(hr))
+        {
+            image = Gfx::Image(_width, _height, Gfx::Rgb32());
+            for(LONG y = 0; y < _height; ++y)
+            {
+                std::memcpy(image.data() + y * _width * 4,
+                            mapped.bits + y * mapped.pitch,
+                            _width * 4);
+            }
+            readBitmap->Unmap();
+        }
+    }
+
+    readBitmap->Release();
+    ctx->Release();
+    return image;
+}
+
+
+void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+{
+    bitmap.reset( rect.size() );
+
+    Gfx::Image image = this->toImage();
+
+    Gfx::PaintContext ctx(bitmap);
+    Gfx::Painter painter(ctx);
+    painter.drawImage(Gfx::PointF(0, 0), image, rect);
+}
+
+
+const Gfx::SizeF& PixmapImpl::size() const
+{
+    return _physicalSize;
+}
+
+
+void PixmapImpl::setScaleFactor(double scaleFactor)
+{
+    _scaling.setScaleFactor(scaleFactor);
+}
+
+
+const Gfx::ImageFormat& PixmapImpl::format() const
+{
+    return Gfx::ImageFormat::rgb32();
+}
+
+
+const Gfx::Scaling& PixmapImpl::scaling() const
+{
+    return _scaling;
+}
+
+
+Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
+{
+    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
+    if( ! canvas)
+        canvas = new PixmapCanvas();
+
+    canvas->setPixmap(*this);
+    _canvas = canvas;
+    return _canvas;
+}
+
+
+void PixmapImpl::releaseCanvas()
+{
+    _canvas = 0;
+}
+
+
+void PixmapImpl::sync()
+{
+}
+
+
+void PixmapImpl::finish()
+{
+}
+
+
+void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+                            const Gfx::PointF& to,
+                            const Pixmap& pm,
+                            const Gfx::RectF* rect)
+{
+    assert(_canvas == &canvas);
+
+    if(_canvas == &canvas)
+        _canvas->drawPixmap(to, pm, rect);
+}
+
+
+const std::string& PixmapImpl::defaultFont()
+{
+    return DWriteFontProvider::instance().defaultFont();
+}
+
+
+void PixmapImpl::setDefaultFont(const std::string& family)
+{
+    DWriteFontProvider::instance().setDefaultFont(family);
+}
+
+
+std::vector<std::string> PixmapImpl::fontFamilies()
+{
+    return DWriteFontProvider::instance().fontFamilies();
+}
+
+
+std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
+{
+    return DWriteFontProvider::instance().fontFaces(family);
+}
+
+#else // PT_FORMS_WIN32_GDI
 
 PixmapImpl::PixmapImpl()
 : _physicalSize(0, 0)

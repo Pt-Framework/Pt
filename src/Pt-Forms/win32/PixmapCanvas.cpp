@@ -28,7 +28,11 @@
 
 #include "PixmapCanvas.h"
 #include "PixmapImpl.h"
+
+#ifndef PT_FORMS_WIN32_DIRECT2D
 #include "GdiFontProvider.h"
+#endif
+
 #include "win32.h"
 
 #include <Pt/Forms/Pixmap.h>
@@ -177,6 +181,8 @@ namespace Forms {
 
 #ifndef PT_FORMS_WIN32_RASTER
 
+#ifndef PT_FORMS_WIN32_DIRECT2D
+
 PixmapCanvas::PixmapCanvas()
 : Gfx::Canvas()
 , _pixmap(0)
@@ -221,22 +227,6 @@ PixmapCanvas::~PixmapCanvas()
 void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 {
     _pixmap = &pixmap;
-}
-
-
-void PixmapCanvas::suspend()
-{
-    invalidate(DirtyAll);
-
-    if(_pixmap)
-        RestoreDC(_pixmap->deviceContext(), -1);
-}
-
-
-void PixmapCanvas::resume()
-{
-    if(_pixmap)
-        SaveDC(_pixmap->deviceContext());
 }
 
 
@@ -1176,7 +1166,9 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     }
 }
 
-#endif // PT_FORMS_WIN32_RASTER
+#endif // ! PT_FORMS_WIN32_DIRECT2D
+
+#endif // ! PT_FORMS_WIN32_RASTER
 
 } // namespace
 

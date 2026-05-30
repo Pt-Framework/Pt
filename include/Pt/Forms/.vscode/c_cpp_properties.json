@@ -15,7 +15,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "PT_FORMS_WIN32_DIRECT2D"
             ],
             "compilerPath": "cl.exe",
             "cStandard": "c17",

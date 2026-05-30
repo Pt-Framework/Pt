@@ -32,6 +32,10 @@
 
 #include "win32/Selector.h"
 
+#ifdef PT_FORMS_WIN32_DIRECT2D
+#include "win32/D2DDevice.h"
+#endif
+
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/Forms/Cursor.h>
@@ -78,6 +82,11 @@ class ApplicationImpl : public Pt::System::EventLoop
         void sendMouseEvent(const MouseEvent& ev);
 
         void nextEvent();
+
+#ifdef PT_FORMS_WIN32_DIRECT2D
+        D2DDevice& d2d()
+        { return _d2d; }
+#endif
 
     public:
         virtual Pt::System::Selector& selector()
@@ -150,6 +159,9 @@ class ApplicationImpl : public Pt::System::EventLoop
         HCURSOR                          _defaultCursorHandle;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
+#ifdef PT_FORMS_WIN32_DIRECT2D
+        D2DDevice                        _d2d;
+#endif
 };
 
 } // namespace
