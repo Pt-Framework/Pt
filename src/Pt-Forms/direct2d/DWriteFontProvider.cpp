@@ -26,8 +26,6 @@
   MA 02110-1301 USA
 */
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
-
 #include "DWriteFontProvider.h"
 #include "D2DDevice.h"
 #include "ApplicationImpl.h"
@@ -211,5 +209,3 @@ void DWriteFontProvider::onRemoveFont(const System::Path& /*path*/)
 } // namespace
 
 } // namespace
-
-#endif // PT_FORMS_WIN32_DIRECT2D

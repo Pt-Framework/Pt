@@ -29,9 +29,7 @@
 #include "PixmapCanvas.h"
 #include "PixmapImpl.h"
 
-#ifndef PT_FORMS_WIN32_DIRECT2D
 #include "GdiFontProvider.h"
-#endif
 
 #include "win32.h"
 
@@ -179,9 +177,7 @@ namespace Pt {
 
 namespace Forms {
 
-#ifndef PT_FORMS_WIN32_RASTER
 
-#ifndef PT_FORMS_WIN32_DIRECT2D
 
 PixmapCanvas::PixmapCanvas()
 : Gfx::Canvas()
@@ -1166,9 +1162,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     }
 }
 
-#endif // ! PT_FORMS_WIN32_DIRECT2D
 
-#endif // ! PT_FORMS_WIN32_RASTER
 
 } // namespace
 

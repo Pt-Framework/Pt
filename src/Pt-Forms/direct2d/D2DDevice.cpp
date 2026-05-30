@@ -26,8 +26,6 @@
   MA 02110-1301 USA
 */
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
-
 #include "D2DDevice.h"
 
 #include <d3d11.h>
@@ -178,5 +176,3 @@ IDXGIDevice* D2DDevice::dxgiDevice()
 } // namespace
 
 } // namespace
-
-#endif // PT_FORMS_WIN32_DIRECT2D

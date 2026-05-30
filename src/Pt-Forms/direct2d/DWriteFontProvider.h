@@ -26,53 +26,55 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_D2DDevice_h
-#define Pt_Forms_D2DDevice_h
+#ifndef Pt_Forms_DWriteFontProvider_h
+#define Pt_Forms_DWriteFontProvider_h
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontFace.h>
+#include <Pt/Gfx/FontProvider.h>
+#include <Pt/System/Path.h>
 
-#include <d2d1.h>
-#include <d2d1_1.h>
+#include <string>
+#include <vector>
+
 #include <dwrite.h>
-#include <dxgi1_2.h>
 
 namespace Pt {
 
 namespace Forms {
 
-class D2DDevice
+class DWriteFontProvider : public Gfx::FontProvider
 {
     public:
-        D2DDevice();
+        static DWriteFontProvider& instance();
 
-        ~D2DDevice();
+        const std::string& defaultFont() const;
 
-        ID2D1Factory1* d2dFactory();
+        void setDefaultFont(const std::string& font);
 
-        ID2D1Device* d2dDevice();
+        std::vector<std::string> fontFamilies() const;
 
-        IDWriteFactory* dwriteFactory();
+        std::vector<Gfx::FontFace> fontFaces(const std::string& family) const;
 
-        IDXGIFactory2* dxgiFactory();
-
-        IDXGIDevice* dxgiDevice();
+        ~DWriteFontProvider();
 
     private:
-        D2DDevice(const D2DDevice&);
-        D2DDevice& operator=(const D2DDevice&);
+        DWriteFontProvider();
+
+        DWriteFontProvider(const DWriteFontProvider&) = delete;
+
+        DWriteFontProvider& operator=(const DWriteFontProvider&) = delete;
+
+        virtual void onAddFont(const System::Path& path) override;
+
+        virtual void onRemoveFont(const System::Path& path) override;
 
     private:
-        ID2D1Factory1*  _d2dFactory;
-        ID2D1Device*    _d2dDevice;
-        IDWriteFactory* _dwriteFactory;
-        IDXGIFactory2*  _dxgiFactory;
-        IDXGIDevice*    _dxgiDevice;
+        std::string _defaultFont;
 };
 
 } // namespace
 
 } // namespace
-
-#endif // PT_FORMS_WIN32_DIRECT2D
 
 #endif

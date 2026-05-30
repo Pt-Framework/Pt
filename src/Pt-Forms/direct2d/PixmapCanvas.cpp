@@ -25,9 +25,6 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-
-#ifdef PT_FORMS_WIN32_DIRECT2D
-
 #include "PixmapCanvas.h"
 #include "PixmapImpl.h"
 #include "D2DDevice.h"
@@ -1203,5 +1200,3 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
 } // namespace
 
 } // namespace
-
-#endif // PT_FORMS_WIN32_DIRECT2D

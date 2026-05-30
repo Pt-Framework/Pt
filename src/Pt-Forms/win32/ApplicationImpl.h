@@ -33,7 +33,7 @@
 #include "win32/Selector.h"
 
 #ifdef PT_FORMS_WIN32_DIRECT2D
-#include "win32/D2DDevice.h"
+#include "D2DDevice.h"
 #endif
 
 #include <Pt/Forms/MouseEvent.h>

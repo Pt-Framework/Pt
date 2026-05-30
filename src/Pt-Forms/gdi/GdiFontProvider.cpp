@@ -29,7 +29,6 @@
 
 #include "GdiFontProvider.h"
 
-#if ! defined(PT_FORMS_WIN32_RASTER) && ! defined(PT_FORMS_WIN32_DIRECT2D)
 
 #include <Pt/Gfx/FontRegistry.h>
 #include <Pt/System/FileInfo.h>
@@ -291,5 +290,3 @@ void GdiFontProvider::unregisterFontFile(const Pt::System::Path& path)
 } // namespace Forms
 
 } // namespace Pt
-
-#endif // ! PT_FORMS_WIN32_RASTER && ! PT_FORMS_WIN32_DIRECT2D

@@ -42,6 +42,27 @@ PT_FORMS_SUBDIR = [ FDirName $(PT_TOP) src Pt-Forms $(GUI:L) ] ;
 PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.cpp  ] ;
 PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.mm  ] ;
 
+if $(PT_FORMS_IMPL) = win32-raster
+{
+    PT_FORMS_BACKEND_DIR = [ FDirName $(PT_TOP) src Pt-Forms raster ] ;
+}
+
+if $(PT_FORMS_IMPL) = win32-direct2d
+{
+    PT_FORMS_BACKEND_DIR = [ FDirName $(PT_TOP) src Pt-Forms direct2d ] ;
+}
+
+if $(PT_FORMS_IMPL) = win32-gdi
+{
+    PT_FORMS_BACKEND_DIR = [ FDirName $(PT_TOP) src Pt-Forms gdi ] ;
+}
+
+if $(PT_FORMS_BACKEND_DIR)
+{
+    SubDirHdrs $(PT_FORMS_BACKEND_DIR) ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_BACKEND_DIR) : *.cpp ] ;
+}
+
 SharedLibrary Pt-Forms : Application.cpp
                          Button.cpp
                          ButtonStyle.cpp

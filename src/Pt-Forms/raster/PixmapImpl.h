@@ -33,40 +33,13 @@
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/FontFace.h>
-
-//#define PT_FORMS_WIN32_RASTER 1
-//#define PT_FORMS_WIN32_DIRECT2D
-
-#ifdef PT_FORMS_WIN32_RASTER
-
 #include <Pt/Gfx/Bitmap.h>
-
-#else
-
-#include <Pt/Gfx/PaintSurface.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Paint.h>
-#include <Pt/Gfx/Path.h>
-#include <Pt/System/Path.h>
-
-#include <vector>
-
-#include <Windows.h>
-
-#ifdef PT_FORMS_WIN32_DIRECT2D
-#include <d2d1_1.h>
-#endif
-
-#endif
 
 namespace Pt {
 
 namespace Forms {
 
 class Pixmap;
-
-#ifdef PT_FORMS_WIN32_RASTER
 
 class PixmapImpl
 {
@@ -179,162 +152,6 @@ class PixmapImpl
         Gfx::Bitmap _bitmap;
         Gfx::Canvas* _canvas;
 };
-
-#else // PT_FORMS_WIN32_RASTER
-
-class PixmapCanvas;
-
-#ifdef PT_FORMS_WIN32_DIRECT2D
-
-class PixmapImpl
-{
-    public:
-        PixmapImpl();
-
-        virtual ~PixmapImpl();
-
-        void reset(const Gfx::Image& image);
-
-        void reset(const Gfx::SizeF& size);
-
-        void reset();
-
-        Gfx::Image toImage() const;
-
-        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
-
-        void setScaleFactor(double scaleFactor);
-
-        ID2D1Bitmap1* bitmap() const
-        { return _d2dBitmap; }
-
-        LONG width() const
-        { return _width; }
-
-        LONG height() const
-        { return _height; }
-
-        void drawPixmap(Gfx::Canvas& canvas,
-                        const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::RectF* rect);
-
-        const Gfx::ImageFormat& format() const;
-
-        const Gfx::SizeF& size() const;
-
-        const Gfx::Scaling& scaling() const;
-
-        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
-        {
-            return 0;
-        }
-
-        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
-
-        void releaseCanvas();
-
-        void sync();
-
-        void finish();
-
-    public:
-        static const std::string& defaultFont();
-
-        static void setDefaultFont(const std::string& family);
-
-        static std::vector<std::string> fontFamilies();
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
-
-    private:
-        void createBitmap(LONG width, LONG height);
-
-        void destroyBitmap();
-
-    private:
-        Gfx::SizeF            _physicalSize;
-        Gfx::Scaling          _scaling;
-
-        LONG                  _width;
-        LONG                  _height;
-        ID2D1Bitmap1*         _d2dBitmap;
-
-        PixmapCanvas*         _canvas;
-};
-
-#else // PT_FORMS_WIN32_GDI
-
-class PixmapImpl
-{
-    public:
-        PixmapImpl();
-
-        virtual ~PixmapImpl();
-
-        void reset(const Gfx::Image& image);
-
-        void reset(const Gfx::SizeF& size);
-
-        void reset();
-
-        Gfx::Image toImage() const;
-
-        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
-
-        void setScaleFactor(double scaleFactor);
-
-        HDC deviceContext() const;
-
-        void drawPixmap(Gfx::Canvas& canvas,
-                        const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::RectF* rect);
-
-        const Gfx::ImageFormat& format() const;
-
-        const Gfx::SizeF& size() const;
-
-        const Gfx::Scaling& scaling() const;
-
-        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
-        {
-            return 0;
-        }
-
-        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
-
-        void releaseCanvas();
-
-        void sync();
-
-        void finish();
-
-    public:
-        static const std::string& defaultFont();
-
-        static void setDefaultFont(const std::string& family);
-
-        static std::vector<std::string> fontFamilies();
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
-
-    private:
-        Gfx::SizeF     _physicalSize;
-        Gfx::Scaling   _scaling;
-
-        LONG           _width;
-        LONG           _height;
-        HDC            _dc;
-        HBITMAP        _bitmap;
-        HBITMAP        _oldBitmap;
-
-        PixmapCanvas*  _canvas;
-};
-
-#endif // PT_FORMS_WIN32_DIRECT2D
-
-#endif // PT_FORMS_WIN32_RASTER
 
 } // namespace
 
