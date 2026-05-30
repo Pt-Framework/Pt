@@ -808,9 +808,6 @@
     <ClInclude Include="..\Pt-Forms\win32\ScreenImpl.h" />
     <ClInclude Include="..\Pt-Forms\win32\win32.h" />
     <ClInclude Include="..\Pt-Forms\win32\WindowImpl.h" />
-    <ClInclude Include="..\Pt-Forms\winrt\ApplicationImpl.h" />
-    <ClInclude Include="..\Pt-Forms\winrt\CursorImpl.h" />
-    <ClInclude Include="..\Pt-Forms\winrt\GfxOutputDeviceImpl.h" />
     <ClInclude Include="..\Pt-Forms\x11\ApplicationImpl.h" />
     <ClInclude Include="..\Pt-Forms\x11\CursorImpl.h" />
     <ClInclude Include="..\Pt-Forms\x11\KeyHandler.h" />
@@ -1512,9 +1509,6 @@
     <ClCompile Include="..\Pt-Forms\Window.cpp" />
     <ClCompile Include="..\Pt-Forms\WindowFrame.cpp" />
     <ClCompile Include="..\Pt-Forms\WindowManager.cpp" />
-    <ClCompile Include="..\Pt-Forms\winrt\ApplicationImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\winrt\CursorImpl.cpp" />
-    <ClCompile Include="..\Pt-Forms\winrt\GfxOutputDeviceImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\x11\ApplicationImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\x11\CursorImpl.cpp" />
     <ClCompile Include="..\Pt-Forms\x11\KeyHandler.cpp" />

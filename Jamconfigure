@@ -775,7 +775,7 @@ EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
 EchoOption --with-mbedtls : "Builtin mbedTLS library" : $(WITH_MBEDTLS:E="no") ;
 
 Configure WITH_SSL ;
-EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
+EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no") ;
 
 Configure PT_SSL_IMPL ;
 EchoOption PT_SSL_IMPL : "SSL implementation" ;
@@ -972,71 +972,97 @@ if $(WITH_QT)
 }
 
 #############################################################################
-# GUI libraries and includes
+# Pt-Forms libraries and includes
 #############################################################################
 
-if --with-x11 in $(ARGV)
-{
-    GUI ?= x11 ;
-}
-else if --with-win32-gdi in $(ARGV)
-{
-    GUI ?= win32 ;
-}
-else if --with-win32-raster in $(ARGV)
-{
-    GUI ?= win32 ;
-}
-else if --with-win32-direct2d in $(ARGV)
-{
-    GUI ?= win32 ;
-}
-else if --with-sdl-raster in $(ARGV)
-{
-    GUI ?= sdl ;
-}
-else if --with-photon in $(ARGV)
-{
-    GUI ?= photon ;
-}
+PT_FORMS_IMPL = ;
+PT_FORMS_RENDERER = ;
+PT_FORMS_INCLUDES = ;
+PT_FORMS_LINKLIBS = ;
 
+# Platform defaults
 if $(TARGET_OS) = "emscripten"
 {
-    GUI ?= emscripten ;
+    PT_FORMS_IMPL = emscripten ;
+    PT_FORMS_RENDERER = raster ;
+}
+else if $(TARGET_OS) = "macosx"
+{
+    PT_FORMS_IMPL = cocoa ;
+}
+else if $(TARGET_OS) = "linux"
+{
+    PT_FORMS_IMPL = linux-fb ;
+    PT_FORMS_RENDERER = raster ;
+}
+else if $(PT_SYSTEM) = win32
+{
+    PT_FORMS_IMPL = win32 ;
+    PT_FORMS_RENDERER = direct2d ;
 }
 
-if ! $(GUI) || $(GUI:L) = "win32"
+# Platform overrides
+if --with-x11 in $(ARGV)
+{
+    PT_FORMS_IMPL = x11 ;
+    PT_FORMS_RENDERER = raster ;
+}
+else if --with-linux-fb in $(ARGV)
+{
+    PT_FORMS_IMPL = linux-fb ;
+    PT_FORMS_RENDERER = raster ;
+}
+
+# Renderer overrides
+if --with-gdi in $(ARGV)
+{
+    PT_FORMS_RENDERER = gdi ;
+}
+else if --with-sw-raster in $(ARGV)
+{
+    PT_FORMS_RENDERER = raster ;
+}
+else if --with-direct2d in $(ARGV)
+{
+    PT_FORMS_RENDERER = direct2d ;
+}
+
+if $(PT_FORMS_IMPL:L) = "win32"
 {
     Load winui.jam ;
-
     ConfigureWinUI ;
-    ConfigureGdi ;
 
-    if $(WITH_GDI) && $(WITH_WINUI)
+    if $(WITH_WINUI)
     {
-        GUI ?= win32 ;
-        GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
-    }
-    
-    if $(GUI)
-    {
-        if --with-win32-raster in $(ARGV)
+        if $(PT_FORMS_RENDERER) = direct2d
         {
-            PT_FORMS_IMPL = win32-raster ;
+            PT_FORMS_LINKLIBS = gdi32.lib Msimg32.lib $(WINUI_LIBS) ;
+            PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "windowscodecs.lib" "dxguid.lib" ;
+            WITH_FORMS = yes ;
         }
-        else if --with-win32-gdi in $(ARGV)
+        else if $(PT_FORMS_RENDERER) = gdi
         {
-            PT_FORMS_IMPL = win32-gdi ;
+            ConfigureGdi ;
+
+            if $(WITH_GDI)
+            {
+                PT_FORMS_LINKLIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+                WITH_FORMS = yes ;
+            }
         }
-        else
+        else if $(PT_FORMS_RENDERER) = raster
         {
-            PT_FORMS_IMPL = win32-direct2d ;
-            GUILIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "windowscodecs.lib" "dxguid.lib" ;
+            ConfigureGdi ;
+
+            if $(WITH_GDI)
+            {
+                PT_FORMS_LINKLIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+                WITH_FORMS = yes ;
+            }
         }
     }
 }
-
-if ! $(GUI) || $(GUI:L) = "x11"
+else if $(PT_FORMS_IMPL:L) = "x11"
 {
     Load x11.jam ;
 
@@ -1049,19 +1075,16 @@ if ! $(GUI) || $(GUI:L) = "x11"
 
         if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
         {
-            GUI ?= x11 ;
-            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
+            PT_FORMS_INCLUDES = $(FREETYPE_INCLUDES) $(X11_INCLUDES) $(XFT_INCLUDES) ;
+            PT_FORMS_LINKLIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
+            WITH_FORMS = yes ;
         }
     }
-
-    if $(GUI)
-    {
-        PT_FORMS_IMPL = x11 ;
-    }
 }
-
-if ! $(GUI) || $(GUI):L = "cocoa"
+else if $(PT_FORMS_IMPL:L) = "cocoa"
 {
+    PT_FORMS_RENDERER = ;
+
     WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
                                "int main() {"
                                "CFRunLoopRef l = CFRunLoopGetMain();"
@@ -1071,21 +1094,15 @@ if ! $(GUI) || $(GUI):L = "cocoa"
 
     if $(WITH_GUI)
     {
-        GUI = cocoa ;
-        GUILIBS = -framework AppKit -framework Foundation ;
+        PT_FORMS_LINKLIBS = -framework AppKit -framework Foundation ;
+        WITH_FORMS = yes ;
     }
 
     # iOS aspen:
-    #GUI     ?= uikit ;
-    #GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
-    
-    if $(GUI)
-    {
-        PT_FORMS_IMPL = cocoa ;
-    }
+    #PT_FORMS_IMPL ?= uikit ;
+    #PT_FORMS_LINKLIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
 }
-
-if ! $(GUI) || $(GUI:L) = "linux-fb"
+else if $(PT_FORMS_IMPL:L) = "linux-fb"
 {
     WITH_GUI = [ CheckBuildC++ "#include <linux/fb.h>"
                                "int main() {"
@@ -1096,15 +1113,10 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
 
     if $(WITH_GUI)
     {
-        GUI = linux-fb ;
-    }
-    
-    if $(GUI)
-    {
-        PT_FORMS_IMPL = linux-fb ;
+        WITH_FORMS = yes ;
 
         Load simd.jam ;
-        
+
         if $(WITH_CPU_NEON)
         {
             PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WITH_CPU_NEON ] ;
@@ -1112,29 +1124,28 @@ if ! $(GUI) || $(GUI:L) = "linux-fb"
         }
     }
 }
-
-if $(GUI:L) = "emscripten"
+else if $(PT_FORMS_IMPL:L) = "emscripten"
 {
-    PT_FORMS_IMPL = emscripten ;
+    WITH_FORMS = yes ;
 }
 
-if $(GUI:L) = "photon"
+Configure WITH_FORMS ;
+EchoOption WITH_FORMS : "Forms module" : $(WITH_FORMS:E="no") ;
+
+Configure PT_FORMS_IMPL ;
+EchoOption PT_FORMS_IMPL : "Forms platform" ;
+
+Configure PT_FORMS_RENDERER ;
+EchoOption PT_FORMS_RENDERER : "Forms graphics" ;
+
+if $(WITH_FORMS)
 {
-    PT_FORMS_IMPL = photon ;
-    GUILIBS = -lphrender -lph ;
-}
+    Configure PT_FORMS_INCLUDES ;
+    EchoOption PT_FORMS_INCLUDES : "Forms platform includes" ;
 
-Configure GUI ;
-EchoOption GUI : "UI platform" : $(GUI:E="none") ;
-
-if $(GUI)
-{
-    Configure PT_FORMS_IMPL ;
-    EchoOption PT_FORMS_IMPL : "UI implementation" ;
-
-    Configure GUILIBS ;
-    EchoOption GUILIBS : "UI platform linklibs" ;
+    Configure PT_FORMS_LINKLIBS ;
+    EchoOption PT_FORMS_LINKLIBS : "Forms platform linklibs" ;
 
     Configure PT_FORMS_C++FLAGS ;
-    EchoOption PT_FORMS_C++FLAGS : "UI platform C++ flags" ;
+    EchoOption PT_FORMS_C++FLAGS : "Forms platform C++ flags" ;
 }

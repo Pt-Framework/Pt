@@ -245,7 +245,7 @@ if $(PT_SYSTEM)
         SubInclude PT_TOP src Pt-Qt ;
     }
 
-    if $(GUI)
+    if $(WITH_FORMS)
     {
         SubInclude PT_TOP src Pt-Forms ;
     }

@@ -136,9 +136,6 @@
     <Filter Include="Pt-Forms\cocoa">
       <UniqueIdentifier>{36941d33-3e4b-4633-8cd5-98c43dcafde5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Forms\winrt">
-      <UniqueIdentifier>{c847b2fe-d585-45e6-b01c-e78bba57be2c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Forms\x11">
       <UniqueIdentifier>{a13fe857-cfa3-460c-a7cf-2be216417aae}</UniqueIdentifier>
     </Filter>
@@ -1874,15 +1871,6 @@
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\cocoa\WindowView.h">
       <Filter>Pt-Forms\cocoa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\winrt\ApplicationImpl.h">
-      <Filter>Pt-Forms\winrt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\winrt\CursorImpl.h">
-      <Filter>Pt-Forms\winrt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Forms\winrt\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Forms\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\x11\ApplicationImpl.h">
       <Filter>Pt-Forms\x11</Filter>
@@ -4811,15 +4799,6 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\WindowManager.cpp">
       <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\winrt\ApplicationImpl.cpp">
-      <Filter>Pt-Forms\winrt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\winrt\CursorImpl.cpp">
-      <Filter>Pt-Forms\winrt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\winrt\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Forms\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\x11\ApplicationImpl.cpp">
       <Filter>Pt-Forms\x11</Filter>

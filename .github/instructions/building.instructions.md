@@ -44,6 +44,27 @@ description: "Build system"
 - `--debug` — enable debug symbols
 - `--optimize` — enable compiler optimizations
 
+## Pt-Forms UI Selection
+
+- `PT_FORMS_IMPL` is a derived configure output and must not be supplied as user input.
+- Use `-sPT_FORMS_PLATFORM=<platform>` only when a variable-based platform override is needed.
+- Supported platform flags:
+  - `--with-x11`
+  - `--with-linux-fb`
+- Supported renderer flags:
+  - `--with-direct2d`
+  - `--with-gdi`
+  - `--with-sw-raster`
+- Native defaults:
+  - Windows: `win32` + `direct2d`
+  - Linux: `linux-fb`
+  - macOS: `cocoa`
+  - Emscripten: `emscripten`
+- Removed flags that must no longer be used:
+  - `--with-win32-direct2d`
+  - `--with-win32-gdi`
+  - `--with-win32-raster`
+
 # Building the Artifacts
 
 - To build the currently selected configuration:

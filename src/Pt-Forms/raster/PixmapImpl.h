@@ -58,6 +58,11 @@ class PixmapImpl
             _bitmap.reset(size);
         }
 
+        void reset(const Gfx::SizeF& size, std::size_t stride)
+        {
+            _bitmap.reset(size, stride);
+        }
+
         void reset()
         {
             _bitmap.reset();
