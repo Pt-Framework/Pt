@@ -36,186 +36,55 @@ namespace Pt {
 
 namespace Forms {
 
+
 //////////////////////////////////////////////////////////////////////////
-// TabBar
+// TabView
 //////////////////////////////////////////////////////////////////////////
 
-TabBar::TabBar()
-: _current( static_cast<std::size_t>(-1) )
+TabView::TabView()
+: _current(StackLayout::NoIndex)
+, _hasBackground(false)
+, _hasFrame(false)
+{
+    _stack.controlRemoved() += Pt::slot(*this, &TabView::onControlRemoved);
+
+    add(_stack);
+}
+
+
+TabView::~TabView()
 {
 }
 
 
-TabBar::~TabBar()
+std::size_t TabView::hitTab(const Gfx::PointF& pos) const
 {
-}
+    if( ! _tabViewStyle.renderer() )
+        return StackLayout::NoIndex;
 
+    if( ! _tabBarRect.contains(pos) )
+        return StackLayout::NoIndex;
 
-bool TabBar::empty() const
-{
-    return _tabs.empty();
-}
-
-
-std::size_t TabBar::size() const
-{
-    return _tabs.size();
-}
-
-
-void TabBar::addTab(const Pt::String& title)
-{
-    TabItem t;
-    t.setText(title);
-    _tabs.push_back(t);
-
-    relayout();
-}
-
-
-void TabBar::removeTab(std::size_t n)
-{
-    if( n >= _tabs.size() )
-        return;
-
-    if(_current == n)
-        _current = static_cast<std::size_t>(-1);
-    else if(_current != static_cast<std::size_t>(-1) && n < _current)
-        --_current;
-
-    _tabs.erase(_tabs.begin() + n);
-
-    relayout();
-}
-
-
-std::size_t TabBar::current() const
-{
-    return _current;
-}
-
-
-void TabBar::setCurrent(std::size_t n)
-{
-    if( n >= _tabs.size() )
-        return;
-
-    if(_current == n)
-        return;
-
-    if( _current < _tabs.size() )
+    for(std::size_t n = 0; n != _tabs.size(); ++n)
     {
-        _tabs.at(_current).setPressed(false);
+        if( _tabs[n].geometry().contains(pos) )
+            return n;
     }
-    
-    _tabs.at(n).setPressed(true);
-    _current = n;
 
-    invalidate();
-    _currentChanged.send(_current);
+    return StackLayout::NoIndex;
 }
 
 
-void TabBar::setText(std::size_t n, const Pt::String& title)
+Gfx::SizeF TabView::measureTabs(PaintSurface& surface,
+                                TabViewRenderer& renderer)
 {
-    if( n >= _tabs.size() )
-        return;
-
-    _tabs.at(n).setText(title);
-
-    relayout();
-    repaint();
-}
-
-
-const Gfx::RectF& TabBar::currentTabRect() const
-{
-    static const Gfx::RectF empty;
-
-    if( _current < _tabs.size() )
-        return _tabs[_current].geometry();
-
-    return empty;
-}
-
-
-void TabBar::setFont(const Gfx::Font& font)
-{
-    _tabBarOptions.setFont(font);
-    invalidate();
-}
-
-
-void TabBar::setFontSize(std::size_t size)
-{
-    _tabBarOptions.setFontSize(size);
-    invalidate();
-}
-
-
-void TabBar::setFontWeight(Gfx::Font::Weight weight)
-{
-    _tabBarOptions.setFontWeight(weight);
-    invalidate();
-}
-
-
-void TabBar::setFontSlant(Gfx::Font::Slant slant)
-{
-    _tabBarOptions.setFontSlant(slant);
-    invalidate();
-}
-
-
-void TabBar::setTextColor(const Gfx::Color& color)
-{
-    _tabBarOptions.setTextColor(color);
-    invalidate();
-}
-
-
-void TabBar::setRenderer(TabViewRenderer* renderer)
-{
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    if(renderer)
-        _tabBarStyle.bind(*renderer, options, _tabBarOptions);
-    else
-        _tabBarStyle.bind(style, options, _tabBarOptions);
-
-    invalidate();
-}
-
-
-void TabBar::onInvalidate()
-{
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    _tabBarStyle.rebind(style, options, _tabBarOptions);
-
-    if( ! _tabBarStyle.renderer() )
-        return;
-
-    Base::onInvalidate();
-    relayout();
-}
-
-
-Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
-{
-    TabViewRenderer* renderer = _tabBarStyle.renderer();
-    if( ! renderer )
-        return Gfx::SizeF();
-
-    // Measure total size by summing individual tab sizes
     Gfx::SizeF total;
 
     for(std::size_t i = 0; i < _tabs.size(); ++i)
     {
-        Gfx::SizeF tabSize = renderer->measureTab( surface(), _tabs[i].text() );
-        _tabs[i].setMeasuredSize(tabSize);
+        TabViewItem& tab = _tabs.at(i);
+        Gfx::SizeF tabSize = renderer.measureTab(surface, tab.text());
+        tab.setMeasuredSize(tabSize);
 
         total.addWidth( tabSize.width() );
 
@@ -227,180 +96,137 @@ Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
 }
 
 
-void TabBar::onLayout(const Gfx::RectF& rect)
+void TabView::layoutTabs(PaintSurface& surface,
+                         TabViewRenderer& renderer,
+                         const Gfx::RectF& rect)
 {
-    Base::onLayout(rect);
+    _tabBarRect = rect;
 
-    TabViewRenderer* renderer = _tabBarStyle.renderer();
-    if( ! renderer )
-        return;
-
-    const Painter& painter = renderer->textPainter( surface() );
+    const Painter& painter = renderer.textPainter(surface);
     Gfx::FontMetrics fontMet = painter.fontMetrics();
 
-    Gfx::PointF tabPos;
+    Gfx::PointF tabPos = rect.topLeft();
 
     for(std::size_t i = 0; i < _tabs.size(); ++i)
     {
-        const Gfx::SizeF& tabSize = _tabs[i].measuredSize();
+        TabViewItem& tab = _tabs.at(i);
+        const Gfx::SizeF& tabSize = tab.measuredSize();
 
         Gfx::RectF tabRect;
         tabRect.setOrigin(tabPos);
         tabRect.setWidth( tabSize.width() );
         tabRect.setHeight( rect.height() );
 
-        _tabs[i].setGeometry(tabRect);
+        tab.setGeometry(tabRect);
 
-        Gfx::RectF textRect = renderer->layoutTab( surface(), tabRect );
+        Gfx::RectF textRect = renderer.layoutTab(surface, tabRect);
         double textY = textRect.y()
                      + (textRect.height() - fontMet.height()) / 2.0
                      + fontMet.ascent();
-        _tabs[i].setTextPos( Gfx::PointF(textRect.x(), textY) );
+        tab.setTextPos( Gfx::PointF(textRect.x(), textY) );
 
         tabPos.addX( tabSize.width() );
     }
 }
 
 
-void TabBar::onPaint(PaintContext& context, const Gfx::RectF& rect)
+void TabView::renderTabs(PaintContext& context,
+                         TabViewRenderer& renderer,
+                         bool enabled)
 {
-    TabViewRenderer* renderer = _tabBarStyle.renderer();
-    if( ! renderer )
-        return;
-
     for(std::size_t i = 0; i < _tabs.size(); ++i)
     {
-        const TabItem& tab = _tabs[i];
+        const TabViewItem& tab = _tabs.at(i);
 
-        TabItemState itemState;
-        itemState.setEnabled( isEnabled() );
+        TabViewItemState itemState;
+        itemState.setEnabled(enabled);
         itemState.setActive( tab.isPressed() );
 
-        onPaintTab(context, tab.geometry(), tab.text(), tab.textPos(), itemState);
+        renderTab(context, renderer, tab.geometry(), tab.text(), tab.textPos(), itemState);
     }
 }
 
 
-void TabBar::onPaintTab(PaintContext& context,
+void TabView::renderTab(PaintContext& context,
+                        TabViewRenderer& renderer,
                         const Gfx::RectF& tabRect,
                         const Pt::String& text,
                         const Gfx::PointF& textPos,
-                        const TabItemState& state)
+                        const TabViewItemState& state)
 {
-    TabViewRenderer* renderer = _tabBarStyle.renderer();
-    if( ! renderer )
+    renderer.renderTab(context, tabRect, text, textPos, state);
+}
+
+
+const Gfx::RectF& TabView::currentTabRect() const
+{
+    static const Gfx::RectF empty;
+
+    if( _current < _tabs.size() )
+        return _tabs.at(_current).geometry();
+
+    return empty;
+}
+
+
+void TabView::onProcessMouseEvent(const MouseEvent& ev)
+{
+    if( ! acceptsInput() )
         return;
 
-    renderer->renderTab(context, tabRect, text, textPos, state);
-}
-
-
-bool TabBar::onMouseEvent(const MouseEvent& ev)
-{
-    Base::onMouseEvent(ev);
-
-    if( ! ev.isPress() )
-        return true;
-
-    for(std::size_t n = 0; n != _tabs.size(); ++n)
+    Gfx::PointF pos = fromGlobal( ev.position() );
+    if( ev.isPress() )
     {
-        TabItem& t = _tabs[n];
-        
-        if( t.geometry().contains( ev.position() ) )
-        {
-            if(n != _current)
-            {
-                if(_current < _tabs.size() )
-                    _tabs.at(_current).setPressed(false);
-                
-                t.setPressed(true);
+        std::size_t current = hitTab(pos);
+        if(current != StackLayout::NoIndex)
+            setCurrent(current);
 
-                _current = n;
-                invalidate();
-
-                _currentChanged.send(_current);
-            }
-
-            break;
-        }
+        return;
     }
 
-    return true;
+    Base::onProcessMouseEvent(ev);
 }
 
 
-bool TabBar::onTouchEvent(const TouchEvent& ev)
+void TabView::onProcessTouchEvent(const TouchEvent& ev)
 {
-    Base::onTouchEvent(ev);
+    if( ! acceptsInput() )
+        return;
 
-    if( ! ev.isPress() )
-        return true;
-
-    for(std::size_t n = 0; n != _tabs.size(); ++n)
+    Gfx::PointF pos = fromGlobal( ev.position() );
+    if( ev.isPress() )
     {
-        TabItem& t = _tabs[n];
-        
-        if( t.geometry().contains( ev.position() ) )
-        {
-            if(n != _current)
-            {
-                if(_current < _tabs.size() )
-                    _tabs.at(_current).setPressed(false);
-                
-                t.setPressed(true);
+        std::size_t current = hitTab(pos);
+        if(current != StackLayout::NoIndex)
+            setCurrent(current);
 
-                _current = n;
-                invalidate();
-
-                _currentChanged.send(_current);
-            }
-
-            break;
-        }
+        return;
     }
 
-    return true;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// TabView
-//////////////////////////////////////////////////////////////////////////
-
-TabView::TabView()
-: _hasBackground(false)
-, _hasFrame(false)
-{
-    _tabBar.currentChanged() += Pt::slot(_stack, &StackLayout::setCurrent);
-    _stack.controlRemoved() += Pt::slot(_tabBar, &TabBar::removeTab);
-
-    _layout.addItem(_tabBar, DockingLayout::Top);
-    _layout.addItem(_stack, DockingLayout::Fill);
-
-    add(_layout);
-}
-
-
-TabView::~TabView()
-{
+    Base::onProcessTouchEvent(ev);
 }
 
 
 bool TabView::empty() const
 {
-    return _tabBar.empty();
+    return _tabs.empty();
 }
 
 
 std::size_t TabView::size() const
 {
-    return _tabBar.size();
+    return _tabs.size();
 }
 
 
 void TabView::addTab(Control& control, const Pt::String& title)
 {
-    _tabBar.addTab(title);
+    TabViewItem tab;
+    tab.setText(title);
+    _tabs.push_back(tab);
+
     _stack.addItem(control);
+    relayout();
 }
 
 
@@ -410,29 +236,58 @@ void TabView::removeTab(std::size_t n)
     if( ! control )
         return;
 
-    // _stack.controlRemoved is wired to _tabBar.removeTab,
-    // so removing from the stack automatically removes the tab title
     _stack.removeItem(*control);
 }
 
 
 std::size_t TabView::current() const
 {
-    return _tabBar.current();
+    return _current;
 }
 
 
 void TabView::setCurrent(std::size_t n)
 {
-    // TabBar::currentChanged is wired to StackLayout::setCurrent,
-    // so only drive the tab bar; the signal handles the stack.
-    _tabBar.setCurrent(n);
+    if( n >= _tabs.size() )
+        return;
+
+    if(_current == n)
+        return;
+
+    if( _current < _tabs.size() )
+        _tabs.at(_current).setPressed(false);
+
+    _tabs.at(n).setPressed(true);
+    _current = n;
+
+    repaint();
+    _stack.setCurrent(n);
 }
 
 
 void TabView::setText(std::size_t n, const Pt::String& title)
 {
-    _tabBar.setText(n, title);
+    if( n >= _tabs.size() )
+        return;
+
+    _tabs.at(n).setText(title);
+    relayout();
+    repaint();
+}
+
+
+void TabView::onControlRemoved(std::size_t n)
+{
+    if( n >= _tabs.size() )
+        return;
+
+    if(_current == n)
+        _current = StackLayout::NoIndex;
+    else if(_current != StackLayout::NoIndex && n < _current)
+        --_current;
+
+    _tabs.erase(_tabs.begin() + n);
+    relayout();
 }
 
 
@@ -469,7 +324,6 @@ void TabView::setFrame(bool enable)
 void TabView::setFont(const Gfx::Font& font)
 {
     _tabViewOptions.setFont(font);
-    _tabBar.setFont(font);
     invalidate();
 }
 
@@ -477,7 +331,6 @@ void TabView::setFont(const Gfx::Font& font)
 void TabView::setFontSize(std::size_t size)
 {
     _tabViewOptions.setFontSize(size);
-    _tabBar.setFontSize(size);
     invalidate();
 }
 
@@ -485,7 +338,6 @@ void TabView::setFontSize(std::size_t size)
 void TabView::setFontWeight(Gfx::Font::Weight weight)
 {
     _tabViewOptions.setFontWeight(weight);
-    _tabBar.setFontWeight(weight);
     invalidate();
 }
 
@@ -493,7 +345,6 @@ void TabView::setFontWeight(Gfx::Font::Weight weight)
 void TabView::setFontSlant(Gfx::Font::Slant slant)
 {
     _tabViewOptions.setFontSlant(slant);
-    _tabBar.setFontSlant(slant);
     invalidate();
 }
 
@@ -501,7 +352,13 @@ void TabView::setFontSlant(Gfx::Font::Slant slant)
 void TabView::setTextColor(const Gfx::Color& color)
 {
     _tabViewOptions.setTextColor(color);
-    _tabBar.setTextColor(color);
+    invalidate();
+}
+
+
+void TabView::setAccentColor(const Gfx::Color& color)
+{
+    _tabViewOptions.setAccentColor(color);
     invalidate();
 }
 
@@ -515,7 +372,6 @@ void TabView::setRenderer(TabViewRenderer* renderer)
     else
         _tabViewStyle.bind(Application::instance().style(), options, _tabViewOptions);
 
-    _tabBar.setRenderer(renderer);
     invalidate();
 }
 
@@ -537,8 +393,34 @@ Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
 {
     Base::onMeasure(policy);
 
-    _layout.measure(policy);
-    return _layout.preferredSize();
+    TabViewRenderer* renderer = _tabViewStyle.renderer();
+    Gfx::SizeF tabBarSize;
+    if( renderer )
+        tabBarSize = measureTabs(surface(), *renderer);
+
+    SizePolicy stackPolicy(policy.horizontal(), policy.vertical());
+    double stackWidth = policy.size().width() - padding().leftRight() - _stack.margin().leftRight();
+    double stackHeight = policy.size().height() - padding().topBottom() - tabBarSize.height() - _stack.margin().topBottom();
+    if( stackWidth < 0 )
+        stackWidth = 0;
+    if( stackHeight < 0 )
+        stackHeight = 0;
+
+    stackPolicy.setWidth(stackWidth);
+    stackPolicy.setHeight(stackHeight);
+
+    _stack.measure(stackPolicy);
+    Gfx::SizeF stackSize = _stack.preferredSize();
+
+    Gfx::SizeF preferred;
+    preferred.setWidth(stackSize.width() + _stack.margin().leftRight());
+    if( tabBarSize.width() > preferred.width() )
+        preferred.setWidth(tabBarSize.width());
+
+    preferred.setHeight(tabBarSize.height() + stackSize.height() + _stack.margin().topBottom());
+    preferred.addWidth(padding().leftRight());
+    preferred.addHeight(padding().topBottom());
+    return preferred;
 }
 
 
@@ -546,18 +428,39 @@ void TabView::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    Gfx::PointF pos(padding().left() + _layout.margin().left(), 
-                    padding().top()  + _layout.margin().top());
-
-    double hspace = padding().leftRight() + _layout.margin().leftRight();
-    double vspace = padding().topBottom() + _layout.margin().topBottom();
-
+    Gfx::PointF pos(padding().left(), padding().top());
     Gfx::SizeF size;
-    size.setWidth( rect.width() - hspace );
-    size.setHeight( rect.height() - vspace );
+    size.setWidth( rect.width() - padding().leftRight() );
+    size.setHeight( rect.height() - padding().topBottom() );
 
-    _layout.move(pos);
-    _layout.resize(size);
+    if( size.width() < 0 )
+        size.setWidth(0);
+    if( size.height() < 0 )
+        size.setHeight(0);
+
+    TabViewRenderer* renderer = _tabViewStyle.renderer();
+    double tabBarHeight = 0;
+    _tabBarRect.clear();
+    if( renderer )
+    {
+        Gfx::SizeF tabBarSize = measureTabs(surface(), *renderer);
+        tabBarHeight = tabBarSize.height();
+
+        Gfx::RectF tabBarRect(pos, Gfx::SizeF(size.width(), tabBarHeight));
+        layoutTabs(surface(), *renderer, tabBarRect);
+    }
+
+    Gfx::PointF stackPos(pos.x() + _stack.margin().left(),
+                         pos.y() + tabBarHeight + _stack.margin().top());
+    Gfx::SizeF stackSize(size.width() - _stack.margin().leftRight(),
+                         size.height() - tabBarHeight - _stack.margin().topBottom());
+    if( stackSize.width() < 0 )
+        stackSize.setWidth(0);
+    if( stackSize.height() < 0 )
+        stackSize.setHeight(0);
+
+    _stack.move(stackPos);
+    _stack.resize(stackSize);
 }
 
 
@@ -580,7 +483,9 @@ void TabView::onPaint(PaintContext& context, const Gfx::RectF& rect)
         onPaintBackground(context, contentRect, state);
 
     if( _hasFrame )
-        onPaintChrome(context, contentRect, _tabBar.currentTabRect(), state);
+        onPaintChrome(context, contentRect, currentTabRect(), state);
+
+    renderTabs(context, *renderer, isEnabled());
 }
 
 

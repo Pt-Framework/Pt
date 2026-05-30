@@ -56,6 +56,14 @@ class PT_FORMS_API TabViewStyleOptions
 
         void setTextColor(const Gfx::Color& color);
 
+        /** @brief Returns the local accent-color override for the active tab.
+        */
+        const Gfx::Color* accentColor() const;
+
+        /** @brief Sets the local accent color for active tabs.
+        */
+        void setAccentColor(const Gfx::Color& color);
+
         const Gfx::Font* font() const;
 
         void setFont(const Gfx::Font& font);
@@ -74,7 +82,8 @@ class PT_FORMS_API TabViewStyleOptions
             Background = 0x01,
             Contour    = 0x02,
             TextColor  = 0x04,
-            Font       = 0x08
+            Font       = 0x08,
+            AccentColor = 0x10
         };
 
         bool hasOverride(StyleOverride mask) const;
@@ -85,6 +94,7 @@ class PT_FORMS_API TabViewStyleOptions
         AutoPtr<Gfx::Brush> _background;
         AutoPtr<Gfx::Pen>   _contour;
         AutoPtr<Gfx::Color> _textColor;
+        AutoPtr<Gfx::Color> _accentColor;
         FontOption          _font;
         std::size_t         _generation;
         unsigned            _overrides;
@@ -110,10 +120,10 @@ class PT_FORMS_API TabViewState
 };
 
 
-class PT_FORMS_API TabItemState
+class PT_FORMS_API TabViewItemState
 {
     public:
-        TabItemState();
+        TabViewItemState();
 
         bool isEnabled() const;
 
@@ -173,7 +183,7 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
                        const Gfx::RectF& tabRect,
                        const Pt::String& text,
                        const Gfx::PointF& textPos,
-                       const TabItemState& state);
+                       const TabViewItemState& state);
 
     protected:
         virtual void onReset(const StyleOptions& options);
@@ -204,7 +214,7 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
                                  const Gfx::RectF& tabRect,
                                  const Pt::String& text,
                                  const Gfx::PointF& textPos,
-                                 const TabItemState& state) = 0;
+                                 const TabViewItemState& state) = 0;
 };
 
 

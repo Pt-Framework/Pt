@@ -1,29 +1,29 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
-  
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  
-  As a special exception, you may use this file as part of a free
-  software library without restriction. Specifically, if other files
-  instantiate templates or use macros or inline functions from this
-  file, or you compile this file and link it with other files to
-  produce an executable, this file does not by itself cause the
-  resulting executable to be covered by the GNU General Public
-  License. This exception does not however invalidate any other
-  reasons why the executable file might be covered by the GNU Library
-  General Public License.
-  
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301 USA
+/* Copyright (C) 2017 Marc Boris Duerner
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ As a special exception, you may use this file as part of a free
+ software library without restriction. Specifically, if other files
+ instantiate templates or use macros or inline functions from this
+ file, or you compile this file and link it with other files to
+ produce an executable, this file does not by itself cause the
+ resulting executable to be covered by the GNU General Public
+ License. This exception does not however invalidate any other
+ reasons why the executable file might be covered by the GNU Library
+ General Public License.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ MA 02110-1301 USA
 */
 
 #ifndef Pt_Forms_TabView_H
@@ -32,9 +32,9 @@
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/TabViewStyle.h>
 #include <Pt/Forms/StackLayout.h>
-#include <Pt/Forms/DockingLayout.h>
-#include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
+
+#include <vector>
 
 namespace Pt {
 
@@ -42,14 +42,14 @@ namespace Forms {
 
 /** @brief Item for tab bars.
 */
-class TabItem
+class TabViewItem
 {
     public:
-        TabItem()
+        TabViewItem()
         : _isPressed(false)
         {}
 
-        ~TabItem()
+        ~TabViewItem()
         {}
 
         const String& text() const
@@ -88,79 +88,6 @@ class TabItem
         Gfx::RectF  _geometry;
         Gfx::PointF _textPos;
         bool        _isPressed;
-};
-
-/** @brief Tab bar for all tabbed controls.
-*/
-class PT_FORMS_API TabBar : public Control
-{
-    public:
-        typedef Control Base;
-
-    public:
-        TabBar();
-
-        virtual ~TabBar();
-
-        bool empty() const;
-
-        std::size_t size() const;
-
-        void addTab(const Pt::String& title);
-
-        void removeTab(std::size_t n);
-
-        std::size_t current() const;
-
-        void setCurrent(std::size_t n);
-
-        void setText(std::size_t n, const Pt::String& title);
-
-        const Gfx::RectF& currentTabRect() const;
-
-        Pt::Signal<std::size_t>& currentChanged()
-        { return _currentChanged; }
-
-    public:
-        void setFont(const Gfx::Font& font);
-
-        void setFontSize(std::size_t size);
-
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        void setTextColor(const Gfx::Color& color);
-
-        void setRenderer(TabViewRenderer* renderer);
-
-    protected:
-        virtual void onInvalidate();
-
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
-        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
-
-        virtual void onPaintTab(PaintContext& context,
-                                const Gfx::RectF& tabRect,
-                                const Pt::String& text,
-                                const Gfx::PointF& textPos,
-                                const TabItemState& state);
-
-    protected:
-        virtual bool onMouseEvent(const MouseEvent& ev);
-
-        virtual bool onTouchEvent(const TouchEvent& ev);
-
-    private:
-        Pt::Signal<std::size_t> _currentChanged;
-        std::vector<TabItem>    _tabs;
-        std::size_t             _current;
-
-        TabViewStyle        _tabBarStyle;
-        TabViewStyleOptions _tabBarOptions;
 };
 
 /** @brief Tabbed view for controls.
@@ -208,9 +135,17 @@ class PT_FORMS_API TabView : public Control
 
         void setTextColor(const Gfx::Color& color);
 
+        /** @brief Sets the local accent color for the active tab.
+        */
+        void setAccentColor(const Gfx::Color& color);
+
         void setRenderer(TabViewRenderer* renderer);
 
     protected:
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
+
+        virtual void onProcessTouchEvent(const TouchEvent& ev);
+
         virtual void onInvalidate();
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
@@ -229,14 +164,39 @@ class PT_FORMS_API TabView : public Control
                                    const TabViewState& state);
 
     private:
-        DockingLayout             _layout;
-        TabBar                    _tabBar;
-        StackLayout               _stack;
+        std::size_t hitTab(const Gfx::PointF& pos) const;
 
-        TabViewStyle         _tabViewStyle;
-        TabViewStyleOptions  _tabViewOptions;
-        bool                      _hasBackground;
-        bool                      _hasFrame;
+        Gfx::SizeF measureTabs(PaintSurface& surface,
+                               TabViewRenderer& renderer);
+
+        void layoutTabs(PaintSurface& surface,
+                        TabViewRenderer& renderer,
+                        const Gfx::RectF& rect);
+
+        void renderTabs(PaintContext& context,
+                        TabViewRenderer& renderer,
+                        bool enabled);
+
+        void renderTab(PaintContext& context,
+                       TabViewRenderer& renderer,
+                       const Gfx::RectF& tabRect,
+                       const Pt::String& text,
+                       const Gfx::PointF& textPos,
+                       const TabViewItemState& state);
+
+        const Gfx::RectF& currentTabRect() const;
+
+        void onControlRemoved(std::size_t n);
+
+        StackLayout              _stack;
+        std::vector<TabViewItem>     _tabs;
+        std::size_t              _current;
+        Gfx::RectF               _tabBarRect;
+
+        TabViewStyle        _tabViewStyle;
+        TabViewStyleOptions _tabViewOptions;
+        bool                _hasBackground;
+        bool                _hasFrame;
 };
 
 } // namespace

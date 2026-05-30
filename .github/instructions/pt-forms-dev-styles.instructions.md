@@ -58,6 +58,9 @@ description: "Guidelines and current architecture for Pt::Forms styles, renderer
 - Prefer reusing `PanelRenderer` or another existing generic container renderer for pane/background/frame chrome. Keep a dedicated container renderer only when container-specific chrome, metrics, or native integration genuinely differ.
 - Repeated-element renderer APIs may accept only flat content inputs such as rects, text, icons, scalars, typed flags, or a small POD snapshot composed from those values. Do not pass the repeated-element widget, model object, or mutable vectors/collections into the renderer.
 - Layout ownership stays with the widget. A renderer may compute a rect for one row/tab/cell, but it must not mutate a widget-owned array, collection, or element object to store the result.
+- `TabView` is expected to own the tab collection, current-selection state, tab geometry, tab measurement/layout, and tab input handling itself.
+- Keep the tab-strip logic private to `TabView`; do not reintroduce a separate `TabBar` helper or widget unless a new requirement proves that the logic cannot stay local.
+- If repeated tab visuals ever need to become independently borrowable later, extract only renderer-level primitives first; do not start by reintroducing a child control or duplicated style state.
 
 ## State Ownership by Layer
 - Typed style flags must match the layer that is being rendered.

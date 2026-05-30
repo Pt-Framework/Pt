@@ -792,7 +792,7 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
                                  const Gfx::RectF& tabRect,
                                  const Pt::String& text,
                                  const Gfx::PointF& textPos,
-                                 const TabItemState& state);
+                                 const TabViewItemState& state);
 
     private:
         Gfx::Brush  _background;

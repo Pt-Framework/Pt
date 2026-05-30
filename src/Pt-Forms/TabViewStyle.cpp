@@ -108,6 +108,19 @@ void TabViewStyleOptions::setTextColor(const Gfx::Color& color)
 }
 
 
+const Gfx::Color* TabViewStyleOptions::accentColor() const
+{
+    return _accentColor.get();
+}
+
+
+void TabViewStyleOptions::setAccentColor(const Gfx::Color& color)
+{
+    _accentColor.reset( new Gfx::Color(color) );
+    setOverride(AccentColor);
+}
+
+
 const Gfx::Font* TabViewStyleOptions::font() const
 {
     return _font.font();
@@ -184,10 +197,10 @@ void TabViewState::setFocused(bool v)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// TabItemState
+// TabViewItemState
 ///////////////////////////////////////////////////////////////////////////////
 
-TabItemState::TabItemState()
+TabViewItemState::TabViewItemState()
 : _enabled(false)
 , _active(false)
 , _highlighted(false)
@@ -196,49 +209,49 @@ TabItemState::TabItemState()
 }
 
 
-bool TabItemState::isEnabled() const
+bool TabViewItemState::isEnabled() const
 {
     return _enabled;
 }
 
 
-void TabItemState::setEnabled(bool v)
+void TabViewItemState::setEnabled(bool v)
 {
     _enabled = v;
 }
 
 
-bool TabItemState::isActive() const
+bool TabViewItemState::isActive() const
 {
     return _active;
 }
 
 
-void TabItemState::setActive(bool v)
+void TabViewItemState::setActive(bool v)
 {
     _active = v;
 }
 
 
-bool TabItemState::isHighlighted() const
+bool TabViewItemState::isHighlighted() const
 {
     return _highlighted;
 }
 
 
-void TabItemState::setHighlighted(bool v)
+void TabViewItemState::setHighlighted(bool v)
 {
     _highlighted = v;
 }
 
 
-bool TabItemState::isPressed() const
+bool TabViewItemState::isPressed() const
 {
     return _pressed;
 }
 
 
-void TabItemState::setPressed(bool v)
+void TabViewItemState::setPressed(bool v)
 {
     _pressed = v;
 }
@@ -320,7 +333,7 @@ void TabViewRenderer::renderTab(PaintContext& context,
                                 const Gfx::RectF& tabRect,
                                 const Pt::String& text,
                                 const Gfx::PointF& textPos,
-                                const TabItemState& state)
+                                const TabViewItemState& state)
 {
     onRenderTab(context, tabRect, text, textPos, state);
 }

@@ -2785,7 +2785,8 @@ void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options,
     const Gfx::Color* tc = tabViewOptions.textColor();
     _textColor = tc ? *tc : options.textColor();
 
-    _accentColor = options.accentColor();
+    const Gfx::Color* ac = tabViewOptions.accentColor();
+    _accentColor = ac ? *ac : options.accentColor();
 
     _bgPainter.setBrush(_background);
     _framePainter.setPen(_contour);
@@ -2863,7 +2864,7 @@ void PlatinumTabViewRenderer::onRenderTab(PaintContext& context,
                                           const Gfx::RectF& tabRect,
                                           const Pt::String& text,
                                           const Gfx::PointF& textPos,
-                                          const TabItemState& state)
+                                          const TabViewItemState& state)
 {
     if( tabRect.width() <= 0 || tabRect.height() <= 0 )
         return;
