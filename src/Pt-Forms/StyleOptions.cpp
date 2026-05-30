@@ -34,33 +34,44 @@ namespace Pt {
 namespace Forms {
 
 StyleOptions::StyleOptions()
-: _background(Gfx::Color(229, 229, 229))
+: _generation(0)
+, _background(Gfx::Color(229, 229, 229))
 , _foreground(Gfx::Color(210, 210, 210))
 , _contour(Gfx::Color(150, 150, 150))
 , _accentColor(20, 140, 250)
 , _viewBackground(Gfx::Color(255, 255, 255))
 , _highlightColor(190, 190, 190)
+, _hoverBackground(Gfx::Color(190, 190, 190))
 , _textBackground(Gfx::Color(255, 255, 255))
 , _textColor(0, 0, 0)
+, _placeholderTextColor(150, 150, 150)
 , _highlightedTextColor(0, 0, 0)
+, _alternateViewBackground(Gfx::Color(255, 255, 255))
+, _popupBackground(Gfx::Color(229, 229, 229))
+, _popupTextColor(0, 0, 0)
 , _font(Gfx::Font("", 10))
-, _generation(0)
+
 {
 }
 
 
 StyleOptions::StyleOptions(const StyleOptions& o)
-: _background(o._background )
+: _generation(o._generation)
+, _background(o._background )
 , _foreground(o._foreground)
 , _contour(o._contour)
 , _accentColor(o._accentColor)
 , _viewBackground(o.viewBackground() )
 , _highlightColor(o._highlightColor)
+, _hoverBackground(o._hoverBackground)
 , _textBackground(o._textBackground )
 , _textColor(o._textColor)
+, _placeholderTextColor(o._placeholderTextColor)
 , _highlightedTextColor( o.highlightedTextColor() )
+, _alternateViewBackground(o._alternateViewBackground)
+, _popupBackground(o._popupBackground)
+, _popupTextColor(o._popupTextColor)
 , _font(o._font)
-, _generation(o._generation)
 {
 }
 
@@ -82,8 +93,13 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
     _viewBackground = o._viewBackground;
     _textBackground = o._textBackground ;
     _highlightColor = o._highlightColor;
+    _hoverBackground = o._hoverBackground;
     _textColor = o._textColor;
+    _placeholderTextColor = o._placeholderTextColor;
     _highlightedTextColor = o._highlightedTextColor;
+    _alternateViewBackground = o._alternateViewBackground;
+    _popupBackground = o._popupBackground;
+    _popupTextColor = o._popupTextColor;
     _font = o._font;
     ++_generation;
 

@@ -66,8 +66,10 @@ class PT_FORMS_API StyleOptions
         // background
         // foreground
         // textColor
+        // placeholderTextColor
 
         // highlightColor
+        // hoverBackground
         // highlightedTextBackground
         // highlightedTextColor
 
@@ -76,11 +78,22 @@ class PT_FORMS_API StyleOptions
         // activeColor
         
         // textBackground
+            // viewBackground
         // alternateTextBackground
+            // alternateViewBackground
 
-        // tooltipBackground / popupBackground
-        // tooltipForeground / popupForeground
-        // tooltipTextColor / popupTextColor
+            // tooltipBackground / popupBackground
+            // tooltipForeground / popupForeground
+            // tooltipTextColor / popupTextColor
+
+            // common standard-widget candidates:
+            // selectionBackground
+            // selectionTextColor
+            // focusColor
+            // disabledBackground
+            // disabledTextColor
+            // separatorColor
+            // caretColor
 
         const Gfx::Brush& background() const
         {
@@ -148,6 +161,17 @@ class PT_FORMS_API StyleOptions
             ++_generation;
         }
 
+        const Gfx::Brush& hoverBackground() const
+        {
+            return _hoverBackground;
+        }
+
+        void setHoverBackground(const Gfx::Brush& b)
+        {
+            _hoverBackground = b;
+            ++_generation;
+        }
+
         const Gfx::Brush& textBackground() const
         {
             return _textBackground;
@@ -170,6 +194,17 @@ class PT_FORMS_API StyleOptions
             ++_generation;
         }
 
+        const Gfx::Color& placeholderTextColor() const
+        {
+            return _placeholderTextColor;
+        }
+
+        void setPlaceholderTextColor(const Gfx::Color& c)
+        {
+            _placeholderTextColor = c;
+            ++_generation;
+        }
+
         const Gfx::Color& highlightedTextColor() const
         {
             return _highlightedTextColor;
@@ -178,6 +213,39 @@ class PT_FORMS_API StyleOptions
         void setHighlightedTextColor(const Gfx::Color& c)
         {
             _highlightedTextColor = c;
+            ++_generation;
+        }
+
+        const Gfx::Brush& alternateViewBackground() const
+        {
+            return _alternateViewBackground;
+        }
+
+        void setAlternateViewBackground(const Gfx::Brush& b)
+        {
+            _alternateViewBackground = b;
+            ++_generation;
+        }
+
+        const Gfx::Brush& popupBackground() const
+        {
+            return _popupBackground;
+        }
+
+        void setPopupBackground(const Gfx::Brush& b)
+        {
+            _popupBackground = b;
+            ++_generation;
+        }
+
+        const Gfx::Color& popupTextColor() const
+        {
+            return _popupTextColor;
+        }
+
+        void setPopupTextColor(const Gfx::Color& c)
+        {
+            _popupTextColor = c;
             ++_generation;
         }
 
@@ -200,17 +268,22 @@ class PT_FORMS_API StyleOptions
         }
 
     private:
-      Gfx::Brush _background;
-      Gfx::Brush _foreground;
-      Gfx::Pen   _contour;
-      Gfx::Color _accentColor;
-      Gfx::Brush _viewBackground;
-      Gfx::Color _highlightColor;
-      Gfx::Brush _textBackground;
-      Gfx::Color _textColor;
-      Gfx::Color _highlightedTextColor;
-      Gfx::Font  _font;
-      std::size_t _generation;
+        std::size_t _generation;
+        Gfx::Brush _background;
+        Gfx::Brush _foreground;
+        Gfx::Pen   _contour;
+        Gfx::Color _accentColor;
+        Gfx::Brush _viewBackground;
+        Gfx::Color _highlightColor;
+        Gfx::Brush _hoverBackground;
+        Gfx::Brush _textBackground;
+        Gfx::Color _textColor;
+        Gfx::Color _placeholderTextColor;
+        Gfx::Color _highlightedTextColor;
+        Gfx::Brush _alternateViewBackground;
+        Gfx::Brush _popupBackground;
+        Gfx::Color _popupTextColor;
+        Gfx::Font  _font;
 };
 
 /** @brief Composable font override slice for widget-local style options.
