@@ -42,9 +42,12 @@ namespace Forms {
 /////////////////////////////////////////////////////////////////////////////
 
 ListBoxItem::ListBoxItem()
-: _isSelectable(false)
+: _onClickBegin(false)
+, _isHovered(false)
+, _isSelectable(false)
 , _isSelected(false)
 {
+    setFocusPolicy(Control::AcceptFocus);
     setPadding(8);
 }
 
@@ -116,29 +119,167 @@ void ListBoxItem::setIcon(const Icon& icon, const Gfx::SizeF& iconSize)
 }
 
 
+bool ListBoxItem::isHovered() const
+{
+    return _isHovered;
+}
+
+
+void ListBoxItem::click()
+{
+    onPressed();
+    onReleased();
+}
+
+
+Signal<>& ListBoxItem::clicked()
+{
+    return _clicked;
+}
+
+
 Pt::Signal<ListBoxItem&>& ListBoxItem::selected()
 {
     return _selected;
 }
 
 
+void ListBoxItem::onActionKey(const KeyEvent& kev)
+{
+    Base::onActionKey(kev);
+
+    if( kev.isPress() )
+        onPressed();
+    else if( kev.isRelease() )
+        onReleased();
+}
+
+
+void ListBoxItem::onShortcut(const Key& key)
+{
+    Base::onShortcut(key);
+
+    onPressed();
+    onReleased();
+}
+
+
+void ListBoxItem::onMnemonic(Pt::Char m)
+{
+    Base::onMnemonic(m);
+
+    onPressed();
+    onReleased();
+}
+
+
 void ListBoxItem::onPressed()
 {
-    Base::onPressed();
 }
 
 
 void ListBoxItem::onReleased()
 {
-    Base::onReleased();
-
     setSelected( ! _isSelected );
 }
 
 
 void ListBoxItem::onCanceled()
 {
-    Base::onCanceled();
+}
+
+
+bool ListBoxItem::onEnterEvent(const EnterEvent& ev)
+{
+    Base::onEnterEvent(ev);
+
+    _isHovered = true;
+    invalidate();
+    return true;
+}
+
+
+bool ListBoxItem::onLeaveEvent(const LeaveEvent& ev)
+{
+    Base::onLeaveEvent(ev);
+
+    _isHovered = false;
+    invalidate();
+    return true;
+}
+
+
+bool ListBoxItem::onMouseEvent(const MouseEvent& ev)
+{
+    Base::onMouseEvent(ev);
+
+    if( ev.isPress() )
+    {
+        _onClickBegin = true;
+        onPressed();
+    }
+    else if( ev.isRelease() )
+    {
+        const Gfx::PointF& pos = ev.position();
+
+        bool inside = pos.x() >= 0 && pos.x() <= size().width()
+                   && pos.y() >= 0 && pos.y() <= size().height();
+
+        bool isClick = _onClickBegin && inside;
+
+        if(_onClickBegin)
+            _onClickBegin = false;
+
+        if(isClick)
+            onReleased();
+        else
+            onCanceled();
+    }
+
+    return true;
+}
+
+
+bool ListBoxItem::onTouchEvent(const TouchEvent& ev)
+{
+    Base::onTouchEvent(ev);
+
+    if( ev.isPress() )
+    {
+        _onClickBegin = true;
+        onPressed();
+    }
+    else if( ev.isRelease() )
+    {
+        const Gfx::PointF& pos = ev.position();
+
+        bool inside = pos.x() > 0 && pos.x() <= size().width()
+                   && pos.y() > 0 && pos.y() <= size().height();
+
+        bool isClick = _onClickBegin && inside;
+
+        if(_onClickBegin)
+            _onClickBegin = false;
+
+        if(isClick)
+            onReleased();
+        else
+            onCanceled();
+    }
+
+    return true;
+}
+
+
+bool ListBoxItem::onScrollEvent(const ScrollEvent& ev)
+{
+    if(_onClickBegin)
+    {
+        _onClickBegin = false;
+        onCanceled();
+    }
+
+    return Base::onScrollEvent(ev);
 }
 
 
@@ -378,7 +519,7 @@ void ListBoxItem::onPaintBackground(PaintContext& context)
 
     ListItemState state;
     state.setEnabled( isEnabled() );
-    state.setHighlighted( isHovered() );
+    state.setHighlighted( _isHovered );
     state.setFocused( hasFocus() );
     state.setSelected( _isSelected );
 
@@ -405,7 +546,7 @@ void ListBoxItem::onPaintIcon(PaintContext& context)
 
     ListItemState state;
     state.setEnabled( isEnabled() );
-    state.setHighlighted( isHovered() );
+    state.setHighlighted( _isHovered );
     state.setFocused( hasFocus() );
     state.setSelected( _isSelected );
 
@@ -421,7 +562,7 @@ void ListBoxItem::onPaintText(PaintContext& context)
 
     ListItemState state;
     state.setEnabled( isEnabled() );
-    state.setHighlighted( isHovered() );
+    state.setHighlighted( _isHovered );
     state.setFocused( hasFocus() );
     state.setSelected( _isSelected );
 
