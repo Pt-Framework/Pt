@@ -31,7 +31,6 @@
 
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/ListBoxStyle.h>
-#include <Pt/Forms/Button.h>
 #include <Pt/Forms/ScrollView.h>
 #include <Pt/Forms/FlowLayout.h>
 #include <Pt/Forms/Icon.h>
@@ -47,9 +46,9 @@ namespace Forms {
 
 class Painter;
 
-class PT_FORMS_API ListBoxItem : public Button
+class PT_FORMS_API ListBoxItem : public Control
 {
-    typedef Button Base;
+        typedef Control Base;
 
       public:
         ListBoxItem();
@@ -73,6 +72,12 @@ class PT_FORMS_API ListBoxItem : public Button
         const Gfx::SizeF& iconSize() const
         { return _iconSize; }
 
+        bool isHovered() const;
+
+        void click();
+
+        Signal<>& clicked();
+
         Pt::Signal<ListBoxItem&>& selected();
 
     public:
@@ -93,11 +98,27 @@ class PT_FORMS_API ListBoxItem : public Button
         void setRenderer(ListItemRenderer* renderer);
 
     protected:
+        virtual void onActionKey(const KeyEvent& kev);
+
+        virtual void onShortcut(const Key& key);
+
+        virtual void onMnemonic(Pt::Char m);
+
         virtual void onPressed();
 
         virtual void onReleased();
 
         virtual void onCanceled();
+
+        virtual bool onEnterEvent(const EnterEvent& ev);
+
+        virtual bool onLeaveEvent(const LeaveEvent& ev);
+
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
+        virtual bool onTouchEvent(const TouchEvent& ev);
+
+        virtual bool onScrollEvent(const ScrollEvent& ev);
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& p);
@@ -178,7 +199,10 @@ class PT_FORMS_API ListBoxItem : public Button
                                   const Gfx::SizeF& textSz);
 
     private:
+        Signal<>                 _clicked;
         Pt::Signal<ListBoxItem&> _selected;
+        bool                     _onClickBegin;
+        bool                     _isHovered;
         bool                     _isSelectable;
         bool                     _isSelected;
         String                   _text;
