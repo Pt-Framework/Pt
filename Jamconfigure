@@ -1036,7 +1036,7 @@ if $(PT_FORMS_IMPL:L) = "win32"
     {
         if $(PT_FORMS_RENDERER) = direct2d
         {
-            PT_FORMS_LINKLIBS = gdi32.lib Msimg32.lib $(WINUI_LIBS) ;
+            PT_FORMS_LINKLIBS = gdi32.lib $(WINUI_LIBS) ;
             PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "windowscodecs.lib" "dxguid.lib" ;
             WITH_FORMS = yes ;
         }
@@ -1056,7 +1056,7 @@ if $(PT_FORMS_IMPL:L) = "win32"
 
             if $(WITH_GDI)
             {
-                PT_FORMS_LINKLIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+                PT_FORMS_LINKLIBS = gdi32.lib $(WINUI_LIBS) ;
                 PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "dxguid.lib" ;
                 WITH_FORMS = yes ;
             }
