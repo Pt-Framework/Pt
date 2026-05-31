@@ -93,10 +93,10 @@ class Property : public PropertyInfo
         {
             C* t = static_cast<C*>( instance );
 
-						typedef typename Pt::TypeTraits<T>::ConstReference ConstRef;
-						ConstRef a = any_cast<ConstRef>(value);
-						
-						(t->*_setter)(a);
+            typedef typename Pt::TypeTraits<T>::ConstReference ConstRef;
+            ConstRef a = any_cast<ConstRef>(value);
+
+            (t->*_setter)(a);
         }
 
     private:

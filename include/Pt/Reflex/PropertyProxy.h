@@ -83,10 +83,10 @@ class ReadWritePropertyProxy : public PropertyInfo
         {
             C* t = static_cast<C*>( instance );
 
-						typedef typename Pt::TypeTraits<T>::ConstReference ConstRef;
-						ConstRef a = any_cast<ConstRef>(value);
-						
-						_setter( *t, a );
+            typedef typename Pt::TypeTraits<T>::ConstReference ConstRef;
+            ConstRef a = any_cast<ConstRef>(value);
+
+            _setter( *t, a );
         }
 
     private:

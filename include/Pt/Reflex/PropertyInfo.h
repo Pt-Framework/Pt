@@ -52,14 +52,14 @@ class PropertyInfo
 
         virtual void set(void* instance, Any& value, Type& type) = 0;
 
-				virtual void set(void* instance, Any& value) = 0;
+        virtual void set(void* instance, Any& value) = 0;
 
-				template <typename T>
-				void setValue(void* instance, const T& value)
-				{
-					Pt::Any a = value;
-					this->set(this, a) ;
-				}
+        template <typename T>
+        void setValue(void* instance, const T& value)
+        {
+            Pt::Any a = value;
+            this->set(this, a) ;
+        }
 
         unsigned ref()
         { return ++_refs; }
