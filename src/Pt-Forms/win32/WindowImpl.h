@@ -167,11 +167,14 @@ class WindowImpl : public WindowFrame
         HICON          _iconHandle;
 
 #ifdef PT_FORMS_WIN32_DIRECT2D
-        IDXGISwapChain1*   _swapChain;
+        IDXGISwapChain1*    _swapChain;
         ID2D1DeviceContext* _presentCtx;
+        ID2D1Bitmap1*       _targetBmp;
+        UINT                _swapChainWidth;
+        UINT                _swapChainHeight;
 
         void createSwapChain();
-        void resizeSwapChain(LONG width, LONG height);
+        void resizeSwapChain(UINT width, UINT height);
 #endif
 };
 

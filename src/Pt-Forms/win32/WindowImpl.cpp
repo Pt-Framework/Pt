@@ -57,6 +57,9 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 #ifdef PT_FORMS_WIN32_DIRECT2D
 , _swapChain(0)
 , _presentCtx(0)
+, _targetBmp(0)
+, _swapChainWidth(0)
+, _swapChainHeight(0)
 #endif
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
@@ -89,6 +92,12 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 WindowImpl::~WindowImpl()
 {
 #ifdef PT_FORMS_WIN32_DIRECT2D
+    if(_targetBmp)
+    {
+        _targetBmp->Release();
+        _targetBmp = 0;
+    }
+
     if(_presentCtx)
     {
         _presentCtx->Release();
@@ -333,33 +342,36 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     DeleteDC(bitmapDC);
     DeleteObject(bitmap);
 #elif defined(PT_FORMS_WIN32_DIRECT2D)
-    pixmap().impl()->finish();
+    pixmap().finish();
 
     createSwapChain();
 
-    ID2D1Bitmap1* d2dBmp = pixmap().impl()->bitmap();
-    if(d2dBmp && _swapChain && _presentCtx)
+    UINT sourceWidth = 0;
+    UINT sourceHeight = 0;
+
+    RECT clientRect;
+    if(GetClientRect(_hwnd, &clientRect))
     {
-        IDXGISurface* surface = 0;
-        HRESULT hr = _swapChain->GetBuffer(0, __uuidof(IDXGISurface),
-                                           reinterpret_cast<void**>(&surface));
-        if(SUCCEEDED(hr) && surface)
+        sourceWidth = static_cast<UINT>(clientRect.right - clientRect.left);
+        sourceHeight = static_cast<UINT>(clientRect.bottom - clientRect.top);
+        resizeSwapChain(sourceWidth, sourceHeight);
+    }
+
+    if(_targetBmp && _swapChain && sourceWidth > 0 && sourceHeight > 0)
+    {
+        ID2D1Bitmap1* d2dBmp = pixmap().impl()->bitmap();
+        if(d2dBmp)
         {
-            D2D1_BITMAP_PROPERTIES1 bmpProps = D2D1::BitmapProperties1(
-                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
-                                  D2D1_ALPHA_MODE_PREMULTIPLIED));
+            D2D1_SIZE_U sourceSize = d2dBmp->GetPixelSize();
 
-            ID2D1Bitmap1* targetBmp = 0;
-            hr = _presentCtx->CreateBitmapFromDxgiSurface(surface, bmpProps,
-                                                          &targetBmp);
-            if(SUCCEEDED(hr) && targetBmp)
+            UINT32 copyW = sourceWidth < sourceSize.width ? sourceWidth : sourceSize.width;
+            UINT32 copyH = sourceHeight < sourceSize.height ? sourceHeight : sourceSize.height;
+
+            if(copyW > 0 && copyH > 0)
             {
-                targetBmp->CopyFromBitmap(nullptr, d2dBmp, nullptr);
-                targetBmp->Release();
+                D2D1_RECT_U srcRect = D2D1::RectU(0, 0, copyW, copyH);
+                _targetBmp->CopyFromBitmap(nullptr, d2dBmp, &srcRect);
             }
-
-            surface->Release();
         }
 
         _swapChain->Present(0, 0);
@@ -643,10 +655,6 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
                  SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
-    resizeSwapChain(lround(size.width()), lround(size.height()));
-#endif
-
     return alignedSize;
 }
 
@@ -701,41 +709,100 @@ void WindowImpl::createSwapChain()
     desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     desc.SampleDesc.Count = 1;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    desc.BufferCount = 2;
-    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+    desc.BufferCount = 1;
+    desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
+    desc.Scaling = DXGI_SCALING_STRETCH;
 
     HRESULT hr = dxgiFactory->CreateSwapChainForHwnd(
         dxgiDevice, _hwnd, &desc, nullptr, nullptr, &_swapChain);
 
-    if(FAILED(hr))
+    if(FAILED(hr) || ! _swapChain)
+    {
         _swapChain = 0;
+        return;
+    }
+
+    DXGI_SWAP_CHAIN_DESC1 actualDesc = {};
+    if(SUCCEEDED(_swapChain->GetDesc1(&actualDesc)))
+    {
+        _swapChainWidth = actualDesc.Width;
+        _swapChainHeight = actualDesc.Height;
+    }
 
     if( ! _presentCtx)
     {
         d2d.d2dDevice()->CreateDeviceContext(
             D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &_presentCtx);
     }
+
+    if(_presentCtx && ! _targetBmp)
+    {
+        IDXGISurface* surface = 0;
+        if(SUCCEEDED(_swapChain->GetBuffer(0, __uuidof(IDXGISurface),
+                                           reinterpret_cast<void**>(&surface))))
+        {
+            D2D1_BITMAP_PROPERTIES1 bmpProps = D2D1::BitmapProperties1(
+                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                                  D2D1_ALPHA_MODE_PREMULTIPLIED));
+            _presentCtx->CreateBitmapFromDxgiSurface(surface, bmpProps, &_targetBmp);
+            surface->Release();
+        }
+    }
 }
 
 
-void WindowImpl::resizeSwapChain(LONG width, LONG height)
+void WindowImpl::resizeSwapChain(UINT width, UINT height)
 {
     if( ! _swapChain)
         return;
 
-    if(width <= 0 || height <= 0)
+    if(width == 0 || height == 0)
         return;
 
+    if(width == _swapChainWidth && height == _swapChainHeight)
+        return;
+
+    if(_presentCtx)
+        _presentCtx->SetTarget(nullptr);
+
+    if(_targetBmp)
+    {
+        _targetBmp->Release();
+        _targetBmp = 0;
+    }
+
     HRESULT hr = _swapChain->ResizeBuffers(
-        0, static_cast<UINT>(width), static_cast<UINT>(height),
-        DXGI_FORMAT_UNKNOWN, 0);
+        0, width, height, DXGI_FORMAT_UNKNOWN, 0);
 
     if(FAILED(hr))
     {
         _swapChain->Release();
         _swapChain = 0;
+        _swapChainWidth = 0;
+        _swapChainHeight = 0;
+        return;
+    }
+
+    _swapChainWidth = width;
+    _swapChainHeight = height;
+
+    if(_presentCtx)
+    {
+        IDXGISurface* surface = 0;
+        if(SUCCEEDED(_swapChain->GetBuffer(0, __uuidof(IDXGISurface),
+                                           reinterpret_cast<void**>(&surface))))
+        {
+            D2D1_BITMAP_PROPERTIES1 bmpProps = D2D1::BitmapProperties1(
+                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                                  D2D1_ALPHA_MODE_PREMULTIPLIED));
+            _presentCtx->CreateBitmapFromDxgiSurface(surface, bmpProps, &_targetBmp);
+            surface->Release();
+        }
     }
 }
+
 
 #endif // PT_FORMS_WIN32_DIRECT2D
 

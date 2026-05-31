@@ -153,7 +153,7 @@ ApplicationImpl::ApplicationImpl()
     _instanceHandle = (HINSTANCE) GetModuleHandle(NULL);
 
     WNDCLASS winClass;
-    winClass.style         = CS_HREDRAW | CS_VREDRAW;
+    winClass.style         = 0;
     winClass.lpfnWndProc   = (WNDPROC)ApplicationImpl::wndProc;
     winClass.cbClsExtra    = 0;
     winClass.cbWndExtra    = 0;
@@ -833,8 +833,13 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     w.repaint(updateRect);
-    
-    Application::instance().loop().processEvents();
+
+    WindowImpl* impl = static_cast<WindowImpl*>(w.frame());
+    if(impl)
+    {
+        InvalidateRect(impl->hwnd(), NULL, FALSE);
+        UpdateWindow(impl->hwnd());
+    }
 }
 
 
