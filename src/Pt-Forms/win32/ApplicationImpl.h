@@ -32,8 +32,8 @@
 
 #include "win32/Selector.h"
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
-#include "D2DDevice.h"
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
+#include "../direct2d/D2DDevice.h"
 #endif
 
 #include <Pt/Forms/MouseEvent.h>
@@ -83,7 +83,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void nextEvent();
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
         D2DDevice& d2d()
         { return _d2d; }
 #endif
@@ -159,7 +159,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         HCURSOR                          _defaultCursorHandle;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
         D2DDevice                        _d2d;
 #endif
 };

@@ -37,7 +37,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Windows.h>
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
 #include <d2d1_1.h>
 #include <dxgi1_2.h>
 #endif
@@ -166,7 +166,7 @@ class WindowImpl : public WindowFrame
         HWND           _hwnd;
         HICON          _iconHandle;
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
         IDXGISwapChain1*    _swapChain;
         ID2D1DeviceContext* _presentCtx;
         ID2D1Bitmap1*       _targetBmp;

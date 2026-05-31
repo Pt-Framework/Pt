@@ -35,7 +35,14 @@ if $(PT_FORMS_RENDERER)
     PT_FORMS_RENDERER_DIR = [ FDirName $(PT_TOP) src Pt-Forms $(PT_FORMS_RENDERER) ] ;
     SubDirHdrs $(PT_FORMS_RENDERER_DIR) ;
     PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_RENDERER_DIR) : *.cpp ] ;
+
+    if $(PT_FORMS_RENDERER) = raster
+    {
+        local _d2ddir = [ FDirName $(PT_TOP) src Pt-Forms direct2d ] ;
+        PT_FORMS_IMPL_SOURCES += [ GLOB $(_d2ddir) : D2DDevice.cpp ] ;
+    }
 }
+
 
 SharedLibrary Pt-Forms : Application.cpp
                          Button.cpp

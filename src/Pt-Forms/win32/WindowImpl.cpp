@@ -31,8 +31,8 @@
 #include "ScreenImpl.h"
 #include "PixmapImpl.h"
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
-#include "D2DDevice.h"
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
+#include "../direct2d/D2DDevice.h"
 #include "ApplicationImpl.h"
 #endif
 
@@ -54,7 +54,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _window(w)
 , _hwnd(0)
 , _iconHandle(0)
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
 , _swapChain(0)
 , _presentCtx(0)
 , _targetBmp(0)
@@ -91,7 +91,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 
 WindowImpl::~WindowImpl()
 {
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
     if(_targetBmp)
     {
         _targetBmp->Release();
@@ -303,44 +303,39 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
 #ifdef PT_FORMS_WIN32_RASTER
-    const Pt::Gfx::Image& image = pixmap().impl()->bitmap().image();
-    
-    const size_t depth = image.pixelStride() * 8;
-    const Pt::uint8_t* data = image.data();
+    pixmap().finish();
 
-    HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
+    createSwapChain();
 
-    if (bitmap == NULL)
+    UINT sourceWidth = 0;
+    UINT sourceHeight = 0;
+
+    RECT clientRect;
+    if(GetClientRect(_hwnd, &clientRect))
     {
-        BITMAPINFO bitmapInfo;
-        ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-        bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bitmapInfo.bmiHeader.biWidth = image.width();
-        bitmapInfo.bmiHeader.biHeight = -(ssize_t)image.height();  // top-down image
-        bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1            
-        bitmapInfo.bmiHeader.biBitCount = depth;                   // 32-bit 
-        bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
-        bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
-        bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
-        bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
-
-        VOID* imageBits = 0;
-        bitmap = CreateDIBSection(windowContext, &bitmapInfo,
-                                  DIB_RGB_COLORS, &imageBits, NULL, 0);
-
-        memcpy(imageBits, data, image.width() * image.height() * 4);
+        sourceWidth = static_cast<UINT>(clientRect.right - clientRect.left);
+        sourceHeight = static_cast<UINT>(clientRect.bottom - clientRect.top);
+        resizeSwapChain(sourceWidth, sourceHeight);
     }
 
-    HDC bitmapDC = CreateCompatibleDC(NULL);
-    SelectObject(bitmapDC, bitmap);
+    if(_targetBmp && _swapChain && sourceWidth > 0 && sourceHeight > 0)
+    {
+        const Gfx::Image& image = pixmap().impl()->bitmap().image();
+        UINT imgW = static_cast<UINT>(image.width());
+        UINT imgH = static_cast<UINT>(image.height());
 
-    BitBlt(windowContext, updateRect.x(), updateRect.y(), 
-           updateRect.width(), updateRect.height(), 
-           bitmapDC, updateRect.x(),  updateRect.y(), SRCCOPY);
+        UINT copyW = sourceWidth < imgW ? sourceWidth : imgW;
+        UINT copyH = sourceHeight < imgH ? sourceHeight : imgH;
 
-    DeleteDC(bitmapDC);
-    DeleteObject(bitmap);
+        if(copyW > 0 && copyH > 0)
+        {
+            D2D1_RECT_U destRect = D2D1::RectU(0, 0, copyW, copyH);
+            UINT pitch = imgW * 4;
+            _targetBmp->CopyFromMemory(&destRect, image.data(), pitch);
+        }
+
+        _swapChain->Present(0, 0);
+    }
 #elif defined(PT_FORMS_WIN32_DIRECT2D)
     pixmap().finish();
 
@@ -688,7 +683,7 @@ void WindowImpl::onCloseEvent(const CloseEvent& ev)
 }
 
 
-#ifdef PT_FORMS_WIN32_DIRECT2D
+#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
 
 void WindowImpl::createSwapChain()
 {
@@ -804,7 +799,7 @@ void WindowImpl::resizeSwapChain(UINT width, UINT height)
 }
 
 
-#endif // PT_FORMS_WIN32_DIRECT2D
+#endif // PT_FORMS_WIN32_DIRECT2D || PT_FORMS_WIN32_RASTER
 
 } // namespace
 
