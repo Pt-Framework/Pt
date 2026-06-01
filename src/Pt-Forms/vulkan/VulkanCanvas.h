@@ -1,0 +1,195 @@
+/* Copyright (C) 2026 Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
+#ifndef Pt_Forms_VulkanCanvas_h
+#define Pt_Forms_VulkanCanvas_h
+
+#include "VulkanDevice.h"
+#include "VulkanBuffer.h"
+
+#include <Pt/Gfx/Canvas.h>
+#include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Path.h>
+
+#include <vulkan/vulkan.h>
+
+#include <vector>
+
+namespace Pt {
+
+namespace Forms {
+
+class VulkanCanvas : public Gfx::Canvas
+{
+    public:
+        VulkanCanvas(VulkanDevice& device);
+
+        ~VulkanCanvas();
+
+        void setTarget(VulkanBuffer& buffer);
+
+        VkCommandBuffer commandBuffer() const
+        { return _cmdBuf; }
+
+    protected:
+        virtual void onBeginPaint(const Gfx::Paint& paint) override;
+
+        virtual void onFinishPaint() override;
+
+    protected:
+        virtual void onSetTransform(const Gfx::Transform& tx) override;
+
+        virtual void onApplyTransform() override;
+
+        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
+
+        virtual void onApplyCompositionMode() override;
+
+        virtual void onSetPen(const Gfx::Pen& pen) override;
+
+        virtual void onApplyPen() override;
+
+        virtual void onSetBrush(const Gfx::Brush& brush) override;
+
+        virtual void onApplyBrush() override;
+
+        virtual void onSetFont(const Gfx::Font& font) override;
+
+        virtual void onApplyFont() override;
+
+        virtual void onSetClip(const Gfx::RectF* clip) override;
+
+        virtual void onApplyClip() override;
+
+    protected:
+        virtual void onDrawLine(const Gfx::PointF& from,
+                                const Gfx::PointF& to) override;
+
+        virtual void onDrawPolyline(const Gfx::PointF* pts,
+                                    const size_t n) override;
+
+        virtual void onFillPolygon(const Gfx::PointF* ps,
+                                   const size_t n) override;
+
+        virtual void onDrawRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onFillRect(const Gfx::RectF& rectangle) override;
+
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft,
+                                   const Gfx::SizeF& size) override;
+
+        virtual void onFillEllipse(const Gfx::PointF& topLeft,
+                                   const Gfx::SizeF& size) override;
+
+    protected:
+        virtual void onSetPath(const Gfx::Path& path) override;
+
+        virtual void onDrawPath() override;
+
+        virtual void onFillPath() override;
+
+        virtual void onDrawPath(const Gfx::Path& path) override;
+
+        virtual void onFillPath(const Gfx::Path& path) override;
+
+    protected:
+        virtual const Gfx::FontMetrics& onGetFontMetrics() const override;
+
+        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
+
+        virtual void onDrawText(const Gfx::PointF& to,
+                                const Pt::String& text,
+                                const Gfx::Transform* transform) override;
+
+    protected:
+        virtual void onDrawImage(const Gfx::PointF& to,
+                                 const Gfx::Image& image,
+                                 const Gfx::RectF* rect) override;
+
+    private:
+        void createRenderPass();
+
+        void createPipelines();
+
+        void createDescriptorPool();
+
+        void beginRenderPass();
+
+        void endRenderPass();
+
+        void uploadVertices(const float* data, size_t size);
+
+        void buildOrthoMatrix(float* mat, float width, float height);
+
+        VkShaderModule createShaderModule(const uint32_t* code, size_t size);
+
+    private:
+        struct PushConstants
+        {
+            float transform[16];
+            float color[4];
+        };
+
+    private:
+        VulkanDevice*        _device;
+        VulkanBuffer*        _target;
+
+        VkCommandBuffer      _cmdBuf;
+        VkRenderPass         _renderPass;
+        VkPipelineLayout     _pipelineLayout;
+        VkPipeline           _solidFillPipeline;
+        VkPipeline           _texturedPipeline;
+        VkDescriptorSetLayout _descriptorSetLayout;
+        VkDescriptorPool     _descriptorPool;
+
+        VkBuffer             _vertexBuffer;
+        VkDeviceMemory       _vertexMemory;
+        size_t               _vertexBufferSize;
+
+        VkSampler            _sampler;
+
+        Gfx::Pen             _pen;
+        Gfx::Brush           _brush;
+        Gfx::Font            _font;
+        Gfx::FontMetrics     _fontMetrics;
+        Gfx::Path            _path;
+        Gfx::CompositionMode _compositionMode;
+        PushConstants        _pushConstants;
+
+        bool                 _inRenderPass;
+};
+
+} // namespace
+
+} // namespace
+
+#endif

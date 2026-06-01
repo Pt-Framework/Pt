@@ -41,6 +41,11 @@ if $(PT_FORMS_RENDERER)
         local _d2ddir = [ FDirName $(PT_TOP) src Pt-Forms direct2d ] ;
         PT_FORMS_IMPL_SOURCES += [ GLOB $(_d2ddir) : D2DDevice.cpp ] ;
     }
+
+    if $(PT_FORMS_RENDERER) = vulkan && $(PT_FORMS_IMPL:L) = linux-drm
+    {
+        SubDirC++Flags [ FDefines PT_FORMS_DRM_VULKAN ] ;
+    }
 }
 
 if $(PT_FORMS_IMPL:L) = linux-fb || $(PT_FORMS_IMPL:L) = linux-drm

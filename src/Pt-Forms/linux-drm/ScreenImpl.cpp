@@ -61,6 +61,11 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 {
     Gfx::SizeF size( _drmDisplay.width(),
                      _drmDisplay.height() );
+
+#ifdef PT_FORMS_DRM_VULKAN
+    _pixmap.impl()->init(_vulkanDevice, _drmDisplay.fd());
+#endif
+
     _pixmap.impl()->reset(size);
 
     Gfx::PaintContext ctx(_pixmap);
@@ -331,18 +336,34 @@ void ScreenImpl::onPaint(PaintContext& context, const Gfx::RectF& rect)
 
 const Gfx::Image& ScreenImpl::image() const
 {
+#ifdef PT_FORMS_DRM_VULKAN
+    // image() is not used with Vulkan renderer
+    static Gfx::Image dummy;
+    return dummy;
+#else
     return _pixmap.impl()->bitmap().image();
+#endif
 }
 
 
 void ScreenImpl::updateScreen(const Gfx::RectI& r)
 {
+#ifdef PT_FORMS_DRM_VULKAN
+    // zero-copy path: submit Vulkan commands and page-flip with DMA-BUF fbId
+    _pixmap.impl()->sync();
+
+    uint32_t fbId = _pixmap.impl()->frontBuffer().drmFbId();
+    _drmDisplay.swapBuffers(fbId);
+
+    _pixmap.impl()->finish();
+#else
     _drmDisplay.blit( image().data(), r );
 
     if( _drawCursor )
         drawCursor();
 
     _drmDisplay.swapBuffers();
+#endif
 }
 
 //

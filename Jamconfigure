@@ -1031,6 +1031,10 @@ else if --with-direct2d in $(ARGV)
 {
     PT_FORMS_RENDERER = direct2d ;
 }
+else if --with-vulkan in $(ARGV)
+{
+    PT_FORMS_RENDERER = vulkan ;
+}
 
 if $(PT_FORMS_IMPL:L) = "win32"
 {
@@ -1144,6 +1148,26 @@ else if $(PT_FORMS_IMPL:L) = "linux-drm"
         PT_FORMS_C++FLAGS += "-I=/usr/include/libdrm" ;
         PT_FORMS_LINKLIBS = -ldrm ;
         WITH_FORMS = yes ;
+
+        if $(PT_FORMS_RENDERER) = vulkan
+        {
+            local WITH_VULKAN = [ CheckBuildC++ "#include <vulkan/vulkan.h>"
+                                                "int main() {"
+                                                "return 0; }"
+                                              : ""
+                                              : "-lvulkan" ] ;
+
+            if $(WITH_VULKAN)
+            {
+                PT_FORMS_LINKLIBS += -lvulkan ;
+                PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_DRM_VULKAN ] ;
+            }
+            else
+            {
+                Echo "WARNING: Vulkan not found, falling back to raster renderer" ;
+                PT_FORMS_RENDERER = raster ;
+            }
+        }
     }
 }
 else if $(PT_FORMS_IMPL:L) = "emscripten"

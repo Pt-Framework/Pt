@@ -38,6 +38,10 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Image.h>
 
+#ifdef PT_FORMS_DRM_VULKAN
+#include "VulkanDevice.h"
+#endif
+
 namespace Pt {
 
 namespace Forms {
@@ -152,6 +156,10 @@ class ScreenImpl : public Form
     private:
         DrmDisplay&                  _drmDisplay;
         Pixmap                       _pixmap;
+
+#ifdef PT_FORMS_DRM_VULKAN
+        VulkanDevice                 _vulkanDevice;
+#endif
 
         Screen*                      _parent;
         Workspace                    _workspace;
