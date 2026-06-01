@@ -65,6 +65,10 @@ class DrmDisplay
 
         void swapBuffers();
 
+        /** @brief Page flip using an external framebuffer ID (zero-copy path).
+        */
+        void swapBuffers(uint32_t externalFbId);
+
     protected:
         friend class DrmDevice;
         friend class ScreenImpl;

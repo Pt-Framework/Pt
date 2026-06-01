@@ -504,6 +504,28 @@ void DrmDisplay::swapBuffers()
     drmModeAtomicFree(req);
 }
 
+
+void DrmDisplay::swapBuffers(uint32_t externalFbId)
+{
+    if( _flipPending )
+        return;
+
+    drmModeAtomicReq* req = drmModeAtomicAlloc();
+    if( ! req )
+        return;
+
+    drmModeAtomicAddProperty(req, _planeId, _propPlaneFbId, externalFbId);
+
+    uint32_t flags = DRM_MODE_PAGE_FLIP_EVENT | DRM_MODE_ATOMIC_NONBLOCK;
+
+    if( drmModeAtomicCommit(_fd, req, flags, this) == 0 )
+    {
+        _flipPending = true;
+    }
+
+    drmModeAtomicFree(req);
+}
+
 } // namespace
 
 } // namespace
