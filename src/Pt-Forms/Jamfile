@@ -43,6 +43,13 @@ if $(PT_FORMS_RENDERER)
     }
 }
 
+if $(PT_FORMS_IMPL:L) = linux-fb || $(PT_FORMS_IMPL:L) = linux-drm
+{
+    local _inputdir = [ FDirName $(PT_TOP) src Pt-Forms linux-input ] ;
+    SubDirHdrs $(_inputdir) ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(_inputdir) : *.cpp ] ;
+}
+
 
 SharedLibrary Pt-Forms : Application.cpp
                          Button.cpp

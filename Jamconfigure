@@ -1012,6 +1012,11 @@ else if --with-linux-fb in $(ARGV)
     PT_FORMS_IMPL = linux-fb ;
     PT_FORMS_RENDERER = raster ;
 }
+else if --with-linux-drm in $(ARGV)
+{
+    PT_FORMS_IMPL = linux-drm ;
+    PT_FORMS_RENDERER = raster ;
+}
 
 # Renderer overrides
 if --with-gdi in $(ARGV)
@@ -1123,6 +1128,22 @@ else if $(PT_FORMS_IMPL:L) = "linux-fb"
             PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WITH_CPU_NEON ] ;
             PT_FORMS_C++FLAGS += $(CPU_NEON_C++FLAGS) ;
         }
+    }
+}
+else if $(PT_FORMS_IMPL:L) = "linux-drm"
+{
+    WITH_GUI = [ CheckBuildC++ "#include <xf86drm.h>"
+                               "#include <xf86drmMode.h>"
+                               "int main() {"
+                               "return 0; }"
+                             : "-I=/usr/include/libdrm"
+                             : "-ldrm" ] ;
+
+    if $(WITH_GUI)
+    {
+        PT_FORMS_C++FLAGS += "-I=/usr/include/libdrm" ;
+        PT_FORMS_LINKLIBS = -ldrm ;
+        WITH_FORMS = yes ;
     }
 }
 else if $(PT_FORMS_IMPL:L) = "emscripten"
