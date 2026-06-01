@@ -136,12 +136,6 @@ class VulkanCanvas : public Gfx::Canvas
                                  const Gfx::RectF* rect) override;
 
     private:
-        void createRenderPass();
-
-        void createPipelines();
-
-        void createDescriptorPool();
-
         void beginRenderPass();
 
         void endRenderPass();
@@ -149,8 +143,6 @@ class VulkanCanvas : public Gfx::Canvas
         void uploadVertices(const float* data, size_t size);
 
         void buildOrthoMatrix(float* mat, float width, float height);
-
-        VkShaderModule createShaderModule(const uint32_t* code, size_t size);
 
     private:
         struct PushConstants
@@ -164,18 +156,10 @@ class VulkanCanvas : public Gfx::Canvas
         VulkanBuffer*        _target;
 
         VkCommandBuffer      _cmdBuf;
-        VkRenderPass         _renderPass;
-        VkPipelineLayout     _pipelineLayout;
-        VkPipeline           _solidFillPipeline;
-        VkPipeline           _texturedPipeline;
-        VkDescriptorSetLayout _descriptorSetLayout;
-        VkDescriptorPool     _descriptorPool;
 
         VkBuffer             _vertexBuffer;
         VkDeviceMemory       _vertexMemory;
         size_t               _vertexBufferSize;
-
-        VkSampler            _sampler;
 
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;

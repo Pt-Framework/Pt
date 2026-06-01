@@ -34,6 +34,10 @@
 #include "DrmDevice.h"
 #include "DrmDisplay.h"
 
+#ifdef PT_FORMS_DRM_VULKAN
+#include "../vulkan/VulkanDevice.h"
+#endif
+
 #include <Pt/Forms/Widget.h>
 #include <Pt/Forms/Cursor.h>
 #include <Pt/Gfx/Transform.h>
@@ -72,6 +76,11 @@ class ApplicationImpl : public Pt::System::MainLoop
         DrmDisplay& drmDisplay()
         { return _drmDisplay; }
 
+#ifdef PT_FORMS_DRM_VULKAN
+        VulkanDevice& vulkanDevice()
+        { return _vulkanDevice; }
+#endif
+
     private:
         void onMouseEvent(const MouseEvent& ev);
 
@@ -94,6 +103,9 @@ class ApplicationImpl : public Pt::System::MainLoop
     private:
         DrmDevice                                   _drmDevice;
         DrmDisplay                                  _drmDisplay;
+#ifdef PT_FORMS_DRM_VULKAN
+        VulkanDevice                                _vulkanDevice;
+#endif
         std::vector<std::unique_ptr<InputDevice>>   _inputDevices;
         std::unique_ptr<MouseDevice>                _mouseDevice;
         Gfx::Transform                              _touchTransform;

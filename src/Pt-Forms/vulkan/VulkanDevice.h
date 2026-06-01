@@ -65,8 +65,35 @@ class VulkanDevice
         VkPhysicalDeviceMemoryProperties memoryProperties() const
         { return _memProps; }
 
+        int drmFd() const
+        { return _drmFd; }
+
+        void setDrmFd(int fd)
+        { _drmFd = fd; }
+
         uint32_t findMemoryType(uint32_t typeFilter,
                                 VkMemoryPropertyFlags properties) const;
+
+        VkRenderPass renderPass() const
+        { return _renderPass; }
+
+        VkPipelineLayout pipelineLayout() const
+        { return _pipelineLayout; }
+
+        VkPipeline solidFillPipeline() const
+        { return _solidFillPipeline; }
+
+        VkPipeline texturedPipeline() const
+        { return _texturedPipeline; }
+
+        VkDescriptorSetLayout descriptorSetLayout() const
+        { return _descriptorSetLayout; }
+
+        VkDescriptorPool descriptorPool() const
+        { return _descriptorPool; }
+
+        VkSampler sampler() const
+        { return _sampler; }
 
     private:
         VulkanDevice(const VulkanDevice&);
@@ -80,6 +107,16 @@ class VulkanDevice
 
         void createCommandPool();
 
+        void createRenderPass();
+
+        void createPipelines();
+
+        void createDescriptorPool();
+
+        void createSampler();
+
+        VkShaderModule createShaderModule(const uint32_t* code, size_t size);
+
     private:
         VkInstance                       _instance;
         VkPhysicalDevice                 _physicalDevice;
@@ -88,6 +125,15 @@ class VulkanDevice
         uint32_t                         _graphicsQueueFamily;
         VkCommandPool                    _commandPool;
         VkPhysicalDeviceMemoryProperties _memProps;
+        int                              _drmFd;
+
+        VkRenderPass                     _renderPass;
+        VkPipelineLayout                 _pipelineLayout;
+        VkPipeline                       _solidFillPipeline;
+        VkPipeline                       _texturedPipeline;
+        VkDescriptorSetLayout            _descriptorSetLayout;
+        VkDescriptorPool                 _descriptorPool;
+        VkSampler                        _sampler;
 };
 
 } // namespace

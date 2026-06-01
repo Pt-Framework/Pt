@@ -51,7 +51,7 @@ class VulkanBuffer
 
         ~VulkanBuffer();
 
-        void create(VulkanDevice& device, int drmFd,
+        void create(VulkanDevice& device,
                     uint32_t width, uint32_t height);
 
         void destroy();
@@ -85,6 +85,8 @@ class VulkanBuffer
         void importToDrm();
 
         void createImageView(VulkanDevice& device);
+
+        void createFramebuffer(VulkanDevice& device);
 
     private:
         VkDevice         _vkDevice;

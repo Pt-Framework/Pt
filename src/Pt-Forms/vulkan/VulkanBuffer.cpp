@@ -67,11 +67,11 @@ VulkanBuffer::~VulkanBuffer()
 }
 
 
-void VulkanBuffer::create(VulkanDevice& device, int drmFd,
+void VulkanBuffer::create(VulkanDevice& device,
                           uint32_t width, uint32_t height)
 {
     _vkDevice = device.device();
-    _drmFd = drmFd;
+    _drmFd = device.drmFd();
     _width = width;
     _height = height;
 
@@ -79,6 +79,7 @@ void VulkanBuffer::create(VulkanDevice& device, int drmFd,
     exportDmaBuf(device);
     importToDrm();
     createImageView(device);
+    createFramebuffer(device);
 
     PT_LOG_DEBUG("VulkanBuffer created: " << _width << "x" << _height
                  << ", fbId=" << _drmFbId);
@@ -265,6 +266,24 @@ void VulkanBuffer::createImageView(VulkanDevice& device)
     VkResult result = vkCreateImageView(device.device(), &viewInfo, 0, &_imageView);
     if( result != VK_SUCCESS )
         throw std::runtime_error("failed to create VulkanBuffer image view");
+}
+
+
+void VulkanBuffer::createFramebuffer(VulkanDevice& device)
+{
+    VkImageView attachments[] = { _imageView };
+
+    VkFramebufferCreateInfo fbInfo = {};
+    fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbInfo.renderPass = device.renderPass();
+    fbInfo.attachmentCount = 1;
+    fbInfo.pAttachments = attachments;
+    fbInfo.width = _width;
+    fbInfo.height = _height;
+    fbInfo.layers = 1;
+
+    if( vkCreateFramebuffer(device.device(), &fbInfo, 0, &_framebuffer) != VK_SUCCESS )
+        throw std::runtime_error("failed to create VulkanBuffer framebuffer");
 }
 
 } // namespace

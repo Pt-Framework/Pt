@@ -62,10 +62,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     Gfx::SizeF size( _drmDisplay.width(),
                      _drmDisplay.height() );
 
-#ifdef PT_FORMS_DRM_VULKAN
-    _pixmap.impl()->init(_vulkanDevice, _drmDisplay.fd());
-#endif
-
     _pixmap.impl()->reset(size);
 
     Gfx::PaintContext ctx(_pixmap);

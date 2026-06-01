@@ -65,6 +65,10 @@ ApplicationImpl::ApplicationImpl()
     _drmDevice.setActive(*this);
     _drmDevice.begin();
 
+#ifdef PT_FORMS_DRM_VULKAN
+    _vulkanDevice.setDrmFd(_drmDevice.fd());
+#endif
+
     std::string keyboard = Pt::System::Application::getEnvVar("PT_KEYBOARD_DEVICE");
     if( ! keyboard.empty() )
         openInputDevice(keyboard);

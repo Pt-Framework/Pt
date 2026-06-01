@@ -28,6 +28,7 @@
 
 #include "PixmapImpl.h"
 
+#include <Pt/Forms/Application.h>
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Rgb32.h>
@@ -51,26 +52,20 @@ static std::string _defaultFontFamily;
 
 
 PixmapImpl::PixmapImpl()
-: _device(0)
-, _drmFd(-1)
-, _backIndex(0)
+: _backIndex(0)
 , _canvas(0)
+, _canvasOwned(false)
 {
 }
 
 
 PixmapImpl::~PixmapImpl()
 {
-    delete _canvas;
+    if( _canvasOwned )
+        delete _canvas;
+
     _buffers[0].destroy();
     _buffers[1].destroy();
-}
-
-
-void PixmapImpl::init(VulkanDevice& device, int drmFd)
-{
-    _device = &device;
-    _drmFd = drmFd;
 }
 
 
@@ -82,8 +77,7 @@ void PixmapImpl::reset(const Gfx::Image& /*image*/)
 
 void PixmapImpl::reset(const Gfx::SizeF& size)
 {
-    if( ! _device || _drmFd < 0 )
-        return;
+    VulkanDevice& device = Application::instance().impl()->vulkanDevice();
 
     _size = size;
 
@@ -96,8 +90,8 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     _buffers[0].destroy();
     _buffers[1].destroy();
 
-    _buffers[0].create(*_device, _drmFd, w, h);
-    _buffers[1].create(*_device, _drmFd, w, h);
+    _buffers[0].create(device, w, h);
+    _buffers[1].create(device, w, h);
     _backIndex = 0;
 
     PT_LOG_DEBUG("PixmapImpl reset: " << w << "x" << h);
@@ -144,55 +138,61 @@ const Gfx::ImageFormat& PixmapImpl::format() const
 }
 
 
-Gfx::Canvas* PixmapImpl::getCanvas(Gfx::Canvas* reuse)
-{
-    if( ! _device )
-        return 0;
-
-    if( ! _canvas )
-    {
-        _canvas = new VulkanCanvas(*_device);
-    }
-
-    _canvas->setTarget( _buffers[_backIndex] );
-    return _canvas;
-}
-
-
-Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* /*reuse*/)
+Gfx::Canvas* PixmapImpl::getCanvas(Gfx::Canvas* /*reuse*/)
 {
     return 0;
 }
 
 
-void PixmapImpl::releaseCanvas()
+Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
+    VulkanDevice& device = Application::instance().impl()->vulkanDevice();
+
+    if( reuse )
+    {
+        _canvas = static_cast<VulkanCanvas*>(reuse);
+        _canvasOwned = false;
+    }
+    else if( ! _canvas )
+    {
+        _canvas = new VulkanCanvas(device);
+        _canvasOwned = true;
+    }
+
+    _canvas->setTarget(_buffers[_backIndex]);
+    return _canvas;
 }
 
 
-void PixmapImpl::sync()
+void PixmapImpl::releaseCanvas()
 {
-    if( ! _device || ! _canvas )
+    if( ! _canvas )
         return;
 
-    // submit command buffer and wait
+    VulkanDevice& device = Application::instance().impl()->vulkanDevice();
+    VkCommandBuffer cmdBuf = _canvas->commandBuffer();
+
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
-
-    VkCommandBuffer cmdBuf = _canvas->commandBuffer();
     submitInfo.pCommandBuffers = &cmdBuf;
 
     VkFenceCreateInfo fenceInfo = {};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
     VkFence fence;
-    vkCreateFence(_device->device(), &fenceInfo, 0, &fence);
+    vkCreateFence(device.device(), &fenceInfo, 0, &fence);
+    vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, fence);
+    vkWaitForFences(device.device(), 1, &fence, VK_TRUE, UINT64_MAX);
+    vkDestroyFence(device.device(), fence, 0);
 
-    vkQueueSubmit(_device->graphicsQueue(), 1, &submitInfo, fence);
-    vkWaitForFences(_device->device(), 1, &fence, VK_TRUE, UINT64_MAX);
+    _canvas = 0;
+}
 
-    vkDestroyFence(_device->device(), fence, 0);
+
+void PixmapImpl::sync()
+{
+    // GPU submission is done in releaseCanvas()
 }
 
 

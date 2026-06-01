@@ -56,8 +56,6 @@ class PixmapImpl
 
         ~PixmapImpl();
 
-        void init(VulkanDevice& device, int drmFd);
-
         void reset(const Gfx::Image& image);
 
         void reset(const Gfx::SizeF& size);
@@ -107,11 +105,10 @@ class PixmapImpl
         static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
 
     private:
-        VulkanDevice*    _device;
-        int              _drmFd;
         VulkanBuffer     _buffers[2];
         int              _backIndex;
         VulkanCanvas*    _canvas;
+        bool             _canvasOwned;
         Gfx::SizeF       _size;
         Gfx::Scaling     _scaling;
 };
