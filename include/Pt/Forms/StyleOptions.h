@@ -35,14 +35,110 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Any.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/SmartPtr.h>
 
 #include <cstddef>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 namespace Pt {
 
 namespace Forms {
+
+/** @brief Non-template base for a single named style option.
+
+    Provides name- and type-based access via Pt::Any so that tooling can
+    inspect and mutate options without knowing their concrete types.
+*/
+class PT_FORMS_API StyleOption
+{
+    public:
+        virtual ~StyleOption()
+        {};
+
+        /** @brief Returns the option name. */
+        const char* name() const
+        {
+            return _name.c_str();
+        }
+
+        /** @brief Returns the dynamic type of the stored value. 
+        */
+        virtual const std::type_info& typeInfo() const = 0;
+
+        /** @brief Returns the current value wrapped in an Any. 
+        */
+        virtual const Pt::Any& get() const = 0;
+
+        /** @brief Sets the value from an Any; throws std::bad_cast on type mismatch. 
+        */
+        virtual void set(const Pt::Any& v) = 0;
+
+    protected:
+        explicit StyleOption(const char* name)
+        : _name(name)
+        {}
+
+    private:
+        std::string _name;
+};
+
+
+/** @brief Typed style option that stores a value of type T.
+
+    Only mutated through StyleOptions setters, which bump the generation
+    counter. Copy ctor and operator= preserve the value as-is.
+*/
+template<typename T>
+class BasicStyleOption : public StyleOption
+{
+    public:
+        BasicStyleOption(const char* name, const T& value)
+        : StyleOption(name)
+        , _value(value)
+        {}
+
+        /** @brief Returns the stored value. */
+        const T& value() const
+        {
+            return any_cast<const T&>(_value);
+        }
+
+        /** @brief Sets the value (does not bump generation). */
+        void setValue(const T& v)
+        {
+            _value = Pt::Any(v);
+        }
+
+        /** @brief Copies the value only. */
+        BasicStyleOption& operator=(const BasicStyleOption& o)
+        {
+            _value = o._value;
+            return *this;
+        }
+
+        virtual const std::type_info& typeInfo() const
+        {
+            return typeid(T);
+        }
+
+        virtual const Pt::Any& get() const
+        {
+            return _value;
+        }
+
+        virtual void set(const Pt::Any& v)
+        {
+            setValue(any_cast<T>(v));
+        }
+
+    private:
+        Pt::Any _value;
+};
+
 
 /** @brief Stores the global theme option values shared across styles.
 
@@ -51,18 +147,8 @@ namespace Forms {
     must be refreshed. Theme-specific geometry and look details that are not
     part of a cross-style contract stay in the concrete style implementation
     instead of the global %StyleOptions object.
-*/
-class PT_FORMS_API StyleOptions
-{
-    public:
-        explicit StyleOptions();
 
-        StyleOptions(const StyleOptions& o);
-
-        virtual ~StyleOptions();
-
-        StyleOptions& operator=(const StyleOptions& o);
-
+    TODO:
         // background
         // foreground
         // textColor
@@ -76,214 +162,175 @@ class PT_FORMS_API StyleOptions
         // accentColor
         // selectedColor
         // activeColor
-        
+
         // textBackground
-            // viewBackground
+        // viewBackground
         // alternateTextBackground
-            // alternateViewBackground
+        // alternateViewBackground
 
-            // tooltipBackground / popupBackground
-            // tooltipForeground / popupForeground
-            // tooltipTextColor / popupTextColor
+        // tooltipBackground / popupBackground
+        // tooltipForeground / popupForeground
+        // tooltipTextColor / popupTextColor
 
-            // common standard-widget candidates:
-            // selectionBackground
-            // selectionTextColor
-            // focusColor
-            // disabledBackground
-            // disabledTextColor
-            // separatorColor
-            // caretColor
+        // common standard-widget candidates:
+        // selectionBackground
+        // selectionTextColor
+        // focusColor
+        // disabledBackground
+        // disabledTextColor
+        // separatorColor
+        // caretColor
 
-        const Gfx::Brush& background() const
+*/
+class PT_FORMS_API StyleOptions
+{
+    public:
+        /** @brief Forward iterator over all StyleOption entries. */
+        class Iterator
         {
-            return _background;
-        }
+            public:
+                explicit Iterator(StyleOption* const* p)
+                : _ptr(p)
+                {}
 
-        void setBackground(const Gfx::Brush& b)
-        {
-            _background = b;
-            ++_generation;
-        }
+                const StyleOption& operator*() const
+                { return **_ptr; }
 
-        const Gfx::Brush& foreground() const
-        {
-            return _foreground;
-        }
+                const StyleOption* operator->() const
+                { return *_ptr; }
 
-        void setForeground(const Gfx::Brush& c)
-        {
-            _foreground = c;
-            ++_generation;
-        }
-        
-        const Gfx::Pen& contour() const
-        {
-            return _contour;
-        }
-        
-        void setContour(const Gfx::Pen& p)
-        {
-            _contour = p;
-            ++_generation;
-        }
+                Iterator& operator++()
+                {
+                    ++_ptr;
+                    return *this;
+                }
 
-        const Gfx::Color& accentColor() const
-        {
-            return _accentColor;
-        }
-        
-        void setAccentColor(const Gfx::Color& color)
-        {
-            _accentColor = color;
-            ++_generation;
-        }
+                bool operator!=(const Iterator& o) const
+                { return _ptr != o._ptr; }
 
-        const Gfx::Brush& viewBackground() const
-        {
-            return _viewBackground;
-        }
+                bool operator==(const Iterator& o) const
+                { return _ptr == o._ptr; }
 
-        void setViewBackground(const Gfx::Brush& b)
-        {
-            _viewBackground = b;
-            ++_generation;
-        }
+            private:
+                StyleOption* const* _ptr;
+        };
 
-        const Gfx::Color& highlightColor() const
-        {
-            return _highlightColor;
-        }
+    public:
+        explicit StyleOptions();
 
-        void setHighlightColor(const Gfx::Color& c)
-        {
-            _highlightColor = c;
-            ++_generation;
-        }
+        StyleOptions(const StyleOptions& o);
 
-        const Gfx::Brush& hoverBackground() const
-        {
-            return _hoverBackground;
-        }
+        virtual ~StyleOptions();
 
-        void setHoverBackground(const Gfx::Brush& b)
-        {
-            _hoverBackground = b;
-            ++_generation;
-        }
+        StyleOptions& operator=(const StyleOptions& o);
 
-        const Gfx::Brush& textBackground() const
-        {
-            return _textBackground;
-        }
-
-        void setTextBackground(const Gfx::Brush& b)
-        {
-            _textBackground = b;
-            ++_generation;
-        }
-
-        const Gfx::Color& textColor() const
-        {
-            return _textColor;
-        }
-
-        void setTextColor(const Gfx::Color& c)
-        {
-            _textColor = c;
-            ++_generation;
-        }
-
-        const Gfx::Color& placeholderTextColor() const
-        {
-            return _placeholderTextColor;
-        }
-
-        void setPlaceholderTextColor(const Gfx::Color& c)
-        {
-            _placeholderTextColor = c;
-            ++_generation;
-        }
-
-        const Gfx::Color& highlightedTextColor() const
-        {
-            return _highlightedTextColor;
-        }
-
-        void setHighlightedTextColor(const Gfx::Color& c)
-        {
-            _highlightedTextColor = c;
-            ++_generation;
-        }
-
-        const Gfx::Brush& alternateViewBackground() const
-        {
-            return _alternateViewBackground;
-        }
-
-        void setAlternateViewBackground(const Gfx::Brush& b)
-        {
-            _alternateViewBackground = b;
-            ++_generation;
-        }
-
-        const Gfx::Brush& popupBackground() const
-        {
-            return _popupBackground;
-        }
-
-        void setPopupBackground(const Gfx::Brush& b)
-        {
-            _popupBackground = b;
-            ++_generation;
-        }
-
-        const Gfx::Color& popupTextColor() const
-        {
-            return _popupTextColor;
-        }
-
-        void setPopupTextColor(const Gfx::Color& c)
-        {
-            _popupTextColor = c;
-            ++_generation;
-        }
-
-        const Gfx::Font& font() const
-        {
-            return _font;
-        }
-
-        void setFont(const Gfx::Font& c)
-        {
-            _font = c;
-            ++_generation;
-        }
-
-        /** @brief Returns the current change generation.
+        /** @brief Returns the current change generation. 
         */
-        std::size_t generation() const
-        {
-            return _generation;
-        }
+        std::size_t generation() const;
+
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Brush& foreground() const;
+
+        void setForeground(const Gfx::Brush& c);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Color& accentColor() const;
+
+        void setAccentColor(const Gfx::Color& color);
+
+        const Gfx::Brush& viewBackground() const;
+
+        void setViewBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& highlightColor() const;
+
+        void setHighlightColor(const Gfx::Color& c);
+
+        const Gfx::Brush& hoverBackground() const;
+
+        void setHoverBackground(const Gfx::Brush& b);
+
+        const Gfx::Brush& textBackground() const;
+
+        void setTextBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& c);
+
+        const Gfx::Color& placeholderTextColor() const;
+
+        void setPlaceholderTextColor(const Gfx::Color& c);
+
+        const Gfx::Color& highlightedTextColor() const;
+
+        void setHighlightedTextColor(const Gfx::Color& c);
+
+        const Gfx::Brush& alternateViewBackground() const;
+
+        void setAlternateViewBackground(const Gfx::Brush& b);
+
+        const Gfx::Brush& popupBackground() const;
+
+        void setPopupBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& popupTextColor() const;
+
+        void setPopupTextColor(const Gfx::Color& c);
+
+        const Gfx::Font& font() const;
+
+        void setFont(const Gfx::Font& f);
+
+        /** @brief Returns an iterator to the first option.
+        */
+        Iterator begin() const;
+
+        /** @brief Returns an iterator past the last option.
+        */
+        Iterator end() const;
+
+        /** @brief Finds an option by name, or returns 0 if not found.
+        */
+        const StyleOption* find(const char* name) const;
+
+        /** @brief Sets an option by name from an Any value; no-op if name is unknown.
+        */
+        void set(const char* name, const Pt::Any& value);
+
+    protected:
+        /** @brief Registers a StyleOption into the polymorphic vector for iteration.
+        */
+        void registerOption(StyleOption* opt);
 
     private:
-        std::size_t _generation;
-        Gfx::Brush _background;
-        Gfx::Brush _foreground;
-        Gfx::Pen   _contour;
-        Gfx::Color _accentColor;
-        Gfx::Brush _viewBackground;
-        Gfx::Color _highlightColor;
-        Gfx::Brush _hoverBackground;
-        Gfx::Brush _textBackground;
-        Gfx::Color _textColor;
-        Gfx::Color _placeholderTextColor;
-        Gfx::Color _highlightedTextColor;
-        Gfx::Brush _alternateViewBackground;
-        Gfx::Brush _popupBackground;
-        Gfx::Color _popupTextColor;
-        Gfx::Font  _font;
+        void init();
+
+    private:
+        std::size_t                      _generation;
+        std::vector<StyleOption*>        _options;
+
+        BasicStyleOption<Gfx::Brush>     _background;
+        BasicStyleOption<Gfx::Brush>     _foreground;
+        BasicStyleOption<Gfx::Pen>       _contour;
+        BasicStyleOption<Gfx::Color>     _accentColor;
+        BasicStyleOption<Gfx::Brush>     _viewBackground;
+        BasicStyleOption<Gfx::Color>     _highlightColor;
+        BasicStyleOption<Gfx::Brush>     _hoverBackground;
+        BasicStyleOption<Gfx::Brush>     _textBackground;
+        BasicStyleOption<Gfx::Color>     _textColor;
+        BasicStyleOption<Gfx::Color>     _placeholderTextColor;
+        BasicStyleOption<Gfx::Color>     _highlightedTextColor;
+        BasicStyleOption<Gfx::Brush>     _alternateViewBackground;
+        BasicStyleOption<Gfx::Brush>     _popupBackground;
+        BasicStyleOption<Gfx::Color>     _popupTextColor;
+        BasicStyleOption<Gfx::Font>      _font;
 };
 
 /** @brief Composable font override slice for widget-local style options.
