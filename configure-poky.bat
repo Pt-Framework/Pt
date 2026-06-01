@@ -21,10 +21,4 @@ set CONFIGURE_OPTIONS=!CONFIGURE_OPTIONS! -sTARGET_OS=linux -sTARGET_OSPLAT=arm 
 -sLINKFLAGS="--sysroot \"!BRAVO_SYSROOT!\" -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard" ^
 -sC++LINKFLAGS="--sysroot \"!BRAVO_SYSROOT!\" -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard" --with-blend2d
 
-set "PKG_CONFIG_PATH=!BRAVO_SYSROOT!\usr\lib\pkgconfig"
-
-echo pkg-config --cflags freetype2:
-pkg-config --cflags freetype2
-REM pkg-config --libs zlib
-
-call jam.bat configure -sCONFIG=%CONFIG% !CONFIGURE_OPTIONS!
+call jam.bat configure !CONFIGURE_OPTIONS!
