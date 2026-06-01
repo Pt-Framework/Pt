@@ -51,10 +51,12 @@ description: "Build system"
 - Supported platform flags:
   - `--with-x11`
   - `--with-linux-fb`
+  - `--with-linux-drm`
 - Supported renderer flags:
   - `--with-direct2d`
   - `--with-gdi`
   - `--with-sw-raster`
+  - `--with-vulkan`
 - Native defaults:
   - Windows: `win32` + `direct2d`
   - Linux: `linux-fb`
