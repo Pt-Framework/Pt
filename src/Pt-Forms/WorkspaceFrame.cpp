@@ -1484,7 +1484,8 @@ void WorkspaceFrame::onProcessPaintEvent(const PaintEvent& ev)
     PaintEvent pev(*_window, winRect);
     _window->processEvent(pev);
 
-    Base::onProcessPaintEvent(ev);
+    PaintEvent fullEv(*this, _frameBounds);
+    Base::onProcessPaintEvent(fullEv);
 }
 
 
