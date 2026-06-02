@@ -54,6 +54,7 @@ namespace Pt {
 
 namespace Http {
 
+class Acceptor;
 class Authorization;
 class Responder;
 class Servlet;
@@ -140,12 +141,26 @@ class ServerThread : public Connectable
                 AcceptEvent(Acceptor* conn)
                 : _conn(conn)
                 { }
-    
+
                 Acceptor* connection() const
                 { return _conn; }
-    
+
             private:
                 Acceptor* _conn;
+        };
+
+        class RemoveHandlerEvent : public Pt::BasicEvent<RemoveHandlerEvent>
+        {
+            public:
+                explicit RemoveHandlerEvent(Acceptor* handler)
+                : _handler(handler)
+                { }
+
+                Acceptor* handler() const
+                { return _handler; }
+
+            private:
+                Acceptor* _handler;
         };
 
         class RemoveServletEvent : public Pt::BasicEvent<RemoveServletEvent>
@@ -154,10 +169,10 @@ class ServerThread : public Connectable
                 RemoveServletEvent(Servlet* s)
                 : _servlet(s)
                 { }
-    
+
                 Servlet* servlet() const
                 { return _servlet; }
-    
+
             private:
                 Servlet* _servlet;
         };
@@ -168,10 +183,10 @@ class ServerThread : public Connectable
                 ServletInfoEvent(Servlet* s)
                 : _servlet(s)
                 { }
-    
+
                 Servlet* servlet() const
                 { return _servlet; }
-    
+
             private:
                 Servlet* _servlet;
         };
@@ -182,7 +197,7 @@ class ServerThread : public Connectable
         ~ServerThread();
 
         void setSecure(Ssl::Context& ctx);
-        
+
         void serve(Acceptor* conn);
 
         void stop();
@@ -193,6 +208,8 @@ class ServerThread : public Connectable
 
     private:
         void onAccept(const AcceptEvent& ev);
+
+        void onRemoveHandler(const RemoveHandlerEvent& ev);
 
         void onRemoveServlet(const RemoveServletEvent& ev);
 
@@ -234,6 +251,8 @@ class ServerImpl : public Connectable
             IOStream* _iostream;
     };
 
+    typedef ServerThread::RemoveHandlerEvent RemoveHandlerEvent;
+
     public:
         ServerImpl();
 
@@ -246,10 +265,14 @@ class ServerImpl : public Connectable
         { 
             System::EventLoop* loop = _serverSocket.loop();
             if (loop)
+            {
                 loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onUpgrade);
+                loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onRemoveHandler);
+            }
             
             _serverSocket.setActive(eventLoop); 
             eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onUpgrade);
+            eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onRemoveHandler);
         }
 
         std::size_t timeout() const
@@ -304,6 +327,8 @@ class ServerImpl : public Connectable
         void onAccept(Net::TcpServer& server);
 
         void onHandlerFinished(Acceptor& conn);
+
+        void onRemoveHandler(const RemoveHandlerEvent& ev);
 
         void onUpgrade(const UpgradeEvent& ev)
         {
