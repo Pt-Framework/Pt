@@ -282,6 +282,14 @@ class PaintContextTest : public Pt::Unit::TestSuite
             registerMethod("InitialClip", *this, &PaintContextTest::InitialClip);
             registerMethod("IntersectOnBegin", *this, &PaintContextTest::IntersectOnBegin);
             registerMethod("IntersectAfterBegin", *this, &PaintContextTest::IntersectAfterBegin);
+            registerMethod("ContextClipAfterBegin", *this,
+                           &PaintContextTest::ContextClipAfterBegin);
+            registerMethod("ResetContextClipFallsBackToPainter", *this,
+                           &PaintContextTest::ResetContextClipFallsBackToPainter);
+            registerMethod("ResetContextClipResetsCanvas", *this,
+                           &PaintContextTest::ResetContextClipResetsCanvas);
+            registerMethod("BeginSurfaceDropsContextClip", *this,
+                           &PaintContextTest::BeginSurfaceDropsContextClip);
             registerMethod("ResetClipFallsBackToContext", *this,
                            &PaintContextTest::ResetClipFallsBackToContext);
             registerMethod("EmptyIntersectionKeepsClip", *this,
@@ -329,6 +337,66 @@ class PaintContextTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(surface.canvas().hasClip());
             assertRectEqual(surface.canvas().clip(), expected);
+        }
+
+        void ContextClipAfterBegin()
+        {
+            TestSurface surface;
+            RectF initialContextClip(PointF(0.0, 0.0), SizeF(10.0, 10.0));
+            RectF updatedContextClip(PointF(4.0, 2.0), SizeF(4.0, 7.0));
+            RectF painterClip(PointF(3.0, 1.0), SizeF(8.0, 8.0));
+            RectF expected = painterClip.intersect(updatedContextClip);
+            PaintContext context(surface, initialContextClip);
+
+            Painter painter(context);
+            painter.setClip(painterClip);
+            context.setClip(updatedContextClip);
+
+            PT_UNIT_ASSERT(surface.canvas().hasClip());
+            assertRectEqual(surface.canvas().clip(), expected);
+        }
+
+        void ResetContextClipFallsBackToPainter()
+        {
+            TestSurface surface;
+            RectF contextClip(PointF(2.0, 1.0), SizeF(9.0, 6.0));
+            RectF painterClip(PointF(4.0, 3.0), SizeF(5.0, 5.0));
+            PaintContext context(surface, contextClip);
+
+            Painter painter(context);
+            painter.setClip(painterClip);
+            context.resetClip();
+
+            PT_UNIT_ASSERT(surface.canvas().hasClip());
+            assertRectEqual(surface.canvas().clip(), painterClip);
+        }
+
+        void ResetContextClipResetsCanvas()
+        {
+            TestSurface surface;
+            RectF contextClip(PointF(2.0, 1.0), SizeF(9.0, 6.0));
+            PaintContext context(surface, contextClip);
+
+            Painter painter(context);
+            context.resetClip();
+
+            PT_UNIT_ASSERT( ! surface.canvas().hasClip() );
+        }
+
+        void BeginSurfaceDropsContextClip()
+        {
+            TestSurface contextSurface;
+            TestSurface surface;
+            RectF contextClip(PointF(0.0, 0.0), SizeF(4.0, 4.0));
+            RectF painterClip(PointF(1.0, 1.0), SizeF(8.0, 8.0));
+            PaintContext context(contextSurface, contextClip);
+
+            Painter painter(context);
+            painter.setClip(painterClip);
+            painter.begin(surface);
+
+            PT_UNIT_ASSERT(surface.canvas().hasClip());
+            assertRectEqual(surface.canvas().clip(), painterClip);
         }
 
         void ResetClipFallsBackToContext()

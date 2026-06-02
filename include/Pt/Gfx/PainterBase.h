@@ -194,12 +194,12 @@ class PT_GFX_API PainterBase : private NonCopyable
         */
         void drawArc(const PointF& topLeft, const SizeF& size,
                      float degBegin, float degEnd);
-        
+
         /** @brief Fills a chord on an ellipse.
         */
         void fillChord(const PointF& topLeft, const SizeF& size,
                        float degBegin, float degEnd);
-        
+
         /** @brief Fills a pie segment on an ellipse.
         */
         void fillPie(const PointF& topLeft, const SizeF& size,
@@ -217,7 +217,7 @@ class PT_GFX_API PainterBase : private NonCopyable
         /** @brief Draws the current path.
         */
         void drawPath();
-        
+
         /** @brief Fills the current path.
         */
         void fillPath();
@@ -225,7 +225,7 @@ class PT_GFX_API PainterBase : private NonCopyable
         /** @brief Draws the given path.
         */
         void drawPath(const Path& path);
-        
+
         /** @brief Fills the given path.
         */
         void fillPath(const Path& path);
@@ -293,9 +293,9 @@ class PT_GFX_API PainterBase : private NonCopyable
     private:
         void onBeginPaint(Canvas& canvas);
 
-        bool resolveCanvasClip(RectF& clip) const;
+        void onSetContextClip(const RectF* clip);
 
-        void applyCanvasClip();
+        void updateClip(const RectF* painterClip, const RectF* contextClip);
 
     private:
         PaintSurface*        _surface;

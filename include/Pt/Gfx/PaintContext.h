@@ -79,13 +79,9 @@ class PT_GFX_API PaintContext : private NonCopyable
         */
         const Scaling& scaling() const;
 
-        /** @brief Returns whether a default clip rect is active.
+        /** @brief Returns the default clip rect or null if clipping is disabled.
         */
-        bool hasClip() const;
-
-        /** @brief Returns the default clip rect.
-        */
-        const RectF& clip() const;
+        const RectF* clip() const;
 
         /** @brief Sets the default clip rect for painters on this context.
         */

@@ -78,8 +78,8 @@ void PainterBase::beginPaint(PaintContext& context)
 
     finish();
 
-    context.attachPainter(*this);
     _context = &context;
+    context.attachPainter(*this);
 
     Canvas* canvas = context.getCanvas(_canvas);
     if(canvas)
@@ -93,20 +93,25 @@ void PainterBase::onBeginPaint(Canvas& canvas)
     _canvas = &canvas;
 
     if(_canvas != reuse)
+    {
         delete reuse;
+
+        if(_canvas)
+        {
+            _canvas->setTransform(_transform);
+            _canvas->setCompositionMode( _paint.compositionMode() );
+            _canvas->setPen( _paint.pen() );
+            _canvas->setBrush( _paint.brush() );
+            _canvas->setFont( _paint.font() );
+            _canvas->setPath(_path);
+        }
+    }
 
     if(_canvas)
     {
-        _canvas->setTransform(_transform);
-        _canvas->setCompositionMode( _paint.compositionMode() );
-        _canvas->setPen( _paint.pen() );
-        _canvas->setBrush( _paint.brush() );
-        _canvas->setFont( _paint.font() );
-        _canvas->setPath(_path);
-
-        applyCanvasClip();
-
         _canvas->beginPaint(_paint);
+
+        updateClip(clip(), _context ? _context->clip() : 0);
     }
 }
 
@@ -119,7 +124,7 @@ void PainterBase::finish()
     if(_surface)
     {
         PaintSurface* surface = _surface;
-        
+
         _surface->detachPainter(*this);
         _surface = 0;
 
@@ -270,55 +275,34 @@ const RectF* PainterBase::clip() const
 }
 
 
-bool PainterBase::resolveCanvasClip(RectF& clip) const
-{
-    const RectF* painterClip = _hasClip ? &_clip : 0;
-    const RectF* contextClip = _context && _context->hasClip()
-                            ? &_context->clip()
-                            : 0;
-
-    if(painterClip && contextClip)
-    {
-        clip = painterClip->intersect(*contextClip);
-        return true;
-    }
-
-    if(painterClip)
-    {
-        clip = *painterClip;
-        return true;
-    }
-
-    if(contextClip)
-    {
-        clip = *contextClip;
-        return true;
-    }
-
-    return false;
-}
-
-
-void PainterBase::applyCanvasClip()
-{
-    if( ! _canvas )
-        return;
-
-    RectF clip;
-    if( resolveCanvasClip(clip) )
-        _canvas->setClip(clip);
-    else
-        _canvas->resetClip();
-}
-
-
 void PainterBase::setClip(const Gfx::RectF& clip)
 {
     _clip = clip;
     _hasClip = true;
 
-    if(_canvas)
-        applyCanvasClip();
+    updateClip(this->clip(), _context ? _context->clip() : 0);
+}
+
+
+void PainterBase::updateClip(const RectF* painterClip, const RectF* contextClip)
+{
+    if( ! _canvas || ! _canvas->isActive() )
+        return;
+
+    if(painterClip && contextClip)
+        _canvas->setClip( painterClip->intersect(*contextClip) );
+    else if(painterClip)
+        _canvas->setClip(*painterClip);
+    else if(contextClip)
+        _canvas->setClip(*contextClip);
+    else
+        _canvas->resetClip();
+}
+
+
+void PainterBase::onSetContextClip(const RectF* contextClip)
+{
+    updateClip(clip(), contextClip);
 }
 
 
@@ -327,8 +311,7 @@ void PainterBase::resetClip()
     _clip = Gfx::RectF();
     _hasClip = false;
 
-    if(_canvas)
-        applyCanvasClip();
+    updateClip(this->clip(), _context ? _context->clip() : 0);
 }
 
 

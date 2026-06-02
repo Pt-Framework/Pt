@@ -107,15 +107,9 @@ const Scaling& PaintContext::scaling() const
 }
 
 
-bool PaintContext::hasClip() const
+const RectF* PaintContext::clip() const
 {
-    return _hasClip;
-}
-
-
-const RectF& PaintContext::clip() const
-{
-    return _clip;
+    return _hasClip ? &_clip : 0;
 }
 
 
@@ -123,12 +117,18 @@ void PaintContext::setClip(const RectF& clip)
 {
     _clip = clip;
     _hasClip = true;
+
+    if(_painter)
+        _painter->onSetContextClip( this->clip() );
 }
 
 
 void PaintContext::resetClip()
 {
     _hasClip = false;
+
+    if(_painter)
+    _painter->onSetContextClip(this->clip());
 }
 
 
@@ -169,7 +169,7 @@ void PaintContext::attachPainter(PainterBase& painter)
 
 void PaintContext::detachPainter(PainterBase& painter)
 {
-    if(_painter)
+    if(_painter == &painter)
         _painter = 0;
 }
 
