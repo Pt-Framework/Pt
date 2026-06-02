@@ -376,8 +376,13 @@ void BitmapCanvas::onApplyClip()
     Gfx::RectF clipP(origin, size);
     RectI clipRect = round(clipP);
 
-    if( clipRect.isNull() ) // crashes otherwise
-        clipRect = RectI( PointI(0, 0), SizeI(1, 1) );
+    if( clipRect.isNull() )
+    {
+        RectI outsideClip( PointI(imageRect.right(), imageRect.bottom()),
+                           SizeI(1, 1) );
+        _currentClip = outsideClip.intersect(imageRect);
+        return;
+    }
 
     _currentClip =  clipRect.intersect(imageRect);
 }

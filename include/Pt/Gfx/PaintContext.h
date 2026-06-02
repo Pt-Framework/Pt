@@ -31,6 +31,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/NonCopyable.h>
 
@@ -58,6 +59,10 @@ class PT_GFX_API PaintContext : private NonCopyable
         */
         explicit PaintContext(PaintSurface& surface);
 
+        /** @brief Constructs a context using the paint surface and an initial clip rect.
+        */
+        PaintContext(PaintSurface& surface, const RectF& clip);
+
         /** @brief Destructor.
         */
         virtual ~PaintContext();
@@ -73,6 +78,22 @@ class PT_GFX_API PaintContext : private NonCopyable
         /** @brief Returns the scaling from logical to physical pixels.
         */
         const Scaling& scaling() const;
+
+        /** @brief Returns whether a default clip rect is active.
+        */
+        bool hasClip() const;
+
+        /** @brief Returns the default clip rect.
+        */
+        const RectF& clip() const;
+
+        /** @brief Sets the default clip rect for painters on this context.
+        */
+        void setClip(const RectF& clip);
+
+        /** @brief Resets the default clip rect.
+        */
+        void resetClip();
 
         /** @brief Returns a canvas for backend drawing.
         */
@@ -101,6 +122,8 @@ class PT_GFX_API PaintContext : private NonCopyable
     private:
         PaintSurface* _surface;
         PainterBase*  _painter;
+        RectF         _clip;
+        bool          _hasClip;
 };
 
 } // namespace

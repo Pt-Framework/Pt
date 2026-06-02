@@ -38,6 +38,18 @@ namespace Gfx {
 PaintContext::PaintContext(PaintSurface& surface)
 : _surface(&surface)
 , _painter(0)
+, _clip()
+, _hasClip(false)
+{
+    _surface->attachContext(*this);
+}
+
+
+PaintContext::PaintContext(PaintSurface& surface, const RectF& clip)
+: _surface(&surface)
+, _painter(0)
+, _clip(clip)
+, _hasClip(true)
 {
     _surface->attachContext(*this);
 }
@@ -92,6 +104,31 @@ const Scaling& PaintContext::scaling() const
 
     static const Scaling identity;
     return identity;
+}
+
+
+bool PaintContext::hasClip() const
+{
+    return _hasClip;
+}
+
+
+const RectF& PaintContext::clip() const
+{
+    return _clip;
+}
+
+
+void PaintContext::setClip(const RectF& clip)
+{
+    _clip = clip;
+    _hasClip = true;
+}
+
+
+void PaintContext::resetClip()
+{
+    _hasClip = false;
 }
 
 

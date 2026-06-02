@@ -902,39 +902,17 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     }
     else
     {
-        // No extra transform: combine canvas transform with position translation,
-        // then draw at origin. Combine with the active D2D transform.
-        D2D1_MATRIX_3X2_F oldTransform;
-        _deviceContext->GetTransform(&oldTransform);
-
-        Gfx::Transform tf;
-        tf.translate(to.x(), to.y());
-
-        D2D1_MATRIX_3X2_F textMatrix = D2D1::Matrix3x2F(
-            static_cast<FLOAT>(tf.m11()), static_cast<FLOAT>(tf.m12()),
-            static_cast<FLOAT>(tf.m21()), static_cast<FLOAT>(tf.m22()),
-            static_cast<FLOAT>(tf.dx()),  static_cast<FLOAT>(tf.dy()));
-
-        // Concatenate: textMatrix * oldTransform
-        D2D1_MATRIX_3X2_F combined;
-        combined._11 = textMatrix._11 * oldTransform._11 + textMatrix._12 * oldTransform._21;
-        combined._12 = textMatrix._11 * oldTransform._12 + textMatrix._12 * oldTransform._22;
-        combined._21 = textMatrix._21 * oldTransform._11 + textMatrix._22 * oldTransform._21;
-        combined._22 = textMatrix._21 * oldTransform._12 + textMatrix._22 * oldTransform._22;
-        combined._31 = textMatrix._31 * oldTransform._11 + textMatrix._32 * oldTransform._21 + oldTransform._31;
-        combined._32 = textMatrix._31 * oldTransform._12 + textMatrix._32 * oldTransform._22 + oldTransform._32;
-
-        _deviceContext->SetTransform(combined);
-
-        D2D1_RECT_F layoutRect = D2D1::RectF(0.0f, -baselineOffset, 100000.0f, 100000.0f);
+        // Keep the active canvas transform so the current clip stays aligned.
+        D2D1_RECT_F layoutRect = D2D1::RectF(static_cast<FLOAT>(to.x()),
+                                             static_cast<FLOAT>(to.y()) - baselineOffset,
+                                             static_cast<FLOAT>(to.x()) + 100000.0f,
+                                             static_cast<FLOAT>(to.y()) + 100000.0f);
 
         _deviceContext->DrawText(wtext.c_str(),
                       static_cast<UINT32>(wtext.size()),
                       _textFormat,
                       layoutRect,
                       _penBrush);
-
-        _deviceContext->SetTransform(oldTransform);
     }
 }
 

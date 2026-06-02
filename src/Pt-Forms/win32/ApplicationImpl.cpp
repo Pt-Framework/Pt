@@ -826,8 +826,6 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     Gfx::SizeF to(width, height);
     to /= w.scaleFactor();
 
-    //Application::instance().loop().processEvents();
-
     ResizeEvent rev(*w.frame(), to);
     Application::instance().processEvent(rev);
 

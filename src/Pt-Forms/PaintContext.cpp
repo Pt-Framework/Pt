@@ -11,6 +11,13 @@ PaintContext::PaintContext(PaintSurface& surface)
 }
 
 
+PaintContext::PaintContext(PaintSurface& surface, const Gfx::RectF& clip)
+: Gfx::PaintContext(surface, clip)
+, _surface(&surface)
+{
+}
+
+
 PaintContext::~PaintContext()
 {
 }

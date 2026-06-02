@@ -10,6 +10,7 @@ if $(PNG_INCLUDES)
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    BlockScaleTest.cpp
                    Argb32Test.cpp
+                   PaintContextTest.cpp
                    PathTest.cpp
                    Rgb32ColorTest.cpp
                    Rgb32Test.cpp

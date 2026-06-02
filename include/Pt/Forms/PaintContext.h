@@ -46,7 +46,13 @@ class PT_FORMS_API PaintContext : public Gfx::PaintContext
     friend class Painter;
 
     public:
+        /** @brief Constructs a context using the Forms paint surface.
+        */
         explicit PaintContext(PaintSurface& surface);
+
+        /** @brief Constructs a context using the Forms paint surface and an initial clip rect.
+        */
+        PaintContext(PaintSurface& surface, const Gfx::RectF& clip);
 
         ~PaintContext();
 

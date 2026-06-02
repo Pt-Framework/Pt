@@ -293,6 +293,10 @@ class PT_GFX_API PainterBase : private NonCopyable
     private:
         void onBeginPaint(Canvas& canvas);
 
+        bool resolveCanvasClip(RectF& clip) const;
+
+        void applyCanvasClip();
+
     private:
         PaintSurface*        _surface;
         PaintContext*        _context;

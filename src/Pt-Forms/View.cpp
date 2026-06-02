@@ -173,7 +173,7 @@ void View::onPaintEvent(const PaintEvent& ev)
 
     Base::onPaintEvent(ev);
 
-    PaintContext ctx( *_surface );
+    PaintContext ctx(*_surface, ev.rect());
     onPaint( ctx, ev.rect() );
 }
 
