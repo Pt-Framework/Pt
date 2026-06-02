@@ -1,8 +1,19 @@
 {
     "version": "0.2.0",
     "configurations": [
-          {
-            "name": "Debug Pt-Forms-Demo (Windows)",
+        {
+            "name": "Pt-Mcp-Demo (HTTP) - Debug",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/Pt-Mcp-Demo.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Pt-Forms-Demo (Windows) - Debug",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/Pt-Forms-Demo.exe",
@@ -11,31 +22,9 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "integratedTerminal"
-          },
-          {
-            "name": "Debug Pt-Forms-Demo (Windows-Skia)",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/skia-debug/Pt-Forms-Demo.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "integratedTerminal"
-          },
-          {
-            "name": "Debug Pt-Gfx-test (Windows)",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/debug/Pt-Gfx-test.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "integratedTerminal"
         },
         {
-            "name": "Debug (Linux)",
+            "name": "Pt-Forms-Demo (Linux) - Debug",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/Pt-Forms-Demo",
@@ -53,7 +42,7 @@
             ]
         },
         {
-            "name": "Debug (macOS)",
+            "name": "Pt-Forms-Demo (MacOS) - Debug",
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/Pt-Forms-Demo",
