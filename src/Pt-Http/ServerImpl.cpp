@@ -429,6 +429,7 @@ ServerThread::ServerThread()
 , _isServletIdle(false)
 {
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onAccept);
+    _loop.eventReceived() += Pt::slot(*this, &ServerThread::onRemoveHandler);
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onRemoveServlet);
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onIsServletIdle);
     
@@ -475,11 +476,11 @@ void ServerThread::stop()
 
 void ServerThread::removeServlet(Servlet& servlet)
 {
-    RemoveServletEvent ev(&servlet);
-    _loop.commitEvent(ev);
-
     System::MutexLock lock(_invokeMutex);
     _isReturned = false;
+
+    RemoveServletEvent ev(&servlet);
+    _loop.commitEvent(ev);
 
     while( ! _isReturned)
         _hasReturned.wait(lock);
@@ -488,13 +489,13 @@ void ServerThread::removeServlet(Servlet& servlet)
 
 bool ServerThread::isServletIdle(Servlet& servlet)
 {
-    ServletInfoEvent ev(&servlet);
-    _loop.commitEvent(ev);
-
     System::MutexLock lock(_invokeMutex);
 
     _isServletIdle = false;
     _isReturned = false;
+
+    ServletInfoEvent ev(&servlet);
+    _loop.commitEvent(ev);
 
     while( ! _isReturned)
         _hasReturned.wait(lock);
@@ -514,6 +515,21 @@ void ServerThread::onAccept(const AcceptEvent& ev)
         handler->setSecure(_sslctx);
 
     handler->beginServe(_loop);
+}
+
+
+void ServerThread::onRemoveHandler(const RemoveHandlerEvent& ev)
+{
+    std::vector<Acceptor*>::iterator it;
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
+    {
+        if(ev.handler() == *it)
+        {
+            delete *it;
+            _handlers.erase(it);
+            break;
+        }
+    }
 }
 
 
@@ -560,16 +576,8 @@ void ServerThread::onIsServletIdle(const ServletInfoEvent& ev)
 
 void ServerThread::onHandlerFinished(Acceptor& handler)
 {
-    std::vector<Acceptor*>::iterator it;
-    for(it = _handlers.begin(); it != _handlers.end(); ++it)
-    {
-        if(&handler == *it)
-        {
-            delete *it;
-            _handlers.erase(it);
-            break;
-        }
-    }
+    RemoveHandlerEvent ev(&handler);
+    _loop.commitEvent(ev);
 }
 
 
@@ -814,10 +822,21 @@ void ServerImpl::onAccept(Net::TcpServer& server)
 
 void ServerImpl::onHandlerFinished(Acceptor& h)
 {
+    System::EventLoop* eventLoop = this->loop();
+    if( ! eventLoop )
+        return;
+
+    RemoveHandlerEvent ev(&h);
+    eventLoop->commitEvent(ev);
+}
+
+
+void ServerImpl::onRemoveHandler(const RemoveHandlerEvent& ev)
+{
     std::vector<Acceptor*>::iterator it;
     for(it = _handlers.begin(); it != _handlers.end(); ++it)
     {
-        if(&h == *it)
+        if(ev.handler() == *it)
         {
             delete *it;
             _handlers.erase(it);
