@@ -379,6 +379,12 @@ Uri::Uri(const std::string& uri)
           _user.clear();
           break;
 
+        case state_password_or_port:
+          _host = _user;
+          _user.clear();
+          _password.clear();
+          break;
+
         default:
           throwInvalid(uri);
     }
