@@ -31,7 +31,11 @@
 #include <Pt/Mcp/HttpService.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/JsonRpc/Fault.h>
 #include <Pt/System/IOError.h>
+#include <Pt/System/Uri.h>
+#include <Pt/SerializationError.h>
+#include <Pt/ConversionError.h>
 #include <cassert>
 
 namespace Pt {
@@ -45,7 +49,7 @@ HttpResponder::HttpResponder(HttpService& httpService,
 , Mcp::Responder(serviceDef, decl)
 , _request(0)
 , _reply(0)
-, _rejectMethod(false)
+, _httpStatus(200)
 {
 }
 
@@ -56,18 +60,53 @@ HttpResponder::~HttpResponder()
 
 
 void HttpResponder::onBeginRequest(Http::Request& request,
-                                   Http::Reply& /*reply*/,
+                                   Http::Reply& reply,
                                    System::EventLoop& /*loop*/)
 {
-    _request = &request;
-    _reply = 0;
-    _rejectMethod = (request.method() != "POST");
-
-    // TODO: early finish on rejection
-    if( ! _rejectMethod)
+    try
     {
+        _request = &request;
+        _reply = &reply;
+        _httpStatus = 200;
+
+        if(request.method() != "POST")
+        {
+            _httpStatus = 405;
+            throw JsonRpc::Fault("Method Not Allowed", JsonRpc::Fault::InvalidRequest);
+        }
+
+        // Validate Origin header (MCP spec MUST)
+        const char* origin = request.header().get("Origin");
+        if(origin)
+        {
+            const char* host = request.header().get("Host");
+            const System::Uri originUri(origin);
+            std::string originHost = originUri.host();
+
+            if(originUri.port() != 0)
+            {
+                originHost += ':';
+                originHost += std::to_string(originUri.port());
+            }
+
+            if( ! host || originHost != std::string(host) )
+            {
+                _httpStatus = 403;
+                throw JsonRpc::Fault("Forbidden: invalid Origin", JsonRpc::Fault::InvalidRequest);
+            }
+        }
+
         beginMessage( request.body() );
         parseMessage();
+    }
+    catch(const JsonRpc::Fault& fault)
+    {
+        setFault(fault.code(), fault.what());
+    }
+    catch(const System::InvalidUri&)
+    {
+        _httpStatus = 403;
+        setFault(JsonRpc::Fault::InvalidRequest, "Forbidden: invalid Origin");
     }
 
     Http::Responder::setReady(false);
@@ -75,45 +114,48 @@ void HttpResponder::onBeginRequest(Http::Request& request,
 
 
 void HttpResponder::onReadRequest(Http::Request& /*request*/,
-                                  Http::Reply& /*reply*/,
+                                  Http::Reply& reply,
                                   System::EventLoop& /*loop*/)
 {
-    if( ! _rejectMethod)
-        parseMessage();
+    parseMessage();
 
     Http::Responder::setReady(false);
 }
 
 
-void HttpResponder::onBeginReply(const Http::Request& /*request*/,
+void HttpResponder::onBeginReply(const Http::Request& request,
                                  Http::Reply& reply,
                                  System::EventLoop& /*loop*/)
 {
     _reply = &reply;
 
-    if(_rejectMethod)
+    if( isFailed() )
     {
-        reply.setStatus(405, "Method Not Allowed");
-        reply.header().set("Allow", "POST");
-        reply.header().set("Content-Type", "application/json");
-        reply.body() << "{\"jsonrpc\":\"2.0\",\"error\":"
-                        "{\"code\":-32600,\"message\":\"Method Not Allowed\"}}";
-        setFinished(true);
+        finishMessage();
         return;
     }
 
-    if(isNotification())
+    // Check MCP-Protocol-Version header for non-initialize requests (MCP spec MUST)
+    if( ! isNotification() && method() != "initialize")
+    {
+        const char* mcpVersion = request.header().get("MCP-Protocol-Version");
+        if( mcpVersion && ! ToolDeclaration::isSupportedVersion(mcpVersion) )
+        {
+            _httpStatus = 400;
+            setFault(JsonRpc::Fault::InvalidRequest, "Unsupported MCP-Protocol-Version");
+            finishMessage();
+            return;
+        }
+    }
+
+    if( isNotification() )
     {
         reply.setStatus(202, "Accepted");
         setFinished(true);
         return;
     }
 
-    reply.header().set("Content-Type", "application/json");
-    beginResult( reply.body() );
-
-    bool isFinished = advanceReply(reply);
-    setFinished(isFinished);
+    finishMessage();
 }
 
 
@@ -122,21 +164,65 @@ void HttpResponder::onWriteReply(const Http::Request& /*request*/,
                                  System::EventLoop& /*loop*/)
 {
     bool isFinished = advanceReply(reply);
-
     Http::Responder::setReady(isFinished);
 }
 
 
 bool HttpResponder::advanceReply(Http::Reply& reply)
 {
-    while( ! advanceResult() )
+    try
     {
-        if(reply.buffer().size() > 8192)
-            return false;
+        while( ! advanceResult() )
+        {
+            if(reply.buffer().size() > 8192)
+                return false;
+        }
+
+        finishResult();
+        return true;
+    }
+    catch(const Json::JsonError& e)
+    {
+        throw System::IOError( e.what() );
+    }
+    catch(const SerializationError& e)
+    {
+        throw System::IOError( e.what() );
+    }
+    catch(const ConversionError& e)
+    {
+        throw System::IOError( e.what() );
     }
 
-    finishResult();
     return true;
+}
+
+
+void HttpResponder::onResult()
+{
+    assert(_reply);
+
+    _reply->setStatus(_httpStatus, "");
+    _reply->header().set("Content-Type", "application/json");
+
+    beginResult(_reply->body());
+
+    bool isFinished = advanceReply(*_reply);
+    setFinished(isFinished);
+}
+
+
+void HttpResponder::onFault()
+{
+    assert(_reply);
+
+    if(_httpStatus == 405)
+        _reply->header().set("Allow", "POST");
+    _reply->setStatus(_httpStatus, "");
+    _reply->header().set("Content-Type", "application/json");
+
+    formatFault(_reply->body());
+    setFinished(true);
 }
 
 } // namespace Mcp

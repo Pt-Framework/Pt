@@ -6,6 +6,7 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mcp ;
 PT_MCP_SOURCES = HttpResponder.cpp
                  HttpService.cpp
                  Responder.cpp
+                 StdioResponder.cpp
                  StdioService.cpp
                  TextFormatter.cpp
                  ToolDeclaration.cpp

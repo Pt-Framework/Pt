@@ -230,9 +230,46 @@ void ToolDeclaration::toToolsList(std::ostream& os) const
 }
 
 
-void ToolDeclaration::toInitializeResult(std::ostream& os) const
+namespace
 {
-    os << "{\"protocolVersion\":\"2024-11-05\""
+
+static const char* const SupportedVersions[] =
+{
+    "2025-11-25",
+    "2025-03-26",
+    0
+};
+
+} // anonymous namespace
+
+
+std::string ToolDeclaration::preferredVersion(const std::string& requested)
+{
+    for(int i = 0; SupportedVersions[i]; ++i)
+    {
+        if(requested == SupportedVersions[i])
+            return SupportedVersions[i];
+    }
+    return SupportedVersions[0];
+}
+
+
+bool ToolDeclaration::isSupportedVersion(const std::string& version)
+{
+    for(int i = 0; SupportedVersions[i]; ++i)
+    {
+        if(version == SupportedVersions[i])
+            return true;
+    }
+    return false;
+}
+
+
+void ToolDeclaration::toInitializeResult(std::ostream& os,
+                                         const char* protocolVersion) const
+{
+    const char* version = protocolVersion ? protocolVersion : SupportedVersions[0];
+    os << "{\"protocolVersion\":\"" << version << "\""
        << ",\"capabilities\":{\"tools\":{}}"
        << ",\"serverInfo\":{\"name\":\"" << _serverName
        << "\",\"version\":\"" << _serverVersion << "\"}}";

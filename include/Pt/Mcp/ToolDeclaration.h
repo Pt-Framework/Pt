@@ -143,13 +143,28 @@ class PT_MCP_API ToolDeclaration : private NonCopyable
     const std::string& serverVersion() const
     { return _serverVersion; }
 
+    /** @brief Returns the best supported protocol version for the given request.
+
+        If @a requested matches a supported version it is returned verbatim.
+        Otherwise the latest supported version is returned.
+    */
+    static std::string preferredVersion(const std::string& requested);
+
+    /** @brief Returns true if @a version is a supported protocol version.
+    */
+    static bool isSupportedVersion(const std::string& version);
+
     /** @brief Writes the tools/list result JSON to the stream.
     */
     void toToolsList(std::ostream& os) const;
 
     /** @brief Writes the initialize result JSON to the stream.
+
+        @a protocolVersion is the negotiated version string to echo back.
+        If null the latest supported version is used.
     */
-    void toInitializeResult(std::ostream& os) const;
+    void toInitializeResult(std::ostream& os,
+                            const char* protocolVersion = 0) const;
 
   private:
     std::string _serverName;

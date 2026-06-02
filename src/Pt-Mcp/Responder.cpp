@@ -30,6 +30,8 @@
 #include "Responder.h"
 #include "TextFormatter.h"
 #include <Pt/JsonRpc/Fault.h>
+#include <Pt/Json/Boolean.h>
+#include <Pt/Json/Float.h>
 #include <Pt/Json/Node.h>
 #include <Pt/Json/Member.h>
 #include <Pt/Json/Integer.h>
@@ -41,6 +43,74 @@ namespace Pt {
 
 namespace Mcp {
 
+namespace {
+
+void writeJsonNode(Json::JsonWriter& writer, const Json::Node& node)
+{
+    switch(node.type())
+    {
+        case Json::Node::StartObject:
+            writer.writeObject();
+            break;
+
+        case Json::Node::EndObject:
+            writer.writeObjectEnd();
+            break;
+
+        case Json::Node::StartArray:
+            writer.writeArray();
+            break;
+
+        case Json::Node::EndArray:
+            writer.writeArrayEnd();
+            break;
+
+        case Json::Node::Member:
+        {
+            const Json::Member& member = static_cast<const Json::Member&>(node);
+            writer.writeMember(member.name());
+            break;
+        }
+
+        case Json::Node::String:
+        {
+            const Json::String& value = static_cast<const Json::String&>(node);
+            writer.writeString(value.value());
+            break;
+        }
+
+        case Json::Node::Integer:
+        {
+            const Json::Integer& value = static_cast<const Json::Integer&>(node);
+            writer.writeInt(value.value());
+            break;
+        }
+
+        case Json::Node::Float:
+        {
+            const Json::Float& value = static_cast<const Json::Float&>(node);
+            writer.writeFloat(value.value());
+            break;
+        }
+
+        case Json::Node::Boolean:
+        {
+            const Json::Boolean& value = static_cast<const Json::Boolean&>(node);
+            writer.writeBool(value.value());
+            break;
+        }
+
+        case Json::Node::Null:
+            writer.writeNull();
+            break;
+
+        default:
+            break;
+    }
+}
+
+}
+
 Responder::Responder(Remoting::ServiceDefinition& serviceDef,
                            const ToolDeclaration& decl)
 : Remoting::Responder(serviceDef)
@@ -50,13 +120,23 @@ Responder::Responder(Remoting::ServiceDefinition& serviceDef,
 , _args(0)
 , _state(OnBegin)
 , _id(0)
+, _method()
+, _toolName()
+, _currentParamName()
+, _requestedVersion()
 , _isFault(false)
 , _hasId(false)
+, _faultCode(0)
+, _faultMessage()
+, _bufferedArgumentsDepth(0)
+, _bufferedArgumentsJson()
+, _bufferedArgumentsStream()
 , _utf8(1)
+, _bufferedArgumentsText(&_utf8)
+, _bufferedArgumentsWriter()
 , _tis(&_utf8)
 , _reader(_tis)
-, _outUtf8(1)
-, _tos(&_outUtf8)
+, _tos(&_utf8)
 , _textFmt(0)
 , _result(0)
 , _resultOs(0)
@@ -71,12 +151,6 @@ Responder::~Responder()
 }
 
 
-bool Responder::isFailed() const
-{
-    return _isFault;
-}
-
-
 void Responder::onCancel()
 {
     _state = OnBegin;
@@ -84,8 +158,18 @@ void Responder::onCancel()
     _tool = 0;
     _isFault = false;
     _hasId = false;
+    _faultCode = 0;
+    _faultMessage.clear();
     _method.clear();
     _toolName.clear();
+    _currentParamName.clear();
+    _requestedVersion.clear();
+    _bufferedArgumentsDepth = 0;
+    _bufferedArgumentsJson.clear();
+    _bufferedArgumentsStream.str(std::string());
+    _bufferedArgumentsStream.clear();
+    _bufferedArgumentsText.reset();
+    _bufferedArgumentsWriter.reset();
     _result = 0;
     _resultOs = 0;
     _skipDepth = 0;
@@ -104,6 +188,194 @@ void Responder::onReady()
 void Responder::reset()
 {
     cancel();
+}
+
+
+void Responder::beginMessage(std::istream& is)
+{
+    cancel();
+    _tis.reset(is);
+    _tis.clear();
+    _tis.textBuffer().import();
+}
+
+
+bool Responder::parseMessage()
+{
+    if(_isFault)
+        return true;
+
+    _tis.textBuffer().import();
+
+    try
+    {
+        for(;;)
+        {
+            const Json::Node* node = _reader.advance();
+            if( ! node)
+                return false;
+
+            if( advance(*node) )
+                return true;
+        }
+    }
+    catch(const JsonRpc::Fault& fault)
+    {
+        setFault(fault.code(), fault.what());
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        setFault(JsonRpc::Fault::InternalError, e.what());
+        return true;
+    }
+}
+
+
+void Responder::finishMessage()
+{
+    if(isFailed())
+        onFault();
+    else
+        onResult();
+}
+
+
+void Responder::beginResult(std::ostream& os)
+{
+    _resultOs = &os;
+
+    assert(_hasId);
+
+    if(_method == "tools/call")
+    {
+        try
+        {
+            _result = call();
+
+            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
+               << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"";
+
+            _tos.clear();
+            _tos.discard();
+            _tos.attach(os);
+
+            delete _textFmt;
+            _textFmt = new TextFormatter(_tos);
+            _result->beginFormat(*_textFmt);
+        }
+        catch(const JsonRpc::Fault& f)
+        {
+            _isFault = true;
+            _result = 0;
+
+            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
+               << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\""
+               << f.what()
+               << "\"}],\"isError\":true}}";
+        }
+        catch(const std::exception& e)
+        {
+            _isFault = true;
+            _result = 0;
+
+            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
+               << ",\"error\":{\"code\":" << JsonRpc::Fault::InternalError << ",\"message\":\""
+               << e.what()
+               << "\"}}";
+        }
+    }
+    else if(_method == "initialize")
+    {
+        std::string version = ToolDeclaration::preferredVersion(_requestedVersion);
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
+        _decl->toInitializeResult(os, version.c_str());
+        os << '}';
+        _result = 0;
+    }
+    else if(_method == "tools/list")
+    {
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
+        _decl->toToolsList(os);
+        os << '}';
+        _result = 0;
+    }
+    else if(_method == "ping")
+    {
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":{}}";
+        _result = 0;
+    }
+    else
+    {
+        // Unknown method
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
+           << ",\"error\":{\"code\":" << JsonRpc::Fault::MethodNotFound << ",\"message\":\"Method not found\"}}";
+        _result = 0;
+    }
+}
+
+
+bool Responder::advanceResult()
+{
+    if( ! _result)
+        return true;
+
+    for(unsigned n = 0; _result && n < 10; ++n)
+    {
+        _result = _result->advanceFormat(*_textFmt);
+    }
+
+    return _result == 0;
+}
+
+
+void Responder::finishResult()
+{
+    if(_resultOs && _method == "tools/call" && ! _isFault)
+    {
+        _tos.flush();
+        *_resultOs << "\"}],\"isError\":false}}";
+    }
+
+    delete _textFmt;
+    _textFmt = 0;
+    _result = 0;
+    _resultOs = 0;
+}
+
+
+void Responder::formatResult(std::ostream& os)
+{
+    beginResult(os);
+    while( ! advanceResult() )
+        ;
+    finishResult();
+}
+
+
+void Responder::formatFault(std::ostream& os)
+{
+    os << "{\"jsonrpc\":\"2.0\",\"id\":";
+    if(_hasId)
+        os << _id;
+    else
+        os << "null";
+    os << ",\"error\":{\"code\":" << _faultCode
+       << ",\"message\":\"" << _faultMessage << "\"}}";  
+}
+
+
+bool Responder::isFailed() const
+{
+    return _isFault;
+}
+
+
+void Responder::setFault(int code, const std::string& msg)
+{
+    _isFault = true;
+    _faultCode = code;
+    _faultMessage = msg;
 }
 
 
@@ -160,9 +432,13 @@ bool Responder::advance(const Json::Node& node)
                 {
                     _state = OnParamName;
                 }
+                else if(_method == "initialize")
+                {
+                    _state = OnInitParamName;
+                }
                 else
                 {
-                    // skip params for non-tools/call methods
+                    // skip params for other methods
                     _skipDepth = 1;
                     _state = OnSkipParams;
                 }
@@ -175,6 +451,7 @@ bool Responder::advance(const Json::Node& node)
             if(node.type() == Json::Node::EndObject)
             {
                 // End of params object
+                _currentParamName.clear();
                 _state = OnEnvelope;
                 break;
             }
@@ -186,29 +463,34 @@ bool Responder::advance(const Json::Node& node)
 
                 if(name == "name")
                 {
-                    // Next node will be the tool name string
-                    // Stay in OnParamName, handle string below
+                    _currentParamName = name;
+                    _state = OnParamNameValue;
                 }
                 else if(name == "arguments")
                 {
+                    _currentParamName = name;
                     _state = OnParamArguments;
                 }
-                // else skip unknown params members
+                else
+                {
+                    _currentParamName = name;
+                    _skipDepth = 0;
+                    _state = OnSkipParamValue;
+                }
             }
-            else if(node.type() == Json::Node::String)
+            break;
+        }
+
+        case OnParamNameValue:
+        {
+            if(node.type() == Json::Node::String)
             {
-                // This is the tool name value
                 const Json::String& s = static_cast<const Json::String&>(node);
-                _toolName = s.value().narrow();
-
-                _tool = _decl->getTool(_toolName);
-                if( ! _tool)
-                    throw JsonRpc::Fault("tool not found", JsonRpc::Fault::MethodNotFound);
-
-                _args = setProcedure(_toolName);
-                if( ! _args)
-                    throw JsonRpc::Fault("tool not registered", JsonRpc::Fault::MethodNotFound);
+                setToolName(s.value().narrow());
             }
+
+            _currentParamName.clear();
+            _state = OnParamName;
             break;
         }
 
@@ -216,17 +498,30 @@ bool Responder::advance(const Json::Node& node)
         {
             if(node.type() == Json::Node::StartObject)
             {
-                // Begin of arguments object — route members by name
-                _state = OnArgValue;
+                if(_tool)
+                {
+                    _state = OnArgMember;
+                }
+                else
+                {
+                    _bufferedArgumentsStream.str(std::string());
+                    _bufferedArgumentsStream.clear();
+                    _bufferedArgumentsText.reset(_bufferedArgumentsStream);
+                    _bufferedArgumentsWriter.reset(_bufferedArgumentsText);
+                    _bufferedArgumentsDepth = 0;
+                    writeBufferedArgumentNode(node);
+                    _state = OnCaptureArguments;
+                }
             }
             break;
         }
 
-        case OnArgValue:
+        case OnArgMember:
         {
             if(node.type() == Json::Node::EndObject)
             {
                 // End of arguments object
+                _currentParamName.clear();
                 _state = OnParamName;
                 break;
             }
@@ -234,25 +529,55 @@ bool Responder::advance(const Json::Node& node)
             if(node.type() == Json::Node::Member)
             {
                 const Json::Member& m = static_cast<const Json::Member&>(node);
-                std::string argName = m.name().narrow();
-
-                if( ! _tool)
-                    throw JsonRpc::Fault("tool not set", JsonRpc::Fault::InvalidRequest);
-
-                int index = _tool->getParamIndex(argName);
-                if(index < 0)
-                    throw JsonRpc::Fault("unknown argument", JsonRpc::Fault::InvalidParameters);
-
-                if( ! _args || ! _args[index])
-                    throw JsonRpc::Fault("invalid argument index", JsonRpc::Fault::InvalidParameters);
-
-                _formatter.beginParse( *_args[index] );
+                beginArgument(m.name().narrow());
+                _state = OnArgData;
             }
-            else
+            break;
+        }
+
+        case OnArgData:
+        {
+            bool done = _formatter.advance(node);
+            if(done)
+                _state = OnArgMember;
+            break;
+        }
+
+        case OnCaptureArguments:
+        {
+            writeBufferedArgumentNode(node);
+            break;
+        }
+
+        case OnSkipParamValue:
+        {
+            if(node.type() == Json::Node::StartObject ||
+               node.type() == Json::Node::StartArray)
             {
-                // Value node — feed to formatter
-                bool done = _formatter.advance(node);
-                (void)done;
+                ++_skipDepth;
+            }
+            else if(node.type() == Json::Node::EndObject ||
+                    node.type() == Json::Node::EndArray)
+            {
+                if(_skipDepth > 0)
+                {
+                    --_skipDepth;
+                    if(_skipDepth == 0)
+                    {
+                        _currentParamName.clear();
+                        _state = OnParamName;
+                    }
+                }
+                else
+                {
+                    _currentParamName.clear();
+                    _state = OnParamName;
+                }
+            }
+            else if(_skipDepth == 0)
+            {
+                _currentParamName.clear();
+                _state = OnParamName;
             }
             break;
         }
@@ -287,6 +612,69 @@ bool Responder::advance(const Json::Node& node)
             break;
         }
 
+        case OnInitParamName:
+        {
+            if(node.type() == Json::Node::EndObject)
+            {
+                _state = OnEnvelope;
+                break;
+            }
+            if(node.type() == Json::Node::Member)
+            {
+                const Json::Member& m = static_cast<const Json::Member&>(node);
+                std::string name = m.name().narrow();
+                if(name == "protocolVersion")
+                    _state = OnInitProtocolVersion;
+                else
+                {
+                    _skipDepth = 0;
+                    _state = OnSkipInitValue;
+                }
+            }
+            break;
+        }
+
+        case OnInitProtocolVersion:
+        {
+            if(node.type() == Json::Node::String)
+            {
+                const Json::String& s = static_cast<const Json::String&>(node);
+                _requestedVersion = s.value().narrow();
+            }
+            _state = OnInitParamName;
+            break;
+        }
+
+        case OnSkipInitValue:
+        {
+            if(node.type() == Json::Node::StartObject ||
+               node.type() == Json::Node::StartArray)
+            {
+                ++_skipDepth;
+            }
+            else if(node.type() == Json::Node::EndObject ||
+                    node.type() == Json::Node::EndArray)
+            {
+                if(_skipDepth > 0)
+                {
+                    --_skipDepth;
+                    if(_skipDepth == 0)
+                        _state = OnInitParamName;
+                }
+                else
+                {
+                    // Unexpected: treat as end of params
+                    _state = OnEnvelope;
+                }
+            }
+            else if(_skipDepth == 0)
+            {
+                // Scalar value — skip is complete
+                _state = OnInitParamName;
+            }
+            break;
+        }
+
         case OnEnd:
             break;
     }
@@ -295,139 +683,89 @@ bool Responder::advance(const Json::Node& node)
 }
 
 
-void Responder::formatResult(std::ostream& os)
+void Responder::setToolName(const std::string& toolName)
 {
-    beginResult(os);
-    while( ! advanceResult() )
-        ;
-    finishResult();
+    _toolName = toolName;
+
+    _tool = _decl->getTool(_toolName);
+    if( ! _tool)
+        throw JsonRpc::Fault("tool not found", JsonRpc::Fault::MethodNotFound);
+
+    _args = setProcedure(_toolName);
+    if( ! _args)
+        throw JsonRpc::Fault("tool not registered", JsonRpc::Fault::MethodNotFound);
+
+    if( ! _bufferedArgumentsJson.empty() )
+        parseBufferedArguments();
 }
 
 
-void Responder::beginMessage(std::istream& is)
+void Responder::beginArgument(const std::string& argName)
 {
-    cancel();
-    _tis.reset(is);
-    _tis.clear();
-    _tis.textBuffer().import();
+    if( ! _tool)
+        throw JsonRpc::Fault("tool not set", JsonRpc::Fault::InvalidRequest);
+
+    int index = _tool->getParamIndex(argName);
+    if(index < 0)
+        throw JsonRpc::Fault("unknown argument", JsonRpc::Fault::InvalidParameters);
+
+    if( ! _args || ! _args[index])
+        throw JsonRpc::Fault("invalid argument index", JsonRpc::Fault::InvalidParameters);
+
+    _formatter.beginParse( *_args[index] );
 }
 
 
-bool Responder::parseMessage()
+void Responder::parseBufferedArguments()
 {
-    _tis.textBuffer().import();
+    std::istringstream input(_bufferedArgumentsJson);
+    Pt::TextIStream tis(input, new Pt::Utf8Codec);
+    tis.textBuffer().import();
+
+    Json::JsonReader reader(tis);
+    State previousState = _state;
+    _state = OnArgMember;
 
     for(;;)
     {
-        const Json::Node* node = _reader.advance();
+        const Json::Node* node = reader.advance();
         if( ! node)
-            return false;
+            break;
 
         if( advance(*node) )
-            return true;
+            break;
     }
+
+    _state = previousState;
+    _bufferedArgumentsJson.clear();
+    _bufferedArgumentsDepth = 0;
 }
 
 
-void Responder::beginResult(std::ostream& os)
+void Responder::writeBufferedArgumentNode(const Json::Node& node)
 {
-    assert(_hasId);
+    writeJsonNode(_bufferedArgumentsWriter, node);
 
-    _resultOs = &os;
-
-    if(_method == "tools/call")
+    if(node.type() == Json::Node::StartObject ||
+       node.type() == Json::Node::StartArray)
     {
-        try
+        ++_bufferedArgumentsDepth;
+    }
+    else if(node.type() == Json::Node::EndObject ||
+            node.type() == Json::Node::EndArray)
+    {
+        --_bufferedArgumentsDepth;
+        if(_bufferedArgumentsDepth == 0)
         {
-            _result = call();
-
-            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-               << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"";
-
-            _tos.clear();
-            _tos.discard();
-            _tos.attach(os);
-
-            delete _textFmt;
-            _textFmt = new TextFormatter(_tos);
-            _result->beginFormat(*_textFmt);
-        }
-        catch(const JsonRpc::Fault& f)
-        {
-            _isFault = true;
-            _result = 0;
-
-            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-               << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\""
-               << f.what()
-               << "\"}],\"isError\":true}}";
-        }
-        catch(const std::exception& e)
-        {
-            _isFault = true;
-            _result = 0;
-
-            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-               << ",\"error\":{\"code\":-32603,\"message\":\""
-               << e.what()
-               << "\"}}";
+            _bufferedArgumentsText.flush();
+            _bufferedArgumentsJson = _bufferedArgumentsStream.str();
+            _bufferedArgumentsStream.str(std::string());
+            _bufferedArgumentsStream.clear();
+            _bufferedArgumentsText.reset();
+            _bufferedArgumentsWriter.reset();
+            _state = OnParamName;
         }
     }
-    else if(_method == "initialize")
-    {
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
-        _decl->toInitializeResult(os);
-        os << '}';
-        _result = 0;
-    }
-    else if(_method == "tools/list")
-    {
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
-        _decl->toToolsList(os);
-        os << '}';
-        _result = 0;
-    }
-    else if(_method == "ping")
-    {
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":{}}";
-        _result = 0;
-    }
-    else
-    {
-        // Unknown method
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-           << ",\"error\":{\"code\":-32601,\"message\":\"Method not found\"}}";
-        _result = 0;
-    }
-}
-
-
-bool Responder::advanceResult()
-{
-    if( ! _result)
-        return true;
-
-    for(unsigned n = 0; _result && n < 10; ++n)
-    {
-        _result = _result->advanceFormat(*_textFmt);
-    }
-
-    return _result == 0;
-}
-
-
-void Responder::finishResult()
-{
-    if(_resultOs && _method == "tools/call" && ! _isFault)
-    {
-        _tos.flush();
-        *_resultOs << "\"}],\"isError\":false}}";
-    }
-
-    delete _textFmt;
-    _textFmt = 0;
-    _result = 0;
-    _resultOs = 0;
 }
 
 } // namespace Mcp

@@ -1,7 +1,9 @@
 SubDir PT_TOP src Pt-Mcp demo ;
 SubDirHdrs $(PT_TOP)/include ;
+
+# Consolidated MCP demo: HTTP by default, --stdio for stdio mode
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mcp-Demo ;
 
 Main Pt-Mcp-Demo : Pt-Mcp-Demo.cpp ;
-LinkSharedLibraries Pt-Mcp-Demo : Pt-Mcp Pt-JsonRpc Pt-Json Pt-Remoting Pt-System Pt ;
+LinkSharedLibraries Pt-Mcp-Demo : Pt-Mcp Pt-Http Pt-JsonRpc Pt-Json Pt-Remoting Pt-Net Pt-System Pt ;
 MakeLocate Pt-Mcp-Demo : $(PT_OUTPUT_TARGET) ;

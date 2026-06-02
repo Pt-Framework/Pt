@@ -28,11 +28,7 @@
  */
 
 #include <Pt/Mcp/StdioService.h>
-#include <Pt/JsonRpc/Fault.h>
-#include "Responder.h"
-#include <Pt/Json/JsonReader.h>
-#include <Pt/TextStream.h>
-#include <Pt/Utf8Codec.h>
+#include "StdioResponder.h"
 #include <sstream>
 #include <cstdlib>
 
@@ -95,139 +91,8 @@ void StdioService::writeMessage(std::ostream& os, const std::string& json)
 
 std::string StdioService::dispatch(const std::string& json)
 {
-    std::string method = extractMethod(json);
-
-    if(method == "initialize")
-        return dispatchInitialize(json);
-    else if(method == "tools/list")
-        return dispatchToolsList(json);
-    else if(method == "tools/call")
-        return dispatchToolsCall(json);
-    else if(method == "notifications/initialized")
-        return std::string();
-
-    // Unknown method — return error
-    Pt::int64_t id = extractId(json);
-    std::ostringstream os;
-    os << "{\"jsonrpc\":\"2.0\",\"id\":" << id
-       << ",\"error\":{\"code\":-32601,\"message\":\"Method not found\"}}";
-    return os.str();
-}
-
-
-std::string StdioService::dispatchInitialize(const std::string& json)
-{
-    Pt::int64_t id = extractId(json);
-
-    std::ostringstream os;
-    os << "{\"jsonrpc\":\"2.0\",\"id\":" << id << ",\"result\":";
-    _decl->toInitializeResult(os);
-    os << '}';
-    return os.str();
-}
-
-
-std::string StdioService::dispatchToolsList(const std::string& json)
-{
-    Pt::int64_t id = extractId(json);
-
-    std::ostringstream os;
-    os << "{\"jsonrpc\":\"2.0\",\"id\":" << id << ",\"result\":";
-    _decl->toToolsList(os);
-    os << '}';
-    return os.str();
-}
-
-
-std::string StdioService::dispatchToolsCall(const std::string& json)
-{
-    Responder responder(*_serviceDef, *_decl);
-
-    try
-    {
-        // Parse the JSON and feed nodes to the responder
-        std::string input = json + "\n";
-        Pt::Utf8Codec utf8(1);
-        Pt::TextIStream tis(&utf8);
-        std::istringstream iss(input);
-        tis.reset(iss);
-        tis.textBuffer().import();
-
-        Json::JsonReader reader(tis);
-
-        for(;;)
-        {
-            const Json::Node* node = reader.advance();
-            if( ! node)
-                break;
-
-            bool done = responder.advance(*node);
-            if(done)
-                break;
-        }
-
-        // Call the procedure and format the result
-        std::ostringstream os;
-        responder.formatResult(os);
-        return os.str();
-    }
-    catch(const JsonRpc::Fault& f)
-    {
-        std::ostringstream os;
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << responder.requestId()
-           << ",\"error\":{\"code\":" << f.code()
-           << ",\"message\":\"" << f.what() << "\"}}";
-        return os.str();
-    }
-    catch(const std::exception& e)
-    {
-        std::ostringstream os;
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << responder.requestId()
-           << ",\"error\":{\"code\":-32603,\"message\":\""
-           << e.what() << "\"}}";
-        return os.str();
-    }
-}
-
-
-std::string StdioService::extractMethod(const std::string& json)
-{
-    // Simple scan for "method":"..." in the JSON
-    std::size_t pos = json.find("\"method\"");
-    if(pos == std::string::npos)
-        return std::string();
-
-    pos = json.find(':', pos + 8);
-    if(pos == std::string::npos)
-        return std::string();
-
-    pos = json.find('"', pos + 1);
-    if(pos == std::string::npos)
-        return std::string();
-
-    std::size_t end = json.find('"', pos + 1);
-    if(end == std::string::npos)
-        return std::string();
-
-    return json.substr(pos + 1, end - pos - 1);
-}
-
-
-Pt::int64_t StdioService::extractId(const std::string& json)
-{
-    std::size_t pos = json.find("\"id\"");
-    if(pos == std::string::npos)
-        return 0;
-
-    pos = json.find(':', pos + 4);
-    if(pos == std::string::npos)
-        return 0;
-
-    ++pos;
-    while(pos < json.size() && (json[pos] == ' ' || json[pos] == '\t'))
-        ++pos;
-
-    return static_cast<Pt::int64_t>( std::atol(json.c_str() + pos) );
+    StdioResponder responder(*_serviceDef, *_decl);
+    return responder.process(json);
 }
 
 } // namespace Mcp

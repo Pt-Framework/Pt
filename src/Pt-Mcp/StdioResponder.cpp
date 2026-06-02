@@ -27,63 +27,53 @@
  * MA 02110-1301 USA
  */
 
-#ifndef PT_MCP_HTTPRESPONDER_H
-#define PT_MCP_HTTPRESPONDER_H
-
-#include <Pt/Mcp/Api.h>
-#include "Responder.h"
-#include <Pt/Http/Responder.h>
+#include "StdioResponder.h"
+#include <sstream>
 
 namespace Pt {
 
 namespace Mcp {
 
-class HttpService;
-
-class HttpResponder : public Http::Responder
-                    , public Responder
+StdioResponder::StdioResponder(Remoting::ServiceDefinition& serviceDef,
+                               const ToolDeclaration& decl)
+: Responder(serviceDef, decl)
 {
-  public:
-    HttpResponder(HttpService& httpService,
-                  Remoting::ServiceDefinition& serviceDef,
-                  const ToolDeclaration& decl);
+}
 
-    ~HttpResponder();
 
-  protected:
-    // inheritdoc
-    void onBeginRequest(Http::Request& request, Http::Reply& reply,
-                        System::EventLoop& loop);
+StdioResponder::~StdioResponder()
+{
+}
 
-    // inheritdoc
-    void onReadRequest(Http::Request& request, Http::Reply& reply,
-                       System::EventLoop& loop);
 
-    // inheritdoc
-    void onBeginReply(const Http::Request& request, Http::Reply& reply,
-                      System::EventLoop& loop);
+std::string StdioResponder::process(const std::string& json)
+{
+    _os.str(std::string());
+    _os.clear();
 
-    // inheritdoc
-    void onWriteReply(const Http::Request& request, Http::Reply& reply,
-                      System::EventLoop& loop);
+    std::istringstream iss(json + "\n");
+    beginMessage(iss);
+    parseMessage();
+    finishMessage();
 
-  protected:
-    // inheritdoc
-    void onResult() override;
+    return _os.str();
+}
 
-    // inheritdoc
-    void onFault() override;
 
-  private:
-    bool advanceReply(Http::Reply& reply);
+void StdioResponder::onResult()
+{
+    if( isNotification() )
+        return;
 
-    Http::Request* _request;
-    Http::Reply* _reply;
-    int _httpStatus;
-};
+    formatResult(_os);
+}
+
+
+void StdioResponder::onFault()
+{
+    formatFault(_os);
+}
 
 } // namespace Mcp
 
 } // namespace Pt
-
-#endif // PT_MCP_HTTPRESPONDER_H

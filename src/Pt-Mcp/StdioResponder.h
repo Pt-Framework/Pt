@@ -27,63 +27,42 @@
  * MA 02110-1301 USA
  */
 
-#ifndef PT_MCP_HTTPRESPONDER_H
-#define PT_MCP_HTTPRESPONDER_H
+#ifndef PT_MCP_STDIORESPONDER_H
+#define PT_MCP_STDIORESPONDER_H
 
-#include <Pt/Mcp/Api.h>
 #include "Responder.h"
-#include <Pt/Http/Responder.h>
+#include <sstream>
+#include <string>
 
 namespace Pt {
 
 namespace Mcp {
 
-class HttpService;
-
-class HttpResponder : public Http::Responder
-                    , public Responder
+class StdioResponder : public Responder
 {
   public:
-    HttpResponder(HttpService& httpService,
-                  Remoting::ServiceDefinition& serviceDef,
-                  const ToolDeclaration& decl);
+    StdioResponder(Remoting::ServiceDefinition& serviceDef,
+                   const ToolDeclaration& decl);
 
-    ~HttpResponder();
+    ~StdioResponder();
 
-  protected:
-    // inheritdoc
-    void onBeginRequest(Http::Request& request, Http::Reply& reply,
-                        System::EventLoop& loop);
+    /** @brief Parse and dispatch @a json, return the JSON-RPC response.
 
-    // inheritdoc
-    void onReadRequest(Http::Request& request, Http::Reply& reply,
-                       System::EventLoop& loop);
-
-    // inheritdoc
-    void onBeginReply(const Http::Request& request, Http::Reply& reply,
-                      System::EventLoop& loop);
-
-    // inheritdoc
-    void onWriteReply(const Http::Request& request, Http::Reply& reply,
-                      System::EventLoop& loop);
+        Returns an empty string for notifications (no id).
+    */
+    std::string process(const std::string& json);
 
   protected:
-    // inheritdoc
     void onResult() override;
 
-    // inheritdoc
     void onFault() override;
 
   private:
-    bool advanceReply(Http::Reply& reply);
-
-    Http::Request* _request;
-    Http::Reply* _reply;
-    int _httpStatus;
+    std::ostringstream _os;
 };
 
 } // namespace Mcp
 
 } // namespace Pt
 
-#endif // PT_MCP_HTTPRESPONDER_H
+#endif // PT_MCP_STDIORESPONDER_H

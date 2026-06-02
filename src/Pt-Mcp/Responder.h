@@ -32,6 +32,7 @@
 
 #include <Pt/Mcp/Api.h>
 #include <Pt/Mcp/ToolDeclaration.h>
+#include <Pt/Json/JsonWriter.h>
 #include <Pt/JsonRpc/Formatter.h>
 #include <Pt/Json/JsonReader.h>
 #include <Pt/Remoting/Responder.h>
@@ -39,6 +40,7 @@
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/Types.h>
+#include <sstream>
 #include <string>
 
 namespace Pt {
@@ -65,15 +67,6 @@ class Responder : public Remoting::Responder
 
     ~Responder();
 
-    /** @brief Feeds one JSON node to the state machine.
-        @return true when the request is complete.
-    */
-    bool advance(const Json::Node& node);
-
-    /** @brief Calls the tool and formats the result synchronously.
-    */
-    void formatResult(std::ostream& os);
-
     /** @brief Resets the responder state.
     */
     void reset();
@@ -86,6 +79,10 @@ class Responder : public Remoting::Responder
         @return true if parsing is complete.
     */
     bool parseMessage();
+
+    /** @brief Dispatches to onResult() or onFault() after parsing is complete.
+    */
+    void finishMessage();
 
     /** @brief Begin formatting the response.
     */
@@ -100,7 +97,19 @@ class Responder : public Remoting::Responder
     */
     void finishResult();
 
+    /** @brief Calls the tool and formats the result synchronously.
+    */
+    void formatResult(std::ostream& os);
+
+    /** @brief Formats a fault response.
+    */
+    void formatFault(std::ostream& os);
+
     bool isFailed() const override;
+
+    /** @brief Fails the responder with a JSON-RPC error code and message.
+    */
+    void setFault(int code, const std::string& msg);
 
     const std::string& method() const
     { return _method; }
@@ -115,8 +124,30 @@ class Responder : public Remoting::Responder
     { return ! _hasId; }
 
   protected:
-    void onCancel() override;
     void onReady() override;
+
+    void onCancel() override;
+
+    /** @brief Called when a fault has occurred and should be formatted and sent.
+
+        Derived classes override this to set transport-specific headers and
+        write the error response by calling beginResult().
+    */
+    virtual void onFault() {}
+
+    /** @brief Called when the result is ready to be formatted and sent.
+
+        Derived classes override this to set transport-specific headers and
+        write the response by calling beginResult(), advanceResult() and
+        finishResult().
+    */
+    virtual void onResult() {}
+
+  public:
+    /** @brief Feeds one JSON node to the state machine.
+        @return true when the request is complete.
+    */
+    bool advance(const Json::Node& node);
 
   private:
     enum State
@@ -126,31 +157,56 @@ class Responder : public Remoting::Responder
         OnMethod,
         OnParams,
         OnParamName,
+        OnParamNameValue,
         OnParamArguments,
-        OnArgValue,
+        OnArgMember,
+        OnArgData,
+        OnCaptureArguments,
         OnId,
         OnSkipParams,
+        OnSkipParamValue,
+        OnInitParamName,
+        OnInitProtocolVersion,
+        OnSkipInitValue,
         OnEnd
     };
 
+  private:
+    void setToolName(const std::string& toolName);
+
+    void beginArgument(const std::string& argName);
+
+    void parseBufferedArguments();
+
+    void writeBufferedArgumentNode(const Json::Node& node);
+
     const ToolDeclaration* _decl;
     const Tool* _tool;
+    Pt::Utf8Codec _utf8;
     JsonRpc::Formatter _formatter;
     Pt::Composer** _args;
     State _state;
     Pt::int64_t _id;
     std::string _method;
     std::string _toolName;
+    std::string _currentParamName;
+    std::string _requestedVersion;
     bool _isFault;
     bool _hasId;
+    int _faultCode;
+    std::string _faultMessage;
+
+    int _bufferedArgumentsDepth;
+    std::string _bufferedArgumentsJson;
+    std::ostringstream _bufferedArgumentsStream;
+    Pt::TextOStream _bufferedArgumentsText;
+    Json::JsonWriter _bufferedArgumentsWriter;
 
     // Incremental parsing
-    Pt::Utf8Codec _utf8;
     Pt::TextIStream _tis;
     Json::JsonReader _reader;
 
     // Incremental result formatting
-    Pt::Utf8Codec _outUtf8;
     Pt::TextOStream _tos;
     TextFormatter* _textFmt;
     Decomposer* _result;

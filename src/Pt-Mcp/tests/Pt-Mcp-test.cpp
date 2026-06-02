@@ -67,8 +67,14 @@ class HttpTest : public Pt::Unit::TestSuite
         registerMethod("Initialize", *this, &HttpTest::Initialize);
         registerMethod("ToolsList", *this, &HttpTest::ToolsList);
         registerMethod("ToolsCall", *this, &HttpTest::ToolsCall);
+        registerMethod("ToolsCallArgumentsFirst", *this, &HttpTest::ToolsCallArgumentsFirst);
+        registerMethod("ToolsCallUnknownArgument", *this, &HttpTest::ToolsCallUnknownArgument);
         registerMethod("Ping", *this, &HttpTest::Ping);
         registerMethod("Notification", *this, &HttpTest::Notification);
+        registerMethod("GetRequest", *this, &HttpTest::GetRequest);
+        registerMethod("InvalidOrigin", *this, &HttpTest::InvalidOrigin);
+        registerMethod("VersionNegotiation", *this, &HttpTest::VersionNegotiation);
+        registerMethod("InvalidMcpVersionHeader", *this, &HttpTest::InvalidMcpVersionHeader);
     }
 
     void failTest()
@@ -207,6 +213,74 @@ class HttpTest : public Pt::Unit::TestSuite
         _server = 0;
     }
 
+    void ToolsCallArgumentsFirst()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("add", *this, &HttpTest::addInt);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("add", "Add two integers")
+            .addParam("a", Pt::Mcp::integerType())
+            .addParam("b", Pt::Mcp::integerType());
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":10,"
+               "\"params\":{\"arguments\":{\"a\":6,\"b\":7},\"name\":\"add\"}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"isError\":false") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("13") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
+    void ToolsCallUnknownArgument()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("add", *this, &HttpTest::addInt);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("add", "Add two integers")
+            .addParam("a", Pt::Mcp::integerType())
+            .addParam("b", Pt::Mcp::integerType());
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":11,"
+               "\"params\":{\"name\":\"add\",\"arguments\":{\"a\":6,\"c\":7}}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"error\"") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("unknown argument") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
     ////////////////////////////////////////////////////////////
     // Ping
     //
@@ -272,6 +346,127 @@ class HttpTest : public Pt::Unit::TestSuite
 
         PT_UNIT_ASSERT(client.reply().statusCode() == 202);
         PT_UNIT_ASSERT(_reply.empty());
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // GetRequest — GET must return 405 Method Not Allowed (no SSE support)
+    //
+    void GetRequest()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("GET");
+        client.request().setUrl("/mcp");
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 405);
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // InvalidOrigin — mismatched Origin header must return 403 Forbidden
+    //
+    void InvalidOrigin()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().header().set("Origin", "http://evil.example.com");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,\"params\":{}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 403);
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // VersionNegotiation — server echoes back a supported requested version
+    //
+    void VersionNegotiation()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":1,"
+               "\"params\":{\"protocolVersion\":\"2025-03-26\","
+               "\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1.0\"}}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"protocolVersion\":\"2025-03-26\"") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // InvalidMcpVersionHeader — unsupported MCP-Protocol-Version must return 400
+    //
+    void InvalidMcpVersionHeader()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("add", *this, &HttpTest::addInt);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("add", "Add two integers")
+            .addParam("a", Pt::Mcp::integerType())
+            .addParam("b", Pt::Mcp::integerType());
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().header().set("MCP-Protocol-Version", "1.0.0-invalid");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":2,\"params\":{}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 400);
 
         delete _server;
         _server = 0;
