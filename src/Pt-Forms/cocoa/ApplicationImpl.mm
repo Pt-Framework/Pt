@@ -342,26 +342,10 @@ void ApplicationImpl::onWake()
     CFRunLoopRef rl = [[NSRunLoop currentRunLoop] getCFRunLoop];
     CFRunLoopWakeUp(rl);
 }
-    
+
 
 void ApplicationImpl::onProcessEvents()
 { 
-    NSEvent* event = nil;
-
-    //
-    // process cocoa events
-    //
-    do 
-    {
-        event = [NSApp nextEventMatchingMask: NSEventMaskAny
-                                              untilDate: nil
-                                              inMode: NSDefaultRunLoopMode
-                                              dequeue: YES];
-        if(event)
-            [NSApp sendEvent:event];
-     } 
-     while (event != 0);
-
     //
     // process available selectables
     //
@@ -382,12 +366,20 @@ void ApplicationImpl::onProcessEvents()
     // process Pt events
     //
     bool isActive = _eventQueue.processEvents( this->eventReceived() );
+
+    //
+    // flush AppKit window updates for views invalidated by Pt paint events
+    // during this wake cycle.
+    //
+    //[NSApp updateWindows];
     
     //
     // handle loop exit
     //
     if( ! isActive)
     {
+        NSEvent* event = nil;
+
         // set stop flag
         [NSApp stop: nil];
         

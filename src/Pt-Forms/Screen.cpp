@@ -260,7 +260,7 @@ void Screen::onProcessPaintEvent(const PaintEvent& ev)
     // skip all updates except the last one
     if(_updates > 0)
       return;
-    
+
     _updateRect.clear();
 
     //_clock.start();
@@ -269,7 +269,7 @@ void Screen::onProcessPaintEvent(const PaintEvent& ev)
 
     const Gfx::RectF& screenRect = ev.rect();
     PaintEvent pev(*_impl, screenRect);
-    
+
     _impl->processEvent(pev);
 
     //static int nnn = 0;

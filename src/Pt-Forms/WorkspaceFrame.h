@@ -354,7 +354,9 @@ class WorkspaceFrame : public WindowFrame
         Gfx::SizeF     _restoreSize;
         WindowState    _state;
 
+        Gfx::PointF    _moveOffset;
         Gfx::PointF    _lastPointer;
+        bool           _movePending;
         bool           _isCapture;
         bool           _isClient;
         bool           _isMoving;

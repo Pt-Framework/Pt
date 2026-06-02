@@ -42,8 +42,6 @@
 #include <Pt/Forms/WindowStateEvent.h>
 #include <Pt/Forms/PaintEvent.h>
 
-#include <Pt/System/Clock.h>
-
 @interface PtWindow : NSWindow
 {
     Pt::Forms::WindowImpl* _windowImpl;
@@ -134,6 +132,8 @@ WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
     _window = [[PtWindow alloc] initWithImpl: this 
                                 frame: noGeometry 
                                 styleMask: _windowStyle];
+
+    [_window setColorSpace:[NSColorSpace sRGBColorSpace]];
 
     if( w.type() == WindowType::Popup )
     {
@@ -661,20 +661,13 @@ void WindowImpl::onAutoCenter(Window& w, const Gfx::SizeF* size)
 
 void WindowImpl::onViewPaint(const NSRect& rect)
 {
-    //std::clog << "ON PAINT: " << _client.title() << " " 
-    //                          << rect.origin.x << "," << rect.origin.y
-    //                          << " " << rect.size.width << "x" << rect.size.height << std::endl;
-
     NSRect frame = [_window frame];
     NSRect content = [_window contentRectForFrameRect:frame];
 
-    // paint rect with origin at top left
     double x = rect.origin.x;
     double y = content.size.height - (rect.origin.y + rect.size.height);
     double width = rect.size.width;
     double height = rect.size.height;
-
-    //System::Clock c1; c1.start();
 
     Pt::Gfx::PointF pos(x, y);
     Gfx::SizeF size(width, height);
@@ -682,24 +675,21 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
-    //std::clog << "Paint time: " << c1.stop().toUSecs() / 1000.0 << " msecs\n";
-
-    //System::Clock c2; c2.start();
-
-    double s = scaleFactor();
-    CGRect sourceRect = CGRectMake(x * s, y * s, width * s, height * s);
-
     CGImageRef image = pixmap().impl()->getCGImage();
-    CGImageRef sourceImage = CGImageCreateWithImageInRect(image, sourceRect);
 
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
-    CGContextDrawImage(windowContext, rect, sourceImage);
-    //CGContextDrawImage(windowContext, NSMakeRect(0, 0, content.size.width, content.size.height), image);
-    
-    CGImageRelease(sourceImage);
 
-    //std::clog << "Blit time: " << c2.stop().toUSecs() / 1000.0 << " msecs (TODO: optimize blit area)\n";
+    double s = scaleFactor();
+    CGRect sourceRect = CGRectMake(x * s, y * s, width * s, height * s);
+    CGImageRef sourceImage = CGImageCreateWithImageInRect(image, sourceRect);
+
+    CGContextSaveGState(windowContext);
+    CGContextSetBlendMode(windowContext, kCGBlendModeCopy);
+    CGContextDrawImage(windowContext, rect, sourceImage);
+    CGContextRestoreGState(windowContext);
+
+    CGImageRelease(sourceImage);
 }
 
 

@@ -42,6 +42,7 @@
 
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
+    #import <AppKit/NSColorSpace.h>
     #import <AppKit/NSGraphicsContext.h>
     #import <AppKit/NSView.h>
     #import <AppKit/NSScreen.h>

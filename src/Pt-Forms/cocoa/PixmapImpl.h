@@ -33,142 +33,14 @@
 #include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
 
-#include <Pt/Gfx/Path.h>
-#include <Pt/System/Path.h>
-
 #include <CoreGraphics/CGBitmapContext.h>
-#include <CoreText/CoreText.h>
-
-#ifdef __OBJC__
-    #import <Foundation/NSGeometry.h>
-    #import <AppKit/NSGraphicsContext.h>
-    #import <AppKit/NSBezierPath.h>
-    #import <AppKit/NSImage.h>
-    #import <AppKit/NSColor.h>
-    #import <AppKit/NSFontManager.h>
-#else
-    struct NSBezierPath;
-    struct NSImage;
-#endif
 
 namespace Pt {
 
 namespace Forms {
 
-class Canvas;
 class Pixmap;
-class PixmapImpl;
-
-class PixmapCanvas : public Gfx::Canvas
-{
-    public:
-        PixmapCanvas();            
-
-        virtual ~PixmapCanvas();
-
-        void setPixmap(PixmapImpl& pixmap);
-
-        void drawPixmap(const Gfx::PointF& to,
-                        const Pixmap& pm,
-                        const Gfx::RectF* rect);
-    
-    protected:
-        virtual void onBeginPaint(const Gfx::Paint& paint) override;
-
-        virtual void onFinishPaint() override;
-
-    protected:
-        virtual void onSetTransform(const Gfx::Transform& tx) override;
-
-        virtual void onApplyTransform() override;
-
-        virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
-        
-        virtual void onApplyCompositionMode() override;
-
-        virtual void onSetPen(const Gfx::Pen& pen) override;
-
-        virtual void onApplyPen() override;
-
-        virtual void onSetBrush(const Gfx::Brush& brush) override;
-
-        virtual void onApplyBrush() override;
-
-        virtual void onSetFont(const Gfx::Font& font) override;
-
-        virtual void onApplyFont() override;
-
-        virtual void onSetClip(const Gfx::RectF* clip) override;
-
-        virtual void onApplyClip() override;
-
-    protected:
-        virtual void onDrawLine(const Gfx::PointF& from, 
-                                const Gfx::PointF& to) override;
-
-        virtual void onDrawPolyline(const Gfx::PointF* pts, const size_t n) override;
-
-        virtual void onFillPolygon(const Gfx::PointF* pts, const size_t n) override;
-
-        virtual void onDrawRect(const Gfx::RectF& rect) override;
-
-        virtual void onFillRect(const Gfx::RectF& rect) override;
-
-        virtual void onDrawEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) override;
-
-        virtual void onFillEllipse(const Gfx::PointF& topLeft, 
-                                   const Gfx::SizeF& size) override;
-
-    protected:
-        virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
-
-        virtual const Gfx::FontMetrics& onGetFontMetrics() const override;
-
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text, 
-                                const Gfx::Transform* trans) override;
-
-    protected:
-        virtual void onDrawImage(const Gfx::PointF& to, 
-                                 const Gfx::Image& image, 
-                                 const Gfx::RectF* rect) override;
-
-    protected:
-        virtual void onSetPath(const Gfx::Path& path) override;
-
-        virtual void onDrawPath() override;
-
-        virtual void onFillPath() override;
-
-        virtual void onDrawPath(const Gfx::Path& path) override;
-
-        virtual void onFillPath(const Gfx::Path& path) override;
-
-    private:
-        CGMutablePathRef makePath(const Gfx::Path& path);
-
-    private:
-        PixmapImpl*             _pixmap;
-        Gfx::Transform          _transform;
-        Gfx::CompositionMode    _compositionMode;
-        CGRect                  _clipRect;
-
-        CGColorRef              _penColor;
-        CGFloat                 _penSize;
-        CGLineCap               _penCap;
-        CGLineJoin              _penJoin;
-        std::vector<CGFloat>    _dashes;
-
-        CGColorRef              _brushColor;
-        Gfx::Brush::FillStyle   _brushStyle;
-
-        CTFontRef                     _font;
-        Gfx::FontMetrics              _fontMetrics;
-        CFMutableDictionaryRef        _fontAttributes;
-        CFMutableAttributedStringRef  _attributedString;
-        
-        CGMutablePathRef        _cgPath;
-};
+class PixmapCanvas;
 
 
 class PixmapImpl
@@ -183,11 +55,11 @@ class PixmapImpl
         void reset(const Gfx::SizeF& size);
 
         void reset();
-        
+
         void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
-        
+
         void setScaleFactor(double scaleFactor);
-    
+
         const Gfx::ImageFormat& format() const;
 
         const Gfx::SizeF& size() const;
@@ -216,6 +88,8 @@ class PixmapImpl
         CGContextRef context() const;
 
         CGImageRef getCGImage() const;
+
+        void invalidateImage();
 
     public:
         static const std::string& defaultFont();

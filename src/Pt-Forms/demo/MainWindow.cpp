@@ -253,6 +253,7 @@ void MainWindow::onZoom(MenuBaseItem& item)
 void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 {
     Window::onPaint(ctx, rect);
+    return;
 
     //{
     //Gfx::Painter p;

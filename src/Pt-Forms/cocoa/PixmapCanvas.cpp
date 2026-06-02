@@ -27,16 +27,12 @@
   MA 02110-1301 USA
 */
 
+#include "PixmapCanvas.h"
 #include "PixmapImpl.h"
 #include "CocoaFontProvider.h"
 
 #include <Pt/Forms/Pixmap.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Utf8Codec.h>
-
-#include <cassert>
 
 namespace Pt {
 
@@ -94,6 +90,8 @@ void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_pixmap)
     {
+        _pixmap->invalidateImage();
+
         CGContextRef context = _pixmap->context();
         if(context)
             CGContextSaveGState(context);
@@ -111,12 +109,6 @@ void PixmapCanvas::onFinishPaint()
     }
 
     _pixmap = 0;
-}
-
-
-void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
-{
-    _compositionMode = mode;
 }
 
 
@@ -142,15 +134,43 @@ void PixmapCanvas::onApplyTransform()
     CGContextRef context = _pixmap->context();
 
     double H = CGBitmapContextGetHeight(context);
-    CGAffineTransform tf = CGAffineTransformMake( _transform.m11(), _transform.m12(), 
+    CGAffineTransform tf = CGAffineTransformMake( _transform.m11(), _transform.m12(),
                                                   -_transform.m21(), -_transform.m22(),
                                                   _transform.dx(), H - _transform.dy() );
     CGContextConcatCTM(context, tf);
 }
 
 
-void PixmapCanvas::onApplyCompositionMode() 
+void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
+    _compositionMode = mode;
+}
+
+
+void PixmapCanvas::onApplyCompositionMode()
+{
+    if( ! _pixmap)
+        return;
+
+    CGContextRef context = _pixmap->context();
+    if( ! context)
+        return;
+
+    CGBlendMode blendMode = kCGBlendModeNormal;
+
+    switch(_compositionMode)
+    {
+        case Gfx::CompositionMode::SourceCopy:
+            blendMode = kCGBlendModeCopy;
+            break;
+
+        case Gfx::CompositionMode::SourceOver:
+        default:
+            blendMode = kCGBlendModeNormal;
+            break;
+    }
+
+    CGContextSetBlendMode(context, blendMode);
 }
 
 
@@ -165,18 +185,18 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 
     _penColor = color;
     _penSize = pen.size();
-    
+
     switch( pen.capStyle() )
     {
         default:
         case Pt::Gfx::Pen::FlatCap:
             _penCap = kCGLineCapButt;
             break;
-        
+
         case Pt::Gfx::Pen::SquareCap:
             _penCap = kCGLineCapSquare;
-            break; 
-        
+            break;
+
         case Pt::Gfx::Pen::RoundCap:
             _penCap = kCGLineCapRound;
             break;
@@ -190,7 +210,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
             _dashes.clear();
             break;
         }
-            
+
         case Pt::Gfx::Pen::Dash:
         {
             if(pen.capStyle() == Gfx::Pen::RoundCap ||
@@ -204,7 +224,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
             }
             break;
         }
- 
+
         case Pt::Gfx::Pen::Dot:
         {
             if(pen.capStyle() == Gfx::Pen::RoundCap ||
@@ -226,11 +246,11 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
         case Pt::Gfx::Pen::RoundJoin:
             _penJoin = kCGLineJoinRound;
             break;
-        
+
         case Pt::Gfx::Pen::BevelJoin:
             _penJoin = kCGLineJoinBevel;
             break;
-            
+
         case Pt::Gfx::Pen::MiterJoin:
             _penJoin = kCGLineJoinMiter;
             break;
@@ -305,7 +325,7 @@ void PixmapCanvas::onApplyBrush()
         case Pt::Gfx::Brush::Solid:
             CGContextSetFillColorWithColor(context, _brushColor);
             break;
-            
+
         case Pt::Gfx::Brush::Texture:
             // CGContextSetFillPattern
             break;
@@ -317,8 +337,8 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     if( ! _fontAttributes )
     {
-        _fontAttributes = CFDictionaryCreateMutable(kCFAllocatorDefault, 2, 
-                                                    &kCFTypeDictionaryKeyCallBacks, 
+        _fontAttributes = CFDictionaryCreateMutable(kCFAllocatorDefault, 2,
+                                                    &kCFTypeDictionaryKeyCallBacks,
                                                     &kCFTypeDictionaryValueCallBacks);
         if( ! _fontAttributes )
             return;
@@ -379,9 +399,9 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* clipRect)
     {
         _clipRect = CGRectNull;
     }
-    else 
+    else
     {
-        _clipRect = CGRectMake( clipRect->x(), clipRect->y(), 
+        _clipRect = CGRectMake( clipRect->x(), clipRect->y(),
                                 clipRect->width(), clipRect->height() );
     }
 }
@@ -416,7 +436,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
         return;
 
     CGContextRef context = _pixmap->context();
-    
+
     const Gfx::PointF& first = pts[0];
     CGContextMoveToPoint(context, first.x(), first.y());
 
@@ -437,7 +457,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 
     CGContextRef context = _pixmap->context();
 
-    const Gfx::PointF&first = pts[0];
+    const Gfx::PointF& first = pts[0];
     CGContextMoveToPoint(context, first.x(), first.y());
 
     for(unsigned i = 1; i < n; i++)
@@ -445,7 +465,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
         const Gfx::PointF& p = pts[i];
         CGContextAddLineToPoint(context, p.x(), p.y());
     }
- 
+
     CGContextFillPath(context);
 }
 
@@ -456,7 +476,7 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
         return;
 
     CGContextRef context = _pixmap->context();
-    
+
     CGRect rect = CGRectMake( r.x(), r.y(), r.width(), r.height() );
     CGContextStrokeRect(context, rect);
 }
@@ -481,7 +501,7 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
     CGContextRef context = _pixmap->context();
 
-    CGRect rect = CGRectMake( topLeft.x(), topLeft.y(), 
+    CGRect rect = CGRectMake( topLeft.x(), topLeft.y(),
                               size.width(), size.height() );
 
     CGContextAddEllipseInRect(context, rect);
@@ -496,8 +516,8 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
     CGContextRef context = _pixmap->context();
 
-    CGRect rect = CGRectMake( topLeft.x(), topLeft.y(), 
-                              size.width(), size.height() ); 
+    CGRect rect = CGRectMake( topLeft.x(), topLeft.y(),
+                              size.width(), size.height() );
 
     CGContextAddEllipseInRect(context, rect);
     CGContextFillPath(context);
@@ -506,14 +526,14 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 
 Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
-    CFStringRef string = CFStringCreateWithBytesNoCopy(0, (const UInt8*) text.c_str(), 
-                                                       text.length() * 4, 
-                                                       kCFStringEncodingUTF32LE, 
+    CFStringRef string = CFStringCreateWithBytesNoCopy(0, (const UInt8*) text.c_str(),
+                                                       text.length() * 4,
+                                                       kCFStringEncodingUTF32LE,
                                                        false, kCFAllocatorNull);
     if( ! string )
         return Gfx::TextMetrics();
 
-    CFMutableAttributedStringRef attributedString = 
+    CFMutableAttributedStringRef attributedString =
         CFAttributedStringCreateMutable(kCFAllocatorDefault, 0);
 
     CFIndex length = CFAttributedStringGetLength(attributedString);
@@ -521,7 +541,7 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     CFRelease(string);
 
     length = CFAttributedStringGetLength(attributedString);
-    CFAttributedStringSetAttributes(attributedString, CFRangeMake(0, length), 
+    CFAttributedStringSetAttributes(attributedString, CFRangeMake(0, length),
                                     _fontAttributes, false);
 
     CTLineRef line = CTLineCreateWithAttributedString(attributedString);
@@ -548,18 +568,18 @@ const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
 }
 
 
-void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
-                              const Pt::String& text, 
-                              const Gfx::Transform* tx)
+void PixmapCanvas::onDrawText(const Gfx::PointF& to,
+                              const Pt::String& text,
+                              const Gfx::Transform* /*tx*/)
 {
     if( ! _pixmap)
         return;
 
     CGContextRef context = _pixmap->context();
 
-    CFStringRef string = CFStringCreateWithBytesNoCopy(NULL, (const UInt8*) text.c_str(), 
-                                                       text.length() * 4, 
-                                                       kCFStringEncodingUTF32LE, 
+    CFStringRef string = CFStringCreateWithBytesNoCopy(NULL, (const UInt8*) text.c_str(),
+                                                       text.length() * 4,
+                                                       kCFStringEncodingUTF32LE,
                                                        false, kCFAllocatorNull);
     if( ! string )
         return;
@@ -570,27 +590,13 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     CFIndex length = CFAttributedStringGetLength(_attributedString);
     CFAttributedStringReplaceString(_attributedString, CFRangeMake(0, length), string);
     CFRelease(string);
-    
-    length = CFAttributedStringGetLength(_attributedString);
-    CFAttributedStringSetAttributes(_attributedString, CFRangeMake(0, length), 
-                                    _fontAttributes, false);
 
-    //CGContextSetTextMatrix( context, CGAffineTransformMake( 1.0, 0.0, 0.0,
-    //                                                        -1.0, 0.0, 0.0) );
+    length = CFAttributedStringGetLength(_attributedString);
+    CFAttributedStringSetAttributes(_attributedString, CFRangeMake(0, length),
+                                    _fontAttributes, false);
 
     Gfx::PointF p = to;
 
-    // Gfx::Transform xform = transform();
-    // xform.translate(to.x(), to.y());
-
-    // if (tx)
-    //     xform *= *tx;
-
-    // // CGAffineTransform: a, b, c, d, tx, ty
-    // CGAffineTransform tf = CGAffineTransformMake( xform.m11(), xform.m12(), 
-    //                                               xform.m21(), xform.m22(),
-    //                                               xform.dx(),  xform.dy() );
-    
     CGContextSaveGState(context);
 
     // undo y-axis flip to prevent drawing upside down
@@ -599,25 +605,20 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
     CGContextScaleCTM(context, 1.0, -1.0);
     CGContextTranslateCTM( context, 0, -height );
 
-    //CGContextConcatCTM(context, tf);
-    //CGContextSetTextPosition(context, 0, 0);
-
     CGFloat y = height - p.y();
     CGContextSetTextPosition(context, p.x(), y);
 
     CTLineRef line = CTLineCreateWithAttributedString(_attributedString);
-    CTLineDraw(line, context);   
+    CTLineDraw(line, context);
     CFRelease(line);
 
     CGContextRestoreGState(context);
-
-    // ALTERNATIVE: CTRunDraw
 }
 
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& to, 
+void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
                                const Gfx::Image& image,
-                               const Gfx::RectF* rect)
+                               const Gfx::RectF* /*rect*/)
 {
     if( image.empty() || ! _pixmap)
         return;
@@ -638,22 +639,22 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst;
-    
-    CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
-                                        8, 32, 4 * image.width(), 
-                                        colorSpace, bitmapInfo, provider, 
+
+    CGImageRef imageRef = CGImageCreate(image.width(), image.height(),
+                                        8, 32, 4 * image.width(),
+                                        colorSpace, bitmapInfo, provider,
                                         NULL, false, kCGRenderingIntentDefault);
 
     double imageWidth = scaling().toLogical( image.width() );
     double imageHeight = scaling().toLogical( image.height() );
     Gfx::RectF imageRect( to, Gfx::SizeF(imageWidth, imageHeight) );
-    
-    CGRect targetRect = CGRectMake( imageRect.x(), imageRect.y(), 
+
+    CGRect targetRect = CGRectMake( imageRect.x(), imageRect.y(),
                                     imageRect.width(), imageRect.height() );
     targetRect.origin.y = height - (targetRect.origin.y + targetRect.size.height);
 
     CGContextDrawImage(context, targetRect, imageRef);
-    
+
     CFRelease(imageRef);
     CFRelease(colorSpace);
     CFRelease(provider);
@@ -697,7 +698,7 @@ CGMutablePathRef PixmapCanvas::makePath(const Gfx::Path& path)
                 const Gfx::PointF& to = it->point(1);
 
                 CGPathAddQuadCurveToPoint(cgPath, NULL, c1.x(), c1.y(),
-                                          to.x(), to.y() );
+                                          to.x(), to.y());
                 break;
             }
 
@@ -707,7 +708,7 @@ CGMutablePathRef PixmapCanvas::makePath(const Gfx::Path& path)
                 const Gfx::PointF& c2 = it->point(1);
                 const Gfx::PointF& to = it->point(2);
 
-                CGPathAddCurveToPoint(cgPath, NULL, c1.x(), c1.y(), 
+                CGPathAddCurveToPoint(cgPath, NULL, c1.x(), c1.y(),
                                       c2.x(), c2.y(), to.x(), to.y());
                 break;
             }
@@ -794,23 +795,45 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 
     const PixmapImpl* pixmap = pm.impl();
     CGContextRef ctx = _pixmap->context();
+    CGContextRef srcCtx = pixmap->context();
 
-    if( ! ctx || ! pixmap->context())
+    if( ! ctx || ! srcCtx )
         return;
-
-    CGImageRef image = pixmap->getCGImage();
 
     CGContextSaveGState(ctx);
 
     if(rectF)
     {
         const Gfx::Scaling& srcScaling = pixmap->scaling();
-        Gfx::RectF physRect = srcScaling.toPhysical(*rectF);
+        Gfx::RectF  physSrc = srcScaling.toPhysical(*rectF);
 
-        CGRect subRect = CGRectMake(physRect.left(),
-                                    physRect.top(),
-                                    physRect.size().width(),
-                                    physRect.size().height());
+        if(_compositionMode == Gfx::CompositionMode::SourceCopy)
+        {
+            CGImageRef image = pixmap->getCGImage();
+
+            CGRect subRect = CGRectMake(physSrc.left(),
+                                        physSrc.top(),
+                                        physSrc.size().width(),
+                                        physSrc.size().height());
+
+            CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
+
+            CGContextTranslateCTM(ctx, toF.x(), toF.y() + rectF->height());
+            CGContextScaleCTM(ctx, 1.0, -1.0);
+            CGContextDrawImage(ctx, CGRectMake(0, 0, rectF->width(), rectF->height()), subImage);
+
+            CGImageRelease(subImage);
+
+            CGContextRestoreGState(ctx);
+            return;
+        }
+
+        CGImageRef image = pixmap->getCGImage();
+
+        CGRect subRect = CGRectMake(physSrc.left(),
+                                    physSrc.top(),
+                                    physSrc.size().width(),
+                                    physSrc.size().height());
 
         CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
 
@@ -824,6 +847,8 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     }
     else
     {
+        CGImageRef image = pixmap->getCGImage();
+
         double logW = scaling().toLogical( pixmap->size().width() );
         double logH = scaling().toLogical( pixmap->size().height() );
 
@@ -835,252 +860,6 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
     CGContextRestoreGState(ctx);
 }
 
-///////////////////////////////////////////////////////////////////////
-// PixmapImpl
-///////////////////////////////////////////////////////////////////////
+} // namespace Forms
 
-PixmapImpl::PixmapImpl()
-: _physicalSize(0, 0)
-, _width(0)
-, _height(0)
-, _context(0)
-, _image(0)
-, _canvas(0)
-{
-}
-
-
-PixmapImpl::~PixmapImpl()
-{
-    destroy();
-}
-
-
-void PixmapImpl::create()
-{
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    _context = CGBitmapContextCreate(0, _width, _height,
-                                     8, 0, colorSpace, 
-                                     kCGImageAlphaPremultipliedLast);
-
-    CGColorSpaceRelease(colorSpace);
-
-    //CGContextSetShouldAntialias(_context, false);
-    //CGContextSetBlendMode(_context, kCGBlendModeNormal);
-    //CGContextSetBlendMode(_context, kCGBlendModeCopy)
-}
-
-
-void PixmapImpl::destroy()
-{
-    if(_image)
-        CGImageRelease(_image);
-
-    if(_context)
-        CGContextRelease(_context);
-
-    _image = 0;
-    _context = 0;
-}
-
-
-CGContextRef PixmapImpl::context() const
-{
-    return _context;
-}
-
-
-CGImageRef PixmapImpl::getCGImage() const
-{
-    if( ! _image && _context)
-    {
-        void* data = CGBitmapContextGetData(_context);
-        size_t bytesPerRow = CGBitmapContextGetBytesPerRow(_context);
-        size_t dataSize = bytesPerRow * _height;
-
-        CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
-        CGColorSpaceRef colorSpace = CGBitmapContextGetColorSpace(_context);
-        CGBitmapInfo bitmapInfo = CGBitmapContextGetBitmapInfo(_context);
-
-        _image = CGImageCreate(_width, _height, 8, 32,
-                               bytesPerRow, colorSpace, bitmapInfo, provider,
-                               NULL, false, kCGRenderingIntentDefault);
-
-        CGDataProviderRelease(provider);
-    }
-
-    return _image;
-}
-
-
-void PixmapImpl::reset(const Gfx::Image& image)
-{
-    size_t width = image.width();
-    size_t height = image.height();
-
-    Gfx::SizeF size(width, height);
-    reset(size);
-
-    if( image.empty() )
-        return;
-
-    Gfx::PointF to(0, 0);
-
-    const Pt::uint8_t* data = image.data();
-    std::size_t dataSize = image.size();
-
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst;
-    
-    CGImageRef imageRef = CGImageCreate(image.width(), image.height(), 
-                                        8, 32, 4 * image.width(), 
-                                        colorSpace, bitmapInfo, provider, 
-                                        NULL, false, kCGRenderingIntentDefault);
-
-    CGRect contextRect = CGRectMake( to.x(), 
-                                     _height - to.y() - image.height(), 
-                                     image.width(), 
-                                     image.height() );
-
-    //CGContextClipToRect(_context, CGRectNull);
-    CGContextDrawImage(_context, contextRect, imageRef);
-   
-    CFRelease(imageRef);
-    CFRelease(colorSpace);
-    CFRelease(provider);
-}
-
-
-void PixmapImpl::reset(const Gfx::SizeF& size)
-{
-    size_t width = lround( size.width() );
-    size_t height = lround( size.height() );
-    
-    _width = width;
-    _height = height;
-    
-    _physicalSize.set(width, height);
-
-    destroy();
-    create();
-}
-
-
-void PixmapImpl::reset()
-{
-    destroy();
-
-    _width = 0;
-    _height = 0;
-
-    _physicalSize.set(0, 0);
-}
-
-
-void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
-{
-    bitmap.reset( rect.size() );
-
-    Gfx::Image image;
-
-    Gfx::PaintContext ctx(bitmap);
-    Gfx::Painter painter(ctx);
-    painter.drawImage(Gfx::PointF(0, 0), image, rect);
-}
-
-
-void PixmapImpl::setScaleFactor(double scaleFactor)
-{
-    _scaling.setScaleFactor(scaleFactor);
-}
-
-
-const Gfx::ImageFormat& PixmapImpl::format() const
-{
-    return Gfx::ImageFormat::rgb32();
-}
-
-
-const Gfx::SizeF& PixmapImpl::size() const
-{
-    return _physicalSize;
-}
-
-
-const Gfx::Scaling& PixmapImpl::scaling() const
-{
-    return _scaling;
-}
-
-
-Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
-{
-    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
-    if( ! canvas ) 
-        canvas  = new PixmapCanvas();
-
-    canvas->setPixmap(*this);
-
-    _canvas = canvas;
-    return _canvas;
-}
-
-
-void PixmapImpl::releaseCanvas()
-{
-    // NOTE: this might be called from the attached canvas base class destructor
-
-    _canvas = 0;
-}
-
-
-void PixmapImpl::sync()
-{
-}
-
-
-void PixmapImpl::finish()
-{
-}
-
-
-void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
-                            const Gfx::PointF& to,
-                            const Pixmap& pm,
-                            const Gfx::RectF* rect)
-{
-    assert(_canvas == &canvas);
-
-    if(_canvas == &canvas)
-        _canvas->drawPixmap(to, pm, rect);
-}
-
-
-const std::string& PixmapImpl::defaultFont()
-{
-    return CocoaFontProvider::instance().defaultFont();
-}
-
-
-void PixmapImpl::setDefaultFont(const std::string& family)
-{
-    CocoaFontProvider::instance().setDefaultFont(family);
-}
-
-
-std::vector<std::string> PixmapImpl::fontFamilies()
-{
-    return CocoaFontProvider::instance().fontFamilies();
-}
-
-
-std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
-{
-    return CocoaFontProvider::instance().fontFaces(family);
-}
-
-} // namespace
-
-} // namespace
+} // namespace Pt
