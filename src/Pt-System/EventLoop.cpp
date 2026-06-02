@@ -248,11 +248,11 @@ std::size_t TimerQueue::processTimers()
 
         if( ! _timers.empty() )
         {
-            PT_LOG_TRACE("resetting timer: " << timer->finished().toMSecs());
-            timer = _timers.begin()->second;
-            _timers.erase( _timers.begin() );
+            Timer* nextTimer = _timers.begin()->second;
 
-            TimerMap::value_type elem(timer->finished(), timer);
+            // reinsert expired timer at front, which might have changed
+            _timers.erase( _timers.begin() );
+            TimerMap::value_type elem(nextTimer->finished(), nextTimer);
             _timers.insert(elem);
         }
     }
