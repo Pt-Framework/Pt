@@ -832,12 +832,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
     w.repaint(updateRect);
 
-    WindowImpl* impl = static_cast<WindowImpl*>(w.frame());
-    if(impl)
-    {
-        InvalidateRect(impl->hwnd(), NULL, FALSE);
-        UpdateWindow(impl->hwnd());
-    }
+    Application::instance().loop().processEvents();
 }
 
 
