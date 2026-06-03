@@ -917,7 +917,7 @@ void WorkspaceFrame::onMoveEvent(const MoveEvent& ev)
 
     //repaint(updateRect);
     
-    updateRect.shift(position().x(), position().y());
+    updateRect.move(position().x(), position().y());
     _wm->repaint(updateRect);
 
     _frameRect.setOrigin( ev.position() );
