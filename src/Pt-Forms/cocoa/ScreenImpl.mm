@@ -47,6 +47,12 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 
 ScreenImpl::~ScreenImpl()
 {
+    if(_captureMonitor)
+    {
+        [NSEvent removeMonitor:_captureMonitor];
+        _captureMonitor = 0;
+    }
+
     while( ! _windows.empty() )
         _windows.back()->unparent();
 
