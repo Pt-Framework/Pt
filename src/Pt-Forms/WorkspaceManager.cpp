@@ -550,19 +550,19 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
         if( ! window->isVisible() )
             continue;
 
-        const Gfx::RectF& requestedFrameRect = frame->frameRect();
-        Gfx::RectF frameRect = rect.intersect(requestedFrameRect);
+        Gfx::RectF frameRect( frame->position(), frame->size() );
+        frameRect = rect.intersect(frameRect);
 
         if( frameRect.isNull() )
             continue;
 
-        Gfx::PointF winPos = frameRect.topLeft() - requestedFrameRect.topLeft();
-        Gfx::RectF winRect( winPos, frameRect.size() );
+        Gfx::PointF winPos = toFrame( *frame, frameRect.topLeft() );
+        Gfx::RectF winRect( winPos, rect.size() );
 
         PaintEvent pev( *frame, winRect );
         frame->processEvent(pev);
 
-        Gfx::PointF surfacePos = frameRect.topLeft() - requestedFrameRect.topLeft();
+        Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
         _painter.drawPixmap(frameRect.topLeft(), frame->pixmap(), surfaceRect);

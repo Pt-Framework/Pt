@@ -411,14 +411,8 @@ WorkspaceFrame::WorkspaceFrame(WorkspaceManager& workspace, Window& window)
 , _borderWidth( workspace.borderWidth() )
 , _titleHeight( workspace.titleHeight() )
 , _state(WindowState::Normal)
-, _moveOffset(0, 0)
-, _resizeStartPointer(0, 0)
-, _resizeStartFrameRect()
-, _resizeStartClientSize()
-, _lastPointer(0, 0)
-, _movePending(false)
-, _isCapture(false)
 , _isClient(false)
+, _isCapture(false)
 , _isMoving(false)
 , _isLeftResizing(false)
 , _isRightResizing(false)
@@ -878,29 +872,14 @@ void WorkspaceFrame::onRequestMove(const Gfx::PointF& pos)
 {
     Gfx::PointF alignedPos = scaling().align(pos);
 
-    if(alignedPos == _frameRect.topLeft())
-        return;
-
-        Gfx::RectF updateRect = _frameRect;
-
     _frameRect.setOrigin(alignedPos);
-
-    MoveEvent immediateMove(*this, alignedPos);
-    Base::onMoveEvent(immediateMove);
 
     Gfx::PointF clientPos = alignedPos;
     clientPos.addX(_borderWidth);
     clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
 
-    updateRect.unify(_frameRect);
-    _wm->repaint(updateRect);
-
-    if( ! _movePending )
-    {
-        _movePending = true;
-        _wm->onMove(*this, alignedPos);
-    }
+    _wm->onMove(*this, alignedPos);
 }
 
 
@@ -908,29 +887,14 @@ void WorkspaceFrame::onMove(Window& w, const Gfx::PointF& pos)
 {
     Gfx::PointF alignedPos = scaling().align(pos);
 
-    if(alignedPos == _frameRect.topLeft())
-        return;
-
-        Gfx::RectF updateRect = _frameRect;
-
     _frameRect.setOrigin(alignedPos);
-
-    MoveEvent immediateMove(*this, alignedPos);
-    Base::onMoveEvent(immediateMove);
 
     Gfx::PointF clientPos = alignedPos;
     clientPos.addX(_borderWidth);
     clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
 
-    updateRect.unify(_frameRect);
-    _wm->repaint(updateRect);
-
-    if( ! _movePending )
-    {
-        _movePending = true;
-        _wm->onMove(*this, alignedPos);
-    }
+    _wm->onMove(*this, alignedPos);
 }
 
 
@@ -938,18 +902,32 @@ void WorkspaceFrame::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
 
-    MoveEvent mev( *_window, _frameRect.topLeft() );
+    MoveEvent mev( *_window, ev.position() );
     _window->processEvent(mev);
 }
 
 
 void WorkspaceFrame::onMoveEvent(const MoveEvent& ev)
 {
-    (void) ev;
-    _movePending = false;
+    Gfx::PointF delta = ev.position() - position();
+    _lastPointer = _lastPointer - delta;
 
-    MoveEvent currentMove(*this, _frameRect.topLeft());
-    Base::onMoveEvent(currentMove);
+    Gfx::RectF updateRect = _frameBounds;
+    updateRect.unify( Gfx::RectF(delta, _frameBounds.size()) );
+
+    //repaint(updateRect);
+    
+    updateRect.shift(position().x(), position().y());
+    _wm->repaint(updateRect);
+
+    _frameRect.setOrigin( ev.position() );
+
+    Gfx::PointF clientPos = ev.position();
+    clientPos.addX(_borderWidth);
+    clientPos.addY(_borderWidth + _titleHeight);
+    _clientRect.setOrigin(clientPos);
+
+    Base::onMoveEvent(ev);
 }
 
 
@@ -1397,14 +1375,9 @@ bool WorkspaceFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress
     {
         _isMoving = (_isMoving && isDrag) || isPress;
 
-        if(isPress)
-        {
-            _moveOffset = toGlobal(pos) - _frameRect.topLeft();
-        }
-
         if(_isMoving && ! isPress)
         {
-            Gfx::PointF to = toGlobal(pos) - _moveOffset;
+            Gfx::PointF to = _frameRect.topLeft() + pos - _lastPointer;
             //_window->move(to);
             
             move(to);
@@ -1434,22 +1407,15 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
         bool isResizing = _isLeftResizing || _isRightResizing ||
                           _isTopResizing || _isBottomResizing;
 
-        if(isResizing && isPress)
-        {
-            _resizeStartPointer = toGlobal(pos);
-            _resizeStartFrameRect = _frameRect;
-            _resizeStartClientSize = _clientBounds.size();
-        }
-
         if(isResizing && ! isPress)
         {
-            const Gfx::PointF currentPointer = toGlobal(pos);
-            const Gfx::PointF delta = currentPointer - _resizeStartPointer;
-
-            Gfx::SizeF winSize = _resizeStartClientSize;
+            Gfx::SizeF winSize = _clientBounds.size();
+            Gfx::PointF winpos = _frameRect.topLeft();
+            Gfx::PointF delta = pos - _lastPointer;
 
             if( _isLeftResizing )
             {
+                winpos.addX( delta.x() );
                 winSize.subWidth(delta.x());
             }
 
@@ -1458,6 +1424,7 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
 
             if(_isTopResizing)
             {
+                winpos.addY( delta.y() );
                 winSize.subHeight(delta.y());
             }
 
@@ -1469,14 +1436,6 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
                 _window->resize(winSize);
                 //resize(winSize);
             }
-
-            Gfx::PointF winpos = _resizeStartFrameRect.topLeft();
-
-            if( _isLeftResizing )
-                winpos.setX(_resizeStartFrameRect.right() - _frameRect.width());
-
-            if(_isTopResizing)
-                winpos.setY(_resizeStartFrameRect.bottom() - _frameRect.height());
 
             if( winpos != _frameRect.topLeft() )
             {
@@ -1507,7 +1466,7 @@ void WorkspaceFrame::onRequestRepaint(const Gfx::RectF& rect)
 {
     _needsRepaint = true;
 
-    Gfx::PointF updatePos = rect.topLeft() + _frameRect.topLeft();
+    Gfx::PointF updatePos = rect.topLeft() + position();
     Gfx::RectF updateRect( updatePos, rect.size() );
     
     _wm->repaint(updateRect);
@@ -1529,8 +1488,7 @@ void WorkspaceFrame::onProcessPaintEvent(const PaintEvent& ev)
     PaintEvent pev(*_window, winRect);
     _window->processEvent(pev);
 
-    PaintEvent fullEv(*this, _frameBounds);
-    Base::onProcessPaintEvent(fullEv);
+    Base::onProcessPaintEvent(ev);
 }
 
 
