@@ -136,7 +136,7 @@ class RectTest : public Pt::Unit::TestSuite
         {
             Rect r1(Point(1.0, 2.0), Size(3.0, 4.0));
             Rect r2(r1);
-            PT_UNIT_ASSERT(r2 == r1);
+            PT_UNIT_ASSERT(r2.isEqual(r1));
         }
 
         void Accessors()
@@ -152,18 +152,18 @@ class RectTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_NEAR(r.right(), 25.0);
             PT_UNIT_ASSERT_NEAR(r.bottom(), 40.0);
 
-            PT_UNIT_ASSERT(r.origin() == Point(5.0, 10.0));
-            PT_UNIT_ASSERT(r.size() == Size(20.0, 30.0));
+            PT_UNIT_ASSERT(r.origin().isEqual(Point(5.0, 10.0)));
+            PT_UNIT_ASSERT(r.size().isEqual(Size(20.0, 30.0)));
         }
 
         void Corners()
         {
             Rect r(Point(10.0, 20.0), Size(30.0, 40.0));
 
-            PT_UNIT_ASSERT(r.topLeft() == Point(10.0, 20.0));
-            PT_UNIT_ASSERT(r.topRight() == Point(40.0, 20.0));
-            PT_UNIT_ASSERT(r.bottomLeft() == Point(10.0, 60.0));
-            PT_UNIT_ASSERT(r.bottomRight() == Point(40.0, 60.0));
+            PT_UNIT_ASSERT(r.topLeft().isEqual(Point(10.0, 20.0)));
+            PT_UNIT_ASSERT(r.topRight().isEqual(Point(40.0, 20.0)));
+            PT_UNIT_ASSERT(r.bottomLeft().isEqual(Point(10.0, 60.0)));
+            PT_UNIT_ASSERT(r.bottomRight().isEqual(Point(40.0, 60.0)));
         }
 
         void SetOriginAndSize()
@@ -265,7 +265,7 @@ class RectTest : public Pt::Unit::TestSuite
             // null rect unify with non-null becomes the other rect
             Rect r4;
             r4.unify(r3);
-            PT_UNIT_ASSERT(r4 == r3);
+            PT_UNIT_ASSERT(r4.isEqual(r3));
         }
 
         void Intersect()
@@ -316,10 +316,10 @@ class RectTest : public Pt::Unit::TestSuite
             Rect r2(Point(1.0, 2.0), Size(3.0, 4.0));
             Rect r3(Point(1.0, 2.0), Size(3.0, 5.0));
 
-            PT_UNIT_ASSERT(r1 == r2);
-            PT_UNIT_ASSERT(r1 != r3);
-            PT_UNIT_ASSERT( ! (r1 != r2) );
-            PT_UNIT_ASSERT( ! (r1 == r3) );
+            PT_UNIT_ASSERT(r1.isEqual(r2));
+            PT_UNIT_ASSERT( ! r1.isEqual(r3));
+            PT_UNIT_ASSERT( ! ( ! r1.isEqual(r2)) );
+            PT_UNIT_ASSERT( ! r1.isEqual(r3) );
         }
 
         void ConstructFromLTRB()

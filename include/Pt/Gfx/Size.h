@@ -176,14 +176,10 @@ class Size
             return *this;
         }
 
-        bool operator==(const Size& other) const
+        bool isEqual(const Size& other, Float eps = FloatNearlyZero) const
         {
-            return (_w == other._w && _h == other._h);
-        }
-
-        bool operator!=(const Size& other) const
-        {
-            return (_w != other._w || _h != other._h);
+            return std::abs(_w - other._w) <= eps &&
+                   std::abs(_h - other._h) <= eps;
         }
 
         bool operator<(const Size& other) const

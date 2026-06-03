@@ -322,7 +322,7 @@ void Window::onProcessLayout(const Gfx::RectF& rect)
         //std::clog << "layout auto-size: " << title() << " " 
         //          << _lastAutoSize.width() << "x" << _lastAutoSize.height() << std::endl;
         
-        if( _lastAutoSize != size() )
+        if( ! _lastAutoSize.isEqual(size()) )
         {
             resize(_lastAutoSize);
         }

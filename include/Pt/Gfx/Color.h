@@ -127,6 +127,12 @@ class Color
             return _value;
         }
 
+        bool operator==(const Color& other) const
+        { return _value == other._value; }
+
+        bool operator!=(const Color& other) const
+        { return _value != other._value; }
+
     private:
         Pt::uint32_t _value;
 };

@@ -238,7 +238,7 @@ void View::onMoveRequest(Control& control, const Gfx::PointF& pos)
 
 void View::onMoveEvent(const MoveEvent& ev)
 {
-    if( position() == ev.position() )
+    if( position().isEqual(ev.position()) )
         return;
 
     Gfx::PointF delta = ev.position() - position();
@@ -264,7 +264,7 @@ void View::onResizeRequest(Control& control, const Gfx::SizeF& size)
 
 void View::onResizeEvent(const ResizeEvent& ev)
 {
-    if( size() == ev.size() )
+    if( size().isEqual(ev.size()) )
         return;
 
     //std::clog << "RESIZE: " << name() << ev.size().width() << std::endl;

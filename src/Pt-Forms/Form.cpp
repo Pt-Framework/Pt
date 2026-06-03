@@ -755,7 +755,7 @@ void Form::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Form::onResizeEvent(const ResizeEvent& ev)
 {
-    if( size() == ev.size() )
+    if( size().isEqual(ev.size()) )
         return;
 
     //_surface.resize( ev.size() );

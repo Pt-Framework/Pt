@@ -1431,13 +1431,13 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
             if(_isBottomResizing)
                 winSize.addHeight( delta.y() );
 
-            if( winSize != _clientBounds.size() )
+            if( ! winSize.isEqual(_clientBounds.size()) )
             {
                 _window->resize(winSize);
                 //resize(winSize);
             }
 
-            if( winpos != _frameRect.topLeft() )
+            if( ! winpos.isEqual(_frameRect.topLeft()) )
             {
                 _window->move(winpos);
                 //move(winpos);

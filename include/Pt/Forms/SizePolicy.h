@@ -127,14 +127,14 @@ class SizePolicy
         {
             return _horizontalMode == s._horizontalMode && 
                    _verticalMode == s._verticalMode && 
-                   _sizeHint == s._sizeHint;
+                   _sizeHint.isEqual(s._sizeHint);
         }
         
         bool operator!= (const SizePolicy& s) const
         {
             return _horizontalMode != s._horizontalMode || 
                    _verticalMode != s._verticalMode || 
-                   _sizeHint != s._sizeHint;
+                   ! _sizeHint.isEqual(s._sizeHint);
         }
 
     private:

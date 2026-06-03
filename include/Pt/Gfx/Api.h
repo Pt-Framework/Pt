@@ -55,8 +55,10 @@ namespace Pt {
 */
 namespace Gfx {
 
-typedef double Float;
 typedef std::ptrdiff_t Int;
+
+typedef double Float;
+const Float FloatNearlyZero = Float(1) / (1 << 12);
 
 class Canvas;
 class FontMetrics;

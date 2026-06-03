@@ -113,9 +113,9 @@ class Point
             return *this;
         }
 
-        Float calcDistance(const Point& other) const
+        Float distanceTo(const Point& other) const
         {
-            if(*this == other)
+            if(isEqual(other))
                 return 0;
 
             return hypot(_x - other._x, _y - other._y);
@@ -128,11 +128,11 @@ class Point
             return *this;
         }
 
-        bool operator==(const Point& pt) const
-        { return (_x == pt._x && _y == pt._y); }
-
-        bool operator!=(const Point& pt) const
-        { return (_x != pt._x || _y != pt._y); }
+        bool isEqual(const Point& other, Float eps = FloatNearlyZero) const
+        {
+            return std::abs(_x - other._x) <= eps &&
+                   std::abs(_y - other._y) <= eps;
+        }
 
         Point& operator+=(const Point& pt)
         {

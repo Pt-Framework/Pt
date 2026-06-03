@@ -593,7 +593,7 @@ void WorkspaceManager::onMove(WorkspaceFrame& frame, const Gfx::PointF& pos)
     std::map<Window*, Gfx::RectF>::iterator wit = _autoCenter.find( &frame.window() );
     if( wit != _autoCenter.end() )
     {
-        if( pos != wit->second.topLeft() )
+        if( ! pos.isEqual(wit->second.topLeft()) )
         {
             //std::clog << "auto-center move END: " << wit->first->title() << " " 
             //                                      << pos.x() << "," << pos.y()<< std::endl;
@@ -618,7 +618,7 @@ void WorkspaceManager::onResize(WorkspaceFrame& frame, const Gfx::SizeF& to)
     std::map<Window*, Gfx::RectF>::iterator wit = _autoCenter.find( &frame.window() );
     if( wit != _autoCenter.end() )
     {
-        if( to != wit->second.size() )
+        if( ! to.isEqual(wit->second.size()) )
         {
             //std::clog << "auto-center resize END: " << wit->first->title() << " " 
             //                                        << to.width() << "x" << to.width()<< std::endl;

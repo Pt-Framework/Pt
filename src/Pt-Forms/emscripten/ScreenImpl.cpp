@@ -311,7 +311,7 @@ void ScreenImpl::onRescale(double scaling)
 
 void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 {
-    if( size() == ev.size() )
+    if( size().isEqual(ev.size()) )
     {
         return;
     }

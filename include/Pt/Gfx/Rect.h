@@ -214,14 +214,9 @@ class Rect
                          this->y() + this->height());
         }
 
-        bool operator==(const Rect& other) const
+        bool isEqual(const Rect& other, Float eps = FloatNearlyZero) const
         {
-            return _p == other._p && _s == other._s;
-        }
-
-        bool operator!=(const Rect& other) const
-        {
-            return _p != other._p || _s != other._s;
+            return _p.isEqual(other._p, eps) && _s.isEqual(other._s, eps);
         }
 
         void move(Float dx, Float dy)

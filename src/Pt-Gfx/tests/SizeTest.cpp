@@ -212,10 +212,10 @@ class SizeTest : public Pt::Unit::TestSuite
             Size s2(3.0, 4.0);
             Size s3(3.0, 5.0);
 
-            PT_UNIT_ASSERT(s1 == s2);
-            PT_UNIT_ASSERT(s1 != s3);
-            PT_UNIT_ASSERT( ! (s1 != s2) );
-            PT_UNIT_ASSERT( ! (s1 == s3) );
+            PT_UNIT_ASSERT(s1.isEqual(s2));
+            PT_UNIT_ASSERT( ! s1.isEqual(s3));
+            PT_UNIT_ASSERT( ! ( ! s1.isEqual(s2)) );
+            PT_UNIT_ASSERT( ! s1.isEqual(s3) );
         }
 
         void LessThan()

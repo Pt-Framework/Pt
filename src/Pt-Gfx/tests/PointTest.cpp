@@ -145,14 +145,14 @@ class PointTest : public Pt::Unit::TestSuite
         {
             Point p1(0.0, 0.0);
             Point p2(3.0, 4.0);
-            PT_UNIT_ASSERT_NEAR(p1.calcDistance(p2), 5.0);
+            PT_UNIT_ASSERT_NEAR(p1.distanceTo(p2), 5.0);
 
             // same point
-            PT_UNIT_ASSERT_NEAR(p1.calcDistance(p1), 0.0);
+            PT_UNIT_ASSERT_NEAR(p1.distanceTo(p1), 0.0);
 
             // negative coordinates
             Point p3(-3.0, -4.0);
-            PT_UNIT_ASSERT_NEAR(p1.calcDistance(p3), 5.0);
+            PT_UNIT_ASSERT_NEAR(p1.distanceTo(p3), 5.0);
         }
 
         void ArithmeticOperators()
@@ -204,10 +204,10 @@ class PointTest : public Pt::Unit::TestSuite
             Point p2(1.0, 2.0);
             Point p3(1.0, 3.0);
 
-            PT_UNIT_ASSERT(p1 == p2);
-            PT_UNIT_ASSERT(p1 != p3);
-            PT_UNIT_ASSERT( ! (p1 != p2) );
-            PT_UNIT_ASSERT( ! (p1 == p3) );
+            PT_UNIT_ASSERT(p1.isEqual(p2));
+            PT_UNIT_ASSERT( ! p1.isEqual(p3));
+            PT_UNIT_ASSERT( ! ( ! p1.isEqual(p2)) );
+            PT_UNIT_ASSERT( ! p1.isEqual(p3) );
         }
 
         void ScalarOperators()

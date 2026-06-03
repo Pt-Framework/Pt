@@ -929,7 +929,7 @@ void Control::onProcessResizeEvent(const ResizeEvent& ev)
 
 void Control::onResizeEvent(const ResizeEvent& ev)
 {
-    if( size() == ev.size() )
+    if( size().isEqual(ev.size()) )
         return;
 
     //std::clog << "RESIZE: " << name() << ev.size().width() << std::endl;
