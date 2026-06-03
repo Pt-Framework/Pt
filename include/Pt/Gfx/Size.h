@@ -39,6 +39,8 @@ namespace Pt {
 
 namespace Gfx {
 
+class SizeI;
+
 /** @brief %Size with floating-point width and height.
 */
 class Size
@@ -68,10 +70,49 @@ class Size
             _h = h;
         }
 
-        bool isNull() const
+        bool isEmpty() const
         {
             return _w == 0 || _h == 0;
         }
+
+        /** @brief Returns the area (width * height).
+        */
+        Float area() const
+        { return _w * _h; }
+
+        /** @brief Swaps width and height in place.
+        */
+        void transpose()
+        {
+            Float tmp = _w;
+            _w = _h;
+            _h = tmp;
+        }
+
+        /** @brief Returns a copy with width and height swapped.
+        */
+        Size toTransposed() const
+        { return Size(_h, _w); }
+
+        /** @brief Constructs from a %SizeI by widening the dimensions.
+        */
+        explicit Size(const SizeI& s);
+
+        /** @brief Assigns from a %SizeI by widening the dimensions.
+        */
+        Size& operator=(const SizeI& s);
+
+        /** @brief Rounds each dimension to the nearest integer and returns a %SizeI.
+        */
+        SizeI round() const;
+
+        /** @brief Floors each dimension and returns a %SizeI.
+        */
+        SizeI floor() const;
+
+        /** @brief Ceils each dimension and returns a %SizeI.
+        */
+        SizeI ceil() const;
 
         Float width() const
         { return _w; }
@@ -234,10 +275,29 @@ class SizeI
             _h = h;
         }
 
-        bool isNull() const
+        bool isEmpty() const
         {
             return _w == 0 || _h == 0;
         }
+
+        /** @brief Returns the area (width * height).
+        */
+        Int area() const
+        { return _w * _h; }
+
+        /** @brief Swaps width and height in place.
+        */
+        void transpose()
+        {
+            Int tmp = _w;
+            _w = _h;
+            _h = tmp;
+        }
+
+        /** @brief Returns a copy with width and height swapped.
+        */
+        SizeI toTransposed() const
+        { return SizeI(_h, _w); }
 
         Int width() const
         { return _w; }
@@ -351,6 +411,35 @@ class SizeI
         Int _w;
         Int _h;
 };
+
+inline Size::Size(const SizeI& s)
+: _w(static_cast<Float>(s.width())), _h(static_cast<Float>(s.height()))
+{}
+
+inline Size& Size::operator=(const SizeI& s)
+{
+    _w = static_cast<Float>(s.width());
+    _h = static_cast<Float>(s.height());
+    return *this;
+}
+
+inline SizeI Size::round() const
+{
+    return SizeI(static_cast<Int>(std::lround(_w)),
+                 static_cast<Int>(std::lround(_h)));
+}
+
+inline SizeI Size::floor() const
+{
+    return SizeI(static_cast<Int>(std::floor(_w)),
+                 static_cast<Int>(std::floor(_h)));
+}
+
+inline SizeI Size::ceil() const
+{
+    return SizeI(static_cast<Int>(std::ceil(_w)),
+                 static_cast<Int>(std::ceil(_h)));
+}
 
 } //namespace
 

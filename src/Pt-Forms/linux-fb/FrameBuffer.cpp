@@ -1,4 +1,4 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
+﻿ /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
@@ -334,7 +334,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::RectI& rect )
     {
       case Rotate0:
       {
-        const Gfx::RectI clipArea = rect.intersect(Gfx::RectI( Gfx::PointI(0, 0), size() ));
+        const Gfx::RectI clipArea = rect.toIntersected(Gfx::RectI( Gfx::PointI(0, 0), size() ));
         const int clipBottom = clipArea.y() + clipArea.height();
         const int widthInByte = clipArea.width()*_pixelSize;
 
@@ -349,7 +349,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::RectI& rect )
 
       case Rotate90:
       {
-        const Gfx::RectI clipArea = rect.intersect( Gfx::RectI(Gfx::PointI(0,0), size()) );
+        const Gfx::RectI clipArea = rect.toIntersected( Gfx::RectI(Gfx::PointI(0,0), size()) );
         const int dst_x = clipArea.y();
         const int dst_y = size().width() - clipArea.x() - clipArea.width();
         const int dst_stride = size().height() * _pixelSize;

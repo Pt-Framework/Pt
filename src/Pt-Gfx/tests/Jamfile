@@ -12,8 +12,11 @@ Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    Argb32Test.cpp
                    PaintContextTest.cpp
                    PathTest.cpp
+                   PointTest.cpp
+                   RectTest.cpp
                    Rgb32ColorTest.cpp
                    Rgb32Test.cpp
+                   SizeTest.cpp
                    Yuv12Test.cpp 
                    ;
 

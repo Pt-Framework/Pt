@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -84,7 +84,7 @@ void Pixmap::reset(const Gfx::SizeF& size)
 
 bool Pixmap::empty() const
 {
-    return _impl->size().isNull();
+    return _impl->size().isEmpty();
 }
 
 

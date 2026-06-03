@@ -209,7 +209,7 @@ class ViewSurface : public PaintSurface
                 return canvas;
    
             Gfx::RectF region = canvas->region();
-            region.shift( _position.x(), _position.y() );
+            region.move( _position.x(), _position.y() );
             region.setSize( _view->size() );
 
             canvas->setRegion(region);

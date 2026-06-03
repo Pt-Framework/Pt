@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2024 Marc Boris Duerner
+﻿/* Copyright (C) 2015-2024 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -362,7 +362,7 @@ void Widget::onRequestRepaint(const Gfx::RectF& rect)
 
 void Widget::onProcessPaintEvent(const PaintEvent& ev)
 {
-    if( ev.rect().isNull() )
+    if( ev.rect().isEmpty() )
         return;
 
     onPaintEvent(ev);

@@ -290,7 +290,7 @@ void PainterBase::updateClip(const RectF* painterClip, const RectF* contextClip)
         return;
 
     if(painterClip && contextClip)
-        _canvas->setClip( painterClip->intersect(*contextClip) );
+        _canvas->setClip( painterClip->toIntersected(*contextClip) );
     else if(painterClip)
         _canvas->setClip(*painterClip);
     else if(contextClip)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2026 Marc Boris Duerner
+﻿/* Copyright (C) 2026 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -458,10 +458,10 @@ void DrmDisplay::setInitialMode()
 
 void DrmDisplay::blit(const Pt::uint8_t* frame, const Gfx::RectI& rect)
 {
-    const Gfx::RectI clipArea = rect.intersect( Gfx::RectI(Gfx::PointI(0, 0), 
+    const Gfx::RectI clipArea = rect.toIntersected( Gfx::RectI(Gfx::PointI(0, 0), 
                                                            Gfx::SizeI(width(), height())) );
 
-    if( clipArea.isNull() )
+    if( clipArea.isEmpty() )
         return;
 
     Pt::uint8_t* dst = backBuffer();

@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Marc Boris Duerner
+﻿/* Copyright (C) 2024 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -250,7 +250,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
 {
     // clip against source boundaries
     RectI fromRect( image.width(), image.height() );
-    fromRect = fromRect.intersect(imageRect);
+    fromRect = fromRect.toIntersected(imageRect);
 
     // update target position if rect got smaller
     PointI toPos = to;
@@ -258,7 +258,7 @@ void BitmapSurface::putImage(const PointI& to, const Image& image,
 
     // clip against target boundaries
     RectI toRect( toPos, fromRect.size() );
-    toRect = toRect.intersect(clip);
+    toRect = toRect.toIntersected(clip);
 
     // update source position if rect got smaller
     PointI fromPos = fromRect.topLeft();

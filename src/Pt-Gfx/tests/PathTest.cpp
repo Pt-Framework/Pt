@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Marc Boris Duerner
+﻿/* Copyright (C) 2024 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -496,7 +496,7 @@ class PathTest : public Pt::Unit::TestSuite
             {
                 Path path;
                 RectF r = path.boundingRect();
-                PT_UNIT_ASSERT(r.isNull());
+                PT_UNIT_ASSERT(r.isEmpty());
             }
 
             // simple line path
@@ -751,7 +751,7 @@ class PathTest : public Pt::Unit::TestSuite
 
             ++it;
 
-            // end point must be close to (cos(90°), sin(90°)) = (~0, 1)
+            // end point must be close to (cos(90Â°), sin(90Â°)) = (~0, 1)
             PT_UNIT_ASSERT(it->type() == Path::CubicTo);
             PT_UNIT_ASSERT(std::fabs(it->point(2).x()) < 0.001);
             PT_UNIT_ASSERT_NEAR(it->point(2).y(), 1.0);
@@ -990,9 +990,9 @@ class PathTest : public Pt::Unit::TestSuite
             Path path;
             path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
 
-            // Bottom edge y=100 — half-open interval means outside.
+            // Bottom edge y=100 â€” half-open interval means outside.
             PT_UNIT_ASSERT(!path.contains(PointF(50.0, 100.0), FillRule::NonZero));
-            // Top edge y=0 — inside by half-open convention.
+            // Top edge y=0 â€” inside by half-open convention.
             PT_UNIT_ASSERT( path.contains(PointF(50.0, 0.0),   FillRule::NonZero));
         }
 
@@ -1055,7 +1055,7 @@ class PathTest : public Pt::Unit::TestSuite
 
         void ContainsRectCrossing()
         {
-            // Path: horizontal band (0,40)→(100,60).
+            // Path: horizontal band (0,40)â†’(100,60).
             Path path;
             path.addRect(RectF(PointF(0.0, 40.0), PointF(100.0, 60.0)));
 
@@ -1075,7 +1075,7 @@ class PathTest : public Pt::Unit::TestSuite
             Path path;
             path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
 
-            // Partially overlapping — corner (50,50) is inside path.
+            // Partially overlapping â€” corner (50,50) is inside path.
             PT_UNIT_ASSERT( path.intersects(RectF(PointF(50.0, 50.0), PointF(150.0, 150.0))));
             // Same with EvenOdd.
             PT_UNIT_ASSERT( path.intersects(RectF(PointF(50.0, 50.0), PointF(150.0, 150.0)), FillRule::EvenOdd));
@@ -1092,7 +1092,7 @@ class PathTest : public Pt::Unit::TestSuite
 
         void IntersectsRectContains()
         {
-            // Rect is small and fully inside the path — rect corners are inside path.
+            // Rect is small and fully inside the path â€” rect corners are inside path.
             Path path;
             path.addRect(RectF(PointF(0.0, 0.0), PointF(100.0, 100.0)));
 
@@ -1101,7 +1101,7 @@ class PathTest : public Pt::Unit::TestSuite
 
         void IntersectsPathInsideRect()
         {
-            // Path is entirely inside the test rect — no rect corners inside path,
+            // Path is entirely inside the test rect â€” no rect corners inside path,
             // no crossings, but bbox subset of rect triggers true.
             Path path;
             path.addRect(RectF(PointF(20.0, 20.0), PointF(80.0, 80.0)));
@@ -1115,7 +1115,7 @@ class PathTest : public Pt::Unit::TestSuite
             Path path;
             path.addEllipse(PointF(0.0, 0.0), SizeF(100.0, 100.0));
 
-            // Rect partly inside — corner (45,45) is inside the circle.
+            // Rect partly inside â€” corner (45,45) is inside the circle.
             PT_UNIT_ASSERT( path.intersects(RectF(PointF(45.0, 45.0), PointF(150.0, 150.0))));
             // Rect entirely outside the circle.
             PT_UNIT_ASSERT(!path.intersects(RectF(PointF(200.0, 200.0), PointF(300.0, 300.0))));

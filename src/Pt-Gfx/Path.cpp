@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner
+﻿/* Copyright (C) 2006-2015 Marc Boris Duerner
    Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
@@ -528,7 +528,7 @@ int pathCubicHit(const Pt::Gfx::PointF p[4], double px, double py)
     return winding;
 }
 
-// Returns true if line segment [p0→p1] crosses the horizontal edge y=hy
+// Returns true if line segment [p0â†’p1] crosses the horizontal edge y=hy
 // within x in [xMin, xMax].
 inline bool pathLineIntersectsH(double x0, double y0, double x1, double y1,
                                  double hy, double xMin, double xMax)
@@ -543,7 +543,7 @@ inline bool pathLineIntersectsH(double x0, double y0, double x1, double y1,
     return ix >= xMin && ix <= xMax;
 }
 
-// Returns true if line segment [p0→p1] crosses the vertical edge x=vx
+// Returns true if line segment [p0â†’p1] crosses the vertical edge x=vx
 // within y in [yMin, yMax].
 inline bool pathLineIntersectsV(double x0, double y0, double x1, double y1,
                                  double vx, double yMin, double yMax)
@@ -585,7 +585,7 @@ bool pathQuadIntersectsRect(const Pt::Gfx::PointF p[3],
     double ti[2];
     std::size_t n;
 
-    // Top edge: curve.y(t) = yMin  →  check curve.x(t) in [xMin, xMax].
+    // Top edge: curve.y(t) = yMin  â†’  check curve.x(t) in [xMin, xMax].
     n = pathQuadRoots(ti, ay, by, cy - yMin, 0.0, 1.0);
     for (std::size_t i = 0; i < n; ++i)
     {
@@ -603,7 +603,7 @@ bool pathQuadIntersectsRect(const Pt::Gfx::PointF p[3],
             return true;
     }
 
-    // Left edge: curve.x(t) = xMin  →  check curve.y(t) in [yMin, yMax].
+    // Left edge: curve.x(t) = xMin  â†’  check curve.y(t) in [yMin, yMax].
     n = pathQuadRoots(ti, ax, bx, cx - xMin, 0.0, 1.0);
     for (std::size_t i = 0; i < n; ++i)
     {
@@ -897,7 +897,7 @@ bool Path::contains(const PointF& point, FillRule rule) const
 
 bool Path::contains(const RectF& rect, FillRule rule) const
 {
-    if( _pathData->isEmpty() || rect.isNull() )
+    if( _pathData->isEmpty() || rect.isEmpty() )
         return false;
 
     // BBox fast reject: path and rect must overlap.
@@ -1007,19 +1007,19 @@ bool Path::contains(const RectF& rect, FillRule rule) const
 
 bool Path::intersects(const RectF& rect, FillRule rule) const
 {
-    if( _pathData->isEmpty() || rect.isNull() )
+    if( _pathData->isEmpty() || rect.isEmpty() )
         return false;
 
     // BBox fast reject.
     const RectF bbox = boundingRect();
-    if( bbox.isNull() )
+    if( bbox.isEmpty() )
         return false;
 
     if( bbox.right()  < rect.left()  || rect.right()  < bbox.left() ||
         bbox.bottom() < rect.top()   || rect.bottom() < bbox.top() )
         return false;
 
-    // If any corner of the rect lies inside the filled area → intersects.
+    // If any corner of the rect lies inside the filled area â†’ intersects.
     if( contains(rect.topLeft(),     rule) ) return true;
     if( contains(rect.topRight(),    rule) ) return true;
     if( contains(rect.bottomLeft(),  rule) ) return true;
@@ -1030,7 +1030,7 @@ bool Path::intersects(const RectF& rect, FillRule rule) const
     const double yMin = rect.top();
     const double yMax = rect.bottom();
 
-    // If any path segment crosses a rect edge → intersects.
+    // If any path segment crosses a rect edge â†’ intersects.
     bool hasMoveTo = false;
     PointF start;
     PointF lastPos;
@@ -1360,7 +1360,7 @@ PathIterator Path::getPolygon(PathIterator it, Polygon& polygon, float tolerance
 
         if( elem.type() == Path::MoveTo )
         {
-            // Next subpath begins — do not consume
+            // Next subpath begins â€” do not consume
             return it;
         }
 

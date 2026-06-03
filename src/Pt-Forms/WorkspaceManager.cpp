@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -526,7 +526,7 @@ void WorkspaceManager::onRequestRepaint(const Gfx::RectF& rect)
 void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
-    if( rect.isNull() )
+    if( rect.isEmpty() )
         return;
 
     Base::onProcessPaintEvent(ev);
@@ -551,9 +551,9 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
             continue;
 
         const Gfx::RectF& requestedFrameRect = frame->frameRect();
-        Gfx::RectF frameRect = rect.intersect(requestedFrameRect);
+        Gfx::RectF frameRect = rect.toIntersected(requestedFrameRect);
 
-        if( frameRect.isNull() )
+        if( frameRect.isEmpty() )
             continue;
 
         Gfx::PointF winPos = frameRect.topLeft() - requestedFrameRect.topLeft();

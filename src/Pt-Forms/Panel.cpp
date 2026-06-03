@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2017 Marc Boris Duerner 
+﻿/* Copyright (C) 2015-2017 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
@@ -234,7 +234,7 @@ Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 
     if( ! _picture.empty() )
     {
-        Gfx::SizeF iconSize = _iconSize.isNull()
+        Gfx::SizeF iconSize = _iconSize.isEmpty()
                             ? surface().scaling().toLogical( _picture.size() )
                             : _iconSize;
 

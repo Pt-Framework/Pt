@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+﻿/* Copyright (C) 2015 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
@@ -426,7 +426,7 @@ void Window::onRequestRepaint(const Gfx::RectF& rect)
 void Window::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& rect = ev.rect();
-    if( rect.isNull() )
+    if( rect.isEmpty() )
         return;
 
     if( ! this->isVisible() )

@@ -318,7 +318,7 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 
     if( _text.empty() )
     {
-        if( _iconSize.isNull() )
+        if( _iconSize.isEmpty() )
             _measuredIconSize = surface().scaling().toLogical( _pixmap.size() );
         else
             _measuredIconSize = _iconSize;

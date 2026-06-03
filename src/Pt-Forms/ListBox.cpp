@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Marc Boris Duerner
+﻿/* Copyright (C) 2017 Marc Boris Duerner
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -395,8 +395,8 @@ Gfx::SizeF ListBoxItem::onMeasureIcon()
         return Gfx::SizeF(0, 0);
 
     Gfx::SizeF pictureSize = scaling().toLogical( _picture.size() );
-    double w = _iconSize.isNull() ? pictureSize.width() : _iconSize.width();
-    double h = _iconSize.isNull() ? pictureSize.height() : _iconSize.height();
+    double w = _iconSize.isEmpty() ? pictureSize.width() : _iconSize.width();
+    double h = _iconSize.isEmpty() ? pictureSize.height() : _iconSize.height();
     return Gfx::SizeF(w, h);
 }
 

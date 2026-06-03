@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+﻿/* Copyright (C) 2015 Marc Boris Duerner 
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -560,7 +560,7 @@ void Form::onInvalidate()
 void Form::onProcessPaintEvent(const PaintEvent& ev)
 {    
     const Gfx::RectF& rect = ev.rect();
-    if( rect.isNull() )
+    if( rect.isEmpty() )
         return;
 
     Base::onProcessPaintEvent(ev);
@@ -570,8 +570,8 @@ void Form::onProcessPaintEvent(const PaintEvent& ev)
     //
     if(_mainControl)
     {
-        Gfx::RectF updateRect = _mainControl->geometry().intersect(rect);
-        if( updateRect.isNull() )
+        Gfx::RectF updateRect = _mainControl->geometry().toIntersected(rect);
+        if( updateRect.isEmpty() )
             return;
 
         Gfx::PointF updatePos = onToControl( *_mainControl, updateRect.topLeft() );

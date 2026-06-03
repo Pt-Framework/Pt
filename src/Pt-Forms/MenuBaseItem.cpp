@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -367,7 +367,7 @@ void MenuBaseItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
     Pt::Gfx::RectF mnemonicRect; // TODO
 
     
-    if (!mnemonicRect.isNull())
+    if (!mnemonicRect.isEmpty())
     {
         double menmonicY = textPos.y() + 1;
         painter.drawLine(Pt::Gfx::PointF(mnemonicRect.left(), menmonicY),

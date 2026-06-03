@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -376,15 +376,15 @@ void BitmapCanvas::onApplyClip()
     Gfx::RectF clipP(origin, size);
     RectI clipRect = round(clipP);
 
-    if( clipRect.isNull() )
+    if( clipRect.isEmpty() )
     {
         RectI outsideClip( PointI(imageRect.right(), imageRect.bottom()),
                            SizeI(1, 1) );
-        _currentClip = outsideClip.intersect(imageRect);
+        _currentClip = outsideClip.toIntersected(imageRect);
         return;
     }
 
-    _currentClip =  clipRect.intersect(imageRect);
+    _currentClip =  clipRect.toIntersected(imageRect);
 }
 
 
@@ -448,10 +448,10 @@ void BitmapCanvas::onDrawRect(const Gfx::RectF& r)
     Gfx::SizeF size =  transform() * r.size();
     Gfx::RectF rect(origin, size);
 
-    RectI rectangle( lround(rect.left()   - 0.4999), 
-                    lround(rect.right()  - 0.4999),
-                    lround(rect.top()    - 0.4999), 
-                    lround(rect.bottom() - 0.4999)) ;
+    RectI rectangle = RectI::fromLTRB(lround(rect.left()   - 0.4999),
+                                       lround(rect.top()    - 0.4999),
+                                       lround(rect.right()  - 0.4999),
+                                       lround(rect.bottom() - 0.4999));
 
     PointI points[5] = { rectangle.topLeft(),
                         rectangle.topRight(),
@@ -475,10 +475,10 @@ void BitmapCanvas::onFillRect(const Gfx::RectF& r)
     Gfx::SizeF size =  transform() * r.size();
     Gfx::RectF rect(origin, size);
 
-    RectI rectangle( lround( rect.left() ),
-                    lround( rect.right() + 0.001 ), 
-                    lround( rect.top() ),
-                    lround( rect.bottom() + 0.001 ) );
+    RectI rectangle = RectI::fromLTRB(lround( rect.left() ),
+                                       lround( rect.top() ),
+                                       lround( rect.right() + 0.001 ),
+                                       lround( rect.bottom() + 0.001 ));
 
     fillRect(rectangle, _currentClip);
 }
@@ -919,9 +919,9 @@ void BitmapCanvas::fill(const PointI& origin, const PointI& pos, int length)
 
 void BitmapCanvas::fillRect(const RectI& rectIn, const RectI& currentClip)
 {
-    RectI rect = currentClip.intersect( rectIn );
+    RectI rect = currentClip.toIntersected( rectIn );
 
-    if( rect.isNull() )
+    if( rect.isEmpty() )
         return;
 
     if( _isGradient )

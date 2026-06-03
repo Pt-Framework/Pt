@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -430,7 +430,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         Gfx::PointF winPos = toFrame( *frame, screenRect.topLeft() );
         Gfx::RectF winRect( winPos, screenRect.size() );
 
-        winRect = winRect.intersect( Gfx::RectF( window->size() ) );
+        winRect = winRect.toIntersected( Gfx::RectF( window->size() ) );
 
         if(winRect.size().width() < 0.1 || winRect.height() < 0.1)
             continue;

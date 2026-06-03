@@ -1,4 +1,4 @@
-/* Copyright (C) 20234 Marc Boris Duerner
+﻿/* Copyright (C) 20234 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -297,15 +297,15 @@ void BitmapCanvas::onApplyClip()
                             SizeI( lround( clipP.width() ),
                                    lround( clipP.height() ) ) );
 
-    if( clipRect.isNull() )
+    if( clipRect.isEmpty() )
     {
         RectI outsideClip( PointI(imageRect.right(), imageRect.bottom()),
                            SizeI(1, 1) );
-        _currentClip = outsideClip.intersect(imageRect);
+        _currentClip = outsideClip.toIntersected(imageRect);
         return;
     }
 
-    _currentClip = clipRect.intersect(imageRect);
+    _currentClip = clipRect.toIntersected(imageRect);
 }
 
 

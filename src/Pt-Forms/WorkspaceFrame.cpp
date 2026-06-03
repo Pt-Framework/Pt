@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -164,10 +164,10 @@ void WindowButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
     const size_t penSize = 1;
     const double spacing = penSize / 2.0;
 
-    Gfx::RectF borderRect(_geometry.left() + spacing,
-                          _geometry.right() - spacing,
-                          _geometry.top() + spacing,
-                          _geometry.bottom() - spacing);
+    Gfx::RectF borderRect = Gfx::RectF::fromLTRB(_geometry.left() + spacing,
+                                                  _geometry.top() + spacing,
+                                                  _geometry.right() - spacing,
+                                                  _geometry.bottom() - spacing);
     double offset = 0;
 
     Gfx::PointF topLeft(borderRect.topLeft().x() + offset, 
@@ -236,10 +236,10 @@ void MinimizeButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
     double inset = scaling.align(3.0);
     double height = scaling.align(2.0);
 
-    Gfx::RectF frameSymbol( geometry().left() + inset,
-                            geometry().right() - inset,
-                            geometry().bottom() - inset - height,
-                            geometry().bottom() - inset);
+    Gfx::RectF frameSymbol = Gfx::RectF::fromLTRB(geometry().left() + inset,
+                                                   geometry().bottom() - inset - height,
+                                                   geometry().right() - inset,
+                                                   geometry().bottom() - inset);
 
     painter.setBrush( Gfx::Color(255, 255, 255) );
     painter.fillRect(frameSymbol);
@@ -271,10 +271,10 @@ void MaximizeButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
 
     double inset = scaling.align(3.0) + scaling.toLogical(0.5);
 
-    Gfx::RectF frameSymbol( geometry().left() + inset,
-                            geometry().right() - inset,
-                            geometry().top() + inset,
-                            geometry().bottom() - inset);
+    Gfx::RectF frameSymbol = Gfx::RectF::fromLTRB(geometry().left() + inset,
+                                                   geometry().top() + inset,
+                                                   geometry().right() - inset,
+                                                   geometry().bottom() - inset);
      
     Pt::Gfx::Pen pen(Gfx::Color(255, 255, 255), 
                      1, Gfx::Pen::Solid, Gfx::Pen::SquareCap, Gfx::Pen::MiterJoin);
@@ -1543,36 +1543,36 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     //Gfx::PointF pos = _window->position();
     Gfx::PointF pos(0, 0);
     
-    Gfx::RectF leftBorder( pos.x(),
-                           pos.x() + _borderWidth,
-                           pos.y() + _borderWidth,
-                           pos.y() + size().height() - _borderWidth);
+    Gfx::RectF leftBorder = Gfx::RectF::fromLTRB(pos.x(),
+                                                  pos.y() + _borderWidth,
+                                                  pos.x() + _borderWidth,
+                                                  pos.y() + size().height() - _borderWidth);
     painter.fillRect(leftBorder);
 
-    Gfx::RectF topBorder(pos.x(),
-                         pos.x() + size().width(),
-                         pos.y(),
-                         pos.y() + _borderWidth);
+    Gfx::RectF topBorder = Gfx::RectF::fromLTRB(pos.x(),
+                                                 pos.y(),
+                                                 pos.x() + size().width(),
+                                                 pos.y() + _borderWidth);
 
     painter.fillRect(topBorder);
     
-    Gfx::RectF rightBorder(pos.x() + size().width() - _borderWidth,
-                           pos.x() + size().width(),
-                           pos.y() + _borderWidth,
-                           pos.y() + size().height() - _borderWidth);
+    Gfx::RectF rightBorder = Gfx::RectF::fromLTRB(pos.x() + size().width() - _borderWidth,
+                                                   pos.y() + _borderWidth,
+                                                   pos.x() + size().width(),
+                                                   pos.y() + size().height() - _borderWidth);
     painter.fillRect(rightBorder);
 
 
-    Gfx::RectF bottomBorder(pos.x(),
-                            pos.x() + size().width(),
-                            pos.y() + size().height() - _borderWidth,
-                            pos.y() + size().height());
+    Gfx::RectF bottomBorder = Gfx::RectF::fromLTRB(pos.x(),
+                                                    pos.y() + size().height() - _borderWidth,
+                                                    pos.x() + size().width(),
+                                                    pos.y() + size().height());
     painter.fillRect(bottomBorder);
 
-    Gfx::RectF titleArea( pos.x() + _borderWidth,
-                          pos.x() + size().width() - _borderWidth,
-                          pos.y() + _borderWidth,
-                          pos.y() + _borderWidth + _titleHeight);
+    Gfx::RectF titleArea = Gfx::RectF::fromLTRB(pos.x() + _borderWidth,
+                                                 pos.y() + _borderWidth,
+                                                 pos.x() + size().width() - _borderWidth,
+                                                 pos.y() + _borderWidth + _titleHeight);
 
     painter.fillRect(titleArea);
 
@@ -1714,8 +1714,8 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     {
         WindowButton* button = *it;
 
-        Gfx::RectF buttonUpdateRect = button->geometry().intersect(rect);
-        if( buttonUpdateRect.isNull() )
+        Gfx::RectF buttonUpdateRect = button->geometry().toIntersected(rect);
+        if( buttonUpdateRect.isEmpty() )
             continue;
 
         button->paint(ctx, buttonUpdateRect);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+﻿/* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -257,7 +257,7 @@ void MenuImpl::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
                                           size().height()) );
         
         // only the damaged region
-        iconStrip = iconStrip.intersect(rect);
+        iconStrip = iconStrip.toIntersected(rect);
 
         Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
         painter.setBrush(brush);

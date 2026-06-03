@@ -1,4 +1,4 @@
-/* Copyright (C) 2026 Marc Boris Duerner
+﻿/* Copyright (C) 2026 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -292,7 +292,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& updateRect = ev.rect();
 
-    if( updateRect.isNull() )
+    if( updateRect.isEmpty() )
         return;
 
     Base::onProcessPaintEvent(ev);

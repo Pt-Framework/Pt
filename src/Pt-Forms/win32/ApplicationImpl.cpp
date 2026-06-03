@@ -846,8 +846,8 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     RECT updateRect;
     GetUpdateRect(hwnd, &updateRect, FALSE);
 
-    Gfx::RectF winRect(updateRect.left, updateRect.right, 
-                       updateRect.top, updateRect.bottom);
+    Gfx::RectF winRect = Gfx::RectF::fromLTRB(updateRect.left, updateRect.top,
+                                               updateRect.right, updateRect.bottom);
 
     winRect = Gfx::RectF( winRect.topLeft() / w.scaleFactor(), 
                           winRect.size() / w.scaleFactor() );

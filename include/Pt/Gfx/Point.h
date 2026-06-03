@@ -39,6 +39,8 @@ namespace Pt {
 
 namespace Gfx {
 
+class PointI;
+
 /** @brief %Point with floating-point X and Y coordinates.
 */
 class Point
@@ -190,6 +192,56 @@ class Point
             return *this;
         }
 
+        /** @brief Returns true if both X and Y are zero.
+        */
+        bool isOrigin() const
+        { return _x == 0 && _y == 0; }
+
+        /** @brief Returns the negation of this point.
+        */
+        Point operator-() const
+        { return Point(-_x, -_y); }
+
+        /** @brief Returns the Euclidean length of the vector from the origin.
+        */
+        Float length() const
+        { return hypot(_x, _y); }
+
+        /** @brief Returns the squared Euclidean length; cheaper than length().
+        */
+        Float lengthSquared() const
+        { return _x * _x + _y * _y; }
+
+        /** @brief Returns a unit-length copy of this point, or a zero point if the length is zero.
+        */
+        Point toNormalized() const
+        {
+            const Float len = this->length();
+            if(len == 0)
+                return Point();
+            return Point(_x / len, _y / len);
+        }
+
+        /** @brief Constructs from a %PointI by widening the coordinates.
+        */
+        explicit Point(const PointI& pt);
+
+        /** @brief Assigns from a %PointI by widening the coordinates.
+        */
+        Point& operator=(const PointI& pt);
+
+        /** @brief Rounds each coordinate to the nearest integer and returns a %PointI.
+        */
+        PointI round() const;
+
+        /** @brief Floors each coordinate and returns a %PointI.
+        */
+        PointI floor() const;
+
+        /** @brief Ceils each coordinate and returns a %PointI.
+        */
+        PointI ceil() const;
+
     private:
         Float _x;
         Float _y;
@@ -328,10 +380,49 @@ class PointI
             return *this;
         }
 
+        /** @brief Returns true if both X and Y are zero.
+        */
+        bool isOrigin() const
+        { return _x == 0 && _y == 0; }
+
+        /** @brief Returns the negation of this point.
+        */
+        PointI operator-() const
+        { return PointI(-_x, -_y); }
+
     private:
         Int _x;
         Int _y;
 };
+
+inline Point::Point(const PointI& pt)
+: _x(static_cast<Float>(pt.x())), _y(static_cast<Float>(pt.y()))
+{}
+
+inline Point& Point::operator=(const PointI& pt)
+{
+    _x = static_cast<Float>(pt.x());
+    _y = static_cast<Float>(pt.y());
+    return *this;
+}
+
+inline PointI Point::round() const
+{
+    return PointI(static_cast<Int>(std::lround(_x)),
+                  static_cast<Int>(std::lround(_y)));
+}
+
+inline PointI Point::floor() const
+{
+    return PointI(static_cast<Int>(std::floor(_x)),
+                  static_cast<Int>(std::floor(_y)));
+}
+
+inline PointI Point::ceil() const
+{
+    return PointI(static_cast<Int>(std::ceil(_x)),
+                  static_cast<Int>(std::ceil(_y)));
+}
 
 } // namespace
 

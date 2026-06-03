@@ -39,6 +39,8 @@ namespace Pt {
 
 namespace Gfx {
 
+class RectI;
+
 /** @brief %Rect with floating-point coordinates.
 */
 class Rect
@@ -69,20 +71,31 @@ class Rect
         {
         }
 
-        Rect(Float left, Float right, Float top, Float bottom)
-        {
-            set(left, right, top, bottom);
-        }
-
         Rect(const Rect& val)
         : _p(val._p)
         , _s(val._s)
         {
         }
 
-        bool isNull() const
+        /** @brief Returns true if width or height is zero.
+        */
+        bool isEmpty() const
         {
             return (_s.width() == 0 || _s.height() == 0);
+        }
+
+        /** @brief Creates a rect from left, top, right, and bottom edges.
+        */
+        static Rect fromLTRB(Float left, Float top, Float right, Float bottom)
+        {
+            return Rect(Point(left, top), Size(right - left, bottom - top));
+        }
+
+        /** @brief Creates a rect from x, y, width, and height.
+        */
+        static Rect fromXYWH(Float x, Float y, Float w, Float h)
+        {
+            return Rect(Point(x, y), Size(w, h));
         }
 
         void clear()
@@ -108,12 +121,6 @@ class Rect
         {
             _p.clear();
             _s.set(width, height);
-        }
-
-        void set(Float left, Float right, Float top, Float bottom)
-        {
-            _p = Point(left, top);
-            _s = Size(right - left, bottom - top);
         }
 
         const Point& origin() const
@@ -217,7 +224,7 @@ class Rect
             return _p != other._p || _s != other._s;
         }
 
-        void shift(Float dx, Float dy)
+        void move(Float dx, Float dy)
         {
             _p.addX(dx);
             _p.addY(dy);
@@ -237,10 +244,10 @@ class Rect
 
         void unify(const Rect& rect)
         {
-            if(rect.isNull())
+            if( rect.isEmpty() )
                 return;
 
-            if(this->isNull())
+            if( this->isEmpty() )
             {
                 _p = rect._p;
                 _s = rect._s;
@@ -252,20 +259,25 @@ class Rect
             const Float r = std::max(this->right(), rect.right());
             const Float b = std::max(this->bottom(), rect.bottom());
 
-            set(l, r, t, b);
+            _p = Point(l, t);
+            _s = Size(r - l, b - t);
         }
 
-        Rect intersect(const Rect& rect) const
+        /** @brief Returns the intersection of this rect and another, or an empty rect if they do not overlap.
+        */
+        Rect toIntersected(const Rect& rect) const
         {
             const Float l = std::max(this->left(), rect.left());
             const Float t = std::max(this->top(), rect.top());
             const Float r = std::min(this->right(), rect.right());
             const Float b = std::min(this->bottom(), rect.bottom());
 
-            return r >= l && b >= t ? Rect(l, r, t, b)
+            return r >= l && b >= t ? Rect::fromLTRB(l, t, r, b)
                                     : Rect();
         }
 
+        /** @brief Returns true if the given point is inside or on the edge of this rect.
+        */
         bool contains(const Point& p) const
         {
             return p.x() >= _p.x() &&
@@ -273,6 +285,86 @@ class Rect
                    p.y() >= _p.y() &&
                    p.y() < _p.y() + _s.height();
         }
+
+        /** @brief Returns true if the given rect is entirely inside this rect.
+        */
+        bool contains(const Rect& r) const
+        {
+            return r.left() >= this->left() &&
+                   r.right() <= this->right() &&
+                   r.top() >= this->top() &&
+                   r.bottom() <= this->bottom();
+        }
+
+        /** @brief Returns true if this rect overlaps with the given rect.
+        */
+        bool intersects(const Rect& r) const
+        {
+            return this->right() > r.left() &&
+                   r.right() > this->left() &&
+                   this->bottom() > r.top() &&
+                   r.bottom() > this->top();
+        }
+
+        /** @brief Returns the center point of this rect.
+        */
+        Point center() const
+        {
+            return Point(_p.x() + _s.width() / 2, _p.y() + _s.height() / 2);
+        }
+
+        /** @brief Normalizes this rect so that width and height are non-negative.
+        */
+        void normalize()
+        {
+            if(_s.width() < 0)
+            {
+                _p.addX(_s.width());
+                _s.setWidth(-_s.width());
+            }
+            if(_s.height() < 0)
+            {
+                _p.addY(_s.height());
+                _s.setHeight(-_s.height());
+            }
+        }
+
+        /** @brief Returns a normalized copy of this rect.
+        */
+        Rect toNormalized() const
+        {
+            Rect r(*this);
+            r.normalize();
+            return r;
+        }
+
+        /** @brief Constructs from a %RectI by widening the coordinates.
+        */
+        explicit Rect(const RectI& r);
+
+        /** @brief Assigns from a %RectI by widening the coordinates.
+        */
+        Rect& operator=(const RectI& r);
+
+        /** @brief Rounds each component to the nearest integer and returns a %RectI.
+        */
+        RectI round() const;
+
+        /** @brief Floors each component and returns a %RectI.
+        */
+        RectI floor() const;
+
+        /** @brief Ceils each component and returns a %RectI.
+        */
+        RectI ceil() const;
+
+        /** @brief Returns the smallest enclosing integer rect.
+        */
+        RectI roundOut() const;
+
+        /** @brief Returns the largest integer rect contained within this rect.
+        */
+        RectI roundIn() const;
 
     private:
         Point _p;
@@ -311,20 +403,31 @@ class RectI
         {
         }
 
-        RectI(Int left, Int right, Int top, Int bottom)
-        {
-            set(left, right, top, bottom);
-        }
-
         RectI(const RectI& val)
         : _p(val._p)
         , _s(val._s)
         {
         }
 
-        bool isNull() const
+        /** @brief Returns true if width or height is zero.
+        */
+        bool isEmpty() const
         {
             return (_s.width() == 0 || _s.height() == 0);
+        }
+
+        /** @brief Creates a rect from left, top, right, and bottom edges.
+        */
+        static RectI fromLTRB(Int left, Int top, Int right, Int bottom)
+        {
+            return RectI(PointI(left, top), SizeI(right - left, bottom - top));
+        }
+
+        /** @brief Creates a rect from x, y, width, and height.
+        */
+        static RectI fromXYWH(Int x, Int y, Int w, Int h)
+        {
+            return RectI(PointI(x, y), SizeI(w, h));
         }
 
         void clear()
@@ -350,12 +453,6 @@ class RectI
         {
             _p.clear();
             _s.set(width, height);
-        }
-
-        void set(Int left, Int right, Int top, Int bottom)
-        {
-            _p = PointI(left, top);
-            _s = SizeI(right - left, bottom - top);
         }
 
         const PointI& origin() const
@@ -459,7 +556,7 @@ class RectI
             return _p != other._p || _s != other._s;
         }
 
-        void shift(Int dx, Int dy)
+        void move(Int dx, Int dy)
         {
             _p.addX(dx);
             _p.addY(dy);
@@ -479,10 +576,10 @@ class RectI
 
         void unify(const RectI& rect)
         {
-            if(rect.isNull())
+            if( rect.isEmpty() )
                 return;
 
-            if(this->isNull())
+            if( this->isEmpty() )
             {
                 _p = rect._p;
                 _s = rect._s;
@@ -494,20 +591,25 @@ class RectI
             const Int r = std::max(this->right(), rect.right());
             const Int b = std::max(this->bottom(), rect.bottom());
 
-            set(l, r, t, b);
+            _p = PointI(l, t);
+            _s = SizeI(r - l, b - t);
         }
 
-        RectI intersect(const RectI& rect) const
+        /** @brief Returns the intersection of this rect and another, or an empty rect if they do not overlap.
+        */
+        RectI toIntersected(const RectI& rect) const
         {
             const Int l = std::max(this->left(), rect.left());
             const Int t = std::max(this->top(), rect.top());
             const Int r = std::min(this->right(), rect.right());
             const Int b = std::min(this->bottom(), rect.bottom());
 
-            return r >= l && b >= t ? RectI(l, r, t, b)
+            return r >= l && b >= t ? RectI::fromLTRB(l, t, r, b)
                                     : RectI();
         }
 
+        /** @brief Returns true if the given point is inside or on the edge of this rect.
+        */
         bool contains(const PointI& p) const
         {
             return p.x() >= _p.x() &&
@@ -516,10 +618,107 @@ class RectI
                    p.y() < _p.y() + _s.height();
         }
 
+        /** @brief Returns true if the given rect is entirely inside this rect.
+        */
+        bool contains(const RectI& r) const
+        {
+            return r.left() >= this->left() &&
+                   r.right() <= this->right() &&
+                   r.top() >= this->top() &&
+                   r.bottom() <= this->bottom();
+        }
+
+        /** @brief Returns true if this rect overlaps with the given rect.
+        */
+        bool intersects(const RectI& r) const
+        {
+            return this->right() > r.left() &&
+                   r.right() > this->left() &&
+                   this->bottom() > r.top() &&
+                   r.bottom() > this->top();
+        }
+
+        /** @brief Returns the center point of this rect.
+        */
+        PointI center() const
+        {
+            return PointI(_p.x() + _s.width() / 2, _p.y() + _s.height() / 2);
+        }
+
+        /** @brief Normalizes this rect so that width and height are non-negative.
+        */
+        void normalize()
+        {
+            if(_s.width() < 0)
+            {
+                _p.addX(_s.width());
+                _s.setWidth(-_s.width());
+            }
+            if(_s.height() < 0)
+            {
+                _p.addY(_s.height());
+                _s.setHeight(-_s.height());
+            }
+        }
+
+        /** @brief Returns a normalized copy of this rect.
+        */
+        RectI toNormalized() const
+        {
+            RectI r(*this);
+            r.normalize();
+            return r;
+        }
+
     private:
         PointI _p;
         SizeI  _s;
 };
+
+inline Rect::Rect(const RectI& r)
+: _p(r.origin())
+, _s(r.size())
+{}
+
+inline Rect& Rect::operator=(const RectI& r)
+{
+    _p = r.origin();
+    _s = r.size();
+    return *this;
+}
+
+inline RectI Rect::round() const
+{
+    return RectI(_p.round(), _s.round());
+}
+
+inline RectI Rect::floor() const
+{
+    return RectI(_p.floor(), _s.floor());
+}
+
+inline RectI Rect::ceil() const
+{
+    return RectI(_p.ceil(), _s.ceil());
+}
+
+inline RectI Rect::roundOut() const
+{
+    const Int l = static_cast<Int>(std::floor(this->left()));
+    const Int t = static_cast<Int>(std::floor(this->top()));
+    const Int r = static_cast<Int>(std::ceil(this->right()));
+    const Int b = static_cast<Int>(std::ceil(this->bottom()));
+    return RectI(PointI(l, t), SizeI(r - l, b - t));
+}
+
+inline RectI Rect::roundIn() const
+{
+    const Int l = static_cast<Int>(std::ceil(this->left()));
+    const Int t = static_cast<Int>(std::ceil(this->top()));
+    const Int r = static_cast<Int>(std::floor(this->right()));
+    const Int b = static_cast<Int>(std::floor(this->bottom()));
+    return RectI(PointI(l, t), SizeI(r - l, b - t));
+}
 
 }  // namespace
 

@@ -99,7 +99,7 @@ void renderMnemonicImpl(Pt::Forms::Painter& painter,
                         const Pt::Gfx::RectF& rect,
                         const Pt::Gfx::RectF& mnemonic)
 {
-    if( mnemonic.isNull() )
+    if( mnemonic.isEmpty() )
         return;
 
     painter.begin(context);
@@ -2371,7 +2371,7 @@ Gfx::SizeF PlatinumListItemRenderer::onMeasureContent(PaintSurface& /*surface*/,
                                                       const Gfx::SizeF& iconSize,
                                                       const Gfx::SizeF& textSize)
 {
-    double spacing = (iconSize.isNull() || textSize.isNull()) ? 0
+    double spacing = (iconSize.isEmpty() || textSize.isEmpty()) ? 0
                    : _font.size() * 0.5;
 
     double w = iconSize.width() + spacing + textSize.width();
@@ -2409,7 +2409,7 @@ void PlatinumListItemRenderer::onLayoutContent(PaintSurface& /*surface*/,
                                                Gfx::RectF& iconRect,
                                                Gfx::RectF& textRect)
 {
-    double spacing = (iconSize.isNull() || textSize.isNull()) ? 0
+    double spacing = (iconSize.isEmpty() || textSize.isEmpty()) ? 0
                    : _font.size() * 0.5;
 
     double iconX = contentRect.x();

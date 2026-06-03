@@ -271,7 +271,7 @@ void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options,
 
     // menu border
     Pt::Gfx::RectF borderRect(this->size());
-    borderRect.shift(inset, inset);
+    borderRect.move(inset, inset);
     borderRect.shrink(2 * inset, 2 * inset);
 
     painter.setPen(_pen);

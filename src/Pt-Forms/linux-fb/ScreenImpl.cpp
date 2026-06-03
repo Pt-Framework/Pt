@@ -1,4 +1,4 @@
- /*
+﻿ /*
   Copyright (C) 2015 Marc Boris Duerner
   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
@@ -305,7 +305,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
     const Gfx::RectF& updateRectF = ev.rect();
 
-    if( updateRectF.isNull() )
+    if( updateRectF.isEmpty() )
         return;
 
     Base::onProcessPaintEvent(ev);

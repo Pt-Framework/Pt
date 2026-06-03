@@ -1,4 +1,4 @@
-/* Copyright (C) 2026 Marc Boris Duerner
+﻿/* Copyright (C) 2026 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -313,7 +313,7 @@ class PaintContextTest : public Pt::Unit::TestSuite
             TestSurface surface;
             RectF contextClip(PointF(0.0, 0.0), SizeF(10.0, 10.0));
             RectF painterClip(PointF(5.0, 4.0), SizeF(8.0, 7.0));
-            RectF expected = painterClip.intersect(contextClip);
+            RectF expected = painterClip.toIntersected(contextClip);
             PaintContext context(surface, contextClip);
 
             Painter painter;
@@ -329,7 +329,7 @@ class PaintContextTest : public Pt::Unit::TestSuite
             TestSurface surface;
             RectF contextClip(PointF(0.0, 0.0), SizeF(10.0, 10.0));
             RectF painterClip(PointF(6.0, 3.0), SizeF(8.0, 8.0));
-            RectF expected = painterClip.intersect(contextClip);
+            RectF expected = painterClip.toIntersected(contextClip);
             PaintContext context(surface, contextClip);
 
             Painter painter(context);
@@ -345,7 +345,7 @@ class PaintContextTest : public Pt::Unit::TestSuite
             RectF initialContextClip(PointF(0.0, 0.0), SizeF(10.0, 10.0));
             RectF updatedContextClip(PointF(4.0, 2.0), SizeF(4.0, 7.0));
             RectF painterClip(PointF(3.0, 1.0), SizeF(8.0, 8.0));
-            RectF expected = painterClip.intersect(updatedContextClip);
+            RectF expected = painterClip.toIntersected(updatedContextClip);
             PaintContext context(surface, initialContextClip);
 
             Painter painter(context);
@@ -425,7 +425,7 @@ class PaintContextTest : public Pt::Unit::TestSuite
             painter.setClip(painterClip);
 
             PT_UNIT_ASSERT(surface.canvas().hasClip());
-            PT_UNIT_ASSERT(surface.canvas().clip().isNull());
+            PT_UNIT_ASSERT(surface.canvas().clip().isEmpty());
         }
 };
 

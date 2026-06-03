@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  *
@@ -38,7 +38,7 @@ ClipPolygon::ClipPolygon()
 
 void ClipPolygon::clip( std::vector<PointI>& in, const RectI& clippingArea )
 {
-    if( clippingArea.isNull())
+    if( clippingArea.isEmpty())
     {
         in.clear();
         return;

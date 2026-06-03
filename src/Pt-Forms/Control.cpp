@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
+﻿/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -561,8 +561,8 @@ void Control::onRepaintRequest(Control& control, const Gfx::RectF& rect)
     Gfx::PointF controlPos = fromControl( control, rect.topLeft() );
     Gfx::RectF controlRect( controlPos, rect.size() );
 
-    controlRect = controlRect.intersect( bounds() );
-    if( controlRect.isNull() )
+    controlRect = controlRect.toIntersected( bounds() );
+    if( controlRect.isEmpty() )
         return;
 
     repaint(controlRect);
@@ -572,7 +572,7 @@ void Control::onRepaintRequest(Control& control, const Gfx::RectF& rect)
 void Control::onProcessPaintEvent(const PaintEvent& ev)
 {    
     const Gfx::RectF& r = ev.rect();
-    if( r.isNull() )
+    if( r.isEmpty() )
         return;
 
     if( ! isVisible() )
@@ -589,8 +589,8 @@ void Control::onProcessPaintEvent(const PaintEvent& ev)
         Control* control = (*it);
 
         // clip control update rect
-        Gfx::RectF updateRect = control->geometry().intersect(r);
-        if( updateRect.isNull() )
+        Gfx::RectF updateRect = control->geometry().toIntersected(r);
+        if( updateRect.isEmpty() )
             continue;
 
         // paint control rect

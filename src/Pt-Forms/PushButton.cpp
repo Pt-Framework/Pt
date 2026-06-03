@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+﻿/* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
@@ -363,7 +363,7 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 
     if( _picture.empty() )
         _measuredIconSize = Gfx::SizeF();
-    else if( _iconSize.isNull() )
+    else if( _iconSize.isEmpty() )
         _measuredIconSize = surface().scaling().toLogical( _picture.size() );
     else
         _measuredIconSize = _iconSize;
