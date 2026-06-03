@@ -47,14 +47,16 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 
 ScreenImpl::~ScreenImpl()
 {
-    if(_captureMonitor)
-    {
-        [NSEvent removeMonitor:_captureMonitor];
-        _captureMonitor = 0;
-    }
-
     while( ! _windows.empty() )
         _windows.back()->unparent();
+
+    if(_captureMonitor)
+    {
+        if([NSApp isRunning])
+            [NSEvent removeMonitor:_captureMonitor];
+
+        _captureMonitor = 0;
+    }
 
     setParent(0);
 }
@@ -375,8 +377,10 @@ void ScreenImpl::setCapture(Widget* capture)
     if(_captureMonitor)
     {
         //std::clog << "RELEASE CAPTURE NSWINDOW: " << _captureMonitor << std::endl;
-        
-        [NSEvent removeMonitor:_captureMonitor];
+
+        if([NSApp isRunning])
+            [NSEvent removeMonitor:_captureMonitor];
+
         _captureMonitor = 0;
     }
 
