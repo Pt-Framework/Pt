@@ -30,6 +30,11 @@ PT_FORMS_SUBDIR = [ FDirName $(PT_TOP) src Pt-Forms $(PT_FORMS_IMPL:L) ] ;
 PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.cpp  ] ;
 PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.mm  ] ;
 
+if $(PT_FORMS_IMPL:L) = wayland
+{
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.c ] ;
+}
+
 if $(PT_FORMS_RENDERER)
 {
     PT_FORMS_RENDERER_DIR = [ FDirName $(PT_TOP) src Pt-Forms $(PT_FORMS_RENDERER) ] ;

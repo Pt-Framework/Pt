@@ -1,0 +1,65 @@
+if ! $(WAYLAND_JAM) {
+WAYLAND_JAM = true ;
+
+Load pkgconfig.jam ;
+
+# ConfigureWayland
+#
+# Detects wayland-client, wayland-cursor and xkbcommon using pkg-config.
+# Falls back to CheckBuildC++ if pkg-config is unavailable.
+#
+# Sets:
+#   WAYLAND_LIBS        -lwayland-client
+#   WAYLAND_CURSOR_LIBS -lwayland-cursor
+#   XKBCOMMON_LIBS      -lxkbcommon
+#
+rule ConfigureWayland
+{
+    local _have_wayland = [ PkgConfig-Exists wayland-client ] ;
+
+    if $(_have_wayland) = yes
+    {
+        WAYLAND_LIBS = [ PkgConfig-LinkLibs wayland-client ] ;
+        WAYLAND_CURSOR_LIBS = [ PkgConfig-LinkLibs wayland-cursor ] ;
+        XKBCOMMON_LIBS = [ PkgConfig-LinkLibs xkbcommon ] ;
+    }
+    else
+    {
+        WAYLAND_LIBS = [ CheckBuildC++ "#include <wayland-client.h>"
+                                       "int main() {"
+                                       "struct wl_display* d = 0;"
+                                       "return 0; }"
+                                     : ""
+                                     : "-lwayland-client" ] ;
+
+        if $(WAYLAND_LIBS)
+        {
+            WAYLAND_LIBS = -lwayland-client ;
+            WAYLAND_CURSOR_LIBS = -lwayland-cursor ;
+
+            XKBCOMMON_LIBS = [ CheckBuildC++ "#include <xkbcommon/xkbcommon.h>"
+                                             "int main() {"
+                                             "return 0; }"
+                                           : ""
+                                           : "-lxkbcommon" ] ;
+
+            if $(XKBCOMMON_LIBS)
+            {
+                XKBCOMMON_LIBS = -lxkbcommon ;
+            }
+        }
+    }
+
+    if $(WAYLAND_LIBS)
+    {
+        Configure WAYLAND_LIBS ;
+        Configure WAYLAND_CURSOR_LIBS ;
+        Configure XKBCOMMON_LIBS ;
+    }
+
+    EchoOption WAYLAND_LIBS : "Wayland lib flags" ;
+    EchoOption WAYLAND_CURSOR_LIBS : "Wayland cursor lib flags" ;
+    EchoOption XKBCOMMON_LIBS : "xkbcommon lib flags" ;
+}
+
+} # WAYLAND_JAM

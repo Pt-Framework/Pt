@@ -1017,6 +1017,11 @@ else if --with-linux-drm in $(ARGV)
     PT_FORMS_IMPL = linux-drm ;
     PT_FORMS_RENDERER = raster ;
 }
+else if --with-wayland in $(ARGV)
+{
+    PT_FORMS_IMPL = wayland ;
+    PT_FORMS_RENDERER = raster ;
+}
 
 # Renderer overrides
 if --with-gdi in $(ARGV)
@@ -1161,6 +1166,37 @@ else if $(PT_FORMS_IMPL:L) = "linux-drm"
             {
                 PT_FORMS_LINKLIBS += -lvulkan ;
                 PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_DRM_VULKAN ] ;
+            }
+            else
+            {
+                Echo "WARNING: Vulkan not found, falling back to raster renderer" ;
+                PT_FORMS_RENDERER = raster ;
+            }
+        }
+    }
+}
+else if $(PT_FORMS_IMPL:L) = "wayland"
+{
+    Load wayland.jam ;
+    ConfigureWayland ;
+
+    if $(WAYLAND_LIBS) && $(XKBCOMMON_LIBS)
+    {
+        PT_FORMS_LINKLIBS = $(WAYLAND_LIBS) $(WAYLAND_CURSOR_LIBS) $(XKBCOMMON_LIBS) ;
+        WITH_FORMS = yes ;
+
+        if $(PT_FORMS_RENDERER) = vulkan
+        {
+            local WITH_VULKAN = [ CheckBuildC++ "#include <vulkan/vulkan.h>"
+                                                "int main() {"
+                                                "return 0; }"
+                                              : ""
+                                              : "-lvulkan" ] ;
+
+            if $(WITH_VULKAN)
+            {
+                PT_FORMS_LINKLIBS += -lvulkan ;
+                PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_VULKAN ] ;
             }
             else
             {
