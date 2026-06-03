@@ -557,7 +557,7 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
             continue;
 
         Gfx::PointF winPos = toFrame( *frame, frameRect.topLeft() );
-        Gfx::RectF winRect( winPos, rect.size() );
+        Gfx::RectF winRect( winPos, frameRect.size() );
 
         PaintEvent pev( *frame, winRect );
         frame->processEvent(pev);
