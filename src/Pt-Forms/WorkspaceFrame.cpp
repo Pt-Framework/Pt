@@ -412,6 +412,10 @@ WorkspaceFrame::WorkspaceFrame(WorkspaceManager& workspace, Window& window)
 , _titleHeight( workspace.titleHeight() )
 , _state(WindowState::Normal)
 , _moveOffset(0, 0)
+, _resizeStartPointer(0, 0)
+, _resizeStartFrameRect()
+, _resizeStartClientSize()
+, _lastPointer(0, 0)
 , _movePending(false)
 , _isCapture(false)
 , _isClient(false)
@@ -1430,15 +1434,22 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
         bool isResizing = _isLeftResizing || _isRightResizing ||
                           _isTopResizing || _isBottomResizing;
 
+        if(isResizing && isPress)
+        {
+            _resizeStartPointer = toGlobal(pos);
+            _resizeStartFrameRect = _frameRect;
+            _resizeStartClientSize = _clientBounds.size();
+        }
+
         if(isResizing && ! isPress)
         {
-            Gfx::SizeF winSize = _clientBounds.size();
-            Gfx::PointF winpos = _frameRect.topLeft();
-            Gfx::PointF delta = pos - _lastPointer;
+            const Gfx::PointF currentPointer = toGlobal(pos);
+            const Gfx::PointF delta = currentPointer - _resizeStartPointer;
+
+            Gfx::SizeF winSize = _resizeStartClientSize;
 
             if( _isLeftResizing )
             {
-                winpos.addX( delta.x() );
                 winSize.subWidth(delta.x());
             }
 
@@ -1447,7 +1458,6 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
 
             if(_isTopResizing)
             {
-                winpos.addY( delta.y() );
                 winSize.subHeight(delta.y());
             }
 
@@ -1459,6 +1469,14 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
                 _window->resize(winSize);
                 //resize(winSize);
             }
+
+            Gfx::PointF winpos = _resizeStartFrameRect.topLeft();
+
+            if( _isLeftResizing )
+                winpos.setX(_resizeStartFrameRect.right() - _frameRect.width());
+
+            if(_isTopResizing)
+                winpos.setY(_resizeStartFrameRect.bottom() - _frameRect.height());
 
             if( winpos != _frameRect.topLeft() )
             {

@@ -355,6 +355,9 @@ class WorkspaceFrame : public WindowFrame
         WindowState    _state;
 
         Gfx::PointF    _moveOffset;
+        Gfx::PointF    _resizeStartPointer;
+        Gfx::RectF     _resizeStartFrameRect;
+        Gfx::SizeF     _resizeStartClientSize;
         Gfx::PointF    _lastPointer;
         bool           _movePending;
         bool           _isCapture;
