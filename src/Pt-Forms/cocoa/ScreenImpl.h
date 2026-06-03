@@ -208,8 +208,6 @@ class ScreenImpl : public WindowManager
         std::vector<Window*>         _windows;
 
         ::id                         _captureMonitor;
-
-        double                       _screenScaling;
 };
 
 } // namespace
