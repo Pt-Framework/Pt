@@ -214,6 +214,24 @@ class WindowImpl : public WindowFrame
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
+        double userScaleFactor() const;
+
+        double backingScaleFactor() const;
+
+        double totalScaleFactor() const;
+
+        Gfx::PointF logicalToAppKit(const Gfx::PointF& pos) const;
+
+        Gfx::SizeF logicalToAppKit(const Gfx::SizeF& size) const;
+
+        Gfx::RectF logicalToAppKit(const Gfx::RectF& rect) const;
+
+        Gfx::PointF appKitToLogical(const Gfx::PointF& pos) const;
+
+        Gfx::SizeF appKitToLogical(const Gfx::SizeF& size) const;
+
+        Gfx::RectF appKitToLogical(const Gfx::RectF& rect) const;
+
         ScreenImpl&              _wm;
         Window&                  _client;
         NSWindow*                _window;

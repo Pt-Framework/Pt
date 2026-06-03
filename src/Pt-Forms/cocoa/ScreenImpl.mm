@@ -41,7 +41,6 @@ namespace Forms {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
 , _captureMonitor(0)
-, _screenScaling(1.0)
 {
 }
 
@@ -163,9 +162,9 @@ Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
     double scaling = scaleFactor();
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
-    CGFloat y = screenHeight - p.y() / scaling;
+    CGFloat y = screenHeight - p.y() * scaling;
     
-    NSPoint pnt = NSMakePoint(p.x() / scaling, y);
+    NSPoint pnt = NSMakePoint(p.x() * scaling, y);
 
     NSInteger n =  [ NSWindow windowNumberAtPoint: pnt
                               belowWindowWithWindowNumber: 0 ];
@@ -423,7 +422,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    RescaleEvent rev(*this, scaling * _screenScaling);
+    RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);
 
     std::vector<Window*>::iterator wit;

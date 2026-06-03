@@ -180,6 +180,9 @@ WindowImpl::~WindowImpl()
     if( _window == nil )
         return;
 
+    if(_view != nil)
+        [static_cast<WindowView*>(_view) detachFromWindow];
+
     [_window close];
 
     [_window release];
@@ -187,6 +190,73 @@ WindowImpl::~WindowImpl()
 
     [_view release];
     _view = nil;
+}
+
+
+double WindowImpl::userScaleFactor() const
+{
+    double scale = Application::instance().scaleFactor();
+    return scale > 0.0 ? scale : 1.0;
+}
+
+
+double WindowImpl::backingScaleFactor() const
+{
+    if(_window != nil)
+    {
+        return [_window backingScaleFactor];
+    }
+
+    NSScreen* screen = [NSScreen mainScreen];
+    return screen ? [screen backingScaleFactor] : 1.0;
+}
+
+
+double WindowImpl::totalScaleFactor() const
+{
+    return userScaleFactor() * backingScaleFactor();
+}
+
+
+Gfx::PointF WindowImpl::logicalToAppKit(const Gfx::PointF& pos) const
+{
+    double scale = userScaleFactor();
+    return pos * scale;
+}
+
+
+Gfx::SizeF WindowImpl::logicalToAppKit(const Gfx::SizeF& size) const
+{
+    double scale = userScaleFactor();
+    return size * scale;
+}
+
+
+Gfx::RectF WindowImpl::logicalToAppKit(const Gfx::RectF& rect) const
+{
+    return Gfx::RectF( logicalToAppKit(rect.topLeft()),
+                       logicalToAppKit(rect.size()) );
+}
+
+
+Gfx::PointF WindowImpl::appKitToLogical(const Gfx::PointF& pos) const
+{
+    double scale = userScaleFactor();
+    return pos / scale;
+}
+
+
+Gfx::SizeF WindowImpl::appKitToLogical(const Gfx::SizeF& size) const
+{
+    double scale = userScaleFactor();
+    return size / scale;
+}
+
+
+Gfx::RectF WindowImpl::appKitToLogical(const Gfx::RectF& rect) const
+{
+    return Gfx::RectF( appKitToLogical(rect.topLeft()),
+                       appKitToLogical(rect.size()) );
 }
 
 
@@ -262,39 +332,35 @@ void WindowImpl::setType(WindowType type)
 
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    //std::clog << "TO SCREEN POS: " << pos.y() << std::endl;
+    Gfx::PointF appKitPos = logicalToAppKit(pos);
 
     CGFloat viewHeight = [_view frame].size.height;
-    double y = viewHeight - pos.y();
-    //std::clog << "TO SCREEN VH: " << viewHeight << " -> " << y << std::endl;
+    double y = viewHeight - appKitPos.y();
 
-    NSPoint p = NSMakePoint(pos.x(), y);
+    NSPoint p = NSMakePoint(appKitPos.x(), y);
     p = [ _window convertPointToScreen: p ];
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
-    y = screenHeight - p.y;
-    //std::clog << "TO SCREEN SH: " << screenHeight << " -> " << y << std::endl;
+    Gfx::PointF screenPos(p.x, screenHeight - p.y);
 
-    return Gfx::PointF(p.x, y);
+    return appKitToLogical(screenPos);
 }
 
 
 Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {   
-    //std::clog << "FROM SCREEN POS: " << pos.y() << std::endl;
+    Gfx::PointF appKitPos = logicalToAppKit(pos);
     
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
-    double y = screenHeight - pos.y();
-    //std::clog << "FROM SCREEN SH: " << screenHeight << " -> " << y << std::endl;
+    double y = screenHeight - appKitPos.y();
 
-    NSPoint p = NSMakePoint(pos.x(), y);
+    NSPoint p = NSMakePoint(appKitPos.x(), y);
     p = [ _window convertPointFromScreen: p ];
 
     CGFloat viewHeight = [_view frame].size.height;
-    y = viewHeight - p.y;
-    //std::clog << "FROM SCREEN VH: " << viewHeight << " -> " << y << std::endl;
+    Gfx::PointF viewPos(p.x, viewHeight - p.y);
     
-    return Gfx::PointF(p.x, y);
+    return appKitToLogical(viewPos);
 }
 
 
@@ -326,7 +392,7 @@ Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 
 void WindowImpl::paint(const Gfx::RectF& rect)
 {
-    Gfx::RectF r( rect.topLeft(), rect.size() );
+    Gfx::RectF appKitRect = logicalToAppKit(rect);
 
     //std::clog << "PAINT RECT: " << rect.x() << "," << rect.y() <<
     //                   " " << rect.width() << "x" << rect.height() << std::endl;
@@ -335,10 +401,10 @@ void WindowImpl::paint(const Gfx::RectF& rect)
     NSRect contentRect = [_window contentRectForFrameRect:frameRect];
     CGFloat contentHeight = contentRect.size.height;
 
-    CGFloat x = r.x();
-    CGFloat y = contentHeight - (r.y() + r.height());
-    CGFloat w = r.width();
-    CGFloat h = r.height();
+    CGFloat x = appKitRect.x();
+    CGFloat y = contentHeight - (appKitRect.y() + appKitRect.height());
+    CGFloat w = appKitRect.width();
+    CGFloat h = appKitRect.height();
     
     //std::clog << "PAINT: " << x << "," << y <<
     //                   " " << w << "x" << h << std::endl;
@@ -376,9 +442,9 @@ void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    //std::clog << "RESCALE EVENT: " << [_window backingScaleFactor] << std::endl;
+    //std::clog << "RESCALE EVENT: " << backingScaleFactor() << std::endl;
     //std::clog << "APP SCALING: " << Application::instance().scaleFactor() << std::endl;
-    scaling *= [_window backingScaleFactor];
+    scaling *= backingScaleFactor();
 
     RescaleEvent rev(*this, scaling);
     Base::onProcessRescaleEvent(rev);
@@ -490,13 +556,15 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
     //std::clog << "MOVE: " << pos.x() << "," << pos.y() << std::endl;
 
+    Gfx::PointF appKitPos = logicalToAppKit(pos);
+
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
     //std::clog << "TODO: WindowImpl.mm 462: get height of parent screen " << screenHeight << std::endl;
 
     NSPoint origin;
-    origin.x = pos.x();
-    origin.y = screenHeight - pos.y() - windowHeight;
+    origin.x = appKitPos.x();
+    origin.y = screenHeight - appKitPos.y() - windowHeight;
     //std::clog << "MOVED ORIGIN: " << _frame.origin.x << "x" << _frame.origin.y << std::endl;
 
     [_window setFrameOrigin:origin];
@@ -519,6 +587,8 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
     //static int nnn = 0;
     //std::clog << ++nnn << " RESIZE: " << size.width() << ", "  << size.height() << std::endl;
 
+    Gfx::SizeF appKitSize = logicalToAppKit(size);
+
     //std::clog << "RESIZE FRAME: " << _frame.origin.x << "," << _frame.origin.y
     //                              << _frame.size.width << "," << _frame.size.height << std::endl;
     NSRect frameRect = [_window frame];
@@ -527,9 +597,9 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
     //std::clog << "CURRENT FRAME: " << frameRect.origin.x << "," << frameRect.origin.y << " "
     //                               << frameRect.size.width << "," << frameRect.size.height << std::endl;
     
-    frameRect.origin.y += content.size.height - size.height();
-    frameRect.size.width += size.width() - content.size.width;
-    frameRect.size.height += size.height() - content.size.height;
+    frameRect.origin.y += content.size.height - appKitSize.height();
+    frameRect.size.width += appKitSize.width() - content.size.width;
+    frameRect.size.height += appKitSize.height() - content.size.height;
     
     //std::clog << "RESIZED FRAME: " << frameRect.origin.x << "," << frameRect.origin.y << " "
     //                               << frameRect.size.width << "," << frameRect.size.height << std::endl;
@@ -631,10 +701,13 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
     //std::clog << "onSetSizeLimits: " << minSizeF.width() << "x" << minSizeF.height()
     //                          << " " << maxSizeF.width() << "x" << maxSizeF.height() << std::endl;
 
-    NSSize minSize = NSMakeSize( minSizeF.width(), minSizeF.height() );
+    Gfx::SizeF minAppKit = logicalToAppKit(minSizeF);
+    Gfx::SizeF maxAppKit = logicalToAppKit(maxSizeF);
+
+    NSSize minSize = NSMakeSize( minAppKit.width(), minAppKit.height() );
     [_window setMinSize:minSize];
 
-    NSSize maxSize = NSMakeSize( maxSizeF.width(), maxSizeF.height() );
+    NSSize maxSize = NSMakeSize( maxAppKit.width(), maxAppKit.height() );
     [_window setMaxSize:maxSize];
 }
 
@@ -669,9 +742,8 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     double width = rect.size.width;
     double height = rect.size.height;
 
-    Pt::Gfx::PointF pos(x, y);
-    Gfx::SizeF size(width, height);
-    Gfx::RectF paintRect(pos, size);
+    Gfx::RectF appKitRect( Gfx::PointF(x, y), Gfx::SizeF(width, height) );
+    Gfx::RectF paintRect = appKitToLogical(appKitRect);
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
@@ -681,7 +753,10 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     CGContextRef windowContext = [graphicsContext CGContext];
 
     double s = scaleFactor();
-    CGRect sourceRect = CGRectMake(x * s, y * s, width * s, height * s);
+    CGRect sourceRect = CGRectMake(paintRect.x() * s,
+                                   paintRect.y() * s,
+                                   paintRect.width() * s,
+                                   paintRect.height() * s);
     CGImageRef sourceImage = CGImageCreateWithImageInRect(image, sourceRect);
 
     CGContextSaveGState(windowContext);
@@ -720,9 +795,7 @@ void WindowImpl::onViewMove(const NSPoint& viewPos)
     double y = screenHeight - viewPos.y - windowHeight;
 
     Pt::Gfx::PointF pos(x, y);
-
-    //double scaling = Application::instance().scaleFactor();
-    //pos = pos / scaling;
+    pos = appKitToLogical(pos);
 
     //std::clog << "onViewMove: " << _client.title() << " " << pos.x() << ", " << pos.y() << std::endl;
 
@@ -754,9 +827,7 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
 
     Gfx::SizeF to(viewSize.width, 
                   viewSize.height);
-
-    //double scaling = Application::instance().scaleFactor();
-    //to = to / scaling;
+    to = appKitToLogical(to);
 
     ResizeEvent rev(*this, to);
     Application::instance().processEvent(rev);
@@ -774,7 +845,7 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
 
 void WindowImpl::onViewDidRescale()
 {
-    CGFloat scale = [ _window backingScaleFactor ];
+    CGFloat scale = backingScaleFactor();
     std::clog << "BACKING SCALE FACTOR: " << scale << std::endl;
 }
 
@@ -921,7 +992,7 @@ void WindowImpl::onViewLMouseDown(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    //pos /= _client.scaleFactor();
+    pos = appKitToLogical(pos);
 
     _mouseEvent.setPress(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -939,7 +1010,7 @@ void WindowImpl::onViewLMouseUp(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    //pos /= _client.scaleFactor();
+    pos = appKitToLogical(pos);
 
     _mouseEvent.setRelease(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -957,7 +1028,7 @@ void WindowImpl::onViewMouseMove(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    //pos /= _client.scaleFactor();
+    pos = appKitToLogical(pos);
 
     _mouseEvent.setMove();
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -975,7 +1046,7 @@ void WindowImpl::onViewRMouseDown(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    //pos /= _client.scaleFactor();
+    pos = appKitToLogical(pos);
 
     _mouseEvent.setPress(MouseEvent::Right);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -993,7 +1064,7 @@ void WindowImpl::onViewRMouseUp(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    //pos /= _client.scaleFactor();
+    pos = appKitToLogical(pos);
 
     _mouseEvent.setRelease(MouseEvent::Right);
     _mouseEvent.setPosition( _client.toGlobal(pos) );

@@ -44,19 +44,25 @@
                 frame: (NSRect) frame
 {
     _windowImpl = window;
+    _window = _windowImpl->window();
+    _isObservingVisible = false;
 
     self = [super initWithFrame: frame];
     [self setWantsLayer:NO];
     [self setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
 
-    // TODO: move this to a separate class WindowController also implemnting 
+    // TODO: move this to a separate class WindowController also implementing 
     //       WindowDelegate
-    [_windowImpl->window() setDelegate: self];
+    if(_window)
+    {
+        [_window setDelegate: self];
 
-    [_windowImpl->window() addObserver:self
-                            forKeyPath:@"visible"
-                               options:NSKeyValueObservingOptionNew
-                               context:nil];
+        [_window addObserver:self
+                  forKeyPath:@"visible"
+                     options:NSKeyValueObservingOptionNew
+                     context:nil];
+        _isObservingVisible = true;
+    }
 
     int opts = (NSTrackingActiveAlways | 
                 NSTrackingInVisibleRect | 
@@ -73,10 +79,28 @@
 }
 
 
+- (void) detachFromWindow
+{
+    if( ! _window )
+        return;
+
+    if([_window delegate] == self)
+        [_window setDelegate:nil];
+
+    if(_isObservingVisible)
+    {
+        [_window removeObserver:self
+                     forKeyPath:@"visible"];
+        _isObservingVisible = false;
+    }
+
+    _window = nil;
+}
+
+
 - (void) dealloc 
 {
-    [_windowImpl->window() removeObserver:self 
-                               forKeyPath:@"visible"];
+    [self detachFromWindow];
 
     [super dealloc];
 }
@@ -349,6 +373,12 @@
     //std::clog << "WINDOW SHOULD CLOSE" << std::endl;
     _windowImpl->onViewClosing();
     return FALSE;
+}
+
+
+- (void) windowWillClose: (NSNotification*) notification
+{
+    [self detachFromWindow];
 }
 
 

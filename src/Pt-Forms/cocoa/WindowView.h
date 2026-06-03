@@ -35,12 +35,16 @@
 @interface WindowView : NSView<NSWindowDelegate>
 {
     Pt::Forms::WindowImpl* _windowImpl;
+    NSWindow*              _window;
+    bool                   _isObservingVisible;
 }
     
 - (WindowView*) initWithImpl: (Pt::Forms::WindowImpl*) window 
                 frame: (NSRect) frame;
 
 - (void) dealloc;
+
+- (void) detachFromWindow;
 
 - (BOOL) acceptsFirstResponder;
 
@@ -93,6 +97,8 @@
 - (void) windowDidResignMain: (NSNotification*) notification;
 
 - (BOOL) windowShouldClose: (id) sender;
+
+- (void) windowWillClose: (NSNotification*) notification;
 
 - (void) windowDidChangeBackingProperties: (NSNotification*) notification;
 
