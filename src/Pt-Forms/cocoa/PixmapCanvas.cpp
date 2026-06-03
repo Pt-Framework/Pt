@@ -52,7 +52,7 @@ PixmapCanvas::PixmapCanvas()
 , _penCap(kCGLineCapButt)
 , _penJoin(kCGLineJoinRound)
 , _brushColor(0)
-, _brushStyle(Gfx::Brush::Solid)
+, _brushGradient(0)
 , _font(0)
 , _fontAttributes(0)
 , _attributedString(0)
@@ -68,6 +68,12 @@ PixmapCanvas::~PixmapCanvas()
 
     if(_penColor)
       CFRelease(_penColor);
+
+    if(_brushColor)
+      CFRelease(_brushColor);
+
+    if(_brushGradient)
+      CGGradientRelease(_brushGradient);
 
     if(_attributedString)
         CFRelease(_attributedString);
@@ -288,9 +294,9 @@ void PixmapCanvas::onApplyPen()
 
 void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
-    _brushStyle = brush.fillStyle();
+    _brush = brush;
 
-    switch(_brushStyle)
+    switch(_brush.fillStyle())
     {
         default:
         case Pt::Gfx::Brush::Solid:
@@ -303,6 +309,44 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
               CFRelease(_brushColor);
 
             _brushColor = color;
+            break;
+        }
+
+        case Pt::Gfx::Brush::Gradient:
+        {
+            if(_brushGradient)
+            {
+                CGGradientRelease(_brushGradient);
+                _brushGradient = 0;
+            }
+
+            const Gfx::ColorStops& stops = brush.gradientStops();
+            const std::size_t count = stops.size();
+
+            if(count > 0)
+            {
+                std::vector<CGFloat> components;
+                std::vector<CGFloat> locations;
+                components.reserve(count * 4);
+                locations.reserve(count);
+
+                for(std::size_t i = 0; i < count; ++i)
+                {
+                    const Gfx::ColorStop& s = stops[i];
+                    components.push_back( s.color().red()   / 255.0 );
+                    components.push_back( s.color().green() / 255.0 );
+                    components.push_back( s.color().blue()  / 255.0 );
+                    components.push_back( s.color().alpha() / 255.0 );
+                    locations.push_back( s.position() );
+                }
+
+                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                _brushGradient = CGGradientCreateWithColorComponents(colorSpace,
+                                                                components.data(),
+                                                                locations.data(),
+                                                                count);
+                CGColorSpaceRelease(colorSpace);
+            }
             break;
         }
 
@@ -319,11 +363,15 @@ void PixmapCanvas::onApplyBrush()
 
     CGContextRef context = _pixmap->context();
 
-    switch(_brushStyle)
+    switch(_brush.fillStyle())
     {
         default:
         case Pt::Gfx::Brush::Solid:
             CGContextSetFillColorWithColor(context, _brushColor);
+            break;
+
+        case Pt::Gfx::Brush::Gradient:
+            // gradient is drawn at fill time via fillGradient()
             break;
 
         case Pt::Gfx::Brush::Texture:
@@ -466,7 +514,18 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
         CGContextAddLineToPoint(context, p.x(), p.y());
     }
 
-    CGContextFillPath(context);
+    if(_brush.fillStyle() == Gfx::Brush::Gradient)
+    {
+        CGContextSaveGState(context);
+        CGRect bbox = CGContextGetPathBoundingBox(context);
+        CGContextClip(context);
+        fillGradient(context, bbox);
+        CGContextRestoreGState(context);
+    }
+    else
+    {
+        CGContextFillPath(context);
+    }
 }
 
 
@@ -490,7 +549,18 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& r)
     CGContextRef context = _pixmap->context();
 
     CGRect rect = CGRectMake( r.x(), r.y(), r.width(), r.height() );
-    CGContextFillRect(context, rect);
+
+    if(_brush.fillStyle() == Gfx::Brush::Gradient)
+    {
+        CGContextSaveGState(context);
+        CGContextClipToRect(context, rect);
+        fillGradient(context, rect);
+        CGContextRestoreGState(context);
+    }
+    else
+    {
+        CGContextFillRect(context, rect);
+    }
 }
 
 
@@ -519,8 +589,19 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
     CGRect rect = CGRectMake( topLeft.x(), topLeft.y(),
                               size.width(), size.height() );
 
-    CGContextAddEllipseInRect(context, rect);
-    CGContextFillPath(context);
+    if(_brush.fillStyle() == Gfx::Brush::Gradient)
+    {
+        CGContextSaveGState(context);
+        CGContextAddEllipseInRect(context, rect);
+        CGContextClip(context);
+        fillGradient(context, rect);
+        CGContextRestoreGState(context);
+    }
+    else
+    {
+        CGContextAddEllipseInRect(context, rect);
+        CGContextFillPath(context);
+    }
 }
 
 
@@ -663,6 +744,66 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
 }
 
 
+void PixmapCanvas::fillGradient(CGContextRef context, CGRect bbox)
+{
+    if( ! _brushGradient)
+        return;
+
+    const Gfx::Brush::GradientStyle gs = _brush.gradient();
+    const Gfx::Brush::PositionMode  pm = _brush.positionMode();
+
+    CGPoint start;
+    CGPoint end;
+
+    if(gs == Gfx::Brush::Horizontal)
+    {
+        start = CGPointMake(bbox.origin.x, bbox.origin.y);
+        end   = CGPointMake(bbox.origin.x + bbox.size.width, bbox.origin.y);
+    }
+    else if(gs == Gfx::Brush::Vertical)
+    {
+        start = CGPointMake(bbox.origin.x, bbox.origin.y);
+        end   = CGPointMake(bbox.origin.x, bbox.origin.y + bbox.size.height);
+    }
+    else if(pm == Gfx::Brush::Relative)
+    {
+        const Gfx::PointF& gb = _brush.gradientBegin();
+        const Gfx::PointF& ge = _brush.gradientEnd();
+        start = CGPointMake(bbox.origin.x + gb.x() * bbox.size.width,
+                            bbox.origin.y + gb.y() * bbox.size.height);
+        end   = CGPointMake(bbox.origin.x + ge.x() * bbox.size.width,
+                            bbox.origin.y + ge.y() * bbox.size.height);
+    }
+    else
+    {
+        start = CGPointMake(_brush.gradientBegin().x(), _brush.gradientBegin().y());
+        end   = CGPointMake(_brush.gradientEnd().x(),   _brush.gradientEnd().y());
+    }
+
+    const CGGradientDrawingOptions opts = kCGGradientDrawsBeforeStartLocation
+                                        | kCGGradientDrawsAfterEndLocation;
+
+    if(gs == Gfx::Brush::Radial)
+    {
+        CGFloat r0 = _brush.gradientBeginRadius();
+        CGFloat r1 = _brush.gradientEndRadius();
+
+        if(pm == Gfx::Brush::Relative)
+        {
+            CGFloat scale = std::min(bbox.size.width, bbox.size.height);
+            r0 *= scale;
+            r1 *= scale;
+        }
+
+        CGContextDrawRadialGradient(context, _brushGradient, start, r0, end, r1, opts);
+    }
+    else
+    {
+        CGContextDrawLinearGradient(context, _brushGradient, start, end, opts);
+    }
+}
+
+
 CGMutablePathRef PixmapCanvas::makePath(const Gfx::Path& path)
 {
     CGMutablePathRef cgPath = CGPathCreateMutable();
@@ -747,8 +888,20 @@ void PixmapCanvas::onFillPath()
 
     CGContextRef context = _pixmap->context();
 
-    CGContextAddPath(context, _cgPath);
-    CGContextFillPath(context);
+    if(_brush.fillStyle() == Gfx::Brush::Gradient)
+    {
+        CGContextSaveGState(context);
+        CGContextAddPath(context, _cgPath);
+        CGRect bbox = CGContextGetPathBoundingBox(context);
+        CGContextClip(context);
+        fillGradient(context, bbox);
+        CGContextRestoreGState(context);
+    }
+    else
+    {
+        CGContextAddPath(context, _cgPath);
+        CGContextFillPath(context);
+    }
 }
 
 
@@ -776,8 +929,21 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
     CGMutablePathRef cgPath = makePath(path);
 
     CGContextRef context = _pixmap->context();
-    CGContextAddPath(context, cgPath);
-    CGContextFillPath(context);
+
+    if(_brush.fillStyle() == Gfx::Brush::Gradient)
+    {
+        CGContextSaveGState(context);
+        CGContextAddPath(context, cgPath);
+        CGRect bbox = CGContextGetPathBoundingBox(context);
+        CGContextClip(context);
+        fillGradient(context, bbox);
+        CGContextRestoreGState(context);
+    }
+    else
+    {
+        CGContextAddPath(context, cgPath);
+        CGContextFillPath(context);
+    }
 
     if(cgPath)
         CGPathRelease(cgPath);

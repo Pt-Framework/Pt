@@ -132,6 +132,8 @@ class PixmapCanvas : public Gfx::Canvas
     private:
         CGMutablePathRef makePath(const Gfx::Path& path);
 
+        void fillGradient(CGContextRef context, CGRect bbox);
+
     private:
         PixmapImpl*             _pixmap;
         Gfx::Transform          _transform;
@@ -144,8 +146,9 @@ class PixmapCanvas : public Gfx::Canvas
         CGLineJoin              _penJoin;
         std::vector<CGFloat>    _dashes;
 
+        Gfx::Brush              _brush;
         CGColorRef              _brushColor;
-        Gfx::Brush::FillStyle   _brushStyle;
+        CGGradientRef           _brushGradient;
 
         CTFontRef                     _font;
         Gfx::FontMetrics              _fontMetrics;
