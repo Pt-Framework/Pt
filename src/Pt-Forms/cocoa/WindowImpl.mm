@@ -193,7 +193,7 @@ WindowImpl::~WindowImpl()
 }
 
 
-double WindowImpl::userScaleFactor() const
+double WindowImpl::applicationScaleFactor() const
 {
     double scale = Application::instance().scaleFactor();
     return scale > 0.0 ? scale : 1.0;
@@ -214,49 +214,49 @@ double WindowImpl::backingScaleFactor() const
 
 double WindowImpl::totalScaleFactor() const
 {
-    return userScaleFactor() * backingScaleFactor();
+    return applicationScaleFactor() * backingScaleFactor();
 }
 
 
-Gfx::PointF WindowImpl::logicalToAppKit(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::toNative(const Gfx::PointF& pos) const
 {
-    double scale = userScaleFactor();
+    double scale = applicationScaleFactor();
     return pos * scale;
 }
 
 
-Gfx::SizeF WindowImpl::logicalToAppKit(const Gfx::SizeF& size) const
+Gfx::SizeF WindowImpl::toNative(const Gfx::SizeF& size) const
 {
-    double scale = userScaleFactor();
+    double scale = applicationScaleFactor();
     return size * scale;
 }
 
 
-Gfx::RectF WindowImpl::logicalToAppKit(const Gfx::RectF& rect) const
+Gfx::RectF WindowImpl::toNative(const Gfx::RectF& rect) const
 {
-    return Gfx::RectF( logicalToAppKit(rect.topLeft()),
-                       logicalToAppKit(rect.size()) );
+    return Gfx::RectF( toNative(rect.topLeft()),
+                       toNative(rect.size()) );
 }
 
 
-Gfx::PointF WindowImpl::appKitToLogical(const Gfx::PointF& pos) const
+Gfx::PointF WindowImpl::fromNative(const Gfx::PointF& pos) const
 {
-    double scale = userScaleFactor();
+    double scale = applicationScaleFactor();
     return pos / scale;
 }
 
 
-Gfx::SizeF WindowImpl::appKitToLogical(const Gfx::SizeF& size) const
+Gfx::SizeF WindowImpl::fromNative(const Gfx::SizeF& size) const
 {
-    double scale = userScaleFactor();
+    double scale = applicationScaleFactor();
     return size / scale;
 }
 
 
-Gfx::RectF WindowImpl::appKitToLogical(const Gfx::RectF& rect) const
+Gfx::RectF WindowImpl::fromNative(const Gfx::RectF& rect) const
 {
-    return Gfx::RectF( appKitToLogical(rect.topLeft()),
-                       appKitToLogical(rect.size()) );
+    return Gfx::RectF( fromNative(rect.topLeft()),
+                       fromNative(rect.size()) );
 }
 
 
@@ -332,7 +332,7 @@ void WindowImpl::setType(WindowType type)
 
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    Gfx::PointF appKitPos = logicalToAppKit(pos);
+    Gfx::PointF appKitPos = toNative(pos);
 
     CGFloat viewHeight = [_view frame].size.height;
     double y = viewHeight - appKitPos.y();
@@ -343,13 +343,13 @@ Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     Gfx::PointF screenPos(p.x, screenHeight - p.y);
 
-    return appKitToLogical(screenPos);
+    return fromNative(screenPos);
 }
 
 
 Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 {   
-    Gfx::PointF appKitPos = logicalToAppKit(pos);
+    Gfx::PointF appKitPos = toNative(pos);
     
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     double y = screenHeight - appKitPos.y();
@@ -360,7 +360,7 @@ Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
     CGFloat viewHeight = [_view frame].size.height;
     Gfx::PointF viewPos(p.x, viewHeight - p.y);
     
-    return appKitToLogical(viewPos);
+    return fromNative(viewPos);
 }
 
 
@@ -392,7 +392,7 @@ Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
 
 void WindowImpl::paint(const Gfx::RectF& rect)
 {
-    Gfx::RectF appKitRect = logicalToAppKit(rect);
+    Gfx::RectF appKitRect = toNative(rect);
 
     //std::clog << "PAINT RECT: " << rect.x() << "," << rect.y() <<
     //                   " " << rect.width() << "x" << rect.height() << std::endl;
@@ -556,7 +556,7 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
     //std::clog << "MOVE: " << pos.x() << "," << pos.y() << std::endl;
 
-    Gfx::PointF appKitPos = logicalToAppKit(pos);
+    Gfx::PointF appKitPos = toNative(pos);
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     CGFloat windowHeight = [_window frame].size.height;
@@ -587,7 +587,7 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
     //static int nnn = 0;
     //std::clog << ++nnn << " RESIZE: " << size.width() << ", "  << size.height() << std::endl;
 
-    Gfx::SizeF appKitSize = logicalToAppKit(size);
+    Gfx::SizeF appKitSize = toNative(size);
 
     //std::clog << "RESIZE FRAME: " << _frame.origin.x << "," << _frame.origin.y
     //                              << _frame.size.width << "," << _frame.size.height << std::endl;
@@ -701,8 +701,8 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
     //std::clog << "onSetSizeLimits: " << minSizeF.width() << "x" << minSizeF.height()
     //                          << " " << maxSizeF.width() << "x" << maxSizeF.height() << std::endl;
 
-    Gfx::SizeF minAppKit = logicalToAppKit(minSizeF);
-    Gfx::SizeF maxAppKit = logicalToAppKit(maxSizeF);
+    Gfx::SizeF minAppKit = toNative(minSizeF);
+    Gfx::SizeF maxAppKit = toNative(maxSizeF);
 
     NSSize minSize = NSMakeSize( minAppKit.width(), minAppKit.height() );
     [_window setMinSize:minSize];
@@ -743,7 +743,7 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     double height = rect.size.height;
 
     Gfx::RectF appKitRect( Gfx::PointF(x, y), Gfx::SizeF(width, height) );
-    Gfx::RectF paintRect = appKitToLogical(appKitRect);
+    Gfx::RectF paintRect = fromNative(appKitRect);
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
@@ -757,6 +757,13 @@ void WindowImpl::onViewPaint(const NSRect& rect)
                                    paintRect.y() * s,
                                    paintRect.width() * s,
                                    paintRect.height() * s);
+
+#ifdef PT_FORMS_WARN_UNALIGNED_BLIT
+    CGRect destRect = CGContextConvertRectToDeviceSpace(windowContext, rect);
+    Detail::warnIfExpensiveBlit("WindowImpl::onViewPaint",
+                                sourceRect, destRect);
+#endif
+
     CGImageRef sourceImage = CGImageCreateWithImageInRect(image, sourceRect);
 
     CGContextSaveGState(windowContext);
@@ -795,7 +802,7 @@ void WindowImpl::onViewMove(const NSPoint& viewPos)
     double y = screenHeight - viewPos.y - windowHeight;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = appKitToLogical(pos);
+    pos = fromNative(pos);
 
     //std::clog << "onViewMove: " << _client.title() << " " << pos.x() << ", " << pos.y() << std::endl;
 
@@ -827,7 +834,7 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
 
     Gfx::SizeF to(viewSize.width, 
                   viewSize.height);
-    to = appKitToLogical(to);
+    to = fromNative(to);
 
     ResizeEvent rev(*this, to);
     Application::instance().processEvent(rev);
@@ -992,7 +999,7 @@ void WindowImpl::onViewLMouseDown(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = appKitToLogical(pos);
+    pos = fromNative(pos);
 
     _mouseEvent.setPress(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -1010,7 +1017,7 @@ void WindowImpl::onViewLMouseUp(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = appKitToLogical(pos);
+    pos = fromNative(pos);
 
     _mouseEvent.setRelease(MouseEvent::Left);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -1028,7 +1035,7 @@ void WindowImpl::onViewMouseMove(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = appKitToLogical(pos);
+    pos = fromNative(pos);
 
     _mouseEvent.setMove();
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -1046,7 +1053,7 @@ void WindowImpl::onViewRMouseDown(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = appKitToLogical(pos);
+    pos = fromNative(pos);
 
     _mouseEvent.setPress(MouseEvent::Right);
     _mouseEvent.setPosition( _client.toGlobal(pos) );
@@ -1064,7 +1071,7 @@ void WindowImpl::onViewRMouseUp(double x, double y)
     y = height - y;
 
     Pt::Gfx::PointF pos(x, y);
-    pos = appKitToLogical(pos);
+    pos = fromNative(pos);
 
     _mouseEvent.setRelease(MouseEvent::Right);
     _mouseEvent.setPosition( _client.toGlobal(pos) );

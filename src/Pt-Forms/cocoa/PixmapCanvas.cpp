@@ -802,59 +802,51 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 
     CGContextSaveGState(ctx);
 
+    CGImageRef image = pixmap->getCGImage();
+
     if(rectF)
     {
         const Gfx::Scaling& srcScaling = pixmap->scaling();
         Gfx::RectF  physSrc = srcScaling.toPhysical(*rectF);
+        CGRect sourceRect = CGRectMake(physSrc.left(),
+                                       physSrc.top(),
+                                       physSrc.size().width(),
+                                       physSrc.size().height());
+        CGRect drawRect = CGRectMake(0, 0, rectF->width(), rectF->height());
 
-        if(_compositionMode == Gfx::CompositionMode::SourceCopy)
-        {
-            CGImageRef image = pixmap->getCGImage();
+        CGImageRef subImage = CGImageCreateWithImageInRect(image, sourceRect);
 
-            CGRect subRect = CGRectMake(physSrc.left(),
-                                        physSrc.top(),
-                                        physSrc.size().width(),
-                                        physSrc.size().height());
-
-            CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
-
-            CGContextTranslateCTM(ctx, toF.x(), toF.y() + rectF->height());
-            CGContextScaleCTM(ctx, 1.0, -1.0);
-            CGContextDrawImage(ctx, CGRectMake(0, 0, rectF->width(), rectF->height()), subImage);
-
-            CGImageRelease(subImage);
-
-            CGContextRestoreGState(ctx);
-            return;
-        }
-
-        CGImageRef image = pixmap->getCGImage();
-
-        CGRect subRect = CGRectMake(physSrc.left(),
-                                    physSrc.top(),
-                                    physSrc.size().width(),
-                                    physSrc.size().height());
-
-        CGImageRef subImage = CGImageCreateWithImageInRect(image, subRect);
-
-        // Flip Y locally at the destination point to prevent
-        // CGContextDrawImage from drawing the image upside down.
         CGContextTranslateCTM(ctx, toF.x(), toF.y() + rectF->height());
         CGContextScaleCTM(ctx, 1.0, -1.0);
-        CGContextDrawImage(ctx, CGRectMake(0, 0, rectF->width(), rectF->height()), subImage);
 
+    #ifdef PT_FORMS_WARN_UNALIGNED_BLIT
+        CGRect destRect = CGContextConvertRectToDeviceSpace(ctx, drawRect);
+        Detail::warnIfExpensiveBlit("PixmapCanvas::drawPixmap",
+                                    sourceRect, destRect);
+    #endif
+
+        CGContextDrawImage(ctx, drawRect, subImage);
         CGImageRelease(subImage);
     }
     else
     {
-        CGImageRef image = pixmap->getCGImage();
-
         double logW = scaling().toLogical( pixmap->size().width() );
         double logH = scaling().toLogical( pixmap->size().height() );
+        CGRect drawRect = CGRectMake(0, 0, logW, logH);
 
         CGContextTranslateCTM(ctx, toF.x(), toF.y() + logH);
         CGContextScaleCTM(ctx, 1.0, -1.0);
-        CGContextDrawImage(ctx, CGRectMake(0, 0, logW, logH), image);
+
+#ifdef PT_FORMS_WARN_UNALIGNED_BLIT
+        CGRect sourceRect = CGRectMake(0, 0,
+                           CGImageGetWidth(image),
+                           CGImageGetHeight(image));
+        CGRect destRect = CGContextConvertRectToDeviceSpace(ctx, drawRect);
+        Detail::warnIfExpensiveBlit("PixmapCanvas::drawPixmap",
+                                    sourceRect, destRect);
+#endif
+
+        CGContextDrawImage(ctx, drawRect, image);
     }
 
     CGContextRestoreGState(ctx);

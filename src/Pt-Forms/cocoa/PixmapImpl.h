@@ -35,12 +35,25 @@
 
 #include <CoreGraphics/CGBitmapContext.h>
 
+// Uncomment to warn about large unaligned Cocoa blits.
+#define PT_FORMS_WARN_UNALIGNED_BLIT
+
 namespace Pt {
 
 namespace Forms {
 
 class Pixmap;
 class PixmapCanvas;
+
+namespace Detail {
+
+#ifdef PT_FORMS_WARN_UNALIGNED_BLIT
+void warnIfExpensiveBlit(const char* tag,
+                         const CGRect& sourceRect,
+                         const CGRect& destRect);
+#endif
+
+}
 
 
 class PixmapImpl

@@ -36,10 +36,60 @@
 #include <Pt/Gfx/PaintContext.h>
 
 #include <cassert>
+#include <cmath>
+#include <iostream>
 
 namespace Pt {
 
 namespace Forms {
+
+#ifdef PT_FORMS_WARN_UNALIGNED_BLIT
+
+namespace {
+
+bool isNearlyEqual(double left, double right)
+{
+    return std::fabs(left - right) <= 0.0001;
+}
+
+
+bool isPhysicalPixelAligned(const CGRect& rect)
+{
+    return isNearlyEqual(CGRectGetMinX(rect), std::round(CGRectGetMinX(rect))) &&
+           isNearlyEqual(CGRectGetMinY(rect), std::round(CGRectGetMinY(rect))) &&
+           isNearlyEqual(CGRectGetMaxX(rect), std::round(CGRectGetMaxX(rect))) &&
+           isNearlyEqual(CGRectGetMaxY(rect), std::round(CGRectGetMaxY(rect)));
+}
+
+} // namespace
+
+namespace Detail {
+
+void warnIfExpensiveBlit(const char* tag,
+                         const CGRect& sourceRectValue,
+                         const CGRect& destRectValue)
+{
+    CGRect sourceRect = CGRectStandardize(sourceRectValue);
+    CGRect destRect = CGRectStandardize(destRectValue);
+
+    double sourcePixels = std::fabs(sourceRect.size.width * sourceRect.size.height);
+    double destPixels = std::fabs(destRect.size.width * destRect.size.height);
+    double pixelCount = sourcePixels > destPixels ? sourcePixels : destPixels;
+
+    if(pixelCount < 16384.0)
+        return;
+
+    if( isPhysicalPixelAligned(sourceRect) && isPhysicalPixelAligned(destRect) )
+        return;
+
+    std::clog << "Warning: " << tag
+              << " has an unaligned expensive blit."
+              << std::endl;
+}
+
+} // namespace CocoaDetail
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////
 // PixmapImpl

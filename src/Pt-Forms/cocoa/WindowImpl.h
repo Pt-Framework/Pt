@@ -214,23 +214,35 @@ class WindowImpl : public WindowFrame
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
-        double userScaleFactor() const;
+        double applicationScaleFactor() const;
 
         double backingScaleFactor() const;
 
         double totalScaleFactor() const;
 
-        Gfx::PointF logicalToAppKit(const Gfx::PointF& pos) const;
+        /** @brief Converts a point from logical to native window-system coordinates.
+        */
+        Gfx::PointF toNative(const Gfx::PointF& pos) const;
 
-        Gfx::SizeF logicalToAppKit(const Gfx::SizeF& size) const;
+        /** @brief Converts a size from logical to native window-system coordinates.
+        */
+        Gfx::SizeF toNative(const Gfx::SizeF& size) const;
 
-        Gfx::RectF logicalToAppKit(const Gfx::RectF& rect) const;
+        /** @brief Converts a rectangle from logical to native window-system coordinates.
+        */
+        Gfx::RectF toNative(const Gfx::RectF& rect) const;
 
-        Gfx::PointF appKitToLogical(const Gfx::PointF& pos) const;
+        /** @brief Converts a point from native window-system to logical coordinates.
+        */
+        Gfx::PointF fromNative(const Gfx::PointF& pos) const;
 
-        Gfx::SizeF appKitToLogical(const Gfx::SizeF& size) const;
+        /** @brief Converts a size from native window-system to logical coordinates.
+        */
+        Gfx::SizeF fromNative(const Gfx::SizeF& size) const;
 
-        Gfx::RectF appKitToLogical(const Gfx::RectF& rect) const;
+        /** @brief Converts a rectangle from native window-system to logical coordinates.
+        */
+        Gfx::RectF fromNative(const Gfx::RectF& rect) const;
 
         ScreenImpl&              _wm;
         Window&                  _client;
