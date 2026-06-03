@@ -562,7 +562,7 @@ void WorkspaceManager::onProcessPaintEvent(const PaintEvent& ev)
         PaintEvent pev( *frame, winRect );
         frame->processEvent(pev);
 
-        Gfx::PointF surfacePos = frameRect.topLeft() - frame->position();
+        Gfx::PointF surfacePos = frame->scaling().align(frameRect.topLeft() - frame->position());
         Gfx::RectF surfaceRect( surfacePos, frameRect.size() );
 
         _painter.drawPixmap(frameRect.topLeft(), frame->pixmap(), surfaceRect);

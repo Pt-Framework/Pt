@@ -742,8 +742,8 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     double width = rect.size.width;
     double height = rect.size.height;
 
-    Gfx::RectF appKitRect( Gfx::PointF(x, y), Gfx::SizeF(width, height) );
-    Gfx::RectF paintRect = fromNative(appKitRect);
+    Gfx::RectF nativeRect( Gfx::PointF(x, y), Gfx::SizeF(width, height) );
+    Gfx::RectF paintRect = fromNative(nativeRect);
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
@@ -752,11 +752,9 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
 
-    double s = scaleFactor();
-    CGRect sourceRect = CGRectMake(paintRect.x() * s,
-                                   paintRect.y() * s,
-                                   paintRect.width() * s,
-                                   paintRect.height() * s);
+    CGFloat backingScale = [_window backingScaleFactor];
+    CGRect sourceRect = CGRectMake(x * backingScale, y * backingScale,
+                                   width * backingScale, height * backingScale);
 
 #ifdef PT_FORMS_WARN_UNALIGNED_BLIT
     CGRect destRect = CGContextConvertRectToDeviceSpace(windowContext, rect);
