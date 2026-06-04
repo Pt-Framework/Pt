@@ -49,29 +49,29 @@ namespace {
 
 void xdgSurfaceConfigure(void* data, struct xdg_surface* xdgSurface, uint32_t serial)
 {
-    static_cast<WindowImpl*>(data)->handleXdgSurfaceConfigure(xdgSurface, serial);
+    static_cast<WindowImpl*>(data)->onXdgSurfaceConfigure(xdgSurface, serial);
 }
 
 void toplevelConfigure(void* data, struct xdg_toplevel* /*toplevel*/,
                        int32_t width, int32_t height, struct wl_array* states)
 {
-    static_cast<WindowImpl*>(data)->handleToplevelConfigure(width, height, states);
+    static_cast<WindowImpl*>(data)->onXdgToplevelConfigure(width, height, states);
 }
 
 void toplevelClose(void* data, struct xdg_toplevel* /*toplevel*/)
 {
-    static_cast<WindowImpl*>(data)->handleToplevelClose();
+    static_cast<WindowImpl*>(data)->onXdgToplevelClose();
 }
 
 void popupConfigure(void* data, struct xdg_popup* /*popup*/,
                     int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    static_cast<WindowImpl*>(data)->handlePopupConfigure(x, y, width, height);
+    static_cast<WindowImpl*>(data)->onXdgPopupConfigure(x, y, width, height);
 }
 
 void popupDone(void* data, struct xdg_popup* /*popup*/)
 {
-    static_cast<WindowImpl*>(data)->handlePopupDone();
+    static_cast<WindowImpl*>(data)->onXdgPopupDone();
 }
 
 void decorationConfigure(void* /*data*/, struct zxdg_toplevel_decoration_v1* /*deco*/,
@@ -80,8 +80,6 @@ void decorationConfigure(void* /*data*/, struct zxdg_toplevel_decoration_v1* /*d
     // Accept whatever decoration mode the compositor chooses.
     // On WSLg this confirms server-side decorations (Windows title bar).
 }
-
-} // anonymous namespace
 
 
 static const struct xdg_surface_listener xdgSurfaceListener = {
@@ -102,6 +100,7 @@ static const struct zxdg_toplevel_decoration_v1_listener decorationListener = {
     decorationConfigure
 };
 
+} // namespace
 
 WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 : WindowFrame(wm, w)
@@ -113,12 +112,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _xdgPopup(0)
 , _positioner(0)
 , _decoration(0)
-, _width(240)
-, _height(160)
-, _pendingWidth(0)
-, _pendingHeight(0)
 , _configured(false)
-, _visible(false)
 {
     ApplicationImpl* app = Application::instance().impl();
 
@@ -199,7 +193,9 @@ void WindowImpl::createPopup(Window& w)
 
     // Create positioner
     _positioner = xdg_wm_base_create_positioner(app->xdgWmBase());
-    xdg_positioner_set_size(_positioner, _width, _height);
+    xdg_positioner_set_size(_positioner,
+                            static_cast<int32_t>( size().width() ),
+                            static_cast<int32_t>( size().height() ));
 
     // Place the anchor rect at the desired position on the parent surface.
     // The popup's top-left corner is anchored to the top-left of this rect.
@@ -292,9 +288,11 @@ void WindowImpl::destroySurface()
     }
 }
 
-// xdg_surface callbacks
+///////////////////////////////////////////////////////////////////////
+// xdg callbacks
+///////////////////////////////////////////////////////////////////////
 
-void WindowImpl::handleXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
+void WindowImpl::onXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
                                            uint32_t serial)
 {
     xdg_surface_ack_configure(xdgSurface, serial);
@@ -302,47 +300,32 @@ void WindowImpl::handleXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
     _configured = true;
 
     // Apply compositor-suggested size if it changed
-    if( _pendingWidth > 0 && _pendingHeight > 0 &&
-        (_pendingWidth != _width || _pendingHeight != _height) )
+    if( ! _pendingSize.isEmpty() && 
+        ! _pendingSize.isEqual( size() ) )
     {
-        _width = _pendingWidth;
-        _height = _pendingHeight;
-
-        // _width/_height are logical (compositor units); pass directly.
-        Gfx::SizeF to(_width, _height);
-        ResizeEvent rev(*this, to);
+        ResizeEvent rev(*this, _pendingSize);
         Application::instance().processEvent(rev);
     }
 
-    if( _visible )
+    if( _window.isVisible() )
     {
-        // _width/_height are logical; no conversion needed.
-        Gfx::SizeF logSize(_width, _height);
-        _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
+        _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
     }
 }
 
 
-// xdg_toplevel callbacks
-
-void WindowImpl::handleToplevelConfigure(int32_t width, int32_t height,
+void WindowImpl::onXdgToplevelConfigure(int32_t width, int32_t height,
                                          struct wl_array* /*states*/)
 {
     // width/height of 0 means the compositor doesn't care — use our own size
     if( width > 0 && height > 0 )
-    {
-        _pendingWidth = width;
-        _pendingHeight = height;
-    }
+        _pendingSize.set(width, height);
     else
-    {
-        _pendingWidth = _width;
-        _pendingHeight = _height;
-    }
+        _pendingSize = size();
 }
 
 
-void WindowImpl::handleToplevelClose()
+void WindowImpl::onXdgToplevelClose()
 {
     // The CloseEvent must target the client Window, not the frame.
     // Window::onProcessCloseEvent is only registered on Window's dispatcher;
@@ -355,20 +338,15 @@ void WindowImpl::handleToplevelClose()
 }
 
 
-// xdg_popup callbacks
-
-void WindowImpl::handlePopupConfigure(int32_t /*x*/, int32_t /*y*/,
+void WindowImpl::onXdgPopupConfigure(int32_t /*x*/, int32_t /*y*/,
                                       int32_t width, int32_t height)
 {
     if( width > 0 && height > 0 )
-    {
-        _pendingWidth = width;
-        _pendingHeight = height;
-    }
+        _pendingSize.set(width, height);
 }
 
 
-void WindowImpl::handlePopupDone()
+void WindowImpl::onXdgPopupDone()
 {
     // The compositor dismissed the popup (click outside the grabbed surface).
     // Close the client Window (Popup) so it goes through the normal
@@ -377,7 +355,9 @@ void WindowImpl::handlePopupDone()
     Application::instance().processEvent(ev);
 }
 
-// WindowFrame virtual overrides
+///////////////////////////////////////////////////////////////////////
+// window frame
+///////////////////////////////////////////////////////////////////////
 
 void WindowImpl::onInit(Window& w)
 {
@@ -396,15 +376,6 @@ void WindowImpl::onInit(Window& w)
         w.processEvent(ev);
     }
 
-    // Sync _width/_height with the window's logical size so that
-    // the first configure repaint covers the whole window.
-    // (onResize will be called during Window::onConnect to allocate the pixmap)
-    Gfx::SizeF logSize = w.size();
-    if( logSize.width() > 0 && logSize.height() > 0 )
-    {
-        _width  = static_cast<int>( logSize.width() );
-        _height = static_cast<int>( logSize.height() );
-    }
 }
 
 
@@ -413,6 +384,17 @@ void WindowImpl::onRelease(Window& w)
     w.setNextResponder(0);
     w.setSurface(0, Gfx::PointF());
     destroySurface();
+}
+
+
+void WindowImpl::onConnect(Screen& screen)
+{
+    Base::onConnect(screen);
+}
+
+
+void WindowImpl::onDisconnect()
+{
 }
 
 
@@ -445,6 +427,18 @@ Gfx::PointF WindowImpl::onFromWindow(const Window& /*w*/,
 }
 
 
+Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
+{
+    return pos + position();
+}
+
+
+Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
+{
+    return pos - position();
+}
+
+
 void WindowImpl::onSetTitle(Window& /*w*/, const std::string& text)
 {
     if( _xdgToplevel )
@@ -461,21 +455,6 @@ void WindowImpl::onSetTitle(Window& /*w*/, const std::string& text)
 void WindowImpl::onSetIcon(Window& /*w*/, const Gfx::Image& /*icon*/)
 {
     // Wayland has no standard protocol for window icons yet.
-}
-
-
-void WindowImpl::onSetState(Window& /*w*/, const WindowState& state)
-{
-    if( ! _xdgToplevel )
-        return;
-
-    if( state == WindowState::Maximized )
-        xdg_toplevel_set_maximized(_xdgToplevel);
-    else
-        xdg_toplevel_unset_maximized(_xdgToplevel);
-
-    if( state == WindowState::Minimized )
-        xdg_toplevel_set_minimized(_xdgToplevel);
 }
 
 
@@ -505,114 +484,39 @@ void WindowImpl::onAutoCenter(Window& /*w*/, const Gfx::SizeF* /*size*/)
     // On Wayland the compositor decides window placement.
 }
 
+///////////////////////////////////////////////////////////////////////
+// window state
+///////////////////////////////////////////////////////////////////////
 
-void WindowImpl::onRepaint(Window& /*w*/, const Gfx::RectF& rect)
+void WindowImpl::onSetState(Window& /*w*/, const WindowState& state)
 {
-    if( ! _configured || ! _surface )
+    if( ! _xdgToplevel )
         return;
 
-    Gfx::PointF screenPos = toScreen( rect.topLeft() );
-    Gfx::RectF screenRect( screenPos, rect.size() );
-    _wm.repaint(screenRect);
-}
-
-
-void WindowImpl::onShow(Window& w, bool visible)
-{
-    _visible = visible;
-
-    // Propagate show/hide to the Window so Widget::_isVisible is updated
-    // (required so Window::onProcessPaintEvent doesn't skip the paint)
-    ShowEvent sev(w, visible);
-    w.processEvent(sev);
-
-    if( visible )
-    {
-        // Recreate popup each time it is shown so that the positioner uses
-        // the current offset (popups cannot be repositioned on Wayland).
-        if( w.type() != WindowType::Default )
-        {
-            destroyPopup();
-            createPopup(w);
-        }
-
-        if( _configured )
-        {
-            // Configure round-trip already done — paint immediately.
-            // _width/_height are logical; no conversion needed.
-            Gfx::SizeF logSize(_width, _height);
-            w.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
-        }
-        else
-        {
-            // Trigger the configure round-trip if not yet started
-            wl_surface_commit(_surface);
-        }
-    }
+    if( state == WindowState::Maximized )
+        xdg_toplevel_set_maximized(_xdgToplevel);
     else
-    {
-        if( w.type() != WindowType::Default )
-        {
-            destroyPopup();
-        }
-        else
-        {
-            wl_surface_attach(_surface, 0, 0, 0);
-            wl_surface_commit(_surface);
-        }
-    }
+        xdg_toplevel_unset_maximized(_xdgToplevel);
+
+    if( state == WindowState::Minimized )
+        xdg_toplevel_set_minimized(_xdgToplevel);
 }
 
 
-void WindowImpl::onActivate(Window& /*w*/, bool /*active*/)
+void WindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
 {
-    // Activation is compositor-managed on Wayland.
+    Base::onProcessWindowStateEvent(ev);
 }
 
 
-void WindowImpl::onEnable(Window& /*w*/, bool /*enable*/)
+void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 {
+    Base::onWindowStateEvent(ev);
 }
 
-
-void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
-{
-    // On Wayland, toplevel windows cannot be positioned by the client;
-    // their compositor-assigned position is unknown, so we treat it as (0,0).
-    // Popup windows are placed at the requested offset relative to the parent.
-    // Fire a MoveEvent with the realized position so that position() returns
-    // the correct offset for toScreen()/fromScreen() and createPopup().
-    const Gfx::PointF realized = (w.type() == WindowType::Default)
-                                  ? Gfx::PointF(0, 0)
-                                  : to;
-    MoveEvent ev(*this, realized);
-    processEvent(ev);
-}
-
-
-Gfx::SizeF WindowImpl::onResize(Window& /*w*/, const Gfx::SizeF& s)
-{
-    // Store the logical size.  The buffer is sized to physical pixels by
-    // WindowFrame::onResizeEvent which calls scaling().toPhysical(size()).
-    // _width/_height are in logical units for the Wayland protocol.
-    _width  = static_cast<int>(s.width());
-    _height = static_cast<int>(s.height());
-
-    // Update the WindowFrame's widget size and (re)allocate the pixmap.
-    // WindowFrame::onRescaleEvent runs before Window::onConnect (and thus
-    // before onResize), so the pixmap was reset to empty at that time because
-    // the frame's size was still (0,0).  Processing a ResizeEvent here
-    // allocates the pixmap at the correct physical size using the already-set
-    // canvas scale factor.
-    if( _width > 0 && _height > 0 )
-    {
-        ResizeEvent frev(*this, s);
-        processEvent(frev);
-    }
-
-    return s;
-}
-
+///////////////////////////////////////////////////////////////////////
+// closing
+///////////////////////////////////////////////////////////////////////
 
 void WindowImpl::onClose(Window& /*w*/)
 {
@@ -622,36 +526,162 @@ void WindowImpl::onClose(Window& /*w*/)
 }
 
 
-void WindowImpl::onConnect(Screen& screen)
+void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
 {
-    Base::onConnect(screen);
+    Base::onProcessCloseEvent(ev);
 }
 
 
-void WindowImpl::onDisconnect()
+void WindowImpl::onCloseEvent(const CloseEvent& ev)
+{
+    Base::onCloseEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// activation
+///////////////////////////////////////////////////////////////////////
+
+void WindowImpl::onActivate(Window& /*w*/, bool /*active*/)
+{
+    // Activation is compositor-managed on Wayland.
+}
+
+
+void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
+{
+    Base::onProcessActivateEvent(ev);
+}
+
+
+void WindowImpl::onActivateEvent(const ActivateEvent& ev)
+{
+    Base::onActivateEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// enabling
+///////////////////////////////////////////////////////////////////////
+
+void WindowImpl::onEnable(Window& /*w*/, bool /*enable*/)
 {
 }
 
 
-Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
+void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 {
-    return pos + position();
+    Base::onProcessEnableEvent(ev);
 }
 
 
-Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
+void WindowImpl::onEnableEvent(const EnableEvent& ev)
 {
-    return pos - position();
+    Base::onEnableEvent(ev);
 }
 
-//
+///////////////////////////////////////////////////////////////////////
+// scaling
+///////////////////////////////////////////////////////////////////////
+
+void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onProcessRescaleEvent(ev);
+
+    // Propagate the total scale (system × user) to the client Window.
+    // All widgets work in logical units; the total scale is what drives
+    // canvas rendering and physical buffer sizing throughout the widget tree.
+    RescaleEvent rev(_window, ev.scaleFactor());
+    _window.processEvent(rev);
+}
+
+
+void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
+{
+    Base::onRescaleEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// visibility
+///////////////////////////////////////////////////////////////////////
+
+void WindowImpl::onShow(Window& w, bool visible)
+{
+    ShowEvent sev(w, visible);
+    w.processEvent(sev);
+
+    bool isWindow = w.type() == WindowType::Default;
+
+    if( isWindow )
+        onShowWindow(w, visible);
+    else
+        onShowPopup(w, visible);
+}
+
+
+void WindowImpl::onShowWindow(Window& w, bool visible)
+{
+    if( visible )
+    {
+        if( _configured )
+        {
+            w.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
+        }
+        else
+        {
+            wl_surface_commit(_surface);
+        }
+    }
+    else
+    {
+        wl_surface_attach(_surface, 0, 0, 0);
+        wl_surface_commit(_surface);
+    }
+}
+
+
+void WindowImpl::onShowPopup(Window& w, bool visible)
+{
+    if( visible )
+    {
+        destroyPopup();
+        createPopup(w);
+    }
+    else
+    {
+        destroyPopup();
+    }
+}
+
+
+void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
+{
+    Base::onProcessShowEvent(ev);
+}
+
+
+void WindowImpl::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
 // painting
-//
+///////////////////////////////////////////////////////////////////////
 
 void WindowImpl::paint(const Gfx::RectF& rect)
 {
     PaintEvent ev(*this, rect);
     processEvent(ev);
+}
+
+
+void WindowImpl::onRepaint(Window& /*w*/, const Gfx::RectF& rect)
+{
+    if( ! _configured || ! _surface )
+        return;
+
+    Gfx::PointF screenPos = toScreen( rect.topLeft() );
+    Gfx::RectF screenRect( screenPos, rect.size() );
+    _wm.repaint(screenRect);
 }
 
 
@@ -678,11 +708,10 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
 void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
 {
-    if( ! _configured || ! _visible )
+    if( ! _configured || ! _window.isVisible() )
         return;
 
-    Gfx::SizeF logSize(_width, _height);
-    _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
+    _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
 }
 
 
@@ -754,46 +783,49 @@ void WindowImpl::onPaintContent(const Gfx::RectF& damage)
     wl_display_flush( app->display() );
 }
 
+///////////////////////////////////////////////////////////////////////
+// move
+///////////////////////////////////////////////////////////////////////
 
-void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
+void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
 {
-    Base::onProcessShowEvent(ev);
-}
-
-
-void WindowImpl::onShowEvent(const ShowEvent& ev)
-{
-    Base::onShowEvent(ev);
-}
-
-
-void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
-{
-    Base::onProcessEnableEvent(ev);
-}
-
-
-void WindowImpl::onEnableEvent(const EnableEvent& ev)
-{
-    Base::onEnableEvent(ev);
-}
-
-
-void WindowImpl::onProcessActivateEvent(const ActivateEvent& ev)
-{
-    Base::onProcessActivateEvent(ev);
-}
-
-
-void WindowImpl::onActivateEvent(const ActivateEvent& ev)
-{
-    Base::onActivateEvent(ev);
+    // On Wayland, toplevel windows cannot be positioned by the client;
+    // their compositor-assigned position is unknown, so we treat it as (0,0).
+    // Popup windows are placed at the requested offset relative to the parent.
+    // Fire a MoveEvent with the realized position so that position() returns
+    // the correct offset for toScreen()/fromScreen() and createPopup().
+    const Gfx::PointF realized = (w.type() == WindowType::Default)
+                                  ? Gfx::PointF(0, 0)
+                                  : to;
+    MoveEvent ev(*this, realized);
+    processEvent(ev);
 }
 
 
 void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
 {
     Base::onProcessMoveEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////
+// resize
+///////////////////////////////////////////////////////////////////////
+
+Gfx::SizeF WindowImpl::onResize(Window& /*w*/, const Gfx::SizeF& s)
+{
+    // Update the WindowFrame's widget size and (re)allocate the pixmap.
+    // WindowFrame::onRescaleEvent runs before Window::onConnect (and thus
+    // before onResize), so the pixmap was reset to empty at that time because
+    // the frame's size was still (0,0).  Processing a ResizeEvent here
+    // allocates the pixmap at the correct physical size using the already-set
+    // canvas scale factor.
+    if( s.width() > 0 && s.height() > 0 )
+    {
+        ResizeEvent frev(*this, s);
+        processEvent(frev);
+    }
+
+    return s;
 }
 
 
@@ -805,48 +837,6 @@ void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
     // relayout(), which sizes the main control (Workspace etc.).
     ResizeEvent rev(_window, ev.size());
     _window.processEvent(rev);
-}
-
-
-void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
-{
-    Base::onProcessRescaleEvent(ev);
-
-    // Propagate the total scale (system × user) to the client Window.
-    // All widgets work in logical units; the total scale is what drives
-    // canvas rendering and physical buffer sizing throughout the widget tree.
-    RescaleEvent rev(_window, ev.scaleFactor());
-    _window.processEvent(rev);
-}
-
-
-void WindowImpl::onRescaleEvent(const RescaleEvent& ev)
-{
-    Base::onRescaleEvent(ev);
-}
-
-
-void WindowImpl::onProcessWindowStateEvent(const WindowStateEvent& ev)
-{
-    Base::onProcessWindowStateEvent(ev);
-}
-
-
-void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
-{
-    Base::onWindowStateEvent(ev);
-}
-
-
-void WindowImpl::onProcessCloseEvent(const CloseEvent& ev)
-{
-    Base::onProcessCloseEvent(ev);
-}
-
-
-void WindowImpl::onCloseEvent(const CloseEvent& ev)
-{
-    Base::onCloseEvent(ev);
 }
 
 } // namespace Forms

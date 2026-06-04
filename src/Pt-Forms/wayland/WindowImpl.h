@@ -44,6 +44,7 @@
 #include <string>
 
 namespace Pt {
+
 namespace Forms {
 
 class ScreenImpl;
@@ -69,10 +70,24 @@ class WindowImpl : public WindowFrame
         { return _surface; }
 
         int width() const 
-        { return _width; }
+        { return static_cast<int>( size().width() ); }
 
         int height() const 
-        { return _height; }
+        { return static_cast<int>( size().height() ); }
+
+    public:
+        void onXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
+                                   uint32_t serial);
+
+        void onXdgToplevelConfigure(int32_t width, int32_t height,
+                                    struct wl_array* states);
+
+        void onXdgToplevelClose();
+
+        void onXdgPopupConfigure(int32_t x, int32_t y,
+                                 int32_t width, int32_t height);
+
+        void onXdgPopupDone();
 
     protected:
         virtual void onInit(Window& w);
@@ -112,45 +127,62 @@ class WindowImpl : public WindowFrame
 
     protected:
         virtual void onConnect(Screen& screen);
+
         virtual void onDisconnect();
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
+
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
+
         virtual void onPaintEvent(const PaintEvent& ev);
+
         virtual void onProcessShowEvent(const ShowEvent& ev);
+
         virtual void onShowEvent(const ShowEvent& ev);
+
         virtual void onProcessEnableEvent(const EnableEvent& ev);
+
         virtual void onEnableEvent(const EnableEvent& ev);
+
         virtual void onProcessActivateEvent(const ActivateEvent& ev);
+
         virtual void onActivateEvent(const ActivateEvent& ev);
+
         virtual void onProcessMoveEvent(const MoveEvent& ev);
+
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
+
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
+
         virtual void onRescaleEvent(const RescaleEvent& ev);
+
         virtual void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
         virtual void onWindowStateEvent(const WindowStateEvent& ev);
+
         virtual void onProcessCloseEvent(const CloseEvent& ev);
+
         virtual void onCloseEvent(const CloseEvent& ev);
 
-    public:
-        // Wayland event handlers called from C listener callbacks
-        void handleXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
-                                       uint32_t serial);
-        void handleToplevelConfigure(int32_t width, int32_t height,
-                                     struct wl_array* states);
-        void handleToplevelClose();
-        void handlePopupConfigure(int32_t x, int32_t y,
-                                  int32_t width, int32_t height);
-        void handlePopupDone();
+    protected:
+        void onShowWindow(Window& w, bool visible);
+
+        void onShowPopup(Window& w, bool visible);
+
+        void onPaintContent(const Gfx::RectF& damage);
+
+        void onBufferReleased(ShmPool& pool);
 
     private:
         void createWindow();
+
         void createPopup(Window& w);
+
         void destroyPopup();
+
         void destroySurface();
-        void onPaintContent(const Gfx::RectF& damage);
-        void onBufferReleased(ShmPool& pool);
 
     private:
         ScreenImpl&                          _wm;
@@ -162,15 +194,12 @@ class WindowImpl : public WindowFrame
         struct xdg_positioner*               _positioner;
         struct zxdg_toplevel_decoration_v1*  _decoration;
         ShmPool                              _shmPool;
-        int                                  _width;
-        int                                  _height;
-        int                                  _pendingWidth;
-        int                                  _pendingHeight;
+        Gfx::SizeF                           _pendingSize;
         bool                                 _configured;
-        bool                                 _visible;
 };
 
 } // namespace Forms
+
 } // namespace Pt
 
 #endif
