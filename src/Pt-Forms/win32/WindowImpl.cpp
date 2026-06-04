@@ -155,48 +155,6 @@ void WindowImpl::onDisconnect()
 }
 
 
-void WindowImpl::setType(WindowType type)
-{
-    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
-    
-    RECT wrect;
-    GetWindowRect(_hwnd, &wrect);
-
-    RECT rect;
-    GetClientRect(_hwnd, &rect);
-
-    switch(type)
-    {
-        case WindowType::Popup:
-            style = WS_POPUP;
-            exStyle = WS_EX_NOACTIVATE;
-            break;
-
-        default:
-        case WindowType::Default:
-            style = WS_OVERLAPPEDWINDOW;
-            exStyle = WS_EX_APPWINDOW;
-            break;
-    }
-
-    // changing the border also changes the window area
-    AdjustWindowRectEx(&rect, style, FALSE, exStyle);
-
-    LONG w = rect.right - rect.left;
-    LONG h = rect.bottom - rect.top;
-    LONG x = wrect.left;
-    LONG y = wrect.top;
-
-    SetWindowLong(_hwnd, GWL_STYLE, style);
-    SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
-    
-    SetWindowPos(_hwnd, 0, x, y, w, h,
-                 SWP_FRAMECHANGED|
-                 SWP_NOZORDER|SWP_NOOWNERZORDER);
-}
-
-
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     const Gfx::Scaling& scaling = this->scaling();

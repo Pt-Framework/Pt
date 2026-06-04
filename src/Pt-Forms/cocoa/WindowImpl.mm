@@ -303,33 +303,6 @@ WindowType WindowImpl::type() const
 }
 
 
-void WindowImpl::setType(WindowType type)
-{
-    //std::clog << "WindowImpl::setType: " << type << std::endl;
-
-    //
-    // TODO: possibly need to remove the view when switching to/from popup
-    //
-
-    switch(type)
-    {
-        case WindowType::Popup:
-            _windowStyle = NSWindowStyleMaskBorderless;
-            break;
-
-        default:
-        case WindowType::Default:
-            _windowStyle = NSWindowStyleMaskTitled |
-                           NSWindowStyleMaskClosable |
-                           NSWindowStyleMaskMiniaturizable |
-                           NSWindowStyleMaskResizable;
-            break;
-    }
-
-    [_window setStyleMask:_windowStyle];
-}
-
-
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF appKitPos = toNative(pos);

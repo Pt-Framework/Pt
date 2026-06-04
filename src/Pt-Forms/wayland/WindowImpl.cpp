@@ -42,6 +42,7 @@
 #include <cstring>
 
 namespace Pt {
+
 namespace Forms {
 
 namespace {
@@ -412,16 +413,6 @@ void WindowImpl::onRelease(Window& w)
     w.setNextResponder(0);
     w.setSurface(0, Gfx::PointF());
     destroySurface();
-}
-
-
-void WindowImpl::setType(WindowType /*type*/)
-{
-    // Type change at runtime is not well supported on Wayland.
-    // Would require recreating the surface hierarchy.
-
-    // NOTE: The WindowImpl::setType funktionality will be removed in future
-    //       versions of Pt-Forms
 }
 
 

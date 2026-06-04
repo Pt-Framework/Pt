@@ -195,26 +195,6 @@ void WindowImpl::onDisconnect()
 }
 
 
-void WindowImpl::setType(WindowType type)
-{
-    //std::clog << "XChangeWindowAttributes: " << type << std::endl;
-
-    XSetWindowAttributes swattr;
-    swattr.override_redirect = (type == WindowType::Popup) ? True : False;
-
-    XChangeWindowAttributes(_display, _window, CWOverrideRedirect, &swattr);
-
-    XWindowAttributes wattr;
-    XGetWindowAttributes(_display, _window, &wattr);
-
-    if(wattr.map_state != IsUnmapped)
-    {
-        XUnmapWindow(_display, _window);
-        XMapWindow(_display,_window);
-    }
-}
-
-
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF physicalPos = scaling().toPhysical(pos);

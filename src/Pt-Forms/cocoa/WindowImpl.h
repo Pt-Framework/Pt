@@ -77,8 +77,6 @@ class WindowImpl : public WindowFrame
 
         WindowType type() const;
 
-        void setType(WindowType type);
-
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
