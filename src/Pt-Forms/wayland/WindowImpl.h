@@ -78,22 +78,38 @@ class WindowImpl : public WindowFrame
 
     protected:
         virtual void onInit(Window& w);
+
         virtual void onRelease(Window& w);
+
         virtual Gfx::PointF onToWindow(const Window& w, const Gfx::PointF& pos) const;
+
         virtual Gfx::PointF onFromWindow(const Window& w, const Gfx::PointF& pos) const;
+
         virtual void onSetTitle(Window& w, const std::string& text);
+
         virtual void onSetIcon(Window& w, const Gfx::Image& icon);
+
         virtual void onSetState(Window& w, const WindowState& state);
+
         virtual void onSetAbove(Window& w, bool above);
+
         virtual void onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
                                      const Gfx::SizeF& maxSize);
+
         virtual void onAutoCenter(Window& w, const Gfx::SizeF* size);
+
         virtual void onRepaint(Window& w, const Gfx::RectF& rect);
+
         virtual void onShow(Window& w, bool visible);
+
         virtual void onActivate(Window& w, bool active);
+
         virtual void onEnable(Window& w, bool enable);
+
         virtual void onMove(Window& w, const Gfx::PointF& to);
+
         virtual Gfx::SizeF onResize(Window& w, const Gfx::SizeF& s);
+
         virtual void onClose(Window& w);
 
     protected:
@@ -148,7 +164,6 @@ class WindowImpl : public WindowFrame
         struct xdg_positioner*               _positioner;
         struct zxdg_toplevel_decoration_v1*  _decoration;
         ShmPool                              _shmPool;
-        Gfx::PointF                          _popupOffset;
         int                                  _width;
         int                                  _height;
         int                                  _pendingWidth;

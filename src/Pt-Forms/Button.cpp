@@ -171,7 +171,7 @@ bool Button::onMouseEvent(const MouseEvent& ev)
                       pos.y() >= 0 && pos.y() <= size().height();
 
         bool isClick = _onClickBegin && inside;
-        
+
         if(_onClickBegin)
         {
             _onClickBegin = false;

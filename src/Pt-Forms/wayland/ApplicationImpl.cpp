@@ -443,7 +443,6 @@ Window* ApplicationImpl::findWindow(struct wl_surface* surface)
     return 0;
 }
 
-
 // Registry callbacks
 
 void ApplicationImpl::handleRegistryGlobal(struct wl_registry* registry,
@@ -541,7 +540,6 @@ void ApplicationImpl::handleSeatCapabilities(uint32_t capabilities)
     }
 }
 
-
 // wl_pointer
 
 void ApplicationImpl::handlePointerEnter(uint32_t serial, struct wl_surface* surface,
@@ -571,12 +569,15 @@ void ApplicationImpl::handlePointerMotion(uint32_t /*time*/, wl_fixed_t sx, wl_f
     _pointerPosition.set( wl_fixed_to_double(sx), wl_fixed_to_double(sy) );
 
     Window* w = findWindow(_pointerFocusSurface);
-    if( ! w )
+    if( ! w || ! w->frame() )
         return;
 
+    // Convert surface-local to screen coordinates for Application dispatch
+    WindowImpl* frame = static_cast<WindowImpl*>( w->frame() );
+    Gfx::PointF screenPos = frame->toScreen(_pointerPosition);
     _mouseEvent.setMove();
     _mouseEvent.setWidget(w);
-    _mouseEvent.setPosition(_pointerPosition);
+    _mouseEvent.setPosition(screenPos);
     Application::instance().processEvent(_mouseEvent);
 }
 
@@ -587,7 +588,7 @@ void ApplicationImpl::handlePointerButton(uint32_t serial, uint32_t /*time*/,
     _pointerSerial = serial;
 
     Window* w = findWindow(_pointerFocusSurface);
-    if( ! w )
+    if( ! w || ! w->frame() )
         return;
 
     // Map Linux button codes to Pt button enumeration
@@ -602,8 +603,12 @@ void ApplicationImpl::handlePointerButton(uint32_t serial, uint32_t /*time*/,
     else
         _mouseEvent.setRelease(btn);
 
+    // Convert surface-local to screen coordinates for Application dispatch
+    WindowImpl* frame = static_cast<WindowImpl*>( w->frame() );
+    Gfx::PointF screenPos = frame->toScreen(_pointerPosition);
+
     _mouseEvent.setWidget(w);
-    _mouseEvent.setPosition(_pointerPosition);
+    _mouseEvent.setPosition(screenPos);
     Application::instance().processEvent(_mouseEvent);
 }
 
@@ -675,14 +680,18 @@ void ApplicationImpl::handleTouchDown(uint32_t /*serial*/, uint32_t /*time*/,
                                       wl_fixed_t x, wl_fixed_t y)
 {
     Window* w = findWindow(surface);
-    if( ! w )
+    if( ! w || ! w->frame() )
         return;
+
+    // Convert surface-local to screen coordinates for Application dispatch
+    WindowImpl* frame = static_cast<WindowImpl*>( w->frame() );
+    Gfx::PointF screenPos = frame->toScreen(
+        Gfx::PointF(wl_fixed_to_double(x), wl_fixed_to_double(y)) );
 
     _touchEvent.clear();
     _touchEvent.setWidget(w);
     _touchEvent.setTrackingId(static_cast<Pt::uint32_t>(id));
-    _touchEvent.setPosition( Gfx::PointF(wl_fixed_to_double(x),
-                                         wl_fixed_to_double(y)) );
+    _touchEvent.setPosition(screenPos);
     _touchEvent.setPress();
     Application::instance().processEvent(_touchEvent);
 }
@@ -706,14 +715,18 @@ void ApplicationImpl::handleTouchMotion(uint32_t /*time*/, int32_t id,
                                         wl_fixed_t x, wl_fixed_t y)
 {
     Window* w = findWindow(_keyboardFocusSurface);
-    if( ! w )
+    if( ! w || ! w->frame() )
         return;
+
+    // Convert surface-local to screen coordinates for Application dispatch
+    WindowImpl* frame = static_cast<WindowImpl*>( w->frame() );
+    Gfx::PointF screenPos = frame->toScreen(
+        Gfx::PointF(wl_fixed_to_double(x), wl_fixed_to_double(y)) );
 
     _touchEvent.clear();
     _touchEvent.setWidget(w);
     _touchEvent.setTrackingId(static_cast<Pt::uint32_t>(id));
-    _touchEvent.setPosition( Gfx::PointF(wl_fixed_to_double(x),
-                                         wl_fixed_to_double(y)) );
+    _touchEvent.setPosition(screenPos);
     _touchEvent.setMove();
     Application::instance().processEvent(_touchEvent);
 }

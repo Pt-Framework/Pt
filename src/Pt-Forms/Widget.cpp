@@ -286,7 +286,6 @@ void Widget::processEvent(const Pt::Event& ev)
 
 void Widget::onProcessEvent(const Pt::Event& ev)
 {
-    //std::clog << typeid(ev).name() << std::endl;
     _dispatcher.send(ev);
 }
 

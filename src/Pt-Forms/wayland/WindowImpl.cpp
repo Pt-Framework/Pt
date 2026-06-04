@@ -129,7 +129,10 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 
     if( w.type() == WindowType::Default )
         createToplevel();
+
     // Popup creation deferred to onShow() when position and size are known
+
+    Base::onSetParent(&wm);
 }
 
 
@@ -171,6 +174,9 @@ void WindowImpl::createPopup(Window& w)
 {
     ApplicationImpl* app = Application::instance().impl();
 
+    _surface = wl_compositor_create_surface(app->compositor());
+    wl_surface_set_user_data(_surface, this);
+
     _xdgSurface = xdg_wm_base_get_xdg_surface(app->xdgWmBase(), _surface);
     xdg_surface_add_listener(_xdgSurface, &xdgSurfaceListener, this);
 
@@ -196,15 +202,15 @@ void WindowImpl::createPopup(Window& w)
 
     // Place the anchor rect at the desired position on the parent surface.
     // The popup's top-left corner is anchored to the top-left of this rect.
-    int32_t anchorX = static_cast<int32_t>(_popupOffset.x());
-    int32_t anchorY = static_cast<int32_t>(_popupOffset.y());
+    int32_t anchorX = static_cast<int32_t>( position().x() );
+    int32_t anchorY = static_cast<int32_t>( position().y() );
     xdg_positioner_set_anchor_rect(_positioner, anchorX, anchorY, 1, 1);
     xdg_positioner_set_anchor(_positioner, XDG_POSITIONER_ANCHOR_TOP_LEFT);
     xdg_positioner_set_gravity(_positioner, XDG_POSITIONER_GRAVITY_BOTTOM_RIGHT);
     xdg_positioner_set_constraint_adjustment(_positioner,
-        XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X |
-        XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_Y |
-        XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_Y);
+                                             XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X |
+                                             XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_Y |
+                                             XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_Y);
 
     _xdgPopup = xdg_surface_get_popup(_xdgSurface, parentXdgSurface, _positioner);
     xdg_popup_add_listener(_xdgPopup, &xdgPopupListener, this);
@@ -233,9 +239,13 @@ void WindowImpl::destroyPopup()
         _xdgSurface = 0;
     }
 
-    // Detach any buffer so the surface is clean for the next xdg_surface
-    wl_surface_attach(_surface, 0, 0, 0);
-    wl_surface_commit(_surface);
+    // Destroy the wl_surface so the compositor removes it from display.
+    // A new surface will be created when the popup is shown again.
+    if( _surface )
+    {
+        wl_surface_destroy(_surface);
+        _surface = 0;
+    }
 
     _configured = false;
 }
@@ -359,10 +369,12 @@ void WindowImpl::handlePopupConfigure(int32_t /*x*/, int32_t /*y*/,
 
 void WindowImpl::handlePopupDone()
 {
-    CloseEvent ev(*this);
+    // The compositor dismissed the popup (click outside the grabbed surface).
+    // Close the client Window (Popup) so it goes through the normal
+    // Popup::onCloseEvent path which updates the popup list and visibility.
+    CloseEvent ev(_client);
     Application::instance().processEvent(ev);
 }
-
 
 // WindowFrame virtual overrides
 
@@ -415,8 +427,9 @@ void WindowImpl::setType(WindowType /*type*/)
 
 Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    // On Wayland, window positions are relative to the compositor.
-    // We don't have global coordinates.
+    // Translate surface-local coordinates to screen coordinates.
+    // position() returns the realized window offset: (0,0) for toplevels
+    // and the popup anchor offset for popup windows.
     return pos + position();
 }
 
@@ -571,11 +584,18 @@ void WindowImpl::onEnable(Window& /*w*/, bool /*enable*/)
 }
 
 
-void WindowImpl::onMove(Window& /*w*/, const Gfx::PointF& to)
+void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
 {
-    // Store position for popup placement (used in createPopup).
-    // Toplevel windows cannot be positioned on Wayland.
-    _popupOffset = to;
+    // On Wayland, toplevel windows cannot be positioned by the client;
+    // their compositor-assigned position is unknown, so we treat it as (0,0).
+    // Popup windows are placed at the requested offset relative to the parent.
+    // Fire a MoveEvent with the realized position so that position() returns
+    // the correct offset for toScreen()/fromScreen() and createPopup().
+    const Gfx::PointF realized = (w.type() == WindowType::Default)
+                                  ? Gfx::PointF(0, 0)
+                                  : to;
+    MoveEvent ev(*this, realized);
+    processEvent(ev);
 }
 
 

@@ -67,23 +67,43 @@ class ApplicationImpl : public Pt::System::MainLoop
 {
     public:
         ApplicationImpl();
+
         virtual ~ApplicationImpl();
 
         void setCursor(const Cursor* cursor);
+
         Pt::Timespan inactivityTime() const;
+
         void sendKeyEvent(const KeyEvent& ev);
+
         void sendMouseEvent(const MouseEvent& ev);
+
         void nextEvent();
 
     public:
-        struct wl_display* display() const { return _display; }
-        struct wl_compositor* compositor() const { return _compositor; }
-        struct wl_shm* shm() const { return _shm; }
-        struct xdg_wm_base* xdgWmBase() const { return _xdgWmBase; }
-        struct wl_seat* seat() const { return _seat; }
-        struct zxdg_decoration_manager_v1* decorationManager() const { return _decorationManager; }
-        double screenScaling() const { return _screenScaling; }
-        int    outputScale()   const { return _outputScale; }
+        struct wl_display* display() const 
+        { return _display; }
+
+        struct wl_compositor* compositor() const 
+        { return _compositor; }
+
+        struct wl_shm* shm() const 
+        { return _shm; }
+
+        struct xdg_wm_base* xdgWmBase() const 
+        { return _xdgWmBase; }
+
+        struct wl_seat* seat() const 
+        { return _seat; }
+
+        struct zxdg_decoration_manager_v1* decorationManager() const 
+        { return _decorationManager; }
+
+        double screenScaling() const 
+        { return _screenScaling; }
+
+        int outputScale()   const 
+        { return _outputScale; }
 
 #ifdef PT_FORMS_WAYLAND_VULKAN
         VulkanDevice& vulkanDevice() { return _vulkanDevice; }
