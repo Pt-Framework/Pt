@@ -796,7 +796,7 @@ void WindowImpl::onMove(Window& w, const Gfx::PointF& to)
     // the correct offset for toScreen()/fromScreen() and createPopup().
     const Gfx::PointF realized = (w.type() == WindowType::Default)
                                   ? Gfx::PointF(0, 0)
-                                  : to;
+                                  : scaling().align(to);
     MoveEvent ev(*this, realized);
     processEvent(ev);
 }
@@ -811,7 +811,7 @@ void WindowImpl::onProcessMoveEvent(const MoveEvent& ev)
 // resize
 ///////////////////////////////////////////////////////////////////////
 
-Gfx::SizeF WindowImpl::onResize(Window& /*w*/, const Gfx::SizeF& s)
+Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     // Update the WindowFrame's widget size and (re)allocate the pixmap.
     // WindowFrame::onRescaleEvent runs before Window::onConnect (and thus
@@ -819,13 +819,27 @@ Gfx::SizeF WindowImpl::onResize(Window& /*w*/, const Gfx::SizeF& s)
     // the frame's size was still (0,0).  Processing a ResizeEvent here
     // allocates the pixmap at the correct physical size using the already-set
     // canvas scale factor.
-    if( s.width() > 0 && s.height() > 0 )
+    Gfx::SizeF alignedSize = scaling().align(s);
+
+    if( alignedSize.width() > w.maximumSize().width() )
+        alignedSize.setWidth( w.maximumSize().width() );
+
+    if( alignedSize.height() > w.maximumSize().height() )
+        alignedSize.setHeight( w.maximumSize().height() );
+
+    if( alignedSize.width() < w.minimumSize().width() )
+        alignedSize.setWidth( w.minimumSize().width() );
+
+    if( alignedSize.height() < w.minimumSize().height() )
+        alignedSize.setHeight( w.minimumSize().height() );
+
+    if( alignedSize.width() > 0 && alignedSize.height() > 0 )
     {
-        ResizeEvent frev(*this, s);
+        ResizeEvent frev(*this, alignedSize);
         processEvent(frev);
     }
 
-    return s;
+    return alignedSize;
 }
 
 
