@@ -116,9 +116,8 @@ void WindowFrame::onDisconnect()
 
 void WindowFrame::onProcessPaintEvent(const PaintEvent& ev)
 {
-    Base::onProcessPaintEvent(ev);
-
     _pixmap.sync();
+    Base::onProcessPaintEvent(ev);
     _wm.surfaceChanged().send(_window);
 }
 

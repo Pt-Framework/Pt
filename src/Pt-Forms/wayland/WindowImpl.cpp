@@ -105,7 +105,7 @@ static const struct zxdg_toplevel_decoration_v1_listener decorationListener = {
 WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 : WindowFrame(wm, w)
 , _wm(wm)
-, _client(w)
+, _window(w)
 , _surface(0)
 , _xdgSurface(0)
 , _xdgToplevel(0)
@@ -128,7 +128,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
     _shmPool.released() += Pt::slot(*this, &WindowImpl::onBufferReleased);
 
     if( w.type() == WindowType::Default )
-        createToplevel();
+        createWindow();
 
     // Popup creation deferred to onShow() when position and size are known
 
@@ -142,7 +142,7 @@ WindowImpl::~WindowImpl()
 }
 
 
-void WindowImpl::createToplevel()
+void WindowImpl::createWindow()
 {
     ApplicationImpl* app = Application::instance().impl();
 
@@ -317,7 +317,7 @@ void WindowImpl::handleXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
     {
         // _width/_height are logical; no conversion needed.
         Gfx::SizeF logSize(_width, _height);
-        _client.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
+        _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
     }
 }
 
@@ -349,7 +349,7 @@ void WindowImpl::handleToplevelClose()
     // Use commitEvent (async) so the event is processed in the normal queue-
     // drain phase of waitNext(), which correctly terminates the loop when
     // Application::exit() is called from the close handler.
-    CloseEvent ev(_client);
+    CloseEvent ev(_window);
     Application::instance().commitEvent(ev);
 }
 
@@ -372,7 +372,7 @@ void WindowImpl::handlePopupDone()
     // The compositor dismissed the popup (click outside the grabbed surface).
     // Close the client Window (Popup) so it goes through the normal
     // Popup::onCloseEvent path which updates the popup list and visibility.
-    CloseEvent ev(_client);
+    CloseEvent ev(_window);
     Application::instance().processEvent(ev);
 }
 
@@ -626,7 +626,7 @@ Gfx::SizeF WindowImpl::onResize(Window& /*w*/, const Gfx::SizeF& s)
 void WindowImpl::onClose(Window& /*w*/)
 {
     destroySurface();
-    CloseEvent ev(_client);
+    CloseEvent ev(_window);
     Application::instance().commitEvent(ev);
 }
 
@@ -664,20 +664,39 @@ void WindowImpl::paint(const Gfx::RectF& rect)
 }
 
 
+void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
+{
+    // Cannot paint until the compositor has configured the xdg_surface.
+    // The configure callback will trigger a full repaint.
+    if( ! _configured )
+        return;
+
+    PaintEvent rev( _window, ev.rect() );
+    _window.processEvent(rev);
+
+    Base::onProcessPaintEvent(ev);
+}
+
+
+void WindowImpl::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
+    onPaintContent( ev.rect() );
+}
+
+
 void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
 {
     if( ! _configured || ! _visible )
         return;
 
     Gfx::SizeF logSize(_width, _height);
-    _client.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
+    _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
 }
 
 
 void WindowImpl::onPaintContent(const Gfx::RectF& damage)
 {
-    pixmap().finish();
-
     const Gfx::Image& image = pixmap().impl()->bitmap().image();
     if( ! image.data() )
         return;
@@ -745,27 +764,6 @@ void WindowImpl::onPaintContent(const Gfx::RectF& damage)
 }
 
 
-void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
-{
-    // Cannot paint until the compositor has configured the xdg_surface.
-    // The configure callback will trigger a full repaint.
-    if( ! _configured )
-        return;
-
-    PaintEvent rev( _client, ev.rect() );
-    _client.processEvent(rev);
-
-    Base::onProcessPaintEvent(ev);
-}
-
-
-void WindowImpl::onPaintEvent(const PaintEvent& ev)
-{
-    Base::onPaintEvent(ev);
-    onPaintContent( ev.rect() );
-}
-
-
 void WindowImpl::onProcessShowEvent(const ShowEvent& ev)
 {
     Base::onProcessShowEvent(ev);
@@ -814,8 +812,8 @@ void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 
     // Forward resize to the client Window so Form::onResizeEvent triggers
     // relayout(), which sizes the main control (Workspace etc.).
-    ResizeEvent rev(_client, ev.size());
-    _client.processEvent(rev);
+    ResizeEvent rev(_window, ev.size());
+    _window.processEvent(rev);
 }
 
 
@@ -826,8 +824,8 @@ void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     // Propagate the total scale (system × user) to the client Window.
     // All widgets work in logical units; the total scale is what drives
     // canvas rendering and physical buffer sizing throughout the widget tree.
-    RescaleEvent rev(_client, ev.scaleFactor());
-    _client.processEvent(rev);
+    RescaleEvent rev(_window, ev.scaleFactor());
+    _window.processEvent(rev);
 }
 
 

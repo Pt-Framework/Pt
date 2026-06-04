@@ -147,7 +147,7 @@ class WindowImpl : public WindowFrame
         void handlePopupDone();
 
     private:
-        void createToplevel();
+        void createWindow();
         void createPopup(Window& w);
         void destroyPopup();
         void destroySurface();
@@ -156,7 +156,7 @@ class WindowImpl : public WindowFrame
 
     private:
         ScreenImpl&                          _wm;
-        Window&                              _client;
+        Window&                              _window;
         struct wl_surface*                   _surface;
         struct xdg_surface*                  _xdgSurface;
         struct xdg_toplevel*                 _xdgToplevel;

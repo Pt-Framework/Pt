@@ -303,7 +303,6 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
 #ifdef PT_FORMS_WIN32_RASTER
-    pixmap().finish();
 
     createSwapChain();
 
@@ -337,7 +336,6 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
         _swapChain->Present(0, 0);
     }
 #elif defined(PT_FORMS_WIN32_DIRECT2D)
-    pixmap().finish();
 
     createSwapChain();
 
