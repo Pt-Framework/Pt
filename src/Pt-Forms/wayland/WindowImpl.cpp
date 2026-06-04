@@ -129,8 +129,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 
     if( w.type() == WindowType::Default )
         createToplevel();
-    else
-        createPopup(w);
+    // Popup creation deferred to onShow() when position and size are known
 }
 
 
@@ -194,18 +193,51 @@ void WindowImpl::createPopup(Window& w)
     // Create positioner
     _positioner = xdg_wm_base_create_positioner(app->xdgWmBase());
     xdg_positioner_set_size(_positioner, _width, _height);
-    xdg_positioner_set_anchor_rect(_positioner, 0, 0, 1, 1);
 
-    // Position relative to anchor widget if available
-    Gfx::PointF pos = w.position();
-    xdg_positioner_set_offset(_positioner,
-                              static_cast<int32_t>(pos.x()),
-                              static_cast<int32_t>(pos.y()));
+    // Place the anchor rect at the desired position on the parent surface.
+    // The popup's top-left corner is anchored to the top-left of this rect.
+    int32_t anchorX = static_cast<int32_t>(_popupOffset.x());
+    int32_t anchorY = static_cast<int32_t>(_popupOffset.y());
+    xdg_positioner_set_anchor_rect(_positioner, anchorX, anchorY, 1, 1);
+    xdg_positioner_set_anchor(_positioner, XDG_POSITIONER_ANCHOR_TOP_LEFT);
+    xdg_positioner_set_gravity(_positioner, XDG_POSITIONER_GRAVITY_BOTTOM_RIGHT);
+    xdg_positioner_set_constraint_adjustment(_positioner,
+        XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X |
+        XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_Y |
+        XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_Y);
 
     _xdgPopup = xdg_surface_get_popup(_xdgSurface, parentXdgSurface, _positioner);
     xdg_popup_add_listener(_xdgPopup, &xdgPopupListener, this);
 
     wl_surface_commit(_surface);
+}
+
+
+void WindowImpl::destroyPopup()
+{
+    if( _xdgPopup )
+    {
+        xdg_popup_destroy(_xdgPopup);
+        _xdgPopup = 0;
+    }
+
+    if( _positioner )
+    {
+        xdg_positioner_destroy(_positioner);
+        _positioner = 0;
+    }
+
+    if( _xdgSurface )
+    {
+        xdg_surface_destroy(_xdgSurface);
+        _xdgSurface = 0;
+    }
+
+    // Detach any buffer so the surface is clean for the next xdg_surface
+    wl_surface_attach(_surface, 0, 0, 0);
+    wl_surface_commit(_surface);
+
+    _configured = false;
 }
 
 
@@ -248,121 +280,6 @@ void WindowImpl::destroySurface()
         _configured = false;
     }
 }
-
-
-void WindowImpl::setType(WindowType /*type*/)
-{
-    // Type change at runtime is not well supported on Wayland.
-    // Would require recreating the surface hierarchy.
-}
-
-
-Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
-{
-    // On Wayland, window positions are relative to the compositor.
-    // We don't have global coordinates.
-    return pos + position();
-}
-
-
-Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
-{
-    return pos - position();
-}
-
-
-void WindowImpl::paint(const Gfx::RectF& rect)
-{
-    PaintEvent ev(*this, rect);
-    processEvent(ev);
-}
-
-
-void WindowImpl::flushPresent()
-{
-}
-
-
-void WindowImpl::onPaintContent(const Gfx::RectF& damage)
-{
-    pixmap().finish();
-
-    const Gfx::Image& image = pixmap().impl()->bitmap().image();
-    if( ! image.data() )
-        return;
-
-    int imgWidth = static_cast<int>( image.width() );
-    int imgHeight = static_cast<int>( image.height() );
-
-    if( imgWidth <= 0 || imgHeight <= 0 )
-        return;
-
-    _shmPool.resize(imgWidth, imgHeight);
-
-    ShmBuffer* buf = _shmPool.acquireBuffer();
-    if( ! buf )
-    {
-        _shmPool.setRepaintOnRelease(true);
-        return;
-    }
-
-    // Recreate buffer if it has stale dimensions from a skipped resize
-    if( buf->width() != imgWidth || buf->height() != imgHeight )
-    {
-        buf->create(_shmPool.shm(), imgWidth, imgHeight, imgWidth * 4);
-    }
-
-    // Copy pixel data from the raster bitmap to the shm buffer
-    const Pt::uint8_t* src = image.data();
-    Pt::uint8_t* dst = buf->data();
-    std::size_t rowBytes = static_cast<std::size_t>(imgWidth) * 4;
-
-    for(int y = 0; y < imgHeight; ++y)
-    {
-        std::memcpy(dst + y * buf->stride(),
-                    src + y * static_cast<int>(image.stride()),
-                    rowBytes);
-    }
-
-    buf->setBusy(true);
-
-    // Tell the compositor how many buffer pixels correspond to one logical
-    // pixel.  This is the rounded integer DPI scale reported by wl_output.
-    int bufferScale = _wm.app().outputScale();
-    if( bufferScale < 1 ) bufferScale = 1;
-    wl_surface_set_buffer_scale(_surface, bufferScale);
-
-    wl_surface_attach(_surface, buf->buffer(), 0, 0);
-
-    int dx = static_cast<int>(damage.x() * bufferScale);
-    int dy = static_cast<int>(damage.y() * bufferScale);
-    int dw = static_cast<int>(damage.width() * bufferScale) + 1;
-    int dh = static_cast<int>(damage.height() * bufferScale) + 1;
-
-    if( dx < 0 ) dx = 0;
-    if( dy < 0 ) dy = 0;
-    if( dw > imgWidth ) dw = imgWidth;
-    if( dh > imgHeight ) dh = imgHeight;
-
-    wl_surface_damage_buffer(_surface, dx, dy, dw, dh);
-    wl_surface_commit(_surface);
-
-    // Flush pending writes so the compositor receives the frame without
-    // waiting for the next blocking wl_display_dispatch() call.
-    ApplicationImpl* app = Application::instance().impl();
-    wl_display_flush( app->display() );
-}
-
-
-void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
-{
-    if( ! _configured || ! _visible )
-        return;
-
-    Gfx::SizeF logSize(_width, _height);
-    _client.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
-}
-
 
 // xdg_surface callbacks
 
@@ -486,6 +403,30 @@ void WindowImpl::onRelease(Window& w)
 }
 
 
+void WindowImpl::setType(WindowType /*type*/)
+{
+    // Type change at runtime is not well supported on Wayland.
+    // Would require recreating the surface hierarchy.
+
+    // NOTE: The WindowImpl::setType funktionality will be removed in future
+    //       versions of Pt-Forms
+}
+
+
+Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
+{
+    // On Wayland, window positions are relative to the compositor.
+    // We don't have global coordinates.
+    return pos + position();
+}
+
+
+Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
+{
+    return pos - position();
+}
+
+
 Gfx::PointF WindowImpl::onToWindow(const Window& /*w*/,
                                     const Gfx::PointF& pos) const
 {
@@ -583,6 +524,14 @@ void WindowImpl::onShow(Window& w, bool visible)
 
     if( visible )
     {
+        // Recreate popup each time it is shown so that the positioner uses
+        // the current offset (popups cannot be repositioned on Wayland).
+        if( w.type() != WindowType::Default )
+        {
+            destroyPopup();
+            createPopup(w);
+        }
+
         if( _configured )
         {
             // Configure round-trip already done — paint immediately.
@@ -598,9 +547,15 @@ void WindowImpl::onShow(Window& w, bool visible)
     }
     else
     {
-        // Hide by attaching a null buffer
-        wl_surface_attach(_surface, 0, 0, 0);
-        wl_surface_commit(_surface);
+        if( w.type() != WindowType::Default )
+        {
+            destroyPopup();
+        }
+        else
+        {
+            wl_surface_attach(_surface, 0, 0, 0);
+            wl_surface_commit(_surface);
+        }
     }
 }
 
@@ -616,9 +571,11 @@ void WindowImpl::onEnable(Window& /*w*/, bool /*enable*/)
 }
 
 
-void WindowImpl::onMove(Window& /*w*/, const Gfx::PointF& /*to*/)
+void WindowImpl::onMove(Window& /*w*/, const Gfx::PointF& to)
 {
-    // On Wayland client cannot set absolute window positions.
+    // Store position for popup placement (used in createPopup).
+    // Toplevel windows cannot be positioned on Wayland.
+    _popupOffset = to;
 }
 
 
@@ -676,9 +633,105 @@ Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
     return pos - position();
 }
 
+//
+// painting
+//
+
+void WindowImpl::paint(const Gfx::RectF& rect)
+{
+    PaintEvent ev(*this, rect);
+    processEvent(ev);
+}
+
+
+void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
+{
+    if( ! _configured || ! _visible )
+        return;
+
+    Gfx::SizeF logSize(_width, _height);
+    _client.repaint( Gfx::RectF(Gfx::PointF(0, 0), logSize) );
+}
+
+
+void WindowImpl::onPaintContent(const Gfx::RectF& damage)
+{
+    pixmap().finish();
+
+    const Gfx::Image& image = pixmap().impl()->bitmap().image();
+    if( ! image.data() )
+        return;
+
+    int imgWidth = static_cast<int>( image.width() );
+    int imgHeight = static_cast<int>( image.height() );
+
+    if( imgWidth <= 0 || imgHeight <= 0 )
+        return;
+
+    _shmPool.resize(imgWidth, imgHeight);
+
+    ShmBuffer* buf = _shmPool.acquireBuffer();
+    if( ! buf )
+    {
+        _shmPool.setRepaintOnRelease(true);
+        return;
+    }
+
+    // Recreate buffer if it has stale dimensions from a skipped resize
+    if( buf->width() != imgWidth || buf->height() != imgHeight )
+    {
+        buf->create(_shmPool.shm(), imgWidth, imgHeight, imgWidth * 4);
+    }
+
+    // Copy pixel data from the raster bitmap to the shm buffer
+    const Pt::uint8_t* src = image.data();
+    Pt::uint8_t* dst = buf->data();
+    std::size_t rowBytes = static_cast<std::size_t>(imgWidth) * 4;
+
+    for(int y = 0; y < imgHeight; ++y)
+    {
+        std::memcpy(dst + y * buf->stride(),
+                    src + y * static_cast<int>(image.stride()),
+                    rowBytes);
+    }
+
+    buf->setBusy(true);
+
+    // Tell the compositor how many buffer pixels correspond to one logical
+    // pixel.  This is the rounded integer DPI scale reported by wl_output.
+    int bufferScale = _wm.app().outputScale();
+    if( bufferScale < 1 ) bufferScale = 1;
+    wl_surface_set_buffer_scale(_surface, bufferScale);
+
+    wl_surface_attach(_surface, buf->buffer(), 0, 0);
+
+    int dx = static_cast<int>(damage.x() * bufferScale);
+    int dy = static_cast<int>(damage.y() * bufferScale);
+    int dw = static_cast<int>(damage.width() * bufferScale) + 1;
+    int dh = static_cast<int>(damage.height() * bufferScale) + 1;
+
+    if( dx < 0 ) dx = 0;
+    if( dy < 0 ) dy = 0;
+    if( dw > imgWidth ) dw = imgWidth;
+    if( dh > imgHeight ) dh = imgHeight;
+
+    wl_surface_damage_buffer(_surface, dx, dy, dw, dh);
+    wl_surface_commit(_surface);
+
+    // Flush pending writes so the compositor receives the frame without
+    // waiting for the next blocking wl_display_dispatch() call.
+    ApplicationImpl* app = Application::instance().impl();
+    wl_display_flush( app->display() );
+}
+
 
 void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
+    // Cannot paint until the compositor has configured the xdg_surface.
+    // The configure callback will trigger a full repaint.
+    if( ! _configured )
+        return;
+
     PaintEvent rev( _client, ev.rect() );
     _client.processEvent(rev);
 
@@ -788,4 +841,5 @@ void WindowImpl::onCloseEvent(const CloseEvent& ev)
 }
 
 } // namespace Forms
+
 } // namespace Pt

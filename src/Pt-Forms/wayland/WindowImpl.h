@@ -55,17 +55,26 @@ class WindowImpl : public WindowFrame
 
     public:
         WindowImpl(ScreenImpl& wm, Window& w);
+
         virtual ~WindowImpl();
 
         void setType(WindowType type);
+
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
+
         void paint(const Gfx::RectF& rect);
 
     public:
-        struct wl_surface* surface() const { return _surface; }
-        int width() const { return _width; }
-        int height() const { return _height; }
+        struct wl_surface* surface() const 
+        { return _surface; }
+
+        int width() const 
+        { return _width; }
+
+        int height() const 
+        { return _height; }
 
     protected:
         virtual void onInit(Window& w);
@@ -121,12 +130,10 @@ class WindowImpl : public WindowFrame
                                   int32_t width, int32_t height);
         void handlePopupDone();
 
-    public:
-        void flushPresent();
-
     private:
         void createToplevel();
         void createPopup(Window& w);
+        void destroyPopup();
         void destroySurface();
         void onPaintContent(const Gfx::RectF& damage);
         void onBufferReleased(ShmPool& pool);
@@ -141,6 +148,7 @@ class WindowImpl : public WindowFrame
         struct xdg_positioner*               _positioner;
         struct zxdg_toplevel_decoration_v1*  _decoration;
         ShmPool                              _shmPool;
+        Gfx::PointF                          _popupOffset;
         int                                  _width;
         int                                  _height;
         int                                  _pendingWidth;
