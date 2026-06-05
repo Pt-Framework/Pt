@@ -100,6 +100,15 @@ static const struct zxdg_toplevel_decoration_v1_listener decorationListener = {
     decorationConfigure
 };
 
+void surfaceFrameCallback(void* data, struct wl_callback* cb, uint32_t time)
+{
+    static_cast<WindowImpl*>(data)->onFrameCallback(cb, time);
+}
+
+static const struct wl_callback_listener frameListener = {
+    surfaceFrameCallback
+};
+
 } // namespace
 
 WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
@@ -112,7 +121,11 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _xdgPopup(0)
 , _positioner(0)
 , _decoration(0)
+, _frameCallback(0)
 , _configured(false)
+, _framePending(false)
+, _needsRepaint(false)
+, _commitPending(false)
 {
     ApplicationImpl* app = Application::instance().impl();
 
@@ -282,6 +295,13 @@ void WindowImpl::destroySurface()
 
     if( _surface )
     {
+        if( _frameCallback )
+        {
+            wl_callback_destroy(_frameCallback);
+            _frameCallback = 0;
+            _framePending = false;
+        }
+
         wl_surface_destroy(_surface);
         _surface = 0;
         _configured = false;
@@ -303,6 +323,17 @@ void WindowImpl::onXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
     if( ! _pendingSize.isEmpty() && 
         ! _pendingSize.isEqual( size() ) )
     {
+        // Cancel pending frame callback — the old frame is for the old size.
+        // This allows the repaint below to commit immediately.
+        if( _frameCallback )
+        {
+            wl_callback_destroy(_frameCallback);
+            _frameCallback = 0;
+        }
+        _framePending = false;
+        _commitPending = false;
+        _commitDamage = Gfx::RectF();
+
         ResizeEvent rev(*this, _pendingSize);
         Application::instance().processEvent(rev);
     }
@@ -632,6 +663,13 @@ void WindowImpl::onShowWindow(Window& w, bool visible)
     }
     else
     {
+        if( _frameCallback )
+        {
+            wl_callback_destroy(_frameCallback);
+            _frameCallback = 0;
+            _framePending = false;
+        }
+
         wl_surface_attach(_surface, 0, 0, 0);
         wl_surface_commit(_surface);
     }
@@ -669,6 +707,12 @@ void WindowImpl::onShowEvent(const ShowEvent& ev)
 
 void WindowImpl::paint(const Gfx::RectF& rect)
 {
+    if( _framePending )
+    {
+        _needsRepaint = true;
+        return;
+    }
+
     PaintEvent ev(*this, rect);
     processEvent(ev);
 }
@@ -706,17 +750,13 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
+void WindowImpl::commitFrame()
 {
-    if( ! _configured || ! _window.isVisible() )
+    if( ! _commitPending )
         return;
 
-    _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
-}
+    _commitPending = false;
 
-
-void WindowImpl::onPaintContent(const Gfx::RectF& damage)
-{
     const Gfx::Image& image = pixmap().impl()->bitmap().image();
     if( ! image.data() )
         return;
@@ -736,7 +776,6 @@ void WindowImpl::onPaintContent(const Gfx::RectF& damage)
         return;
     }
 
-    // Recreate buffer if it has stale dimensions from a skipped resize
     if( buf->width() != imgWidth || buf->height() != imgHeight )
     {
         buf->create(_shmPool.shm(), imgWidth, imgHeight, imgWidth * 4);
@@ -756,14 +795,13 @@ void WindowImpl::onPaintContent(const Gfx::RectF& damage)
 
     buf->setBusy(true);
 
-    // Tell the compositor how many buffer pixels correspond to one logical
-    // pixel.  This is the rounded integer DPI scale reported by wl_output.
     int bufferScale = _wm.app().outputScale();
     if( bufferScale < 1 ) bufferScale = 1;
     wl_surface_set_buffer_scale(_surface, bufferScale);
 
     wl_surface_attach(_surface, buf->buffer(), 0, 0);
 
+    const Gfx::RectF& damage = _commitDamage;
     int dx = static_cast<int>(damage.x() * bufferScale);
     int dy = static_cast<int>(damage.y() * bufferScale);
     int dw = static_cast<int>(damage.width() * bufferScale) + 1;
@@ -775,12 +813,47 @@ void WindowImpl::onPaintContent(const Gfx::RectF& damage)
     if( dh > imgHeight ) dh = imgHeight;
 
     wl_surface_damage_buffer(_surface, dx, dy, dw, dh);
-    wl_surface_commit(_surface);
 
-    // Flush pending writes so the compositor receives the frame without
-    // waiting for the next blocking wl_display_dispatch() call.
-    ApplicationImpl* app = Application::instance().impl();
-    wl_display_flush( app->display() );
+    _frameCallback = wl_surface_frame(_surface);
+    wl_callback_add_listener(_frameCallback, &frameListener, this);
+
+    wl_surface_commit(_surface);
+    _framePending = true;
+    _needsRepaint = false;
+
+    _commitDamage = Gfx::RectF();
+
+    wl_display_flush( _wm.app().display() );
+}
+
+
+void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
+{
+    if( ! _configured || ! _window.isVisible() )
+        return;
+
+    _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
+}
+
+
+void WindowImpl::onFrameCallback(struct wl_callback* cb, uint32_t /*time*/)
+{
+    wl_callback_destroy(cb);
+    _frameCallback = 0;
+    _framePending = false;
+
+    if( _needsRepaint && _configured && _window.isVisible() )
+    {
+        _needsRepaint = false;
+        _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
+    }
+}
+
+
+void WindowImpl::onPaintContent(const Gfx::RectF& damage)
+{
+    _commitDamage.unify(damage);
+    _commitPending = true;
 }
 
 ///////////////////////////////////////////////////////////////////////

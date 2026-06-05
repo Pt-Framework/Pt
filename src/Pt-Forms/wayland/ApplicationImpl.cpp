@@ -409,10 +409,12 @@ void ApplicationImpl::nextEvent()
 void ApplicationImpl::onRun()
 {
     _wlFd.processEvents();
+    flushPendingPaints();
 
     while( MainLoop::impl()->waitNext() )
     {
         _wlFd.processEvents();
+        flushPendingPaints();
     }
 }
 
@@ -420,6 +422,23 @@ void ApplicationImpl::onRun()
 void ApplicationImpl::onWaylandEvents(int)
 {
     _wlFd.processEvents();
+}
+
+
+void ApplicationImpl::flushPendingPaints()
+{
+    const std::vector<Window*>& windows = Application::instance().screen().windows();
+
+    for(std::size_t i = 0; i < windows.size(); ++i)
+    {
+        Window* w = windows[i];
+        if( ! w->frame() )
+            continue;
+
+        WindowImpl* wi = static_cast<WindowImpl*>( w->frame() );
+        if( wi->commitPending() )
+            wi->commitFrame();
+    }
 }
 
 

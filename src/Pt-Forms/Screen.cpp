@@ -250,16 +250,13 @@ void Screen::onRequestRepaint(const Gfx::RectF& rect)
 void Screen::onProcessPaintEvent(const PaintEvent& ev)
 {
     if(_updates == 0)
-    {
-        //std::clog << "PAINT EVENT screen skipped" << std::endl;
         return;
-    }
 
     --_updates;
 
     // skip all updates except the last one
     if(_updates > 0)
-      return;
+        return;
 
     _updateRect.clear();
 

@@ -89,6 +89,8 @@ class WindowImpl : public WindowFrame
 
         void onXdgPopupDone();
 
+        void onFrameCallback(struct wl_callback* cb, uint32_t time);
+
     protected:
         virtual void onInit(Window& w);
 
@@ -175,6 +177,12 @@ class WindowImpl : public WindowFrame
 
         void onBufferReleased(ShmPool& pool);
 
+    public:
+        void commitFrame();
+
+        bool commitPending() const
+        { return _commitPending; }
+
     private:
         void createWindow();
 
@@ -194,8 +202,13 @@ class WindowImpl : public WindowFrame
         struct xdg_positioner*               _positioner;
         struct zxdg_toplevel_decoration_v1*  _decoration;
         ShmPool                              _shmPool;
+        struct wl_callback*                  _frameCallback;
         Gfx::SizeF                           _pendingSize;
+        Gfx::RectF                           _commitDamage;
         bool                                 _configured;
+        bool                                 _framePending;
+        bool                                 _needsRepaint;
+        bool                                 _commitPending;
 };
 
 } // namespace Forms

@@ -148,6 +148,7 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     private:
         void onWaylandEvents(int);
+        void flushPendingPaints();
         Window* findWindow(struct wl_surface* surface);
 
     private:
