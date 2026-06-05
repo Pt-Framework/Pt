@@ -171,6 +171,13 @@ class PT_GFX_API Brush
             Radial      = 3
         };
 
+        /** @brief Identifies how image texture coordinates are interpreted.
+        */
+        enum TextureMode
+        {
+            SourcePixels = 0
+        };
+
     public:
         /** @brief Contructs a null brush.
         */
@@ -180,9 +187,15 @@ class PT_GFX_API Brush
         */
         Brush(const Color& color);
 
-        /** @brief Constructs a texture brush.
+        /** @brief Constructs an image texture brush.
+
+            The texture origin is expressed in source image pixel coordinates.
+
+            @param image The source image used as the repeating tile.
+            @param origin The texture pattern origin in source pixel coordinates.
         */
-        Brush(const Image& texture, Pt::int32_t offX = 0, Pt::int32_t offY = 0);
+        static Brush imageTexture(const Image& image,
+                                  const Gfx::PointF& origin = Gfx::PointF());
 
         /** @brief Constructs a vertical gradient brush from two colors.
         */
@@ -268,25 +281,20 @@ class PT_GFX_API Brush
         */
         float gradientEndRadius() const;
 
-        /** @brief Sets the texture image and offset.
+        /** @brief Returns how the texture origin is interpreted.
         */
-        void setTexture(const Image& texture,
-                        Pt::int32_t offX = 0, Pt::int32_t offY = 0);
+        TextureMode textureMode() const;
 
         /** @brief Returns the texture image.
         */
         const Image& texture() const;
 
-        // TODO: offset for textures is the origin and needs to be
-        //       handled diferently in the painters
+        /** @brief Returns the texture pattern origin.
 
-        /** @brief Returns the horizontal texture offset.
+            The coordinates are expressed in the space identified by
+            %Brush::textureMode().
         */
-        Pt::int32_t offsetX() const;
-
-        /** @brief Returns the vertical texture offset.
-        */
-        Pt::int32_t offsetY() const;
+        const PointF& textureOrigin() const;
 
         /** @brief Returns true if the brush uses a gradient.
         */
@@ -314,25 +322,34 @@ class BrushData
         BrushData()
         : _isNull(true)
         , _fillStyle(Brush::Solid)
+        , _positionMode(Brush::Relative)
         , _color(0, 0, 0)
         , _gradient(Brush::Horizontal)
-        , _ofsX(0)
-        , _ofsY(0)
+        , _gradientBeginRadius(0.0f)
+        , _gradientEndRadius(0.0f)
+        , _textureMode(Brush::SourcePixels)
+        , _textureOrigin()
         , _texture(0)
         {}
 
         BrushData(const Color& color)
         : _isNull(false)
         , _fillStyle(Brush::Solid)
+        , _positionMode(Brush::Relative)
         , _color(color)
         , _gradient(Brush::Horizontal)
-        , _ofsX(0)
-        , _ofsY(0)
+        , _gradientBeginRadius(0.0f)
+        , _gradientEndRadius(0.0f)
+        , _textureMode(Brush::SourcePixels)
+        , _textureOrigin()
         , _texture(0)
         {}
 
-        BrushData(const Image& texture,
-                  Pt::int32_t offsetX, Pt::int32_t offsetY);
+        BrushData(const Image& texture, const PointF& textureOrigin);
+
+        BrushData(const BrushData& other);
+
+        BrushData& operator=(const BrushData& other);
 
         // only for old Painter
         BrushData(const Color& from, const Color& to,
@@ -396,16 +413,15 @@ class BrushData
         float gradientEndRadius() const
         { return _gradientEndRadius; }
 
-        void setTexture(const Image& texture,
-                        Pt::int32_t offsetX, Pt::int32_t offsetY);
+        void setImageTexture(const Image& texture, const PointF& textureOrigin);
 
         const Image& texture() const;
 
-        Pt::int32_t offsetX() const
-        { return _ofsX; }
+        Brush::TextureMode textureMode() const
+        { return _textureMode; }
 
-        Pt::int32_t offsetY() const
-        { return _ofsY; }
+        const PointF& textureOrigin() const
+        { return _textureOrigin; }
 
         bool isGradient() const
         { return _fillStyle == Brush::Gradient; }
@@ -429,8 +445,8 @@ class BrushData
         PointF               _gradientEnd;
         float                _gradientEndRadius;
 
-        Pt::int32_t          _ofsX;
-        Pt::int32_t          _ofsY;
+        Brush::TextureMode   _textureMode;
+        PointF               _textureOrigin;
         Bitmap*              _texture;
 };
 

@@ -142,7 +142,13 @@ class PixmapCanvas : public Gfx::Canvas
     private:
         ID2D1PathGeometry* createPathGeometry(const Gfx::Path& path);
 
-        void createFillBrush();
+        void createBrush();
+
+        void createSolidBrush();
+
+        void createTextureBrush();
+
+        void createGradientBrush();
 
     private:
         PixmapImpl*               _pixmap;
@@ -157,6 +163,7 @@ class PixmapCanvas : public Gfx::Canvas
 
         Gfx::Brush                _brush;
         ID2D1Brush*               _fillBrush;
+        ID2D1Bitmap*              _textureBitmap;
 
         Gfx::Font                 _font;
         IDWriteTextFormat*        _textFormat;

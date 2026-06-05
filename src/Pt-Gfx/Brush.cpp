@@ -31,7 +31,47 @@
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintContext.h>
+#include <cmath>
 #include <stdexcept>
+
+namespace
+{
+
+static const Pt::Gfx::Float TextureNearlyZero = static_cast<Pt::Gfx::Float>(1e-6);
+
+
+Pt::Gfx::Float normalizeTextureShift(Pt::Gfx::Float value, Pt::Gfx::Float extent)
+{
+    if(extent <= TextureNearlyZero)
+        return 0.0f;
+
+    Pt::Gfx::Float shift = std::fmod(value, extent);
+    if(shift < 0.0f)
+        shift += extent;
+
+    if(shift <= TextureNearlyZero || extent - shift <= TextureNearlyZero)
+        return 0.0f;
+
+    return shift;
+}
+
+
+void drawTextureSlice(Pt::Gfx::Painter& painter, const Pt::Gfx::Image& texture,
+                      Pt::Gfx::Float destX, Pt::Gfx::Float destY,
+                      Pt::Gfx::Float srcX, Pt::Gfx::Float srcY,
+                      Pt::Gfx::Float width, Pt::Gfx::Float height)
+{
+    if(width <= TextureNearlyZero || height <= TextureNearlyZero)
+        return;
+
+    painter.drawImage(
+        Pt::Gfx::PointF(destX, destY),
+        texture,
+        Pt::Gfx::RectF(Pt::Gfx::PointF(srcX, srcY), Pt::Gfx::SizeF(width, height))
+    );
+}
+
+}
 
 namespace Pt {
 
@@ -102,15 +142,16 @@ Brush::Brush(const Color& color)
 {}
 
 
-Brush::Brush(const Image& texture,
-             Pt::int32_t offsetX, Pt::int32_t offsetY)
-: _brushData( new BrushData(texture, offsetX, offsetY) )
-{}
-
-
 Brush::Brush(BrushData* data)
 : _brushData(data)
 {
+}
+
+
+Brush Brush::imageTexture(const Image& image, const PointF& origin)
+{
+    BrushData* data = new BrushData(image, origin);
+    return Brush(data);
 }
 
 
@@ -200,8 +241,7 @@ void Brush::setColor(const Color& color)
 {
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData( new BrushData() );
-        *brushData = *_brushData;
+        SmartPtr<BrushData> brushData( new BrushData(*_brushData) );
         _brushData = brushData;
     }
 
@@ -257,36 +297,21 @@ float Brush::gradientEndRadius() const
 }
 
 
-void Brush::setTexture(const Image& texture,
-                       Pt::int32_t offsetX, Pt::int32_t offsetY)
-{
-    // COW
-    if(_brushData.refs() > 1)
-    {
-        SmartPtr<BrushData> brushData( new BrushData() );
-        *brushData = *_brushData;
-        _brushData = brushData;
-    }
-
-    _brushData->setTexture(texture, offsetX, offsetY);
-}
-
-
 const Image& Brush::texture() const
 {
     return _brushData->texture();
 }
 
 
-Pt::int32_t Brush::offsetX() const
+Brush::TextureMode Brush::textureMode() const
 {
-    return _brushData->offsetX();
+    return _brushData->textureMode();
 }
 
 
-Pt::int32_t Brush::offsetY() const
+const PointF& Brush::textureOrigin() const
 {
-    return _brushData->offsetY();
+    return _brushData->textureOrigin();
 }
 
 
@@ -311,17 +336,73 @@ bool Brush::isNull() const
 // BrushData
 //////////////////////////////////////////////////////////////////////////
 
-BrushData::BrushData(const Image& texture,
-                     Pt::int32_t offsetX, Pt::int32_t offsetY)
+BrushData::BrushData(const Image& texture, const PointF& textureOrigin)
 : _isNull(true)
 , _fillStyle(Brush::Solid)
 , _positionMode(Brush::Relative)
+, _color(0, 0, 0)
 , _gradient(Brush::Horizontal)
-, _ofsX(0)
-, _ofsY(0)
+, _gradientBeginRadius(0.0f)
+, _gradientEndRadius(0.0f)
+, _textureMode(Brush::SourcePixels)
+, _textureOrigin()
 , _texture(0)
 {
-    setTexture(texture, offsetX, offsetY);
+    setImageTexture(texture, textureOrigin);
+}
+
+
+BrushData::BrushData(const BrushData& other)
+: _isNull(other._isNull)
+, _fillStyle(other._fillStyle)
+, _positionMode(other._positionMode)
+, _color(other._color)
+, _gradient(other._gradient)
+, _gradientStops(other._gradientStops)
+, _gradientBegin(other._gradientBegin)
+, _gradientBeginRadius(other._gradientBeginRadius)
+, _gradientEnd(other._gradientEnd)
+, _gradientEndRadius(other._gradientEndRadius)
+, _textureMode(other._textureMode)
+, _textureOrigin(other._textureOrigin)
+, _texture(0)
+{
+    if(other._texture)
+    {
+        _texture = new Bitmap;
+        _texture->reset(other._texture->image());
+    }
+}
+
+
+BrushData& BrushData::operator=(const BrushData& other)
+{
+    if(this == &other)
+        return *this;
+
+    Bitmap* texture = 0;
+    if(other._texture)
+    {
+        texture = new Bitmap;
+        texture->reset(other._texture->image());
+    }
+
+    delete _texture;
+
+    _isNull = other._isNull;
+    _fillStyle = other._fillStyle;
+    _positionMode = other._positionMode;
+    _color = other._color;
+    _gradient = other._gradient;
+    _gradientStops = other._gradientStops;
+    _gradientBegin = other._gradientBegin;
+    _gradientBeginRadius = other._gradientBeginRadius;
+    _gradientEnd = other._gradientEnd;
+    _gradientEndRadius = other._gradientEndRadius;
+    _textureMode = other._textureMode;
+    _textureOrigin = other._textureOrigin;
+    _texture = texture;
+    return *this;
 }
 
 
@@ -330,9 +411,12 @@ BrushData::BrushData(const Color& from, const Color& to,
 : _isNull(false)
 , _fillStyle(Brush::Gradient)
 , _positionMode(Brush::Relative)
+, _color(0, 0, 0)
 , _gradient(g)
-, _ofsX(0)
-, _ofsY(0)
+, _gradientBeginRadius(0.0f)
+, _gradientEndRadius(0.0f)
+, _textureMode(Brush::SourcePixels)
+, _textureOrigin()
 , _texture(0)
 {
     _gradientStops.add(0.0, from);
@@ -360,8 +444,17 @@ BrushData::~BrushData()
 void BrushData::setSolid(const Color& color)
 {
     _fillStyle = Brush::Solid;
-    _color     = color;
-    _isNull    = false;
+    _positionMode = Brush::Relative;
+    _color = color;
+    _gradient = Brush::Horizontal;
+    _gradientStops.clear();
+    _gradientBegin.clear();
+    _gradientBeginRadius = 0.0f;
+    _gradientEnd.clear();
+    _gradientEndRadius = 0.0f;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin.clear();
+    _isNull = false;
 
     delete _texture;
     _texture = 0;
@@ -370,16 +463,27 @@ void BrushData::setSolid(const Color& color)
 
 void BrushData::set1DGradient(Brush::GradientStyle g, const ColorStops& colorStops)
 {
-    _isNull        = false;
-    _fillStyle     = Brush::Gradient;
-    _positionMode  = Brush::Absolute;
-
-    _gradient      = g;
+    _isNull = false;
+    _fillStyle = Brush::Gradient;
+    _positionMode = Brush::Absolute;
+    _gradient = g;
     _gradientStops = colorStops;
+    _gradientBeginRadius = 0.0f;
+    _gradientEndRadius = 0.0f;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin.clear();
 
-    _ofsX          = 0;
-    _ofsY          = 0;
-    
+    if(g == Brush::Horizontal)
+    {
+        _gradientBegin.set(0.0f, 0.5f);
+        _gradientEnd.set(1.0f, 0.5f);
+    }
+    else
+    {
+        _gradientBegin.set(0.5f, 0.0f);
+        _gradientEnd.set(0.5f, 1.0f);
+    }
+
     delete _texture;
     _texture = 0;
 }
@@ -388,18 +492,18 @@ void BrushData::set1DGradient(Brush::GradientStyle g, const ColorStops& colorSto
 void BrushData::setLinearGradient(const PointF& begin, const PointF& end,
                                   const ColorStops& colorStops)
 {
-    _isNull        = false;
-    _fillStyle     = Brush::Gradient;
-    _positionMode  = Brush::Absolute;
-
-    _gradient      = Brush::Linear;
+    _isNull = false;
+    _fillStyle = Brush::Gradient;
+    _positionMode = Brush::Absolute;
+    _gradient = Brush::Linear;
     _gradientStops = colorStops;
     _gradientBegin = begin;
-    _gradientEnd   = end;
+    _gradientBeginRadius = 0.0f;
+    _gradientEnd = end;
+    _gradientEndRadius = 0.0f;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin.clear();
 
-    _ofsX          = 0;
-    _ofsY          = 0;
-    
     delete _texture;
     _texture = 0;
 }
@@ -409,18 +513,18 @@ void BrushData::setLinearGradient(float beginX, float beginY,
                                   float endX, float endY,
                                   const ColorStops& colorStops)
 {
-    _isNull        = false;
-    _fillStyle     = Brush::Gradient;
-    _positionMode  = Brush::Relative;
-
-    _gradient      = Brush::Linear;
+    _isNull = false;
+    _fillStyle = Brush::Gradient;
+    _positionMode = Brush::Relative;
+    _gradient = Brush::Linear;
     _gradientStops = colorStops;
     _gradientBegin.set(beginX, beginY);
+    _gradientBeginRadius = 0.0f;
     _gradientEnd.set(endX, endY);
+    _gradientEndRadius = 0.0f;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin.clear();
 
-    _ofsX          = 0;
-    _ofsY          = 0;
-    
     delete _texture;
     _texture = 0;
 }
@@ -430,20 +534,18 @@ void BrushData::setRadialGradient(const PointF& begin, float beginRadius,
                                   const PointF& end, float endRadius,
                                   const ColorStops& colorStops)
 {
-    _isNull        = false;
-    _fillStyle     = Brush::Gradient;
-    _positionMode  = Brush::Absolute;
-
-    _gradient      = Brush::Radial;
+    _isNull = false;
+    _fillStyle = Brush::Gradient;
+    _positionMode = Brush::Absolute;
+    _gradient = Brush::Radial;
     _gradientStops = colorStops;
     _gradientBegin = begin;
     _gradientBeginRadius = beginRadius;
     _gradientEnd = end;
     _gradientEndRadius = endRadius;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin.clear();
 
-    _ofsX          = 0;
-    _ofsY          = 0;
-    
     delete _texture;
     _texture = 0;
 }
@@ -453,20 +555,18 @@ void BrushData::setRadialGradient(float beginX, float beginY, float beginRadius,
                                   float endX, float endY, float endRadius,
                                   const ColorStops& colorStops)
 {
-    _isNull        = false;
-    _fillStyle     = Brush::Gradient;
-    _positionMode  = Brush::Relative;
-
-    _gradient      = Brush::Radial;
+    _isNull = false;
+    _fillStyle = Brush::Gradient;
+    _positionMode = Brush::Relative;
+    _gradient = Brush::Radial;
     _gradientStops = colorStops;
     _gradientBegin.set(beginX, beginY);
     _gradientBeginRadius = beginRadius;
     _gradientEnd.set(endX, endY);
     _gradientEndRadius = endRadius;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin.clear();
 
-    _ofsX          = 0;
-    _ofsY          = 0;
-    
     delete _texture;
     _texture = 0;
 }
@@ -482,140 +582,65 @@ const Image& BrushData::texture() const
 }
 
 
-void BrushData::setTexture(const Image& texture,
-                           Pt::int32_t offsetX, Pt::int32_t offsetY)
+void BrushData::setImageTexture(const Image& texture, const PointF& textureOrigin)
 {
     delete _texture;
     _texture = 0;
 
     _texture = new Bitmap;
 
-    // The texture has no offset
-    if( ! offsetX && ! offsetY )
+    const Pt::Gfx::Float textureWidth = static_cast<Pt::Gfx::Float>(texture.width());
+    const Pt::Gfx::Float textureHeight = static_cast<Pt::Gfx::Float>(texture.height());
+    const Pt::Gfx::Float shiftX = normalizeTextureShift(textureOrigin.x(), textureWidth);
+    const Pt::Gfx::Float shiftY = normalizeTextureShift(textureOrigin.y(), textureHeight);
+
+    if(shiftX <= TextureNearlyZero && shiftY <= TextureNearlyZero)
     {
-        _texture->reset( texture);
+        _texture->reset(texture);
     }
-    else // The texture has offset
+    else
     {
-        // Prepare the destination texture
-        _texture->reset( SizeF(texture.width(), texture.height()) );
+        _texture->reset(SizeF(textureWidth, textureHeight));
 
         PaintContext ctx(*_texture);
         Painter painter(ctx);
         painter.setCompositionMode(CompositionMode::SourceCopy);
 
-        // Calculate the source and destination coordinate
-        Pt::int32_t sx, dx;
-        if(offsetX >= 0)
-        {
-            sx = offsetX % texture.width();
-            dx = 0;
-        }
-        else
-        {
-            sx = 0;
-            dx = (-offsetX) % texture.width();
-        }
+        const Pt::Gfx::Float rightWidth = textureWidth - shiftX;
+        const Pt::Gfx::Float bottomHeight = textureHeight - shiftY;
 
-        Pt::int32_t sy, dy;
-        if(offsetY >= 0)
-        {
-            sy = offsetY % texture.height();
-            dy = 0;
-        }
-        else
-        {
-            sy = 0;
-            dy = (-offsetY) % texture.height();
-        }
+        drawTextureSlice(painter, texture,
+                         0.0f, 0.0f,
+                         shiftX, shiftY,
+                         rightWidth, bottomHeight);
 
-        // Draw on the main area
-        painter.drawImage( PointF(dx, dy), texture,
-                           RectF( PointF(sx, sy),
-                                  SizeF(texture.width() - sx, texture.height() - sy)) );
+        drawTextureSlice(painter, texture,
+                         rightWidth, 0.0f,
+                         0.0f, shiftY,
+                         shiftX, bottomHeight);
 
-        if( ! dx && ! dy) // positive offset
-        {
-            // Draw on the right/top-right hole
-            painter.drawImage(
-                PointF(texture.width() - sx, dy), texture,
-                RectF(PointF(0, sy), SizeF(texture.width() - sx, texture.height() - sy))
-            );
-            // Draw on the bottom/bottom-left hole
-            painter.drawImage(
-                 PointF(dx, texture.height() - sy), texture,
-                 RectF(PointF(sx, 0), SizeF(texture.width() - sx, texture.height() - sy))
-            );
-            // Draw on the bottom-right hole
-            painter.drawImage(
-                PointF(texture.width() - sx, texture.height() - sy), texture,
-                RectF(PointF(0, 0), SizeF(texture.width() - sx, texture.height() - sy))
-            );
-        }
-        else if(!sx && !sy) // negative offset
-        {
-            // Draw on the left/bottom-left hole
-            painter.drawImage(
-                PointF(0, dy), texture,
-                RectF(PointF(texture.width() - dx, 0), SizeF(dx, texture.height() - dy))
-            );
-            // Draw on the top/top-right hole
-            painter.drawImage(
-                PointF(dx, 0), texture,
-                RectF(PointF(0, texture.height() - dy), SizeF(texture.width() - dx, dy))
-            );
-            // Draw on the left-top hole
-            painter.drawImage(
-                PointF(0, 0), texture,
-                RectF(PointF(texture.width() - dx, texture.height() - dy), SizeF(dx, dy))
-            );
-        }
-        else if( ! dx && ! sy) // Mixed offset
-        {
-            // Draw on the top-left hole
-            painter.drawImage(
-                PointF(0, 0), texture,
-                RectF(PointF(sx, texture.height() - dy), SizeF(texture.width() - sx, dy))
-            );
-            // Draw on the top-right hole
-            painter.drawImage(
-                PointF(sx, 0), texture,
-                RectF(PointF(0, texture.height() - dy), SizeF(sx, dy))
-            );
-            // Draw on the bottom-right hole
-            painter.drawImage(
-                PointF(sx, dy), texture,
-                RectF(PointF(0, 0), SizeF(sx, dy))
-            );
-        }
-        else if( ! sx && ! dy ) // Mixed offset
-        {
-            // Draw on the top-left hole
-            painter.drawImage(
-                PointF(0, 0), texture,
-                RectF(PointF(texture.width() - dx, sy), SizeF(dx, texture.height() - sy))
-            );
-            // Draw on the bottom-left hole
-            painter.drawImage(
-                PointF(0, sy), texture,
-                RectF(PointF(texture.width() - dx, 0), SizeF(dx, sy))
-            );
-            // Draw on the bottom-right hole
-            painter.drawImage(
-                PointF(dx, sy), texture,
-                RectF(PointF(0, 0), SizeF(dx, sy))
-            );
-        }
+        drawTextureSlice(painter, texture,
+                         0.0f, bottomHeight,
+                         shiftX, 0.0f,
+                         rightWidth, shiftY);
+
+        drawTextureSlice(painter, texture,
+                         rightWidth, bottomHeight,
+                         0.0f, 0.0f,
+                         shiftX, shiftY);
     }
 
-    _isNull        = false;
-    _fillStyle     = Brush::Texture;
-    _positionMode  = Brush::Absolute;
-
+    _isNull = false;
+    _fillStyle = Brush::Texture;
+    _positionMode = Brush::Absolute;
+    _gradient = Brush::Horizontal;
     _gradientStops.clear();
-
-    _ofsX          = offsetX;
-    _ofsY          = offsetY;
+    _gradientBegin.clear();
+    _gradientBeginRadius = 0.0f;
+    _gradientEnd.clear();
+    _gradientEndRadius = 0.0f;
+    _textureMode = Brush::SourcePixels;
+    _textureOrigin = textureOrigin;
 }
 
 } // namespace

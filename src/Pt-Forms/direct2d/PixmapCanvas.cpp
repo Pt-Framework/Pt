@@ -85,6 +85,7 @@ PixmapCanvas::PixmapCanvas()
 , _strokeStyle(0)
 , _penWidth(1.0f)
 , _fillBrush(0)
+, _textureBitmap(0)
 , _textFormat(0)
 , _pathGeom(0)
 , _clipSet(false)
@@ -106,6 +107,9 @@ PixmapCanvas::~PixmapCanvas()
 
     if(_strokeStyle)
         _strokeStyle->Release();
+
+    if(_textureBitmap)
+        _textureBitmap->Release();
 
     if(_fillBrush)
         _fillBrush->Release();
@@ -234,6 +238,12 @@ void PixmapCanvas::onFinishPaint()
             _fillBrush = 0;
         }
 
+        if(_textureBitmap)
+        {
+            _textureBitmap->Release();
+            _textureBitmap = 0;
+        }
+
         Application::instance().impl()->d2d().d2dDevice()->CreateDeviceContext(
             D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &_deviceContext);
 
@@ -243,7 +253,7 @@ void PixmapCanvas::onFinishPaint()
             D2D1_COLOR_F penColor = toD2DColor( _pen.color() );
             _deviceContext->CreateSolidColorBrush(penColor, &_penBrush);
 
-            createFillBrush();
+            createBrush();
         }
     }
 }
@@ -408,7 +418,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
     if( ! _deviceContext)
         return;
 
-    createFillBrush();
+    createBrush();
 }
 
 
@@ -419,25 +429,95 @@ void PixmapCanvas::onApplyBrush()
 
     // Lazy-init after device context recreation
     if( ! _fillBrush)
-        createFillBrush();
+        createBrush();
 }
 
 
-void PixmapCanvas::createFillBrush()
+void PixmapCanvas::createBrush()
 {
     if( ! _deviceContext)
         return;
 
-    if( ! _brush.isGradient())
+    if(_textureBitmap)
     {
-        ID2D1SolidColorBrush* solidBrush = 0;
-        _deviceContext->CreateSolidColorBrush(toD2DColor(_brush.color()),
-                                              &solidBrush);
-        _fillBrush = solidBrush;
+        _textureBitmap->Release();
+        _textureBitmap = 0;
+    }
+
+    if( _brush.isTexture() )
+    {
+        createTextureBrush();
         return;
     }
 
-    // Build gradient stop collection
+    if( _brush.isGradient() )
+    {
+        createGradientBrush();
+        return;
+    }
+
+    createSolidBrush();
+}
+
+
+void PixmapCanvas::createSolidBrush()
+{
+    ID2D1SolidColorBrush* solidBrush = 0;
+    _deviceContext->CreateSolidColorBrush(toD2DColor(_brush.color()), &solidBrush);
+    _fillBrush = solidBrush;
+}
+
+
+void PixmapCanvas::createTextureBrush()
+{
+    const Gfx::Image& texture = _brush.texture();
+
+    if(texture.width() == 0 || texture.height() == 0)
+    {
+        createSolidBrush();
+        return;
+    }
+
+    const Pt::uint8_t* data = texture.data();
+    Gfx::Rgb32Image rgb32Texture;
+
+    if(texture.format() != Gfx::ImageFormat::rgb32() || texture.padding() != 0)
+    {
+        rgb32Texture.reset(texture.width(), texture.height());
+        Gfx::copyView(texture, rgb32Texture);
+        data = rgb32Texture.data();
+    }
+
+    D2D1_SIZE_U bmpSize = D2D1::SizeU(
+        static_cast<UINT32>(texture.width()),
+        static_cast<UINT32>(texture.height()));
+    D2D1_BITMAP_PROPERTIES bmpProps = D2D1::BitmapProperties(
+        D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                          D2D1_ALPHA_MODE_PREMULTIPLIED));
+
+    HRESULT hr = _deviceContext->CreateBitmap(
+        bmpSize, data,
+        static_cast<UINT32>(texture.width() * 4),
+        bmpProps, &_textureBitmap);
+
+    if(FAILED(hr) || ! _textureBitmap)
+        return;
+
+    D2D1_BITMAP_BRUSH_PROPERTIES brushProps;
+    brushProps.extendModeX = D2D1_EXTEND_MODE_WRAP;
+    brushProps.extendModeY = D2D1_EXTEND_MODE_WRAP;
+    brushProps.interpolationMode = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
+
+    ID2D1BitmapBrush* bitmapBrush = 0;
+    hr = _deviceContext->CreateBitmapBrush(
+        _textureBitmap, brushProps, &bitmapBrush);
+
+    _fillBrush = bitmapBrush;
+}
+
+
+void PixmapCanvas::createGradientBrush()
+{
     const Gfx::ColorStops& stops = _brush.gradientStops();
 
     std::vector<D2D1_GRADIENT_STOP> d2dStops;
