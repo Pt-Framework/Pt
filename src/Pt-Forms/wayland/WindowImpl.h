@@ -184,8 +184,6 @@ class WindowImpl : public WindowFrame
 
         void createPopup(Window& w);
 
-        void destroyPopup();
-
         void destroySurface();
 
     private:

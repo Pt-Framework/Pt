@@ -237,53 +237,6 @@ void WindowImpl::createPopup(Window& w)
 }
 
 
-void WindowImpl::destroyPopup()
-{
-    if( _xdgPopup )
-    {
-        xdg_popup_destroy(_xdgPopup);
-        _xdgPopup = 0;
-    }
-
-    if( _positioner )
-    {
-        xdg_positioner_destroy(_positioner);
-        _positioner = 0;
-    }
-
-    if( _xdgSurface )
-    {
-        xdg_surface_destroy(_xdgSurface);
-        _xdgSurface = 0;
-    }
-
-    // Destroy the wl_surface so the compositor removes it from display.
-    // A new surface will be created when the popup is shown again.
-    if( _surface )
-    {
-#ifdef PT_FORMS_WAYLAND_NANOVG
-        if( _eglSurface )
-        {
-            eglDestroySurface(
-                static_cast<EGLDisplay>(_wm.app().nanovgDevice().eglDisplay()),
-                static_cast<EGLSurface>(_eglSurface));
-            _eglSurface = 0;
-        }
-
-        if( _eglWindow )
-        {
-            wl_egl_window_destroy(static_cast<struct wl_egl_window*>(_eglWindow));
-            _eglWindow = 0;
-        }
-#endif
-
-        wl_surface_destroy(_surface);
-        _surface = 0;
-    }
-
-    _configured = false;
-}
-
 
 void WindowImpl::destroySurface()
 {
@@ -717,12 +670,12 @@ void WindowImpl::onShowPopup(Window& w, bool visible)
 {
     if( visible )
     {
-        destroyPopup();
+        destroySurface();
         createPopup(w);
     }
     else
     {
-        destroyPopup();
+        destroySurface();
     }
 }
 
@@ -853,7 +806,7 @@ void WindowImpl::commitFrame()
     NVGcontext* vg = device.context();
 
     glViewport(0, 0, winWidth, winHeight);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Composite the pixmap framebuffer onto the full window surface. The
