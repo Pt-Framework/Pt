@@ -41,6 +41,14 @@
 
 #include <cstring>
 
+#ifdef PT_FORMS_WAYLAND_NANOVG
+#include "../nanovg/NanoVGDevice.h"
+#include <wayland-egl.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+#include "../nanovg/nanovg.h"
+#endif
+
 namespace Pt {
 
 namespace Forms {
@@ -123,6 +131,10 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _decoration(0)
 , _frameCallback(0)
 , _configured(false)
+#ifdef PT_FORMS_WAYLAND_NANOVG
+, _eglWindow(0)
+, _eglSurface(0)
+#endif
 {
     ApplicationImpl* app = Application::instance().impl();
 
@@ -249,6 +261,22 @@ void WindowImpl::destroyPopup()
     // A new surface will be created when the popup is shown again.
     if( _surface )
     {
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        if( _eglSurface )
+        {
+            eglDestroySurface(
+                static_cast<EGLDisplay>(_wm.app().nanovgDevice().eglDisplay()),
+                static_cast<EGLSurface>(_eglSurface));
+            _eglSurface = 0;
+        }
+
+        if( _eglWindow )
+        {
+            wl_egl_window_destroy(static_cast<struct wl_egl_window*>(_eglWindow));
+            _eglWindow = 0;
+        }
+#endif
+
         wl_surface_destroy(_surface);
         _surface = 0;
     }
@@ -296,6 +324,22 @@ void WindowImpl::destroySurface()
             wl_callback_destroy(_frameCallback);
             _frameCallback = 0;
         }
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        if( _eglSurface )
+        {
+            eglDestroySurface(
+                static_cast<EGLDisplay>(_wm.app().nanovgDevice().eglDisplay()),
+                static_cast<EGLSurface>(_eglSurface));
+            _eglSurface = 0;
+        }
+
+        if( _eglWindow )
+        {
+            wl_egl_window_destroy(static_cast<struct wl_egl_window*>(_eglWindow));
+            _eglWindow = 0;
+        }
+#endif
 
         wl_surface_destroy(_surface);
         _surface = 0;
@@ -751,6 +795,99 @@ bool WindowImpl::commitPending() const
 }
 
 
+#ifdef PT_FORMS_WAYLAND_NANOVG
+
+void WindowImpl::commitFrame()
+{
+    if( _frameCallback )
+        return;
+
+    PixmapImpl* impl = pixmap().impl();
+
+    int img = impl->framebufferImage();
+    if( img < 0 )
+        return;
+
+    int winWidth = impl->width();
+    int winHeight = impl->height();
+
+    if( winWidth <= 0 || winHeight <= 0 )
+        return;
+
+    NanoVGDevice& device = _wm.app().nanovgDevice();
+    if( ! device.isValid() )
+        return;
+
+    // Lazily create the EGL window surface, or resize it to match the pixmap.
+    if( ! _eglWindow )
+    {
+        _eglWindow = wl_egl_window_create(_surface, winWidth, winHeight);
+        if( ! _eglWindow )
+            return;
+
+        _eglSurface = static_cast<void*>( eglCreateWindowSurface(
+            static_cast<EGLDisplay>( device.eglDisplay() ),
+            static_cast<EGLConfig>( device.eglConfig() ),
+            reinterpret_cast<EGLNativeWindowType>( _eglWindow ),
+            0) );
+
+        if( _eglSurface == 0 )
+            return;
+    }
+    else
+    {
+        int attachedWidth = 0;
+        int attachedHeight = 0;
+        wl_egl_window_get_attached_size(
+            static_cast<struct wl_egl_window*>(_eglWindow),
+            &attachedWidth, &attachedHeight);
+
+        if( attachedWidth != winWidth || attachedHeight != winHeight )
+            wl_egl_window_resize(
+                static_cast<struct wl_egl_window*>(_eglWindow),
+                winWidth, winHeight, 0, 0);
+    }
+
+    device.makeCurrent(_eglSurface);
+
+    NVGcontext* vg = device.context();
+
+    glViewport(0, 0, winWidth, winHeight);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Composite the pixmap framebuffer onto the full window surface. The
+    // framebuffer image carries NVG_IMAGE_FLIPY, so it appears upright.
+    nvgBeginFrame(vg, static_cast<float>(winWidth), static_cast<float>(winHeight), 1.0f);
+    NVGpaint paint = nvgImagePattern(vg, 0.0f, 0.0f,
+                                     static_cast<float>(winWidth),
+                                     static_cast<float>(winHeight),
+                                     0.0f, img, 1.0f);
+    nvgBeginPath(vg);
+    nvgRect(vg, 0.0f, 0.0f,
+            static_cast<float>(winWidth), static_cast<float>(winHeight));
+    nvgFillPaint(vg, paint);
+    nvgFill(vg);
+    nvgEndFrame(vg);
+
+    int bufferScale = _wm.app().outputScale();
+    if( bufferScale < 1 ) bufferScale = 1;
+    wl_surface_set_buffer_scale(_surface, bufferScale);
+
+    _frameCallback = wl_surface_frame(_surface);
+    wl_callback_add_listener(_frameCallback, &frameListener, this);
+
+    // eglSwapBuffers attaches the rendered buffer, damages and commits.
+    eglSwapBuffers(static_cast<EGLDisplay>( device.eglDisplay() ),
+                   static_cast<EGLSurface>( _eglSurface ));
+
+    _commitDamage = Gfx::RectF();
+
+    wl_display_flush( _wm.app().display() );
+}
+
+#else
+
 void WindowImpl::commitFrame()
 {
     if( _frameCallback )
@@ -818,6 +955,8 @@ void WindowImpl::commitFrame()
 
     wl_display_flush( _wm.app().display() );
 }
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////
 // move

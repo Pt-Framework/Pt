@@ -57,6 +57,10 @@
 #include "../vulkan/VulkanDevice.h"
 #endif
 
+#ifdef PT_FORMS_WAYLAND_NANOVG
+#include "../nanovg/NanoVGDevice.h"
+#endif
+
 namespace Pt {
 
 namespace Forms {
@@ -107,6 +111,10 @@ class ApplicationImpl : public Pt::System::MainLoop
 
 #ifdef PT_FORMS_WAYLAND_VULKAN
         VulkanDevice& vulkanDevice() { return _vulkanDevice; }
+#endif
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        NanoVGDevice& nanovgDevice() { return _nanovgDevice; }
 #endif
 
     protected:
@@ -186,6 +194,10 @@ class ApplicationImpl : public Pt::System::MainLoop
 
 #ifdef PT_FORMS_WAYLAND_VULKAN
         VulkanDevice                          _vulkanDevice;
+#endif
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        NanoVGDevice                          _nanovgDevice;
 #endif
 };
 

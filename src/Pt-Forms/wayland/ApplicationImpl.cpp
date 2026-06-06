@@ -333,11 +333,20 @@ ApplicationImpl::ApplicationImpl()
     _wlFd.eventReady() += Pt::slot(*this, &ApplicationImpl::onWaylandEvents);
 
     _cursorImpl.init(_shm, _pointer, _compositor);
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+    if( ! _nanovgDevice.create( static_cast<void*>(_display) ) )
+        throw AccessFailed("NanoVG EGL device");
+#endif
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
+#ifdef PT_FORMS_WAYLAND_NANOVG
+    _nanovgDevice.destroy();
+#endif
+
     if( _touch )
         wl_touch_destroy(_touch);
 

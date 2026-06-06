@@ -49,6 +49,7 @@ namespace Forms {
 
 class ScreenImpl;
 
+
 class WindowImpl : public WindowFrame
 {
     typedef WindowFrame Base;
@@ -201,6 +202,10 @@ class WindowImpl : public WindowFrame
         Gfx::SizeF                           _pendingSize;
         Gfx::RectF                           _commitDamage;
         bool                                 _configured;
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        void*                                _eglWindow;
+        void*                                _eglSurface;
+#endif
 };
 
 } // namespace Forms

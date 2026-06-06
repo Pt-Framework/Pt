@@ -1040,6 +1040,10 @@ else if --with-vulkan in $(ARGV)
 {
     PT_FORMS_RENDERER = vulkan ;
 }
+else if --with-nanovg in $(ARGV)
+{
+    PT_FORMS_RENDERER = nanovg ;
+}
 
 if $(PT_FORMS_IMPL:L) = "win32"
 {
@@ -1202,6 +1206,21 @@ else if $(PT_FORMS_IMPL:L) = "wayland"
             {
                 Echo "WARNING: Vulkan not found, falling back to raster renderer" ;
                 PT_FORMS_RENDERER = raster ;
+            }
+        }
+        else if $(PT_FORMS_RENDERER) = nanovg
+        {
+            ConfigureWaylandEgl ;
+
+            if $(WAYLAND_EGL_LIBS) && $(EGL_LIBS) && $(GLESV2_LIBS)
+            {
+                PT_FORMS_LINKLIBS += $(EGL_LIBS) $(GLESV2_LIBS) $(WAYLAND_EGL_LIBS) $(M_LINKLIBS) ;
+                PT_FORMS_INCLUDES += $(FREETYPE_INCLUDES) ;
+                PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_NANOVG ] ;
+            }
+            else
+            {
+                Exit "Error: --with-nanovg requires EGL, GLESv2 and wayland-egl (libwayland-egl-dev)." ;
             }
         }
     }

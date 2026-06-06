@@ -62,4 +62,93 @@ rule ConfigureWayland
     EchoOption XKBCOMMON_LIBS : "xkbcommon lib flags" ;
 }
 
+# ConfigureWaylandEgl
+#
+# Detects wayland-egl (wl_egl_window), EGL and OpenGL ES 2.0 using pkg-config.
+# Falls back to CheckBuildC++ if pkg-config is unavailable.
+#
+# Sets:
+#   WAYLAND_EGL_LIBS    -lwayland-egl
+#   EGL_LIBS            -lEGL
+#   GLESV2_LIBS         -lGLESv2
+#
+rule ConfigureWaylandEgl
+{
+    local _have_wl_egl = [ PkgConfig-Exists wayland-egl ] ;
+
+    if $(_have_wl_egl) = yes
+    {
+        WAYLAND_EGL_LIBS = [ PkgConfig-LinkLibs wayland-egl ] ;
+    }
+    else
+    {
+        WAYLAND_EGL_LIBS = [ CheckBuildC++ "#include <wayland-client.h>"
+                                           "#include <wayland-egl.h>"
+                                           "int main() {"
+                                           "struct wl_egl_window* w = "
+                                           "wl_egl_window_create(0, 1, 1);"
+                                           "return 0; }"
+                                         : ""
+                                         : "-lwayland-egl" ] ;
+
+        if $(WAYLAND_EGL_LIBS)
+        {
+            WAYLAND_EGL_LIBS = -lwayland-egl ;
+        }
+    }
+
+    local _have_egl = [ PkgConfig-Exists egl ] ;
+
+    if $(_have_egl) = yes
+    {
+        EGL_LIBS = [ PkgConfig-LinkLibs egl ] ;
+    }
+    else
+    {
+        EGL_LIBS = [ CheckBuildC++ "#include <EGL/egl.h>"
+                                   "int main() {"
+                                   "EGLDisplay d = eglGetDisplay(0);"
+                                   "return 0; }"
+                                 : ""
+                                 : "-lEGL" ] ;
+
+        if $(EGL_LIBS)
+        {
+            EGL_LIBS = -lEGL ;
+        }
+    }
+
+    local _have_glesv2 = [ PkgConfig-Exists glesv2 ] ;
+
+    if $(_have_glesv2) = yes
+    {
+        GLESV2_LIBS = [ PkgConfig-LinkLibs glesv2 ] ;
+    }
+    else
+    {
+        GLESV2_LIBS = [ CheckBuildC++ "#include <GLES2/gl2.h>"
+                                      "int main() {"
+                                      "glClear(0);"
+                                      "return 0; }"
+                                    : ""
+                                    : "-lGLESv2" ] ;
+
+        if $(GLESV2_LIBS)
+        {
+            GLESV2_LIBS = -lGLESv2 ;
+        }
+    }
+
+    if $(WAYLAND_EGL_LIBS) && $(EGL_LIBS) && $(GLESV2_LIBS)
+    {
+        Configure WAYLAND_EGL_LIBS ;
+        Configure EGL_LIBS ;
+        Configure GLESV2_LIBS ;
+    }
+
+    EchoOption WAYLAND_EGL_LIBS : "Wayland EGL lib flags" ;
+    EchoOption EGL_LIBS : "EGL lib flags" ;
+    EchoOption GLESV2_LIBS : "OpenGL ES 2.0 lib flags" ;
+}
+
 } # WAYLAND_JAM
