@@ -123,9 +123,6 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
 , _decoration(0)
 , _frameCallback(0)
 , _configured(false)
-, _framePending(false)
-, _needsRepaint(false)
-, _commitPending(false)
 {
     ApplicationImpl* app = Application::instance().impl();
 
@@ -133,7 +130,6 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
     wl_surface_set_user_data(_surface, this);
 
     _shmPool.init(app->shm());
-    _shmPool.released() += Pt::slot(*this, &WindowImpl::onBufferReleased);
 
     if( w.type() == WindowType::Default )
         createWindow();
@@ -299,7 +295,6 @@ void WindowImpl::destroySurface()
         {
             wl_callback_destroy(_frameCallback);
             _frameCallback = 0;
-            _framePending = false;
         }
 
         wl_surface_destroy(_surface);
@@ -330,8 +325,7 @@ void WindowImpl::onXdgSurfaceConfigure(struct xdg_surface* xdgSurface,
             wl_callback_destroy(_frameCallback);
             _frameCallback = 0;
         }
-        _framePending = false;
-        _commitPending = false;
+        
         _commitDamage = Gfx::RectF();
 
         ResizeEvent rev(*this, _pendingSize);
@@ -667,7 +661,6 @@ void WindowImpl::onShowWindow(Window& w, bool visible)
         {
             wl_callback_destroy(_frameCallback);
             _frameCallback = 0;
-            _framePending = false;
         }
 
         wl_surface_attach(_surface, 0, 0, 0);
@@ -705,19 +698,6 @@ void WindowImpl::onShowEvent(const ShowEvent& ev)
 // painting
 ///////////////////////////////////////////////////////////////////////
 
-void WindowImpl::paint(const Gfx::RectF& rect)
-{
-    if( _framePending )
-    {
-        _needsRepaint = true;
-        return;
-    }
-
-    PaintEvent ev(*this, rect);
-    processEvent(ev);
-}
-
-
 void WindowImpl::onRepaint(Window& /*w*/, const Gfx::RectF& rect)
 {
     if( ! _configured || ! _surface )
@@ -726,6 +706,13 @@ void WindowImpl::onRepaint(Window& /*w*/, const Gfx::RectF& rect)
     Gfx::PointF screenPos = toScreen( rect.topLeft() );
     Gfx::RectF screenRect( screenPos, rect.size() );
     _wm.repaint(screenRect);
+}
+
+
+void WindowImpl::paint(const Gfx::RectF& rect)
+{
+    PaintEvent ev(*this, rect);
+    processEvent(ev);
 }
 
 
@@ -746,16 +733,28 @@ void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 void WindowImpl::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
-    onPaintContent( ev.rect() );
+
+    _commitDamage.unify( ev.rect() );
+}
+
+
+void WindowImpl::onFrameCallback(struct wl_callback* cb, uint32_t /*time*/)
+{
+    wl_callback_destroy(cb);
+    _frameCallback = 0;
+}
+
+
+bool WindowImpl::commitPending() const
+{ 
+    return ! _commitDamage.isEmpty(); 
 }
 
 
 void WindowImpl::commitFrame()
 {
-    if( ! _commitPending )
+    if( _frameCallback )
         return;
-
-    _commitPending = false;
 
     const Gfx::Image& image = pixmap().impl()->bitmap().image();
     if( ! image.data() )
@@ -771,10 +770,7 @@ void WindowImpl::commitFrame()
 
     ShmBuffer* buf = _shmPool.acquireBuffer();
     if( ! buf )
-    {
-        _shmPool.setRepaintOnRelease(true);
         return;
-    }
 
     if( buf->width() != imgWidth || buf->height() != imgHeight )
     {
@@ -818,42 +814,9 @@ void WindowImpl::commitFrame()
     wl_callback_add_listener(_frameCallback, &frameListener, this);
 
     wl_surface_commit(_surface);
-    _framePending = true;
-    _needsRepaint = false;
-
     _commitDamage = Gfx::RectF();
 
     wl_display_flush( _wm.app().display() );
-}
-
-
-void WindowImpl::onBufferReleased(ShmPool& /*pool*/)
-{
-    if( ! _configured || ! _window.isVisible() )
-        return;
-
-    _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
-}
-
-
-void WindowImpl::onFrameCallback(struct wl_callback* cb, uint32_t /*time*/)
-{
-    wl_callback_destroy(cb);
-    _frameCallback = 0;
-    _framePending = false;
-
-    if( _needsRepaint && _configured && _window.isVisible() )
-    {
-        _needsRepaint = false;
-        _window.repaint( Gfx::RectF(Gfx::PointF(0, 0), size()) );
-    }
-}
-
-
-void WindowImpl::onPaintContent(const Gfx::RectF& damage)
-{
-    _commitDamage.unify(damage);
-    _commitPending = true;
 }
 
 ///////////////////////////////////////////////////////////////////////

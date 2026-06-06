@@ -173,15 +173,10 @@ class WindowImpl : public WindowFrame
 
         void onShowPopup(Window& w, bool visible);
 
-        void onPaintContent(const Gfx::RectF& damage);
-
-        void onBufferReleased(ShmPool& pool);
-
     public:
         void commitFrame();
 
-        bool commitPending() const
-        { return _commitPending; }
+        bool commitPending() const;
 
     private:
         void createWindow();
@@ -206,9 +201,6 @@ class WindowImpl : public WindowFrame
         Gfx::SizeF                           _pendingSize;
         Gfx::RectF                           _commitDamage;
         bool                                 _configured;
-        bool                                 _framePending;
-        bool                                 _needsRepaint;
-        bool                                 _commitPending;
 };
 
 } // namespace Forms

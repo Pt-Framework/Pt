@@ -413,7 +413,6 @@ void ApplicationImpl::onRun()
 
     while( MainLoop::impl()->waitNext() )
     {
-        _wlFd.processEvents();
         flushPendingPaints();
     }
 }
@@ -421,7 +420,7 @@ void ApplicationImpl::onRun()
 
 void ApplicationImpl::onWaylandEvents(int)
 {
-    _wlFd.processEvents();
+    //_wlFd.processEvents();
 }
 
 
