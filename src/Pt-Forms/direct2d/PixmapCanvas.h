@@ -150,6 +150,10 @@ class PixmapCanvas : public Gfx::Canvas
 
         void createGradientBrush();
 
+        bool isRelativeGradient() const;
+
+        void prepareGradientBrush(const D2D1_RECT_F& bounds);
+
     private:
         PixmapImpl*               _pixmap;
         ID2D1DeviceContext*       _deviceContext;

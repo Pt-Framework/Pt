@@ -622,6 +622,26 @@ void PixmapCanvas::createGradientBrush()
 }
 
 
+bool PixmapCanvas::isRelativeGradient() const
+{
+    return _brush.isGradient() && _brush.positionMode() == Gfx::Brush::Relative;
+}
+
+
+void PixmapCanvas::prepareGradientBrush(const D2D1_RECT_F& bounds)
+{
+    FLOAT width  = bounds.right  - bounds.left;
+    FLOAT height = bounds.bottom - bounds.top;
+
+    D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F(
+        width,  0.0f,
+        0.0f,   height,
+        bounds.left, bounds.top);
+
+    _fillBrush->SetTransform(matrix);
+}
+
+
 void PixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
@@ -818,6 +838,24 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
         sink->Close();
         sink->Release();
 
+        if(isRelativeGradient())
+        {
+            FLOAT minX = static_cast<FLOAT>(pts[0].x());
+            FLOAT minY = static_cast<FLOAT>(pts[0].y());
+            FLOAT maxX = minX;
+            FLOAT maxY = minY;
+            for(size_t i = 1; i < n; ++i)
+            {
+                FLOAT px = static_cast<FLOAT>(pts[i].x());
+                FLOAT py = static_cast<FLOAT>(pts[i].y());
+                if(px < minX) minX = px;
+                if(py < minY) minY = py;
+                if(px > maxX) maxX = px;
+                if(py > maxY) maxY = py;
+            }
+            prepareGradientBrush(D2D1::RectF(minX, minY, maxX, maxY));
+        }
+
         _deviceContext->FillGeometry(geom, _fillBrush);
     }
 
@@ -841,6 +879,8 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
         return;
 
     D2D1_RECT_F rect = toD2DRect(rectangle);
+    if(isRelativeGradient())
+        prepareGradientBrush(rect);
     _deviceContext->FillRectangle(rect, _fillBrush);
 }
 
@@ -872,6 +912,16 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft,
                       static_cast<FLOAT>(topLeft.y() + size.height() / 2.0)),
         static_cast<FLOAT>(size.width() / 2.0),
         static_cast<FLOAT>(size.height() / 2.0));
+
+    if(isRelativeGradient())
+    {
+        D2D1_RECT_F bounds = D2D1::RectF(
+            static_cast<FLOAT>(topLeft.x()),
+            static_cast<FLOAT>(topLeft.y()),
+            static_cast<FLOAT>(topLeft.x() + size.width()),
+            static_cast<FLOAT>(topLeft.y() + size.height()));
+        prepareGradientBrush(bounds);
+    }
 
     _deviceContext->FillEllipse(ellipse, _fillBrush);
 }
@@ -1224,6 +1274,13 @@ void PixmapCanvas::onFillPath()
     if( ! _deviceContext || ! _fillBrush || ! _pathGeom)
         return;
 
+    if(isRelativeGradient())
+    {
+        D2D1_RECT_F bounds;
+        if(SUCCEEDED(_pathGeom->GetBounds(nullptr, &bounds)))
+            prepareGradientBrush(bounds);
+    }
+
     _deviceContext->FillGeometry(_pathGeom, _fillBrush);
 }
 
@@ -1250,6 +1307,13 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
     ID2D1PathGeometry* geom = createPathGeometry(path);
     if( ! geom)
         return;
+
+    if(isRelativeGradient())
+    {
+        D2D1_RECT_F bounds;
+        if(SUCCEEDED(geom->GetBounds(nullptr, &bounds)))
+            prepareGradientBrush(bounds);
+    }
 
     _deviceContext->FillGeometry(geom, _fillBrush);
     geom->Release();
