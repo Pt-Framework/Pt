@@ -176,11 +176,15 @@ void PixmapCanvas::onApplyCompositionMode()
     if( ! _pixmap)
         return;
 
+
+    // Always use NVG_SOURCE_OVER for pixmap rendering, regardless of Pt's
+    // CompositionMode. nanovg's stencil-based text rendering and anti-aliasing
+    // require proper alpha blending; NVG_COPY would write partial-coverage
+    // pixels without blending, causing visual artifacts.
     PaintCommand c;
     c.type = PaintCommand::SetCompositionMode;
-    c.compositionMode = (_compositionMode == Gfx::CompositionMode::SourceCopy)
-                        ? NVG_COPY
-                        : NVG_SOURCE_OVER;
+    c.compositionMode = NVG_SOURCE_OVER;
+
     _pixmap->commands().push_back(c);
 }
 
