@@ -153,6 +153,8 @@ class NanoVGDevice
         
         unsigned int        _quadProgram;
         unsigned int        _quadVbo;
+        int                 _quadPosAttr;
+        int                 _quadTexUniform;
 
         static NanoVGDevice* _instance;
 };

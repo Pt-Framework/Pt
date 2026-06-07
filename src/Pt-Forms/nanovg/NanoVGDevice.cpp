@@ -58,6 +58,8 @@ NanoVGDevice::NanoVGDevice()
 , _rtH(0)
 , _quadProgram(0)
 , _quadVbo(0)
+, _quadPosAttr(-1)
+, _quadTexUniform(-1)
 {
     _instance = this;
 }
@@ -468,6 +470,9 @@ bool NanoVGDevice::initQuadRenderer()
 
     glDeleteShader(vShader);
     glDeleteShader(fShader);
+    
+    _quadPosAttr = glGetAttribLocation(_quadProgram, "pos");
+    _quadTexUniform = glGetUniformLocation(_quadProgram, "tex");
 
     float quadVertices[] = {
         -1.0f, -1.0f,
@@ -499,16 +504,20 @@ void NanoVGDevice::renderTexturedQuad(int nvgImage)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
-    glUniform1i(glGetUniformLocation(_quadProgram, "tex"), 0);
+    if (_quadTexUniform >= 0)
+        glUniform1i(_quadTexUniform, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
-    GLint posAttr = glGetAttribLocation(_quadProgram, "pos");
-    glVertexAttribPointer(posAttr, 2, GL_FLOAT, GL_FALSE, 8, nullptr);
-    glEnableVertexAttribArray(posAttr);
+    if (_quadPosAttr >= 0) {
+        glVertexAttribPointer(_quadPosAttr, 2, GL_FLOAT, GL_FALSE, 8, nullptr);
+        glEnableVertexAttribArray(_quadPosAttr);
+    }
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    glDisableVertexAttribArray(posAttr);
+    if (_quadPosAttr >= 0) {
+        glDisableVertexAttribArray(_quadPosAttr);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     if (prevProgram > 0)
