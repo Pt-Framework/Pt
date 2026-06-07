@@ -8,7 +8,8 @@
             "browse": {
                 "path": [
                     "${workspaceFolder}",
-                    "${workspaceFolder}/../../include/Pt/Forms"
+                    "${workspaceFolder}/../../include/Pt/Forms",
+                    "${workspaceFolder}/nanovg"
                 ],
                 "limitSymbolsToIncludedHeaders": false
             },
@@ -16,7 +17,8 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "PT_FORMS_WIN32_DIRECT2D"
+                "PT_FORMS_WIN32_DIRECT2D",
+                "PT_FORMS_WAYLAND_NANOVG"
             ],
             "compilerPath": "cl.exe",
             "cStandard": "c17",
