@@ -291,15 +291,22 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
         float lineHeight = 0.0f;
         nvgTextMetrics(vg, &ascender, &descender, &lineHeight);
 
+        // fontstash adds lineGap to the ascender before normalizing, producing
+        // a smaller value than the true typographic ascender. Use the FreeType
+        // face->ascender / units_per_EM ratio directly so that fm.ascent()
+        // matches what the raster renderer reports and widget baseline
+        // calculations place text at the correct position.
+        const float trueAscender = device->fontAscenderRatio(_fontFace) * _fontSize;
+
         // nanovg reports a negative descender below the baseline.
-        _fontMetrics.setAscent(ascender);
+        _fontMetrics.setAscent(trueAscender);
         _fontMetrics.setDescent(-descender);
-        _fontMetrics.setLeading(lineHeight - (ascender - descender));
+        _fontMetrics.setLeading(lineHeight - (trueAscender + (-descender)));
 
         // Use FreeType OS/2 table values (sCapHeight, sxHeight) for exact
         // typographic heights relative to the ascender.
-        _fontMetrics.setCapHeight(device->fontCapHeightRatio(_fontFace) * ascender);
-        _fontMetrics.setXHeight(device->fontXHeightRatio(_fontFace) * ascender);
+        _fontMetrics.setCapHeight(device->fontCapHeightRatio(_fontFace) * trueAscender);
+        _fontMetrics.setXHeight(device->fontXHeightRatio(_fontFace) * trueAscender);
     }
 }
 

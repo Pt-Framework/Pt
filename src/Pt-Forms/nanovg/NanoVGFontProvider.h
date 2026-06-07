@@ -62,6 +62,12 @@ class NanoVGFontProvider
         // requested point size, mirroring the raster renderer.
         float sizeScale(int handle) const;
 
+        // Returns face->ascender / face->units_per_EM for the given handle.
+        // Multiply by the nanovg font size to get the true typographic
+        // ascender in canvas units, overriding the lineGap-adjusted value
+        // that fontstash reports via fonsVertMetrics.
+        float ascenderRatio(int handle) const;
+
         // Returns the cap height as a ratio of the ascender, read from the
         // OS/2 table sCapHeight field. Returns 0.7 when not available.
         float capHeightRatio(int handle) const;
@@ -80,6 +86,7 @@ class NanoVGFontProvider
             int         stretch;  // 1..9
             int         handle;          // nanovg font handle
             float       scale;           // line height / ascender
+            float       ascenderRatio;   // face->ascender / face->units_per_EM
             float       capHeightRatio;  // cap height / ascender (OS/2 sCapHeight)
             float       xHeightRatio;    // x-height / ascender   (OS/2 sxHeight)
         };

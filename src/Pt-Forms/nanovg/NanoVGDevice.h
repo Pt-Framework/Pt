@@ -107,6 +107,11 @@ class NanoVGDevice
         // to convert a requested point size to a nanovg pixel size.
         float fontSizeScale(int handle);
 
+        // Returns face->ascender / face->units_per_EM for a nanovg font handle.
+        // Gives the true typographic ascender, bypassing the lineGap adjustment
+        // that fontstash applies internally.
+        float fontAscenderRatio(int handle);
+
         // Returns the cap height as a ratio of the ascender, from the OS/2
         // sCapHeight field. Returns 0.7 when not available.
         float fontCapHeightRatio(int handle);

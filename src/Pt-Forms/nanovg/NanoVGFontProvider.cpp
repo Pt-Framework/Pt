@@ -91,6 +91,15 @@ float faceScale(FT_Face face)
 }
 
 
+float faceAscenderRatio(FT_Face face)
+{
+    if(face->units_per_EM == 0)
+        return 0.9f;
+
+    return static_cast<float>(face->ascender) / static_cast<float>(face->units_per_EM);
+}
+
+
 float faceCapHeightRatio(FT_Face face)
 {
     if(face->ascender == 0)
@@ -120,6 +129,7 @@ float faceXHeightRatio(FT_Face face)
 struct FaceMetadata
 {
     float scale;
+    float ascenderRatio;
     float capHeightRatio;
     float xHeightRatio;
 };
@@ -127,7 +137,7 @@ struct FaceMetadata
 
 FaceMetadata memFaceMetadata(const unsigned char* data, int size)
 {
-    FaceMetadata m = { 1.0f, 0.7f, 0.54f };
+    FaceMetadata m = { 1.0f, 0.9f, 0.7f, 0.54f };
 
     FT_Library ft = 0;
     if(FT_Init_FreeType(&ft) != 0)
@@ -137,6 +147,7 @@ FaceMetadata memFaceMetadata(const unsigned char* data, int size)
     if(FT_New_Memory_Face(ft, data, size, 0, &face) == 0)
     {
         m.scale          = faceScale(face);
+        m.ascenderRatio  = faceAscenderRatio(face);
         m.capHeightRatio = faceCapHeightRatio(face);
         m.xHeightRatio   = faceXHeightRatio(face);
         FT_Done_Face(face);
@@ -219,6 +230,7 @@ void NanoVGFontProvider::registerEmbedded()
         entry.stretch        = 5;
         entry.handle         = embedded[i].handle;
         entry.scale          = meta.scale;
+        entry.ascenderRatio  = meta.ascenderRatio;
         entry.capHeightRatio = meta.capHeightRatio;
         entry.xHeightRatio   = meta.xHeightRatio;
         _faces.push_back(entry);
@@ -269,6 +281,7 @@ void NanoVGFontProvider::loadFile(const std::string& path)
         entry.slant          = slantFromStyleFlags(face->style_flags);
         entry.stretch        = 5;
         entry.scale          = faceScale(face);
+        entry.ascenderRatio  = faceAscenderRatio(face);
         entry.capHeightRatio = faceCapHeightRatio(face);
         entry.xHeightRatio   = faceXHeightRatio(face);
 
@@ -375,6 +388,18 @@ float NanoVGFontProvider::sizeScale(int handle) const
     }
 
     return 1.0f;
+}
+
+
+float NanoVGFontProvider::ascenderRatio(int handle) const
+{
+    for(std::vector<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+    {
+        if(it->handle == handle)
+            return it->ascenderRatio;
+    }
+
+    return 0.9f;
 }
 
 

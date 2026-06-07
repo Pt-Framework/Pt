@@ -375,6 +375,15 @@ float NanoVGDevice::fontSizeScale(int handle)
 }
 
 
+float NanoVGDevice::fontAscenderRatio(int handle)
+{
+    if( ! _fonts)
+        return 0.9f;
+
+    return _fonts->ascenderRatio(handle);
+}
+
+
 float NanoVGDevice::fontCapHeightRatio(int handle)
 {
     if( ! _fonts)
