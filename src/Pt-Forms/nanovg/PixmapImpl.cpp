@@ -47,9 +47,6 @@
 #include "nanovg_gl_utils.h"
 
 #include <cmath>
-#include <chrono>
-#include <iostream>
-#include <iomanip>
 #include <cassert>
 #include <vector>
 
@@ -522,8 +519,6 @@ void PixmapImpl::flush()
     if(_commands.empty() || _image < 0)
         return;
 
-    auto flushStart = std::chrono::steady_clock::now();
-
     NanoVGDevice* device = NanoVGDevice::instance();
     if( ! device || ! device->isValid())
         return;
@@ -533,9 +528,7 @@ void PixmapImpl::flush()
 
     NVGcontext* vg = device->context();
 
-    auto t1 = std::chrono::steady_clock::now();
     nvgBeginFrame(vg, static_cast<float>(_width), static_cast<float>(_height), 1.0f);
-    auto t2 = std::chrono::steady_clock::now();
 
     // Current state tracked across state commands for fill/text replay.
     Gfx::Brush currentBrush;
@@ -870,24 +863,9 @@ void PixmapImpl::flush()
     if(brushTexImage >= 0)
         nvgDeleteImage(vg, brushTexImage);
 
-    auto t3 = std::chrono::steady_clock::now();
     nvgEndFrame(vg);
-    auto t4 = std::chrono::steady_clock::now();
+
     device->unbindRenderTarget();
-    auto t5 = std::chrono::steady_clock::now();
-
-    auto flushEnd = std::chrono::steady_clock::now();
-    auto totalUs = std::chrono::duration_cast<std::chrono::microseconds>(flushEnd - flushStart).count();
-    auto setupUs = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-    auto replayUs = std::chrono::duration_cast<std::chrono::microseconds>(t3 - t2).count();
-    auto endFrameUs = std::chrono::duration_cast<std::chrono::microseconds>(t4 - t3).count();
-    auto unbindUs = std::chrono::duration_cast<std::chrono::microseconds>(t5 - t4).count();
-
-    PT_LOG_TRACE("[PERF] flush() " << std::setw(6) << totalUs << 
-                 "µs (setup:" << setupUs << " replay:" << replayUs << 
-                 " endFrame:" << endFrameUs << " unbind:" << unbindUs << 
-                 ") cmds:" << _commands.size() );
-
     _commands.clear();
 }
 

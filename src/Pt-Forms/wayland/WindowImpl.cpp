@@ -733,8 +733,15 @@ void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
     if( ! _configured )
         return;
 
+    auto paintBegin = std::chrono::steady_clock::now();
+
     PaintEvent rev( _window, ev.rect() );
     _window.processEvent(rev);
+
+    auto paintEnd = std::chrono::steady_clock::now();
+    auto paintUs = std::chrono::duration_cast<std::chrono::microseconds>(paintEnd - paintBegin).count();
+    PT_LOG_TRACE("[PERF] PAINT (NVG) - " << std::setw(6) << 
+                 " paintCycle:" << paintUs << ")");
 
     Base::onProcessPaintEvent(ev);
 }
@@ -764,14 +771,17 @@ bool WindowImpl::commitPending() const
 
 void WindowImpl::commitFrame()
 {
-    auto frameStart = std::chrono::steady_clock::now();
-
     if( _frameCallback )
         return;
 
     PixmapImpl* impl = pixmap().impl();
 
+    auto flushStart = std::chrono::steady_clock::now();
+
     impl->flush();
+
+    auto flushEnd = std::chrono::steady_clock::now();
+    auto flushUs  = std::chrono::duration_cast<std::chrono::microseconds>(flushEnd - flushStart).count();
 
     int img = impl->framebufferImage();
     if( img < 0 )
@@ -820,14 +830,11 @@ void WindowImpl::commitFrame()
     device.makeCurrent(_eglSurface);
 
     glViewport(0, 0, winWidth, winHeight);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
 
     // Composite the pixmap framebuffer onto the full window surface using
     // a simple fullscreen textured quad renderer, avoiding expensive nanovg
     // tessellation pass.
-
-    auto replayStart = std::chrono::steady_clock::now();
+    auto blitStart = std::chrono::steady_clock::now();
 
     // Use simple GLES2 textured quad rendering instead of nvgEndFrame
     // This avoids tessellation cost entirely - just copies texture to screen
@@ -836,8 +843,10 @@ void WindowImpl::commitFrame()
         device.renderTexturedQuad(img);
     }
 
-    auto replayEnd = std::chrono::steady_clock::now();
-    auto blitUs = std::chrono::duration_cast<std::chrono::microseconds>(replayEnd - replayStart).count();
+    auto blitEnd = std::chrono::steady_clock::now();
+    auto blitUs  = std::chrono::duration_cast<std::chrono::microseconds>(blitEnd - blitStart).count();
+
+    auto eglStart = std::chrono::steady_clock::now();
 
     int bufferScale = _wm.app().outputScale();
     if( bufferScale < 1 ) bufferScale = 1;
@@ -860,25 +869,19 @@ void WindowImpl::commitFrame()
     wl_callback_add_listener(_frameCallback, &frameListener, this);
 
     // eglSwapBuffers attaches the rendered buffer and commits.
-    auto eglStart = std::chrono::steady_clock::now();
     eglSwapBuffers(static_cast<EGLDisplay>( device.eglDisplay() ),
                    static_cast<EGLSurface>( _eglSurface ));
-    auto eglEnd = std::chrono::steady_clock::now();
 
     _commitDamage = Gfx::RectF();
 
-    auto displayFlushStart = std::chrono::steady_clock::now();
     wl_display_flush( _wm.app().display() );
-    auto displayFlushEnd = std::chrono::steady_clock::now();
 
-    auto frameEnd = std::chrono::steady_clock::now();
-    auto eglUs = std::chrono::duration_cast<std::chrono::microseconds>(eglEnd - eglStart).count();
-    auto flushUs = std::chrono::duration_cast<std::chrono::microseconds>(displayFlushEnd - displayFlushStart).count();
-    auto totalUs = std::chrono::duration_cast<std::chrono::microseconds>(frameEnd - frameStart).count();
+    auto eglEnd = std::chrono::steady_clock::now();
+    auto eglUs  = std::chrono::duration_cast<std::chrono::microseconds>(eglEnd - eglStart).count();
 
-    PT_LOG_TRACE("[PERF] commitFrame(NVG) " << std::setw(6) << totalUs << 
-                 " blit:" << blitUs << " eglSwap:" << eglUs << 
-                 " displayFlush:" << flushUs << ")");
+    PT_LOG_TRACE("[PERF] COMMIT (NVG) - " << std::setw(6) << 
+                 " flush:" << flushUs << " blit:" << blitUs << 
+                 " eglSwap:" << eglUs);
 }
 
 #else

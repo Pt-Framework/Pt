@@ -356,10 +356,16 @@ void NanoVGDevice::makeCurrentOffscreen()
     if( ! _display)
         return;
 
-    eglMakeCurrent(static_cast<EGLDisplay>(_display),
+    EGLDisplay dpy = static_cast<EGLDisplay>(_display);
+    EGLContext ctx = static_cast<EGLContext>(_context);
+
+    if (eglGetCurrentContext() == ctx && eglGetCurrentSurface(EGL_DRAW) != EGL_NO_SURFACE)
+        return;
+
+    eglMakeCurrent(dpy,
                    static_cast<EGLSurface>(_pbuffer),
                    static_cast<EGLSurface>(_pbuffer),
-                   static_cast<EGLContext>(_context));
+                   ctx);
 }
 
 
@@ -368,10 +374,14 @@ void NanoVGDevice::makeCurrent(void* eglSurface)
     if( ! _display)
         return;
 
-    eglMakeCurrent(static_cast<EGLDisplay>(_display),
-                   static_cast<EGLSurface>(eglSurface),
-                   static_cast<EGLSurface>(eglSurface),
-                   static_cast<EGLContext>(_context));
+    EGLDisplay dpy = static_cast<EGLDisplay>(_display);
+    EGLSurface surf = static_cast<EGLSurface>(eglSurface);
+    EGLContext ctx = static_cast<EGLContext>(_context);
+
+    if (eglGetCurrentContext() == ctx && eglGetCurrentSurface(EGL_DRAW) == surf)
+        return;
+
+    eglMakeCurrent(dpy, surf, surf, ctx);
 }
 
 
