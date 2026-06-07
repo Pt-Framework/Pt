@@ -374,6 +374,24 @@ float NanoVGDevice::fontSizeScale(int handle)
     return _fonts->sizeScale(handle);
 }
 
+
+float NanoVGDevice::fontCapHeightRatio(int handle)
+{
+    if( ! _fonts)
+        return 0.7f;
+
+    return _fonts->capHeightRatio(handle);
+}
+
+
+float NanoVGDevice::fontXHeightRatio(int handle)
+{
+    if( ! _fonts)
+        return 0.54f;
+
+    return _fonts->xHeightRatio(handle);
+}
+
 } // namespace
 
 } // namespace

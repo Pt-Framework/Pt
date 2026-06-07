@@ -107,6 +107,14 @@ class NanoVGDevice
         // to convert a requested point size to a nanovg pixel size.
         float fontSizeScale(int handle);
 
+        // Returns the cap height as a ratio of the ascender, from the OS/2
+        // sCapHeight field. Returns 0.7 when not available.
+        float fontCapHeightRatio(int handle);
+
+        // Returns the x-height as a ratio of the ascender, from the OS/2
+        // sxHeight field. Returns 0.54 when not available.
+        float fontXHeightRatio(int handle);
+
         static NanoVGDevice* instance()
         { return _instance; }
 

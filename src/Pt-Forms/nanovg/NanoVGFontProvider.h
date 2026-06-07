@@ -62,6 +62,14 @@ class NanoVGFontProvider
         // requested point size, mirroring the raster renderer.
         float sizeScale(int handle) const;
 
+        // Returns the cap height as a ratio of the ascender, read from the
+        // OS/2 table sCapHeight field. Returns 0.7 when not available.
+        float capHeightRatio(int handle) const;
+
+        // Returns the x-height as a ratio of the ascender, read from the
+        // OS/2 table sxHeight field. Returns 0.54 when not available.
+        float xHeightRatio(int handle) const;
+
     private:
         struct FaceEntry
         {
@@ -70,8 +78,10 @@ class NanoVGFontProvider
             int         weight;   // 100..900
             int         slant;    // 0 = upright, 1 = italic/oblique
             int         stretch;  // 1..9
-            int         handle;   // nanovg font handle
-            float       scale;    // line height / ascender
+            int         handle;          // nanovg font handle
+            float       scale;           // line height / ascender
+            float       capHeightRatio;  // cap height / ascender (OS/2 sCapHeight)
+            float       xHeightRatio;    // x-height / ascender   (OS/2 sxHeight)
         };
 
         void registerEmbedded();

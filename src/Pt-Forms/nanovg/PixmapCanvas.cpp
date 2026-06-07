@@ -176,7 +176,6 @@ void PixmapCanvas::onApplyCompositionMode()
     if( ! _pixmap)
         return;
 
-
     // Always use NVG_SOURCE_OVER for pixmap rendering, regardless of Pt's
     // CompositionMode. nanovg's stencil-based text rendering and anti-aliasing
     // require proper alpha blending; NVG_COPY would write partial-coverage
@@ -296,6 +295,11 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
         _fontMetrics.setAscent(ascender);
         _fontMetrics.setDescent(-descender);
         _fontMetrics.setLeading(lineHeight - (ascender - descender));
+
+        // Use FreeType OS/2 table values (sCapHeight, sxHeight) for exact
+        // typographic heights relative to the ascender.
+        _fontMetrics.setCapHeight(device->fontCapHeightRatio(_fontFace) * ascender);
+        _fontMetrics.setXHeight(device->fontXHeightRatio(_fontFace) * ascender);
     }
 }
 

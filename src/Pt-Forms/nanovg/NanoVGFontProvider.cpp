@@ -91,22 +91,59 @@ float faceScale(FT_Face face)
 }
 
 
-float memFaceScale(const unsigned char* data, int size)
+float faceCapHeightRatio(FT_Face face)
 {
+    if(face->ascender == 0)
+        return 0.7f;
+
+    TT_OS2* os2 = static_cast<TT_OS2*>(FT_Get_Sfnt_Table(face, FT_SFNT_OS2));
+    if(os2 && os2->sCapHeight > 0)
+        return static_cast<float>(os2->sCapHeight) / static_cast<float>(face->ascender);
+
+    return 0.7f;
+}
+
+
+float faceXHeightRatio(FT_Face face)
+{
+    if(face->ascender == 0)
+        return 0.54f;
+
+    TT_OS2* os2 = static_cast<TT_OS2*>(FT_Get_Sfnt_Table(face, FT_SFNT_OS2));
+    if(os2 && os2->sxHeight > 0)
+        return static_cast<float>(os2->sxHeight) / static_cast<float>(face->ascender);
+
+    return 0.54f;
+}
+
+
+struct FaceMetadata
+{
+    float scale;
+    float capHeightRatio;
+    float xHeightRatio;
+};
+
+
+FaceMetadata memFaceMetadata(const unsigned char* data, int size)
+{
+    FaceMetadata m = { 1.0f, 0.7f, 0.54f };
+
     FT_Library ft = 0;
     if(FT_Init_FreeType(&ft) != 0)
-        return 1.0f;
+        return m;
 
     FT_Face face = 0;
-    float scale = 1.0f;
     if(FT_New_Memory_Face(ft, data, size, 0, &face) == 0)
     {
-        scale = faceScale(face);
+        m.scale          = faceScale(face);
+        m.capHeightRatio = faceCapHeightRatio(face);
+        m.xHeightRatio   = faceXHeightRatio(face);
         FT_Done_Face(face);
     }
 
     FT_Done_FreeType(ft);
-    return scale;
+    return m;
 }
 
 } // anonymous namespace
@@ -173,13 +210,17 @@ void NanoVGFontProvider::registerEmbedded()
         if(embedded[i].handle < 0)
             continue;
 
+        const FaceMetadata meta = memFaceMetadata(embedded[i].data, embedded[i].size);
+
         FaceEntry entry;
-        entry.family = "DejaVu Sans";
-        entry.weight = embedded[i].weight;
-        entry.slant = embedded[i].slant;
-        entry.stretch = 5;
-        entry.handle = embedded[i].handle;
-        entry.scale = memFaceScale(embedded[i].data, embedded[i].size);
+        entry.family         = "DejaVu Sans";
+        entry.weight         = embedded[i].weight;
+        entry.slant          = embedded[i].slant;
+        entry.stretch        = 5;
+        entry.handle         = embedded[i].handle;
+        entry.scale          = meta.scale;
+        entry.capHeightRatio = meta.capHeightRatio;
+        entry.xHeightRatio   = meta.xHeightRatio;
         _faces.push_back(entry);
     }
 }
@@ -222,12 +263,14 @@ void NanoVGFontProvider::loadFile(const std::string& path)
         }
 
         FaceEntry entry;
-        entry.family = family;
-        entry.styleName = face->style_name ? face->style_name : std::string();
-        entry.weight = weightFromStyleFlags(face->style_flags);
-        entry.slant = slantFromStyleFlags(face->style_flags);
-        entry.stretch = 5;
-        entry.scale = faceScale(face);
+        entry.family         = family;
+        entry.styleName      = face->style_name ? face->style_name : std::string();
+        entry.weight         = weightFromStyleFlags(face->style_flags);
+        entry.slant          = slantFromStyleFlags(face->style_flags);
+        entry.stretch        = 5;
+        entry.scale          = faceScale(face);
+        entry.capHeightRatio = faceCapHeightRatio(face);
+        entry.xHeightRatio   = faceXHeightRatio(face);
 
         TT_OS2* os2 = static_cast<TT_OS2*>(FT_Get_Sfnt_Table(face, FT_SFNT_OS2));
         if(os2)
@@ -332,6 +375,30 @@ float NanoVGFontProvider::sizeScale(int handle) const
     }
 
     return 1.0f;
+}
+
+
+float NanoVGFontProvider::capHeightRatio(int handle) const
+{
+    for(std::vector<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+    {
+        if(it->handle == handle)
+            return it->capHeightRatio;
+    }
+
+    return 0.7f;
+}
+
+
+float NanoVGFontProvider::xHeightRatio(int handle) const
+{
+    for(std::vector<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+    {
+        if(it->handle == handle)
+            return it->xHeightRatio;
+    }
+
+    return 0.54f;
 }
 
 
