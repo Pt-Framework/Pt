@@ -838,10 +838,23 @@ void WindowImpl::commitFrame()
     if( bufferScale < 1 ) bufferScale = 1;
     wl_surface_set_buffer_scale(_surface, bufferScale);
 
+    {
+        const Gfx::RectF& damage = _commitDamage;
+        int dx = static_cast<int>(damage.x() * bufferScale);
+        int dy = static_cast<int>(damage.y() * bufferScale);
+        int dw = static_cast<int>(damage.width() * bufferScale) + 1;
+        int dh = static_cast<int>(damage.height() * bufferScale) + 1;
+        if( dx < 0 ) dx = 0;
+        if( dy < 0 ) dy = 0;
+        if( dw > winWidth )  dw = winWidth;
+        if( dh > winHeight ) dh = winHeight;
+        wl_surface_damage_buffer(_surface, dx, dy, dw, dh);
+    }
+
     _frameCallback = wl_surface_frame(_surface);
     wl_callback_add_listener(_frameCallback, &frameListener, this);
 
-    // eglSwapBuffers attaches the rendered buffer, damages and commits.
+    // eglSwapBuffers attaches the rendered buffer and commits.
     eglSwapBuffers(static_cast<EGLDisplay>( device.eglDisplay() ),
                    static_cast<EGLSurface>( _eglSurface ));
 
