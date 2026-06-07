@@ -56,6 +56,8 @@ NanoVGDevice::NanoVGDevice()
 , _stencilRbo(0)
 , _rtW(0)
 , _rtH(0)
+, _quadProgram(0)
+, _quadVbo(0)
 {
     _instance = this;
 }
@@ -202,6 +204,11 @@ bool NanoVGDevice::create(void* nativeDisplay)
 
     _fonts = new NanoVGFontProvider(nvg);
 
+    if( ! initQuadRenderer())
+    {
+        PT_LOG_ERROR("initQuadRenderer failed to initialize GLES2 shaders");
+    }
+
     PT_LOG_INFO("nanovg device created (EGL " << major << '.' << minor << ')');
     return true;
 }
@@ -213,6 +220,15 @@ void NanoVGDevice::destroy()
     {
         delete _fonts;
         _fonts = 0;
+    }
+
+    if(_quadProgram)
+    {
+        makeCurrentOffscreen();
+        glDeleteProgram(_quadProgram);
+        glDeleteBuffers(1, &_quadVbo);
+        _quadProgram = 0;
+        _quadVbo = 0;
     }
 
     // Destroy shared render-target FBO and stencil RBO while the context is
@@ -401,6 +417,104 @@ float NanoVGDevice::fontXHeightRatio(int handle)
     return _fonts->xHeightRatio(handle);
 }
 
-} // namespace
+static const char* quadVertexShader = R"(
+    attribute vec2 pos;
+    varying vec2 uv;
+    void main() {
+        uv = pos * 0.5 + 0.5;
+        gl_Position = vec4(pos, 0.0, 1.0);
+    }
+)";
 
-} // namespace
+static const char* quadFragmentShader = R"(
+    precision mediump float;
+    uniform sampler2D tex;
+    varying vec2 uv;
+    void main() {
+        gl_FragColor = texture2D(tex, uv);
+    }
+)";
+
+bool NanoVGDevice::initQuadRenderer()
+{
+    if (_quadProgram != 0)
+        return true;
+
+    GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vShader, 1, &quadVertexShader, nullptr);
+    glCompileShader(vShader);
+    
+    int success = 0;
+    glGetShaderiv(vShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        PT_LOG_ERROR("Quad vertex shader compile failed");
+        return false;
+    }
+
+    GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fShader, 1, &quadFragmentShader, nullptr);
+    glCompileShader(fShader);
+    
+    glGetShaderiv(fShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        PT_LOG_ERROR("Quad fragment shader compile failed");
+        return false;
+    }
+
+    _quadProgram = glCreateProgram();
+    glAttachShader(_quadProgram, vShader);
+    glAttachShader(_quadProgram, fShader);
+    glLinkProgram(_quadProgram);
+
+    glDeleteShader(vShader);
+    glDeleteShader(fShader);
+
+    float quadVertices[] = {
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
+        -1.0f,  1.0f,
+         1.0f,  1.0f
+    };
+
+    glGenBuffers(1, &_quadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+    return true;
+}
+
+void NanoVGDevice::renderTexturedQuad(int nvgImage)
+{
+    if (!initQuadRenderer())
+        return;
+
+    GLuint tex = nvglImageHandleGLES2(_nvg, nvgImage);
+    if (tex == 0)
+        return;
+
+    GLint prevProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
+
+    glUseProgram(_quadProgram);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glUniform1i(glGetUniformLocation(_quadProgram, "tex"), 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+    GLint posAttr = glGetAttribLocation(_quadProgram, "pos");
+    glVertexAttribPointer(posAttr, 2, GL_FLOAT, GL_FALSE, 8, nullptr);
+    glEnableVertexAttribArray(posAttr);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(posAttr);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    if (prevProgram > 0)
+        glUseProgram(prevProgram);
+}
+
+} // namespace Forms
+
+} // namespace Pt

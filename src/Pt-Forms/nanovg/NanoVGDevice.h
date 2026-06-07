@@ -125,10 +125,16 @@ class NanoVGDevice
         unsigned int renderFramebufferObject() const
         { return _renderFbo; }
 
+        // Composites a nanovg texture to the currently bound framebuffer using a
+        // fullscreen GLES2 quad. Bypasses nanovg tessellation for maximum speed.
+        void renderTexturedQuad(int nvgImage);
+
         static NanoVGDevice* instance()
         { return _instance; }
 
     private:
+        bool initQuadRenderer();
+
         NanoVGDevice(const NanoVGDevice&);
         NanoVGDevice& operator=(const NanoVGDevice&);
 
@@ -144,6 +150,9 @@ class NanoVGDevice
         unsigned int        _stencilRbo;  // stencil RBO attached to _renderFbo
         int                 _rtW;         // current stencil RBO width
         int                 _rtH;         // current stencil RBO height
+        
+        unsigned int        _quadProgram;
+        unsigned int        _quadVbo;
 
         static NanoVGDevice* _instance;
 };
