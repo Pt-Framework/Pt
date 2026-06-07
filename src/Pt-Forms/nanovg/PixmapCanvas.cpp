@@ -283,6 +283,14 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
     NVGcontext* vg = device ? device->context() : 0;
     if(vg && _fontFace >= 0)
     {
+        // Metric queries must use identity transform so that nvgTextMetrics
+        // computes fonsSetSize(fontSize * scale) with scale=1. After flush()
+        // the NVG state retains the last SetTransform (m11=scaleFactor), which
+        // would cause fontstash's integer isize = (short)(size*scale*10) to
+        // truncate differently and produce unstable metric values.
+        nvgSave(vg);
+        nvgResetTransform(vg);
+
         nvgFontFaceId(vg, _fontFace);
         nvgFontSize(vg, _fontSize);
 
@@ -291,6 +299,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
         float lineHeight = 0.0f;
         nvgTextMetrics(vg, &ascender, &descender, &lineHeight);
 
+        nvgRestore(vg);
         // fontstash adds lineGap to the ascender before normalizing, producing
         // a smaller value than the true typographic ascender. Use the FreeType
         // face->ascender / units_per_EM ratio directly so that fm.ascent()
@@ -451,11 +460,17 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
     nvgFontSize(vg, _fontSize);
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
 
+    // Same reasoning as onSetFont: use identity transform so the
+    // fontstash isize truncation is consistent regardless of NVG state.
+    nvgSave(vg);
+    nvgResetTransform(vg);
+
     std::string utf8 = toUtf8(text);
 
     float bounds[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
     float advance = nvgTextBounds(vg, 0.0f, 0.0f, utf8.c_str(), 0, bounds);
 
+    nvgRestore(vg);
     Gfx::TextMetrics tm;
     tm.setAdvance(advance);
     tm.setBoundingWidth(bounds[2] - bounds[0]);
