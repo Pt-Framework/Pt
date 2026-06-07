@@ -37,12 +37,15 @@
 #include <Pt/Gfx/TextMetrics.h>
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Scaling.h>
+#include <Pt/System/Logger.h>
 #include <Pt/String.h>
 
 #include <vector>
 #include <string>
 #include <cmath>
 #include <cassert>
+
+PT_LOG_DEFINE("Pt.Forms.PixmapCanvas");
 
 namespace {
 

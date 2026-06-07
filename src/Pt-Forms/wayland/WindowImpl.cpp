@@ -38,8 +38,12 @@
 #include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Forms/LayoutEvent.h>
 #include <Pt/Forms/ShowEvent.h>
+#include <Pt/System/Logger.h>
 
 #include <cstring>
+#include <chrono>
+#include <iostream>
+#include <iomanip>
 
 #ifdef PT_FORMS_WAYLAND_NANOVG
 #include "../nanovg/NanoVGDevice.h"
@@ -47,11 +51,19 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include "../nanovg/nanovg.h"
+#include "../nanovg/nanovg_gl.h"
 #endif
+
+PT_LOG_DEFINE("Pt.Forms.Window");
 
 namespace Pt {
 
 namespace Forms {
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+// Forward declaration of helper function (defined below)
+void renderTexturedQuad(NVGcontext* vg, int nvgImage);
+#endif
 
 namespace {
 
@@ -758,14 +770,13 @@ bool WindowImpl::commitPending() const
 
 void WindowImpl::commitFrame()
 {
+    auto frameStart = std::chrono::steady_clock::now();
+
     if( _frameCallback )
         return;
 
     PixmapImpl* impl = pixmap().impl();
 
-    // Replay any pending draw commands into the pixmap texture before the
-    // window frame opens. This ensures the nvgBeginFrame below is top-level
-    // and never nested inside an offscreen recording frame.
     impl->flush();
 
     int img = impl->framebufferImage();
@@ -814,25 +825,25 @@ void WindowImpl::commitFrame()
 
     device.makeCurrent(_eglSurface);
 
-    NVGcontext* vg = device.context();
-
     glViewport(0, 0, winWidth, winHeight);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Composite the pixmap framebuffer onto the full window surface. The
-    // framebuffer image carries NVG_IMAGE_FLIPY, so it appears upright.
-    nvgBeginFrame(vg, static_cast<float>(winWidth), static_cast<float>(winHeight), 1.0f);
-    NVGpaint paint = nvgImagePattern(vg, 0.0f, 0.0f,
-                                     static_cast<float>(winWidth),
-                                     static_cast<float>(winHeight),
-                                     0.0f, img, 1.0f);
-    nvgBeginPath(vg);
-    nvgRect(vg, 0.0f, 0.0f,
-            static_cast<float>(winWidth), static_cast<float>(winHeight));
-    nvgFillPaint(vg, paint);
-    nvgFill(vg);
-    nvgEndFrame(vg);
+    // Composite the pixmap framebuffer onto the full window surface using
+    // a simple fullscreen textured quad renderer, avoiding expensive nanovg
+    // tessellation pass.
+    
+    auto replayStart = std::chrono::steady_clock::now();
+    
+    // Use simple GLES2 textured quad rendering instead of nvgEndFrame
+    // This avoids tessellation cost entirely - just copies texture to screen
+    if( img >= 0 )
+    {
+        renderTexturedQuad(device.context(), img);
+    }
+    
+    auto replayEnd = std::chrono::steady_clock::now();
+    auto blitUs = std::chrono::duration_cast<std::chrono::microseconds>(replayEnd - replayStart).count();
 
     int bufferScale = _wm.app().outputScale();
     if( bufferScale < 1 ) bufferScale = 1;
@@ -855,12 +866,25 @@ void WindowImpl::commitFrame()
     wl_callback_add_listener(_frameCallback, &frameListener, this);
 
     // eglSwapBuffers attaches the rendered buffer and commits.
+    auto eglStart = std::chrono::steady_clock::now();
     eglSwapBuffers(static_cast<EGLDisplay>( device.eglDisplay() ),
                    static_cast<EGLSurface>( _eglSurface ));
+    auto eglEnd = std::chrono::steady_clock::now();
 
     _commitDamage = Gfx::RectF();
 
+    auto displayFlushStart = std::chrono::steady_clock::now();
     wl_display_flush( _wm.app().display() );
+    auto displayFlushEnd = std::chrono::steady_clock::now();
+
+    auto frameEnd = std::chrono::steady_clock::now();
+    auto eglUs = std::chrono::duration_cast<std::chrono::microseconds>(eglEnd - eglStart).count();
+    auto flushUs = std::chrono::duration_cast<std::chrono::microseconds>(displayFlushEnd - displayFlushStart).count();
+    auto totalUs = std::chrono::duration_cast<std::chrono::microseconds>(frameEnd - frameStart).count();
+
+    PT_LOG_TRACE("[PERF] commitFrame(NVG) " << std::setw(6) << totalUs << 
+                 " blit:" << blitUs << " eglSwap:" << eglUs << 
+                 " displayFlush:" << flushUs << ")");
 }
 
 #else
@@ -994,6 +1018,137 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& s)
     return alignedSize;
 }
 
+#ifdef PT_FORMS_WAYLAND_NANOVG
+
+// Helper function to render nanovg texture as fullscreen quad using GLES2,
+// avoiding expensive nvgEndFrame tessellation. 
+
+// Simple GLES2 shaders for fullscreen textured quad rendering
+static const char* quadVertexShader = R"(
+    attribute vec2 pos;
+    varying vec2 uv;
+    void main() {
+        uv = pos * 0.5 + 0.5;
+        gl_Position = vec4(pos, 0.0, 1.0);
+    }
+)";
+
+static const char* quadFragmentShader = R"(
+    precision mediump float;
+    uniform sampler2D tex;
+    varying vec2 uv;
+    void main() {
+        gl_FragColor = texture2D(tex, uv);
+    }
+)";
+
+static GLuint quadProgram = 0;
+static GLuint quadVBO = 0;
+
+bool initQuadRenderer()
+{
+    if (quadProgram != 0)
+        return true;
+
+    // Compile vertex shader
+    GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vShader, 1, &quadVertexShader, nullptr);
+    glCompileShader(vShader);
+    
+    int success = 0;
+    glGetShaderiv(vShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetShaderInfoLog(vShader, sizeof(log), nullptr, log);
+        std::cerr << "[ERROR] Quad vertex shader compile failed: " << log << std::endl;
+        return false;
+    }
+
+    // Compile fragment shader
+    GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fShader, 1, &quadFragmentShader, nullptr);
+    glCompileShader(fShader);
+    
+    glGetShaderiv(fShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetShaderInfoLog(fShader, sizeof(log), nullptr, log);
+        std::cerr << "[ERROR] Quad fragment shader compile failed: " << log << std::endl;
+        return false;
+    }
+
+    // Link program
+    quadProgram = glCreateProgram();
+    glAttachShader(quadProgram, vShader);
+    glAttachShader(quadProgram, fShader);
+    glLinkProgram(quadProgram);
+    
+    glGetProgramiv(quadProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        char log[512];
+        glGetProgramInfoLog(quadProgram, sizeof(log), nullptr, log);
+        std::cerr << "[ERROR] Quad program link failed: " << log << std::endl;
+        return false;
+    }
+
+    glDeleteShader(vShader);
+    glDeleteShader(fShader);
+
+    // Create fullscreen quad geometry
+    float quadVertices[] = {
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
+        -1.0f,  1.0f,
+         1.0f,  1.0f
+    };
+
+    glGenBuffers(1, &quadVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+    return true;
+}
+
+void renderTexturedQuad(NVGcontext* vg, int nvgImage)
+{
+    if (!initQuadRenderer())
+        return;
+
+    // Get the underlying GLES2 texture handle from the nanovg image
+    GLuint tex = nvglImageHandleGLES2(vg, nvgImage);
+    if (tex == 0)
+        return;
+
+    // Save GL state
+    GLint prevProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
+
+    // Use quad renderer program
+    glUseProgram(quadProgram);
+
+    // Bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glUniform1i(glGetUniformLocation(quadProgram, "tex"), 0);
+
+    // Set up vertex attributes
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    GLint posAttr = glGetAttribLocation(quadProgram, "pos");
+    glVertexAttribPointer(posAttr, 2, GL_FLOAT, GL_FALSE, 8, nullptr);
+    glEnableVertexAttribArray(posAttr);
+
+    // Render quad
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(posAttr);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Restore state
+    if (prevProgram > 0)
+        glUseProgram(prevProgram);
+}
+
+#endif // PT_FORMS_WAYLAND_NANOVG
 
 void WindowImpl::onProcessResizeEvent(const ResizeEvent& ev)
 {

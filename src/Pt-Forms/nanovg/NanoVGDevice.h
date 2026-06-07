@@ -120,6 +120,11 @@ class NanoVGDevice
         // sxHeight field. Returns 0.54 when not available.
         float fontXHeightRatio(int handle);
 
+        // Returns the shared render-target FBO handle for GPU blit operations.
+        // Used by windows to efficiently composite the pixmap framebuffer.
+        unsigned int renderFramebufferObject() const
+        { return _renderFbo; }
+
         static NanoVGDevice* instance()
         { return _instance; }
 
