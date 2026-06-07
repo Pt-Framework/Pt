@@ -28,6 +28,7 @@
 #include "PixmapCanvas.h"
 #include "PixmapImpl.h"
 #include "NanoVGDevice.h"
+#include "PaintCommand.h"
 
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Image.h>
@@ -37,10 +38,6 @@
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/Scaling.h>
 #include <Pt/String.h>
-
-#include <GLES2/gl2.h>
-#include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
 
 #include <vector>
 #include <string>
@@ -96,42 +93,6 @@ std::string toUtf8(const Pt::String& text)
     return out;
 }
 
-
-// Converts a Gfx image to a tightly packed RGBA buffer (nanovg byte order).
-// Pt rgb32 images store premultiplied BGRA, so the red and blue channels are
-// swapped.
-void buildRgba(const Pt::Gfx::Image& image,
-               std::vector<unsigned char>& out,
-               int& width,
-               int& height)
-{
-    namespace Gfx = Pt::Gfx;
-
-    width = static_cast<int>(image.width());
-    height = static_cast<int>(image.height());
-
-    const Pt::uint8_t* data = image.data();
-    Gfx::Rgb32Image rgb32;
-
-    if(image.format() != Gfx::ImageFormat::rgb32() || image.padding() != 0)
-    {
-        rgb32.reset(image.width(), image.height());
-        Gfx::copyView(image, rgb32);
-        data = rgb32.data();
-    }
-
-    const std::size_t count = static_cast<std::size_t>(width) * height;
-    out.resize(count * 4);
-
-    for(std::size_t i = 0; i < count; ++i)
-    {
-        out[i * 4 + 0] = data[i * 4 + 2];
-        out[i * 4 + 1] = data[i * 4 + 1];
-        out[i * 4 + 2] = data[i * 4 + 0];
-        out[i * 4 + 3] = data[i * 4 + 3];
-    }
-}
-
 } // anonymous namespace
 
 namespace Pt {
@@ -160,8 +121,8 @@ PixmapCanvas::PixmapCanvas()
 
 PixmapCanvas::~PixmapCanvas()
 {
-    if(_vg && _textureImage >= 0)
-        nvgDeleteImage(_vg, _textureImage);
+    // _textureImage is not used in recording mode; brush textures are created
+    // and destroyed during flush() inside PixmapImpl.
 }
 
 
@@ -173,40 +134,16 @@ void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
 
 void PixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
 {
-    if( ! _pixmap)
-        return;
-
-    NanoVGDevice* device = NanoVGDevice::instance();
-    if( ! device || ! device->isValid())
-        return;
-
-    NVGLUframebuffer* fb = _pixmap->framebuffer();
-    if( ! fb)
-        return;
-
-    _vg = device->context();
-
-    const int width = _pixmap->width();
-    const int height = _pixmap->height();
-
-    device->makeCurrentOffscreen();
-    nvgluBindFramebuffer(fb);
-    glViewport(0, 0, width, height);
-
-    nvgBeginFrame(_vg, static_cast<float>(width), static_cast<float>(height), 1.0f);
+    // Recording mode: no nanovg frame is opened here. Commands are appended
+    // to _pixmap->commands() and replayed lazily in PixmapImpl::flush().
     _painting = true;
 }
 
 
 void PixmapCanvas::onFinishPaint()
 {
-    if( ! _vg || ! _painting)
-        return;
-
-    nvgEndFrame(_vg);
-    glFlush();
-    nvgluBindFramebuffer(0);
-
+    // Recording mode: no nanovg frame to close. The command buffer is flushed
+    // when the pixmap texture is actually needed (commitFrame, toImage, blit).
     _painting = false;
 }
 
@@ -218,16 +155,13 @@ void PixmapCanvas::onSetTransform(const Gfx::Transform& /*tx*/)
 
 void PixmapCanvas::onApplyTransform()
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    const Gfx::Transform& tx = transform();
-
-    nvgResetTransform(_vg);
-    nvgTransform(_vg,
-                 static_cast<float>(tx.m11()), static_cast<float>(tx.m12()),
-                 static_cast<float>(tx.m21()), static_cast<float>(tx.m22()),
-                 static_cast<float>(tx.dx()),  static_cast<float>(tx.dy()));
+    PaintCommand c;
+    c.type = PaintCommand::SetTransform;
+    c.transform = transform();
+    _pixmap->commands().push_back(c);
 }
 
 
@@ -239,13 +173,15 @@ void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 
 void PixmapCanvas::onApplyCompositionMode()
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    if(_compositionMode == Gfx::CompositionMode::SourceCopy)
-        nvgGlobalCompositeOperation(_vg, NVG_COPY);
-    else
-        nvgGlobalCompositeOperation(_vg, NVG_SOURCE_OVER);
+    PaintCommand c;
+    c.type = PaintCommand::SetCompositionMode;
+    c.compositionMode = (_compositionMode == Gfx::CompositionMode::SourceCopy)
+                        ? NVG_COPY
+                        : NVG_SOURCE_OVER;
+    _pixmap->commands().push_back(c);
 }
 
 
@@ -293,170 +229,35 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 
 void PixmapCanvas::onApplyPen()
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    nvgStrokeColor(_vg, _penColor);
-    nvgStrokeWidth(_vg, _penWidth);
-    nvgLineCap(_vg, _lineCap);
-    nvgLineJoin(_vg, _lineJoin);
+    PaintCommand c;
+    c.type     = PaintCommand::SetPen;
+    c.penColor = _penColor;
+    c.penWidth = _penWidth;
+    c.lineCap  = _lineCap;
+    c.lineJoin = _lineJoin;
+    _pixmap->commands().push_back(c);
 }
 
 
 void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
-
-    if(_vg && _textureImage >= 0)
-    {
-        nvgDeleteImage(_vg, _textureImage);
-        _textureImage = -1;
-    }
+    _textureImage = -1;
 }
 
 
 void PixmapCanvas::onApplyBrush()
 {
-    // nanovg fills are configured per shape in applyFillForBounds(), so the
-    // gradient and texture coordinates can be computed from the shape bounds.
-}
-
-
-void PixmapCanvas::applyFillForBounds(const Gfx::RectF& bounds)
-{
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    if(_brush.isTexture())
-    {
-        if(_textureImage < 0)
-        {
-            const Gfx::Image& texture = _brush.texture();
-            if(texture.width() != 0 && texture.height() != 0)
-            {
-                std::vector<unsigned char> rgba;
-                int tw = 0;
-                int th = 0;
-                buildRgba(texture, rgba, tw, th);
-
-                _textureImage = nvgCreateImageRGBA(_vg, tw, th,
-                    NVG_IMAGE_REPEATX | NVG_IMAGE_REPEATY | NVG_IMAGE_PREMULTIPLIED,
-                    &rgba[0]);
-            }
-        }
-
-        if(_textureImage >= 0)
-        {
-            int tw = 0;
-            int th = 0;
-            nvgImageSize(_vg, _textureImage, &tw, &th);
-
-            const Gfx::PointF& origin = _brush.textureOrigin();
-            NVGpaint paint = nvgImagePattern(_vg,
-                static_cast<float>(origin.x()), static_cast<float>(origin.y()),
-                static_cast<float>(tw), static_cast<float>(th),
-                0.0f, _textureImage, 1.0f);
-            nvgFillPaint(_vg, paint);
-            return;
-        }
-
-        nvgFillColor(_vg, toNVGColor(_brush.color()));
-        return;
-    }
-
-    if(_brush.isGradient())
-    {
-        // nanovg gradients support only two colors. Multi-stop gradients are
-        // approximated using the first and last stop.
-        const Gfx::ColorStops& stops = _brush.gradientStops();
-
-        NVGcolor inner;
-        NVGcolor outer;
-        if(stops.size() >= 2)
-        {
-            inner = toNVGColor(stops.front().color());
-            outer = toNVGColor(stops.back().color());
-        }
-        else
-        {
-            inner = toNVGColor(_brush.color());
-            outer = toNVGColor(_brush.gradientColor());
-        }
-
-        const bool relative = _brush.positionMode() == Gfx::Brush::Relative;
-        const float bx = static_cast<float>(bounds.x());
-        const float by = static_cast<float>(bounds.y());
-        const float bw = static_cast<float>(bounds.width());
-        const float bh = static_cast<float>(bounds.height());
-
-        Gfx::Brush::GradientStyle style = _brush.gradient();
-
-        if(style == Gfx::Brush::Radial)
-        {
-            const Gfx::PointF& center = _brush.gradientEnd();
-            float cx;
-            float cy;
-            float radius = _brush.gradientEndRadius();
-
-            if(relative)
-            {
-                cx = bx + static_cast<float>(center.x()) * bw;
-                cy = by + static_cast<float>(center.y()) * bh;
-                radius *= (bw + bh) * 0.5f;
-            }
-            else
-            {
-                cx = static_cast<float>(center.x());
-                cy = static_cast<float>(center.y());
-            }
-
-            NVGpaint paint = nvgRadialGradient(_vg, cx, cy, 0.0f, radius, inner, outer);
-            nvgFillPaint(_vg, paint);
-            return;
-        }
-
-        float sx;
-        float sy;
-        float ex;
-        float ey;
-
-        if(style == Gfx::Brush::Horizontal)
-        {
-            sx = bx;          sy = by;
-            ex = bx + bw;     ey = by;
-        }
-        else if(style == Gfx::Brush::Vertical)
-        {
-            sx = bx;          sy = by;
-            ex = bx;          ey = by + bh;
-        }
-        else
-        {
-            const Gfx::PointF& begin = _brush.gradientBegin();
-            const Gfx::PointF& end = _brush.gradientEnd();
-
-            if(relative)
-            {
-                sx = bx + static_cast<float>(begin.x()) * bw;
-                sy = by + static_cast<float>(begin.y()) * bh;
-                ex = bx + static_cast<float>(end.x()) * bw;
-                ey = by + static_cast<float>(end.y()) * bh;
-            }
-            else
-            {
-                sx = static_cast<float>(begin.x());
-                sy = static_cast<float>(begin.y());
-                ex = static_cast<float>(end.x());
-                ey = static_cast<float>(end.y());
-            }
-        }
-
-        NVGpaint paint = nvgLinearGradient(_vg, sx, sy, ex, ey, inner, outer);
-        nvgFillPaint(_vg, paint);
-        return;
-    }
-
-    nvgFillColor(_vg, toNVGColor(_brush.color()));
+    PaintCommand c;
+    c.type  = PaintCommand::SetBrush;
+    c.brush = _brush;
+    _pixmap->commands().push_back(c);
 }
 
 
@@ -497,7 +298,14 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 
 void PixmapCanvas::onApplyFont()
 {
-    // The font face and size are set per text operation.
+    if( ! _pixmap)
+        return;
+
+    PaintCommand c;
+    c.type     = PaintCommand::SetFont;
+    c.fontFace = _fontFace;
+    c.fontSize = _fontSize;
+    _pixmap->commands().push_back(c);
 }
 
 
@@ -517,133 +325,102 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* clip)
 
 void PixmapCanvas::onApplyClip()
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
+    PaintCommand c;
+    c.type    = PaintCommand::SetClip;
+    c.hasClip = _clipSet;
     if(_clipSet)
-    {
-        nvgScissor(_vg,
-                   static_cast<float>(_clip.x()), static_cast<float>(_clip.y()),
-                   static_cast<float>(_clip.width()), static_cast<float>(_clip.height()));
-    }
-    else
-    {
-        nvgResetScissor(_vg);
-    }
+        c.clip = _clip;
+    _pixmap->commands().push_back(c);
 }
 
 
 void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    nvgBeginPath(_vg);
-    nvgMoveTo(_vg, static_cast<float>(from.x()), static_cast<float>(from.y()));
-    nvgLineTo(_vg, static_cast<float>(to.x()), static_cast<float>(to.y()));
-    nvgStroke(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::DrawLine;
+    c.p0   = from;
+    c.p1   = to;
+    _pixmap->commands().push_back(c);
 }
 
 
 void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
-    if( ! _vg || n < 2)
+    if( ! _pixmap || n < 2)
         return;
 
-    nvgBeginPath(_vg);
-    nvgMoveTo(_vg, static_cast<float>(pts[0].x()), static_cast<float>(pts[0].y()));
-    for(size_t i = 1; i < n; ++i)
-        nvgLineTo(_vg, static_cast<float>(pts[i].x()), static_cast<float>(pts[i].y()));
-    nvgStroke(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::DrawPolyline;
+    c.points.assign(pts, pts + n);
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
 void PixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 {
-    if( ! _vg || n < 3)
+    if( ! _pixmap || n < 3)
         return;
 
-    double minX = ps[0].x();
-    double minY = ps[0].y();
-    double maxX = minX;
-    double maxY = minY;
-
-    nvgBeginPath(_vg);
-    nvgMoveTo(_vg, static_cast<float>(ps[0].x()), static_cast<float>(ps[0].y()));
-    for(size_t i = 1; i < n; ++i)
-    {
-        nvgLineTo(_vg, static_cast<float>(ps[i].x()), static_cast<float>(ps[i].y()));
-
-        if(ps[i].x() < minX) minX = ps[i].x();
-        if(ps[i].y() < minY) minY = ps[i].y();
-        if(ps[i].x() > maxX) maxX = ps[i].x();
-        if(ps[i].y() > maxY) maxY = ps[i].y();
-    }
-    nvgClosePath(_vg);
-
-    applyFillForBounds(Gfx::RectF::fromXYWH(minX, minY, maxX - minX, maxY - minY));
-    nvgFill(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::FillPolygon;
+    c.points.assign(ps, ps + n);
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
 void PixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    nvgBeginPath(_vg);
-    nvgRect(_vg,
-            static_cast<float>(rectangle.x()), static_cast<float>(rectangle.y()),
-            static_cast<float>(rectangle.width()), static_cast<float>(rectangle.height()));
-    nvgStroke(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::DrawRect;
+    c.rect = rectangle;
+    _pixmap->commands().push_back(c);
 }
 
 
 void PixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    nvgBeginPath(_vg);
-    nvgRect(_vg,
-            static_cast<float>(rectangle.x()), static_cast<float>(rectangle.y()),
-            static_cast<float>(rectangle.width()), static_cast<float>(rectangle.height()));
-
-    applyFillForBounds(rectangle);
-    nvgFill(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::FillRect;
+    c.rect = rectangle;
+    _pixmap->commands().push_back(c);
 }
 
 
 void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    nvgBeginPath(_vg);
-    nvgEllipse(_vg,
-               static_cast<float>(topLeft.x() + size.width() / 2.0),
-               static_cast<float>(topLeft.y() + size.height() / 2.0),
-               static_cast<float>(size.width() / 2.0),
-               static_cast<float>(size.height() / 2.0));
-    nvgStroke(_vg);
+    PaintCommand c;
+    c.type        = PaintCommand::DrawEllipse;
+    c.p0          = topLeft;
+    c.ellipseSize = size;
+    _pixmap->commands().push_back(c);
 }
 
 
 void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    nvgBeginPath(_vg);
-    nvgEllipse(_vg,
-               static_cast<float>(topLeft.x() + size.width() / 2.0),
-               static_cast<float>(topLeft.y() + size.height() / 2.0),
-               static_cast<float>(size.width() / 2.0),
-               static_cast<float>(size.height() / 2.0));
-
-    applyFillForBounds(Gfx::RectF::fromXYWH(topLeft.x(), topLeft.y(),
-                                            size.width(), size.height()));
-    nvgFill(_vg);
+    PaintCommand c;
+    c.type        = PaintCommand::FillEllipse;
+    c.p0          = topLeft;
+    c.ellipseSize = size;
+    _pixmap->commands().push_back(c);
 }
 
 
@@ -684,41 +461,21 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
                               const Pt::String& text,
                               const Gfx::Transform* tform)
 {
-    if( ! _vg || _fontFace < 0)
+    if( ! _pixmap || _fontFace < 0)
         return;
 
-    std::string utf8 = toUtf8(text);
+    PaintCommand c;
+    c.type = PaintCommand::DrawText;
+    c.p0   = to;
+    c.text = toUtf8(text);
 
     if(tform)
     {
-        nvgSave(_vg);
-        nvgFontFaceId(_vg, _fontFace);
-        nvgFontSize(_vg, _fontSize);
-        nvgTextAlign(_vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-        nvgFillColor(_vg, _penColor);
-
-        // The current transform already maps logical to physical coordinates.
-        // Translate to the text origin and apply the extra text transform.
-        nvgTranslate(_vg, static_cast<float>(to.x()), static_cast<float>(to.y()));
-        nvgTransform(_vg,
-                     static_cast<float>(tform->m11()), static_cast<float>(tform->m12()),
-                     static_cast<float>(tform->m21()), static_cast<float>(tform->m22()),
-                     static_cast<float>(tform->dx()),  static_cast<float>(tform->dy()));
-
-        nvgText(_vg, 0.0f, 0.0f, utf8.c_str(), 0);
-        nvgRestore(_vg);
+        c.hasTextTransform = true;
+        c.textTransform    = *tform;
     }
-    else
-    {
-        nvgFontFaceId(_vg, _fontFace);
-        nvgFontSize(_vg, _fontSize);
-        nvgTextAlign(_vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-        nvgFillColor(_vg, _penColor);
 
-        nvgText(_vg,
-                static_cast<float>(to.x()), static_cast<float>(to.y()),
-                utf8.c_str(), 0);
-    }
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
@@ -726,182 +483,25 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
     if(image.width() == 0 || image.height() == 0)
         return;
 
-    std::vector<unsigned char> rgba;
-    int width = 0;
-    int height = 0;
-    buildRgba(image, rgba, width, height);
-
-    int img = nvgCreateImageRGBA(_vg, width, height,
-                                 NVG_IMAGE_PREMULTIPLIED, &rgba[0]);
-    if(img <= 0)
-        return;
+    PaintCommand c;
+    c.type  = PaintCommand::DrawImage;
+    c.p0    = toF;
+    c.image = image;
 
     if(rect)
     {
-        const float rx = static_cast<float>(rect->x());
-        const float ry = static_cast<float>(rect->y());
-        const float rw = static_cast<float>(rect->width());
-        const float rh = static_cast<float>(rect->height());
-
-        if(rw > 0.0f && rh > 0.0f)
-        {
-            const float dx = static_cast<float>(toF.x());
-            const float dy = static_cast<float>(toF.y());
-            const float dw = rw;
-            const float dh = rh;
-
-            const float tileW = dw * static_cast<float>(width) / rw;
-            const float tileH = dh * static_cast<float>(height) / rh;
-            const float ox = dx - rx * (dw / rw);
-            const float oy = dy - ry * (dh / rh);
-
-            nvgSave(_vg);
-            nvgIntersectScissor(_vg, dx, dy, dw, dh);
-            nvgBeginPath(_vg);
-            nvgRect(_vg, dx, dy, dw, dh);
-            NVGpaint paint = nvgImagePattern(_vg, ox, oy, tileW, tileH, 0.0f, img, 1.0f);
-            nvgFillPaint(_vg, paint);
-            nvgFill(_vg);
-            nvgRestore(_vg);
-        }
-    }
-    else
-    {
-        const Gfx::Scaling& dstScaling = scaling();
-        const float logW = static_cast<float>(dstScaling.toLogical(static_cast<double>(width)));
-        const float logH = static_cast<float>(dstScaling.toLogical(static_cast<double>(height)));
-        const float dx = static_cast<float>(toF.x());
-        const float dy = static_cast<float>(toF.y());
-
-        nvgBeginPath(_vg);
-        nvgRect(_vg, dx, dy, logW, logH);
-        NVGpaint paint = nvgImagePattern(_vg, dx, dy, logW, logH, 0.0f, img, 1.0f);
-        nvgFillPaint(_vg, paint);
-        nvgFill(_vg);
+        c.hasSrcRect = true;
+        c.srcRect    = *rect;
     }
 
-    nvgDeleteImage(_vg, img);
+    _pixmap->commands().push_back(std::move(c));
 }
-
-
-void PixmapCanvas::buildPath(const Gfx::Path& path)
-{
-    nvgBeginPath(_vg);
-
-    for(Gfx::PathIterator it = path.begin(); it != path.end(); ++it)
-    {
-        switch(it->type())
-        {
-            default:
-                break;
-
-            case Gfx::Path::MoveTo:
-            {
-                const Gfx::PointF& to = it->point(0);
-                nvgMoveTo(_vg, static_cast<float>(to.x()), static_cast<float>(to.y()));
-                break;
-            }
-
-            case Gfx::Path::LineTo:
-            {
-                const Gfx::PointF& to = it->point(0);
-                nvgLineTo(_vg, static_cast<float>(to.x()), static_cast<float>(to.y()));
-                break;
-            }
-
-            case Gfx::Path::QuadTo:
-            {
-                const Gfx::PointF& cp = it->point(0);
-                const Gfx::PointF& to = it->point(1);
-                nvgQuadTo(_vg,
-                          static_cast<float>(cp.x()), static_cast<float>(cp.y()),
-                          static_cast<float>(to.x()), static_cast<float>(to.y()));
-                break;
-            }
-
-            case Gfx::Path::CubicTo:
-            {
-                const Gfx::PointF& c1 = it->point(0);
-                const Gfx::PointF& c2 = it->point(1);
-                const Gfx::PointF& to = it->point(2);
-                nvgBezierTo(_vg,
-                            static_cast<float>(c1.x()), static_cast<float>(c1.y()),
-                            static_cast<float>(c2.x()), static_cast<float>(c2.y()),
-                            static_cast<float>(to.x()), static_cast<float>(to.y()));
-                break;
-            }
-
-            case Gfx::Path::Close:
-            {
-                nvgClosePath(_vg);
-                break;
-            }
-        }
-    }
-}
-
-
-namespace {
-
-Pt::Gfx::RectF pathBounds(const Pt::Gfx::Path& path)
-{
-    namespace Gfx = Pt::Gfx;
-
-    bool first = true;
-    double minX = 0.0;
-    double minY = 0.0;
-    double maxX = 0.0;
-    double maxY = 0.0;
-
-    for(Gfx::PathIterator it = path.begin(); it != path.end(); ++it)
-    {
-        int points = 0;
-        switch(it->type())
-        {
-            case Gfx::Path::MoveTo:
-            case Gfx::Path::LineTo:
-                points = 1;
-                break;
-            case Gfx::Path::QuadTo:
-                points = 2;
-                break;
-            case Gfx::Path::CubicTo:
-                points = 3;
-                break;
-            default:
-                points = 0;
-                break;
-        }
-
-        for(int i = 0; i < points; ++i)
-        {
-            const Gfx::PointF& p = it->point(i);
-            if(first)
-            {
-                minX = maxX = p.x();
-                minY = maxY = p.y();
-                first = false;
-            }
-            else
-            {
-                if(p.x() < minX) minX = p.x();
-                if(p.y() < minY) minY = p.y();
-                if(p.x() > maxX) maxX = p.x();
-                if(p.y() > maxY) maxY = p.y();
-            }
-        }
-    }
-
-    return Gfx::RectF::fromXYWH(minX, minY, maxX - minX, maxY - minY);
-}
-
-} // anonymous namespace
 
 
 void PixmapCanvas::onSetPath(const Gfx::Path& path)
@@ -912,43 +512,49 @@ void PixmapCanvas::onSetPath(const Gfx::Path& path)
 
 void PixmapCanvas::onDrawPath()
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    buildPath(_ptPath);
-    nvgStroke(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::DrawPath;
+    c.path = _ptPath;
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
 void PixmapCanvas::onFillPath()
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    buildPath(_ptPath);
-    applyFillForBounds(pathBounds(_ptPath));
-    nvgFill(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::FillPath;
+    c.path = _ptPath;
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
 void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    buildPath(path);
-    nvgStroke(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::DrawPath;
+    c.path = path;
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
 void PixmapCanvas::onFillPath(const Gfx::Path& path)
 {
-    if( ! _vg)
+    if( ! _pixmap)
         return;
 
-    buildPath(path);
-    applyFillForBounds(pathBounds(path));
-    nvgFill(_vg);
+    PaintCommand c;
+    c.type = PaintCommand::FillPath;
+    c.path = path;
+    _pixmap->commands().push_back(std::move(c));
 }
 
 
@@ -956,14 +562,17 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& to,
                               const Pixmap& pm,
                               const Gfx::RectF* rect)
 {
-    if( ! _vg || ! _painting)
+    if( ! _pixmap || ! _painting)
         return;
 
     applyState();
 
-    const PixmapImpl* srcImpl = pm.impl();
+    PixmapImpl* srcImpl = const_cast<PixmapImpl*>(pm.impl());
     if( ! srcImpl)
         return;
+
+    // Flush the source so its texture is current before we record the blit.
+    srcImpl->flush();
 
     int img = srcImpl->framebufferImage();
     if(img < 0)
@@ -974,52 +583,27 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& to,
     if(srcW == 0 || srcH == 0)
         return;
 
+    PaintCommand c;
+    c.type           = PaintCommand::DrawPixmap;
+    c.p0             = to;
+    c.srcPixmapImage = img;
+    c.srcPixmapW     = srcW;
+    c.srcPixmapH     = srcH;
+
     if(rect)
     {
         const Gfx::Scaling& srcScaling = srcImpl->scaling();
         Gfx::RectF physRect = srcScaling.toPhysical(*rect);
-
-        const float rx = static_cast<float>(physRect.x());
-        const float ry = static_cast<float>(physRect.y());
-        const float rw = static_cast<float>(physRect.width());
-        const float rh = static_cast<float>(physRect.height());
-
-        if(rw > 0.0f && rh > 0.0f)
-        {
-            const float dx = static_cast<float>(to.x());
-            const float dy = static_cast<float>(to.y());
-            const float dw = static_cast<float>(rect->width());
-            const float dh = static_cast<float>(rect->height());
-
-            const float tileW = dw * static_cast<float>(srcW) / rw;
-            const float tileH = dh * static_cast<float>(srcH) / rh;
-            const float ox = dx - rx * (dw / rw);
-            const float oy = dy - ry * (dh / rh);
-
-            nvgSave(_vg);
-            nvgIntersectScissor(_vg, dx, dy, dw, dh);
-            nvgBeginPath(_vg);
-            nvgRect(_vg, dx, dy, dw, dh);
-            NVGpaint paint = nvgImagePattern(_vg, ox, oy, tileW, tileH, 0.0f, img, 1.0f);
-            nvgFillPaint(_vg, paint);
-            nvgFill(_vg);
-            nvgRestore(_vg);
-        }
+        c.hasSrcRect = true;
+        c.srcRect    = physRect;
+        // Record logical destination dimensions separately; the srcRect holds
+        // physical pixel coordinates for texture sampling, but nanovg draw
+        // calls need logical units so the canvas transform is not applied twice.
+        c.destW = static_cast<float>(rect->width());
+        c.destH = static_cast<float>(rect->height());
     }
-    else
-    {
-        const Gfx::Scaling& dstScaling = scaling();
-        const float logW = static_cast<float>(dstScaling.toLogical(static_cast<double>(srcW)));
-        const float logH = static_cast<float>(dstScaling.toLogical(static_cast<double>(srcH)));
-        const float dx = static_cast<float>(to.x());
-        const float dy = static_cast<float>(to.y());
 
-        nvgBeginPath(_vg);
-        nvgRect(_vg, dx, dy, logW, logH);
-        NVGpaint paint = nvgImagePattern(_vg, dx, dy, logW, logH, 0.0f, img, 1.0f);
-        nvgFillPaint(_vg, paint);
-        nvgFill(_vg);
-    }
+    _pixmap->commands().push_back(std::move(c));
 }
 
 } // namespace

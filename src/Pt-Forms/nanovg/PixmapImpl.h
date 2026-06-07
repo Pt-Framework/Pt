@@ -38,10 +38,10 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 
+#include "PaintCommand.h"
+
 #include <string>
 #include <vector>
-
-struct NVGLUframebuffer;
 
 namespace Pt {
 
@@ -50,9 +50,11 @@ namespace Forms {
 class Pixmap;
 class PixmapCanvas;
 
-// Back buffer for the nanovg renderer. Pixels live in an offscreen GLES2
-// framebuffer object that is rendered into by a PixmapCanvas and composited
-// onto windows with the shared nanovg context.
+// Back buffer for the nanovg renderer. Each pixmap is backed by a single
+// nanovg image (GLES2 texture). Drawing commands are recorded into a
+// PaintCommand buffer by PixmapCanvas and replayed lazily inside one
+// nvgBeginFrame/nvgEndFrame via flush(), using the shared render-target FBO
+// owned by NanoVGDevice. This eliminates nested nvg frames.
 class PixmapImpl
 {
     public:
@@ -72,19 +74,24 @@ class PixmapImpl
 
         void setScaleFactor(double scaleFactor);
 
-        // nanovg image handle of the framebuffer, or -1 if empty. Used by
-        // windows to composite the pixmap.
-        int framebufferImage() const;
-
-        // Framebuffer object for binding by the canvas, or 0 if empty.
-        NVGLUframebuffer* framebuffer() const
-        { return _fb; }
+        // nanovg image handle of the backing texture, or -1 if empty.
+        // Used by windows to composite the pixmap and by drawPixmap.
+        int framebufferImage() const
+        { return _image; }
 
         int width() const
         { return _width; }
 
         int height() const
         { return _height; }
+
+        // Replay all pending PaintCommands into the backing texture using the
+        // shared render-target FBO. No-op when the command buffer is empty.
+        void flush();
+
+        // Access to the command buffer for PixmapCanvas.
+        std::vector<PaintCommand>& commands()
+        { return _commands; }
 
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
@@ -110,7 +117,7 @@ class PixmapImpl
         {}
 
         void finish()
-        {}
+        { flush(); }
 
     public:
         static const std::string& defaultFont()
@@ -134,19 +141,21 @@ class PixmapImpl
         }
 
     private:
-        void createFramebuffer(int width, int height);
+        void createTexture(int width, int height);
 
-        void destroyFramebuffer();
+        void destroyTexture();
 
     private:
-        Gfx::SizeF        _physicalSize;
-        Gfx::Scaling      _scaling;
+        Gfx::SizeF                _physicalSize;
+        Gfx::Scaling              _scaling;
 
-        int               _width;
-        int               _height;
-        NVGLUframebuffer* _fb;
+        int                       _width;
+        int                       _height;
+        int                       _image;    // nanovg image handle, -1 if empty
 
-        PixmapCanvas*     _canvas;
+        std::vector<PaintCommand> _commands;
+
+        PixmapCanvas*             _canvas;
 };
 
 } // namespace

@@ -143,15 +143,8 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onFillPath(const Gfx::Path& path) override;
 
     private:
-        void buildPath(const Gfx::Path& path);
-
-        void applyFillForBounds(const Gfx::RectF& bounds);
-
-        void strokeCurrent();
-
-    private:
         PixmapImpl*           _pixmap;
-        NVGcontext*           _vg;
+        NVGcontext*           _vg;       // used only for immediate metric calls
         bool                  _painting;
 
         Gfx::CompositionMode  _compositionMode;

@@ -52,6 +52,10 @@ NanoVGDevice::NanoVGDevice()
 , _pbuffer(0)
 , _nvg(0)
 , _fonts(0)
+, _renderFbo(0)
+, _stencilRbo(0)
+, _rtW(0)
+, _rtH(0)
 {
     _instance = this;
 }
@@ -211,6 +215,28 @@ void NanoVGDevice::destroy()
         _fonts = 0;
     }
 
+    // Destroy shared render-target FBO and stencil RBO while the context is
+    // still current so the GL objects are released on the correct context.
+    if(_renderFbo || _stencilRbo)
+    {
+        makeCurrentOffscreen();
+
+        if(_stencilRbo)
+        {
+            glDeleteRenderbuffers(1, &_stencilRbo);
+            _stencilRbo = 0;
+        }
+
+        if(_renderFbo)
+        {
+            glDeleteFramebuffers(1, &_renderFbo);
+            _renderFbo = 0;
+        }
+
+        _rtW = 0;
+        _rtH = 0;
+    }
+
     EGLDisplay display = static_cast<EGLDisplay>(_display);
 
     if(_nvg)
@@ -239,6 +265,71 @@ void NanoVGDevice::destroy()
     _config = 0;
     _context = 0;
     _pbuffer = 0;
+}
+
+
+int NanoVGDevice::createImage(int w, int h)
+{
+    if( ! _nvg || w <= 0 || h <= 0)
+        return -1;
+
+    return nvgCreateImageRGBA(_nvg, w, h,
+                              NVG_IMAGE_FLIPY | NVG_IMAGE_PREMULTIPLIED,
+                              0);
+}
+
+
+bool NanoVGDevice::bindRenderTarget(int nvgImage, int w, int h)
+{
+    if( ! _nvg || nvgImage < 0 || w <= 0 || h <= 0)
+        return false;
+
+    makeCurrentOffscreen();
+
+    // Lazy-create the shared FBO on first use.
+    if( ! _renderFbo)
+    {
+        glGenFramebuffers(1, &_renderFbo);
+        glGenRenderbuffers(1, &_stencilRbo);
+    }
+
+    // Attach the pixmap texture as color attachment.
+    GLuint tex = nvglImageHandleGLES2(_nvg, nvgImage);
+    glBindFramebuffer(GL_FRAMEBUFFER, _renderFbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D, tex, 0);
+
+    // Resize stencil RBO only when the target size changes.
+    if(w != _rtW || h != _rtH)
+    {
+        glBindRenderbuffer(GL_RENDERBUFFER, _stencilRbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, w, h);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                  GL_RENDERBUFFER, _stencilRbo);
+        _rtW = w;
+        _rtH = h;
+    }
+
+    // Validate; if not complete try the depth/stencil packed fallback once.
+    // GL_DEPTH24_STENCIL8 / GL_DEPTH_STENCIL_ATTACHMENT are not available in
+    // pure GLES2 (they come from GL_OES_packed_depth_stencil). Only attempt
+    // the plain stencil path; if the driver rejects it, log and bail.
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        PT_LOG_ERROR("bindRenderTarget: FBO incomplete for "
+                     << w << 'x' << h);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return false;
+    }
+
+    glViewport(0, 0, w, h);
+    return true;
+}
+
+
+void NanoVGDevice::unbindRenderTarget()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 

@@ -757,6 +757,11 @@ void WindowImpl::commitFrame()
 
     PixmapImpl* impl = pixmap().impl();
 
+    // Replay any pending draw commands into the pixmap texture before the
+    // window frame opens. This ensures the nvgBeginFrame below is top-level
+    // and never nested inside an offscreen recording frame.
+    impl->flush();
+
     int img = impl->framebufferImage();
     if( img < 0 )
         return;

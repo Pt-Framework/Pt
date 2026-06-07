@@ -85,6 +85,20 @@ class NanoVGDevice
         // windows before compositing into their swap chain.
         void makeCurrent(void* eglSurface);
 
+        // Creates a nanovg image (texture) of the given size with
+        // NVG_IMAGE_FLIPY | NVG_IMAGE_PREMULTIPLIED flags. Returns the nanovg
+        // image handle, or -1 on failure. The context must be current.
+        int createImage(int w, int h);
+
+        // Binds the shared render-target FBO with nvgImage as color attachment
+        // and ensures the stencil RBO matches the target size. Calls
+        // makeCurrentOffscreen() internally. After the call glViewport is set
+        // to (0,0,w,h) and the FBO is ready to receive nvg draw calls.
+        bool bindRenderTarget(int nvgImage, int w, int h);
+
+        // Unbinds the shared render-target FBO (restores default framebuffer).
+        void unbindRenderTarget();
+
         // Resolves a font request to a nanovg font handle, registering fonts on
         // first use. Returns -1 if no font is available.
         int fontFace(const Gfx::Font& font);
@@ -107,6 +121,11 @@ class NanoVGDevice
         void*               _pbuffer;   // EGLSurface
         NVGcontext*         _nvg;
         NanoVGFontProvider* _fonts;
+
+        unsigned int        _renderFbo;   // shared offscreen render-target FBO
+        unsigned int        _stencilRbo;  // stencil RBO attached to _renderFbo
+        int                 _rtW;         // current stencil RBO width
+        int                 _rtH;         // current stencil RBO height
 
         static NanoVGDevice* _instance;
 };
