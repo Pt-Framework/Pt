@@ -672,6 +672,12 @@ void WindowImpl::onShowPopup(Window& w, bool visible)
     {
         destroySurface();
         createPopup(w);
+
+        // Flush the Wayland write buffer immediately so the compositor
+        // receives the surface creation/commit without waiting for the
+        // next event-loop iteration (mouse move or key press).
+        ApplicationImpl* app = Application::instance().impl();
+        wl_display_flush(app->display());
     }
     else
     {
