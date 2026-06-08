@@ -28,7 +28,6 @@
 
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
-#include "PixmapImpl.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Cursor.h>
@@ -67,6 +66,7 @@ namespace Forms {
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
 , _screen(0)
+, _genericBackend(0)
 {
     EmscriptenFullscreenStrategy strategy;
 		strategy.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT;
@@ -83,13 +83,18 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
     emscripten_enter_soft_fullscreen("canvas", &strategy);
 
+    GraphicsBackend& graphics = Application::instance().graphicsBackend();
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphics);
+    if( ! _genericBackend )
+        throw std::invalid_argument("invalid graphics");
+
 	  double width, height;
 	  emscripten_get_element_css_size("canvas", &width, &height);
 
     Gfx::SizeF size(width, height);
     _pixmap.reset(size);
-                             
-    const Gfx::Image& image = _pixmap.impl()->bitmap().image();
+
+    const Gfx::Image& image = _genericBackend->image(_pixmap);
 
     _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
                                                          image.width(), image.height(), 
@@ -320,8 +325,8 @@ void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 
     Gfx::SizeF size = scaling().toPhysical( ev.size() );
     _pixmap.reset(size);
-    
-    const Gfx::Image& image = _pixmap.impl()->bitmap().image();
+
+    const Gfx::Image& image = _genericBackend->image(_pixmap);
 
     SDL_FreeSurface(_imageSurface);
     _imageSurface = 0; 

@@ -36,6 +36,8 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 
+#include "../generic/GenericGraphicsBackend.h"
+
 #include <SDL.h>
 
 namespace Pt {
@@ -147,6 +149,7 @@ class ScreenImpl : public Form
         Screen*      _parent;
         Workspace    _workspace;
 
+        GenericGraphicsBackend* _genericBackend;
         Pixmap       _pixmap;
 
         SDL_Window*   _screen;

@@ -75,10 +75,10 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         void nextEvent();
 
-                GraphicsBackend* queryBackend()
-                {
-                        return 0;
-                }
+        GraphicsBackend* queryBackend()
+        {
+            return 0;
+        }
 
         DrmDisplay& drmDisplay()
         { return _drmDisplay; }
