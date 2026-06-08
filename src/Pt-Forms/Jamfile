@@ -24,7 +24,7 @@ PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_IMPL_DIR) : *.c ] ;
 PT_FORMS_GENERIC_SUBDIR = [ FDirName $(PT_TOP) src Pt-Forms generic ] ;
 PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_GENERIC_SUBDIR) : *.cpp ] ;
 
-if $(WITH_FORMS_DIRECT2D)
+if $(WITH_FORMS_DIRECT2D) || $(PT_FORMS_IMPL:L) = win32
 {
     local D2D_DIR = [ FDirName $(PT_TOP) src Pt-Forms direct2d ] ;
     SubDirHdrs $(D2DDIR) ;
