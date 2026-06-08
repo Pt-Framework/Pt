@@ -28,7 +28,6 @@
 */
 
 #import "ApplicationImpl.h"
-#import "PixmapImpl.h"
 #import "WindowImpl.h"
 
 #import <AppKit/NSApplication.h>

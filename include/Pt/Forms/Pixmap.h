@@ -43,7 +43,33 @@ namespace Pt {
 
 namespace Forms {
 
-class PixmapImpl;
+/** @brief Interface for the platform/backend-specific pixmap implementation.
+*/
+class PT_FORMS_API IPixmapImpl
+{
+    public:
+        virtual ~IPixmapImpl() {}
+
+        virtual void reset(const Gfx::Image& image) = 0;
+        virtual void reset(const Gfx::SizeF& size) = 0;
+        virtual void reset() = 0;
+
+        virtual void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const = 0;
+        virtual void setScaleFactor(double scaleFactor) = 0;
+        virtual void drawPixmap(Gfx::Canvas& canvas, const Gfx::PointF& to,
+                                const Pixmap& pm, const Gfx::RectF* rect) = 0;
+
+        virtual const Gfx::ImageFormat& format() const = 0;
+        virtual const Gfx::SizeF& size() const = 0;
+        virtual const Gfx::Scaling& scaling() const = 0;
+
+        virtual Gfx::Canvas* getCanvas(Gfx::Canvas* reuse) = 0;
+        virtual Gfx::Canvas* createCanvas(Gfx::Canvas* reuse) = 0;
+        virtual void releaseCanvas() = 0;
+        virtual void sync() = 0;
+        virtual void finish() = 0;
+};
+
 
 /** @brief Back buffer drawing surface.
 */
@@ -94,27 +120,18 @@ class PT_FORMS_API Pixmap : public PaintSurface
         virtual void onFinish() override;
 
     public:
-        static std::string defaultFont();
-
-        static void setDefaultFont(const std::string& family);
-
-        static std::vector<std::string> fontFamilies();
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
-
-    public:
-        PixmapImpl* impl()
+        IPixmapImpl* impl()
         {
             return _impl;
         }
 
-        const PixmapImpl* impl() const
+        const IPixmapImpl* impl() const
         {
             return _impl;
         }
-    
+
     private:
-        PixmapImpl* _impl;
+        IPixmapImpl* _impl;
 };
 
 typedef Pixmap PixmapSurface;

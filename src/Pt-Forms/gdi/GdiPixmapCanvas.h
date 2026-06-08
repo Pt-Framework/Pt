@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,31 +26,35 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_COCOA_PIXMAP_CANVAS_H
-#define PT_FORMS_COCOA_PIXMAP_CANVAS_H
+#ifndef PT_FORMS_PIXMAP_CANVAS_H
+#define PT_FORMS_PIXMAP_CANVAS_H
 
-#include <Pt/Gfx/Canvas.h>
+#include <Pt/Forms/Api.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/Canvas.h>
 
-#include <CoreGraphics/CGBitmapContext.h>
-#include <CoreText/CoreText.h>
+#include <Windows.h>
 
 namespace Pt {
 
 namespace Forms {
 
 class Pixmap;
-class PixmapImpl;
+class GdiPixmapImpl;
 
-
-class PixmapCanvas : public Gfx::Canvas
+class GdiPixmapCanvas : public Gfx::Canvas
 {
     public:
-        PixmapCanvas();
+        GdiPixmapCanvas();
 
-        virtual ~PixmapCanvas();
+        ~GdiPixmapCanvas();
 
-        void setPixmap(PixmapImpl& pixmap);
+        void setPixmap(GdiPixmapImpl& pixmap);
 
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
@@ -68,7 +71,7 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onApplyTransform() override;
 
         virtual void onSetCompositionMode(const Gfx::CompositionMode& mode) override;
-
+        
         virtual void onApplyCompositionMode() override;
 
         virtual void onSetPen(const Gfx::Pen& pen) override;
@@ -88,33 +91,31 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onApplyClip() override;
 
     protected:
-        virtual void onDrawLine(const Gfx::PointF& from,
-                                const Gfx::PointF& to) override;
+        virtual void onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to) override;
 
         virtual void onDrawPolyline(const Gfx::PointF* pts, const size_t n) override;
 
-        virtual void onFillPolygon(const Gfx::PointF* pts, const size_t n) override;
+        virtual void onFillPolygon(const Gfx::PointF* ps, const size_t n) override;
 
-        virtual void onDrawRect(const Gfx::RectF& rect) override;
+        virtual void onDrawRect(const Gfx::RectF& rectangle) override;
 
-        virtual void onFillRect(const Gfx::RectF& rect) override;
+        virtual void onFillRect(const Gfx::RectF& rectangle) override;
 
-        virtual void onDrawEllipse(const Gfx::PointF& topLeft,
-                                   const Gfx::SizeF& size) override;
+        virtual void onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) override;
 
-        virtual void onFillEllipse(const Gfx::PointF& topLeft,
-                                   const Gfx::SizeF& size) override;
+        virtual void onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) override;
 
     protected:
         virtual Gfx::TextMetrics onGetTextMetrics(const Pt::String& text) const override;
 
         virtual const Gfx::FontMetrics& onGetFontMetrics() const override;
 
-        virtual void onDrawText(const Gfx::PointF& to, const Pt::String& text,
-                                const Gfx::Transform* trans) override;
+        virtual void onDrawText(const Gfx::PointF& to, 
+                                const Pt::String& text, 
+                                const Gfx::Transform* transform) override;
 
     protected:
-        virtual void onDrawImage(const Gfx::PointF& to,
+        virtual void onDrawImage(const Gfx::PointF& toF, 
                                  const Gfx::Image& image,
                                  const Gfx::RectF* rect) override;
 
@@ -130,36 +131,39 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onFillPath(const Gfx::Path& path) override;
 
     private:
-        CGMutablePathRef makePath(const Gfx::Path& path);
+        POINT toContext(double x, double y);
 
-        void fillGradient(CGContextRef context, CGRect bbox);
+        POINT toContext(const Gfx::PointF& p);
+
+        void addPath(HDC dc, const Gfx::Path& path);
+
+        Gfx::FontMetrics getFontMetrics() const;
 
     private:
-        PixmapImpl*             _pixmap;
-        Gfx::Transform          _transform;
-        Gfx::CompositionMode    _compositionMode;
-        CGRect                  _clipRect;
-
-        CGColorRef              _penColor;
-        CGFloat                 _penSize;
-        CGLineCap               _penCap;
-        CGLineJoin              _penJoin;
-        std::vector<CGFloat>    _dashes;
-
-        Gfx::Brush              _brush;
-        CGColorRef              _brushColor;
-        CGGradientRef           _brushGradient;
-
-        CTFontRef                     _font;
-        Gfx::FontMetrics              _fontMetrics;
-        CFMutableDictionaryRef        _fontAttributes;
-        CFMutableAttributedStringRef  _attributedString;
-
-        CGMutablePathRef        _cgPath;
+        GdiPixmapImpl*               _pixmap;
+        Gfx::CompositionMode      _compositionMode;
+        double                    _lastScaleFactor;
+        Gfx::Pen                  _logicalPen;
+        HPEN                      _pen;
+        DWORD                     _penSize;
+        Gfx::Color                _penColor;
+        HBRUSH                    _brush;
+        bool                      _gradientBrush;
+        Gfx::Brush::GradientStyle _gradient;
+        Gfx::Color                _gradientStart;
+        Gfx::Color                _gradientStop;
+        std::wstring              _text;
+        Gfx::RectF                _clip;
+        bool                      _hasClip;
+        HRGN                      _clipRect;
+        HFONT                     _font;
+        Gfx::FontMetrics          _fontMetrics;
+        Gfx::Path                 _path;
 };
 
-} // namespace Forms
+} // namespace
 
-} // namespace Pt
+} // namespace
 
-#endif // PT_FORMS_COCOA_PIXMAP_CANVAS_H
+#endif
+

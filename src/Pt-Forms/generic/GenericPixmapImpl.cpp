@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapImpl.h"
+#include "GenericPixmapImpl.h"
 
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Canvas.h>
@@ -38,16 +38,17 @@ namespace Pt {
 
 namespace Forms {
 
-void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
-                            const Pt::Gfx::PointF& to,
-                            const Pixmap& pixmap,
-                            const Gfx::RectF* rect)
+void GenericPixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+                                   const Pt::Gfx::PointF& to,
+                                   const Pixmap& pixmap,
+                                   const Gfx::RectF* rect)
 {
     assert(_canvas == &canvas);
 
     if(_canvas == &canvas)
     {
-        _canvas->drawBitmap(to, pixmap.impl()->_bitmap, rect);
+        const GenericPixmapImpl* src = static_cast<const GenericPixmapImpl*>( pixmap.impl() );
+        _canvas->drawBitmap(to, src->bitmap(), rect);
     }
 }
 

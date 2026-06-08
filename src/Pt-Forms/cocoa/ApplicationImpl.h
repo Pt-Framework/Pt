@@ -52,6 +52,7 @@ class Control;
 class Window;
 class KeyEvent;
 class MouseEvent;
+class GraphicsBackend;
 
 class ApplicationImpl : public Pt::System::EventLoop, 
                         public System::Selector
@@ -107,6 +108,11 @@ class ApplicationImpl : public Pt::System::EventLoop,
 
         void sendMouseEvent(const MouseEvent& ev)
         {}
+
+        GraphicsBackend* queryBackend()
+        {
+            return 0;
+        }
 
     public:
         System::Selector& selector()
@@ -174,6 +180,7 @@ class ApplicationImpl : public Pt::System::EventLoop,
         IOEntry& enableIOHandle(System::IOHandle* h);
 
     private:
+        CocoaGraphicsBackend             _cocoaBackend;
         System::Mutex                    _mutex;
         System::SelectableList           _selectables;
         std::vector<IOEntry>             _iotable;

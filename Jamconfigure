@@ -979,12 +979,17 @@ PT_FORMS_IMPL = ;
 PT_FORMS_RENDERER = ;
 PT_FORMS_INCLUDES = ;
 PT_FORMS_LINKLIBS = ;
+PT_FORMS_GRAPHICS = generic ;
+
+WITH_FORMS_DIRECT2D = ;
+WITH_FORMS_GDI = ;
+WITH_FORMS_VULKAN = ;
+WITH_FORMS_NANOVG = ;
 
 # Platform defaults
-if $(TARGET_OS) = "emscripten"
+ if $(PT_SYSTEM) = win32
 {
-    PT_FORMS_IMPL = emscripten ;
-    PT_FORMS_RENDERER = raster ;
+    PT_FORMS_IMPL = win32 ;
 }
 else if $(TARGET_OS) = "macosx"
 {
@@ -993,56 +998,100 @@ else if $(TARGET_OS) = "macosx"
 else if $(TARGET_OS) = "linux"
 {
     PT_FORMS_IMPL = linux-fb ;
-    PT_FORMS_RENDERER = raster ;
 }
-else if $(PT_SYSTEM) = win32
+else if $(TARGET_OS) = "emscripten"
 {
-    PT_FORMS_IMPL = win32 ;
-    PT_FORMS_RENDERER = direct2d ;
+    PT_FORMS_IMPL = emscripten ;
 }
 
 # Platform overrides
-if --with-x11 in $(ARGV)
+if --with-wayland in $(ARGV)
+{
+    PT_FORMS_IMPL = wayland ;
+}
+else if --with-x11 in $(ARGV)
 {
     PT_FORMS_IMPL = x11 ;
-    PT_FORMS_RENDERER = raster ;
 }
 else if --with-linux-fb in $(ARGV)
 {
     PT_FORMS_IMPL = linux-fb ;
-    PT_FORMS_RENDERER = raster ;
 }
-else if --with-linux-drm in $(ARGV)
+else if --with-drm in $(ARGV)
 {
     PT_FORMS_IMPL = linux-drm ;
-    PT_FORMS_RENDERER = raster ;
-}
-else if --with-wayland in $(ARGV)
-{
-    PT_FORMS_IMPL = wayland ;
-    PT_FORMS_RENDERER = raster ;
 }
 
-# Renderer overrides
+# Graphics backend options
+if --with-direct2d in $(ARGV)
+{
+    PT_FORMS_GRAPHICS += direct2d ;
+    WITH_FORMS_DIRECT2D = yes ;
+}
+
 if --with-gdi in $(ARGV)
 {
-    PT_FORMS_RENDERER = gdi ;
+    PT_FORMS_GRAPHICS += gdi ;
+    WITH_FORMS_GDI = yes ;
 }
-else if --with-sw-raster in $(ARGV)
+
+if --with-vulkan in $(ARGV)
 {
-    PT_FORMS_RENDERER = raster ;
+    PT_FORMS_GRAPHICS += vulkan ;
+    WITH_FORMS_VULKAN = vulkan ;
 }
-else if --with-direct2d in $(ARGV)
+
+if --with-nanovg in $(ARGV)
 {
-    PT_FORMS_RENDERER = direct2d ;
+    PT_FORMS_GRAPHICS += nanovg ;
+    WITH_FORMS_NANOVG = nanovg ;
 }
-else if --with-vulkan in $(ARGV)
+
+# Vulkan backend
+if $(WITH_FORMS_VULKAN)
 {
-    PT_FORMS_RENDERER = vulkan ;
+    local WITH_VULKAN = [ CheckBuildC++ "#include <vulkan/vulkan.h>"
+                                        "int main() {"
+                                        "return 0; }"
+                                        : ""
+                                        : "-lvulkan" ] ;
+    if $(WITH_VULKAN)
+    {
+        PT_FORMS_LINKLIBS += -lvulkan ;
+        PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_VULKAN ] ;
+    }
+    else
+    {
+        Exit "Failed: Vulkan not found." ;
+    }
 }
-else if --with-nanovg in $(ARGV)
+
+# NanoVG backend
+if $(WITH_FORMS_NANOVG)
 {
-    PT_FORMS_RENDERER = nanovg ;
+    # TODO: $(EGL_LIBS) && $(GLESV2_LIBS)
+}
+
+# Direct2D backend
+if $(WITH_FORMS_DIRECT2D)
+{
+    PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "dxguid.lib" "windowscodecs.lib" ;
+}
+
+# GDI backend
+if $(WITH_FORMS_GDI)
+{
+    Load winui.jam ;
+    ConfigureGdi ;
+
+    if $(WITH_GDI)
+    {
+        PT_FORMS_LINKLIBS += $(GDI_LIBS) ;
+    }
+    else
+    {
+        Exit "Failed: windows GDI not found." ;
+    }
 }
 
 if $(PT_FORMS_IMPL:L) = "win32"
@@ -1052,33 +1101,25 @@ if $(PT_FORMS_IMPL:L) = "win32"
 
     if $(WITH_WINUI)
     {
-        if $(PT_FORMS_RENDERER) = direct2d
-        {
-            PT_FORMS_LINKLIBS = gdi32.lib $(WINUI_LIBS) ;
-            PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "windowscodecs.lib" "dxguid.lib" ;
-            WITH_FORMS = yes ;
-        }
-        else if $(PT_FORMS_RENDERER) = gdi
-        {
-            ConfigureGdi ;
+        PT_FORMS_LINKLIBS += $(WINUI_LIBS) ;
 
-            if $(WITH_GDI)
-            {
-                PT_FORMS_LINKLIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
-                WITH_FORMS = yes ;
-            }
-        }
-        else if $(PT_FORMS_RENDERER) = raster
+        # Direct2d always needed buffer disapply
+        if ! $(WITH_FORMS_DIRECT2D)
         {
-            ConfigureGdi ;
-
-            if $(WITH_GDI)
-            {
-                PT_FORMS_LINKLIBS = gdi32.lib $(WINUI_LIBS) ;
-                PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "dxguid.lib" ;
-                WITH_FORMS = yes ;
-            }
+            PT_FORMS_LINKLIBS += "d2d1.lib" "d3d11.lib" "dxgi.lib" "dwrite.lib" "dxguid.lib" ;
         }
+
+        # gdi32 always needed for win32 (cursor handling)
+        if ! $(WITH_FORMS_GDI)
+        {
+            PT_FORMS_LINKLIBS += "gdi32.lib" ;
+        }
+
+        WITH_FORMS = yes ;
+    }
+    else
+    {
+        Exit "Failed: windows user32 not found." ;
     }
 }
 else if $(PT_FORMS_IMPL:L) = "x11"
@@ -1098,39 +1139,45 @@ else if $(PT_FORMS_IMPL:L) = "x11"
             PT_FORMS_LINKLIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
             WITH_FORMS = yes ;
         }
+        else
+        {
+            Exit "Failed: Xext/Xft not found." ;
+        }
+    }
+    else
+    {
+        Exit "Failed: X11 core not found." ;
     }
 }
 else if $(PT_FORMS_IMPL:L) = "cocoa"
 {
     PT_FORMS_RENDERER = ;
 
-    WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
-                               "int main() {"
-                               "CFRunLoopRef l = CFRunLoopGetMain();"
-                               "return 0; }"
-                             : ""
-                             : -framework AppKit -framework Foundation ] ;
+    WITH_COCOA = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
+                                 "int main() {"
+                                 "CFRunLoopRef l = CFRunLoopGetMain();"
+                                 "return 0; }"
+                               : ""
+                               : -framework AppKit -framework Foundation ] ;
 
-    if $(WITH_GUI)
+    if $(WITH_COCOA)
     {
         PT_FORMS_LINKLIBS = -framework AppKit -framework Foundation ;
         WITH_FORMS = yes ;
     }
-
-    # iOS aspen:
-    #PT_FORMS_IMPL ?= uikit ;
-    #PT_FORMS_LINKLIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
+    else
+    {
+        Exit "Failed: Cocoa not found." ;
+    }
 }
 else if $(PT_FORMS_IMPL:L) = "linux-fb"
 {
-    WITH_GUI = [ CheckBuildC++ "#include <linux/fb.h>"
-                               "int main() {"
-                               "struct fb_var_screeninfo si;"
-                               "return 0; }"
-                             : ""
-                             : "" ] ;
-
-    if $(WITH_GUI)
+    WITH_LINUX_FB = [ CheckBuildC++ "#include <linux/fb.h>"
+                                    "int main() {"
+                                    "struct fb_var_screeninfo si;"
+                                    "return 0; }"
+                                   : "" : "" ] ;
+    if $(WITH_LINUX_FB)
     {
         WITH_FORMS = yes ;
 
@@ -1142,41 +1189,29 @@ else if $(PT_FORMS_IMPL:L) = "linux-fb"
             PT_FORMS_C++FLAGS += $(CPU_NEON_C++FLAGS) ;
         }
     }
+    else
+    {
+        Exit "Failed: linux-fb not found." ;
+    }
 }
 else if $(PT_FORMS_IMPL:L) = "linux-drm"
 {
-    WITH_GUI = [ CheckBuildC++ "#include <xf86drm.h>"
+    WITH_DRM = [ CheckBuildC++ "#include <xf86drm.h>"
                                "#include <xf86drmMode.h>"
                                "int main() {"
                                "return 0; }"
                              : "-I=/usr/include/libdrm"
                              : "-ldrm" ] ;
 
-    if $(WITH_GUI)
+    if $(WITH_DRM)
     {
         PT_FORMS_C++FLAGS += "-I=/usr/include/libdrm" ;
         PT_FORMS_LINKLIBS = -ldrm ;
         WITH_FORMS = yes ;
-
-        if $(PT_FORMS_RENDERER) = vulkan
-        {
-            local WITH_VULKAN = [ CheckBuildC++ "#include <vulkan/vulkan.h>"
-                                                "int main() {"
-                                                "return 0; }"
-                                              : ""
-                                              : "-lvulkan" ] ;
-
-            if $(WITH_VULKAN)
-            {
-                PT_FORMS_LINKLIBS += -lvulkan ;
-                PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_DRM_VULKAN ] ;
-            }
-            else
-            {
-                Echo "WARNING: Vulkan not found, falling back to raster renderer" ;
-                PT_FORMS_RENDERER = raster ;
-            }
-        }
+    }
+    else
+    {
+        Exit "Failed: DRM/KMS not found." ;
     }
 }
 else if $(PT_FORMS_IMPL:L) = "wayland"
@@ -1188,40 +1223,25 @@ else if $(PT_FORMS_IMPL:L) = "wayland"
     {
         PT_FORMS_LINKLIBS = $(WAYLAND_LIBS) $(WAYLAND_CURSOR_LIBS) $(XKBCOMMON_LIBS) ;
         WITH_FORMS = yes ;
+    }
+    else
+    {
+        Exit "Failed: wayland nor found." ;
+    }
 
-        if $(PT_FORMS_RENDERER) = vulkan
+    if $(WITH_FORMS_NANOVG)
+    {
+        ConfigureWaylandEgl ;
+
+        if $(WAYLAND_EGL_LIBS) && $(EGL_LIBS) && $(GLESV2_LIBS)
         {
-            local WITH_VULKAN = [ CheckBuildC++ "#include <vulkan/vulkan.h>"
-                                                "int main() {"
-                                                "return 0; }"
-                                              : ""
-                                              : "-lvulkan" ] ;
-
-            if $(WITH_VULKAN)
-            {
-                PT_FORMS_LINKLIBS += -lvulkan ;
-                PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_VULKAN ] ;
-            }
-            else
-            {
-                Echo "WARNING: Vulkan not found, falling back to raster renderer" ;
-                PT_FORMS_RENDERER = raster ;
-            }
+            PT_FORMS_LINKLIBS += $(EGL_LIBS) $(GLESV2_LIBS) $(WAYLAND_EGL_LIBS) $(M_LINKLIBS) ;
+            PT_FORMS_INCLUDES += $(FREETYPE_INCLUDES) ;
+            PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_NANOVG ] ;
         }
-        else if $(PT_FORMS_RENDERER) = nanovg
+        else
         {
-            ConfigureWaylandEgl ;
-
-            if $(WAYLAND_EGL_LIBS) && $(EGL_LIBS) && $(GLESV2_LIBS)
-            {
-                PT_FORMS_LINKLIBS += $(EGL_LIBS) $(GLESV2_LIBS) $(WAYLAND_EGL_LIBS) $(M_LINKLIBS) ;
-                PT_FORMS_INCLUDES += $(FREETYPE_INCLUDES) ;
-                PT_FORMS_C++FLAGS += [ FDefines PT_FORMS_WAYLAND_NANOVG ] ;
-            }
-            else
-            {
-                Exit "Error: --with-nanovg requires EGL, GLESv2 and wayland-egl (libwayland-egl-dev)." ;
-            }
+            Exit "Failed: EGL, GLESv2 and wayland-egl not found." ;
         }
     }
 }
@@ -1233,14 +1253,16 @@ else if $(PT_FORMS_IMPL:L) = "emscripten"
 Configure WITH_FORMS ;
 EchoOption WITH_FORMS : "Forms module" : $(WITH_FORMS:E="no") ;
 
-Configure PT_FORMS_IMPL ;
-EchoOption PT_FORMS_IMPL : "Forms platform" ;
-
-Configure PT_FORMS_RENDERER ;
-EchoOption PT_FORMS_RENDERER : "Forms graphics" ;
-
 if $(WITH_FORMS)
 {
+    Configure PT_FORMS_IMPL ;
+    EchoOption --with-<wayland|x11|linux-fb|drm> : "Forms platform" : $(PT_FORMS_IMPL) ;
+
+    Configure WITH_FORMS_DIRECT2D ;
+    Configure WITH_FORMS_GDI ;
+    Configure WITH_FORMS_NANOVG ;
+    EchoOption --with-<direct2d|gdi|nanovg> : "Forms graphics" : $(PT_FORMS_GRAPHICS) ;
+
     Configure PT_FORMS_INCLUDES ;
     EchoOption PT_FORMS_INCLUDES : "Forms platform includes" ;
 

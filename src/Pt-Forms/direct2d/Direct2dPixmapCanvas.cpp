@@ -25,8 +25,8 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-#include "PixmapCanvas.h"
-#include "PixmapImpl.h"
+#include "Direct2dPixmapCanvas.h"
+#include "Direct2dPixmapImpl.h"
 #include "D2DDevice.h"
 #include "ApplicationImpl.h"
 
@@ -77,7 +77,7 @@ namespace Pt {
 
 namespace Forms {
 
-PixmapCanvas::PixmapCanvas()
+    Direct2dPixmapCanvas::Direct2dPixmapCanvas()
 : Gfx::Canvas()
 , _pixmap(0)
 , _deviceContext(0)
@@ -97,7 +97,7 @@ PixmapCanvas::PixmapCanvas()
 }
 
 
-PixmapCanvas::~PixmapCanvas()
+    Direct2dPixmapCanvas::~Direct2dPixmapCanvas()
 {
     if(_pathGeom)
         _pathGeom->Release();
@@ -122,13 +122,13 @@ PixmapCanvas::~PixmapCanvas()
 }
 
 
-void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
+    void Direct2dPixmapCanvas::setPixmap(Direct2dPixmapImpl& pixmap)
 {
     _pixmap = &pixmap;
 }
 
 
-void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
+    void Direct2dPixmapCanvas::drawPixmap(const Gfx::PointF& toF,
                               const Pixmap& pm,
                               const Gfx::RectF* rect)
 {
@@ -137,7 +137,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 
     applyState();
 
-    const PixmapImpl* srcImpl = pm.impl();
+    const Direct2dPixmapImpl* srcImpl = static_cast<const Direct2dPixmapImpl*>(pm.impl());
     if( ! srcImpl)
         return;
 
@@ -188,7 +188,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 }
 
 
-void PixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
+    void Direct2dPixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
 {
     if( ! _pixmap || ! _deviceContext)
         return;
@@ -204,7 +204,7 @@ void PixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
 }
 
 
-void PixmapCanvas::onFinishPaint()
+    void Direct2dPixmapCanvas::onFinishPaint()
 {
     if( ! _deviceContext || ! _painting)
         return;
@@ -259,12 +259,12 @@ void PixmapCanvas::onFinishPaint()
 }
 
 
-void PixmapCanvas::onSetTransform(const Gfx::Transform& /*tx*/)
+    void Direct2dPixmapCanvas::onSetTransform(const Gfx::Transform& /*tx*/)
 {
 }
 
 
-void PixmapCanvas::onApplyTransform()
+    void Direct2dPixmapCanvas::onApplyTransform()
 {
     if( ! _deviceContext)
         return;
@@ -280,13 +280,13 @@ void PixmapCanvas::onApplyTransform()
 }
 
 
-void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
+    void Direct2dPixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
 }
 
 
-void PixmapCanvas::onApplyCompositionMode()
+    void Direct2dPixmapCanvas::onApplyCompositionMode()
 {
     if( ! _deviceContext)
         return;
@@ -298,7 +298,7 @@ void PixmapCanvas::onApplyCompositionMode()
 }
 
 
-void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
+    void Direct2dPixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     _pen = pen;
 
@@ -391,7 +391,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapCanvas::onApplyPen()
+    void Direct2dPixmapCanvas::onApplyPen()
 {
     if( ! _deviceContext)
         return;
@@ -405,7 +405,7 @@ void PixmapCanvas::onApplyPen()
 }
 
 
-void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
+    void Direct2dPixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
 
@@ -422,7 +422,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void PixmapCanvas::onApplyBrush()
+    void Direct2dPixmapCanvas::onApplyBrush()
 {
     if( ! _deviceContext)
         return;
@@ -433,7 +433,7 @@ void PixmapCanvas::onApplyBrush()
 }
 
 
-void PixmapCanvas::createBrush()
+    void Direct2dPixmapCanvas::createBrush()
 {
     if( ! _deviceContext)
         return;
@@ -460,7 +460,7 @@ void PixmapCanvas::createBrush()
 }
 
 
-void PixmapCanvas::createSolidBrush()
+    void Direct2dPixmapCanvas::createSolidBrush()
 {
     ID2D1SolidColorBrush* solidBrush = 0;
     _deviceContext->CreateSolidColorBrush(toD2DColor(_brush.color()), &solidBrush);
@@ -468,7 +468,7 @@ void PixmapCanvas::createSolidBrush()
 }
 
 
-void PixmapCanvas::createTextureBrush()
+    void Direct2dPixmapCanvas::createTextureBrush()
 {
     const Gfx::Image& texture = _brush.texture();
 
@@ -516,7 +516,7 @@ void PixmapCanvas::createTextureBrush()
 }
 
 
-void PixmapCanvas::createGradientBrush()
+    void Direct2dPixmapCanvas::createGradientBrush()
 {
     const Gfx::ColorStops& stops = _brush.gradientStops();
 
@@ -622,13 +622,13 @@ void PixmapCanvas::createGradientBrush()
 }
 
 
-bool PixmapCanvas::isRelativeGradient() const
+    bool Direct2dPixmapCanvas::isRelativeGradient() const
 {
     return _brush.isGradient() && _brush.positionMode() == Gfx::Brush::Relative;
 }
 
 
-void PixmapCanvas::prepareGradientBrush(const D2D1_RECT_F& bounds)
+    void Direct2dPixmapCanvas::prepareGradientBrush(const D2D1_RECT_F& bounds)
 {
     FLOAT width  = bounds.right  - bounds.left;
     FLOAT height = bounds.bottom - bounds.top;
@@ -642,7 +642,7 @@ void PixmapCanvas::prepareGradientBrush(const D2D1_RECT_F& bounds)
 }
 
 
-void PixmapCanvas::onSetFont(const Gfx::Font& font)
+    void Direct2dPixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
 
@@ -750,14 +750,14 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void PixmapCanvas::onApplyFont()
+    void Direct2dPixmapCanvas::onApplyFont()
 {
     // Font/textFormat already created in onSetFont.
     // Nothing additional needed for D2D.
 }
 
 
-void PixmapCanvas::onSetClip(const Gfx::RectF* clip)
+    void Direct2dPixmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
     if(clip)
     {
@@ -771,7 +771,7 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* clip)
 }
 
 
-void PixmapCanvas::onApplyClip()
+    void Direct2dPixmapCanvas::onApplyClip()
 {
     if( ! _deviceContext)
         return;
@@ -791,7 +791,7 @@ void PixmapCanvas::onApplyClip()
 }
 
 
-void PixmapCanvas::onDrawLine(const Gfx::PointF& from,
+    void Direct2dPixmapCanvas::onDrawLine(const Gfx::PointF& from,
                               const Gfx::PointF& to)
 {
     if( ! _deviceContext || ! _penBrush)
@@ -802,7 +802,7 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& from,
 }
 
 
-void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+    void Direct2dPixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if( ! _deviceContext || ! _penBrush || n < 2)
         return;
@@ -815,7 +815,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
+    void Direct2dPixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
     if( ! _deviceContext || ! _fillBrush || n < 3)
         return;
@@ -863,7 +863,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
+    void Direct2dPixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
 {
     if( ! _deviceContext || ! _penBrush)
         return;
@@ -873,7 +873,7 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
 }
 
 
-void PixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
+    void Direct2dPixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
 {
     if( ! _deviceContext || ! _fillBrush)
         return;
@@ -885,7 +885,7 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
 }
 
 
-void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft,
+    void Direct2dPixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft,
                                  const Gfx::SizeF& size)
 {
     if( ! _deviceContext || ! _penBrush)
@@ -901,7 +901,7 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft,
 }
 
 
-void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft,
+    void Direct2dPixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft,
                                  const Gfx::SizeF& size)
 {
     if( ! _deviceContext || ! _fillBrush)
@@ -927,7 +927,7 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft,
 }
 
 
-Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
+    Gfx::TextMetrics Direct2dPixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     if( ! _textFormat)
         return Gfx::TextMetrics();
@@ -970,13 +970,13 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 }
 
 
-const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
+    const Gfx::FontMetrics& Direct2dPixmapCanvas::onGetFontMetrics() const
 {
     return _fontMetrics;
 }
 
 
-void PixmapCanvas::onDrawText(const Gfx::PointF& to,
+    void Direct2dPixmapCanvas::onDrawText(const Gfx::PointF& to,
                               const Pt::String& text,
                               const Gfx::Transform* tform)
 {
@@ -1047,7 +1047,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
 }
 
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
+    void Direct2dPixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
@@ -1119,7 +1119,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
 }
 
 
-ID2D1PathGeometry* PixmapCanvas::createPathGeometry(const Gfx::Path& path)
+    ID2D1PathGeometry* Direct2dPixmapCanvas::createPathGeometry(const Gfx::Path& path)
 {
     ID2D1PathGeometry* geom = 0;
     Application::instance().impl()->d2d().d2dFactory()->CreatePathGeometry(&geom);
@@ -1247,7 +1247,7 @@ ID2D1PathGeometry* PixmapCanvas::createPathGeometry(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onSetPath(const Gfx::Path& path)
+void Direct2dPixmapCanvas::onSetPath(const Gfx::Path& path)
 {
     if(_pathGeom)
     {
@@ -1260,7 +1260,7 @@ void PixmapCanvas::onSetPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onDrawPath()
+void Direct2dPixmapCanvas::onDrawPath()
 {
     if( ! _deviceContext || ! _penBrush || ! _pathGeom)
         return;
@@ -1269,7 +1269,7 @@ void PixmapCanvas::onDrawPath()
 }
 
 
-void PixmapCanvas::onFillPath()
+void Direct2dPixmapCanvas::onFillPath()
 {
     if( ! _deviceContext || ! _fillBrush || ! _pathGeom)
         return;
@@ -1285,7 +1285,7 @@ void PixmapCanvas::onFillPath()
 }
 
 
-void PixmapCanvas::onDrawPath(const Gfx::Path& path)
+void Direct2dPixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
     if( ! _deviceContext || ! _penBrush)
         return;
@@ -1299,7 +1299,7 @@ void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onFillPath(const Gfx::Path& path)
+void Direct2dPixmapCanvas::onFillPath(const Gfx::Path& path)
 {
     if( ! _deviceContext || ! _fillBrush)
         return;

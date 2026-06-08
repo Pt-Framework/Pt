@@ -29,7 +29,7 @@
 #include "ScreenImpl.h"
 #include "DrmDisplay.h"
 #include "ApplicationImpl.h"
-#include "PixmapImpl.h"
+#include "../generic/GenericGraphicsBackend.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Cursor.h>
@@ -53,16 +53,22 @@ namespace Pt {
 namespace Forms {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
-: _drmDisplay( app.drmDisplay() )
+: _genericBackend(0)
+, _drmDisplay( app.drmDisplay() )
 , _parent(0)
 , _dpi(96.0)
 , _cursorPos(0, 0)
 , _drawCursor(false)
 {
+    GraphicsBackend& graphics = Application::instance().graphicsBackend();
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphics);
+    if( ! _genericBackend )
+        throw std::invalid_argument("invalid graphics");
+
     Gfx::SizeF size( _drmDisplay.width(),
                      _drmDisplay.height() );
 
-    _pixmap.impl()->reset(size);
+    _pixmap.reset(size);
 
     Gfx::PaintContext ctx(_pixmap);
     Gfx::Painter painter(ctx);
@@ -337,7 +343,7 @@ const Gfx::Image& ScreenImpl::image() const
     static Gfx::Image dummy;
     return dummy;
 #else
-    return _pixmap.impl()->bitmap().image();
+    return _genericBackend->image(_pixmap);
 #endif
 }
 

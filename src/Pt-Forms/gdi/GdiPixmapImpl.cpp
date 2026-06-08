@@ -28,8 +28,8 @@
 */
 
 #include "win32.h"
-#include "PixmapImpl.h"
-#include "PixmapCanvas.h"
+#include "GdiPixmapImpl.h"
+#include "GdiPixmapCanvas.h"
 #include "GdiFontProvider.h"
 
 #include <Pt/Forms/View.h>
@@ -49,7 +49,7 @@ namespace Pt {
 
 namespace Forms {
 
-PixmapImpl::PixmapImpl()
+GdiPixmapImpl::GdiPixmapImpl()
 : _physicalSize(0, 0)
 , _width(0)
 , _height(0)
@@ -68,7 +68,7 @@ PixmapImpl::PixmapImpl()
 }
 
 
-PixmapImpl::~PixmapImpl()
+GdiPixmapImpl::~GdiPixmapImpl()
 {
     if(_bitmap)
     {
@@ -80,7 +80,7 @@ PixmapImpl::~PixmapImpl()
 }
 
 
-void PixmapImpl::reset(const Gfx::SizeF& size)
+void GdiPixmapImpl::reset(const Gfx::SizeF& size)
 {
     LONG width = lround( size.width() );
     LONG height = lround( size.height() );
@@ -105,7 +105,7 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
 }
 
 
-void PixmapImpl::reset()
+void GdiPixmapImpl::reset()
 {
     if(_bitmap)
     {
@@ -121,7 +121,7 @@ void PixmapImpl::reset()
 }
 
 
-void PixmapImpl::reset(const Gfx::Image& image)
+void GdiPixmapImpl::reset(const Gfx::Image& image)
 {
     size_t width = image.width();
     size_t height = image.height();
@@ -175,7 +175,7 @@ void PixmapImpl::reset(const Gfx::Image& image)
 }
 
 
-Gfx::Image PixmapImpl::toImage() const
+Gfx::Image GdiPixmapImpl::toImage() const
 {
     BITMAPINFO bitmapInfo;
     ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
@@ -204,7 +204,7 @@ Gfx::Image PixmapImpl::toImage() const
 }
 
 
-void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+void GdiPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
     bitmap.reset( rect.size() );
 
@@ -216,41 +216,41 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 }
 
 
-const Gfx::SizeF& PixmapImpl::size() const
+const Gfx::SizeF& GdiPixmapImpl::size() const
 {
     return _physicalSize;
 }
 
 
-void PixmapImpl::setScaleFactor(double scaleFactor)
+void GdiPixmapImpl::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 }
 
 
-HDC PixmapImpl::deviceContext() const
+HDC GdiPixmapImpl::deviceContext() const
 {
     return _dc;
 }
 
 
-const Gfx::ImageFormat& PixmapImpl::format() const
+const Gfx::ImageFormat& GdiPixmapImpl::format() const
 {
     return Gfx::ImageFormat::rgb32();
 }
 
 
-const Gfx::Scaling& PixmapImpl::scaling() const
+const Gfx::Scaling& GdiPixmapImpl::scaling() const
 {
     return _scaling;
 }
 
 
-Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
+Gfx::Canvas* GdiPixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
+    GdiPixmapCanvas* canvas = dynamic_cast<GdiPixmapCanvas*>(reuse);
     if( ! canvas ) 
-        canvas  = new PixmapCanvas();
+        canvas  = new GdiPixmapCanvas();
     
     canvas->setPixmap(*this);
 
@@ -259,7 +259,7 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 }
 
 
-void PixmapImpl::releaseCanvas()
+void GdiPixmapImpl::releaseCanvas()
 {
     // NOTE: this might be called from the attached canvas base class destructor
 
@@ -274,17 +274,17 @@ void PixmapImpl::releaseCanvas()
 }
 
 
-void PixmapImpl::sync()
+void GdiPixmapImpl::sync()
 {
 }
 
 
-void PixmapImpl::finish()
+void GdiPixmapImpl::finish()
 {
 }
 
 
-void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+void GdiPixmapImpl::drawPixmap(Gfx::Canvas& canvas,
                             const Gfx::PointF& to,
                             const Pixmap& pm,
                             const Gfx::RectF* rect)
@@ -295,30 +295,7 @@ void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
         _canvas->drawPixmap(to, pm, rect);
 }
 
-
-const std::string& PixmapImpl::defaultFont()
-{
-    return GdiFontProvider::instance().defaultFont();
-}
-
-
-void PixmapImpl::setDefaultFont(const std::string& family)
-{
-    GdiFontProvider::instance().setDefaultFont(family);
-}
-
-
-std::vector<std::string> PixmapImpl::fontFamilies()
-{
-    return GdiFontProvider::instance().fontFamilies();
-}
-
-
-std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
-{
-    return GdiFontProvider::instance().fontFaces(family);
-}
-
 } // namespace
 
 } // namespace
+

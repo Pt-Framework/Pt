@@ -42,6 +42,8 @@ namespace Pt {
 
 namespace Forms {
 
+class GraphicsBackend;
+
 class Selector : public System::Selector
 {
     public:
@@ -122,6 +124,11 @@ class ApplicationImpl : public Pt::System::EventLoop
         void sendMouseEvent(const MouseEvent& ev);
     
         void nextEvent();
+
+        GraphicsBackend* queryBackend()
+        {
+            return 0;
+        }
 
         virtual System::Selector& selector()
         { 

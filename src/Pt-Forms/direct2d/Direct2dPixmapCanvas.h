@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_PIXMAP_CANVAS_H
-#define PT_FORMS_PIXMAP_CANVAS_H
+#ifndef PT_FORMS_DIRECT2D_DIRECT2DPIXMAPCANVAS_H
+#define PT_FORMS_DIRECT2D_DIRECT2DPIXMAPCANVAS_H
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Gfx/Rect.h>
@@ -49,16 +49,16 @@ namespace Pt {
 namespace Forms {
 
 class Pixmap;
-class PixmapImpl;
+class Direct2dPixmapImpl;
 
-class PixmapCanvas : public Gfx::Canvas
+class Direct2dPixmapCanvas : public Gfx::Canvas
 {
     public:
-        PixmapCanvas();
+    Direct2dPixmapCanvas();
 
-        ~PixmapCanvas();
+    ~Direct2dPixmapCanvas();
 
-        void setPixmap(PixmapImpl& pixmap);
+        void setPixmap(Direct2dPixmapImpl& pixmap);
 
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
@@ -155,7 +155,7 @@ class PixmapCanvas : public Gfx::Canvas
         void prepareGradientBrush(const D2D1_RECT_F& bounds);
 
     private:
-        PixmapImpl*               _pixmap;
+        Direct2dPixmapImpl*       _pixmap;
         ID2D1DeviceContext*       _deviceContext;
         Gfx::CompositionMode      _compositionMode;
 

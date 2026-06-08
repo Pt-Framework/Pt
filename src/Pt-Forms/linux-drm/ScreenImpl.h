@@ -45,6 +45,7 @@ namespace Forms {
 class ApplicationImpl;
 class Cursor;
 class Screen;
+class GenericGraphicsBackend;
 
 class ScreenImpl : public Form
 {
@@ -150,6 +151,7 @@ class ScreenImpl : public Form
         void drawCursor();
 
     private:
+        GenericGraphicsBackend*      _genericBackend;
         DrmDisplay&                  _drmDisplay;
         Pixmap                       _pixmap;
 

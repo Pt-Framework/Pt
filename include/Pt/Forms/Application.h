@@ -34,6 +34,7 @@
 #include <Pt/Forms/Screen.h>
 #include <Pt/Forms/Style.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/GraphicsBackend.h>
 #include <Pt/Forms/PlatinumStyle.h>
 #include <Pt/Forms/InputMethod.h>
 #include <Pt/Forms/Icon.h>
@@ -65,6 +66,10 @@ class PT_FORMS_API Application : public Pt::System::Application
         virtual ~Application();
 
         ApplicationImpl* impl();
+
+        GraphicsBackend& graphicsBackend();
+
+        const GraphicsBackend& graphicsBackend() const;
 
         static Application& instance();
 
@@ -262,6 +267,7 @@ class PT_FORMS_API Application : public Pt::System::Application
         typedef std::map<Pt::uint64_t, Widget*> WidgetMap;
 
         ApplicationImpl*             _impl;
+        GraphicsBackend*             _graphicsBackend;
         Pt::Signal<const Pt::Event&> _eventReceived;
         Screen*                      _mainScreen;
         Pt::uint64_t                 _lastId;

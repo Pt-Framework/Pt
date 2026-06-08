@@ -66,6 +66,7 @@ namespace Pt {
 namespace Forms {
 
 class WindowImpl;
+class GraphicsBackend;
 
 class ApplicationImpl : public Pt::System::MainLoop
 {
@@ -83,6 +84,11 @@ class ApplicationImpl : public Pt::System::MainLoop
         void sendMouseEvent(const MouseEvent& ev);
 
         void nextEvent();
+
+        GraphicsBackend* queryBackend()
+        {
+            return 0;
+        }
 
     public:
         struct wl_display* display() const 

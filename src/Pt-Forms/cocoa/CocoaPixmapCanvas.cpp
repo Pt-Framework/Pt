@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapCanvas.h"
-#include "PixmapImpl.h"
+#include "CocoaPixmapCanvas.h"
+#include "CocoaPixmapImpl.h"
 #include "CocoaFontProvider.h"
 
 #include <Pt/Forms/Pixmap.h>
@@ -39,10 +39,10 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
-// PixmapCanvas
+// CocoaPixmapCanvas
 ///////////////////////////////////////////////////////////////////////
 
-PixmapCanvas::PixmapCanvas()
+CocoaPixmapCanvas::CocoaPixmapCanvas()
 : Gfx::Canvas()
 , _pixmap(0)
 , _compositionMode(Gfx::CompositionMode::SourceCopy)
@@ -61,7 +61,7 @@ PixmapCanvas::PixmapCanvas()
 }
 
 
-PixmapCanvas::~PixmapCanvas()
+CocoaPixmapCanvas::~CocoaPixmapCanvas()
 {
     if(_font)
       CFRelease(_font);
@@ -86,13 +86,13 @@ PixmapCanvas::~PixmapCanvas()
 }
 
 
-void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
+void CocoaPixmapCanvas::setPixmap(CocoaPixmapImpl& pixmap)
 {
     _pixmap = &pixmap;
 }
 
 
-void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
+void CocoaPixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_pixmap)
     {
@@ -105,7 +105,7 @@ void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 }
 
 
-void PixmapCanvas::onFinishPaint()
+void CocoaPixmapCanvas::onFinishPaint()
 {
     if(_pixmap)
     {
@@ -118,7 +118,7 @@ void PixmapCanvas::onFinishPaint()
 }
 
 
-void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
+void CocoaPixmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
     if(_pixmap && isActive())
     {
@@ -132,7 +132,7 @@ void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
 }
 
 
-void PixmapCanvas::onApplyTransform()
+void CocoaPixmapCanvas::onApplyTransform()
 {
     if( ! _pixmap)
         return;
@@ -147,13 +147,13 @@ void PixmapCanvas::onApplyTransform()
 }
 
 
-void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
+void CocoaPixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
 }
 
 
-void PixmapCanvas::onApplyCompositionMode()
+void CocoaPixmapCanvas::onApplyCompositionMode()
 {
     if( ! _pixmap)
         return;
@@ -180,7 +180,7 @@ void PixmapCanvas::onApplyCompositionMode()
 }
 
 
-void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
+void CocoaPixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     CGColorRef color = CGColorCreateGenericRGB( pen.color().red() / 255.0,
                                                 pen.color().green() / 255.0,
@@ -269,7 +269,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapCanvas::onApplyPen()
+void CocoaPixmapCanvas::onApplyPen()
 {
     if( ! _pixmap)
         return;
@@ -292,7 +292,7 @@ void PixmapCanvas::onApplyPen()
 }
 
 
-void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
+void CocoaPixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
 
@@ -356,7 +356,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void PixmapCanvas::onApplyBrush()
+void CocoaPixmapCanvas::onApplyBrush()
 {
     if( ! _pixmap)
         return;
@@ -381,7 +381,7 @@ void PixmapCanvas::onApplyBrush()
 }
 
 
-void PixmapCanvas::onSetFont(const Gfx::Font& font)
+void CocoaPixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     if( ! _fontAttributes )
     {
@@ -425,12 +425,12 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void PixmapCanvas::onApplyFont()
+void CocoaPixmapCanvas::onApplyFont()
 {
 }
 
 
-void PixmapCanvas::onSetClip(const Gfx::RectF* clipRect)
+void CocoaPixmapCanvas::onSetClip(const Gfx::RectF* clipRect)
 {
     // Restore to the clean createCanvas state and save a new checkpoint,
     // because CGContext clipping is cumulative and cannot be undone
@@ -455,7 +455,7 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* clipRect)
 }
 
 
-void PixmapCanvas::onApplyClip()
+void CocoaPixmapCanvas::onApplyClip()
 {
     if( ! _pixmap)
         return;
@@ -465,7 +465,7 @@ void PixmapCanvas::onApplyClip()
 }
 
 
-void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void CocoaPixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( ! _pixmap)
         return;
@@ -478,7 +478,7 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 }
 
 
-void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+void CocoaPixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if(n < 2 || ! _pixmap)
         return;
@@ -498,7 +498,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
+void CocoaPixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 {
     if(n < 2 || ! _pixmap)
         return;
@@ -529,7 +529,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
+void CocoaPixmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
     if( ! _pixmap)
         return;
@@ -541,7 +541,7 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
 }
 
 
-void PixmapCanvas::onFillRect(const Gfx::RectF& r)
+void CocoaPixmapCanvas::onFillRect(const Gfx::RectF& r)
 {
     if( ! _pixmap)
         return;
@@ -564,7 +564,7 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 }
 
 
-void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void CocoaPixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap)
         return;
@@ -579,7 +579,7 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void CocoaPixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap)
         return;
@@ -605,7 +605,7 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
+Gfx::TextMetrics CocoaPixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     CFStringRef string = CFStringCreateWithBytesNoCopy(0, (const UInt8*) text.c_str(),
                                                        text.length() * 4,
@@ -643,15 +643,15 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 }
 
 
-const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
+const Gfx::FontMetrics& CocoaPixmapCanvas::onGetFontMetrics() const
 {
     return _fontMetrics;
 }
 
 
-void PixmapCanvas::onDrawText(const Gfx::PointF& to,
-                              const Pt::String& text,
-                              const Gfx::Transform* /*tx*/)
+void CocoaPixmapCanvas::onDrawText(const Gfx::PointF& to,
+                                   const Pt::String& text,
+                                   const Gfx::Transform* /*tx*/)
 {
     if( ! _pixmap)
         return;
@@ -697,9 +697,9 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
 }
 
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
-                               const Gfx::Image& image,
-                               const Gfx::RectF* /*rect*/)
+void CocoaPixmapCanvas::onDrawImage(const Gfx::PointF& to,
+                                    const Gfx::Image& image,
+                                    const Gfx::RectF* /*rect*/)
 {
     if( image.empty() || ! _pixmap)
         return;
@@ -744,7 +744,7 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& to,
 }
 
 
-void PixmapCanvas::fillGradient(CGContextRef context, CGRect bbox)
+void CocoaPixmapCanvas::fillGradient(CGContextRef context, CGRect bbox)
 {
     if( ! _brushGradient)
         return;
@@ -804,7 +804,7 @@ void PixmapCanvas::fillGradient(CGContextRef context, CGRect bbox)
 }
 
 
-CGMutablePathRef PixmapCanvas::makePath(const Gfx::Path& path)
+CGMutablePathRef CocoaPixmapCanvas::makePath(const Gfx::Path& path)
 {
     CGMutablePathRef cgPath = CGPathCreateMutable();
 
@@ -860,7 +860,7 @@ CGMutablePathRef PixmapCanvas::makePath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onSetPath(const Gfx::Path& path)
+void CocoaPixmapCanvas::onSetPath(const Gfx::Path& path)
 {
     if(_cgPath)
         CGPathRelease(_cgPath);
@@ -869,7 +869,7 @@ void PixmapCanvas::onSetPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onDrawPath()
+void CocoaPixmapCanvas::onDrawPath()
 {
     if( ! _pixmap)
         return;
@@ -881,7 +881,7 @@ void PixmapCanvas::onDrawPath()
 }
 
 
-void PixmapCanvas::onFillPath()
+void CocoaPixmapCanvas::onFillPath()
 {
     if( ! _pixmap)
         return;
@@ -905,7 +905,7 @@ void PixmapCanvas::onFillPath()
 }
 
 
-void PixmapCanvas::onDrawPath(const Gfx::Path& path)
+void CocoaPixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
     if( ! _pixmap)
         return;
@@ -921,7 +921,7 @@ void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onFillPath(const Gfx::Path& path)
+void CocoaPixmapCanvas::onFillPath(const Gfx::Path& path)
 {
     if( ! _pixmap)
         return;
@@ -950,16 +950,16 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
-                              const Pixmap& pm,
-                              const Gfx::RectF* rectF)
+void CocoaPixmapCanvas::drawPixmap(const Gfx::PointF& toF,
+                                   const Pixmap& pm,
+                                   const Gfx::RectF* rectF)
 {
     if( ! _pixmap )
         return;
 
     applyState();
 
-    const PixmapImpl* pixmap = pm.impl();
+    const CocoaPixmapImpl* pixmap = static_cast<const CocoaPixmapImpl*>(pm.impl());
     CGContextRef ctx = _pixmap->context();
     CGContextRef srcCtx = pixmap->context();
 
@@ -987,7 +987,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 
     #ifdef PT_FORMS_WARN_UNALIGNED_BLIT
         CGRect destRect = CGContextConvertRectToDeviceSpace(ctx, drawRect);
-        Detail::warnIfExpensiveBlit("PixmapCanvas::drawPixmap",
+        Detail::warnIfExpensiveBlit("CocoaPixmapCanvas::drawPixmap",
                                     sourceRect, destRect);
     #endif
 
@@ -1008,7 +1008,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
                            CGImageGetWidth(image),
                            CGImageGetHeight(image));
         CGRect destRect = CGContextConvertRectToDeviceSpace(ctx, drawRect);
-        Detail::warnIfExpensiveBlit("PixmapCanvas::drawPixmap",
+        Detail::warnIfExpensiveBlit("CocoaPixmapCanvas::drawPixmap",
                                     sourceRect, destRect);
 #endif
 

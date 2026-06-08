@@ -1,4 +1,4 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner 
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,11 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_COCOA_PIXMAP_IMPL_H
-#define PT_FORMS_COCOA_PIXMAP_IMPL_H
+#ifndef PT_FORMS_COCOA_COCOOPIXMAPIMPL_H
+#define PT_FORMS_COCOA_COCOOPIXMAPIMPL_H
 
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/FontFace.h>
-#include <Pt/Gfx/PaintSurface.h>
 #include <Pt/Gfx/Canvas.h>
 
 #include <CoreGraphics/CGBitmapContext.h>
@@ -43,7 +43,7 @@ namespace Pt {
 namespace Forms {
 
 class Pixmap;
-class PixmapCanvas;
+class CocoaPixmapCanvas;
 
 namespace Detail {
 
@@ -53,68 +53,56 @@ void warnIfExpensiveBlit(const char* tag,
                          const CGRect& destRect);
 #endif
 
-}
+} // namespace Detail
 
 
-class PixmapImpl
+class CocoaPixmapImpl : public IPixmapImpl
 {
     public:
-        PixmapImpl();
+        CocoaPixmapImpl();
 
-        virtual ~PixmapImpl();
+        virtual ~CocoaPixmapImpl();
 
-        void reset(const Gfx::Image& image);
+        void reset(const Gfx::Image& image) override;
 
-        void reset(const Gfx::SizeF& size);
+        void reset(const Gfx::SizeF& size) override;
 
-        void reset();
+        void reset() override;
 
-        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const override;
 
-        void setScaleFactor(double scaleFactor);
+        void setScaleFactor(double scaleFactor) override;
 
-        const Gfx::ImageFormat& format() const;
+        const Gfx::ImageFormat& format() const override;
 
-        const Gfx::SizeF& size() const;
+        const Gfx::SizeF& size() const override;
 
-        const Gfx::Scaling& scaling() const;
+        const Gfx::Scaling& scaling() const override;
 
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pm,
-                        const Gfx::RectF* rect);
+                        const Gfx::RectF* rect) override;
 
-        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse) override
         {
             return 0;
         }
 
-        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse) override;
 
-        void releaseCanvas();
+        void releaseCanvas() override;
 
-        void sync();
+        void sync() override;
 
-        void finish();
+        void finish() override;
 
     public:
         CGContextRef context() const;
-
-        CGImageRef getCGImage() const;
-
-        void invalidateImage();
-
-    public:
-        static const std::string& defaultFont();
-
-        static void setDefaultFont(const std::string& family);
-
-        static std::vector<std::string> fontFamilies();
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
+        CGImageRef   getCGImage() const;
+        void         invalidateImage();
 
         void create();
-    
         void destroy();
 
     private:
@@ -126,11 +114,11 @@ class PixmapImpl
         CGContextRef        _context;
         mutable CGImageRef  _image;
 
-        PixmapCanvas*       _canvas;
+        CocoaPixmapCanvas*  _canvas;
 };
 
-} // namespace
+} // namespace Forms
 
-} // namespace
+} // namespace Pt
 
-#endif // include guard
+#endif

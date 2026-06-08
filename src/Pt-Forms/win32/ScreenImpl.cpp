@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace Forms {
 
-ScreenImpl::ScreenImpl(ApplicationImpl&)
+ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
 , _screenScaling(1.0)
 {
@@ -226,7 +226,8 @@ void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 
 WindowFrame* ScreenImpl::onAttach(Window& w)
 {
-    WindowImpl* frame = new WindowImpl(*this, w);
+    Application& app = Application::instance();
+    WindowImpl* frame = new WindowImpl(*this, w, app.graphicsBackend());
     frame->setNextResponder(this);
 
     _windows.push_back(&w);

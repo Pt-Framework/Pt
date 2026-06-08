@@ -37,16 +37,18 @@
 #include <Pt/Gfx/Size.h>
 #include <Windows.h>
 
-#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
 #include <d2d1_1.h>
 #include <dxgi1_2.h>
-#endif
 
 namespace Pt {
 
 namespace Forms {
 
 class ScreenImpl;
+class GraphicsBackend;
+class GenericGraphicsBackend;
+class Direct2dGraphicsBackend;
+class GdiGraphicsBackend;
 
 class WindowImpl : public WindowFrame
 {
@@ -55,7 +57,7 @@ class WindowImpl : public WindowFrame
     friend class ScreenImpl;
 
     public:
-        WindowImpl(ScreenImpl& wm,  Window& w);
+        WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend);
 
         ~WindowImpl();
 
@@ -113,9 +115,9 @@ class WindowImpl : public WindowFrame
 
         virtual void onDisconnect();
 
-        
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
-        
+
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
 
@@ -159,12 +161,35 @@ class WindowImpl : public WindowFrame
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
+        typedef void (WindowImpl::*PaintWindow)(HDC windowContext,
+                                                const Gfx::RectF& updateRect);
+
+    private:
+        void bindBackend(GraphicsBackend& graphicsBackend);
+
+        void paintWindowNone(HDC windowContext, const Gfx::RectF& updateRect);
+
+        void paintWindowGeneric(HDC windowContext, const Gfx::RectF& updateRect);
+
+    #if defined(PT_FORMS_WIN32_DIRECT2D)
+        void paintWindowDirect2d(HDC windowContext, const Gfx::RectF& updateRect);
+    #endif
+
+    #if defined(PT_FORMS_WIN32_GDI)
+        void paintWindowGdi(HDC windowContext, const Gfx::RectF& updateRect);
+    #endif
+
+        private:
         ScreenImpl&    _wm;
         Window&        _window;
         HWND           _hwnd;
         HICON          _iconHandle;
 
-#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
+        GenericGraphicsBackend*  _genericBackend;
+        Direct2dGraphicsBackend* _direct2dBackend;
+        GdiGraphicsBackend*      _gdiBackend;
+        PaintWindow              _paintWindow;
+
         IDXGISwapChain1*    _swapChain;
         ID2D1DeviceContext* _presentCtx;
         ID2D1Bitmap1*       _targetBmp;
@@ -173,7 +198,6 @@ class WindowImpl : public WindowFrame
 
         void createSwapChain();
         void resizeSwapChain(UINT width, UINT height);
-#endif
 };
 
 } // namespace

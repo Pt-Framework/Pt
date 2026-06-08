@@ -1,11 +1,11 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,16 +15,16 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-    MA 02110-1301    USA
+  MA 02110-1301 USA
 */
 
 #include "ApplicationImpl.h"
@@ -61,9 +61,9 @@ namespace Forms {
 ApplicationImpl::ApplicationImpl()
 : _mouseDevice(0)
 , _lastActivityTime( Pt::System::Clock::getSystemTime() )
-{           
+{
     showConsole(false);
-    
+
     std::string keyboard = Pt::System::Application::getEnvVar("PT_KEYBOARD_DEVICE");
     if( ! keyboard.empty() )
       openInputDevice(keyboard);
@@ -162,7 +162,7 @@ Pt::Timespan ApplicationImpl::inactivityTime() const
     Pt::DateTime now = Pt::System::Clock::getSystemTime();
     Pt::Timespan inactivity = now - _lastActivityTime;
     return inactivity;
-}	
+}
 
 
 void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
@@ -182,14 +182,14 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
     _lastActivityTime = Pt::System::Clock::getSystemTime();
-   
+
     Screen& screen = Application::instance().screen();
     ScreenImpl* screenImpl = screen.impl();
     screenImpl->drawCursor( ev.position() );
-    
+
     double scaling = Application::instance().scaleFactor();
     Gfx::PointF pos = ev.position() / scaling;
-    
+
     MouseEvent mev = ev;
     mev.setWidget(&screen);
     mev.setPosition(pos);
@@ -220,7 +220,7 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
     double scaling = Application::instance().scaleFactor();
     Pt::Gfx::PointF pos = _touchTransform * ev.position();
     pos /= scaling;
-    
+
     TouchEvent tev = ev;
     tev.setWidget(&screen);
     tev.setPosition(pos);
@@ -281,7 +281,7 @@ void ApplicationImpl::showConsole(bool s)
     else
     {
         ioctl(fd, KDSETMODE, KD_TEXT);
-        
+
         //tcsetattr(STDIN_FILENO, TCSAFLUSH, &tm_orig);
     }
 

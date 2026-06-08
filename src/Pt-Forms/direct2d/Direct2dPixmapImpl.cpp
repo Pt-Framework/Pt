@@ -28,10 +28,9 @@
 */
 
 #include "win32.h"
-#include "PixmapImpl.h"
-#include "PixmapCanvas.h"
+#include "Direct2dPixmapImpl.h"
+#include "Direct2dPixmapCanvas.h"
 #include "D2DDevice.h"
-#include "DWriteFontProvider.h"
 #include "ApplicationImpl.h"
 
 #include <Pt/Forms/Application.h>
@@ -52,7 +51,7 @@ namespace Pt {
 
 namespace Forms {
 
-PixmapImpl::PixmapImpl()
+Direct2dPixmapImpl::Direct2dPixmapImpl()
 : _physicalSize(0, 0)
 , _width(0)
 , _height(0)
@@ -62,13 +61,13 @@ PixmapImpl::PixmapImpl()
 }
 
 
-PixmapImpl::~PixmapImpl()
+Direct2dPixmapImpl::~Direct2dPixmapImpl()
 {
     destroyBitmap();
 }
 
 
-void PixmapImpl::createBitmap(LONG width, LONG height)
+void Direct2dPixmapImpl::createBitmap(LONG width, LONG height)
 {
     destroyBitmap();
 
@@ -105,7 +104,7 @@ void PixmapImpl::createBitmap(LONG width, LONG height)
 }
 
 
-void PixmapImpl::destroyBitmap()
+void Direct2dPixmapImpl::destroyBitmap()
 {
     if(_d2dBitmap)
     {
@@ -119,7 +118,7 @@ void PixmapImpl::destroyBitmap()
 }
 
 
-void PixmapImpl::reset(const Gfx::SizeF& size)
+void Direct2dPixmapImpl::reset(const Gfx::SizeF& size)
 {
     LONG width = lround( size.width() );
     LONG height = lround( size.height() );
@@ -131,13 +130,13 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
 }
 
 
-void PixmapImpl::reset()
+void Direct2dPixmapImpl::reset()
 {
     destroyBitmap();
 }
 
 
-void PixmapImpl::reset(const Gfx::Image& image)
+void Direct2dPixmapImpl::reset(const Gfx::Image& image)
 {
     size_t width = image.width();
     size_t height = image.height();
@@ -166,7 +165,7 @@ void PixmapImpl::reset(const Gfx::Image& image)
 }
 
 
-Gfx::Image PixmapImpl::toImage() const
+Gfx::Image Direct2dPixmapImpl::toImage() const
 {
     if(_width == 0 || _height == 0 || ! _d2dBitmap)
         return Gfx::Image();
@@ -225,7 +224,7 @@ Gfx::Image PixmapImpl::toImage() const
 }
 
 
-void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+void Direct2dPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
     bitmap.reset( rect.size() );
 
@@ -237,35 +236,35 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 }
 
 
-const Gfx::SizeF& PixmapImpl::size() const
+const Gfx::SizeF& Direct2dPixmapImpl::size() const
 {
     return _physicalSize;
 }
 
 
-void PixmapImpl::setScaleFactor(double scaleFactor)
+void Direct2dPixmapImpl::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 }
 
 
-const Gfx::ImageFormat& PixmapImpl::format() const
+const Gfx::ImageFormat& Direct2dPixmapImpl::format() const
 {
     return Gfx::ImageFormat::rgb32();
 }
 
 
-const Gfx::Scaling& PixmapImpl::scaling() const
+const Gfx::Scaling& Direct2dPixmapImpl::scaling() const
 {
     return _scaling;
 }
 
 
-Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
+Gfx::Canvas* Direct2dPixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
+    Direct2dPixmapCanvas* canvas = dynamic_cast<Direct2dPixmapCanvas*>(reuse);
     if( ! canvas)
-        canvas = new PixmapCanvas();
+        canvas = new Direct2dPixmapCanvas();
 
     canvas->setPixmap(*this);
     _canvas = canvas;
@@ -273,55 +272,31 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 }
 
 
-void PixmapImpl::releaseCanvas()
+void Direct2dPixmapImpl::releaseCanvas()
 {
     _canvas = 0;
 }
 
 
-void PixmapImpl::sync()
+void Direct2dPixmapImpl::sync()
 {
 }
 
 
-void PixmapImpl::finish()
+void Direct2dPixmapImpl::finish()
 {
 }
 
 
-void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
-                            const Gfx::PointF& to,
-                            const Pixmap& pm,
-                            const Gfx::RectF* rect)
+void Direct2dPixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+                                    const Gfx::PointF& to,
+                                    const Pixmap& pm,
+                                    const Gfx::RectF* rect)
 {
     assert(_canvas == &canvas);
 
     if(_canvas == &canvas)
         _canvas->drawPixmap(to, pm, rect);
-}
-
-
-const std::string& PixmapImpl::defaultFont()
-{
-    return DWriteFontProvider::instance().defaultFont();
-}
-
-
-void PixmapImpl::setDefaultFont(const std::string& family)
-{
-    DWriteFontProvider::instance().setDefaultFont(family);
-}
-
-
-std::vector<std::string> PixmapImpl::fontFamilies()
-{
-    return DWriteFontProvider::instance().fontFamilies();
-}
-
-
-std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
-{
-    return DWriteFontProvider::instance().fontFaces(family);
 }
 
 } // namespace

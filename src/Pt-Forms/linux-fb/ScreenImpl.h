@@ -48,6 +48,7 @@ class ApplicationImpl;
 class FrameBuffer;
 class Cursor;
 class Screen;
+class GenericGraphicsBackend;
 
 class ScreenImpl : public Form
 {
@@ -63,10 +64,10 @@ class ScreenImpl : public Form
 
         virtual ~ScreenImpl();
 
-        
+
         void setParent(Screen* screen);
 
-        
+
         void addWindow(Window& w);
 
         void removeWindow(Window& w);
@@ -77,12 +78,6 @@ class ScreenImpl : public Form
 
 
         void setCapture(Widget* capture);
-
-        
-        //double scaleFactor() const;
-
-
-        //bool isEnabled() const;
 
     public:
         void drawCursor(const Pt::Gfx::PointF& pos);
@@ -163,25 +158,26 @@ class ScreenImpl : public Form
         };
 
         const Gfx::Image& image() const;
-        
+
         void updateScreen(const Gfx::RectI& area);
 
         void drawCursor(Pt::uint8_t* buffer);
-        
+
         void grabImage(const Pt::uint8_t* buffer, const Gfx::PointI& pos,
                        Gfx::Image& image);
- 
+
         void bitBlit(const Pt::uint8_t* from, size_t width, size_t height, 
                      const Gfx::PointI& pos, Pt::uint8_t* buffer, BlitOp op);
 
     private:
+        GenericGraphicsBackend*      _genericBackend;
         FrameBuffer&                 _frameBuffer;
         Pixmap                       _pixmap;
 
         Screen*                      _parent;
         Workspace                    _workspace;
-        
-        double                       _dpi;       
+
+        double                       _dpi;
         Gfx::Image                   _cursorBackground;
         Gfx::PointI                  _cursorPos;
         bool                         _drawCursor;

@@ -27,9 +27,9 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapImpl.h"
-
 #include <Pt/Forms/Pixmap.h>
+#include <Pt/Forms/Application.h>
+#include <Pt/Forms/GraphicsBackend.h>
 
 namespace Pt {
 
@@ -38,7 +38,8 @@ namespace Forms {
 Pixmap::Pixmap()
 : _impl(0)
 {
-    _impl = new PixmapImpl();
+    GraphicsBackend& backend = Application::instance().graphicsBackend();
+    _impl = backend.createPixmapImpl();
 }
 
 
@@ -156,30 +157,6 @@ void Pixmap::onSync()
 void Pixmap::onFinish() 
 {
     _impl->finish();
-}
-
-
-std::string Pixmap::defaultFont()
-{
-    return PixmapImpl::defaultFont();
-}
-
-
-void Pixmap::setDefaultFont(const std::string& family)
-{
-    PixmapImpl::setDefaultFont(family);
-}
-
-
-std::vector<std::string> Pixmap::fontFamilies()
-{
-    return PixmapImpl::fontFamilies();
-}
-
-
-std::vector<Gfx::FontFace> Pixmap::fontFaces(const std::string& family)
-{
-    return PixmapImpl::fontFaces(family);
 }
 
 } // namespace

@@ -39,6 +39,7 @@
 #include <Pt/Forms/WindowFrame.h>
 
 #include <CoreGraphics/CGGeometry.h>
+#include <CoreGraphics/CGContext.h>
 
 #ifdef __OBJC__
     #import <AppKit/NSWindow.h>
@@ -63,6 +64,9 @@ namespace Pt {
 namespace Forms {
 
 class ScreenImpl;
+class GraphicsBackend;
+class GenericGraphicsBackend;
+class CocoaGraphicsBackend;
 
 class WindowImpl : public WindowFrame
 {
@@ -71,7 +75,7 @@ class WindowImpl : public WindowFrame
     friend class ScreenImpl;
 
     public:
-        WindowImpl(ScreenImpl& wm,  Window& w);
+        WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend);
 
         virtual ~WindowImpl();
 
@@ -212,6 +216,18 @@ class WindowImpl : public WindowFrame
         virtual void onCloseEvent(const CloseEvent& ev);
 
     private:
+        typedef void (WindowImpl::*PaintWindow)(CGContextRef ctx, const CGRect& nativeRect);
+
+    private:
+        void bindBackend(GraphicsBackend& graphicsBackend);
+
+        void paintWindowNone(CGContextRef ctx, const CGRect& nativeRect);
+
+        void paintWindowGeneric(CGContextRef ctx, const CGRect& nativeRect);
+
+        void paintWindowCocoa(CGContextRef ctx, const CGRect& nativeRect);
+
+    private:
         double applicationScaleFactor() const;
 
         double backingScaleFactor() const;
@@ -247,6 +263,10 @@ class WindowImpl : public WindowFrame
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;
+
+        GenericGraphicsBackend*  _genericBackend;
+        CocoaGraphicsBackend*    _cocoaBackend;
+        PaintWindow              _paintWindow;
 
         unsigned                 _keyFlags;
         Key::Modifiers           _keyModifiers;

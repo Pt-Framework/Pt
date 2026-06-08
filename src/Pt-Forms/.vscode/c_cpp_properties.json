@@ -18,6 +18,7 @@
                 "UNICODE",
                 "_UNICODE",
                 "PT_FORMS_WIN32_DIRECT2D",
+                "PT_FORMS_WIN32_GDI",
                 "PT_FORMS_WAYLAND_NANOVG"
             ],
             "compilerPath": "cl.exe",

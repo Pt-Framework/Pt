@@ -27,9 +27,8 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapImpl.h"
-#include "PixmapCanvas.h"
-#include "CocoaFontProvider.h"
+#include "CocoaPixmapImpl.h"
+#include "CocoaPixmapCanvas.h"
 
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Painter.h>
@@ -70,11 +69,11 @@ void warnIfExpensiveBlit(const char* tag,
                          const CGRect& destRectValue)
 {
     CGRect sourceRect = CGRectStandardize(sourceRectValue);
-    CGRect destRect = CGRectStandardize(destRectValue);
+    CGRect destRect   = CGRectStandardize(destRectValue);
 
     double sourcePixels = std::fabs(sourceRect.size.width * sourceRect.size.height);
-    double destPixels = std::fabs(destRect.size.width * destRect.size.height);
-    double pixelCount = sourcePixels > destPixels ? sourcePixels : destPixels;
+    double destPixels   = std::fabs(destRect.size.width   * destRect.size.height);
+    double pixelCount   = sourcePixels > destPixels ? sourcePixels : destPixels;
 
     if(pixelCount < 16384.0)
         return;
@@ -87,32 +86,29 @@ void warnIfExpensiveBlit(const char* tag,
               << std::endl;
 }
 
-} // namespace CocoaDetail
+} // namespace Detail
 
 #endif
 
 ///////////////////////////////////////////////////////////////////////
-// PixmapImpl
+// CocoaPixmapImpl
 ///////////////////////////////////////////////////////////////////////
 
-PixmapImpl::PixmapImpl()
+CocoaPixmapImpl::CocoaPixmapImpl()
 : _physicalSize(0, 0)
 , _width(0)
 , _height(0)
 , _context(0)
 , _image(0)
 , _canvas(0)
-{
-}
+{}
 
-
-PixmapImpl::~PixmapImpl()
+CocoaPixmapImpl::~CocoaPixmapImpl()
 {
     destroy();
 }
 
-
-void PixmapImpl::create()
+void CocoaPixmapImpl::create()
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 
@@ -122,27 +118,20 @@ void PixmapImpl::create()
     CGColorSpaceRelease(colorSpace);
 }
 
-
-void PixmapImpl::destroy()
+void CocoaPixmapImpl::destroy()
 {
-    if(_image)
-        CGImageRelease(_image);
-
-    if(_context)
-        CGContextRelease(_context);
-
-    _image = 0;
+    if(_image)   CGImageRelease(_image);
+    if(_context) CGContextRelease(_context);
+    _image   = 0;
     _context = 0;
 }
 
-
-CGContextRef PixmapImpl::context() const
+CGContextRef CocoaPixmapImpl::context() const
 {
     return _context;
 }
 
-
-void PixmapImpl::invalidateImage()
+void CocoaPixmapImpl::invalidateImage()
 {
     if(_image)
     {
@@ -151,18 +140,17 @@ void PixmapImpl::invalidateImage()
     }
 }
 
-
-CGImageRef PixmapImpl::getCGImage() const
+CGImageRef CocoaPixmapImpl::getCGImage() const
 {
     if( ! _image && _context)
     {
-        void* data = CGBitmapContextGetData(_context);
+        void*  data        = CGBitmapContextGetData(_context);
         size_t bytesPerRow = CGBitmapContextGetBytesPerRow(_context);
-        size_t dataSize = bytesPerRow * _height;
+        size_t dataSize    = bytesPerRow * _height;
 
-        CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
-        CGColorSpaceRef colorSpace = CGBitmapContextGetColorSpace(_context);
-        CGBitmapInfo bitmapInfo = CGBitmapContextGetBitmapInfo(_context);
+        CGDataProviderRef provider   = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
+        CGColorSpaceRef   colorSpace = CGBitmapContextGetColorSpace(_context);
+        CGBitmapInfo      bitmapInfo = CGBitmapContextGetBitmapInfo(_context);
 
         _image = CGImageCreate(_width, _height, 8, 32,
                                bytesPerRow, colorSpace, bitmapInfo, provider,
@@ -174,10 +162,9 @@ CGImageRef PixmapImpl::getCGImage() const
     return _image;
 }
 
-
-void PixmapImpl::reset(const Gfx::Image& image)
+void CocoaPixmapImpl::reset(const Gfx::Image& image)
 {
-    size_t width = image.width();
+    size_t width  = image.width();
     size_t height = image.height();
 
     Gfx::SizeF size(width, height);
@@ -188,12 +175,12 @@ void PixmapImpl::reset(const Gfx::Image& image)
 
     Gfx::PointF to(0, 0);
 
-    const Pt::uint8_t* data = image.data();
-    std::size_t dataSize = image.size();
+    const Pt::uint8_t* data     = image.data();
+    std::size_t        dataSize = image.size();
 
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst;
+    CGDataProviderRef provider   = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
+    CGColorSpaceRef   colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo      bitmapInfo = kCGBitmapByteOrder32Host|kCGImageAlphaPremultipliedFirst;
 
     CGImageRef imageRef = CGImageCreate(image.width(), image.height(),
                                         8, 32, 4 * image.width(),
@@ -212,13 +199,12 @@ void PixmapImpl::reset(const Gfx::Image& image)
     CFRelease(provider);
 }
 
-
-void PixmapImpl::reset(const Gfx::SizeF& size)
+void CocoaPixmapImpl::reset(const Gfx::SizeF& size)
 {
-    size_t width = lround( size.width() );
+    size_t width  = lround( size.width() );
     size_t height = lround( size.height() );
 
-    _width = width;
+    _width  = width;
     _height = height;
 
     _physicalSize.set(width, height);
@@ -227,19 +213,15 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
     create();
 }
 
-
-void PixmapImpl::reset()
+void CocoaPixmapImpl::reset()
 {
     destroy();
-
-    _width = 0;
+    _width  = 0;
     _height = 0;
-
     _physicalSize.set(0, 0);
 }
 
-
-void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+void CocoaPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
     bitmap.reset( rect.size() );
 
@@ -250,36 +232,31 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
     painter.drawImage(Gfx::PointF(0, 0), image, rect);
 }
 
-
-void PixmapImpl::setScaleFactor(double scaleFactor)
+void CocoaPixmapImpl::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 }
 
-
-const Gfx::ImageFormat& PixmapImpl::format() const
+const Gfx::ImageFormat& CocoaPixmapImpl::format() const
 {
     return Gfx::ImageFormat::rgb32();
 }
 
-
-const Gfx::SizeF& PixmapImpl::size() const
+const Gfx::SizeF& CocoaPixmapImpl::size() const
 {
     return _physicalSize;
 }
 
-
-const Gfx::Scaling& PixmapImpl::scaling() const
+const Gfx::Scaling& CocoaPixmapImpl::scaling() const
 {
     return _scaling;
 }
 
-
-Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
+Gfx::Canvas* CocoaPixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
+    CocoaPixmapCanvas* canvas = dynamic_cast<CocoaPixmapCanvas*>(reuse);
     if( ! canvas )
-        canvas  = new PixmapCanvas();
+        canvas = new CocoaPixmapCanvas();
 
     canvas->setPixmap(*this);
 
@@ -287,58 +264,23 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
     return _canvas;
 }
 
-
-void PixmapImpl::releaseCanvas()
+void CocoaPixmapImpl::releaseCanvas()
 {
-    // NOTE: this might be called from the attached canvas base class destructor
-
     _canvas = 0;
 }
 
+void CocoaPixmapImpl::sync()   {}
+void CocoaPixmapImpl::finish() {}
 
-void PixmapImpl::sync()
-{
-}
-
-
-void PixmapImpl::finish()
-{
-}
-
-
-void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
-                            const Gfx::PointF& to,
-                            const Pixmap& pm,
-                            const Gfx::RectF* rect)
+void CocoaPixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+                                 const Gfx::PointF& to,
+                                 const Pixmap& pm,
+                                 const Gfx::RectF* rect)
 {
     assert(_canvas == &canvas);
 
     if(_canvas == &canvas)
         _canvas->drawPixmap(to, pm, rect);
-}
-
-
-const std::string& PixmapImpl::defaultFont()
-{
-    return CocoaFontProvider::instance().defaultFont();
-}
-
-
-void PixmapImpl::setDefaultFont(const std::string& family)
-{
-    CocoaFontProvider::instance().setDefaultFont(family);
-}
-
-
-std::vector<std::string> PixmapImpl::fontFamilies()
-{
-    return CocoaFontProvider::instance().fontFamilies();
-}
-
-
-std::vector<Gfx::FontFace> PixmapImpl::fontFaces(const std::string& family)
-{
-    return CocoaFontProvider::instance().fontFaces(family);
 }
 
 } // namespace Forms

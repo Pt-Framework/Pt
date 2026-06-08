@@ -2,18 +2,9 @@ SubDir PT_TOP src Pt-Forms ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
 SubDirHdrs $(PT_TOP)/src/Pt-Forms/$(PT_FORMS_IMPL) ;
+SubDirHdrs $(PT_TOP)/src/Pt-Forms/generic ;
 SubDirC++Flags [ FDefines PT_FORMS_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms ;
-
-if $(PT_FORMS_IMPL:L) = win32
-{
-    switch $(PT_FORMS_RENDERER)
-    {
-        case direct2d : SubDirC++Flags [ FDefines PT_FORMS_WIN32_DIRECT2D ] ;
-        case raster  : SubDirC++Flags [ FDefines PT_FORMS_WIN32_RASTER ] ;
-        case gdi     : SubDirC++Flags [ FDefines PT_FORMS_WIN32_GDI ] ;
-    }
-}
 
 if $(PT_FORMS_C++FLAGS)
 {
@@ -25,50 +16,76 @@ if $(PT_FORMS_INCLUDES)
     SubDirHdrs $(PT_FORMS_INCLUDES) ;
 }
 
-PT_FORMS_SUBDIR = [ FDirName $(PT_TOP) src Pt-Forms $(PT_FORMS_IMPL:L) ] ;
+PT_FORMS_IMPL_DIR = [ FDirName $(PT_TOP) src Pt-Forms $(PT_FORMS_IMPL:L) ] ;
+PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_IMPL_DIR) : *.cpp  ] ;
+PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_IMPL_DIR) : *.mm  ] ;
+PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_IMPL_DIR) : *.c ] ;
 
-PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.cpp  ] ;
-PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.mm  ] ;
+PT_FORMS_GENERIC_SUBDIR = [ FDirName $(PT_TOP) src Pt-Forms generic ] ;
+PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_GENERIC_SUBDIR) : *.cpp ] ;
 
-if $(PT_FORMS_IMPL:L) = wayland
+if $(WITH_FORMS_DIRECT2D)
 {
-    PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_SUBDIR) : *.c ] ;
+    local D2D_DIR = [ FDirName $(PT_TOP) src Pt-Forms direct2d ] ;
+    SubDirHdrs $(D2DDIR) ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(D2D_DIR) : *.cpp ] ;
 }
 
-if $(PT_FORMS_RENDERER)
+if $(WITH_FORMS_GDI)
 {
-    PT_FORMS_RENDERER_DIR = [ FDirName $(PT_TOP) src Pt-Forms $(PT_FORMS_RENDERER) ] ;
-    SubDirHdrs $(PT_FORMS_RENDERER_DIR) ;
-    PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_RENDERER_DIR) : *.cpp ] ;
+    local GDI_DIR = [ FDirName $(PT_TOP) src Pt-Forms gdi ] ;
+    SubDirHdrs $(GDI_DIR) ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(GDI_DIR) : *.cpp ] ;
+}
 
-    if $(PT_FORMS_RENDERER) = raster && $(PT_FORMS_IMPL:L) = win32
-    {
-        local _d2ddir = [ FDirName $(PT_TOP) src Pt-Forms direct2d ] ;
-        PT_FORMS_IMPL_SOURCES += [ GLOB $(_d2ddir) : D2DDevice.cpp ] ;
-    }
+if $(PT_WITH_VULKAN)
+{
+    local VULKAN_DIR = [ FDirName $(PT_TOP) src Pt-Forms vulkan ] ;
+    SubDirHdrs $(VULKAN_DIR) ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(VULKAN_DIR) : *.cpp ] ;
+}
 
-    if $(PT_FORMS_RENDERER) = vulkan && $(PT_FORMS_IMPL:L) = linux-drm
-    {
-        SubDirC++Flags [ FDefines PT_FORMS_DRM_VULKAN ] ;
-    }
+if $(WITH_FORMS_NANOVG)
+{
+    local NANOVG_DIR = [ FDirName $(PT_TOP) src Pt-Forms nanovg ] ;
 
-    if $(PT_FORMS_RENDERER) = nanovg
-    {
-        PT_FORMS_IMPL_SOURCES += [ GLOB $(PT_FORMS_RENDERER_DIR) : *.c ] ;
-        SubDirHdrs $(FREETYPE_INCLUDES) ;
-        SubDirHdrs [ FDirName $(PT_TOP) src Pt-Gfx freetype ] ;
-        SubDirCcFlags [ FDefines FONS_USE_FREETYPE ] ;
-        SubDirC++Flags [ FDefines NANOVG_GLES2 ] ;
-    }
+    SubDirHdrs $(NANOVG_DIR) ;
+    SubDirC++Flags [ FDefines NANOVG_GLES2 ] ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(NANOVG_DIR) : *.c ] ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(NANOVG_DIR) : *.cpp ] ;
+
+    SubDirHdrs $(FREETYPE_INCLUDES) ;
+    SubDirHdrs [ FDirName $(PT_TOP) src Pt-Gfx freetype ] ;
+    SubDirCcFlags [ FDefines FONS_USE_FREETYPE ] ;
 }
 
 if $(PT_FORMS_IMPL:L) = linux-fb || $(PT_FORMS_IMPL:L) = linux-drm
 {
-    local _inputdir = [ FDirName $(PT_TOP) src Pt-Forms linux-input ] ;
-    SubDirHdrs $(_inputdir) ;
-    PT_FORMS_IMPL_SOURCES += [ GLOB $(_inputdir) : *.cpp ] ;
+    local LINUX_INPUT_DIR = [ FDirName $(PT_TOP) src Pt-Forms linux-input ] ;
+    SubDirHdrs $(LINUX_INPUT_DIR) ;
+    PT_FORMS_IMPL_SOURCES += [ GLOB $(LINUX_INPUT_DIR) : *.cpp ] ;
 }
 
+if $(PT_FORMS_IMPL:L) = win32
+{
+    if $(WITH_FORMS_DIRECT2D)
+    {
+        SubDirC++Flags [ FDefines PT_FORMS_WIN32_DIRECT2D ] ;
+    }
+
+    if $(WITH_FORMS_GDI)
+    {
+        SubDirC++Flags [ FDefines PT_FORMS_WIN32_GDI ] ;
+    }
+}
+
+if $(PT_FORMS_IMPL:L) = wayland
+{
+    if $(WITH_FORMS_NANOVG)
+    {
+        SubDirC++Flags [ FDefines PT_FORMS_WAYLAND_NANOVG ] ;
+    }
+}
 
 SharedLibrary Pt-Forms : Application.cpp
                          Button.cpp

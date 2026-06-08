@@ -29,13 +29,21 @@
 
 #include "WindowImpl.h"
 #include "ScreenImpl.h"
-#include "PixmapImpl.h"
-
-#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
-#include "../direct2d/D2DDevice.h"
 #include "ApplicationImpl.h"
+
+#include "../generic/GenericGraphicsBackend.h"
+
+#if defined(PT_FORMS_WIN32_GDI)
+#include "../gdi/GdiGraphicsBackend.h"
 #endif
 
+#if defined(PT_FORMS_WIN32_DIRECT2D)
+#include "../direct2d/Direct2dGraphicsBackend.h"
+#endif
+
+#include "../direct2d/D2DDevice.h"
+
+#include <Pt/Forms/GraphicsBackend.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Window.h>
 #include <Pt/Forms/WindowManager.h>
@@ -43,30 +51,33 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Math.h>
 #include <cassert>
+#include <stdexcept>
 
 namespace Pt {
 
 namespace Forms {
 
-WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
+WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend)
 : WindowFrame(wm, w)
 , _wm(wm)
 , _window(w)
 , _hwnd(0)
 , _iconHandle(0)
-#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
+, _genericBackend(0)
+, _direct2dBackend(0)
+, _gdiBackend(0)
+, _paintWindow(&WindowImpl::paintWindowNone)
 , _swapChain(0)
 , _presentCtx(0)
 , _targetBmp(0)
 , _swapChainWidth(0)
 , _swapChainHeight(0)
-#endif
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
-  
+
     LONG style = 0;
     LONG exStyle = 0;
-    
+
     switch( w.type() )
     {
         case WindowType::Popup:
@@ -85,13 +96,14 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
                            0, 0, 10, 10, GetDesktopWindow(), 
                            NULL, hInstance, NULL);
 
+    bindBackend(graphicsBackend);
+
     Base::onSetParent(&wm);
 }
 
 
 WindowImpl::~WindowImpl()
 {
-#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
     if(_targetBmp)
     {
         _targetBmp->Release();
@@ -109,7 +121,6 @@ WindowImpl::~WindowImpl()
         _swapChain->Release();
         _swapChain = 0;
     }
-#endif
 
     DestroyWindow( _hwnd);
 
@@ -253,15 +264,58 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     updateRect = Gfx::RectF( updateRect.topLeft() * scaleFactor(), 
                              updateRect.size() * scaleFactor() );
 
-    //std::clog << "ON PAINT: " << _window.title() << " " 
-    //                          << ev.rect().x() << "," << ev.rect().y()
-    //                          << " " << ev.rect().width() << "x" << ev.rect().height() << std::endl;
-
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(_hwnd, &ps);
 
-#ifdef PT_FORMS_WIN32_RASTER
+    (this->*_paintWindow)(windowContext, updateRect);
 
+    EndPaint(_hwnd, &ps);
+}
+
+
+void WindowImpl::bindBackend(GraphicsBackend& graphicsBackend)
+{
+    _paintWindow = &WindowImpl::paintWindowNone;
+    _genericBackend = 0;
+    _direct2dBackend = 0;
+    _gdiBackend = 0;
+
+#if defined(PT_FORMS_WIN32_DIRECT2D)
+    _direct2dBackend = dynamic_cast<Direct2dGraphicsBackend*>(&graphicsBackend);
+    if(_direct2dBackend)
+    {
+        _paintWindow = &WindowImpl::paintWindowDirect2d;
+        return;
+    }
+#endif
+
+#if defined(PT_FORMS_WIN32_GDI)
+    _gdiBackend = dynamic_cast<GdiGraphicsBackend*>(&graphicsBackend);
+    if(_gdiBackend)
+    {
+        _paintWindow = &WindowImpl::paintWindowGdi;
+        return;
+    }
+#endif
+
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphicsBackend);
+    if(_genericBackend)
+    {
+        _paintWindow = &WindowImpl::paintWindowGeneric;
+        return;
+    }
+
+    throw std::invalid_argument("invalid graphics");
+}
+
+
+void WindowImpl::paintWindowNone(HDC /*windowContext*/, const Gfx::RectF& /*updateRect*/)
+{
+}
+
+
+void WindowImpl::paintWindowGeneric(HDC /*windowContext*/, const Gfx::RectF& /*updateRect*/)
+{
     createSwapChain();
 
     UINT sourceWidth = 0;
@@ -277,7 +331,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
     if(_targetBmp && _swapChain && sourceWidth > 0 && sourceHeight > 0)
     {
-        const Gfx::Image& image = pixmap().impl()->bitmap().image();
+        const Gfx::Image& image = _genericBackend->image( pixmap() );
         UINT imgW = static_cast<UINT>(image.width());
         UINT imgH = static_cast<UINT>(image.height());
 
@@ -293,7 +347,13 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
         _swapChain->Present(0, 0);
     }
-#elif defined(PT_FORMS_WIN32_DIRECT2D)
+}
+
+#if defined(PT_FORMS_WIN32_DIRECT2D)
+
+void WindowImpl::paintWindowDirect2d(HDC /*windowContext*/, const Gfx::RectF& /*updateRect*/)
+{
+    assert(_direct2dBackend != nullptr);
 
     createSwapChain();
 
@@ -301,7 +361,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
     UINT sourceHeight = 0;
 
     RECT clientRect;
-    if(GetClientRect(_hwnd, &clientRect))
+    if( GetClientRect(_hwnd, &clientRect) )
     {
         sourceWidth = static_cast<UINT>(clientRect.right - clientRect.left);
         sourceHeight = static_cast<UINT>(clientRect.bottom - clientRect.top);
@@ -310,7 +370,7 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
     if(_targetBmp && _swapChain && sourceWidth > 0 && sourceHeight > 0)
     {
-        ID2D1Bitmap1* d2dBmp = pixmap().impl()->bitmap();
+        ID2D1Bitmap1* d2dBmp = _direct2dBackend->bitmap( pixmap() );
         if(d2dBmp)
         {
             D2D1_SIZE_U sourceSize = d2dBmp->GetPixelSize();
@@ -327,17 +387,27 @@ void WindowImpl::onPaintEvent(const PaintEvent& ev)
 
         _swapChain->Present(0, 0);
     }
-#elif defined(PT_FORMS_WIN32_GDI)
-    HDC bitmapContext = pixmap().impl()->deviceContext();
-
-    BitBlt(windowContext, updateRect.x(), updateRect.y(), 
-           updateRect.width(), updateRect.height(), 
-           bitmapContext, updateRect.x(),  updateRect.y(), SRCCOPY);
-#endif
-
-    EndPaint(_hwnd, &ps);
 }
 
+#endif
+
+#if defined(PT_FORMS_WIN32_GDI)
+
+void WindowImpl::paintWindowGdi(HDC windowContext, const Gfx::RectF& updateRect)
+{
+    if( ! _gdiBackend)
+        return;
+
+    HDC bitmapContext = _gdiBackend->bitmapContext(pixmap());
+    if( ! bitmapContext)
+        return;
+
+    BitBlt(windowContext, updateRect.x(), updateRect.y(),
+           updateRect.width(), updateRect.height(),
+           bitmapContext, updateRect.x(), updateRect.y(), SRCCOPY);
+}
+
+#endif
 
 void WindowImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
@@ -639,8 +709,6 @@ void WindowImpl::onCloseEvent(const CloseEvent& ev)
 }
 
 
-#if defined(PT_FORMS_WIN32_DIRECT2D) || defined(PT_FORMS_WIN32_RASTER)
-
 void WindowImpl::createSwapChain()
 {
     if(_swapChain)
@@ -754,8 +822,6 @@ void WindowImpl::resizeSwapChain(UINT width, UINT height)
     }
 }
 
-
-#endif // PT_FORMS_WIN32_DIRECT2D || PT_FORMS_WIN32_RASTER
 
 } // namespace
 

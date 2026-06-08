@@ -29,7 +29,8 @@
 
 #include "WindowImpl.h"
 #include "ScreenImpl.h"
-#include "PixmapImpl.h"
+#include "CocoaGraphicsBackend.h"
+#include "../generic/GenericGraphicsBackend.h"
 #include "ApplicationImpl.h"
 #include "WindowView.h"
 
@@ -103,8 +104,11 @@ namespace Pt {
 
 namespace Forms {
 
-WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
+WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend)
 : WindowFrame(wm, w)
+, _genericBackend(0)
+, _cocoaBackend(0)
+, _paintWindow(&WindowImpl::paintWindowNone)
 , _wm(wm)
 , _client(w)
 , _window(nil)
@@ -170,6 +174,8 @@ WindowImpl::WindowImpl(ScreenImpl& wm,  Window& w)
     //]];
 
     //[_window setInitialFirstResponder: view];
+
+    bindBackend(graphicsBackend);
 
     Base::onSetParent(&wm);
 }
@@ -720,10 +726,53 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     PaintEvent pev(*this, paintRect);
     processEvent(pev);
 
-    CGImageRef image = pixmap().impl()->getCGImage();
-
     NSGraphicsContext* graphicsContext = [NSGraphicsContext currentContext];
     CGContextRef windowContext = [graphicsContext CGContext];
+
+    (this->*_paintWindow)(windowContext, rect);
+}
+
+
+void WindowImpl::bindBackend(GraphicsBackend& graphicsBackend)
+{
+    _paintWindow    = &WindowImpl::paintWindowNone;
+    _cocoaBackend   = 0;
+    _genericBackend = 0;
+
+    _cocoaBackend = dynamic_cast<CocoaGraphicsBackend*>(&graphicsBackend);
+    if(_cocoaBackend)
+    {
+        _paintWindow = &WindowImpl::paintWindowCocoa;
+        return;
+    }
+
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphicsBackend);
+    if(_genericBackend)
+    {
+        _paintWindow = &WindowImpl::paintWindowGeneric;
+        return;
+    }
+
+    throw std::invalid_argument("invalid graphics");
+}
+
+
+void WindowImpl::paintWindowNone(CGContextRef /*ctx*/, const CGRect& /*rect*/)
+{
+}
+
+
+void WindowImpl::paintWindowCocoa(CGContextRef windowContext, const CGRect& rect)
+{
+    NSRect frame = [_window frame];
+    NSRect content = [_window contentRectForFrameRect:frame];
+
+    double x      = rect.origin.x;
+    double y      = content.size.height - (rect.origin.y + rect.size.height);
+    double width  = rect.size.width;
+    double height = rect.size.height;
+
+    CGImageRef image = _cocoaBackend->getCGImage(pixmap());
 
     CGFloat backingScale = [_window backingScaleFactor];
     CGRect sourceRect = CGRectMake(x * backingScale, y * backingScale,
@@ -731,7 +780,7 @@ void WindowImpl::onViewPaint(const NSRect& rect)
 
 #ifdef PT_FORMS_WARN_UNALIGNED_BLIT
     CGRect destRect = CGContextConvertRectToDeviceSpace(windowContext, rect);
-    Detail::warnIfExpensiveBlit("WindowImpl::onViewPaint",
+    Detail::warnIfExpensiveBlit("WindowImpl::paintWindowCocoa",
                                 sourceRect, destRect);
 #endif
 
@@ -743,6 +792,54 @@ void WindowImpl::onViewPaint(const NSRect& rect)
     CGContextRestoreGState(windowContext);
 
     CGImageRelease(sourceImage);
+}
+
+
+void WindowImpl::paintWindowGeneric(CGContextRef windowContext, const CGRect& rect)
+{
+    NSRect frame = [_window frame];
+    NSRect content = [_window contentRectForFrameRect:frame];
+
+    double x      = rect.origin.x;
+    double y      = content.size.height - (rect.origin.y + rect.size.height);
+    double width  = rect.size.width;
+    double height = rect.size.height;
+
+    const Gfx::Image& img = _genericBackend->image(pixmap());
+
+    const Pt::uint8_t* data     = img.data();
+    std::size_t        dataSize = img.size();
+
+    CGDataProviderRef provider   = CGDataProviderCreateWithData(NULL, data, dataSize, NULL);
+    CGColorSpaceRef   colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo      bitmapInfo = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;
+
+    CGImageRef image = CGImageCreate(img.width(), img.height(),
+                                     8, 32, img.stride(),
+                                     colorSpace, bitmapInfo, provider,
+                                     NULL, false, kCGRenderingIntentDefault);
+
+    CGFloat backingScale = [_window backingScaleFactor];
+    CGRect sourceRect = CGRectMake(x * backingScale, y * backingScale,
+                                   width * backingScale, height * backingScale);
+
+#ifdef PT_FORMS_WARN_UNALIGNED_BLIT
+    CGRect destRect = CGContextConvertRectToDeviceSpace(windowContext, rect);
+    Detail::warnIfExpensiveBlit("WindowImpl::paintWindowGeneric",
+                                sourceRect, destRect);
+#endif
+
+    CGImageRef sourceImage = CGImageCreateWithImageInRect(image, sourceRect);
+
+    CGContextSaveGState(windowContext);
+    CGContextSetBlendMode(windowContext, kCGBlendModeCopy);
+    CGContextDrawImage(windowContext, rect, sourceImage);
+    CGContextRestoreGState(windowContext);
+
+    CGImageRelease(sourceImage);
+    CGImageRelease(image);
+    CFRelease(colorSpace);
+    CFRelease(provider);
 }
 
 

@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapCanvas.h"
-#include "PixmapImpl.h"
+#include "GdiPixmapCanvas.h"
+#include "GdiPixmapImpl.h"
 
 #include "GdiFontProvider.h"
 
@@ -179,7 +179,7 @@ namespace Forms {
 
 
 
-PixmapCanvas::PixmapCanvas()
+GdiPixmapCanvas::GdiPixmapCanvas()
 : Gfx::Canvas()
 , _pixmap(0)
 , _lastScaleFactor(1.0)
@@ -195,7 +195,7 @@ PixmapCanvas::PixmapCanvas()
 }
 
 
-PixmapCanvas::~PixmapCanvas()
+GdiPixmapCanvas::~GdiPixmapCanvas()
 {
     if(_pixmap)
     {
@@ -220,20 +220,20 @@ PixmapCanvas::~PixmapCanvas()
 }
 
 
-void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
+void GdiPixmapCanvas::setPixmap(GdiPixmapImpl& pixmap)
 {
     _pixmap = &pixmap;
 }
 
 
-void PixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
+void GdiPixmapCanvas::onBeginPaint(const Gfx::Paint& paint)
 {
     if(_pixmap)
         SaveDC(_pixmap->deviceContext());
 }
 
 
-void PixmapCanvas::onFinishPaint()
+void GdiPixmapCanvas::onFinishPaint()
 {
     if(_pixmap)
         RestoreDC(_pixmap->deviceContext(), -1);
@@ -242,23 +242,23 @@ void PixmapCanvas::onFinishPaint()
 }
 
 
-void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
+void GdiPixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode) 
 {
     _compositionMode = mode;
 }
 
 
-void PixmapCanvas::onApplyCompositionMode() 
+void GdiPixmapCanvas::onApplyCompositionMode() 
 {
 }
 
 
-void PixmapCanvas::onApplyTransform()
+void GdiPixmapCanvas::onApplyTransform()
 {
 }
 
 
-void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
+void GdiPixmapCanvas::onSetTransform(const Gfx::Transform& tx)
 {
     if(_pixmap && isActive())
     {
@@ -281,7 +281,7 @@ void PixmapCanvas::onSetTransform(const Gfx::Transform& tx)
 }
 
 
-void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
+void GdiPixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     _logicalPen = pen;
 
@@ -310,7 +310,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapCanvas::onApplyPen()
+void GdiPixmapCanvas::onApplyPen()
 {
     if(_pixmap)
     {
@@ -327,7 +327,7 @@ void PixmapCanvas::onApplyPen()
 }
 
 
-void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
+void GdiPixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     if(_brush)
     {
@@ -414,7 +414,7 @@ void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 }
 
 
-void PixmapCanvas::onApplyBrush()
+void GdiPixmapCanvas::onApplyBrush()
 {
     if( ! _pixmap )
         return;
@@ -435,7 +435,7 @@ void PixmapCanvas::onApplyBrush()
 }
 
 
-void PixmapCanvas::onSetFont(const Gfx::Font& font)
+void GdiPixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     if(_font)
     {
@@ -448,7 +448,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void PixmapCanvas::onApplyFont()
+void GdiPixmapCanvas::onApplyFont()
 {
     if( ! _pixmap )
         return;
@@ -462,7 +462,7 @@ void PixmapCanvas::onApplyFont()
 }
 
 
-void PixmapCanvas::onSetClip(const Gfx::RectF* rectF)
+void GdiPixmapCanvas::onSetClip(const Gfx::RectF* rectF)
 {
     if(_pixmap && isActive())
     {
@@ -481,7 +481,7 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* rectF)
 }
 
 
-void PixmapCanvas::onApplyClip()
+void GdiPixmapCanvas::onApplyClip()
 {  
     if(_pixmap)
     {
@@ -515,13 +515,13 @@ void PixmapCanvas::onApplyClip()
 }
 
 
-POINT PixmapCanvas::toContext(const Gfx::PointF& p)
+POINT GdiPixmapCanvas::toContext(const Gfx::PointF& p)
 {
     return toContext(p.x(), p.y());
 }
 
 
-POINT PixmapCanvas::toContext(double x, double y)
+POINT GdiPixmapCanvas::toContext(double x, double y)
 {
     Gfx::PointF p = transform() * Gfx::PointF(x, y);
 
@@ -533,7 +533,7 @@ POINT PixmapCanvas::toContext(double x, double y)
 }
 
 
-void PixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
+void GdiPixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 {
     if( ! _pixmap )
         return;
@@ -547,7 +547,7 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& p0, const Gfx::PointF& p1)
 }
 
 
-void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+void GdiPixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if( ! _pixmap )
         return;
@@ -565,7 +565,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
+void GdiPixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     if( ! _pixmap )
         return;
@@ -628,7 +628,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 }
 
 
-void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
+void GdiPixmapCanvas::onDrawRect(const Gfx::RectF& r)
 {
     if( ! _pixmap )
         return;
@@ -650,7 +650,7 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& r)
 }
 
 
-void PixmapCanvas::onFillRect(const Gfx::RectF& r)
+void GdiPixmapCanvas::onFillRect(const Gfx::RectF& r)
 {
     if( ! _pixmap )
         return;
@@ -687,7 +687,7 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& r)
 }
 
 
-void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void GdiPixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap )
         return;
@@ -708,7 +708,7 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void GdiPixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap )
         return;
@@ -751,7 +751,7 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
+Gfx::TextMetrics GdiPixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     if( ! _pixmap )
         return Gfx::TextMetrics();
@@ -820,13 +820,13 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 }
 
 
-const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
+const Gfx::FontMetrics& GdiPixmapCanvas::onGetFontMetrics() const
 {
     return _fontMetrics;
 }
 
 
-Gfx::FontMetrics PixmapCanvas::getFontMetrics() const
+Gfx::FontMetrics GdiPixmapCanvas::getFontMetrics() const
 {
     if( ! _pixmap )
         return Gfx::FontMetrics();
@@ -865,7 +865,7 @@ Gfx::FontMetrics PixmapCanvas::getFontMetrics() const
 }
 
 
-void PixmapCanvas::onDrawText(const Gfx::PointF& to, 
+void GdiPixmapCanvas::onDrawText(const Gfx::PointF& to, 
                               const Pt::String& text, 
                               const Gfx::Transform* tform)
 {
@@ -899,7 +899,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
 }
 
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& toF, 
+void GdiPixmapCanvas::onDrawImage(const Gfx::PointF& toF, 
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
@@ -976,13 +976,13 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
 }
 
 
-void PixmapCanvas::onSetPath(const Gfx::Path& path)
+void GdiPixmapCanvas::onSetPath(const Gfx::Path& path)
 {
     _path = path;
 }
 
 
-void PixmapCanvas::onDrawPath()
+void GdiPixmapCanvas::onDrawPath()
 {
     if(_pixmap)
     {
@@ -993,7 +993,7 @@ void PixmapCanvas::onDrawPath()
 }
 
 
-void PixmapCanvas::onFillPath()
+void GdiPixmapCanvas::onFillPath()
 {
     if(_pixmap)
     {
@@ -1004,7 +1004,7 @@ void PixmapCanvas::onFillPath()
 }
 
 
-void PixmapCanvas::onDrawPath(const Gfx::Path& path)
+void GdiPixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
     if(_pixmap)
     {
@@ -1015,7 +1015,7 @@ void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onFillPath(const Gfx::Path& path)
+void GdiPixmapCanvas::onFillPath(const Gfx::Path& path)
 {
     if(_pixmap)
     {
@@ -1026,7 +1026,7 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::addPath(HDC dc, const Gfx::Path& path)
+void GdiPixmapCanvas::addPath(HDC dc, const Gfx::Path& path)
 {
     BeginPath(dc);
 
@@ -1107,7 +1107,7 @@ void PixmapCanvas::addPath(HDC dc, const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
+void GdiPixmapCanvas::drawPixmap(const Gfx::PointF& toF,
                                const Pixmap& pm,
                                const Gfx::RectF* rect)
 {
@@ -1116,7 +1116,7 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 
     applyState();
 
-    const PixmapImpl* pixmap = pm.impl();
+    const GdiPixmapImpl* pixmap = static_cast<const GdiPixmapImpl*>( pm.impl() );
     HDC dc = _pixmap->deviceContext();
     HDC pixmapDC = pixmap->deviceContext();
 
@@ -1167,3 +1167,4 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& toF,
 } // namespace
 
 } // namespace
+

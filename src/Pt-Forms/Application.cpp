@@ -28,8 +28,8 @@
 */
 
 #include "ApplicationImpl.h"
-#include "PixmapImpl.h"
 #include "ScreenImpl.h"
+#include "generic/GenericGraphicsBackend.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Window.h>
@@ -66,6 +66,7 @@ namespace Forms {
 Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
 , _impl( new ApplicationImpl() ) 
+, _graphicsBackend(0)
 , _mainScreen(0)
 , _lastId(1)
 , _defaultInputMethod(0)
@@ -79,26 +80,30 @@ Application::Application(int argc, char** argv)
     _style = PlatinumStyle();
     _style.reset(_styleOptions);
 
+    _graphicsBackend = _impl->queryBackend();
+    if( ! _graphicsBackend )
+        _graphicsBackend = new GenericGraphicsBackend();
+
     _mainScreen = new Screen(*_impl);
 
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchMouseEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessMouseEvent);
-    
+
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchTouchEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessTouchEvent);
-    
+
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchScrollEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessScrollEvent);
-    
+
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchEnterEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessEnterEvent);
-    
+
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchLeaveEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessLeaveEvent);
-    
+
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchKeyEvent);
     _eventReceived += Pt::slot(*this, &Application::onProcessKeyEvent);
-    
+
     loop().eventReceived() += Pt::slot(*this, &Application::onDispatchInvalidateEvent );
     _eventReceived += Pt::slot(*this, &Application::onProcessInvalidateEvent);
 
@@ -148,6 +153,7 @@ Application::~Application()
     delete _defaultInputMethod;
 
     delete _mainScreen;
+    delete _graphicsBackend;
     delete _impl;
 }
 
@@ -155,6 +161,18 @@ Application::~Application()
 ApplicationImpl* Application::impl()
 {
     return _impl;
+}
+
+
+GraphicsBackend& Application::graphicsBackend()
+{
+    return *_graphicsBackend;
+}
+
+
+const GraphicsBackend& Application::graphicsBackend() const
+{
+    return *_graphicsBackend;
 }
 
 
@@ -242,25 +260,25 @@ const std::vector<Pt::System::Path>& Application::fontFiles() const
 
 std::string Application::defaultFont() const
 {
-    return PixmapImpl::defaultFont();
+    return graphicsBackend().defaultFont();
 }
 
 
 void Application::setDefaultFont(const std::string& family)
 {
-    PixmapImpl::setDefaultFont(family);
+    graphicsBackend().setDefaultFont(family);
 }
 
 
 std::vector<std::string> Application::fontFamilies() const
 {
-    return PixmapImpl::fontFamilies();
+    return graphicsBackend().fontFamilies();
 }
 
 
 std::vector<Gfx::FontFace> Application::fontFaces(const std::string& family) const
 {
-    return PixmapImpl::fontFaces(family);
+    return graphicsBackend().fontFaces(family);
 }
 
 

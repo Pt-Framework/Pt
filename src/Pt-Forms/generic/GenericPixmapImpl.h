@@ -27,12 +27,12 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_PixmapImpl_h
-#define Pt_Forms_PixmapImpl_h
+#ifndef PT_FORMS_GENERIC_GENERICPIXMAPIMPL_H
+#define PT_FORMS_GENERIC_GENERICPIXMAPIMPL_H
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/PaintSurface.h>
-#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Bitmap.h>
 
 namespace Pt {
@@ -41,19 +41,19 @@ namespace Forms {
 
 class Pixmap;
 
-class PixmapImpl
+class GenericPixmapImpl : public IPixmapImpl
 {
     public:
-        PixmapImpl()
+        GenericPixmapImpl()
         : _canvas(0)
         { }
 
-        void reset(const Gfx::Image& image)
+        void reset(const Gfx::Image& image) override
         {
             _bitmap.reset(image);
         }
 
-        void reset(const Gfx::SizeF& size)
+        void reset(const Gfx::SizeF& size) override
         {
             _bitmap.reset(size);
         }
@@ -63,7 +63,7 @@ class PixmapImpl
             _bitmap.reset(size, stride);
         }
 
-        void reset()
+        void reset() override
         {
             _bitmap.reset();
         }
@@ -73,7 +73,7 @@ class PixmapImpl
             return _bitmap;
         }
 
-        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const override
         {
             bitmap.reset( rect.size() );
 
@@ -81,12 +81,12 @@ class PixmapImpl
             bitmap.drawBitmap(Gfx::PointF(0, 0), _bitmap, paint, &rect);
         }
 
-        const Gfx::SizeF& size() const
+        const Gfx::SizeF& size() const override
         {
             return _bitmap.size();
         }
 
-        void setScaleFactor(double scaleFactor)
+        void setScaleFactor(double scaleFactor) override
         {
             _bitmap.setScaleFactor(scaleFactor);
         }
@@ -94,65 +94,44 @@ class PixmapImpl
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pixmap,
-                        const Gfx::RectF* rect);
-        
-        const Gfx::ImageFormat& format() const
+                        const Gfx::RectF* rect) override;
+
+        const Gfx::ImageFormat& format() const override
         {
             return _bitmap.format();
         }
 
-        const Gfx::Scaling& scaling() const
+        const Gfx::Scaling& scaling() const override
         {
             return _bitmap.scaling();
         }
 
-        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
+        Gfx::Canvas* getCanvas(Gfx::Canvas* reuse) override
         {
             _canvas = _bitmap.getCanvas(reuse);
             return _canvas;
         }
 
-        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse)
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse) override
         {
             return 0;
         }
 
-        void releaseCanvas()
+        void releaseCanvas() override
         {
             _canvas = 0;
         }
 
-        void sync()
+        void sync() override
         {
             _bitmap.sync();
         }
 
-        void finish()
+        void finish() override
         {
             _bitmap.finish();
         }
 
-    public:
-        static const std::string& defaultFont()
-        {
-            return Gfx::Bitmap::defaultFont();
-        }
-
-        static void setDefaultFont(const std::string& family)
-        {
-            Gfx::Bitmap::setDefaultFont(family);
-        }
-
-        static std::vector<std::string> fontFamilies()
-        {
-            return Gfx::Bitmap::fontFamilies();
-        }
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family)
-        {
-            return Gfx::Bitmap::fontFaces(family);
-        }
-    
     private:
         Gfx::Bitmap _bitmap;
         Gfx::Canvas* _canvas;

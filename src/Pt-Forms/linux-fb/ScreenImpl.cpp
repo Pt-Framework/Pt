@@ -31,7 +31,7 @@
 #include "ScreenImpl.h"
 #include "FrameBuffer.h"
 #include "ApplicationImpl.h"
-#include "PixmapImpl.h"
+#include "../generic/GenericGraphicsBackend.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Cursor.h>
@@ -55,16 +55,26 @@ namespace Pt {
 namespace Forms {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
-: _frameBuffer( app.frameBuffer() )
+: _genericBackend(0)
+, _frameBuffer( app.frameBuffer() )
 , _parent(0)
 , _dpi(96.0)
 , _cursorPos(0, 0)
 , _drawCursor(false)
 {
-    Gfx::SizeF size( _frameBuffer.width(), 
+    GraphicsBackend& graphics = Application::instance().graphicsBackend();
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphics);
+    if( ! _genericBackend )
+        throw std::invalid_argument("invalid graphics");
+
+    GenericPixmapImpl* pixmapImpl = dynamic_cast<GenericPixmapImpl*>(_pixmap.impl());
+    if( ! pixmapImpl )
+        throw std::invalid_argument("invalid graphics");
+
+    Gfx::SizeF size( _frameBuffer.width(),
                      _frameBuffer.height() );
-    _pixmap.impl()->reset( size, _frameBuffer.strideSize() );
-                             
+    pixmapImpl->reset( size, _frameBuffer.strideSize() );
+
     Gfx::PaintContext ctx(_pixmap);
     Gfx::Painter painter(ctx);
 
@@ -94,7 +104,7 @@ void ScreenImpl::setParent(Screen* screen)
     //       2. connect to screen
     //       3. call onShow/onResize on screen
     //
-    
+
     _parent = screen;
 
     if(_parent)
@@ -226,19 +236,19 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 
 
 bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
-{ 
+{
     return Base::onMouseEvent(ev);
 }
 
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
-{ 
+{
     Base::onProcessTouchEvent(ev);
 }
 
 
 bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
-{ 
+{
     return Base::onTouchEvent(ev);
 }
 
@@ -247,7 +257,7 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 {
     if( ! isEnabled() )
         return;
-  
+
     Base::onProcessScrollEvent(ev);
 }
 
@@ -262,7 +272,7 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
     if( ! isEnabled() )
         return;
-    
+
     Base::onProcessKeyEvent(ev);
 }
 
@@ -274,7 +284,7 @@ bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
 
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
-{   
+{
     Base::onProcessRescaleEvent(ev);
 }
 
@@ -285,7 +295,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
 
     Gfx::SizeF size( _frameBuffer.width(), 
                      _frameBuffer.height() );
-    
+
     size /= scaleFactor();
 
     _pixmap.setScaleFactor( scaleFactor() );
@@ -318,7 +328,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     // update the screen including the cursor
     //
     Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
-    
+
     Gfx::RectI updateRect( Gfx::PointI( lround(updateRectP.x()), 
                                         lround(updateRectP.y()) ),
                            Gfx::SizeI( lround(updateRectP.width()),
@@ -328,7 +338,7 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
-{    
+{
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
@@ -364,7 +374,7 @@ void ScreenImpl::onPaint(PaintContext& context, const Gfx::RectF& rect)
 
 const Gfx::Image& ScreenImpl::image() const
 {
-    return _pixmap.impl()->bitmap().image();
+    return _genericBackend->image(_pixmap);
 }
 
 
@@ -372,7 +382,7 @@ void ScreenImpl::updateScreen(const Gfx::RectI& r)
 {
     if(_drawCursor)
         drawCursor( const_cast<uint8_t*>( image().data() ) );
-    
+
     _frameBuffer.output( image().data(), r );
 }
 
@@ -380,7 +390,7 @@ void ScreenImpl::updateScreen(const Gfx::RectI& r)
 void ScreenImpl::drawCursor(const Pt::Gfx::PointF& pos)
 {
     _drawCursor = true;
- 
+
     //
     // erase previous cursor area on screen
     //
@@ -427,7 +437,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
         PT_LOG_DEBUG("no cursor image");
         return;
     }
-    
+
     if( _cursorBackground.width() != static_cast<int>( cursor.width() ) ||
         _cursorBackground.height() != static_cast<int>( cursor.height() ) )
     {
@@ -443,7 +453,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 
     bitBlit(&cursor.andRgb888()[0], cursor.width(), cursor.height(), 
             _cursorPos, buffer, AndOp);
-    
+
     bitBlit(&cursor.xorRgb888()[0], cursor.width(), cursor.height(), 
             _cursorPos, buffer, XorOp);
 }

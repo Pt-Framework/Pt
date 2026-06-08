@@ -31,6 +31,7 @@
 #define Pt_Forms_PixmapImpl_h
 
 #include <Pt/Forms/Api.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/PaintSurface.h>
 #include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/PaintSurface.h>
@@ -43,90 +44,70 @@
 #include <vector>
 
 #include <Windows.h>
-#include <d2d1_1.h>
 
 namespace Pt {
 
 namespace Forms {
 
 class Pixmap;
-class PixmapCanvas;
+class GdiPixmapCanvas;
 
-class PixmapImpl
+class GdiPixmapImpl : public IPixmapImpl
 {
     public:
-        PixmapImpl();
+        GdiPixmapImpl();
 
-        virtual ~PixmapImpl();
+        virtual ~GdiPixmapImpl();
 
-        void reset(const Gfx::Image& image);
+        void reset(const Gfx::Image& image) override;
 
-        void reset(const Gfx::SizeF& size);
+        void reset(const Gfx::SizeF& size) override;
 
-        void reset();
+        void reset() override;
 
         Gfx::Image toImage() const;
 
-        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const override;
 
-        void setScaleFactor(double scaleFactor);
+        void setScaleFactor(double scaleFactor) override;
 
-        ID2D1Bitmap1* bitmap() const
-        { return _d2dBitmap; }
-
-        LONG width() const
-        { return _width; }
-
-        LONG height() const
-        { return _height; }
+        HDC deviceContext() const;
 
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pm,
-                        const Gfx::RectF* rect);
+                        const Gfx::RectF* rect) override;
 
-        const Gfx::ImageFormat& format() const;
+        const Gfx::ImageFormat& format() const override;
 
-        const Gfx::SizeF& size() const;
+        const Gfx::SizeF& size() const override;
 
-        const Gfx::Scaling& scaling() const;
+        const Gfx::Scaling& scaling() const override;
 
         Gfx::Canvas* getCanvas(Gfx::Canvas* reuse)
         {
             return 0;
         }
 
-        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse);
+        Gfx::Canvas* createCanvas(Gfx::Canvas* reuse) override;
 
-        void releaseCanvas();
+        void releaseCanvas() override;
 
-        void sync();
+        void sync() override;
 
-        void finish();
-
-    public:
-        static const std::string& defaultFont();
-
-        static void setDefaultFont(const std::string& family);
-
-        static std::vector<std::string> fontFamilies();
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family);
+        void finish() override;
 
     private:
-        void createBitmap(LONG width, LONG height);
+        Gfx::SizeF     _physicalSize;
+        Gfx::Scaling   _scaling;
 
-        void destroyBitmap();
+        LONG           _width;
+        LONG           _height;
+        HDC            _dc;
+        HBITMAP        _bitmap;
+        HBITMAP        _oldBitmap;
 
-    private:
-        Gfx::SizeF            _physicalSize;
-        Gfx::Scaling          _scaling;
-
-        LONG                  _width;
-        LONG                  _height;
-        ID2D1Bitmap1*         _d2dBitmap;
-
-        PixmapCanvas*         _canvas;
+        GdiPixmapCanvas*  _canvas;
 };
 
 } // namespace
@@ -134,3 +115,4 @@ class PixmapImpl
 } // namespace
 
 #endif
+

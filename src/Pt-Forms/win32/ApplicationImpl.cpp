@@ -30,8 +30,15 @@
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include "WindowImpl.h"
-#include "PixmapImpl.h"
 #include "KeyMap.h"
+
+#if defined(PT_FORMS_WIN32_DIRECT2D)
+#include "../direct2d/Direct2dGraphicsBackend.h"
+#endif
+
+#if defined(PT_FORMS_WIN32_GDI)
+#include "../gdi/GdiGraphicsBackend.h"
+#endif
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Screen.h>
@@ -177,6 +184,20 @@ ApplicationImpl::~ApplicationImpl()
     DestroyCursor(_defaultCursorHandle);
 
     UnregisterClass("Pt-Forms", _instanceHandle);
+}
+
+
+GraphicsBackend* ApplicationImpl::queryBackend()
+{
+#if defined(PT_FORMS_WIN32_DIRECT2D)
+    return new Direct2dGraphicsBackend();
+#endif
+
+#if defined(PT_FORMS_WIN32_GDI)
+    return new GdiGraphicsBackend();
+#endif
+
+    return 0;
 }
 
 
