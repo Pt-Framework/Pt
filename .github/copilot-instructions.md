@@ -9,6 +9,9 @@ It provides a large amount of features and is still very easy to use.
 - At the end of every completed task, suggest improvements to the instruction
   files if the task revealed missing, unneeded, clear, or incorrect instructions.
 
+- Code only, no explanation. Bullets over paragraphs.
+- No explanations unless asked.
+
 # Task Specific Instructions
 
 Before performing any task, identify which of the instruction files below are
