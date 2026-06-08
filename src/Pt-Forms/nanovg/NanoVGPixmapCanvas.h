@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_PIXMAP_CANVAS_H
-#define PT_FORMS_PIXMAP_CANVAS_H
+#ifndef PT_FORMS_NANOVG_NANOVGPIXMAPCANVAS_H
+#define PT_FORMS_NANOVG_NANOVGPIXMAPCANVAS_H
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Gfx/Rect.h>
@@ -48,20 +48,20 @@ namespace Pt {
 namespace Forms {
 
 class Pixmap;
-class PixmapImpl;
+class NanoVGPixmapImpl;
 
 // Canvas of the nanovg renderer. Translates Gfx drawing commands into nanovg
 // calls. Each paint session corresponds to a single nanovg frame rendered into
 // the pixmap framebuffer. nanovg keeps a single mutable draw state, so the
 // onApply* overrides set the current nanovg state for the next primitive.
-class PixmapCanvas : public Gfx::Canvas
+class NanoVGPixmapCanvas : public Gfx::Canvas
 {
     public:
-        PixmapCanvas();
+        NanoVGPixmapCanvas();
 
-        ~PixmapCanvas();
+        ~NanoVGPixmapCanvas();
 
-        void setPixmap(PixmapImpl& pixmap);
+        void setPixmap(NanoVGPixmapImpl& pixmap);
 
         void drawPixmap(const Gfx::PointF& to,
                         const Pixmap& pm,
@@ -143,7 +143,7 @@ class PixmapCanvas : public Gfx::Canvas
         virtual void onFillPath(const Gfx::Path& path) override;
 
     private:
-        PixmapImpl*           _pixmap;
+        NanoVGPixmapImpl*           _pixmap;
         NVGcontext*           _vg;       // used only for immediate metric calls
         bool                  _painting;
 
@@ -173,4 +173,4 @@ class PixmapCanvas : public Gfx::Canvas
 
 } // namespace
 
-#endif
+#endif // PT_FORMS_NANOVG_NANOVGPIXMAPCANVAS_H

@@ -99,6 +99,10 @@ class NanoVGDevice
         // Unbinds the shared render-target FBO (restores default framebuffer).
         void unbindRenderTarget();
 
+        // Returns the font provider for direct font enumeration access.
+        NanoVGFontProvider* fontProvider() const
+        { return _fonts; }
+
         // Resolves a font request to a nanovg font handle, registering fonts on
         // first use. Returns -1 if no font is available.
         int fontFace(const Gfx::Font& font);

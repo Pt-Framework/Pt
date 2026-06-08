@@ -29,7 +29,7 @@
 #include "WindowImpl.h"
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include "PixmapImpl.h"
+#include "../generic/GenericGraphicsBackend.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Window.h>
@@ -46,7 +46,9 @@
 #include <iomanip>
 
 #ifdef PT_FORMS_WAYLAND_NANOVG
+#include "../nanovg/NanoVGGraphicsBackend.h"
 #include "../nanovg/NanoVGDevice.h"
+#include "../nanovg/NanoVGPixmapImpl.h"
 #include <wayland-egl.h>
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -126,8 +128,13 @@ static const struct wl_callback_listener frameListener = {
 
 } // namespace
 
-WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
+WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend)
 : WindowFrame(wm, w)
+, _genericBackend(0)
+#ifdef PT_FORMS_WAYLAND_NANOVG
+, _nanovgBackend(0)
+#endif
+, _commitFrame(&WindowImpl::commitFrameNone)
 , _wm(wm)
 , _window(w)
 , _surface(0)
@@ -154,6 +161,8 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
         createWindow();
 
     // Popup creation deferred to onShow() when position and size are known
+
+    bindBackend(graphicsBackend);
 
     Base::onSetParent(&wm);
 }
@@ -767,14 +776,49 @@ bool WindowImpl::commitPending() const
     return ! _commitDamage.isEmpty(); 
 }
 
-#ifdef PT_FORMS_WAYLAND_NANOVG
 
 void WindowImpl::commitFrame()
 {
     if( _frameCallback )
         return;
 
-    PixmapImpl* impl = pixmap().impl();
+    (this->*_commitFrame)();
+}
+
+
+void WindowImpl::bindBackend(GraphicsBackend& graphicsBackend)
+{
+    _genericBackend = 0;
+    _commitFrame    = &WindowImpl::commitFrameNone;
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+    _nanovgBackend = dynamic_cast<NanoVGGraphicsBackend*>(&graphicsBackend);
+    if( _nanovgBackend )
+    {
+        _commitFrame = &WindowImpl::commitFrameNanovg;
+        return;
+    }
+#endif
+
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphicsBackend);
+    if( _genericBackend )
+    {
+        _commitFrame = &WindowImpl::commitFrameGeneric;
+        return;
+    }
+}
+
+
+void WindowImpl::commitFrameNone()
+{
+}
+
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+
+void WindowImpl::commitFrameNanovg()
+{
+    NanoVGPixmapImpl* impl = static_cast<NanoVGPixmapImpl*>( pixmap().impl() );
 
     auto flushStart = std::chrono::steady_clock::now();
 
@@ -886,12 +930,9 @@ void WindowImpl::commitFrame()
 
 #else
 
-void WindowImpl::commitFrame()
+void WindowImpl::commitFrameGeneric()
 {
-    if( _frameCallback )
-        return;
-
-    const Gfx::Image& image = pixmap().impl()->bitmap().image();
+    const Gfx::Image& image = _genericBackend->image(pixmap());
     if( ! image.data() )
         return;
 

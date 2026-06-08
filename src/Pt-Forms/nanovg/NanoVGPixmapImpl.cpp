@@ -26,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#include "PixmapImpl.h"
-#include "PixmapCanvas.h"
+#include "NanoVGPixmapImpl.h"
+#include "NanoVGPixmapCanvas.h"
 #include "NanoVGDevice.h"
 
 #include <Pt/Forms/Pixmap.h>
@@ -365,7 +365,7 @@ namespace Pt {
 
 namespace Forms {
 
-PixmapImpl::PixmapImpl()
+NanoVGPixmapImpl::PixmapImpl()
 : _physicalSize(0, 0)
 , _width(0)
 , _height(0)
@@ -375,13 +375,13 @@ PixmapImpl::PixmapImpl()
 }
 
 
-PixmapImpl::~PixmapImpl()
+NanoVGPixmapImpl::~PixmapImpl()
 {
     destroyTexture();
 }
 
 
-void PixmapImpl::createTexture(int width, int height)
+void NanoVGPixmapImpl::createTexture(int width, int height)
 {
     destroyTexture();
 
@@ -412,7 +412,7 @@ void PixmapImpl::createTexture(int width, int height)
 }
 
 
-void PixmapImpl::destroyTexture()
+void NanoVGPixmapImpl::destroyTexture()
 {
     if(_image >= 0)
     {
@@ -433,7 +433,7 @@ void PixmapImpl::destroyTexture()
 }
 
 
-void PixmapImpl::reset(const Gfx::SizeF& size)
+void NanoVGPixmapImpl::reset(const Gfx::SizeF& size)
 {
     int width  = static_cast<int>( std::lround(size.width()) );
     int height = static_cast<int>( std::lround(size.height()) );
@@ -445,13 +445,13 @@ void PixmapImpl::reset(const Gfx::SizeF& size)
 }
 
 
-void PixmapImpl::reset()
+void NanoVGPixmapImpl::reset()
 {
     destroyTexture();
 }
 
 
-void PixmapImpl::reset(const Gfx::Image& image)
+void NanoVGPixmapImpl::reset(const Gfx::Image& image)
 {
     const std::size_t width  = image.width();
     const std::size_t height = image.height();
@@ -514,7 +514,7 @@ void PixmapImpl::reset(const Gfx::Image& image)
 }
 
 
-void PixmapImpl::flush()
+void NanoVGPixmapImpl::flush()
 {
     if(_commands.empty() || _image < 0)
         return;
@@ -870,7 +870,7 @@ void PixmapImpl::flush()
 }
 
 
-Gfx::Image PixmapImpl::toImage() const
+Gfx::Image NanoVGPixmapImpl::toImage() const
 {
     if(_width == 0 || _height == 0 || _image < 0)
         return Gfx::Image();
@@ -913,7 +913,7 @@ Gfx::Image PixmapImpl::toImage() const
 }
 
 
-void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+void NanoVGPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
     bitmap.reset( rect.size() );
 
@@ -925,35 +925,35 @@ void PixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 }
 
 
-const Gfx::SizeF& PixmapImpl::size() const
+const Gfx::SizeF& NanoVGPixmapImpl::size() const
 {
     return _physicalSize;
 }
 
 
-void PixmapImpl::setScaleFactor(double scaleFactor)
+void NanoVGPixmapImpl::setScaleFactor(double scaleFactor)
 {
     _scaling.setScaleFactor(scaleFactor);
 }
 
 
-const Gfx::ImageFormat& PixmapImpl::format() const
+const Gfx::ImageFormat& NanoVGPixmapImpl::format() const
 {
     return Gfx::ImageFormat::rgb32();
 }
 
 
-const Gfx::Scaling& PixmapImpl::scaling() const
+const Gfx::Scaling& NanoVGPixmapImpl::scaling() const
 {
     return _scaling;
 }
 
 
-Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
+Gfx::Canvas* NanoVGPixmapImpl::createCanvas(Gfx::Canvas* reuse)
 {
-    PixmapCanvas* canvas = dynamic_cast<PixmapCanvas*>(reuse);
+    NanoVGPixmapCanvas* canvas = dynamic_cast<NanoVGPixmapCanvas*>(reuse);
     if( ! canvas)
-        canvas = new PixmapCanvas();
+        canvas = new NanoVGPixmapCanvas();
 
     canvas->setPixmap(*this);
     _canvas = canvas;
@@ -961,13 +961,13 @@ Gfx::Canvas* PixmapImpl::createCanvas(Gfx::Canvas* reuse)
 }
 
 
-void PixmapImpl::releaseCanvas()
+void NanoVGPixmapImpl::releaseCanvas()
 {
     _canvas = 0;
 }
 
 
-void PixmapImpl::drawPixmap(Gfx::Canvas& canvas,
+void NanoVGPixmapImpl::drawPixmap(Gfx::Canvas& canvas,
                             const Gfx::PointF& to,
                             const Pixmap& pm,
                             const Gfx::RectF* rect)

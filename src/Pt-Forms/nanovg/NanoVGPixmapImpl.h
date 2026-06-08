@@ -26,11 +26,10 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_PixmapImpl_h
-#define Pt_Forms_PixmapImpl_h
+#ifndef PT_FORMS_NANOVG_NANOVGPIXMAPIMPL_H
+#define PT_FORMS_NANOVG_NANOVGPIXMAPIMPL_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Gfx/FontFace.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImageFormat.h>
@@ -50,19 +49,19 @@ namespace Pt {
 namespace Forms {
 
 class Pixmap;
-class PixmapCanvas;
+class NanoVGPixmapCanvas;
 
 // Back buffer for the nanovg renderer. Each pixmap is backed by a single
 // nanovg image (GLES2 texture). Drawing commands are recorded into a
 // PaintCommand buffer by PixmapCanvas and replayed lazily inside one
 // nvgBeginFrame/nvgEndFrame via flush(), using the shared render-target FBO
 // owned by NanoVGDevice. This eliminates nested nvg frames.
-class PixmapImpl : public IPixmapImpl
+class NanoVGPixmapImpl : public IPixmapImpl
 {
     public:
-        PixmapImpl();
+        NanoVGPixmapImpl();
 
-        virtual ~PixmapImpl();
+        virtual ~NanoVGPixmapImpl();
 
         void reset(const Gfx::Image& image) override;
 
@@ -121,27 +120,6 @@ class PixmapImpl : public IPixmapImpl
         void finish() override
         { flush(); }
 
-    public:
-        static const std::string& defaultFont()
-        {
-            return Gfx::Bitmap::defaultFont();
-        }
-
-        static void setDefaultFont(const std::string& family)
-        {
-            Gfx::Bitmap::setDefaultFont(family);
-        }
-
-        static std::vector<std::string> fontFamilies()
-        {
-            return Gfx::Bitmap::fontFamilies();
-        }
-
-        static std::vector<Gfx::FontFace> fontFaces(const std::string& family)
-        {
-            return Gfx::Bitmap::fontFaces(family);
-        }
-
     private:
         void createTexture(int width, int height);
 
@@ -157,7 +135,7 @@ class PixmapImpl : public IPixmapImpl
 
         std::vector<PaintCommand> _commands;
 
-        PixmapCanvas*             _canvas;
+        NanoVGPixmapCanvas*               _canvas;
 };
 
 } // namespace

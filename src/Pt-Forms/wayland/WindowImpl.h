@@ -48,6 +48,11 @@ namespace Pt {
 namespace Forms {
 
 class ScreenImpl;
+class GraphicsBackend;
+class GenericGraphicsBackend;
+#ifdef PT_FORMS_WAYLAND_NANOVG
+class NanoVGGraphicsBackend;
+#endif
 
 
 class WindowImpl : public WindowFrame
@@ -56,7 +61,7 @@ class WindowImpl : public WindowFrame
     friend class ScreenImpl;
 
     public:
-        WindowImpl(ScreenImpl& wm, Window& w);
+        WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend);
 
         virtual ~WindowImpl();
 
@@ -180,6 +185,20 @@ class WindowImpl : public WindowFrame
         bool commitPending() const;
 
     private:
+        typedef void (WindowImpl::*CommitFrame)();
+
+    private:
+        void bindBackend(GraphicsBackend& graphicsBackend);
+
+        void commitFrameNone();
+
+        void commitFrameGeneric();
+
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        void commitFrameNanovg();
+#endif
+
+    private:
         void createWindow();
 
         void createPopup(Window& w);
@@ -187,6 +206,12 @@ class WindowImpl : public WindowFrame
         void destroySurface();
 
     private:
+        GenericGraphicsBackend*              _genericBackend;
+#ifdef PT_FORMS_WAYLAND_NANOVG
+        NanoVGGraphicsBackend*               _nanovgBackend;
+#endif
+        CommitFrame                          _commitFrame;
+
         ScreenImpl&                          _wm;
         Window&                              _window;
         struct wl_surface*                   _surface;

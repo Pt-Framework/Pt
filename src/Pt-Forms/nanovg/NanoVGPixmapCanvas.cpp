@@ -25,8 +25,8 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-#include "PixmapCanvas.h"
-#include "PixmapImpl.h"
+#include "NanoVGPixmapCanvas.h"
+#include "NanoVGPixmapImpl.h"
 #include "NanoVGDevice.h"
 #include "PaintCommand.h"
 
@@ -45,7 +45,7 @@
 #include <cmath>
 #include <cassert>
 
-PT_LOG_DEFINE("Pt.Forms.PixmapCanvas");
+PT_LOG_DEFINE("Pt.Forms.NanoVGPixmapCanvas");
 
 namespace {
 
@@ -102,7 +102,7 @@ namespace Pt {
 
 namespace Forms {
 
-PixmapCanvas::PixmapCanvas()
+NanoVGPixmapCanvas::NanoVGPixmapCanvas()
 : Gfx::Canvas()
 , _pixmap(0)
 , _vg(0)
@@ -122,20 +122,20 @@ PixmapCanvas::PixmapCanvas()
 }
 
 
-PixmapCanvas::~PixmapCanvas()
+NanoVGPixmapCanvas::~NanoVGPixmapCanvas()
 {
     // _textureImage is not used in recording mode; brush textures are created
     // and destroyed during flush() inside PixmapImpl.
 }
 
 
-void PixmapCanvas::setPixmap(PixmapImpl& pixmap)
+void NanoVGPixmapCanvas::setPixmap(NanoVGPixmapImpl& pixmap)
 {
     _pixmap = &pixmap;
 }
 
 
-void PixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
+void NanoVGPixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
 {
     // Recording mode: no nanovg frame is opened here. Commands are appended
     // to _pixmap->commands() and replayed lazily in PixmapImpl::flush().
@@ -143,7 +143,7 @@ void PixmapCanvas::onBeginPaint(const Gfx::Paint& /*paint*/)
 }
 
 
-void PixmapCanvas::onFinishPaint()
+void NanoVGPixmapCanvas::onFinishPaint()
 {
     // Recording mode: no nanovg frame to close. The command buffer is flushed
     // when the pixmap texture is actually needed (commitFrame, toImage, blit).
@@ -151,12 +151,12 @@ void PixmapCanvas::onFinishPaint()
 }
 
 
-void PixmapCanvas::onSetTransform(const Gfx::Transform& /*tx*/)
+void NanoVGPixmapCanvas::onSetTransform(const Gfx::Transform& /*tx*/)
 {
 }
 
 
-void PixmapCanvas::onApplyTransform()
+void NanoVGPixmapCanvas::onApplyTransform()
 {
     if( ! _pixmap)
         return;
@@ -168,13 +168,13 @@ void PixmapCanvas::onApplyTransform()
 }
 
 
-void PixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
+void NanoVGPixmapCanvas::onSetCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
 }
 
 
-void PixmapCanvas::onApplyCompositionMode()
+void NanoVGPixmapCanvas::onApplyCompositionMode()
 {
     if( ! _pixmap)
         return;
@@ -191,7 +191,7 @@ void PixmapCanvas::onApplyCompositionMode()
 }
 
 
-void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
+void NanoVGPixmapCanvas::onSetPen(const Gfx::Pen& pen)
 {
     _pen = pen;
 
@@ -233,7 +233,7 @@ void PixmapCanvas::onSetPen(const Gfx::Pen& pen)
 }
 
 
-void PixmapCanvas::onApplyPen()
+void NanoVGPixmapCanvas::onApplyPen()
 {
     if( ! _pixmap)
         return;
@@ -248,14 +248,14 @@ void PixmapCanvas::onApplyPen()
 }
 
 
-void PixmapCanvas::onSetBrush(const Gfx::Brush& brush)
+void NanoVGPixmapCanvas::onSetBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
     _textureImage = -1;
 }
 
 
-void PixmapCanvas::onApplyBrush()
+void NanoVGPixmapCanvas::onApplyBrush()
 {
     if( ! _pixmap)
         return;
@@ -267,7 +267,7 @@ void PixmapCanvas::onApplyBrush()
 }
 
 
-void PixmapCanvas::onSetFont(const Gfx::Font& font)
+void NanoVGPixmapCanvas::onSetFont(const Gfx::Font& font)
 {
     _font = font;
 
@@ -323,7 +323,7 @@ void PixmapCanvas::onSetFont(const Gfx::Font& font)
 }
 
 
-void PixmapCanvas::onApplyFont()
+void NanoVGPixmapCanvas::onApplyFont()
 {
     if( ! _pixmap)
         return;
@@ -336,7 +336,7 @@ void PixmapCanvas::onApplyFont()
 }
 
 
-void PixmapCanvas::onSetClip(const Gfx::RectF* clip)
+void NanoVGPixmapCanvas::onSetClip(const Gfx::RectF* clip)
 {
     if(clip)
     {
@@ -350,7 +350,7 @@ void PixmapCanvas::onSetClip(const Gfx::RectF* clip)
 }
 
 
-void PixmapCanvas::onApplyClip()
+void NanoVGPixmapCanvas::onApplyClip()
 {
     if( ! _pixmap)
         return;
@@ -364,7 +364,7 @@ void PixmapCanvas::onApplyClip()
 }
 
 
-void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void NanoVGPixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( ! _pixmap)
         return;
@@ -377,7 +377,7 @@ void PixmapCanvas::onDrawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 }
 
 
-void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
+void NanoVGPixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 {
     if( ! _pixmap || n < 2)
         return;
@@ -389,7 +389,7 @@ void PixmapCanvas::onDrawPolyline(const Gfx::PointF* pts, const size_t n)
 }
 
 
-void PixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
+void NanoVGPixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 {
     if( ! _pixmap || n < 3)
         return;
@@ -401,7 +401,7 @@ void PixmapCanvas::onFillPolygon(const Gfx::PointF* ps, const size_t n)
 }
 
 
-void PixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
+void NanoVGPixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
 {
     if( ! _pixmap)
         return;
@@ -413,7 +413,7 @@ void PixmapCanvas::onDrawRect(const Gfx::RectF& rectangle)
 }
 
 
-void PixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
+void NanoVGPixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
 {
     if( ! _pixmap)
         return;
@@ -425,7 +425,7 @@ void PixmapCanvas::onFillRect(const Gfx::RectF& rectangle)
 }
 
 
-void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void NanoVGPixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap)
         return;
@@ -438,7 +438,7 @@ void PixmapCanvas::onDrawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void NanoVGPixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     if( ! _pixmap)
         return;
@@ -451,7 +451,7 @@ void PixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& s
 }
 
 
-Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
+Gfx::TextMetrics NanoVGPixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 {
     NanoVGDevice* device = NanoVGDevice::instance();
     NVGcontext* vg = device ? device->context() : 0;
@@ -484,13 +484,13 @@ Gfx::TextMetrics PixmapCanvas::onGetTextMetrics(const Pt::String& text) const
 }
 
 
-const Gfx::FontMetrics& PixmapCanvas::onGetFontMetrics() const
+const Gfx::FontMetrics& NanoVGPixmapCanvas::onGetFontMetrics() const
 {
     return _fontMetrics;
 }
 
 
-void PixmapCanvas::onDrawText(const Gfx::PointF& to,
+void NanoVGPixmapCanvas::onDrawText(const Gfx::PointF& to,
                               const Pt::String& text,
                               const Gfx::Transform* tform)
 {
@@ -512,7 +512,7 @@ void PixmapCanvas::onDrawText(const Gfx::PointF& to,
 }
 
 
-void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
+void NanoVGPixmapCanvas::onDrawImage(const Gfx::PointF& toF,
                                const Gfx::Image& image,
                                const Gfx::RectF* rect)
 {
@@ -537,13 +537,13 @@ void PixmapCanvas::onDrawImage(const Gfx::PointF& toF,
 }
 
 
-void PixmapCanvas::onSetPath(const Gfx::Path& path)
+void NanoVGPixmapCanvas::onSetPath(const Gfx::Path& path)
 {
     _ptPath = path;
 }
 
 
-void PixmapCanvas::onDrawPath()
+void NanoVGPixmapCanvas::onDrawPath()
 {
     if( ! _pixmap)
         return;
@@ -555,7 +555,7 @@ void PixmapCanvas::onDrawPath()
 }
 
 
-void PixmapCanvas::onFillPath()
+void NanoVGPixmapCanvas::onFillPath()
 {
     if( ! _pixmap)
         return;
@@ -567,7 +567,7 @@ void PixmapCanvas::onFillPath()
 }
 
 
-void PixmapCanvas::onDrawPath(const Gfx::Path& path)
+void NanoVGPixmapCanvas::onDrawPath(const Gfx::Path& path)
 {
     if( ! _pixmap)
         return;
@@ -579,7 +579,7 @@ void PixmapCanvas::onDrawPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::onFillPath(const Gfx::Path& path)
+void NanoVGPixmapCanvas::onFillPath(const Gfx::Path& path)
 {
     if( ! _pixmap)
         return;
@@ -591,7 +591,7 @@ void PixmapCanvas::onFillPath(const Gfx::Path& path)
 }
 
 
-void PixmapCanvas::drawPixmap(const Gfx::PointF& to,
+void NanoVGPixmapCanvas::drawPixmap(const Gfx::PointF& to,
                               const Pixmap& pm,
                               const Gfx::RectF* rect)
 {
@@ -600,7 +600,8 @@ void PixmapCanvas::drawPixmap(const Gfx::PointF& to,
 
     applyState();
 
-    PixmapImpl* srcImpl = const_cast<PixmapImpl*>(pm.impl());
+    const NanoVGPixmapImpl* srcConstImpl = static_cast<const NanoVGPixmapImpl*>( pm.impl() );
+    NanoVGPixmapImpl* srcImpl = const_cast<NanoVGPixmapImpl*>(srcConstImpl);
     if( ! srcImpl)
         return;
 

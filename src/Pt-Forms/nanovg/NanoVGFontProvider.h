@@ -26,10 +26,16 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_NanoVGFontProvider_h
-#define Pt_Forms_NanoVGFontProvider_h
+#ifndef PT_FORMS_NANOVG_NANOVGFONTPROVIDER_H
+#define PT_FORMS_NANOVG_NANOVGFONTPROVIDER_H
 
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontFace.h>
+#include <Pt/Gfx/FontProvider.h>
+#include <Pt/System/Path.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include <string>
 #include <vector>
@@ -47,10 +53,20 @@ namespace Forms {
 //
 // Variable fonts are matched to their nearest static instance only. Per axis
 // coordinates are not applied (v1 limitation).
-class NanoVGFontProvider
+class NanoVGFontProvider : public Gfx::FontProvider
 {
     public:
         explicit NanoVGFontProvider(NVGcontext* nvg);
+
+        ~NanoVGFontProvider();
+
+        const std::string& defaultFont() const;
+
+        void setDefaultFont(const std::string& family);
+
+        std::vector<std::string> fontFamilies() const;
+
+        std::vector<Gfx::FontFace> fontFaces(const std::string& family) const;
 
         // Returns the nanovg font handle for the request, or -1 if no font is
         // available.
@@ -81,6 +97,7 @@ class NanoVGFontProvider
         {
             std::string family;
             std::string styleName;
+            System::Path source;         // file path, empty for embedded
             int         weight;   // 100..900
             int         slant;    // 0 = upright, 1 = italic/oblique
             int         stretch;  // 1..9
@@ -93,8 +110,14 @@ class NanoVGFontProvider
 
         void registerEmbedded();
 
-        void loadFile(const std::string& path);
+        void loadFile(const System::Path& path);
 
+    protected:
+        void onAddFont(const System::Path& path) override;
+
+        void onRemoveFont(const System::Path& path) override;
+
+    private:
         const FaceEntry* findBestMatch(const std::string& family,
                                        const std::string& styleName,
                                        int weight, int slant, int stretch) const;
@@ -106,6 +129,8 @@ class NanoVGFontProvider
 
     private:
         NVGcontext*            _nvg;
+        FT_Library             _ft;
+        std::string            _defaultFont;
         std::vector<FaceEntry> _faces;
         int                    _defaultRegular;
         int                    _defaultBold;
@@ -117,4 +142,4 @@ class NanoVGFontProvider
 
 } // namespace
 
-#endif
+#endif // PT_FORMS_NANOVG_NANOVGFONTPROVIDER_H

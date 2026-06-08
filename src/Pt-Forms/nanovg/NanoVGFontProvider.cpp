@@ -42,6 +42,7 @@
 
 #include "nanovg.h"
 
+#include <algorithm>
 #include <cstdlib>
 
 PT_LOG_DEFINE("Pt.Forms.NanoVG.Font");
@@ -135,13 +136,9 @@ struct FaceMetadata
 };
 
 
-FaceMetadata memFaceMetadata(const unsigned char* data, int size)
+FaceMetadata memFaceMetadata(FT_Library ft, const unsigned char* data, int size)
 {
     FaceMetadata m = { 1.0f, 0.9f, 0.7f, 0.54f };
-
-    FT_Library ft = 0;
-    if(FT_Init_FreeType(&ft) != 0)
-        return m;
 
     FT_Face face = 0;
     if(FT_New_Memory_Face(ft, data, size, 0, &face) == 0)
@@ -153,7 +150,6 @@ FaceMetadata memFaceMetadata(const unsigned char* data, int size)
         FT_Done_Face(face);
     }
 
-    FT_Done_FreeType(ft);
     return m;
 }
 
@@ -162,16 +158,26 @@ FaceMetadata memFaceMetadata(const unsigned char* data, int size)
 
 NanoVGFontProvider::NanoVGFontProvider(NVGcontext* nvg)
 : _nvg(nvg)
+, _ft(0)
+, _defaultFont("DejaVu Sans")
 , _defaultRegular(-1)
 , _defaultBold(-1)
 , _defaultItalic(-1)
 , _defaultBoldItalic(-1)
 {
+    FT_Init_FreeType(&_ft);
+
     registerEmbedded();
 
     const std::vector<System::Path>& files = Gfx::FontRegistry::instance().fontFiles();
     for(std::vector<System::Path>::const_iterator it = files.begin(); it != files.end(); ++it)
-        loadFile(it->toLocal());
+        onAddFont(*it);
+}
+
+
+NanoVGFontProvider::~NanoVGFontProvider()
+{
+    FT_Done_FreeType(_ft);
 }
 
 
@@ -221,7 +227,7 @@ void NanoVGFontProvider::registerEmbedded()
         if(embedded[i].handle < 0)
             continue;
 
-        const FaceMetadata meta = memFaceMetadata(embedded[i].data, embedded[i].size);
+        const FaceMetadata meta = memFaceMetadata(_ft, embedded[i].data, embedded[i].size);
 
         FaceEntry entry;
         entry.family         = "DejaVu Sans";
@@ -238,18 +244,13 @@ void NanoVGFontProvider::registerEmbedded()
 }
 
 
-void NanoVGFontProvider::loadFile(const std::string& path)
+void NanoVGFontProvider::loadFile(const System::Path& path)
 {
-    FT_Library ft = 0;
-    if(FT_Init_FreeType(&ft) != 0)
-        return;
+    const std::string local = path.toLocal();
 
     FT_Face face = 0;
-    if(FT_New_Face(ft, path.c_str(), 0, &face) != 0)
-    {
-        FT_Done_FreeType(ft);
+    if(FT_New_Face(_ft, local.c_str(), 0, &face) != 0)
         return;
-    }
 
     const long faceCount = face->num_faces;
 
@@ -257,7 +258,7 @@ void NanoVGFontProvider::loadFile(const std::string& path)
     {
         if(faceIndex > 0)
         {
-            if(FT_New_Face(ft, path.c_str(), faceIndex, &face) != 0)
+            if(FT_New_Face(_ft, local.c_str(), faceIndex, &face) != 0)
                 continue;
         }
 
@@ -298,13 +299,15 @@ void NanoVGFontProvider::loadFile(const std::string& path)
         name += entry.styleName;
 
         if(nvgFindFont(_nvg, name.c_str()) < 0)
-            entry.handle = nvgCreateFontAtIndex(_nvg, name.c_str(), path.c_str(),
+            entry.handle = nvgCreateFontAtIndex(_nvg, name.c_str(), local.c_str(),
                                                 static_cast<int>(faceIndex));
         else
             entry.handle = nvgFindFont(_nvg, name.c_str());
 
         if(entry.handle < 0)
             continue;
+
+        entry.source = path;
 
         if(_defaultRegular >= 0)
             nvgAddFallbackFontId(_nvg, entry.handle, _defaultRegular);
@@ -313,8 +316,6 @@ void NanoVGFontProvider::loadFile(const std::string& path)
 
         PT_LOG_INFO("registered font: " << family << ' ' << entry.styleName);
     }
-
-    FT_Done_FreeType(ft);
 }
 
 
@@ -424,6 +425,72 @@ float NanoVGFontProvider::xHeightRatio(int handle) const
     }
 
     return 0.54f;
+}
+
+
+const std::string& NanoVGFontProvider::defaultFont() const
+{
+    return _defaultFont;
+}
+
+
+void NanoVGFontProvider::setDefaultFont(const std::string& family)
+{
+    _defaultFont = family;
+}
+
+
+std::vector<std::string> NanoVGFontProvider::fontFamilies() const
+{
+    std::vector<std::string> result;
+
+    for(std::vector<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+    {
+        if(std::find(result.begin(), result.end(), it->family) == result.end())
+            result.push_back(it->family);
+    }
+
+    return result;
+}
+
+
+std::vector<Gfx::FontFace> NanoVGFontProvider::fontFaces(const std::string& family) const
+{
+    std::vector<Gfx::FontFace> result;
+
+    for(std::vector<FaceEntry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+    {
+        if(it->family != family)
+            continue;
+
+        const Gfx::Font::Weight  weight  = static_cast<Gfx::Font::Weight>(it->weight);
+        const Gfx::Font::Slant   slant   = it->slant != 0 ? Gfx::Font::Slant::Italic
+                                                           : Gfx::Font::Slant::Normal;
+        const Gfx::Font::Stretch stretch = static_cast<Gfx::Font::Stretch>(it->stretch);
+
+        result.push_back(Gfx::FontFace(it->family, weight, slant, stretch, it->styleName));
+    }
+
+    return result;
+}
+
+
+void NanoVGFontProvider::onAddFont(const System::Path& path)
+{
+    loadFile(path);
+}
+
+
+void NanoVGFontProvider::onRemoveFont(const System::Path& path)
+{
+    std::vector<FaceEntry>::iterator it = _faces.begin();
+    while(it != _faces.end())
+    {
+        if(it->source == path)
+            it = _faces.erase(it);
+        else
+            ++it;
+    }
 }
 
 

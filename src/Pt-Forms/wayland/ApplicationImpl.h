@@ -58,6 +58,7 @@
 #endif
 
 #ifdef PT_FORMS_WAYLAND_NANOVG
+#include "../nanovg/NanoVGGraphicsBackend.h"
 #include "../nanovg/NanoVGDevice.h"
 #endif
 
@@ -87,7 +88,11 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         GraphicsBackend* queryBackend()
         {
+#ifdef PT_FORMS_WAYLAND_NANOVG
+            return new NanoVGGraphicsBackend();
+#else
             return 0;
+#endif
         }
 
     public:
