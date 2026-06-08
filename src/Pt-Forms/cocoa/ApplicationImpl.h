@@ -30,6 +30,7 @@
 #ifndef Pt_Forms_cocoa_ApplicationImpl_h
 #define Pt_Forms_cocoa_ApplicationImpl_h
 
+#include "CocoaGraphicsBackend.h"
 #include "posix/Selector.h"
 #include "SelectableList.h"
 
@@ -52,7 +53,6 @@ class Control;
 class Window;
 class KeyEvent;
 class MouseEvent;
-class GraphicsBackend;
 
 class ApplicationImpl : public Pt::System::EventLoop, 
                         public System::Selector
@@ -111,7 +111,7 @@ class ApplicationImpl : public Pt::System::EventLoop,
 
         GraphicsBackend* queryBackend()
         {
-            return 0;
+            return new CocoaGraphicsBackend();
         }
 
     public:
@@ -180,7 +180,6 @@ class ApplicationImpl : public Pt::System::EventLoop,
         IOEntry& enableIOHandle(System::IOHandle* h);
 
     private:
-        CocoaGraphicsBackend             _cocoaBackend;
         System::Mutex                    _mutex;
         System::SelectableList           _selectables;
         std::vector<IOEntry>             _iotable;
