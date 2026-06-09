@@ -44,6 +44,8 @@ namespace Pt {
 namespace Forms {
 
 class ScreenImpl;
+class GraphicsBackend;
+class GenericGraphicsBackend;
 
 class WindowImpl : public WindowFrame
 {
@@ -52,7 +54,7 @@ class WindowImpl : public WindowFrame
     friend class ScreenImpl;
 
     public:
-        WindowImpl(ScreenImpl& wm,  Window& w);
+        WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend);
 
         virtual ~WindowImpl();
 
@@ -61,6 +63,8 @@ class WindowImpl : public WindowFrame
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
         void paint(const Gfx::RectF& rect);
+
+        void commitFrame(int x, int y, int w, int h);
 
         //void show(bool visible);
 
@@ -201,7 +205,19 @@ class WindowImpl : public WindowFrame
 
         bool isMaximized();
 
+        void bindBackend(GraphicsBackend& graphicsBackend);
+
+        void commitFrameNone(int x, int y, int w, int h);
+
+        void commitFrameGeneric(int x, int y, int w, int h);
+
     private:
+        typedef void (WindowImpl::*CommitFrame)(int, int, int, int);
+
+    private:
+        GenericGraphicsBackend* _genericBackend;
+        CommitFrame             _commitFrame;
+
         ScreenImpl&    _wm;
         Window&        _client;
         ::Window       _window;

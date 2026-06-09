@@ -28,8 +28,8 @@
 
 #include "WindowImpl.h"
 #include "ApplicationImpl.h"
-#include "PixmapImpl.h"
 #include "ScreenImpl.h"
+#include "../generic/GenericGraphicsBackend.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Window.h>
@@ -42,8 +42,10 @@ namespace Pt {
 
 namespace Forms {
 
-WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
+WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBackend)
 : WindowFrame(wm, w)
+, _genericBackend(0)
+, _commitFrame(&WindowImpl::commitFrameNone)
 , _wm(wm)
 , _client(w)
 , _window(None)
@@ -55,6 +57,8 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w)
   _display = Application::instance().impl()->display();
 
   create( w.type() );
+
+  bindBackend(graphicsBackend);
 }
 
 
@@ -155,6 +159,51 @@ void WindowImpl::destroy()
 
     XDestroyWindow(_display, _window);
     _window = 0;
+}
+
+
+void WindowImpl::bindBackend(GraphicsBackend& graphicsBackend)
+{
+    _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphicsBackend);
+    if( _genericBackend )
+    {
+        _commitFrame = &WindowImpl::commitFrameGeneric;
+        return;
+    }
+}
+
+
+void WindowImpl::commitFrame(int x, int y, int w, int h)
+{
+    (this->*_commitFrame)(x, y, w, h);
+}
+
+
+void WindowImpl::commitFrameNone(int /*x*/, int /*y*/, int /*w*/, int /*h*/)
+{
+}
+
+
+void WindowImpl::commitFrameGeneric(int x, int y, int w, int h)
+{
+    const Gfx::Image& image = _genericBackend->image( pixmap() );
+    if( ! image.data() )
+        return;
+
+    char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
+
+    ApplicationImpl* app = Application::instance().impl();
+    XImage* ximage = XCreateImage(app->display(), app->visual(), app->depth(),
+                                  ZPixmap, 0,
+                                  data, image.width(), image.height(),
+                                  app->depth() == 24 ? 32 : app->depth(), 0);
+
+    unsigned int screen = DefaultScreen(app->display());
+    GC gc = DefaultGC(app->display(), screen);
+    XPutImage(app->display(), _window, gc, ximage, x, y, x, y, w, h);
+
+    ximage->data = NULL;
+    XDestroyImage(ximage);
 }
 
 

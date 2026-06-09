@@ -169,7 +169,7 @@ void ScreenImpl::onRequestRepaint(const Gfx::RectF& rect)
 
 WindowFrame* ScreenImpl::onAttach(Window& w)
 {
-    WindowImpl* frame = new WindowImpl(*this, w);
+    WindowImpl* frame = new WindowImpl(*this, w, Application::instance().graphicsBackend());
     frame->setNextResponder(this);
 
     _windows.push_back(&w);

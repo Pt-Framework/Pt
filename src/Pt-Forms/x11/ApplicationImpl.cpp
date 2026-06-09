@@ -30,8 +30,8 @@
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include "WindowImpl.h"
-#include "PixmapImpl.h"
 #include "KeyHandler.h"
+#include "../generic/GenericGraphicsBackend.h"
 
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Screen.h>
@@ -295,27 +295,7 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     frame->processEvent(pev);
 
     WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
-    const Gfx::Image& image = windowImpl->pixmap().impl()->bitmap().image();
-    char* data = reinterpret_cast<char*>( const_cast<Pt::uint8_t*>(image.data()) );
-
-    //std::clog << "  EXPOSE " << window.title() << " "
-    //                              << x << ", " << y << " " 
-    //                              << image.width() << "x" << image.height() << std::endl;
-
-    XImage* ximage = XCreateImage(_display, _visual, _depth, ZPixmap, 0, 
-                                  data, image.width(), image.height(), 
-                                  _depth == 24 ? 32 : _depth, 0);
-    
-    unsigned int screen = DefaultScreen(_display);
-    ::Window drawable = windowImpl->window();
-    GC gc = DefaultGC(_display, screen);
-    
-    XPutImage( _display, drawable, gc, ximage, x, y, x, y, width, height);
-    
-    ximage->data = NULL;
-    XDestroyImage(ximage); 
-
-    //XFlush(_display);
+    windowImpl->commitFrame(x, y, width, height);
 }
 
 
