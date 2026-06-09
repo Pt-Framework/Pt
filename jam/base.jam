@@ -192,6 +192,20 @@ rule EchoOptionLine
 }
 
 #
+# Echoes each value on its own line with visual separator for long option values.
+# Each value gets a dedicated line with arrow indicator.
+#
+rule EchoOptionLineSimple
+{
+    local _indent = "  " ;
+
+    for local _val in $(1)
+    {
+        Echo $(_indent) $(_val) ;
+    }
+}
+
+#
 # EchoOption OS : "Host Operating system" [ : $(OS:L) ] ;
 #
 rule EchoOption
