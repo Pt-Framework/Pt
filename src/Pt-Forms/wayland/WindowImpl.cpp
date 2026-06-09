@@ -928,7 +928,7 @@ void WindowImpl::commitFrameNanovg()
                  " eglSwap:" << eglUs);
 }
 
-#else
+#endif
 
 void WindowImpl::commitFrameGeneric()
 {
@@ -995,7 +995,7 @@ void WindowImpl::commitFrameGeneric()
     wl_display_flush( _wm.app().display() );
 }
 
-#endif
+
 
 ///////////////////////////////////////////////////////////////////////
 // move
