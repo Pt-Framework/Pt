@@ -67,9 +67,9 @@ class NanoVGGraphicsBackend : public GraphicsBackend
             return NanoVGDevice::instance()->fontProvider()->fontFaces(family);
         }
 
-        NanoVGPixmapImpl* getPixmapImpl(const Pixmap& pixmap) const
+        const NanoVGPixmapImpl* getPixmapImpl(const Pixmap& pixmap) const
         {
-            return static_cast<NanoVGPixmapImpl*>( pixmap.impl() );
+            return static_cast<const NanoVGPixmapImpl*>( pixmap.impl() );
         }
 };
 
