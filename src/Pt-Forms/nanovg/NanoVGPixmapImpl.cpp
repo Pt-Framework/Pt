@@ -365,7 +365,7 @@ namespace Pt {
 
 namespace Forms {
 
-NanoVGPixmapImpl::PixmapImpl()
+NanoVGPixmapImpl::NanoVGPixmapImpl()
 : _physicalSize(0, 0)
 , _width(0)
 , _height(0)
@@ -375,7 +375,7 @@ NanoVGPixmapImpl::PixmapImpl()
 }
 
 
-NanoVGPixmapImpl::~PixmapImpl()
+NanoVGPixmapImpl::~NanoVGPixmapImpl()
 {
     destroyTexture();
 }
@@ -875,7 +875,7 @@ Gfx::Image NanoVGPixmapImpl::toImage() const
     if(_width == 0 || _height == 0 || _image < 0)
         return Gfx::Image();
 
-    const_cast<PixmapImpl*>(this)->flush();
+    const_cast<NanoVGPixmapImpl*>(this)->flush();
 
     NanoVGDevice* device = NanoVGDevice::instance();
     if( ! device || ! device->isValid())
