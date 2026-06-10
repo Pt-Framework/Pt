@@ -50,7 +50,6 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBacke
 , _client(w)
 , _window(None)
 , _display(0)
-, _hasFirstShow(false)
 , _width(240)
 , _height(160)
 {
@@ -353,16 +352,23 @@ void WindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 
 void WindowImpl::onProcessPaintEvent(const PaintEvent& ev)
 {
-    Base::onProcessPaintEvent(ev);
-
     PaintEvent rev( _client, ev.rect() );
     _client.processEvent(rev);
+
+    Base::onProcessPaintEvent(ev);
 }
 
 
 void WindowImpl::onPaintEvent(const PaintEvent& ev)
 {
     Base::onPaintEvent(ev);
+
+    Gfx::RectF rect = ev.rect();
+
+    rect = Gfx::RectF( rect.topLeft() * scaleFactor(), 
+                       rect.size() * scaleFactor() );
+
+    commitFrame(rect.x(), rect.y(), rect.width(), rect.height());
 }
 
 

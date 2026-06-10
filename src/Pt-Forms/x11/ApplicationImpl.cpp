@@ -293,9 +293,6 @@ void ApplicationImpl::onExpose(Window& window, XEvent& xev)
     WindowFrame* frame = window.frame();
     PaintEvent pev(*frame, rect);
     frame->processEvent(pev);
-
-    WindowImpl* windowImpl = static_cast<WindowImpl*>( window.frame() );
-    windowImpl->commitFrame(x, y, width, height);
 }
 
 

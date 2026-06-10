@@ -222,7 +222,6 @@ class WindowImpl : public WindowFrame
         Window&        _client;
         ::Window       _window;
         ::Display*     _display;
-        bool           _hasFirstShow;
         int            _width;
         int            _height;
 };
