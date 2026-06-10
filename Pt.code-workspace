@@ -57,6 +57,14 @@
             "name": "Pt-Reflex"
         },
         {
+            "path": "include/Pt/Cosmo",
+            "name": "Pt-Cosmo (Includes)"
+        },
+        {
+            "path": "src/Pt-Cosmo",
+            "name": "Pt-Cosmo"
+        },
+        {
             "path": "include/Pt/Remoting",
             "name": "Pt-Remoting (Includes)"
         },

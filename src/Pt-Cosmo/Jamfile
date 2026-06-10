@@ -1,0 +1,23 @@
+SubDir PT_TOP src Pt-Cosmo ;
+
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_COSMO_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Cosmo ;
+
+SharedLibrary Pt-Cosmo : Activator.cpp
+                         ComponentManager.cpp
+                         ComponentManagerImpl.cpp
+                         ComponentTable.cpp
+                         ExportMap.cpp
+                         ImportMap.cpp
+                         Main.cpp
+                         MainImpl.cpp ;
+
+LinkSharedLibraries Pt-Cosmo : Pt-System Pt ;
+MakeLocate Pt-Cosmo : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Cosmo : $(PT_INSTALL_LIBDIR) ;
+
+Main cosmo : Cosmo.cpp ;
+LinkSharedLibraries cosmo : Pt-Cosmo ;
+MakeLocate cosmo : $(PT_OUTPUT_TARGET) ;
+MakeInstall cosmo : $(PT_INSTALL_BINDIR) ;
