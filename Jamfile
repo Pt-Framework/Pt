@@ -119,6 +119,12 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Mcp ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir PT_TOP include Pt Cosmo ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Cosmo ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Cosmo ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 SubDir PT_TOP include Pt Unit ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Unit ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -210,6 +216,7 @@ if $(PT_SYSTEM)
     SubInclude PT_TOP src Pt-System ;
     SubInclude PT_TOP src Pt-Net ;
     SubInclude PT_TOP src Pt-Cma ;
+    SubInclude PT_TOP src Pt-Cosmo ;
     SubInclude PT_TOP src Pt-Db ;
     SubInclude PT_TOP src Pt-Http ;
     SubInclude PT_TOP src Pt-Remoting ;
@@ -220,10 +227,10 @@ if $(PT_SYSTEM)
     SubInclude PT_TOP src Pt-Ssl ;
     SubInclude PT_TOP src Pt-Gfx ;
 
-	  if $(WITH_EGL_TEST)
-	  {
-		  SubInclude PT_TOP src Pt-Forms egl-test ;
-	  }
+    if $(WITH_EGL_TEST)
+    {
+        SubInclude PT_TOP src Pt-Forms egl-test ;
+    }
 
     #if $(GUI)
     #{
