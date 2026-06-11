@@ -31,6 +31,7 @@
 #include <Pt/Unit/Api.h>
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
+#include <sstream>
 #include <iostream>
 #include <cmath>
 #include <limits>
