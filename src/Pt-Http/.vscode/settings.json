@@ -1,0 +1,6 @@
+{
+    "C_Cpp.default.browse.path": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/../../include/Pt/Http"
+    ]
+}

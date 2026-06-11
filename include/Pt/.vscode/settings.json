@@ -1,24 +1,6 @@
 {
-    "files.exclude": {
-        "Cma": true,
-        "Db": true,
-        "Forms": true,
-        "Gfx": true,
-        "Http": true,
-        "Json": true,
-        "JsonRpc": true,
-        "Mfc": true,
-        "Mcp": true,
-        "Net": true,
-        "Qt": true,
-        "Reflex": true,
-        "Remoting": true,
-        "Soap": true,
-        "Ssl": true,
-        "System": true,
-        "Unit": true,
-        "WxWidgets": true,
-        "Xml": true,
-        "XmlRpc": true
-    }
+    "C_Cpp.default.browse.path": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/../../src/Pt"
+    ]
 }

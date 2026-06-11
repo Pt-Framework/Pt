@@ -2,45 +2,29 @@
     "configurations": [
         {
             "name": "Win32",
-            "includePath": [
-                "${default}"
-            ],
-            "browse": {
-                "path": [
-                    "${workspaceFolder}",
-                    "${workspaceFolder}/../../../src/Pt-Gfx"
-                ],
-                "limitSymbolsToIncludedHeaders": false
-            },
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
             "compilerPath": "cl.exe",
-            "cStandard": "c17",
-            "cppStandard": "c++14",
             "intelliSenseMode": "windows-msvc-x64"
         },
         {
             "name": "MacOS",
-            "includePath": [
-                "${default}"
-            ],
-            "browse": {
-                "path": [
-                    "${workspaceFolder}",
-                    "${workspaceFolder}/../../../src/Pt-Gfx"
-                ],
-                "limitSymbolsToIncludedHeaders": false
-            },
             "defines": [
                 "_DEBUG"
             ],
             "compilerPath": "/usr/bin/clang++",
-            "cStandard": "c17",
-            "cppStandard": "c++14",
             "intelliSenseMode": "macos-clang-x64"
+        },
+        {
+            "name": "Linux",
+            "defines": [
+                "_DEBUG"
+            ],
+            "compilerPath": "/usr/bin/g++",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
