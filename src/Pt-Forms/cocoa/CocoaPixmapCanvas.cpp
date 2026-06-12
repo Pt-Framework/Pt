@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -53,6 +53,7 @@ CocoaPixmapCanvas::CocoaPixmapCanvas()
 , _penJoin(kCGLineJoinRound)
 , _brushColor(0)
 , _brushGradient(0)
+, _brushImage(0)
 , _font(0)
 , _fontAttributes(0)
 , _attributedString(0)
@@ -74,6 +75,9 @@ CocoaPixmapCanvas::~CocoaPixmapCanvas()
 
     if(_brushGradient)
       CGGradientRelease(_brushGradient);
+
+    if(_brushImage)
+      CGImageRelease(_brushImage);
 
     if(_attributedString)
         CFRelease(_attributedString);
@@ -351,7 +355,41 @@ void CocoaPixmapCanvas::onSetBrush(const Gfx::Brush& brush)
         }
 
         case Pt::Gfx::Brush::Texture:
+        {
+            if(_brushImage)
+            {
+                CGImageRelease(_brushImage);
+                _brushImage = 0;
+            }
+
+            const Gfx::Image& texture = _brush.texture();
+            if( ! texture.empty())
+            {
+                CFDataRef cfData = CFDataCreate(kCFAllocatorDefault,
+                                                texture.data(),
+                                                static_cast<CFIndex>(texture.size()));
+                if(cfData)
+                {
+                    CGDataProviderRef provider = CGDataProviderCreateWithCFData(cfData);
+                    CFRelease(cfData);
+
+                    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                    const CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host
+                                                  | kCGImageAlphaPremultipliedFirst;
+
+                    _brushImage = CGImageCreate(
+                        texture.width(), texture.height(),
+                        8, 32,
+                        static_cast<std::size_t>(texture.width() * 4),
+                        colorSpace, bitmapInfo, provider,
+                        NULL, false, kCGRenderingIntentDefault);
+
+                    CGColorSpaceRelease(colorSpace);
+                    CGDataProviderRelease(provider);
+                }
+            }
             break;
+        }
     }
 }
 
@@ -522,6 +560,13 @@ void CocoaPixmapCanvas::onFillPolygon(const Gfx::PointF* pts, const size_t n)
         fillGradient(context, bbox);
         CGContextRestoreGState(context);
     }
+    else if(_brush.fillStyle() == Gfx::Brush::Texture)
+    {
+        CGContextSaveGState(context);
+        CGContextClip(context);
+        fillTexture(context);
+        CGContextRestoreGState(context);
+    }
     else
     {
         CGContextFillPath(context);
@@ -555,6 +600,13 @@ void CocoaPixmapCanvas::onFillRect(const Gfx::RectF& r)
         CGContextSaveGState(context);
         CGContextClipToRect(context, rect);
         fillGradient(context, rect);
+        CGContextRestoreGState(context);
+    }
+    else if(_brush.fillStyle() == Gfx::Brush::Texture)
+    {
+        CGContextSaveGState(context);
+        CGContextClipToRect(context, rect);
+        fillTexture(context);
         CGContextRestoreGState(context);
     }
     else
@@ -595,6 +647,14 @@ void CocoaPixmapCanvas::onFillEllipse(const Gfx::PointF& topLeft, const Gfx::Siz
         CGContextAddEllipseInRect(context, rect);
         CGContextClip(context);
         fillGradient(context, rect);
+        CGContextRestoreGState(context);
+    }
+    else if(_brush.fillStyle() == Gfx::Brush::Texture)
+    {
+        CGContextSaveGState(context);
+        CGContextAddEllipseInRect(context, rect);
+        CGContextClip(context);
+        fillTexture(context);
         CGContextRestoreGState(context);
     }
     else
@@ -804,6 +864,33 @@ void CocoaPixmapCanvas::fillGradient(CGContextRef context, CGRect bbox)
 }
 
 
+void CocoaPixmapCanvas::fillTexture(CGContextRef context)
+{
+    if( ! _brushImage)
+        return;
+
+    CGFloat H = CGBitmapContextGetHeight(context);
+    CGFloat height = scaling().toLogical(H);
+
+    // Undo the y-axis flip applied by the canvas CTM so that image
+    // pixels are drawn right-side up, matching onDrawImage behaviour.
+    CGContextScaleCTM(context, 1.0, -1.0);
+    CGContextTranslateCTM(context, 0, -height);
+
+    CGFloat tileW = scaling().toLogical( (double)CGImageGetWidth(_brushImage) );
+    CGFloat tileH = scaling().toLogical( (double)CGImageGetHeight(_brushImage) );
+
+    const Gfx::PointF& origin = _brush.textureOrigin();
+    CGFloat originX = scaling().toLogical( origin.x() );
+    CGFloat originY = scaling().toLogical( origin.y() );
+
+    // originY is in canvas space (y-down); in the unflipped CoreGraphics
+    // space the equivalent y-position is (height - originY - tileH).
+    CGRect tileRect = CGRectMake(originX, height - originY - tileH, tileW, tileH);
+    CGContextDrawTiledImage(context, tileRect, _brushImage);
+}
+
+
 CGMutablePathRef CocoaPixmapCanvas::makePath(const Gfx::Path& path)
 {
     CGMutablePathRef cgPath = CGPathCreateMutable();
@@ -897,6 +984,14 @@ void CocoaPixmapCanvas::onFillPath()
         fillGradient(context, bbox);
         CGContextRestoreGState(context);
     }
+    else if(_brush.fillStyle() == Gfx::Brush::Texture)
+    {
+        CGContextSaveGState(context);
+        CGContextAddPath(context, _cgPath);
+        CGContextClip(context);
+        fillTexture(context);
+        CGContextRestoreGState(context);
+    }
     else
     {
         CGContextAddPath(context, _cgPath);
@@ -937,6 +1032,14 @@ void CocoaPixmapCanvas::onFillPath(const Gfx::Path& path)
         CGRect bbox = CGContextGetPathBoundingBox(context);
         CGContextClip(context);
         fillGradient(context, bbox);
+        CGContextRestoreGState(context);
+    }
+    else if(_brush.fillStyle() == Gfx::Brush::Texture)
+    {
+        CGContextSaveGState(context);
+        CGContextAddPath(context, cgPath);
+        CGContextClip(context);
+        fillTexture(context);
         CGContextRestoreGState(context);
     }
     else
