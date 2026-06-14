@@ -55,7 +55,7 @@ class Call
     virtual ~Call()
     {}
 
-    virtual void execute() = 0;
+    virtual void call() = 0;
 
     virtual void pushResult(lua_State* co, Context& ctx) = 0;
 
@@ -84,7 +84,7 @@ class MethodCall : public Call
     , _args(args)
     {}
 
-    void execute() override
+    void call() override
     {
       try
       {
@@ -114,7 +114,7 @@ class PropertyGetCall : public Call
     , _self(self)
     {}
 
-    void execute() override
+    void call() override
     {
       try { _result = _pi->get(_self); }
       catch(const std::exception& e) { setError(e.what()); }
@@ -139,7 +139,7 @@ class PropertySetCall : public Call
     , _value(value)
     {}
 
-    void execute() override
+    void call() override
     {
       try { _pi->set(_self, _value.toAny(), _value.type()); }
       catch(const std::exception& e) { setError(e.what()); }
@@ -165,7 +165,7 @@ class ConstructorCall : public Call
     , _args(args)
     {}
 
-    void execute() override
+    void call() override
     {
       try
       {

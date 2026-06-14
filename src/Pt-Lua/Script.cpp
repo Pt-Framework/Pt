@@ -231,7 +231,7 @@ bool Script::onCall()
 {
   if(_pendingCall)
   {
-    _pendingCall->execute();
+    _pendingCall->call();
 
     if( _pendingCall->hasError() )
     {
@@ -258,7 +258,14 @@ void Script::onAsyncCall()
   _activeAsyncCall = _pendingAsyncCall;
   _pendingAsyncCall = 0;
   _activeAsyncCall->bind(_ctx.typeManager());
-  _activeAsyncCall->beginCall(*parent(), &Script::postReady, this);
+  _activeAsyncCall->finished() += Pt::slot(*this, &Script::onAsyncCallFinished);
+  _activeAsyncCall->beginCall(*parent());
+}
+
+
+void Script::onAsyncCallFinished()
+{
+  post();
 }
 
 
@@ -284,12 +291,6 @@ bool Script::onAsyncCallReady()
   delete _activeAsyncCall;
   _activeAsyncCall = 0;
   return true;
-}
-
-
-void Script::postReady(void* user)
-{
-  static_cast<Script*>(user)->post();
 }
 
 

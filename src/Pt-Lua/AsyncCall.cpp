@@ -38,9 +38,7 @@ namespace Pt {
 namespace Lua {
 
 AsyncCall::AsyncCall()
-: _readyCb(0)
-, _readyUser(0)
-, _hasError(false)
+: _hasError(false)
 , _rtype(0)
 {
 }
@@ -63,11 +61,8 @@ Pt::Reflex::Type* AsyncCall::rtype() const
 }
 
 
-void AsyncCall::beginCall(Pt::System::EventLoop& loop,
-                        ReadyCallback readyCb, void* user)
+void AsyncCall::beginCall(Pt::System::EventLoop& loop)
 {
-  _readyCb   = readyCb;
-  _readyUser = user;
   onBeginCall(loop);
 }
 
@@ -75,6 +70,12 @@ void AsyncCall::beginCall(Pt::System::EventLoop& loop,
 Pt::Any AsyncCall::getResult()
 {
   return onGetResult();
+}
+
+
+Pt::Signal<>& AsyncCall::finished()
+{
+  return _finished;
 }
 
 
@@ -86,8 +87,7 @@ void AsyncCall::cancel()
 
 void AsyncCall::setReady()
 {
-  if(_readyCb)
-    _readyCb(_readyUser);
+  _finished.send();
 }
 
 

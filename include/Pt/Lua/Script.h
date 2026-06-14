@@ -47,7 +47,8 @@ class AsyncCall;
 class Context;
 class Call;
 
-class PT_LUA_API Script : public Pt::System::Selectable
+class PT_LUA_API Script : public System::Selectable
+                        , public Connectable
 {
   public:
     enum Status
@@ -92,6 +93,8 @@ class PT_LUA_API Script : public Pt::System::Selectable
 
     void onAsyncCall();
 
+    void onAsyncCallFinished();
+
     bool onAsyncCallReady();
 
     void resume();
@@ -99,8 +102,6 @@ class PT_LUA_API Script : public Pt::System::Selectable
     bool isCancelled() const;
 
     void setError(const std::string& msg);
-
-    static void postReady(void* user);
 
     static void yieldHook(lua_State* L, lua_Debug* ar);
 

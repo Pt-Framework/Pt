@@ -31,6 +31,7 @@
 #define PT_LUA_ASYNCCALL_H
 
 #include <Pt/Lua/Api.h>
+#include <Pt/Signal.h>
 #include <Pt/Reflex/MethodInfo.h>
 #include <Pt/Reflex/TypeManager.h>
 #include <Pt/Reflex/FunctionInfo.h>
@@ -49,8 +50,6 @@ namespace Lua {
 class PT_LUA_API AsyncCall
 {
   public:
-    typedef void (*ReadyCallback)(void* user);
-
     AsyncCall();
 
     virtual ~AsyncCall();
@@ -59,10 +58,11 @@ class PT_LUA_API AsyncCall
 
     Pt::Reflex::Type* rtype() const;
 
-    void beginCall(Pt::System::EventLoop& loop,
-                   ReadyCallback readyCb, void* user);
+    void beginCall(Pt::System::EventLoop& loop);
 
     Pt::Any getResult();
+
+    Pt::Signal<>& finished();
 
     void cancel();
 
@@ -85,8 +85,7 @@ class PT_LUA_API AsyncCall
     virtual void onCancel() = 0;
 
   private:
-    ReadyCallback     _readyCb;
-    void*             _readyUser;
+    Pt::Signal<>      _finished;
     bool              _hasError;
     std::string       _errorMsg;
     Pt::Reflex::Type* _rtype;
