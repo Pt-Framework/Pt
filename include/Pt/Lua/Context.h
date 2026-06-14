@@ -44,6 +44,8 @@ namespace Pt {
 
 namespace Lua {
 
+/** @brief Scripting context.
+*/
 class PT_LUA_API Context
 {
   public:
@@ -59,12 +61,6 @@ class PT_LUA_API Context
 
     void reset();
 
-    int pushTo(lua_State* co, Pt::Any& value, Pt::Reflex::Type& type);
-
-    void pushObject(void* instance, Pt::Reflex::Type& type);
-
-    int push(Pt::Any& value, Pt::Reflex::Type& type);
-
   private:
     Context(const Context&);
     Context& operator=(const Context&);
@@ -77,6 +73,20 @@ class PT_LUA_API Context
     // Snapshot of global keys present after bindType() calls, used by reset().
     std::vector<std::string> _bindingKeys;
 };
+
+/** @internal
+*/
+struct LuaObjectHeader
+{
+  void*             instance;
+  Pt::Reflex::Type* type;
+  void (*destructor)(void*);
+};
+
+/** @internal
+*/
+static const std::size_t LUAOBJECT_DATA_OFFSET =
+  (sizeof(LuaObjectHeader) + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
 
 } // namespace
 

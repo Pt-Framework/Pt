@@ -41,6 +41,10 @@ struct lua_Debug;
 
 namespace Pt {
 
+class Any;
+
+namespace Reflex { class Type; }
+
 namespace Lua {
 
 class AsyncCall;
@@ -97,6 +101,8 @@ class PT_LUA_API Script : public System::Selectable
 
     bool onAsyncCallReady();
 
+    int pushResult(Pt::Any& value, Pt::Reflex::Type& type);
+
     void resume();
 
     bool isCancelled() const;
@@ -106,16 +112,16 @@ class PT_LUA_API Script : public System::Selectable
     static void yieldHook(lua_State* L, lua_Debug* ar);
 
   private:
-    Context&     _ctx;
-    lua_State*      _co;
-    bool            _isCancelled;
-    Status          _lastStatus;
-    std::string     _errorMsg;
-    Pt::Signal<>    _advanced;
+    Context&      _ctx;
+    lua_State*    _co;
+    bool          _isCancelled;
+    Status        _lastStatus;
+    std::string   _errorMsg;
+    Pt::Signal<>  _advanced;
 
-    Call*    _pendingCall;
-    AsyncCall*        _pendingAsyncCall;
-    AsyncCall*        _activeAsyncCall;
+    Call*         _pendingCall;
+    AsyncCall*    _pendingAsyncCall;
+    AsyncCall*    _activeAsyncCall;
 };
 
 } // namespace

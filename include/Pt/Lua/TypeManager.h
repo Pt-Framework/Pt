@@ -98,7 +98,7 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     template <typename A1>
     void registerAsyncFunction(const char* name, AsyncCall* (*func)(A1))
     {
-      AsyncFunction<A1>* fi = new AsyncFunction<A1>(name, func, *this, luaCallPtrType());
+      AsyncFunction<A1>* fi = new AsyncFunction<A1>(name, func, *this, asyncCallType());
       _ownedFunctions.push_back(fi);
       Pt::Reflex::TypeManager::registerFunction(fi);
     }
@@ -108,7 +108,7 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     template <typename A1, typename A2>
     void registerAsyncFunction(const char* name, AsyncCall* (*func)(A1, A2))
     {
-      AsyncFunction<A1, A2>* fi = new AsyncFunction<A1, A2>(name, func, *this, luaCallPtrType());
+      AsyncFunction<A1, A2>* fi = new AsyncFunction<A1, A2>(name, func, *this, asyncCallType());
       _ownedFunctions.push_back(fi);
       Pt::Reflex::TypeManager::registerFunction(fi);
     }
@@ -116,9 +116,8 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     Pt::Reflex::Type& voidType() const
     { return *_voidType; }
 
-    // Returns the AsyncCall* type used as return-type for async methods/functions.
-    Pt::Reflex::Type& luaCallPtrType() const
-    { return *_luaCallPtrType; }
+    Pt::Reflex::Type& asyncCallType() const
+    { return *_asyncCallType; }
 
   private:
     // Destructor thunk: calls T's destructor on the raw object pointer.
@@ -143,7 +142,7 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     Pt::Reflex::BasicType<bool>*        _boolType;
     Pt::Reflex::BasicType<std::string>* _stringType;
     Pt::Reflex::Type*                   _voidType;
-    Pt::Reflex::BasicType<AsyncCall*>*    _luaCallPtrType;
+    Pt::Reflex::BasicType<AsyncCall*>*  _asyncCallType;
 };
 
 } // namespace

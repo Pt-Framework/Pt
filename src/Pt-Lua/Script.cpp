@@ -37,19 +37,31 @@
 #include <stdexcept>
 #include <string>
 
-namespace Pt {
-
-namespace Lua {
+/*
+  TODO:
+    - Error handling: error in lua script and ScriptError exception,
+    - exceptions from native c++ calls
+    - Is Call and its derivateives still needed?
+      - only used for exception strings which are handled locally anyways.
+    - C++ value from Result. currently only get int
+    - resolve lua script includes
+    - Context reset more efficient?
+    - Context bindings cleanup
+*/
 
 namespace {
 
-static const char* const LUA_SCRIPT_KEY  = "Script";
+static const char* const PT_LUA_SCRIPT_KEY  = "Script";
 
-static const char* const LUA_SCRIPT_CO   = "LuaScript_co";
+static const char* const PT_LUA_SCRIPT_CO   = "LuaScript_co";
 
-static const int INSTRUCTIONS_PER_YIELD = 100000;
+static const int PT_LUA_INSTRUCTIONS_PER_YIELD = 100000;
 
 } // namespace
+
+namespace Pt {
+
+namespace Lua {
 
 Script::Script(Context& ctx, const char* script)
 : _ctx(ctx)
@@ -63,7 +75,7 @@ Script::Script(Context& ctx, const char* script)
   lua_State* L = ctx.state();
 
   // Enforce single-script-per-context rule.
-  lua_getfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_KEY);
+  lua_getfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_KEY);
   bool alreadyActive = ! lua_isnil(L, -1);
   lua_pop(L, 1);
   if(alreadyActive)
@@ -71,12 +83,12 @@ Script::Script(Context& ctx, const char* script)
 
   // Store this in the registry so closures can find it.
   lua_pushlightuserdata(L, this);
-  lua_setfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_KEY);
+  lua_setfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_KEY);
 
   // Create and anchor coroutine.
   _co = lua_newthread(L);
   lua_pushvalue(L, -1);
-  lua_setfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_CO);
+  lua_setfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_CO);
   lua_pop(L, 1);
 
   if(luaL_loadstring(_co, script) != LUA_OK)
@@ -86,13 +98,13 @@ Script::Script(Context& ctx, const char* script)
     _lastStatus = ScriptError;
     // Clean up registry so context can be reused.
     lua_pushnil(L);
-    lua_setfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_KEY);
+    lua_setfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_KEY);
     lua_pushnil(L);
-    lua_setfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_CO);
+    lua_setfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_CO);
     return;
   }
 
-  lua_sethook(_co, &Script::yieldHook, LUA_MASKCOUNT, INSTRUCTIONS_PER_YIELD);
+  lua_sethook(_co, &Script::yieldHook, LUA_MASKCOUNT, PT_LUA_INSTRUCTIONS_PER_YIELD);
 }
 
 
@@ -109,9 +121,9 @@ Script::~Script()
 
   // Release the coroutine anchor and Script registry entries.
   lua_pushnil(L);
-  lua_setfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_KEY);
+  lua_setfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_KEY);
   lua_pushnil(L);
-  lua_setfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_CO);
+  lua_setfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_CO);
   lua_pushnil(L);
   lua_setfield(L, LUA_REGISTRYINDEX, "LuaPendingCall");
   lua_pushnil(L);
@@ -142,7 +154,7 @@ void Script::yieldHook(lua_State* L, lua_Debug* /*ar*/)
 
 Script* Script::fromState(lua_State* L)
 {
-  lua_getfield(L, LUA_REGISTRYINDEX, LUA_SCRIPT_KEY);
+  lua_getfield(L, LUA_REGISTRYINDEX, PT_LUA_SCRIPT_KEY);
   Script* script = static_cast<Script*>(lua_touserdata(L, -1));
   lua_pop(L, 1);
   return script;
@@ -231,7 +243,7 @@ bool Script::onCall()
 {
   if(_pendingCall)
   {
-    _pendingCall->call();
+    Pt::Any result = _pendingCall->call();
 
     if( _pendingCall->hasError() )
     {
@@ -244,7 +256,9 @@ bool Script::onCall()
       return false;
     }
 
-    _pendingCall->pushResult(_co, _ctx);
+    if(_pendingCall->rtype())
+      pushResult(result, *_pendingCall->rtype());
+
     delete _pendingCall;
     _pendingCall = 0;
   }
@@ -286,7 +300,7 @@ bool Script::onAsyncCallReady()
 
   Pt::Any result = _activeAsyncCall->getResult();
   if(_activeAsyncCall->rtype())
-    _ctx.pushTo(_co, result, *_activeAsyncCall->rtype());
+    pushResult(result, *_activeAsyncCall->rtype());
 
   delete _activeAsyncCall;
   _activeAsyncCall = 0;
@@ -366,6 +380,77 @@ void Script::resume()
     _errorMsg = msg ? msg : "script error";
     _lastStatus = ScriptError;
   }
+}
+
+
+int Script::pushResult(Pt::Any& value, Pt::Reflex::Type& type)
+{
+  const std::type_info* ti = type.id();
+
+  if( ! ti || type.name() == "void")
+    return 0;
+
+  if(*ti == typeid(bool))
+  {
+    lua_pushboolean(_co, *static_cast<bool*>(value.get()) ? 1 : 0);
+    return 1;
+  }
+  if(*ti == typeid(int))
+  {
+    lua_pushinteger(_co, *static_cast<int*>(value.get()));
+    return 1;
+  }
+  if(*ti == typeid(long))
+  {
+    lua_pushinteger(_co, *static_cast<long*>(value.get()));
+    return 1;
+  }
+  if(*ti == typeid(double))
+  {
+    lua_pushnumber(_co, *static_cast<double*>(value.get()));
+    return 1;
+  }
+  if(*ti == typeid(float))
+  {
+    lua_pushnumber(_co, *static_cast<float*>(value.get()));
+    return 1;
+  }
+  if(*ti == typeid(std::string))
+  {
+    const std::string* s = static_cast<const std::string*>(value.get());
+    lua_pushstring(_co, s->c_str());
+    return 1;
+  }
+
+  // Object type: copy-construct into owned Lua userdata.
+  void (*dtor)(void*) = 0;
+  const std::vector<TypeManager::TypeBinding>& bindings =
+    _ctx.typeManager().bindings();
+  for(std::size_t i = 0; i < bindings.size(); ++i)
+  {
+    if(bindings[i].type == &type)
+    {
+      dtor = bindings[i].destructor;
+      break;
+    }
+  }
+
+  if( ! dtor)
+  {
+    lua_pushnil(_co);
+    return 1;
+  }
+
+  std::size_t totalSize = LUAOBJECT_DATA_OFFSET + type.size();
+  LuaObjectHeader* hdr =
+    static_cast<LuaObjectHeader*>(lua_newuserdatauv(_co, totalSize, 0));
+  hdr->instance   = static_cast<char*>(static_cast<void*>(hdr)) + LUAOBJECT_DATA_OFFSET;
+  hdr->type       = &type;
+  hdr->destructor = dtor;
+  std::memcpy(hdr->instance, value.get(), type.size());
+  luaL_getmetatable(_co, type.name().c_str());
+  lua_setmetatable(_co, -2);
+  return 1;
 }
 
 } // namespace

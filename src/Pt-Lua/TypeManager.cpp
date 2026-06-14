@@ -59,7 +59,7 @@ TypeManager::TypeManager()
 , _boolType(new Pt::Reflex::BasicType<bool>("bool"))
 , _stringType(new Pt::Reflex::BasicType<std::string>("string"))
 , _voidType(new VoidType())
-, _luaCallPtrType(new Pt::Reflex::BasicType<AsyncCall*>("AsyncCall*"))
+, _asyncCallType(new Pt::Reflex::BasicType<AsyncCall*>("AsyncCall*"))
 {
   Pt::Reflex::TypeManager::registerType(*_intType);
   Pt::Reflex::TypeManager::registerType(*_longType);
@@ -68,14 +68,14 @@ TypeManager::TypeManager()
   Pt::Reflex::TypeManager::registerType(*_boolType);
   Pt::Reflex::TypeManager::registerType(*_stringType);
   Pt::Reflex::TypeManager::registerType(*_voidType);
-  Pt::Reflex::TypeManager::registerType(*_luaCallPtrType);
+  Pt::Reflex::TypeManager::registerType(*_asyncCallType);
 }
 
 
 TypeManager::~TypeManager()
 {
   delete _voidType;
-  delete _luaCallPtrType;
+  delete _asyncCallType;
   delete _stringType;
   delete _boolType;
   delete _doubleType;
@@ -92,7 +92,7 @@ void TypeManager::registerAsyncFunction(const char* name,
                                             AsyncCall* (*func)())
 {
   AsyncFunction<Pt::Reflex::Void, Pt::Reflex::Void>* fi =
-    new AsyncFunction<Pt::Reflex::Void, Pt::Reflex::Void>(name, func, luaCallPtrType());
+    new AsyncFunction<Pt::Reflex::Void, Pt::Reflex::Void>(name, func, asyncCallType());
   _ownedFunctions.push_back(fi);
   Pt::Reflex::TypeManager::registerFunction(fi);
 }

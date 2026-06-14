@@ -28,24 +28,10 @@
  */
 
 #include <Pt/Lua/Call.h>
-#include <Pt/Lua/Context.h>
-
-#include <lua.hpp>
 
 namespace Pt {
 
 namespace Lua {
-
-void MethodCall::pushResult(lua_State* co, Context& ctx)
-{
-    ctx.pushTo(co, _result, _mi->rtype());
-}
-
-
-void PropertyGetCall::pushResult(lua_State* co, Context& ctx)
-{
-    ctx.pushTo(co, _result, _pi->type());
-}
 
 } // namespace Pt::Lua
 

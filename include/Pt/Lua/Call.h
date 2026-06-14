@@ -40,13 +40,9 @@
 #include <string>
 #include <vector>
 
-struct lua_State;
-
 namespace Pt {
 
 namespace Lua {
-
-class Context;
 
 
 class Call
@@ -55,9 +51,9 @@ class Call
     virtual ~Call()
     {}
 
-    virtual void call() = 0;
+    virtual Pt::Any call() = 0;
 
-    virtual void pushResult(lua_State* co, Context& ctx) = 0;
+    virtual Pt::Reflex::Type* rtype() const = 0;
 
     bool hasError() const
     { return ! _errorMsg.empty(); }
@@ -84,25 +80,27 @@ class MethodCall : public Call
     , _args(args)
     {}
 
-    void call() override
+    Pt::Any call() override
     {
       try
       {
         Pt::Reflex::ArgumentList arglist(
           _args.empty() ? static_cast<Pt::Reflex::Argument*>(0) : &_args[0],
           _args.size());
-        _result = _mi->call(_self, arglist);
+        return _mi->call(_self, arglist);
       }
       catch(const std::exception& e) { setError(e.what()); }
+
+      return Pt::Any();
     }
 
-    void pushResult(lua_State* co, Context& ctx) override;
+    Pt::Reflex::Type* rtype() const override
+    { return &_mi->rtype(); }
 
   private:
     Pt::Reflex::MethodInfo*           _mi;
     void*                             _self;
     std::vector<Pt::Reflex::Argument> _args;
-    Pt::Any                           _result;
 };
 
 
@@ -114,18 +112,20 @@ class PropertyGetCall : public Call
     , _self(self)
     {}
 
-    void call() override
+    Pt::Any call() override
     {
-      try { _result = _pi->get(_self); }
+      try { return _pi->get(_self); }
       catch(const std::exception& e) { setError(e.what()); }
+
+      return Pt::Any();
     }
 
-    void pushResult(lua_State* co, Context& ctx) override;
+    Pt::Reflex::Type* rtype() const override
+    { return &_pi->type(); }
 
   private:
     Pt::Reflex::PropertyInfo* _pi;
     void*                     _self;
-    Pt::Any                   _result;
 };
 
 
@@ -139,14 +139,16 @@ class PropertySetCall : public Call
     , _value(value)
     {}
 
-    void call() override
+    Pt::Any call() override
     {
       try { _pi->set(_self, _value.toAny(), _value.type()); }
       catch(const std::exception& e) { setError(e.what()); }
+
+      return Pt::Any();
     }
 
-    void pushResult(lua_State* /*co*/, Context& /*ctx*/) override
-    {}
+    Pt::Reflex::Type* rtype() const override
+    { return 0; }
 
   private:
     Pt::Reflex::PropertyInfo* _pi;
@@ -165,7 +167,7 @@ class ConstructorCall : public Call
     , _args(args)
     {}
 
-    void call() override
+    Pt::Any call() override
     {
       try
       {
@@ -175,11 +177,12 @@ class ConstructorCall : public Call
         _ci->call(_instance, arglist);
       }
       catch(const std::exception& e) { setError(e.what()); }
+
+      return Pt::Any();
     }
 
-    // The userdata is already on the coroutine stack; the continuation returns it.
-    void pushResult(lua_State* /*co*/, Context& /*ctx*/) override
-    {}
+    Pt::Reflex::Type* rtype() const override
+    { return 0; }
 
   private:
     Pt::Reflex::ConstructorInfo*      _ci;
