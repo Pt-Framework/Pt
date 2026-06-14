@@ -57,6 +57,14 @@
             "name": "Pt-Reflex"
         },
         {
+            "path": "include/Pt/Lua",
+            "name": "Pt-Lua (Includes)"
+        },
+        {
+            "path": "src/Pt-Lua",
+            "name": "Pt-Lua"
+        },
+        {
             "path": "include/Pt/Cosmo",
             "name": "Pt-Cosmo (Includes)"
         },

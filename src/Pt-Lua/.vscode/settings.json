@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.browse.path": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/../../include/Pt/Lua",
+        "${workspaceFolder}/lua-5.5.0"
+    ]
+}

@@ -1,0 +1,23 @@
+SubDir PT_TOP src Pt-Lua ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-Lua/lua-5.5.0 ;
+SubDirC++Flags [ FDefines PT_LUA_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Lua ;
+
+PT_LUA_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-Lua lua-5.5.0 ] ;
+PT_LUA_IMPL += [ GLOB $(PT_LUA_IMPL_SUBDIR) : *.c  ] ;
+
+PT_LUA_SOURCES = $(PT_LUA_IMPL)
+                 AsyncCall.cpp
+                 Call.cpp
+                 Context.cpp
+                 Result.cpp
+                 Script.cpp
+                 TypeManager.cpp ;
+
+SharedLibrary Pt-Lua : $(PT_LUA_SOURCES) ;
+LinkSharedLibraries Pt-Lua :  Pt-Reflex Pt-System Pt ;
+MakeLocate Pt-Lua : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Lua : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-Lua tests ;

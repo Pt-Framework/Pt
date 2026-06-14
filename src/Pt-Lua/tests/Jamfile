@@ -1,0 +1,10 @@
+SubDir PT_TOP src Pt-Lua tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Lua ;
+
+Main Pt-Lua-test : Pt-Lua-test.cpp
+                   ScriptTest.cpp ;
+
+LinkSharedLibraries Pt-Lua-test : Pt Pt-System Pt-Lua Pt-Reflex Pt-Unit ;
+MakeLocate Pt-Lua-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Lua-test : $(PT_OUTPUT_TEST) ;
