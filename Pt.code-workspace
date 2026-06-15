@@ -105,6 +105,14 @@
             "name": "Pt-Mcp"
         },
         {
+            "path": "include/Pt/Db",
+            "name": "Pt-Db (Includes)"
+        },
+        {
+            "path": "src/Pt-Db",
+            "name": "Pt-Db"
+        },
+        {
             "path": "include/Pt/Xml",
             "name": "Pt-Xml (Includes)"
         },
