@@ -1,29 +1,4 @@
-/*
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-/*
+﻿/*
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -63,6 +38,7 @@
 #include <Pt/Db/Row.h>
 #include <Pt/Db/Value.h>
 #include <Pt/Db/Statement.h>
+#include <Pt/Db/Transaction.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/Method.h>
@@ -114,20 +90,15 @@ namespace Db {
 namespace sqlite {
 
 Connection::Connection()
-: _db(0)
+: _pendingTask(nullptr)
+, _completedTask(nullptr)
+, _db(0)
 , _conninfo()
-, _worker( Pt::Method<void, Connection>(*this, &Connection::workerRun) )
+, _thread( Pt::Method<void, Connection>(*this, &Connection::processTasks) )
 , _shutdown(false)
 , _cancelFlag(false)
-, _completedOp(WkNone)
-, _pendingOp(WkNone)
-, _pendingStmt(0)
-, _pendingBatchSize(0)
 , _batchCursor(0)
-, _batchSize(100)
 , _batchDone(false)
-, _rowCount(0)
-, _opFailed(false)
 {
 }
 
@@ -142,8 +113,8 @@ Connection::~Connection()
         _workReady.signal();
     }
 
-    if(_worker.isJoinable())
-        _worker.join();
+    if(_thread.isJoinable())
+        _thread.join();
 }
 
 
@@ -151,216 +122,59 @@ Connection::~Connection()
 
 void Connection::ensureWorker()
 {
-    if(_worker.state() == Pt::System::Thread::Ready)
-        _worker.start();
+    if(_thread.state() == Pt::System::Thread::Ready)
+        _thread.start();
 }
 
 
-void Connection::enqueue(OpType op)
+void Connection::enqueue(Task* task)
 {
     ensureWorker();
 
     Pt::System::MutexLock lock(_mutex);
-    _pendingOp = op;
+    _pendingTask = task;
     _workReady.signal();
 }
 
 
-void Connection::workerRun()
+void Connection::processTasks()
 {
     while(true)
     {
-        OpType op;
+        Task* task;
         {
             Pt::System::MutexLock lock(_mutex);
 
-            while(_pendingOp == WkNone && ! _shutdown)
+            while( ! _pendingTask && ! _shutdown)
                 _workReady.wait(_mutex);
 
             if(_shutdown)
                 break;
 
-            op = _pendingOp;
+            task = _pendingTask;
         }
 
-        // Execute the operation outside the lock
-        bool failed = false;
-        std::string errorMsg;
-        Result resultSet;
-        size_type rowCount = 0;
-        Pt::Db::Statement preparedStmt;
+        // Execute outside the lock; results stored in the task
+        std::exception_ptr exception;
 
         try
         {
-            switch(op)
-            {
-                case WkOpen:
-                {
-                    if(_db)
-                    {
-                        clearStatementCache();
-                        ::sqlite3_close(_db);
-                        _db = 0;
-                    }
-                    int ret = ::sqlite3_open(_conninfo.c_str(), &_db);
-                    if(ret != SQLITE_OK)
-                        throw InvalidConnection(std::string("sqlite3_open failed: ") + ::sqlite3_errmsg(_db));
-                    ::sqlite3_enable_load_extension(_db, 1);
-                    ::sqlite3_busy_handler(_db, busyHandler, _db);
-                    break;
-                }
-
-                case WkExec:
-                {
-                    char* errmsg = 0;
-                    ResultImpl* res = new ResultImpl();
-                    resultSet = Result(res);
-
-                    int ret = ::sqlite3_exec(_db, _pendingSql.c_str(), selectCallback, res, &errmsg);
-
-                    if(ret != SQLITE_OK && ret != SQLITE_INTERRUPT)
-                    {
-                        std::string msg = errmsg ? errmsg : "sqlite3_exec failed";
-                        ::sqlite3_free(errmsg);
-                        throw QueryFailed(msg, _pendingSql);
-                    }
-                    if(errmsg)
-                        ::sqlite3_free(errmsg);
-
-                    rowCount = static_cast<size_type>( ::sqlite3_changes(_db) );
-                    break;
-                }
-
-                case WkSelect:
-                {
-                    char* errmsg = 0;
-                    ResultImpl* res = new ResultImpl();
-                    resultSet = Result(res);
-
-                    int ret = ::sqlite3_exec(_db, _pendingSql.c_str(), selectCallback, res, &errmsg);
-
-                    if(ret != SQLITE_OK && ret != SQLITE_INTERRUPT)
-                    {
-                        std::string msg = errmsg ? errmsg : "sqlite3_exec failed";
-                        ::sqlite3_free(errmsg);
-                        throw QueryFailed(msg, _pendingSql);
-                    }
-                    if(errmsg)
-                        ::sqlite3_free(errmsg);
-                    break;
-                }
-
-                case WkStmtExec:
-                {
-                    rowCount = _pendingStmt->execute();
-                    break;
-                }
-
-                case WkStmtSelect:
-                {
-                    resultSet = _pendingStmt->select();
-                    break;
-                }
-
-                case WkBatchFetch:
-                {
-                    if( ! _batchCursor || _batchDone)
-                    {
-                        resultSet = Result( new ResultImpl() );
-                        break;
-                    }
-
-                    ResultImpl* res = new ResultImpl();
-                    resultSet = Result(res);
-
-                    for(size_type i = 0; i < _batchSize; ++i)
-                    {
-                        if(_cancelFlag.load())
-                            break;
-
-                        Pt::Db::Row row = _batchCursor->fetch();
-
-                        if(row.empty())
-                        {
-                            _batchDone = true;
-                            break;
-                        }
-
-                        res->add(row);
-                    }
-                    break;
-                }
-
-                case WkPrepare:
-                {
-                    preparedStmt = Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, _pendingSql) );
-                    break;
-                }
-
-                case WkBeginTxn:
-                {
-                    char* errmsg = nullptr;
-                    int ret = ::sqlite3_exec(_db, "BEGIN TRANSACTION", nullptr, nullptr, &errmsg);
-                    if(ret != SQLITE_OK)
-                    {
-                        std::string msg = errmsg ? errmsg : "BEGIN TRANSACTION failed";
-                        ::sqlite3_free(errmsg);
-                        throw QueryFailed(msg, "BEGIN TRANSACTION");
-                    }
-                    break;
-                }
-
-                case WkCommitTxn:
-                {
-                    char* errmsg = nullptr;
-                    int ret = ::sqlite3_exec(_db, "COMMIT TRANSACTION", nullptr, nullptr, &errmsg);
-                    if(ret != SQLITE_OK)
-                    {
-                        std::string msg = errmsg ? errmsg : "COMMIT TRANSACTION failed";
-                        ::sqlite3_free(errmsg);
-                        throw QueryFailed(msg, "COMMIT TRANSACTION");
-                    }
-                    break;
-                }
-
-                case WkRollbackTxn:
-                {
-                    char* errmsg = nullptr;
-                    int ret = ::sqlite3_exec(_db, "ROLLBACK TRANSACTION", nullptr, nullptr, &errmsg);
-                    if(ret != SQLITE_OK)
-                    {
-                        std::string msg = errmsg ? errmsg : "ROLLBACK TRANSACTION failed";
-                        ::sqlite3_free(errmsg);
-                        throw QueryFailed(msg, "ROLLBACK TRANSACTION");
-                    }
-                    break;
-                }
-
-                default:
-                    break;
-            }
+            task->execute(*this);
         }
-        catch(const std::exception& e)
+        catch(...)
         {
-            failed   = true;
-            errorMsg = e.what();
+            exception = std::current_exception();
         }
 
-        // Store result and notify — all under the same lock so that
-        // cancel() cannot return until setReady() has already been called.
+        // Store exception under the lock so that endXxx() mutex
+        // establishes happens-before with writes done in execute().
         {
             Pt::System::MutexLock lock(_mutex);
-            _completedOp = op;
-            _pendingOp   = WkNone;
-            _resultSet   = resultSet;
-            _rowCount    = rowCount;
-            _preparedStmt = preparedStmt;
-            _opFailed    = failed;
-            _opError     = errorMsg;
+            task->exception = exception;
+            _completedTask = task;
+            _pendingTask   = nullptr;
 
-            // Only notify the EventLoop if the operation was not cancelled.
-            // After cancelOp() returns, no post() must be pending.
-            if(!_cancelFlag.load())
+            if( ! _cancelFlag.load())
                 post();
 
             _workDone.signal();
@@ -369,25 +183,216 @@ void Connection::workerRun()
 }
 
 
+// --- Task execute() implementations ---
+
+void Connection::OpenTask::execute(Connection& conn)
+{
+    if(conn._db)
+    {
+        conn.clearStatementCache();
+        ::sqlite3_close(conn._db);
+        conn._db = 0;
+    }
+    int ret = ::sqlite3_open(connStr.c_str(), &conn._db);
+    if(ret != SQLITE_OK)
+        throw InvalidConnection(std::string("sqlite3_open failed: ") + ::sqlite3_errmsg(conn._db));
+    ::sqlite3_enable_load_extension(conn._db, 1);
+    ::sqlite3_busy_handler(conn._db, busyHandler, conn._db);
+}
+
+void Connection::OpenTask::complete(Connection& conn)
+{
+    conn._finished.send();
+}
+
+
+void Connection::ExecTask::execute(Connection& conn)
+{
+    char* errmsg = 0;
+    ResultImpl* res = new ResultImpl();
+    result = Result(res);
+
+    int ret = ::sqlite3_exec(conn._db, sql.c_str(), selectCallback, res, &errmsg);
+
+    if(ret != SQLITE_OK && ret != SQLITE_INTERRUPT)
+    {
+        std::string msg = errmsg ? errmsg : "sqlite3_exec failed";
+        ::sqlite3_free(errmsg);
+        throw QueryFailed(msg, sql);
+    }
+    if(errmsg)
+        ::sqlite3_free(errmsg);
+
+    rowCount = static_cast<size_type>( ::sqlite3_changes(conn._db) );
+}
+
+void Connection::ExecTask::complete(Connection& conn)
+{
+    conn._executeFinished.send();
+}
+
+
+void Connection::SelectTask::execute(Connection& conn)
+{
+    char* errmsg = 0;
+    ResultImpl* res = new ResultImpl();
+    result = Result(res);
+
+    int ret = ::sqlite3_exec(conn._db, sql.c_str(), selectCallback, res, &errmsg);
+
+    if(ret != SQLITE_OK && ret != SQLITE_INTERRUPT)
+    {
+        std::string msg = errmsg ? errmsg : "sqlite3_exec failed";
+        ::sqlite3_free(errmsg);
+        throw QueryFailed(msg, sql);
+    }
+    if(errmsg)
+        ::sqlite3_free(errmsg);
+}
+
+void Connection::SelectTask::complete(Connection& conn)
+{
+    conn._selectFinished.send();
+}
+
+
+void Connection::PrepareTask::execute(Connection& conn)
+{
+    result = Pt::Db::Statement( new Pt::Db::sqlite::Statement(&conn, sql) );
+}
+
+void Connection::PrepareTask::complete(Connection& conn)
+{
+    conn._prepareFinished.send();
+}
+
+
+void Connection::StmtExecTask::execute(Connection& /*conn*/)
+{
+    rowCount = stmt->execute();
+}
+
+void Connection::StmtExecTask::complete(Connection& /*conn*/)
+{
+    stmt->executeFinished().send();
+}
+
+
+void Connection::StmtSelectTask::execute(Connection& /*conn*/)
+{
+    result = stmt->select();
+}
+
+void Connection::StmtSelectTask::complete(Connection& /*conn*/)
+{
+    stmt->selectFinished().send();
+}
+
+
+void Connection::BeginTxnTask::execute(Connection& conn)
+{
+    char* errmsg = nullptr;
+    int ret = ::sqlite3_exec(conn._db, sql.c_str(), nullptr, nullptr, &errmsg);
+    if(ret != SQLITE_OK)
+    {
+        std::string msg = errmsg ? errmsg : "BEGIN TRANSACTION failed";
+        ::sqlite3_free(errmsg);
+        throw QueryFailed(msg, sql);
+    }
+}
+
+void Connection::BeginTxnTask::complete(Connection& /*conn*/)
+{
+    txn->startFinished().send();
+}
+
+
+void Connection::CommitTxnTask::execute(Connection& conn)
+{
+    char* errmsg = nullptr;
+    int ret = ::sqlite3_exec(conn._db, sql.c_str(), nullptr, nullptr, &errmsg);
+    if(ret != SQLITE_OK)
+    {
+        std::string msg = errmsg ? errmsg : "COMMIT TRANSACTION failed";
+        ::sqlite3_free(errmsg);
+        throw QueryFailed(msg, sql);
+    }
+}
+
+void Connection::CommitTxnTask::complete(Connection& /*conn*/)
+{
+    txn->commitFinished().send();
+}
+
+
+void Connection::RollbackTxnTask::execute(Connection& conn)
+{
+    char* errmsg = nullptr;
+    int ret = ::sqlite3_exec(conn._db, sql.c_str(), nullptr, nullptr, &errmsg);
+    if(ret != SQLITE_OK)
+    {
+        std::string msg = errmsg ? errmsg : "ROLLBACK TRANSACTION failed";
+        ::sqlite3_free(errmsg);
+        throw QueryFailed(msg, sql);
+    }
+}
+
+void Connection::RollbackTxnTask::complete(Connection& /*conn*/)
+{
+    txn->rollbackFinished().send();
+}
+
+
+void Connection::BatchFetchTask::execute(Connection& /*conn*/)
+{
+    if( ! cursor || done)
+    {
+        result = Result( new ResultImpl() );
+        return;
+    }
+
+    ResultImpl* res = new ResultImpl();
+    result = Result(res);
+
+    for(size_type i = 0; i < batchSize; ++i)
+    {
+        Pt::Db::Row row = cursor->fetch();
+
+        if(row.empty())
+        {
+            done = true;
+            break;
+        }
+
+        res->add(row);
+    }
+}
+
+void Connection::BatchFetchTask::complete(Connection& /*conn*/)
+{
+    cursor->fetched().send();
+}
+
+
 // --- Synchronous operations ---
 
-void Connection::startTransaction()
+void Connection::startTransaction(const char* sql)
 {
-    execute("BEGIN TRANSACTION");
+    execute(sql ? sql : "BEGIN TRANSACTION");
 }
 
 
-void Connection::commitTransaction()
+void Connection::commitTransaction(const char* sql)
 {
     clearStatementCache();
-    execute("COMMIT TRANSACTION");
+    execute(sql ? sql : "COMMIT TRANSACTION");
 }
 
 
-void Connection::rollbackTransaction()
+void Connection::rollbackTransaction(const char* sql)
 {
     clearStatementCache();
-    execute("ROLLBACK TRANSACTION");
+    execute(sql ? sql : "ROLLBACK TRANSACTION");
 }
 
 
@@ -456,17 +461,15 @@ void Connection::onClose()
 
 void Connection::onBeginExec(const std::string& sql)
 {
-    _pendingSql  = sql;
-    _pendingStmt = 0;
-    enqueue(WkExec);
+    _execTask.sql = sql;
+    enqueue(&_execTask);
 }
 
 
 void Connection::onBeginSelect(const std::string& sql)
 {
-    _pendingSql  = sql;
-    _pendingStmt = 0;
-    enqueue(WkSelect);
+    _selectTask.sql = sql;
+    enqueue(&_selectTask);
 }
 
 
@@ -474,9 +477,9 @@ void Connection::beginExec(Statement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    _state       = PendingExec;
-    _pendingStmt = &stmt;
-    enqueue(WkStmtExec);
+    _state             = PendingExec;
+    _stmtExecTask.stmt = &stmt;
+    enqueue(&_stmtExecTask);
 }
 
 
@@ -484,9 +487,9 @@ Connection::size_type Connection::endExec(Statement& /*stmt*/)
 {
     _state = Idle;
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
-    return _rowCount;
+    if(_stmtExecTask.exception)
+        std::rethrow_exception(_stmtExecTask.exception);
+    return _stmtExecTask.rowCount;
 }
 
 
@@ -494,9 +497,9 @@ void Connection::beginSelect(Statement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    _state       = PendingSelect;
-    _pendingStmt = &stmt;
-    enqueue(WkStmtSelect);
+    _state               = PendingSelect;
+    _stmtSelectTask.stmt = &stmt;
+    enqueue(&_stmtSelectTask);
 }
 
 
@@ -504,42 +507,42 @@ Result Connection::endSelect(Statement& /*stmt*/)
 {
     _state = Idle;
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
-    return _resultSet;
+    if(_stmtSelectTask.exception)
+        std::rethrow_exception(_stmtSelectTask.exception);
+    return _stmtSelectTask.result;
 }
 
 
 Connection::size_type Connection::onEndExec()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
-    return _rowCount;
+    if(_execTask.exception)
+        std::rethrow_exception(_execTask.exception);
+    return _execTask.rowCount;
 }
 
 
 Result Connection::onEndSelect()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
-    return _resultSet;
+    if(_selectTask.exception)
+        std::rethrow_exception(_selectTask.exception);
+    return _selectTask.result;
 }
 
 
 void Connection::onBeginOpen(const std::string& connStr)
 {
-    _conninfo = connStr;
-    enqueue(WkOpen);
+    _openTask.connStr = connStr;
+    enqueue(&_openTask);
 }
 
 
 void Connection::onEndOpen()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw InvalidConnection(_opError);
+    if(_openTask.exception)
+        std::rethrow_exception(_openTask.exception);
 }
 
 
@@ -547,10 +550,12 @@ void Connection::beginBatchFetch(ICursor& cursor, size_type batchSize)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    _state       = PendingBatchFetch;
-    _batchCursor = static_cast<SqliteCursor*>(&cursor);
-    _batchSize   = batchSize;
-    enqueue(WkBatchFetch);
+    _state                   = PendingBatchFetch;
+    _batchFetchTask.cursor    = static_cast<SqliteCursor*>(&cursor);
+    _batchFetchTask.batchSize = batchSize;
+    _batchFetchTask.done      = _batchDone;
+    _batchCursor              = static_cast<SqliteCursor*>(&cursor);
+    enqueue(&_batchFetchTask);
 }
 
 
@@ -558,9 +563,10 @@ Result Connection::endBatchFetch()
 {
     _state = Idle;
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
-    return _resultSet;
+    if(_batchFetchTask.exception)
+        std::rethrow_exception(_batchFetchTask.exception);
+    _batchDone = _batchFetchTask.done;
+    return _batchFetchTask.result;
 }
 
 
@@ -587,16 +593,14 @@ void Connection::onSetActive(Pt::System::EventLoop* loop)
 
 void Connection::onCancelOp()
 {
-    // Ask SQLite to interrupt any running query (thread-safe per SQLite docs)
     if(_db)
         ::sqlite3_interrupt(_db);
 
     _cancelFlag.store(true);
 
-    // Wait until worker finishes the current op
     {
         Pt::System::MutexLock lock(_mutex);
-        while(_pendingOp != WkNone)
+        while(_pendingTask)
             _workDone.wait(_mutex);
     }
 
@@ -612,102 +616,75 @@ void Connection::onCancel()
 
 bool Connection::onRun()
 {
-    switch(_completedOp)
-    {
-        case WkOpen:
-            _finished.send();
-            break;
-        case WkExec:
-            _executeFinished.send();
-            break;
-        case WkSelect:
-            _selectFinished.send();
-            break;
-        case WkStmtExec:
-            if(_pendingStmt)
-                _pendingStmt->executeFinished().send();
-            break;
-        case WkStmtSelect:
-            if(_pendingStmt)
-                _pendingStmt->selectFinished().send();
-            break;
-        case WkBatchFetch:
-            if(_batchCursor)
-                _batchCursor->fetched().send();
-            break;
-        case WkPrepare:
-            _prepareFinished.send();
-            break;
-        case WkBeginTxn:
-        case WkCommitTxn:
-        case WkRollbackTxn:
-            _transactionFinished.send();
-            break;
-        default:
-            _finished.send();
-            break;
-    }
+    if(_completedTask)
+        _completedTask->complete(*this);
     return true;
 }
 
+
 void Connection::onBeginPrepare(const std::string& query)
 {
-    _pendingSql  = query;
-    _pendingStmt = nullptr;
-    enqueue(WkPrepare);
+    _prepareTask.sql = query;
+    enqueue(&_prepareTask);
 }
 
 
 Pt::Db::Statement Connection::onEndPrepare()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
-    return _preparedStmt;
+    if(_prepareTask.exception)
+        std::rethrow_exception(_prepareTask.exception);
+    return _prepareTask.result;
 }
 
 
-void Connection::onBeginStartTransaction()
+void Connection::onBeginStartTransaction(Pt::Db::Transaction& txn, const char* sql)
 {
-    enqueue(WkBeginTxn);
+    _beginTxnTask.txn = &txn;
+    _beginTxnTask.sql = sql ? sql : "BEGIN TRANSACTION";
+    enqueue(&_beginTxnTask);
 }
 
 
 void Connection::onEndStartTransaction()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
+    if(_beginTxnTask.exception)
+        std::rethrow_exception(_beginTxnTask.exception);
 }
 
 
-void Connection::onBeginCommitTransaction()
+void Connection::onBeginCommitTransaction(Pt::Db::Transaction& txn, const char* sql)
 {
     clearStatementCache();
-    enqueue(WkCommitTxn);
+    _commitTxnTask.txn = &txn;
+    _commitTxnTask.sql = sql ? sql : "COMMIT TRANSACTION";
+    enqueue(&_commitTxnTask);
 }
 
 
 void Connection::onEndCommitTransaction()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
+    if(_commitTxnTask.exception)
+        std::rethrow_exception(_commitTxnTask.exception);
 }
 
 
-void Connection::onBeginRollbackTransaction()
+void Connection::onBeginRollbackTransaction(Pt::Db::Transaction& txn, const char* sql)
 {
     clearStatementCache();
-    enqueue(WkRollbackTxn);
+    _rollbackTxnTask.txn = &txn;
+    _rollbackTxnTask.sql = sql ? sql : "ROLLBACK TRANSACTION";
+    enqueue(&_rollbackTxnTask);
 }
 
 
 void Connection::onEndRollbackTransaction()
 {
     Pt::System::MutexLock lock(_mutex);
-    if(_opFailed)
-        throw QueryFailed(_opError, "");
+    if(_rollbackTxnTask.exception)
+        std::rethrow_exception(_rollbackTxnTask.exception);
 }
 
 } // namespace sqlite

@@ -41,6 +41,10 @@
 #include <Pt/Signal.h>
 #include <string>
 
+#if __cplusplus >= 202002L
+#include <coroutine>
+#endif
+
 namespace Pt {
 
 namespace System {
@@ -53,6 +57,11 @@ class Result;
 class Row;
 class Value;
 class Statement;
+class Transaction;
+
+#if __cplusplus >= 202002L
+class AsyncOpen;
+#endif
 
 /** \brief Smart-pointer wrapper around a database connection backend.
 
@@ -200,41 +209,38 @@ class PT_DB_API Connection
         */
         Pt::Signal<>& prepareFinished();
 
-    public:
-        /** \brief Start a database transaction.
-        */
-        void startTransaction();
+    private:
+        friend class Transaction;
 
-        /** \brief Commit the current transaction.
-        */
-        void commitTransaction();
+        void startTransaction(const char* sql = nullptr);
 
-        /** \brief Roll back the current transaction.
-        */
-        void rollbackTransaction();
+        void commitTransaction(const char* sql = nullptr);
 
-    public:
-        /** \brief Begin async BEGIN TRANSACTION.
-        */
-        void beginStartTransaction();
+        void rollbackTransaction(const char* sql = nullptr);
+
+        void beginStartTransaction(Transaction& txn, const char* sql);
 
         void endStartTransaction();
 
-        /** \brief Begin async COMMIT TRANSACTION.
-        */
-        void beginCommitTransaction();
+        void beginCommitTransaction(Transaction& txn, const char* sql);
 
         void endCommitTransaction();
 
-        /** \brief Begin async ROLLBACK TRANSACTION.
-        */
-        void beginRollbackTransaction();
+        void beginRollbackTransaction(Transaction& txn, const char* sql);
 
         void endRollbackTransaction();
 
-        /** \brief Signal emitted when an async transaction operation completes.
+#if __cplusplus >= 202002L
+    public:
+        /** \brief Asynchronously open the database as a C++20 awaitable.
+
+            Returns an awaitable that can be used with co_await.
+            Wraps beginOpen() / endOpen() / openFinished().
+
+            \param connStr Driver-specific connection string (no driver prefix).
         */
-        Pt::Signal<>& transactionFinished();
+        AsyncOpen openAsync(const std::string& connStr);
+#endif
 
     public:
         /** \brief Returns the underlying backend implementation.
@@ -255,6 +261,52 @@ class PT_DB_API Connection
 
         ConnectionImplPtr _connection;
 };
+
+#if __cplusplus >= 202002L
+
+/** @brief Awaitable for async open of a database connection.
+
+    Wraps the beginOpen() / endOpen() / openFinished() async pattern
+    into a C++20 awaitable for use with co_await.
+
+    @ingroup Pt-Db
+*/
+class AsyncOpen : public Connectable
+{
+    public:
+        /** @brief Construct an awaitable for opening a connection.
+
+            \param conn The database connection to open.
+            \param connStr Driver-specific connection string.
+        */
+        AsyncOpen(Connection& conn, const std::string& connStr)
+        : _conn(conn)
+        , _connStr(connStr)
+        {}
+
+        bool await_ready() const
+        { return false; }
+
+        void await_suspend(std::coroutine_handle<> h)
+        {
+            _handle = h;
+            _conn.openFinished() += slot(*this, &AsyncOpen::onReady);
+            _conn.beginOpen(_connStr);
+        }
+
+        void await_resume()
+        { _conn.endOpen(); }
+
+    private:
+        void onReady()
+        { _handle.resume(); }
+
+        Connection& _conn;
+        const std::string& _connStr;
+        std::coroutine_handle<> _handle;
+};
+
+#endif // __cplusplus >= 202002L
 
 } // namespace Db
 

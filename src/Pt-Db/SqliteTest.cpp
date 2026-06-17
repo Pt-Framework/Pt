@@ -162,7 +162,7 @@ private:
                 _db->execute(strStream.str());
             }
 
-           _db->commitTransaction();
+           sqliteConn.commit();
            _exit = true;
            _success = true;
        }
@@ -457,7 +457,7 @@ void SqliteTest::testConcurrency()
 
         Pt::Db::SqliteTransaction sqliteConn(con,true,true);
         con.execute("CREATE TABLE TestTable (name,age,salary);");
-        con.commitTransaction();
+        sqliteConn.commit();
 
         AccessDbRunnable *runAccessWrite = new AccessDbRunnable(true, con, 500);
         AccessDbRunnable *runAccessRead = new AccessDbRunnable(false, con1, 500, 0);

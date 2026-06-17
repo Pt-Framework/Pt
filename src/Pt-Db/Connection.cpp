@@ -33,6 +33,7 @@
 #include <Pt/Db/Connection.h>
 #include <Pt/Db/IConnector.h>
 #include <Pt/Db/Exception.h>
+#include <Pt/Db/Transaction.h>
 
 namespace Pt {
 
@@ -106,21 +107,21 @@ void Connection::endOpen()
 }
 
 
-void Connection::startTransaction()
+void Connection::startTransaction(const char* sql)
 {
-    _connection->startTransaction();
+    _connection->startTransaction(sql);
 }
 
 
-void Connection::commitTransaction()
+void Connection::commitTransaction(const char* sql)
 {
-    _connection->commitTransaction();
+    _connection->commitTransaction(sql);
 }
 
 
-void Connection::rollbackTransaction()
+void Connection::rollbackTransaction(const char* sql)
 {
-    _connection->rollbackTransaction();
+    _connection->rollbackTransaction(sql);
 }
 
 
@@ -220,15 +221,9 @@ Pt::Signal<>& Connection::prepareFinished()
 }
 
 
-Pt::Signal<>& Connection::transactionFinished()
+void Connection::beginStartTransaction(Transaction& txn, const char* sql)
 {
-    return _connection->transactionFinished();
-}
-
-
-void Connection::beginStartTransaction()
-{
-    _connection->beginStartTransaction();
+    _connection->beginStartTransaction(txn, sql);
 }
 
 
@@ -238,9 +233,9 @@ void Connection::endStartTransaction()
 }
 
 
-void Connection::beginCommitTransaction()
+void Connection::beginCommitTransaction(Transaction& txn, const char* sql)
 {
-    _connection->beginCommitTransaction();
+    _connection->beginCommitTransaction(txn, sql);
 }
 
 
@@ -250,9 +245,9 @@ void Connection::endCommitTransaction()
 }
 
 
-void Connection::beginRollbackTransaction()
+void Connection::beginRollbackTransaction(Transaction& txn, const char* sql)
 {
-    _connection->beginRollbackTransaction();
+    _connection->beginRollbackTransaction(txn, sql);
 }
 
 
@@ -272,6 +267,16 @@ const IConnection* Connection::impl() const
 {
     return _connection.get();
 }
+
+
+#if __cplusplus >= 202002L
+
+AsyncOpen Connection::openAsync(const std::string& connStr)
+{
+    return AsyncOpen(*this, connStr);
+}
+
+#endif // __cplusplus >= 202002L
 
 } // namespace Db
 

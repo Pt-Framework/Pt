@@ -32,6 +32,7 @@
 #include <Pt/Db/Exception.h>
 #include <Pt/Db/Result.h>
 #include <Pt/Db/Statement.h>
+#include <Pt/Db/Transaction.h>
 
 namespace Pt {
 
@@ -70,12 +71,6 @@ Pt::Signal<>& IConnection::selectFinished()
 Pt::Signal<>& IConnection::prepareFinished()
 {
     return onPrepareFinished();
-}
-
-
-Pt::Signal<>& IConnection::transactionFinished()
-{
-    return onTransactionFinished();
 }
 
 
@@ -181,12 +176,12 @@ Statement IConnection::endPrepare()
 }
 
 
-void IConnection::beginStartTransaction()
+void IConnection::beginStartTransaction(Transaction& txn, const char* sql)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingBeginTxn;
-    onBeginStartTransaction();
+    onBeginStartTransaction(txn, sql);
 }
 
 
@@ -197,12 +192,12 @@ void IConnection::endStartTransaction()
 }
 
 
-void IConnection::beginCommitTransaction()
+void IConnection::beginCommitTransaction(Transaction& txn, const char* sql)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingCommitTxn;
-    onBeginCommitTransaction();
+    onBeginCommitTransaction(txn, sql);
 }
 
 
@@ -213,12 +208,12 @@ void IConnection::endCommitTransaction()
 }
 
 
-void IConnection::beginRollbackTransaction()
+void IConnection::beginRollbackTransaction(Transaction& txn, const char* sql)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingRollbackTxn;
-    onBeginRollbackTransaction();
+    onBeginRollbackTransaction(txn, sql);
 }
 
 

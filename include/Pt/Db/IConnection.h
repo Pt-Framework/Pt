@@ -53,6 +53,7 @@ class Result;
 class Row;
 class Value;
 class Statement;
+class Transaction;
 
 /** \brief Base class for database connection backends.
 
@@ -85,8 +86,6 @@ class PT_DB_API IConnection : public RefCounted
         Pt::Signal<>& selectFinished();
 
         Pt::Signal<>& prepareFinished();
-
-        Pt::Signal<>& transactionFinished();
 
         /** \brief Attach to an EventLoop for async operations.
 
@@ -137,27 +136,27 @@ class PT_DB_API IConnection : public RefCounted
 
         /** \brief Begin async BEGIN TRANSACTION.
         */
-        void beginStartTransaction();
+        void beginStartTransaction(Transaction& txn, const char* sql);
 
         void endStartTransaction();
 
         /** \brief Begin async COMMIT TRANSACTION.
         */
-        void beginCommitTransaction();
+        void beginCommitTransaction(Transaction& txn, const char* sql);
 
         void endCommitTransaction();
 
         /** \brief Begin async ROLLBACK TRANSACTION.
         */
-        void beginRollbackTransaction();
+        void beginRollbackTransaction(Transaction& txn, const char* sql);
 
         void endRollbackTransaction();
 
-        virtual void startTransaction() = 0;
+        virtual void startTransaction(const char* sql) = 0;
 
-        virtual void commitTransaction() = 0;
+        virtual void commitTransaction(const char* sql) = 0;
 
-        virtual void rollbackTransaction() = 0;
+        virtual void rollbackTransaction(const char* sql) = 0;
 
         virtual size_type execute(const std::string& query) = 0;
 
@@ -195,8 +194,6 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual Pt::Signal<>& onPrepareFinished() = 0;
 
-        virtual Pt::Signal<>& onTransactionFinished() = 0;
-
         virtual void onSetActive(Pt::System::EventLoop* loop) = 0;
 
         virtual void onOpen(const std::string& connStr) = 0;
@@ -221,15 +218,15 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual Statement onEndPrepare() = 0;
 
-        virtual void onBeginStartTransaction() = 0;
+        virtual void onBeginStartTransaction(Transaction& txn, const char* sql) = 0;
 
         virtual void onEndStartTransaction() = 0;
 
-        virtual void onBeginCommitTransaction() = 0;
+        virtual void onBeginCommitTransaction(Transaction& txn, const char* sql) = 0;
 
         virtual void onEndCommitTransaction() = 0;
 
-        virtual void onBeginRollbackTransaction() = 0;
+        virtual void onBeginRollbackTransaction(Transaction& txn, const char* sql) = 0;
 
         virtual void onEndRollbackTransaction() = 0;
 

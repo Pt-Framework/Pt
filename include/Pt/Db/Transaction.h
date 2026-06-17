@@ -34,6 +34,7 @@
 #include <Pt/Db/Api.h>
 #include <Pt/Db/Connection.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Signal.h>
 
 namespace Pt {
 
@@ -48,11 +49,11 @@ namespace Db {
 class Transaction : private NonCopyable
 {
     private:
-        // \brief Actual connection to a database.
-        Connection& _DbConnection;
-
-        // \brief Parameter whether if exists a current transaction.
-        bool _active;
+        Connection&  _connection;
+        bool         _active;
+        Pt::Signal<> _startFinished;
+        Pt::Signal<> _commitFinished;
+        Pt::Signal<> _rollbackFinished;
 
     public:
         /** Creates a transaction
@@ -61,7 +62,7 @@ class Transaction : private NonCopyable
             whether the transaction should start immediately.
         */
         Transaction(Connection& conn, bool starttransaction = true)
-        : _DbConnection(conn)
+        : _connection(conn)
         , _active(false)
         {
             if (starttransaction)
@@ -95,7 +96,7 @@ class Transaction : private NonCopyable
             \return Connection reference.
         */
         const Connection& getConnection() const
-        { return _DbConnection; }
+        { return _connection; }
 
         /** \brief Begin transaction.
 
@@ -105,10 +106,8 @@ class Transaction : private NonCopyable
         void begin()
         {
             if (_active)
-            {
                 rollback();
-            }
-            _DbConnection.startTransaction();
+            _connection.startTransaction(onGetBeginSql());
             _active = true;
         }
 
@@ -121,7 +120,7 @@ class Transaction : private NonCopyable
         {
             if (_active)
             {
-                _DbConnection.commitTransaction();
+                _connection.commitTransaction(onGetCommitSql());
                 _active = false;
             }
         }
@@ -135,7 +134,7 @@ class Transaction : private NonCopyable
         {
             if (_active)
             {
-                _DbConnection.rollbackTransaction();
+                _connection.rollbackTransaction(onGetRollbackSql());
                 _active = false;
             }
         }
@@ -151,174 +150,88 @@ class Transaction : private NonCopyable
         {
             if(_active)
                 rollback();
-            _DbConnection.beginStartTransaction();
+            _connection.beginStartTransaction(*this, onGetBeginSql());
         }
 
         /** \brief Complete async BEGIN TRANSACTION.
         */
         void endStart()
         {
-            _DbConnection.endStartTransaction();
+            _connection.endStartTransaction();
             _active = true;
         }
+
+        Pt::Signal<>& startFinished()
+        { return _startFinished; }
 
         /** \brief Begin async COMMIT TRANSACTION.
         */
         void beginCommit()
         {
             _active = false;
-            _DbConnection.beginCommitTransaction();
+            _connection.beginCommitTransaction(*this, onGetCommitSql());
         }
 
         /** \brief Complete async COMMIT TRANSACTION.
         */
         void endCommit()
         {
-            _DbConnection.endCommitTransaction();
+            _connection.endCommitTransaction();
         }
+
+        Pt::Signal<>& commitFinished()
+        { return _commitFinished; }
+
 
         /** \brief Begin async ROLLBACK TRANSACTION.
         */
         void beginRollback()
         {
             _active = false;
-            _DbConnection.beginRollbackTransaction();
+            _connection.beginRollbackTransaction(*this, onGetRollbackSql());
         }
 
         /** \brief Complete async ROLLBACK TRANSACTION.
         */
         void endRollback()
         {
-            _DbConnection.endRollbackTransaction();
+            _connection.endRollbackTransaction();
         }
+
+        Pt::Signal<>& rollbackFinished()
+        { return _rollbackFinished; }
+
+    protected:
+        virtual const char* onGetBeginSql()
+        { return nullptr; }
+
+        virtual const char* onGetCommitSql()
+        { return nullptr; }
+
+        virtual const char* onGetRollbackSql()
+        { return nullptr; }
 };
 
 
-/** The class Transaction monitors the state of a transaction on a database-conection.
-
-    The constructor starts by default a transaction on the database. The transactionstate
-    is hold it the class. The destructor rolls the transaction back, when not explicitely
-    commited or rolled back.
-*/
-class SqliteTransaction : private NonCopyable
+class SqliteTransaction : public Transaction
 {
-    private:
-        // \brief Actual connection to a database.
-        Connection& _DbConnection;
-
-        // \brief Parameter whether if exists a current transaction.
-        bool _active;
-
     public:
-        /** Creates a transaction
-
-            Creates a new transaction from a connection and parameter
-            whether the transaction should start immediately.
-        */
-        SqliteTransaction(Connection& conn, bool starttransaction = true, bool immediate = false)
-        : _DbConnection(conn)
-        , _active(false)
+        SqliteTransaction(Connection& conn, bool start = true, bool immediate = false)
+        : Transaction(conn, false)
+        , _immediate(immediate)
         {
-            if (starttransaction)
-            {
-                begin(immediate);
-            }
+            if(start)
+                begin();
         }
 
-        /** \brief Destructor
-
-            If active the current transaction will be rolled back.
-        */
-        ~SqliteTransaction()
+    protected:
+        const char* onGetBeginSql() override
         {
-            if (_active)
-            {
-                try
-                {
-                    rollback();
-                }
-                catch (const std::exception&)
-                {
-                }
-            }
+            return _immediate ? "BEGIN IMMEDIATE TRANSACTION" : nullptr;
         }
 
-        /** Returns connection.
-
-            Returns the current connection object.
-
-            \return Connection reference.
-        */
-        const Connection& getConnection() const  { return _DbConnection; }
-
-        /** \brief Begin a deferred transaction.
-
-            Starts a new deferred transaction. If there is an active
-            transaction it will be rolled back before beginning this
-            transaction.
-
-            The default transaction behavior is deferred. Deferred means
-            that no locks are acquired on the database until the database
-            is first accessed. Thus with a deferred transaction, the
-            BEGIN statement itself does nothing. Locks are not acquired
-            until the first read or write operation. The first read
-            operation against a database creates a SHARED lock and the
-            first write operation creates a RESERVED lock. Because the
-            acquisition of locks is deferred until they are needed, it
-            is possible that another thread or process could create a
-            separate transaction and write to the database after the
-            BEGIN on the current thread has executed.
-
-            If the transaction is immediate, then RESERVED locks are
-            acquired on all databases as soon as the BEGIN command is
-            executed, without waiting for the database to be used.
-            After a BEGIN IMMEDIATE, it is guaranteed that no other
-            thread or process will be able to write to the database
-            or do a BEGIN IMMEDIATE or BEGIN EXCLUSIVE. Other processes
-            can continue to read from the database.
-        */
-        void begin(bool immediate = false)
-        {
-            if (_active)
-            {
-                rollback();
-            }
-
-            if(immediate)
-                _DbConnection.execute("BEGIN IMMEDIATE TRANSACTION");
-            else
-                _DbConnection.startTransaction();
-
-            _active = true;
-        }
-
-        /** \brief Commit a transaction
-
-            Commits the current transaction. If there is no active transaction
-            nothing happens. The transaction state is reset.
-        */
-        void commit()
-        {
-            if (_active)
-            {
-                _DbConnection.commitTransaction();
-                _active = false;
-            }
-        }
-
-        /** \brief Roll back a transaction.
-
-            Rolls back the current transaction. If there is no active
-            transaction nothing is done. The transaction state is reset.
-        */
-        void rollback()
-        {
-            if (_active)
-            {
-                _DbConnection.rollbackTransaction();
-                _active = false;
-            }
-        }
+    private:
+        bool _immediate;
 };
 
 } // namespace Db
