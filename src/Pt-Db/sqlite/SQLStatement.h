@@ -74,8 +74,15 @@ namespace sqlite {
             virtual Value selectValue();
             virtual ICursor* createCursor();
 
+            virtual void      beginExec();
+            virtual size_type endExec();
+            virtual void      beginSelect();
+            virtual Result    endSelect();
+            virtual void      cancel();
+
             // specific methods of sqlite-driver
             sqlite3_stmt* getStmt() const   { return _stmt; }
+            Connection*   getConnection()   { return _conn.get(); }
 
             void putback(sqlite3_stmt* stmt);
 

@@ -3,7 +3,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -13,96 +13,98 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+/*
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "SQLConnection.h"
 #include "SQLStatement.h"
+#include "SqliteCursor.h"
 
 #include "../RowImpl.h"
 #include "../ValueImpl.h"
 #include "../ResultImpl.h"
-#include "Error.h"
+#include "SqliteError.h"
 
+#include <Pt/Db/Exception.h>
 #include <Pt/Db/Result.h>
 #include <Pt/Db/Row.h>
 #include <Pt/Db/Value.h>
 #include <Pt/Db/Statement.h>
 #include <Pt/System/Thread.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/Method.h>
 
 #include <stdlib.h>
+#include <stdexcept>
 
 namespace {
 
-    int select_callback(void *pArg, int argc, char ** argv, char **columnNames)
+// Build a Result by running a SELECT via sqlite3_exec callback
+int selectCallback(void* pArg, int argc, char** argv, char** /*columnNames*/)
+{
+    Pt::Db::ResultImpl* res = static_cast<Pt::Db::ResultImpl*>(pArg);
+
+    Pt::Db::RowImpl::data_type data;
+    for(int i = 0; i < argc; ++i)
     {
-        Pt::Db::ResultImpl* res = static_cast<Pt::Db::ResultImpl*>(pArg);
-
-        Pt::Db::RowImpl::data_type data;
-
-        for (int i = 0; i < argc; ++i)
-        {
-            Pt::Db::Value v;
-            if (argv[i])
-            {
-                v = Pt::Db::Value( new Pt::Db::ValueImpl(argv[i]) );
-            }
-            data.push_back(v);
-        }
-
-        res->add( Pt::Db::Row( new Pt::Db::RowImpl(data) ) );
-
-        return SQLITE_OK;
+        Pt::Db::Value v;
+        if(argv[i])
+            v = Pt::Db::Value( new Pt::Db::ValueImpl(argv[i]) );
+        data.push_back(v);
     }
 
-    /**
-     * @brief Callback method, which is used to handle the busy state of the database.
-     *
-     * The presence of a busy handler does not guarantee that it will be invoked when there is lock contention. 
-     * If SQLite determines that invoking the busy handler could result in a deadlock, it will go ahead and return 
-     * SQLITE_BUSY or SQLITE_IOERR_BLOCKED instead of invoking the busy handler. Consider a scenario where one process 
-     * is holding a read lock that it is trying to promote to a reserved lock and a second process is holding a reserved 
-     * lock that it is trying to promote to an exclusive lock. The first process cannot proceed because it is blocked by 
-     * the second and the second process cannot proceed because it is blocked by the first. If both processes invoke 
-     * the busy handlers, neither will make any progress. Therefore, SQLite returns SQLITE_BUSY for the first process, 
-     * hoping that this will induce the first process to release its read lock and allow the second process to proceed.
-     * 
-     * @param pArg Copy of the third argument of the method sqlite3_busy_handler(...).
-     * @param priorCalls The number of times that the busy handler has been invoked for this locking event.
-     *
-     * @return 1 when additional attempts are made to access the database, otherwise 0.
-     */
-    int busyHandler(void* pArg, int priorCalls)
-    {
-        // sleep if handler has been called less than threshold value
-        if (priorCalls < 500)
-        {
-            // adding a random value here greatly reduces locking
-            if (pArg == 0)
-            {
-                // mostly impossible, because the third argument is the database connection. So if the connection
-                // is lost, then no possibility to access the busy handler.
-                Pt::System::Thread::sleep((rand() % 500) + 400);
-            }
-            else 
-            {
-                Pt::System::Thread::sleep(500);
-            }
-            return 1;
-        }
-
-        // sqlite3_exec will immediately return SQLITE_BUSY.
-        return 0;
-    }
+    res->add( Pt::Db::Row( new Pt::Db::RowImpl(data) ) );
+    return SQLITE_OK;
 }
+
+// Retry on SQLITE_BUSY
+int busyHandler(void* pArg, int priorCalls)
+{
+    if(priorCalls < 500)
+    {
+        if(pArg == 0)
+            Pt::System::Thread::sleep( (rand() % 500) + 400 );
+        else
+            Pt::System::Thread::sleep(500);
+        return 1;
+    }
+    return 0;
+}
+
+} // namespace
 
 
 namespace Pt {
@@ -111,100 +113,488 @@ namespace Db {
 
 namespace sqlite {
 
-    Connection::Connection(const char* conninfo)
+Connection::Connection()
+: _db(0)
+, _conninfo()
+, _worker( Pt::Method<void, Connection>(*this, &Connection::workerRun) )
+, _shutdown(false)
+, _cancelFlag(false)
+, _completedOp(WkNone)
+, _pendingOp(WkNone)
+, _pendingStmt(0)
+, _pendingBatchSize(0)
+, _batchCursor(0)
+, _batchSize(100)
+, _batchDone(false)
+, _rowCount(0)
+, _opFailed(false)
+{
+}
+
+
+
+Connection::~Connection()
+{
+    onClose();
+
     {
-        int ret = ::sqlite3_open(conninfo, &_Db);
-        ret = ::sqlite3_enable_load_extension(_Db, 1);
-        if(ret != SQLITE_OK)
+        Pt::System::MutexLock lock(_mutex);
+        _shutdown = true;
+        _workReady.signal();
+    }
+
+    if(_worker.isJoinable())
+        _worker.join();
+}
+
+
+// --- Worker thread ---
+
+void Connection::ensureWorker()
+{
+    if(_worker.state() == Pt::System::Thread::Ready)
+        _worker.start();
+}
+
+
+void Connection::enqueue(OpType op)
+{
+    ensureWorker();
+
+    Pt::System::MutexLock lock(_mutex);
+    _pendingOp = op;
+    _workReady.signal();
+}
+
+
+void Connection::workerRun()
+{
+    while(true)
+    {
+        OpType op;
         {
-            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
-        }
-        // use busy handler to be called if database is locked.
-        ::sqlite3_busy_handler(_Db, busyHandler, _Db);        
-    }
+            Pt::System::MutexLock lock(_mutex);
 
-    Connection::~Connection()
-    {
-        if (_Db)
+            while(_pendingOp == WkNone && ! _shutdown)
+                _workReady.wait(_mutex);
+
+            if(_shutdown)
+                break;
+
+            op = _pendingOp;
+        }
+
+        // Execute the operation outside the lock
+        bool failed = false;
+        std::string errorMsg;
+        Result resultSet;
+        size_type rowCount = 0;
+
+        try
         {
-            this->clearStatementCache();
-            ::sqlite3_close(_Db);
+            switch(op)
+            {
+                case WkOpen:
+                {
+                    if(_db)
+                    {
+                        clearStatementCache();
+                        ::sqlite3_close(_db);
+                        _db = 0;
+                    }
+                    int ret = ::sqlite3_open(_conninfo.c_str(), &_db);
+                    if(ret != SQLITE_OK)
+                        throw InvalidConnection(std::string("sqlite3_open failed: ") + ::sqlite3_errmsg(_db));
+                    ::sqlite3_enable_load_extension(_db, 1);
+                    ::sqlite3_busy_handler(_db, busyHandler, _db);
+                    break;
+                }
+
+                case WkExec:
+                {
+                    char* errmsg = 0;
+                    ResultImpl* res = new ResultImpl();
+                    resultSet = Result(res);
+
+                    int ret = ::sqlite3_exec(_db, _pendingSql.c_str(), selectCallback, res, &errmsg);
+
+                    if(ret != SQLITE_OK && ret != SQLITE_INTERRUPT)
+                    {
+                        std::string msg = errmsg ? errmsg : "sqlite3_exec failed";
+                        ::sqlite3_free(errmsg);
+                        throw QueryFailed(msg, _pendingSql);
+                    }
+                    if(errmsg)
+                        ::sqlite3_free(errmsg);
+
+                    rowCount = static_cast<size_type>( ::sqlite3_changes(_db) );
+                    break;
+                }
+
+                case WkSelect:
+                {
+                    char* errmsg = 0;
+                    ResultImpl* res = new ResultImpl();
+                    resultSet = Result(res);
+
+                    int ret = ::sqlite3_exec(_db, _pendingSql.c_str(), selectCallback, res, &errmsg);
+
+                    if(ret != SQLITE_OK && ret != SQLITE_INTERRUPT)
+                    {
+                        std::string msg = errmsg ? errmsg : "sqlite3_exec failed";
+                        ::sqlite3_free(errmsg);
+                        throw QueryFailed(msg, _pendingSql);
+                    }
+                    if(errmsg)
+                        ::sqlite3_free(errmsg);
+                    break;
+                }
+
+                case WkStmtExec:
+                {
+                    rowCount = _pendingStmt->execute();
+                    break;
+                }
+
+                case WkStmtSelect:
+                {
+                    resultSet = _pendingStmt->select();
+                    break;
+                }
+
+                case WkBatchFetch:
+                {
+                    if( ! _batchCursor || _batchDone)
+                    {
+                        resultSet = Result( new ResultImpl() );
+                        break;
+                    }
+
+                    ResultImpl* res = new ResultImpl();
+                    resultSet = Result(res);
+
+                    for(size_type i = 0; i < _batchSize; ++i)
+                    {
+                        if(_cancelFlag.load())
+                            break;
+
+                        Pt::Db::Row row = _batchCursor->fetch();
+
+                        if(row.empty())
+                        {
+                            _batchDone = true;
+                            break;
+                        }
+
+                        res->add(row);
+                    }
+                    break;
+                }
+
+                default:
+                    break;
+            }
         }
-    }
-
-    void Connection::beginTransaction()
-    {
-        this->execute("BEGIN TRANSACTION");
-    }
-
-    void Connection::commitTransaction()
-    {
-        // Statement handles are invalidated at transaction end, therefore we
-        // release all cached statements here.
-        // The problem still remains since the application might preserve a
-        // statement handle, which can't be released here.
-        this->clearStatementCache();
-
-        this->execute("COMMIT TRANSACTION");
-    }
-
-    void Connection::rollbackTransaction()
-    {
-        // Statement handles are invalidated at transaction end, therefore we
-        // release all cached statements here.
-        // The problem still remains since the application might preserve a
-        // statement handle, which can't be released here.
-        this->clearStatementCache();
-
-        this->execute("ROLLBACK TRANSACTION");
-    }
-
-    Connection::size_type Connection::execute(const std::string& query)
-    {
-        char* errmsg;
-
-        //PT_LOG_DEBUG("sqlite_exec(" << Db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
-
-        int ret = ::sqlite3_exec(_Db, query.c_str(), 0, 0, &errmsg);
-        if(ret != SQLITE_OK)
+        catch(const std::exception& e)
         {
-            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+            failed   = true;
+            errorMsg = e.what();
         }
-        
-        //PT_LOG_DEBUG("sqlite_exec ret=" << ret);
-        
-        return ::sqlite3_changes(_Db);
-    }
 
-    Result Connection::select(const std::string& query)
+        // Store result and notify — all under the same lock so that
+        // cancel() cannot return until setReady() has already been called.
+        {
+            Pt::System::MutexLock lock(_mutex);
+            _completedOp = op;
+            _pendingOp   = WkNone;
+            _resultSet   = resultSet;
+            _rowCount    = rowCount;
+            _opFailed    = failed;
+            _opError     = errorMsg;
+
+            // Only notify the EventLoop if the operation was not cancelled.
+            // After cancelOp() returns, no post() must be pending.
+            if(!_cancelFlag.load())
+                post();
+
+            _workDone.signal();
+        }
+    }
+}
+
+
+// --- Synchronous operations ---
+
+void Connection::beginTransaction()
+{
+    execute("BEGIN TRANSACTION");
+}
+
+
+void Connection::commitTransaction()
+{
+    clearStatementCache();
+    execute("COMMIT TRANSACTION");
+}
+
+
+void Connection::rollbackTransaction()
+{
+    clearStatementCache();
+    execute("ROLLBACK TRANSACTION");
+}
+
+
+Connection::size_type Connection::execute(const std::string& query)
+{
+    char* errmsg = 0;
+    int ret = ::sqlite3_exec(_db, query.c_str(), 0, 0, &errmsg);
+
+    if(ret != SQLITE_OK)
+        Pt::Db::sqlite::SqliteError(ret, query.c_str());
+
+    return static_cast<size_type>( ::sqlite3_changes(_db) );
+}
+
+
+Result Connection::select(const std::string& query)
+{
+    return prepare(query).select();
+}
+
+
+Pt::Db::Statement Connection::prepare(const std::string& query)
+{
+    return Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, query) );
+}
+
+
+long long Connection::insertId()
+{
+    return ::sqlite3_last_insert_rowid(_db);
+}
+
+
+// --- Async operation hooks ---
+
+void Connection::onOpen(const std::string& connStr)
+{
+    if(_db)
     {
-        return prepare(query).select();
+        clearStatementCache();
+        ::sqlite3_close(_db);
+        _db = 0;
     }
 
-    Row Connection::selectRow(const std::string& query)
+    int ret = ::sqlite3_open(connStr.c_str(), &_db);
+    if(ret != SQLITE_OK)
+        throw InvalidConnection(std::string("sqlite3_open failed: ") + ::sqlite3_errmsg(_db));
+
+    ::sqlite3_enable_load_extension(_db, 1);
+    ::sqlite3_busy_handler(_db, busyHandler, _db);
+}
+
+
+void Connection::onClose()
+{
+    onCancelOp();
+
+    if(_db)
     {
-        return prepare(query).selectRow();
+        clearStatementCache();
+        ::sqlite3_close(_db);
+        _db = 0;
     }
+}
 
-    Value Connection::selectValue(const std::string& query)
+
+void Connection::onBeginExec(const std::string& sql)
+{
+    _pendingSql  = sql;
+    _pendingStmt = 0;
+    enqueue(WkExec);
+}
+
+
+void Connection::onBeginSelect(const std::string& sql)
+{
+    _pendingSql  = sql;
+    _pendingStmt = 0;
+    enqueue(WkSelect);
+}
+
+
+void Connection::beginExec(Statement& stmt)
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state       = PendingExec;
+    _pendingStmt = &stmt;
+    enqueue(WkStmtExec);
+}
+
+
+Connection::size_type Connection::endExec(Statement& /*stmt*/)
+{
+    _state = Idle;
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+    return _rowCount;
+}
+
+
+void Connection::beginSelect(Statement& stmt)
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state       = PendingSelect;
+    _pendingStmt = &stmt;
+    enqueue(WkStmtSelect);
+}
+
+
+Result Connection::endSelect(Statement& /*stmt*/)
+{
+    _state = Idle;
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+    return _resultSet;
+}
+
+
+Connection::size_type Connection::onEndExec()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+    return _rowCount;
+}
+
+
+Result Connection::onEndSelect()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+    return _resultSet;
+}
+
+
+void Connection::onBeginOpen(const std::string& connStr)
+{
+    _conninfo = connStr;
+    enqueue(WkOpen);
+}
+
+
+void Connection::onEndOpen()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw InvalidConnection(_opError);
+}
+
+
+void Connection::beginBatchFetch(SqliteCursor& cursor, size_type batchSize)
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state       = static_cast<State>(PendingBatchFetch);
+    _batchCursor = &cursor;
+    _batchSize   = batchSize;
+    enqueue(WkBatchFetch);
+}
+
+
+Result Connection::endBatchFetch()
+{
+    _state = Idle;
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+    return _resultSet;
+}
+
+
+void Connection::closeBatchFetch()
+{
+    if(_state == static_cast<State>(PendingBatchFetch))
     {
-        return prepare(query).selectValue();
+        _state = Idle;
+        onCancelOp();
     }
+    _batchCursor = nullptr;
+    _batchDone   = false;
+}
 
-    Pt::Db::Statement Connection::prepare(const std::string& query)
+
+void Connection::onSetActive(Pt::System::EventLoop* loop)
+{
+    if(loop)
+        Selectable::setActive(*loop);
+    else
+        Selectable::detach();
+}
+
+
+void Connection::onCancelOp()
+{
+    // Ask SQLite to interrupt any running query (thread-safe per SQLite docs)
+    if(_db)
+        ::sqlite3_interrupt(_db);
+
+    _cancelFlag.store(true);
+
+    // Wait until worker finishes the current op
     {
-        //PT_LOG_DEBUG("prepare(\"" << query << "\")");
-        return Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, query) );
+        Pt::System::MutexLock lock(_mutex);
+        while(_pendingOp != WkNone)
+            _workDone.wait(_mutex);
     }
 
-    long long Connection::insertId()
+    _cancelFlag.store(false);
+}
+
+
+void Connection::onCancel()
+{
+    onCancelOp();
+}
+
+
+bool Connection::onRun()
+{
+    switch(_completedOp)
     {
-        return sqlite3_last_insert_rowid( this->_Db );
+        case WkOpen:
+            _finished.send();
+            break;
+        case WkExec:
+            _executeFinished.send();
+            break;
+        case WkSelect:
+            _selectFinished.send();
+            break;
+        case WkStmtExec:
+        case WkStmtSelect:
+            if(_pendingStmt)
+                _pendingStmt->finished().send();
+            break;
+        case WkBatchFetch:
+            if(_batchCursor)
+                _batchCursor->fetched().send();
+            break;
+        default:
+            _finished.send();
+            break;
     }
+    return true;
+}
 
+} // namespace sqlite
 
-} //namespace sqlite
+} // namespace Db
 
-} //namespace Db
-
-} //namespace Pt
+} // namespace Pt

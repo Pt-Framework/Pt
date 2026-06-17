@@ -1491,13 +1491,13 @@
     <ClInclude Include="..\Pt-Db\ValueImpl.h">
       <Filter>Pt-Db</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Db\sqlite\Connector.h">
+    <ClInclude Include="..\Pt-Db\sqlite\SqliteConnector.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Db\sqlite\Cursor.h">
+    <ClInclude Include="..\Pt-Db\sqlite\SqliteCursor.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
-    <ClInclude Include="..\Pt-Db\sqlite\Error.h">
+    <ClInclude Include="..\Pt-Db\sqlite\SqliteError.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Db\sqlite\SQLConnection.h">
@@ -4527,13 +4527,13 @@
     <ClCompile Include="..\Pt-Db\ValueImplTest.cpp">
       <Filter>Pt-Db</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Db\sqlite\Connector.cpp">
+    <ClCompile Include="..\Pt-Db\sqlite\SqliteConnector.cpp">
       <Filter>Pt-Db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Db\sqlite\Cursor.cpp">
+    <ClCompile Include="..\Pt-Db\sqlite\SqliteCursor.cpp">
       <Filter>Pt-Db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Db\sqlite\Error.cpp">
+    <ClCompile Include="..\Pt-Db\sqlite\SqliteError.cpp">
       <Filter>Pt-Db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Db\sqlite\SQLConnection.cpp">

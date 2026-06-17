@@ -2,12 +2,12 @@
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,41 +17,44 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-#include "Cursor.h"
+
+#include "SqliteCursor.h"
 #include "StmtRow.h"
-#include "Error.h"
+#include "SqliteError.h"
+#include "SQLConnection.h"
 
 #include <Pt/Db/Row.h>
 #include <Pt/System/Thread.h>
 
 namespace Pt {
- 
+
 namespace Db {
- 
+
 namespace sqlite {
 
-    Cursor::Cursor(Statement* statement, sqlite3_stmt* stmt)
+    SqliteCursor::SqliteCursor(Statement* statement, sqlite3_stmt* stmt)
         : _statement(statement)
         , _stmt(stmt)
     { }
 
-    Cursor::~Cursor()
+    SqliteCursor::~SqliteCursor()
     {
+        if(_open)
+            closeBatchFetch();
         _statement->putback(_stmt);
     }
 
-    Row Cursor::fetch()
+    Row SqliteCursor::fetch()
     {
         int ret = 0;
         int n = 0;
@@ -78,10 +81,27 @@ namespace sqlite {
         }
         else if (ret != SQLITE_ROW)
         {
-            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+            Pt::Db::sqlite::SqliteError(ret);
         }
 
         return Row(new StmtRow(getStmt()));
+    }
+
+    void SqliteCursor::beginBatchFetch(size_type batchSize)
+    {
+        _open = true;
+        _statement->getConnection()->beginBatchFetch(*this, batchSize);
+    }
+
+    Result SqliteCursor::endBatchFetch()
+    {
+        return _statement->getConnection()->endBatchFetch();
+    }
+
+    void SqliteCursor::closeBatchFetch()
+    {
+        _open = false;
+        _statement->getConnection()->closeBatchFetch();
     }
 
 } //namespace sqlite
@@ -89,4 +109,3 @@ namespace sqlite {
 } //namespace Db
 
 } //namespace Pt
-

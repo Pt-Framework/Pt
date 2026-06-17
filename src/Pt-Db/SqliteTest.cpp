@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2007 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -42,7 +42,7 @@
 #include <cstddef>
 
 /**
- * @brief Helper class using for the write or read access test to the database. 
+ * @brief Helper class using for the write or read access test to the database.
  *
  * Implements a Runnable which runs in a loop until a stop() API is called. Before use this class, a database must be
  * already created and also contains table name, age and salary.
@@ -57,13 +57,13 @@ public:
      * @param accessWrite Indicate whether the helper class is used for the database write access or read access test.
      * @param db The connection instance to the target database.
      * @param accessFreq Number of write or read access to the target database.
-     * @param startValue The first value added to "40000" for the field "salary". This value will be incremented depends 
+     * @param startValue The first value added to "40000" for the field "salary". This value will be incremented depends
      *        on the accessFreq within the read and write methods.
      */
-    AccessDbRunnable(const bool accessWrite, const Pt::Db::Connection& db, const Pt::uint32_t accessFreq, const Pt::uint32_t& startValue = 0)
+    AccessDbRunnable(const bool accessWrite, Pt::Db::Connection& db, const Pt::uint32_t accessFreq, const Pt::uint32_t& startValue = 0)
     : _exit(false)
     , _accessWrite(accessWrite)
-    , _db(db)
+    , _db(&db)
     , _accessFreq(accessFreq)
     , _startValue(startValue)
     , _success(false)
@@ -75,7 +75,7 @@ public:
      */
     void stop()
     {
-        _exit = true; 
+        _exit = true;
     }
 
     /**
@@ -104,7 +104,7 @@ public:
                 readDb();
             }
         }
-        _db.close();
+        _db->close();
     }
 
 private:
@@ -122,7 +122,7 @@ private:
     /**
      * @brief Specifies the data base to access.
      */
-    Pt::Db::Connection _db;
+    Pt::Db::Connection* _db;
 
     /**
      * @brief Specifies the frequently access to the database.
@@ -130,7 +130,7 @@ private:
     Pt::uint32_t _accessFreq;
 
     /**
-     * @brief The first value added to "40000" for the field "salary". This value will be incremented depending 
+     * @brief The first value added to "40000" for the field "salary". This value will be incremented depending
      *        on the accessFreq within the read and write methods.
      */
     Pt::uint32_t _startValue;
@@ -153,16 +153,16 @@ private:
         try
         {
             _success = false;
-            Pt::Db::SqliteTransaction sqliteConn(_db,true,true);
+            Pt::Db::SqliteTransaction sqliteConn(*_db,true,true);
 
             for (Pt::uint32_t i=0; i < _accessFreq; ++i)
             {
                 std::stringstream strStream;
                 strStream << "INSERT INTO TestTable (name,age,salary) VALUES ('Thomas0',20, " << 40000 + i + _startValue << ")";
-                _db.execute(strStream.str());
+                _db->execute(strStream.str());
             }
 
-           _db.commitTransaction();
+           _db->commitTransaction();
            _exit = true;
            _success = true;
        }
@@ -188,13 +188,13 @@ private:
     void readDb()
     {
         try
-        {            
+        {
             _success = false;
             for (Pt::uint32_t i=0; i < _accessFreq; ++i)
             {
                 std::stringstream strStream;
                 strStream << "SELECT * FROM TestTable WHERE name = 'Thomas0' AND salary = " << 40000 + i + _startValue << "";
-                Pt::Db::Result result = _db.select(strStream.str());
+                Pt::Db::Result result = _db->select(strStream.str());
             }
             _success = true;
             _exit = true;
@@ -210,7 +210,7 @@ private:
         catch (...)
         {
             std::cout << "... caught while loading UpdateHandler on ReadDb" << std::endl;
-        }        
+        }
     }
 };
 
@@ -222,6 +222,8 @@ class SqliteTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("SqliteTest")
         {
             Pt::Unit::TestSuite::registerMethod("testConnection", *this, &SqliteTest::Connection );
+            Pt::Unit::TestSuite::registerMethod( "testGet",        *this, &SqliteTest::testGet );
+            Pt::Unit::TestSuite::registerMethod( "testOpen",       *this, &SqliteTest::testOpen );
             Pt::Unit::TestSuite::registerMethod( "testCreateTable", *this, &SqliteTest::CreateTable );
             Pt::Unit::TestSuite::registerMethod( "testInsert", *this, &SqliteTest::Insert );
             Pt::Unit::TestSuite::registerMethod( "testSelect", *this, &SqliteTest::Select );
@@ -234,8 +236,10 @@ class SqliteTest : public Pt::Unit::TestSuite
         void setUp();
         void tearDown();
 
-    protected:	
+    protected:
         void Connection();
+        void testGet();
+        void testOpen();
         void CreateTable();
         void Insert();
         void Select();
@@ -258,7 +262,8 @@ void SqliteTest::tearDown()
 {
     try
     {
-        Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
+        Pt::Db::Connection con("sqlite");
+        con.open("SqliteTest.db");
         con.execute("DROP TABLE TestTable");
     }
     catch(...){}
@@ -291,13 +296,48 @@ void SqliteTest::fillTable(Pt::Db::Connection& con)
 
 void SqliteTest::Connection()
 {
-    Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
+    Pt::Db::Connection con("sqlite");
+    con.open("SqliteTest.db");
+}
+
+
+void SqliteTest::testGet()
+{
+    Pt::Db::Connection con("sqlite");
+    con.open(":memory:");
+
+    PT_UNIT_ASSERT( con.isOpen() );
+    con.execute("CREATE TABLE t (id INTEGER)");
+    con.execute("INSERT INTO t VALUES (1)");
+    Pt::Db::Result r = con.select("SELECT id FROM t");
+    PT_UNIT_ASSERT( r.size() == 1 );
+    PT_UNIT_ASSERT( r[0][0].getInt() == 1 );
+}
+
+
+void SqliteTest::testOpen()
+{
+    Pt::Db::Connection con("sqlite");
+    PT_UNIT_ASSERT( ! con.isOpen() );
+
+    con.open(":memory:");
+    PT_UNIT_ASSERT( con.isOpen() );
+
+    con.execute("CREATE TABLE t (id INTEGER)");
+    con.execute("INSERT INTO t VALUES (99)");
+    Pt::Db::Result r = con.select("SELECT id FROM t");
+    PT_UNIT_ASSERT( r.size() == 1 );
+    PT_UNIT_ASSERT( r[0][0].getInt() == 99 );
+
+    con.close();
+    PT_UNIT_ASSERT( ! con.isOpen() );
 }
 
 
 void SqliteTest::CreateTable()
 {
-    Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
+    Pt::Db::Connection con("sqlite");
+    con.open("SqliteTest.db");
     Pt::Db::Transaction tact(con);
 
     con.execute("CREATE TABLE TestTable (name,age,salary);");
@@ -310,7 +350,8 @@ void SqliteTest::CreateTable()
 
 void SqliteTest::Insert()
 {
-    Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
+    Pt::Db::Connection con("sqlite");
+    con.open("SqliteTest.db");
     Pt::Db::Transaction tact(con);
 
     con.execute("CREATE TABLE TestTable (name,age,salary);");
@@ -325,7 +366,8 @@ void SqliteTest::Insert()
 
 void SqliteTest::Select()
 {
-    Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
+    Pt::Db::Connection con("sqlite");
+    con.open("SqliteTest.db");
     Pt::Db::Transaction tact(con);
 
     con.execute("CREATE TABLE TestTable (name,age,salary);");
@@ -335,7 +377,7 @@ void SqliteTest::Select()
     Pt::Db::Result result = con.select("SELECT * FROM TestTable WHERE age > 30 AND age < 60");
     PT_UNIT_ASSERT( result.size() == 4 );
 
-    Pt::Db::Row row = con.selectRow("SELECT * FROM TestTable WHERE name = 'Angelique'");
+    Pt::Db::Row row = con.select("SELECT * FROM TestTable WHERE name = 'Angelique'").getRow(0);
     PT_UNIT_ASSERT( row.size() == 3 );
 
     std::string name;
@@ -346,7 +388,7 @@ void SqliteTest::Select()
     PT_UNIT_ASSERT(age == 32);
     PT_UNIT_ASSERT(salary == 68400);
 
-    Pt::Db::Value val = con.selectValue("SELECT salary FROM TestTable WHERE age = 48");
+    Pt::Db::Value val = con.select("SELECT salary FROM TestTable WHERE age = 48").getValue(0, 0);
     PT_UNIT_ASSERT( val.getUnsigned() == 8000 );
 
     tact.commit();
@@ -354,7 +396,8 @@ void SqliteTest::Select()
 
 void SqliteTest::Delete()
 {
-    Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTest.db");
+    Pt::Db::Connection con("sqlite");
+    con.open("SqliteTest.db");
     Pt::Db::Transaction tact(con);
 
     con.execute("CREATE TABLE TestTable (name,age,salary);");
@@ -376,24 +419,25 @@ void SqliteTest::Delete()
 
 void SqliteTest::Pragma()
 {
-    Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteTestPragma.db");
+    Pt::Db::Connection con("sqlite");
+    con.open("SqliteTestPragma.db");
     Pt::Db::Value result;
 
     // NOTE: setting the page_size only works if its the first statement
     con.execute("PRAGMA page_size=4096;"); // size of one page in bytes
-    result = con.selectValue("PRAGMA page_size;");
+    result = con.select("PRAGMA page_size;").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 4096 );
 
     con.execute("PRAGMA auto_vacuum = 1"); // 0 | 1 - reclaim unused space or not
-    result = con.selectValue("PRAGMA auto_vacuum");
+    result = con.select("PRAGMA auto_vacuum").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 1 );
 
     con.execute("PRAGMA cache_size = 3500"); // No. of cached pages
-    result = con.selectValue("PRAGMA cache_size");
+    result = con.select("PRAGMA cache_size").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 3500 );
 
     con.execute("PRAGMA count_changes = 1"); // 0 | 1 - if set INSERT, UPDATE, DELETE return No. of changes
-    result = con.selectValue("PRAGMA count_changes");
+    result = con.select("PRAGMA count_changes").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 1 );
 }
 
@@ -402,17 +446,23 @@ void SqliteTest::testConcurrency()
     bool success = false;
     try
     {
-        Pt::Db::Connection con = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
-        Pt::Db::Connection con1 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
-        Pt::Db::Connection con2 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
-        
+        if(  Pt::System::FileInfo::exists( Pt::System::Path("SqliteConcurrencyTest.db") ) )
+            Pt::System::FileInfo::remove( Pt::System::Path("SqliteConcurrencyTest.db") );
+
+        Pt::Db::Connection con("sqlite");
+        con.open("SqliteConcurrencyTest.db");
+        Pt::Db::Connection con1("sqlite");
+        con1.open("SqliteConcurrencyTest.db");
+        Pt::Db::Connection con2("sqlite");
+        con2.open("SqliteConcurrencyTest.db");
+
         Pt::Db::SqliteTransaction sqliteConn(con,true,true);
         con.execute("CREATE TABLE TestTable (name,age,salary);");
         con.commitTransaction();
 
-        AccessDbRunnable *runAccessWrite = new AccessDbRunnable(true, con, 20000);
-        AccessDbRunnable *runAccessRead = new AccessDbRunnable(false, con1, 5000, 0);
-        AccessDbRunnable *runAccessWrite1 = new AccessDbRunnable(true, con2, 10000, 20001);
+        AccessDbRunnable *runAccessWrite = new AccessDbRunnable(true, con, 500);
+        AccessDbRunnable *runAccessRead = new AccessDbRunnable(false, con1, 500, 0);
+        AccessDbRunnable *runAccessWrite1 = new AccessDbRunnable(true, con2, 500, 2501);
 
         //Create the Threads.
         Pt::System::AttachedThread th1(Pt::callable(*runAccessWrite, &AccessDbRunnable::run));
@@ -431,20 +481,22 @@ void SqliteTest::testConcurrency()
         runAccessWrite->stop();
         runAccessRead->stop();
         runAccessWrite1->stop();
- 
+
         th3.join();
         th2.join();
         th1.join();
 
-        Pt::Db::Connection con3 = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
-        Pt::Db::Value result = con3.selectValue("SELECT COUNT(name) FROM TestTable where name = 'Thomas0'");
-        PT_UNIT_ASSERT(result.getInt() == 30000);
+        Pt::Db::Connection con3("sqlite");
+        con3.open("SqliteConcurrencyTest.db");
+        Pt::Db::Value result = con3.select("SELECT COUNT(name) FROM TestTable where name = 'Thomas0'").getValue(0, 0);
+        PT_UNIT_ASSERT(result.getInt() == 1000);
 
         PT_UNIT_ASSERT(runAccessWrite->isTestSuccessfully());
         PT_UNIT_ASSERT(runAccessRead->isTestSuccessfully());
         PT_UNIT_ASSERT(runAccessWrite1->isTestSuccessfully());
 
-        Pt::Db::Connection conDelete = Pt::Db::connect("sqlite:SqliteConcurrencyTest.db");
+        Pt::Db::Connection conDelete("sqlite");
+        conDelete.open("SqliteConcurrencyTest.db");
         conDelete.execute("DROP TABLE TestTable");
 
         conDelete.close();
@@ -467,7 +519,7 @@ void SqliteTest::testConcurrency()
     {
         std::cout << "... caught while loading UpdateHandler" << std::endl;
     }
-    
+
     PT_UNIT_ASSERT(success);
     Pt::System::FileInfo::remove( Pt::System::Path("SqliteConcurrencyTest.db") );
 }

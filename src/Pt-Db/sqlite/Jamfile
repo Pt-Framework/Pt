@@ -5,16 +5,16 @@ SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 if $(TARGET_OS:L) = wince
 {
 	# only the C++ compiler seemed to define _WIN32_WCE, but not the
-	# C compiler ??? -marc 
+	# C compiler ??? -marc
 	CCFLAGS += /D_WIN32_WCE ;
 }
 
 PT_SQLITE_SOURCES = sqlite3.c ;
 
-PT_SQLITE_SOURCES += SQLConnection.cpp 
-                     Connector.cpp
-                     Cursor.cpp
-                     Error.cpp
+PT_SQLITE_SOURCES += SQLConnection.cpp
+                     SqliteConnector.cpp
+                     SqliteCursor.cpp
+                     SqliteError.cpp
                      SQLStatement.cpp
                      StmtRow.cpp
                      StmtValue.cpp

@@ -30,12 +30,11 @@
 
 #include "ValueImpl.h"
 
+#include <Pt/Db/Exception.h>
 #include <Pt/Db/Blob.h>
 #include <Pt/Date.h>
 #include <Pt/Time.h>
 #include <Pt/DateTime.h>
-#include <Pt/SourceInfo.h>
-#include <stdexcept>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
@@ -55,7 +54,7 @@ namespace
         in >> ret;
 
         if ( in.fail() )
-            throw std::logic_error( "Conversion error" + PT_SOURCEINFO );
+            throw Pt::Db::TypeMismatch("Conversion error", "");
 
         return ret;
     }
@@ -67,7 +66,7 @@ namespace
         in >> std::scientific >> std::setprecision(15) >> ret;
 
         if ( in.fail() )
-            throw std::logic_error( "Conversion error" + PT_SOURCEINFO );
+            throw Pt::Db::TypeMismatch("Conversion error", "");
 
         return ret;
     }
@@ -86,7 +85,7 @@ bool ValueImpl::isNull() const
 bool ValueImpl::getBool() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return !_data.empty() && ::isTrue(_data.at(0));
 }
@@ -95,7 +94,7 @@ bool ValueImpl::getBool() const
 int ValueImpl::getInt() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return ::getValue<int>(_data);
 }
@@ -104,7 +103,7 @@ int ValueImpl::getInt() const
 unsigned ValueImpl::getUnsigned() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return ::getValue<unsigned>(_data);
 }
@@ -113,7 +112,7 @@ unsigned ValueImpl::getUnsigned() const
 float ValueImpl::getFloat() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return ::getValue<float>(_data);
 }
@@ -122,7 +121,7 @@ float ValueImpl::getFloat() const
 double ValueImpl::getDouble() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return ::getValue<double>(_data);
 }
@@ -131,7 +130,7 @@ double ValueImpl::getDouble() const
 char ValueImpl::getChar() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return _data.at(0);
 }
@@ -140,7 +139,7 @@ char ValueImpl::getChar() const
 void ValueImpl::getString(std::string& s) const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     s = _data;
 }
@@ -149,7 +148,7 @@ void ValueImpl::getString(std::string& s) const
 Date ValueImpl::getDate() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return Date::fromIsoString(_data);
 }
@@ -158,7 +157,7 @@ Date ValueImpl::getDate() const
 Time ValueImpl::getTime() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return Time::fromIsoString(_data);
 }
@@ -167,7 +166,7 @@ Time ValueImpl::getTime() const
 DateTime ValueImpl::getDateTime() const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     return DateTime::fromIsoString(_data);
 }
@@ -175,7 +174,7 @@ DateTime ValueImpl::getDateTime() const
 void ValueImpl::getBlob(Blob& blob) const
 {
     if (_null)
-        throw std::logic_error("Value is null." + PT_SOURCEINFO);
+        throw TypeMismatch("Value is null", "");
 
     blob.assign( _data.data(), _data.size() );
 }

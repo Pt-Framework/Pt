@@ -346,9 +346,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\RowImpl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\RowImplTest.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\SqliteTest.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Connector.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Cursor.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Error.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteConnector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteCursor.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteError.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SQLConnection.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\sqlite3.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteTest.cpp" />
@@ -1475,9 +1475,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\libpng\pngstruct.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\ResultImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\RowImpl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Connector.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Cursor.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Error.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteConnector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteCursor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteError.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SQLConnection.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\sqlite3.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\sqlite3ext.h" />

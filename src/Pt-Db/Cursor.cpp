@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2026 by Marc Boris Duerner
+  Copyright (C) 2006 by Tommi Maekitalo
+  Copyright (C) 2006-2026 by Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -25,91 +26,42 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
- */
+*/
 
-#include "Pt/Db/Exception.h"
+#include <Pt/Db/Cursor.h>
+#include <Pt/Db/ICursor.h>
 
 namespace Pt {
 
 namespace Db {
 
-DbError::DbError(const std::string& what)
-: std::runtime_error(what)
+Cursor::Cursor(ICursor* cursor)
+: _cursor(cursor)
 {}
 
-
-DbError::~DbError() throw()
-{}
-
-
-ConnectFailed::ConnectFailed(const std::string& what)
-: DbError(what)
-{}
-
-
-ConnectFailed::~ConnectFailed() throw()
-{}
-
-
-AccessDenied::AccessDenied(const std::string& what)
-: ConnectFailed(what)
-{}
-
-
-AccessDenied::~AccessDenied() throw()
-{}
-
-
-InvalidConnection::InvalidConnection(const std::string& what)
-: ConnectFailed(what)
-{}
-
-
-InvalidConnection::~InvalidConnection() throw()
-{}
-
-
-QueryFailed::QueryFailed(const std::string& what, const std::string& statement)
-: DbError(what)
-, _statement(statement)
-{}
-
-
-QueryFailed::~QueryFailed() throw()
-{}
-
-
-const std::string& QueryFailed::statement() const
+Signal<>& Cursor::fetched()
 {
-    return _statement;
+    return _cursor->fetched();
 }
 
+void Cursor::beginFetch(size_type batchSize)
+{
+    _cursor->beginBatchFetch(batchSize);
+}
 
-InvalidQuery::InvalidQuery(const std::string& what, const std::string& statement)
-: QueryFailed(what, statement)
-{}
+Result Cursor::endFetch()
+{
+    Result r = _cursor->endBatchFetch();
+    if(r.empty())
+        close();
+    return r;
+}
 
-
-InvalidQuery::~InvalidQuery() throw()
-{}
-
-
-ConstraintMismatch::ConstraintMismatch(const std::string& what, const std::string& statement)
-: QueryFailed(what, statement)
-{}
-
-
-ConstraintMismatch::~ConstraintMismatch() throw()
-{}
-
-
-TypeMismatch::TypeMismatch(const std::string& what, const std::string& statement)
-: QueryFailed(what, statement)
-{}
-
-
-TypeMismatch::~TypeMismatch() throw()
-{}
+void Cursor::close()
+{
+    if(_cursor && _cursor->isOpen())
+        _cursor->closeBatchFetch();
+}
 
 } // namespace Db
 

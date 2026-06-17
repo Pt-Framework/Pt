@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
+ * Copyright (C) 2006-2026 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,35 +17,59 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA
  */
 
-#include "Connector.h"
-#include "SQLConnection.h"
-
-#include <Pt/Db/Connection.h>
-
+#include "ConnectionManager.h"
+#include <Pt/Db/Exception.h>
 
 namespace Pt {
 
 namespace Db {
 
-namespace sqlite {
+ConnectionManager::ConnectionManager()
+{
+}
 
-    Pt::Db::Connection Connector::connect(const std::string& url)
-    {
-            return Pt::Db::Connection( new Pt::Db::sqlite::Connection( url.c_str() ) );
-    }
 
-} // namespace sqlite
+ConnectionManager::~ConnectionManager()
+{
+}
+
+
+void ConnectionManager::registerDriver(const std::string& name, IConnector* connector)
+{
+    _drivers[name] = connector;
+}
+
+
+IConnector* ConnectionManager::findConnector(const std::string& name) const
+{
+    if(name == "sqlite")
+        return const_cast<sqlite::SqliteConnector*>(&_sqliteConnector);
+
+    std::map<std::string, IConnector*>::const_iterator it = _drivers.find(name);
+    if(it != _drivers.end())
+        return it->second;
+
+    return 0;
+}
+
+
+/*static*/ ConnectionManager& ConnectionManager::instance()
+{
+    static ConnectionManager mgr;
+    return mgr;
+}
 
 } // namespace Db
 

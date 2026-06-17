@@ -2,12 +2,12 @@
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,6 +34,7 @@
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
 #include <Pt/Db/Blob.h>
+#include <Pt/Signal.h>
 #include <string>
 
 
@@ -55,8 +56,10 @@ namespace Db {
     public:
         typedef std::size_t size_type;
 
-        virtual void clear() = 0;
+        Signal<>& finished()
+        { return _finished; }
 
+        virtual void clear() = 0;
 
         virtual void setNull(const std::string& col) = 0;
         virtual void setBool(const std::string& col, bool data) = 0;
@@ -76,6 +79,17 @@ namespace Db {
         virtual Row selectRow() = 0;
         virtual Value selectValue() = 0;
         virtual ICursor* createCursor() = 0;
+
+        virtual void   beginExec() = 0;
+        virtual size_type endExec() = 0;
+        virtual void   beginSelect() = 0;
+        virtual Result endSelect() = 0;
+        virtual void   cancel() = 0;
+
+    protected:
+        IStatement() {}
+
+        Signal<> _finished;
     };
 
 } // namespace Db

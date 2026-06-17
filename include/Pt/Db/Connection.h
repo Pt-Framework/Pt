@@ -1,254 +1,227 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2006 by Tommi Maekitalo
+  Copyright (C) 2006 by Marc Boris Duerner
 
-#ifndef PT_DB_Connection_H
-#define PT_DB_Connection_H
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
+#ifndef PT_DB_CONNECTION_H
+#define PT_DB_CONNECTION_H
 
 #include <Pt/Db/Api.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IConnection.h>
 #include <Pt/Db/Statement.h>
+#include <Pt/Db/Result.h>
+#include <Pt/Db/Row.h>
+#include <Pt/Db/Value.h>
+#include <Pt/Signal.h>
 #include <string>
 
 namespace Pt {
 
+namespace System {
+class EventLoop;
+}
+
 namespace Db {
 
-    class Result;
-    class Row;
-    class Value;
-    class Statement;
+class Result;
+class Row;
+class Value;
+class Statement;
 
-    /** \brief This class holds a connection to a database.
+/** \brief Smart-pointer wrapper around a database connection backend.
 
-        A Connection object is created with a specific implementation
-        of a database connection (SqLite, mySql, ...). The actual
-        Connection is referencecounted. You can copy this class as
-        you need. The connection will be closed if their are no further
-        references to it.
-    */
-    class PT_DB_API Connection
-    {
-        public:
-            //! \brief The size-type used for the Connection class.
-            typedef std::size_t size_type;
+    Construct with a driver name; the backend is allocated via the
+    ConnectionManager and stays valid for the lifetime of the object.
+    Call open() or beginOpen() to establish the actual connection.
 
-        private:
-            //! \brief Reference counted implementation.
-            SmartPtr<IConnection, InternalRefCounted<IConnection> > _connection;
+    Without an EventLoop all operations are synchronous.
+    Call setActive() with an EventLoop to enable async mode, then use
+    beginExec() / beginSelect() etc. and connect to finished() for results.
 
-        public:
-            /** \brief Standard constructor.
+    @ingroup Pt-Db
+*/
+class PT_DB_API Connection
+{
+    public:
+        typedef std::size_t size_type;
 
-                Construct a Connection with empty values for parameters.
-            */
-            Connection() { }
-            
-            /** \brief Construct a Connection from a special implementation.
-                
-                \param conn Implementation of a Connection.
-            */
-            Connection(IConnection* conn)
-                : _connection(conn)
-            { }
+        /** \brief Allocate a backend for the named driver.
 
-            /** \brief Close the connection to a database.
+            The connection is not yet open. Call open() or beginOpen() to
+            establish the database connection.
 
-                Remove the reference to the connected database. If this was the last
-                open reference to the database the connection is closed.            
-            */
-            void close()
-            { 
-                _connection.reset();
-            }
-            
-            /** \brief Starts a database transaction.            
-            */
-            void beginTransaction();
+            \param driver Registered driver name (e.g. "sqlite").
+        */
+        explicit Connection(const std::string& driver);
 
-            /** \brief Commits a transaction.
+        /** \brief Construct from an existing backend (takes ownership).
 
-                Commits the current transaction. Mostly this function is not
-                needed. Better use function of class Pt::Db::Transaction instead.
-            */
-            void commitTransaction();
+            Intended for unit tests and custom backends.
+        */
+        explicit Connection(IConnection* conn);
 
-            /** \brief Rollback a transaction.
+        /** \brief Cancels any pending async operation and destroys the object.
+        */
+        ~Connection();
 
-                Rolls back the current transaction. Mostly this function is not
-                needed. Better use function of class Pt::Db::Transaction instead.
-            */
-            void rollbackTransaction();
+        /** \brief Attach to an EventLoop for async operations.
+        */
+        void setActive(Pt::System::EventLoop& loop);
 
-            /** \brief Executes a static database query.
+        /** \brief Cancel any pending async operation.
+        */
+        void cancel();
 
-                Executes a static query, without returning results. The query 
-                is normally a kind of INSERT-, UPDATE- or DELETE-statement. 
-                When you need to pass parameters you should use 
-                class Pt::Db::Statement.
+        /** \brief Signal emitted when an async operation completes.
 
-                \param query Query to execute.
-                \return Number of changes in database.
-            */
-            size_type execute(const std::string& query);
+            Connect to this signal and call the corresponding endXxx()
+            in the handler to retrieve results.
+        */
+        Pt::Signal<>& finished();
 
-            /** \brief Executes a select query.
+        /** \brief Return the last auto-increment row id.
+        */
+        long long insertId();
 
-                Executes a static query, which returns a result. 
-                The query is normally a SELECT-statement.
+    public:
+        /** \brief Start a database transaction.
+        */
+        void beginTransaction();
 
-                \param query Query to execute.
-                \return Result of query.
-            */
-            Result select(const std::string& query);
+        /** \brief Commit the current transaction.
+        */
+        void commitTransaction();
 
-            /** \brief Executes a row selection query.
+        /** \brief Roll back the current transaction.
+        */
+        void rollbackTransaction();
 
-                Executes a static query and returns the first row of the 
-                result. If the result contains no rows an exception is
-                thrown. 
+    public:
+        /** \brief Returns true if the database is open.
+        */
+        bool isOpen() const;
 
-                \param query Query to execute.
-                \return Row result of query.
-            */
-            Row selectRow(const std::string& query);
+        /** \brief Returns true if the database is not open.
+        */
+        bool operator!() const;
 
-            /**  \brief Execute a value selection query.
-            
-                Executes a static query and retunrn the first value of the
-                first row of the result. If the result contains no rows 
-                with values an exception is thrown.
+        /** \brief Synchronously open the database.
 
-                \param query Query to execute.
-                \return Value result of query.
-            */
-            Value selectValue(const std::string& query);
+            \param connStr Driver-specific connection string (no driver prefix).
+        */
+        void open(const std::string& connStr);
 
-            /** \brief Create a statement.
+        /** \brief Close the database connection.
+        */
+        void close();
 
-                Creates a new Statement object of a given query.
+        /** \brief Begin async open of the database.
 
-                \param query Query statement.
-                \return Statement.
-            */
-            Statement prepare(const std::string& query);
+            \param connStr Driver-specific connection string (no driver prefix).
+        */
+        void beginOpen(const std::string& connStr);
 
-            /** \brief Create a cached statement.
+        /** \brief Complete async open. Throws on failure.
+        */
+        void endOpen();
 
-                Creates a new Statement-object of a given query and stores
-                the statement in a cache. When called with the same query
-                again the cached statemnt is returned.
+    public:
+        /** \brief Compile a prepared statement.
+        */
+        Statement prepare(const std::string& query);
 
-                \param query Query statement.
-                \return Cached Statement.
-            */
-            Statement prepareCached(const std::string& query);
+        /** \brief Compile and cache a prepared statement.
+        */
+        Statement prepareCached(const std::string& query);
 
-            /** \brief Returns an auto_increment value.
+        /** \brief Clear the statement cache.
+        */
+        void clearStatementCache();
 
-                This function returns the value of a auto_increment value of a table
-                which is generated by the Db when a new row is inserted.
+    public:
+        /** \brief Execute a DML/DDL statement synchronously.
 
-                \return The new auto_increment value.
-            */
-            long long insertId();
+            \return Number of rows affected.
+        */
+        size_type execute(const std::string& query);
 
-            /** \brief Clears statement cache.
-                
-                Clears the statment cache which was created 
-                by prepareCache.
-            */
-            void clearStatementCache()
-            { _connection->clearStatementCache(); }
+        /** \brief Begin async execution statement.
+        */
+        void beginExec(const std::string& sql);
 
-            /** \brief Test if a connection doesn't exists.
+        /** \brief Begin async execution statement.
+        */
+        size_type endExec();
 
-                Return true if there is no connection established
-                to a database.
+        /** \brief Signal emitted when an async raw exec completes.
+        */
+        Pt::Signal<>& executeFinished();
 
-                \return True if disconnect.
-            */
-            bool operator!() const             { return !_connection; }
+    public:
+        /** \brief Execute a SELECT query synchronously.
+        */
+        Result select(const std::string& query);
 
-            //! \brief Returns the actual implementation-class.
-            const IConnection* getImpl() const { return &*_connection; }
-    };
+        /** \brief Begin async SELECT for a SQL string.
+        */
+        void beginSelect(const std::string& sql);
 
-    /** \brief Establish a connection to a database.
-    
-        The url is prefixed with a drivername followed by a colon and a driver-
-        specific part. If the connection can't be established, an exception is thrown.
-        
-        Examples:
-        
-        \code
-        tntDb::Connection myConn = tntDb::connect("mysql:Db=DS2;user=web;passwd=web");
-        tntDb::Connection pgConn = tntDb::connect("postgresql:Dbname=DS2 user=web passwd=web");
-        \endcode
-        
-        \param url the url of the database to connect to
-        \return the established connection
-        \throw LogicError
-        \throw RuntimeError
-    */
-    PT_DB_API Connection connect(const std::string& url);
+        /** \brief Ends async SELECT and returns result.
+        */
+        Result endSelect();
 
-    /** \brief Fetch a connection from a pool or create a new one.
-    
-        A static pool of connections is kept in memory. The function looks
-        in this pool, if there is a connection, which matches the url. If found
-        the connection is removed from the pool and returned. When the returned
-        connection-object is destroyed (and all copies of it), the actual
-        connection is put back into the pool.
-        
-        When there is no connections in the pool, which match the url, a new
-        connection is established.
-    */
-    //Connection connectCached(const std::string& url);
+        /** \brief Signal emitted when an async raw select completes.
+        */
+        Pt::Signal<>& selectFinished();
 
-    /** \brief Releases unused connections
-    
-        Keeps the given number of connections.
-    */
-    //void dropCached(unsigned keep = 0);
+    public:
+        /** \brief Returns the underlying backend implementation.
+        */
+        IConnection* impl();
 
-    /** \brief Releases unused connections.
-    
-        Releases unused connections, which match the given url. Keeps
-        the given number of connections
-    */
-    //void dropCached(const std::string& url, unsigned keep = 0);
+        /** \brief Returns the underlying backend implementation (const).
+        */
+        const IConnection* impl() const;
+
+    private:
+        Connection(const Connection&) = delete;
+
+        Connection& operator=(const Connection&) = delete;
+
+        typedef SmartPtr<IConnection,
+                         InternalRefCounted<IConnection> > ConnectionImplPtr;
+
+        ConnectionImplPtr _connection;
+};
 
 } // namespace Db
 
 } // namespace Pt
 
-#endif // PTB_DB_Connection_H
-
+#endif // PT_DB_CONNECTION_H

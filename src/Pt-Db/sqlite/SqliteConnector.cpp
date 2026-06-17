@@ -2,12 +2,12 @@
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,92 +17,33 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Db/Statement.h"
-#include "Pt/Db/Result.h"
-#include "Pt/Db/Row.h"
-#include "Pt/Db/Value.h"
-
-#include <iostream>
-using namespace std;
+#include "SqliteConnector.h"
+#include "SQLConnection.h"
 
 
 namespace Pt {
 
 namespace Db {
 
-    Statement::size_type Statement::execute()
+namespace sqlite {
+
+    Pt::Db::IConnection* SqliteConnector::get()
     {
-        return _stmt->execute();
+        return new Pt::Db::sqlite::Connection();
     }
 
-    Result Statement::select()
-    {
-        return _stmt->select();
-    }
-
-    Row Statement::selectRow()
-    {
-        return _stmt->selectRow();
-    }
-
-    Value Statement::selectValue()
-    {
-        return _stmt->selectValue();
-    }
-
-    Statement::ConstIterator Statement::begin() const
-    {
-        return ConstIterator( _stmt->createCursor() );
-    }
-
-    Statement::ConstIterator Statement::end() const
-    {
-        return ConstIterator();
-    }
-
-
-    Cursor Statement::getCursor()
-    {
-        return Cursor( _stmt->createCursor() );
-    }
-
-
-    Statement::ConstIterator::ConstIterator(ICursor* cursor)
-        : _cursor(cursor)
-    {
-        if (cursor)
-        {
-            _current = cursor->fetch();
-            if (!_current) {
-                //clog << "No row fetched" << endl;
-                _cursor.reset();
-            }
-        }
-    }
-
-
-    Statement::ConstIterator& Statement::ConstIterator::operator++()
-    {
-        _current = _cursor->fetch();
-
-        if (!_current) {
-            //clog << "No row fetched" << endl;
-            _cursor.reset();
-        }
-
-        return *this;
-    }
+} // namespace sqlite
 
 } // namespace Db
 

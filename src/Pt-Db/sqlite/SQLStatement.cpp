@@ -1,13 +1,13 @@
-/*
+﻿/*
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,27 +17,28 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "SQLStatement.h"
-#include "Cursor.h"
+#include "SqliteCursor.h"
 #include "SQLConnection.h"
 
 #include "../ResultImpl.h"
 #include "../RowImpl.h"
 #include "../ValueImpl.h"
 
-#include "Error.h"
+#include "SqliteError.h"
 
+#include "Pt/Db/Exception.h"
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
@@ -92,15 +93,14 @@ namespace sqlite {
 
             // prepare statement
             const char* tzTail;
-            //PT_LOG_DEBUG("sqlite3_prepare(" << _conn->getSqlite3() << ", \"" << _query
-            //  << "\", " << &_stmt << ", " << &tzTail << ')');
-            
-            int n = static_cast<int>( _query.size() );
 
-            int ret = ::sqlite3_prepare(_conn->getSqlite3(), _query.data(), n, &_stmt, &tzTail);
+            int n = static_cast<int>( _query.size() );
+            sqlite3* db = _conn->getSqlite3();
+
+            int ret = ::sqlite3_prepare(db, _query.data(), n, &_stmt, &tzTail);
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
 
             //PT_LOG_DEBUG("sqlite3_stmt = " << _stmt);
@@ -115,7 +115,7 @@ namespace sqlite {
                     //PT_LOG_DEBUG("sqlite3_finalize(" << _stmt << ')');
                     ::sqlite3_finalize(_stmt);
                     _stmt = 0;
-                        Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                    Pt::Db::sqlite::SqliteError(ret, _query.c_str());
                 }
             }
         }
@@ -171,7 +171,7 @@ namespace sqlite {
                 int ret = ::sqlite3_reset(_stmt);
                 if(ret != SQLITE_OK)
                 {
-                    Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                    Pt::Db::sqlite::SqliteError(ret, _query.c_str());
                 }
 
                 _needReset = false;
@@ -194,7 +194,7 @@ namespace sqlite {
             int ret = ::sqlite3_bind_null(stmt, i + 1);
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -212,7 +212,7 @@ namespace sqlite {
             int ret = ::sqlite3_bind_null(stmt, idx);
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -235,7 +235,7 @@ namespace sqlite {
             int ret = ::sqlite3_bind_int(stmt, idx, data);
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -272,7 +272,7 @@ namespace sqlite {
             int ret = ::sqlite3_bind_double(stmt, idx, data);
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -291,7 +291,7 @@ namespace sqlite {
             int ret = ::sqlite3_bind_text(stmt, idx, &data, 1, SQLITE_TRANSIENT);
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -314,7 +314,7 @@ namespace sqlite {
 
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -330,14 +330,14 @@ namespace sqlite {
 
             //PT_LOG_DEBUG("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
-            
+
             int n = static_cast<int>( data.size() );
 
             int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), n, SQLITE_TRANSIENT);
 
             if(ret != SQLITE_OK)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
         }
     }
@@ -366,7 +366,7 @@ namespace sqlite {
         int ret = sqlite3_step(_stmt);
         if (ret != SQLITE_DONE)
         {
-            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+            Pt::Db::sqlite::SqliteError(ret, _query.c_str());
         }
 
         return ::sqlite3_changes(::sqlite3_db_handle(_stmt));
@@ -409,7 +409,7 @@ namespace sqlite {
             }
             else if(ret != SQLITE_DONE)
             {
-                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+                Pt::Db::sqlite::SqliteError(ret, _query.c_str());
             }
 
         } while (ret == SQLITE_ROW);
@@ -448,10 +448,10 @@ namespace sqlite {
         }
         else if(ret == SQLITE_DONE)
         {
-            throw std::logic_error("sqlite3_step reached 'SQLITE_DONE', but more data was expected" + PT_SOURCEINFO);
+            throw InvalidQuery("sqlite3_step reached SQLITE_DONE, but more data was expected", _query);
         }
 
-        Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+        Pt::Db::sqlite::SqliteError(ret, _query.c_str());
         return Row();
     }
 
@@ -469,7 +469,7 @@ namespace sqlite {
 
             if (count == 0)
             {
-                throw std::logic_error("Invalid query" + PT_SOURCEINFO);
+                throw InvalidQuery("Invalid query", _query);
             }
 
             //PT_LOG_DEBUG("sqlite3_column_text(" << _stmt << ", 0)");
@@ -484,10 +484,10 @@ namespace sqlite {
         }
         else if (ret == SQLITE_DONE)
         {
-            throw std::logic_error("sqlite3_step reached 'SQLITE_DONE', but more data was expected" + PT_SOURCEINFO);
+            throw InvalidQuery("sqlite3_step reached SQLITE_DONE, but more data was expected", _query);
         }
 
-        Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+        Pt::Db::sqlite::SqliteError(ret, _query.c_str());
         return Value();
     }
 
@@ -495,7 +495,37 @@ namespace sqlite {
     {
         _stmtInUse = getBindStmt();
         _stmt = 0;
-        return new Cursor(this, _stmtInUse);
+        return new SqliteCursor(this, _stmtInUse);
+    }
+
+
+    void Statement::beginExec()
+    {
+        _conn->beginExec(*this);
+    }
+
+
+    IStatement::size_type Statement::endExec()
+    {
+        return _conn->endExec(*this);
+    }
+
+
+    void Statement::beginSelect()
+    {
+        _conn->beginSelect(*this);
+    }
+
+
+    Result Statement::endSelect()
+    {
+        return _conn->endSelect(*this);
+    }
+
+
+    void Statement::cancel()
+    {
+        _conn->cancelOp();
     }
 
 } //namespace sqlite

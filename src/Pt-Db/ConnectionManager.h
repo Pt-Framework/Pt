@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
+ * Copyright (C) 2006-2026 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
  *
  * This library is free software; you can redistribute it and/or
@@ -25,52 +25,54 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA
  */
-#ifndef PT_DB_ICURSOR_H
-#define PT_DB_ICURSOR_H
 
-#include <Pt/Db/Api.h>
-#include <Pt/Db/Result.h>
-#include <Pt/RefCounted.h>
-#include <Pt/Signal.h>
-#include <cstddef>
+#ifndef PT_DB_CONNECTIONMANAGER_H
+#define PT_DB_CONNECTIONMANAGER_H
+
+#include <Pt/NonCopyable.h>
+#include "sqlite/SqliteConnector.h"
+#include <map>
+#include <string>
 
 namespace Pt {
 
 namespace Db {
 
-class Row;
+class IConnector;
 
-class PT_DB_API ICursor : public RefCounted
+class ConnectionManager : private Pt::NonCopyable
 {
     public:
-        typedef std::size_t size_type;
+        ConnectionManager();
 
-        Signal<>& fetched()
-        { return _fetched; }
+        ~ConnectionManager();
 
-        bool isOpen() const
-        { return _open; }
+        /** \brief Register a named driver.
 
-        virtual Row    fetch() = 0;
+            The caller retains ownership of the connector pointer.
+            The registered pointer must remain valid for the lifetime
+            of this ConnectionManager.
+        */
+        void registerDriver(const std::string& name, IConnector* connector);
 
-        virtual void   beginBatchFetch(size_type batchSize) = 0;
-        virtual Result endBatchFetch() = 0;
-        virtual void   closeBatchFetch() = 0;
+        /** \brief Find a driver by name. Returns null if not found.
+        */
+        IConnector* findConnector(const std::string& name) const;
 
-    protected:
-        ICursor()
-        : _open(false)
-        {}
+        /** \brief Returns the process-wide singleton instance.
+        */
+        static ConnectionManager& instance();
 
-        Signal<> _fetched;
-        bool     _open;
+    private:
+        sqlite::SqliteConnector           _sqliteConnector;
+        std::map<std::string, IConnector*> _drivers;
 };
 
-} //namespace Db
+} // namespace Db
 
-} //namespace Pt
+} // namespace Pt
 
-#endif // PT_DB_ICURSOR_H
-
+#endif // PT_DB_CONNECTIONMANAGER_H

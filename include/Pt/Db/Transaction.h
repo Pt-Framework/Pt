@@ -49,7 +49,7 @@ namespace Db {
     {
         private:
             // \brief Actual connection to a database.
-            Connection _DbConnection;
+            Connection& _DbConnection;
 
             // \brief Parameter whether if exists a current transaction.
             bool _active;
@@ -60,7 +60,7 @@ namespace Db {
                 Creates a new transaction from a connection and parameter
                 whether the transaction should start immediately.
             */
-            Transaction(const Connection& conn, bool starttransaction = true)
+            Transaction(Connection& conn, bool starttransaction = true)
             : _DbConnection(conn)
             , _active(false)
             {
@@ -138,6 +138,40 @@ namespace Db {
                     _active = false;
                 }
             }
+
+            // --- Async variants (require Connection::setActive(loop)) ---
+
+            /** \brief Async BEGIN. Delegates to Connection::beginExec("BEGIN").
+            */
+            void beginBegin()
+            {
+                if(_active)
+                    rollback();
+                _DbConnection.beginExec("BEGIN TRANSACTION");
+                _active = true;
+            }
+
+            /** \brief Async COMMIT.
+            */
+            void beginCommit()
+            {
+                if(_active)
+                {
+                    _DbConnection.beginExec("COMMIT TRANSACTION");
+                    _active = false;
+                }
+            }
+
+            /** \brief Async ROLLBACK.
+            */
+            void beginRollback()
+            {
+                if(_active)
+                {
+                    _DbConnection.beginExec("ROLLBACK TRANSACTION");
+                    _active = false;
+                }
+            }
     };
 
 
@@ -151,7 +185,7 @@ namespace Db {
     {
         private:
             // \brief Actual connection to a database.
-            Connection _DbConnection;
+            Connection& _DbConnection;
 
             // \brief Parameter whether if exists a current transaction.
             bool _active;
@@ -162,7 +196,7 @@ namespace Db {
                 Creates a new transaction from a connection and parameter
                 whether the transaction should start immediately.
             */
-            SqliteTransaction(const Connection& conn, bool starttransaction = true, bool immediate = false)
+            SqliteTransaction(Connection& conn, bool starttransaction = true, bool immediate = false)
             : _DbConnection(conn)
             , _active(false)
             {

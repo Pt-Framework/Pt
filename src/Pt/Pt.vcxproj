@@ -736,9 +736,9 @@
     <ClInclude Include="..\libpng\pngstruct.h" />
     <ClInclude Include="..\Pt-Db\ResultImpl.h" />
     <ClInclude Include="..\Pt-Db\RowImpl.h" />
-    <ClInclude Include="..\Pt-Db\sqlite\Connector.h" />
-    <ClInclude Include="..\Pt-Db\sqlite\Cursor.h" />
-    <ClInclude Include="..\Pt-Db\sqlite\Error.h" />
+    <ClInclude Include="..\Pt-Db\sqlite\SqliteConnector.h" />
+    <ClInclude Include="..\Pt-Db\sqlite\SqliteCursor.h" />
+    <ClInclude Include="..\Pt-Db\sqlite\SqliteError.h" />
     <ClInclude Include="..\Pt-Db\sqlite\SQLConnection.h" />
     <ClInclude Include="..\Pt-Db\sqlite\sqlite3.h" />
     <ClInclude Include="..\Pt-Db\sqlite\sqlite3ext.h" />
@@ -1381,9 +1381,9 @@
     <ClCompile Include="..\Pt-Db\RowImpl.cpp" />
     <ClCompile Include="..\Pt-Db\RowImplTest.cpp" />
     <ClCompile Include="..\Pt-Db\SqliteTest.cpp" />
-    <ClCompile Include="..\Pt-Db\sqlite\Connector.cpp" />
-    <ClCompile Include="..\Pt-Db\sqlite\Cursor.cpp" />
-    <ClCompile Include="..\Pt-Db\sqlite\Error.cpp" />
+    <ClCompile Include="..\Pt-Db\sqlite\SqliteConnector.cpp" />
+    <ClCompile Include="..\Pt-Db\sqlite\SqliteCursor.cpp" />
+    <ClCompile Include="..\Pt-Db\sqlite\SqliteError.cpp" />
     <ClCompile Include="..\Pt-Db\sqlite\SQLConnection.cpp" />
     <ClCompile Include="..\Pt-Db\sqlite\sqlite3.c" />
     <ClCompile Include="..\Pt-Db\sqlite\SqliteTest.cpp" />

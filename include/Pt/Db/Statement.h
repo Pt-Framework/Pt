@@ -2,12 +2,12 @@
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -32,10 +32,12 @@
 #define PT_DB_STATEMENT_H
 
 #include <Pt/SmartPtr.h>
+#include <Pt/Signal.h>
 #include <Pt/Date.h>
 #include <Pt/Time.h>
 #include <Pt/DateTime.h>
 #include <Pt/Db/Api.h>
+#include <Pt/Db/Cursor.h>
 #include <Pt/Db/IStatement.h>
 #include <Pt/Db/ICursor.h>
 #include <Pt/Db/Row.h>
@@ -296,6 +298,38 @@ namespace Db {
             */
             ConstIterator end() const;
 
+            /** \brief Open an async batch cursor on this statement.
+
+                Returns a %Cursor that manages the cursor lifecycle. Connect to
+                %Cursor::fetched() and call %Cursor::beginFetch(n) to start
+                iteration.
+            */
+            Cursor getCursor();
+
+            /** \brief Signal emitted when an async exec/select completes. */
+            Signal<>& finished()
+            { return _stmt->finished(); }
+
+            /** \brief Begin async execution (DML). */
+            void beginExec()
+            { _stmt->beginExec(); }
+
+            /** \brief Retrieve row count after async exec completes. */
+            size_type endExec()
+            { return _stmt->endExec(); }
+
+            /** \brief Begin async SELECT. */
+            void beginSelect()
+            { _stmt->beginSelect(); }
+
+            /** \brief Retrieve Result after async select completes. */
+            Result endSelect()
+            { return _stmt->endSelect(); }
+
+            /** \brief Cancel any pending async operation on this statement. */
+            void cancel()
+            { _stmt->cancel(); }
+
             /** \brief Test if bound to a statement
 
                 Returns true, if this class is not bound to an actual statement.
@@ -308,6 +342,10 @@ namespace Db {
             //! \brief Returns the actual implementation-class.
             const IStatement* getImpl() const
             { return &*_stmt; }
+
+            //! \brief Returns the actual implementation-class (non-const).
+            IStatement* impl()
+            { return _stmt.get(); }
     };
 
     /** \brief Iterator for statements.

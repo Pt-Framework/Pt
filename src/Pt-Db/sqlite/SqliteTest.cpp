@@ -200,10 +200,10 @@ void SqliteTest::testSelect()
     Pt::Db::Result result = con.select("SELECT * FROM TestTable WHERE age > 30 AND age < 60");
     PT_UNIT_ASSERT( result.size() == 4 );
 
-    Pt::Db::Row row = con.selectRow("SELECT * FROM TestTable WHERE name = 'Angelique'");
+    Pt::Db::Row row = con.select("SELECT * FROM TestTable WHERE name = 'Angelique'").getRow(0);
     PT_UNIT_ASSERT( row.size() == 3 );
 
-    Pt::Db::Value val = con.selectValue("SELECT salary FROM TestTable WHERE age = 48");
+    Pt::Db::Value val = con.select("SELECT salary FROM TestTable WHERE age = 48").getValue(0, 0);
     PT_UNIT_ASSERT( val.getUnsigned() == 8000 );
 
     tact.commit();
@@ -242,21 +242,21 @@ void SqliteTest::testPragma()
     // no warning. --stephan
 
     con.execute("PRAGMA auto_vacuum = 1"); // 0 | 1 - reclaim unused space or not
-    result = con.selectValue("PRAGMA auto_vacuum");
+    result = con.select("PRAGMA auto_vacuum").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 1 );
 
     con.execute("PRAGMA cache_size = 3500"); // No. of cached pages
-    result = con.selectValue("PRAGMA cache_size");
+    result = con.select("PRAGMA cache_size").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 3500 );
 
     con.execute("PRAGMA count_changes = 1"); // 0 | 1 - if set INSERT, UPDATE, DELETE return No. of changes
-    result = con.selectValue("PRAGMA count_changes");
+    result = con.select("PRAGMA count_changes").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 1 );
 
 #if 0
     // This test fails in sqlite 3.5.2:
     con.execute("PRAGMA page_size = 4096"); // size of one page in bytes
-    result = con.selectValue("PRAGMA page_size");
+    result = con.select("PRAGMA page_size").getValue(0, 0);
     PT_UNIT_ASSERT( result.getInt() == 4096 );
 #endif // 0|1
 

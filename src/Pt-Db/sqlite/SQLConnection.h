@@ -1,34 +1,18 @@
-/*
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #ifndef PT_DB_SQLITE_CONNECTION_H
 #define PT_DB_SQLITE_CONNECTION_H
 
 #include <Pt/Db/IConnection.h>
+#include <Pt/Db/ICursor.h>
+#include <Pt/Db/Result.h>
+#include <Pt/SmartPtr.h>
+#include <Pt/Signal.h>
+#include <Pt/System/Selectable.h>
+#include <Pt/System/Thread.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/Condition.h>
 #include "sqlite3.h"
+#include <atomic>
+#include <string>
 
 namespace Pt {
 
@@ -36,51 +20,122 @@ namespace Db {
 
 namespace sqlite {
 
+    class SqliteCursor;
+    class Statement;
+
     class Connection : public IStmtCacheConnection
+                     , public Pt::System::Selectable
     {
-        sqlite3* _Db;
+    public:
+        Connection();
 
-        public:
-            explicit Connection(const char* conninfo);
+        ~Connection();
 
-            ~Connection();
+        // --- Synchronous operations ---
 
-            /** \brief Starts a database deferred transaction.
+        void beginTransaction();
+        void commitTransaction();
+        void rollbackTransaction();
 
-                The default transaction behavior is deferred. Deferred means that no locks are acquired on the database 
-                until the database is first accessed. Thus with a deferred transaction, the BEGIN statement itself 
-                does nothing. Locks are not acquired until the first read or write operation. The first read operation 
-                against a database creates a SHARED lock and the first write operation creates a RESERVED lock. Because 
-                the acquisition of locks is deferred until they are needed, it is possible that another thread or 
-                process could create a separate transaction and write to the database after the BEGIN on the current 
-                thread has executed. 
-            */
-            void beginTransaction();
+        size_type execute(const std::string& query);
+        Result select(const std::string& query);
+        Pt::Db::Statement prepare(const std::string& query);
+        long long insertId();
 
-            void commitTransaction();
+        sqlite3* getSqlite3() const
+        { return _db; }
 
-            void rollbackTransaction();
+        // --- Async Statement operations (called by sqlite::Statement) ---
+        void      beginExec(Statement& stmt);
+        size_type endExec(Statement& stmt);
+        void      beginSelect(Statement& stmt);
+        Result    endSelect(Statement& stmt);
 
-            size_type execute(const std::string& query);
+        // --- Async batch cursor ---
+        void beginBatchFetch(SqliteCursor& cursor, size_type batchSize);
+        Result endBatchFetch();
+        void closeBatchFetch();
 
-            Result select(const std::string& query);
+        // Selectable callbacks (EventLoop thread)
+        void onAttach(Pt::System::EventLoop& loop) override {}
+        void onDetach(Pt::System::EventLoop& loop) override {}
+        void onCancel() override;
+        bool onRun() override;
 
-            Row selectRow(const std::string& query);
+    protected:
+        // --- IConnection hooks ---
 
-            Value selectValue(const std::string& query);
+        Pt::Signal<>& onFinished() override { return _finished; }
+        Pt::Signal<>& onExecuteFinished() override { return _executeFinished; }
+        Pt::Signal<>& onSelectFinished() override  { return _selectFinished; }
 
-            Pt::Db::Statement prepare(const std::string& query);
+        void onSetActive(Pt::System::EventLoop* loop) override;
 
-            long long insertId();
+        void onOpen(const std::string& connStr) override;
+        void onClose() override;
+        void onCancelOp() override;
 
-            sqlite3* getSqlite3() const
-            { return _Db; }
+        void onBeginOpen(const std::string& connStr) override;
+        void onEndOpen() override;
+
+        void onBeginExec(const std::string& sql) override;
+        size_type onEndExec() override;
+        void onBeginSelect(const std::string& sql) override;
+        Result onEndSelect() override;
+
+    private:
+        void workerRun();
+        void ensureWorker();
+
+        enum OpType
+        {
+            WkNone       = 0,
+            WkExec       = 1,
+            WkSelect     = 2,
+            WkStmtExec   = 3,
+            WkStmtSelect = 4,
+            WkOpen       = 5,
+            WkBatchFetch = 6
+        };
+
+        void enqueue(OpType op);
+
+        // Extends IConnection::State; must not overlap with Idle/PendingOpen/PendingExec/PendingSelect
+        enum { PendingBatchFetch = 4 };
+
+        sqlite3*                  _db;
+        std::string               _conninfo;
+
+        Pt::System::Thread        _worker;
+        Pt::System::Mutex         _mutex;
+        Pt::System::Condition     _workReady;
+        Pt::System::Condition     _workDone;
+        bool                      _shutdown;
+        std::atomic<bool>         _cancelFlag;
+
+        // Completion signals
+        Pt::Signal<>              _finished;
+        Pt::Signal<>              _executeFinished;
+        Pt::Signal<>              _selectFinished;
+        OpType                    _completedOp;
+
+        // Pending operation
+        OpType                    _pendingOp;
+        std::string               _pendingSql;
+        Statement*                _pendingStmt;
+        size_type                 _pendingBatchSize;
+
+        // Cursor state
+        SqliteCursor*             _batchCursor;
+        size_type                 _batchSize;
+        bool                      _batchDone;
+
+        // Operation result
+        Result                    _resultSet;
+        size_type                 _rowCount;
+        bool                      _opFailed;
+        std::string               _opError;
     };
 
-} //namespace sqlite
-
-} //namespace Db
-
-} //namespace PT
-
-#endif // PTV_DB_SQLITE_CONNECTION_H
+}}} // Pt::Db::sqlite
+#endif // PT_DB_SQLITE_CONNECTION_H

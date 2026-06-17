@@ -12,14 +12,18 @@ if $(TARGET_OS:L) = symbian
 # BUG: if a C source file comes first, jam links a C library
 PT_DB_SOURCES = [ FDirName sqlite SQLConnection.cpp ]
                 [ FDirName sqlite sqlite3.c ]
-                [ FDirName sqlite Connector.cpp ]
-                [ FDirName sqlite Cursor.cpp ]
-                [ FDirName sqlite Error.cpp ]
+                [ FDirName sqlite SqliteConnector.cpp ]
+                [ FDirName sqlite SqliteCursor.cpp ]
+                [ FDirName sqlite SqliteError.cpp ]
                 [ FDirName sqlite SQLStatement.cpp ]
                 [ FDirName sqlite StmtRow.cpp ]
                 [ FDirName sqlite StmtValue.cpp ]
                 Connection.cpp
+                ConnectionManager.cpp
+                Cursor.cpp
                 Exception.cpp
+                IConnection.cpp
+                IConnector.cpp
                 Result.cpp
                 ResultImpl.cpp
                 Row.cpp
@@ -32,7 +36,8 @@ SharedLibrary Pt-Db : $(PT_DB_SOURCES) ;
 LinkSharedLibraries Pt-Db : Pt Pt-System ;
 MakeLocate Pt-Db : $(PT_OUTPUT_TARGET) ;
 
-PT_DB_TESTS = ResultImplTest.cpp
+PT_DB_TESTS = AsyncTest.cpp
+              ResultImplTest.cpp
               RowImplTest.cpp
               SqliteTest.cpp
               ValueImplTest.cpp

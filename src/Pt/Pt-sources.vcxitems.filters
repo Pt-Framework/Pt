@@ -1953,13 +1953,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\ValueImplTest.cpp">
       <Filter>Pt-Db</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Connector.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteConnector.cpp">
       <Filter>Pt-Db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Cursor.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteCursor.cpp">
       <Filter>Pt-Db\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Error.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteError.cpp">
       <Filter>Pt-Db\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SQLConnection.cpp">
@@ -4439,13 +4439,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\ValueImpl.h">
       <Filter>Pt-Db</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Connector.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteConnector.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Cursor.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteCursor.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\Error.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SqliteError.h">
       <Filter>Pt-Db\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Db\sqlite\SQLConnection.h">
