@@ -49,9 +49,9 @@ IConnection::IConnection()
 }
 
 
-Pt::Signal<>& IConnection::finished()
+Pt::Signal<>& IConnection::openFinished()
 {
-    return onFinished();
+    return onOpenFinished();
 }
 
 
@@ -64,6 +64,18 @@ Pt::Signal<>& IConnection::executeFinished()
 Pt::Signal<>& IConnection::selectFinished()
 {
     return onSelectFinished();
+}
+
+
+Pt::Signal<>& IConnection::prepareFinished()
+{
+    return onPrepareFinished();
+}
+
+
+Pt::Signal<>& IConnection::transactionFinished()
+{
+    return onTransactionFinished();
 }
 
 
@@ -153,6 +165,70 @@ Result IConnection::endSelect()
 }
 
 
+void IConnection::beginPrepare(const std::string& query)
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state = PendingPrepare;
+    onBeginPrepare(query);
+}
+
+
+Statement IConnection::endPrepare()
+{
+    _state = Idle;
+    return onEndPrepare();
+}
+
+
+void IConnection::beginStartTransaction()
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state = PendingBeginTxn;
+    onBeginStartTransaction();
+}
+
+
+void IConnection::endStartTransaction()
+{
+    _state = Idle;
+    onEndStartTransaction();
+}
+
+
+void IConnection::beginCommitTransaction()
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state = PendingCommitTxn;
+    onBeginCommitTransaction();
+}
+
+
+void IConnection::endCommitTransaction()
+{
+    _state = Idle;
+    onEndCommitTransaction();
+}
+
+
+void IConnection::beginRollbackTransaction()
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    _state = PendingRollbackTxn;
+    onBeginRollbackTransaction();
+}
+
+
+void IConnection::endRollbackTransaction()
+{
+    _state = Idle;
+    onEndRollbackTransaction();
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 // IStmtCacheConnection
 ///////////////////////////////////////////////////////////////////////
@@ -164,7 +240,7 @@ Statement IStmtCacheConnection::prepareCached(const std::string& query)
     if(it == _stmtCache.end())
     {
         Statement stmt = prepare(query);
-        IStatement* istmt = const_cast<IStatement*>( stmt.getImpl() );
+        IStatement* istmt = stmt.impl();
         _stmtCache.insert( StatementCache::value_type(query, StatementPtr(istmt)) );
         return stmt;
     }

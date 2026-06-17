@@ -106,9 +106,9 @@ void Connection::endOpen()
 }
 
 
-void Connection::beginTransaction()
+void Connection::startTransaction()
 {
-    _connection->beginTransaction();
+    _connection->startTransaction();
 }
 
 
@@ -184,9 +184,9 @@ Result Connection::endSelect()
 }
 
 
-Pt::Signal<>& Connection::finished()
+Pt::Signal<>& Connection::openFinished()
 {
-    return _connection->finished();
+    return _connection->openFinished();
 }
 
 
@@ -199,6 +199,66 @@ Pt::Signal<>& Connection::executeFinished()
 Pt::Signal<>& Connection::selectFinished()
 {
     return _connection->selectFinished();
+}
+
+
+void Connection::beginPrepare(const std::string& query)
+{
+    _connection->beginPrepare(query);
+}
+
+
+Statement Connection::endPrepare()
+{
+    return _connection->endPrepare();
+}
+
+
+Pt::Signal<>& Connection::prepareFinished()
+{
+    return _connection->prepareFinished();
+}
+
+
+Pt::Signal<>& Connection::transactionFinished()
+{
+    return _connection->transactionFinished();
+}
+
+
+void Connection::beginStartTransaction()
+{
+    _connection->beginStartTransaction();
+}
+
+
+void Connection::endStartTransaction()
+{
+    _connection->endStartTransaction();
+}
+
+
+void Connection::beginCommitTransaction()
+{
+    _connection->beginCommitTransaction();
+}
+
+
+void Connection::endCommitTransaction()
+{
+    _connection->endCommitTransaction();
+}
+
+
+void Connection::beginRollbackTransaction()
+{
+    _connection->beginRollbackTransaction();
+}
+
+
+void Connection::endRollbackTransaction()
+{
+    _connection->endRollbackTransaction();
 }
 
 

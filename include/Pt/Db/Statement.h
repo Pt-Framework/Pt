@@ -306,9 +306,13 @@ namespace Db {
             */
             Cursor getCursor();
 
-            /** \brief Signal emitted when an async exec/select completes. */
-            Signal<>& finished()
-            { return _stmt->finished(); }
+            /** \brief Signal emitted when an async exec (DML) completes. */
+            Signal<>& executeFinished()
+            { return _stmt->executeFinished(); }
+
+            /** \brief Signal emitted when an async select completes. */
+            Signal<>& selectFinished()
+            { return _stmt->selectFinished(); }
 
             /** \brief Begin async execution (DML). */
             void beginExec()
@@ -354,8 +358,15 @@ namespace Db {
         It fullfils the requirements for a forward iterator. An empty iterator marks
         the end of the sequence.
     */
-    class PT_DB_API Statement::ConstIterator : public std::iterator<std::forward_iterator_tag, Row>
+    class PT_DB_API Statement::ConstIterator
     {
+        public:
+            using iterator_category = std::forward_iterator_tag;
+            using value_type        = Row;
+            using difference_type   = std::ptrdiff_t;
+            using pointer           = const Row*;
+            using reference         = const Row&;
+
         private:
             Row _current;
             SmartPtr<ICursor, InternalRefCounted<ICursor> > _cursor;

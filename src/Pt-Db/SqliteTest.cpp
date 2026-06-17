@@ -380,8 +380,7 @@ void SqliteTest::Select()
     Pt::Db::Row row = con.select("SELECT * FROM TestTable WHERE name = 'Angelique'").getRow(0);
     PT_UNIT_ASSERT( row.size() == 3 );
 
-    std::string name;
-    row[0].getString(name);
+    std::string name = row[0].getString();
     int age = row[1].getInt();
     unsigned salary = row[2].getUnsigned();
     PT_UNIT_ASSERT(name == "Angelique");

@@ -132,7 +132,6 @@ Connection::Connection()
 }
 
 
-
 Connection::~Connection()
 {
     onClose();
@@ -189,6 +188,7 @@ void Connection::workerRun()
         std::string errorMsg;
         Result resultSet;
         size_type rowCount = 0;
+        Pt::Db::Statement preparedStmt;
 
         try
         {
@@ -291,6 +291,51 @@ void Connection::workerRun()
                     break;
                 }
 
+                case WkPrepare:
+                {
+                    preparedStmt = Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, _pendingSql) );
+                    break;
+                }
+
+                case WkBeginTxn:
+                {
+                    char* errmsg = nullptr;
+                    int ret = ::sqlite3_exec(_db, "BEGIN TRANSACTION", nullptr, nullptr, &errmsg);
+                    if(ret != SQLITE_OK)
+                    {
+                        std::string msg = errmsg ? errmsg : "BEGIN TRANSACTION failed";
+                        ::sqlite3_free(errmsg);
+                        throw QueryFailed(msg, "BEGIN TRANSACTION");
+                    }
+                    break;
+                }
+
+                case WkCommitTxn:
+                {
+                    char* errmsg = nullptr;
+                    int ret = ::sqlite3_exec(_db, "COMMIT TRANSACTION", nullptr, nullptr, &errmsg);
+                    if(ret != SQLITE_OK)
+                    {
+                        std::string msg = errmsg ? errmsg : "COMMIT TRANSACTION failed";
+                        ::sqlite3_free(errmsg);
+                        throw QueryFailed(msg, "COMMIT TRANSACTION");
+                    }
+                    break;
+                }
+
+                case WkRollbackTxn:
+                {
+                    char* errmsg = nullptr;
+                    int ret = ::sqlite3_exec(_db, "ROLLBACK TRANSACTION", nullptr, nullptr, &errmsg);
+                    if(ret != SQLITE_OK)
+                    {
+                        std::string msg = errmsg ? errmsg : "ROLLBACK TRANSACTION failed";
+                        ::sqlite3_free(errmsg);
+                        throw QueryFailed(msg, "ROLLBACK TRANSACTION");
+                    }
+                    break;
+                }
+
                 default:
                     break;
             }
@@ -309,6 +354,7 @@ void Connection::workerRun()
             _pendingOp   = WkNone;
             _resultSet   = resultSet;
             _rowCount    = rowCount;
+            _preparedStmt = preparedStmt;
             _opFailed    = failed;
             _opError     = errorMsg;
 
@@ -325,7 +371,7 @@ void Connection::workerRun()
 
 // --- Synchronous operations ---
 
-void Connection::beginTransaction()
+void Connection::startTransaction()
 {
     execute("BEGIN TRANSACTION");
 }
@@ -497,12 +543,12 @@ void Connection::onEndOpen()
 }
 
 
-void Connection::beginBatchFetch(SqliteCursor& cursor, size_type batchSize)
+void Connection::beginBatchFetch(ICursor& cursor, size_type batchSize)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    _state       = static_cast<State>(PendingBatchFetch);
-    _batchCursor = &cursor;
+    _state       = PendingBatchFetch;
+    _batchCursor = static_cast<SqliteCursor*>(&cursor);
     _batchSize   = batchSize;
     enqueue(WkBatchFetch);
 }
@@ -520,7 +566,7 @@ Result Connection::endBatchFetch()
 
 void Connection::closeBatchFetch()
 {
-    if(_state == static_cast<State>(PendingBatchFetch))
+    if(_state == PendingBatchFetch)
     {
         _state = Idle;
         onCancelOp();
@@ -578,19 +624,90 @@ bool Connection::onRun()
             _selectFinished.send();
             break;
         case WkStmtExec:
+            if(_pendingStmt)
+                _pendingStmt->executeFinished().send();
+            break;
         case WkStmtSelect:
             if(_pendingStmt)
-                _pendingStmt->finished().send();
+                _pendingStmt->selectFinished().send();
             break;
         case WkBatchFetch:
             if(_batchCursor)
                 _batchCursor->fetched().send();
+            break;
+        case WkPrepare:
+            _prepareFinished.send();
+            break;
+        case WkBeginTxn:
+        case WkCommitTxn:
+        case WkRollbackTxn:
+            _transactionFinished.send();
             break;
         default:
             _finished.send();
             break;
     }
     return true;
+}
+
+void Connection::onBeginPrepare(const std::string& query)
+{
+    _pendingSql  = query;
+    _pendingStmt = nullptr;
+    enqueue(WkPrepare);
+}
+
+
+Pt::Db::Statement Connection::onEndPrepare()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+    return _preparedStmt;
+}
+
+
+void Connection::onBeginStartTransaction()
+{
+    enqueue(WkBeginTxn);
+}
+
+
+void Connection::onEndStartTransaction()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+}
+
+
+void Connection::onBeginCommitTransaction()
+{
+    clearStatementCache();
+    enqueue(WkCommitTxn);
+}
+
+
+void Connection::onEndCommitTransaction()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
+}
+
+
+void Connection::onBeginRollbackTransaction()
+{
+    clearStatementCache();
+    enqueue(WkRollbackTxn);
+}
+
+
+void Connection::onEndRollbackTransaction()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_opFailed)
+        throw QueryFailed(_opError, "");
 }
 
 } // namespace sqlite

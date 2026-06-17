@@ -24,6 +24,7 @@
 
 #include <Pt/Db/IStatement.h>
 #include <Pt/Db/Blob.h>
+#include <Pt/Signal.h>
 #include <Pt/SmartPtr.h>
 #include "sqlite3.h"
 
@@ -47,6 +48,9 @@ namespace sqlite {
 
         bool _needReset;
         void reset();
+
+        Signal<> _executeFinished;
+        Signal<> _selectFinished;
 
         public:
             Statement(Connection* conn, const std::string& query);
@@ -79,6 +83,9 @@ namespace sqlite {
             virtual void      beginSelect();
             virtual Result    endSelect();
             virtual void      cancel();
+
+            virtual Signal<>& onExecuteFinished() { return _executeFinished; }
+            virtual Signal<>& onSelectFinished()  { return _selectFinished; }
 
             // specific methods of sqlite-driver
             sqlite3_stmt* getStmt() const   { return _stmt; }

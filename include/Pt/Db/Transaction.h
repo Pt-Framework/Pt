@@ -2,12 +2,12 @@
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,12 +17,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -39,268 +39,287 @@ namespace Pt {
 
 namespace Db {
 
-    /** The class Transaction monitors the state of a transaction on a database-conection.
+/** The class Transaction monitors the state of a transaction on a database-conection.
 
-        The constructor starts by default a transaction on the database. The transactionstate
-        is hold it the class. The destructor rolls the transaction back, when not explicitely
-        commited or rolled back.
-    */
-    class Transaction : private NonCopyable
-    {
-        private:
-            // \brief Actual connection to a database.
-            Connection& _DbConnection;
+    The constructor starts by default a transaction on the database. The transactionstate
+    is hold it the class. The destructor rolls the transaction back, when not explicitely
+    commited or rolled back.
+*/
+class Transaction : private NonCopyable
+{
+    private:
+        // \brief Actual connection to a database.
+        Connection& _DbConnection;
 
-            // \brief Parameter whether if exists a current transaction.
-            bool _active;
+        // \brief Parameter whether if exists a current transaction.
+        bool _active;
 
-        public:
-            /** Creates a transaction
+    public:
+        /** Creates a transaction
 
-                Creates a new transaction from a connection and parameter
-                whether the transaction should start immediately.
-            */
-            Transaction(Connection& conn, bool starttransaction = true)
-            : _DbConnection(conn)
-            , _active(false)
+            Creates a new transaction from a connection and parameter
+            whether the transaction should start immediately.
+        */
+        Transaction(Connection& conn, bool starttransaction = true)
+        : _DbConnection(conn)
+        , _active(false)
+        {
+            if (starttransaction)
             {
-                if (starttransaction)
-                {
-                    begin();
-                }
+                begin();
             }
+        }
 
-            /** \brief Destructor
+        /** \brief Destructor
 
-                If active the current transaction will be rolled back.
-            */
-            ~Transaction()
+            If active the current transaction will be rolled back.
+        */
+        ~Transaction()
+        {
+            if (_active)
             {
-                if (_active)
-                {
-                    try
-                    {
-                        rollback();
-                    }
-                    catch (const std::exception&)
-                    {
-                    }
-                }
-            }
-
-            /** Returns connection.
-
-                Returns the current connection object.
-
-                \return Connection reference.
-            */
-            const Connection& getConnection() const  { return _DbConnection; }
-
-            /** \brief Begin transaction.
-
-                Starts a new deferred transaction. If there is an active transaction it will be rolled back 
-                before beginning this transaction.
-            */
-            void begin()
-            {
-                if (_active)
+                try
                 {
                     rollback();
                 }
-                _DbConnection.beginTransaction();
-                _active = true;
-            }
-
-            /** \brief Commit a transaction
-
-                Commits the current transaction. If there is no active transaction
-                nothing happens. The transaction state is reset.
-            */
-            void commit()
-            {
-                if (_active)
+                catch (const std::exception&)
                 {
-                    _DbConnection.commitTransaction();
-                    _active = false;
                 }
             }
+        }
 
-            /** \brief Roll back a transaction.
+        /** Returns connection.
 
-                Rolls back the current transaction. If there is no active
-                transaction nothing is done. The transaction state is reset.
-            */
-            void rollback()
+            Returns the current connection object.
+
+            \return Connection reference.
+        */
+        const Connection& getConnection() const
+        { return _DbConnection; }
+
+        /** \brief Begin transaction.
+
+            Starts a new deferred transaction. If there is an active transaction it will be rolled back
+            before beginning this transaction.
+        */
+        void begin()
+        {
+            if (_active)
             {
-                if (_active)
-                {
-                    _DbConnection.rollbackTransaction();
-                    _active = false;
-                }
+                rollback();
             }
+            _DbConnection.startTransaction();
+            _active = true;
+        }
 
-            // --- Async variants (require Connection::setActive(loop)) ---
+        /** \brief Commit a transaction
 
-            /** \brief Async BEGIN. Delegates to Connection::beginExec("BEGIN").
-            */
-            void beginBegin()
+            Commits the current transaction. If there is no active transaction
+            nothing happens. The transaction state is reset.
+        */
+        void commit()
+        {
+            if (_active)
             {
-                if(_active)
-                    rollback();
-                _DbConnection.beginExec("BEGIN TRANSACTION");
-                _active = true;
+                _DbConnection.commitTransaction();
+                _active = false;
             }
+        }
 
-            /** \brief Async COMMIT.
-            */
-            void beginCommit()
+        /** \brief Roll back a transaction.
+
+            Rolls back the current transaction. If there is no active
+            transaction nothing is done. The transaction state is reset.
+        */
+        void rollback()
+        {
+            if (_active)
             {
-                if(_active)
-                {
-                    _DbConnection.beginExec("COMMIT TRANSACTION");
-                    _active = false;
-                }
+                _DbConnection.rollbackTransaction();
+                _active = false;
             }
+        }
 
-            /** \brief Async ROLLBACK.
-            */
-            void beginRollback()
+        // --- Async variants (require Connection::setActive(loop)) ---
+
+        /** \brief Begin async BEGIN TRANSACTION.
+
+            Starts the async transaction. Call endStart() in the
+            transactionFinished() signal handler to complete.
+        */
+        void beginStart()
+        {
+            if(_active)
+                rollback();
+            _DbConnection.beginStartTransaction();
+        }
+
+        /** \brief Complete async BEGIN TRANSACTION.
+        */
+        void endStart()
+        {
+            _DbConnection.endStartTransaction();
+            _active = true;
+        }
+
+        /** \brief Begin async COMMIT TRANSACTION.
+        */
+        void beginCommit()
+        {
+            _active = false;
+            _DbConnection.beginCommitTransaction();
+        }
+
+        /** \brief Complete async COMMIT TRANSACTION.
+        */
+        void endCommit()
+        {
+            _DbConnection.endCommitTransaction();
+        }
+
+        /** \brief Begin async ROLLBACK TRANSACTION.
+        */
+        void beginRollback()
+        {
+            _active = false;
+            _DbConnection.beginRollbackTransaction();
+        }
+
+        /** \brief Complete async ROLLBACK TRANSACTION.
+        */
+        void endRollback()
+        {
+            _DbConnection.endRollbackTransaction();
+        }
+};
+
+
+/** The class Transaction monitors the state of a transaction on a database-conection.
+
+    The constructor starts by default a transaction on the database. The transactionstate
+    is hold it the class. The destructor rolls the transaction back, when not explicitely
+    commited or rolled back.
+*/
+class SqliteTransaction : private NonCopyable
+{
+    private:
+        // \brief Actual connection to a database.
+        Connection& _DbConnection;
+
+        // \brief Parameter whether if exists a current transaction.
+        bool _active;
+
+    public:
+        /** Creates a transaction
+
+            Creates a new transaction from a connection and parameter
+            whether the transaction should start immediately.
+        */
+        SqliteTransaction(Connection& conn, bool starttransaction = true, bool immediate = false)
+        : _DbConnection(conn)
+        , _active(false)
+        {
+            if (starttransaction)
             {
-                if(_active)
-                {
-                    _DbConnection.beginExec("ROLLBACK TRANSACTION");
-                    _active = false;
-                }
+                begin(immediate);
             }
-    };
+        }
 
+        /** \brief Destructor
 
-    /** The class Transaction monitors the state of a transaction on a database-conection.
-
-        The constructor starts by default a transaction on the database. The transactionstate
-        is hold it the class. The destructor rolls the transaction back, when not explicitely
-        commited or rolled back.
-    */
-    class SqliteTransaction : private NonCopyable
-    {
-        private:
-            // \brief Actual connection to a database.
-            Connection& _DbConnection;
-
-            // \brief Parameter whether if exists a current transaction.
-            bool _active;
-
-        public:
-            /** Creates a transaction
-
-                Creates a new transaction from a connection and parameter
-                whether the transaction should start immediately.
-            */
-            SqliteTransaction(Connection& conn, bool starttransaction = true, bool immediate = false)
-            : _DbConnection(conn)
-            , _active(false)
+            If active the current transaction will be rolled back.
+        */
+        ~SqliteTransaction()
+        {
+            if (_active)
             {
-                if (starttransaction)
-                {
-                    begin(immediate);
-                }
-            }
-
-            /** \brief Destructor
-
-                If active the current transaction will be rolled back.
-            */
-            ~SqliteTransaction()
-            {
-                if (_active)
-                {
-                    try
-                    {
-                        rollback();
-                    }
-                    catch (const std::exception&)
-                    {
-                    }
-                }
-            }
-
-            /** Returns connection.
-
-                Returns the current connection object.
-
-                \return Connection reference.
-            */
-            const Connection& getConnection() const  { return _DbConnection; }
-
-            /** \brief Begin a deferred transaction.
-
-                Starts a new deferred transaction. If there is an active
-                transaction it will be rolled back before beginning this
-                transaction.
-
-                The default transaction behavior is deferred. Deferred means
-                that no locks are acquired on the database until the database
-                is first accessed. Thus with a deferred transaction, the
-                BEGIN statement itself does nothing. Locks are not acquired
-                until the first read or write operation. The first read
-                operation against a database creates a SHARED lock and the
-                first write operation creates a RESERVED lock. Because the
-                acquisition of locks is deferred until they are needed, it
-                is possible that another thread or process could create a
-                separate transaction and write to the database after the
-                BEGIN on the current thread has executed.
-
-                If the transaction is immediate, then RESERVED locks are
-                acquired on all databases as soon as the BEGIN command is
-                executed, without waiting for the database to be used.
-                After a BEGIN IMMEDIATE, it is guaranteed that no other
-                thread or process will be able to write to the database
-                or do a BEGIN IMMEDIATE or BEGIN EXCLUSIVE. Other processes
-                can continue to read from the database.
-            */
-            void begin(bool immediate = false)
-            {
-                if (_active)
+                try
                 {
                     rollback();
                 }
-
-                if(immediate)
-                    _DbConnection.execute("BEGIN IMMEDIATE TRANSACTION");
-                else
-                    _DbConnection.beginTransaction();
-
-                _active = true;
-            }
-
-            /** \brief Commit a transaction
-
-                Commits the current transaction. If there is no active transaction
-                nothing happens. The transaction state is reset.
-            */
-            void commit()
-            {
-                if (_active)
+                catch (const std::exception&)
                 {
-                    _DbConnection.commitTransaction();
-                    _active = false;
                 }
             }
+        }
 
-            /** \brief Roll back a transaction.
+        /** Returns connection.
 
-                Rolls back the current transaction. If there is no active
-                transaction nothing is done. The transaction state is reset.
-            */
-            void rollback()
+            Returns the current connection object.
+
+            \return Connection reference.
+        */
+        const Connection& getConnection() const  { return _DbConnection; }
+
+        /** \brief Begin a deferred transaction.
+
+            Starts a new deferred transaction. If there is an active
+            transaction it will be rolled back before beginning this
+            transaction.
+
+            The default transaction behavior is deferred. Deferred means
+            that no locks are acquired on the database until the database
+            is first accessed. Thus with a deferred transaction, the
+            BEGIN statement itself does nothing. Locks are not acquired
+            until the first read or write operation. The first read
+            operation against a database creates a SHARED lock and the
+            first write operation creates a RESERVED lock. Because the
+            acquisition of locks is deferred until they are needed, it
+            is possible that another thread or process could create a
+            separate transaction and write to the database after the
+            BEGIN on the current thread has executed.
+
+            If the transaction is immediate, then RESERVED locks are
+            acquired on all databases as soon as the BEGIN command is
+            executed, without waiting for the database to be used.
+            After a BEGIN IMMEDIATE, it is guaranteed that no other
+            thread or process will be able to write to the database
+            or do a BEGIN IMMEDIATE or BEGIN EXCLUSIVE. Other processes
+            can continue to read from the database.
+        */
+        void begin(bool immediate = false)
+        {
+            if (_active)
             {
-                if (_active)
-                {
-                    _DbConnection.rollbackTransaction();
-                    _active = false;
-                }
+                rollback();
             }
-    };
+
+            if(immediate)
+                _DbConnection.execute("BEGIN IMMEDIATE TRANSACTION");
+            else
+                _DbConnection.startTransaction();
+
+            _active = true;
+        }
+
+        /** \brief Commit a transaction
+
+            Commits the current transaction. If there is no active transaction
+            nothing happens. The transaction state is reset.
+        */
+        void commit()
+        {
+            if (_active)
+            {
+                _DbConnection.commitTransaction();
+                _active = false;
+            }
+        }
+
+        /** \brief Roll back a transaction.
+
+            Rolls back the current transaction. If there is no active
+            transaction nothing is done. The transaction state is reset.
+        */
+        void rollback()
+        {
+            if (_active)
+            {
+                _DbConnection.rollbackTransaction();
+                _active = false;
+            }
+        }
+};
 
 } // namespace Db
 

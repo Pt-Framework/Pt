@@ -19,6 +19,7 @@
 #include <Pt/Db/Result.h>
 #include <Pt/Db/Row.h>
 #include <Pt/Db/Value.h>
+#include <Pt/Db/Transaction.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Db/Cursor.h>
 #include <Pt/Connectable.h>
@@ -28,7 +29,7 @@
 #include <stdexcept>
 
 
-// Helper receiver for finished() signal
+// Helper receiver for openFinished() signal
 struct FinishedReceiver : public Pt::Connectable
 {
     Pt::System::MainLoop* loop;
@@ -57,13 +58,20 @@ public:
     AsyncTest()
     : Pt::Unit::TestSuite("Pt::Db::AsyncTest")
     {
-        registerMethod("SyncExec",       *this, &AsyncTest::syncExec);
-        registerMethod("AsyncExec",      *this, &AsyncTest::asyncExec);
-        registerMethod("AsyncSelect",    *this, &AsyncTest::asyncSelect);
-        registerMethod("AsyncCancel",    *this, &AsyncTest::asyncCancel);
-        registerMethod("AsyncSequence",  *this, &AsyncTest::asyncSequence);
-        registerMethod("AsyncCursor",    *this, &AsyncTest::asyncCursor);
-        registerMethod("AsyncOpen",      *this, &AsyncTest::asyncOpen);
+        registerMethod("SyncExec",              *this, &AsyncTest::syncExec);
+        registerMethod("AsyncExec",             *this, &AsyncTest::asyncExec);
+        registerMethod("AsyncSelect",           *this, &AsyncTest::asyncSelect);
+        registerMethod("AsyncCancel",           *this, &AsyncTest::asyncCancel);
+        registerMethod("AsyncSequence",         *this, &AsyncTest::asyncSequence);
+        registerMethod("AsyncCursor",           *this, &AsyncTest::asyncCursor);
+        registerMethod("AsyncOpen",             *this, &AsyncTest::asyncOpen);
+        registerMethod("AsyncStmtExecSignal",   *this, &AsyncTest::asyncStmtExecSignal);
+        registerMethod("AsyncStmtSelectSignal", *this, &AsyncTest::asyncStmtSelectSignal);
+        registerMethod("AsyncPrepare",          *this, &AsyncTest::asyncPrepare);
+        registerMethod("AsyncBeginTxn",         *this, &AsyncTest::asyncBeginTxn);
+        registerMethod("AsyncTransactionCycle", *this, &AsyncTest::asyncTransactionCycle);
+        registerMethod("AsyncRollback",         *this, &AsyncTest::asyncRollback);
+        registerMethod("AsyncTransactionClass", *this, &AsyncTest::asyncTransactionClass);
     }
 
 protected:
@@ -74,6 +82,13 @@ protected:
     void asyncSequence();
     void asyncCursor();
     void asyncOpen();
+    void asyncStmtExecSignal();
+    void asyncStmtSelectSignal();
+    void asyncPrepare();
+    void asyncBeginTxn();
+    void asyncTransactionCycle();
+    void asyncRollback();
+    void asyncTransactionClass();
 };
 
 Pt::Unit::RegisterTest<AsyncTest> register_AsyncTest;
@@ -82,9 +97,7 @@ Pt::Unit::RegisterTest<AsyncTest> register_AsyncTest;
 // Helper: extract string from Value
 static std::string valueString(const Pt::Db::Value& v)
 {
-    std::string s;
-    v.getString(s);
-    return s;
+    return v.getString();
 }
 
 
@@ -339,7 +352,7 @@ void AsyncTest::asyncOpen()
     conn.setActive(loop);
 
     OpenReceiver rx(loop, conn);
-    conn.finished() += Pt::slot(rx, &OpenReceiver::onFinished);
+    conn.openFinished() += Pt::slot(rx, &OpenReceiver::onFinished);
 
     conn.beginOpen(":memory:");
     loop.run();
@@ -353,5 +366,374 @@ void AsyncTest::asyncOpen()
     Pt::Db::Result r = conn.select("SELECT id FROM t");
     PT_UNIT_ASSERT( r.size() == 1 );
     PT_UNIT_ASSERT( r[0][0].getInt() == 42 );
+}
+
+
+// --- Async Statement exec/select with separate signals ---
+
+struct StmtExecReceiver : public Pt::Connectable
+{
+    Pt::System::MainLoop* loop;
+    Pt::Db::Statement*    stmt;
+    bool  done;
+    bool  failed;
+    std::size_t rowCount;
+
+    StmtExecReceiver(Pt::System::MainLoop& l, Pt::Db::Statement& s)
+    : loop(&l), stmt(&s), done(false), failed(false), rowCount(0)
+    {}
+
+    void onExecuteFinished()
+    {
+        try { rowCount = stmt->endExec(); }
+        catch(const std::exception&) { failed = true; }
+        done = true;
+        loop->exit();
+    }
+};
+
+void AsyncTest::asyncStmtExecSignal()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    conn.execute("CREATE TABLE t (id INTEGER)");
+    Pt::Db::Statement stmt = conn.prepare("INSERT INTO t VALUES (:id)");
+    stmt.set("id", 7);
+
+    StmtExecReceiver rx(loop, stmt);
+    stmt.executeFinished() += Pt::slot(rx, &StmtExecReceiver::onExecuteFinished);
+
+    stmt.beginExec();
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( rx.done );
+
+    Pt::Db::Result r = conn.select("SELECT COUNT(*) FROM t WHERE id=7");
+    PT_UNIT_ASSERT( r[0][0].getInt() == 1 );
+}
+
+
+struct StmtSelectReceiver : public Pt::Connectable
+{
+    Pt::System::MainLoop* loop;
+    Pt::Db::Statement*    stmt;
+    bool  done;
+    bool  failed;
+    Pt::Db::Result result;
+
+    StmtSelectReceiver(Pt::System::MainLoop& l, Pt::Db::Statement& s)
+    : loop(&l), stmt(&s), done(false), failed(false)
+    {}
+
+    void onSelectFinished()
+    {
+        try { result = stmt->endSelect(); }
+        catch(const std::exception&) { failed = true; }
+        done = true;
+        loop->exit();
+    }
+};
+
+void AsyncTest::asyncStmtSelectSignal()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    conn.execute("CREATE TABLE t (id INTEGER, val TEXT)");
+    conn.execute("INSERT INTO t VALUES (1, 'alpha')");
+    conn.execute("INSERT INTO t VALUES (2, 'beta')");
+
+    Pt::Db::Statement stmt = conn.prepare("SELECT * FROM t ORDER BY id");
+
+    StmtSelectReceiver rx(loop, stmt);
+    stmt.selectFinished() += Pt::slot(rx, &StmtSelectReceiver::onSelectFinished);
+
+    stmt.beginSelect();
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( rx.result.size() == 2 );
+    PT_UNIT_ASSERT( rx.result[0][1].getString() == "alpha" );
+}
+
+
+// --- Async prepare ---
+
+struct PrepareReceiver : public Pt::Connectable
+{
+    Pt::System::MainLoop* loop;
+    Pt::Db::Connection*   conn;
+    bool  done;
+    bool  failed;
+    Pt::Db::Statement stmt;
+
+    PrepareReceiver(Pt::System::MainLoop& l, Pt::Db::Connection& c)
+    : loop(&l), conn(&c), done(false), failed(false)
+    {}
+
+    void onPrepareFinished()
+    {
+        try { stmt = conn->endPrepare(); }
+        catch(const std::exception&) { failed = true; }
+        done = true;
+        loop->exit();
+    }
+};
+
+void AsyncTest::asyncPrepare()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    conn.execute("CREATE TABLE t (id INTEGER)");
+
+    PrepareReceiver rx(loop, conn);
+    conn.prepareFinished() += Pt::slot(rx, &PrepareReceiver::onPrepareFinished);
+
+    conn.beginPrepare("INSERT INTO t VALUES (:id)");
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( ! ! rx.stmt );
+
+    rx.stmt.set("id", 42);
+    rx.stmt.execute();
+    Pt::Db::Result r = conn.select("SELECT id FROM t");
+    PT_UNIT_ASSERT( r.size() == 1 );
+    PT_UNIT_ASSERT( r[0][0].getInt() == 42 );
+}
+
+
+// --- Async transaction ---
+
+struct TxnReceiver : public Pt::Connectable
+{
+    Pt::System::MainLoop* loop;
+    Pt::Db::Connection*   conn;
+    bool  done;
+    bool  failed;
+
+    TxnReceiver(Pt::System::MainLoop& l, Pt::Db::Connection& c)
+    : loop(&l), conn(&c), done(false), failed(false)
+    {}
+
+    void onTxnFinished()
+    {
+        try { conn->endStartTransaction(); }
+        catch(const std::exception&) { failed = true; }
+        done = true;
+        loop->exit();
+    }
+};
+
+void AsyncTest::asyncBeginTxn()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    TxnReceiver rx(loop, conn);
+    conn.transactionFinished() += Pt::slot(rx, &TxnReceiver::onTxnFinished);
+
+    conn.beginStartTransaction();
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( rx.done );
+
+    conn.rollbackTransaction();
+}
+
+
+void AsyncTest::asyncTransactionCycle()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    conn.execute("CREATE TABLE t (id INTEGER)");
+
+    // Step 1: async BEGIN
+    struct CycleReceiver : public Pt::Connectable
+    {
+        Pt::System::MainLoop* loop;
+        Pt::Db::Connection*   conn;
+        int  step;
+        bool failed;
+
+        CycleReceiver(Pt::System::MainLoop& l, Pt::Db::Connection& c)
+        : loop(&l), conn(&c), step(0), failed(false)
+        {}
+
+        void onTxnFinished()
+        {
+            try
+            {
+                if(step == 0)
+                {
+                    conn->endStartTransaction();
+                    conn->execute("INSERT INTO t VALUES (1)");
+                    ++step;
+                    conn->beginCommitTransaction();
+                }
+                else
+                {
+                    conn->endCommitTransaction();
+                    ++step;
+                    loop->exit();
+                }
+            }
+            catch(const std::exception&)
+            {
+                failed = true;
+                loop->exit();
+            }
+        }
+    };
+
+    CycleReceiver rx(loop, conn);
+    conn.transactionFinished() += Pt::slot(rx, &CycleReceiver::onTxnFinished);
+
+    conn.beginStartTransaction();
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( rx.step == 2 );
+
+    Pt::Db::Result r = conn.select("SELECT COUNT(*) FROM t");
+    PT_UNIT_ASSERT( r[0][0].getInt() == 1 );
+}
+
+
+void AsyncTest::asyncRollback()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    conn.execute("CREATE TABLE t (id INTEGER)");
+
+    struct RollReceiver : public Pt::Connectable
+    {
+        Pt::System::MainLoop* loop;
+        Pt::Db::Connection*   conn;
+        int  step;
+        bool failed;
+
+        RollReceiver(Pt::System::MainLoop& l, Pt::Db::Connection& c)
+        : loop(&l), conn(&c), step(0), failed(false)
+        {}
+
+        void onTxnFinished()
+        {
+            try
+            {
+                if(step == 0)
+                {
+                    conn->endStartTransaction();
+                    conn->execute("INSERT INTO t VALUES (99)");
+                    ++step;
+                    conn->beginRollbackTransaction();
+                }
+                else
+                {
+                    conn->endRollbackTransaction();
+                    ++step;
+                    loop->exit();
+                }
+            }
+            catch(const std::exception&)
+            {
+                failed = true;
+                loop->exit();
+            }
+        }
+    };
+
+    RollReceiver rx(loop, conn);
+    conn.transactionFinished() += Pt::slot(rx, &RollReceiver::onTxnFinished);
+
+    conn.beginStartTransaction();
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( rx.step == 2 );
+
+    // Rollback — no rows committed
+    Pt::Db::Result r = conn.select("SELECT COUNT(*) FROM t");
+    PT_UNIT_ASSERT( r[0][0].getInt() == 0 );
+}
+
+
+void AsyncTest::asyncTransactionClass()
+{
+    Pt::System::MainLoop loop;
+    Pt::Db::Connection conn("sqlite");
+    conn.open(":memory:");
+    conn.setActive(loop);
+
+    conn.execute("CREATE TABLE t (id INTEGER)");
+
+    struct TxnClassReceiver : public Pt::Connectable
+    {
+        Pt::System::MainLoop*  loop;
+        Pt::Db::Connection*    conn;
+        Pt::Db::Transaction*   txn;
+        int  step;
+        bool failed;
+
+        TxnClassReceiver(Pt::System::MainLoop& l, Pt::Db::Connection& c, Pt::Db::Transaction& t)
+        : loop(&l), conn(&c), txn(&t), step(0), failed(false)
+        {}
+
+        void onTxnFinished()
+        {
+            try
+            {
+                if(step == 0)
+                {
+                    txn->endStart();
+                    conn->execute("INSERT INTO t VALUES (5)");
+                    ++step;
+                    txn->beginCommit();
+                }
+                else
+                {
+                    txn->endCommit();
+                    ++step;
+                    loop->exit();
+                }
+            }
+            catch(const std::exception&)
+            {
+                failed = true;
+                loop->exit();
+            }
+        }
+    };
+
+    Pt::Db::Transaction txn(conn, false);
+    TxnClassReceiver rx(loop, conn, txn);
+    conn.transactionFinished() += Pt::slot(rx, &TxnClassReceiver::onTxnFinished);
+
+    txn.beginStart();
+    loop.run();
+
+    PT_UNIT_ASSERT( ! rx.failed );
+    PT_UNIT_ASSERT( rx.step == 2 );
+
+    Pt::Db::Result r = conn.select("SELECT COUNT(*) FROM t WHERE id=5");
+    PT_UNIT_ASSERT( r[0][0].getInt() == 1 );
 }
 

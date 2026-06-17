@@ -4,6 +4,7 @@
 #include <Pt/Db/IConnection.h>
 #include <Pt/Db/ICursor.h>
 #include <Pt/Db/Result.h>
+#include <Pt/Db/Statement.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Selectable.h>
@@ -33,7 +34,7 @@ namespace sqlite {
 
         // --- Synchronous operations ---
 
-        void beginTransaction();
+        void startTransaction();
         void commitTransaction();
         void rollbackTransaction();
 
@@ -52,7 +53,7 @@ namespace sqlite {
         Result    endSelect(Statement& stmt);
 
         // --- Async batch cursor ---
-        void beginBatchFetch(SqliteCursor& cursor, size_type batchSize);
+        void beginBatchFetch(ICursor& cursor, size_type batchSize);
         Result endBatchFetch();
         void closeBatchFetch();
 
@@ -65,9 +66,11 @@ namespace sqlite {
     protected:
         // --- IConnection hooks ---
 
-        Pt::Signal<>& onFinished() override { return _finished; }
-        Pt::Signal<>& onExecuteFinished() override { return _executeFinished; }
-        Pt::Signal<>& onSelectFinished() override  { return _selectFinished; }
+        Pt::Signal<>& onOpenFinished() override        { return _finished; }
+        Pt::Signal<>& onExecuteFinished() override    { return _executeFinished; }
+        Pt::Signal<>& onSelectFinished() override     { return _selectFinished; }
+        Pt::Signal<>& onPrepareFinished() override    { return _prepareFinished; }
+        Pt::Signal<>& onTransactionFinished() override{ return _transactionFinished; }
 
         void onSetActive(Pt::System::EventLoop* loop) override;
 
@@ -83,25 +86,36 @@ namespace sqlite {
         void onBeginSelect(const std::string& sql) override;
         Result onEndSelect() override;
 
+        void onBeginPrepare(const std::string& query) override;
+        Pt::Db::Statement onEndPrepare() override;
+
+        void onBeginStartTransaction() override;
+        void onEndStartTransaction() override;
+        void onBeginCommitTransaction() override;
+        void onEndCommitTransaction() override;
+        void onBeginRollbackTransaction() override;
+        void onEndRollbackTransaction() override;
+
     private:
         void workerRun();
         void ensureWorker();
 
         enum OpType
         {
-            WkNone       = 0,
-            WkExec       = 1,
-            WkSelect     = 2,
-            WkStmtExec   = 3,
-            WkStmtSelect = 4,
-            WkOpen       = 5,
-            WkBatchFetch = 6
+            WkNone           = 0,
+            WkExec           = 1,
+            WkSelect         = 2,
+            WkStmtExec       = 3,
+            WkStmtSelect     = 4,
+            WkOpen           = 5,
+            WkBatchFetch     = 6,
+            WkPrepare        = 7,
+            WkBeginTxn       = 8,
+            WkCommitTxn      = 9,
+            WkRollbackTxn    = 10
         };
 
         void enqueue(OpType op);
-
-        // Extends IConnection::State; must not overlap with Idle/PendingOpen/PendingExec/PendingSelect
-        enum { PendingBatchFetch = 4 };
 
         sqlite3*                  _db;
         std::string               _conninfo;
@@ -117,6 +131,8 @@ namespace sqlite {
         Pt::Signal<>              _finished;
         Pt::Signal<>              _executeFinished;
         Pt::Signal<>              _selectFinished;
+        Pt::Signal<>              _prepareFinished;
+        Pt::Signal<>              _transactionFinished;
         OpType                    _completedOp;
 
         // Pending operation
@@ -135,6 +151,7 @@ namespace sqlite {
         size_type                 _rowCount;
         bool                      _opFailed;
         std::string               _opError;
+        Pt::Db::Statement         _preparedStmt;
     };
 
 }}} // Pt::Db::sqlite

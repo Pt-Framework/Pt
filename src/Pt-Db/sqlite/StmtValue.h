@@ -54,6 +54,7 @@ namespace sqlite {
             virtual double getDouble() const;
             virtual char getChar() const;
             virtual void getString(std::string& stringdata) const;
+            virtual std::string getString() const;
             virtual Date getDate() const;
             virtual Time getTime() const;
             virtual DateTime getDateTime() const;

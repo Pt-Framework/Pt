@@ -72,6 +72,7 @@ namespace Db {
             virtual char getChar() const;
 
             virtual void getString(std::string& s) const;
+            virtual std::string getString() const;
 
             virtual Date getDate() const;
 

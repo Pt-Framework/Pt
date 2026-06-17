@@ -62,7 +62,7 @@ class Statement;
 
     Without an EventLoop all operations are synchronous.
     Call setActive() with an EventLoop to enable async mode, then use
-    beginExec() / beginSelect() etc. and connect to finished() for results.
+    beginExec() / beginSelect() etc. and connect to openFinished() for results.
 
     @ingroup Pt-Db
 */
@@ -98,29 +98,9 @@ class PT_DB_API Connection
         */
         void cancel();
 
-        /** \brief Signal emitted when an async operation completes.
-
-            Connect to this signal and call the corresponding endXxx()
-            in the handler to retrieve results.
-        */
-        Pt::Signal<>& finished();
-
         /** \brief Return the last auto-increment row id.
         */
         long long insertId();
-
-    public:
-        /** \brief Start a database transaction.
-        */
-        void beginTransaction();
-
-        /** \brief Commit the current transaction.
-        */
-        void commitTransaction();
-
-        /** \brief Roll back the current transaction.
-        */
-        void rollbackTransaction();
 
     public:
         /** \brief Returns true if the database is open.
@@ -151,18 +131,12 @@ class PT_DB_API Connection
         */
         void endOpen();
 
-    public:
-        /** \brief Compile a prepared statement.
-        */
-        Statement prepare(const std::string& query);
+        /** \brief Signal emitted when an async operation completes.
 
-        /** \brief Compile and cache a prepared statement.
+            Connect to this signal and call the corresponding endXxx()
+            in the handler to retrieve results.
         */
-        Statement prepareCached(const std::string& query);
-
-        /** \brief Clear the statement cache.
-        */
-        void clearStatementCache();
+        Pt::Signal<>& openFinished();
 
     public:
         /** \brief Execute a DML/DDL statement synchronously.
@@ -199,6 +173,68 @@ class PT_DB_API Connection
         /** \brief Signal emitted when an async raw select completes.
         */
         Pt::Signal<>& selectFinished();
+
+    public:
+        /** \brief Compile a prepared statement.
+        */
+        Statement prepare(const std::string& query);
+
+        /** \brief Compile and cache a prepared statement.
+        */
+        Statement prepareCached(const std::string& query);
+
+        /** \brief Clear the statement cache.
+        */
+        void clearStatementCache();
+
+    public:
+        /** \brief Compile a prepared statement asynchronously.
+        */
+        void beginPrepare(const std::string& query);
+
+        /** \brief Complete async prepare. Returns the compiled statement.
+        */
+        Statement endPrepare();
+
+        /** \brief Signal emitted when an async prepare completes.
+        */
+        Pt::Signal<>& prepareFinished();
+
+    public:
+        /** \brief Start a database transaction.
+        */
+        void startTransaction();
+
+        /** \brief Commit the current transaction.
+        */
+        void commitTransaction();
+
+        /** \brief Roll back the current transaction.
+        */
+        void rollbackTransaction();
+
+    public:
+        /** \brief Begin async BEGIN TRANSACTION.
+        */
+        void beginStartTransaction();
+
+        void endStartTransaction();
+
+        /** \brief Begin async COMMIT TRANSACTION.
+        */
+        void beginCommitTransaction();
+
+        void endCommitTransaction();
+
+        /** \brief Begin async ROLLBACK TRANSACTION.
+        */
+        void beginRollbackTransaction();
+
+        void endRollbackTransaction();
+
+        /** \brief Signal emitted when an async transaction operation completes.
+        */
+        Pt::Signal<>& transactionFinished();
 
     public:
         /** \brief Returns the underlying backend implementation.

@@ -76,13 +76,17 @@ class PT_DB_API IConnection : public RefCounted
 
             Fires on the EventLoop thread. Call the corresponding endXxx()
             method to retrieve the result or receive any exception.
-            Delegates to onFinished() — the signal object lives in the backend.
+            Delegates to onOpenFinished() — the signal object lives in the backend.
         */
-        Pt::Signal<>& finished();
+        Pt::Signal<>& openFinished();
 
         Pt::Signal<>& executeFinished();
 
         Pt::Signal<>& selectFinished();
+
+        Pt::Signal<>& prepareFinished();
+
+        Pt::Signal<>& transactionFinished();
 
         /** \brief Attach to an EventLoop for async operations.
 
@@ -113,18 +117,43 @@ class PT_DB_API IConnection : public RefCounted
         */
         void endOpen();
 
-        /** \brief Begin async execution of a DML/SELECT SQL string.
+        /** \brief Begin async execution of a DML SQL string.
         */
         void beginExec(const std::string& sql);
 
         size_type endExec();
 
+        /** \brief Begin async SELECT query.
+        */
         void beginSelect(const std::string& sql);
 
         Result endSelect();
 
+        /** \brief Begin async prepare of a statement.
+        */
+        void beginPrepare(const std::string& query);
 
-        virtual void beginTransaction() = 0;
+        Statement endPrepare();
+
+        /** \brief Begin async BEGIN TRANSACTION.
+        */
+        void beginStartTransaction();
+
+        void endStartTransaction();
+
+        /** \brief Begin async COMMIT TRANSACTION.
+        */
+        void beginCommitTransaction();
+
+        void endCommitTransaction();
+
+        /** \brief Begin async ROLLBACK TRANSACTION.
+        */
+        void beginRollbackTransaction();
+
+        void endRollbackTransaction();
+
+        virtual void startTransaction() = 0;
 
         virtual void commitTransaction() = 0;
 
@@ -147,17 +176,26 @@ class PT_DB_API IConnection : public RefCounted
 
         enum State
         {
-            Idle          = 0,
-            PendingOpen   = 1,
-            PendingExec   = 2,
-            PendingSelect = 3
+            Idle                 = 0,
+            PendingOpen          = 1,
+            PendingExec          = 2,
+            PendingSelect        = 3,
+            PendingPrepare       = 4,
+            PendingBeginTxn      = 5,
+            PendingCommitTxn     = 6,
+            PendingRollbackTxn   = 7,
+            PendingBatchFetch    = 8
         };
 
-        virtual Pt::Signal<>& onFinished() = 0;
+        virtual Pt::Signal<>& onOpenFinished() = 0;
 
         virtual Pt::Signal<>& onExecuteFinished() = 0;
 
         virtual Pt::Signal<>& onSelectFinished() = 0;
+
+        virtual Pt::Signal<>& onPrepareFinished() = 0;
+
+        virtual Pt::Signal<>& onTransactionFinished() = 0;
 
         virtual void onSetActive(Pt::System::EventLoop* loop) = 0;
 
@@ -178,6 +216,22 @@ class PT_DB_API IConnection : public RefCounted
         virtual void onBeginSelect(const std::string& sql) = 0;
 
         virtual Result onEndSelect() = 0;
+
+        virtual void onBeginPrepare(const std::string& query) = 0;
+
+        virtual Statement onEndPrepare() = 0;
+
+        virtual void onBeginStartTransaction() = 0;
+
+        virtual void onEndStartTransaction() = 0;
+
+        virtual void onBeginCommitTransaction() = 0;
+
+        virtual void onEndCommitTransaction() = 0;
+
+        virtual void onBeginRollbackTransaction() = 0;
+
+        virtual void onEndRollbackTransaction() = 0;
 
         bool                    _isOpen;
         State                   _state;
