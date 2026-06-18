@@ -48,8 +48,7 @@ IConnection::IConnection()
 : _isOpen(false)
 , _state(Idle)
 , _loop(nullptr)
-, _pendingStmt(nullptr)
-, _pendingCursor(nullptr)
+, _pendingOp(nullptr)
 , _prepareCachedHit(false)
 {
 }
@@ -76,8 +75,7 @@ void IConnection::close()
     if(_state != Idle)
     {
         _state = Idle;
-        _pendingStmt = nullptr;
-        _pendingCursor = nullptr;
+        _pendingOp = nullptr;
         onCancelOp();
     }
     _isOpen = false;
@@ -91,8 +89,7 @@ void IConnection::beginClose()
     if(_state != Idle)
     {
         _state = Idle;
-        _pendingStmt = nullptr;
-        _pendingCursor = nullptr;
+        _pendingOp = nullptr;
         onCancelOp();
     }
     _state = PendingClose;
@@ -113,8 +110,7 @@ void IConnection::cancelOp() noexcept
     if(_state == Idle)
         return;
     _state = Idle;
-    _pendingStmt = nullptr;
-    _pendingCursor = nullptr;
+    _pendingOp = nullptr;
     onCancelOp();
 }
 
@@ -350,7 +346,7 @@ void IConnection::beginExecute(IStatement& stmt)
         throw InvalidConnection("Operation pending");
 
     _state = PendingExec;
-    _pendingStmt = &stmt;
+    _pendingOp = &stmt;
     stmt.onBeginExec();
 }
 
@@ -358,7 +354,7 @@ void IConnection::beginExecute(IStatement& stmt)
 IConnection::size_type IConnection::endExecute(IStatement& stmt)
 {
     _state = Idle;
-    _pendingStmt = nullptr;
+    _pendingOp = nullptr;
     return stmt.onEndExec();
 }
 
@@ -371,7 +367,7 @@ void IConnection::beginSelect(IStatement& stmt)
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingSelect;
-    _pendingStmt = &stmt;
+    _pendingOp = &stmt;
     stmt.onBeginSelect();
 }
 
@@ -379,7 +375,7 @@ void IConnection::beginSelect(IStatement& stmt)
 Result IConnection::endSelect(IStatement& stmt)
 {
     _state = Idle;
-    _pendingStmt = nullptr;
+    _pendingOp = nullptr;
     return stmt.onEndSelect();
 }
 
@@ -389,7 +385,7 @@ void IConnection::beginBatchFetch(ICursor& cursor, size_type batchSize)
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingBatchFetch;
-    _pendingCursor = &cursor;
+    _pendingOp = &cursor;
     cursor.onBeginBatchFetch(batchSize);
 }
 
@@ -397,17 +393,17 @@ void IConnection::beginBatchFetch(ICursor& cursor, size_type batchSize)
 Result IConnection::endBatchFetch(ICursor& cursor)
 {
     _state = Idle;
-    _pendingCursor = nullptr;
+    _pendingOp = nullptr;
     return cursor.onEndBatchFetch();
 }
 
 
 void IConnection::closeCursor(ICursor& cursor)
 {
-    if(_pendingCursor == &cursor)
+    if(_pendingOp == &cursor)
     {
         _state = Idle;
-        _pendingCursor = nullptr;
+        _pendingOp = nullptr;
         onCancelOp();
     }
     cursor.onClose();
@@ -416,10 +412,10 @@ void IConnection::closeCursor(ICursor& cursor)
 
 void IConnection::closeStatement(IStatement& stmt)
 {
-    if(_pendingStmt == &stmt)
+    if(_pendingOp == &stmt)
     {
         _state = Idle;
-        _pendingStmt = nullptr;
+        _pendingOp = nullptr;
         onCancelOp();
     }
 }

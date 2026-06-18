@@ -333,8 +333,7 @@ class PT_DB_API IConnection : public RefCounted
         bool                    _isOpen;
         State                   _state;
         Pt::System::EventLoop*  _loop;
-        IStatement*             _pendingStmt;
-        ICursor*                _pendingCursor;
+        void*                   _pendingOp;
 };
 
 
