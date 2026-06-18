@@ -260,11 +260,19 @@ Value IConnection::selectValue(IStatement& stmt)
 }
 
 
-Cursor IConnection::getCursor(IStatement& stmt)
+Result IConnection::fetchBatch(ICursor& cursor, size_type batchSize)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    return Cursor(stmt.onCreateCursor());
+    return cursor.onFetchBatch(batchSize);
+}
+
+
+Cursor IConnection::getCursor(IStatement& stmt, size_type batchSize)
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+    return Cursor(stmt.onCreateCursor(), batchSize);
 }
 
 //

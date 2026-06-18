@@ -36,32 +36,91 @@ namespace Pt {
 
 namespace Db {
 
-Cursor::Cursor(ICursor* cursor)
+Cursor::Cursor(ICursor* cursor, size_type batchSize)
 : _cursor(cursor)
+, _batchSize(batchSize)
 {}
+
+
+bool Cursor::fetch()
+{
+    _batch = _cursor->connection()->fetchBatch(*_cursor, _batchSize);
+    return ! _batch.empty();
+}
+
 
 Signal<>& Cursor::fetched()
 {
     return _cursor->fetched();
 }
 
-void Cursor::beginFetch(size_type batchSize)
+
+void Cursor::beginFetch()
 {
-    _cursor->connection()->beginBatchFetch(*_cursor, batchSize);
+    _cursor->connection()->beginBatchFetch(*_cursor, _batchSize);
 }
 
-Result Cursor::endFetch()
+
+Result& Cursor::endFetch()
 {
-    Result r = _cursor->connection()->endBatchFetch(*_cursor);
-    if(r.empty())
+    _batch = _cursor->connection()->endBatchFetch(*_cursor);
+    if(_batch.empty())
         _cursor->connection()->closeBatchFetch(*_cursor);
-    return r;
+    return _batch;
 }
+
 
 void Cursor::close()
 {
     if(_cursor && _cursor->isOpen())
         _cursor->connection()->closeBatchFetch(*_cursor);
+}
+
+
+Cursor::Iterator Cursor::begin()
+{
+    return CursorIterator(*this);
+}
+
+
+Cursor::Iterator Cursor::end()
+{
+    return CursorIterator();
+}
+
+
+CursorIterator::CursorIterator(const Cursor& cursor)
+: _cursor(cursor)
+, _index(0)
+{
+    if( ! _cursor.fetch())
+        _cursor = Cursor();
+    else
+        _current = _cursor.result()[0];
+}
+
+
+bool CursorIterator::operator==(const CursorIterator& other) const
+{
+    return _cursor.impl() == other._cursor.impl();
+}
+
+
+CursorIterator& CursorIterator::operator++()
+{
+    ++_index;
+    if(_index >= _cursor.result().size())
+    {
+        if( ! _cursor.fetch())
+        {
+            _cursor = Cursor();
+            _index = 0;
+            return *this;
+        }
+        _index = 0;
+    }
+    _current = _cursor.result()[_index];
+    return *this;
 }
 
 } // namespace Db

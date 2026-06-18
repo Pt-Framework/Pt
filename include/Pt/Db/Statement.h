@@ -40,7 +40,6 @@
 #include <Pt/Db/Cursor.h>
 #include <Pt/Db/IStatement.h>
 #include <Pt/Db/IConnection.h>
-#include <Pt/Db/ICursor.h>
 #include <Pt/Db/Row.h>
 #include <string>
 
@@ -65,8 +64,6 @@ namespace Db {
     class PT_DB_API Statement
     {
         public:
-            class ConstIterator;
-
             //! \brief The size-type for this Statement
             typedef IStatement::size_type size_type;
 
@@ -242,29 +239,22 @@ namespace Db {
                 return *this;
             }
 
-            /** \brief Get Iterator to first row
+            /** \brief Open a batch cursor on this statement.
 
-                This methods creates a cursor and fetches the first row.
+                Returns a %Cursor that manages the cursor lifecycle.
 
-                \return Iterator to first row
+                For synchronous row-by-row iteration use range-for:
+                @code
+                for(auto& row : stmt.getCursor(100)) { ... }
+                @endcode
+
+                For asynchronous batch iteration connect to %Cursor::fetched()
+                and call %Cursor::beginFetch().
+
+                \param batchSize Number of rows to fetch per batch.
+                \return Cursor positioned before the first row.
             */
-            ConstIterator begin() const;
-
-            /** \brief Get Iterator to end of row
-
-                A empty iterator is returned, which indicates the end of a row.
-
-                \return Iterator to the end of row.
-            */
-            ConstIterator end() const;
-
-            /** \brief Open an async batch cursor on this statement.
-
-                Returns a %Cursor that manages the cursor lifecycle. Connect to
-                %Cursor::fetched() and call %Cursor::beginFetch(n) to start
-                iteration.
-            */
-            Cursor getCursor();
+            Cursor getCursor(size_type batchSize);
 
             /** \brief Cancel any pending async operation on this statement.
             */
@@ -353,90 +343,6 @@ namespace Db {
             //! \brief Returns the actual implementation-class (non-const).
             IStatement* impl()
             { return _stmt.get(); }
-    };
-
-    /** \brief Iterator for statements.
-
-        This iterator can be used to iterate over a Statement like over a sequence.
-        It fullfils the requirements for a forward iterator. An empty iterator marks
-        the end of the sequence.
-    */
-    class PT_DB_API Statement::ConstIterator
-    {
-        public:
-            using iterator_category = std::forward_iterator_tag;
-            using value_type        = Row;
-            using difference_type   = std::ptrdiff_t;
-            using pointer           = const Row*;
-            using reference         = const Row&;
-
-        private:
-            Row _current;
-            SmartPtr<ICursor, InternalRefCounted<ICursor> > _cursor;
-
-        public:
-            /** \brief Construct an iterator from a specific implementation
-
-                The iterator will manage the passed implementation,
-                thus it needs to be created on the heap.
-
-                \param cursor Iterator implementation
-            */
-            ConstIterator(ICursor* cursor = 0);
-
-            /** \brief Test it two iterators are equal.
-
-                Two iterators are equal if they point to the same iteration.
-
-                \param c Other iterator.
-                \return True if equal.
-            */
-            bool operator== (const ConstIterator& c) const
-            { return _cursor == c._cursor; }
-
-            /** \brief Test it two iterators are not equal.
-
-                Two iterators are not equal if they do not point to the same
-                iteration.
-
-                \param c Other iterator.
-                \return True if not equal.
-            */
-            bool operator!= (const ConstIterator& c) const
-            { return _cursor != c._cursor; }
-
-            /** \brief Steps forward.
-
-                Fetches the next row. If no rows are available, the cursor
-                is closed and removed.
-
-                \return Iterator to next element.
-            */
-            ConstIterator& operator++();
-
-            /** \brief Get current row.
-
-                Provides read access to the current row in the iterated
-                statement.
-
-                \return Const reference to a row.
-            */
-            const Row& operator* () const
-            { return _current; }
-
-            /** \brief Get pointer to current row.
-
-                Provides read access to the current row in the iterated
-                statement.
-
-                \return Const pointer to a row.
-            */
-            const Row* operator-> () const
-            { return &_current; }
-
-            //! \brief Returns the actual implementation-class
-            const ICursor* getImpl() const
-            { return &*_cursor; }
     };
 
 } // namespace Db

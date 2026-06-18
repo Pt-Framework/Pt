@@ -32,6 +32,7 @@
 #include "StmtRow.h"
 #include "SqliteError.h"
 #include "SQLConnection.h"
+#include "../ResultImpl.h"
 
 #include <Pt/Db/Row.h>
 #include <Pt/System/Thread.h>
@@ -56,7 +57,7 @@ namespace sqlite {
         _statement->putback(_stmt);
     }
 
-    Row SqliteCursor::fetch()
+    Row SqliteCursor::fetchRow()
     {
         int ret = 0;
         int n = 0;
@@ -88,6 +89,26 @@ namespace sqlite {
 
         return Row(new StmtRow(getStmt()));
     }
+
+    Result SqliteCursor::onFetchBatch(size_type batchSize)
+    {
+        ResultImpl* res = new ResultImpl();
+        Result result(res);
+
+        for(size_type i = 0; i < batchSize && ! _done; ++i)
+        {
+            Row row = fetchRow();
+            if(row.empty())
+            {
+                _done = true;
+                break;
+            }
+            res->add(row);
+        }
+
+        return result;
+    }
+
 
     void SqliteCursor::onBeginBatchFetch(size_type batchSize)
     {

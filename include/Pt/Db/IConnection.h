@@ -197,7 +197,9 @@ class PT_DB_API IConnection : public RefCounted
         Result endSelect(IStatement& stmt);
 
     public:
-        Cursor getCursor(IStatement& stmt);
+        Cursor getCursor(IStatement& stmt, size_type batchSize);
+
+        Result fetchBatch(ICursor& cursor, size_type batchSize);
 
         void beginBatchFetch(ICursor& cursor, size_type batchSize);
 

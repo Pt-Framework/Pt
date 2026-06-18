@@ -295,13 +295,13 @@ struct AsyncCursorTest : public Pt::Connectable
             conn.execute("INSERT INTO t VALUES (" + std::to_string(i) + ")");
 
         stmt   = conn.prepare("SELECT * FROM t ORDER BY id");
-        cursor = stmt.getCursor();
+        cursor = stmt.getCursor(10);
         cursor.fetched() += Pt::slot(*this, &AsyncCursorTest::onFetched);
     }
 
     void run()
     {
-        cursor.beginFetch(10);
+        cursor.beginFetch();
         loop.run();
 
         PT_UNIT_ASSERT( done );
@@ -321,7 +321,7 @@ struct AsyncCursorTest : public Pt::Connectable
             return;
         }
 
-        cursor.beginFetch(10);
+        cursor.beginFetch();
     }
 };
 

@@ -363,21 +363,8 @@ void Connection::BatchFetchTask::execute(Connection& /*conn*/)
         return;
     }
 
-    ResultImpl* res = new ResultImpl();
-    result = Result(res);
-
-    for(size_type i = 0; i < batchSize; ++i)
-    {
-        Pt::Db::Row row = cursor->fetch();
-
-        if(row.empty())
-        {
-            done = true;
-            break;
-        }
-
-        res->add(row);
-    }
+    result = cursor->onFetchBatch(batchSize);
+    done = cursor->isDone();
 }
 
 void Connection::BatchFetchTask::complete(Connection& /*conn*/)

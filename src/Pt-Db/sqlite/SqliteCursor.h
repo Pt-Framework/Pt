@@ -34,30 +34,40 @@ namespace Db {
 
 namespace sqlite {
 
-    class Statement;
+class Statement;
 
-    class SqliteCursor : public ICursor
-    {
+class SqliteCursor : public ICursor
+{
+    friend class Connection;
+
+    public:
+        SqliteCursor(Statement* statement, sqlite3_stmt* stmt);
+
+        ~SqliteCursor();
+
+        sqlite3_stmt* getStmt() const
+        { return _stmt; }
+
+        bool isDone() const
+        { return _done; }
+
+    protected:
+        Result onFetchBatch(size_type batchSize) override;
+
+        void onBeginBatchFetch(size_type batchSize) override;
+
+        Result onEndBatchFetch() override;
+
+        void onCloseBatchFetch() override;
+
+    private:
+        Row fetchRow();
+
+    private:
         SmartPtr<Statement, InternalRefCounted<Statement> > _statement;
         sqlite3_stmt* _stmt;
         bool          _done;
-
-        public:
-            SqliteCursor(Statement* statement, sqlite3_stmt* stmt);
-            ~SqliteCursor();
-
-            // ICursor virtuals
-            Row    fetch() override;
-
-            // specific methods of sqlite-driver
-            sqlite3_stmt* getStmt() const { return _stmt; }
-            bool          isDone() const  { return _done; }
-
-        protected:
-            void   onBeginBatchFetch(size_type batchSize) override;
-            Result onEndBatchFetch() override;
-            void   onCloseBatchFetch() override;
-    };
+};
 
 } //namespace sqlite
 

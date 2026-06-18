@@ -111,51 +111,9 @@ void Statement::cancel()
 }
 
 
-Statement::ConstIterator Statement::begin() const
+Cursor Statement::getCursor(size_type batchSize)
 {
-    Cursor c = _stmt->connection()->getCursor(*_stmt);
-    return ConstIterator(c.impl());
-}
-
-
-Statement::ConstIterator Statement::end() const
-{
-    return ConstIterator();
-}
-
-
-Cursor Statement::getCursor()
-{
-    return _stmt->connection()->getCursor(*_stmt);
-}
-
-
-Statement::ConstIterator::ConstIterator(ICursor* cursor)
-: _cursor(cursor)
-{
-    if(cursor)
-    {
-        _current = cursor->fetch();
-        if(!_current)
-        {
-            // clog << "No row fetched" << endl;
-            _cursor.reset();
-        }
-    }
-}
-
-
-Statement::ConstIterator& Statement::ConstIterator::operator++()
-{
-    _current = _cursor->fetch();
-
-    if(!_current)
-    {
-        // clog << "No row fetched" << endl;
-        _cursor.reset();
-    }
-
-    return *this;
+    return _stmt->connection()->getCursor(*_stmt, batchSize);
 }
 
 } // namespace Db

@@ -60,13 +60,14 @@ class PT_DB_API ICursor : public RefCounted
         IConnection* connection()
         { return _conn; }
 
-        virtual Row    fetch() = 0;
-
     protected:
         explicit ICursor(IConnection* conn)
         : _conn(conn)
         , _open(false)
         {}
+
+        // Sync batch-fetch hook — called from IConnection::fetchBatch()
+        virtual Result onFetchBatch(size_type batchSize) = 0;
 
         // Async batch-fetch hooks — called only from IConnection NVI wrappers
         virtual void   onBeginBatchFetch(size_type batchSize) = 0;
