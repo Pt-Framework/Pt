@@ -30,29 +30,31 @@
 #ifndef PT_DB_ISTATEMENT_H
 #define PT_DB_ISTATEMENT_H
 
-
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
 #include <Pt/Db/Blob.h>
 #include <Pt/Signal.h>
 #include <string>
 
-
 namespace Pt {
 
-    class Date;
-    class Time;
-    class DateTime;
+class Date;
+class Time;
+class DateTime;
 
 namespace Db {
 
-    class Result;
-    class Row;
-    class Value;
-    class ICursor;
+class Result;
+class Row;
+class Value;
+class ICursor;
+class IConnection;
 
-    class PT_DB_API IStatement : public RefCounted
-    {
+
+class PT_DB_API IStatement : public RefCounted
+{
+    friend class IConnection;
+
     public:
         typedef std::size_t size_type;
 
@@ -61,6 +63,9 @@ namespace Db {
 
         Signal<>& selectFinished()
         { return _selectFinished; }
+
+        IConnection* connection()
+        { return _conn; }
 
         virtual void clear() = 0;
 
@@ -77,23 +82,27 @@ namespace Db {
         virtual void setTime(const std::string& col, const Time& data) = 0;
         virtual void setDatetime(const std::string& col, const DateTime& data) = 0;
 
-        virtual size_type execute() = 0;
-        virtual Result select() = 0;
-        virtual Row selectRow() = 0;
-        virtual Value selectValue() = 0;
-        virtual ICursor* createCursor() = 0;
-
-        virtual void   beginExec() = 0;
-        virtual size_type endExec() = 0;
-        virtual void   beginSelect() = 0;
-        virtual Result endSelect() = 0;
-        virtual void   cancel() = 0;
-
     protected:
+        explicit IStatement(IConnection* conn)
+        : _conn(conn)
+        {}
+
+        virtual ICursor*  createCursor() = 0;
+
+        virtual size_type execute() = 0;
+        virtual void      onBeginExec() = 0;
+        virtual size_type onEndExec() = 0;
+
+        virtual Result    select() = 0;
+        virtual Row       selectRow() = 0;
+        virtual Value     selectValue() = 0;
+        virtual void      onBeginSelect() = 0;
+        virtual Result    onEndSelect() = 0;
+
+    private:
         Signal<> _executeFinished;
         Signal<> _selectFinished;
-
-        IStatement() {}
+        IConnection* _conn;
 };
 
 } // namespace Db

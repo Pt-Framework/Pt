@@ -40,6 +40,7 @@ namespace sqlite {
     {
         SmartPtr<Statement, InternalRefCounted<Statement> > _statement;
         sqlite3_stmt* _stmt;
+        bool          _done;
 
         public:
             SqliteCursor(Statement* statement, sqlite3_stmt* stmt);
@@ -47,12 +48,15 @@ namespace sqlite {
 
             // ICursor virtuals
             Row    fetch() override;
-            void   beginBatchFetch(size_type batchSize) override;
-            Result endBatchFetch() override;
-            void   closeBatchFetch() override;
 
             // specific methods of sqlite-driver
             sqlite3_stmt* getStmt() const { return _stmt; }
+            bool          isDone() const  { return _done; }
+
+        protected:
+            void   onBeginBatchFetch(size_type batchSize) override;
+            Result onEndBatchFetch() override;
+            void   onCloseBatchFetch() override;
     };
 
 } //namespace sqlite

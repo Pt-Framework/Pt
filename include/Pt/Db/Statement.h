@@ -39,6 +39,7 @@
 #include <Pt/Db/Api.h>
 #include <Pt/Db/Cursor.h>
 #include <Pt/Db/IStatement.h>
+#include <Pt/Db/IConnection.h>
 #include <Pt/Db/ICursor.h>
 #include <Pt/Db/Row.h>
 #include <string>
@@ -241,6 +242,35 @@ namespace Db {
                 return *this;
             }
 
+            /** \brief Get Iterator to first row
+
+                This methods creates a cursor and fetches the first row.
+
+                \return Iterator to first row
+            */
+            ConstIterator begin() const;
+
+            /** \brief Get Iterator to end of row
+
+                A empty iterator is returned, which indicates the end of a row.
+
+                \return Iterator to the end of row.
+            */
+            ConstIterator end() const;
+
+            /** \brief Open an async batch cursor on this statement.
+
+                Returns a %Cursor that manages the cursor lifecycle. Connect to
+                %Cursor::fetched() and call %Cursor::beginFetch(n) to start
+                iteration.
+            */
+            Cursor getCursor();
+
+            /** \brief Cancel any pending async operation on this statement.
+            */
+            void cancel();
+
+        public:
             /** \brief Executes a query with the current parameters
 
                 The query should not return results. This method is normally
@@ -250,6 +280,19 @@ namespace Db {
             */
             size_type execute();
 
+            /** \brief Begin async execution (DML).
+            */
+            void beginExec();
+
+            /** \brief Retrieve row count after async exec completes.
+            */
+            size_type endExec();
+
+            /** \brief Signal emitted when an async exec (DML) completes.
+            */
+            Signal<>& executeFinished();
+
+        public:
             /** \brief Execute a query
                 Executes a query, which returns a resultset, with the current
                 parameters. The query is normally a SELECT-statement.
@@ -281,59 +324,18 @@ namespace Db {
                 \throw TODO
             */
             Value selectValue();
-
-            /** \brief Get Iterator to first row
-
-                This methods creates a cursor and fetches the first row.
-
-                \return Iterator to first row
-            */
-            ConstIterator begin() const;
-
-            /** \brief Get Iterator to end of row
-
-                A empty iterator is returned, which indicates the end of a row.
-
-                \return Iterator to the end of row.
-            */
-            ConstIterator end() const;
-
-            /** \brief Open an async batch cursor on this statement.
-
-                Returns a %Cursor that manages the cursor lifecycle. Connect to
-                %Cursor::fetched() and call %Cursor::beginFetch(n) to start
-                iteration.
-            */
-            Cursor getCursor();
-
-            /** \brief Signal emitted when an async exec (DML) completes. */
-            Signal<>& executeFinished()
-            { return _stmt->executeFinished(); }
-
-            /** \brief Signal emitted when an async select completes. */
-            Signal<>& selectFinished()
-            { return _stmt->selectFinished(); }
-
-            /** \brief Begin async execution (DML). */
-            void beginExec()
-            { _stmt->beginExec(); }
-
-            /** \brief Retrieve row count after async exec completes. */
-            size_type endExec()
-            { return _stmt->endExec(); }
-
             /** \brief Begin async SELECT. */
-            void beginSelect()
-            { _stmt->beginSelect(); }
+            void beginSelect();
 
-            /** \brief Retrieve Result after async select completes. */
-            Result endSelect()
-            { return _stmt->endSelect(); }
+            /** \brief Retrieve Result after async select completes.
+            */
+            Result endSelect();
 
-            /** \brief Cancel any pending async operation on this statement. */
-            void cancel()
-            { _stmt->cancel(); }
+            /** \brief Signal emitted when an async select completes.
+            */
+            Signal<>& selectFinished();
 
+        public:
             /** \brief Test if bound to a statement
 
                 Returns true, if this class is not bound to an actual statement.

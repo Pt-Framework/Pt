@@ -30,6 +30,7 @@
 
 #include <Pt/Db/Cursor.h>
 #include <Pt/Db/ICursor.h>
+#include <Pt/Db/IConnection.h>
 
 namespace Pt {
 
@@ -46,21 +47,21 @@ Signal<>& Cursor::fetched()
 
 void Cursor::beginFetch(size_type batchSize)
 {
-    _cursor->beginBatchFetch(batchSize);
+    _cursor->connection()->beginBatchFetch(*_cursor, batchSize);
 }
 
 Result Cursor::endFetch()
 {
-    Result r = _cursor->endBatchFetch();
+    Result r = _cursor->connection()->endBatchFetch(*_cursor);
     if(r.empty())
-        close();
+        _cursor->connection()->closeBatchFetch(*_cursor);
     return r;
 }
 
 void Cursor::close()
 {
     if(_cursor && _cursor->isOpen())
-        _cursor->closeBatchFetch();
+        _cursor->connection()->closeBatchFetch(*_cursor);
 }
 
 } // namespace Db

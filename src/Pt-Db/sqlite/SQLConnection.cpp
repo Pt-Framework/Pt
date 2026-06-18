@@ -97,8 +97,6 @@ Connection::Connection()
 , _thread( Pt::Method<void, Connection>(*this, &Connection::processTasks) )
 , _shutdown(false)
 , _cancelFlag(false)
-, _batchCursor(0)
-, _batchDone(false)
 {
 }
 
@@ -267,9 +265,23 @@ void Connection::PrepareTask::complete(Connection& conn)
 }
 
 
+// --- Friend-access helpers for Statement protected methods ---
+
+Connection::size_type Connection::callStatementExecute(Statement& stmt)
+{
+    return stmt.execute();
+}
+
+
+Result Connection::callStatementSelect(Statement& stmt)
+{
+    return stmt.select();
+}
+
+
 void Connection::StmtExecTask::execute(Connection& /*conn*/)
 {
-    rowCount = stmt->execute();
+    rowCount = Connection::callStatementExecute(*stmt);
 }
 
 void Connection::StmtExecTask::complete(Connection& /*conn*/)
@@ -280,7 +292,7 @@ void Connection::StmtExecTask::complete(Connection& /*conn*/)
 
 void Connection::StmtSelectTask::execute(Connection& /*conn*/)
 {
-    result = stmt->select();
+    result = Connection::callStatementSelect(*stmt);
 }
 
 void Connection::StmtSelectTask::complete(Connection& /*conn*/)
@@ -374,29 +386,29 @@ void Connection::BatchFetchTask::complete(Connection& /*conn*/)
 }
 
 
-// --- Synchronous operations ---
+// --- Synchronous operation hooks ---
 
-void Connection::startTransaction(const char* sql)
+void Connection::onStartTransaction(const char* sql)
 {
-    execute(sql ? sql : "BEGIN TRANSACTION");
+    onExecute(sql ? sql : "BEGIN TRANSACTION");
 }
 
 
-void Connection::commitTransaction(const char* sql)
-{
-    clearStatementCache();
-    execute(sql ? sql : "COMMIT TRANSACTION");
-}
-
-
-void Connection::rollbackTransaction(const char* sql)
+void Connection::onCommitTransaction(const char* sql)
 {
     clearStatementCache();
-    execute(sql ? sql : "ROLLBACK TRANSACTION");
+    onExecute(sql ? sql : "COMMIT TRANSACTION");
 }
 
 
-Connection::size_type Connection::execute(const std::string& query)
+void Connection::onRollbackTransaction(const char* sql)
+{
+    clearStatementCache();
+    onExecute(sql ? sql : "ROLLBACK TRANSACTION");
+}
+
+
+Connection::size_type Connection::onExecute(const std::string& query)
 {
     char* errmsg = 0;
     int ret = ::sqlite3_exec(_db, query.c_str(), 0, 0, &errmsg);
@@ -408,21 +420,76 @@ Connection::size_type Connection::execute(const std::string& query)
 }
 
 
-Result Connection::select(const std::string& query)
+Result Connection::onSelect(const std::string& query)
 {
-    return prepare(query).select();
+    return onPrepare(query).select();
 }
 
 
-Pt::Db::Statement Connection::prepare(const std::string& query)
+Pt::Db::Statement Connection::onPrepare(const std::string& query)
 {
     return Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, query) );
 }
 
 
-long long Connection::insertId()
+long long Connection::onInsertId()
 {
     return ::sqlite3_last_insert_rowid(_db);
+}
+
+
+// --- Internal helpers for Statement async operations ---
+
+void Connection::enqueueStmtExec(Statement& stmt)
+{
+    _stmtExecTask.stmt = &stmt;
+    enqueue(&_stmtExecTask);
+}
+
+
+Connection::size_type Connection::completeStmtExec()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_stmtExecTask.exception)
+        std::rethrow_exception(_stmtExecTask.exception);
+    return _stmtExecTask.rowCount;
+}
+
+
+void Connection::enqueueStmtSelect(Statement& stmt)
+{
+    _stmtSelectTask.stmt = &stmt;
+    enqueue(&_stmtSelectTask);
+}
+
+
+Result Connection::completeStmtSelect()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_stmtSelectTask.exception)
+        std::rethrow_exception(_stmtSelectTask.exception);
+    return _stmtSelectTask.result;
+}
+
+
+// --- Internal helpers for Cursor batch-fetch ---
+
+void Connection::enqueueBatchFetch(SqliteCursor& cursor, size_type batchSize)
+{
+    _batchFetchTask.cursor    = &cursor;
+    _batchFetchTask.batchSize = batchSize;
+    _batchFetchTask.done      = cursor.isDone();
+    enqueue(&_batchFetchTask);
+}
+
+
+Result Connection::completeBatchFetch(bool& done)
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_batchFetchTask.exception)
+        std::rethrow_exception(_batchFetchTask.exception);
+    done = _batchFetchTask.done;
+    return _batchFetchTask.result;
 }
 
 
@@ -430,7 +497,6 @@ long long Connection::insertId()
 
 void Connection::onOpen(const std::string& connStr)
 {
-    if(_db)
     {
         clearStatementCache();
         ::sqlite3_close(_db);
@@ -466,59 +532,19 @@ void Connection::onBeginExec(const std::string& sql)
 }
 
 
-void Connection::onBeginSelect(const std::string& sql)
-{
-    _selectTask.sql = sql;
-    enqueue(&_selectTask);
-}
-
-
-void Connection::beginExec(Statement& stmt)
-{
-    if(_state != Idle)
-        throw InvalidConnection("Operation pending");
-    _state             = PendingExec;
-    _stmtExecTask.stmt = &stmt;
-    enqueue(&_stmtExecTask);
-}
-
-
-Connection::size_type Connection::endExec(Statement& /*stmt*/)
-{
-    _state = Idle;
-    Pt::System::MutexLock lock(_mutex);
-    if(_stmtExecTask.exception)
-        std::rethrow_exception(_stmtExecTask.exception);
-    return _stmtExecTask.rowCount;
-}
-
-
-void Connection::beginSelect(Statement& stmt)
-{
-    if(_state != Idle)
-        throw InvalidConnection("Operation pending");
-    _state               = PendingSelect;
-    _stmtSelectTask.stmt = &stmt;
-    enqueue(&_stmtSelectTask);
-}
-
-
-Result Connection::endSelect(Statement& /*stmt*/)
-{
-    _state = Idle;
-    Pt::System::MutexLock lock(_mutex);
-    if(_stmtSelectTask.exception)
-        std::rethrow_exception(_stmtSelectTask.exception);
-    return _stmtSelectTask.result;
-}
-
-
 Connection::size_type Connection::onEndExec()
 {
     Pt::System::MutexLock lock(_mutex);
     if(_execTask.exception)
         std::rethrow_exception(_execTask.exception);
     return _execTask.rowCount;
+}
+
+
+void Connection::onBeginSelect(const std::string& sql)
+{
+    _selectTask.sql = sql;
+    enqueue(&_selectTask);
 }
 
 
@@ -543,42 +569,6 @@ void Connection::onEndOpen()
     Pt::System::MutexLock lock(_mutex);
     if(_openTask.exception)
         std::rethrow_exception(_openTask.exception);
-}
-
-
-void Connection::beginBatchFetch(ICursor& cursor, size_type batchSize)
-{
-    if(_state != Idle)
-        throw InvalidConnection("Operation pending");
-    _state                   = PendingBatchFetch;
-    _batchFetchTask.cursor    = static_cast<SqliteCursor*>(&cursor);
-    _batchFetchTask.batchSize = batchSize;
-    _batchFetchTask.done      = _batchDone;
-    _batchCursor              = static_cast<SqliteCursor*>(&cursor);
-    enqueue(&_batchFetchTask);
-}
-
-
-Result Connection::endBatchFetch()
-{
-    _state = Idle;
-    Pt::System::MutexLock lock(_mutex);
-    if(_batchFetchTask.exception)
-        std::rethrow_exception(_batchFetchTask.exception);
-    _batchDone = _batchFetchTask.done;
-    return _batchFetchTask.result;
-}
-
-
-void Connection::closeBatchFetch()
-{
-    if(_state == PendingBatchFetch)
-    {
-        _state = Idle;
-        onCancelOp();
-    }
-    _batchCursor = nullptr;
-    _batchDone   = false;
 }
 
 

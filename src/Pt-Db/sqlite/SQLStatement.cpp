@@ -59,7 +59,8 @@ namespace Db {
 namespace sqlite {
 
     Statement::Statement(Connection* conn, const std::string& query)
-        : _stmt(0)
+        : IStatement(conn)
+        , _stmt(0)
         , _stmtInUse(0)
         , _conn(conn)
         , _query(query)
@@ -499,33 +500,27 @@ namespace sqlite {
     }
 
 
-    void Statement::beginExec()
+    void Statement::onBeginExec()
     {
-        _conn->beginExec(*this);
+        _conn->enqueueStmtExec(*this);
     }
 
 
-    IStatement::size_type Statement::endExec()
+    IStatement::size_type Statement::onEndExec()
     {
-        return _conn->endExec(*this);
+        return _conn->completeStmtExec();
     }
 
 
-    void Statement::beginSelect()
+    void Statement::onBeginSelect()
     {
-        _conn->beginSelect(*this);
+        _conn->enqueueStmtSelect(*this);
     }
 
 
-    Result Statement::endSelect()
+    Result Statement::onEndSelect()
     {
-        return _conn->endSelect(*this);
-    }
-
-
-    void Statement::cancel()
-    {
-        _conn->cancelOp();
+        return _conn->completeStmtSelect();
     }
 
 } //namespace sqlite

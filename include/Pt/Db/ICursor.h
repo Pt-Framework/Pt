@@ -41,9 +41,13 @@ namespace Pt {
 namespace Db {
 
 class Row;
+class IConnection;
+
 
 class PT_DB_API ICursor : public RefCounted
 {
+    friend class IConnection;
+
     public:
         typedef std::size_t size_type;
 
@@ -53,19 +57,25 @@ class PT_DB_API ICursor : public RefCounted
         bool isOpen() const
         { return _open; }
 
+        IConnection* connection()
+        { return _conn; }
+
         virtual Row    fetch() = 0;
 
-        virtual void   beginBatchFetch(size_type batchSize) = 0;
-        virtual Result endBatchFetch() = 0;
-        virtual void   closeBatchFetch() = 0;
-
     protected:
-        ICursor()
-        : _open(false)
+        explicit ICursor(IConnection* conn)
+        : _conn(conn)
+        , _open(false)
         {}
+
+        // Async batch-fetch hooks — called only from IConnection NVI wrappers
+        virtual void   onBeginBatchFetch(size_type batchSize) = 0;
+        virtual Result onEndBatchFetch() = 0;
+        virtual void   onCloseBatchFetch() = 0;
 
         Signal<> _fetched;
         bool     _open;
+        IConnection* _conn;
 };
 
 } //namespace Db

@@ -37,6 +37,9 @@
 #include <Pt/Signal.h>
 #include <Pt/Db/ICursor.h>
 #include <Pt/Db/IStatement.h>
+#include <Pt/Db/Result.h>
+#include <Pt/Db/Row.h>
+#include <Pt/Db/Value.h>
 
 #include <string>
 #include <map>
@@ -81,8 +84,6 @@ class PT_DB_API IConnection : public RefCounted
         */
         Pt::Signal<>& openFinished();
 
-        Pt::Signal<>& executeFinished();
-
         Pt::Signal<>& selectFinished();
 
         Pt::Signal<>& prepareFinished();
@@ -116,12 +117,6 @@ class PT_DB_API IConnection : public RefCounted
         */
         void endOpen();
 
-        /** \brief Begin async execution of a DML SQL string.
-        */
-        void beginExec(const std::string& sql);
-
-        size_type endExec();
-
         /** \brief Begin async SELECT query.
         */
         void beginSelect(const std::string& sql);
@@ -152,23 +147,61 @@ class PT_DB_API IConnection : public RefCounted
 
         void endRollbackTransaction();
 
-        virtual void startTransaction(const char* sql) = 0;
+        // Synchronous operations — guarded: throw if an async op is pending.
 
-        virtual void commitTransaction(const char* sql) = 0;
 
-        virtual void rollbackTransaction(const char* sql) = 0;
+        Result select(const std::string& query);
 
-        virtual size_type execute(const std::string& query) = 0;
-
-        virtual Result select(const std::string& query) = 0;
-
-        virtual Statement prepare(const std::string& query) = 0;
+        Statement prepare(const std::string& query);
 
         virtual Statement prepareCached(const std::string& query) = 0;
 
         virtual void clearStatementCache() = 0;
 
-        virtual long long insertId() = 0;
+        long long insertId();
+
+        void startTransaction(const char* sql = nullptr);
+
+        void commitTransaction(const char* sql = nullptr);
+
+        void rollbackTransaction(const char* sql = nullptr);
+
+    public:
+        size_type execute(const std::string& query);
+
+        void beginExec(const std::string& sql);
+
+        size_type endExec();
+
+        Pt::Signal<>& executeFinished();
+
+        size_type executeStatement(IStatement& stmt);
+
+        void beginExecStatement(IStatement& stmt);
+
+        size_type endExecStatement(IStatement& stmt);
+
+    public:
+        Result selectStatement(IStatement& stmt);
+
+        Row selectRowStatement(IStatement& stmt);
+
+        Value selectValueStatement(IStatement& stmt);
+
+        ICursor* createStatementCursor(IStatement& stmt);
+
+
+
+        void beginSelectStatement(IStatement& stmt);
+
+        Result endSelectStatement(IStatement& stmt);
+
+        // Cursor batch-fetch operations — route through ICursor virtuals.
+        void beginBatchFetch(ICursor& cursor, size_type batchSize);
+
+        Result endBatchFetch(ICursor& cursor);
+
+        void closeBatchFetch(ICursor& cursor);
 
     protected:
         IConnection();
@@ -229,6 +262,21 @@ class PT_DB_API IConnection : public RefCounted
         virtual void onBeginRollbackTransaction(Transaction& txn, const char* sql) = 0;
 
         virtual void onEndRollbackTransaction() = 0;
+
+        // Sync operation hooks — implemented by each backend.
+        virtual size_type onExecute(const std::string& query) = 0;
+
+        virtual Result onSelect(const std::string& query) = 0;
+
+        virtual Statement onPrepare(const std::string& query) = 0;
+
+        virtual long long onInsertId() = 0;
+
+        virtual void onStartTransaction(const char* sql) = 0;
+
+        virtual void onCommitTransaction(const char* sql) = 0;
+
+        virtual void onRollbackTransaction(const char* sql) = 0;
 
         bool                    _isOpen;
         State                   _state;

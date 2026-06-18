@@ -43,14 +43,16 @@ namespace Db {
 namespace sqlite {
 
     SqliteCursor::SqliteCursor(Statement* statement, sqlite3_stmt* stmt)
-        : _statement(statement)
+        : ICursor(statement->connection())
+        , _statement(statement)
         , _stmt(stmt)
+        , _done(false)
     { }
 
     SqliteCursor::~SqliteCursor()
     {
         if(_open)
-            closeBatchFetch();
+            _conn->closeBatchFetch(*this);
         _statement->putback(_stmt);
     }
 
@@ -87,21 +89,21 @@ namespace sqlite {
         return Row(new StmtRow(getStmt()));
     }
 
-    void SqliteCursor::beginBatchFetch(size_type batchSize)
+    void SqliteCursor::onBeginBatchFetch(size_type batchSize)
     {
         _open = true;
-        _statement->getConnection()->beginBatchFetch(*this, batchSize);
+        _statement->getConnection()->enqueueBatchFetch(*this, batchSize);
     }
 
-    Result SqliteCursor::endBatchFetch()
+    Result SqliteCursor::onEndBatchFetch()
     {
-        return _statement->getConnection()->endBatchFetch();
+        return _statement->getConnection()->completeBatchFetch(_done);
     }
 
-    void SqliteCursor::closeBatchFetch()
+    void SqliteCursor::onCloseBatchFetch()
     {
         _open = false;
-        _statement->getConnection()->closeBatchFetch();
+        _done = false;
     }
 
 } //namespace sqlite
