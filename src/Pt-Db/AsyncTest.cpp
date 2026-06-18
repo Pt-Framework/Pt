@@ -296,7 +296,7 @@ struct AsyncCursorTest : public Pt::Connectable
 
         stmt   = conn.prepare("SELECT * FROM t ORDER BY id");
         cursor = stmt.getCursor(10);
-        cursor.fetched() += Pt::slot(*this, &AsyncCursorTest::onFetched);
+        cursor.fetchFinished() += Pt::slot(*this, &AsyncCursorTest::onFetched);
     }
 
     void run()

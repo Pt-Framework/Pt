@@ -265,6 +265,17 @@ void SqliteConnection::PrepareTask::complete(SqliteConnection& conn)
 }
 
 
+void SqliteConnection::PrepareCachedTask::execute(SqliteConnection& conn)
+{
+    result = Pt::Db::Statement( new Pt::Db::sqlite::SqliteStatement(&conn, sql) );
+}
+
+void SqliteConnection::PrepareCachedTask::complete(SqliteConnection& conn)
+{
+    conn._prepareCachedFinished.send();
+}
+
+
 // --- Friend-access helpers for SqliteStatement protected methods ---
 
 SqliteConnection::size_type SqliteConnection::callStatementExecute(SqliteStatement& stmt)
@@ -369,7 +380,7 @@ void SqliteConnection::BatchFetchTask::execute(SqliteConnection& /*conn*/)
 
 void SqliteConnection::BatchFetchTask::complete(SqliteConnection& /*conn*/)
 {
-    cursor->fetched().send();
+    cursor->fetchFinished().send();
 }
 
 
@@ -512,6 +523,36 @@ void SqliteConnection::onClose()
 }
 
 
+void SqliteConnection::CloseTask::execute(SqliteConnection& conn)
+{
+    if(conn._db)
+    {
+        conn.clearStatementCache();
+        ::sqlite3_close(conn._db);
+        conn._db = 0;
+    }
+}
+
+void SqliteConnection::CloseTask::complete(SqliteConnection& conn)
+{
+    conn._closeFinished.send();
+}
+
+
+void SqliteConnection::onBeginClose()
+{
+    enqueue(&_closeTask);
+}
+
+
+void SqliteConnection::onEndClose()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_closeTask.exception)
+        std::rethrow_exception(_closeTask.exception);
+}
+
+
 void SqliteConnection::onBeginExec(const std::string& sql)
 {
     _execTask.sql = sql;
@@ -568,7 +609,7 @@ void SqliteConnection::onSetActive(Pt::System::EventLoop* loop)
 }
 
 
-void SqliteConnection::onCancelOp()
+void SqliteConnection::onCancelOp() noexcept
 {
     if(_db)
         ::sqlite3_interrupt(_db);
@@ -579,6 +620,10 @@ void SqliteConnection::onCancelOp()
         Pt::System::MutexLock lock(_mutex);
         while(_pendingTask)
             _workDone.wait(_mutex);
+        // Discard any exception from the cancelled task
+        if(_completedTask)
+            _completedTask->exception = nullptr;
+        _completedTask = nullptr;
     }
 
     _cancelFlag.store(false);
@@ -595,7 +640,15 @@ bool SqliteConnection::onRun()
 {
     if(_completedTask)
         _completedTask->complete(*this);
+    else if(_prepareCachedHit)
+        _prepareCachedFinished.send();
     return true;
+}
+
+
+void SqliteConnection::onNotifyPreparedCached()
+{
+    post();
 }
 
 
@@ -612,6 +665,22 @@ Pt::Db::Statement SqliteConnection::onEndPrepare()
     if(_prepareTask.exception)
         std::rethrow_exception(_prepareTask.exception);
     return _prepareTask.result;
+}
+
+
+void SqliteConnection::onBeginPrepareCachedMiss(const std::string& query)
+{
+    _prepareCachedTask.sql = query;
+    enqueue(&_prepareCachedTask);
+}
+
+
+Pt::Db::Statement SqliteConnection::onEndPrepareCachedMiss()
+{
+    Pt::System::MutexLock lock(_mutex);
+    if(_prepareCachedTask.exception)
+        std::rethrow_exception(_prepareCachedTask.exception);
+    return _prepareCachedTask.result;
 }
 
 

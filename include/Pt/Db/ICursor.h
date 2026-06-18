@@ -51,7 +51,7 @@ class PT_DB_API ICursor : public RefCounted
     public:
         typedef std::size_t size_type;
 
-        Signal<>& fetched()
+        Signal<>& fetchFinished()
         { return _fetched; }
 
         bool isOpen() const
@@ -72,7 +72,7 @@ class PT_DB_API ICursor : public RefCounted
         // Async batch-fetch hooks — called only from IConnection NVI wrappers
         virtual void   onBeginBatchFetch(size_type batchSize) = 0;
         virtual Result onEndBatchFetch() = 0;
-        virtual void   onCloseBatchFetch() = 0;
+        virtual void   onClose() = 0;
 
         Signal<> _fetched;
         bool     _open;

@@ -49,9 +49,9 @@ bool Cursor::fetch()
 }
 
 
-Signal<>& Cursor::fetched()
+Signal<>& Cursor::fetchFinished()
 {
-    return _cursor->fetched();
+    return _cursor->fetchFinished();
 }
 
 
@@ -65,7 +65,7 @@ Result& Cursor::endFetch()
 {
     _batch = _cursor->connection()->endBatchFetch(*_cursor);
     if(_batch.empty())
-        _cursor->connection()->closeBatchFetch(*_cursor);
+        _cursor->connection()->closeCursor(*_cursor);
     return _batch;
 }
 
@@ -73,7 +73,7 @@ Result& Cursor::endFetch()
 void Cursor::close()
 {
     if(_cursor && _cursor->isOpen())
-        _cursor->connection()->closeBatchFetch(*_cursor);
+        _cursor->connection()->closeCursor(*_cursor);
 }
 
 

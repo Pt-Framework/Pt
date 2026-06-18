@@ -48,6 +48,9 @@ IConnection::IConnection()
 : _isOpen(false)
 , _state(Idle)
 , _loop(nullptr)
+, _pendingStmt(nullptr)
+, _pendingCursor(nullptr)
+, _prepareCachedHit(false)
 {
 }
 
@@ -73,6 +76,8 @@ void IConnection::close()
     if(_state != Idle)
     {
         _state = Idle;
+        _pendingStmt = nullptr;
+        _pendingCursor = nullptr;
         onCancelOp();
     }
     _isOpen = false;
@@ -80,11 +85,36 @@ void IConnection::close()
 }
 
 
-void IConnection::cancelOp()
+void IConnection::beginClose()
+{
+    // Cancel any pending operation first (sync, deterministic)
+    if(_state != Idle)
+    {
+        _state = Idle;
+        _pendingStmt = nullptr;
+        _pendingCursor = nullptr;
+        onCancelOp();
+    }
+    _state = PendingClose;
+    _isOpen = false;
+    onBeginClose();
+}
+
+
+void IConnection::endClose()
+{
+    _state = Idle;
+    onEndClose();
+}
+
+
+void IConnection::cancelOp() noexcept
 {
     if(_state == Idle)
         return;
     _state = Idle;
+    _pendingStmt = nullptr;
+    _pendingCursor = nullptr;
     onCancelOp();
 }
 
@@ -320,6 +350,7 @@ void IConnection::beginExecute(IStatement& stmt)
         throw InvalidConnection("Operation pending");
 
     _state = PendingExec;
+    _pendingStmt = &stmt;
     stmt.onBeginExec();
 }
 
@@ -327,6 +358,7 @@ void IConnection::beginExecute(IStatement& stmt)
 IConnection::size_type IConnection::endExecute(IStatement& stmt)
 {
     _state = Idle;
+    _pendingStmt = nullptr;
     return stmt.onEndExec();
 }
 
@@ -339,6 +371,7 @@ void IConnection::beginSelect(IStatement& stmt)
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingSelect;
+    _pendingStmt = &stmt;
     stmt.onBeginSelect();
 }
 
@@ -346,6 +379,7 @@ void IConnection::beginSelect(IStatement& stmt)
 Result IConnection::endSelect(IStatement& stmt)
 {
     _state = Idle;
+    _pendingStmt = nullptr;
     return stmt.onEndSelect();
 }
 
@@ -355,6 +389,7 @@ void IConnection::beginBatchFetch(ICursor& cursor, size_type batchSize)
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
     _state = PendingBatchFetch;
+    _pendingCursor = &cursor;
     cursor.onBeginBatchFetch(batchSize);
 }
 
@@ -362,18 +397,31 @@ void IConnection::beginBatchFetch(ICursor& cursor, size_type batchSize)
 Result IConnection::endBatchFetch(ICursor& cursor)
 {
     _state = Idle;
+    _pendingCursor = nullptr;
     return cursor.onEndBatchFetch();
 }
 
 
-void IConnection::closeBatchFetch(ICursor& cursor)
+void IConnection::closeCursor(ICursor& cursor)
 {
-    if(_state == PendingBatchFetch)
+    if(_pendingCursor == &cursor)
     {
         _state = Idle;
+        _pendingCursor = nullptr;
         onCancelOp();
     }
-    cursor.onCloseBatchFetch();
+    cursor.onClose();
+}
+
+
+void IConnection::closeStatement(IStatement& stmt)
+{
+    if(_pendingStmt == &stmt)
+    {
+        _state = Idle;
+        _pendingStmt = nullptr;
+        onCancelOp();
+    }
 }
 
 
@@ -403,6 +451,61 @@ Statement IStmtCacheConnection::prepareCached(const std::string& query)
 void IStmtCacheConnection::clearStatementCache()
 {
     _stmtCache.clear();
+}
+
+
+void IStmtCacheConnection::beginPrepareCached(const std::string& query)
+{
+    if(_state != Idle)
+        throw InvalidConnection("Operation pending");
+
+    StatementCache::iterator it = _stmtCache.find(query);
+
+    if(it != _stmtCache.end())
+    {
+        // Cache hit: store the raw pointer and signal via post() on next EventLoop tick
+        _cachedHitStmt = it->second.get();
+        _prepareCachedHit = true;
+        _state = PendingPrepare;
+        onNotifyPreparedCached();
+        return;
+    }
+
+    // Cache miss: delegate to dedicated async prepare-cached path
+    _cachedHitStmt = nullptr;
+    _prepareCachedHit = false;
+    _state = PendingPrepare;
+    onBeginPrepareCachedMiss(query);
+    _pendingPrepareCachedQuery = query;
+}
+
+
+Statement IStmtCacheConnection::endPrepareCached()
+{
+    if(_state != PendingPrepare)
+        throw InvalidConnection("No prepare-cached operation pending");
+
+    _state = Idle;
+
+    if(_prepareCachedHit)
+    {
+        _prepareCachedHit = false;
+        IStatement* raw = _cachedHitStmt;
+        _cachedHitStmt = nullptr;
+        return Statement(raw);
+    }
+
+    // Cache miss path: get the result from the async prepare
+    Statement stmt = onEndPrepareCachedMiss();
+
+    if( ! _pendingPrepareCachedQuery.empty() )
+    {
+        IStatement* istmt = stmt.impl();
+        _stmtCache.insert( StatementCache::value_type(_pendingPrepareCachedQuery, StatementPtr(istmt)) );
+        _pendingPrepareCachedQuery.clear();
+    }
+
+    return stmt;
 }
 
 } // namespace Db

@@ -83,6 +83,8 @@ namespace Db {
             : _stmt(stmt)
             { }
 
+            ~Statement();
+
             /** \brief Sets all hostvariables to NULL.
 
                 Sets all hostvariables to NULL.
@@ -248,7 +250,7 @@ namespace Db {
                 for(auto& row : stmt.getCursor(100)) { ... }
                 @endcode
 
-                For asynchronous batch iteration connect to %Cursor::fetched()
+                For asynchronous batch iteration connect to %Cursor::fetchFinished()
                 and call %Cursor::beginFetch().
 
                 \param batchSize Number of rows to fetch per batch.
@@ -281,6 +283,12 @@ namespace Db {
             /** \brief Signal emitted when an async exec (DML) completes.
             */
             Signal<>& executeFinished();
+
+            /** \brief Returns the row id of the last inserted row.
+
+                Valid after execute() or endExecute().
+            */
+            long long lastInsertId() const;
 
         public:
             /** \brief Execute a query

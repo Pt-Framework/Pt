@@ -52,8 +52,7 @@ namespace sqlite {
 
     SqliteCursor::~SqliteCursor()
     {
-        if(_open)
-            _conn->closeBatchFetch(*this);
+        _conn->closeCursor(*this);
         _statement->putback(_stmt);
     }
 
@@ -121,7 +120,7 @@ namespace sqlite {
         return _statement->getConnection()->completeBatchFetch(_done);
     }
 
-    void SqliteCursor::onCloseBatchFetch()
+    void SqliteCursor::onClose()
     {
         _open = false;
         _done = false;

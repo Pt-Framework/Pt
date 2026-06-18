@@ -130,6 +130,20 @@ class PT_DB_API Connection
         */
         void close();
 
+        /** \brief Begin async close of the database.
+
+            Cancels any pending operation, then closes asynchronously.
+        */
+        void beginClose();
+
+        /** \brief Complete async close. Throws on failure.
+        */
+        void endClose();
+
+        /** \brief Signal emitted when an async close completes.
+        */
+        Pt::Signal<>& closeFinished();
+
         /** \brief Begin async open of the database.
 
             \param connStr Driver-specific connection string (no driver prefix).
@@ -208,6 +222,18 @@ class PT_DB_API Connection
         /** \brief Signal emitted when an async prepare completes.
         */
         Pt::Signal<>& prepareFinished();
+
+        /** \brief Compile and cache a prepared statement asynchronously.
+        */
+        void beginPrepareCached(const std::string& query);
+
+        /** \brief Complete async prepareCached. Returns the compiled statement.
+        */
+        Statement endPrepareCached();
+
+        /** \brief Signal emitted when an async prepareCached completes.
+        */
+        Pt::Signal<>& prepareCachedFinished();
 
     private:
         friend class Transaction;

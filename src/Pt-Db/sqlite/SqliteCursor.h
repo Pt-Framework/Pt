@@ -58,7 +58,7 @@ class SqliteCursor : public ICursor
 
         Result onEndBatchFetch() override;
 
-        void onCloseBatchFetch() override;
+        void onClose() override;
 
     private:
         Row fetchRow();

@@ -82,9 +82,9 @@ class PT_DB_API IConnection : public RefCounted
         /** \brief Cancel any pending async operation.
 
             Blocks until the backend has acknowledged cancellation.
-            Sets state to Idle.
+            Sets state to Idle. Never throws.
         */
-        void cancelOp();
+        void cancelOp() noexcept;
 
         long long insertId();
 
@@ -96,7 +96,21 @@ class PT_DB_API IConnection : public RefCounted
         /** \brief Close the database and cancel any pending operation.
         */
         void close();
+        /** \brief Begin async close of the database.
 
+            Cancels any pending operation, then closes asynchronously.
+            Fires closeFinished() when done.
+        */
+        void beginClose();
+
+        /** \brief Complete async close. Throws on failure.
+        */
+        void endClose();
+
+        /** \brief Signal emitted when an async close completes.
+        */
+        Pt::Signal<>& closeFinished()
+        { return _closeFinished; }
         /** \brief Returns true if the database is open.
         */
         bool isOpen() const
@@ -163,7 +177,24 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual Statement prepareCached(const std::string& query) = 0;
 
-       virtual void clearStatementCache() = 0;
+        virtual void clearStatementCache() = 0;
+
+        /** \brief Begin async prepare with cache lookup.
+
+            On cache hit fires prepareCachedFinished() via the EventLoop on
+            the next iteration. On miss, behaves like beginPrepare() and
+            stores the result in the cache when endPrepareCached() is called.
+        */
+        virtual void beginPrepareCached(const std::string& query) = 0;
+
+        /** \brief Complete async prepareCached. Returns the compiled statement.
+        */
+        virtual Statement endPrepareCached() = 0;
+
+        /** \brief Signal emitted when an async prepareCached completes.
+        */
+        Pt::Signal<>& prepareCachedFinished()
+        { return _prepareCachedFinished; }
 
         /** \brief Begin async prepare of a statement.
         */
@@ -205,7 +236,9 @@ class PT_DB_API IConnection : public RefCounted
 
         Result endBatchFetch(ICursor& cursor);
 
-        void closeBatchFetch(ICursor& cursor);
+        void closeCursor(ICursor& cursor);
+
+        void closeStatement(IStatement& stmt);
 
     protected:
         IConnection();
@@ -220,7 +253,8 @@ class PT_DB_API IConnection : public RefCounted
             PendingBeginTxn      = 5,
             PendingCommitTxn     = 6,
             PendingRollbackTxn   = 7,
-            PendingBatchFetch    = 8
+            PendingBatchFetch    = 8,
+            PendingClose         = 9
         };
 
         virtual void onSetActive(Pt::System::EventLoop* loop) = 0;
@@ -229,7 +263,15 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual void onClose() = 0;
 
-        virtual void onCancelOp() = 0;
+        virtual void onCancelOp() noexcept = 0;
+
+        virtual void onBeginClose() = 0;
+
+        virtual void onEndClose() = 0;
+
+        /** \brief Called by IStmtCacheConnection on cache-hit to trigger post().
+        */
+        virtual void onNotifyPreparedCached() = 0;
 
         virtual void onBeginOpen(const std::string& connStr) = 0;
 
@@ -246,6 +288,13 @@ class PT_DB_API IConnection : public RefCounted
         virtual void onBeginPrepare(const std::string& query) = 0;
 
         virtual Statement onEndPrepare() = 0;
+
+        /** \brief Called by IStmtCacheConnection on cache-miss to trigger async prepare.
+            Backend enqueues a prepare task that fires prepareCachedFinished() on completion.
+        */
+        virtual void onBeginPrepareCachedMiss(const std::string& query) = 0;
+
+        virtual Statement onEndPrepareCachedMiss() = 0;
 
         virtual void onBeginStartTransaction(Transaction& txn, const char* sql) = 0;
 
@@ -275,12 +324,17 @@ class PT_DB_API IConnection : public RefCounted
         virtual void onRollbackTransaction(const char* sql) = 0;
 
         Pt::Signal<>            _openFinished;
+        Pt::Signal<>            _closeFinished;
         Pt::Signal<>            _executeFinished;
         Pt::Signal<>            _selectFinished;
         Pt::Signal<>            _prepareFinished;
+        Pt::Signal<>            _prepareCachedFinished;
+        bool                    _prepareCachedHit;
         bool                    _isOpen;
         State                   _state;
         Pt::System::EventLoop*  _loop;
+        IStatement*             _pendingStmt;
+        ICursor*                _pendingCursor;
 };
 
 
@@ -299,10 +353,16 @@ class PT_DB_API IStmtCacheConnection : public IConnection
 
         virtual void clearStatementCache();
 
+        virtual void beginPrepareCached(const std::string& query);
+
+        virtual Statement endPrepareCached();
+
     private:
         typedef SmartPtr<IStatement, InternalRefCounted<IStatement> > StatementPtr;
         typedef std::map<std::string, StatementPtr> StatementCache;
         StatementCache _stmtCache;
+        IStatement*    _cachedHitStmt = nullptr;
+        std::string    _pendingPrepareCachedQuery;
 };
 
 } // namespace Db

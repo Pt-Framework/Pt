@@ -63,10 +63,15 @@ class SqliteConnection : public IStmtCacheConnection
 
         void onOpen(const std::string& connStr) override;
         void onClose() override;
-        void onCancelOp() override;
+        void onCancelOp() noexcept override;
 
         void onBeginOpen(const std::string& connStr) override;
         void onEndOpen() override;
+
+        void onBeginClose() override;
+        void onEndClose() override;
+
+        void onNotifyPreparedCached() override;
 
         void onBeginExec(const std::string& sql) override;
         size_type onEndExec() override;
@@ -75,6 +80,9 @@ class SqliteConnection : public IStmtCacheConnection
 
         void onBeginPrepare(const std::string& query) override;
         Pt::Db::Statement onEndPrepare() override;
+
+        void onBeginPrepareCachedMiss(const std::string& query) override;
+        Pt::Db::Statement onEndPrepareCachedMiss() override;
 
         void onBeginStartTransaction(Pt::Db::Transaction& txn, const char* sql) override;
         void onEndStartTransaction() override;
@@ -146,6 +154,14 @@ class SqliteConnection : public IStmtCacheConnection
                 void complete(SqliteConnection& conn) override;
         };
 
+        struct PrepareCachedTask : Task
+        {
+                std::string sql;
+                Pt::Db::Statement result;
+                void execute(SqliteConnection& conn) override;
+                void complete(SqliteConnection& conn) override;
+        };
+
         struct StmtExecTask : Task
         {
                 SqliteStatement* stmt = nullptr;
@@ -196,6 +212,12 @@ class SqliteConnection : public IStmtCacheConnection
                 void complete(SqliteConnection& conn) override;
         };
 
+        struct CloseTask : Task
+        {
+                void execute(SqliteConnection& conn) override;
+                void complete(SqliteConnection& conn) override;
+        };
+
         void enqueue(Task* task);
 
         // Task instances (no heap allocation)
@@ -203,12 +225,14 @@ class SqliteConnection : public IStmtCacheConnection
         ExecTask _execTask;
         SelectTask _selectTask;
         PrepareTask _prepareTask;
+        PrepareCachedTask _prepareCachedTask;
         StmtExecTask _stmtExecTask;
         StmtSelectTask _stmtSelectTask;
         BeginTxnTask _beginTxnTask;
         CommitTxnTask _commitTxnTask;
         RollbackTxnTask _rollbackTxnTask;
         BatchFetchTask _batchFetchTask;
+        CloseTask _closeTask;
 
         Task* _pendingTask;
         Task* _completedTask;

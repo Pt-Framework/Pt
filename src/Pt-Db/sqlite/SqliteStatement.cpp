@@ -70,6 +70,9 @@ namespace sqlite {
 
     SqliteStatement::~SqliteStatement()
     {
+        if(_conn)
+            _conn->closeStatement(*this);
+
         if (_stmt)
         {
             //PT_LOG_DEBUG("sqlite3_finalize(" << stmt << ')');
@@ -370,6 +373,7 @@ namespace sqlite {
             Pt::Db::sqlite::SqliteError(ret, _query.c_str());
         }
 
+        setLastInsertId( ::sqlite3_last_insert_rowid(::sqlite3_db_handle(_stmt)) );
         return ::sqlite3_changes(::sqlite3_db_handle(_stmt));
     }
 

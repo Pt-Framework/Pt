@@ -71,7 +71,7 @@ class CursorIterator;
     Async usage — signal-driven batch iteration:
     @code
     Pt::Db::Cursor cursor = stmt.getCursor(100);
-    cursor.fetched() += Pt::slot(rx, &Receiver::onBatch);
+    cursor.fetchFinished() += Pt::slot(rx, &Receiver::onBatch);
     cursor.beginFetch();
     loop.run();
 
@@ -134,7 +134,7 @@ class PT_DB_API Cursor
             to retrieve the batch, then call beginFetch() again for the next
             batch.
         */
-        Signal<>& fetched();
+        Signal<>& fetchFinished();
 
         /** @brief Returns true if the cursor is open (async path).
         */

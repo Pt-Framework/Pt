@@ -38,6 +38,10 @@ namespace Pt {
 
 namespace Db {
 
+Statement::~Statement()
+{
+}
+
 //
 // execute SQL statement
 //
@@ -63,6 +67,12 @@ Statement::size_type Statement::endExecute()
 Signal<>& Statement::executeFinished()
 {
     return _stmt->executeFinished();
+}
+
+
+long long Statement::lastInsertId() const
+{
+    return _stmt->lastInsertId();
 }
 
 //

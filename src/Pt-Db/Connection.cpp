@@ -89,6 +89,24 @@ void Connection::close()
 }
 
 
+void Connection::beginClose()
+{
+    _connection->beginClose();
+}
+
+
+void Connection::endClose()
+{
+    _connection->endClose();
+}
+
+
+Pt::Signal<>& Connection::closeFinished()
+{
+    return _connection->closeFinished();
+}
+
+
 void Connection::open(const std::string& connStr)
 {
     _connection->open(connStr);
@@ -152,6 +170,24 @@ Statement Connection::prepareCached(const std::string& query)
 void Connection::clearStatementCache()
 {
     _connection->clearStatementCache();
+}
+
+
+void Connection::beginPrepareCached(const std::string& query)
+{
+    _connection->beginPrepareCached(query);
+}
+
+
+Statement Connection::endPrepareCached()
+{
+    return _connection->endPrepareCached();
+}
+
+
+Pt::Signal<>& Connection::prepareCachedFinished()
+{
+    return _connection->prepareCachedFinished();
 }
 
 

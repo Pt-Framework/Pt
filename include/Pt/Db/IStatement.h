@@ -64,6 +64,9 @@ class PT_DB_API IStatement : public RefCounted
         Signal<>& selectFinished()
         { return _selectFinished; }
 
+        long long lastInsertId() const
+        { return _lastInsertId; }
+
         IConnection* connection()
         { return _conn; }
 
@@ -85,6 +88,7 @@ class PT_DB_API IStatement : public RefCounted
     protected:
         explicit IStatement(IConnection* conn)
         : _conn(conn)
+        , _lastInsertId(0)
         {}
 
     protected:
@@ -108,10 +112,15 @@ class PT_DB_API IStatement : public RefCounted
 
         virtual Result onEndSelect() = 0;
 
+    protected:
+        void setLastInsertId(long long id)
+        { _lastInsertId = id; }
+
     private:
         Signal<> _executeFinished;
         Signal<> _selectFinished;
         IConnection* _conn;
+        long long _lastInsertId;
 };
 
 } // namespace Db
