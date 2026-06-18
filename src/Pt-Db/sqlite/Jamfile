@@ -11,11 +11,11 @@ if $(TARGET_OS:L) = wince
 
 PT_SQLITE_SOURCES = sqlite3.c ;
 
-PT_SQLITE_SOURCES += SQLConnection.cpp
+PT_SQLITE_SOURCES += SqliteConnection.cpp
                      SqliteConnector.cpp
                      SqliteCursor.cpp
                      SqliteError.cpp
-                     SQLStatement.cpp
+                     SqliteStatement.cpp
                      StmtRow.cpp
                      StmtValue.cpp
                      ;

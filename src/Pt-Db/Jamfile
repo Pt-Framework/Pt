@@ -10,12 +10,12 @@ if $(TARGET_OS:L) = symbian
 }
 
 # BUG: if a C source file comes first, jam links a C library
-PT_DB_SOURCES = [ FDirName sqlite SQLConnection.cpp ]
+PT_DB_SOURCES = [ FDirName sqlite SqliteConnection.cpp ]
                 [ FDirName sqlite sqlite3.c ]
                 [ FDirName sqlite SqliteConnector.cpp ]
                 [ FDirName sqlite SqliteCursor.cpp ]
                 [ FDirName sqlite SqliteError.cpp ]
-                [ FDirName sqlite SQLStatement.cpp ]
+                [ FDirName sqlite SqliteStatement.cpp ]
                 [ FDirName sqlite StmtRow.cpp ]
                 [ FDirName sqlite StmtValue.cpp ]
                 Connection.cpp

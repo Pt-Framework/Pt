@@ -18,14 +18,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
+
 #ifndef PT_DB_SQLITE_STMTROW_H
 #define PT_DB_SQLITE_STMTROW_H
 
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IRow.h>
 
-#include "SQLStatement.h"
+#include "SqliteStatement.h"
 
 
 namespace Pt {
@@ -49,7 +49,7 @@ namespace sqlite {
         Value getValue(size_type field_num) const;
 
         // specific methods of sqlite-driver
-        sqlite3_stmt* getStmt() const   
+        sqlite3_stmt* getStmt() const
         { return _stmt; }
     };
 

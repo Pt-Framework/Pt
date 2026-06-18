@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2006 by Tommi Maekitalo
  * Copyright (C) 2006 by Marc Boris Duerner
  * Copyright (C) 2006 by Stefan Bueder
@@ -28,9 +28,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "SQLStatement.h"
+#include "SqliteStatement.h"
 #include "SqliteCursor.h"
-#include "SQLConnection.h"
+#include "SqliteConnection.h"
 
 #include "../ResultImpl.h"
 #include "../RowImpl.h"
@@ -58,7 +58,7 @@ namespace Db {
 
 namespace sqlite {
 
-    Statement::Statement(Connection* conn, const std::string& query)
+    SqliteStatement::SqliteStatement(SqliteConnection* conn, const std::string& query)
         : IStatement(conn)
         , _stmt(0)
         , _stmtInUse(0)
@@ -68,7 +68,7 @@ namespace sqlite {
     {
     }
 
-    Statement::~Statement()
+    SqliteStatement::~SqliteStatement()
     {
         if (_stmt)
         {
@@ -85,7 +85,7 @@ namespace sqlite {
 
 
 
-    sqlite3_stmt* Statement::getBindStmt()
+    sqlite3_stmt* SqliteStatement::getBindStmt()
     {
         if (_stmt == 0)
         {
@@ -124,7 +124,7 @@ namespace sqlite {
         return _stmt;
     }
 
-    void Statement::putback(sqlite3_stmt* stmt)
+    void SqliteStatement::putback(sqlite3_stmt* stmt)
     {
         if (_stmt == 0)
         {
@@ -149,7 +149,7 @@ namespace sqlite {
         }
     }
 
-    int Statement::getBindIndex(const std::string& col)
+    int SqliteStatement::getBindIndex(const std::string& col)
     {
         sqlite3_stmt* stmt = getBindStmt();
 
@@ -162,7 +162,7 @@ namespace sqlite {
         return idx;
     }
 
-    void Statement::reset()
+    void SqliteStatement::reset()
     {
         if (_stmt)
         {
@@ -184,7 +184,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::clear()
+    void SqliteStatement::clear()
     {
         sqlite3_stmt* stmt = getBindStmt();
 
@@ -200,7 +200,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::setNull(const std::string& col)
+    void SqliteStatement::setNull(const std::string& col)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();
@@ -218,12 +218,12 @@ namespace sqlite {
         }
     }
 
-    void Statement::setBool(const std::string& col, bool data)
+    void SqliteStatement::setBool(const std::string& col, bool data)
     {
         setInt(col, data ? 1 : 0);
     }
 
-    void Statement::setInt(const std::string& col, int data)
+    void SqliteStatement::setInt(const std::string& col, int data)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();
@@ -241,7 +241,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::setUnsigned(const std::string& col, unsigned data)
+    void SqliteStatement::setUnsigned(const std::string& col, unsigned data)
     {
         if (data > static_cast<unsigned>(std::numeric_limits<int>::max()))
         {
@@ -255,12 +255,12 @@ namespace sqlite {
         }
     }
 
-    void Statement::setFloat(const std::string& col, float data)
+    void SqliteStatement::setFloat(const std::string& col, float data)
     {
         setDouble(col, static_cast<double>(data));
     }
 
-    void Statement::setDouble(const std::string& col, double data)
+    void SqliteStatement::setDouble(const std::string& col, double data)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();
@@ -278,7 +278,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::setChar(const std::string& col, char data)
+    void SqliteStatement::setChar(const std::string& col, char data)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();
@@ -297,7 +297,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::setString(const std::string& col, const std::string& data)
+    void SqliteStatement::setString(const std::string& col, const std::string& data)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();
@@ -320,7 +320,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::setBlob(const std::string& col, const Blob& data)
+    void SqliteStatement::setBlob(const std::string& col, const Blob& data)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();
@@ -343,22 +343,22 @@ namespace sqlite {
         }
     }
 
-    void Statement::setDate(const std::string& col, const Date& data)
+    void SqliteStatement::setDate(const std::string& col, const Date& data)
     {
         setString(col, data.toIsoString());
     }
 
-    void Statement::setTime(const std::string& col, const Time& data)
+    void SqliteStatement::setTime(const std::string& col, const Time& data)
     {
         setString(col, data.toIsoString());
     }
 
-    void Statement::setDatetime(const std::string& col, const DateTime& data)
+    void SqliteStatement::setDatetime(const std::string& col, const DateTime& data)
     {
         setString(col, data.toIsoString());
     }
 
-    Statement::size_type Statement::onExecute()
+    SqliteStatement::size_type SqliteStatement::onExecute()
     {
         reset();
         _needReset = true;
@@ -373,7 +373,7 @@ namespace sqlite {
         return ::sqlite3_changes(::sqlite3_db_handle(_stmt));
     }
 
-    Result Statement::onSelect()
+    Result SqliteStatement::onSelect()
     {
         reset();
         _needReset = true;
@@ -418,7 +418,7 @@ namespace sqlite {
         return result;
     }
 
-    Row Statement::onSelectRow()
+    Row SqliteStatement::onSelectRow()
     {
         reset();
         _needReset = true;
@@ -456,7 +456,7 @@ namespace sqlite {
         return Row();
     }
 
-    Value Statement::onSelectValue()
+    Value SqliteStatement::onSelectValue()
     {
         reset();
         _needReset = true;
@@ -492,7 +492,7 @@ namespace sqlite {
         return Value();
     }
 
-    ICursor* Statement::onCreateCursor()
+    ICursor* SqliteStatement::onCreateCursor()
     {
         _stmtInUse = getBindStmt();
         _stmt = 0;
@@ -500,25 +500,25 @@ namespace sqlite {
     }
 
 
-    void Statement::onBeginExec()
+    void SqliteStatement::onBeginExec()
     {
         _conn->enqueueStmtExec(*this);
     }
 
 
-    IStatement::size_type Statement::onEndExec()
+    IStatement::size_type SqliteStatement::onEndExec()
     {
         return _conn->completeStmtExec();
     }
 
 
-    void Statement::onBeginSelect()
+    void SqliteStatement::onBeginSelect()
     {
         _conn->enqueueStmtSelect(*this);
     }
 
 
-    Result Statement::onEndSelect()
+    Result SqliteStatement::onEndSelect()
     {
         return _conn->completeStmtSelect();
     }

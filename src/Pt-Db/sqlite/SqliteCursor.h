@@ -34,14 +34,14 @@ namespace Db {
 
 namespace sqlite {
 
-class Statement;
+class SqliteStatement;
 
 class SqliteCursor : public ICursor
 {
-    friend class Connection;
+    friend class SqliteConnection;
 
     public:
-        SqliteCursor(Statement* statement, sqlite3_stmt* stmt);
+        SqliteCursor(SqliteStatement* statement, sqlite3_stmt* stmt);
 
         ~SqliteCursor();
 
@@ -64,7 +64,7 @@ class SqliteCursor : public ICursor
         Row fetchRow();
 
     private:
-        SmartPtr<Statement, InternalRefCounted<Statement> > _statement;
+        SmartPtr<SqliteStatement, InternalRefCounted<SqliteStatement> > _statement;
         sqlite3_stmt* _stmt;
         bool          _done;
 };

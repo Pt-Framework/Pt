@@ -29,7 +29,7 @@
  */
 
 #include "SqliteConnector.h"
-#include "SQLConnection.h"
+#include "SqliteConnection.h"
 
 
 namespace Pt {
@@ -40,7 +40,7 @@ namespace sqlite {
 
     Pt::Db::IConnection* SqliteConnector::get()
     {
-        return new Pt::Db::sqlite::Connection();
+        return new Pt::Db::sqlite::SqliteConnection();
     }
 
 } // namespace sqlite

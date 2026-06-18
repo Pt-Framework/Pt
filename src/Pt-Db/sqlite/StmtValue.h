@@ -22,7 +22,7 @@
 #ifndef PT_DB_SQLITE_STMTVALUE_H
 #define PT_DB_SQLITE_STMTVALUE_H
 
-#include "SQLStatement.h"
+#include "SqliteStatement.h"
 
 #include <Pt/Db/Blob.h>
 #include <Pt/SmartPtr.h>

@@ -31,7 +31,7 @@
 #include "SqliteCursor.h"
 #include "StmtRow.h"
 #include "SqliteError.h"
-#include "SQLConnection.h"
+#include "SqliteConnection.h"
 #include "../ResultImpl.h"
 
 #include <Pt/Db/Row.h>
@@ -43,7 +43,7 @@ namespace Db {
 
 namespace sqlite {
 
-    SqliteCursor::SqliteCursor(Statement* statement, sqlite3_stmt* stmt)
+    SqliteCursor::SqliteCursor(SqliteStatement* statement, sqlite3_stmt* stmt)
         : ICursor(statement->connection())
         , _statement(statement)
         , _stmt(stmt)
