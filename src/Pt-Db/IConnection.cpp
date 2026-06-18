@@ -52,24 +52,6 @@ IConnection::IConnection()
 }
 
 
-Pt::Signal<>& IConnection::openFinished()
-{
-    return onOpenFinished();
-}
-
-
-Pt::Signal<>& IConnection::selectFinished()
-{
-    return onSelectFinished();
-}
-
-
-Pt::Signal<>& IConnection::prepareFinished()
-{
-    return onPrepareFinished();
-}
-
-
 void IConnection::setActive(Pt::System::EventLoop* loop)
 {
     _loop = loop;
@@ -254,35 +236,35 @@ void IConnection::rollbackTransaction(const char* sql)
 }
 
 
-Result IConnection::selectStatement(IStatement& stmt)
+Result IConnection::select(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    return stmt.select();
+    return stmt.onSelect();
 }
 
 
-Row IConnection::selectRowStatement(IStatement& stmt)
+Row IConnection::selectRow(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    return stmt.selectRow();
+    return stmt.onSelectRow();
 }
 
 
-Value IConnection::selectValueStatement(IStatement& stmt)
+Value IConnection::selectValue(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    return stmt.selectValue();
+    return stmt.onSelectValue();
 }
 
 
-ICursor* IConnection::createStatementCursor(IStatement& stmt)
+Cursor IConnection::getCursor(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
-    return stmt.createCursor();
+    return Cursor(stmt.onCreateCursor());
 }
 
 //
@@ -298,7 +280,7 @@ IConnection::size_type IConnection::execute(const std::string& query)
 }
 
 
-void IConnection::beginExec(const std::string& sql)
+void IConnection::beginExecute(const std::string& sql)
 {
     if(_state != Idle)
         throw ConnectionError("Operation pending");
@@ -308,29 +290,23 @@ void IConnection::beginExec(const std::string& sql)
 }
 
 
-IConnection::size_type IConnection::endExec()
+IConnection::size_type IConnection::endExecute()
 {
     _state = Idle;
     return onEndExec();
 }
 
 
-Pt::Signal<>& IConnection::executeFinished()
-{
-    return onExecuteFinished();
-}
-
-
-IConnection::size_type IConnection::executeStatement(IStatement& stmt)
+IConnection::size_type IConnection::execute(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
 
-    return stmt.execute();
+    return stmt.onExecute();
 }
 
 
-void IConnection::beginExecStatement(IStatement& stmt)
+void IConnection::beginExecute(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
@@ -340,7 +316,7 @@ void IConnection::beginExecStatement(IStatement& stmt)
 }
 
 
-IConnection::size_type IConnection::endExecStatement(IStatement& stmt)
+IConnection::size_type IConnection::endExecute(IStatement& stmt)
 {
     _state = Idle;
     return stmt.onEndExec();
@@ -350,7 +326,7 @@ IConnection::size_type IConnection::endExecStatement(IStatement& stmt)
 // select SQL
 //
 
-void IConnection::beginSelectStatement(IStatement& stmt)
+void IConnection::beginSelect(IStatement& stmt)
 {
     if(_state != Idle)
         throw InvalidConnection("Operation pending");
@@ -359,7 +335,7 @@ void IConnection::beginSelectStatement(IStatement& stmt)
 }
 
 
-Result IConnection::endSelectStatement(IStatement& stmt)
+Result IConnection::endSelect(IStatement& stmt)
 {
     _state = Idle;
     return stmt.onEndSelect();

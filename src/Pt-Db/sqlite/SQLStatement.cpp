@@ -358,7 +358,7 @@ namespace sqlite {
         setString(col, data.toIsoString());
     }
 
-    Statement::size_type Statement::execute()
+    Statement::size_type Statement::onExecute()
     {
         reset();
         _needReset = true;
@@ -373,7 +373,7 @@ namespace sqlite {
         return ::sqlite3_changes(::sqlite3_db_handle(_stmt));
     }
 
-    Result Statement::select()
+    Result Statement::onSelect()
     {
         reset();
         _needReset = true;
@@ -418,7 +418,7 @@ namespace sqlite {
         return result;
     }
 
-    Row Statement::selectRow()
+    Row Statement::onSelectRow()
     {
         reset();
         _needReset = true;
@@ -456,7 +456,7 @@ namespace sqlite {
         return Row();
     }
 
-    Value Statement::selectValue()
+    Value Statement::onSelectValue()
     {
         reset();
         _needReset = true;
@@ -492,7 +492,7 @@ namespace sqlite {
         return Value();
     }
 
-    ICursor* Statement::createCursor()
+    ICursor* Statement::onCreateCursor()
     {
         _stmtInUse = getBindStmt();
         _stmt = 0;

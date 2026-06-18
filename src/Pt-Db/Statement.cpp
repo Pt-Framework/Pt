@@ -44,19 +44,19 @@ namespace Db {
 
 Statement::size_type Statement::execute()
 {
-    return _stmt->connection()->executeStatement(*_stmt);
+    return _stmt->connection()->execute(*_stmt);
 }
 
 
-void Statement::beginExec()
+void Statement::beginExecute()
 {
-    _stmt->connection()->beginExecStatement(*_stmt);
+    _stmt->connection()->beginExecute(*_stmt);
 }
 
 
-Statement::size_type Statement::endExec()
+Statement::size_type Statement::endExecute()
 {
-    return _stmt->connection()->endExecStatement(*_stmt);
+    return _stmt->connection()->endExecute(*_stmt);
 }
 
 
@@ -71,31 +71,31 @@ Signal<>& Statement::executeFinished()
 
 Result Statement::select()
 {
-    return _stmt->connection()->selectStatement(*_stmt);
+    return _stmt->connection()->select(*_stmt);
 }
 
 
 Row Statement::selectRow()
 {
-    return _stmt->connection()->selectRowStatement(*_stmt);
+    return _stmt->connection()->selectRow(*_stmt);
 }
 
 
 Value Statement::selectValue()
 {
-    return _stmt->connection()->selectValueStatement(*_stmt);
+    return _stmt->connection()->selectValue(*_stmt);
 }
 
 
 void Statement::beginSelect()
 {
-    _stmt->connection()->beginSelectStatement(*_stmt);
+    _stmt->connection()->beginSelect(*_stmt);
 }
 
 
 Result Statement::endSelect()
 {
-    return _stmt->connection()->endSelectStatement(*_stmt);
+    return _stmt->connection()->endSelect(*_stmt);
 }
 
 
@@ -113,7 +113,8 @@ void Statement::cancel()
 
 Statement::ConstIterator Statement::begin() const
 {
-    return ConstIterator(_stmt->connection()->createStatementCursor(*_stmt));
+    Cursor c = _stmt->connection()->getCursor(*_stmt);
+    return ConstIterator(c.impl());
 }
 
 
@@ -125,7 +126,7 @@ Statement::ConstIterator Statement::end() const
 
 Cursor Statement::getCursor()
 {
-    return Cursor(_stmt->connection()->createStatementCursor(*_stmt));
+    return _stmt->connection()->getCursor(*_stmt);
 }
 
 

@@ -49,7 +49,7 @@ struct FinishedReceiver : public Pt::Connectable
 
     void onFinished()
     {
-        try { conn->endExec(); }
+        try { conn->endExecute(); }
         catch(const std::exception& e) { failed = true; error = e.what(); }
         done = true;
         loop->exit();
@@ -138,7 +138,7 @@ void AsyncTest::asyncExec()
     FinishedReceiver rx(loop, conn);
     conn.executeFinished() += Pt::slot(rx, &FinishedReceiver::onFinished);
 
-    conn.beginExec("INSERT INTO t VALUES (1, 'async')");;
+    conn.beginExecute("INSERT INTO t VALUES (1, 'async')");;
     loop.run();
 
     PT_UNIT_ASSERT( ! rx.failed );
@@ -229,7 +229,7 @@ struct SequenceReceiver : public Pt::Connectable
 
     void onFinished()
     {
-        try { conn->endExec(); }
+        try { conn->endExecute(); }
         catch(const std::exception&)
         {
             failed = true;
@@ -239,7 +239,7 @@ struct SequenceReceiver : public Pt::Connectable
         ++step;
         if(step == 1)
         {
-            conn->beginExec("INSERT INTO t VALUES (2)");
+            conn->beginExecute("INSERT INTO t VALUES (2)");
         }
         else
         {
@@ -261,7 +261,7 @@ void AsyncTest::asyncSequence()
     SequenceReceiver rx(loop, conn);
     conn.executeFinished() += Pt::slot(rx, &SequenceReceiver::onFinished);
 
-    conn.beginExec("INSERT INTO t VALUES (1)");
+    conn.beginExecute("INSERT INTO t VALUES (1)");
     loop.run();
 
     PT_UNIT_ASSERT( ! rx.failed );
@@ -396,7 +396,7 @@ struct StmtExecReceiver : public Pt::Connectable
 
     void onExecuteFinished()
     {
-        try { rowCount = stmt->endExec(); }
+        try { rowCount = stmt->endExecute(); }
         catch(const std::exception&) { failed = true; }
         done = true;
         loop->exit();
@@ -417,7 +417,7 @@ void AsyncTest::asyncStmtExecSignal()
     StmtExecReceiver rx(loop, stmt);
     stmt.executeFinished() += Pt::slot(rx, &StmtExecReceiver::onExecuteFinished);
 
-    stmt.beginExec();
+    stmt.beginExecute();
     loop.run();
 
     PT_UNIT_ASSERT( ! rx.failed );

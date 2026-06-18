@@ -113,6 +113,11 @@ class PT_DB_API Cursor
         */
         Result endFetch();
 
+        /** @brief Return the underlying backend cursor pointer.
+        */
+        ICursor* impl()
+        { return _cursor.get(); }
+
         /** @brief Close the cursor and release all associated resources.
 
             Safe to call even if a fetch is currently in progress (cancels it).

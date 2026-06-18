@@ -282,11 +282,11 @@ namespace Db {
 
             /** \brief Begin async execution (DML).
             */
-            void beginExec();
+            void beginExecute();
 
             /** \brief Retrieve row count after async exec completes.
             */
-            size_type endExec();
+            size_type endExecute();
 
             /** \brief Signal emitted when an async exec (DML) completes.
             */
@@ -324,6 +324,7 @@ namespace Db {
                 \throw TODO
             */
             Value selectValue();
+
             /** \brief Begin async SELECT. */
             void beginSelect();
 

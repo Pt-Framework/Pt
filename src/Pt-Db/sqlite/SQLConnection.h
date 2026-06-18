@@ -59,25 +59,6 @@ class Connection : public IStmtCacheConnection
         bool onRun() override;
 
     protected:
-        // --- IConnection signal hooks ---
-
-        Pt::Signal<>& onOpenFinished() override
-        {
-            return _finished;
-        }
-        Pt::Signal<>& onExecuteFinished() override
-        {
-            return _executeFinished;
-        }
-        Pt::Signal<>& onSelectFinished() override
-        {
-            return _selectFinished;
-        }
-        Pt::Signal<>& onPrepareFinished() override
-        {
-            return _prepareFinished;
-        }
-
         void onSetActive(Pt::System::EventLoop* loop) override;
 
         void onOpen(const std::string& connStr) override;
@@ -242,11 +223,6 @@ class Connection : public IStmtCacheConnection
         bool _shutdown;
         std::atomic<bool> _cancelFlag;
 
-        // Completion signals for Connection-level operations
-        Pt::Signal<> _finished;
-        Pt::Signal<> _executeFinished;
-        Pt::Signal<> _selectFinished;
-        Pt::Signal<> _prepareFinished;
 };
 
 } // namespace sqlite

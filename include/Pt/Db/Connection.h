@@ -156,11 +156,11 @@ class PT_DB_API Connection
 
         /** \brief Begin async execution statement.
         */
-        void beginExec(const std::string& sql);
+        void beginExecute(const std::string& sql);
 
         /** \brief Begin async execution statement.
         */
-        size_type endExec();
+        size_type endExecute();
 
         /** \brief Signal emitted when an async raw exec completes.
         */

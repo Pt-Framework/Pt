@@ -200,7 +200,7 @@ void Connection::OpenTask::execute(Connection& conn)
 
 void Connection::OpenTask::complete(Connection& conn)
 {
-    conn._finished.send();
+    conn._openFinished.send();
 }
 
 
@@ -269,13 +269,13 @@ void Connection::PrepareTask::complete(Connection& conn)
 
 Connection::size_type Connection::callStatementExecute(Statement& stmt)
 {
-    return stmt.execute();
+    return stmt.onExecute();
 }
 
 
 Result Connection::callStatementSelect(Statement& stmt)
 {
-    return stmt.select();
+    return stmt.onSelect();
 }
 
 

@@ -87,17 +87,26 @@ class PT_DB_API IStatement : public RefCounted
         : _conn(conn)
         {}
 
-        virtual ICursor*  createCursor() = 0;
+    protected:
+        virtual ICursor*  onCreateCursor() = 0;
 
-        virtual size_type execute() = 0;
-        virtual void      onBeginExec() = 0;
+    protected:
+        virtual size_type onExecute() = 0;
+
+        virtual void onBeginExec() = 0;
+
         virtual size_type onEndExec() = 0;
 
-        virtual Result    select() = 0;
-        virtual Row       selectRow() = 0;
-        virtual Value     selectValue() = 0;
-        virtual void      onBeginSelect() = 0;
-        virtual Result    onEndSelect() = 0;
+    protected:
+        virtual Result onSelect() = 0;
+
+        virtual Row onSelectRow() = 0;
+
+        virtual Value onSelectValue() = 0;
+
+        virtual void onBeginSelect() = 0;
+
+        virtual Result onEndSelect() = 0;
 
     private:
         Signal<> _executeFinished;

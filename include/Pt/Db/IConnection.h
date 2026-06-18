@@ -36,6 +36,7 @@
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
 #include <Pt/Db/ICursor.h>
+#include <Pt/Db/Cursor.h>
 #include <Pt/Db/IStatement.h>
 #include <Pt/Db/Result.h>
 #include <Pt/Db/Row.h>
@@ -71,22 +72,6 @@ class PT_DB_API IConnection : public RefCounted
     public:
         typedef std::size_t size_type;
 
-        /** \brief Returns true if the database is open.
-        */
-        bool isOpen() const
-        { return _isOpen; }
-
-        /** \brief Signal emitted when an async operation completes.
-
-            Fires on the EventLoop thread. Call the corresponding endXxx()
-            method to retrieve the result or receive any exception.
-            Delegates to onOpenFinished() — the signal object lives in the backend.
-        */
-        Pt::Signal<>& openFinished();
-
-        Pt::Signal<>& selectFinished();
-
-        Pt::Signal<>& prepareFinished();
 
         /** \brief Attach to an EventLoop for async operations.
 
@@ -94,6 +79,16 @@ class PT_DB_API IConnection : public RefCounted
         */
         void setActive(Pt::System::EventLoop* loop);
 
+        /** \brief Cancel any pending async operation.
+
+            Blocks until the backend has acknowledged cancellation.
+            Sets state to Idle.
+        */
+        void cancelOp();
+
+        long long insertId();
+
+    public:
         /** \brief Synchronously open the database.
         */
         void open(const std::string& connStr);
@@ -102,12 +97,10 @@ class PT_DB_API IConnection : public RefCounted
         */
         void close();
 
-        /** \brief Cancel any pending async operation.
-
-            Blocks until the backend has acknowledged cancellation.
-            Sets state to Idle.
+        /** \brief Returns true if the database is open.
         */
-        void cancelOp();
+        bool isOpen() const
+        { return _isOpen; }
 
         /** \brief Begin async open of the database.
         */
@@ -117,17 +110,19 @@ class PT_DB_API IConnection : public RefCounted
         */
         void endOpen();
 
-        /** \brief Begin async SELECT query.
+        /** \brief Signal emitted when an async open completes.
+
+            Fires on the EventLoop thread. Call endOpen() to finalize.
         */
-        void beginSelect(const std::string& sql);
+        Pt::Signal<>& openFinished()
+        { return _openFinished; }
 
-        Result endSelect();
+    public:
+        void startTransaction(const char* sql = nullptr);
 
-        /** \brief Begin async prepare of a statement.
-        */
-        void beginPrepare(const std::string& query);
+        void commitTransaction(const char* sql = nullptr);
 
-        Statement endPrepare();
+        void rollbackTransaction(const char* sql = nullptr);
 
         /** \brief Begin async BEGIN TRANSACTION.
         */
@@ -147,56 +142,63 @@ class PT_DB_API IConnection : public RefCounted
 
         void endRollbackTransaction();
 
-        // Synchronous operations — guarded: throw if an async op is pending.
+    public:
+        size_type execute(const std::string& query);
 
+        void beginExecute(const std::string& sql);
 
-        Result select(const std::string& query);
+        size_type endExecute();
 
+        Pt::Signal<>& executeFinished()
+        { return _executeFinished; }
+
+        size_type execute(IStatement& stmt);
+
+        void beginExecute(IStatement& stmt);
+
+        size_type endExecute(IStatement& stmt);
+
+    public:
         Statement prepare(const std::string& query);
 
         virtual Statement prepareCached(const std::string& query) = 0;
 
-        virtual void clearStatementCache() = 0;
+       virtual void clearStatementCache() = 0;
 
-        long long insertId();
+        /** \brief Begin async prepare of a statement.
+        */
+        void beginPrepare(const std::string& query);
 
-        void startTransaction(const char* sql = nullptr);
+        Statement endPrepare();
 
-        void commitTransaction(const char* sql = nullptr);
-
-        void rollbackTransaction(const char* sql = nullptr);
-
-    public:
-        size_type execute(const std::string& query);
-
-        void beginExec(const std::string& sql);
-
-        size_type endExec();
-
-        Pt::Signal<>& executeFinished();
-
-        size_type executeStatement(IStatement& stmt);
-
-        void beginExecStatement(IStatement& stmt);
-
-        size_type endExecStatement(IStatement& stmt);
+        Pt::Signal<>& prepareFinished()
+        { return _prepareFinished; }
 
     public:
-        Result selectStatement(IStatement& stmt);
+        Result select(const std::string& query);
 
-        Row selectRowStatement(IStatement& stmt);
+        /** \brief Begin async SELECT query.
+        */
+        void beginSelect(const std::string& sql);
 
-        Value selectValueStatement(IStatement& stmt);
+        Result endSelect();
 
-        ICursor* createStatementCursor(IStatement& stmt);
+        Pt::Signal<>& selectFinished()
+        { return _selectFinished; }
 
+        Result select(IStatement& stmt);
 
+        Row selectRow(IStatement& stmt);
 
-        void beginSelectStatement(IStatement& stmt);
+        Value selectValue(IStatement& stmt);
 
-        Result endSelectStatement(IStatement& stmt);
+        void beginSelect(IStatement& stmt);
 
-        // Cursor batch-fetch operations — route through ICursor virtuals.
+        Result endSelect(IStatement& stmt);
+
+    public:
+        Cursor getCursor(IStatement& stmt);
+
         void beginBatchFetch(ICursor& cursor, size_type batchSize);
 
         Result endBatchFetch(ICursor& cursor);
@@ -218,14 +220,6 @@ class PT_DB_API IConnection : public RefCounted
             PendingRollbackTxn   = 7,
             PendingBatchFetch    = 8
         };
-
-        virtual Pt::Signal<>& onOpenFinished() = 0;
-
-        virtual Pt::Signal<>& onExecuteFinished() = 0;
-
-        virtual Pt::Signal<>& onSelectFinished() = 0;
-
-        virtual Pt::Signal<>& onPrepareFinished() = 0;
 
         virtual void onSetActive(Pt::System::EventLoop* loop) = 0;
 
@@ -278,6 +272,10 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual void onRollbackTransaction(const char* sql) = 0;
 
+        Pt::Signal<>            _openFinished;
+        Pt::Signal<>            _executeFinished;
+        Pt::Signal<>            _selectFinished;
+        Pt::Signal<>            _prepareFinished;
         bool                    _isOpen;
         State                   _state;
         Pt::System::EventLoop*  _loop;

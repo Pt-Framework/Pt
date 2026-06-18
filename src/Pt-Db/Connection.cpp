@@ -161,15 +161,15 @@ long long Connection::insertId()
 }
 
 
-void Connection::beginExec(const std::string& sql)
+void Connection::beginExecute(const std::string& sql)
 {
-    _connection->beginExec(sql);
+    _connection->beginExecute(sql);
 }
 
 
-Connection::size_type Connection::endExec()
+Connection::size_type Connection::endExecute()
 {
-    return _connection->endExec();
+    return _connection->endExecute();
 }
 
 
