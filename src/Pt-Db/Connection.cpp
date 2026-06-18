@@ -32,7 +32,7 @@
 
 #include <Pt/Db/Connection.h>
 #include <Pt/Db/IConnector.h>
-#include <Pt/Db/Exception.h>
+#include <Pt/Db/DbError.h>
 #include <Pt/Db/Transaction.h>
 
 namespace Pt {

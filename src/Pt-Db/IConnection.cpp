@@ -29,7 +29,7 @@
 */
 
 #include <Pt/Db/IConnection.h>
-#include <Pt/Db/Exception.h>
+#include <Pt/Db/DbError.h>
 #include <Pt/Db/Result.h>
 #include <Pt/Db/Statement.h>
 #include <Pt/Db/Transaction.h>

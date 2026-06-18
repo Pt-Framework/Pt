@@ -21,7 +21,7 @@ PT_DB_SOURCES = [ FDirName sqlite SQLConnection.cpp ]
                 Connection.cpp
                 ConnectionManager.cpp
                 Cursor.cpp
-                Exception.cpp
+                DbError.cpp
                 IConnection.cpp
                 IConnector.cpp
                 Result.cpp

@@ -27,7 +27,7 @@
   MA 02110-1301 USA
  */
 
-#include "Pt/Db/Exception.h"
+#include "Pt/Db/DbError.h"
 
 namespace Pt {
 

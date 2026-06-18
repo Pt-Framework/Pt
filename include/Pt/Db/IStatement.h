@@ -57,10 +57,10 @@ namespace Db {
         typedef std::size_t size_type;
 
         Signal<>& executeFinished()
-        { return onExecuteFinished(); }
+        { return _executeFinished; }
 
         Signal<>& selectFinished()
-        { return onSelectFinished(); }
+        { return _selectFinished; }
 
         virtual void clear() = 0;
 
@@ -90,11 +90,11 @@ namespace Db {
         virtual void   cancel() = 0;
 
     protected:
-        IStatement() {}
+        Signal<> _executeFinished;
+        Signal<> _selectFinished;
 
-        virtual Signal<>& onExecuteFinished() = 0;
-        virtual Signal<>& onSelectFinished() = 0;
-    };
+        IStatement() {}
+};
 
 } // namespace Db
 

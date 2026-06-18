@@ -33,7 +33,7 @@
 #include "../ResultImpl.h"
 #include "SqliteError.h"
 
-#include <Pt/Db/Exception.h>
+#include <Pt/Db/DbError.h>
 #include <Pt/Db/Result.h>
 #include <Pt/Db/Row.h>
 #include <Pt/Db/Value.h>

@@ -27,8 +27,8 @@
   MA 02110-1301 USA
  */
 
-#ifndef Pt_Db_Exception_h
-#define Pt_Db_Exception_h
+#ifndef Pt_Db_DbError_h
+#define Pt_Db_DbError_h
 
 #include <Pt/Db/Api.h>
 #include <string>

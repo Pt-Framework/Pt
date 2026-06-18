@@ -38,7 +38,7 @@
 
 #include "SqliteError.h"
 
-#include "Pt/Db/Exception.h"
+#include "Pt/Db/DbError.h"
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"

@@ -30,7 +30,7 @@
  */
 
 #include "ConnectionManager.h"
-#include <Pt/Db/Exception.h>
+#include <Pt/Db/DbError.h>
 
 namespace Pt {
 

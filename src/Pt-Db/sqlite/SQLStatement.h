@@ -49,9 +49,6 @@ namespace sqlite {
         bool _needReset;
         void reset();
 
-        Signal<> _executeFinished;
-        Signal<> _selectFinished;
-
         public:
             Statement(Connection* conn, const std::string& query);
             ~Statement();
@@ -83,9 +80,6 @@ namespace sqlite {
             virtual void      beginSelect();
             virtual Result    endSelect();
             virtual void      cancel();
-
-            virtual Signal<>& onExecuteFinished() { return _executeFinished; }
-            virtual Signal<>& onSelectFinished()  { return _selectFinished; }
 
             // specific methods of sqlite-driver
             sqlite3_stmt* getStmt() const   { return _stmt; }
