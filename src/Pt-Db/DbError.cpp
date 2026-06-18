@@ -42,17 +42,17 @@ DbError::~DbError() throw()
 {}
 
 
-ConnectFailed::ConnectFailed(const std::string& what)
+ConnectionError::ConnectionError(const std::string& what)
 : DbError(what)
 {}
 
 
-ConnectFailed::~ConnectFailed() throw()
+ConnectionError::~ConnectionError() throw()
 {}
 
 
 AccessDenied::AccessDenied(const std::string& what)
-: ConnectFailed(what)
+: ConnectionError(what)
 {}
 
 
@@ -61,7 +61,7 @@ AccessDenied::~AccessDenied() throw()
 
 
 InvalidConnection::InvalidConnection(const std::string& what)
-: ConnectFailed(what)
+: ConnectionError(what)
 {}
 
 

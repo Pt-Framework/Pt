@@ -44,7 +44,7 @@ void SqliteError(int errorCode, const char* statement)
             throw InvalidQuery("SQL error or missing database", statement);
 
         case SQLITE_INTERNAL :
-            throw InvalidQuery("Internal logic error in SQLite", statement);
+            throw InvalidConnection("Internal logic error in SQLite");
 
         case SQLITE_PERM :
             throw AccessDenied("Access permission denied");
@@ -53,10 +53,10 @@ void SqliteError(int errorCode, const char* statement)
             throw QueryFailed("Callback routine requested an abort", statement);
 
         case SQLITE_BUSY :
-            throw AccessDenied("The database file is locked");
+            throw QueryFailed("The database file is locked", statement);
 
         case SQLITE_LOCKED :
-            throw AccessDenied("A table in the database is locked");
+            throw QueryFailed("A table in the database is locked", statement);
 
         case SQLITE_NOMEM :
             throw std::bad_alloc();
@@ -71,7 +71,7 @@ void SqliteError(int errorCode, const char* statement)
             throw System::IOError("Some kind of disk I/O error occurred");
 
         case SQLITE_CORRUPT :
-            throw QueryFailed("The database disk image is malformed", statement);
+            throw InvalidConnection("The database disk image is malformed");
 
         case SQLITE_NOTFOUND :
             throw InvalidQuery("Table or record not found", statement);
@@ -98,7 +98,7 @@ void SqliteError(int errorCode, const char* statement)
             throw TypeMismatch("Data type mismatch", statement);
 
         case SQLITE_MISUSE :
-            throw InvalidConnection("Library used incorrectly");
+            throw InvalidQuery("Library used incorrectly", statement);
 
         case SQLITE_NOLFS :
             throw InvalidConnection("Uses OS features not supported on host");
@@ -107,10 +107,10 @@ void SqliteError(int errorCode, const char* statement)
             throw AccessDenied("Authorization denied");
 
         case SQLITE_FORMAT :
-            throw InvalidQuery("Auxiliary database format error", statement);
+            throw InvalidConnection("Auxiliary database format error");
 
         case SQLITE_RANGE :
-            throw TypeMismatch("Parameter index out of range", statement);
+            throw InvalidQuery("Parameter index out of range", statement);
 
         case SQLITE_NOTADB :
             throw InvalidConnection("File opened that is not a database file");

@@ -112,9 +112,9 @@ void IConnection::cancelOp()
 void IConnection::beginOpen(const std::string& connStr)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     if(_isOpen)
-        throw InvalidConnection("Already open");
+        throw ConnectionError("Already open");
     _state = PendingOpen;
     onBeginOpen(connStr);
 }
@@ -131,7 +131,7 @@ void IConnection::endOpen()
 void IConnection::beginExec(const std::string& sql)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     _state = PendingExec;
     onBeginExec(sql);
 }
@@ -147,7 +147,7 @@ IConnection::size_type IConnection::endExec()
 void IConnection::beginSelect(const std::string& sql)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     _state = PendingSelect;
     onBeginSelect(sql);
 }
@@ -163,7 +163,7 @@ Result IConnection::endSelect()
 void IConnection::beginPrepare(const std::string& query)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     _state = PendingPrepare;
     onBeginPrepare(query);
 }
@@ -179,7 +179,7 @@ Statement IConnection::endPrepare()
 void IConnection::beginStartTransaction(Transaction& txn, const char* sql)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     _state = PendingBeginTxn;
     onBeginStartTransaction(txn, sql);
 }
@@ -195,7 +195,7 @@ void IConnection::endStartTransaction()
 void IConnection::beginCommitTransaction(Transaction& txn, const char* sql)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     _state = PendingCommitTxn;
     onBeginCommitTransaction(txn, sql);
 }
@@ -211,7 +211,7 @@ void IConnection::endCommitTransaction()
 void IConnection::beginRollbackTransaction(Transaction& txn, const char* sql)
 {
     if(_state != Idle)
-        throw InvalidConnection("Operation pending");
+        throw ConnectionError("Operation pending");
     _state = PendingRollbackTxn;
     onBeginRollbackTransaction(txn, sql);
 }

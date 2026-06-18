@@ -61,18 +61,18 @@ class PT_DB_API DbError : public std::runtime_error
 
     @ingroup Pt-Db-Exceptions
 */
-class PT_DB_API ConnectFailed : public DbError
+class PT_DB_API ConnectionError : public DbError
 {
     public:
         /** @brief Constructor.
 
             @param what Description of the error.
         */
-        explicit ConnectFailed(const std::string& what);
+        explicit ConnectionError(const std::string& what);
 
         /** @brief Destructor.
         */
-        ~ConnectFailed() throw();
+        ~ConnectionError() throw();
 };
 
 
@@ -82,7 +82,7 @@ class PT_DB_API ConnectFailed : public DbError
 
     @ingroup Pt-Db-Exceptions
 */
-class PT_DB_API AccessDenied : public ConnectFailed
+class PT_DB_API AccessDenied : public ConnectionError
 {
     public:
         /** @brief Constructor.
@@ -104,7 +104,7 @@ class PT_DB_API AccessDenied : public ConnectFailed
 
     @ingroup Pt-Db-Exceptions
 */
-class PT_DB_API InvalidConnection : public ConnectFailed
+class PT_DB_API InvalidConnection : public ConnectionError
 {
     public:
         /** @brief Constructor.
