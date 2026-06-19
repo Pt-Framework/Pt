@@ -27,30 +27,50 @@
 
 class CoroTest : public Pt::Unit::TestSuite
 {
-public:
-    CoroTest()
-    : Pt::Unit::TestSuite("Pt::Db::CoroTest")
-    {
-        registerMethod("OpenCloseAsync", *this, &CoroTest::openCloseAsync);
-        registerMethod("ExecuteAsync",   *this, &CoroTest::executeAsync);
-        registerMethod("SelectAsync",    *this, &CoroTest::selectAsync);
-        registerMethod("CancelSelect",   *this, &CoroTest::cancelSelect);
-    }
+    public:
+        CoroTest()
+        : Pt::Unit::TestSuite("Pt::Db::CoroTest")
+        , _loop(nullptr)
+        {
+            registerMethod("OpenClose", *this, &CoroTest::openClose);
+            registerMethod("Execute",   *this, &CoroTest::execute);
+            registerMethod("Select",    *this, &CoroTest::select);
+            registerMethod("CancelSelect",   *this, &CoroTest::cancelSelect);
+        }
 
-protected:
-    void openCloseAsync();
-    void executeAsync();
-    void selectAsync();
-    void cancelSelect();
+    protected:
+        void setUp() override
+        {
+            _loop = new Pt::System::MainLoop();
+        }
+
+        void tearDown() override
+        {
+            delete _loop;
+            _loop = nullptr;
+        }
+
+        void openClose();
+        void execute();
+        void select();
+        void cancelSelect();
+
+        Pt::Task openCloseAsync();
+        Pt::Task executeAsync();
+        Pt::Task selectAsync();
+        Pt::Task cancelSelectAsync();
+
+    private:
+        Pt::System::MainLoop* _loop;
 };
 
 Pt::Unit::RegisterTest<CoroTest> register_CoroTest;
 
 
-static Pt::Task coroOpenClose(Pt::System::MainLoop& loop)
+Pt::Task CoroTest::openCloseAsync()
 {
     Pt::Db::Connection conn("sqlite");
-    conn.setActive(loop);
+    conn.setActive(*_loop);
 
     co_await conn.openAsync(":memory:");
     PT_UNIT_ASSERT( conn.isOpen() );
@@ -58,23 +78,22 @@ static Pt::Task coroOpenClose(Pt::System::MainLoop& loop)
     co_await conn.closeAsync();
     PT_UNIT_ASSERT( ! conn.isOpen() );
 
-    loop.exit();
+    _loop->exit();
 }
 
-void CoroTest::openCloseAsync()
+void CoroTest::openClose()
 {
-    Pt::System::MainLoop loop;
-    Pt::Task task = coroOpenClose(loop);
+    Pt::Task task = openCloseAsync();
     task.run();
-    loop.run();
+    _loop->run();
     task.rethrowIfFailed();
 }
 
 
-static Pt::Task coroExecute(Pt::System::MainLoop& loop)
+Pt::Task CoroTest::executeAsync()
 {
     Pt::Db::Connection conn("sqlite");
-    conn.setActive(loop);
+    conn.setActive(*_loop);
 
     co_await conn.openAsync(":memory:");
     co_await conn.executeAsync("CREATE TABLE t (id INTEGER)");
@@ -85,23 +104,22 @@ static Pt::Task coroExecute(Pt::System::MainLoop& loop)
     n = co_await conn.executeAsync("INSERT INTO t VALUES (2)");
     PT_UNIT_ASSERT( n == 1 );
 
-    loop.exit();
+    _loop->exit();
 }
 
-void CoroTest::executeAsync()
+void CoroTest::execute()
 {
-    Pt::System::MainLoop loop;
-    Pt::Task task = coroExecute(loop);
+    Pt::Task task = executeAsync();
     task.run();
-    loop.run();
+    _loop->run();
     task.rethrowIfFailed();
 }
 
 
-static Pt::Task coroSelect(Pt::System::MainLoop& loop)
+Pt::Task CoroTest::selectAsync()
 {
     Pt::Db::Connection conn("sqlite");
-    conn.setActive(loop);
+    conn.setActive(*_loop);
 
     co_await conn.openAsync(":memory:");
     co_await conn.executeAsync("CREATE TABLE t (id INTEGER, val TEXT)");
@@ -113,23 +131,22 @@ static Pt::Task coroSelect(Pt::System::MainLoop& loop)
     PT_UNIT_ASSERT( r[0][1].getString() == "alpha" );
     PT_UNIT_ASSERT( r[1][1].getString() == "beta" );
 
-    loop.exit();
+    _loop->exit();
 }
 
-void CoroTest::selectAsync()
+void CoroTest::select()
 {
-    Pt::System::MainLoop loop;
-    Pt::Task task = coroSelect(loop);
+    Pt::Task task = selectAsync();
     task.run();
-    loop.run();
+    _loop->run();
     task.rethrowIfFailed();
 }
 
 
-static Pt::Task coroCancelSelect(Pt::System::MainLoop& loop)
+Pt::Task CoroTest::cancelSelectAsync()
 {
     Pt::Db::Connection conn("sqlite");
-    conn.setActive(loop);
+    conn.setActive(*_loop);
 
     co_await conn.openAsync(":memory:");
     co_await conn.executeAsync("CREATE TABLE t (id INTEGER)");
@@ -137,13 +154,12 @@ static Pt::Task coroCancelSelect(Pt::System::MainLoop& loop)
 
     co_await conn.selectAsync("SELECT * FROM t");
 
-    loop.exit();
+    _loop->exit();
 }
 
 void CoroTest::cancelSelect()
 {
-    Pt::System::MainLoop loop;
-    Pt::Task task = coroCancelSelect(loop);
+    Pt::Task task = cancelSelectAsync();
 
     task.run();    // start — coroutine suspends at openAsync
     task.cancel(); // request_stop → next co_await skips, coroutine completes
