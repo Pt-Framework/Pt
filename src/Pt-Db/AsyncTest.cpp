@@ -28,12 +28,6 @@
 #include <string>
 #include <stdexcept>
 
-#if __cplusplus >= 202002L
-#include <Pt/Task.h>
-#include <Pt/Db/Connection.h>
-#endif
-
-
 // Helper receiver for openFinished() signal
 struct FinishedReceiver : public Pt::Connectable
 {
@@ -77,9 +71,6 @@ public:
         registerMethod("AsyncTransactionCycle", *this, &AsyncTest::asyncTransactionCycle);
         registerMethod("AsyncRollback",         *this, &AsyncTest::asyncRollback);
         registerMethod("AsyncTransactionClass", *this, &AsyncTest::asyncTransactionClass);
-#if __cplusplus >= 202002L
-        registerMethod("AsyncOpenCoro", *this, &AsyncTest::asyncOpenCoro);
-#endif
     }
 
 protected:
@@ -97,9 +88,6 @@ protected:
     void asyncTransactionCycle();
     void asyncRollback();
     void asyncTransactionClass();
-#if __cplusplus >= 202002L
-    void asyncOpenCoro();
-#endif
 };
 
 Pt::Unit::RegisterTest<AsyncTest> register_AsyncTest;
@@ -752,32 +740,4 @@ void AsyncTest::asyncTransactionClass()
 }
 
 
-#if __cplusplus >= 202002L
-
-static Pt::DetachedTask coroOpen(Pt::Db::Connection& conn, Pt::System::MainLoop& loop)
-{
-    co_await conn.openAsync(":memory:");
-
-    conn.execute("CREATE TABLE t (id INTEGER)");
-    conn.execute("INSERT INTO t VALUES (42)");
-
-    Pt::Db::Result r = conn.select("SELECT * FROM t");
-    PT_UNIT_ASSERT( r.size() == 1 );
-    PT_UNIT_ASSERT( r[0][0].getInt() == 42 );
-
-    loop.exit();
-}
-
-
-void AsyncTest::asyncOpenCoro()
-{
-    Pt::System::MainLoop loop;
-    Pt::Db::Connection conn("sqlite");
-    conn.setActive(loop);
-
-    coroOpen(conn, loop);
-    loop.run();
-}
-
-#endif // __cplusplus >= 202002L
 

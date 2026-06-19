@@ -1371,7 +1371,9 @@
     <ClCompile Include="..\Pt-Cma\ComponentFactory.cpp" />
     <ClCompile Include="..\Pt-Cma\ComponentLibrary.cpp" />
     <ClCompile Include="..\Pt-Cma\IUnknown.cpp" />
+    <ClCompile Include="..\Pt-Db\AsyncTest.cpp" />
     <ClCompile Include="..\Pt-Db\Connection.cpp" />
+    <ClCompile Include="..\Pt-Db\CoroTest.cpp" />
     <ClCompile Include="..\Pt-Db\Exception.cpp" />
     <ClCompile Include="..\Pt-Db\Pt-Db-test.cpp" />
     <ClCompile Include="..\Pt-Db\Result.cpp" />

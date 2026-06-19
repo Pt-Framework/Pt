@@ -34,6 +34,7 @@
 
 #include <coroutine>
 #include <exception>
+#include <stop_token>
 
 namespace Pt {
 
@@ -65,6 +66,110 @@ class DetachedTask
             void unhandled_exception()
             { std::terminate(); }
         };
+};
+
+
+/** @brief Cancellable coroutine return type with lazy start.
+
+    A Task starts suspended. Call run() to begin execution.
+    The caller can cancel a running Task via cancel(), which
+    propagates a stop request to any awaitable that supports
+    setStopToken(). On cancel, awaitables skip their work and
+    the coroutine runs through to completion. Check
+    isCancelled() to detect cancellation.
+
+    @ingroup BasicTypes
+*/
+class Task
+{
+    public:
+        struct promise_type
+        {
+            Task get_return_object()
+            {
+                auto h = handle_type::from_promise(*this);
+                return Task(h);
+            }
+
+            std::suspend_always initial_suspend() noexcept
+            { return {}; }
+
+            std::suspend_always final_suspend() noexcept
+            { return {}; }
+
+            void return_void()
+            { _cancelled = _stopSource.stop_requested(); }
+
+            void unhandled_exception()
+            { _exception = std::current_exception(); }
+
+            template<typename A>
+            A&& await_transform(A&& a)
+            {
+                a.setStopToken(_stopSource.get_token());
+                return static_cast<A&&>(a);
+            }
+
+            std::stop_source _stopSource;
+            std::exception_ptr _exception;
+            bool _cancelled = false;
+        };
+
+        using handle_type = std::coroutine_handle<promise_type>;
+
+        Task(Task&& other) noexcept
+        : _handle(other._handle)
+        { other._handle = nullptr; }
+
+        ~Task()
+        {
+            if( _handle )
+                _handle.destroy();
+        }
+
+        /** @brief Start execution of the coroutine.
+        */
+        void run()
+        {
+            if( _handle && ! _handle.done() )
+                _handle.resume();
+        }
+
+        /** @brief Request cancellation of the running coroutine.
+        */
+        void cancel()
+        {
+            if( _handle )
+                _handle.promise()._stopSource.request_stop();
+        }
+
+        /** @brief Returns true if the coroutine has finished.
+        */
+        bool done() const
+        { return _handle && _handle.done(); }
+
+        /** @brief Returns true if the coroutine was cancelled.
+        */
+        bool isCancelled() const
+        { return _handle && _handle.promise()._cancelled; }
+
+        /** @brief Re-throw any stored exception from the coroutine.
+        */
+        void rethrowIfFailed()
+        {
+            if( _handle && _handle.promise()._exception )
+                std::rethrow_exception(_handle.promise()._exception);
+        }
+
+    private:
+        explicit Task(handle_type h)
+        : _handle(h)
+        {}
+
+        Task(const Task&) = delete;
+        Task& operator=(const Task&) = delete;
+
+        handle_type _handle;
 };
 
 } // namespace Pt

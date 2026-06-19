@@ -312,6 +312,24 @@ AsyncOpen Connection::openAsync(const std::string& connStr)
     return AsyncOpen(*this, connStr);
 }
 
+
+AsyncClose Connection::closeAsync()
+{
+    return AsyncClose(*this);
+}
+
+
+AsyncExecute Connection::executeAsync(const std::string& sql)
+{
+    return AsyncExecute(*this, sql);
+}
+
+
+AsyncSelect Connection::selectAsync(const std::string& sql)
+{
+    return AsyncSelect(*this, sql);
+}
+
 #endif // __cplusplus >= 202002L
 
 } // namespace Db
