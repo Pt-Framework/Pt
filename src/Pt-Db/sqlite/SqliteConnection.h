@@ -28,7 +28,7 @@ class SqliteCursor;
 class SqliteStatement;
 
 class SqliteConnection : public IStmtCacheConnection
-                 , public Pt::System::Selectable
+                       , public Pt::System::Selectable
 {
     public:
         SqliteConnection();
