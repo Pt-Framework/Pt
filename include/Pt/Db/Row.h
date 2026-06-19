@@ -243,9 +243,14 @@ namespace Db {
         by using relational operators such as < or >.
     */
     class Row::ConstIterator
-            : public std::iterator<std::random_access_iterator_tag, Value>
     {
         public:
+            typedef std::random_access_iterator_tag iterator_category;
+            typedef Value                           value_type;
+            typedef std::ptrdiff_t                  difference_type;
+            typedef const Value*                    pointer;
+            typedef const Value&                    reference;
+
             //! \brief Const reference to a value.
             typedef const value_type& const_reference;
 
