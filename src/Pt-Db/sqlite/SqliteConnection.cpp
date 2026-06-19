@@ -430,9 +430,15 @@ Pt::Db::Statement SqliteConnection::onPrepare(const std::string& query)
 }
 
 
-long long SqliteConnection::onInsertId()
+long long SqliteConnection::onLastInsertId(const std::string& /*name*/)
 {
     return ::sqlite3_last_insert_rowid(_db);
+}
+
+
+bool SqliteConnection::onPing()
+{
+    return _db != nullptr;
 }
 
 

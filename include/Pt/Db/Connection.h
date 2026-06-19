@@ -115,9 +115,24 @@ class PT_DB_API Connection
         */
         void cancel();
 
-        /** \brief Return the last auto-increment row id.
+        /** \brief Test whether the backend connection is alive.
         */
-        long long insertId();
+        bool ping();
+
+        /** \brief Return the last auto-generated row ID.
+
+            For backends that support named sequences (e.g. PostgreSQL)
+            pass the sequence name; otherwise pass an empty string.
+        */
+        long long lastInsertId(const std::string& name = std::string());
+
+        /** \brief Returns true if no async operation is pending.
+        */
+        bool isIdle() const;
+
+        /** \brief Returns true if a transaction is currently active.
+        */
+        bool hasTransaction() const;
 
     public:
         /** \brief Returns true if the database is open.

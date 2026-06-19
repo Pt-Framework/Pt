@@ -46,7 +46,7 @@ namespace Db {
 
 IConnection::IConnection()
 : _isOpen(false)
-, _state(Idle)
+, _inTransaction(false)
 , _loop(nullptr)
 , _pendingOp(nullptr)
 , _prepareCachedHit(false)
@@ -63,7 +63,7 @@ void IConnection::setActive(Pt::System::EventLoop* loop)
 
 void IConnection::open(const std::string& connStr)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     onOpen(connStr);
     _isOpen = true;
@@ -72,12 +72,12 @@ void IConnection::open(const std::string& connStr)
 
 void IConnection::close()
 {
-    if(_state != Idle)
+    if(_pendingOp)
     {
-        _state = Idle;
         _pendingOp = nullptr;
         onCancelOp();
     }
+    _inTransaction = false;
     _isOpen = false;
     onClose();
 }
@@ -86,13 +86,12 @@ void IConnection::close()
 void IConnection::beginClose()
 {
     // Cancel any pending operation first (sync, deterministic)
-    if(_state != Idle)
+    if(_pendingOp)
     {
-        _state = Idle;
         _pendingOp = nullptr;
         onCancelOp();
     }
-    _state = PendingClose;
+    _pendingOp = this;
     _isOpen = false;
     onBeginClose();
 }
@@ -100,16 +99,15 @@ void IConnection::beginClose()
 
 void IConnection::endClose()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     onEndClose();
 }
 
 
 void IConnection::cancelOp() noexcept
 {
-    if(_state == Idle)
+    if(_pendingOp == nullptr)
         return;
-    _state = Idle;
     _pendingOp = nullptr;
     onCancelOp();
 }
@@ -117,18 +115,18 @@ void IConnection::cancelOp() noexcept
 
 void IConnection::beginOpen(const std::string& connStr)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
     if(_isOpen)
         throw ConnectionError("Already open");
-    _state = PendingOpen;
+    _pendingOp = this;
     onBeginOpen(connStr);
 }
 
 
 void IConnection::endOpen()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     onEndOpen();
     _isOpen = true;
 }
@@ -136,87 +134,90 @@ void IConnection::endOpen()
 
 void IConnection::beginSelect(const std::string& sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
-    _state = PendingSelect;
+    _pendingOp = this;
     onBeginSelect(sql);
 }
 
 
 Result IConnection::endSelect()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     return onEndSelect();
 }
 
 
 void IConnection::beginPrepare(const std::string& query)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
-    _state = PendingPrepare;
+    _pendingOp = this;
     onBeginPrepare(query);
 }
 
 
 Statement IConnection::endPrepare()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     return onEndPrepare();
 }
 
 
 void IConnection::beginStartTransaction(Transaction& txn, const char* sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
-    _state = PendingBeginTxn;
+    _pendingOp = &txn;
     onBeginStartTransaction(txn, sql);
 }
 
 
 void IConnection::endStartTransaction()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     onEndStartTransaction();
+    _inTransaction = true;
 }
 
 
 void IConnection::beginCommitTransaction(Transaction& txn, const char* sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
-    _state = PendingCommitTxn;
+    _pendingOp = &txn;
     onBeginCommitTransaction(txn, sql);
 }
 
 
 void IConnection::endCommitTransaction()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     onEndCommitTransaction();
+    _inTransaction = false;
 }
 
 
 void IConnection::beginRollbackTransaction(Transaction& txn, const char* sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
-    _state = PendingRollbackTxn;
+    _pendingOp = &txn;
     onBeginRollbackTransaction(txn, sql);
 }
 
 
 void IConnection::endRollbackTransaction()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     onEndRollbackTransaction();
+    _inTransaction = false;
 }
 
 
 Result IConnection::select(const std::string& query)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return onSelect(query);
 }
@@ -224,47 +225,56 @@ Result IConnection::select(const std::string& query)
 
 Statement IConnection::prepare(const std::string& query)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return onPrepare(query);
 }
 
 
-long long IConnection::insertId()
+bool IConnection::ping()
 {
-    if(_state != Idle)
+    return onPing();
+}
+
+
+long long IConnection::lastInsertId(const std::string& name)
+{
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
-    return onInsertId();
+    return onLastInsertId(name);
 }
 
 
 void IConnection::startTransaction(const char* sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     onStartTransaction(sql);
+    _inTransaction = true;
 }
 
 
 void IConnection::commitTransaction(const char* sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     onCommitTransaction(sql);
+    _inTransaction = false;
 }
 
 
 void IConnection::rollbackTransaction(const char* sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     onRollbackTransaction(sql);
+    _inTransaction = false;
 }
 
 
 Result IConnection::select(IStatement& stmt)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return stmt.onSelect();
 }
@@ -272,7 +282,7 @@ Result IConnection::select(IStatement& stmt)
 
 Row IConnection::selectRow(IStatement& stmt)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return stmt.onSelectRow();
 }
@@ -280,7 +290,7 @@ Row IConnection::selectRow(IStatement& stmt)
 
 Value IConnection::selectValue(IStatement& stmt)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return stmt.onSelectValue();
 }
@@ -288,7 +298,7 @@ Value IConnection::selectValue(IStatement& stmt)
 
 Result IConnection::fetchBatch(ICursor& cursor, size_type batchSize)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return cursor.onFetchBatch(batchSize);
 }
@@ -296,7 +306,7 @@ Result IConnection::fetchBatch(ICursor& cursor, size_type batchSize)
 
 Cursor IConnection::getCursor(IStatement& stmt, size_type batchSize)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
     return Cursor(stmt.onCreateCursor(), batchSize);
 }
@@ -307,7 +317,7 @@ Cursor IConnection::getCursor(IStatement& stmt, size_type batchSize)
 
 IConnection::size_type IConnection::execute(const std::string& query)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
 
     return onExecute(query);
@@ -316,24 +326,24 @@ IConnection::size_type IConnection::execute(const std::string& query)
 
 void IConnection::beginExecute(const std::string& sql)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw ConnectionError("Operation pending");
 
-    _state = PendingExec;
+    _pendingOp = this;
     onBeginExec(sql);
 }
 
 
 IConnection::size_type IConnection::endExecute()
 {
-    _state = Idle;
+    _pendingOp = nullptr;
     return onEndExec();
 }
 
 
 IConnection::size_type IConnection::execute(IStatement& stmt)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
 
     return stmt.onExecute();
@@ -342,10 +352,9 @@ IConnection::size_type IConnection::execute(IStatement& stmt)
 
 void IConnection::beginExecute(IStatement& stmt)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
 
-    _state = PendingExec;
     _pendingOp = &stmt;
     stmt.onBeginExec();
 }
@@ -353,7 +362,6 @@ void IConnection::beginExecute(IStatement& stmt)
 
 IConnection::size_type IConnection::endExecute(IStatement& stmt)
 {
-    _state = Idle;
     _pendingOp = nullptr;
     return stmt.onEndExec();
 }
@@ -364,9 +372,8 @@ IConnection::size_type IConnection::endExecute(IStatement& stmt)
 
 void IConnection::beginSelect(IStatement& stmt)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
-    _state = PendingSelect;
     _pendingOp = &stmt;
     stmt.onBeginSelect();
 }
@@ -374,7 +381,6 @@ void IConnection::beginSelect(IStatement& stmt)
 
 Result IConnection::endSelect(IStatement& stmt)
 {
-    _state = Idle;
     _pendingOp = nullptr;
     return stmt.onEndSelect();
 }
@@ -382,9 +388,8 @@ Result IConnection::endSelect(IStatement& stmt)
 
 void IConnection::beginBatchFetch(ICursor& cursor, size_type batchSize)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
-    _state = PendingBatchFetch;
     _pendingOp = &cursor;
     cursor.onBeginBatchFetch(batchSize);
 }
@@ -392,7 +397,6 @@ void IConnection::beginBatchFetch(ICursor& cursor, size_type batchSize)
 
 Result IConnection::endBatchFetch(ICursor& cursor)
 {
-    _state = Idle;
     _pendingOp = nullptr;
     return cursor.onEndBatchFetch();
 }
@@ -402,7 +406,6 @@ void IConnection::closeCursor(ICursor& cursor)
 {
     if(_pendingOp == &cursor)
     {
-        _state = Idle;
         _pendingOp = nullptr;
         onCancelOp();
     }
@@ -414,7 +417,16 @@ void IConnection::closeStatement(IStatement& stmt)
 {
     if(_pendingOp == &stmt)
     {
-        _state = Idle;
+        _pendingOp = nullptr;
+        onCancelOp();
+    }
+}
+
+
+void IConnection::cancelTransaction(Transaction& txn)
+{
+    if(_pendingOp == &txn)
+    {
         _pendingOp = nullptr;
         onCancelOp();
     }
@@ -427,7 +439,7 @@ void IConnection::closeStatement(IStatement& stmt)
 
 Statement IStmtCacheConnection::prepareCached(const std::string& query)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
 
     StatementCache::iterator it = _stmtCache.find(query);
@@ -452,7 +464,7 @@ void IStmtCacheConnection::clearStatementCache()
 
 void IStmtCacheConnection::beginPrepareCached(const std::string& query)
 {
-    if(_state != Idle)
+    if(_pendingOp)
         throw InvalidConnection("Operation pending");
 
     StatementCache::iterator it = _stmtCache.find(query);
@@ -462,7 +474,7 @@ void IStmtCacheConnection::beginPrepareCached(const std::string& query)
         // Cache hit: store the raw pointer and signal via post() on next EventLoop tick
         _cachedHitStmt = it->second.get();
         _prepareCachedHit = true;
-        _state = PendingPrepare;
+        _pendingOp = this;
         onNotifyPreparedCached();
         return;
     }
@@ -470,7 +482,7 @@ void IStmtCacheConnection::beginPrepareCached(const std::string& query)
     // Cache miss: delegate to dedicated async prepare-cached path
     _cachedHitStmt = nullptr;
     _prepareCachedHit = false;
-    _state = PendingPrepare;
+    _pendingOp = this;
     onBeginPrepareCachedMiss(query);
     _pendingPrepareCachedQuery = query;
 }
@@ -478,10 +490,10 @@ void IStmtCacheConnection::beginPrepareCached(const std::string& query)
 
 Statement IStmtCacheConnection::endPrepareCached()
 {
-    if(_state != PendingPrepare)
+    if(_pendingOp == nullptr)
         throw InvalidConnection("No prepare-cached operation pending");
 
-    _state = Idle;
+    _pendingOp = nullptr;
 
     if(_prepareCachedHit)
     {

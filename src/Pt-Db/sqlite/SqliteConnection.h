@@ -95,7 +95,8 @@ class SqliteConnection : public IStmtCacheConnection
         size_type onExecute(const std::string& query) override;
         Result onSelect(const std::string& query) override;
         Pt::Db::Statement onPrepare(const std::string& query) override;
-        long long onInsertId() override;
+        bool onPing() override;
+        long long onLastInsertId(const std::string& name) override;
         void onStartTransaction(const char* sql) override;
         void onCommitTransaction(const char* sql) override;
         void onRollbackTransaction(const char* sql) override;

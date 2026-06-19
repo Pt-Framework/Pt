@@ -62,7 +62,7 @@ class Transaction;
 /** \brief Base class for database connection backends.
 
     Implements the NVI pattern: the public non-virtual methods manage
-    shared state (_isOpen, _state) and delegate to protected virtual
+    shared state (_isOpen, _pendingOp) and delegate to protected virtual
     onXxx() hooks that backends override.
 
     \see Db::Connection
@@ -86,7 +86,29 @@ class PT_DB_API IConnection : public RefCounted
         */
         void cancelOp() noexcept;
 
-        long long insertId();
+        /** \brief Test whether the backend connection is alive.
+
+            Returns true if the connection responds. For embedded
+            backends (e.g. SQLite) this is always true when open.
+        */
+        bool ping();
+
+        /** \brief Return the last auto-generated row ID.
+
+            For backends that support named sequences (e.g. PostgreSQL)
+            pass the sequence name; otherwise pass an empty string.
+        */
+        long long lastInsertId(const std::string& name);
+
+        /** \brief Returns true if no async operation is pending.
+        */
+        bool isIdle() const
+        { return _pendingOp == nullptr; }
+
+        /** \brief Returns true if a transaction is currently active.
+        */
+        bool hasTransaction() const
+        { return _inTransaction; }
 
     public:
         /** \brief Synchronously open the database.
@@ -240,22 +262,10 @@ class PT_DB_API IConnection : public RefCounted
 
         void closeStatement(IStatement& stmt);
 
+        void cancelTransaction(Transaction& txn);
+
     protected:
         IConnection();
-
-        enum State
-        {
-            Idle                 = 0,
-            PendingOpen          = 1,
-            PendingExec          = 2,
-            PendingSelect        = 3,
-            PendingPrepare       = 4,
-            PendingBeginTxn      = 5,
-            PendingCommitTxn     = 6,
-            PendingRollbackTxn   = 7,
-            PendingBatchFetch    = 8,
-            PendingClose         = 9
-        };
 
         virtual void onSetActive(Pt::System::EventLoop* loop) = 0;
 
@@ -315,7 +325,9 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual Statement onPrepare(const std::string& query) = 0;
 
-        virtual long long onInsertId() = 0;
+        virtual bool onPing() = 0;
+
+        virtual long long onLastInsertId(const std::string& name) = 0;
 
         virtual void onStartTransaction(const char* sql) = 0;
 
@@ -331,7 +343,7 @@ class PT_DB_API IConnection : public RefCounted
         Pt::Signal<>            _prepareCachedFinished;
         bool                    _prepareCachedHit;
         bool                    _isOpen;
-        State                   _state;
+        bool                    _inTransaction;
         Pt::System::EventLoop*  _loop;
         void*                   _pendingOp;
 };

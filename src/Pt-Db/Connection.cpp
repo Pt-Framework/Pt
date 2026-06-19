@@ -191,9 +191,27 @@ Pt::Signal<>& Connection::prepareCachedFinished()
 }
 
 
-long long Connection::insertId()
+bool Connection::isIdle() const
 {
-    return _connection->insertId();
+    return _connection->isIdle();
+}
+
+
+bool Connection::hasTransaction() const
+{
+    return _connection->hasTransaction();
+}
+
+
+bool Connection::ping()
+{
+    return _connection->ping();
+}
+
+
+long long Connection::lastInsertId(const std::string& name)
+{
+    return _connection->lastInsertId(name);
 }
 
 
