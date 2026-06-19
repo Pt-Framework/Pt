@@ -75,7 +75,7 @@ void IConnection::close()
     if(_pendingOp)
     {
         _pendingOp = nullptr;
-        onCancelOp();
+        onCancelPending();
     }
     _inTransaction = false;
     _isOpen = false;
@@ -89,7 +89,7 @@ void IConnection::beginClose()
     if(_pendingOp)
     {
         _pendingOp = nullptr;
-        onCancelOp();
+        onCancelPending();
     }
     _pendingOp = this;
     _isOpen = false;
@@ -104,12 +104,12 @@ void IConnection::endClose()
 }
 
 
-void IConnection::cancelOp() noexcept
+void IConnection::cancelPending() noexcept
 {
     if(_pendingOp == nullptr)
         return;
     _pendingOp = nullptr;
-    onCancelOp();
+    onCancelPending();
 }
 
 
@@ -118,7 +118,7 @@ void IConnection::cancelConnection() noexcept
     if(_pendingOp != this)
         return;
     _pendingOp = nullptr;
-    onCancelOp();
+    onCancelPending();
 }
 
 
@@ -434,7 +434,7 @@ void IConnection::cancelCursor(ICursor& cursor)
     if(_pendingOp == &cursor)
     {
         _pendingOp = nullptr;
-        onCancelOp();
+        onCancelPending();
     }
     cursor.onClose();
 }
@@ -445,7 +445,7 @@ void IConnection::cancelStatement(IStatement& stmt)
     if(_pendingOp == &stmt)
     {
         _pendingOp = nullptr;
-        onCancelOp();
+        onCancelPending();
     }
 }
 

@@ -63,7 +63,7 @@ class SqliteConnection : public IStmtCacheConnection
 
         void onOpen(const std::string& connStr) override;
         void onClose() override;
-        void onCancelOp() noexcept override;
+        void onCancelPending() noexcept override;
 
         void onBeginOpen(const std::string& connStr) override;
         void onEndOpen() override;

@@ -544,7 +544,7 @@ void SqliteConnection::onOpen(const std::string& connStr)
 
 void SqliteConnection::onClose()
 {
-    onCancelOp();
+    onCancelPending();
 
     if(_db)
     {
@@ -641,7 +641,7 @@ void SqliteConnection::onSetActive(Pt::System::EventLoop* loop)
 }
 
 
-void SqliteConnection::onCancelOp() noexcept
+void SqliteConnection::onCancelPending() noexcept
 {
     if(_db)
         ::sqlite3_interrupt(_db);
@@ -664,7 +664,7 @@ void SqliteConnection::onCancelOp() noexcept
 
 void SqliteConnection::onCancel()
 {
-    onCancelOp();
+    onCancelPending();
 }
 
 

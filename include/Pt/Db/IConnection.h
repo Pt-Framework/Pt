@@ -273,7 +273,7 @@ class PT_DB_API IConnection : public RefCounted
 
         /** \brief Cancel any pending async operation. Never throws.
         */
-        void cancelOp() noexcept;
+        void cancelPending() noexcept;
 
         /** \brief Cancel a pending connection-level async operation.
 
@@ -289,7 +289,7 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual void onClose() = 0;
 
-        virtual void onCancelOp() noexcept = 0;
+        virtual void onCancelPending() noexcept = 0;
 
         virtual void onBeginClose() = 0;
 
