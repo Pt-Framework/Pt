@@ -117,7 +117,7 @@ Signal<>& Statement::selectFinished()
 
 void Statement::cancel()
 {
-    _stmt->connection()->cancelOp();
+    _stmt->connection()->cancelStatement(*_stmt);
 }
 
 

@@ -71,7 +71,7 @@ namespace sqlite {
     SqliteStatement::~SqliteStatement()
     {
         if(_conn)
-            _conn->closeStatement(*this);
+            _conn->cancelStatement(*this);
 
         if (_stmt)
         {

@@ -113,6 +113,15 @@ void IConnection::cancelOp() noexcept
 }
 
 
+void IConnection::cancelConnection() noexcept
+{
+    if(_pendingOp != this)
+        return;
+    _pendingOp = nullptr;
+    onCancelOp();
+}
+
+
 void IConnection::beginOpen(const std::string& connStr)
 {
     if(_pendingOp)
@@ -233,7 +242,25 @@ Statement IConnection::prepare(const std::string& query)
 
 bool IConnection::ping()
 {
+    if(_pendingOp != nullptr)
+        throw InvalidConnection("Operation pending");
     return onPing();
+}
+
+
+void IConnection::beginPing()
+{
+    if(_pendingOp != nullptr)
+        throw InvalidConnection("Operation pending");
+    _pendingOp = this;
+    onBeginPing();
+}
+
+
+bool IConnection::endPing()
+{
+    _pendingOp = nullptr;
+    return onEndPing();
 }
 
 
@@ -402,7 +429,7 @@ Result IConnection::endBatchFetch(ICursor& cursor)
 }
 
 
-void IConnection::closeCursor(ICursor& cursor)
+void IConnection::cancelCursor(ICursor& cursor)
 {
     if(_pendingOp == &cursor)
     {
@@ -413,19 +440,9 @@ void IConnection::closeCursor(ICursor& cursor)
 }
 
 
-void IConnection::closeStatement(IStatement& stmt)
+void IConnection::cancelStatement(IStatement& stmt)
 {
     if(_pendingOp == &stmt)
-    {
-        _pendingOp = nullptr;
-        onCancelOp();
-    }
-}
-
-
-void IConnection::cancelTransaction(Transaction& txn)
-{
-    if(_pendingOp == &txn)
     {
         _pendingOp = nullptr;
         onCancelOp();

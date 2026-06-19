@@ -69,6 +69,7 @@ class AsyncOpen;
 class AsyncClose;
 class AsyncExecute;
 class AsyncSelect;
+class AsyncPing;
 #endif
 
 /** \brief Smart-pointer wrapper around a database connection backend.
@@ -118,6 +119,18 @@ class PT_DB_API Connection
         /** \brief Test whether the backend connection is alive.
         */
         bool ping();
+
+        /** \brief Begin async ping.
+        */
+        void beginPing();
+
+        /** \brief Complete async ping. Returns true if connection is alive.
+        */
+        bool endPing();
+
+        /** \brief Signal emitted when an async ping completes.
+        */
+        Pt::Signal<>& pingFinished();
 
         /** \brief Return the last auto-generated row ID.
 
@@ -305,6 +318,12 @@ class PT_DB_API Connection
             \return Awaitable yielding the result set.
         */
         AsyncSelect selectAsync(const std::string& sql);
+
+        /** \brief Asynchronously ping the database as a C++20 awaitable.
+
+            \return Awaitable yielding true if the connection is alive.
+        */
+        AsyncPing pingAsync();
 #endif
 
     public:
@@ -590,6 +609,71 @@ class AsyncSelect : public Connectable
 
         Connection& _conn;
         const std::string& _sql;
+        std::coroutine_handle<> _handle;
+        std::stop_token _token;
+        std::optional<std::stop_callback<std::function<void()>>> _stopCb;
+        bool _cancelled;
+};
+
+
+/** @brief Awaitable for async ping.
+    @ingroup Pt-Db
+*/
+class AsyncPing : public Connectable
+{
+    public:
+        AsyncPing(Connection& conn)
+        : _conn(conn)
+        , _cancelled(false)
+        {}
+
+        void setStopToken(std::stop_token st)
+        { _token = st; }
+
+        bool await_ready() const
+        { return false; }
+
+        bool await_suspend(std::coroutine_handle<> h)
+        {
+            _handle = h;
+
+            if( _token.stop_requested() )
+            {
+                _cancelled = true;
+                return false;
+            }
+
+            _conn.pingFinished() += slot(*this, &AsyncPing::onReady);
+
+            if( _token.stop_possible() )
+                _stopCb.emplace(_token, [this]{ onCancelled(); });
+
+            _conn.beginPing();
+            return true;
+        }
+
+        bool await_resume()
+        {
+            if( _cancelled )
+                return false;
+            return _conn.endPing();
+        }
+
+    private:
+        void onReady()
+        {
+            _stopCb.reset();
+            _handle.resume();
+        }
+
+        void onCancelled()
+        {
+            _cancelled = true;
+            _conn.cancel();
+            _handle.resume();
+        }
+
+        Connection& _conn;
         std::coroutine_handle<> _handle;
         std::stop_token _token;
         std::optional<std::stop_callback<std::function<void()>>> _stopCb;

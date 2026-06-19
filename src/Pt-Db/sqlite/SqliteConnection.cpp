@@ -442,6 +442,32 @@ bool SqliteConnection::onPing()
 }
 
 
+void SqliteConnection::PingTask::execute(SqliteConnection& conn)
+{
+    result = conn._db != nullptr;
+}
+
+
+void SqliteConnection::PingTask::complete(SqliteConnection& conn)
+{
+    conn._pingFinished.send();
+}
+
+
+void SqliteConnection::onBeginPing()
+{
+    enqueue(&_pingTask);
+}
+
+
+bool SqliteConnection::onEndPing()
+{
+    if(_pingTask.exception)
+        std::rethrow_exception(_pingTask.exception);
+    return _pingTask.result;
+}
+
+
 // --- Internal helpers for SqliteStatement async operations ---
 
 void SqliteConnection::enqueueStmtExec(SqliteStatement& stmt)

@@ -52,7 +52,7 @@ namespace sqlite {
 
     SqliteCursor::~SqliteCursor()
     {
-        _conn->closeCursor(*this);
+        _conn->cancelCursor(*this);
         _statement->putback(_stmt);
     }
 

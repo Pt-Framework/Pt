@@ -65,7 +65,7 @@ Result& Cursor::endFetch()
 {
     _batch = _cursor->connection()->endBatchFetch(*_cursor);
     if(_batch.empty())
-        _cursor->connection()->closeCursor(*_cursor);
+        _cursor->connection()->cancelCursor(*_cursor);
     return _batch;
 }
 
@@ -73,7 +73,7 @@ Result& Cursor::endFetch()
 void Cursor::close()
 {
     if(_cursor && _cursor->isOpen())
-        _cursor->connection()->closeCursor(*_cursor);
+        _cursor->connection()->cancelCursor(*_cursor);
 }
 
 

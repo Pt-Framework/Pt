@@ -79,19 +79,25 @@ class PT_DB_API IConnection : public RefCounted
         */
         void setActive(Pt::System::EventLoop* loop);
 
-        /** \brief Cancel any pending async operation.
-
-            Blocks until the backend has acknowledged cancellation.
-            Sets state to Idle. Never throws.
-        */
-        void cancelOp() noexcept;
-
         /** \brief Test whether the backend connection is alive.
 
             Returns true if the connection responds. For embedded
             backends (e.g. SQLite) this is always true when open.
         */
         bool ping();
+
+        /** \brief Begin async ping.
+        */
+        void beginPing();
+
+        /** \brief Complete async ping. Returns true if connection is alive.
+        */
+        bool endPing();
+
+        /** \brief Signal emitted when an async ping completes.
+        */
+        Pt::Signal<>& pingFinished()
+        { return _pingFinished; }
 
         /** \brief Return the last auto-generated row ID.
 
@@ -258,14 +264,24 @@ class PT_DB_API IConnection : public RefCounted
 
         Result endBatchFetch(ICursor& cursor);
 
-        void closeCursor(ICursor& cursor);
+        void cancelCursor(ICursor& cursor);
 
-        void closeStatement(IStatement& stmt);
-
-        void cancelTransaction(Transaction& txn);
+        void cancelStatement(IStatement& stmt);
 
     protected:
         IConnection();
+
+        /** \brief Cancel any pending async operation. Never throws.
+        */
+        void cancelOp() noexcept;
+
+        /** \brief Cancel a pending connection-level async operation.
+
+            Only cancels when the pending op was started on the connection
+            itself (open, close, execute, select, prepare, ping). Has no
+            effect when a transaction or statement op is pending.
+        */
+        void cancelConnection() noexcept;
 
         virtual void onSetActive(Pt::System::EventLoop* loop) = 0;
 
@@ -327,6 +343,10 @@ class PT_DB_API IConnection : public RefCounted
 
         virtual bool onPing() = 0;
 
+        virtual void onBeginPing() = 0;
+
+        virtual bool onEndPing() = 0;
+
         virtual long long onLastInsertId(const std::string& name) = 0;
 
         virtual void onStartTransaction(const char* sql) = 0;
@@ -341,11 +361,14 @@ class PT_DB_API IConnection : public RefCounted
         Pt::Signal<>            _selectFinished;
         Pt::Signal<>            _prepareFinished;
         Pt::Signal<>            _prepareCachedFinished;
+        Pt::Signal<>            _pingFinished;
         bool                    _prepareCachedHit;
         bool                    _isOpen;
         bool                    _inTransaction;
         Pt::System::EventLoop*  _loop;
         void*                   _pendingOp;
+
+        friend class Connection;
 };
 
 

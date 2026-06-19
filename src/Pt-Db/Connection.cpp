@@ -79,7 +79,7 @@ void Connection::setActive(Pt::System::EventLoop& loop)
 
 void Connection::cancel()
 {
-    _connection->cancelOp();
+    _connection->cancelConnection();
 }
 
 
@@ -206,6 +206,24 @@ bool Connection::hasTransaction() const
 bool Connection::ping()
 {
     return _connection->ping();
+}
+
+
+void Connection::beginPing()
+{
+    _connection->beginPing();
+}
+
+
+bool Connection::endPing()
+{
+    return _connection->endPing();
+}
+
+
+Pt::Signal<>& Connection::pingFinished()
+{
+    return _connection->pingFinished();
 }
 
 
@@ -346,6 +364,12 @@ AsyncExecute Connection::executeAsync(const std::string& sql)
 AsyncSelect Connection::selectAsync(const std::string& sql)
 {
     return AsyncSelect(*this, sql);
+}
+
+
+AsyncPing Connection::pingAsync()
+{
+    return AsyncPing(*this);
 }
 
 #endif // __cplusplus >= 202002L

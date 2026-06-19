@@ -96,6 +96,8 @@ class SqliteConnection : public IStmtCacheConnection
         Result onSelect(const std::string& query) override;
         Pt::Db::Statement onPrepare(const std::string& query) override;
         bool onPing() override;
+        void onBeginPing() override;
+        bool onEndPing() override;
         long long onLastInsertId(const std::string& name) override;
         void onStartTransaction(const char* sql) override;
         void onCommitTransaction(const char* sql) override;
@@ -219,6 +221,13 @@ class SqliteConnection : public IStmtCacheConnection
                 void complete(SqliteConnection& conn) override;
         };
 
+        struct PingTask : Task
+        {
+                bool result = false;
+                void execute(SqliteConnection& conn) override;
+                void complete(SqliteConnection& conn) override;
+        };
+
         void enqueue(Task* task);
 
         // Task instances (no heap allocation)
@@ -234,6 +243,7 @@ class SqliteConnection : public IStmtCacheConnection
         RollbackTxnTask _rollbackTxnTask;
         BatchFetchTask _batchFetchTask;
         CloseTask _closeTask;
+        PingTask _pingTask;
 
         Task* _pendingTask;
         Task* _completedTask;
