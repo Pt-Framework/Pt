@@ -12,6 +12,11 @@
 *.pdf     binary
 *.zip     binary
 
+src/blend2d/** linguist-vendored
+src/freetype/** linguist-vendored
+src/openssl/** linguist-vendored
+src/skia/** linguist-vendored
+
 .gitignore     export-ignore
 .gitattributes export-ignore
 
