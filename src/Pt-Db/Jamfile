@@ -35,6 +35,7 @@ PT_DB_SOURCES = [ FDirName sqlite SqliteConnection.cpp ]
 SharedLibrary Pt-Db : $(PT_DB_SOURCES) ;
 LinkSharedLibraries Pt-Db : Pt Pt-System ;
 MakeLocate Pt-Db : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Db : $(PT_INSTALL_LIBDIR) ;
 
 PT_DB_TESTS = AsyncTest.cpp
               CoroTest.cpp
