@@ -1,10 +1,10 @@
 /* Copyright (C) 2017 Marc Boris Duerner
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -36,9 +36,12 @@
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
 #include <cstddef>
+
+#include <Pt/Forms/ProgressBar.h> // XXX
 
 namespace Pt {
 
@@ -81,7 +84,13 @@ class PT_FORMS_API ListBoxItem : public Control
         Pt::Signal<ListBoxItem&>& selected();
 
     public:
-        const Gfx::Font& font() const;
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        Gfx::Font font() const;
 
         void setFont(const Gfx::Font& font);
 
@@ -90,10 +99,6 @@ class PT_FORMS_API ListBoxItem : public Control
         void setFontWeight(Gfx::Font::Weight weight);
 
         void setFontSlant(Gfx::Font::Slant slant);
-
-        void setBackground(const Gfx::Brush& b);
-
-        void setTextColor(const Gfx::Color& color);
 
         void setRenderer(ListItemRenderer* renderer);
 
@@ -121,84 +126,92 @@ class PT_FORMS_API ListBoxItem : public Control
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& p);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
-
-        /** @brief Paints the list item background layer.
-
-            The default implementation delegates to the current %ListItemRenderer.
-        */
-        virtual void onPaintBackground(PaintContext& context);
-
-        /** @brief Paints the list item content layers.
-
-            The default implementation sequences icon and text painting.
-        */
-        virtual void onPaintContent(PaintContext& context);
-
-        /** @brief Paints the list item icon layer.
-
-            The default implementation does nothing if no prepared icon pixmap exists.
-        */
-        virtual void onPaintIcon(PaintContext& context);
-
-        /** @brief Paints the list item text layer.
-
-            The default implementation does nothing if the item text is empty.
-        */
-        virtual void onPaintText(PaintContext& context);
+    protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
         /** @brief Measures the icon content size.
 
             The default implementation returns the logical picture size
-            or the configured icon size. Override to provide a custom
-            content size or return (0,0) to exclude the icon from layout.
+            or the configured icon size.
         */
         virtual Gfx::SizeF onMeasureIcon();
 
         /** @brief Measures the text content size.
 
             The default implementation returns the text advance and font
-            height from the renderer's text painter. Override to provide
-            a custom content size or return (0,0) to exclude text from layout.
+            height.
         */
-        virtual Gfx::SizeF onMeasureText();
+        virtual Gfx::SizeF onMeasureText(const String& text);
 
         /** @brief Aggregates icon and text sizes into total content size.
 
-            The default implementation delegates to the renderer's
-            measureContent method. Override to provide a custom aggregation
-            when icon and text are arranged differently than the renderer assumes.
+            Override to provide a custom aggregation when icon and text are
+            arranged differently.
         */
-        virtual Gfx::SizeF onMeasureContent(const Gfx::SizeF& iconSz,
+        virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy,
+                                            const Gfx::SizeF& iconSz,
                                             const Gfx::SizeF& textSz);
 
-        /** @brief Computes icon layout within the inner rect.
+    protected:
+        virtual void onLayout(const Gfx::RectF& rect);
 
-            The default implementation calls layoutContent on the renderer
-            and caches the icon rect and position. Override with an empty
-            body to skip icon layout when not needed.
+        /** @brief Lays out extra content after icon and text have been positioned.
+
+            Called by the base onLayout after onLayoutIcon and onLayoutText have
+            populated their private caches. Override to position embedded child
+            controls or other extra content using the pre-computed rects.
+            The default implementation does nothing.
         */
-        virtual void onLayoutIcon(const Gfx::RectF& innerRect,
-                                  const Gfx::SizeF& iconSz,
-                                  const Gfx::SizeF& textSz);
+        virtual void onLayoutContent(const Gfx::RectF& innerRect,
+                                     const Gfx::RectF& iconRect,
+                                     const Gfx::RectF& textRect);
 
-        /** @brief Computes text layout within the inner rect.
+    protected:
+        virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
-            The default implementation calls layoutContent on the renderer
-            and caches the text rect and position. Override with an empty
-            body to skip text layout when not needed.
+        /** @brief Paints the list item background layer.
+
+            The default implementation delegates to the current %ListItemRenderer.
         */
-        virtual void onLayoutText(const Gfx::RectF& innerRect,
-                                  const Gfx::SizeF& iconSz,
-                                  const Gfx::SizeF& textSz);
+        virtual void onPaintBackground(PaintContext& context,
+                                         const ListItemState& state);
+
+        /** @brief Paints the list item content layers.
+
+            The default implementation sequences icon and text painting.
+        */
+        virtual void onPaintContent(PaintContext& context,
+                                    const ListItemState& state);
+
+        /** @brief Paints the list item icon layer.
+
+            The default implementation does nothing if no prepared icon pixmap exists.
+        */
+        virtual void onPaintIcon(PaintContext& context,
+                                 const Gfx::RectF& iconRect,
+                                 const PixmapSurface& picture,
+                                 const Gfx::PointF& iconPos,
+                                 const ListItemState& state);
+
+        /** @brief Paints the list item text layer.
+
+            The default implementation does nothing if the item text is empty.
+        */
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& textRect,
+                                 const String& text,
+                                 const Gfx::PointF& textPos,
+                                 const Gfx::FontMetrics& fm,
+                                 const ListItemState& state);
+
+    protected:
+        ListItemRenderer* renderer();
 
     private:
+        ListItemState getState() const;
+
         Signal<>                 _clicked;
         Pt::Signal<ListBoxItem&> _selected;
         bool                     _onClickBegin;
@@ -222,6 +235,48 @@ class PT_FORMS_API ListBoxItem : public Control
         Gfx::RectF           _textRect;
         Gfx::PointF          _iconPos;
         Gfx::PointF          _textPos;
+        Gfx::FontMetrics     _fontMetrics;
+};
+
+
+class PT_FORMS_API ProgressViewItem : public Pt::Forms::ListBoxItem
+{
+    typedef Pt::Forms::ListBoxItem Base;
+
+    public:
+        ProgressViewItem();
+
+        ~ProgressViewItem();
+
+        void setStatus(const Pt::String& text);
+
+        void setProgress(float progress);
+
+        void setFinished();
+
+    protected:
+        virtual Gfx::SizeF onMeasureText(const String& text) override;
+
+        virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy,
+                                            const Gfx::SizeF& iconSz,
+                                            const Gfx::SizeF& textSz) override;
+
+        virtual void onLayoutContent(const Gfx::RectF& innerRect,
+                                     const Gfx::RectF& iconRect,
+                                     const Gfx::RectF& textRect) override;
+
+        virtual void onPaintText(PaintContext& context,
+                                 const Gfx::RectF& textRect,
+                                 const String& text,
+                                 const Gfx::PointF& textPos,
+                                 const Gfx::FontMetrics& fm,
+                                 const ListItemState& state) override;
+
+    private:
+        Pt::Forms::ProgressBar _progressBar;
+        Pt::String             _statusText;
+        double                 _statusTextWidth;
+        double                 _textLineHeight;
 };
 
 

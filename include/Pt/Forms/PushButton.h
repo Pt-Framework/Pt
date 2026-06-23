@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -111,13 +111,14 @@ class PT_FORMS_API PushButton : public Button
         virtual void onCanceled();
 
     protected:
+        virtual void onRescaleEvent(const RescaleEvent& ev);
+
+    protected:
+        virtual void onInvalidate();
+
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
-
-        virtual void onInvalidate();
-
-        virtual void onRescaleEvent(const RescaleEvent& ev);
 
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
