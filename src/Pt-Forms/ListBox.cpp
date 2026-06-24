@@ -383,6 +383,8 @@ Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
     if( ! renderer )
         return Gfx::SizeF(0, 0);
 
+    _fontMetrics = renderer->textPainter( surface() ).fontMetrics();
+
     _measuredIconSz = onMeasureIcon();
     _measuredTextSz = onMeasureText(_text);
 
@@ -417,8 +419,7 @@ Gfx::SizeF ListBoxItem::onMeasureText(const String& text)
 
     const Painter& painter = renderer->textPainter( surface() );
     Gfx::TextMetrics tm = painter.textMetrics(text);
-    Gfx::FontMetrics fm = painter.fontMetrics();
-    return Gfx::SizeF(tm.advance(), fm.height());
+    return Gfx::SizeF(tm.advance(), _fontMetrics.height());
 }
 
 
@@ -450,17 +451,8 @@ void ListBoxItem::onLayout(const Gfx::RectF& rect)
 
     Gfx::RectF iconRect;
     Gfx::RectF textRect;
-    renderer->layoutContent(surface(), innerRect, _measuredIconSz, _measuredTextSz,
-                             iconRect, textRect);
+    onLayoutContent(innerRect, _measuredIconSz, _measuredTextSz, _fontMetrics, iconRect, textRect);
 
-    onLayoutContent(innerRect, iconRect, textRect);
-}
-
-
-void ListBoxItem::onLayoutContent(const Gfx::RectF& /*innerRect*/,
-                                   const Gfx::RectF& iconRect,
-                                   const Gfx::RectF& textRect)
-{
     _iconRect = iconRect;
 
     if( ! _picture.empty() )
@@ -476,16 +468,23 @@ void ListBoxItem::onLayoutContent(const Gfx::RectF& /*innerRect*/,
 
     if( ! _text.empty() )
     {
-        ListItemRenderer* r = renderer();
-        if(r)
-        {
-            const Painter& painter = r->textPainter( surface() );
-            _fontMetrics = painter.fontMetrics();
-            double textY = textRect.y() + (textRect.height() - _fontMetrics.height()) / 2.0 + _fontMetrics.ascent();
-            _textPos.setX(textRect.x());
-            _textPos.setY(textY);
-        }
+        double textY = textRect.y() + (textRect.height() - _fontMetrics.height()) / 2.0 + _fontMetrics.ascent();
+        _textPos.setX(textRect.x());
+        _textPos.setY(textY);
     }
+}
+
+
+void ListBoxItem::onLayoutContent(const Gfx::RectF& innerRect,
+                                   const Gfx::SizeF& iconSz,
+                                   const Gfx::SizeF& textSz,
+                                   const Gfx::FontMetrics& /*fm*/,
+                                   Gfx::RectF& iconRect,
+                                   Gfx::RectF& textRect)
+{
+    ListItemRenderer* r = renderer();
+    if(r)
+        r->layoutContent(surface(), innerRect, iconSz, textSz, iconRect, textRect);
 }
 
 
@@ -566,131 +565,6 @@ ListItemState ListBoxItem::getState() const
     st.setFocused( hasFocus() );
     st.setSelected( _isSelected );
     return st;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// ProgressViewItem
-/////////////////////////////////////////////////////////////////////////////
-
-ProgressViewItem::ProgressViewItem()
-{
-  this->add(_progressBar);
-
-  _progressBar.setRange(0, 100);
-  _progressBar.setValue(0);
-  _progressBar.show(false);
-}
-
-
-ProgressViewItem::~ProgressViewItem()
-{
-}
-
-
-void ProgressViewItem::setStatus(const Pt::String& text)
-{
-  _statusText = text;
-  invalidate();
-}
-
-
-void ProgressViewItem::setProgress(float progress)
-{
-  _progressBar.show(true);
-
-  int value = static_cast<int>(100 * progress);
-  _progressBar.setValue(value);
-}
-
-
-void ProgressViewItem::setFinished()
-{
-  setStatus( Pt::String() );
-  _progressBar.show(false);
-}
-
-
-Pt::Gfx::SizeF ProgressViewItem::onMeasureText(const Pt::String& text)
-{
-    if( ! _statusText.empty() )
-        _statusTextWidth = Base::onMeasureText(_statusText).width();
-
-    return Base::onMeasureText(text);
-}
-
-
-Pt::Gfx::SizeF ProgressViewItem::onMeasureContent(const Pt::Forms::SizePolicy& policy,
-                                                   const Pt::Gfx::SizeF& iconSz,
-                                                   const Pt::Gfx::SizeF& textSz)
-{
-    double spacing = iconSz.isEmpty() || textSz.isEmpty() ? 0 : textSz.height() * 0.5;
-
-    double barWidth = policy.width() - iconSz.width() - spacing
-                      - _progressBar.margin().leftRight() - padding().leftRight();
-
-    SizePolicy barPolicy(policy.horizontal(), SizePolicy::Preferred);
-    barPolicy.setSize(barWidth, policy.height());
-
-    _progressBar.measure(barPolicy);
-    Gfx::SizeF barSz = _progressBar.preferredSize();
-
-    _textLineHeight = textSz.height();
-
-    double contentWidth  = iconSz.width() + spacing + textSz.width();
-    double contentHeight = textSz.height() + barSz.height() + spacing + textSz.height();
-    contentHeight = std::max(contentHeight, iconSz.height());
-
-    return Gfx::SizeF(contentWidth, contentHeight);
-}
-
-
-void ProgressViewItem::onLayoutContent(const Pt::Gfx::RectF& innerRect,
-                                        const Pt::Gfx::RectF& iconRect,
-                                        const Pt::Gfx::RectF& textRect)
-{
-    Base::onLayoutContent(innerRect, iconRect, textRect);
-
-    double spacing = iconRect.isEmpty() || textRect.isEmpty() ? 0 : _textLineHeight * 0.5;
-
-    Gfx::SizeF barSize = _progressBar.preferredSize();
-
-    Gfx::PointF pos;
-    pos.setX( textRect.x() );
-
-    if( _statusText.empty() )
-        pos.setY( size().height() - padding().bottom() - barSize.height() );
-    else
-        pos.setY( innerRect.y() + _textLineHeight + spacing / 2 );
-
-    _progressBar.move(pos);
-    _progressBar.resize(barSize);
-}
-
-
-void ProgressViewItem::onPaintText(Pt::Forms::PaintContext& context,
-                                   const Pt::Gfx::RectF& textRect,
-                                   const Pt::String& text,
-                                   const Pt::Gfx::PointF& textPos,
-                                   const Pt::Gfx::FontMetrics& fm,
-                                   const Pt::Forms::ListItemState& state)
-{
-    Gfx::PointF mainTextPos = textPos;
-    if( _progressBar.isVisible() && ! _statusText.empty() )
-        mainTextPos.setY( textRect.y() + fm.ascent() );
-
-    Base::onPaintText(context, textRect, text, mainTextPos, fm, state);
-
-    if( ! _statusText.empty() )
-    {
-        Painter painter(context);
-        painter.setFont( font() );
-        painter.setPen( textColor() );
-
-        double statusX = size().width() - padding().right() - _statusTextWidth;
-        double statusY = size().height() - padding().bottom() - fm.descent();
-
-        painter.drawText(Gfx::PointF(statusX, statusY), _statusText);
-    }
 }
 
 /////////////////////////////////////////////////////////////////////////////

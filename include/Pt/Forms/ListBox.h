@@ -165,8 +165,11 @@ class PT_FORMS_API ListBoxItem : public Control
             The default implementation does nothing.
         */
         virtual void onLayoutContent(const Gfx::RectF& innerRect,
-                                     const Gfx::RectF& iconRect,
-                                     const Gfx::RectF& textRect);
+                                     const Gfx::SizeF& iconSz,
+                                     const Gfx::SizeF& textSz,
+                                     const Gfx::FontMetrics& fm,
+                                     Gfx::RectF& iconRect,
+                                     Gfx::RectF& textRect);
 
     protected:
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
@@ -236,47 +239,6 @@ class PT_FORMS_API ListBoxItem : public Control
         Gfx::PointF          _iconPos;
         Gfx::PointF          _textPos;
         Gfx::FontMetrics     _fontMetrics;
-};
-
-
-class PT_FORMS_API ProgressViewItem : public Pt::Forms::ListBoxItem
-{
-    typedef Pt::Forms::ListBoxItem Base;
-
-    public:
-        ProgressViewItem();
-
-        ~ProgressViewItem();
-
-        void setStatus(const Pt::String& text);
-
-        void setProgress(float progress);
-
-        void setFinished();
-
-    protected:
-        virtual Gfx::SizeF onMeasureText(const String& text) override;
-
-        virtual Gfx::SizeF onMeasureContent(const SizePolicy& policy,
-                                            const Gfx::SizeF& iconSz,
-                                            const Gfx::SizeF& textSz) override;
-
-        virtual void onLayoutContent(const Gfx::RectF& innerRect,
-                                     const Gfx::RectF& iconRect,
-                                     const Gfx::RectF& textRect) override;
-
-        virtual void onPaintText(PaintContext& context,
-                                 const Gfx::RectF& textRect,
-                                 const String& text,
-                                 const Gfx::PointF& textPos,
-                                 const Gfx::FontMetrics& fm,
-                                 const ListItemState& state) override;
-
-    private:
-        Pt::Forms::ProgressBar _progressBar;
-        Pt::String             _statusText;
-        double                 _statusTextWidth;
-        double                 _textLineHeight;
 };
 
 
