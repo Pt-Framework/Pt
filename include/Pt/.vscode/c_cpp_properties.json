@@ -8,6 +8,8 @@
                 "_UNICODE"
             ],
             "compilerPath": "cl.exe",
+            "cppStandard": "c++20",
+            "compilerArgs": [ "/Zc:__cplusplus" ],
             "intelliSenseMode": "windows-msvc-x64"
         },
         {
