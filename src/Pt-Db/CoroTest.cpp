@@ -54,10 +54,10 @@ class CoroTest : public Pt::Unit::TestSuite
         void select();
         void cancelSelect();
 
-        Pt::Task openCloseAsync();
-        Pt::Task executeAsync();
-        Pt::Task selectAsync();
-        Pt::Task cancelSelectAsync();
+        Pt::Task<> openCloseAsync();
+        Pt::Task<> executeAsync();
+        Pt::Task<> selectAsync();
+        Pt::Task<> cancelSelectAsync();
 
     private:
         Pt::System::MainLoop* _loop;
@@ -66,7 +66,7 @@ class CoroTest : public Pt::Unit::TestSuite
 Pt::Unit::RegisterTest<CoroTest> register_CoroTest;
 
 
-Pt::Task CoroTest::openCloseAsync()
+Pt::Task<> CoroTest::openCloseAsync()
 {
     Pt::Db::Connection conn("sqlite");
     conn.setActive(*_loop);
@@ -82,13 +82,13 @@ Pt::Task CoroTest::openCloseAsync()
 
 void CoroTest::openClose()
 {
-    Pt::Task task = openCloseAsync();
+    Pt::Task<> task = openCloseAsync();
     task.run();
     _loop->run();
 }
 
 
-Pt::Task CoroTest::executeAsync()
+Pt::Task<> CoroTest::executeAsync()
 {
     Pt::Db::Connection conn("sqlite");
     conn.setActive(*_loop);
@@ -107,13 +107,13 @@ Pt::Task CoroTest::executeAsync()
 
 void CoroTest::execute()
 {
-    Pt::Task task = executeAsync();
+    Pt::Task<> task = executeAsync();
     task.run();
     _loop->run();
 }
 
 
-Pt::Task CoroTest::selectAsync()
+Pt::Task<> CoroTest::selectAsync()
 {
     Pt::Db::Connection conn("sqlite");
     conn.setActive(*_loop);
@@ -133,13 +133,13 @@ Pt::Task CoroTest::selectAsync()
 
 void CoroTest::select()
 {
-    Pt::Task task = selectAsync();
+    Pt::Task<> task = selectAsync();
     task.run();
     _loop->run();
 }
 
 
-Pt::Task CoroTest::cancelSelectAsync()
+Pt::Task<> CoroTest::cancelSelectAsync()
 {
     Pt::Db::Connection conn("sqlite");
     conn.setActive(*_loop);
@@ -150,7 +150,7 @@ Pt::Task CoroTest::cancelSelectAsync()
 
 void CoroTest::cancelSelect()
 {
-    Pt::Task task = cancelSelectAsync();
+    Pt::Task<> task = cancelSelectAsync();
     task.run();    // suspends at co_await openAsync
     task.cancel(); // doCancel() + frame destroyed
 

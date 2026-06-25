@@ -40,7 +40,6 @@
 namespace Pt {
 
 class Awaiter;
-class Task;
 
 /** @brief Coroutine return type for detached fire-and-forget coroutines.
 
@@ -72,6 +71,53 @@ class DetachedTask
         };
 };
 
+/** @brief Base for Task promise types; provides await/cancel plumbing.
+
+    @ingroup BasicTypes
+*/
+struct PromiseBase
+{
+    template<typename A>
+    A&& await_transform(A&& a)
+    {
+        _awaiter = &a;
+        return std::forward<A>(a);
+    }
+
+    void setFinished()
+    {
+        _awaiter = nullptr;
+    }
+
+    void cancel();
+
+    Awaiter* _awaiter = nullptr;
+};
+
+/** @brief Provides the return-value storage for Task<T>.
+
+    @ingroup BasicTypes
+*/
+template<typename T>
+struct PromiseReturn
+{
+    void return_value(T v)
+    { _result = std::move(v); }
+
+    T _result{};
+};
+
+/** @brief Specialisation for void coroutines.
+
+    @ingroup BasicTypes
+*/
+template<>
+struct PromiseReturn<void>
+{
+    void return_void()
+    {}
+};
+
 /** @brief Cancellable coroutine task for single-threaded async operations.
 
     Manages the lifetime of a C++20 coroutine frame. The task starts
@@ -82,10 +128,11 @@ class DetachedTask
 
     @ingroup BasicTypes
 */
+template<typename T = void>
 class Task
 {
     public:
-        struct Promise
+        struct promise_type : public PromiseBase, public PromiseReturn<T>
         {
             Task get_return_object()
             {
@@ -99,32 +146,12 @@ class Task
             std::suspend_always final_suspend() noexcept
             { return {}; }
 
-            void return_void()
-            {}
-
             void unhandled_exception()
             { std::terminate(); }
-
-            template<typename A>
-            A&& await_transform(A&& a)
-            {
-                _awaiter = &a;
-                return std::forward<A>(a);
-            }
-
-            void setFinished()
-            {
-                _awaiter = nullptr;
-            }
-
-            void cancel();
-
-            Awaiter* _awaiter = nullptr;
         };
 
     public:
-        using promise_type = Promise;
-        using handle_type = std::coroutine_handle<Promise>;
+        using handle_type = std::coroutine_handle<promise_type>;
 
         explicit Task(handle_type h)
         : _handle(h)
@@ -172,12 +199,22 @@ class Task
         explicit operator bool() const
         { return _handle != nullptr; }
 
+        /** @brief Retrieve the coroutine result. Only valid after done() == true.
+        */
+        T result()
+        { return std::move(_handle.promise()._result); }
+
     private:
         Task(const Task&) = delete;
         Task& operator=(const Task&) = delete;
 
         handle_type _handle;
 };
+
+
+template<>
+inline void Task<void>::result() = delete;
+
 
 /** @brief Base class for C++20 awaitables driven by an event-loop signal.
 
@@ -191,15 +228,15 @@ class Task
 */
 class Awaiter : public Connectable
 {
-    using handle_type = std::coroutine_handle<Task::promise_type>;
-
     public:
         bool await_ready() const
         { return false; }
 
-        bool await_suspend(handle_type h)
+        template<typename P>
+        bool await_suspend(std::coroutine_handle<P> h)
         {
-            _handle = h;
+            _handle  = h;
+            _promise = &h.promise();
             onBegin();
             return true;
         }
@@ -215,9 +252,10 @@ class Awaiter : public Connectable
 
         void setReady()
         {
-            if( _handle )
+            if( _promise )
             {
-                _handle.promise().setFinished();
+                _promise->setFinished();
+                _promise = nullptr;
                 _handle.resume();
             }
         }
@@ -228,11 +266,12 @@ class Awaiter : public Connectable
         virtual void onCancel() = 0;
 
     protected:
-        handle_type _handle;
+        std::coroutine_handle<> _handle;
+        PromiseBase*            _promise = nullptr;
 };
 
 
-inline void Task::Promise::cancel()
+inline void PromiseBase::cancel()
 {
     if(_awaiter)
     {
