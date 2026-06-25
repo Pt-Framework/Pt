@@ -42,12 +42,8 @@
 #include <string>
 
 #if __cplusplus >= 202002L
-#include <Pt/Connectable.h>
 #include <Pt/Slot.h>
-#include <coroutine>
-#include <functional>
-#include <optional>
-#include <stop_token>
+#include <Pt/Task.h>
 #endif
 
 namespace Pt {
@@ -355,329 +351,146 @@ class PT_DB_API Connection
 
     @ingroup Pt-Db
 */
-class AsyncOpen : public Connectable
+class AsyncOpen : public Pt::Awaiter
 {
     public:
         AsyncOpen(Connection& conn, const std::string& connStr)
         : _conn(conn)
         , _connStr(connStr)
-        , _cancelled(false)
         {}
-
-        void setStopToken(std::stop_token st)
-        { _token = st; }
-
-        bool await_ready() const
-        { return false; }
-
-        bool await_suspend(std::coroutine_handle<> h)
-        {
-            _handle = h;
-
-            if( _token.stop_requested() )
-            {
-                _cancelled = true;
-                return false;
-            }
-
-            _conn.openFinished() += slot(*this, &AsyncOpen::onReady);
-
-            if( _token.stop_possible() )
-                _stopCb.emplace(_token, [this]{ onCancelled(); });
-
-            _conn.beginOpen(_connStr);
-            return true;
-        }
 
         void await_resume()
         {
-            if( ! _cancelled )
-                _conn.endOpen();
+            _conn.endOpen();
         }
 
     private:
-        void onReady()
+        void onBegin() override
         {
-            _stopCb.reset();
-            _handle.resume();
+            _conn.openFinished() += slot(*this, &AsyncOpen::setReady);
+            _conn.beginOpen(_connStr);
         }
 
-        void onCancelled()
-        {
-            _cancelled = true;
-            _conn.cancel();
-            _handle.resume();
-        }
+
+        void onCancel() override
+        { _conn.cancel(); }
 
         Connection& _conn;
         const std::string& _connStr;
-        std::coroutine_handle<> _handle;
-        std::stop_token _token;
-        std::optional<std::stop_callback<std::function<void()>>> _stopCb;
-        bool _cancelled;
 };
-
 
 /** @brief Awaitable for async close of a database connection.
     @ingroup Pt-Db
 */
-class AsyncClose : public Connectable
+class AsyncClose : public Pt::Awaiter
 {
     public:
         AsyncClose(Connection& conn)
         : _conn(conn)
-        , _cancelled(false)
         {}
 
-        void setStopToken(std::stop_token st)
-        { _token = st; }
-
-        bool await_ready() const
-        { return false; }
-
-        bool await_suspend(std::coroutine_handle<> h)
-        {
-            _handle = h;
-
-            if( _token.stop_requested() )
-            {
-                _cancelled = true;
-                return false;
-            }
-
-            _conn.closeFinished() += slot(*this, &AsyncClose::onReady);
-
-            if( _token.stop_possible() )
-                _stopCb.emplace(_token, [this]{ onCancelled(); });
-
-            _conn.beginClose();
-            return true;
-        }
-
         void await_resume()
-        {
-            if( ! _cancelled )
-                _conn.endClose();
-        }
+        { _conn.endClose(); }
 
     private:
-        void onReady()
+        void onBegin() override
         {
-            _stopCb.reset();
-            _handle.resume();
+            _conn.closeFinished() += slot(*this, &AsyncClose::setReady);
+            _conn.beginClose();
         }
 
-        void onCancelled()
-        {
-            _cancelled = true;
-            _conn.cancel();
-            _handle.resume();
-        }
+        void onCancel() override
+        { _conn.cancel(); }
 
         Connection& _conn;
-        std::coroutine_handle<> _handle;
-        std::stop_token _token;
-        std::optional<std::stop_callback<std::function<void()>>> _stopCb;
-        bool _cancelled;
 };
 
 
 /** @brief Awaitable for async execution of a DML/DDL statement.
     @ingroup Pt-Db
 */
-class AsyncExecute : public Connectable
+class AsyncExecute : public Pt::Awaiter
 {
     public:
         AsyncExecute(Connection& conn, const std::string& sql)
         : _conn(conn)
         , _sql(sql)
-        , _cancelled(false)
         {}
 
-        void setStopToken(std::stop_token st)
-        { _token = st; }
-
-        bool await_ready() const
-        { return false; }
-
-        bool await_suspend(std::coroutine_handle<> h)
-        {
-            _handle = h;
-
-            if( _token.stop_requested() )
-            {
-                _cancelled = true;
-                return false;
-            }
-
-            _conn.executeFinished() += slot(*this, &AsyncExecute::onReady);
-
-            if( _token.stop_possible() )
-                _stopCb.emplace(_token, [this]{ onCancelled(); });
-
-            _conn.beginExecute(_sql);
-            return true;
-        }
-
         Connection::size_type await_resume()
-        {
-            if( _cancelled )
-                return 0;
-            return _conn.endExecute();
-        }
+        { return _conn.endExecute(); }
 
     private:
-        void onReady()
+        void onBegin() override
         {
-            _stopCb.reset();
-            _handle.resume();
+            _conn.executeFinished() += slot(*this, &AsyncExecute::setReady);
+            _conn.beginExecute(_sql);
         }
 
-        void onCancelled()
-        {
-            _cancelled = true;
-            _conn.cancel();
-            _handle.resume();
-        }
+        void onCancel() override
+        { _conn.cancel(); }
 
         Connection& _conn;
         const std::string& _sql;
-        std::coroutine_handle<> _handle;
-        std::stop_token _token;
-        std::optional<std::stop_callback<std::function<void()>>> _stopCb;
-        bool _cancelled;
 };
 
 
 /** @brief Awaitable for async SELECT query.
     @ingroup Pt-Db
 */
-class AsyncSelect : public Connectable
+class AsyncSelect : public Pt::Awaiter
 {
     public:
         AsyncSelect(Connection& conn, const std::string& sql)
         : _conn(conn)
         , _sql(sql)
-        , _cancelled(false)
         {}
 
-        void setStopToken(std::stop_token st)
-        { _token = st; }
-
-        bool await_ready() const
-        { return false; }
-
-        bool await_suspend(std::coroutine_handle<> h)
-        {
-            _handle = h;
-
-            if( _token.stop_requested() )
-            {
-                _cancelled = true;
-                return false;
-            }
-
-            _conn.selectFinished() += slot(*this, &AsyncSelect::onReady);
-
-            if( _token.stop_possible() )
-                _stopCb.emplace(_token, [this]{ onCancelled(); });
-
-            _conn.beginSelect(_sql);
-            return true;
-        }
-
         Result await_resume()
-        {
-            if( _cancelled )
-                return Result();
-            return _conn.endSelect();
-        }
+        { return _conn.endSelect(); }
 
     private:
-        void onReady()
+        void onBegin() override
         {
-            _stopCb.reset();
-            _handle.resume();
+            _conn.selectFinished() += slot(*this, &AsyncSelect::setReady);
+            _conn.beginSelect(_sql);
         }
 
-        void onCancelled()
-        {
-            _cancelled = true;
-            _conn.cancel();
-            _handle.resume();
-        }
+        void onCancel() override
+        { _conn.cancel(); }
 
         Connection& _conn;
         const std::string& _sql;
-        std::coroutine_handle<> _handle;
-        std::stop_token _token;
-        std::optional<std::stop_callback<std::function<void()>>> _stopCb;
-        bool _cancelled;
 };
 
 
 /** @brief Awaitable for async ping.
     @ingroup Pt-Db
 */
-class AsyncPing : public Connectable
+class AsyncPing : public Pt::Awaiter
 {
     public:
         AsyncPing(Connection& conn)
         : _conn(conn)
-        , _cancelled(false)
         {}
-
-        void setStopToken(std::stop_token st)
-        { _token = st; }
-
-        bool await_ready() const
-        { return false; }
-
-        bool await_suspend(std::coroutine_handle<> h)
-        {
-            _handle = h;
-
-            if( _token.stop_requested() )
-            {
-                _cancelled = true;
-                return false;
-            }
-
-            _conn.pingFinished() += slot(*this, &AsyncPing::onReady);
-
-            if( _token.stop_possible() )
-                _stopCb.emplace(_token, [this]{ onCancelled(); });
-
-            _conn.beginPing();
-            return true;
-        }
 
         bool await_resume()
         {
-            if( _cancelled )
-                return false;
             return _conn.endPing();
         }
 
     private:
-        void onReady()
+        void onBegin() override
         {
-            _stopCb.reset();
-            _handle.resume();
+            _conn.pingFinished() += slot(*this, &AsyncPing::setReady);
+            _conn.beginPing();
         }
 
-        void onCancelled()
-        {
-            _cancelled = true;
-            _conn.cancel();
-            _handle.resume();
-        }
+
+        void onCancel() override
+        { _conn.cancel(); }
 
         Connection& _conn;
-        std::coroutine_handle<> _handle;
-        std::stop_token _token;
-        std::optional<std::stop_callback<std::function<void()>>> _stopCb;
-        bool _cancelled;
 };
 
 #endif // __cplusplus >= 202002L

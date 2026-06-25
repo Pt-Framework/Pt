@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2026 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
@@ -30,19 +30,23 @@
 #ifndef PT_TASK_H
 #define PT_TASK_H
 
-#if __cplusplus >= 202002L
+#include <Pt/Api.h>
+#include <Pt/Connectable.h>
 
+#if __cplusplus >= 202002L
 #include <coroutine>
 #include <exception>
-#include <stop_token>
 
 namespace Pt {
+
+class Awaiter;
+class Task;
 
 /** @brief Coroutine return type for detached fire-and-forget coroutines.
 
     Use as the return type of a coroutine function that uses co_await
     but does not return a value to the caller. The coroutine runs
-    detached — the caller has no handle and cannot await the result.
+    detached; the caller has no handle and cannot await the result.
 
     @ingroup BasicTypes
 */
@@ -68,27 +72,25 @@ class DetachedTask
         };
 };
 
+/** @brief Cancellable coroutine task for single-threaded async operations.
 
-/** @brief Cancellable coroutine return type with lazy start.
-
-    A Task starts suspended. Call run() to begin execution.
-    The caller can cancel a running Task via cancel(), which
-    propagates a stop request to any awaitable that supports
-    setStopToken(). On cancel, awaitables skip their work and
-    the coroutine runs through to completion. Check
-    isCancelled() to detect cancellation.
+    Manages the lifetime of a C++20 coroutine frame. The task starts
+    suspended; call run() to begin execution. Call cancel() to abort
+    a suspended coroutine and immediately destroy its frame. Exceptions
+    in the coroutine body must be handled with try/catch; unhandled
+    exceptions call %std::terminate().
 
     @ingroup BasicTypes
 */
 class Task
 {
     public:
-        struct promise_type
+        struct Promise
         {
             Task get_return_object()
             {
-                auto h = handle_type::from_promise(*this);
-                return Task(h);
+                auto handle = Task::handle_type::from_promise(*this);
+                return Task(handle);
             }
 
             std::suspend_always initial_suspend() noexcept
@@ -98,28 +100,41 @@ class Task
             { return {}; }
 
             void return_void()
-            { _cancelled = _stopSource.stop_requested(); }
+            {}
 
             void unhandled_exception()
-            { _exception = std::current_exception(); }
+            { std::terminate(); }
 
             template<typename A>
             A&& await_transform(A&& a)
             {
-                a.setStopToken(_stopSource.get_token());
-                return static_cast<A&&>(a);
+                _awaiter = &a;
+                return std::forward<A>(a);
             }
 
-            std::stop_source _stopSource;
-            std::exception_ptr _exception;
-            bool _cancelled = false;
+            void setFinished()
+            {
+                _awaiter = nullptr;
+            }
+
+            void cancel();
+
+            Awaiter* _awaiter = nullptr;
         };
 
-        using handle_type = std::coroutine_handle<promise_type>;
+    public:
+        using promise_type = Promise;
+        using handle_type = std::coroutine_handle<Promise>;
+
+        explicit Task(handle_type h)
+        : _handle(h)
+        {}
 
         Task(Task&& other) noexcept
         : _handle(other._handle)
-        { other._handle = nullptr; }
+        {
+            other._handle = nullptr;
+        }
 
         ~Task()
         {
@@ -140,37 +155,91 @@ class Task
         void cancel()
         {
             if( _handle )
-                _handle.promise()._stopSource.request_stop();
+            {
+                _handle.promise().cancel();
+                _handle.destroy();
+                _handle = nullptr;
+            }
         }
 
-        /** @brief Returns true if the coroutine has finished.
+        /** @brief Returns true if the coroutine has finished normally.
         */
         bool done() const
         { return _handle && _handle.done(); }
 
-        /** @brief Returns true if the coroutine was cancelled.
+        /** @brief Returns true if the task has an associated coroutine frame.
         */
-        bool isCancelled() const
-        { return _handle && _handle.promise()._cancelled; }
-
-        /** @brief Re-throw any stored exception from the coroutine.
-        */
-        void rethrowIfFailed()
-        {
-            if( _handle && _handle.promise()._exception )
-                std::rethrow_exception(_handle.promise()._exception);
-        }
+        explicit operator bool() const
+        { return _handle != nullptr; }
 
     private:
-        explicit Task(handle_type h)
-        : _handle(h)
-        {}
-
         Task(const Task&) = delete;
         Task& operator=(const Task&) = delete;
 
         handle_type _handle;
 };
+
+/** @brief Base class for C++20 awaitables driven by an event-loop signal.
+
+    Subclasses implement two customization points:
+    - onBegin(): subscribe to the completion signal and start the operation.
+    - onCancel(): abort the in-flight operation.
+
+    The result is retrieved via await_resume() in the subclass.
+
+    @ingroup BasicTypes
+*/
+class Awaiter : public Connectable
+{
+    using handle_type = std::coroutine_handle<Task::promise_type>;
+
+    public:
+        bool await_ready() const
+        { return false; }
+
+        bool await_suspend(handle_type h)
+        {
+            _handle = h;
+            onBegin();
+            return true;
+        }
+
+        void cancel()
+        {
+            onCancel();
+        }
+
+    protected:
+        Awaiter()
+        {}
+
+        void setReady()
+        {
+            if( _handle )
+            {
+                _handle.promise().setFinished();
+                _handle.resume();
+            }
+        }
+
+    protected:
+        virtual void onBegin() = 0;
+
+        virtual void onCancel() = 0;
+
+    protected:
+        handle_type _handle;
+};
+
+
+inline void Task::Promise::cancel()
+{
+    if(_awaiter)
+    {
+        _awaiter->cancel();
+        _awaiter = nullptr;
+    }
+}
 
 } // namespace Pt
 

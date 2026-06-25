@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2026 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,6 @@
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
-#include <Pt/Task.h>
 #include <Pt/Db/Connection.h>
 #include <Pt/Db/Result.h>
 #include <Pt/System/MainLoop.h>
@@ -86,7 +85,6 @@ void CoroTest::openClose()
     Pt::Task task = openCloseAsync();
     task.run();
     _loop->run();
-    task.rethrowIfFailed();
 }
 
 
@@ -112,7 +110,6 @@ void CoroTest::execute()
     Pt::Task task = executeAsync();
     task.run();
     _loop->run();
-    task.rethrowIfFailed();
 }
 
 
@@ -139,7 +136,6 @@ void CoroTest::select()
     Pt::Task task = selectAsync();
     task.run();
     _loop->run();
-    task.rethrowIfFailed();
 }
 
 
@@ -149,23 +145,16 @@ Pt::Task CoroTest::cancelSelectAsync()
     conn.setActive(*_loop);
 
     co_await conn.openAsync(":memory:");
-    co_await conn.executeAsync("CREATE TABLE t (id INTEGER)");
-    co_await conn.executeAsync("INSERT INTO t VALUES (1)");
-
-    co_await conn.selectAsync("SELECT * FROM t");
-
     _loop->exit();
 }
 
 void CoroTest::cancelSelect()
 {
     Pt::Task task = cancelSelectAsync();
+    task.run();    // suspends at co_await openAsync
+    task.cancel(); // doCancel() + frame destroyed
 
-    task.run();    // start — coroutine suspends at openAsync
-    task.cancel(); // request_stop → next co_await skips, coroutine completes
-
-    PT_UNIT_ASSERT( task.done() );
-    PT_UNIT_ASSERT( task.isCancelled() );
+    PT_UNIT_ASSERT( ! task );
 }
 
 #endif // __cplusplus >= 202002L
