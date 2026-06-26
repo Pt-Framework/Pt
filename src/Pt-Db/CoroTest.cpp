@@ -31,10 +31,11 @@ class CoroTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt::Db::CoroTest")
         , _loop(nullptr)
         {
-            registerMethod("OpenClose", *this, &CoroTest::openClose);
-            registerMethod("Execute",   *this, &CoroTest::execute);
-            registerMethod("Select",    *this, &CoroTest::select);
-            registerMethod("CancelSelect",   *this, &CoroTest::cancelSelect);
+            registerMethod("OpenClose",    *this, &CoroTest::openClose);
+            registerMethod("Execute",       *this, &CoroTest::execute);
+            registerMethod("Select",        *this, &CoroTest::select);
+            registerMethod("CancelSelect",  *this, &CoroTest::cancelSelect);
+            registerMethod("NestedTask",    *this, &CoroTest::nestedTask);
         }
 
     protected:
@@ -53,11 +54,14 @@ class CoroTest : public Pt::Unit::TestSuite
         void execute();
         void select();
         void cancelSelect();
+        void nestedTask();
 
-        Pt::Task<> openCloseAsync();
-        Pt::Task<> executeAsync();
-        Pt::Task<> selectAsync();
-        Pt::Task<> cancelSelectAsync();
+        Pt::Task<>             openCloseAsync();
+        Pt::Task<>             executeAsync();
+        Pt::Task<>             selectAsync();
+        Pt::Task<>             cancelSelectAsync();
+        Pt::Task<std::size_t>  insertRowAsync(Pt::Db::Connection& conn, int id);
+        Pt::Task<>             nestedTaskAsync();
 
     private:
         Pt::System::MainLoop* _loop;
@@ -155,6 +159,40 @@ void CoroTest::cancelSelect()
     task.cancel(); // doCancel() + frame destroyed
 
     PT_UNIT_ASSERT( ! task );
+}
+
+
+Pt::Task<std::size_t> CoroTest::insertRowAsync(Pt::Db::Connection& conn, int id)
+{
+    std::string sql = "INSERT INTO t VALUES (" + std::to_string(id) + ")";
+    std::size_t n = co_await conn.executeAsync(sql);
+    co_return n;
+}
+
+
+Pt::Task<> CoroTest::nestedTaskAsync()
+{
+    Pt::Db::Connection conn("sqlite");
+    conn.setActive(*_loop);
+
+    co_await conn.openAsync(":memory:");
+    co_await conn.executeAsync("CREATE TABLE t (id INTEGER)");
+
+    std::size_t n1 = co_await insertRowAsync(conn, 1);
+    PT_UNIT_ASSERT( n1 == 1 );
+
+    std::size_t n2 = co_await insertRowAsync(conn, 2);
+    PT_UNIT_ASSERT( n2 == 1 );
+
+    _loop->exit();
+}
+
+
+void CoroTest::nestedTask()
+{
+    Pt::Task<> task = nestedTaskAsync();
+    task.run();
+    _loop->run();
 }
 
 #endif // __cplusplus >= 202002L

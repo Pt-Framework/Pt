@@ -39,8 +39,6 @@
 
 namespace Pt {
 
-class Awaiter;
-
 /** @brief Coroutine return type for detached fire-and-forget coroutines.
 
     Use as the return type of a coroutine function that uses co_await
@@ -71,51 +69,114 @@ class DetachedTask
         };
 };
 
-/** @brief Base for Task promise types; provides await/cancel plumbing.
+/** @brief Base class for all co_await-able types used inside a %Task coroutine.
+
+    Both %Awaiter (IO-driven awaitables) and %Task<T> (coroutine chaining)
+    derive from this class, allowing %PromiseBase to cancel any pending
+    operation through a single virtual dispatch.
 
     @ingroup BasicTypes
 */
-struct PromiseBase
+class AwaiterBase
 {
-    template<typename A>
-    A&& await_transform(A&& a)
-    {
-        _awaiter = &a;
-        return std::forward<A>(a);
-    }
+    public:
+        /** @brief Cancel the pending operation.
+        */
+        virtual void cancel() = 0;
 
-    void setFinished()
-    {
-        _awaiter = nullptr;
-    }
+    protected:
+        /** @brief Constructor.
+        */
+        AwaiterBase() = default;
 
-    void cancel();
+        /** @brief No copy constructor.
+        */
+        AwaiterBase(const AwaiterBase&) = delete;
 
-    Awaiter* _awaiter = nullptr;
+        /** @brief No copy assignment.
+        */
+        AwaiterBase& operator=(const AwaiterBase&) = delete;
+
+        /** @brief Destructor.
+        */
+        virtual ~AwaiterBase() = default;
 };
 
-/** @brief Provides the return-value storage for Task<T>.
+/** @brief Base for Task.
 
     @ingroup BasicTypes
 */
-template<typename T>
-struct PromiseReturn
+class TaskBase : public AwaiterBase
 {
-    void return_value(T v)
-    { _result = std::move(v); }
+    public:
+        struct PromiseBase
+        {
+            template<typename A>
+            A&& await_transform(A&& a)
+            {
+                _pending = &a;
+                return std::forward<A>(a);
+            }
 
-    T _result{};
-};
+            void setFinished()
+            {
+                _pending = nullptr;
+            }
 
-/** @brief Specialisation for void coroutines.
+            void cancel()
+            {
+                if(_pending)
+                {
+                    _pending->cancel();
+                    _pending = nullptr;
+                }
+            }
 
-    @ingroup BasicTypes
-*/
-template<>
-struct PromiseReturn<void>
-{
-    void return_void()
-    {}
+            AwaiterBase*            _pending      = nullptr;
+            std::coroutine_handle<> _continuation = nullptr;
+            PromiseBase*            _outer        = nullptr;
+        };
+
+        struct FinalAwaitable
+        {
+            bool await_ready() const noexcept
+            { return false; }
+
+            template<typename P>
+            std::coroutine_handle<> await_suspend(std::coroutine_handle<P> h) noexcept
+            {
+                if( h.promise()._outer )
+                {
+                    h.promise()._outer->setFinished();
+                    h.promise()._outer = nullptr;
+                }
+
+                if( h.promise()._continuation )
+                    return h.promise()._continuation;
+
+                return std::noop_coroutine();
+            }
+
+            void await_resume() noexcept
+            {}
+        };
+
+    protected:
+        /** @brief Constructor.
+        */
+        TaskBase() = default;
+
+        /** @brief No copy constructor.
+        */
+        TaskBase(const TaskBase&) = delete;
+
+        /** @brief No copy assignment.
+        */
+        TaskBase& operator=(const TaskBase&) = delete;
+
+        /** @brief Destructor.
+        */
+        virtual ~TaskBase() = default;
 };
 
 /** @brief Cancellable coroutine task for single-threaded async operations.
@@ -126,13 +187,17 @@ struct PromiseReturn<void>
     in the coroutine body must be handled with try/catch; unhandled
     exceptions call %std::terminate().
 
+    A %Task<T> is itself co_await-able, allowing coroutine chaining: an
+    outer coroutine can co_await an inner %Task<T> and resume when it
+    completes, with the result available as the co_await expression value.
+
     @ingroup BasicTypes
 */
 template<typename T = void>
-class Task
+class Task : public TaskBase
 {
     public:
-        struct promise_type : public PromiseBase, public PromiseReturn<T>
+        struct Promise : public PromiseBase
         {
             Task get_return_object()
             {
@@ -143,15 +208,21 @@ class Task
             std::suspend_always initial_suspend() noexcept
             { return {}; }
 
-            std::suspend_always final_suspend() noexcept
+            FinalAwaitable final_suspend() noexcept
             { return {}; }
 
             void unhandled_exception()
             { std::terminate(); }
+
+            void return_value(T v)
+            { _result = std::move(v); }
+
+            T _result{};
         };
 
     public:
-        using handle_type = std::coroutine_handle<promise_type>;
+        using promise_type = Promise;
+        using handle_type = std::coroutine_handle<Promise>;
 
         explicit Task(handle_type h)
         : _handle(h)
@@ -179,7 +250,7 @@ class Task
 
         /** @brief Request cancellation of the running coroutine.
         */
-        void cancel()
+        void cancel() override
         {
             if( _handle )
             {
@@ -204,6 +275,28 @@ class Task
         T result()
         { return std::move(_handle.promise()._result); }
 
+        /** @brief Returns true if the inner coroutine has already finished.
+        */
+        bool await_ready() const noexcept
+        { return done(); }
+
+        /** @brief Suspend the outer coroutine and start the inner coroutine.
+        */
+        template<typename P>
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<P> outer) noexcept
+        {
+            _handle.promise()._continuation = outer;
+            _handle.promise()._outer = &outer.promise();
+            return _handle;
+        }
+
+        /** @brief Resume the outer coroutine with the result of the inner task.
+        */
+        T await_resume()
+        {
+            return std::move(_handle.promise()._result);
+        }
+
     private:
         Task(const Task&) = delete;
         Task& operator=(const Task&) = delete;
@@ -213,8 +306,35 @@ class Task
 
 
 template<>
+struct Task<void>::Promise : public TaskBase::PromiseBase
+{
+    Task<void> get_return_object()
+    {
+        auto handle = Task::handle_type::from_promise(*this);
+        return Task<void>(handle);
+    }
+
+    std::suspend_always initial_suspend() noexcept
+    { return {}; }
+
+    TaskBase::FinalAwaitable final_suspend() noexcept
+    { return {}; }
+
+    void unhandled_exception()
+    { std::terminate(); }
+
+    void return_void()
+    {}
+};
+
+
+template<>
 inline void Task<void>::result() = delete;
 
+
+template<>
+inline void Task<void>::await_resume()
+{}
 
 /** @brief Base class for C++20 awaitables driven by an event-loop signal.
 
@@ -226,7 +346,7 @@ inline void Task<void>::result() = delete;
 
     @ingroup BasicTypes
 */
-class Awaiter : public Connectable
+class Awaiter : public Connectable, public AwaiterBase
 {
     public:
         bool await_ready() const
@@ -241,7 +361,7 @@ class Awaiter : public Connectable
             return true;
         }
 
-        void cancel()
+        void cancel() override
         {
             onCancel();
         }
@@ -267,18 +387,8 @@ class Awaiter : public Connectable
 
     protected:
         std::coroutine_handle<> _handle;
-        PromiseBase*            _promise = nullptr;
+        TaskBase::PromiseBase*  _promise = nullptr;
 };
-
-
-inline void PromiseBase::cancel()
-{
-    if(_awaiter)
-    {
-        _awaiter->cancel();
-        _awaiter = nullptr;
-    }
-}
 
 } // namespace Pt
 
