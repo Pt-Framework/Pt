@@ -36,8 +36,16 @@
 #if __cplusplus >= 202002L
 #include <coroutine>
 #include <exception>
+#include <stdexcept>
+#include <utility>
 
 namespace Pt {
+
+template<typename T = void>
+class Task;
+
+template<typename Awaitable>
+struct AwaiterProxy;
 
 /** @brief Coroutine return type for detached fire-and-forget coroutines.
 
@@ -102,6 +110,56 @@ class AwaiterBase
         virtual ~AwaiterBase() = default;
 };
 
+/** @brief Base class for C++20 awaitables driven by an event-loop signal.
+
+    Subclasses implement two customization points:
+    - onBegin(): subscribe to the completion signal and start the operation.
+    - onCancel(): abort the in-flight operation.
+
+    The result is retrieved via await_resume() in the subclass.
+
+    @ingroup BasicTypes
+*/
+class Awaiter : public Connectable, public AwaiterBase
+{
+    public:
+        bool await_ready() const
+        { return false; }
+
+        template<typename P>
+        bool await_suspend(std::coroutine_handle<P> h)
+        {
+            _handle  = h;
+            onBegin();
+            return true;
+        }
+
+        void cancel() override
+        {
+            onCancel();
+        }
+
+    protected:
+        Awaiter()
+        {}
+
+        void setReady()
+        {
+            if( auto h = std::exchange(_handle, nullptr) )
+            {
+                h.resume();
+            }
+        }
+
+    protected:
+        virtual void onBegin() = 0;
+
+        virtual void onCancel() = 0;
+
+    protected:
+        std::coroutine_handle<> _handle;
+};
+
 /** @brief Base for Task.
 
     @ingroup BasicTypes
@@ -112,10 +170,10 @@ class TaskBase : public AwaiterBase
         struct PromiseBase
         {
             template<typename A>
-            A&& await_transform(A&& a)
+            AwaiterProxy<A> await_transform(A&& a)
             {
                 _pending = &a;
-                return std::forward<A>(a);
+                return AwaiterProxy<A>{ std::forward<A>(a), this };
             }
 
             void setFinished()
@@ -145,11 +203,14 @@ class TaskBase : public AwaiterBase
             template<typename P>
             std::coroutine_handle<> await_suspend(std::coroutine_handle<P> h) noexcept
             {
-                if( h.promise()._outer )
+                PromiseBase* outer = h.promise()._outer;
+
+                if( outer && outer != &h.promise() )
                 {
-                    h.promise()._outer->setFinished();
-                    h.promise()._outer = nullptr;
+                    outer->setFinished();
                 }
+
+                h.promise()._outer = nullptr;
 
                 if( h.promise()._continuation )
                     return h.promise()._continuation;
@@ -179,6 +240,81 @@ class TaskBase : public AwaiterBase
         virtual ~TaskBase() = default;
 };
 
+template<typename A>
+struct AwaiterProxy
+{
+    A&& _awaitable;
+    TaskBase::PromiseBase* _promise;
+
+    bool await_ready()
+    { return _awaitable.await_ready(); }
+
+    template<typename P>
+    auto await_suspend(std::coroutine_handle<P> h) -> decltype(_awaitable.await_suspend(h))
+    { return _awaitable.await_suspend(h); }
+
+    auto await_resume() -> decltype(_awaitable.await_resume())
+    {
+        _promise->setFinished();
+        return _awaitable.await_resume();
+    }
+};
+
+template<typename T>
+struct TaskPromise : public TaskBase::PromiseBase
+{
+    Task<T> get_return_object()
+    {
+        auto handle = std::coroutine_handle<TaskPromise>::from_promise(*this);
+        return Task<T>(handle);
+    }
+
+    std::suspend_always initial_suspend() noexcept
+    { return {}; }
+
+    TaskBase::FinalAwaitable final_suspend() noexcept
+    { return {}; }
+
+    void unhandled_exception()
+    { std::terminate(); }
+
+    void return_value(T v)
+    { _result = std::move(v); }
+
+    T getResult()
+    { return std::move(_result); }
+
+    T _result{};
+};
+
+
+template<typename T>
+struct TaskPromise<T&> : public TaskBase::PromiseBase
+{
+    Task<T&> get_return_object()
+    {
+        auto handle = std::coroutine_handle<TaskPromise>::from_promise(*this);
+        return Task<T&>(handle);
+    }
+
+    std::suspend_always initial_suspend() noexcept
+    { return {}; }
+
+    TaskBase::FinalAwaitable final_suspend() noexcept
+    { return {}; }
+
+    void unhandled_exception()
+    { std::terminate(); }
+
+    void return_value(T& v)
+    { _result = &v; }
+
+    T& getResult()
+    { return *_result; }
+
+    T* _result = nullptr;
+};
+
 /** @brief Cancellable coroutine task for single-threaded async operations.
 
     Manages the lifetime of a C++20 coroutine frame. The task starts
@@ -193,36 +329,12 @@ class TaskBase : public AwaiterBase
 
     @ingroup BasicTypes
 */
-template<typename T = void>
+template<typename T>
 class Task : public TaskBase
 {
     public:
-        struct Promise : public PromiseBase
-        {
-            Task get_return_object()
-            {
-                auto handle = Task::handle_type::from_promise(*this);
-                return Task(handle);
-            }
-
-            std::suspend_always initial_suspend() noexcept
-            { return {}; }
-
-            FinalAwaitable final_suspend() noexcept
-            { return {}; }
-
-            void unhandled_exception()
-            { std::terminate(); }
-
-            void return_value(T v)
-            { _result = std::move(v); }
-
-            T _result{};
-        };
-
-    public:
-        using promise_type = Promise;
-        using handle_type = std::coroutine_handle<Promise>;
+        using promise_type = TaskPromise<T>;
+        using handle_type = std::coroutine_handle<TaskPromise<T>>;
 
         explicit Task(handle_type h)
         : _handle(h)
@@ -245,7 +357,13 @@ class Task : public TaskBase
         void run()
         {
             if( _handle && ! _handle.done() )
+            {
+                if (_handle.promise()._outer)
+                    throw std::logic_error("task pending");
+
+                _handle.promise()._outer = &_handle.promise();
                 _handle.resume();
+            }
         }
 
         /** @brief Request cancellation of the running coroutine.
@@ -273,7 +391,7 @@ class Task : public TaskBase
         /** @brief Retrieve the coroutine result. Only valid after done() == true.
         */
         T result()
-        { return std::move(_handle.promise()._result); }
+        { return _handle.promise().getResult(); }
 
         /** @brief Returns true if the inner coroutine has already finished.
         */
@@ -283,8 +401,13 @@ class Task : public TaskBase
         /** @brief Suspend the outer coroutine and start the inner coroutine.
         */
         template<typename P>
-        std::coroutine_handle<> await_suspend(std::coroutine_handle<P> outer) noexcept
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<P> outer)
         {
+            if(_handle.promise()._outer)
+            {
+                throw std::logic_error("task pending");
+            }
+
             _handle.promise()._continuation = outer;
             _handle.promise()._outer = &outer.promise();
             return _handle;
@@ -293,9 +416,7 @@ class Task : public TaskBase
         /** @brief Resume the outer coroutine with the result of the inner task.
         */
         T await_resume()
-        {
-            return std::move(_handle.promise()._result);
-        }
+        { return _handle.promise().getResult(); }
 
     private:
         Task(const Task&) = delete;
@@ -306,11 +427,11 @@ class Task : public TaskBase
 
 
 template<>
-struct Task<void>::Promise : public TaskBase::PromiseBase
+struct TaskPromise<void> : public TaskBase::PromiseBase
 {
     Task<void> get_return_object()
     {
-        auto handle = Task::handle_type::from_promise(*this);
+        auto handle = std::coroutine_handle<TaskPromise>::from_promise(*this);
         return Task<void>(handle);
     }
 
@@ -325,69 +446,9 @@ struct Task<void>::Promise : public TaskBase::PromiseBase
 
     void return_void()
     {}
-};
 
-
-template<>
-inline void Task<void>::result() = delete;
-
-
-template<>
-inline void Task<void>::await_resume()
-{}
-
-/** @brief Base class for C++20 awaitables driven by an event-loop signal.
-
-    Subclasses implement two customization points:
-    - onBegin(): subscribe to the completion signal and start the operation.
-    - onCancel(): abort the in-flight operation.
-
-    The result is retrieved via await_resume() in the subclass.
-
-    @ingroup BasicTypes
-*/
-class Awaiter : public Connectable, public AwaiterBase
-{
-    public:
-        bool await_ready() const
-        { return false; }
-
-        template<typename P>
-        bool await_suspend(std::coroutine_handle<P> h)
-        {
-            _handle  = h;
-            _promise = &h.promise();
-            onBegin();
-            return true;
-        }
-
-        void cancel() override
-        {
-            onCancel();
-        }
-
-    protected:
-        Awaiter()
-        {}
-
-        void setReady()
-        {
-            if( _promise )
-            {
-                _promise->setFinished();
-                _promise = nullptr;
-                _handle.resume();
-            }
-        }
-
-    protected:
-        virtual void onBegin() = 0;
-
-        virtual void onCancel() = 0;
-
-    protected:
-        std::coroutine_handle<> _handle;
-        TaskBase::PromiseBase*  _promise = nullptr;
+    void getResult()
+    {}
 };
 
 } // namespace Pt
