@@ -37,17 +37,8 @@
 #include <coroutine>
 #include <exception>
 #include <stdexcept>
-#include <utility>
 
 namespace Pt {
-
-class PromiseBase;
-
-template<typename T = void>
-class Task;
-
-template<typename Awaitable>
-class AwaiterProxy;
 
 /** @brief Coroutine return type for detached fire-and-forget coroutines.
 
@@ -147,8 +138,10 @@ class Awaiter : public Connectable, public AwaiterBase
 
         void setReady()
         {
-            if( auto h = std::exchange(_handle, nullptr) )
+            if( _handle )
             {
+                std::coroutine_handle<> h = _handle;
+                _handle = nullptr;
                 h.resume();
             }
         }
@@ -318,7 +311,7 @@ class FinalAwaiter
 
     @ingroup BasicTypes
 */
-template<typename T>
+template<typename T = void>
 class Task : public AwaiterBase
 {
     public:
