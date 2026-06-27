@@ -80,14 +80,14 @@ description: "Coding Styles and Guidelines"
 - Formatting:
   - Line Length: Limit to 100 columns.
   - Templates: Always break declarations into multiple lines.
- 
+
 # Coding Guidelines
 
 - Copyright Header:
   - Start every file with the copyright header from `include/<Project>/Api.h`.
   - Fill in the current year, leaving the author list intact.
 
-- C++ Standard: Use C++14 features where appropriate.
+- C++ Standard: Prefer C++14 features, use C++20 where necessary.
 
 - API Macros: Use the module's API macro (uppercase) from `Api.h` for non-inline symbols.
   - Core: `<PROJECT>_API` from `<Project>/Api.h`.
@@ -115,6 +115,6 @@ description: "Coding Styles and Guidelines"
     reference (e.g., `const Style& style = Application::instance().style();`).
   - Improves readability and avoids repeated evaluation of the same chain.
 
-- Visual Studio Projects: 
+- Visual Studio Projects:
   - Register new files also in the `.vcxproj` and `.vcxproj.filters` if they exist.
   - Filter structure in `.vcxproj.filters` mirrors the directory structure.
