@@ -41,11 +41,13 @@
 
 namespace Pt {
 
+class PromiseBase;
+
 template<typename T = void>
 class Task;
 
 template<typename Awaitable>
-struct AwaiterProxy;
+class AwaiterProxy;
 
 /** @brief Coroutine return type for detached fire-and-forget coroutines.
 
@@ -80,8 +82,8 @@ class DetachedTask
 /** @brief Base class for all co_await-able types used inside a %Task coroutine.
 
     Both %Awaiter (IO-driven awaitables) and %Task<T> (coroutine chaining)
-    derive from this class, allowing %PromiseBase to cancel any pending
-    operation through a single virtual dispatch.
+    derive from this class, allowing to cancel any pending operation through
+    a single virtual dispatch.
 
     @ingroup BasicTypes
 */
@@ -129,7 +131,7 @@ class Awaiter : public Connectable, public AwaiterBase
         template<typename P>
         bool await_suspend(std::coroutine_handle<P> h)
         {
-            _handle  = h;
+            _handle = h;
             onBegin();
             return true;
         }
@@ -160,159 +162,146 @@ class Awaiter : public Connectable, public AwaiterBase
         std::coroutine_handle<> _handle;
 };
 
-/** @brief Base for Task.
 
-    @ingroup BasicTypes
-*/
-class TaskBase : public AwaiterBase
+class PromiseBase
 {
     public:
-        struct PromiseBase
+        void setFinished()
         {
-            template<typename A>
-            AwaiterProxy<A> await_transform(A&& a)
-            {
-                _pending = &a;
-                return AwaiterProxy<A>{ std::forward<A>(a), this };
-            }
+            _pending = nullptr;
+        }
 
-            void setFinished()
+        void cancel()
+        {
+            if(_pending)
             {
+                _pending->cancel();
                 _pending = nullptr;
             }
+        }
 
-            void cancel()
-            {
-                if(_pending)
-                {
-                    _pending->cancel();
-                    _pending = nullptr;
-                }
-            }
-
-            AwaiterBase*            _pending      = nullptr;
-            std::coroutine_handle<> _continuation = nullptr;
-            PromiseBase*            _outer        = nullptr;
-        };
-
-        struct FinalAwaitable
-        {
-            bool await_ready() const noexcept
-            { return false; }
-
-            template<typename P>
-            std::coroutine_handle<> await_suspend(std::coroutine_handle<P> h) noexcept
-            {
-                PromiseBase* outer = h.promise()._outer;
-
-                if( outer && outer != &h.promise() )
-                {
-                    outer->setFinished();
-                }
-
-                h.promise()._outer = nullptr;
-
-                if( h.promise()._continuation )
-                    return h.promise()._continuation;
-
-                return std::noop_coroutine();
-            }
-
-            void await_resume() noexcept
-            {}
-        };
+        AwaiterBase*            _pending      = nullptr;
+        std::coroutine_handle<> _continuation = nullptr;
+        PromiseBase*            _outer        = nullptr;
 
     protected:
-        /** @brief Constructor.
-        */
-        TaskBase() = default;
+        PromiseBase() = default;
+        ~PromiseBase() = default;
 
-        /** @brief No copy constructor.
-        */
-        TaskBase(const TaskBase&) = delete;
-
-        /** @brief No copy assignment.
-        */
-        TaskBase& operator=(const TaskBase&) = delete;
-
-        /** @brief Destructor.
-        */
-        virtual ~TaskBase() = default;
+        PromiseBase(const PromiseBase&) = delete;
+        PromiseBase& operator=(const PromiseBase&) = delete;
 };
+
+
+template<typename T>
+class PromiseResult
+{
+    public:
+        void return_value(T v)
+        { _result = std::move(v); }
+
+        T getResult()
+        { return std::move(_result); }
+
+        T _result{};
+
+    protected:
+        PromiseResult() = default;
+        ~PromiseResult() = default;
+
+        PromiseResult(const PromiseResult&) = delete;
+        PromiseResult& operator=(const PromiseResult&) = delete;
+};
+
+
+template<typename T>
+class PromiseResult<T&>
+{
+    public:
+        void return_value(T& v)
+        { _result = &v; }
+
+        T& getResult()
+        { return *_result; }
+
+        T* _result = nullptr;
+
+    protected:
+        PromiseResult() = default;
+        ~PromiseResult() = default;
+
+        PromiseResult(const PromiseResult&) = delete;
+        PromiseResult& operator=(const PromiseResult&) = delete;
+};
+
+
+template<>
+class PromiseResult<void>
+{
+    public:
+        void return_void()
+        {}
+
+        void getResult()
+        {}
+
+    protected:
+        PromiseResult() = default;
+        ~PromiseResult() = default;
+
+        PromiseResult(const PromiseResult&) = delete;
+        PromiseResult& operator=(const PromiseResult&) = delete;
+};
+
 
 template<typename A>
-struct AwaiterProxy
+class AwaiterProxy
 {
-    A&& _awaitable;
-    TaskBase::PromiseBase* _promise;
+    public:
+        A&& _awaitable;
+        PromiseBase* _promise;
 
-    bool await_ready()
-    { return _awaitable.await_ready(); }
+        bool await_ready()
+        { return _awaitable.await_ready(); }
 
-    template<typename P>
-    auto await_suspend(std::coroutine_handle<P> h) -> decltype(_awaitable.await_suspend(h))
-    { return _awaitable.await_suspend(h); }
+        template<typename P>
+        auto await_suspend(std::coroutine_handle<P> h) -> decltype(_awaitable.await_suspend(h))
+        { return _awaitable.await_suspend(h); }
 
-    auto await_resume() -> decltype(_awaitable.await_resume())
-    {
-        _promise->setFinished();
-        return _awaitable.await_resume();
-    }
-};
-
-template<typename T>
-struct TaskPromise : public TaskBase::PromiseBase
-{
-    Task<T> get_return_object()
-    {
-        auto handle = std::coroutine_handle<TaskPromise>::from_promise(*this);
-        return Task<T>(handle);
-    }
-
-    std::suspend_always initial_suspend() noexcept
-    { return {}; }
-
-    TaskBase::FinalAwaitable final_suspend() noexcept
-    { return {}; }
-
-    void unhandled_exception()
-    { std::terminate(); }
-
-    void return_value(T v)
-    { _result = std::move(v); }
-
-    T getResult()
-    { return std::move(_result); }
-
-    T _result{};
+        auto await_resume() -> decltype(_awaitable.await_resume())
+        {
+            _promise->setFinished();
+            return _awaitable.await_resume();
+        }
 };
 
 
-template<typename T>
-struct TaskPromise<T&> : public TaskBase::PromiseBase
+class FinalAwaiter
 {
-    Task<T&> get_return_object()
-    {
-        auto handle = std::coroutine_handle<TaskPromise>::from_promise(*this);
-        return Task<T&>(handle);
-    }
+    public:
+        bool await_ready() const noexcept
+        { return false; }
 
-    std::suspend_always initial_suspend() noexcept
-    { return {}; }
+        template<typename P>
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<P> h) noexcept
+        {
+            PromiseBase* outer = h.promise()._outer;
 
-    TaskBase::FinalAwaitable final_suspend() noexcept
-    { return {}; }
+            if( outer && outer != &h.promise() )
+            {
+                outer->setFinished();
+            }
 
-    void unhandled_exception()
-    { std::terminate(); }
+            h.promise()._outer = nullptr;
 
-    void return_value(T& v)
-    { _result = &v; }
+            if( h.promise()._continuation )
+                return h.promise()._continuation;
 
-    T& getResult()
-    { return *_result; }
+            return std::noop_coroutine();
+        }
 
-    T* _result = nullptr;
+        void await_resume() noexcept
+        {}
 };
 
 /** @brief Cancellable coroutine task for single-threaded async operations.
@@ -330,12 +319,39 @@ struct TaskPromise<T&> : public TaskBase::PromiseBase
     @ingroup BasicTypes
 */
 template<typename T>
-class Task : public TaskBase
+class Task : public AwaiterBase
 {
     public:
-        using promise_type = TaskPromise<T>;
-        using handle_type = std::coroutine_handle<TaskPromise<T>>;
+        class Promise : public PromiseResult<T>
+                      , public PromiseBase
+        {
+            public:
+                template<typename A>
+                AwaiterProxy<A> await_transform(A&& a)
+                {
+                    _pending = &a;
+                    return AwaiterProxy<A>{ std::forward<A>(a), this };
+                }
 
+                Task get_return_object()
+                {
+                    return Task(std::coroutine_handle<promise_type>::from_promise(*this));
+                }
+
+                std::suspend_always initial_suspend() noexcept
+                { return {}; }
+
+                FinalAwaiter final_suspend() noexcept
+                { return {}; }
+
+                void unhandled_exception()
+                { std::terminate(); }
+        };
+
+        using promise_type = Promise;
+        using handle_type = std::coroutine_handle<promise_type>;
+
+    public:
         explicit Task(handle_type h)
         : _handle(h)
         {}
@@ -423,32 +439,6 @@ class Task : public TaskBase
         Task& operator=(const Task&) = delete;
 
         handle_type _handle;
-};
-
-
-template<>
-struct TaskPromise<void> : public TaskBase::PromiseBase
-{
-    Task<void> get_return_object()
-    {
-        auto handle = std::coroutine_handle<TaskPromise>::from_promise(*this);
-        return Task<void>(handle);
-    }
-
-    std::suspend_always initial_suspend() noexcept
-    { return {}; }
-
-    TaskBase::FinalAwaitable final_suspend() noexcept
-    { return {}; }
-
-    void unhandled_exception()
-    { std::terminate(); }
-
-    void return_void()
-    {}
-
-    void getResult()
-    {}
 };
 
 } // namespace Pt
