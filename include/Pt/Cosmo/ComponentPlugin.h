@@ -71,6 +71,26 @@ class ComponentFactory
     }
 };
 
+/** @internal @brief From Reference component factory.
+*/
+template <typename T>
+class FromReference
+{
+  public:
+    explicit FromReference(T& instance)
+    : _instance(&instance)
+    {}
+
+    Cosmo::Component* create()
+    { return _instance; }
+
+    void destroy(Cosmo::Component* /*instance*/)
+    {}
+
+  private:
+    T* _instance;
+};
+
 /** @brief Default component plugin.
 
     Implements the %IComponentPlugin interface for a concrete component
@@ -135,7 +155,7 @@ class ComponentPlugin : public IComponentPlugin
     };
 
   public:
-    ComponentPlugin(const char* featureId, const char* info, 
+    ComponentPlugin(const char* featureId, const char* info,
                     ComponentMode mode = ComponentMode::None,
                     const Factory& factory = ComponentFactory<T>());
 
@@ -145,10 +165,10 @@ class ComponentPlugin : public IComponentPlugin
         from application code, @a info is the implementation info string and
         the @a mode flags indicate various operation modes such as auto-start.
     */
-    ComponentPlugin(const char* featureId, const char* classId, const char* info, 
+    ComponentPlugin(const char* featureId, const char* classId, const char* info,
                     ComponentMode mode = ComponentMode::None,
                     const Factory& factory = ComponentFactory<T>());
-    
+
     /** @brief Destructor.
     */
     ~ComponentPlugin();
@@ -185,16 +205,16 @@ class ComponentPlugin : public IComponentPlugin
     bool onHasInterface(const std::type_info& ti) const override;
 
     // inherit docs
-    virtual IUnknown* onQueryInterface(Component& c, 
+    virtual IUnknown* onQueryInterface(Component& c,
                                        const std::type_info& ti) const override;
 
   protected:
     // inherit docs
-    virtual void onAttach(IComponentManager& cm, 
+    virtual void onAttach(IComponentManager& cm,
                           const std::string& instance) override;
 
     // inherit docs
-    virtual void onDetach(IComponentManager& cm, 
+    virtual void onDetach(IComponentManager& cm,
                           const std::string& instance) override;
 
     // inherit docs
@@ -234,7 +254,7 @@ class ComponentPlugin : public IComponentPlugin
     ComponentMode             _mode;
     std::vector<std::string>  _dependencies;
 
-    std::multimap<IComponentManager*, 
+    std::multimap<IComponentManager*,
                   std::string>        _componentManager;
 
     AutoReleasePool _pool;
