@@ -43,7 +43,7 @@
 
 #if __cplusplus >= 202002L
 #include <Pt/Slot.h>
-#include <Pt/Task.h>
+#include <Pt/Coroutine.h>
 #endif
 
 namespace Pt {

@@ -27,8 +27,8 @@
  * MA 02110-1301 USA
  */
 
-#ifndef PT_TASK_H
-#define PT_TASK_H
+#ifndef PT_COROUTINE_H
+#define PT_COROUTINE_H
 
 #include <Pt/Api.h>
 #include <Pt/Connectable.h>
@@ -39,36 +39,6 @@
 #include <stdexcept>
 
 namespace Pt {
-
-/** @brief Coroutine return type for detached fire-and-forget coroutines.
-
-    Use as the return type of a coroutine function that uses co_await
-    but does not return a value to the caller. The coroutine runs
-    detached; the caller has no handle and cannot await the result.
-
-    @ingroup BasicTypes
-*/
-class DetachedTask
-{
-    public:
-        struct promise_type
-        {
-            DetachedTask get_return_object()
-            { return DetachedTask{}; }
-
-            std::suspend_never initial_suspend() noexcept
-            { return {}; }
-
-            std::suspend_never final_suspend() noexcept
-            { return {}; }
-
-            void return_void()
-            {}
-
-            void unhandled_exception()
-            { std::terminate(); }
-        };
-};
 
 /** @brief Base class for all co_await-able types used inside a %Task coroutine.
 
@@ -438,4 +408,4 @@ class Task : public AwaiterBase
 
 #endif // __cplusplus >= 202002L
 
-#endif // PT_TASK_H
+#endif // PT_COROUTINE_H

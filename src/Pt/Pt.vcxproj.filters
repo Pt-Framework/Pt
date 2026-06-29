@@ -1341,7 +1341,7 @@
     <ClInclude Include="..\..\include\Pt\StringStream.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Task.h">
+    <ClInclude Include="..\..\include\Pt\Coroutine.h">
       <Filter>Pt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\TextBuffer.h">

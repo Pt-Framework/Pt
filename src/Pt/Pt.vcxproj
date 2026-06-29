@@ -329,7 +329,7 @@
     <ClInclude Include="..\..\include\Pt\StreamBuffer.h" />
     <ClInclude Include="..\..\include\Pt\String.h" />
     <ClInclude Include="..\..\include\Pt\StringStream.h" />
-    <ClInclude Include="..\..\include\Pt\Task.h" />
+    <ClInclude Include="..\..\include\Pt\Coroutine.h" />
     <ClInclude Include="..\..\include\Pt\System\Api.h" />
     <ClInclude Include="..\..\include\Pt\System\Application.h" />
     <ClInclude Include="..\..\include\Pt\System\Clock.h" />
