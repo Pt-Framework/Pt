@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2013 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -53,7 +53,7 @@ namespace System {
     @code
     Pt::System::Path path("/tmp/logout.txt");
     Pt::System::FileInfo fi(path);
-    
+
     if( fi.type() == Pt::System::FileInfo::File )
     {
         std::cout << fi.path().toLocal() << ": " << fi.size() << " bytes.\n";
@@ -63,7 +63,7 @@ namespace System {
         std::cout << fi.path().toLocal() << " is invalid.\n";
     }
     @endcode
-    
+
     Most operations are available as non-member functions, so it is not
     neccessary to create temporary %FileInfo objects. Only the paths to
     files or directories are required to perform file system operations.
@@ -75,7 +75,7 @@ namespace System {
     {
         Pt::System::Path tmp1("/tmp/tmpfile1");
         Pt::System::Path tmp2("/tmp/tmpfile2");
-        
+
         // create a temporary file
         Pt::System::FileInfo::createFile(tmp1);
 
@@ -110,6 +110,39 @@ class PT_SYSTEM_API FileInfo
             Directory = 1, //!< Directory
             File = 2,      //!< Regular file
             Link = 4       //!< Symbolic link
+        };
+
+        //! @brief File permission flags.
+        enum Perms
+        {
+            NoPerms     = 0,      //!< No permissions
+            OwnerRead   = 0400,   //!< Owner read permission
+            OwnerWrite  = 0200,   //!< Owner write permission
+            OwnerExec   = 0100,   //!< Owner execute permission
+            OwnerAll    = 0700,   //!< All owner permissions
+            GroupRead   = 040,    //!< Group read permission
+            GroupWrite  = 020,    //!< Group write permission
+            GroupExec   = 010,    //!< Group execute permission
+            GroupAll    = 070,    //!< All group permissions
+            OthersRead  = 04,     //!< Others read permission
+            OthersWrite = 02,     //!< Others write permission
+            OthersExec  = 01,     //!< Others execute permission
+            OthersAll   = 07,     //!< All others permissions
+            AllPerms    = 0777,   //!< All basic permissions
+            SetUid      = 04000,  //!< Set-user-ID on execute
+            SetGid      = 02000,  //!< Set-group-ID on execute
+            StickyBit   = 01000,  //!< Sticky bit
+            PermMask    = 07777,  //!< All valid permission bits
+            UnknownPerms = 0xFFFF //!< Permissions not known
+        };
+
+        //! @brief Options for modifying permissions.
+        enum PermOptions
+        {
+            PermReplace  = 1, //!< Replace permissions entirely
+            PermAdd      = 2, //!< Add permission bits
+            PermRemove   = 4, //!< Remove permission bits
+            PermNoFollow = 8  //!< Do not follow symbolic links
         };
 
     public:
@@ -155,6 +188,10 @@ class PT_SYSTEM_API FileInfo
         bool isLink() const
         { return FileInfo::isLink(_path); }
 
+        //! @brief Returns the file permissions.
+        Perms permissions() const
+        { return FileInfo::permissions(_path); }
+
     public:
         //! @brief Returns the type of file at the \a path.
         static Type type(const Path& path);
@@ -166,6 +203,19 @@ class PT_SYSTEM_API FileInfo
 
         //! @brief Returns the time when last modified.
         static DateTime lastModified(const Path& path);
+
+        //! @brief Returns the permissions of the file at the \a path.
+        static Perms permissions(const Path& path);
+
+        /** @brief Sets the permissions of the file at the \a path.
+
+            The \a opts parameter controls how the permissions are applied.
+            Use PermReplace to set permissions exactly, PermAdd to add bits,
+            or PermRemove to remove bits. Combine with PermNoFollow using
+            bitwise OR to act on the symbolic link itself.
+        */
+        static void permissions(const Path& path, Perms prms,
+                                PermOptions opts = PermReplace);
 
         //! @brief Returns true if a file or directory exists at the \a path.
         static bool exists(const Path& path)
@@ -196,10 +246,76 @@ class PT_SYSTEM_API FileInfo
         //! @internal
         Path& path()
         { return _path; }
-    
+
     private:
         Path _path;
 };
+
+
+/** @brief Bitwise OR for %FileInfo permission flags.
+
+    @related FileInfo
+*/
+inline FileInfo::Perms operator|(FileInfo::Perms a, FileInfo::Perms b)
+{
+    return static_cast<FileInfo::Perms>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+/** @brief Bitwise AND for %FileInfo permission flags.
+
+    @related FileInfo
+*/
+inline FileInfo::Perms operator&(FileInfo::Perms a, FileInfo::Perms b)
+{
+    return static_cast<FileInfo::Perms>(static_cast<int>(a) & static_cast<int>(b));
+}
+
+/** @brief Bitwise XOR for %FileInfo permission flags.
+
+    @related FileInfo
+*/
+inline FileInfo::Perms operator^(FileInfo::Perms a, FileInfo::Perms b)
+{
+    return static_cast<FileInfo::Perms>(static_cast<int>(a) ^ static_cast<int>(b));
+}
+
+/** @brief Bitwise NOT for %FileInfo permission flags.
+
+    @related FileInfo
+*/
+inline FileInfo::Perms operator~(FileInfo::Perms a)
+{
+    return static_cast<FileInfo::Perms>(~static_cast<int>(a));
+}
+
+/** @brief Bitwise OR assignment for %FileInfo permission flags.
+
+    @related FileInfo
+*/
+inline FileInfo::Perms& operator|=(FileInfo::Perms& a, FileInfo::Perms b)
+{
+    a = a | b;
+    return a;
+}
+
+/** @brief Bitwise AND assignment for %FileInfo permission flags.
+
+    @related FileInfo
+*/
+inline FileInfo::Perms& operator&=(FileInfo::Perms& a, FileInfo::Perms b)
+{
+    a = a & b;
+    return a;
+}
+
+/** @brief Bitwise OR for %FileInfo permission options.
+
+    @related FileInfo
+*/
+inline FileInfo::PermOptions operator|(FileInfo::PermOptions a, FileInfo::PermOptions b)
+{
+    return static_cast<FileInfo::PermOptions>(static_cast<int>(a) | static_cast<int>(b));
+}
 
 
 /** @brief Compare two %FileInfo objects.

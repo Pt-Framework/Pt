@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2008 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -75,7 +75,7 @@ class FileInfoImpl
             {
                 return FileInfo::File;
             }
-            else if( S_ISDIR(st.st_mode) ) 
+            else if( S_ISDIR(st.st_mode) )
             {
                 return FileInfo::Directory;
             }
@@ -99,7 +99,7 @@ class FileInfoImpl
             {
                 return FileInfo::File;
             }
-            else if( S_ISDIR(st.st_mode) ) 
+            else if( S_ISDIR(st.st_mode) )
             {
                 return FileInfo::Directory;
             }
@@ -164,6 +164,54 @@ class FileInfoImpl
             {
                 throw AccessFailed(path.impl()->c_str());
             }
+        }
+
+        static FileInfo::Perms permissions(const Path& path)
+        {
+            struct stat st;
+            if( 0 != ::stat(path.impl()->c_str(), &st) )
+            {
+                throw AccessFailed(path.impl()->c_str());
+            }
+
+            return static_cast<FileInfo::Perms>(st.st_mode & 07777);
+        }
+
+        static void permissions(const Path& path, FileInfo::Perms prms,
+                                FileInfo::PermOptions opts)
+        {
+            FileInfo::Perms effective = static_cast<FileInfo::Perms>(
+                static_cast<int>(prms) & static_cast<int>(FileInfo::PermMask));
+
+            if( static_cast<int>(opts) & static_cast<int>(FileInfo::PermAdd) )
+            {
+                FileInfo::Perms current = permissions(path);
+                effective = static_cast<FileInfo::Perms>(
+                    static_cast<int>(current) | static_cast<int>(effective));
+            }
+            else if( static_cast<int>(opts) & static_cast<int>(FileInfo::PermRemove) )
+            {
+                FileInfo::Perms current = permissions(path);
+                effective = static_cast<FileInfo::Perms>(
+                    static_cast<int>(current) & ~static_cast<int>(effective));
+            }
+
+            int ret;
+
+#ifdef AT_SYMLINK_NOFOLLOW
+            if( static_cast<int>(opts) & static_cast<int>(FileInfo::PermNoFollow) )
+            {
+                ret = ::fchmodat(AT_FDCWD, path.impl()->c_str(),
+                                 static_cast<mode_t>(effective), AT_SYMLINK_NOFOLLOW);
+            }
+            else
+#endif
+            {
+                ret = ::chmod(path.impl()->c_str(), static_cast<mode_t>(effective));
+            }
+
+            if( ret != 0 )
+                throw AccessFailed(path.impl()->c_str());
         }
 };
 

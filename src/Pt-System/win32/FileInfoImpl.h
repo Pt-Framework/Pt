@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2008 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -123,8 +123,8 @@ class FileInfoImpl
         static DateTime lastModified(const Path& path)
         {
             WIN32_FILE_ATTRIBUTE_DATA info;
-            BOOL ret = GetFileAttributesExW( path.impl()->c_str(), 
-                                             GetFileExInfoStandard, 
+            BOOL ret = GetFileAttributesExW( path.impl()->c_str(),
+                                             GetFileExInfoStandard,
                                              &info );
             if(ret == 0)
             {
@@ -176,7 +176,7 @@ class FileInfoImpl
         static void remove(const Path& path)
         {
             DWORD attr = GetFileAttributesW( path.impl()->c_str() );
-            
+
             if(attr & FILE_ATTRIBUTE_DIRECTORY)
             {
                 if( FALSE == ::RemoveDirectoryW(path.impl()->c_str()) )
@@ -213,6 +213,60 @@ class FileInfoImpl
             if( FALSE == ::MoveFileExW(path.impl()->c_str(), to.impl()->c_str(), 0) )
                 throw AccessFailed( path.toString().narrow() );
 #endif
+        }
+
+        static FileInfo::Perms permissions(const Path& path)
+        {
+            DWORD attr = GetFileAttributesW( path.impl()->c_str() );
+
+            if(attr == INVALID_FILE_ATTRIBUTES)
+                throw AccessFailed( path.toString().narrow() );
+
+            FileInfo::Perms perms = static_cast<FileInfo::Perms>(
+                FileInfo::OwnerRead | FileInfo::GroupRead | FileInfo::OthersRead |
+                FileInfo::OwnerExec | FileInfo::GroupExec | FileInfo::OthersExec);
+
+            if( ! (attr & FILE_ATTRIBUTE_READONLY) )
+            {
+                perms = static_cast<FileInfo::Perms>(
+                    static_cast<int>(perms) |
+                    FileInfo::OwnerWrite | FileInfo::GroupWrite | FileInfo::OthersWrite);
+            }
+
+            return perms;
+        }
+
+        static void permissions(const Path& path, FileInfo::Perms prms,
+                                FileInfo::PermOptions opts)
+        {
+            FileInfo::Perms effective = static_cast<FileInfo::Perms>(
+                static_cast<int>(prms) & static_cast<int>(FileInfo::PermMask));
+
+            if( static_cast<int>(opts) & static_cast<int>(FileInfo::PermAdd) )
+            {
+                FileInfo::Perms current = permissions(path);
+                effective = static_cast<FileInfo::Perms>(
+                    static_cast<int>(current) | static_cast<int>(effective));
+            }
+            else if( static_cast<int>(opts) & static_cast<int>(FileInfo::PermRemove) )
+            {
+                FileInfo::Perms current = permissions(path);
+                effective = static_cast<FileInfo::Perms>(
+                    static_cast<int>(current) & ~static_cast<int>(effective));
+            }
+
+            DWORD attr = GetFileAttributesW( path.impl()->c_str() );
+
+            if(attr == INVALID_FILE_ATTRIBUTES)
+                throw AccessFailed( path.toString().narrow() );
+
+            if( static_cast<int>(effective) & static_cast<int>(FileInfo::OwnerWrite) )
+                attr &= ~FILE_ATTRIBUTE_READONLY;
+            else
+                attr |= FILE_ATTRIBUTE_READONLY;
+
+            if( FALSE == SetFileAttributesW(path.impl()->c_str(), attr) )
+                throw AccessFailed( path.toString().narrow() );
         }
 };
 
