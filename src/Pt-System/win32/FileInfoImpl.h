@@ -59,6 +59,26 @@ class FileInfoImpl
                 throw IOError("CloseHandle");
         }
 
+        static void createSymlink(const Path& target, const Path& link)
+        {
+            DWORD flags = 0;
+            DWORD attr = GetFileAttributesW( target.impl()->c_str() );
+            if( attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY) )
+                flags = SYMBOLIC_LINK_FLAG_DIRECTORY;
+
+            if( FALSE == ::CreateSymbolicLinkW(link.impl()->c_str(),
+                                               target.impl()->c_str(),
+                                               flags | SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE) )
+                throw AccessFailed( link.toString().narrow() );
+        }
+
+        static void createHardlink(const Path& target, const Path& link)
+        {
+            if( FALSE == ::CreateHardLinkW(link.impl()->c_str(),
+                                           target.impl()->c_str(), NULL) )
+                throw AccessFailed( link.toString().narrow() );
+        }
+
         static void createDirectory(const Path& path)
         {
             if( FALSE == ::CreateDirectoryW(path.impl()->c_str(), NULL) )

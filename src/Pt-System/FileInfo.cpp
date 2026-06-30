@@ -91,6 +91,18 @@ void FileInfo::createFile(const Path& path)
 }
 
 
+void FileInfo::createSymlink(const Path& target, const Path& link)
+{
+    FileInfoImpl::createSymlink(target, link);
+}
+
+
+void FileInfo::createHardlink(const Path& target, const Path& link)
+{
+    FileInfoImpl::createHardlink(target, link);
+}
+
+
 void FileInfo::createDirectory(const Path& path)
 {
     PT_LOG_DEBUG("created: " << path.toLocal());

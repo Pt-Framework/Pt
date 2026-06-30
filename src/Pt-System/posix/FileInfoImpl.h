@@ -55,6 +55,18 @@ class FileInfoImpl
             ::close(fd);
         }
 
+        static void createSymlink(const Path& target, const Path& link)
+        {
+            if( 0 != ::symlink(target.impl()->c_str(), link.impl()->c_str()) )
+                throw AccessFailed(link.impl()->c_str());
+        }
+
+        static void createHardlink(const Path& target, const Path& link)
+        {
+            if( 0 != ::link(target.impl()->c_str(), link.impl()->c_str()) )
+                throw AccessFailed(link.impl()->c_str());
+        }
+
         static void createDirectory(const Path& path)
         {
             if( -1 == ::mkdir(path.impl()->c_str(), 0777) )

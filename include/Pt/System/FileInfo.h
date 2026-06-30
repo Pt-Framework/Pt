@@ -224,6 +224,12 @@ class PT_SYSTEM_API FileInfo
         //! @brief Creates a new file.
         static void createFile(const Path& path);
 
+        //! @brief Creates a symbolic link at \a link pointing to \a target.
+        static void createSymlink(const Path& target, const Path& link);
+
+        //! @brief Creates a hard link at \a link pointing to \a target.
+        static void createHardlink(const Path& target, const Path& link);
+
         //! @brief Creates a new directory.
         static void createDirectory(const Path& path);
 
