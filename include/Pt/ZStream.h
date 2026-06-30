@@ -107,6 +107,11 @@ class ZIStream : public BasicIStream<char>
             _buffer.finish();
         }
 
+        /** @brief Returns the total number of decompressed bytes produced so far.
+        */
+        std::size_t zcount() const
+        { return _buffer.zcount(); }
+
     private:
         ZBuffer _buffer;
 };
@@ -255,6 +260,11 @@ class ZIOStream : public BasicIOStream<char>
         {
             _buffer.finish();
         }
+
+        /** @brief Returns the total number of decompressed bytes produced so far.
+        */
+        std::size_t zcount() const
+        { return _buffer.zcount(); }
 
     private:
         ZBuffer _buffer;

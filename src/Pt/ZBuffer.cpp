@@ -39,6 +39,7 @@ ZBuffer::ZBuffer(Format fmt)
 , _zstr(0)
 , _format(fmt)
 , _zbufsize(0)
+, _zcount(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -55,6 +56,7 @@ ZBuffer::ZBuffer(std::ios& ios, Format fmt)
 , _zstr(0)
 , _format(fmt)
 , _zbufsize(0)
+, _zcount(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -106,6 +108,7 @@ void ZBuffer::discard()
     }
 
     _zbufsize = 0;
+    _zcount   = 0;
 }
 
 
@@ -266,6 +269,7 @@ void ZBuffer::inflateBuffer()
     std::streamsize generated = unused - _zstr->avail_out;
     if(generated)
     {
+        _zcount += static_cast<std::size_t>(generated);
         this->setg(this->eback(),               // start of read buffer
                    this->gptr(),                // gptr position
                    this->egptr() + generated ); // end of read buffer

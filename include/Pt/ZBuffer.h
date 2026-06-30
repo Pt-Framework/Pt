@@ -87,6 +87,10 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         */
         void finish();
 
+        /** @brief Returns the total number of decompressed bytes produced so far.
+        */
+        std::size_t zcount() const { return _zcount; }
+
         /** @brief Import data from the target stream.
 
             Returns the number of bytes consumed from the underlyig stream.
@@ -126,6 +130,8 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         static const int _zbufmax = 4096;
         char _zbuf[_zbufmax];
         int _zbufsize;
+
+        std::size_t _zcount;
 };
 
 } // namespace Pt
