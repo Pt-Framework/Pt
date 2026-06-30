@@ -34,9 +34,10 @@
 
 namespace Pt {
 
-ZBuffer::ZBuffer()
+ZBuffer::ZBuffer(Format fmt)
 : _target(0)
 , _zstr(0)
+, _format(fmt)
 , _zbufsize(0)
 {
     this->setg(0, 0, 0);
@@ -49,9 +50,10 @@ ZBuffer::ZBuffer()
 }
 
 
-ZBuffer::ZBuffer(std::ios& ios)
+ZBuffer::ZBuffer(std::ios& ios, Format fmt)
 : _target(&ios)
 , _zstr(0)
+, _format(fmt)
 , _zbufsize(0)
 {
     this->setg(0, 0, 0);
@@ -65,14 +67,14 @@ ZBuffer::ZBuffer(std::ios& ios)
 
 
 ZBuffer::~ZBuffer()
-{ 
+{
     try
     {
         reset();
-    } 
+    }
     catch(...)
     {}
-    
+
     delete _zstr;
 }
 
@@ -81,7 +83,7 @@ void ZBuffer::attach(std::ios& target)
 {
     _target = &target;
 }
-        
+
 
 void ZBuffer::detach()
 {
@@ -136,7 +138,7 @@ void ZBuffer::finish()
           err = deflate(_zstr, Z_FINISH);
           if(err != Z_STREAM_END && err != Z_OK)
               throw IOError("deflate failed");
-                  
+
           std::streamsize avail = _zbufmax - _zstr->avail_out;
           avail -= _target->rdbuf()->sputn(_zbuf, avail);
           if(avail > 0)
@@ -155,8 +157,9 @@ std::streamsize ZBuffer::import(std::streamsize maxImport)
         // discard ends deflating for put area
         discard();
 
-        int err = inflateInit(_zstr);
-        if (err != Z_OK) 
+        const int windowBits = (_format == Gzip) ? MAX_WBITS + 32 : MAX_WBITS;
+        int err = inflateInit2(_zstr, windowBits);
+        if (err != Z_OK)
             throw IOError("inflateInit failed");
 
         this->setg(_buf, _buf, _buf);
@@ -198,8 +201,9 @@ std::streamsize ZBuffer::import(const char* data, std::streamsize size)
         // discard ends deflating for put area
         discard();
 
-        int err = inflateInit(_zstr);
-        if (err != Z_OK) 
+        const int windowBits = (_format == Gzip) ? MAX_WBITS + 32 : MAX_WBITS;
+        int err = inflateInit2(_zstr, windowBits);
+        if (err != Z_OK)
             throw IOError("inflateInit failed");
 
         this->setg(_buf, _buf, _buf);
@@ -247,10 +251,10 @@ void ZBuffer::inflateBuffer()
     while( _zstr->avail_in > 0 && _zstr->avail_out > 0)
     {
       int err = inflate(_zstr, Z_NO_FLUSH);
-      
+
       if(err == Z_STREAM_END)
           break;
-      
+
       if(err != Z_OK)
           throw IOError("inflate failed");
     }
@@ -273,7 +277,7 @@ std::streamsize ZBuffer::showmanyc()
 {
     // Return 0, because we can not predict how many characters
     // can be decompressed. If we returned a number > 0, the next
-    // call to underflow() must exactly read this number of bytes 
+    // call to underflow() must exactly read this number of bytes
     // without blocking.
 
     return _target && _target->rdbuf() ? 0 : -1;
@@ -281,8 +285,8 @@ std::streamsize ZBuffer::showmanyc()
 
 
 std::streamsize ZBuffer::showfull()
-{ 
-    return 0; 
+{
+    return 0;
 }
 
 
@@ -326,8 +330,9 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
         // discard ends inflating for get area
         discard();
 
-        int err = deflateInit(_zstr, Z_DEFAULT_COMPRESSION);
-        if (err != Z_OK) 
+        const int windowBits = (_format == Gzip) ? MAX_WBITS + 16 : MAX_WBITS;
+        int err = deflateInit2(_zstr, Z_DEFAULT_COMPRESSION, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
+        if (err != Z_OK)
           throw IOError("deflateInit failed");
 
         this->setp( _buf, _buf + _bufmax );
@@ -343,9 +348,9 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
             _zstr->avail_out = _zbufmax;
 
             int err = deflate(_zstr, Z_NO_FLUSH);
-            if (err != Z_OK) 
+            if (err != Z_OK)
                 throw IOError("deflate failed");
-             
+
             std::streamsize avail = _zbufmax - _zstr->avail_out;
             avail -= _target->rdbuf()->sputn(_zbuf, avail);
             if(avail > 0)

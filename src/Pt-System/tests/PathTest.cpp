@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -36,7 +36,7 @@ class PathTest : public Pt::Unit::TestSuite
     public:
         PathTest()
         : Pt::Unit::TestSuite("PathTest")
-        { 
+        {
             Pt::Unit::TestSuite::registerMethod( "Append", *this, &PathTest::Append );
             Pt::Unit::TestSuite::registerMethod( "Concat", *this, &PathTest::Concat );
             Pt::Unit::TestSuite::registerMethod( "Compare", *this, &PathTest::Compare );
@@ -45,6 +45,8 @@ class PathTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "BaseName", *this, &PathTest::BaseName );
             Pt::Unit::TestSuite::registerMethod( "Extension", *this, &PathTest::Extension );
             Pt::Unit::TestSuite::registerMethod( "Extension", *this, &PathTest::Extension );
+            Pt::Unit::TestSuite::registerMethod( "ForwardSlash", *this, &PathTest::ForwardSlash );
+            Pt::Unit::TestSuite::registerMethod( "ToGeneric", *this, &PathTest::ToGeneric );
         }
 
     protected:
@@ -69,7 +71,14 @@ class PathTest : public Pt::Unit::TestSuite
             path += "abc/";
             path += Pt::String("xyz\\");
             path += "123";
-            PT_UNIT_ASSERT_EQUALS( path.toString(), "abc/xyz\\123");
+
+            // all separators are normalized to native format
+            std::string expected("abc");
+            expected += Pt::System::Path::dirsep().narrow();
+            expected += "xyz";
+            expected += Pt::System::Path::dirsep().narrow();
+            expected += "123";
+            PT_UNIT_ASSERT_EQUALS( path.toString(), expected.c_str() );
         }
 
         void Compare()
@@ -102,7 +111,7 @@ class PathTest : public Pt::Unit::TestSuite
             path = "abc";
             path /= "xyz";
             PT_UNIT_ASSERT_EQUALS( path.fileName(), "xyz" );
-            
+
             path = "abc.txt";
             PT_UNIT_ASSERT_EQUALS( path.fileName(), "abc.txt" );
 
@@ -135,13 +144,13 @@ class PathTest : public Pt::Unit::TestSuite
             path = "abc";
             path /= "xyz";
             PT_UNIT_ASSERT_EQUALS( path.dirName(), dir.c_str() );
-         
+
             path = "abc";
             path /= "def";
             path /= "ghi";
             path = path.dirName();
             PT_UNIT_ASSERT_EQUALS( path.dirName(), dir.c_str() );
-            
+
             path = Pt::System::Path::dirsep();
             PT_UNIT_ASSERT( path.dirName().empty() );
 
@@ -174,7 +183,7 @@ class PathTest : public Pt::Unit::TestSuite
             path = "abc";
             path /= "xyz";
             PT_UNIT_ASSERT_EQUALS( path.baseName(), "xyz" );
-            
+
             path = "abc.txt";
             PT_UNIT_ASSERT_EQUALS( path.baseName(), "abc" );
 
@@ -204,7 +213,7 @@ class PathTest : public Pt::Unit::TestSuite
             path = "abc";
             path /= "xyz";
             PT_UNIT_ASSERT( path.extension().empty() );
-            
+
             path = "abc.txt";
             PT_UNIT_ASSERT_EQUALS( path.extension(), "txt" );
 
@@ -213,6 +222,62 @@ class PathTest : public Pt::Unit::TestSuite
 
             path = "abc";
             PT_UNIT_ASSERT( path.extension().empty() );
+        }
+
+        void ForwardSlash()
+        {
+            // Forward slashes are normalized to native separator on Win32
+            Pt::System::Path path("abc/def/ghi.txt");
+
+            // fileName must work with forward-slash input
+            PT_UNIT_ASSERT_EQUALS( path.fileName(), "ghi.txt" );
+
+            // dirName must work with forward-slash input
+            std::string expectedDir("abc");
+            expectedDir += Pt::System::Path::dirsep().narrow();
+            expectedDir += "def";
+            expectedDir += Pt::System::Path::dirsep().narrow();
+            PT_UNIT_ASSERT_EQUALS( path.dirName(), expectedDir.c_str() );
+
+            // extension must work
+            PT_UNIT_ASSERT_EQUALS( path.extension(), "txt" );
+
+            // baseName must work
+            PT_UNIT_ASSERT_EQUALS( path.baseName(), "ghi" );
+
+            // append with forward-slash leading char
+            Pt::System::Path base("root");
+            base /= "/sub";
+            PT_UNIT_ASSERT_EQUALS( base.fileName(), "sub" );
+
+            // mixed separators
+            Pt::System::Path mixed("a/b");
+            mixed /= "c";
+            PT_UNIT_ASSERT_EQUALS( mixed.fileName(), "c" );
+
+            std::string mixedDir("a");
+            mixedDir += Pt::System::Path::dirsep().narrow();
+            mixedDir += "b";
+            mixedDir += Pt::System::Path::dirsep().narrow();
+            PT_UNIT_ASSERT_EQUALS( mixed.dirName(), mixedDir.c_str() );
+        }
+
+        void ToGeneric()
+        {
+            Pt::System::Path path("abc");
+            path /= "def";
+            path /= "ghi.txt";
+
+            // toGeneric always returns forward slashes
+            PT_UNIT_ASSERT_EQUALS( path.toGeneric(), "abc/def/ghi.txt" );
+
+            // round-trip: construct from generic, get generic back
+            Pt::System::Path path2("x/y/z");
+            PT_UNIT_ASSERT_EQUALS( path2.toGeneric(), "x/y/z" );
+
+            // empty path
+            Pt::System::Path empty;
+            PT_UNIT_ASSERT( empty.toGeneric().empty() );
         }
 };
 

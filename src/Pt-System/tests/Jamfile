@@ -11,6 +11,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   PipeTest.cpp
                   ProcessTest.cpp
                   SerialDeviceTest.cpp
+                  TarReaderTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
                   UriTest.cpp
@@ -26,6 +27,10 @@ Main ProcessTestChild : ProcessTestChild.cpp ;
 MakeLocate ProcessTestChild : $(PT_OUTPUT_TARGET) ;
 LinkSharedLibraries ProcessTestChild : Pt Pt-System  ;
 Depends Pt-System-test : ProcessTestChild ;
+
+Main tar-demo : TarDemo.cpp ;
+MakeLocate tar-demo : $(PT_OUTPUT_TARGET) ;
+LinkSharedLibraries tar-demo : Pt Pt-System ;
 
 #Main ThreadDemo : ThreadDemo.cpp ;
 #MakeLocate ThreadDemo : $(PT_OUTPUT_TARGET) ;

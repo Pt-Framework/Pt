@@ -242,6 +242,13 @@ class PT_SYSTEM_API Path
         */
         std::string toLocal() const;
 
+        /** @brief Returns the path name with generic separators.
+
+            On Windows the returned string uses forward slashes as
+            directory separators. On POSIX it is identical to toString().
+        */
+        Pt::String toGeneric() const;
+
         // Others
 
         /** @brief Returns the directory separator string.

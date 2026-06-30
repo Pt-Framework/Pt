@@ -58,6 +58,8 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           SerialDevice.cpp
                           Semaphore.cpp
                           SystemError.cpp
+                          TarReader.cpp
+                          TarWriter.cpp
                           Thread.cpp
                           Timer.cpp
                           Uri.cpp

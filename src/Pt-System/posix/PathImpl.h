@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2014 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -71,7 +71,7 @@ static struct InitSystemCodec
 inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& local)
 {
     TextCodec<Pt::Char, char>* codec = systemCodec();
-    
+
     Utf8Codec utf8Codec;
     if( ! codec )
         codec = &utf8Codec;;
@@ -82,7 +82,7 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
     MBState state;
     std::codecvt_base::result r;
 
-    do 
+    do
     {
         char* toNext = to;
         r = codec->out(state, from, fromEnd, from, to, toEnd, toNext);
@@ -91,7 +91,7 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
             local.append(5, '?');
         else
             local.append(to, toNext);
-    } 
+    }
     while(r == std::codecvt_base::partial);
 }
 
@@ -99,7 +99,7 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
 inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
 {
     TextCodec<Pt::Char, char>* codec = systemCodec();
-    
+
     Utf8Codec utf8Codec;
     if( ! codec )
         codec = &utf8Codec;;
@@ -110,7 +110,7 @@ inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
     MBState state;
     std::codecvt_base::result r;
 
-    do 
+    do
     {
         Pt::Char* toNext = to;
         r = codec->in(state, from, fromEnd, from, to, toEnd, toNext);
@@ -119,7 +119,7 @@ inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
             ustr.append(5, '?');
         else
             ustr.append(to, toNext);
-    } 
+    }
     while(r == std::codecvt_base::partial);
 }
 
@@ -132,7 +132,7 @@ class PathImpl
     public:
         PathImpl()
         { }
-        
+
         void clear()
         { _path.clear(); }
 
@@ -206,15 +206,20 @@ class PathImpl
             return str;
         }
 
+        Pt::String toGeneric() const
+        {
+            return toString();
+        }
+
         const std::string& toLocal() const
         {
             return _path;
         }
 
-        static char dirsep() 
+        static char dirsep()
         { return '/'; }
 
-        static char extsep() 
+        static char extsep()
         { return '.'; }
 
     private:

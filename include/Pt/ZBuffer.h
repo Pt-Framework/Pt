@@ -43,26 +43,34 @@ namespace Pt {
 class PT_API ZBuffer : public BasicStreamBuffer<char>
 {
     public:
+        /** @brief Compression/decompression format.
+        */
+        enum Format
+        {
+            Zlib = 0, ///< zlib header/trailer with Adler-32 checksum.
+            Gzip      ///< gzip header/trailer with CRC-32 checksum (RFC 1952).
+        };
+
         /** @brief Default Constructor.
         */
-        ZBuffer();
-        
+        ZBuffer(Format fmt = Zlib);
+
         /** @brief Construct with target stream.
         */
-        ZBuffer(std::ios& ios);
+        ZBuffer(std::ios& ios, Format fmt = Zlib);
 
         /** @brief Destructor.
         */
         virtual ~ZBuffer();
-        
+
         /** @brief Attach to target stream.
         */
         void attach(std::ios& target);
-        
+
         /** @brief Detach from target stream.
         */
         void detach();
-        
+
         /** @brief Discards the buffer content and resets the state.
         */
         void discard();
@@ -96,25 +104,26 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
 
         // inheritdoc
         virtual int sync();
-        
+
         // inheritdoc
         virtual int_type underflow();
-        
+
         // inheritdoc
         virtual int_type overflow(int_type ch);
-    
+
     private:
         void inflateBuffer();
 
     private:
         std::ios* _target;
         z_stream* _zstr;
+        Format _format;
 
         static const int _pbmax = 4;
-        static const int _bufmax = 1024;
+        static const int _bufmax = 4096;
         char _buf[_bufmax];
 
-        static const int _zbufmax = 1024;
+        static const int _zbufmax = 4096;
         char _zbuf[_zbufmax];
         int _zbufsize;
 };
