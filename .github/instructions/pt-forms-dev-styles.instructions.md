@@ -1,5 +1,4 @@
 ---
-applyTo: "**/*Style.h,**/*Style.cpp,**/StyleOptions.h,**/StyleOptions.cpp,**/Application.cpp,**/Application.h,**/Platinum*.cpp,**/Platinum*.h,**/Button.cpp,**/Button.h,**/PushButton.cpp,**/PushButton.h,**/Panel.cpp,**/Panel.h,**/Label.cpp,**/Label.h,**/CheckBox.cpp,**/CheckBox.h,**/SpinBox.cpp,**/SpinBox.h,**/ProgressBar.cpp,**/ProgressBar.h,**/LineEdit.cpp,**/LineEdit.h,**/Slider.cpp,**/Slider.h,**/ScrollBar.cpp,**/ScrollBar.h,**/ComboBox.cpp,**/ComboBox.h,**/ListBox.cpp,**/ListBox.h,**/TabView.cpp,**/TabView.h"
 description: "Guidelines and current architecture for Pt::Forms styles, renderers, shared style reset, extracted ButtonStyle/PanelStyle slices, and widget integration in PushButton, Panel, and Label."
 ---
 
