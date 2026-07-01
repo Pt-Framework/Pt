@@ -495,7 +495,7 @@ class TarReaderImpl
                 _entry.setSize(size);
                 _entry.setRemaining(size);
                 _entry.setData(0, 0);
-                _entry.setType(Pt::System::FileInfo::File);
+                _entry.setType(TarEntry::File);
                 _entry.setLinkTarget(Pt::System::Path());
                 _entry.setPermissions(perms);
                 _entry.setMtime(mtime);
@@ -510,7 +510,7 @@ class TarReaderImpl
                 _entry.setSize(0);
                 _entry.setRemaining(0);
                 _entry.setData(0, 0);
-                _entry.setType(Pt::System::FileInfo::Link);
+                _entry.setType(TarEntry::Link);
                 _entry.setLinkTarget( Pt::System::Path(linkTarget.c_str()) );
                 _entry.setPermissions(perms);
                 _entry.setMtime(mtime);
@@ -526,7 +526,7 @@ class TarReaderImpl
                 _entry.setSize(0);
                 _entry.setRemaining(0);
                 _entry.setData(0, 0);
-                _entry.setType(Pt::System::FileInfo::Directory);
+                _entry.setType(TarEntry::Directory);
                 _entry.setLinkTarget(Pt::System::Path());
                 _entry.setPermissions(perms);
                 _entry.setMtime(mtime);
@@ -557,9 +557,8 @@ class TarReaderImpl
                 _entry.setSize(0);
                 _entry.setRemaining(0);
                 _entry.setData(0, 0);
-                _entry.setType(Pt::System::FileInfo::File);
+                _entry.setType(TarEntry::Hardlink);
                 _entry.setLinkTarget( Pt::System::Path(linkTarget.c_str()) );
-                _entry.setPermissions(perms);
                 _entry.setMtime(mtime);
                 _state = OnHeader;
                 return true;

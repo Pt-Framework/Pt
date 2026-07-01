@@ -56,7 +56,7 @@ namespace Pt {
         if( ! entry )
             break; // starved, call advance() again when more data arrives
 
-        if(entry->type == Pt::System::FileInfo::File)
+        if(entry->type() == Pt::TarEntry::File)
         {
             char buf[4096];
             std::size_t n = 0;
@@ -85,9 +85,9 @@ namespace Pt {
     ### Hard links
 
     Hard link entries (tar typeflag '1') are returned as %TarEntry objects
-    with type() == %FileInfo::File and a non-empty linkTarget().  Use
-    %TarEntry::isHardlink() to distinguish them from regular files.  No
-    content data is associated with a hard link entry.
+    with type() == %TarEntry::Hardlink.  No content data is associated with
+    a hard link entry.  Use %TarEntry::isHardlink() as a convenience check,
+    and %FileInfo::createHardlink() to create the link during extraction.
 */
 class PT_SYSTEM_API TarReader
 {

@@ -28,10 +28,14 @@
 #include <Pt/System/TarEntry.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/Path.h>
+#include <Pt/IOError.h>
 #include <Pt/Arg.h>
 #include <Pt/ZStream.h>
 
+#if __cplusplus >= 201703L
 #include <filesystem>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -60,8 +64,7 @@ static bool isGzip(const std::string& path)
 
 static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
 {
-    std::ofstream outFile;
-    Pt::System::Path filePath;
+    std::ofstream currentFile;
 
     while( ! reader.isEnd() )
     {
@@ -70,16 +73,16 @@ static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
             break;  // starved — in real code: return, wait for data, come back
 
         // Continuation of the current file
-        if( outFile.is_open() )
+        if( currentFile.is_open() )
         {
             if(entry->avail() > 0)
-                outFile.write(entry->data(),
+                currentFile.write(entry->data(),
                               static_cast<std::streamsize>(entry->avail()));
 
             if(entry->isEnd())
             {
-                outFile.close();
-                Pt::System::FileInfo::permissions(filePath, entry->permissions(),
+                currentFile.close();
+                Pt::System::FileInfo::permissions(outDir / entry->path(), entry->permissions(),
                                                   Pt::System::FileInfo::PermReplace);
             }
             continue;
@@ -88,7 +91,7 @@ static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
         // New entry
         const Pt::System::Path fullPath = outDir / entry->path();
 
-        if(entry->type() == Pt::System::FileInfo::Directory)
+        if(entry->type() == Pt::TarEntry::Directory)
         {
             std::cout << "  dir  " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal() << "\n";
@@ -96,46 +99,53 @@ static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
             Pt::System::FileInfo::permissions(fullPath, entry->permissions(),
                                               Pt::System::FileInfo::PermReplace);
         }
-        else if(entry->type() == Pt::System::FileInfo::Link)
+        else if(entry->type() == Pt::TarEntry::Link)
         {
             std::cout << "  link " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal()
                       << " -> " << entry->linkTarget().toLocal() << "\n";
         }
-        else if(entry->isHardlink())
+        else if(entry->type() == Pt::TarEntry::Hardlink)
         {
             std::cout << "  hard " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal()
                       << " -> " << entry->linkTarget().toLocal() << "\n";
         }
-        else // File
+        else if(entry->type() == Pt::TarEntry::File)
         {
-            Pt::System::Path parentDir(fullPath.dirName());
-            Pt::System::FileInfo::createDirectories(parentDir);
-
             std::cout << "  file " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal() << "\n";
 
+            Pt::System::Path parentDir( fullPath.dirName() );
+            Pt::System::FileInfo::createDirectories(parentDir);
+
+#if __cplusplus >= 201703L
             Pt::String p = fullPath.toString();
             const char32_t* p32 = reinterpret_cast<const char32_t*>(p.c_str());
             const std::filesystem::path fspath(p32);
-            outFile.open(fspath, std::ios::binary | std::ios::trunc);
-            if( ! outFile.is_open() )
-                throw std::runtime_error("cannot create " + fullPath.toLocal());
-
-            filePath = fullPath;
+            currentFile.open(fspath, std::ios::binary | std::ios::trunc);
+#else
+            currentFile.open(fullPath.toLocal(), std::ios::binary | std::ios::trunc);
+#endif
+            if( ! currentFile.is_open() )
+                throw Pt::AccessFailed( fullPath.toLocal() );
 
             if(entry->avail() > 0)
-                outFile.write(entry->data(),
-                              static_cast<std::streamsize>(entry->avail()));
+                currentFile.write(entry->data(),
+                                  static_cast<std::streamsize>(entry->avail()));
 
             if(entry->isEnd())
             {
-                outFile.close();
-                Pt::System::FileInfo::permissions(filePath, entry->permissions(),
+                currentFile.close();
+                Pt::System::FileInfo::permissions(fullPath, entry->permissions(),
                                                   Pt::System::FileInfo::PermReplace);
             }
-            // Not isEnd(): outer loop comes back → continuation branch handles it
+        }
+        else
+        {
+            std::cout << "  ???  " << formatPerms(entry->permissions())
+                      << "  " << fullPath.toLocal()
+                      << " (unknown tar entry type)\n";
         }
     }
 }

@@ -190,10 +190,9 @@ class TarReaderTest : public Pt::Unit::TestSuite
         PT_UNIT_ASSERT(entry != 0);
         PT_UNIT_ASSERT(entry->path().toString() == "hello.txt");
         PT_UNIT_ASSERT_EQUAL(entry->size(), content.size());
-        PT_UNIT_ASSERT(entry->type() == Pt::System::FileInfo::File);
+        PT_UNIT_ASSERT(entry->type() == Pt::TarEntry::File);
 
-        std::string got;
-        while(entry->avail() > 0)
+        std::string got;        while(entry->avail() > 0)
         {
             got.append(entry->data(), entry->avail());
             if( entry->isEnd() )
@@ -221,7 +220,7 @@ class TarReaderTest : public Pt::Unit::TestSuite
         const Pt::TarEntry* entry = reader.advance(4096);
         PT_UNIT_ASSERT(entry != 0);
         PT_UNIT_ASSERT(entry->path().toString() == "subdir");
-        PT_UNIT_ASSERT(entry->type() == Pt::System::FileInfo::Directory);
+        PT_UNIT_ASSERT(entry->type() == Pt::TarEntry::Directory);
         PT_UNIT_ASSERT_EQUAL(entry->size(), std::size_t(0));
         PT_UNIT_ASSERT(entry->isEnd());
 
@@ -243,7 +242,7 @@ class TarReaderTest : public Pt::Unit::TestSuite
         const Pt::TarEntry* entry = reader.advance(4096);
         PT_UNIT_ASSERT(entry != 0);
         PT_UNIT_ASSERT(entry->path().toString() == "link.txt");
-        PT_UNIT_ASSERT(entry->type() == Pt::System::FileInfo::Link);
+        PT_UNIT_ASSERT(entry->type() == Pt::TarEntry::Link);
         PT_UNIT_ASSERT(entry->linkTarget().toString() == "target.txt");
         PT_UNIT_ASSERT(entry->isEnd());
 
@@ -265,8 +264,7 @@ class TarReaderTest : public Pt::Unit::TestSuite
         const Pt::TarEntry* entry = reader.advance(4096);
         PT_UNIT_ASSERT(entry != 0);
         PT_UNIT_ASSERT(entry->path().toString() == "link.bin");
-        PT_UNIT_ASSERT(entry->type() == Pt::System::FileInfo::File);
-        PT_UNIT_ASSERT(entry->isHardlink());
+        PT_UNIT_ASSERT(entry->type() == Pt::TarEntry::Hardlink);
         PT_UNIT_ASSERT(entry->linkTarget().toString() == "original.bin");
         PT_UNIT_ASSERT_EQUAL(entry->size(), std::size_t(0));
         PT_UNIT_ASSERT(entry->isEnd());

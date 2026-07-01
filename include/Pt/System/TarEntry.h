@@ -62,6 +62,16 @@ namespace Pt {
 class TarEntry
 {
   public:
+    /** @brief Entry type in the tar archive. */
+    enum Type
+    {
+        Invalid   = 0, //!< Not yet set
+        File      = 1, //!< Regular file
+        Directory = 2, //!< Directory
+        Link      = 3, //!< Symbolic link
+        Hardlink  = 4  //!< Hard link
+    };
+
     /** @brief Default constructor.
     */
     TarEntry() = default;
@@ -92,16 +102,6 @@ class TarEntry
     bool isEnd() const
     { return _avail == _remaining; }
 
-    /** @brief Returns true if this entry is a hard link.
-
-        Hard links have type() == %FileInfo::File and a non-empty
-        linkTarget().  The link target is the archive-relative path of the
-        file that was linked.  Use %FileInfo::createHardlink() to create the
-        link during extraction.
-    */
-    bool isHardlink() const
-    { return _type == Pt::System::FileInfo::File && !_linkTarget.toString().empty(); }
-
     /** @brief Path of this entry. */
     const Pt::System::Path& path() const
     { return _path; }
@@ -125,8 +125,8 @@ class TarEntry
     const char* data() const
     { return _data; }
 
-    /** @brief Entry type (file, directory, symbolic link). */
-    Pt::System::FileInfo::Type type() const
+    /** @brief Entry type (file, directory, symbolic link, or hard link). */
+    Type type() const
     { return _type; }
 
     /** @brief Link target path for symbolic links. */
@@ -153,7 +153,7 @@ class TarEntry
     void setData(const char* data, std::size_t avail)
     { _data = data; _avail = avail; }
 
-    void setType(Pt::System::FileInfo::Type type)
+    void setType(Type type)
     { _type = type; }
 
     void setLinkTarget(const Pt::System::Path& target)
@@ -176,7 +176,7 @@ class TarEntry
     std::size_t                  _remaining   = 0;
     std::size_t                  _avail       = 0;
     const char*                  _data        = 0;
-    Pt::System::FileInfo::Type   _type;
+    Type                         _type        = Invalid;
     Pt::System::Path             _linkTarget;
     Pt::System::FileInfo::Perms  _permissions;
     Pt::DateTime                 _mtime;
