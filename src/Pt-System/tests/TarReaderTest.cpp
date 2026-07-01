@@ -114,6 +114,19 @@ struct TarBuilder
         bytes.insert(bytes.end(), hdr, hdr + 512);
     }
 
+    void addHardlink(const char* name, const char* target)
+    {
+        char hdr[512] = {};
+        std::strncpy(hdr, name, 99);
+        setOctal(hdr + 100, 8, 0644);
+        hdr[156] = '1';
+        std::strncpy(hdr + 157, target, 99);
+        std::memcpy(hdr + 257, "ustar", 5);
+        std::memcpy(hdr + 263, "00", 2);
+        computeChksum(hdr);
+        bytes.insert(bytes.end(), hdr, hdr + 512);
+    }
+
     void finalize()
     {
         bytes.insert(bytes.end(), 1024, '\0');
@@ -144,6 +157,7 @@ class TarReaderTest : public Pt::Unit::TestSuite
         registerMethod("SymLink",       *this, &TarReaderTest::SymLink);
         registerMethod("MultipleFiles", *this, &TarReaderTest::MultipleFiles);
         registerMethod("LargeFile",     *this, &TarReaderTest::LargeFile);
+        registerMethod("HardLink",      *this, &TarReaderTest::HardLink);
     }
 
   protected:
@@ -237,6 +251,31 @@ class TarReaderTest : public Pt::Unit::TestSuite
         PT_UNIT_ASSERT(entry == 0);
         PT_UNIT_ASSERT(reader.isEnd());
     }
+
+    // Hard link — verify type, isHardlink() and link target.
+    void HardLink()
+    {
+        TarBuilder b;
+        b.addHardlink("link.bin", "original.bin");
+        b.finalize();
+        auto ss = b.stream();
+
+        Pt::TarReader reader(ss);
+
+        const Pt::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT(entry->path().toString() == "link.bin");
+        PT_UNIT_ASSERT(entry->type() == Pt::System::FileInfo::File);
+        PT_UNIT_ASSERT(entry->isHardlink());
+        PT_UNIT_ASSERT(entry->linkTarget().toString() == "original.bin");
+        PT_UNIT_ASSERT_EQUAL(entry->size(), std::size_t(0));
+        PT_UNIT_ASSERT(entry->isEnd());
+
+        entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry == 0);
+        PT_UNIT_ASSERT(reader.isEnd());
+    }
+
 
     // Two files — verify sequential reading does not mix content.
     void MultipleFiles()

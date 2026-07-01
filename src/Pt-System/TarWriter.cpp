@@ -104,6 +104,16 @@ class TarWriterImpl
                          std::time(0));
     }
 
+    void addHardlink(const Pt::System::Path& path,
+                     const Pt::System::Path& target)
+    {
+        std::string p = path.toLocal();
+        std::string t = target.toLocal();
+        writePaxHeaderIfNeeded(p, t);
+        writeUStarHeader(p, t, '1', 0, Pt::System::FileInfo::NoPerms,
+                         std::time(0));
+    }
+
     void finish()
     {
         char block[512] = {};
@@ -370,6 +380,13 @@ void TarWriter::addSymlink(const Pt::System::Path& path,
                            const Pt::System::Path& target)
 {
     _impl->addSymlink(path, target);
+}
+
+
+void TarWriter::addHardlink(const Pt::System::Path& path,
+                            const Pt::System::Path& target)
+{
+    _impl->addHardlink(path, target);
 }
 
 

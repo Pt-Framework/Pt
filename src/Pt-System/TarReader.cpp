@@ -552,7 +552,18 @@ class TarReaderImpl
             }
 
             case '1': // hard link
-                throw Pt::IOError("tar: hard links are not supported");
+            {
+                _entry.setPath( Pt::System::Path(path.c_str()) );
+                _entry.setSize(0);
+                _entry.setRemaining(0);
+                _entry.setData(0, 0);
+                _entry.setType(Pt::System::FileInfo::File);
+                _entry.setLinkTarget( Pt::System::Path(linkTarget.c_str()) );
+                _entry.setPermissions(perms);
+                _entry.setMtime(mtime);
+                _state = OnHeader;
+                return true;
+            }
 
             default: // unknown type: skip data blocks
             {

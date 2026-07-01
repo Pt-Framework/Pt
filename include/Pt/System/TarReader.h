@@ -80,8 +80,14 @@ namespace Pt {
     ### Pax extended headers
 
     Long paths (> 100 characters), UTF-8 paths and extended modification
-    times are handled via Pax extended headers.  Hard links are not
-    supported and throw Pt::IOError.
+    times are handled via Pax extended headers.
+
+    ### Hard links
+
+    Hard link entries (tar typeflag '1') are returned as %TarEntry objects
+    with type() == %FileInfo::File and a non-empty linkTarget().  Use
+    %TarEntry::isHardlink() to distinguish them from regular files.  No
+    content data is associated with a hard link entry.
 */
 class PT_SYSTEM_API TarReader
 {

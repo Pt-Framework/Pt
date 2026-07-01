@@ -96,6 +96,14 @@ class PT_SYSTEM_API TarWriter
     void addSymlink(const Pt::System::Path& path,
                     const Pt::System::Path& target);
 
+    /** @brief Write a hard-link entry.
+
+        @param path   Archive path of the new link (UTF-8).
+        @param target Archive path of the existing file to link to (UTF-8).
+    */
+    void addHardlink(const Pt::System::Path& path,
+                     const Pt::System::Path& target);
+
     /** @brief Write the end-of-archive marker (two 512-byte null blocks). */
     void finish();
 

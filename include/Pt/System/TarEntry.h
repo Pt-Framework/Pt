@@ -92,6 +92,16 @@ class TarEntry
     bool isEnd() const
     { return _avail == _remaining; }
 
+    /** @brief Returns true if this entry is a hard link.
+
+        Hard links have type() == %FileInfo::File and a non-empty
+        linkTarget().  The link target is the archive-relative path of the
+        file that was linked.  Use %FileInfo::createHardlink() to create the
+        link during extraction.
+    */
+    bool isHardlink() const
+    { return _type == Pt::System::FileInfo::File && !_linkTarget.toString().empty(); }
+
     /** @brief Path of this entry. */
     const Pt::System::Path& path() const
     { return _path; }
