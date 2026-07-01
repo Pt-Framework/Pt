@@ -118,7 +118,8 @@ void FileInfo::createDirectories(const Path& path)
     Pt::System::Path subDir( path.dirName() );
     createDirectories(subDir);
 
-    createDirectory(path);
+    if( ! FileInfo::exists(path) )
+        createDirectory(path);
 }
 
 
