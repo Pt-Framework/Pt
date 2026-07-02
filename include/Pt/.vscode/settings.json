@@ -2,5 +2,30 @@
     "C_Cpp.default.browse.path": [
         "${workspaceFolder}",
         "${workspaceFolder}/../../src/Pt"
-    ]
+    ],
+    "files.exclude": {
+        "Cma": true,
+        "Cosmo": true,
+        "Db": true,
+        "Forms": true,
+        "Gfx": true,
+        "Http": true,
+        "Json": true,
+        "JsonRpc": true,
+        "Lua": true,
+        "Mcp": true,
+        "Mfc": true,
+        "Net": true,
+        "Qt": true,
+        "Refex": true,
+        "Remoting": true,
+        "Soap": true,
+        "Ssl": true,
+        "Reflex": true,
+        "System": true,
+        "Unit": true,
+        "WxWidgets": true,
+        "Xml": true,
+        "XmlRpc": true
+    }
 }
