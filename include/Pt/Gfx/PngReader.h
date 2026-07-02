@@ -30,7 +30,7 @@
 #define PT_GFX_PNGREADER_H
 
 #include <Pt/Gfx/Api.h>
-#include <iosfwd>
+#include <ios>
 
 namespace Pt {
 
