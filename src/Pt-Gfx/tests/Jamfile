@@ -2,9 +2,12 @@ SubDir PT_TOP src Pt-Gfx tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
+local PNG_TEST_SOURCES ;
+
 if $(PNG_INCLUDES)
 {
     SubDirHdrs $(PNG_INCLUDES) ;
+    PNG_TEST_SOURCES = PngTest.cpp ;
 }
 
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
@@ -17,7 +20,8 @@ Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    Rgb32ColorTest.cpp
                    Rgb32Test.cpp
                    SizeTest.cpp
-                   Yuv12Test.cpp 
+                   Yuv12Test.cpp
+                   $(PNG_TEST_SOURCES)
                    ;
 
 LinkSharedLibraries Pt-Gfx-test : Pt Pt-Gfx Pt-System Pt-Unit ;

@@ -22,7 +22,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301  USA
  */
 
@@ -66,8 +66,20 @@ class PT_GFX_API PngReader
         void reset();
 
         /** @brief Reads image data from the target stream.
+
+            Consumes bytes currently available in the stream buffer and feeds
+            them to the PNG decoder.
+
+            When @a importSize is 0 (default), only bytes already available via
+            in_avail() are consumed (non-blocking, suitable for event-loop use).
+            When @a importSize is greater than 0, up to that many bytes are read
+            from the underlying stream via sgetn(), which may block until data
+            arrives (suitable for file or thread use).
+
+            @returns Pointer to the completed %Image once all PNG data has been
+                     decoded, nullptr when more data is needed.
         */
-        Image* advance();
+        Image* advance(std::streamsize importSize = 0);
 
         /** @brief Reads the whole image from the stream.
         */

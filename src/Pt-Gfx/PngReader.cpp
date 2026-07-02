@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Marc Duerner 
+/* Copyright (C) 2017 Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301  USA
  */
 
@@ -39,6 +39,10 @@
 namespace Pt {
 
 namespace Gfx {
+
+///////////////////////////////////////////////////////////////////////
+// PngReaderImpl
+///////////////////////////////////////////////////////////////////////
 
 class PngReaderImpl
 {
@@ -115,27 +119,20 @@ class PngReaderImpl
             if( ! _image )
                 throw IOError("png error");
 
-            int eof = std::ios::traits_type::eof();
-            
-            do
-            {
-                int c = _target->rdbuf()->sgetc();
-                if(c == eof)
-                    throw IOError("invalid png format");
-            } 
-            while( ! advance() );
+            while( ! advance(sizeof(_buffer)) )
+                ;
 
             return *_image;
         }
 
-        Image* advance()
+        Image* advance(std::streamsize importSize = 0)
         {
             if( ! _target || ! _target->rdbuf() || ! _image )
                 return 0;
 
             if( ! _pngRead )
             {
-                _pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, 
+                _pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING,
                                                   NULL, &onPngError, &onPngWarning);
                 if( ! _pngRead )
                     throw IOError("png error");
@@ -151,17 +148,16 @@ class PngReaderImpl
                 png_set_progressive_read_fn(_pngRead, this, &onPngInfo, &onPngRow, &onPngEnd);
             }
 
-            std::streamsize avail = _target->rdbuf()->in_avail();
+            std::streamsize avail = (importSize > 0) ? importSize
+                                                     : _target->rdbuf()->in_avail();
 
             if(_state == OnBegin)
             {
-                if(avail <= 0)
-                  return 0;
+                if(importSize == 0 && avail <= 0)
+                    return 0;
 
                 std::streamsize signatureSize = 7;
-                
                 std::streamsize s = std::min(signatureSize - _bufferSize, avail);
-
                 std::streamsize n = _target->rdbuf()->sgetn(_buffer + _bufferSize, s);
                 if(n > 0)
                 {
@@ -173,11 +169,11 @@ class PngReaderImpl
                     return 0;
 
                 int isPng = png_sig_cmp((png_byte*)_buffer, 0, png_size_t(_bufferSize));
-                
-                if(isPng != 0)
-                  throw IOError("invalid png format");
 
-                png_set_sig_bytes( _pngRead, static_cast<int>(n) );
+                if(isPng != 0)
+                    throw IOError("invalid png format");
+
+                png_set_sig_bytes( _pngRead, static_cast<int>(_bufferSize) );
 
                 _bufferSize = 0;
                 _state = OnData;
@@ -185,16 +181,27 @@ class PngReaderImpl
 
             while(avail > 0 && _state != OnEnd)
             {
-                std::streamsize n = avail > sizeof(_buffer) ? sizeof(_buffer)
-                                                            : avail;
+                std::streamsize n = avail > static_cast<std::streamsize>( sizeof(_buffer) )
+                                          ? static_cast<std::streamsize>( sizeof(_buffer) )
+                                          : avail;
 
-                avail -= _target->rdbuf()->sgetn(_buffer, n);
-                png_process_data(_pngRead, _pngInfo, (png_byte*)_buffer, (png_size_t)n);
+                std::streamsize read = _target->rdbuf()->sgetn(_buffer, n);
+                if(read <= 0)
+                {
+                    // EOF is an error when reading blocking chunk
+                    if(importSize > 0)
+                        throw IOError("invalid png format");
+
+                    break;
+                }
+
+                avail -= read;
+                png_process_data(_pngRead, _pngInfo, (png_byte*)_buffer, (png_size_t)read);
             }
 
             return _state == OnEnd ? _image : 0;
         }
-        
+
         static void onPngRead(png_structp png, png_bytep data, png_size_t length)
         {
             png_voidp p = png_get_io_ptr(png);
@@ -208,7 +215,7 @@ class PngReaderImpl
             std::streamsize n = static_cast<std::streamsize>(length);
             _target->rdbuf()->sgetn(buffer, n);
         }
-        
+
         static void onPngInfo(png_structp png, png_infop info)
         {
             png_voidp p = png_get_progressive_ptr(png);
@@ -226,13 +233,13 @@ class PngReaderImpl
 
             // image height in pixel
             _height = png_get_image_height(png, info);
-   
+
             // bits per CHANNEL
             _depth = png_get_bit_depth(png, info);
-    
+
             // number of channels
             _channels = png_get_channels(png, info);
-    
+
             // color type. (RGB, RGBA, Luminance, luminance alpha... palette... etc)
             png_uint_32 color_type = png_get_color_type(png, info);
 
@@ -241,27 +248,27 @@ class PngReaderImpl
             {
                 case PNG_COLOR_TYPE_PALETTE:
                     png_set_palette_to_rgb(png);
-            
+
                     // channel info
                     _channels = 3;
                     break;
-        
+
                 case PNG_COLOR_TYPE_GRAY:
                     if (_depth < 8)
                         png_set_expand_gray_1_2_4_to_8(png);
-            
+
                     // bitdepth info
                     _depth = 8;
                     break;
             }
-    
+
             // alpha channel
             if (png_get_valid(png, info, PNG_INFO_tRNS))
             {
                 png_set_tRNS_to_alpha(png);
                 _channels += 1;
             }
-    
+
             // round precision down to 8
             if (_depth == 16)
             {
@@ -269,7 +276,7 @@ class PngReaderImpl
                 _depth = 8;
             }
         }
-        
+
         static void onPngRow(png_structp png, png_bytep data, png_uint_32 row, int pass)
         {
             png_voidp p = png_get_progressive_ptr(png);
@@ -280,16 +287,16 @@ class PngReaderImpl
         void onRow(png_structp png, png_bytep data, png_uint_32 row, int pass)
         {
             // image width in pixel
-            png_uint_32 width =  _width;
+            png_uint_32 width =  static_cast<png_uint_32>(_width);
 
             // image height in pixel
             //png_uint_32 height = _height;
-    
+
             // bits per CHANNEL
-            png_uint_32 bitdepth = _depth;
-    
+            png_uint_32 bitdepth = static_cast<png_uint_32>(_depth);
+
             // number of channels
-            png_uint_32 channels = _channels;
+            png_uint_32 channels = static_cast<png_uint_32>(_channels);
 
             // resize target image
             if( _image->width() != _width || _image->height() != _height )
@@ -305,7 +312,7 @@ class PngReaderImpl
             {
                 Argb32LineView lines( _image->data(), _image->width(), _image->height(), 0, Argb32::get() );
                 auto line = lines.line(row);
-  
+
                 if( channels == 3 )
                 {
                     for(auto& pixel : *line)
@@ -360,7 +367,7 @@ class PngReaderImpl
         }
 
     private:
-        enum State 
+        enum State
         {
             OnBegin = 0,
             OnData = 1,
@@ -381,6 +388,9 @@ class PngReaderImpl
         std::size_t _channels;
 };
 
+///////////////////////////////////////////////////////////////////////
+// PngReader
+///////////////////////////////////////////////////////////////////////
 
 PngReader::PngReader()
 : _impl( new PngReaderImpl() )
@@ -417,9 +427,9 @@ void PngReader::reset()
 }
 
 
-Image* PngReader::advance()
+Image* PngReader::advance(std::streamsize importSize)
 {
-    return _impl->advance();
+    return _impl->advance(importSize);
 }
 
 
