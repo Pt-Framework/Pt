@@ -28,6 +28,8 @@
 #include <Pt/Cosmo/IDependencyInfo.h>
 #include <Pt/Cosmo/Main.h>
 
+#include <Pt/Settings.h>
+
 #include <iostream>
 #include <string>
 
@@ -87,7 +89,7 @@ void onList(Pt::Cosmo::ComponentManager& cm, const std::string& info)
       }
       else
         std::cout << ", ";
-      
+
       std::cout << featureId;
     }
 
@@ -106,7 +108,7 @@ void onInfo(Pt::Cosmo::ComponentManager& cm, const std::string& info)
       return;
     }
   }
-  
+
   std::cout << "No such component." << std::endl;
 }
 
@@ -167,9 +169,13 @@ int main(int argc, char** argv)
 
     return 0;
   }
+  catch(const Pt::SettingsError& se)
+  {
+    std::cerr << "settings error: " << se.what() << " (" << se.line() << ")" << std::endl;
+  }
   catch(const std::exception& e)
   {
-    std::cerr << "ERR: " << e.what() << std::endl;
+    std::cerr << "internal error: " << e.what() << " (" << typeid(e).name() << ")" << std::endl;
   }
 
   return 1;

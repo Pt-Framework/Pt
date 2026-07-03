@@ -18,6 +18,6 @@ MakeLocate Pt-Cosmo : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Cosmo : $(PT_INSTALL_LIBDIR) ;
 
 Main cosmo : Cosmo.cpp ;
-LinkSharedLibraries cosmo : Pt-Cosmo ;
+LinkSharedLibraries cosmo : Pt-Cosmo Pt ;
 MakeLocate cosmo : $(PT_OUTPUT_TARGET) ;
 MakeInstall cosmo : $(PT_INSTALL_BINDIR) ;
