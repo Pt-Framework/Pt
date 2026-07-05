@@ -3,7 +3,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -13,12 +13,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -36,6 +36,10 @@
 #include "Pt/System/Selectable.h"
 #include "Pt/System/Thread.h"
 #include "Pt/System/Mutex.h"
+
+#if __cplusplus >= 202002L
+#include <Pt/Generator.h>
+#endif
 
 class TestAllocator : public Pt::Allocator
 {
@@ -103,7 +107,7 @@ class TestSelectable : public Pt::System::Selectable
         : Pt::System::Selectable()
         , _loop(0)
         , _thread()
-        { 
+        {
             _thread.init( Pt::callable(*this, &TestSelectable::executeThread) );
         }
 
@@ -111,7 +115,7 @@ class TestSelectable : public Pt::System::Selectable
         {
             if( ! _loop)
                 throw std::logic_error("TestSelectable not active");
-            
+
             _thread.start();
         }
 
@@ -133,7 +137,7 @@ class TestSelectable : public Pt::System::Selectable
 
             loop->exit();
         }
-        
+
         virtual void onAttach(Pt::System::EventLoop& loop)
         {
             Pt::System::MutexLock lock(_mtx);
@@ -176,6 +180,9 @@ class EventLoopTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
             Pt::Unit::TestSuite::registerMethod( "MaxAlloc", *this, &EventLoopTest::MaxAlloc);
             //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
+#if __cplusplus >= 202002L
+            Pt::Unit::TestSuite::registerMethod("YieldAsyncTest", *this, &EventLoopTest::YieldAsyncTest);
+#endif
         }
 
         void setUp()
@@ -187,7 +194,7 @@ class EventLoopTest : public Pt::Unit::TestSuite
         void SelectableTest()
         {
             TestSelectable ts;
-            
+
             Pt::System::MainLoop el;
 
             ts.setActive(el);
@@ -238,6 +245,40 @@ class EventLoopTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT_THROW( el.commitEvent( E1() ), std::bad_alloc );
         }
+
+#if __cplusplus >= 202002L
+        Pt::Generator<int> squares(int n)
+        {
+            for (int i = 1; i <= n; ++i)
+                co_yield i * i;
+        }
+
+        Pt::Task<void> yieldingTask(Pt::System::EventLoop& loop, int& result)
+        {
+            auto sq = squares(3);
+            int sum = 0;
+            while( co_await sq.next() )
+            {
+                sum += sq.value();
+                co_await loop.yieldAsync();
+            }
+            result = sum;
+            loop.exit();
+        }
+
+        void YieldAsyncTest()
+        {
+            Pt::System::MainLoop loop;
+            int finalResult = -1;
+
+            Pt::Task<void> task = yieldingTask(loop, finalResult);
+            task.run();
+
+            loop.run();
+            PT_UNIT_ASSERT( task.done() );
+            PT_UNIT_ASSERT_EQUAL(finalResult, 14); // 1^2 + 2^2 + 3^2 = 14
+        }
+#endif
 
          Pt::System::MainLoop* _loop;
 

@@ -41,6 +41,11 @@
 #include <map>
 #include <deque>
 
+#if __cplusplus >= 202002L
+#include <Pt/Coroutine.h>
+#include <Pt/System/Selectable.h>
+#endif
+
 namespace Pt {
 
 namespace System {
@@ -48,6 +53,10 @@ namespace System {
 class Timer;
 class Selectable;
 class Selector;
+
+#if __cplusplus >= 202002L
+class AsyncYield;
+#endif
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
@@ -61,7 +70,7 @@ class Selector;
     event loop, the latter allows queing multiple events and it is up to
     the caller to wake the event loop by calling wake() when all
     events are added. When the event loop processes its event, the signal
-    eventReceived is send for each processed event. Events are processed in 
+    eventReceived is send for each processed event. Events are processed in
     the order they were added.
 
     To start the %MainLoop the method run() must be executed. It blocks
@@ -110,23 +119,30 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<>& exited()
         { return _exited; }
 
+#if __cplusplus >= 202002L
+        /** @brief Pauses a coroutine and delegates execution back to the loop.
+            @return C++20 awaitable yielding execution to the loop processing queue.
+        */
+        AsyncYield yieldAsync();
+#endif
+
         /** @brief Posts the loop to run a selectable.
 
-            The event loop is woken up and the selectable's run function is 
+            The event loop is woken up and the selectable's run function is
             called in the event loop thread. This function may be called from
             any thread, especially from a selectable, that is based on a
             parallel execution model e.g. using a worker thread.
         */
         void post(Selectable& s)
-        { 
+        {
             onReady(s);
             wake();
         }
 
         //! @brief Sets the Selectable as ready without waking the loop.
         void setReady(Selectable& s)
-        { 
-            onReady(s); 
+        {
+            onReady(s);
         }
 
         //! @internal
@@ -223,6 +239,67 @@ class PT_SYSTEM_API TimerQueue
     private:
         TimerMap _timers;
 };
+
+#if __cplusplus >= 202002L
+
+/** @brief Awaitable that schedules a resume in the EventLoop.
+
+    This splits heavy coroutine computations into chunks avoiding
+    EventLoop starvation for socket or UI events.
+    @ingroup Pt-System
+*/
+class PT_SYSTEM_API AsyncYield : public Pt::Awaiter
+                               , private Pt::System::Selectable
+{
+    public:
+        explicit AsyncYield(EventLoop& loop)
+        {
+            this->setActive(loop);
+        }
+
+        virtual ~AsyncYield()
+        {
+            Selectable::cancel();
+        }
+
+        void await_resume() noexcept
+        {}
+
+    protected:
+        void onBegin() override
+        {
+            this->post();
+        }
+
+        void cancel() override
+        {
+            Selectable::cancel();
+        }
+
+        void onCancel() override
+        {
+            _handle = nullptr;
+        }
+
+        void onAttach(Pt::System::EventLoop&) override
+        {}
+
+        void onDetach(Pt::System::EventLoop&) override
+        {}
+
+        bool onRun() override
+        {
+            this->setReady();
+            return true;
+        }
+};
+
+inline AsyncYield EventLoop::yieldAsync()
+{
+    return AsyncYield(*this);
+}
+
+#endif // __cplusplus >= 202002L
 
 } // namespace System
 

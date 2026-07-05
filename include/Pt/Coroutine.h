@@ -34,6 +34,7 @@
 #include <Pt/Connectable.h>
 
 #if __cplusplus >= 202002L
+
 #include <coroutine>
 #include <exception>
 #include <stdexcept>
@@ -83,7 +84,7 @@ class AwaiterBase
 
     @ingroup BasicTypes
 */
-class Awaiter : public Connectable, public AwaiterBase
+class Awaiter : public AwaiterBase
 {
     public:
         bool await_ready() const
@@ -251,9 +252,7 @@ class FinalAwaiter
             PromiseBase* outer = h.promise()._outer;
 
             if( outer && outer != &h.promise() )
-            {
                 outer->setFinished();
-            }
 
             h.promise()._outer = nullptr;
 
@@ -289,6 +288,8 @@ class Task : public AwaiterBase
                       , public PromiseBase
         {
             public:
+                std::exception_ptr _exception;
+
                 template<typename A>
                 AwaiterProxy<A> await_transform(A&& a)
                 {
@@ -308,7 +309,7 @@ class Task : public AwaiterBase
                 { return {}; }
 
                 void unhandled_exception()
-                { std::terminate(); }
+                { _exception = std::current_exception(); }
         };
 
         using promise_type = Promise;
@@ -370,7 +371,12 @@ class Task : public AwaiterBase
         /** @brief Retrieve the coroutine result. Only valid after done() == true.
         */
         T result()
-        { return _handle.promise().getResult(); }
+        {
+            if( _handle.promise()._exception )
+                std::rethrow_exception(_handle.promise()._exception);
+
+                return _handle.promise().getResult();
+        }
 
         /** @brief Returns true if the inner coroutine has already finished.
         */
@@ -395,7 +401,12 @@ class Task : public AwaiterBase
         /** @brief Resume the outer coroutine with the result of the inner task.
         */
         T await_resume()
-        { return _handle.promise().getResult(); }
+        {
+            if( _handle.promise()._exception )
+                std::rethrow_exception(_handle.promise()._exception);
+
+                return _handle.promise().getResult();
+        }
 
     private:
         Task(const Task&) = delete;

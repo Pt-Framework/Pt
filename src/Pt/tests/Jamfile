@@ -9,6 +9,7 @@ Main Pt-test : Pt-test.cpp
                ByteorderTest.cpp
                CharTest.cpp
                ConversionTest.cpp
+               CoroutineTest.cpp
                DateTest.cpp
                DateTimeTest.cpp
                DelegateTest.cpp

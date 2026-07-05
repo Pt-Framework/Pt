@@ -352,6 +352,7 @@ class PT_DB_API Connection
     @ingroup Pt-Db
 */
 class AsyncOpen : public Pt::Awaiter
+               , public Pt::Connectable
 {
     public:
         AsyncOpen(Connection& conn, const std::string& connStr)
@@ -383,6 +384,7 @@ class AsyncOpen : public Pt::Awaiter
     @ingroup Pt-Db
 */
 class AsyncClose : public Pt::Awaiter
+                , public Pt::Connectable
 {
     public:
         AsyncClose(Connection& conn)
@@ -410,6 +412,7 @@ class AsyncClose : public Pt::Awaiter
     @ingroup Pt-Db
 */
 class AsyncExecute : public Pt::Awaiter
+                   , public Pt::Connectable
 {
     public:
         AsyncExecute(Connection& conn, const std::string& sql)
@@ -439,6 +442,7 @@ class AsyncExecute : public Pt::Awaiter
     @ingroup Pt-Db
 */
 class AsyncSelect : public Pt::Awaiter
+                 , public Pt::Connectable
 {
     public:
         AsyncSelect(Connection& conn, const std::string& sql)
@@ -468,6 +472,7 @@ class AsyncSelect : public Pt::Awaiter
     @ingroup Pt-Db
 */
 class AsyncPing : public Pt::Awaiter
+               , public Pt::Connectable
 {
     public:
         AsyncPing(Connection& conn)

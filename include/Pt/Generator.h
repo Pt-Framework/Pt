@@ -152,16 +152,9 @@ class Generator : public AwaiterBase
                     return AwaiterProxy<A>{ std::forward<A>(a), this };
                 }
 
-                YieldAwaiter yield_value(std::remove_reference_t<T>& value) noexcept
+                YieldAwaiter yield_value(T value) noexcept
                 {
-                    this->set(value);
-                    return {};
-                }
-
-                YieldAwaiter yield_value(std::remove_reference_t<T>&& value) noexcept
-                    requires( ! std::is_reference_v<T> )
-                {
-                    this->set(std::move(value));
+                    this->set(std::forward<T>(value));
                     return {};
                 }
         };
