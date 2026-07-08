@@ -138,7 +138,7 @@ class TarWriterImpl
         _filePadding     = (512u - (totalSize % 512u)) % 512u;
     }
 
-    void writeFileData(const char* data, std::size_t size)
+    void writeFile(const char* data, std::size_t size)
     {
         if(size > _pendingFileSize)
             throw Pt::IOError("tar writer: too many bytes written for file entry");
@@ -454,9 +454,9 @@ void TarWriter::beginFile(const Pt::System::Path& path,
 }
 
 
-void TarWriter::writeFileData(const char* data, std::size_t size)
+void TarWriter::writeFile(const char* data, std::size_t size)
 {
-    _impl->writeFileData(data, size);
+    _impl->writeFile(data, size);
 }
 
 

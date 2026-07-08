@@ -131,7 +131,7 @@ class PT_SYSTEM_API TarWriter
         @throws Pt::IOError if @a size exceeds the remaining byte count
                 declared in beginFile().
     */
-    void writeFileData(const char* data, std::size_t size);
+    void writeFile(const char* data, std::size_t size);
 
     /** @brief Finish the current streaming file entry started by beginFile().
 
