@@ -37,6 +37,8 @@
 
 namespace Pt {
 
+namespace System {
+
 // UStar header block layout (512 bytes, POSIX.1-1988)
 struct UStarHeader
 {
@@ -160,6 +162,8 @@ inline time_t tarDatetimeToEpoch(const Pt::DateTime& dt)
         + static_cast<long long>(dt.second()));
 }
 
-} // namespace
+} // namespace System
+
+} // namespace Pt
 
 #endif // include guard

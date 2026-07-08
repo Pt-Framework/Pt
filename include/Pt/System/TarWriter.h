@@ -37,6 +37,8 @@
 
 namespace Pt {
 
+namespace System {
+
 /** @brief Blocking writer for tar archives (Pax/UStar format).
 
     TarWriter writes entries into a tar archive sequentially.  All write
@@ -104,6 +106,42 @@ class PT_SYSTEM_API TarWriter
     void addHardlink(const Pt::System::Path& path,
                      const Pt::System::Path& target);
 
+    /** @brief Begin writing a regular file entry for streaming.
+
+        Writes the archive header for a file of the given total size.
+        Subsequent calls to writeFileData() deliver the content bytes;
+        endFile() must be called once all data has been written.
+
+        @param path        Archive path (UTF-8).
+        @param totalSize   Total byte count that will be written via writeFileData().
+        @param permissions POSIX permission bits.
+    */
+    void beginFile(const Pt::System::Path& path,
+                   std::size_t totalSize,
+                   Pt::System::FileInfo::Perms permissions);
+
+    /** @brief Write a chunk of data for the current streaming file entry.
+
+        May be called multiple times after beginFile() until all totalSize
+        bytes have been written.  The sum of all @a size arguments must equal
+        the @a totalSize passed to beginFile().
+
+        @param data   Pointer to data bytes.
+        @param size   Number of bytes to write.
+        @throws Pt::IOError if @a size exceeds the remaining byte count
+                declared in beginFile().
+    */
+    void writeFileData(const char* data, std::size_t size);
+
+    /** @brief Finish the current streaming file entry started by beginFile().
+
+        Writes the 512-byte block-alignment padding.
+
+        @throws Pt::IOError if not all bytes declared in beginFile() have
+                been written via writeFileData().
+    */
+    void endFile();
+
     /** @brief Write the end-of-archive marker (two 512-byte null blocks). */
     void finish();
 
@@ -117,6 +155,8 @@ class PT_SYSTEM_API TarWriter
 };
 
 
-} // namespace
+} // namespace System
+
+} // namespace Pt
 
 #endif // include guard

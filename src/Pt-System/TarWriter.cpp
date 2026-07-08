@@ -39,6 +39,8 @@
 
 namespace Pt {
 
+namespace System {
+
 ///////////////////////////////////////////////////////////////////////
 // TarWriterImpl
 ///////////////////////////////////////////////////////////////////////
@@ -48,10 +50,14 @@ class TarWriterImpl
   public:
     TarWriterImpl()
     : _target(0)
+    , _pendingFileSize(0)
+    , _filePadding(0)
     { }
 
     explicit TarWriterImpl(std::ostream& os)
     : _target(&os)
+    , _pendingFileSize(0)
+    , _filePadding(0)
     { }
 
     void attach(std::ostream& os)
@@ -66,7 +72,9 @@ class TarWriterImpl
 
     void reset()
     {
-        _target = 0;
+        _target          = 0;
+        _pendingFileSize = 0;
+        _filePadding     = 0;
     }
 
     void addFile(const Pt::System::Path& path,
@@ -74,6 +82,7 @@ class TarWriterImpl
                  std::size_t size,
                  Pt::System::FileInfo::Perms permissions)
     {
+        requireEndFile();
         std::string p = path.toLocal();
         writePaxHeaderIfNeeded(p, "");
         writeUStarHeader(p, "", '0', size, permissions, std::time(0));
@@ -87,6 +96,7 @@ class TarWriterImpl
     void addDirectory(const Pt::System::Path& path,
                       Pt::System::FileInfo::Perms permissions)
     {
+        requireEndFile();
         std::string p = path.toLocal();
         if( ! p.empty() && p.back() != '/')
             p += '/';
@@ -97,6 +107,7 @@ class TarWriterImpl
     void addSymlink(const Pt::System::Path& path,
                     const Pt::System::Path& target)
     {
+        requireEndFile();
         std::string p = path.toLocal();
         std::string t = target.toLocal();
         writePaxHeaderIfNeeded(p, t);
@@ -107,6 +118,7 @@ class TarWriterImpl
     void addHardlink(const Pt::System::Path& path,
                      const Pt::System::Path& target)
     {
+        requireEndFile();
         std::string p = path.toLocal();
         std::string t = target.toLocal();
         writePaxHeaderIfNeeded(p, t);
@@ -114,8 +126,38 @@ class TarWriterImpl
                          std::time(0));
     }
 
+    void beginFile(const Pt::System::Path& path,
+                   std::size_t totalSize,
+                   Pt::System::FileInfo::Perms permissions)
+    {
+        requireEndFile();
+        std::string p = path.toLocal();
+        writePaxHeaderIfNeeded(p, "");
+        writeUStarHeader(p, "", '0', totalSize, permissions, std::time(0));
+        _pendingFileSize = totalSize;
+        _filePadding     = (512u - (totalSize % 512u)) % 512u;
+    }
+
+    void writeFileData(const char* data, std::size_t size)
+    {
+        if(size > _pendingFileSize)
+            throw Pt::IOError("tar writer: too many bytes written for file entry");
+        if(data && size > 0)
+            writeRaw(data, size);
+        _pendingFileSize -= size;
+    }
+
+    void endFile()
+    {
+        if(_pendingFileSize != 0)
+            throw Pt::IOError("tar writer: not all file data was written");
+        writePadding(_filePadding);
+        _filePadding = 0;
+    }
+
     void finish()
     {
+        requireEndFile();
         char block[512] = {};
         writeRaw(block, 512);
         writeRaw(block, 512);
@@ -123,6 +165,14 @@ class TarWriterImpl
 
   private:
     std::ostream* _target;
+    std::size_t   _pendingFileSize;
+    std::size_t   _filePadding;
+
+    void requireEndFile()
+    {
+        if(_pendingFileSize != 0)
+            throw Pt::IOError("tar writer: endFile() was not called");
+    }
 
     void requireTarget()
     {
@@ -395,4 +445,26 @@ void TarWriter::finish()
     _impl->finish();
 }
 
-} // namespace
+
+void TarWriter::beginFile(const Pt::System::Path& path,
+                          std::size_t totalSize,
+                          Pt::System::FileInfo::Perms permissions)
+{
+    _impl->beginFile(path, totalSize, permissions);
+}
+
+
+void TarWriter::writeFileData(const char* data, std::size_t size)
+{
+    _impl->writeFileData(data, size);
+}
+
+
+void TarWriter::endFile()
+{
+    _impl->endFile();
+}
+
+} // namespace System
+
+} // namespace Pt

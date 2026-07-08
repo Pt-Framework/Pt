@@ -37,6 +37,8 @@
 
 namespace Pt {
 
+namespace System {
+
 ///////////////////////////////////////////////////////////////////////
 // Pax extended header parsing
 ///////////////////////////////////////////////////////////////////////
@@ -659,4 +661,6 @@ bool TarReader::isEnd() const
     return _impl->isEnd();
 }
 
-} // namespace
+} // namespace System
+
+} // namespace Pt

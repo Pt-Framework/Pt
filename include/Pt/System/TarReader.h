@@ -38,6 +38,8 @@
 
 namespace Pt {
 
+namespace System {
+
 /** @brief Incremental reader for tar archives (Pax/UStar format).
 
     TarReader parses a tar archive from a std::istream incrementally.  It
@@ -56,7 +58,7 @@ namespace Pt {
         if( ! entry )
             break; // starved, call advance() again when more data arrives
 
-        if(entry->type() == Pt::TarEntry::File)
+        if(entry->type() == Pt::System::TarEntry::File)
         {
             char buf[4096];
             std::size_t n = 0;
@@ -147,6 +149,8 @@ class PT_SYSTEM_API TarReader
     class TarReaderImpl* _impl;
 };
 
-} // namespace
+} // namespace System
+
+} // namespace Pt
 
 #endif // include guard

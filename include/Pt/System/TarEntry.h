@@ -38,6 +38,7 @@
 
 namespace Pt {
 
+namespace System {
 
 /** @brief Describes a single entry in a tar archive.
 
@@ -182,6 +183,8 @@ class TarEntry
     Pt::DateTime                 _mtime;
 };
 
-} // namespace
+} // namespace System
+
+} // namespace Pt
 
 #endif // include guard

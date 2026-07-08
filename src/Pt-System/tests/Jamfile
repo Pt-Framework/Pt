@@ -11,7 +11,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   PipeTest.cpp
                   ProcessTest.cpp
                   SerialDeviceTest.cpp
-                  TarReaderTest.cpp
+                  TarTest.cpp
                   ThreadTest.cpp
                   TimerTest.cpp
                   UriTest.cpp

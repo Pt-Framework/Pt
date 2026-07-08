@@ -62,13 +62,13 @@ static bool isGzip(const std::string& path)
 }
 
 
-static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
+static void extract(Pt::System::TarReader& reader, const Pt::System::Path& outDir)
 {
     std::ofstream currentFile;
 
     while( ! reader.isEnd() )
     {
-        const Pt::TarEntry* entry = reader.advance(8192);
+        const Pt::System::TarEntry* entry = reader.advance(8192);
         if( ! entry )
             break;  // starved — in real code: return, wait for data, come back
 
@@ -91,7 +91,7 @@ static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
         // New entry
         const Pt::System::Path fullPath = outDir / entry->path();
 
-        if(entry->type() == Pt::TarEntry::Directory)
+        if(entry->type() == Pt::System::TarEntry::Directory)
         {
             std::cout << "  dir  " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal() << "\n";
@@ -99,19 +99,19 @@ static void extract(Pt::TarReader& reader, const Pt::System::Path& outDir)
             Pt::System::FileInfo::permissions(fullPath, entry->permissions(),
                                               Pt::System::FileInfo::PermReplace);
         }
-        else if(entry->type() == Pt::TarEntry::Link)
+        else if(entry->type() == Pt::System::TarEntry::Link)
         {
             std::cout << "  link " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal()
                       << " -> " << entry->linkTarget().toLocal() << "\n";
         }
-        else if(entry->type() == Pt::TarEntry::Hardlink)
+        else if(entry->type() == Pt::System::TarEntry::Hardlink)
         {
             std::cout << "  hard " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal()
                       << " -> " << entry->linkTarget().toLocal() << "\n";
         }
-        else if(entry->type() == Pt::TarEntry::File)
+        else if(entry->type() == Pt::System::TarEntry::File)
         {
             std::cout << "  file " << formatPerms(entry->permissions())
                       << "  " << fullPath.toLocal() << "\n";
@@ -180,12 +180,12 @@ int main(int argc, char* argv[])
         if(useGzip)
         {
             Pt::ZIStream zis(ifs, Pt::ZBuffer::Gzip);
-            Pt::TarReader reader(zis);
+            Pt::System::TarReader reader(zis);
             extract(reader, outDirP);
         }
         else
         {
-            Pt::TarReader reader(ifs);
+            Pt::System::TarReader reader(ifs);
             extract(reader, outDirP);
         }
     }
