@@ -589,7 +589,7 @@ class TarWriterTest : public Pt::Unit::TestSuite
         for(std::size_t offset = 0; offset < fileSize; offset += chunkSize)
         {
             std::size_t n = std::min(chunkSize, fileSize - offset);
-            writer.writeFileData(content.data() + offset, n);
+            writer.writeFile(content.data() + offset, n);
         }
         writer.endFile();
         writer.finish();
@@ -628,7 +628,7 @@ class TarWriterTest : public Pt::Unit::TestSuite
         writer.beginFile(Pt::System::Path("f.bin"), 4,
                          Pt::System::FileInfo::NoPerms);
         const char data[5] = {};
-        PT_UNIT_ASSERT_THROW(writer.writeFileData(data, 5), Pt::IOError);
+        PT_UNIT_ASSERT_THROW(writer.writeFile(data, 5), Pt::IOError);
     }
 
     // endFile before all declared bytes are written → IOError.
@@ -639,7 +639,7 @@ class TarWriterTest : public Pt::Unit::TestSuite
         writer.beginFile(Pt::System::Path("f.bin"), 10,
                          Pt::System::FileInfo::NoPerms);
         const char data[5] = {};
-        writer.writeFileData(data, 5);
+        writer.writeFile(data, 5);
         PT_UNIT_ASSERT_THROW(writer.endFile(), Pt::IOError);
     }
 
@@ -651,7 +651,7 @@ class TarWriterTest : public Pt::Unit::TestSuite
         writer.beginFile(Pt::System::Path("f.bin"), 10,
                          Pt::System::FileInfo::NoPerms);
         const char data[5] = {};
-        writer.writeFileData(data, 5);
+        writer.writeFile(data, 5);
         PT_UNIT_ASSERT_THROW(
             writer.addFile(Pt::System::Path("g.bin"), data, 5,
                            Pt::System::FileInfo::NoPerms),
