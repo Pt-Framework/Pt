@@ -375,7 +375,7 @@ class Task : public AwaiterBase
             if( _handle.promise()._exception )
                 std::rethrow_exception(_handle.promise()._exception);
 
-                return _handle.promise().getResult();
+            return _handle.promise().getResult();
         }
 
         /** @brief Returns true if the inner coroutine has already finished.
