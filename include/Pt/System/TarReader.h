@@ -42,54 +42,48 @@ namespace System {
 
 /** @brief Incremental reader for tar archives (Pax/UStar format).
 
-    TarReader parses a tar archive from a std::istream incrementally.  It
-    is designed for use with non-blocking streams: advance() consumes only
-    the bytes that are currently available in the stream buffer and returns
-    nullptr when more data is needed.
+    %TarReader parses a tar archive from a std::istream one entry at a time.
+    It is designed for non-blocking use: advance() delivers only the bytes
+    already in the stream buffer and returns nullptr when the stream is
+    starved.
 
-    ### Reading a complete archive
+    Call advance() in a loop.  A non-null return value holds a %TarEntry
+    with the current entry's metadata and the first content chunk.  Read
+    %TarEntry::data() for %TarEntry::avail() bytes, then call advance()
+    again to fetch the next chunk.  Repeat until %TarEntry::isEnd() is
+    true, then call advance() once more to move to the next archive entry.
+    The loop ends when isEnd() on the reader itself returns true.
+
+    Pass a non-zero @a importSize to advance() to read more bytes from the
+    stream per call — this may block and is suitable for file-based use.
+
+    Pax extended headers handle long paths (> 99 characters), UTF-8 paths,
+    and extended modification times automatically.
 
     @code
     TarReader reader(stream);
 
-    while( ! reader.atEnd() )
+    while( ! reader.isEnd() )
     {
         const TarEntry* entry = reader.advance();
         if( ! entry )
-            break; // starved, call advance() again when more data arrives
+            break; // not enough data, call advance() again when more arrives
 
-        if(entry->type() == Pt::System::TarEntry::File)
+        if(entry->type() == TarEntry::File)
         {
-            char buf[4096];
-            std::size_t n = 0;
-            while( (n = reader.read(buf, sizeof(buf))) > 0 )
-                outFile.write(buf, n);
-
-            if(entry->remaining == 0)
-                onEntryComplete();  // all bytes consumed
-            else
-                waitForMoreData();  // call advance()/read() later
+            do
+            {
+                outFile.write(entry->data(), entry->avail());
+                if(entry->isEnd())
+                    break;
+                entry = reader.advance();
+            }
+            while(entry);
         }
     }
     @endcode
 
-    ### Non-blocking event-loop usage
-
-    Call advance() each time new data arrives.  The @a avail member shows
-    how many bytes can be read immediately.  @a remaining tracks how many
-    bytes of the current entry have not yet been delivered.
-
-    ### Pax extended headers
-
-    Long paths (> 100 characters), UTF-8 paths and extended modification
-    times are handled via Pax extended headers.
-
-    ### Hard links
-
-    Hard link entries (tar typeflag '1') are returned as %TarEntry objects
-    with type() == %TarEntry::Hardlink.  No content data is associated with
-    a hard link entry.  Use %TarEntry::isHardlink() as a convenience check,
-    and %FileInfo::createHardlink() to create the link during extraction.
+    @ingroup Pt-System-Tar
 */
 class PT_SYSTEM_API TarReader
 {
@@ -97,47 +91,54 @@ class PT_SYSTEM_API TarReader
     using Entry = TarEntry;
 
   public:
+    /** @brief Default constructor.
+    */
     TarReader();
 
+    /** @brief Constructor attaching to @a is.
+    */
     explicit TarReader(std::istream& is);
 
+    /** @brief Destructor.
+    */
     ~TarReader();
 
-    /** @brief Attach to an input stream. */
+    /** @brief Attach to an input stream.
+    */
     void attach(std::istream& is);
 
-    /** @brief Detach from the current input stream. */
+    /** @brief Detach from the current input stream.
+    */
     void detach();
 
-    /** @brief Reset state and detach from the input stream. */
+    /** @brief Reset state and detach from the input stream.
+    */
     void reset();
 
-    /** @brief Reset state and attach to a new input stream. */
+    /** @brief Reset state and attach to a new input stream.
+    */
     void reset(std::istream& is);
 
-    /** @brief Advance the parser.
+    /** @brief Advance to the next entry or deliver the next content chunk.
 
-        Consumes bytes from the stream, parses headers and updates the
-        current TarEntry.
+        Each call consumes the bytes previously exposed via %TarEntry::data()
+        and fetches the next data from the stream.  Process %TarEntry::data()
+        before calling advance() again — the buffer is reused on each call.
 
-        On each call while in data state, the bytes previously exposed via
-        TarEntry::data (TarEntry::avail bytes) are implicitly consumed before
-        new data is fetched.  The caller must therefore process TarEntry::data
-        before calling advance() again.
+        When @a importSize is 0 (default), only bytes already in the stream
+        buffer are used and no blocking I/O is performed, making this safe
+        for event-loop use.  A value greater than 0 allows reading up to
+        that many additional bytes from the stream, which may block.
 
-        When @a importSize is 0 (default), only bytes already available in
-        the stream buffer are consumed (non-blocking, suitable for
-        event-loop use).  When @a importSize is greater than 0, up to that
-        many bytes are read from the underlying stream via sgetn(), which
-        may block until data arrives (suitable for file or thread use).
+        @param importSize Maximum bytes to read from the stream; 0 is non-blocking.
 
-        @returns Pointer to the current TarEntry once a header has been
-                 parsed.  Returns nullptr only when no entry header could be
-                 parsed yet or when isEnd() is true.
+        @return Pointer to the current %TarEntry once a header has been parsed,
+                or nullptr when the stream is starved and more data is needed.
     */
     const TarEntry* advance(std::streamsize importSize = 0);
 
-    /** @brief Returns true after two consecutive null blocks have been read. */
+    /** @brief Returns true when the end-of-archive marker has been read.
+    */
     bool isEnd() const;
 
   private:

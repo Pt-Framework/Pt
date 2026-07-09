@@ -40,30 +40,29 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Describes a single entry in a tar archive.
+/** @brief Represents a single entry returned by TarReader.
 
-    Path strings are always UTF-8 encoded.
+    A %TarEntry holds the metadata and provides access to the content of
+    one entry in a tar archive.  Instances are produced by
+    %TarReader::advance() and remain valid until the next advance() call.
 
-    The %size() method holds the total byte count of the entry's content as
-    read from the archive header and remains constant for the lifetime of the
-    entry.
+    Use %type() to distinguish files, directories, symbolic links, and hard
+    links.  Use %path() for the archive path, %mtime() for the modification
+    time, and %permissions() for the POSIX permission bits.
 
-    The %remaining() method reflects how many content bytes have not yet been
-    consumed.  It is decremented by TarReader::advance() as data is consumed.
+    File content is delivered in one or more chunks.  After each advance()
+    call, up to %avail() bytes are readable at %data().  Process those bytes
+    before calling advance() again — the buffer is reused on the next call.
+    Repeat until %isEnd() returns true, which means all %size() bytes have
+    been delivered.
 
-    The %avail() method reflects how many bytes are currently readable via
-    the %data() pointer.  It is updated by TarReader::advance().
-
-    The %data() pointer points into TarReader's internal buffer.  Exactly
-    %avail() bytes are valid starting at %data().  The pointer is
-    invalidated on the next call to TarReader::advance().
-
-    Call %isEnd() to check whether all content bytes have been delivered.
+    @ingroup Pt-System-Tar
 */
 class TarEntry
 {
   public:
-    /** @brief Entry type in the tar archive. */
+    /** @brief Entry type in the tar archive.
+    */
     enum Type
     {
         Invalid   = 0, //!< Not yet set
@@ -94,75 +93,99 @@ class TarEntry
     void clear()
     { *this = TarEntry(); }
 
-    /** @brief Returns true when all content bytes have been delivered.
+    /** @brief Returns true when the entire content has been delivered.
 
-        Equivalent to <tt>avail() == remaining()</tt>.  When true after
-        writing data(), no further advance() call is needed for this entry's
-        data; the next outer advance() call will proceed to the next entry.
+        Once this returns true, the next %TarReader::advance() call moves
+        to the following archive entry.
     */
     bool isEnd() const
     { return _avail == _remaining; }
 
-    /** @brief Path of this entry. */
+    /** @brief Archive path of this entry (UTF-8 encoded).
+    */
     const Pt::System::Path& path() const
     { return _path; }
 
-    /** @brief Total content size in bytes as declared in the archive header. */
+    /** @brief Total content size in bytes as stored in the archive header.
+    */
     std::size_t size() const
     { return _size; }
 
-    /** @brief Content bytes not yet consumed. */
+    /** @brief Content bytes not yet delivered by TarReader::advance().
+    */
     std::size_t remaining() const
     { return _remaining; }
 
-    /** @brief Bytes currently readable via data(). */
+    /** @brief Number of bytes readable at the current data() pointer.
+    */
     std::size_t avail() const
     { return _avail; }
 
-    /** @brief Pointer to avail() bytes in TarReader's internal buffer.
+    /** @brief Pointer to the current content chunk of avail() bytes.
 
-        Valid until the next call to TarReader::advance().
+        Process these bytes before calling %TarReader::advance() again —
+        the pointer becomes invalid on the next advance() call.
     */
     const char* data() const
     { return _data; }
 
-    /** @brief Entry type (file, directory, symbolic link, or hard link). */
+    /** @brief Type of this archive entry (file, directory, link, or hard link).
+    */
     Type type() const
     { return _type; }
 
-    /** @brief Link target path for symbolic links. */
+    /** @brief Target path for symbolic and hard links (UTF-8 encoded).
+    */
     const Pt::System::Path& linkTarget() const
     { return _linkTarget; }
 
-    /** @brief File permissions. */
+    /** @brief POSIX permission bits for this entry.
+    */
     Pt::System::FileInfo::Perms permissions() const
     { return _permissions; }
 
-    /** @brief Modification time. */
+    /** @brief Last modification time of this entry.
+    */
     const Pt::DateTime& mtime() const
     { return _mtime; }
 
+    /** @brief Sets the archive path.
+    */
     void setPath(const Pt::System::Path& path)
     { _path = path; }
 
+    /** @brief Sets the total content size in bytes.
+    */
     void setSize(std::size_t size)
     { _size = size; }
 
+    /** @brief Sets the number of content bytes not yet delivered.
+    */
     void setRemaining(std::size_t remaining)
     { _remaining   = remaining; }
 
+    /** @brief Sets the current data chunk pointer and the number of available bytes.
+    */
     void setData(const char* data, std::size_t avail)
     { _data = data; _avail = avail; }
 
+    /** @brief Sets the entry type.
+    */
     void setType(Type type)
     { _type = type; }
 
+    /** @brief Sets the link target path.
+    */
     void setLinkTarget(const Pt::System::Path& target)
     { _linkTarget = target; }
 
+    /** @brief Sets the POSIX permission bits.
+    */
     void setPermissions(Pt::System::FileInfo::Perms p)
     { _permissions = p; }
 
+    /** @brief Sets the modification time.
+    */
     void setMtime(const Pt::DateTime& mtime)
     { _mtime = mtime; }
 

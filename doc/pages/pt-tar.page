@@ -1,0 +1,14 @@
+/** \page Pt-System-Tar-Page Tar Archive I/O
+
+@copydetails Pt-System-Tar
+
+@section Pt-System-Tar-Page-TarEntry Archive Entry
+@copydetails Pt::System::TarEntry
+
+@section Pt-System-Tar-Page-TarReader Reading Archives
+@copydetails Pt::System::TarReader
+
+@section Pt-System-Tar-Page-TarWriter Writing Archives
+@copydetails Pt::System::TarWriter
+
+*/

@@ -41,33 +41,64 @@ namespace System {
 
 /** @brief Blocking writer for tar archives (Pax/UStar format).
 
-    TarWriter writes entries into a tar archive sequentially.  All write
-    operations are synchronous and flush immediately to the attached
+    %TarWriter writes entries sequentially into a tar archive.  All
+    operations are synchronous and write directly to the attached
     std::ostream.
 
-    Call finish() to write the end-of-archive marker (two 512-byte null
-    blocks) before closing the stream.
+    Use addFile(), addDirectory(), addSymlink(), or addHardlink() to write
+    complete entries in a single call.  For large files, use the streaming
+    API: beginFile() writes the header, writeFile() delivers the content in
+    one or more chunks, and endFile() closes the entry.
 
-    Path strings are interpreted as UTF-8.  Pax extended headers are
-    written automatically for paths longer than 99 characters or containing
-    non-ASCII characters.
+    Always call finish() before closing the stream to write the mandatory
+    end-of-archive marker.  Paths are interpreted as UTF-8; Pax extended
+    headers are written automatically for long or non-ASCII paths.
+
+    @code
+    std::ofstream ofs("archive.tar", std::ios::binary);
+    TarWriter writer(ofs);
+
+    // complete entries
+    writer.addDirectory(Pt::System::Path("src/"), dirPerms);
+    writer.addFile(Pt::System::Path("src/main.cpp"),
+                   src.data(), src.size(), filePerms);
+
+    // streaming a large file
+    writer.beginFile(Pt::System::Path("data.bin"), totalSize, filePerms);
+    writer.writeFile(chunk1, size1);
+    writer.writeFile(chunk2, size2);
+    writer.endFile();
+
+    writer.finish();
+    @endcode
+
+    @ingroup Pt-System-Tar
 */
 class PT_SYSTEM_API TarWriter
 {
   public:
+    /** @brief Default constructor.
+    */
     TarWriter();
 
+    /** @brief Constructor attaching to @a os.
+    */
     explicit TarWriter(std::ostream& os);
 
+    /** @brief Destructor.
+    */
     ~TarWriter();
 
-    /** @brief Attach to an output stream. */
+    /** @brief Attach to an output stream.
+    */
     void attach(std::ostream& os);
 
-    /** @brief Detach from the current output stream. */
+    /** @brief Detach from the current output stream.
+    */
     void detach();
 
-    /** @brief Detach from the current output stream and reset state. */
+    /** @brief Detach from the current output stream and reset state.
+    */
     void reset();
 
     /** @brief Write a regular file entry.
@@ -109,11 +140,11 @@ class PT_SYSTEM_API TarWriter
     /** @brief Begin writing a regular file entry for streaming.
 
         Writes the archive header for a file of the given total size.
-        Subsequent calls to writeFileData() deliver the content bytes;
+        Subsequent calls to writeFile() deliver the content bytes;
         endFile() must be called once all data has been written.
 
         @param path        Archive path (UTF-8).
-        @param totalSize   Total byte count that will be written via writeFileData().
+        @param totalSize   Total byte count that will be written via writeFile().
         @param permissions POSIX permission bits.
     */
     void beginFile(const Pt::System::Path& path,
@@ -138,11 +169,12 @@ class PT_SYSTEM_API TarWriter
         Writes the 512-byte block-alignment padding.
 
         @throws Pt::IOError if not all bytes declared in beginFile() have
-                been written via writeFileData().
+                been written via writeFile().
     */
     void endFile();
 
-    /** @brief Write the end-of-archive marker (two 512-byte null blocks). */
+    /** @brief Write the end-of-archive marker (two 512-byte null blocks).
+    */
     void finish();
 
   private:
