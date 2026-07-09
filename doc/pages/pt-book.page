@@ -22,7 +22,7 @@
         <li> @ref sigslot_Signals </li>
         <li> @ref sigslot_Delegates </li>
     </ul>
-    
+
     <li> @ref text </li>
     <ul>
         <li> @ref text_Encodings </li>
@@ -77,6 +77,13 @@
         <li> @ref plugins_Libraries </li>
         <li> @ref plugins_Implementation </li>
         <li> @ref plugins_LoadingPlugins </li>
+    </ul>
+
+    <li> @ref Pt-System-Tar-Page </li>
+    <ul>
+        <li> @ref Pt-System-Tar-Page-TarEntry </li>
+        <li> @ref Pt-System-Tar-Page-TarReader </li>
+        <li> @ref Pt-System-Tar-Page-TarWriter </li>
     </ul>
 </ul>
 
