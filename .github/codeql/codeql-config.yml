@@ -1,0 +1,10 @@
+paths-ignore:
+  - jam/
+  - src/blend2d/
+  - src/freetype/
+  - src/libjpeg/
+  - src/libpng/
+  - src/mbedtls/
+  - src/openssl/
+  - src/skia/
+  - src/zlib/
