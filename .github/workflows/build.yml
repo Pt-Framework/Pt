@@ -18,7 +18,7 @@ jobs:
 
       - name: Build
         run: .\jam.bat -q -j4
-      
+
   Ubuntu-2024-Debug:
     runs-on: ubuntu-24.04
     steps:
