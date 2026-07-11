@@ -4,7 +4,7 @@
 
 INSTALLGRIST ?= installed ;
 
-HDRPATTERN = 
+HDRPATTERN =
     "^[     ]*#[    ]*include[  ]*[<\"]([^\">]*)[\">].*$" ;
 
 NOARSCAN     ?= true ;
@@ -50,7 +50,7 @@ rule BuildFile
     MakeLocate $(_out) : $(LOCATE_SOURCE) ;
     SEARCH on $(_in) = $(SEARCH_SOURCE) ;
     Depends $(_out) : $(_in) ;
-    
+
     $(_action) $(_out) : $(_in) ;
 
     Clean clean : $(_out) ;
@@ -145,7 +145,7 @@ rule HeaderDefines
 {
     local _cmd  = $(RM) $(<) $(STDERR_TO_STDOUT) ;
     local _result = [ EXEC $(_cmd:J=" ") ] ;
-    
+
     for local _v in $(2)
     {
         WriteFile $(<) : "" ;
@@ -166,7 +166,7 @@ rule File
 }
 
 
-rule GenFile 
+rule GenFile
 {
     local _t = [ FGristSourceFiles $(<) ] ;
     local _s = [ FAppendSuffix $(>[1]) : $(SUFEXE) ] ;
@@ -205,6 +205,42 @@ rule HdrMacroFile
 }
 
 
+#rule HdrRule
+#{
+#    # HdrRule source : headers ;
+#
+#    # N.B.  This rule is called during binding, potentially after
+#    # the fate of many targets has been determined, and must be
+#    # used with caution: don't add dependencies to unrelated
+#    # targets, and don't set variables on $(<).
+#
+#    # Tell Jam that anything depending on $(<) also depends on $(>),
+#    # set SEARCH so Jam can find the headers, but then say we don't
+#    # care if we can't actually find the headers (they may have been
+#    # within ifdefs),
+#
+#    local s ;
+#
+#    if $(HDRGRIST)
+#    {
+#        s = $(>:G=$(HDRGRIST)) ;
+#    } else {
+#        s = $(>) ;
+#    }
+#
+#    INCLUDES $(<) : $(s) ;
+#    SEARCH on $(s) = $(HDRSEARCH) ;
+#    NOCARE $(s) ;
+#
+#    # Propagate on $(<) to $(>)
+#
+#    HDRSEARCH on $(s) = $(HDRSEARCH) ;
+#    HDRSCAN on $(s) = $(HDRSCAN) ;
+#    HDRRULE on $(s) = $(HDRRULE) ;
+#    HDRGRIST on $(s) = $(HDRGRIST) ;
+#}
+
+
 rule HdrRule
 {
     # HdrRule source : headers ;
@@ -221,23 +257,75 @@ rule HdrRule
 
     local s ;
 
-    if $(HDRGRIST) 
-    { 
-        s = $(>:G=$(HDRGRIST)) ;
-    } else { 
-        s = $(>) ; 
+    # Extract the actual grist from the source file currently being scanned.
+    # Global variables like SOURCE_GRIST are invalid during the scan phase.
+    local _source_grist = $(<:G) ;
+
+    for local _h in $(>)
+    {
+        local _g ;
+
+        # Check if the header exists relative to the local source directory
+        # (HDRSOURCE). This correctly handles:
+        #   - #include "config.h"       -> HDRSOURCE/config.h
+        #   - #inlcude "bits/detail.h"  -> HDRSOURCE/bits/detail.h
+        # Assume these are private headers and grist them to shield against
+        # other private header files with the same name. Public header files
+        # are assumed to be path prefixed correctly.
+        if $(HDRSOURCE)
+        {
+            local _full = $(_h:R=$(HDRSOURCE)) ;
+            local _found = [ GLOB $(_full:D) : $(_full:BS) ] ;
+            if $(_found)
+            {
+                # Apply explicitly set HDRGRIST, otherwise inherit the grist
+                # from the source file that included this header.
+                if $(HDRGRIST)
+                {
+                    _g = $(HDRGRIST) ;
+                }
+                else
+                {
+                    _g = $(_source_grist) ;
+                }
+            }
+            else if $(HDRGRIST)
+            {
+                # Not a private header, but user explicitly set HDRGRIST.
+                _g = $(HDRGRIST) ;
+            }
+        }
+        else if $(HDRGRIST)
+        {
+            # No HDRSOURCE, but user explicitly set HDRGRIST.
+            _g = $(HDRGRIST) ;
+        }
+
+        # Apply the determined grist (or leave it empty)
+        if $(_g)
+        {
+            s = $(_h:G=$(_g)) ;
+        }
+        else
+        {
+            s = $(_h) ;
+        }
+
+        INCLUDES $(<) : $(s) ;
+        SEARCH on $(s) = $(HDRSEARCH) ;
+        NOCARE $(s) ;
+
+        # Propagate on $(<) to $(>)
+        HDRSEARCH on $(s) = $(HDRSEARCH) ;
+        HDRSCAN on $(s) = $(HDRSCAN) ;
+        HDRRULE on $(s) = $(HDRRULE) ;
+        HDRSOURCE on $(s) = $(HDRSOURCE) ;
+
+        # Never propagate HDRGRIST through header includes — it would cascade
+        # and grist public headers that should stay in the global namespace.
+        # Grist detection is solely driven by the GLOB check above.
+        HDRGRIST on $(s) = ;
     }
-
-    INCLUDES $(<) : $(s) ;
-    SEARCH on $(s) = $(HDRSEARCH) ;
-    NOCARE $(s) ;
-
-    # Propagate on $(<) to $(>)
-
-    HDRSEARCH on $(s) = $(HDRSEARCH) ;
-    HDRSCAN on $(s) = $(HDRSCAN) ;
-    HDRRULE on $(s) = $(HDRRULE) ;
-    HDRGRIST on $(s) = $(HDRGRIST) ;
 }
 
 
@@ -269,13 +357,13 @@ rule InstallInto
         Install $(tt) : $(i) ;
         Chmod $(tt) ;
 
-        if $(OWNER) && $(CHOWN) 
+        if $(OWNER) && $(CHOWN)
         {
             Chown $(tt) ;
             OWNER on $(tt) = $(OWNER) ;
         }
 
-        if $(GROUP) && $(CHGRP) 
+        if $(GROUP) && $(CHGRP)
         {
             Chgrp $(tt) ;
             GROUP on $(tt) = $(GROUP) ;
@@ -437,11 +525,11 @@ rule LibraryFromObjects
         MakeLocate $(_l) $(_l)($(_s:BS)) : $(LOCATE_TARGET) ;
     }
 
-    if $(NOARSCAN) 
-    { 
+    if $(NOARSCAN)
+    {
         # If we can't scan the library to timestamp its contents,
         # we have to just make the library depend directly on the
-        # on-disk object files.  
+        # on-disk object files.
 
         DEPENDS $(_l) : $(_s) ;
     }
@@ -624,7 +712,7 @@ rule MainFromObjects
 
     # Add grist to file names
     local _s = [ FGristFiles $(_objs) ] ;
-    
+
     # Add suffix to exe
     local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
@@ -660,7 +748,7 @@ rule MainFromObjects
 
     Clean clean : $(_t) ;
 
-    Link $(_t) : $(_s) ;    
+    Link $(_t) : $(_s) ;
 }
 
 
@@ -799,7 +887,7 @@ rule Object
     # the regexp pattern $(HDRSCAN) and then invokes $(HDRRULE)
     # with the scanned file as the target and the found headers
     # as the sources.  HDRSEARCH is the value of SEARCH used for
-    # the found header files.  Finally, if jam must deal with 
+    # the found header files.  Finally, if jam must deal with
     # header files of the same name in different directories,
     # they can be distinguished with HDRGRIST.
 
@@ -820,6 +908,11 @@ rule Object
     HDRSCAN on $(>) = $(HDRPATTERN) ;
     HDRSEARCH on $(>) = $(HDRS) $(SUBDIRHDRS) $(h) $(STDHDRS) ;
     HDRGRIST on $(>) = $(HDRGRIST) ;
+
+    # The source file's own directory only - used in HdrRule to identify
+    # local private headers (same-dir #include "Foo.h") without false-matching
+    # headers from other modules or system paths.
+    HDRSOURCE on $(>) = $(h) ;
 
     # if source is not .c, generate .c with specific rule
 
@@ -978,17 +1071,17 @@ rule SubDir
     #
     # SubDir TOP d1 [ ... ]
     #
-    # This introduces a Jamfile that is part of a project tree 
+    # This introduces a Jamfile that is part of a project tree
     # rooted at $(TOP).  It (only once) includes the project-specific
     # rules file $(TOP)/Jamrules and then sets search & locate stuff.
     #
-    # If the variable $(TOPRULES) is set (where TOP is the first arg 
+    # If the variable $(TOPRULES) is set (where TOP is the first arg
     # to SubDir), that file is included instead of $(TOP)/Jamrules.
     #
-    # d1 ... are the directory elements that lead to this directory 
+    # d1 ... are the directory elements that lead to this directory
     # from $(TOP).  We construct the system dependent path from these
     # directory elements in order to set search&locate stuff.
-    # 
+    #
 
     #
     # If $(TOP)/Jamrules hasn't been included and not a subtree, do so.
@@ -1122,7 +1215,7 @@ rule SubInclude
 #
 rule SubTree
 {
-    if $(<[1]) = $(>[1]) 
+    if $(<[1]) = $(>[1])
     {
         Exit SubTree can not use parent root variable ;
     }
@@ -1179,13 +1272,13 @@ rule FGrist
 }
 
 
-rule FGristFiles 
+rule FGristFiles
 {
     if ! $(SOURCE_GRIST)
     {
         return $(<) ;
     }
-    else 
+    else
     {
         return $(<:G=$(SOURCE_GRIST)) ;
     }
@@ -1194,7 +1287,7 @@ rule FGristFiles
 
 rule FGristSourceFiles
 {
-    # Produce source file name name with grist in it, 
+    # Produce source file name name with grist in it,
     # if SOURCE_GRIST is set.
 
     # Leave header files alone, because they have a global
@@ -1204,7 +1297,7 @@ rule FGristSourceFiles
     {
         return $(<) ;
     }
-    else 
+    else
     {
         local _i _o ;
 
@@ -1229,7 +1322,7 @@ rule FGristSourceFiles
 actions updated together piecemeal Archive
 {
     $(TOOLSET_SET_PATH)
-    $(AR) $(<) $(>) 
+    $(AR) $(<) $(>)
 }
 
 actions As
@@ -1241,7 +1334,7 @@ actions As
 actions C++
 {
     $(TOOLSET_SET_PATH)
-    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>) 
+    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -I$(STDHDRS) -o $(<) $(>)
 }
 
 actions Cc
@@ -1287,13 +1380,13 @@ actions HardLink
 
 actions existing Install
 {
-    $(CP) $(>) $(<) 
+    $(CP) $(>) $(<)
 }
 
 #actions Link bind NEEDLIBS
 #{
 #
-#    "$(LINK)" $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS) 
+#    "$(LINK)" $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 #}
 
 actions MakeFile1
@@ -1331,13 +1424,13 @@ if $(RELOCATE)
     actions C++
     {
         $(TOOLSET_SET_PATH)
-        $(C++) -c $(C++FLAGS) $(OPTIM) -I$(HDRS) $(>) 
+        $(C++) -c $(C++FLAGS) $(OPTIM) -I$(HDRS) $(>)
     }
 
     actions Cc
     {
         $(TOOLSET_SET_PATH)
-        $(CC) -c $(CCFLAGS) $(OPTIM) -I$(HDRS) $(>) 
+        $(CC) -c $(CCFLAGS) $(OPTIM) -I$(HDRS) $(>)
     }
 
     actions ignore CcMv

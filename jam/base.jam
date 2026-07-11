@@ -1,5 +1,5 @@
 # JAMBASE - jam 2.3 ruleset providing make(1)-like functionality
-#   
+#
 # Supports UNIX, NT, and VMS.
 #
 # 12/27/93 (seiwald) - purturb library sources with SOURCE_GRIST
@@ -17,7 +17,7 @@
 # 01/08/95 (seiwald) - Shell now handled with awk, not sed
 # 01/09/95 (seiwald) - Install* now take dest directory as target
 # 01/10/95 (seiwald) - All entries sorted.
-# 01/10/95 (seiwald) - NT support moved in, with LauraW's help.  
+# 01/10/95 (seiwald) - NT support moved in, with LauraW's help.
 # 01/10/95 (seiwald) - VMS support moved in.
 # 02/06/95 (seiwald) - ObjectC++Flags and SubDirC++Flags added.
 # 02/07/95 (seiwald) - Iron out when HDRSEARCH uses "" or SEARCH_SOURCE.
@@ -33,14 +33,14 @@
 #
 # all       - parent of first, shell, files, lib, exe
 # first     - first dependent of 'all', for potential initialization
-# shell     - parent of all Shell targets 
+# shell     - parent of all Shell targets
 # files     - parent of all File targets
 # lib       - parent of all Library targets
 # exe       - parent of all Main targets
 # dirs      - parent of all MkDir targets
 # clean     - removes all Shell, File, Library, and Main targets
 # uninstall - removes all Install targets
-#   
+#
 
 # Rules defined by this file:
 #
@@ -116,7 +116,7 @@
 #   EXIT - blurt out targets and exit
 #   INCLUDES - marks sources as headers for target (a codependency)
 #   NOCARE - don't panic if the target can't be built
-#   NOUPDATE - create the target if needed but never update it 
+#   NOUPDATE - create the target if needed but never update it
 #   NOTFILE - ignore the timestamp of the target (it's not a file)
 #   TEMPORARY - target need not be present if sources haven't changed
 #
@@ -233,13 +233,13 @@ rule EchoOption
     {
         # Check if the full line exceeds ~76 characters
         local _all = $(_optname) $(_vals) ;
-        local _toolong = [ MATCH ^(............................................................................)(.*) : $(_all:J=" ") ] ;
+        #local _toolong = [ MATCH ^(............................................................................)(.*) : $(_all:J=" ") ] ;
 
         if $(_toolong)
         {
             # Long output: header alone, then all values hard-split
             Echo $(_optname) ;
-            EchoOptionLine $(_vals) ;
+            Echo $(_vals) ;
         }
         else
         {
@@ -277,7 +277,7 @@ rule GetOption
 #
 # example: s = [ replace "Feet\\Street" "\\\\" "\\\\" ] ;
 #
-# replaces one backslash with two. 
+# replaces one backslash with two.
 # Note that the match argument must be doubly escaped.
 #
 rule Replace (
@@ -366,10 +366,10 @@ rule FSubDir
     # path (using ../../ etc) back to that root directory.
     # Sets result in $(<)
 
-    if ! $(<[1]) 
+    if ! $(<[1])
     {
         _d = $(DOT) ;
-    } 
+    }
     else
     {
         _d = $(DOTDOT) ;
@@ -418,7 +418,7 @@ rule FDirName
     else if $(MAC)
     {
         _s = $(DOT) ;
-        
+
         for _i in $(<)
         {
             _s = $(_i:R=$(_s)) ;
@@ -426,7 +426,7 @@ rule FDirName
     }
     else
     {
-        _s = $(<[1]) ; 
+        _s = $(<[1]) ;
 
         for _i in $(<[2-])
         {
@@ -482,7 +482,7 @@ rule FRelPath
 rule FAppendSuffix
 {
     # E.g., "FAppendSuffix yacc lex foo.bat : $(SUFEXE) ;"
-    # returns (yacc,lex,foo.bat) on Unix and 
+    # returns (yacc,lex,foo.bat) on Unix and
     # (yacc.exe,lex.exe,foo.bat) on NT.
 
     if $(>)
@@ -511,7 +511,7 @@ rule FAppendSuffix
 
 rule unmakeDir
 {
-    if $(>[1]:D) && $(>[1]:D) != $(>[1]) && $(>[1]:D) != \\\\ 
+    if $(>[1]:D) && $(>[1]:D) != $(>[1]) && $(>[1]:D) != \\\\
     {
         unmakeDir $(<) : $(>[1]:D) $(>[1]:BS) $(>[2-]) ;
     }
@@ -525,10 +525,10 @@ rule unmakeDir
 rule FConvertToSlashes
 {
   local _d, _s, _i ;
-  
+
   unmakeDir _d : $(<) ;
-  
-  _s = $(_d[1]) ; 
+
+  _s = $(_d[1]) ;
   for _i in $(_d[2-])
   {
     _s = $(_s)/$(_i) ;
