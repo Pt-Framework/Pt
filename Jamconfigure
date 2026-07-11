@@ -485,7 +485,7 @@ if --fetch-deps in $(ARGV)
 
     Fetch-Url "$(baseUrl)/$(manifestName)" : $(manifestTmp) ;
     local remoteContent = [ FILE_GET_CONTENTS $(manifestTmp) ] ;
-    
+
     local localContent = ;
     if [ CHECK_IF_FILE $(manifestLocal) ]
     {
@@ -509,13 +509,24 @@ if --fetch-deps in $(ARGV)
     local depsRoot = [ FDirName $(DEPS_DIR) $(targetTriple) ] ;
     local depsIncludes = [ FDirName $(depsRoot) include ] ;
     local depsLibDir = [ FDirName $(depsRoot) lib ] ;
-    
+
     if $(WITH_DEBUG) && ! $(WITH_OPTIM)
     {
         depsLibDir = [ FDirName $(depsRoot) debug lib ] ;
     }
 
     SetDependencyPath $(depsRoot) : $(depsIncludes) : $(depsLibDir) ;
+}
+
+#############################################################################
+# Conan dependencies
+#############################################################################
+
+if --with-conan in $(ARGV)
+{
+    local conanDeps = $(CONAN_DEPS:E=conan-deps.jam) ;
+    EchoOption --with-conan : "Conan dependencies" : $(conanDeps) ;
+    include $(conanDeps) ;
 }
 
 #############################################################################
@@ -535,7 +546,7 @@ if ! $(WITH_BUILTIN_ZLIB)
                                  $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
 }
 
-if ! $(WITH_ZLIB) 
+if ! $(WITH_ZLIB)
 {
     WITH_BUILTIN_ZLIB = yes ;
 }
@@ -799,7 +810,7 @@ EchoOption SSL_LINKFLAGS : "SSL link flags" ;
 if --with-blend2d in $(ARGV)
 {
     Load simd.jam ;
-    
+
     WITH_BLEND2D = yes ;
     Configure WITH_BLEND2D ;
     EchoOption --with-blend2d : "Blend2d library" : $(WITH_BLEND2D:E="no") ;
