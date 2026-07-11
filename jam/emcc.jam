@@ -45,7 +45,7 @@ rule TryBuildC++
 
 
 rule CheckToolset
-{    
+{
     EMSDK ?= $(EMSDK:J=" ") ;
 
     EchoOption EMSDK : "Emscripten SDK" ;
@@ -88,7 +88,7 @@ rule CheckCc
         # -gsource-map or -g
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
 
-        # works only with static linking: -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK 
+        # works only with static linking: -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK
         LINKFLAGS ?= -pthread  -sSTACK_SIZE=6MB -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
     }
     else
@@ -101,11 +101,11 @@ rule CheckCc
     {
         OPTIM ?= -O2 ;
     }
-    else 
+    else
     {
         OPTIM ?= -O0 ;
     }
-    
+
     WARN ?= -Wall ;
 
     Configure CCFLAGS ;
@@ -126,6 +126,11 @@ rule CheckC++
 
     LINK++ = $(C++) ;
     Configure LINK++ ;
+
+    if $(STDC++)
+    {
+        C++FLAGS += -std=c++$(STDC++) ;
+    }
 
     C++FLAGS += -fexceptions ;
     C++LINKFLAGS += -fexceptions ;
@@ -171,7 +176,7 @@ rule Main-Build
     MainFromObjects $(<) : $(>) ;
 
     local _target = $(<:S=$(SUFEXE)) ;
-   
+
     Clean clean : $(_target:S=.js) ;
     Clean clean : $(_target:S=.wasm) ;
 }
@@ -182,7 +187,7 @@ rule Main-MakeLocate
     local _target = $(<:S=$(SUFEXE)) ;
 
     _MakeLocate $(_target) : $(>) ;
-    
+
     MakeLocate $(_target:S=.js) : $(>) ;
     MakeLocate $(_target:S=.wasm) : $(>) ;
 }
@@ -236,7 +241,7 @@ rule SharedLibrary-LinkSharedLibraries
     if $(3)
     {
         LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2:S=$(SUFDLL)) ;
-        
+
     }
     else
     {
@@ -253,5 +258,5 @@ rule SharedLibrary-LinkSharedLibraries
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
   $(TOOLSET_SET_PATH)
-  $(LINK) $(>) $(LINKFLAGS) -L$(SHLIBS:P) -l$(LINKSHLIBS:B) $(WARN) -o $(<) $(UNDEFS) $(LINKLIBS) $(NEEDLIBS) 
+  $(LINK) $(>) $(LINKFLAGS) -L$(SHLIBS:P) -l$(LINKSHLIBS:B) $(WARN) -o $(<) $(UNDEFS) $(LINKLIBS) $(NEEDLIBS)
 }

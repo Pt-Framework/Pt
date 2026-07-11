@@ -104,7 +104,7 @@ rule CheckCc
     {
         OPTIM ?= -O2 ;
     }
-    else 
+    else
     {
         OPTIM ?= -O0 ;
     }
@@ -134,6 +134,11 @@ rule CheckC++
 
     LINK++ = $(C++) ;
     Configure LINK++ ;
+
+    if $(STDC++)
+    {
+        C++FLAGS += -std=c++$(STDC++) ;
+    }
 
     #if $(WITH_GCC_FLAG_VISIBILITY)
     #{
@@ -245,7 +250,7 @@ rule SharedLibrary-LinkSharedLibraries
             for local _d in $(_deps)
             {
                 local _found = false ;
-    
+
                 for _r in $(RPATHLIBS)
                 {
                     if $(_r) = $(_d)
@@ -253,7 +258,7 @@ rule SharedLibrary-LinkSharedLibraries
                         _found = true ;
                     }
                 }
-    
+
                 # only add if not added previously
                 if $(_found) = false
                 {
@@ -271,6 +276,5 @@ rule SharedLibrary-LinkSharedLibraries
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
   $(TOOLSET_SET_PATH)
-  $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
+  $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP)
 }
-

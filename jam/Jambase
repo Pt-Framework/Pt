@@ -11,12 +11,12 @@ JAMDIR ?= jam ;
 rule Load
 {
     local _inc = $(<[1]) ;
-    
+
     for local _i in $(<[2-])
     {
         _inc = $(_i:R=$(_inc)) ;
     }
-    
+
     _inc = $(_inc:R=$(JAMDIR)) ;
     include $(_inc) ;
 }
@@ -76,10 +76,14 @@ if $(JAM_SWITCH) || $(JAM_CONFIGURE)
     if --optimize in $(ARGV)
     {
         WITH_OPTIM = yes ;
-        CONFIG ?= release ; 
+        CONFIG ?= release ;
     }
 
     EchoOption --optimize : "Optimized Build" : $(WITH_OPTIM:E="no") ;
+
+    STDC++ ?= [ GetOption --stdc++ ] ;
+
+    EchoOption --stdc++ : "C++ Standard" : $(STDC++:E="(compiler default)") ;
 
     # configure build
     ConfigureLog "[ Configure ]" ;

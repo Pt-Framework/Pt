@@ -255,20 +255,19 @@ rule EchoOption
 #
 rule GetOption
 {
-  local name = $(1)"=" ;
-  local value ;
+    local value ;
 
-  for local arg in $(ARGV)
-  {
-    local regex = "^"$(name)"(.*)" ;
-    local match = [ MATCH $(regex) : $(arg) ] ;
-    if $(match)
+    for local arg in $(ARGV)
     {
-      value += $(match) ;
+        local _parts = [ SPLIT_BY_CHARACTERS $(arg) : "=" ] ;
+        if $(_parts[1]) = $(1)
+        {
+            # Rejoin remaining parts in case the value itself contains '='
+            value += $(_parts[2-]:J="=") ;
+        }
     }
-  }
 
-  return $(value) ;
+    return $(value) ;
 }
 
 #

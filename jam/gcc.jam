@@ -9,7 +9,7 @@
 # /usr/lib/libgcc_s.1.dylib (compatibility version 1.0.0, current version 1.0.0)
 # /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 111.0.0)
 #
-#Then you'll link your application as normal, and when you put the library in Contents/Libraries everything will just work 
+#Then you'll link your application as normal, and when you put the library in Contents/Libraries everything will just work
 #
 #If building the dynamic library appropriately isn't an option (a closed-source third-party library for example), don't worry. It's the install_name copied to your program that's really important, and that can be fudged. You'll link your application with the -headerpad_max_install_names flag, then edit it with install_name_tool.
 #
@@ -188,6 +188,11 @@ rule Gcc-CheckC++
 
     LINK++ = $(C++) ;
     Configure LINK++ ;
+
+    if $(STDC++)
+    {
+        C++FLAGS += -std=c++$(STDC++) ;
+    }
 
     #if $(WITH_GCC_FLAG_VISIBILITY)
     #{

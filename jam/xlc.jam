@@ -73,7 +73,7 @@ rule CheckCc
     {
         OPTIM ?= -O2 ;
     }
-    else 
+    else
     {
         OPTIM ?= -O0 ;
     }
@@ -97,8 +97,13 @@ rule CheckC++
     LINK++ = $(C++) ;
     Configure LINK++ ;
 
+    if $(STDC++)
+    {
+        C++FLAGS += -std=c++$(STDC++) ;
+    }
+
     C++FLAGS += -qrtti -qlanglvl=newexcp -qeh -qstaticinline ;
-    
+
     if $(WITH_DEBUG)
     {
         C++FLAGS  += -DDEBUG ;
@@ -187,4 +192,3 @@ actions Link bind NEEDLIBS SHLIBS LINKSHLIBS
 {
     $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -bdynamic -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
 }
-

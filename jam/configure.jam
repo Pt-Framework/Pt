@@ -6,7 +6,7 @@ YES ?= "yes" ;
 NO ?= "no" ;
 
 # windows batch and posix shell
-STDERR_TO_STDOUT = " 2>&1" ; 
+STDERR_TO_STDOUT = " 2>&1" ;
 
 TONULL = " 2>/dev/null 1>/dev/null" ;
 if $(OS:L) = "nt"
@@ -61,7 +61,7 @@ rule ConfigureSwitch
     {
         # TODO: check timestamp of cached Jamrules against Jamconfigure
 
-        if [ CHECK_IF_FILE $(JAMRULES).$(_config) ] 
+        if [ CHECK_IF_FILE $(JAMRULES).$(_config) ]
         {
             include Jamrules.$(_config) ;
             TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
@@ -105,7 +105,7 @@ rule ConfigureWrite
             _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
             _value += "\"$(_valtmp)\"" ;
         }
-    
+
         WriteFile $(_file) : $(_var)" ?= "$(_value:J=" ")" ;" ;
     }
 
@@ -127,7 +127,7 @@ rule SubTree
     # SubConfigure TOP d1 [ d2 [ d3 [ d4 ] ] ] : SUB_TOP
     #
 
-    if $(<[1]) = $(>[1]) 
+    if $(<[1]) = $(>[1])
     {
         Exit SubConfigure can not use parent root variable ;
     }
@@ -139,7 +139,7 @@ rule SubTree
 
     # path to subtree Jamconfigure and Jamrules
     local _subdir = [ FDirName $($(<[1])) $(<[2-]) ] ;
-    local _subrules = [ FDirName $(_subdir) $(JAMRULES) ] ;    
+    local _subrules = [ FDirName $(_subdir) $(JAMRULES) ] ;
 
     #ConfigureClean $(_subdir) ;
     #
@@ -161,7 +161,7 @@ rule SubTree
     #        _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
     #        _value += "\"$(_valtmp)\"" ;
     #    }
-    # 
+    #
     #     WriteFile $(_subrules) : $(_var)" ?= "$(_value:J=" ")" ;" ;
     #}
 
@@ -175,7 +175,7 @@ rule SubDir
     #
     # SubDir TOP
     #
-    # This introduces a Jamconfigure that is part of a project tree 
+    # This introduces a Jamconfigure that is part of a project tree
     # rooted at $(TOP). This allows the Jamconfigure of a project to be
     # used as a sub project.
     #
@@ -311,7 +311,7 @@ rule ConfigureMkDir
     {
         MKDIR = "mkdir" ;
     }
-    
+
     if ! $(RMDIR) && [ TryCommand "rmdir /s/q check_dir" ]
     {
         RMDIR = "rmdir /s/q" ;
@@ -394,7 +394,7 @@ rule ConfigureLn
     }
 
     TryCommand $(RM) "check.in" "check.out" ;
- 
+
     if ! $(LN)
     {
         EchoOption LN : "File link" : "not supported" ;
@@ -433,8 +433,8 @@ rule ConfigureDotSlash
     {
         Exit "Checking for directory dotdot... FAILED!" ;
     }
-    
-    SLASH = ;   
+
+    SLASH = ;
     if ! $(SLASH) && [ TryCommand "cd .\\" ]
     {
         SLASH = "\\" ;
@@ -446,7 +446,7 @@ rule ConfigureDotSlash
 
     }
 
-    if ! $(SLASH) 
+    if ! $(SLASH)
     {
         Exit "Checking for directory separator... FAILED!" ;
     }
@@ -491,7 +491,7 @@ rule ConfigureCmd
     {
         Exit "Checking for command AND... FAILED!" ;
     }
-    
+
     Configure CMDAND : $(CMDAND) ;
     EchoOption CMDAND : "Command and" ;
 }
@@ -555,7 +555,7 @@ rule ConfigureToolset
       if $(OS:L) = nt
       {
           toolset_path = $(TOOLSET_ROOT:J=" ") ;
-          
+
           for local p in $(TOOLSET_PATH)
           {
               if $(toolset_path)
@@ -571,7 +571,7 @@ rule ConfigureToolset
       else
       {
           toolset_path = $(TOOLSET_ROOT:J=" ") ;
-          
+
           for local p in $(TOOLSET_PATH)
           {
               if $(toolset_path)
@@ -581,7 +581,7 @@ rule ConfigureToolset
 
               toolset_path += $(p) ;
           }
-          
+
           TOOLSET_SET_PATH = PATH=$(toolset_path):\$PATH ;
       }
     }
@@ -644,6 +644,12 @@ rule ConfigureC++
         EchoOption C++ : "C++ compiler" : $(C++) ;
         EchoOption LINK++ : "C++ Linker" : $(LINK++) ;
 
+        if $(STDC++)
+        {
+            EchoOption STDC++ : "C++ Standard" ;
+            Configure STDC++ ;
+        }
+
         EchoOption C++FLAGS : "C++ Flags" ;
         EchoOption C++LINKFLAGS : "C++ Link Flags" ;
 
@@ -662,7 +668,7 @@ rule ConfigureC++
 rule CheckBuild
 {
     ConfigureLog "\n[ CheckBuild ]" ;
-    
+
     local _cmd = $(1) ;
     local _src = $(2) ;
     local _in = $(3) ;
@@ -714,7 +720,7 @@ rule CheckBuildCc
 rule CheckBuildC++
 {
     ConfigureLog "\n[ CheckBuildC++ ]" ;
-    
+
     local _src = $(1) ;
     ConfigureLog $(_src) ;
 
