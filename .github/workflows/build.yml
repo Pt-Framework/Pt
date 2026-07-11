@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Configure Debug
-        run: ./jam.sh configure -sCONFIG=debug --debug
+        run: ./jam.sh configure -sCONFIG=debug --debug --stdc++=20
 
       - name: Build
         run: ./jam.sh -q -j4
