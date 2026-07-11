@@ -38,7 +38,10 @@ rule Png-ConfigureLink ( includes * : c++flags * : linklibs * : libdir * : linkf
     local result ;
 
     local is_debug ;
-    if $(WITH_DEBUG) && ! $(WITH_OPTIM) { is_debug = true ; }
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
+    {
+        is_debug = true ;
+    }
 
     # 1: caller-provided libs
     if ! $(result) && $(linklibs)
