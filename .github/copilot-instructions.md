@@ -6,6 +6,10 @@ It provides a large amount of features and is still very easy to use.
 
 # General Instructions
 
+- Propose and implement substantive improvements; breaking changes are
+  acceptable. Compatibility is desirable but secondary - never let it prevent
+  meaningful improvements.
+
 - At the end of every completed task, suggest improvements to the instruction
   files if the task revealed missing, unneeded, clear, or incorrect instructions.
 
