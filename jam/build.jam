@@ -205,6 +205,28 @@ rule HdrMacroFile
 }
 
 
+rule HdrLocal
+{
+    # HdrLocal include-name ... ;
+    #
+    # Register include names that may conflict with same-named headers in other
+    # modules. Each name is stored as HDRGRISTLOCAL(name) for O(1) lookup in
+    # HdrRule — no filesystem access, no duplicates.
+    #
+    # Call this from any Jamfile where a naming conflict is known to exist.
+    # Because HdrRule runs after all Jamfiles are parsed, a single declaration
+    # from any module protects all modules that include that filename.
+    #
+    # Example:
+    #   HdrLocal Clock.h Components.h Config.h ;
+    #
+    for local _h in $(<)
+    {
+        HDRGRISTLOCAL($(_h:BS)) = 1 ;
+    }
+}
+
+
 #rule HdrRule
 #{
 #    # HdrRule source : headers ;
@@ -243,7 +265,7 @@ rule HdrMacroFile
 
 rule HdrRule
 {
-    # HdrRule source : headers ;
+    # HdrRule source : headers : bound-name ;
 
     # N.B.  This rule is called during binding, potentially after
     # the fate of many targets has been determined, and must be
@@ -261,33 +283,41 @@ rule HdrRule
     # Global variables like SOURCE_GRIST are invalid during the scan phase.
     local _source_grist = $(<:G) ;
 
+    # $(3) is the physical bound path of $(<) as provided by Jam's header
+    # scanner (headers.c). Its directory is always the correct base for
+    # resolving relative includes — even for transitively scanned headers
+    # like public headers in include/ that include their own bits/ files.
+    local _source_dir = $(3:D) ;
+
     for local _h in $(>)
     {
         local _g ;
 
-        # Check if the header exists relative to the local source directory
-        # (HDRSOURCE). This correctly handles:
-        #   - #include "config.h"       -> HDRSOURCE/config.h
-        #   - #inlcude "bits/detail.h"  -> HDRSOURCE/bits/detail.h
-        # Assume these are private headers and grist them to shield against
-        # other private header files with the same name. Public header files
-        # are assumed to be path prefixed correctly.
-        if $(HDRSOURCE)
+        # Fast path: header explicitly registered via HdrLocal — O(1) lookup,
+        # no filesystem access. Covers headers that GLOB cannot detect (e.g. those
+        # found via include paths rather than the scanning file's own directory).
+        if $(HDRGRISTLOCAL($(_h:BS)))
         {
-            local _full = $(_h:R=$(HDRSOURCE)) ;
+            if $(HDRGRIST) { _g = $(HDRGRIST) ; }
+            else           { _g = $(_source_grist) ; }
+        }
+        # Auto-detect path: check if the header exists relative to the physical
+        # directory of the currently scanned file. This correctly handles:
+        #   - #include "config.h"       -> _source_dir/config.h
+        #   - #include "bits/detail.h"  -> _source_dir/bits/detail.h
+        # Public headers like <Bravo/System/Api.h> are not found because
+        # _source_dir/Bravo/System/ does not exist -> they stay global.
+        # System headers like <iostream> are also not found -> stay global.
+        else if $(_source_dir)
+        {
+            local _full = $(_h:R=$(_source_dir)) ;
             local _found = [ GLOB $(_full:D) : $(_full:BS) ] ;
             if $(_found)
             {
                 # Apply explicitly set HDRGRIST, otherwise inherit the grist
                 # from the source file that included this header.
-                if $(HDRGRIST)
-                {
-                    _g = $(HDRGRIST) ;
-                }
-                else
-                {
-                    _g = $(_source_grist) ;
-                }
+                if $(HDRGRIST) { _g = $(HDRGRIST) ; }
+                else           { _g = $(_source_grist) ; }
             }
             else if $(HDRGRIST)
             {
@@ -297,7 +327,7 @@ rule HdrRule
         }
         else if $(HDRGRIST)
         {
-            # No HDRSOURCE, but user explicitly set HDRGRIST.
+            # No physical directory available, but user explicitly set HDRGRIST.
             _g = $(HDRGRIST) ;
         }
 
@@ -319,11 +349,10 @@ rule HdrRule
         HDRSEARCH on $(s) = $(HDRSEARCH) ;
         HDRSCAN on $(s) = $(HDRSCAN) ;
         HDRRULE on $(s) = $(HDRRULE) ;
-        HDRSOURCE on $(s) = $(HDRSOURCE) ;
 
         # Never propagate HDRGRIST through header includes — it would cascade
         # and grist public headers that should stay in the global namespace.
-        # Grist detection is solely driven by the GLOB check above.
+        # Grist detection is solely driven by the GLOB check using $(3:D) above.
         HDRGRIST on $(s) = ;
     }
 }
@@ -908,11 +937,6 @@ rule Object
     HDRSCAN on $(>) = $(HDRPATTERN) ;
     HDRSEARCH on $(>) = $(HDRS) $(SUBDIRHDRS) $(h) $(STDHDRS) ;
     HDRGRIST on $(>) = $(HDRGRIST) ;
-
-    # The source file's own directory only - used in HdrRule to identify
-    # local private headers (same-dir #include "Foo.h") without false-matching
-    # headers from other modules or system paths.
-    HDRSOURCE on $(>) = $(h) ;
 
     # if source is not .c, generate .c with specific rule
 
