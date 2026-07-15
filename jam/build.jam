@@ -943,7 +943,11 @@ rule Object
     switch $(>:S)
     {
         case .asm : As $(<) : $(>) ;
-        case .c :   Cc $(<) : $(>) ;
+        case .c :
+            local _cc ;
+            on $(<) _cc = $(CCLANG:E=Cc) ;
+            $(_cc) $(<) : $(>) ;
+
         case .C :   C++ $(<) : $(>) ;
         case .cc :  C++ $(<) : $(>) ;
         case .cpp : C++ $(<) : $(>) ;
@@ -968,6 +972,12 @@ rule ObjectCcFlags
 rule ObjectC++Flags
 {
     C++FLAGS on [ FGristFiles $(<:BS=$(SUFOBJ)) ] += $(>) ; # FIX was only S
+}
+
+
+rule ObjectC++
+{
+    CCLANG on [ FGristFiles $(<:BS=$(SUFOBJ)) ] = C++ ;
 }
 
 

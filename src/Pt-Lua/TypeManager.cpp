@@ -29,7 +29,10 @@
 
 #include <Pt/Lua/TypeManager.h>
 #include <Pt/Reflex/Type.h>
-#include <lua.hpp>
+
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 namespace Pt {
 

@@ -32,7 +32,9 @@
 #include <Pt/Lua/AsyncCall.h>
 #include <Pt/Lua/Call.h>
 
-#include <lua.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #include <stdexcept>
 #include <string>

@@ -28,7 +28,10 @@
  */
 
 #include <Pt/Lua/Result.h>
-#include <lua.hpp>
+
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 namespace Pt {
 

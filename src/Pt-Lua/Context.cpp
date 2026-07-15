@@ -38,7 +38,9 @@
 #include <Pt/Reflex/Argument.h>
 #include <Pt/Any.h>
 
-#include <lua.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #include <cstring>
 #include <typeinfo>
