@@ -46,7 +46,7 @@ class Property : public PropertyInfo
         typedef T (C::*Getter)() const;
         typedef void (C::*Setter)(T);
 
-        Property(TypeManager& ctx, const std::string& name, Getter getter, Setter setter )
+        Property(TypeManager& ctx, const std::string& name, Getter getter, Setter setter)
         : _name(name)
         , _getter(getter)
         , _setter(setter)
@@ -54,11 +54,11 @@ class Property : public PropertyInfo
             _type = ctx.getType( typeid(T) );
         }
 
-        Property(Type& type, const std::string& name, Getter getter, Setter setter )
+        Property(Type& type, const std::string& name, Getter getter, Setter setter)
         : _name(name)
         , _getter(getter)
         , _setter(setter)
-				, _type(&type)
+		, _type(&type)
         {
         }
 
@@ -111,4 +111,3 @@ class Property : public PropertyInfo
 }
 
 #endif
-

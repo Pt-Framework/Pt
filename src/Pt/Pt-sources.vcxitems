@@ -1017,9 +1017,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\ConstructorInfo.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\ConstructorProxy.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\FunctionInfo.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\FunctionProxy.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\Function.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\GenericMethod.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\GenericType.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\MethodInfo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\Method.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\MethodProxy.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\Property.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\PropertyInfo.h" />

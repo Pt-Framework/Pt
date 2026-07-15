@@ -320,12 +320,6 @@ class PT_REFLEX_API TypeManager
 
         void registerType(GenericType& type);
 
-        // template <typename R, typename A1, typename A2>
-        // void registerFunction( const char* name, R (*func)(A1, A2) );
-
-        template <typename A1>
-        void registerFunction( const char* name, void (*func)(A1) );
-
         bool registerFunction(Pt::Reflex::FunctionInfo* fi);
 
         bool unregisterFunction(Pt::Reflex::FunctionInfo* fi);
@@ -335,6 +329,15 @@ class PT_REFLEX_API TypeManager
         Pt::Reflex::FunctionInfo* function(const std::string& name, const Pt::Reflex::ArgumentList& args);
 
         Pt::Reflex::FunctionInfo* function(const std::string& name, Pt::Reflex::Type** args, std::size_t nargs);
+
+        template <typename R, typename A1, typename A2>
+        void registerFunction(const char* name, R (*func)(A1, A2));
+
+        template <typename R, typename A1>
+        void registerFunction(const char* name, R (*func)(A1));
+
+        template <typename R>
+        void registerFunction(const char* name, R (*func)());
 
         TypeTable& types()
         { return _ttab; }
@@ -359,32 +362,38 @@ class PT_REFLEX_API TypeManager
 
 }
 
-#include <Pt/Reflex/FunctionProxy.h>
+#include <Pt/Reflex/Function.h>
 
 namespace Pt {
 
 namespace Reflex {
 
-// template <typename R, typename A1, typename A2>
-// inline void TypeManager::registerFunction( const char* name, R (*proxy)(A1, A2) )
-// {
-//     FunctionProxy<R, A1, A2>* fi = new FunctionProxy<R, A1, A2>(*this, name, proxy);
-//     if ( ! TypeManager::registerFunction(fi) )
-//     {
-//         delete fi;
-//     }
-// }
-/*
-template <typename A1>
-inline void TypeManager::registerFunction( const char* name, void (*proxy)(A1) )
+template <typename R, typename A1, typename A2>
+inline void TypeManager::registerFunction(const char* name, R (*func)(A1, A2))
 {
-    FunctionProxy<A1>* fi = new FunctionProxy<A1>(*this, name, proxy);
-    if ( ! TypeManager::registerFunction(fi) )
-    {
+    Function<R, A1, A2>* fi = new Function<R, A1, A2>(*this, name, func);
+    if( ! TypeManager::registerFunction(fi) )
         delete fi;
-    }
 }
-*/
+
+
+template <typename R, typename A1>
+inline void TypeManager::registerFunction(const char* name, R (*func)(A1))
+{
+    Function<R, A1>* fi = new Function<R, A1>(*this, name, func);
+    if( ! TypeManager::registerFunction(fi) )
+        delete fi;
+}
+
+
+template <typename R>
+inline void TypeManager::registerFunction(const char* name, R (*func)())
+{
+    Function<R>* fi = new Function<R>(*this, name, func);
+    if( ! TypeManager::registerFunction(fi) )
+        delete fi;
+}
+
 }
 
 }

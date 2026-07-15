@@ -278,9 +278,11 @@
     <ClInclude Include="..\..\include\Pt\Reflex\ConstructorInfo.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\ConstructorProxy.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\FunctionInfo.h" />
-    <ClInclude Include="..\..\include\Pt\Reflex\FunctionProxy.h" />
+    <ClInclude Include="..\..\include\Pt\Reflex\Function.h" />
+    <ClInclude Include="..\..\include\Pt\Reflex\GenericMethod.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\GenericType.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\MethodInfo.h" />
+    <ClInclude Include="..\..\include\Pt\Reflex\Method.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\MethodProxy.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\Property.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\PropertyInfo.h" />

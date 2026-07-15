@@ -51,12 +51,9 @@ class WaitCall : public BasicAsyncCall<void>
                , public Pt::Connectable
 {
   public:
-    explicit WaitCall(int ms) : _ms(ms) {}
-
-    static AsyncCall* create(int ms)
-    {
-      return new WaitCall(ms);
-    }
+    explicit WaitCall(int ms)
+    : _ms(ms)
+    {}
 
   private:
     void onBeginCall(Pt::System::EventLoop& loop) override
@@ -81,6 +78,32 @@ class WaitCall : public BasicAsyncCall<void>
 };
 
 
+inline AsyncCall* waitAsync(int ms)
+{
+  return new WaitCall(ms);
+}
+
+
+// WaitFunction demonstrates a user-managed BasicAsyncFunction subclass that
+// holds host-program state (a scale factor) and forwards it to the AsyncCall
+// constructor. It auto-unregisters from the TypeManager when destroyed.
+class WaitFunction : public BasicAsyncFunction<int>
+{
+  public:
+    WaitFunction(Pt::Lua::TypeManager& tm, int scale)
+    : BasicAsyncFunction<int>("scaledWait", tm, tm.asyncCallType())
+    , _scale(scale)
+    {}
+
+  protected:
+    AsyncCall* onCall(int ms) override
+    { return new WaitCall(ms * _scale); }
+
+  private:
+    int _scale;
+};
+
+
 const char script0[] =
   "local p = Point(3, 4)\n"
   "result = p:sum()\n";
@@ -91,6 +114,10 @@ const char script1[] =
   "c:increment()\n"
   "c:increment()\n"
   "result = c:increment()\n";
+
+const char script2[] =
+  "scaledWait(5)\n"
+  "result = 42\n";
 
 } // namespace
 
@@ -106,7 +133,7 @@ ScriptTest::ScriptTest()
   _tm.registerType<Counter>(_counterType);
   _counterType.define(_tm);
 
-  _tm.registerAsyncFunction("wait", &WaitCall::create);
+  _tm.registerAsyncFunction("wait", &waitAsync);
 
   _ctx = new Pt::Lua::Context(_tm);
 
@@ -114,6 +141,10 @@ ScriptTest::ScriptTest()
                                       *this, &ScriptTest::Advance);
   Pt::Unit::TestSuite::registerMethod("AsyncAdvance",
                                       *this, &ScriptTest::AsyncAdvance);
+  Pt::Unit::TestSuite::registerMethod("AsyncAdvanceWithState",
+                                      *this, &ScriptTest::AsyncAdvanceWithState);
+  Pt::Unit::TestSuite::registerMethod("ReturnObjectByValue",
+                                      *this, &ScriptTest::ReturnObjectByValue);
 }
 
 
@@ -193,6 +224,76 @@ void ScriptTest::onAsyncAdvanced()
     PT_UNIT_FAIL(_script->errorMessage());
 
   _loop->exit();
+}
+
+
+void ScriptTest::AsyncAdvanceWithState()
+{
+  WaitFunction wf(_tm, 2);
+  _tm.registerAsyncFunction(wf);
+
+  Pt::Lua::Context ctx(_tm);
+
+  Script script(ctx, script2);
+  script.setActive(*_loop);
+  script.advanced() += Pt::slot(*this, &ScriptTest::onAsyncAdvanced);
+  script.beginAdvance();
+
+  _script = &script;
+
+  _loop->run();
+
+  Result result(ctx.state());
+  PT_UNIT_ASSERT_EQUAL(result.get("result"), 42);
+}
+
+
+// Regression test for return-by-value of a registered non-trivially-copyable type.
+//
+// Prior to the fix, Script::pushResult() used std::memcpy to place the
+// returned object into the Lua userdata. For types like std::vector<int> this
+// is a shallow byte copy: the vector's internal heap pointer is duplicated.
+// The Pt::Any holding the return value is destroyed immediately after
+// pushResult() returns, freeing the vector's heap storage. The Lua userdata
+// then holds a dangling pointer. When the Context is destroyed (lua_close),
+// the Lua GC calls the __gc destructor on the userdata — which calls
+// ~vector<int>() on the dangling copy → double-free → crash.
+//
+// The fix replaces memcpy with a placement-new copy-construction thunk
+// registered alongside the destructor thunk in TypeManager::TypeBinding.
+void ScriptTest::ReturnObjectByValue()
+{
+  // Isolated TypeManager: VectorInt must be registered before Point calls
+  // defineToNumbers() so that std::vector<int> can be resolved as a return type.
+  TypeManager tm;
+
+  VectorIntType vectorType;
+  tm.registerType<std::vector<int>>(vectorType);
+  vectorType.define(tm);
+
+  PointType localPointType;
+  tm.registerType<Point>(localPointType);
+  localPointType.define(tm);
+  localPointType.defineToNumbers(tm);
+
+  Pt::Lua::Context ctx(tm);
+
+  const char* script =
+    "local p = Point(3, 4)\n"
+    "local v = p:toNumbers()\n"
+    "result = v:length()\n";
+
+  Script s(ctx, script);
+  while(true)
+  {
+    Script::Status st = s.advance();
+    if(st == Script::NativeCall) continue;
+    if(st == Script::ScriptError) PT_UNIT_FAIL(s.errorMessage());
+    break;
+  }
+
+  Result r(ctx.state());
+  PT_UNIT_ASSERT_EQUAL(r.get("result"), 2);
 }
 
 

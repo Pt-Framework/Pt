@@ -49,11 +49,19 @@ struct Point
 {
   Point()
   : x(0), y(0)
-  {}
+  { }
 
   Point(int x_, int y_)
   : x(x_), y(y_)
-  {}
+  { }
+
+  std::vector<int> toNumbers() const
+  {
+      std::vector<int> nums;
+      nums.push_back(x);
+      nums.push_back(y);
+      return nums;
+  }
 
   int x;
   int y;
@@ -99,6 +107,17 @@ class PointType : public Type
 
     static int  sum(Point& p)
     { return p.x + p.y; }
+
+    static std::vector<int> toNumsProxy(Point& p)
+    { return p.toNumbers(); }
+
+  public:
+    // Registers toNumbers() on top of the base define().
+    // Requires std::vector<int> (VectorIntType) to already be in tm.
+    void defineToNumbers(TypeManager& tm)
+    {
+      this->registerMethod(tm, "toNumbers", &PointType::toNumsProxy);
+    }
 };
 
 
@@ -143,6 +162,28 @@ inline AsyncCall* Counter::increment()
 {
   return new IncrementCall(*this);
 }
+
+
+// VectorIntType registers std::vector<int> as a Lua type.
+// Only returned from native code; no Lua-side constructor needed.
+class VectorIntType : public Type
+{
+  public:
+    VectorIntType()
+    : Type(typeid(std::vector<int>), "VectorInt")
+    {}
+
+    std::size_t size() const { return sizeof(std::vector<int>); }
+
+    void define(TypeManager& tm)
+    {
+      this->registerMethod(tm, "length", &vectorLength);
+    }
+
+  private:
+    static int vectorLength(std::vector<int>& v)
+    { return static_cast<int>(v.size()); }
+};
 
 
 class CounterType : public Type
@@ -192,12 +233,17 @@ class ScriptTest : public Pt::Unit::TestSuite
 
     void AsyncAdvance();
 
+    void AsyncAdvanceWithState();
+
+    void ReturnObjectByValue();
+
     void onAsyncAdvanced();
 
   private:
-    TypeManager        _tm;
+    TypeManager           _tm;
     PointType             _pointType;
     CounterType           _counterType;
+    VectorIntType         _vectorIntType;
 
     Pt::System::MainLoop* _loop;
     Pt::Lua::Context*    _ctx;

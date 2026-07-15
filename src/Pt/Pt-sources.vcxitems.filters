@@ -3773,13 +3773,19 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\FunctionInfo.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\FunctionProxy.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\Function.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\GenericMethod.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\GenericType.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\MethodInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\Method.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Reflex\MethodProxy.h">

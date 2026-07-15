@@ -2220,13 +2220,19 @@
     <ClInclude Include="..\..\include\Pt\Reflex\FunctionInfo.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Reflex\FunctionProxy.h">
+    <ClInclude Include="..\..\include\Pt\Reflex\Function.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\GenericMethod.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Reflex\GenericType.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Reflex\MethodInfo.h">
+      <Filter>Pt-Reflex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Reflex\Method.h">
       <Filter>Pt-Reflex</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Reflex\MethodProxy.h">

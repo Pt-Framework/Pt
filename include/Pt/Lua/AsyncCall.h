@@ -206,6 +206,84 @@ class AsyncFunctionInfo : public Pt::Reflex::FunctionInfo
 
 template <typename A1 = Pt::Reflex::Void,
           typename A2 = Pt::Reflex::Void>
+class BasicAsyncFunction : public AsyncFunctionInfo
+{
+  public:
+    BasicAsyncFunction(const char* name,
+                       Pt::Reflex::TypeManager& tm, Pt::Reflex::Type& returnType)
+    : AsyncFunctionInfo(name)
+    {
+      _params[0] = tm.getType(typeid(A1));
+      _params[1] = tm.getType(typeid(A2));
+      this->init(returnType, _params, 2);
+    }
+
+    Pt::Any call(const Pt::Reflex::ArgumentList& args) override
+    {
+      Pt::Reflex::ArgumentIterator arg = args.begin();
+      A1 a1 = Pt::Reflex::ArgumentTraits<A1>::cast(*_params[0], arg->type(), arg->get());
+      ++arg;
+      A2 a2 = Pt::Reflex::ArgumentTraits<A2>::cast(*_params[1], arg->type(), arg->get());
+      return Pt::Any(onCall(a1, a2));
+    }
+
+  protected:
+    virtual AsyncCall* onCall(A1, A2) = 0;
+
+  private:
+    Pt::Reflex::Type* _params[2];
+};
+
+
+template <typename A1>
+class BasicAsyncFunction<A1, Pt::Reflex::Void> : public AsyncFunctionInfo
+{
+  public:
+    BasicAsyncFunction(const char* name,
+                       Pt::Reflex::TypeManager& tm, Pt::Reflex::Type& returnType)
+    : AsyncFunctionInfo(name)
+    {
+      _params[0] = tm.getType(typeid(A1));
+      this->init(returnType, _params, 1);
+    }
+
+    Pt::Any call(const Pt::Reflex::ArgumentList& args) override
+    {
+      Pt::Reflex::ArgumentIterator arg = args.begin();
+      A1 a1 = Pt::Reflex::ArgumentTraits<A1>::cast(*_params[0], arg->type(), arg->get());
+      return Pt::Any(onCall(a1));
+    }
+
+  protected:
+    virtual AsyncCall* onCall(A1) = 0;
+
+  private:
+    Pt::Reflex::Type* _params[1];
+};
+
+
+template <>
+class BasicAsyncFunction<Pt::Reflex::Void, Pt::Reflex::Void> : public AsyncFunctionInfo
+{
+  public:
+    BasicAsyncFunction(const char* name, Pt::Reflex::Type& returnType)
+    : AsyncFunctionInfo(name)
+    {
+      this->init(returnType, 0, 0);
+    }
+
+    Pt::Any call(const Pt::Reflex::ArgumentList& /*args*/) override
+    {
+      return Pt::Any(onCall());
+    }
+
+  protected:
+    virtual AsyncCall* onCall() = 0;
+};
+
+
+template <typename A1 = Pt::Reflex::Void,
+          typename A2 = Pt::Reflex::Void>
 class AsyncFunction : public AsyncFunctionInfo
 {
   public:

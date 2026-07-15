@@ -375,6 +375,12 @@ TypeManager::~TypeManager()
         it->setParent(0);
     }
 
+    for( it = _functions.begin(); it != _functions.end(); ++it)
+    {
+        if( it->refs() == 0 )
+            delete &(*it);
+    }
+
     Pt::Reflex::TypeTable::Iterator tit;
     for( tit = _ttab.begin(); tit != _ttab.end(); ++tit)
     {

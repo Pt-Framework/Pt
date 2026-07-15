@@ -65,6 +65,7 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     {
       Type*          type;
       void (*destructor)(void*);
+      void (*copyConstruct)(void* dst, const void* src);
     };
 
     TypeManager();
@@ -80,8 +81,9 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     {
       Pt::Reflex::TypeManager::registerType(type);
       TypeBinding b;
-      b.type       = &type;
-      b.destructor = &destroyLuaObject<T>;
+      b.type         = &type;
+      b.destructor   = &destroyLuaObject<T>;
+      b.copyConstruct = &copyConstructLuaObject<T>;
       _bindings.push_back(b);
     }
 
@@ -113,6 +115,10 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
       Pt::Reflex::TypeManager::registerFunction(fi);
     }
 
+    // Register a user-managed async function. The TypeManager does not take
+    // ownership; fi auto-unregisters from the TypeManager when destroyed.
+    void registerAsyncFunction(AsyncFunctionInfo& fi);
+
     Pt::Reflex::Type& voidType() const
     { return *_voidType; }
 
@@ -126,6 +132,15 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     static void destroyLuaObject(void* p)
     {
       static_cast<T*>(p)->~T();
+    }
+
+    // Copy-construction thunk: placement-new copy-constructs T into dst from src.
+    // Used by Script::pushResult() to initialise the Lua userdata for
+    // by-value return types. Handles non-trivially copyable types correctly.
+    template <typename T>
+    static void copyConstructLuaObject(void* dst, const void* src)
+    {
+      new (dst) T(*static_cast<const T*>(src));
     }
 
   private:

@@ -423,14 +423,16 @@ int Script::pushResult(Pt::Any& value, Pt::Reflex::Type& type)
   }
 
   // Object type: copy-construct into owned Lua userdata.
-  void (*dtor)(void*) = 0;
+  void (*dtor)(void*)                  = 0;
+  void (*copyCtor)(void*, const void*) = 0;
   const std::vector<TypeManager::TypeBinding>& bindings =
     _ctx.typeManager().bindings();
   for(std::size_t i = 0; i < bindings.size(); ++i)
   {
     if(bindings[i].type == &type)
     {
-      dtor = bindings[i].destructor;
+      dtor    = bindings[i].destructor;
+      copyCtor = bindings[i].copyConstruct;
       break;
     }
   }
@@ -447,7 +449,7 @@ int Script::pushResult(Pt::Any& value, Pt::Reflex::Type& type)
   hdr->instance   = static_cast<char*>(static_cast<void*>(hdr)) + LUAOBJECT_DATA_OFFSET;
   hdr->type       = &type;
   hdr->destructor = dtor;
-  std::memcpy(hdr->instance, value.get(), type.size());
+  copyCtor(hdr->instance, value.get());
   luaL_getmetatable(_co, type.name().c_str());
   lua_setmetatable(_co, -2);
   return 1;

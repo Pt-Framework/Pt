@@ -97,6 +97,12 @@ void TypeManager::registerAsyncFunction(const char* name,
   Pt::Reflex::TypeManager::registerFunction(fi);
 }
 
+
+void TypeManager::registerAsyncFunction(AsyncFunctionInfo& fi)
+{
+  Pt::Reflex::TypeManager::registerFunction(&fi);
+}
+
 } // namespace
 
 } // namespace

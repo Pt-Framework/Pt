@@ -50,6 +50,16 @@ namespace Pt {
 */
 namespace Lua {
 
+class Script;
+class Context;
+class Result;
+class Call;
+class AsyncFunctionInfo;
+class AsyncMethodInfo;
+class AsyncCall;
+class Type;
+class TypeManager;
+
 } // namespace
 
 } // namespace
