@@ -58,8 +58,7 @@ namespace {
 int objectGc(lua_State* L)
 {
   LuaObjectHeader* hdr = static_cast<LuaObjectHeader*>(lua_touserdata(L, 1));
-  if(hdr->destructor)
-    hdr->destructor(hdr->instance);
+  hdr->type->destroy(hdr->instance);
   return 0;
 }
 
@@ -273,8 +272,6 @@ static int constructClosure(lua_State* L)
 {
   Pt::Reflex::Type* type =
     static_cast<Pt::Reflex::Type*>(lua_touserdata(L, lua_upvalueindex(1)));
-  void (*dtor)(void*) =
-    reinterpret_cast<void(*)(void*)>(lua_touserdata(L, lua_upvalueindex(2)));
 
   int nstack = lua_gettop(L) - 1;
   if(nstack < 0) nstack = 0;
@@ -310,7 +307,6 @@ static int constructClosure(lua_State* L)
     static_cast<LuaObjectHeader*>(lua_newuserdatauv(L, totalSize, 0));
   hdr->instance   = static_cast<char*>(static_cast<void*>(hdr)) + LUAOBJECT_DATA_OFFSET;
   hdr->type       = type;
-  hdr->destructor = dtor;
   luaL_getmetatable(L, type->name().c_str());
   lua_setmetatable(L, -2);
 
@@ -442,9 +438,9 @@ Context::Context(TypeManager& tm)
   }
   lua_pop(_L, 1);  // pop global table
 
-  const std::vector<TypeManager::TypeBinding>& bindings = tm.bindings();
-  for(std::size_t i = 0; i < bindings.size(); ++i)
-    bindType(*bindings[i].type, bindings[i].destructor);
+  const std::vector<Pt::Reflex::Type*>& boundTypes = tm.boundTypes();
+  for(std::size_t i = 0; i < boundTypes.size(); ++i)
+    bindType(*boundTypes[i]);
 
   // Snapshot type binding globals (class tables).
   lua_pushglobaltable(_L);
@@ -479,7 +475,7 @@ Context::Context(TypeManager& tm)
 }
 
 
-void Context::bindType(Type& type, void (*destructor)(void*))
+void Context::bindType(Pt::Reflex::Type& type)
 {
   // Method table
   lua_newtable(_L);
@@ -551,8 +547,7 @@ void Context::bindType(Type& type, void (*destructor)(void*))
 
   lua_newtable(_L);
   lua_pushlightuserdata(_L, &type);
-  lua_pushlightuserdata(_L, reinterpret_cast<void*>(destructor));
-  lua_pushcclosure(_L, &constructClosure, 2);
+  lua_pushcclosure(_L, &constructClosure, 1);
   lua_setfield(_L, -2, "__call");
   lua_setmetatable(_L, classTableIdx);
 

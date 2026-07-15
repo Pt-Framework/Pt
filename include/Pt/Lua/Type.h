@@ -41,6 +41,7 @@ namespace Lua {
 
 class TypeManager;
 
+
 class Type : public Pt::Reflex::Type
 {
   public:
@@ -67,6 +68,37 @@ class Type : public Pt::Reflex::Type
                              AsyncCall* (T::*method)(A1, A2))
     {
       this->registerMethod(new AsyncMethod<T, A1, A2>(tm, name, method));
+    }
+};
+
+
+template <typename T>
+class BasicType : public Pt::Reflex::BasicType<T>
+{
+  public:
+    explicit BasicType(const std::string& name)
+    : Pt::Reflex::BasicType<T>(name)
+    {}
+
+    template <typename U>
+    void registerAsyncMethod(TypeManager& tm, const char* name,
+                             AsyncCall* (U::*method)())
+    {
+      this->registerMethod(new AsyncMethod<U>(tm, name, method));
+    }
+
+    template <typename U, typename A1>
+    void registerAsyncMethod(TypeManager& tm, const char* name,
+                             AsyncCall* (U::*method)(A1))
+    {
+      this->registerMethod(new AsyncMethod<U, A1>(tm, name, method));
+    }
+
+    template <typename U, typename A1, typename A2>
+    void registerAsyncMethod(TypeManager& tm, const char* name,
+                             AsyncCall* (U::*method)(A1, A2))
+    {
+      this->registerMethod(new AsyncMethod<U, A1, A2>(tm, name, method));
     }
 };
 

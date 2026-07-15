@@ -61,34 +61,26 @@ namespace Lua {
 class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
 {
   public:
-    struct TypeBinding
-    {
-      Type*          type;
-      void (*destructor)(void*);
-      void (*copyConstruct)(void* dst, const void* src);
-    };
-
     TypeManager();
 
     ~TypeManager();
 
-    // Register a type. Captures the destructor thunk for T.
+    // Register a type and record it in the bound-types list for Context.
+    // For Lua::BasicType<T> the destroy/copyConstruct ops are already set
+    // by Pt::Reflex::BasicType<T>. For plain Lua::Type subclasses they
+    // remain null — those types cannot be returned by value from Lua scripts.
     // Must be called before Context construction.
     // After all types are registered, call type.define() in a second pass
     // so that inter-type references can be resolved.
     template <typename T>
-    void registerType(Type& type)
+    void registerType(Pt::Reflex::Type& type)
     {
       Pt::Reflex::TypeManager::registerType(type);
-      TypeBinding b;
-      b.type         = &type;
-      b.destructor   = &destroyLuaObject<T>;
-      b.copyConstruct = &copyConstructLuaObject<T>;
-      _bindings.push_back(b);
+      _boundTypes.push_back(&type);
     }
 
-    const std::vector<TypeBinding>& bindings() const
-    { return _bindings; }
+    const std::vector<Pt::Reflex::Type*>& boundTypes() const
+    { return _boundTypes; }
 
     // Register an async global function by name (0 arguments).
     // Must be called before Context construction.
@@ -126,25 +118,7 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
     { return *_asyncCallType; }
 
   private:
-    // Destructor thunk: calls T's destructor on the raw object pointer.
-    // Used by Context __gc to destroy owned Lua userdata objects.
-    template <typename T>
-    static void destroyLuaObject(void* p)
-    {
-      static_cast<T*>(p)->~T();
-    }
-
-    // Copy-construction thunk: placement-new copy-constructs T into dst from src.
-    // Used by Script::pushResult() to initialise the Lua userdata for
-    // by-value return types. Handles non-trivially copyable types correctly.
-    template <typename T>
-    static void copyConstructLuaObject(void* dst, const void* src)
-    {
-      new (dst) T(*static_cast<const T*>(src));
-    }
-
-  private:
-    std::vector<TypeBinding>         _bindings;
+    std::vector<Pt::Reflex::Type*>   _boundTypes;
     // Owns AsyncFunctionInfo objects registered via registerAsyncFunction().
     // refs=1 prevents cross-DLL delete by TypeManager; we delete in ~TypeManager.
     std::vector<AsyncFunctionInfo*>  _ownedFunctions;

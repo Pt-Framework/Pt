@@ -480,6 +480,24 @@ class PT_REFLEX_API Type
 
         virtual std::size_t size() const = 0;
 
+        void destroy(void* p) const
+        { if(_destructor) _destructor(p); }
+
+        void copyConstruct(void* dst, const void* src) const
+        { if(_copyConstruct) _copyConstruct(dst, src); }
+
+        void setDestructor(void (*fn)(void*))
+        { _destructor = fn; }
+
+        void setCopyConstruct(void (*fn)(void*, const void*))
+        { _copyConstruct = fn; }
+
+        bool hasDestructor() const
+        { return _destructor != nullptr; }
+
+        bool hasCopyConstruct() const
+        { return _copyConstruct != nullptr; }
+
         ConstructorInfo* constructor( const Pt::Reflex::ArgumentList& args);
 
         ConstructorInfo* constructor( Pt::Reflex::Type** args, std::size_t nargs);
@@ -595,6 +613,8 @@ class PT_REFLEX_API Type
         ConstructorTable _ctab;
         PropertyTable _ptab;
         MethodTable _mtab;
+        void (*_destructor)(void*) = nullptr;
+        void (*_copyConstruct)(void*, const void*) = nullptr;
 };
 
 
@@ -605,10 +625,19 @@ class BasicType : public Reflex::Type
         BasicType(const std::string& name)
         : Type(typeid(T), name)
         {
+            this->setDestructor(&destroyObj);
+            this->setCopyConstruct(&copyConstructObj);
         }
 
-        std::size_t size() const 
+        std::size_t size() const
         { return sizeof(T); }
+
+    private:
+        static void destroyObj(void* p)
+        { static_cast<T*>(p)->~T(); }
+
+        static void copyConstructObj(void* dst, const void* src)
+        { new (dst) T(*static_cast<const T*>(src)); }
 };
 
 }
@@ -756,7 +785,7 @@ inline void Type::registerMethod( TypeManager& context, const char* name, R (T::
 
 
 template <typename C, typename T>
-void Type::registerProperty( TypeManager& tm, const char* name, 
+void Type::registerProperty( TypeManager& tm, const char* name,
                              T (*getter)(C&), void (*setter)(C&, T) )
 {
     PropertyInfo* pi = new ReadWritePropertyProxy<C, T>(tm, name, getter, setter);
@@ -768,7 +797,7 @@ void Type::registerProperty( TypeManager& tm, const char* name,
 
 
 template <typename C, typename T>
-void Type::registerProperty( TypeManager& tm, const char* name, 
+void Type::registerProperty( TypeManager& tm, const char* name,
                              T (C::*getter)() const, void (C::*setter)(T) )
 {
     PropertyInfo* pi = new Property<C, T>(tm, name, getter, setter);

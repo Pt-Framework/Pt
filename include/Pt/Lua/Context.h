@@ -65,7 +65,7 @@ class PT_LUA_API Context
     Context(const Context&);
     Context& operator=(const Context&);
 
-    void bindType(Type& type, void (*destructor)(void*));
+    void bindType(Pt::Reflex::Type& type);
 
   private:
     TypeManager&   _tm;
@@ -80,7 +80,6 @@ struct LuaObjectHeader
 {
   void*             instance;
   Pt::Reflex::Type* type;
-  void (*destructor)(void*);
 };
 
 /** @internal

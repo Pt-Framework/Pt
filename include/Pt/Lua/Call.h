@@ -44,7 +44,6 @@ namespace Pt {
 
 namespace Lua {
 
-
 class Call
 {
   public:
@@ -62,6 +61,12 @@ class Call
     { return _errorMsg; }
 
   protected:
+    Call() = default;
+
+    Call(const Call&) = delete;
+
+    Call& operator=(const Call&) = delete;
+
     void setError(const std::string& msg)
     { _errorMsg = msg; }
 

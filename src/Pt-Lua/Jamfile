@@ -12,7 +12,7 @@ PT_LUA_SOURCES = AsyncCall.cpp
                  Context.cpp
                  Result.cpp
                  Script.cpp
-                 TypeManager.cpp 
+                 TypeManager.cpp
                  $(PT_LUA_IMPL) ;
 
 SharedLibrary Pt-Lua : $(PT_LUA_SOURCES) ;

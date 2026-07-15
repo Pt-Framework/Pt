@@ -68,14 +68,12 @@ struct Point
 };
 
 
-class PointType : public Type
+class PointType : public Pt::Lua::BasicType<Point>
 {
   public:
     PointType()
-    : Type(typeid(Point), "Point")
+    : Pt::Lua::BasicType<Point>("Point")
     {}
-
-    std::size_t size() const { return sizeof(Point); }
 
     void define(TypeManager& tm)
     {
@@ -166,14 +164,12 @@ inline AsyncCall* Counter::increment()
 
 // VectorIntType registers std::vector<int> as a Lua type.
 // Only returned from native code; no Lua-side constructor needed.
-class VectorIntType : public Type
+class VectorIntType : public Pt::Lua::BasicType<std::vector<int>>
 {
   public:
     VectorIntType()
-    : Type(typeid(std::vector<int>), "VectorInt")
+    : Pt::Lua::BasicType<std::vector<int>>("VectorInt")
     {}
-
-    std::size_t size() const { return sizeof(std::vector<int>); }
 
     void define(TypeManager& tm)
     {
@@ -186,14 +182,12 @@ class VectorIntType : public Type
 };
 
 
-class CounterType : public Type
+class CounterType : public Pt::Lua::BasicType<Counter>
 {
   public:
     CounterType()
-    : Type(typeid(Counter), "Counter")
+    : Pt::Lua::BasicType<Counter>("Counter")
     {}
-
-    std::size_t size() const { return sizeof(Counter); }
 
     void define(TypeManager& tm)
     {

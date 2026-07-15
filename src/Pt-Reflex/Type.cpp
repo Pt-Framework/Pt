@@ -569,6 +569,8 @@ Type::Type(const std::string& name)
 , _name(name)
 , _id(0)
 , _base(0)
+, _destructor(0)
+, _copyConstruct(0)
 {
 }
 
@@ -579,6 +581,8 @@ Type::Type(const std::type_info& ti, const std::string& name)
 , _name(name)
 , _id(&ti)
 , _base(0)
+, _destructor(0)
+, _copyConstruct(0)
 {
 }
 
