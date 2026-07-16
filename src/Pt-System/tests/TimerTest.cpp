@@ -48,6 +48,9 @@ class TimerTest : public Pt::Unit::TestSuite
             this->registerMethod("RemoveOnTimeout", *this, &TimerTest::RemoveOnTimeout);
             this->registerMethod("RemoveAddOnTimeout", *this, &TimerTest::RemoveAddOnTimeout);
             this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
+#if __cplusplus >= 202002L
+            this->registerMethod("CoWait", *this, &TimerTest::CoWait);
+#endif
         }
 
         void setUp()
@@ -160,6 +163,11 @@ class TimerTest : public Pt::Unit::TestSuite
             _timer = 0;
         }
 
+#if __cplusplus >= 202002L
+        void CoWait();
+        Pt::Task<> coWaitAsync();
+#endif
+
     private:
         Pt::System::Timer* _timer;
         Pt::System::MainLoop* _loop;
@@ -167,3 +175,30 @@ class TimerTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<TimerTest> register_TimerTest;
+
+
+#if __cplusplus >= 202002L
+
+Pt::Task<> TimerTest::coWaitAsync()
+{
+    Pt::System::Clock clock;
+    clock.start();
+
+    co_await _timer->waitAsync(100);
+
+    Pt::Timespan elapsed = clock.stop();
+    PT_UNIT_ASSERT(elapsed.toMSecs() >= 90);
+    PT_UNIT_ASSERT(elapsed.toMSecs() < 200);
+
+    _loop->exit();
+}
+
+
+void TimerTest::CoWait()
+{
+    Pt::Task<> task = coWaitAsync();
+    task.run();
+    _loop->run();
+}
+
+#endif // __cplusplus >= 202002L

@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,9 +34,15 @@
 #include <Pt/Timespan.h>
 #include <cstddef>
 
+#if __cplusplus >= 202002L
+#include <Pt/Coroutine.h>
+#endif
+
 namespace Pt {
 
 namespace System {
+
+class AsyncWait;
 
 /** @brief Notifies clients in constant intervals
 
@@ -58,7 +64,7 @@ namespace System {
     int main()
     {
         Pt::System::MainLoop loop;
-  
+
         Pt::System::Timer timer;
         timer.timeout() += Pt::slot(onTimer);
         timer.setActive(loop);
@@ -159,6 +165,22 @@ class PT_SYSTEM_API Timer
         const Timespan& finished() const
         { return _finished; }
 
+#if __cplusplus >= 202002L
+        /** @brief Start a one-shot timer delay as a C++20 awaitable.
+
+            Returns an awaitable that suspends the coroutine until the
+            timer fires after the specified duration. The timer is automatically
+            stopped when the awaitable completes or is cancelled.
+
+            The %Timer must be registered with an event loop via setActive()
+            before awaiting.
+
+            @param ms Delay duration in milliseconds.
+            @return Awaitable that suspends until timeout or cancellation.
+        */
+        AsyncWait waitAsync(std::size_t ms);
+#endif
+
     private:
         Sentry*     _sentry;
         EventLoop*  _loop;
@@ -167,6 +189,42 @@ class PT_SYSTEM_API Timer
         Signal<>    _timeout;
         void*       _reserved;
 };
+
+#if __cplusplus >= 202002L
+
+/** @brief Awaitable for async one-shot timer delay.
+
+    Wraps the Timer's start() / stop() / timeout() async pattern into a
+    C++20 awaitable for use with co_await. The timer is automatically
+    started when the awaitable begins and stopped when it completes.
+
+    @ingroup Pt-System
+*/
+class PT_SYSTEM_API AsyncWait : public Pt::Awaiter
+                              , public Pt::Connectable
+{
+    public:
+        /** @brief Construct an awaitable for a one-shot timer delay.
+
+            @param timer Reference to the Timer to delay.
+            @param ms Duration in milliseconds.
+        */
+        AsyncWait(Timer& timer, std::size_t ms);
+
+        /** @brief Resume the awaiting coroutine after timeout.
+        */
+        void await_resume();
+
+    private:
+        void onBegin() override;
+
+        void onCancel() override;
+
+        Timer& _timer;
+        std::size_t _ms;
+};
+
+#endif // __cplusplus >= 202002L
 
 } // namespace System
 

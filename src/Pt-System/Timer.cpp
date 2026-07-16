@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -118,9 +118,9 @@ void Timer::start(std::size_t interval)
 {
     _interval = interval;
     PT_LOG_DEBUG("Timer started, interval: " << _interval);
-    
+
     Timespan now = Clock::getSystemTicks();
-    
+
     bool overrun = checkInterval(_interval, now);
     if(overrun)
     {
@@ -245,6 +245,42 @@ void Timer::detach()
 
     _loop = 0;
 }
+
+
+#if __cplusplus >= 202002L
+
+AsyncWait Timer::waitAsync(std::size_t ms)
+{
+    return AsyncWait(*this, ms);
+}
+
+
+AsyncWait::AsyncWait(Timer& timer, std::size_t ms)
+    : _timer(timer)
+    , _ms(ms)
+{
+}
+
+
+void AsyncWait::onBegin()
+{
+    _timer.timeout() += slot(*this, &AsyncWait::setReady);
+    _timer.start(_ms);
+}
+
+
+void AsyncWait::onCancel()
+{
+    _timer.stop();
+}
+
+
+void AsyncWait::await_resume()
+{
+    _timer.stop();
+}
+
+#endif // __cplusplus >= 202002L
 
 } // namespace System
 
