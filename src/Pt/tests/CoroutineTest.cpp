@@ -44,11 +44,12 @@ class CoroutineTest : public Pt::Unit::TestSuite
         CoroutineTest()
         : Pt::Unit::TestSuite("Pt::CoroutineTest")
         {
-            registerMethod("GeneratorTask",         *this, &CoroutineTest::GeneratorTask);
-            registerMethod("GeneratorException",     *this, &CoroutineTest::GeneratorException);
-            registerMethod("TaskException",          *this, &CoroutineTest::TaskException);
-            registerMethod("GeneratorByReference",   *this, &CoroutineTest::GeneratorByReference);
-            registerMethod("TaskByReference",        *this, &CoroutineTest::TaskByReference);
+            registerMethod("GeneratorTask",                        *this, &CoroutineTest::GeneratorTask);
+            registerMethod("GeneratorException",                  *this, &CoroutineTest::GeneratorException);
+            registerMethod("TaskException",                       *this, &CoroutineTest::TaskException);
+            registerMethod("GeneratorByReference",                *this, &CoroutineTest::GeneratorByReference);
+            registerMethod("TaskByReference",                     *this, &CoroutineTest::TaskByReference);
+            registerMethod("DefaultConstructorAndMoveAssignment", *this, &CoroutineTest::DefaultConstructorAndMoveAssignment);
         }
 
     protected:
@@ -100,6 +101,22 @@ class CoroutineTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( task.done() );
             PT_UNIT_ASSERT_EQUAL( task.result(), 50 );
+        }
+
+        void DefaultConstructorAndMoveAssignment()
+        {
+            // Test default constructor
+            Pt::Task<int> task;
+            PT_UNIT_ASSERT( ! task );  // Should have no handle
+
+            // Test move assignment
+            task = squaresTask(3);  // 1² + 2² + 3² = 14
+            PT_UNIT_ASSERT( task );  // Should have a handle now
+
+            // Verify task runs correctly
+            task.run();
+            PT_UNIT_ASSERT( task.done() );
+            PT_UNIT_ASSERT_EQUAL( task.result(), 14 );
         }
 
     private:

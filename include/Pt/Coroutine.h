@@ -316,6 +316,10 @@ class Task : public AwaiterBase
         using handle_type = std::coroutine_handle<promise_type>;
 
     public:
+        Task() noexcept
+        : _handle(nullptr)
+        {}
+
         explicit Task(handle_type h)
         : _handle(h)
         {}
@@ -324,6 +328,18 @@ class Task : public AwaiterBase
         : _handle(other._handle)
         {
             other._handle = nullptr;
+        }
+
+        Task& operator=(Task&& other) noexcept
+        {
+            if(this != &other)
+            {
+                if(_handle)
+                    _handle.destroy();
+                _handle = other._handle;
+                other._handle = nullptr;
+            }
+            return *this;
         }
 
         ~Task()
@@ -413,6 +429,7 @@ class Task : public AwaiterBase
         Task& operator=(const Task&) = delete;
 
         handle_type _handle;
+
 };
 
 } // namespace Pt
