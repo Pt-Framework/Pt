@@ -49,7 +49,7 @@ class CoroutineTest : public Pt::Unit::TestSuite
             registerMethod("TaskException",                       *this, &CoroutineTest::TaskException);
             registerMethod("GeneratorByReference",                *this, &CoroutineTest::GeneratorByReference);
             registerMethod("TaskByReference",                     *this, &CoroutineTest::TaskByReference);
-            registerMethod("DefaultConstructorAndMoveAssignment", *this, &CoroutineTest::DefaultConstructorAndMoveAssignment);
+            registerMethod("TaskAssign",                          *this, &CoroutineTest::TaskAssign);
         }
 
     protected:
@@ -103,7 +103,7 @@ class CoroutineTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUAL( task.result(), 50 );
         }
 
-        void DefaultConstructorAndMoveAssignment()
+        void TaskAssign()
         {
             // Test default constructor
             Pt::Task<int> task;
