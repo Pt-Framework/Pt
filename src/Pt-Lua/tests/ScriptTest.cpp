@@ -145,6 +145,11 @@ ScriptTest::ScriptTest()
                                       *this, &ScriptTest::AsyncAdvanceWithState);
   Pt::Unit::TestSuite::registerMethod("ReturnObjectByValue",
                                       *this, &ScriptTest::ReturnObjectByValue);
+
+#if __cplusplus >= 202002L
+  Pt::Unit::TestSuite::registerMethod("CoAdvance",
+                                      *this, &ScriptTest::CoAdvance);
+#endif
 }
 
 
@@ -295,6 +300,43 @@ void ScriptTest::ReturnObjectByValue()
   Result r(ctx.state());
   PT_UNIT_ASSERT_EQUAL(r.get("result"), 2);
 }
+
+
+#if __cplusplus >= 202002L
+
+void ScriptTest::CoAdvance()
+{
+  Pt::Task<> task = advanceAsync();
+  task.run();
+  _loop->run();
+}
+
+
+Pt::Task<> ScriptTest::advanceAsync()
+{
+  Script script(*_ctx, script1);
+  script.setActive(*_loop);
+
+  while(true)
+  {
+    Script::Status s = co_await script.advanceAsync();
+
+    if(s == Script::Yield || s == Script::NativeCall)
+      continue;
+
+    if(s == Script::ScriptError)
+      PT_UNIT_FAIL(script.errorMessage());
+
+    break; // ScriptOk
+  }
+
+  Result result(_ctx->state());
+  PT_UNIT_ASSERT_EQUAL(result.get("result"), 3);
+
+  _loop->exit();
+}
+
+#endif // __cplusplus >= 202002L
 
 
 Pt::Unit::RegisterTest<ScriptTest> register_LuaScriptTest;

@@ -39,6 +39,11 @@ struct lua_Debug;
 
 #include <string>
 
+#if __cplusplus >= 202002L
+#include <Pt/Slot.h>
+#include <Pt/Coroutine.h>
+#endif
+
 namespace Pt {
 
 class Any;
@@ -50,6 +55,10 @@ namespace Lua {
 class AsyncCall;
 class Context;
 class Call;
+
+#if __cplusplus >= 202002L
+class AsyncAdvance;
+#endif
 
 class PT_LUA_API Script : public System::Selectable
                         , public Connectable
@@ -79,6 +88,15 @@ class PT_LUA_API Script : public System::Selectable
     { return _errorMsg; }
 
     static Script* fromState(lua_State* L);
+
+#if __cplusplus >= 202002L
+    /** @brief Asynchronously advance the Lua script as a C++20 awaitable.
+
+        Returns an awaitable for use with co_await.
+        Wraps beginAdvance() / endAdvance() / advanced().
+    */
+    AsyncAdvance advanceAsync();
+#endif
 
   protected:
     bool onRun();
@@ -123,6 +141,41 @@ class PT_LUA_API Script : public System::Selectable
     AsyncCall*    _pendingAsyncCall;
     AsyncCall*    _activeAsyncCall;
 };
+
+#if __cplusplus >= 202002L
+
+/** @brief Awaitable for async advance of a Lua %Script.
+
+    Wraps the beginAdvance() / endAdvance() / advanced() async pattern
+    into a C++20 awaitable for use with co_await.
+
+    @ingroup Pt-Lua
+*/
+class AsyncAdvance : public Pt::Awaiter
+                   , public Pt::Connectable
+{
+    public:
+        AsyncAdvance(Script& script)
+        : _script(script)
+        {}
+
+        Script::Status await_resume()
+        { return _script.endAdvance(); }
+
+    private:
+        void onBegin() override
+        {
+            _script.advanced() += slot(*this, &AsyncAdvance::setReady);
+            _script.beginAdvance();
+        }
+
+        void onCancel() override
+        { _script.cancel(); }
+
+        Script& _script;
+};
+
+#endif // __cplusplus >= 202002L
 
 } // namespace
 

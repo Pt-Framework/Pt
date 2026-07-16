@@ -459,6 +459,15 @@ int Script::pushResult(Pt::Any& value, Pt::Reflex::Type& type)
   return 1;
 }
 
+#if __cplusplus >= 202002L
+
+AsyncAdvance Script::advanceAsync()
+{
+  return AsyncAdvance(*this);
+}
+
+#endif // __cplusplus >= 202002L
+
 } // namespace
 
 } // namespace

@@ -37,6 +37,10 @@
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Connectable.h>
 
+#if __cplusplus >= 202002L
+#include <Pt/Coroutine.h>
+#endif
+
 namespace Pt {
 
 namespace Lua {
@@ -232,6 +236,12 @@ class ScriptTest : public Pt::Unit::TestSuite
     void ReturnObjectByValue();
 
     void onAsyncAdvanced();
+
+#if __cplusplus >= 202002L
+    void CoAdvance();
+
+    Pt::Task<> advanceAsync();
+#endif
 
   private:
     TypeManager           _tm;
