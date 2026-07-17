@@ -21,7 +21,7 @@ set CONFIGURE_OPTIONS=!CONFIGURE_OPTIONS! -sTARGET_OS=linux -sTARGET_OSPLAT=arm 
 -sTOOLSET_PATH="!POKY_TOOLSET_ROOT!\usr\bin" ^
 -sTOOLSET_PREFIX="arm-poky-linux-gnueabi-" ^
 -sCCFLAGS="-mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard --sysroot \"!POKY_SYSROOT!\"" ^
--sC++FLAGS="-std=c++17 -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard --sysroot \"!POKY_SYSROOT!\"" ^
+-sC++FLAGS="-std=c++20 -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard --sysroot \"!POKY_SYSROOT!\"" ^
 -sLINKFLAGS="--sysroot \"!POKY_SYSROOT!\" -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard" ^
 -sC++LINKFLAGS="--sysroot \"!POKY_SYSROOT!\" -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard" --with-blend2d
 
