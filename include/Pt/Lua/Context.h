@@ -32,7 +32,7 @@
 
 #include <Pt/Lua/Api.h>
 #include <Pt/Lua/AsyncCall.h>
-#include <Pt/Lua/TypeManager.h>
+#include <Pt/Reflex/TypeManager.h>
 #include <Pt/Any.h>
 
 #include <string>
@@ -49,14 +49,14 @@ namespace Lua {
 class PT_LUA_API Context
 {
   public:
-    explicit Context(TypeManager& tm);
+    explicit Context(Pt::Reflex::TypeManager& tm);
 
     ~Context();
 
     lua_State* state() const
     { return _L; }
 
-    TypeManager& typeManager()
+    Pt::Reflex::TypeManager& typeManager()
     { return _tm; }
 
     void reset();
@@ -68,7 +68,7 @@ class PT_LUA_API Context
     void bindType(Pt::Reflex::Type& type);
 
   private:
-    TypeManager&   _tm;
+    Pt::Reflex::TypeManager&  _tm;
     struct lua_State* _L;
     // Snapshot of global keys present after bindType() calls, used by reset().
     std::vector<std::string> _bindingKeys;

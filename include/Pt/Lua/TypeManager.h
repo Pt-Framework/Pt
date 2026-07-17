@@ -32,32 +32,19 @@
 
 #include <Pt/Lua/Api.h>
 #include <Pt/Lua/AsyncCall.h>
-#include <Pt/Lua/Type.h>
 #include <Pt/Reflex/TypeManager.h>
+#include <Pt/Reflex/Function.h>
 #include <Pt/Reflex/Type.h>
-
-#include <vector>
 
 namespace Pt {
 
 namespace Lua {
 
-// Extends Pt::Reflex::TypeManager to additionally capture the destructor
-// thunk (void(*)(void*)) for each user-defined C++ class registered for Lua
-// export. The TypeBinding list is later consumed by Context to wire __gc.
-//
-// Also pre-registers the common primitive types (int, long, float, double,
-// bool, std::string, void) so that Type::registerMethod() and
-// Type::registerConstructor() can resolve their parameter and return types
-// from this manager without manual setup.
-//
-// Usage:
-//   TypeManager tm;
-//   tm.registerType<Counter>(counterType);  // Phase 1: register all types
-//   tm.registerType<Point>(pointType);
-//   counterType.define(tm);                 // Phase 2: define (may ref other types)
-//   pointType.define(tm);
-//   Context ctx(tm);                     // exports all registered types
+template <typename A1 = Pt::Reflex::Void,
+          typename A2 = Pt::Reflex::Void>
+using AsyncFunction = Pt::Reflex::BasicFunction<AsyncCall*, A1, A2>;
+
+
 class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
 {
   public:
@@ -65,65 +52,10 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
 
     ~TypeManager();
 
-    // Register a type and record it in the bound-types list for Context.
-    // For Lua::BasicType<T> the destroy/copyConstruct ops are already set
-    // by Pt::Reflex::BasicType<T>. For plain Lua::Type subclasses they
-    // remain null — those types cannot be returned by value from Lua scripts.
-    // Must be called before Context construction.
-    // After all types are registered, call type.define() in a second pass
-    // so that inter-type references can be resolved.
-    template <typename T>
-    void registerType(Pt::Reflex::Type& type)
-    {
-      Pt::Reflex::TypeManager::registerType(type);
-      _boundTypes.push_back(&type);
-    }
-
-    const std::vector<Pt::Reflex::Type*>& boundTypes() const
-    { return _boundTypes; }
-
-    // Register an async global function by name (0 arguments).
-    // Must be called before Context construction.
-    void registerAsyncFunction(const char* name,
-                               AsyncCall* (*func)());
-
-    // Register an async global function by name (1 typed argument).
-    // Must be called before Context construction.
-    template <typename A1>
-    void registerAsyncFunction(const char* name, AsyncCall* (*func)(A1))
-    {
-      AsyncFunction<A1>* fi = new AsyncFunction<A1>(name, func, *this, asyncCallType());
-      _ownedFunctions.push_back(fi);
-      Pt::Reflex::TypeManager::registerFunction(fi);
-    }
-
-    // Register an async global function by name (2 typed arguments).
-    // Must be called before Context construction.
-    template <typename A1, typename A2>
-    void registerAsyncFunction(const char* name, AsyncCall* (*func)(A1, A2))
-    {
-      AsyncFunction<A1, A2>* fi = new AsyncFunction<A1, A2>(name, func, *this, asyncCallType());
-      _ownedFunctions.push_back(fi);
-      Pt::Reflex::TypeManager::registerFunction(fi);
-    }
-
-    // Register a user-managed async function. The TypeManager does not take
-    // ownership; fi auto-unregisters from the TypeManager when destroyed.
-    void registerAsyncFunction(AsyncFunctionInfo& fi);
-
     Pt::Reflex::Type& voidType() const
     { return *_voidType; }
 
-    Pt::Reflex::Type& asyncCallType() const
-    { return *_asyncCallType; }
-
   private:
-    std::vector<Pt::Reflex::Type*>   _boundTypes;
-    // Owns AsyncFunctionInfo objects registered via registerAsyncFunction().
-    // refs=1 prevents cross-DLL delete by TypeManager; we delete in ~TypeManager.
-    std::vector<AsyncFunctionInfo*>  _ownedFunctions;
-
-    // Owned primitive types — pre-registered in the constructor.
     Pt::Reflex::BasicType<int>*         _intType;
     Pt::Reflex::BasicType<long>*        _longType;
     Pt::Reflex::BasicType<float>*       _floatType;

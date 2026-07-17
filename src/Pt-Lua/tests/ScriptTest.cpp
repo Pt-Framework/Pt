@@ -84,14 +84,14 @@ inline AsyncCall* waitAsync(int ms)
 }
 
 
-// WaitFunction demonstrates a user-managed BasicAsyncFunction subclass that
+// WaitFunction demonstrates a user-managed BasicFunctionInfo subclass that
 // holds host-program state (a scale factor) and forwards it to the AsyncCall
 // constructor. It auto-unregisters from the TypeManager when destroyed.
-class WaitFunction : public BasicAsyncFunction<int>
+class WaitFunction : public AsyncFunction<int>
 {
   public:
-    WaitFunction(Pt::Lua::TypeManager& tm, int scale)
-    : BasicAsyncFunction<int>("scaledWait", tm, tm.asyncCallType())
+    WaitFunction(Pt::Reflex::TypeManager& tm, int scale)
+    : AsyncFunction<int>("scaledWait", tm)
     , _scale(scale)
     {}
 
@@ -127,13 +127,15 @@ ScriptTest::ScriptTest()
 , _ctx(0)
 , _script(0)
 {
-  _tm.registerType<Point>(_pointType);
+  _tm.registerType(_pointType);
+  _tm.registerType(_counterType);
+  _tm.registerType(_vectorIntType);
+
   _pointType.define(_tm);
-
-  _tm.registerType<Counter>(_counterType);
   _counterType.define(_tm);
+  _vectorIntType.define(_tm);
 
-  _tm.registerAsyncFunction("wait", &waitAsync);
+  _tm.registerFunction("wait", &waitAsync);
 
   _ctx = new Pt::Lua::Context(_tm);
 
@@ -235,7 +237,7 @@ void ScriptTest::onAsyncAdvanced()
 void ScriptTest::AsyncAdvanceWithState()
 {
   WaitFunction wf(_tm, 2);
-  _tm.registerAsyncFunction(wf);
+  _tm.registerFunction(&wf);
 
   Pt::Lua::Context ctx(_tm);
 
@@ -268,20 +270,7 @@ void ScriptTest::AsyncAdvanceWithState()
 // registered alongside the destructor thunk in TypeManager::TypeBinding.
 void ScriptTest::ReturnObjectByValue()
 {
-  // Isolated TypeManager: VectorInt must be registered before Point calls
-  // defineToNumbers() so that std::vector<int> can be resolved as a return type.
-  TypeManager tm;
-
-  VectorIntType vectorType;
-  tm.registerType<std::vector<int>>(vectorType);
-  vectorType.define(tm);
-
-  PointType localPointType;
-  tm.registerType<Point>(localPointType);
-  localPointType.define(tm);
-  localPointType.defineToNumbers(tm);
-
-  Pt::Lua::Context ctx(tm);
+  Pt::Lua::Context ctx(_tm);
 
   const char* script =
     "local p = Point(3, 4)\n"

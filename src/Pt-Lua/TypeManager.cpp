@@ -85,26 +85,8 @@ TypeManager::~TypeManager()
   delete _floatType;
   delete _longType;
   delete _intType;
-
-  for(std::size_t i = 0; i < _ownedFunctions.size(); ++i)
-    delete _ownedFunctions[i];
 }
 
-
-void TypeManager::registerAsyncFunction(const char* name,
-                                            AsyncCall* (*func)())
-{
-  AsyncFunction<Pt::Reflex::Void, Pt::Reflex::Void>* fi =
-    new AsyncFunction<Pt::Reflex::Void, Pt::Reflex::Void>(name, func, asyncCallType());
-  _ownedFunctions.push_back(fi);
-  Pt::Reflex::TypeManager::registerFunction(fi);
-}
-
-
-void TypeManager::registerAsyncFunction(AsyncFunctionInfo& fi)
-{
-  Pt::Reflex::TypeManager::registerFunction(&fi);
-}
 
 } // namespace
 

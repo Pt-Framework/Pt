@@ -99,6 +99,12 @@ std::size_t ConstructorTable::size() const
 }
 
 
+bool ConstructorTable::empty() const
+{
+    return _entries.empty();
+}
+
+
 Pt::Reflex::ConstructorInfo* ConstructorTable::find(const Pt::Reflex::ArgumentList& args)
 {
     std::size_t nargs = args.size();
@@ -276,7 +282,12 @@ MethodTable::ConstIterator MethodTable::end() const
 std::size_t MethodTable::size() const
 {
     return _entries.size();
+}
 
+
+bool MethodTable::empty() const
+{
+    return _entries.empty();
 }
 
 
@@ -511,7 +522,12 @@ PropertyTable::ConstIterator PropertyTable::end() const
 std::size_t PropertyTable::size() const
 {
     return _entries.size();
+}
 
+
+bool PropertyTable::empty() const
+{
+    return _entries.empty();
 }
 
 

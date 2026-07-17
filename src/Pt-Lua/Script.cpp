@@ -425,16 +425,22 @@ int Script::pushResult(Pt::Any& value, Pt::Reflex::Type& type)
   }
 
   // Object type: always copy-construct into owned Lua userdata.
-  const std::vector<Pt::Reflex::Type*>& boundTypes = _ctx.typeManager().boundTypes();
-  bool isBound = false;
-  for(std::size_t i = 0; i < boundTypes.size(); ++i)
-  {
-    if(boundTypes[i] == &type)
-    {
-      isBound = true;
-      break;
-    }
-  }
+  // const std::vector<Pt::Reflex::Type*>& boundTypes = _ctx.typeManager().boundTypes();
+  // bool isBound = false;
+  // for(std::size_t i = 0; i < boundTypes.size(); ++i)
+  // {
+  //   if(boundTypes[i] == &type)
+  //   {
+  //     isBound = true;
+  //     break;
+  //   }
+  // }
+
+  // Object type: check if a metatable was registered for this type in the Lua registry.
+  luaL_getmetatable(_co, type.name().c_str());
+  bool isBound = ! lua_isnil(_co, -1);
+  lua_pop(_co, 1);
+
 
   if( ! isBound )
   {

@@ -149,6 +149,8 @@ class PT_REFLEX_API ConstructorTable
 
         std::size_t size() const;
 
+        bool empty() const;
+
         Pt::Reflex::ConstructorInfo* find(const Pt::Reflex::ArgumentList& args);
 
         Pt::Reflex::ConstructorInfo* find(Pt::Reflex::Type** args, std::size_t nargs);
@@ -266,6 +268,8 @@ class PT_REFLEX_API MethodTable
         ConstIterator end() const;
 
         std::size_t size() const;
+
+        bool empty() const;
 
         Pt::Reflex::MethodInfo* find(const std::string& name, const ArgumentList& args);
 
@@ -388,6 +392,8 @@ class PT_REFLEX_API PropertyTable
         ConstIterator end() const;
 
         std::size_t size() const;
+
+        bool empty() const;
 
         Pt::Reflex::PropertyInfo* find(const std::string& name);
 

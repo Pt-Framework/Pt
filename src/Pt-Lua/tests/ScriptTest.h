@@ -31,7 +31,6 @@
 #define WORKBENCH_SCRIPTTEST_H
 
 #include <Pt/Lua/TypeManager.h>
-#include <Pt/Lua/Type.h>
 #include <Pt/Lua/AsyncCall.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Unit/TestSuite.h>
@@ -72,11 +71,11 @@ struct Point
 };
 
 
-class PointType : public Pt::Lua::BasicType<Point>
+class PointType : public Pt::Reflex::BasicType<Point>
 {
   public:
     PointType()
-    : Pt::Lua::BasicType<Point>("Point")
+    : Pt::Reflex::BasicType<Point>("Point")
     {}
 
     void define(TypeManager& tm)
@@ -86,6 +85,8 @@ class PointType : public Pt::Lua::BasicType<Point>
       this->registerMethod(tm, "sum", &sum);
       this->registerProperty(tm, "x", &getX, &setX);
       this->registerProperty(tm, "y", &getY, &setY);
+
+      this->registerMethod(tm, "toNumbers", &PointType::toNumsProxy);
     }
 
   private:
@@ -112,14 +113,6 @@ class PointType : public Pt::Lua::BasicType<Point>
 
     static std::vector<int> toNumsProxy(Point& p)
     { return p.toNumbers(); }
-
-  public:
-    // Registers toNumbers() on top of the base define().
-    // Requires std::vector<int> (VectorIntType) to already be in tm.
-    void defineToNumbers(TypeManager& tm)
-    {
-      this->registerMethod(tm, "toNumbers", &PointType::toNumsProxy);
-    }
 };
 
 
@@ -168,11 +161,11 @@ inline AsyncCall* Counter::increment()
 
 // VectorIntType registers std::vector<int> as a Lua type.
 // Only returned from native code; no Lua-side constructor needed.
-class VectorIntType : public Pt::Lua::BasicType<std::vector<int>>
+class VectorIntType : public Pt::Reflex::BasicType<std::vector<int>>
 {
   public:
     VectorIntType()
-    : Pt::Lua::BasicType<std::vector<int>>("VectorInt")
+    : Pt::Reflex::BasicType<std::vector<int>>("VectorInt")
     {}
 
     void define(TypeManager& tm)
@@ -186,18 +179,18 @@ class VectorIntType : public Pt::Lua::BasicType<std::vector<int>>
 };
 
 
-class CounterType : public Pt::Lua::BasicType<Counter>
+class CounterType : public Pt::Reflex::BasicType<Counter>
 {
   public:
     CounterType()
-    : Pt::Lua::BasicType<Counter>("Counter")
+    : Pt::Reflex::BasicType<Counter>("Counter")
     {}
 
     void define(TypeManager& tm)
     {
       this->registerConstructor(tm, *this, &CounterType::construct);
       this->registerProperty(tm, "value", &getValue, &setValue);
-      this->registerAsyncMethod(tm, "increment", &Counter::increment);
+      this->registerMethod(tm, "increment", &Counter::increment);
     }
 
   private:

@@ -328,8 +328,8 @@ static int constructClosure(lua_State* L)
 
 static int luaFunctionDispatchClosure(lua_State* L)
 {
-  AsyncFunctionInfo* info =
-    static_cast<AsyncFunctionInfo*>(lua_touserdata(L, lua_upvalueindex(1)));
+  Pt::Reflex::FunctionInfo* info =
+    static_cast<Pt::Reflex::FunctionInfo*>(lua_touserdata(L, lua_upvalueindex(1)));
 
   std::vector<Pt::Reflex::Argument> args;
   args.reserve(info->psize());
@@ -350,8 +350,8 @@ static int luaFunctionDispatchClosure(lua_State* L)
 
 static int luaAsyncDispatchClosure(lua_State* L)
 {
-  AsyncMethodInfo* info =
-    static_cast<AsyncMethodInfo*>(lua_touserdata(L, lua_upvalueindex(1)));
+  Pt::Reflex::MethodInfo* info =
+    static_cast<Pt::Reflex::MethodInfo*>(lua_touserdata(L, lua_upvalueindex(1)));
 
   LuaObjectHeader* hdr = static_cast<LuaObjectHeader*>(lua_touserdata(L, 1));
   void* instance = hdr ? hdr->instance : 0;
@@ -421,9 +421,17 @@ void installOperators(lua_State* L, Pt::Reflex::Type& type, int metatableIdx,
   }
 }
 
+
+static bool hasBindings(const Pt::Reflex::Type& t)
+{
+  return ! t.constructors().empty()||
+         ! t.methods().empty() ||
+         ! t.properties().empty();
+}
+
 } // anonymous namespace
 
-Context::Context(TypeManager& tm)
+Context::Context(Pt::Reflex::TypeManager& tm)
 : _tm(tm)
 , _L(luaL_newstate())
 {
@@ -440,9 +448,15 @@ Context::Context(TypeManager& tm)
   }
   lua_pop(_L, 1);  // pop global table
 
-  const std::vector<Pt::Reflex::Type*>& boundTypes = tm.boundTypes();
-  for(std::size_t i = 0; i < boundTypes.size(); ++i)
-    bindType(*boundTypes[i]);
+  {
+    Pt::Reflex::TypeTable::Iterator tit = tm.types().begin();
+    for( ; tit != tm.types().end(); ++tit)
+    {
+      Pt::Reflex::Type& t = *tit;
+      if( hasBindings(t) )
+        bindType(t);
+    }
+  }
 
   // Snapshot type binding globals (class tables).
   lua_pushglobaltable(_L);
@@ -466,13 +480,14 @@ Context::Context(TypeManager& tm)
   Pt::Reflex::FunctionTable::Iterator fit = tm.functions().begin();
   for( ; fit != tm.functions().end(); ++fit)
   {
-    AsyncFunctionInfo* info = dynamic_cast<AsyncFunctionInfo*>(&(*fit));
-    if( ! info)
+    Pt::Reflex::FunctionInfo& fi = *fit;
+    const std::type_info* rtid = fi.rtype().id();
+    if( ! rtid || *rtid != typeid(AsyncCall*))
       continue;
-    lua_pushlightuserdata(_L, info);
+    lua_pushlightuserdata(_L, &fi);
     lua_pushcclosure(_L, &luaFunctionDispatchClosure, 1);
-    lua_setglobal(_L, info->name());
-    _bindingKeys.push_back(info->name());
+    lua_setglobal(_L, fi.name());
+    _bindingKeys.push_back(fi.name());
   }
 }
 
@@ -488,9 +503,10 @@ void Context::bindType(Pt::Reflex::Type& type)
     for( ; it != type.methods().end(); ++it)
     {
       Pt::Reflex::MethodInfo& mi = *it;
-      if(AsyncMethodInfo* ami = dynamic_cast<AsyncMethodInfo*>(&mi))
+      const std::type_info* rtid = mi.rtype().id();
+      if(rtid && *rtid == typeid(AsyncCall*))
       {
-        lua_pushlightuserdata(_L, ami);
+        lua_pushlightuserdata(_L, &mi);
         lua_pushcclosure(_L, &luaAsyncDispatchClosure, 1);
       }
       else

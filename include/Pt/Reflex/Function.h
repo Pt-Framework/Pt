@@ -38,6 +38,174 @@ namespace Pt {
 
 namespace Reflex {
 
+///////////////////////////////////////////////////////////////////////
+// BasicFunction
+///////////////////////////////////////////////////////////////////////
+
+template <typename R,
+          typename A1 = Void,
+          typename A2 = Void>
+class BasicFunction : public FunctionInfo
+{
+  public:
+    BasicFunction(const char* name, TypeManager& tm)
+    : FunctionInfo(1, std::string(name))
+    {
+      Type* rtype = tm.getType(typeid(R));
+      _params[0] = tm.getType(typeid(A1));
+      _params[1] = tm.getType(typeid(A2));
+      this->init(*rtype, _params, 2);
+    }
+
+    Any call(const ArgumentList& args) override
+    {
+      ArgumentIterator arg = args.begin();
+      A1 a1 = ArgumentTraits<A1>::cast(*_params[0], arg->type(), arg->get());
+      ++arg;
+      A2 a2 = ArgumentTraits<A2>::cast(*_params[1], arg->type(), arg->get());
+      return Any( this->onCall(a1, a2) );
+    }
+
+  protected:
+    virtual R onCall(A1, A2) = 0;
+
+  private:
+    Type* _params[2];
+};
+
+
+template <typename R, typename A1>
+class BasicFunction<R, A1, Void> : public FunctionInfo
+{
+  public:
+    BasicFunction(const char* name, TypeManager& tm)
+    : FunctionInfo(1, std::string(name))
+    {
+      Type* rtype = tm.getType(typeid(R));
+      _params[0] = tm.getType(typeid(A1));
+      this->init(*rtype, _params, 1);
+    }
+
+    Any call(const ArgumentList& args) override
+    {
+      ArgumentIterator arg = args.begin();
+      A1 a1 = ArgumentTraits<A1>::cast(*_params[0], arg->type(), arg->get());
+      return Any( this->onCall(a1) );
+    }
+
+  protected:
+    virtual R onCall(A1) = 0;
+
+  private:
+    Type* _params[1];
+};
+
+
+template <typename R>
+class BasicFunction<R, Void, Void> : public FunctionInfo
+{
+  public:
+    BasicFunction(const char* name, TypeManager& tm)
+    : FunctionInfo(1, std::string(name))
+    {
+      Type* rtype = tm.getType(typeid(R));
+      this->init(*rtype, 0, 0);
+    }
+
+    Any call(const ArgumentList& /*args*/) override
+    {
+      return Any( this->onCall() );
+    }
+
+  protected:
+    virtual R onCall() = 0;
+};
+
+
+template <typename A1, typename A2>
+class BasicFunction<void, A1, A2> : public FunctionInfo
+{
+  public:
+    BasicFunction(const char* name, TypeManager& tm)
+    : FunctionInfo(1, std::string(name))
+    {
+      Type* rtype = tm.getType(typeid(void));
+      _params[0] = tm.getType(typeid(A1));
+      _params[1] = tm.getType(typeid(A2));
+      this->init(*rtype, _params, 2);
+    }
+
+    Any call(const ArgumentList& args) override
+    {
+      ArgumentIterator arg = args.begin();
+      A1 a1 = ArgumentTraits<A1>::cast(*_params[0], arg->type(), arg->get());
+      ++arg;
+      A2 a2 = ArgumentTraits<A2>::cast(*_params[1], arg->type(), arg->get());
+      this->onCall(a1, a2);
+      return Any();
+    }
+
+  protected:
+    virtual void onCall(A1, A2) = 0;
+
+  private:
+    Type* _params[2];
+};
+
+
+template <typename A1>
+class BasicFunction<void, A1, Void> : public FunctionInfo
+{
+  public:
+    BasicFunction(const char* name, TypeManager& tm)
+    : FunctionInfo(1, std::string(name))
+    {
+      Type* rtype = tm.getType(typeid(void));
+      _params[0] = tm.getType(typeid(A1));
+      this->init(*rtype, _params, 1);
+    }
+
+    Any call(const ArgumentList& args) override
+    {
+      ArgumentIterator arg = args.begin();
+      A1 a1 = ArgumentTraits<A1>::cast(*_params[0], arg->type(), arg->get());
+      this->onCall(a1);
+      return Any();
+    }
+
+  protected:
+    virtual void onCall(A1) = 0;
+
+  private:
+    Type* _params[1];
+};
+
+
+template <>
+class BasicFunction<void, Void, Void> : public FunctionInfo
+{
+  public:
+    BasicFunction(const char* name, TypeManager& tm)
+    : FunctionInfo(1, std::string(name))
+    {
+      Type* rtype = tm.getType(typeid(void));
+      this->init(*rtype, 0, 0);
+    }
+
+    Any call(const ArgumentList& /*args*/) override
+    {
+      this->onCall();
+      return Any();
+    }
+
+  protected:
+    virtual void onCall() = 0;
+};
+
+///////////////////////////////////////////////////////////////////////
+// Function
+///////////////////////////////////////////////////////////////////////
+
 // Non-void return, 2 args (primary template)
 template <typename R,
           typename A1 = Void,
