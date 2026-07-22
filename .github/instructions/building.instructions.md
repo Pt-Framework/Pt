@@ -1,5 +1,5 @@
 ---
-description: "Build system"
+description: "Build system & setup"
 ---
 
 # Building with Jam
@@ -15,24 +15,24 @@ description: "Build system"
   any configure, switch, build, clean, or verification command.
 - NEVER use VS Code tasks (run_task) to build.
 - ALWAYS check the exit code of the actual standalone build command to determine build success.
-- ALWAYS check the exit code after every build command — no exceptions. 
+- ALWAYS check the exit code after every build command — no exceptions.
 - NEVER rely on build output alone.
 - ALWAYS run the build command without any further processing.
-- ALWAYS perform a full global build to verify that dependent modules are not broken. 
+- ALWAYS perform a full global build to verify that dependent modules are not broken.
 - NEVER only build the local module or test target.
 
 # Configuring the Build
 
-- Configure debug build: 
+- Configure debug build:
   `jam.bat configure -sCONFIG=debug --debug`
 
-- Configure release vuild: 
+- Configure release vuild:
   `jam.bat configure -sCONFIG=release --debug --optimize`
 
-- Switch to debug configuration: 
+- Switch to debug configuration:
   `jam.bat switch debug`
 
-- Switch to release configuration: 
+- Switch to release configuration:
   `jam.bat switch release`
 
 - `jam.bat configure` always creates a new build configuration
@@ -55,7 +55,6 @@ description: "Build system"
 - Supported renderer flags:
   - `--with-direct2d`
   - `--with-gdi`
-  - `--with-sw-raster`
   - `--with-vulkan`
 - Native defaults:
   - Windows: `win32` + `direct2d`
@@ -79,7 +78,7 @@ description: "Build system"
 
 # Cleaning the Build
 
-- Remove all build artifacts: 
+- Remove all build artifacts:
   `jam.bat clean`
 
 # Build Setup

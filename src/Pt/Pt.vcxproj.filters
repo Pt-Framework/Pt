@@ -3309,7 +3309,6 @@
     <None Include="..\..\jam\emcc.jam">
       <Filter>jam</Filter>
     </None>
-    <None Include="..\..\.github\copilot-instructions.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\freetype\src\autofit\afangles.c">
