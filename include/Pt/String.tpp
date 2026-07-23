@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2004-2007 Marc Boris Duerner
  * Copyright (C) 2011 Tommi Maekitalo
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -129,6 +129,15 @@ inline basic_string<Pt::Char>::~basic_string()
 }
 
 
+template<typename Operation>
+void basic_string<Pt::Char>::resize_and_overwrite(size_type n, Operation op)
+{
+    privreserve(n);
+    size_type r = op(privdata_rw(), n);
+    setLength(r);
+}
+
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
 {
     return assign( str.c_str(), str.size() );
@@ -140,9 +149,9 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string
     const Pt::Char* from = &str.at(pos);
 
     if( str.size() - pos < n )
-        n = str.size() - pos; 
+        n = str.size() - pos;
 
-    return this->assign( from, n );  
+    return this->assign( from, n );
 }
 
 
@@ -172,7 +181,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const basic_string
     const Pt::Char* from = &str.at(pos);
 
     if( str.size() - pos < n )
-        n = str.size() - pos; 
+        n = str.size() - pos;
 
     return this->append( from, n );
 }
@@ -185,7 +194,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::append(InputIterator begin, Inpu
     {
         push_back(*begin++);
     }
-    
+
     return *this;
 }
 
@@ -216,7 +225,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, con
     const Pt::Char* from = &str[pos2];
 
     if( str.size() - pos2 < n )
-        n = str.size() - pos2; 
+        n = str.size() - pos2;
 
     return insert(pos, from, n);
 }
@@ -276,7 +285,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
         throw out_of_range("replace");
 
     if( str.size() - pos2 < n2 )
-        n2 = str.size() - pos2; 
+        n2 = str.size() - pos2;
 
     return replace(pos, n, str.privdata_ro() + pos2, n2);
 }
@@ -336,7 +345,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
         throw out_of_range("compare");
 
     if( str.size() - pos2 < n2 )
-        n2 = str.size() - pos2; 
+        n2 = str.size() - pos2;
 
     return compare(pos, n, str.privdata_ro() + pos2, n2);
 }
@@ -380,7 +389,7 @@ basic_string<Pt::Char>::rfind(const Pt::Char* str, size_type pos) const
 }
 
 
-inline 
+inline
 basic_string<Pt::Char>& basic_string<Pt::Char>::operator+=(Pt::Char c)
 {
     size_type len = 0;
@@ -396,7 +405,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::operator+=(Pt::Char c)
         len = longStringLength();
         cap = longStringCapacity();
     }
-    
+
     size_type newLen = len + 1;
     if( newLen > cap )
         privreserve(newLen);
@@ -412,7 +421,7 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::operator+=(Pt::Char c)
     {
         Pt::Char* p = longStringData();
         p[len] = c;
-    
+
         _d._u._p._end = _d._u._p._begin + newLen;
         _d._u._p._begin[newLen] = 0;
     }
@@ -431,10 +440,10 @@ basic_string<Pt::Char> basic_string<Pt::Char>::fromUtf16(InIterT from, InIterT f
         unsigned ch = *from;
 
         // high surrogate
-        if (ch >= 0xD800 && ch <= 0xDBFF) 
+        if (ch >= 0xD800 && ch <= 0xDBFF)
         {
             // invalid or missing low surrogate
-            if(++from == fromEnd || *from < 0xDC00 || *from > 0xDFFF) 
+            if(++from == fromEnd || *from < 0xDC00 || *from > 0xDFFF)
             {
                 ret += Pt::Char(0xFFFD);
                 break;

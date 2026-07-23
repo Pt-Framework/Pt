@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2007 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -73,6 +73,12 @@ class PT_API StringBuffer : public BasicStreamBuffer<Char>
 
         void str(const Pt::String& str);
 
+#if __cplusplus >= 201103L
+        void str(Pt::String&& s);
+
+        void swap(StringBuffer& other);
+#endif
+
     protected:
         virtual std::streamsize showfull() override;
 
@@ -90,26 +96,32 @@ class PT_API StringBuffer : public BasicStreamBuffer<Char>
 
         virtual std::streamsize xsputn(const char_type* s, std::streamsize n) override;
 
-        virtual pos_type seekoff(off_type off, std::ios_base::seekdir way, 
+        virtual pos_type seekoff(off_type off, std::ios_base::seekdir way,
                                  std::ios_base::openmode m = std::ios_base::in|std::ios_base::out) override;
 
-        virtual pos_type seekpos(pos_type sp, 
+        virtual pos_type seekpos(pos_type sp,
                                  std::ios_base::openmode m = std::ios_base::in|std::ios_base::out) override;
 
     private:
         std::ios_base::openmode _mode;
         Pt::String              _str;
-        mutable char_type*      _hm = nullptr;
+        std::streamsize         _hwm;
 };
 
-} // namespace Pt
-
-//#define PT_STRINGSTREAM_BUILTIN 1
-
-#if defined(_MSC_VER) && __cplusplus >= 202002L
+#if defined(PT_WITH_STD_STRINGSTREAM)
 
 namespace Pt {
 
+typedef std::basic_stringstream<Pt::Char> StringStream;
+typedef std::basic_istringstream<Pt::Char> IStringStream;
+typedef std::basic_ostringstream<Pt::Char> OStringStream;
+
+#else
+
+/** @brief Unicode string input stream.
+
+    @ingroup Unicode
+*/
 class PT_API IStringStream : public std::basic_istream<Pt::Char>
 {
     public:
@@ -139,7 +151,10 @@ class PT_API IStringStream : public std::basic_istream<Pt::Char>
         Pt::StringBuffer _buffer;
 };
 
+/** @brief Unicode string output stream.
 
+    @ingroup Unicode
+*/
 class PT_API OStringStream : public std::basic_ostream<Pt::Char>
 {
     public:
@@ -169,7 +184,10 @@ class PT_API OStringStream : public std::basic_ostream<Pt::Char>
         Pt::StringBuffer _buffer;
 };
 
+/** @brief Unicode string stream.
 
+    @ingroup Unicode
+*/
 class PT_API StringStream : public std::basic_iostream<Pt::Char>
 {
     public:
@@ -199,56 +217,8 @@ class PT_API StringStream : public std::basic_iostream<Pt::Char>
         Pt::StringBuffer _buffer;
 };
 
-} // namespace Pt
-
-#else
-
-namespace Pt {
-
-/** @class Pt::StringStream StringStream.h "Pt/StringStream.h"
-    @brief Unicode string stream.
-
-    This class is a typedef of the std::basic_stringstream template for
-    the unicode character type Pt::Char:
-
-    @code
-    typedef std::basic_stringstream<Pt::Char> StringStream;
-    @endcode
-
-    @ingroup Unicode
-*/
-typedef std::basic_stringstream<Pt::Char> StringStream;
-
-/** @class Pt::IStringStream StringStream.h "Pt/StringStream.h"
-    @brief Unicode string input stream.
-
-    This class is a typedef of the std::ibasic_stringstream template for
-    the unicode character type Pt::Char:
-
-    @code
-    typedef std::basic_istringstream<Pt::Char> StringStream;
-    @endcode
-
-    @ingroup Unicode
-*/
-typedef std::basic_istringstream<Pt::Char> IStringStream;
-
-/** @class Pt::OStringStream StringStream.h "Pt/StringStream.h"
-    @brief Unicode string output stream.
-
-    This class is a typedef of the std::basic_ostringstream template for
-    the unicode character type Pt::Char:
-
-    @code
-    typedef std::basic_ostringstream<Pt::Char> StringStream;
-    @endcode
-
-    @ingroup Unicode
-*/
-typedef std::basic_ostringstream<Pt::Char> OStringStream;
+#endif // PT_WITH_STD_STRINGSTREAM
 
 } // namespace Pt
-
-#endif
 
 #endif

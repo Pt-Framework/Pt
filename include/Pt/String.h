@@ -418,7 +418,7 @@ class PT_API basic_string<Pt::Char>
     public:
         /** @brief Default Constructor.
         */
-        explicit basic_string( const allocator_type& a = allocator_type());
+        explicit basic_string(const allocator_type& a = allocator_type());
 
         /** @brief Constructor.
         */
@@ -555,6 +555,14 @@ class PT_API basic_string<Pt::Char>
         /** @brief Reserves space.
         */
         void reserve(std::size_t n = 0);
+
+        /** @brief Resizes the string without initialization.
+
+            The buffer is passed to to @p op which must return the number of
+            valid characters.
+        */
+        template<typename Operation>
+        void resize_and_overwrite(size_type n, Operation op);
 
         /** @brief Swaps with another string.
         */

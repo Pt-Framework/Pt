@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2007 Tobias Mueller
  * Copyright (C) 2007 PTV AG
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -40,7 +40,7 @@ class StringStreamTest : public Pt::Unit::TestSuite
 {
     public:
         StringStreamTest()
-        : Pt::Unit::TestSuite("StringStreamTest")
+        : Pt::Unit::TestSuite("Pt::StringStreamTest")
         {
             Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::ReadFloat );
             Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &StringStreamTest::readInt );
@@ -54,6 +54,15 @@ class StringStreamTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod("WriteFixed", *this, &StringStreamTest::WriteFixed );
             Pt::Unit::TestSuite::registerMethod("WriteScientific", *this, &StringStreamTest::WriteScientific );
             Pt::Unit::TestSuite::registerMethod("WritePtr", *this, &StringStreamTest::WritePtr );
+            Pt::Unit::TestSuite::registerMethod("WriteReadBack", *this, &StringStreamTest::writeReadBack );
+            Pt::Unit::TestSuite::registerMethod("SeekRead", *this, &StringStreamTest::seekRead );
+            Pt::Unit::TestSuite::registerMethod("Putback", *this, &StringStreamTest::putback );
+            Pt::Unit::TestSuite::registerMethod("BulkRead", *this, &StringStreamTest::bulkRead );
+            Pt::Unit::TestSuite::registerMethod("LargeWrite", *this, &StringStreamTest::largeWrite );
+#if __cplusplus >= 201103L
+            Pt::Unit::TestSuite::registerMethod("SwapBuffers", *this, &StringStreamTest::swapBuffers );
+            Pt::Unit::TestSuite::registerMethod("MoveStr", *this, &StringStreamTest::moveStr );
+#endif
 
         }
 
@@ -69,6 +78,15 @@ class StringStreamTest : public Pt::Unit::TestSuite
         void WriteFixed();
         void WriteScientific();
         void WritePtr();
+        void writeReadBack();
+        void seekRead();
+        void putback();
+        void bulkRead();
+        void largeWrite();
+#if __cplusplus >= 201103L
+        void swapBuffers();
+        void moveStr();
+#endif
 };
 
 Pt::Unit::RegisterTest<StringStreamTest> _registerStringStreamTest;
@@ -277,7 +295,7 @@ void StringStreamTest::WriteDec()
     ss << std::dec << std::internal <<  std::setw(10) << -42;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"-       42");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -312,7 +330,7 @@ void StringStreamTest::WriteDec()
     ss << std::dec << std::noshowpos << std::left << std::setw(10) << 42 << std::flush;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"42        ");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -333,11 +351,11 @@ void StringStreamTest::WriteFloat()
 {
     Pt::StringStream ss;
     Pt::String str;
-    
+
     ss << std::setprecision(3) << std::left << std::setw(10) << 0.0;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"0.0       ");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -372,43 +390,43 @@ void StringStreamTest::WriteFloat()
     ss  << std::setprecision(6) << std::internal << std::noshowpos << std::setw(10) << -123.4561;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"-  123.456");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::setprecision(6) << std::internal << std::showpos << std::setw(10) << 123.4561;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"+  123.456");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::setprecision(1) << std::right << std::noshowpoint << std::noshowpos << std::setw(10) << 2.8;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"         3");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::setprecision(1) << std::right << std::showpoint << std::noshowpos << std::setw(10) << 2.8;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"        3.");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::setprecision(2) << std::right << std::showpos << std::setw(10) << 3.14;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"      +3.1");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::setprecision(7) << std::right << std::noshowpos << std::setw(10) << -10000.0;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"  -10000.0");
-    
-    
+
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -422,11 +440,11 @@ void StringStreamTest::WriteFixed()
 {
     Pt::StringStream ss;
     Pt::String str;
-    
+
     ss << std::fixed << std::setprecision(3) << std::left << std::setw(10) << 0.0;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"0.000     ");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -461,43 +479,43 @@ void StringStreamTest::WriteFixed()
     ss << std::fixed << std::setprecision(3) << std::internal << std::noshowpos << std::setw(10) << -123.4561;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"-  123.456");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::fixed << std::setprecision(3) << std::internal << std::showpos << std::setw(10) << 123.4561;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"+  123.456");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::fixed << std::setprecision(0) << std::right << std::noshowpoint << std::noshowpos << std::setw(10) << 2.8;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"         3");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::fixed << std::setprecision(0) << std::right << std::showpoint << std::noshowpos << std::setw(10) << 2.8;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"        3.");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::fixed << std::setprecision(1) << std::right << std::showpos << std::setw(10) << 3.14;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"      +3.1");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::fixed << std::setprecision(2) << std::right << std::noshowpos << std::setw(10) << -10000.0;
     str = ss.str();
     PT_UNIT_ASSERT(str == L" -10000.00");
-    
-    
+
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -515,10 +533,10 @@ void StringStreamTest::WriteScientific()
     ss << std::scientific << std::setprecision(3) << std::left  << std::setw(15) << 0.0;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"0.000e+000     ");
-    
+
     ss.clear();
     ss.str( Pt::String() );
-    
+
     ss << std::scientific << std::setprecision(3) << std::left << std::noshowpos << std::setw(15)  << 123.4568;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"1.235e+002     ");
@@ -551,7 +569,7 @@ void StringStreamTest::WriteScientific()
     ss << std::scientific << std::setprecision(3) << std::internal << std::noshowpos << std::setw(15) << -123.44444;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"-    1.234e+002");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -565,28 +583,28 @@ void StringStreamTest::WriteScientific()
     ss << std::scientific << std::setprecision(0) << std::right << std::noshowpoint << std::noshowpos << std::setw(15) << 2.8;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"         3e+000");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::scientific << std::setprecision(0) << std::right << std::showpoint << std::noshowpos << std::setw(15) << 2.8;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"        3.e+000");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::scientific << std::setprecision(1) << std::right << std::showpos << std::setw(15) << 3.14;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"      +3.1e+000");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
     ss << std::scientific << std::setprecision(2) << std::right << std::noshowpos << std::setw(15) << -10000.0;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"     -1.00e+004");
-    
+
     ss.clear();
     ss.str( Pt::String() );
 
@@ -602,7 +620,7 @@ void StringStreamTest::WritePtr()
     Pt::String str;
 
     const void* ptr = 0;
- 
+
     ss << ptr;
     str = ss.str();
     PT_UNIT_ASSERT(str == L"0");
@@ -628,3 +646,108 @@ void StringStreamTest::WritePtr()
     str = ss.str();
     PT_UNIT_ASSERT(str == L"0         ");
 }
+
+
+void StringStreamTest::writeReadBack()
+{
+    Pt::StringStream ss;
+    ss << Pt::String(L"hello");
+
+    ss.clear();
+    ss.seekg(0, std::ios::beg);
+
+    Pt::String result;
+    ss >> result;
+    PT_UNIT_ASSERT(result == Pt::String(L"hello"));
+}
+
+
+void StringStreamTest::seekRead()
+{
+    Pt::StringStream ss;
+    ss << Pt::String(L"abcde");
+
+    ss.clear();
+    ss.seekg(0, std::ios::beg);
+    Pt::String result;
+    ss >> result;
+    PT_UNIT_ASSERT(result == Pt::String(L"abcde"));
+
+    ss.clear();
+    ss.seekg(2, std::ios::beg);
+    result.clear();
+    ss >> result;
+    PT_UNIT_ASSERT(result == Pt::String(L"cde"));
+
+    ss.clear();
+    ss.seekg(-2, std::ios::end);
+    result.clear();
+    ss >> result;
+    PT_UNIT_ASSERT(result == Pt::String(L"de"));
+}
+
+
+void StringStreamTest::putback()
+{
+    Pt::StringStream ss( Pt::String(L"abc") );
+
+    Pt::Char ch;
+    ss.get(ch);
+    PT_UNIT_ASSERT(ss.good());
+
+    ss.putback(ch);
+    PT_UNIT_ASSERT(ss.good());
+
+    Pt::Char ch2;
+    ss.get(ch2);
+    PT_UNIT_ASSERT(ch2 == ch);
+}
+
+
+void StringStreamTest::bulkRead()
+{
+    Pt::String data(L"hello world");
+    Pt::StringStream ss(data);
+
+    Pt::Char buf[12];
+    ss.read(buf, 11);
+    PT_UNIT_ASSERT(ss.gcount() == 11);
+    PT_UNIT_ASSERT( Pt::String(buf, 11) == data );
+}
+
+
+void StringStreamTest::largeWrite()
+{
+    Pt::String alphabet(L"abcdefghijklmnopqrstuvwxyz");
+    Pt::String expected;
+    for(int i = 0; i < 1000; ++i)
+        expected += alphabet[i % 26];
+
+    Pt::StringStream ss;
+    ss << expected;
+    PT_UNIT_ASSERT(ss.str() == expected);
+}
+
+
+#if __cplusplus >= 201103L
+
+void StringStreamTest::swapBuffers()
+{
+    Pt::StringBuffer a( Pt::String(L"hello"), std::ios::in | std::ios::out );
+    Pt::StringBuffer b( Pt::String(L"world"), std::ios::in | std::ios::out );
+
+    a.swap(b);
+
+    PT_UNIT_ASSERT(a.str() == Pt::String(L"world"));
+    PT_UNIT_ASSERT(b.str() == Pt::String(L"hello"));
+}
+
+
+void StringStreamTest::moveStr()
+{
+    Pt::StringBuffer buf(std::ios::in | std::ios::out);
+    buf.str( Pt::String(L"moved") );
+    PT_UNIT_ASSERT(buf.str() == Pt::String(L"moved"));
+}
+
+#endif // __cplusplus >= 201103L
