@@ -5,36 +5,63 @@ TAR ?= tar ;
 
 rule Tar
 {
-  local _tar = $(1) ;
-  local _files = $(2) ;
+  local _tar    = $(1) ;
+  local _files  = $(2) ;
   local _tmpdir = $(1:B)-tar ;
 
   $(<)_type = "Tar" ;
 
   Clean package-clean : $(_tar) ;
-  
   Depends package : $(_tar) ;
-  
+
+  ARCHIVE_NAME on $(_tar) = $(_tar) ;
+
+  local _all_stages ;
+
   for local f in $(_files)
   {
-    local _member = $(f:BSG=$(_tar)) ;
+    local _stage = $(f:BSG=$(_tar)-stage) ;
 
-    Depends $(_tar) : $(_member) ;
-    Depends $(_member) : $(f) ;
-    Depends $(_member) : $(_tmpdir) ;
+    _all_stages += $(_stage) ;
+
+    Depends $(_stage) : $(f) ;
+    Depends $(_stage) : $(_tmpdir) ;
     MkDir $(_tmpdir) ;
 
-    ARCHIVE_RIGHTS on $(_member) = 0666 ;
-    ARCHIVE_NAME on $(_member) = $(_tar) ;
-    ARCHIVE_DIR on $(_member) = "" ;
+    ARCHIVE_NAME   on $(_stage) = $(_tar) ;
+    ARCHIVE_DIR    on $(_stage) = "" ;
+    ARCHIVE_RIGHTS on $(_stage) = 0666 ;
 
     if $(3)
     {
-      ARCHIVE_DIR on $(_member) = [ FDirName $(3) ] ;
+      ARCHIVE_DIR on $(_stage) = [ FDirName $(3) ] ;
     }
 
-    TarFile $(_member) : $(f) ;
+    TarCopy $(_stage) : $(f) ;
   }
+
+  if ! [ on $(_tar) return $(TAR_CLEAN_REGISTERED) ]
+  {
+      TAR_CLEAN_REGISTERED on $(_tar) = true ;
+      local _clean = $(_tar:G=tar-clean) ;
+      NOTFILE $(_clean) ;
+      ALWAYS $(_clean) ;
+      STAGEDIR on $(_clean) = $(_tmpdir) ;
+      Depends package-clean : $(_clean) ;
+      TarClean $(_clean) ;
+  }
+
+  # Accumulate the default mode so TarBuild can iterate over known modes
+  # instead of scanning the staging tree on disk.
+  if ! 0666 in [ on $(_tar) return $(ARCHIVE_MODES) ] {
+    ARCHIVE_MODES on $(_tar) += 0666 ;
+  }
+
+  # All staging must complete before the archive is assembled.
+  # Pass $(_all_stages) as sources so 'actions together TarBuild' accumulates
+  # stages across multiple Tar calls for the same archive.
+  Depends $(_tar) : $(_all_stages) ;
+  TarBuild $(_tar) : $(_all_stages) ;
 }
 
 
@@ -49,58 +76,83 @@ rule Tar-MakeLocate
 
 rule TarMode
 {
-  local _tar = $(1) ;
-  local _files = $(2) ;
+  local _tar    = $(1) ;
+  local _files  = $(2) ;
   local _rights = $(3) ;
-  
+
   for local f in $(_files)
   {
-    local _member = $(f:BSG=$(_tar)) ;
-    ARCHIVE_RIGHTS on $(_member) = $(_rights) ;
+    # Mode is encoded in the staging path; set it on the _stage target so
+    # TarCopy places the file under the correct mode-named subdirectory.
+    ARCHIVE_RIGHTS on $(f:BSG=$(_tar)-stage) = $(_rights) ;
+  }
+
+  # Accumulate this mode so TarBuild knows which subdirectories to process.
+  if ! $(_rights) in [ on $(_tar) return $(ARCHIVE_MODES) ] {
+    ARCHIVE_MODES on $(_tar) += $(_rights) ;
   }
 }
 
 
-actions TarFile bind ARCHIVE_NAME
+actions TarClean bind STAGEDIR
 {
-  set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
-  set FILE_DIR=%TMP_DIR%\$(ARCHIVE_DIR)
-
-  if not exist "%FILE_DIR%" (
-    mkdir "%FILE_DIR%"
-  )
-
-  copy "$(2)" "%FILE_DIR%" > NUL
-  
-  set CURRENT_DIR=%cd%
-  
-  for /f "delims=" %%i in ("%CURRENT_DIR%") do (
-    set CURRENT_DIR=%%~pnxi
-  )
-    
-  cd "%TMP_DIR%"
-  
-  set FILE=$(2:BSD=$(ARCHIVE_DIR))
-  set FILE=%FILE:\=/%
-  
-  set ARCHIVE=%CURRENT_DIR%/$(ARCHIVE_NAME)
-  set ARCHIVE=%ARCHIVE:\=/%
-  
-  REM TODO: return with FAILURE if tar command fails
-  
-  if exist "%ARCHIVE%" (
-    $(TAR) rf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
-  ) else (
-    $(TAR) cf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS)
-  )
+    if exist "$(STAGEDIR)" ( rd /s /q "$(STAGEDIR)" )
 }
 
 
-actions together Tar
+# Phase 1 — copy each file into tmpdir/<mode>/<dir>/.
+# All TarCopy invocations for the same archive run in parallel.
+actions quietly TarCopy bind ARCHIVE_NAME
 {
-  set TMP_DIR=$(1:DB)-tar
-  REM echo REMOVE %TMP_DIR%
-  
+  set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
+  set FILE_DIR=%TMP_DIR%\$(ARCHIVE_RIGHTS)\$(ARCHIVE_DIR)
+
+  if not exist "%FILE_DIR%" (
+    mkdir "%FILE_DIR%" 2> NUL
+  )
+
+  copy "$(2)" "%FILE_DIR%" > NUL
+}
+
+
+# Phase 2 — assemble the archive from the staging tree.
+# Iterates over ARCHIVE_MODES (pre-computed in Jam rules); one 'tar' invocation
+# per mode group. 'together' merges multiple Tar calls for the same archive.
+actions together TarBuild bind ARCHIVE_NAME
+{
+  set CURRENT_DIR=%cd%
+  for /f "delims=" %%i in ("%CURRENT_DIR%") do set CURRENT_DIR=%%~pnxi
+
+  set ARCHIVE=%CURRENT_DIR%/$(ARCHIVE_NAME)
+  set ARCHIVE=%ARCHIVE:\=/%
+
+  set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
+  set TMP_DIR_FWD=%TMP_DIR:\=/%
+
+  if exist "%ARCHIVE%" del "%ARCHIVE%"
+
+  for %%m in ($(ARCHIVE_MODES:J= )) do (
+    if exist "%TMP_DIR_FWD%/%%m" (
+      if exist "%ARCHIVE%" (
+        $(TAR) rf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
+      ) else (
+        $(TAR) cf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
+      )
+
+      if ERRORLEVEL 1 (
+        echo REPEATING %%m $(ARCHIVE_NAME:BS)
+        timeout /t 3 /nobreak > NUL
+
+        if exist "%ARCHIVE%" (
+          $(TAR) rf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
+        ) else (
+          $(TAR) cf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
+        )
+      )
+    )
+  )
+
+  REM Clean up staging tree now that the archive is complete.
   if exist "%TMP_DIR%" (
     rd /s/q "%TMP_DIR%"
   )

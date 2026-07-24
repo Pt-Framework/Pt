@@ -11,7 +11,7 @@
 # use /DPT_MCHECK for memory usage statistics
 
 CC = cl /nologo
-CFLAGS = -DNT /MT /O2 -wd4996 kernel32.lib advapi32.lib user32.lib
+CFLAGS = -DNT -DOPT_SEMAPHORE /MT /O2 -wd4996 kernel32.lib advapi32.lib user32.lib
 TARGET = /Fejam
 
 SOURCES = \
