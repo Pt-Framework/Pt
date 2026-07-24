@@ -1,0 +1,37 @@
+# Project-scoped Grok permissions for Platinum (Pt).
+# Hard-excludes large generated/vendored trees from Read/Edit/Grep.
+# Soft policy remains in AGENTS.md; this enforces it for tools.
+#
+# To work on a denied tree: temporarily comment out the matching lines
+# and start a new session (rules load at session start).
+
+[permission]
+deny = [
+  # --- Build / generated / fetched ---
+  "Read(**/build/**)",
+  "Edit(**/build/**)",
+  "Read(**/tmp/**)",
+  "Edit(**/tmp/**)",
+  "Read(**/deps/**)",
+  "Edit(**/deps/**)",
+  "Read(**/doc/website/htdocs/**)",
+  "Edit(**/doc/website/htdocs/**)",
+
+  # --- Vendored third-party under src/ (not Pt wrappers) ---
+  "Read(**/src/skia/**)",
+  "Edit(**/src/skia/**)",
+  "Read(**/src/openssl/**)",
+  "Edit(**/src/openssl/**)",
+  "Read(**/src/blend2d/**)",
+  "Edit(**/src/blend2d/**)",
+  "Read(**/src/freetype/**)",
+  "Edit(**/src/freetype/**)",
+  "Read(**/src/libjpeg/**)",
+  "Edit(**/src/libjpeg/**)",
+  "Read(**/src/libpng/**)",
+  "Edit(**/src/libpng/**)",
+  "Read(**/src/mbedtls/**)",
+  "Edit(**/src/mbedtls/**)",
+  "Read(**/src/zlib/**)",
+  "Edit(**/src/zlib/**)",
+]
