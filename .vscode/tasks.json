@@ -24,8 +24,11 @@
             "type": "shell",
             "command": "./jam.sh",
             "windows": {
-                "command": ".\\jam.bat configure ${input:configureOptions} ${input:configureExtra}"
+                "command": ".\\jam.bat"
             },
+            "args": [
+                "configure", "${input:configureOptions}", "${input:configureExtra}"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
