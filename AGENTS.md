@@ -12,6 +12,9 @@ Pt is a C++ framework for high-performance, multi-platform apps from one codebas
 - Multi-root workspaces may show the same file under different folder roots.
 - Do not search `build/`, `tmp/`, `deps/`, `doc/website/htdocs/`, or large
   vendored trees (`src/skia`, `src/openssl`, …) unless the task requires it.
+- Use only ASCII characters in all output (code, comments, file names, messages)
+  unless the task explicitly requires non-ASCII characters (e.g. localized strings,
+  binary data, or Unicode-specific tests).
 
 ## Task Specific Instructions
 
