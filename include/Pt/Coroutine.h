@@ -74,7 +74,7 @@ class AwaiterBase
         virtual ~AwaiterBase() = default;
 };
 
-/** @brief Base class for C++20 awaitables driven by an event-loop signal.
+/** @brief Base class for coroutine awaitables.
 
     Subclasses implement two customization points:
     - onBegin(): subscribe to the completion signal and start the operation.
@@ -124,6 +124,58 @@ class Awaiter : public AwaiterBase
 
     protected:
         std::coroutine_handle<> _handle;
+};
+
+
+/** @brief Basic coroutine awaitable.
+
+    Use %BasicAwaiter<R> instead of %Awaiter when the awaitable only
+    needs to deliver a result upon resumption. Subclasses implement
+    the onBegin() / onCancel() customization points and provide a result
+    via onReady(). The await_resume() method calls onReady() and returns
+    its value.
+
+    @ingroup BasicTypes
+*/
+template<typename R>
+class BasicAwaiter : public Awaiter
+{
+    public:
+        /** @brief Returns the result produced when the awaitable resumes.
+        */
+        R await_resume()
+        {
+            return onReady();
+        }
+
+    protected:
+        /** @brief Produce the result for await_resume().
+
+            Called exactly once when the coroutine is resumed.
+        */
+        virtual R onReady() = 0;
+};
+
+
+/** @brief BasicAwaiter specialization for awaitables without a result.
+
+    @ingroup BasicTypes
+*/
+template<>
+class BasicAwaiter<void> : public Awaiter
+{
+    public:
+        /** @brief Resumes the coroutine after the operation completed.
+        */
+        void await_resume()
+        { onReady(); }
+
+    protected:
+        /** @brief Called once when the awaitable resumes.
+
+            Use this to clean up or finalize the operation.
+        */
+        virtual void onReady() = 0;
 };
 
 

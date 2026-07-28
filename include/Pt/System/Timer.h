@@ -200,7 +200,7 @@ class PT_SYSTEM_API Timer
 
     @ingroup Pt-System
 */
-class PT_SYSTEM_API AsyncWait : public Pt::Awaiter
+class PT_SYSTEM_API AsyncWait : public Pt::BasicAwaiter<void>
                               , public Pt::Connectable
 {
     public:
@@ -211,14 +211,12 @@ class PT_SYSTEM_API AsyncWait : public Pt::Awaiter
         */
         AsyncWait(Timer& timer, std::size_t ms);
 
-        /** @brief Resume the awaiting coroutine after timeout.
-        */
-        void await_resume();
-
     private:
         void onBegin() override;
 
         void onCancel() override;
+
+        void onReady() override;
 
         Timer& _timer;
         std::size_t _ms;

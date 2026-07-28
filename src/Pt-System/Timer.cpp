@@ -275,7 +275,7 @@ void AsyncWait::onCancel()
 }
 
 
-void AsyncWait::await_resume()
+void AsyncWait::onReady()
 {
     _timer.stop();
 }
