@@ -30,7 +30,10 @@
 #define PT_SSL_CERTIFICATEIMPL_H
 
 #include <Pt/Ssl/Api.h>
+#include <mbedtls/x509_crt.h>
+#include <mbedtls/pk.h>
 #include <string>
+#include <cassert>
 
 namespace Pt {
 
@@ -39,27 +42,43 @@ namespace Ssl {
 class CertificateImpl
 {
     public:
-        CertificateImpl()
-        { }
-
-        ~CertificateImpl()
-        { }
-
-        int serialNumber() const
+        explicit CertificateImpl(mbedtls_x509_crt* crt, mbedtls_pk_context* pk = 0)
+        : _crt(crt)
+        , _pk(pk)
         {
-            return 0;
+            assert(_crt);
         }
 
-        std::string issuer() const
+        ~CertificateImpl()
         {
-            return std::string();
+            if(_pk)
+            {
+                mbedtls_pk_free(_pk);
+                delete _pk;
+            }
+
+            mbedtls_x509_crt_free(_crt);
+            delete _crt;
         }
 
         std::string subject() const
         {
-            return "Unknown Organization, Unknown Name";
+            char buf[256];
+            int n = mbedtls_x509_dn_gets(buf, sizeof(buf), &_crt->subject);
+            if(n < 0)
+                return std::string();
+            return std::string(buf, static_cast<std::size_t>(n));
         }
-        
+
+        std::string issuer() const
+        {
+            char buf[256];
+            int n = mbedtls_x509_dn_gets(buf, sizeof(buf), &_crt->issuer);
+            if(n < 0)
+                return std::string();
+            return std::string(buf, static_cast<std::size_t>(n));
+        }
+
         std::string notBefore() const
         {
             return std::string();
@@ -67,12 +86,22 @@ class CertificateImpl
 
         std::string notAfter() const
         {
-           return std::string();
+            return std::string();
         }
+
+        const mbedtls_x509_crt* crt() const
+        { return _crt; }
+
+        const mbedtls_pk_context* pk() const
+        { return _pk; }
+
+    private:
+        mbedtls_x509_crt*   _crt;
+        mbedtls_pk_context* _pk;
 };
 
 } // namespace Ssl
 
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_CERTIFICATEIMPL_H

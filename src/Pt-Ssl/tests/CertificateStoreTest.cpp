@@ -45,7 +45,7 @@ class CertificateStoreTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("CertificateStoreTest")
         {
             Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
-            
+
             this->registerMethod("Import", *this, &CertificateStoreTest::Import);
 
             //makePkc12Data();
@@ -57,10 +57,10 @@ class CertificateStoreTest : public Pt::Unit::TestSuite
 
             Pt::Ssl::CertificateStore store;
             store.loadPkcs12(certChain, sizeof(chainPkcs12), "123");
-    
+
             const Pt::Ssl::Certificate* cert = store.findCertificate("Server");
             PT_UNIT_ASSERT(cert);
-    
+
             cert = store.findCertificate("Intermediate CA 2");
             PT_UNIT_ASSERT(cert);
 
@@ -70,7 +70,7 @@ class CertificateStoreTest : public Pt::Unit::TestSuite
             {
                 ++certCount;
             }
-            
+
             PT_UNIT_ASSERT(certCount != 0);
             PT_UNIT_ASSERT_EQUALS( certCount, store.size() );
         }
@@ -104,8 +104,8 @@ void makePkc12Data()
         for(std::streamsize n = 0; n < size; ++n)
         {
             if(n != 0)
-                std::cout << ", "; 
-            
+                std::cout << ", ";
+
             std::cout << (int)(unsigned char)(buf[n]);
         }
     }
