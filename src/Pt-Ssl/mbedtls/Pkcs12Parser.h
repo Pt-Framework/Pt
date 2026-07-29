@@ -32,7 +32,6 @@
 #include <mbedtls/x509_crt.h>
 #include <mbedtls/pk.h>
 #include <cstddef>
-#include <vector>
 
 namespace Pt {
 
@@ -43,13 +42,17 @@ namespace Ssl {
 // and must free them using the matching mbedtls_*_free + delete sequence.
 // On failure all out parameters are left as NULL / empty.
 //
+// The leaf certificate is returned in *cert and the CA chain in *ca. The
+// *ca chain is linked via mbedtls_x509_crt::next and can be freed by
+// traversing it. *cert is a single certificate with next == NULL.
+//
 // Returns true on success, false on any parse or decryption error.
-bool parsePkcs12(const unsigned char*            data,
-                 std::size_t                     len,
-                 const char*                     passwd,
-                 mbedtls_pk_context**            pkey,
-                 mbedtls_x509_crt**              cert,
-                 std::vector<mbedtls_x509_crt*>& ca);
+bool parsePkcs12(const unsigned char* data,
+                 std::size_t          len,
+                 const char*          passwd,
+                 mbedtls_pk_context** pkey,
+                 mbedtls_x509_crt**   cert,
+                 mbedtls_x509_crt**   ca);
 
 } // namespace Ssl
 

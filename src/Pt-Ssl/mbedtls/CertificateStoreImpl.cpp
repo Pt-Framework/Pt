@@ -36,7 +36,6 @@
 #include <Pt/System/Logger.h>
 #include <mbedtls/x509_crt.h>
 #include <cstring>
-#include <vector>
 
 PT_LOG_DEFINE("Pt.Ssl.CertificateStore")
 
@@ -63,45 +62,50 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12,
                                       std::size_t len,
                                       const char* passwd)
 {
-    PT_LOG_DEBUG("loadPkcs12: " << passwd);
+    PT_LOG_DEBUG("loadPkcs12: " << len << " bytes");
 
-    mbedtls_pk_context* pkey = 0;
-    mbedtls_x509_crt*   cert = 0;
-    std::vector<mbedtls_x509_crt*> ca;
+    mbedtls_pk_context* pk = 0;
+    mbedtls_x509_crt*   x509 = 0;
+    mbedtls_x509_crt*   ca = 0;
 
-    if( ! parsePkcs12(reinterpret_cast<const unsigned char*>(pkcs12), len,
-                      passwd, &pkey, &cert, ca))
+    if( ! parsePkcs12( reinterpret_cast<const unsigned char*>(pkcs12), len,
+                       passwd, &pk, &x509, &ca) )
         throw InvalidCertificate("invalid PKCS12 data");
 
-    PkAutoPtr pkeyGuard(pkey);
+    PkAutoPtr pkeyPtr(pk);
+    X509CrtAutoPtr x509Ptr(x509);
+    X509ChainAutoPtr caChainPtr(ca);
 
-    if(cert)
+    if(x509)
     {
-        X509CrtAutoPtr certGuard(cert);
-        AutoPtr<CertificateImpl> implGuard(new CertificateImpl(cert, pkey));
-        certGuard.release();
-        pkeyGuard.release();
+        AutoPtr<CertificateImpl> certImpl( new CertificateImpl(x509, pk) );
+        x509Ptr.release();
+        pkeyPtr.release();
 
-        AutoPtr<Certificate> certObjGuard(new Certificate(implGuard.get()));
-        implGuard.release();
+        AutoPtr<Certificate> certPtr(new Certificate( certImpl.get() ));
+        certImpl.release();
 
-        _allCerts.push_back(certObjGuard.get());
-        certObjGuard.release();
+        _allCerts.push_back( certPtr.get() );
+        certPtr.release();
 
         PT_LOG_DEBUG("imported certificate: " << _allCerts.back()->subject());
     }
 
-    for(std::size_t i = 0; i < ca.size(); ++i)
+    while(caChainPtr)
     {
-        X509CrtAutoPtr caGuard(ca[i]);
-        AutoPtr<CertificateImpl> implGuard(new CertificateImpl(ca[i]));
-        caGuard.release();
+        X509CrtAutoPtr caCertPtr( caChainPtr.release() );
 
-        AutoPtr<Certificate> certObjGuard(new Certificate(implGuard.get()));
-        implGuard.release();
+        caChainPtr.reset(caCertPtr->next);
+        caCertPtr->next = 0;
 
-        _allCerts.push_back(certObjGuard.get());
-        certObjGuard.release();
+        AutoPtr<CertificateImpl> implPtr( new CertificateImpl(caCertPtr.get()) );
+        caCertPtr.release();
+
+        AutoPtr<Certificate> certPtr( new Certificate(implPtr.get()) );
+        implPtr.release();
+
+        _allCerts.push_back(certPtr.get());
+        certPtr.release();
 
         PT_LOG_DEBUG("imported CA certificate: " << _allCerts.back()->subject());
     }
@@ -112,7 +116,7 @@ void CertificateStoreImpl::loadPem(const char* data,
                                    std::size_t len,
                                    const char* /*passwd*/)
 {
-    PT_LOG_DEBUG("loadPem");
+    PT_LOG_DEBUG("loadPem: " << len << " bytes");
 
     mbedtls_x509_crt* crt = new mbedtls_x509_crt();
     mbedtls_x509_crt_init(crt);

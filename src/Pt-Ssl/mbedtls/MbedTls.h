@@ -51,6 +51,25 @@ class FreeMbedX509Crt
 typedef Pt::AutoPtr<mbedtls_x509_crt, FreeMbedX509Crt> X509CrtAutoPtr;
 
 
+class FreeMbedX509Chain
+{
+    protected:
+        void destroy(mbedtls_x509_crt* ptr)
+        {
+            while(ptr)
+            {
+                mbedtls_x509_crt* next = ptr->next;
+                ptr->next = 0;
+                mbedtls_x509_crt_free(ptr);
+                delete ptr;
+                ptr = next;
+            }
+        }
+};
+
+typedef Pt::AutoPtr<mbedtls_x509_crt, FreeMbedX509Chain> X509ChainAutoPtr;
+
+
 class FreeMbedPk
 {
     protected:

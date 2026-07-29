@@ -87,7 +87,7 @@ void StreamBufferTest::Handshake()
     const Pt::Ssl::Certificate* clientCA = store.findCertificate("SGC Certificate Authority");
     PT_UNIT_ASSERT( clientCA );
     clientContext.addCACertificate(*clientCA);
-    
+
     // client begins the handshake
     std::stringstream data;
     Pt::Ssl::StreamBuffer client(clientContext, data, Pt::Ssl::Connect);
@@ -101,7 +101,7 @@ void StreamBufferTest::Handshake()
         // client handshake progress
         while( client.writeHandshake() )
             ;
-    
+
         PT_UNIT_ASSERT(data.str().size() > 0);
         data.str( data.str() );
         data.clear();
@@ -109,13 +109,13 @@ void StreamBufferTest::Handshake()
         // server handshake progress
         while( server.readHandshake() )
             ;
-    
+
         data.clear();
         data.str( std::string() );
-    
+
         while( server.writeHandshake() )
             ;
-    
+
         PT_UNIT_ASSERT(data.str().size() > 0);
         data.str( data.str() );
         data.clear();
@@ -153,4 +153,3 @@ void StreamBufferTest::Handshake()
     client.sgetn( buf2, sizeof(buf2) - 1 );
     PT_UNIT_ASSERT( std::string(buf2) == "Hello Client!" );
 }
-

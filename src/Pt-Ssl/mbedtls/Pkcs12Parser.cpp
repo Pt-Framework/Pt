@@ -27,6 +27,7 @@
  */
 
 #include "Pkcs12Parser.h"
+#include "MbedTls.h"
 #include <mbedtls/asn1.h>
 #include <mbedtls/pkcs5.h>
 #include <mbedtls/pkcs12.h>
@@ -68,11 +69,12 @@ static bool oidEq(const mbedtls_asn1_buf& b, const unsigned char* oid, std::size
 
 struct ParseState
 {
-    mbedtls_pk_context**            pkey;
-    mbedtls_x509_crt**              cert;
-    std::vector<mbedtls_x509_crt*>* ca;
-    const char*                     passwd;
-    mbedtls_ctr_drbg_context*       ctr_drbg;
+    mbedtls_pk_context** pkey;
+    mbedtls_x509_crt**   cert;
+    mbedtls_x509_crt**   ca;
+    mbedtls_x509_crt**   caTail;
+    const char*          passwd;
+    mbedtls_ctr_drbg_context* ctr_drbg;
 };
 
 
@@ -96,23 +98,25 @@ static bool parseCertBag(const unsigned char* bagVal, std::size_t len,
 
     // CertBag ::= SEQUENCE { certId OID, certValue [0] EXPLICIT { OCTET STRING } }
     std::size_t seqLen;
-    if(mbedtls_asn1_get_tag(&p, end, &seqLen,
-                             MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0)
+    if(mbedtls_asn1_get_tag(&p, end, &seqLen, MBEDTLS_ASN1_CONSTRUCTED |
+                                              MBEDTLS_ASN1_SEQUENCE) != 0)
         return false;
+
     const unsigned char* seqEnd = p + seqLen;
 
     // certId OID (skip)
     std::size_t oidLen;
     if(mbedtls_asn1_get_tag(&p, seqEnd, &oidLen, MBEDTLS_ASN1_OID) != 0)
         return false;
+
     p += oidLen;
 
     // certValue [0] EXPLICIT
     std::size_t ctxLen;
-    if(mbedtls_asn1_get_tag(&p, seqEnd, &ctxLen,
-                             MBEDTLS_ASN1_CONTEXT_SPECIFIC |
-                             MBEDTLS_ASN1_CONSTRUCTED | 0) != 0)
+    if(mbedtls_asn1_get_tag(&p, seqEnd, &ctxLen, MBEDTLS_ASN1_CONTEXT_SPECIFIC |
+                                                 MBEDTLS_ASN1_CONSTRUCTED | 0) != 0)
         return false;
+
     const unsigned char* ctxEnd = p + ctxLen;
 
     // OCTET STRING containing DER cert
@@ -122,22 +126,28 @@ static bool parseCertBag(const unsigned char* bagVal, std::size_t len,
 
     const unsigned char* derCert = p;
 
-    mbedtls_x509_crt* crt = new(std::nothrow) mbedtls_x509_crt();
-    if( ! crt)
+    X509CrtAutoPtr crtPtr( new(std::nothrow) mbedtls_x509_crt() );
+    if( ! crtPtr)
         return false;
-    mbedtls_x509_crt_init(crt);
 
-    if(mbedtls_x509_crt_parse_der(crt, derCert, derLen) != 0)
-    {
-        mbedtls_x509_crt_free(crt);
-        delete crt;
+    mbedtls_x509_crt_init(crtPtr.get());
+
+    if(mbedtls_x509_crt_parse_der(crtPtr.get(), derCert, derLen) != 0)
         return false;
-    }
+
+    mbedtls_x509_crt* crt = crtPtr.release();
 
     if( ! *st.cert)
+    {
         *st.cert = crt;
+    }
     else
-        st.ca->push_back(crt);
+    {
+        crt->next = *st.ca;
+        *st.ca = crt;
+        if( ! *st.caTail)
+            *st.caTail = crt;
+    }
 
     return true;
 }
@@ -158,8 +168,8 @@ static bool parseSafeContents(const unsigned char* data, std::size_t len,
     if(mbedtls_asn1_get_tag(&p, end, &seqLen,
                              MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0)
         return false;
-    const unsigned char* seqEnd = p + seqLen;
 
+    const unsigned char* seqEnd = p + seqLen;
     while(p < seqEnd)
     {
         // SafeBag ::= SEQUENCE { bagId OID, bagValue [0] EXPLICIT ANY, attrs? }
@@ -167,6 +177,7 @@ static bool parseSafeContents(const unsigned char* data, std::size_t len,
         if(mbedtls_asn1_get_tag(&p, seqEnd, &bagLen,
                                  MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0)
             return false;
+
         const unsigned char* bagEnd = p + bagLen;
 
         // bagId OID
@@ -174,6 +185,7 @@ static bool parseSafeContents(const unsigned char* data, std::size_t len,
         bagId.tag = MBEDTLS_ASN1_OID;
         if(mbedtls_asn1_get_tag(&p, bagEnd, &bagId.len, MBEDTLS_ASN1_OID) != 0)
             return false;
+
         bagId.p = p;
         p += bagId.len;
 
@@ -183,6 +195,7 @@ static bool parseSafeContents(const unsigned char* data, std::size_t len,
                                  MBEDTLS_ASN1_CONTEXT_SPECIFIC |
                                  MBEDTLS_ASN1_CONSTRUCTED | 0) != 0)
             return false;
+
         unsigned char* bagValStart = p;
 
         if(OID_CMP(bagId, oidCertBag))
@@ -200,25 +213,20 @@ static bool parseSafeContents(const unsigned char* data, std::size_t len,
                 std::size_t pwdLen = (shrouded && st.passwd)
                     ? std::strlen(st.passwd) : 0;
 
-                mbedtls_pk_context* pk = new(std::nothrow) mbedtls_pk_context();
-                if( ! pk)
+                PkAutoPtr pkPtr( new(std::nothrow) mbedtls_pk_context() );
+                if( ! pkPtr)
                     return false;
-                mbedtls_pk_init(pk);
 
-                int ret = mbedtls_pk_parse_key(pk, bagValStart, bagValLen,
+                mbedtls_pk_init(pkPtr.get());
+
+                int ret = mbedtls_pk_parse_key(pkPtr.get(), bagValStart, bagValLen,
                                                pwd, pwdLen,
                                                mbedtls_ctr_drbg_random,
                                                st.ctr_drbg);
-                if(ret != 0)
-                {
-                    mbedtls_pk_free(pk);
-                    delete pk;
-                    // non-fatal: key import failure is skipped
-                }
-                else
-                {
-                    *st.pkey = pk;
-                }
+                if(ret == 0)
+                    *st.pkey = pkPtr.release();
+
+                // else non-fatal: key import failure is skipped
             }
         }
         // else: unknown bag type, skip
@@ -374,16 +382,16 @@ static bool parseContentInfo(unsigned char** p, const unsigned char* end,
 // Public entry point
 // ---------------------------------------------------------------------------
 
-bool parsePkcs12(const unsigned char*            data,
-                 std::size_t                     len,
-                 const char*                     passwd,
-                 mbedtls_pk_context**            pkey,
-                 mbedtls_x509_crt**              cert,
-                 std::vector<mbedtls_x509_crt*>& ca)
+bool parsePkcs12(const unsigned char* data,
+                 std::size_t          len,
+                 const char*          passwd,
+                 mbedtls_pk_context** pkey,
+                 mbedtls_x509_crt**   cert,
+                 mbedtls_x509_crt**   ca)
 {
     *pkey = 0;
     *cert = 0;
-    ca.clear();
+    *ca   = 0;
 
     // Init RNG (needed by mbedtls_pk_parse_key for RSA blinding)
     mbedtls_entropy_context  entropy;
@@ -398,10 +406,11 @@ bool parsePkcs12(const unsigned char*            data,
     if(ok)
     {
         ParseState st;
-        st.pkey     = pkey;
-        st.cert     = cert;
-        st.ca       = &ca;
-        st.passwd   = passwd;
+        st.pkey  = pkey;
+        st.cert  = cert;
+        st.ca    = ca;
+        st.caTail = ca;
+        st.passwd = passwd;
         st.ctr_drbg = &ctr_drbg;
 
         unsigned char* p   = const_cast<unsigned char*>(data);
@@ -514,12 +523,15 @@ bool parsePkcs12(const unsigned char*            data,
             delete *cert;
             *cert = 0;
         }
-        for(std::size_t i = 0; i < ca.size(); ++i)
+
+        while(*ca)
         {
-            mbedtls_x509_crt_free(ca[i]);
-            delete ca[i];
+            mbedtls_x509_crt* next = (*ca)->next;
+            (*ca)->next = 0;
+            mbedtls_x509_crt_free(*ca);
+            delete *ca;
+            *ca = next;
         }
-        ca.clear();
         return false;
     }
 
