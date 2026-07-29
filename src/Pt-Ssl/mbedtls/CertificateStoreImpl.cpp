@@ -28,8 +28,15 @@
  */
 
 #include "CertificateStoreImpl.h"
+#include "CertificateImpl.h"
+#include "MbedTls.h"
+#include "Pkcs12Parser.h"
+#include <Pt/Ssl/SslError.h>
+#include <Pt/SmartPtr.h>
 #include <Pt/System/Logger.h>
 #include <mbedtls/x509_crt.h>
+#include <cstring>
+#include <vector>
 
 PT_LOG_DEFINE("Pt.Ssl.CertificateStore")
 
@@ -44,6 +51,11 @@ CertificateStoreImpl::CertificateStoreImpl()
 
 CertificateStoreImpl::~CertificateStoreImpl()
 {
+    for(std::vector<Certificate*>::iterator it = _allCerts.begin();
+        it != _allCerts.end(); ++it)
+    {
+        delete *it;
+    }
 }
 
 
@@ -53,22 +65,89 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12,
 {
     PT_LOG_DEBUG("loadPkcs12: " << passwd);
 
-    mbedtls_x509_crt cacert;
-    mbedtls_x509_crt_init( &cacert );
+    mbedtls_pk_context* pkey = 0;
+    mbedtls_x509_crt*   cert = 0;
+    std::vector<mbedtls_x509_crt*> ca;
+
+    if( ! parsePkcs12(reinterpret_cast<const unsigned char*>(pkcs12), len,
+                      passwd, &pkey, &cert, ca))
+        throw InvalidCertificate("invalid PKCS12 data");
+
+    PkAutoPtr pkeyGuard(pkey);
+
+    if(cert)
+    {
+        X509CrtAutoPtr certGuard(cert);
+        AutoPtr<CertificateImpl> implGuard(new CertificateImpl(cert, pkey));
+        certGuard.release();
+        pkeyGuard.release();
+
+        AutoPtr<Certificate> certObjGuard(new Certificate(implGuard.get()));
+        implGuard.release();
+
+        _allCerts.push_back(certObjGuard.get());
+        certObjGuard.release();
+
+        PT_LOG_DEBUG("imported certificate: " << _allCerts.back()->subject());
+    }
+
+    for(std::size_t i = 0; i < ca.size(); ++i)
+    {
+        X509CrtAutoPtr caGuard(ca[i]);
+        AutoPtr<CertificateImpl> implGuard(new CertificateImpl(ca[i]));
+        caGuard.release();
+
+        AutoPtr<Certificate> certObjGuard(new Certificate(implGuard.get()));
+        implGuard.release();
+
+        _allCerts.push_back(certObjGuard.get());
+        certObjGuard.release();
+
+        PT_LOG_DEBUG("imported CA certificate: " << _allCerts.back()->subject());
+    }
 }
 
 
 void CertificateStoreImpl::loadPem(const char* data,
                                    std::size_t len,
-                                   const char* passwd)
+                                   const char* /*passwd*/)
 {
-    PT_LOG_DEBUG("loadPem: " << passwd);
+    PT_LOG_DEBUG("loadPem");
+
+    mbedtls_x509_crt* crt = new mbedtls_x509_crt();
+    mbedtls_x509_crt_init(crt);
+
+    X509CrtAutoPtr crtGuard(crt);
+
+    if(mbedtls_x509_crt_parse(crt,
+                               reinterpret_cast<const unsigned char*>(data),
+                               len + 1) != 0)
+        throw InvalidCertificate("invalid PEM certificate");
+
+    AutoPtr<CertificateImpl> implGuard(new CertificateImpl(crt));
+    crtGuard.release();
+
+    AutoPtr<Certificate> certGuard(new Certificate(implGuard.get()));
+    implGuard.release();
+
+    _allCerts.push_back(certGuard.get());
+    certGuard.release();
+
+    PT_LOG_DEBUG("imported certificate: " << _allCerts.back()->subject());
 }
 
 
 const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
 {
     PT_LOG_TRACE("find certificate: " << subject);
+
+    for(std::vector<Certificate*>::const_iterator it = _allCerts.begin();
+        it != _allCerts.end(); ++it)
+    {
+        const Certificate* cert = *it;
+        if( cert->subject().find(subject) != std::string::npos )
+            return cert;
+    }
     return 0;
 }
 

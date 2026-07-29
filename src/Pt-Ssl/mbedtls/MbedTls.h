@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2013 by Marc Duerner
+ * Copyright (C) 2026 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,53 +26,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_SSL_CERTIFICATESTOREIMPL_H
-#define PT_SSL_CERTIFICATESTOREIMPL_H
+#ifndef PT_SSL_MBEDTLS_H
+#define PT_SSL_MBEDTLS_H
 
 #include <Pt/Ssl/Api.h>
-#include <Pt/Ssl/Certificate.h>
-#include <Pt/Ssl/CertificateStore.h>
-#include <cstddef>
-#include <vector>
+#include <Pt/SmartPtr.h>
+#include <mbedtls/x509_crt.h>
+#include <mbedtls/pk.h>
 
 namespace Pt {
 
 namespace Ssl {
 
-class CertificateStoreImpl
+class FreeMbedX509Crt
 {
-    public:
-        CertificateStoreImpl();
-
-        ~CertificateStoreImpl();
-
-        std::size_t size() const
-        { return _allCerts.size(); }
-
-        CertificateStore::ConstIterator begin() const
+    protected:
+        void destroy(mbedtls_x509_crt* ptr)
         {
-            Certificate* const* p = _allCerts.empty() ? 0 : &_allCerts.front();
-            return CertificateStore::ConstIterator(p);
+            mbedtls_x509_crt_free(ptr);
+            delete ptr;
         }
-
-        CertificateStore::ConstIterator end() const
-        {
-            Certificate* const* p = _allCerts.empty() ? 0 : &_allCerts.front() + _allCerts.size();
-            return CertificateStore::ConstIterator(p);
-        }
-
-        void loadPkcs12(const char* data, std::size_t len, const char* passwd);
-
-        void loadPem(const char* data, std::size_t len, const char* passwd);
-
-        const Certificate* findCertificate(const std::string& subject);
-
-    private:
-        std::vector<Certificate*> _allCerts;
 };
+
+typedef Pt::AutoPtr<mbedtls_x509_crt, FreeMbedX509Crt> X509CrtAutoPtr;
+
+
+class FreeMbedPk
+{
+    protected:
+        void destroy(mbedtls_pk_context* ptr)
+        {
+            mbedtls_pk_free(ptr);
+            delete ptr;
+        }
+};
+
+typedef Pt::AutoPtr<mbedtls_pk_context, FreeMbedPk> PkAutoPtr;
 
 } // namespace Ssl
 
 } // namespace Pt
 
-#endif // PT_SSL_CERTIFICATESTOREIMPL_H
+#endif // PT_SSL_MBEDTLS_H
