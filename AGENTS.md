@@ -28,33 +28,33 @@ Before acting, choose the **smallest** set of modules that match the task
 
 ### Instructions Index
 
-- Coding guidelines & style, directory layout, writing and reviewing code:
+- For Coding guidelines & style, directory layout, writing and reviewing code read:
   `.github/instructions/coding.instructions.md`
 
-- Doxygen comments, public headers, API docs:
+- For Doxygen comments, public headers, API docs read:
   `.github/instructions/documenting.instructions.md`
 
-- Build system & setup, building, build configuration, adding sources files:
+- For Build system & setup, building, build configuration, adding source files read:
   `.github/instructions/building.instructions.md`
 
-- Unit tests, test suites, assertions, test registration, test failures:
+- For Unit tests, test suites, assertions, test registration, test failures read:
   `.github/instructions/testing.instructions.md`
   `.github/instructions/pt-unit-api.instructions.md`
 
-- Jam scripts, `Jamfile`, `*.jam` (not jam C sources):
+- For Jam scripts, `Jamfile`, `*.jam` (not jam C sources) read:
   `.github/instructions/jam.instructions.md`
 
-- Jam executable internals, `jam/src`, Jambase boot, toolset `.jam`:
+- For Jam executable internals, `jam/src`, Jambase boot, toolset `.jam` read:
   `.github/instructions/jam-internals.instructions.md`
 
-- Signals, slots, delegates, events, connect, emit, observable:
+- For Signals, slots, delegates, events, connect, emit, observable read:
   `.github/instructions/pt-api-sigslot.instructions.md`
 
-- Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images):
+- For Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images) read:
   `.github/instructions/pt-gfx-api-images.instructions.md`
 
-- Draw shapes, paths, text, bitmaps, stroke, fill, gradient, paint surface:
+- For Draw shapes, paths, text, bitmaps, stroke, fill, gradient, paint surface read:
   `.github/instructions/pt-gfx-api-drawing.instructions.md`
 
-- Forms UI, styling, widget renderers, layout, measure, `PlatinumStyle`:
+- For Forms UI, styling, widget renderers, layout, measure, `PlatinumStyle` read:
   `.github/instructions/pt-forms-dev-styles.instructions.md`
