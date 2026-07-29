@@ -118,24 +118,24 @@ void CertificateStoreImpl::loadPem(const char* data,
 {
     PT_LOG_DEBUG("loadPem: " << len << " bytes");
 
-    mbedtls_x509_crt* crt = new mbedtls_x509_crt();
-    mbedtls_x509_crt_init(crt);
+    mbedtls_x509_crt* x509 = new mbedtls_x509_crt();
+    mbedtls_x509_crt_init(x509);
 
-    X509CrtAutoPtr crtGuard(crt);
+    X509CrtAutoPtr x509Ptr(x509);
 
-    if(mbedtls_x509_crt_parse(crt,
-                               reinterpret_cast<const unsigned char*>(data),
-                               len + 1) != 0)
+    if(mbedtls_x509_crt_parse(x509,
+                              reinterpret_cast<const unsigned char*>(data),
+                              len + 1) != 0)
         throw InvalidCertificate("invalid PEM certificate");
 
-    AutoPtr<CertificateImpl> implGuard(new CertificateImpl(crt));
-    crtGuard.release();
+    AutoPtr<CertificateImpl> implPtr( new CertificateImpl(x509) );
+    x509Ptr.release();
 
-    AutoPtr<Certificate> certGuard(new Certificate(implGuard.get()));
-    implGuard.release();
+    AutoPtr<Certificate> certPtr( new Certificate(implPtr.get()) );
+    implPtr.release();
 
-    _allCerts.push_back(certGuard.get());
-    certGuard.release();
+    _allCerts.push_back( certPtr.get() );
+    certPtr.release();
 
     PT_LOG_DEBUG("imported certificate: " << _allCerts.back()->subject());
 }
@@ -152,6 +152,7 @@ const Certificate* CertificateStoreImpl::findCertificate(const std::string& subj
         if( cert->subject().find(subject) != std::string::npos )
             return cert;
     }
+
     return 0;
 }
 
