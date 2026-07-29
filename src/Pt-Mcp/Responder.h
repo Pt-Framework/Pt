@@ -51,8 +51,6 @@ namespace Json {
 
 namespace Mcp {
 
-class TextFormatter;
-
 /** @brief Dispatches MCP requests to service procedures.
 
     Parses the MCP envelope, determines the method (initialize,
@@ -207,8 +205,8 @@ class Responder : public Remoting::Responder
     Json::JsonReader _reader;
 
     // Incremental result formatting
-    Pt::TextOStream _tos;
-    TextFormatter* _textFmt;
+    ContentFormatter* _contentFormatter;
+    Pt::Formatter* _resultFormatter;
     Decomposer* _result;
     std::ostream* _resultOs;
     int _skipDepth;

@@ -32,50 +32,14 @@
 
 #include <Pt/Mcp/Api.h>
 #include <Pt/Mcp/Type.h>
+#include <Pt/Mcp/ContentType.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 #include <vector>
 
 namespace Pt {
 
-class Decomposer;
-
 namespace Mcp {
-
-/** @brief Formats a tool result as MCP content.
-
-    ContentType determines how a Decomposer result is serialized
-    into an MCP content block (text, image, etc.).
-*/
-class PT_MCP_API ContentType
-{
-  public:
-    virtual ~ContentType();
-
-    /** @brief Formats the decomposed result into an MCP content block.
-
-        Writes a JSON content object (e.g. {"type":"text","text":"..."})
-        to the output stream.
-    */
-    virtual void format(Decomposer* result, std::ostream& os) const = 0;
-};
-
-
-/** @brief Formats tool results as MCP text content.
-
-    Serializes the result using TextFormatter (compact YAML-like)
-    and embeds it in a text content block.
-*/
-class PT_MCP_API TextContent : public ContentType
-{
-  public:
-    TextContent();
-
-    void format(Decomposer* result, std::ostream& os) const override;
-};
-
-PT_MCP_API const TextContent& textContent();
-
 
 /** @brief MCP tool descriptor.
 

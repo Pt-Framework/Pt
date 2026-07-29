@@ -28,56 +28,11 @@
  */
 
 #include <Pt/Mcp/ToolDeclaration.h>
-#include "TextFormatter.h"
-#include <Pt/Decomposer.h>
-#include <Pt/TextStream.h>
-#include <Pt/Utf8Codec.h>
 #include <ostream>
 
 namespace Pt {
 
 namespace Mcp {
-
-
-//
-// ContentType
-//
-
-ContentType::~ContentType()
-{
-}
-
-
-//
-// TextContent
-//
-
-TextContent::TextContent()
-{
-}
-
-
-void TextContent::format(Decomposer* result, std::ostream& os) const
-{
-    os << "{\"type\":\"text\",\"text\":\"";
-
-    Pt::Utf8Codec codec(1);
-    Pt::TextOStream tos(&codec);
-    tos.attach(os);
-
-    TextFormatter fmt(tos);
-    result->format(fmt);
-    tos.flush();
-
-    os << "\"}";
-}
-
-
-const TextContent& textContent()
-{
-    static TextContent tc;
-    return tc;
-}
 
 
 //

@@ -3,8 +3,10 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_MCP_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mcp ;
 
-PT_MCP_SOURCES = HttpResponder.cpp
+PT_MCP_SOURCES = ContentType.cpp
+                 HttpResponder.cpp
                  HttpService.cpp
+                 ImageFormatter.cpp
                  Responder.cpp
                  StdioResponder.cpp
                  StdioService.cpp
