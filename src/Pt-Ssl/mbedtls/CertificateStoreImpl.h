@@ -49,15 +49,15 @@ class CertificateStoreImpl
         { return 0; }
 
         CertificateStore::ConstIterator begin() const
-        { 
+        {
             Certificate* const* cert = 0;
-            return CertificateStore::ConstIterator( cert); 
+            return CertificateStore::ConstIterator( cert);
         }
 
         CertificateStore::ConstIterator end() const
         {
             Certificate* const* cert = 0;
-            return CertificateStore::ConstIterator(cert); 
+            return CertificateStore::ConstIterator(cert);
         }
 
         void loadPkcs12(const char* data, std::size_t len, const char* passwd);

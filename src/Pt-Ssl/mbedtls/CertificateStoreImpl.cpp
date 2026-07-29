@@ -47,14 +47,14 @@ CertificateStoreImpl::~CertificateStoreImpl()
 }
 
 
-void CertificateStoreImpl::loadPkcs12(const char* pkcs12, 
-                                      std::size_t len, 
+void CertificateStoreImpl::loadPkcs12(const char* pkcs12,
+                                      std::size_t len,
                                       const char* passwd)
 {
-    PT_LOG_DEBUG("loadPkcs12: " << passwd); 
+    PT_LOG_DEBUG("loadPkcs12: " << passwd);
 
     mbedtls_x509_crt cacert;
-    mbedtls_x509_crt_init( &cacert );          
+    mbedtls_x509_crt_init( &cacert );
 }
 
 
