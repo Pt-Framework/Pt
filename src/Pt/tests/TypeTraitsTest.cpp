@@ -78,7 +78,7 @@ class TypeTraitsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( value );
 
             value = Pt::FalseType();
-            PT_UNIT_ASSERT( value );
+            PT_UNIT_ASSERT( ! value );
 
             int intValue = Pt::IntegralConstant<int, 42>();
             PT_UNIT_ASSERT_EQUAL( intValue, 42 );
