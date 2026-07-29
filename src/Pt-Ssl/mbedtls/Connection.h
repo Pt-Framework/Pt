@@ -31,6 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
+#include <mbedtls/ssl.h>
 #include <ios>
 #include <cstddef>
 
@@ -48,7 +49,7 @@ class Connection
         void setPeerName(const std::string& peerName);
 
         bool connected() const
-        { return false; }
+        { return _connected; }
 
         const char* currentCipher() const;
 
@@ -66,9 +67,37 @@ class Connection
 
         std::streamsize read(char* buf, std::size_t n, std::streamsize isize);
 
+    protected:
+        static int bio_send(void* ctx, const unsigned char* buf, std::size_t len);
+
+        static int bio_recv(void* ctx, unsigned char* buf, std::size_t len);
+
+    protected:
+        int bioWrite(const unsigned char* buf, std::size_t len);
+
+        int bioRead(unsigned char* buf, std::size_t len);
+
+        void verifyPeerName();
+
     private:
-        Context* _ctx;
-        std::ios* _ios;
+        enum PendingDirection
+        {
+            NoneWanted,
+            WantRead,
+            WantWrite
+        };
+
+        Context*             _ctx;
+        std::ios*            _ios;
+        mbedtls_ssl_context   _ssl;
+        std::string           _peerName;
+        bool                  _connected;
+        bool                  _isWriting;
+        bool                  _isReading;
+        std::streamsize       _maxImport;
+        PendingDirection      _pending;
+        bool                  _shutdownSent;
+        bool                  _shutdownReceived;
 };
 
 } // namespace Ssl

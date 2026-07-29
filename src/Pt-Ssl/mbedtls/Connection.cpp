@@ -27,8 +27,11 @@
  */
 
 #include "Connection.h"
+#include "ContextImpl.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
+#include <mbedtls/error.h>
+#include <algorithm>
 #include <streambuf>
 
 PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
@@ -37,77 +40,311 @@ namespace Pt {
 
 namespace Ssl {
 
+namespace {
+
+std::string mbedErrorString(int ret)
+{
+    char buf[128];
+    mbedtls_strerror(ret, buf, sizeof(buf));
+    return std::string(buf);
+}
+
+} // namespace
+
+
 Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 : _ctx(&ctx)
 , _ios(&ios)
+, _connected(false)
+, _isWriting(false)
+, _isReading(false)
+, _maxImport(0)
+, _pending(NoneWanted)
+, _shutdownSent(false)
+, _shutdownReceived(false)
 {
+    mbedtls_ssl_init(&_ssl);
+
+    mbedtls_ssl_conf_endpoint( ctx.impl()->config(),
+                              omode == Accept ? MBEDTLS_SSL_IS_SERVER : MBEDTLS_SSL_IS_CLIENT );
+
+    if( mbedtls_ssl_setup(&_ssl, ctx.impl()->config()) != 0 )
+        throw SslError("failed to initialize SSL session");
+
+    mbedtls_ssl_set_bio(&_ssl, this, &Connection::bio_send, &Connection::bio_recv, 0);
 }
 
 
 Connection::~Connection()
 {
+    mbedtls_ssl_free(&_ssl);
 }
 
 
 void Connection::setPeerName(const std::string& peerName)
 {
+    _peerName = peerName;
+
+    if( ! _peerName.empty() )
+        mbedtls_ssl_set_hostname(&_ssl, _peerName.c_str());
+}
+
+
+void Connection::verifyPeerName()
+{
+    if( _peerName.empty() )
+        return;
+
+    if( mbedtls_ssl_get_verify_result(&_ssl) != 0 )
+        throw HandshakeFailed("Invalid peer name");
 }
 
 
 const char* Connection::currentCipher() const
 {
-    return "NONE";
+    const char* name = mbedtls_ssl_get_ciphersuite(&_ssl);
+    return name ? name : "NONE";
 }
 
 
 bool Connection::writeHandshake()
 {
     PT_LOG_TRACE("Connection::writeHandshake");
-    throw HandshakeFailed("SSL handshake failed");
 
-    return false;
+    if( _connected || _pending == WantRead )
+        return false;
+
+    _pending = NoneWanted;
+    _isWriting = true;
+    _isReading = false;
+    _maxImport = 0;
+
+    int ret = mbedtls_ssl_handshake(&_ssl);
+    PT_LOG_DEBUG("mbedtls_ssl_handshake: " << ret);
+
+    _isWriting = false;
+
+    if(ret == 0)
+    {
+        verifyPeerName();
+        _connected = true;
+        return false;
+    }
+
+    if(ret == MBEDTLS_ERR_SSL_WANT_READ)
+    {
+        _pending = WantRead;
+        return false;
+    }
+
+    if(ret == MBEDTLS_ERR_SSL_WANT_WRITE)
+        return true;
+
+    PT_LOG_WARN("handshake failed: " << mbedErrorString(ret));
+    throw HandshakeFailed("SSL handshake failed");
 }
 
 
 bool Connection::readHandshake()
 {
     PT_LOG_TRACE("Connection::readHandshake");
+
+    if( _connected || _pending == WantWrite )
+        return false;
+
+    _pending = NoneWanted;
+    _isWriting = false;
+    _isReading = true;
+    _maxImport = 0;
+
+    int ret = mbedtls_ssl_handshake(&_ssl);
+    PT_LOG_DEBUG("mbedtls_ssl_handshake: " << ret);
+
+    _isReading = false;
+
+    if(ret == 0)
+    {
+        verifyPeerName();
+        _connected = true;
+        return false;
+    }
+
+    if(ret == MBEDTLS_ERR_SSL_WANT_WRITE)
+    {
+        _pending = WantWrite;
+        return false;
+    }
+
+    if(ret == MBEDTLS_ERR_SSL_WANT_READ)
+        return true;
+
+    PT_LOG_WARN("handshake failed: " << mbedErrorString(ret));
     throw HandshakeFailed("SSL handshake failed");
 }
 
 
 bool Connection::shutdown()
 {
-    PT_LOG_DEBUG("shutdown failed");
+    PT_LOG_DEBUG("Connection::shutdown");
+
+    if( ! _connected )
+        return true;
+
+    if( ! _shutdownSent )
+    {
+        _isWriting = true;
+        _isReading = false;
+        _maxImport = 0;
+
+        int ret = mbedtls_ssl_close_notify(&_ssl);
+
+        _isWriting = false;
+
+        if(ret == 0)
+        {
+            _shutdownSent = true;
+        }
+        else if(ret == MBEDTLS_ERR_SSL_WANT_WRITE)
+        {
+            return false;
+        }
+        else
+        {
+            throw SslError("shutdown failed");
+        }
+    }
+
+    // wait for the peer's close_notify
+    _isWriting = false;
+    _isReading = true;
+    _maxImport = 0;
+
+    unsigned char buf[16];
+    int ret = mbedtls_ssl_read(&_ssl, buf, sizeof(buf));
+
+    _isReading = false;
+
+    if(ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
+    {
+        _shutdownReceived = true;
+        _connected = false;
+        return true;
+    }
+
+    if(ret == MBEDTLS_ERR_SSL_WANT_READ)
+        return false;
+
+    if(ret > 0) // unexpected application data while waiting for close_notify
+        return false;
+
     throw SslError("shutdown failed");
-    
-    return false;
 }
 
 
 bool Connection::isShutdown() const
 {
-    return false;
+    return _shutdownSent || _shutdownReceived;
 }
 
 
 bool Connection::isClosed() const
-{   
-    return true;
+{
+    return ! _connected;
 }
 
 
 std::streamsize Connection::write(const char* buf, std::size_t n)
 {
-    PT_LOG_TRACE("Connection::write");
+    _isWriting = true;
+    _isReading = false;
+    _maxImport = 0;
+
+    int written = mbedtls_ssl_write(&_ssl, reinterpret_cast<const unsigned char*>(buf), n);
+    PT_LOG_DEBUG("encrypted " << written << " bytes");
+
+    _isWriting = false;
+
+    if(written >= 0)
+        return written;
+
+    if(written == MBEDTLS_ERR_SSL_WANT_WRITE)
+        return 0;
+
     throw SslError("encoding failed");
 }
 
 
 std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
 {
-    PT_LOG_TRACE("Connection::read");
+    _isWriting = false;
+    _isReading = true;
+    _maxImport = maxImport;
+
+    int readSize = mbedtls_ssl_read(&_ssl, reinterpret_cast<unsigned char*>(buf), n);
+    PT_LOG_DEBUG("read " << readSize << " bytes from _ssl");
+
+    _isReading = false;
+    _maxImport = 0;
+
+    if(readSize >= 0)
+        return readSize;
+
+    // happens when the peer has sent the close_notify alert
+    if(readSize == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
+        return 0;
+
+    if(readSize == MBEDTLS_ERR_SSL_WANT_READ)
+        return 0;
+
+    PT_LOG_DEBUG("ssl error: " << mbedErrorString(readSize));
     throw SslError("decoding failed");
+}
+
+
+int Connection::bio_send(void* ctx, const unsigned char* buf, std::size_t len)
+{
+    return static_cast<Connection*>(ctx)->bioWrite(buf, len);
+}
+
+
+int Connection::bio_recv(void* ctx, unsigned char* buf, std::size_t len)
+{
+    return static_cast<Connection*>(ctx)->bioRead(buf, len);
+}
+
+
+int Connection::bioWrite(const unsigned char* buf, std::size_t len)
+{
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb )
+        return MBEDTLS_ERR_SSL_WANT_WRITE;
+
+    if(_isReading)
+        return MBEDTLS_ERR_SSL_WANT_WRITE;
+
+    std::streamsize n = sb->sputn(reinterpret_cast<const char*>(buf), len);
+    return static_cast<int>(n);
+}
+
+
+int Connection::bioRead(unsigned char* buf, std::size_t len)
+{
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb || _isWriting )
+        return MBEDTLS_ERR_SSL_WANT_READ;
+
+    std::streamsize avail = sb->in_avail();
+    if(avail == 0 && _maxImport == 0)
+        return MBEDTLS_ERR_SSL_WANT_READ;
+
+    std::streamsize n = static_cast<std::streamsize>(len);
+    if(_maxImport != 0)
+        n = std::min(n, _maxImport);
+    else
+        n = std::min(n, avail);
+
+    std::streamsize r = sb->sgetn(reinterpret_cast<char*>(buf), n);
+    return static_cast<int>(r);
 }
 
 } // namespace Ssl

@@ -50,7 +50,7 @@ SSLInit::~SSLInit()
 Context::Context()
 : _impl(0)
 {
-    _impl = new ContextImpl(SSLv3);
+    _impl = new ContextImpl(TLS);
 }
 
 

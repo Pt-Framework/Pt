@@ -43,7 +43,7 @@ class ContextTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("ContextTest")
         {
             Pt::System::Logger::setLogLevel("Pt.Ssl", Pt::System::Error);
-            
+
             this->registerMethod("Assign", *this, &ContextTest::Assign);
         }
 
@@ -57,7 +57,7 @@ class ContextTest : public Pt::Unit::TestSuite
             store.loadPkcs12(serverCerts, sizeof(serverPkcs12), "123");
             store.loadPkcs12(caCerts, sizeof(caPkcs12), "123");
 
-            Pt::Ssl::Context ctx(Pt::Ssl::TLSv1);
+            Pt::Ssl::Context ctx(Pt::Ssl::TLSv1_2);
             ctx.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
             const Pt::Ssl::Certificate* cert = store.findCertificate("SGC Mainframe");
@@ -67,7 +67,7 @@ class ContextTest : public Pt::Unit::TestSuite
             cert = store.findCertificate("SGC Certificate Authority");
             PT_UNIT_ASSERT(cert);
             ctx.addCACertificate(*cert);
-   
+
             Pt::Ssl::Context ctx2;
             ctx2.assign(ctx);
 

@@ -65,7 +65,7 @@ void StreamBufferTest::Handshake()
     store.loadPkcs12(caCerts, sizeof(caPkcs12), "123");
 
     // Server context
-    Pt::Ssl::Context serverContext(Pt::Ssl::TLSv1);
+    Pt::Ssl::Context serverContext(Pt::Ssl::TLSv1_2);
     serverContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
     const Pt::Ssl::Certificate* servCert = store.findCertificate("SGC Mainframe");
@@ -77,7 +77,7 @@ void StreamBufferTest::Handshake()
     serverContext.addCACertificate(*servCA);
 
     // Client context
-    Pt::Ssl::Context clientContext(Pt::Ssl::TLSv1);
+    Pt::Ssl::Context clientContext(Pt::Ssl::TLSv1_2);
     clientContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
     const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");
