@@ -58,6 +58,14 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12,
 }
 
 
+void CertificateStoreImpl::loadPem(const char* data,
+                                   std::size_t len,
+                                   const char* passwd)
+{
+    PT_LOG_DEBUG("loadPem: " << passwd);
+}
+
+
 const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
 {
     PT_LOG_TRACE("find certificate: " << subject);

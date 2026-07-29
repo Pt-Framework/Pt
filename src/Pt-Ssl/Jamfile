@@ -25,6 +25,16 @@ LinkSharedLibraries Pt-Ssl : Pt Pt-Net Pt-System ;
 MakeLocate Pt-Ssl : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Ssl : $(PT_INSTALL_LIBDIR) ;
 
+if $(SSL_LINKLIBS)
+{
+    LinkLibs Pt-Ssl : $(SSL_LINKLIBS) ;
+}
+
+if $(SSL_LINKFLAGS)
+{
+    LinkFlags Pt-Ssl : $(SSL_LINKFLAGS) ;
+}
+
 if $(WITH_OPENSSL)
 {
     LinkLibraries Pt-Ssl : Pt-Ssl-openssl ;
@@ -32,11 +42,6 @@ if $(WITH_OPENSSL)
 else if $(WITH_MBEDTLS)
 {
     LinkLibraries Pt-Ssl : mbedtls ;
-}
-else
-{
-    LinkFlags Pt-Ssl : $(SSL_LINKFLAGS) ;
-    LinkLibs Pt-Ssl : $(SSL_LINKLIBS) ;
 }
 
 if $(WITH_SSL)

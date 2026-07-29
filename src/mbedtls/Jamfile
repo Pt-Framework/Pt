@@ -7,7 +7,3 @@ MBEDTLS_SOURCES += [ GLOB $(MBEDTLS_SUBDIR) : *.c  ] ;
 
 Library mbedtls : $(MBEDTLS_SOURCES) ;
 MakeLocate mbedtls : $(PT_OUTPUT_TARGET) ;
-
-Main selftest : test/selftest.c ;
-LinkLibraries selftest : mbedtls ;
-MakeLocate selftest : $(PT_OUTPUT_TARGET) ;

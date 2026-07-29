@@ -745,6 +745,19 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
     WITH_SSL = yes ;
     PT_SSL_IMPL = "mbedtls" ;
     SSL_INCLUDES = [ FDirName $(PT_TOP) src mbedtls include ] ;
+
+    # mbedTLS uses BCryptGenRandom() as its entropy source on Windows
+    WITH_BCRYPT = [ CheckBuildC++ "#include <windows.h>"
+                                  "#include <bcrypt.h>"
+                                  "int main() { BCryptGenRandom(NULL, 0, 0,"
+                                  "BCRYPT_USE_SYSTEM_PREFERRED_RNG); return 0; }"
+                                  : ""
+                                  : "bcrypt.lib" ] ;
+
+    if $(WITH_BCRYPT)
+    {
+        SSL_LINKLIBS += bcrypt.lib ;
+    }
 }
 
 if ! $(WITH_SSL)
