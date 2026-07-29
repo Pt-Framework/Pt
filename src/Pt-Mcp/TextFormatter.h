@@ -30,9 +30,11 @@
 #ifndef PT_MCP_TEXTFORMATTER_H
 #define PT_MCP_TEXTFORMATTER_H
 
-#include <Pt/Formatter.h>
+#include <Pt/Mcp/ContentType.h>
 #include <Pt/String.h>
 #include <Pt/IOStream.h>
+#include <Pt/TextStream.h>
+#include <Pt/Utf8Codec.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -43,16 +45,20 @@ namespace Mcp {
 
     Used by TextContent to serialize tool results for MCP responses.
     Scalars are written directly, structs as key: value pairs, and
-    arrays as dash-prefixed lists with 2-space indentation.
+    arrays as dash-prefixed lists with 2-space indentation. Owns its
+    own UTF-8 text stream so it can be created and destroyed per
+    request without sharing state with other instances.
 */
-class TextFormatter : public Pt::Formatter
+class TextFormatter : public Pt::Formatter, public ContentFormatter
 {
   public:
-    explicit TextFormatter(std::basic_ostream<Pt::Char>& os);
+    TextFormatter();
 
     ~TextFormatter();
 
-    void attach(std::basic_ostream<Pt::Char>& os);
+    Pt::Formatter& beginContent(std::ostream& os) override;
+
+    void finishContent(std::ostream& os) override;
 
   protected:
     void onAddString(const char* name, const char* type,
@@ -138,6 +144,8 @@ class TextFormatter : public Pt::Formatter
     void writeDouble(double value);
 
     std::basic_ostream<Pt::Char>* _os;
+    Pt::Utf8Codec _utf8;
+    Pt::TextOStream _tos;
     int  _depth;
     bool _afterKey;
     bool _firstMember;

@@ -35,13 +35,16 @@ namespace Pt {
 
 namespace Mcp {
 
-TextFormatter::TextFormatter(std::basic_ostream<Pt::Char>& os)
-: _os(&os)
+TextFormatter::TextFormatter()
+: _os(0)
+, _utf8(1)
+, _tos(&_utf8)
 , _depth(0)
 , _afterKey(false)
 , _firstMember(true)
 , _firstElement(true)
 {
+    _os = &_tos;
 }
 
 
@@ -50,13 +53,18 @@ TextFormatter::~TextFormatter()
 }
 
 
-void TextFormatter::attach(std::basic_ostream<Pt::Char>& os)
+Pt::Formatter& TextFormatter::beginContent(std::ostream& os)
 {
-    _os = &os;
-    _depth = 0;
-    _afterKey = false;
-    _firstMember = true;
-    _firstElement = true;
+    os << "{\"type\":\"text\",\"text\":\"";
+    _tos.attach(os);
+    return *this;
+}
+
+
+void TextFormatter::finishContent(std::ostream& os)
+{
+    _tos.flush();
+    os << "\"}";
 }
 
 

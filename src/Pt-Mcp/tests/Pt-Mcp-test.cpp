@@ -41,6 +41,7 @@
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Logger.h>
+#include <Pt/SerializationInfo.h>
 #include <string>
 #include <sstream>
 
@@ -48,6 +49,21 @@
 namespace Pt {
 
 namespace Mcp {
+
+namespace {
+
+    /** @brief Minimal test payload that decomposes to a single Binary node. */
+    struct PngImage
+    {
+        std::string bytes;
+    };
+
+    void operator<<=(Pt::SerializationInfo& si, const PngImage& img)
+    {
+        si.setBinary(img.bytes.data(), img.bytes.size());
+    }
+
+} // anonymous namespace
 
 class HttpTest : public Pt::Unit::TestSuite
               , public Pt::Connectable
@@ -75,6 +91,7 @@ class HttpTest : public Pt::Unit::TestSuite
         registerMethod("InvalidOrigin", *this, &HttpTest::InvalidOrigin);
         registerMethod("VersionNegotiation", *this, &HttpTest::VersionNegotiation);
         registerMethod("InvalidMcpVersionHeader", *this, &HttpTest::InvalidMcpVersionHeader);
+        registerMethod("ImageContent", *this, &HttpTest::ImageContent);
     }
 
     void failTest()
@@ -472,6 +489,44 @@ class HttpTest : public Pt::Unit::TestSuite
         _server = 0;
     }
 
+    ////////////////////////////////////////////////////////////
+    // ImageContent
+    //
+    void ImageContent()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("getImage", *this, &HttpTest::getImage);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("getImage", "Return a test image")
+            .setContent(Pt::Mcp::imageContent());
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":20,"
+               "\"params\":{\"name\":\"getImage\",\"arguments\":{}}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"isError\":false") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("\"type\":\"image\"") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("\"mimeType\":\"image/png\"") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("\"data\":\"UE5HREFUQQ==\"") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
   private:
     void onReplyReceived(Pt::Http::Client& client)
     {
@@ -495,6 +550,13 @@ class HttpTest : public Pt::Unit::TestSuite
     int addInt(int a, int b)
     {
         return a + b;
+    }
+
+    PngImage getImage()
+    {
+        PngImage img;
+        img.bytes = "PNGDATA";
+        return img;
     }
 };
 

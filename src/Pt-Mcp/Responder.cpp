@@ -28,7 +28,6 @@
  */
 
 #include "Responder.h"
-#include "TextFormatter.h"
 #include <Pt/JsonRpc/Fault.h>
 #include <Pt/Json/Boolean.h>
 #include <Pt/Json/Float.h>
@@ -136,8 +135,8 @@ Responder::Responder(Remoting::ServiceDefinition& serviceDef,
 , _bufferedArgumentsWriter()
 , _tis(&_utf8)
 , _reader(_tis)
-, _tos(&_utf8)
-, _textFmt(0)
+, _contentFormatter(0)
+, _resultFormatter(0)
 , _result(0)
 , _resultOs(0)
 , _skipDepth(0)
@@ -147,7 +146,8 @@ Responder::Responder(Remoting::ServiceDefinition& serviceDef,
 
 Responder::~Responder()
 {
-    delete _textFmt;
+    if(_contentFormatter)
+        _tool->content().releaseFormatter(_contentFormatter);
 }
 
 
@@ -155,6 +155,14 @@ void Responder::onCancel()
 {
     _state = OnBegin;
     _args = 0;
+
+    if(_contentFormatter)
+    {
+        _tool->content().releaseFormatter(_contentFormatter);
+        _contentFormatter = 0;
+        _resultFormatter = 0;
+    }
+
     _tool = 0;
     _isFault = false;
     _hasId = false;
@@ -173,10 +181,6 @@ void Responder::onCancel()
     _result = 0;
     _resultOs = 0;
     _skipDepth = 0;
-    _tos.flush();
-    _tos.discard();
-    delete _textFmt;
-    _textFmt = 0;
 }
 
 
@@ -253,16 +257,22 @@ void Responder::beginResult(std::ostream& os)
         {
             _result = call();
 
+            const ContentType& content = _tool->content();
+
             os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-               << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"";
+               << ",\"result\":{\"content\":[";// do this in ContentFormatter::beginContent
 
-            _tos.clear();
-            _tos.discard();
-            _tos.attach(os);
+            if(_contentFormatter)
+            {
+                content.releaseFormatter(_contentFormatter);
+                _contentFormatter = 0;
+                _resultFormatter = 0;
+            }
 
-            delete _textFmt;
-            _textFmt = new TextFormatter(_tos);
-            _result->beginFormat(*_textFmt);
+            _contentFormatter = content.getFormatter();
+
+            _resultFormatter = &_contentFormatter->beginContent(os);
+            _result->beginFormat(*_resultFormatter);
         }
         catch(const JsonRpc::Fault& f)
         {
@@ -322,7 +332,7 @@ bool Responder::advanceResult()
 
     for(unsigned n = 0; _result && n < 10; ++n)
     {
-        _result = _result->advanceFormat(*_textFmt);
+        _result = _result->advanceFormat(*_resultFormatter);
     }
 
     return _result == 0;
@@ -333,12 +343,19 @@ void Responder::finishResult()
 {
     if(_resultOs && _method == "tools/call" && ! _isFault)
     {
-        _tos.flush();
-        *_resultOs << "\"}],\"isError\":false}}";
+        _contentFormatter->finishContent(*_resultOs);
+        _tool->content().releaseFormatter(_contentFormatter);
+        _contentFormatter = 0;
+        _resultFormatter = 0;
+        *_resultOs << "],\"isError\":false}}"; // do this in ContentFormatter::finishContent
+    }
+    else if(_contentFormatter)
+    {
+        _tool->content().releaseFormatter(_contentFormatter);
+        _contentFormatter = 0;
+        _resultFormatter = 0;
     }
 
-    delete _textFmt;
-    _textFmt = 0;
     _result = 0;
     _resultOs = 0;
 }
@@ -361,7 +378,7 @@ void Responder::formatFault(std::ostream& os)
     else
         os << "null";
     os << ",\"error\":{\"code\":" << _faultCode
-       << ",\"message\":\"" << _faultMessage << "\"}}";  
+       << ",\"message\":\"" << _faultMessage << "\"}}";
 }
 
 
