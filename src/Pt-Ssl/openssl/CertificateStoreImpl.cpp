@@ -58,15 +58,18 @@ void CertificateStoreImpl::loadPem(const char* pem, std::size_t len, const char*
 {
     BioAutoPtr pkeyIn( BIO_new_mem_buf( (void*) pem, len ) );
     EVP_PKEY* pkey = PEM_read_bio_PrivateKey(pkeyIn.get(), NULL, NULL, (void*)passwd);
-    if(pkey) 
+    if(pkey)
     {
         PT_LOG_DEBUG("imported key");
         EVP_PKEY_free(pkey);
     }
 
     BioAutoPtr certIn( BIO_new_mem_buf( (void*) pem, len ) );
+
+    // read the leaf first (preserves trust settings via _AUX), then any
+    // concatenated chain certs that follow in the same PEM blob
     X509* x509 = PEM_read_bio_X509_AUX(certIn.get(), NULL, NULL, (void*)passwd);
-    if(x509) 
+    while(x509)
     {
         X509AutoPtr x509Ptr(x509);
         CertificateImpl* impl = new CertificateImpl(x509);
@@ -81,6 +84,8 @@ void CertificateStoreImpl::loadPem(const char* pem, std::size_t len, const char*
         certPtr.release();
 
         PT_LOG_DEBUG("imported certificate: " << cert->subject());
+
+        x509 = PEM_read_bio_X509(certIn.get(), NULL, NULL, (void*)passwd);
     }
 }
 
@@ -113,14 +118,14 @@ void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const c
     if(ca)
         caPtr.reset(ca);
 
-    if(x509) 
+    if(x509)
     {
         X509AutoPtr x509Ptr(x509);
 
         CertificateImpl* impl = new CertificateImpl(x509, pkey);
         AutoPtr<CertificateImpl> implPtr(impl);
         x509Ptr.release();
-        
+
         Certificate* cert = new Certificate( implPtr.get() );
         AutoPtr<Certificate> certPtr(cert);
         implPtr.release();
@@ -128,7 +133,7 @@ void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const c
         _allCerts.push_back( certPtr.get() );
         certPtr.release();
     }
-    
+
     if(caPtr)
     {
         for(int i = 0; i < sk_X509_num( caPtr.get() ); i++)
@@ -147,14 +152,14 @@ void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const c
             _allCerts.push_back( certPtr.get() );
             certPtr.release();
         }
-    }  
+    }
 }
 
 
 const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
 {
     std::vector<Certificate*>::const_iterator it;
-    for(it = _allCerts.begin(); it != _allCerts.end(); ++it) 
+    for(it = _allCerts.begin(); it != _allCerts.end(); ++it)
     {
         const Certificate* cert = *it;
         if( cert->subject().find(subject) != std::string::npos )
@@ -179,22 +184,22 @@ const Certificate* CertificateStoreImpl::findCertificate(const std::string& subj
 //        //   PEM_write_bio_PrivateKey
 //        //   i2d_PUBKEY_bio
 //        //   i2d_PrivateKey_bio
-//        
+//
 //        void fromPem(const char* data, std::size_t len)
 //        {
 //            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 //
 //            // Try to read/parse the CA X509 certificates
-//            while(true) 
+//            while(true)
 //            {
 //                // Read the certificate
 //                X509AutoPtr x509 ( PEM_read_bio_X509_AUX(in.get(), 0, 0, 0) );
-//                if( ! x509) 
+//                if( ! x509)
 //                  break;
 //
 //                Certificate cert( new CertificateImpl(x509.get()) );
 //                this->push_back(cert);
-//                
+//
 //                x509.release();
 //            }
 //        }

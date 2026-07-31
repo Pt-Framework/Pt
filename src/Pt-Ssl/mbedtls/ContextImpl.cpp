@@ -50,8 +50,13 @@ mbedtls_x509_crt* copyCertificate(const mbedtls_x509_crt* src)
     X509CrtAutoPtr copyPtr( new mbedtls_x509_crt() );
     mbedtls_x509_crt_init( copyPtr.get() );
 
-    if( mbedtls_x509_crt_parse_der(copyPtr.get(), src->raw.p, src->raw.len) != 0 )
-        throw InvalidCertificate("invalid certificate");
+    // mbedtls_x509_crt_parse_der appends to an already-populated chain, so
+    // looping over src->next reconstructs the full linked certificate chain.
+    for(const mbedtls_x509_crt* node = src; node; node = node->next)
+    {
+        if( mbedtls_x509_crt_parse_der(copyPtr.get(), node->raw.p, node->raw.len) != 0 )
+            throw InvalidCertificate("invalid certificate");
+    }
 
     return copyPtr.release();
 }
@@ -251,8 +256,14 @@ void ContextImpl::setIdentity(const Certificate& cert)
     mbedtls_x509_crt* leaf = copyCertificate( cert.impl()->crt() );
     mbedtls_pk_context* key = copyPrivateKey( cert.impl()->pk(), &_drbg );
 
-    // splice any chain certs already added via addCertificate() before the identity was known
-    leaf->next = _identityCert;
+    // leaf may already carry its own copied chain; splice at its tail so certs
+    // added via addCertificate() before the identity was known aren't lost
+    mbedtls_x509_crt* tail = leaf;
+    while(tail->next)
+        tail = tail->next;
+
+    tail->next = _identityCert;
+
     _identityCert = leaf;
     _identityKey = key;
 

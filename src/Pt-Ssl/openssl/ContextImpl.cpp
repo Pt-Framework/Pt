@@ -46,10 +46,10 @@ static Pt::System::Mutex* sslmtx = 0;
 
 void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
 {
-    //PT_LOG_TRACE("thread: " << ((mode&CRYPTO_LOCK)?"l":"u") 
+    //PT_LOG_TRACE("thread: " << ((mode&CRYPTO_LOCK)?"l":"u")
     //                     << ((type&CRYPTO_READ)?"r":"w")
     //                     << ' ' << file << ':' << line );
-    
+
     if (mode & CRYPTO_LOCK)
     {
         sslmtx[type].lock();
@@ -63,7 +63,7 @@ void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
 
 void SSLInitImpl()
 {
-    if(0 == ssl_init_counter++) 
+    if(0 == ssl_init_counter++)
     {
         PT_LOG_INFO("OpenSSL library initialization");
 
@@ -131,7 +131,7 @@ void SSLExitImpl()
 
 
 X509* copyX509(X509* from)
-{   
+{
     return X509_dup(from);
 }
 
@@ -142,17 +142,17 @@ EVP_PKEY* copyPrivateKey(EVP_PKEY* from)
 
     BioAutoPtr bio(b);
 
-    if (PEM_write_bio_PKCS8PrivateKey(bio.get(), from, 0, 0, 0, 0, 0) <= 0) 
+    if (PEM_write_bio_PKCS8PrivateKey(bio.get(), from, 0, 0, 0, 0, 0) <= 0)
     {
         throw InvalidCertificate("invalid certificate");
     }
 
     EVP_PKEY *target = 0;
-    if (PEM_read_bio_PrivateKey(bio.get(), &target, 0, 0) == 0) 
+    if (PEM_read_bio_PrivateKey(bio.get(), &target, 0, 0) == 0)
     {
         throw InvalidCertificate("invalid certificate");
     }
-    
+
     return target;
 }
 
@@ -165,30 +165,30 @@ ContextImpl::ContextImpl(Protocol protocol)
 , _pkey(0)
 {
     // Create the context for the given protocol
-    switch(_protocol) 
+    switch(_protocol)
     {
         default:
-        case SSLv3or2: 
+        case SSLv3or2:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            _ctx = SSL_CTX_new( SSLv23_method() ); 
+            _ctx = SSL_CTX_new( SSLv23_method() );
 #else
             _ctx = ::SSL_CTX_new( ::TLS_method() );
 #endif
             break;
 
-        case SSLv2: 
+        case SSLv2:
             // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
-            _ctx = SSL_CTX_new( SSLv23_method() ); 
+            _ctx = SSL_CTX_new( SSLv23_method() );
             break;
-        
-        case SSLv3: 
+
+        case SSLv3:
             // SSLv3_method is not available everywhere (check OPENSSL_NO_SSL3)
-            _ctx = SSL_CTX_new( SSLv23_method() ); 
+            _ctx = SSL_CTX_new( SSLv23_method() );
             break;
 
         case TLSv1:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            _ctx = SSL_CTX_new( TLSv1_method () ); 
+            _ctx = SSL_CTX_new( TLSv1_method () );
 #else
             _ctx = ::SSL_CTX_new(::TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_VERSION);
@@ -198,7 +198,7 @@ ContextImpl::ContextImpl(Protocol protocol)
 
         case TLSv1_1:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            _ctx = SSL_CTX_new( TLSv1_1_method () ); 
+            _ctx = SSL_CTX_new( TLSv1_1_method () );
 #else
             _ctx = ::SSL_CTX_new(::TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_1_VERSION);
@@ -208,7 +208,7 @@ ContextImpl::ContextImpl(Protocol protocol)
 
         case TLSv1_2:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            _ctx = SSL_CTX_new( TLSv1_2_method () ); 
+            _ctx = SSL_CTX_new( TLSv1_2_method () );
 #else
             _ctx = ::SSL_CTX_new(::TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_2_VERSION);
@@ -221,7 +221,7 @@ ContextImpl::ContextImpl(Protocol protocol)
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(_ctx, _verifyDepth);
 #endif
-    
+
     SSL_CTX_set_options(_ctx, SSL_OP_SINGLE_DH_USE);
     SSL_CTX_set_mode(_ctx, SSL_MODE_NO_AUTO_CHAIN);
     SSL_CTX_set_mode(_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
@@ -237,7 +237,7 @@ ContextImpl::~ContextImpl()
 
     if(_pkey)
         EVP_PKEY_free(_pkey);
-    
+
     if(_x509)
         X509_free(_x509);
 
@@ -249,8 +249,8 @@ ContextImpl::~ContextImpl()
 
 
 Protocol ContextImpl::protocol() const
-{ 
-    return _protocol; 
+{
+    return _protocol;
 }
 
 
@@ -258,31 +258,31 @@ void ContextImpl::setProtocol(Protocol protocol)
 {
     bool v2 = false;
 
-    switch(protocol) 
+    switch(protocol)
     {
         default:
-        case SSLv3or2: 
+        case SSLv3or2:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() );  
+            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() );
 #else
-            SSL_CTX_set_ssl_version( _ctx, ::TLS_method() ); 
+            SSL_CTX_set_ssl_version( _ctx, ::TLS_method() );
 #endif
             break;
 
-        case SSLv2: 
+        case SSLv2:
             // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
             SSL_CTX_set_ssl_version(_ctx, SSLv23_method() );
             v2 = true;
             break;
 
         case SSLv3:
-            // SSLv3_method is not available everywhere (check OPENSSL_NO_SSL3) 
-            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() ); 
+            // SSLv3_method is not available everywhere (check OPENSSL_NO_SSL3)
+            SSL_CTX_set_ssl_version( _ctx, SSLv23_method() );
             break;
 
-        case TLSv1: 
+        case TLSv1:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            SSL_CTX_set_ssl_version( _ctx, TLSv1_method() ); 
+            SSL_CTX_set_ssl_version( _ctx, TLSv1_method() );
 #else
             SSL_CTX_set_ssl_version( _ctx, TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_VERSION);
@@ -290,9 +290,9 @@ void ContextImpl::setProtocol(Protocol protocol)
 #endif
             break;
 
-        case TLSv1_1: 
+        case TLSv1_1:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            SSL_CTX_set_ssl_version( _ctx, TLSv1_1_method() ); 
+            SSL_CTX_set_ssl_version( _ctx, TLSv1_1_method() );
 #else
             SSL_CTX_set_ssl_version( _ctx, TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_1_VERSION);
@@ -300,9 +300,9 @@ void ContextImpl::setProtocol(Protocol protocol)
 #endif
             break;
 
-        case TLSv1_2: 
+        case TLSv1_2:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            SSL_CTX_set_ssl_version( _ctx, TLSv1_2_method() ); 
+            SSL_CTX_set_ssl_version( _ctx, TLSv1_2_method() );
 #else
             SSL_CTX_set_ssl_version( _ctx, TLS_method());
             SSL_CTX_set_min_proto_version(_ctx, TLS1_2_VERSION);
@@ -326,8 +326,8 @@ void ContextImpl::setVerifyDepth(int n)
 
 
 VerifyMode ContextImpl::verifyMode() const
-{ 
-    return _verify; 
+{
+    return _verify;
 }
 
 
@@ -339,7 +339,7 @@ void ContextImpl::setVerifyMode(VerifyMode m)
         case TryVerify:
             mode = SSL_VERIFY_PEER;
             break;
-    
+
         case AlwaysVerify:
             mode = SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
             break;
@@ -368,16 +368,16 @@ void ContextImpl::assign(const ContextImpl& ctx)
     if(_pkey)
         EVP_PKEY_free(_pkey);
     _pkey = 0;
-    
+
     if(_x509)
         X509_free(_x509);
     _x509 = 0;
 
     if( ctx._x509 )
     {
-        _pkey = copyPrivateKey( ctx._pkey );  
+        _pkey = copyPrivateKey( ctx._pkey );
         _x509 = copyX509( ctx._x509 );
-        
+
         if( ! SSL_CTX_use_certificate(_ctx, _x509) )
         {
             throw InvalidCertificate("invalid certificate");
@@ -394,7 +394,7 @@ void ContextImpl::assign(const ContextImpl& ctx)
 
     for(std::vector<X509*>::const_iterator it = ctx._extraCerts.begin(); it != ctx._extraCerts.end(); ++it)
     {
-        // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
+        // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate,
         // or increase the refcount. We must copy it, because the SSL_CTX will
         // free it
 
@@ -413,7 +413,7 @@ void ContextImpl::assign(const ContextImpl& ctx)
     {
         X509_free(*it);
     }
-    
+
     _caCerts.clear();
     _caCerts.reserve( ctx._caCerts.size() );
 
@@ -458,7 +458,7 @@ void ContextImpl::setIdentity(const Certificate& cert)
         char buf[255];
         ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
         PT_LOG_WARN("invalid certificate: " << buf);
-        
+
         throw InvalidCertificate("invalid certificate");
     }
 
@@ -467,18 +467,18 @@ void ContextImpl::setIdentity(const Certificate& cert)
         char buf[255];
         ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
         PT_LOG_WARN("invalid private key: " << buf);
-        
+
         throw InvalidCertificate("invalid certificate");
     }
-    
-    // openssl will not check the private key of this context against the 
+
+    // openssl will not check the private key of this context against the
     // certifictate. TO do so call SSL_CTX_check_private_key(_ctx)
 }
 
 
 void ContextImpl::addCertificate(const Certificate& certificate)
 {
-    // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate, 
+    // NOTE: SSL_CTX_add_extra_chain_cert does not copy the X509 certificate,
     // or increase the refcount. We must copy it, because the SSL_CTX will
     // free it
 
@@ -492,7 +492,7 @@ void ContextImpl::addCertificate(const Certificate& certificate)
         char buf[255];
         ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
         PT_LOG_WARN("invalid extra certificate: " << buf);
-        
+
         throw InvalidCertificate("invalid extra certificate");
     }
 
@@ -504,7 +504,7 @@ void ContextImpl::addCertificate(const Certificate& certificate)
 void ContextImpl::addCACertificate(const Certificate& trustedCert)
 {
     PT_LOG_TRACE("adding CA certificate:" << trustedCert.subject());
-    
+
     _caCerts.reserve(_caCerts.size() + 1);
 
     X509* x509 = copyX509( trustedCert.impl()->x509() );
@@ -515,6 +515,7 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
     {
         PT_LOG_TRACE("creating new X509 store");
         store = X509_STORE_new();
+        SSL_CTX_set_cert_store(_ctx, store);
     }
 
     if( ! X509_STORE_add_cert(store, x509) )
@@ -522,18 +523,18 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
         char buf[255];
         ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
         PT_LOG_WARN("invalid CA certificate: " << buf);
-        
+
         throw InvalidCertificate("invalid CA certificate");
     }
-    
+
     _caCerts.push_back(x509);
     x509Ptr.release();
 }
 
 
 SSL_CTX* ContextImpl::ctx() const
-{ 
-    return _ctx; 
+{
+    return _ctx;
 }
 
 } // namespace Ssl
