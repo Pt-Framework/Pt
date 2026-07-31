@@ -35,8 +35,10 @@
 #include <mbedtls/md.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
+#include <Pt/System/Clock.h>
 #include <cstring>
 #include <new>
+#include <sstream>
 #include <vector>
 
 namespace Pt {
@@ -399,9 +401,14 @@ bool parsePkcs12(const unsigned char* data,
     mbedtls_entropy_init(&entropy);
     mbedtls_ctr_drbg_init(&ctr_drbg);
 
-    static const unsigned char pers[] = "pkcs12_parse";
-    bool ok = (mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
-                                      &entropy, pers, sizeof(pers) - 1) == 0);
+    std::ostringstream seedBuilder;
+    const Pt::int64_t ticks = Pt::System::Clock::getSystemTicks().toUSecs();
+    seedBuilder << "Pt.Ssl.Context" << ticks;
+    std::string seed = seedBuilder.str();
+    const unsigned char* seedData = reinterpret_cast<const unsigned char*>( seed.data() );
+
+    bool ok = (mbedtls_ctr_drbg_seed( &ctr_drbg, mbedtls_entropy_func, &entropy,
+                                      seedData, seed.size() ) == 0);
 
     if(ok)
     {

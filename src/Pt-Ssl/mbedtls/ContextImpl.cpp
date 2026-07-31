@@ -31,8 +31,10 @@
 #include "MbedTls.h"
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
+#include <Pt/System/Clock.h>
 #include <mbedtls/error.h>
 #include <cstring>
+#include <sstream>
 
 PT_LOG_DEFINE("Pt.Ssl.Context")
 
@@ -104,10 +106,14 @@ ContextImpl::ContextImpl(Protocol protocol)
     mbedtls_entropy_init(&_entropy);
     mbedtls_ctr_drbg_init(&_drbg);
 
-    static const char pers[] = "Pt.Ssl.Context";
-    if( mbedtls_ctr_drbg_seed(&_drbg, mbedtls_entropy_func, &_entropy,
-                              reinterpret_cast<const unsigned char*>(pers),
-                              sizeof(pers) - 1) != 0 )
+    std::ostringstream seedBuilder;
+    const Pt::int64_t ticks = Pt::System::Clock::getSystemTicks().toUSecs();
+    seedBuilder << "Pt.Ssl.Context" << this << ticks;
+    std::string seed = seedBuilder.str();
+    const unsigned char* seedData = reinterpret_cast<const unsigned char*>( seed.data() );
+
+    if( mbedtls_ctr_drbg_seed( &_drbg, mbedtls_entropy_func, &_entropy,
+                               seedData, seed.size() ) != 0 )
         throw SslError("failed to seed RNG");
 
     if( mbedtls_ssl_config_defaults(&_config, MBEDTLS_SSL_IS_CLIENT,
