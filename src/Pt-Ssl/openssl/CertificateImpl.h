@@ -26,7 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef PT_SSL_CERTIFICATEIMPL_H
 #define PT_SSL_CERTIFICATEIMPL_H
 
@@ -45,19 +45,10 @@ class CertificateImpl
         , _pkey(pkey)
         {
             assert(_x509);
+
+            _subject = getSubject();
+            _issuer = getIssuer();
         }
-
-        //CertificateImpl(const char* data, size_t len)
-        //: _x509(0)
-        //, _refs(1)
-        //{
-        //    BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
-
-        //    // Try to read/parse DER encoded certificate
-        //    _x509 = d2i_X509_bio(in.get(), 0);
-        //    if( ! _x509)
-        //        throw InvalidCertificate("invalid DER certificate");
-        //}
 
         ~CertificateImpl()
         {
@@ -73,11 +64,24 @@ class CertificateImpl
         }
 
         std::string issuer() const
+        { return _issuer; }
+
+        std::string subject() const
+        { return _subject; }
+
+        X509* x509() const
+        { return _x509; }
+
+        EVP_PKEY* pkey() const
+        { return _pkey; }
+
+    private:
+        std::string getIssuer() const
         {
             return toString( X509_get_issuer_name(_x509) );
         }
 
-        std::string subject() const
+        std::string getSubject() const
         {
             char buf[255];
 
@@ -85,7 +89,7 @@ class CertificateImpl
 
             X509_NAME* subject = X509_get_subject_name(_x509);
 
-            if( 0 <= X509_NAME_get_text_by_NID(subject, NID_organizationName, buf, sizeof(buf)) ) 
+            if( 0 <= X509_NAME_get_text_by_NID(subject, NID_organizationName, buf, sizeof(buf)) )
             {
                 s += buf;
             }
@@ -96,7 +100,7 @@ class CertificateImpl
 
             s += ", ";
 
-            if( 0 <= X509_NAME_get_text_by_NID(subject, NID_commonName, buf, sizeof(buf)) ) 
+            if( 0 <= X509_NAME_get_text_by_NID(subject, NID_commonName, buf, sizeof(buf)) )
             {
                 s += buf;
             }
@@ -111,28 +115,19 @@ class CertificateImpl
             // NID_stateOrProvinceName
 
             return s;
-
-            //return toString( X509_get_subject_name(_x509) );
         }
 
-        X509* x509() const
-        { return _x509; }
-
-        EVP_PKEY* pkey() const
-        { return _pkey; }
-
-    private:
         static std::string toString(const X509_NAME* val)
         {
             int len = 0;
             char buf[1024];
-            
+
             BioAutoPtr out( BIO_new(BIO_s_mem()) );
-            if( X509_NAME_print( out.get(), (X509_NAME*) val, 0) ) 
+            if( X509_NAME_print( out.get(), (X509_NAME*) val, 0) )
             {
                 len = BIO_read( out.get(), buf, sizeof(buf) );
             }
-            
+
             return std::string(buf, len);
         }
 
@@ -153,6 +148,8 @@ class CertificateImpl
     private:
         X509* _x509;
         EVP_PKEY* _pkey;
+        std::string _subject;
+        std::string _issuer;
 };
 
 } // namespace Ssl

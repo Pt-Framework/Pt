@@ -53,6 +53,8 @@ class CertificateImpl
         , _refs(1)
         {
             assert(_cert);
+            // parse the DN once; findCertificate() scans subject() in a loop
+            _subject = getSubject();
         }
 
         explicit CertificateImpl(SecIdentityRef identity)
@@ -62,6 +64,7 @@ class CertificateImpl
         {
             SecIdentityCopyCertificate(identity, &_cert);
             assert(_cert);
+            _subject = getSubject();
         }
 
         ~CertificateImpl()
@@ -81,15 +84,14 @@ class CertificateImpl
         int serialNumber() const
         {
             CFDataRef data = SecCertificateCopySerialNumberData(_cert, NULL);
-            
             if( ! data )
                 return 0;
-                
-            const size_t sz = sizeof(int); 
+
+            const size_t sz = sizeof(int);
             UInt8 buf[sz];
             CFDataGetBytes(data, CFRangeMake(0, sz), buf);
             CFRelease(data);
-            
+
             int n = 0;
             memcpy(&n, buf, sz);
             return n;
@@ -101,21 +103,8 @@ class CertificateImpl
         }
 
         std::string subject() const
-        {
-            std::string r("Unknown Organization, Unknown Name");
-            
-            CFStringRef summary = SecCertificateCopySubjectSummary(_cert);
-            if(summary)
-            {
-                char buf[255];
-                CFStringGetCString(summary, buf, sizeof(buf), kCFStringEncodingUTF8);
-                r = buf;
-                CFRelease(summary);
-            }
-            
-            return r;
-        }
-        
+        { return _subject; }
+
         std::string notBefore() const
         {
             return "";
@@ -125,17 +114,35 @@ class CertificateImpl
         {
             return "";
         }
-        
+
         SecCertificateRef certificate() const
         { return _cert; }
-        
+
         SecIdentityRef identity() const
         { return _ident; }
+
+    private:
+        std::string getSubject() const
+        {
+            std::string r("Unknown Organization, Unknown Name");
+
+            CFStringRef summary = SecCertificateCopySubjectSummary(_cert);
+            if(summary)
+            {
+                char buf[255];
+                CFStringGetCString(summary, buf, sizeof(buf), kCFStringEncodingUTF8);
+                r = buf;
+                CFRelease(summary);
+            }
+
+            return r;
+        }
 
     private:
         SecIdentityRef _ident;
         SecCertificateRef _cert;
         Pt::atomic_t _refs;
+        std::string _subject;
 };
 
 } // namespace Ssl

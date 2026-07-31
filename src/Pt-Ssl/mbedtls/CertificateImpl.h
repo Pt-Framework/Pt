@@ -47,6 +47,9 @@ class CertificateImpl
         , _pk(pk)
         {
             assert(_crt);
+
+            _subject = getSubject();
+            _issuer = getIssuer();
         }
 
         ~CertificateImpl()
@@ -62,22 +65,10 @@ class CertificateImpl
         }
 
         std::string subject() const
-        {
-            char buf[256];
-            int n = mbedtls_x509_dn_gets(buf, sizeof(buf), &_crt->subject);
-            if(n < 0)
-                return std::string();
-            return std::string(buf, static_cast<std::size_t>(n));
-        }
+        { return _subject; }
 
         std::string issuer() const
-        {
-            char buf[256];
-            int n = mbedtls_x509_dn_gets(buf, sizeof(buf), &_crt->issuer);
-            if(n < 0)
-                return std::string();
-            return std::string(buf, static_cast<std::size_t>(n));
-        }
+        { return _issuer; }
 
         std::string notBefore() const
         {
@@ -96,8 +87,29 @@ class CertificateImpl
         { return _pk; }
 
     private:
+        std::string getSubject() const
+        {
+            char buf[512];
+            int n = mbedtls_x509_dn_gets(buf, sizeof(buf), &_crt->subject);
+            if(n < 0)
+                return std::string();
+            return std::string(buf, static_cast<std::size_t>(n));
+        }
+
+        std::string getIssuer() const
+        {
+            char buf[512];
+            int n = mbedtls_x509_dn_gets(buf, sizeof(buf), &_crt->issuer);
+            if(n < 0)
+                return std::string();
+            return std::string(buf, static_cast<std::size_t>(n));
+        }
+
+    private:
         mbedtls_x509_crt*   _crt;
         mbedtls_pk_context* _pk;
+        std::string _subject;
+        std::string _issuer;
 };
 
 } // namespace Ssl

@@ -31,6 +31,7 @@
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
 #include <mbedtls/error.h>
+#include <mbedtls/x509_crt.h>
 #include <algorithm>
 #include <streambuf>
 
@@ -47,6 +48,21 @@ std::string mbedErrorString(int ret)
     char buf[128];
     mbedtls_strerror(ret, buf, sizeof(buf));
     return std::string(buf);
+}
+
+// decodes the verify-result bitmask into the actual failure reasons (expired, revoked, CN mismatch, ...)
+std::string mbedVerifyInfoString(uint32_t flags)
+{
+    char buf[256];
+    int n = mbedtls_x509_crt_verify_info(buf, sizeof(buf), "", flags);
+    if(n <= 0)
+        return "unknown verification error";
+
+    std::string info(buf, n);
+    while( ! info.empty() && (info.back() == '\n' || info.back() == '\r') )
+        info.erase(info.size() - 1);
+
+    return info;
 }
 
 } // namespace
@@ -94,8 +110,13 @@ void Connection::verifyPeerName()
     if( _peerName.empty() )
         return;
 
-    if( mbedtls_ssl_get_verify_result(&_ssl) != 0 )
-        throw HandshakeFailed("Invalid peer name");
+    uint32_t flags = mbedtls_ssl_get_verify_result(&_ssl);
+    if(flags != 0)
+    {
+        std::string info = mbedVerifyInfoString(flags);
+        PT_LOG_WARN("peer verification failed: " << info);
+        throw HandshakeFailed("Peer verification failed: " + info);
+    }
 }
 
 
