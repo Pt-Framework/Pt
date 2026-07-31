@@ -48,7 +48,6 @@ HttpResponder::HttpResponder(HttpService& httpService,
 , Mcp::Responder(serviceDef, decl)
 , _request(0)
 , _reply(0)
-, _httpStatus(200)
 {
 }
 
@@ -66,11 +65,10 @@ void HttpResponder::onBeginRequest(Http::Request& request,
     {
         _request = &request;
         _reply = &reply;
-        _httpStatus = 200;
 
         if(request.method() != "POST")
         {
-            _httpStatus = 405;
+            reply.setStatus(405, "Method Not Allowed");
             throw JsonRpc::Fault("Method Not Allowed", JsonRpc::Fault::InvalidRequest);
         }
 
@@ -90,7 +88,7 @@ void HttpResponder::onBeginRequest(Http::Request& request,
 
             if( ! host || originHost != std::string(host) )
             {
-                _httpStatus = 403;
+                reply.setStatus(403, "Forbidden");
                 throw JsonRpc::Fault("Forbidden: invalid Origin", JsonRpc::Fault::InvalidRequest);
             }
         }
@@ -104,7 +102,7 @@ void HttpResponder::onBeginRequest(Http::Request& request,
     }
     catch(const System::InvalidUri&)
     {
-        _httpStatus = 403;
+        reply.setStatus(403, "Forbidden");
         setFault(JsonRpc::Fault::InvalidRequest, "Forbidden: invalid Origin");
     }
 
@@ -127,26 +125,17 @@ void HttpResponder::onBeginReply(const Http::Request& request,
 {
     _reply = &reply;
 
-    if( isFailed() )
-    {
-        finishMessage(loop);
-        return;
-    }
-
-    if( isNotification() )
+    if( isNotification() && reply.statusCode() == 200 )
     {
         reply.setStatus(202, "Accepted");
-        setFinished(true);
-        return;
     }
-
-    // Check MCP-Protocol-Version header for non-initialize calls (MCP spec MUST)
-    if( method() != "initialize")
+    else if( method() != "initialize")
     {
+        // Check MCP-Protocol-Version header for non-initialize calls (MCP spec MUST)
         const char* mcpVersion = request.header().get("MCP-Protocol-Version");
         if( mcpVersion && ! ToolDeclaration::isSupportedVersion(mcpVersion) )
         {
-            _httpStatus = 400;
+            reply.setStatus(400, "Bad Request");
             setFault(JsonRpc::Fault::InvalidRequest, "Unsupported MCP-Protocol-Version");
         }
     }
@@ -200,7 +189,6 @@ void HttpResponder::onResult()
 {
     assert(_reply);
 
-    _reply->setStatus(_httpStatus, "");
     _reply->header().set("Content-Type", "application/json");
     beginResult(_reply->body());
 
@@ -213,10 +201,9 @@ void HttpResponder::onFault(const JsonRpc::Fault& fault)
 {
     assert(_reply);
 
-    if(_httpStatus == 405)
+    if(_reply->statusCode() == 405)
         _reply->header().set("Allow", "POST");
 
-    _reply->setStatus(_httpStatus, "");
     _reply->header().set("Content-Type", "application/json");
     beginFault(_reply->body(), fault);
 

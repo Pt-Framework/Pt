@@ -79,7 +79,6 @@ class HttpResponder : public Http::Responder
 
     Http::Request* _request;
     Http::Reply* _reply;
-    int _httpStatus;
 };
 
 } // namespace Mcp

@@ -219,7 +219,7 @@ class Responder : public Remoting::Responder
     ContentFormatter* _contentFormatter;
     Pt::Formatter* _resultFormatter;
     Decomposer* _result;
-    std::ostream* _resultOs;
+    std::ostream* _os;
     int _skipDepth;
 };
 

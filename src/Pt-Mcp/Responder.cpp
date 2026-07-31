@@ -141,7 +141,7 @@ Responder::Responder(Remoting::ServiceDefinition& serviceDef,
 , _contentFormatter(0)
 , _resultFormatter(0)
 , _result(0)
-, _resultOs(0)
+, _os(0)
 , _skipDepth(0)
 {
 }
@@ -204,7 +204,7 @@ void Responder::onCancel()
     _bufferedArgumentsText.reset();
     _bufferedArgumentsWriter.reset();
     _result = 0;
-    _resultOs = 0;
+    _os = 0;
     _skipDepth = 0;
 }
 
@@ -308,7 +308,6 @@ void Responder::finishMessage(System::EventLoop& loop)
     catch(const JsonRpc::Fault& e)
     {
         setToolFault(e.code(), e.what());
-        _result = 0;
         onFault(_fault);
     }
     catch(const Remoting::Fault& fault)
@@ -319,13 +318,11 @@ void Responder::finishMessage(System::EventLoop& loop)
     catch(const SerializationError& e)
     {
         setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
-        _result = 0;
         onFault(_fault);
     }
     catch(const ConversionError& e)
     {
         setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
-        _result = 0;
         onFault(_fault);
     }
 }
@@ -335,35 +332,28 @@ void Responder::onReady()
 {
     try
     {
-        _result = endCall();
+         _result = endCall();
         onResult();
+        return;
     }
     catch(const JsonRpc::Fault& e)
     {
         setToolFault(e.code(), e.what());
-        _result = 0;
-
         onFault(_fault);
     }
     catch(const Remoting::Fault& e)
     {
         setToolFault(JsonRpc::Fault::InternalError, e.what());
-        _result = 0;
-
         onFault(_fault);
     }
     catch(const SerializationError& e)
     {
         setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
-        _result = 0;
-
         onFault(_fault);
     }
     catch(const ConversionError& e)
     {
         setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
-        _result = 0;
-
         onFault(_fault);
     }
 }
@@ -371,15 +361,14 @@ void Responder::onReady()
 
 void Responder::beginResult(std::ostream& os)
 {
-    _resultOs = &os;
+    _os = &os;
 
     if( isNotification() )
         return;
 
     if(_method == "tools/call")
     {
-        const ContentType& content = _tool->content();
-        _contentFormatter = content.getFormatter();
+        _contentFormatter = _tool->content().getFormatter();
 
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
            << ",\"result\":{\"content\":[";
@@ -393,26 +382,23 @@ void Responder::beginResult(std::ostream& os)
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
         _decl->toInitializeResult(os, version.c_str());
         os << '}';
-        _result = 0;
     }
     else if(_method == "tools/list")
     {
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
         _decl->toToolsList(os);
         os << '}';
-        _result = 0;
     }
     else if(_method == "ping")
     {
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":{}}";
-        _result = 0;
     }
 }
 
 
 void Responder::beginFault(std::ostream& os, const JsonRpc::Fault& fault)
 {
-    _resultOs = &os;
+    _os = &os;
 
     if( isNotification() )
         return;
@@ -424,7 +410,6 @@ void Responder::beginFault(std::ostream& os, const JsonRpc::Fault& fault)
            << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"";
         writeJsonString(os, fault.what());
         os << "\"}],\"isError\":true}}";
-        _result = 0;
     }
     else
     {
@@ -433,14 +418,15 @@ void Responder::beginFault(std::ostream& os, const JsonRpc::Fault& fault)
            << ",\"error\":{\"code\":" << fault.code() << ",\"message\":\"";
         writeJsonString(os, fault.what());
         os << "\"}}";
-        _result = 0;
     }
+
+    _result = 0;
 }
 
 
 bool Responder::advanceResult()
 {
-    if( ! _result)
+    if( ! _result || isNotification() )
         return true;
 
     for(unsigned n = 0; _result && n < 10; ++n)
@@ -454,23 +440,20 @@ bool Responder::advanceResult()
 
 void Responder::finishResult()
 {
-    if(_resultOs && _method == "tools/call" && ! _isFault && _contentFormatter)
+    assert(_os);
+
+    if(_contentFormatter)
     {
-        _contentFormatter->finishContent(*_resultOs);
-        _tool->content().releaseFormatter(_contentFormatter);
-        _contentFormatter = 0;
-        _resultFormatter = 0;
-        *_resultOs << "],\"isError\":false}}";
-    }
-    else if(_contentFormatter)
-    {
+        _contentFormatter->finishContent(*_os);
+        *_os << "],\"isError\":false}}";
+
         _tool->content().releaseFormatter(_contentFormatter);
         _contentFormatter = 0;
         _resultFormatter = 0;
     }
 
     _result = 0;
-    _resultOs = 0;
+    _os = 0;
 }
 
 
@@ -481,15 +464,17 @@ void Responder::formatResult(std::ostream& os)
     while( ! advanceResult() )
         ;
 
-        finishResult();
+    finishResult();
 }
 
 
 void Responder::formatFault(std::ostream& os)
 {
     beginFault(os, _fault);
+
     while( ! advanceResult() )
         ;
+
     finishResult();
 }
 
