@@ -125,13 +125,13 @@ void HttpResponder::onReadRequest(Http::Request& /*request*/,
 
 void HttpResponder::onBeginReply(const Http::Request& request,
                                  Http::Reply& reply,
-                                 System::EventLoop& /*loop*/)
+                                 System::EventLoop& loop)
 {
     _reply = &reply;
 
     if( isFailed() )
     {
-        finishMessage();
+        finishMessage(loop);
         return;
     }
 
@@ -143,7 +143,7 @@ void HttpResponder::onBeginReply(const Http::Request& request,
         {
             _httpStatus = 400;
             setFault(JsonRpc::Fault::InvalidRequest, "Unsupported MCP-Protocol-Version");
-            finishMessage();
+            finishMessage(loop);
             return;
         }
     }
@@ -155,7 +155,7 @@ void HttpResponder::onBeginReply(const Http::Request& request,
         return;
     }
 
-    finishMessage();
+    finishMessage(loop);
 }
 
 

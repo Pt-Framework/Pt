@@ -79,8 +79,12 @@ class Responder : public Remoting::Responder
     bool parseMessage();
 
     /** @brief Dispatches to onResult() or onFault() after parsing is complete.
+
+        For tools/call, drives the service procedure via beginCall(loop);
+        onReady() dispatches onResult()/onFault() once the procedure
+        completes, synchronously or asynchronously.
     */
-    void finishMessage();
+    void finishMessage(System::EventLoop& loop);
 
     /** @brief Begin formatting the response.
     */
@@ -178,6 +182,14 @@ class Responder : public Remoting::Responder
 
     void writeBufferedArgumentNode(const Json::Node& node);
 
+    //! @internal Distinguishes a tool-level fault/error from a successful call for beginResult().
+    enum ToolCallOutcome
+    {
+        ToolCallOk,
+        ToolCallFault,
+        ToolCallError
+    };
+
     const ToolDeclaration* _decl;
     const Tool* _tool;
     Pt::Utf8Codec _utf8;
@@ -193,6 +205,7 @@ class Responder : public Remoting::Responder
     bool _hasId;
     int _faultCode;
     std::string _faultMessage;
+    ToolCallOutcome _toolCallOutcome;
 
     int _bufferedArgumentsDepth;
     std::string _bufferedArgumentsJson;

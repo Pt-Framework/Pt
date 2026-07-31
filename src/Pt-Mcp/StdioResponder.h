@@ -42,7 +42,8 @@ class StdioResponder : public Responder
 {
   public:
     StdioResponder(Remoting::ServiceDefinition& serviceDef,
-                   const ToolDeclaration& decl);
+                   const ToolDeclaration& decl,
+                   System::EventLoop& loop);
 
     ~StdioResponder();
 
@@ -58,6 +59,8 @@ class StdioResponder : public Responder
     void onFault() override;
 
   private:
+    System::EventLoop& _loop;
+    bool               _finished;
     std::ostringstream _os;
 };
 

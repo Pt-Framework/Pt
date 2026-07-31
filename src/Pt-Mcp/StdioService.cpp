@@ -37,9 +37,11 @@ namespace Pt {
 namespace Mcp {
 
 StdioService::StdioService(Remoting::ServiceDefinition& serviceDef,
-                           const ToolDeclaration& decl)
+                           const ToolDeclaration& decl,
+                           System::EventLoop& loop)
 : _serviceDef(&serviceDef)
 , _decl(&decl)
+, _loop(loop)
 {
 }
 
@@ -91,7 +93,7 @@ void StdioService::writeMessage(std::ostream& os, const std::string& json)
 
 std::string StdioService::dispatch(const std::string& json)
 {
-    StdioResponder responder(*_serviceDef, *_decl);
+    StdioResponder responder(*_serviceDef, *_decl, _loop);
     return responder.process(json);
 }
 

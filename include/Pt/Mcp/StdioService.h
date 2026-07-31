@@ -33,6 +33,7 @@
 #include <Pt/Mcp/Api.h>
 #include <Pt/Mcp/ToolDeclaration.h>
 #include <Pt/Remoting/ServiceDefinition.h>
+#include <Pt/System/Api.h>
 #include <string>
 #include <iosfwd>
 
@@ -48,10 +49,12 @@ namespace Mcp {
 class PT_MCP_API StdioService
 {
   public:
-    /** @brief Construct with a service definition and tool declaration.
+    /** @brief Construct with a service definition, tool declaration and
+        the event loop used to drive asynchronous service procedures.
     */
     StdioService(Remoting::ServiceDefinition& serviceDef,
-                 const ToolDeclaration& decl);
+                 const ToolDeclaration& decl,
+                 System::EventLoop& loop);
 
     /** @brief Destructor.
     */
@@ -84,6 +87,7 @@ class PT_MCP_API StdioService
 
     Remoting::ServiceDefinition* _serviceDef;
     const ToolDeclaration* _decl;
+    System::EventLoop& _loop;
 };
 
 } // namespace Mcp

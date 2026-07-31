@@ -74,7 +74,8 @@ void runHttpMode(Pt::Remoting::ServiceDefinition& serviceDef,
 void runStdioMode(Pt::Remoting::ServiceDefinition& serviceDef,
                   Pt::Mcp::ToolDeclaration& decl)
 {
-    Pt::Mcp::StdioService mcp(serviceDef, decl);
+    Pt::System::MainLoop loop;
+    Pt::Mcp::StdioService mcp(serviceDef, decl, loop);
 
     while(true)
     {

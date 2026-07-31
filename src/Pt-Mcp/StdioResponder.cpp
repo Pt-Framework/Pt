@@ -35,8 +35,11 @@ namespace Pt {
 namespace Mcp {
 
 StdioResponder::StdioResponder(Remoting::ServiceDefinition& serviceDef,
-                               const ToolDeclaration& decl)
+                               const ToolDeclaration& decl,
+                               System::EventLoop& loop)
 : Responder(serviceDef, decl)
+, _loop(loop)
+, _finished(false)
 {
 }
 
@@ -50,11 +53,16 @@ std::string StdioResponder::process(const std::string& json)
 {
     _os.str(std::string());
     _os.clear();
+    _finished = false;
 
     std::istringstream iss(json + "\n");
     beginMessage(iss);
     parseMessage();
-    finishMessage();
+    finishMessage(_loop);
+
+    // Block until an async ActiveProcedure tool completes, if not already done.
+    if( ! _finished )
+        _loop.run();
 
     return _os.str();
 }
@@ -62,16 +70,19 @@ std::string StdioResponder::process(const std::string& json)
 
 void StdioResponder::onResult()
 {
-    if( isNotification() )
-        return;
+    if( ! isNotification() )
+        formatResult(_os);
 
-    formatResult(_os);
+    _finished = true;
+    _loop.exit();
 }
 
 
 void StdioResponder::onFault()
 {
     formatFault(_os);
+    _finished = true;
+    _loop.exit();
 }
 
 } // namespace Mcp
