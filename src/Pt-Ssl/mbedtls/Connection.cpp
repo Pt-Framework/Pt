@@ -65,10 +65,9 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 {
     mbedtls_ssl_init(&_ssl);
 
-    mbedtls_ssl_conf_endpoint( ctx.impl()->config(),
-                              omode == Accept ? MBEDTLS_SSL_IS_SERVER : MBEDTLS_SSL_IS_CLIENT );
-
-    if( mbedtls_ssl_setup(&_ssl, ctx.impl()->config()) != 0 )
+    mbedtls_ssl_config* config = omode == Accept ? ctx.impl()->serverConfig()
+                                                 : ctx.impl()->clientConfig();
+    if( mbedtls_ssl_setup(&_ssl, config) != 0 )
         throw SslError("failed to initialize SSL session");
 
     mbedtls_ssl_set_bio(&_ssl, this, &Connection::bio_send, &Connection::bio_recv, 0);

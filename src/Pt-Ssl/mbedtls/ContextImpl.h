@@ -74,9 +74,13 @@ class ContextImpl
 
         void addCertificate(const Certificate& cert);
 
-        //! @internal used by Connection to set up the mbedtls SSL session
-        mbedtls_ssl_config* config()
-        { return &_config; }
+        //! @internal used by Connection to set up a client-role mbedtls SSL session
+        mbedtls_ssl_config* clientConfig()
+        { return &_clientConfig; }
+
+        //! @internal used by Connection to set up a server-role mbedtls SSL session
+        mbedtls_ssl_config* serverConfig()
+        { return &_serverConfig; }
 
     private:
         void maybeRegisterOwnCert();
@@ -85,7 +89,8 @@ class ContextImpl
         Protocol                 _protocol;
         VerifyMode               _verify;
         int                      _verifyDepth;
-        mbedtls_ssl_config       _config;
+        mbedtls_ssl_config       _clientConfig;
+        mbedtls_ssl_config       _serverConfig;
         mbedtls_entropy_context  _entropy;
         mbedtls_ctr_drbg_context _drbg;
         mbedtls_x509_crt*        _identityCert;

@@ -102,7 +102,8 @@ ContextImpl::ContextImpl(Protocol protocol)
 , _ownCertRegistered(false)
 , _caChain(0)
 {
-    mbedtls_ssl_config_init(&_config);
+    mbedtls_ssl_config_init(&_clientConfig);
+    mbedtls_ssl_config_init(&_serverConfig);
     mbedtls_entropy_init(&_entropy);
     mbedtls_ctr_drbg_init(&_drbg);
 
@@ -116,12 +117,18 @@ ContextImpl::ContextImpl(Protocol protocol)
                                seedData, seed.size() ) != 0 )
         throw SslError("failed to seed RNG");
 
-    if( mbedtls_ssl_config_defaults(&_config, MBEDTLS_SSL_IS_CLIENT,
+    if( mbedtls_ssl_config_defaults(&_clientConfig, MBEDTLS_SSL_IS_CLIENT,
                                     MBEDTLS_SSL_TRANSPORT_STREAM,
                                     MBEDTLS_SSL_PRESET_DEFAULT) != 0 )
         throw SslError("failed to initialize SSL configuration");
 
-    mbedtls_ssl_conf_rng(&_config, mbedtls_ctr_drbg_random, &_drbg);
+    if( mbedtls_ssl_config_defaults(&_serverConfig, MBEDTLS_SSL_IS_SERVER,
+                                    MBEDTLS_SSL_TRANSPORT_STREAM,
+                                    MBEDTLS_SSL_PRESET_DEFAULT) != 0 )
+        throw SslError("failed to initialize SSL configuration");
+
+    mbedtls_ssl_conf_rng(&_clientConfig, mbedtls_ctr_drbg_random, &_drbg);
+    mbedtls_ssl_conf_rng(&_serverConfig, mbedtls_ctr_drbg_random, &_drbg);
 
     setProtocol(protocol);
     setVerifyMode(_verify);
@@ -139,7 +146,8 @@ ContextImpl::~ContextImpl()
     freeCertChain(_identityCert);
     freeCertChain(_caChain);
 
-    mbedtls_ssl_config_free(&_config);
+    mbedtls_ssl_config_free(&_clientConfig);
+    mbedtls_ssl_config_free(&_serverConfig);
     mbedtls_ctr_drbg_free(&_drbg);
     mbedtls_entropy_free(&_entropy);
 }
@@ -156,13 +164,17 @@ void ContextImpl::setProtocol(Protocol protocol)
     switch(protocol)
     {
         case TLS: // negotiate the highest version mbedtls supports
-            mbedtls_ssl_conf_min_tls_version(&_config, MBEDTLS_SSL_VERSION_TLS1_2);
-            mbedtls_ssl_conf_max_tls_version(&_config, MBEDTLS_SSL_VERSION_TLS1_3);
+            mbedtls_ssl_conf_min_tls_version(&_clientConfig, MBEDTLS_SSL_VERSION_TLS1_2);
+            mbedtls_ssl_conf_max_tls_version(&_clientConfig, MBEDTLS_SSL_VERSION_TLS1_3);
+            mbedtls_ssl_conf_min_tls_version(&_serverConfig, MBEDTLS_SSL_VERSION_TLS1_2);
+            mbedtls_ssl_conf_max_tls_version(&_serverConfig, MBEDTLS_SSL_VERSION_TLS1_3);
             break;
 
         case TLSv1_2:
-            mbedtls_ssl_conf_min_tls_version(&_config, MBEDTLS_SSL_VERSION_TLS1_2);
-            mbedtls_ssl_conf_max_tls_version(&_config, MBEDTLS_SSL_VERSION_TLS1_2);
+            mbedtls_ssl_conf_min_tls_version(&_clientConfig, MBEDTLS_SSL_VERSION_TLS1_2);
+            mbedtls_ssl_conf_max_tls_version(&_clientConfig, MBEDTLS_SSL_VERSION_TLS1_2);
+            mbedtls_ssl_conf_min_tls_version(&_serverConfig, MBEDTLS_SSL_VERSION_TLS1_2);
+            mbedtls_ssl_conf_max_tls_version(&_serverConfig, MBEDTLS_SSL_VERSION_TLS1_2);
             break;
 
         default:
@@ -196,7 +208,8 @@ void ContextImpl::setVerifyMode(VerifyMode m)
         case AlwaysVerify: mode = MBEDTLS_SSL_VERIFY_REQUIRED; break;
     }
 
-    mbedtls_ssl_conf_authmode(&_config, mode);
+    mbedtls_ssl_conf_authmode(&_clientConfig, mode);
+    mbedtls_ssl_conf_authmode(&_serverConfig, mode);
     _verify = m;
 }
 
@@ -224,7 +237,9 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
         tail->next = copy;
     }
 
-    mbedtls_ssl_conf_ca_chain(&_config, _caChain, 0);
+    // shared read-only trust anchor list across both roles (zero-copy)
+    mbedtls_ssl_conf_ca_chain(&_clientConfig, _caChain, 0);
+    mbedtls_ssl_conf_ca_chain(&_serverConfig, _caChain, 0);
 }
 
 
@@ -270,7 +285,11 @@ void ContextImpl::maybeRegisterOwnCert()
     if(_ownCertRegistered || ! _identityCert || ! _identityKey)
         return;
 
-    if( mbedtls_ssl_conf_own_cert(&_config, _identityCert, _identityKey) != 0 )
+    // shared read-only identity across both roles (zero-copy)
+    if( mbedtls_ssl_conf_own_cert(&_clientConfig, _identityCert, _identityKey) != 0 )
+        throw SslError("failed to set identity certificate");
+
+    if( mbedtls_ssl_conf_own_cert(&_serverConfig, _identityCert, _identityKey) != 0 )
         throw SslError("failed to set identity certificate");
 
     _ownCertRegistered = true;
