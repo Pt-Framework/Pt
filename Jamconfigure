@@ -535,7 +535,7 @@ if --with-conan in $(ARGV)
 
 Load zlib.jam ;
 
-if --with-included-zlib in $(ARGV)
+if --with-inline-zlib in $(ARGV)
 {
     WITH_BUILTIN_ZLIB = yes ;
 }
@@ -552,7 +552,7 @@ if ! $(WITH_ZLIB)
 }
 
 Configure WITH_BUILTIN_ZLIB ;
-EchoOption --with-included-zlib : "Included zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+EchoOption --with-inline-zlib : "Using inline zlib" : $(WITH_BUILTIN_ZLIB:E="no") ;
 
 if $(WITH_BUILTIN_ZLIB)
 {
@@ -589,7 +589,7 @@ Configure ZLIB_LINKFLAGS ;
 
 Load libpng.jam ;
 
-if --with-included-libpng in $(ARGV)
+if --with-inline-libpng in $(ARGV)
 {
     WITH_BUILTIN_LIBPNG = yes ;
 }
@@ -606,7 +606,7 @@ if ! $(WITH_PNG)
 }
 
 Configure WITH_BUILTIN_LIBPNG ;
-EchoOption --with-included-libpng : "Included libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
+EchoOption --with-inline-libpng : "Using inline libpng" : $(WITH_BUILTIN_LIBPNG:E="no") ;
 
 if $(WITH_BUILTIN_LIBPNG)
 {
@@ -634,7 +634,7 @@ EchoOption PNG_LINKFLAGS : "PNG link flags" ;
 
 Load libjpeg.jam ;
 
-if --with-included-libjpeg in $(ARGV)
+if --with-inline-libjpeg in $(ARGV)
 {
     WITH_BUILTIN_LIBJPEG = yes ;
 }
@@ -651,7 +651,7 @@ if ! $(WITH_JPEG)
 }
 
 Configure WITH_BUILTIN_LIBJPEG ;
-EchoOption --with-included-libjpeg : "Included libjpeg library"
+EchoOption --with-inline-libjpeg : "Using inline libjpeg"
                                    : $(WITH_BUILTIN_LIBJPEG:E="no") ;
 
 if $(WITH_BUILTIN_LIBJPEG)
@@ -680,7 +680,7 @@ EchoOption JPEG_LINKFLAGS : "JPEG link flags" ;
 
 Load freetype.jam ;
 
-if --with-included-freetype in $(ARGV)
+if --with-inline-freetype in $(ARGV)
 {
     WITH_BUILTIN_FREETYPE = yes ;
 }
@@ -697,7 +697,7 @@ if ! $(WITH_FREETYPE)
 }
 
 Configure WITH_BUILTIN_FREETYPE ;
-EchoOption --with-included-freetype : "Included freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
+EchoOption --with-inline-freetype : "Using inline Freetype" : $(WITH_BUILTIN_FREETYPE:E="no") ;
 
 if $(WITH_BUILTIN_FREETYPE)
 {
