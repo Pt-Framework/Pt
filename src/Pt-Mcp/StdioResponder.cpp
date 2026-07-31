@@ -78,7 +78,7 @@ void StdioResponder::onResult()
 }
 
 
-void StdioResponder::onFault()
+void StdioResponder::onFault(const JsonRpc::Fault& /*fault*/)
 {
     formatFault(_os);
     _finished = true;

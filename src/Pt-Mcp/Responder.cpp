@@ -35,8 +35,11 @@
 #include <Pt/Json/Member.h>
 #include <Pt/Json/Integer.h>
 #include <Pt/Json/String.h>
+#include <Pt/SerializationError.h>
+#include <Pt/ConversionError.h>
 #include <Pt/Decomposer.h>
 #include <cassert>
+#include <cstdio>
 
 namespace Pt {
 
@@ -124,10 +127,9 @@ Responder::Responder(Remoting::ServiceDefinition& serviceDef,
 , _currentParamName()
 , _requestedVersion()
 , _isFault(false)
+, _isToolFault(false)
 , _hasId(false)
-, _faultCode(0)
-, _faultMessage()
-, _toolCallOutcome(ToolCallOk)
+, _fault("", 0)
 , _bufferedArgumentsDepth(0)
 , _bufferedArgumentsJson()
 , _bufferedArgumentsStream()
@@ -152,6 +154,28 @@ Responder::~Responder()
 }
 
 
+bool Responder::isFailed() const
+{
+    return _isFault;
+}
+
+
+void Responder::setFault(int code, const std::string& msg)
+{
+    _isFault = true;
+    _fault = JsonRpc::Fault(msg, code);
+    _isToolFault = false;
+}
+
+
+void Responder::setToolFault(int code, const std::string& msg)
+{
+    _isFault = true;
+    _fault = JsonRpc::Fault(msg, code);
+    _isToolFault = true;
+}
+
+
 void Responder::onCancel()
 {
     _state = OnBegin;
@@ -166,10 +190,9 @@ void Responder::onCancel()
 
     _tool = 0;
     _isFault = false;
+    _isToolFault = false;
     _hasId = false;
-    _faultCode = 0;
-    _faultMessage.clear();
-    _toolCallOutcome = ToolCallOk;
+    _fault = JsonRpc::Fault("", 0);
     _method.clear();
     _toolName.clear();
     _currentParamName.clear();
@@ -186,45 +209,10 @@ void Responder::onCancel()
 }
 
 
-void Responder::onReady()
-{
-    try
-    {
-        _result = endCall();
-        _toolCallOutcome = ToolCallOk;
-    }
-    catch(const JsonRpc::Fault& f)
-    {
-        setFault(f.code(), f.what());
-        _toolCallOutcome = ToolCallFault;
-        _result = 0;
-    }
-    catch(const Remoting::Fault& f)
-    {
-        setFault(JsonRpc::Fault::InternalError, f.what());
-        onFault();
-        return;
-    }
-    catch(const std::exception& e)
-    {
-        setFault(JsonRpc::Fault::InternalError, e.what());
-        _toolCallOutcome = ToolCallError;
-        _result = 0;
-    }
-
-    onResult();
-}
-
-
-void Responder::reset()
-{
-    cancel();
-}
-
-
 void Responder::beginMessage(std::istream& is)
 {
     cancel();
+
     _tis.reset(is);
     _tis.clear();
     _tis.textBuffer().import();
@@ -233,73 +221,150 @@ void Responder::beginMessage(std::istream& is)
 
 bool Responder::parseMessage()
 {
-    if(_isFault)
-        return true;
-
-    _tis.textBuffer().import();
-
     try
     {
+        if( this->isFailed() )
+            return true;
+
+        _tis.textBuffer().import();
+
         for(;;)
         {
             const Json::Node* node = _reader.advance();
-            if( ! node)
-                return false;
+            if( ! node )
+            {
+                break;
+            }
 
-            if( advance(*node) )
+            bool done = this->advance(*node);
+            if(done)
+            {
+                if( ! isNotification() )
+                {
+                    if(_state != OnEnd)
+                        setFault(JsonRpc::Fault::InvalidRequest, "invalid request");
+                    else if(_method.empty())
+                        setFault(JsonRpc::Fault::InvalidRequest, "missing method");
+                }
+
                 return true;
+            }
         }
+
+        return false;
     }
-    catch(const JsonRpc::Fault& fault)
+    catch(const JsonRpc::Fault& e)
     {
-        setFault(fault.code(), fault.what());
-        return true;
+        setFault(e.code(), e.what());
     }
-    catch(const std::exception& e)
+    catch(const Json::JsonError& e)
     {
-        setFault(JsonRpc::Fault::InternalError, e.what());
-        return true;
+        setFault(JsonRpc::Fault::ParseError, e.what());
     }
+    catch(const SerializationError& e)
+    {
+        setFault(JsonRpc::Fault::InvalidParameters, e.what());
+    }
+    catch(const ConversionError& e)
+    {
+        setFault(JsonRpc::Fault::InvalidParameters, e.what());
+    }
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( JsonRpc::Fault::InternalError, fault.what() );
+    }
+
+    return true;
 }
 
 
 void Responder::finishMessage(System::EventLoop& loop)
 {
-    if(isFailed())
+    if( this->isFailed() )
     {
-        onFault();
+        onFault(_fault);
         return;
     }
 
-    if(_method != "tools/call")
-    {
-        onResult();
-        return;
-    }
-
-    // onReady() dispatches onResult()/onFault() once the procedure completes.
     try
     {
+        if(_method != "tools/call")
+        {
+            if(_method == "initialize" || _method == "tools/list" || _method == "ping")
+            {
+                onResult();
+            }
+            else
+            {
+                setFault(JsonRpc::Fault::MethodNotFound, "Method not found");
+                onFault(_fault);
+            }
+
+            return;
+        }
+
         beginCall(loop);
     }
-    catch(const JsonRpc::Fault& f)
+    catch(const JsonRpc::Fault& e)
     {
-        setFault(f.code(), f.what());
-        _toolCallOutcome = ToolCallFault;
+        setToolFault(e.code(), e.what());
         _result = 0;
+        onFault(_fault);
+    }
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( JsonRpc::Fault::InternalError, fault.what() );
+        onFault(_fault);
+    }
+    catch(const SerializationError& e)
+    {
+        setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
+        _result = 0;
+        onFault(_fault);
+    }
+    catch(const ConversionError& e)
+    {
+        setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
+        _result = 0;
+        onFault(_fault);
+    }
+}
+
+
+void Responder::onReady()
+{
+    try
+    {
+        _result = endCall();
         onResult();
     }
-    catch(const Remoting::Fault& f)
+    catch(const JsonRpc::Fault& e)
     {
-        setFault(JsonRpc::Fault::InternalError, f.what());
-        onFault();
-    }
-    catch(const std::exception& e)
-    {
-        setFault(JsonRpc::Fault::InternalError, e.what());
-        _toolCallOutcome = ToolCallError;
+        setToolFault(e.code(), e.what());
         _result = 0;
-        onResult();
+
+        onFault(_fault);
+    }
+    catch(const Remoting::Fault& e)
+    {
+        setToolFault(JsonRpc::Fault::InternalError, e.what());
+        _result = 0;
+
+        onFault(_fault);
+    }
+    catch(const SerializationError& e)
+    {
+        setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
+        _result = 0;
+
+        onFault(_fault);
+    }
+    catch(const ConversionError& e)
+    {
+        setToolFault(JsonRpc::Fault::InvalidParameters, e.what());
+        _result = 0;
+
+        onFault(_fault);
     }
 }
 
@@ -308,66 +373,19 @@ void Responder::beginResult(std::ostream& os)
 {
     _resultOs = &os;
 
-    assert(_hasId);
+    if( isNotification() )
+        return;
 
     if(_method == "tools/call")
     {
-        if(_toolCallOutcome == ToolCallFault)
-        {
-            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-               << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\""
-               << _faultMessage
-               << "\"}],\"isError\":true}}";
-        }
-        else if(_toolCallOutcome == ToolCallError)
-        {
-            os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-               << ",\"error\":{\"code\":" << _faultCode << ",\"message\":\""
-               << _faultMessage
-               << "\"}}";
-        }
-        else
-        {
-            try
-            {
-                const ContentType& content = _tool->content();
+        const ContentType& content = _tool->content();
+        _contentFormatter = content.getFormatter();
 
-                os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-                   << ",\"result\":{\"content\":[";// do this in ContentFormatter::beginContent
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
+           << ",\"result\":{\"content\":[";
 
-                if(_contentFormatter)
-                {
-                    content.releaseFormatter(_contentFormatter);
-                    _contentFormatter = 0;
-                    _resultFormatter = 0;
-                }
-
-                _contentFormatter = content.getFormatter();
-
-                _resultFormatter = &_contentFormatter->beginContent(os);
-                _result->beginFormat(*_resultFormatter);
-            }
-            catch(const JsonRpc::Fault& f)
-            {
-                setFault(f.code(), f.what());
-                _result = 0;
-
-                os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-                   << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\""
-                   << f.what()
-                   << "\"}],\"isError\":true}}";
-            }
-            catch(const std::exception& e)
-            {
-                setFault(JsonRpc::Fault::InternalError, e.what());
-                _result = 0;
-
-                os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-                   << ",\"error\":{\"code\":" << JsonRpc::Fault::InternalError << ",\"message\":\""
-                   << e.what()
-                   << "\"}}";
-            }
-        }
+        _resultFormatter = &_contentFormatter->beginContent(os);
+        _result->beginFormat(*_resultFormatter);
     }
     else if(_method == "initialize")
     {
@@ -389,11 +407,32 @@ void Responder::beginResult(std::ostream& os)
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":{}}";
         _result = 0;
     }
+}
+
+
+void Responder::beginFault(std::ostream& os, const JsonRpc::Fault& fault)
+{
+    _resultOs = &os;
+
+    if( isNotification() )
+        return;
+
+    if(_method == "tools/call" && _isToolFault)
+    {
+        // Tool execution failed -> MCP isError response
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
+           << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"";
+        writeJsonString(os, fault.what());
+        os << "\"}],\"isError\":true}}";
+        _result = 0;
+    }
     else
     {
-        // Unknown method
+        // Protocol-level fault -> JSON-RPC error
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-           << ",\"error\":{\"code\":" << JsonRpc::Fault::MethodNotFound << ",\"message\":\"Method not found\"}}";
+           << ",\"error\":{\"code\":" << fault.code() << ",\"message\":\"";
+        writeJsonString(os, fault.what());
+        os << "\"}}";
         _result = 0;
     }
 }
@@ -415,13 +454,13 @@ bool Responder::advanceResult()
 
 void Responder::finishResult()
 {
-    if(_resultOs && _method == "tools/call" && ! _isFault)
+    if(_resultOs && _method == "tools/call" && ! _isFault && _contentFormatter)
     {
         _contentFormatter->finishContent(*_resultOs);
         _tool->content().releaseFormatter(_contentFormatter);
         _contentFormatter = 0;
         _resultFormatter = 0;
-        *_resultOs << "],\"isError\":false}}"; // do this in ContentFormatter::finishContent
+        *_resultOs << "],\"isError\":false}}";
     }
     else if(_contentFormatter)
     {
@@ -438,35 +477,52 @@ void Responder::finishResult()
 void Responder::formatResult(std::ostream& os)
 {
     beginResult(os);
+
+    while( ! advanceResult() )
+        ;
+
+        finishResult();
+}
+
+
+void Responder::formatFault(std::ostream& os)
+{
+    beginFault(os, _fault);
     while( ! advanceResult() )
         ;
     finishResult();
 }
 
 
-void Responder::formatFault(std::ostream& os)
+void Responder::writeJsonString(std::ostream& os, const std::string& value)
 {
-    os << "{\"jsonrpc\":\"2.0\",\"id\":";
-    if(_hasId)
-        os << _id;
-    else
-        os << "null";
-    os << ",\"error\":{\"code\":" << _faultCode
-       << ",\"message\":\"" << _faultMessage << "\"}}";
-}
+    for(std::string::const_iterator it = value.begin(); it != value.end(); ++it)
+    {
+        unsigned char c = static_cast<unsigned char>(*it);
 
-
-bool Responder::isFailed() const
-{
-    return _isFault;
-}
-
-
-void Responder::setFault(int code, const std::string& msg)
-{
-    _isFault = true;
-    _faultCode = code;
-    _faultMessage = msg;
+        switch(c)
+        {
+            case '"':  os << "\\\""; break;
+            case '\\': os << "\\\\"; break;
+            case '\b': os << "\\b";  break;
+            case '\f': os << "\\f";  break;
+            case '\n': os << "\\n";  break;
+            case '\r': os << "\\r";  break;
+            case '\t': os << "\\t";  break;
+            default:
+                if(c < 0x20)
+                {
+                    char buf[7];
+                    std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+                    os << buf;
+                }
+                else
+                {
+                    os << c;
+                }
+                break;
+        }
+    }
 }
 
 

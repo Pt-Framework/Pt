@@ -33,6 +33,7 @@
 #include <Pt/Mcp/Api.h>
 #include <Pt/Mcp/ToolDeclaration.h>
 #include <Pt/Json/JsonWriter.h>
+#include <Pt/JsonRpc/Fault.h>
 #include <Pt/JsonRpc/Formatter.h>
 #include <Pt/Json/JsonReader.h>
 #include <Pt/Remoting/Responder.h>
@@ -65,10 +66,6 @@ class Responder : public Remoting::Responder
 
     ~Responder();
 
-    /** @brief Resets the responder state.
-    */
-    void reset();
-
     /** @brief Begin parsing a request from a stream.
     */
     void beginMessage(std::istream& is);
@@ -86,9 +83,13 @@ class Responder : public Remoting::Responder
     */
     void finishMessage(System::EventLoop& loop);
 
-    /** @brief Begin formatting the response.
+    /** @brief Begin formatting a successful response.
     */
     void beginResult(std::ostream& os);
+
+    /** @brief Begin formatting a fault response.
+    */
+    void beginFault(std::ostream& os, const JsonRpc::Fault& fault);
 
     /** @brief Continue formatting the result.
         @return true if the result is fully formatted.
@@ -113,6 +114,10 @@ class Responder : public Remoting::Responder
     */
     void setFault(int code, const std::string& msg);
 
+    /** @brief Fails the responder because of a tool execution error.
+    */
+    void setToolFault(int code, const std::string& msg);
+
     const std::string& method() const
     { return _method; }
 
@@ -133,9 +138,9 @@ class Responder : public Remoting::Responder
     /** @brief Called when a fault has occurred and should be formatted and sent.
 
         Derived classes override this to set transport-specific headers and
-        write the error response by calling beginResult().
+        write the error response by calling beginFault().
     */
-    virtual void onFault() {}
+    virtual void onFault(const JsonRpc::Fault& fault) = 0;
 
     /** @brief Called when the result is ready to be formatted and sent.
 
@@ -143,7 +148,7 @@ class Responder : public Remoting::Responder
         write the response by calling beginResult(), advanceResult() and
         finishResult().
     */
-    virtual void onResult() {}
+    virtual void onResult() = 0;
 
   public:
     /** @brief Feeds one JSON node to the state machine.
@@ -182,13 +187,7 @@ class Responder : public Remoting::Responder
 
     void writeBufferedArgumentNode(const Json::Node& node);
 
-    //! @internal Distinguishes a tool-level fault/error from a successful call for beginResult().
-    enum ToolCallOutcome
-    {
-        ToolCallOk,
-        ToolCallFault,
-        ToolCallError
-    };
+    void writeJsonString(std::ostream& os, const std::string& value);
 
     const ToolDeclaration* _decl;
     const Tool* _tool;
@@ -202,10 +201,9 @@ class Responder : public Remoting::Responder
     std::string _currentParamName;
     std::string _requestedVersion;
     bool _isFault;
+    bool _isToolFault;
     bool _hasId;
-    int _faultCode;
-    std::string _faultMessage;
-    ToolCallOutcome _toolCallOutcome;
+    JsonRpc::Fault _fault;
 
     int _bufferedArgumentsDepth;
     std::string _bufferedArgumentsJson;

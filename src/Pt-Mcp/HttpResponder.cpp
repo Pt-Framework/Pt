@@ -31,7 +31,6 @@
 #include <Pt/Mcp/HttpService.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
-#include <Pt/JsonRpc/Fault.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Uri.h>
 #include <Pt/SerializationError.h>
@@ -118,7 +117,6 @@ void HttpResponder::onReadRequest(Http::Request& /*request*/,
                                   System::EventLoop& /*loop*/)
 {
     parseMessage();
-
     Http::Responder::setReady(false);
 }
 
@@ -135,24 +133,22 @@ void HttpResponder::onBeginReply(const Http::Request& request,
         return;
     }
 
-    // Check MCP-Protocol-Version header for non-initialize requests (MCP spec MUST)
-    if( ! isNotification() && method() != "initialize")
+    if( isNotification() )
+    {
+        reply.setStatus(202, "Accepted");
+        setFinished(true);
+        return;
+    }
+
+    // Check MCP-Protocol-Version header for non-initialize calls (MCP spec MUST)
+    if( method() != "initialize")
     {
         const char* mcpVersion = request.header().get("MCP-Protocol-Version");
         if( mcpVersion && ! ToolDeclaration::isSupportedVersion(mcpVersion) )
         {
             _httpStatus = 400;
             setFault(JsonRpc::Fault::InvalidRequest, "Unsupported MCP-Protocol-Version");
-            finishMessage(loop);
-            return;
         }
-    }
-
-    if( isNotification() )
-    {
-        reply.setStatus(202, "Accepted");
-        setFinished(true);
-        return;
     }
 
     finishMessage(loop);
@@ -174,8 +170,10 @@ bool HttpResponder::advanceReply(Http::Reply& reply)
     {
         while( ! advanceResult() )
         {
-            if(reply.buffer().size() > 8192)
+            if( reply.buffer().size() > 8192 )
+            {
                 return false;
+            }
         }
 
         finishResult();
@@ -204,7 +202,6 @@ void HttpResponder::onResult()
 
     _reply->setStatus(_httpStatus, "");
     _reply->header().set("Content-Type", "application/json");
-
     beginResult(_reply->body());
 
     bool isFinished = advanceReply(*_reply);
@@ -212,17 +209,19 @@ void HttpResponder::onResult()
 }
 
 
-void HttpResponder::onFault()
+void HttpResponder::onFault(const JsonRpc::Fault& fault)
 {
     assert(_reply);
 
     if(_httpStatus == 405)
         _reply->header().set("Allow", "POST");
+
     _reply->setStatus(_httpStatus, "");
     _reply->header().set("Content-Type", "application/json");
+    beginFault(_reply->body(), fault);
 
-    formatFault(_reply->body());
-    setFinished(true);
+    bool isFinished = advanceReply(*_reply);
+    setFinished(isFinished);
 }
 
 } // namespace Mcp

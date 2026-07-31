@@ -33,6 +33,8 @@
 #include <Pt/Mcp/HttpService.h>
 #include <Pt/Mcp/ToolDeclaration.h>
 #include <Pt/Remoting/ServiceDefinition.h>
+#include <Pt/Remoting/Fault.h>
+#include <Pt/JsonRpc/Fault.h>
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
@@ -92,6 +94,11 @@ class HttpTest : public Pt::Unit::TestSuite
         registerMethod("VersionNegotiation", *this, &HttpTest::VersionNegotiation);
         registerMethod("InvalidMcpVersionHeader", *this, &HttpTest::InvalidMcpVersionHeader);
         registerMethod("ImageContent", *this, &HttpTest::ImageContent);
+        registerMethod("MissingIdRequest", *this, &HttpTest::MissingIdRequest);
+        registerMethod("ToolThrowsJsonRpcFault", *this, &HttpTest::ToolThrowsJsonRpcFault);
+        registerMethod("ToolThrowsRemotingFault", *this, &HttpTest::ToolThrowsRemotingFault);
+        registerMethod("InvalidJson", *this, &HttpTest::InvalidJson);
+        registerMethod("UnknownMethod", *this, &HttpTest::UnknownMethod);
     }
 
     void failTest()
@@ -557,6 +564,181 @@ class HttpTest : public Pt::Unit::TestSuite
         PngImage img;
         img.bytes = "PNGDATA";
         return img;
+    }
+
+    int throwJsonRpcFault()
+    {
+        throw Pt::JsonRpc::Fault("tool says \"stop\"", Pt::JsonRpc::Fault::InvalidParameters);
+    }
+
+    int throwRemotingFault()
+    {
+        throw Pt::Remoting::Fault("remoting fault");
+    }
+
+    ////////////////////////////////////////////////////////////
+    // MissingIdRequest — notification without id produces no response
+    //
+    void MissingIdRequest()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("add", *this, &HttpTest::addInt);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("add", "Add two integers")
+            .addParam("a", Pt::Mcp::integerType())
+            .addParam("b", Pt::Mcp::integerType());
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 202);
+        PT_UNIT_ASSERT(_reply.empty());
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // ToolThrowsJsonRpcFault
+    //
+    void ToolThrowsJsonRpcFault()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("throwFault", *this, &HttpTest::throwJsonRpcFault);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("throwFault", "Throws a JsonRpc::Fault");
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":30,"
+               "\"params\":{\"name\":\"throwFault\",\"arguments\":{}}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"isError\":true") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("tool says \\\"stop\\\"") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // ToolThrowsRemotingFault
+    //
+    void ToolThrowsRemotingFault()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        serviceDef.registerProcedure("throwRemoting", *this, &HttpTest::throwRemotingFault);
+
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        decl.addTool("throwRemoting", "Throws a Remoting::Fault");
+
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":32,"
+               "\"params\":{\"name\":\"throwRemoting\",\"arguments\":{}}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"isError\":true") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("remoting fault") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // InvalidJson
+    //
+    void InvalidJson()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":50 not json";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"error\"") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("\"code\":-32700") != std::string::npos);
+
+        delete _server;
+        _server = 0;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // UnknownMethod
+    //
+    void UnknownMethod()
+    {
+        Pt::Remoting::ServiceDefinition serviceDef;
+        Pt::Mcp::ToolDeclaration decl("test-server", "1.0.0");
+        Pt::Mcp::HttpService mcpService(serviceDef, decl);
+        Pt::Http::MapUrl servlet("/mcp", mcpService);
+        _server->addServlet(servlet);
+
+        Pt::Http::Client client(*_loop);
+        client.setHost( Pt::Net::Endpoint::ip4Loopback(8079) );
+        client.replyReceived() += Pt::slot(*this, &HttpTest::onReplyReceived);
+        client.request().setMethod("POST");
+        client.request().setUrl("/mcp");
+        client.request().body()
+            << "{\"jsonrpc\":\"2.0\",\"method\":\"tools/unknown\",\"id\":40,\"params\":{}}";
+        client.beginReceive();
+
+        _loop->run();
+
+        PT_UNIT_ASSERT(client.reply().statusCode() == 200);
+        PT_UNIT_ASSERT(_reply.find("\"error\"") != std::string::npos);
+        PT_UNIT_ASSERT(_reply.find("\"code\":-32601") != std::string::npos);
+
+        delete _server;
+        _server = 0;
     }
 };
 

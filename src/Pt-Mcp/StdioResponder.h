@@ -56,7 +56,7 @@ class StdioResponder : public Responder
   protected:
     void onResult() override;
 
-    void onFault() override;
+    void onFault(const JsonRpc::Fault& fault) override;
 
   private:
     System::EventLoop& _loop;

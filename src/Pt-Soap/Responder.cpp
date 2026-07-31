@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -37,28 +37,28 @@
 
 namespace {
 
-static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ', 
-    'v', 'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0' , '"', ' ', 
-    'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
+static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ',
+    'v', 'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0' , '"', ' ',
+    'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"',
     '?', '>' };
 
 static const Pt::Char SOAP_REPLY_BEGIN_1_1[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
                                                'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
-                                               '"', 'h', 't', 't', 'p', ':', '/', '/', 's', 'c', 'h', 'e', 'm', 'a', 's', '.', 
-                                               'x', 'm', 'l', 's', 'o', 'a', 'p', '.', 'o', 'r', 'g', '/', 's', 'o', 'a', 'p', 
+                                               '"', 'h', 't', 't', 'p', ':', '/', '/', 's', 'c', 'h', 'e', 'm', 'a', 's', '.',
+                                               'x', 'm', 'l', 's', 'o', 'a', 'p', '.', 'o', 'r', 'g', '/', 's', 'o', 'a', 'p',
                                                '/', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '/', '"', '>',
                                               '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
 
 static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
                                                'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
-                                               '"', 'h', 't', 't', 'p', ':', '/', '/', 
-                                               'w', 'w', 'w', '.', 'w', '3', '.', 'o', 'r', 'g', 
-                                               '/', '2', '0', '0', '3', '/', '0', '5', '/', 's', 'o', 'a', 'p', 
+                                               '"', 'h', 't', 't', 'p', ':', '/', '/',
+                                               'w', 'w', 'w', '.', 'w', '3', '.', 'o', 'r', 'g',
+                                               '/', '2', '0', '0', '3', '/', '0', '5', '/', 's', 'o', 'a', 'p',
                                                '-', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '"', '>',
                                               '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
 
 static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>',
-                                            '<', '/', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' }; 
+                                            '<', '/', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' };
 
 static const Pt::Char SOAP_FAULT[]  = { '<', 's', 'o', 'a', 'p', ':', 'F', 'a', 'u', 'l', 't',  '>' };
 static const Pt::Char SOAP_FAULT_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'F', 'a', 'u', 'l', 't',  '>' };
@@ -83,7 +83,8 @@ namespace Pt {
 
 namespace Soap {
 
-Responder::Responder(const ServiceDeclaration& decl, Remoting::ServiceDefinition& def)
+Responder::Responder(const ServiceDeclaration& decl,
+                     Remoting::ServiceDefinition& def)
 : Remoting::Responder(def)
 , _serviceDecl( &decl )
 , _op(0)
@@ -112,6 +113,13 @@ bool Responder::isFailed() const
 }
 
 
+void Responder::setFault(int rc, const char* msg)
+{
+    _fault = Fault(msg, rc);
+    _isFault = true;
+}
+
+
 void Responder::onCancel()
 {
     _state = OnBegin;
@@ -127,7 +135,7 @@ void Responder::onCancel()
 void Responder::beginMessage(std::istream& is)
 {
     cancel();
-    
+
     _bin.reset(is);
 }
 
@@ -138,7 +146,7 @@ bool Responder::parseMessage()
     {
         if( this->isFailed() )
             return true;
-        
+
         for(;;)
         {
             const Xml::Node* node = _reader.advance();
@@ -146,7 +154,7 @@ bool Responder::parseMessage()
             {
                 break;
             }
-            
+
             bool done = this->advance(*node);
             if(done)
             {
@@ -155,6 +163,10 @@ bool Responder::parseMessage()
         }
 
         return false;
+    }
+    catch(const Fault& fault)
+    {
+        setFault(fault.rc(), fault.what() );
     }
     catch(const Xml::XmlError& error)
     {
@@ -167,10 +179,6 @@ bool Responder::parseMessage()
     catch(const ConversionError& error)
     {
         setFault(3, error.what() );
-    }
-    catch(const Fault& fault)
-    {
-        setFault(fault.rc(), fault.what() );
     }
     catch(const Remoting::Fault& fault)
     {
@@ -212,7 +220,7 @@ void Responder::finishMessage(System::EventLoop& loop)
 
 
 void Responder::onReady()
-{    
+{
     try
     {
         _result = endCall(); // throws Fault
@@ -222,7 +230,7 @@ void Responder::onReady()
     {
         setFault( fault.rc(), fault.what() );
         onFault(_fault);
-    } 
+    }
     catch(const Remoting::Fault& fault)
     {
         setFault( Fault::InternalXmlRpcError, fault.what() );
@@ -245,7 +253,7 @@ void Responder::beginResult(std::ostream& os)
     const Pt::String& outName = _op->outputName();
     Pt::String targetNamespace = _serviceDecl->targetNamespace().c_str();
     _ts << '<' << outName << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
-    
+
     const Parameter* param = _op->getOutput();
     assert(param);
     if( ! param)
@@ -267,7 +275,7 @@ void Responder::beginFault(std::ostream& os, const Fault& fault)
     _ts.clear();
     _ts.discard();
     _ts.attach(os);
-    
+
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
     _ts.write( SOAP_REPLY_BEGIN, sizeof(SOAP_REPLY_BEGIN)/sizeof(Char) );
 
@@ -319,13 +327,6 @@ void Responder::finishResult()
 }
 
 
-void Responder::setFault(int rc, const char* msg)
-{
-    _fault = Fault(msg, rc);
-    _isFault = true;
-}
-
-
 bool Responder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
@@ -352,7 +353,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
                 if( se.name().name() == L"Body" )
                     _state = OnBody;
             }
-            
+
             break;
         }
 
@@ -399,7 +400,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
 
                 _formatter.setParameter(*param);
                 _formatter.beginParse(**_args);
-                
+
                 _state = OnParam;
                 break;
             }
@@ -426,7 +427,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
                 assert( Xml::toEndElement(node).name().local() == L"Body" );
                 _state = OnBodyEnd;
             }
-            
+
             break;
         }
 
@@ -437,7 +438,7 @@ bool Responder::advance(const Pt::Xml::Node& node)
                 assert( Xml::toEndElement(node).name().local() == L"Envelope" );
                 _state = OnEnvelopeEnd;
             }
-            
+
             break;
         }
 

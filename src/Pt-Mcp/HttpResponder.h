@@ -72,7 +72,7 @@ class HttpResponder : public Http::Responder
     void onResult() override;
 
     // inheritdoc
-    void onFault() override;
+    void onFault(const JsonRpc::Fault& fault) override;
 
   private:
     bool advanceReply(Http::Reply& reply);
