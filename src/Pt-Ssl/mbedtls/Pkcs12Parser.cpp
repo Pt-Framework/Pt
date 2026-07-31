@@ -403,7 +403,7 @@ bool parsePkcs12(const unsigned char* data,
 
     std::ostringstream seedBuilder;
     const Pt::int64_t ticks = Pt::System::Clock::getSystemTicks().toUSecs();
-    seedBuilder << "Pt.Ssl.Context" << ticks;
+    seedBuilder << "Pt.Ssl.Pkcs12" << &ctr_drbg<< ticks;
     std::string seed = seedBuilder.str();
     const unsigned char* seedData = reinterpret_cast<const unsigned char*>( seed.data() );
 
