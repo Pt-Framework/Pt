@@ -55,18 +55,18 @@ ContentFormatter::~ContentFormatter()
 Pt::Formatter& ContentFormatter::beginContent(std::ostream& os)
 {
     _os = &os;
-    os << "{\"content\":[";
+    os << "\"content\":[";
     onBeginContent();
 
     return onBeginFormat();
 }
 
 
-void ContentFormatter::finishContent(std::ostream& os, bool isError)
+void ContentFormatter::finishContent(std::ostream& os)
 {
     _os = &os;
     onFinishContent();
-    os << "],\"isError\":" << (isError ? "true" : "false") << '}';
+    os << ']';
 }
 
 

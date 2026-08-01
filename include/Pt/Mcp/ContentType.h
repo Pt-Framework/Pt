@@ -61,11 +61,10 @@ class PT_MCP_API ContentFormatter
     */
     Pt::Formatter& beginContent(std::ostream& os);
 
-    /** @brief Flushes buffered output and writes the closing bytes to @a os.
-
-        @param isError If true, the MCP result is marked as an error.
+    /** @brief Flushes buffered output and writes the closing bytes of the
+        content array to @a os.
     */
-    void finishContent(std::ostream& os, bool isError = false);
+    void finishContent(std::ostream& os);
 
   protected:
     ContentFormatter();

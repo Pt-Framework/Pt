@@ -68,50 +68,7 @@ void YamlTextFormatter::writeIndent(int depth)
 void YamlTextFormatter::writeText(const Pt::Char* s, std::size_t n)
 {
     Pt::TextOStream& tos = textOutput();
-    const Pt::Char* begin = s;
-    const Pt::Char* end = s + n;
-
-    while(begin < end)
-    {
-        const Pt::Char* p = begin;
-        while(p < end)
-        {
-            Pt::uint32_t cp = p->value();
-            if(cp == '"' || cp == '\\' || cp < 0x20)
-                break;
-            ++p;
-        }
-
-        if(p > begin)
-            tos.write(begin, p - begin);
-
-        if(p == end)
-            break;
-
-        Pt::uint32_t ch = p->value();
-        switch(ch)
-        {
-            case '"':  tos << Pt::Char('\\') << Pt::Char('"'); break;
-            case '\\': tos << Pt::Char('\\') << Pt::Char('\\'); break;
-            case '\n': tos << Pt::Char('\\') << Pt::Char('n'); break;
-            case '\r': tos << Pt::Char('\\') << Pt::Char('r'); break;
-            case '\t': tos << Pt::Char('\\') << Pt::Char('t'); break;
-            default:
-            {
-                Pt::Char buf[6];
-                buf[0] = Pt::Char('\\');
-                buf[1] = Pt::Char('u');
-                buf[2] = Pt::Char("0123456789abcdef"[(ch >> 12) & 0xF]);
-                buf[3] = Pt::Char("0123456789abcdef"[(ch >> 8) & 0xF]);
-                buf[4] = Pt::Char("0123456789abcdef"[(ch >> 4) & 0xF]);
-                buf[5] = Pt::Char("0123456789abcdef"[ch & 0xF]);
-                tos.write(buf, 6);
-                break;
-            }
-        }
-
-        begin = p + 1;
-    }
+    escape(tos, s, n);
 }
 
 

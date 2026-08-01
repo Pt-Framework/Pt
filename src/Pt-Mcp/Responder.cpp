@@ -372,7 +372,7 @@ void Responder::beginResult(std::ostream& os)
     {
         _contentFormatter = _tool->content().getFormatter();
 
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":{";
 
         _resultFormatter = &_contentFormatter->beginContent(os);
         _result->beginFormat(*_resultFormatter);
@@ -447,7 +447,7 @@ void Responder::finishResult()
     if(_contentFormatter)
     {
         _contentFormatter->finishContent(*_os);
-        *_os << '}';
+        *_os << ",\"isError\":false}}";
 
         _tool->content().releaseFormatter(_contentFormatter);
         _contentFormatter = 0;

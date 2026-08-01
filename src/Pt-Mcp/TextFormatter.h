@@ -55,6 +55,8 @@ class TextFormatter : public ContentFormatter
     */
     static void escape(std::ostream& os, const char* text);
 
+    static void escape(Pt::TextOStream& tos, const Pt::Char* s, std::size_t n);
+
   protected:
     void onBeginContent() override;
 

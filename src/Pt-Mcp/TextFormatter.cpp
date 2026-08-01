@@ -64,32 +64,62 @@ void TextFormatter::onFinishContent()
 
 void TextFormatter::escape(std::ostream& os, const char* text)
 {
-    for(const char* p = text; *p != '\0'; ++p)
-    {
-        unsigned char c = static_cast<unsigned char>(*p);
+    Pt::String s = Utf8Codec::decode(text);
 
-        switch(c)
+    Utf8Codec utf8(1);
+    Pt::TextOStream tos(&utf8);
+    tos.attach(os);
+
+    escape(tos, s.c_str(), s.size());
+    tos.flush();
+}
+
+
+void TextFormatter::escape(Pt::TextOStream& tos, const Pt::Char* s, std::size_t n)
+{
+    const Pt::Char* begin = s;
+    const Pt::Char* end = s + n;
+
+    while(begin < end)
+    {
+        const Pt::Char* p = begin;
+        while(p < end)
         {
-            case '"':  os << "\\\""; break;
-            case '\\': os << "\\\\"; break;
-            case '\b': os << "\\b";  break;
-            case '\f': os << "\\f";  break;
-            case '\n': os << "\\n";  break;
-            case '\r': os << "\\r";  break;
-            case '\t': os << "\\t";  break;
-            default:
-                if(c < 0x20)
-                {
-                    char buf[7];
-                    std::snprintf(buf, sizeof(buf), "\\u%04x", c);
-                    os << buf;
-                }
-                else
-                {
-                    os << c;
-                }
+            Pt::uint32_t cp = p->value();
+            if(cp == '"' || cp == '\\' || cp < 0x20)
                 break;
+            ++p;
         }
+
+        if(p > begin)
+            tos.write(begin, p - begin);
+
+        if(p == end)
+            break;
+
+        Pt::uint32_t ch = p->value();
+        switch(ch)
+        {
+            case '"':  tos << Pt::Char('\\') << Pt::Char('"'); break;
+            case '\\': tos << Pt::Char('\\') << Pt::Char('\\'); break;
+            case '\n': tos << Pt::Char('\\') << Pt::Char('n'); break;
+            case '\r': tos << Pt::Char('\\') << Pt::Char('r'); break;
+            case '\t': tos << Pt::Char('\\') << Pt::Char('t'); break;
+            default:
+            {
+                Pt::Char buf[6];
+                buf[0] = Pt::Char('\\');
+                buf[1] = Pt::Char('u');
+                buf[2] = Pt::Char("0123456789abcdef"[(ch >> 12) & 0xF]);
+                buf[3] = Pt::Char("0123456789abcdef"[(ch >> 8) & 0xF]);
+                buf[4] = Pt::Char("0123456789abcdef"[(ch >> 4) & 0xF]);
+                buf[5] = Pt::Char("0123456789abcdef"[ch & 0xF]);
+                tos.write(buf, 6);
+                break;
+            }
+        }
+
+        begin = p + 1;
     }
 }
 
