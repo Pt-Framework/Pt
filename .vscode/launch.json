@@ -16,7 +16,7 @@
             "name": "Pt-Forms-Demo (Windows) - Debug",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/debug/Pt-Mcp-test.exe",
+            "program": "${workspaceFolder}/build/debug/Pt-Forms-Demo.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
