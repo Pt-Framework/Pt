@@ -187,8 +187,6 @@ class Responder : public Remoting::Responder
 
     void writeBufferedArgumentNode(const Json::Node& node);
 
-    void writeJsonString(std::ostream& os, const std::string& value);
-
     const ToolDeclaration* _decl;
     const Tool* _tool;
     Pt::Utf8Codec _utf8;

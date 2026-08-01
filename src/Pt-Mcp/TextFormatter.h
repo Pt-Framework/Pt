@@ -31,125 +31,43 @@
 #define PT_MCP_TEXTFORMATTER_H
 
 #include <Pt/Mcp/ContentType.h>
-#include <Pt/String.h>
-#include <Pt/IOStream.h>
 #include <Pt/TextStream.h>
 #include <Pt/Utf8Codec.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Mcp {
 
-/** @brief Formats decomposed values as compact YAML-like text.
+/** @brief Base class for text-based MCP content formatters.
 
-    Used by TextContent to serialize tool results for MCP responses.
-    Scalars are written directly, structs as key: value pairs, and
-    arrays as dash-prefixed lists with 2-space indentation. Owns its
-    own UTF-8 text stream so it can be created and destroyed per
-    request without sharing state with other instances.
+    Owns the UTF-8 text stream attached to the output stream owned by
+    ContentFormatter. Concrete subclasses inherit Pt::Formatter and
+    use textOutput() to write their specific text style.
 */
-class TextFormatter : public Pt::Formatter, public ContentFormatter
+class TextFormatter : public ContentFormatter
 {
   public:
     TextFormatter();
 
     ~TextFormatter();
 
-    Pt::Formatter& beginContent(std::ostream& os) override;
-
-    void finishContent(std::ostream& os) override;
+    /** @brief Escapes a string for embedding in JSON text.
+    */
+    static void escape(std::ostream& os, const char* text);
 
   protected:
-    void onAddString(const char* name, const char* type,
-                     const Pt::Char* value, const char* id) override;
+    void onBeginContent() override;
 
-    void onAddBinary(const char* name, const char* type,
-                     const char* value, std::size_t length,
-                     const char* id) override;
+    void onFinishContent() override;
 
-    void onAddBool(const char* name, bool value,
-                   const char* id) override;
-
-    void onAddChar(const char* name, const Pt::Char& value,
-                   const char* id) override;
-
-    void onAddInt8(const char* name, Pt::int8_t value,
-                   const char* id) override;
-
-    void onAddInt16(const char* name, Pt::int16_t value,
-                    const char* id) override;
-
-    void onAddInt32(const char* name, Pt::int32_t value,
-                    const char* id) override;
-
-    void onAddInt64(const char* name, Pt::int64_t value,
-                    const char* id) override;
-
-    void onAddUInt8(const char* name, Pt::uint8_t value,
-                    const char* id) override;
-
-    void onAddUInt16(const char* name, Pt::uint16_t value,
-                     const char* id) override;
-
-    void onAddUInt32(const char* name, Pt::uint32_t value,
-                     const char* id) override;
-
-    void onAddUInt64(const char* name, Pt::uint64_t value,
-                     const char* id) override;
-
-    void onAddFloat(const char* name, float value,
-                    const char* id) override;
-
-    void onAddDouble(const char* name, double value,
-                     const char* id) override;
-
-    void onAddLongDouble(const char* name, long double value,
-                         const char* id) override;
-
-    void onAddReference(const char* name, const char* refId) override;
-
-    void onBeginStruct(const char* name, const char* type,
-                       const char* id) override;
-
-    void onBeginMember(const char* name) override;
-
-    void onFinishMember() override;
-
-    void onFinishStruct() override;
-
-    void onBeginSequence(const char* name, const char* type,
-                         const char* id) override;
-
-    void onBeginElement() override;
-
-    void onFinishElement() override;
-
-    void onFinishSequence() override;
-
-    void onBeginParse(Composer& /*composer*/) override
-    {}
-
-    bool onParseSome() override
-    { return true; }
-
-    void onParse() override
-    {}
+    /** @brief Returns the UTF-8 text stream used to write content.
+    */
+    Pt::TextOStream& textOutput()
+    { return _tos; }
 
   private:
-    void writeIndent();
-    void writeEscaped(const Pt::Char* s, std::size_t n);
-    void writeInt(Pt::int64_t value);
-    void writeUInt(Pt::uint64_t value);
-    void writeDouble(double value);
-
-    std::basic_ostream<Pt::Char>* _os;
     Pt::Utf8Codec _utf8;
     Pt::TextOStream _tos;
-    int  _depth;
-    bool _afterKey;
-    bool _firstMember;
-    bool _firstElement;
 };
 
 } // namespace Mcp

@@ -29,6 +29,7 @@
 
 #include <Pt/Mcp/ContentType.h>
 #include "TextFormatter.h"
+#include "YamlTextFormatter.h"
 #include "ImageFormatter.h"
 #include <ostream>
 
@@ -36,15 +37,43 @@ namespace Pt {
 
 namespace Mcp {
 
-
 //
 // ContentFormatter
 //
+
+ContentFormatter::ContentFormatter()
+: _os(0)
+{
+}
+
 
 ContentFormatter::~ContentFormatter()
 {
 }
 
+
+Pt::Formatter& ContentFormatter::beginContent(std::ostream& os)
+{
+    _os = &os;
+    os << "{\"content\":[";
+    onBeginContent();
+
+    return onBeginFormat();
+}
+
+
+void ContentFormatter::finishContent(std::ostream& os, bool isError)
+{
+    _os = &os;
+    onFinishContent();
+    os << "],\"isError\":" << (isError ? "true" : "false") << '}';
+}
+
+
+void ContentFormatter::write(const char* s, std::size_t n)
+{
+    _os->write(s, n);
+}
 
 //
 // ContentType
@@ -53,13 +82,6 @@ ContentFormatter::~ContentFormatter()
 ContentType::~ContentType()
 {
 }
-
-
-void ContentType::releaseFormatter(ContentFormatter* formatter) const
-{
-    delete formatter;
-}
-
 
 //
 // TextContent
@@ -72,7 +94,13 @@ TextContent::TextContent()
 
 ContentFormatter* TextContent::getFormatter() const
 {
-    return new TextFormatter();
+    return new YamlTextFormatter();
+}
+
+
+void TextContent::releaseFormatter(ContentFormatter* formatter) const
+{
+    delete formatter;
 }
 
 
@@ -81,7 +109,6 @@ const TextContent& textContent()
     static TextContent tc;
     return tc;
 }
-
 
 //
 // ImageContent
@@ -96,6 +123,12 @@ ImageContent::ImageContent(const std::string& mimeType)
 ContentFormatter* ImageContent::getFormatter() const
 {
     return new ImageFormatter(_mimeType);
+}
+
+
+void ImageContent::releaseFormatter(ContentFormatter* formatter) const
+{
+    delete formatter;
 }
 
 

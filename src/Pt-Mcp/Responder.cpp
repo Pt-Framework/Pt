@@ -28,6 +28,8 @@
  */
 
 #include "Responder.h"
+#include "TextFormatter.h"
+
 #include <Pt/JsonRpc/Fault.h>
 #include <Pt/Json/Boolean.h>
 #include <Pt/Json/Float.h>
@@ -370,8 +372,7 @@ void Responder::beginResult(std::ostream& os)
     {
         _contentFormatter = _tool->content().getFormatter();
 
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
-           << ",\"result\":{\"content\":[";
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
 
         _resultFormatter = &_contentFormatter->beginContent(os);
         _result->beginFormat(*_resultFormatter);
@@ -391,7 +392,8 @@ void Responder::beginResult(std::ostream& os)
     }
     else if(_method == "ping")
     {
-        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":{}}";
+        os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id << ",\"result\":";
+        os << "{}}";
     }
 }
 
@@ -408,7 +410,7 @@ void Responder::beginFault(std::ostream& os, const JsonRpc::Fault& fault)
         // Tool execution failed -> MCP isError response
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
            << ",\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"";
-        writeJsonString(os, fault.what());
+        TextFormatter::escape(os, fault.what());
         os << "\"}],\"isError\":true}}";
     }
     else
@@ -416,7 +418,7 @@ void Responder::beginFault(std::ostream& os, const JsonRpc::Fault& fault)
         // Protocol-level fault -> JSON-RPC error
         os << "{\"jsonrpc\":\"2.0\",\"id\":" << _id
            << ",\"error\":{\"code\":" << fault.code() << ",\"message\":\"";
-        writeJsonString(os, fault.what());
+        TextFormatter::escape(os, fault.what());
         os << "\"}}";
     }
 
@@ -445,7 +447,7 @@ void Responder::finishResult()
     if(_contentFormatter)
     {
         _contentFormatter->finishContent(*_os);
-        *_os << "],\"isError\":false}}";
+        *_os << '}';
 
         _tool->content().releaseFormatter(_contentFormatter);
         _contentFormatter = 0;
@@ -476,38 +478,6 @@ void Responder::formatFault(std::ostream& os)
         ;
 
     finishResult();
-}
-
-
-void Responder::writeJsonString(std::ostream& os, const std::string& value)
-{
-    for(std::string::const_iterator it = value.begin(); it != value.end(); ++it)
-    {
-        unsigned char c = static_cast<unsigned char>(*it);
-
-        switch(c)
-        {
-            case '"':  os << "\\\""; break;
-            case '\\': os << "\\\\"; break;
-            case '\b': os << "\\b";  break;
-            case '\f': os << "\\f";  break;
-            case '\n': os << "\\n";  break;
-            case '\r': os << "\\r";  break;
-            case '\t': os << "\\t";  break;
-            default:
-                if(c < 0x20)
-                {
-                    char buf[7];
-                    std::snprintf(buf, sizeof(buf), "\\u%04x", c);
-                    os << buf;
-                }
-                else
-                {
-                    os << c;
-                }
-                break;
-        }
-    }
 }
 
 

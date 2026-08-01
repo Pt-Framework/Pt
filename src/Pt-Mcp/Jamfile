@@ -12,7 +12,8 @@ PT_MCP_SOURCES = ContentType.cpp
                  StdioService.cpp
                  TextFormatter.cpp
                  ToolDeclaration.cpp
-                 Type.cpp ;
+                 Type.cpp
+                 YamlTextFormatter.cpp ;
 
 SharedLibrary Pt-Mcp : $(PT_MCP_SOURCES) ;
 LinkSharedLibraries Pt-Mcp : Pt-JsonRpc Pt-Json Pt-Http Pt-Net Pt-Remoting Pt-System Pt ;

@@ -40,18 +40,23 @@ ImageFormatter::ImageFormatter(const std::string& mimeType)
 }
 
 
-Pt::Formatter& ImageFormatter::beginContent(std::ostream& os)
+void ImageFormatter::onBeginContent()
 {
-    os << "{\"type\":\"image\",\"data\":\"";
-    _b64.attach(os);
+    output() << "{\"type\":\"image\",\"data\":\"";
+    _b64.attach(output());
+}
+
+
+Pt::Formatter& ImageFormatter::onBeginFormat()
+{
     return *this;
 }
 
 
-void ImageFormatter::finishContent(std::ostream& os)
+void ImageFormatter::onFinishContent()
 {
     _b64.flush();
-    os << "\",\"mimeType\":\"" << _mimeType << "\"}";
+    output() << "\",\"mimeType\":\"" << _mimeType << "\"}";
 }
 
 

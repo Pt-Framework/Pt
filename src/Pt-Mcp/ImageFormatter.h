@@ -52,11 +52,13 @@ class ImageFormatter : public Pt::Formatter, public ContentFormatter
   public:
     explicit ImageFormatter(const std::string& mimeType);
 
-    Pt::Formatter& beginContent(std::ostream& os) override;
-
-    void finishContent(std::ostream& os) override;
-
   protected:
+    void onBeginContent() override;
+
+    Pt::Formatter& onBeginFormat() override;
+
+    void onFinishContent() override;
+
     void onAddBinary(const char* name, const char* type,
                      const char* value, std::size_t length, const char* id) override;
 

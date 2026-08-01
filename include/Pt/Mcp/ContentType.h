@@ -59,13 +59,46 @@ class PT_MCP_API ContentFormatter
     /** @brief Writes the opening bytes of the content block to @a os and
         returns the Formatter the result is to be decomposed into.
     */
-    virtual Pt::Formatter& beginContent(std::ostream& os) = 0;
+    Pt::Formatter& beginContent(std::ostream& os);
 
     /** @brief Flushes buffered output and writes the closing bytes to @a os.
-    */
-    virtual void finishContent(std::ostream& os) = 0;
-};
 
+        @param isError If true, the MCP result is marked as an error.
+    */
+    void finishContent(std::ostream& os, bool isError = false);
+
+  protected:
+    ContentFormatter();
+
+    /** @brief Writes the opening bytes of the concrete content block.
+
+        Implementations write the type-specific opening JSON, e.g.
+        {"type":"text","text":".
+    */
+    virtual void onBeginContent() = 0;
+
+    /** @brief Returns the Formatter the decomposed result is drained into.
+
+        Called by beginContent() after onBeginContent() has written the opening bytes.
+    */
+    virtual Pt::Formatter& onBeginFormat() = 0;
+
+    /** @brief Writes the closing bytes of the concrete content block.
+    */
+    virtual void onFinishContent() = 0;
+
+    /** @brief Writes raw bytes to the output stream.
+    */
+    void write(const char* s, std::size_t n);
+
+    /** @brief Returns the output stream passed to beginContent().
+    */
+    std::ostream& output() const
+    { return *_os; }
+
+  private:
+    std::ostream* _os;
+};
 
 /** @brief Formats a tool result as MCP content.
 
@@ -104,7 +137,7 @@ class PT_MCP_API ContentType
         not write anything - call formatter->finishFormat() first to
         complete the content block normally.
     */
-    void releaseFormatter(ContentFormatter* formatter) const;
+    virtual void releaseFormatter(ContentFormatter* formatter) const = 0;
 };
 
 
@@ -119,6 +152,8 @@ class PT_MCP_API TextContent : public ContentType
     TextContent();
 
     ContentFormatter* getFormatter() const override;
+
+    void releaseFormatter(ContentFormatter* formatter) const override;
 };
 
 PT_MCP_API const TextContent& textContent();
@@ -137,6 +172,8 @@ class PT_MCP_API ImageContent : public ContentType
     explicit ImageContent(const std::string& mimeType = "image/png");
 
     ContentFormatter* getFormatter() const override;
+
+    void releaseFormatter(ContentFormatter* formatter) const override;
 
   private:
     std::string _mimeType;
