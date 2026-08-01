@@ -59,7 +59,7 @@ description: "Coding Styles and Guidelines"
   - Class Layout: Indent `public`/`private` by 4 spaces from the `class` brace.
   - Initializers: Break constructor initializers before commas; do not pack them.
   - Two Blank Lines between member function definitions in .cpp files.
-  - Two Blank Linesb before undocumented class/struct declarations in headers.
+  - Two Blank Lines before undocumented class/struct declarations in headers.
 
 - Types & Symbols:
   - Pointers/References: Left-aligned (e.g., `Type* ptr`).
