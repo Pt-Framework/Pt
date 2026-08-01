@@ -46,7 +46,7 @@ concrete `XxxPixelBase` subclass.
   on any `BasicImage<ImageFormat>`).
 - **`Color` (= `Argb32Color`)** is the default 8-bit color type.
   Use it unless you need higher precision.
-- **`ColorF`** is the 16-bit floating-point color type. Required when 
+- **`ColorF`** is the 16-bit floating-point color type. Required when
   precision matters (e.g. gradients, blending).
 
 ## Adding a New Pixel Format
@@ -59,7 +59,6 @@ When adding a new format `Xxx`:
    `ConstPixelLike` (see `Pixel.h` for the full requirements).
 3. Create the format class `Xxx` with `Pixel`/`ConstPixel` typedefs
    and static helpers (`getColorF`, `assign`, `fill`, etc.).
-. Verify the new pixel type satisfies the concepts (if building with
+4. Verify the new pixel type satisfies the concepts (if building with
    C++20) by instantiating `static_assert(PixelLike<XxxPixel>)` in a
    test.
-
