@@ -19,7 +19,7 @@ Pt is a C++ framework for high-performance, multi-platform apps from one codebas
 ## Task Specific Instructions
 
 Before acting, choose the **smallest** set of modules that match the task
-(usually 1–3). Read each chosen file **fully once**. Then act.
+(usually 1–4). Read each chosen file **fully once**. Then act.
 
 - Do **not** load modules “just in case”.
 - Do **not** re-read a module already loaded in this session.
@@ -27,6 +27,10 @@ Before acting, choose the **smallest** set of modules that match the task
 - Do **not** invent conventions from memory; the file is authoritative.
 
 ### Instructions Index
+
+Read the matching file explicitly whenever its topic applies to the task, even
+if it has an `applyTo` pattern that may already auto-attach - never assume its
+content is in context without having read it.
 
 - For Coding guidelines & style, directory layout, writing and reviewing code read:
   `.github/instructions/coding.instructions.md`
