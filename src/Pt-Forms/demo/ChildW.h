@@ -32,7 +32,7 @@ class ChildW : public Forms::Window
 {
     public:
         ChildW(const std::string& title);
-        
+
         ~ChildW();
 
         DockingLayout& layout()

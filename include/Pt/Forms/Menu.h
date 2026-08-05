@@ -54,9 +54,9 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 
     public:
         Menu();
-    
+
         virtual ~Menu();
-        
+
         double iconWidth() const;
 
         const Pt::Gfx::Brush& background() const;
@@ -65,7 +65,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 
         const Pt::Gfx::Pen& contour() const;
 
-        void setContour(const Pt::Gfx::Pen& p);     
+        void setContour(const Pt::Gfx::Pen& p);
 
         void addItem(MenuItem& item);
 
@@ -74,7 +74,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
         void removeItem(MenuItem& item);
 
         void removeItem(MenuSubItem& item);
-        
+
     protected:
         //Pt::Forms::Popup
         virtual void onInvalidate();
@@ -93,7 +93,7 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 
         virtual void onRenderBackground( const Pt::Forms::StyleOptions& options, Pt::Forms::Painter& painter,
                                          const Pt::Gfx::RectF& rect) const;
-       
+
        //MenuBase
         virtual void onAddMenu(MenuSubItem& item);
 

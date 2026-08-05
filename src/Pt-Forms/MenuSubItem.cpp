@@ -51,17 +51,17 @@ void MenuSubItem::setMenu(Menu* menu)
 
     if( _menu)
     {
-        _menu->setParentItem(this);   
-        
+        _menu->setParentItem(this);
+
         if (_parentMenu)
             _parentMenu->removeMenu(*this);
-    }    
+    }
 }
 
 const std::vector<Key> MenuSubItem::onGetShortcuts()
 {
     std::vector<Key> sck = MenuItemBase::onGetShortcuts();
-    
+
     if(_menu == 0)
         return sck;
 
@@ -150,11 +150,11 @@ void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
-    
+
     Forms::Painter painter(context);
     painter.setClip(rect);
-    
-    
+
+
     // background
     bool highlight = this->isHighlighted();
     if (highlight)
@@ -162,9 +162,9 @@ void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
         painter.setBrush(_brush);
         painter.fillRect(rect);
     }
-    
-    
-    // icon    
+
+
+    // icon
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
 
@@ -176,7 +176,7 @@ void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
     painter.setCompositionMode(prevMode);
 
 
-    // item text    
+    // item text
     painter.setFont(_font);
     painter.setPen(_textPen);
 
@@ -189,8 +189,8 @@ void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
     painter.drawText(textPos, _text);
 
-    
-    // shortcut text    
+
+    // shortcut text
     const Pt::Forms::Key* sk = shortcut();
     if(sk)
     {
@@ -204,9 +204,9 @@ void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
         painter.drawText(skPos, skText);
     }
-    
-    
-    // menu indicator    
+
+
+    // menu indicator
     static const double indicatorWidth = 5.0;
 
     double x = this->size().width() - indicatorWidth - this->padding().right();
@@ -223,7 +223,7 @@ void MenuSubItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
     // separator
     if (_hasSeparator)
-    {       
+    {
         Pt::Gfx::PointF from(textX, size().height());
         Pt::Gfx::PointF to(size().width(), size().height());
 

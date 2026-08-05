@@ -40,7 +40,7 @@ namespace Pt {
 namespace Forms {
 
 MenuBarItem::MenuBarItem()
-{            
+{
 }
 
 
@@ -64,9 +64,9 @@ Pt::Gfx::SizeF MenuBarItem::onMeasure(const  Pt::Forms::SizePolicy& policy)
 
 
 void MenuBarItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
-{    
+{
     MenuItemBase::onPaint(context,rect);
-    
+
     const  Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
 
@@ -93,7 +93,7 @@ void MenuBarItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
         painter.drawLine(Pt::Gfx::PointF(x2, y1), Pt::Gfx::PointF(x2, y2));
     }
 
-    // item text    
+    // item text
     painter.setFont(_font);
     Pt::Gfx::TextMetrics fm = painter.textMetrics(_text);
     Pt::Gfx::FontMetrics fontMet = painter.fontMetrics();

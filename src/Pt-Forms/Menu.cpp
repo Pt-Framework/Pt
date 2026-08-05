@@ -45,7 +45,7 @@ Menu::Menu()
 , _layout(Direction::Top)
 , _iconWidth(0)
 {
-    setContent(&_layout);    
+    setContent(&_layout);
 }
 
 
@@ -57,20 +57,20 @@ Menu::~Menu()
 void Menu::addItem(MenuItem& item)
 {
    _layout.addItem(item);
- 
+
 }
 
 void Menu::addItem(MenuSubItem& item)
 {
     _layout.addItem(item);
-    
+
     item.setParentMenu(this);
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
 }
 
 void Menu::removeItem(MenuItem& item)
 {
-    _layout.removeItem(item);    
+    _layout.removeItem(item);
 }
 
 void Menu::removeItem(MenuSubItem& item)
@@ -81,7 +81,7 @@ void Menu::removeItem(MenuSubItem& item)
 }
 
 void Menu::onItemTriggered(MenuItemBase& item)
-{    
+{
     MenuSubItem* smi =dynamic_cast<MenuSubItem*>(&item);
 
     assert(smi!= 0);
@@ -100,7 +100,7 @@ void Menu::onItemTriggered(MenuItemBase& item)
         Pt::Forms::SizePolicy policy(Pt::Forms::SizePolicy::Preferred, Pt::Forms::SizePolicy::Preferred);
         //menu->setAutoSize(policy);
         menu->autoSize(policy);
-        
+
         menu->setAbove(true);
         menu->show();
     }
@@ -211,14 +211,14 @@ void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
     {
         painter.drawRect(borderRect);
         return;
-    }        
+    }
 
     const MenuBarItem * mbi = dynamic_cast<const MenuBarItem*>(p);
 
     if (mbi == 0)
     {
         painter.drawRect(borderRect);
-    
+
         return;
     }
 
@@ -227,7 +227,7 @@ void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
         painter.drawRect(borderRect);
         return;
     }
-    
+
     const double firstWidth = p->size().width();
     const double x1 = borderRect.x();
     const double y1 = borderRect.y();
@@ -238,13 +238,13 @@ void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
     painter.drawLine(Pt::Gfx::PointF(x1 + firstWidth, y1), Pt::Gfx::PointF(x2, y1));
     painter.drawLine(Pt::Gfx::PointF(x2, y1), Pt::Gfx::PointF(x2, y2));
     painter.drawLine(Pt::Gfx::PointF(x2, y2), Pt::Gfx::PointF(x1, y2));
-    painter.drawLine(Pt::Gfx::PointF(x1, y2), Pt::Gfx::PointF(x1, y1));            
-    
+    painter.drawLine(Pt::Gfx::PointF(x1, y2), Pt::Gfx::PointF(x1, y1));
+
 }
 
-void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options, 
+void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options,
                               Painter& painter, const Pt::Gfx::RectF& rect) const
-{    
+{
     Pt::Gfx::SizeF size = this->size();
 
     size -= 1;
@@ -288,7 +288,7 @@ void Menu::onProcessMouseEvent(const Pt::Forms::MouseEvent& ev)
             Pt::Forms::Popup::onProcessMouseEvent(ev);
         else
             menu->processEvent(ev);
-        
+
         return;
     }
     Pt::Forms::Popup::onProcessMouseEvent(ev);
@@ -303,7 +303,7 @@ void Menu::onShowEvent(const Pt::Forms::ShowEvent& ev)
     if (mi)
     {
         if( ev.visible() )
-            mi->openMenu();  
+            mi->openMenu();
         else
             mi->closeMenu();
     }

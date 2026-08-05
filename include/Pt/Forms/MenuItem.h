@@ -38,13 +38,13 @@ namespace Forms {
 class Menu;
 
 class PT_FORMS_API MenuItem : public MenuItemBase
-{    
+{
     typedef MenuItemBase Base;
 
-    public:        
+    public:
         MenuItem();
-    
-        virtual ~MenuItem();       
+
+        virtual ~MenuItem();
 };
 
 }}

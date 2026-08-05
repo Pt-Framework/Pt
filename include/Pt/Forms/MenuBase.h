@@ -91,7 +91,7 @@ class PT_FORMS_API MenuBase
         }
 
     protected:
-      
+
         virtual void onCloseMenu(MenuSubItem& item) = 0;
 
         virtual void onOpenMenu(MenuSubItem& item) = 0;

@@ -128,7 +128,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          ProgressBarStyle.cpp
                          PushButton.cpp
                          Responder.cpp
-                         Screen.cpp 
+                         Screen.cpp
                          ScrollBar.cpp
                          ScrollBarStyle.cpp
                          ScrollView.cpp

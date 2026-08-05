@@ -80,7 +80,7 @@ void MenuBar::setContour(const Pt::Gfx::Pen& p)
 
 
 void MenuBar::addItem(MenuBarItem& item)
-{    
+{
     _layout.addItem(item);
 
     if(item.menu())
@@ -92,7 +92,7 @@ void MenuBar::addItem(MenuBarItem& item)
 
 
 void MenuBar::removeItem(MenuBarItem& item)
-{    
+{
     _layout.removeItem(item);
 
     item.triggered() -= Pt::slot(*this, &MenuBar::onItemClicked);
@@ -100,7 +100,7 @@ void MenuBar::removeItem(MenuBarItem& item)
     item.setParentMenu(0);
 
     if(_currentItem == &item)
-        _currentItem = 0;     
+        _currentItem = 0;
 }
 
 void MenuBar::onAddMenu(MenuSubItem& item)
@@ -114,7 +114,7 @@ void MenuBar::onRemoveMenu(MenuSubItem& item)
 }
 
 Pt::Forms::Widget* MenuBar::onFindMenu(const Pt::Gfx::PointF& screenPos)
-{ 
+{
     if( ! isVisible() )
         return 0;
 
@@ -142,9 +142,9 @@ void MenuBar::onOpenMenu(MenuSubItem& item)
         if(_currentItem->menu())
             _currentItem->menu()->close();
     }
-    
+
     _currentItem = &item;
-    
+
 }
 
 
@@ -155,7 +155,7 @@ void MenuBar::onCloseMenu(MenuSubItem& item)
         _currentItem = 0;
         //setCapture(false);
     }
-    
+
     invalidate();
 }
 
@@ -177,7 +177,7 @@ void MenuBar::onItemClicked(MenuItemBase& item)
         return;
 
     if( ! menu->isVisible() )
-    {     
+    {
         Pt::Gfx::PointF menuPos( 0, item.size().height() );
         menuPos = item.toGlobal(menuPos);
         menu->move(menuPos);
@@ -202,7 +202,7 @@ void MenuBar::onInvalidate()
 
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
     const Pt::Forms::Style& style = Pt::Forms::Application::instance().style();
-    
+
     _brush = background();
     _pen = contour();
 }
@@ -216,7 +216,7 @@ Pt::Gfx::SizeF MenuBar::onMeasure(const Pt::Forms::SizePolicy& policy)
     Pt::Forms::SizePolicy contentPolicy = policy;
     contentPolicy.setWidth( policy.size().width() - hspace );
     contentPolicy.setHeight( policy.size().height() - vspace );
-        
+
     _layout.measure(contentPolicy);
     return _layout.preferredSize();
 }
@@ -225,11 +225,11 @@ Pt::Gfx::SizeF MenuBar::onMeasure(const Pt::Forms::SizePolicy& policy)
 void MenuBar::onLayout(const Pt::Gfx::RectF& rect)
 {
     Base::onLayout(rect);
-    
 
-    Pt::Gfx::PointF pos(padding().left() + _layout.margin().left(), 
+
+    Pt::Gfx::PointF pos(padding().left() + _layout.margin().left(),
                     padding().top()  + _layout.margin().top());
-        
+
     double hspace = padding().leftRight() + _layout.margin().leftRight();
     double vspace = padding().topBottom() + _layout.margin().topBottom();
 
@@ -253,7 +253,7 @@ void MenuBar::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
     painter.setBrush(_brush);
     painter.fillRect(rect);
-    
+
 }
 
 
@@ -267,7 +267,7 @@ void MenuBar::onProcessMouseEvent(const Pt::Forms::MouseEvent& ev)
             Base::onProcessMouseEvent(ev);
         else
             menu->processEvent(ev);
-        
+
         return;
     }
 
@@ -280,7 +280,7 @@ void MenuBar::onProcessMouseEvent(const Pt::Forms::MouseEvent& ev)
 
 
 bool MenuBar::onMouseEvent(const Pt::Forms::MouseEvent& ev)
-{ 
+{
     if( _currentItem && ev.isPress() )
     {
         _currentItem->closeMenu();
@@ -291,7 +291,7 @@ bool MenuBar::onMouseEvent(const Pt::Forms::MouseEvent& ev)
 
 
 bool MenuBar::onTouchEvent(const Pt::Forms::TouchEvent& ev)
-{ 
+{
     if( _currentItem && ev.isPress() )
     {
         _currentItem->closeMenu();

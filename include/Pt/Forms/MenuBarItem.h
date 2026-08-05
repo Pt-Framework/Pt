@@ -43,7 +43,7 @@ namespace Forms {
 class MenuBar;
 
 class PT_FORMS_API MenuBarItem : public MenuSubItem
-{    
+{
     public:
         MenuBarItem();
 
@@ -58,5 +58,3 @@ class PT_FORMS_API MenuBarItem : public MenuSubItem
 }}
 
 #endif
-
-
