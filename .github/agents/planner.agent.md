@@ -8,7 +8,7 @@ model: ["Claude Sonnet 5", "GPT-5.5"]
 handoffs:
   - label: "Start Implementation"
     agent: Developer
-    prompt: "Implement the plan above."
+    prompt: "Plan is ready. Start implementation."
     send: false
 ---
 
@@ -22,6 +22,7 @@ or editing any code yourself.
 - Follow the matching project instructions referenced by `AGENTS.md`.
 - Produce an ordered implementation plan with files, symbols, checks, and open decisions.
 - Ask the user to confirm the plan before handing off to the Developer.
+- Hand off to the Developer.
 
 ## Constraints
 - DO NOT edit any file.
@@ -34,7 +35,6 @@ or editing any code yourself.
 3. Identify affected headers, sources, build files, symbols, and verification steps.
 4. Draft an ordered, numbered plan. Call out open decisions with alternatives and
    a short reason for each.
-5. Ask the user to confirm the plan before handoff.
 
 ## Output Format
 - Affected modules, files, and symbols

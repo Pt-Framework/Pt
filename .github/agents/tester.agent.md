@@ -11,7 +11,7 @@ handoffs:
     send: false
   - label: "Report Failures"
     agent: Developer
-    prompt: "Fix the following failing tests:"
+    prompt: "Tests failed. Fix the failed tests."
     send: false
 ---
 
@@ -25,6 +25,8 @@ project's C++ modules, and report pass/fail precisely.
 - Build and run the relevant test executable directly.
 - Report commands, exit codes, and failure details precisely.
 - Follow the matching test and build instructions referenced by `AGENTS.md`.
+- Hand off to the Developer if the tests failed.
+- Hand off to the Reviewer if the tests passed.
 
 ## Constraints
 - DO NOT change implementation behavior; only add/adjust tests unless a fix is
@@ -36,9 +38,9 @@ project's C++ modules, and report pass/fail precisely.
 2. Add or update the required tests and registrations.
 3. Build and run the relevant documented test target or executable.
 4. Report the command, exit code, and relevant failure details.
-5. If tests pass, or no tests are needed for this change, hand off to the
-   Reviewer with a note that no changes were required. If tests fail, hand off
-   to the Developer with the exact failure details
+5. End the report by stating the next handoff:
+  - Tests pass -> recommend the **Reviewer**.
+  - Tests fail -> recommend the **Developer**.
 
 ## Output Format
 - Tests added/changed (suite and method names)

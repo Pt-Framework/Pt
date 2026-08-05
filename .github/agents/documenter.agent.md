@@ -7,7 +7,7 @@ model: [ "Claude Sonnet 5" ]
 handoffs:
   - label: "Request Final Sign-off"
     agent: Reviewer
-    prompt: "Docs updated for the changed headers. Please give final sign-off on the documentation."
+    prompt: "Docs updated. Give final sign-off on the documentation."
     send: false
 ---
 
@@ -31,8 +31,6 @@ comments in the project's C++ headers after implementation review.
 1. Identify the public headers changed by the reviewed feature.
 2. Apply the documented API documentation rules for the changed headers.
 3. Add missing documentation comments and correct outdated or incorrect ones.
-4. Hand off to the Reviewer for sign-off even if no documentation changes were
-   needed; state that explicitly in the handoff.
 
 ## Output Format
 - List of headers and symbols documented/corrected
