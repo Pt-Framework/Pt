@@ -26,7 +26,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-#include <Pt/Forms/MenuBaseItem.h>
+#include <Pt/Forms/MenuItemBase.h>
 #include <Pt/Forms/Menu.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/PaintContext.h>
@@ -37,7 +37,7 @@
 namespace Pt {
 namespace Forms {
 
-MenuBaseItem::MenuBaseItem()
+MenuItemBase::MenuItemBase()
 : _iconWidth(0)
 , _text("(empty)")
 , _hasSeparator(false)
@@ -49,7 +49,7 @@ MenuBaseItem::MenuBaseItem()
     setMargin(0);
 }
 
-Pt::String MenuBaseItem::shortcutText(const Pt::Forms::Key& key)
+Pt::String MenuItemBase::shortcutText(const Pt::Forms::Key& key)
 {
     Pt::String text;
 
@@ -98,63 +98,63 @@ Pt::String MenuBaseItem::shortcutText(const Pt::Forms::Key& key)
 }
 
 
-MenuBaseItem::~MenuBaseItem()
+MenuItemBase::~MenuItemBase()
 {
 }
 
 
-const Pt::String& MenuBaseItem::text() const
+const Pt::String& MenuItemBase::text() const
 {
     return _text;
 }
 
 
-void MenuBaseItem::setText(const Pt::String& t)
+void MenuItemBase::setText(const Pt::String& t)
 {
     _text = t;
     invalidate();
 }
 
 
-const Pt::Gfx::Image& MenuBaseItem::icon() const
+const Pt::Gfx::Image& MenuItemBase::icon() const
 {
     return _icon;
 }
 
 
-void MenuBaseItem::setIcon(const Pt::Gfx::Image& img)
+void MenuItemBase::setIcon(const Pt::Gfx::Image& img)
 {
     _icon = img;
     invalidate();
 }
 
 
-double MenuBaseItem::iconPadding() const
+double MenuItemBase::iconPadding() const
 {
     return _iconWidth;
 }
 
 
-void MenuBaseItem::setIconPadding(double w)
+void MenuItemBase::setIconPadding(double w)
 {
     _iconWidth = std::max<double>(w, _icon.width());
 }
 
 
-Pt::Signal<MenuBaseItem&>& MenuBaseItem::triggered()
+Pt::Signal<MenuItemBase&>& MenuItemBase::triggered()
 {
     return _triggered;
 }
 
 
-const Pt::Gfx::Brush& MenuBaseItem::background() const
+const Pt::Gfx::Brush& MenuItemBase::background() const
 {
     return _background ? *_background
         : Pt::Forms::Application::instance().styleOptions().background();
 }
 
 
-void MenuBaseItem::setBackground(const Pt::Gfx::Brush& b)
+void MenuItemBase::setBackground(const Pt::Gfx::Brush& b)
 {
     _background.reset(new Pt::Gfx::Brush(b));
     _overrides |= OverrideBackground;
@@ -162,14 +162,14 @@ void MenuBaseItem::setBackground(const Pt::Gfx::Brush& b)
 }
 
 
-const Pt::Gfx::Pen& MenuBaseItem::contour() const
+const Pt::Gfx::Pen& MenuItemBase::contour() const
 {
     return _contour ? *_contour
         : Pt::Forms::Application::instance().styleOptions().contour();
 }
 
 
-void MenuBaseItem::setContour(const Pt::Gfx::Pen& p)
+void MenuItemBase::setContour(const Pt::Gfx::Pen& p)
 {
     _contour.reset(new Pt::Gfx::Pen(p));
     _overrides |= OverrideContour;
@@ -177,14 +177,14 @@ void MenuBaseItem::setContour(const Pt::Gfx::Pen& p)
 }
 
 
-const Pt::Gfx::Color& MenuBaseItem::textColor() const
+const Pt::Gfx::Color& MenuItemBase::textColor() const
 {
     return _textColor ? *_textColor
         : Pt::Forms::Application::instance().styleOptions().textColor();
 }
 
 
-void MenuBaseItem::setTextColor(const Pt::Gfx::Color& color)
+void MenuItemBase::setTextColor(const Pt::Gfx::Color& color)
 {
     _textColor.reset(new Pt::Gfx::Color(color));
     _overrides |= OverrideTextColor;
@@ -192,13 +192,13 @@ void MenuBaseItem::setTextColor(const Pt::Gfx::Color& color)
 }
 
 
-const Pt::Gfx::Font& MenuBaseItem::font() const
+const Pt::Gfx::Font& MenuItemBase::font() const
 {
     return _font;
 }
 
 
-void MenuBaseItem::setFont(const Pt::Gfx::Font& font)
+void MenuItemBase::setFont(const Pt::Gfx::Font& font)
 {
     _customFont = font;
     _overrides |= OverrideFontAll;
@@ -207,7 +207,7 @@ void MenuBaseItem::setFont(const Pt::Gfx::Font& font)
 }
 
 
-Pt::Gfx::Font MenuBaseItem::getFont() const
+Pt::Gfx::Font MenuItemBase::getFont() const
 {
     const Pt::Gfx::Font& base = Pt::Forms::Application::instance().styleOptions().font();
 
@@ -234,7 +234,7 @@ Pt::Gfx::Font MenuBaseItem::getFont() const
 }
 
 
-void MenuBaseItem::setFontSize(std::size_t size)
+void MenuItemBase::setFontSize(std::size_t size)
 {
     _customFont = _customFont.withSize(size);
     _overrides |= OverrideFontSize;
@@ -243,7 +243,7 @@ void MenuBaseItem::setFontSize(std::size_t size)
 }
 
 
-void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
+void MenuItemBase::setFontWeight(Pt::Gfx::Font::Weight weight)
 {
     _customFont = _customFont.withWeight(weight);
     _overrides |= OverrideFontWeight;
@@ -252,7 +252,7 @@ void MenuBaseItem::setFontWeight(Pt::Gfx::Font::Weight weight)
 }
 
 
-void MenuBaseItem::setFontSlant(Pt::Gfx::Font::Slant slant)
+void MenuItemBase::setFontSlant(Pt::Gfx::Font::Slant slant)
 {
     _customFont = _customFont.withSlant(slant);
     _overrides |= OverrideFontSlant;
@@ -262,14 +262,14 @@ void MenuBaseItem::setFontSlant(Pt::Gfx::Font::Slant slant)
 
 
 
-void MenuBaseItem::onTriggered()
+void MenuItemBase::onTriggered()
 {
     _triggered.send(*this);
 }
 
 
 
-void MenuBaseItem::onShortcut(const Pt::Forms::Key& key)
+void MenuItemBase::onShortcut(const Pt::Forms::Key& key)
 {
     Base::onShortcut(key);
 
@@ -277,7 +277,7 @@ void MenuBaseItem::onShortcut(const Pt::Forms::Key& key)
 }
 
 
-void MenuBaseItem::onInvalidate()
+void MenuItemBase::onInvalidate()
 {
     Base::onInvalidate();
 
@@ -298,7 +298,7 @@ void MenuBaseItem::onInvalidate()
 }
 
 
-Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
+Pt::Gfx::SizeF MenuItemBase::onMeasure(const Pt::Forms::SizePolicy& policy)
 {
     Painter _painter(surface());
     _painter.setFont(_font);
@@ -325,7 +325,7 @@ Pt::Gfx::SizeF MenuBaseItem::onMeasure(const Pt::Forms::SizePolicy& policy)
 }
 
 
-void MenuBaseItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
+void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {
     const Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 
@@ -401,7 +401,7 @@ void MenuBaseItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 }
 
 
-bool MenuBaseItem::onMouseEvent(const Pt::Forms::MouseEvent& ev)
+bool MenuItemBase::onMouseEvent(const Pt::Forms::MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
@@ -416,7 +416,7 @@ bool MenuBaseItem::onMouseEvent(const Pt::Forms::MouseEvent& ev)
 }
 
 
-bool MenuBaseItem::onTouchEvent(const Pt::Forms::TouchEvent& ev)
+bool MenuItemBase::onTouchEvent(const Pt::Forms::TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
@@ -431,7 +431,7 @@ bool MenuBaseItem::onTouchEvent(const Pt::Forms::TouchEvent& ev)
 }
 
 
-bool MenuBaseItem::onEnterEvent( const EnterEvent& ev)
+bool MenuItemBase::onEnterEvent( const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
 
@@ -442,7 +442,7 @@ bool MenuBaseItem::onEnterEvent( const EnterEvent& ev)
 }
 
 
-bool MenuBaseItem::onLeaveEvent(const LeaveEvent& ev)
+bool MenuItemBase::onLeaveEvent(const LeaveEvent& ev)
 {
     Base::onLeaveEvent(ev);
 
