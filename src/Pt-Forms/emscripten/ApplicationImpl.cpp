@@ -31,15 +31,15 @@
 #include "Keycodes.h"
 
 #include <Pt/Forms/Application.h>
-#include <Pt/Forms/ResizeEvent.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 #include <Pt/DateTime.h>
 #include <Pt/Utf8Codec.h>
 
-#include <SDL.h>
 #include <emscripten.h>
+#include <emscripten/threading.h>
+#include <pthread.h>
 
 PT_LOG_DEFINE("Pt.Forms.Application")
 
@@ -48,15 +48,32 @@ namespace Pt {
 namespace Forms {
 
 ApplicationImpl::ApplicationImpl()
-: _lastActivityTime( Pt::System::Clock::getSystemTime() )
+: _exiting(false)
+, _lastActivityTime( Pt::System::Clock::getSystemTime() )
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    // registered with an explicit target thread: under -sPROXY_TO_PTHREAD=1 the
+    // implicit EM_CALLBACK_THREAD_CONTEXT_CALLING_THREAD auto-detection does not
+    // reliably back-proxy DOM events to this worker (events are silently handled
+    // on the browser main thread instead, where this module's code is not loaded)
+    pthread_t self = pthread_self();
+
+    emscripten_set_keydown_callback_on_thread(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, &ApplicationImpl::onKeyDown, self);
+    emscripten_set_keyup_callback_on_thread(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, &ApplicationImpl::onKeyUp, self);
+
+    emscripten_set_mousedown_callback_on_thread(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, &ApplicationImpl::onMouseEvent, self);
+    emscripten_set_mouseup_callback_on_thread(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, &ApplicationImpl::onMouseEvent, self);
+    emscripten_set_mousemove_callback_on_thread(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, &ApplicationImpl::onMouseEvent, self);
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-    SDL_Quit();
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
+
+    emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
+    emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
+    emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
 } 
 
 
@@ -85,7 +102,7 @@ void ApplicationImpl::sendMouseEvent(const MouseEvent& ev)
 
 void ApplicationImpl::nextEvent()
 {
-    //MainLoop::waitNext();
+    this->waitNext();
 }
 
 
@@ -109,26 +126,48 @@ void ApplicationImpl::onReady(System::Selectable& s)
 }
 
 
-void ApplicationImpl::mainLoop(void* arg)
+bool ApplicationImpl::waitNext()
 {
-    ApplicationImpl* app = static_cast<ApplicationImpl*>(arg); 
-    app->processEvents();
+    std::size_t timeout = _timerQueue.processTimers();
+
+    // never wait indefinitely: a worker thread blocked in pthread_cond_wait
+    // cannot service browser input events proxied to it under -sPROXY_TO_PTHREAD=1
+    if(timeout == System::EventLoop::WaitInfinite)
+        timeout = 16;
+
+    {
+        emscripten_current_thread_process_queued_calls();
+
+        System::MutexLock lock(_wakeMutex);
+        _wakeCondition.wait( _wakeMutex, static_cast<unsigned int>(timeout) );
+    }
+
+    this->processEvents();
+
+    return ! _exiting;
 }
 
 
 void ApplicationImpl::onRun()
 {
-    emscripten_set_main_loop_arg(&ApplicationImpl::mainLoop, this, 0, true);
+    while( this->waitNext() )
+        ;                        
 }
+
+
+void ApplicationImpl::run()
+{
+    this->onRun();
+}
+
 
 
 void ApplicationImpl::onExit()
 {
+    _exiting = true;
+
     _eventQueue.exit();
     wake();
-
-    PT_LOG_DEBUG("emscripten_cancel_main_loop");
-    emscripten_cancel_main_loop();
 }
 
 
@@ -147,145 +186,134 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 
 void ApplicationImpl::onWake()
 {
+    System::MutexLock lock(_wakeMutex);
+    _wakeCondition.signal();
 }
 
 
 void ApplicationImpl::onProcessEvents()
 {
+    _eventQueue.processEvents( this->eventReceived() );
+}
+
+
+void ApplicationImpl::dispatchKeyEvent(const EmscriptenKeyboardEvent& e, bool press)
+{
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+
     Screen& screen = Application::instance().screen();
 
-    SDL_Event ev;
-    while( SDL_PollEvent(&ev) > 0 )
+    Key::Modifiers modifiers;
+
+    if(e.shiftKey)
+        modifiers.add(Key::Shift);
+
+    if(e.ctrlKey)
+        modifiers.add(Key::Control);
+
+    if(e.altKey)
+        modifiers.add(Key::Alt);
+
+    if(e.metaKey)
+        modifiers.add(Key::Meta);
+
+    Key key( modifiers, toKeycode(e.code) );
+
+    if(press)
+        _keyEvent.setPress( key, Pt::Char() );
+    else
+        _keyEvent.setRelease( key, Pt::Char() );
+
+    _keyEvent.setWidget(&screen);
+    this->commitEvent(_keyEvent);
+
+    //
+    // NOTE: produces a fake key event with a character since keydown
+    //       does not report composed characters
+    //
+    if(press)
     {
-        if(ev.type == SDL_TEXTINPUT)
+        Pt::String text = Pt::Utf8Codec::decode( e.key, std::strlen(e.key) );
+        if(text.size() == 1)
         {
-            //
-            // NOTE: produces a fake key event with a character since SDL
-            //       does not report characters in key events
-            //
+            Key textKey;
 
-            Pt::String text = Pt::Utf8Codec::decode(ev.text.text, 
-                                                    std::strlen(ev.text.text));
-            if( ! text.empty() )
-            {
-                Key key;
-
-                KeyEvent keyEvent(screen);
-                keyEvent.setPress(key, text[0]);
-                Application::instance().processEvent(keyEvent);
-            }
-        }
-        else if(ev.type == SDL_WINDOWEVENT)
-        {
-            if(ev.window.event == SDL_WINDOWEVENT_RESIZED ||
-                ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED )
-            {
-                Gfx::SizeF to(ev.window.data1, ev.window.data2);
-                to /= screen.scaleFactor();
-
-                ResizeEvent rev(screen, to);
-                Application::instance().processEvent(rev);
-
-                Gfx::RectF updateRect(Gfx::PointF(0, 0), to);
-                screen.repaint(updateRect);
-            }
-        }
-        else if(ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEBUTTONDOWN)
-        {
-            _lastActivityTime = Pt::System::Clock::getSystemTime();
-          
-            double scaling = Application::instance().scaleFactor();
-
-            Gfx::PointF pos(ev.button.x, ev.button.y);
-            pos = pos / scaling;
-
-            _mev.setWidget(&screen);
-            _mev.setPosition(pos);
-          
-            int buttonIdx = ev.button.button;
-            MouseEvent::Button button = buttonIdx == 1 ? MouseEvent::Left :
-                                        buttonIdx == 3 ? MouseEvent::Right :
-                                        MouseEvent::Middle;
-          
-            if( ev.type == SDL_MOUSEBUTTONDOWN )
-              _mev.setPress(button);
-            else
-              _mev.setRelease(button);
-
-          Application::instance().processEvent(_mev);
-        }
-        else if(ev.type == SDL_MOUSEMOTION)
-        {
-            _lastActivityTime = Pt::System::Clock::getSystemTime();
-          
-            double scaling = Application::instance().scaleFactor();
-
-            Gfx::PointF pos(ev.motion.x, ev.motion.y);
-            pos = pos / scaling;
-
-            _mev.setWidget(&screen);
-            _mev.setPosition(pos);
-            _mev.setMove();
-
-            Application::instance().processEvent(_mev);
-        }
-        else if(ev.type == SDL_KEYUP  || ev.type == SDL_KEYDOWN )
-        {
-            _lastActivityTime = Pt::System::Clock::getSystemTime();
-
-            Pt::uint32_t keyCode = toKeycode(ev.key.keysym.sym);
-          
-            Pt::Char ch;
-            Key::Modifiers modifiers;
-
-            if(ev.key.keysym.mod & KMOD_LSHIFT)
-                modifiers.add(Key::Shift);
-          
-            if(ev.key.keysym.mod & KMOD_RSHIFT)
-                modifiers.add(Key::Shift);
-
-            if(ev.key.keysym.mod & KMOD_LCTRL )
-                modifiers.add(Key::Control);
-
-            if(ev.key.keysym.mod & KMOD_RCTRL )
-                modifiers.add(Key::Control);
-
-            if(ev.key.keysym.mod & KMOD_LALT  )
-                modifiers.add(Key::Alt);
-
-            if(ev.key.keysym.mod & KMOD_RALT  )
-                modifiers.add(Key::Alt);
-
-            if(ev.key.keysym.mod & KMOD_LGUI )
-                modifiers.add(Key::Meta);
-
-            if(ev.key.keysym.mod & KMOD_RGUI )
-                modifiers.add(Key::Meta);
-
-            Key key(modifiers, keyCode);
-
-            if( ev.type == SDL_KEYDOWN )
-                _keyEvent.setPress(key, ch);
-            else
-                _keyEvent.setRelease(key, ch);
-
-            _keyEvent.setWidget(&screen);
-
-            Application::instance().processEvent(_keyEvent);
+            KeyEvent textEvent(screen);
+            textEvent.setPress(textKey, text[0]);
+            this->commitEvent(textEvent);
         }
     }
+}
 
-    _eventQueue.processEvents( this->eventReceived() );
+
+void ApplicationImpl::dispatchMouseEvent(const EmscriptenMouseEvent& e, int eventType)
+{ 
+    _lastActivityTime = Pt::System::Clock::getSystemTime();
+
+    Screen& screen = Application::instance().screen();
+    double scaling = Application::instance().scaleFactor();
+
+    Gfx::PointF pos(e.targetX, e.targetY);
+    pos = pos / scaling;
+
+    _mev.setWidget(&screen);
+    _mev.setPosition(pos);
+
+    if(eventType == EMSCRIPTEN_EVENT_MOUSEMOVE)
+    {
+        _mev.setMove();
+    }
+    else
+    {
+        MouseEvent::Button button = e.button == 0 ? MouseEvent::Left :
+                                    e.button == 2 ? MouseEvent::Right :
+                                    MouseEvent::Middle;
+
+        if(eventType == EMSCRIPTEN_EVENT_MOUSEDOWN)
+            _mev.setPress(button);
+        else
+            _mev.setRelease(button);
+    }
+
+    this->commitEvent(_mev);
+}
+
+
+EM_BOOL ApplicationImpl::onKeyDown(int /*eventType*/, const EmscriptenKeyboardEvent* e, void* userData)
+{
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(userData);
+    app->dispatchKeyEvent(*e, true);
+    return true;
+}
+
+
+EM_BOOL ApplicationImpl::onKeyUp(int /*eventType*/, const EmscriptenKeyboardEvent* e, void* userData)
+{
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(userData);
+    app->dispatchKeyEvent(*e, false);
+    return true;
+}
+
+
+EM_BOOL ApplicationImpl::onMouseEvent(int eventType, const EmscriptenMouseEvent* e, void* userData)
+{
+    ApplicationImpl* app = static_cast<ApplicationImpl*>(userData);
+    app->dispatchMouseEvent(*e, eventType);
+    return true;
 }
 
 
 void ApplicationImpl::onAttachTimer(System::Timer& timer)
 {
+    _timerQueue.addTimer(timer);
+    wake();
 }
 
 
 void ApplicationImpl::onDetachTimer(System::Timer& timer)
 {
+    _timerQueue.removeTimer(timer);
+    wake();
 }
 
 } // namespace
