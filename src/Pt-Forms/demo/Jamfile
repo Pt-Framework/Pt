@@ -22,7 +22,7 @@ if $(WITH_BUILTIN_SKIA)
 
 MakeLocate Pt-Forms-Demo : $(PT_OUTPUT_TARGET) ;
 
-if $(TARGET_OS) = wasm
+if $(TARGET_OS) = emscripten
 {
   LinkFlags Pt-Forms-Demo : --preload-file etc/icons@/ ;
 }
