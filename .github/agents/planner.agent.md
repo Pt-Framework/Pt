@@ -6,7 +6,7 @@ tools: [read, search, todo, agent]
 agents: [Explore]
 model: ["Claude Sonnet 5", "GPT-5.5"]
 handoffs:
-  - label: "Start Implementation"
+  - label: "Start Development"
     agent: Developer
     prompt: "Plan is ready. Start implementation."
     send: false
