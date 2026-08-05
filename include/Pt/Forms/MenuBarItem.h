@@ -30,7 +30,7 @@
 #define PT_FORMS_MENUBARITEM_H
 
 #include <Pt/Forms//Api.h>
-#include <Pt/Forms//MenuMenuItem.h>
+#include <Pt/Forms/MenuSubItem.h>
 #include <Pt/Forms/Button.h>
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/FlowLayout.h>
@@ -42,8 +42,8 @@ namespace Forms {
 
 class MenuBar;
 
-class PT_FORMS_API MenuBarItem : public MenuMenuItem
-{    
+class PT_FORMS_API MenuBarItem : public MenuSubItem
+{
     public:
         MenuBarItem();
 
@@ -58,5 +58,3 @@ class PT_FORMS_API MenuBarItem : public MenuMenuItem
 }}
 
 #endif
-
-

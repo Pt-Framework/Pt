@@ -3,7 +3,7 @@ name: "Builder"
 description: "Use when building the full project, verifying current changes, or diagnosing compile/link errors. Read-only plus terminal; never edits files."
 argument-hint: "Ask to build and verify the current changes."
 tools: [read, search, execute]
-model: [ "Claude Haiku 4.5", "Kimi K2.7 Code" ]
+model: [ "Claude Sonnet 5" ]
 handoffs:
   - label: "Fix Build Errors"
     agent: Developer

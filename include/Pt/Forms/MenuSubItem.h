@@ -30,7 +30,8 @@
 #define PT_FORMS_MENUSUBITEM_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/MenuMenuItem.h>
+#include <Pt/Forms/MenuBase.h>
+#include <Pt/Forms/MenuItemBase.h>
 #include <Pt/Forms/Button.h>
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/FlowLayout.h>
@@ -43,20 +44,61 @@ namespace Forms {
 class Menu;
 class MenuBar;
 
-class PT_FORMS_API MenuSubItem : public MenuMenuItem
+class PT_FORMS_API MenuSubItem : public MenuItemBase
 {
+    friend class Menu;
+
     public:
-        typedef MenuMenuItem Base;
+        typedef MenuItemBase Base;
 
     public:
         MenuSubItem();
 
         virtual ~MenuSubItem();
-   
-   protected:
+
+        void setMenu(Menu* menu);
+
+        const Menu* menu() const
+        {
+            return _menu;
+        }
+
+        Menu* menu()
+        {
+            return _menu;
+        }
+
+        void setParentMenu(MenuBase* p)
+        {
+            _parentMenu = p;
+        }
+
+        void cancel();
+
+        void closeMenu();
+
+        void openMenu();
+
+        bool isMenuOpen() const
+        {
+            return _isOpen;
+        }
+
+    protected:
+        virtual const std::vector<Key> onGetShortcuts();
+
+        virtual const std::vector<Pt::Char> onGetMnemonics();
+
+        virtual void onShortcut(const Key& key);
+
+        virtual void onMnemonic(Pt::Char m);
+
         virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& updateRect);
 
-   
+    private:
+        MenuBase* _parentMenu;
+        Menu* _menu;
+        bool _isOpen;
 };
 
 }}

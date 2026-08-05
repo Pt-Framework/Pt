@@ -60,19 +60,19 @@ MainWindow::MainWindow()
 , _scrollContainer2(Forms::Direction::Top)
 {
     setContent(&_workspace);
-    
+
     Pt::Gfx::Image windowIcon;
 
     std::stringstream ss;
     ss.write((const char*)atesionIcon, atesionIconSize);
 
     Pt::Gfx::PngReader reader(ss, windowIcon);
-    
+
     setTitle("Main 1");
     move( Gfx::PointF(80, 80) );
     resize( Gfx::SizeF(900, 750) );
 
-    windowIcon = reader.get();    
+    windowIcon = reader.get();
     setIcon(windowIcon);
 
     //_child2.setTopMost(true);
@@ -185,7 +185,7 @@ MainWindow::MainWindow()
     _menu.setName("All Music");
 
     _item1.setText("Heavy Metal");
-    
+
     Key f3(Key::F3);
     _item1.setShortcut( &f3 );
     _menu.addItem(_item1);
@@ -239,7 +239,7 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::onZoom(MenuBaseItem& item)
+void MainWindow::onZoom(MenuItemBase& item)
 {
     if(item.text() == "100%")
         Application::instance().setScaleFactor(1.0);
@@ -266,7 +266,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
     //Gfx::Bitmap image( Gfx::SizeF(320, 240) );
     //p.begin(image);
     //}
- 
+
     Gfx::Painter painter;
 
     painter.begin(ctx);
@@ -321,7 +321,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 
     sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect( info, img.data(), rowBytes);
     SkCanvas* canvas = surface->getCanvas();
-    
+
     canvas->clear(SK_ColorWHITE);
 
     SkPaint paint;
@@ -351,7 +351,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 
     // Image painter 2
     Pt::Gfx::ImagePainter2  painter2(img);
-    
+
     painter2.setPen(Gfx::Pen(Gfx::Color(0, 255, 00), 10));
 
     Gfx::PointF p3(40, 20);
@@ -385,7 +385,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
     return;
 #endif
 
-    
+
     Gfx::Bitmap imageSurface( Gfx::SizeF(600, 600) );
     Gfx::PaintContext imageContext(imageSurface);
 
@@ -557,7 +557,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 
     Pt::Gfx::Path path;
     path.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(20, 20), Pt::Gfx::SizeF(100, 100)), 10);
-    
+
     path.addRoundedRect(Pt::Gfx::RectF(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(100, 100)), 10);
 
     //imagePainter.fillPath(path);
@@ -623,7 +623,7 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
 #endif
 
     //painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-    
+
     painter.drawImage( Gfx::PointF(10, 30), imageSurface.image() );
 }
 
@@ -635,7 +635,7 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
     if( ev.isRelease(MouseEvent::Right) )
     {
         Gfx::PointF menuPos = this->toGlobal( ev.position() );
-        
+
         _menu.autoSize();
         _menu.move(menuPos);
         _menu.setAbove(true);

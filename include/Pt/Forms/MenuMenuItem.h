@@ -31,7 +31,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/MenuBase.h>
-#include <Pt/Forms/MenuBaseItem.h>
+#include <Pt/Forms/MenuItemBase.h>
 #include <vector>
 
 namespace Pt {
@@ -40,12 +40,12 @@ namespace Forms {
 class Menu;
 class MenuBar;
 
-class PT_FORMS_API MenuMenuItem : public MenuBaseItem
+class PT_FORMS_API MenuMenuItem : public MenuItemBase
 {
     friend class Menu;
 
     public:
-        typedef MenuBaseItem Base;
+        typedef MenuItemBase Base;
 
     public:
         MenuMenuItem();
@@ -72,7 +72,7 @@ class PT_FORMS_API MenuMenuItem : public MenuBaseItem
 
         void cancel();
 
-    
+
         void closeMenu();
 
         void openMenu();

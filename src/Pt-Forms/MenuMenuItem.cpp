@@ -74,17 +74,17 @@ void MenuMenuItem::setMenu(Menu* menu)
 
     if( _menu)
     {
-        _menu->setParentItem(this);   
-        
+        _menu->setParentItem(this);
+
         if (_parentMenu)
             _parentMenu->removeMenu(*this);
-    }    
+    }
 }
 
 const std::vector<Key> MenuMenuItem::onGetShortcuts()
 {
-    std::vector<Key> sck = MenuBaseItem::onGetShortcuts();
-    
+    std::vector<Key> sck = MenuItemBase::onGetShortcuts();
+
     if(_menu == 0)
         return sck;
 
@@ -98,7 +98,7 @@ const std::vector<Key> MenuMenuItem::onGetShortcuts()
 
 const std::vector<Pt::Char> MenuMenuItem::onGetMnemonics()
 {
-    std::vector<Pt::Char> mns = MenuBaseItem::onGetMnemonics();
+    std::vector<Pt::Char> mns = MenuItemBase::onGetMnemonics();
 
     if (_menu == 0)
         return mns;
@@ -119,7 +119,7 @@ void MenuMenuItem::onMnemonic(Pt::Char m)
     {
         if (m == *myMn)
         {
-            MenuBaseItem::onMnemonic(m);
+            MenuItemBase::onMnemonic(m);
             return;
         }
     }
@@ -144,7 +144,7 @@ void MenuMenuItem::onShortcut(const Key& key)
     {
         if( key == *myKey)
         {
-            MenuBaseItem::onShortcut(key);
+            MenuItemBase::onShortcut(key);
             return;
         }
     }

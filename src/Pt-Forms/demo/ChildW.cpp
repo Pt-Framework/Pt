@@ -39,7 +39,7 @@ ChildW::ChildW(const std::string& title)
 
     _item1.setText("New");
     _item1.setName("NewItem");
-    Key f3(Key::F3); 
+    Key f3(Key::F3);
     _item1.setShortcut(&f3);
     _fileMenu.addItem(_item1);
 
@@ -50,14 +50,14 @@ ChildW::ChildW(const std::string& title)
     _fileMenu.addItem(_item2);
 
     _item3.triggered() += Pt::slot(*this, &ChildW::onMenuExit);
-    _item3.setText("Exit");    
+    _item3.setText("Exit");
     _item3.setName("ExitItem");
     Key ctrlA(Key::Control, Key::A);
     _item3.setShortcut(&ctrlA);
     _fileMenu.addItem(_item3);
 
     _editMenu.setName("EditMenu");
-    
+
     _edit1.setText("Cut");
     _editMenu.addItem(_edit1);
 
@@ -69,7 +69,7 @@ ChildW::ChildW(const std::string& title)
 
     _edit3.setText("Paste");
     _editMenu.addItem(_edit3);
-    
+
     _fileMenuItem.setMnemonic("F&ile");
     _fileMenuItem.setText("File");
     _fileMenuItem.setMenu(&_fileMenu);
@@ -86,9 +86,9 @@ ChildW::ChildW(const std::string& title)
     _workspace.setContent(&_mainLayout);
 
     setContent(&_workspace);
-    
+
     setTitle(title);
-    
+
     //Icon label
     System::Path appdir( Application::instance().argv()[0] );
     appdir = appdir.dirName();
@@ -104,22 +104,22 @@ ChildW::ChildW(const std::string& title)
     _iconLabel.setAlignment(Alignment::Bottom);
     _iconLabel.setPadding(10);
 
-    //Text    
+    //Text
     _textLabel.setName("TextLabel");
     _textLabel.setText("Platinum C++     Framework");
     _textLabel.setAlignment(Alignment::Bottom);
     _textLabel.setPadding(10);
     _textLabel.setBackground( Gfx::Color(240, 220, 70) );
     _textLabel.setMnemonicControl(&_toggleButton);
-    _textLabel.setCursor( &Forms::Cursor::waitCursor() ); 
+    _textLabel.setCursor( &Forms::Cursor::waitCursor() );
     _textLabel.setContour(Gfx::Color(200, 190, 60));
 
     //Toggle button
     Pt::Forms::Key key(Pt::Forms::Key::Control, Pt::Forms::Key::I);
-    
+
     _toggleButton.setName("toggle");
     _toggleButton.setText("&Toggle Me [CTRL+I]" );
-    _toggleButton.setToggle(true);  
+    _toggleButton.setToggle(true);
     _toggleButton.setShortcut( &key );
     _toggleButton.setMargin(5);
     _toggleButton.setPadding(5);
@@ -127,15 +127,15 @@ ChildW::ChildW(const std::string& title)
 
     //Dialog button
     Pt::Forms::Key dKey(Pt::Forms::Key::Control, Pt::Forms::Key::D);
-    
-    _dialogButton.setName("dialog");  
+
+    _dialogButton.setName("dialog");
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
     _dialogButton.setShortcut( &dKey );
     _dialogButton.setMargin(5);
     _dialogButton.setPadding(5);
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
-    
-    //Close button    
+
+    //Close button
     Pt::Forms::Key xKey(Pt::Forms::Key::Control, Pt::Forms::Key::X);
 
     _closeButton.setContour( Gfx::Color(150, 30, 30) );
@@ -144,14 +144,14 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setHighlightColor( Gfx::Color(200, 70, 70) );
     _closeButton.setMinimumHeight(40);
 
-    _closeButton.setName("close"); 
+    _closeButton.setName("close");
     _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setShortcut(&xKey);
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
-      
+
     _checkBox.setState(CheckBox::Unspecified);
-    _checkBox.setName("CheckBox"); 
+    _checkBox.setName("CheckBox");
     _checkBox.setText("Ch&eck Me");
 
     _checkBox.setMargin(5);
@@ -159,7 +159,7 @@ ChildW::ChildW(const std::string& title)
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
     _lineEdit.setName("LineEdit");
-    _lineEdit.setAccepted(true); 
+    _lineEdit.setAccepted(true);
     //_lineEdit.setText("Hello World!");
     _lineEdit.setPlaceholderText("placeholder text");
     _lineEdit.setMargin(5);
@@ -176,7 +176,7 @@ ChildW::ChildW(const std::string& title)
     for(unsigned n = 0; n < 9; ++n)
     {
         ListBoxItem* item = new ListBoxItem;
-        
+
         std::ostringstream oss;
         oss << "Item " << n;
         item->setText(oss.str().c_str());
@@ -186,19 +186,19 @@ ChildW::ChildW(const std::string& title)
         _comboItems.push_back(item);
     }
 
-    _progressBar.setName("ProgressBar"); 
+    _progressBar.setName("ProgressBar");
     _progressBar.setRange(0, 100);
     _progressBar.setMargin(5);
     _progressBar.setPadding(5);
 
-    _slider.setName("Slider"); 
+    _slider.setName("Slider");
     _slider.setMargin(5);
     _slider.setPadding(5);
     _slider.setRange(0, 100);
     _slider.setPosition(100);
     _slider.positionChanged() += Pt::slot(_progressBar, &ProgressBar::setValue);
 
-    _spinBox.setName("SpinBox"); 
+    _spinBox.setName("SpinBox");
     _spinBox.setMargin(5);
     _spinBox.valueEdited() += Pt::slot(*this, &ChildW::checkSpinBox);
 
@@ -208,18 +208,18 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.addItem(_lineEdit, DockingLayout::Top);
     _buttonBar.addItem(_checkBox, DockingLayout::Top);
     _buttonBar.addItem(_closeButton, DockingLayout::Top);
-    _buttonBar.addItem(_dialogButton, DockingLayout::Top); 
+    _buttonBar.addItem(_dialogButton, DockingLayout::Top);
     _buttonBar.addItem(_toggleButton, DockingLayout::Top);
     _buttonBar.addItem(_progressBar, DockingLayout::Top);
     _buttonBar.addItem(_slider, DockingLayout::Top);
     _buttonBar.addItem(_spinBox, DockingLayout::Top);
- 
+
     _childView.setName("MainPanel");
-    _childView.setPadding(20); 
+    _childView.setPadding(20);
     _childView.addItem(_textLabel, DockingLayout::Fill);
     _childView.addItem(_iconLabel, DockingLayout::Bottom);
     _childView.addItem(_buttonBar, DockingLayout::Bottom);
-     
+
     //_childWindow2.setMainWidget(&_closeButton);
     _childWindow2.move(Gfx::PointF(5, 40));
     _childWindow2.resize( Gfx::SizeF(250, 500) );
@@ -241,7 +241,7 @@ ChildW::~ChildW()
 }
 
 
-void ChildW::onMenuExit(MenuBaseItem& item)
+void ChildW::onMenuExit(MenuItemBase& item)
 {
     Pt::Forms::Application::instance().exit();
 }
@@ -251,18 +251,18 @@ void ChildW::onShowDialog()
     //std::clog << "----------------" << std::endl;
     //_closeButton.setText("AAA");
     //_closeButton.setText("BBB");
-    //_closeButton.setText("CCC");    
+    //_closeButton.setText("CCC");
     //_closeButton.setMargin(50);
-    
+
     //Gfx::SizeF size(400,260);
     //_childWindow2.resize(Gfx::SizeF(400,260));
 
     //Gfx::PointF pos(0,0);
     //_childWindow2.move(pos);
 
-    //Dialog1 d;    
+    //Dialog1 d;
     //d.showModal();
-    
+
     //enable(false);
 
     _buttonBar.removeItem(_closeButton);

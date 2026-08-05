@@ -47,12 +47,12 @@ class MenuBar;
 
 class PT_FORMS_API MenuBar : public Control
                          , protected MenuBase
-{ 
+{
     typedef Control Base;
 
     public:
         MenuBar();
-    
+
         virtual ~MenuBar();
 
         void addItem(MenuBarItem& item);
@@ -71,16 +71,16 @@ class PT_FORMS_API MenuBar : public Control
 
         virtual Pt::Forms::Widget* onFindMenu(const Pt::Gfx::PointF& screenPos);
 
-        virtual void onAddMenu(MenuMenuItem& item);
+        virtual void onAddMenu(MenuSubItem& item);
 
-        virtual void onRemoveMenu(MenuMenuItem& item);
+        virtual void onRemoveMenu(MenuSubItem& item);
 
-        virtual void onOpenMenu(MenuMenuItem& item);
+        virtual void onOpenMenu(MenuSubItem& item);
 
-        virtual void onCloseMenu(MenuMenuItem& item);
+        virtual void onCloseMenu(MenuSubItem& item);
 
         virtual void onCancel();
-       
+
         virtual void onInvalidate();
 
         virtual Pt::Gfx::SizeF onMeasure(const Pt::Forms::SizePolicy& policy);
@@ -88,22 +88,22 @@ class PT_FORMS_API MenuBar : public Control
         virtual void onLayout(const Pt::Gfx::RectF& rect);
 
         virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& rect);
-        
+
         virtual bool onMouseEvent(const Pt::Forms::MouseEvent& ev);
 
         virtual bool onTouchEvent(const Pt::Forms::TouchEvent& ev);
 
-        void onItemClicked(MenuBaseItem& item);
+        void onItemClicked(MenuItemBase& item);
 
         void onProcessMouseEvent(const Pt::Forms::MouseEvent& ev);
 
     private:
         Pt::Forms::FlowLayout         _layout;
-        MenuMenuItem*               _currentItem;
+        MenuSubItem*               _currentItem;
         Pt::AutoPtr<Pt::Gfx::Brush> _background;
         Pt::AutoPtr<Pt::Gfx::Pen>   _contour;
         Pt::Gfx::Brush               _brush;
-        Pt::Gfx::Pen                 _pen;        
+        Pt::Gfx::Pen                 _pen;
 };
 
 }}

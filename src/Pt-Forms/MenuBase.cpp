@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 #include <Pt/Forms/MenuBase.h>
-#include <Pt/Forms/MenuMenuItem.h>
+#include <Pt/Forms/MenuSubItem.h>
 
 namespace Pt {
 namespace Forms {

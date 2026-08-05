@@ -340,7 +340,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
     }
 
 
-    // icon
+    // icon    
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
 
@@ -351,7 +351,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
     painter.drawPixmap(iconPos, _picture);
     painter.setCompositionMode(prevMode);
 
-    // item text
+    // item text    
     painter.setFont(_font);
     painter.setPen(_textPen);
 
@@ -366,7 +366,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
     Pt::Gfx::RectF mnemonicRect; // TODO
 
-
+    
     if (!mnemonicRect.isEmpty())
     {
         double menmonicY = textPos.y() + 1;
@@ -374,7 +374,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
             Pt::Gfx::PointF(mnemonicRect.right(), menmonicY));
     }
 
-    // shortcut text
+    // shortcut text    
     const Pt::Forms::Key* sk = shortcut();
     if (sk)
     {
@@ -388,7 +388,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
         painter.drawText(skPos, skText);
     }
-
+  
     // separator
     if (_hasSeparator)
     {
@@ -436,7 +436,7 @@ bool MenuItemBase::onEnterEvent( const EnterEvent& ev)
     Base::onEnterEvent(ev);
 
     _isHighlighted = true;
-
+    
     invalidate();
     return true;
 }

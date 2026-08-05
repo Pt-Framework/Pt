@@ -31,7 +31,6 @@
 #include <Pt/Forms/MenuItem.h>
 #include <Pt/Forms/MenuSubItem.h>
 #include <Pt/Forms/MenuBarItem.h>
-#include <Pt/Forms/MenuMenuItem.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
@@ -46,7 +45,7 @@ Menu::Menu()
 , _layout(Direction::Top)
 , _iconWidth(0)
 {
-    setContent(&_layout);    
+    setContent(&_layout);
 }
 
 
@@ -58,20 +57,20 @@ Menu::~Menu()
 void Menu::addItem(MenuItem& item)
 {
    _layout.addItem(item);
- 
+
 }
 
 void Menu::addItem(MenuSubItem& item)
 {
     _layout.addItem(item);
-    
+
     item.setParentMenu(this);
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
 }
 
 void Menu::removeItem(MenuItem& item)
 {
-    _layout.removeItem(item);    
+    _layout.removeItem(item);
 }
 
 void Menu::removeItem(MenuSubItem& item)
@@ -81,8 +80,8 @@ void Menu::removeItem(MenuSubItem& item)
     _layout.removeItem(item);
 }
 
-void Menu::onItemTriggered(MenuBaseItem& item)
-{    
+void Menu::onItemTriggered(MenuItemBase& item)
+{
     MenuSubItem* smi =dynamic_cast<MenuSubItem*>(&item);
 
     assert(smi!= 0);
@@ -101,7 +100,7 @@ void Menu::onItemTriggered(MenuBaseItem& item)
         Pt::Forms::SizePolicy policy(Pt::Forms::SizePolicy::Preferred, Pt::Forms::SizePolicy::Preferred);
         //menu->setAutoSize(policy);
         menu->autoSize(policy);
-        
+
         menu->setAbove(true);
         menu->show();
     }
@@ -135,12 +134,12 @@ Pt::Forms::Widget* Menu::onFindMenu(const Pt::Gfx::PointF& screenPos)
     return smi->menu()->onFindMenu(screenPos);
 }
 
-void Menu::onOpenMenu(MenuMenuItem& item)
+void Menu::onOpenMenu(MenuSubItem& item)
 {
     _currentItem = &item;
 }
 
-void Menu::onCloseMenu(MenuMenuItem& item)
+void Menu::onCloseMenu(MenuSubItem& item)
 {
     if( _currentItem == &item)
         _currentItem = 0;
@@ -206,20 +205,20 @@ void Menu::onPaint(PaintContext& ctx, const Pt::Gfx::RectF& rect)
 
 void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
 {
-    const MenuBaseItem* p = parentItem();
+    const MenuItemBase* p = parentItem();
 
     if (!p)
     {
         painter.drawRect(borderRect);
         return;
-    }        
+    }
 
     const MenuBarItem * mbi = dynamic_cast<const MenuBarItem*>(p);
 
     if (mbi == 0)
     {
         painter.drawRect(borderRect);
-    
+
         return;
     }
 
@@ -228,7 +227,7 @@ void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
         painter.drawRect(borderRect);
         return;
     }
-    
+
     const double firstWidth = p->size().width();
     const double x1 = borderRect.x();
     const double y1 = borderRect.y();
@@ -239,13 +238,13 @@ void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
     painter.drawLine(Pt::Gfx::PointF(x1 + firstWidth, y1), Pt::Gfx::PointF(x2, y1));
     painter.drawLine(Pt::Gfx::PointF(x2, y1), Pt::Gfx::PointF(x2, y2));
     painter.drawLine(Pt::Gfx::PointF(x2, y2), Pt::Gfx::PointF(x1, y2));
-    painter.drawLine(Pt::Gfx::PointF(x1, y2), Pt::Gfx::PointF(x1, y1));            
-    
+    painter.drawLine(Pt::Gfx::PointF(x1, y2), Pt::Gfx::PointF(x1, y1));
+
 }
 
-void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options, 
+void Menu::onRenderBackground(const Pt::Forms::StyleOptions& options,
                               Painter& painter, const Pt::Gfx::RectF& rect) const
-{    
+{
     Pt::Gfx::SizeF size = this->size();
 
     size -= 1;
@@ -289,7 +288,7 @@ void Menu::onProcessMouseEvent(const Pt::Forms::MouseEvent& ev)
             Pt::Forms::Popup::onProcessMouseEvent(ev);
         else
             menu->processEvent(ev);
-        
+
         return;
     }
     Pt::Forms::Popup::onProcessMouseEvent(ev);
@@ -299,12 +298,12 @@ void Menu::onShowEvent(const Pt::Forms::ShowEvent& ev)
 {
     Pt::Forms::Popup::onShowEvent(ev);
 
-    MenuMenuItem* mi = dynamic_cast<MenuMenuItem*>(parentItem());
+    MenuSubItem* mi = dynamic_cast<MenuSubItem*>(parentItem());
 
     if (mi)
     {
         if( ev.visible() )
-            mi->openMenu();  
+            mi->openMenu();
         else
             mi->closeMenu();
     }
@@ -312,7 +311,7 @@ void Menu::onShowEvent(const Pt::Forms::ShowEvent& ev)
 
 void Menu::onCloseEvent(const Pt::Forms::CloseEvent& ev)
 {
-    MenuMenuItem* mi = dynamic_cast<MenuMenuItem*>(parentItem());
+    MenuSubItem* mi = dynamic_cast<MenuSubItem*>(parentItem());
 
     if( mi)
         mi->closeMenu();
@@ -336,11 +335,11 @@ bool Menu::onLeaveEvent(const Pt::Forms::LeaveEvent& ev)
     return Pt::Forms::Popup::onLeaveEvent(ev);
 }
 
-void Menu::onAddMenu(MenuMenuItem& item)
+void Menu::onAddMenu(MenuSubItem& item)
 {
 }
 
-void Menu::onRemoveMenu(MenuMenuItem& item)
+void Menu::onRemoveMenu(MenuSubItem& item)
 {
 }
 

@@ -156,9 +156,8 @@
     <ClInclude Include="..\..\include\Pt\Forms\MenuBar.h" />
     <ClInclude Include="..\..\include\Pt\Forms\MenuBarItem.h" />
     <ClInclude Include="..\..\include\Pt\Forms\MenuBase.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\MenuBaseItem.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\MenuItemBase.h" />
     <ClInclude Include="..\..\include\Pt\Forms\MenuItem.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\MenuMenuItem.h" />
     <ClInclude Include="..\..\include\Pt\Forms\MenuSubItem.h" />
     <ClInclude Include="..\..\include\Pt\Forms\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\MoveEvent.h" />
@@ -1480,9 +1479,8 @@
     <ClCompile Include="..\Pt-Forms\MenuBar.cpp" />
     <ClCompile Include="..\Pt-Forms\MenuBarItem.cpp" />
     <ClCompile Include="..\Pt-Forms\MenuBase.cpp" />
-    <ClCompile Include="..\Pt-Forms\MenuBaseItem.cpp" />
+    <ClCompile Include="..\Pt-Forms\MenuItemBase.cpp" />
     <ClCompile Include="..\Pt-Forms\MenuItem.cpp" />
-    <ClCompile Include="..\Pt-Forms\MenuMenuItem.cpp" />
     <ClCompile Include="..\Pt-Forms\MenuSubItem.cpp" />
     <ClCompile Include="..\Pt-Forms\Panel.cpp" />
     <ClCompile Include="..\Pt-Forms\Pixmap.cpp" />
