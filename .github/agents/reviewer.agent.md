@@ -15,7 +15,7 @@ handoffs:
     send: false
   - label: "Fix Doc Review Feedback"
     agent: Documenter
-    prompt: "Review failed. Address documeantation review feedback."
+    prompt: "Review failed. Address documentation review feedback."
     send: false
 ---
 
