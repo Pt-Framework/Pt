@@ -31,7 +31,8 @@ comments in the project's C++ headers after implementation review.
 1. Identify the public headers changed by the reviewed feature.
 2. Apply the documented API documentation rules for the changed headers.
 3. Add missing documentation comments and correct outdated or incorrect ones.
-4. Hand off to the Reviewer for a final documentation-only sign-off.
+4. Hand off to the Reviewer for sign-off even if no documentation changes were
+   needed; state that explicitly in the handoff.
 
 ## Output Format
 - List of headers and symbols documented/corrected

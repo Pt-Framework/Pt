@@ -36,8 +36,9 @@ project's C++ modules, and report pass/fail precisely.
 2. Add or update the required tests and registrations.
 3. Build and run the relevant documented test target or executable.
 4. Report the command, exit code, and relevant failure details.
-5. If tests pass, hand off to the Reviewer. If tests fail, hand off to the Developer
-   with the exact failure details.
+5. If tests pass, or no tests are needed for this change, hand off to the
+   Reviewer with a note that no changes were required. If tests fail, hand off
+   to the Developer with the exact failure details
 
 ## Output Format
 - Tests added/changed (suite and method names)

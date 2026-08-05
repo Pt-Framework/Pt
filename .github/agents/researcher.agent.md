@@ -39,4 +39,3 @@ ideas, and derive requirements for the project.
 - Compliance considerations
 - Functional requirements
 - Non-functional requirements
-- Confirmation question as the last line of the response

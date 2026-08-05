@@ -41,4 +41,3 @@ or editing any code yourself.
 - Ordered implementation plan
 - Open decisions or assumptions, if any
 - Build and test checks the Developer, Builder, or Tester should perform later
-- Confirmation question as the last line of the response
