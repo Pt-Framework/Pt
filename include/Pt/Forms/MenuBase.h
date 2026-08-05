@@ -35,8 +35,8 @@
 namespace Pt {
 namespace Forms {
 
-class MenuMenuItem;
-class MenuBaseItem;
+class MenuSubItem;
+class MenuItemBase;
 
 class PT_FORMS_API MenuBase
 {
@@ -55,57 +55,57 @@ class PT_FORMS_API MenuBase
             return onFindMenu(screenPos);
         }
 
-        void closeMenu(MenuMenuItem& item)
+        void closeMenu(MenuSubItem& item)
         {
             onCloseMenu(item);
         }
 
-        void openMenu(MenuMenuItem& item)
+        void openMenu(MenuSubItem& item)
         {
             onOpenMenu(item);
         }
 
-        const MenuBaseItem* parentItem() const
+        const MenuItemBase* parentItem() const
         {
             return _parentItem;
         }
 
-        MenuBaseItem* parentItem()
+        MenuItemBase* parentItem()
         {
             return _parentItem;
         }
 
-        void setParentItem(MenuBaseItem* item)
+        void setParentItem(MenuItemBase* item)
         {
             _parentItem = item;
         }
 
-        void addMenu(MenuMenuItem& item)
+        void addMenu(MenuSubItem& item)
         {
             onAddMenu(item);
         }
 
-        void removeMenu(MenuMenuItem& item)
+        void removeMenu(MenuSubItem& item)
         {
             onRemoveMenu(item);
         }
 
     protected:
       
-        virtual void onCloseMenu(MenuMenuItem& item) = 0;
+        virtual void onCloseMenu(MenuSubItem& item) = 0;
 
-        virtual void onOpenMenu(MenuMenuItem& item) = 0;
+        virtual void onOpenMenu(MenuSubItem& item) = 0;
 
-        virtual void onAddMenu(MenuMenuItem& item) = 0;
+        virtual void onAddMenu(MenuSubItem& item) = 0;
 
-        virtual void onRemoveMenu(MenuMenuItem& item) = 0;
+        virtual void onRemoveMenu(MenuSubItem& item) = 0;
 
         virtual void onCancel() = 0;
 
         virtual Pt::Forms::Widget* onFindMenu(const Pt::Gfx::PointF& screenPos) = 0;
 
     private:
-        MenuBaseItem* _parentItem;
+        MenuItemBase* _parentItem;
 };
 
 }}

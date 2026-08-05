@@ -26,16 +26,12 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
-#ifndef PT_FORMS_MENUSUBITEM_H
-#define PT_FORMS_MENUSUBITEM_H
+#ifndef PT_FORMS_MENUMENUITEM_H
+#define PT_FORMS_MENUMENUITEM_H
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/MenuBase.h>
 #include <Pt/Forms/MenuItemBase.h>
-#include <Pt/Forms/Button.h>
-#include <Pt/Forms/Control.h>
-#include <Pt/Forms/FlowLayout.h>
-#include <Pt/SmartPtr.h>
 #include <vector>
 
 namespace Pt {
@@ -44,7 +40,7 @@ namespace Forms {
 class Menu;
 class MenuBar;
 
-class PT_FORMS_API MenuSubItem : public MenuItemBase
+class PT_FORMS_API MenuMenuItem : public MenuItemBase
 {
     friend class Menu;
 
@@ -52,9 +48,9 @@ class PT_FORMS_API MenuSubItem : public MenuItemBase
         typedef MenuItemBase Base;
 
     public:
-        MenuSubItem();
+        MenuMenuItem();
 
-        virtual ~MenuSubItem();
+        virtual ~MenuMenuItem();
 
         void setMenu(Menu* menu);
 
@@ -62,6 +58,7 @@ class PT_FORMS_API MenuSubItem : public MenuItemBase
         {
             return _menu;
         }
+
 
         Menu* menu()
         {
@@ -75,9 +72,11 @@ class PT_FORMS_API MenuSubItem : public MenuItemBase
 
         void cancel();
 
+
         void closeMenu();
 
         void openMenu();
+
 
         bool isMenuOpen() const
         {
@@ -92,8 +91,6 @@ class PT_FORMS_API MenuSubItem : public MenuItemBase
         virtual void onShortcut(const Key& key);
 
         virtual void onMnemonic(Pt::Char m);
-
-        virtual void onPaint(PaintContext& context, const Pt::Gfx::RectF& updateRect);
 
     private:
         MenuBase* _parentMenu;

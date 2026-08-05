@@ -31,7 +31,6 @@
 #include <Pt/Forms/MenuItem.h>
 #include <Pt/Forms/MenuSubItem.h>
 #include <Pt/Forms/MenuBarItem.h>
-#include <Pt/Forms/MenuMenuItem.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>
@@ -81,7 +80,7 @@ void Menu::removeItem(MenuSubItem& item)
     _layout.removeItem(item);
 }
 
-void Menu::onItemTriggered(MenuBaseItem& item)
+void Menu::onItemTriggered(MenuItemBase& item)
 {    
     MenuSubItem* smi =dynamic_cast<MenuSubItem*>(&item);
 
@@ -135,12 +134,12 @@ Pt::Forms::Widget* Menu::onFindMenu(const Pt::Gfx::PointF& screenPos)
     return smi->menu()->onFindMenu(screenPos);
 }
 
-void Menu::onOpenMenu(MenuMenuItem& item)
+void Menu::onOpenMenu(MenuSubItem& item)
 {
     _currentItem = &item;
 }
 
-void Menu::onCloseMenu(MenuMenuItem& item)
+void Menu::onCloseMenu(MenuSubItem& item)
 {
     if( _currentItem == &item)
         _currentItem = 0;
@@ -206,7 +205,7 @@ void Menu::onPaint(PaintContext& ctx, const Pt::Gfx::RectF& rect)
 
 void Menu::drawBorder(Painter& painter, const Pt::Gfx::RectF& borderRect) const
 {
-    const MenuBaseItem* p = parentItem();
+    const MenuItemBase* p = parentItem();
 
     if (!p)
     {
@@ -299,7 +298,7 @@ void Menu::onShowEvent(const Pt::Forms::ShowEvent& ev)
 {
     Pt::Forms::Popup::onShowEvent(ev);
 
-    MenuMenuItem* mi = dynamic_cast<MenuMenuItem*>(parentItem());
+    MenuSubItem* mi = dynamic_cast<MenuSubItem*>(parentItem());
 
     if (mi)
     {
@@ -312,7 +311,7 @@ void Menu::onShowEvent(const Pt::Forms::ShowEvent& ev)
 
 void Menu::onCloseEvent(const Pt::Forms::CloseEvent& ev)
 {
-    MenuMenuItem* mi = dynamic_cast<MenuMenuItem*>(parentItem());
+    MenuSubItem* mi = dynamic_cast<MenuSubItem*>(parentItem());
 
     if( mi)
         mi->closeMenu();
@@ -336,11 +335,11 @@ bool Menu::onLeaveEvent(const Pt::Forms::LeaveEvent& ev)
     return Pt::Forms::Popup::onLeaveEvent(ev);
 }
 
-void Menu::onAddMenu(MenuMenuItem& item)
+void Menu::onAddMenu(MenuSubItem& item)
 {
 }
 
-void Menu::onRemoveMenu(MenuMenuItem& item)
+void Menu::onRemoveMenu(MenuSubItem& item)
 {
 }
 

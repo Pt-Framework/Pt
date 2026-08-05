@@ -11,11 +11,138 @@ namespace Pt {
 namespace Forms {
 
 MenuSubItem::MenuSubItem()
+: _menu(0)
+, _isOpen(false)
+, _parentMenu(0)
 {
 }
 
 MenuSubItem::~MenuSubItem()
 {
+}
+
+void MenuSubItem::closeMenu()
+{
+    _isOpen = false;
+    if (_parentMenu)
+        _parentMenu->closeMenu(*this);
+}
+
+void MenuSubItem::openMenu()
+{
+    _isOpen = true;
+
+    if (_parentMenu)
+        _parentMenu->openMenu(*this);
+}
+
+
+void MenuSubItem::setMenu(Menu* menu)
+{
+    if (_menu)
+    {
+        _menu->setParentItem(0);
+
+        if(_parentMenu)
+            _parentMenu->addMenu(*this);
+    }
+
+    _menu = menu;
+
+    if( _menu)
+    {
+        _menu->setParentItem(this);   
+        
+        if (_parentMenu)
+            _parentMenu->removeMenu(*this);
+    }    
+}
+
+const std::vector<Key> MenuSubItem::onGetShortcuts()
+{
+    std::vector<Key> sck = MenuItemBase::onGetShortcuts();
+    
+    if(_menu == 0)
+        return sck;
+
+    std::map<Key, Control*>::const_iterator  it = _menu->shortcuts().begin();
+
+    for( ;it != _menu->shortcuts().end(); ++it)
+        sck.push_back(it->first);
+
+    return sck;
+}
+
+const std::vector<Pt::Char> MenuSubItem::onGetMnemonics()
+{
+    std::vector<Pt::Char> mns = MenuItemBase::onGetMnemonics();
+
+    if (_menu == 0)
+        return mns;
+
+    std::map<Pt::Char, Control*>::const_iterator  it = _menu->mnemonics().begin();
+
+    for (; it != _menu->mnemonics().end(); ++it)
+        mns.push_back(it->first);
+
+    return mns;
+}
+
+void MenuSubItem::onMnemonic(Pt::Char m)
+{
+    const Char* myMn = mnemonic();
+
+    if (myMn)
+    {
+        if (m == *myMn)
+        {
+            MenuItemBase::onMnemonic(m);
+            return;
+        }
+    }
+
+    std::map<Pt::Char, Control*>::const_iterator  it = _menu->mnemonics().begin();
+
+    for (; it != _menu->mnemonics().end(); ++it)
+    {
+        if (it->first == m)
+        {
+            it->second->processMnemonic(m);
+            break;
+        }
+    }
+}
+
+void MenuSubItem::onShortcut(const Key& key)
+{
+    const Key* myKey = shortcut();
+
+    if(myKey)
+    {
+        if( key == *myKey)
+        {
+            MenuItemBase::onShortcut(key);
+            return;
+        }
+    }
+
+    std::map<Key, Control*>::const_iterator  it = _menu->shortcuts().begin();
+
+    for (; it != _menu->shortcuts().end(); ++it)
+    {
+        if(it->first == key)
+        {
+            it->second->processShortcut(key);
+            break;
+        }
+    }
+}
+
+
+void MenuSubItem::cancel()
+{
+    if(_menu)
+        _menu->cancel();
 }
 
 

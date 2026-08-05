@@ -30,16 +30,16 @@
 #define PT_FORMS_MENUITEM_H
 
 #include <Pt/Forms/Api.h>
-#include <Pt/Forms/MenuBaseItem.h>
+#include <Pt/Forms/MenuItemBase.h>
 
 namespace Pt {
 namespace Forms {
 
 class Menu;
 
-class PT_FORMS_API MenuItem : public MenuBaseItem
+class PT_FORMS_API MenuItem : public MenuItemBase
 {    
-    typedef MenuBaseItem Base;
+    typedef MenuItemBase Base;
 
     public:        
         MenuItem();

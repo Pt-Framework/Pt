@@ -65,7 +65,7 @@ Pt::Gfx::SizeF MenuBarItem::onMeasure(const  Pt::Forms::SizePolicy& policy)
 
 void MenuBarItem::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 {    
-    MenuBaseItem::onPaint(context,rect);
+    MenuItemBase::onPaint(context,rect);
     
     const  Pt::Forms::StyleOptions& options = Pt::Forms::Application::instance().styleOptions();
 

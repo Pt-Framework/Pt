@@ -56,7 +56,7 @@ class ChildW : public Forms::Window
 
         void checkSpinBox(int value);
 
-        void onMenuExit(MenuBaseItem& item);
+        void onMenuExit(MenuItemBase& item);
 
     private:
         DockingLayout _mainLayout;

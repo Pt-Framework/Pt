@@ -52,7 +52,7 @@ class MainWindow : public Pt::Forms::Window
       virtual ~MainWindow();
 
     protected:
-        void onZoom(MenuBaseItem&);
+        void onZoom(MenuItemBase&);
 
     protected:
         virtual void onPaint(PaintContext& ctx, const Gfx::RectF& rect);

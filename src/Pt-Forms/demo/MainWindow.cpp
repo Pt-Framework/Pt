@@ -239,7 +239,7 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::onZoom(MenuBaseItem& item)
+void MainWindow::onZoom(MenuItemBase& item)
 {
     if(item.text() == "100%")
         Application::instance().setScaleFactor(1.0);

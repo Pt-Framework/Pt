@@ -1737,13 +1737,10 @@
     <ClInclude Include="..\..\include\Pt\Forms\MenuBase.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\MenuBaseItem.h">
+    <ClInclude Include="..\..\include\Pt\Forms\MenuItemBase.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\MenuItem.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\MenuMenuItem.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\MenuSubItem.h">
@@ -4727,13 +4724,10 @@
     <ClCompile Include="..\Pt-Forms\MenuBase.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Forms\MenuBaseItem.cpp">
+    <ClCompile Include="..\Pt-Forms\MenuItemBase.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\MenuItem.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Forms\MenuMenuItem.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\MenuSubItem.cpp">

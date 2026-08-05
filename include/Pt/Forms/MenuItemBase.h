@@ -37,16 +37,16 @@ namespace Pt {
 
 namespace Forms {
 
-class PT_FORMS_API MenuBaseItem : public Control
+class PT_FORMS_API MenuItemBase : public Control
 {
     public:
         typedef Control Base;
 
     public:
 
-        MenuBaseItem();
+        MenuItemBase();
 
-        virtual ~MenuBaseItem();
+        virtual ~MenuItemBase();
 
         const Pt::String& text() const;
 
@@ -75,7 +75,7 @@ class PT_FORMS_API MenuBaseItem : public Control
             return _isHighlighted;
         }
 
-        Pt::Signal<MenuBaseItem&>& triggered();
+        Pt::Signal<MenuItemBase&>& triggered();
 
 
     public:
@@ -140,7 +140,7 @@ class PT_FORMS_API MenuBaseItem : public Control
         };
 
     protected:
-        Pt::Signal<MenuBaseItem&> _triggered;
+        Pt::Signal<MenuItemBase&> _triggered;
         double            _iconWidth;
         Pt::Gfx::Image        _icon;
         Pt::String        _text;

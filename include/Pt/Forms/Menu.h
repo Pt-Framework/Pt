@@ -44,14 +44,13 @@ namespace Forms {
 class MenuItem;
 class MenuBarItem;
 class MenuSubItem;
-class MenuMenuItem;
-class MenuBaseItem;
+class MenuItemBase;
 
 class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 {
     public:
         friend class MenuBar;
-        friend class MenuMenuItem;
+        friend class MenuSubItem;
 
     public:
         Menu();
@@ -96,13 +95,13 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
                                          const Pt::Gfx::RectF& rect) const;
        
        //MenuBase
-        virtual void onAddMenu(MenuMenuItem& item);
+        virtual void onAddMenu(MenuSubItem& item);
 
-        virtual void onRemoveMenu(MenuMenuItem& item);
+        virtual void onRemoveMenu(MenuSubItem& item);
 
-        virtual void onCloseMenu(MenuMenuItem& item);
+        virtual void onCloseMenu(MenuSubItem& item);
 
-        virtual void onOpenMenu(MenuMenuItem& item);
+        virtual void onOpenMenu(MenuSubItem& item);
 
         virtual void onCancel();
 
@@ -112,12 +111,12 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
         void onProcessMouseEvent(const Pt::Forms::MouseEvent& ev);
 
     private:
-        void onItemTriggered(MenuBaseItem& m);
+        void onItemTriggered(MenuItemBase& m);
 
         void drawBorder(Pt::Forms::Painter& painter, const Pt::Gfx::RectF& borderRect) const;
 
     private:
-        MenuBaseItem*          _currentItem;
+        MenuItemBase*          _currentItem;
         Pt::Forms::FlowLayout    _layout;
         Pt::ssize_t            _iconWidth;
         Pt::AutoPtr<Pt::Gfx::Brush>  _background;

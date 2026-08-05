@@ -241,7 +241,7 @@ ChildW::~ChildW()
 }
 
 
-void ChildW::onMenuExit(MenuBaseItem& item)
+void ChildW::onMenuExit(MenuItemBase& item)
 {
     Pt::Forms::Application::instance().exit();
 }

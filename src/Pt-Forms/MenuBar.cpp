@@ -103,12 +103,12 @@ void MenuBar::removeItem(MenuBarItem& item)
         _currentItem = 0;     
 }
 
-void MenuBar::onAddMenu(MenuMenuItem& item)
+void MenuBar::onAddMenu(MenuSubItem& item)
 {
     item.menu()->setAnchor(this);
 }
 
-void MenuBar::onRemoveMenu(MenuMenuItem& item)
+void MenuBar::onRemoveMenu(MenuSubItem& item)
 {
     item.menu()->setAnchor(0);
 }
@@ -135,7 +135,7 @@ Pt::Forms::Widget* MenuBar::onFindMenu(const Pt::Gfx::PointF& screenPos)
 }
 
 
-void MenuBar::onOpenMenu(MenuMenuItem& item)
+void MenuBar::onOpenMenu(MenuSubItem& item)
 {
     if(_currentItem)
     {
@@ -148,7 +148,7 @@ void MenuBar::onOpenMenu(MenuMenuItem& item)
 }
 
 
-void MenuBar::onCloseMenu(MenuMenuItem& item)
+void MenuBar::onCloseMenu(MenuSubItem& item)
 {
     if(_currentItem == &item)
     {
@@ -167,7 +167,7 @@ void MenuBar::onCancel()
 }
 
 
-void MenuBar::onItemClicked(MenuBaseItem& item)
+void MenuBar::onItemClicked(MenuItemBase& item)
 {
     MenuBarItem * bari = (MenuBarItem*)&item;
 
