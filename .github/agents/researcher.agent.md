@@ -7,7 +7,7 @@ model: [ "Gemini 3.1 Pro (Preview)" ]
 handoffs:
   - label: "Plan Implementation"
     agent: Planner
-    prompt: "Create an implementation plan for the requirements gathered above."
+    prompt: "Research finished. Create an implementation plan for the gathered requirements."
     send: false
 ---
 
