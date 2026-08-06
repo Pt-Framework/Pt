@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2015-2025 Marc Boris Duerner
+/* Copyright (C) 2015-2025 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -45,16 +45,60 @@ PT_LOG_DEFINE("Pt.Forms.Screen")
 
 namespace {
 
-EM_BOOL onCanvasResized(int eventType, const void *reserved, void *obj)
+void resizeCanvasToWindow()
 {
-	  double width, height;
-	  emscripten_get_element_css_size("canvas", &width, &height);
-    //std::clog << "emscripten resize: " << width << " " << height << std::endl;
+    double width, height;
+    emscripten_get_element_css_size("canvas", &width, &height);
+    emscripten_set_canvas_element_size("canvas", int(width), int(height));
 
-    //std::clog << "pixel ratio: " << emscripten_get_device_pixel_ratio() << std::endl;
-    emscripten_set_canvas_size( int(width), int(height) );
+    Pt::Forms::Screen& screen = Pt::Forms::Application::instance().screen();
 
+    Pt::Gfx::SizeF size(width, height);
+    size /= screen.scaleFactor();
+
+    Pt::Forms::ResizeEvent rev(screen, size);
+    Pt::Forms::Application::instance().processEvent(rev);
+
+    Pt::Gfx::RectF updateRect(Pt::Gfx::PointF(0, 0), size);
+    screen.repaint(updateRect);
+}
+
+// avoids emscripten_enter_soft_fullscreen's WebGL render-target resize path,
+// which crashes when proxied to the main thread under -sPROXY_TO_PTHREAD=1
+EM_BOOL onWindowResized(int /*eventType*/, const EmscriptenUiEvent* /*uiEvent*/, void* /*userData*/)
+{
+    resizeCanvasToWindow();
     return true;
+}
+
+// pins the canvas to the full browser viewport, independent of the host page's own CSS
+void makeCanvasFullscreen(const char* selector)
+{
+    MAIN_THREAD_EM_ASM({
+        var canvas = document.querySelector(UTF8ToString($0));
+        document.body.style.margin = "0";
+        document.body.style.overflow = "hidden";
+        canvas.style.position = "fixed";
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        canvas.style.width = "100vw";
+        canvas.style.height = "100vh";
+        canvas.style.display = "block";
+    }, selector);
+}
+
+// blits an RGBA8888 buffer onto the 2d context of the given canvas element;
+// proxied to the main thread since only it has DOM access under -sPROXY_TO_PTHREAD=1
+void blitCanvasImage(const char* selector, const unsigned char* pixels, int width, int height)
+{
+    MAIN_THREAD_EM_ASM({
+        var canvas = document.querySelector(UTF8ToString($0));
+        var ctx = canvas.ptContext2d || (canvas.ptContext2d = canvas.getContext("2d"));
+        // ImageData rejects a SharedArrayBuffer-backed view, so copy out of wasm memory
+        var view = HEAPU8.subarray($1, $1 + $2 * $3 * 4);
+        var data = new Uint8ClampedArray(view);
+        ctx.putImageData(new ImageData(data, $2, $3), 0, 0);
+    }, selector, pixels, width, height);
 }
 
 } // namespace
@@ -65,44 +109,23 @@ namespace Forms {
 
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _parent(0)
-, _screen(0)
 , _genericBackend(0)
 {
-    EmscriptenFullscreenStrategy strategy;
-		strategy.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT;
-    strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
-		strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
-		strategy.canvasResizedCallback = onCanvasResized;
-		strategy.canvasResizedCallbackUserData = this; 
-		
-    //strategy.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_HIDEF;
+    makeCanvasFullscreen("canvas");
 
-    //std::clog << "pixel ratio: " << emscripten_get_device_pixel_ratio() << std::endl;
-    
-    //emscripten_set_resize_callback(0, 0, false, emscWindowSizeChanged)
+    double width, height;
+    emscripten_get_element_css_size("canvas", &width, &height);
+    emscripten_set_canvas_element_size("canvas", int(width), int(height));
 
-    emscripten_enter_soft_fullscreen("canvas", &strategy);
+    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, onWindowResized);
 
     GraphicsBackend& graphics = Application::instance().graphicsBackend();
     _genericBackend = dynamic_cast<GenericGraphicsBackend*>(&graphics);
     if( ! _genericBackend )
         throw std::invalid_argument("invalid graphics");
 
-	  double width, height;
-	  emscripten_get_element_css_size("canvas", &width, &height);
-
     Gfx::SizeF size(width, height);
     _pixmap.reset(size);
-
-    const Gfx::Image& image = _genericBackend->image(_pixmap);
-
-    _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
-                                                         image.width(), image.height(), 
-                                                         32, image.width() * 4,
-                                                         SDL_PIXELFORMAT_RGB888 );
-
-    _screen = SDL_CreateWindow("Screen", 0, 0, width, height, 
-                               SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
     setSurface( &_pixmap, Gfx::PointF(0, 0) );
     setContent(&_workspace);
@@ -111,10 +134,9 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
 ScreenImpl::~ScreenImpl()
 {
-    Form::setSurface(0, Gfx::PointF(0, 0) );
+    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
 
-    SDL_FreeSurface(_imageSurface);
-    SDL_DestroyWindow(_screen);
+    Form::setSurface(0, Gfx::PointF(0, 0) );
 }
 
 
@@ -325,16 +347,35 @@ void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 
     Gfx::SizeF size = scaling().toPhysical( ev.size() );
     _pixmap.reset(size);
+}
 
-    const Gfx::Image& image = _genericBackend->image(_pixmap);
 
-    SDL_FreeSurface(_imageSurface);
-    _imageSurface = 0; 
+void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image)
+{
+    const std::size_t width = static_cast<std::size_t>(image.width());
+    const std::size_t height = static_cast<std::size_t>(image.height());
+    const std::size_t srcStride = static_cast<std::size_t>(image.stride());
+    const std::size_t dstStride = width * 4;
 
-    _imageSurface = SDL_CreateRGBSurfaceWithFormatFrom( (void*) image.data(), 
-                                                         image.width(), image.height(), 
-                                                         32, image.width() * 4,
-                                                         SDL_PIXELFORMAT_RGB888 );
+    _canvasBuffer.resize(dstStride * height);
+
+    const Pt::uint8_t* src = image.data();
+    Pt::uint8_t* dst = _canvasBuffer.data();
+
+    // Argb32 stores B,G,R,A per pixel; canvas ImageData expects R,G,B,A
+    for(std::size_t y = 0; y < height; ++y)
+    {
+        const Pt::uint8_t* srcRow = src + y * srcStride;
+        Pt::uint8_t* dstRow = dst + y * dstStride;
+
+        for(std::size_t x = 0; x < width; ++x)
+        {
+            dstRow[x * 4 + 0] = srcRow[x * 4 + 2];
+            dstRow[x * 4 + 1] = srcRow[x * 4 + 1];
+            dstRow[x * 4 + 2] = srcRow[x * 4 + 0];
+            dstRow[x * 4 + 3] = 255;
+        }
+    }
 }
 
 
@@ -347,26 +388,10 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
     Base::onProcessPaintEvent(ev);
 
-    //Pt::Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
-    //
-    //Rect updateRect( Gfx::Image::Point( lround(updateRectP.x()), 
-    //                                    lround(updateRectP.y()) ),
-    //                 Gfx::Image::Size( lround(updateRectP.width()),
-    //                                   lround(updateRectP.height()) ) );
+    const Gfx::Image& image = _genericBackend->image(_pixmap);
+    updateCanvasBuffer(image);
 
-    SDL_Surface* surface = SDL_GetWindowSurface(_screen);
-
-    if( SDL_MUSTLOCK(surface) ) 
-        SDL_LockSurface(surface);
-
-    int r = SDL_BlitSurface(_imageSurface, NULL, surface, NULL);
-    if(r < 0)
-        std::clog << "SDL_BlitSurface failed: " << r << std::endl;
-
-    if( SDL_MUSTLOCK(surface) ) 
-        SDL_UnlockSurface(surface);
-
-    SDL_UpdateWindowSurface(_screen);
+    blitCanvasImage("canvas", _canvasBuffer.data(), int(image.width()), int(image.height()));
 }
 
 

@@ -38,7 +38,7 @@
 
 #include "../generic/GenericGraphicsBackend.h"
 
-#include <SDL.h>
+#include <vector>
 
 namespace Pt {
 
@@ -134,6 +134,12 @@ class ScreenImpl : public Form
                              const Gfx::RectF& updateRect);
 
     //
+    // canvas blit
+    //
+    private:
+        void updateCanvasBuffer(const Gfx::Image& image);
+
+    //
     // input
     //
     protected:
@@ -152,8 +158,7 @@ class ScreenImpl : public Form
         GenericGraphicsBackend* _genericBackend;
         Pixmap       _pixmap;
 
-        SDL_Window*   _screen;
-        SDL_Surface*  _imageSurface;
+        std::vector<Pt::uint8_t> _canvasBuffer;
 };
 
 } // namespace

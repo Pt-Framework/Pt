@@ -28,167 +28,139 @@
 
 #include <Pt/Forms/Key.h>
 #include <Pt/Types.h>
+#include <map>
+#include <string>
 
 namespace Pt {
 
 namespace Forms {
 
-Pt::uint32_t toKeycode(int sdlKey)
+// maps a KeyboardEvent.code string (https://w3c.github.io/uievents-code/)
+// to a Pt::Forms::Key::Code
+Pt::uint32_t toKeycode(const char* domCode)
 {
-    Pt::uint32_t keyCode = Key::NoKey;
+    static const std::map<std::string, Pt::uint32_t> codeMap = {
+        { "Backspace",    Key::Backspace },
+        { "Tab",          Key::Tab       },
+        { "Enter",        Key::Return    },
+        { "Escape",       Key::Escape    },
+        { "Space",        Key::Space     },
 
-    switch(sdlKey)
-    {
-        case SDLK_BACKSPACE:     keyCode = Key::Backspace; break;
-        case SDLK_TAB:           keyCode = Key::Tab;       break;
-        case SDLK_RETURN:        keyCode = Key::Return;    break;
-        case SDLK_ESCAPE:        keyCode = Key::Escape;    break;
-        case SDLK_SPACE:         keyCode = Key::Space;     break;
+        { "Digit0",  Key::D0 },
+        { "Digit1",  Key::D1 },
+        { "Digit2",  Key::D2 },
+        { "Digit3",  Key::D3 },
+        { "Digit4",  Key::D4 },
+        { "Digit5",  Key::D5 },
+        { "Digit6",  Key::D6 },
+        { "Digit7",  Key::D7 },
+        { "Digit8",  Key::D8 },
+        { "Digit9",  Key::D9 },
 
-        case SDLK_0:  keyCode = Key::D0;   break;
-        case SDLK_1:  keyCode = Key::D1;   break;
-        case SDLK_2:  keyCode = Key::D2;   break;
-        case SDLK_3:  keyCode = Key::D3;   break;
-        case SDLK_4:  keyCode = Key::D4;   break;
-        case SDLK_5:  keyCode = Key::D5;   break;
-        case SDLK_6:  keyCode = Key::D6;   break;
-        case SDLK_7:  keyCode = Key::D7;   break;
-        case SDLK_8:  keyCode = Key::D8;   break;
-        case SDLK_9:  keyCode = Key::D9;   break;
+        { "KeyA",  Key::A },
+        { "KeyB",  Key::B },
+        { "KeyC",  Key::C },
+        { "KeyD",  Key::D },
+        { "KeyE",  Key::E },
+        { "KeyF",  Key::F },
+        { "KeyG",  Key::G },
+        { "KeyH",  Key::H },
+        { "KeyI",  Key::I },
+        { "KeyJ",  Key::J },
+        { "KeyK",  Key::K },
+        { "KeyL",  Key::L },
+        { "KeyM",  Key::M },
+        { "KeyN",  Key::N },
+        { "KeyO",  Key::O },
+        { "KeyP",  Key::P },
+        { "KeyQ",  Key::Q },
+        { "KeyR",  Key::R },
+        { "KeyS",  Key::S },
+        { "KeyT",  Key::T },
+        { "KeyU",  Key::U },
+        { "KeyV",  Key::V },
+        { "KeyW",  Key::W },
+        { "KeyX",  Key::X },
+        { "KeyY",  Key::Y },
+        { "KeyZ",  Key::Z },
 
-        case SDLK_a:  keyCode = Key::A;   break;
-        case SDLK_b:  keyCode = Key::B;   break;
-        case SDLK_c:  keyCode = Key::C;   break;
-        case SDLK_d:  keyCode = Key::D;   break;
-        case SDLK_e:  keyCode = Key::E;   break;
-        case SDLK_f:  keyCode = Key::F;   break;
-        case SDLK_g:  keyCode = Key::G;   break;
-        case SDLK_h:  keyCode = Key::H;   break;
-        case SDLK_i:  keyCode = Key::I;   break;
-        case SDLK_j:  keyCode = Key::J;   break;
-        case SDLK_k:  keyCode = Key::K;   break;
-        case SDLK_l:  keyCode = Key::L;   break;
-        case SDLK_m:  keyCode = Key::M;   break;
-        case SDLK_n:  keyCode = Key::N;   break;
-        case SDLK_o:  keyCode = Key::O;   break;
-        case SDLK_p:  keyCode = Key::P;   break;
-        case SDLK_q:  keyCode = Key::Q;   break;
-        case SDLK_r:  keyCode = Key::R;   break;
-        case SDLK_s:  keyCode = Key::T;   break;
-        case SDLK_t:  keyCode = Key::S;   break;
-        case SDLK_u:  keyCode = Key::U;   break;
-        case SDLK_v:  keyCode = Key::V;   break;
-        case SDLK_w:  keyCode = Key::W;   break;
-        case SDLK_x:  keyCode = Key::X;   break;
-        case SDLK_y:  keyCode = Key::Y;   break;
-        case SDLK_z:  keyCode = Key::Z;   break;
+        { "ShiftLeft",     Key::ShiftKey   },
+        { "ShiftRight",    Key::ShiftKey   },
+        { "ControlLeft",   Key::ControlKey },
+        { "ControlRight",  Key::ControlKey },
+        { "AltLeft",       Key::AltKey     },
+        { "AltRight",      Key::AltKey     },
+        { "MetaLeft",      Key::MetaKey    },
+        { "MetaRight",     Key::MetaKey    },
 
-        case SDLK_LSHIFT:   keyCode = Key::ShiftKey;    break;
-        case SDLK_RSHIFT:   keyCode = Key::ShiftKey;    break;
-        case SDLK_LCTRL:    keyCode = Key::ControlKey;  break;
-        case SDLK_RCTRL:    keyCode = Key::ControlKey;  break;
-        case SDLK_LALT:     keyCode = Key::AltKey;      break;
-        case SDLK_RALT:     keyCode = Key::AltKey;      break;
-        case SDLK_LGUI:     keyCode = Key::MetaKey;     break;
-        case SDLK_RGUI:     keyCode = Key::MetaKey;     break;
+        { "ArrowLeft",   Key::ArrowLeft  },
+        { "ArrowRight",  Key::ArrowRight },
+        { "ArrowUp",     Key::ArrowUp    },
+        { "ArrowDown",   Key::ArrowDown  },
 
-        case SDLK_LEFT:   keyCode = Key::ArrowLeft;   break;
-        case SDLK_RIGHT:  keyCode = Key::ArrowRight;  break;
-        case SDLK_UP:     keyCode = Key::ArrowUp;     break;
-        case SDLK_DOWN:   keyCode = Key::ArrowDown;   break;
+        { "NumLock",  Key::NumLock },
+        { "Numpad0",  Key::NumPad0 },
+        { "Numpad1",  Key::NumPad1 },
+        { "Numpad2",  Key::NumPad2 },
+        { "Numpad3",  Key::NumPad3 },
+        { "Numpad4",  Key::NumPad4 },
+        { "Numpad5",  Key::NumPad5 },
+        { "Numpad6",  Key::NumPad6 },
+        { "Numpad7",  Key::NumPad7 },
+        { "Numpad8",  Key::NumPad8 },
+        { "Numpad9",  Key::NumPad9 },
 
-        //case SDLK_NUMLOCK:    keyCode = Key::NumLock;     break;
-        case SDLK_KP_1:       keyCode = Key::NumPad0;     break;
-        case SDLK_KP_2:       keyCode = Key::NumPad1;     break;
-        case SDLK_KP_3:       keyCode = Key::NumPad2;     break;
-        case SDLK_KP_4:       keyCode = Key::NumPad3;     break;
-        case SDLK_KP_5:       keyCode = Key::NumPad4;     break;
-        case SDLK_KP_6:       keyCode = Key::NumPad5;     break;
-        case SDLK_KP_7:       keyCode = Key::NumPad6;     break;
-        case SDLK_KP_8:       keyCode = Key::NumPad7;     break;
-        case SDLK_KP_9:       keyCode = Key::NumPad8;     break;
-        case SDLK_KP_0:       keyCode = Key::NumPad9;     break;
+        { "NumpadMultiply",  Key::Multiply  },
+        { "NumpadAdd",       Key::Add       },
+        { "NumpadDivide",    Key::Divide    },
+        { "NumpadSubtract",  Key::Subtract  },
+        { "NumpadDecimal",   Key::Decimal   },
+        { "NumpadEnter",     Key::Return    },
 
-        case SDLK_KP_MULTIPLY:   keyCode = Key::Multiply;   break;
-        case SDLK_KP_PLUS:       keyCode = Key::Add;        break;
-        case SDLK_KP_DIVIDE:     keyCode = Key::Divide;     break;
-        case SDLK_KP_MINUS:      keyCode = Key::Subtract;   break;
-        case SDLK_KP_PERIOD:     keyCode = Key::Separator;  break;
-        case SDLK_KP_ENTER:      keyCode = Key::Return;  break;
-        case SDLK_KP_DECIMAL:    keyCode = Key::Decimal;    break;
+        { "F1",   Key::F1  },
+        { "F2",   Key::F2  },
+        { "F3",   Key::F3  },
+        { "F4",   Key::F4  },
+        { "F5",   Key::F5  },
+        { "F6",   Key::F6  },
+        { "F7",   Key::F7  },
+        { "F8",   Key::F8  },
+        { "F9",   Key::F9  },
+        { "F10",  Key::F10 },
+        { "F11",  Key::F11 },
+        { "F12",  Key::F12 },
+        { "F13",  Key::F13 },
+        { "F14",  Key::F14 },
+        { "F15",  Key::F15 },
+        { "F16",  Key::F16 },
+        { "F17",  Key::F17 },
+        { "F18",  Key::F18 },
+        { "F19",  Key::F19 },
+        { "F20",  Key::F20 },
+        { "F21",  Key::F21 },
+        { "F22",  Key::F22 },
+        { "F23",  Key::F23 },
+        { "F24",  Key::F24 },
 
-        case SDLK_F1:    keyCode = Key::F1;   break;
-        case SDLK_F2:    keyCode = Key::F2;   break;
-        case SDLK_F3:    keyCode = Key::F3;   break;
-        case SDLK_F4:    keyCode = Key::F4;   break;
-        case SDLK_F5:    keyCode = Key::F5;   break;
-        case SDLK_F6:    keyCode = Key::F6;   break;
-        case SDLK_F7:    keyCode = Key::F7;   break;
-        case SDLK_F8:    keyCode = Key::F8;   break;
-        case SDLK_F9:    keyCode = Key::F9;   break;
-        case SDLK_F10:  keyCode = Key::F10;  break;
-        case SDLK_F11:  keyCode = Key::F11;  break;
-        case SDLK_F12:  keyCode = Key::F12;  break;
-        case SDLK_F13:  keyCode = Key::F13;  break;
-        case SDLK_F14:  keyCode = Key::F14;  break;
-        case SDLK_F15:  keyCode = Key::F15;  break;
-        case SDLK_F16:  keyCode = Key::F16;  break;
-        case SDLK_F17:  keyCode = Key::F17;  break;
-        case SDLK_F18:  keyCode = Key::F18;  break;
-        case SDLK_F19:  keyCode = Key::F19;  break;
-        case SDLK_F20:  keyCode = Key::F20;  break;
-        case SDLK_F21:  keyCode = Key::F21;  break;
-        case SDLK_F22:  keyCode = Key::F22;  break;
-        case SDLK_F23:  keyCode = Key::F23;  break;
-        case SDLK_F24:  keyCode = Key::F24;  break;
+        { "Insert",       Key::Insert      },
+        { "Delete",       Key::Delete      },
+        { "Home",         Key::Home        },
+        { "End",          Key::End         },
+        { "PageUp",       Key::PageUp      },
+        { "PageDown",     Key::PageDown    },
+        { "CapsLock",     Key::CapsLock    },
+        { "PrintScreen",  Key::PrintScreen },
+        { "ScrollLock",   Key::ScrollLock  },
+        { "Pause",        Key::Pause       },
+        { "Help",         Key::Help        },
+        { "ContextMenu",  Key::AppsMenu    },
+    };
 
-        case SDLK_INSERT:          keyCode = Key::Insert;       break;
-        case SDLK_DELETE:          keyCode = Key::Delete;       break;
-        case SDLK_HOME:            keyCode = Key::Home;         break;
-        case SDLK_END:             keyCode = Key::End;          break;
-        case SDLK_PAGEUP:          keyCode = Key::PageUp;       break;
-        case SDLK_PAGEDOWN:        keyCode = Key::PageDown;     break;
-        case SDLK_CAPSLOCK:        keyCode = Key::CapsLock;     break;
-        case SDLK_PRINTSCREEN:     keyCode = Key::PrintScreen;  break;
-        case SDLK_SYSREQ:          keyCode = Key::SysReq;       break;
-        case SDLK_SCROLLLOCK:      keyCode = Key::ScrollLock;   break;
-        case SDLK_PAUSE:           keyCode = Key::Pause;        break;
-        //case SDLK_BREAK:         keyCode = Key::Break;        break;
-        case SDLK_CLEAR:           keyCode = Key::Clear;        break;
-        case SDLK_SLEEP:           keyCode = Key::Sleep;     break;
-        //case :                   keyCode = Key::Select;       break;
-        //case SDLK_PRINT:           keyCode = Key::Print;       break;
-        //case :                   keyCode = Key::Execute;      break;
-        case SDLK_HELP		:        keyCode = Key::Help;         break;
-        case SDLK_MENU		:        keyCode = Key::AppsMenu;     break;
-        //case :                   keyCode = Key::ModeChange;   break;
+    std::map<std::string, Pt::uint32_t>::const_iterator it = codeMap.find(domCode);
+    if( it == codeMap.end() )
+        return Key::NoKey;
 
-        // Key::Play             
-        // Key::Zoom                               
-        // Key::BrowserBack      
-        // Key::BrowserForward   
-        // Key::BrowserRefresh   
-        // Key::BrowserStop      
-        // Key::BrowserSearch    
-        // Key::BrowserFavorites 
-        // Key::BrowserHome      
-        // Key::VolumeMute       
-        // Key::VolumeDown       
-        // Key::VolumeUp         
-        // Key::MediaNext        
-        // Key::MediaPrev        
-        // Key::MediaStop        
-        // Key::MediaPlay        
-        // Key::LaunchMail       
-        // Key::LaunchMedia      
-        // Key::LaunchApp1       
-        // Key::LaunchApp2       
-
-        default:
-            break;
-    }
-
-    return keyCode;
+    return it->second;
 }
 
 } // namespace

@@ -35,8 +35,13 @@
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/Condition.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
+
+#include <emscripten/html5.h>
+
+#include <thread>
 
 namespace Pt {
 
@@ -161,14 +166,32 @@ class ApplicationImpl : public Pt::System::EventLoop
         virtual void onDetachTimer(System::Timer& timer);
 
     private:
-        static void mainLoop(void* arg);
+        // single wait/dispatch step, shared by onRun() and nextEvent()
+        bool waitNext();
+
+        // entry point of the real OS thread that runs the blocking event loop
+        void run();
+
+        void dispatchKeyEvent(const EmscriptenKeyboardEvent& e, bool press);
+
+        void dispatchMouseEvent(const EmscriptenMouseEvent& e, int eventType);
+
+        static EM_BOOL onKeyDown(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
+
+        static EM_BOOL onKeyUp(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
+
+        static EM_BOOL onMouseEvent(int eventType, const EmscriptenMouseEvent* e, void* userData);
 
     private:
-        Selector           _selector;
-        System::EventQueue _eventQueue;
-        Pt::DateTime       _lastActivityTime;
-        MouseEvent         _mev;
-        KeyEvent           _keyEvent;
+        Selector               _selector;
+        System::EventQueue     _eventQueue;
+        System::Mutex          _wakeMutex;
+        System::Condition      _wakeCondition;
+        System::TimerQueue     _timerQueue;
+        bool                   _exiting;
+        Pt::DateTime           _lastActivityTime;
+        MouseEvent             _mev;
+        KeyEvent               _keyEvent;
 };
 
 } // namespace
