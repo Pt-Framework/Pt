@@ -5,6 +5,7 @@ deploy/
 deps/
 Jamrules*
 jam*.bin
+.agents
 
 # Documentation (generated)
 doc/html/
