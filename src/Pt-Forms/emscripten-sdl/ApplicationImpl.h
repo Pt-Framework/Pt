@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
   MA 02110-1301 USA
 */
 
@@ -35,13 +35,8 @@
 #include <Pt/Forms/MouseEvent.h>
 #include <Pt/Forms/KeyEvent.h>
 #include <Pt/System/EventLoop.h>
-#include <Pt/System/Condition.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
-
-#include <emscripten/html5.h>
-
-#include <thread>
 
 namespace Pt {
 
@@ -127,7 +122,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         void sendKeyEvent(const KeyEvent& ev);
 
         void sendMouseEvent(const MouseEvent& ev);
-
+    
         void nextEvent();
 
         GraphicsBackend* queryBackend()
@@ -136,8 +131,8 @@ class ApplicationImpl : public Pt::System::EventLoop
         }
 
         virtual System::Selector& selector()
-        {
-          return _selector;
+        { 
+          return _selector; 
         }
 
     protected:
@@ -166,35 +161,12 @@ class ApplicationImpl : public Pt::System::EventLoop
         virtual void onDetachTimer(System::Timer& timer);
 
     private:
-        // single wait/dispatch step, shared by onRun() and nextEvent()
-        bool waitNext();
-
-        // entry point of the real OS thread that runs the blocking event loop
-        void run();
-
-        void dispatchKeyEvent(const EmscriptenKeyboardEvent& e, bool press);
-
-        void dispatchMouseEvent(const EmscriptenMouseEvent& e, int eventType);
-
-        static EM_BOOL onKeyDown(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
-
-        static EM_BOOL onKeyUp(int eventType, const EmscriptenKeyboardEvent* e, void* userData);
-
-        static EM_BOOL onMouseEvent(int eventType, const EmscriptenMouseEvent* e, void* userData);
-
-    private:
-        Selector               _selector;
-        System::EventQueue     _eventQueue;
-        System::Mutex          _wakeMutex;
-        System::Condition      _wakeCondition;
-        // guarded by _wakeMutex; catches a wake() fired before waitNext() starts waiting,
-        // which a bare condition variable would otherwise silently drop for a full timeout
-        bool                   _wakePending;
-        System::TimerQueue     _timerQueue;
-        bool                   _exiting;
-        Pt::DateTime           _lastActivityTime;
-        MouseEvent             _mev;
-        KeyEvent               _keyEvent;
+        Selector           _selector;
+        System::EventQueue _eventQueue;
+        Pt::DateTime       _lastActivityTime;
+        MouseEvent         _mev;
+        KeyEvent           _keyEvent;
+        bool               _active;
 };
 
 } // namespace
@@ -202,3 +174,4 @@ class ApplicationImpl : public Pt::System::EventLoop
 } // namespace
 
 #endif
+

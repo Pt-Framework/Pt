@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
   MA 02110-1301 USA
 */
 
@@ -38,7 +38,7 @@
 
 #include "../generic/GenericGraphicsBackend.h"
 
-#include <vector>
+#include <SDL.h>
 
 namespace Pt {
 
@@ -59,10 +59,10 @@ class ScreenImpl : public Form
 
         virtual ~ScreenImpl();
 
-
+        
         void setParent(Screen* screen);
 
-
+        
         void addWindow(Window& w);
 
         void removeWindow(Window& w);
@@ -71,7 +71,7 @@ class ScreenImpl : public Form
 
         WindowManager& windowManager();
 
-
+        
         void setCapture(Widget* capture);
 
     //
@@ -130,15 +130,8 @@ class ScreenImpl : public Form
 
         virtual void onPaintEvent(const PaintEvent& ev);
 
-        virtual void onPaint(PaintContext& context,
+        virtual void onPaint(PaintContext& context, 
                              const Gfx::RectF& updateRect);
-
-    //
-    // canvas blit
-    //
-    private:
-        void updateCanvasBuffer(const Gfx::Image& image, std::size_t x0, std::size_t y0,
-                                 std::size_t width, std::size_t height);
 
     //
     // input
@@ -159,7 +152,8 @@ class ScreenImpl : public Form
         GenericGraphicsBackend* _genericBackend;
         Pixmap       _pixmap;
 
-        std::vector<Pt::uint8_t> _canvasBuffer;
+        SDL_Window*   _screen;
+        SDL_Surface*  _imageSurface;
 };
 
 } // namespace

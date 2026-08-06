@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -49,6 +49,7 @@ namespace Forms {
 
 ApplicationImpl::ApplicationImpl()
 : _exiting(false)
+, _wakePending(false)
 , _lastActivityTime( Pt::System::Clock::getSystemTime() )
 {
     // registered with an explicit target thread: under -sPROXY_TO_PTHREAD=1 the
@@ -74,7 +75,7 @@ ApplicationImpl::~ApplicationImpl()
     emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
     emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
     emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, false, 0);
-} 
+}
 
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
@@ -86,7 +87,7 @@ Pt::Timespan ApplicationImpl::inactivityTime() const
     Pt::DateTime now = Pt::System::Clock::getSystemTime();
     Pt::Timespan inactivity = now - _lastActivityTime;
     return inactivity;
-}	
+}
 
 
 void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
@@ -135,11 +136,17 @@ bool ApplicationImpl::waitNext()
     if(timeout == System::EventLoop::WaitInfinite)
         timeout = 16;
 
-    {
-        emscripten_current_thread_process_queued_calls();
+    emscripten_current_thread_process_queued_calls();
 
+    {
         System::MutexLock lock(_wakeMutex);
-        _wakeCondition.wait( _wakeMutex, static_cast<unsigned int>(timeout) );
+
+        // a proxied callback above may have already called wake() for this tick;
+        // only block if that didn't happen, else the signal would be missed
+        if( ! _wakePending)
+            _wakeCondition.wait( _wakeMutex, static_cast<unsigned int>(timeout) );
+
+        _wakePending = false;
     }
 
     this->processEvents();
@@ -151,7 +158,7 @@ bool ApplicationImpl::waitNext()
 void ApplicationImpl::onRun()
 {
     while( this->waitNext() )
-        ;                        
+        ;
 }
 
 
@@ -173,20 +180,21 @@ void ApplicationImpl::onExit()
 
 void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
 {
-    _eventQueue.pushEvent(ev); 
+    _eventQueue.pushEvent(ev);
     wake();
 }
 
 
 void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 {
-    _eventQueue.pushEvent(ev); 
+    _eventQueue.pushEvent(ev);
 }
 
 
 void ApplicationImpl::onWake()
 {
     System::MutexLock lock(_wakeMutex);
+    _wakePending = true;
     _wakeCondition.signal();
 }
 
@@ -247,7 +255,7 @@ void ApplicationImpl::dispatchKeyEvent(const EmscriptenKeyboardEvent& e, bool pr
 
 
 void ApplicationImpl::dispatchMouseEvent(const EmscriptenMouseEvent& e, int eventType)
-{ 
+{
     _lastActivityTime = Pt::System::Clock::getSystemTime();
 
     Screen& screen = Application::instance().screen();

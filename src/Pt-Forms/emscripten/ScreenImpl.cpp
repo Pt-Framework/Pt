@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -40,6 +40,9 @@
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
+
+#include <algorithm>
+#include <cmath>
 
 PT_LOG_DEFINE("Pt.Forms.Screen")
 
@@ -87,18 +90,102 @@ void makeCanvasFullscreen(const char* selector)
     }, selector);
 }
 
-// blits an RGBA8888 buffer onto the 2d context of the given canvas element;
-// proxied to the main thread since only it has DOM access under -sPROXY_TO_PTHREAD=1
-void blitCanvasImage(const char* selector, const unsigned char* pixels, int width, int height)
+// blits an RGBA8888 buffer onto the 2d context of the given canvas element at (dx, dy);
+// proxied to the main thread since only it has DOM access under -sPROXY_TO_PTHREAD=1.
+// putImageData() calls are throttled to at most one per browser animation frame: several
+// correct-but-intermediate blits can otherwise be posted in quick succession (e.g. during a
+// fast MDI subwindow resize) and the browser may composite in between two of them, flashing
+// a stale frame before the final one appears
+void blitCanvasImage(const char* selector, const unsigned char* pixels, int width, int height,
+                     int dx, int dy)
 {
     MAIN_THREAD_EM_ASM({
         var canvas = document.querySelector(UTF8ToString($0));
         var ctx = canvas.ptContext2d || (canvas.ptContext2d = canvas.getContext("2d"));
-        // ImageData rejects a SharedArrayBuffer-backed view, so copy out of wasm memory
-        var view = HEAPU8.subarray($1, $1 + $2 * $3 * 4);
-        var data = new Uint8ClampedArray(view);
-        ctx.putImageData(new ImageData(data, $2, $3), 0, 0);
-    }, selector, pixels, width, height);
+        var w = $2;
+        var h = $3;
+        var dx = $4;
+        var dy = $5;
+        var cw = canvas.width;
+        var ch = canvas.height;
+
+        // persistent full-canvas buffer cached on the canvas: reused across calls and only
+        // reallocated when the canvas itself is resized; each call copies just its dirty
+        // sub-rect into it, while putImageData() below flushes the accumulated dirty area
+        var full = canvas.ptFullData;
+        if( ! full || full.w !== cw || full.h !== ch)
+        {
+            var data = new Uint8ClampedArray(cw * ch * 4);
+            // object literal avoided: unparenthesized top-level commas would split the EM_ASM macro argument
+            full = {};
+            full.data = data;
+            full.imgData = new ImageData(data, cw, ch);
+            full.w = cw;
+            full.h = ch;
+            canvas.ptFullData = full;
+            // the buffer was just reallocated (zeroed): any pending dirty rect now refers to
+            // stale contents and must not be flushed against it
+            canvas.ptDirty = null;
+        }
+
+        // clamp the incoming rect to the current canvas bounds before copying/unioning
+        var x0 = Math.max(0, dx);
+        var y0 = Math.max(0, dy);
+        var x1 = Math.min(cw, dx + w);
+        var y1 = Math.min(ch, dy + h);
+        if(x1 <= x0 || y1 <= y0)
+            return;
+
+        var view = HEAPU8.subarray($1, $1 + w * h * 4);
+        var skipX = x0 - dx;
+        var skipY = y0 - dy;
+        var copyW = x1 - x0;
+        var copyH = y1 - y0;
+
+        for(var y = 0; y < copyH; ++y)
+        {
+            var srcOff = ((skipY + y) * w + skipX) * 4;
+            var dstOff = ((y0 + y) * cw + x0) * 4;
+            full.data.set(view.subarray(srcOff, srcOff + copyW * 4), dstOff);
+        }
+
+        // union the new rect into the not-yet-flushed pending dirty rect instead of
+        // overwriting it, so every blit between two animation frames is included
+        var pending = canvas.ptDirty;
+        if(pending)
+        {
+            pending.x0 = Math.min(pending.x0, x0);
+            pending.y0 = Math.min(pending.y0, y0);
+            pending.x1 = Math.max(pending.x1, x1);
+            pending.y1 = Math.max(pending.y1, y1);
+        }
+        else
+        {
+            // object literal avoided: unparenthesized top-level commas would split the EM_ASM macro argument
+            pending = {};
+            pending.x0 = x0;
+            pending.y0 = y0;
+            pending.x1 = x1;
+            pending.y1 = y1;
+            canvas.ptDirty = pending;
+        }
+
+        if( ! canvas.ptRafPending)
+        {
+            canvas.ptRafPending = true;
+            requestAnimationFrame(function()
+            {
+                var rect = canvas.ptDirty;
+                canvas.ptRafPending = false;
+                canvas.ptDirty = null;
+                if( ! rect)
+                    return;
+
+                ctx.putImageData(canvas.ptFullData.imgData, 0, 0,
+                                  rect.x0, rect.y0, rect.x1 - rect.x0, rect.y1 - rect.y0);
+            });
+        }
+    }, selector, pixels, width, height, dx, dy);
 }
 
 } // namespace
@@ -159,13 +246,13 @@ void ScreenImpl::setParent(Screen* screen)
 
 void ScreenImpl::addWindow(Window& w)
 {
-    _workspace.addWindow(w); 
+    _workspace.addWindow(w);
 }
 
 
 void ScreenImpl::removeWindow(Window& w)
-{ 
-    _workspace.removeWindow(w); 
+{
+    _workspace.removeWindow(w);
 }
 
 
@@ -263,19 +350,19 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 
 
 bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
-{ 
+{
     return Base::onMouseEvent(ev);
 }
 
 
 void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
-{ 
+{
     Base::onProcessTouchEvent(ev);
 }
 
 
 bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
-{ 
+{
     return Base::onTouchEvent(ev);
 }
 
@@ -284,7 +371,7 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 {
     if( ! isEnabled() )
         return;
-  
+
     Base::onProcessScrollEvent(ev);
 }
 
@@ -299,7 +386,7 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 {
     if( ! isEnabled() )
         return;
-    
+
     Base::onProcessKeyEvent(ev);
 }
 
@@ -311,7 +398,7 @@ bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
 
 
 void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
-{   
+{
     Base::onProcessRescaleEvent(ev);
 }
 
@@ -350,10 +437,9 @@ void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image)
+void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image, std::size_t x0, std::size_t y0,
+                                     std::size_t width, std::size_t height)
 {
-    const std::size_t width = static_cast<std::size_t>(image.width());
-    const std::size_t height = static_cast<std::size_t>(image.height());
     const std::size_t srcStride = static_cast<std::size_t>(image.stride());
     const std::size_t dstStride = width * 4;
 
@@ -365,7 +451,7 @@ void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image)
     // Argb32 stores B,G,R,A per pixel; canvas ImageData expects R,G,B,A
     for(std::size_t y = 0; y < height; ++y)
     {
-        const Pt::uint8_t* srcRow = src + y * srcStride;
+        const Pt::uint8_t* srcRow = src + (y0 + y) * srcStride + x0 * 4;
         Pt::uint8_t* dstRow = dst + y * dstStride;
 
         for(std::size_t x = 0; x < width; ++x)
@@ -389,14 +475,36 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     Base::onProcessPaintEvent(ev);
 
     const Gfx::Image& image = _genericBackend->image(_pixmap);
-    updateCanvasBuffer(image);
 
-    blitCanvasImage("canvas", _canvasBuffer.data(), int(image.width()), int(image.height()));
+    const Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
+
+    const long imgWidth = static_cast<long>(image.width());
+    const long imgHeight = static_cast<long>(image.height());
+
+    // expand fractional edges outward by 1px so no seam/stale-pixel line remains
+    const long x0 = std::max<long>(0, static_cast<long>( std::floor(updateRectP.x()) ) - 1);
+    const long y0 = std::max<long>(0, static_cast<long>( std::floor(updateRectP.y()) ) - 1);
+    const long x1 = std::min<long>(imgWidth,
+        static_cast<long>( std::ceil(updateRectP.x() + updateRectP.width()) ) + 1);
+    const long y1 = std::min<long>(imgHeight,
+        static_cast<long>( std::ceil(updateRectP.y() + updateRectP.height()) ) + 1);
+
+    if(x1 <= x0 || y1 <= y0)
+        return;
+
+    const std::size_t dirtyWidth = static_cast<std::size_t>(x1 - x0);
+    const std::size_t dirtyHeight = static_cast<std::size_t>(y1 - y0);
+
+    updateCanvasBuffer(image, static_cast<std::size_t>(x0), static_cast<std::size_t>(y0),
+                        dirtyWidth, dirtyHeight);
+
+    blitCanvasImage("canvas", _canvasBuffer.data(), int(dirtyWidth), int(dirtyHeight),
+                     int(x0), int(y0));
 }
 
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
-{    
+{
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
