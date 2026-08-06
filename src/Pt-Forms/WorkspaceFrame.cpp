@@ -153,7 +153,7 @@ void WindowButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
     Gfx::Color backgroundColor = color();
     Gfx::Color borderTopLeftColor = light;
     Gfx::Color borderBottomRightColor = dark;
-    
+
     if(_isPressed)
     {
         backgroundColor = brighten(color(), 0.9f);
@@ -170,40 +170,40 @@ void WindowButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
                                                   _geometry.bottom() - spacing);
     double offset = 0;
 
-    Gfx::PointF topLeft(borderRect.topLeft().x() + offset, 
+    Gfx::PointF topLeft(borderRect.topLeft().x() + offset,
                         borderRect.topLeft().y() + offset);
-    Gfx::PointF bottomLeft(borderRect.bottomLeft().x() + offset, 
+    Gfx::PointF bottomLeft(borderRect.bottomLeft().x() + offset,
                            borderRect.bottomLeft().y() - offset);
-    Gfx::PointF bottomRight(borderRect.bottomRight().x() - offset, 
+    Gfx::PointF bottomRight(borderRect.bottomRight().x() - offset,
                             borderRect.bottomRight().y() - offset);
-    Gfx::PointF topRight(borderRect.topRight().x() - offset, 
+    Gfx::PointF topRight(borderRect.topRight().x() - offset,
                          borderRect.topRight().y() + offset);
-    
+
     //
     // fill background
     //
     Gfx::Brush brush = backgroundColor;
     painter.setBrush(brush);
     painter.fillRect(borderRect);
-  
+
     //
     // bottom right border
     //
     Gfx::PointF points[3] = { bottomLeft, bottomRight, topRight };
 
-    painter.setPen( Gfx::Pen(borderBottomRightColor, penSize, 
+    painter.setPen( Gfx::Pen(borderBottomRightColor, penSize,
                              Gfx::Pen::Solid, Gfx::Pen::FlatCap, Gfx::Pen::MiterJoin) );
 
     painter.drawPolyline(points, 3);
 
     //
     // top left border
-    //    
+    //
     points[0] = topRight;
     points[1] = topLeft;
     points[2] = bottomLeft;
 
-    painter.setPen(Gfx::Pen(borderTopLeftColor, penSize, 
+    painter.setPen(Gfx::Pen(borderTopLeftColor, penSize,
                             Gfx::Pen::Solid, Gfx::Pen::FlatCap, Gfx::Pen::MiterJoin));
 
     painter.drawPolyline(points, 3);
@@ -275,14 +275,14 @@ void MaximizeButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
                                                    geometry().top() + inset,
                                                    geometry().right() - inset,
                                                    geometry().bottom() - inset);
-     
-    Pt::Gfx::Pen pen(Gfx::Color(255, 255, 255), 
+
+    Pt::Gfx::Pen pen(Gfx::Color(255, 255, 255),
                      1, Gfx::Pen::Solid, Gfx::Pen::SquareCap, Gfx::Pen::MiterJoin);
     painter.setPen(pen);
     painter.drawRect(frameSymbol);
 
     frameSymbol.setHeight( scaling.align(2.0) );
-    
+
     painter.setBrush( Gfx::Color(255, 255, 255) );
     painter.fillRect(frameSymbol);
 }
@@ -319,25 +319,25 @@ void CloseButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
 
     Gfx::PointF line1[] = { Gfx::PointF( buttonRect.topLeft().x() + margin + inset,
                                          buttonRect.topLeft().y() + offset + margin + inset),
-                            
+
                             Gfx::PointF( buttonRect.topLeft().x() + offset + margin + inset,
                                          buttonRect.topLeft().y() + margin + inset ),
-                            
+
                             Gfx::PointF( buttonRect.bottomRight().x() - margin - inset,
                                          buttonRect.bottomRight().y() - offset - margin - inset),
-                            
+
                             Gfx::PointF( buttonRect.bottomRight().x() - offset - margin - inset,
                                          buttonRect.bottomRight().y() - margin - inset) };
 
     Gfx::PointF line2[] = { Gfx::PointF( buttonRect.topRight().x() - offset - margin - inset,
                                          buttonRect.topRight().y() + margin + inset ),
-                            
+
                             Gfx::PointF( buttonRect.topRight().x() - margin - inset,
                                          buttonRect.topRight().y() + offset + margin + inset ),
-                            
+
                             Gfx::PointF( buttonRect.bottomLeft().x() + offset + margin + inset,
                                          buttonRect.bottomLeft().y() - margin - inset),
-                            
+
                             Gfx::PointF( buttonRect.bottomLeft().x() + margin + inset,
                                          buttonRect.bottomLeft().y() - offset - margin - inset) };
 
@@ -382,7 +382,7 @@ void MenuButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
 
     double x = (geometry().width() - triangleWidth) / 2.0;
     x = geometry().x() + scaling.align(x);
-    
+
     double y = (geometry().height() - triangleHeight) / 2.0;
     y = geometry().y() + scaling.align(y - 1);
 
@@ -395,7 +395,7 @@ void MenuButton::paint(PaintContext& ctx, const Gfx::RectF& rect)
     Gfx::Brush brush( Gfx::Color(255, 255, 255) );
     painter.setBrush(brush);
     painter.fillPolygon(triangle, 3);
-    
+
     //painter.setPen(Gfx::ColorF::fromRgb8(255, 0, 0));
     //painter.drawPolyline(triangle, 4);
 }
@@ -422,13 +422,13 @@ WorkspaceFrame::WorkspaceFrame(WorkspaceManager& workspace, Window& window)
 , _currentFrameItem(OnNone)
 {
     Base::onSetParent(&workspace);
-    
+
     switch( window.type() )
     {
         case WindowType::Popup:
             setFrame(0, 0);
             break;
-        
+
         default:
         case WindowType::Default:
             setFrame(_borderWidth, _titleHeight);
@@ -469,7 +469,7 @@ void WorkspaceFrame::onInit(Window& w)
     if( screen() )
     {
         double scaling = scaleFactor();
-    
+
         RescaleEvent ev(w, scaling);
         w.processEvent(ev);
     }
@@ -568,8 +568,8 @@ void WorkspaceFrame::onSetAbove(Window& w, bool above)
 }
 
 
-void WorkspaceFrame::onSetSizeLimits(Window& w, 
-                                       const Gfx::SizeF& minSize, 
+void WorkspaceFrame::onSetSizeLimits(Window& w,
+                                       const Gfx::SizeF& minSize,
                                        const Gfx::SizeF& maxSize)
 {
     _wm->onSetSizeLimits(*this, minSize, maxSize);
@@ -724,7 +724,7 @@ void WorkspaceFrame::onLayout()
 }
 
 
-Gfx::PointF WorkspaceFrame::onToWindow(const Window& w, 
+Gfx::PointF WorkspaceFrame::onToWindow(const Window& w,
                                          const Gfx::PointF& pos) const
 {
     double offX = _borderWidth;
@@ -734,7 +734,7 @@ Gfx::PointF WorkspaceFrame::onToWindow(const Window& w,
 }
 
 
-Gfx::PointF WorkspaceFrame::onFromWindow(const Window& w, 
+Gfx::PointF WorkspaceFrame::onFromWindow(const Window& w,
                                            const Gfx::PointF& pos) const
 {
     double offX = _borderWidth;
@@ -762,11 +762,11 @@ Widget* WorkspaceFrame::onHitTest(const Gfx::PointF& pos)
 
 
 Gfx::PointF WorkspaceFrame::onToParent(const Gfx::PointF& pos) const
-{ 
+{
     return _wm->fromFrame(*this, pos);
 }
 
-        
+
 Gfx::PointF WorkspaceFrame::onFromParent(const Gfx::PointF& pos) const
 {
     return _wm->toFrame(*this, pos);
@@ -838,7 +838,7 @@ void WorkspaceFrame::onProcessEnableEvent(const EnableEvent& ev)
 
 
 void WorkspaceFrame::onEnableEvent(const EnableEvent& ev)
-{    
+{
     Base::onEnableEvent(ev);
 
     repaint(_frameBounds);
@@ -916,7 +916,7 @@ void WorkspaceFrame::onMoveEvent(const MoveEvent& ev)
     updateRect.unify( Gfx::RectF(delta, _frameBounds.size()) );
 
     //repaint(updateRect);
-    
+
     updateRect.move(position().x(), position().y());
     _wm->repaint(updateRect);
 
@@ -988,7 +988,7 @@ void WorkspaceFrame::onProcessResizeEvent(const ResizeEvent& ev)
     clientSize.subWidth(2 * _borderWidth);
     clientSize.subHeight(2 * _borderWidth);
     clientSize.subHeight(_titleHeight);
-    
+
     _clientRect.setSize(clientSize);
     _clientBounds.setSize(clientSize);
 
@@ -1038,7 +1038,7 @@ void WorkspaceFrame::onProcessMouseEvent(const MouseEvent& ev)
 
     //
     // stop capture on press
-    // 
+    //
     if(_isCapture)
     {
         if( ev.isRelease() )
@@ -1068,7 +1068,7 @@ void WorkspaceFrame::onProcessMouseEvent(const MouseEvent& ev)
         setCapture(true);
         _isCapture = true;
     }
-        
+
     Widget::onProcessMouseEvent(ev);
 }
 
@@ -1083,7 +1083,7 @@ void WorkspaceFrame::onProcessTouchEvent(const TouchEvent& tev)
         window->processEvent(tev);
         return;
     }
-        
+
     Widget::onProcessTouchEvent(tev);
 }
 
@@ -1112,15 +1112,15 @@ bool WorkspaceFrame::onMouseEvent(const MouseEvent& mev)
 
         if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
         {
-            if(onTopBorder && onLeftBorder) 
+            if(onTopBorder && onLeftBorder)
                 setCurrentFrameItem(OnFrameTopLeft);
-            else if(onTopBorder && onRightBorder) 
+            else if(onTopBorder && onRightBorder)
                 setCurrentFrameItem(OnFrameTopRight);
             else if(onTopBorder)
                 setCurrentFrameItem(OnFrameTop);
-            else if(onBottomBorder && onLeftBorder) 
+            else if(onBottomBorder && onLeftBorder)
                 setCurrentFrameItem(OnFrameBottomLeft);
-            else if(onBottomBorder && onRightBorder) 
+            else if(onBottomBorder && onRightBorder)
                 setCurrentFrameItem(OnFrameBottomRight);
             else if(onBottomBorder)
                 setCurrentFrameItem(OnFrameBottom);
@@ -1138,7 +1138,7 @@ bool WorkspaceFrame::onMouseEvent(const MouseEvent& mev)
     }
 
     _lastPointer = pos;
-    
+
     return true;
 }
 
@@ -1167,15 +1167,15 @@ bool WorkspaceFrame::onTouchEvent(const TouchEvent& tev)
 
         if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
         {
-            if(onTopBorder && onLeftBorder) 
+            if(onTopBorder && onLeftBorder)
                 setCurrentFrameItem(OnFrameTopLeft);
-            else if(onTopBorder && onRightBorder) 
+            else if(onTopBorder && onRightBorder)
                 setCurrentFrameItem(OnFrameTopRight);
             else if(onTopBorder)
                 setCurrentFrameItem(OnFrameTop);
-            else if(onBottomBorder && onLeftBorder) 
+            else if(onBottomBorder && onLeftBorder)
                 setCurrentFrameItem(OnFrameBottomLeft);
-            else if(onBottomBorder && onRightBorder) 
+            else if(onBottomBorder && onRightBorder)
                 setCurrentFrameItem(OnFrameBottomRight);
             else if(onBottomBorder)
                 setCurrentFrameItem(OnFrameBottom);
@@ -1236,7 +1236,7 @@ void WorkspaceFrame::setCurrentFrameItem(FrameItem item)
       default:
           Application::instance().setCursor( &Cursor::defaultCursor() );
     }
-    
+
     _currentFrameItem = item;
 }
 
@@ -1379,7 +1379,7 @@ bool WorkspaceFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress
         {
             Gfx::PointF to = _frameRect.topLeft() + pos - _lastPointer;
             //_window->move(to);
-            
+
             move(to);
         }
 
@@ -1431,16 +1431,16 @@ bool WorkspaceFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPre
             if(_isBottomResizing)
                 winSize.addHeight( delta.y() );
 
-            if( ! winSize.isEqual(_clientBounds.size()) )
-            {
-                _window->resize(winSize);
-                //resize(winSize);
-            }
-
             if( ! winpos.isEqual(_frameRect.topLeft()) )
             {
                 _window->move(winpos);
                 //move(winpos);
+            }
+
+            if( ! winSize.isEqual(_clientBounds.size()) )
+            {
+                _window->resize(winSize);
+                //resize(winSize);
             }
         }
 
@@ -1468,7 +1468,7 @@ void WorkspaceFrame::onRequestRepaint(const Gfx::RectF& rect)
 
     Gfx::PointF updatePos = rect.topLeft() + position();
     Gfx::RectF updateRect( updatePos, rect.size() );
-    
+
     _wm->repaint(updateRect);
 }
 
@@ -1481,7 +1481,7 @@ void WorkspaceFrame::onProcessPaintEvent(const PaintEvent& ev)
     _needsRepaint = false;
 
     const Gfx::RectF& rect = ev.rect();
-    
+
     Gfx::PointF winPos = onToWindow( *_window, rect.topLeft() );
     Gfx::RectF winRect( winPos, rect.size() );
 
@@ -1518,7 +1518,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
 
     //Gfx::PointF pos = _window->position();
     Gfx::PointF pos(0, 0);
-    
+
     Gfx::RectF leftBorder = Gfx::RectF::fromLTRB(pos.x(),
                                                   pos.y() + _borderWidth,
                                                   pos.x() + _borderWidth,
@@ -1531,7 +1531,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
                                                  pos.y() + _borderWidth);
 
     painter.fillRect(topBorder);
-    
+
     Gfx::RectF rightBorder = Gfx::RectF::fromLTRB(pos.x() + size().width() - _borderWidth,
                                                    pos.y() + _borderWidth,
                                                    pos.x() + size().width(),
@@ -1570,7 +1570,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
                      Gfx::PointF(pos.x() + size().width(),
                                  pos.y() + offset) );
     // outer left
-    painter.drawLine(Gfx::PointF(pos.x() + offset, 
+    painter.drawLine(Gfx::PointF(pos.x() + offset,
                                  pos.y()),
                      Gfx::PointF(pos.x() + offset,
                                  pos.y() + size().height()) );
@@ -1590,24 +1590,24 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     //
     // dark outer and inner border contour
     //
-    
+
     Gfx::Color borderDark = brighten(color, 0.75f);
     Gfx::Pen borderPenDark(borderDark, penSize);
 
     painter.setPen(borderPenDark);
-    
+
     // outer bottom
     painter.drawLine( Gfx::PointF(pos.x(),
                                   pos.y() + size().height() - offset),
                       Gfx::PointF(pos.x() + size().width() - offset,
                                   pos.y() + size().height() - offset) );
-    
+
     // outer right
     painter.drawLine(Gfx::PointF( pos.x() + size().width() - offset,
                                   pos.y() ),
                      Gfx::PointF(pos.x() + size().width() - offset,
                                  pos.y() + size().height() - offset) );
-    
+
     // inner left
     painter.drawLine( Gfx::PointF(pos.x() + _borderWidth - offset,
                                   pos.y() + _borderWidth + _titleHeight - offset),
@@ -1659,11 +1659,11 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
 
     double lineOffset = scaling.align(2.0);
     double gripHeight = (8 * lineSize) + (3 * lineOffset);
-    
+
     double gripLeft = textPos.x() + tm.advance() + _borderWidth;
     double gripRight = pos.x() + size().width() - _borderWidth - 3 * _titleHeight;
     double gripOffset = (_titleHeight + _borderWidth - gripHeight) / 2.0;
-    
+
     double gripY = pos.y() + scaling.align(gripOffset);
     gripY += offset;
 
