@@ -169,6 +169,40 @@ class TestSelectable : public Pt::System::Selectable
 };
 
 
+class CoalesceSelectable : public Pt::System::Selectable
+{
+    public:
+        CoalesceSelectable()
+        : Pt::System::Selectable()
+        , _runCount(0)
+        {}
+
+        void postMany(unsigned n)
+        {
+            for(unsigned i = 0; i < n; ++i)
+                post();
+        }
+
+        int _runCount;
+
+    protected:
+        virtual void onAttach(Pt::System::EventLoop&)
+        {}
+
+        virtual void onDetach(Pt::System::EventLoop&)
+        {}
+
+        bool onRun()
+        {
+            ++_runCount;
+            return true;
+        }
+
+        void onCancel()
+        {}
+};
+
+
 class EventLoopTest : public Pt::Unit::TestSuite
                     , public Pt::Connectable
 {
@@ -178,6 +212,7 @@ class EventLoopTest : public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "SelectableTest", *this, &EventLoopTest::SelectableTest);
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
+            Pt::Unit::TestSuite::registerMethod( "CoalesceTest", *this, &EventLoopTest::CoalesceTest);
             Pt::Unit::TestSuite::registerMethod( "MaxAlloc", *this, &EventLoopTest::MaxAlloc);
             //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
 #if __cplusplus >= 202002L
@@ -221,6 +256,24 @@ class EventLoopTest : public Pt::Unit::TestSuite
             el.run();
 
             PT_UNIT_ASSERT(_cnt == 3);
+        }
+
+        void CoalesceTest()
+        {
+            Pt::System::MainLoop el;
+
+            CoalesceSelectable cs;
+            cs.setActive(el);
+            cs.postMany(5);
+
+            Pt::System::Timer exitTimer;
+            exitTimer.setActive(el);
+            exitTimer.start(500);
+            exitTimer.timeout() += Pt::slot(el, &Pt::System::EventLoop::exit);
+
+            el.run();
+
+            PT_UNIT_ASSERT(cs._runCount == 1);
         }
 
         void onE1(const E1&)

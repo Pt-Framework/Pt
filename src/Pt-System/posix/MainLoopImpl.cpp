@@ -28,6 +28,7 @@
 
 #include "MainLoopImpl.h"
 #include <Pt/System/Logger.h>
+#include <algorithm>
 
 PT_LOG_DEFINE("Pt.System.MainLoop")
 
@@ -52,7 +53,12 @@ MainLoopImpl::~MainLoopImpl()
 void MainLoopImpl::avail(Selectable& s)
 {
     MutexLock lock(_mutex);
-    _avail.push_back(&s);
+
+    std::vector<Selectable*>::iterator it = std::lower_bound(_avail.begin(),
+                                                             _avail.end(), &s);
+
+    if(it == _avail.end() || *it != &s)
+        _avail.insert(it, &s);
 }
 
 
@@ -60,14 +66,11 @@ void MainLoopImpl::idle(Selectable& s)
 {
     MutexLock lock(_mutex);
 
-    std::vector<Selectable*>::iterator it = _avail.begin();
-    while( it != _avail.end() )
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
+    std::vector<Selectable*>::iterator it = std::lower_bound(_avail.begin(),
+                                                             _avail.end(), &s);
+
+    if(it != _avail.end() && *it == &s)
+        _avail.erase(it);
 }
 
 
@@ -157,4 +160,3 @@ bool MainLoopImpl::waitNext()
 } //namespace System
 
 } //namespace Pt
-
