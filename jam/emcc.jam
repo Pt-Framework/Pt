@@ -81,10 +81,12 @@ rule CheckCc
     # pool must cover the PROXY_TO_PTHREAD proxy thread plus any app-spawned
     # worker threads (e.g. Pt::Forms::ApplicationImpl's event loop thread),
     # otherwise extra pthread_create calls block until the pool grows
-    MAIN_LINKFLAGS = --emrun -s EXPORT_ALL=1 -s MAIN_MODULE=1 -s PROXY_TO_PTHREAD=1 -s PTHREAD_POOL_SIZE=4 -s EXIT_RUNTIME=1 ;
+    MAIN_LINKFLAGS = --emrun -s EXPORT_ALL=1 -s MAIN_MODULE=1 ;
+    MAIN_LINKFLAGS += -s PROXY_TO_PTHREAD=1 -s PTHREAD_POOL_SIZE=4 ;
+    MAIN_LINKFLAGS += -s EXIT_RUNTIME=1 ;
     DLL_LINKFLAGS = -s EXPORT_ALL=1 -s SIDE_MODULE=1 ;
 
-    CCFLAGS += -fPIC -pthread ;
+    CCFLAGS += -fPIC -pthread -msimd128 ;
 
     if $(WITH_DEBUG)
     {
@@ -92,12 +94,14 @@ rule CheckCc
         CCFLAGS += -DDEBUG -D_DEBUG -g ;
 
         # works only with static linking: -sASSERTIONS=2 -sSAFE_HEAP=1 -sSTACK_OVERFLOW_CHECK
-        LINKFLAGS ?= -pthread  -sSTACK_SIZE=6MB -sALLOW_MEMORY_GROWTH=1 -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
+
+        # -sALLOW_MEMORY_GROWTH=1 or -sINITIAL_MEMORY=96MB
+        LINKFLAGS ?= -msimd128 -pthread -sSTACK_SIZE=6MB -sINITIAL_MEMORY=96MB -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
     }
     else
     {
         CCFLAGS += -DNDEBUG ;
-        LINKFLAGS ?= -pthread -sSTACK_SIZE=6MB -sALLOW_MEMORY_GROWTH=1  -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
+        LINKFLAGS ?= -msimd128 -pthread -sSTACK_SIZE=6MB -sINITIAL_MEMORY=96MB -sSHARED_MEMORY=1 -sIMPORTED_MEMORY=1 ;
     }
 
     if $(WITH_OPTIM)
@@ -138,7 +142,7 @@ rule CheckC++
     C++FLAGS += -fexceptions ;
     C++LINKFLAGS += -fexceptions ;
 
-    C++FLAGS += -fPIC -pthread ;
+    C++FLAGS += -fPIC -pthread -msimd128 ;
 
     if $(WITH_DEBUG)
     {

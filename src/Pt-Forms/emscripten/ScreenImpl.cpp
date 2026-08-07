@@ -43,6 +43,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+
+#if defined(__wasm_simd128__)
+#include <wasm_simd128.h>
+#endif
 
 PT_LOG_DEFINE("Pt.Forms.Screen")
 
@@ -96,12 +101,12 @@ void makeCanvasFullscreen(const char* selector)
 // correct-but-intermediate blits can otherwise be posted in quick succession (e.g. during a
 // fast MDI subwindow resize) and the browser may composite in between two of them, flashing
 // a stale frame before the final one appears
-void blitCanvasImage(const char* selector, const unsigned char* pixels, int width, int height,
+void blitCanvasImage2(const char* selector, const unsigned char* pixels, int width, int height,
                      int dx, int dy)
 {
     MAIN_THREAD_EM_ASM({
         var canvas = document.querySelector(UTF8ToString($0));
-        var ctx = canvas.ptContext2d || (canvas.ptContext2d = canvas.getContext("2d"));
+        var ctx = canvas.ptContext2d || (canvas.ptContext2d = canvas.getContext("2d", { alpha: false }));
         var w = $2;
         var h = $3;
         var dx = $4;
@@ -109,81 +114,100 @@ void blitCanvasImage(const char* selector, const unsigned char* pixels, int widt
         var cw = canvas.width;
         var ch = canvas.height;
 
-        // persistent full-canvas buffer cached on the canvas: reused across calls and only
-        // reallocated when the canvas itself is resized; each call copies just its dirty
-        // sub-rect into it, while putImageData() below flushes the accumulated dirty area
         var full = canvas.ptFullData;
-        if( ! full || full.w !== cw || full.h !== ch)
+        if (!full || full.w !== cw || full.h !== ch)
         {
-            var data = new Uint8ClampedArray(cw * ch * 4);
-            // object literal avoided: unparenthesized top-level commas would split the EM_ASM macro argument
+            var buffer = new ArrayBuffer(cw * ch * 4);
+            var offscreen = document.createElement("canvas");
+            offscreen.width = cw;
+            offscreen.height = ch;
+            var offCtx = offscreen.getContext("2d", { alpha: false });
+
+            // Object literal avoided: unparenthesized top-level commas would split the EM_ASM macro argument
             full = {};
-            full.data = data;
-            full.imgData = new ImageData(data, cw, ch);
+            full.fastData = new Uint8Array(buffer);
+            full.imgData = new ImageData(new Uint8ClampedArray(buffer), cw, ch);
+            full.offscreen = offscreen;
+            full.offCtx = offCtx;
             full.w = cw;
             full.h = ch;
+
             canvas.ptFullData = full;
-            // the buffer was just reallocated (zeroed): any pending dirty rect now refers to
-            // stale contents and must not be flushed against it
-            canvas.ptDirty = null;
+            canvas.ptDirtyRects = [];
         }
 
-        // clamp the incoming rect to the current canvas bounds before copying/unioning
         var x0 = Math.max(0, dx);
         var y0 = Math.max(0, dy);
         var x1 = Math.min(cw, dx + w);
         var y1 = Math.min(ch, dy + h);
-        if(x1 <= x0 || y1 <= y0)
-            return;
+        if(x1 <= x0 || y1 <= y0) return;
 
-        var view = HEAPU8.subarray($1, $1 + w * h * 4);
-        var skipX = x0 - dx;
-        var skipY = y0 - dy;
         var copyW = x1 - x0;
         var copyH = y1 - y0;
+        var skipX = x0 - dx;
+        var skipY = y0 - dy;
 
-        for(var y = 0; y < copyH; ++y)
-        {
-            var srcOff = ((skipY + y) * w + skipX) * 4;
-            var dstOff = ((y0 + y) * cw + x0) * 4;
-            full.data.set(view.subarray(srcOff, srcOff + copyW * 4), dstOff);
+        // 1. ABSOLUT WICHTIG: Synchron kopieren, bevor C++ den Puffer (_canvasBuffer)
+        // für das nächste Rechteck in Millisekunden überschreibt!
+        var srcMem = HEAPU8;
+        var dstMem = full.fastData;
+
+        if (copyW === w && copyW === cw) {
+            var srcPtr = $1 + (skipY * w) * 4;
+            var dstPtr = y0 * cw * 4;
+            dstMem.set(srcMem.subarray(srcPtr, srcPtr + copyH * w * 4), dstPtr);
+        } else {
+            var srcStride = w * 4;
+            var dstStride = cw * 4;
+            var rowBytes = copyW * 4;
+            var srcPtr = $1 + ((skipY * w) + skipX) * 4;
+            var dstPtr = (y0 * cw + x0) * 4;
+
+            for(var y = 0; y < copyH; ++y) {
+                dstMem.set(srcMem.subarray(srcPtr, srcPtr + rowBytes), dstPtr);
+                srcPtr += srcStride;
+                dstPtr += dstStride;
+            }
         }
 
-        // union the new rect into the not-yet-flushed pending dirty rect instead of
-        // overwriting it, so every blit between two animation frames is included
-        var pending = canvas.ptDirty;
-        if(pending)
-        {
-            pending.x0 = Math.min(pending.x0, x0);
-            pending.y0 = Math.min(pending.y0, y0);
-            pending.x1 = Math.max(pending.x1, x1);
-            pending.y1 = Math.max(pending.y1, y1);
-        }
-        else
-        {
-            // object literal avoided: unparenthesized top-level commas would split the EM_ASM macro argument
-            pending = {};
-            pending.x0 = x0;
-            pending.y0 = y0;
-            pending.x1 = x1;
-            pending.y1 = y1;
-            canvas.ptDirty = pending;
+        if (!canvas.ptDirtyRects) {
+            canvas.ptDirtyRects = [];
         }
 
-        if( ! canvas.ptRafPending)
+        // 2. Erledigtes, perfekt aus C++ gerettetes Rectangle in die Todo-Liste pushen
+        var newRect = {};
+        newRect.x = x0;
+        newRect.y = y0;
+        newRect.w = copyW;
+        newRect.h = copyH;
+        canvas.ptDirtyRects.push(newRect);
+
+        // 3. Atomares Flip-Scheduling (Double Buffering)
+        if (!canvas.ptRafPending)
         {
             canvas.ptRafPending = true;
-            requestAnimationFrame(function()
-            {
-                var rect = canvas.ptDirty;
-                canvas.ptRafPending = false;
-                canvas.ptDirty = null;
-                if( ! rect)
-                    return;
 
-                ctx.putImageData(canvas.ptFullData.imgData, 0, 0,
-                                  rect.x0, rect.y0, rect.x1 - rect.x0, rect.y1 - rect.y0);
-            });
+            // Ein Timeout debounced multiple Aufrufe. Wenn du ein MDI von Top/Left resizt,
+            // haut Pt::Forms für den Hintergrund UND das Window in einem Lauf Paints raus.
+            // Durch das Debouncen flippen wir erst, wenn Pt vollständig fertig ist.
+            setTimeout(function() {
+                requestAnimationFrame(function() {
+                    canvas.ptRafPending = false;
+
+                    var rects = canvas.ptDirtyRects;
+                    canvas.ptDirtyRects = [];
+                    var fullRef = canvas.ptFullData;
+
+                    // Erst in den unsichtbaren Puffer...
+                    for (var i = 0; i < rects.length; i++) {
+                        var r = rects[i];
+                        fullRef.offCtx.putImageData(fullRef.imgData, 0, 0, r.x, r.y, r.w, r.h);
+                    }
+
+                    // ... dann in einem Blitz ohne Tearing auf den Monitor
+                    ctx.drawImage(fullRef.offscreen, 0, 0);
+                });
+            }, 0);
         }
     }, selector, pixels, width, height, dx, dy);
 }
@@ -438,7 +462,7 @@ void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 
 
 void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image, std::size_t x0, std::size_t y0,
-                                     std::size_t width, std::size_t height)
+                                   std::size_t width, std::size_t height)
 {
     const std::size_t srcStride = static_cast<std::size_t>(image.stride());
     const std::size_t dstStride = width * 4;
@@ -448,18 +472,49 @@ void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image, std::size_t x0, std
     const Pt::uint8_t* src = image.data();
     Pt::uint8_t* dst = _canvasBuffer.data();
 
-    // Argb32 stores B,G,R,A per pixel; canvas ImageData expects R,G,B,A
+#if defined(__wasm_simd128__)
+    // Maske, um das höchste Byte (Alpha im Little-Endian-Format) auf 0xFF zu setzen
+    const v128_t alpha_mask = wasm_i32x4_splat(0xFF000000u);
+#endif
+
     for(std::size_t y = 0; y < height; ++y)
     {
         const Pt::uint8_t* srcRow = src + (y0 + y) * srcStride + x0 * 4;
         Pt::uint8_t* dstRow = dst + y * dstStride;
 
-        for(std::size_t x = 0; x < width; ++x)
+        std::size_t x = 0;
+
+#if defined(__wasm_simd128__)
+        for(; x + 4 <= width; x += 4)
         {
-            dstRow[x * 4 + 0] = srcRow[x * 4 + 2];
-            dstRow[x * 4 + 1] = srcRow[x * 4 + 1];
-            dstRow[x * 4 + 2] = srcRow[x * 4 + 0];
-            dstRow[x * 4 + 3] = 255;
+            v128_t pixels = wasm_v128_load(srcRow + x * 4);
+
+            // 1-Source Shuffle: nur R und B swappen, Alpha (Indizes 3, 7, 11, 15) ignorieren/behalten.
+            // Übersetzt sich nativ in genau 1x pshufb (x86).
+            v128_t swapped = wasm_i8x16_shuffle(pixels, pixels,
+                2, 1, 0, 3,
+                6, 5, 4, 7,
+                10, 9, 8, 11,
+                14, 13, 12, 15);
+
+            // Alpha per OR fixieren. Übersetzt sich nativ in 1x por.
+            v128_t out = wasm_v128_or(swapped, alpha_mask);
+
+            wasm_v128_store(dstRow + x * 4, out);
+        }
+#endif
+
+        for(; x < width; ++x)
+        {
+            Pt::uint32_t v;
+            std::memcpy(&v, srcRow + x * 4, sizeof(v));
+
+            Pt::uint32_t o = 0xFF000000u
+                           | (v & 0x0000FF00u)
+                           | ((v & 0x000000FFu) << 16)
+                           | ((v & 0x00FF0000u) >> 16);
+
+            std::memcpy(dstRow + x * 4, &o, sizeof(o));
         }
     }
 }
@@ -496,10 +551,10 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
     const std::size_t dirtyHeight = static_cast<std::size_t>(y1 - y0);
 
     updateCanvasBuffer(image, static_cast<std::size_t>(x0), static_cast<std::size_t>(y0),
-                        dirtyWidth, dirtyHeight);
+                       dirtyWidth, dirtyHeight);
 
     blitCanvasImage("canvas", _canvasBuffer.data(), int(dirtyWidth), int(dirtyHeight),
-                     int(x0), int(y0));
+                    int(x0), int(y0));
 }
 
 
