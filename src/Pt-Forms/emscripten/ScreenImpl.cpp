@@ -101,7 +101,7 @@ void makeCanvasFullscreen(const char* selector)
 // correct-but-intermediate blits can otherwise be posted in quick succession (e.g. during a
 // fast MDI subwindow resize) and the browser may composite in between two of them, flashing
 // a stale frame before the final one appears
-void blitCanvasImage2(const char* selector, const unsigned char* pixels, int width, int height,
+void blitCanvasImage(const char* selector, const unsigned char* pixels, int width, int height,
                      int dx, int dy)
 {
     MAIN_THREAD_EM_ASM({
