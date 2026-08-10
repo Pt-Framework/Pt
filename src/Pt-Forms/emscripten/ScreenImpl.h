@@ -136,6 +136,11 @@ class ScreenImpl : public Form
     //
     // canvas blit
     //
+    public:
+        bool commitPending() const;
+
+        void commitFrame();
+
     private:
         void updateCanvasBuffer(const Gfx::Image& image, std::size_t x0, std::size_t y0,
                                  std::size_t width, std::size_t height);
@@ -155,10 +160,11 @@ class ScreenImpl : public Form
     private:
         Screen*      _parent;
         Workspace    _workspace;
-
-        GenericGraphicsBackend* _genericBackend;
         Pixmap       _pixmap;
 
+        GenericGraphicsBackend* _genericBackend;
+
+        Gfx::RectF               _commitDamage;
         std::vector<Pt::uint8_t> _canvasBuffer;
 };
 

@@ -458,6 +458,8 @@ void ScreenImpl::onResizeEvent(const ResizeEvent& ev)
 
     Gfx::SizeF size = scaling().toPhysical( ev.size() );
     _pixmap.reset(size);
+
+    _commitDamage.clear();
 }
 
 
@@ -520,18 +522,20 @@ void ScreenImpl::updateCanvasBuffer(const Gfx::Image& image, std::size_t x0, std
 }
 
 
-void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
+bool ScreenImpl::commitPending() const
 {
-    const Gfx::RectF& updateRectF = ev.rect();
+    return ! _commitDamage.isEmpty();
+}
 
-    if( updateRectF.isEmpty() )
+
+void ScreenImpl::commitFrame()
+{
+    if( _commitDamage.isEmpty() )
         return;
-
-    Base::onProcessPaintEvent(ev);
 
     const Gfx::Image& image = _genericBackend->image(_pixmap);
 
-    const Gfx::RectF updateRectP = scaling().toPhysical(updateRectF);
+    const Gfx::RectF updateRectP = scaling().toPhysical(_commitDamage);
 
     const long imgWidth = static_cast<long>(image.width());
     const long imgHeight = static_cast<long>(image.height());
@@ -545,7 +549,10 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         static_cast<long>( std::ceil(updateRectP.y() + updateRectP.height()) ) + 1);
 
     if(x1 <= x0 || y1 <= y0)
+    {
+        _commitDamage.clear();
         return;
+    }
 
     const std::size_t dirtyWidth = static_cast<std::size_t>(x1 - x0);
     const std::size_t dirtyHeight = static_cast<std::size_t>(y1 - y0);
@@ -555,6 +562,21 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
 
     blitCanvasImage("canvas", _canvasBuffer.data(), int(dirtyWidth), int(dirtyHeight),
                     int(x0), int(y0));
+
+    _commitDamage.clear();
+}
+
+
+void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
+{
+    const Gfx::RectF& updateRectF = ev.rect();
+
+    if( updateRectF.isEmpty() )
+        return;
+
+    Base::onProcessPaintEvent(ev);
+
+    _commitDamage.unify(updateRectF);
 }
 
 

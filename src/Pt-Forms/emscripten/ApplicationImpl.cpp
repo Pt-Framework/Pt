@@ -202,6 +202,10 @@ void ApplicationImpl::onWake()
 void ApplicationImpl::onProcessEvents()
 {
     _eventQueue.processEvents( this->eventReceived() );
+
+    ScreenImpl* screen = Application::instance().screen().impl();
+    if( screen && screen->commitPending() )
+        screen->commitFrame();
 }
 
 
