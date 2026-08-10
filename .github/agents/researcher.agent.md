@@ -1,13 +1,13 @@
 ---
 name: "Researcher"
-description: "Use when researching feature or product ideas for the project before implementation planning. Produces market context, requirements, compliance considerations, and saves them to `.agents/session/requirements.md`."
-argument-hint: "Describe the feature or product idea."
+description: "Use when researching a feature or product idea before planning. Produces confirmed requirements in `.agents/session/requirements.md`."
+argument-hint: "Describe the feature idea, target users, and questions to research."
 tools: [read, edit, search, web]
 model: [ "Gemini 3.1 Pro (Preview)" ]
 handoffs:
   - label: "Plan Implementation"
     agent: Planner
-    prompt: "Research finished. Read `.agents/session/requirements.md` and create an implementation plan for the gathered requirements."
+    prompt: "The confirmed requirements are in `.agents/session/requirements.md`. Read them before creating the implementation plan."
     send: false
 ---
 

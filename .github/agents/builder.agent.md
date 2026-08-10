@@ -1,9 +1,9 @@
 ---
 name: "Builder"
-description: "Builds the full project and parses compiler/linker errors."
-user-invocable: false
+description: "Use when verifying the full project build or diagnosing compiler and linker failures."
+argument-hint: "Build the full project and report the command, configuration, exit code, and relevant errors."
 tools: [read, search, execute]
-model: [ "Claude Sonnet 5" ]
+model: [ "Kimi K2.7 Code" ]
 ---
 
 # Agent Profile
