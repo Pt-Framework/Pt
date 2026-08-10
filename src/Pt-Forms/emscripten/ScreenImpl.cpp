@@ -170,44 +170,18 @@ void blitCanvasImage(const char* selector, const unsigned char* pixels, int widt
             }
         }
 
-        if (!canvas.ptDirtyRects) {
-            canvas.ptDirtyRects = [];
-        }
+        // 2. Synchron in den unsichtbaren Offscreen-Puffer schreiben
+        full.offCtx.putImageData(full.imgData, 0, 0, x0, y0, copyW, copyH);
 
-        // 2. Erledigtes, perfekt aus C++ gerettetes Rectangle in die Todo-Liste pushen
-        var newRect = {};
-        newRect.x = x0;
-        newRect.y = y0;
-        newRect.w = copyW;
-        newRect.h = copyH;
-        canvas.ptDirtyRects.push(newRect);
-
-        // 3. Atomares Flip-Scheduling (Double Buffering)
+        // 3. Atomares Flip-Scheduling: C++ ruft commitFrame nur einmal pro
+        //    Event-Loop-Iteration auf, daher reicht ein einzelnes rAF-Posting
         if (!canvas.ptRafPending)
         {
             canvas.ptRafPending = true;
-
-            // Ein Timeout debounced multiple Aufrufe. Wenn du ein MDI von Top/Left resizt,
-            // haut Pt::Forms für den Hintergrund UND das Window in einem Lauf Paints raus.
-            // Durch das Debouncen flippen wir erst, wenn Pt vollständig fertig ist.
-            setTimeout(function() {
-                requestAnimationFrame(function() {
-                    canvas.ptRafPending = false;
-
-                    var rects = canvas.ptDirtyRects;
-                    canvas.ptDirtyRects = [];
-                    var fullRef = canvas.ptFullData;
-
-                    // Erst in den unsichtbaren Puffer...
-                    for (var i = 0; i < rects.length; i++) {
-                        var r = rects[i];
-                        fullRef.offCtx.putImageData(fullRef.imgData, 0, 0, r.x, r.y, r.w, r.h);
-                    }
-
-                    // ... dann in einem Blitz ohne Tearing auf den Monitor
-                    ctx.drawImage(fullRef.offscreen, 0, 0);
-                });
-            }, 0);
+            requestAnimationFrame(function() {
+                canvas.ptRafPending = false;
+                ctx.drawImage(canvas.ptFullData.offscreen, 0, 0);
+            });
         }
     }, selector, pixels, width, height, dx, dy);
 }
