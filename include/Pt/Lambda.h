@@ -188,11 +188,11 @@ SlotT slot(Connectable& context, L&& lambda)
     @related LambdaSlot
     @related Slot
 */
-template <typename R, typename... A, typename L>
-LambdaSlot<typename TypeTraits<L>::Value, R, A...> slot(L&& lambda)
+template <typename R, typename... A, typename T,
+          typename L = typename TypeTraits<T>::Value>
+LambdaSlot<L, R, A...> slot(T&& lambda)
 {
-    typedef typename TypeTraits<L>::Value LambdaT;
-    return LambdaSlot<LambdaT, R, A...>( std::forward<L>(lambda) );
+    return LambdaSlot<L, R, A...>( std::forward<T>(lambda) );
 }
 
 /** @brief Returns a slot object for the given lambda.
@@ -200,11 +200,12 @@ LambdaSlot<typename TypeTraits<L>::Value, R, A...> slot(L&& lambda)
     @related LambdaSlot
     @related Slot
 */
-template <typename R, typename... A, typename L>
-LambdaSlot<typename TypeTraits<L>::Value, R, A...> slot(Connectable& context, L&& lambda)
+template <typename R, typename... A, typename T,
+          typename L = typename TypeTraits<T>::Value>
+LambdaSlot<L, R, A...> slot(Connectable& context, T&& lambda)
 {
     typedef typename TypeTraits<L>::Value LambdaT;
-    return LambdaSlot<LambdaT, R, A...>( std::forward<L>(lambda), &context );
+    return LambdaSlot<L, R, A...>( std::forward<T>(lambda), &context );
 }
 
 } // namespace Pt
