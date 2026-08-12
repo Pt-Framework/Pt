@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
  * Copyright (C) 2005 Stephan Beal
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,17 +16,18 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Signal.h"
+#include "Pt/Lambda.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -52,18 +53,18 @@ class Callee : public Pt::Connectable
         }
 
         void slot0()
-        { 
-            ++_count; 
+        {
+            ++_count;
         }
 
         void slot1(int n)
-        { 
-            ++_count; 
+        {
+            ++_count;
         }
 
         void slot2(int, int)
-        { 
-            ++_count; 
+        {
+            ++_count;
         }
 
         int count() const
@@ -94,6 +95,11 @@ class SignalTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DisconnectWhileSend", *this, &SignalTest::DisconnectWhileSend );
             Pt::Unit::TestSuite::registerMethod( "DeleteWhileSend", *this, &SignalTest::DeleteWhileSend );
             Pt::Unit::TestSuite::registerMethod( "CopySignal", *this, &SignalTest::CopySignal );
+            Pt::Unit::TestSuite::registerMethod( "Lambda", *this, &SignalTest::Lambda );
+            Pt::Unit::TestSuite::registerMethod( "LambdaGeneric", *this, &SignalTest::LambdaGeneric );
+            Pt::Unit::TestSuite::registerMethod( "LambdaReturn", *this, &SignalTest::LambdaReturn );
+            Pt::Unit::TestSuite::registerMethod( "LambdaClose", *this, &SignalTest::LambdaClose );
+            Pt::Unit::TestSuite::registerMethod( "LambdaContext", *this, &SignalTest::LambdaContext );
             Pt::Unit::TestSuite::registerMethod( "Send0", *this, &SignalTest::Send0 );
             Pt::Unit::TestSuite::registerMethod( "Send2", *this, &SignalTest::Send2 );
             Pt::Unit::TestSuite::registerMethod( "SignalToSignal0", *this, &SignalTest::SignalToSignal0 );
@@ -129,7 +135,7 @@ class SignalTest : public Pt::Unit::TestSuite
 
             // A signal must call its slot when connected
             recv = new Callee;
-            Pt::Connection connection = 
+            Pt::Connection connection =
                 signal += Pt::slot( Pt::slot(*recv, &Callee::slot1), 42 );
             signal.send();
             PT_UNIT_ASSERT( recv->count() == 1);
@@ -160,7 +166,7 @@ class SignalTest : public Pt::Unit::TestSuite
 
             // A signal must call its slot when connected
             recv = new Callee;
-            Pt::Connection connection = 
+            Pt::Connection connection =
                 signal += Pt::slot( Pt::slot(*recv, &Callee::slot2), 42 );
             signal.send(5);
             PT_UNIT_ASSERT( recv->count() == 1);
@@ -235,7 +241,7 @@ class SignalTest : public Pt::Unit::TestSuite
 
             delete recv;
         }
-       
+
         void Send2()
         {
             Callee* recv = new Callee;
@@ -296,6 +302,72 @@ class SignalTest : public Pt::Unit::TestSuite
 
             signal3.send();
             PT_UNIT_ASSERT( callee.count() == 1 );
+        }
+
+        void Lambda()
+        {
+            int count = 0;
+            Pt::Signal<> signal;
+            signal += Pt::slot([&count]() { ++count; });
+
+            signal.send();
+
+            PT_UNIT_ASSERT(count == 1);
+        }
+
+        void LambdaGeneric()
+        {
+            int value = 0;
+            Pt::Signal<int> signal;
+            signal += Pt::slot<void, int>([&value](auto) { value = 42; });
+
+            signal.send(7);
+
+            PT_UNIT_ASSERT(value == 42);
+        }
+
+        void LambdaReturn()
+        {
+            int value = 0;
+            Pt::Signal<int> signal;
+            signal += Pt::slot([&value](int argument) {
+                value = argument;
+                return argument;
+            });
+
+            signal.send(7);
+
+            PT_UNIT_ASSERT(value == 7);
+        }
+
+        void LambdaClose()
+        {
+            int count = 0;
+            Pt::Signal<> signal;
+            Pt::Connection connection = signal += Pt::slot([&count]() { ++count; });
+
+            connection.close();
+            signal.send();
+
+            PT_UNIT_ASSERT(count == 0);
+            PT_UNIT_ASSERT(signal.connectionCount() == 0);
+        }
+
+        void LambdaContext()
+        {
+            int count = 0;
+            Pt::Signal<> signal;
+
+            {
+                Pt::Connectable context;
+                signal += Pt::slot(context, [&count]() { ++count; });
+                PT_UNIT_ASSERT(context.connectionCount() == 1);
+            }
+
+            signal.send();
+
+            PT_UNIT_ASSERT(count == 0);
+            PT_UNIT_ASSERT(signal.connectionCount() == 0);
         }
 
         void DeleteWhileSend()

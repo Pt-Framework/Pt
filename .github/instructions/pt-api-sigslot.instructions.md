@@ -11,6 +11,7 @@ description: "Using Pt signals, slots, delegates, and events for type-safe callb
 - Class-doc override: `include/Pt/Api-Callable.h` — `Callable`
 - Class-doc override: `include/Pt/Api-Invokable.h` — `Invokable`
 - Class-doc override: `include/Pt/Api-Function.h` — `Function`, `FunctionSlot`
+- Class-doc override: `include/Pt/Api-Lambda.h` — `Lambda`, `LambdaSlot`
 - Class-doc override: `include/Pt/Api-Method.h` — `Method`, `MethodSlot`
 - Class-doc override: `include/Pt/Api-ConstMethod.h` — `ConstMethod`, `ConstMethodSlot`
 
@@ -25,6 +26,7 @@ For detailed documentation with examples, read:
 - `include/Pt/Slot.h` — Slot concept and creation helpers
 - `include/Pt/Method.h` — Method slots (member function wrappers)
 - `include/Pt/Function.h` — Function slots (free function wrappers)
+- `include/Pt/Lambda.h` — Lambda and function object slots
 - `include/Pt/ConstMethod.h` — Const method slots
 
 ## Key Classes
@@ -35,6 +37,8 @@ For detailed documentation with examples, read:
 | `Delegate<R, A1, ..., A10>` | `<Pt/Delegate.h>` | Single-target callable with return value |
 | `Connection` | `<Pt/Connection.h>` | Represents a signal-to-slot link |
 | `Connectable` | `<Pt/Connectable.h>` | Base class providing lifetime management |
+| `Lambda<F, R, A...>` | `<Pt/Lambda.h>` | Lambda or function object adapter |
+| `LambdaSlot<F, R, A...>` | `<Pt/Lambda.h>` | Lambda adapter usable as a slot |
 | `Signal<const Pt::Event&>` | `<Pt/Signal.h>` | Event dispatch routed by type |
 | `Event` / `BasicEvent<T>` | `<Pt/Event.h>` | Base for custom event types |
 
@@ -47,6 +51,10 @@ Use `Pt::slot()` to create slot objects:
 | Member function | `Pt::slot(object, &Class::method)` |
 | Const member function | `Pt::slot(constObject, &Class::constMethod)` |
 | Free function | `Pt::slot(&freeFunction)` |
+| Non-generic lambda/function object | `Pt::slot(lambda)` |
+| Generic lambda/function object | `Pt::slot<R, A...>(lambda)` |
+| Context-bound non-generic lambda | `Pt::slot(context, lambda)` |
+| Context-bound generic lambda | `Pt::slot<R, A...>(context, lambda)` |
 | Another signal (chaining) | `Pt::slot(otherSignal)` |
 | A delegate | `Pt::slot(delegate)` |
 | Bound parameter | `Pt::slot(Pt::slot(obj, &Class::method), boundValue)` |

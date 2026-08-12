@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
  * Copyright (C) 2005 Stephan Beal
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,6 +30,7 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Delegate.h"
+#include "Pt/Lambda.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -80,6 +81,10 @@ class DelegateTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Call0", *this, &DelegateTest::Call0 );
             Pt::Unit::TestSuite::registerMethod( "Call2", *this, &DelegateTest::Call2 );
             Pt::Unit::TestSuite::registerMethod( "ChainDelegates", *this, &DelegateTest::ChainDelegates );
+            Pt::Unit::TestSuite::registerMethod( "LambdaGeneric", *this, &DelegateTest::LambdaGeneric );
+            Pt::Unit::TestSuite::registerMethod( "LambdaMutable", *this, &DelegateTest::LambdaMutable );
+            Pt::Unit::TestSuite::registerMethod( "LambdaClose", *this, &DelegateTest::LambdaClose );
+            Pt::Unit::TestSuite::registerMethod( "LambdaContext", *this, &DelegateTest::LambdaContext );
         }
 
         virtual void setUp()
@@ -191,6 +196,50 @@ class DelegateTest : public Pt::Unit::TestSuite
 
             d2.call();
             PT_UNIT_ASSERT( callee.count() == 1 );
+        }
+
+        void LambdaGeneric()
+        {
+            Pt::Delegate<int, int> delegate;
+            delegate += Pt::slot<int, int>([](auto value) { return value + 1; });
+
+            PT_UNIT_ASSERT(delegate.call(41) == 42);
+        }
+
+        void LambdaMutable()
+        {
+            Pt::Delegate<int> delegate;
+            delegate += Pt::slot([value = 0]() mutable { return ++value; });
+
+            PT_UNIT_ASSERT(delegate.call() == 1);
+            PT_UNIT_ASSERT(delegate.call() == 2);
+        }
+
+        void LambdaClose()
+        {
+            Pt::Delegate<int> delegate;
+            Pt::Connection connection = delegate += Pt::slot([]() { return 42; });
+
+            connection.close();
+            delegate.invoke();
+
+            PT_UNIT_ASSERT(! delegate.isConnected());
+        }
+
+        void LambdaContext()
+        {
+            Pt::Delegate<int> delegate;
+
+            {
+                Pt::Connectable context;
+                delegate += Pt::slot(context, []() { return 42; });
+                PT_UNIT_ASSERT(context.connectionCount() == 1);
+            }
+
+            delegate.invoke();
+
+            PT_UNIT_ASSERT(! delegate.isConnected());
+            PT_UNIT_ASSERT(delegate.connectionCount() == 0);
         }
 
         void DeleteWhileCall()

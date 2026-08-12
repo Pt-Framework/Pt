@@ -33,7 +33,7 @@
 
     @brief Type-safe callback mechanism for connecting signals to slots and delegates.
 
-    Callback mechanisms for event handling have become ubiqitous in todays 
+    Callback mechanisms for event handling have become ubiqitous in todays
     application frameworks. Older examples are the use of function pointers as
     callbacks or the message maps found in the MFC toolkit. More modern approaches
     include the .NET delegates and so-called signal-slot techniques. When signals
@@ -41,7 +41,7 @@
     signal of one object to the slot of another object. In most cases connection
     management features are built-in so that an object closes all it connections
     automatically when it gets destroyed. Once the connection has been established,
-    all connected slots are called when a signal is send. Connecting signals to 
+    all connected slots are called when a signal is send. Connecting signals to
     slots is type-safe i.e. a signal can only be connected to a slot that matches
     the signal's signature. At the same time it allows a great deal of flexibility
     (loose coupling), since the caller has no intimite knowledge of the callee. A
@@ -51,7 +51,7 @@
     int main()
     {
         Pt::System::Application app;
-    
+
         Pt::System::Timer timer;
         timer.setActive( app.loop() );
         timer.start(1000);
@@ -64,6 +64,31 @@
     This program will simply exit, when the timer expires after 1000 ms. The
     application object is the callee and the member function Application::exit
     serves as a slot. The timer is the caller, which has a signal called timeout.
+
+    Non-generic lambdas and function objects derive their slot signature from
+    operator(). Generic lambdas use an explicitly stated slot signature. The
+    callable must be copyable because a connection clones its slot. A lambda
+    slot cannot be removed with operator-= because captured values do not have
+    general equality. Retain the returned %Connection and close it when no
+    context is supplied.
+
+    @code
+    Pt::Signal<int> signal;
+    Pt::Connection connection = signal +=
+      Pt::slot([this](int) { add(42); });
+
+    Pt::Delegate<int, int> delegate;
+    delegate += Pt::slot<int, int>([](auto value) { return value + 1; });
+    int result = delegate.call(41);
+
+    connection.close();
+
+    Pt::Connectable context;
+  signal += Pt::slot(context, [this](int) { add(42); });
+    @endcode
+
+    Destroying the context closes its bound connections automatically. The
+    context must outlive every unsafe capture while the connection remains open.
 */
 
 #endif
