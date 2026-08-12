@@ -35,23 +35,6 @@
 
 namespace Pt {
 
-template <typename L, typename R, typename ARGUMENTS>
-class Lambda : public Callable<R, ARGUMENTS>
-{
-    public:
-        /** @brief Constructs from a lambda or function object.
-        */
-        template <typename T>
-        explicit Lambda(T&& lambda);
-
-        // inherit doc
-        R operator()(ARGUMENTS args) const;
-
-        // inherit doc
-        Lambda* clone() const;
-};
-
-
 /** @brief Adapts a %Lambda for use as a slot.
 
     Lambda slots cannot be compared because captured lambda values have no
