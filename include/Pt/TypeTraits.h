@@ -93,6 +93,7 @@ template <typename T>
 struct TypeTraits : public TypeTraitsBase<T>
 {
     static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 0;
 };
@@ -102,6 +103,25 @@ template <typename T>
 struct TypeTraits<const T> : public TypeTraitsBase<T>
 {
     static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 0;
+    static const unsigned int isReference = 0;
+};
+
+template <typename T>
+struct TypeTraits<volatile T> : public TypeTraitsBase<T>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 0;
+    static const unsigned int isReference = 0;
+};
+
+template <typename T>
+struct TypeTraits<const volatile T> : public TypeTraitsBase<T>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 1;
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 0;
 };
@@ -111,6 +131,7 @@ template <typename T>
 struct TypeTraits<T&> : public TypeTraitsBase<T>
 {
     static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 1;
 };
@@ -120,6 +141,27 @@ template <typename T>
 struct TypeTraits<const T&> : public TypeTraitsBase<T>
 {
     static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 0;
+    static const unsigned int isReference = 1;
+};
+
+
+template <typename T>
+struct TypeTraits<volatile T&> : public TypeTraitsBase<T>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 0;
+    static const unsigned int isReference = 1;
+};
+
+
+template <typename T>
+struct TypeTraits<const volatile T&> : public TypeTraitsBase<T>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 1;
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 1;
 };
@@ -129,6 +171,7 @@ template <typename T>
 struct TypeTraits<T*> : public TypeTraitsBase<T>
 {
     static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
     static const unsigned int isPointer = 1;
     static const unsigned int isReference = 0;
 };
@@ -138,15 +181,77 @@ template <typename T>
 struct TypeTraits<const T*> : public TypeTraitsBase<T>
 {
     static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T>
+struct TypeTraits<volatile T*> : public TypeTraitsBase<T>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T>
+struct TypeTraits<const volatile T*> : public TypeTraitsBase<T>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 1;
     static const unsigned int isPointer = 1;
     static const unsigned int isReference = 0;
 };
 
 
 template <typename T, std::size_t N>
-struct TypeTraits<T[N]> : public TypeTraitsBase<T>
+struct TypeTraits<T[N]> : public TypeTraitsBase<T*>
 {
     static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T, std::size_t N>
+struct TypeTraits<const T[N]> : public TypeTraitsBase<const T*>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T, std::size_t N>
+struct TypeTraits<volatile T[N]> : public TypeTraitsBase<volatile T*>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T, std::size_t N>
+struct TypeTraits<const volatile T[N]> : public TypeTraitsBase<const volatile T*>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename R, typename... Args>
+struct TypeTraits<R(Args...)> : public TypeTraitsBase<R(*)(Args...)>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
     static const unsigned int isPointer = 1;
     static const unsigned int isReference = 0;
 };
@@ -163,6 +268,7 @@ struct TypeTraits<void>
     typedef void* ConstPointer;
 
     static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 0;
 };

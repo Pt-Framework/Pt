@@ -39,6 +39,9 @@ struct TypeTraits
     //! @brief If the type is const 1, otherwise 0.
     static const unsigned int isConst;
 
+    //! @brief If the type is volatile 1, otherwise 0.
+    static const unsigned int isVolatile;
+
     //! @brief If the type is a pointer 1, otherwise 0.
     static const unsigned int isPointer;
 
