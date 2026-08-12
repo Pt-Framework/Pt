@@ -49,16 +49,20 @@ template <typename L, typename R, typename... A>
 class Lambda : public Callable<R, A...>
 {
     public:
+        /** @brief Constructs from a lambda or function object.
+        */
         template <typename T>
         explicit Lambda(T&& lambda)
         : _lambda(std::forward<T>(lambda))
         { }
 
+        // inherit doc
         R operator()(A... args) const
         {
             return _lambda(std::forward<A>(args)...);
         }
 
+        // inherit doc
         Lambda* clone() const
         {
             return new Lambda(*this);
@@ -68,7 +72,13 @@ class Lambda : public Callable<R, A...>
         mutable L _lambda;
 };
 
-/** @internal Lambda slot.
+/** @brief Adapts a %Lambda for use as a slot.
+
+    Lambda slots cannot be compared because captured lambda values have no
+    general equality operation. Retain and close the returned %Connection to
+    disconnect a slot, or bind it to a %Connectable context.
+
+    @ingroup sigslot
 */
 template <typename L, typename R, typename... A>
 class LambdaSlot : public BasicSlot<R, A...>
@@ -77,22 +87,27 @@ class LambdaSlot : public BasicSlot<R, A...>
         typedef Lambda<L, R, A...> LambdaT;
 
     public:
+        /** @brief Constructs from a lambda and optional lifetime context.
+        */
         template <typename T>
         LambdaSlot(T&& lambda, Connectable* context = 0)
         : _lambda(std::forward<T>(lambda))
         , _context(context)
         { }
 
+        // inherit doc
         virtual const void* callable() const
         {
             return &_lambda;
         }
 
+        // inherit doc
         Slot* clone() const
         {
             return new LambdaSlot(*this);
         }
 
+        // inherit doc
         virtual void onConnect(const Connection& connection)
         {
             if(_context && connection.sender() != _context)
@@ -101,6 +116,7 @@ class LambdaSlot : public BasicSlot<R, A...>
             }
         }
 
+        // inherit doc
         virtual void onDisconnect(const Connection& connection)
         {
             if(_context && connection.sender() != _context)
@@ -109,6 +125,7 @@ class LambdaSlot : public BasicSlot<R, A...>
             }
         }
 
+        // inherit doc
         virtual bool equals(const Slot&) const
         {
             return false;
@@ -119,28 +136,33 @@ class LambdaSlot : public BasicSlot<R, A...>
         Connectable* _context;
 };
 
-/** @internal Maps to slot type.
+/** @internal Maps a lambda to slot type.
 */
 template <typename L,
           class C = typename TypeTraits<L>::Value,
           typename M = decltype( &C::operator() )>
 struct LambdaSlotTraits;
 
-
+/** @internal Maps a lambda to slot type.
+*/
 template <typename L, class C, typename R, typename... As>
 struct LambdaSlotTraits<L, C, R (C::*)(As...)>
 {
     typedef LambdaSlot<C, R, As...> Slot;
 };
 
-
+/** @internal Maps a lambda to slot type.
+*/
 template <typename L, class C, typename R, typename... As>
 struct LambdaSlotTraits<L, C, R (C::*)(As...) const>
 {
     typedef LambdaSlot<C, R, As...> Slot;
 };
 
-/** @internal Creates a slot from a lambda.
+/** @brief Returns a deduced slot object for the given lambda.
+
+    @related LambdaSlot
+    @related Slot
 */
 template <typename L,
           typename SlotT = typename LambdaSlotTraits<L>::Slot>
@@ -149,7 +171,10 @@ SlotT slot(L&& lambda)
     return SlotT( std::forward<L>(lambda) );
 }
 
-/** @internal Creates a slot from a lambda and context object.
+/** @brief Returns a deduced slot object for the given lambda.
+
+    @related LambdaSlot
+    @related Slot
 */
 template <typename L,
           typename SlotT = typename LambdaSlotTraits<L>::Slot>
@@ -158,7 +183,10 @@ SlotT slot(Connectable& context, L&& lambda)
     return SlotT( std::forward<L>(lambda), &context );
 }
 
-/** @internal Creates a slot from a lambda.
+/** @brief Returns a slot object for the given lambda.
+
+    @related LambdaSlot
+    @related Slot
 */
 template <typename R, typename... A, typename L>
 LambdaSlot<typename TypeTraits<L>::Value, R, A...> slot(L&& lambda)
@@ -167,7 +195,10 @@ LambdaSlot<typename TypeTraits<L>::Value, R, A...> slot(L&& lambda)
     return LambdaSlot<LambdaT, R, A...>( std::forward<L>(lambda) );
 }
 
-/** @internal Creates a slot from a lambda and context object.
+/** @brief Returns a slot object for the given lambda.
+
+    @related LambdaSlot
+    @related Slot
 */
 template <typename R, typename... A, typename L>
 LambdaSlot<typename TypeTraits<L>::Value, R, A...> slot(Connectable& context, L&& lambda)
