@@ -35,15 +35,6 @@
 
 namespace Pt {
 
-/** @brief Adapts a lambda or function object as a callable.
-
-    The callable is stored by value and must therefore be copyable. For a
-    non-generic lambda, the factory derives the %Callable interface from
-    operator(). Generic lambdas require an explicitly supplied signature.
-
-    @headerfile Lambda.h <Pt/Lambda.h>
-    @ingroup sigslot
-*/
 template <typename L, typename R, typename ARGUMENTS>
 class Lambda : public Callable<R, ARGUMENTS>
 {

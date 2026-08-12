@@ -37,7 +37,13 @@
 
 namespace Pt {
 
-/** @internal Lambda callable.
+/** @brief Adapts a lambda or function object as a callable.
+
+    The callable is stored by value and must therefore be copyable. For a
+    non-generic lambda, the factory derives the %Callable interface from
+    operator(). Generic lambdas require an explicitly supplied signature.
+
+    @ingroup sigslot
 */
 template <typename L, typename R, typename... A>
 class Lambda : public Callable<R, A...>
