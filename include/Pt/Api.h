@@ -1,4 +1,5 @@
-/* Copyright (C) 2008 Marc Boris Duerner
+/*
+  Copyright (C) 2008 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,13 +18,13 @@
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
 
   You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301 USA
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
 */
 
 #if defined(_MSC_VER)
@@ -122,19 +123,5 @@ namespace Pt {
     class Time;
 
 }
-
-/*______ _       _   _                         _____
-  | ___ \ |     | | (_)                       /  __ \ _     _
-  | |_/ / | __ _| |_ _ _ __  _   _ _ __ ___   | /  \/| |_ _| |_
-  |  __/| |/ _` | __| | '_ \| | | | '_ ` _ \  | |  |_   _|_   _|
-  | |   | | (_| | |_| | | | | |_| | | | | | | | \__/\|_|   |_|
-  \_|   |_|\__,_|\__|_|_| |_|\__,_|_| |_| |_|  \____/
-  ______                                           _
-  |  ___|                                         | |
-  | |_ _ __ __ _ _ __ ___   _____      _____  _ __| | __
-  |  _| '__/ _` | '_ ` _ \ / _ \ \ /\ / / _ \| '__| |/ /
-  | | | | | (_| | | | | | |  __/\ V  V / (_) | |  |   <
-  \_| |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\
-*/
 
 #endif
