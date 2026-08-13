@@ -3,14 +3,40 @@
 *.sh      text eol=lf
 *.py      text eol=lf
 
+*.cmd     text eol=crlf
 *.bat     text eol=crlf
+*.ps1     text eol=crlf
 *.sln     text eol=crlf
-*.vcproj  text eol=crlf
+*.psm1    text eol=crlf
+*.psd1    text eol=crlf
+*.ps1xml  text eol=crlf
+*.vbs     text eol=crlf
+*.wsf     text eol=crlf
+*.wsh     text eol=crlf
+*.hta     text eol=crlf
 
-*.png     binary
-*.jpg     binary
-*.pdf     binary
-*.zip     binary
+*.vcxproj          text eol=crlf
+*.vcxproj.filters  text eol=crlf
+*.vcxitems         text eol=crlf
+*.vcxitems.filters text eol=crlf
+*.rc               text eol=crlf
+*.RC               text eol=crlf
+*.props            text eol=crlf
+*.targets          text eol=crlf
+
+*.exe      binary
+*.zip      binary
+*.pdf      binary
+*.pptx     binary
+*.psd      binary
+*.pspimage binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.ttf      binary
+*.otf      binary
 
 src/blend2d/** linguist-vendored
 src/freetype/** linguist-vendored
@@ -19,4 +45,3 @@ src/skia/** linguist-vendored
 
 .gitignore     export-ignore
 .gitattributes export-ignore
-
