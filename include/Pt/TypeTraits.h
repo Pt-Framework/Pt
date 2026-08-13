@@ -1,30 +1,32 @@
 /*
- * Copyright (C) 2005 Marc Boris Duerner
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2016 Marc Boris Duerner
+  Copyright (C) 2016 Aloysius Indrayanto
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
 
 #ifndef Pt_TypeTraits_h
 #define Pt_TypeTraits_h
@@ -54,12 +56,12 @@ typedef BoolConstant<true> TrueType;
 
 
 template<class T, class U>
-struct IsSame : FalseType 
+struct IsSame : FalseType
 {};
- 
+
 
 template<class T>
-struct IsSame<T, T> : TrueType 
+struct IsSame<T, T> : TrueType
 {};
 
 
@@ -78,7 +80,7 @@ struct IfElse<false, TrueT, FalseT>
 
 
 template <typename T>
-struct TypeTraitsBase 
+struct TypeTraitsBase
 {
     typedef T Value;
     typedef const T ConstValue;
@@ -247,6 +249,46 @@ struct TypeTraits<const volatile T[N]> : public TypeTraitsBase<const volatile T*
 };
 
 
+template <typename T>
+struct TypeTraits<T[]> : public TypeTraitsBase<T*>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T>
+struct TypeTraits<const T[]> : public TypeTraitsBase<const T*>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T>
+struct TypeTraits<volatile T[]> : public TypeTraitsBase<volatile T*>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename T>
+struct TypeTraits<const volatile T[]> : public TypeTraitsBase<const volatile T*>
+{
+    static const unsigned int isConst = 1;
+    static const unsigned int isVolatile = 1;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 0;
+};
+
+
 template <typename R, typename... Args>
 struct TypeTraits<R(Args...)> : public TypeTraitsBase<R(*)(Args...)>
 {
@@ -254,6 +296,16 @@ struct TypeTraits<R(Args...)> : public TypeTraitsBase<R(*)(Args...)>
     static const unsigned int isVolatile = 0;
     static const unsigned int isPointer = 1;
     static const unsigned int isReference = 0;
+};
+
+
+template <typename R, typename... Args>
+struct TypeTraits<R(&)(Args...)> : public TypeTraitsBase<R(*)(Args...)>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 1;
+    static const unsigned int isReference = 1;
 };
 
 
@@ -311,7 +363,7 @@ class IsCompatible
 template <typename T>
 struct IntTraits
 {};
-    
+
 template <>
 struct IntTraits<signed char>
 {
@@ -356,7 +408,7 @@ struct IntTraits<int>
 
     static const unsigned int isSigned = 1;
 };
- 
+
 template <>
 struct IntTraits<unsigned int>
 {
