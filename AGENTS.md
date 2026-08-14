@@ -1,8 +1,24 @@
 # Platinum (Pt) - Agent Instructions
-Pt is a C++ framework for high-performance, multi-platform apps from one codebase.
+
+Pt is a general-purpose, easy to use C++ framework for high-performance,
+multi-platform applications from one codebase. Develop durable framework
+concepts, APIs, and implementations that must serve many applications,
+platforms, and user requirements.
 
 ## General Instructions
 
+- Treat every change as framework design, not application-specific code. Prefer
+  coherent, composable abstractions that fit existing framework concepts and
+  serve a broad range of applications, platforms, and requirements.
+- Do not default to the smallest local solution when it would create a narrow
+  API, encode one application's policy, or prevent valid future uses.
+- Evaluate designs beyond the current example: consider API clarity,
+  extensibility, cross-platform behavior, performance, ownership, and failure
+  handling. Avoid speculative generalization; broader abstractions must remain
+  justified, understandable, and proportionate to their boundary.
+- Reuse and extend established framework patterns when they express the model
+  well. Do not add special cases or convenience shortcuts that weaken
+  conceptual consistency.
 - Prefer substantive improvements; breaking changes are acceptable when they
   improve the design. Compatibility is desirable but secondary.
 - After a completed task, suggest instruction-file fixes if the task revealed
