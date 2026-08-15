@@ -39,6 +39,16 @@ namespace {
 void function0()
 {}
 
+class RoutedEvent : public Pt::BasicEvent<RoutedEvent>
+{
+    public:
+        explicit RoutedEvent(int value)
+        : value(value)
+        { }
+
+        int value;
+};
+
 class Callee : public Pt::Connectable
 {
     public:
@@ -102,6 +112,7 @@ class SignalTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "LambdaContext", *this, &SignalTest::LambdaContext );
             Pt::Unit::TestSuite::registerMethod( "Send0", *this, &SignalTest::Send0 );
             Pt::Unit::TestSuite::registerMethod( "Send2", *this, &SignalTest::Send2 );
+            Pt::Unit::TestSuite::registerMethod( "RouteEvent", *this, &SignalTest::RouteEvent );
             Pt::Unit::TestSuite::registerMethod( "SignalToSignal0", *this, &SignalTest::SignalToSignal0 );
         }
 
@@ -269,6 +280,18 @@ class SignalTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( signal.connectionCount() == 0);
 
             delete recv;
+        }
+
+        void RouteEvent()
+        {
+            Pt::Signal<const Pt::Event&> signal;
+            int value = 0;
+            signal += Pt::slot([&value](const RoutedEvent& event) { value = event.value; });
+
+            RoutedEvent event(42);
+            signal.send(event);
+
+            PT_UNIT_ASSERT(value == 42);
         }
 
         void SignalToSignal0()

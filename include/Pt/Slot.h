@@ -1,30 +1,31 @@
 /*
- * Copyright (C) 2008 Marc Boris Duerner
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2008 Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
+*/
 
 #ifndef Pt_Slot_h
 #define Pt_Slot_h
@@ -32,33 +33,58 @@
 #include <Pt/Api.h>
 #include <Pt/Void.h>
 #include <Pt/Callable.h>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 namespace Pt {
 
 class Connection;
 
-class Slot 
+/** @brief Endpoint of a signal/slot connection
+
+    Slots can be constructed with the @link Pt::Slot slot()@endlink function,
+    which is overloaded for various types of callable entities, most notably
+    functions or member functions. Slots are lightweight proxy-objects and one
+    example is the Pt::MethodSlot, which allows to use a member function as a
+    slot.
+
+    @ingroup sigslot
+*/
+class Slot
 {
     public:
+        /** @brief Destructor
+        */
         virtual ~Slot() {}
 
+        /** @brief Clone this object with new
+        */
         virtual Slot* clone() const = 0;
 
+        /** @brief Returns a pointer to the contained callable
+        */
         virtual const void* callable() const = 0;
 
+        /** @brief Notifies of connects
+        */
         virtual void onConnect(const Connection& c) = 0;
 
+        /** @brief Notifies of disconnects
+        */
         virtual void onDisconnect(const Connection& c) = 0;
 
+        /** @brief Returns true if two slots are equal in value
+        */
         virtual bool equals(const Slot& slot) const = 0;
 };
 
-template < typename R, typename A1 = Void,  typename A2 = Void,
-                       typename A3 = Void,  typename A4 = Void,
-                       typename A5 = Void,  typename A6 = Void,
-                       typename A7 = Void,  typename A8 = Void,
-                       typename A9 = Void,  typename A10 = Void >
-class BasicSlot : public Slot 
+/** @brief Base type for various "slot" types.
+
+    @ingroup sigslot
+*/
+template <typename R, typename... As>
+class BasicSlot : public Slot
 {
     public:
         virtual Slot* clone() const = 0;
@@ -73,174 +99,123 @@ class BindAdaptorBase
         : _slot( s.clone() )
         , _a(a)
         { }
-        
+
         BindAdaptorBase(const BindAdaptorBase& c)
         : _slot( c._slot->clone() )
         , _a(c._a)
         { }
-        
+
         ~BindAdaptorBase()
         { delete _slot; }
-        
+
         BindAdaptorBase& operator=(const BindAdaptorBase& b)
         {
             if(this == &b)
-              return *this;
+            return *this;
 
             Slot* s = b.slot().clone();
             delete _slot;
             _slot = s;
-            
+
             _a = b._a;
             return *this;
         }
-        
+
         Slot& slot()
-        { return *_slot; }
-        
+        {
+            return *_slot;
+        }
+
         const Slot& slot() const
-        { return *_slot; }
+        {
+            return *_slot;
+        }
 
         const T& arg() const
-        { return _a; }
+        {
+            return _a;
+        }
 
     private:
         Slot* _slot;
-        T     _a;
+        T _a;
 };
 
+namespace SigSlotDetail {
 
-template <typename R, typename A1, 
-          typename A2 = Void, typename A3 = Void, 
-          typename A4 = Void>
-class BindAdaptor : public Callable<R, A1, A2, A3>
-                  , public BindAdaptorBase<A4>
-{   
-    public:
-        typedef BasicSlot<R, A1, A2, A3> SlotBase;
+template <typename R, typename Tuple, typename Indices>
+class BindAdaptor;
 
-    public:
-        BindAdaptor(const BasicSlot<R, A1, A2, A3, A4>& slot, const A4& a)
-        : BindAdaptorBase<A4>(slot, a)
-        { }
-        
-        virtual Callable<R, A1, A2, A3>* clone() const
-        { return new BindAdaptor(*this); }
-
-        virtual R operator()(A1 a1, A2 a2, A3 a3) const
-        { 
-            const Callable<R, A1, A2, A3, A4>* cb = 
-                static_cast< const Callable<R, A1, A2, A3, A4>* >( this->slot().callable() );
-            
-            return cb->call( a1, a2, a3, this->arg() ); 
-        }
-};
-
-
-template <typename R, typename A1, 
-          typename A2, typename A3>
-class BindAdaptor<R, A1, A2, A3, Void> : public Callable<R, A1, A2>
-                                       , public BindAdaptorBase<A3>
-{   
-    public:
-        typedef BasicSlot<R, A1, A2> SlotBase;
-
-    public:
-        BindAdaptor(const BasicSlot<R, A1, A2, A3>& slot, const A3& a)
-        : BindAdaptorBase<A3>(slot, a)
-        { }
-        
-        virtual Callable<R, A1, A2>* clone() const
-        { return new BindAdaptor(*this); }
-
-        virtual R operator()(A1 a1, A2 a2) const
-        { 
-            const Callable<R, A1, A2, A3>* cb = 
-                static_cast< const Callable<R, A1, A2, A3>* >( this->slot().callable() );
-            
-            return cb->call( a1, a2, this->arg() ); 
-        }
-};
-
-
-
-template <typename R, typename A1, typename A2>
-class BindAdaptor<R, A1, A2, Void, Void> : public Callable<R, A1>
-                                         , public BindAdaptorBase<A2>
-{   
-    public:
-        typedef BasicSlot<R, A1> SlotBase;
-
-    public:
-        BindAdaptor(const BasicSlot<R, A1, A2>& slot, const A2& a)
-        : BindAdaptorBase<A2>(slot, a)
-        { }
-        
-        virtual Callable<R, A1>* clone() const
-        { return new BindAdaptor(*this); }
-
-        virtual R operator()(A1 a1) const
-        { 
-            const Callable<R, A1, A2>* cb = 
-                static_cast< const Callable<R, A1, A2>* >( this->slot().callable() );
-            
-            return cb->call( a1, this->arg() ); 
-        }
-};
-
-
-template <typename R, typename A1>
-class BindAdaptor<R, A1, Void, Void, Void> : public Callable<R>
-                                           , public BindAdaptorBase<A1>
-{   
-    public:
-        typedef BasicSlot<R> SlotBase;
-
-    public:
-        BindAdaptor(const BasicSlot<R, A1>& slot, const A1& a)
-        : BindAdaptorBase<A1>(slot, a)
-        { }
-        
-        virtual Callable<R>* clone() const
-        { return new BindAdaptor(*this); }
-
-        virtual R operator()() const
-        { 
-            const Callable<R, A1>* cb = 
-                static_cast< const Callable<R, A1>* >( this->slot().callable() );
-            
-            return cb->call( this->arg() ); 
-        }
-};
-
-
-template <typename R, typename A1, typename A2, typename A3, typename A4>
-class BoundSlot : public BindAdaptor<R, A1, A2, A3, A4>::SlotBase
+template <typename R, typename Tuple, std::size_t... Is>
+class BindAdaptor<R, Tuple, std::index_sequence<Is...>>
+: public Callable<R, typename std::tuple_element<Is, Tuple>::type...>
+, public BindAdaptorBase<
+      typename std::tuple_element<std::tuple_size<Tuple>::value - 1, Tuple>::type>
 {
     public:
+        typedef typename std::tuple_element<std::tuple_size<Tuple>::value - 1, Tuple>::type BoundT;
+        typedef BasicSlot<R, typename std::tuple_element<Is, Tuple>::type...> SlotBase;
+        typedef BasicSlot<R, typename std::tuple_element<Is, Tuple>::type..., BoundT> FullSlotBase;
+        typedef Callable<R, typename std::tuple_element<Is, Tuple>::type...> CallableBase;
+        typedef Callable<R, typename std::tuple_element<Is, Tuple>::type..., BoundT> FullCallable;
+
+    public:
+        BindAdaptor(const FullSlotBase& slot, const BoundT& arg)
+        : BindAdaptorBase<BoundT>(slot, arg)
+        { }
+
+        CallableBase* clone() const
+        {
+            return new BindAdaptor(*this);
+        }
+
+        R operator()(typename std::tuple_element<Is, Tuple>::type... args) const
+        {
+            const FullCallable* callable =
+                static_cast<const FullCallable*>( this->slot().callable() );
+            return callable->call(args..., this->arg());
+        }
+};
+
+} // namespace SigSlotDetail
+
+/** @brief Slot produced by binding a final argument to another slot.
+
+    The bound argument is copied. The resulting slot accepts all original
+    arguments except the final one.
+
+    @ingroup sigslot
+*/
+template <typename R, typename Tuple, typename Indices>
+class BoundSlot
+: public SigSlotDetail::BindAdaptor<R, Tuple, Indices>::SlotBase
+{
+    typedef SigSlotDetail::BindAdaptor<R, Tuple, Indices> AdaptorT;
+
+    public:
         template <typename T>
-        BoundSlot(const BasicSlot<R, A1, A2, A3, A4>& slot, const T& a)
-        : _adaptor(slot, a)
+        BoundSlot(const typename AdaptorT::FullSlotBase& slot, const T& arg)
+        : _adaptor(slot, arg)
         { }
 
         Slot* clone() const
-        { 
-            return new BoundSlot(*this); 
+        {
+            return new BoundSlot(*this);
         }
-        
+
         virtual const void* callable() const
-        { 
-            return &_adaptor; 
+        {
+            return &_adaptor;
         }
 
-        virtual void onConnect(const Connection& c)
+        virtual void onConnect(const Connection& connection)
         {
-            _adaptor.slot().onConnect(c);
+            _adaptor.slot().onConnect(connection);
         }
 
-        virtual void onDisconnect(const Connection& c)
+        virtual void onDisconnect(const Connection& connection)
         {
-            _adaptor.slot().onDisconnect(c);
+            _adaptor.slot().onDisconnect(connection);
         }
 
         virtual bool equals(const Slot& slot) const
@@ -249,14 +224,37 @@ class BoundSlot : public BindAdaptor<R, A1, A2, A3, A4>::SlotBase
         }
 
     private:
-        BindAdaptor<R, A1, A2, A3, A4> _adaptor;     
+        AdaptorT _adaptor;
 };
 
+namespace SigSlotDetail {
 
-template < typename R, typename A1, typename A2, typename A3, typename A4, typename T>
-BoundSlot<R, A1, A2, A3, A4> slot(const BasicSlot<R, A1, A2, A3, A4>& slot, const T& a)
+template <typename R, typename Tuple>
+struct BoundSlotTraits;
+
+template <typename R, typename A, typename... As>
+struct BoundSlotTraits<R, std::tuple<A, As...>>
 {
-    return BoundSlot<R, A1, A2, A3, A4>(slot, a);
+    typedef BoundSlot<R,
+                      std::tuple<A, As...>,
+                      std::make_index_sequence<sizeof...(As)>> Type;
+};
+
+} // namespace SigSlotDetail
+
+/** @brief Binds the final argument of a slot to a copied value.
+
+    Repeatedly binding the result produces a slot with one fewer argument each
+    time, including a zero-argument slot.
+
+    @related BoundSlot
+*/
+template <typename R, typename... As, typename T>
+typename SigSlotDetail::BoundSlotTraits<R, std::tuple<As...>>::Type
+slot(const BasicSlot<R, As...>& slot, const T& arg)
+{
+    typedef typename SigSlotDetail::BoundSlotTraits<R, std::tuple<As...>>::Type BoundSlotT;
+    return BoundSlotT(slot, arg);
 }
 
 } // namespace Pt

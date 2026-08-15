@@ -912,14 +912,7 @@
     <ClInclude Include="Unicode.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\Pt\Callable.tpp" />
-    <None Include="..\..\include\Pt\ConstMethod.tpp" />
-    <None Include="..\..\include\Pt\Delegate.tpp" />
-    <None Include="..\..\include\Pt\Function.tpp" />
-    <None Include="..\..\include\Pt\Invokable.tpp" />
-    <None Include="..\..\include\Pt\Method.tpp" />
     <None Include="..\..\include\Pt\Remoting\RemoteProcedure.tpp" />
-    <None Include="..\..\include\Pt\Signal.tpp" />
     <None Include="..\..\include\Pt\String.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\jam.sh" />

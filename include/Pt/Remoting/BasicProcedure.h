@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -1046,21 +1046,11 @@ class BasicProcedure<R,
 };
 
 
-template < typename R,
-           typename A1 = Pt::Void,
-           typename A2 = Pt::Void,
-           typename A3 = Pt::Void,
-           typename A4 = Pt::Void,
-           typename A5 = Pt::Void,
-           typename A6 = Pt::Void,
-           typename A7 = Pt::Void,
-           typename A8 = Pt::Void,
-           typename A9 = Pt::Void,
-           typename A10 = Pt::Void >
+template <typename R, typename... As>
 class BasicProcedureDef : public ServiceProcedureDef
 {
     public:
-        BasicProcedureDef(const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb)
+        BasicProcedureDef(const Callable<R, As...>& cb)
         : _cb(0)
         {
             _cb = cb.clone();
@@ -1073,12 +1063,12 @@ class BasicProcedureDef : public ServiceProcedureDef
 
     protected:
         virtual ServiceProcedure* onCreateProcedure(Responder& resp) const
-        { 
-            return new BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( *_cb, resp ); 
+        {
+            return new BasicProcedure<R, As...>(*_cb, resp);
         }
 
     private:
-        Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>* _cb;
+        Callable<R, As...>* _cb;
 };
 
 } // namespace Remoting

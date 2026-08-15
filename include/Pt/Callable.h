@@ -1,30 +1,32 @@
 /*
- * Copyright (C) 2005-2008 by Marc Boris Duerner
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2005 by Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
+*/
+
 #ifndef Pt_Callable_h
 #define Pt_Callable_h
 
@@ -33,7 +35,52 @@
 
 namespace Pt {
 
-#include <Pt/Callable.tpp>
+/** @brief An interface for all callable entities.
+
+	The %Callable interface extends the %Invokable interface to handle
+	return values. The variadic template argument list determines the
+	callable signature.
+
+	@ingroup sigslot
+*/
+template <typename R, typename... As>
+class Callable : public Invokable<As...>
+{
+	public:
+		typedef R ReturnT;
+		enum { NumArgs = sizeof...(As) };
+
+	public:
+		/** @brief Returns a copy of this instance
+
+			A copy of the instance is created with new is returned. Ownership
+			is transfered to the caller, who has to delete it.
+		*/
+		virtual Callable* clone() const = 0;
+
+		/** @brief Call the callable entity.
+
+			The passed arguments must match the template arguments.
+		*/
+		virtual ReturnT operator()(As... args) const = 0;
+
+		/** @brief Same as operator().
+		*/
+		ReturnT call(As... args) const
+		{
+			return this->operator()(args...);
+		}
+
+		/** @brief Invoke the callable entity.
+
+			Inherited from %Invokable. Ignores the return value of the %Callable.
+			The passed arguments must match the template arguments.
+		*/
+		void invoke(As... args) const
+		{
+			this->operator()(args...);
+		}
+};
 
 } // namespace Pt
 

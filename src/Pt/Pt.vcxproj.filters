@@ -3131,27 +3131,6 @@
     <None Include="..\libpng\Jamfile">
       <Filter>libpng</Filter>
     </None>
-    <None Include="..\..\include\Pt\Callable.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\ConstMethod.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Delegate.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Function.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Invokable.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Method.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Signal.tpp">
-      <Filter>Pt</Filter>
-    </None>
     <None Include="..\..\include\Pt\String.tpp">
       <Filter>Pt</Filter>
     </None>

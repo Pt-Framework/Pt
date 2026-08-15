@@ -1426,14 +1426,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Unicode.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Callable.tpp" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\ConstMethod.tpp" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Delegate.tpp" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Function.tpp" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Invokable.tpp" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Method.tpp" />
     <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Remoting\RemoteProcedure.tpp" />
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Signal.tpp" />
     <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\String.tpp" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam.bat" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam.sh" />

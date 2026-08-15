@@ -4456,27 +4456,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Callable.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\ConstMethod.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Delegate.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Function.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Invokable.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Method.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Signal.tpp">
-      <Filter>Pt</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\String.tpp">
       <Filter>Pt</Filter>
     </None>

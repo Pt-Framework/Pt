@@ -2,18 +2,12 @@
 description: "Using Pt signals, slots, delegates, and events for type-safe callbacks."
 ---
 
-# Doxygen Group and Class-Doc Overrides
+# Doxygen Group and Headers
 
 - Group definition: `include/Pt/Api-sigslot.h` — `@defgroup sigslot`
-- Class-doc override: `include/Pt/Api-Signal.h` — `Signal`, `SignalSlot`
-- Class-doc override: `include/Pt/Api-Delegate.h` — `Delegate`, `DelegateSlot`
-- Class-doc override: `include/Pt/Api-Slot.h` — `Slot`, `BasicSlot`
-- Class-doc override: `include/Pt/Api-Callable.h` — `Callable`
-- Class-doc override: `include/Pt/Api-Invokable.h` — `Invokable`
-- Class-doc override: `include/Pt/Api-Function.h` — `Function`, `FunctionSlot`
-- Class-doc override: `include/Pt/Api-Lambda.h` — `Lambda`, `LambdaSlot`
-- Class-doc override: `include/Pt/Api-Method.h` — `Method`, `MethodSlot`
-- Class-doc override: `include/Pt/Api-ConstMethod.h` — `ConstMethod`, `ConstMethodSlot`
+- Public class documentation lives beside each declaration: `Invokable.h`,
+  `Callable.h`, `Slot.h`, `Function.h`, `Method.h`, `ConstMethod.h`,
+  `Lambda.h`, `Delegate.h`, and `Signal.h`.
 
 # Signals, Slots and Delegates
 
@@ -33,8 +27,8 @@ For detailed documentation with examples, read:
 
 | Class | Header | Purpose |
 |-------|--------|---------|
-| `Signal<A1, ..., A10>` | `<Pt/Signal.h>` | Multi-cast emitter — calls all connected slots |
-| `Delegate<R, A1, ..., A10>` | `<Pt/Delegate.h>` | Single-target callable with return value |
+| `Signal<As...>` | `<Pt/Signal.h>` | Multi-cast emitter — calls all connected slots |
+| `Delegate<R, As...>` | `<Pt/Delegate.h>` | Single-target callable with return value |
 | `Connection` | `<Pt/Connection.h>` | Represents a signal-to-slot link |
 | `Connectable` | `<Pt/Connectable.h>` | Base class providing lifetime management |
 | `Lambda<F, R, A...>` | `<Pt/Lambda.h>` | Lambda or function object adapter |
@@ -59,10 +53,13 @@ Use `Pt::slot()` to create slot objects:
 | A delegate | `Pt::slot(delegate)` |
 | Bound parameter | `Pt::slot(Pt::slot(obj, &Class::method), boundValue)` |
 
+Binding copies the final argument and may be repeated until a zero-argument
+slot remains. Signatures are unbounded parameter packs; explicitly
+`Pt::Void`-padded SigSlot forms are unsupported.
+
 ## Implementation Notes for Agents
 
-- `Signal.tpp` contains 10 partial specializations (0–10 parameters) with
-  identical structure — only the parameter count varies.
-- `<Pt/Signal.h>` includes `<Pt/Signal.tpp>` inside `namespace Pt`.
+- `Signal<const Pt::Event&>` remains a specialized routed-event implementation
+  in `Signal.h` and `src/Pt/Signal.cpp`.
 - All slot-creation headers (`Method.h`, `Function.h`, `ConstMethod.h`) are
   included transitively by `<Pt/Signal.h>` and `<Pt/Delegate.h>`.
