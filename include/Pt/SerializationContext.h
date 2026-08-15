@@ -41,7 +41,8 @@ namespace Pt {
 
 class SerializationContextImpl;
 
-//! @cond HIDDEN_DOCS
+//! @cond PT_DOXYGEN_HIDDEN
+
 class PT_API SerializationContext : public SerializationInfo
 {
     public:
@@ -103,11 +104,11 @@ class PT_API SerializationContext : public SerializationInfo
         const char* makeId(const void* p)
         { return onMakeId(p); }
 
-    public:     
+    public:
         void beginLoad(void* obj, const std::type_info& ti,
                        const char* name, const char* id)
         { onBeginLoad(obj, ti, name, id); }
-        
+
         void finishLoad()
         { onFinishLoad(); }
 
@@ -160,6 +161,7 @@ class PT_API SerializationContext : public SerializationInfo
         SerializationContextImpl* _cache;
         bool _refsEnabled;
 };
+
 //! @endcond
 
 template <typename T>

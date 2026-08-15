@@ -90,7 +90,8 @@ struct TypeTraitsBase
     typedef const T* ConstPointer;
 };
 
-//! @cond HIDDEN_DOCS
+//! @cond PT_DOXYGEN_HIDDEN
+
 template <typename T>
 struct TypeTraits : public TypeTraitsBase<T>
 {
@@ -99,6 +100,7 @@ struct TypeTraits : public TypeTraitsBase<T>
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 0;
 };
+
 //! @endcond
 
 template <typename T>
