@@ -292,7 +292,7 @@ struct TypeTraits<const volatile T[]> : public TypeTraitsBase<const volatile T*>
 
 
 template <typename R, typename... Args>
-struct TypeTraits<R(Args...)> : public TypeTraitsBase<R(*)(Args...)>
+struct TypeTraits<R(*)(Args...)> : public TypeTraitsBase<R(*)(Args...)>
 {
     static const unsigned int isConst = 0;
     static const unsigned int isVolatile = 0;
@@ -302,11 +302,21 @@ struct TypeTraits<R(Args...)> : public TypeTraitsBase<R(*)(Args...)>
 
 
 template <typename R, typename... Args>
+struct TypeTraits<R(Args...)> : public TypeTraitsBase<R(*)(Args...)>
+{
+    static const unsigned int isConst = 0;
+    static const unsigned int isVolatile = 0;
+    static const unsigned int isPointer = 0;
+    static const unsigned int isReference = 0;
+};
+
+
+template <typename R, typename... Args>
 struct TypeTraits<R(&)(Args...)> : public TypeTraitsBase<R(*)(Args...)>
 {
     static const unsigned int isConst = 0;
     static const unsigned int isVolatile = 0;
-    static const unsigned int isPointer = 1;
+    static const unsigned int isPointer = 0;
     static const unsigned int isReference = 1;
 };
 
