@@ -81,9 +81,15 @@ class Method : public Callable<R, As...>
 		}
 
 		// inherit doc
-		R operator()(As... args) const
+		R call(As... args) const
 		{
 			return (_object->*_method)(args...);
+		}
+
+		// inherit doc
+		void invoke(As... args) const
+		{
+			(_object->*_method)(args...);
 		}
 
 		// inherit doc

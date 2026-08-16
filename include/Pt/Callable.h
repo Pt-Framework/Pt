@@ -37,49 +37,40 @@ namespace Pt {
 
 /** @brief An interface for all callable entities.
 
-	The %Callable interface extends the %Invokable interface to handle
-	return values. The variadic template argument list determines the
-	callable signature.
+    The %Callable interface extends the %Invokable interface to handle
+    return values. The variadic template argument list determines the
+    callable signature.
 
-	@ingroup sigslot
+    @ingroup sigslot
 */
 template <typename R, typename... As>
 class Callable : public Invokable<As...>
 {
-	public:
-		typedef R ReturnT;
-		enum { NumArgs = sizeof...(As) };
+    public:
+        /** @brief Returns a copy of this instance
 
-	public:
-		/** @brief Returns a copy of this instance
+            A copy of the instance is created with new is returned. Ownership
+            is transfered to the caller, who has to delete it.
+        */
+        virtual Callable* clone() const = 0;
 
-			A copy of the instance is created with new is returned. Ownership
-			is transfered to the caller, who has to delete it.
-		*/
-		virtual Callable* clone() const = 0;
+        /** @brief Calls the callable entity and returns its result.
 
-		/** @brief Call the callable entity.
+            This is the primary non-virtual entry point used by Delegate
+            and other callers that need the return value. All derived
+            classes must implement this.
+        */
+        virtual R call(As... args) const = 0;
 
-			The passed arguments must match the template arguments.
-		*/
-		virtual ReturnT operator()(As... args) const = 0;
+        /** @brief Same as call().
+        */
+        R operator()(As... args) const
+        {
+            return this->call(args...);
+        }
 
-		/** @brief Same as operator().
-		*/
-		ReturnT call(As... args) const
-		{
-			return this->operator()(args...);
-		}
-
-		/** @brief Invoke the callable entity.
-
-			Inherited from %Invokable. Ignores the return value of the %Callable.
-			The passed arguments must match the template arguments.
-		*/
-		void invoke(As... args) const
-		{
-			this->operator()(args...);
-		}
+        // inherit docs
+        virtual void invoke(As... args) const = 0;
 };
 
 } // namespace Pt

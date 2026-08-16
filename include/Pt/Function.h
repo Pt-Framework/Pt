@@ -57,9 +57,16 @@ class Function : public Callable<R, As...>
 		: _function(function)
 		{ }
 
-		R operator()(As... args) const
+		// inherit doc
+		R call(As... args) const
 		{
 			return (*_function)(args...);
+		}
+
+		// inherit doc
+		void invoke(As... args) const
+		{
+			(*_function)(args...);
 		}
 
 		Function* clone() const

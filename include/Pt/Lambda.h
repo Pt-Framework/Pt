@@ -57,9 +57,15 @@ class Lambda : public Callable<R, A...>
         { }
 
         // inherit doc
-        R operator()(A... args) const
+        R call(A... args) const
         {
             return _lambda(std::forward<A>(args)...);
+        }
+
+        // inherit doc
+        void invoke(A... args) const
+        {
+            _lambda(std::forward<A>(args)...);
         }
 
         // inherit doc

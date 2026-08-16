@@ -117,11 +117,20 @@ class BindAdaptor<R, Tuple, std::index_sequence<Is...>>
             return new BindAdaptor(*this);
         }
 
-        R operator()(typename std::tuple_element<Is, Tuple>::type... args) const
+        // inherit doc
+        R call(typename std::tuple_element<Is, Tuple>::type... args) const
         {
             const FullCallable* callable =
                 static_cast<const FullCallable*>( this->slot().callable() );
             return callable->call(args..., this->arg());
+        }
+
+        // inherit doc
+        void invoke(typename std::tuple_element<Is, Tuple>::type... args) const
+        {
+            const FullCallable* callable =
+                static_cast<const FullCallable*>( this->slot().callable() );
+            callable->call(args..., this->arg());
         }
 };
 
