@@ -248,7 +248,7 @@ class Signal : public SignalBase
                 if( it->isValid() && it->sender() == this )
                 {
                     const InvokableT* invokable =
-                        static_cast<const InvokableT*>( it->slot()->callable() );
+                        static_cast<const InvokableT*>( it->callable() );
                     invokable->invoke(args...);
                 }
 
@@ -296,7 +296,7 @@ class SignalSlot : public BasicSlot<void, As...>
         }
 
         // inherit doc
-        virtual const void* callable() const
+        virtual const Callback* callable() const
         {
             return &_method;
         }
@@ -393,7 +393,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
             virtual void route(const Pt::Event& ev)
             {
                 typedef Invokable<const Pt::Event&> InvokableT;
-                const InvokableT* invokable = static_cast<const InvokableT*>( _target.slot()->callable() );
+                const InvokableT* invokable = static_cast<const InvokableT*>( _target.callable() );
                 invokable->invoke(ev);
             }
 
@@ -418,7 +418,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
             virtual void route(const Pt::Event& ev)
             {
                 typedef Invokable<const Pt::Event&> InvokableT;
-                const InvokableT* invokable = static_cast<const InvokableT*>( connection().slot()->callable() );
+                const InvokableT* invokable = static_cast<const InvokableT*>( connection().callable() );
 
                 const EventT& event = static_cast<const EventT&>(ev);
                 invokable->invoke(event);

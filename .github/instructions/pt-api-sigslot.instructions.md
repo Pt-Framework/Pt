@@ -63,3 +63,9 @@ slot remains. Signatures are unbounded parameter packs; explicitly
   in `Signal.h` and `src/Pt/Signal.cpp`.
 - All slot-creation headers (`Method.h`, `Function.h`, `ConstMethod.h`) are
   included transitively by `<Pt/Signal.h>` and `<Pt/Delegate.h>`.
+- `Slot::callable()` / `Connection::callable()` return `const Callback*`, the
+  non-template root of `Invokable`/`Callable`. Each concrete slot converts its
+  stored callable to `Callback*` via an implicit derived-to-base conversion
+  (never a `void*` erasure). `Connection` caches that pointer at construction;
+  senders downcast the cached `Callback*` to `Callable<R, As...>` or
+  `Invokable<As...>` on the hot emit path instead of re-reading `slot()`.

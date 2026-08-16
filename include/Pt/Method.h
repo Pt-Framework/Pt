@@ -132,7 +132,7 @@ class MethodSlot : public BasicSlot<R, As...>
 		}
 
 		// inherit doc
-		virtual const void* callable() const
+		virtual const Callback* callable() const
 		{
 			return &_method;
 		}

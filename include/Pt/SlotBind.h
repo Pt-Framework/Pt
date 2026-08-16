@@ -151,7 +151,8 @@ class BoundSlot
             return new BoundSlot(*this);
         }
 
-        virtual const void* callable() const
+        // inherit doc
+        virtual const Callback* callable() const
         {
             return &_adaptor;
         }

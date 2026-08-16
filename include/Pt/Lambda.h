@@ -96,7 +96,7 @@ class LambdaSlot : public BasicSlot<R, A...>
         { }
 
         // inherit doc
-        virtual const void* callable() const
+        virtual const Callback* callable() const
         {
             return &_lambda;
         }

@@ -97,7 +97,8 @@ class FunctionSlot : public BasicSlot<R, As...>
 			return new FunctionSlot(*this);
 		}
 
-		virtual const void* callable() const
+		// inherit doc
+		virtual const Callback* callable() const
 		{
 			return &_function;
 		}

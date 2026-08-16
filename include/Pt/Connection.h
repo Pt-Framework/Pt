@@ -44,6 +44,7 @@ class ConnectionData
         , _valid(true)
         , _slot(slot)
         , _sender(&sender)
+        , _callable(slot->callable())
         { }
 
         ~ConnectionData()
@@ -76,11 +77,15 @@ class ConnectionData
         const Slot* slot() const
         { return _slot; }
 
+        const Callback* callable() const
+        { return _callable; }
+
     private:
         unsigned _refs;
         bool _valid;
         Slot* _slot;
         Connectable* _sender;
+        const Callback* _callable;
 };
 
 /** @brief Represents a connection between a Signal/Delegate and a slot.
@@ -113,6 +118,11 @@ class PT_API Connection
         //! @brief Returns the slot.
         const Slot* slot() const
         { return _data ? _data->slot() : 0; }
+
+        /** @brief Returns the slot's Callback, cached at connection time.
+        */
+        const Callback* callable() const
+        { return _data ? _data->callable() : 0; }
 
         //! @brief Returns true if closed.
         bool operator!() const

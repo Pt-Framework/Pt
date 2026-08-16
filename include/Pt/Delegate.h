@@ -239,7 +239,7 @@ class Delegate : public DelegateBase
                 throw std::logic_error("Delegate::call(): Delegate not connected");
 
             const CallableT* callable =
-                static_cast<const CallableT*>( _target.slot()->callable() );
+                static_cast<const CallableT*>( _target.callable() );
             return callable->call(args...);
         }
 
@@ -254,7 +254,7 @@ class Delegate : public DelegateBase
                 return;
 
             const CallableT* callable =
-                static_cast<const CallableT*>( _target.slot()->callable() );
+                static_cast<const CallableT*>( _target.callable() );
             callable->call(args...);
         }
 
@@ -292,7 +292,7 @@ class DelegateSlot : public BasicSlot<R, As...>
         }
 
         // inherit doc
-        virtual const void* callable() const
+        virtual const Callback* callable() const
         {
             return &_method;
         }

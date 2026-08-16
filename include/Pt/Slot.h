@@ -62,9 +62,13 @@ class Slot
         */
         virtual Slot* clone() const = 0;
 
-        /** @brief Returns a pointer to the contained callable
+        /** @brief Returns the callable converted to the type-erased Callback interface
+
+            The concrete slot returns its stored callable converted to
+            Callback via a derived-to-base conversion. Callers downcast the
+            result to Callable<R, As...> or Invokable<As...> to invoke it.
         */
-        virtual const void* callable() const = 0;
+        virtual const Callback* callable() const = 0;
 
         /** @brief Notifies of connects
         */
