@@ -292,6 +292,7 @@
     <ClInclude Include="..\..\include\Pt\Regex.h" />
     <ClInclude Include="..\..\include\Pt\Remoting\ActiveProcedure.h" />
     <ClInclude Include="..\..\include\Pt\Remoting\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Remoting\Arguments.h" />
     <ClInclude Include="..\..\include\Pt\Remoting\BasicProcedure.h" />
     <ClInclude Include="..\..\include\Pt\Remoting\Client.h" />
     <ClInclude Include="..\..\include\Pt\Remoting\Fault.h" />

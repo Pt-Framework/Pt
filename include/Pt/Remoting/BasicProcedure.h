@@ -1,35 +1,37 @@
 /*
- * Copyright (C) 2009-2026 by Marc Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2009-2026 by Marc Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
+*/
 
 #ifndef PT_REMOTING_BASICPROCEDURE_H
 #define PT_REMOTING_BASICPROCEDURE_H
 
 #include <Pt/Remoting/Api.h>
+#include <Pt/Remoting/Arguments.h>
 #include <Pt/Remoting/ServiceProcedure.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/Decomposer.h>
@@ -43,94 +45,6 @@ namespace Remoting {
 
 class Responder;
 
-
-template <typename T>
-struct Argument
-{
-    T value;
-    BasicComposer<T> composer;
-
-    explicit Argument(SerializationContext* ctx)
-    : composer(ctx)
-    {}
-
-    void begin()
-    {
-        composer.begin(value);
-    }
-};
-
-
-template <typename... Ts>
-class Arguments;
-
-
-template <>
-class Arguments<>
-{
-    public:
-        explicit Arguments(SerializationContext* /*ctx*/)
-        {}
-
-        void begin()
-        {}
-
-        void fill(std::size_t i, Composer** args)
-        {
-            args[i] = 0;
-        }
-};
-
-
-template <typename T, typename... Ts>
-class Arguments<T, Ts...>
-{
-    public:
-        explicit Arguments(SerializationContext* ctx)
-        : _head(ctx)
-        , _tail(ctx)
-        {}
-
-        void begin()
-        {
-            _head.begin();
-            _tail.begin();
-        }
-
-        void fill(std::size_t i, Composer** args)
-        {
-            args[i] = &_head.composer;
-            _tail.fill(i + 1, args);
-        }
-
-        T& head()
-        {
-            return _head.value;
-        }
-
-        Arguments<Ts...>& tail()
-        {
-            return _tail;
-        }
-
-    private:
-        Argument<T> _head;
-        Arguments<Ts...> _tail;
-};
-
-
-template <typename R, typename C, typename... Vs>
-R call(C& cb, Arguments<>& /*args*/, Vs&... vs)
-{
-    return cb.call(vs...);
-}
-
-
-template <typename R, typename C, typename T, typename... Ts, typename... Vs>
-R call(C& cb, Arguments<T, Ts...>& args, Vs&... vs)
-{
-    return call<R>(cb, args.tail(), vs..., args.head());
-}
 
 /** @brief Generic service procedure.
 */
@@ -166,9 +80,23 @@ class BasicProcedure : public ServiceProcedure
 
         Decomposer* onEndCall()
         {
-            _rv = Remoting::call<R>(*_cb, _argv);
+            _rv = callWith<R>(_argv);
             _r.begin(_rv, "");
             return &_r;
+        }
+
+    protected:
+        template <typename R, typename... Vs>
+        R callWith(Arguments<>& /*args*/, Vs&... vs)
+        {
+            return _cb->call(vs...);
+        }
+
+
+        template <typename R, typename T, typename... Ts, typename... Vs>
+        R callWith(Arguments<T, Ts...>& args, Vs&... vs)
+        {
+            return callWith<R>(args.tail(), vs..., args.head());
         }
 
     private:

@@ -2259,6 +2259,9 @@
     <ClInclude Include="..\..\include\Pt\Remoting\Api.h">
       <Filter>Pt-Remoting</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Arguments.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Remoting\BasicProcedure.h">
       <Filter>Pt-Remoting</Filter>
     </ClInclude>
