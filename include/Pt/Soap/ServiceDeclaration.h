@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2014 by Dr. Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -61,7 +61,7 @@ class Type : private NonCopyable
             Dict = 8,
             DictElement = 9
         };
-    
+
     public:
         explicit Type(TypeId typeId)
         : _typeId(typeId)
@@ -78,13 +78,13 @@ class Type : private NonCopyable
         virtual const Parameter* getParameter(std::size_t n) const = 0;
 
         virtual const Parameter* getParameter(const std::string& name) const = 0;
-                
+
         virtual const char* name() const = 0;
 
         virtual std::size_t size() const = 0;
 
     private:
-        TypeId _typeId;    
+        TypeId _typeId;
 };
 
 
@@ -93,7 +93,7 @@ class SimpleType : public Type
     public:
         explicit SimpleType(TypeId typeId)
         : Type(typeId)
-        {            
+        {
         }
 
         virtual ~SimpleType()
@@ -121,9 +121,9 @@ class ComplexType : public Type
 {
     public:
         explicit ComplexType(TypeId typeId, const std::string& name)
-        : Type(typeId)    
-        , _name(name)    
-        {            
+        : Type(typeId)
+        , _name(name)
+        {
         }
 
         virtual ~ComplexType()
@@ -139,7 +139,7 @@ class ComplexType : public Type
             return _name.c_str();
         }
 
-    private:    
+    private:
         std::string _name;
 };
 
@@ -152,7 +152,7 @@ class Parameter
         , _min(1)
         , _max(1)
         {}
-        
+
         Parameter(const std::string& name, const Type& t)
         : _name(name)
         , _type(&t)
@@ -218,7 +218,7 @@ class PT_SOAP_API IntegerType : public SimpleType
     public:
         IntegerType();
 
-        virtual ~IntegerType();  
+        virtual ~IntegerType();
 
         virtual const char* name() const
         {
@@ -276,7 +276,7 @@ class PT_SOAP_API StructType : public ComplexType
 
         virtual ~StructType();
 
-        void addParameter(const std::string& name, const Type& param, 
+        void addParameter(const std::string& name, const Type& param,
                           int minOccurence = 1, int maxOccurence = 1);
 
         virtual const Parameter* getParameter(std::size_t n) const;
@@ -298,7 +298,7 @@ class PT_SOAP_API ArrayType : public ComplexType
 {
     public:
         ArrayType(const std::string& name);
-        
+
         ArrayType(const std::string& name, const Type& elem, const std::string& elemName);
 
         virtual ~ArrayType();
@@ -353,7 +353,7 @@ class PT_SOAP_API DictType : public ComplexType
         virtual ~DictType();
 
         void setElement(const std::string& elemName,
-                        const std::string& keyname, const Type& keyType, 
+                        const std::string& keyname, const Type& keyType,
                         const std::string& valueName, const Type& valueType);
 
         virtual const Parameter* getParameter(std::size_t n) const;
@@ -424,7 +424,7 @@ class PT_SOAP_API Operation : private NonCopyable
 };
 
 
-class PT_SOAP_API ServiceDeclaration 
+class PT_SOAP_API ServiceDeclaration
 {
     public:
         ServiceDeclaration(const std::string& name);
@@ -443,19 +443,19 @@ class PT_SOAP_API ServiceDeclaration
         void addOperation(Operation& op);
 
         const Operation* getOperation(const Pt::String& name) const;
-        
+
         void toWsdl(std::ostream& os) const;
 
     public:
         // deprecated
         static const BooleanType& boolType();
-        
+
         // deprecated
         static const IntegerType& intType();
-        
+
         // deprecated
         static const FloatType& floatType();
-        
+
         // deprecated
         static const StringType& stringType();
 
@@ -474,50 +474,50 @@ class PT_SOAP_API ServiceDeclaration
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-class BasicParameter : public Type
-{
-    public:
-        BasicParameter()
-        { }
-};
+// template <typename T>
+// class BasicParameter : public Type
+// {
+//     public:
+//         BasicParameter()
+//         { }
+// };
 
 
-template <>
-class BasicParameter<int> : public IntegerType
-{
-    public:
-        BasicParameter()
-        { }
-};
+// template <>
+// class BasicParameter<int> : public IntegerType
+// {
+//     public:
+//         BasicParameter()
+//         { }
+// };
 
 
-template <typename T>
-class BasicParameter< std::vector<T> > : public ArrayType
-{
-    public:
-        BasicParameter()
-        { 
-            setElement(_elem);
-        }
+// template <typename T>
+// class BasicParameter< std::vector<T> > : public ArrayType
+// {
+//     public:
+//         BasicParameter()
+//         {
+//             setElement(_elem);
+//         }
 
-    private:
-        BasicParameter<T> _elem;
-};
+//     private:
+//         BasicParameter<T> _elem;
+// };
 
 
-template <typename R, typename A1, typename A2>
-class BasicProcedureDefinition : public Operation
-{
-    public:
-        BasicProcedureDefinition()
-        {}
+// template <typename R, typename A1, typename A2>
+// class BasicProcedureDefinition : public Operation
+// {
+//     public:
+//         BasicProcedureDefinition()
+//         {}
 
-    private:
-        BasicParameter<R> _rDef;
-        BasicParameter<A1> _a1Def;
-        BasicParameter<A2> _a2Def;
-};
+//     private:
+//         BasicParameter<R> _rDef;
+//         BasicParameter<A1> _a1Def;
+//         BasicParameter<A2> _a2Def;
+// };
 
 } // namespace Soap
 
