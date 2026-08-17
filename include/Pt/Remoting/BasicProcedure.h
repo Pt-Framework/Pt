@@ -80,23 +80,23 @@ class BasicProcedure : public ServiceProcedure
 
         Decomposer* onEndCall()
         {
-            _rv = callWith<R>(_argv);
+            _rv = callWith(_argv);
             _r.begin(_rv, "");
             return &_r;
         }
 
     protected:
-        template <typename R, typename... Vs>
+        template <typename... Vs>
         R callWith(Arguments<>& /*args*/, Vs&... vs)
         {
             return _cb->call(vs...);
         }
 
 
-        template <typename R, typename T, typename... Ts, typename... Vs>
+        template <typename T, typename... Ts, typename... Vs>
         R callWith(Arguments<T, Ts...>& args, Vs&... vs)
         {
-            return callWith<R>(args.tail(), vs..., args.head());
+            return callWith(args.tail(), vs..., args.head());
         }
 
     private:

@@ -124,33 +124,33 @@ class Arguments<T, Ts...>
 };
 
 
-template <std::size_t I, typename... Ts>
-struct ArgumentsGetter;
-
-
-template <std::size_t I, typename T, typename... Ts>
-struct ArgumentsGetter<I, T, Ts...>
+template <std::size_t I>
+struct At
 {
+    template <typename T, typename... Ts>
     static auto& get(Arguments<T, Ts...>& args)
     {
-        return ArgumentsGetter<I - 1, Ts...>::get(args.tail());
+        return At<I - 1>::get(args.tail());
     }
 
+    template <typename T, typename... Ts>
     static const auto& get(const Arguments<T, Ts...>& args)
     {
-        return ArgumentsGetter<I - 1, Ts...>::get(args.tail());
+        return At<I - 1>::get(args.tail());
     }
 };
 
 
-template <typename T, typename... Ts>
-struct ArgumentsGetter<0, T, Ts...>
+template <>
+struct At<0>
 {
+    template <typename T, typename... Ts>
     static T& get(Arguments<T, Ts...>& args)
     {
         return args.head();
     }
 
+    template <typename T, typename... Ts>
     static const T& get(const Arguments<T, Ts...>& args)
     {
         return args.head();
@@ -161,18 +161,18 @@ struct ArgumentsGetter<0, T, Ts...>
 template <std::size_t I, typename... Ts>
 auto& get(Arguments<Ts...>& args)
 {
-    return ArgumentsGetter<I, Ts...>::get(args);
+    return At<I>::get(args);
 }
 
 
 template <std::size_t I, typename... Ts>
 const auto& get(const Arguments<Ts...>& args)
 {
-    return ArgumentsGetter<I, Ts...>::get(args);
+    return At<I>::get(args);
 }
 
-} // namespace Remoting
+} // namespace
 
-} // namespace Pt
+} // namespace
 
-#endif // PT_REMOTING_ARGUMENTS_H
+#endif // include guard
