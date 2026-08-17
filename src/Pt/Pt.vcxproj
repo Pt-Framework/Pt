@@ -913,7 +913,6 @@
     <ClInclude Include="Unicode.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\Pt\Remoting\RemoteProcedure.tpp" />
     <None Include="..\..\include\Pt\String.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\jam.sh" />

@@ -3218,9 +3218,6 @@
     <None Include="..\Pt-Reflex\tests\Jamfile">
       <Filter>Pt-Reflex\tests</Filter>
     </None>
-    <None Include="..\..\include\Pt\Remoting\RemoteProcedure.tpp">
-      <Filter>Pt-Remoting</Filter>
-    </None>
     <None Include="..\Pt-Remoting\Jamfile">
       <Filter>Pt-Remoting</Filter>
     </None>

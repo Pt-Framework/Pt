@@ -1426,7 +1426,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Unicode.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Remoting\RemoteProcedure.tpp" />
     <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\String.tpp" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam.bat" />
     <None Include="$(MSBuildThisFileDirectory)..\..\jam.sh" />

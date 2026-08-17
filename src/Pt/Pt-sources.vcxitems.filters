@@ -4510,9 +4510,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\Pt-Reflex\Jamfile">
       <Filter>Pt-Reflex</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\include\Pt\Remoting\RemoteProcedure.tpp">
-      <Filter>Pt-Remoting</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\Pt-Remoting\Jamfile">
       <Filter>Pt-Remoting</Filter>
     </None>
