@@ -40,8 +40,8 @@ namespace Pt {
 
 namespace Lua {
 
-template <typename A1 = Pt::Reflex::Void,
-          typename A2 = Pt::Reflex::Void>
+template <typename A1 = Pt::Void,
+          typename A2 = Pt::Void>
 using AsyncFunction = Pt::Reflex::BasicFunction<AsyncCall*, A1, A2>;
 
 

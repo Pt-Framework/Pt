@@ -79,6 +79,20 @@ struct IfElse<false, TrueT, FalseT>
 };
 
 
+template <std::size_t Index, typename T, typename... Ts>
+struct NthType
+{
+    typedef typename NthType<Index - 1, Ts...>::type type;
+};
+
+
+template <typename T, typename... Ts>
+struct NthType<0, T, Ts...>
+{
+    typedef T type;
+};
+
+
 template <typename T>
 struct TypeTraitsBase
 {

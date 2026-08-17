@@ -567,20 +567,9 @@ class PT_REFLEX_API Type
         template <typename R, typename T, typename A1, typename A2>
         void registerMethod( TypeManager& context, const char* name, R (*method)(T&, A1, A2) );
 
-        template <typename R, typename T>
-        void registerMethod( TypeManager& context, const char* name, R (T::*method)() );
-
-        template <typename R, typename T, typename A1>
-        void registerMethod( TypeManager& context, const char* name, R (T::*method)(A1) );
-
-        template <typename R, typename T, typename A1, typename A2>
-        void registerMethod( TypeManager& context, const char* name, R (T::*method)(A1, A2) );
-
-        template <typename R, typename T, typename A1, typename A2, typename A3>
-        void registerMethod( TypeManager& context, const char* name, R (T::*method)(A1, A2, A3) );
-
-        template <typename R, typename T, typename A1, typename A2, typename A3, typename A4>
-        void registerMethod( TypeManager& context, const char* name, R (T::*method)(A1, A2, A3, A4) );
+        template <typename R, typename T, typename... As>
+        void registerMethod( TypeManager& context, const char* name,
+                             R (T::*method)(As...) );
 
         template <typename C, typename T>
         void registerProperty( TypeManager& context, const char* name, T (*getter)(C&), void (*setter)(C&, T) );
@@ -750,42 +739,11 @@ inline void Type::registerMethod( TypeManager& context, const char* name, R (*pr
 }
 
 
-template <typename R, typename T>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (T::*proxy)() )
+template <typename R, typename T, typename... As>
+inline void Type::registerMethod( TypeManager& context, const char* name,
+                                  R (T::*proxy)(As...) )
 {
-    Method<R, T>* mi = new Method<R, T>(context, name, proxy);
-    Type::registerMethod(mi);
-}
-
-
-template <typename R, typename T, typename A1>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (T::*proxy)(A1) )
-{
-    Method<R, T, A1>* mi = new Method<R, T, A1>(context, name, proxy);
-    Type::registerMethod(mi);
-}
-
-
-template <typename R, typename T, typename A1, typename A2>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (T::*proxy)(A1, A2) )
-{
-    Method<R, T, A1, A2>* mi = new Method<R, T, A1, A2>(context, name, proxy);
-    Type::registerMethod(mi);
-}
-
-
-template <typename R, typename T, typename A1, typename A2, typename A3>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (T::*proxy)(A1, A2, A3) )
-{
-    Method<R, T, A1, A2, A3>* mi = new Method<R, T, A1, A2, A3>(context, name, proxy);
-    Type::registerMethod(mi);
-}
-
-
-template <typename R, typename T, typename A1, typename A2, typename A3, typename A4>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (T::*proxy)(A1, A2, A3, A4) )
-{
-    Method<R, T, A1, A2, A3, A4>* mi = new Method<R, T, A1, A2, A3, A4>(context, name, proxy);
+    Method<R, T, As...>* mi = new Method<R, T, As...>(context, name, proxy);
     Type::registerMethod(mi);
 }
 
