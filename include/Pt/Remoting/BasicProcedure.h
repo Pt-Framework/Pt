@@ -38,6 +38,7 @@
 #include <Pt/Composer.h>
 #include <Pt/TypeTraits.h>
 #include <cstddef>
+#include <utility>
 
 namespace Pt {
 
@@ -80,23 +81,16 @@ class BasicProcedure : public ServiceProcedure
 
         Decomposer* onEndCall()
         {
-            _rv = callWith(_argv);
+            _rv = callWith(std::index_sequence_for<As...>());
             _r.begin(_rv, "");
             return &_r;
         }
 
     protected:
-        template <typename... Vs>
-        R callWith(Arguments<>& /*args*/, Vs&... vs)
+        template <std::size_t... Is>
+        R callWith(std::index_sequence<Is...>)
         {
-            return _cb->call(vs...);
-        }
-
-
-        template <typename T, typename... Ts, typename... Vs>
-        R callWith(Arguments<T, Ts...>& args, Vs&... vs)
-        {
-            return callWith(args.tail(), vs..., args.head());
+            return _cb->call(get<Is>(_argv)...);
         }
 
     private:

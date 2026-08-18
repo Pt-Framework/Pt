@@ -38,6 +38,7 @@
 #include <Pt/Composer.h>
 #include <Pt/TypeTraits.h>
 #include <cstddef>
+#include <utility>
 
 namespace Pt {
 
@@ -110,7 +111,7 @@ class ActiveProcedure : public ServiceProcedure
         // inherit docs
         virtual void onBeginCall(System::EventLoop& loop)
         {
-            invokeWith(loop, _argv);
+            invokeWith(loop, std::index_sequence_for<As...>());
         }
 
         // inherit docs
@@ -131,16 +132,10 @@ class ActiveProcedure : public ServiceProcedure
         virtual const R& onResult() = 0;
 
     protected:
-        template <typename... Vs>
-        void invokeWith(System::EventLoop& loop, Arguments<>&, Vs&... vs)
+        template <std::size_t... Is>
+        void invokeWith(System::EventLoop& loop, std::index_sequence<Is...>)
         {
-            onInvoke(loop, vs...);
-        }
-
-        template <typename T, typename... Ts, typename... Vs>
-        void invokeWith(System::EventLoop& loop, Arguments<T, Ts...>& args, Vs&... vs)
-        {
-            invokeWith(loop, args.tail(), vs..., args.head());
+            onInvoke(loop, get<Is>(_argv)...);
         }
 
     private:
