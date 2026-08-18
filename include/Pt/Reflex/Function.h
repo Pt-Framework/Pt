@@ -52,14 +52,10 @@ class BasicFunction : public FunctionInfo
     public:
         BasicFunction(const char* name, TypeManager& tm)
         : FunctionInfo(1, std::string(name))
+        , _params{ tm.getType(typeid(As))...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = tm.getType(typeid(R));
-            Type* ptypes[] = { tm.getType(typeid(As))...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 
@@ -98,14 +94,10 @@ class BasicFunction<void, As...> : public FunctionInfo
     public:
          BasicFunction(const char* name, TypeManager& tm)
         : FunctionInfo(1, std::string(name))
+        , _params{ tm.getType(typeid(As))...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = tm.getType(typeid(void));
-            Type* ptypes[] = { tm.getType(typeid(As))...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 
@@ -151,14 +143,10 @@ class Function : public FunctionInfo
         Function(TypeManager& tm, const char* name, FuncPtr func)
         : FunctionInfo(0, std::string(name))
         , _func(func)
+        , _params{ tm.getType(typeid(As))...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = tm.getType(typeid(R));
-            Type* ptypes[] = { tm.getType(typeid(As))...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 
@@ -199,14 +187,10 @@ class Function<void, As...> : public FunctionInfo
         Function(TypeManager& tm, const char* name, FuncPtr func)
         : FunctionInfo(0, std::string(name))
         , _func(func)
+        , _params{ tm.getType(typeid(As))...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = tm.getType(typeid(void));
-            Type* ptypes[] = { tm.getType(typeid(As))...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 

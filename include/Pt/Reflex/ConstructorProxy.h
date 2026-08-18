@@ -52,13 +52,9 @@ class ConstructorProxy : public ConstructorInfo
         : ConstructorInfo()
         , _type(&type)
         , _ctor(ctor)
+        , _params{ ctx.getType( typeid(As) )...,
+                   static_cast<Type*>(0) }
         {
-            Type* ptypes[] = { ctx.getType( typeid(As) )...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(sizeof...(As) ? _params : 0, sizeof...(As));
         }
 

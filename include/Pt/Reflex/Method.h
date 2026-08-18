@@ -59,14 +59,10 @@ class Method : public MethodInfo
         Method(TypeManager& ctx, const std::string& name, MemFunc mf)
         : MethodInfo(name)
         , _mf(mf)
+        , _params{ ctx.getType( typeid(As) )...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = ctx.getType( typeid(R) );
-            Type* ptypes[] = { ctx.getType( typeid(As) )...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 
@@ -110,14 +106,10 @@ class Method<void, C, As...> : public MethodInfo
         Method(TypeManager& ctx, const std::string& name, MemFunc mf)
         : MethodInfo(name)
         , _mf(mf)
+        , _params{ ctx.getType( typeid(As) )...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = ctx.getType( typeid(void) );
-            Type* ptypes[] = { ctx.getType( typeid(As) )...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 

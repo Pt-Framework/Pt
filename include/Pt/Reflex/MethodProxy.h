@@ -53,14 +53,10 @@ class MethodProxy : public MethodInfo
         MethodProxy(TypeManager& ctx, const std::string& name, FuncPtr proxy)
         : MethodInfo(name)
         , _proxy(proxy)
+        , _params{ ctx.getType( typeid(As) )...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = ctx.getType( typeid(R) );
-            Type* ptypes[] = { ctx.getType( typeid(As) )...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 
@@ -103,14 +99,10 @@ class MethodProxy<void, C, As...> : public MethodInfo
         MethodProxy(TypeManager& ctx, const std::string& name, FuncPtr proxy)
         : MethodInfo(name)
         , _proxy(proxy)
+        , _params{ ctx.getType( typeid(As) )...,
+                   static_cast<Type*>(0) }
         {
             Type* rtype = ctx.getType( typeid(void) );
-            Type* ptypes[] = { ctx.getType( typeid(As) )...,
-                               static_cast<Type*>(0) };
-
-            for(std::size_t n = 0; n < sizeof...(As); ++n)
-                _params[n] = ptypes[n];
-
             this->init(*rtype, sizeof...(As) ? _params : 0, sizeof...(As));
         }
 
