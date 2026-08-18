@@ -34,101 +34,67 @@
 #include <Pt/Reflex/Argument.h>
 #include <Pt/Any.h>
 #include <string>
+#include <utility>
 
 namespace Pt {
 
 namespace Reflex {
 
-template <typename T>
-class GenericMethod0 : public Pt::Reflex::MethodInfo
+//! @cond PT_DOXYGEN_HIDDEN
+
+template <typename C, typename Seq>
+class GenericMethodBase;
+
+template <typename C, std::size_t... Is>
+class GenericMethodBase<C, std::index_sequence<Is...>> : public MethodInfo
 {
-    public:
-        typedef Pt::Any (*ProxyFunc)(T&);
+    template <std::size_t>
+    using ArgumentN = Argument;
 
     public:
-        GenericMethod0(ProxyFunc proxy, const std::string& name,
-                       Pt::Reflex::Type& rtype)
-        : Pt::Reflex::MethodInfo(name)
+        template <typename... Ts>
+        GenericMethodBase(const std::string& name, Any (*proxy)(C&, ArgumentN<Is>&...),
+                          Type& rtype, Ts&... ts)
+        : MethodInfo(name)
         , _proxy(proxy)
+        , _params{ &ts..., static_cast<Type*>(0) }
         {
-            this->init(rtype, 0, 0);
+            static_assert(sizeof...(Ts) == sizeof...(Is),
+                          "method arity mismatch");
+            this->init(rtype, sizeof...(Is) ? _params : 0, sizeof...(Is));
         }
 
-        Pt::Any call(void* instance, const Pt::Reflex::ArgumentList& args)
+        Any call(void* instance, const ArgumentList& args) override
         {
-            T* obj = static_cast<T*>(instance);
-            return _proxy(*obj);
+            C* obj = static_cast<C*>(instance);
+            ArgumentIterator arg = args.begin();
+            return _proxy(*obj, *(arg + Is)...);
         }
 
     private:
-        ProxyFunc _proxy;
+        Any (*_proxy)(C&, ArgumentN<Is>&...);
+        Type* _params[sizeof...(Is) + 1];
 };
 
+//! @endcond
 
-template <typename T>
-class GenericMethod1 : public Pt::Reflex::MethodInfo
+/** @brief Wraps a generic method proxy.
+
+    The first template parameter is the class type. The second is the
+    number of %Argument parameters accepted by the generic method.
+
+*/
+template <typename C, std::size_t N>
+class GenericMethod : public GenericMethodBase<C, std::make_index_sequence<N>>
 {
     public:
-        typedef Pt::Any (*ProxyFunc)(T&, Pt::Reflex::Argument&);
-
-    public:
-        GenericMethod1(ProxyFunc proxy, const std::string& name,
-                       Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1)
-        : Pt::Reflex::MethodInfo(name)
-        , _proxy(proxy)
-        {
-            _params[0] = &t1;
-            this->init(rtype, _params, 1);
-        }
-
-        Pt::Any call(void* instance, const Pt::Reflex::ArgumentList& args)
-        {
-            T* obj = static_cast<T*>(instance);
-
-            Pt::Reflex::ArgumentIterator arg = args.begin();
-
-            return _proxy(*obj, *arg);
-        }
-
-    private:
-        ProxyFunc _proxy;
-        Pt::Reflex::Type* _params[1];
-};
-
-
-template <typename T>
-class GenericMethod2 : public Pt::Reflex::MethodInfo
-{
-    public:
-        typedef Pt::Any (*ProxyFunc)(T&, Pt::Reflex::Argument&, Pt::Reflex::Argument&);
-
-    public:
-        GenericMethod2(ProxyFunc proxy, const std::string& name,
-                       Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1, Pt::Reflex::Type& t2)
-        : Pt::Reflex::MethodInfo(name)
-        , _proxy(proxy)
-        {
-            _params[0] = &t1;
-            _params[1] = &t2;
-            this->init(rtype, _params, 2);
-        }
-
-        Pt::Any call(void* instance, const Pt::Reflex::ArgumentList& args)
-        {
-            T* obj = static_cast<T*>(instance);
-
-            Pt::Reflex::ArgumentIterator arg = args.begin();
-            Pt::Reflex::Argument& a1 = *arg;
-
-            ++arg;
-            Pt::Reflex::Argument& a2 = *arg;
-
-            return _proxy(*obj, a1, a2);
-        }
-
-    private:
-        ProxyFunc _proxy;
-        Pt::Reflex::Type* _params[2];
+        /** @brief Construct from a generic method proxy.
+        */
+        template <typename... As, typename... Ts>
+        GenericMethod(const std::string& name, Any (*proxy)(C&, As&...),
+                      Type& rtype, Ts&... ts)
+        : GenericMethodBase<C, std::make_index_sequence<N>>(name, proxy, rtype, ts...)
+        { }
 };
 
 } // namespace Reflex

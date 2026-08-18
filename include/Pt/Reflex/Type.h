@@ -542,17 +542,9 @@ class PT_REFLEX_API Type
         void registerConstructor( TypeManager& tm, T& type, void (T::*method)(void*, As...) );
 
 
-        template <typename T>
-        void registerMethod(const char* name, Pt::Any (*proxy)(T&),
-                            Pt::Reflex::Type& rtype);
-
-        template <typename T>
-        void registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Argument&),
-                            Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1);
-
-        template <typename T>
-        void registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Argument&, Pt::Reflex::Argument&),
-                            Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1, Pt::Reflex::Type& t2);
+        template <typename T, typename... As, typename... Ts>
+        void registerMethod(const char* name, Pt::Any (*proxy)(T&, As&...),
+                            Pt::Reflex::Type& rtype, Ts&... ts);
 
 
         template <typename R, typename T, typename... As>
@@ -650,30 +642,13 @@ inline void Type::registerConstructor( TypeManager& tm, T& type, void (T::*proxy
 }
 
 
-template <typename T>
-void Type::registerMethod(const char* name, Pt::Any (*proxy)(T&),
-                         Pt::Reflex::Type& rtype)
+template <typename T, typename... As, typename... Ts>
+void Type::registerMethod(const char* name, Pt::Any (*proxy)(T&, As&...),
+                          Pt::Reflex::Type& rtype, Ts&... ts)
 {
-    GenericMethod0<T>* gm =  new GenericMethod0<T>(proxy, name, rtype);
-    this->registerMethod( gm );
-}
-
-
-template <typename T>
-void Type::registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Argument&),
-                         Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1)
-{
-    GenericMethod1<T>* gm = new GenericMethod1<T>(proxy, name, rtype, t1);
-    this->registerMethod( gm );
-}
-
-
-template <typename T>
-void Type::registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Argument&, Pt::Reflex::Argument&),
-                         Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1, Pt::Reflex::Type& t2)
-{
-    GenericMethod2<T>* gm = new GenericMethod2<T>(proxy, name, rtype, t1, t2);
-    this->registerMethod( gm );
+    GenericMethod<T, sizeof...(Ts)>* gm =
+        new GenericMethod<T, sizeof...(Ts)>(name, proxy, rtype, ts...);
+    this->registerMethod(gm);
 }
 
 
