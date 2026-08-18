@@ -1,30 +1,32 @@
 /*
- * Copyright (C) 2004-2010 by Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2004-2010 by Marc Boris Duerner
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
+*/
+
 #ifndef PT_REFLEX_TYPE_H
 #define PT_REFLEX_TYPE_H
 
@@ -32,6 +34,7 @@
 #include <Pt/Reflex/ConstructorInfo.h>
 #include <Pt/Reflex/MethodInfo.h>
 #include <Pt/Reflex/PropertyInfo.h>
+#include <Pt/Reflex/GenericMethod.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -534,17 +537,10 @@ class PT_REFLEX_API Type
         const PropertyTable& properties() const
         { return _ptab; }
 
-        template <typename T>
-        void registerConstructor( TypeManager& tm, T& type, void (T::*method)(void*) );
 
-        template <typename T, typename A1>
-        void registerConstructor( TypeManager& tm, T& type, void (T::*method)(void*, A1) );
+        template <typename T, typename... As>
+        void registerConstructor( TypeManager& tm, T& type, void (T::*method)(void*, As...) );
 
-        template <typename T, typename A1, typename A2>
-        void registerConstructor( TypeManager& tm, T& type, void (T::*method)(void*, A1, A2) );
-
-        template <typename T, typename A1, typename A2, typename A3>
-        void registerConstructor( TypeManager& tm, T& type, void (T::*method)(void*, A1, A2, A3) );
 
         template <typename T>
         void registerMethod(const char* name, Pt::Any (*proxy)(T&),
@@ -558,18 +554,13 @@ class PT_REFLEX_API Type
         void registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Argument&, Pt::Reflex::Argument&),
                             Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1, Pt::Reflex::Type& t2);
 
-        template <typename R, typename T>
-        void registerMethod( TypeManager& context, const char* name, R (*method)(T&) );
-
-        template <typename R, typename T, typename A1>
-        void registerMethod( TypeManager& context, const char* name, R (*method)(T&, A1) );
-
-        template <typename R, typename T, typename A1, typename A2>
-        void registerMethod( TypeManager& context, const char* name, R (*method)(T&, A1, A2) );
 
         template <typename R, typename T, typename... As>
-        void registerMethod( TypeManager& context, const char* name,
-                             R (T::*method)(As...) );
+        void registerMethod( TypeManager& context, const char* name, R (*method)(T&, As...) );
+
+        template <typename R, typename T, typename... As>
+        void registerMethod( TypeManager& context, const char* name, R (T::*method)(As...) );
+
 
         template <typename C, typename T>
         void registerProperty( TypeManager& context, const char* name, T (*getter)(C&), void (*setter)(C&, T) );
@@ -641,6 +632,7 @@ class BasicType : public Reflex::Type
 
 #include <Pt/Reflex/ConstructorProxy.h>
 #include <Pt/Reflex/MethodProxy.h>
+#include <Pt/Reflex/Method.h>
 #include <Pt/Reflex/PropertyProxy.h>
 #include <Pt/Reflex/Property.h>
 
@@ -648,40 +640,10 @@ namespace Pt {
 
 namespace Reflex {
 
-template <typename T>
-inline void Type::registerConstructor( TypeManager& tm, T& type, void (T::*proxy)(void*) )
+template <typename T, typename... As>
+inline void Type::registerConstructor( TypeManager& tm, T& type, void (T::*proxy)(void*, As...) )
 {
-    ConstructorProxy<T>* ci = new ConstructorProxy<T>(tm, type, proxy);
-    bool ok = Type::registerConstructor(ci);
-    if( ! ok )
-        delete ci;
-}
-
-
-template <typename T, typename A1>
-inline void Type::registerConstructor( TypeManager& tm, T& type, void (T::*proxy)(void*, A1) )
-{
-    ConstructorProxy<T, A1>* ci = new ConstructorProxy<T, A1>(tm, type, proxy);
-    bool ok = Type::registerConstructor(ci);
-    if( ! ok )
-        delete ci;
-}
-
-
-template <typename T, typename A1, typename A2>
-inline void Type::registerConstructor( TypeManager& tm, T& type, void (T::*proxy)(void*, A1, A2) )
-{
-    ConstructorProxy<T, A1, A2>* ci = new ConstructorProxy<T, A1, A2>(tm, type, proxy);
-    bool ok = Type::registerConstructor(ci);
-    if( ! ok )
-        delete ci;
-}
-
-
-template <typename T, typename A1, typename A2,typename A3>
-inline void Type::registerConstructor( TypeManager& tm, T& type, void (T::*proxy)(void*, A1, A2, A3) )
-{
-    ConstructorProxy<T, A1, A2, A3>* ci = new ConstructorProxy<T, A1, A2, A3>(tm, type, proxy);
+    ConstructorProxy<T, As...>* ci = new ConstructorProxy<T, As...>(tm, type, proxy);
     bool ok = Type::registerConstructor(ci);
     if( ! ok )
         delete ci;
@@ -715,26 +677,10 @@ void Type::registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Arg
 }
 
 
-template <typename R, typename T>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (*proxy)(T&) )
+template <typename R, typename T, typename... As>
+inline void Type::registerMethod( TypeManager& context, const char* name, R (*proxy)(T&, As...) )
 {
-    MethodProxy<R, T>* mi = new MethodProxy<R, T>(context, name, proxy);
-    Type::registerMethod(mi);
-}
-
-
-template <typename R, typename T, typename A1>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (*proxy)(T&, A1) )
-{
-    MethodProxy<R, T, A1>* mi = new MethodProxy<R, T, A1>(context, name, proxy);
-    Type::registerMethod(mi);
-}
-
-
-template <typename R, typename T, typename A1, typename A2>
-inline void Type::registerMethod( TypeManager& context, const char* name, R (*proxy)(T&, A1, A2) )
-{
-    MethodProxy<R, T, A1, A2>* mi = new MethodProxy<R, T, A1, A2>(context, name, proxy);
+    MethodProxy<R, T, As...>* mi = new MethodProxy<R, T, As...>(context, name, proxy);
     Type::registerMethod(mi);
 }
 
