@@ -60,7 +60,7 @@ PT_API DateTime dateTimeFromString(const std::string& s, int* utcOffset);
     thrown by the underlying time and date, isValid() can be used
     to check numeric date and time values.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 class DateTime
 {

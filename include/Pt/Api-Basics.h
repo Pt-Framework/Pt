@@ -26,18 +26,26 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_API_CONCURRENCY_H
-#define PT_API_CONCURRENCY_H
+#ifndef PT_API_BASICS_H
+#define PT_API_BASICS_H
 
-/** @defgroup Concurrency Concurrency
+/** @defgroup Pt-Basics Basic Types
 
-    @brief Threads, mutexes, semaphores, condition variables and atomic operations.
+    @brief Fixed-size integers, date and time types, and type-erased values.
 
-    The classes and functions in this group make it possible to write
-    multi-threaded programs. Access to shared resources can be serialized
-    by various types of mutexes, semaphores and condition variables. The most
-    lightweight synchronization primitives are atomic integers. The framework
-    allows to start threads, which can be either joinable or detached. 
+    The %Pt framework defines a number of signed and unsigned,
+    @link Pt-Basics-Page-FixedInt fixed-size integer@endlink types. These
+    are typedefs of fundamental integer types and the actual type depends
+    on the platform.
+
+    The classes that represent @link Pt-Basics-Page-DateTime dates and times@endlink,
+    namely Pt::Date, Pt::Time, Pt::DateTime and Pt::Timespan, can be used for
+    comparison, sorting or calculating dates, times and timespans. These types
+    are serializable and conversion to ISO string format is supported as well.
+
+    The class Pt::Any is able to contain any other copyable type. This is
+    useful in situations where type erasure is required, for example, to store
+    completely unrelated types in a list or vector.
 */
 
 #endif

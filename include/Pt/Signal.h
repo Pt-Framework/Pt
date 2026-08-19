@@ -183,7 +183,7 @@ class PT_API SignalBase : public Connectable
     and does not depend on an event loop. If multiple slots are connected to
     a signal, the slots will be called one after another.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename... As>
 class Signal : public SignalBase
@@ -277,7 +277,7 @@ class Signal : public SignalBase
     effectively converts a %Signal object into a Slot object, so that it
     can be used as the target of another %Signal. This allows chaining of
     %Signals.
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename... As>
 class SignalSlot : public BasicSlot<void, As...>

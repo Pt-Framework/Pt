@@ -187,7 +187,7 @@ class DelegateBase : public Connectable
     connection was closed, the delegate is invoked, which has no effect. Finally,
     when the delegate is called again, an exception is thrown and catched.
 
-    \ingroup sigslot
+    \ingroup Pt-Signals
 */
 template <typename R, typename... As>
 class Delegate : public DelegateBase
@@ -273,7 +273,7 @@ class Delegate : public DelegateBase
     can be used as the target of another %Delegate. This allows chaining of
     delegates.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename R, typename... As>
 class DelegateSlot : public BasicSlot<R, As...>

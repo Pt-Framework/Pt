@@ -5,14 +5,14 @@ description: "API Documentation"
 
 # Documentation Structure
 
-Doxygen documentation for classes/functions/groups is the foundation. 
+Doxygen documentation for classes/functions/groups is the foundation.
 Pages and agent instructions build on top of it. Pages assemble the
 Doxygen content for human readers, and instructions files index it by
 features for agents.
 
 # API Documentation
 
-- All API documentation (namespaces, classes, methods, enums, free 
+- All API documentation (namespaces, classes, methods, enums, free
   functions) belongs in the public header files, not in `.cpp` files.
 - Document every public namespace, class, funtions using Doxygen.
 - Assign each class/interface/function to a Doxygen group using `@ingroup`.
@@ -37,9 +37,13 @@ features for agents.
 
 # User Documentation Pages
 
-- Doxygen Page files live in `doc/pages/`. Pages compose the Doxygen API and
-  Groups
-  Documentation into readable user documentation.
+- Doxygen Page files live in `doc/pages/` and compose the Doxygen API and group
+  documentation into readable user documentation.
+- Page file names are lowercase, e.g. `pt-signals.page`.
+- Page IDs use a `-Page` suffix to distinguish them from group IDs.
+  - Example: group `Pt-Signals` → page `Pt-Signals-Page`.
+  - Section anchors use the page ID as prefix with hyphens:
+    `Pt-Signals-Page-Signals`.
 - Pages contain **no new content** — only `@copydetails` references.
 - Use `@copydetails <GroupId>` in a page to pull in group documentation.
 - Use `@section <anchor> <Title>` to introduce page subsections.
@@ -48,13 +52,22 @@ features for agents.
 
 # Agent Instructions
 
-- One `.instructions.md` file per **high-level feature set** (covering one 
+- One `.instructions.md` file per **high-level feature set** (covering one
   or more related groups), e.g. `<Module>.instructions.md` covers all
   `<Module>-*` groups.
 - These files index the Doxygen foundation for agents: they map features
   and tasks to the relevant headers and `Api-<Feature>.h` group files.
 - They do not contain documentation or explanations — those belong in
   headers and group files.
+
+# Website
+
+- Doxygen generates HTML into `doc/website/htdocs/`. Do not edit those files
+  by hand.
+- The website root files in `doc/website/` (e.g. `index.html`, `docs.html`)
+  contain hand-written navigation links to Doxygen output in `doc/website/*.html`.
+  - Doxygen `\page <id>` produces `htdocs/<id>.html`.
+  - Doxygen `@defgroup <id>` produces `htdocs/group__<id>.html`.
 
 # Doxygen Style
 

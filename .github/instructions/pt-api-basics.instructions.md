@@ -2,8 +2,8 @@
 description: "Basic Types"
 ---
 
-- BasicTypes module overview and API boundaries:
-  `include/Pt/Api-BasicTypes.h`
+- Pt-Basics module overview and API boundaries:
+  `include/Pt/Api-Basics.h`
 - Fixed-size integer typedefs (int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t):
   `include/Pt/Types.h`
 - Type-erased value container for any copyable type:

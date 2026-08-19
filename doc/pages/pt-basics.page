@@ -1,8 +1,8 @@
-/** \page basictypes Basic Types
+/** \page Pt-Basics-Page Basic Types
 
-@copydetails BasicTypes
+@copydetails Pt-Basics
 
-@section basictypes_FixedInt Fixed Size Integers
+@section Pt-Basics-Page-FixedInt Fixed Size Integers
 
 The %Pt framework defines a number of fixed-size, signed and unsigned integers
 ranging from 8-bit to 64-bit widths. They are typedefs for builtin fundamental
@@ -36,9 +36,9 @@ table shows all available fixed-size integer types:
         <td><b>uint64_t</b></td>
         <td>unsigned 64 bit integer</td>
     </tr>
-</table> 
+</table>
 
-@section basictypes_DateTime Dates and Times
+@section Pt-Basics-Page-DateTime Dates and Times
 
 @copydetails Pt::Timespan
 
@@ -48,7 +48,7 @@ table shows all available fixed-size integer types:
 
 @copydetails Pt::DateTime
 
-@section basictypes_Any The Any Class
+@section Pt-Basics-Page-Any The Any Class
 
 @copydetails Pt::Any
 

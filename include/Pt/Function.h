@@ -40,7 +40,7 @@ namespace Pt {
 	The %Function class wraps free functions in the form of a Callable,
 	for use with the signals/slots framework.
 
-	@ingroup sigslot
+	@ingroup Pt-Signals
 */
 template <typename R, typename... As>
 class Function : public Callable<R, As...>
@@ -87,7 +87,7 @@ class Function : public Callable<R, As...>
 
 /** @brief Wraps %Function objects so that they can act as slots.
 
-	@ingroup sigslot
+	@ingroup Pt-Signals
 */
 template <typename R, typename... As>
 class FunctionSlot : public BasicSlot<R, As...>

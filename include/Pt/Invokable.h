@@ -50,7 +50,7 @@ class Callback
     number of arguments, but does not provide a return value. It serves as
     a base type for other types in the Pt signals/slots framework.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename... As>
 class Invokable : public Callback

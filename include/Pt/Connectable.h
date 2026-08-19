@@ -44,7 +44,7 @@ namespace Pt {
     overload Connectable::opened and Connectable::closed to tune
     connection managenment.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 class PT_API Connectable
 {

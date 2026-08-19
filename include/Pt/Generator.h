@@ -116,7 +116,7 @@ class YieldAwaiter
     It produces values lazily by resuming via a NextAwaiter. Unlike standard synchronous
     generators, its body may also co_await as it maps back to the EventLoop correctly.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 template<typename T>
 class Generator : public AwaiterBase

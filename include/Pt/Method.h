@@ -41,7 +41,7 @@ namespace Pt {
 	The %Method class wraps member functions as Callable objects
 	so that they can be used with the signals/slots framework.
 
-	@ingroup sigslot
+	@ingroup Pt-Signals
 */
 template <typename R, typename ClassT, typename... As>
 class Method : public Callable<R, As...>
@@ -119,7 +119,7 @@ class Method : public Callable<R, As...>
 
 /** @brief Wraps %Method objects so that they can act as Slots.
 
-	@ingroup sigslot
+	@ingroup Pt-Signals
 */
 template <typename R, typename ClassT, typename... As>
 class MethodSlot : public BasicSlot<R, As...>

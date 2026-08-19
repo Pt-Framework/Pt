@@ -1,0 +1,13 @@
+/** \page Pt-Signals-Page Signals and Delegates
+
+@copydetails Pt-Signals
+
+@section Pt-Signals-Page-Signals Signals
+
+@copydetails Pt::Signal
+
+@section Pt-Signals-Page-Delegates Delegates
+
+@copydetails Pt::Delegate
+
+*/

@@ -44,7 +44,7 @@ think you have all relevant information.
   `.github/instructions/jam-internals.instructions.md`
 
 - Signals, slots, delegates, events, connect, emit, observable:
-  `.github/instructions/pt-api-sigslot.instructions.md`
+  `.github/instructions/pt-api-signals.instructions.md`
 
 - Pixel types, image formats, image access, pixel iteration:
   `.github/instructions/pt-gfx-api-images.instructions.md`

@@ -43,7 +43,7 @@ namespace Pt {
     non-generic lambda, the factory derives the %Callable interface from
     operator(). Generic lambdas require an explicitly supplied signature.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename L, typename R, typename... A>
 class Lambda : public Callable<R, A...>
@@ -84,7 +84,7 @@ class Lambda : public Callable<R, A...>
     general equality operation. Retain and close the returned %Connection to
     disconnect a slot, or bind it to a %Connectable context.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename L, typename R, typename... A>
 class LambdaSlot : public BasicSlot<R, A...>

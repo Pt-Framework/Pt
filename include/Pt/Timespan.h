@@ -57,7 +57,7 @@ namespace Pt {
     std::cout << "The difference is " << d.toSecs() << " secs" << std::endl;
     @endcode
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 class Timespan
 {

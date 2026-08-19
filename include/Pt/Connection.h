@@ -90,7 +90,7 @@ class ConnectionData
 
 /** @brief Represents a connection between a Signal/Delegate and a slot.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 class PT_API Connection
 {

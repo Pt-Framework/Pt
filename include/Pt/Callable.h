@@ -41,7 +41,7 @@ namespace Pt {
     return values. The variadic template argument list determines the
     callable signature.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename R, typename... As>
 class Callable : public Invokable<As...>

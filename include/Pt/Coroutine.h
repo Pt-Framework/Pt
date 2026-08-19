@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2026 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
@@ -47,7 +47,7 @@ namespace Pt {
     derive from this class, allowing to cancel any pending operation through
     a single virtual dispatch.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 class AwaiterBase
 {
@@ -82,7 +82,7 @@ class AwaiterBase
 
     The result is retrieved via await_resume() in the subclass.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 class Awaiter : public AwaiterBase
 {
@@ -135,7 +135,7 @@ class Awaiter : public AwaiterBase
     via onReady(). The await_resume() method calls onReady() and returns
     its value.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 template<typename R>
 class BasicAwaiter : public Awaiter
@@ -159,7 +159,7 @@ class BasicAwaiter : public Awaiter
 
 /** @brief BasicAwaiter specialization for awaitables without a result.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 template<>
 class BasicAwaiter<void> : public Awaiter
@@ -330,7 +330,7 @@ class FinalAwaiter
     outer coroutine can co_await an inner %Task<T> and resume when it
     completes, with the result available as the co_await expression value.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 template<typename T = void>
 class Task : public AwaiterBase

@@ -26,7 +26,7 @@ The user provides the module name (e.g. `System`, `Net`, `Http`) and optionally 
 3. **Name the files**
    - Use the prefix `pt-<module>-api-` and a short thematic suffix, e.g. `pt-<module>-api-<theme>.instructions.md`.
    - Only the core module uses the `pt-api-` prefix.
-   - If a group already has an existing instructions file (e.g. `pt-api-sigslot.instructions.md`), update it instead of creating a duplicate.
+   - If a group already has an existing instructions file (e.g. `pt-api-signals.instructions.md`), update it instead of creating a duplicate.
 
 4. **Write each file**
    - Start with YAML frontmatter containing `description: "..."`.

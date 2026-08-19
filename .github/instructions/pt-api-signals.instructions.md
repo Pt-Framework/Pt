@@ -4,7 +4,7 @@ description: "Using Pt signals, slots, delegates, and events for type-safe callb
 
 # Doxygen Group and Headers
 
-- Group definition: `include/Pt/Api-sigslot.h` — `@defgroup sigslot`
+- Group definition: `include/Pt/Api-Signals.h` — `@defgroup Pt-Signals`
 - Public class documentation lives beside each declaration: `Invokable.h`,
   `Callable.h`, `Slot.h`, `Function.h`, `Method.h`, `ConstMethod.h`,
   `Lambda.h`, `Delegate.h`, and `Signal.h`.
@@ -14,7 +14,7 @@ description: "Using Pt signals, slots, delegates, and events for type-safe callb
 The Pt signal/slot system provides type-safe, lifetime-managed callbacks.
 
 For detailed documentation with examples, read:
-- `include/Pt/Api-sigslot.h` — Conceptual overview and introduction
+- `include/Pt/Api-Signals.h` — Conceptual overview and introduction
 - `include/Pt/Signal.h` — Signal usage, connecting, emitting, disconnecting
 - `include/Pt/Delegate.h` — Delegate usage, call() vs invoke()
 - `include/Pt/Slot.h` — Slot concept and creation helpers

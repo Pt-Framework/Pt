@@ -3,11 +3,11 @@
 @section pt_core Core Library
 
 <ul>
-    <li> @ref basictypes </li>
+    <li> @ref Pt-Basics-Page </li>
     <ul>
-        <li> @ref basictypes_FixedInt </li>
-        <li> @ref basictypes_DateTime </li>
-        <li> @ref basictypes_Any </li>
+        <li> @ref Pt-Basics-Page-FixedInt </li>
+        <li> @ref Pt-Basics-Page-DateTime </li>
+        <li> @ref Pt-Basics-Page-Any </li>
     </ul>
 
     <li> @ref allocators </li>
@@ -17,10 +17,10 @@
         <li> @ref allocators_Page </li>
     </ul>
 
-    <li> @ref sigslot </li>
+    <li> @ref Pt-Signals-Page </li>
     <ul>
-        <li> @ref sigslot_Signals </li>
-        <li> @ref sigslot_Delegates </li>
+        <li> @ref Pt-Signals-Page-Signals </li>
+        <li> @ref Pt-Signals-Page-Delegates </li>
     </ul>
 
     <li> @ref text </li>
@@ -62,7 +62,7 @@
         <li> @ref filesystem_FileIO </li>
     </ul>
 
-    <li> @ref concurrency </li>
+    <li> @ref Pt-System-Concurrency-Page </li>
 
     <li> @ref logging </li>
     <ul>

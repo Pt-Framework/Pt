@@ -68,7 +68,7 @@ content is in context without having read it.
   `.github/instructions/jam-internals.instructions.md`
 
 - For Signals, slots, delegates, events, connect, emit, observable read:
-  `.github/instructions/pt-api-sigslot.instructions.md`
+  `.github/instructions/pt-api-signals.instructions.md`
 
 - For Basic types, Any, dates, times, events and atomic integers read:
   `.github/instructions/pt-api-basics.instructions.md`

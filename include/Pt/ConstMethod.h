@@ -41,7 +41,7 @@ namespace Pt {
 	The %ConstMethod class wraps const member functions as Callable objects
 	so that they can be used with the signals/slots framework.
 
-	@ingroup sigslot
+	@ingroup Pt-Signals
 */
 template <typename R, typename ClassT, typename... As>
 class ConstMethod : public Callable<R, As...>
@@ -105,7 +105,7 @@ class ConstMethod : public Callable<R, As...>
 
 /** @brief Wraps %ConstMethod objects so that they can act as Slots.
 
-	@ingroup sigslot
+	@ingroup Pt-Signals
 */
 template <typename R, typename ClassT, typename... As>
 class ConstMethodSlot : public BasicSlot<R, As...>

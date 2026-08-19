@@ -49,7 +49,7 @@ class Connection;
     example is the Pt::MethodSlot, which allows to use a member function as a
     slot.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 class Slot
 {
@@ -85,7 +85,7 @@ class Slot
 
 /** @brief Base type for various "slot" types.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename R, typename... As>
 class BasicSlot : public Slot

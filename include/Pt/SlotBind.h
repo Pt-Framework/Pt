@@ -141,7 +141,7 @@ class BindAdaptor<R, Tuple, std::index_sequence<Is...>>
     The bound argument is copied. The resulting slot accepts all original
     arguments except the final one.
 
-    @ingroup sigslot
+    @ingroup Pt-Signals
 */
 template <typename R, typename Tuple, typename Indices>
 class BoundSlot

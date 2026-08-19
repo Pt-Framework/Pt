@@ -58,7 +58,7 @@ namespace Pt {
     template argument for %any_cast() will not throw an exception, but return
     a null pointer if the requested type does not match.
 
-    @ingroup BasicTypes
+    @ingroup Pt-Basics
 */
 class Any
 {

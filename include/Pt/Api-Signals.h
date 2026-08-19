@@ -26,10 +26,10 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_API_SIGSLOT_H
-#define PT_API_SIGSLOT_H
+#ifndef PT_API_SIGNALS_H
+#define PT_API_SIGNALS_H
 
-/** @defgroup sigslot Signals and Delegates
+/** @defgroup Pt-Signals Signals and Delegates
 
     @brief Type-safe callback mechanism for connecting signals to slots and delegates.
 
