@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_SCROLLBARSTYLE_H
 #define PT_FORMS_SCROLLBARSTYLE_H
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 #include <Pt/Forms/Direction.h>
 
 namespace Pt {
@@ -264,7 +264,7 @@ class PT_FORMS_API ScrollBarRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ScrollBarStyle : public StyleBinder<ScrollBarRenderer,
+class PT_FORMS_API ScrollBarStyle : public Styler<ScrollBarRenderer,
                                                        ScrollBarStyleOptions>
 {
     public:

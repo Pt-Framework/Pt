@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_LINEEDITSTYLE_H
 #define PT_FORMS_LINEEDITSTYLE_H
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -222,7 +222,7 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API LineEditStyle : public StyleBinder<LineEditRenderer,
+class PT_FORMS_API LineEditStyle : public Styler<LineEditRenderer,
                                                       LineEditStyleOptions>
 {
     public:

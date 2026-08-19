@@ -30,7 +30,7 @@
 #ifndef Pt_Forms_PanelStyle_h
 #define Pt_Forms_PanelStyle_h
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -268,7 +268,7 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
     Keeps the active renderer binding for the shared style renderer, a private
     override clone, or an explicitly assigned custom renderer.
 */
-class PT_FORMS_API PanelStyle : public StyleBinder<PanelRenderer, 
+class PT_FORMS_API PanelStyle : public Styler<PanelRenderer, 
                                                    PanelStyleOptions>
 {
     public:

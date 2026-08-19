@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_TABVIEWSTYLE_H
 #define PT_FORMS_TABVIEWSTYLE_H
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -218,7 +218,7 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API TabViewStyle : public StyleBinder<TabViewRenderer,
+class PT_FORMS_API TabViewStyle : public Styler<TabViewRenderer,
                                                      TabViewStyleOptions>
 {
     public:

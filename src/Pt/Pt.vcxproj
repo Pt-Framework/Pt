@@ -183,6 +183,7 @@
     <ClInclude Include="..\..\include\Pt\Forms\SpinBox.h" />
     <ClInclude Include="..\..\include\Pt\Forms\StackLayout.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Style.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\Styler.h" />
     <ClInclude Include="..\..\include\Pt\Forms\StyleOptions.h" />
     <ClInclude Include="..\..\include\Pt\Forms\TableLayout.h" />
     <ClInclude Include="..\..\include\Pt\Forms\TabView.h" />

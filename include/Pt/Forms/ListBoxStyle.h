@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_LISTBOXSTYLE_H
 #define PT_FORMS_LISTBOXSTYLE_H
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -144,7 +144,7 @@ class PT_FORMS_API ListBoxRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ListBoxStyle : public StyleBinder<ListBoxRenderer,
+class PT_FORMS_API ListBoxStyle : public Styler<ListBoxRenderer,
                                                      ListBoxStyleOptions>
 {
     public:
@@ -324,7 +324,7 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ListItemStyle : public StyleBinder<ListItemRenderer,
+class PT_FORMS_API ListItemStyle : public Styler<ListItemRenderer,
                                                       ListItemStyleOptions>
 {
     public:

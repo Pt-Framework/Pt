@@ -180,7 +180,7 @@ class PT_FORMS_API PushButton : public Button
 
         ButtonState               _buttonState;
         ButtonStyleOptions        _buttonStyleOptions;
-        ButtonStyle               _buttonStyle;
+        ButtonStyler              _buttonStyler;
 
         Gfx::SizeF                _iconSize;
         Gfx::PointF               _textPos;

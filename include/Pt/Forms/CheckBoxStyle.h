@@ -30,7 +30,7 @@
 #ifndef Pt_Forms_CheckBoxStyle_h
 #define Pt_Forms_CheckBoxStyle_h
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -322,7 +322,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
     Keeps the active renderer binding for the shared style renderer, a private
     override clone, or an explicitly assigned custom renderer.
 */
-class PT_FORMS_API CheckBoxStyle : public StyleBinder<CheckBoxRenderer,
+class PT_FORMS_API CheckBoxStyle : public Styler<CheckBoxRenderer,
                                                       CheckBoxStyleOptions>
 {
     public:

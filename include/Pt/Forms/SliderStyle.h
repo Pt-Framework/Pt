@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_SLIDERSTYLE_H
 #define PT_FORMS_SLIDERSTYLE_H
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -210,7 +210,7 @@ class PT_FORMS_API SliderRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API SliderStyle : public StyleBinder<SliderRenderer,
+class PT_FORMS_API SliderStyle : public Styler<SliderRenderer,
                                                     SliderStyleOptions>
 {
     public:

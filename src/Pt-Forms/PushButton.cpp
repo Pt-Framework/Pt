@@ -309,9 +309,9 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
     const StyleOptions& options = Application::instance().styleOptions();
 
     if( renderer )
-        _buttonStyle.bind(*renderer, options, _buttonStyleOptions);
+        _buttonStyler.bind(*renderer, options, _buttonStyleOptions);
     else
-        _buttonStyle.bind(Application::instance().style(), options, _buttonStyleOptions);
+        _buttonStyler.bind(Application::instance().style(), options, _buttonStyleOptions);
 
     invalidate();
 }
@@ -324,7 +324,7 @@ void PushButton::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    ButtonRenderer* renderer = _buttonStyle.rebind(style, options,
+    ButtonRenderer* renderer = _buttonStyler.rebind(style, options,
                                                    _buttonStyleOptions);
     if( ! renderer )
         return;
@@ -352,7 +352,7 @@ void PushButton::onInvalidate()
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer )
         return Gfx::SizeF(0, 0);
 
@@ -384,7 +384,7 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer )
         return;
 
@@ -444,7 +444,7 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
 void PushButton::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _buttonStyle.renderer() )
+    if( ! _buttonStyler.renderer() )
         return;
 
     Gfx::RectF widgetRect( size() );
@@ -462,7 +462,7 @@ void PushButton::onPaintBackground(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer )
         return;
 
@@ -474,7 +474,7 @@ void PushButton::onPaintFrame(PaintContext& context,
                               const Gfx::RectF& rect,
                               const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer || _buttonState.isFlat() )
         return;
 
@@ -488,7 +488,7 @@ void PushButton::onPaintIcon(PaintContext& context,
                              const Gfx::PointF& pos,
                              const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer || picture.empty() )
         return;
 
@@ -502,7 +502,7 @@ void PushButton::onPaintText(PaintContext& context,
                              const Gfx::PointF& pos,
                              const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer )
         return;
 
@@ -518,7 +518,7 @@ void PushButton::onPaintMnemonic(PaintContext& context,
                                 const Gfx::RectF& mnemonic,
                                 const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyle.renderer();
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer || text().empty() )
         return;
 

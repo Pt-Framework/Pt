@@ -29,7 +29,7 @@
 #ifndef Pt_Forms_SpinBoxStyle_h
 #define Pt_Forms_SpinBoxStyle_h
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -265,7 +265,7 @@ class PT_FORMS_API SpinBoxRenderer : public Style::Facet
 
 /** @brief Binds a spin box widget to the currently active renderer.
 */
-class PT_FORMS_API SpinBoxStyle : public StyleBinder<SpinBoxRenderer,
+class PT_FORMS_API SpinBoxStyle : public Styler<SpinBoxRenderer,
                                                      SpinBoxStyleOptions>
 {
     public:

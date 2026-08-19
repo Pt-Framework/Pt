@@ -30,7 +30,7 @@
 #ifndef Pt_Forms_ButtonStyle_h
 #define Pt_Forms_ButtonStyle_h
 
-#include <Pt/Forms/Style.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -400,13 +400,13 @@ class PT_FORMS_API ButtonRenderer : public Style::Facet
     shared style renderer, private override clone, and externally assigned
     custom renderer.
 */
-class PT_FORMS_API ButtonStyle : public StyleBinder<ButtonRenderer, 
-                                                    ButtonStyleOptions>
+class PT_FORMS_API ButtonStyler : public Styler<ButtonRenderer, 
+                                                ButtonStyleOptions>
 {
     public:
         /** @brief Constructs an unbound button style controller.
         */
-        ButtonStyle();
+        ButtonStyler();
 };
 
 } // namespace
