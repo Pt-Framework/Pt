@@ -23,7 +23,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -126,7 +126,7 @@ class FacetPtr
                 _facet->ref();
         }
 
-        T* operator->() const 
+        T* operator->() const
         { return _facet; }
 
         T& operator*() const
@@ -170,13 +170,13 @@ class PT_FORMS_API Style
                 }
 
                 void ref()
-                { 
-                    ++_refs; 
+                {
+                    ++_refs;
                 }
 
                 std::size_t unref()
-                { 
-                    return --_refs; 
+                {
+                    return --_refs;
                 }
 
                 /** @brief Resets the facet to the given global style options.
@@ -238,7 +238,7 @@ class PT_FORMS_API Style
             return _generation;
         }
 
-        template <typename FacetT> 
+        template <typename FacetT>
         FacetT* get() const
         {
             Facet* facet = find( typeid(FacetT) );
@@ -307,10 +307,11 @@ class StyleBinder : private NonCopyable
 
         /** @brief Refreshes the current renderer binding.
 
-            Re-prepares the current custom renderer when the local prepare
-            inputs changed. Shared style renderers and override clones are
-            reacquired through the current %Style by delegating to the
-            style-path bind.
+            Custom renderers stay assigned and are re-prepared only when the
+            palette or local options generation changed. Shared renderers and
+            override clones are reacquired through the style-path bind when
+            the %Style generation changed or the override mode flipped.
+            Override clones with an unchanged source are re-prepared in place.
         */
         RendererT* rebind(const Pt::Forms::Style& style,
                           const StyleOptions& options,
@@ -436,17 +437,36 @@ StyleBinder<RendererT, OptionsT>::rebind(const Pt::Forms::Style& style,
                                          const StyleOptions& options,
                                          const OptionsT& localOptions)
 {
-    if( ! _renderer || _binding != CustomRenderer )
+    const bool optionsChanged = _styleOptionsGeneration != options.generation() ||
+                                _localOptionsGeneration != localOptions.generation();
+
+    if( _binding == CustomRenderer )
+    {
+        if( _renderer && optionsChanged )
+            _renderer->prepare(options, localOptions);
+
+        if( _renderer )
+        {
+            _styleOptionsGeneration = options.generation();
+            _localOptionsGeneration = localOptions.generation();
+        }
+
+        return _renderer.get();
+    }
+
+    const bool unbound = ! _renderer;
+    const bool styleChanged = _boundStyleGeneration != style.generation();
+    const bool overrideChanged = localOptions.hasOverrides() != (_binding == CustomOverrides);
+
+    if( unbound || styleChanged || overrideChanged )
         return bind(style, options, localOptions);
 
-    bool needsPrepare = _styleOptionsGeneration != options.generation() ||
-                        _localOptionsGeneration != localOptions.generation();
-
-    if( needsPrepare )
+    if( _binding == CustomOverrides && optionsChanged )
+    {
         _renderer->prepare(options, localOptions);
-
-    _styleOptionsGeneration = options.generation();
-    _localOptionsGeneration = localOptions.generation();
+        _styleOptionsGeneration = options.generation();
+        _localOptionsGeneration = localOptions.generation();
+    }
 
     return _renderer.get();
 }

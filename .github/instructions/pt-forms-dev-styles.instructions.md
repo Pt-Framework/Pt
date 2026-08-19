@@ -120,10 +120,10 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 - `XStyle::bind(const Pt::Forms::Style&, ...)` is the style-path bind. It must always leave custom mode and switch to `Style` or `Override`.
 - In the style-path bind, clone and locally prepare a private renderer only when local `XStyleOptions` actually contain overrides. If there are no local overrides, bind the shared renderer from `%Style` directly and do not prepare it locally.
 - `XStyle::bind(XRenderer&, ...)` is only the explicit custom-renderer assignment path, typically from a widget `setRenderer(XRenderer*)` API. Do not use pointer-identity checks during invalidation to detect whether a custom renderer changed.
-- `XStyle::rebind(const Pt::Forms::Style&, ...)` re-prepares only the currently assigned custom renderer when the local prepare generations changed. For `Style` and `Override`, it delegates back through `bind(style, ...)` so the active renderer source is reacquired centrally.
+- `XStyle::rebind(const Pt::Forms::Style&, ...)` re-prepares a custom renderer when the palette or local prepare generations changed. Shared and override paths call `bind(style, ...)` when the `%Style` generation changed or the override mode flipped. An override clone with an unchanged source is re-prepared in place.
 - When a bind or rebind path cannot obtain a renderer, keep the cached prepare generations invalid. Only store the current prepare generations after a successful `%XRenderer::prepare(...)` call.
 - Widgets that use an extracted slice should keep `setRenderer(T* renderer)` pointer-based when `nullptr` is part of the public API contract for falling back to the current style. Non-null pointers map to `bind(*renderer, ...)`; null maps to `bind(Application::instance().style(), ...)`.
-- Widgets that use an extracted slice may call `rebind(style, options, localOptions)` uniformly during `%onInvalidate()`. The binder keeps the custom path local and routes style and override paths back through `bind(style, ...)`.
+- Widgets that use an extracted slice may call `rebind(style, options, localOptions)` uniformly during `%onInvalidate()`. The binder keeps the custom path local and reacquires shared or override renderers only when the style source or override mode changed.
 - In `%onInvalidate()`, call the base implementation first, reacquire the renderer through the slice binder, then refresh widget-owned derived caches such as icon pixmaps, and finally request relayout.
 
 ### Button Slice
