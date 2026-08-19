@@ -22,6 +22,7 @@ For detailed documentation with examples, read:
 - `include/Pt/Function.h` — Function slots (free function wrappers)
 - `include/Pt/Lambda.h` — Lambda and function object slots
 - `include/Pt/ConstMethod.h` — Const method slots
+- `include/Pt/SlotBind.h` — Argument binding for slots
 
 ## Key Classes
 

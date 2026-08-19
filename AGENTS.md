@@ -70,6 +70,27 @@ content is in context without having read it.
 - For Signals, slots, delegates, events, connect, emit, observable read:
   `.github/instructions/pt-api-sigslot.instructions.md`
 
+- For Basic types, Any, dates, times, events and atomic integers read:
+  `.github/instructions/pt-api-basics.instructions.md`
+
+- For Unicode strings, text codecs, regex, Base64, parsing and formatting read:
+  `.github/instructions/pt-api-text.instructions.md`
+
+- For Memory management, smart pointers and allocators read:
+  `.github/instructions/pt-api-memory.instructions.md`
+
+- For Coroutines, awaitables and generators read:
+  `.github/instructions/pt-api-coroutines.instructions.md`
+
+- For Serialization, composers and formatters read:
+  `.github/instructions/pt-api-serialization.instructions.md`
+
+- For I/O streams, buffers and zlib streams read:
+  `.github/instructions/pt-api-streams.instructions.md`
+
+- For Program arguments, settings, type traits and helper utilities read:
+  `.github/instructions/pt-api-utilities.instructions.md`
+
 - For Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images) read:
   `.github/instructions/pt-gfx-api-images.instructions.md`
 
