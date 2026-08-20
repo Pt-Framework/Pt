@@ -1680,6 +1680,9 @@
     <ClInclude Include="..\..\include\Pt\Forms\Button.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ButtonStyle.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\CheckBox.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
@@ -1767,6 +1770,9 @@
     <ClInclude Include="..\..\include\Pt\Forms\PushButton.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Renderer.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\Responder.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
@@ -1801,6 +1807,9 @@
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\Styler.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\StylerBase.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\StyleOptions.h">
@@ -4652,6 +4661,9 @@
     <ClCompile Include="..\Pt-Forms\Button.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
+    <ClCompile Include="..\Pt-Forms\ButtonStyle.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
     <ClCompile Include="..\Pt-Forms\CheckBox.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
@@ -4758,6 +4770,9 @@
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\Style.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\StylerBase.cpp">
       <Filter>Pt-Forms</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\StyleOptions.cpp">

@@ -27,55 +27,81 @@
   Boston, MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_API_H
-#define PT_FORMS_API_H
-
-#include <Pt/Api.h>
-
-#define PT_FORMS_VERSION_MAJOR PT_VERSION_MAJOR
-#define PT_FORMS_VERSION_MINOR PT_VERSION_MINOR
-#define PT_FORMS_VERSION_REVISION PT_VERSION_REVISION
-#define PT_FORMS_VERSION_PRERELEASE PT_VERSION_PRERELEASE
-
-#if defined(PT_FORMS_API_EXPORT)
-#    define PT_FORMS_API PT_EXPORT
-#  else
-#    define PT_FORMS_API PT_IMPORT
-#  endif
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
-/** @namespace Pt::Forms
-    @brief Graphical User Interface
-*/
 namespace Forms {
 
-class ActivateEvent;
-class CloseEvent;
-class Control;
-class EnableEvent;
-class EnterEvent;
-class FocusEvent;
-class InvalidateEvent;
-class KeyEvent;
-class LeaveEvent;
-class LayoutEvent;
-class MeasureEvent;
-class MouseEvent;
-class MoveEvent;
-class PaintEvent;
-class RelayoutEvent;
-class RescaleEvent;
-class ResizeEvent;
-class ScrollEvent;
-class ShowEvent;
-class TouchEvent;
-class Widget;
-class Window;
-class WindowStateEvent;
+const std::size_t StylerBase::InvalidGeneration = std::size_t(-1);
+
+
+StylerBase::StylerBase()
+: _styleGeneration(InvalidGeneration)
+, _optionsGeneration(InvalidGeneration)
+{
+}
+
+
+Renderer* StylerBase::bind(const Style& style, const StyleOptions& options)
+{
+    if( isStyleChanged(style) )
+    {
+        Renderer* renderer = onBindStyle(style);
+        _renderer.reset(renderer);
+
+        _styleGeneration = style.generation();
+        _optionsGeneration = InvalidGeneration;
+    }
+
+    if( _renderer && isOptionsChanged(options) )
+    {
+        onBindOptions(options);
+        _optionsGeneration = options.generation();
+    }
+
+    return _renderer.get();
+}
+
+
+bool StylerBase::isBound() const
+{
+    return _renderer != 0;
+}
+
+
+bool StylerBase::isStyleChanged(const Style& style) const
+{
+    if( ! _renderer )
+        return true;
+
+    if( _styleGeneration != style.generation() )
+        return true;
+
+    return onIsStyleChanged();
+}
+
+
+bool StylerBase::isOptionsChanged(const StyleOptions& options) const
+{
+    if( _optionsGeneration != options.generation() )
+        return true;
+
+    return onIsOptionsChanged();
+}
+
+
+bool StylerBase::onIsStyleChanged() const
+{
+    return false;
+}
+
+
+bool StylerBase::onIsOptionsChanged() const
+{
+    return false;
+}
 
 } // namespace
 
 } // namespace
-
-#endif

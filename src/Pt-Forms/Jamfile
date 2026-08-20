@@ -140,6 +140,7 @@ SharedLibrary Pt-Forms : Application.cpp
                          StackLayout.cpp
                          PanelStyle.cpp
                          Style.cpp
+                         StylerBase.cpp
                          StyleOptions.cpp
                          TableLayout.cpp
                          TabView.cpp

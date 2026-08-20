@@ -128,6 +128,7 @@
     <ClInclude Include="..\..\include\Pt\Forms\Api.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Application.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Button.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\ButtonStyle.h" />
     <ClInclude Include="..\..\include\Pt\Forms\CheckBox.h" />
     <ClInclude Include="..\..\include\Pt\Forms\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ComboBox.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="..\..\include\Pt\Forms\Popup.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ProgressBar.h" />
     <ClInclude Include="..\..\include\Pt\Forms\PushButton.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\Renderer.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Responder.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Screen.h" />
@@ -184,6 +186,7 @@
     <ClInclude Include="..\..\include\Pt\Forms\StackLayout.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Style.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Styler.h" />
+    <ClInclude Include="..\..\include\Pt\Forms\StylerBase.h" />
     <ClInclude Include="..\..\include\Pt\Forms\StyleOptions.h" />
     <ClInclude Include="..\..\include\Pt\Forms\TableLayout.h" />
     <ClInclude Include="..\..\include\Pt\Forms\TabView.h" />
@@ -1442,6 +1445,7 @@
     <ClCompile Include="..\Pt-Gfx\Transform.cpp" />
     <ClCompile Include="..\Pt-Forms\Application.cpp" />
     <ClCompile Include="..\Pt-Forms\Button.cpp" />
+    <ClCompile Include="..\Pt-Forms\ButtonStyle.cpp" />
     <ClCompile Include="..\Pt-Forms\CheckBox.cpp" />
     <ClCompile Include="..\Pt-Forms\ComboBox.cpp" />
     <ClCompile Include="..\Pt-Forms\Control.cpp" />
@@ -1493,6 +1497,7 @@
     <ClCompile Include="..\Pt-Forms\SpinBox.cpp" />
     <ClCompile Include="..\Pt-Forms\StackLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\Style.cpp" />
+    <ClCompile Include="..\Pt-Forms\StylerBase.cpp" />
     <ClCompile Include="..\Pt-Forms\StyleOptions.cpp" />
     <ClCompile Include="..\Pt-Forms\TableLayout.cpp" />
     <ClCompile Include="..\Pt-Forms\TabView.cpp" />

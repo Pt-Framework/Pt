@@ -1,34 +1,36 @@
-/* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2016 Marc Boris Duerner
+/*
+  Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+  Copyright (C) 2016 Marc Boris Duerner
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- As a special exception, you may use this file as part of a free
- software library without restriction. Specifically, if other files
- instantiate templates or use macros or inline functions from this
- file, or you compile this file and link it with other files to
- produce an executable, this file does not by itself cause the
- resulting executable to be covered by the GNU General Public
- License. This exception does not however invalidate any other
- reasons why the executable file might be covered by the GNU Library
- General Public License.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- MA 02110-1301 USA
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
 */
 
 #include <Pt/Forms/ButtonStyle.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Style.h>
 
 namespace Pt {
 
@@ -267,7 +269,7 @@ void ButtonState::setFlat(bool value)
 ///////////////////////////////////////////////////////////////////////
 
 ButtonRenderer::ButtonRenderer(std::size_t refs)
-: Style::Facet( typeid(ButtonRenderer), refs )
+: Renderer( typeid(ButtonRenderer), refs )
 {
 }
 
@@ -406,7 +408,89 @@ void ButtonRenderer::renderIcon(PaintContext& context,
 ///////////////////////////////////////////////////////////////////////
 
 ButtonStyler::ButtonStyler()
+: _renderer(0)
+, _custom(0)
+, _customChanged(false)
+, _hasOverrides(false)
+, _overridesGeneration( std::size_t(-1) )
 {
+}
+
+
+void ButtonStyler::setRenderer(ButtonRenderer* renderer)
+{
+    _custom.reset(renderer);
+    _customChanged = true;
+}
+
+
+ButtonRenderer* ButtonStyler::renderer()
+{
+    return _renderer;
+}
+
+
+const ButtonRenderer* ButtonStyler::renderer() const
+{
+    return _renderer;
+}
+
+
+ButtonStyleOptions& ButtonStyler::options()
+{
+    return _options;
+}
+
+
+const ButtonStyleOptions& ButtonStyler::options() const
+{
+    return _options;
+}
+
+
+bool ButtonStyler::onIsStyleChanged() const
+{
+    if( _customChanged )
+        return true;
+
+    return _options.hasOverrides() != _hasOverrides;
+}
+
+
+bool ButtonStyler::onIsOptionsChanged() const
+{
+    return _options.generation() != _overridesGeneration;
+}
+
+
+Renderer* ButtonStyler::onBindStyle(const Style& style)
+{
+    _customChanged = false;
+    _hasOverrides = _options.hasOverrides();
+
+    if( _custom )
+    {
+        _renderer = _custom.get();
+        return _renderer;
+    }
+
+    _renderer = style.get<ButtonRenderer>();
+    if( _renderer && _hasOverrides )
+        _renderer = _renderer->create();
+
+    return _renderer;
+}
+
+
+void ButtonStyler::onBindOptions(const StyleOptions& options)
+{
+    _overridesGeneration = _options.generation();
+
+    if( ! _custom && ! _hasOverrides )
+        return;
+
+    if( _renderer )
+        _renderer->prepare(options, _options);
 }
 
 } // namespace

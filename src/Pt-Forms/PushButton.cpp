@@ -1,11 +1,11 @@
-﻿/* Copyright (C) 2016 Marc Boris Duerner 
+﻿/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -100,7 +100,7 @@ void PushButton::setLayout(Direction d)
 
 const Gfx::Brush& PushButton::foreground() const
 {
-    if( const Gfx::Brush* foreground = _buttonStyleOptions.foreground() )
+    if( const Gfx::Brush* foreground = _buttonStyler.options().foreground() )
         return *foreground;
 
     return Application::instance().styleOptions().foreground();
@@ -109,7 +109,7 @@ const Gfx::Brush& PushButton::foreground() const
 
 void PushButton::setForeground(const Gfx::Brush& b)
 {
-    _buttonStyleOptions.setForeground(b);
+    _buttonStyler.options().setForeground(b);
 
     invalidate();
 }
@@ -117,7 +117,7 @@ void PushButton::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& PushButton::contour() const
 {
-    if( const Gfx::Pen* contour = _buttonStyleOptions.contour() )
+    if( const Gfx::Pen* contour = _buttonStyler.options().contour() )
         return *contour;
 
     return Application::instance().styleOptions().contour();
@@ -126,7 +126,7 @@ const Gfx::Pen& PushButton::contour() const
 
 void PushButton::setContour(const Gfx::Pen& p)
 {
-    _buttonStyleOptions.setContour(p);
+    _buttonStyler.options().setContour(p);
 
     invalidate();
 }
@@ -134,7 +134,7 @@ void PushButton::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& PushButton::accentColor() const
 {
-    if( const Gfx::Color* accentColor = _buttonStyleOptions.accentColor() )
+    if( const Gfx::Color* accentColor = _buttonStyler.options().accentColor() )
         return *accentColor;
 
     return Application::instance().styleOptions().accentColor();
@@ -143,7 +143,7 @@ const Gfx::Color& PushButton::accentColor() const
 
 void PushButton::setAccentColor(const Gfx::Color& color)
 {
-    _buttonStyleOptions.setAccentColor(color);
+    _buttonStyler.options().setAccentColor(color);
 
     invalidate();
 }
@@ -151,7 +151,7 @@ void PushButton::setAccentColor(const Gfx::Color& color)
 
 const Gfx::Color& PushButton::highlightColor() const
 {
-    if( const Gfx::Color* highlightColor = _buttonStyleOptions.highlightColor() )
+    if( const Gfx::Color* highlightColor = _buttonStyler.options().highlightColor() )
         return *highlightColor;
 
     return Application::instance().styleOptions().highlightColor();
@@ -160,7 +160,7 @@ const Gfx::Color& PushButton::highlightColor() const
 
 void PushButton::setHighlightColor(const Gfx::Color& color)
 {
-    _buttonStyleOptions.setHighlightColor(color);
+    _buttonStyler.options().setHighlightColor(color);
 
     invalidate();
 }
@@ -168,7 +168,7 @@ void PushButton::setHighlightColor(const Gfx::Color& color)
 
 const Gfx::Color& PushButton::textColor() const
 {
-    if( const Gfx::Color* textColor = _buttonStyleOptions.textColor() )
+    if( const Gfx::Color* textColor = _buttonStyler.options().textColor() )
         return *textColor;
 
     return Application::instance().styleOptions().textColor();
@@ -177,7 +177,7 @@ const Gfx::Color& PushButton::textColor() const
 
 void PushButton::setTextColor(const Gfx::Color& color)
 {
-    _buttonStyleOptions.setTextColor(color);
+    _buttonStyler.options().setTextColor(color);
 
     invalidate();
 }
@@ -186,13 +186,13 @@ void PushButton::setTextColor(const Gfx::Color& color)
 Gfx::Font PushButton::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    return _buttonStyleOptions.getFont(options.font());
+    return _buttonStyler.options().getFont(options.font());
 }
 
 
 void PushButton::setFont(const Gfx::Font& font)
 {
-    _buttonStyleOptions.setFont(font);
+    _buttonStyler.options().setFont(font);
 
     invalidate();
 }
@@ -200,7 +200,7 @@ void PushButton::setFont(const Gfx::Font& font)
 
 void PushButton::setFontSize(std::size_t size)
 {
-    _buttonStyleOptions.setFontSize(size);
+    _buttonStyler.options().setFontSize(size);
 
     invalidate();
 }
@@ -208,7 +208,7 @@ void PushButton::setFontSize(std::size_t size)
 
 void PushButton::setFontWeight(Gfx::Font::Weight weight)
 {
-    _buttonStyleOptions.setFontWeight(weight);
+    _buttonStyler.options().setFontWeight(weight);
 
     invalidate();
 }
@@ -216,7 +216,7 @@ void PushButton::setFontWeight(Gfx::Font::Weight weight)
 
 void PushButton::setFontSlant(Gfx::Font::Slant slant)
 {
-    _buttonStyleOptions.setFontSlant(slant);
+    _buttonStyler.options().setFontSlant(slant);
 
     invalidate();
 }
@@ -283,7 +283,7 @@ void PushButton::onCanceled()
     Base::onCanceled();
 
     if( _isBeingToggled )
-    { 
+    {
         _isBeingToggled = false;
         setPressed( ! isPressed() );
     }
@@ -306,13 +306,11 @@ void PushButton::onRescaleEvent(const RescaleEvent& ev)
 
 void PushButton::setRenderer(ButtonRenderer* renderer)
 {
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    if( renderer )
-        _buttonStyler.bind(*renderer, options, _buttonStyleOptions);
-    else
-        _buttonStyler.bind(Application::instance().style(), options, _buttonStyleOptions);
-
+    _buttonStyler.setRenderer(renderer);
+    _buttonStyler.bind(style, options);
     invalidate();
 }
 
@@ -324,8 +322,8 @@ void PushButton::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    ButtonRenderer* renderer = _buttonStyler.rebind(style, options,
-                                                   _buttonStyleOptions);
+    _buttonStyler.bind(style, options);
+    ButtonRenderer* renderer = _buttonStyler.renderer();
     if( ! renderer )
         return;
 
