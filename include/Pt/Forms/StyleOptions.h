@@ -1,11 +1,11 @@
 /* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -65,15 +65,15 @@ class PT_FORMS_API StyleOption
             return _name.c_str();
         }
 
-        /** @brief Returns the dynamic type of the stored value. 
+        /** @brief Returns the dynamic type of the stored value.
         */
         virtual const std::type_info& typeInfo() const = 0;
 
-        /** @brief Returns the current value wrapped in an Any. 
+        /** @brief Returns the current value wrapped in an Any.
         */
         virtual const Pt::Any& get() const = 0;
 
-        /** @brief Sets the value from an Any; throws std::bad_cast on type mismatch. 
+        /** @brief Sets the value from an Any; throws std::bad_cast on type mismatch.
         */
         virtual void set(const Pt::Any& v) = 0;
 
@@ -224,7 +224,7 @@ class PT_FORMS_API StyleOptions
 
         StyleOptions& operator=(const StyleOptions& o);
 
-        /** @brief Returns the current change generation. 
+        /** @brief Returns the current change generation.
         */
         std::size_t generation() const;
 
@@ -391,6 +391,54 @@ class PT_FORMS_API FontOption
     private:
         AutoPtr<Gfx::Font> _font;
         unsigned           _overrides;
+};
+
+
+/** @brief Common base for widget-local style override tokens.
+
+    Tracks which local overrides are present and a generation counter
+    that changes whenever an override is set. Slice-specific options
+    classes derive from this type and store only their token values.
+*/
+class PT_FORMS_API StyleOptionsBase
+{
+    public:
+        /** @brief Constructs empty local style options.
+        */
+        StyleOptionsBase();
+
+        /** @brief Destructor.
+        */
+        virtual ~StyleOptionsBase();
+
+        /** @brief Returns true if any local style override is present.
+        */
+        bool hasOverrides() const;
+
+        /** @brief Returns the current local override generation.
+
+            The generation changes whenever any local override token is
+            modified and can be used to detect when renderer preparation
+            must be refreshed.
+        */
+        std::size_t generation() const;
+
+    protected:
+        /** @brief Returns true if the given override bit is set.
+        */
+        bool hasOverride(unsigned mask) const;
+
+        /** @brief Marks the given override bit and bumps the generation.
+        */
+        void setOverride(unsigned mask);
+
+        /** @brief Increments the local override generation.
+        */
+        void bumpGeneration();
+
+    private:
+        std::size_t _generation;
+        unsigned    _overrides;
 };
 
 } // namespace

@@ -5,7 +5,7 @@
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -41,20 +41,12 @@ namespace Forms {
     Carries only the optional local override tokens that are resolved during
     renderer preparation.
 */
-class PT_FORMS_API PanelStyleOptions
+class PT_FORMS_API PanelStyleOptions : public StyleOptionsBase
 {
     public:
         /** @brief Constructs empty local panel style options.
         */
         PanelStyleOptions();
-
-        /** @brief Returns true if any local style override is present.
-        */
-        bool hasOverrides() const;
-
-        /** @brief Returns the current local override generation.
-        */
-        std::size_t generation() const;
 
         /** @brief Returns the local background override or 0 if none is set.
         */
@@ -113,17 +105,11 @@ class PT_FORMS_API PanelStyleOptions
             Font       = 0x08
         };
 
-        bool hasOverride(StyleOverride mask) const;
-
-        void setOverride(StyleOverride mask);
-
     private:
         AutoPtr<Gfx::Brush> _background;
         AutoPtr<Gfx::Pen>   _contour;
         AutoPtr<Gfx::Color> _textColor;
         FontOption          _font;
-        std::size_t         _generation;
-        unsigned            _overrides;
 };
 
 /** @brief Stores the transient render state for panel-like widgets.
@@ -268,7 +254,7 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
     Keeps the active renderer binding for the shared style renderer, a private
     override clone, or an explicitly assigned custom renderer.
 */
-class PT_FORMS_API PanelStyle : public Styler<PanelRenderer, 
+class PT_FORMS_API PanelStyle : public Styler<PanelRenderer,
                                                    PanelStyleOptions>
 {
     public:

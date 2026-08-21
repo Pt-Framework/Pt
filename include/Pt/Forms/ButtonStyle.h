@@ -42,24 +42,12 @@ namespace Forms {
     Carries optional local tokens that are resolved during the prepare step.
     Render and icon hooks never receive these overrides directly.
 */
-class PT_FORMS_API ButtonStyleOptions
+class PT_FORMS_API ButtonStyleOptions : public StyleOptionsBase
 {
     public:
         /** @brief Constructs empty local button style options.
         */
         ButtonStyleOptions();
-
-        /** @brief Returns true if any local style override is present.
-        */
-        bool hasOverrides() const;
-
-        /** @brief Returns the current local override generation.
-
-            The generation changes whenever any local override token is
-            modified and can be used to detect when renderer preparation must
-            be refreshed.
-        */
-        std::size_t generation() const;
 
         /** @brief Returns the local foreground override or 0 if none is set.
         */
@@ -138,10 +126,6 @@ class PT_FORMS_API ButtonStyleOptions
             Font           = 0x20
         };
 
-        bool hasOverride(StyleOverride mask) const;
-
-        void setOverride(StyleOverride mask);
-
     private:
         AutoPtr<Gfx::Brush> _foreground;
         AutoPtr<Gfx::Pen>   _contour;
@@ -149,8 +133,6 @@ class PT_FORMS_API ButtonStyleOptions
         AutoPtr<Gfx::Color> _highlightColor;
         AutoPtr<Gfx::Color> _textColor;
         FontOption          _font;
-        std::size_t         _generation;
-        unsigned            _overrides;
 };
 
 /** @brief Stores the widget-local visual state for a push button.
@@ -397,9 +379,11 @@ class PT_FORMS_API ButtonRenderer : public Renderer
 
 /** @brief Binds a push button to the currently active renderer.
 
-    Owns the widget-local button overrides and keeps the active renderer
-    binding for the three supported button cases: shared style renderer,
+    Owns the widget-local button overrides and caches a typed renderer
+    pointer for the three supported button cases: shared style renderer,
     private override clone, and externally assigned custom renderer.
+    Custom-renderer ownership and bind-case selection live on %StylerBase.
+    %onStyleRenderer writes the typed pointer at each creation site.
 */
 class PT_FORMS_API ButtonStyler : public StylerBase
 {
@@ -410,9 +394,9 @@ class PT_FORMS_API ButtonStyler : public StylerBase
 
         /** @brief Assigns an externally owned custom renderer.
 
-            Marks the custom source dirty so the next %bind call
-            reacquires it. A null renderer falls back to the current
-            style.
+            Stores the custom source and marks it dirty so the next %bind
+            call reacquires it. A null renderer falls back to the current
+            style. Binding and prepare happen in %bind.
         */
         void setRenderer(ButtonRenderer* renderer);
 
@@ -433,21 +417,17 @@ class PT_FORMS_API ButtonStyler : public StylerBase
         const ButtonStyleOptions& options() const;
 
     protected:
-        virtual bool onIsStyleChanged() const;
+        virtual const StyleOptionsBase& onLocalOptions() const;
 
-        virtual bool onIsOptionsChanged() const;
+        virtual Renderer* onStyleRenderer(const Style& style);
 
-        virtual Renderer* onBindStyle(const Style& style);
+        virtual Renderer* onCreateRenderer(const Style& style);
 
         virtual void onBindOptions(const StyleOptions& options);
 
     private:
-        ButtonStyleOptions       _options;
-        ButtonRenderer*          _renderer;
-        FacetPtr<ButtonRenderer> _custom;
-        bool                     _customChanged;
-        bool                     _hasOverrides;
-        std::size_t              _overridesGeneration;
+        ButtonStyleOptions _options;
+        ButtonRenderer*    _renderer;
 };
 
 } // namespace

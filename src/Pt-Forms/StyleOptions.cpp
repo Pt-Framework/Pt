@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -372,6 +372,49 @@ void StyleOptions::set(const char* name, const Pt::Any& value)
             return;
         }
     }
+}
+
+
+StyleOptionsBase::StyleOptionsBase()
+: _generation(0)
+, _overrides(0)
+{
+}
+
+
+StyleOptionsBase::~StyleOptionsBase()
+{
+}
+
+
+bool StyleOptionsBase::hasOverrides() const
+{
+    return _overrides != 0;
+}
+
+
+std::size_t StyleOptionsBase::generation() const
+{
+    return _generation;
+}
+
+
+bool StyleOptionsBase::hasOverride(unsigned mask) const
+{
+    return (_overrides & mask) != 0;
+}
+
+
+void StyleOptionsBase::setOverride(unsigned mask)
+{
+    _overrides |= mask;
+    ++_generation;
+}
+
+
+void StyleOptionsBase::bumpGeneration()
+{
+    ++_generation;
 }
 
 

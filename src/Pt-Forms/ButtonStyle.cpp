@@ -41,34 +41,7 @@ namespace Forms {
 ///////////////////////////////////////////////////////////////////////
 
 ButtonStyleOptions::ButtonStyleOptions()
-: _generation(0)
-, _overrides(0)
 {
-}
-
-
-bool ButtonStyleOptions::hasOverrides() const
-{
-    return _overrides != 0;
-}
-
-
-std::size_t ButtonStyleOptions::generation() const
-{
-    return _generation;
-}
-
-
-bool ButtonStyleOptions::hasOverride(StyleOverride mask) const
-{
-    return (_overrides & mask) != 0;
-}
-
-
-void ButtonStyleOptions::setOverride(StyleOverride mask)
-{
-    _overrides |= mask;
-    ++_generation;
 }
 
 
@@ -409,18 +382,14 @@ void ButtonRenderer::renderIcon(PaintContext& context,
 
 ButtonStyler::ButtonStyler()
 : _renderer(0)
-, _custom(0)
-, _customChanged(false)
-, _hasOverrides(false)
-, _overridesGeneration( std::size_t(-1) )
 {
 }
 
 
 void ButtonStyler::setRenderer(ButtonRenderer* renderer)
 {
-    _custom.reset(renderer);
-    _customChanged = true;
+    _renderer = renderer;
+    apply(renderer);
 }
 
 
@@ -448,49 +417,30 @@ const ButtonStyleOptions& ButtonStyler::options() const
 }
 
 
-bool ButtonStyler::onIsStyleChanged() const
+const StyleOptionsBase& ButtonStyler::onLocalOptions() const
 {
-    if( _customChanged )
-        return true;
-
-    return _options.hasOverrides() != _hasOverrides;
+    return _options;
 }
 
 
-bool ButtonStyler::onIsOptionsChanged() const
+Renderer* ButtonStyler::onStyleRenderer(const Style& style)
 {
-    return _options.generation() != _overridesGeneration;
-}
-
-
-Renderer* ButtonStyler::onBindStyle(const Style& style)
-{
-    _customChanged = false;
-    _hasOverrides = _options.hasOverrides();
-
-    if( _custom )
-    {
-        _renderer = _custom.get();
-        return _renderer;
-    }
-
     _renderer = style.get<ButtonRenderer>();
-    if( _renderer && _hasOverrides )
-        _renderer = _renderer->create();
+    return _renderer;
+}
 
+
+Renderer* ButtonStyler::onCreateRenderer(const Style& style)
+{
+    ButtonRenderer* renderer = style.get<ButtonRenderer>();
+    _renderer = renderer ? renderer->create() : 0;
     return _renderer;
 }
 
 
 void ButtonStyler::onBindOptions(const StyleOptions& options)
 {
-    _overridesGeneration = _options.generation();
-
-    if( ! _custom && ! _hasOverrides )
-        return;
-
-    if( _renderer )
-        _renderer->prepare(options, _options);
+    _renderer->prepare(options, _options);
 }
 
 } // namespace

@@ -39,25 +39,49 @@ const std::size_t StylerBase::InvalidGeneration = std::size_t(-1);
 StylerBase::StylerBase()
 : _styleGeneration(InvalidGeneration)
 , _optionsGeneration(InvalidGeneration)
+, _localOptionsGeneration(InvalidGeneration)
+, _hasOverrides(false)
+, _customChanged(false)
 {
 }
 
 
 Renderer* StylerBase::bind(const Style& style, const StyleOptions& options)
 {
-    if( isStyleChanged(style) )
+    const StyleOptionsBase& localOptions = onLocalOptions();
+
+    if( isStyleChanged(style, localOptions) )
     {
-        Renderer* renderer = onBindStyle(style);
+        Renderer* renderer = 0;
+
+        if( _custom )
+        {
+            renderer = _custom.get();
+        }
+        else
+        {
+            renderer = onStyleRenderer(style);
+
+            if( renderer && localOptions.hasOverrides() )
+                renderer = onCreateRenderer(style);
+        }
+
         _renderer.reset(renderer);
 
+        _customChanged = false;
         _styleGeneration = style.generation();
+        _hasOverrides = localOptions.hasOverrides();
         _optionsGeneration = InvalidGeneration;
+        _localOptionsGeneration = InvalidGeneration;
     }
 
-    if( _renderer && isOptionsChanged(options) )
+    if( _renderer && isOptionsChanged(options, localOptions) )
     {
-        onBindOptions(options);
+        if( _custom || _hasOverrides )
+            onBindOptions(options);
+
         _optionsGeneration = options.generation();
+        _localOptionsGeneration = localOptions.generation();
     }
 
     return _renderer.get();
@@ -70,7 +94,15 @@ bool StylerBase::isBound() const
 }
 
 
-bool StylerBase::isStyleChanged(const Style& style) const
+void StylerBase::apply(Renderer* renderer)
+{
+    _custom.reset(renderer);
+    _customChanged = true;
+}
+
+
+bool StylerBase::isStyleChanged(const Style& style,
+                                const StyleOptionsBase& localOptions) const
 {
     if( ! _renderer )
         return true;
@@ -78,27 +110,22 @@ bool StylerBase::isStyleChanged(const Style& style) const
     if( _styleGeneration != style.generation() )
         return true;
 
-    return onIsStyleChanged();
+    if( localOptions.hasOverrides() != _hasOverrides )
+        return true;
+
+    return _customChanged;
 }
 
 
-bool StylerBase::isOptionsChanged(const StyleOptions& options) const
+bool StylerBase::isOptionsChanged(const StyleOptions& options,
+                                  const StyleOptionsBase& localOptions) const
 {
     if( _optionsGeneration != options.generation() )
         return true;
 
-    return onIsOptionsChanged();
-}
+    if( _localOptionsGeneration != localOptions.generation() )
+        return true;
 
-
-bool StylerBase::onIsStyleChanged() const
-{
-    return false;
-}
-
-
-bool StylerBase::onIsOptionsChanged() const
-{
     return false;
 }
 

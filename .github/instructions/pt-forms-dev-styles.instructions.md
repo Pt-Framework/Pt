@@ -109,25 +109,25 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 - Global theme changes must run through `%Application::setStyle(...)` or `%Application::setStyleOptions(...)`. That path calls `%Style::reset(const StyleOptions&)`, which fans the global options out to each shared facet through `%Style::Facet::reset(...)` and protected `%onReset(...)`.
 - Shared renderers fetched directly from `%Style` must treat `%onReset(...)` as their synchronization point for global defaults. Implement `%onReset(...)` by calling `%prepare(...)` with the current global `%StyleOptions` and an empty local slice-options object.
 - Each extracted slice separates responsibilities explicitly:
-  - `XStyleOptions`: widget-local override tokens plus a generation counter only.
+  - `XStyleOptions`: derives from `%StyleOptionsBase` and stores only widget-local override tokens. Override presence and generation live on `%StyleOptionsBase`.
   - `XState`: transient render state only.
   - `XRenderer`: prepared drawing state, measure/layout/render primitives, and optional icon preparation. Button renderers derive from `%Renderer`.
   - `XStyler`: renderer-binding controller only.
   - Widget: owns control flow, geometry, text/icon caches, and the helper that produces `XState`. On `%StylerBase` slices the styler owns `XStyleOptions`. On template `%Styler` slices the widget still owns `XStyleOptions`.
-- `XStyleOptions` must not absorb transient interaction flags, and `XState` must not absorb style tokens. Keep local override data and transient render state separate.
+- `XStyleOptions` must not absorb transient interaction flags, and `XState` must not absorb style tokens. Keep local override data and transient render state separate. Do not reintroduce per-class `hasOverrides()`, `generation()`, `_generation`, or `_overrides` on slice options.
 - `XRenderer::prepare(const StyleOptions&, const XStyleOptions&)` is the explicit synchronization point for extracted slices. Resolve global defaults plus local override tokens during `%onPrepare(...)` and cache all data needed later by painters, measure/layout hooks, render hooks, and optional icon preparation.
 - Render hooks must consume prepared renderer state plus `XState` only. If a renderer needs information from `%StyleOptions`, resolve and cache it during `%onPrepare(...)` or shared-facet `%onReset(...)` instead of re-fetching it during render.
-- `%StylerBase` owns the currently bound renderer and the style/options generation fields used for change detection. It does not expose an untyped `%renderer()` accessor. Custom renderer pointers, override tokens, and override-mode bookkeeping live only in the derived styler.
+- `%StylerBase` owns the currently bound renderer, the custom renderer source, and the style, global-options, and local-options generation fields used for change detection, including override-mode flips from `%StyleOptionsBase::hasOverrides()`. It does not expose an untyped `%renderer()` accessor. Override tokens live in the derived styler.
 - Measure/layout/render code should use the typed `XStyler::renderer()` accessor. Do not add an untyped `%renderer()` on `%StylerBase`.
-- `%StylerBase::bind(const Style&, const StyleOptions&)` is the only public bind path. It calls `%onBindStyle(...)` when `%isStyleChanged(...)` is true and `%onBindOptions(...)` when a renderer is bound and `%isOptionsChanged(...)` is true.
-- `%isStyleChanged(...)` is true when no renderer is bound, the `%Style` generation changed, or `%onIsStyleChanged()` returns true. `%isOptionsChanged(...)` is true when the `%StyleOptions` generation changed or `%onIsOptionsChanged()` returns true. The default hooks return false.
-- After `%onBindStyle(...)`, `%StylerBase` invalidates the cached options generation so a newly acquired renderer always goes through `%onBindOptions(...)`.
-- On `%StylerBase` slices, `%onBindStyle(const Style&)` returns the renderer to bind, or 0 if none is available. It must not prepare that renderer. `%onBindOptions(const StyleOptions&)` applies tokens to the already bound renderer. Shared style prototypes must be left untouched.
-- `%ButtonStyler` keeps a typed `%ButtonRenderer*` and returns it from `%renderer()` without casting.
-- `%ButtonStyler::setRenderer(ButtonRenderer*)` stores a typed custom pointer and marks the custom source dirty. The next `%bind(...)` acquires it through `%onBindStyle(...)`. A null pointer falls back to the current style. Do not compare stored renderer pointers for identity; addresses can be reused.
-- `%ButtonStyler` treats a dirty custom source or an override-mode flip as a style-source change (`%onIsStyleChanged`). Token-only changes with the same override mode are option changes (`%onIsOptionsChanged`) and prepare the current renderer in place.
-- `%ButtonStyler::onBindStyle(...)` returns the custom renderer when one is assigned. Otherwise it returns the shared `%ButtonRenderer` from `%Style`, or a `%create()` clone of that prototype when local overrides exist.
-- `%ButtonStyler::onBindOptions(...)` prepares only custom renderers and override clones. Shared style prototypes stay synchronized through `%Style::reset()`.
+- `%StylerBase::bind(const Style&, const StyleOptions&)` is the only public bind path. Local options come from `%onLocalOptions()`. It calls `%onStyleRenderer(...)` when `%isStyleChanged(...)` is true and `%onBindOptions(...)` when a renderer is bound, the renderer is custom or an override clone, and `%isOptionsChanged(...)` is true.
+- `%isStyleChanged(...)` is true when no renderer is bound, the `%Style` generation changed, local override mode flipped, or the custom renderer source is dirty. `%isOptionsChanged(...)` is true when the global `%StyleOptions` generation or the local `%StyleOptionsBase` generation changed. There is no `%onIsStyleChanged()` or `%onIsOptionsChanged()` hook.
+- After `%onStyleRenderer(...)`, `%StylerBase` invalidates the cached options generations so a newly acquired renderer always goes through `%onBindOptions(...)` when it is custom or an override clone.
+- On `%StylerBase` slices, `%onStyleRenderer(const Style&)` returns the renderer to bind, or 0 if none is available. It must not prepare that renderer. It must already include the override clone when local overrides exist and the custom renderer when one is assigned. `%onBindOptions(const StyleOptions&)` applies tokens to the already bound renderer. The base already skipped shared prototypes (`_custom || _hasOverrides`).
+- `%ButtonStyler` caches a typed `%ButtonRenderer*` at each creation site and returns it from `%renderer()` without casting. No downcast from `%StylerBase`.
+- `%ButtonStyler::setRenderer(ButtonRenderer*)` stores a typed custom pointer and marks the custom source dirty through `%setCustomRenderer(...)`. The next `%bind(...)` acquires it through `%onStyleRenderer(...)`. A null pointer falls back to the current style. Do not compare stored renderer pointers for identity; addresses can be reused.
+- `%ButtonStyler` does not track `_hasOverrides` or `_overridesGeneration`. Token-only changes with the same override mode are option changes and prepare the current renderer in place. Override-mode flips rebind.
+- `%ButtonStyler::onStyleRenderer(...)` returns the custom renderer when one is assigned. Otherwise it returns the shared `%ButtonRenderer` from `%Style`, or a `%create()` clone of that prototype when local overrides exist.
+- `%ButtonStyler::onBindOptions(...)` prepares only because the base already skipped shared prototypes. Shared style prototypes stay synchronized through `%Style::reset()`.
 - On remaining template `%Styler` slices, `%bind` / `%rebind` still follow the replace-versus-refresh split.
 - In the style-path bind, clone and locally prepare a private renderer only when local `XStyleOptions` actually contain overrides. If there are no local overrides, bind the shared renderer from `%Style` directly and do not prepare it locally.
 - When a bind or update path cannot obtain a renderer, keep the cached prepare generations invalid. Only store the current prepare generations after a successful `%onBindOptions(...)` or `%XRenderer::prepare(...)` call.
@@ -139,7 +139,7 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 
 - `%PushButton` uses the extracted slice pattern with `%ButtonStyleOptions`, `%ButtonState`, `%ButtonRenderer`, and `%ButtonStyler`.
 - `%ButtonStyler` derives from `%StylerBase` and owns `%ButtonStyleOptions`.
-- `%ButtonStyleOptions` owns only widget-local override tokens such as foreground, contour, accent/highlight colors, text color, and font overrides, plus its own generation counter.
+- `%ButtonStyleOptions` derives from `%StyleOptionsBase` and owns only widget-local override tokens such as foreground, contour, accent/highlight colors, text color, and font overrides.
 - `%ButtonState` owns only transient interaction flags: `enabled`, `hovered`, `focused`, `pressed`, and `flat`.
 - `%ButtonRenderer` derives from `%Renderer` and provides the prepared button-specific primitives `measureContent()`, `measureFrame()`, `layoutFrame()`, `layoutContent()`, `layoutMnemonic()`, `textPainter()`, `prepareIcon()`, `renderBackground()`, `renderChrome()`, `renderText()`, `renderMnemonic()`, and `renderIcon()`.
 - `%PushButton::setRenderer(ButtonRenderer*)` keeps `nullptr` as the public style-fallback API. It stores the pointer with `%ButtonStyler::setRenderer(...)` and then calls `%bind(style, options)` immediately because `%invalidate()` only posts an event. `%PushButton::onInvalidate()` calls `%bind(style, options)`, refreshes the widget-owned icon picture through `%ButtonRenderer::prepareIcon(...)`, and then requests relayout.
@@ -148,7 +148,7 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 ### Panel Slice
 
 - `%Panel` and `%Label` share the extracted slice pattern with `%PanelStyleOptions`, `%PanelState`, `%PanelRenderer`, and `%PanelStyle`.
-- `%PanelStyleOptions` owns only widget-local panel override tokens such as background, contour, text color, and font overrides, plus its own generation counter.
+- `%PanelStyleOptions` derives from `%StyleOptionsBase` and owns only widget-local panel override tokens such as background, contour, text color, and font overrides.
 - `%PanelState` currently owns only the transient render flags `enabled` and `focused`.
 - `%PanelRenderer` provides the prepared panel-like primitives `measureFrame()`, `layoutFrame()`, `textPainter()`, `renderBackground()`, `renderFrame()`, `renderText()`, and `renderIcon()`.
 - `%Panel::setRenderer(PanelRenderer*)` and `%Label::setRenderer(PanelRenderer*)` keep `nullptr` as the public style-fallback API. Their `%onInvalidate()` paths reacquire the active renderer through `%PanelStyle::rebind(...)`, refresh widget-owned icon caches afterwards, and then request relayout.
