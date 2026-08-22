@@ -61,6 +61,12 @@ class StyleOptionsTest : public Unit::TestSuite
                                             &StyleOptionsTest::CopyAssign);
             Unit::TestSuite::registerMethod("Get", *this,
                                             &StyleOptionsTest::Get);
+            Unit::TestSuite::registerMethod("GetOverlay", *this,
+                                            &StyleOptionsTest::GetOverlay);
+            Unit::TestSuite::registerMethod("GetOverlayFont", *this,
+                                            &StyleOptionsTest::GetOverlayFont);
+            Unit::TestSuite::registerMethod("GetOverlayMissing", *this,
+                                            &StyleOptionsTest::GetOverlayMissing);
         }
 
     protected:
@@ -309,6 +315,72 @@ class StyleOptionsTest : public Unit::TestSuite
             StyleOptions options;
             PT_UNIT_ASSERT_THROW(options.get<BackgroundOption>(), std::logic_error);
             PT_UNIT_ASSERT_THROW(options.get<FontOption>(), std::logic_error);
+        }
+
+
+        void GetOverlay()
+        {
+            StyleOptions options = StyleOptions::defaults();
+            StyleOptions overlay;
+
+            const ForegroundOption& fallback =
+                options.get<ForegroundOption>(overlay);
+            PT_UNIT_ASSERT(fallback.value().color() ==
+                           options.get<ForegroundOption>().value().color());
+
+            ForegroundOption local(Gfx::Color(1, 2, 3));
+            overlay.set(local);
+
+            const ForegroundOption& selected =
+                options.get<ForegroundOption>(overlay);
+            PT_UNIT_ASSERT(selected.value().color() == Gfx::Color(1, 2, 3));
+        }
+
+
+        void GetOverlayFont()
+        {
+            StyleOptions options = StyleOptions::defaults();
+            StyleOptions overlay;
+            const Gfx::Font& base = options.get<FontOption>().value();
+
+            const FontOption& missing = options.get<FontOption>(overlay);
+            PT_UNIT_ASSERT(missing.getFont(base).size() == base.size());
+            PT_UNIT_ASSERT(missing.getFont(base).family() == base.family());
+
+            FontOption complete;
+            complete.setFont(Gfx::Font("serif", 14));
+            overlay.set(complete);
+
+            const FontOption& replaced = options.get<FontOption>(overlay);
+            Gfx::Font replacedFont = replaced.getFont(base);
+            PT_UNIT_ASSERT(replacedFont.family() == "serif");
+            PT_UNIT_ASSERT(replacedFont.size() == 14);
+
+            FontOption sizeOnly;
+            sizeOnly.setSize(18);
+            overlay.set(sizeOnly);
+
+            const FontOption& partial = options.get<FontOption>(overlay);
+            Gfx::Font merged = partial.getFont(base);
+            PT_UNIT_ASSERT(merged.size() == 18);
+            PT_UNIT_ASSERT(merged.family() == base.family());
+        }
+
+
+        void GetOverlayMissing()
+        {
+            StyleOptions options;
+            StyleOptions overlay;
+
+            PT_UNIT_ASSERT_THROW(options.get<ForegroundOption>(overlay),
+                                 std::logic_error);
+
+            ForegroundOption local(Gfx::Color(4, 5, 6));
+            overlay.set(local);
+
+            const ForegroundOption& selected =
+                options.get<ForegroundOption>(overlay);
+            PT_UNIT_ASSERT(selected.value().color() == Gfx::Color(4, 5, 6));
         }
 };
 

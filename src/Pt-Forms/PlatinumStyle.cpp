@@ -160,69 +160,6 @@ Gfx::Font resolvePanelFont(const StyleOptions& options,
 }
 
 
-const Gfx::Brush& resolveButtonForeground(const StyleOptions& options,
-                                          const StyleOptions& local)
-{
-    const ForegroundOption* foreground = local.find<ForegroundOption>();
-    if(foreground)
-        return foreground->value();
-
-    return options.get<ForegroundOption>().value();
-}
-
-
-const Gfx::Pen& resolveButtonContour(const StyleOptions& options,
-                                     const StyleOptions& local)
-{
-    const ContourOption* contour = local.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
-    return options.get<ContourOption>().value();
-}
-
-
-const Gfx::Color& resolveButtonAccentColor(const StyleOptions& options,
-                                           const StyleOptions& local)
-{
-    const AccentColorOption* accentColor = local.find<AccentColorOption>();
-    if(accentColor)
-        return accentColor->value();
-
-    return options.get<AccentColorOption>().value();
-}
-
-
-const Gfx::Color& resolveButtonHighlightColor(const StyleOptions& options,
-                                              const StyleOptions& local)
-{
-    const HighlightColorOption* highlightColor = local.find<HighlightColorOption>();
-    if(highlightColor)
-        return highlightColor->value();
-
-    return options.get<HighlightColorOption>().value();
-}
-
-
-const Gfx::Color& resolveButtonTextColor(const StyleOptions& options,
-                                         const StyleOptions& local)
-{
-    const TextColorOption* textColor = local.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    return options.get<TextColorOption>().value();
-}
-
-
-Gfx::Font resolveButtonFont(const StyleOptions& options,
-                            const StyleOptions& local)
-{
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = local.find<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
-}
-
 } // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -503,24 +440,32 @@ ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 void PlatinumButtonRenderer::onPrepare(const StyleOptions& options,
                                        const StyleOptions& buttonOptions)
 {
-    Gfx::Pen cPen = resolveButtonContour(options, buttonOptions);
+    const ContourOption& contour = options.get<ContourOption>(buttonOptions);
+    Gfx::Pen cPen = contour.value();
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    _accentColor = resolveButtonAccentColor(options, buttonOptions);
-    _textColor = resolveButtonTextColor(options, buttonOptions);
+    const AccentColorOption& accentColor = options.get<AccentColorOption>(buttonOptions);
+    _accentColor = accentColor.value();
 
-    _normalPainter.setBrush( resolveButtonForeground(options, buttonOptions) );
+    const TextColorOption& textColor = options.get<TextColorOption>(buttonOptions);
+    _textColor = textColor.value();
+
+    const ForegroundOption& foreground = options.get<ForegroundOption>(buttonOptions);
+    _normalPainter.setBrush( foreground.value() );
     _normalPainter.setPen( cPen );
 
     Gfx::Brush pressedBrush(_accentColor);
     _pressedPainter.setBrush( pressedBrush );
     _pressedPainter.setPen( cPen );
 
-    Gfx::Brush highlightBrush( resolveButtonHighlightColor(options, buttonOptions) );
+    const HighlightColorOption& highlightColor = options.get<HighlightColorOption>(buttonOptions);
+    Gfx::Brush highlightBrush( highlightColor.value() );
     _highlightPainter.setBrush( highlightBrush );
     _highlightPainter.setPen( cPen );
 
-    _textPainter.setFont( resolveButtonFont(options, buttonOptions) );
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption& font = options.get<FontOption>(buttonOptions);
+    _textPainter.setFont( font.getFont(baseFont) );
     _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 

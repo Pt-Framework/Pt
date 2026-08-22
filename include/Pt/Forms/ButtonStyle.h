@@ -117,7 +117,9 @@ class PT_FORMS_API ButtonRenderer : public Renderer
 
             This is the explicit synchronization point for the button slice.
             Implementations prepare all renderer-local resources from the
-            supplied theme %StyleOptions and widget-local overlay.
+            supplied theme %StyleOptions and widget-local overlay. Resolve
+            tokens with %StyleOptions::get(overlay). Merge a local font
+            with %FontOption::getFont() against the theme font.
         */
         void prepare(const StyleOptions& options,
                      const StyleOptions& buttonOptions);

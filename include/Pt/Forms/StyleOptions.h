@@ -542,6 +542,8 @@ class PT_FORMS_API FontOption : public StyleOption
     token is a concrete option type (%ForegroundOption, %FontOption,
     and the other contract types). Overlay callers use %find(); it
     may be 0. Complete bags use %get(), which returns a reference.
+    %get(overlay) selects the overlay token when present and otherwise
+    %get(). Font merge stays on %FontOption::getFont().
 
     %Application owns the live global instance constructed from
     defaults(). Widgets or their styler hold a second instance as the
@@ -589,6 +591,14 @@ class PT_FORMS_API StyleOptions
         template <typename T>
         const T& get() const;
 
+        /** @brief Returns the overlay option of type T, or this bag's option.
+
+            Prefers @a overlay when T is present there. Otherwise %get().
+            Throws std::logic_error when T is absent from both bags.
+        */
+        template <typename T>
+        const T& get(const StyleOptions& overlay) const;
+
         /** @brief Replaces the option of type T and bumps generation.
         */
         template <typename T>
@@ -629,6 +639,14 @@ const T& StyleOptions::get() const
         throw std::logic_error(std::string("style option not set: ") + T::name());
 
     return *option;
+}
+
+
+template <typename T>
+const T& StyleOptions::get(const StyleOptions& overlay) const
+{
+    const T* local = overlay.find<T>();
+    return local ? *local : get<T>();
 }
 
 

@@ -100,13 +100,11 @@ void PushButton::setLayout(Direction d)
 
 const Gfx::Brush& PushButton::foreground() const
 {
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const ForegroundOption* foreground = buttonOptions.find<ForegroundOption>();
-    if(foreground)
-        return foreground->value();
-
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>().value();
+    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const ForegroundOption& foreground =
+        options.get<ForegroundOption>(buttonOptions);
+    return foreground.value();
 }
 
 
@@ -121,13 +119,10 @@ void PushButton::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& PushButton::contour() const
 {
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const ContourOption* contour = buttonOptions.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>().value();
+    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const ContourOption& contour = options.get<ContourOption>(buttonOptions);
+    return contour.value();
 }
 
 
@@ -142,13 +137,11 @@ void PushButton::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& PushButton::accentColor() const
 {
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const AccentColorOption* accentColor = buttonOptions.find<AccentColorOption>();
-    if(accentColor)
-        return accentColor->value();
-
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<AccentColorOption>().value();
+    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const AccentColorOption& accentColor =
+        options.get<AccentColorOption>(buttonOptions);
+    return accentColor.value();
 }
 
 
@@ -163,14 +156,11 @@ void PushButton::setAccentColor(const Gfx::Color& color)
 
 const Gfx::Color& PushButton::highlightColor() const
 {
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const HighlightColorOption* highlightColor =
-        buttonOptions.find<HighlightColorOption>();
-    if(highlightColor)
-        return highlightColor->value();
-
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<HighlightColorOption>().value();
+    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const HighlightColorOption& highlightColor =
+        options.get<HighlightColorOption>(buttonOptions);
+    return highlightColor.value();
 }
 
 
@@ -185,13 +175,10 @@ void PushButton::setHighlightColor(const Gfx::Color& color)
 
 const Gfx::Color& PushButton::textColor() const
 {
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const TextColorOption* textColor = buttonOptions.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>().value();
+    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const TextColorOption& textColor = options.get<TextColorOption>(buttonOptions);
+    return textColor.value();
 }
 
 
@@ -207,10 +194,11 @@ void PushButton::setTextColor(const Gfx::Color& color)
 Gfx::Font PushButton::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
     const StyleOptions& buttonOptions = _buttonStyler.options();
-    const FontOption* localFont = buttonOptions.find<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
+
+    const FontOption& font = options.get<FontOption>(buttonOptions);
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    return font.getFont(baseFont);
 }
 
 
