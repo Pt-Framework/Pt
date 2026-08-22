@@ -5,6 +5,10 @@
 # To work on a denied tree: temporarily comment out the matching lines
 # and start a new session (rules load at session start).
 
+[git]
+auto_branch = false
+prefer_direct_commit = true
+
 [permission]
 deny = [
   # --- Build / generated / fetched ---
