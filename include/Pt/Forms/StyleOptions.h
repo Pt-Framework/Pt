@@ -545,10 +545,18 @@ class PT_FORMS_API FontOption : public StyleOption
     %get(overlay) selects the overlay token when present and otherwise
     %get(). Font merge stays on %FontOption::getFont().
 
+    A parent can be set with %setParent(). When set, %get() and
+    %generation() recurse to the parent after consulting the local
+    bag. This allows a sparse widget overlay to fall back to the
+    global theme automatically. %find() and %hasOverrides() remain
+    local-only and report only the contents of this bag. Cycles in
+    the parent chain must be avoided.
+
     %Application owns the live global instance constructed from
     defaults(). Widgets or their styler hold a second instance as the
-    overlay. %generation() increments on a successful %set or %reset.
-    The vocabulary is closed: only the built-in option types are stored.
+    overlay. %generation() increments on a successful %set, %reset,
+    or %setParent call that changes the parent. The vocabulary is
+    closed: only the built-in option types are stored.
 */
 class PT_FORMS_API StyleOptions
 {
@@ -574,6 +582,17 @@ class PT_FORMS_API StyleOptions
         /** @brief Returns true if the bag contains any option.
         */
         bool hasOverrides() const;
+
+        /** @brief Sets a parent bag for fallback lookups.
+
+            Changing the parent bumps the generation. Passing 0 clears
+            the parent.
+        */
+        void setParent(const StyleOptions* parent);
+
+        /** @brief Returns the parent bag or 0.
+        */
+        const StyleOptions* parent() const;
 
         /** @brief Returns the option of type T, or 0 if absent.
 
@@ -620,6 +639,7 @@ class PT_FORMS_API StyleOptions
 
     private:
         std::size_t               _generation;
+        const StyleOptions*       _parent;
         std::vector<StyleOption*> _options;
 };
 
@@ -635,10 +655,13 @@ template <typename T>
 const T& StyleOptions::get() const
 {
     const T* option = find<T>();
-    if( ! option )
-        throw std::logic_error(std::string("style option not set: ") + T::name());
+    if( option )
+        return *option;
 
-    return *option;
+    if( _parent )
+        return _parent->get<T>();
+
+    throw std::logic_error(std::string("style option not set: ") + T::name());
 }
 
 

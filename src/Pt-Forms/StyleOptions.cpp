@@ -154,12 +154,14 @@ Gfx::Font FontOption::getFont(const Gfx::Font& base) const
 
 StyleOptions::StyleOptions()
 : _generation(0)
+, _parent(0)
 {
 }
 
 
 StyleOptions::StyleOptions(const StyleOptions& o)
 : _generation(o._generation)
+, _parent(o._parent)
 {
     _options.reserve(o._options.size());
     for(std::size_t n = 0; n < o._options.size(); ++n)
@@ -180,6 +182,7 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
 
     clear();
     _generation = o._generation;
+    _parent = o._parent;
     _options.reserve(o._options.size());
     for(std::size_t n = 0; n < o._options.size(); ++n)
         _options.push_back( o._options[n]->clone() );
@@ -244,13 +247,32 @@ StyleOptions StyleOptions::defaults()
 
 std::size_t StyleOptions::generation() const
 {
-    return _generation;
+    std::size_t gen = _generation;
+    if( _parent )
+        gen += _parent->generation();
+    return gen;
 }
 
 
 bool StyleOptions::hasOverrides() const
 {
     return ! _options.empty();
+}
+
+
+void StyleOptions::setParent(const StyleOptions* parent)
+{
+    if( _parent != parent )
+    {
+        _parent = parent;
+        ++_generation;
+    }
+}
+
+
+const StyleOptions* StyleOptions::parent() const
+{
+    return _parent;
 }
 
 
