@@ -121,11 +121,12 @@ void ScrollBar::scroll(double pos)
 
 const Gfx::Brush& ScrollBar::background() const
 {
-    if( const BackgroundOption* background = _scrollBarOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _scrollBarOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<BackgroundOption>()->value();
+    return options.get<BackgroundOption>().value();
 }
 
 
@@ -139,11 +140,12 @@ void ScrollBar::setBackground(const Gfx::Brush& b)
 
 const Gfx::Brush& ScrollBar::foreground() const
 {
-    if( const ForegroundOption* foreground = _scrollBarOptions.get<ForegroundOption>() )
+    const ForegroundOption* foreground = _scrollBarOptions.find<ForegroundOption>();
+    if(foreground)
         return foreground->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>()->value();
+    return options.get<ForegroundOption>().value();
 }
 
 
@@ -157,11 +159,12 @@ void ScrollBar::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& ScrollBar::contour() const
 {
-    if( const ContourOption* contour = _scrollBarOptions.get<ContourOption>() )
+    const ContourOption* contour = _scrollBarOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 

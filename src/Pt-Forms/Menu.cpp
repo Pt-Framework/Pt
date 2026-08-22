@@ -163,7 +163,7 @@ const Pt::Gfx::Brush& Menu::background() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::BackgroundOption>()->value();
+    return options.get<Pt::Forms::BackgroundOption>().value();
 }
 
 void Menu::setBackground(const Pt::Gfx::Brush& b)
@@ -179,7 +179,7 @@ const Pt::Gfx::Pen& Menu::contour() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::ContourOption>()->value();
+    return options.get<Pt::Forms::ContourOption>().value();
 }
 
 void Menu::setContour(const Pt::Gfx::Pen& p)

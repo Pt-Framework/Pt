@@ -241,11 +241,12 @@ Pt::Signal<ListBoxItem&>& ComboBox::selected()
 
 const Gfx::Brush& ComboBox::background() const
 {
-    if( const BackgroundOption* background = _comboBoxOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _comboBoxOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>()->value();
+    return options.get<TextBackgroundOption>().value();
 }
 
 
@@ -259,11 +260,12 @@ void ComboBox::setBackground(const Gfx::Brush& b)
 
 const Gfx::Brush& ComboBox::foreground() const
 {
-    if( const ForegroundOption* foreground = _comboBoxOptions.get<ForegroundOption>() )
+    const ForegroundOption* foreground = _comboBoxOptions.find<ForegroundOption>();
+    if(foreground)
         return foreground->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>()->value();
+    return options.get<ForegroundOption>().value();
 }
 
 
@@ -277,11 +279,12 @@ void ComboBox::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& ComboBox::contour() const
 {
-    if( const ContourOption* contour = _comboBoxOptions.get<ContourOption>() )
+    const ContourOption* contour = _comboBoxOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
@@ -295,11 +298,12 @@ void ComboBox::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& ComboBox::textColor() const
 {
-    if( const TextColorOption* textColor = _comboBoxOptions.get<TextColorOption>() )
+    const TextColorOption* textColor = _comboBoxOptions.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
@@ -314,8 +318,8 @@ void ComboBox::setTextColor(const Gfx::Color& color)
 Gfx::Font ComboBox::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -331,7 +335,7 @@ void ComboBox::setFont(const Gfx::Font& font)
 
 void ComboBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _comboBoxOptions.set(font);
@@ -341,7 +345,7 @@ void ComboBox::setFontSize(std::size_t size)
 
 void ComboBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _comboBoxOptions.set(font);
@@ -351,7 +355,7 @@ void ComboBox::setFontWeight(Gfx::Font::Weight weight)
 
 void ComboBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _comboBoxOptions.set(font);

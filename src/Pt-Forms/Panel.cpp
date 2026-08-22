@@ -96,11 +96,12 @@ const Gfx::Brush* Panel::background() const
     if( ! _hasBackground )
         return 0;
 
-    if( const BackgroundOption* background = _panelStyleOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _panelStyleOptions.find<BackgroundOption>();
+    if(background)
         return &background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<BackgroundOption>()->value();
+    return &options.get<BackgroundOption>().value();
 }
 
 
@@ -126,11 +127,12 @@ const Gfx::Pen* Panel::contour() const
     if( ! _hasFrame )
         return 0;
 
-    if( const ContourOption* contour = _panelStyleOptions.get<ContourOption>() )
+    const ContourOption* contour = _panelStyleOptions.find<ContourOption>();
+    if(contour)
         return &contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<ContourOption>()->value();
+    return &options.get<ContourOption>().value();
 }
 
 

@@ -121,38 +121,41 @@ namespace {
 const Gfx::Brush& resolvePanelBackground(const StyleOptions& options,
                                          const StyleOptions& local)
 {
-    if( const BackgroundOption* background = local.get<BackgroundOption>() )
+    const BackgroundOption* background = local.find<BackgroundOption>();
+    if(background)
         return background->value();
 
-    return options.get<BackgroundOption>()->value();
+    return options.get<BackgroundOption>().value();
 }
 
 
 const Gfx::Pen& resolvePanelContour(const StyleOptions& options,
                                     const StyleOptions& local)
 {
-    if( const ContourOption* contour = local.get<ContourOption>() )
+    const ContourOption* contour = local.find<ContourOption>();
+    if(contour)
         return contour->value();
 
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
 const Gfx::Color& resolvePanelTextColor(const StyleOptions& options,
                                         const StyleOptions& local)
 {
-    if( const TextColorOption* textColor = local.get<TextColorOption>() )
+    const TextColorOption* textColor = local.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
 Gfx::Font resolvePanelFont(const StyleOptions& options,
                            const StyleOptions& local)
 {
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = local.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = local.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -160,58 +163,63 @@ Gfx::Font resolvePanelFont(const StyleOptions& options,
 const Gfx::Brush& resolveButtonForeground(const StyleOptions& options,
                                           const StyleOptions& local)
 {
-    if( const ForegroundOption* foreground = local.get<ForegroundOption>() )
+    const ForegroundOption* foreground = local.find<ForegroundOption>();
+    if(foreground)
         return foreground->value();
 
-    return options.get<ForegroundOption>()->value();
+    return options.get<ForegroundOption>().value();
 }
 
 
 const Gfx::Pen& resolveButtonContour(const StyleOptions& options,
                                      const StyleOptions& local)
 {
-    if( const ContourOption* contour = local.get<ContourOption>() )
+    const ContourOption* contour = local.find<ContourOption>();
+    if(contour)
         return contour->value();
 
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
 const Gfx::Color& resolveButtonAccentColor(const StyleOptions& options,
                                            const StyleOptions& local)
 {
-    if( const AccentColorOption* accentColor = local.get<AccentColorOption>() )
+    const AccentColorOption* accentColor = local.find<AccentColorOption>();
+    if(accentColor)
         return accentColor->value();
 
-    return options.get<AccentColorOption>()->value();
+    return options.get<AccentColorOption>().value();
 }
 
 
 const Gfx::Color& resolveButtonHighlightColor(const StyleOptions& options,
                                               const StyleOptions& local)
 {
-    if( const HighlightColorOption* highlightColor = local.get<HighlightColorOption>() )
+    const HighlightColorOption* highlightColor = local.find<HighlightColorOption>();
+    if(highlightColor)
         return highlightColor->value();
 
-    return options.get<HighlightColorOption>()->value();
+    return options.get<HighlightColorOption>().value();
 }
 
 
 const Gfx::Color& resolveButtonTextColor(const StyleOptions& options,
                                          const StyleOptions& local)
 {
-    if( const TextColorOption* textColor = local.get<TextColorOption>() )
+    const TextColorOption* textColor = local.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
 Gfx::Font resolveButtonFont(const StyleOptions& options,
                             const StyleOptions& local)
 {
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = local.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = local.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -815,24 +823,24 @@ void PlatinumCheckBoxRenderer::onReset(const StyleOptions& options)
 void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& cbOptions)
 {
-    const BackgroundOption* localBg = cbOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = cbOptions.find<BackgroundOption>();
     Gfx::Brush bg = localBg ? localBg->value()
-                            : options.get<TextBackgroundOption>()->value();
+                            : options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = cbOptions.get<ContourOption>();
+    const ContourOption* localContour = cbOptions.find<ContourOption>();
     Gfx::Pen cPen = localContour ? localContour->value()
-                                 : options.get<ContourOption>()->value();
+                                 : options.get<ContourOption>().value();
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
     _boxPainter.setBrush( bg );
     _boxPainter.setPen( cPen );
 
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = cbOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = cbOptions.find<FontOption>();
     Gfx::Font f = localFont ? localFont->getFont(baseFont) : baseFont;
-    const TextColorOption* localText = cbOptions.get<TextColorOption>();
+    const TextColorOption* localText = cbOptions.find<TextColorOption>();
     Gfx::Color tc = localText ? localText->value()
-                              : options.get<TextColorOption>()->value();
+                              : options.get<TextColorOption>().value();
 
     _textPainter.setFont( f );
     _textPainter.setPen( tc );
@@ -1045,28 +1053,28 @@ SpinBoxRenderer* PlatinumSpinBoxRenderer::onCreate() const
 void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& options,
                                         const StyleOptions& spinBoxOptions)
 {
-    const BackgroundOption* localBg = spinBoxOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = spinBoxOptions.find<BackgroundOption>();
     _background = localBg ? localBg->value()
-                          : options.get<TextBackgroundOption>()->value();
+                          : options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = spinBoxOptions.get<ContourOption>();
+    const ContourOption* localContour = spinBoxOptions.find<ContourOption>();
     _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>()->value();
+                            : options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const ForegroundOption* localFg = spinBoxOptions.get<ForegroundOption>();
+    const ForegroundOption* localFg = spinBoxOptions.find<ForegroundOption>();
     _foreground = localFg ? localFg->value()
-                          : options.get<ForegroundOption>()->value();
+                          : options.get<ForegroundOption>().value();
 
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = spinBoxOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = spinBoxOptions.find<FontOption>();
     _font = localFont ? localFont->getFont(baseFont) : baseFont;
 
-    const TextColorOption* localText = spinBoxOptions.get<TextColorOption>();
+    const TextColorOption* localText = spinBoxOptions.find<TextColorOption>();
     _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>()->value();
+                           : options.get<TextColorOption>().value();
 
-    _accentColor = options.get<AccentColorOption>()->value();
+    _accentColor = options.get<AccentColorOption>().value();
 
     _textPainter.setFont(_font);
     _textPainter.setPen(_textColor);
@@ -1373,26 +1381,26 @@ LineEditRenderer* PlatinumLineEditRenderer::onCreate() const
 void PlatinumLineEditRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& lineEditOptions)
 {
-    const BackgroundOption* localBg = lineEditOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = lineEditOptions.find<BackgroundOption>();
     _background = localBg ? localBg->value()
-                          : options.get<TextBackgroundOption>()->value();
+                          : options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = lineEditOptions.get<ContourOption>();
+    const ContourOption* localContour = lineEditOptions.find<ContourOption>();
     _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>()->value();
+                            : options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = lineEditOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = lineEditOptions.find<FontOption>();
     _font = localFont ? localFont->getFont(baseFont) : baseFont;
 
-    const TextColorOption* localText = lineEditOptions.get<TextColorOption>();
+    const TextColorOption* localText = lineEditOptions.find<TextColorOption>();
     _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>()->value();
+                           : options.get<TextColorOption>().value();
 
-    _accentColor = options.get<AccentColorOption>()->value();
-    _selectionBackground = options.get<AccentColorOption>()->value();
-    _selectionTextColor = options.get<TextBackgroundOption>()->value().color();
+    _accentColor = options.get<AccentColorOption>().value();
+    _selectionBackground = options.get<AccentColorOption>().value();
+    _selectionTextColor = options.get<TextBackgroundOption>().value().color();
 
     _textPainter.setFont( _font );
     _textPainter.setPen( Gfx::Pen(_textColor) );
@@ -1560,22 +1568,22 @@ ProgressBarRenderer* PlatinumProgressBarRenderer::onCreate() const
 void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options,
                                             const StyleOptions& progressBarOptions)
 {
-    const ForegroundOption* localFg = progressBarOptions.get<ForegroundOption>();
+    const ForegroundOption* localFg = progressBarOptions.find<ForegroundOption>();
     _foreground = localFg ? localFg->value()
-                          : Gfx::Brush( options.get<AccentColorOption>()->value() );
+                          : Gfx::Brush( options.get<AccentColorOption>().value() );
 
-    _textBackground = options.get<TextBackgroundOption>()->value().color();
+    _textBackground = options.get<TextBackgroundOption>().value().color();
 
-    _trackPainter.setBrush( options.get<ForegroundOption>()->value() );
+    _trackPainter.setBrush( options.get<ForegroundOption>().value() );
     _chunkPainter.setBrush( _foreground );
 
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = progressBarOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = progressBarOptions.find<FontOption>();
     Gfx::Font resolvedFont = localFont ? localFont->getFont(baseFont) : baseFont;
 
-    const TextColorOption* localText = progressBarOptions.get<TextColorOption>();
+    const TextColorOption* localText = progressBarOptions.find<TextColorOption>();
     Gfx::Color textCol = localText ? localText->value()
-                                   : options.get<TextColorOption>()->value();
+                                   : options.get<TextColorOption>().value();
 
     _textPainter.setFont( resolvedFont );
     _textPainter.setPen( Gfx::Pen(textCol) );
@@ -1731,15 +1739,15 @@ SliderRenderer* PlatinumSliderRenderer::onCreate() const
 void PlatinumSliderRenderer::onPrepare(const StyleOptions& options,
                                        const StyleOptions& sliderOptions)
 {
-    const ForegroundOption* localFg = sliderOptions.get<ForegroundOption>();
+    const ForegroundOption* localFg = sliderOptions.find<ForegroundOption>();
     _foreground = localFg ? localFg->value()
-                          : Gfx::Brush( options.get<AccentColorOption>()->value() );
+                          : Gfx::Brush( options.get<AccentColorOption>().value() );
 
-    const ContourOption* localContour = sliderOptions.get<ContourOption>();
+    const ContourOption* localContour = sliderOptions.find<ContourOption>();
     _contourBrush = Gfx::Brush( localContour ? localContour->value().color()
-                                             : options.get<ContourOption>()->value().color() );
+                                             : options.get<ContourOption>().value().color() );
 
-    _trackPainter.setBrush( options.get<ForegroundOption>()->value() );
+    _trackPainter.setBrush( options.get<ForegroundOption>().value() );
     _handlePainter.setBrush( _foreground );
 }
 
@@ -1869,15 +1877,15 @@ ScrollBarRenderer* PlatinumScrollBarRenderer::onCreate() const
 void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& options,
                                           const StyleOptions& scrollBarOptions)
 {
-    const BackgroundOption* localBg = scrollBarOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = scrollBarOptions.find<BackgroundOption>();
     _background = localBg ? localBg->value()
-                          : options.get<BackgroundOption>()->value();
+                          : options.get<BackgroundOption>().value();
 
-    const ContourOption* localContour = scrollBarOptions.get<ContourOption>();
+    const ContourOption* localContour = scrollBarOptions.find<ContourOption>();
     _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>()->value();
+                            : options.get<ContourOption>().value();
 
-    _accentColor = options.get<AccentColorOption>()->value();
+    _accentColor = options.get<AccentColorOption>().value();
 
     _trackPainter.setBrush( _background );
     _trackPainter.setPen( _contour );
@@ -2280,13 +2288,13 @@ ListBoxRenderer* PlatinumListBoxRenderer::onCreate() const
 void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options,
                                         const StyleOptions& listBoxOptions)
 {
-    const BackgroundOption* localBg = listBoxOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = listBoxOptions.find<BackgroundOption>();
     _viewBackground = localBg ? localBg->value()
-                              : options.get<ViewBackgroundOption>()->value();
+                              : options.get<ViewBackgroundOption>().value();
 
-    const ContourOption* localContour = listBoxOptions.get<ContourOption>();
+    const ContourOption* localContour = listBoxOptions.find<ContourOption>();
     _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>()->value();
+                            : options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
     _bgPainter.setBrush(_viewBackground);
@@ -2376,21 +2384,21 @@ ListItemRenderer* PlatinumListItemRenderer::onCreate() const
 void PlatinumListItemRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& listItemOptions)
 {
-    _highlightBrush = Gfx::Brush( options.get<HighlightColorOption>()->value() );
-    _highlightedTextColor = options.get<HighlightedTextColorOption>()->value();
+    _highlightBrush = Gfx::Brush( options.get<HighlightColorOption>().value() );
+    _highlightedTextColor = options.get<HighlightedTextColorOption>().value();
 
-    const BackgroundOption* localBg = listItemOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = listItemOptions.find<BackgroundOption>();
     _hasBackground = (localBg != 0);
     if(localBg)
         _background = localBg->value();
 
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = listItemOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = listItemOptions.find<FontOption>();
     _font = localFont ? localFont->getFont(baseFont) : baseFont;
 
-    const TextColorOption* localText = listItemOptions.get<TextColorOption>();
+    const TextColorOption* localText = listItemOptions.find<TextColorOption>();
     _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>()->value();
+                           : options.get<TextColorOption>().value();
 
     _textPainter.setFont(_font);
     _textPainter.setPen( Gfx::Pen(_textColor) );
@@ -2546,28 +2554,28 @@ ComboBoxRenderer* PlatinumComboBoxRenderer::onCreate() const
 void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& comboBoxOptions)
 {
-    const BackgroundOption* localBg = comboBoxOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = comboBoxOptions.find<BackgroundOption>();
     _background = localBg ? localBg->value()
-                          : options.get<TextBackgroundOption>()->value();
+                          : options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = comboBoxOptions.get<ContourOption>();
+    const ContourOption* localContour = comboBoxOptions.find<ContourOption>();
     _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>()->value();
+                            : options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const ForegroundOption* localFg = comboBoxOptions.get<ForegroundOption>();
+    const ForegroundOption* localFg = comboBoxOptions.find<ForegroundOption>();
     _foreground = localFg ? localFg->value()
-                          : options.get<ForegroundOption>()->value();
+                          : options.get<ForegroundOption>().value();
 
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = comboBoxOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = comboBoxOptions.find<FontOption>();
     _font = localFont ? localFont->getFont(baseFont) : baseFont;
 
-    const TextColorOption* localText = comboBoxOptions.get<TextColorOption>();
+    const TextColorOption* localText = comboBoxOptions.find<TextColorOption>();
     _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>()->value();
+                           : options.get<TextColorOption>().value();
 
-    _accentColor = options.get<AccentColorOption>()->value();
+    _accentColor = options.get<AccentColorOption>().value();
 
     _bgPainter.setBrush(_background);
     _bgPainter.setPen(_contour);
@@ -2808,27 +2816,27 @@ TabViewRenderer* PlatinumTabViewRenderer::onCreate() const
 void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options,
                                         const StyleOptions& tabViewOptions)
 {
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = tabViewOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = tabViewOptions.find<FontOption>();
     _font = localFont ? localFont->getFont(baseFont) : baseFont;
     _inset = _font.size() / 2.0;
 
-    const ContourOption* localContour = tabViewOptions.get<ContourOption>();
+    const ContourOption* localContour = tabViewOptions.find<ContourOption>();
     _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>()->value();
+                            : options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const BackgroundOption* localBg = tabViewOptions.get<BackgroundOption>();
+    const BackgroundOption* localBg = tabViewOptions.find<BackgroundOption>();
     _background = localBg ? localBg->value()
-                          : options.get<BackgroundOption>()->value();
+                          : options.get<BackgroundOption>().value();
 
-    const TextColorOption* localText = tabViewOptions.get<TextColorOption>();
+    const TextColorOption* localText = tabViewOptions.find<TextColorOption>();
     _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>()->value();
+                           : options.get<TextColorOption>().value();
 
-    const AccentColorOption* localAccent = tabViewOptions.get<AccentColorOption>();
+    const AccentColorOption* localAccent = tabViewOptions.find<AccentColorOption>();
     _accentColor = localAccent ? localAccent->value()
-                               : options.get<AccentColorOption>()->value();
+                               : options.get<AccentColorOption>().value();
 
     _bgPainter.setBrush(_background);
     _framePainter.setPen(_contour);

@@ -199,11 +199,12 @@ Pt::Signal<const Pt::String&>& LineEdit::editingFinished()
 
 const Gfx::Brush& LineEdit::background() const
 {
-    if( const BackgroundOption* background = _lineEditOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _lineEditOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>()->value();
+    return options.get<TextBackgroundOption>().value();
 }
 
 
@@ -217,11 +218,12 @@ void LineEdit::setBackground(const Gfx::Brush& b)
 
 const Gfx::Pen& LineEdit::contour() const
 {
-    if( const ContourOption* contour = _lineEditOptions.get<ContourOption>() )
+    const ContourOption* contour = _lineEditOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
@@ -235,11 +237,12 @@ void LineEdit::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& LineEdit::textColor() const
 {
-    if( const TextColorOption* textColor = _lineEditOptions.get<TextColorOption>() )
+    const TextColorOption* textColor = _lineEditOptions.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
@@ -254,8 +257,8 @@ void LineEdit::setTextColor(const Gfx::Color& color)
 Gfx::Font LineEdit::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = _lineEditOptions.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -271,7 +274,7 @@ void LineEdit::setFont(const Gfx::Font& font)
 
 void LineEdit::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    const FontOption* localFont = _lineEditOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _lineEditOptions.set(font);
@@ -281,7 +284,7 @@ void LineEdit::setFontSize(std::size_t size)
 
 void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    const FontOption* localFont = _lineEditOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _lineEditOptions.set(font);
@@ -291,7 +294,7 @@ void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 
 void LineEdit::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    const FontOption* localFont = _lineEditOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _lineEditOptions.set(font);

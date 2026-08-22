@@ -57,7 +57,7 @@ const Pt::Gfx::Brush& MenuBar::background() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::BackgroundOption>()->value();
+    return options.get<Pt::Forms::BackgroundOption>().value();
 }
 
 
@@ -75,7 +75,7 @@ const Pt::Gfx::Pen& MenuBar::contour() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::ContourOption>()->value();
+    return options.get<Pt::Forms::ContourOption>().value();
 }
 
 

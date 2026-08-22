@@ -254,7 +254,7 @@ bool StyleOptions::hasOverrides() const
 }
 
 
-StyleOption* StyleOptions::find(const std::type_info& ti) const
+StyleOption* StyleOptions::lookup(const std::type_info& ti) const
 {
     for(std::size_t n = 0; n < _options.size(); ++n)
     {

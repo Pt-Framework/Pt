@@ -116,11 +116,12 @@ Signal<int>& Slider::positionChanged()
 
 const Gfx::Brush& Slider::background() const
 {
-    if( const BackgroundOption* background = _sliderOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _sliderOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<BackgroundOption>()->value();
+    return options.get<BackgroundOption>().value();
 }
 
 
@@ -134,11 +135,12 @@ void Slider::setBackground(const Gfx::Brush& b)
 
 const Gfx::Brush& Slider::foreground() const
 {
-    if( const ForegroundOption* foreground = _sliderOptions.get<ForegroundOption>() )
+    const ForegroundOption* foreground = _sliderOptions.find<ForegroundOption>();
+    if(foreground)
         return foreground->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>()->value();
+    return options.get<ForegroundOption>().value();
 }
 
 
@@ -152,11 +154,12 @@ void Slider::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& Slider::contour() const
 {
-    if( const ContourOption* contour = _sliderOptions.get<ContourOption>() )
+    const ContourOption* contour = _sliderOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
@@ -170,11 +173,12 @@ void Slider::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& Slider::textColor() const
 {
-    if( const TextColorOption* textColor = _sliderOptions.get<TextColorOption>() )
+    const TextColorOption* textColor = _sliderOptions.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
@@ -189,8 +193,8 @@ void Slider::setTextColor(const Gfx::Color& color)
 Gfx::Font Slider::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = _sliderOptions.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -206,7 +210,7 @@ void Slider::setFont(const Gfx::Font& font)
 
 void Slider::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    const FontOption* localFont = _sliderOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _sliderOptions.set(font);
@@ -216,7 +220,7 @@ void Slider::setFontSize(std::size_t size)
 
 void Slider::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    const FontOption* localFont = _sliderOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _sliderOptions.set(font);
@@ -226,7 +230,7 @@ void Slider::setFontWeight(Gfx::Font::Weight weight)
 
 void Slider::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    const FontOption* localFont = _sliderOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _sliderOptions.set(font);

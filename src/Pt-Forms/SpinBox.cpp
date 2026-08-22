@@ -380,11 +380,12 @@ Pt::Signal<const Pt::String&>& SpinBox::editingFinished()
 
 const Gfx::Brush& SpinBox::background() const
 {
-    if( const BackgroundOption* background = _spinBoxOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _spinBoxOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>()->value();
+    return options.get<TextBackgroundOption>().value();
 }
 
 
@@ -398,11 +399,12 @@ void SpinBox::setBackground(const Gfx::Brush& b)
 
 const Gfx::Brush& SpinBox::foreground() const
 {
-    if( const ForegroundOption* foreground = _spinBoxOptions.get<ForegroundOption>() )
+    const ForegroundOption* foreground = _spinBoxOptions.find<ForegroundOption>();
+    if(foreground)
         return foreground->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>()->value();
+    return options.get<ForegroundOption>().value();
 }
 
 
@@ -416,11 +418,12 @@ void SpinBox::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& SpinBox::contour() const
 {
-    if( const ContourOption* contour = _spinBoxOptions.get<ContourOption>() )
+    const ContourOption* contour = _spinBoxOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
@@ -434,11 +437,12 @@ void SpinBox::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& SpinBox::textColor() const
 {
-    if( const TextColorOption* textColor = _spinBoxOptions.get<TextColorOption>() )
+    const TextColorOption* textColor = _spinBoxOptions.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
@@ -453,8 +457,8 @@ void SpinBox::setTextColor(const Gfx::Color& color)
 Gfx::Font SpinBox::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -470,7 +474,7 @@ void SpinBox::setFont(const Gfx::Font& font)
 
 void SpinBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _spinBoxOptions.set(font);
@@ -480,7 +484,7 @@ void SpinBox::setFontSize(std::size_t size)
 
 void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _spinBoxOptions.set(font);
@@ -490,7 +494,7 @@ void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 
 void SpinBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _spinBoxOptions.set(font);

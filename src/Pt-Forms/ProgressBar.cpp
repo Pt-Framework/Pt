@@ -120,11 +120,12 @@ Signal<int>& ProgressBar::valueChanged()
 
 const Gfx::Brush& ProgressBar::background() const
 {
-    if( const BackgroundOption* background = _progressBarOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _progressBarOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<BackgroundOption>()->value();
+    return options.get<BackgroundOption>().value();
 }
 
 
@@ -138,11 +139,12 @@ void ProgressBar::setBackground(const Gfx::Brush& b)
 
 const Gfx::Brush& ProgressBar::foreground() const
 {
-    if( const ForegroundOption* foreground = _progressBarOptions.get<ForegroundOption>() )
+    const ForegroundOption* foreground = _progressBarOptions.find<ForegroundOption>();
+    if(foreground)
         return foreground->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>()->value();
+    return options.get<ForegroundOption>().value();
 }
 
 
@@ -156,11 +158,12 @@ void ProgressBar::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& ProgressBar::contour() const
 {
-    if( const ContourOption* contour = _progressBarOptions.get<ContourOption>() )
+    const ContourOption* contour = _progressBarOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
@@ -174,11 +177,12 @@ void ProgressBar::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& ProgressBar::textColor() const
 {
-    if( const TextColorOption* textColor = _progressBarOptions.get<TextColorOption>() )
+    const TextColorOption* textColor = _progressBarOptions.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
@@ -193,8 +197,8 @@ void ProgressBar::setTextColor(const Gfx::Color& color)
 Gfx::Font ProgressBar::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = _progressBarOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = _progressBarOptions.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -210,7 +214,7 @@ void ProgressBar::setFont(const Gfx::Font& font)
 
 void ProgressBar::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _progressBarOptions.get<FontOption>();
+    const FontOption* localFont = _progressBarOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _progressBarOptions.set(font);
@@ -220,7 +224,7 @@ void ProgressBar::setFontSize(std::size_t size)
 
 void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _progressBarOptions.get<FontOption>();
+    const FontOption* localFont = _progressBarOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _progressBarOptions.set(font);
@@ -230,7 +234,7 @@ void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 
 void ProgressBar::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _progressBarOptions.get<FontOption>();
+    const FontOption* localFont = _progressBarOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _progressBarOptions.set(font);

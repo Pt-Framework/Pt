@@ -154,7 +154,7 @@ const Pt::Gfx::Brush& MenuItemBase::background() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::BackgroundOption>()->value();
+    return options.get<Pt::Forms::BackgroundOption>().value();
 }
 
 
@@ -173,7 +173,7 @@ const Pt::Gfx::Pen& MenuItemBase::contour() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::ContourOption>()->value();
+    return options.get<Pt::Forms::ContourOption>().value();
 }
 
 
@@ -192,7 +192,7 @@ const Pt::Gfx::Color& MenuItemBase::textColor() const
 
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    return options.get<Pt::Forms::TextColorOption>()->value();
+    return options.get<Pt::Forms::TextColorOption>().value();
 }
 
 
@@ -223,7 +223,7 @@ Pt::Gfx::Font MenuItemBase::getFont() const
 {
     const Pt::Forms::StyleOptions& options =
         Pt::Forms::Application::instance().styleOptions();
-    const Pt::Gfx::Font& base = options.get<Pt::Forms::FontOption>()->value();
+    const Pt::Gfx::Font& base = options.get<Pt::Forms::FontOption>().value();
 
     if( ! (_overrides & OverrideFontAny) )
         return base;
@@ -308,7 +308,7 @@ void MenuItemBase::onInvalidate()
     _picture.reset(_icon);
 
     if(_isHighlighted)
-        _brush = options.get<Pt::Forms::HighlightColorOption>()->value();
+        _brush = options.get<Pt::Forms::HighlightColorOption>().value();
 }
 
 

@@ -38,6 +38,8 @@
 #include <Pt/SmartPtr.h>
 
 #include <cstddef>
+#include <stdexcept>
+#include <string>
 #include <typeinfo>
 #include <vector>
 
@@ -462,7 +464,7 @@ class PopupTextColorOption : public StyleOption
     A complete font replaces the base font. Size, weight, and slant
     overrides are merged into a base font by %getFont(). %isSet() is
     true when any override bit is set on this value. Bag presence is
-    separate and is reported by %StyleOptions::get().
+    separate and is reported by %StyleOptions::find().
 */
 class PT_FORMS_API FontOption : public StyleOption
 {
@@ -536,9 +538,10 @@ class PT_FORMS_API FontOption : public StyleOption
     One class is used for both the complete global options and a sparse
     widget overlay. The default constructor is an empty bag.
     %StyleOptions::defaults() inserts the built-in contract tokens.
-    Presence is bag membership via %get(), %set, and %reset(). Each
+    Presence is bag membership via %find(), %set, and %reset(). Each
     token is a concrete option type (%ForegroundOption, %FontOption,
-    and the other contract types).
+    and the other contract types). Overlay callers use %find(); it
+    may be 0. Complete bags use %get(), which returns a reference.
 
     %Application owns the live global instance constructed from
     defaults(). Widgets or their styler hold a second instance as the
@@ -571,9 +574,20 @@ class PT_FORMS_API StyleOptions
         bool hasOverrides() const;
 
         /** @brief Returns the option of type T, or 0 if absent.
+
+            Use for overlays and bags of unknown completeness.
         */
         template <typename T>
-        const T* get() const;
+        const T* find() const;
+
+        /** @brief Returns the option of type T.
+
+            Use for complete bags such as %defaults() and
+            %Application::styleOptions(). Throws std::logic_error if T
+            is absent.
+        */
+        template <typename T>
+        const T& get() const;
 
         /** @brief Replaces the option of type T and bumps generation.
         */
@@ -588,7 +602,7 @@ class PT_FORMS_API StyleOptions
         void reset();
 
     private:
-        StyleOption* find(const std::type_info& ti) const;
+        StyleOption* lookup(const std::type_info& ti) const;
 
         void replace(StyleOption* option);
 
@@ -601,9 +615,20 @@ class PT_FORMS_API StyleOptions
 
 
 template <typename T>
-const T* StyleOptions::get() const
+const T* StyleOptions::find() const
 {
-    return static_cast<const T*>( find(typeid(T)) );
+    return static_cast<const T*>( lookup(typeid(T)) );
+}
+
+
+template <typename T>
+const T& StyleOptions::get() const
+{
+    const T* option = find<T>();
+    if( ! option )
+        throw std::logic_error(std::string("style option not set: ") + T::name());
+
+    return *option;
 }
 
 

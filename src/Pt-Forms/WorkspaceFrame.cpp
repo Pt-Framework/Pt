@@ -1626,7 +1626,7 @@ void WorkspaceFrame::onPaintEvent(const PaintEvent& ev)
     Pt::String title = _window->title().c_str();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& font = options.get<FontOption>()->value();
+    const Gfx::Font& font = options.get<FontOption>().value();
     painter.setFont(font);
     Gfx::TextMetrics tm = painter.textMetrics(title);
     Gfx::FontMetrics fm = painter.fontMetrics();

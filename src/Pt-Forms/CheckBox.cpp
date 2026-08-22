@@ -73,11 +73,12 @@ bool CheckBox::isChecked() const
 
 const Gfx::Brush& CheckBox::background() const
 {
-    if( const BackgroundOption* background = _checkBoxOptions.get<BackgroundOption>() )
+    const BackgroundOption* background = _checkBoxOptions.find<BackgroundOption>();
+    if(background)
         return background->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>()->value();
+    return options.get<TextBackgroundOption>().value();
 }
 
 
@@ -91,11 +92,12 @@ void CheckBox::setBackground(const Gfx::Brush& b)
 
 const Gfx::Pen& CheckBox::contour() const
 {
-    if( const ContourOption* contour = _checkBoxOptions.get<ContourOption>() )
+    const ContourOption* contour = _checkBoxOptions.find<ContourOption>();
+    if(contour)
         return contour->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>()->value();
+    return options.get<ContourOption>().value();
 }
 
 
@@ -109,11 +111,12 @@ void CheckBox::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& CheckBox::textColor() const
 {
-    if( const TextColorOption* textColor = _checkBoxOptions.get<TextColorOption>() )
+    const TextColorOption* textColor = _checkBoxOptions.find<TextColorOption>();
+    if(textColor)
         return textColor->value();
 
     const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>()->value();
+    return options.get<TextColorOption>().value();
 }
 
 
@@ -128,8 +131,8 @@ void CheckBox::setTextColor(const Gfx::Color& color)
 Gfx::Font CheckBox::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>()->value();
-    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    const Gfx::Font& baseFont = options.get<FontOption>().value();
+    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -145,7 +148,7 @@ void CheckBox::setFont(const Gfx::Font& font)
 
 void CheckBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _checkBoxOptions.set(font);
@@ -155,7 +158,7 @@ void CheckBox::setFontSize(std::size_t size)
 
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _checkBoxOptions.set(font);
@@ -165,7 +168,7 @@ void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _checkBoxOptions.set(font);
