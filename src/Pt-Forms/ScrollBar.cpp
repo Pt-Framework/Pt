@@ -1,11 +1,11 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -121,47 +121,54 @@ void ScrollBar::scroll(double pos)
 
 const Gfx::Brush& ScrollBar::background() const
 {
-    if( const Gfx::Brush* b = _scrollBarOptions.background() )
-        return *b;
+    if( const BackgroundOption* background = _scrollBarOptions.get<BackgroundOption>() )
+        return background->value();
 
-    return Application::instance().styleOptions().background();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<BackgroundOption>()->value();
 }
 
 
 void ScrollBar::setBackground(const Gfx::Brush& b)
 {
-    _scrollBarOptions.setBackground(b);
+    BackgroundOption background(b);
+    _scrollBarOptions.set(background);
     invalidate();
 }
 
 
 const Gfx::Brush& ScrollBar::foreground() const
 {
-    if( const Gfx::Brush* b = _scrollBarOptions.foreground() )
-        return *b;
+    if( const ForegroundOption* foreground = _scrollBarOptions.get<ForegroundOption>() )
+        return foreground->value();
 
-    return Application::instance().styleOptions().foreground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ForegroundOption>()->value();
 }
+
 
 void ScrollBar::setForeground(const Gfx::Brush& b)
 {
-    _scrollBarOptions.setForeground(b);
+    ForegroundOption foreground(b);
+    _scrollBarOptions.set(foreground);
     invalidate();
 }
 
 
 const Gfx::Pen& ScrollBar::contour() const
 {
-    if( const Gfx::Pen* p = _scrollBarOptions.contour() )
-        return *p;
+    if( const ContourOption* contour = _scrollBarOptions.get<ContourOption>() )
+        return contour->value();
 
-    return Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ContourOption>()->value();
 }
 
 
 void ScrollBar::setContour(const Gfx::Pen& p)
 {
-    _scrollBarOptions.setContour(p);
+    ContourOption contour(p);
+    _scrollBarOptions.set(contour);
     invalidate();
 }
 

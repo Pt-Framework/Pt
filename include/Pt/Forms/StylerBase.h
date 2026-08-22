@@ -84,7 +84,7 @@ class PT_FORMS_API StylerBase : private NonCopyable
             Options always exist. The returned object is used for override
             detection and option-generation checks.
         */
-        virtual const StyleOptionsBase& onLocalOptions() const = 0;
+        virtual const StyleOptions& onLocalOptions() const = 0;
 
         /** @brief Resolves the renderer for the current style source.
 
@@ -116,12 +116,12 @@ class PT_FORMS_API StylerBase : private NonCopyable
         /** @brief Returns true if the style source must be rebound.
         */
         bool isStyleChanged(const Style& style,
-                            const StyleOptionsBase& localOptions) const;
+                            const StyleOptions& localOptions) const;
 
         /** @brief Returns true if the bound renderer must refresh its tokens.
         */
         bool isOptionsChanged(const StyleOptions& options,
-                              const StyleOptionsBase& localOptions) const;
+                              const StyleOptions& localOptions) const;
 
     private:
         static const std::size_t InvalidGeneration;

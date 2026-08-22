@@ -1,5 +1,5 @@
 
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -77,7 +77,7 @@ class PT_FORMS_API CheckBox : public Button
 
         void setTextColor(const Gfx::Color& color);
 
-        const Gfx::Font& font() const;
+        Gfx::Font font() const;
 
         void setFont(const Gfx::Font& font);
 
@@ -127,7 +127,7 @@ class PT_FORMS_API CheckBox : public Button
     private:
         State                      _state;
         CheckBoxStyle              _checkBoxStyle;
-        CheckBoxStyleOptions       _checkBoxOptions;
+        StyleOptions               _checkBoxOptions;
 
         Gfx::RectF                 _boxRect;
         Gfx::RectF                 _textRect;

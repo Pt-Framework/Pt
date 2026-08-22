@@ -35,93 +35,6 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
-// PanelStyleOptions
-///////////////////////////////////////////////////////////////////////
-
-PanelStyleOptions::PanelStyleOptions()
-{
-}
-
-
-const Gfx::Brush* PanelStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void PanelStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* PanelStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void PanelStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Color* PanelStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void PanelStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* PanelStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void PanelStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void PanelStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void PanelStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void PanelStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font PanelStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-///////////////////////////////////////////////////////////////////////
 // PanelState
 ///////////////////////////////////////////////////////////////////////
 
@@ -177,7 +90,7 @@ PanelRenderer* PanelRenderer::create() const
 
 
 void PanelRenderer::prepare(const StyleOptions& options,
-                            const PanelStyleOptions& panelOptions)
+                            const StyleOptions& panelOptions)
 {
     onPrepare(options, panelOptions);
 }
@@ -185,7 +98,7 @@ void PanelRenderer::prepare(const StyleOptions& options,
 
 void PanelRenderer::onReset(const StyleOptions& options)
 {
-    PanelStyleOptions panelOptions;
+    StyleOptions panelOptions;
     prepare(options, panelOptions);
 }
 

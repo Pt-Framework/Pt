@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
+/* Copyright (C) 2017 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -126,7 +126,7 @@ SpinBox::SpinBox()
 , _upButton(SpinBoxButton::Up)
 {
     setFocusPolicy(Control::AcceptFocus);
-    
+
     _editor.setText("0");
 
     _upButton.clicked() += Pt::slot(*this, &SpinBox::onUp);
@@ -283,7 +283,7 @@ void SpinBox::onStep(int n)
 
     Pt::String str = toText(_value);
     _editor.setText(str);
-    
+
     repaint();
     relayout();
 
@@ -312,7 +312,7 @@ Adjustment SpinBox::textAdjustment() const
 void SpinBox::setTextAdjustment(Adjustment a)
 {
     _editor.setAdjustment(a);
-    
+
     repaint();
     relayout();
 }
@@ -327,7 +327,7 @@ std::size_t SpinBox::cursorPosition() const
 void SpinBox::setCursorPosition(std::size_t n)
 {
     _editor.setCursorPosition(n);
-    
+
     repaint();
     relayout();
 }
@@ -342,7 +342,7 @@ bool SpinBox::isAccepted() const
 void SpinBox::setAccepted(bool a)
 {
     _isAccepted = a;
-    
+
     if( ! a )
     {
         setFocusPolicy(Control::KeepFocus);
@@ -380,101 +380,120 @@ Pt::Signal<const Pt::String&>& SpinBox::editingFinished()
 
 const Gfx::Brush& SpinBox::background() const
 {
-    if( const Gfx::Brush* b = _spinBoxOptions.background() )
-        return *b;
+    if( const BackgroundOption* background = _spinBoxOptions.get<BackgroundOption>() )
+        return background->value();
 
-    return Application::instance().styleOptions().textBackground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextBackgroundOption>()->value();
 }
 
 
 void SpinBox::setBackground(const Gfx::Brush& b)
 {
-    _spinBoxOptions.setBackground(b);
+    BackgroundOption background(b);
+    _spinBoxOptions.set(background);
     invalidate();
 }
 
 
 const Gfx::Brush& SpinBox::foreground() const
 {
-    if( const Gfx::Brush* b = _spinBoxOptions.foreground() )
-        return *b;
+    if( const ForegroundOption* foreground = _spinBoxOptions.get<ForegroundOption>() )
+        return foreground->value();
 
-    return Application::instance().styleOptions().foreground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ForegroundOption>()->value();
 }
 
 
 void SpinBox::setForeground(const Gfx::Brush& b)
 {
-    _spinBoxOptions.setForeground(b);
+    ForegroundOption foreground(b);
+    _spinBoxOptions.set(foreground);
     invalidate();
 }
 
 
 const Gfx::Pen& SpinBox::contour() const
 {
-    if( const Gfx::Pen* p = _spinBoxOptions.contour() )
-        return *p;
+    if( const ContourOption* contour = _spinBoxOptions.get<ContourOption>() )
+        return contour->value();
 
-    return Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ContourOption>()->value();
 }
 
 
 void SpinBox::setContour(const Gfx::Pen& p)
 {
-    _spinBoxOptions.setContour(p);
+    ContourOption contour(p);
+    _spinBoxOptions.set(contour);
     invalidate();
 }
 
 
 const Gfx::Color& SpinBox::textColor() const
 {
-    if( const Gfx::Color* c = _spinBoxOptions.textColor() )
-        return *c;
+    if( const TextColorOption* textColor = _spinBoxOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void SpinBox::setTextColor(const Gfx::Color& color)
 {
-    _spinBoxOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _spinBoxOptions.set(textColor);
     invalidate();
 }
 
 
-const Gfx::Font& SpinBox::font() const
+Gfx::Font SpinBox::font() const
 {
-    if( const Gfx::Font* f = _spinBoxOptions.font() )
-        return *f;
-
-    return Application::instance().styleOptions().font();
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void SpinBox::setFont(const Gfx::Font& font)
 {
-    _spinBoxOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _spinBoxOptions.set(fontOption);
     invalidate();
 }
 
 
 void SpinBox::setFontSize(std::size_t size)
 {
-    _spinBoxOptions.setFontSize(size);
+    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _spinBoxOptions.set(font);
     invalidate();
 }
 
 
 void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    _spinBoxOptions.setFontWeight(weight);
+    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _spinBoxOptions.set(font);
     invalidate();
 }
 
 
 void SpinBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    _spinBoxOptions.setFontSlant(slant);
+    const FontOption* localFont = _spinBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _spinBoxOptions.set(font);
     invalidate();
 }
 
@@ -526,7 +545,7 @@ Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
     Gfx::SizeF contentSize(policy.width(), 0);
     Gfx::SizeF totalSize = renderer->measureFrame( surface(), contentSize );
 
-    return Gfx::SizeF( totalSize.width() + padding().leftRight(), 
+    return Gfx::SizeF( totalSize.width() + padding().leftRight(),
                        totalSize.height() + padding().topBottom() );
 }
 
@@ -636,7 +655,7 @@ void SpinBox::onPaintText(PaintContext& context,
 
 
 bool SpinBox::onKeyEvent(const KeyEvent& ev)
-{  
+{
     Base::onKeyEvent(ev);
 
     if( ! ev.isPress() || ! _isEditable )
@@ -740,7 +759,7 @@ bool SpinBox::onMouseEvent(const MouseEvent& ev)
     Base::onMouseEvent(ev);
 
     if( ! ev.isPress() || ! _entryRect.contains( ev.position() ) )
-        return true;  
+        return true;
 
     if(_isEditable)
     {
@@ -759,7 +778,7 @@ bool SpinBox::onTouchEvent(const TouchEvent& ev)
     Base::onTouchEvent(ev);
 
     if( ! ev.isPress() || ! _entryRect.contains( ev.position() ) )
-        return true;  
+        return true;
 
     if(_isEditable)
     {
@@ -778,7 +797,7 @@ bool SpinBox::onEnterEvent(const EnterEvent& ev)
     Base::onEnterEvent(ev);
 
     _isHighlighted = true;
-    
+
     invalidate();
     return true;
 }
@@ -805,7 +824,7 @@ void SpinBox::onFocusEvent(const FocusEvent& ev)
         {
             Pt::String str = toText(_value);
             _editor.setText(str);
-    
+
             repaint();
             relayout();
 

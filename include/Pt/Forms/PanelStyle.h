@@ -36,82 +36,6 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores widget-local style overrides for panel-like widgets.
-
-    Carries only the optional local override tokens that are resolved during
-    renderer preparation.
-*/
-class PT_FORMS_API PanelStyleOptions : public StyleOptionsBase
-{
-    public:
-        /** @brief Constructs empty local panel style options.
-        */
-        PanelStyleOptions();
-
-        /** @brief Returns the local background override or 0 if none is set.
-        */
-        const Gfx::Brush* background() const;
-
-        /** @brief Sets the local background override.
-        */
-        void setBackground(const Gfx::Brush& brush);
-
-        /** @brief Returns the local contour override or 0 if none is set.
-        */
-        const Gfx::Pen* contour() const;
-
-        /** @brief Sets the local contour override.
-        */
-        void setContour(const Gfx::Pen& pen);
-
-        /** @brief Returns the local text color override or 0 if none is set.
-        */
-        const Gfx::Color* textColor() const;
-
-        /** @brief Sets the local text color override.
-        */
-        void setTextColor(const Gfx::Color& color);
-
-        /** @brief Returns the local font override data or 0 if none is set.
-        */
-        const Gfx::Font* font() const;
-
-        /** @brief Sets the complete local font override.
-        */
-        void setFont(const Gfx::Font& font);
-
-        /** @brief Sets the local font size override.
-        */
-        void setFontSize(std::size_t size);
-
-        /** @brief Sets the local font weight override.
-        */
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        /** @brief Sets the local font slant override.
-        */
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        /** @brief Resolves the effective font against the given base font.
-        */
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02,
-            TextColor  = 0x04,
-            Font       = 0x08
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Color> _textColor;
-        FontOption          _font;
-};
-
 /** @brief Stores the transient render state for panel-like widgets.
 
     Carries only widget state that render hooks may observe directly.
@@ -165,7 +89,7 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
             This is the explicit synchronization point for the panel slice.
         */
         void prepare(const StyleOptions& options,
-                     const PanelStyleOptions& panelOptions);
+                     const StyleOptions& panelOptions);
 
     public:
         /** @brief Returns the outer size including the frame for the given content size.
@@ -218,7 +142,7 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
         virtual PanelRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const PanelStyleOptions& panelOptions) = 0;
+                               const StyleOptions& panelOptions) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -255,7 +179,7 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
     override clone, or an explicitly assigned custom renderer.
 */
 class PT_FORMS_API PanelStyle : public Styler<PanelRenderer,
-                                                   PanelStyleOptions>
+                                                   StyleOptions>
 {
     public:
         /** @brief Constructs an unbound panel style controller.

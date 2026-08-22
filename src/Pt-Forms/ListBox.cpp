@@ -284,23 +284,26 @@ bool ListBoxItem::onScrollEvent(const ScrollEvent& ev)
 
 void ListBoxItem::setBackground(const Gfx::Brush& b)
 {
-    _listItemOptions.setBackground(b);
+    BackgroundOption background(b);
+    _listItemOptions.set(background);
     invalidate();
 }
 
 
 const Gfx::Color& ListBoxItem::textColor() const
 {
-    if( const Gfx::Color* textColor = _listItemOptions.textColor() )
-        return *textColor;
+    if( const TextColorOption* textColor = _listItemOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void ListBoxItem::setTextColor(const Gfx::Color& color)
 {
-    _listItemOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _listItemOptions.set(textColor);
     invalidate();
 }
 
@@ -308,34 +311,47 @@ void ListBoxItem::setTextColor(const Gfx::Color& color)
 Gfx::Font ListBoxItem::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    return _listItemOptions.getFont(options.font());
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _listItemOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void ListBoxItem::setFont(const Gfx::Font& f)
 {
-    _listItemOptions.setFont(f);
+    FontOption fontOption;
+    fontOption.setFont(f);
+    _listItemOptions.set(fontOption);
     invalidate();
 }
 
 
 void ListBoxItem::setFontSize(std::size_t size)
 {
-    _listItemOptions.setFontSize(size);
+    const FontOption* localFont = _listItemOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _listItemOptions.set(font);
     invalidate();
 }
 
 
 void ListBoxItem::setFontWeight(Gfx::Font::Weight weight)
 {
-    _listItemOptions.setFontWeight(weight);
+    const FontOption* localFont = _listItemOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _listItemOptions.set(font);
     invalidate();
 }
 
 
 void ListBoxItem::setFontSlant(Gfx::Font::Slant slant)
 {
-    _listItemOptions.setFontSlant(slant);
+    const FontOption* localFont = _listItemOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _listItemOptions.set(font);
     invalidate();
 }
 
@@ -679,17 +695,18 @@ const Gfx::Brush* ListBox::background() const
     if( ! _hasBackground )
         return 0;
 
-    const Gfx::Brush* b = _listBoxOptions.background();
-    if(b)
-        return b;
+    if( const BackgroundOption* background = _listBoxOptions.get<BackgroundOption>() )
+        return &background->value();
 
-    return &Application::instance().styleOptions().viewBackground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return &options.get<ViewBackgroundOption>()->value();
 }
 
 
 void ListBox::setBackground(const Gfx::Brush& b)
 {
-    _listBoxOptions.setBackground(b);
+    BackgroundOption background(b);
+    _listBoxOptions.set(background);
     _hasBackground = true;
     invalidate();
 }
@@ -707,17 +724,18 @@ const Gfx::Pen* ListBox::contour() const
     if( ! _hasFrame )
         return 0;
 
-    const Gfx::Pen* p = _listBoxOptions.contour();
-    if(p)
-        return p;
+    if( const ContourOption* contour = _listBoxOptions.get<ContourOption>() )
+        return &contour->value();
 
-    return &Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return &options.get<ContourOption>()->value();
 }
 
 
 void ListBox::setContour(const Gfx::Pen& pen)
 {
-    _listBoxOptions.setContour(pen);
+    ContourOption contour(pen);
+    _listBoxOptions.set(contour);
     _hasFrame = true;
     invalidate();
 }

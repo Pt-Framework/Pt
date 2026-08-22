@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
+/* Copyright (C) 2017 Marc Boris Duerner
    Copyright (C) 2017 Ilja Maier
 
   This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -116,101 +116,120 @@ Signal<int>& Slider::positionChanged()
 
 const Gfx::Brush& Slider::background() const
 {
-    if( const Gfx::Brush* b = _sliderOptions.background() )
-        return *b;
+    if( const BackgroundOption* background = _sliderOptions.get<BackgroundOption>() )
+        return background->value();
 
-    return Application::instance().styleOptions().background();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<BackgroundOption>()->value();
 }
 
 
 void Slider::setBackground(const Gfx::Brush& b)
 {
-    _sliderOptions.setBackground(b);
+    BackgroundOption background(b);
+    _sliderOptions.set(background);
     invalidate();
 }
 
 
-const Gfx::Color& Slider::foreground() const
+const Gfx::Brush& Slider::foreground() const
 {
-    if( const Gfx::Color* c = _sliderOptions.foreground() )
-        return *c;
+    if( const ForegroundOption* foreground = _sliderOptions.get<ForegroundOption>() )
+        return foreground->value();
 
-    return Application::instance().styleOptions().accentColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ForegroundOption>()->value();
 }
 
 
-void Slider::setForeground(const Gfx::Color& b)
+void Slider::setForeground(const Gfx::Brush& b)
 {
-    _sliderOptions.setForeground(b);
+    ForegroundOption foreground(b);
+    _sliderOptions.set(foreground);
     invalidate();
 }
 
 
 const Gfx::Pen& Slider::contour() const
 {
-    if( const Gfx::Pen* p = _sliderOptions.contour() )
-        return *p;
+    if( const ContourOption* contour = _sliderOptions.get<ContourOption>() )
+        return contour->value();
 
-    return Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ContourOption>()->value();
 }
 
 
 void Slider::setContour(const Gfx::Pen& p)
 {
-    _sliderOptions.setContour(p);
+    ContourOption contour(p);
+    _sliderOptions.set(contour);
     invalidate();
 }
 
 
 const Gfx::Color& Slider::textColor() const
 {
-    if( const Gfx::Color* c = _sliderOptions.textColor() )
-        return *c;
+    if( const TextColorOption* textColor = _sliderOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void Slider::setTextColor(const Gfx::Color& color)
 {
-    _sliderOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _sliderOptions.set(textColor);
     invalidate();
 }
 
 
-const Gfx::Font& Slider::font() const
+Gfx::Font Slider::font() const
 {
-    if( const Gfx::Font* f = _sliderOptions.font() )
-        return *f;
-
-    return Application::instance().styleOptions().font();
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void Slider::setFont(const Gfx::Font& font)
 {
-    _sliderOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _sliderOptions.set(fontOption);
     invalidate();
 }
 
 
 void Slider::setFontSize(std::size_t size)
 {
-    _sliderOptions.setFontSize(size);
+    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _sliderOptions.set(font);
     invalidate();
 }
 
 
 void Slider::setFontWeight(Gfx::Font::Weight weight)
 {
-    _sliderOptions.setFontWeight(weight);
+    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _sliderOptions.set(font);
     invalidate();
 }
 
 
 void Slider::setFontSlant(Gfx::Font::Slant slant)
 {
-    _sliderOptions.setFontSlant(slant);
+    const FontOption* localFont = _sliderOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _sliderOptions.set(font);
     invalidate();
 }
 

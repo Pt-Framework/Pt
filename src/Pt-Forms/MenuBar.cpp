@@ -52,8 +52,12 @@ MenuBar::~MenuBar()
 
 const Pt::Gfx::Brush& MenuBar::background() const
 {
-    return _background ? *_background
-                       : Pt::Forms::Application::instance().styleOptions().background();
+    if(_background)
+        return *_background;
+
+    const Pt::Forms::StyleOptions& options =
+        Pt::Forms::Application::instance().styleOptions();
+    return options.get<Pt::Forms::BackgroundOption>()->value();
 }
 
 
@@ -66,8 +70,12 @@ void MenuBar::setBackground(const Pt::Gfx::Brush& b)
 
 const Pt::Gfx::Pen& MenuBar::contour() const
 {
-    return _contour ? *_contour
-                    : Pt::Forms::Application::instance().styleOptions().contour();
+    if(_contour)
+        return *_contour;
+
+    const Pt::Forms::StyleOptions& options =
+        Pt::Forms::Application::instance().styleOptions();
+    return options.get<Pt::Forms::ContourOption>()->value();
 }
 
 

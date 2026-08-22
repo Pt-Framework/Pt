@@ -33,90 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-LineEditStyleOptions::LineEditStyleOptions()
-{
-}
-
-
-const Gfx::Brush* LineEditStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void LineEditStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* LineEditStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void LineEditStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Color* LineEditStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void LineEditStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* LineEditStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void LineEditStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void LineEditStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void LineEditStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void LineEditStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font LineEditStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
 LineEditState::LineEditState()
 : _enabled(false)
 , _focused(false)
@@ -205,7 +121,7 @@ LineEditRenderer* LineEditRenderer::create() const
 
 
 void LineEditRenderer::prepare(const StyleOptions& options,
-                               const LineEditStyleOptions& lineEditOptions)
+                               const StyleOptions& lineEditOptions)
 {
     onPrepare(options, lineEditOptions);
 }
@@ -213,7 +129,7 @@ void LineEditRenderer::prepare(const StyleOptions& options,
 
 void LineEditRenderer::onReset(const StyleOptions& options)
 {
-    LineEditStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

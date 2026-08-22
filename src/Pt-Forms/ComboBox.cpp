@@ -1,10 +1,10 @@
 /* Copyright (C) 2017 Marc Boris Duerner
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -51,7 +51,7 @@ ComboBox::ComboBox()
 
     // process key events in the combo box edit field when popup is open
     _popup.eventReceived() += Pt::slot(*this, &ComboBox::processKeyEvent);
-    
+
     _items.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
 
@@ -62,7 +62,7 @@ ComboBox::~ComboBox()
 
 
 void ComboBox::addItem(ListBoxItem& item)
-{   
+{
     _items.addItem(item);
 
     //item.setTextInput(true);
@@ -97,7 +97,7 @@ bool ComboBox::isAccepted() const
 void ComboBox::setAccepted(bool a)
 {
     _isAccepted = a;
-    
+
     if( ! a )
     {
         setFocusPolicy(Control::KeepFocus);
@@ -160,7 +160,7 @@ void ComboBox::setMaxHeight(double height)
 //
 //    Gfx::SizeF popupSize = _popup.measure(policy);
 //    _popup.resize(popupSize);
-//    
+//
 //    Gfx::PointF popupPos(0, size().height() );
 //    popupPos = this->toScreen(popupPos);
 //    _popup.move(popupPos);
@@ -177,7 +177,7 @@ void ComboBox::showPopup()
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setWidth( size().width() );
     policy.setHeight(0);
-    
+
     _popup.autoSize(policy);
 
     Gfx::PointF popupPos(0, size().height() );
@@ -188,7 +188,7 @@ void ComboBox::showPopup()
     _popup.setAnchor(this);
     _popup.setName("ComboPopup");
     _popup.show();
-    
+
     //Application::instance().setPopup(_popup);
     //setCapture(true);
 }
@@ -196,7 +196,7 @@ void ComboBox::showPopup()
 
 void ComboBox::hidePopup()
 {
-    //setCapture(false);   
+    //setCapture(false);
     //Application::instance().releasePopup(_popup);
 
     _popup.show(false);
@@ -241,106 +241,120 @@ Pt::Signal<ListBoxItem&>& ComboBox::selected()
 
 const Gfx::Brush& ComboBox::background() const
 {
-    const Gfx::Brush* b = _comboBoxOptions.background();
-    if(b)
-        return *b;
+    if( const BackgroundOption* background = _comboBoxOptions.get<BackgroundOption>() )
+        return background->value();
 
-    return Application::instance().styleOptions().textBackground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextBackgroundOption>()->value();
 }
 
 
 void ComboBox::setBackground(const Gfx::Brush& b)
 {
-    _comboBoxOptions.setBackground(b);
+    BackgroundOption background(b);
+    _comboBoxOptions.set(background);
     invalidate();
 }
 
 
 const Gfx::Brush& ComboBox::foreground() const
 {
-    const Gfx::Brush* b = _comboBoxOptions.foreground();
-    if(b)
-        return *b;
+    if( const ForegroundOption* foreground = _comboBoxOptions.get<ForegroundOption>() )
+        return foreground->value();
 
-    return Application::instance().styleOptions().foreground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ForegroundOption>()->value();
 }
 
 
 void ComboBox::setForeground(const Gfx::Brush& b)
 {
-    _comboBoxOptions.setForeground(b);
+    ForegroundOption foreground(b);
+    _comboBoxOptions.set(foreground);
     invalidate();
 }
 
 
 const Gfx::Pen& ComboBox::contour() const
 {
-    const Gfx::Pen* p = _comboBoxOptions.contour();
-    if(p)
-        return *p;
+    if( const ContourOption* contour = _comboBoxOptions.get<ContourOption>() )
+        return contour->value();
 
-    return Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ContourOption>()->value();
 }
 
 
 void ComboBox::setContour(const Gfx::Pen& p)
 {
-    _comboBoxOptions.setContour(p);
+    ContourOption contour(p);
+    _comboBoxOptions.set(contour);
     invalidate();
 }
 
 
 const Gfx::Color& ComboBox::textColor() const
 {
-    const Gfx::Color* c = _comboBoxOptions.textColor();
-    if(c)
-        return *c;
+    if( const TextColorOption* textColor = _comboBoxOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void ComboBox::setTextColor(const Gfx::Color& color)
 {
-    _comboBoxOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _comboBoxOptions.set(textColor);
     invalidate();
 }
 
 
-const Gfx::Font& ComboBox::font() const
+Gfx::Font ComboBox::font() const
 {
-    const Gfx::Font* f = _comboBoxOptions.font();
-    if(f)
-        return *f;
-
-    return Application::instance().styleOptions().font();
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void ComboBox::setFont(const Gfx::Font& font)
 {
-    _comboBoxOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _comboBoxOptions.set(fontOption);
     invalidate();
 }
 
 
 void ComboBox::setFontSize(std::size_t size)
 {
-    _comboBoxOptions.setFontSize(size);
+    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _comboBoxOptions.set(font);
     invalidate();
 }
 
 
 void ComboBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    _comboBoxOptions.setFontWeight(weight);
+    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _comboBoxOptions.set(font);
     invalidate();
 }
 
 
 void ComboBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    _comboBoxOptions.setFontSlant(slant);
+    const FontOption* localFont = _comboBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _comboBoxOptions.set(font);
     invalidate();
 }
 
@@ -361,11 +375,11 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 void ComboBox::onItemSelected(ListBoxItem& item)
 {
     //Application::instance().inputMethod().finish();
-    
+
     _editor.setText( item.text() );
 
     hidePopup();
-    
+
     invalidate();
 }
 
@@ -507,7 +521,7 @@ void ComboBox::onPaintText(PaintContext& context,
 void ComboBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
-    
+
     ComboBoxRenderer* renderer = _comboBoxStyle.renderer();
     if( ! renderer )
         return;
@@ -538,7 +552,7 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
     else if( ev.key().code() == Pt::Forms::Key::Return )
     {
         invalidate();
-        
+
         if( isAccepted() )
             _returnPressed.send( _editor.text() );
     }
@@ -602,7 +616,7 @@ void ComboBox::onProcessMouseEvent(const MouseEvent& ev)
 
 
 bool ComboBox::onMouseEvent(const MouseEvent& ev)
-{    
+{
     Base::onMouseEvent(ev);
 
     if( ! ev.isPress() )
@@ -626,7 +640,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     {
         _pendingCursorX = ev.x();
         relayout();
-            
+
         Application::instance().inputMethod().begin(*this);
     }
 
@@ -635,7 +649,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 
 
 bool ComboBox::onTouchEvent(const TouchEvent& ev)
-{    
+{
     Base::onTouchEvent(ev);
 
     if( ! ev.isPress() )
@@ -662,7 +676,7 @@ bool ComboBox::onEnterEvent(const EnterEvent& ev)
     Base::onEnterEvent(ev);
 
     _isHighlighted = true;
-    
+
     invalidate();
     return true;
 }
@@ -701,5 +715,3 @@ void ComboBox::onFocusEvent(const FocusEvent& ev)
 } // namespace
 
 } // namespace
-
-

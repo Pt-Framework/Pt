@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
+/* Copyright (C) 2017 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -14,12 +14,12 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -68,9 +68,9 @@ class PT_FORMS_API ProgressBar : public Control
 
         void setBackground(const Gfx::Brush& b);
 
-        const Gfx::Color& foreground() const;
+        const Gfx::Brush& foreground() const;
 
-        void setForeground(const Gfx::Color& b);
+        void setForeground(const Gfx::Brush& b);
 
         const Gfx::Pen& contour() const;
 
@@ -80,7 +80,7 @@ class PT_FORMS_API ProgressBar : public Control
 
         void setTextColor(const Gfx::Color& color);
 
-        const Gfx::Font& font() const;
+        Gfx::Font font() const;
 
         void setFont(const Gfx::Font& font);
 
@@ -101,7 +101,7 @@ class PT_FORMS_API ProgressBar : public Control
 
         virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual void onPaint(PaintContext& context, 
+        virtual void onPaint(PaintContext& context,
                             const Gfx::RectF& updateRect);
 
         virtual void onPaintChrome(PaintContext& context,
@@ -125,7 +125,7 @@ class PT_FORMS_API ProgressBar : public Control
         Gfx::RectF _chunkRect;
 
         ProgressBarStyle        _progressBarStyle;
-        ProgressBarStyleOptions _progressBarOptions;
+        StyleOptions            _progressBarOptions;
 };
 
 } // namespace

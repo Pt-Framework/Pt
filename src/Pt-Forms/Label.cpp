@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2015 Marc Boris Duerner 
+﻿/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -107,16 +107,18 @@ const Gfx::Brush* Label::background() const
     if( ! _hasBackground )
         return 0;
 
-    if( const Gfx::Brush* background = _panelStyleOptions.background() )
-        return background;
+    if( const BackgroundOption* background = _panelStyleOptions.get<BackgroundOption>() )
+        return &background->value();
 
-    return &Application::instance().styleOptions().background();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return &options.get<BackgroundOption>()->value();
 }
 
 
 void Label::setBackground(const Gfx::Brush& b)
 {
-    _panelStyleOptions.setBackground(b);
+    BackgroundOption background(b);
+    _panelStyleOptions.set(background);
     _hasBackground = true;
 
     invalidate();
@@ -135,16 +137,18 @@ const Gfx::Pen* Label::contour() const
     if( ! _hasFrame )
         return 0;
 
-    if( const Gfx::Pen* contour = _panelStyleOptions.contour() )
-        return contour;
+    if( const ContourOption* contour = _panelStyleOptions.get<ContourOption>() )
+        return &contour->value();
 
-    return &Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return &options.get<ContourOption>()->value();
 }
 
 
 void Label::setContour(const Gfx::Pen& p)
 {
-    _panelStyleOptions.setContour(p);
+    ContourOption contour(p);
+    _panelStyleOptions.set(contour);
     _hasFrame = true;
 
     invalidate();
@@ -160,16 +164,18 @@ void Label::setFrame(bool b)
 
 const Gfx::Color& Label::textColor() const
 {
-    if( const Gfx::Color* textColor = _panelStyleOptions.textColor() )
-        return *textColor;
+    if( const TextColorOption* textColor = _panelStyleOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void Label::setTextColor(const Gfx::Color& color)
 {
-    _panelStyleOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _panelStyleOptions.set(textColor);
 
     invalidate();
 }
@@ -178,13 +184,17 @@ void Label::setTextColor(const Gfx::Color& color)
 Gfx::Font Label::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    return _panelStyleOptions.getFont(options.font());
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _panelStyleOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void Label::setFont(const Gfx::Font& font)
 {
-    _panelStyleOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _panelStyleOptions.set(fontOption);
 
     invalidate();
 }
@@ -192,7 +202,10 @@ void Label::setFont(const Gfx::Font& font)
 
 void Label::setFontSize(std::size_t size)
 {
-    _panelStyleOptions.setFontSize(size);
+    const FontOption* localFont = _panelStyleOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _panelStyleOptions.set(font);
 
     invalidate();
 }
@@ -200,7 +213,10 @@ void Label::setFontSize(std::size_t size)
 
 void Label::setFontWeight(Gfx::Font::Weight weight)
 {
-    _panelStyleOptions.setFontWeight(weight);
+    const FontOption* localFont = _panelStyleOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _panelStyleOptions.set(font);
 
     invalidate();
 }
@@ -208,7 +224,10 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
 
 void Label::setFontSlant(Gfx::Font::Slant slant)
 {
-    _panelStyleOptions.setFontSlant(slant);
+    const FontOption* localFont = _panelStyleOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _panelStyleOptions.set(font);
 
     invalidate();
 }
@@ -231,7 +250,7 @@ Adjustment Label::adjustment() const
         case Alignment::Bottom:
             adjustment = Adjustment::Center;
             break;
-        
+
         case Alignment::TopRight:
         case Alignment::Right:
         case Alignment::BottomRight:
@@ -413,7 +432,7 @@ void Label::onLayout(const Gfx::RectF& rect)
                 break;
         }
 
-        _iconPos = surface().scaling().align( Gfx::PointF(innerRect.left() + x, 
+        _iconPos = surface().scaling().align( Gfx::PointF(innerRect.left() + x,
                                                           innerRect.top() + y) );
     }
     else
@@ -461,7 +480,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 }
 
 
-void Label::onPaint(PaintContext& context, 
+void Label::onPaint(PaintContext& context,
                     const Gfx::RectF& /*rect*/)
 {
     if( ! _panelStyle.renderer() )

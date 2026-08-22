@@ -1,0 +1,10 @@
+SubDir PT_TOP src Pt-Forms tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms ;
+
+Main Pt-Forms-test : Pt-Forms-test.cpp
+                     StyleOptionsTest.cpp ;
+
+LinkSharedLibraries Pt-Forms-test : Pt-Forms Pt-Gfx Pt-System Pt-Unit Pt ;
+MakeLocate Pt-Forms-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Forms-test : $(PT_OUTPUT_TEST) ;

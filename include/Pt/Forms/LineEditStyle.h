@@ -35,52 +35,6 @@ namespace Pt {
 
 namespace Forms {
 
-class PT_FORMS_API LineEditStyleOptions : public StyleOptionsBase
-{
-    public:
-        LineEditStyleOptions();
-
-        const Gfx::Brush* background() const;
-
-        void setBackground(const Gfx::Brush& brush);
-
-        const Gfx::Pen* contour() const;
-
-        void setContour(const Gfx::Pen& pen);
-
-        const Gfx::Color* textColor() const;
-
-        void setTextColor(const Gfx::Color& color);
-
-        const Gfx::Font* font() const;
-
-        void setFont(const Gfx::Font& font);
-
-        void setFontSize(std::size_t size);
-
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02,
-            TextColor  = 0x04,
-            Font       = 0x08
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Color> _textColor;
-        FontOption          _font;
-};
-
-
 class PT_FORMS_API LineEditState
 {
     public:
@@ -125,7 +79,7 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
         LineEditRenderer* create() const;
 
         void prepare(const StyleOptions& options,
-                     const LineEditStyleOptions& lineEditOptions);
+                     const StyleOptions& lineEditOptions);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -171,7 +125,7 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
         virtual LineEditRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const LineEditStyleOptions& lineEditOptions) = 0;
+                               const StyleOptions& lineEditOptions) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -213,7 +167,7 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
 
 
 class PT_FORMS_API LineEditStyle : public Styler<LineEditRenderer,
-                                                      LineEditStyleOptions>
+                                                      StyleOptions>
 {
     public:
         LineEditStyle();

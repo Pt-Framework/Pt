@@ -149,8 +149,12 @@ Pt::Signal<MenuItemBase&>& MenuItemBase::triggered()
 
 const Pt::Gfx::Brush& MenuItemBase::background() const
 {
-    return _background ? *_background
-        : Pt::Forms::Application::instance().styleOptions().background();
+    if(_background)
+        return *_background;
+
+    const Pt::Forms::StyleOptions& options =
+        Pt::Forms::Application::instance().styleOptions();
+    return options.get<Pt::Forms::BackgroundOption>()->value();
 }
 
 
@@ -164,8 +168,12 @@ void MenuItemBase::setBackground(const Pt::Gfx::Brush& b)
 
 const Pt::Gfx::Pen& MenuItemBase::contour() const
 {
-    return _contour ? *_contour
-        : Pt::Forms::Application::instance().styleOptions().contour();
+    if(_contour)
+        return *_contour;
+
+    const Pt::Forms::StyleOptions& options =
+        Pt::Forms::Application::instance().styleOptions();
+    return options.get<Pt::Forms::ContourOption>()->value();
 }
 
 
@@ -179,8 +187,12 @@ void MenuItemBase::setContour(const Pt::Gfx::Pen& p)
 
 const Pt::Gfx::Color& MenuItemBase::textColor() const
 {
-    return _textColor ? *_textColor
-        : Pt::Forms::Application::instance().styleOptions().textColor();
+    if(_textColor)
+        return *_textColor;
+
+    const Pt::Forms::StyleOptions& options =
+        Pt::Forms::Application::instance().styleOptions();
+    return options.get<Pt::Forms::TextColorOption>()->value();
 }
 
 
@@ -209,7 +221,9 @@ void MenuItemBase::setFont(const Pt::Gfx::Font& font)
 
 Pt::Gfx::Font MenuItemBase::getFont() const
 {
-    const Pt::Gfx::Font& base = Pt::Forms::Application::instance().styleOptions().font();
+    const Pt::Forms::StyleOptions& options =
+        Pt::Forms::Application::instance().styleOptions();
+    const Pt::Gfx::Font& base = options.get<Pt::Forms::FontOption>()->value();
 
     if( ! (_overrides & OverrideFontAny) )
         return base;
@@ -294,7 +308,7 @@ void MenuItemBase::onInvalidate()
     _picture.reset(_icon);
 
     if(_isHighlighted)
-        _brush = options.highlightColor();
+        _brush = options.get<Pt::Forms::HighlightColorOption>()->value();
 }
 
 
@@ -340,7 +354,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
     }
 
 
-    // icon    
+    // icon
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
 
@@ -351,7 +365,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
     painter.drawPixmap(iconPos, _picture);
     painter.setCompositionMode(prevMode);
 
-    // item text    
+    // item text
     painter.setFont(_font);
     painter.setPen(_textPen);
 
@@ -366,7 +380,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
     Pt::Gfx::RectF mnemonicRect; // TODO
 
-    
+
     if (!mnemonicRect.isEmpty())
     {
         double menmonicY = textPos.y() + 1;
@@ -374,7 +388,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
             Pt::Gfx::PointF(mnemonicRect.right(), menmonicY));
     }
 
-    // shortcut text    
+    // shortcut text
     const Pt::Forms::Key* sk = shortcut();
     if (sk)
     {
@@ -388,7 +402,7 @@ void MenuItemBase::onPaint(PaintContext& context, const Pt::Gfx::RectF& rect)
 
         painter.drawText(skPos, skText);
     }
-  
+
     // separator
     if (_hasSeparator)
     {
@@ -436,7 +450,7 @@ bool MenuItemBase::onEnterEvent( const EnterEvent& ev)
     Base::onEnterEvent(ev);
 
     _isHighlighted = true;
-    
+
     invalidate();
     return true;
 }

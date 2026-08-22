@@ -1,11 +1,11 @@
-﻿/* Copyright (C) 2015-2017 Marc Boris Duerner 
+﻿/* Copyright (C) 2015-2017 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA  02110-1301  USA
 */
 
@@ -96,16 +96,18 @@ const Gfx::Brush* Panel::background() const
     if( ! _hasBackground )
         return 0;
 
-    if( const Gfx::Brush* background = _panelStyleOptions.background() )
-        return background;
+    if( const BackgroundOption* background = _panelStyleOptions.get<BackgroundOption>() )
+        return &background->value();
 
-    return &Application::instance().styleOptions().background();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return &options.get<BackgroundOption>()->value();
 }
 
 
 void Panel::setBackground(const Gfx::Brush& b)
 {
-    _panelStyleOptions.setBackground(b);
+    BackgroundOption background(b);
+    _panelStyleOptions.set(background);
     _hasBackground = true;
 
     invalidate();
@@ -124,16 +126,18 @@ const Gfx::Pen* Panel::contour() const
     if( ! _hasFrame )
         return 0;
 
-    if( const Gfx::Pen* contour = _panelStyleOptions.contour() )
-        return contour;
+    if( const ContourOption* contour = _panelStyleOptions.get<ContourOption>() )
+        return &contour->value();
 
-    return &Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return &options.get<ContourOption>()->value();
 }
 
 
 void Panel::setContour(const Gfx::Pen& pen)
 {
-    _panelStyleOptions.setContour(pen);
+    ContourOption contour(pen);
+    _panelStyleOptions.set(contour);
     _hasFrame = true;
 
     invalidate();
@@ -264,7 +268,7 @@ void Panel::onLayout(const Gfx::RectF& rect)
 
     if( _content )
     {
-        Gfx::PointF pos(_contentRect.left() + padding().left() + _content->margin().left(), 
+        Gfx::PointF pos(_contentRect.left() + padding().left() + _content->margin().left(),
                         _contentRect.top() + padding().top() + _content->margin().top());
 
         double hspace = padding().leftRight() + _content->margin().leftRight();
@@ -397,4 +401,3 @@ PanelState Panel::panelState() const
 } // namespace
 
 } // namespace
-

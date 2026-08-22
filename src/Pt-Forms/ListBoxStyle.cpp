@@ -34,41 +34,6 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////////////
-// ListBoxStyleOptions
-///////////////////////////////////////////////////////////////////////////////
-
-ListBoxStyleOptions::ListBoxStyleOptions()
-{
-}
-
-
-const Gfx::Brush* ListBoxStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void ListBoxStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* ListBoxStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void ListBoxStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // ListBoxState
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -125,7 +90,7 @@ ListBoxRenderer* ListBoxRenderer::create() const
 
 
 void ListBoxRenderer::prepare(const StyleOptions& options,
-                              const ListBoxStyleOptions& listBoxOptions)
+                              const StyleOptions& listBoxOptions)
 {
     onPrepare(options, listBoxOptions);
 }
@@ -133,7 +98,7 @@ void ListBoxRenderer::prepare(const StyleOptions& options,
 
 void ListBoxRenderer::onReset(const StyleOptions& options)
 {
-    ListBoxStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 
@@ -170,81 +135,6 @@ void ListBoxRenderer::renderChrome(PaintContext& context,
 
 ListBoxStyle::ListBoxStyle()
 {
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// ListItemStyleOptions
-///////////////////////////////////////////////////////////////////////////////
-
-ListItemStyleOptions::ListItemStyleOptions()
-{
-}
-
-
-const Gfx::Brush* ListItemStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void ListItemStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Color* ListItemStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void ListItemStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* ListItemStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void ListItemStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void ListItemStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void ListItemStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void ListItemStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font ListItemStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
 }
 
 
@@ -331,7 +221,7 @@ ListItemRenderer* ListItemRenderer::create() const
 
 
 void ListItemRenderer::prepare(const StyleOptions& options,
-                               const ListItemStyleOptions& listItemOptions)
+                               const StyleOptions& listItemOptions)
 {
     onPrepare(options, listItemOptions);
 }
@@ -339,7 +229,7 @@ void ListItemRenderer::prepare(const StyleOptions& options,
 
 void ListItemRenderer::onReset(const StyleOptions& options)
 {
-    ListItemStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

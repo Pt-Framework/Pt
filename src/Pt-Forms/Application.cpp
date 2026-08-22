@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
- 
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
    version 2.1 of the License, or (at your option) any later version.
- 
+
    As a special exception, you may use this file as part of a free
    software library without restriction. Specifically, if other files
    instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
    License. This exception does not however invalidate any other
    reasons why the executable file might be covered by the GNU Library
    General Public License.
- 
+
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
- 
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301 USA
 */
 
@@ -65,10 +65,11 @@ namespace Forms {
 
 Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
-, _impl( new ApplicationImpl() ) 
+, _impl( new ApplicationImpl() )
 , _graphicsBackend(0)
 , _mainScreen(0)
 , _lastId(1)
+, _styleOptions(StyleOptions::defaults())
 , _defaultInputMethod(0)
 , _inputMethod(0)
 , _onScroll(false)
@@ -348,7 +349,7 @@ Pt::uint64_t Application::makeId()
 Widget* Application::findWidget(Pt::uint64_t id)
 {
     WidgetMap::iterator it =_widgets.find(id);
-    return it != _widgets.end() ? it->second : 0; 
+    return it != _widgets.end() ? it->second : 0;
 }
 
 
@@ -395,7 +396,7 @@ Pt::Signal<const Pt::Event&>&  Application::eventReceived()
 void Application::invalidate()
 {
     WidgetMap::iterator it = _widgets.begin();
-  
+
     for( ; it != _widgets.end(); ++it)
     {
         it->second->invalidate();
@@ -435,13 +436,13 @@ Widget* Application::capture() const
 
 void Application::onRequestCapture(Widget& target, bool isCapture)
 {
-    std::list<Widget*>::iterator it = std::find(_capture.begin(), 
+    std::list<Widget*>::iterator it = std::find(_capture.begin(),
                                                 _capture.end(), &target);
-    
+
     if( it != _capture.end() )
         _capture.erase(it);
 
-    if(isCapture) 
+    if(isCapture)
         _capture.push_back(&target);
 
     //if(isCapture)
@@ -456,7 +457,7 @@ void Application::onRequestCapture(Widget& target, bool isCapture)
 
 void Application::onShowPopup(Popup& w, bool transient)
 {
-    std::list<Popup*>::iterator it = std::find(_popups.begin(), 
+    std::list<Popup*>::iterator it = std::find(_popups.begin(),
                                                _popups.end(), &w);
     if( it != _popups.end() )
         _popups.erase(it);
@@ -513,7 +514,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
         for(pit = _popups.begin(); pit != _popups.end(); ++pit )
         {
             Popup* popup = *pit;
-            
+
             // popup or its content was hit
             if(popup == hit || popup->isAncestorOf(*hit) )
                 popupHit = popup;
@@ -548,11 +549,11 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
         Popup* popup = *pit++;
 
         // keep all popups that are related to the hit
-        bool keepOpen = popupHit ? popup == popupHit || 
-                                   isPopupOf(*popup, *popupHit) || 
+        bool keepOpen = popupHit ? popup == popupHit ||
+                                   isPopupOf(*popup, *popupHit) ||
                                    isPopupOf(*popupHit, *popup)
                                  : false;
-        
+
         // if IME is used keep all popups not related to IME window
         if( imeHit && ! isPopupOf(*popup, *ime) )
             keepOpen = true;
@@ -562,7 +563,7 @@ void Application::onClosePopups(const Gfx::PointF& screenPos)
             //std::clog << "AUTO_CLOSE: " << popup->name() << std::endl;
             //popup->close();
             closePopups.push_back(popup);
-            
+
             //pit = _popups.begin();
         }
     }
@@ -598,7 +599,7 @@ void Application::onProcessMouseEvent(const MouseEvent& ev)
     onDetectScroll( widget, screenPos, ev.isPress(), ev.isPressed() );
 
     //
-    // close popups 
+    // close popups
     //
     if( ev.isPress(MouseEvent::Left) || ev.isPress(MouseEvent::Right) )
     {
@@ -689,7 +690,7 @@ void Application::onProcessTouchEvent(const TouchEvent& ev)
     onDetectScroll( widget, screenPos, ev.isPress(), ev.isPressed() );
 
     //
-    // close popups 
+    // close popups
     //
     if( ev.isPress() )
     {
@@ -760,7 +761,7 @@ void Application::onDetectScroll(Widget* widget, const Gfx::PointF& screenPos,
                                  bool isPress, bool isPressed)
 {
     const double threshold = 8;
-    
+
     // TODO: start scroll only if within widget
 
     if(isPress)
@@ -771,7 +772,7 @@ void Application::onDetectScroll(Widget* widget, const Gfx::PointF& screenPos,
     else if(isPressed)
     {
         double deltaY = screenPos.y() - _scrollFrom.y();
-        
+
         if( ! _onScroll && std::fabs(deltaY) > threshold )
         {
             _onScroll = true;
@@ -783,7 +784,7 @@ void Application::onDetectScroll(Widget* widget, const Gfx::PointF& screenPos,
 
             deltaY = screenPos.y() - _scrollFrom.y();
             //std::clog << "SCROLL STARTED: " << deltaY << std::endl;
-            
+
             ScrollEvent sev(*widget);
             sev.set(ScrollEvent::Vertical, deltaY);
             processEvent(sev);

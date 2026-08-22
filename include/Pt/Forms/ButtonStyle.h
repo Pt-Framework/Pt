@@ -37,104 +37,6 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores the widget-local style overrides for a push button.
-
-    Carries optional local tokens that are resolved during the prepare step.
-    Render and icon hooks never receive these overrides directly.
-*/
-class PT_FORMS_API ButtonStyleOptions : public StyleOptionsBase
-{
-    public:
-        /** @brief Constructs empty local button style options.
-        */
-        ButtonStyleOptions();
-
-        /** @brief Returns the local foreground override or 0 if none is set.
-        */
-        const Gfx::Brush* foreground() const;
-
-        /** @brief Sets the local foreground override.
-        */
-        void setForeground(const Gfx::Brush& brush);
-
-        /** @brief Returns the local contour override or 0 if none is set.
-        */
-        const Gfx::Pen* contour() const;
-
-        /** @brief Sets the local contour override.
-        */
-        void setContour(const Gfx::Pen& pen);
-
-        /** @brief Returns the local accent color override or 0 if none is
-            set.
-        */
-        const Gfx::Color* accentColor() const;
-
-        /** @brief Sets the local accent color override.
-        */
-        void setAccentColor(const Gfx::Color& color);
-
-        /** @brief Returns the local highlight color override or 0 if none is
-            set.
-        */
-        const Gfx::Color* highlightColor() const;
-
-        /** @brief Sets the local highlight color override.
-        */
-        void setHighlightColor(const Gfx::Color& color);
-
-        /** @brief Returns the local text color override or 0 if none is set.
-        */
-        const Gfx::Color* textColor() const;
-
-        /** @brief Sets the local text color override.
-        */
-        void setTextColor(const Gfx::Color& color);
-
-        /** @brief Returns the local font override data or 0 if none is set.
-        */
-        const Gfx::Font* font() const;
-
-        /** @brief Sets the complete local font override.
-        */
-        void setFont(const Gfx::Font& font);
-
-        /** @brief Sets the local font size override.
-        */
-        void setFontSize(std::size_t size);
-
-        /** @brief Sets the local font weight override.
-        */
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        /** @brief Sets the local font slant override.
-        */
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        /** @brief Resolves the effective font against the given style default.
-        */
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Foreground     = 0x01,
-            Contour        = 0x02,
-            AccentColor    = 0x04,
-            HighlightColor = 0x08,
-            TextColor      = 0x10,
-            Font           = 0x20
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _foreground;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Color> _accentColor;
-        AutoPtr<Gfx::Color> _highlightColor;
-        AutoPtr<Gfx::Color> _textColor;
-        FontOption          _font;
-};
-
 /** @brief Stores the widget-local visual state for a push button.
 
     Carries only the transient interaction state that render and icon hooks
@@ -215,10 +117,10 @@ class PT_FORMS_API ButtonRenderer : public Renderer
 
             This is the explicit synchronization point for the button slice.
             Implementations prepare all renderer-local resources from the
-            supplied %StyleOptions and %ButtonStyleOptions.
+            supplied theme %StyleOptions and widget-local overlay.
         */
         void prepare(const StyleOptions& options,
-                     const ButtonStyleOptions& buttonOptions);
+                     const StyleOptions& buttonOptions);
 
     public:
         /** @brief Returns the combined content size for icon and text arranged by direction.
@@ -318,7 +220,7 @@ class PT_FORMS_API ButtonRenderer : public Renderer
         virtual ButtonRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const ButtonStyleOptions& buttonOptions) = 0;
+                               const StyleOptions& buttonOptions) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -410,14 +312,14 @@ class PT_FORMS_API ButtonStyler : public StylerBase
 
         /** @brief Returns the widget-local button style options.
         */
-        ButtonStyleOptions& options();
+        StyleOptions& options();
 
         /** @brief Returns the widget-local button style options.
         */
-        const ButtonStyleOptions& options() const;
+        const StyleOptions& options() const;
 
     protected:
-        virtual const StyleOptionsBase& onLocalOptions() const;
+        virtual const StyleOptions& onLocalOptions() const;
 
         virtual Renderer* onStyleRenderer(const Style& style);
 
@@ -426,7 +328,7 @@ class PT_FORMS_API ButtonStyler : public StylerBase
         virtual void onBindOptions(const StyleOptions& options);
 
     private:
-        ButtonStyleOptions _options;
+        StyleOptions    _options;
         ButtonRenderer*    _renderer;
 };
 

@@ -1,11 +1,11 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -73,89 +73,102 @@ bool CheckBox::isChecked() const
 
 const Gfx::Brush& CheckBox::background() const
 {
-    const Gfx::Brush* b = _checkBoxOptions.background();
-    if( b )
-        return *b;
+    if( const BackgroundOption* background = _checkBoxOptions.get<BackgroundOption>() )
+        return background->value();
 
-    return Application::instance().styleOptions().textBackground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextBackgroundOption>()->value();
 }
 
 
 void CheckBox::setBackground(const Gfx::Brush& b)
 {
-    _checkBoxOptions.setBackground(b);
+    BackgroundOption background(b);
+    _checkBoxOptions.set(background);
     invalidate();
 }
 
 
 const Gfx::Pen& CheckBox::contour() const
 {
-    const Gfx::Pen* p = _checkBoxOptions.contour();
-    if( p )
-        return *p;
+    if( const ContourOption* contour = _checkBoxOptions.get<ContourOption>() )
+        return contour->value();
 
-    return Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ContourOption>()->value();
 }
 
 
 void CheckBox::setContour(const Gfx::Pen& p)
 {
-    _checkBoxOptions.setContour(p);
+    ContourOption contour(p);
+    _checkBoxOptions.set(contour);
     invalidate();
 }
 
 
 const Gfx::Color& CheckBox::textColor() const
 {
-    const Gfx::Color* c = _checkBoxOptions.textColor();
-    if( c )
-        return *c;
+    if( const TextColorOption* textColor = _checkBoxOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void CheckBox::setTextColor(const Gfx::Color& color)
 {
-    _checkBoxOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _checkBoxOptions.set(textColor);
     invalidate();
 }
 
 
-const Gfx::Font& CheckBox::font() const
+Gfx::Font CheckBox::font() const
 {
-    const Gfx::Font* f = _checkBoxOptions.font();
-    if( f )
-        return *f;
-
-    return Application::instance().styleOptions().font();
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void CheckBox::setFont(const Gfx::Font& font)
 {
-    _checkBoxOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _checkBoxOptions.set(fontOption);
     invalidate();
 }
 
 
 void CheckBox::setFontSize(std::size_t size)
 {
-    _checkBoxOptions.setFontSize(size);
+    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _checkBoxOptions.set(font);
     invalidate();
 }
 
 
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    _checkBoxOptions.setFontWeight(weight);
+    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _checkBoxOptions.set(font);
     invalidate();
 }
 
 
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    _checkBoxOptions.setFontSlant(slant);
+    const FontOption* localFont = _checkBoxOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _checkBoxOptions.set(font);
     invalidate();
 }
 

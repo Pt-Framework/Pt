@@ -35,63 +35,6 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores widget-local style overrides for a spin box.
-
-    Carries only the optional local override tokens that are resolved during
-    renderer preparation.
-*/
-class PT_FORMS_API SpinBoxStyleOptions : public StyleOptionsBase
-{
-    public:
-        SpinBoxStyleOptions();
-
-        const Gfx::Brush* background() const;
-
-        void setBackground(const Gfx::Brush& brush);
-
-        const Gfx::Pen* contour() const;
-
-        void setContour(const Gfx::Pen& pen);
-
-        const Gfx::Brush* foreground() const;
-
-        void setForeground(const Gfx::Brush& brush);
-
-        const Gfx::Color* textColor() const;
-
-        void setTextColor(const Gfx::Color& color);
-
-        const Gfx::Font* font() const;
-
-        void setFont(const Gfx::Font& font);
-
-        void setFontSize(std::size_t size);
-
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02,
-            Foreground = 0x04,
-            TextColor  = 0x08,
-            Font       = 0x10
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Brush> _foreground;
-        AutoPtr<Gfx::Color> _textColor;
-        FontOption          _font;
-};
-
-
 /** @brief Stores the transient render state for a spin box widget.
 
     Carries only widget state that render hooks may observe directly.
@@ -160,7 +103,7 @@ class PT_FORMS_API SpinBoxRenderer : public Style::Facet
         SpinBoxRenderer* create() const;
 
         void prepare(const StyleOptions& options,
-                     const SpinBoxStyleOptions& spinBoxOptions);
+                     const StyleOptions& spinBoxOptions);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -203,7 +146,7 @@ class PT_FORMS_API SpinBoxRenderer : public Style::Facet
         virtual SpinBoxRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const SpinBoxStyleOptions& spinBoxOptions) = 0;
+                               const StyleOptions& spinBoxOptions) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -256,7 +199,7 @@ class PT_FORMS_API SpinBoxRenderer : public Style::Facet
 /** @brief Binds a spin box widget to the currently active renderer.
 */
 class PT_FORMS_API SpinBoxStyle : public Styler<SpinBoxRenderer,
-                                                     SpinBoxStyleOptions>
+                                                     StyleOptions>
 {
     public:
         SpinBoxStyle();

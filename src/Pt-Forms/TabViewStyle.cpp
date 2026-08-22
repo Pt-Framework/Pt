@@ -34,107 +34,6 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////////////
-// TabViewStyleOptions
-///////////////////////////////////////////////////////////////////////////////
-
-TabViewStyleOptions::TabViewStyleOptions()
-{
-}
-
-
-const Gfx::Brush* TabViewStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void TabViewStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* TabViewStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void TabViewStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Color* TabViewStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void TabViewStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Color* TabViewStyleOptions::accentColor() const
-{
-    return _accentColor.get();
-}
-
-
-void TabViewStyleOptions::setAccentColor(const Gfx::Color& color)
-{
-    _accentColor.reset( new Gfx::Color(color) );
-    setOverride(AccentColor);
-}
-
-
-const Gfx::Font* TabViewStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void TabViewStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void TabViewStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void TabViewStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void TabViewStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font TabViewStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // TabViewState
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -252,7 +151,7 @@ TabViewRenderer* TabViewRenderer::create() const
 
 
 void TabViewRenderer::prepare(const StyleOptions& options,
-                              const TabViewStyleOptions& tabViewOptions)
+                              const StyleOptions& tabViewOptions)
 {
     onPrepare(options, tabViewOptions);
 }
@@ -260,7 +159,7 @@ void TabViewRenderer::prepare(const StyleOptions& options,
 
 void TabViewRenderer::onReset(const StyleOptions& options)
 {
-    TabViewStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

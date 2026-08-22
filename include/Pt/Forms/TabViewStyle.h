@@ -35,62 +35,6 @@ namespace Pt {
 
 namespace Forms {
 
-class PT_FORMS_API TabViewStyleOptions : public StyleOptionsBase
-{
-    public:
-        TabViewStyleOptions();
-
-        const Gfx::Brush* background() const;
-
-        void setBackground(const Gfx::Brush& brush);
-
-        const Gfx::Pen* contour() const;
-
-        void setContour(const Gfx::Pen& pen);
-
-        const Gfx::Color* textColor() const;
-
-        void setTextColor(const Gfx::Color& color);
-
-        /** @brief Returns the local accent-color override for the active tab.
-        */
-        const Gfx::Color* accentColor() const;
-
-        /** @brief Sets the local accent color for active tabs.
-        */
-        void setAccentColor(const Gfx::Color& color);
-
-        const Gfx::Font* font() const;
-
-        void setFont(const Gfx::Font& font);
-
-        void setFontSize(std::size_t size);
-
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02,
-            TextColor  = 0x04,
-            Font       = 0x08,
-            AccentColor = 0x10
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Color> _textColor;
-        AutoPtr<Gfx::Color> _accentColor;
-        FontOption          _font;
-};
-
-
 class PT_FORMS_API TabViewState
 {
     public:
@@ -149,7 +93,7 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
         TabViewRenderer* create() const;
 
         void prepare(const StyleOptions& options,
-                     const TabViewStyleOptions& tabViewOptions);
+                     const StyleOptions& tabViewOptions);
 
     public:
         Gfx::SizeF measureTab(PaintSurface& surface,
@@ -181,7 +125,7 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
         virtual TabViewRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const TabViewStyleOptions& tabViewOptions) = 0;
+                               const StyleOptions& tabViewOptions) = 0;
 
         virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
                                         const Pt::String& text) = 0;
@@ -209,7 +153,7 @@ class PT_FORMS_API TabViewRenderer : public Style::Facet
 
 
 class PT_FORMS_API TabViewStyle : public Styler<TabViewRenderer,
-                                                     TabViewStyleOptions>
+                                                     StyleOptions>
 {
     public:
         TabViewStyle();

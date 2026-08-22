@@ -48,7 +48,7 @@ StylerBase::StylerBase()
 
 Renderer* StylerBase::bind(const Style& style, const StyleOptions& options)
 {
-    const StyleOptionsBase& localOptions = onLocalOptions();
+    const StyleOptions& localOptions = onLocalOptions();
 
     if( isStyleChanged(style, localOptions) )
     {
@@ -102,7 +102,7 @@ void StylerBase::apply(Renderer* renderer)
 
 
 bool StylerBase::isStyleChanged(const Style& style,
-                                const StyleOptionsBase& localOptions) const
+                                const StyleOptions& localOptions) const
 {
     if( ! _renderer )
         return true;
@@ -118,7 +118,7 @@ bool StylerBase::isStyleChanged(const Style& style,
 
 
 bool StylerBase::isOptionsChanged(const StyleOptions& options,
-                                  const StyleOptionsBase& localOptions) const
+                                  const StyleOptions& localOptions) const
 {
     if( _optionsGeneration != options.generation() )
         return true;

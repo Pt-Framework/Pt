@@ -1,11 +1,11 @@
-/* Copyright (C) 2017 Marc Boris Duerner 
+/* Copyright (C) 2017 Marc Boris Duerner
    Copyright (C) 2017 Ilja Maier
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -67,9 +67,9 @@ class PT_FORMS_API Slider : public Control
 
         void setBackground(const Gfx::Brush& b);
 
-        const Gfx::Color& foreground() const;
+        const Gfx::Brush& foreground() const;
 
-        void setForeground(const Gfx::Color& b);
+        void setForeground(const Gfx::Brush& b);
 
         const Gfx::Pen& contour() const;
 
@@ -79,7 +79,7 @@ class PT_FORMS_API Slider : public Control
 
         void setTextColor(const Gfx::Color& color);
 
-        const Gfx::Font& font() const;
+        Gfx::Font font() const;
 
         void setFont(const Gfx::Font& font);
 
@@ -124,7 +124,7 @@ class PT_FORMS_API Slider : public Control
     private:
         Signal<int>           _positionChanged;
         SliderStyle           _sliderStyle;
-        SliderStyleOptions    _sliderOptions;
+        StyleOptions          _sliderOptions;
         int                   _position;
         int                   _min;
         int                   _max;

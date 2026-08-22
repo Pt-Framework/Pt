@@ -295,7 +295,8 @@ void TabView::onControlRemoved(std::size_t n)
 
 void TabView::setBackground(const Gfx::Brush& b)
 {
-    _tabViewOptions.setBackground(b);
+    BackgroundOption background(b);
+    _tabViewOptions.set(background);
     _hasBackground = true;
     invalidate();
 }
@@ -310,7 +311,8 @@ void TabView::setBackground(bool enable)
 
 void TabView::setContour(const Gfx::Pen& p)
 {
-    _tabViewOptions.setContour(p);
+    ContourOption contour(p);
+    _tabViewOptions.set(contour);
     _hasFrame = true;
     invalidate();
 }
@@ -325,42 +327,55 @@ void TabView::setFrame(bool enable)
 
 void TabView::setFont(const Gfx::Font& font)
 {
-    _tabViewOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _tabViewOptions.set(fontOption);
     invalidate();
 }
 
 
 void TabView::setFontSize(std::size_t size)
 {
-    _tabViewOptions.setFontSize(size);
+    const FontOption* localFont = _tabViewOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _tabViewOptions.set(font);
     invalidate();
 }
 
 
 void TabView::setFontWeight(Gfx::Font::Weight weight)
 {
-    _tabViewOptions.setFontWeight(weight);
+    const FontOption* localFont = _tabViewOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _tabViewOptions.set(font);
     invalidate();
 }
 
 
 void TabView::setFontSlant(Gfx::Font::Slant slant)
 {
-    _tabViewOptions.setFontSlant(slant);
+    const FontOption* localFont = _tabViewOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _tabViewOptions.set(font);
     invalidate();
 }
 
 
 void TabView::setTextColor(const Gfx::Color& color)
 {
-    _tabViewOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _tabViewOptions.set(textColor);
     invalidate();
 }
 
 
 void TabView::setAccentColor(const Gfx::Color& color)
 {
-    _tabViewOptions.setAccentColor(color);
+    AccentColorOption accentColor(color);
+    _tabViewOptions.set(accentColor);
     invalidate();
 }
 

@@ -36,82 +36,6 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores widget-local style overrides for a check box.
-
-    Carries only the optional local override tokens that are resolved during
-    renderer preparation.
-*/
-class PT_FORMS_API CheckBoxStyleOptions : public StyleOptionsBase
-{
-    public:
-        /** @brief Constructs empty local check box style options.
-        */
-        CheckBoxStyleOptions();
-
-        /** @brief Returns the local background override or 0 if none is set.
-        */
-        const Gfx::Brush* background() const;
-
-        /** @brief Sets the local background override.
-        */
-        void setBackground(const Gfx::Brush& brush);
-
-        /** @brief Returns the local contour override or 0 if none is set.
-        */
-        const Gfx::Pen* contour() const;
-
-        /** @brief Sets the local contour override.
-        */
-        void setContour(const Gfx::Pen& pen);
-
-        /** @brief Returns the local text color override or 0 if none is set.
-        */
-        const Gfx::Color* textColor() const;
-
-        /** @brief Sets the local text color override.
-        */
-        void setTextColor(const Gfx::Color& color);
-
-        /** @brief Returns the local font override data or 0 if none is set.
-        */
-        const Gfx::Font* font() const;
-
-        /** @brief Sets the complete local font override.
-        */
-        void setFont(const Gfx::Font& font);
-
-        /** @brief Sets the local font size override.
-        */
-        void setFontSize(std::size_t size);
-
-        /** @brief Sets the local font weight override.
-        */
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        /** @brief Sets the local font slant override.
-        */
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        /** @brief Resolves the effective font against the given base font.
-        */
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02,
-            TextColor  = 0x04,
-            Font       = 0x08
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Color> _textColor;
-        FontOption          _font;
-};
-
 /** @brief Stores the transient render state for a check box widget.
 
     Carries only widget state that render hooks may observe directly.
@@ -183,7 +107,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
             This is the explicit synchronization point for the check box slice.
         */
         void prepare(const StyleOptions& options,
-                     const CheckBoxStyleOptions& checkBoxOptions);
+                     const StyleOptions& checkBoxOptions);
 
     public:
         /** @brief Returns the natural size of the check indicator on surface.
@@ -257,7 +181,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
         virtual CheckBoxRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const CheckBoxStyleOptions& checkBoxOptions) = 0;
+                               const StyleOptions& checkBoxOptions) = 0;
 
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
 
@@ -309,7 +233,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
     override clone, or an explicitly assigned custom renderer.
 */
 class PT_FORMS_API CheckBoxStyle : public Styler<CheckBoxRenderer,
-                                                      CheckBoxStyleOptions>
+                                                      StyleOptions>
 {
     public:
         /** @brief Constructs an unbound check box style controller.

@@ -227,7 +227,7 @@ class PT_FORMS_API ListBoxItem : public Control
         Gfx::SizeF               _iconSize;
 
         ListItemStyle        _listItemStyle;
-        ListItemStyleOptions _listItemOptions;
+        StyleOptions         _listItemOptions;
 
         PixmapSurface        _picture;
 
@@ -322,7 +322,7 @@ class PT_FORMS_API ListBox : public Control
         ScrollView                _scrollView;
         ListBoxLayout             _layout;
         ListBoxStyle              _listBoxStyle;
-        ListBoxStyleOptions       _listBoxOptions;
+        StyleOptions              _listBoxOptions;
         bool                      _hasBackground;
         bool                      _hasFrame;
 };

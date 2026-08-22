@@ -33,50 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-ScrollBarStyleOptions::ScrollBarStyleOptions()
-{
-}
-
-
-const Gfx::Brush* ScrollBarStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void ScrollBarStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* ScrollBarStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void ScrollBarStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Brush* ScrollBarStyleOptions::foreground() const
-{
-    return _foreground.get();
-}
-
-
-void ScrollBarStyleOptions::setForeground(const Gfx::Brush& brush)
-{
-    _foreground.reset( new Gfx::Brush(brush) );
-    setOverride(Foreground);
-}
-
-
 ScrollBarState::ScrollBarState()
 : _enabled(false)
 , _focused(false)
@@ -204,7 +160,7 @@ ScrollBarRenderer* ScrollBarRenderer::create() const
 
 
 void ScrollBarRenderer::prepare(const StyleOptions& options,
-                                const ScrollBarStyleOptions& scrollBarOptions)
+                                const StyleOptions& scrollBarOptions)
 {
     onPrepare(options, scrollBarOptions);
 }
@@ -212,7 +168,7 @@ void ScrollBarRenderer::prepare(const StyleOptions& options,
 
 void ScrollBarRenderer::onReset(const StyleOptions& options)
 {
-    ScrollBarStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

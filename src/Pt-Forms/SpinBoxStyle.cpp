@@ -33,103 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-SpinBoxStyleOptions::SpinBoxStyleOptions()
-{
-}
-
-
-const Gfx::Brush* SpinBoxStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void SpinBoxStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* SpinBoxStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void SpinBoxStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Brush* SpinBoxStyleOptions::foreground() const
-{
-    return _foreground.get();
-}
-
-
-void SpinBoxStyleOptions::setForeground(const Gfx::Brush& brush)
-{
-    _foreground.reset( new Gfx::Brush(brush) );
-    setOverride(Foreground);
-}
-
-
-const Gfx::Color* SpinBoxStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void SpinBoxStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* SpinBoxStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void SpinBoxStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void SpinBoxStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void SpinBoxStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void SpinBoxStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font SpinBoxStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
 SpinBoxState::SpinBoxState()
 : _enabled(false)
 , _hovered(false)
@@ -257,7 +160,7 @@ SpinBoxRenderer* SpinBoxRenderer::create() const
 
 
 void SpinBoxRenderer::prepare(const StyleOptions& options,
-                              const SpinBoxStyleOptions& spinBoxOptions)
+                              const StyleOptions& spinBoxOptions)
 {
     onPrepare(options, spinBoxOptions);
 }
@@ -265,7 +168,7 @@ void SpinBoxRenderer::prepare(const StyleOptions& options,
 
 void SpinBoxRenderer::onReset(const StyleOptions& options)
 {
-    SpinBoxStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

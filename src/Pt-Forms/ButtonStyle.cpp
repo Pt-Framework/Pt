@@ -37,134 +37,6 @@ namespace Pt {
 namespace Forms {
 
 ///////////////////////////////////////////////////////////////////////
-// ButtonStyleOptions
-///////////////////////////////////////////////////////////////////////
-
-ButtonStyleOptions::ButtonStyleOptions()
-{
-}
-
-
-const Gfx::Brush* ButtonStyleOptions::foreground() const
-{
-    if( _foreground )
-        return _foreground.get();
-
-    return 0;
-}
-
-
-void ButtonStyleOptions::setForeground(const Gfx::Brush& brush)
-{
-    _foreground.reset( new Gfx::Brush(brush) );
-    setOverride(ButtonStyleOptions::Foreground);
-}
-
-
-const Gfx::Pen* ButtonStyleOptions::contour() const
-{
-    if( _contour )
-        return _contour.get();
-
-    return 0;
-}
-
-
-void ButtonStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(ButtonStyleOptions::Contour);
-}
-
-
-const Gfx::Color* ButtonStyleOptions::accentColor() const
-{
-    if( _accentColor )
-        return _accentColor.get();
-
-    return 0;
-}
-
-
-void ButtonStyleOptions::setAccentColor(const Gfx::Color& color)
-{
-    _accentColor.reset( new Gfx::Color(color) );
-    setOverride(ButtonStyleOptions::AccentColor);
-}
-
-
-const Gfx::Color* ButtonStyleOptions::highlightColor() const
-{
-    if( _highlightColor )
-        return _highlightColor.get();
-
-    return 0;
-}
-
-
-void ButtonStyleOptions::setHighlightColor(const Gfx::Color& color)
-{
-    _highlightColor.reset( new Gfx::Color(color) );
-    setOverride(ButtonStyleOptions::HighlightColor);
-}
-
-
-const Gfx::Color* ButtonStyleOptions::textColor() const
-{
-    if( _textColor )
-        return _textColor.get();
-
-    return 0;
-}
-
-
-void ButtonStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(ButtonStyleOptions::TextColor);
-}
-
-
-const Gfx::Font* ButtonStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void ButtonStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void ButtonStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void ButtonStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void ButtonStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font ButtonStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-///////////////////////////////////////////////////////////////////////
 // ButtonState
 ///////////////////////////////////////////////////////////////////////
 
@@ -259,7 +131,7 @@ ButtonRenderer* ButtonRenderer::create() const
 
 
 void ButtonRenderer::prepare(const StyleOptions& options,
-                             const ButtonStyleOptions& buttonOptions)
+                             const StyleOptions& buttonOptions)
 {
     onPrepare(options, buttonOptions);
 }
@@ -267,7 +139,7 @@ void ButtonRenderer::prepare(const StyleOptions& options,
 
 void ButtonRenderer::onReset(const StyleOptions& options)
 {
-    ButtonStyleOptions buttonOptions;
+    StyleOptions buttonOptions;
     prepare(options, buttonOptions);
 }
 
@@ -405,19 +277,19 @@ const ButtonRenderer* ButtonStyler::renderer() const
 }
 
 
-ButtonStyleOptions& ButtonStyler::options()
+StyleOptions& ButtonStyler::options()
 {
     return _options;
 }
 
 
-const ButtonStyleOptions& ButtonStyler::options() const
+const StyleOptions& ButtonStyler::options() const
 {
     return _options;
 }
 
 
-const StyleOptionsBase& ButtonStyler::onLocalOptions() const
+const StyleOptions& ButtonStyler::onLocalOptions() const
 {
     return _options;
 }

@@ -33,103 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-ProgressBarStyleOptions::ProgressBarStyleOptions()
-{
-}
-
-
-const Gfx::Brush* ProgressBarStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void ProgressBarStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* ProgressBarStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void ProgressBarStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Color* ProgressBarStyleOptions::foreground() const
-{
-    return _foreground.get();
-}
-
-
-void ProgressBarStyleOptions::setForeground(const Gfx::Color& color)
-{
-    _foreground.reset( new Gfx::Color(color) );
-    setOverride(Foreground);
-}
-
-
-const Gfx::Color* ProgressBarStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void ProgressBarStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* ProgressBarStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void ProgressBarStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void ProgressBarStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void ProgressBarStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void ProgressBarStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font ProgressBarStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
 ProgressBarState::ProgressBarState()
 : _enabled(false)
 , _focused(false)
@@ -179,7 +82,7 @@ ProgressBarRenderer* ProgressBarRenderer::create() const
 
 
 void ProgressBarRenderer::prepare(const StyleOptions& options,
-                                  const ProgressBarStyleOptions& progressBarOptions)
+                                  const StyleOptions& progressBarOptions)
 {
     onPrepare(options, progressBarOptions);
 }
@@ -187,7 +90,7 @@ void ProgressBarRenderer::prepare(const StyleOptions& options,
 
 void ProgressBarRenderer::onReset(const StyleOptions& options)
 {
-    ProgressBarStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

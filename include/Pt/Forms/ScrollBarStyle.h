@@ -36,38 +36,6 @@ namespace Pt {
 
 namespace Forms {
 
-class PT_FORMS_API ScrollBarStyleOptions : public StyleOptionsBase
-{
-    public:
-        ScrollBarStyleOptions();
-
-        const Gfx::Brush* background() const;
-
-        void setBackground(const Gfx::Brush& brush);
-
-        const Gfx::Pen* contour() const;
-
-        void setContour(const Gfx::Pen& pen);
-
-        const Gfx::Brush* foreground() const;
-
-        void setForeground(const Gfx::Brush& brush);
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02,
-            Foreground = 0x04
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-        AutoPtr<Gfx::Brush> _foreground;
-};
-
-
 class PT_FORMS_API ScrollBarState
 {
     public:
@@ -127,7 +95,7 @@ class PT_FORMS_API ScrollBarRenderer : public Style::Facet
         ScrollBarRenderer* create() const;
 
         void prepare(const StyleOptions& options,
-                     const ScrollBarStyleOptions& scrollBarOptions);
+                     const StyleOptions& scrollBarOptions);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -193,7 +161,7 @@ class PT_FORMS_API ScrollBarRenderer : public Style::Facet
         virtual ScrollBarRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const ScrollBarStyleOptions& scrollBarOptions) = 0;
+                               const StyleOptions& scrollBarOptions) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize,
@@ -255,7 +223,7 @@ class PT_FORMS_API ScrollBarRenderer : public Style::Facet
 
 
 class PT_FORMS_API ScrollBarStyle : public Styler<ScrollBarRenderer,
-                                                       ScrollBarStyleOptions>
+                                                       StyleOptions>
 {
     public:
         ScrollBarStyle();

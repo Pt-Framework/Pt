@@ -38,32 +38,6 @@ namespace Forms {
 class Pixmap;
 
 
-class PT_FORMS_API ListBoxStyleOptions : public StyleOptionsBase
-{
-    public:
-        ListBoxStyleOptions();
-
-        const Gfx::Brush* background() const;
-
-        void setBackground(const Gfx::Brush& brush);
-
-        const Gfx::Pen* contour() const;
-
-        void setContour(const Gfx::Pen& pen);
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            Contour    = 0x02
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Pen>   _contour;
-};
-
-
 class PT_FORMS_API ListBoxState
 {
     public:
@@ -93,7 +67,7 @@ class PT_FORMS_API ListBoxRenderer : public Style::Facet
         ListBoxRenderer* create() const;
 
         void prepare(const StyleOptions& options,
-                     const ListBoxStyleOptions& listBoxOptions);
+                     const StyleOptions& listBoxOptions);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -116,7 +90,7 @@ class PT_FORMS_API ListBoxRenderer : public Style::Facet
         virtual ListBoxRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const ListBoxStyleOptions& listBoxOptions) = 0;
+                               const StyleOptions& listBoxOptions) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -135,50 +109,10 @@ class PT_FORMS_API ListBoxRenderer : public Style::Facet
 
 
 class PT_FORMS_API ListBoxStyle : public Styler<ListBoxRenderer,
-                                                     ListBoxStyleOptions>
+                                                     StyleOptions>
 {
     public:
         ListBoxStyle();
-};
-
-
-class PT_FORMS_API ListItemStyleOptions : public StyleOptionsBase
-{
-    public:
-        ListItemStyleOptions();
-
-        const Gfx::Brush* background() const;
-
-        void setBackground(const Gfx::Brush& brush);
-
-        const Gfx::Color* textColor() const;
-
-        void setTextColor(const Gfx::Color& color);
-
-        const Gfx::Font* font() const;
-
-        void setFont(const Gfx::Font& font);
-
-        void setFontSize(std::size_t size);
-
-        void setFontWeight(Gfx::Font::Weight weight);
-
-        void setFontSlant(Gfx::Font::Slant slant);
-
-        Gfx::Font getFont(const Gfx::Font& base) const;
-
-    private:
-        enum StyleOverride
-        {
-            Background = 0x01,
-            TextColor  = 0x02,
-            Font       = 0x04
-        };
-
-    private:
-        AutoPtr<Gfx::Brush> _background;
-        AutoPtr<Gfx::Color> _textColor;
-        FontOption          _font;
 };
 
 
@@ -221,7 +155,7 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
         ListItemRenderer* create() const;
 
         void prepare(const StyleOptions& options,
-                     const ListItemStyleOptions& listItemOptions);
+                     const StyleOptions& listItemOptions);
 
     public:
         Gfx::SizeF measureContent(PaintSurface& surface,
@@ -265,7 +199,7 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
         virtual ListItemRenderer* onCreate() const = 0;
 
         virtual void onPrepare(const StyleOptions& options,
-                               const ListItemStyleOptions& listItemOptions) = 0;
+                               const StyleOptions& listItemOptions) = 0;
 
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& iconSize,
@@ -305,7 +239,7 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
 
 
 class PT_FORMS_API ListItemStyle : public Styler<ListItemRenderer,
-                                                      ListItemStyleOptions>
+                                                      StyleOptions>
 {
     public:
         ListItemStyle();

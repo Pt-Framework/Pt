@@ -33,103 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-ComboBoxStyleOptions::ComboBoxStyleOptions()
-{
-}
-
-
-const Gfx::Brush* ComboBoxStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void ComboBoxStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* ComboBoxStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void ComboBoxStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Brush* ComboBoxStyleOptions::foreground() const
-{
-    return _foreground.get();
-}
-
-
-void ComboBoxStyleOptions::setForeground(const Gfx::Brush& brush)
-{
-    _foreground.reset( new Gfx::Brush(brush) );
-    setOverride(Foreground);
-}
-
-
-const Gfx::Color* ComboBoxStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void ComboBoxStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* ComboBoxStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void ComboBoxStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void ComboBoxStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void ComboBoxStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void ComboBoxStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font ComboBoxStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
 ComboBoxState::ComboBoxState()
 : _enabled(false)
 , _focused(false)
@@ -249,7 +152,7 @@ ComboBoxRenderer* ComboBoxRenderer::create() const
 
 
 void ComboBoxRenderer::prepare(const StyleOptions& options,
-                               const ComboBoxStyleOptions& comboBoxOptions)
+                               const StyleOptions& comboBoxOptions)
 {
     onPrepare(options, comboBoxOptions);
 }
@@ -257,7 +160,7 @@ void ComboBoxRenderer::prepare(const StyleOptions& options,
 
 void ComboBoxRenderer::onReset(const StyleOptions& options)
 {
-    ComboBoxStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

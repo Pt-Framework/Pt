@@ -245,8 +245,11 @@ void Window::setAbove(bool above)
 
 const Gfx::Brush& Window::background() const
 {
-    return _background ? *_background
-                       : Application::instance().styleOptions().background();
+    if(_background)
+        return *_background;
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<BackgroundOption>()->value();
 }
 
 

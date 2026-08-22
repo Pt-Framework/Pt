@@ -33,103 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-SliderStyleOptions::SliderStyleOptions()
-{
-}
-
-
-const Gfx::Brush* SliderStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void SliderStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* SliderStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void SliderStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Color* SliderStyleOptions::foreground() const
-{
-    return _foreground.get();
-}
-
-
-void SliderStyleOptions::setForeground(const Gfx::Color& color)
-{
-    _foreground.reset( new Gfx::Color(color) );
-    setOverride(Foreground);
-}
-
-
-const Gfx::Color* SliderStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void SliderStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* SliderStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void SliderStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void SliderStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void SliderStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void SliderStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font SliderStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
 SliderState::SliderState()
 : _enabled(false)
 , _hovered(false)
@@ -192,7 +95,7 @@ SliderRenderer* SliderRenderer::create() const
 
 
 void SliderRenderer::prepare(const StyleOptions& options,
-                             const SliderStyleOptions& sliderOptions)
+                             const StyleOptions& sliderOptions)
 {
     onPrepare(options, sliderOptions);
 }
@@ -200,7 +103,7 @@ void SliderRenderer::prepare(const StyleOptions& options,
 
 void SliderRenderer::onReset(const StyleOptions& options)
 {
-    SliderStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

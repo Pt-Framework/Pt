@@ -34,90 +34,6 @@ namespace Pt {
 
 namespace Forms {
 
-CheckBoxStyleOptions::CheckBoxStyleOptions()
-{
-}
-
-
-const Gfx::Brush* CheckBoxStyleOptions::background() const
-{
-    return _background.get();
-}
-
-
-void CheckBoxStyleOptions::setBackground(const Gfx::Brush& brush)
-{
-    _background.reset( new Gfx::Brush(brush) );
-    setOverride(Background);
-}
-
-
-const Gfx::Pen* CheckBoxStyleOptions::contour() const
-{
-    return _contour.get();
-}
-
-
-void CheckBoxStyleOptions::setContour(const Gfx::Pen& pen)
-{
-    _contour.reset( new Gfx::Pen(pen) );
-    setOverride(Contour);
-}
-
-
-const Gfx::Color* CheckBoxStyleOptions::textColor() const
-{
-    return _textColor.get();
-}
-
-
-void CheckBoxStyleOptions::setTextColor(const Gfx::Color& color)
-{
-    _textColor.reset( new Gfx::Color(color) );
-    setOverride(TextColor);
-}
-
-
-const Gfx::Font* CheckBoxStyleOptions::font() const
-{
-    return _font.font();
-}
-
-
-void CheckBoxStyleOptions::setFont(const Gfx::Font& font)
-{
-    _font.setFont(font);
-    setOverride(Font);
-}
-
-
-void CheckBoxStyleOptions::setFontSize(std::size_t size)
-{
-    _font.setSize(size);
-    setOverride(Font);
-}
-
-
-void CheckBoxStyleOptions::setFontWeight(Gfx::Font::Weight weight)
-{
-    _font.setWeight(weight);
-    setOverride(Font);
-}
-
-
-void CheckBoxStyleOptions::setFontSlant(Gfx::Font::Slant slant)
-{
-    _font.setSlant(slant);
-    setOverride(Font);
-}
-
-
-Gfx::Font CheckBoxStyleOptions::getFont(const Gfx::Font& base) const
-{
-    return _font.getFont(base);
-}
-
-
 CheckBoxState::CheckBoxState()
 : _enabled(false)
 , _hovered(false)
@@ -193,7 +109,7 @@ CheckBoxRenderer* CheckBoxRenderer::create() const
 
 
 void CheckBoxRenderer::prepare(const StyleOptions& options,
-                               const CheckBoxStyleOptions& checkBoxOptions)
+                               const StyleOptions& checkBoxOptions)
 {
     onPrepare(options, checkBoxOptions);
 }
@@ -201,7 +117,7 @@ void CheckBoxRenderer::prepare(const StyleOptions& options,
 
 void CheckBoxRenderer::onReset(const StyleOptions& options)
 {
-    CheckBoxStyleOptions empty;
+    StyleOptions empty;
     onPrepare(options, empty);
 }
 

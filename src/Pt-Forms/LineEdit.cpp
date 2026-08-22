@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -93,7 +93,7 @@ bool LineEdit::isEmpty() const
 
 
 const Pt::String& LineEdit::displayText() const
-{   
+{
     return _editor.displayText();
 }
 
@@ -119,7 +119,7 @@ LineEdit::EchoMode LineEdit::echoMode() const
 
 void LineEdit::setEchoMode(LineEdit::EchoMode mode)
 {
-    _echoMode = mode;   
+    _echoMode = mode;
     _editor.setMasked(_echoMode == Masked);
 
     invalidate();
@@ -161,7 +161,7 @@ bool LineEdit::isAccepted() const
 void LineEdit::setAccepted(bool a)
 {
     _isAccepted = a;
-    
+
     if( ! a )
     {
         setFocusPolicy(Control::KeepFocus);
@@ -199,89 +199,102 @@ Pt::Signal<const Pt::String&>& LineEdit::editingFinished()
 
 const Gfx::Brush& LineEdit::background() const
 {
-    const Gfx::Brush* b = _lineEditOptions.background();
-    if(b)
-        return *b;
+    if( const BackgroundOption* background = _lineEditOptions.get<BackgroundOption>() )
+        return background->value();
 
-    return Application::instance().styleOptions().textBackground();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextBackgroundOption>()->value();
 }
 
 
 void LineEdit::setBackground(const Gfx::Brush& b)
 {
-    _lineEditOptions.setBackground(b);
+    BackgroundOption background(b);
+    _lineEditOptions.set(background);
     invalidate();
 }
 
 
 const Gfx::Pen& LineEdit::contour() const
 {
-    const Gfx::Pen* p = _lineEditOptions.contour();
-    if(p)
-        return *p;
+    if( const ContourOption* contour = _lineEditOptions.get<ContourOption>() )
+        return contour->value();
 
-    return Application::instance().styleOptions().contour();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<ContourOption>()->value();
 }
 
 
 void LineEdit::setContour(const Gfx::Pen& p)
 {
-    _lineEditOptions.setContour(p);
+    ContourOption contour(p);
+    _lineEditOptions.set(contour);
     invalidate();
 }
 
 
 const Gfx::Color& LineEdit::textColor() const
 {
-    const Gfx::Color* c = _lineEditOptions.textColor();
-    if(c)
-        return *c;
+    if( const TextColorOption* textColor = _lineEditOptions.get<TextColorOption>() )
+        return textColor->value();
 
-    return Application::instance().styleOptions().textColor();
+    const StyleOptions& options = Application::instance().styleOptions();
+    return options.get<TextColorOption>()->value();
 }
 
 
 void LineEdit::setTextColor(const Gfx::Color& color)
 {
-    _lineEditOptions.setTextColor(color);
+    TextColorOption textColor(color);
+    _lineEditOptions.set(textColor);
     invalidate();
 }
 
 
-const Gfx::Font& LineEdit::font() const
+Gfx::Font LineEdit::font() const
 {
-    const Gfx::Font* f = _lineEditOptions.font();
-    if(f)
-        return *f;
-
-    return Application::instance().styleOptions().font();
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Gfx::Font& baseFont = options.get<FontOption>()->value();
+    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
 
 void LineEdit::setFont(const Gfx::Font& font)
 {
-    _lineEditOptions.setFont(font);
+    FontOption fontOption;
+    fontOption.setFont(font);
+    _lineEditOptions.set(fontOption);
     invalidate();
 }
 
 
 void LineEdit::setFontSize(std::size_t size)
 {
-    _lineEditOptions.setFontSize(size);
+    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSize(size);
+    _lineEditOptions.set(font);
     invalidate();
 }
 
 
 void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 {
-    _lineEditOptions.setFontWeight(weight);
+    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setWeight(weight);
+    _lineEditOptions.set(font);
     invalidate();
 }
 
 
 void LineEdit::setFontSlant(Gfx::Font::Slant slant)
 {
-    _lineEditOptions.setFontSlant(slant);
+    const FontOption* localFont = _lineEditOptions.get<FontOption>();
+    FontOption font = localFont ? *localFont : FontOption();
+    font.setSlant(slant);
+    _lineEditOptions.set(font);
     invalidate();
 }
 
@@ -330,7 +343,7 @@ Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
     Gfx::SizeF contentSize(policy.width(), 0);
     Gfx::SizeF sz = renderer->measureFrame(surface(), contentSize);
 
-    return Gfx::SizeF( sz.width() + padding().leftRight(), 
+    return Gfx::SizeF( sz.width() + padding().leftRight(),
                        sz.height() + padding().topBottom() );
 }
 
@@ -434,7 +447,7 @@ void LineEdit::onResizeEvent(const ResizeEvent& ev)
 
 
 bool LineEdit::onKeyEvent(const KeyEvent& ev)
-{  
+{
     Base::onKeyEvent(ev);
 
     if( ! ev.isPress() || ! _isEditable )
@@ -507,7 +520,7 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
 
         Application::instance().inputMethod().begin(*this);
     }
-    
+
     return true;
 }
 
@@ -538,7 +551,7 @@ bool LineEdit::onEnterEvent(const EnterEvent& ev)
     Base::onEnterEvent(ev);
 
     _isHighlighted = true;
-    
+
     invalidate();
     return true;
 }
