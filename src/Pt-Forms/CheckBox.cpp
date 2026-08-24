@@ -73,7 +73,7 @@ bool CheckBox::isChecked() const
 
 const Gfx::Brush& CheckBox::background() const
 {
-    const BackgroundOption* background = _checkBoxOptions.find<BackgroundOption>();
+    const TextBackgroundOption* background = _checkBoxOptions.find<TextBackgroundOption>();
     if(background)
         return background->value();
 
@@ -84,7 +84,7 @@ const Gfx::Brush& CheckBox::background() const
 
 void CheckBox::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
+    TextBackgroundOption background(b);
     _checkBoxOptions.set(background);
     invalidate();
 }
@@ -132,7 +132,7 @@ Gfx::Font CheckBox::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -148,7 +148,7 @@ void CheckBox::setFont(const Gfx::Font& font)
 
 void CheckBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _checkBoxOptions.set(font);
@@ -158,7 +158,7 @@ void CheckBox::setFontSize(std::size_t size)
 
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _checkBoxOptions.set(font);
@@ -168,7 +168,7 @@ void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _checkBoxOptions.find<FontOption>();
+    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _checkBoxOptions.set(font);

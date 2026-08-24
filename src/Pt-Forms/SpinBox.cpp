@@ -380,7 +380,7 @@ Pt::Signal<const Pt::String&>& SpinBox::editingFinished()
 
 const Gfx::Brush& SpinBox::background() const
 {
-    const BackgroundOption* background = _spinBoxOptions.find<BackgroundOption>();
+    const TextBackgroundOption* background = _spinBoxOptions.find<TextBackgroundOption>();
     if(background)
         return background->value();
 
@@ -391,7 +391,7 @@ const Gfx::Brush& SpinBox::background() const
 
 void SpinBox::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
+    TextBackgroundOption background(b);
     _spinBoxOptions.set(background);
     invalidate();
 }
@@ -458,7 +458,7 @@ Gfx::Font SpinBox::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -474,7 +474,7 @@ void SpinBox::setFont(const Gfx::Font& font)
 
 void SpinBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _spinBoxOptions.set(font);
@@ -484,7 +484,7 @@ void SpinBox::setFontSize(std::size_t size)
 
 void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _spinBoxOptions.set(font);
@@ -494,7 +494,7 @@ void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 
 void SpinBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _spinBoxOptions.find<FontOption>();
+    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _spinBoxOptions.set(font);

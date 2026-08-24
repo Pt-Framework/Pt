@@ -336,7 +336,7 @@ void TabView::setFont(const Gfx::Font& font)
 
 void TabView::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _tabViewOptions.find<FontOption>();
+    const FontOption* localFont = _tabViewOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _tabViewOptions.set(font);
@@ -346,7 +346,7 @@ void TabView::setFontSize(std::size_t size)
 
 void TabView::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _tabViewOptions.find<FontOption>();
+    const FontOption* localFont = _tabViewOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _tabViewOptions.set(font);
@@ -356,7 +356,7 @@ void TabView::setFontWeight(Gfx::Font::Weight weight)
 
 void TabView::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _tabViewOptions.find<FontOption>();
+    const FontOption* localFont = _tabViewOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _tabViewOptions.set(font);

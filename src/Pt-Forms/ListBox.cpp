@@ -313,7 +313,7 @@ Gfx::Font ListBoxItem::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _listItemOptions.find<FontOption>();
+    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -329,7 +329,7 @@ void ListBoxItem::setFont(const Gfx::Font& f)
 
 void ListBoxItem::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _listItemOptions.find<FontOption>();
+    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _listItemOptions.set(font);
@@ -339,7 +339,7 @@ void ListBoxItem::setFontSize(std::size_t size)
 
 void ListBoxItem::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _listItemOptions.find<FontOption>();
+    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _listItemOptions.set(font);
@@ -349,7 +349,7 @@ void ListBoxItem::setFontWeight(Gfx::Font::Weight weight)
 
 void ListBoxItem::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _listItemOptions.find<FontOption>();
+    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _listItemOptions.set(font);
@@ -696,7 +696,7 @@ const Gfx::Brush* ListBox::background() const
     if( ! _hasBackground )
         return 0;
 
-    const BackgroundOption* background = _listBoxOptions.find<BackgroundOption>();
+    const ViewBackgroundOption* background = _listBoxOptions.find<ViewBackgroundOption>();
     if(background)
         return &background->value();
 
@@ -707,7 +707,7 @@ const Gfx::Brush* ListBox::background() const
 
 void ListBox::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
+    ViewBackgroundOption background(b);
     _listBoxOptions.set(background);
     _hasBackground = true;
     invalidate();

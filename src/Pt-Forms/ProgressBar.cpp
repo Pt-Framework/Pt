@@ -198,7 +198,7 @@ Gfx::Font ProgressBar::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _progressBarOptions.find<FontOption>();
+    const FontOption* localFont = _progressBarOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -214,7 +214,7 @@ void ProgressBar::setFont(const Gfx::Font& font)
 
 void ProgressBar::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _progressBarOptions.find<FontOption>();
+    const FontOption* localFont = _progressBarOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _progressBarOptions.set(font);
@@ -224,7 +224,7 @@ void ProgressBar::setFontSize(std::size_t size)
 
 void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _progressBarOptions.find<FontOption>();
+    const FontOption* localFont = _progressBarOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _progressBarOptions.set(font);
@@ -234,7 +234,7 @@ void ProgressBar::setFontWeight(Gfx::Font::Weight weight)
 
 void ProgressBar::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _progressBarOptions.find<FontOption>();
+    const FontOption* localFont = _progressBarOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _progressBarOptions.set(font);

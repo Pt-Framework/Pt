@@ -188,7 +188,7 @@ Gfx::Font Label::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _panelStyleOptions.find<FontOption>();
+    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -205,7 +205,7 @@ void Label::setFont(const Gfx::Font& font)
 
 void Label::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _panelStyleOptions.find<FontOption>();
+    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _panelStyleOptions.set(font);
@@ -216,7 +216,7 @@ void Label::setFontSize(std::size_t size)
 
 void Label::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _panelStyleOptions.find<FontOption>();
+    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _panelStyleOptions.set(font);
@@ -227,7 +227,7 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
 
 void Label::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _panelStyleOptions.find<FontOption>();
+    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _panelStyleOptions.set(font);

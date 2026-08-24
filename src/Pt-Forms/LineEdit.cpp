@@ -199,7 +199,7 @@ Pt::Signal<const Pt::String&>& LineEdit::editingFinished()
 
 const Gfx::Brush& LineEdit::background() const
 {
-    const BackgroundOption* background = _lineEditOptions.find<BackgroundOption>();
+    const TextBackgroundOption* background = _lineEditOptions.find<TextBackgroundOption>();
     if(background)
         return background->value();
 
@@ -210,7 +210,7 @@ const Gfx::Brush& LineEdit::background() const
 
 void LineEdit::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
+    TextBackgroundOption background(b);
     _lineEditOptions.set(background);
     invalidate();
 }
@@ -258,7 +258,7 @@ Gfx::Font LineEdit::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _lineEditOptions.find<FontOption>();
+    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -274,7 +274,7 @@ void LineEdit::setFont(const Gfx::Font& font)
 
 void LineEdit::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _lineEditOptions.find<FontOption>();
+    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _lineEditOptions.set(font);
@@ -284,7 +284,7 @@ void LineEdit::setFontSize(std::size_t size)
 
 void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _lineEditOptions.find<FontOption>();
+    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _lineEditOptions.set(font);
@@ -294,7 +294,7 @@ void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 
 void LineEdit::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _lineEditOptions.find<FontOption>();
+    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _lineEditOptions.set(font);

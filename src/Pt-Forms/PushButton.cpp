@@ -198,7 +198,7 @@ void PushButton::setFont(const Gfx::Font& font)
 void PushButton::setFontSize(std::size_t size)
 {
     StyleOptions& buttonOptions = _buttonStyler.options();
-    const FontOption* localFont = buttonOptions.find<FontOption>();
+    const FontOption* localFont = buttonOptions.findLocal<FontOption>();
 
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
@@ -211,7 +211,7 @@ void PushButton::setFontSize(std::size_t size)
 void PushButton::setFontWeight(Gfx::Font::Weight weight)
 {
     StyleOptions& local = _buttonStyler.options();
-    const FontOption* localFont = local.find<FontOption>();
+    const FontOption* localFont = local.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     local.set(font);
@@ -223,7 +223,7 @@ void PushButton::setFontWeight(Gfx::Font::Weight weight)
 void PushButton::setFontSlant(Gfx::Font::Slant slant)
 {
     StyleOptions& local = _buttonStyler.options();
-    const FontOption* localFont = local.find<FontOption>();
+    const FontOption* localFont = local.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     local.set(font);

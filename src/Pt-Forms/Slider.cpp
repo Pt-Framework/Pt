@@ -194,7 +194,7 @@ Gfx::Font Slider::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _sliderOptions.find<FontOption>();
+    const FontOption* localFont = _sliderOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -210,7 +210,7 @@ void Slider::setFont(const Gfx::Font& font)
 
 void Slider::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _sliderOptions.find<FontOption>();
+    const FontOption* localFont = _sliderOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _sliderOptions.set(font);
@@ -220,7 +220,7 @@ void Slider::setFontSize(std::size_t size)
 
 void Slider::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _sliderOptions.find<FontOption>();
+    const FontOption* localFont = _sliderOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _sliderOptions.set(font);
@@ -230,7 +230,7 @@ void Slider::setFontWeight(Gfx::Font::Weight weight)
 
 void Slider::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _sliderOptions.find<FontOption>();
+    const FontOption* localFont = _sliderOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _sliderOptions.set(font);

@@ -766,7 +766,7 @@ void PlatinumCheckBoxRenderer::onReset(const StyleOptions& options)
 void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& cbOptions)
 {
-    const BackgroundOption* localBg = cbOptions.find<BackgroundOption>();
+    const TextBackgroundOption* localBg = cbOptions.find<TextBackgroundOption>();
     Gfx::Brush bg = localBg ? localBg->value()
                             : options.get<TextBackgroundOption>().value();
 
@@ -996,7 +996,7 @@ SpinBoxRenderer* PlatinumSpinBoxRenderer::onCreate() const
 void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& options,
                                         const StyleOptions& spinBoxOptions)
 {
-    const BackgroundOption* localBg = spinBoxOptions.find<BackgroundOption>();
+    const TextBackgroundOption* localBg = spinBoxOptions.find<TextBackgroundOption>();
     _background = localBg ? localBg->value()
                           : options.get<TextBackgroundOption>().value();
 
@@ -1324,7 +1324,7 @@ LineEditRenderer* PlatinumLineEditRenderer::onCreate() const
 void PlatinumLineEditRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& lineEditOptions)
 {
-    const BackgroundOption* localBg = lineEditOptions.find<BackgroundOption>();
+    const TextBackgroundOption* localBg = lineEditOptions.find<TextBackgroundOption>();
     _background = localBg ? localBg->value()
                           : options.get<TextBackgroundOption>().value();
 
@@ -2244,7 +2244,7 @@ ListBoxRenderer* PlatinumListBoxRenderer::onCreate() const
 void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options,
                                         const StyleOptions& listBoxOptions)
 {
-    const BackgroundOption* localBg = listBoxOptions.find<BackgroundOption>();
+    const ViewBackgroundOption* localBg = listBoxOptions.find<ViewBackgroundOption>();
     _viewBackground = localBg ? localBg->value()
                               : options.get<ViewBackgroundOption>().value();
 
@@ -2510,7 +2510,7 @@ ComboBoxRenderer* PlatinumComboBoxRenderer::onCreate() const
 void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options,
                                          const StyleOptions& comboBoxOptions)
 {
-    const BackgroundOption* localBg = comboBoxOptions.find<BackgroundOption>();
+    const TextBackgroundOption* localBg = comboBoxOptions.find<TextBackgroundOption>();
     _background = localBg ? localBg->value()
                           : options.get<TextBackgroundOption>().value();
 

@@ -241,7 +241,7 @@ Pt::Signal<ListBoxItem&>& ComboBox::selected()
 
 const Gfx::Brush& ComboBox::background() const
 {
-    const BackgroundOption* background = _comboBoxOptions.find<BackgroundOption>();
+    const TextBackgroundOption* background = _comboBoxOptions.find<TextBackgroundOption>();
     if(background)
         return background->value();
 
@@ -252,7 +252,7 @@ const Gfx::Brush& ComboBox::background() const
 
 void ComboBox::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
+    TextBackgroundOption background(b);
     _comboBoxOptions.set(background);
     invalidate();
 }
@@ -319,7 +319,7 @@ Gfx::Font ComboBox::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.findLocal<FontOption>();
     return localFont ? localFont->getFont(baseFont) : baseFont;
 }
 
@@ -335,7 +335,7 @@ void ComboBox::setFont(const Gfx::Font& font)
 
 void ComboBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
     _comboBoxOptions.set(font);
@@ -345,7 +345,7 @@ void ComboBox::setFontSize(std::size_t size)
 
 void ComboBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
     _comboBoxOptions.set(font);
@@ -355,7 +355,7 @@ void ComboBox::setFontWeight(Gfx::Font::Weight weight)
 
 void ComboBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _comboBoxOptions.find<FontOption>();
+    const FontOption* localFont = _comboBoxOptions.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
     _comboBoxOptions.set(font);

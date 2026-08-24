@@ -530,10 +530,10 @@ class PT_FORMS_API FontOption : public StyleOption
     %get(overlay) selects the overlay token when present and otherwise
     %get(). Font merge stays on %FontOption::getFont().
 
-    A parent can be set with %setParent(). When set, %get() and
+    A parent can be set with %setParent(). When set, %get(), %find() and
     %generation() recurse to the parent after consulting the local
     bag. This allows a sparse widget overlay to fall back to the
-    global theme automatically. %find() and %hasOverrides() remain
+    global theme automatically. %findLocal() and %hasOverrides() remain
     local-only and report only the contents of this bag. Cycles in
     the parent chain must be avoided.
 
@@ -579,12 +579,11 @@ class PT_FORMS_API StyleOptions
         */
         const StyleOptions* parent() const;
 
-        /** @brief Returns the option of type T, or 0 if absent.
-
-            Use for overlays and bags of unknown completeness.
-
-            TODO: findLocal without parent lookup.
+        /** @brief Returns the local option of type T, or 0 if absent.
         */
+        template <typename T>
+        const T* findLocal() const;
+
         template <typename T>
         const T* find() const;
 
@@ -596,14 +595,6 @@ class PT_FORMS_API StyleOptions
         */
         template <typename T>
         const T& get() const;
-
-        /** @brief Returns the overlay option of type T, or this bag's option.
-
-            Prefers @a overlay when T is present there. Otherwise %get().
-            Throws std::logic_error when T is absent from both bags.
-        */
-        template <typename T>
-        const T& get(const StyleOptions& overlay) const;
 
         /** @brief Replaces the option of type T and bumps generation.
         */
@@ -632,9 +623,23 @@ class PT_FORMS_API StyleOptions
 
 
 template <typename T>
-const T* StyleOptions::find() const
+const T* StyleOptions::findLocal() const
 {
     return static_cast<const T*>( lookup(typeid(T)) );
+}
+
+
+template <typename T>
+const T* StyleOptions::find() const
+{
+    const T* option = findLocal<T>();
+    if(option)
+        return option;
+
+    if( _parent )
+        return _parent->find<T>();
+
+    return 0;
 }
 
 
@@ -642,21 +647,10 @@ template <typename T>
 const T& StyleOptions::get() const
 {
     const T* option = find<T>();
-    if( option )
+    if(option)
         return *option;
 
-    if( _parent )
-        return _parent->get<T>();
-
     throw std::logic_error(std::string("style option not set: ") + T::name());
-}
-
-
-template <typename T>
-const T& StyleOptions::get(const StyleOptions& overlay) const
-{
-    const T* local = overlay.find<T>();
-    return local ? *local : get<T>();
 }
 
 
