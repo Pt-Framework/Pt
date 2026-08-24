@@ -471,7 +471,7 @@ class PT_FORMS_API PlatinumProgressBarRenderer : public ProgressBarRenderer
                                   const ProgressBarState& state);
 
     private:
-        Gfx::Brush  _foreground;
+        //Gfx::Brush  _foreground;
         Gfx::Color  _textBackground;
         Painter _trackPainter;
         Painter _chunkPainter;
@@ -520,7 +520,7 @@ class PT_FORMS_API PlatinumSliderRenderer : public SliderRenderer
                                     const SliderState& state);
 
     private:
-        Gfx::Brush _foreground;
+        Gfx::Brush _hoverBrush;
         Gfx::Brush _contourBrush;
         Painter _trackPainter;
         Painter _handlePainter;

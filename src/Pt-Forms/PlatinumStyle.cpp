@@ -1508,17 +1508,20 @@ ProgressBarRenderer* PlatinumProgressBarRenderer::onCreate() const
     return new PlatinumProgressBarRenderer();
 }
 
+
 void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options,
                                             const StyleOptions& progressBarOptions)
 {
+    Gfx::Brush chunkBrush = options.get<AccentColorOption>().value() ;
+
     const ForegroundOption* localFg = progressBarOptions.find<ForegroundOption>();
-    _foreground = localFg ? localFg->value()
-                          : Gfx::Brush( options.get<AccentColorOption>().value() );
+    Gfx::Brush foregroundBrush = localFg ? localFg->value()
+                                         : Gfx::Brush( options.get<ForegroundOption>().value() );
 
     _textBackground = options.get<TextBackgroundOption>().value().color();
 
-    _trackPainter.setBrush( options.get<ForegroundOption>().value() );
-    _chunkPainter.setBrush( _foreground );
+    _trackPainter.setBrush(foregroundBrush);
+    _chunkPainter.setBrush(chunkBrush);
 
     const Gfx::Font& baseFont = options.get<FontOption>().value();
     const FontOption* localFont = progressBarOptions.find<FontOption>();
@@ -1534,6 +1537,7 @@ void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options,
     _invertTextPainter.setFont( resolvedFont );
     _invertTextPainter.setPen( Gfx::Pen(_textBackground) );
 }
+
 
 Gfx::SizeF PlatinumProgressBarRenderer::onMeasureFrame(PaintSurface& surface,
                                                         const Gfx::SizeF& contentSize)
@@ -1551,12 +1555,14 @@ Gfx::SizeF PlatinumProgressBarRenderer::onMeasureFrame(PaintSurface& surface,
     return outerSz;
 }
 
+
 Gfx::SizeF PlatinumProgressBarRenderer::onMeasureBar(PaintSurface& surface)
 {
     _textPainter.begin(surface);
     double barHeight = _textPainter.scaling().align(3.0);
     return Gfx::SizeF(100.0, barHeight); // arbitrary width for measure
 }
+
 
 void PlatinumProgressBarRenderer::onLayoutChrome(PaintSurface& surface,
                                                  const Gfx::RectF& rect,
@@ -1579,6 +1585,7 @@ void PlatinumProgressBarRenderer::onLayoutChrome(PaintSurface& surface,
     textRect = rect;
 }
 
+
 void PlatinumProgressBarRenderer::onLayoutBar(PaintSurface& surface,
                                               const Gfx::RectF& barRect,
                                               float progressRatio,
@@ -1590,11 +1597,13 @@ void PlatinumProgressBarRenderer::onLayoutBar(PaintSurface& surface,
                            Gfx::SizeF(barRect.width() * progressRatio, barRect.height()));
 }
 
+
 const Painter& PlatinumProgressBarRenderer::onGetTextPainter(PaintSurface& surface)
 {
     _textPainter.begin(surface);
     return _textPainter;
 }
+
 
 void PlatinumProgressBarRenderer::onRenderTrack(PaintContext& context,
                                                 const Gfx::RectF& trackRect,
@@ -1606,6 +1615,7 @@ void PlatinumProgressBarRenderer::onRenderTrack(PaintContext& context,
     _trackPainter.begin(context);
     _trackPainter.fillRect(trackRect);
 }
+
 
 void PlatinumProgressBarRenderer::onRenderChunk(PaintContext& context,
                                                 const Gfx::RectF& chunkRect,
@@ -1623,6 +1633,7 @@ void PlatinumProgressBarRenderer::onRenderChunk(PaintContext& context,
                                            chunkRect.y()),
                                Gfx::SizeF(d, d) );
 }
+
 
 void PlatinumProgressBarRenderer::onRenderText(PaintContext& context,
                                                const Gfx::RectF& textRect,
@@ -1682,16 +1693,18 @@ SliderRenderer* PlatinumSliderRenderer::onCreate() const
 void PlatinumSliderRenderer::onPrepare(const StyleOptions& options,
                                        const StyleOptions& sliderOptions)
 {
-    const ForegroundOption* localFg = sliderOptions.find<ForegroundOption>();
-    _foreground = localFg ? localFg->value()
-                          : Gfx::Brush( options.get<AccentColorOption>().value() );
+    _hoverBrush = options.get<AccentColorOption>().value();
 
     const ContourOption* localContour = sliderOptions.find<ContourOption>();
     _contourBrush = Gfx::Brush( localContour ? localContour->value().color()
                                              : options.get<ContourOption>().value().color() );
 
-    _trackPainter.setBrush( options.get<ForegroundOption>().value() );
-    _handlePainter.setBrush( _foreground );
+    const ForegroundOption* localForeground = sliderOptions.find<ForegroundOption>();
+    Gfx::Brush foregroundBrush = localForeground ? localForeground->value()
+                                                 : options.get<ForegroundOption>().value();
+
+    _trackPainter.setBrush(foregroundBrush);
+    _handlePainter.setBrush(_contourBrush);
 }
 
 
@@ -1788,7 +1801,7 @@ void PlatinumSliderRenderer::onRenderHandle(PaintContext& context,
         return;
 
     if( state.isHovered() )
-        _handlePainter.setBrush( _foreground );
+        _handlePainter.setBrush( _hoverBrush );
     else
         _handlePainter.setBrush( _contourBrush );
 
