@@ -1,6 +1,6 @@
 ---
 name: "Planner"
-description: "Use when planning a C++ feature or bugfix before implementation. Produces a reviewed implementation plan in `.agents/session/plan.md`."
+description: "Prepares a reviewed implementation plan for a C++ feature or bugfix in `.agents/session/plan.md`."
 argument-hint: "Describe the feature or bug, expected behavior, and relevant modules."
 tools: [read, search, edit, agent]
 agents: [Reviewer, Developer, Explore]

@@ -1,6 +1,6 @@
 ---
 name: "Researcher"
-description: "Use when researching a feature or product idea before planning. Produces confirmed requirements in `.agents/session/requirements.md`."
+description: "Researches a feature or product idea before planning. Produces confirmed requirements in `.agents/session/requirements.md`."
 argument-hint: "Describe the feature idea, target users, and questions to research."
 tools: [read, edit, search, web]
 model: [ "Gemini 3.1 Pro (Preview)" ]

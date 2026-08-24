@@ -1,6 +1,6 @@
 ---
 name: "Developer"
-description: "Use when implementing an approved C++ plan or fixing implementation feedback. Orchestrates build, test, documentation, and review."
+description: "Implements an approved C++ plan or fixes implementation feedback. Orchestrates build, test, documentation, and review."
 argument-hint: "Describe the implementation task, or name the approved plan and feedback to address."
 tools: [read, edit, search, agent]
 agents: [Builder, Tester, Documenter, Reviewer]
