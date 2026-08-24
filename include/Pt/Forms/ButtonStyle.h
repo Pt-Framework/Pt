@@ -113,16 +113,14 @@ class PT_FORMS_API ButtonRenderer : public Renderer
         */
         ButtonRenderer* create() const;
 
-        /** @brief Applies the widget-local button style overrides to this renderer.
+        /** @brief Applies the button style options to this renderer.
 
             This is the explicit synchronization point for the button slice.
-            Implementations prepare all renderer-local resources from the
-            supplied theme %StyleOptions and widget-local overlay. Resolve
-            tokens with %StyleOptions::get(overlay). Merge a local font
-            with %FontOption::getFont() against the theme font.
+            The supplied options already include the widget-local overlay via
+            the parent lookup of %StyleOptions. Implementations resolve tokens
+            with %StyleOptions::get().
         */
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& buttonOptions);
+        void prepare(const StyleOptions& options);
 
     public:
         /** @brief Returns the combined content size for icon and text arranged by direction.
@@ -221,8 +219,7 @@ class PT_FORMS_API ButtonRenderer : public Renderer
 
         virtual ButtonRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& buttonOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -281,57 +278,41 @@ class PT_FORMS_API ButtonRenderer : public Renderer
                                   const ButtonState& state) = 0;
 };
 
-/** @brief Binds a push button to the currently active renderer.
-
-    Owns the widget-local button overrides and caches a typed renderer
-    pointer for the three supported button cases: shared style renderer,
-    private override clone, and externally assigned custom renderer.
-    Custom-renderer ownership and bind-case selection live on %StylerBase.
-    %onStyleRenderer writes the typed pointer at each creation site.
+/** @brief Button styler.
 */
 class PT_FORMS_API ButtonStyler : public StylerBase
 {
     public:
-        /** @brief Constructs an unbound button style controller.
+        /** @brief Constructs an unbound button styler.
         */
         ButtonStyler();
 
-        /** @brief Assigns an externally owned custom renderer.
-
-            Stores the custom source and marks it dirty so the next %bind
-            call reacquires it. A null renderer falls back to the current
-            style. Binding and prepare happen in %bind.
+        /** @brief Assigns a specific button renderer.
         */
-        void setRenderer(ButtonRenderer* renderer);
+        void setRenderer(ButtonRenderer* renderer = 0);
 
-        /** @brief Returns the currently bound button renderer or 0.
+        /** @brief Returns the bound button renderer or 0.
         */
         ButtonRenderer* renderer();
 
-        /** @brief Returns the currently bound button renderer or 0.
-        */
-        const ButtonRenderer* renderer() const;
-
-        /** @brief Returns the widget-local button style options.
+        /** @brief Returns the button style options.
         */
         StyleOptions& options();
 
-        /** @brief Returns the widget-local button style options.
+        /** @brief Returns the button style options.
         */
         const StyleOptions& options() const;
 
     protected:
-        virtual const StyleOptions& onLocalOptions() const;
+        virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
 
         virtual Renderer* onStyleRenderer(const Style& style);
 
         virtual Renderer* onCreateRenderer(const Style& style);
 
-        virtual void onBindOptions(const StyleOptions& options);
-
     private:
-        StyleOptions    _options;
-        ButtonRenderer*    _renderer;
+        FacetPtr<ButtonRenderer> _renderer;
+        StyleOptions             _options;
 };
 
 } // namespace

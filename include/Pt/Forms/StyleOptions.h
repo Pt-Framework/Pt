@@ -1,30 +1,31 @@
-/* Copyright (C) 2016-2026 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2016-2026 Marc Boris Duerner
+/*
+  Copyright (C) 2016-2026 Laurentiu-Gheorghe Crisan
+  Copyright (C) 2016-2026 Marc Boris Duerner
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
- As a special exception, you may use this file as part of a free
- software library without restriction. Specifically, if other files
- instantiate templates or use macros or inline functions from this
- file, or you compile this file and link it with other files to
- produce an executable, this file does not by itself cause the
- resulting executable to be covered by the GNU General Public
- License. This exception does not however invalidate any other
- reasons why the executable file might be covered by the GNU Library
- General Public License.
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- MA 02110-1301 USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the:
+  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  Boston, MA 02110-1301 USA
 */
 
 #ifndef Pt_Forms_StyleOptions_h
@@ -62,7 +63,6 @@ class PT_FORMS_API StyleOption
         virtual const std::type_info& typeId() const = 0;
 };
 
-
 /** @brief Background brush option.
 */
 class BackgroundOption : public StyleOption
@@ -91,7 +91,6 @@ class BackgroundOption : public StyleOption
     private:
         Gfx::Brush _value;
 };
-
 
 /** @brief Foreground brush option.
 */
@@ -122,7 +121,6 @@ class ForegroundOption : public StyleOption
         Gfx::Brush _value;
 };
 
-
 /** @brief Contour pen option.
 */
 class ContourOption : public StyleOption
@@ -152,7 +150,6 @@ class ContourOption : public StyleOption
         Gfx::Pen _value;
 };
 
-
 /** @brief Accent color option.
 */
 class AccentColorOption : public StyleOption
@@ -177,7 +174,6 @@ class AccentColorOption : public StyleOption
     private:
         Gfx::Color _value;
 };
-
 
 /** @brief View background brush option.
 */
@@ -208,7 +204,6 @@ class ViewBackgroundOption : public StyleOption
         Gfx::Brush _value;
 };
 
-
 /** @brief Highlight color option.
 */
 class HighlightColorOption : public StyleOption
@@ -233,7 +228,6 @@ class HighlightColorOption : public StyleOption
     private:
         Gfx::Color _value;
 };
-
 
 /** @brief Hover background brush option.
 */
@@ -264,7 +258,6 @@ class HoverBackgroundOption : public StyleOption
         Gfx::Brush _value;
 };
 
-
 /** @brief Text background brush option.
 */
 class TextBackgroundOption : public StyleOption
@@ -294,7 +287,6 @@ class TextBackgroundOption : public StyleOption
         Gfx::Brush _value;
 };
 
-
 /** @brief Text color option.
 */
 class TextColorOption : public StyleOption
@@ -319,7 +311,6 @@ class TextColorOption : public StyleOption
     private:
         Gfx::Color _value;
 };
-
 
 /** @brief Placeholder text color option.
 */
@@ -346,7 +337,6 @@ class PlaceholderTextColorOption : public StyleOption
         Gfx::Color _value;
 };
 
-
 /** @brief Highlighted text color option.
 */
 class HighlightedTextColorOption : public StyleOption
@@ -371,7 +361,6 @@ class HighlightedTextColorOption : public StyleOption
     private:
         Gfx::Color _value;
 };
-
 
 /** @brief Alternate view background brush option.
 */
@@ -402,7 +391,6 @@ class AlternateViewBackgroundOption : public StyleOption
         Gfx::Brush _value;
 };
 
-
 /** @brief Popup background brush option.
 */
 class PopupBackgroundOption : public StyleOption
@@ -432,7 +420,6 @@ class PopupBackgroundOption : public StyleOption
         Gfx::Brush _value;
 };
 
-
 /** @brief Popup text color option.
 */
 class PopupTextColorOption : public StyleOption
@@ -457,7 +444,6 @@ class PopupTextColorOption : public StyleOption
     private:
         Gfx::Color _value;
 };
-
 
 /** @brief Font option with full and partial overrides.
 
@@ -532,7 +518,6 @@ class PT_FORMS_API FontOption : public StyleOption
         unsigned           _overrides;
 };
 
-
 /** @brief Stores global style tokens or a sparse widget-local overlay.
 
     One class is used for both the complete global options and a sparse
@@ -597,6 +582,8 @@ class PT_FORMS_API StyleOptions
         /** @brief Returns the option of type T, or 0 if absent.
 
             Use for overlays and bags of unknown completeness.
+
+            TODO: findLocal without parent lookup.
         */
         template <typename T>
         const T* find() const;

@@ -437,20 +437,19 @@ ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 }
 
 
-void PlatinumButtonRenderer::onPrepare(const StyleOptions& options,
-                                       const StyleOptions& buttonOptions)
+void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
 {
-    const ContourOption& contour = options.get<ContourOption>(buttonOptions);
+    const ContourOption& contour = options.get<ContourOption>();
     Gfx::Pen cPen = contour.value();
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const AccentColorOption& accentColor = options.get<AccentColorOption>(buttonOptions);
+    const AccentColorOption& accentColor = options.get<AccentColorOption>();
     _accentColor = accentColor.value();
 
-    const TextColorOption& textColor = options.get<TextColorOption>(buttonOptions);
+    const TextColorOption& textColor = options.get<TextColorOption>();
     _textColor = textColor.value();
 
-    const ForegroundOption& foreground = options.get<ForegroundOption>(buttonOptions);
+    const ForegroundOption& foreground = options.get<ForegroundOption>();
     _normalPainter.setBrush( foreground.value() );
     _normalPainter.setPen( cPen );
 
@@ -458,14 +457,13 @@ void PlatinumButtonRenderer::onPrepare(const StyleOptions& options,
     _pressedPainter.setBrush( pressedBrush );
     _pressedPainter.setPen( cPen );
 
-    const HighlightColorOption& highlightColor = options.get<HighlightColorOption>(buttonOptions);
+    const HighlightColorOption& highlightColor = options.get<HighlightColorOption>();
     Gfx::Brush highlightBrush( highlightColor.value() );
     _highlightPainter.setBrush( highlightBrush );
     _highlightPainter.setPen( cPen );
 
     const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption& font = options.get<FontOption>(buttonOptions);
-    _textPainter.setFont( font.getFont(baseFont) );
+    _textPainter.setFont( baseFont );
     _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 

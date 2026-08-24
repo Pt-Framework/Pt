@@ -40,23 +40,28 @@ StylerBase::StylerBase()
 : _styleGeneration(InvalidGeneration)
 , _optionsGeneration(InvalidGeneration)
 , _localOptionsGeneration(InvalidGeneration)
-, _hasOverrides(false)
-, _customChanged(false)
+, _isRenderer(false)
+, _isOverride(false)
 {
 }
 
 
-Renderer* StylerBase::bind(const Style& style, const StyleOptions& options)
+StylerBase::~StylerBase()
 {
-    const StyleOptions& localOptions = onLocalOptions();
+}
+
+
+Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
+{
+    StyleOptions& localOptions = onBindOptions(styleOptions);
 
     if( isStyleChanged(style, localOptions) )
     {
         Renderer* renderer = 0;
 
-        if( _custom )
+        if(_isRenderer)
         {
-            renderer = _custom.get();
+            renderer = _renderer.get();
         }
         else
         {
@@ -67,20 +72,20 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& options)
         }
 
         _renderer.reset(renderer);
-
-        _customChanged = false;
         _styleGeneration = style.generation();
-        _hasOverrides = localOptions.hasOverrides();
+        _isOverride = localOptions.hasOverrides();
         _optionsGeneration = InvalidGeneration;
         _localOptionsGeneration = InvalidGeneration;
     }
 
-    if( _renderer && isOptionsChanged(options, localOptions) )
+    if( _renderer && isOptionsChanged(styleOptions, localOptions) )
     {
-        if( _custom || _hasOverrides )
-            onBindOptions(options);
+        if( _isRenderer || _isOverride )
+        {
+            _renderer->prepare(localOptions);
+        }
 
-        _optionsGeneration = options.generation();
+        _optionsGeneration = styleOptions.generation();
         _localOptionsGeneration = localOptions.generation();
     }
 
@@ -94,10 +99,10 @@ bool StylerBase::isBound() const
 }
 
 
-void StylerBase::apply(Renderer* renderer)
+void StylerBase::init(Renderer* renderer)
 {
-    _custom.reset(renderer);
-    _customChanged = true;
+    _isRenderer = renderer != 0;
+    _renderer.reset(renderer);
 }
 
 
@@ -110,10 +115,10 @@ bool StylerBase::isStyleChanged(const Style& style,
     if( _styleGeneration != style.generation() )
         return true;
 
-    if( localOptions.hasOverrides() != _hasOverrides )
+    if( _isOverride != localOptions.hasOverrides() )
         return true;
 
-    return _customChanged;
+    return false;
 }
 
 

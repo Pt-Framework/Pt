@@ -152,8 +152,7 @@ class PT_FORMS_API PlatinumButtonRenderer : public ButtonRenderer
     protected:
         virtual ButtonRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                       const StyleOptions& buttonOptions);
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                            const Gfx::SizeF& contentSize);

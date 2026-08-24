@@ -130,17 +130,15 @@ ButtonRenderer* ButtonRenderer::create() const
 }
 
 
-void ButtonRenderer::prepare(const StyleOptions& options,
-                             const StyleOptions& buttonOptions)
+void ButtonRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, buttonOptions);
+    onPrepare(options);
 }
 
 
 void ButtonRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions buttonOptions;
-    prepare(options, buttonOptions);
+    prepare(options);
 }
 
 
@@ -253,27 +251,20 @@ void ButtonRenderer::renderIcon(PaintContext& context,
 ///////////////////////////////////////////////////////////////////////
 
 ButtonStyler::ButtonStyler()
-: _renderer(0)
 {
 }
 
 
 void ButtonStyler::setRenderer(ButtonRenderer* renderer)
 {
-    _renderer = renderer;
-    apply(renderer);
+    _renderer.reset(renderer);
+    init(renderer);
 }
 
 
 ButtonRenderer* ButtonStyler::renderer()
 {
-    return _renderer;
-}
-
-
-const ButtonRenderer* ButtonStyler::renderer() const
-{
-    return _renderer;
+    return _renderer.get();
 }
 
 
@@ -289,30 +280,26 @@ const StyleOptions& ButtonStyler::options() const
 }
 
 
-const StyleOptions& ButtonStyler::onLocalOptions() const
+StyleOptions& ButtonStyler::onBindOptions(const StyleOptions& global)
 {
+    _options.setParent(&global);
     return _options;
 }
 
 
 Renderer* ButtonStyler::onStyleRenderer(const Style& style)
 {
-    _renderer = style.get<ButtonRenderer>();
-    return _renderer;
+    ButtonRenderer* styleRenderer = style.get<ButtonRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
 }
 
 
 Renderer* ButtonStyler::onCreateRenderer(const Style& style)
 {
-    ButtonRenderer* renderer = style.get<ButtonRenderer>();
-    _renderer = renderer ? renderer->create() : 0;
-    return _renderer;
-}
-
-
-void ButtonStyler::onBindOptions(const StyleOptions& options)
-{
-    _renderer->prepare(options, _options);
+    ButtonRenderer* styleRenderer = style.get<ButtonRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace

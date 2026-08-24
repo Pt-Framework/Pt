@@ -39,100 +39,62 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Renderer-binding controller for extracted style slices.
+/** @brief Styler base class.
 
-    Owns the currently bound %Renderer and the custom renderer source.
-    Detects when a derived styler must acquire a new renderer or refresh
-    its tokens. Derived classes resolve a typed renderer in
-    %onStyleRenderer and apply tokens in %onBindOptions. Shared style
-    renderers are never prepared here; they are synchronized through
-    %Style::reset().
+    Binds a specific renderer or the default renderer to style options.
 */
 class PT_FORMS_API StylerBase : private NonCopyable
 {
+    static const std::size_t InvalidGeneration;
+
     public:
-        /** @brief Constructs an unbound style controller.
+        /** @brief Constructs an unbound styler.
         */
         StylerBase();
 
-        /** @brief Binds or refreshes the renderer for the current style.
-
-            Local options come from %onLocalOptions. Uses the custom renderer
-            when one is assigned, otherwise calls %onStyleRenderer and clones
-            the result through %onCreateRenderer if local overrides exist.
-            Calls %onBindOptions when the bound renderer is custom or an
-            override clone and the global or local options generation changed.
-            Unchanged bindings are left in place.
+        /** @brief Destructor.
         */
-        Renderer* bind(const Style& style, const StyleOptions& options);
+        virtual ~StylerBase();
 
-        /** @brief Returns true if a renderer is currently bound.
+        /** @brief Binds or rebinds to a style and global style options.
+        */
+        Renderer* bind(const Style& style, const StyleOptions& styleOptions);
+
+        /** @brief Returns true if bound.
         */
         bool isBound() const;
 
     protected:
-        /** @brief Assigns an externally owned custom renderer.
-
-            Stores the custom source and marks it dirty so the next %bind
-            call reacquires it. A null renderer falls back to the current
-            style. Pointer identity is not compared; addresses can be reused.
+        /** @brief Initializes with a specific renderer.
         */
-        void apply(Renderer* renderer);
+        void init(Renderer* renderer);
 
-        /** @brief Returns the widget-local style options.
-
-            Options always exist. The returned object is used for override
-            detection and option-generation checks.
+        /** @brief Returns the specific style options.
         */
-        virtual const StyleOptions& onLocalOptions() const = 0;
+        virtual StyleOptions& onBindOptions(const StyleOptions& global) = 0;
 
-        /** @brief Resolves the renderer for the current style source.
-
-            Must return the shared style renderer to bind, or 0 if none is
-            available. Must not prepare the returned renderer. The returned
-            renderer is cloned automatically by %onCreateRenderer when local
-            overrides exist. Custom renderers are handled by %StylerBase.
+        /** @brief Resolves the shared style renderer for the current style.
         */
         virtual Renderer* onStyleRenderer(const Style& style) = 0;
 
-        /** @brief Creates an independant renderer.
-
-            Called by %bind when the renderer returned by %onStyleRenderer
-            is a shared style prototype and local overrides exist. The
-            implementation must allocate and return a new renderer of the
-            same concrete type. Must not prepare the returned renderer.
+        /** @brief Creates an independant style renderer.
         */
         virtual Renderer* onCreateRenderer(const Style& style) = 0;
 
-        /** @brief Applies tokens to the currently bound renderer.
-
-            Called only after a renderer has been bound and only for custom
-            renderers and override clones. Shared style prototypes stay
-            synchronized through %Style::reset().
-        */
-        virtual void onBindOptions(const StyleOptions& options) = 0;
-
     private:
-        /** @brief Returns true if the style source must be rebound.
-        */
         bool isStyleChanged(const Style& style,
                             const StyleOptions& localOptions) const;
 
-        /** @brief Returns true if the bound renderer must refresh its tokens.
-        */
         bool isOptionsChanged(const StyleOptions& options,
                               const StyleOptions& localOptions) const;
 
     private:
-        static const std::size_t InvalidGeneration;
-
         FacetPtr<Renderer> _renderer;
-        FacetPtr<Renderer> _custom;
         std::size_t        _styleGeneration;
         std::size_t        _optionsGeneration;
         std::size_t        _localOptionsGeneration;
-        bool               _hasOverrides;
-        bool               _customChanged;
+        bool               _isRenderer;
+        bool               _isOverride;
 };
 
 } // namespace

@@ -100,11 +100,7 @@ void PushButton::setLayout(Direction d)
 
 const Gfx::Brush& PushButton::foreground() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const ForegroundOption& foreground =
-        options.get<ForegroundOption>(buttonOptions);
-    return foreground.value();
+    return _buttonStyler.options().get<ForegroundOption>().value();
 }
 
 
@@ -119,10 +115,7 @@ void PushButton::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& PushButton::contour() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const ContourOption& contour = options.get<ContourOption>(buttonOptions);
-    return contour.value();
+    return _buttonStyler.options().get<ContourOption>().value();
 }
 
 
@@ -137,11 +130,7 @@ void PushButton::setContour(const Gfx::Pen& p)
 
 const Gfx::Color& PushButton::accentColor() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const AccentColorOption& accentColor =
-        options.get<AccentColorOption>(buttonOptions);
-    return accentColor.value();
+    return _buttonStyler.options().get<AccentColorOption>().value();
 }
 
 
@@ -156,11 +145,7 @@ void PushButton::setAccentColor(const Gfx::Color& color)
 
 const Gfx::Color& PushButton::highlightColor() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const HighlightColorOption& highlightColor =
-        options.get<HighlightColorOption>(buttonOptions);
-    return highlightColor.value();
+    return _buttonStyler.options().get<HighlightColorOption>().value();
 }
 
 
@@ -175,10 +160,7 @@ void PushButton::setHighlightColor(const Gfx::Color& color)
 
 const Gfx::Color& PushButton::textColor() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const StyleOptions& buttonOptions = _buttonStyler.options();
-    const TextColorOption& textColor = options.get<TextColorOption>(buttonOptions);
-    return textColor.value();
+    return _buttonStyler.options().get<TextColorOption>().value();
 }
 
 
@@ -194,11 +176,12 @@ void PushButton::setTextColor(const Gfx::Color& color)
 Gfx::Font PushButton::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const FontOption& base = options.get<FontOption>();
 
-    const FontOption& font = options.get<FontOption>(buttonOptions);
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    return font.getFont(baseFont);
+    const StyleOptions& buttonOptions = _buttonStyler.options();
+    const FontOption& overlay = buttonOptions.get<FontOption>();
+
+    return overlay.getFont( base.value() );
 }
 
 
@@ -332,11 +315,10 @@ void PushButton::onRescaleEvent(const RescaleEvent& ev)
 
 void PushButton::setRenderer(ButtonRenderer* renderer)
 {
-    const Style& style = Application::instance().style();
-    const StyleOptions& options = Application::instance().styleOptions();
-
     _buttonStyler.setRenderer(renderer);
-    _buttonStyler.bind(style, options);
+    _buttonStyler.bind(Application::instance().style(),
+                       Application::instance().styleOptions());
+
     invalidate();
 }
 

@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2016 Marc Boris Duerner 
+﻿/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -45,7 +45,7 @@ namespace {
 
 std::size_t nextStyleGeneration()
 {
-    static std::size_t generation = 0;
+    static std::size_t generation = 1;
     return ++generation;
 }
 
@@ -94,7 +94,7 @@ void Style::assign(const Style& style)
     for(FacetMap::iterator it = _facets.begin(); it != _facets.end(); ++it)
     {
         Facet* facet = it->second;
-        
+
         if( 0 == facet->unref() )
             delete facet;
     }
@@ -114,7 +114,7 @@ void Style::set(Facet* facet)
         return;
 
     FacetMap::value_type val(facet->typeId(), facet);
-    
+
     std::pair<FacetMap::iterator, bool> r = _facets.insert(val);
     if( ! r.second )
     {
