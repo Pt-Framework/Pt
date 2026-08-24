@@ -179,9 +179,9 @@ Gfx::Font PushButton::font() const
     const FontOption& base = options.get<FontOption>();
 
     const StyleOptions& buttonOptions = _buttonStyler.options();
-    const FontOption& overlay = buttonOptions.get<FontOption>();
+    const FontOption& font = buttonOptions.get<FontOption>();
 
-    return overlay.getFont( base.value() );
+    return font.getFont( base.value() );
 }
 
 
@@ -197,11 +197,12 @@ void PushButton::setFont(const Gfx::Font& font)
 
 void PushButton::setFontSize(std::size_t size)
 {
-    StyleOptions& local = _buttonStyler.options();
-    const FontOption* localFont = local.find<FontOption>();
+    StyleOptions& buttonOptions = _buttonStyler.options();
+    const FontOption* localFont = buttonOptions.find<FontOption>();
+
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
-    local.set(font);
+    buttonOptions.set(font);
 
     invalidate();
 }
