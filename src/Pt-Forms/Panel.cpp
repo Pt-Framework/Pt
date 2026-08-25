@@ -96,19 +96,14 @@ const Gfx::Brush* Panel::background() const
     if( ! _hasBackground )
         return 0;
 
-    const BackgroundOption* background = _panelStyleOptions.find<BackgroundOption>();
-    if(background)
-        return &background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<BackgroundOption>().value();
+    return &_panelStyler.options().get<BackgroundOption>().value();
 }
 
 
 void Panel::setBackground(const Gfx::Brush& b)
 {
     BackgroundOption background(b);
-    _panelStyleOptions.set(background);
+    _panelStyler.options().set(background);
     _hasBackground = true;
 
     invalidate();
@@ -127,19 +122,14 @@ const Gfx::Pen* Panel::contour() const
     if( ! _hasFrame )
         return 0;
 
-    const ContourOption* contour = _panelStyleOptions.find<ContourOption>();
-    if(contour)
-        return &contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<ContourOption>().value();
+    return &_panelStyler.options().get<ContourOption>().value();
 }
 
 
 void Panel::setContour(const Gfx::Pen& pen)
 {
     ContourOption contour(pen);
-    _panelStyleOptions.set(contour);
+    _panelStyler.options().set(contour);
     _hasFrame = true;
 
     invalidate();
@@ -167,13 +157,9 @@ void Panel::onRescaleEvent(const RescaleEvent& ev)
 
 void Panel::setRenderer(PanelRenderer* renderer)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if( renderer )
-        _panelStyle.bind(*renderer, options, _panelStyleOptions);
-    else
-        _panelStyle.bind(Application::instance().style(), options,
-                         _panelStyleOptions);
+    _panelStyler.setRenderer(renderer);
+    _panelStyler.bind(Application::instance().style(),
+                      Application::instance().styleOptions());
 
     invalidate();
 }
@@ -186,8 +172,8 @@ void Panel::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    PanelRenderer* renderer = _panelStyle.rebind(style, options,
-                                                 _panelStyleOptions);
+    _panelStyler.bind(style, options);
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer )
         return;
 
@@ -213,7 +199,7 @@ void Panel::onInvalidate()
 
 Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer )
         return Gfx::SizeF(0, 0);
 
@@ -262,7 +248,7 @@ void Panel::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer )
         return;
 
@@ -290,7 +276,7 @@ void Panel::onLayout(const Gfx::RectF& rect)
 
 void Panel::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _panelStyle.renderer() )
+    if( ! _panelStyler.renderer() )
         return;
 
     Gfx::RectF widgetRect( size() );
@@ -305,7 +291,7 @@ void Panel::onPaintBackground(PaintContext& context,
                               const Gfx::RectF& rect,
                               const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || ! _hasBackground )
         return;
 
@@ -317,7 +303,7 @@ void Panel::onPaintContent(PaintContext& context,
                            const Gfx::RectF& contentRect,
                            const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || _picture.empty() )
         return;
 
@@ -384,7 +370,7 @@ void Panel::onPaintFrame(PaintContext& context,
                          const Gfx::RectF& rect,
                          const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || ! _hasFrame )
         return;
 

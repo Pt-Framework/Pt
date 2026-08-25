@@ -107,19 +107,14 @@ const Gfx::Brush* Label::background() const
     if( ! _hasBackground )
         return 0;
 
-    const BackgroundOption* background = _panelStyleOptions.find<BackgroundOption>();
-    if(background)
-        return &background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<BackgroundOption>().value();
+    return &_panelStyler.options().get<BackgroundOption>().value();
 }
 
 
 void Label::setBackground(const Gfx::Brush& b)
 {
     BackgroundOption background(b);
-    _panelStyleOptions.set(background);
+    _panelStyler.options().set(background);
     _hasBackground = true;
 
     invalidate();
@@ -138,19 +133,14 @@ const Gfx::Pen* Label::contour() const
     if( ! _hasFrame )
         return 0;
 
-    const ContourOption* contour = _panelStyleOptions.find<ContourOption>();
-    if(contour)
-        return &contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<ContourOption>().value();
+    return &_panelStyler.options().get<ContourOption>().value();
 }
 
 
 void Label::setContour(const Gfx::Pen& p)
 {
     ContourOption contour(p);
-    _panelStyleOptions.set(contour);
+    _panelStyler.options().set(contour);
     _hasFrame = true;
 
     invalidate();
@@ -166,19 +156,14 @@ void Label::setFrame(bool b)
 
 const Gfx::Color& Label::textColor() const
 {
-    const TextColorOption* textColor = _panelStyleOptions.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>().value();
+    return _panelStyler.options().get<TextColorOption>().value();
 }
 
 
 void Label::setTextColor(const Gfx::Color& color)
 {
     TextColorOption textColor(color);
-    _panelStyleOptions.set(textColor);
+    _panelStyler.options().set(textColor);
 
     invalidate();
 }
@@ -187,9 +172,12 @@ void Label::setTextColor(const Gfx::Color& color)
 Gfx::Font Label::font() const
 {
     const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
+    const FontOption& base = options.get<FontOption>();
+
+    const StyleOptions& panelOptions = _panelStyler.options();
+    const FontOption& font = panelOptions.get<FontOption>();
+
+    return font.getFont( base.value() );
 }
 
 
@@ -197,7 +185,7 @@ void Label::setFont(const Gfx::Font& font)
 {
     FontOption fontOption;
     fontOption.setFont(font);
-    _panelStyleOptions.set(fontOption);
+    _panelStyler.options().set(fontOption);
 
     invalidate();
 }
@@ -205,10 +193,12 @@ void Label::setFont(const Gfx::Font& font)
 
 void Label::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
+    StyleOptions& panelOptions = _panelStyler.options();
+    const FontOption* localFont = panelOptions.findLocal<FontOption>();
+
     FontOption font = localFont ? *localFont : FontOption();
     font.setSize(size);
-    _panelStyleOptions.set(font);
+    panelOptions.set(font);
 
     invalidate();
 }
@@ -216,10 +206,11 @@ void Label::setFontSize(std::size_t size)
 
 void Label::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
+    StyleOptions& local = _panelStyler.options();
+    const FontOption* localFont = local.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setWeight(weight);
-    _panelStyleOptions.set(font);
+    local.set(font);
 
     invalidate();
 }
@@ -227,10 +218,11 @@ void Label::setFontWeight(Gfx::Font::Weight weight)
 
 void Label::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _panelStyleOptions.findLocal<FontOption>();
+    StyleOptions& local = _panelStyler.options();
+    const FontOption* localFont = local.findLocal<FontOption>();
     FontOption font = localFont ? *localFont : FontOption();
     font.setSlant(slant);
-    _panelStyleOptions.set(font);
+    local.set(font);
 
     invalidate();
 }
@@ -286,13 +278,9 @@ void Label::onResizeEvent(const ResizeEvent& ev)
 
 void Label::setRenderer(PanelRenderer* renderer)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if( renderer )
-        _panelStyle.bind(*renderer, options, _panelStyleOptions);
-    else
-        _panelStyle.bind(Application::instance().style(), options,
-                         _panelStyleOptions);
+    _panelStyler.setRenderer(renderer);
+    _panelStyler.bind(Application::instance().style(),
+                      Application::instance().styleOptions());
 
     invalidate();
 }
@@ -305,8 +293,8 @@ void Label::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    PanelRenderer* renderer = _panelStyle.rebind(style, options,
-                                                 _panelStyleOptions);
+    _panelStyler.bind(style, options);
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer )
         return;
 
@@ -332,7 +320,7 @@ void Label::onInvalidate()
 
 Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer )
         return Gfx::SizeF(0, 0);
 
@@ -378,7 +366,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer )
         return;
 
@@ -486,7 +474,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 void Label::onPaint(PaintContext& context,
                     const Gfx::RectF& /*rect*/)
 {
-    if( ! _panelStyle.renderer() )
+    if( ! _panelStyler.renderer() )
         return;
 
     Gfx::RectF widgetRect( size() );
@@ -502,7 +490,7 @@ void Label::onPaintBackground(PaintContext& context,
                               const Gfx::RectF& rect,
                               const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || ! _hasBackground )
         return;
 
@@ -513,7 +501,7 @@ void Label::onPaintFrame(PaintContext& context,
                          const Gfx::RectF& rect,
                          const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || ! _hasFrame )
         return;
 
@@ -524,7 +512,7 @@ void Label::onPaintIcon(PaintContext& context,
                         const Gfx::RectF& contentRect,
                         const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || _icon.empty() || _pixmap.empty() )
         return;
 
@@ -537,7 +525,7 @@ void Label::onPaintText(PaintContext& context,
                         const Gfx::RectF& contentRect,
                         const PanelState& state)
 {
-    PanelRenderer* renderer = _panelStyle.renderer();
+    PanelRenderer* renderer = _panelStyler.renderer();
     if( ! renderer || ! _icon.empty() )
         return;
 

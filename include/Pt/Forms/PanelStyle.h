@@ -30,7 +30,7 @@
 #ifndef Pt_Forms_PanelStyle_h
 #define Pt_Forms_PanelStyle_h
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
@@ -73,7 +73,7 @@ class PT_FORMS_API PanelState
     Provides rendering primitives for panel backgrounds, frames, text,
     and icons. Subclasses override the protected virtuals.
 */
-class PT_FORMS_API PanelRenderer : public Style::Facet
+class PT_FORMS_API PanelRenderer : public Renderer
 {
     public:
         explicit PanelRenderer(std::size_t refs = 0);
@@ -84,12 +84,9 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
         */
         PanelRenderer* create() const;
 
-        /** @brief Applies the widget-local panel style overrides to this renderer.
-
-            This is the explicit synchronization point for the panel slice.
+        /** @brief Applies the panel style options to this renderer.
         */
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& panelOptions);
+        void prepare(const StyleOptions& options);
 
     public:
         /** @brief Returns the outer size including the frame for the given content size.
@@ -141,8 +138,7 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
 
         virtual PanelRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& panelOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -173,18 +169,41 @@ class PT_FORMS_API PanelRenderer : public Style::Facet
                                   const PanelState& state) = 0;
 };
 
-/** @brief Binds a panel-like widget to the currently active renderer.
-
-    Keeps the active renderer binding for the shared style renderer, a private
-    override clone, or an explicitly assigned custom renderer.
+/** @brief Panel styler.
 */
-class PT_FORMS_API PanelStyle : public Styler<PanelRenderer,
-                                                   StyleOptions>
+class PT_FORMS_API PanelStyler : public StylerBase
 {
     public:
-        /** @brief Constructs an unbound panel style controller.
+        /** @brief Constructs an unbound panel styler.
         */
-        PanelStyle();
+        PanelStyler();
+
+        /** @brief Assigns a specific panel renderer.
+        */
+        void setRenderer(PanelRenderer* renderer = 0);
+
+        /** @brief Returns the bound panel renderer or 0.
+        */
+        PanelRenderer* renderer();
+
+        /** @brief Returns the panel style options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the panel style options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<PanelRenderer> _renderer;
+        StyleOptions            _options;
 };
 
 } // namespace

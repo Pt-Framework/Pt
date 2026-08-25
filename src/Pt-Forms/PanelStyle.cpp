@@ -29,6 +29,7 @@
 
 #include <Pt/Forms/PanelStyle.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Style.h>
 
 namespace Pt {
 
@@ -73,7 +74,7 @@ void PanelState::setFocused(bool value)
 ///////////////////////////////////////////////////////////////////////
 
 PanelRenderer::PanelRenderer(std::size_t refs)
-: Style::Facet( typeid(PanelRenderer), refs )
+: Renderer( typeid(PanelRenderer), refs )
 {
 }
 
@@ -89,17 +90,15 @@ PanelRenderer* PanelRenderer::create() const
 }
 
 
-void PanelRenderer::prepare(const StyleOptions& options,
-                            const StyleOptions& panelOptions)
+void PanelRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, panelOptions);
+    onPrepare(options);
 }
 
 
 void PanelRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions panelOptions;
-    prepare(options, panelOptions);
+    prepare(options);
 }
 
 
@@ -159,11 +158,59 @@ void PanelRenderer::renderIcon(PaintContext& context,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// PanelStyle
+// PanelStyler
 ///////////////////////////////////////////////////////////////////////
 
-PanelStyle::PanelStyle()
+PanelStyler::PanelStyler()
 {
+}
+
+
+void PanelStyler::setRenderer(PanelRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+PanelRenderer* PanelStyler::renderer()
+{
+    return _renderer.get();
+}
+
+
+StyleOptions& PanelStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& PanelStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& PanelStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.setParent(&global);
+    return _options;
+}
+
+
+Renderer* PanelStyler::onStyleRenderer(const Style& style)
+{
+    PanelRenderer* styleRenderer = style.get<PanelRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* PanelStyler::onCreateRenderer(const Style& style)
+{
+    PanelRenderer* styleRenderer = style.get<PanelRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace

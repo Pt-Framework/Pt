@@ -116,52 +116,6 @@ namespace Pt {
 
 namespace Forms {
 
-namespace {
-
-const Gfx::Brush& resolvePanelBackground(const StyleOptions& options,
-                                         const StyleOptions& local)
-{
-    const BackgroundOption* background = local.find<BackgroundOption>();
-    if(background)
-        return background->value();
-
-    return options.get<BackgroundOption>().value();
-}
-
-
-const Gfx::Pen& resolvePanelContour(const StyleOptions& options,
-                                    const StyleOptions& local)
-{
-    const ContourOption* contour = local.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
-    return options.get<ContourOption>().value();
-}
-
-
-const Gfx::Color& resolvePanelTextColor(const StyleOptions& options,
-                                        const StyleOptions& local)
-{
-    const TextColorOption* textColor = local.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    return options.get<TextColorOption>().value();
-}
-
-
-Gfx::Font resolvePanelFont(const StyleOptions& options,
-                           const StyleOptions& local)
-{
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = local.find<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
-}
-
-
-} // anonymous namespace
-
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumRendererBase
 ///////////////////////////////////////////////////////////////////////////////
@@ -321,19 +275,22 @@ PanelRenderer* PlatinumPanelRenderer::onCreate() const
 }
 
 
-void PlatinumPanelRenderer::onPrepare(const StyleOptions& options,
-                                      const StyleOptions& panelOptions)
+void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
 {
     _cornerRadius = platinumPanelCornerRadius;
 
-    _bgPainter.setBrush( resolvePanelBackground(options, panelOptions) );
+    _bgPainter.setBrush( options.get<BackgroundOption>().value() );
 
-    Gfx::Pen framePen( resolvePanelContour(options, panelOptions) );
+    Gfx::Pen framePen( options.get<ContourOption>().value() );
     framePen.setJoinStyle(Gfx::Pen::BevelJoin);
     _framePainter.setPen(framePen);
 
-    _textPainter.setFont( resolvePanelFont(options, panelOptions) );
-    _textPainter.setPen( Gfx::Pen( resolvePanelTextColor(options, panelOptions) ) );
+    const FontOption& font = options.get<FontOption>();
+    const Gfx::Font& base = options.parent()
+                          ? options.parent()->get<FontOption>().value()
+                          : font.value();
+    _textPainter.setFont( font.getFont(base) );
+    _textPainter.setPen( Gfx::Pen( options.get<TextColorOption>().value() ) );
 }
 
 
@@ -462,8 +419,11 @@ void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
     _highlightPainter.setBrush( highlightBrush );
     _highlightPainter.setPen( cPen );
 
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    _textPainter.setFont( baseFont );
+    const FontOption& font = options.get<FontOption>();
+    const Gfx::Font& base = options.parent()
+                          ? options.parent()->get<FontOption>().value()
+                          : font.value();
+    _textPainter.setFont( font.getFont(base) );
     _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 

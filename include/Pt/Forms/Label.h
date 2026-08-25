@@ -161,8 +161,7 @@ class PT_FORMS_API Label : public Control
         Gfx::SizeF  _measuredIconSize;
         bool        _iconInvalid;
 
-        PanelStyle        _panelStyle;
-        StyleOptions      _panelStyleOptions;
+        PanelStyler       _panelStyler;
         bool              _hasBackground;
         bool              _hasFrame;
         Gfx::RectF        _contentRect;
