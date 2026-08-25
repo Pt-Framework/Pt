@@ -338,3 +338,4 @@ LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL)
                                               $(PRELIB)Pt-Soap$(SUFDLL)
                                               $(PRELIB)Pt-XmlRpc$(SUFDLL)
                                               $(PRELIB)Pt-Gfx$(SUFDLL) ;
+
