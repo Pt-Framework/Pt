@@ -6,12 +6,13 @@ description: "API Documentation"
 # Documentation Structure
 
 Doxygen documentation for classes/functions/groups is the foundation.
-Pages and agent instructions build on top of it. Pages assemble the
-Doxygen content for human readers, and instructions files index it by
+Pages, the Website and agent instructions build on top of it. Pages assemble
+the Doxygen content for human readers, and instructions files index it by
 features for agents.
 
 # API Documentation
 
+- Prefer brief only documentation in simple cases.
 - All API documentation (namespaces, classes, methods, enums, free
   functions) belongs in the public header files, not in `.cpp` files.
 - Document every public namespace, class, funtions using Doxygen.
@@ -123,14 +124,22 @@ class MyClass
     */
     virtual ~MyClass();
 
-    /** @brief Brief description of the method.
-
-        The detailed description of the method.
-
-        @param a Description of parameter a.
-        @param b Description of parameter b.
+    /** @brief Multiplies @a a and @a b and returns the result.
     */
-    void doSomething(int a, int b);
+    int multiply(int a, int b);
+
+    /** @brief This method does something complicated.
+
+        Detailed description of the method.
+
+        @param name Description of parameter name.
+        @param b Description of parameter b.
+
+        @return Description of the result.
+
+        @throw std::invalid_argument if @a  b is 0.
+    */
+    float somethingComplicated(const std::string& name, float b);
 };
 
 }
