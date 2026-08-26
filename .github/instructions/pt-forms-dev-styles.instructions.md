@@ -138,27 +138,17 @@ Forms currently uses two renderer-management patterns. Preserve the established 
 - Widgets that use `%StylerBase` call `%bind(style, options)` during `%onInvalidate()`. Widgets that still use the template `%Styler` call `%rebind(style, options, localOptions)`.
 - In `%onInvalidate()`, call the base implementation first, reacquire the renderer through the slice styler, then refresh widget-owned derived caches such as icon pixmaps, and finally request relayout.
 
-### Button Slice
+### Widget Slice
 
-- `%PushButton` uses the extracted slice pattern with a `%StyleOptions` overlay, `%ButtonState`, `%ButtonRenderer`, and `%ButtonStyler`.
-- `%ButtonStyler` derives from `%StylerBase` and owns the `%StyleOptions` overlay.
-- The overlay stores only widget-local override tokens such as foreground, contour, accent/highlight colors, text color, and font overrides. Unset slots fall back to the theme through the parent set on the overlay in `%onBindOptions(...)`.
-- `%ButtonState` owns only transient interaction flags: `enabled`, `hovered`, `focused`, `pressed`, and `flat`.
-- `%ButtonRenderer` derives from `%Renderer` and provides the prepared button-specific primitives `measureContent()`, `measureFrame()`, `layoutFrame()`, `layoutContent()`, `layoutMnemonic()`, `textPainter()`, `prepareIcon()`, `renderBackground()`, `renderChrome()`, `renderText()`, `renderMnemonic()`, and `renderIcon()`.
-- `%ButtonRenderer::prepare(const StyleOptions& options)` receives the button overlay with the global options as its parent. Implementations resolve tokens with `%options.get<T>()` and merge partial font overrides explicitly against the base font.
-- `%PushButton::setRenderer(ButtonRenderer*)` keeps `nullptr` as the public style-fallback API. It stores the pointer with `%ButtonStyler::setRenderer(...)` and then calls `%bind(style, options)` immediately because `%invalidate()` only posts an event. `%PushButton::onInvalidate()` calls `%bind(style, options)`, refreshes the widget-owned icon picture through `%ButtonRenderer::prepareIcon(...)`, and then requests relayout.
-- Button widgets should use `%ButtonState` as the single source of truth for render-relevant booleans such as `pressed` and `flat`. Keep pure control-flow bookkeeping outside `%ButtonState`.
-
-### Panel Slice
-
-- `%Panel` and `%Label` share the extracted slice pattern with a `%StyleOptions` overlay, `%PanelState`, `%PanelRenderer`, and `%PanelStyler`.
-- `%PanelStyler` derives from `%StylerBase` and owns the `%StyleOptions` overlay.
-- The overlay owns only widget-local panel override tokens such as background, contour, text color, and font overrides. `%Panel` and `%Label` keep `_hasBackground` / `_hasFrame` as widget policy flags.
-- `%PanelState` currently owns only the transient render flags `enabled` and `focused`.
-- `%PanelRenderer` derives from `%Renderer` and provides the prepared panel-like primitives `measureFrame()`, `layoutFrame()`, `textPainter()`, `renderBackground()`, `renderFrame()`, `renderText()`, and `renderIcon()`.
-- `%PanelRenderer::prepare(const StyleOptions& options)` receives the panel overlay with the global options as its parent. Implementations resolve tokens with `%options.get<T>()` and merge partial font overrides explicitly against the base font.
-- `%Panel::setRenderer(PanelRenderer*)` and `%Label::setRenderer(PanelRenderer*)` keep `nullptr` as the public style-fallback API. They store the pointer with `%PanelStyler::setRenderer(...)` and then call `%bind(style, options)` immediately because `%invalidate()` only posts an event. `%onInvalidate()` calls `%bind(style, options)`, refreshes widget-owned icon caches afterwards, and then requests relayout.
-- Prefer reusing `%PanelRenderer` for generic framed/background/text/icon container chrome before introducing a new dedicated renderer family. Keep a dedicated renderer only when the new widget needs genuinely different primitives, metrics, or native integration.
+- A widget using the extracted slice pattern consists of a `%StyleOptions` overlay, a widget-specific `%XState`, `%XRenderer`, and `%XStyler`.
+- `%XStyler` derives from `%StylerBase`, owns the `%StyleOptions` overlay, and exposes typed `%renderer()` and `%options()` accessors. The widget retains geometry, widget-owned caches, and render-time state.
+- The overlay stores only widget-local override tokens appropriate to the widget, such as backgrounds, foregrounds, contours, accents, text colors, and font overrides. Unset tokens fall back to the global theme through the parent set in `%XStyler::onBindOptions(...)`. Keep widget policy flags, such as whether a background or frame is enabled, on the widget rather than in the overlay.
+- `%XState` owns only transient, render-relevant interaction flags. It is the single source of truth for those flags; keep pure control-flow bookkeeping outside it.
+- `%XRenderer` derives from `%Renderer` and provides only the prepared measure, layout, painter, cache-preparation, and render primitives that the widget needs. Follow the explicit layer naming and parameter-shape rules above. Reuse an existing generic renderer family when its primitives, metrics, and native integration fit; introduce a dedicated renderer family only when they genuinely differ.
+- `%XRenderer::prepare(const StyleOptions& options)` receives the widget overlay with the global options as its parent. Resolve tokens with `%options.get<T>()`, merge partial font overrides explicitly against the base font, and have `%onReset(...)` call `%prepare(...)` so shared renderers are refreshed only through `%Style::reset(...)`.
+- `%Widget::setRenderer(XRenderer*)` keeps `nullptr` as the public style-fallback API. It stores the pointer through `%XStyler::setRenderer(...)`, immediately calls `%bind(style, options)` because `%invalidate()` only posts an event, and then invalidates.
+- `%Widget::onInvalidate()` calls the base implementation, binds through the same path, reacquires the typed renderer, refreshes any widget-owned derived caches, and requests relayout.
+- `%StylerBase` retains its existing `%isDefault(global)` decision for selecting the shared renderer or a private override clone.
 
 ### State Collection
 

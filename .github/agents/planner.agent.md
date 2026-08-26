@@ -8,7 +8,7 @@ model: ["GPT-5.6 Terra", "Grok 4.6 (xai)"]
 handoffs:
   - label: "Start Development"
     agent: Developer
-    prompt: "Use the concrete work ID and plan path supplied by Planner. Read `.agents/session/<work-id>/plan.md` before starting implementation, and reuse that work ID for the implementation report."
+    prompt: "Use the exact work ID and plan path supplied by Planner. Before starting implementation, read `.agents/session/<work-id>/plan.md`, where <work-id> is the work ID. Reuse that work ID for the implementation report."
     send: false
 ---
 

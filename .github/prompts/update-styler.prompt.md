@@ -22,8 +22,8 @@ Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` refere
 - `setRenderer(XRenderer* = 0)` must store the typed pointer and call `init(renderer)`. A null pointer falls back to the style.
 - Provide typed `renderer()` and `options()` accessors. Do not downcast from `StylerBase` or use the return value of `bind`.
 - Cache the shared or cloned renderer in the typed pointer used by `renderer()`.
-- Use `StyleOptions::hasOptions()` to determine whether the local overlay requires an override clone.
-- `StylerBase` prepares only a custom renderer or override clone (`_isRenderer || _isOverride`) through `Renderer::prepare(localOptions)`. Synchronize shared prototypes only through `Style::reset` to `onReset`.
+- `StylerBase` determines whether the local overlay requires an override clone by comparing it with the global options: `localOptions.isDefault(styleOptions)` sets `_isDefaultOptions`. When `_isDefaultOptions` is true, the shared style renderer is used; otherwise an override clone is created.
+- `StylerBase` prepares only a specific renderer or override clone (`_isRenderer || ! _isDefaultOptions`) through `Renderer::prepare(localOptions)`. Shared style prototypes are not prepared during bind; they are synchronized through `Style::reset` calling `Renderer::onReset(options)`.
 - Move the widget's typed style-option accessors and mutators to `XStyler`. The styler getters resolve effective values through `_options.get<T>().value()`; its setters create and store the matching local option token through `_options.set(...)` without invalidating or binding.
 - Preserve partial font overrides in `XStyler`: `setFontSize`, `setFontWeight`, and `setFontSlant` begin with `_options.findLocal<FontOption>()` when present, change only the requested attribute, and store the result.
 
@@ -54,6 +54,5 @@ Do not change:
 
 The plan must:
 - Identify every implementation file and symbol that needs to change for this slice, with the intended change for each.
-- Include updating `.github/instructions/pt-forms-dev-styles.instructions.md` for this slice to describe `XStyler : StylerBase`.
 - Include searches within the migrated slice and its concrete theme renderers for the old `XStyle` type, widget-owned overlay, `rebind(`, and two-argument `prepare` / `onPrepare` calls.
 - Include `jam.bat -q -j4` from the repository root as the final validation step and require exit code 0.

@@ -7,7 +7,7 @@ model: [ "Gemini 3.1 Pro (Preview)" ]
 handoffs:
   - label: "Plan Implementation"
     agent: Planner
-    prompt: "Use the concrete work ID and requirements path supplied by Researcher. Read `.agents/session/<work-id>/requirements.md` before creating the implementation plan, and reuse that work ID."
+    prompt: "Use the exact work ID and requirements path supplied by Researcher. Before creating the implementation plan, read `.agents/session/<work-id>/requirements.md`, where <work-id> is the work ID. Reuse that work ID."
     send: false
 ---
 
