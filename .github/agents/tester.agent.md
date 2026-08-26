@@ -3,7 +3,7 @@ name: "Tester"
 description: "Use when adding, updating, building, or running focused Pt C++ unit tests."
 argument-hint: "Test the specified change or module. Name affected files, expected behavior, and any relevant test target."
 tools: [read, edit, search, execute]
-model: [ "GPT-5.6 Terra" ]
+model: [ "GPT-5.6 Terra", "Grok 4.6 (xai)" ]
 ---
 
 # Agent Profile
