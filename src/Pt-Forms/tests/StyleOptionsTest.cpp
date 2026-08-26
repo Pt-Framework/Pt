@@ -69,8 +69,8 @@ class StyleOptionsTest : public Unit::TestSuite
         {
             StyleOptions options;
 
-            PT_UNIT_ASSERT( ! options.hasOverrides() );
-            PT_UNIT_ASSERT(options.generation() == 0);
+            PT_UNIT_ASSERT( ! options.hasOptions() );
+            PT_UNIT_ASSERT(options.generation() == 1);
             PT_UNIT_ASSERT(options.find<BackgroundOption>() == 0);
             PT_UNIT_ASSERT(options.find<ForegroundOption>() == 0);
             PT_UNIT_ASSERT(options.find<ContourOption>() == 0);
@@ -93,7 +93,7 @@ class StyleOptionsTest : public Unit::TestSuite
         {
             StyleOptions options = StyleOptions::defaults();
 
-            PT_UNIT_ASSERT( options.hasOverrides() );
+            PT_UNIT_ASSERT( options.hasOptions() );
             PT_UNIT_ASSERT(options.find<BackgroundOption>() != 0);
             PT_UNIT_ASSERT(options.find<ForegroundOption>() != 0);
             PT_UNIT_ASSERT(options.find<ContourOption>() != 0);
@@ -157,23 +157,23 @@ class StyleOptionsTest : public Unit::TestSuite
             BackgroundOption background(Gfx::Color(1, 2, 3));
 
             options.set(background);
-            PT_UNIT_ASSERT( options.hasOverrides() );
+            PT_UNIT_ASSERT( options.hasOptions() );
             PT_UNIT_ASSERT(options.find<BackgroundOption>() != 0);
             PT_UNIT_ASSERT(options.get<BackgroundOption>().value().color() ==
                            Gfx::Color(1, 2, 3));
 
             options.reset<BackgroundOption>();
-            PT_UNIT_ASSERT( ! options.hasOverrides() );
+            PT_UNIT_ASSERT( ! options.hasOptions() );
             PT_UNIT_ASSERT(options.find<BackgroundOption>() == 0);
 
             TextColorOption textColor(Gfx::Color(9, 8, 7));
             options.set(textColor);
-            PT_UNIT_ASSERT( options.hasOverrides() );
+            PT_UNIT_ASSERT( options.hasOptions() );
             PT_UNIT_ASSERT(options.get<TextColorOption>().value() ==
                            Gfx::Color(9, 8, 7));
 
             options.reset<TextColorOption>();
-            PT_UNIT_ASSERT( ! options.hasOverrides() );
+            PT_UNIT_ASSERT( ! options.hasOptions() );
             PT_UNIT_ASSERT(options.find<TextColorOption>() == 0);
         }
 
@@ -237,36 +237,36 @@ class StyleOptionsTest : public Unit::TestSuite
         void HasOverridesEmptyBag()
         {
             StyleOptions options;
-            PT_UNIT_ASSERT( ! options.hasOverrides() );
+            PT_UNIT_ASSERT( ! options.hasOptions() );
 
             BackgroundOption background(Gfx::Color(1, 1, 1));
             options.set(background);
-            PT_UNIT_ASSERT( options.hasOverrides() );
+            PT_UNIT_ASSERT( options.hasOptions() );
 
             options.reset<BackgroundOption>();
-            PT_UNIT_ASSERT( ! options.hasOverrides() );
+            PT_UNIT_ASSERT( ! options.hasOptions() );
         }
 
 
         void Generation()
         {
             StyleOptions options;
-            const std::size_t g0 = options.generation();
+            const std::size_t g = options.generation();
 
             BackgroundOption background(Gfx::Color(1, 1, 1));
             options.set(background);
-            PT_UNIT_ASSERT(options.generation() == g0 + 1);
+            PT_UNIT_ASSERT(options.generation() == g + 1);
 
             options.reset<BackgroundOption>();
-            PT_UNIT_ASSERT(options.generation() == g0 + 2);
+            PT_UNIT_ASSERT(options.generation() == g + 2);
 
             options.reset<BackgroundOption>();
-            PT_UNIT_ASSERT(options.generation() == g0 + 2);
+            PT_UNIT_ASSERT(options.generation() == g + 2);
 
             FontOption font;
             font.setSize(18);
             options.set(font);
-            PT_UNIT_ASSERT(options.generation() == g0 + 3);
+            PT_UNIT_ASSERT(options.generation() == g + 3);
         }
 
 
@@ -281,7 +281,7 @@ class StyleOptionsTest : public Unit::TestSuite
             options.set(font);
 
             StyleOptions copy(options);
-            PT_UNIT_ASSERT( copy.hasOverrides() );
+            PT_UNIT_ASSERT( copy.hasOptions() );
             PT_UNIT_ASSERT(copy.find<BackgroundOption>() != 0);
             PT_UNIT_ASSERT(copy.get<BackgroundOption>().value().color() ==
                            Gfx::Color(4, 5, 6));
@@ -291,15 +291,15 @@ class StyleOptionsTest : public Unit::TestSuite
 
             StyleOptions assigned;
             assigned = options;
-            PT_UNIT_ASSERT( assigned.hasOverrides() );
+            PT_UNIT_ASSERT( assigned.hasOptions() );
             PT_UNIT_ASSERT(assigned.get<BackgroundOption>().value().color() ==
                            Gfx::Color(4, 5, 6));
             PT_UNIT_ASSERT( assigned.get<FontOption>().isSet() );
 
             assigned.reset<BackgroundOption>();
             assigned.reset<FontOption>();
-            PT_UNIT_ASSERT( ! assigned.hasOverrides() );
-            PT_UNIT_ASSERT( options.hasOverrides() );
+            PT_UNIT_ASSERT( ! assigned.hasOptions() );
+            PT_UNIT_ASSERT( options.hasOptions() );
             PT_UNIT_ASSERT(options.find<BackgroundOption>() != 0);
             PT_UNIT_ASSERT(options.find<FontOption>() != 0);
         }

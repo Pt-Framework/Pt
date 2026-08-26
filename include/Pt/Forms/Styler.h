@@ -127,9 +127,9 @@ template <typename RendererT,
           typename OptionsT>
 Styler<RendererT, OptionsT>::Styler()
 : _binding(SharedRenderer)
-, _boundStyleGeneration( std::size_t(-1) )
-, _styleOptionsGeneration( std::size_t(-1) )
-, _localOptionsGeneration( std::size_t(-1) )
+, _boundStyleGeneration(0)
+, _styleOptionsGeneration(0)
+, _localOptionsGeneration(0)
 {
 }
 
@@ -160,7 +160,7 @@ Styler<RendererT, OptionsT>::bind(const Pt::Forms::Style& style,
     _styleOptionsGeneration = std::size_t(-1);
     _localOptionsGeneration = std::size_t(-1);
 
-    if( localOptions.hasOverrides() )
+    if( localOptions.hasOptions() )
     {
         RendererT* renderer = style.get<RendererT>();
         if( renderer )
@@ -237,7 +237,7 @@ Styler<RendererT, OptionsT>::rebind(const Pt::Forms::Style& style,
 
     const bool unbound = ! _renderer;
     const bool styleChanged = _boundStyleGeneration != style.generation();
-    const bool overrideChanged = localOptions.hasOverrides() != (_binding == CustomOverrides);
+    const bool overrideChanged = localOptions.hasOptions() != (_binding == CustomOverrides);
 
     if( unbound || styleChanged || overrideChanged )
         return bind(style, options, localOptions);

@@ -130,26 +130,39 @@ void FontOption::setSlant(Gfx::Font::Slant slant)
 }
 
 
+void FontOption::merge(const FontOption& overlay)
+{
+    if( overlay._overrides == 0 )
+        return;
+
+    if( overlay._overrides & All )
+    {
+        *this = overlay;
+        return;
+    }
+
+    if( ! _font )
+        _font.reset( new Gfx::Font );
+
+    if( overlay._overrides & Size )
+        *_font = _font->withSize(overlay._font->size());
+
+    if( overlay._overrides & Weight )
+        *_font = _font->withWeight(overlay._font->weight());
+
+    if( overlay._overrides & Slant )
+        *_font = _font->withSlant(overlay._font->slant());
+
+    _overrides |= overlay._overrides;
+}
+
+
 Gfx::Font FontOption::getFont(const Gfx::Font& base) const
 {
-    if( ! _font )
-        return base;
-
-    if( _overrides & All )
-        return *_font;
-
-    Gfx::Font font(base);
-
-    if( _overrides & Size )
-        font = font.withSize(_font->size());
-
-    if( _overrides & Weight )
-        font = font.withWeight(_font->weight());
-
-    if( _overrides & Slant )
-        font = font.withSlant(_font->slant());
-
-    return font;
+    FontOption option;
+    option.setFont(base);
+    option.merge(*this);
+    return option.value();
 }
 
 
@@ -182,7 +195,8 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
         return *this;
 
     clear();
-    _generation = o._generation;
+    ++_generation;
+
     _parent = o._parent;
     _options.reserve(o._options.size());
     for(std::size_t n = 0; n < o._options.size(); ++n)
@@ -255,7 +269,7 @@ std::size_t StyleOptions::generation() const
 }
 
 
-bool StyleOptions::hasOverrides() const
+bool StyleOptions::hasOptions() const
 {
     return ! _options.empty();
 }
@@ -277,7 +291,7 @@ const StyleOptions* StyleOptions::parent() const
 }
 
 
-StyleOption* StyleOptions::lookup(const std::type_info& ti) const
+StyleOption* StyleOptions::findOption(const std::type_info& ti) const
 {
     for(std::size_t n = 0; n < _options.size(); ++n)
     {

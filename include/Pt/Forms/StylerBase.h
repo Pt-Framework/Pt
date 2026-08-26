@@ -45,7 +45,7 @@ namespace Forms {
 */
 class PT_FORMS_API StylerBase : private NonCopyable
 {
-    static const std::size_t InvalidGeneration;
+    static const std::size_t InvalidGeneration = 0;
 
     public:
         /** @brief Constructs an unbound styler.

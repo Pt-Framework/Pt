@@ -50,8 +50,9 @@ namespace Forms {
 
 /** @brief Non-template base for a typed style option.
 
-    Each concrete option type implements %clone() and %typeId().
-    The lookup key is the option class, not the stored value type.
+    Each concrete option type implements %clone(), %typeId(), %name()
+    and %merge(). The lookup key is the option class, not the stored
+    value type.
 */
 class PT_FORMS_API StyleOption
 {
@@ -61,6 +62,8 @@ class PT_FORMS_API StyleOption
         virtual StyleOption* clone() const = 0;
 
         virtual const std::type_info& typeId() const = 0;
+
+        virtual const char* name() const = 0;
 };
 
 /** @brief Background brush option.
@@ -79,13 +82,16 @@ class BackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const BackgroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new BackgroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(BackgroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "background"; }
 
     private:
@@ -108,13 +114,16 @@ class ForegroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const ForegroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new ForegroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(ForegroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "foreground"; }
 
     private:
@@ -137,13 +146,16 @@ class ContourOption : public StyleOption
         const Gfx::Pen& value() const
         { return _value; }
 
+        void merge(const ContourOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new ContourOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(ContourOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "contour"; }
 
     private:
@@ -162,13 +174,16 @@ class AccentColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
+        void merge(const AccentColorOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new AccentColorOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(AccentColorOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "accentColor"; }
 
     private:
@@ -191,13 +206,16 @@ class ViewBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const ViewBackgroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new ViewBackgroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(ViewBackgroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "viewBackground"; }
 
     private:
@@ -216,13 +234,16 @@ class HighlightColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
+        void merge(const HighlightColorOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new HighlightColorOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(HighlightColorOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "highlightColor"; }
 
     private:
@@ -245,13 +266,16 @@ class HoverBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const HoverBackgroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new HoverBackgroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(HoverBackgroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "hoverBackground"; }
 
     private:
@@ -274,13 +298,16 @@ class TextBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const TextBackgroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new TextBackgroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(TextBackgroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "textBackground"; }
 
     private:
@@ -299,13 +326,16 @@ class TextColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
+        void merge(const TextColorOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new TextColorOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(TextColorOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "textColor"; }
 
     private:
@@ -324,13 +354,16 @@ class PlaceholderTextColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
+        void merge(const PlaceholderTextColorOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new PlaceholderTextColorOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(PlaceholderTextColorOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "placeholderTextColor"; }
 
     private:
@@ -349,13 +382,16 @@ class HighlightedTextColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
+        void merge(const HighlightedTextColorOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new HighlightedTextColorOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(HighlightedTextColorOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "highlightedTextColor"; }
 
     private:
@@ -378,13 +414,16 @@ class AlternateViewBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const AlternateViewBackgroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new AlternateViewBackgroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(AlternateViewBackgroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "alternateViewBackground"; }
 
     private:
@@ -407,13 +446,16 @@ class PopupBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
+        void merge(const PopupBackgroundOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new PopupBackgroundOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(PopupBackgroundOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "popupBackground"; }
 
     private:
@@ -432,30 +474,28 @@ class PopupTextColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
+        void merge(const PopupTextColorOption& other)
+        { _value = other._value; }
+
         virtual StyleOption* clone() const
         { return new PopupTextColorOption(*this); }
 
         virtual const std::type_info& typeId() const
         { return typeid(PopupTextColorOption); }
 
-        static const char* name()
+        virtual const char* name() const override
         { return "popupTextColor"; }
 
     private:
         Gfx::Color _value;
 };
 
-/** @brief Font option with full and partial overrides.
-
-    A complete font replaces the base font. Size, weight, and slant
-    overrides are merged into a base font by %getFont(). %isSet() is
-    true when any override bit is set on this value. Bag presence is
-    separate and is reported by %StyleOptions::find().
+/** @brief Font option.
 */
 class PT_FORMS_API FontOption : public StyleOption
 {
     public:
-        /** @brief Constructs an empty partial font option.
+        /** @brief Constructs an empty font option.
         */
         FontOption();
 
@@ -467,7 +507,7 @@ class PT_FORMS_API FontOption : public StyleOption
 
         virtual const std::type_info& typeId() const;
 
-        static const char* name()
+        virtual const char* name() const override
         { return "font"; }
 
         /** @brief Returns true if any font override is set.
@@ -496,6 +536,14 @@ class PT_FORMS_API FontOption : public StyleOption
         */
         void setSlant(Gfx::Font::Slant slant);
 
+        /** @brief Replaces or merges this font option with @a overlay.
+
+            A complete font in @a overlay replaces this option. Partial
+            size, weight, and slant overrides from @a overlay are merged
+            into this option.
+        */
+        void merge(const FontOption& overlay);
+
         /** @brief Resolves the effective font against the given base font.
 
             Returns @a base unchanged when no override is set. A full font
@@ -518,35 +566,21 @@ class PT_FORMS_API FontOption : public StyleOption
         unsigned           _overrides;
 };
 
-/** @brief Stores global style tokens or a sparse widget-local overlay.
+/** @brief Style options container.
 
-    One class is used for both the complete global options and a sparse
-    widget overlay. The default constructor is an empty bag.
-    %StyleOptions::defaults() inserts the built-in contract tokens.
-    Presence is bag membership via %find(), %set, and %reset(). Each
-    token is a concrete option type (%ForegroundOption, %FontOption,
-    and the other contract types). Overlay callers use %find(); it
-    may be 0. Complete bags use %get(), which returns a reference.
-    %get(overlay) selects the overlay token when present and otherwise
-    %get(). Font merge stays on %FontOption::getFont().
+    Contains local style options such as %ForegroundOption or %FontOption.
+    The default constructor creates an empty container. %defaults() returns
+    a container populated with the built-in default options.
 
-    A parent can be set with %setParent(). When set, %get(), %find() and
-    %generation() recurse to the parent after consulting the local
-    bag. This allows a sparse widget overlay to fall back to the
-    global theme automatically. %findLocal() and %hasOverrides() remain
-    local-only and report only the contents of this bag. Cycles in
-    the parent chain must be avoided.
-
-    %Application owns the live global instance constructed from
-    defaults(). Widgets or their styler hold a second instance as the
-    overlay. %generation() increments on a successful %set, %reset,
-    or %setParent call that changes the parent. The vocabulary is
-    closed: only the built-in option types are stored.
+    A parent container can be configured with %setParent() to provide
+    inherited options. %find() and %get() consider both local and
+    inherited options. %findLocal() and %hasOptions() only consider
+    locally stored options. %set() and %reset() modify the local options.
 */
 class PT_FORMS_API StyleOptions
 {
     public:
-        /** @brief Constructs an empty option bag.
+        /** @brief Constructs an empty container.
         */
         StyleOptions();
 
@@ -556,7 +590,7 @@ class PT_FORMS_API StyleOptions
 
         StyleOptions& operator=(const StyleOptions& o);
 
-        /** @brief Returns a complete bag with the built-in contract tokens.
+        /** @brief Returns a complete container with the built-in default options.
         */
         static StyleOptions defaults();
 
@@ -564,18 +598,15 @@ class PT_FORMS_API StyleOptions
         */
         std::size_t generation() const;
 
-        /** @brief Returns true if the bag contains any option.
+        /** @brief Returns true if the container contains any local option.
         */
-        bool hasOverrides() const;
+        bool hasOptions() const;
 
-        /** @brief Sets a parent bag for fallback lookups.
-
-            Changing the parent bumps the generation. Passing 0 clears
-            the parent.
+        /** @brief Sets the parent container that provides inherited options.
         */
         void setParent(const StyleOptions* parent);
 
-        /** @brief Returns the parent bag or 0.
+        /** @brief Returns the parent container that provides inherited options, or 0.
         */
         const StyleOptions* parent() const;
 
@@ -584,32 +615,36 @@ class PT_FORMS_API StyleOptions
         template <typename T>
         const T* findLocal() const;
 
+        /** @brief Returns the local or inherited option of type T, or 0 if absent.
+        */
         template <typename T>
         const T* find() const;
 
-        /** @brief Returns the option of type T.
-
-            Use for complete bags such as %defaults() and
-            %Application::styleOptions(). Throws std::logic_error if T
-            is absent.
+        /** @brief Returns the local or inherited option of type T.
         */
         template <typename T>
         const T& get() const;
 
-        /** @brief Replaces the option of type T and bumps generation.
+        /** @brief Merges the local and inherited options of type T into @a option.
+
+            Returns false if no option of type T is present locally or
+            in the parent chain.
+        */
+        template <typename T>
+        bool resolve(T& option) const;
+
+        /** @brief Sets or replaces the local option of type T.
         */
         template <typename T>
         void set(const T& option);
 
-        /** @brief Removes the option of type T if present.
-
-            Generation is unchanged when T is absent.
+        /** @brief Removes the local option of type T if present.
         */
         template <typename T>
         void reset();
 
     private:
-        StyleOption* lookup(const std::type_info& ti) const;
+        StyleOption* findOption(const std::type_info& ti) const;
 
         void replace(StyleOption* option);
 
@@ -625,7 +660,7 @@ class PT_FORMS_API StyleOptions
 template <typename T>
 const T* StyleOptions::findLocal() const
 {
-    return static_cast<const T*>( lookup(typeid(T)) );
+    return static_cast<const T*>( findOption(typeid(T)) );
 }
 
 
@@ -650,14 +685,32 @@ const T& StyleOptions::get() const
     if(option)
         return *option;
 
-    throw std::logic_error(std::string("style option not set: ") + T::name());
+    throw std::logic_error("invalid style option");
+}
+
+
+template <typename T>
+bool StyleOptions::resolve(T& option) const
+{
+    bool found = false;
+    if( _parent )
+        found = _parent->resolve(option);
+
+    const T* local = findLocal<T>();
+    if(local)
+    {
+        option.merge(*local);
+        found = true;
+    }
+
+    return found;
 }
 
 
 template <typename T>
 void StyleOptions::set(const T& option)
 {
-    replace(option.clone());
+    replace( option.clone() );
     ++_generation;
 }
 

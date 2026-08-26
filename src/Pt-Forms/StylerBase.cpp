@@ -33,9 +33,6 @@ namespace Pt {
 
 namespace Forms {
 
-const std::size_t StylerBase::InvalidGeneration = std::size_t(-1);
-
-
 StylerBase::StylerBase()
 : _styleGeneration(InvalidGeneration)
 , _optionsGeneration(InvalidGeneration)
@@ -67,13 +64,13 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
         {
             renderer = onStyleRenderer(style);
 
-            if( renderer && localOptions.hasOverrides() )
+            if( renderer && localOptions.hasOptions() )
                 renderer = onCreateRenderer(style);
         }
 
         _renderer.reset(renderer);
         _styleGeneration = style.generation();
-        _isOverride = localOptions.hasOverrides();
+        _isOverride = localOptions.hasOptions();
         _optionsGeneration = InvalidGeneration;
         _localOptionsGeneration = InvalidGeneration;
     }
@@ -115,7 +112,7 @@ bool StylerBase::isStyleChanged(const Style& style,
     if( _styleGeneration != style.generation() )
         return true;
 
-    if( _isOverride != localOptions.hasOverrides() )
+    if( _isOverride != localOptions.hasOptions() )
         return true;
 
     return false;
