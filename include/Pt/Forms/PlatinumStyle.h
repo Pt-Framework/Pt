@@ -231,10 +231,7 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
     protected:
         virtual CheckBoxRenderer* onCreate() const;
 
-        virtual void onReset(const StyleOptions& options);
-
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& checkBoxOptions);
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface);
 

@@ -73,105 +73,73 @@ bool CheckBox::isChecked() const
 
 const Gfx::Brush& CheckBox::background() const
 {
-    const TextBackgroundOption* background = _checkBoxOptions.find<TextBackgroundOption>();
-    if(background)
-        return background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>().value();
+    return _checkBoxStyler.background();
 }
 
 
 void CheckBox::setBackground(const Gfx::Brush& b)
 {
-    TextBackgroundOption background(b);
-    _checkBoxOptions.set(background);
+    _checkBoxStyler.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& CheckBox::contour() const
 {
-    const ContourOption* contour = _checkBoxOptions.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>().value();
+    return _checkBoxStyler.contour();
 }
 
 
 void CheckBox::setContour(const Gfx::Pen& p)
 {
-    ContourOption contour(p);
-    _checkBoxOptions.set(contour);
+    _checkBoxStyler.setContour(p);
     invalidate();
 }
 
 
 const Gfx::Color& CheckBox::textColor() const
 {
-    const TextColorOption* textColor = _checkBoxOptions.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>().value();
+    return _checkBoxStyler.textColor();
 }
 
 
 void CheckBox::setTextColor(const Gfx::Color& color)
 {
-    TextColorOption textColor(color);
-    _checkBoxOptions.set(textColor);
+    _checkBoxStyler.setTextColor(color);
     invalidate();
 }
 
 
 Gfx::Font CheckBox::font() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
+    return _checkBoxStyler.font();
 }
 
 
 void CheckBox::setFont(const Gfx::Font& font)
 {
-    FontOption fontOption;
-    fontOption.setFont(font);
-    _checkBoxOptions.set(fontOption);
+    _checkBoxStyler.setFont(font);
     invalidate();
 }
 
 
 void CheckBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSize(size);
-    _checkBoxOptions.set(font);
+    _checkBoxStyler.setFontSize(size);
     invalidate();
 }
 
 
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setWeight(weight);
-    _checkBoxOptions.set(font);
+    _checkBoxStyler.setFontWeight(weight);
     invalidate();
 }
 
 
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _checkBoxOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSlant(slant);
-    _checkBoxOptions.set(font);
+    _checkBoxStyler.setFontSlant(slant);
     invalidate();
 }
 
@@ -181,10 +149,8 @@ void CheckBox::setRenderer(CheckBoxRenderer* renderer)
     const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    if( renderer )
-        _checkBoxStyle.bind(*renderer, options, _checkBoxOptions);
-    else
-        _checkBoxStyle.bind(style, options, _checkBoxOptions);
+    _checkBoxStyler.setRenderer(renderer);
+    _checkBoxStyler.bind(style, options);
 
     invalidate();
 }
@@ -232,9 +198,9 @@ void CheckBox::onInvalidate()
     const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    _checkBoxStyle.rebind(style, options, _checkBoxOptions);
+    _checkBoxStyler.bind(style, options);
 
-    if( ! _checkBoxStyle.renderer() )
+    if( ! _checkBoxStyler.renderer() )
         return;
 
     relayout();
@@ -243,7 +209,7 @@ void CheckBox::onInvalidate()
 
 Gfx::SizeF CheckBox::onMeasure(const SizePolicy& /*policy*/)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyle.renderer();
+    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
     if( ! renderer )
         return Gfx::SizeF(0, 0);
 
@@ -265,7 +231,7 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    CheckBoxRenderer* renderer = _checkBoxStyle.renderer();
+    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
     if( ! renderer )
         return;
 
@@ -304,7 +270,7 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
 
 void CheckBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _checkBoxStyle.renderer() )
+    if( ! _checkBoxStyler.renderer() )
         return;
 
     Gfx::RectF widgetRect( size() );
@@ -321,7 +287,7 @@ void CheckBox::onPaintChrome(PaintContext& context,
                              const Gfx::RectF& boxRect,
                              const CheckBoxState& state)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyle.renderer();
+    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
     if( ! renderer )
         return;
 
@@ -335,7 +301,7 @@ void CheckBox::onPaintText(PaintContext& context,
                            const Gfx::PointF& pos,
                            const CheckBoxState& state)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyle.renderer();
+    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
     if( ! renderer )
         return;
 
@@ -348,7 +314,7 @@ void CheckBox::onPaintMnemonic(PaintContext& context,
                               const Gfx::RectF& mnemonic,
                               const CheckBoxState& state)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyle.renderer();
+    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
     if( ! renderer )
         return;
 

@@ -708,34 +708,18 @@ CheckBoxRenderer* PlatinumCheckBoxRenderer::onCreate() const
 }
 
 
-void PlatinumCheckBoxRenderer::onReset(const StyleOptions& options)
+void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
-}
+    Gfx::Brush bg = options.get<TextBackgroundOption>().value();
 
-
-void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options,
-                                         const StyleOptions& cbOptions)
-{
-    const TextBackgroundOption* localBg = cbOptions.find<TextBackgroundOption>();
-    Gfx::Brush bg = localBg ? localBg->value()
-                            : options.get<TextBackgroundOption>().value();
-
-    const ContourOption* localContour = cbOptions.find<ContourOption>();
-    Gfx::Pen cPen = localContour ? localContour->value()
-                                 : options.get<ContourOption>().value();
+    Gfx::Pen cPen = options.get<ContourOption>().value();
     cPen.setJoinStyle(Gfx::Pen::BevelJoin);
 
     _boxPainter.setBrush( bg );
     _boxPainter.setPen( cPen );
 
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = cbOptions.find<FontOption>();
-    Gfx::Font f = localFont ? localFont->getFont(baseFont) : baseFont;
-    const TextColorOption* localText = cbOptions.find<TextColorOption>();
-    Gfx::Color tc = localText ? localText->value()
-                              : options.get<TextColorOption>().value();
+    Gfx::Font f = options.get<FontOption>().value();
+    Gfx::Color tc = options.get<TextColorOption>().value();
 
     _textPainter.setFont( f );
     _textPainter.setPen( tc );

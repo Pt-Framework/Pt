@@ -30,7 +30,7 @@
 #ifndef Pt_Forms_CheckBoxStyle_h
 #define Pt_Forms_CheckBoxStyle_h
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
@@ -91,7 +91,7 @@ class PT_FORMS_API CheckBoxState
     Provides rendering primitives for the check indicator, label text,
     and mnemonic underline. Subclasses override the protected virtuals.
 */
-class PT_FORMS_API CheckBoxRenderer : public Style::Facet
+class PT_FORMS_API CheckBoxRenderer : public Renderer
 {
     public:
         explicit CheckBoxRenderer(std::size_t refs = 0);
@@ -102,12 +102,11 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
         */
         CheckBoxRenderer* create() const;
 
-        /** @brief Applies the widget-local check box style overrides to this renderer.
+        /** @brief Applies the effective check box style options to this renderer.
 
             This is the explicit synchronization point for the check box slice.
         */
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& checkBoxOptions);
+        void prepare(const StyleOptions& options);
 
     public:
         /** @brief Returns the natural size of the check indicator on surface.
@@ -180,8 +179,7 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
 
         virtual CheckBoxRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& checkBoxOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
 
@@ -232,13 +230,83 @@ class PT_FORMS_API CheckBoxRenderer : public Style::Facet
     Keeps the active renderer binding for the shared style renderer, a private
     override clone, or an explicitly assigned custom renderer.
 */
-class PT_FORMS_API CheckBoxStyle : public Styler<CheckBoxRenderer,
-                                                      StyleOptions>
+class PT_FORMS_API CheckBoxStyler : public StylerBase
 {
     public:
         /** @brief Constructs an unbound check box style controller.
         */
-        CheckBoxStyle();
+        CheckBoxStyler();
+
+        /** @brief Returns the effective check box background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local check box background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective check box contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local check box contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective check box text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local check box text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective check box font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local check box font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local check box font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local check box font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local check box font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Assigns a specific check box renderer.
+        */
+        void setRenderer(CheckBoxRenderer* renderer = 0);
+
+        /** @brief Returns the bound check box renderer or 0.
+        */
+        CheckBoxRenderer* renderer();
+
+        /** @brief Returns the effective check box options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the effective check box options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<CheckBoxRenderer> _renderer;
+        StyleOptions                _options;
 };
 
 } // namespace
