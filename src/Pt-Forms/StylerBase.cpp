@@ -54,8 +54,9 @@ void StylerBase::init(Renderer* renderer)
 }
 
 
-Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
+bool StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
 {
+    bool changed = false;
     StyleOptions& localOptions = onBindOptions(styleOptions);
 
     if( isStyleChanged(style, styleOptions, localOptions) )
@@ -82,6 +83,7 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
         _renderer.reset(renderer);
         _styleGeneration = style.generation();
         _optionsGeneration = StyleOptions::InvalidGeneration;
+        changed = true;
     }
 
     if( _renderer && isOptionsChanged(localOptions) )
@@ -92,9 +94,10 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
         }
 
         _optionsGeneration = localOptions.generation();
+        changed = true;
     }
 
-    return _renderer.get();
+    return changed;
 }
 
 

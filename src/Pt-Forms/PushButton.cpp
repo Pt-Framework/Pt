@@ -285,6 +285,7 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
     _buttonStyler.bind(Application::instance().style(),
                        Application::instance().styleOptions());
 
+    _iconInvalid = true;
     invalidate();
 }
 
@@ -296,25 +297,24 @@ void PushButton::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    _buttonStyler.bind(style, options);
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer )
-        return;
+    if( _buttonStyler.bind(style, options) )
+        _iconInvalid = true;
 
-    if( _iconInvalid )
+    if(_iconInvalid)
     {
-        _iconInvalid = false;
-        const ButtonState& state = buttonState();
+        _picture.reset();
 
-        if( ! _icon.empty() )
+        if( _buttonStyler.isBound() )
         {
-            const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
-            const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
-            renderer->prepareIcon(iconImage, _picture, state);
-        }
-        else
-        {
-            _picture.reset();
+            if( ! _icon.empty() )
+            {
+                const ButtonState& state = buttonState();
+                const Gfx::SizeF scaledSize = scaling().toPhysical(_iconSize);
+                const Pt::Gfx::Image& iconImage = _icon.getImage(scaledSize);
+                _buttonStyler.prepareIcon(iconImage, _picture, state);
+            }
+
+            _iconInvalid = false;
         }
     }
 
@@ -324,13 +324,7 @@ void PushButton::onInvalidate()
 
 Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer )
-        return Gfx::SizeF(0, 0);
-
-    const Painter& painter = renderer->textPainter( surface() );
-    _textMetrics = painter.textMetrics( text() );
-    _fontMetrics = painter.fontMetrics();
+    _buttonStyler.measureText(surface(), text(), _textMetrics, _fontMetrics);
     Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
 
     if( _picture.empty() )
@@ -340,15 +334,13 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
     else
         _measuredIconSize = _iconSize;
 
-    Gfx::SizeF itemsSize = renderer->measureContent(surface(),
-                                                    _direction,
-                                                    _measuredIconSize,
-                                                    textSize);
+    Gfx::SizeF itemsSize = _buttonStyler.measureContent(surface(), _direction,
+                                                        _measuredIconSize, textSize);
 
     Gfx::SizeF contentSize(itemsSize.width() + padding().leftRight(),
                            itemsSize.height() + padding().topBottom());
 
-    return renderer->measureFrame( surface(), contentSize );
+    return _buttonStyler.measureFrame( surface(), contentSize );
 }
 
 
@@ -356,23 +348,15 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer )
-        return;
-
     const Gfx::Scaling& scaling = surface().scaling();
 
     Gfx::SizeF textSize(_textMetrics.advance(), _fontMetrics.height());
 
-    _contentRect = renderer->layoutFrame( surface(), Gfx::RectF(size()) );
+    _contentRect = _buttonStyler.layoutFrame(surface(), Gfx::RectF(size()));
 
-    renderer->layoutContent(surface(),
-                            _contentRect,
-                            _direction,
-                            _measuredIconSize,
-                            textSize,
-                            _iconRect,
-                            _textRect);
+    _buttonStyler.layoutContent(surface(),_contentRect, _direction,
+                                _measuredIconSize, textSize,_iconRect,
+                                _textRect);
 
     if( ! _picture.empty() )
     {
@@ -403,11 +387,11 @@ void PushButton::onLayout(const Gfx::RectF& rect)
         if(m)
             mnIdx = text().find(*m);
 
-        _mnemonicRect = renderer->layoutMnemonic(surface(),
-                             text(),
-                             _textPos,
-                             _fontMetrics,
-                             mnIdx);
+        _mnemonicRect = _buttonStyler.layoutMnemonic(surface(),
+                                  text(),
+                                  _textPos,
+                                  _fontMetrics,
+                                  mnIdx);
     }
 
     repaint();
@@ -416,9 +400,6 @@ void PushButton::onLayout(const Gfx::RectF& rect)
 
 void PushButton::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _buttonStyler.renderer() )
-        return;
-
     Gfx::RectF widgetRect( size() );
     const ButtonState& state = buttonState();
 
@@ -434,11 +415,7 @@ void PushButton::onPaintBackground(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderBackground(context, rect, state);
+    _buttonStyler.renderBackground(context, rect, state);
 }
 
 
@@ -446,11 +423,10 @@ void PushButton::onPaintFrame(PaintContext& context,
                               const Gfx::RectF& rect,
                               const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer || _buttonState.isFlat() )
+    if( _buttonState.isFlat() )
         return;
 
-    renderer->renderChrome(context, rect, state);
+    _buttonStyler.renderChrome(context, rect, state);
 }
 
 
@@ -460,11 +436,10 @@ void PushButton::onPaintIcon(PaintContext& context,
                              const Gfx::PointF& pos,
                              const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer || picture.empty() )
+    if( picture.empty() )
         return;
 
-    renderer->renderIcon(context, rect, picture, pos, state);
+    _buttonStyler.renderIcon(context, rect, picture, pos, state);
 }
 
 
@@ -474,14 +449,10 @@ void PushButton::onPaintText(PaintContext& context,
                              const Gfx::PointF& pos,
                              const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer )
-        return;
-
     if( text.empty() )
         return;
 
-    renderer->renderText(context, rect, text, pos, state);
+    _buttonStyler.renderText(context, rect, text, pos, state);
 }
 
 
@@ -490,11 +461,10 @@ void PushButton::onPaintMnemonic(PaintContext& context,
                                 const Gfx::RectF& mnemonic,
                                 const ButtonState& state)
 {
-    ButtonRenderer* renderer = _buttonStyler.renderer();
-    if( ! renderer || text().empty() )
+    if( text().empty() )
         return;
 
-    renderer->renderMnemonic(context, rect, mnemonic, state);
+    _buttonStyler.renderMnemonic(context, rect, mnemonic, state);
 }
 
 } // namespace

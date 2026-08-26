@@ -20,10 +20,12 @@ Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` refere
 - `onStyleRenderer(style)` must return the shared `style.get<XRenderer>()`; do not clone or prepare it.
 - `onCreateRenderer(style)` must return a `create()` clone, or `0`.
 - `setRenderer(XRenderer* = 0)` must store the typed pointer and call `init(renderer)`. A null pointer falls back to the style.
-- Provide typed `renderer()` and `options()` accessors. Do not downcast from `StylerBase` or use the return value of `bind`.
-- Cache the shared or cloned renderer in the typed pointer used by `renderer()`.
+- Do not expose an `XStyler::renderer()` accessor or return a renderer pointer from any other public `XStyler` API. Provide the typed `options()` accessors only. Do not downcast from `StylerBase`; the return value of `bind` is only a change signal and never exposes a renderer.
+- Cache the shared, cloned, or specific renderer in a private typed pointer. Only `XStyler` may access that pointer directly.
+- For every `XRenderer` operation used by the widget's invalidation, measurement, layout, or painting phases, provide a matching, typed `XStyler` forwarding method. Preserve the `XRenderer` operation's parameter and return shapes; do not introduce unqualified composite wrappers. The forwarding methods delegate to the private typed renderer pointer and are called only after `isBound()` succeeds.
 - `StylerBase` determines whether the local overlay requires an override clone by comparing it with the global options: `localOptions.isDefault(styleOptions)` sets `_isDefaultOptions`. When `_isDefaultOptions` is true, the shared style renderer is used; otherwise an override clone is created.
 - `StylerBase` prepares only a specific renderer or override clone (`_isRenderer || ! _isDefaultOptions`) through `Renderer::prepare(localOptions)`. Shared style prototypes are not prepared during bind; they are synchronized through `Style::reset` calling `Renderer::onReset(options)`.
+- `StylerBase::bind(style, options)` returns `true` when the effective renderer binding or effective options changed and renderer-dependent widget caches may need refreshing. It may return `true` even when no renderer can be obtained; `isBound()` remains the only validity guard before calling a typed styler forwarding method.
 - Move the widget's typed style-option accessors and mutators to `XStyler`. The styler getters resolve effective values through `_options.get<T>().value()`; its setters create and store the matching local option token through `_options.set(...)` without invalidating or binding.
 - Preserve partial font overrides in `XStyler`: `setFontSize`, `setFontWeight`, and `setFontSlant` begin with `_options.findLocal<FontOption>()` when present, change only the requested attribute, and store the result.
 
@@ -39,8 +41,10 @@ Widget:
 - Do not access `styler.options()` from widget style getters or setters and do not add a second `Application::styleOptions()` fallback.
 - Implement `font()` by returning `styler.font()`; the overlay's `FontOption` is materialized against the inherited global font by `StyleOptions::bind()`.
 - Keep widget policy flags, such as `_hasBackground`, on the widget rather than converting them into tokens.
-- `setRenderer` must call `styler.setRenderer(renderer)`, immediately `bind(style, options)`, then `invalidate()`.
-- `onInvalidate` must call the base implementation, then `bind(style, options)`, obtain the typed renderer, update caches, and request relayout. Do not use `rebind`.
+- `setRenderer` must call `styler.setRenderer(renderer)`, immediately `bind(style, options)`, invalidate every widget-owned renderer-dependent cache, then `invalidate()`.
+- `onInvalidate` must call the base implementation, then `bind(style, options)`. When `bind` returns `true`, invalidate every widget-owned renderer-dependent cache before refreshing it. Check `styler.isBound()` before using typed styler forwarding methods; if unbound, clear stale renderer-derived cache values but keep their invalid state so a later successful bind refreshes them. Always request relayout. Do not use `rebind`.
+- In all widget invalidation, measure, layout, and paint paths, call the corresponding typed `XStyler` forwarding method rather than accessing an `XRenderer` pointer. Use `styler.isBound()` for no-renderer guards. The widget must not declare an `XRenderer*` local, call `styler.renderer()`, or invoke `renderer->...` directly.
+- Preserve the existing lifecycle phase order, widget-owned geometry, icon caches, paint-layer order, and widget policy flags while moving only the renderer boundary into `XStyler`.
 
 Platinum and concrete theme renderers:
 - Use `onPrepare(const StyleOptions&)` and remove two-bag resolvers.
@@ -54,5 +58,5 @@ Do not change:
 
 The plan must:
 - Identify every implementation file and symbol that needs to change for this slice, with the intended change for each.
-- Include searches within the migrated slice and its concrete theme renderers for the old `XStyle` type, widget-owned overlay, `rebind(`, and two-argument `prepare` / `onPrepare` calls.
+- Include searches within the migrated slice and its concrete theme renderers for the old `XStyle` type, widget-owned overlay, `rebind(`, two-argument `prepare` / `onPrepare` calls, `styler.renderer()`, `XRenderer*` locals in the widget, and direct `renderer->` calls.
 - Include `jam.bat -q -j4` from the repository root as the final validation step and require exit code 0.

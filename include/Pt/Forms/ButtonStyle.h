@@ -347,13 +347,94 @@ class PT_FORMS_API ButtonStyler : public StylerBase
         */
         void setFontSlant(Gfx::Font::Slant slant);
 
+        /** @brief Prepares @a picture from @a icon for @a state.
+
+            Returns true when a bound renderer prepared @a picture.
+        */
+        bool prepareIcon(const Gfx::Image& icon,
+                         Pixmap& picture,
+                         const ButtonState& state) const;
+
+        /** @brief Measures @a text and stores its metrics for @a surface.
+        */
+        void measureText(PaintSurface& surface,
+                         const String& text,
+                         Gfx::TextMetrics& textMetrics,
+                         Gfx::FontMetrics& fontMetrics) const;
+
+        /** @brief Measures icon and text content arranged by @a direction.
+        */
+        Gfx::SizeF measureContent(PaintSurface& surface,
+                                  Direction direction,
+                                  const Gfx::SizeF& iconSize,
+                                  const Gfx::SizeF& textSize) const;
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Returns the frame content rectangle within @a frameRect.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect) const;
+
+        /** @brief Lays out icon and text rectangles within @a contentRect.
+        */
+        void layoutContent(PaintSurface& surface,
+                           const Gfx::RectF& contentRect,
+                           Direction direction,
+                           const Gfx::SizeF& iconSize,
+                           const Gfx::SizeF& textSize,
+                           Gfx::RectF& iconRect,
+                           Gfx::RectF& textRect) const;
+
+        /** @brief Returns the mnemonic underline rectangle for @a mnemonicIndex.
+        */
+        Gfx::RectF layoutMnemonic(PaintSurface& surface,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::FontMetrics& fontMetrics,
+                                  String::size_type mnemonicIndex) const;
+
+        /** @brief Renders the button background within @a rect for @a state.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const ButtonState& state) const;
+
+        /** @brief Renders the button chrome within @a rect for @a state.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const ButtonState& state) const;
+
+        /** @brief Renders @a text at @a pos within @a rect for @a state.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        const ButtonState& state) const;
+
+        /** @brief Renders the mnemonic underline within @a mnemonic for @a state.
+        */
+        void renderMnemonic(PaintContext& context,
+                            const Gfx::RectF& rect,
+                            const Gfx::RectF& mnemonic,
+                            const ButtonState& state) const;
+
+        /** @brief Renders @a picture at @a pos within @a rect for @a state.
+        */
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        const ButtonState& state) const;
+
         /** @brief Assigns a specific button renderer.
         */
         void setRenderer(ButtonRenderer* renderer = 0);
-
-        /** @brief Returns the bound button renderer or 0.
-        */
-        ButtonRenderer* renderer();
 
         /** @brief Returns the bound effective button options.
 

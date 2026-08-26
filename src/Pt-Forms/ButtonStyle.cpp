@@ -31,6 +31,7 @@
 #include <Pt/Forms/ButtonStyle.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/Style.h>
+#include <Pt/Forms/Painter.h>
 
 namespace Pt {
 
@@ -356,16 +357,174 @@ void ButtonStyler::setFontSlant(Gfx::Font::Slant slant)
 }
 
 
+bool ButtonStyler::prepareIcon(const Gfx::Image& icon,
+                               Pixmap& picture,
+                               const ButtonState& state) const
+{
+    if( ! _renderer )
+        return false;
+
+    _renderer->prepareIcon(icon, picture, state);
+    return true;
+}
+
+
+void ButtonStyler::measureText(PaintSurface& surface,
+                               const String& text,
+                               Gfx::TextMetrics& textMetrics,
+                               Gfx::FontMetrics& fontMetrics) const
+{
+    if( ! _renderer )
+    {
+        textMetrics = Gfx::TextMetrics();
+        fontMetrics = Gfx::FontMetrics();
+        return;
+    }
+
+    const Painter& painter = _renderer->textPainter(surface);
+    textMetrics = painter.textMetrics(text);
+    fontMetrics = painter.fontMetrics();
+}
+
+
+Gfx::SizeF ButtonStyler::measureContent(PaintSurface& surface,
+                                        Direction direction,
+                                        const Gfx::SizeF& iconSize,
+                                        const Gfx::SizeF& textSize) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureContent(surface, direction, iconSize, textSize);
+}
+
+
+Gfx::SizeF ButtonStyler::measureFrame(PaintSurface& surface,
+                                      const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+Gfx::RectF ButtonStyler::layoutFrame(PaintSurface& surface,
+                                     const Gfx::RectF& frameRect) const
+{
+    if( ! _renderer )
+        return Gfx::RectF();
+
+    return _renderer->layoutFrame(surface, frameRect);
+}
+
+
+void ButtonStyler::layoutContent(PaintSurface& surface,
+                                 const Gfx::RectF& contentRect,
+                                 Direction direction,
+                                 const Gfx::SizeF& iconSize,
+                                 const Gfx::SizeF& textSize,
+                                 Gfx::RectF& iconRect,
+                                 Gfx::RectF& textRect) const
+{
+    if( ! _renderer )
+    {
+        iconRect = Gfx::RectF();
+        textRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutContent(surface,
+                             contentRect,
+                             direction,
+                             iconSize,
+                             textSize,
+                             iconRect,
+                             textRect);
+}
+
+
+Gfx::RectF ButtonStyler::layoutMnemonic(PaintSurface& surface,
+                                        const String& text,
+                                        const Gfx::PointF& textPos,
+                                        const Gfx::FontMetrics& fontMetrics,
+                                        String::size_type mnemonicIndex) const
+{
+    if( ! _renderer )
+        return Gfx::RectF();
+
+    return _renderer->layoutMnemonic(surface,
+                                     text,
+                                     textPos,
+                                     fontMetrics,
+                                     mnemonicIndex);
+}
+
+
+void ButtonStyler::renderBackground(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const ButtonState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderBackground(context, rect, state);
+}
+
+
+void ButtonStyler::renderChrome(PaintContext& context,
+                                const Gfx::RectF& rect,
+                                const ButtonState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, rect, state);
+}
+
+
+void ButtonStyler::renderText(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const String& text,
+                              const Gfx::PointF& pos,
+                              const ButtonState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderText(context, rect, text, pos, state);
+}
+
+
+void ButtonStyler::renderMnemonic(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::RectF& mnemonic,
+                                  const ButtonState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderMnemonic(context, rect, mnemonic, state);
+}
+
+
+void ButtonStyler::renderIcon(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const Pixmap& picture,
+                              const Gfx::PointF& pos,
+                              const ButtonState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderIcon(context, rect, picture, pos, state);
+}
+
+
 void ButtonStyler::setRenderer(ButtonRenderer* renderer)
 {
     _renderer.reset(renderer);
     init(renderer);
-}
-
-
-ButtonRenderer* ButtonStyler::renderer()
-{
-    return _renderer.get();
 }
 
 

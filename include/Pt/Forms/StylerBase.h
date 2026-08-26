@@ -56,7 +56,7 @@ class PT_FORMS_API StylerBase : private NonCopyable
 
         /** @brief Binds or rebinds to a style and global style options.
         */
-        Renderer* bind(const Style& style, const StyleOptions& styleOptions);
+        bool bind(const Style& style, const StyleOptions& styleOptions);
 
         /** @brief Returns true if bound.
         */
