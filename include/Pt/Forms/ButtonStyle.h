@@ -287,6 +287,66 @@ class PT_FORMS_API ButtonStyler : public StylerBase
         */
         ButtonStyler();
 
+        /** @brief Returns the effective foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
+
+        /** @brief Sets the widget-local foreground brush to @a brush.
+        */
+        void setForeground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective accent color.
+        */
+        const Gfx::Color& accentColor() const;
+
+        /** @brief Sets the widget-local accent color to @a color.
+        */
+        void setAccentColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective highlight color.
+        */
+        const Gfx::Color& highlightColor() const;
+
+        /** @brief Sets the widget-local highlight color to @a color.
+        */
+        void setHighlightColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
         /** @brief Assigns a specific button renderer.
         */
         void setRenderer(ButtonRenderer* renderer = 0);

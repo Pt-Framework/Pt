@@ -255,6 +255,107 @@ ButtonStyler::ButtonStyler()
 }
 
 
+const Gfx::Brush& ButtonStyler::foreground() const
+{
+    return _options.get<ForegroundOption>().value();
+}
+
+
+void ButtonStyler::setForeground(const Gfx::Brush& brush)
+{
+    _options.set( ForegroundOption(brush) );
+}
+
+
+const Gfx::Pen& ButtonStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void ButtonStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& ButtonStyler::accentColor() const
+{
+    return _options.get<AccentColorOption>().value();
+}
+
+
+void ButtonStyler::setAccentColor(const Gfx::Color& color)
+{
+    _options.set( AccentColorOption(color) );
+}
+
+
+const Gfx::Color& ButtonStyler::highlightColor() const
+{
+    return _options.get<HighlightColorOption>().value();
+}
+
+
+void ButtonStyler::setHighlightColor(const Gfx::Color& color)
+{
+    _options.set( HighlightColorOption(color) );
+}
+
+
+const Gfx::Color& ButtonStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void ButtonStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font ButtonStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void ButtonStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void ButtonStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void ButtonStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void ButtonStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
 void ButtonStyler::setRenderer(ButtonRenderer* renderer)
 {
     _renderer.reset(renderer);

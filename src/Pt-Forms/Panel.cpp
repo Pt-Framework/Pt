@@ -96,14 +96,13 @@ const Gfx::Brush* Panel::background() const
     if( ! _hasBackground )
         return 0;
 
-    return &_panelStyler.options().get<BackgroundOption>().value();
+    return &_panelStyler.background();
 }
 
 
 void Panel::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
-    _panelStyler.options().set(background);
+    _panelStyler.setBackground(b);
     _hasBackground = true;
 
     invalidate();
@@ -122,14 +121,13 @@ const Gfx::Pen* Panel::contour() const
     if( ! _hasFrame )
         return 0;
 
-    return &_panelStyler.options().get<ContourOption>().value();
+    return &_panelStyler.contour();
 }
 
 
 void Panel::setContour(const Gfx::Pen& pen)
 {
-    ContourOption contour(pen);
-    _panelStyler.options().set(contour);
+    _panelStyler.setContour(pen);
     _hasFrame = true;
 
     invalidate();

@@ -24,6 +24,8 @@ Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` refere
 - Cache the shared or cloned renderer in the typed pointer used by `renderer()`.
 - Use `StyleOptions::hasOptions()` to determine whether the local overlay requires an override clone.
 - `StylerBase` prepares only a custom renderer or override clone (`_isRenderer || _isOverride`) through `Renderer::prepare(localOptions)`. Synchronize shared prototypes only through `Style::reset` to `onReset`.
+- Move the widget's typed style-option accessors and mutators to `XStyler`. The styler getters resolve effective values through `_options.get<T>().value()`; its setters create and store the matching local option token through `_options.set(...)` without invalidating or binding.
+- Preserve partial font overrides in `XStyler`: `setFontSize`, `setFontWeight`, and `setFontSlant` begin with `_options.findLocal<FontOption>()` when present, change only the requested attribute, and store the result.
 
 Renderer:
 - `XRenderer` derives directly from `Renderer` using `Renderer(typeid(XRenderer), refs)`; do not derive directly from `Style::Facet`.
@@ -33,9 +35,9 @@ Renderer:
 
 Widget:
 - Remove the overlay from the widget. `XStyler` owns its `StyleOptions`.
-- Setters use `styler.options().set(...)` followed by `invalidate()`.
-- Getters use `styler.options().get<T>().value()`. Do not add a second `Application::styleOptions()` fallback.
-- For partial fonts, use `findLocal<FontOption>()`, then set the result. Implement `font()` by returning `styler.options().get<FontOption>().value()`, because the overlay's `FontOption` is materialized against the inherited global font by `StyleOptions::bind()`.
+- Keep the widget's existing public style-option API as a thin facade: getters call the corresponding typed `XStyler` getter; setters call the typed `XStyler` setter followed by `invalidate()`.
+- Do not access `styler.options()` from widget style getters or setters and do not add a second `Application::styleOptions()` fallback.
+- Implement `font()` by returning `styler.font()`; the overlay's `FontOption` is materialized against the inherited global font by `StyleOptions::bind()`.
 - Keep widget policy flags, such as `_hasBackground`, on the widget rather than converting them into tokens.
 - `setRenderer` must call `styler.setRenderer(renderer)`, immediately `bind(style, options)`, then `invalidate()`.
 - `onInvalidate` must call the base implementation, then `bind(style, options)`, obtain the typed renderer, update caches, and request relayout. Do not use `rebind`.

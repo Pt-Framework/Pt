@@ -166,6 +166,83 @@ PanelStyler::PanelStyler()
 }
 
 
+const Gfx::Brush& PanelStyler::background() const
+{
+    return _options.get<BackgroundOption>().value();
+}
+
+
+void PanelStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( BackgroundOption(brush) );
+}
+
+
+const Gfx::Pen& PanelStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void PanelStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& PanelStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void PanelStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font PanelStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void PanelStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void PanelStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void PanelStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void PanelStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
 void PanelStyler::setRenderer(PanelRenderer* renderer)
 {
     _renderer.reset(renderer);
