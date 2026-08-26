@@ -289,10 +289,7 @@ StyleOptions StyleOptions::defaults()
 
 std::size_t StyleOptions::generation() const
 {
-    std::size_t gen = _generation;
-    if( _parent )
-        gen += _parent->generation();
-    return gen;
+    return _generation;
 }
 
 
@@ -309,15 +306,13 @@ void StyleOptions::bind(const StyleOptions* base)
     if( _parent == base && _boundGeneration == baseGeneration )
         return;
 
-    if( _parent != base )
-        ++_generation;
-
     _parent = base;
 
     for(std::size_t n = 0; n < _options.size(); ++n)
         _options[n]->bind(base);
 
     _boundGeneration = baseGeneration;
+    ++_generation;
 }
 
 

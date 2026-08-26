@@ -65,6 +65,8 @@ class StyleOptionsTest : public Unit::TestSuite
                                             &StyleOptionsTest::Get);
             Unit::TestSuite::registerMethod("Bind", *this,
                                             &StyleOptionsTest::Bind);
+            Unit::TestSuite::registerMethod("BindChangesGeneration", *this,
+                                            &StyleOptionsTest::BindChangesGeneration);
 
         }
 
@@ -354,6 +356,25 @@ class StyleOptionsTest : public Unit::TestSuite
             StyleOptions emptyOptions;
             emptyOptions.bind(0);
             PT_UNIT_ASSERT(emptyOptions.find<FontOption>() == 0);
+        }
+
+
+        void BindChangesGeneration()
+        {
+            StyleOptions firstParent;
+            firstParent.set( BackgroundOption(Gfx::Color(1, 1, 1)) );
+            firstParent.set( ForegroundOption(Gfx::Color(2, 2, 2)) );
+
+            StyleOptions secondParent;
+            secondParent.set( BackgroundOption(Gfx::Color(3, 3, 3)) );
+
+            StyleOptions options;
+            options.bind(&firstParent);
+            const std::size_t generation = options.generation();
+
+            options.bind(&secondParent);
+            PT_UNIT_ASSERT(options.parent() == &secondParent);
+            PT_UNIT_ASSERT(options.generation() == generation + 1);
         }
 };
 

@@ -35,7 +35,6 @@ namespace Forms {
 
 StylerBase::StylerBase()
 : _styleGeneration(StyleOptions::InvalidGeneration)
-, _optionsGeneration(StyleOptions::InvalidGeneration)
 , _localOptionsGeneration(StyleOptions::InvalidGeneration)
 , _isRenderer(false)
 , _isOverride(false)
@@ -82,18 +81,16 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
         _renderer.reset(renderer);
         _styleGeneration = style.generation();
         _isOverride = localOptions.hasOptions();
-        _optionsGeneration = StyleOptions::InvalidGeneration;
         _localOptionsGeneration = StyleOptions::InvalidGeneration;
     }
 
-    if( _renderer && isOptionsChanged(styleOptions, localOptions) )
+    if( _renderer && isOptionsChanged(localOptions) )
     {
         if( _isRenderer || _isOverride )
         {
             _renderer->prepare(localOptions);
         }
 
-        _optionsGeneration = styleOptions.generation();
         _localOptionsGeneration = localOptions.generation();
     }
 
@@ -123,12 +120,8 @@ bool StylerBase::isStyleChanged(const Style& style,
 }
 
 
-bool StylerBase::isOptionsChanged(const StyleOptions& options,
-                                  const StyleOptions& localOptions) const
+bool StylerBase::isOptionsChanged(const StyleOptions& localOptions) const
 {
-    if( _optionsGeneration != options.generation() )
-        return true;
-
     if( _localOptionsGeneration != localOptions.generation() )
         return true;
 
