@@ -61,6 +61,8 @@ class StyleOptionsTest : public Unit::TestSuite
                                             &StyleOptionsTest::CopyAssign);
             Unit::TestSuite::registerMethod("Get", *this,
                                             &StyleOptionsTest::Get);
+            Unit::TestSuite::registerMethod("Resolve", *this,
+                                            &StyleOptionsTest::Resolve);
 
         }
 
@@ -310,6 +312,33 @@ class StyleOptionsTest : public Unit::TestSuite
             StyleOptions options;
             PT_UNIT_ASSERT_THROW(options.get<BackgroundOption>(), std::logic_error);
             PT_UNIT_ASSERT_THROW(options.get<FontOption>(), std::logic_error);
+        }
+
+
+        void Resolve()
+        {
+            StyleOptions baseOptions;
+            FontOption baseFont;
+            baseFont.setFont( Gfx::Font("serif", 12) );
+            baseOptions.set(baseFont);
+
+            StyleOptions overrideOptions;
+            overrideOptions.setParent(&baseOptions);
+            FontOption sizeOverride;
+            sizeOverride.setSize(18);
+            overrideOptions.set(sizeOverride);
+
+            StyleOptions options;
+            options.setParent(&overrideOptions);
+
+            FontOption font;
+            PT_UNIT_ASSERT( options.resolve(font) );
+            PT_UNIT_ASSERT(font.value().family() == "serif");
+            PT_UNIT_ASSERT(font.value().size() == 18);
+
+            StyleOptions emptyOptions;
+            FontOption emptyFont;
+            PT_UNIT_ASSERT( ! emptyOptions.resolve(emptyFont) );
         }
 };
 

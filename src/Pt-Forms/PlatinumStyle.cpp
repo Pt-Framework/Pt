@@ -285,11 +285,9 @@ void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
     framePen.setJoinStyle(Gfx::Pen::BevelJoin);
     _framePainter.setPen(framePen);
 
-    const FontOption& font = options.get<FontOption>();
-    const Gfx::Font& base = options.parent()
-                          ? options.parent()->get<FontOption>().value()
-                          : font.value();
-    _textPainter.setFont( font.getFont(base) );
+    FontOption font;
+    options.resolve(font);
+    _textPainter.setFont( font.value() );
     _textPainter.setPen( Gfx::Pen( options.get<TextColorOption>().value() ) );
 }
 
@@ -419,11 +417,9 @@ void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
     _highlightPainter.setBrush( highlightBrush );
     _highlightPainter.setPen( cPen );
 
-    const FontOption& font = options.get<FontOption>();
-    const Gfx::Font& base = options.parent()
-                          ? options.parent()->get<FontOption>().value()
-                          : font.value();
-    _textPainter.setFont( font.getFont(base) );
+    FontOption font;
+    options.resolve(font);
+    _textPainter.setFont( font.value() );
     _textPainter.setPen( Gfx::Pen(_textColor) );
 }
 
