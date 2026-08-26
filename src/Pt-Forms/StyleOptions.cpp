@@ -299,6 +299,22 @@ bool StyleOptions::hasOptions() const
 }
 
 
+bool StyleOptions::isDefault(const StyleOptions& base) const
+{
+    const StyleOptions* options = this;
+
+    while(options && options != &base)
+    {
+        if( options->hasLocalOptions() )
+            return false;
+
+        options = options->parent();
+    }
+
+    return options == &base;
+}
+
+
 void StyleOptions::bind(const StyleOptions* base)
 {
     const std::size_t baseGeneration = base ? base->generation() : 0;
@@ -319,6 +335,12 @@ void StyleOptions::bind(const StyleOptions* base)
 const StyleOptions* StyleOptions::parent() const
 {
     return _parent;
+}
+
+
+bool StyleOptions::hasLocalOptions() const
+{
+    return ! _options.empty();
 }
 
 

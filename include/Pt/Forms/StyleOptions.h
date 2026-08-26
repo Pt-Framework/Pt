@@ -562,8 +562,14 @@ class PT_FORMS_API StyleOptions
         std::size_t generation() const;
 
         /** @brief Returns true if the container contains any local option.
+
+            TODO: remove this in favour of isDefault
         */
         bool hasOptions() const;
+
+        /** @brief Returns true if no options override @a base.
+        */
+        bool isDefault(const StyleOptions& base) const;
 
         /** @brief Binds local options to @a inherited and materializes effective values.
 
@@ -602,6 +608,8 @@ class PT_FORMS_API StyleOptions
         void reset();
 
     private:
+        bool hasLocalOptions() const;
+
         StyleOption* findOption(const std::type_info& ti) const;
 
         void replaceOption(StyleOption* option);

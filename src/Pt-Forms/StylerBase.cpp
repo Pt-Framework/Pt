@@ -67,15 +67,15 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
             // use specific renderer
             renderer = _renderer.get();
         }
-        else if( localOptions.hasOptions() )
-        {
-            // cloned style renderer
-            renderer = onCreateRenderer(style);
-        }
-        else
+        else if( localOptions.isDefault(styleOptions) )
         {
             // default shared style renderer
             renderer = onStyleRenderer(style);
+        }
+        else
+        {
+            // cloned style renderer
+            renderer = onCreateRenderer(style);
         }
 
         _renderer.reset(renderer);
