@@ -12,7 +12,14 @@ features for agents.
 
 # API Documentation
 
-- Prefer brief only documentation in simple cases.
+- Prefer compact documentation. Use a one-line `/** @brief ... */` comment
+  when the signature and brief text are sufficient to understand the API.
+- Do not add detailed description blocks, `@param`, or `@return` for trivial
+  or self-evident members (e.g., default constructors, destructors, simple
+  getters/setters). Instead, the text must still cover the relevant arguments,
+  return value, and exceptions. Refer to parameters with `@a <name>`.
+- Add detailed descriptions, parameters, and return values only for non-obvious
+  behavior, contracts, errors, or complex usage.
 - All API documentation (namespaces, classes, methods, enums, free
   functions) belongs in the public header files, not in `.cpp` files.
 - Document every public namespace, class, funtions using Doxygen.
