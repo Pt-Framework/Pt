@@ -171,10 +171,7 @@ void Label::setTextColor(const Gfx::Color& color)
 
 Gfx::Font Label::font() const
 {
-    FontOption font;
-    _panelStyler.options().resolve(font);
-
-    return font.value();
+    return _panelStyler.options().get<FontOption>().value();
 }
 
 

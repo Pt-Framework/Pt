@@ -295,11 +295,13 @@ class PT_FORMS_API ButtonStyler : public StylerBase
         */
         ButtonRenderer* renderer();
 
-        /** @brief Returns the button style options.
+        /** @brief Returns the bound effective button options.
+
+            Use %StyleOptions::findLocal() to query an explicit widget-local token.
         */
         StyleOptions& options();
 
-        /** @brief Returns the button style options.
+        /** @brief Returns the bound effective button options.
         */
         const StyleOptions& options() const;
 

@@ -34,22 +34,45 @@ namespace Pt {
 
 namespace Forms {
 
+namespace {
+
+const std::size_t invalidGeneration = 0;
+
+}
+
+///////////////////////////////////////////////////////////////////////
+// StyleOption
+///////////////////////////////////////////////////////////////////////
+
 StyleOption::~StyleOption()
 {
 }
 
+///////////////////////////////////////////////////////////////////////
+// FontOption
+///////////////////////////////////////////////////////////////////////
 
 FontOption::FontOption()
-: _overrides(0)
+: _size(0)
+, _weight(Gfx::Font::Weight::Normal)
+, _slant(Gfx::Font::Slant::Normal)
+, _resolvedFont()
+, _overrides(0)
 {
 }
 
 
 FontOption::FontOption(const FontOption& o)
-: _overrides(o._overrides)
+: _size(o._size)
+, _weight(o._weight)
+, _slant(o._slant)
+, _resolvedFont()
+, _overrides(o._overrides)
 {
     if( o._font )
         _font.reset( new Gfx::Font(*o._font) );
+
+    bind(0);
 }
 
 
@@ -58,12 +81,17 @@ FontOption& FontOption::operator=(const FontOption& o)
     if(this == &o)
         return *this;
 
+    _size = o._size;
+    _weight = o._weight;
+    _slant = o._slant;
     _overrides = o._overrides;
 
     if( o._font )
         _font.reset( new Gfx::Font(*o._font) );
     else
         _font.reset();
+
+    _resolvedFont = o._resolvedFont;
 
     return *this;
 }
@@ -89,7 +117,7 @@ bool FontOption::isSet() const
 
 const Gfx::Font& FontOption::value() const
 {
-    return *_font;
+    return _resolvedFont;
 }
 
 
@@ -97,78 +125,80 @@ void FontOption::setFont(const Gfx::Font& font)
 {
     _font.reset( new Gfx::Font(font) );
     _overrides |= All;
+    _resolvedFont = getFont(_resolvedFont);
 }
 
 
 void FontOption::setSize(std::size_t size)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withSize(size);
+    _size = size;
     _overrides |= Size;
+    _resolvedFont = _resolvedFont.withSize(size);
 }
 
 
 void FontOption::setWeight(Gfx::Font::Weight weight)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withWeight(weight);
+    _weight = weight;
     _overrides |= Weight;
+    _resolvedFont = _resolvedFont.withWeight(weight);
 }
 
 
 void FontOption::setSlant(Gfx::Font::Slant slant)
 {
-    if( ! _font )
-        _font.reset( new Gfx::Font );
-
-    *_font = _font->withSlant(slant);
+    _slant = slant;
     _overrides |= Slant;
+    _resolvedFont = _resolvedFont.withSlant(slant);
 }
 
 
-void FontOption::merge(const FontOption& overlay)
+void FontOption::bind(const StyleOptions* inherited)
 {
-    if( overlay._overrides == 0 )
-        return;
+    const FontOption* base = inherited ? inherited->find<FontOption>() : 0;
+    _resolvedFont = base ? base->value() : Gfx::Font();
 
-    if( overlay._overrides & All )
-    {
-        *this = overlay;
-        return;
-    }
+    if( _overrides & All )
+        _resolvedFont = *_font;
 
-    if( ! _font )
-        _font.reset( new Gfx::Font );
+    if( _overrides & Size )
+        _resolvedFont = _resolvedFont.withSize(_size);
 
-    if( overlay._overrides & Size )
-        *_font = _font->withSize(overlay._font->size());
+    if( _overrides & Weight )
+        _resolvedFont = _resolvedFont.withWeight(_weight);
 
-    if( overlay._overrides & Weight )
-        *_font = _font->withWeight(overlay._font->weight());
-
-    if( overlay._overrides & Slant )
-        *_font = _font->withSlant(overlay._font->slant());
-
-    _overrides |= overlay._overrides;
+    if( _overrides & Slant )
+        _resolvedFont = _resolvedFont.withSlant(_slant);
 }
 
 
-Gfx::Font FontOption::getFont(const Gfx::Font& base) const
+Gfx::Font FontOption::getFont(const Gfx::Font& baseFont) const
 {
-    FontOption option;
-    option.setFont(base);
-    option.merge(*this);
-    return option.value();
+    Gfx::Font font = baseFont;
+
+    if( _overrides & All )
+        font = *_font;
+
+    if( _overrides & Size )
+        font = font.withSize(_size);
+
+    if( _overrides & Weight )
+        font = font.withWeight(_weight);
+
+    if( _overrides & Slant )
+        font = font.withSlant(_slant);
+
+    return font;
 }
 
+///////////////////////////////////////////////////////////////////////
+// StyleOptions
+///////////////////////////////////////////////////////////////////////
 
 StyleOptions::StyleOptions()
 : _generation(1)
 , _parent(0)
+, _boundGeneration(invalidGeneration)
 {
 }
 
@@ -176,8 +206,9 @@ StyleOptions::StyleOptions()
 StyleOptions::StyleOptions(const StyleOptions& o)
 : _generation(o._generation)
 , _parent(o._parent)
+, _boundGeneration(invalidGeneration)
 {
-    _options.reserve(o._options.size());
+    _options.reserve( o._options.size() );
     for(std::size_t n = 0; n < o._options.size(); ++n)
         _options.push_back( o._options[n]->clone() );
 }
@@ -185,7 +216,7 @@ StyleOptions::StyleOptions(const StyleOptions& o)
 
 StyleOptions::~StyleOptions()
 {
-    clear();
+    clearOptions();
 }
 
 
@@ -194,11 +225,13 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
     if(this == &o)
         return *this;
 
-    clear();
+    clearOptions();
     ++_generation;
 
     _parent = o._parent;
-    _options.reserve(o._options.size());
+    _boundGeneration = invalidGeneration;
+
+    _options.reserve(  o._options.size() );
     for(std::size_t n = 0; n < o._options.size(); ++n)
         _options.push_back( o._options[n]->clone() );
 
@@ -275,13 +308,22 @@ bool StyleOptions::hasOptions() const
 }
 
 
-void StyleOptions::setParent(const StyleOptions* parent)
+void StyleOptions::bind(const StyleOptions* base)
 {
-    if( _parent != parent )
-    {
-        _parent = parent;
+    const std::size_t baseGeneration = base ? base->generation() : 0;
+
+    if( _parent == base && _boundGeneration == baseGeneration )
+        return;
+
+    if( _parent != base )
         ++_generation;
-    }
+
+    _parent = base;
+
+    for(std::size_t n = 0; n < _options.size(); ++n)
+        _options[n]->bind(base);
+
+    _boundGeneration = baseGeneration;
 }
 
 
@@ -303,7 +345,7 @@ StyleOption* StyleOptions::findOption(const std::type_info& ti) const
 }
 
 
-void StyleOptions::replace(StyleOption* option)
+void StyleOptions::replaceOption(StyleOption* option)
 {
     const std::type_info& ti = option->typeId();
     for(std::size_t n = 0; n < _options.size(); ++n)
@@ -316,11 +358,27 @@ void StyleOptions::replace(StyleOption* option)
         }
     }
 
+    ++_generation;
     _options.push_back(option);
 }
 
 
-void StyleOptions::clear()
+void StyleOptions::removeOption(const std::type_info& ti)
+{
+    for(std::size_t n = 0; n < _options.size(); ++n)
+    {
+        if( _options[n]->typeId() == ti )
+        {
+            delete _options[n];
+            _options.erase(_options.begin() + n);
+            ++_generation;
+            return;
+        }
+    }
+}
+
+
+void StyleOptions::clearOptions()
 {
     for(std::size_t n = 0; n < _options.size(); ++n)
         delete _options[n];

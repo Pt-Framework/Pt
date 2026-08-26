@@ -186,11 +186,13 @@ class PT_FORMS_API PanelStyler : public StylerBase
         */
         PanelRenderer* renderer();
 
-        /** @brief Returns the panel style options.
+        /** @brief Returns the bound effective panel options.
+
+            Use %StyleOptions::findLocal() to query an explicit widget-local token.
         */
         StyleOptions& options();
 
-        /** @brief Returns the panel style options.
+        /** @brief Returns the bound effective panel options.
         */
         const StyleOptions& options() const;
 

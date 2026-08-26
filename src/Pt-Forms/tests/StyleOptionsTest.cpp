@@ -47,10 +47,12 @@ class StyleOptionsTest : public Unit::TestSuite
                                             &StyleOptionsTest::Defaults);
             Unit::TestSuite::registerMethod("SetReset", *this,
                                             &StyleOptionsTest::SetReset);
-            Unit::TestSuite::registerMethod("FontPartial", *this,
-                                            &StyleOptionsTest::FontPartial);
-            Unit::TestSuite::registerMethod("FontReplaceDropsFull", *this,
-                                            &StyleOptionsTest::FontReplaceDropsFull);
+            Unit::TestSuite::registerMethod("FontBinding", *this,
+                                            &StyleOptionsTest::FontBinding);
+            Unit::TestSuite::registerMethod("FontBindingAfterSet", *this,
+                                            &StyleOptionsTest::FontBindingAfterSet);
+            Unit::TestSuite::registerMethod("FontCompleteThenPartial", *this,
+                                            &StyleOptionsTest::FontCompleteThenPartial);
             Unit::TestSuite::registerMethod("SetReplacesSameType", *this,
                                             &StyleOptionsTest::SetReplacesSameType);
             Unit::TestSuite::registerMethod("HasOverridesEmptyBag", *this,
@@ -61,8 +63,8 @@ class StyleOptionsTest : public Unit::TestSuite
                                             &StyleOptionsTest::CopyAssign);
             Unit::TestSuite::registerMethod("Get", *this,
                                             &StyleOptionsTest::Get);
-            Unit::TestSuite::registerMethod("Resolve", *this,
-                                            &StyleOptionsTest::Resolve);
+            Unit::TestSuite::registerMethod("Bind", *this,
+                                            &StyleOptionsTest::Bind);
 
         }
 
@@ -146,10 +148,6 @@ class StyleOptionsTest : public Unit::TestSuite
             PT_UNIT_ASSERT(font.value().family().empty());
             PT_UNIT_ASSERT(font.value().size() == 10);
 
-            Gfx::Font otherBase("serif", 20);
-            Gfx::Font resolved = font.getFont(otherBase);
-            PT_UNIT_ASSERT(resolved.family().empty());
-            PT_UNIT_ASSERT(resolved.size() == 10);
         }
 
 
@@ -180,43 +178,63 @@ class StyleOptionsTest : public Unit::TestSuite
         }
 
 
-        void FontPartial()
+        void FontBinding()
         {
+            StyleOptions inherited;
+            FontOption baseFont;
+            baseFont.setFont( Gfx::Font("serif", 10) );
+            inherited.set(baseFont);
+
             StyleOptions options;
-            Gfx::Font base("", 10);
+
+            FontOption font;
+            font.setSize(18);
+            options.set(font);
+            options.bind(&inherited);
+
+            const FontOption* stored = options.find<FontOption>();
+            PT_UNIT_ASSERT(stored != 0);
+            PT_UNIT_ASSERT( stored->isSet() );
+            PT_UNIT_ASSERT(options.get<FontOption>().value().size() == 18);
+            PT_UNIT_ASSERT(options.get<FontOption>().value().family() == "serif");
+
+            options.reset<FontOption>();
+            PT_UNIT_ASSERT(options.findLocal<FontOption>() == 0);
+        }
+
+
+        void FontBindingAfterSet()
+        {
+            StyleOptions inherited;
+            FontOption baseFont;
+            baseFont.setFont( Gfx::Font("serif", 10) );
+            inherited.set(baseFont);
+
+            StyleOptions options;
+            options.bind(&inherited);
 
             FontOption font;
             font.setSize(18);
             options.set(font);
 
-            const FontOption* stored = options.find<FontOption>();
-            PT_UNIT_ASSERT(stored != 0);
-            PT_UNIT_ASSERT( stored->isSet() );
-
-            Gfx::Font resolved = stored->getFont(base);
+            const Gfx::Font& resolved = options.get<FontOption>().value();
+            PT_UNIT_ASSERT(resolved.family() == "serif");
             PT_UNIT_ASSERT(resolved.size() == 18);
-            PT_UNIT_ASSERT(resolved.family() == base.family());
-
-            options.reset<FontOption>();
-            PT_UNIT_ASSERT(options.find<FontOption>() == 0);
         }
 
 
-        void FontReplaceDropsFull()
+        void FontCompleteThenPartial()
         {
             StyleOptions options;
             FontOption complete;
             complete.setFont(Gfx::Font("serif", 14));
+            complete.setSize(18);
             options.set(complete);
+            options.bind(0);
 
-            FontOption sizeOnly;
-            sizeOnly.setSize(18);
-            options.set(sizeOnly);
-
-            Gfx::Font base("sans", 10);
-            Gfx::Font resolved = options.get<FontOption>().getFont(base);
+            const Gfx::Font& resolved = options.get<FontOption>().value();
             PT_UNIT_ASSERT(resolved.size() == 18);
-            PT_UNIT_ASSERT(resolved.family() == base.family());
+            PT_UNIT_ASSERT(resolved.family() == "serif");
         }
 
 
@@ -315,7 +333,7 @@ class StyleOptionsTest : public Unit::TestSuite
         }
 
 
-        void Resolve()
+        void Bind()
         {
             StyleOptions baseOptions;
             FontOption baseFont;
@@ -323,22 +341,19 @@ class StyleOptionsTest : public Unit::TestSuite
             baseOptions.set(baseFont);
 
             StyleOptions overrideOptions;
-            overrideOptions.setParent(&baseOptions);
             FontOption sizeOverride;
             sizeOverride.setSize(18);
             overrideOptions.set(sizeOverride);
+            overrideOptions.bind(&baseOptions);
 
             StyleOptions options;
-            options.setParent(&overrideOptions);
-
-            FontOption font;
-            PT_UNIT_ASSERT( options.resolve(font) );
-            PT_UNIT_ASSERT(font.value().family() == "serif");
-            PT_UNIT_ASSERT(font.value().size() == 18);
+            options.bind(&overrideOptions);
+            PT_UNIT_ASSERT(options.get<FontOption>().value().family() == "serif");
+            PT_UNIT_ASSERT(options.get<FontOption>().value().size() == 18);
 
             StyleOptions emptyOptions;
-            FontOption emptyFont;
-            PT_UNIT_ASSERT( ! emptyOptions.resolve(emptyFont) );
+            emptyOptions.bind(0);
+            PT_UNIT_ASSERT(emptyOptions.find<FontOption>() == 0);
         }
 };
 

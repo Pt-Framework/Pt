@@ -48,11 +48,12 @@ namespace Pt {
 
 namespace Forms {
 
+class StyleOptions;
+
 /** @brief Non-template base for a typed style option.
 
-    Each concrete option type implements %clone(), %typeId(), %name()
-    and %merge(). The lookup key is the option class, not the stored
-    value type.
+    Each concrete option type implements %clone(), %typeId(), and %name().
+    The lookup key is the option class, not the stored value type.
 */
 class PT_FORMS_API StyleOption
 {
@@ -64,6 +65,9 @@ class PT_FORMS_API StyleOption
         virtual const std::type_info& typeId() const = 0;
 
         virtual const char* name() const = 0;
+
+        virtual void bind(const StyleOptions* /*inherited*/)
+        {}
 };
 
 /** @brief Background brush option.
@@ -81,9 +85,6 @@ class BackgroundOption : public StyleOption
 
         const Gfx::Brush& value() const
         { return _value; }
-
-        void merge(const BackgroundOption& other)
-        { _value = other._value; }
 
         virtual StyleOption* clone() const
         { return new BackgroundOption(*this); }
@@ -114,9 +115,6 @@ class ForegroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
-        void merge(const ForegroundOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new ForegroundOption(*this); }
 
@@ -146,9 +144,6 @@ class ContourOption : public StyleOption
         const Gfx::Pen& value() const
         { return _value; }
 
-        void merge(const ContourOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new ContourOption(*this); }
 
@@ -173,9 +168,6 @@ class AccentColorOption : public StyleOption
 
         const Gfx::Color& value() const
         { return _value; }
-
-        void merge(const AccentColorOption& other)
-        { _value = other._value; }
 
         virtual StyleOption* clone() const
         { return new AccentColorOption(*this); }
@@ -206,9 +198,6 @@ class ViewBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
-        void merge(const ViewBackgroundOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new ViewBackgroundOption(*this); }
 
@@ -233,9 +222,6 @@ class HighlightColorOption : public StyleOption
 
         const Gfx::Color& value() const
         { return _value; }
-
-        void merge(const HighlightColorOption& other)
-        { _value = other._value; }
 
         virtual StyleOption* clone() const
         { return new HighlightColorOption(*this); }
@@ -266,9 +252,6 @@ class HoverBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
-        void merge(const HoverBackgroundOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new HoverBackgroundOption(*this); }
 
@@ -298,9 +281,6 @@ class TextBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
-        void merge(const TextBackgroundOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new TextBackgroundOption(*this); }
 
@@ -325,9 +305,6 @@ class TextColorOption : public StyleOption
 
         const Gfx::Color& value() const
         { return _value; }
-
-        void merge(const TextColorOption& other)
-        { _value = other._value; }
 
         virtual StyleOption* clone() const
         { return new TextColorOption(*this); }
@@ -354,9 +331,6 @@ class PlaceholderTextColorOption : public StyleOption
         const Gfx::Color& value() const
         { return _value; }
 
-        void merge(const PlaceholderTextColorOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new PlaceholderTextColorOption(*this); }
 
@@ -381,9 +355,6 @@ class HighlightedTextColorOption : public StyleOption
 
         const Gfx::Color& value() const
         { return _value; }
-
-        void merge(const HighlightedTextColorOption& other)
-        { _value = other._value; }
 
         virtual StyleOption* clone() const
         { return new HighlightedTextColorOption(*this); }
@@ -414,9 +385,6 @@ class AlternateViewBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
-        void merge(const AlternateViewBackgroundOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new AlternateViewBackgroundOption(*this); }
 
@@ -446,9 +414,6 @@ class PopupBackgroundOption : public StyleOption
         const Gfx::Brush& value() const
         { return _value; }
 
-        void merge(const PopupBackgroundOption& other)
-        { _value = other._value; }
-
         virtual StyleOption* clone() const
         { return new PopupBackgroundOption(*this); }
 
@@ -473,9 +438,6 @@ class PopupTextColorOption : public StyleOption
 
         const Gfx::Color& value() const
         { return _value; }
-
-        void merge(const PopupTextColorOption& other)
-        { _value = other._value; }
 
         virtual StyleOption* clone() const
         { return new PopupTextColorOption(*this); }
@@ -514,9 +476,7 @@ class PT_FORMS_API FontOption : public StyleOption
         */
         bool isSet() const;
 
-        /** @brief Returns the stored font.
-
-            Valid when a complete font override is set.
+        /** @brief Returns the effective font.
         */
         const Gfx::Font& value() const;
 
@@ -536,21 +496,11 @@ class PT_FORMS_API FontOption : public StyleOption
         */
         void setSlant(Gfx::Font::Slant slant);
 
-        /** @brief Replaces or merges this font option with @a overlay.
+        virtual void bind(const StyleOptions* inherited);
 
-            A complete font in @a overlay replaces this option. Partial
-            size, weight, and slant overrides from @a overlay are merged
-            into this option.
+        /** @brief Returns the local font overrides merged with @a baseFont.
         */
-        void merge(const FontOption& overlay);
-
-        /** @brief Resolves the effective font against the given base font.
-
-            Returns @a base unchanged when no override is set. A full font
-            override replaces @a base entirely; partial overrides for size,
-            weight, and slant are merged into @a base.
-        */
-        Gfx::Font getFont(const Gfx::Font& base) const;
+        Gfx::Font getFont(const Gfx::Font& baseFont) const;
 
     private:
         enum Override
@@ -562,8 +512,12 @@ class PT_FORMS_API FontOption : public StyleOption
         };
 
     private:
-        AutoPtr<Gfx::Font> _font;
-        unsigned           _overrides;
+        AutoPtr<Gfx::Font>    _font;
+        std::size_t           _size;
+        Gfx::Font::Weight     _weight;
+        Gfx::Font::Slant      _slant;
+        Gfx::Font             _resolvedFont;
+        unsigned              _overrides;
 };
 
 /** @brief Style options container.
@@ -572,8 +526,8 @@ class PT_FORMS_API FontOption : public StyleOption
     The default constructor creates an empty container. %defaults() returns
     a container populated with the built-in default options.
 
-    A parent container can be configured with %setParent() to provide
-    inherited options. %find() and %get() consider both local and
+    %bind() associates an inherited container and materializes local partial
+    options against its effective values. %find() and %get() consider both local and
     inherited options. %findLocal() and %hasOptions() only consider
     locally stored options. %set() and %reset() modify the local options.
 */
@@ -584,10 +538,16 @@ class PT_FORMS_API StyleOptions
         */
         StyleOptions();
 
+        /** @brief Copy Constructor.
+        */
         StyleOptions(const StyleOptions& o);
 
+        /** @brief Destructor.
+        */
         ~StyleOptions();
 
+        /** @brief Assigns style options.
+        */
         StyleOptions& operator=(const StyleOptions& o);
 
         /** @brief Returns a complete container with the built-in default options.
@@ -602,9 +562,12 @@ class PT_FORMS_API StyleOptions
         */
         bool hasOptions() const;
 
-        /** @brief Sets the parent container that provides inherited options.
+        /** @brief Binds local options to @a inherited and materializes effective values.
+
+            Rebinding with unchanged local and inherited generations performs no option
+            traversal. Passing 0 removes the inherited container.
         */
-        void setParent(const StyleOptions* parent);
+        void bind(const StyleOptions* inherited);
 
         /** @brief Returns the parent container that provides inherited options, or 0.
         */
@@ -625,14 +588,6 @@ class PT_FORMS_API StyleOptions
         template <typename T>
         const T& get() const;
 
-        /** @brief Merges the local and inherited options of type T into @a option.
-
-            Returns false if no option of type T is present locally or
-            in the parent chain.
-        */
-        template <typename T>
-        bool resolve(T& option) const;
-
         /** @brief Sets or replaces the local option of type T.
         */
         template <typename T>
@@ -646,12 +601,15 @@ class PT_FORMS_API StyleOptions
     private:
         StyleOption* findOption(const std::type_info& ti) const;
 
-        void replace(StyleOption* option);
+        void replaceOption(StyleOption* option);
 
-        void clear();
+        void removeOption(const std::type_info& ti);
+
+        void clearOptions();
 
     private:
         std::size_t               _generation;
+        std::size_t               _boundGeneration;
         const StyleOptions*       _parent;
         std::vector<StyleOption*> _options;
 };
@@ -690,45 +648,18 @@ const T& StyleOptions::get() const
 
 
 template <typename T>
-bool StyleOptions::resolve(T& option) const
-{
-    bool found = false;
-    if( _parent )
-        found = _parent->resolve(option);
-
-    const T* local = findLocal<T>();
-    if(local)
-    {
-        option.merge(*local);
-        found = true;
-    }
-
-    return found;
-}
-
-
-template <typename T>
 void StyleOptions::set(const T& option)
 {
-    replace( option.clone() );
-    ++_generation;
+    StyleOption* localOption = option.clone();
+    localOption->bind(_parent);
+    replaceOption(localOption);
 }
 
 
 template <typename T>
 void StyleOptions::reset()
 {
-    const std::type_info& ti = typeid(T);
-    for(std::size_t n = 0; n < _options.size(); ++n)
-    {
-        if( _options[n]->typeId() == ti )
-        {
-            delete _options[n];
-            _options.erase(_options.begin() + n);
-            ++_generation;
-            return;
-        }
-    }
+    removeOption(typeid(T));
 }
 
 } // namespace

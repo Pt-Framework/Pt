@@ -282,7 +282,7 @@ const StyleOptions& ButtonStyler::options() const
 
 StyleOptions& ButtonStyler::onBindOptions(const StyleOptions& global)
 {
-    _options.setParent(&global);
+    _options.bind(&global);
     return _options;
 }
 

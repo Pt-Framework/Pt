@@ -175,10 +175,7 @@ void PushButton::setTextColor(const Gfx::Color& color)
 
 Gfx::Font PushButton::font() const
 {
-    FontOption font;
-    _buttonStyler.options().resolve(font);
-
-    return font.value();
+    return _buttonStyler.options().get<FontOption>().value();
 }
 
 
