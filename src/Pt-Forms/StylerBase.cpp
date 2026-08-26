@@ -35,9 +35,9 @@ namespace Forms {
 
 StylerBase::StylerBase()
 : _styleGeneration(StyleOptions::InvalidGeneration)
-, _localOptionsGeneration(StyleOptions::InvalidGeneration)
+, _optionsGeneration(StyleOptions::InvalidGeneration)
 , _isRenderer(false)
-, _isOverride(false)
+, _isDefaultOptions(false)
 {
 }
 
@@ -58,16 +58,17 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
 {
     StyleOptions& localOptions = onBindOptions(styleOptions);
 
-    if( isStyleChanged(style, localOptions) )
+    if( isStyleChanged(style, styleOptions, localOptions) )
     {
         Renderer* renderer = 0;
+        _isDefaultOptions = localOptions.isDefault(styleOptions);
 
         if( _isRenderer )
         {
             // use specific renderer
             renderer = _renderer.get();
         }
-        else if( localOptions.isDefault(styleOptions) )
+        else if( _isDefaultOptions )
         {
             // default shared style renderer
             renderer = onStyleRenderer(style);
@@ -80,18 +81,17 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
 
         _renderer.reset(renderer);
         _styleGeneration = style.generation();
-        _isOverride = localOptions.hasOptions();
-        _localOptionsGeneration = StyleOptions::InvalidGeneration;
+        _optionsGeneration = StyleOptions::InvalidGeneration;
     }
 
     if( _renderer && isOptionsChanged(localOptions) )
     {
-        if( _isRenderer || _isOverride )
+        if( _isRenderer || ! _isDefaultOptions )
         {
             _renderer->prepare(localOptions);
         }
 
-        _localOptionsGeneration = localOptions.generation();
+        _optionsGeneration = localOptions.generation();
     }
 
     return _renderer.get();
@@ -105,6 +105,7 @@ bool StylerBase::isBound() const
 
 
 bool StylerBase::isStyleChanged(const Style& style,
+                                const StyleOptions& styleOptions,
                                 const StyleOptions& localOptions) const
 {
     if( ! _renderer )
@@ -113,7 +114,7 @@ bool StylerBase::isStyleChanged(const Style& style,
     if( _styleGeneration != style.generation() )
         return true;
 
-    if( _isOverride != localOptions.hasOptions() )
+    if( _isDefaultOptions != localOptions.isDefault(styleOptions) )
         return true;
 
     return false;
@@ -122,7 +123,7 @@ bool StylerBase::isStyleChanged(const Style& style,
 
 bool StylerBase::isOptionsChanged(const StyleOptions& localOptions) const
 {
-    if( _localOptionsGeneration != localOptions.generation() )
+    if( _optionsGeneration != localOptions.generation() )
         return true;
 
     return false;

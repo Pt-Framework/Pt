@@ -81,16 +81,17 @@ class PT_FORMS_API StylerBase : private NonCopyable
 
     private:
         bool isStyleChanged(const Style& style,
-                            const StyleOptions& localOptions) const;
+                    const StyleOptions& styleOptions,
+                    const StyleOptions& localOptions) const;
 
         bool isOptionsChanged(const StyleOptions& localOptions) const;
 
     private:
         FacetPtr<Renderer> _renderer;
         std::size_t        _styleGeneration;
-        std::size_t        _localOptionsGeneration;
+        std::size_t        _optionsGeneration;
         bool               _isRenderer;
-        bool               _isOverride;
+        bool               _isDefaultOptions;
 };
 
 } // namespace
