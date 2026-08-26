@@ -534,6 +534,9 @@ class PT_FORMS_API FontOption : public StyleOption
 class PT_FORMS_API StyleOptions
 {
     public:
+        static const std::size_t InvalidGeneration = 0;
+
+    public:
         /** @brief Constructs an empty container.
         */
         StyleOptions();

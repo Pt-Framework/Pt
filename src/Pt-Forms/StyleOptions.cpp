@@ -34,12 +34,6 @@ namespace Pt {
 
 namespace Forms {
 
-namespace {
-
-const std::size_t invalidGeneration = 0;
-
-}
-
 ///////////////////////////////////////////////////////////////////////
 // StyleOption
 ///////////////////////////////////////////////////////////////////////
@@ -198,7 +192,7 @@ Gfx::Font FontOption::getFont(const Gfx::Font& baseFont) const
 StyleOptions::StyleOptions()
 : _generation(1)
 , _parent(0)
-, _boundGeneration(invalidGeneration)
+, _boundGeneration(InvalidGeneration)
 {
 }
 
@@ -206,7 +200,7 @@ StyleOptions::StyleOptions()
 StyleOptions::StyleOptions(const StyleOptions& o)
 : _generation(o._generation)
 , _parent(o._parent)
-, _boundGeneration(invalidGeneration)
+, _boundGeneration(InvalidGeneration)
 {
     _options.reserve( o._options.size() );
     for(std::size_t n = 0; n < o._options.size(); ++n)
@@ -229,7 +223,7 @@ StyleOptions& StyleOptions::operator=(const StyleOptions& o)
     ++_generation;
 
     _parent = o._parent;
-    _boundGeneration = invalidGeneration;
+    _boundGeneration = InvalidGeneration;
 
     _options.reserve(  o._options.size() );
     for(std::size_t n = 0; n < o._options.size(); ++n)
@@ -354,6 +348,7 @@ void StyleOptions::replaceOption(StyleOption* option)
         {
             delete _options[n];
             _options[n] = option;
+            ++_generation;
             return;
         }
     }

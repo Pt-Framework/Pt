@@ -34,9 +34,9 @@ namespace Pt {
 namespace Forms {
 
 StylerBase::StylerBase()
-: _styleGeneration(InvalidGeneration)
-, _optionsGeneration(InvalidGeneration)
-, _localOptionsGeneration(InvalidGeneration)
+: _styleGeneration(StyleOptions::InvalidGeneration)
+, _optionsGeneration(StyleOptions::InvalidGeneration)
+, _localOptionsGeneration(StyleOptions::InvalidGeneration)
 , _isRenderer(false)
 , _isOverride(false)
 {
@@ -48,6 +48,13 @@ StylerBase::~StylerBase()
 }
 
 
+void StylerBase::init(Renderer* renderer)
+{
+    _isRenderer = renderer != 0;
+    _renderer.reset(renderer);
+}
+
+
 Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
 {
     StyleOptions& localOptions = onBindOptions(styleOptions);
@@ -56,23 +63,27 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
     {
         Renderer* renderer = 0;
 
-        if(_isRenderer)
+        if( _isRenderer )
         {
+            // use specific renderer
             renderer = _renderer.get();
+        }
+        else if( localOptions.hasOptions() )
+        {
+            // cloned style renderer
+            renderer = onCreateRenderer(style);
         }
         else
         {
+            // default shared style renderer
             renderer = onStyleRenderer(style);
-
-            if( renderer && localOptions.hasOptions() )
-                renderer = onCreateRenderer(style);
         }
 
         _renderer.reset(renderer);
         _styleGeneration = style.generation();
         _isOverride = localOptions.hasOptions();
-        _optionsGeneration = InvalidGeneration;
-        _localOptionsGeneration = InvalidGeneration;
+        _optionsGeneration = StyleOptions::InvalidGeneration;
+        _localOptionsGeneration = StyleOptions::InvalidGeneration;
     }
 
     if( _renderer && isOptionsChanged(styleOptions, localOptions) )
@@ -93,13 +104,6 @@ Renderer* StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
 bool StylerBase::isBound() const
 {
     return _renderer != 0;
-}
-
-
-void StylerBase::init(Renderer* renderer)
-{
-    _isRenderer = renderer != 0;
-    _renderer.reset(renderer);
 }
 
 

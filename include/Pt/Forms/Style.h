@@ -255,7 +255,6 @@ class PT_FORMS_API Style
         std::size_t _generation;
 };
 
-
 } // namespace
 
 } // namespace
