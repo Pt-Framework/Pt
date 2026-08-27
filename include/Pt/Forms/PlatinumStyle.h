@@ -371,8 +371,7 @@ class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer
     protected:
         virtual LineEditRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& lineEditOptions);
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                       const Gfx::SizeF& contentSize);

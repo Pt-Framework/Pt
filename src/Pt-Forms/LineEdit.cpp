@@ -199,117 +199,86 @@ Pt::Signal<const Pt::String&>& LineEdit::editingFinished()
 
 const Gfx::Brush& LineEdit::background() const
 {
-    const TextBackgroundOption* background = _lineEditOptions.find<TextBackgroundOption>();
-    if(background)
-        return background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>().value();
+    return _styler.background();
 }
 
 
 void LineEdit::setBackground(const Gfx::Brush& b)
 {
-    TextBackgroundOption background(b);
-    _lineEditOptions.set(background);
+    _styler.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& LineEdit::contour() const
 {
-    const ContourOption* contour = _lineEditOptions.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>().value();
+    return _styler.contour();
 }
 
 
 void LineEdit::setContour(const Gfx::Pen& p)
 {
-    ContourOption contour(p);
-    _lineEditOptions.set(contour);
+    _styler.setContour(p);
     invalidate();
 }
 
 
 const Gfx::Color& LineEdit::textColor() const
 {
-    const TextColorOption* textColor = _lineEditOptions.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>().value();
+    return _styler.textColor();
 }
 
 
 void LineEdit::setTextColor(const Gfx::Color& color)
 {
-    TextColorOption textColor(color);
-    _lineEditOptions.set(textColor);
+    _styler.setTextColor(color);
     invalidate();
 }
 
 
 Gfx::Font LineEdit::font() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
+    return _styler.font();
 }
 
 
 void LineEdit::setFont(const Gfx::Font& font)
 {
-    FontOption fontOption;
-    fontOption.setFont(font);
-    _lineEditOptions.set(fontOption);
+    _styler.setFont(font);
     invalidate();
 }
 
 
 void LineEdit::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSize(size);
-    _lineEditOptions.set(font);
+    _styler.setFontSize(size);
     invalidate();
 }
 
 
 void LineEdit::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setWeight(weight);
-    _lineEditOptions.set(font);
+    _styler.setFontWeight(weight);
     invalidate();
 }
 
 
 void LineEdit::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _lineEditOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSlant(slant);
-    _lineEditOptions.set(font);
+    _styler.setFontSlant(slant);
     invalidate();
 }
 
 
 void LineEdit::setRenderer(LineEditRenderer* renderer)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
+    _styler.setRenderer(renderer);
 
-    if(renderer)
-        _lineEditStyle.bind(*renderer, options, _lineEditOptions);
-    else
-        _lineEditStyle.bind(Application::instance().style(), options, _lineEditOptions);
+    const Application& application = Application::instance();
+    _styler.bind(application.style(), application.styleOptions());
+
+    _textRect = Gfx::RectF();
+    _cursorRect = Gfx::RectF();
 
     invalidate();
 }
@@ -332,19 +301,23 @@ void LineEdit::onInvalidate()
 {
     Base::onInvalidate();
 
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
-    _lineEditStyle.rebind(Application::instance().style(), options, _lineEditOptions);
+
+    if( _styler.bind(style, options) )
+    {
+        _textRect = Gfx::RectF();
+        _cursorRect = Gfx::RectF();
+    }
+
+    relayout();
 }
 
 
 Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
 {
-    LineEditRenderer* renderer = _lineEditStyle.renderer();
-    if( ! renderer )
-        return Gfx::SizeF(0, 0);
-
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF sz = renderer->measureFrame(surface(), contentSize);
+    Gfx::SizeF sz = _styler.measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( sz.width() + padding().leftRight(),
                        sz.height() + padding().topBottom() );
@@ -355,41 +328,36 @@ void LineEdit::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    LineEditRenderer* renderer = _lineEditStyle.renderer();
-    if( ! renderer )
-        return;
-
-    _textRect = renderer->layoutFrame( surface(), Gfx::RectF(size()) );
+    _textRect = _styler.layoutFrame( surface(), Gfx::RectF(size()) );
 
     _editor.setPosition( _textRect.topLeft() );
     _editor.setSize( _textRect.size() );
 
-    const Painter& painter = renderer->textPainter(surface());
+    const Painter* painter = _styler.textPainter(surface());
+    _cursorRect.clear();
 
-    if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(painter, _placeholderText, _line);
-    else
-        _editor.layout(painter, _line);
-
-    if(_pendingCursorX >= 0)
+    if( painter )
     {
-        std::size_t n = _line.xToCursor(painter, _pendingCursorX);
-        _editor.setCursorPosition(n);
-        _pendingCursorX = -1;
-    }
+        if( _editor.isEmpty() && ! hasFocus() )
+            _editor.layout(*painter, _placeholderText, _line);
+        else
+            _editor.layout(*painter, _line);
 
-    if( _isEditable && hasFocus() )
-    {
-        double cursorX = _line.cursorToX(painter, _editor.cursorPosition());
-        cursorX += _line.position().x();
+        if(_pendingCursorX >= 0)
+        {
+            std::size_t n = _line.xToCursor(*painter, _pendingCursorX);
+            _editor.setCursorPosition(n);
+            _pendingCursorX = -1;
+        }
 
-        Gfx::PointF top(cursorX, _line.position().y());
-        Gfx::PointF bottom(cursorX, _line.position().y() + _line.maxHeight());
-        _cursorRect = Gfx::RectF(top, bottom);
-    }
-    else
-    {
-        _cursorRect = Gfx::RectF();
+        if( _isEditable && hasFocus() )
+        {
+            double cursorX = _line.cursorToX(*painter, _editor.cursorPosition());
+            cursorX += _line.position().x();
+
+            _cursorRect.set( Gfx::PointF(cursorX, _line.position().y()),
+                             Gfx::SizeF(1, _line.maxHeight()) );
+        }
     }
 
     repaint( bounds() );
@@ -398,10 +366,6 @@ void LineEdit::onLayout(const Gfx::RectF& rect)
 
 void LineEdit::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
-    LineEditRenderer* renderer = _lineEditStyle.renderer();
-    if( ! renderer )
-        return;
-
     LineEditState state = lineEditState();
 
     bool placeholder = _editor.isEmpty() && ! hasFocus();
@@ -430,12 +394,8 @@ void LineEdit::onPaintChrome(PaintContext& context,
                              const Gfx::RectF& selection,
                              const LineEditState& state)
 {
-    LineEditRenderer* renderer = _lineEditStyle.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderChrome(context, rect, textRect,
-                           text, textPos, cursor, selection, state);
+    _styler.renderChrome(context, rect, textRect,
+                         text, textPos, cursor, selection, state);
 }
 
 

@@ -174,8 +174,7 @@ class PT_FORMS_API LineEdit : public Control
         EchoMode                      _echoMode;
         double                        _spacing;
 
-        LineEditStyle                  _lineEditStyle;
-        StyleOptions                   _lineEditOptions;
+        LineEditStyler                 _styler;
 
         Gfx::RectF                    _textRect;
         Gfx::RectF                    _cursorRect;

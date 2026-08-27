@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/LineEditStyle.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Style.h>
 
 namespace Pt {
 
@@ -104,7 +105,7 @@ void LineEditState::setPlaceholder(bool value)
 
 
 LineEditRenderer::LineEditRenderer(std::size_t refs)
-: Style::Facet( typeid(LineEditRenderer), refs )
+: Renderer( typeid(LineEditRenderer), refs )
 {
 }
 
@@ -120,17 +121,15 @@ LineEditRenderer* LineEditRenderer::create() const
 }
 
 
-void LineEditRenderer::prepare(const StyleOptions& options,
-                               const StyleOptions& lineEditOptions)
+void LineEditRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, lineEditOptions);
+    onPrepare(options);
 }
 
 
 void LineEditRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -219,8 +218,172 @@ void LineEditRenderer::onRenderChrome(PaintContext& context,
 }
 
 
-LineEditStyle::LineEditStyle()
+LineEditStyler::LineEditStyler()
 {
+}
+
+
+const Gfx::Brush& LineEditStyler::background() const
+{
+    return _options.get<TextBackgroundOption>().value();
+}
+
+
+void LineEditStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( TextBackgroundOption(brush) );
+}
+
+
+const Gfx::Pen& LineEditStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void LineEditStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& LineEditStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void LineEditStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font LineEditStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void LineEditStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void LineEditStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void LineEditStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void LineEditStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
+Gfx::SizeF LineEditStyler::measureFrame(PaintSurface& surface,
+                                         const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+Gfx::RectF LineEditStyler::layoutFrame(PaintSurface& surface,
+                                        const Gfx::RectF& rect) const
+{
+    if( ! _renderer )
+        return Gfx::RectF();
+
+    return _renderer->layoutFrame(surface, rect);
+}
+
+
+const Painter* LineEditStyler::textPainter(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return 0;
+
+    return &_renderer->textPainter(surface);
+}
+
+
+void LineEditStyler::renderChrome(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::RectF& textRect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::RectF& cursor,
+                                  const Gfx::RectF& selection,
+                                  const LineEditState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, rect, textRect, text, textPos, cursor, selection, state);
+}
+
+
+void LineEditStyler::setRenderer(LineEditRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& LineEditStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& LineEditStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& LineEditStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* LineEditStyler::onStyleRenderer(const Style& style)
+{
+    LineEditRenderer* styleRenderer = style.get<LineEditRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* LineEditStyler::onCreateRenderer(const Style& style)
+{
+    LineEditRenderer* styleRenderer = style.get<LineEditRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace

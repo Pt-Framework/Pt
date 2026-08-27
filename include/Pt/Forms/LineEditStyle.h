@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_LINEEDITSTYLE_H
 #define PT_FORMS_LINEEDITSTYLE_H
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
@@ -69,7 +69,9 @@ class PT_FORMS_API LineEditState
 };
 
 
-class PT_FORMS_API LineEditRenderer : public Style::Facet
+/** @brief Renders the visual appearance of a line edit.
+*/
+class PT_FORMS_API LineEditRenderer : public Renderer
 {
     public:
         explicit LineEditRenderer(std::size_t refs = 0);
@@ -78,8 +80,9 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
 
         LineEditRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& lineEditOptions);
+        /** @brief Applies resolved line edit style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -88,6 +91,8 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
         Gfx::RectF layoutFrame(PaintSurface& surface,
                                const Gfx::RectF& rect);
 
+        /** @brief Returns the prepared text painter for @a surface.
+        */
         const Painter& textPainter(PaintSurface& surface);
 
         void renderChrome(PaintContext& context,
@@ -124,8 +129,7 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
 
         virtual LineEditRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& lineEditOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -166,11 +170,106 @@ class PT_FORMS_API LineEditRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API LineEditStyle : public Styler<LineEditRenderer,
-                                                      StyleOptions>
+/** @brief Binds line edit renderers and widget-local style options.
+*/
+class PT_FORMS_API LineEditStyler : public StylerBase
 {
     public:
-        LineEditStyle();
+        /** @brief Constructs an unbound line edit styler.
+        */
+        LineEditStyler();
+
+        /** @brief Returns the effective text background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local text background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Measures the frame enclosing @a contentSize, or returns an empty size.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Returns the frame content rectangle, or an empty rectangle when unavailable.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& rect) const;
+
+        /** @brief Returns the prepared text painter, or 0 when no renderer is bound.
+        */
+        const Painter* textPainter(PaintSurface& surface) const;
+
+        /** @brief Renders line edit chrome when a renderer is bound.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const Gfx::RectF& textRect,
+                          const String& text,
+                          const Gfx::PointF& textPos,
+                          const Gfx::RectF& cursor,
+                          const Gfx::RectF& selection,
+                          const LineEditState& state) const;
+
+        /** @brief Assigns a specific line edit renderer or restores style fallback.
+        */
+        void setRenderer(LineEditRenderer* renderer = 0);
+
+        /** @brief Returns the bound effective line edit options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the bound effective line edit options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<LineEditRenderer> _renderer;
+        StyleOptions               _options;
 };
 
 } // namespace

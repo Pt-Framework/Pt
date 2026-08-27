@@ -1257,25 +1257,16 @@ LineEditRenderer* PlatinumLineEditRenderer::onCreate() const
 }
 
 
-void PlatinumLineEditRenderer::onPrepare(const StyleOptions& options,
-                                         const StyleOptions& lineEditOptions)
+void PlatinumLineEditRenderer::onPrepare(const StyleOptions& options)
 {
-    const TextBackgroundOption* localBg = lineEditOptions.find<TextBackgroundOption>();
-    _background = localBg ? localBg->value()
-                          : options.get<TextBackgroundOption>().value();
+    _background = options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = lineEditOptions.find<ContourOption>();
-    _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>().value();
+    _contour = options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = lineEditOptions.find<FontOption>();
-    _font = localFont ? localFont->getFont(baseFont) : baseFont;
+    _font = options.get<FontOption>().value();
 
-    const TextColorOption* localText = lineEditOptions.find<TextColorOption>();
-    _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>().value();
+    _textColor = options.get<TextColorOption>().value();
 
     _accentColor = options.get<AccentColorOption>().value();
     _selectionBackground = options.get<AccentColorOption>().value();
