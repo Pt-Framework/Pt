@@ -73,73 +73,73 @@ bool CheckBox::isChecked() const
 
 const Gfx::Brush& CheckBox::background() const
 {
-    return _checkBoxStyler.background();
+    return _styler.background();
 }
 
 
 void CheckBox::setBackground(const Gfx::Brush& b)
 {
-    _checkBoxStyler.setBackground(b);
+    _styler.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& CheckBox::contour() const
 {
-    return _checkBoxStyler.contour();
+    return _styler.contour();
 }
 
 
 void CheckBox::setContour(const Gfx::Pen& p)
 {
-    _checkBoxStyler.setContour(p);
+    _styler.setContour(p);
     invalidate();
 }
 
 
 const Gfx::Color& CheckBox::textColor() const
 {
-    return _checkBoxStyler.textColor();
+    return _styler.textColor();
 }
 
 
 void CheckBox::setTextColor(const Gfx::Color& color)
 {
-    _checkBoxStyler.setTextColor(color);
+    _styler.setTextColor(color);
     invalidate();
 }
 
 
 Gfx::Font CheckBox::font() const
 {
-    return _checkBoxStyler.font();
+    return _styler.font();
 }
 
 
 void CheckBox::setFont(const Gfx::Font& font)
 {
-    _checkBoxStyler.setFont(font);
+    _styler.setFont(font);
     invalidate();
 }
 
 
 void CheckBox::setFontSize(std::size_t size)
 {
-    _checkBoxStyler.setFontSize(size);
+    _styler.setFontSize(size);
     invalidate();
 }
 
 
 void CheckBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    _checkBoxStyler.setFontWeight(weight);
+    _styler.setFontWeight(weight);
     invalidate();
 }
 
 
 void CheckBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    _checkBoxStyler.setFontSlant(slant);
+    _styler.setFontSlant(slant);
     invalidate();
 }
 
@@ -149,8 +149,13 @@ void CheckBox::setRenderer(CheckBoxRenderer* renderer)
     const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    _checkBoxStyler.setRenderer(renderer);
-    _checkBoxStyler.bind(style, options);
+    _styler.setRenderer(renderer);
+    _styler.bind(style, options);
+
+    _boxRect = Gfx::RectF();
+    _textRect = Gfx::RectF();
+    _textPos = Gfx::PointF();
+    _mnemonicRect = Gfx::RectF();
 
     invalidate();
 }
@@ -198,10 +203,13 @@ void CheckBox::onInvalidate()
     const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    _checkBoxStyler.bind(style, options);
-
-    if( ! _checkBoxStyler.renderer() )
-        return;
+    if( _styler.bind(style, options) )
+    {
+        _boxRect = Gfx::RectF();
+        _textRect = Gfx::RectF();
+        _textPos = Gfx::PointF();
+        _mnemonicRect = Gfx::RectF();
+    }
 
     relayout();
 }
@@ -209,18 +217,19 @@ void CheckBox::onInvalidate()
 
 Gfx::SizeF CheckBox::onMeasure(const SizePolicy& /*policy*/)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
-    if( ! renderer )
-        return Gfx::SizeF(0, 0);
+    const Painter* painter = _styler.textPainter(surface());
+    Gfx::SizeF textSize(0, 0);
 
-    const Painter& painter = renderer->textPainter( surface() );
-    Gfx::TextMetrics tm = painter.textMetrics( text() );
-    Gfx::FontMetrics fm = painter.fontMetrics();
+    if( painter )
+    {
+        Gfx::TextMetrics tm = painter->textMetrics( text() );
+        Gfx::FontMetrics fm = painter->fontMetrics();
+        textSize = Gfx::SizeF(tm.advance(), fm.lineHeight());
+    }
 
-    Gfx::SizeF textSize(tm.advance(), fm.lineHeight());
-    Gfx::SizeF indicatorSize = renderer->measureIndicator(surface());
-    Gfx::SizeF contentSize = renderer->measureContent(surface(), indicatorSize, textSize);
-    Gfx::SizeF totalSize = renderer->measureFrame(surface(), contentSize);
+    Gfx::SizeF indicatorSize = _styler.measureIndicator(surface());
+    Gfx::SizeF contentSize = _styler.measureContent(surface(), indicatorSize, textSize);
+    Gfx::SizeF totalSize = _styler.measureFrame(surface(), contentSize);
 
     return Gfx::SizeF(totalSize.width() + padding().leftRight(),
                       totalSize.height() + padding().topBottom());
@@ -231,25 +240,34 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
-    if( ! renderer )
-        return;
-
     Gfx::RectF insetRect( Gfx::PointF(padding().left(), padding().top()),
                           Gfx::SizeF(size().width() - padding().leftRight(),
                                      size().height() - padding().topBottom()) );
 
-    Gfx::RectF contentRect = renderer->layoutFrame(surface(), insetRect);
+    Gfx::RectF contentRect = _styler.layoutFrame(surface(), insetRect);
 
-    const Painter& painter = renderer->textPainter(surface());
-    Gfx::FontMetrics fm = painter.fontMetrics();
-    Gfx::TextMetrics tm = painter.textMetrics( text() );
+    _boxRect = Gfx::RectF();
+    _textRect = Gfx::RectF();
+    _textPos = Gfx::PointF();
+    _mnemonicRect = Gfx::RectF();
+
+    const Painter* painter = _styler.textPainter(surface());
+    if( ! painter )
+    {
+        _styler.layoutContent(surface(), contentRect, Gfx::SizeF(0, 0),
+                                      Gfx::SizeF(0, 0), _boxRect, _textRect);
+        repaint();
+        return;
+    }
+
+    Gfx::FontMetrics fm = painter->fontMetrics();
+    Gfx::TextMetrics tm = painter->textMetrics( text() );
 
     Gfx::SizeF textSize(tm.advance(), fm.lineHeight());
-    Gfx::SizeF indicatorSize = renderer->measureIndicator(surface());
+    Gfx::SizeF indicatorSize = _styler.measureIndicator(surface());
 
-    renderer->layoutContent(surface(), contentRect, indicatorSize, textSize,
-                            _boxRect, _textRect);
+    _styler.layoutContent(surface(), contentRect, indicatorSize, textSize,
+                          _boxRect, _textRect);
 
     const Gfx::Scaling& scaling = surface().scaling();
     double textY = scaling.align(_textRect.y() + _textRect.height() / 2.0) + fm.capHeight() / 2.0;
@@ -261,8 +279,8 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
     if( m )
         mnIdx = text().find(*m);
 
-    _mnemonicRect = renderer->layoutMnemonic(surface(), text(), _textPos,
-                                             fm, mnIdx);
+    _mnemonicRect = _styler.layoutMnemonic(surface(), text(), _textPos,
+                                           fm, mnIdx);
 
     repaint();
 }
@@ -270,9 +288,6 @@ void CheckBox::onLayout(const Gfx::RectF& rect)
 
 void CheckBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _checkBoxStyler.renderer() )
-        return;
-
     Gfx::RectF widgetRect( size() );
     CheckBoxState state = checkBoxState();
 
@@ -287,11 +302,7 @@ void CheckBox::onPaintChrome(PaintContext& context,
                              const Gfx::RectF& boxRect,
                              const CheckBoxState& state)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderChrome(context, rect, boxRect, state);
+    _styler.renderChrome(context, rect, boxRect, state);
 }
 
 
@@ -301,11 +312,7 @@ void CheckBox::onPaintText(PaintContext& context,
                            const Gfx::PointF& pos,
                            const CheckBoxState& state)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderText(context, textRect, text, pos, state);
+    _styler.renderText(context, textRect, text, pos, state);
 }
 
 
@@ -314,11 +321,7 @@ void CheckBox::onPaintMnemonic(PaintContext& context,
                               const Gfx::RectF& mnemonic,
                               const CheckBoxState& state)
 {
-    CheckBoxRenderer* renderer = _checkBoxStyler.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderMnemonic(context, rect, mnemonic, state);
+    _styler.renderMnemonic(context, rect, mnemonic, state);
 }
 
 } // namespace

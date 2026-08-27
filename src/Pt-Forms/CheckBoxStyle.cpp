@@ -294,9 +294,115 @@ void CheckBoxStyler::setRenderer(CheckBoxRenderer* renderer)
 }
 
 
-CheckBoxRenderer* CheckBoxStyler::renderer()
+const Painter* CheckBoxStyler::textPainter(PaintSurface& surface)
 {
-    return _renderer.get();
+    if( _renderer )
+        return &_renderer->textPainter(surface);
+
+    return 0;
+}
+
+
+Gfx::SizeF CheckBoxStyler::measureIndicator(PaintSurface& surface)
+{
+    if( _renderer )
+        return _renderer->measureIndicator(surface);
+
+    return Gfx::SizeF(0, 0);
+}
+
+
+Gfx::SizeF CheckBoxStyler::measureContent(PaintSurface& surface,
+                                           const Gfx::SizeF& indicatorSize,
+                                           const Gfx::SizeF& textSize)
+{
+    if( _renderer )
+        return _renderer->measureContent(surface, indicatorSize, textSize);
+
+    return Gfx::SizeF(0, 0);
+}
+
+
+Gfx::SizeF CheckBoxStyler::measureFrame(PaintSurface& surface,
+                                         const Gfx::SizeF& contentSize)
+{
+    if( _renderer )
+        return _renderer->measureFrame(surface, contentSize);
+
+    return Gfx::SizeF(0, 0);
+}
+
+
+Gfx::RectF CheckBoxStyler::layoutFrame(PaintSurface& surface,
+                                        const Gfx::RectF& frameRect)
+{
+    if( _renderer )
+        return _renderer->layoutFrame(surface, frameRect);
+
+    return Gfx::RectF();
+}
+
+
+void CheckBoxStyler::layoutContent(PaintSurface& surface,
+                                   const Gfx::RectF& contentRect,
+                                   const Gfx::SizeF& indicatorSize,
+                                   const Gfx::SizeF& textSize,
+                                   Gfx::RectF& indicatorRect,
+                                   Gfx::RectF& textRect)
+{
+    if( _renderer )
+    {
+        _renderer->layoutContent(surface, contentRect, indicatorSize, textSize,
+                                 indicatorRect, textRect);
+    }
+    else
+    {
+        indicatorRect = Gfx::RectF();
+        textRect = Gfx::RectF();
+    }
+}
+
+
+Gfx::RectF CheckBoxStyler::layoutMnemonic(PaintSurface& surface,
+                                           const String& text,
+                                           const Gfx::PointF& textPos,
+                                           const Gfx::FontMetrics& fontMetrics,
+                                           String::size_type mnemonicIndex)
+{
+    return _renderer ? _renderer->layoutMnemonic(surface, text, textPos, fontMetrics,
+                                                  mnemonicIndex)
+                     : Gfx::RectF();
+}
+
+
+void CheckBoxStyler::renderChrome(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::RectF& boxRect,
+                                  const CheckBoxState& state)
+{
+    if( _renderer )
+        _renderer->renderChrome(context, rect, boxRect, state);
+}
+
+
+void CheckBoxStyler::renderText(PaintContext& context,
+                                const Gfx::RectF& textRect,
+                                const String& text,
+                                const Gfx::PointF& pos,
+                                const CheckBoxState& state)
+{
+    if( _renderer )
+        _renderer->renderText(context, textRect, text, pos, state);
+}
+
+
+void CheckBoxStyler::renderMnemonic(PaintContext& context,
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& mnemonic,
+                                    const CheckBoxState& state)
+{
+    if( _renderer )
+        _renderer->renderMnemonic(context, rect, mnemonic, state);
 }
 
 

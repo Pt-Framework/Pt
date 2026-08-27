@@ -285,9 +285,68 @@ class PT_FORMS_API CheckBoxStyler : public StylerBase
         */
         void setRenderer(CheckBoxRenderer* renderer = 0);
 
-        /** @brief Returns the bound check box renderer or 0.
+        /** @brief Returns the current text painter or 0 when no renderer is bound.
         */
-        CheckBoxRenderer* renderer();
+        const Painter* textPainter(PaintSurface& surface);
+
+        /** @brief Returns the natural size of the check indicator on @a surface.
+        */
+        Gfx::SizeF measureIndicator(PaintSurface& surface);
+
+        /** @brief Returns the combined content size for the indicator and text.
+        */
+        Gfx::SizeF measureContent(PaintSurface& surface,
+                      const Gfx::SizeF& indicatorSize,
+                      const Gfx::SizeF& textSize);
+
+        /** @brief Returns the outer size including the frame for @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                    const Gfx::SizeF& contentSize);
+
+        /** @brief Returns the content rectangle within @a frameRect.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                       const Gfx::RectF& frameRect);
+
+        /** @brief Partitions @a contentRect into indicator and text rectangles.
+        */
+        void layoutContent(PaintSurface& surface,
+                   const Gfx::RectF& contentRect,
+                   const Gfx::SizeF& indicatorSize,
+                   const Gfx::SizeF& textSize,
+                   Gfx::RectF& indicatorRect,
+                   Gfx::RectF& textRect);
+
+        /** @brief Returns the mnemonic underline rectangle.
+        */
+        Gfx::RectF layoutMnemonic(PaintSurface& surface,
+                      const String& text,
+                      const Gfx::PointF& textPos,
+                      const Gfx::FontMetrics& fontMetrics,
+                      String::size_type mnemonicIndex);
+
+        /** @brief Draws check indicator chrome.
+        */
+        void renderChrome(PaintContext& context,
+                  const Gfx::RectF& rect,
+                  const Gfx::RectF& boxRect,
+                  const CheckBoxState& state);
+
+        /** @brief Draws text clipped to @a textRect.
+        */
+        void renderText(PaintContext& context,
+                const Gfx::RectF& textRect,
+                const String& text,
+                const Gfx::PointF& pos,
+                const CheckBoxState& state);
+
+        /** @brief Draws the mnemonic underline.
+        */
+        void renderMnemonic(PaintContext& context,
+                    const Gfx::RectF& rect,
+                    const Gfx::RectF& mnemonic,
+                    const CheckBoxState& state);
 
         /** @brief Returns the effective check box options.
         */

@@ -126,7 +126,7 @@ class PT_FORMS_API CheckBox : public Button
 
     private:
         State                      _state;
-        CheckBoxStyler             _checkBoxStyler;
+        CheckBoxStyler             _styler;
 
         Gfx::RectF                 _boxRect;
         Gfx::RectF                 _textRect;

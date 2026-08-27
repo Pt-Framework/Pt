@@ -149,27 +149,6 @@ void ComboBox::setMaxHeight(double height)
 }
 
 
-//void ComboBox::showPopup()
-//{
-//    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
-//    policy.setWidth( size().width() );
-//    policy.setHeight(0);
-//    _popup.setSizePolicy(policy);
-//
-//    _popup.setMaximumHeight(_maxHeight);
-//
-//    Gfx::SizeF popupSize = _popup.measure(policy);
-//    _popup.resize(popupSize);
-//
-//    Gfx::PointF popupPos(0, size().height() );
-//    popupPos = this->toScreen(popupPos);
-//    _popup.move(popupPos);
-//
-//    _popup.setTopMost(true);
-//    _popup.show();
-//}
-
-
 void ComboBox::showPopup()
 {
     _popup.setMaximumHeight(_maxHeight);
@@ -188,17 +167,11 @@ void ComboBox::showPopup()
     _popup.setAnchor(this);
     _popup.setName("ComboPopup");
     _popup.show();
-
-    //Application::instance().setPopup(_popup);
-    //setCapture(true);
 }
 
 
 void ComboBox::hidePopup()
 {
-    //setCapture(false);
-    //Application::instance().releasePopup(_popup);
-
     _popup.show(false);
 }
 
@@ -554,18 +527,6 @@ bool ComboBox::onKeyEvent(const KeyEvent& ev)
 
 void ComboBox::onProcessMouseEvent(const MouseEvent& ev)
 {
-    //if( _popup.isVisible() )
-    //{
-    //    const Gfx::PointF& screenPos = ev.position();
-    //    Widget* hit = Application::instance().screen().hitTest(screenPos);
-
-    //    if( hit && hit->isDescendantOf(_popup) )
-    //    {
-    //        _popup.processEvent(ev);
-    //        return;
-    //    }
-    //}
-
     Base::onProcessMouseEvent(ev);
 }
 
@@ -665,7 +626,6 @@ void ComboBox::onFocusEvent(const FocusEvent& ev)
         Application::instance().inputMethod().begin(*this);
     }
 }
-
 
 } // namespace
 

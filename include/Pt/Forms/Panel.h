@@ -119,7 +119,7 @@ class PT_FORMS_API Panel : public Control
 
     private:
         Control*          _content;
-        PanelStyler       _panelStyler;
+        PanelStyler       _styler;
         bool              _hasBackground;
         bool              _hasFrame;
         Icon              _icon;

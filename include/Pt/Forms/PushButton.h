@@ -179,7 +179,7 @@ class PT_FORMS_API PushButton : public Button
         PixmapSurface             _picture;
 
         ButtonState               _buttonState;
-        ButtonStyler              _buttonStyler;
+        ButtonStyler              _styler;
 
         Gfx::SizeF                _iconSize;
         Gfx::PointF               _textPos;
