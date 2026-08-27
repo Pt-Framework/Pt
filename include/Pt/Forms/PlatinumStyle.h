@@ -637,8 +637,9 @@ class PT_FORMS_API PlatinumListItemRenderer : public ListItemRenderer
     protected:
         virtual ListItemRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& listItemOptions);
+        /** @brief Prepares the list item renderer from resolved style options.
+        */
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& iconSize,
@@ -663,6 +664,10 @@ class PT_FORMS_API PlatinumListItemRenderer : public ListItemRenderer
                                         const Gfx::RectF& rect,
                                         const ListItemState& state);
 
+        virtual void onRenderHighlight(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const ListItemState& state);
+
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
@@ -677,7 +682,6 @@ class PT_FORMS_API PlatinumListItemRenderer : public ListItemRenderer
 
     private:
         Gfx::Brush  _background;
-        bool        _hasBackground;
         Gfx::Font   _font;
         Gfx::Color  _textColor;
         Gfx::Brush  _highlightBrush;

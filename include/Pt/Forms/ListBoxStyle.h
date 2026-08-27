@@ -206,7 +206,9 @@ class PT_FORMS_API ListItemState
 };
 
 
-class PT_FORMS_API ListItemRenderer : public Style::Facet
+/** @brief Renders the visual appearance of a list item.
+*/
+class PT_FORMS_API ListItemRenderer : public Renderer
 {
     public:
         explicit ListItemRenderer(std::size_t refs = 0);
@@ -215,8 +217,9 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
 
         ListItemRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& listItemOptions);
+        /** @brief Applies the resolved list item style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureContent(PaintSurface& surface,
@@ -242,6 +245,12 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
                               const Gfx::RectF& rect,
                               const ListItemState& state);
 
+        /** @brief Renders the list item highlight background within @a rect for @a state.
+        */
+        void renderHighlight(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const ListItemState& state);
+
         void renderText(PaintContext& context,
                         const Gfx::RectF& textRect,
                         const String& text,
@@ -259,8 +268,9 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
 
         virtual ListItemRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& listItemOptions) = 0;
+        /** @brief Prepares this renderer from the resolved list item options.
+        */
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& iconSize,
@@ -285,6 +295,12 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
                                         const Gfx::RectF& rect,
                                         const ListItemState& state) = 0;
 
+        /** @brief Renders the selected or highlighted list item background.
+        */
+        virtual void onRenderHighlight(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const ListItemState& state) = 0;
+
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
@@ -299,11 +315,126 @@ class PT_FORMS_API ListItemRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ListItemStyle : public Styler<ListItemRenderer,
-                                                      StyleOptions>
+/** @brief Binds list item renderers and their local style options.
+*/
+class PT_FORMS_API ListItemStyler : public StylerBase
 {
     public:
-        ListItemStyle();
+        /** @brief Constructs an unbound list item styler.
+        */
+        ListItemStyler();
+
+        /** @brief Sets the widget-local list item background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective list item text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local list item text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective list item font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local list item font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local list item font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local list item font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local list item font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Measures content containing @a iconSize and @a textSize.
+        */
+        Gfx::SizeF measureContent(PaintSurface& surface,
+                                  const Gfx::SizeF& iconSize,
+                                  const Gfx::SizeF& textSize) const;
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Returns the text painter for @a surface, or 0 when unavailable.
+        */
+        const Painter* textPainter(PaintSurface& surface) const;
+
+        /** @brief Returns the frame content rectangle within @a frameRect.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect) const;
+
+        /** @brief Lays out icon and text rectangles within @a contentRect.
+        */
+        void layoutContent(PaintSurface& surface,
+                           const Gfx::RectF& contentRect,
+                           const Gfx::SizeF& iconSize,
+                           const Gfx::SizeF& textSize,
+                           Gfx::RectF& iconRect,
+                           Gfx::RectF& textRect) const;
+
+        /** @brief Renders the list item background within @a rect for @a state.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const ListItemState& state) const;
+
+        /** @brief Renders the list item highlight background within @a rect for @a state.
+        */
+        void renderHighlight(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const ListItemState& state) const;
+
+        /** @brief Renders @a text at @a pos within @a textRect for @a state.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        const ListItemState& state) const;
+
+        /** @brief Renders @a picture at @a pos within @a iconRect for @a state.
+        */
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& iconRect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        const ListItemState& state) const;
+
+        /** @brief Assigns a specific list item renderer.
+        */
+        void setRenderer(ListItemRenderer* renderer = 0);
+
+        /** @brief Returns the bound effective list item options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the bound effective list item options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<ListItemRenderer> _renderer;
+        StyleOptions               _options;
 };
 
 } // namespace

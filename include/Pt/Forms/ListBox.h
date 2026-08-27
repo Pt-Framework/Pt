@@ -179,7 +179,14 @@ class PT_FORMS_API ListBoxItem : public Control
             The default implementation delegates to the current %ListItemRenderer.
         */
         virtual void onPaintBackground(PaintContext& context,
-                                         const ListItemState& state);
+                                       const ListItemState& state);
+
+        /** @brief Paints the list item gighlight layer.
+
+            The default implementation delegates to the current %ListItemRenderer.
+        */
+        virtual void onPaintHighlight(PaintContext& context,
+                                      const ListItemState& state);
 
         /** @brief Paints the list item content layers.
 
@@ -209,36 +216,34 @@ class PT_FORMS_API ListBoxItem : public Control
                                  const Gfx::FontMetrics& fm,
                                  const ListItemState& state);
 
-    protected:
-        ListItemRenderer* renderer();
-
     private:
         ListItemState getState() const;
 
+    private:
         Signal<>                 _clicked;
         Pt::Signal<ListBoxItem&> _selected;
         bool                     _onClickBegin;
         bool                     _isHovered;
         bool                     _isSelectable;
         bool                     _isSelected;
+        bool                     _hasBackground;
         String                   _text;
 
         Icon                     _icon;
         Gfx::SizeF               _iconSize;
 
-        ListItemStyle        _listItemStyle;
-        StyleOptions         _listItemOptions;
+        ListItemStyler           _listItemStyle;
 
-        PixmapSurface        _picture;
+        PixmapSurface            _picture;
 
-        Gfx::SizeF           _measuredIconSz;
-        Gfx::SizeF           _measuredTextSz;
+        Gfx::SizeF               _measuredIconSz;
+        Gfx::SizeF               _measuredTextSz;
 
-        Gfx::RectF           _iconRect;
-        Gfx::RectF           _textRect;
-        Gfx::PointF          _iconPos;
-        Gfx::PointF          _textPos;
-        Gfx::FontMetrics     _fontMetrics;
+        Gfx::RectF               _iconRect;
+        Gfx::RectF               _textRect;
+        Gfx::PointF              _iconPos;
+        Gfx::PointF              _textPos;
+        Gfx::FontMetrics         _fontMetrics;
 };
 
 

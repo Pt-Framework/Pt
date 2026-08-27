@@ -45,6 +45,7 @@ ListBoxItem::ListBoxItem()
 , _isHovered(false)
 , _isSelectable(false)
 , _isSelected(false)
+, _hasBackground(false)
 {
     setFocusPolicy(Control::AcceptFocus);
     setPadding(8);
@@ -284,87 +285,75 @@ bool ListBoxItem::onScrollEvent(const ScrollEvent& ev)
 
 void ListBoxItem::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
-    _listItemOptions.set(background);
+    _listItemStyle.setBackground(b);
+    _hasBackground = true;
     invalidate();
 }
 
 
 const Gfx::Color& ListBoxItem::textColor() const
 {
-    const TextColorOption* textColor = _listItemOptions.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>().value();
+    return _listItemStyle.textColor();
 }
 
 
 void ListBoxItem::setTextColor(const Gfx::Color& color)
 {
-    TextColorOption textColor(color);
-    _listItemOptions.set(textColor);
+    _listItemStyle.setTextColor(color);
     invalidate();
 }
 
 
 Gfx::Font ListBoxItem::font() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
+    return _listItemStyle.font();
 }
 
 
 void ListBoxItem::setFont(const Gfx::Font& f)
 {
-    FontOption fontOption;
-    fontOption.setFont(f);
-    _listItemOptions.set(fontOption);
+    _listItemStyle.setFont(f);
     invalidate();
 }
 
 
 void ListBoxItem::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSize(size);
-    _listItemOptions.set(font);
+    _listItemStyle.setFontSize(size);
     invalidate();
 }
 
 
 void ListBoxItem::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setWeight(weight);
-    _listItemOptions.set(font);
+    _listItemStyle.setFontWeight(weight);
     invalidate();
 }
 
 
 void ListBoxItem::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _listItemOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSlant(slant);
-    _listItemOptions.set(font);
+    _listItemStyle.setFontSlant(slant);
     invalidate();
 }
 
 
 void ListBoxItem::setRenderer(ListItemRenderer* renderer)
 {
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    if(renderer)
-        _listItemStyle.bind(*renderer, options, _listItemOptions);
-    else
-        _listItemStyle.bind(Application::instance().style(), options, _listItemOptions);
+    _listItemStyle.setRenderer(renderer);
+    _listItemStyle.bind(style, options);
+
+    _picture.reset(Gfx::Image());
+    _measuredIconSz = Gfx::SizeF();
+    _measuredTextSz = Gfx::SizeF();
+    _fontMetrics = Gfx::FontMetrics();
+    _iconRect = Gfx::RectF();
+    _textRect = Gfx::RectF();
+    _iconPos = Gfx::PointF();
+    _textPos = Gfx::PointF();
 
     invalidate();
 }
@@ -372,12 +361,22 @@ void ListBoxItem::setRenderer(ListItemRenderer* renderer)
 
 void ListBoxItem::onInvalidate()
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    _listItemStyle.rebind(Application::instance().style(), options, _listItemOptions);
+    Base::onInvalidate();
 
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer )
-        return;
+    const Style& style = Application::instance().style();
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( _listItemStyle.bind(style, options) )
+    {
+        _picture.reset(Gfx::Image());
+        _measuredIconSz = Gfx::SizeF();
+        _measuredTextSz = Gfx::SizeF();
+        _fontMetrics = Gfx::FontMetrics();
+        _iconRect = Gfx::RectF();
+        _textRect = Gfx::RectF();
+        _iconPos = Gfx::PointF();
+        _textPos = Gfx::PointF();
+    }
 
     if( _icon.empty() )
     {
@@ -390,23 +389,26 @@ void ListBoxItem::onInvalidate()
         _picture.reset(iconImage);
     }
 
-    Base::onInvalidate();
+    relayout();
 }
 
 
 Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer )
+    const Painter* painter = _listItemStyle.textPainter(surface());
+    if( ! painter )
+    {
+        _fontMetrics = Gfx::FontMetrics();
         return Gfx::SizeF(0, 0);
+    }
 
-    _fontMetrics = renderer->textPainter( surface() ).fontMetrics();
+    _fontMetrics = painter->fontMetrics();
 
     _measuredIconSz = onMeasureIcon();
     _measuredTextSz = onMeasureText(_text);
 
     Gfx::SizeF contentSize = onMeasureContent(p, _measuredIconSz, _measuredTextSz);
-    Gfx::SizeF frameSize = renderer->measureFrame(surface(), contentSize);
+    Gfx::SizeF frameSize = _listItemStyle.measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( frameSize.width() + padding().leftRight(),
                        frameSize.height() + padding().topBottom() );
@@ -430,12 +432,11 @@ Gfx::SizeF ListBoxItem::onMeasureText(const String& text)
     if( text.empty() )
         return Gfx::SizeF(0, 0);
 
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer )
+    const Painter* painter = _listItemStyle.textPainter(surface());
+    if( ! painter )
         return Gfx::SizeF(0, 0);
 
-    const Painter& painter = renderer->textPainter( surface() );
-    Gfx::TextMetrics tm = painter.textMetrics(text);
+    Gfx::TextMetrics tm = painter->textMetrics(text);
     return Gfx::SizeF(tm.advance(), _fontMetrics.height());
 }
 
@@ -444,11 +445,7 @@ Gfx::SizeF ListBoxItem::onMeasureContent(const SizePolicy& /*policy*/,
                                          const Gfx::SizeF& iconSz,
                                          const Gfx::SizeF& textSz)
 {
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer )
-        return Gfx::SizeF(0, 0);
-
-    return renderer->measureContent(surface(), iconSz, textSz);
+    return _listItemStyle.measureContent(surface(), iconSz, textSz);
 }
 
 
@@ -456,15 +453,11 @@ void ListBoxItem::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer )
-        return;
-
     Gfx::RectF contentRect( Gfx::PointF(padding().left(), padding().top()),
                            Gfx::SizeF(rect.width() - padding().leftRight(),
                                       rect.height() - padding().topBottom()) );
 
-    Gfx::RectF innerRect = renderer->layoutFrame(surface(), contentRect);
+    Gfx::RectF innerRect = _listItemStyle.layoutFrame(surface(), contentRect);
 
     Gfx::RectF iconRect;
     Gfx::RectF textRect;
@@ -499,41 +492,44 @@ void ListBoxItem::onLayoutContent(const Gfx::RectF& innerRect,
                                    Gfx::RectF& iconRect,
                                    Gfx::RectF& textRect)
 {
-    ListItemRenderer* r = renderer();
-    if(r)
-        r->layoutContent(surface(), innerRect, iconSz, textSz, iconRect, textRect);
+    _listItemStyle.layoutContent(surface(), innerRect, iconSz, textSz, iconRect, textRect);
 }
 
 
 void ListBoxItem::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if( ! _listItemStyle.renderer() )
-        return;
-
     ListItemState st = getState();
     onPaintBackground(context, st);
+    onPaintHighlight(context, st);
     onPaintContent(context, st);
 }
 
 
 void ListBoxItem::onPaintBackground(PaintContext& context,
-                                     const ListItemState& state)
+                                    const ListItemState& state)
 {
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer )
-        return;
+    if(_hasBackground)
+    {
+        Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
+        _listItemStyle.renderBackground(context, widgetRect, state);
+    }
+}
 
-    Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
-    renderer->renderBackground(context, widgetRect, state);
+
+void ListBoxItem::onPaintHighlight(PaintContext& context,
+                                   const ListItemState& state)
+{
+    if( state.isSelected() || state.isHighlighted() )
+    {
+        Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
+        _listItemStyle.renderHighlight(context, widgetRect, state);
+    }
 }
 
 
 void ListBoxItem::onPaintContent(PaintContext& context,
                                   const ListItemState& state)
 {
-    if( ! _listItemStyle.renderer() )
-        return;
-
     onPaintIcon(context, _iconRect, _picture, _iconPos, state);
     onPaintText(context, _textRect, _text, _textPos, _fontMetrics, state);
 }
@@ -545,11 +541,10 @@ void ListBoxItem::onPaintIcon(PaintContext& context,
                               const Gfx::PointF& iconPos,
                               const ListItemState& st)
 {
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer || picture.empty() )
+    if( picture.empty() )
         return;
 
-    renderer->renderIcon(context, iconRect, picture, iconPos, st);
+    _listItemStyle.renderIcon(context, iconRect, picture, iconPos, st);
 }
 
 
@@ -560,17 +555,10 @@ void ListBoxItem::onPaintText(PaintContext& context,
                               const Gfx::FontMetrics& /*fm*/,
                               const ListItemState& st)
 {
-    ListItemRenderer* renderer = _listItemStyle.renderer();
-    if( ! renderer || text.empty() )
+    if( text.empty() )
         return;
 
-    renderer->renderText(context, textRect, text, textPos, st);
-}
-
-
-ListItemRenderer* ListBoxItem::renderer()
-{
-    return _listItemStyle.renderer();
+    _listItemStyle.renderText(context, textRect, text, textPos, st);
 }
 
 

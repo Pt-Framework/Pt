@@ -2242,7 +2242,6 @@ void PlatinumListBoxRenderer::onRenderChrome(PaintContext& context,
 
 PlatinumListItemRenderer::PlatinumListItemRenderer(std::size_t refs)
 : ListItemRenderer(refs)
-, _hasBackground(false)
 {
 }
 
@@ -2258,24 +2257,13 @@ ListItemRenderer* PlatinumListItemRenderer::onCreate() const
 }
 
 
-void PlatinumListItemRenderer::onPrepare(const StyleOptions& options,
-                                         const StyleOptions& listItemOptions)
+void PlatinumListItemRenderer::onPrepare(const StyleOptions& options)
 {
+    _background = options.get<BackgroundOption>().value();
     _highlightBrush = Gfx::Brush( options.get<HighlightColorOption>().value() );
     _highlightedTextColor = options.get<HighlightedTextColorOption>().value();
-
-    const BackgroundOption* localBg = listItemOptions.find<BackgroundOption>();
-    _hasBackground = (localBg != 0);
-    if(localBg)
-        _background = localBg->value();
-
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = listItemOptions.find<FontOption>();
-    _font = localFont ? localFont->getFont(baseFont) : baseFont;
-
-    const TextColorOption* localText = listItemOptions.find<TextColorOption>();
-    _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>().value();
+    _font = options.get<FontOption>().value();
+    _textColor = options.get<TextColorOption>().value();
 
     _textPainter.setFont(_font);
     _textPainter.setPen( Gfx::Pen(_textColor) );
@@ -2351,23 +2339,27 @@ void PlatinumListItemRenderer::onLayoutContent(PaintSurface& /*surface*/,
 
 void PlatinumListItemRenderer::onRenderBackground(PaintContext& context,
                                                   const Gfx::RectF& rect,
-                                                  const ListItemState& state)
+                                                  const ListItemState& /*state*/)
 {
     if( rect.width() <= 0 || rect.height() <= 0 )
         return;
 
-    if( state.isSelected() || state.isHighlighted() )
-    {
-        _bgPainter.setBrush(_highlightBrush);
-        _bgPainter.begin(context);
-        _bgPainter.fillRect(rect);
-    }
-    else if( _hasBackground )
-    {
-        _bgPainter.setBrush(_background);
-        _bgPainter.begin(context);
-        _bgPainter.fillRect(rect);
-    }
+    _bgPainter.setBrush(_background);
+    _bgPainter.begin(context);
+    _bgPainter.fillRect(rect);
+}
+
+
+void PlatinumListItemRenderer::onRenderHighlight(PaintContext& context,
+                                                 const Gfx::RectF& rect,
+                                                 const ListItemState& /*state*/)
+{
+    if( rect.width() <= 0 || rect.height() <= 0 )
+        return;
+
+    _bgPainter.setBrush(_highlightBrush);
+    _bgPainter.begin(context);
+    _bgPainter.fillRect(rect);
 }
 
 

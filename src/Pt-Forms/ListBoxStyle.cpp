@@ -298,7 +298,7 @@ void ListItemState::setSelected(bool v)
 ///////////////////////////////////////////////////////////////////////////////
 
 ListItemRenderer::ListItemRenderer(std::size_t refs)
-: Style::Facet( typeid(ListItemRenderer), refs )
+: Renderer( typeid(ListItemRenderer), refs )
 {
 }
 
@@ -314,17 +314,15 @@ ListItemRenderer* ListItemRenderer::create() const
 }
 
 
-void ListItemRenderer::prepare(const StyleOptions& options,
-                               const StyleOptions& listItemOptions)
+void ListItemRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, listItemOptions);
+    onPrepare(options);
 }
 
 
 void ListItemRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -375,6 +373,14 @@ void ListItemRenderer::renderBackground(PaintContext& context,
 }
 
 
+void ListItemRenderer::renderHighlight(PaintContext& context,
+                                       const Gfx::RectF& rect,
+                                       const ListItemState& state)
+{
+    onRenderHighlight(context, rect, state);
+}
+
+
 void ListItemRenderer::renderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
@@ -395,8 +401,215 @@ void ListItemRenderer::renderIcon(PaintContext& context,
 }
 
 
-ListItemStyle::ListItemStyle()
+ListItemStyler::ListItemStyler()
 {
+}
+
+
+void ListItemStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( BackgroundOption(brush) );
+}
+
+
+const Gfx::Color& ListItemStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void ListItemStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font ListItemStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void ListItemStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void ListItemStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void ListItemStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void ListItemStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
+Gfx::SizeF ListItemStyler::measureContent(PaintSurface& surface,
+                                          const Gfx::SizeF& iconSize,
+                                          const Gfx::SizeF& textSize) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureContent(surface, iconSize, textSize);
+}
+
+
+Gfx::SizeF ListItemStyler::measureFrame(PaintSurface& surface,
+                                        const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+const Painter* ListItemStyler::textPainter(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return 0;
+
+    return &_renderer->textPainter(surface);
+}
+
+
+Gfx::RectF ListItemStyler::layoutFrame(PaintSurface& surface,
+                                       const Gfx::RectF& frameRect) const
+{
+    if( ! _renderer )
+        return frameRect;
+
+    return _renderer->layoutFrame(surface, frameRect);
+}
+
+
+void ListItemStyler::layoutContent(PaintSurface& surface,
+                                   const Gfx::RectF& contentRect,
+                                   const Gfx::SizeF& iconSize,
+                                   const Gfx::SizeF& textSize,
+                                   Gfx::RectF& iconRect,
+                                   Gfx::RectF& textRect) const
+{
+    if( ! _renderer )
+    {
+        iconRect = Gfx::RectF();
+        textRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutContent(surface, contentRect, iconSize, textSize, iconRect, textRect);
+}
+
+
+void ListItemStyler::renderBackground(PaintContext& context,
+                                      const Gfx::RectF& rect,
+                                      const ListItemState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderBackground(context, rect, state);
+}
+
+
+void ListItemStyler::renderHighlight(PaintContext& context,
+                                     const Gfx::RectF& rect,
+                                     const ListItemState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderHighlight(context, rect, state);
+}
+
+
+void ListItemStyler::renderText(PaintContext& context,
+                                const Gfx::RectF& textRect,
+                                const String& text,
+                                const Gfx::PointF& pos,
+                                const ListItemState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderText(context, textRect, text, pos, state);
+}
+
+
+void ListItemStyler::renderIcon(PaintContext& context,
+                                const Gfx::RectF& iconRect,
+                                const Pixmap& picture,
+                                const Gfx::PointF& pos,
+                                const ListItemState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderIcon(context, iconRect, picture, pos, state);
+}
+
+
+void ListItemStyler::setRenderer(ListItemRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& ListItemStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& ListItemStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& ListItemStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* ListItemStyler::onStyleRenderer(const Style& style)
+{
+    ListItemRenderer* styleRenderer = style.get<ListItemRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* ListItemStyler::onCreateRenderer(const Style& style)
+{
+    ListItemRenderer* styleRenderer = style.get<ListItemRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace
