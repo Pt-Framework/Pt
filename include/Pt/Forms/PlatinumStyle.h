@@ -603,8 +603,7 @@ class PT_FORMS_API PlatinumListBoxRenderer : public ListBoxRenderer
     protected:
         virtual ListBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& listBoxOptions);
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);

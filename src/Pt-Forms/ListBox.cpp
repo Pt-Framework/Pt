@@ -696,19 +696,13 @@ const Gfx::Brush* ListBox::background() const
     if( ! _hasBackground )
         return 0;
 
-    const ViewBackgroundOption* background = _listBoxOptions.find<ViewBackgroundOption>();
-    if(background)
-        return &background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<ViewBackgroundOption>().value();
+    return &_styler.background();
 }
 
 
 void ListBox::setBackground(const Gfx::Brush& b)
 {
-    ViewBackgroundOption background(b);
-    _listBoxOptions.set(background);
+    _styler.setBackground(b);
     _hasBackground = true;
     invalidate();
 }
@@ -726,19 +720,13 @@ const Gfx::Pen* ListBox::contour() const
     if( ! _hasFrame )
         return 0;
 
-    const ContourOption* contour = _listBoxOptions.find<ContourOption>();
-    if(contour)
-        return &contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return &options.get<ContourOption>().value();
+    return &_styler.contour();
 }
 
 
 void ListBox::setContour(const Gfx::Pen& pen)
 {
-    ContourOption contour(pen);
-    _listBoxOptions.set(contour);
+    _styler.setContour(pen);
     _hasFrame = true;
     invalidate();
 }
@@ -777,12 +765,11 @@ int ListBox::maximumY() const
 
 void ListBox::setRenderer(ListBoxRenderer* renderer)
 {
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    if(renderer)
-        _listBoxStyle.bind(*renderer, options, _listBoxOptions);
-    else
-        _listBoxStyle.bind(Application::instance().style(), options, _listBoxOptions);
+    _styler.setRenderer(renderer);
+    _styler.bind(style, options);
 
     invalidate();
 }
@@ -792,11 +779,9 @@ void ListBox::onInvalidate()
 {
     Base::onInvalidate();
 
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
-    _listBoxStyle.rebind(Application::instance().style(), options, _listBoxOptions);
-
-    if( ! _listBoxStyle.renderer() )
-        return;
+    _styler.bind(style, options);
 
     relayout();
 }
@@ -804,14 +789,12 @@ void ListBox::onInvalidate()
 
 Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 {
-    ListBoxRenderer* renderer = _listBoxStyle.renderer();
-
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();
     double vspace = padding().topBottom() + _scrollView.margin().topBottom();
 
-    if( renderer && _hasFrame )
+    if(_hasFrame)
     {
-        Gfx::SizeF frameSize = renderer->measureFrame(surface(), Gfx::SizeF(0, 0));
+        Gfx::SizeF frameSize = _styler.measureFrame(surface(), Gfx::SizeF(0, 0));
         hspace += frameSize.width();
         vspace += frameSize.height();
     }
@@ -834,13 +817,11 @@ void ListBox::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    ListBoxRenderer* renderer = _listBoxStyle.renderer();
-
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
     Gfx::RectF contentRect = widgetRect;
 
-    if( renderer && _hasFrame )
-        contentRect = renderer->layoutFrame(surface(), widgetRect);
+    if(_hasFrame)
+        contentRect = _styler.layoutFrame(surface(), widgetRect);
 
     Gfx::PointF pos(contentRect.x() + _scrollView.margin().left(),
                     contentRect.y() + _scrollView.margin().top());
@@ -855,10 +836,6 @@ void ListBox::onLayout(const Gfx::RectF& rect)
 
 void ListBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    ListBoxRenderer* renderer = _listBoxStyle.renderer();
-    if( ! renderer )
-        return;
-
     ListBoxState state;
     state.setEnabled( isEnabled() );
     state.setFocused( hasFocus() );
@@ -867,12 +844,12 @@ void ListBox::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 
     if( _hasBackground )
     {
-        renderer->renderBackground(context, widgetRect, state);
+        _styler.renderBackground(context, widgetRect, state);
     }
 
     if( _hasFrame )
     {
-        renderer->renderChrome(context, widgetRect, state);
+        _styler.renderChrome(context, widgetRect, state);
     }
 }
 

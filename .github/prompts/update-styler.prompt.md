@@ -2,7 +2,6 @@
 name: "update-styler"
 description: "Plan a migration to the StylerBase API"
 argument-hint: "Styler class to migrate, e.g. CheckboxStyler"
-agent: "Planner"
 ---
 
 Prepare an implementation plan to migrate `${input:stylerClass:Enter the XStyler class to migrate, for example CheckboxStyler}` from `Styler<XRenderer, StyleOptions>` to `StylerBase`, following `ButtonStyler`/`PanelStyler` and `PushButton`/`Panel`/`Label`. Treat the supplied class as `XStyler` below and derive `XRenderer`, `XStyle`, and related widget names accordingly. Preserve the existing `XStyle.h` / `XStyle.cpp` file names, do not introduce a compatibility typedef, and require `@brief` documentation only for declarations changed by this migration.
@@ -60,3 +59,4 @@ The plan must:
 - Identify every implementation file and symbol that needs to change for this slice, with the intended change for each.
 - Include searches within the migrated slice and its concrete theme renderers for the old `XStyle` type, widget-owned overlay, `rebind(`, two-argument `prepare` / `onPrepare` calls, `styler.renderer()`, `XRenderer*` locals in the widget, and direct `renderer->` calls.
 - Include `jam.bat -q -j4` from the repository root as the final validation step and require exit code 0.
+- No unit tests are required.

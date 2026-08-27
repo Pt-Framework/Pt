@@ -73,7 +73,7 @@ void ListBoxState::setFocused(bool v)
 ///////////////////////////////////////////////////////////////////////////////
 
 ListBoxRenderer::ListBoxRenderer(std::size_t refs)
-: Style::Facet( typeid(ListBoxRenderer), refs )
+: Renderer( typeid(ListBoxRenderer), refs )
 {
 }
 
@@ -89,17 +89,15 @@ ListBoxRenderer* ListBoxRenderer::create() const
 }
 
 
-void ListBoxRenderer::prepare(const StyleOptions& options,
-                              const StyleOptions& listBoxOptions)
+void ListBoxRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, listBoxOptions);
+    onPrepare(options);
 }
 
 
 void ListBoxRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -133,8 +131,104 @@ void ListBoxRenderer::renderChrome(PaintContext& context,
 }
 
 
-ListBoxStyle::ListBoxStyle()
+ListBoxStyler::ListBoxStyler()
 {
+}
+
+
+const Gfx::Brush& ListBoxStyler::background() const
+{
+    return _options.get<ViewBackgroundOption>().value();
+}
+
+
+void ListBoxStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( ViewBackgroundOption(brush) );
+}
+
+
+const Gfx::Pen& ListBoxStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void ListBoxStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+Gfx::SizeF ListBoxStyler::measureFrame(PaintSurface& surface,
+                                       const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return contentSize;
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+Gfx::RectF ListBoxStyler::layoutFrame(PaintSurface& surface,
+                                      const Gfx::RectF& frameRect) const
+{
+    if( ! _renderer )
+        return frameRect;
+
+    return _renderer->layoutFrame(surface, frameRect);
+}
+
+
+void ListBoxStyler::renderBackground(PaintContext& context,
+                                     const Gfx::RectF& rect,
+                                     const ListBoxState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderBackground(context, rect, state);
+}
+
+
+void ListBoxStyler::renderChrome(PaintContext& context,
+                                 const Gfx::RectF& rect,
+                                 const ListBoxState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, rect, state);
+}
+
+
+void ListBoxStyler::setRenderer(ListBoxRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& ListBoxStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* ListBoxStyler::onStyleRenderer(const Style& style)
+{
+    ListBoxRenderer* styleRenderer = style.get<ListBoxRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* ListBoxStyler::onCreateRenderer(const Style& style)
+{
+    ListBoxRenderer* styleRenderer = style.get<ListBoxRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 

@@ -321,8 +321,7 @@ class PT_FORMS_API ListBox : public Control
     private:
         ScrollView                _scrollView;
         ListBoxLayout             _layout;
-        ListBoxStyle              _listBoxStyle;
-        StyleOptions              _listBoxOptions;
+        ListBoxStyler             _styler;
         bool                      _hasBackground;
         bool                      _hasFrame;
 };

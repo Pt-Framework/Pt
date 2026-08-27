@@ -29,6 +29,7 @@
 #ifndef PT_FORMS_LISTBOXSTYLE_H
 #define PT_FORMS_LISTBOXSTYLE_H
 
+#include <Pt/Forms/StylerBase.h>
 #include <Pt/Forms/Styler.h>
 
 namespace Pt {
@@ -57,17 +58,22 @@ class PT_FORMS_API ListBoxState
 };
 
 
-class PT_FORMS_API ListBoxRenderer : public Style::Facet
+/** @brief Renders the visual appearance of a list box container.
+*/
+class PT_FORMS_API ListBoxRenderer : public Renderer
 {
     public:
         explicit ListBoxRenderer(std::size_t refs = 0);
 
         virtual ~ListBoxRenderer();
 
+        /** @brief Creates a new default-constructed renderer instance.
+        */
         ListBoxRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& listBoxOptions);
+        /** @brief Applies the resolved list box style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -89,8 +95,7 @@ class PT_FORMS_API ListBoxRenderer : public Style::Facet
 
         virtual ListBoxRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& listBoxOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -108,11 +113,67 @@ class PT_FORMS_API ListBoxRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ListBoxStyle : public Styler<ListBoxRenderer,
-                                                     StyleOptions>
+/** @brief Binds list box renderers and their local style options.
+*/
+class PT_FORMS_API ListBoxStyler : public StylerBase
 {
     public:
-        ListBoxStyle();
+        /** @brief Constructs an unbound list box styler.
+        */
+        ListBoxStyler();
+
+        /** @brief Returns the effective list box background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local list box background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective list box contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local list box contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Returns the frame content rectangle within @a frameRect.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect) const;
+
+        /** @brief Renders the list box background within @a rect for @a state.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const ListBoxState& state) const;
+
+        /** @brief Renders the list box chrome within @a rect for @a state.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const ListBoxState& state) const;
+
+        /** @brief Assigns a specific list box renderer.
+        */
+        void setRenderer(ListBoxRenderer* renderer = 0);
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<ListBoxRenderer> _renderer;
+        StyleOptions              _options;
 };
 
 

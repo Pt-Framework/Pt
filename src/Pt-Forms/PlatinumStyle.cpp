@@ -2168,16 +2168,10 @@ ListBoxRenderer* PlatinumListBoxRenderer::onCreate() const
 }
 
 
-void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options,
-                                        const StyleOptions& listBoxOptions)
+void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options)
 {
-    const ViewBackgroundOption* localBg = listBoxOptions.find<ViewBackgroundOption>();
-    _viewBackground = localBg ? localBg->value()
-                              : options.get<ViewBackgroundOption>().value();
-
-    const ContourOption* localContour = listBoxOptions.find<ContourOption>();
-    _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>().value();
+    _viewBackground = options.get<ViewBackgroundOption>().value();
+    _contour = options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
     _bgPainter.setBrush(_viewBackground);
