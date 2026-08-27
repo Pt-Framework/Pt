@@ -2633,30 +2633,17 @@ TabViewRenderer* PlatinumTabViewRenderer::onCreate() const
 }
 
 
-void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options,
-                                        const StyleOptions& tabViewOptions)
+void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options)
 {
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = tabViewOptions.find<FontOption>();
-    _font = localFont ? localFont->getFont(baseFont) : baseFont;
+    _font = options.get<FontOption>().value();
     _inset = _font.size() / 2.0;
 
-    const ContourOption* localContour = tabViewOptions.find<ContourOption>();
-    _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>().value();
+    _contour = options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const BackgroundOption* localBg = tabViewOptions.find<BackgroundOption>();
-    _background = localBg ? localBg->value()
-                          : options.get<BackgroundOption>().value();
-
-    const TextColorOption* localText = tabViewOptions.find<TextColorOption>();
-    _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>().value();
-
-    const AccentColorOption* localAccent = tabViewOptions.find<AccentColorOption>();
-    _accentColor = localAccent ? localAccent->value()
-                               : options.get<AccentColorOption>().value();
+    _background = options.get<BackgroundOption>().value();
+    _textColor = options.get<TextColorOption>().value();
+    _accentColor = options.get<AccentColorOption>().value();
 
     _bgPainter.setBrush(_background);
     _framePainter.setPen(_contour);

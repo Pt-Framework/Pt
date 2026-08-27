@@ -768,8 +768,9 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
     protected:
         virtual TabViewRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& tabViewOptions);
+        /** @brief Prepares the renderer from resolved tab view style options.
+        */
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
                                          const Pt::String& text);

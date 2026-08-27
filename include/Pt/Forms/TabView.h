@@ -125,6 +125,10 @@ class PT_FORMS_API TabView : public Control
 
         void setFrame(bool enable);
 
+        /** @brief Returns the effective tab view font.
+        */
+        Gfx::Font font() const;
+
         void setFont(const Gfx::Font& font);
 
         void setFontSize(std::size_t size);
@@ -166,19 +170,21 @@ class PT_FORMS_API TabView : public Control
     private:
         std::size_t hitTab(const Gfx::PointF& pos) const;
 
-        Gfx::SizeF measureTabs(PaintSurface& surface,
-                               TabViewRenderer& renderer);
+        /** @brief Measures all tab labels on @a surface.
+        */
+        Gfx::SizeF measureTabs(PaintSurface& surface);
 
-        void layoutTabs(PaintSurface& surface,
-                        TabViewRenderer& renderer,
-                        const Gfx::RectF& rect);
+        /** @brief Lays out all tab labels within @a rect.
+        */
+        void layoutTabs(PaintSurface& surface, const Gfx::RectF& rect);
 
-        void renderTabs(PaintContext& context,
-                        TabViewRenderer& renderer,
-                        bool enabled);
+        /** @brief Renders all tab labels with @a enabled state.
+        */
+        void renderTabs(PaintContext& context, bool enabled);
 
+        /** @brief Renders one tab label for @a state.
+        */
         void renderTab(PaintContext& context,
-                       TabViewRenderer& renderer,
                        const Gfx::RectF& tabRect,
                        const Pt::String& text,
                        const Gfx::PointF& textPos,
@@ -188,15 +194,15 @@ class PT_FORMS_API TabView : public Control
 
         void onControlRemoved(std::size_t n);
 
+    private:
         StackLayout              _stack;
-        std::vector<TabViewItem>     _tabs;
+        std::vector<TabViewItem> _tabs;
         std::size_t              _current;
         Gfx::RectF               _tabBarRect;
 
-        TabViewStyle        _tabViewStyle;
-        StyleOptions        _tabViewOptions;
-        bool                _hasBackground;
-        bool                _hasFrame;
+        TabViewStyler            _tabViewStyler;
+        bool                     _hasBackground;
+        bool                     _hasFrame;
 };
 
 } // namespace

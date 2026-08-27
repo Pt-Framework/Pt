@@ -134,7 +134,7 @@ void TabViewItemState::setPressed(bool v)
 ///////////////////////////////////////////////////////////////////////////////
 
 TabViewRenderer::TabViewRenderer(std::size_t refs)
-: Style::Facet( typeid(TabViewRenderer), refs )
+: Renderer( typeid(TabViewRenderer), refs )
 {
 }
 
@@ -150,17 +150,15 @@ TabViewRenderer* TabViewRenderer::create() const
 }
 
 
-void TabViewRenderer::prepare(const StyleOptions& options,
-                              const StyleOptions& tabViewOptions)
+void TabViewRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, tabViewOptions);
+    onPrepare(options);
 }
 
 
 void TabViewRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -211,8 +209,203 @@ void TabViewRenderer::renderTab(PaintContext& context,
 }
 
 
-TabViewStyle::TabViewStyle()
+TabViewStyler::TabViewStyler()
 {
+}
+
+
+const Gfx::Brush& TabViewStyler::background() const
+{
+    return _options.get<BackgroundOption>().value();
+}
+
+
+void TabViewStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( BackgroundOption(brush) );
+}
+
+
+const Gfx::Pen& TabViewStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void TabViewStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& TabViewStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void TabViewStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+const Gfx::Color& TabViewStyler::accentColor() const
+{
+    return _options.get<AccentColorOption>().value();
+}
+
+
+void TabViewStyler::setAccentColor(const Gfx::Color& color)
+{
+    _options.set( AccentColorOption(color) );
+}
+
+
+Gfx::Font TabViewStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void TabViewStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void TabViewStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void TabViewStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void TabViewStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
+Gfx::SizeF TabViewStyler::measureTab(PaintSurface& surface,
+                                      const Pt::String& text) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureTab(surface, text);
+}
+
+
+Gfx::RectF TabViewStyler::layoutTab(PaintSurface& surface,
+                                    const Gfx::RectF& tabRect) const
+{
+    if( ! _renderer )
+        return tabRect;
+
+    return _renderer->layoutTab(surface, tabRect);
+}
+
+
+const Painter* TabViewStyler::textPainter(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return 0;
+
+    return &_renderer->textPainter(surface);
+}
+
+
+void TabViewStyler::renderBackground(PaintContext& context,
+                                     const Gfx::RectF& contentRect,
+                                     const TabViewState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderBackground(context, contentRect, state);
+}
+
+
+void TabViewStyler::renderChrome(PaintContext& context,
+                                 const Gfx::RectF& contentRect,
+                                 const Gfx::RectF& activeTabRect,
+                                 const TabViewState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, contentRect, activeTabRect, state);
+}
+
+
+void TabViewStyler::renderTab(PaintContext& context,
+                              const Gfx::RectF& tabRect,
+                              const Pt::String& text,
+                              const Gfx::PointF& textPos,
+                              const TabViewItemState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderTab(context, tabRect, text, textPos, state);
+}
+
+
+void TabViewStyler::setRenderer(TabViewRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& TabViewStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& TabViewStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& TabViewStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* TabViewStyler::onStyleRenderer(const Style& style)
+{
+    _renderer.reset( style.get<TabViewRenderer>() );
+    return _renderer.get();
+}
+
+
+Renderer* TabViewStyler::onCreateRenderer(const Style& style)
+{
+    TabViewRenderer* styleRenderer = style.get<TabViewRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace

@@ -59,9 +59,6 @@ TabView::~TabView()
 
 std::size_t TabView::hitTab(const Gfx::PointF& pos) const
 {
-    if( ! _tabViewStyle.renderer() )
-        return StackLayout::NoIndex;
-
     if( ! _tabBarRect.contains(pos) )
         return StackLayout::NoIndex;
 
@@ -75,15 +72,14 @@ std::size_t TabView::hitTab(const Gfx::PointF& pos) const
 }
 
 
-Gfx::SizeF TabView::measureTabs(PaintSurface& surface,
-                                TabViewRenderer& renderer)
+Gfx::SizeF TabView::measureTabs(PaintSurface& surface)
 {
     Gfx::SizeF total;
 
     for(std::size_t i = 0; i < _tabs.size(); ++i)
     {
         TabViewItem& tab = _tabs.at(i);
-        Gfx::SizeF tabSize = renderer.measureTab(surface, tab.text());
+        Gfx::SizeF tabSize = _tabViewStyler.measureTab(surface, tab.text());
         tab.setMeasuredSize(tabSize);
 
         total.addWidth( tabSize.width() );
@@ -97,13 +93,14 @@ Gfx::SizeF TabView::measureTabs(PaintSurface& surface,
 
 
 void TabView::layoutTabs(PaintSurface& surface,
-                         TabViewRenderer& renderer,
                          const Gfx::RectF& rect)
 {
     _tabBarRect = rect;
 
-    const Painter& painter = renderer.textPainter(surface);
-    Gfx::FontMetrics fontMet = painter.fontMetrics();
+    Gfx::FontMetrics fontMet;
+    const Painter* painter = _tabViewStyler.textPainter(surface);
+    if(painter)
+        fontMet = painter->fontMetrics();
 
     Gfx::PointF tabPos = rect.topLeft();
 
@@ -119,7 +116,7 @@ void TabView::layoutTabs(PaintSurface& surface,
 
         tab.setGeometry(tabRect);
 
-        Gfx::RectF textRect = renderer.layoutTab(surface, tabRect);
+        Gfx::RectF textRect = _tabViewStyler.layoutTab(surface, tabRect);
         double textY = textRect.y()
                      + (textRect.height() - fontMet.height()) / 2.0
                      + fontMet.ascent();
@@ -131,7 +128,6 @@ void TabView::layoutTabs(PaintSurface& surface,
 
 
 void TabView::renderTabs(PaintContext& context,
-                         TabViewRenderer& renderer,
                          bool enabled)
 {
     for(std::size_t i = 0; i < _tabs.size(); ++i)
@@ -142,19 +138,18 @@ void TabView::renderTabs(PaintContext& context,
         itemState.setEnabled(enabled);
         itemState.setActive( tab.isPressed() );
 
-        renderTab(context, renderer, tab.geometry(), tab.text(), tab.textPos(), itemState);
+        renderTab(context, tab.geometry(), tab.text(), tab.textPos(), itemState);
     }
 }
 
 
 void TabView::renderTab(PaintContext& context,
-                        TabViewRenderer& renderer,
                         const Gfx::RectF& tabRect,
                         const Pt::String& text,
                         const Gfx::PointF& textPos,
                         const TabViewItemState& state)
 {
-    renderer.renderTab(context, tabRect, text, textPos, state);
+    _tabViewStyler.renderTab(context, tabRect, text, textPos, state);
 }
 
 
@@ -295,8 +290,7 @@ void TabView::onControlRemoved(std::size_t n)
 
 void TabView::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
-    _tabViewOptions.set(background);
+    _tabViewStyler.setBackground(b);
     _hasBackground = true;
     invalidate();
 }
@@ -311,8 +305,7 @@ void TabView::setBackground(bool enable)
 
 void TabView::setContour(const Gfx::Pen& p)
 {
-    ContourOption contour(p);
-    _tabViewOptions.set(contour);
+    _tabViewStyler.setContour(p);
     _hasFrame = true;
     invalidate();
 }
@@ -325,69 +318,71 @@ void TabView::setFrame(bool enable)
 }
 
 
+Gfx::Font TabView::font() const
+{
+    return _tabViewStyler.font();
+}
+
+
 void TabView::setFont(const Gfx::Font& font)
 {
-    FontOption fontOption;
-    fontOption.setFont(font);
-    _tabViewOptions.set(fontOption);
+    _tabViewStyler.setFont(font);
     invalidate();
 }
 
 
 void TabView::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _tabViewOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSize(size);
-    _tabViewOptions.set(font);
+    _tabViewStyler.setFontSize(size);
     invalidate();
 }
 
 
 void TabView::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _tabViewOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setWeight(weight);
-    _tabViewOptions.set(font);
+    _tabViewStyler.setFontWeight(weight);
     invalidate();
 }
 
 
 void TabView::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _tabViewOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSlant(slant);
-    _tabViewOptions.set(font);
+    _tabViewStyler.setFontSlant(slant);
     invalidate();
 }
 
 
 void TabView::setTextColor(const Gfx::Color& color)
 {
-    TextColorOption textColor(color);
-    _tabViewOptions.set(textColor);
+    _tabViewStyler.setTextColor(color);
     invalidate();
 }
 
 
 void TabView::setAccentColor(const Gfx::Color& color)
 {
-    AccentColorOption accentColor(color);
-    _tabViewOptions.set(accentColor);
+    _tabViewStyler.setAccentColor(color);
     invalidate();
 }
 
 
 void TabView::setRenderer(TabViewRenderer* renderer)
 {
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    if(renderer)
-        _tabViewStyle.bind(*renderer, options, _tabViewOptions);
-    else
-        _tabViewStyle.bind(Application::instance().style(), options, _tabViewOptions);
+    _tabViewStyler.setRenderer(renderer);
+    _tabViewStyler.bind(style, options);
+
+    _tabBarRect.clear();
+
+    for(std::size_t i = 0; i < _tabs.size(); ++i)
+    {
+        TabViewItem& tab = _tabs.at(i);
+        tab.setMeasuredSize( Gfx::SizeF() );
+        tab.setGeometry( Gfx::RectF() );
+        tab.setTextPos( Gfx::PointF() );
+    }
 
     invalidate();
 }
@@ -395,13 +390,24 @@ void TabView::setRenderer(TabViewRenderer* renderer)
 
 void TabView::onInvalidate()
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    _tabViewStyle.rebind(Application::instance().style(), options, _tabViewOptions);
-
-    if( ! _tabViewStyle.renderer() )
-        return;
-
     Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    if( _tabViewStyler.bind(style, options) )
+    {
+        _tabBarRect.clear();
+
+        for(std::size_t i = 0; i < _tabs.size(); ++i)
+        {
+            TabViewItem& tab = _tabs.at(i);
+            tab.setMeasuredSize( Gfx::SizeF() );
+            tab.setGeometry( Gfx::RectF() );
+            tab.setTextPos( Gfx::PointF() );
+        }
+    }
+
     relayout();
 }
 
@@ -410,10 +416,7 @@ Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
 {
     Base::onMeasure(policy);
 
-    TabViewRenderer* renderer = _tabViewStyle.renderer();
-    Gfx::SizeF tabBarSize;
-    if( renderer )
-        tabBarSize = measureTabs(surface(), *renderer);
+    Gfx::SizeF tabBarSize = measureTabs(surface());
 
     SizePolicy stackPolicy(policy.horizontal(), policy.vertical());
     double stackWidth = policy.size().width() - padding().leftRight() - _stack.margin().leftRight();
@@ -432,7 +435,7 @@ Gfx::SizeF TabView::onMeasure(const SizePolicy& policy)
     Gfx::SizeF preferred;
     preferred.setWidth(stackSize.width() + _stack.margin().leftRight());
     if( tabBarSize.width() > preferred.width() )
-        preferred.setWidth(tabBarSize.width());
+        preferred.setWidth( tabBarSize.width() );
 
     preferred.setHeight(tabBarSize.height() + stackSize.height() + _stack.margin().topBottom());
     preferred.addWidth(padding().leftRight());
@@ -455,17 +458,11 @@ void TabView::onLayout(const Gfx::RectF& rect)
     if( size.height() < 0 )
         size.setHeight(0);
 
-    TabViewRenderer* renderer = _tabViewStyle.renderer();
-    double tabBarHeight = 0;
-    _tabBarRect.clear();
-    if( renderer )
-    {
-        Gfx::SizeF tabBarSize = measureTabs(surface(), *renderer);
-        tabBarHeight = tabBarSize.height();
+    Gfx::SizeF tabBarSize = measureTabs(surface());
+    double tabBarHeight = tabBarSize.height();
 
-        Gfx::RectF tabBarRect(pos, Gfx::SizeF(size.width(), tabBarHeight));
-        layoutTabs(surface(), *renderer, tabBarRect);
-    }
+    Gfx::RectF tabBarRect(pos, Gfx::SizeF(size.width(), tabBarHeight));
+    layoutTabs(surface(), tabBarRect);
 
     Gfx::PointF stackPos(pos.x() + _stack.margin().left(),
                          pos.y() + tabBarHeight + _stack.margin().top());
@@ -485,10 +482,6 @@ void TabView::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
     Base::onPaint(context, rect);
 
-    TabViewRenderer* renderer = _tabViewStyle.renderer();
-    if( ! renderer )
-        return;
-
     TabViewState state;
     state.setEnabled( isEnabled() );
     state.setFocused( hasFocus() );
@@ -496,13 +489,13 @@ void TabView::onPaint(PaintContext& context, const Gfx::RectF& rect)
     // Content panel rect (below tab bar)
     Gfx::RectF contentRect = _stack.geometry();
 
-    if( _hasBackground )
+    if(_hasBackground)
         onPaintBackground(context, contentRect, state);
 
-    if( _hasFrame )
+    if(_hasFrame)
         onPaintChrome(context, contentRect, currentTabRect(), state);
 
-    renderTabs(context, *renderer, isEnabled());
+    renderTabs(context, isEnabled());
 }
 
 
@@ -510,11 +503,7 @@ void TabView::onPaintBackground(PaintContext& context,
                                 const Gfx::RectF& contentRect,
                                 const TabViewState& state)
 {
-    TabViewRenderer* renderer = _tabViewStyle.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderBackground(context, contentRect, state);
+    _tabViewStyler.renderBackground(context, contentRect, state);
 }
 
 
@@ -523,11 +512,7 @@ void TabView::onPaintChrome(PaintContext& context,
                             const Gfx::RectF& activeTabRect,
                             const TabViewState& state)
 {
-    TabViewRenderer* renderer = _tabViewStyle.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderChrome(context, contentRect, activeTabRect, state);
+    _tabViewStyler.renderChrome(context, contentRect, activeTabRect, state);
 }
 
 } // namespace
