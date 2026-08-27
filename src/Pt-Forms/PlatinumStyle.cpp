@@ -929,30 +929,16 @@ SpinBoxRenderer* PlatinumSpinBoxRenderer::onCreate() const
 }
 
 
-void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& options,
-                                        const StyleOptions& spinBoxOptions)
+void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& options)
 {
-    const TextBackgroundOption* localBg = spinBoxOptions.find<TextBackgroundOption>();
-    _background = localBg ? localBg->value()
-                          : options.get<TextBackgroundOption>().value();
+    _background = options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = spinBoxOptions.find<ContourOption>();
-    _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>().value();
+    _contour = options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const ForegroundOption* localFg = spinBoxOptions.find<ForegroundOption>();
-    _foreground = localFg ? localFg->value()
-                          : options.get<ForegroundOption>().value();
-
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = spinBoxOptions.find<FontOption>();
-    _font = localFont ? localFont->getFont(baseFont) : baseFont;
-
-    const TextColorOption* localText = spinBoxOptions.find<TextColorOption>();
-    _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>().value();
-
+    _foreground = options.get<ForegroundOption>().value();
+    _font = options.get<FontOption>().value();
+    _textColor = options.get<TextColorOption>().value();
     _accentColor = options.get<AccentColorOption>().value();
 
     _textPainter.setFont(_font);

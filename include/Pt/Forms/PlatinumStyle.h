@@ -293,8 +293,9 @@ class PT_FORMS_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
     protected:
         virtual SpinBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& spinBoxOptions);
+        /** @brief Prepares the renderer from effective spin box style options.
+        */
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);

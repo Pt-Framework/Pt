@@ -236,8 +236,7 @@ class PT_FORMS_API SpinBox : public Control
         Gfx::RectF                    _downButtonRect;
         Gfx::RectF                    _textRect;
 
-        SpinBoxStyle                  _spinBoxStyle;
-        StyleOptions                  _spinBoxOptions;
+        SpinBoxStyler                 _styler;
 };
 
 } // namespace

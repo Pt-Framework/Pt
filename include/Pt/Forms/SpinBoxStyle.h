@@ -29,7 +29,7 @@
 #ifndef Pt_Forms_SpinBoxStyle_h
 #define Pt_Forms_SpinBoxStyle_h
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
@@ -93,17 +93,20 @@ class PT_FORMS_API SpinBoxState
     Provides rendering primitives for the entry area, up/down buttons,
     indicators, and text. Subclasses override the protected virtuals.
 */
-class PT_FORMS_API SpinBoxRenderer : public Style::Facet
+class PT_FORMS_API SpinBoxRenderer : public Renderer
 {
     public:
         explicit SpinBoxRenderer(std::size_t refs = 0);
 
         virtual ~SpinBoxRenderer();
 
+        /** @brief Creates a new default-constructed spin box renderer.
+        */
         SpinBoxRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& spinBoxOptions);
+        /** @brief Applies effective spin box style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -141,12 +144,15 @@ class PT_FORMS_API SpinBoxRenderer : public Style::Facet
                         const SpinBoxState& state);
 
     protected:
+        /** @brief Resets the shared renderer to global style options.
+        */
         virtual void onReset(const StyleOptions& options);
 
         virtual SpinBoxRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& spinBoxOptions) = 0;
+        /** @brief Prepares the renderer from effective spin box style options.
+        */
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -196,13 +202,125 @@ class PT_FORMS_API SpinBoxRenderer : public Style::Facet
 };
 
 
-/** @brief Binds a spin box widget to the currently active renderer.
+/** @brief Binds spin box renderers and widget-local style options.
 */
-class PT_FORMS_API SpinBoxStyle : public Styler<SpinBoxRenderer,
-                                                     StyleOptions>
+class PT_FORMS_API SpinBoxStyler : public StylerBase
 {
     public:
-        SpinBoxStyle();
+        /** @brief Constructs an unbound spin box styler.
+        */
+        SpinBoxStyler();
+
+        /** @brief Returns the effective spin box text background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local spin box text background brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
+
+        /** @brief Sets the widget-local foreground brush.
+        */
+        void setForeground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local text color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local font size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local font weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local font slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Lays out spin box chrome and clears the output rectangles when unavailable.
+        */
+        void layoutChrome(PaintSurface& surface,
+                          const Gfx::RectF& rect,
+                          Gfx::RectF& entryRect,
+                          Gfx::RectF& upButtonRect,
+                          Gfx::RectF& downButtonRect,
+                          Gfx::RectF& textRect) const;
+
+        /** @brief Returns the prepared text painter for @a surface, or 0 when unavailable.
+        */
+        const Painter* textPainter(PaintSurface& surface) const;
+
+        /** @brief Renders spin box chrome within the supplied rectangles.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const Gfx::RectF& entryRect,
+                          const Gfx::RectF& upButtonRect,
+                          const Gfx::RectF& downButtonRect,
+                          const SpinBoxState& state) const;
+
+        /** @brief Renders spin box text and cursor data within @a textRect.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::RectF& cursor,
+                        const SpinBoxState& state) const;
+
+        /** @brief Assigns a specific spin box renderer.
+        */
+        void setRenderer(SpinBoxRenderer* renderer = 0);
+
+        /** @brief Returns the bound effective spin box options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the bound effective spin box options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<SpinBoxRenderer> _renderer;
+        StyleOptions              _options;
 };
 
 } // namespace

@@ -380,124 +380,86 @@ Pt::Signal<const Pt::String&>& SpinBox::editingFinished()
 
 const Gfx::Brush& SpinBox::background() const
 {
-    const TextBackgroundOption* background = _spinBoxOptions.find<TextBackgroundOption>();
-    if(background)
-        return background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextBackgroundOption>().value();
+    return _styler.background();
 }
 
 
 void SpinBox::setBackground(const Gfx::Brush& b)
 {
-    TextBackgroundOption background(b);
-    _spinBoxOptions.set(background);
+    _styler.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Brush& SpinBox::foreground() const
 {
-    const ForegroundOption* foreground = _spinBoxOptions.find<ForegroundOption>();
-    if(foreground)
-        return foreground->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>().value();
+    return _styler.foreground();
 }
 
 
 void SpinBox::setForeground(const Gfx::Brush& b)
 {
-    ForegroundOption foreground(b);
-    _spinBoxOptions.set(foreground);
+    _styler.setForeground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& SpinBox::contour() const
 {
-    const ContourOption* contour = _spinBoxOptions.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>().value();
+    return _styler.contour();
 }
 
 
 void SpinBox::setContour(const Gfx::Pen& p)
 {
-    ContourOption contour(p);
-    _spinBoxOptions.set(contour);
+    _styler.setContour(p);
     invalidate();
 }
 
 
 const Gfx::Color& SpinBox::textColor() const
 {
-    const TextColorOption* textColor = _spinBoxOptions.find<TextColorOption>();
-    if(textColor)
-        return textColor->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<TextColorOption>().value();
+    return _styler.textColor();
 }
 
 
 void SpinBox::setTextColor(const Gfx::Color& color)
 {
-    TextColorOption textColor(color);
-    _spinBoxOptions.set(textColor);
+    _styler.setTextColor(color);
     invalidate();
 }
 
 
 Gfx::Font SpinBox::font() const
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
-    return localFont ? localFont->getFont(baseFont) : baseFont;
+    return _styler.font();
 }
 
 
 void SpinBox::setFont(const Gfx::Font& font)
 {
-    FontOption fontOption;
-    fontOption.setFont(font);
-    _spinBoxOptions.set(fontOption);
+    _styler.setFont(font);
     invalidate();
 }
 
 
 void SpinBox::setFontSize(std::size_t size)
 {
-    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSize(size);
-    _spinBoxOptions.set(font);
+    _styler.setFontSize(size);
     invalidate();
 }
 
 
 void SpinBox::setFontWeight(Gfx::Font::Weight weight)
 {
-    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setWeight(weight);
-    _spinBoxOptions.set(font);
+    _styler.setFontWeight(weight);
     invalidate();
 }
 
 
 void SpinBox::setFontSlant(Gfx::Font::Slant slant)
 {
-    const FontOption* localFont = _spinBoxOptions.findLocal<FontOption>();
-    FontOption font = localFont ? *localFont : FontOption();
-    font.setSlant(slant);
-    _spinBoxOptions.set(font);
+    _styler.setFontSlant(slant);
     invalidate();
 }
 
@@ -506,10 +468,9 @@ void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 {
     const StyleOptions& opts = Application::instance().styleOptions();
 
-    if(renderer)
-        _spinBoxStyle.bind(*renderer, opts, _spinBoxOptions);
-    else
-        _spinBoxStyle.bind(Application::instance().style(), opts, _spinBoxOptions);
+    _styler.setRenderer(renderer);
+    _styler.bind(Application::instance().style(), opts);
+    _line = TextLine();
 
     invalidate();
 }
@@ -536,18 +497,17 @@ void SpinBox::onInvalidate()
 
     const Style& style = Application::instance().style();
     const StyleOptions& opts = Application::instance().styleOptions();
-    _spinBoxStyle.rebind(style, opts, _spinBoxOptions);
+    if( _styler.bind(style, opts) )
+        _line = TextLine();
+
+    relayout();
 }
 
 
 Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
 {
-    SpinBoxRenderer* renderer = _spinBoxStyle.renderer();
-    if( ! renderer )
-        return Gfx::SizeF();
-
     Gfx::SizeF contentSize(policy.width(), 0);
-    Gfx::SizeF totalSize = renderer->measureFrame( surface(), contentSize );
+    Gfx::SizeF totalSize = _styler.measureFrame(surface(), contentSize);
 
     return Gfx::SizeF( totalSize.width() + padding().leftRight(),
                        totalSize.height() + padding().topBottom() );
@@ -558,17 +518,13 @@ void SpinBox::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    SpinBoxRenderer* renderer = _spinBoxStyle.renderer();
-    if( ! renderer )
-        return;
-
     Gfx::PointF origin(padding().left(), padding().top());
     Gfx::SizeF inner(size().width() - padding().leftRight(),
                      size().height() - padding().topBottom());
     Gfx::RectF chromeRect(origin, inner);
 
-    renderer->layoutChrome(surface(), chromeRect,
-                           _entryRect, _upButtonRect, _downButtonRect, _textRect);
+    _styler.layoutChrome(surface(), chromeRect, _entryRect, _upButtonRect,
+                         _downButtonRect, _textRect);
 
     _downButton.move( _downButtonRect.topLeft() );
     _downButton.resize( _downButtonRect.size() );
@@ -579,24 +535,27 @@ void SpinBox::onLayout(const Gfx::RectF& rect)
     _editor.setPosition( _textRect.topLeft() );
     _editor.setSize( _textRect.size() );
 
-    const Painter& painter = renderer->textPainter( surface() );
-    _editor.layout(painter, _line);
-
-    if(_pendingCursorX >= 0)
+    const Painter* painter = _styler.textPainter(surface());
+    if(painter)
     {
-        std::size_t n = _line.xToCursor(painter, _pendingCursorX);
-        _editor.setCursorPosition(n);
-        _pendingCursorX = -1;
+        _editor.layout(*painter, _line);
+
+        if(_pendingCursorX >= 0)
+        {
+            std::size_t n = _line.xToCursor(*painter, _pendingCursorX);
+            _editor.setCursorPosition(n);
+            _pendingCursorX = -1;
+        }
+    }
+    else
+    {
+        _line = TextLine();
     }
 }
 
 
 void SpinBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
 {
-    SpinBoxRenderer* renderer = _spinBoxStyle.renderer();
-    if( ! renderer )
-        return;
-
     SpinBoxState state = spinBoxState();
 
     Gfx::PointF origin(padding().left(), padding().top());
@@ -613,14 +572,16 @@ void SpinBox::onPaint(PaintContext& context, const Gfx::RectF& rect)
     Gfx::RectF cursor;
     if( _isEditable && hasFocus() )
     {
-        const Painter& painter = renderer->textPainter( surface() );
+        const Painter* painter = _styler.textPainter(surface());
+        if(painter)
+        {
+            double cursorX = _line.cursorToX(*painter, _editor.cursorPosition());
+            cursorX += _line.position().x();
 
-        double cursorX = _line.cursorToX(painter, _editor.cursorPosition());
-        cursorX += _line.position().x();
-
-        Gfx::PointF top(cursorX, _line.position().y());
-        Gfx::PointF bottom(cursorX, _line.position().y() + _line.maxHeight());
-        cursor = Gfx::RectF(top, bottom);
+            Gfx::PointF top(cursorX, _line.position().y());
+            Gfx::PointF bottom(cursorX, _line.position().y() + _line.maxHeight());
+            cursor = Gfx::RectF(top, bottom);
+        }
     }
 
     onPaintText(context, _textRect, _line.text(), textPos, cursor, state);
@@ -634,12 +595,8 @@ void SpinBox::onPaintChrome(PaintContext& context,
                             const Gfx::RectF& downButtonRect,
                             const SpinBoxState& state)
 {
-    SpinBoxRenderer* renderer = _spinBoxStyle.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderChrome(context, rect, entryRect, upButtonRect,
-                           downButtonRect, state);
+    _styler.renderChrome(context, rect, entryRect, upButtonRect,
+                         downButtonRect, state);
 }
 
 
@@ -650,11 +607,7 @@ void SpinBox::onPaintText(PaintContext& context,
                           const Gfx::RectF& cursor,
                           const SpinBoxState& state)
 {
-    SpinBoxRenderer* renderer = _spinBoxStyle.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderText(context, textRect, text, textPos, cursor, state);
+    _styler.renderText(context, textRect, text, textPos, cursor, state);
 }
 
 

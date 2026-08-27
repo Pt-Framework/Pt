@@ -143,7 +143,7 @@ void SpinBoxState::setDownHovered(bool value)
 
 
 SpinBoxRenderer::SpinBoxRenderer(std::size_t refs)
-: Style::Facet( typeid(SpinBoxRenderer), refs )
+: Renderer( typeid(SpinBoxRenderer), refs )
 {
 }
 
@@ -159,17 +159,15 @@ SpinBoxRenderer* SpinBoxRenderer::create() const
 }
 
 
-void SpinBoxRenderer::prepare(const StyleOptions& options,
-                              const StyleOptions& spinBoxOptions)
+void SpinBoxRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, spinBoxOptions);
+    onPrepare(options);
 }
 
 
 void SpinBoxRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -252,8 +250,212 @@ void SpinBoxRenderer::onRenderChrome(PaintContext& context,
 }
 
 
-SpinBoxStyle::SpinBoxStyle()
+///////////////////////////////////////////////////////////////////////
+// SpinBoxStyler
+///////////////////////////////////////////////////////////////////////
+
+SpinBoxStyler::SpinBoxStyler()
 {
+}
+
+
+const Gfx::Brush& SpinBoxStyler::background() const
+{
+    return _options.get<TextBackgroundOption>().value();
+}
+
+
+void SpinBoxStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( TextBackgroundOption(brush) );
+}
+
+
+const Gfx::Brush& SpinBoxStyler::foreground() const
+{
+    return _options.get<ForegroundOption>().value();
+}
+
+
+void SpinBoxStyler::setForeground(const Gfx::Brush& brush)
+{
+    _options.set( ForegroundOption(brush) );
+}
+
+
+const Gfx::Pen& SpinBoxStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void SpinBoxStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& SpinBoxStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void SpinBoxStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font SpinBoxStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void SpinBoxStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void SpinBoxStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void SpinBoxStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void SpinBoxStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
+Gfx::SizeF SpinBoxStyler::measureFrame(PaintSurface& surface,
+                                        const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return contentSize;
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+void SpinBoxStyler::layoutChrome(PaintSurface& surface,
+                                  const Gfx::RectF& rect,
+                                  Gfx::RectF& entryRect,
+                                  Gfx::RectF& upButtonRect,
+                                  Gfx::RectF& downButtonRect,
+                                  Gfx::RectF& textRect) const
+{
+    if( ! _renderer )
+    {
+        entryRect = Gfx::RectF();
+        upButtonRect = Gfx::RectF();
+        downButtonRect = Gfx::RectF();
+        textRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutChrome(surface, rect, entryRect, upButtonRect,
+                            downButtonRect, textRect);
+}
+
+
+const Painter* SpinBoxStyler::textPainter(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return 0;
+
+    return &_renderer->textPainter(surface);
+}
+
+
+void SpinBoxStyler::renderChrome(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::RectF& entryRect,
+                                  const Gfx::RectF& upButtonRect,
+                                  const Gfx::RectF& downButtonRect,
+                                  const SpinBoxState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, rect, entryRect, upButtonRect,
+                            downButtonRect, state);
+}
+
+
+void SpinBoxStyler::renderText(PaintContext& context,
+                                const Gfx::RectF& textRect,
+                                const String& text,
+                                const Gfx::PointF& textPos,
+                                const Gfx::RectF& cursor,
+                                const SpinBoxState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderText(context, textRect, text, textPos, cursor, state);
+}
+
+
+void SpinBoxStyler::setRenderer(SpinBoxRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& SpinBoxStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& SpinBoxStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& SpinBoxStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* SpinBoxStyler::onStyleRenderer(const Style& style)
+{
+    SpinBoxRenderer* styleRenderer = style.get<SpinBoxRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* SpinBoxStyler::onCreateRenderer(const Style& style)
+{
+    SpinBoxRenderer* styleRenderer = style.get<SpinBoxRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace
