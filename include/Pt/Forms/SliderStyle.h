@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_SLIDERSTYLE_H
 #define PT_FORMS_SLIDERSTYLE_H
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
@@ -59,17 +59,22 @@ class PT_FORMS_API SliderState
 };
 
 
-class PT_FORMS_API SliderRenderer : public Style::Facet
+/** @brief Renders the visual appearance of a slider.
+*/
+class PT_FORMS_API SliderRenderer : public Renderer
 {
     public:
         explicit SliderRenderer(std::size_t refs = 0);
 
         virtual ~SliderRenderer();
 
+        /** @brief Creates a new default-constructed slider renderer.
+        */
         SliderRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& sliderOptions);
+        /** @brief Applies effective slider style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -106,12 +111,15 @@ class PT_FORMS_API SliderRenderer : public Style::Facet
                           const SliderState& state);
 
     protected:
+        /** @brief Resets the shared slider renderer to global style options.
+        */
         virtual void onReset(const StyleOptions& options);
 
         virtual SliderRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& sliderOptions) = 0;
+        /** @brief Prepares the renderer from effective slider style options.
+        */
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -148,11 +156,132 @@ class PT_FORMS_API SliderRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API SliderStyle : public Styler<SliderRenderer,
-                                                    StyleOptions>
+/** @brief Slider styler.
+*/
+class PT_FORMS_API SliderStyler : public StylerBase
 {
     public:
-        SliderStyle();
+        /** @brief Constructs an unbound slider styler.
+        */
+        SliderStyler();
+
+        /** @brief Returns the effective background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
+
+        /** @brief Sets the widget-local foreground brush to @a brush.
+        */
+        void setForeground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Measures the slider track.
+        */
+        Gfx::SizeF measureTrack(PaintSurface& surface) const;
+
+        /** @brief Measures the slider handle.
+        */
+        Gfx::SizeF measureHandle(PaintSurface& surface) const;
+
+        /** @brief Lays out the slider track and handle rectangles.
+        */
+        void layoutChrome(PaintSurface& surface,
+                          const Gfx::RectF& rect,
+                          const Gfx::SizeF& trackSize,
+                          const Gfx::SizeF& handleSize,
+                          Gfx::RectF& trackRect,
+                          Gfx::RectF& handleRect) const;
+
+        /** @brief Lays out the handle for @a fraction along @a trackRect.
+        */
+        void layoutHandle(PaintSurface& surface,
+                          const Gfx::RectF& trackRect,
+                          float fraction,
+                          Gfx::RectF& handleRect) const;
+
+        /** @brief Renders the slider chrome within @a rect for @a state.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const Gfx::RectF& trackRect,
+                          const Gfx::RectF& handleRect,
+                          const SliderState& state) const;
+
+        /** @brief Assigns a specific slider renderer.
+        */
+        void setRenderer(SliderRenderer* renderer = 0);
+
+        /** @brief Returns the bound effective slider options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the bound effective slider options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        /** @brief Binds local slider options to @a global and returns them.
+        */
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        /** @brief Resolves the shared slider renderer from @a style.
+        */
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        /** @brief Creates an independent slider renderer from @a style.
+        */
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<SliderRenderer> _renderer;
+        StyleOptions             _options;
 };
 
 } // namespace

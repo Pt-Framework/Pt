@@ -483,8 +483,9 @@ class PT_FORMS_API PlatinumSliderRenderer : public SliderRenderer
     protected:
         virtual SliderRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& sliderOptions);
+        /** @brief Prepares the slider renderer from effective style options.
+        */
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize);

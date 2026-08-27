@@ -1608,18 +1608,13 @@ SliderRenderer* PlatinumSliderRenderer::onCreate() const
 }
 
 
-void PlatinumSliderRenderer::onPrepare(const StyleOptions& options,
-                                       const StyleOptions& sliderOptions)
+void PlatinumSliderRenderer::onPrepare(const StyleOptions& options)
 {
     _hoverBrush = options.get<AccentColorOption>().value();
 
-    const ContourOption* localContour = sliderOptions.find<ContourOption>();
-    _contourBrush = Gfx::Brush( localContour ? localContour->value().color()
-                                             : options.get<ContourOption>().value().color() );
+    _contourBrush = Gfx::Brush( options.get<ContourOption>().value().color() );
 
-    const ForegroundOption* localForeground = sliderOptions.find<ForegroundOption>();
-    Gfx::Brush foregroundBrush = localForeground ? localForeground->value()
-                                                 : options.get<ForegroundOption>().value();
+    Gfx::Brush foregroundBrush = options.get<ForegroundOption>().value();
 
     _trackPainter.setBrush(foregroundBrush);
     _handlePainter.setBrush(_contourBrush);

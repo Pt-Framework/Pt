@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/SliderStyle.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Style.h>
 
 namespace Pt {
 
@@ -78,7 +79,7 @@ void SliderState::setFocused(bool value)
 
 
 SliderRenderer::SliderRenderer(std::size_t refs)
-: Style::Facet( typeid(SliderRenderer), refs )
+: Renderer( typeid(SliderRenderer), refs )
 {
 }
 
@@ -94,17 +95,15 @@ SliderRenderer* SliderRenderer::create() const
 }
 
 
-void SliderRenderer::prepare(const StyleOptions& options,
-                             const StyleOptions& sliderOptions)
+void SliderRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, sliderOptions);
+    onPrepare(options);
 }
 
 
 void SliderRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -184,8 +183,218 @@ void SliderRenderer::onRenderChrome(PaintContext& context,
 }
 
 
-SliderStyle::SliderStyle()
+SliderStyler::SliderStyler()
 {
+}
+
+
+const Gfx::Brush& SliderStyler::background() const
+{
+    return _options.get<BackgroundOption>().value();
+}
+
+
+void SliderStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( BackgroundOption(brush) );
+}
+
+
+const Gfx::Brush& SliderStyler::foreground() const
+{
+    return _options.get<ForegroundOption>().value();
+}
+
+
+void SliderStyler::setForeground(const Gfx::Brush& brush)
+{
+    _options.set( ForegroundOption(brush) );
+}
+
+
+const Gfx::Pen& SliderStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void SliderStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& SliderStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void SliderStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font SliderStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void SliderStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void SliderStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void SliderStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void SliderStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
+Gfx::SizeF SliderStyler::measureFrame(PaintSurface& surface,
+                                      const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+Gfx::SizeF SliderStyler::measureTrack(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureTrack(surface);
+}
+
+
+Gfx::SizeF SliderStyler::measureHandle(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureHandle(surface);
+}
+
+
+void SliderStyler::layoutChrome(PaintSurface& surface,
+                                const Gfx::RectF& rect,
+                                const Gfx::SizeF& trackSize,
+                                const Gfx::SizeF& handleSize,
+                                Gfx::RectF& trackRect,
+                                Gfx::RectF& handleRect) const
+{
+    if( ! _renderer )
+    {
+        trackRect = Gfx::RectF();
+        handleRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutChrome(surface,
+                            rect,
+                            trackSize,
+                            handleSize,
+                            trackRect,
+                            handleRect);
+}
+
+
+void SliderStyler::layoutHandle(PaintSurface& surface,
+                                const Gfx::RectF& trackRect,
+                                float fraction,
+                                Gfx::RectF& handleRect) const
+{
+    if( ! _renderer )
+    {
+        handleRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutHandle(surface, trackRect, fraction, handleRect);
+}
+
+
+void SliderStyler::renderChrome(PaintContext& context,
+                                const Gfx::RectF& rect,
+                                const Gfx::RectF& trackRect,
+                                const Gfx::RectF& handleRect,
+                                const SliderState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, rect, trackRect, handleRect, state);
+}
+
+
+void SliderStyler::setRenderer(SliderRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& SliderStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& SliderStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& SliderStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* SliderStyler::onStyleRenderer(const Style& style)
+{
+    SliderRenderer* styleRenderer = style.get<SliderRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* SliderStyler::onCreateRenderer(const Style& style)
+{
+    SliderRenderer* styleRenderer = style.get<SliderRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace

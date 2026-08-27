@@ -123,8 +123,7 @@ class PT_FORMS_API Slider : public Control
 
     private:
         Signal<int>           _positionChanged;
-        SliderStyle           _sliderStyle;
-        StyleOptions          _sliderOptions;
+        SliderStyler          _sliderStyler;
         int                   _position;
         int                   _min;
         int                   _max;
