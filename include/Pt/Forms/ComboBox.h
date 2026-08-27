@@ -169,6 +169,8 @@ class PT_FORMS_API ComboBox : public Control
 
         void processKeyEvent(const KeyEvent& ev);
 
+        ComboBoxState comboBoxState() const;
+
     private:
         Pt::Signal<const Pt::String&> _textChanged;
         Pt::Signal<const Pt::String&> _textEdited;
@@ -191,8 +193,7 @@ class PT_FORMS_API ComboBox : public Control
         bool          _isButtonHighlighted;
         double        _pendingCursorX;
 
-        ComboBoxStyle        _comboBoxStyle;
-        StyleOptions         _comboBoxOptions;
+        ComboBoxStyler       _styler;
 };
 
 } // namespace

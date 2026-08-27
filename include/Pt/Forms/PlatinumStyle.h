@@ -700,8 +700,9 @@ class PT_FORMS_API PlatinumComboBoxRenderer : public ComboBoxRenderer
     protected:
         virtual ComboBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& comboBoxOptions);
+        /** @brief Prepares the combo box renderer from resolved style options.
+        */
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);

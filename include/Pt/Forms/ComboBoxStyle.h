@@ -29,7 +29,8 @@
 #ifndef PT_FORMS_COMBOBOXSTYLE_H
 #define PT_FORMS_COMBOBOXSTYLE_H
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Painter.h>
 
 namespace Pt {
 
@@ -88,17 +89,24 @@ class PT_FORMS_API ComboBoxButtonState
 };
 
 
-class PT_FORMS_API ComboBoxRenderer : public Style::Facet
+/** @brief Renders the visual appearance of a combo box.
+*/
+class PT_FORMS_API ComboBoxRenderer : public Renderer
 {
     public:
+        /** @brief Constructs a combo box renderer.
+        */
         explicit ComboBoxRenderer(std::size_t refs = 0);
 
         virtual ~ComboBoxRenderer();
 
+        /** @brief Creates a new default-constructed renderer instance.
+        */
         ComboBoxRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& comboBoxOptions);
+        /** @brief Applies the resolved combo box style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -138,8 +146,9 @@ class PT_FORMS_API ComboBoxRenderer : public Style::Facet
 
         virtual ComboBoxRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& comboBoxOptions) = 0;
+        /** @brief Prepares the concrete renderer from resolved style options.
+        */
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -179,11 +188,124 @@ class PT_FORMS_API ComboBoxRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ComboBoxStyle : public Styler<ComboBoxRenderer,
-                                                      StyleOptions>
+/** @brief Binds ComboBox renderers and widget-local style options.
+*/
+class PT_FORMS_API ComboBoxStyler : public StylerBase
 {
     public:
-        ComboBoxStyle();
+        /** @brief Constructs an unbound combo box styler.
+        */
+        ComboBoxStyler();
+
+        /** @brief Returns the effective text background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local text background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
+
+        /** @brief Sets the widget-local foreground brush to @a brush.
+        */
+        void setForeground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Lays out combo box chrome within @a rect.
+        */
+        void layoutChrome(PaintSurface& surface,
+                          const Gfx::RectF& rect,
+                          Gfx::RectF& entryRect,
+                          Gfx::RectF& buttonRect,
+                          Gfx::RectF& textRect) const;
+
+        /** @brief Returns the painter configured for combo box text, or 0 if the styler is not bound.
+        */
+        const Painter* textPainter(PaintSurface& surface);
+
+        /** @brief Renders combo box chrome for the supplied states.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const Gfx::RectF& entryRect,
+                          const Gfx::RectF& buttonRect,
+                          const ComboBoxState& state,
+                          const ComboBoxButtonState& buttonState) const;
+
+        /** @brief Renders @a text at @a textPos for @a state.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::RectF& cursor,
+                        const ComboBoxState& state) const;
+
+        /** @brief Assigns a specific combo box renderer.
+        */
+        void setRenderer(ComboBoxRenderer* renderer = 0);
+
+        /** @brief Returns the effective combo box options.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the effective combo box options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<ComboBoxRenderer> _renderer;
+        StyleOptions               _options;
 };
 
 } // namespace

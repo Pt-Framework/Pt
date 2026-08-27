@@ -2443,30 +2443,16 @@ ComboBoxRenderer* PlatinumComboBoxRenderer::onCreate() const
 }
 
 
-void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options,
-                                         const StyleOptions& comboBoxOptions)
+void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options)
 {
-    const TextBackgroundOption* localBg = comboBoxOptions.find<TextBackgroundOption>();
-    _background = localBg ? localBg->value()
-                          : options.get<TextBackgroundOption>().value();
+    _background = options.get<TextBackgroundOption>().value();
 
-    const ContourOption* localContour = comboBoxOptions.find<ContourOption>();
-    _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>().value();
+    _contour = options.get<ContourOption>().value();
     _contour.setJoinStyle(Gfx::Pen::BevelJoin);
 
-    const ForegroundOption* localFg = comboBoxOptions.find<ForegroundOption>();
-    _foreground = localFg ? localFg->value()
-                          : options.get<ForegroundOption>().value();
-
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = comboBoxOptions.find<FontOption>();
-    _font = localFont ? localFont->getFont(baseFont) : baseFont;
-
-    const TextColorOption* localText = comboBoxOptions.find<TextColorOption>();
-    _textColor = localText ? localText->value()
-                           : options.get<TextColorOption>().value();
-
+    _foreground = options.get<ForegroundOption>().value();
+    _font = options.get<FontOption>().value();
+    _textColor = options.get<TextColorOption>().value();
     _accentColor = options.get<AccentColorOption>().value();
 
     _bgPainter.setBrush(_background);

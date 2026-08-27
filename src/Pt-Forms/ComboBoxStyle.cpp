@@ -135,7 +135,7 @@ void ComboBoxButtonState::setPressed(bool v)
 
 
 ComboBoxRenderer::ComboBoxRenderer(std::size_t refs)
-: Style::Facet( typeid(ComboBoxRenderer), refs )
+: Renderer( typeid(ComboBoxRenderer), refs )
 {
 }
 
@@ -151,17 +151,15 @@ ComboBoxRenderer* ComboBoxRenderer::create() const
 }
 
 
-void ComboBoxRenderer::prepare(const StyleOptions& options,
-                               const StyleOptions& comboBoxOptions)
+void ComboBoxRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, comboBoxOptions);
+    onPrepare(options);
 }
 
 
 void ComboBoxRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -237,8 +235,205 @@ void ComboBoxRenderer::onRenderChrome(PaintContext& context,
 }
 
 
-ComboBoxStyle::ComboBoxStyle()
+ComboBoxStyler::ComboBoxStyler()
 {
+}
+
+
+const Gfx::Brush& ComboBoxStyler::background() const
+{
+    return _options.get<TextBackgroundOption>().value();
+}
+
+
+void ComboBoxStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( TextBackgroundOption(brush) );
+}
+
+
+const Gfx::Brush& ComboBoxStyler::foreground() const
+{
+    return _options.get<ForegroundOption>().value();
+}
+
+
+void ComboBoxStyler::setForeground(const Gfx::Brush& brush)
+{
+    _options.set( ForegroundOption(brush) );
+}
+
+
+const Gfx::Pen& ComboBoxStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void ComboBoxStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+const Gfx::Color& ComboBoxStyler::textColor() const
+{
+    return _options.get<TextColorOption>().value();
+}
+
+
+void ComboBoxStyler::setTextColor(const Gfx::Color& color)
+{
+    _options.set( TextColorOption(color) );
+}
+
+
+Gfx::Font ComboBoxStyler::font() const
+{
+    return _options.get<FontOption>().value();
+}
+
+
+void ComboBoxStyler::setFont(const Gfx::Font& font)
+{
+    FontOption option;
+    option.setFont(font);
+    _options.set(option);
+}
+
+
+void ComboBoxStyler::setFontSize(std::size_t size)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSize(size);
+    _options.set(option);
+}
+
+
+void ComboBoxStyler::setFontWeight(Gfx::Font::Weight weight)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setWeight(weight);
+    _options.set(option);
+}
+
+
+void ComboBoxStyler::setFontSlant(Gfx::Font::Slant slant)
+{
+    const FontOption* localFont = _options.findLocal<FontOption>();
+    FontOption option = localFont ? *localFont : FontOption();
+    option.setSlant(slant);
+    _options.set(option);
+}
+
+
+Gfx::SizeF ComboBoxStyler::measureFrame(PaintSurface& surface,
+                                         const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return contentSize;
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+void ComboBoxStyler::layoutChrome(PaintSurface& surface,
+                                  const Gfx::RectF& rect,
+                                  Gfx::RectF& entryRect,
+                                  Gfx::RectF& buttonRect,
+                                  Gfx::RectF& textRect) const
+{
+    if( ! _renderer )
+    {
+        entryRect = Gfx::RectF();
+        buttonRect = Gfx::RectF();
+        textRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutChrome(surface, rect, entryRect, buttonRect, textRect);
+}
+
+
+const Painter* ComboBoxStyler::textPainter(PaintSurface& surface)
+{
+    if( ! _renderer )
+        return 0;
+
+    return &_renderer->textPainter(surface);
+}
+
+
+void ComboBoxStyler::renderChrome(PaintContext& context,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::RectF& entryRect,
+                                  const Gfx::RectF& buttonRect,
+                                  const ComboBoxState& state,
+                                  const ComboBoxButtonState& buttonState) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context, rect, entryRect, buttonRect,
+                            state, buttonState);
+}
+
+
+void ComboBoxStyler::renderText(PaintContext& context,
+                                const Gfx::RectF& textRect,
+                                const String& text,
+                                const Gfx::PointF& textPos,
+                                const Gfx::RectF& cursor,
+                                const ComboBoxState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderText(context, textRect, text, textPos, cursor, state);
+}
+
+
+void ComboBoxStyler::setRenderer(ComboBoxRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& ComboBoxStyler::options()
+{
+    return _options;
+}
+
+
+const StyleOptions& ComboBoxStyler::options() const
+{
+    return _options;
+}
+
+
+StyleOptions& ComboBoxStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* ComboBoxStyler::onStyleRenderer(const Style& style)
+{
+    ComboBoxRenderer* styleRenderer = style.get<ComboBoxRenderer>();
+    _renderer.reset(styleRenderer);
+    return _renderer.get();
+}
+
+
+Renderer* ComboBoxStyler::onCreateRenderer(const Style& style)
+{
+    ComboBoxRenderer* styleRenderer = style.get<ComboBoxRenderer>();
+    _renderer.reset( styleRenderer ? styleRenderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace
