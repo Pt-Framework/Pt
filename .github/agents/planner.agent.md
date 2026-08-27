@@ -8,7 +8,7 @@ model: ["GPT-5.6 Terra", "Grok 4.6 (xai)"]
 handoffs:
   - label: "Start Development"
     agent: Developer
-    prompt: "Use the exact work ID and plan path supplied by Planner. Before starting implementation, read `.agents/session/<work-id>/plan.md`, where <work-id> is the work ID. Reuse that work ID for the implementation report."
+    prompt: "Implement the plan."
     send: false
 ---
 
@@ -26,9 +26,17 @@ or editing any code yourself.
 - Save the final approved plan to `.agents/session/<work-id>/plan.md` utilizing the `edit` tool.
 
 ## Work ID
-- A work ID is a short descriptive keyword using lowercase ASCII letters, digits, and single hyphens, such as `http-timeout` or `json-parser`.
-- When requirements are handed off from Researcher, reuse the work ID and requirements path exactly as supplied. Do not allocate another work ID.
-- For a direct Planner invocation without a requirements artifact, derive the work ID from one to three meaningful request keywords. Before creating `.agents/session/<work-id>/`, check whether it already exists and append the smallest unused numeric suffix on collision: `http-timeout-2`, then `http-timeout-3`.
+A work ID is a short descriptive slug: lowercase ASCII letters, digits, and single hyphens, such as `http-timeout` or `json-parser`. Each work item lives in `.agents/session/<work-id>/`, holding `requirements.md` (Researcher's input) and `plan.md` (this agent's own output).
+
+### Resolving the input
+Apply in order:
+1. A concrete `requirements.md` or `plan.md` path is given -> use it directly; the work ID is its parent directory name.
+2. A session directory path (`.agents/session/<work-id>/`) is given -> derive the work ID from the directory name; look inside for both `requirements.md` and `plan.md`.
+3. A bare work ID is given in the prompt, or is visible earlier in the conversation (e.g. a Researcher handoff) -> derive `.agents/session/<work-id>/` yourself and look for the same files.
+4. Nothing above resolves -> this is a direct invocation; derive and reserve a new work ID from one to three meaningful request keywords, checking `.agents/session/<work-id>/` for a collision and appending the smallest unused numeric suffix: `http-timeout-2`, then `http-timeout-3`.
+
+When both files exist for a resolved work ID, `requirements.md` is the authoritative task definition; treat `plan.md` as background (the previous draft) and update it in place rather than discarding it. When only `plan.md` exists, plan directly from it. An explicit work ID with neither file existing is reused as-is for the new plan, skipping the collision check.
+
 - State the selected work ID and concrete plan path in every Developer handoff. The receiving agent must reuse them and must not allocate another work ID.
 
 ## Constraints
@@ -41,9 +49,9 @@ or editing any code yourself.
 - DO NOT offer a handoff to the Developer before the plan is reviewed, saved, and approved by the user.
 
 ## Approach
-1. If the prompt names a requirements file, use the `read` tool to load that file before planning. Treat the file, its work ID, and any explicit prompt constraints as the requirements source.
-2. If the prompt provides a feature, bug, or requirements directly without naming a requirements file, use that prompt as the requirements source.
-3. Reuse the work ID supplied with a requirements handoff. For a direct invocation, select and reserve a work ID according to the Work ID rules.
+1. Resolve the work ID and its artifacts per the Work ID rules, from a named file, a named directory, or a bare/contextual work ID.
+2. If resolution finds a `requirements.md` and/or `plan.md`, use the `read` tool to load them and treat them, plus any explicit prompt constraints, as the requirements source.
+3. If nothing resolves, treat the prompt itself as the requirements source for a freshly reserved work ID.
 4. Identify the smallest relevant planning scope from the requirements source.
 5. Identify affected headers, sources, build files, symbols, and verification steps.
 6. Draft an ordered, numbered plan and save it to `.agents/session/<work-id>/plan.md`. Include the work ID and plan path in the plan. Call out open decisions with alternatives and a short reason for each. Mark which steps can run in parallel vs. which block on prior steps. For plans with 5+ steps, group them into named phases.
