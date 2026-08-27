@@ -3,7 +3,7 @@ name: "Researcher"
 description: "Researches a feature or product idea before planning. Produces confirmed requirements in a unique work-ID session directory."
 argument-hint: "Describe the feature idea, target users, and questions to research."
 tools: [read, edit, search, web]
-model: [ "Gemini 3.1 Pro (Preview)" ]
+model: [ "Claude Sonnet 5" ]
 handoffs:
   - label: "Plan Implementation"
     agent: Planner

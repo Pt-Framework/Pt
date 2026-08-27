@@ -3,7 +3,7 @@ name: "Reviewer"
 description: "Reviews a plan, implementation, or API documentation for correctness and project conventions."
 argument-hint: "Review the specified plan, files, or documentation. State the review mode: plan, implementation, or documentation."
 tools: [read, search]
-model: [ "Gemini 3.1 Pro (Preview)" ]
+model: [ "Claude Sonnet 5" ]
 ---
 
 # Agent Profile

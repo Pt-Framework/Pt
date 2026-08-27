@@ -4,7 +4,7 @@ description: "Implements an approved C++ plan or fixes implementation feedback i
 argument-hint: "Describe the implementation task, or name the approved plan and feedback to address."
 tools: [read, edit, search, agent]
 agents: [Builder, Tester, Documenter, Reviewer]
-model: [ "GPT-5.6 Terra", "Grok 4.6 (xai)" ]
+model: [ "GPT-5.6 Terra" ]
 ---
 
 # Agent Profile

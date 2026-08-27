@@ -4,7 +4,7 @@ description: "Prepares a reviewed implementation plan for a C++ feature or bugfi
 argument-hint: "Describe the feature or bug, expected behavior, and relevant modules."
 tools: [read, search, edit, agent]
 agents: [Reviewer, Developer, Explore]
-model: ["GPT-5.6 Terra", "Grok 4.6 (xai)"]
+model: [ "Claude Sonnet 5" ]
 handoffs:
   - label: "Start Development"
     agent: Developer
