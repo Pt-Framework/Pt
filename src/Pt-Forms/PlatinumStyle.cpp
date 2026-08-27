@@ -1436,27 +1436,18 @@ ProgressBarRenderer* PlatinumProgressBarRenderer::onCreate() const
 }
 
 
-void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options,
-                                            const StyleOptions& progressBarOptions)
+void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options)
 {
-    Gfx::Brush chunkBrush = options.get<AccentColorOption>().value() ;
-
-    const ForegroundOption* localFg = progressBarOptions.find<ForegroundOption>();
-    Gfx::Brush foregroundBrush = localFg ? localFg->value()
-                                         : Gfx::Brush( options.get<ForegroundOption>().value() );
+    Gfx::Brush chunkBrush = options.get<AccentColorOption>().value();
+    Gfx::Brush foregroundBrush = options.get<ForegroundOption>().value();
 
     _textBackground = options.get<TextBackgroundOption>().value().color();
 
     _trackPainter.setBrush(foregroundBrush);
     _chunkPainter.setBrush(chunkBrush);
 
-    const Gfx::Font& baseFont = options.get<FontOption>().value();
-    const FontOption* localFont = progressBarOptions.find<FontOption>();
-    Gfx::Font resolvedFont = localFont ? localFont->getFont(baseFont) : baseFont;
-
-    const TextColorOption* localText = progressBarOptions.find<TextColorOption>();
-    Gfx::Color textCol = localText ? localText->value()
-                                   : options.get<TextColorOption>().value();
+    Gfx::Font resolvedFont = options.get<FontOption>().value();
+    Gfx::Color textCol = options.get<TextColorOption>().value();
 
     _textPainter.setFont( resolvedFont );
     _textPainter.setPen( Gfx::Pen(textCol) );

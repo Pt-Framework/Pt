@@ -124,8 +124,7 @@ class PT_FORMS_API ProgressBar : public Control
         Gfx::RectF _trackRect;
         Gfx::RectF _chunkRect;
 
-        ProgressBarStyle        _progressBarStyle;
-        StyleOptions            _progressBarOptions;
+        ProgressBarStyler       _styler;
 };
 
 } // namespace

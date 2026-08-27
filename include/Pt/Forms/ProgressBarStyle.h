@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_PROGRESSBARSTYLE_H
 #define PT_FORMS_PROGRESSBARSTYLE_H
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 
 namespace Pt {
 
@@ -53,8 +53,9 @@ class PT_FORMS_API ProgressBarState
         bool _focused;
 };
 
-
-class PT_FORMS_API ProgressBarRenderer : public Style::Facet
+/** @brief Renders the visual appearance of a progress bar.
+*/
+class PT_FORMS_API ProgressBarRenderer : public Renderer
 {
     public:
         explicit ProgressBarRenderer(std::size_t refs = 0);
@@ -63,8 +64,9 @@ class PT_FORMS_API ProgressBarRenderer : public Style::Facet
 
         ProgressBarRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& progressBarOptions);
+        /** @brief Applies the progress bar style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -121,8 +123,7 @@ class PT_FORMS_API ProgressBarRenderer : public Style::Facet
 
         virtual ProgressBarRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& progressBarOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -174,12 +175,160 @@ class PT_FORMS_API ProgressBarRenderer : public Style::Facet
                                   const ProgressBarState& state) = 0;
 };
 
-
-class PT_FORMS_API ProgressBarStyle : public Styler<ProgressBarRenderer,
-                                                         StyleOptions>
+/** @brief Progress bar styler.
+*/
+class PT_FORMS_API ProgressBarStyler : public StylerBase
 {
     public:
-        ProgressBarStyle();
+        /** @brief Constructs an unbound progress bar styler.
+        */
+        ProgressBarStyler();
+
+        /** @brief Returns the effective background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
+
+        /** @brief Sets the widget-local foreground brush to @a brush.
+        */
+        void setForeground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Returns the effective text color.
+        */
+        const Gfx::Color& textColor() const;
+
+        /** @brief Sets the widget-local text color to @a color.
+        */
+        void setTextColor(const Gfx::Color& color);
+
+        /** @brief Returns the effective font.
+        */
+        Gfx::Font font() const;
+
+        /** @brief Sets the widget-local font to @a font.
+        */
+        void setFont(const Gfx::Font& font);
+
+        /** @brief Sets the widget-local font size to @a size.
+        */
+        void setFontSize(std::size_t size);
+
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
+        void setFontWeight(Gfx::Font::Weight weight);
+
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
+        void setFontSlant(Gfx::Font::Slant slant);
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Measures the bar's natural size.
+        */
+        Gfx::SizeF measureBar(PaintSurface& surface) const;
+
+        /** @brief Lays out the bar and text rectangles.
+        */
+        void layoutChrome(PaintSurface& surface,
+                          const Gfx::RectF& rect,
+                          const Gfx::SizeF& barSize,
+                          const Gfx::SizeF& textSize,
+                          Gfx::RectF& barRect,
+                          Gfx::RectF& textRect) const;
+
+        /** @brief Lays out the track and chunk rectangles.
+        */
+        void layoutBar(PaintSurface& surface,
+                       const Gfx::RectF& barRect,
+                       float progressRatio,
+                       Gfx::RectF& trackRect,
+                       Gfx::RectF& chunkRect) const;
+
+        /** @brief Returns the text painter for @a surface, or 0 when unavailable.
+        */
+        const Painter* textPainter(PaintSurface& surface) const;
+
+        /** @brief Renders the chrome within @a rect.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          const Gfx::RectF& trackRect,
+                          const Gfx::RectF& chunkRect,
+                          const Gfx::RectF& textRect,
+                          const String& text,
+                          const Gfx::PointF& textPos,
+                          const ProgressBarState& state) const;
+
+        /** @brief Renders the bar.
+        */
+        void renderBar(PaintContext& context,
+                       const Gfx::RectF& trackRect,
+                       const Gfx::RectF& chunkRect,
+                       const ProgressBarState& state) const;
+
+        /** @brief Renders the track.
+        */
+        void renderTrack(PaintContext& context,
+                         const Gfx::RectF& trackRect,
+                         const ProgressBarState& state) const;
+
+        /** @brief Renders the chunk.
+        */
+        void renderChunk(PaintContext& context,
+                         const Gfx::RectF& chunkRect,
+                         const ProgressBarState& state) const;
+
+        /** @brief Renders the text.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& textRect,
+                        const Gfx::RectF& chunkRect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const ProgressBarState& state) const;
+
+        /** @brief Assigns a specific progress bar renderer.
+        */
+        void setRenderer(ProgressBarRenderer* renderer = 0);
+
+        /** @brief Returns the bound effective progress bar options.
+
+            Use %StyleOptions::findLocal() to query an explicit widget-local token.
+        */
+        StyleOptions& options();
+
+        /** @brief Returns the bound effective progress bar options.
+        */
+        const StyleOptions& options() const;
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<ProgressBarRenderer> _renderer;
+        StyleOptions                  _options;
 };
 
 } // namespace
