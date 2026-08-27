@@ -1748,17 +1748,10 @@ ScrollBarRenderer* PlatinumScrollBarRenderer::onCreate() const
 }
 
 
-void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& options,
-                                          const StyleOptions& scrollBarOptions)
+void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& options)
 {
-    const BackgroundOption* localBg = scrollBarOptions.find<BackgroundOption>();
-    _background = localBg ? localBg->value()
-                          : options.get<BackgroundOption>().value();
-
-    const ContourOption* localContour = scrollBarOptions.find<ContourOption>();
-    _contour = localContour ? localContour->value()
-                            : options.get<ContourOption>().value();
-
+    _background = options.get<BackgroundOption>().value();
+    _contour = options.get<ContourOption>().value();
     _accentColor = options.get<AccentColorOption>().value();
 
     _trackPainter.setBrush( _background );

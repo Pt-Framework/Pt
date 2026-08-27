@@ -531,8 +531,9 @@ class PT_FORMS_API PlatinumScrollBarRenderer : public ScrollBarRenderer
     protected:
         virtual ScrollBarRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& scrollBarOptions);
+        /** @brief Prepares this renderer from effective scroll bar options.
+        */
+        virtual void onPrepare(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize,

@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_SCROLLBARSTYLE_H
 #define PT_FORMS_SCROLLBARSTYLE_H
 
-#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/StylerBase.h>
 #include <Pt/Forms/Direction.h>
 
 namespace Pt {
@@ -85,17 +85,20 @@ class PT_FORMS_API ScrollBarState
 };
 
 
-class PT_FORMS_API ScrollBarRenderer : public Style::Facet
+class PT_FORMS_API ScrollBarRenderer : public Renderer
 {
     public:
         explicit ScrollBarRenderer(std::size_t refs = 0);
 
         virtual ~ScrollBarRenderer();
 
+        /** @brief Creates a new default-constructed scroll bar renderer.
+        */
         ScrollBarRenderer* create() const;
 
-        void prepare(const StyleOptions& options,
-                     const StyleOptions& scrollBarOptions);
+        /** @brief Applies the effective scroll bar style options to this renderer.
+        */
+        void prepare(const StyleOptions& options);
 
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
@@ -156,12 +159,13 @@ class PT_FORMS_API ScrollBarRenderer : public Style::Facet
                                   const ScrollBarState& state);
 
     protected:
+        /** @brief Resets the shared scroll bar renderer to global defaults.
+        */
         virtual void onReset(const StyleOptions& options);
 
         virtual ScrollBarRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options,
-                               const StyleOptions& scrollBarOptions) = 0;
+        virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize,
@@ -222,11 +226,94 @@ class PT_FORMS_API ScrollBarRenderer : public Style::Facet
 };
 
 
-class PT_FORMS_API ScrollBarStyle : public Styler<ScrollBarRenderer,
-                                                       StyleOptions>
+/** @brief Scroll bar styler.
+*/
+class PT_FORMS_API ScrollBarStyler : public StylerBase
 {
     public:
-        ScrollBarStyle();
+        /** @brief Constructs an unbound scroll bar styler.
+        */
+        ScrollBarStyler();
+
+        /** @brief Returns the effective background brush.
+        */
+        const Gfx::Brush& background() const;
+
+        /** @brief Sets the widget-local background brush to @a brush.
+        */
+        void setBackground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective foreground brush.
+        */
+        const Gfx::Brush& foreground() const;
+
+        /** @brief Sets the widget-local foreground brush to @a brush.
+        */
+        void setForeground(const Gfx::Brush& brush);
+
+        /** @brief Returns the effective contour pen.
+        */
+        const Gfx::Pen& contour() const;
+
+        /** @brief Sets the widget-local contour pen to @a pen.
+        */
+        void setContour(const Gfx::Pen& pen);
+
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize,
+                                Direction direction) const;
+
+        /** @brief Measures a decrease or increase button for @a direction.
+        */
+        Gfx::SizeF measureButton(PaintSurface& surface,
+                                 Direction direction) const;
+
+        /** @brief Lays out the track and decrease and increase buttons within @a rect.
+        */
+        void layoutChrome(PaintSurface& surface,
+                          const Gfx::RectF& rect,
+                          Direction direction,
+                          const Gfx::SizeF& buttonSize,
+                          Gfx::RectF& trackRect,
+                          Gfx::RectF& decreaseRect,
+                          Gfx::RectF& increaseRect) const;
+
+        /** @brief Lays out the handle within @a trackRect.
+        */
+        void layoutHandle(PaintSurface& surface,
+                          const Gfx::RectF& trackRect,
+                          Direction direction,
+                          float fraction,
+                          float viewProportion,
+                          Gfx::RectF& handleRect) const;
+
+        /** @brief Renders the scroll bar chrome within @a rect for @a state.
+        */
+        void renderChrome(PaintContext& context,
+                          const Gfx::RectF& rect,
+                          Direction direction,
+                          const Gfx::RectF& trackRect,
+                          const Gfx::RectF& handleRect,
+                          const Gfx::RectF& decreaseRect,
+                          const Gfx::RectF& increaseRect,
+                          const ScrollBarState& state) const;
+
+        /** @brief Assigns a specific scroll bar renderer.
+        */
+        void setRenderer(ScrollBarRenderer* renderer = 0);
+
+    protected:
+        virtual StyleOptions& onBindOptions(const StyleOptions& global);
+
+        virtual Renderer* onStyleRenderer(const Style& style);
+
+        virtual Renderer* onCreateRenderer(const Style& style);
+
+    private:
+        FacetPtr<ScrollBarRenderer> _renderer;
+        StyleOptions                _options;
 };
 
 } // namespace

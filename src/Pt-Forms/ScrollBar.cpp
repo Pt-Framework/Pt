@@ -121,69 +121,54 @@ void ScrollBar::scroll(double pos)
 
 const Gfx::Brush& ScrollBar::background() const
 {
-    const BackgroundOption* background = _scrollBarOptions.find<BackgroundOption>();
-    if(background)
-        return background->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<BackgroundOption>().value();
+    return _styler.background();
 }
 
 
 void ScrollBar::setBackground(const Gfx::Brush& b)
 {
-    BackgroundOption background(b);
-    _scrollBarOptions.set(background);
+    _styler.setBackground(b);
     invalidate();
 }
 
 
 const Gfx::Brush& ScrollBar::foreground() const
 {
-    const ForegroundOption* foreground = _scrollBarOptions.find<ForegroundOption>();
-    if(foreground)
-        return foreground->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ForegroundOption>().value();
+    return _styler.foreground();
 }
 
 
 void ScrollBar::setForeground(const Gfx::Brush& b)
 {
-    ForegroundOption foreground(b);
-    _scrollBarOptions.set(foreground);
+    _styler.setForeground(b);
     invalidate();
 }
 
 
 const Gfx::Pen& ScrollBar::contour() const
 {
-    const ContourOption* contour = _scrollBarOptions.find<ContourOption>();
-    if(contour)
-        return contour->value();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    return options.get<ContourOption>().value();
+    return _styler.contour();
 }
 
 
 void ScrollBar::setContour(const Gfx::Pen& p)
 {
-    ContourOption contour(p);
-    _scrollBarOptions.set(contour);
+    _styler.setContour(p);
     invalidate();
 }
 
 
 void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
 {
+    const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
 
-    if(renderer)
-        _scrollBarStyle.bind(*renderer, options, _scrollBarOptions);
-    else
-        _scrollBarStyle.bind(Application::instance().style(), options, _scrollBarOptions);
+    _styler.setRenderer(renderer);
+    _styler.bind(style, options);
+
+    _trackRect = Gfx::RectF();
+    _decreaseRect = Gfx::RectF();
+    _increaseRect = Gfx::RectF();
 
     invalidate();
 }
@@ -248,7 +233,13 @@ void ScrollBar::onInvalidate()
 
     const Style& style = Application::instance().style();
     const StyleOptions& options = Application::instance().styleOptions();
-    _scrollBarStyle.rebind(style, options, _scrollBarOptions);
+
+    if( _styler.bind(style, options) )
+    {
+        _trackRect = Gfx::RectF();
+        _decreaseRect = Gfx::RectF();
+        _increaseRect = Gfx::RectF();
+    }
 
     relayout();
 }
@@ -256,10 +247,6 @@ void ScrollBar::onInvalidate()
 
 void ScrollBar::onPaint(PaintContext& context, const Gfx::RectF& /*updateRect*/)
 {
-    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
-    if( ! renderer )
-        return;
-
     Direction dir = direction();
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
 
@@ -281,38 +268,22 @@ void ScrollBar::onPaintChrome(PaintContext& context,
                               const Gfx::RectF& increaseRect,
                               const ScrollBarState& state)
 {
-    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
-    if( ! renderer )
-        return;
-
-    renderer->renderChrome(context, rect, direction, trackRect, handleRect,
-                           decreaseRect, increaseRect, state);
+    _styler.renderChrome(context, rect, direction, trackRect, handleRect,
+                         decreaseRect, increaseRect, state);
 }
 
 
 Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
 {
-    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
-    if( ! renderer )
-    {
-        if( _orientation == Vertical )
-            return Gfx::SizeF(16.0, policy.size().height());
-
-        return Gfx::SizeF(policy.size().width(), 16.0);
-    }
-
     Direction dir = direction();
     Gfx::SizeF contentSize = policy.size();
-    return renderer->measureFrame(surface(), contentSize, dir);
+    return _styler.measureFrame(surface(), contentSize, dir);
 }
 
 
 bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
-
-    if( ! _scrollBarStyle.renderer() )
-        return true;
 
     HotZone zone = hitTest( ev.position() );
 
@@ -394,9 +365,6 @@ bool ScrollBar::onTouchEvent(const TouchEvent& tev)
 {
     Base::onTouchEvent(tev);
 
-    if( ! _scrollBarStyle.renderer() )
-        return true;
-
     HotZone zone = hitTest( tev.position() );
 
     if( tev.isPress() )
@@ -469,30 +437,22 @@ void ScrollBar::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
-    if( ! renderer )
-        return;
-
     Direction dir = direction();
     Gfx::RectF widgetRect( Gfx::PointF(0, 0), size() );
 
-    Gfx::SizeF buttonSize = renderer->measureButton(surface(), dir);
+    Gfx::SizeF buttonSize = _styler.measureButton(surface(), dir);
 
-    renderer->layoutChrome(surface(), widgetRect, dir, buttonSize,
-                           _trackRect, _decreaseRect, _increaseRect);
+    _styler.layoutChrome(surface(), widgetRect, dir, buttonSize,
+                         _trackRect, _decreaseRect, _increaseRect);
 }
 
 
 Gfx::RectF ScrollBar::currentHandleRect()
 {
-    ScrollBarRenderer* renderer = _scrollBarStyle.renderer();
-    if( ! renderer )
-        return Gfx::RectF();
-
     Direction dir = direction();
     Gfx::RectF handleRect;
-    renderer->layoutHandle(surface(), _trackRect, dir,
-                           fraction(), viewProportion(), handleRect);
+    _styler.layoutHandle(surface(), _trackRect, dir,
+                         fraction(), viewProportion(), handleRect);
 
     return handleRect;
 }

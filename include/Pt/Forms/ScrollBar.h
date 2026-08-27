@@ -84,6 +84,8 @@ class PT_FORMS_API ScrollBar : public Control
 
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Assigns a specific scroll bar renderer or restores the style renderer.
+        */
         void setRenderer(ScrollBarRenderer* renderer);
 
         ScrollBarState scrollBarState() const;
@@ -144,11 +146,10 @@ class PT_FORMS_API ScrollBar : public Control
         bool                     _dragging;
         Signal<double>           _changed;
 
-        ScrollBarStyle           _scrollBarStyle;
-        StyleOptions             _scrollBarOptions;
-        Gfx::RectF              _trackRect;
-        Gfx::RectF              _decreaseRect;
-        Gfx::RectF              _increaseRect;
+        ScrollBarStyler          _styler;
+        Gfx::RectF               _trackRect;
+        Gfx::RectF               _decreaseRect;
+        Gfx::RectF               _increaseRect;
         HotZone                  _hoveredZone;
         HotZone                  _pressedZone;
 };

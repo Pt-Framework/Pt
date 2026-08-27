@@ -28,6 +28,7 @@
 
 #include <Pt/Forms/ScrollBarStyle.h>
 #include <Pt/Forms/StyleOptions.h>
+#include <Pt/Forms/Style.h>
 
 namespace Pt {
 
@@ -143,7 +144,7 @@ void ScrollBarState::setIncreasePressed(bool value)
 
 
 ScrollBarRenderer::ScrollBarRenderer(std::size_t refs)
-: Style::Facet( typeid(ScrollBarRenderer), refs )
+: Renderer( typeid(ScrollBarRenderer), refs )
 {
 }
 
@@ -159,17 +160,15 @@ ScrollBarRenderer* ScrollBarRenderer::create() const
 }
 
 
-void ScrollBarRenderer::prepare(const StyleOptions& options,
-                                const StyleOptions& scrollBarOptions)
+void ScrollBarRenderer::prepare(const StyleOptions& options)
 {
-    onPrepare(options, scrollBarOptions);
+    onPrepare(options);
 }
 
 
 void ScrollBarRenderer::onReset(const StyleOptions& options)
 {
-    StyleOptions empty;
-    onPrepare(options, empty);
+    prepare(options);
 }
 
 
@@ -293,8 +292,175 @@ void ScrollBarRenderer::onRenderChrome(PaintContext& context,
 }
 
 
-ScrollBarStyle::ScrollBarStyle()
+///////////////////////////////////////////////////////////////////////
+// ScrollBarStyler
+///////////////////////////////////////////////////////////////////////
+
+ScrollBarStyler::ScrollBarStyler()
 {
+}
+
+
+const Gfx::Brush& ScrollBarStyler::background() const
+{
+    return _options.get<BackgroundOption>().value();
+}
+
+
+void ScrollBarStyler::setBackground(const Gfx::Brush& brush)
+{
+    _options.set( BackgroundOption(brush) );
+}
+
+
+const Gfx::Brush& ScrollBarStyler::foreground() const
+{
+    return _options.get<ForegroundOption>().value();
+}
+
+
+void ScrollBarStyler::setForeground(const Gfx::Brush& brush)
+{
+    _options.set( ForegroundOption(brush) );
+}
+
+
+const Gfx::Pen& ScrollBarStyler::contour() const
+{
+    return _options.get<ContourOption>().value();
+}
+
+
+void ScrollBarStyler::setContour(const Gfx::Pen& pen)
+{
+    _options.set( ContourOption(pen) );
+}
+
+
+Gfx::SizeF ScrollBarStyler::measureFrame(PaintSurface& surface,
+                                         const Gfx::SizeF& contentSize,
+                                         Direction direction) const
+{
+    if( ! _renderer )
+    {
+        if( direction == Direction::Top || direction == Direction::Bottom )
+            return Gfx::SizeF(16.0, contentSize.height());
+
+        return Gfx::SizeF(contentSize.width(), 16.0);
+    }
+
+    return _renderer->measureFrame(surface, contentSize, direction);
+}
+
+
+Gfx::SizeF ScrollBarStyler::measureButton(PaintSurface& surface,
+                                          Direction direction) const
+{
+    if( ! _renderer )
+        return Gfx::SizeF();
+
+    return _renderer->measureButton(surface, direction);
+}
+
+
+void ScrollBarStyler::layoutChrome(PaintSurface& surface,
+                                   const Gfx::RectF& rect,
+                                   Direction direction,
+                                   const Gfx::SizeF& buttonSize,
+                                   Gfx::RectF& trackRect,
+                                   Gfx::RectF& decreaseRect,
+                                   Gfx::RectF& increaseRect) const
+{
+    if( ! _renderer )
+    {
+        trackRect = Gfx::RectF();
+        decreaseRect = Gfx::RectF();
+        increaseRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutChrome(surface,
+                            rect,
+                            direction,
+                            buttonSize,
+                            trackRect,
+                            decreaseRect,
+                            increaseRect);
+}
+
+
+void ScrollBarStyler::layoutHandle(PaintSurface& surface,
+                                   const Gfx::RectF& trackRect,
+                                   Direction direction,
+                                   float fraction,
+                                   float viewProportion,
+                                   Gfx::RectF& handleRect) const
+{
+    if( ! _renderer )
+    {
+        handleRect = Gfx::RectF();
+        return;
+    }
+
+    _renderer->layoutHandle(surface,
+                            trackRect,
+                            direction,
+                            fraction,
+                            viewProportion,
+                            handleRect);
+}
+
+
+void ScrollBarStyler::renderChrome(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   Direction direction,
+                                   const Gfx::RectF& trackRect,
+                                   const Gfx::RectF& handleRect,
+                                   const Gfx::RectF& decreaseRect,
+                                   const Gfx::RectF& increaseRect,
+                                   const ScrollBarState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderChrome(context,
+                            rect,
+                            direction,
+                            trackRect,
+                            handleRect,
+                            decreaseRect,
+                            increaseRect,
+                            state);
+}
+
+
+void ScrollBarStyler::setRenderer(ScrollBarRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    init(renderer);
+}
+
+
+StyleOptions& ScrollBarStyler::onBindOptions(const StyleOptions& global)
+{
+    _options.bind(&global);
+    return _options;
+}
+
+
+Renderer* ScrollBarStyler::onStyleRenderer(const Style& style)
+{
+    ScrollBarRenderer* renderer = style.get<ScrollBarRenderer>();
+    _renderer.reset(renderer);
+    return renderer;
+}
+
+
+Renderer* ScrollBarStyler::onCreateRenderer(const Style& style)
+{
+    ScrollBarRenderer* renderer = style.get<ScrollBarRenderer>();
+    _renderer.reset( renderer ? renderer->create() : 0 );
+    return _renderer.get();
 }
 
 } // namespace
