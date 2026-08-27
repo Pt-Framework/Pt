@@ -222,13 +222,51 @@ class PT_FORMS_API PanelStyler : public StylerBase
         */
         void setFontSlant(Gfx::Font::Slant slant);
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
+        Gfx::SizeF measureFrame(PaintSurface& surface,
+                                const Gfx::SizeF& contentSize) const;
+
+        /** @brief Returns the frame content rectangle within @a frameRect.
+        */
+        Gfx::RectF layoutFrame(PaintSurface& surface,
+                               const Gfx::RectF& frameRect) const;
+
+        /** @brief Returns the text painter for @a surface, or 0 when unavailable.
+        */
+        const Painter* textPainter(PaintSurface& surface) const;
+
+        /** @brief Renders the panel background within @a rect for @a state.
+        */
+        void renderBackground(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const PanelState& state) const;
+
+        /** @brief Renders the panel frame within @a rect for @a state.
+        */
+        void renderFrame(PaintContext& context,
+                         const Gfx::RectF& rect,
+                         const PanelState& state) const;
+
+        /** @brief Renders @a text at @a pos within @a rect for @a state.
+        */
+        void renderText(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& pos,
+                        const PanelState& state) const;
+
+        /** @brief Renders @a picture at @a pos within @a rect for @a state.
+        */
+        void renderIcon(PaintContext& context,
+                        const Gfx::RectF& rect,
+                        const Pixmap& picture,
+                        const Gfx::PointF& pos,
+                        const PanelState& state) const;
+
         /** @brief Assigns a specific panel renderer.
         */
         void setRenderer(PanelRenderer* renderer = 0);
-
-        /** @brief Returns the bound panel renderer or 0.
-        */
-        PanelRenderer* renderer();
 
         /** @brief Returns the bound effective panel options.
 

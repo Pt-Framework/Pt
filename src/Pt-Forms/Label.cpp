@@ -250,6 +250,7 @@ void Label::setRenderer(PanelRenderer* renderer)
     _styler.setRenderer(renderer);
     _styler.bind(Application::instance().style(), Application::instance().styleOptions());
 
+    _iconInvalid = true;
     invalidate();
 }
 
@@ -262,9 +263,6 @@ void Label::onInvalidate()
     const Style& style = Application::instance().style();
 
     _styler.bind(style, options);
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer )
-        return;
 
     if(_iconInvalid)
     {
@@ -288,10 +286,6 @@ void Label::onInvalidate()
 
 Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer )
-        return Gfx::SizeF(0, 0);
-
     Gfx::SizeF contentSize;
 
     if( _text.empty() )
@@ -306,27 +300,29 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
     else
     {
         const Gfx::Scaling& scaling = surface().scaling();
+        const Painter* painter = _styler.textPainter(surface());
+        if(painter)
+        {
+            const Gfx::FontMetrics fontMetrics = painter->fontMetrics();
 
-        const Painter& painter = renderer->textPainter(surface());
-        const Gfx::FontMetrics fontMetrics = painter.fontMetrics();
+            TextBlock block;
+            block.setAdjustment(adjustment());
+            block.setMaxWidth(policy.size().width());
+            block.setLineSpacing(scaling.align(fontMetrics.height() / 3.0));
+            block.layout(*painter, _text);
 
-        TextBlock block;
-        block.setAdjustment(adjustment());
-        block.setMaxWidth(policy.size().width());
-        block.setLineSpacing(scaling.align(fontMetrics.height() / 3.0));
-        block.layout(painter, _text);
+            double w = block.size().width() + scaling.toLogical(0.5);
+            double h = block.size().height() + scaling.toLogical(0.5);
 
-        double w = block.size().width() + scaling.toLogical(0.5);
-        double h = block.size().height() + scaling.toLogical(0.5);
-
-        _measuredIconSize = Gfx::SizeF();
-        contentSize = Gfx::SizeF(scaling.align(w), scaling.align(h));
+            _measuredIconSize = Gfx::SizeF();
+            contentSize = Gfx::SizeF(scaling.align(w), scaling.align(h));
+        }
     }
 
     Gfx::SizeF paddedSize(contentSize.width() + padding().leftRight(),
                           contentSize.height() + padding().topBottom());
 
-    return renderer->measureFrame(surface(), paddedSize);
+    return _styler.measureFrame(surface(), paddedSize);
 }
 
 
@@ -334,11 +330,7 @@ void Label::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer )
-        return;
-
-    _contentRect = renderer->layoutFrame(surface(), Gfx::RectF(size()));
+    _contentRect = _styler.layoutFrame(surface(), Gfx::RectF(size()));
 
     double left = _contentRect.left() + padding().left();
     double top = _contentRect.top() + padding().top();
@@ -401,14 +393,19 @@ void Label::onLayout(const Gfx::RectF& rect)
     else
     {
         const Gfx::Scaling& scaling = surface().scaling();
+        const Painter* painter = _styler.textPainter(surface());
+        if( ! painter )
+        {
+            repaint();
+            return;
+        }
 
-        const Painter& painter = renderer->textPainter(surface());
-        const Gfx::FontMetrics fontMetrics = painter.fontMetrics();
+        const Gfx::FontMetrics fontMetrics = painter->fontMetrics();
 
         _textBlock.setMaxWidth(innerRect.width());
         _textBlock.setAdjustment(adjustment());
         _textBlock.setLineSpacing(scaling.align(fontMetrics.height() / 3.0));
-        _textBlock.layout(painter, _text);
+        _textBlock.layout(*painter, _text);
 
         double blockH = scaling.align(_textBlock.height());
         double y = 0;
@@ -445,9 +442,6 @@ void Label::onLayout(const Gfx::RectF& rect)
 
 void Label::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 {
-    if(!_styler.renderer())
-        return;
-
     Gfx::RectF widgetRect(size());
     PanelState state = panelState();
 
@@ -460,38 +454,34 @@ void Label::onPaint(PaintContext& context, const Gfx::RectF& /*rect*/)
 void Label::onPaintBackground(PaintContext& context, const Gfx::RectF& rect,
                               const PanelState& state)
 {
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer || ! _hasBackground )
+    if( ! _hasBackground )
         return;
 
-    renderer->renderBackground(context, rect, state);
+    _styler.renderBackground(context, rect, state);
 }
 
 void Label::onPaintFrame(PaintContext& context, const Gfx::RectF& rect, const PanelState& state)
 {
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer || ! _hasFrame )
+    if( ! _hasFrame )
         return;
 
-    renderer->renderFrame(context, rect, state);
+    _styler.renderFrame(context, rect, state);
 }
 
 void Label::onPaintIcon(PaintContext& context, const Gfx::RectF& contentRect,
                         const PanelState& state)
 {
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer || _icon.empty() || _pixmap.empty() )
+    if( _icon.empty() || _pixmap.empty() )
         return;
 
-    renderer->renderIcon(context, contentRect, _pixmap, _iconPos, state);
+    _styler.renderIcon(context, contentRect, _pixmap, _iconPos, state);
 }
 
 
 void Label::onPaintText(PaintContext& context, const Gfx::RectF& contentRect,
                         const PanelState& state)
 {
-    PanelRenderer* renderer = _styler.renderer();
-    if( ! renderer || ! _icon.empty() )
+    if( ! _icon.empty() )
         return;
 
     TextBlock::ConstIterator it;
@@ -503,7 +493,7 @@ void Label::onPaintText(PaintContext& context, const Gfx::RectF& contentRect,
         Gfx::PointF pos = _textBlock.position() + it->position();
         pos.addY(ascent);
 
-        renderer->renderText(context, contentRect, lineText, pos, state);
+        _styler.renderText(context, contentRect, lineText, pos, state);
     }
 }
 

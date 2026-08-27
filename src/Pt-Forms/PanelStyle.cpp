@@ -243,16 +243,87 @@ void PanelStyler::setFontSlant(Gfx::Font::Slant slant)
 }
 
 
+Gfx::SizeF PanelStyler::measureFrame(PaintSurface& surface,
+                                     const Gfx::SizeF& contentSize) const
+{
+    if( ! _renderer )
+        return contentSize;
+
+    return _renderer->measureFrame(surface, contentSize);
+}
+
+
+Gfx::RectF PanelStyler::layoutFrame(PaintSurface& surface,
+                                    const Gfx::RectF& frameRect) const
+{
+    if( ! _renderer )
+        return frameRect;
+
+    return _renderer->layoutFrame(surface, frameRect);
+}
+
+
+const Painter* PanelStyler::textPainter(PaintSurface& surface) const
+{
+    if( ! _renderer )
+        return 0;
+
+    return &_renderer->textPainter(surface);
+}
+
+
+void PanelStyler::renderBackground(PaintContext& context,
+                                   const Gfx::RectF& rect,
+                                   const PanelState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderBackground(context, rect, state);
+}
+
+
+void PanelStyler::renderFrame(PaintContext& context,
+                              const Gfx::RectF& rect,
+                              const PanelState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderFrame(context, rect, state);
+}
+
+
+void PanelStyler::renderText(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const String& text,
+                             const Gfx::PointF& pos,
+                             const PanelState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderText(context, rect, text, pos, state);
+}
+
+
+void PanelStyler::renderIcon(PaintContext& context,
+                             const Gfx::RectF& rect,
+                             const Pixmap& picture,
+                             const Gfx::PointF& pos,
+                             const PanelState& state) const
+{
+    if( ! _renderer )
+        return;
+
+    _renderer->renderIcon(context, rect, picture, pos, state);
+}
+
+
 void PanelStyler::setRenderer(PanelRenderer* renderer)
 {
     _renderer.reset(renderer);
     init(renderer);
-}
-
-
-PanelRenderer* PanelStyler::renderer()
-{
-    return _renderer.get();
 }
 
 
