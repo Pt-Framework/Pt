@@ -30,7 +30,6 @@
 #define PT_FORMS_LISTBOXSTYLE_H
 
 #include <Pt/Forms/StylerBase.h>
-#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
