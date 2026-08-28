@@ -96,10 +96,6 @@ class PT_FORMS_API ScrollBarRenderer : public Renderer
         */
         ScrollBarRenderer* create() const;
 
-        /** @brief Applies the effective scroll bar style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize,
@@ -159,13 +155,11 @@ class PT_FORMS_API ScrollBarRenderer : public Renderer
                                   const ScrollBarState& state);
 
     protected:
-        /** @brief Resets the shared scroll bar renderer to global defaults.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual ScrollBarRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        /** @copydoc Style::Facet::onReset
+        */
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize,

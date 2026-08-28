@@ -100,7 +100,7 @@ class PT_FORMS_API PlatinumPanelRenderer : public PanelRenderer
     protected:
         virtual PanelRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                          const Gfx::SizeF& contentSize);
@@ -151,7 +151,7 @@ class PT_FORMS_API PlatinumButtonRenderer : public ButtonRenderer
     protected:
         virtual ButtonRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                            const Gfx::SizeF& contentSize);
@@ -231,7 +231,7 @@ class PT_FORMS_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
     protected:
         virtual CheckBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface);
 
@@ -295,7 +295,7 @@ class PT_FORMS_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
 
         /** @brief Prepares the renderer from effective spin box style options.
         */
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);
@@ -372,7 +372,7 @@ class PT_FORMS_API PlatinumLineEditRenderer : public LineEditRenderer
     protected:
         virtual LineEditRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                       const Gfx::SizeF& contentSize);
@@ -428,7 +428,7 @@ class PT_FORMS_API PlatinumProgressBarRenderer : public ProgressBarRenderer
     protected:
         virtual ProgressBarRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                             const Gfx::SizeF& contentSize);
@@ -486,7 +486,7 @@ class PT_FORMS_API PlatinumSliderRenderer : public SliderRenderer
 
         /** @brief Prepares the slider renderer from effective style options.
         */
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize);
@@ -535,7 +535,7 @@ class PT_FORMS_API PlatinumScrollBarRenderer : public ScrollBarRenderer
 
         /** @brief Prepares this renderer from effective scroll bar options.
         */
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize,
@@ -605,7 +605,7 @@ class PT_FORMS_API PlatinumListBoxRenderer : public ListBoxRenderer
     protected:
         virtual ListBoxRenderer* onCreate() const;
 
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);
@@ -641,7 +641,7 @@ class PT_FORMS_API PlatinumListItemRenderer : public ListItemRenderer
 
         /** @brief Prepares the list item renderer from resolved style options.
         */
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& iconSize,
@@ -706,7 +706,7 @@ class PT_FORMS_API PlatinumComboBoxRenderer : public ComboBoxRenderer
 
         /** @brief Prepares the combo box renderer from resolved style options.
         */
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize);
@@ -770,7 +770,7 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
 
         /** @brief Prepares the renderer from resolved tab view style options.
         */
-        virtual void onPrepare(const StyleOptions& options);
+        virtual void onReset(const StyleOptions& options);
 
         virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
                                          const Pt::String& text);

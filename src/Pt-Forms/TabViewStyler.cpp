@@ -150,18 +150,6 @@ TabViewRenderer* TabViewRenderer::create() const
 }
 
 
-void TabViewRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void TabViewRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF TabViewRenderer::measureTab(PaintSurface& surface,
                                         const Pt::String& text)
 {

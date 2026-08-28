@@ -121,18 +121,6 @@ LineEditRenderer* LineEditRenderer::create() const
 }
 
 
-void LineEditRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void LineEditRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF LineEditRenderer::measureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize)
 {

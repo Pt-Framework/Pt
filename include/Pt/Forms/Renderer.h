@@ -61,8 +61,6 @@ class PT_FORMS_API Renderer : public Style::Facet
             return onCreate();
         }
 
-        virtual void prepare(const StyleOptions& options) = 0;
-
     protected:
         /** @brief Hook that allocates a new renderer of the same concrete type.
         */

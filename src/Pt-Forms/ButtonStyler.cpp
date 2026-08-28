@@ -131,18 +131,6 @@ ButtonRenderer* ButtonRenderer::create() const
 }
 
 
-void ButtonRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void ButtonRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF ButtonRenderer::measureContent(PaintSurface& surface,
                                           Direction direction,
                                           const Gfx::SizeF& iconSize,

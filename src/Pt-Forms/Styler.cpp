@@ -90,7 +90,7 @@ bool Styler::bind(const Style& style, const StyleOptions& styleOptions)
     {
         if( _isRenderer || ! _isDefaultOptions )
         {
-            _renderer->prepare(localOptions);
+            _renderer->reset(localOptions);
         }
 
         _optionsGeneration = localOptions.generation();

@@ -159,18 +159,6 @@ SpinBoxRenderer* SpinBoxRenderer::create() const
 }
 
 
-void SpinBoxRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void SpinBoxRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF SpinBoxRenderer::measureFrame(PaintSurface& surface,
                                          const Gfx::SizeF& contentSize)
 {

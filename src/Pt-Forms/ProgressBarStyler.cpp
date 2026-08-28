@@ -81,18 +81,6 @@ ProgressBarRenderer* ProgressBarRenderer::create() const
 }
 
 
-void ProgressBarRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void ProgressBarRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF ProgressBarRenderer::measureFrame(PaintSurface& surface,
                                              const Gfx::SizeF& contentSize)
 {

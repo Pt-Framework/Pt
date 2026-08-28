@@ -104,10 +104,6 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
         */
         SpinBoxRenderer* create() const;
 
-        /** @brief Applies effective spin box style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
@@ -144,15 +140,11 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
                         const SpinBoxState& state);
 
     protected:
-        /** @brief Resets the shared renderer to global style options.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual SpinBoxRenderer* onCreate() const = 0;
 
-        /** @brief Prepares the renderer from effective spin box style options.
+        /** @copydoc Style::Facet::onReset
         */
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;

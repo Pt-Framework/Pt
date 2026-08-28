@@ -64,10 +64,6 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
 
         ProgressBarRenderer* create() const;
 
-        /** @brief Applies the progress bar style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
@@ -119,11 +115,11 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                         const ProgressBarState& state);
 
     protected:
-        virtual void onReset(const StyleOptions& options);
-
         virtual ProgressBarRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        /** @copydoc Style::Facet::onReset
+        */
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;

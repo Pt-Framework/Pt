@@ -95,18 +95,6 @@ SliderRenderer* SliderRenderer::create() const
 }
 
 
-void SliderRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void SliderRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF SliderRenderer::measureFrame(PaintSurface& surface,
                                          const Gfx::SizeF& contentSize)
 {

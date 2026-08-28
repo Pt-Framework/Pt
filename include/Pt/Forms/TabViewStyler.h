@@ -98,10 +98,6 @@ class PT_FORMS_API TabViewRenderer : public Renderer
         */
         TabViewRenderer* create() const;
 
-        /** @brief Applies the resolved tab view style options.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureTab(PaintSurface& surface,
                               const Pt::String& text);
@@ -127,15 +123,11 @@ class PT_FORMS_API TabViewRenderer : public Renderer
                        const TabViewItemState& state);
 
     protected:
-        /** @brief Resets the shared renderer to global style options.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual TabViewRenderer* onCreate() const = 0;
 
-        /** @brief Prepares this renderer from resolved tab view style options.
+        /** @copydoc Style::Facet::onReset
         */
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
                                         const Pt::String& text) = 0;

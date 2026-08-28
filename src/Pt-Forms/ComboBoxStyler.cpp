@@ -151,18 +151,6 @@ ComboBoxRenderer* ComboBoxRenderer::create() const
 }
 
 
-void ComboBoxRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void ComboBoxRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF ComboBoxRenderer::measureFrame(PaintSurface& surface,
                                            const Gfx::SizeF& contentSize)
 {

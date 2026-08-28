@@ -72,10 +72,6 @@ class PT_FORMS_API SliderRenderer : public Renderer
         */
         SliderRenderer* create() const;
 
-        /** @brief Applies effective slider style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
@@ -111,15 +107,11 @@ class PT_FORMS_API SliderRenderer : public Renderer
                           const SliderState& state);
 
     protected:
-        /** @brief Resets the shared slider renderer to global style options.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual SliderRenderer* onCreate() const = 0;
 
-        /** @brief Prepares the renderer from effective slider style options.
+        /** @copydoc Style::Facet::onReset
         */
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;

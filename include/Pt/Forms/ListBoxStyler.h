@@ -70,10 +70,6 @@ class PT_FORMS_API ListBoxRenderer : public Renderer
         */
         ListBoxRenderer* create() const;
 
-        /** @brief Applies the resolved list box style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
@@ -90,11 +86,11 @@ class PT_FORMS_API ListBoxRenderer : public Renderer
                           const ListBoxState& state);
 
     protected:
-        virtual void onReset(const StyleOptions& options);
-
         virtual ListBoxRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        /** @copydoc Style::Facet::onReset
+        */
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
@@ -216,10 +212,6 @@ class PT_FORMS_API ListItemRenderer : public Renderer
 
         ListItemRenderer* create() const;
 
-        /** @brief Applies the resolved list item style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureContent(PaintSurface& surface,
                                   const Gfx::SizeF& iconSize,
@@ -263,13 +255,11 @@ class PT_FORMS_API ListItemRenderer : public Renderer
                         const ListItemState& state);
 
     protected:
-        virtual void onReset(const StyleOptions& options);
-
         virtual ListItemRenderer* onCreate() const = 0;
 
-        /** @brief Prepares this renderer from the resolved list item options.
+        /** @copydoc Style::Facet::onReset
         */
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& iconSize,

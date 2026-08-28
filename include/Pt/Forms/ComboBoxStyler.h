@@ -104,10 +104,6 @@ class PT_FORMS_API ComboBoxRenderer : public Renderer
         */
         ComboBoxRenderer* create() const;
 
-        /** @brief Applies the resolved combo box style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
@@ -142,13 +138,11 @@ class PT_FORMS_API ComboBoxRenderer : public Renderer
                         const ComboBoxState& state);
 
     protected:
-        virtual void onReset(const StyleOptions& options);
-
         virtual ComboBoxRenderer* onCreate() const = 0;
 
-        /** @brief Prepares the concrete renderer from resolved style options.
+        /** @copydoc Style::Facet::onReset
         */
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;

@@ -90,18 +90,6 @@ PanelRenderer* PanelRenderer::create() const
 }
 
 
-void PanelRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void PanelRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF PanelRenderer::measureFrame(PaintSurface& surface,
                                        const Gfx::SizeF& contentSize)
 {

@@ -15,7 +15,7 @@ The following references are authoritative and override older wording:
 - `include/Pt/Forms/PanelStyler.h`, `src/Pt-Forms/PanelStyler.cpp`
 - `src/Pt-Forms/PushButton.cpp`, `src/Pt-Forms/Panel.cpp`, `src/Pt-Forms/Label.cpp`
 
-Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` reference. Do not introduce a compatibility typedef. Document new public declarations with `@brief` only.
+Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onReset` reference. Do not introduce a compatibility typedef. Document new public declarations with `@brief` only.
 
 ## Files
 
@@ -30,8 +30,8 @@ Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` refere
 - Own a `StyleOptions` overlay and a typed `FacetPtr<XRenderer>`.
 - Expose `setRenderer(XRenderer* = 0)`, typed `options()` accessors, option getters/setters, and a typed forwarding method for every `XRenderer` operation the widget uses in invalidate, measure, layout, or paint.
 - Do not expose a public `renderer()` accessor. Do not downcast from `Styler`. `bind` is only a change signal.
-- `onBindOptions(global)` must bind the overlay with `_options.bind(&global)` and return the overlay. Do not prepare it.
-- `onStyleRenderer(style)` must return the shared `style.get<XRenderer>()`; do not clone or prepare it.
+- `onBindOptions(global)` must bind the overlay with `_options.bind(&global)` and return the overlay. Do not reset it.
+- `onStyleRenderer(style)` must return the shared `style.get<XRenderer>()`; do not clone or reset it.
 - `onCreateRenderer(style)` must return a `create()` clone, or `0`.
 - `setRenderer` stores the typed pointer and calls `init(renderer)`. A null pointer falls back to the current style on the next `bind`.
 - Option getters resolve through `_options.get<T>().value()`. Setters store a local token with `_options.set(...)` and must not invalidate or bind.
@@ -41,8 +41,7 @@ Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` refere
 ## XRenderer
 
 - Derive from `Renderer` using `Renderer(typeid(XRenderer), refs)`. Do not derive from `Style::Facet` directly.
-- Use `prepare(const StyleOptions&)` / `onPrepare(const StyleOptions&)` and one combined bag: the overlay with its parent.
-- Implement `onReset(options)` as `prepare(options)`.
+- Implement `onReset(const StyleOptions&)` as the sole pure-virtual hook, using the combined bag: the overlay with its parent. Do not add `prepare()` / `onPrepare()`.
 - Provide typed `create()` / `onCreate()`.
 - Use explicit layer names. Do not add naked `measure()`, `layout()`, or `render()`.
 
@@ -60,6 +59,6 @@ Use `PlatinumButtonRenderer` / `PlatinumPanelRenderer` as the `onPrepare` refere
 ## Platinum
 
 - Add a `PlatinumXRenderer` in `PlatinumStyle` when the widget needs a theme renderer.
-- Use `onPrepare(const StyleOptions&)` and resolve tokens as `options.get<T>().value()`.
+- Use `onReset(const StyleOptions&)` and resolve tokens as `options.get<T>().value()`.
 
 Final validation: `jam.bat -q -j4` from the repository root, exit code 0. No unit tests are required.

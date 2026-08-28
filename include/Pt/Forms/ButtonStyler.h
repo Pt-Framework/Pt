@@ -113,15 +113,6 @@ class PT_FORMS_API ButtonRenderer : public Renderer
         */
         ButtonRenderer* create() const;
 
-        /** @brief Applies the button style options to this renderer.
-
-            This is the explicit synchronization point for the button slice.
-            The supplied options already include the widget-local overlay via
-            the parent lookup of %StyleOptions. Implementations resolve tokens
-            with %StyleOptions::get().
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         /** @brief Returns the combined content size for icon and text arranged by direction.
 
@@ -213,13 +204,11 @@ class PT_FORMS_API ButtonRenderer : public Renderer
                         const ButtonState& state);
 
     protected:
-        /** @brief Resets the shared button renderer to global defaults.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual ButtonRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        /** @copydoc Style::Facet::onReset
+        */
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;

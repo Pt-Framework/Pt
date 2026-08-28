@@ -84,10 +84,6 @@ class PT_FORMS_API PanelRenderer : public Renderer
         */
         PanelRenderer* create() const;
 
-        /** @brief Applies the panel style options to this renderer.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         /** @brief Returns the outer size including the frame for the given content size.
         */
@@ -132,13 +128,11 @@ class PT_FORMS_API PanelRenderer : public Renderer
                         const PanelState& state);
 
     protected:
-        /** @brief Resets the shared panel renderer to global defaults.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual PanelRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        /** @copydoc Style::Facet::onReset
+        */
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;

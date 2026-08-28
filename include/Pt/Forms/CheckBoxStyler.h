@@ -102,12 +102,6 @@ class PT_FORMS_API CheckBoxRenderer : public Renderer
         */
         CheckBoxRenderer* create() const;
 
-        /** @brief Applies the effective check box style options to this renderer.
-
-            This is the explicit synchronization point for the check box slice.
-        */
-        void prepare(const StyleOptions& options);
-
     public:
         /** @brief Returns the natural size of the check indicator on surface.
         */
@@ -173,13 +167,11 @@ class PT_FORMS_API CheckBoxRenderer : public Renderer
                             const CheckBoxState& state);
 
     protected:
-        /** @brief Resets the shared check box renderer to global defaults.
-        */
-        virtual void onReset(const StyleOptions& options);
-
         virtual CheckBoxRenderer* onCreate() const = 0;
 
-        virtual void onPrepare(const StyleOptions& options) = 0;
+        /** @copydoc Style::Facet::onReset
+        */
+        virtual void onReset(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
 

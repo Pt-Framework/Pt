@@ -180,7 +180,7 @@ class PT_FORMS_API Style
                     return --_refs;
                 }
 
-                /** @brief Resets the facet to the given global style options.
+                /** @brief Resets with new style options.
                 */
                 void reset(const StyleOptions& options)
                 {
@@ -188,7 +188,7 @@ class PT_FORMS_API Style
                 }
 
             protected:
-                /** @brief Hook for facet-specific global reset logic.
+                /** @brief Resets with new style options.
                 */
                 virtual void onReset(const StyleOptions& /*options*/)
                 {

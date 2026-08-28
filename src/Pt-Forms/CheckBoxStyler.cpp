@@ -109,18 +109,6 @@ CheckBoxRenderer* CheckBoxRenderer::create() const
 }
 
 
-void CheckBoxRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void CheckBoxRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF CheckBoxRenderer::measureIndicator(PaintSurface& surface)
 {
     return onMeasureIndicator(surface);

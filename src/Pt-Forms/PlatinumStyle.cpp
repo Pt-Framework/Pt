@@ -275,7 +275,7 @@ PanelRenderer* PlatinumPanelRenderer::onCreate() const
 }
 
 
-void PlatinumPanelRenderer::onPrepare(const StyleOptions& options)
+void PlatinumPanelRenderer::onReset(const StyleOptions& options)
 {
     _cornerRadius = platinumPanelCornerRadius;
 
@@ -390,7 +390,7 @@ ButtonRenderer* PlatinumButtonRenderer::onCreate() const
 }
 
 
-void PlatinumButtonRenderer::onPrepare(const StyleOptions& options)
+void PlatinumButtonRenderer::onReset(const StyleOptions& options)
 {
     const ContourOption& contour = options.get<ContourOption>();
     Gfx::Pen cPen = contour.value();
@@ -708,7 +708,7 @@ CheckBoxRenderer* PlatinumCheckBoxRenderer::onCreate() const
 }
 
 
-void PlatinumCheckBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumCheckBoxRenderer::onReset(const StyleOptions& options)
 {
     Gfx::Brush bg = options.get<TextBackgroundOption>().value();
 
@@ -929,7 +929,7 @@ SpinBoxRenderer* PlatinumSpinBoxRenderer::onCreate() const
 }
 
 
-void PlatinumSpinBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumSpinBoxRenderer::onReset(const StyleOptions& options)
 {
     _background = options.get<TextBackgroundOption>().value();
 
@@ -1243,7 +1243,7 @@ LineEditRenderer* PlatinumLineEditRenderer::onCreate() const
 }
 
 
-void PlatinumLineEditRenderer::onPrepare(const StyleOptions& options)
+void PlatinumLineEditRenderer::onReset(const StyleOptions& options)
 {
     _background = options.get<TextBackgroundOption>().value();
 
@@ -1422,7 +1422,7 @@ ProgressBarRenderer* PlatinumProgressBarRenderer::onCreate() const
 }
 
 
-void PlatinumProgressBarRenderer::onPrepare(const StyleOptions& options)
+void PlatinumProgressBarRenderer::onReset(const StyleOptions& options)
 {
     Gfx::Brush chunkBrush = options.get<AccentColorOption>().value();
     Gfx::Brush foregroundBrush = options.get<ForegroundOption>().value();
@@ -1594,7 +1594,7 @@ SliderRenderer* PlatinumSliderRenderer::onCreate() const
 }
 
 
-void PlatinumSliderRenderer::onPrepare(const StyleOptions& options)
+void PlatinumSliderRenderer::onReset(const StyleOptions& options)
 {
     _hoverBrush = options.get<AccentColorOption>().value();
 
@@ -1729,7 +1729,7 @@ ScrollBarRenderer* PlatinumScrollBarRenderer::onCreate() const
 }
 
 
-void PlatinumScrollBarRenderer::onPrepare(const StyleOptions& options)
+void PlatinumScrollBarRenderer::onReset(const StyleOptions& options)
 {
     _background = options.get<BackgroundOption>().value();
     _contour = options.get<ContourOption>().value();
@@ -2133,7 +2133,7 @@ ListBoxRenderer* PlatinumListBoxRenderer::onCreate() const
 }
 
 
-void PlatinumListBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumListBoxRenderer::onReset(const StyleOptions& options)
 {
     _viewBackground = options.get<ViewBackgroundOption>().value();
     _contour = options.get<ContourOption>().value();
@@ -2222,7 +2222,7 @@ ListItemRenderer* PlatinumListItemRenderer::onCreate() const
 }
 
 
-void PlatinumListItemRenderer::onPrepare(const StyleOptions& options)
+void PlatinumListItemRenderer::onReset(const StyleOptions& options)
 {
     _background = options.get<BackgroundOption>().value();
     _highlightBrush = Gfx::Brush( options.get<HighlightColorOption>().value() );
@@ -2385,7 +2385,7 @@ ComboBoxRenderer* PlatinumComboBoxRenderer::onCreate() const
 }
 
 
-void PlatinumComboBoxRenderer::onPrepare(const StyleOptions& options)
+void PlatinumComboBoxRenderer::onReset(const StyleOptions& options)
 {
     _background = options.get<TextBackgroundOption>().value();
 
@@ -2633,7 +2633,7 @@ TabViewRenderer* PlatinumTabViewRenderer::onCreate() const
 }
 
 
-void PlatinumTabViewRenderer::onPrepare(const StyleOptions& options)
+void PlatinumTabViewRenderer::onReset(const StyleOptions& options)
 {
     _font = options.get<FontOption>().value();
     _inset = _font.size() / 2.0;

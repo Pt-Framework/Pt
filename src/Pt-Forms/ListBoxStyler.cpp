@@ -89,18 +89,6 @@ ListBoxRenderer* ListBoxRenderer::create() const
 }
 
 
-void ListBoxRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void ListBoxRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF ListBoxRenderer::measureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize)
 {
@@ -311,18 +299,6 @@ ListItemRenderer::~ListItemRenderer()
 ListItemRenderer* ListItemRenderer::create() const
 {
     return onCreate();
-}
-
-
-void ListItemRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void ListItemRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
 }
 
 

@@ -160,18 +160,6 @@ ScrollBarRenderer* ScrollBarRenderer::create() const
 }
 
 
-void ScrollBarRenderer::prepare(const StyleOptions& options)
-{
-    onPrepare(options);
-}
-
-
-void ScrollBarRenderer::onReset(const StyleOptions& options)
-{
-    prepare(options);
-}
-
-
 Gfx::SizeF ScrollBarRenderer::measureFrame(PaintSurface& surface,
                                             const Gfx::SizeF& contentSize,
                                             Direction direction)
