@@ -1806,9 +1806,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\Style.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Styler.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\StylerBase.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
