@@ -89,12 +89,12 @@ if $(PT_FORMS_IMPL:L) = wayland
 
 SharedLibrary Pt-Forms : Application.cpp
                          Button.cpp
-                         ButtonStyle.cpp
+                         ButtonStyler.cpp
                          CanvasLayout.cpp
                          CheckBox.cpp
-                         CheckBoxStyle.cpp
+                         CheckBoxStyler.cpp
                          ComboBox.cpp
-                         ComboBoxStyle.cpp
+                         ComboBoxStyler.cpp
                          Control.cpp
                          Cursor.cpp
                          DockingLayout.cpp
@@ -105,10 +105,10 @@ SharedLibrary Pt-Forms : Application.cpp
                          InputMethod.cpp
                          Layout.cpp
                          LineEdit.cpp
-                         LineEditStyle.cpp
+                         LineEditStyler.cpp
                          LineEditor.cpp
                          ListBox.cpp
-                         ListBoxStyle.cpp
+                         ListBoxStyler.cpp
                          Label.cpp
                          Menu.cpp
                          MenuBar.cpp
@@ -125,26 +125,26 @@ SharedLibrary Pt-Forms : Application.cpp
                          PlatinumStyle.cpp
                          Popup.cpp
                          ProgressBar.cpp
-                         ProgressBarStyle.cpp
+                         ProgressBarStyler.cpp
                          PushButton.cpp
                          Responder.cpp
                          Screen.cpp
                          ScrollBar.cpp
-                         ScrollBarStyle.cpp
+                         ScrollBarStyler.cpp
                          ScrollView.cpp
                          ScrollLayout.cpp
                          Slider.cpp
-                         SliderStyle.cpp
+                         SliderStyler.cpp
                          SpinBox.cpp
-                         SpinBoxStyle.cpp
+                         SpinBoxStyler.cpp
                          StackLayout.cpp
-                         PanelStyle.cpp
+                         PanelStyler.cpp
                          Style.cpp
-                         StylerBase.cpp
+                         Styler.cpp
                          StyleOptions.cpp
                          TableLayout.cpp
                          TabView.cpp
-                         TabViewStyle.cpp
+                         TabViewStyler.cpp
                          TextBlock.cpp
                          View.cpp
                          Widget.cpp

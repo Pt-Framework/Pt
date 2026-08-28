@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_LINEEDITSTYLE_H
 #define PT_FORMS_LINEEDITSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -172,7 +172,7 @@ class PT_FORMS_API LineEditRenderer : public Renderer
 
 /** @brief Binds line edit renderers and widget-local style options.
 */
-class PT_FORMS_API LineEditStyler : public StylerBase
+class PT_FORMS_API LineEditStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound line edit styler.

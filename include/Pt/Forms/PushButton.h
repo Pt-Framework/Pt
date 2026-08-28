@@ -31,7 +31,7 @@
 #define Pt_Forms_PushButton_H
 
 #include <Pt/Forms/Button.h>
-#include <Pt/Forms/ButtonStyle.h>
+#include <Pt/Forms/ButtonStyler.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Direction.h>

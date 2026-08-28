@@ -31,7 +31,7 @@
 #define PT_FORMS_LINEEDIT_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/LineEditStyle.h>
+#include <Pt/Forms/LineEditStyler.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Adjustment.h>
 #include <Pt/SmartPtr.h>

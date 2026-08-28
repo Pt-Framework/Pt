@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Forms/Slider.h>
-#include <Pt/Forms/SliderStyle.h>
+#include <Pt/Forms/SliderStyler.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>

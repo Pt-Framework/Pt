@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_TABVIEWSTYLE_H
 #define PT_FORMS_TABVIEWSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -164,7 +164,7 @@ class PT_FORMS_API TabViewRenderer : public Renderer
 
 /** @brief Binds tab view renderers and local style options.
 */
-class PT_FORMS_API TabViewStyler : public StylerBase
+class PT_FORMS_API TabViewStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound tab view styler.

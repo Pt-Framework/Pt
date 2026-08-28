@@ -30,7 +30,7 @@
 #define Pt_Forms_TabView_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/TabViewStyle.h>
+#include <Pt/Forms/TabViewStyler.h>
 #include <Pt/Forms/StackLayout.h>
 #include <Pt/Signal.h>
 

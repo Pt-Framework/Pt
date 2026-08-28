@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
 
  This library is free software; you can redistribute it and/or
@@ -32,17 +32,17 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Style.h>
-#include <Pt/Forms/ButtonStyle.h>
-#include <Pt/Forms/PanelStyle.h>
-#include <Pt/Forms/CheckBoxStyle.h>
-#include <Pt/Forms/SpinBoxStyle.h>
-#include <Pt/Forms/SliderStyle.h>
-#include <Pt/Forms/ScrollBarStyle.h>
-#include <Pt/Forms/ProgressBarStyle.h>
-#include <Pt/Forms/LineEditStyle.h>
-#include <Pt/Forms/ComboBoxStyle.h>
-#include <Pt/Forms/ListBoxStyle.h>
-#include <Pt/Forms/TabViewStyle.h>
+#include <Pt/Forms/ButtonStyler.h>
+#include <Pt/Forms/PanelStyler.h>
+#include <Pt/Forms/CheckBoxStyler.h>
+#include <Pt/Forms/SpinBoxStyler.h>
+#include <Pt/Forms/SliderStyler.h>
+#include <Pt/Forms/ScrollBarStyler.h>
+#include <Pt/Forms/ProgressBarStyler.h>
+#include <Pt/Forms/LineEditStyler.h>
+#include <Pt/Forms/ComboBoxStyler.h>
+#include <Pt/Forms/ListBoxStyler.h>
+#include <Pt/Forms/TabViewStyler.h>
 #include <Pt/Forms/Painter.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Font.h>

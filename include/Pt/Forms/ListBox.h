@@ -30,7 +30,7 @@
 #define Pt_Forms_ListBox_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/ListBoxStyle.h>
+#include <Pt/Forms/ListBoxStyler.h>
 #include <Pt/Forms/ScrollView.h>
 #include <Pt/Forms/FlowLayout.h>
 #include <Pt/Forms/Icon.h>

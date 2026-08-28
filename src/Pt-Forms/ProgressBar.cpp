@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Forms/ProgressBar.h>
-#include <Pt/Forms/ProgressBarStyle.h>
+#include <Pt/Forms/ProgressBarStyler.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>

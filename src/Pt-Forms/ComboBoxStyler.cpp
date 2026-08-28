@@ -26,7 +26,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/ComboBoxStyle.h>
+#include <Pt/Forms/ComboBoxStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 
 namespace Pt {

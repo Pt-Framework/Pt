@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Forms/ScrollBar.h>
-#include <Pt/Forms/ScrollBarStyle.h>
+#include <Pt/Forms/ScrollBarStyler.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/PaintContext.h>

@@ -26,85 +26,85 @@
  MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_SpinBoxStyle_h
-#define Pt_Forms_SpinBoxStyle_h
+#ifndef PT_FORMS_COMBOBOXSTYLE_H
+#define PT_FORMS_COMBOBOXSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
+#include <Pt/Forms/Painter.h>
 
 namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores the transient render state for a spin box widget.
-
-    Carries only widget state that render hooks may observe directly.
-*/
-class PT_FORMS_API SpinBoxState
+class PT_FORMS_API ComboBoxState
 {
     public:
-        SpinBoxState();
+        ComboBoxState();
 
         bool isEnabled() const;
 
         void setEnabled(bool value);
 
-        bool isHovered() const;
-
-        void setHovered(bool value);
-
         bool isFocused() const;
 
         void setFocused(bool value);
+
+        bool isHighlighted() const;
+
+        void setHighlighted(bool value);
 
         bool isEditable() const;
 
         void setEditable(bool value);
 
-        bool isUpPressed() const;
+        bool isPopupVisible() const;
 
-        void setUpPressed(bool value);
-
-        bool isUpHovered() const;
-
-        void setUpHovered(bool value);
-
-        bool isDownPressed() const;
-
-        void setDownPressed(bool value);
-
-        bool isDownHovered() const;
-
-        void setDownHovered(bool value);
+        void setPopupVisible(bool value);
 
     private:
         bool _enabled;
-        bool _hovered;
         bool _focused;
+        bool _highlighted;
         bool _editable;
-        bool _upPressed;
-        bool _upHovered;
-        bool _downPressed;
-        bool _downHovered;
+        bool _popupVisible;
 };
 
 
-/** @brief Renders the visual appearance of a spin box widget.
-
-    Provides rendering primitives for the entry area, up/down buttons,
-    indicators, and text. Subclasses override the protected virtuals.
-*/
-class PT_FORMS_API SpinBoxRenderer : public Renderer
+class PT_FORMS_API ComboBoxButtonState
 {
     public:
-        explicit SpinBoxRenderer(std::size_t refs = 0);
+        ComboBoxButtonState();
 
-        virtual ~SpinBoxRenderer();
+        bool isHighlighted() const;
 
-        /** @brief Creates a new default-constructed spin box renderer.
+        void setHighlighted(bool value);
+
+        bool isPressed() const;
+
+        void setPressed(bool value);
+
+    private:
+        bool _highlighted;
+        bool _pressed;
+};
+
+
+/** @brief Renders the visual appearance of a combo box.
+*/
+class PT_FORMS_API ComboBoxRenderer : public Renderer
+{
+    public:
+        /** @brief Constructs a combo box renderer.
         */
-        SpinBoxRenderer* create() const;
+        explicit ComboBoxRenderer(std::size_t refs = 0);
 
-        /** @brief Applies effective spin box style options to this renderer.
+        virtual ~ComboBoxRenderer();
+
+        /** @brief Creates a new default-constructed renderer instance.
+        */
+        ComboBoxRenderer* create() const;
+
+        /** @brief Applies the resolved combo box style options to this renderer.
         */
         void prepare(const StyleOptions& options);
 
@@ -112,110 +112,96 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
 
-        Gfx::SizeF measureEntry(PaintSurface& surface,
-                                const Gfx::SizeF& contentSize);
-
-        Gfx::SizeF measureIndicator(PaintSurface& surface);
+        Gfx::SizeF measureButton(PaintSurface& surface);
 
         void layoutChrome(PaintSurface& surface,
                           const Gfx::RectF& rect,
                           Gfx::RectF& entryRect,
-                          Gfx::RectF& upButtonRect,
-                          Gfx::RectF& downButtonRect,
+                          Gfx::RectF& buttonRect,
                           Gfx::RectF& textRect);
-
-        Gfx::RectF layoutEntry(PaintSurface& surface,
-                               const Gfx::RectF& entryRect);
 
         const Painter& textPainter(PaintSurface& surface);
 
         void renderChrome(PaintContext& context,
                           const Gfx::RectF& rect,
                           const Gfx::RectF& entryRect,
-                          const Gfx::RectF& upButtonRect,
-                          const Gfx::RectF& downButtonRect,
-                          const SpinBoxState& state);
+                          const Gfx::RectF& buttonRect,
+                          const ComboBoxState& state,
+                          const ComboBoxButtonState& buttonState);
+
+        void renderButton(PaintContext& context,
+                          const Gfx::RectF& buttonRect,
+                          const ComboBoxState& state,
+                          const ComboBoxButtonState& buttonState);
 
         void renderText(PaintContext& context,
                         const Gfx::RectF& textRect,
                         const String& text,
                         const Gfx::PointF& textPos,
                         const Gfx::RectF& cursor,
-                        const SpinBoxState& state);
+                        const ComboBoxState& state);
 
     protected:
-        /** @brief Resets the shared renderer to global style options.
-        */
         virtual void onReset(const StyleOptions& options);
 
-        virtual SpinBoxRenderer* onCreate() const = 0;
+        virtual ComboBoxRenderer* onCreate() const = 0;
 
-        /** @brief Prepares the renderer from effective spin box style options.
+        /** @brief Prepares the concrete renderer from resolved style options.
         */
         virtual void onPrepare(const StyleOptions& options) = 0;
 
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
-        virtual Gfx::SizeF onMeasureEntry(PaintSurface& surface,
-                                          const Gfx::SizeF& contentSize) = 0;
-
-        virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
+        virtual Gfx::SizeF onMeasureButton(PaintSurface& surface) = 0;
 
         virtual void onLayoutChrome(PaintSurface& surface,
                                     const Gfx::RectF& rect,
                                     Gfx::RectF& entryRect,
-                                    Gfx::RectF& upButtonRect,
-                                    Gfx::RectF& downButtonRect,
+                                    Gfx::RectF& buttonRect,
                                     Gfx::RectF& textRect) = 0;
-
-        virtual Gfx::RectF onLayoutEntry(PaintSurface& surface,
-                                         const Gfx::RectF& entryRect) = 0;
 
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& entryRect,
-                                    const Gfx::RectF& upButtonRect,
-                                    const Gfx::RectF& downButtonRect,
-                                    const SpinBoxState& state);
+                                    const Gfx::RectF& buttonRect,
+                                    const ComboBoxState& state,
+                                    const ComboBoxButtonState& buttonState);
 
         virtual void onRenderEntry(PaintContext& context,
                                    const Gfx::RectF& entryRect,
-                                   const SpinBoxState& state) = 0;
+                                   const ComboBoxState& state) = 0;
 
-        virtual void onRenderUpButton(PaintContext& context,
-                                      const Gfx::RectF& buttonRect,
-                                      const SpinBoxState& state) = 0;
-
-        virtual void onRenderDownButton(PaintContext& context,
-                                        const Gfx::RectF& buttonRect,
-                                        const SpinBoxState& state) = 0;
+        virtual void onRenderButton(PaintContext& context,
+                                    const Gfx::RectF& buttonRect,
+                                    const ComboBoxState& state,
+                                    const ComboBoxButtonState& buttonState) = 0;
 
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::RectF& cursor,
-                                  const SpinBoxState& state) = 0;
+                                  const ComboBoxState& state) = 0;
 };
 
 
-/** @brief Binds spin box renderers and widget-local style options.
+/** @brief Binds ComboBox renderers and widget-local style options.
 */
-class PT_FORMS_API SpinBoxStyler : public StylerBase
+class PT_FORMS_API ComboBoxStyler : public Styler
 {
     public:
-        /** @brief Constructs an unbound spin box styler.
+        /** @brief Constructs an unbound combo box styler.
         */
-        SpinBoxStyler();
+        ComboBoxStyler();
 
-        /** @brief Returns the effective spin box text background brush.
+        /** @brief Returns the effective text background brush.
         */
         const Gfx::Brush& background() const;
 
-        /** @brief Sets the widget-local spin box text background brush.
+        /** @brief Sets the widget-local text background brush to @a brush.
         */
         void setBackground(const Gfx::Brush& brush);
 
@@ -223,7 +209,7 @@ class PT_FORMS_API SpinBoxStyler : public StylerBase
         */
         const Gfx::Brush& foreground() const;
 
-        /** @brief Sets the widget-local foreground brush.
+        /** @brief Sets the widget-local foreground brush to @a brush.
         */
         void setForeground(const Gfx::Brush& brush);
 
@@ -231,7 +217,7 @@ class PT_FORMS_API SpinBoxStyler : public StylerBase
         */
         const Gfx::Pen& contour() const;
 
-        /** @brief Sets the widget-local contour pen.
+        /** @brief Sets the widget-local contour pen to @a pen.
         */
         void setContour(const Gfx::Pen& pen);
 
@@ -239,7 +225,7 @@ class PT_FORMS_API SpinBoxStyler : public StylerBase
         */
         const Gfx::Color& textColor() const;
 
-        /** @brief Sets the widget-local text color.
+        /** @brief Sets the widget-local text color to @a color.
         */
         void setTextColor(const Gfx::Color& color);
 
@@ -247,19 +233,19 @@ class PT_FORMS_API SpinBoxStyler : public StylerBase
         */
         Gfx::Font font() const;
 
-        /** @brief Sets the widget-local font.
+        /** @brief Sets the widget-local font to @a font.
         */
         void setFont(const Gfx::Font& font);
 
-        /** @brief Sets the widget-local font size.
+        /** @brief Sets the widget-local font size to @a size.
         */
         void setFontSize(std::size_t size);
 
-        /** @brief Sets the widget-local font weight.
+        /** @brief Sets the widget-local font weight to @a weight.
         */
         void setFontWeight(Gfx::Font::Weight weight);
 
-        /** @brief Sets the widget-local font slant.
+        /** @brief Sets the widget-local font slant to @a slant.
         */
         void setFontSlant(Gfx::Font::Slant slant);
 
@@ -268,46 +254,45 @@ class PT_FORMS_API SpinBoxStyler : public StylerBase
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize) const;
 
-        /** @brief Lays out spin box chrome and clears the output rectangles when unavailable.
+        /** @brief Lays out combo box chrome within @a rect.
         */
         void layoutChrome(PaintSurface& surface,
                           const Gfx::RectF& rect,
                           Gfx::RectF& entryRect,
-                          Gfx::RectF& upButtonRect,
-                          Gfx::RectF& downButtonRect,
+                          Gfx::RectF& buttonRect,
                           Gfx::RectF& textRect) const;
 
-        /** @brief Returns the prepared text painter for @a surface, or 0 when unavailable.
+        /** @brief Returns the painter configured for combo box text, or 0 if the styler is not bound.
         */
-        const Painter* textPainter(PaintSurface& surface) const;
+        const Painter* textPainter(PaintSurface& surface);
 
-        /** @brief Renders spin box chrome within the supplied rectangles.
+        /** @brief Renders combo box chrome for the supplied states.
         */
         void renderChrome(PaintContext& context,
                           const Gfx::RectF& rect,
                           const Gfx::RectF& entryRect,
-                          const Gfx::RectF& upButtonRect,
-                          const Gfx::RectF& downButtonRect,
-                          const SpinBoxState& state) const;
+                          const Gfx::RectF& buttonRect,
+                          const ComboBoxState& state,
+                          const ComboBoxButtonState& buttonState) const;
 
-        /** @brief Renders spin box text and cursor data within @a textRect.
+        /** @brief Renders @a text at @a textPos for @a state.
         */
         void renderText(PaintContext& context,
                         const Gfx::RectF& textRect,
                         const String& text,
                         const Gfx::PointF& textPos,
                         const Gfx::RectF& cursor,
-                        const SpinBoxState& state) const;
+                        const ComboBoxState& state) const;
 
-        /** @brief Assigns a specific spin box renderer.
+        /** @brief Assigns a specific combo box renderer.
         */
-        void setRenderer(SpinBoxRenderer* renderer = 0);
+        void setRenderer(ComboBoxRenderer* renderer = 0);
 
-        /** @brief Returns the bound effective spin box options.
+        /** @brief Returns the effective combo box options.
         */
         StyleOptions& options();
 
-        /** @brief Returns the bound effective spin box options.
+        /** @brief Returns the effective combo box options.
         */
         const StyleOptions& options() const;
 
@@ -319,8 +304,8 @@ class PT_FORMS_API SpinBoxStyler : public StylerBase
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:
-        FacetPtr<SpinBoxRenderer> _renderer;
-        StyleOptions              _options;
+        FacetPtr<ComboBoxRenderer> _renderer;
+        StyleOptions               _options;
 };
 
 } // namespace

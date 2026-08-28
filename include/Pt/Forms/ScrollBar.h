@@ -33,7 +33,7 @@
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Direction.h>
-#include <Pt/Forms/ScrollBarStyle.h>
+#include <Pt/Forms/ScrollBarStyler.h>
 
 namespace Pt {
 

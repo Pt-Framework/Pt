@@ -27,13 +27,13 @@
   Boston, MA 02110-1301 USA
 */
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
 namespace Forms {
 
-StylerBase::StylerBase()
+Styler::Styler()
 : _styleGeneration(StyleOptions::InvalidGeneration)
 , _optionsGeneration(StyleOptions::InvalidGeneration)
 , _isRenderer(false)
@@ -42,19 +42,19 @@ StylerBase::StylerBase()
 }
 
 
-StylerBase::~StylerBase()
+Styler::~Styler()
 {
 }
 
 
-void StylerBase::init(Renderer* renderer)
+void Styler::init(Renderer* renderer)
 {
     _isRenderer = renderer != 0;
     _renderer.reset(renderer);
 }
 
 
-bool StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
+bool Styler::bind(const Style& style, const StyleOptions& styleOptions)
 {
     bool changed = false;
     StyleOptions& localOptions = onBindOptions(styleOptions);
@@ -101,13 +101,13 @@ bool StylerBase::bind(const Style& style, const StyleOptions& styleOptions)
 }
 
 
-bool StylerBase::isBound() const
+bool Styler::isBound() const
 {
     return _renderer != 0;
 }
 
 
-bool StylerBase::isStyleChanged(const Style& style,
+bool Styler::isStyleChanged(const Style& style,
                                 const StyleOptions& styleOptions,
                                 const StyleOptions& localOptions) const
 {
@@ -124,7 +124,7 @@ bool StylerBase::isStyleChanged(const Style& style,
 }
 
 
-bool StylerBase::isOptionsChanged(const StyleOptions& localOptions) const
+bool Styler::isOptionsChanged(const StyleOptions& localOptions) const
 {
     if( _optionsGeneration != localOptions.generation() )
         return true;

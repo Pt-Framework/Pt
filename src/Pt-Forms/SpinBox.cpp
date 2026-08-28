@@ -27,7 +27,7 @@
 */
 
 #include <Pt/Forms/SpinBox.h>
-#include <Pt/Forms/SpinBoxStyle.h>
+#include <Pt/Forms/SpinBoxStyler.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/PaintContext.h>
 #include <Pt/Forms/Painter.h>

@@ -30,7 +30,7 @@
 #define Pt_Forms_ProgressBar_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/ProgressBarStyle.h>
+#include <Pt/Forms/ProgressBarStyler.h>
 #include <Pt/Signal.h>
 
 namespace Pt {

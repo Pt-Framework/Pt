@@ -26,7 +26,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/ProgressBarStyle.h>
+#include <Pt/Forms/ProgressBarStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 
 namespace Pt {

@@ -34,7 +34,7 @@
 #include <Pt/Forms/PushButton.h>
 #include <Pt/Forms/LineEditor.h>
 #include <Pt/Forms/Adjustment.h>
-#include <Pt/Forms/SpinBoxStyle.h>
+#include <Pt/Forms/SpinBoxStyler.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 

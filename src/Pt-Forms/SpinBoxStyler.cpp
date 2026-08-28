@@ -26,7 +26,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/SpinBoxStyle.h>
+#include <Pt/Forms/SpinBoxStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 
 namespace Pt {

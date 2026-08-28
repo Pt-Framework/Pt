@@ -32,7 +32,7 @@
 
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Alignment.h>
-#include <Pt/Forms/PanelStyle.h>
+#include <Pt/Forms/PanelStyler.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Gfx/Color.h>

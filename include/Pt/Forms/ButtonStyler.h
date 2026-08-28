@@ -28,10 +28,10 @@
   Boston, MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_ButtonStyle_h
-#define Pt_Forms_ButtonStyle_h
+#ifndef Pt_Forms_ButtonStyler_h
+#define Pt_Forms_ButtonStyler_h
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -280,7 +280,7 @@ class PT_FORMS_API ButtonRenderer : public Renderer
 
 /** @brief Button styler.
 */
-class PT_FORMS_API ButtonStyler : public StylerBase
+class PT_FORMS_API ButtonStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound button styler.

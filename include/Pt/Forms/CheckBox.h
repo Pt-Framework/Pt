@@ -32,7 +32,7 @@
 #define Pt_Forms_CheckBox_h
 
 #include <Pt/Forms/Button.h>
-#include <Pt/Forms/CheckBoxStyle.h>
+#include <Pt/Forms/CheckBoxStyler.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/TextMetrics.h>
 

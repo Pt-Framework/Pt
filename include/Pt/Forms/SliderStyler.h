@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_SLIDERSTYLE_H
 #define PT_FORMS_SLIDERSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -158,7 +158,7 @@ class PT_FORMS_API SliderRenderer : public Renderer
 
 /** @brief Slider styler.
 */
-class PT_FORMS_API SliderStyler : public StylerBase
+class PT_FORMS_API SliderStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound slider styler.

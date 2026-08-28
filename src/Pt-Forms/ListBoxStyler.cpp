@@ -26,7 +26,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/ListBoxStyle.h>
+#include <Pt/Forms/ListBoxStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 
 namespace Pt {

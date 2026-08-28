@@ -27,8 +27,8 @@
   Boston, MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_StylerBase_h
-#define Pt_Forms_StylerBase_h
+#ifndef Pt_Forms_Styler_h
+#define Pt_Forms_Styler_h
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Renderer.h>
@@ -39,20 +39,20 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Styler base class.
+/** @brief Styler.
 
     Binds a specific renderer or the default renderer to style options.
 */
-class PT_FORMS_API StylerBase : private NonCopyable
+class PT_FORMS_API Styler : private NonCopyable
 {
     public:
         /** @brief Constructs an unbound styler.
         */
-        StylerBase();
+        Styler();
 
         /** @brief Destructor.
         */
-        virtual ~StylerBase();
+        virtual ~Styler();
 
         /** @brief Binds or rebinds to a style and global style options.
         */

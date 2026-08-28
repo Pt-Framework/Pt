@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_PROGRESSBARSTYLE_H
 #define PT_FORMS_PROGRESSBARSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -177,7 +177,7 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
 
 /** @brief Progress bar styler.
 */
-class PT_FORMS_API ProgressBarStyler : public StylerBase
+class PT_FORMS_API ProgressBarStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound progress bar styler.

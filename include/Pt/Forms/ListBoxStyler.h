@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_LISTBOXSTYLE_H
 #define PT_FORMS_LISTBOXSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -114,7 +114,7 @@ class PT_FORMS_API ListBoxRenderer : public Renderer
 
 /** @brief Binds list box renderers and their local style options.
 */
-class PT_FORMS_API ListBoxStyler : public StylerBase
+class PT_FORMS_API ListBoxStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound list box styler.
@@ -316,7 +316,7 @@ class PT_FORMS_API ListItemRenderer : public Renderer
 
 /** @brief Binds list item renderers and their local style options.
 */
-class PT_FORMS_API ListItemStyler : public StylerBase
+class PT_FORMS_API ListItemStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound list item styler.

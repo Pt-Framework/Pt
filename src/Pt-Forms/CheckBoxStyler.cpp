@@ -27,7 +27,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/CheckBoxStyle.h>
+#include <Pt/Forms/CheckBoxStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/Style.h>
 

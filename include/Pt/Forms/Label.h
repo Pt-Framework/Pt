@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2015 Marc Boris Duerner
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@
 #include <Pt/Forms/Control.h>
 #include <Pt/Forms/Alignment.h>
 #include <Pt/Forms/Adjustment.h>
-#include <Pt/Forms/PanelStyle.h>
+#include <Pt/Forms/PanelStyler.h>
 #include <Pt/Forms/TextBlock.h>
 #include <Pt/Forms/PixmapSurface.h>
 #include <Pt/Forms/Icon.h>

@@ -28,7 +28,7 @@
   Boston, MA 02110-1301 USA
 */
 
-#include <Pt/Forms/ButtonStyle.h>
+#include <Pt/Forms/ButtonStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/Style.h>
 #include <Pt/Forms/Painter.h>

@@ -27,10 +27,10 @@
  MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_CheckBoxStyle_h
-#define Pt_Forms_CheckBoxStyle_h
+#ifndef Pt_Forms_CheckBoxStyler_h
+#define Pt_Forms_CheckBoxStyler_h
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -230,7 +230,7 @@ class PT_FORMS_API CheckBoxRenderer : public Renderer
     Keeps the active renderer binding for the shared style renderer, a private
     override clone, or an explicitly assigned custom renderer.
 */
-class PT_FORMS_API CheckBoxStyler : public StylerBase
+class PT_FORMS_API CheckBoxStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound check box style controller.

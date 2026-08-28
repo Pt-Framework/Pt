@@ -31,7 +31,7 @@
 #define Pt_Forms_Slider_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/SliderStyle.h>
+#include <Pt/Forms/SliderStyler.h>
 #include <Pt/Signal.h>
 
 namespace Pt {

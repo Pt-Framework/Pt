@@ -29,7 +29,7 @@
 #ifndef PT_FORMS_SCROLLBARSTYLE_H
 #define PT_FORMS_SCROLLBARSTYLE_H
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 #include <Pt/Forms/Direction.h>
 
 namespace Pt {
@@ -228,7 +228,7 @@ class PT_FORMS_API ScrollBarRenderer : public Renderer
 
 /** @brief Scroll bar styler.
 */
-class PT_FORMS_API ScrollBarStyler : public StylerBase
+class PT_FORMS_API ScrollBarStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound scroll bar styler.

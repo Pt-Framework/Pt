@@ -26,7 +26,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/LineEditStyle.h>
+#include <Pt/Forms/LineEditStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/Style.h>
 

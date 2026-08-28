@@ -26,7 +26,7 @@
  MA 02110-1301 USA
 */
 
-#include <Pt/Forms/TabViewStyle.h>
+#include <Pt/Forms/TabViewStyler.h>
 #include <Pt/Forms/StyleOptions.h>
 
 namespace Pt {

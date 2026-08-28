@@ -27,10 +27,10 @@
  MA 02110-1301 USA
 */
 
-#ifndef Pt_Forms_PanelStyle_h
-#define Pt_Forms_PanelStyle_h
+#ifndef Pt_Forms_PanelStyler_h
+#define Pt_Forms_PanelStyler_h
 
-#include <Pt/Forms/StylerBase.h>
+#include <Pt/Forms/Styler.h>
 
 namespace Pt {
 
@@ -171,7 +171,7 @@ class PT_FORMS_API PanelRenderer : public Renderer
 
 /** @brief Panel styler.
 */
-class PT_FORMS_API PanelStyler : public StylerBase
+class PT_FORMS_API PanelStyler : public Styler
 {
     public:
         /** @brief Constructs an unbound panel styler.

@@ -30,7 +30,7 @@
 #define Pt_Forms_ComboBox_H
 
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/ComboBoxStyle.h>
+#include <Pt/Forms/ComboBoxStyler.h>
 #include <Pt/Forms/Popup.h>
 #include <Pt/Forms/ListBox.h>
 #include <Pt/Forms/LineEditor.h>
