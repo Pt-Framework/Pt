@@ -1,4 +1,4 @@
-name: Build platform-sdk
+name: Build Platform SDK
 
 on:
   workflow_dispatch:
