@@ -4,6 +4,8 @@ description: "Researches a feature or product idea before planning. Produces con
 argument-hint: "Describe the feature idea, target users, and questions to research."
 tools: [read, edit, search, web]
 model: [ "Claude Sonnet 5" ]
+user-invocable: true
+disable-model-invocation: true
 handoffs:
   - label: "Plan Implementation"
     agent: Planner
@@ -19,7 +21,8 @@ ideas, and derive requirements for the project.
 - Research relevant existing solutions and comparable features.
 - Identify functional and non-functional requirements.
 - Check applicable compliance and regulatory considerations.
-- Reserve a unique work ID and use the `edit` tool to save confirmed requirements to `.agents/session/<work-id>/requirements.md`.
+- Reserve a unique work ID and use the `edit` tool to save confirmed
+  requirements to `.agents/session/<work-id>/requirements.md`.
 - Hand off confirmed requirements to the Planner for implementation planning.
 
 ## Work ID

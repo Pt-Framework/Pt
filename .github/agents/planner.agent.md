@@ -5,6 +5,8 @@ argument-hint: "Describe the feature or bug, expected behavior, and relevant mod
 tools: [read, search, edit, agent]
 agents: [Reviewer, Developer, Explore]
 model: [ "Claude Sonnet 5" ]
+user-invocable: true
+disable-model-invocation: true
 handoffs:
   - label: "Start Development"
     agent: Developer

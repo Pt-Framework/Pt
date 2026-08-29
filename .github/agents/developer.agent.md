@@ -5,6 +5,8 @@ argument-hint: "Describe the implementation task, or name the approved plan and 
 tools: [read, edit, search, agent]
 agents: [Builder, Tester, Documenter, Reviewer]
 model: [ "GPT-5.6 Terra" ]
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Agent Profile
