@@ -14,6 +14,8 @@ class PtConan(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
 
+    exports = "JamDepsGenerator.py"
+
     options = {
         "shared":       [True, False],
         "with_ssl":     [True, False],
@@ -29,9 +31,15 @@ class PtConan(ConanFile):
         "with_blend2d": False,
     }
 
-    # ---------------------------------------------------------------------------
-    # Dependencies
-    # ---------------------------------------------------------------------------
+    def layout(self):
+        self.folders.root = ".."
+        self.folders.source = "."
+
+    def export_sources(self):
+        src = os.path.normpath(os.path.join(self.recipe_folder, ".."))
+        copy(self, "*", src=src, dst=self.export_sources_folder,
+             excludes=[".git", "build", "tmp", "deps", "platform",
+                       ".conan2", ".vs"])
 
     def requirements(self):
         if self.options.with_gfx or self.options.with_forms:
@@ -42,22 +50,12 @@ class PtConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/[>=3.0 <4]")
 
-    # ---------------------------------------------------------------------------
-    # Generate build helper files
-    # ---------------------------------------------------------------------------
-
     def generate(self):
-        # Activate the build environment (sets CC, CXX, etc. for cross-builds)
         VirtualBuildEnv(self).generate()
 
-        # Write conan-deps.jam so Jamconfigure can find the Conan-provided deps
-        sys.path.insert(0, os.path.join(self.source_folder, "conan"))
+        sys.path.insert(0, self.recipe_folder)
         from JamDepsGenerator import JamDepsGenerator
         JamDepsGenerator(self).generate()
-
-    # ---------------------------------------------------------------------------
-    # Build
-    # ---------------------------------------------------------------------------
 
     def build(self):
         is_debug = str(self.settings.build_type) == "Debug"
@@ -89,21 +87,15 @@ class PtConan(ConanFile):
         self.run("{} -j8".format(jam),
                  cwd=self.source_folder)
 
-    # ---------------------------------------------------------------------------
-    # Package
-    # ---------------------------------------------------------------------------
-
     def package(self):
         is_debug = str(self.settings.build_type) == "Debug"
         config   = "debug" if is_debug else "release"
         build_dir = os.path.join(self.source_folder, "build", config)
 
-        # Public headers
         copy(self, "*.h",
              src=os.path.join(self.source_folder, "include"),
              dst=os.path.join(self.package_folder, "include"))
 
-        # Static libraries
         copy(self, "*.lib",
              src=build_dir,
              dst=os.path.join(self.package_folder, "lib"),
@@ -113,7 +105,6 @@ class PtConan(ConanFile):
              dst=os.path.join(self.package_folder, "lib"),
              keep_path=False)
 
-        # Shared libraries
         copy(self, "*.dll",
              src=build_dir,
              dst=os.path.join(self.package_folder, "bin"),
@@ -127,12 +118,7 @@ class PtConan(ConanFile):
              dst=os.path.join(self.package_folder, "lib"),
              keep_path=False)
 
-    # ---------------------------------------------------------------------------
-    # Package info (consumed by downstream projects)
-    # ---------------------------------------------------------------------------
-
     def package_info(self):
-        # Link order: most dependent first
         self.cpp_info.libs = [
             "PtForms",
             "PtGfx",

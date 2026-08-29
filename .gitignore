@@ -3,6 +3,7 @@ build/
 tmp/
 deploy/
 deps/
+platform/
 Jamrules*
 jam*.bin
 .agents
