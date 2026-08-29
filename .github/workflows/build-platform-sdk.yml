@@ -43,7 +43,8 @@ jobs:
         if: ${{ !inputs.replace }}
         shell: pwsh
         run: |
-          gh release view "${{ env.PLATFORM_SDK_TAG }}" 2>&1 | Out-Null
+          $PSNativeCommandUseErrorActionPreference = $false
+          gh release view "${{ env.PLATFORM_SDK_TAG }}" *> $null
           if ($LASTEXITCODE -eq 0) {
             Write-Error "Release ${{ env.PLATFORM_SDK_TAG }} already exists. Increment versionCode or enable replace."
             exit 1
