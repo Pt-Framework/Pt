@@ -1,6 +1,10 @@
 {
     "folders": [
         {
+            "path": ".",
+            "name": "All Files"
+        },
+        {
             "path": "include/Pt",
             "name": "Pt (Includes)"
         },
@@ -151,10 +155,6 @@
         {
             "path": "src/Pt-Forms",
             "name": "Pt-Forms"
-        },
-        {
-            "path": ".",
-            "name": "All Files"
         }
     ],
     "settings": {
