@@ -1,0 +1,915 @@
+# Platform Layer for Jam-Based Frameworks
+
+Architecture concept. Platinum (Pt) is the reference consumer. The same model
+applies to any Jam project that must ship third-party libraries without putting
+Conan or vcpkg on the user's path.
+
+---
+
+## 1. Purpose
+
+Jam remains a build system, not a package-manager frontend. A user needs Jam,
+a compiler, and optionally Fetch. Conan runs only in CI, where it produces
+relocatable ABI prefixes.
+
+Three supply paths exist in parallel. None replaces the others.
+
+1. System / toolchain sysroot:
+     Linux, Yocto, manufacturer sysroot, Homebrew
+2. Platform prefix:
+     Windows / macOS without system zlib, png, jpeg, FreeType, OpenSSL
+3. Vendor / inline sources:
+     builds without external dependencies, same flags as the project
+
+Configure flags and env vars (`ZLIB_INCLUDES=...`, `--with-xxx-dir`) override
+whichever of the three is in use, and they always win.
+
+The platform prefix is a **hint source** for the existing per-package
+Configure rules. It is not a compiler sysroot and it does not mutate global
+`C++FLAGS` or `LINKFLAGS`.
+
+---
+
+## 2. Configure priority
+
+The cascade depends on whether a platform prefix was selected.
+
+**Platform not selected** (no `--with-platform` / `--fetch-platform` /
+`--with-platform-abi`):
+
+1. User paths / env / `ZLIB_LINKLIBS=...`
+2. System: pkg-config and compile/link probes (`ZLib-Configure` with empty hints)
+3. Vendor / inline sources
+
+**Platform selected:**
+
+1. User paths / env / `--with-inline-xxx` — still always win
+2. Platform prefix, injected as the same five hints `*-Configure` already
+   accepts
+3. Vendor / inline sources, if the platform probe fails
+
+There is no unhinted first probe when the platform is selected. On POSIX,
+`ZLib-Configure` with empty arguments finds `/usr/include/zlib.h` and `-lz`.
+A second "then try the platform" step would never run, and platform png would
+be linked against system zlib.
+
+There is no silent fallback between two platform ABIs. If the chosen prefix
+is missing: error, or vendor, reported clearly.
+
+`--with-platform` names a prefix that must already exist (default cache, or
+`=<root>`). `--fetch-platform` is the same load, after downloading that
+prefix into the default cache. Neither changes the meaning of user overrides.
+
+---
+
+## 3. What a platform prefix is
+
+Not `full_deploy/host/zlib/1.3.1/Release/...`.
+Not `SetDependencyPath`.
+Not generated `-I` / `-L` / `-l` text.
+Not a global include or lib path applied to every translation unit.
+
+A platform prefix is one **relocatable ABI tree**: identity, a package graph,
+and on-disk artifacts. The consumer maps package names to the framework
+variables `ZLIB_INCLUDES`, `ZLIB_C++FLAGS`, `ZLIB_LINKLIBS`, `ZLIB_LIBDIR`,
+`ZLIB_LINKFLAGS` (and the PNG / JPEG / FREETYPE / SSL equivalents). Existing
+`*-Configure` rules then probe those hints.
+
+Identity:
+
+```text
+<os>-<arch>-<toolset>[-<abi>]
+windows-x64-msvc-md
+windows-x64-msvc-mdd
+macos-arm64-clang
+linux-x64-clang
+yocto-cortexa7-gcc
+```
+
+A platform may export several ABIs. Each ABI is a complete prefix, not a
+`debug/lib` folder inside another prefix.
+
+Windows currently has two ABIs because `/MD` and `/MDd` are two MSVC runtimes
+(`RuntimeLibrary`, `_ITERATOR_DEBUG_LEVEL`), not "zlib less optimized".
+Linux and macOS typically have one. Later splits (ASan, `mt`) are the same
+mechanism: extra artifact, same layout.
+
+### 3.1 A single exported ABI has no name
+
+Do not call the only ABI `default`, `common`, or `standard`. Those words
+collide with "the ABI Configure picks" and they age badly: the day ASan
+appears, `standard` plus `asan` is a false pair.
+
+The ABI tag exists to distinguish **variants of the same**
+`<os>-<arch>-<toolset>`. If there is only one variant, the three-part
+identity is already unique. Omit the tag from the directory and the zip
+name.
+
+- One prefix: `macos-arm64-clang`, no ABI component
+- Split later: keep `macos-arm64-clang` for the original; add
+  `macos-arm64-clang-asan`. Do not rename the original to `...-standard`
+- Windows always has a tag (`md`, `mdd`) because it always has two
+
+`--with-platform-abi` without a value, on a platform that exports one ABI,
+is a no-op (same prefix as omitting the flag). On Windows it still means
+the CONFIG mapping (`md` / `mdd`).
+
+`CONFIG` (project debug/release) and platform ABI are different axes.
+Mapping is a platform convention, not a universal debug/release pair:
+
+- Project release: Windows `md`; other OS the one untagged prefix
+- Project debug: Windows `mdd`; other OS the same untagged prefix
+
+Override remains: `--with-platform-abi=md` despite debug,
+`--with-platform=D:/prefixes/...`. Auto-map only where the platform
+actually has a debug ABI.
+
+---
+
+## 4. Layout of an ABI prefix
+
+Packages live in **per-package directories** under one ABI prefix. A flat
+`include/` + `lib/` sysroot would only pay off if the compiler saw the prefix
+globally. That is the model this design rejects.
+
+```text
+<prefix>/                          # one ABI, one zip, one contract file
+  jam/
+    packages.jam                   # data, no flags, no rules
+  zlib/
+    include/zlib.h
+    lib/zlib.lib                   # or libz.a / libz.dylib
+    bin/zlib.dll                   # omitted for static
+  png/
+    include/png.h
+    lib/png16.lib
+    bin/libpng16.dll
+  jpeg/
+    include/...
+    lib/...
+    bin/...
+  freetype/
+    include/ft2build.h
+    include/freetype2/...          # extra dir allowed
+    lib/freetype.lib
+    bin/freetype.dll
+  openssl/
+    include/openssl/...
+    lib/libssl.lib libcrypto.lib
+    bin/...
+```
+
+Directory names match `PLATFORM_PACKAGES` (`zlib`, `png`, `jpeg`,
+`freetype`, `openssl`), not Conan recipe names (`libpng`, `libjpeg-turbo`).
+
+Default locations, relative to the prefix:
+
+- Headers: `$(pkg)/include`
+- Import libs / `.a`: `$(pkg)/lib`
+- Deploy: `$(pkg)/bin`
+
+`PLATFORM_PACKAGE_INCLUDES.$(pkg)` exists only when that convention is not enough
+(FreeType's `include/freetype2`). `PLATFORM_PACKAGE_DEPLOY.$(pkg)` lists
+filenames in that package's `bin/` (`zlib.dll`), not prefix-relative paths.
+
+One zip per ABI. Not one zip per package (that would be a package manager).
+`md` and `mdd` are two prefixes, never two trees in one zip.
+
+No version directories, no `full_deploy`, no `debug/` inside `md`.
+Library names inside a given prefix are stable (`zlib.lib` in both `md` and
+`mdd`). Configure does not guess `zlib` / `zlibd` / `z` on the platform path.
+
+Relocatable: no absolute paths in the zip. The consumer sets `PLATFORM_ROOT`
+before including `jam/packages.jam`.
+
+Optional: `$(pkg)/lib/pkgconfig/` as a bonus. Jam does not need it.
+
+---
+
+## 5. `jam/packages.jam` — data only
+
+Jam syntax, **one file per ABI prefix**, at `<prefix>/jam/packages.jam`.
+Variables only: no schema engine, no rules, no toolset flags. Logic lives
+in the consumer (`jam/platform.jam` in the framework). The file is writable
+by hand and readable without running Jam. Jam remains the canonical form.
+
+Prefix-wide identity uses `PLATFORM_*`. Anything that varies by package
+uses `PLATFORM_PACKAGE_*` plus a dotted package name.
+
+### 5.1 One file, not one file per package
+
+There is no `zlib/package.jam`. Partial *use* of the prefix does not need
+it. Partial *shipping* (a zip that contains only zlib) is a package manager
+and is out of scope.
+
+What "only part of the platform" already means:
+
+- The zip still contains the whole prefix. One identity, one ABI, one
+  fetch.
+- `Jamconfigure` only calls `Platform-Includes zlib` (and friends) for
+  packages it actually configures. Unused directories sit unused.
+- `--with-inline-png` still skips the png hints and builds inline png
+  against platform zlib, or the other way around, through the existing
+  per-package blocks.
+
+What a per-package `package.jam` would add: a load graph. Including png's
+file would have to pull zlib's file because `PLATFORM_PACKAGE_DEPENDS.png = zlib`.
+That is dependency resolution at include time. This layer does not solve
+dependencies.
+
+`PLATFORM_PACKAGE_DEPENDS` is a **declared closed graph**, written by the producer,
+not a solver. The consumer walks it for include closure (always), deploy
+closure (shared DLLs next to the exe), and link closure (static only). No
+versions, no optional deps, no "find zlib elsewhere". If png is in the
+prefix, zlib is in the prefix.
+
+Identity (`PLATFORM_ID`, `PLATFORM_LINKAGE`) and the graph belong in one
+place. Splitting them across package files would duplicate the ABI on every
+file and make a hand-written prefix worse, not better.
+
+### 5.2 Indexed names (`PLATFORM_PACKAGE_LIBS.$(pkg)`)
+
+Jam has no maps. A variable whose name contains a dot is still one
+variable: `PLATFORM_PACKAGE_LIBS.zlib` is the literal name. Indexing is
+
+```jam
+$(PLATFORM_PACKAGE_LIBS.$(pkg))    # pkg = zlib  →  PLATFORM_PACKAGE_LIBS.zlib
+```
+
+That is the idiomatic Jam dictionary (`HDRRULE.$(target)`, and so on). It
+is a good idea here.
+
+Not used:
+
+- `PLATFORM_PACKAGE_LIBS_zlib` — works (`$(PLATFORM_PACKAGE_LIBS_$(pkg))`) but reads as a
+  different family from `PLATFORM_PACKAGE_LIBS`
+- Parallel lists (`PLATFORM_PACKAGES` plus a positional `PLATFORM_PACKAGE_LIBS`) —
+  fragile when a package is omitted
+- Putting `FLinkLibs` or paths in the file — toolset and relocatable root
+  belong in the consumer
+
+Dots are not a struct operator. Do not write `$(PLATFORM.LIBS.zlib)`.
+
+### 5.3 Example
+
+```jam
+# <prefix>/jam/packages.jam
+if ! $(PLATFORM_PACKAGES_JAM_INCLUDED) {
+PLATFORM_PACKAGES_JAM_INCLUDED = true ;
+
+PLATFORM_SCHEMA  = 1 ;
+PLATFORM_ID      = windows-x64-msvc-md ;
+PLATFORM_LINKAGE = shared ;
+
+PLATFORM_PACKAGES = zlib png jpeg freetype openssl ;
+
+PLATFORM_PACKAGE_LIBS.zlib        = zlib ;
+PLATFORM_PACKAGE_DEPLOY.zlib      = zlib.dll ;
+PLATFORM_PACKAGE_VERSION.zlib     = 1.3.1 ;
+
+PLATFORM_PACKAGE_LIBS.png         = png16 ;
+PLATFORM_PACKAGE_DEPENDS.png      = zlib ;
+PLATFORM_PACKAGE_DEPLOY.png       = libpng16.dll ;
+PLATFORM_PACKAGE_VERSION.png      = 1.6.43 ;
+
+PLATFORM_PACKAGE_LIBS.jpeg        = jpeg ;
+PLATFORM_PACKAGE_DEPLOY.jpeg      = jpeg62.dll ;
+PLATFORM_PACKAGE_VERSION.jpeg     = 3.0.3 ;
+
+PLATFORM_PACKAGE_LIBS.freetype    = freetype ;
+PLATFORM_PACKAGE_DEPENDS.freetype = png zlib ;
+PLATFORM_PACKAGE_DEPLOY.freetype  = freetype.dll ;
+PLATFORM_PACKAGE_VERSION.freetype = 2.13.2 ;
+
+PLATFORM_PACKAGE_LIBS.openssl     = ssl crypto ;
+PLATFORM_PACKAGE_SYSLIBS.openssl  = crypt32 ws2_32 advapi32 user32 ;
+PLATFORM_PACKAGE_DEPLOY.openssl   = libssl-3-x64.dll libcrypto-3-x64.dll ;
+PLATFORM_PACKAGE_VERSION.openssl  = 3.3.1 ;
+
+}
+```
+
+A macOS prefix uses a three-part `PLATFORM_ID` (`macos-arm64-clang`).
+
+Prefix-wide variables that earn their place:
+
+- `PLATFORM_SCHEMA`: contract version. Cheap, lets the consumer reject an
+  unknown file.
+- `PLATFORM_ID`: the identity string, same as the directory and zip name.
+  Echo and a mismatch check (`--fetch-platform=windows-x64-msvc-md` pointed
+  at an `mdd` tree). Not used to invent compiler flags.
+- `PLATFORM_LINKAGE`: `shared` or `static`. This is the one identity field
+  `Platform-LinkLibs` / `Platform-Deploy` branch on (link closure, whether
+  deploy files exist). If every shipped prefix is shared, it is still
+  worth stating: a hand-written static prefix must not be treated as
+  shared.
+- `PLATFORM_PACKAGES`: which dotted keys exist. Do not scan the disk.
+
+Not in the file — denormalized copies of `PLATFORM_ID`, of Jam, or of
+product policy:
+
+- `PLATFORM_OS` / `PLATFORM_ARCH` / `PLATFORM_TOOLSET`: Jam already has
+  `TARGET_OS`, `TARGET_OSPLAT`, `TOOLSET`. The compile probe fails if the
+  prefix does not match. Parsing `PLATFORM_ID` is enough if a check is
+  ever needed.
+- `PLATFORM_ABI`: already the optional fourth component of `PLATFORM_ID`.
+  Configure picked the prefix before `packages.jam` is read.
+- `PLATFORM_CRT` (`MD` / `MDd`): duplicate of the Windows ABI tag. The
+  project already has `/MD` or `/MDd`; the zip must not set them.
+- `PLATFORM_PUBLIC_ABI` (`c`): a product rule ("no STL in the prefix"),
+  not a Configure input.
+- `PLATFORM_REDIST`: `mdd` is not redistributable. That is a Windows fact
+  the framework already knows from the ABI tag, not data in the zip.
+
+### 5.4 Variable families
+
+- `PLATFORM_PACKAGE_LIBS.$(pkg)`: artifact names inside the prefix.
+  Not `-lssl`, `ssl.lib`, `libssl.lib`.
+- `PLATFORM_PACKAGE_DEPENDS.$(pkg)`: other packages in this prefix (the graph).
+  Not the link line, not a solver.
+- `PLATFORM_PACKAGE_SYSLIBS.$(pkg)`: linker names of the OS, not in the zip.
+  Not `-lpthread` as a flag.
+- `PLATFORM_PACKAGE_FRAMEWORKS.$(pkg)`: macOS framework names.
+  Not `-framework Security`.
+- `PLATFORM_PACKAGE_DEFINES.$(pkg)`: token, not `-D`.
+  Not raw `C++FLAGS`.
+- `PLATFORM_PACKAGE_INCLUDES.$(pkg)`: paths relative to the prefix, only if not
+  `$(pkg)/include`. Not `-I`.
+- `PLATFORM_PACKAGE_DEPLOY.$(pkg)`: filenames in `$(pkg)/bin`.
+  Not prefix-relative paths, not a global list.
+- `PLATFORM_PACKAGE_VERSION.$(pkg)`: documentation / manifest.
+  Not a search path.
+
+Omit empty lists. No `PLATFORM_ROOT` in the file. No `FLinkLibs`, no
+`C++FLAGS +=`, no `-L`, no `/LIBPATH`.
+
+Do not write `ZLIB_LINKLIBS` / `SSL_LINKLIBS` into the zip. Mapping package
+to consumer variable is the framework's job. The zip knows `zlib` / `png` /
+`openssl`. A MinGW prefix and an MSVC prefix differ in names and `syslibs`,
+not in flag syntax.
+
+The `mdd` prefix: `PLATFORM_ID = windows-x64-msvc-mdd`, same linkage,
+different `PLATFORM_PACKAGE_DEPLOY` list.
+
+---
+
+## 6. Include closure vs. link closure
+
+pkg-config abstracts over unknown distros. Here the package set is closed and
+the layout is known. This is not a pkg-config clone.
+
+Three things pkg-config mixes — kept separate:
+
+- Libs in the prefix (`freetype`, `png16`, `zlib`):
+  `PLATFORM_PACKAGE_LIBS` / `PLATFORM_PACKAGE_DEPENDS`
+- OS system libs (`crypt32`, `ws2_32`):
+  `PLATFORM_PACKAGE_SYSLIBS` — names; Jam applies `FLinkLibs`
+- Real flags (`-pthread`, `-framework`, `/DEFAULTLIB:`):
+  consumer / toolset, not the zip
+
+`pthread` stays `PTHREAD_LINKLIBS` from Configure. The prefix may store the
+name `pthread`, never `-lpthread`.
+
+**Includes are always transitive.** `png.h` includes `zlib.h`. `Pt-Gfx` does
+`SubDirHdrs $(PNG_INCLUDES)` and does not add `ZLIB_INCLUDES`. Therefore
+`Platform-Includes png` returns `png/include` **and** `zlib/include`.
+That compile closure follows `PLATFORM_PACKAGE_DEPENDS` regardless of shared vs.
+static. Walking `PLATFORM_PACKAGE_DEPENDS` is closure of a known DAG, not resolving
+a dependency.
+
+**Deploy files are per package.** There is no `PLATFORM_DEPLOY_FILES`.
+`png.h` needs `zlib.h` at compile time; `libpng16.dll` needs `zlib.dll` next
+to the exe. Staging therefore walks `PLATFORM_PACKAGE_DEPENDS` for deploy
+too, even when the link line does not (shared). Static packages omit
+`PLATFORM_PACKAGE_DEPLOY`. The consumer concatenates when an app wants
+every DLL of the prefix; the zip does not pre-flatten that list.
+
+**Link lines are not always transitive.**
+
+- Shared, Linux/mac, C ABI: direct `PLATFORM_PACKAGE_LIBS`
+- Shared, OpenSSL, MSVC: direct `PLATFORM_PACKAGE_LIBS` + `PLATFORM_PACKAGE_SYSLIBS`
+- Static: closure over `PLATFORM_PACKAGE_DEPENDS`, then all `libs` + `syslibs`
+- Framework as shared lib: apps link the framework; prefix DLLs are runtime
+- Framework as static lib: closure one step further onto the app link
+
+Shared `.dll` / `.so` / `.dylib` already record NEEDED. Dumping
+`PLATFORM_PACKAGE_DEPENDS` onto the command line is overlinking. `Pt-Gfx` already
+passes `ZLIB_LINKLIBS` separately from `PNG_LINKLIBS`.
+
+MSVC import libs: shared OpenSSL still needs `crypt32 ws2_32 advapi32 user32`
+on the line. That is why `PLATFORM_PACKAGE_SYSLIBS` exists.
+
+`FIncludes` and `FLibPath` expand lists (`-I$(<)`, `/LIBPATH:$(<)`).
+`CheckDependencyLinkC++` already takes `libdir *`. Several include dirs and
+several lib dirs on one package are valid.
+
+---
+
+## 7. Consumer API (`jam/platform.jam`)
+
+Not in the zip. Once per project. This is the framework file; the prefix
+file is `jam/packages.jam`.
+
+There is **no** `Platform-Apply`. A rule that does
+
+```jam
+C++FLAGS  += [ FIncludes [ FDirName $(PLATFORM_ROOT) include ] ] ;
+LINKFLAGS += [ FLibPath  [ FDirName $(PLATFORM_ROOT) lib     ] ] ;
+```
+
+would put platform headers and lib paths on every translation unit. That
+fights `SubDirHdrs $(ZLIB_INCLUDES)`, `--with-inline-zlib` (`ZLIB_INCLUDES`
+→ `src/zlib` while global `-I` still points at the prefix), and mixed
+sources (system png + platform zlib). Jamfiles already consume per-package
+variables:
+
+- `*_INCLUDES`: `SubDirHdrs` in modules that use the package
+- `*_C++FLAGS`: `ObjectC++Flags` on specific sources
+- `*_LINKLIBS`: `LinkLibs` on the target
+- `*_LINKFLAGS`: `LinkFlags` on the target (`FLibPath` is already inside)
+- `*_LIBDIR`: Configure-time search hint only
+
+The prefix therefore fills that same five-tuple through rules. Toolset
+helpers stay in the consumer: `FLinkLibs`, `FIncludes`, `FDefines`,
+`FLibPath`.
+
+```jam
+rule Platform-Load ( root )
+{
+    PLATFORM_ROOT = $(root) ;
+    include [ FDirName $(PLATFORM_ROOT) jam packages.jam ] ;
+}
+
+rule Platform-Includes ( packages + )
+{
+    # Direct $(pkg)/include (or PLATFORM_PACKAGE_INCLUDES.$(pkg)),
+    # plus compile closure over PLATFORM_PACKAGE_DEPENDS.
+}
+
+rule Platform-CxxFlags ( packages + )
+{
+    # [ FDefines $(PLATFORM_PACKAGE_DEFINES.$(pkg)) ] — empty for the current C packages
+}
+
+rule Platform-LinkLibs ( packages + )
+{
+    # Shared: PLATFORM_PACKAGE_LIBS + PLATFORM_PACKAGE_SYSLIBS of the named packages.
+    # Static: same after Platform-Closure.
+    # Always: [ FLinkLibs ... ], never raw flags from the zip.
+}
+
+rule Platform-LibDir ( packages + )
+{
+    # $(root)/$(pkg)/lib for the named packages
+    # (and their needs, when the link probe must see them).
+}
+
+rule Platform-LinkFlags ( packages + )
+{
+    # Extra flags only. Do not duplicate FLibPath here:
+    # CheckDependencyLinkC++ already does FLibPath $(libdir).
+}
+
+rule Platform-Deploy ( packages + )
+{
+    # $(root)/$(pkg)/bin/$(PLATFORM_PACKAGE_DEPLOY.$(pkg))
+    # plus deploy closure over PLATFORM_PACKAGE_DEPENDS.
+}
+```
+
+`Platform-Load` only sets `PLATFORM_ROOT` and includes `jam/packages.jam`.
+It does not touch `C++FLAGS`, `LINKFLAGS`, or `ZLIB_*`.
+
+---
+
+## 8. Integration with `Jamconfigure`
+
+The existing contract of every `*-Configure` rule is:
+
+```text
+*-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
+```
+
+If any hint is set, pkg-config is skipped and the first link attempt is the
+caller-provided libs. If all hints are empty, pkg-config and name guessing
+(`zlibd` / `zlib` / `z`) run. Side effects on success: the five `*_`
+variables.
+
+The platform prefix must look like a user who set those variables on the
+command line. It must not look like a second search space (`DEPS_INCLUDES` /
+`DEPS_LIBDIR`).
+
+### 8.1 Load the prefix, do not apply it
+
+Today `--with-platform-sdk` fetches an archive and `include`s a generated
+`platform-sdk-release.jam` / `platform-sdk-debug.jam` that assigns `ZLIB_*`
+directly and still encodes `full_deploy/host/...` paths.
+
+Replace that include with a load of `jam/packages.jam`. `--with-platform`,
+`--fetch-platform`, or `--with-platform-abi` selects the layer. Fetch runs
+only for `--fetch-platform`, and only into the default cache. Mapping
+`CONFIG` → `md` / `mdd` happens here, not inside the zip.
+
+```jam
+# After toolset setup, before the zlib / png / ... blocks.
+# Selected if --with-platform, --fetch-platform, or --with-platform-abi
+# is present (bare or =value).
+
+if $(WITH_PLATFORM)
+{
+    # --with-platform=<root> wins; otherwise
+    # platform/<os>-<arch>-<toolset>[-<abi>]/
+    Platform-Load $(PLATFORM_ROOT) ;
+    Configure PLATFORM_ROOT ;
+    EchoOption PLATFORM_ROOT : "platform root" ;
+}
+```
+
+Do not `include` a file that writes `ZLIB_INCLUDES = ...`.
+
+### 8.2 zlib — one `ZLib-Configure`, platform as `?=` hints
+
+Today:
+
+```jam
+Load zlib.jam ;
+
+if --with-inline-zlib in $(ARGV)
+{
+    WITH_BUILTIN_ZLIB = yes ;
+}
+
+if ! $(WITH_BUILTIN_ZLIB)
+{
+    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
+                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
+}
+
+if ! $(WITH_ZLIB)
+{
+    WITH_BUILTIN_ZLIB = yes ;
+}
+```
+
+With the platform selected, fill **only unset** hints, then call Configure
+**once**:
+
+```jam
+Load zlib.jam ;
+
+if --with-inline-zlib in $(ARGV)
+{
+    WITH_BUILTIN_ZLIB = yes ;
+}
+
+if ! $(WITH_BUILTIN_ZLIB)
+{
+    if $(PLATFORM_ROOT)
+    {
+        ZLIB_INCLUDES  ?= [ Platform-Includes zlib ] ;
+        ZLIB_C++FLAGS  ?= [ Platform-CxxFlags zlib ] ;
+        ZLIB_LINKLIBS  ?= [ Platform-LinkLibs zlib ] ;
+        ZLIB_LIBDIR    ?= [ Platform-LibDir zlib ] ;
+        ZLIB_LINKFLAGS ?= [ Platform-LinkFlags zlib ] ;
+    }
+
+    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
+                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
+}
+
+if ! $(WITH_ZLIB)
+{
+    WITH_BUILTIN_ZLIB = yes ;
+}
+```
+
+Why `?=`, and why a single call:
+
+- `ZLIB_INCLUDES=C:/third-party/zlib` on the command line stays in force.
+- `--with-inline-zlib` still skips Configure entirely.
+- Without `PLATFORM_ROOT`, the block is unchanged: empty hints, system
+  probe, then vendor.
+- With `PLATFORM_ROOT`, hints are set **before** the only `ZLib-Configure`.
+  pkg-config is skipped. The first link attempt is `PLATFORM_PACKAGE_LIBS.zlib`.
+  System `/usr/include/zlib.h` does not win.
+- A two-step "probe system, then platform" is wrong whenever the platform
+  was requested: the first probe succeeds on POSIX.
+
+The probe that remains is "does this prefix match this compiler?", not
+"search the machine for zlib".
+
+`*_LIBDIR` is required. Setting only `*_LINKLIBS` leaves the linker without
+`FLibPath` of the package's `lib/` directory. `CheckDependencyLinkC++`
+turns `LIBDIR` into `*_LINKFLAGS`.
+
+### 8.3 png, jpeg, FreeType — same pattern
+
+```jam
+Load libpng.jam ;
+
+if --with-inline-libpng in $(ARGV)
+{
+    WITH_BUILTIN_LIBPNG = yes ;
+}
+
+if ! $(WITH_BUILTIN_LIBPNG)
+{
+    if $(PLATFORM_ROOT)
+    {
+        PNG_INCLUDES  ?= [ Platform-Includes png ] ;   # png + zlib includes
+        PNG_C++FLAGS  ?= [ Platform-CxxFlags png ] ;
+        PNG_LINKLIBS  ?= [ Platform-LinkLibs png ] ;   # png16 (+ syslibs)
+        PNG_LIBDIR    ?= [ Platform-LibDir png ] ;
+        PNG_LINKFLAGS ?= [ Platform-LinkFlags png ] ;
+    }
+
+    WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) :
+                               $(PNG_LINKLIBS) : $(PNG_LIBDIR) : $(PNG_LINKFLAGS) ] ;
+}
+```
+
+Repeat for jpeg (`jpeg` → `JPEG_*`) and FreeType (`freetype` → `FREETYPE_*`).
+`Platform-Includes freetype` returns FreeType's include dirs plus png and
+zlib, because `PLATFORM_PACKAGE_DEPENDS.freetype = png zlib`.
+
+### 8.4 OpenSSL — same hints, framework prefix `SSL`
+
+The zip package name is `openssl`. The Jam variables stay `SSL_*`, as
+`OpenSsl-Configure` already uses.
+
+`--with-openssl` (inline) and `--with-mbedtls` stay **above** the system /
+platform probe, as they do today. Only the `OpenSsl-Configure` branch takes
+platform hints:
+
+```jam
+Load openssl.jam ;
+
+if --with-openssl in $(ARGV)
+{
+    include [ FDirName src openssl Jamconfigure ] ;
+    WITH_OPENSSL = "yes" ;
+    WITH_SSL = yes ;
+    PT_SSL_IMPL = "openssl" ;
+    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
+}
+
+# ... mbedtls, Apple SSL, unchanged ...
+
+if ! $(WITH_SSL)
+{
+    if $(PLATFORM_ROOT)
+    {
+        SSL_INCLUDES  ?= [ Platform-Includes openssl ] ;
+        SSL_C++FLAGS  ?= [ Platform-CxxFlags openssl ] ;
+        SSL_LINKLIBS  ?= [ Platform-LinkLibs openssl ] ;
+        SSL_LIBDIR    ?= [ Platform-LibDir openssl ] ;
+        SSL_LINKFLAGS ?= [ Platform-LinkFlags openssl ] ;
+    }
+
+    WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS) :
+                                   $(SSL_LINKLIBS) : $(SSL_LIBDIR) : $(SSL_LINKFLAGS) ] ;
+    if $(WITH_SSL)
+    {
+        PT_SSL_IMPL = "openssl" ;
+    }
+}
+```
+
+`Platform-LinkLibs openssl` must return `ssl crypto` **and**
+`crypt32 ws2_32 advapi32 user32` on MSVC, already passed through `FLinkLibs`.
+Without `PLATFORM_PACKAGE_SYSLIBS` on that hint line the MSVC probe fails even though
+the import libs are present.
+
+### 8.5 What Jamfiles do not change
+
+`src/Pt-Gfx/Jamfile`, `src/Pt-Ssl/Jamfile`, `src/Pt/Jamfile` keep:
+
+```jam
+SubDirHdrs $(PNG_INCLUDES) ;
+LinkFlags Pt-Gfx : $(PNG_LINKFLAGS) ;
+LinkLibs  Pt-Gfx : $(PNG_LINKLIBS) ;
+ObjectC++Flags PngReader.cpp PngWriter.cpp : $(PNG_C++FLAGS) ;
+```
+
+They never mention `PLATFORM_ROOT`. Builtin vs. prebuilt remains
+`WITH_BUILTIN_LIBPNG` / `WITH_PNG` as today.
+
+---
+
+## 9. Deploy files
+
+Deploy files are the `bin/` trees of the **chosen** ABI. Each package lists
+its own files in `PLATFORM_PACKAGE_DEPLOY.$(pkg)` (names in `$(pkg)/bin`).
+
+- `jam install` / app staging: copy `Platform-Deploy` of the packages the
+  app actually uses, closed over `PLATFORM_PACKAGE_DEPENDS`, next to the
+  exe or into `PT_INSTALL_BINDIR`.
+- Static `.lib` / `.a` in `lib/` do not ship with the binary.
+- Transitive DLLs (brotli / bzip2 of FreeType) live in their own package
+  directories in the prefix when the producer copied `cpp_info.bindirs`.
+
+Windows: **`mdd` is not redistributable.** Debug CRT (`MSVCP*D.dll`,
+`VCRUNTIME*D.dll`) is not in the VC redistributable, only on machines with
+Visual Studio. Release products take `md`. Debug locally puts `mdd` DLLs next
+to the exe. The framework treats the `mdd` identity as not redistributable;
+the zip does not carry a `PLATFORM_REDIST` flag.
+
+---
+
+## 10. ABI contract and mixing project-debug with release deps
+
+The prefix model always scales. Mixing project-debug against release deps
+scales only under an ABI contract.
+
+- C ABI, shared (zlib, png, jpeg, FreeType-C, OpenSSL):
+  Linux/mac is the normal case. Windows `md` DLL vs. `/MDd` project is often
+  fine because each DLL has its CRT — no heap / `FILE*` across the boundary.
+- Static + different CRT:
+  wrong on Windows.
+- C++ with STL in the public API:
+  `LNK2038` / `_ITERATOR_DEBUG_LEVEL`. Same ABI tag, or keep it out of the
+  prefix.
+
+Shared linkage and a C public ABI are a product decision, not extra
+variables in `packages.jam` beyond `PLATFORM_LINKAGE`. A library that puts
+`std::string` in its API is not a platform candidate — or it forces the
+same ABI tag (`mdd` with debug).
+
+Three paths when C++ deps appear — not two zips "just in case" for zlib:
+
+1. Vendor the heavy C++ pieces, same flags as the project.
+2. A second ABI prefix only when the platform actually splits (`mdd`, later
+   `asan`).
+3. Optional product choice: project-debug on Windows with `/MD /Od /Zi` —
+   one prefix, not the de-facto VS debug ABI. Anyone who wants a normal VS
+   debug session needs `mdd`.
+
+Vendor remains the path that is **always** correct (static, templates,
+exotics, "the same flags line by line").
+
+---
+
+## 11. Configure flags (framework side)
+
+Three flags. Any one of them selects the platform layer. Each may be bare
+(the default) or take `=value`.
+
+`--with-platform` uses a prefix that is already on disk. `--fetch-platform`
+does the same configure, after fetching that prefix into the default cache.
+The value of `--with-platform` is the root when one is given.
+
+`--with-platform`
+
+- Bare: detect `<os>-<arch>-<toolset>`, attach the ABI tag only if the
+  platform exports more than one, use `platform/<id>/`. Error if that tree
+  is missing. No network.
+- `--with-platform=D:/prefixes/windows-x64-msvc-md`: use that prefix as-is.
+  No network. The value is a filesystem root, not an identity.
+
+`--fetch-platform`
+
+- Same load as `--with-platform` with the default cache, but download or
+  refresh the zip first. Bare: detect identity, fetch into `platform/<id>/`,
+  then configure. This is the usual first-time command.
+- `--fetch-platform=windows-x64-msvc-md`: pin the identity to fetch.
+  `--with-platform-abi` still overrides the ABI tag of that id.
+- Implies the platform layer; `--with-platform` is not required next to it.
+- Do not combine with `--with-platform=<root>`. Fetch always targets the
+  default cache; an explicit root is already local.
+
+`--with-platform-abi`
+
+- Bare: the platform mapping (`md` on Windows release, `mdd` on Windows
+  debug). On a platform with one ABI, a no-op.
+- `--with-platform-abi=md` (or `mdd`, later `asan`): force that tag.
+  Needed only when the auto-map is wrong, e.g. a debug `CONFIG` against
+  `md` deps.
+- Implies the platform layer (default cache, no fetch unless
+  `--fetch-platform` is also given).
+
+`--fetch-platform` is not a boolean beside `--with-platform`. A bool would
+make the common case two flags (`--with-platform --fetch-platform`) and
+would not give a place to pin identity. A stale default cache is refreshed
+only by `--fetch-platform`; `--with-platform` will not phone home.
+
+Not platform-layer flags, unchanged, and still stronger than the layer:
+
+- `--with-xxx-dir` / `ZLIB_INCLUDES=...` and the rest of the five-tuple:
+  always win (`?=` does not overwrite)
+- `--with-inline-xxx`: force vendor; skips `*-Configure`
+
+Not used: `--with-platform-root`, `--with-platform-sdk`, `--sdk-root`,
+`--sdk-abi`, `--fetch-sdk`, `--no-fetch`.
+
+Identity in the archive name and directory is `windows-x64-msvc-md` or
+`macos-arm64-clang`, not `x64-windows`. A single zip that contains both
+`platform-sdk-release.jam` and `platform-sdk-debug.jam` is the debug/release
+layout this design removes. One cache. Never mix `md` and `mdd` in one
+search path.
+
+---
+
+## 12. Production (CI / Conan) — not the daily path
+
+Conan exists only in the GitHub Action.
+
+- Custom deployer (`sysroot_deploy`), not `full_deploy` as the shipping
+  format.
+- One directory per package: `$(pkg)/include`, `$(pkg)/lib`, `$(pkg)/bin`.
+- Write `jam/packages.jam` from `cpp_info`: `libs` → `PLATFORM_PACKAGE_LIBS`,
+  `requires` → `PLATFORM_PACKAGE_DEPENDS`, `system_libs` →
+  `PLATFORM_PACKAGE_SYSLIBS`, `frameworks` → `PLATFORM_PACKAGE_FRAMEWORKS`,
+  `bindirs` → `PLATFORM_PACKAGE_DEPLOY`, extra `includedirs` →
+  `PLATFORM_PACKAGE_INCLUDES`. The result is the same file a person would write.
+- Do **not** emit `ZLIB_INCLUDES` / `PNG_LINKLIBS` from the generator. That
+  mapping is `jam/platform.jam`.
+- Windows: two installs → two prefixes (or two zips): `...-md`, `...-mdd`.
+- macOS / Linux: one untagged prefix until an ABI split exists.
+- Assert: `zlib/include/zlib.h`, `zlib/lib/zlib.lib` or `libz.a`, `bin/`
+  when shared, `jam/packages.jam`, **no** version tree, **no** absolute CI
+  paths.
+- Generator `.jam` with `-L` / `-l` and `SetDependencyPath` is not this path.
+
+Default matrix: both Windows ABIs (the debug ABI is a platform fact), one
+untagged prefix for macOS. `mdd` is not a subfolder of the `md` zip.
+
+---
+
+## 13. Hand-written prefix / other build systems
+
+By hand: fill the per-package directories, write `jam/packages.jam` with the
+assignments, point `--with-platform=` at it. No Conan.
+
+Other systems: the file is `KEY = value` and
+`PLATFORM_PACKAGE_LIBS.foo = ...`.
+Parsable without executing Jam. No parallel `platform.cmake` as source. Jam
+stays canonical; a later mirror at most.
+
+---
+
+## 14. Deliberate non-goals
+
+- `Platform-Apply` / global `C++FLAGS +=` / global `LINKFLAGS +=`
+- `SetDependencyPath` / `DEPS_INCLUDES` / `DEPS_LIBDIR` as the platform
+  interface
+- Flat `include/` + `lib/` sysroot (rejected together with Apply)
+- `debug/lib` inside the same prefix
+- A second conceptual "debug layer" instead of an ABI tag
+- Naming the only ABI `default` / `common` / `standard`
+- Two-step Configure (system first, platform second) while the platform is
+  selected
+- `--with-platform-root`; `--no-fetch`; `--fetch-platform` as a boolean
+  beside `--with-platform`
+- Writing `ZLIB_*` into the zip
+- Per-package `package.jam` files or per-package zips
+- Solving dependencies (versions, optionals, "find zlib elsewhere")
+- Conan / vcpkg in the user build
+- pkg-config as a requirement on Windows
+- Raw flags in the zip (`-l`, `-L`, `-pthread`, `-framework`, `/LIBPATH`)
+- Rules / `FLinkLibs` / `C++FLAGS` in `jam/packages.jam`
+- A global `PLATFORM_DEPLOY_FILES` list
+- Vendoring everything (OpenSSL in Jam: Perl / NASM)
+- Forcing everything into the prefix (C++ STL API)
+- CMake ExternalProject as a second build world
+
+---
+
+## 15. How the layers compose
+
+```text
+User flags / explicit five-tuple / --with-inline-xxx
+        |
+        |  else, if PLATFORM_ROOT is set
+        v
+Platform hints  ->  one *-Configure probe
+        |
+        |  else (no platform), or probe failed
+        v
+System / toolchain sysroot / pkg-config     <- Yocto, distro, manufacturer
+        |                                     (only when the platform was
+        |                                      not selected)
+        |  else
+        v
+Vendor / inline sources                     <- same flags as the project
+```
+
+When the platform is selected, system is not consulted for packages the
+prefix lists. When it is not selected, the prefix is not consulted at all.
+
+Platform: convenience for full platforms, including their extra ABIs.
+Vendor: ABI-accurate path and cross.
+System: when the machine already has the dependency.
+
+---
+
+## 16. Short form
+
+**One layer. Platforms declare ABI variants; a single ABI is untagged.
+Each ABI is a prefix of per-package directories plus `jam/packages.jam`
+(`PLATFORM_*` identity, `PLATFORM_PACKAGE_*` maps). The consumer loads the
+prefix, translates names with the toolset, and injects the existing
+`*_INCLUDES` / `*_C++FLAGS` / `*_LINKLIBS` / `*_LIBDIR` / `*_LINKFLAGS`
+hints — once, before `*-Configure`. Includes and deploy close over
+`PLATFORM_PACKAGE_DEPENDS`; link lines close only for static. That walk is
+not a solver. User overrides stay Configure. Deploy files are per package.
+Conan stays in CI.**
