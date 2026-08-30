@@ -41,14 +41,12 @@ jobs:
 
       - name: Check tag does not exist
         if: ${{ !inputs.replace }}
-        shell: pwsh
+        shell: bash
         run: |
-          $PSNativeCommandUseErrorActionPreference = $false
-          gh release view "${{ env.PLATFORM_SDK_TAG }}" *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Error "Release ${{ env.PLATFORM_SDK_TAG }} already exists. Increment versionCode or enable replace."
+          if gh release view "${{ env.PLATFORM_SDK_TAG }}" >/dev/null 2>&1; then
+            echo "Release ${{ env.PLATFORM_SDK_TAG }} already exists. Increment versionCode or enable replace." >&2
             exit 1
-          }
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
