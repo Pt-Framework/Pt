@@ -51,7 +51,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -79,19 +79,22 @@ jobs:
           $profile = "${{ matrix.profile }}"
           $recipe = "conan/platform-sdk"
           if (-not (Test-Path $lock)) {
-            conan lock create $recipe --profile=$profile -s build_type=Release -s compiler.runtime_type=Release --lockfile-out=$lock
+            conan lock create $recipe --profile:host=$profile --profile:build=$profile -s:h build_type=Release -s:b build_type=Release -s:h compiler.runtime_type=Release -s:b compiler.runtime_type=Release --lockfile-out=$lock
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            conan lock create $recipe --profile=$profile -s build_type=Debug -s compiler.runtime_type=Debug --lockfile=$lock --lockfile-out=$lock
+            conan lock create $recipe --profile:host=$profile --profile:build=$profile -s:h build_type=Debug -s:b build_type=Debug -s:h compiler.runtime_type=Debug -s:b compiler.runtime_type=Debug --lockfile=$lock --lockfile-out=$lock
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
 
       - name: Install Release
         run: >
           conan install conan/platform-sdk
-          --profile=${{ matrix.profile }}
+          --profile:host=${{ matrix.profile }}
+          --profile:build=${{ matrix.profile }}
           --lockfile=${{ env.LOCKFILE }}
-          -s build_type=Release
-          -s compiler.runtime_type=Release
+          -s:h build_type=Release
+          -s:b build_type=Release
+          -s:h compiler.runtime_type=Release
+          -s:b compiler.runtime_type=Release
           --build=missing
           --deployer=full_deploy
           --deployer-folder=${{ env.DEPLOY_DIR }}
@@ -100,10 +103,13 @@ jobs:
       - name: Install Debug
         run: >
           conan install conan/platform-sdk
-          --profile=${{ matrix.profile }}
+          --profile:host=${{ matrix.profile }}
+          --profile:build=${{ matrix.profile }}
           --lockfile=${{ env.LOCKFILE }}
-          -s build_type=Debug
-          -s compiler.runtime_type=Debug
+          -s:h build_type=Debug
+          -s:b build_type=Debug
+          -s:h compiler.runtime_type=Debug
+          -s:b compiler.runtime_type=Debug
           --build=missing
           --deployer=full_deploy
           --deployer-folder=${{ env.DEPLOY_DIR }}
