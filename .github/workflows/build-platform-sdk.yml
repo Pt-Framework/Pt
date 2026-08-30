@@ -72,6 +72,9 @@ jobs:
           restore-keys: |
             conan-${{ runner.os }}-${{ matrix.platform }}-
 
+      - name: Detect Conan profile
+        run: conan profile detect --name=ci --force
+
       - name: Create lockfile if missing
         shell: pwsh
         run: |
@@ -79,16 +82,18 @@ jobs:
           $profile = "${{ matrix.profile }}"
           $recipe = "conan/platform-sdk"
           if (-not (Test-Path $lock)) {
-            conan lock create $recipe --profile:host=$profile --profile:build=$profile -s:h build_type=Release -s:b build_type=Release -s:h compiler.runtime_type=Release -s:b compiler.runtime_type=Release --lockfile-out=$lock
+            conan lock create $recipe --profile:host=ci --profile:host=$profile --profile:build=ci --profile:build=$profile -s:h build_type=Release -s:b build_type=Release -s:h compiler.runtime_type=Release -s:b compiler.runtime_type=Release --lockfile-out=$lock
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            conan lock create $recipe --profile:host=$profile --profile:build=$profile -s:h build_type=Debug -s:b build_type=Debug -s:h compiler.runtime_type=Debug -s:b compiler.runtime_type=Debug --lockfile=$lock --lockfile-out=$lock
+            conan lock create $recipe --profile:host=ci --profile:host=$profile --profile:build=ci --profile:build=$profile -s:h build_type=Debug -s:b build_type=Debug -s:h compiler.runtime_type=Debug -s:b compiler.runtime_type=Debug --lockfile=$lock --lockfile-out=$lock
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
 
       - name: Install Release
         run: >
           conan install conan/platform-sdk
+          --profile:host=ci
           --profile:host=${{ matrix.profile }}
+          --profile:build=ci
           --profile:build=${{ matrix.profile }}
           --lockfile=${{ env.LOCKFILE }}
           -s:h build_type=Release
@@ -103,7 +108,9 @@ jobs:
       - name: Install Debug
         run: >
           conan install conan/platform-sdk
+          --profile:host=ci
           --profile:host=${{ matrix.profile }}
+          --profile:build=ci
           --profile:build=${{ matrix.profile }}
           --lockfile=${{ env.LOCKFILE }}
           -s:h build_type=Debug
@@ -203,7 +210,7 @@ jobs:
             "Sha256: $hash"
             "Date: $(Get-Date -Format 'yyyy-MM-dd')"
             "Platform: ${{ matrix.platform }}"
-            "Compiler: msvc 193"
+            "Compiler: msvc"
             "Runtime: MD/MDd"
             "Shared: true"
             "Packages:"
