@@ -1,0 +1,294 @@
+name: Build Platform
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionCode:
+        description: 'Version code'
+        required: false
+        default: '1'
+        type: string
+      replace:
+        description: 'Replace existing'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  preflight:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    env:
+      PLATFORM_TAG: platform-${{ inputs.versionCode }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check tag does not exist
+        if: ${{ !inputs.replace }}
+        shell: bash
+        run: |
+          if gh release view "${{ env.PLATFORM_TAG }}" >/dev/null 2>&1; then
+            echo "Release ${{ env.PLATFORM_TAG }} already exists. Increment versionCode or enable replace." >&2
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: preflight
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows-2022
+            profile: conan/platform/profiles/windows-msvc2022-x64
+            platform_id: windows-x64-msvc-md
+            build_type: Release
+            runtime_type: Release
+            runtime: MD
+          - os: windows-2022
+            profile: conan/platform/profiles/windows-msvc2022-x64
+            platform_id: windows-x64-msvc-mdd
+            build_type: Debug
+            runtime_type: Debug
+            runtime: MDd
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    env:
+      CONAN_HOME: ${{ github.workspace }}/.conan2
+      PLATFORM_TAG: platform-${{ inputs.versionCode }}
+      PLATFORM_ID: ${{ matrix.platform_id }}
+      EXPORT_DIR: ${{ github.workspace }}/export
+      PREFIX: ${{ github.workspace }}/deploy/${{ matrix.platform_id }}
+      GENERATORS: ${{ github.workspace }}/conan-gen
+      LOCKFILE: ${{ github.workspace }}/conan/platform/conan.lock
+      RECIPE: conan/platform
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install Conan
+        run: python -m pip install "conan>=2,<3"
+
+      - name: Setup NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Setup Perl
+        run: choco install strawberryperl --no-progress -y
+
+      - name: Cache Conan
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.CONAN_HOME }}
+          key: conan-${{ runner.os }}-${{ matrix.platform_id }}-${{ hashFiles('conan/platform/conan.lock', 'conan/platform/conanfile.py', 'conan/platform/profiles/**', 'conan/platform/deployer.py') }}
+          restore-keys: |
+            conan-${{ runner.os }}-${{ matrix.platform_id }}-
+
+      - name: Detect Conan profile
+        run: conan profile detect --name=ci --force
+
+      - name: Create lockfile if missing
+        shell: pwsh
+        run: |
+          $lock = "${{ env.LOCKFILE }}"
+          $profile = "${{ matrix.profile }}"
+          $recipe = "${{ env.RECIPE }}"
+          if (-not (Test-Path $lock)) {
+            conan lock create $recipe --profile:host=ci --profile:host=$profile --profile:build=ci --profile:build=$profile -s:h build_type=Release -s:b build_type=Release -s:h compiler.runtime_type=Release -s:b compiler.runtime_type=Release --lockfile-out=$lock
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            conan lock create $recipe --profile:host=ci --profile:host=$profile --profile:build=ci --profile:build=$profile -s:h build_type=Debug -s:b build_type=Debug -s:h compiler.runtime_type=Debug -s:b compiler.runtime_type=Debug --lockfile=$lock --lockfile-out=$lock
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Install
+        run: >
+          conan install ${{ env.RECIPE }}
+          --profile:host=ci
+          --profile:host=${{ matrix.profile }}
+          --profile:build=ci
+          --profile:build=${{ matrix.profile }}
+          --lockfile=${{ env.LOCKFILE }}
+          -s:h build_type=${{ matrix.build_type }}
+          -s:b build_type=${{ matrix.build_type }}
+          -s:h compiler.runtime_type=${{ matrix.runtime_type }}
+          -s:b compiler.runtime_type=${{ matrix.runtime_type }}
+          --build=missing
+          --deployer=${{ env.RECIPE }}/deployer.py
+          --deployer-folder=${{ env.PREFIX }}
+          --output-folder=${{ env.GENERATORS }}
+
+      - name: Assert prefix layout
+        shell: pwsh
+        run: |
+          $out = "${{ env.PREFIX }}"
+          $id = "${{ env.PLATFORM_ID }}"
+          $jamPath = Join-Path $out "jam\packages.jam"
+
+          foreach ($pkg in @("zlib", "png", "jpeg", "freetype", "openssl")) {
+            if (-not (Test-Path (Join-Path $out $pkg))) {
+              Write-Error "Missing package directory: $pkg"
+              exit 1
+            }
+          }
+
+          if (-not (Test-Path (Join-Path $out "zlib\include\zlib.h"))) {
+            Write-Error "Missing zlib/include/zlib.h"
+            exit 1
+          }
+          $zlibLibs = Get-ChildItem (Join-Path $out "zlib\lib") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".lib" }
+          if (-not $zlibLibs) {
+            Write-Error "Missing .lib under zlib/lib"
+            exit 1
+          }
+          $zlibDlls = Get-ChildItem (Join-Path $out "zlib\bin") -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq ".dll" }
+          if (-not $zlibDlls) {
+            Write-Error "Missing .dll under zlib/bin"
+            exit 1
+          }
+
+          if (Test-Path (Join-Path $out "full_deploy")) {
+            Write-Error "Unexpected full_deploy directory"
+            exit 1
+          }
+          if (Test-Path (Join-Path $out "libpng")) {
+            Write-Error "Unexpected libpng directory (expected png)"
+            exit 1
+          }
+          if (Test-Path (Join-Path $out "libjpeg-turbo")) {
+            Write-Error "Unexpected libjpeg-turbo directory (expected jpeg)"
+            exit 1
+          }
+
+          foreach ($pkgDir in Get-ChildItem $out -Directory) {
+            foreach ($child in Get-ChildItem $pkgDir.FullName -Directory -ErrorAction SilentlyContinue) {
+              if ($child.Name -match '^\d+\.\d+') {
+                Write-Error "Unexpected version directory: $($child.FullName)"
+                exit 1
+              }
+            }
+          }
+
+          if (-not (Test-Path $jamPath)) {
+            Write-Error "Missing jam/packages.jam"
+            exit 1
+          }
+          $text = Get-Content $jamPath -Raw
+          if ($text -notmatch "PLATFORM_PACKAGES_JAM_INCLUDED") {
+            Write-Error "packages.jam missing PLATFORM_PACKAGES_JAM_INCLUDED"
+            exit 1
+          }
+          if ($text -notmatch "PLATFORM_LINKAGE") {
+            Write-Error "packages.jam missing PLATFORM_LINKAGE"
+            exit 1
+          }
+          if ($text -notmatch [regex]::Escape("PLATFORM_ID      = $id ;") -and $text -notmatch [regex]::Escape("PLATFORM_ID = $id ;")) {
+            Write-Error "packages.jam PLATFORM_ID is not $id"
+            exit 1
+          }
+          if ($text -match "ZLIB_INCLUDES|FLinkLibs|full_deploy|\.conan2|D:\\a\\|C:/Users/") {
+            Write-Error "packages.jam contains forbidden tokens or absolute CI paths"
+            exit 1
+          }
+
+          foreach ($m in [regex]::Matches($text, 'PLATFORM_PACKAGE_LIBS\.(\S+)\s+=\s+([^;]+);')) {
+            $pkg = $m.Groups[1].Value
+            $libs = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
+            foreach ($lib in $libs) {
+              $libPath = Join-Path $out "$pkg\lib\$lib.lib"
+              if (-not (Test-Path $libPath)) {
+                Write-Error "Missing $libPath"
+                exit 1
+              }
+            }
+          }
+
+          foreach ($m in [regex]::Matches($text, 'PLATFORM_PACKAGE_DEPLOY\.(\S+)\s+=\s+([^;]+);')) {
+            $pkg = $m.Groups[1].Value
+            $files = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
+            foreach ($file in $files) {
+              $binPath = Join-Path $out "$pkg\bin\$file"
+              if (-not (Test-Path $binPath)) {
+                Write-Error "Missing $binPath"
+                exit 1
+              }
+            }
+          }
+
+      - name: Create archive
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.EXPORT_DIR }}" | Out-Null
+          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PLATFORM_ID }}.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          Compress-Archive -Path (Join-Path "${{ env.PREFIX }}" "*") -DestinationPath $zip
+
+      - name: Create manifest
+        shell: pwsh
+        run: |
+          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PLATFORM_ID }}.zip"
+          $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
+          $jamPath = Join-Path "${{ env.PREFIX }}" "jam\packages.jam"
+          $text = Get-Content $jamPath -Raw
+          $packages = @()
+          foreach ($m in [regex]::Matches($text, 'PLATFORM_PACKAGE_VERSION\.(\S+)\s+=\s+([^;]+);')) {
+            $packages += "$($m.Groups[1].Value)/$($m.Groups[2].Value.Trim())"
+          }
+          $manifest = "$zip.manifest"
+          $lines = @(
+            "Version: ${{ env.PLATFORM_TAG }}"
+            "Sha256: $hash"
+            "Date: $(Get-Date -Format 'yyyy-MM-dd')"
+            "Platform: ${{ env.PLATFORM_ID }}"
+            "Compiler: msvc"
+            "Runtime: ${{ matrix.runtime }}"
+            "Shared: true"
+            "Packages:"
+          )
+          $lines += $packages
+          $lines -join "`n" | Out-File -FilePath $manifest -Encoding utf8 -NoNewline
+          Copy-Item "${{ env.LOCKFILE }}" (Join-Path "${{ env.EXPORT_DIR }}" "conan.lock") -Force
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform_id }}
+          path: ${{ env.EXPORT_DIR }}/*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    env:
+      PLATFORM_TAG: platform-${{ inputs.versionCode }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/artifacts
+          merge-multiple: true
+
+      - name: Release packages
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.PLATFORM_TAG }}
+          name: "Pt platform (${{ env.PLATFORM_TAG }})"
+          body: Precompiled platform prefixes for Windows x64 MSVC, ABIs md and mdd (zlib, png, jpeg, freetype, openssl)
+          files: |
+            ${{ github.workspace }}/artifacts/*.zip
+            ${{ github.workspace }}/artifacts/*.zip.manifest
+            ${{ github.workspace }}/artifacts/conan.lock
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
