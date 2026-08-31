@@ -44,6 +44,32 @@ description: "Build system & setup"
 - `--debug` — enable debug symbols
 - `--optimize` — enable compiler optimizations
 
+## Platform Dependencies
+
+Third-party libraries (zlib, png, jpeg, FreeType, OpenSSL) can come from a
+prebuilt platfrom root instead of system or vendrized inline sources. Any
+of these flags selects a platform layer:
+
+- `--with-platform` - default `<id>` and use `platform/<id>/` under the repo
+  root. Error if that directory is missing. No network.
+- `--with-platform=<id>` - use that explicit platform identity with
+  `platform/<id>/`. No network.
+- `--fetch-platform` - default `<id>`, download `<id>.zip` into
+  `platform/<id>/`, then configure.
+- `--fetch-platform=<id>` — pin the identity to fetch.
+
+`<id>` is `<os>-<arch>-<toolset>[-<abi>]`, e.g. `windows-x64-msvc-md`.
+Windows always has an ABI tag. Other OS omit it until an ABI split exists.
+
+- Default cache: `platform/<id>/`
+- Release tag: `PLATFORM_RELEASE` (default `platform-1`)
+- Fetch URL: `https://github.com/Pt-Framework/Pt/releases/download/$(PLATFORM_RELEASE)/$(id).zip`
+- `--fetch-platform` cannot be combined with `--with-platform=<root>`
+
+User overrides still win: `--with-inline-zlib` / `--with-inline-libpng` /
+`--with-inline-libjpeg` / `--with-inline-freetype`, and the five-tuple
+(`ZLIB_INCLUDES=...` and the rest). `?=` does not overwrite them.
+
 ## Pt-Forms UI Selection
 
 - `PT_FORMS_IMPL` is a derived configure output and must not be supplied as user input.

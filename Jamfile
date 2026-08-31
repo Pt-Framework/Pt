@@ -169,6 +169,22 @@ PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Forms ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 #############################################################################
+# Platform prefix deploy files
+#############################################################################
+
+if $(PT_PLATFORM_INSTALL)
+{
+    for local src in $(PT_PLATFORM_INSTALL)
+    {
+        local dest = $(src:BS) ;
+        File $(dest) : $(src) ;
+        MakeLocate $(dest) : $(PT_OUTPUT_TARGET) ;
+        Clean clean : $(dest) ;
+        InstallFile $(PT_INSTALL_BINDIR) : $(src) ;
+    }
+}
+
+#############################################################################
 # Pt Build Targets
 #############################################################################
 
@@ -338,4 +354,3 @@ LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL)
                                               $(PRELIB)Pt-Soap$(SUFDLL)
                                               $(PRELIB)Pt-XmlRpc$(SUFDLL)
                                               $(PRELIB)Pt-Gfx$(SUFDLL) ;
-

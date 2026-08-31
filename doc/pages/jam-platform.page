@@ -34,8 +34,7 @@ Configure rules. It is not a compiler sysroot and it does not mutate global
 
 The cascade depends on whether a platform prefix was selected.
 
-**Platform not selected** (no `--with-platform` / `--fetch-platform` /
-`--with-platform-abi`):
+**Platform not selected** (no `--with-platform` / `--fetch-platform`):
 
 1. User paths / env / `ZLIB_LINKLIBS=...`
 2. System: pkg-config and compile/link probes (`ZLib-Configure` with empty hints)
@@ -110,19 +109,13 @@ name.
   `macos-arm64-clang-asan`. Do not rename the original to `...-standard`
 - Windows always has a tag (`md`, `mdd`) because it always has two
 
-`--with-platform-abi` without a value, on a platform that exports one ABI,
-is a no-op (same prefix as omitting the flag). On Windows it still means
-the CONFIG mapping (`md` / `mdd`).
-
 `CONFIG` (project debug/release) and platform ABI are different axes.
 Mapping is a platform convention, not a universal debug/release pair:
 
 - Project release: Windows `md`; other OS the one untagged prefix
 - Project debug: Windows `mdd`; other OS the same untagged prefix
 
-Override remains: `--with-platform-abi=md` despite debug,
-`--with-platform=D:/prefixes/...`. Auto-map only where the platform
-actually has a debug ABI.
+Auto-map only where the platform actually has a debug ABI.
 
 ---
 
@@ -505,14 +498,14 @@ Today `--with-platform-sdk` fetches an archive and `include`s a generated
 `platform-sdk-release.jam` / `platform-sdk-debug.jam` that assigns `ZLIB_*`
 directly and still encodes `full_deploy/host/...` paths.
 
-Replace that include with a load of `jam/packages.jam`. `--with-platform`,
-`--fetch-platform`, or `--with-platform-abi` selects the layer. Fetch runs
-only for `--fetch-platform`, and only into the default cache. Mapping
-`CONFIG` → `md` / `mdd` happens here, not inside the zip.
+Replace that include with a load of `jam/packages.jam`. `--with-platform`
+or `--fetch-platform` selects the layer. Fetch runs only for
+`--fetch-platform`, and only into the default cache. Mapping `CONFIG` →
+`md` / `mdd` happens here, not inside the zip.
 
 ```jam
 # After toolset setup, before the zlib / png / ... blocks.
-# Selected if --with-platform, --fetch-platform, or --with-platform-abi
+# Selected if --with-platform or --fetch-platform
 # is present (bare or =value).
 
 if $(WITH_PLATFORM)
@@ -760,11 +753,10 @@ The value of `--with-platform` is the root when one is given.
 
 `--with-platform`
 
-- Bare: detect `<os>-<arch>-<toolset>`, attach the ABI tag only if the
-  platform exports more than one, use `platform/<id>/`. Error if that tree
-  is missing. No network.
-- `--with-platform=D:/prefixes/windows-x64-msvc-md`: use that prefix as-is.
-  No network. The value is a filesystem root, not an identity.
+- Bare: detect `<os>-<arch>-<toolset>` and apply the ABI tag, then use
+  `platform/<id>/`. Error if that tree is missing. No network.
+- `--with-platform=windows-x64-msvc-md`: use that identity with
+  `platform/<id>/`. No network.
 
 `--fetch-platform`
 
@@ -772,20 +764,10 @@ The value of `--with-platform` is the root when one is given.
   refresh the zip first. Bare: detect identity, fetch into `platform/<id>/`,
   then configure. This is the usual first-time command.
 - `--fetch-platform=windows-x64-msvc-md`: pin the identity to fetch.
-  `--with-platform-abi` still overrides the ABI tag of that id.
 - Implies the platform layer; `--with-platform` is not required next to it.
-- Do not combine with `--with-platform=<root>`. Fetch always targets the
-  default cache; an explicit root is already local.
-
-`--with-platform-abi`
-
-- Bare: the platform mapping (`md` on Windows release, `mdd` on Windows
-  debug). On a platform with one ABI, a no-op.
-- `--with-platform-abi=md` (or `mdd`, later `asan`): force that tag.
-  Needed only when the auto-map is wrong, e.g. a debug `CONFIG` against
-  `md` deps.
-- Implies the platform layer (default cache, no fetch unless
-  `--fetch-platform` is also given).
+- Do not combine with `--with-platform=<id>`. Fetch always targets the
+  default cache; an explicit identity via `--with-platform` is already
+  local.
 
 `--fetch-platform` is not a boolean beside `--with-platform`. A bool would
 make the common case two flags (`--with-platform --fetch-platform`) and
