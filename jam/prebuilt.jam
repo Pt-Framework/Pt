@@ -1,0 +1,305 @@
+if ! $(PREBUILT_JAM_INCLUDED) {
+PREBUILT_JAM_INCLUDED = true ;
+
+Load fetch.jam ;
+
+# Identity: <os>-<arch>-<toolset>[-<abi>]. Windows always has md/mdd.
+# ABI auto-map is WITH_DEBUG && ! WITH_OPTIM -> mdd, else md.
+#
+rule Prebuilt-Tuple ( abi ? )
+{
+    local os = $(TARGET_OS:L) ;
+    switch $(os)
+    {
+        case nt     : os = windows ;
+        case win32  : os = windows ;
+        case macosx : os = macos ;
+    }
+
+    local arch = $(TARGET_OSPLAT:L) ;
+    switch $(arch)
+    {
+        case x86_64  : arch = x64 ;
+        case amd64   : arch = x64 ;
+        case aarch64 : arch = arm64 ;
+    }
+
+    local toolset = $(TOOLSET:L) ;
+    switch $(toolset)
+    {
+        case vc* : toolset = msvc ;
+    }
+
+    local id = $(os)-$(arch)-$(toolset) ;
+    if $(abi)
+    {
+        id = $(id)-$(abi) ;
+    }
+
+    return $(id) ;
+}
+
+# Prebuilt-Fetch <url> : <dest>
+#
+# Download <url> when <url>.manifest changed. dest is the
+# prefix directory. The sidecar is dest.manifest, next to dest,
+# not inside it. Returns dest when fetched, empty when up to
+# date. Caller must Fetch-Configure first.
+#
+rule Prebuilt-Fetch ( url : dest )
+{
+    Fetch-Configure ;
+
+    local manifestLocal = [ FDirName $(dest) manifest ] ;
+    local manifestTmp   = $(dest).manifest.tmp ;
+    local archiveTmp    = $(dest).tmp ;
+    local fetched       = ;
+
+    Fetch-Url "$(url).manifest" : $(manifestTmp) ;
+    local remoteContent = [ FILE_GET_CONTENTS $(manifestTmp) ] ;
+
+    local localContent = ;
+    if [ CHECK_IF_FILE $(manifestLocal) ]
+    {
+        localContent = [ FILE_GET_CONTENTS $(manifestLocal) ] ;
+    }
+
+    if $(remoteContent) != $(localContent)
+    {
+        Fetch-Url $(url) : $(archiveTmp) ;
+        Fetch-RmDir $(dest) ;
+        Fetch-Unzip $(archiveTmp) : $(dest) ;
+        FILE_RENAME $(manifestTmp) : $(manifestLocal) ;
+        fetched = $(dest) ;
+    }
+
+    FILE_REMOVE $(manifestTmp) ;
+    FILE_REMOVE $(archiveTmp) ;
+
+    return $(fetched) ;
+}
+
+# Prebuilt-Import <root>
+#
+# Sets PREBUILT_ROOT, includes <root>/jam/packages.jam, and checks
+# PREBUILT_SCHEMA (must be 1).
+#
+rule Prebuilt-Import ( root )
+{
+    PREBUILT_ROOT = $(root) ;
+
+    local jamfile = [ FDirName $(PREBUILT_ROOT) jam packages.jam ] ;
+
+    if ! [ CHECK_IF_FILE $(jamfile) ]
+    {
+        Exit "Error: prebuilt packages.jam not found:" $(jamfile) ;
+    }
+    else
+    {
+        include $(jamfile) ;
+
+        if $(PREBUILT_SCHEMA) != 1
+        {
+            Exit "Error: unsupported PREBUILT_SCHEMA:" $(PREBUILT_SCHEMA) ;
+        }
+    }
+}
+
+# Prebuilt-Depends <packages>
+#
+# Uses PREBUILT_PACKAGE_DEPENDS.$(pkg) for a unique dependency walk.
+# Named packages are first, dependencies last. Small-N list membership; not a
+# solver.
+#
+rule Prebuilt-Depends ( packages + )
+{
+    local result ;
+    local pending = $(packages) ;
+
+    while $(pending)
+    {
+        local pkg = $(pending[1]) ;
+        pending = $(pending[2-]) ;
+
+        if ! $(pkg) in $(result)
+        {
+            result += $(pkg) ;
+            pending += $(PREBUILT_PACKAGE_DEPENDS.$(pkg)) ;
+        }
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-Includes <packages>
+#
+# Include dirs of the PREBUILT_PACKAGE_DEPENDS.$(pkg) closure.
+# PREBUILT_PACKAGE_INCLUDES.$(pkg) is prefix-relative (may contain /) when
+# the default $(pkg)/include is not enough; otherwise $(root)/$(pkg)/include.
+#
+rule Prebuilt-Includes ( packages + )
+{
+    local result ;
+    local pkgs = [ Prebuilt-Depends $(packages) ] ;
+
+    for local pkg in $(pkgs)
+    {
+        if $(PREBUILT_PACKAGE_INCLUDES.$(pkg))
+        {
+            for local inc in $(PREBUILT_PACKAGE_INCLUDES.$(pkg))
+            {
+                local parts = [ SPLIT_BY_CHARACTERS $(inc) : "/" ] ;
+                result += [ FDirName $(PREBUILT_ROOT) $(parts) ] ;
+            }
+        }
+        else
+        {
+            result += [ FDirName $(PREBUILT_ROOT) $(pkg) include ] ;
+        }
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-CxxFlags <packages>
+#
+# [ FDefines ... ] from PREBUILT_PACKAGE_DEFINES.$(pkg) for the named
+# packages only.
+#
+rule Prebuilt-CxxFlags ( packages + )
+{
+    local result ;
+
+    for local pkg in $(packages)
+    {
+        if $(PREBUILT_PACKAGE_DEFINES.$(pkg))
+        {
+            result += [ FDefines $(PREBUILT_PACKAGE_DEFINES.$(pkg)) ] ;
+        }
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-LinkLibs <packages>
+#
+# Shared: PREBUILT_PACKAGE_LIBS.$(pkg), PREBUILT_PACKAGE_SYSLIBS.$(pkg), and
+# PREBUILT_PACKAGE_FRAMEWORKS.$(pkg) of the named packages. Static: same over
+# the PREBUILT_PACKAGE_DEPENDS.$(pkg) closure. Named packages first,
+# dependencies last. Frameworks are appended as -framework <name>.
+#
+rule Prebuilt-LinkLibs ( packages + )
+{
+    local result ;
+    local pkgs = $(packages) ;
+
+    if $(PREBUILT_LINKAGE) = static
+    {
+        pkgs = [ Prebuilt-Depends $(packages) ] ;
+    }
+
+    for local pkg in $(pkgs)
+    {
+        result += [ FLinkLibs $(PREBUILT_PACKAGE_LIBS.$(pkg))
+                              $(PREBUILT_PACKAGE_SYSLIBS.$(pkg)) ] ;
+
+        for local fw in $(PREBUILT_PACKAGE_FRAMEWORKS.$(pkg))
+        {
+            result += -framework $(fw) ;
+        }
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-LibPath <packages>
+#
+# Library paths of the named packages. PLATFORM_PACKAGE_LIBPATH.$(pkg) is
+# prefix-relative; otherwise $(pkg)/lib. Shared: named packages. Static:
+# PREBUILT_PACKAGE_DEPENDS.$(pkg) closure (the link probe must see dependent
+# archives).
+#
+rule Prebuilt-LibPath ( packages + )
+{
+    local result ;
+    local pkgs = $(packages) ;
+
+    if $(PREBUILT_LINKAGE) = static
+    {
+        pkgs = [ Prebuilt-Depends $(packages) ] ;
+    }
+
+    for local pkg in $(pkgs)
+    {
+        local paths = $(PLATFORM_PACKAGE_LIBPATH.$(pkg)) ;
+        if ! $(paths)
+        {
+            paths = $(pkg)/lib ;
+        }
+
+        for local path in $(paths)
+        {
+            local parts = [ SPLIT_BY_CHARACTERS $(path) : "/" ] ;
+            local dir = [ FDirName $(PREBUILT_ROOT) $(parts) ] ;
+
+            if ! $(dir) in $(result)
+            {
+                result += $(dir) ;
+            }
+        }
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-LinkFlags <packages>
+#
+# Extra linker flags from PREBUILT_PACKAGE_LINKFLAGS.$(pkg).
+# Shared: named packages. Static: PREBUILT_PACKAGE_DEPENDS.$(pkg) closure.
+# Never FLibPath: CheckDependencyLinkC++ adds it from LIBDIR.
+#
+rule Prebuilt-LinkFlags ( packages + )
+{
+    local result ;
+    local pkgs = $(packages) ;
+
+    if $(PREBUILT_LINKAGE) = static
+    {
+        pkgs = [ Prebuilt-Depends $(packages) ] ;
+    }
+
+    for local pkg in $(pkgs)
+    {
+        result += $(PREBUILT_PACKAGE_LINKFLAGS.$(pkg)) ;
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-Deploy <packages>
+#
+# Paths to PREBUILT_PACKAGE_DEPLOY.$(pkg) under $(root)/$(pkg)/bin, over the
+# PREBUILT_PACKAGE_DEPENDS.$(pkg) closure.
+#
+rule Prebuilt-Deploy ( packages + )
+{
+    local result ;
+    local pkgs = [ Prebuilt-Depends $(packages) ] ;
+
+    for local pkg in $(pkgs)
+    {
+        for local f in $(PREBUILT_PACKAGE_DEPLOY.$(pkg))
+        {
+            local path = [ FDirName $(PREBUILT_ROOT) $(pkg) bin $(f) ] ;
+
+            if ! $(path) in $(result)
+            {
+                result += $(path) ;
+            }
+        }
+    }
+
+    return $(result) ;
+}
+
+} # PREBUILT_JAM_INCLUDED

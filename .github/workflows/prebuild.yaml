@@ -1,4 +1,4 @@
-name: Build Platform
+name: Prebuilt Dependencies
 
 on:
   workflow_dispatch:
@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: read
     env:
-      PLATFORM_TAG: platform-${{ inputs.versionCode }}
+      PREBUILT_TAG: prebuilt-${{ inputs.versionCode }}
     steps:
       - uses: actions/checkout@v6
 
@@ -28,8 +28,8 @@ jobs:
         if: ${{ !inputs.replace }}
         shell: bash
         run: |
-          if gh release view "${{ env.PLATFORM_TAG }}" >/dev/null 2>&1; then
-            echo "Release ${{ env.PLATFORM_TAG }} already exists. Increment versionCode or enable replace." >&2
+          if gh release view "${{ env.PREBUILT_TAG }}" >/dev/null 2>&1; then
+            echo "Release ${{ env.PREBUILT_TAG }} already exists. Increment versionCode or enable replace." >&2
             exit 1
           fi
         env:
@@ -42,14 +42,14 @@ jobs:
       matrix:
         include:
           - os: windows-2022
-            profile: conan/platform/profiles/windows-msvc2022-x64
-            platform_id: windows-x64-msvc-md
+            profile: conan/prebuilt/profiles/windows-msvc2022-x64
+            prebuilt_id: windows-x64-msvc-md
             build_type: Release
             runtime_type: Release
             runtime: MD
           - os: windows-2022
-            profile: conan/platform/profiles/windows-msvc2022-x64
-            platform_id: windows-x64-msvc-mdd
+            profile: conan/prebuilt/profiles/windows-msvc2022-x64
+            prebuilt_id: windows-x64-msvc-mdd
             build_type: Debug
             runtime_type: Debug
             runtime: MDd
@@ -61,13 +61,13 @@ jobs:
 
     env:
       CONAN_HOME: ${{ github.workspace }}/.conan2
-      PLATFORM_TAG: platform-${{ inputs.versionCode }}
-      PLATFORM_ID: ${{ matrix.platform_id }}
+      PREBUILT_TAG: prebuilt-${{ inputs.versionCode }}
+      PREBUILT_ID: ${{ matrix.prebuilt_id }}
       EXPORT_DIR: ${{ github.workspace }}/export
-      PREFIX: ${{ github.workspace }}/deploy/${{ matrix.platform_id }}
+      PREFIX: ${{ github.workspace }}/deploy/${{ matrix.prebuilt_id }}
       GENERATORS: ${{ github.workspace }}/conan-gen
-      LOCKFILE: ${{ github.workspace }}/conan/platform/conan.lock
-      RECIPE: conan/platform
+      LOCKFILE: ${{ github.workspace }}/conan/prebuilt/conan.lock
+      RECIPE: conan/prebuilt
 
     steps:
       - uses: actions/checkout@v6
@@ -90,9 +90,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ env.CONAN_HOME }}
-          key: conan-${{ runner.os }}-${{ matrix.platform_id }}-${{ hashFiles('conan/platform/conan.lock', 'conan/platform/conanfile.py', 'conan/platform/profiles/**', 'conan/platform/deployer.py') }}
+          key: conan-${{ runner.os }}-${{ matrix.prebuilt_id }}-${{ hashFiles('conan/prebuilt/conan.lock', 'conan/prebuilt/conanfile.py', 'conan/prebuilt/profiles/**', 'conan/prebuilt/deployer.py') }}
           restore-keys: |
-            conan-${{ runner.os }}-${{ matrix.platform_id }}-
+            conan-${{ runner.os }}-${{ matrix.prebuilt_id }}-
 
       - name: Detect Conan profile
         run: conan profile detect --name=ci --force
@@ -131,7 +131,7 @@ jobs:
         shell: pwsh
         run: |
           $out = "${{ env.PREFIX }}"
-          $id = "${{ env.PLATFORM_ID }}"
+          $id = "${{ env.PREBUILT_ID }}"
           $jamPath = Join-Path $out "jam\packages.jam"
 
           foreach ($pkg in @("zlib", "png", "jpeg", "freetype", "openssl")) {
@@ -183,16 +183,16 @@ jobs:
             exit 1
           }
           $text = Get-Content $jamPath -Raw
-          if ($text -notmatch "PLATFORM_PACKAGES_JAM_INCLUDED") {
-            Write-Error "packages.jam missing PLATFORM_PACKAGES_JAM_INCLUDED"
+          if ($text -notmatch "PREBUILT_PACKAGES_JAM_INCLUDED") {
+            Write-Error "packages.jam missing PREBUILT_PACKAGES_JAM_INCLUDED"
             exit 1
           }
-          if ($text -notmatch "PLATFORM_LINKAGE") {
-            Write-Error "packages.jam missing PLATFORM_LINKAGE"
+          if ($text -notmatch "PREBUILT_LINKAGE") {
+            Write-Error "packages.jam missing PREBUILT_LINKAGE"
             exit 1
           }
-          if ($text -notmatch [regex]::Escape("PLATFORM_ID      = $id ;") -and $text -notmatch [regex]::Escape("PLATFORM_ID = $id ;")) {
-            Write-Error "packages.jam PLATFORM_ID is not $id"
+          if ($text -notmatch [regex]::Escape("PREBUILT_ID      = $id ;") -and $text -notmatch [regex]::Escape("PREBUILT_ID = $id ;")) {
+            Write-Error "packages.jam PREBUILT_ID is not $id"
             exit 1
           }
           if ($text -match "ZLIB_INCLUDES|FLinkLibs|full_deploy|\.conan2|D:\\a\\|C:/Users/") {
@@ -200,19 +200,32 @@ jobs:
             exit 1
           }
 
-          foreach ($m in [regex]::Matches($text, 'PLATFORM_PACKAGE_LIBS\.(\S+)\s+=\s+([^;]+);')) {
+          foreach ($m in [regex]::Matches($text, 'PREBUILT_PACKAGE_LIBS\.(\S+)\s+=\s+([^;]+);')) {
             $pkg = $m.Groups[1].Value
             $libs = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
+            $libPathMatch = [regex]::Match($text, "PLATFORM_PACKAGE_LIBPATH\.$([regex]::Escape($pkg))\s+=\s+([^;]+);")
+            if (-not $libPathMatch.Success) {
+              Write-Error "packages.jam missing PLATFORM_PACKAGE_LIBPATH.$pkg"
+              exit 1
+            }
+            $libPaths = $libPathMatch.Groups[1].Value.Trim() -split '\s+' | Where-Object { $_ }
             foreach ($lib in $libs) {
-              $libPath = Join-Path $out "$pkg\lib\$lib.lib"
-              if (-not (Test-Path $libPath)) {
-                Write-Error "Missing $libPath"
+              $found = $false
+              foreach ($path in $libPaths) {
+                $libPath = Join-Path $out "$path\$lib.lib"
+                if (Test-Path $libPath) {
+                  $found = $true
+                  break
+                }
+              }
+              if (-not $found) {
+                Write-Error "Missing library $lib in PLATFORM_PACKAGE_LIBPATH.$pkg"
                 exit 1
               }
             }
           }
 
-          foreach ($m in [regex]::Matches($text, 'PLATFORM_PACKAGE_DEPLOY\.(\S+)\s+=\s+([^;]+);')) {
+          foreach ($m in [regex]::Matches($text, 'PREBUILT_PACKAGE_DEPLOY\.(\S+)\s+=\s+([^;]+);')) {
             $pkg = $m.Groups[1].Value
             $files = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
             foreach ($file in $files) {
@@ -228,27 +241,27 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "${{ env.EXPORT_DIR }}" | Out-Null
-          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PLATFORM_ID }}.zip"
+          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.zip"
           if (Test-Path $zip) { Remove-Item $zip }
           Compress-Archive -Path (Join-Path "${{ env.PREFIX }}" "*") -DestinationPath $zip
 
       - name: Create manifest
         shell: pwsh
         run: |
-          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PLATFORM_ID }}.zip"
+          $zip = Join-Path "${{ env.EXPORT_DIR }}" "${{ env.PREBUILT_ID }}.zip"
           $hash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
           $jamPath = Join-Path "${{ env.PREFIX }}" "jam\packages.jam"
           $text = Get-Content $jamPath -Raw
           $packages = @()
-          foreach ($m in [regex]::Matches($text, 'PLATFORM_PACKAGE_VERSION\.(\S+)\s+=\s+([^;]+);')) {
+          foreach ($m in [regex]::Matches($text, 'PREBUILT_PACKAGE_VERSION\.(\S+)\s+=\s+([^;]+);')) {
             $packages += "$($m.Groups[1].Value)/$($m.Groups[2].Value.Trim())"
           }
           $manifest = "$zip.manifest"
           $lines = @(
-            "Version: ${{ env.PLATFORM_TAG }}"
+            "Version: ${{ env.PREBUILT_TAG }}"
             "Sha256: $hash"
             "Date: $(Get-Date -Format 'yyyy-MM-dd')"
-            "Platform: ${{ env.PLATFORM_ID }}"
+            "Prebuilt: ${{ env.PREBUILT_ID }}"
             "Compiler: msvc"
             "Runtime: ${{ matrix.runtime }}"
             "Shared: true"
@@ -261,7 +274,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.platform_id }}
+          name: ${{ matrix.prebuilt_id }}
           path: ${{ env.EXPORT_DIR }}/*
           if-no-files-found: error
 
@@ -271,7 +284,7 @@ jobs:
     permissions:
       contents: write
     env:
-      PLATFORM_TAG: platform-${{ inputs.versionCode }}
+      PREBUILT_TAG: prebuilt-${{ inputs.versionCode }}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -282,9 +295,9 @@ jobs:
       - name: Release packages
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ env.PLATFORM_TAG }}
-          name: "Pt platform (${{ env.PLATFORM_TAG }})"
-          body: Precompiled platform prefixes for Windows x64 MSVC, ABIs md and mdd (zlib, png, jpeg, freetype, openssl)
+          tag_name: ${{ env.PREBUILT_TAG }}
+          name: "Pt prebuilt (${{ env.PREBUILT_TAG }})"
+          body: Precompiled prebuilt prefixes for Windows x64 MSVC, ABIs md and mdd (zlib, png, jpeg, freetype, openssl)
           files: |
             ${{ github.workspace }}/artifacts/*.zip
             ${{ github.workspace }}/artifacts/*.zip.manifest

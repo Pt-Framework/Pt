@@ -1,8 +1,8 @@
 from conan import ConanFile
 
 
-class PtPlatformConan(ConanFile):
-    name = "pt-platform"
+class PtPrebuiltConan(ConanFile):
+    name = "pt-prebuilt"
     description = "Precompiled third-party libraries for Platinum (CI zip only)"
     license = "Proprietary"
     url = "https://github.com/Pt-Framework/Pt"

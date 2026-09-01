@@ -38,7 +38,7 @@ class PtConan(ConanFile):
     def export_sources(self):
         src = os.path.normpath(os.path.join(self.recipe_folder, ".."))
         copy(self, "*", src=src, dst=self.export_sources_folder,
-             excludes=[".git", "build", "tmp", "deps", "platform",
+             excludes=[".git", "build", "tmp", "deps", "prebuilt",
                        ".conan2", ".vs"])
 
     def requirements(self):
