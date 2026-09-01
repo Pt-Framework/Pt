@@ -70,6 +70,12 @@ User overrides still win: `--with-inline-zlib` / `--with-inline-libpng` /
 `--with-inline-libjpeg` / `--with-inline-freetype`, and the five-tuple
 (`ZLIB_INCLUDES=...` and the rest). `?=` does not overwrite them.
 
+Prebuilt dependencies preserve native per-package `bin/` and `lib/` trees. They do
+not select runtime files for installation. A consuming Jamfile chooses packages
+with `Prebuilt-Packages` or `Prebuilt-Depends`, obtains all files through
+`Prebuilt-Bin` and `Prebuilt-Lib`, then explicitly stages or installs them with
+its own `File`, `MakeLocate`, and `InstallFile` rules.
+
 ## Pt-Forms UI Selection
 
 - `PT_FORMS_IMPL` is a derived configure output and must not be supplied as user input.

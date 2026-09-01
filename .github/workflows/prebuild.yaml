@@ -191,6 +191,10 @@ jobs:
             Write-Error "packages.jam missing PREBUILT_LINKAGE"
             exit 1
           }
+          if ($text -match "PREBUILT_PACKAGE_DEPLOY") {
+            Write-Error "packages.jam must not contain PREBUILT_PACKAGE_DEPLOY"
+            exit 1
+          }
           if ($text -notmatch [regex]::Escape("PREBUILT_ID      = $id ;") -and $text -notmatch [regex]::Escape("PREBUILT_ID = $id ;")) {
             Write-Error "packages.jam PREBUILT_ID is not $id"
             exit 1
@@ -220,18 +224,6 @@ jobs:
               }
               if (-not $found) {
                 Write-Error "Missing library $lib in PREBUILT_PACKAGE_LIBPATH.$pkg"
-                exit 1
-              }
-            }
-          }
-
-          foreach ($m in [regex]::Matches($text, 'PREBUILT_PACKAGE_DEPLOY\.(\S+)\s+=\s+([^;]+);')) {
-            $pkg = $m.Groups[1].Value
-            $files = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
-            foreach ($file in $files) {
-              $binPath = Join-Path $out "$pkg\bin\$file"
-              if (-not (Test-Path $binPath)) {
-                Write-Error "Missing $binPath"
                 exit 1
               }
             }

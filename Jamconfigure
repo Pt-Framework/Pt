@@ -501,6 +501,7 @@ if --with-prebuilt in $(ARGV) || $(PT_PREBUILT_ID) ||
     }
 
     Prebuilt-Import $(PT_PREBUILT_ROOT) ;
+    Configure PT_PREBUILT_ROOT ;
 }
 
 #############################################################################
@@ -834,43 +835,6 @@ EchoOption SSL_LINKLIBS : "SSL libs" ;
 
 Configure SSL_LINKFLAGS ;
 EchoOption SSL_LINKFLAGS : "SSL link flags" ;
-
-if $(PT_PREBUILT_ROOT)
-{
-    local pkgs ;
-
-    if $(WITH_ZLIB) && ! $(WITH_BUILTIN_ZLIB)
-    {
-        pkgs += zlib ;
-    }
-
-    if $(WITH_PNG) && ! $(WITH_BUILTIN_LIBPNG)
-    {
-        pkgs += png ;
-    }
-
-    if $(WITH_JPEG) && ! $(WITH_BUILTIN_LIBJPEG)
-    {
-        pkgs += jpeg ;
-    }
-
-    if $(WITH_FREETYPE) && ! $(WITH_BUILTIN_FREETYPE)
-    {
-        pkgs += freetype ;
-    }
-
-    if $(WITH_SSL) && $(PT_SSL_IMPL) = openssl && ! $(WITH_OPENSSL) && ! $(WITH_MBEDTLS)
-    {
-        pkgs += openssl ;
-    }
-
-    if $(pkgs)
-    {
-        PT_PREBUILT_INSTALL = [ Prebuilt-Deploy $(pkgs) ] ;
-        Configure PT_PREBUILT_INSTALL ;
-        EchoOption PT_PREBUILT_INSTALL : "prebuilt install files" ;
-    }
-}
 
 #############################################################################
 # blend2D graphics library

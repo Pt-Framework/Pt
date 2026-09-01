@@ -276,25 +276,81 @@ rule Prebuilt-LinkFlags ( packages + )
     return $(result) ;
 }
 
-# Prebuilt-Deploy <packages>
+# Prebuilt-Packages
 #
-# Paths to PREBUILT_PACKAGE_DEPLOY.$(pkg) under $(root)/$(pkg)/bin, over the
-# PREBUILT_PACKAGE_DEPENDS.$(pkg) closure.
+# Names of all packages exported by the prefix.
 #
-rule Prebuilt-Deploy ( packages + )
+rule Prebuilt-Packages
+{
+    return $(PREBUILT_PACKAGES) ;
+}
+
+# Prebuilt-Files <directory>
+#
+# Recursively returns all files below directory. Directories are not returned.
+#
+rule Prebuilt-Files ( directory )
 {
     local result ;
-    local pkgs = [ Prebuilt-Depends $(packages) ] ;
 
-    for local pkg in $(pkgs)
+    for local entry in [ GLOB $(directory) : * ]
     {
-        for local f in $(PREBUILT_PACKAGE_DEPLOY.$(pkg))
+        if [ FILE_IS_DIR $(entry) ]
         {
-            local path = [ FDirName $(PREBUILT_ROOT) $(pkg) bin $(f) ] ;
+            result += [ Prebuilt-Files $(entry) ] ;
+        }
+        else
+        {
+            result += $(entry) ;
+        }
+    }
 
-            if ! $(path) in $(result)
+    return $(result) ;
+}
+
+# Prebuilt-Bin <packages>
+#
+# Files below the native bin directory of each named package. Does not resolve
+# package dependencies.
+#
+rule Prebuilt-Bin ( packages + )
+{
+    local result ;
+
+    for local pkg in $(packages)
+    {
+        local directory = [ FDirName $(PREBUILT_ROOT) $(pkg) bin ] ;
+
+        for local file in [ Prebuilt-Files $(directory) ]
+        {
+            if ! $(file) in $(result)
             {
-                result += $(path) ;
+                result += $(file) ;
+            }
+        }
+    }
+
+    return $(result) ;
+}
+
+# Prebuilt-Lib <packages>
+#
+# Files below the native lib directory of each named package. Does not resolve
+# package dependencies.
+#
+rule Prebuilt-Lib ( packages + )
+{
+    local result ;
+
+    for local pkg in $(packages)
+    {
+        local directory = [ FDirName $(PREBUILT_ROOT) $(pkg) lib ] ;
+
+        for local file in [ Prebuilt-Files $(directory) ]
+        {
+            if ! $(file) in $(result)
+            {
+                result += $(file) ;
             }
         }
     }

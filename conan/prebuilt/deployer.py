@@ -15,46 +15,14 @@ PACKAGE_DIR_MAP = {
 
 PREFERRED_ORDER = ("zlib", "png", "jpeg", "freetype", "openssl")
 
-LIB_SUFFIXES = (".lib", ".a", ".dylib")
-
-
 def _prefix_name(conan_name):
     return PACKAGE_DIR_MAP.get(conan_name, conan_name)
-
-
-def _is_lib(name):
-    lower = name.lower()
-    if lower.endswith(LIB_SUFFIXES):
-        return True
-    return ".so" in lower
-
-
-def _is_deploy(name):
-    lower = name.lower()
-    if lower.endswith(".dll") or lower.endswith(".dylib"):
-        return True
-    return ".so" in lower
 
 
 def _copy_tree(src, dst):
     if not os.path.isdir(src):
         return
-    shutil.copytree(src, dst, dirs_exist_ok=True)
-
-
-def _copy_files(src_dir, dst_dir, predicate):
-    copied = []
-    if not os.path.isdir(src_dir):
-        return copied
-    for name in sorted(os.listdir(src_dir)):
-        src = os.path.join(src_dir, name)
-        if not os.path.isfile(src):
-            continue
-        if predicate(name):
-            os.makedirs(dst_dir, exist_ok=True)
-            shutil.copy2(src, os.path.join(dst_dir, name))
-            copied.append(name)
-    return copied
+    shutil.copytree(src, dst, dirs_exist_ok=True, symlinks=True)
 
 
 def _rel_posix(path, root):
@@ -157,7 +125,6 @@ def _write_packages_jam(path, prebuilt_id, packages):
             ("PREBUILT_PACKAGE_LINKFLAGS.{}".format(name), pkg["linkflags"]),
             ("PREBUILT_PACKAGE_DEFINES.{}".format(name), pkg["defines"]),
             ("PREBUILT_PACKAGE_INCLUDES.{}".format(name), pkg["includes"]),
-            ("PREBUILT_PACKAGE_DEPLOY.{}".format(name), pkg["deploy"]),
             ("PREBUILT_PACKAGE_VERSION.{}".format(name), [pkg["version"]] if pkg["version"] else []),
         ]
         written = False
@@ -202,24 +169,11 @@ def deploy(graph, output_folder, **kwargs):
         _copy_tree(os.path.join(package_folder, "include"),
                    os.path.join(dest, "include"))
 
-        _copy_files(os.path.join(package_folder, "lib"),
-                    os.path.join(dest, "lib"),
-                    _is_lib)
+        _copy_tree(os.path.join(package_folder, "lib"),
+                   os.path.join(dest, "lib"))
 
-        deploy_files = _copy_files(os.path.join(package_folder, "bin"),
-                                   os.path.join(dest, "bin"),
-                                   _is_deploy)
-        deploy_files.extend(_copy_files(os.path.join(package_folder, "lib"),
-                                        os.path.join(dest, "bin"),
-                                        lambda n: n.lower().endswith(".dll")))
-        # Unique, stable order
-        seen_deploy = set()
-        unique_deploy = []
-        for name in deploy_files:
-            if name not in seen_deploy:
-                seen_deploy.add(name)
-                unique_deploy.append(name)
-        deploy_files = unique_deploy
+        _copy_tree(os.path.join(package_folder, "bin"),
+                   os.path.join(dest, "bin"))
 
         has_include = os.path.isdir(os.path.join(dest, "include"))
         has_lib = os.path.isdir(os.path.join(dest, "lib")) and os.listdir(os.path.join(dest, "lib"))
@@ -248,7 +202,6 @@ def deploy(graph, output_folder, **kwargs):
             "linkflags": linkflags,
             "defines": defines,
             "includes": _extra_includes(pkg_name, cpp, package_folder),
-            "deploy": deploy_files,
             "dep": dep,
         })
         exported.add(pkg_name)

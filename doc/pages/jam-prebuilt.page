@@ -10,7 +10,7 @@ Conan or vcpkg on the user's path.
 
 Jam remains a build system, not a package-manager frontend. A user needs Jam,
 a compiler, and optionally Fetch. Conan runs only in CI, where it produces
-relocatable ABI prefixes.
+relocatable ABI bundles.
 
 Three supply paths exist in parallel. None replaces the others.
 
@@ -158,12 +158,13 @@ Directory names match `PREBUILT_PACKAGES` (`zlib`, `png`, `jpeg`,
 Default locations, relative to the prefix:
 
 - Headers: `$(pkg)/include`
-- Import libs / `.a`: `$(pkg)/lib`
-- Deploy: `$(pkg)/bin`
+- Libraries: `$(pkg)/lib`
+- Binaries: `$(pkg)/bin`
 
 `PREBUILT_PACKAGE_INCLUDES.$(pkg)` exists only when that convention is not enough
-(FreeType's `include/freetype2`). `PREBUILT_PACKAGE_DEPLOY.$(pkg)` lists
-filenames in that package's `bin/` (`zlib.dll`), not prefix-relative paths.
+(FreeType's `include/freetype2`). The producer preserves the complete native
+`lib/` and `bin/` trees; it does not classify files by extension or move files
+between those directories.
 
 One zip per ABI. Not one zip per package (that would be a package manager).
 `md` and `mdd` are two prefixes, never two trees in one zip.
@@ -257,26 +258,21 @@ PREBUILT_LINKAGE = shared ;
 PREBUILT_PACKAGES = zlib png jpeg freetype openssl ;
 
 PREBUILT_PACKAGE_LIBS.zlib        = zlib ;
-PREBUILT_PACKAGE_DEPLOY.zlib      = zlib.dll ;
 PREBUILT_PACKAGE_VERSION.zlib     = 1.3.1 ;
 
 PREBUILT_PACKAGE_LIBS.png         = png16 ;
 PREBUILT_PACKAGE_DEPENDS.png      = zlib ;
-PREBUILT_PACKAGE_DEPLOY.png       = libpng16.dll ;
 PREBUILT_PACKAGE_VERSION.png      = 1.6.43 ;
 
 PREBUILT_PACKAGE_LIBS.jpeg        = jpeg ;
-PREBUILT_PACKAGE_DEPLOY.jpeg      = jpeg62.dll ;
 PREBUILT_PACKAGE_VERSION.jpeg     = 3.0.3 ;
 
 PREBUILT_PACKAGE_LIBS.freetype    = freetype ;
 PREBUILT_PACKAGE_DEPENDS.freetype = png zlib ;
-PREBUILT_PACKAGE_DEPLOY.freetype  = freetype.dll ;
 PREBUILT_PACKAGE_VERSION.freetype = 2.13.2 ;
 
 PREBUILT_PACKAGE_LIBS.openssl     = ssl crypto ;
 PREBUILT_PACKAGE_SYSLIBS.openssl  = crypt32 ws2_32 advapi32 user32 ;
-PREBUILT_PACKAGE_DEPLOY.openssl   = libssl-3-x64.dll libcrypto-3-x64.dll ;
 PREBUILT_PACKAGE_VERSION.openssl  = 3.3.1 ;
 
 }
@@ -292,10 +288,9 @@ Prefix-wide variables that earn their place:
   Echo and a mismatch check (`--fetch-prebuilt=windows-x64-msvc-md` pointed
   at an `mdd` tree). Not used to invent compiler flags.
 - `PREBUILT_LINKAGE`: `shared` or `static`. This is the one identity field
-  `Prebuilt-LinkLibs` / `Prebuilt-Deploy` branch on (link closure, whether
-  deploy files exist). If every shipped prefix is shared, it is still
-  worth stating: a hand-written static prefix must not be treated as
-  shared.
+  `Prebuilt-LinkLibs` branches on for link closure. If every shipped prefix is
+  shared, it is still worth stating: a hand-written static prefix must not be
+  treated as shared.
 - `PREBUILT_PACKAGES`: which dotted keys exist. Do not scan the disk.
 
 Not in the file — denormalized copies of `PREBUILT_ID`, of Jam, or of
@@ -328,8 +323,6 @@ product policy:
   Not raw `C++FLAGS`.
 - `PREBUILT_PACKAGE_INCLUDES.$(pkg)`: paths relative to the prefix, only if not
   `$(pkg)/include`. Not `-I`.
-- `PREBUILT_PACKAGE_DEPLOY.$(pkg)`: filenames in `$(pkg)/bin`.
-  Not prefix-relative paths, not a global list.
 - `PREBUILT_PACKAGE_VERSION.$(pkg)`: documentation / manifest.
   Not a search path.
 
@@ -342,7 +335,7 @@ to consumer variable is the framework's job. The zip knows `zlib` / `png` /
 not in flag syntax.
 
 The `mdd` prefix: `PREBUILT_ID = windows-x64-msvc-mdd`, same linkage,
-different `PREBUILT_PACKAGE_DEPLOY` list.
+different on-disk artifacts.
 
 ---
 
@@ -370,12 +363,11 @@ That compile closure follows `PREBUILT_PACKAGE_DEPENDS` regardless of shared vs.
 static. Walking `PREBUILT_PACKAGE_DEPENDS` is closure of a known DAG, not resolving
 a dependency.
 
-**Deploy files are per package.** There is no `PREBUILT_DEPLOY_FILES`.
-`png.h` needs `zlib.h` at compile time; `libpng16.dll` needs `zlib.dll` next
-to the exe. Staging therefore walks `PREBUILT_PACKAGE_DEPENDS` for deploy
-too, even when the link line does not (shared). Static packages omit
-`PREBUILT_PACKAGE_DEPLOY`. The consumer concatenates when an app wants
-every DLL of the prefix; the zip does not pre-flatten that list.
+**Deployment is caller-owned.** There is no `PREBUILT_DEPLOY_FILES` or
+per-file deployment metadata. `Prebuilt-Bin` and `Prebuilt-Lib` return all
+files from the selected native package directories. The caller decides whether
+to use direct packages, `[ Prebuilt-Depends <packages> ]`, or
+`[ Prebuilt-Packages ]`, and where selected files are staged or installed.
 
 **Link lines are not always transitive.**
 
@@ -451,7 +443,7 @@ rule Prebuilt-LinkLibs ( packages + )
     # Always: [ FLinkLibs ... ], never raw flags from the zip.
 }
 
-rule Prebuilt-LibDir ( packages + )
+rule Prebuilt-LibPath ( packages + )
 {
     # $(root)/$(pkg)/lib for the named packages
     # (and their needs, when the link probe must see them).
@@ -463,10 +455,19 @@ rule Prebuilt-LinkFlags ( packages + )
     # CheckDependencyLinkC++ already does FLibPath $(libdir).
 }
 
-rule Prebuilt-Deploy ( packages + )
+rule Prebuilt-Packages
 {
-    # $(root)/$(pkg)/bin/$(PREBUILT_PACKAGE_DEPLOY.$(pkg))
-    # plus deploy closure over PREBUILT_PACKAGE_DEPENDS.
+  # All package names exported by the prefix.
+}
+
+rule Prebuilt-Bin ( packages + )
+{
+  # All files below $(root)/$(pkg)/bin for exactly the named packages.
+}
+
+rule Prebuilt-Lib ( packages + )
+{
+  # All files below $(root)/$(pkg)/lib for exactly the named packages.
 }
 ```
 
@@ -557,7 +558,7 @@ if ! $(WITH_BUILTIN_ZLIB)
         ZLIB_INCLUDES  ?= [ Prebuilt-Includes zlib ] ;
         ZLIB_C++FLAGS  ?= [ Prebuilt-CxxFlags zlib ] ;
         ZLIB_LINKLIBS  ?= [ Prebuilt-LinkLibs zlib ] ;
-        ZLIB_LIBDIR    ?= [ Prebuilt-LibDir zlib ] ;
+        ZLIB_LIBDIR    ?= [ Prebuilt-LibPath zlib ] ;
         ZLIB_LINKFLAGS ?= [ Prebuilt-LinkFlags zlib ] ;
     }
 
@@ -607,7 +608,7 @@ if ! $(WITH_BUILTIN_LIBPNG)
         PNG_INCLUDES  ?= [ Prebuilt-Includes png ] ;   # png + zlib includes
         PNG_C++FLAGS  ?= [ Prebuilt-CxxFlags png ] ;
         PNG_LINKLIBS  ?= [ Prebuilt-LinkLibs png ] ;   # png16 (+ syslibs)
-        PNG_LIBDIR    ?= [ Prebuilt-LibDir png ] ;
+        PNG_LIBDIR    ?= [ Prebuilt-LibPath png ] ;
         PNG_LINKFLAGS ?= [ Prebuilt-LinkFlags png ] ;
     }
 
@@ -650,7 +651,7 @@ if ! $(WITH_SSL)
         SSL_INCLUDES  ?= [ Prebuilt-Includes openssl ] ;
         SSL_C++FLAGS  ?= [ Prebuilt-CxxFlags openssl ] ;
         SSL_LINKLIBS  ?= [ Prebuilt-LinkLibs openssl ] ;
-        SSL_LIBDIR    ?= [ Prebuilt-LibDir openssl ] ;
+        SSL_LIBDIR    ?= [ Prebuilt-LibPath openssl ] ;
         SSL_LINKFLAGS ?= [ Prebuilt-LinkFlags openssl ] ;
     }
 
@@ -684,17 +685,34 @@ They never mention `PREBUILT_ROOT`. Builtin vs. prebuilt remains
 
 ---
 
-## 9. Deploy files
+## 9. Caller-owned deployment
 
-Deploy files are the `bin/` trees of the **chosen** ABI. Each package lists
-its own files in `PREBUILT_PACKAGE_DEPLOY.$(pkg)` (names in `$(pkg)/bin`).
+The prefix contains complete native `bin/` and `lib/` trees. It does not
+designate deploy files: a package `bin/` can contain programs as well as
+runtime libraries, while Linux and macOS shared libraries commonly remain in
+`lib/`.
 
-- `jam install` / app staging: copy `Prebuilt-Deploy` of the packages the
-  app actually uses, closed over `PREBUILT_PACKAGE_DEPENDS`, next to the
-  exe or into `PT_INSTALL_BINDIR`.
-- Static `.lib` / `.a` in `lib/` do not ship with the binary.
-- Transitive DLLs (brotli / bzip2 of FreeType) live in their own package
-  directories in the prefix when the producer copied `cpp_info.bindirs`.
+An application chooses package scope and source areas without naming files:
+
+```jam
+local packages = [ Prebuilt-Packages ] ;
+local sources = [ Prebuilt-Bin $(packages) ] ;
+sources += [ Prebuilt-Lib $(packages) ] ;
+
+for local src in $(sources)
+{
+    local dest = $(src:BS) ;
+    File $(dest) : $(src) ;
+    MakeLocate $(dest) : $(PT_OUTPUT_TARGET) ;
+    Clean clean : $(dest) ;
+    InstallFile $(PT_INSTALL_BINDIR) : $(src) ;
+}
+```
+
+For a smaller set, pass direct package names to `Prebuilt-Bin` or
+`Prebuilt-Lib`. To include transitive package content deliberately, first use
+`local packages = [ Prebuilt-Depends openssl ] ;`. The caller owns the
+selection of source area, dependency closure, and destination.
 
 Windows: **`mdd` is not redistributable.** Debug CRT (`MSVCP*D.dll`,
 `VCRUNTIME*D.dll`) is not in the VC redistributable, only on machines with
@@ -794,11 +812,12 @@ Conan exists only in the GitHub Action.
 - Write `jam/packages.jam` from `cpp_info`: `libs` → `PREBUILT_PACKAGE_LIBS`,
   `requires` → `PREBUILT_PACKAGE_DEPENDS`, `system_libs` →
   `PREBUILT_PACKAGE_SYSLIBS`, `frameworks` → `PREBUILT_PACKAGE_FRAMEWORKS`,
-  `bindirs` → `PREBUILT_PACKAGE_DEPLOY`, extra `includedirs` →
-  `PREBUILT_PACKAGE_INCLUDES`. The result is the same file a person would write.
+  extra `includedirs` → `PREBUILT_PACKAGE_INCLUDES`. Copy complete `lib/` and
+  `bin/` trees without classifying or relocating files. The result is the same
+  file a person would write.
 - Do **not** emit `ZLIB_INCLUDES` / `PNG_LINKLIBS` from the generator. That
   mapping is `jam/prebuilt.jam`.
-- Windows: two installs → two prefixes (or two zips): `...-md`, `...-mdd`.
+- Windows: two installs → two bundles (or two zips): `...-md`, `...-mdd`.
 - macOS / Linux: one untagged prefix until an ABI split exists.
 - Assert: `zlib/include/zlib.h`, `zlib/lib/zlib.lib` or `libz.a`, `bin/`
   when shared, `jam/packages.jam`, **no** version tree, **no** absolute CI
