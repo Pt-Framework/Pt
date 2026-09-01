@@ -494,12 +494,7 @@ command line. It must not look like a second search space (`DEPS_INCLUDES` /
 
 ### 8.1 Load the prefix, do not apply it
 
-The legacy `--with-platform-sdk` flow fetches an archive and `include`s a generated
-`platform-sdk-release.jam` / `platform-sdk-debug.jam` that assigns `ZLIB_*`
-directly and still encodes `full_deploy/host/...` paths.
-
-Replace that include with a load of `jam/packages.jam`. `--with-prebuilt`
-or `--fetch-prebuilt` selects the layer. Fetch runs only for
+`--with-prebuilt` or `--fetch-prebuilt` selects the layer. Fetch runs only for
 `--fetch-prebuilt`, and only into the default cache. Mapping `CONFIG` →
 `md` / `mdd` happens here, not inside the zip.
 
@@ -780,14 +775,12 @@ Not prebuilt-layer flags, unchanged, and still stronger than the layer:
   always win (`?=` does not overwrite)
 - `--with-inline-xxx`: force vendor; skips `*-Configure`
 
-Not used: `--with-prebuilt-root`, `--with-platform-sdk`, `--sdk-root`,
-`--sdk-abi`, `--fetch-sdk`, `--no-fetch`.
+Not used: `--with-prebuilt-root`, `--no-fetch`.
 
 Identity in the archive name and directory is `windows-x64-msvc-md` or
 macos-arm64-clang`, not `x64-windows`. A single zip that contains both
-`platform-sdk-release.jam` and `platform-sdk-debug.jam` is the debug/release
-layout this design removes. One cache. Never mix `md` and `mdd` in one
-search path.
+ABI variants is the debug/release layout this design removes. One cache.
+Never mix `md` and `mdd` in one search path.
 
 ---
 

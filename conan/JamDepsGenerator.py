@@ -15,19 +15,11 @@ Usage (in a conanfile.py)
         def generate(self):
             JamDepsGenerator(self).generate()
 
-    # Relocatable platform-sdk zip (paths under $(PLATFORM_SDK_ROOT)):
-            JamDepsGenerator(self,
-                             root_var="PLATFORM_SDK_ROOT",
-                             output_filename="platform-sdk-release.jam").generate()
-
 Generated file format
 ---------------------
     PNG_INCLUDES = C:/path/to/include ;
     PNG_LIBDIR   = C:/path/to/lib ;
     PNG_LINKLIBS = [ FLinkLibs png16 ] ;
-
-    # with root_var=PLATFORM_SDK_ROOT:
-    PNG_INCLUDES = [ FDirName $(PLATFORM_SDK_ROOT) full_deploy host libpng 1.6.44 Release x86_64 include ] ;
 
 Jam variable naming convention
 -------------------------------
