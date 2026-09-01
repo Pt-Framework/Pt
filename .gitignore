@@ -2,8 +2,6 @@
 build/
 tmp/
 deploy/
-deps/
-platform/
 /prebuilt/
 Jamrules*
 jam*.bin

@@ -150,7 +150,7 @@ def _write_packages_jam(path, prebuilt_id, packages):
         pkg = by_name[name]
         fields = [
             ("PREBUILT_PACKAGE_LIBS.{}".format(name), pkg["libs"]),
-            ("PLATFORM_PACKAGE_LIBPATH.{}".format(name), pkg["libpath"]),
+            ("PREBUILT_PACKAGE_LIBPATH.{}".format(name), pkg["libpath"]),
             ("PREBUILT_PACKAGE_DEPENDS.{}".format(name), pkg["depends"]),
             ("PREBUILT_PACKAGE_SYSLIBS.{}".format(name), pkg["syslibs"]),
             ("PREBUILT_PACKAGE_FRAMEWORKS.{}".format(name), pkg["frameworks"]),

@@ -203,9 +203,9 @@ jobs:
           foreach ($m in [regex]::Matches($text, 'PREBUILT_PACKAGE_LIBS\.(\S+)\s+=\s+([^;]+);')) {
             $pkg = $m.Groups[1].Value
             $libs = $m.Groups[2].Value.Trim() -split '\s+' | Where-Object { $_ }
-            $libPathMatch = [regex]::Match($text, "PLATFORM_PACKAGE_LIBPATH\.$([regex]::Escape($pkg))\s+=\s+([^;]+);")
+            $libPathMatch = [regex]::Match($text, "PREBUILT_PACKAGE_LIBPATH\.$([regex]::Escape($pkg))\s+=\s+([^;]+);")
             if (-not $libPathMatch.Success) {
-              Write-Error "packages.jam missing PLATFORM_PACKAGE_LIBPATH.$pkg"
+              Write-Error "packages.jam missing PREBUILT_PACKAGE_LIBPATH.$pkg"
               exit 1
             }
             $libPaths = $libPathMatch.Groups[1].Value.Trim() -split '\s+' | Where-Object { $_ }
@@ -219,7 +219,7 @@ jobs:
                 }
               }
               if (-not $found) {
-                Write-Error "Missing library $lib in PLATFORM_PACKAGE_LIBPATH.$pkg"
+                Write-Error "Missing library $lib in PREBUILT_PACKAGE_LIBPATH.$pkg"
                 exit 1
               }
             }

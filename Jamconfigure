@@ -460,23 +460,22 @@ if ! $(WITH_ATOMICS)
 }
 
 #############################################################################
-# Platform dependencies
+# Prebuilt dependencies
 #############################################################################
 
-# TODO: rename Platform API to PREBUILT
+Load prebuilt.jam ;
 
-Load platform.jam ;
+PT_PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
+PT_FETCH_PREBUILT_ID ?= [ GetOption --fetch-prebuilt ] ;
+PT_PREBUILT_RELEASE ?= prebuilt-1 ;
 
-PT_PLATFORM_ID ?= [ GetOption --with-platform ] ;
-PT_FETCH_PLATFORM_ID ?= [ GetOption --fetch-platform ] ;
-
-if $(PT_FETCH_PLATFORM_ID)
+if $(PT_FETCH_PREBUILT_ID)
 {
-    PT_PLATFORM_ID = $(PT_FETCH_PLATFORM_ID) ;
+    PT_PREBUILT_ID = $(PT_FETCH_PREBUILT_ID) ;
 }
 
-if --with-platform in $(ARGV) || $(PT_PLATFORM_ID) ||
-   --fetch-platform in $(ARGV) || $(PT_FETCH_PLATFORM_ID)
+if --with-prebuilt in $(ARGV) || $(PT_PREBUILT_ID) ||
+   --fetch-prebuilt in $(ARGV) || $(PT_FETCH_PREBUILT_ID)
 {
     local abi ;
     if $(TARGET_OS:L) in nt win32 windows
@@ -488,21 +487,20 @@ if --with-platform in $(ARGV) || $(PT_PLATFORM_ID) ||
         }
     }
 
-    PT_PLATFORM_ID ?= [ Platform-Tuple $(abi) ] ;
-    PT_PLATFORM_ROOT = [ FDirName $(PT_TOP) platform $(PT_PLATFORM_ID) ] ;
-    EchoOption --with-platform : "Using platform" : $(PT_PLATFORM_ID) ;
+    PT_PREBUILT_ID ?= [ Prebuilt-Tuple $(abi) ] ;
+    PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PT_PREBUILT_ID) ] ;
+    EchoOption --with-prebuilt : "Using prebuilt" : $(PT_PREBUILT_ID) ;
 
-    if --fetch-platform in $(ARGV) || $(PT_FETCH_PLATFORM_ID)
+    if --fetch-prebuilt in $(ARGV) || $(PT_FETCH_PREBUILT_ID)
     {
-        local version = "platform-1" ;
-        local platfromUrl = "https://github.com/Pt-Framework/Pt/releases/download/$(version)" ;
-        local url = [ FDirName $(platfromUrl) $(PT_PLATFORM_ID:S=.zip) ] ;
-        EchoOption --fetch-platform : "Fetch platform" : $(PT_PLATFORM_ID) ;
+        local prebuiltUrl = "https://github.com/Pt-Framework/Pt/releases/download/$(PT_PREBUILT_RELEASE)" ;
+        local url = [ FDirName $(prebuiltUrl) $(PT_PREBUILT_ID:S=.zip) ] ;
+        EchoOption --fetch-prebuilt : "Fetch prebuilt" : $(PT_PREBUILT_ID) ;
 
-        Platform-Fetch $(url) : $(PT_PLATFORM_ROOT) ;
+        Prebuilt-Fetch $(url) : $(PT_PREBUILT_ROOT) ;
     }
 
-    Platform-Import $(PT_PLATFORM_ROOT) ;
+    Prebuilt-Import $(PT_PREBUILT_ROOT) ;
 }
 
 #############################################################################
@@ -518,13 +516,13 @@ if --with-inline-zlib in $(ARGV)
 
 if ! $(WITH_BUILTIN_ZLIB)
 {
-    if $(PT_PLATFORM_ROOT)
+    if $(PT_PREBUILT_ROOT)
     {
-        ZLIB_INCLUDES  ?= [ Platform-Includes zlib ] ;
-        ZLIB_C++FLAGS  ?= [ Platform-CxxFlags zlib ] ;
-        ZLIB_LINKLIBS  ?= [ Platform-LinkLibs zlib ] ;
-        ZLIB_LIBDIR    ?= [ Platform-LibDir zlib ] ;
-        ZLIB_LINKFLAGS ?= [ Platform-LinkFlags zlib ] ;
+        ZLIB_INCLUDES  ?= [ Prebuilt-Includes zlib ] ;
+        ZLIB_C++FLAGS  ?= [ Prebuilt-CxxFlags zlib ] ;
+        ZLIB_LINKLIBS  ?= [ Prebuilt-LinkLibs zlib ] ;
+        ZLIB_LIBDIR    ?= [ Prebuilt-LibPath zlib ] ;
+        ZLIB_LINKFLAGS ?= [ Prebuilt-LinkFlags zlib ] ;
     }
 
     WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
@@ -581,13 +579,13 @@ if --with-inline-libpng in $(ARGV)
 
 if ! $(WITH_BUILTIN_LIBPNG)
 {
-    if $(PT_PLATFORM_ROOT)
+    if $(PT_PREBUILT_ROOT)
     {
-        PNG_INCLUDES  ?= [ Platform-Includes png ] ;
-        PNG_C++FLAGS  ?= [ Platform-CxxFlags png ] ;
-        PNG_LINKLIBS  ?= [ Platform-LinkLibs png ] ;
-        PNG_LIBDIR    ?= [ Platform-LibDir png ] ;
-        PNG_LINKFLAGS ?= [ Platform-LinkFlags png ] ;
+        PNG_INCLUDES  ?= [ Prebuilt-Includes png ] ;
+        PNG_C++FLAGS  ?= [ Prebuilt-CxxFlags png ] ;
+        PNG_LINKLIBS  ?= [ Prebuilt-LinkLibs png ] ;
+        PNG_LIBDIR    ?= [ Prebuilt-LibPath png ] ;
+        PNG_LINKFLAGS ?= [ Prebuilt-LinkFlags png ] ;
     }
 
     WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) :
@@ -635,13 +633,13 @@ if --with-inline-libjpeg in $(ARGV)
 
 if ! $(WITH_BUILTIN_LIBJPEG)
 {
-    if $(PT_PLATFORM_ROOT)
+    if $(PT_PREBUILT_ROOT)
     {
-        JPEG_INCLUDES  ?= [ Platform-Includes jpeg ] ;
-        JPEG_C++FLAGS  ?= [ Platform-CxxFlags jpeg ] ;
-        JPEG_LINKLIBS  ?= [ Platform-LinkLibs jpeg ] ;
-        JPEG_LIBDIR    ?= [ Platform-LibDir jpeg ] ;
-        JPEG_LINKFLAGS ?= [ Platform-LinkFlags jpeg ] ;
+        JPEG_INCLUDES  ?= [ Prebuilt-Includes jpeg ] ;
+        JPEG_C++FLAGS  ?= [ Prebuilt-CxxFlags jpeg ] ;
+        JPEG_LINKLIBS  ?= [ Prebuilt-LinkLibs jpeg ] ;
+        JPEG_LIBDIR    ?= [ Prebuilt-LibPath jpeg ] ;
+        JPEG_LINKFLAGS ?= [ Prebuilt-LinkFlags jpeg ] ;
     }
 
     WITH_JPEG = [ Jpeg-Configure $(JPEG_INCLUDES) : $(JPEG_C++FLAGS) :
@@ -690,13 +688,13 @@ if --with-inline-freetype in $(ARGV)
 
 if ! $(WITH_BUILTIN_FREETYPE)
 {
-    if $(PT_PLATFORM_ROOT)
+    if $(PT_PREBUILT_ROOT)
     {
-        FREETYPE_INCLUDES  ?= [ Platform-Includes freetype ] ;
-        FREETYPE_C++FLAGS  ?= [ Platform-CxxFlags freetype ] ;
-        FREETYPE_LINKLIBS  ?= [ Platform-LinkLibs freetype ] ;
-        FREETYPE_LIBDIR    ?= [ Platform-LibDir freetype ] ;
-        FREETYPE_LINKFLAGS ?= [ Platform-LinkFlags freetype ] ;
+        FREETYPE_INCLUDES  ?= [ Prebuilt-Includes freetype ] ;
+        FREETYPE_C++FLAGS  ?= [ Prebuilt-CxxFlags freetype ] ;
+        FREETYPE_LINKLIBS  ?= [ Prebuilt-LinkLibs freetype ] ;
+        FREETYPE_LIBDIR    ?= [ Prebuilt-LibPath freetype ] ;
+        FREETYPE_LINKFLAGS ?= [ Prebuilt-LinkFlags freetype ] ;
     }
 
     WITH_FREETYPE = [ Freetype-Configure $(FREETYPE_INCLUDES) : $(FREETYPE_C++FLAGS) :
@@ -772,7 +770,7 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
     }
 }
 
-if ! $(WITH_SSL) && ! $(PT_PLATFORM_ROOT)
+if ! $(WITH_SSL) && ! $(PT_PREBUILT_ROOT)
 {
     SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-framework Foundation -framework Security") ;
 
@@ -793,13 +791,13 @@ if ! $(WITH_SSL) && ! $(PT_PLATFORM_ROOT)
 
 if ! $(WITH_SSL)
 {
-    if $(PT_PLATFORM_ROOT)
+    if $(PT_PREBUILT_ROOT)
     {
-        SSL_INCLUDES  ?= [ Platform-Includes openssl ] ;
-        SSL_C++FLAGS  ?= [ Platform-CxxFlags openssl ] ;
-        SSL_LINKLIBS  ?= [ Platform-LinkLibs openssl ] ;
-        SSL_LIBDIR    ?= [ Platform-LibDir openssl ] ;
-        SSL_LINKFLAGS ?= [ Platform-LinkFlags openssl ] ;
+        SSL_INCLUDES  ?= [ Prebuilt-Includes openssl ] ;
+        SSL_C++FLAGS  ?= [ Prebuilt-CxxFlags openssl ] ;
+        SSL_LINKLIBS  ?= [ Prebuilt-LinkLibs openssl ] ;
+        SSL_LIBDIR    ?= [ Prebuilt-LibPath openssl ] ;
+        SSL_LINKFLAGS ?= [ Prebuilt-LinkFlags openssl ] ;
     }
 
     WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS) :
@@ -837,7 +835,7 @@ EchoOption SSL_LINKLIBS : "SSL libs" ;
 Configure SSL_LINKFLAGS ;
 EchoOption SSL_LINKFLAGS : "SSL link flags" ;
 
-if $(PT_PLATFORM_ROOT)
+if $(PT_PREBUILT_ROOT)
 {
     local pkgs ;
 
@@ -868,9 +866,9 @@ if $(PT_PLATFORM_ROOT)
 
     if $(pkgs)
     {
-        PT_PLATFORM_INSTALL = [ Platform-Deploy $(pkgs) ] ;
-        Configure PT_PLATFORM_INSTALL ;
-        EchoOption PT_PLATFORM_INSTALL : "platform install files" ;
+        PT_PREBUILT_INSTALL = [ Prebuilt-Deploy $(pkgs) ] ;
+        Configure PT_PREBUILT_INSTALL ;
+        EchoOption PT_PREBUILT_INSTALL : "prebuilt install files" ;
     }
 }
 

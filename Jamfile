@@ -169,12 +169,12 @@ PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Forms ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 #############################################################################
-# Platform prefix deploy files
+# Prebuilt prefix deploy files
 #############################################################################
 
-if $(PT_PLATFORM_INSTALL)
+if $(PT_PREBUILT_INSTALL)
 {
-    for local src in $(PT_PLATFORM_INSTALL)
+    for local src in $(PT_PREBUILT_INSTALL)
     {
         local dest = $(src:BS) ;
         File $(dest) : $(src) ;

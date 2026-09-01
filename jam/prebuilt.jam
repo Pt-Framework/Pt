@@ -214,7 +214,7 @@ rule Prebuilt-LinkLibs ( packages + )
 
 # Prebuilt-LibPath <packages>
 #
-# Library paths of the named packages. PLATFORM_PACKAGE_LIBPATH.$(pkg) is
+# Library paths of the named packages. PREBUILT_PACKAGE_LIBPATH.$(pkg) is
 # prefix-relative; otherwise $(pkg)/lib. Shared: named packages. Static:
 # PREBUILT_PACKAGE_DEPENDS.$(pkg) closure (the link probe must see dependent
 # archives).
@@ -231,7 +231,7 @@ rule Prebuilt-LibPath ( packages + )
 
     for local pkg in $(pkgs)
     {
-        local paths = $(PLATFORM_PACKAGE_LIBPATH.$(pkg)) ;
+        local paths = $(PREBUILT_PACKAGE_LIBPATH.$(pkg)) ;
         if ! $(paths)
         {
             paths = $(pkg)/lib ;
