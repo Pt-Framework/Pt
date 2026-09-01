@@ -154,6 +154,7 @@ def _write_packages_jam(path, prebuilt_id, packages):
             ("PREBUILT_PACKAGE_DEPENDS.{}".format(name), pkg["depends"]),
             ("PREBUILT_PACKAGE_SYSLIBS.{}".format(name), pkg["syslibs"]),
             ("PREBUILT_PACKAGE_FRAMEWORKS.{}".format(name), pkg["frameworks"]),
+            ("PREBUILT_PACKAGE_LINKFLAGS.{}".format(name), pkg["linkflags"]),
             ("PREBUILT_PACKAGE_DEFINES.{}".format(name), pkg["defines"]),
             ("PREBUILT_PACKAGE_INCLUDES.{}".format(name), pkg["includes"]),
             ("PREBUILT_PACKAGE_DEPLOY.{}".format(name), pkg["deploy"]),
@@ -232,6 +233,8 @@ def deploy(graph, output_folder, **kwargs):
         libs = [l for l in (cpp.libs or []) if l]
         syslibs = [l for l in (cpp.system_libs or []) if l]
         frameworks = [f for f in (cpp.frameworks or []) if f]
+        linkflags = [f for f in (cpp.sharedlinkflags or []) if f]
+        linkflags.extend(f for f in (cpp.exelinkflags or []) if f and f not in linkflags)
         defines = [d for d in (cpp.defines or []) if d]
 
         packages.append({
@@ -242,6 +245,7 @@ def deploy(graph, output_folder, **kwargs):
             "depends": [],
             "syslibs": syslibs,
             "frameworks": frameworks,
+            "linkflags": linkflags,
             "defines": defines,
             "includes": _extra_includes(pkg_name, cpp, package_folder),
             "deploy": deploy_files,
