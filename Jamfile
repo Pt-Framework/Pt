@@ -35,7 +35,6 @@ rule Moc
 #############################################################################
 # General values and settings
 #############################################################################
-# test
 Load unittest.jam ;
 Load lsbpkg.jam ;
 
@@ -174,9 +173,7 @@ InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Forms ] : $(PT_INSTALL_INCLUD
 
 if $(PT_PREBUILT_ROOT)
 {
-    local packages = [ Prebuilt-Packages ] ;
-    local sources = [ Prebuilt-Bin $(packages) ] ;
-    sources += [ Prebuilt-Lib $(packages) ] ;
+    local sources = $(PT_PREBUILT_BIN_FILES) $(PT_PREBUILT_LIB_FILES) ;
 
     for local src in $(sources)
     {
@@ -259,12 +256,6 @@ if $(PT_SYSTEM)
     {
         SubInclude PT_TOP src Pt-Forms egl-test ;
     }
-
-    #if $(GUI)
-    #{
-    #    SubInclude PT_TOP src Pt-Gui ;
-    #}
-
     if $(WITH_MFC) = yes
     {
         SubInclude PT_TOP src Pt-Mfc ;
