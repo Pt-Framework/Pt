@@ -296,8 +296,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.PREBUILT_TAG }}
-          name: "Pt prebuilt (${{ env.PREBUILT_TAG }})"
-          body: Precompiled prebuilt prefixes for Windows x64 MSVC, ABIs md and mdd (zlib, png, jpeg, freetype, openssl)
+          name: "Pt Prebuilt Dependencies (${{ env.PREBUILT_TAG }})"
+          body: Precompiled dependencies (zlib, png, jpeg, freetype, openssl)
           files: |
             ${{ github.workspace }}/artifacts/*.zip
             ${{ github.workspace }}/artifacts/*.zip.manifest
