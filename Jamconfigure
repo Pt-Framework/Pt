@@ -500,12 +500,15 @@ if --with-prebuilt in $(ARGV) || $(PT_PREBUILT_ID) ||
         Prebuilt-Fetch $(url) : $(PT_PREBUILT_ROOT) ;
     }
 
+    Configure PT_PREBUILT_ROOT ;
+}
+
+if $(PT_PREBUILT_ROOT)
+{
     Prebuilt-Import $(PT_PREBUILT_ROOT) ;
     local packages = [ Prebuilt-Packages ] ;
     PT_PREBUILT_BIN_FILES = [ Prebuilt-Bin $(packages) ] ;
     PT_PREBUILT_LIB_FILES = [ Prebuilt-Lib $(packages) ] ;
-
-    Configure PT_PREBUILT_ROOT ;
     Configure PT_PREBUILT_BIN_FILES ;
     Configure PT_PREBUILT_LIB_FILES ;
 }

@@ -177,11 +177,14 @@ if $(PT_PREBUILT_ROOT)
 
     for local src in $(sources)
     {
-        local dest = $(src:BS) ;
-        File $(dest) : $(src) ;
-        MakeLocate $(dest) : $(PT_OUTPUT_TARGET) ;
-        Clean clean : $(dest) ;
-        InstallFile $(PT_INSTALL_BINDIR) : $(src) ;
+        if $(src:S) = $(SUFDLL)
+        {
+            local dest = $(src:BS) ;
+            File $(dest) : $(src) ;
+            MakeLocate $(dest) : $(PT_OUTPUT_TARGET) ;
+            Clean clean : $(dest) ;
+            InstallFile $(PT_INSTALL_BINDIR) : $(src) ;
+        }
     }
 }
 
