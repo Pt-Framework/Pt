@@ -3,6 +3,16 @@ applyTo: "**/*.h"
 description: "API Documentation"
 ---
 
+# User Documentation
+
+- Write for a reader who will use the feature, not for the person who
+  implemented it. ASCII only.
+- Full sentences and short paragraphs. Lead with what the thing is or what
+  the reader does, then the command, identifier, or example.
+- Use plain language in running text. Keep real identifiers as names
+  (`--with-prebuilt`, `PREBUILT_ROOT`). Do not stack jargon
+  (not "relocatable ABI tree under the identity directory").
+
 # Documentation Structure
 
 Doxygen documentation for classes/functions/groups is the foundation.
@@ -52,11 +62,19 @@ features for agents.
   - Example: group `Pt-Signals` → page `Pt-Signals-Page`.
   - Section anchors use the page ID as prefix with hyphens:
     `Pt-Signals-Page-Signals`.
-- Pages contain **no new content** — only `@copydetails` references.
+- API topic pages (`pt-signals.page`, ...) contain **no new content** —
+  only `@copydetails` references to groups and types.
 - Use `@copydetails <GroupId>` in a page to pull in group documentation.
 - Use `@section <anchor> <Title>` to introduce page subsections.
 - Use `@copydetails <Qualified::Name>` in a page to pull in class or function
   documentation.
+- Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
+  contain original prose and follow User-Facing Prose. They must not
+  repeat API reference that already lives in a group, or steps that
+  already live on another guide page.
+- Do not repeat another page. Point to it with `@ref` instead.
+- `@code` for commands, `@verbatim` for directory trees and URLs,
+  `@section` for headings.
 
 # Agent Instructions
 

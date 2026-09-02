@@ -1,138 +1,134 @@
-# Prebuilt Layer for Jam-Based Frameworks
+/** \page jam-prebuilt-page Prebuilt Dependencies
 
-Architecture concept. Platinum (Pt) is the reference consumer. The same model
-applies to any Jam project that must ship third-party libraries without putting
-Conan or vcpkg on the user's path.
+A Jam project can take third-party libraries from a prebuilt dependency bundle
+instead of from the system or from sources in the tree. A bundle is a directory
+of already compiled headers and libraries for one platform. The published
+bundles might include zlib, libpng, libjpeg, FreeType or OpenSSL.
 
----
+The bundle is placed under the @c prebuilt directory in the project root. Each
+platform has its own subdirectory, for example @c prebuilt/windows-x64-msvc-md.
+Those files contain no absolute paths, so the directory can be moved or unpacked
+as a whole.
 
-## 1. Purpose
+Prebuilt libraries are used only when passing @c --with-prebuilt or
+@c --fetch-prebuilt. They do not replace the compiler, and they do not change
+the global compiler or linker flags. See @ref jam-usage for the rest of the
+configure and build process.
 
-Jam remains a build system, not a package-manager frontend. A user needs Jam,
-a compiler, and optionally Fetch. Conan runs only in CI, where it produces
-relocatable ABI bundles.
+@section jam-prebuilt-page-Using Using Prebuilt Dependencies
 
-Three supply paths exist in parallel. None replaces the others.
+The usual first-time command downloads the matching bundle if needed, then
+configures the build:
 
-1. System / toolchain sysroot:
-     Linux, Yocto, manufacturer sysroot, Homebrew
-2. Prebuilt prefix:
-     Windows / macOS without system zlib, png, jpeg, FreeType, OpenSSL
-3. Vendor / inline sources:
-     builds without external dependencies, same flags as the project
+@code
+jam.bat configure --fetch-prebuilt
+./jam.sh configure --fetch-prebuilt
+@endcode
 
-Configure flags and env vars (`ZLIB_INCLUDES=...`, `--with-xxx-dir`) override
-whichever of the three is in use, and they always win.
+If the bundle is already on disk, pass @c --with-prebuilt instead. Jam picks
+the platform folder from the current OS, CPU and toolset. The command fails if
+that folder is missing. No network access is performed.
 
-The prebuilt prefix is a **hint source** for the existing per-package
-Configure rules. It is not a compiler sysroot and it does not mutate global
-`C++FLAGS` or `LINKFLAGS`.
+@code
+./jam.sh configure --with-prebuilt
+@endcode
 
----
+Either flag may take an explicit platform name. That pins the folder under
+@c prebuilt, still without downloading with @c --with-prebuilt:
 
-## 2. Configure priority
+@code
+./jam.sh configure --with-prebuilt=windows-x64-msvc-md
+./jam.sh configure --with-prebuilt=macos-arm64-clang
+./jam.sh configure --fetch-prebuilt=windows-x64-msvc-md
+@endcode
 
-The cascade depends on whether a prebuilt prefix was selected.
+@c --fetch-prebuilt already selects prebuilt libraries; @c --with-prebuilt is
+not required next to it. Do not combine @c --fetch-prebuilt with
+@c --with-prebuilt=name. Fetch always writes into the platform folder under
+@c prebuilt. A stale folder is refreshed only by @c --fetch-prebuilt;
+@c --with-prebuilt will not contact the network.
 
-**Prebuilt not selected** (no `--with-prebuilt` / `--fetch-prebuilt`):
+The platform folder name is @c os-arch-toolset, with an extra suffix on
+Windows. Jam builds it from @c TARGET_OS, @c TARGET_OSPLAT and @c TOOLSET:
 
-1. User paths / env / `ZLIB_LINKLIBS=...`
-2. System: pkg-config and compile/link probes (`ZLib-Configure` with empty hints)
-3. Vendor / inline sources
+- @c nt / @c win32 become @c windows; @c macosx becomes @c macos
+- @c x86_64 / @c amd64 become @c x64; @c aarch64 becomes @c arm64
+- Visual Studio toolsets @c vc* become @c msvc
 
-**Prebuilt selected:**
+Examples:
 
-1. User paths / env / `--with-inline-xxx` — still always win
-2. Prebuilt prefix, injected as the same five hints `*-Configure` already
-   accepts
-3. Vendor / inline sources, if the prebuilt probe fails
+- @c windows-x64-msvc-md
+- @c windows-x64-msvc-mdd
+- @c macos-arm64-clang
+- @c linux-x64-clang
 
-There is no unhinted first probe when the prebuilt is selected. On POSIX,
-`ZLib-Configure` with empty arguments finds `/usr/include/zlib.h` and `-lz`.
-A second "then try the prebuilt" step would never run, and prebuilt png would
-be linked against system zlib.
+Windows always has a suffix for the C runtime. A debug build without
+optimization maps to @c mdd, otherwise @c md. Other operating systems omit the
+suffix until a second runtime variant exists. The project's debug/release
+setting and that Windows suffix are separate: on Linux and macOS the same
+folder is used for both debug and release builds.
 
-There is no silent fallback between two prebuilt ABIs. If the chosen prefix
-is missing: error, or vendor, reported clearly.
+The default location is @c prebuilt/<name> in the project root. The download
+uses the release tag @c PREBUILT_RELEASE (default @c prebuilt-1). The zip URL
+is:
 
-`--with-prebuilt` names a prefix that must already exist (default cache, or
-`=<root>`). `--fetch-prebuilt` is the same load, after downloading that
-prefix into the default cache. Neither changes the meaning of user overrides.
+@verbatim
+https://github.com/Pt-Framework/Pt/releases/download/<PREBUILT_RELEASE>/<name>.zip
+@endverbatim
 
----
+Settings made explicitly always win. If any of the five package variables
+are set on the command line or in the environment, or if a flag is passed
+that builds that package from sources in the tree, prebuilt paths are not
+applied to that package. The following commands keep a hand-chosen zlib or
+build zlib from sources, while still using the bundle for the other libraries:
 
-## 3. What a prebuilt prefix is
+@code
+./jam.sh configure --with-prebuilt -sZLIB_INCLUDES=/opt/zlib/include
+./jam.sh configure --fetch-prebuilt --with-inline-zlib
+@endcode
 
-Not `full_deploy/host/zlib/1.3.1/Release/...`.
-Not `SetDependencyPath`.
-Not generated `-I` / `-L` / `-l` text.
-Not a global include or lib path applied to every translation unit.
+Flags such as @c --with-inline-zlib, @c --with-inline-libpng,
+@c --with-inline-libjpeg and @c --with-inline-freetype skip the corresponding
+Configure probe and build that package from sources in the tree.
 
-A prebuilt prefix is one **relocatable ABI tree**: identity, a package graph,
-and on-disk artifacts. The consumer maps package names to the framework
-variables `ZLIB_INCLUDES`, `ZLIB_C++FLAGS`, `ZLIB_LINKLIBS`, `ZLIB_LIBDIR`,
-`ZLIB_LINKFLAGS` (and the PNG / JPEG / FREETYPE / SSL equivalents). Existing
-`*-Configure` rules then probe those hints.
+Configure looks for each library in this order:
 
-Identity:
+@verbatim
+User settings / --with-inline-xxx
+        |
+        |  else, if a prebuilt folder was selected
+        v
+Prebuilt paths  ->  one package Configure probe
+        |
+        |  else (prebuilt not selected), or probe failed
+        v
+System / compiler paths / pkg-config
+        |
+        |  else
+        v
+Sources in the tree
+@endverbatim
 
-```text
-<os>-<arch>-<toolset>[-<abi>]
-windows-x64-msvc-md
-windows-x64-msvc-mdd
-macos-arm64-clang
-linux-x64-clang
-yocto-cortexa7-gcc
-```
+When prebuilt libraries are selected, the system is not consulted for packages
+listed in the bundle. When they are not selected, @c prebuilt is not consulted
+at all. There is no fallback from one platform folder to another. If the chosen
+folder is missing, configure reports an error. If a package probe against the
+bundle fails, that package falls back to sources in the tree.
 
-A prebuilt may export several ABIs. Each ABI is a complete prefix, not a
-`debug/lib` folder inside another prefix.
+@section jam-prebuilt-page-Layout Layout
 
-Windows currently has two ABIs because `/MD` and `/MDd` are two MSVC runtimes
-(`RuntimeLibrary`, `_ITERATOR_DEBUG_LEVEL`), not "zlib less optimized".
-Linux and macOS typically have one. Later splits (ASan, `mt`) are the same
-mechanism: extra artifact, same layout.
+One platform is one directory and one zip. Each library lives in its own
+subdirectory, named after @c PREBUILT_PACKAGES (@c zlib, @c png, @c jpeg,
+@c freetype, @c openssl).
 
-### 3.1 A single exported ABI has no name
-
-Do not call the only ABI `default`, `common`, or `standard`. Those words
-collide with "the ABI Configure picks" and they age badly: the day ASan
-appears, `standard` plus `asan` is a false pair.
-
-The ABI tag exists to distinguish **variants of the same**
-`<os>-<arch>-<toolset>`. If there is only one variant, the three-part
-identity is already unique. Omit the tag from the directory and the zip
-name.
-
-- One prefix: `macos-arm64-clang`, no ABI component
-- Split later: keep `macos-arm64-clang` for the original; add
-  `macos-arm64-clang-asan`. Do not rename the original to `...-standard`
-- Windows always has a tag (`md`, `mdd`) because it always has two
-
-`CONFIG` (project debug/release) and prebuilt ABI are different axes.
-Mapping is a prebuilt convention, not a universal debug/release pair:
-
-- Project release: Windows `md`; other OS the one untagged prefix
-- Project debug: Windows `mdd`; other OS the same untagged prefix
-
-Auto-map only where the prebuilt actually has a debug ABI.
-
----
-
-## 4. Layout of an ABI prefix
-
-Packages live in **per-package directories** under one ABI prefix. A flat
-`include/` + `lib/` sysroot would only pay off if the compiler saw the prefix
-globally. That is the model this design rejects.
-
-```text
-<prefix>/                          # one ABI, one zip, one contract file
+@verbatim
+prebuilt/<name>/
   jam/
-    packages.jam                   # data, no flags, no rules
+    packages.jam
   zlib/
     include/zlib.h
-    lib/zlib.lib                   # or libz.a / libz.dylib
-    bin/zlib.dll                   # omitted for static
+    lib/zlib.lib          (or libz.a / libz.dylib)
+    bin/zlib.dll          (omitted for static)
   png/
     include/png.h
     lib/png16.lib
@@ -143,111 +139,81 @@ globally. That is the model this design rejects.
     bin/...
   freetype/
     include/ft2build.h
-    include/freetype2/...          # extra dir allowed
+    include/freetype2/...
     lib/freetype.lib
     bin/freetype.dll
   openssl/
     include/openssl/...
     lib/libssl.lib libcrypto.lib
     bin/...
-```
+@endverbatim
 
-Directory names match `PREBUILT_PACKAGES` (`zlib`, `png`, `jpeg`,
-`freetype`, `openssl`), not Conan recipe names (`libpng`, `libjpeg-turbo`).
+Default locations, relative to @c PREBUILT_ROOT:
 
-Default locations, relative to the prefix:
+- Headers: @c $(pkg)/include
+- Libraries: @c $(pkg)/lib
+- Binaries: @c $(pkg)/bin
 
-- Headers: `$(pkg)/include`
-- Libraries: `$(pkg)/lib`
-- Binaries: `$(pkg)/bin`
+@c PREBUILT_PACKAGE_INCLUDES.$(pkg) is set only when that layout is not enough
+(FreeType's @c include/freetype2). The native @c lib/ and @c bin/ directories
+are kept complete. There are no version directories and no @c debug/ folder
+inside an @c md tree. Library names stay the same for a given platform folder
+(@c zlib.lib in both @c md and @c mdd).
 
-`PREBUILT_PACKAGE_INCLUDES.$(pkg)` exists only when that convention is not enough
-(FreeType's `include/freetype2`). The producer preserves the complete native
-`lib/` and `bin/` trees; it does not classify files by extension or move files
-between those directories.
+The directory can be moved as a whole because it contains no absolute paths.
+The project sets @c PREBUILT_ROOT before including @c jam/packages.jam.
 
-One zip per ABI. Not one zip per package (that would be a package manager).
-`md` and `mdd` are two prefixes, never two trees in one zip.
+@section jam-prebuilt-page-Manifest packages.jam
 
-No version directories, no `full_deploy`, no `debug/` inside `md`.
-Library names inside a given prefix are stable (`zlib.lib` in both `md` and
-`mdd`). Configure does not guess `zlib` / `zlibd` / `z` on the prebuilt path.
+Each bundle contains one Jam data file at @c jam/packages.jam. It assigns
+variables only: no rules and no toolset flags. The rules that use those
+variables live in @c jam/prebuilt.jam.
 
-Relocatable: no absolute paths in the zip. The consumer sets `PREBUILT_ROOT`
-before including `jam/packages.jam`.
+Names that describe the whole bundle use the prefix @c PREBUILT_. Names that
+vary by package use @c PREBUILT_PACKAGE_ plus a dotted package name, for
+example @c PREBUILT_PACKAGE_LIBS.zlib, which is read as
+@c $(PREBUILT_PACKAGE_LIBS.$(pkg)).
 
-Optional: `$(pkg)/lib/pkgconfig/` as a bonus. Jam does not need it.
+Bundle-wide variables:
 
----
+- @c PREBUILT_SCHEMA is the file format version. The project requires @c 1.
+- @c PREBUILT_ID is the same string as the directory and zip name.
+- @c PREBUILT_LINKAGE is @c shared or @c static. @c Prebuilt-LinkLibs uses
+  this when deciding whether to also link packages that this one depends on.
+- @c PREBUILT_PACKAGES lists the package names that have dotted keys.
 
-## 5. `jam/packages.jam` — data only
+Per-package variables. Omit empty lists. Values are names, tokens, or paths
+relative to @c PREBUILT_ROOT, never raw flags (@c -l, @c -I, @c -D,
+@c -framework, @c /LIBPATH):
 
-Jam syntax, **one file per ABI prefix**, at `<prefix>/jam/packages.jam`.
-Variables only: no schema engine, no rules, no toolset flags. Logic lives
-in the consumer (`jam/prebuilt.jam` in the framework). The file is writable
-by hand and readable without running Jam. Jam remains the canonical form.
+- @c PREBUILT_PACKAGE_LIBS.$(pkg): library names inside the bundle
+  (@c zlib, @c png16, @c ssl @c crypto). Not @c -lssl or @c zlib.lib.
+- @c PREBUILT_PACKAGE_DEPENDS.$(pkg): other packages in this bundle that
+  this one needs.
+- @c PREBUILT_PACKAGE_SYSLIBS.$(pkg): OS linker names that are not in the zip
+  (@c crypt32, @c ws2_32). Jam applies @c FLinkLibs.
+- @c PREBUILT_PACKAGE_FRAMEWORKS.$(pkg): macOS framework names.
+- @c PREBUILT_PACKAGE_DEFINES.$(pkg): preprocessor tokens, not @c -D.
+- @c PREBUILT_PACKAGE_INCLUDES.$(pkg): include paths relative to
+  @c PREBUILT_ROOT, only if not @c $(pkg)/include.
+- @c PREBUILT_PACKAGE_LIBPATH.$(pkg): library paths relative to
+  @c PREBUILT_ROOT, only if not @c $(pkg)/lib.
+- @c PREBUILT_PACKAGE_LINKFLAGS.$(pkg): extra linker flags.
+- @c PREBUILT_PACKAGE_VERSION.$(pkg): version string for documentation.
 
-Prefix-wide identity uses `PREBUILT_*`. Anything that varies by package
-uses `PREBUILT_PACKAGE_*` plus a dotted package name.
+@c PREBUILT_PACKAGE_DEPENDS lists every needed package in the same bundle. If
+png is in the bundle, zlib is in the bundle too. The project walks that list
+for include paths (always), for files to copy (when asked), and for extra
+link libraries (static linking only). There are no version ranges, no optional
+dependencies, and no search for a package outside the bundle.
 
-### 5.1 One file, not one file per package
+The file does not set @c ZLIB_LINKLIBS or @c SSL_LINKLIBS. Mapping package
+names to those project variables is done in @c jam/prebuilt.jam.
 
-There is no `zlib/package.jam`. Partial *use* of the prefix does not need
-it. Partial *shipping* (a zip that contains only zlib) is a package manager
-and is out of scope.
+Example:
 
-What "only part of the prebuilt" already means:
-
-- The zip still contains the whole prefix. One identity, one ABI, one
-  fetch.
-- `Jamconfigure` only calls `Prebuilt-Includes zlib` (and friends) for
-  packages it actually configures. Unused directories sit unused.
-- `--with-inline-png` still skips the png hints and builds inline png
-  against prebuilt zlib, or the other way around, through the existing
-  per-package blocks.
-
-What a per-package `package.jam` would add: a load graph. Including png's
-file would have to pull zlib's file because `PREBUILT_PACKAGE_DEPENDS.png = zlib`.
-That is dependency resolution at include time. This layer does not solve
-dependencies.
-
-`PREBUILT_PACKAGE_DEPENDS` is a **declared closed graph**, written by the producer,
-not a solver. The consumer walks it for include closure (always), deploy
-closure (shared DLLs next to the exe), and link closure (static only). No
-versions, no optional deps, no "find zlib elsewhere". If png is in the
-prefix, zlib is in the prefix.
-
-Identity (`PREBUILT_ID`, `PREBUILT_LINKAGE`) and the graph belong in one
-place. Splitting them across package files would duplicate the ABI on every
-file and make a hand-written prefix worse, not better.
-
-### 5.2 Indexed names (`PREBUILT_PACKAGE_LIBS.$(pkg)`)
-
-Jam has no maps. A variable whose name contains a dot is still one
-variable: `PREBUILT_PACKAGE_LIBS.zlib` is the literal name. Indexing is
-
-```jam
-$(PREBUILT_PACKAGE_LIBS.$(pkg))    # pkg = zlib  →  PREBUILT_PACKAGE_LIBS.zlib
-```
-
-That is the idiomatic Jam dictionary (`HDRRULE.$(target)`, and so on). It
-is a good idea here.
-
-Not used:
-
-- `PREBUILT_PACKAGE_LIBS_zlib` — works (`$(PREBUILT_PACKAGE_LIBS_$(pkg))`) but reads as a
-  different family from `PREBUILT_PACKAGE_LIBS`
-- Parallel lists (`PREBUILT_PACKAGES` plus a positional `PREBUILT_PACKAGE_LIBS`) —
-  fragile when a package is omitted
-- Putting `FLinkLibs` or paths in the file — toolset and relocatable root
-  belong in the consumer
-
-Dots are not a struct operator. Do not write `$(PREBUILT.LIBS.zlib)`.
-
-### 5.3 Example
-
-```jam
-# <prefix>/jam/packages.jam
+@code
+# prebuilt/<name>/jam/packages.jam
 if ! $(PREBUILT_PACKAGES_JAM_INCLUDED) {
 PREBUILT_PACKAGES_JAM_INCLUDED = true ;
 
@@ -276,274 +242,32 @@ PREBUILT_PACKAGE_SYSLIBS.openssl  = crypt32 ws2_32 advapi32 user32 ;
 PREBUILT_PACKAGE_VERSION.openssl  = 3.3.1 ;
 
 }
-```
+@endcode
 
-A macOS prefix uses a three-part `PREBUILT_ID` (`macos-arm64-clang`).
+A macOS bundle uses a three-part @c PREBUILT_ID such as @c macos-arm64-clang.
+The Windows @c mdd folder uses @c PREBUILT_ID = windows-x64-msvc-mdd, the same
+linkage, and different files on disk.
 
-Prefix-wide variables that earn their place:
+@section jam-prebuilt-page-Configure Configure Integration
 
-- `PREBUILT_SCHEMA`: contract version. Cheap, lets the consumer reject an
-  unknown file.
-- `PREBUILT_ID`: the identity string, same as the directory and zip name.
-  Echo and a mismatch check (`--fetch-prebuilt=windows-x64-msvc-md` pointed
-  at an `mdd` tree). Not used to invent compiler flags.
-- `PREBUILT_LINKAGE`: `shared` or `static`. This is the one identity field
-  `Prebuilt-LinkLibs` branches on for link closure. If every shipped prefix is
-  shared, it is still worth stating: a hand-written static prefix must not be
-  treated as shared.
-- `PREBUILT_PACKAGES`: which dotted keys exist. Do not scan the disk.
+Every package Configure rule has the same arguments:
 
-Not in the file — denormalized copies of `PREBUILT_ID`, of Jam, or of
-product policy:
-
-- `PREBUILT_OS` / `PREBUILT_ARCH` / `PREBUILT_TOOLSET`: Jam already has
-  `TARGET_OS`, `TARGET_OSPLAT`, `TOOLSET`. The compile probe fails if the
-  prefix does not match. Parsing `PREBUILT_ID` is enough if a check is
-  ever needed.
-- `PREBUILT_ABI`: already the optional fourth component of `PREBUILT_ID`.
-  Configure picked the prefix before `packages.jam` is read.
-- `PREBUILT_CRT` (`MD` / `MDd`): duplicate of the Windows ABI tag. The
-  project already has `/MD` or `/MDd`; the zip must not set them.
-- `PREBUILT_PUBLIC_ABI` (`c`): a product rule ("no STL in the prefix"),
-  not a Configure input.
-- `PREBUILT_REDIST`: `mdd` is not redistributable. That is a Windows fact
-  the framework already knows from the ABI tag, not data in the zip.
-
-### 5.4 Variable families
-
-- `PREBUILT_PACKAGE_LIBS.$(pkg)`: artifact names inside the prefix.
-  Not `-lssl`, `ssl.lib`, `libssl.lib`.
-- `PREBUILT_PACKAGE_DEPENDS.$(pkg)`: other packages in this prefix (the graph).
-  Not the link line, not a solver.
-- `PREBUILT_PACKAGE_SYSLIBS.$(pkg)`: linker names of the OS, not in the zip.
-  Not `-lpthread` as a flag.
-- `PREBUILT_PACKAGE_FRAMEWORKS.$(pkg)`: macOS framework names.
-  Not `-framework Security`.
-- `PREBUILT_PACKAGE_DEFINES.$(pkg)`: token, not `-D`.
-  Not raw `C++FLAGS`.
-- `PREBUILT_PACKAGE_INCLUDES.$(pkg)`: paths relative to the prefix, only if not
-  `$(pkg)/include`. Not `-I`.
-- `PREBUILT_PACKAGE_VERSION.$(pkg)`: documentation / manifest.
-  Not a search path.
-
-Omit empty lists. No `PREBUILT_ROOT` in the file. No `FLinkLibs`, no
-`C++FLAGS +=`, no `-L`, no `/LIBPATH`.
-
-Do not write `ZLIB_LINKLIBS` / `SSL_LINKLIBS` into the zip. Mapping package
-to consumer variable is the framework's job. The zip knows `zlib` / `png` /
-`openssl`. A MinGW prefix and an MSVC prefix differ in names and `syslibs`,
-not in flag syntax.
-
-The `mdd` prefix: `PREBUILT_ID = windows-x64-msvc-mdd`, same linkage,
-different on-disk artifacts.
-
----
-
-## 6. Include closure vs. link closure
-
-pkg-config abstracts over unknown distros. Here the package set is closed and
-the layout is known. This is not a pkg-config clone.
-
-Three things pkg-config mixes — kept separate:
-
-- Libs in the prefix (`freetype`, `png16`, `zlib`):
-  `PREBUILT_PACKAGE_LIBS` / `PREBUILT_PACKAGE_DEPENDS`
-- OS system libs (`crypt32`, `ws2_32`):
-  `PREBUILT_PACKAGE_SYSLIBS` — names; Jam applies `FLinkLibs`
-- Real flags (`-pthread`, `-framework`, `/DEFAULTLIB:`):
-  consumer / toolset, not the zip
-
-`pthread` stays `PTHREAD_LINKLIBS` from Configure. The prefix may store the
-name `pthread`, never `-lpthread`.
-
-**Includes are always transitive.** `png.h` includes `zlib.h`. `Pt-Gfx` does
-`SubDirHdrs $(PNG_INCLUDES)` and does not add `ZLIB_INCLUDES`. Therefore
-`Prebuilt-Includes png` returns `png/include` **and** `zlib/include`.
-That compile closure follows `PREBUILT_PACKAGE_DEPENDS` regardless of shared vs.
-static. Walking `PREBUILT_PACKAGE_DEPENDS` is closure of a known DAG, not resolving
-a dependency.
-
-**Deployment is caller-owned.** There is no `PREBUILT_DEPLOY_FILES` or
-per-file deployment metadata. `Prebuilt-Bin` and `Prebuilt-Lib` return all
-files from the selected native package directories. The caller decides whether
-to use direct packages, `[ Prebuilt-Depends <packages> ]`, or
-`[ Prebuilt-Packages ]`, and where selected files are staged or installed.
-
-**Link lines are not always transitive.**
-
-- Shared, Linux/mac, C ABI: direct `PREBUILT_PACKAGE_LIBS`
-- Shared, OpenSSL, MSVC: direct `PREBUILT_PACKAGE_LIBS` + `PREBUILT_PACKAGE_SYSLIBS`
-- Static: closure over `PREBUILT_PACKAGE_DEPENDS`, then all `libs` + `syslibs`
-- Framework as shared lib: apps link the framework; prefix DLLs are runtime
-- Framework as static lib: closure one step further onto the app link
-
-Shared `.dll` / `.so` / `.dylib` already record NEEDED. Dumping
-`PREBUILT_PACKAGE_DEPENDS` onto the command line is overlinking. `Pt-Gfx` already
-passes `ZLIB_LINKLIBS` separately from `PNG_LINKLIBS`.
-
-MSVC import libs: shared OpenSSL still needs `crypt32 ws2_32 advapi32 user32`
-on the line. That is why `PREBUILT_PACKAGE_SYSLIBS` exists.
-
-`FIncludes` and `FLibPath` expand lists (`-I$(<)`, `/LIBPATH:$(<)`).
-`CheckDependencyLinkC++` already takes `libdir *`. Several include dirs and
-several lib dirs on one package are valid.
-
----
-
-## 7. Consumer API (`jam/prebuilt.jam`)
-
-Not in the zip. Once per project. This is the framework file; the prefix
-file is `jam/packages.jam`.
-
-There is **no** `Prebuilt-Apply`. A rule that does
-
-```jam
-C++FLAGS  += [ FIncludes [ FDirName $(PREBUILT_ROOT) include ] ] ;
-LINKFLAGS += [ FLibPath  [ FDirName $(PREBUILT_ROOT) lib     ] ] ;
-```
-
-would put prebuilt headers and lib paths on every translation unit. That
-fights `SubDirHdrs $(ZLIB_INCLUDES)`, `--with-inline-zlib` (`ZLIB_INCLUDES`
-→ `src/zlib` while global `-I` still points at the prefix), and mixed
-sources (system png + prebuilt zlib). Jamfiles already consume per-package
-variables:
-
-- `*_INCLUDES`: `SubDirHdrs` in modules that use the package
-- `*_C++FLAGS`: `ObjectC++Flags` on specific sources
-- `*_LINKLIBS`: `LinkLibs` on the target
-- `*_LINKFLAGS`: `LinkFlags` on the target (`FLibPath` is already inside)
-- `*_LIBDIR`: Configure-time search hint only
-
-The prefix therefore fills that same five-tuple through rules. Toolset
-helpers stay in the consumer: `FLinkLibs`, `FIncludes`, `FDefines`,
-`FLibPath`.
-
-```jam
-rule Prebuilt-Import ( root )
-{
-    PREBUILT_ROOT = $(root) ;
-    include [ FDirName $(PREBUILT_ROOT) jam packages.jam ] ;
-}
-
-rule Prebuilt-Includes ( packages + )
-{
-    # Direct $(pkg)/include (or PREBUILT_PACKAGE_INCLUDES.$(pkg)),
-    # plus compile closure over PREBUILT_PACKAGE_DEPENDS.
-}
-
-rule Prebuilt-CxxFlags ( packages + )
-{
-    # [ FDefines $(PREBUILT_PACKAGE_DEFINES.$(pkg)) ] — empty for the current C packages
-}
-
-rule Prebuilt-LinkLibs ( packages + )
-{
-    # Shared: PREBUILT_PACKAGE_LIBS + PREBUILT_PACKAGE_SYSLIBS of the named packages.
-    # Static: same after Prebuilt-Closure.
-    # Always: [ FLinkLibs ... ], never raw flags from the zip.
-}
-
-rule Prebuilt-LibPath ( packages + )
-{
-    # $(root)/$(pkg)/lib for the named packages
-    # (and their needs, when the link probe must see them).
-}
-
-rule Prebuilt-LinkFlags ( packages + )
-{
-    # Extra flags only. Do not duplicate FLibPath here:
-    # CheckDependencyLinkC++ already does FLibPath $(libdir).
-}
-
-rule Prebuilt-Packages
-{
-  # All package names exported by the prefix.
-}
-
-rule Prebuilt-Bin ( packages + )
-{
-  # All files below $(root)/$(pkg)/bin for exactly the named packages.
-}
-
-rule Prebuilt-Lib ( packages + )
-{
-  # All files below $(root)/$(pkg)/lib for exactly the named packages.
-}
-```
-
-`Prebuilt-Import` only sets `PREBUILT_ROOT` and includes `jam/packages.jam`.
-It does not touch `C++FLAGS`, `LINKFLAGS`, or `ZLIB_*`.
-
----
-
-## 8. Integration with `Jamconfigure`
-
-The existing contract of every `*-Configure` rule is:
-
-```text
+@verbatim
 *-Configure INCLUDES : C++FLAGS : LINKLIBS : LIBDIR : LINKFLAGS
-```
+@endverbatim
 
-If any hint is set, pkg-config is skipped and the first link attempt is the
-caller-provided libs. If all hints are empty, pkg-config and name guessing
-(`zlibd` / `zlib` / `z`) run. Side effects on success: the five `*_`
-variables.
+If any of those is set, pkg-config is skipped and the first link attempt uses
+the passed libraries. If all five are empty, pkg-config and name
+guessing run. On success the five @c *_ variables are set.
 
-The prebuilt prefix must look like a user who set those variables on the
-command line. It must not look like a second search space (`DEPS_INCLUDES` /
-`DEPS_LIBDIR`).
+@c Prebuilt-Import sets @c PREBUILT_ROOT and includes @c jam/packages.jam. It
+does not touch @c C++FLAGS, @c LINKFLAGS, or @c ZLIB_*.
 
-### 8.1 Load the prefix, do not apply it
+For each package, if the bundle is loaded and sources in the tree were not
+requested, empty variables are filled from the bundle, then Configure is
+called once:
 
-`--with-prebuilt` or `--fetch-prebuilt` selects the layer. Fetch runs only for
-`--fetch-prebuilt`, and only into the default cache. Mapping `CONFIG` →
-`md` / `mdd` happens here, not inside the zip.
-
-```jam
-# After toolset setup, before the zlib / png / ... blocks.
-# Selected if --with-prebuilt or --fetch-prebuilt is present (bare or =value).
-PT_PREBUILT_ID ?= [ GetOption --with-prebuilt ] ;
-PT_FETCH_PREBUILT_ID ?= [ GetOption --fetch-prebuilt ] ;
-
-if --with-prebuilt in $(ARGV) || $(PT_PREBUILT_ID) ||
-   --fetch-prebuilt in $(ARGV) || $(PT_FETCH_PREBUILT_ID)
-{
-  PT_PREBUILT_ID ?= [ Prebuilt-Tuple $(abi) ] ;
-  PT_PREBUILT_ROOT = [ FDirName $(PT_TOP) prebuilt $(PT_PREBUILT_ID) ] ;
-  Prebuilt-Import $(PT_PREBUILT_ROOT) ;
-}
-```
-
-Do not `include` a file that writes `ZLIB_INCLUDES = ...`.
-
-### 8.2 zlib — one `ZLib-Configure`, prebuilt as `?=` hints
-
-Today:
-
-```jam
-Load zlib.jam ;
-
-if --with-inline-zlib in $(ARGV)
-{
-    WITH_BUILTIN_ZLIB = yes ;
-}
-
-if ! $(WITH_BUILTIN_ZLIB)
-{
-    WITH_ZLIB = [ ZLib-Configure $(ZLIB_INCLUDES) : $(ZLIB_C++FLAGS) :
-                                 $(ZLIB_LINKLIBS) : $(ZLIB_LIBDIR) : $(ZLIB_LINKFLAGS) ] ;
-}
-
-if ! $(WITH_ZLIB)
-{
-    WITH_BUILTIN_ZLIB = yes ;
-}
-```
-
-With the prebuilt selected, fill **only unset** hints, then call Configure
-**once**:
-
-```jam
+@code
 Load zlib.jam ;
 
 if --with-inline-zlib in $(ARGV)
@@ -570,131 +294,119 @@ if ! $(WITH_ZLIB)
 {
     WITH_BUILTIN_ZLIB = yes ;
 }
-```
+@endcode
 
-Why `?=`, and why a single call:
+The same pattern is used for png (@c PNG_*), jpeg (@c JPEG_*), FreeType
+(@c FREETYPE_*), and OpenSSL. The zip package name is @c openssl; the Jam
+variables stay @c SSL_*, as @c OpenSsl-Configure already uses. Flags that
+select sources in the tree are handled before the prebuilt or system probe.
 
-- `ZLIB_INCLUDES=C:/third-party/zlib` on the command line stays in force.
-- `--with-inline-zlib` still skips Configure entirely.
-- Without `PREBUILT_ROOT`, the block is unchanged: empty hints, system
-  probe, then vendor.
-- With `PREBUILT_ROOT`, hints are set **before** the only `ZLib-Configure`.
-  pkg-config is skipped. The first link attempt is `PREBUILT_PACKAGE_LIBS.zlib`.
-  System `/usr/include/zlib.h` does not win.
-- A two-step "probe system, then prebuilt" is wrong whenever the prebuilt
-  was requested: the first probe succeeds on POSIX.
+Package name to variable mapping:
 
-The probe that remains is "does this prefix match this compiler?", not
-"search the machine for zlib".
+- @c zlib -> @c ZLIB_*
+- @c png -> @c PNG_*
+- @c jpeg -> @c JPEG_*
+- @c freetype -> @c FREETYPE_*
+- @c openssl -> @c SSL_*
 
-`*_LIBDIR` is required. Setting only `*_LINKLIBS` leaves the linker without
-`FLibPath` of the package's `lib/` directory. `CheckDependencyLinkC++`
-turns `LIBDIR` into `*_LINKFLAGS`.
+@c *_LIBDIR is required. Setting only @c *_LINKLIBS leaves the linker without
+@c FLibPath of the package's @c lib/ directory. @c CheckDependencyLinkC++
+turns @c LIBDIR into @c *_LINKFLAGS.
 
-### 8.3 png, jpeg, FreeType — same pattern
+Jamfiles do not mention @c PREBUILT_ROOT. They keep using the five package
+variables:
 
-```jam
-Load libpng.jam ;
-
-if --with-inline-libpng in $(ARGV)
-{
-    WITH_BUILTIN_LIBPNG = yes ;
-}
-
-if ! $(WITH_BUILTIN_LIBPNG)
-{
-    if $(PREBUILT_ROOT)
-    {
-        PNG_INCLUDES  ?= [ Prebuilt-Includes png ] ;   # png + zlib includes
-        PNG_C++FLAGS  ?= [ Prebuilt-CxxFlags png ] ;
-        PNG_LINKLIBS  ?= [ Prebuilt-LinkLibs png ] ;   # png16 (+ syslibs)
-        PNG_LIBDIR    ?= [ Prebuilt-LibPath png ] ;
-        PNG_LINKFLAGS ?= [ Prebuilt-LinkFlags png ] ;
-    }
-
-    WITH_PNG = [ Png-Configure $(PNG_INCLUDES) : $(PNG_C++FLAGS) :
-                               $(PNG_LINKLIBS) : $(PNG_LIBDIR) : $(PNG_LINKFLAGS) ] ;
-}
-```
-
-Repeat for jpeg (`jpeg` → `JPEG_*`) and FreeType (`freetype` → `FREETYPE_*`).
-`Prebuilt-Includes freetype` returns FreeType's include dirs plus png and
-zlib, because `PREBUILT_PACKAGE_DEPENDS.freetype = png zlib`.
-
-### 8.4 OpenSSL — same hints, framework prefix `SSL`
-
-The zip package name is `openssl`. The Jam variables stay `SSL_*`, as
-`OpenSsl-Configure` already uses.
-
-`--with-openssl` (inline) and `--with-mbedtls` stay **above** the system /
-prebuilt probe, as they do today. Only the `OpenSsl-Configure` branch takes
-prebuilt hints:
-
-```jam
-Load openssl.jam ;
-
-if --with-openssl in $(ARGV)
-{
-    include [ FDirName src openssl Jamconfigure ] ;
-    WITH_OPENSSL = "yes" ;
-    WITH_SSL = yes ;
-    PT_SSL_IMPL = "openssl" ;
-    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
-}
-
-# ... mbedtls, Apple SSL, unchanged ...
-
-if ! $(WITH_SSL)
-{
-    if $(PREBUILT_ROOT)
-    {
-        SSL_INCLUDES  ?= [ Prebuilt-Includes openssl ] ;
-        SSL_C++FLAGS  ?= [ Prebuilt-CxxFlags openssl ] ;
-        SSL_LINKLIBS  ?= [ Prebuilt-LinkLibs openssl ] ;
-        SSL_LIBDIR    ?= [ Prebuilt-LibPath openssl ] ;
-        SSL_LINKFLAGS ?= [ Prebuilt-LinkFlags openssl ] ;
-    }
-
-    WITH_SSL = [ OpenSsl-Configure $(SSL_INCLUDES) : $(SSL_C++FLAGS) :
-                                   $(SSL_LINKLIBS) : $(SSL_LIBDIR) : $(SSL_LINKFLAGS) ] ;
-    if $(WITH_SSL)
-    {
-        PT_SSL_IMPL = "openssl" ;
-    }
-}
-```
-
-`Prebuilt-LinkLibs openssl` must return `ssl crypto` **and**
-`crypt32 ws2_32 advapi32 user32` on MSVC, already passed through `FLinkLibs`.
-Without `PREBUILT_PACKAGE_SYSLIBS` on that hint line the MSVC probe fails even though
-the import libs are present.
-
-### 8.5 What Jamfiles do not change
-
-`src/Pt-Gfx/Jamfile`, `src/Pt-Ssl/Jamfile`, `src/Pt/Jamfile` keep:
-
-```jam
+@code
 SubDirHdrs $(PNG_INCLUDES) ;
-LinkFlags Pt-Gfx : $(PNG_LINKFLAGS) ;
-LinkLibs  Pt-Gfx : $(PNG_LINKLIBS) ;
+LinkFlags mylib : $(PNG_LINKFLAGS) ;
+LinkLibs  mylib : $(PNG_LINKLIBS) ;
 ObjectC++Flags PngReader.cpp PngWriter.cpp : $(PNG_C++FLAGS) ;
-```
+@endcode
 
-They never mention `PREBUILT_ROOT`. Builtin vs. prebuilt remains
-`WITH_BUILTIN_LIBPNG` / `WITH_PNG` as today.
+Whether a package was found or built from sources is still the usual
+@c WITH_* / @c WITH_BUILTIN_* variables, as without prebuilt libraries.
 
----
+Include directories always cover dependent packages as well. @c png.h includes
+@c zlib.h, and a Jamfile can call @c SubDirHdrs $(PNG_INCLUDES) without adding
+@c ZLIB_INCLUDES. Therefore @c Prebuilt-Includes png returns @c png/include
+and @c zlib/include. That walk follows @c PREBUILT_PACKAGE_DEPENDS for both
+shared and static bundles. @c Prebuilt-Includes freetype returns FreeType's
+include dirs plus png and zlib.
 
-## 9. Caller-owned deployment
+Link lines do not always add dependent packages:
 
-The prefix contains complete native `bin/` and `lib/` trees. It does not
-designate deploy files: a package `bin/` can contain programs as well as
-runtime libraries, while Linux and macOS shared libraries commonly remain in
-`lib/`.
+- Shared: @c PREBUILT_PACKAGE_LIBS and @c PREBUILT_PACKAGE_SYSLIBS of the
+  named packages only, plus @c PREBUILT_PACKAGE_FRAMEWORKS as
+  @c -framework name
+- Static: the same, after also collecting the packages listed in
+  @c PREBUILT_PACKAGE_DEPENDS
+- MSVC shared OpenSSL still needs @c crypt32 @c ws2_32 @c advapi32 @c user32
+  on the line (@c PREBUILT_PACKAGE_SYSLIBS)
 
-An application chooses package scope and source areas without naming files:
+@section jam-prebuilt-page-API Jam Rules
 
-```jam
+The rules live in @c jam/prebuilt.jam, loaded once per project. The bundle
+file is @c jam/packages.jam. Toolset helpers stay in the project:
+@c FLinkLibs, @c FIncludes, @c FDefines, @c FLibPath.
+
+- @c Prebuilt-Tuple ( abi ? ) \n
+  Builds the platform folder name from @c TARGET_OS, @c TARGET_OSPLAT and
+  @c TOOLSET, with an optional extra suffix such as @c md.
+
+- @c Prebuilt-Fetch ( url : dest ) \n
+  Downloads @c url when the remote @c url.manifest differs from
+  @c dest/manifest. Replaces @c dest with the unzipped archive. The caller
+  must run @c Fetch-Configure first.
+
+- @c Prebuilt-Import ( root ) \n
+  Sets @c PREBUILT_ROOT, includes @c jam/packages.jam, and exits if
+  @c PREBUILT_SCHEMA is not @c 1.
+
+- @c Prebuilt-Depends ( packages + ) \n
+  Walks @c PREBUILT_PACKAGE_DEPENDS without duplicates. Named packages first,
+  dependencies last.
+
+- @c Prebuilt-Includes ( packages + ) \n
+  Include directories of those packages and the packages they depend on. Uses
+  @c PREBUILT_PACKAGE_INCLUDES.$(pkg) when set, otherwise
+  @c $(PREBUILT_ROOT)/$(pkg)/include.
+
+- @c Prebuilt-CxxFlags ( packages + ) \n
+  @c [ FDefines $(PREBUILT_PACKAGE_DEFINES.$(pkg)) ] for the named packages
+  only.
+
+- @c Prebuilt-LinkLibs ( packages + ) \n
+  Shared: @c PREBUILT_PACKAGE_LIBS, @c PREBUILT_PACKAGE_SYSLIBS and
+  @c PREBUILT_PACKAGE_FRAMEWORKS of the named packages. Static: the same
+  over the packages returned by @c Prebuilt-Depends. Always passed through
+  @c FLinkLibs. Frameworks are appended as @c -framework name.
+
+- @c Prebuilt-LibPath ( packages + ) \n
+  @c $(PREBUILT_ROOT)/$(pkg)/lib, or @c PREBUILT_PACKAGE_LIBPATH.$(pkg).
+  Shared: named packages. Static: those packages and the ones they depend on.
+
+- @c Prebuilt-LinkFlags ( packages + ) \n
+  Extra flags from @c PREBUILT_PACKAGE_LINKFLAGS.$(pkg) only. Does not
+  duplicate @c FLibPath; @c CheckDependencyLinkC++ adds that from @c LIBDIR.
+
+- @c Prebuilt-Packages \n
+  All package names exported by the bundle (@c PREBUILT_PACKAGES).
+
+- @c Prebuilt-Bin ( packages + ) / @c Prebuilt-Lib ( packages + ) \n
+  All files below the native @c bin/ or @c lib/ directory of each named
+  package. These rules do not walk dependencies.
+
+@section jam-prebuilt-page-Deploy Deployment
+
+Prebuilt bundles keep complete native @c bin/ and @c lib/ directories. They do
+not say which files to install. A package @c bin/ can contain programs as well
+as runtime libraries; Linux and macOS shared libraries commonly remain in
+@c lib/.
+
+The project chooses which packages to copy and whether to take @c bin/ or
+@c lib/, then stages or installs with its own rules. For every package:
+
+@code
 local packages = [ Prebuilt-Packages ] ;
 local sources = [ Prebuilt-Bin $(packages) ] ;
 sources += [ Prebuilt-Lib $(packages) ] ;
@@ -703,207 +415,44 @@ for local src in $(sources)
 {
     local dest = $(src:BS) ;
     File $(dest) : $(src) ;
-    MakeLocate $(dest) : $(PT_OUTPUT_TARGET) ;
+    MakeLocate $(dest) : $(LOCATE_TARGET) ;
     Clean clean : $(dest) ;
-    InstallFile $(PT_INSTALL_BINDIR) : $(src) ;
+    InstallFile $(BINDIR) : $(src) ;
 }
-```
+@endcode
 
-For a smaller set, pass direct package names to `Prebuilt-Bin` or
-`Prebuilt-Lib`. To include transitive package content deliberately, first use
-`local packages = [ Prebuilt-Depends openssl ] ;`. The caller owns the
-selection of source area, dependency closure, and destination.
+For a smaller set, pass package names to @c Prebuilt-Bin or @c Prebuilt-Lib.
+To include files from packages that one of them depends on, first use
+@c local packages = [ Prebuilt-Depends openssl ] ;.
 
-Windows: **`mdd` is not redistributable.** Debug CRT (`MSVCP*D.dll`,
-`VCRUNTIME*D.dll`) is not in the VC redistributable, only on machines with
-Visual Studio. Release products take `md`. Debug locally puts `mdd` DLLs next
-to the exe. The framework treats the `mdd` identity as not redistributable;
-the zip does not carry a `PREBUILT_REDIST` flag.
+@note Windows @c mdd is not redistributable. The debug CRT
+(@c MSVCP*D.dll, @c VCRUNTIME*D.dll) is not in the Visual C++
+redistributable. Release products use @c md. Local debug builds may place
+@c mdd DLLs next to the executable.
 
----
+@section jam-prebuilt-page-Produce Creating Prebuilt Dependencies
 
-## 10. ABI contract and mixing project-debug with release deps
+A bundle can be written by hand: fill the per-package directories, write
+@c jam/packages.jam, and point @c --with-prebuilt at the platform folder
+under @c prebuilt. Conan is not required. @c packages.jam is @c KEY = value
+assignments and is readable without running Jam.
 
-The prefix model always scales. Mixing project-debug against release deps
-scales only under an ABI contract.
+A generator, including one driven by Conan in CI, writes the same layout:
 
-- C ABI, shared (zlib, png, jpeg, FreeType-C, OpenSSL):
-  Linux/mac is the normal case. Windows `md` DLL vs. `/MDd` project is often
-  fine because each DLL has its CRT — no heap / `FILE*` across the boundary.
-- Static + different CRT:
-  wrong on Windows.
-- C++ with STL in the public API:
-  `LNK2038` / `_ITERATOR_DEBUG_LEVEL`. Same ABI tag, or keep it out of the
-  prefix.
+- One directory per package: @c $(pkg)/include, @c $(pkg)/lib, @c $(pkg)/bin
+- @c jam/packages.jam: library names to @c PREBUILT_PACKAGE_LIBS, other
+  packages in this bundle to @c PREBUILT_PACKAGE_DEPENDS, OS linker names to
+  @c PREBUILT_PACKAGE_SYSLIBS, macOS frameworks to
+  @c PREBUILT_PACKAGE_FRAMEWORKS, extra include dirs to
+  @c PREBUILT_PACKAGE_INCLUDES
+- Complete @c lib/ and @c bin/ directories, without sorting or moving files
+- Do not emit @c ZLIB_INCLUDES / @c PNG_LINKLIBS from the generator; that
+  mapping is @c jam/prebuilt.jam
+- Windows: two zips, @c windows-x64-msvc-md and @c windows-x64-msvc-mdd
+- macOS / Linux: one folder name without a runtime suffix until a second
+  variant exists
+- Check: @c zlib/include/zlib.h, @c zlib/lib/zlib.lib or @c libz.a, @c bin/
+  when shared, @c jam/packages.jam, no version directories, no absolute
+  machine paths
 
-Shared linkage and a C public ABI are a product decision, not extra
-variables in `packages.jam` beyond `PREBUILT_LINKAGE`. A library that puts
-`std::string` in its API is not a prebuilt candidate — or it forces the
-same ABI tag (`mdd` with debug).
-
-Three paths when C++ deps appear — not two zips "just in case" for zlib:
-
-1. Vendor the heavy C++ pieces, same flags as the project.
-2. A second ABI prefix only when the prebuilt actually splits (`mdd`, later
-   `asan`).
-3. Optional product choice: project-debug on Windows with `/MD /Od /Zi` —
-   one prefix, not the de-facto VS debug ABI. Anyone who wants a normal VS
-   debug session needs `mdd`.
-
-Vendor remains the path that is **always** correct (static, templates,
-exotics, "the same flags line by line").
-
----
-
-## 11. Configure flags (framework side)
-
-Three flags. Any one of them selects the prebuilt layer. Each may be bare
-(the default) or take `=value`.
-
-`--with-prebuilt` uses a prefix that is already on disk. `--fetch-prebuilt`
-does the same configure, after fetching that prefix into the default cache.
-The value of `--with-prebuilt` is the root when one is given.
-
-`--with-prebuilt`
-
-- Bare: detect `<os>-<arch>-<toolset>` and apply the ABI tag, then use
-  `prebuilt/<id>/`. Error if that tree is missing. No network.
-- `--with-prebuilt=windows-x64-msvc-md`: use that identity with
-  `prebuilt/<id>/`. No network.
-
-`--fetch-prebuilt`
-
-- Same load as `--with-prebuilt` with the default cache, but download or
-  refresh the zip first. Bare: detect identity, fetch into `prebuilt/<id>/`,
-  then configure. This is the usual first-time command.
-- `--fetch-prebuilt=windows-x64-msvc-md`: pin the identity to fetch.
-- Implies the prebuilt layer; `--with-prebuilt` is not required next to it.
-- Do not combine with `--with-prebuilt=<id>`. Fetch always targets the
-  default cache; an explicit identity via `--with-prebuilt` is already
-  local.
-
-`--fetch-prebuilt` is not a boolean beside `--with-prebuilt`. A bool would
-make the common case two flags (`--with-prebuilt --fetch-prebuilt`) and
-would not give a place to pin identity. A stale default cache is refreshed
-only by `--fetch-prebuilt`; `--with-prebuilt` will not phone home.
-
-Not prebuilt-layer flags, unchanged, and still stronger than the layer:
-
-- `--with-xxx-dir` / `ZLIB_INCLUDES=...` and the rest of the five-tuple:
-  always win (`?=` does not overwrite)
-- `--with-inline-xxx`: force vendor; skips `*-Configure`
-
-Not used: `--with-prebuilt-root`, `--no-fetch`.
-
-Identity in the archive name and directory is `windows-x64-msvc-md` or
-macos-arm64-clang`, not `x64-windows`. A single zip that contains both
-ABI variants is the debug/release layout this design removes. One cache.
-Never mix `md` and `mdd` in one search path.
-
----
-
-## 12. Production (CI / Conan) — not the daily path
-
-Conan exists only in the GitHub Action.
-
-- Custom deployer (`sysroot_deploy`), not `full_deploy` as the shipping
-  format.
-- One directory per package: `$(pkg)/include`, `$(pkg)/lib`, `$(pkg)/bin`.
-- Write `jam/packages.jam` from `cpp_info`: `libs` → `PREBUILT_PACKAGE_LIBS`,
-  `requires` → `PREBUILT_PACKAGE_DEPENDS`, `system_libs` →
-  `PREBUILT_PACKAGE_SYSLIBS`, `frameworks` → `PREBUILT_PACKAGE_FRAMEWORKS`,
-  extra `includedirs` → `PREBUILT_PACKAGE_INCLUDES`. Copy complete `lib/` and
-  `bin/` trees without classifying or relocating files. The result is the same
-  file a person would write.
-- Do **not** emit `ZLIB_INCLUDES` / `PNG_LINKLIBS` from the generator. That
-  mapping is `jam/prebuilt.jam`.
-- Windows: two installs → two bundles (or two zips): `...-md`, `...-mdd`.
-- macOS / Linux: one untagged prefix until an ABI split exists.
-- Assert: `zlib/include/zlib.h`, `zlib/lib/zlib.lib` or `libz.a`, `bin/`
-  when shared, `jam/packages.jam`, **no** version tree, **no** absolute CI
-  paths.
-- Generator `.jam` with `-L` / `-l` and `SetDependencyPath` is not this path.
-
-Default matrix: both Windows ABIs (the debug ABI is a prebuilt fact), one
-untagged prefix for macOS. `mdd` is not a subfolder of the `md` zip.
-
----
-
-## 13. Hand-written prefix / other build systems
-
-By hand: fill the per-package directories, write `jam/packages.jam` with the
-assignments, point `--with-prebuilt=` at it. No Conan.
-
-Other systems: the file is `KEY = value` and
-`PREBUILT_PACKAGE_LIBS.foo = ...`.
-Parsable without executing Jam. No parallel `prebuilt.cmake` as source. Jam
-stays canonical; a later mirror at most.
-
----
-
-## 14. Deliberate non-goals
-
-- `Prebuilt-Apply` / global `C++FLAGS +=` / global `LINKFLAGS +=`
-- `SetDependencyPath` / `DEPS_INCLUDES` / `DEPS_LIBDIR` as the prebuilt
-  interface
-- Flat `include/` + `lib/` sysroot (rejected together with Apply)
-- `debug/lib` inside the same prefix
-- A second conceptual "debug layer" instead of an ABI tag
-- Naming the only ABI `default` / `common` / `standard`
-- Two-step Configure (system first, prebuilt second) while the prebuilt is
-  selected
-- `--with-prebuilt-root`; `--no-fetch`; `--fetch-prebuilt` as a boolean
-  beside `--with-prebuilt`
-- Writing `ZLIB_*` into the zip
-- Per-package `package.jam` files or per-package zips
-- Solving dependencies (versions, optionals, "find zlib elsewhere")
-- Conan / vcpkg in the user build
-- pkg-config as a requirement on Windows
-- Raw flags in the zip (`-l`, `-L`, `-pthread`, `-framework`, `/LIBPATH`)
-- Rules / `FLinkLibs` / `C++FLAGS` in `jam/packages.jam`
-- A global `PREBUILT_DEPLOY_FILES` list
-- Vendoring everything (OpenSSL in Jam: Perl / NASM)
-- Forcing everything into the prefix (C++ STL API)
-- CMake ExternalProject as a second build world
-
----
-
-## 15. How the layers compose
-
-```text
-User flags / explicit five-tuple / --with-inline-xxx
-        |
-        |  else, if PREBUILT_ROOT is set
-        v
-Prebuilt hints  ->  one *-Configure probe
-        |
-        |  else (no prebuilt), or probe failed
-        v
-System / toolchain sysroot / pkg-config     <- Yocto, distro, manufacturer
-        |                                     (only when the prebuilt was
-        |                                      not selected)
-        |  else
-        v
-Vendor / inline sources                     <- same flags as the project
-```
-
-When the prebuilt is selected, system is not consulted for packages the
-prefix lists. When it is not selected, the prefix is not consulted at all.
-
-Prebuilt: convenience for full prebuilts, including their extra ABIs.
-Vendor: ABI-accurate path and cross.
-System: when the machine already has the dependency.
-
----
-
-## 16. Short form
-
-**One layer. Prebuilts declare ABI variants; a single ABI is untagged.
-Each ABI is a prefix of per-package directories plus `jam/packages.jam`
-(`PREBUILT_*` identity, `PREBUILT_PACKAGE_*` maps). The consumer loads the
-prefix, translates names with the toolset, and injects the existing
-`*_INCLUDES` / `*_C++FLAGS` / `*_LINKLIBS` / `*_LIBDIR` / `*_LINKFLAGS`
-hints — once, before `*-Configure`. Includes and deploy close over
-`PREBUILT_PACKAGE_DEPENDS`; link lines close only for static. That walk is
-not a solver. User overrides stay Configure. Deploy files are per package.
-Conan stays in CI.**
+*/
