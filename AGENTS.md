@@ -115,6 +115,9 @@ content is in context without having read it.
 - For reflection, meta-objects, types, invocation and properties read:
   `.github/instructions/pt-reflex-api-reflection.instructions.md`
 
+- For Lua scripting, script execution, reflected bindings and asynchronous Lua calls read:
+  `.github/instructions/pt-lua-api-scripting.instructions.md`
+
 - For HTTP basics, messages, requests, replies, streams, errors and credentials read:
   `.github/instructions/pt-http-api-messages.instructions.md`
 
