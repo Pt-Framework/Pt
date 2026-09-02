@@ -136,6 +136,9 @@ content is in context without having read it.
 - For JSON-RPC clients, services, HTTP transport, serialization read:
   `.github/instructions/pt-jsonrpc-api-procedures.instructions.md`
 
+- For implementing an MCP server, MCP tools, HTTP transport, standard-I/O transport read:
+  `.github/instructions/pt-mcp-api.instructions.md`
+
 - For SSL/TLS encrypted streams, certificates, contexts, verification, handshakes read:
   `.github/instructions/pt-ssl-api.instructions.md`
 
