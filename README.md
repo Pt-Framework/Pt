@@ -25,3 +25,4 @@ Please visit the [Platinum Home Page](https://pt-framework.net)
 The Platinum Framework is licensed under the **GNU Lesser General Public 
 License v2.1** with a special linking exception to provide it for use in 
 all projects, both open and proprietary.
+
