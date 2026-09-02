@@ -130,6 +130,12 @@ content is in context without having read it.
 - For SSL/TLS encrypted streams, certificates, contexts, verification, handshakes read:
   `.github/instructions/pt-ssl-api.instructions.md`
 
+- For Cosmo components, plugins, manifests, lifecycle management, activation, connections, startup, and command-line arguments read:
+  `.github/instructions/pt-cosmo-api-components.instructions.md`
+
+- For Cosmo enumerable collections, type-safe iteration, resource lifetime, auto-release pools, smart pointers, and buffers read:
+  `.github/instructions/pt-cosmo-api-utilities.instructions.md`
+
 - For Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images) read:
   `.github/instructions/pt-gfx-api-images.instructions.md`
 
