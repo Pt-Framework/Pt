@@ -112,6 +112,9 @@ content is in context without having read it.
 - For TCP and UDP sockets, endpoints, connection setup and multicast read:
   `.github/instructions/pt-net-api-sockets.instructions.md`
 
+- For reflection, meta-objects, types, invocation and properties read:
+  `.github/instructions/pt-reflex-api-reflection.instructions.md`
+
 - For HTTP basics, messages, requests, replies, streams, errors and credentials read:
   `.github/instructions/pt-http-api-messages.instructions.md`
 
