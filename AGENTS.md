@@ -109,6 +109,9 @@ content is in context without having read it.
 - For asynchronous I/O, native handle/fd monitoring, streams, pipes, serial ports, URI parsing and tar archives read:
   `.github/instructions/pt-system-api-io.instructions.md`
 
+- For TCP and UDP sockets, endpoints, connection setup and multicast read:
+  `.github/instructions/pt-net-api-sockets.instructions.md`
+
 - For Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images) read:
   `.github/instructions/pt-gfx-api-images.instructions.md`
 
