@@ -115,7 +115,7 @@ at all. There is no fallback from one platform folder to another. If the chosen
 folder is missing, configure reports an error. If a package probe against the
 bundle fails, that package falls back to sources in the tree.
 
-@section jam-prebuilt-page-Layout Layout
+@section jam-prebuilt-page-Layout Bundle Directory Layout
 
 One platform is one directory and one zip. Each library lives in its own
 subdirectory, named after @c PREBUILT_PACKAGES (@c zlib, @c png, @c jpeg,
@@ -163,7 +163,7 @@ inside an @c md tree. Library names stay the same for a given platform folder
 The directory can be moved as a whole because it contains no absolute paths.
 The project sets @c PREBUILT_ROOT before including @c jam/packages.jam.
 
-@section jam-prebuilt-page-Manifest packages.jam
+@section jam-prebuilt-page-Manifest The packages.jam Manifest
 
 Each bundle contains one Jam data file at @c jam/packages.jam. It assigns
 variables only: no rules and no toolset flags. The rules that use those
