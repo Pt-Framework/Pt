@@ -94,6 +94,9 @@ content is in context without having read it.
 - For Program arguments, settings, type traits and helper utilities read:
   `.github/instructions/pt-api-utilities.instructions.md`
 
+- For database connections, queries, result sets, transactions, and database backends read:
+  `.github/instructions/pt-db-api-database.instructions.md`
+
 - For threads, mutexes, semaphores, condition variables, queues, subprocesses, clocks, system time and monotonic ticks read:
   `.github/instructions/pt-system-api-concurrency.instructions.md`
 
