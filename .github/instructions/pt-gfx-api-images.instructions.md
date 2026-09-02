@@ -1,64 +1,52 @@
 ---
-description: "Pixel types, image formats, and image access patterns in Pt::Gfx."
+description: "Images, formats, pixels, views, conversion, scaling, and image codecs in Pt::Gfx."
 ---
 
-# Doxygen Group and Class-Doc Overrides
-
-- Group definition: `include/Pt/Gfx/Api-Images.h` — `@defgroup Pt-Gfx-Images`
-- Class-doc override: `include/Pt/Gfx/Api-Argb32Image.h` — `Argb32Image` (typedef)
-- Class-doc override: `include/Pt/Gfx/Api-Rgb32Image.h` — `Rgb32Image` (typedef)
-
-# Pixel Types
-
-Pixel types provide access to pixel data in an image. They come in
-mutable/const pairs. Every format class (e.g. `Argb32`) defines a
-`Pixel` and `ConstPixel` typedef for its concrete pixel type.
-
-The formal requirements are defined as C++20 concepts `PixelLike`
-and `ConstPixelLike` in `Pixel.h`, guarded by `#ifdef __cpp_concepts`.
-The project targets C++14, so the concepts serve as documentation only.
-
-| Format   | Pixel         | ConstPixel         | ColorType | Header     |
-|----------|---------------|--------------------|-----------|------------|
-| `Argb32` | `Argb32Pixel` | `Argb32ConstPixel` | `Color`   | `Argb32.h` |
-| `Rgb32`  | `Rgb32Pixel`  | `Rgb32ConstPixel`  | `Color`   | `Rgb32.h`  |
-| `Rgb16`  | `Rgb16Pixel`  | `Rgb16ConstPixel`  | `Color`   | `Rgb16.h`  |
-| `Yuv12`  | `Yuv12Pixel`  | `Yuv12ConstPixel`  | `ColorF`  | `Yuv12.h`  |
-
-Generic: `Pixel<ColorT>` / `ConstPixel<ColorT>` in `ImageFormat.h`
-with type erasure used with the ImageFormat.
-
-`PixelBase` is the abstract base for the internal pixel implementation
-used by `Pixel<ColorT>` / `ConstPixel<ColorT>`. Each format has a
-concrete `XxxPixelBase` subclass.
-
-- **`operator=` is deleted** on all pixel types. To rebind a pixel to
-  a different position, use `reset()`. To write a color value, use
-  `operator=(const ColorType&)` or `assign()`.
-
-## When to Use Which
-
-- **Concrete pixels** (`Argb32Pixel`, etc.) when the format is known
-  at compile time. They are lightweight value types with no virtual
-  dispatch and enable format-specific optimizations.
-- **Generic pixels** (`Pixel<Color>`, `Pixel<ColorF>`) when the format
-  is only known at runtime (e.g. generic image processing that works
-  on any `BasicImage<ImageFormat>`).
-- **`Color` (= `Argb32Color`)** is the default 8-bit color type.
-  Use it unless you need higher precision.
-- **`ColorF`** is the 16-bit floating-point color type. Required when
-  precision matters (e.g. gradients, blending).
-
-## Adding a New Pixel Format
-
-When adding a new format `Xxx`:
-1. Create `XxxPixelBase` deriving from `PixelBase`, override
-   `onGetType()`, `onAssignPixels()`, `onCopyPixels()`, and color
-   accessors.
-2. Create `XxxPixel` and `XxxConstPixel` satisfying `PixelLike` /
-   `ConstPixelLike` (see `Pixel.h` for the full requirements).
-3. Create the format class `Xxx` with `Pixel`/`ConstPixel` typedefs
-   and static helpers (`getColorF`, `assign`, `fill`, etc.).
-4. Verify the new pixel type satisfies the concepts (if building with
-   C++20) by instantiating `static_assert(PixelLike<XxxPixel>)` in a
-   test.
+- Image ownership, formats, views, and pixel access concepts:
+	`include/Pt/Gfx/Api-Images.h`
+- Create format-generic images, own or wrap image data:
+	`include/Pt/Gfx/Image.h`
+- Define runtime image formats and access generic pixels:
+	`include/Pt/Gfx/ImageFormat.h`
+- Define image and view traits for compile-time pixel access:
+	`include/Pt/Gfx/ImageTraits.h`
+- Access and traverse an individual pixel:
+	`include/Pt/Gfx/Pixel.h`
+- Build format-specific pixel access implementations:
+	`include/Pt/Gfx/PixelBase.h`
+- Use ARGB-32 colors, pixels, and image formats:
+	`include/Pt/Gfx/Argb32.h`
+- Use premultiplied RGB-32 colors, pixels, and image formats:
+	`include/Pt/Gfx/Rgb32.h`
+- Use RGB-16 colors, pixels, and image formats:
+	`include/Pt/Gfx/Rgb16.h`
+- Use YUV-12 colors, pixels, and image formats:
+	`include/Pt/Gfx/Yuv12.h`
+- Create an owning image with ARGB-32 pixels:
+	`include/Pt/Gfx/Argb32Image.h`
+- Create an owning image with premultiplied RGB-32 pixels:
+	`include/Pt/Gfx/Rgb32Image.h`
+- Create an owning image with YUV-12 pixels:
+	`include/Pt/Gfx/Yuv12Image.h`
+- Access a rectangular image region without copying:
+	`include/Pt/Gfx/View.h`
+- Work with the common base of image views:
+	`include/Pt/Gfx/ViewBase.h`
+- Access a single pixel as a non-owning view:
+	`include/Pt/Gfx/PixelView.h`
+- Access a single image row as a non-owning view:
+	`include/Pt/Gfx/LineView.h`
+- Work with contiguous pixel spans:
+	`include/Pt/Gfx/Span.h`
+- Copy or fill pixel ranges efficiently:
+	`include/Pt/Gfx/CopyPixel.h`
+- Convert between color representations:
+	`include/Pt/Gfx/ConvertColor.h`
+- Downscale image blocks:
+	`include/Pt/Gfx/BlockScale.h`
+- Read JPEG images:
+	`include/Pt/Gfx/JpegReader.h`
+- Read PNG images:
+	`include/Pt/Gfx/PngReader.h`
+- Write PNG images:
+	`include/Pt/Gfx/PngWriter.h`
