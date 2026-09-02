@@ -86,7 +86,7 @@ content is in context without having read it.
   `.github/instructions/pt-api-serialization.instructions.md`
 
 - For JSON documents, streaming parser and writer, serialization formatter read:
-  `.github/instructions/pt-json-api-processing.instructions.md`
+  `.github/instructions/pt-json-api.instructions.md`
 
 - For I/O streams, buffers and zlib streams read:
   `.github/instructions/pt-api-streams.instructions.md`
@@ -95,7 +95,7 @@ content is in context without having read it.
   `.github/instructions/pt-api-utilities.instructions.md`
 
 - For database connections, queries, result sets, transactions, and database backends read:
-  `.github/instructions/pt-db-api-database.instructions.md`
+  `.github/instructions/pt-db-api.instructions.md`
 
 - For threads, mutexes, semaphores, condition variables, queues, subprocesses, clocks, system time and monotonic ticks read:
   `.github/instructions/pt-system-api-concurrency.instructions.md`
@@ -116,13 +116,13 @@ content is in context without having read it.
   `.github/instructions/pt-system-api-io.instructions.md`
 
 - For TCP and UDP sockets, endpoints, connection setup and multicast read:
-  `.github/instructions/pt-net-api-sockets.instructions.md`
+  `.github/instructions/pt-net-api.instructions.md`
 
 - For reflection, meta-objects, types, invocation and properties read:
-  `.github/instructions/pt-reflex-api-reflection.instructions.md`
+  `.github/instructions/pt-reflex-api.instructions.md`
 
 - For Lua scripting, script execution, reflected bindings and asynchronous Lua calls read:
-  `.github/instructions/pt-lua-api-scripting.instructions.md`
+  `.github/instructions/pt-lua-api.instructions.md`
 
 - For HTTP basics, messages, requests, replies, streams, errors and credentials read:
   `.github/instructions/pt-http-api-messages.instructions.md`
@@ -134,13 +134,13 @@ content is in context without having read it.
   `.github/instructions/pt-http-api-servers.instructions.md`
 
 - For implementing RPC clients and services:
-  `.github/instructions/pt-remoting-api-procedures.instructions.md`
+  `.github/instructions/pt-remoting-api.instructions.md`
 
 - For XML-RPC clients and services:
   `.github/instructions/pt-xmlrpc-api.instructions.md`
 
 - For JSON-RPC clients, services, HTTP transport, serialization read:
-  `.github/instructions/pt-jsonrpc-api-procedures.instructions.md`
+  `.github/instructions/pt-jsonrpc-api.instructions.md`
 
 - For SOAP clients and services:
   `.github/instructions/pt-soap-api.instructions.md`
@@ -164,7 +164,7 @@ content is in context without having read it.
   `.github/instructions/pt-gfx-api-drawing.instructions.md`
 
 - For XML parsing, writing, DTDs, namespaces, and serialization read:
-  `.github/instructions/pt-xml-api-processing.instructions.md`
+  `.github/instructions/pt-xml-api.instructions.md`
 
 - For Forms UI, styling, widget renderers, layout, measure, `PlatinumStyle` read:
   `.github/instructions/pt-forms-dev-styles.instructions.md`
