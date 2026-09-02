@@ -157,5 +157,8 @@ content is in context without having read it.
 - For Draw shapes, paths, text, bitmaps, stroke, fill, gradient, paint surface read:
   `.github/instructions/pt-gfx-api-drawing.instructions.md`
 
+- For XML parsing, writing, DTDs, namespaces, and serialization read:
+  `.github/instructions/pt-xml-api-processing.instructions.md`
+
 - For Forms UI, styling, widget renderers, layout, measure, `PlatinumStyle` read:
   `.github/instructions/pt-forms-dev-styles.instructions.md`
