@@ -13,6 +13,33 @@ intergrates well into existing toolkits and frameworks.
 
 Please visit the [Platinum Home Page](https://pt-framework.net)
 
+## Features
+
+- Cross-platform development for Windows, Linux, and macOS from one C++ codebase
+- Text processing and formatting
+- Serialization support
+- Memory management utilities
+- Reflection and meta-objects
+- Coroutines and asynchronous programming
+- Unit testing support
+- Logging facilities
+- Event loops and timers
+- Concurrency primitives
+- Filesystem access
+- Synchronous and asynchronous I/O
+- TCP and UDP networking
+- SSL/TLS support
+- HTTP clients and servers
+- JSON-RPC, XML-RPC, SOAP, and general remoting
+- Model Context Protocol (MCP) server support
+- JSON parsing, writing, and serialization
+- XML parsing, writing, and serialization
+- Database connectivity
+- Lua scripting integration
+- Graphics and image processing
+- Native Forms user interfaces
+- Cosmo lightweight component model
+
 ## Documentation
 
 - 📚 [Documentation](https://pt-framework.net/docs.html)
@@ -22,6 +49,6 @@ Please visit the [Platinum Home Page](https://pt-framework.net)
 
 ## License
 
-The Platinum Framework is licensed under the **GNU Lesser General Public 
-License v2.1** with a special linking exception to provide it for use in 
+The Platinum Framework is licensed under the **GNU Lesser General Public
+License v2.1** with a special linking exception to provide it for use in
 all projects, both open and proprietary.
