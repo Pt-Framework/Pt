@@ -85,6 +85,9 @@ content is in context without having read it.
 - For Serialization, composers and formatters read:
   `.github/instructions/pt-api-serialization.instructions.md`
 
+- For JSON documents, streaming parser and writer, serialization formatter read:
+  `.github/instructions/pt-json-api-processing.instructions.md`
+
 - For I/O streams, buffers and zlib streams read:
   `.github/instructions/pt-api-streams.instructions.md`
 
