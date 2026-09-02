@@ -136,8 +136,14 @@ content is in context without having read it.
 - For implementing RPC clients and services:
   `.github/instructions/pt-remoting-api-procedures.instructions.md`
 
+- For XML-RPC clients and services:
+  `.github/instructions/pt-xmlrpc-api.instructions.md`
+
 - For JSON-RPC clients, services, HTTP transport, serialization read:
   `.github/instructions/pt-jsonrpc-api-procedures.instructions.md`
+
+- For SOAP clients and services:
+  `.github/instructions/pt-soap-api.instructions.md`
 
 - For implementing an MCP server, MCP tools, HTTP transport, standard-I/O transport read:
   `.github/instructions/pt-mcp-api.instructions.md`
