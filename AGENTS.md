@@ -112,6 +112,15 @@ content is in context without having read it.
 - For TCP and UDP sockets, endpoints, connection setup and multicast read:
   `.github/instructions/pt-net-api-sockets.instructions.md`
 
+- For HTTP basics, messages, requests, replies, streams, errors and credentials read:
+  `.github/instructions/pt-http-api-messages.instructions.md`
+
+- For HTTP clients, authentication, requests, persistent connections and pipelining read:
+  `.github/instructions/pt-http-api-clients.instructions.md`
+
+- For HTTP servers, authorization, responders, services, request routing and HTTPS read:
+  `.github/instructions/pt-http-api-servers.instructions.md`
+
 - For SSL/TLS encrypted streams, certificates, contexts, verification, handshakes read:
   `.github/instructions/pt-ssl-api.instructions.md`
 
