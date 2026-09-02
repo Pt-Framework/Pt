@@ -91,6 +91,24 @@ content is in context without having read it.
 - For Program arguments, settings, type traits and helper utilities read:
   `.github/instructions/pt-api-utilities.instructions.md`
 
+- For threads, mutexes, semaphores, condition variables, queues, subprocesses, clocks, system time and monotonic ticks read:
+  `.github/instructions/pt-system-api-concurrency.instructions.md`
+
+- For file and directory operations, paths and FileDevice read:
+  `.github/instructions/pt-system-api-filesystem.instructions.md`
+
+- For logging, log levels, targets and channels read:
+  `.github/instructions/pt-system-api-logging.instructions.md`
+
+- For shared libraries, symbols and plugins read:
+  `.github/instructions/pt-system-api-plugins.instructions.md`
+
+- For event loops, timers, cross-thread events, async loop operations and console applications read:
+  `.github/instructions/pt-system-api-eventloop.instructions.md`
+
+- For asynchronous I/O, native handle/fd monitoring, streams, pipes, serial ports, URI parsing and tar archives read:
+  `.github/instructions/pt-system-api-io.instructions.md`
+
 - For Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images) read:
   `.github/instructions/pt-gfx-api-images.instructions.md`
 
