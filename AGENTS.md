@@ -127,6 +127,9 @@ content is in context without having read it.
 - For HTTP servers, authorization, responders, services, request routing and HTTPS read:
   `.github/instructions/pt-http-api-servers.instructions.md`
 
+- For implementing RPC clients and services:
+  `.github/instructions/pt-remoting-api-procedures.instructions.md`
+
 - For SSL/TLS encrypted streams, certificates, contexts, verification, handshakes read:
   `.github/instructions/pt-ssl-api.instructions.md`
 
