@@ -112,6 +112,9 @@ content is in context without having read it.
 - For TCP and UDP sockets, endpoints, connection setup and multicast read:
   `.github/instructions/pt-net-api-sockets.instructions.md`
 
+- For SSL/TLS encrypted streams, certificates, contexts, verification, handshakes read:
+  `.github/instructions/pt-ssl-api.instructions.md`
+
 - For Pixel types, image formats, image access, pixel iteration (`Pt::Gfx` images) read:
   `.github/instructions/pt-gfx-api-images.instructions.md`
 
