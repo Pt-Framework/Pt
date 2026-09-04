@@ -4,7 +4,7 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301  USA
  */
 
@@ -51,7 +51,7 @@
     [self setWantsLayer:NO];
     [self setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
 
-    // TODO: move this to a separate class WindowController also implementing 
+    // TODO: move this to a separate class WindowController also implementing
     //       WindowDelegate
     if(_window)
     {
@@ -64,14 +64,14 @@
         _isObservingVisible = true;
     }
 
-    int opts = (NSTrackingActiveAlways | 
-                NSTrackingInVisibleRect | 
-                NSTrackingMouseEnteredAndExited | 
+    int opts = (NSTrackingActiveAlways |
+                NSTrackingInVisibleRect |
+                NSTrackingMouseEnteredAndExited |
                 NSTrackingMouseMoved);
-    
-    NSTrackingArea* area = [[NSTrackingArea alloc] initWithRect:[self bounds] 
-                                                   options:opts 
-                                                   owner:self 
+
+    NSTrackingArea* area = [[NSTrackingArea alloc] initWithRect:[self bounds]
+                                                   options:opts
+                                                   owner:self
                                                    userInfo:nil];
     [self addTrackingArea:area];
 
@@ -98,7 +98,7 @@
 }
 
 
-- (void) dealloc 
+- (void) dealloc
 {
     [self detachFromWindow];
 
@@ -109,16 +109,16 @@
 - (void) observeValueForKeyPath:(NSString*) keyPath
                        ofObject:(id) object
                          change:(NSDictionary*) change
-                        context:(void *) context 
+                        context:(void *) context
 {
-    if ([keyPath isEqualToString:@"visible"] && object == _windowImpl->window()) 
+    if ([keyPath isEqualToString:@"visible"] && object == _windowImpl->window())
     {
         BOOL isVisible = [change[NSKeyValueChangeNewKey] boolValue];
         if( ! isVisible )
         {
             _windowImpl->onViewShow(false);
-        } 
-        else 
+        }
+        else
         {
             _windowImpl->onViewShow(true);
         }
@@ -138,15 +138,15 @@
 }
 
 
-- (BOOL) resignFirstResponder 
+- (BOOL) resignFirstResponder
 {
     return TRUE;
 }
 
 
-- (BOOL) isOpaque 
-{ 
-    return YES; 
+- (BOOL) isOpaque
+{
+    return YES;
 }
 
 
@@ -171,14 +171,14 @@
         u16Char = 8;
 
     Pt::Char ch(u16Char);
-    
+
     _windowImpl->onViewKeyDown(keyCode, ch);
 }
 
 
 - (void) keyUp: (NSEvent*) ev
 {
-    NSString* chars = [ev characters];   
+    NSString* chars = [ev characters];
     unsigned keyCode = [ev keyCode];
 
     // TODO: convert from UTF-16
@@ -197,7 +197,7 @@
         u16Char = 8;
 
     Pt::Char ch(u16Char);
-    
+
     _windowImpl->onViewKeyUp(keyCode, ch);
 }
 
@@ -212,7 +212,7 @@
 - (void) drawRect: (NSRect) rect
 {
     //std::clog << "drawRect BEGIN" << std::endl;
-    //std::clog << "_invalidRect: " << _invalidRect.size.width << "x" 
+    //std::clog << "_invalidRect: " << _invalidRect.size.width << "x"
     //                              << _invalidRect.size.height << std::endl;
 
     // NSRect r = NSUnionRect(_invalidRect, rect);
@@ -226,7 +226,7 @@
 
 - (void) setFrameOrigin: (NSPoint) origin
 {
-    //std::clog << "FRAME ORIGIN: " << origin.x << "," 
+    //std::clog << "FRAME ORIGIN: " << origin.x << ","
     //                              << origin.y << std::endl;
 
     [super setFrameOrigin:origin];
@@ -238,9 +238,9 @@
 {
     //std::clog << "FRAME SIZE : " << frameSize.width << "x"
     //                             << frameSize.height << std::endl;
-    
+
     [super setFrameSize:frameSize];
-    
+
     //_windowImpl->onViewResize(frameSize);
 }
 
@@ -285,14 +285,14 @@
 }
 
 
-- (void) rightMouseDown:(NSEvent *) ev 
+- (void) rightMouseDown:(NSEvent *) ev
 {
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onViewRMouseDown(mp.x, mp.y);
 }
 
 
-- (void) rightMouseUp:(NSEvent *) ev 
+- (void) rightMouseUp:(NSEvent *) ev
 {
     NSPoint mp = [ev locationInWindow];
     _windowImpl->onViewRMouseUp(mp.x, mp.y);
@@ -368,7 +368,7 @@
 }
 
 
-- (BOOL) windowShouldClose: (id) sender 
+- (BOOL) windowShouldClose: (id) sender
 {
     //std::clog << "WINDOW SHOULD CLOSE" << std::endl;
     _windowImpl->onViewClosing();
@@ -383,6 +383,12 @@
 
 
 - (void) windowDidChangeBackingProperties: (NSNotification*) notification
+{
+    _windowImpl->onViewDidRescale();
+}
+
+
+- (void) windowDidChangeScreen: (NSNotification*) notification
 {
     _windowImpl->onViewDidRescale();
 }

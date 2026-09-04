@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -49,7 +49,7 @@
     NSWindowStyleMask      _style;
 }
 
-- (PtWindow*) initWithImpl: (Pt::Forms::WindowImpl*) window 
+- (PtWindow*) initWithImpl: (Pt::Forms::WindowImpl*) window
                      frame: (NSRect) frame
                  styleMask: (NSWindowStyleMask) style;
 
@@ -64,15 +64,15 @@
 
 - (PtWindow*) initWithImpl: (Pt::Forms::WindowImpl*) window
                      frame: (NSRect) frame
-                 styleMask: (NSWindowStyleMask) style 
+                 styleMask: (NSWindowStyleMask) style
 
 {
     _windowImpl = window;
     _style = style;
 
-    self = [super initWithContentRect: frame 
-                            styleMask: _style 
-                              backing: NSBackingStoreBuffered 
+    self = [super initWithContentRect: frame
+                            styleMask: _style
+                              backing: NSBackingStoreBuffered
                                 defer: NO];
     return self;
 }
@@ -114,6 +114,7 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBacke
 , _window(nil)
 , _view(nil)
 , _windowStyle(0)
+, _backingScaleFactor(1.0)
 , _keyFlags(0)
 {
     NSRect noGeometry = NSMakeRect(0, 0, 1, 1);
@@ -133,8 +134,8 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBacke
             break;
     }
 
-    _window = [[PtWindow alloc] initWithImpl: this 
-                                frame: noGeometry 
+    _window = [[PtWindow alloc] initWithImpl: this
+                                frame: noGeometry
                                 styleMask: _windowStyle];
 
     [_window setColorSpace:[NSColorSpace sRGBColorSpace]];
@@ -149,8 +150,8 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBacke
         [_window setLevel: NSNormalWindowLevel];
     }
 
-	  NSWindowController * windowController = [[NSWindowController alloc] initWithWindow:_window]; 
-	  [windowController autorelease]; 
+	  NSWindowController * windowController = [[NSWindowController alloc] initWithWindow:_window];
+	  [windowController autorelease];
 
     [_window setReleasedWhenClosed: NO];
     //[_window setAcceptsMouseMovedEvents:YES];
@@ -158,7 +159,9 @@ WindowImpl::WindowImpl(ScreenImpl& wm, Window& w, GraphicsBackend& graphicsBacke
     NSView* contentView = [_window contentView];
     NSRect contentBounds = [contentView bounds];
 
-    WindowView* view = [[WindowView alloc] initWithImpl: this 
+    _backingScaleFactor = [_window backingScaleFactor];
+
+    WindowView* view = [[WindowView alloc] initWithImpl: this
                                            frame: contentBounds];
     _view = view;
 
@@ -213,8 +216,7 @@ double WindowImpl::backingScaleFactor() const
         return [_window backingScaleFactor];
     }
 
-    NSScreen* screen = [NSScreen mainScreen];
-    return screen ? [screen backingScaleFactor] : 1.0;
+    return _backingScaleFactor;
 }
 
 
@@ -277,7 +279,7 @@ void WindowImpl::onInit(Window& w)
     if( screen() )
     {
         double scaling = scaleFactor();
-    
+
         RescaleEvent ev(w, scaling);
         w.processEvent(ev);
     }
@@ -327,9 +329,9 @@ Gfx::PointF WindowImpl::toScreen(const Gfx::PointF& pos) const
 
 
 Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
-{   
+{
     Gfx::PointF appKitPos = toNative(pos);
-    
+
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
     double y = screenHeight - appKitPos.y();
 
@@ -338,19 +340,19 @@ Gfx::PointF WindowImpl::fromScreen(const Gfx::PointF& pos) const
 
     CGFloat viewHeight = [_view frame].size.height;
     Gfx::PointF viewPos(p.x, viewHeight - p.y);
-    
+
     return fromNative(viewPos);
 }
 
 
-Gfx::PointF WindowImpl::onToWindow(const Window& w, 
+Gfx::PointF WindowImpl::onToWindow(const Window& w,
                                        const Gfx::PointF& pos) const
 {
     return pos;
 }
 
 
-Gfx::PointF WindowImpl::onFromWindow(const Window& w, 
+Gfx::PointF WindowImpl::onFromWindow(const Window& w,
                                          const Gfx::PointF& pos) const
 {
     return pos;
@@ -359,13 +361,13 @@ Gfx::PointF WindowImpl::onFromWindow(const Window& w,
 
 Gfx::PointF WindowImpl::onToParent(const Gfx::PointF& pos) const
 {
-    return _wm.fromFrame(*this, pos); 
+    return _wm.fromFrame(*this, pos);
 }
-     
-        
+
+
 Gfx::PointF WindowImpl::onFromParent(const Gfx::PointF& pos) const
-{ 
-    return _wm.toFrame(*this, pos); 
+{
+    return _wm.toFrame(*this, pos);
 }
 
 
@@ -384,7 +386,7 @@ void WindowImpl::paint(const Gfx::RectF& rect)
     CGFloat y = contentHeight - (appKitRect.y() + appKitRect.height());
     CGFloat w = appKitRect.width();
     CGFloat h = appKitRect.height();
-    
+
     //std::clog << "PAINT: " << x << "," << y <<
     //                   " " << w << "x" << h << std::endl;
 
@@ -397,7 +399,7 @@ void WindowImpl::onRepaint(Window& w, const Gfx::RectF& rect)
 {
     Gfx::PointF screenPos = toScreen( rect.topLeft() );
     Gfx::RectF screenRect( screenPos, rect.size() );
-    
+
     _wm.repaint(screenRect);
 }
 
@@ -526,7 +528,7 @@ void WindowImpl::onProcessEnableEvent(const EnableEvent& ev)
 
 
 void WindowImpl::onEnableEvent(const EnableEvent& ev)
-{    
+{
     Base::onEnableEvent(ev);
 }
 
@@ -575,11 +577,11 @@ Gfx::SizeF WindowImpl::onResize(Window& w, const Gfx::SizeF& size)
 
     //std::clog << "CURRENT FRAME: " << frameRect.origin.x << "," << frameRect.origin.y << " "
     //                               << frameRect.size.width << "," << frameRect.size.height << std::endl;
-    
+
     frameRect.origin.y += content.size.height - appKitSize.height();
     frameRect.size.width += appKitSize.width() - content.size.width;
     frameRect.size.height += appKitSize.height() - content.size.height;
-    
+
     //std::clog << "RESIZED FRAME: " << frameRect.origin.x << "," << frameRect.origin.y << " "
     //                               << frameRect.size.width << "," << frameRect.size.height << std::endl;
 
@@ -608,7 +610,7 @@ void WindowImpl::onSetAbove(Window& w, bool above)
 
 void WindowImpl::onSetTitle(Window& w, const std::string& text)
 {
-    NSString* title = [NSString stringWithCString:text.c_str() 
+    NSString* title = [NSString stringWithCString:text.c_str()
                                 encoding:[NSString defaultCStringEncoding]];
     [_window setTitle: title];
 }
@@ -639,12 +641,12 @@ void WindowImpl::onSetState(Window& w, const WindowState& s)
             {
                 [_window deminiaturize: nil];
             }
-            
+
             if( [_window isZoomed] )
             {
                 [_window zoom: nil];
             }
-            
+
             break;
 
         case WindowState::Maximized:
@@ -674,7 +676,7 @@ void WindowImpl::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF, 
+void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
                                             const Gfx::SizeF& maxSizeF)
 {
     //std::clog << "onSetSizeLimits: " << minSizeF.width() << "x" << minSizeF.height()
@@ -691,7 +693,7 @@ void WindowImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSizeF,
 }
 
 
-void WindowImpl::onAutoCenter(Window& w, const Gfx::SizeF* size) 
+void WindowImpl::onAutoCenter(Window& w, const Gfx::SizeF* size)
 {
     _wm.onAutoCenter(*this, size);
 }
@@ -774,9 +776,8 @@ void WindowImpl::paintWindowCocoa(CGContextRef windowContext, const CGRect& rect
 
     CGImageRef image = _cocoaBackend->getCGImage(pixmap());
 
-    CGFloat backingScale = [_window backingScaleFactor];
-    CGRect sourceRect = CGRectMake(x * backingScale, y * backingScale,
-                                   width * backingScale, height * backingScale);
+    CGRect sourceRect = CGRectMake(x * _backingScaleFactor, y * _backingScaleFactor,
+                                   width * _backingScaleFactor, height * _backingScaleFactor);
 
 #ifdef PT_FORMS_WARN_UNALIGNED_BLIT
     CGRect destRect = CGContextConvertRectToDeviceSpace(windowContext, rect);
@@ -819,9 +820,8 @@ void WindowImpl::paintWindowGeneric(CGContextRef windowContext, const CGRect& re
                                      colorSpace, bitmapInfo, provider,
                                      NULL, false, kCGRenderingIntentDefault);
 
-    CGFloat backingScale = [_window backingScaleFactor];
-    CGRect sourceRect = CGRectMake(x * backingScale, y * backingScale,
-                                   width * backingScale, height * backingScale);
+    CGRect sourceRect = CGRectMake(x * _backingScaleFactor, y * _backingScaleFactor,
+                                   width * _backingScaleFactor, height * _backingScaleFactor);
 
 #ifdef PT_FORMS_WARN_UNALIGNED_BLIT
     CGRect destRect = CGContextConvertRectToDeviceSpace(windowContext, rect);
@@ -880,13 +880,13 @@ void WindowImpl::onViewMove(const NSPoint& viewPos)
 
 
 void WindowImpl::onViewResize(const NSSize& viewSize)
-{   
+{
     //std::clog << "onViewResize: " << _client.title() << " " << viewSize.width << "x" << viewSize.height << std::endl;
 
     Window::State wstate = WindowState::Normal;
 
     if( [_window isZoomed] )
-    {		
+    {
         wstate = WindowState::Maximized;
     }
     else if( [_window isMiniaturized] )
@@ -900,7 +900,7 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
         Application::instance().commitEvent(wse);
     }
 
-    Gfx::SizeF to(viewSize.width, 
+    Gfx::SizeF to(viewSize.width,
                   viewSize.height);
     to = fromNative(to);
 
@@ -912,7 +912,7 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
 
     // cocoa performs a paint/display right after a window resize, so we
     // need to process the window update now to avoid flicker
-    // 
+    //
     // OR: override NSWwindow::setFrame to not perform a paint/display
     Application::instance().impl()->processEvents();
 }
@@ -920,8 +920,27 @@ void WindowImpl::onViewResize(const NSSize& viewSize)
 
 void WindowImpl::onViewDidRescale()
 {
-    CGFloat scale = backingScaleFactor();
-    std::clog << "BACKING SCALE FACTOR: " << scale << std::endl;
+    double newScale = 1.0;
+    if(_window != nil)
+        newScale = [_window backingScaleFactor];
+
+    if(newScale == _backingScaleFactor)
+        return;
+
+    _backingScaleFactor = newScale;
+
+    double applicationScale = applicationScaleFactor();
+
+    RescaleEvent rev(*this, applicationScale);
+    processEvent(rev);
+
+    ResizeEvent resizeEv(*this, size());
+    processEvent(resizeEv);
+
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), size());
+    _client.repaint(updateRect);
+
+    Application::instance().impl()->processEvents();
 }
 
 
@@ -966,7 +985,7 @@ void WindowImpl::onViewKeyDown(unsigned vkey, Pt::Char ch)
     if(vkey < keyMapSize)
     {
         keyCode = keyMap[vkey];
-        
+
         if(keyCode == Key::NoKey)
             keyCode = toupper(ch).value();
     }
@@ -987,7 +1006,7 @@ void WindowImpl::onViewKeyUp(unsigned vkey, Pt::Char ch)
     if(vkey < keyMapSize)
     {
         keyCode = keyMap[vkey];
-        
+
         if(keyCode == Key::NoKey)
             keyCode = toupper(ch).value();
     }
@@ -1008,9 +1027,9 @@ void WindowImpl::onViewKeyModifier(unsigned int mask)
     bool wasControl = (_keyFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
     bool wasAlt = (_keyFlags & NSEventModifierFlagOption) == NSEventModifierFlagOption;
     bool wasMeta = (_keyFlags & NSEventModifierFlagCommand) == NSEventModifierFlagCommand;
-    
+
     _keyFlags = mask;
-    
+
     bool shift = (_keyFlags & NSEventModifierFlagShift) == NSEventModifierFlagShift;
     bool control = (_keyFlags & NSEventModifierFlagControl) == NSEventModifierFlagControl;
     bool alt = (_keyFlags & NSEventModifierFlagOption) == NSEventModifierFlagOption;
@@ -1042,9 +1061,9 @@ void WindowImpl::onViewKeyModifier(unsigned int mask)
     if(keyCode == Key::NoKey)
         return;
 
-    bool wasPressed = ( ! wasShift   && shift)   || 
+    bool wasPressed = ( ! wasShift   && shift)   ||
                       ( ! wasControl && control) ||
-                      ( ! wasAlt     && alt)     || 
+                      ( ! wasAlt     && alt)     ||
                       ( ! wasMeta    && meta);
 
     Key key(_keyModifiers, keyCode);

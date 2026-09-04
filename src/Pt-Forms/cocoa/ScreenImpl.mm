@@ -1,10 +1,10 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -41,7 +41,10 @@ namespace Forms {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _parent(0)
 , _captureMonitor(0)
+, _screenScaling(1.0)
 {
+    NSScreen* screen = [NSScreen mainScreen];
+    _screenScaling = screen ? [screen backingScaleFactor] : 1.0;
 }
 
 
@@ -71,11 +74,11 @@ void ScreenImpl::setParent(Screen* screen)
         // TODO:
         NSScreen* mainScreen = [NSScreen mainScreen];
         NSRect screenRect = [mainScreen visibleFrame];
-        //std::clog << "screen size: " << screenRect.size.width << "x" 
+        //std::clog << "screen size: " << screenRect.size.width << "x"
         //                             << screenRect.size.height << std::endl;
 
         Gfx::SizeF size(screenRect.size.width, screenRect.size.height);
-        size /= scaleFactor();
+        size /= scaleFactor() / _screenScaling;
 
         _parent->onResize(*this, size);
         _parent->onShow(*this, true);
@@ -87,13 +90,13 @@ void ScreenImpl::setParent(Screen* screen)
 
 void ScreenImpl::addWindow(Window& w)
 {
-    w.setParent(*this); 
+    w.setParent(*this);
 }
 
 
 void ScreenImpl::removeWindow(Window& w)
-{ 
-    w.unparent(); 
+{
+    w.unparent();
 }
 
 
@@ -122,19 +125,19 @@ Window* ScreenImpl::findWindow(NSWindow* wnd)
         if( window->frame() && impl->window() == wnd )
             return window;
     }
-    
+
     return 0;
 }
 
 
-Gfx::PointF ScreenImpl::toFrame(const WindowImpl& frame, 
+Gfx::PointF ScreenImpl::toFrame(const WindowImpl& frame,
                                 const Gfx::PointF& pos) const
 {
     return frame.fromScreen(pos);
 }
 
 
-Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame, 
+Gfx::PointF ScreenImpl::fromFrame(const WindowImpl& frame,
                                   const Gfx::PointF& pos) const
 {
     return frame.toScreen(pos);
@@ -153,7 +156,7 @@ void ScreenImpl::onAutoCenter(WindowFrame& w, const Gfx::SizeF* size)
 
     double x = (screenSize.width() - windowSize.width()) / 2.0;
     double y = (screenSize.height() - windowSize.height()) / 2.0;
-    
+
     //std::clog << "auto-center BEGIN: " << w.window().title() << " " << x << "," << y << std::endl;
     //std::clog << "window size: " << windowSize.width() << "x" << windowSize.height() << std::endl;
     //std::clog << "screen size: " << screenSize.width() << "x" << screenSize.height() << std::endl;
@@ -167,12 +170,12 @@ void ScreenImpl::onAutoCenter(WindowFrame& w, const Gfx::SizeF* size)
 
 Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 {
-    double scaling = scaleFactor();
+    double appScaling = scaleFactor() / _screenScaling;
 
     CGFloat screenHeight = [[NSScreen mainScreen] frame].size.height;
-    CGFloat y = screenHeight - p.y() * scaling;
-    
-    NSPoint pnt = NSMakePoint(p.x() * scaling, y);
+    CGFloat y = screenHeight - p.y() * appScaling;
+
+    NSPoint pnt = NSMakePoint(p.x() * appScaling, y);
 
     NSInteger n =  [ NSWindow windowNumberAtPoint: pnt
                               belowWindowWithWindowNumber: 0 ];
@@ -186,7 +189,7 @@ Widget* ScreenImpl::onHitTest(const Gfx::PointF& p)
 
     WindowImpl* frame = static_cast<WindowImpl*>( win->frame() );
     Gfx::PointF pos = toFrame(*frame, p);
-    
+
     return win->hitTest(pos);
 }
 
@@ -245,7 +248,8 @@ void ScreenImpl::onDetach(WindowFrame& frame)
 
 void ScreenImpl::onInit(WindowFrame& frame)
 {
-    RescaleEvent ev( frame, scaleFactor() );
+    double windowScaling = scaleFactor() / _screenScaling;
+    RescaleEvent ev( frame, windowScaling );
     frame.processEvent(ev);
 
     Base::onInit(frame);
@@ -351,7 +355,7 @@ void ScreenImpl::onRelease(WindowFrame& frame)
 //}
 
 
-//void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize, 
+//void ScreenImpl::onSetSizeLimits(Window& w, const Gfx::SizeF& minSize,
 //                                            const Gfx::SizeF& maxSize)
 //{
 //    WindowImpl* impl = static_cast<WindowImpl*>( w.frame() );
@@ -392,7 +396,7 @@ void ScreenImpl::setCapture(Widget* capture)
 
     std::vector<Window*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
-    {      
+    {
         if( capture == *wit || capture->isDescendantOf(**wit) )
         {
             window = *wit;
@@ -411,10 +415,10 @@ void ScreenImpl::setCapture(Widget* capture)
     // NOTE: local monitors will only capture events on the window frame
 
     _captureMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask: mask
-                               handler:^ void (NSEvent* event) 
+                               handler:^ void (NSEvent* event)
                                {
                                    NSEventType eventType = [event type];
-                                   
+
                                    if(eventType == NSEventTypeLeftMouseDown ||
                                       eventType == NSEventTypeRightMouseDown ||
                                       eventType == NSEventTypeOtherMouseDown)
@@ -433,7 +437,7 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
 {
     double scaling = ev.scaleFactor();
 
-    RescaleEvent rev(*this, scaling);
+    RescaleEvent rev(*this, scaling * _screenScaling);
     Base::onProcessRescaleEvent(rev);
 
     std::vector<Window*>::iterator wit;
@@ -441,9 +445,9 @@ void ScreenImpl::onProcessRescaleEvent(const RescaleEvent& ev)
     {
         Window* window = *wit;
         WindowFrame* frame = window->frame();
-        
-        RescaleEvent ev(*frame, scaling);
-        frame->processEvent(ev);
+
+        RescaleEvent wev(*frame, scaling);
+        frame->processEvent(wev);
     }
 }
 
@@ -458,7 +462,7 @@ void ScreenImpl::onRescaleEvent(const RescaleEvent& ev)
     //std::clog << "screen size: " << screenRect.size.width << "x" << screenRect.size.height << std::endl;
 
     Gfx::SizeF size(screenRect.size.width, screenRect.size.height);
-    size /= scaleFactor();
+    size /= scaleFactor() / _screenScaling;
 
     _parent->onResize(*this, size);
 }
@@ -496,17 +500,13 @@ void ScreenImpl::onProcessPaintEvent(const PaintEvent& ev)
         if(winRect.size().width() < 0.1 || winRect.height() < 0.1)
             continue;
 
-        // send (native) paint event to window
-        winRect = Gfx::RectF( winRect.topLeft() /* * window->scaleFactor()*/, 
-                              winRect.size() /* * window->scaleFactor()*/);
-
         frame->paint(winRect);
     }
 }
 
 
 void ScreenImpl::onPaintEvent(const PaintEvent& ev)
-{    
+{
     Base::onPaintEvent(ev);
 
     const Gfx::RectF& rect = ev.rect();
@@ -534,7 +534,7 @@ void ScreenImpl::onProcessEnableEvent(const EnableEvent& ev)
 
 
 void ScreenImpl::onEnableEvent(const EnableEvent& ev)
-{    
+{
     Base::onEnableEvent(ev);
 }
 
@@ -552,7 +552,7 @@ void ScreenImpl::onProcessMouseEvent(const MouseEvent& ev)
 
 
 bool ScreenImpl::onMouseEvent(const MouseEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
     return Base::onMouseEvent(ev);
 }
@@ -565,7 +565,7 @@ void ScreenImpl::onProcessTouchEvent(const TouchEvent& ev)
 
 
 bool ScreenImpl::onTouchEvent(const TouchEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
     return Base::onTouchEvent(ev);
 }
@@ -578,7 +578,7 @@ void ScreenImpl::onProcessScrollEvent(const ScrollEvent& ev)
 
 
 bool ScreenImpl::onScrollEvent(const ScrollEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
     return Base::onScrollEvent(ev);
 }
@@ -595,9 +595,9 @@ void ScreenImpl::onProcessKeyEvent(const KeyEvent& ev)
 
 
 bool ScreenImpl::onKeyEvent(const KeyEvent& ev)
-{ 
+{
     // TODO: possibly pass on to application
-    return Base::onKeyEvent(ev); 
+    return Base::onKeyEvent(ev);
 }
 
 } // namespace

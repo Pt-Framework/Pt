@@ -263,6 +263,7 @@ class WindowImpl : public WindowFrame
         NSWindow*                _window;
         NSView*                  _view;
         int                      _windowStyle;
+        double                   _backingScaleFactor;
 
         GenericGraphicsBackend*  _genericBackend;
         CocoaGraphicsBackend*    _cocoaBackend;
