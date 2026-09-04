@@ -136,7 +136,7 @@ void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const c
 
     if(caPtr)
     {
-        for(int i = 0; i < sk_X509_num( caPtr.get() ); i++)
+        while( sk_X509_num( caPtr.get() ) > 0 )
         {
             X509* elem = sk_X509_pop( caPtr.get() );
             X509AutoPtr x509Ptr(elem);
