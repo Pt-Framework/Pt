@@ -151,7 +151,9 @@ content is in context without having read it.
 - For SSL/TLS encrypted streams, certificates, contexts, verification, handshakes read:
   `.github/instructions/pt-ssl-api.instructions.md`
 
-- For Cosmo components, plugins, manifests, lifecycle management, activation, connections, startup, and command-line arguments read:
+- For Create, implement, register, declare, activate or deactivate a Cosmo component,
+  implement a component interface, wire component dependencies, use the
+  component framework, review component code read:
   `.github/instructions/pt-cosmo-api-components.instructions.md`
 
 - For Cosmo enumerable collections, type-safe iteration, resource lifetime, auto-release pools, smart pointers, and buffers read:
