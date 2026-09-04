@@ -34,8 +34,7 @@ namespace Pt {
 namespace System {
 
 IODevice::IODevice()
-: _loop(0)
-, _rbuf(0)
+: _rbuf(0)
 , _rbuflen(0)
 , _ravail(0)
 , _wbuf(0)
@@ -102,7 +101,8 @@ std::size_t IODevice::endRead()
 
     try
     {
-        n = this->onEndRead(*_loop, _rbuf, _rbuflen, _eof);
+        EventLoop* loop = parent();
+        n = this->onEndRead(*loop, _rbuf, _rbuflen, _eof);
     }
     catch (...)
     {
@@ -167,7 +167,8 @@ std::size_t IODevice::endWrite()
 
     try
     {
-        n = onEndWrite(*_loop, _wbuf, _wbuflen);
+        EventLoop* loop = parent();
+        n = onEndWrite(*loop, _wbuf, _wbuflen);
     }
     catch (...)
     {
@@ -237,18 +238,6 @@ bool IODevice::isEof() const
 void IODevice::setEof(bool eof)
 { 
     _eof = eof; 
-}
-
-
-void IODevice::onAttach(EventLoop& loop)
-{ 
-    _loop = &loop;
-}
-
-
-void IODevice::onDetach(EventLoop& loop)
-{ 
-    _loop = 0; 
 }
 
 

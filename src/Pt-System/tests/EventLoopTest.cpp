@@ -186,12 +186,6 @@ class CoalesceSelectable : public Pt::System::Selectable
         int _runCount;
 
     protected:
-        virtual void onAttach(Pt::System::EventLoop&)
-        {}
-
-        virtual void onDetach(Pt::System::EventLoop&)
-        {}
-
         bool onRun()
         {
             ++_runCount;
