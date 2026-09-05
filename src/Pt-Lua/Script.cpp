@@ -311,7 +311,8 @@ void Script::onAsyncCall()
 
 void Script::onAsyncCallFinished()
 {
-  post();
+  if( ! isCancelled() )
+    post();
 }
 
 
@@ -505,6 +506,7 @@ AsyncAdvance Script::advanceAsync()
 
 AsyncAdvance::AsyncAdvance(Script& script)
 : _script(&script)
+, _isPending(false)
 {
   _script->attachAwaiter(*this);
 }
@@ -514,6 +516,9 @@ AsyncAdvance::~AsyncAdvance()
 {
   if(_script)
   {
+    if(_isPending)
+      _script->cancel();
+
     _script->detachAwaiter(*this);
     _script = 0;
   }
@@ -529,22 +534,34 @@ Script::Status AsyncAdvance::await_resume()
 void AsyncAdvance::onBegin()
 {
   Script& script = this->script();
-  script.advanced() += slot(*this, &AsyncAdvance::setReady);
+  _isPending = true;
+  script.advanced() += slot(*this, &AsyncAdvance::onAdvanced);
   script.beginAdvance();
 }
 
 
 void AsyncAdvance::onCancel()
 {
-  if(_script)
+  if(_script && _isPending)
+  {
+    _isPending = false;
     _script->cancel();
+  }
 }
 
 
 void AsyncAdvance::onDetach()
 {
   _script = 0;
+  _isPending = false;
   _handle = nullptr;
+}
+
+
+void AsyncAdvance::onAdvanced()
+{
+  _isPending = false;
+  setReady();
 }
 
 

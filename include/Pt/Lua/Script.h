@@ -60,6 +60,10 @@ class Call;
 class AsyncAdvance;
 #endif
 
+/** @brief Lua script.
+
+    @ingroup Pt-Lua
+*/
 class PT_LUA_API Script : public System::Selectable
                         , public Connectable
 {
@@ -182,9 +186,12 @@ class PT_LUA_API AsyncAdvance : public Pt::Awaiter
 
     void onDetach();
 
+    void onAdvanced();
+
     Script& script();
 
     Script* _script;
+    bool _isPending;
 };
 
 #endif // __cplusplus >= 202002L

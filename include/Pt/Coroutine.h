@@ -190,10 +190,11 @@ class PromiseBase
 
         void cancel()
         {
-            if(_pending)
+            AwaiterBase* pending = _pending;
+            _pending = nullptr;
+            if(pending)
             {
-                _pending->cancel();
-                _pending = nullptr;
+                pending->cancel();
             }
         }
 
@@ -418,8 +419,9 @@ class Task : public AwaiterBase
             if( _handle )
             {
                 _handle.promise().cancel();
-                _handle.destroy();
+                handle_type handle = _handle;
                 _handle = nullptr;
+                handle.destroy();
             }
         }
 

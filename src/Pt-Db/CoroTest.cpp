@@ -41,6 +41,7 @@ class CoroTest : public Pt::Unit::TestSuite
             registerMethod("DestroyTask",    *this, &CoroTest::destroyTask);
             registerMethod("PendingAwaiter",  *this, &CoroTest::pendingAwaiter);
             registerMethod("NestedTask",    *this, &CoroTest::nestedTask);
+            registerMethod("DeferredArguments", *this, &CoroTest::deferredArguments);
         }
 
     protected:
@@ -64,6 +65,7 @@ class CoroTest : public Pt::Unit::TestSuite
         void destroyTask();
         void pendingAwaiter();
         void nestedTask();
+        void deferredArguments();
 
         Pt::Task<>             openCloseAsync();
         Pt::Task<>             executeAsync();
@@ -71,6 +73,12 @@ class CoroTest : public Pt::Unit::TestSuite
         Pt::Task<>             cancelSelectAsync();
         Pt::Task<>             awaitOpenAsync(Pt::Db::Connection& conn);
         Pt::Task<>             awaitSelectAsync(Pt::Db::AsyncSelect& awaiter);
+        Pt::Task<>             awaitOpenAndExit(Pt::Db::AsyncOpen& awaiter,
+                            Pt::System::EventLoop& loop);
+        Pt::Task<>             awaitExecuteAndExit(Pt::Db::AsyncExecute& awaiter,
+                               Pt::System::EventLoop& loop);
+        Pt::Task<>             awaitSelectAndExit(Pt::Db::AsyncSelect& awaiter,
+                              Pt::System::EventLoop& loop);
         Pt::Task<std::size_t>  insertRowAsync(Pt::Db::Connection& conn, int id);
         Pt::Task<>             nestedTaskAsync();
 
@@ -238,6 +246,80 @@ void CoroTest::pendingAwaiter()
     Pt::Db::AsyncOpen open = conn.openAsync(":memory:");
 
     PT_UNIT_ASSERT_THROW( conn.pingAsync(), std::logic_error );
+}
+
+
+Pt::Task<> CoroTest::awaitOpenAndExit(Pt::Db::AsyncOpen& awaiter,
+                                       Pt::System::EventLoop& loop)
+{
+    co_await awaiter;
+    loop.exit();
+}
+
+
+Pt::Task<> CoroTest::awaitExecuteAndExit(Pt::Db::AsyncExecute& awaiter,
+                                          Pt::System::EventLoop& loop)
+{
+    co_await awaiter;
+    loop.exit();
+}
+
+
+Pt::Task<> CoroTest::awaitSelectAndExit(Pt::Db::AsyncSelect& awaiter,
+                                         Pt::System::EventLoop& loop)
+{
+    co_await awaiter;
+    loop.exit();
+}
+
+
+void CoroTest::deferredArguments()
+{
+    {
+        Pt::System::MainLoop loop;
+        Pt::Db::Connection conn("sqlite");
+        conn.setActive(loop);
+
+        Pt::Db::AsyncOpen awaiter = conn.openAsync(std::string(":memory:"));
+        Pt::Task<> task = awaitOpenAndExit(awaiter, loop);
+        task.run();
+        loop.run();
+
+        PT_UNIT_ASSERT( conn.isOpen() );
+    }
+
+    {
+        Pt::System::MainLoop loop;
+        Pt::Db::Connection conn("sqlite");
+        conn.open(":memory:");
+        conn.setActive(loop);
+
+        Pt::Db::AsyncExecute awaiter =
+            conn.executeAsync(std::string("CREATE TABLE t (id INTEGER)"));
+        Pt::Task<> task = awaitExecuteAndExit(awaiter, loop);
+        task.run();
+        loop.run();
+
+        Pt::Db::Result result = conn.select("SELECT COUNT(*) FROM sqlite_master WHERE name='t'");
+        PT_UNIT_ASSERT( result[0][0].getInt() == 1 );
+    }
+
+    {
+        Pt::System::MainLoop loop;
+        Pt::Db::Connection conn("sqlite");
+        conn.open(":memory:");
+        conn.setActive(loop);
+        conn.execute("CREATE TABLE t (id INTEGER)");
+        conn.execute("INSERT INTO t VALUES (1)");
+
+        Pt::Db::AsyncSelect awaiter =
+            conn.selectAsync(std::string("SELECT * FROM t"));
+        Pt::Task<> task = awaitSelectAndExit(awaiter, loop);
+        task.run();
+        loop.run();
+
+        PT_UNIT_ASSERT( task.done() );
+    }
 }
 
 

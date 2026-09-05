@@ -72,6 +72,8 @@ class CoroutineTest : public Pt::Unit::TestSuite
             registerMethod("TaskByReference",                     *this, &CoroutineTest::TaskByReference);
             registerMethod("TaskAssign",                          *this, &CoroutineTest::TaskAssign);
             registerMethod("TaskDestructorCancels",               *this, &CoroutineTest::TaskDestructorCancels);
+            registerMethod("NestedTaskDestructorCancels",         *this, &CoroutineTest::NestedTaskDestructorCancels);
+            registerMethod("GeneratorCancel",                     *this, &CoroutineTest::GeneratorCancel);
         }
 
     protected:
@@ -152,6 +154,33 @@ class CoroutineTest : public Pt::Unit::TestSuite
             }
 
             PT_UNIT_ASSERT( cancelled );
+        }
+
+        void NestedTaskDestructorCancels()
+        {
+            bool cancelled = false;
+
+            {
+                Pt::Task<> task = nestedPendingTask(cancelled);
+                task.run();
+                PT_UNIT_ASSERT( task );
+            }
+
+            PT_UNIT_ASSERT( cancelled );
+        }
+
+        void GeneratorCancel()
+        {
+            bool cancelled = false;
+            Pt::Generator<int> generator = pendingGenerator(cancelled);
+            Pt::Task<> task = awaitNext(generator);
+            task.run();
+
+            generator.cancel();
+            PT_UNIT_ASSERT( cancelled );
+
+            task.cancel();
+            PT_UNIT_ASSERT( ! task );
         }
 
     private:
@@ -239,6 +268,22 @@ class CoroutineTest : public Pt::Unit::TestSuite
         Pt::Task<> pendingTask(bool& cancelled)
         {
             co_await PendingAwaiter(cancelled);
+        }
+
+        Pt::Task<> nestedPendingTask(bool& cancelled)
+        {
+            co_await pendingTask(cancelled);
+        }
+
+        Pt::Generator<int> pendingGenerator(bool& cancelled)
+        {
+            co_await PendingAwaiter(cancelled);
+            co_yield 1;
+        }
+
+        Pt::Task<> awaitNext(Pt::Generator<int>& generator)
+        {
+            co_await generator.next();
         }
 };
 

@@ -165,9 +165,17 @@ class Generator : public AwaiterBase
         class NextAwaiter : public AwaiterBase
         {
             public:
-                explicit NextAwaiter(handle_type h)
-                : _handle(h)
+                explicit NextAwaiter(Generator& generator)
+                : _generator(&generator)
+                , _handle(generator._handle)
+                , _isPending(false)
                 {}
+
+                ~NextAwaiter()
+                {
+                    if(_generator && _isPending)
+                        _generator->detachAwaiter(*this);
+                }
 
                 void cancel() override
                 {
@@ -181,6 +189,9 @@ class Generator : public AwaiterBase
                 template<typename FormP>
                 std::coroutine_handle<> await_suspend(std::coroutine_handle<FormP> outer)
                 {
+                    _generator->attachAwaiter(*this);
+                    _isPending = true;
+
                     if( _handle.promise()._outer )
                         throw std::logic_error("generator pending");
 
@@ -191,6 +202,15 @@ class Generator : public AwaiterBase
 
                 bool await_resume()
                 {
+                    if(_generator && _isPending)
+                    {
+                        _generator->detachAwaiter(*this);
+                        _isPending = false;
+                    }
+
+                    if( ! _handle )
+                        return false;
+
                     if (_handle.promise()._exception)
                         std::rethrow_exception(_handle.promise()._exception);
 
@@ -198,7 +218,18 @@ class Generator : public AwaiterBase
                 }
 
             private:
+                friend class Generator;
+
+                void onDetach()
+                {
+                    _generator = nullptr;
+                    _handle = nullptr;
+                    _isPending = false;
+                }
+
+                Generator* _generator;
                 handle_type _handle;
+                bool _isPending;
         };
 
     public:
@@ -214,12 +245,19 @@ class Generator : public AwaiterBase
 
         ~Generator()
         {
-            if (_handle)
-                _handle.destroy();
+            cancel();
         }
 
-        void cancel() override {
-            if (_handle) {
+        void cancel() override
+        {
+            if(_awaiter)
+            {
+                _awaiter->onDetach();
+                _awaiter = nullptr;
+            }
+
+            if (_handle)
+            {
                 _handle.promise().cancel();
                 _handle.destroy();
                 _handle = nullptr;
@@ -228,7 +266,7 @@ class Generator : public AwaiterBase
 
         NextAwaiter next()
         {
-            return NextAwaiter{_handle};
+            return NextAwaiter(*this);
         }
 
         T value()
@@ -237,11 +275,26 @@ class Generator : public AwaiterBase
         }
 
     private:
+        void attachAwaiter(NextAwaiter& awaiter)
+        {
+            if(_awaiter && _awaiter != &awaiter)
+                throw std::logic_error("generator pending");
+
+            _awaiter = &awaiter;
+        }
+
+        void detachAwaiter(NextAwaiter& awaiter)
+        {
+            if(_awaiter == &awaiter)
+                _awaiter = nullptr;
+        }
+
         Generator(const Generator&) = delete;
         Generator& operator=(const Generator&) = delete;
 
     private:
         handle_type _handle;
+        NextAwaiter* _awaiter = nullptr;
 };
 
 } // namespace Pt

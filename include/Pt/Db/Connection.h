@@ -437,7 +437,7 @@ class AsyncOpen : public ConnectionAwaiter
             conn.beginOpen(_connStr);
         }
 
-        const std::string& _connStr;
+        std::string _connStr;
 };
 
 /** @brief Awaitable for async close of a database connection.
@@ -484,7 +484,8 @@ class AsyncExecute : public ConnectionAwaiter
             conn.executeFinished() += slot(*this, &AsyncExecute::setReady);
             conn.beginExecute(_sql);
         }
-        const std::string& _sql;
+
+        std::string _sql;
 };
 
 
@@ -509,7 +510,8 @@ class AsyncSelect : public ConnectionAwaiter
             conn.selectFinished() += slot(*this, &AsyncSelect::setReady);
             conn.beginSelect(_sql);
         }
-        const std::string& _sql;
+
+        std::string _sql;
 };
 
 
