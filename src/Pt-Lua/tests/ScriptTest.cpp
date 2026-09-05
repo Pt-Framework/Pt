@@ -40,6 +40,7 @@
 #include <Pt/Unit/RegisterTest.h>
 
 #include <string>
+#include <stdexcept>
 
 namespace Pt {
 
@@ -151,6 +152,14 @@ ScriptTest::ScriptTest()
 #if __cplusplus >= 202002L
   Pt::Unit::TestSuite::registerMethod("CoAdvance",
                                       *this, &ScriptTest::CoAdvance);
+  Pt::Unit::TestSuite::registerMethod("DestroyScript",
+                                      *this, &ScriptTest::DestroyScript);
+  Pt::Unit::TestSuite::registerMethod("DestroyWaitingScript",
+                                      *this, &ScriptTest::DestroyWaitingScript);
+  Pt::Unit::TestSuite::registerMethod("DestroyTask",
+                                      *this, &ScriptTest::DestroyTask);
+  Pt::Unit::TestSuite::registerMethod("PendingAwaiter",
+                                      *this, &ScriptTest::PendingAwaiter);
 #endif
 }
 
@@ -298,6 +307,69 @@ void ScriptTest::CoAdvance()
   Pt::Task<> task = advanceAsync();
   task.run();
   _loop->run();
+}
+
+
+Pt::Task<> ScriptTest::awaitAdvanceAsync(Pt::Lua::AsyncAdvance& awaiter)
+{
+  co_await awaiter;
+}
+
+
+void ScriptTest::DestroyScript()
+{
+  Script* script = new Script(*_ctx, script1);
+
+  {
+    Pt::Lua::AsyncAdvance awaiter = script->advanceAsync();
+    delete script;
+
+    Pt::Task<> task = awaitAdvanceAsync(awaiter);
+    task.run();
+
+    PT_UNIT_ASSERT( task.done() );
+    PT_UNIT_ASSERT_THROW( task.result(), std::logic_error );
+  }
+}
+
+
+void ScriptTest::DestroyWaitingScript()
+{
+  Script* script = new Script(*_ctx, script1);
+  script->setActive(*_loop);
+
+  Pt::Lua::AsyncAdvance awaiter = script->advanceAsync();
+  Pt::Task<> task = awaitAdvanceAsync(awaiter);
+  task.run();
+  delete script;
+
+  PT_UNIT_ASSERT( ! task.done() );
+  task.cancel();
+  PT_UNIT_ASSERT( ! task );
+}
+
+
+void ScriptTest::DestroyTask()
+{
+  Script script(*_ctx, script1);
+  script.setActive(*_loop);
+
+  {
+    Pt::Lua::AsyncAdvance awaiter = script.advanceAsync();
+    Pt::Task<> task = awaitAdvanceAsync(awaiter);
+    task.run();
+  }
+
+  PT_UNIT_ASSERT_EQUAL( script.advance(), Script::ScriptError );
+}
+
+
+void ScriptTest::PendingAwaiter()
+{
+  Script script(*_ctx, script1);
+  Pt::Lua::AsyncAdvance advance = script.advanceAsync();
+
+  PT_UNIT_ASSERT_THROW( script.advanceAsync(), std::logic_error );
 }
 
 

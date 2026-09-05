@@ -111,6 +111,14 @@ class PT_LUA_API Script : public System::Selectable
     Script(const Script&);
     Script& operator=(const Script&);
 
+#if __cplusplus >= 202002L
+    friend class AsyncAdvance;
+
+    void attachAwaiter(AsyncAdvance& awaiter);
+
+    void detachAwaiter(AsyncAdvance& awaiter);
+#endif
+
     bool onCall();
 
     void onAsyncCall();
@@ -140,6 +148,10 @@ class PT_LUA_API Script : public System::Selectable
     Call*         _pendingCall;
     AsyncCall*    _pendingAsyncCall;
     AsyncCall*    _activeAsyncCall;
+
+  #if __cplusplus >= 202002L
+    AsyncAdvance* _awaiter = nullptr;
+  #endif
 };
 
 #if __cplusplus >= 202002L
@@ -151,28 +163,28 @@ class PT_LUA_API Script : public System::Selectable
 
     @ingroup Pt-Lua
 */
-class AsyncAdvance : public Pt::Awaiter
-                   , public Pt::Connectable
+class PT_LUA_API AsyncAdvance : public Pt::Awaiter
+                              , public Pt::Connectable
 {
     public:
-        AsyncAdvance(Script& script)
-        : _script(script)
-        {}
+    AsyncAdvance(Script& script);
 
-        Script::Status await_resume()
-        { return _script.endAdvance(); }
+    ~AsyncAdvance();
+
+    Script::Status await_resume();
 
     private:
-        void onBegin() override
-        {
-            _script.advanced() += slot(*this, &AsyncAdvance::setReady);
-            _script.beginAdvance();
-        }
+    friend class Script;
 
-        void onCancel() override
-        { _script.cancel(); }
+    void onBegin() override;
 
-        Script& _script;
+    void onCancel() override;
+
+    void onDetach();
+
+    Script& script();
+
+    Script* _script;
 };
 
 #endif // __cplusplus >= 202002L

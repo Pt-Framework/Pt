@@ -112,6 +112,16 @@ Script::Script(Context& ctx, const char* script)
 
 Script::~Script()
 {
+#if __cplusplus >= 202002L
+  if(_awaiter)
+  {
+    _awaiter->onDetach();
+    _awaiter = 0;
+  }
+#endif
+
+  cancel();
+
   delete _pendingCall;
   _pendingCall = 0;
   delete _pendingAsyncCall;
@@ -167,6 +177,26 @@ void Script::beginAdvance()
 {
   post();
 }
+
+
+#if __cplusplus >= 202002L
+
+void Script::attachAwaiter(AsyncAdvance& awaiter)
+{
+  if(_awaiter && _awaiter != &awaiter)
+    throw std::logic_error("async operation pending");
+
+  _awaiter = &awaiter;
+}
+
+
+void Script::detachAwaiter(AsyncAdvance& awaiter)
+{
+  if(_awaiter == &awaiter)
+    _awaiter = 0;
+}
+
+#endif
 
 
 Script::Status Script::endAdvance() const
@@ -470,6 +500,60 @@ int Script::pushResult(Pt::Any& value, Pt::Reflex::Type& type)
 AsyncAdvance Script::advanceAsync()
 {
   return AsyncAdvance(*this);
+}
+
+
+AsyncAdvance::AsyncAdvance(Script& script)
+: _script(&script)
+{
+  _script->attachAwaiter(*this);
+}
+
+
+AsyncAdvance::~AsyncAdvance()
+{
+  if(_script)
+  {
+    _script->detachAwaiter(*this);
+    _script = 0;
+  }
+}
+
+
+Script::Status AsyncAdvance::await_resume()
+{
+  return script().endAdvance();
+}
+
+
+void AsyncAdvance::onBegin()
+{
+  Script& script = this->script();
+  script.advanced() += slot(*this, &AsyncAdvance::setReady);
+  script.beginAdvance();
+}
+
+
+void AsyncAdvance::onCancel()
+{
+  if(_script)
+    _script->cancel();
+}
+
+
+void AsyncAdvance::onDetach()
+{
+  _script = 0;
+  _handle = nullptr;
+}
+
+
+Script& AsyncAdvance::script()
+{
+  if( ! _script )
+    throw std::logic_error("script destroyed");
+
+  return *_script;
 }
 
 #endif // __cplusplus >= 202002L

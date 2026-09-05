@@ -46,7 +46,9 @@ namespace Lua {
 
 class Context;
 class Script;
-
+#if __cplusplus >= 202002L
+class AsyncAdvance;
+#endif
 
 struct Point
 {
@@ -233,7 +235,17 @@ class ScriptTest : public Pt::Unit::TestSuite
 #if __cplusplus >= 202002L
     void CoAdvance();
 
+  void DestroyScript();
+
+  void DestroyWaitingScript();
+
+  void DestroyTask();
+
+  void PendingAwaiter();
+
     Pt::Task<> advanceAsync();
+
+  Pt::Task<> awaitAdvanceAsync(Pt::Lua::AsyncAdvance& awaiter);
 #endif
 
   private:
