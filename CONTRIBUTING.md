@@ -29,7 +29,7 @@ git config credential.github.com.useHttpPath true
 ```
 
 Add `--local` to apply these settings to this repository, or `--global` to
-apply them to all repositories for the current user.
+apply them to all repositories for the current user. May require `ceredentials.helper` set to true.
 
 ## Repository Layout
 
