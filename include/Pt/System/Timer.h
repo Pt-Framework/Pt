@@ -215,6 +215,8 @@ class PT_SYSTEM_API Timer
 class PT_SYSTEM_API AsyncWait : public Pt::BasicAwaiter<void>
                               , public Pt::Connectable
 {
+    friend class Timer;
+
     public:
         /** @brief Construct an awaitable for a one-shot timer delay.
 
@@ -226,15 +228,13 @@ class PT_SYSTEM_API AsyncWait : public Pt::BasicAwaiter<void>
         ~AsyncWait();
 
     private:
-        friend class Timer;
-
         void onBegin() override;
 
         void onCancel() override;
 
         void onReady() override;
 
-        void onDetach() override;
+        void onDetach();
 
         Timer& timer();
 

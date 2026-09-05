@@ -384,7 +384,7 @@ class ConnectionAwaiter : public Pt::Awaiter
             }
         }
 
-        void onDetach() override
+        void onDetach()
         {
             _conn = nullptr;
             _handle = nullptr;

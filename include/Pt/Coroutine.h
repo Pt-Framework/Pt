@@ -123,9 +123,6 @@ class Awaiter : public AwaiterBase
 
         virtual void onCancel() = 0;
 
-        virtual void onDetach()
-        {}
-
     protected:
         std::coroutine_handle<> _handle;
 };
