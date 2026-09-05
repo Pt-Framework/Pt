@@ -32,6 +32,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 class TimerTest : public Pt::Unit::TestSuite
                 , public Pt::Connectable
@@ -50,6 +51,10 @@ class TimerTest : public Pt::Unit::TestSuite
             this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
 #if __cplusplus >= 202002L
             this->registerMethod("CoWait", *this, &TimerTest::CoWait);
+            this->registerMethod("DestroyTimer", *this, &TimerTest::DestroyTimer);
+            this->registerMethod("DestroyWaitingTimer", *this, &TimerTest::DestroyWaitingTimer);
+            this->registerMethod("DestroyTask", *this, &TimerTest::DestroyTask);
+            this->registerMethod("PendingAwaiter", *this, &TimerTest::PendingAwaiter);
 #endif
         }
 
@@ -165,7 +170,12 @@ class TimerTest : public Pt::Unit::TestSuite
 
 #if __cplusplus >= 202002L
         void CoWait();
+        void DestroyTimer();
+        void DestroyWaitingTimer();
+        void DestroyTask();
+        void PendingAwaiter();
         Pt::Task<> coWaitAsync();
+        Pt::Task<> awaitTimerAsync(Pt::System::AsyncWait& awaiter);
 #endif
 
     private:
@@ -199,6 +209,66 @@ void TimerTest::CoWait()
     Pt::Task<> task = coWaitAsync();
     task.run();
     _loop->run();
+}
+
+
+Pt::Task<> TimerTest::awaitTimerAsync(Pt::System::AsyncWait& awaiter)
+{
+    co_await awaiter;
+}
+
+
+void TimerTest::DestroyTimer()
+{
+    Pt::System::Timer* timer = new Pt::System::Timer();
+
+    {
+        Pt::System::AsyncWait awaiter = timer->waitAsync(100);
+        delete timer;
+
+        Pt::Task<> task = awaitTimerAsync(awaiter);
+        task.run();
+
+        PT_UNIT_ASSERT( task.done() );
+        PT_UNIT_ASSERT_THROW( task.result(), std::logic_error );
+    }
+}
+
+
+void TimerTest::DestroyWaitingTimer()
+{
+    Pt::System::MainLoop loop;
+    Pt::System::Timer* timer = new Pt::System::Timer();
+    timer->setActive(loop);
+
+    Pt::System::AsyncWait awaiter = timer->waitAsync(100);
+    Pt::Task<> task = awaitTimerAsync(awaiter);
+    task.run();
+    delete timer;
+
+    PT_UNIT_ASSERT( ! task.done() );
+    task.cancel();
+    PT_UNIT_ASSERT( ! task );
+}
+
+
+void TimerTest::DestroyTask()
+{
+    {
+        Pt::Task<> task = coWaitAsync();
+        task.run();
+        PT_UNIT_ASSERT( _timer->isStarted() );
+    }
+
+    PT_UNIT_ASSERT( ! _timer->isStarted() );
+}
+
+
+void TimerTest::PendingAwaiter()
+{
+    Pt::System::AsyncWait wait = _timer->waitAsync(100);
+
+    PT_UNIT_ASSERT_THROW( _timer->waitAsync(100), std::logic_error );
 }
 
 #endif // __cplusplus >= 202002L

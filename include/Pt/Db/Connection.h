@@ -66,6 +66,7 @@ class AsyncClose;
 class AsyncExecute;
 class AsyncSelect;
 class AsyncPing;
+class ConnectionAwaiter;
 #endif
 
 /** \brief Smart-pointer wrapper around a database connection backend.
@@ -270,6 +271,14 @@ class PT_DB_API Connection
     private:
         friend class Transaction;
 
+#if __cplusplus >= 202002L
+        friend class ConnectionAwaiter;
+
+        void attachAwaiter(ConnectionAwaiter& awaiter);
+
+        void detachAwaiter(ConnectionAwaiter& awaiter);
+#endif
+
         void startTransaction(const char* sql = nullptr);
 
         void commitTransaction(const char* sql = nullptr);
@@ -340,9 +349,65 @@ class PT_DB_API Connection
                          InternalRefCounted<IConnection> > ConnectionImplPtr;
 
         ConnectionImplPtr _connection;
+
+#if __cplusplus >= 202002L
+        ConnectionAwaiter* _awaiter = nullptr;
+#endif
 };
 
 #if __cplusplus >= 202002L
+
+/** @brief Base class for awaiters operating on a database connection.
+
+    Tracks a pending connection operation so either its task or the connection
+    can be destroyed without leaving a dangling reference.
+
+    @ingroup Pt-Db
+*/
+class ConnectionAwaiter : public Pt::Awaiter
+                        , public Pt::Connectable
+{
+    public:
+        explicit ConnectionAwaiter(Connection& conn)
+        : _conn(&conn)
+        {
+            _conn->attachAwaiter(*this); ;
+        }
+
+        ~ConnectionAwaiter()
+        {
+            if(_conn)
+            {
+                _conn->cancel();
+                _conn->detachAwaiter(*this);
+                _conn = nullptr;
+            }
+        }
+
+        void onDetach() override
+        {
+            _conn = nullptr;
+            _handle = nullptr;
+        }
+
+    protected:
+        Connection& connection()
+        {
+            if( ! _conn )
+                throw std::logic_error("invalid connection");
+
+            return *_conn;
+        }
+
+        void onCancel() override
+        {
+            if(_conn)
+                _conn->cancel();
+        }
+
+    private:
+        Connection* _conn;
+};
 
 /** @brief Awaitable for async open of a database connection.
 
@@ -351,89 +416,74 @@ class PT_DB_API Connection
 
     @ingroup Pt-Db
 */
-class AsyncOpen : public Pt::Awaiter
-               , public Pt::Connectable
+class AsyncOpen : public ConnectionAwaiter
 {
     public:
         AsyncOpen(Connection& conn, const std::string& connStr)
-        : _conn(conn)
+        : ConnectionAwaiter(conn)
         , _connStr(connStr)
         {}
 
         void await_resume()
         {
-            _conn.endOpen();
+            connection().endOpen();
         }
 
     private:
         void onBegin() override
         {
-            _conn.openFinished() += slot(*this, &AsyncOpen::setReady);
-            _conn.beginOpen(_connStr);
+            Connection& conn = connection();
+            conn.openFinished() += slot(*this, &AsyncOpen::setReady);
+            conn.beginOpen(_connStr);
         }
 
-
-        void onCancel() override
-        { _conn.cancel(); }
-
-        Connection& _conn;
         const std::string& _connStr;
 };
 
 /** @brief Awaitable for async close of a database connection.
     @ingroup Pt-Db
 */
-class AsyncClose : public Pt::Awaiter
-                , public Pt::Connectable
+class AsyncClose : public ConnectionAwaiter
 {
     public:
         AsyncClose(Connection& conn)
-        : _conn(conn)
+        : ConnectionAwaiter(conn)
         {}
 
         void await_resume()
-        { _conn.endClose(); }
+        { connection().endClose(); }
 
     private:
         void onBegin() override
         {
-            _conn.closeFinished() += slot(*this, &AsyncClose::setReady);
-            _conn.beginClose();
+            Connection& conn = connection();
+            conn.closeFinished() += slot(*this, &AsyncClose::setReady);
+            conn.beginClose();
         }
-
-        void onCancel() override
-        { _conn.cancel(); }
-
-        Connection& _conn;
 };
 
 
 /** @brief Awaitable for async execution of a DML/DDL statement.
     @ingroup Pt-Db
 */
-class AsyncExecute : public Pt::Awaiter
-                   , public Pt::Connectable
+class AsyncExecute : public ConnectionAwaiter
 {
     public:
         AsyncExecute(Connection& conn, const std::string& sql)
-        : _conn(conn)
+        : ConnectionAwaiter(conn)
         , _sql(sql)
         {}
 
         Connection::size_type await_resume()
-        { return _conn.endExecute(); }
+        { return connection().endExecute(); }
 
     private:
         void onBegin() override
         {
-            _conn.executeFinished() += slot(*this, &AsyncExecute::setReady);
-            _conn.beginExecute(_sql);
+            Connection& conn = connection();
+            conn.executeFinished() += slot(*this, &AsyncExecute::setReady);
+            conn.beginExecute(_sql);
         }
-
-        void onCancel() override
-        { _conn.cancel(); }
-
-        Connection& _conn;
         const std::string& _sql;
 };
 
@@ -441,29 +491,24 @@ class AsyncExecute : public Pt::Awaiter
 /** @brief Awaitable for async SELECT query.
     @ingroup Pt-Db
 */
-class AsyncSelect : public Pt::Awaiter
-                 , public Pt::Connectable
+class AsyncSelect : public ConnectionAwaiter
 {
     public:
         AsyncSelect(Connection& conn, const std::string& sql)
-        : _conn(conn)
+        : ConnectionAwaiter(conn)
         , _sql(sql)
         {}
 
         Result await_resume()
-        { return _conn.endSelect(); }
+        { return connection().endSelect(); }
 
     private:
         void onBegin() override
         {
-            _conn.selectFinished() += slot(*this, &AsyncSelect::setReady);
-            _conn.beginSelect(_sql);
+            Connection& conn = connection();
+            conn.selectFinished() += slot(*this, &AsyncSelect::setReady);
+            conn.beginSelect(_sql);
         }
-
-        void onCancel() override
-        { _conn.cancel(); }
-
-        Connection& _conn;
         const std::string& _sql;
 };
 
@@ -471,31 +516,25 @@ class AsyncSelect : public Pt::Awaiter
 /** @brief Awaitable for async ping.
     @ingroup Pt-Db
 */
-class AsyncPing : public Pt::Awaiter
-               , public Pt::Connectable
+class AsyncPing : public ConnectionAwaiter
 {
     public:
         AsyncPing(Connection& conn)
-        : _conn(conn)
+        : ConnectionAwaiter(conn)
         {}
 
         bool await_resume()
         {
-            return _conn.endPing();
+            return connection().endPing();
         }
 
     private:
         void onBegin() override
         {
-            _conn.pingFinished() += slot(*this, &AsyncPing::setReady);
-            _conn.beginPing();
+            Connection& conn = connection();
+            conn.pingFinished() += slot(*this, &AsyncPing::setReady);
+            conn.beginPing();
         }
-
-
-        void onCancel() override
-        { _conn.cancel(); }
-
-        Connection& _conn;
 };
 
 #endif // __cplusplus >= 202002L

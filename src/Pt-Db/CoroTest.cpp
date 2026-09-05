@@ -35,6 +35,11 @@ class CoroTest : public Pt::Unit::TestSuite
             registerMethod("Execute",       *this, &CoroTest::execute);
             registerMethod("Select",        *this, &CoroTest::select);
             registerMethod("CancelSelect",  *this, &CoroTest::cancelSelect);
+            registerMethod("DestroyConnection", *this, &CoroTest::destroyConnection);
+            registerMethod("DestroyStoredAwaiterConnection", *this,
+                           &CoroTest::destroyStoredAwaiterConnection);
+            registerMethod("DestroyTask",    *this, &CoroTest::destroyTask);
+            registerMethod("PendingAwaiter",  *this, &CoroTest::pendingAwaiter);
             registerMethod("NestedTask",    *this, &CoroTest::nestedTask);
         }
 
@@ -54,12 +59,18 @@ class CoroTest : public Pt::Unit::TestSuite
         void execute();
         void select();
         void cancelSelect();
+        void destroyConnection();
+        void destroyStoredAwaiterConnection();
+        void destroyTask();
+        void pendingAwaiter();
         void nestedTask();
 
         Pt::Task<>             openCloseAsync();
         Pt::Task<>             executeAsync();
         Pt::Task<>             selectAsync();
         Pt::Task<>             cancelSelectAsync();
+        Pt::Task<>             awaitOpenAsync(Pt::Db::Connection& conn);
+        Pt::Task<>             awaitSelectAsync(Pt::Db::AsyncSelect& awaiter);
         Pt::Task<std::size_t>  insertRowAsync(Pt::Db::Connection& conn, int id);
         Pt::Task<>             nestedTaskAsync();
 
@@ -159,6 +170,74 @@ void CoroTest::cancelSelect()
     task.cancel(); // doCancel() + frame destroyed
 
     PT_UNIT_ASSERT( ! task );
+}
+
+
+Pt::Task<> CoroTest::awaitOpenAsync(Pt::Db::Connection& conn)
+{
+    co_await conn.openAsync(":memory:");
+}
+
+
+Pt::Task<> CoroTest::awaitSelectAsync(Pt::Db::AsyncSelect& awaiter)
+{
+    co_await awaiter;
+}
+
+
+void CoroTest::destroyConnection()
+{
+    Pt::Db::Connection* conn = new Pt::Db::Connection("sqlite");
+    conn->setActive(*_loop);
+
+    Pt::Task<> task = awaitOpenAsync(*conn);
+    task.run();
+    delete conn;
+
+    PT_UNIT_ASSERT( task );
+    task.cancel();
+    PT_UNIT_ASSERT( ! task );
+}
+
+
+void CoroTest::destroyStoredAwaiterConnection()
+{
+    Pt::Db::Connection* conn = new Pt::Db::Connection("sqlite");
+
+    {
+        Pt::Db::AsyncSelect awaiter = conn->selectAsync("SELECT 1");
+        delete conn;
+
+        Pt::Task<> task = awaitSelectAsync(awaiter);
+        task.run();
+
+        PT_UNIT_ASSERT( task.done() );
+        PT_UNIT_ASSERT_THROW( task.result(), std::logic_error );
+    }
+}
+
+
+void CoroTest::destroyTask()
+{
+    Pt::Db::Connection conn("sqlite");
+    conn.setActive(*_loop);
+
+    {
+        Pt::Task<> task = awaitOpenAsync(conn);
+        task.run();
+        PT_UNIT_ASSERT( ! task.done() );
+    }
+
+    PT_UNIT_ASSERT( conn.isIdle() );
+}
+
+
+void CoroTest::pendingAwaiter()
+{
+    Pt::Db::Connection conn("sqlite");
+    Pt::Db::AsyncOpen open = conn.openAsync(":memory:");
+
+    PT_UNIT_ASSERT_THROW( conn.pingAsync(), std::logic_error );
 }
 
 

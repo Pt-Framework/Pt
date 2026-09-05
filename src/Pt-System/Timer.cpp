@@ -91,6 +91,14 @@ Timer::Timer()
 
 Timer::~Timer()
 {
+#if __cplusplus >= 202002L
+    if(_awaiter)
+    {
+        _awaiter->onDetach();
+        _awaiter = nullptr;
+    }
+#endif
+
     try
     {
         this->detach();
@@ -249,6 +257,21 @@ void Timer::detach()
 
 #if __cplusplus >= 202002L
 
+void Timer::attachAwaiter(AsyncWait& awaiter)
+{
+    if(_awaiter && _awaiter != &awaiter)
+        throw std::logic_error("async operation pending");
+
+    _awaiter = &awaiter;
+}
+
+
+void Timer::detachAwaiter(AsyncWait& awaiter)
+{
+    if(_awaiter == &awaiter)
+        _awaiter = nullptr;
+}
+
 AsyncWait Timer::waitAsync(std::size_t ms)
 {
     return AsyncWait(*this, ms);
@@ -256,28 +279,58 @@ AsyncWait Timer::waitAsync(std::size_t ms)
 
 
 AsyncWait::AsyncWait(Timer& timer, std::size_t ms)
-    : _timer(timer)
+    : _timer(&timer)
     , _ms(ms)
 {
+    _timer->attachAwaiter(*this);
+}
+
+
+AsyncWait::~AsyncWait()
+{
+    if(_timer)
+    {
+        _timer->stop();
+        _timer->detachAwaiter(*this);
+        _timer = nullptr;
+    }
 }
 
 
 void AsyncWait::onBegin()
 {
-    _timer.timeout() += slot(*this, &AsyncWait::setReady);
-    _timer.start(_ms);
+    Timer& timer = this->timer();
+    timer.timeout() += slot(*this, &AsyncWait::setReady);
+    timer.start(_ms);
 }
 
 
 void AsyncWait::onCancel()
 {
-    _timer.stop();
+    if(_timer)
+        _timer->stop();
 }
 
 
 void AsyncWait::onReady()
 {
-    _timer.stop();
+    timer().stop();
+}
+
+
+void AsyncWait::onDetach()
+{
+    _timer = nullptr;
+    _handle = nullptr;
+}
+
+
+Timer& AsyncWait::timer()
+{
+    if( ! _timer )
+        throw std::logic_error("timer destroyed");
+
+    return *_timer;
 }
 
 #endif // __cplusplus >= 202002L

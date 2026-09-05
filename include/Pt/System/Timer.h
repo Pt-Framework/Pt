@@ -182,12 +182,24 @@ class PT_SYSTEM_API Timer
 #endif
 
     private:
+#if __cplusplus >= 202002L
+        friend class AsyncWait;
+
+        void attachAwaiter(AsyncWait& awaiter);
+
+        void detachAwaiter(AsyncWait& awaiter);
+#endif
+
         Sentry*     _sentry;
         EventLoop*  _loop;
         std::size_t _interval;
         Timespan    _finished;
         Signal<>    _timeout;
         void*       _reserved;
+
+    #if __cplusplus >= 202002L
+        AsyncWait*  _awaiter = nullptr;
+    #endif
 };
 
 #if __cplusplus >= 202002L
@@ -211,14 +223,22 @@ class PT_SYSTEM_API AsyncWait : public Pt::BasicAwaiter<void>
         */
         AsyncWait(Timer& timer, std::size_t ms);
 
+        ~AsyncWait();
+
     private:
+        friend class Timer;
+
         void onBegin() override;
 
         void onCancel() override;
 
         void onReady() override;
 
-        Timer& _timer;
+        void onDetach() override;
+
+        Timer& timer();
+
+        Timer* _timer;
         std::size_t _ms;
 };
 

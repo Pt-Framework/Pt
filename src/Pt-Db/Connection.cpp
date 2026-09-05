@@ -34,6 +34,7 @@
 #include <Pt/Db/IConnector.h>
 #include <Pt/Db/DbError.h>
 #include <Pt/Db/Transaction.h>
+#include <stdexcept>
 
 namespace Pt {
 
@@ -56,6 +57,14 @@ Connection::Connection(IConnection* conn)
 
 Connection::~Connection()
 {
+#if __cplusplus >= 202002L
+    if(_awaiter)
+    {
+        _awaiter->onDetach();
+        _awaiter = nullptr;
+    }
+#endif
+    cancel();
 }
 
 
@@ -81,6 +90,26 @@ void Connection::cancel()
 {
     _connection->cancelConnection();
 }
+
+
+#if __cplusplus >= 202002L
+
+void Connection::attachAwaiter(ConnectionAwaiter& awaiter)
+{
+    if(_awaiter && _awaiter != &awaiter)
+        throw std::logic_error("async operation pending");
+
+    _awaiter = &awaiter;
+}
+
+
+void Connection::detachAwaiter(ConnectionAwaiter& awaiter)
+{
+    if(_awaiter == &awaiter)
+        _awaiter = nullptr;
+}
+
+#endif
 
 
 void Connection::close()

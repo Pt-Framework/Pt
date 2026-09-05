@@ -38,6 +38,27 @@ namespace Pt {
 
 #if __cplusplus >= 202002L
 
+class PendingAwaiter : public Pt::Awaiter
+{
+    public:
+        explicit PendingAwaiter(bool& cancelled)
+        : _cancelled(cancelled)
+        {}
+
+        void await_resume()
+        {}
+
+    private:
+        void onBegin() override
+        {}
+
+        void onCancel() override
+        { _cancelled = true; }
+
+        bool& _cancelled;
+};
+
+
 class CoroutineTest : public Pt::Unit::TestSuite
 {
     public:
@@ -50,6 +71,7 @@ class CoroutineTest : public Pt::Unit::TestSuite
             registerMethod("GeneratorByReference",                *this, &CoroutineTest::GeneratorByReference);
             registerMethod("TaskByReference",                     *this, &CoroutineTest::TaskByReference);
             registerMethod("TaskAssign",                          *this, &CoroutineTest::TaskAssign);
+            registerMethod("TaskDestructorCancels",               *this, &CoroutineTest::TaskDestructorCancels);
         }
 
     protected:
@@ -117,6 +139,19 @@ class CoroutineTest : public Pt::Unit::TestSuite
             task.run();
             PT_UNIT_ASSERT( task.done() );
             PT_UNIT_ASSERT_EQUAL( task.result(), 14 );
+        }
+
+        void TaskDestructorCancels()
+        {
+            bool cancelled = false;
+
+            {
+                Pt::Task<> task = pendingTask(cancelled);
+                task.run();
+                PT_UNIT_ASSERT( task );
+            }
+
+            PT_UNIT_ASSERT( cancelled );
         }
 
     private:
@@ -199,6 +234,11 @@ class CoroutineTest : public Pt::Unit::TestSuite
                 sum += gen.value();
 
             co_return sum;
+        }
+
+        Pt::Task<> pendingTask(bool& cancelled)
+        {
+            co_await PendingAwaiter(cancelled);
         }
 };
 

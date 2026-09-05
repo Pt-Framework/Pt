@@ -100,6 +100,7 @@ class Awaiter : public AwaiterBase
 
         void cancel() override
         {
+            _handle = nullptr;
             onCancel();
         }
 
@@ -121,6 +122,9 @@ class Awaiter : public AwaiterBase
         virtual void onBegin() = 0;
 
         virtual void onCancel() = 0;
+
+        virtual void onDetach()
+        {}
 
     protected:
         std::coroutine_handle<> _handle;
@@ -386,8 +390,7 @@ class Task : public AwaiterBase
         {
             if(this != &other)
             {
-                if(_handle)
-                    _handle.destroy();
+                cancel();
                 _handle = other._handle;
                 other._handle = nullptr;
             }
@@ -395,10 +398,7 @@ class Task : public AwaiterBase
         }
 
         ~Task()
-        {
-            if( _handle )
-                _handle.destroy();
-        }
+        { cancel(); }
 
         /** @brief Start execution of the coroutine.
         */
