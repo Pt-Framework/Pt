@@ -22,7 +22,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -37,7 +37,7 @@ namespace Pt {
 namespace Gfx {
 
 ///////////////////////////////////////////////////////////////////////
-// Rgb32 
+// Rgb32
 ///////////////////////////////////////////////////////////////////////
 
 inline Rgb32Color Rgb32::getRgb32Color(const Pt::uint8_t* p)
@@ -51,19 +51,14 @@ inline ColorF Rgb32::getColorF(const Pt::uint8_t* p)
     const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
     const Pt::uint32_t a = pixel >> 24;
 
-    if (a == 0)
+    if(a == 0)
         return ColorF(0, 0, 0, 0);
 
-    const Pt::uint32_t r = ((pixel & 0x00FF0000) >> 16);
-    const Pt::uint32_t g = ((pixel & 0x0000FF00) >>  8);
-    const Pt::uint32_t b =  (pixel & 0x000000FF);
-
-    const Pt::uint16_t a16 = a * 257;
-    const Pt::uint16_t r16 = (r * 255 * 257) / a;
-    const Pt::uint16_t g16 = (g * 255 * 257) / a;
-    const Pt::uint16_t b16 = (b * 255 * 257) / a;
-
-    return ColorF(a16, r16, g16, b16);
+    const float invA = 1.f / static_cast<float>(a);
+    return ColorF( ColorF::toChannelF(static_cast<Pt::uint8_t>(a)),
+                   ((pixel & 0x00FF0000) >> 16) * invA,
+                   ((pixel & 0x0000FF00) >>  8) * invA,
+                    (pixel & 0x000000FF)        * invA );
 }
 
 
@@ -79,9 +74,9 @@ inline Color Rgb32::getColor(const Pt::uint8_t* p)
     const Pt::uint32_t g = ((pixel & 0x0000FF00) >>  8);
     const Pt::uint32_t b =  (pixel & 0x000000FF);
 
-    return Color( Pt::uint8_t(a), 
-                        Pt::uint8_t((r * 255) / a), 
-                        Pt::uint8_t((g * 255) / a), 
+    return Color( Pt::uint8_t(a),
+                        Pt::uint8_t((r * 255) / a),
+                        Pt::uint8_t((g * 255) / a),
                         Pt::uint8_t((b * 255) / a) );
 }
 
@@ -185,7 +180,7 @@ inline void Rgb32::assign(Pt::uint8_t* to, const Color* colors, std::size_t leng
 
 
 inline void Rgb32::assign(Pt::uint8_t* to, const ColorF* colors, std::size_t length)
-{          
+{
     for(std::size_t n = 0; n < length; ++n)
     {
         assign(to, colors[n]);
@@ -237,7 +232,7 @@ inline void sourceOver(Rgb32Pixel& to, const Rgb32ConstPixel& from, std::size_t 
     const Pt::uint8_t* src = from.base();
           Pt::uint8_t* dst = to.base();
 
-    for(std::size_t i = 0; i < length; ++i) 
+    for(std::size_t i = 0; i < length; ++i)
     {
         const Pt::uint32_t alphaInv = 255 - src[3];
         dst[0] = (Pt::uint8_t) ( src[0] + ((alphaInv * dst[0]) >> 8) );
@@ -297,7 +292,7 @@ inline void Rgb32Pixel::advanceLines(Pt::ssize_t n)
 
 
 inline Rgb32Pixel& Rgb32Pixel::operator=(const Color& color)
-{ 
+{
     Rgb32::assign(base(), color);
     return *this;
 }
@@ -453,7 +448,7 @@ inline Color Rgb32Pixel::getColor() const
 // Rgb32ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
-inline Rgb32ConstPixel::Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view, 
+inline Rgb32ConstPixel::Rgb32ConstPixel(const Pt::uint8_t* data, const ViewBase& view,
                                         Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _base( Rgb32::getPixel(view, data, x, y) )
@@ -480,7 +475,7 @@ inline Rgb32ConstPixel::Rgb32ConstPixel(T& view, Pt::ssize_t x, Pt::ssize_t y)
 inline Rgb32ConstPixel::Rgb32ConstPixel(const Rgb32Pixel& p)
 : _view(p._view)
 , _base(p._base)
-{ 
+{
 }
 
 

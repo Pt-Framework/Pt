@@ -43,19 +43,13 @@ namespace Gfx {
 
 inline ColorF Argb32::getColorF(const Pt::uint8_t* p)
 {
-    const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
+    Pt::uint32_t pixel;
+    std::memcpy(&pixel, p, sizeof(pixel));
 
-    const Pt::uint16_t ta =  pixel               >> 24;
-    const Pt::uint16_t tr = (pixel & 0x00FF0000) >> 16;
-    const Pt::uint16_t tg = (pixel & 0x0000FF00) >>  8;
-    const Pt::uint16_t tb =  pixel & 0x000000FF;
-
-    Pt::uint16_t a = (ta << 8) + ta;
-    Pt::uint16_t r = (tr << 8) + tr;
-    Pt::uint16_t g = (tg << 8) + tg;
-    Pt::uint16_t b = (tb << 8) + tb;
-
-    return ColorF(a, r, g, b);
+    return ColorF::fromRgb8( static_cast<Pt::uint8_t>(pixel >> 16),
+                             static_cast<Pt::uint8_t>(pixel >>  8),
+                             static_cast<Pt::uint8_t>(pixel),
+                             static_cast<Pt::uint8_t>(pixel >> 24) );
 }
 
 
@@ -89,12 +83,7 @@ inline void Argb32::assign(Pt::uint8_t* to, const Color& from)
 
 inline void Argb32::assign(Pt::uint8_t* to, const ColorF& c)
 {
-    Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(to);
-
-    *pixel = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-             ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-               Pt::uint32_t(c.green() & 0xFF00)         |
-             ( Pt::uint32_t(c.blue ()         ) >>  8 );
+    assign(to, Color(c));
 }
 
 
@@ -110,14 +99,7 @@ inline void Argb32::fill(Pt::uint8_t* to, std::size_t length, const Color& c)
 
 inline void Argb32::fill(Pt::uint8_t* to, std::size_t length, const ColorF& c)
 {
-    const Pt::uint32_t value = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-                               ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                               ( Pt::uint32_t(c.green() & 0xFF00)       ) |
-                               ( Pt::uint32_t(c.blue ()         ) >>  8 );
-
-    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
-    for(std::size_t i = 0; i < length; ++i) 
-        *dst++ = value;
+    fill(to, length, Color(c));
 }
 
 

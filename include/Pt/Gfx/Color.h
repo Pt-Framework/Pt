@@ -23,7 +23,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -49,7 +49,7 @@ class Color
         Color()
         : _value(0)
         { }
-        
+
         Color(const Color& color) = default;
 
         explicit Color(uint32_t value)
@@ -69,15 +69,15 @@ class Color
         Color(Pt::uint8_t a, Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b)
         : _value( (uint32_t(a) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) )
         { }
-        
+
         explicit Color(const ColorF& c);
 
         Color& operator=(const Color& color) = default;
 
         Color& operator=(const ColorF& c);
-        
+
         Color& operator=(uint32_t value)
-        { 
+        {
             _value = value;
             return *this;
         }
@@ -86,32 +86,32 @@ class Color
         {
             return _value >> 24;
         }
-        
+
         void setAlpha(Pt::uint8_t a)
         {
             _value = (_value & 0x00FFFFFF) | (uint32_t(a) << 24);
         }
-        
+
         Pt::uint8_t red() const
         {
             return (_value & 0x00FF0000) >> 16;
         }
-        
+
         void setRed(Pt::uint8_t r)
         {
             _value = (_value & 0xFF00FFFF) | (uint32_t(r) << 16);
         }
-        
+
         Pt::uint8_t green() const
         {
             return (_value & 0x0000FF00) >> 8;
         }
-        
+
         void setGreen(Pt::uint8_t g)
         {
             _value = (_value & 0xFFFF00FF) | (uint32_t(g) << 8);
         }
-        
+
         Pt::uint8_t blue() const
         {
             return _value & 0x000000FF;
@@ -137,16 +137,22 @@ class Color
         Pt::uint32_t _value;
 };
 
-/** High precision color type
+/** @brief RGBA float32 working color.
+
+    Four native floats in RGBA memory order. Channels use the range
+    [0, 1]. Values greater than 1 are allowed for HDR. Alpha is
+    straight. ColorF is a working type, not a pixel buffer format.
+    Memory order matches RGBA32F so a later ArgbF32 format can copy
+    a ColorF as 16 bytes.
 */
 class ColorF
 {
     public:
         ColorF()
-        : _a(65535)
-        , _r(0)
+        : _r(0)
         , _g(0)
         , _b(0)
+        , _a(0)
         { }
 
         ColorF(const ColorF&) = default;
@@ -157,122 +163,136 @@ class ColorF
 
         ColorF& operator=(const Color& c);
 
-        ColorF(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
-        : _a(a)
-        , _r(r)
+        ColorF(float a, float r, float g, float b)
+        : _r(r)
         , _g(g)
         , _b(b)
+        , _a(a)
         { }
 
-        ColorF(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
-        : _a(65535)
-        , _r(r)
+        ColorF(float r, float g, float b)
+        : _r(r)
         , _g(g)
         , _b(b)
+        , _a(1.f)
         { }
 
-        Pt::uint16_t alpha() const
+        float alpha() const
         {
             return _a;
         }
-        
-        void setAlpha( Pt::uint16_t c)
+
+        void setAlpha(float c)
         {
             _a = c;
         }
-        
-        Pt::uint16_t red() const
+
+        float red() const
         {
-             return _r;
+            return _r;
         }
-        
-        void setRed( Pt::uint16_t c)
+
+        void setRed(float c)
         {
             _r = c;
         }
-        
-        Pt::uint16_t green() const
+
+        float green() const
         {
             return _g;
         }
 
-        void setGreen( Pt::uint16_t c)
+        void setGreen(float c)
         {
             _g = c;
         }
-        
-        Pt::uint16_t blue() const
+
+        float blue() const
         {
             return _b;
         }
 
-        void setBlue( Pt::uint16_t c)
+        void setBlue(float c)
         {
             _b = c;
         }
 
         ColorF toGray() const
         {
-            const Pt::uint32_t rf = 77;
-            const Pt::uint32_t gf = 128;
-            const Pt::uint32_t bf = 51;
-
-            const Pt::uint32_t v = (_r * rf +
-                                    _g * gf +
-                                    _b * bf) >> 8;
-
-            const Pt::uint16_t s = static_cast<Pt::uint16_t>(v);
-
+            const float s = 0.299f * _r + 0.587f * _g + 0.114f * _b;
             return ColorF(_a, s, s, s);
+        }
+
+        /** @brief Converts an 8-bit channel to the unit interval.
+        */
+        static float toChannelF(Pt::uint8_t c)
+        {
+            return c * (1.f / 255.f);
+        }
+
+        /** @brief Converts a unit-interval channel to 8-bit.
+
+            Values below 0 become 0. Values of 1 or greater become 255.
+        */
+        static Pt::uint8_t toChannel8(float c)
+        {
+            if(c <= 0.f)
+                return 0;
+            if(c >= 1.f)
+                return 255;
+
+            return static_cast<Pt::uint8_t>(c * 255.f + 0.5f);
         }
 
         static ColorF fromRgb8(Pt::uint8_t r, Pt::uint8_t g,
                                Pt::uint8_t b, Pt::uint8_t a = 255)
         {
-            return ColorF(a * 257, r * 257, g * 257, b * 257);
+            return ColorF(toChannelF(a), toChannelF(r),
+                          toChannelF(g), toChannelF(b));
         }
 
     private:
-        Pt::uint16_t _a;
-        Pt::uint16_t _r;
-        Pt::uint16_t _g;
-        Pt::uint16_t _b;
+        float _r;
+        float _g;
+        float _b;
+        float _a;
 };
 
 
 inline Color::Color(const ColorF& c)
-: _value( (Pt::uint32_t(c.alpha() >> 8) << 24) |
-         (Pt::uint32_t(c.red()   >> 8) << 16) |
-         (Pt::uint32_t(c.green() >> 8) <<  8) |
-          Pt::uint32_t(c.blue()  >> 8) )
+: _value( (Pt::uint32_t(ColorF::toChannel8(c.alpha())) << 24) |
+          (Pt::uint32_t(ColorF::toChannel8(c.red()))   << 16) |
+          (Pt::uint32_t(ColorF::toChannel8(c.green())) <<  8) |
+           Pt::uint32_t(ColorF::toChannel8(c.blue())) )
 {
 }
 
 
 inline Color& Color::operator=(const ColorF& c)
 {
-    _value = (Pt::uint32_t(c.alpha() >> 8) << 24) |
-             (Pt::uint32_t(c.red()   >> 8) << 16) |
-             (Pt::uint32_t(c.green() >> 8) <<  8) |
-              Pt::uint32_t(c.blue()  >> 8);
+    _value = (Pt::uint32_t(ColorF::toChannel8(c.alpha())) << 24) |
+             (Pt::uint32_t(ColorF::toChannel8(c.red()))   << 16) |
+             (Pt::uint32_t(ColorF::toChannel8(c.green())) <<  8) |
+              Pt::uint32_t(ColorF::toChannel8(c.blue()));
     return *this;
 }
 
 
 inline ColorF::ColorF(const Color& c)
-: _a(c.alpha() * 257)
-, _r(c.red()   * 257)
-, _g(c.green() * 257)
-, _b(c.blue()  * 257)
+: _r(toChannelF(c.red()))
+, _g(toChannelF(c.green()))
+, _b(toChannelF(c.blue()))
+, _a(toChannelF(c.alpha()))
 {
 }
 
+
 inline ColorF& ColorF::operator=(const Color& c)
 {
-    _a = c.alpha() * 257;
-    _r = c.red()   * 257;
-    _g = c.green() * 257;
-    _b = c.blue()  * 257;
+    _r = toChannelF(c.red());
+    _g = toChannelF(c.green());
+    _b = toChannelF(c.blue());
+    _a = toChannelF(c.alpha());
     return *this;
 }
 

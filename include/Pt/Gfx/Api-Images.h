@@ -40,10 +40,11 @@
     typed image when its format is known by the calling code.
 
     %Image and %ImageF select their format at runtime through the abstract
-    %ImageFormat interface. %Image exposes %Pixel<Color>, while %ImageF
-    exposes %Pixel<ColorF>. Use these images when the format is chosen by an
-    image decoder, caller, or other runtime input. The generic pixels use the
-    selected %ImageFormat for their pixel operations.
+    %ImageFormat interface. %Image exposes %Pixel<Color>. %ImageF is a
+    ColorF lens on the same runtime %ImageFormat, not a float storage
+    format, and exposes %Pixel<ColorF>. Use these images when the format
+    is chosen by an image decoder, caller, or other runtime input. The
+    generic pixels use the selected %ImageFormat for their pixel operations.
 
     Both image families provide the same non-owning views. Use %view() to
     access a rectangular region, %pixelView() to traverse individual pixels,

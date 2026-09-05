@@ -252,7 +252,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
                 Yuv12PixelView::Iterator it = imageView.begin();
                 Yuv12PixelView::Iterator end = imageView.end();
             
-                Pt::Gfx::ColorF color(100, 100, 100);
+                Pt::Gfx::ColorF color(100 / 255.f, 100 / 255.f, 100 / 255.f);
             
                 Pt::System::Clock clock;
                 clock.start();
@@ -260,7 +260,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
                 for( ; it != end; ++it)
                 {
                     color = it->getColor();
-                    color.setRed(99);
+                    color.setRed(99 / 255.f);
 
                     (*it) = color;
                 }

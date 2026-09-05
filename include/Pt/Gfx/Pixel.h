@@ -48,8 +48,7 @@ namespace Gfx {
     A PixelLike provides read/write access to pixel data in an image.
     It supports traversal, single and bulk color read/write, same-type
     pixel copy, and fill operations. The ColorType determines the
-    intermediate color representation (e.g. Color for 8-bit, ColorF
-    for 16-bit).
+    intermediate color representation (e.g. Color or ColorF).
 
     The view constructor and reset are template members that accept
     any view type (BasicView or BasicImage). The concept can only

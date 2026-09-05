@@ -44,17 +44,11 @@ inline ColorF Rgb16::getColorF(const Pt::uint8_t* p)
 {
     const Pt::uint16_t pixel = *reinterpret_cast<const Pt::uint16_t*>(p);
 
-    const Pt::uint16_t tr = (pixel & 0xF800) >> 11;
-    const Pt::uint16_t tg = (pixel & 0x07E0) >>  5;
-    const Pt::uint16_t tb =  pixel & 0x001F;
+    const float r = ((pixel & 0xF800) >> 11) * (1.f / 31.f);
+    const float g = ((pixel & 0x07E0) >>  5) * (1.f / 63.f);
+    const float b =  (pixel & 0x001F)        * (1.f / 31.f);
 
-    // expand 5/6/5 to 16-bit range
-    Pt::uint16_t a = 0xFFFF;
-    Pt::uint16_t r = (tr << 11) | (tr << 6) | (tr << 1) | (tr >> 4);
-    Pt::uint16_t g = (tg << 10) | (tg << 4) | (tg >> 2);
-    Pt::uint16_t b = (tb << 11) | (tb << 6) | (tb << 1) | (tb >> 4);
-
-    return ColorF(a, r, g, b);
+    return ColorF(r, g, b);
 }
 
 

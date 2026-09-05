@@ -399,13 +399,33 @@ class PT_GFX_API Rgb16 final : public ImageFormat
                    (Pt::uint16_t(b)      >> 3);
         }
 
-        /** @brief Encode a ColorF (16-bit channels) to a 16-bit RGB565 value.
+        /** @brief Encode a ColorF to a 16-bit RGB565 value.
         */
         static Pt::uint16_t encode(const ColorF& c)
         {
-              return Pt::uint16_t(c.red  () & 0xF800)        |
-                    (Pt::uint16_t(c.green() & 0xFC00) >> 5)  |
-                    (Pt::uint16_t(c.blue ()        )  >> 11);
+            return (Pt::uint16_t(pack5(c.red())) << 11) |
+                   (Pt::uint16_t(pack6(c.green())) << 5) |
+                    Pt::uint16_t(pack5(c.blue()));
+        }
+
+        static Pt::uint8_t pack5(float v)
+        {
+            if(v <= 0.f)
+                return 0;
+            if(v >= 1.f)
+                return 31;
+
+            return static_cast<Pt::uint8_t>(v * 31.f + 0.5f);
+        }
+
+        static Pt::uint8_t pack6(float v)
+        {
+            if(v <= 0.f)
+                return 0;
+            if(v >= 1.f)
+                return 63;
+
+            return static_cast<Pt::uint8_t>(v * 63.f + 0.5f);
         }
 };
 

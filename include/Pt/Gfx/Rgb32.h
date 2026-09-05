@@ -452,12 +452,13 @@ class PT_GFX_API Rgb32 final : public ImageFormat
         */
         static Pt::uint32_t premultiply(const ColorF& c)
         {
-            const Pt::uint32_t a = c.alpha() >> 8;
-            const Pt::uint32_t r = (Pt::uint32_t)(c.red  () >> 8) * a / 255;
-            const Pt::uint32_t g = (Pt::uint32_t)(c.green() >> 8) * a / 255;
-            const Pt::uint32_t b = (Pt::uint32_t)(c.blue () >> 8) * a / 255;
+            const float a = c.alpha();
+            const Pt::uint32_t au = ColorF::toChannel8(a);
+            const Pt::uint32_t r = ColorF::toChannel8(c.red() * a);
+            const Pt::uint32_t g = ColorF::toChannel8(c.green() * a);
+            const Pt::uint32_t b = ColorF::toChannel8(c.blue() * a);
 
-            return (a << 24) | (r << 16) | (g << 8) | b;
+            return (au << 24) | (r << 16) | (g << 8) | b;
         }
 };
 

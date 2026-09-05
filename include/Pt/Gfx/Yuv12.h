@@ -350,13 +350,14 @@ class PT_GFX_API Yuv12 final : public ImageFormat
     public:
         static ColorF getColorF(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
         {
-            Pt::uint32_t rv = 298 * (y - 16)                   + 409 * (v - 128) + 128;
-            Pt::uint32_t gv = 298 * (y - 16) - 100 * (u - 128) - 208 * (v - 128) + 128;
-            Pt::uint32_t bv = 298 * (y - 16) + 516 * (u - 128)                   + 128;
+            const float ym = static_cast<float>(y) - 16.f;
+            const float um = static_cast<float>(u) - 128.f;
+            const float vm = static_cast<float>(v) - 128.f;
+            const float scale = 1.f / 65535.f;
 
-            Pt::uint16_t r = rv > 65535 ? 65535 : static_cast<Pt::uint16_t>(rv);
-            Pt::uint16_t g = gv > 65535 ? 65535 : static_cast<Pt::uint16_t>(gv);
-            Pt::uint16_t b = bv > 65535 ? 65535 : static_cast<Pt::uint16_t>(bv);
+            const float r = (298.f * ym + 409.f * vm + 128.f) * scale;
+            const float g = (298.f * ym - 100.f * um - 208.f * vm + 128.f) * scale;
+            const float b = (298.f * ym + 516.f * um + 128.f) * scale;
 
             return ColorF(r, g, b);
         }
@@ -364,19 +365,32 @@ class PT_GFX_API Yuv12 final : public ImageFormat
         static void fromColor(Pt::uint8_t* y, Pt::uint8_t* u, Pt::uint8_t* v,
                               const ColorF& color)
         {
-            Pt::int32_t r = color.red();
-            Pt::int32_t g = color.green();
-            Pt::int32_t b = color.blue();
+            const float r = color.red() * 65535.f;
+            const float g = color.green() * 65535.f;
+            const float b = color.blue() * 65535.f;
+            const float scale = 1.f / 65536.f;
 
-            Pt::int32_t yy = (( 66 * r + 129 * g +  25 * b + 128) >> 16) +  16;
-            Pt::int32_t uu = ((-38 * r -  74 * g + 112 * b + 128) >> 16) + 128;
-            Pt::int32_t vv = ((112 * r -  94 * g -  18 * b + 128) >> 16) + 128;
+            const float yy = ( 66.f * r + 129.f * g +  25.f * b + 128.f) * scale +  16.f;
+            const float uu = (-38.f * r -  74.f * g + 112.f * b + 128.f) * scale + 128.f;
+            const float vv = (112.f * r -  94.f * g -  18.f * b + 128.f) * scale + 128.f;
 
-            *y = yy > 255 ? 255 : static_cast<Pt::uint8_t>(yy);
-            *u = uu > 255 ? 255 : static_cast<Pt::uint8_t>(uu);
-            *v = vv > 255 ? 255 : static_cast<Pt::uint8_t>(vv);
+            *y = packYuv(yy);
+            *u = packYuv(uu);
+            *v = packYuv(vv);
         }
 
+    private:
+        static Pt::uint8_t packYuv(float v)
+        {
+            if(v <= 0.f)
+                return 0;
+            if(v >= 255.f)
+                return 255;
+
+            return static_cast<Pt::uint8_t>(v + 0.5f);
+        }
+
+    public:
         template <typename T>
         static Pt::ssize_t init(T* data, Pt::ssize_t stride, 
                                 Pt::ssize_t width, Pt::ssize_t height,

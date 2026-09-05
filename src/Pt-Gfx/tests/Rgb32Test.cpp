@@ -32,6 +32,7 @@
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -63,12 +64,16 @@ class Rgb32Test : public Pt::Unit::TestSuite
             Color(128, 199,  99, 49),  Color(64,  179,  59, 31),
         }
         , inputColorsF {
-            ColorF(65535, 51400, 25700, 12850),  ColorF(0,     51400, 25700, 12850),
-            ColorF(32896, 51400, 25700, 12850), ColorF(16448, 46260, 15420,  8224),
+            ColorF(1.f, 200 / 255.f, 100 / 255.f, 50 / 255.f),
+            ColorF(0.f, 200 / 255.f, 100 / 255.f, 50 / 255.f),
+            ColorF(128 / 255.f, 200 / 255.f, 100 / 255.f, 50 / 255.f),
+            ColorF(64 / 255.f, 180 / 255.f, 60 / 255.f, 30 / 255.f),
         }
         , expectedColorsF {
-            ColorF(65535, 51400, 25700, 12850),  ColorF(0,         0,     0,     0),
-            ColorF(32896, 51199, 25599, 12799), ColorF(16448, 46079, 15359,  8191),
+            ColorF(1.f, 200 / 255.f, 100 / 255.f, 50 / 255.f),
+            ColorF(0.f, 0.f, 0.f, 0.f),
+            ColorF(128 / 255.f, 100.f / 128.f, 50.f / 128.f, 25.f / 128.f),
+            ColorF(64 / 255.f, 45.f / 64.f, 15.f / 64.f, 8.f / 64.f),
         }
         {
             registerMethod("ImageTraits", *this, &Rgb32Test::ImageTraits);
@@ -861,12 +866,13 @@ class Rgb32Test : public Pt::Unit::TestSuite
         static std::vector<Pt::uint8_t> toRgb32Data(const ColorF& color,
                                                     std::size_t count)
         {
-            const Pt::uint32_t alpha = color.alpha() >> 8;
-            const Pt::uint8_t red = Pt::uint8_t((Pt::uint32_t(color.red() >> 8) * alpha) / 255);
-            const Pt::uint8_t green = Pt::uint8_t((Pt::uint32_t(color.green() >> 8) * alpha) / 255);
-            const Pt::uint8_t blue = Pt::uint8_t((Pt::uint32_t(color.blue() >> 8) * alpha) / 255);
+            const float a = color.alpha();
+            const Pt::uint8_t alpha = ColorF::toChannel8(a);
+            const Pt::uint8_t red = ColorF::toChannel8(color.red() * a);
+            const Pt::uint8_t green = ColorF::toChannel8(color.green() * a);
+            const Pt::uint8_t blue = ColorF::toChannel8(color.blue() * a);
 
-            return toRgb32Data(Gfx::Rgb32Color(Pt::uint8_t(alpha), red, green, blue), count);
+            return toRgb32Data(Gfx::Rgb32Color(alpha, red, green, blue), count);
         }
 
         template <typename ImageT>
@@ -904,19 +910,16 @@ class Rgb32Test : public Pt::Unit::TestSuite
 
             bool isEqualColorF(const ColorF& left, const ColorF& right) const
             {
-                return left.alpha() == right.alpha()
-                    && left.red() == right.red()
-                    && left.green() == right.green()
-                    && left.blue() == right.blue();
+                return Rgb32Test::isEqualColorF(left, right);
             }
         };
 
         static bool isEqualColorF(const ColorF& left, const ColorF& right)
         {
-            return left.alpha() == right.alpha()
-                && left.red() == right.red()
-                && left.green() == right.green()
-                && left.blue() == right.blue();
+            return std::fabs(left.alpha() - right.alpha()) <= 1e-5f
+                && std::fabs(left.red() - right.red()) <= 1e-5f
+                && std::fabs(left.green() - right.green()) <= 1e-5f
+                && std::fabs(left.blue() - right.blue()) <= 1e-5f;
         }
 
         static std::string printBytes(const Pt::uint8_t* data, std::size_t size)
