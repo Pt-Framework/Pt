@@ -123,13 +123,13 @@ The following Jam variables control where build artifacts are placed:
   - Use `MakeLocate <target> : <dir>` in Jamfiles to set the output directory,
   - and `MakeInstall <target> : <dir>` in Jamfiles to set the install destination.
 
-| Use for                      | Build path                        | Variable                  |
-|------------------------------|-----------------------------------|---------------------------|
-| Object files                 | `tmp/<Config>/`                   | `PT_OUTPUT_OBJECT`        |
-| Executables                  | `build/<Config>/`                 | `PT_OUTPUT_TARGET`        |
-| Shared libraries             | `build/<Config>/`                 | `PT_OUTPUT_TARGET`        |
-| Install dest for executables | `deploy/<Config>/`                | `PT_INSTALL_BINDIR`       |
-| Install dest for libraries   | `deploy/<Config>/`                | `PT_INSTALL_LIBDIR`       |
+| Use for                      | Build path            | Variable              |
+|------------------------------|-----------------------|-----------------------|
+| Object files                 | `tmp/<Config>/`       | `PT_OUTPUT_OBJECT`    |
+| Executables                  | `build/<Config>/`     | `PT_OUTPUT_TARGET`    |
+| Shared libraries             | `build/<Config>/`     | `PT_OUTPUT_TARGET`    |
+| Install dest for executables | `deploy/<Config>/`    | `PT_INSTALL_BINDIR`   |
+| Install dest for libraries   | `deploy/<Config>/`    | `PT_INSTALL_LIBDIR`   |
 
 # Sub-Directory Specific Setup
 
