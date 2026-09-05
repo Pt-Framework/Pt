@@ -14,6 +14,8 @@ description: "Images, formats, pixels, views, conversion, scaling, and image cod
 	`include/Pt/Gfx/Pixel.h`
 - Build format-specific pixel access implementations:
 	`include/Pt/Gfx/PixelBase.h`
+- Color types for generic runtime image formats:
+	`include/Pt/Gfx/Color.h`
 - Use ARGB-32 colors, pixels, and image formats:
 	`include/Pt/Gfx/Argb32.h`
 - Use premultiplied RGB-32 colors, pixels, and image formats:
