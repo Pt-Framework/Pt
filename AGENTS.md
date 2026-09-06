@@ -168,5 +168,5 @@ content is in context without having read it.
 - For XML parsing, writing, DTDs, namespaces, and serialization read:
   `.github/instructions/pt-xml-api.instructions.md`
 
-- For Forms UI, styling, widget renderers, layout, measure, `PlatinumStyle` read:
+- For Forms UI styling, style renderers, `PlatinumStyle` read:
   `.github/instructions/pt-forms-dev-styles.instructions.md`
