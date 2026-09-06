@@ -104,6 +104,94 @@ class PT_FORMS_API TableLayout : public Layout
         std::vector<Row> _rows;
 };
 
+
+/** @brief Table layout with two-phase measure for Fill and nested layouts.
+
+    @ingroup Pt-Forms
+*/
+class PT_FORMS_API TableLayout2 : public Layout
+{
+    typedef Layout Base;
+
+    public:
+        enum SizeMode
+        {
+            Fill,
+            Preferred,
+            Fixed
+        };
+
+    public:
+        TableLayout2();
+
+        virtual ~TableLayout2();
+
+        void addItem(Control& control, std::size_t row, std::size_t column);
+
+        void removeItem(Control& control);
+
+        void setColumn(std::size_t col, SizeMode mode, double size = 0);
+
+        void setRow(std::size_t row, SizeMode mode, double size = 0);
+
+    protected:
+        virtual void onRemoveControl(Control& control);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+    private:
+        class SizeInfo
+        {
+            public:
+                SizeInfo()
+                : _mode(Preferred)
+                , _size(0)
+                { }
+
+                SizeInfo(SizeMode m, double size)
+                : _mode(m)
+                , _size(size)
+                { }
+
+                SizeMode mode() const
+                { return _mode; }
+
+                double size() const
+                { return _size; }
+
+            private:
+                SizeMode _mode;
+                double   _size;
+        };
+
+        typedef std::vector<Control*> Row;
+
+        Control* cell(std::size_t row, std::size_t column) const;
+
+        SizeMode columnMode(std::size_t column) const;
+
+        SizeMode rowMode(std::size_t row) const;
+
+        void measureItem(Control& item,
+                         SizeMode colMode,
+                         SizeMode rowMode,
+                         double width,
+                         double height);
+
+        void computeTracks(std::vector<double>& tracks,
+                           const std::vector<SizeInfo>& infos,
+                           std::size_t count,
+                           double content,
+                           bool horizontal) const;
+
+    private:
+        std::vector<SizeInfo> _columnSizes;
+        std::vector<SizeInfo> _rowSizes;
+        std::vector<Row>      _rows;
+};
+
 } // namespace
 
 } // namespace
