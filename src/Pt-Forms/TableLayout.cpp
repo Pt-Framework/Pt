@@ -97,7 +97,6 @@ void TableLayout::onRemoveControl(Control& control)
             if(item == &control)
             {
                 *it = 0;
-                remove(control);
                 break;
             }
         }
