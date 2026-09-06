@@ -107,28 +107,28 @@ class TestFlow : public FlowLayout
 };
 
 
-class TableLayout2Test : public Unit::TestSuite
+class TableLayoutTest : public Unit::TestSuite
 {
     public:
-        TableLayout2Test()
-        : Unit::TestSuite("Pt::Forms::TableLayout2Test")
+        TableLayoutTest()
+        : Unit::TestSuite("Pt::Forms::TableLayoutTest")
         {
             Unit::TestSuite::registerMethod("MultiRowPreferred", *this,
-                                            &TableLayout2Test::MultiRowPreferred);
+                                            &TableLayoutTest::MultiRowPreferred);
             Unit::TestSuite::registerMethod("VerticalFill", *this,
-                                            &TableLayout2Test::VerticalFill);
+                                            &TableLayoutTest::VerticalFill);
             Unit::TestSuite::registerMethod("NestedFill", *this,
-                                            &TableLayout2Test::NestedFill);
+                                            &TableLayoutTest::NestedFill);
             Unit::TestSuite::registerMethod("Wrap", *this,
-                                            &TableLayout2Test::Wrap);
+                                            &TableLayoutTest::Wrap);
             Unit::TestSuite::registerMethod("HiddenCell", *this,
-                                            &TableLayout2Test::HiddenCell);
+                                            &TableLayoutTest::HiddenCell);
             Unit::TestSuite::registerMethod("TwoFillRows", *this,
-                                            &TableLayout2Test::TwoFillRows);
+                                            &TableLayoutTest::TwoFillRows);
             Unit::TestSuite::registerMethod("LeftoverClamp", *this,
-                                            &TableLayout2Test::LeftoverClamp);
+                                            &TableLayoutTest::LeftoverClamp);
             Unit::TestSuite::registerMethod("RemoveItem", *this,
-                                            &TableLayout2Test::RemoveItem);
+                                            &TableLayoutTest::RemoveItem);
         }
 
     protected:
@@ -298,7 +298,7 @@ class TableLayout2Test : public Unit::TestSuite
         }
 };
 
-Unit::RegisterTest<TableLayout2Test> _registerTableLayout2Test;
+Unit::RegisterTest<TableLayoutTest> _registerTableLayoutTest;
 
 } // namespace Forms
 
