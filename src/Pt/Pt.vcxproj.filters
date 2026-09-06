@@ -145,6 +145,9 @@
     <Filter Include="Pt-Forms\demo">
       <UniqueIdentifier>{a671ee7a-b3c8-4a1b-91a0-ff01ecaa6b90}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Forms\gallery">
+      <UniqueIdentifier>{c8d3a1e4-7b2f-4c91-a6e0-3f9b5d8c2a17}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Pt-Forms\Events">
       <UniqueIdentifier>{fce78a73-3874-4da3-9687-1fef15f5a3f4}</UniqueIdentifier>
     </Filter>
@@ -1967,6 +1970,36 @@
     </ClInclude>
     <ClInclude Include="..\Pt-Forms\demo\MainWindow.h">
       <Filter>Pt-Forms\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\ButtonPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\CollectionPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\DisplayPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\GalleryPage.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\InputPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\LayoutPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\MainWindow.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\MenuPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\OverviewPage.h">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Forms\gallery\WindowPages.h">
+      <Filter>Pt-Forms\gallery</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\ActivateEvent.h">
       <Filter>Pt-Forms\Events</Filter>
@@ -4912,6 +4945,39 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\demo\PainterDemo.cpp">
       <Filter>Pt-Forms\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\ButtonPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\CollectionPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\DisplayPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\GalleryPage.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\InputPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\LayoutPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\Main.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\MainWindow.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\MenuPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\OverviewPage.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Forms\gallery\WindowPages.cpp">
+      <Filter>Pt-Forms\gallery</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Forms\win32\ApplicationImpl.cpp">
       <Filter>Pt-Forms\win32</Filter>

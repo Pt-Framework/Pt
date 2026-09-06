@@ -175,4 +175,5 @@ if $(PT_FORMS_RENDERER) = nanovg
 }
 
 SubInclude PT_TOP src Pt-Forms demo ;
+SubInclude PT_TOP src Pt-Forms gallery ;
 SubInclude PT_TOP src Pt-Forms tests ;

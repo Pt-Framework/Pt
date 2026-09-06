@@ -1,0 +1,37 @@
+SubDir PT_TOP src Pt-Forms gallery ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms-Gallery ;
+
+FORMS_GALLERY_SOURCES = Main.cpp
+                        MainWindow.cpp
+                        GalleryPage.cpp
+                        OverviewPage.cpp
+                        ButtonPages.cpp
+                        DisplayPages.cpp
+                        InputPages.cpp
+                        CollectionPages.cpp
+                        MenuPages.cpp
+                        LayoutPages.cpp
+                        WindowPages.cpp
+                        ;
+
+Main Pt-Forms-Gallery : $(FORMS_GALLERY_SOURCES) ;
+LinkSharedLibraries Pt-Forms-Gallery : Pt Pt-System Pt-Gfx Pt-Forms ;
+MakeLocate Pt-Forms-Gallery : $(PT_OUTPUT_TARGET) ;
+
+if $(TARGET_OS) = emscripten
+{
+  LinkFlags Pt-Forms-Gallery : --preload-file etc/icons@/ ;
+}
+
+PT_GALLERY_ICONS_DIR = [ FDirName etc icons ] ;
+PT_GALLERY_ICONS = [ GLOB $(PT_GALLERY_ICONS_DIR) : *.png  ] ;
+
+PT_GALLERY_IMAGES_DIR = [ FDirName etc images ] ;
+PT_GALLERY_ICONS += [ GLOB $(PT_GALLERY_IMAGES_DIR) : platinum.png  ] ;
+
+for local f in $(PT_GALLERY_ICONS)
+{
+    File $(f:BS) : $(f) ;
+    MakeLocate $(f:BS)  : [ FDirName $(PT_OUTPUT_TARGET) ] ;
+}
