@@ -187,8 +187,14 @@ const WindowFrame* Window::frame() const
 
 void Window::getBitmap(Gfx::Bitmap& bitmap) const
 {
+    getBitmap( bitmap, Gfx::RectF(Gfx::PointF(0, 0), size()) );
+}
+
+
+void Window::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
+{
     if(_frame)
-        _frame->getBitmap(bitmap);
+        _frame->getBitmap(bitmap, rect);
 }
 
 

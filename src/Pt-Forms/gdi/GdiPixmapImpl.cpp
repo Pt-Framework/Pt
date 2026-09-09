@@ -206,13 +206,67 @@ Gfx::Image GdiPixmapImpl::toImage() const
 
 void GdiPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
-    bitmap.reset( rect.size() );
+    const Gfx::RectI wanted = Gfx::RectI::fromXYWH(
+        static_cast<Gfx::Int>( lround( rect.x() ) ),
+        static_cast<Gfx::Int>( lround( rect.y() ) ),
+        static_cast<Gfx::Int>( lround( rect.width() ) ),
+        static_cast<Gfx::Int>( lround( rect.height() ) ) );
 
-    Gfx::Image image = this->toImage();
+    const Gfx::RectI bounds = Gfx::RectI::fromXYWH(
+        0, 0,
+        static_cast<Gfx::Int>(_width),
+        static_cast<Gfx::Int>(_height) );
 
-    Gfx::PaintContext ctx(bitmap);
-    Gfx::Painter painter(ctx);
-    painter.drawImage(Gfx::PointF(0, 0), image, rect);
+    const Gfx::RectI srcRect = wanted.toIntersected(bounds);
+    if(srcRect.isEmpty() || ! _bitmap)
+    {
+        bitmap.reset();
+        return;
+    }
+
+    const LONG x = static_cast<LONG>( srcRect.x() );
+    const LONG y = static_cast<LONG>( srcRect.y() );
+    const LONG w = static_cast<LONG>( srcRect.width() );
+    const LONG h = static_cast<LONG>( srcRect.height() );
+
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+    bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bitmapInfo.bmiHeader.biWidth = w;
+    bitmapInfo.bmiHeader.biHeight = -h;
+    bitmapInfo.bmiHeader.biPlanes = 1;
+    bitmapInfo.bmiHeader.biBitCount = 32;
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+    VOID* bits = 0;
+    HBITMAP dib = CreateDIBSection(_dc, &bitmapInfo, DIB_RGB_COLORS, &bits, NULL, 0);
+    if( ! dib || ! bits)
+    {
+        bitmap.reset();
+        return;
+    }
+
+    HDC memDC = CreateCompatibleDC(_dc);
+    if( ! memDC )
+    {
+        DeleteObject(dib);
+        bitmap.reset();
+        return;
+    }
+
+    HGDIOBJ oldBmp = SelectObject(memDC, dib);
+    BitBlt(memDC, 0, 0, w, h, _dc, x, y, SRCCOPY);
+
+    Gfx::Rgb32PixelView pixels(static_cast<Pt::uint8_t*>(bits), w, h);
+    for( Gfx::Rgb32PixelView::Pixel& p : pixels )
+        p.setAlpha(255);
+
+    Gfx::Image src(static_cast<Pt::uint8_t*>(bits), w, h, 0, Gfx::Rgb32());
+    bitmap.reset(src);
+
+    SelectObject(memDC, oldBmp);
+    DeleteDC(memDC);
+    DeleteObject(dib);
 }
 
 

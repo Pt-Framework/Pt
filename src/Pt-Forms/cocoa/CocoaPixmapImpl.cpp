@@ -33,6 +33,8 @@
 #include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/PaintContext.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rgb32.h>
 
 #include <cassert>
 #include <cmath>
@@ -223,13 +225,41 @@ void CocoaPixmapImpl::reset()
 
 void CocoaPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
-    bitmap.reset( rect.size() );
+    const Gfx::RectI wanted = Gfx::RectI::fromXYWH(
+        static_cast<Gfx::Int>( lround( rect.x() ) ),
+        static_cast<Gfx::Int>( lround( rect.y() ) ),
+        static_cast<Gfx::Int>( lround( rect.width() ) ),
+        static_cast<Gfx::Int>( lround( rect.height() ) ) );
 
-    Gfx::Image image;
+    const Gfx::RectI bounds = Gfx::RectI::fromXYWH(
+        0, 0,
+        static_cast<Gfx::Int>(_width),
+        static_cast<Gfx::Int>(_height) );
 
-    Gfx::PaintContext ctx(bitmap);
-    Gfx::Painter painter(ctx);
-    painter.drawImage(Gfx::PointF(0, 0), image, rect);
+    const Gfx::RectI srcRect = wanted.toIntersected(bounds);
+    if( ! _context || srcRect.isEmpty() )
+    {
+        bitmap.reset();
+        return;
+    }
+
+    Pt::uint8_t* data = static_cast<Pt::uint8_t*>(CGBitmapContextGetData(_context));
+    if( ! data)
+    {
+        bitmap.reset();
+        return;
+    }
+
+    const Pt::ssize_t x = srcRect.x();
+    const Pt::ssize_t y = srcRect.y();
+    const Pt::ssize_t w = srcRect.width();
+    const Pt::ssize_t h = srcRect.height();
+    const Pt::ssize_t bpr = static_cast<Pt::ssize_t>(
+        CGBitmapContextGetBytesPerRow(_context));
+    Pt::uint8_t* first = data + (_height - 1 - y) * bpr + x * 4;
+    const Pt::ssize_t padding = -bpr - w * 4;
+    Gfx::Image src(first, w, h, padding, Gfx::Rgb32());
+    bitmap.reset(src);
 }
 
 void CocoaPixmapImpl::setScaleFactor(double scaleFactor)

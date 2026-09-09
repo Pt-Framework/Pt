@@ -76,10 +76,16 @@ class PT_GFX_API Bitmap : public PaintSurface
         void reset();
 
         /** @brief Replaces the bitmap with an existing image.
+
+            The existing pixel buffer is reused when the image size already
+            matches. Pixels are copied without drawing or blending.
         */
         void reset(const Gfx::Image& image);
 
         /** @brief Resets the bitmap to a new size in physical pixels.
+
+            The existing pixel buffer is reused when @a size and @a stride
+            already match the current buffer.
         */
         void reset(const Gfx::SizeF&, std::size_t stride = 0);
 

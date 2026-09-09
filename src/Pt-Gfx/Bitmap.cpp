@@ -32,6 +32,8 @@
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Image.h>
 
+#include <cmath>
+
 namespace Pt {
 
 namespace Gfx {
@@ -74,7 +76,13 @@ void Bitmap::reset(const Gfx::Image& image)
         return;
     }
 
-    invalidate();
+    if( lround( size().width() ) != image.width() ||
+        lround( size().height() ) != image.height() ||
+        this->image().padding() != 0 )
+    {
+        invalidate();
+    }
+
     _surface->reset(image);
 }
 
@@ -84,6 +92,17 @@ void Bitmap::reset(const Gfx::SizeF& sizeF, std::size_t stride)
     if(sizeF.width() <= 0 || sizeF.height() <= 0)
     {
         reset();
+        return;
+    }
+
+    const long width = lround( sizeF.width() );
+    const long height = lround( sizeF.height() );
+
+    if( ! empty() &&
+        lround( size().width() ) == width &&
+        lround( size().height() ) == height &&
+        image().padding() == static_cast<Pt::ssize_t>(stride) )
+    {
         return;
     }
 

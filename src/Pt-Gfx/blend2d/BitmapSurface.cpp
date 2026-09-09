@@ -70,19 +70,8 @@ const Gfx::Image& BitmapSurface::image() const
 
 void BitmapSurface::reset(const Gfx::Image& image)
 {
-    _rgb32Image.reset( image.width(), image.height() );
+    reset( Gfx::SizeF(image.width(), image.height()) );
     copyView(image, _rgb32Image);
-
-    _image.reset( _rgb32Image.data(), _rgb32Image.width(), _rgb32Image.height(),
-                  _rgb32Image.padding() );
-
-    _physicalSize.set( image.width(), image.height() );
-
-    if( _rasterContext.target_image() )
-        _rasterContext.end();
-   
-    _rasterImage.create_from_data( _rgb32Image.width(), _rgb32Image.height(), 
-                                   BL_FORMAT_PRGB32, _rgb32Image.data(), _rgb32Image.stride() );
 }
 
 
@@ -90,6 +79,11 @@ void BitmapSurface::reset(const Gfx::SizeF& sizeF, std::size_t stride)
 {
     long width = lround( sizeF.width() );
     long height = lround( sizeF.height() );
+
+    if( _rgb32Image.width() == width &&
+        _rgb32Image.height() == height &&
+        _rgb32Image.padding() == static_cast<Pt::ssize_t>(stride) )
+        return;
 
     _rgb32Image.reset( width, height, stride );
 

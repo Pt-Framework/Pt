@@ -4679,6 +4679,9 @@
     <ClCompile Include="..\Pt-Gfx\tests\Argb32Test.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\Pt-Gfx\tests\BitmapTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\Pt-Gfx\tests\PathTest.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>

@@ -89,12 +89,20 @@ PaintSurface& WindowFrame::surface()
 
 void WindowFrame::getBitmap(Gfx::Bitmap& bitmap)
 {
+    getBitmap( bitmap, Gfx::RectF(Gfx::PointF(0, 0), _window.size()) );
+}
+
+
+void WindowFrame::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect)
+{
     Gfx::PointF contentPos = onFromWindow( _window, Gfx::PointF(0, 0) );
     Gfx::RectF contentRect( contentPos, _window.size() );
+    Gfx::RectF requested( contentPos + rect.topLeft(), rect.size() );
+    Gfx::RectF clipped = requested.toIntersected(contentRect);
 
-    contentRect = scaling().toPhysical(contentRect);
+    clipped = scaling().toPhysical(clipped);
 
-    _pixmap.getBitmap(bitmap, contentRect);
+    _pixmap.getBitmap(bitmap, clipped);
 }
 
 

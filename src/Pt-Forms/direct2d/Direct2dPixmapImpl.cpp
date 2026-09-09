@@ -226,13 +226,88 @@ Gfx::Image Direct2dPixmapImpl::toImage() const
 
 void Direct2dPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
-    bitmap.reset( rect.size() );
+    const Gfx::RectI wanted = Gfx::RectI::fromXYWH(
+        static_cast<Gfx::Int>( lround( rect.x() ) ),
+        static_cast<Gfx::Int>( lround( rect.y() ) ),
+        static_cast<Gfx::Int>( lround( rect.width() ) ),
+        static_cast<Gfx::Int>( lround( rect.height() ) ) );
 
-    Gfx::Image image = this->toImage();
+    const Gfx::RectI bounds = Gfx::RectI::fromXYWH(
+        0, 0,
+        static_cast<Gfx::Int>(_width),
+        static_cast<Gfx::Int>(_height) );
 
-    Gfx::PaintContext ctx(bitmap);
-    Gfx::Painter painter(ctx);
-    painter.drawImage(Gfx::PointF(0, 0), image, rect);
+    const Gfx::RectI clipped = wanted.toIntersected(bounds);
+    if(clipped.isEmpty() || ! _d2dBitmap)
+    {
+        bitmap.reset();
+        return;
+    }
+
+    const LONG x = static_cast<LONG>( clipped.x() );
+    const LONG y = static_cast<LONG>( clipped.y() );
+    const LONG w = static_cast<LONG>( clipped.width() );
+    const LONG h = static_cast<LONG>( clipped.height() );
+
+    ID2D1DeviceContext* ctx = 0;
+    Application::instance().impl()->d2d().d2dDevice()->CreateDeviceContext(
+        D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &ctx);
+    if( ! ctx)
+    {
+        bitmap.reset();
+        return;
+    }
+
+    D2D1_BITMAP_PROPERTIES1 readProps = D2D1::BitmapProperties1(
+        D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+        D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                          D2D1_ALPHA_MODE_PREMULTIPLIED),
+        0, 0);
+
+    ID2D1Bitmap1* readBitmap = 0;
+    HRESULT hr = ctx->CreateBitmap(
+        D2D1::SizeU(static_cast<UINT32>(w), static_cast<UINT32>(h)),
+        nullptr, 0, readProps, &readBitmap);
+
+    if(FAILED(hr) || ! readBitmap)
+    {
+        ctx->Release();
+        bitmap.reset();
+        return;
+    }
+
+    D2D1_POINT_2U destPoint = D2D1::Point2U(0, 0);
+    D2D1_RECT_U srcRect = D2D1::RectU(static_cast<UINT32>(x),
+                                      static_cast<UINT32>(y),
+                                      static_cast<UINT32>(x + w),
+                                      static_cast<UINT32>(y + h));
+    hr = readBitmap->CopyFromBitmap(&destPoint, _d2dBitmap, &srcRect);
+
+    if(SUCCEEDED(hr))
+    {
+        D2D1_MAPPED_RECT mapped;
+        hr = readBitmap->Map(D2D1_MAP_OPTIONS_READ, &mapped);
+        if(SUCCEEDED(hr))
+        {
+            const Pt::ssize_t padding =
+                static_cast<Pt::ssize_t>(mapped.pitch) - w * 4;
+            Gfx::Image src(static_cast<Pt::uint8_t*>(mapped.bits),
+                           w, h, padding, Gfx::Rgb32());
+            bitmap.reset(src);
+            readBitmap->Unmap();
+        }
+        else
+        {
+            bitmap.reset();
+        }
+    }
+    else
+    {
+        bitmap.reset();
+    }
+
+    readBitmap->Release();
+    ctx->Release();
 }
 
 

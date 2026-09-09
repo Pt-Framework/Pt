@@ -1455,6 +1455,7 @@
     <ClCompile Include="..\Pt-Gfx\skia\SkiaBlitter.cpp" />
     <ClCompile Include="..\Pt-Gfx\skia\SkiaContext.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\Argb32Test.cpp" />
+    <ClCompile Include="..\Pt-Gfx\tests\BitmapTest.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\BlockScaleTest.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\PathTest.cpp" />
     <ClCompile Include="..\Pt-Gfx\tests\Pt-Gfx-test.cpp" />

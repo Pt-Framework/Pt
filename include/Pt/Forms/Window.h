@@ -92,7 +92,17 @@ class PT_FORMS_API Window : public Form
         const WindowFrame* frame() const; 
 
     public:
+        /** @brief Copies the window content into @a bitmap.
+        */
         void getBitmap(Gfx::Bitmap& bitmap) const;
+
+        /** @brief Copies a window content rectangle into @a bitmap.
+
+            @a rect is in window logical coordinates. The copied area is the
+            intersection with the window content. If the intersection is
+            empty, @a bitmap is reset to empty.
+        */
+        void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const;
 
     public:
         void autoCenter();

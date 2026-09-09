@@ -32,9 +32,11 @@
 
 #include <Pt/Forms/Pixmap.h>
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Bitmap.h>
 #include <Pt/Gfx/Canvas.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/LineView.h>
 #include <Pt/Gfx/Rgb32.h>
 #include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/Painter.h>
@@ -915,13 +917,68 @@ Gfx::Image NanoVGPixmapImpl::toImage() const
 
 void NanoVGPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
-    bitmap.reset( rect.size() );
+    const Gfx::RectI wanted = Gfx::RectI::fromXYWH(
+        static_cast<Gfx::Int>( lround( rect.x() ) ),
+        static_cast<Gfx::Int>( lround( rect.y() ) ),
+        static_cast<Gfx::Int>( lround( rect.width() ) ),
+        static_cast<Gfx::Int>( lround( rect.height() ) ) );
 
-    Gfx::Image image = this->toImage();
+    const Gfx::RectI bounds = Gfx::RectI::fromXYWH(
+        0, 0,
+        static_cast<Gfx::Int>(_width),
+        static_cast<Gfx::Int>(_height) );
 
-    Gfx::PaintContext ctx(bitmap);
-    Gfx::Painter painter(ctx);
-    painter.drawImage(Gfx::PointF(0, 0), image, rect);
+    const Gfx::RectI srcRect = wanted.toIntersected(bounds);
+    if(_image < 0 || srcRect.isEmpty())
+    {
+        bitmap.reset();
+        return;
+    }
+
+    const int x = static_cast<int>( srcRect.x() );
+    const int y = static_cast<int>( srcRect.y() );
+    const int w = static_cast<int>( srcRect.width() );
+    const int h = static_cast<int>( srcRect.height() );
+
+    const_cast<NanoVGPixmapImpl*>(this)->flush();
+
+    NanoVGDevice* device = NanoVGDevice::instance();
+    if( ! device || ! device->isValid())
+    {
+        bitmap.reset();
+        return;
+    }
+
+    if( ! device->bindRenderTarget(_image, _width, _height) )
+    {
+        bitmap.reset();
+        return;
+    }
+
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(w) * h * 4);
+    const int glY = _height - y - h;
+    glReadPixels(x, glY, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
+    device->unbindRenderTarget();
+
+    // TODO: Implement an RGBA ImageFormat for GLES2 glReadPixels so
+    // copyView can convert to Rgb32 without swapping R/B on Rgb32 pixels.
+    Gfx::Rgb32LineView lines(static_cast<Pt::uint8_t*>(buffer.data()), w, h, 0);
+    for(Gfx::Rgb32Span& line : lines)
+    {
+        for(Gfx::Rgb32Pixel& p : line)
+        {
+            const Pt::uint8_t r = p.red();
+            const Pt::uint8_t b = p.blue();
+            p.setRed(b);
+            p.setBlue(r);
+        }
+    }
+
+    const Pt::ssize_t bpr = static_cast<Pt::ssize_t>(w) * 4;
+    Pt::uint8_t* first = static_cast<Pt::uint8_t*>(buffer.data()) + (h - 1) * bpr;
+    const Pt::ssize_t padding = -bpr - w * 4;
+    Gfx::Image src(first, w, h, padding, Gfx::Rgb32());
+    bitmap.reset(src);
 }
 
 
