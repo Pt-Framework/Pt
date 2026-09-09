@@ -324,6 +324,7 @@ void MainWindow::onDark(MenuItemBase& /*item*/)
     options.set( HighlightedTextColorOption(Gfx::Color(200, 200, 200)) );
     options.set( ForegroundOption(Gfx::Color(46, 51, 55)) );
     options.set( AccentColorOption(Gfx::Color(120, 150, 230)) );
+    options.set( ContourOption(Gfx::Color(120, 120, 120)) );
 
     Application::instance().setStyleOptions(options);
 }
