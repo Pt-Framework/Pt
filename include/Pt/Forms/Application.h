@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -54,6 +54,15 @@ namespace Forms {
 class Cursor;
 class Popup;
 
+/** @brief Main element of a %Pt::Forms graphical user interface.
+
+    The %Application object is the central class of every %Pt::Forms-based
+    graphical user interface. It is the root of the widget tree, hosts the
+    event loop, and provides fundamental services such as styles, style
+    options, and the input method.
+
+    @ingroup Pt-Forms-Basics
+*/
 class PT_FORMS_API Application : public Pt::System::Application
 {
     friend class Widget;
@@ -210,7 +219,7 @@ class PT_FORMS_API Application : public Pt::System::Application
 
 
         void onDispatchLayoutEvent(const LayoutEvent& ev);
-        
+
         void onProcessLayoutEvent(const LayoutEvent& ev);
 
 
@@ -275,13 +284,13 @@ class PT_FORMS_API Application : public Pt::System::Application
 
         Style                        _style;
         StyleOptions                 _styleOptions;
-        
+
         DefaultInputMethod*          _defaultInputMethod;
         InputMethod*                 _inputMethod;
-        
+
         std::list<Popup*>            _popups;
         std::list<Widget*>           _capture;
-                                     
+
         Gfx::PointF                  _scrollFrom;
         bool                         _onScroll;
         Gfx::PngReader               _iconReader;
