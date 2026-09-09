@@ -43,7 +43,6 @@
 #include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
-#include <Pt/Gfx/Argb32.h>
 
 #include <cassert>
 
@@ -162,65 +161,6 @@ void Direct2dPixmapImpl::reset(const Gfx::Image& image)
         static_cast<UINT32>(width), static_cast<UINT32>(height));
     _d2dBitmap->CopyFromMemory(&destRect, src,
         static_cast<UINT32>(width * 4));
-}
-
-
-Gfx::Image Direct2dPixmapImpl::toImage() const
-{
-    if(_width == 0 || _height == 0 || ! _d2dBitmap)
-        return Gfx::Image();
-
-    // Map the bitmap to read pixels (create a CPU-readable copy)
-    ID2D1DeviceContext* ctx = 0;
-    Application::instance().impl()->d2d().d2dDevice()->CreateDeviceContext(
-        D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &ctx);
-    if( ! ctx)
-        return Gfx::Image();
-
-    // Create a CPU-readable bitmap
-    D2D1_BITMAP_PROPERTIES1 readProps = D2D1::BitmapProperties1(
-        D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-        D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
-                          D2D1_ALPHA_MODE_PREMULTIPLIED),
-        0, 0);
-
-    ID2D1Bitmap1* readBitmap = 0;
-    HRESULT hr = ctx->CreateBitmap(
-        D2D1::SizeU(static_cast<UINT32>(_width), static_cast<UINT32>(_height)),
-        nullptr, 0, readProps, &readBitmap);
-
-    if(FAILED(hr) || ! readBitmap)
-    {
-        ctx->Release();
-        return Gfx::Image();
-    }
-
-    D2D1_POINT_2U destPoint = D2D1::Point2U(0, 0);
-    D2D1_RECT_U srcRect = D2D1::RectU(0, 0,
-        static_cast<UINT32>(_width), static_cast<UINT32>(_height));
-    hr = readBitmap->CopyFromBitmap(&destPoint, _d2dBitmap, &srcRect);
-
-    Gfx::Image image;
-    if(SUCCEEDED(hr))
-    {
-        D2D1_MAPPED_RECT mapped;
-        hr = readBitmap->Map(D2D1_MAP_OPTIONS_READ, &mapped);
-        if(SUCCEEDED(hr))
-        {
-            image = Gfx::Image(_width, _height, Gfx::Rgb32());
-            for(LONG y = 0; y < _height; ++y)
-            {
-                std::memcpy(image.data() + y * _width * 4,
-                            mapped.bits + y * mapped.pitch,
-                            _width * 4);
-            }
-            readBitmap->Unmap();
-        }
-    }
-
-    readBitmap->Release();
-    ctx->Release();
-    return image;
 }
 
 

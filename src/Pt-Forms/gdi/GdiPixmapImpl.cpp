@@ -41,7 +41,6 @@
 #include <Pt/Gfx/PaintContext.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Rgb32.h>
-#include <Pt/Gfx/Argb32.h>
 
 #include <cassert>
 
@@ -172,35 +171,6 @@ void GdiPixmapImpl::reset(const Gfx::Image& image)
 
     DeleteDC(bitmapDC);
     DeleteObject(bitmap);
-}
-
-
-Gfx::Image GdiPixmapImpl::toImage() const
-{
-    BITMAPINFO bitmapInfo;
-    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-    bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bitmapInfo.bmiHeader.biWidth = _width;
-    bitmapInfo.bmiHeader.biHeight = -(ssize_t)_height;  // top-down image
-    bitmapInfo.bmiHeader.biPlanes = 1;                         // always 1
-    bitmapInfo.bmiHeader.biBitCount = 32;                      // bits per pixel
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;               // uncompressed RGB
-    bitmapInfo.bmiHeader.biSizeImage = 0;                      // automatic
-    bitmapInfo.bmiHeader.biClrUsed = 0;                        // no color table
-    bitmapInfo.bmiHeader.biClrImportant = 0;                   // no color table
-
-    Pt::Gfx::Image image(_width, _height, Pt::Gfx::Rgb32());
-    Pt::uint8_t* data = image.data();
-
-    int ret = GetDIBits(_dc, _bitmap, 0, _height, data, 
-                        &bitmapInfo, DIB_RGB_COLORS);
-
-    Gfx::Argb32PixelView pixels(data, _width, _height);
-    for( Gfx::Argb32PixelView::Pixel& p : pixels )
-        p.setAlpha(255);
-
-    return image;
 }
 
 

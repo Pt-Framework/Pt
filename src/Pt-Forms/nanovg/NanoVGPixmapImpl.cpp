@@ -872,49 +872,6 @@ void NanoVGPixmapImpl::flush()
 }
 
 
-Gfx::Image NanoVGPixmapImpl::toImage() const
-{
-    if(_width == 0 || _height == 0 || _image < 0)
-        return Gfx::Image();
-
-    const_cast<NanoVGPixmapImpl*>(this)->flush();
-
-    NanoVGDevice* device = NanoVGDevice::instance();
-    if( ! device || ! device->isValid())
-        return Gfx::Image();
-
-    if( ! device->bindRenderTarget(_image, _width, _height) )
-        return Gfx::Image();
-
-    std::vector<unsigned char> buffer(_width * _height * 4);
-    glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
-
-    device->unbindRenderTarget();
-
-    // GL framebuffers have a bottom-left origin, Pt images a top-left origin.
-    // Flip rows and swizzle RGBA to Pt rgb32 (BGRA).
-    Gfx::Image image(_width, _height, Gfx::Rgb32());
-    Pt::uint8_t* dst = image.data();
-
-    for(int y = 0; y < _height; ++y)
-    {
-        const unsigned char* srcRow =
-            buffer.data() + (_height - 1 - y) * _width * 4;
-        Pt::uint8_t* dstRow = dst + y * _width * 4;
-
-        for(int x = 0; x < _width; ++x)
-        {
-            dstRow[x * 4 + 0] = srcRow[x * 4 + 2]; // B <- R
-            dstRow[x * 4 + 1] = srcRow[x * 4 + 1]; // G
-            dstRow[x * 4 + 2] = srcRow[x * 4 + 0]; // R <- B
-            dstRow[x * 4 + 3] = srcRow[x * 4 + 3]; // A
-        }
-    }
-
-    return image;
-}
-
-
 void NanoVGPixmapImpl::getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const
 {
     const Gfx::RectI wanted = Gfx::RectI::fromXYWH(

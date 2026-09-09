@@ -69,8 +69,6 @@ class NanoVGPixmapImpl : public IPixmapImpl
 
         void reset() override;
 
-        Gfx::Image toImage() const;
-
         void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const override;
 
         void setScaleFactor(double scaleFactor) override;
