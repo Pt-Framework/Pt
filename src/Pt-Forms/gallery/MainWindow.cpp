@@ -62,6 +62,18 @@ MainWindow::MainWindow()
     _viewMenuItem.setMenu(&_viewMenu);
     _menuBar.addItem(_viewMenuItem);
 
+    _lightItem.setText("Light");
+    _lightItem.triggered() += Pt::slot(*this, &MainWindow::onLight);
+    _styleMenu.addItem(_lightItem);
+
+    _darkItem.setText("Dark");
+    _darkItem.triggered() += Pt::slot(*this, &MainWindow::onDark);
+    _styleMenu.addItem(_darkItem);
+
+    _styleMenuItem.setText("Style");
+    _styleMenuItem.setMenu(&_styleMenu);
+    _menuBar.addItem(_styleMenuItem);
+
     _aboutItem.setText("About");
     _aboutItem.triggered() += Pt::slot(*this, &MainWindow::onAbout);
     _helpMenu.addItem(_aboutItem);
@@ -291,6 +303,29 @@ void MainWindow::onNext(MenuItemBase& /*item*/)
 void MainWindow::onPrevious(MenuItemBase& /*item*/)
 {
     stepNav(-1);
+}
+
+
+void MainWindow::onLight(MenuItemBase& /*item*/)
+{
+    Application::instance().setStyleOptions( StyleOptions::defaults() );
+}
+
+
+void MainWindow::onDark(MenuItemBase& /*item*/)
+{
+    StyleOptions options = StyleOptions::defaults();
+
+    options.set( BackgroundOption(Gfx::Color(23, 26, 28)) );
+    options.set( TextBackgroundOption(Gfx::Color(13, 16, 18)) );
+    options.set( ViewBackgroundOption(Gfx::Color(23, 26, 28)) );
+    options.set( TextColorOption(Gfx::Color(180, 180, 180)) );
+    options.set( HighlightColorOption(Gfx::Color(46, 52, 55)) );
+    options.set( HighlightedTextColorOption(Gfx::Color(200, 200, 200)) );
+    options.set( ForegroundOption(Gfx::Color(46, 51, 55)) );
+    options.set( AccentColorOption(Gfx::Color(120, 150, 230)) );
+
+    Application::instance().setStyleOptions(options);
 }
 
 

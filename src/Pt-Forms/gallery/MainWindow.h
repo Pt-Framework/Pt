@@ -82,6 +82,10 @@ class MainWindow : public Window
 
         void onPrevious(MenuItemBase& item);
 
+        void onLight(MenuItemBase& item);
+
+        void onDark(MenuItemBase& item);
+
         void onAbout(MenuItemBase& item);
 
         void onExit(MenuItemBase& item);
@@ -101,13 +105,17 @@ class MainWindow : public Window
         MenuBar     _menuBar;
         Menu        _fileMenu;
         Menu        _viewMenu;
+        Menu        _styleMenu;
         Menu        _helpMenu;
         MenuBarItem _fileMenuItem;
         MenuBarItem _viewMenuItem;
+        MenuBarItem _styleMenuItem;
         MenuBarItem _helpMenuItem;
         MenuItem    _exitItem;
         MenuItem    _nextItem;
         MenuItem    _prevItem;
+        MenuItem    _lightItem;
+        MenuItem    _darkItem;
         MenuItem    _aboutItem;
 
         DockingLayout _mainLayout;
