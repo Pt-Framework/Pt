@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -117,14 +117,14 @@ class PT_FORMS_API Control : public View
     public:
         //
         // focus handling
-        // 
+        //
         FocusPolicy focusPolicy() const;
 
         void setFocusPolicy(FocusPolicy f);
 
         size_t focusIndex() const;
 
-        void setFocusIndex(size_t index);  
+        void setFocusIndex(size_t index);
 
         bool hasFocus() const;
 
@@ -141,7 +141,7 @@ class PT_FORMS_API Control : public View
 
         void setShortcut(const Key* k);
 
-        const Pt::Char* mnemonic() const; 
+        const Pt::Char* mnemonic() const;
 
         void setMnemonic(const Char& ch);
 
@@ -161,21 +161,21 @@ class PT_FORMS_API Control : public View
 
     //
     // invalidation
-    // 
+    //
     protected:
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
-    
+
         virtual void onInvalidate();
 
     //
     // painting
-    //  
+    //
     protected:
         virtual void onProcessPaintEvent(const PaintEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
-        
-        virtual void onPaint(PaintContext& context, 
+
+        virtual void onPaint(PaintContext& context,
                              const Gfx::RectF& rect);
 
     //
@@ -196,7 +196,7 @@ class PT_FORMS_API Control : public View
 
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-       
+
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
@@ -254,14 +254,14 @@ class PT_FORMS_API Control : public View
 
         virtual void onDisconnect();
 
-        
+
         virtual Widget* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
-        
-        
+
+
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestShow(bool isShown);
@@ -274,14 +274,14 @@ class PT_FORMS_API Control : public View
 
         virtual void onRequestResize(const Gfx::SizeF& s);
 
-        
+
         virtual void onProcessEvent(const Pt::Event& ev);
 
 
         virtual void onProcessEnableEvent(const EnableEvent& ev);
 
         virtual void onEnableEvent(const EnableEvent& ev);
-        
+
         virtual void onEnable(bool isEnable);
 
 
@@ -298,7 +298,7 @@ class PT_FORMS_API Control : public View
 
 
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
-        
+
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescale(double scaling);
@@ -346,10 +346,10 @@ class PT_FORMS_API Control : public View
     // View
     //
     protected:
-        virtual Gfx::PointF onToControl(const Control& control, 
+        virtual Gfx::PointF onToControl(const Control& control,
                                        const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromControl(const Control& control, 
+        virtual Gfx::PointF onFromControl(const Control& control,
                                          const Gfx::PointF& pos) const;
 
         virtual void onAttach(Control& control);
@@ -397,7 +397,7 @@ class PT_FORMS_API Control : public View
         Gfx::SizeF                   _requestedSize;
 
         bool                         _isMeasureInvalid;
-                                    
+
         SizePolicy                   _sizePolicy;
         SizePolicy                   _lastPolicy;
         Gfx::SizeF                   _preferredSize;

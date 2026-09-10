@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -75,14 +75,14 @@ class PT_FORMS_API View : public Widget
             AcceptFocus,
             KeepFocus
         };
-    
+
     protected:
         View();
-    
+
     public:
         virtual ~View();
 
-        Gfx::PointF toControl(const Control& control, 
+        Gfx::PointF toControl(const Control& control,
                               const Gfx::PointF& pos) const;
 
         Gfx::PointF fromControl(const Control& control,
@@ -92,29 +92,29 @@ class PT_FORMS_API View : public Widget
 
         const PaintSurface& surface() const;
 
-        void setSurface(PaintSurface* surface, 
+        void setSurface(PaintSurface* surface,
                         const Gfx::PointF& pos = Gfx::PointF() );
 
     protected:
-        virtual void onSetSurface(PaintSurface* surface, 
+        virtual void onSetSurface(PaintSurface* surface,
                                   const Gfx::PointF& pos);
 
-        virtual void onPaint(PaintContext& context, 
+        virtual void onPaint(PaintContext& context,
                              const Gfx::RectF& rect);
-    
+
     protected:
         virtual void onAttach(Control& control);
-        
+
         virtual void onDetach(Control& control);
 
         virtual void onInit(Control& control);
 
         virtual void onRelease(Control& control);
 
-        virtual Gfx::PointF onToControl(const Control& control, 
+        virtual Gfx::PointF onToControl(const Control& control,
                                         const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromControl(const Control& control, 
+        virtual Gfx::PointF onFromControl(const Control& control,
                                           const Gfx::PointF& pos) const;
 
     protected:
@@ -142,7 +142,7 @@ class PT_FORMS_API View : public Widget
 
         virtual void onDisconnect();
 
-        
+
         virtual void onPaintEvent(const PaintEvent& ev) override;
 
         virtual void onMoveEvent(const MoveEvent& ev) override;
@@ -178,9 +178,9 @@ class ViewSurface : public PaintSurface
         const Gfx::PointF& position() const
         {
             return _position;
-        } 
+        }
 
-        void setSurface(PaintSurface* surface, 
+        void setSurface(PaintSurface* surface,
                         const Gfx::PointF& pos)
         {
             _surface = surface;
@@ -214,11 +214,11 @@ class ViewSurface : public PaintSurface
 
         virtual Gfx::Canvas* onGetCanvas(Gfx::Canvas* reuse) override
         {
-            Gfx::Canvas* canvas = _surface ? _surface->getCanvas(reuse) 
+            Gfx::Canvas* canvas = _surface ? _surface->getCanvas(reuse)
                                                   : 0;
             if( ! canvas )
                 return canvas;
-   
+
             Gfx::RectF region = canvas->region();
             region.move( _position.x(), _position.y() );
             region.setSize( _view->size() );

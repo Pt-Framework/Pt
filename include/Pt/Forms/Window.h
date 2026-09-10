@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301  USA
 */
 
@@ -81,7 +81,7 @@ class PT_FORMS_API Window : public Form
         typedef WindowState State;
 
     public:
-        explicit Window(WindowManager* parent = 0, 
+        explicit Window(WindowManager* parent = 0,
                         WindowType type = WindowType::Default);
 
         virtual ~Window();
@@ -93,11 +93,11 @@ class PT_FORMS_API Window : public Form
 
         WindowManager* windowManager();
 
-        const WindowManager* windowManager() const; 
+        const WindowManager* windowManager() const;
 
         WindowFrame* frame();
 
-        const WindowFrame* frame() const; 
+        const WindowFrame* frame() const;
 
     public:
         /** @brief Copies the window content into @a bitmap.
@@ -123,7 +123,7 @@ class PT_FORMS_API Window : public Form
     public:
         Type type() const;
 
-        
+
         const Gfx::Image& icon() const;
 
         void setIcon(const Gfx::Image& i);
@@ -132,12 +132,12 @@ class PT_FORMS_API Window : public Form
 
         void setTitle( const std::string& t );
 
-        
+
         bool isAbove() const;
 
         void setAbove(bool top);
 
-        
+
         bool isActive() const;
 
 
@@ -185,14 +185,14 @@ class PT_FORMS_API Window : public Form
 
         virtual void onDisconnect();
 
-        
+
         virtual Widget* onHitTest(const Gfx::PointF& p);
 
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
-        
+
         virtual void onProcessEvent(const Pt::Event& ev);
 
         virtual void onRequestRepaint(const Gfx::RectF& rect);
@@ -315,7 +315,7 @@ class PT_FORMS_API Window : public Form
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual bool onTouchEvent( const TouchEvent& ev );
-    
+
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
         virtual bool onKeyEvent(const KeyEvent& ev);
@@ -323,7 +323,7 @@ class PT_FORMS_API Window : public Form
         virtual bool onEnterEvent(const EnterEvent& ev);
 
         virtual bool onLeaveEvent(const LeaveEvent& ev);
-    
+
     //
     // Implementation
     //
@@ -334,9 +334,9 @@ class PT_FORMS_API Window : public Form
         WindowFrame*                 _frame;
         WindowManager*               _wm;
 
-        bool                         _show; 
+        bool                         _show;
         bool                         _isActive;
-        bool                         _enabled; 
+        bool                         _enabled;
         bool                         _isClosed;
 
         Pt::Signal<>                 _closed;
@@ -354,7 +354,7 @@ class PT_FORMS_API Window : public Form
         Gfx::Image                   _icon;
         State                        _state;
         bool                         _isAbove;
-   
+
         AutoPtr<Gfx::Brush>          _background;
         Gfx::Brush                   _backgroundBrush;
 };

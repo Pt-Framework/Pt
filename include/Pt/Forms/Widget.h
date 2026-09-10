@@ -76,7 +76,7 @@ class PT_FORMS_API Widget : public Responder
 
     public:
         virtual ~Widget();
-        
+
         /** @brief Returns the ID.
         */
         Pt::uint64_t id() const;
@@ -84,7 +84,7 @@ class PT_FORMS_API Widget : public Responder
         /** @brief Returns the name.
         */
         const std::string& name() const;
-        
+
         /** @brief Sets the name.
         */
         void setName(const std::string& n);
@@ -101,11 +101,11 @@ class PT_FORMS_API Widget : public Responder
         /** @brief Returns the connected screen.
         */
         Screen* screen();
-        
+
         /** @brief Returns the connected screen.
         */
         const Screen* screen() const;
-        
+
         /** @brief Returns the parent.
         */
         Widget* parent();
@@ -137,7 +137,7 @@ class PT_FORMS_API Widget : public Responder
         /** @brief Converts to global coordinate.
         */
         Gfx::PointF toGlobal(const Gfx::PointF& pos) const;
-        
+
         /** @brief Converts to local coordinate.
         */
         Gfx::PointF fromGlobal(const Gfx::PointF& pos) const;
@@ -155,17 +155,17 @@ class PT_FORMS_API Widget : public Responder
         /** @brief Invalidates the state.
         */
         void invalidate();
-        
+
     public:
         /** @brief Initiates a repaint cycle.
         */
         virtual void repaint(const Gfx::RectF& rect);
-        
+
         /** @brief Initiates a repaint cycle.
         */
         virtual void repaint();
 
-    public:  
+    public:
         /** @brief Returns the current scale factor.
         */
         double scaleFactor() const;
@@ -176,7 +176,7 @@ class PT_FORMS_API Widget : public Responder
         /** @brief Indicates whether the widget is visible.
         */
         bool isVisible() const;
-        
+
         /** @brief Shows the widget.
         */
         virtual void show(bool b = true);
@@ -251,7 +251,7 @@ class PT_FORMS_API Widget : public Responder
         /** @brief Process event.
         */
         void processEvent(const Pt::Event& ev);
-        
+
         /** @brief Signals that an event needs to be processed.
         */
         Pt::Signal<const Pt::Event&>& eventReceived();
@@ -309,7 +309,7 @@ class PT_FORMS_API Widget : public Responder
         virtual void onProcessInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
-    
+
         virtual void onInvalidate();
 
     protected:
@@ -319,7 +319,7 @@ class PT_FORMS_API Widget : public Responder
 
     protected:
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
-        
+
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
         virtual void onRescale(double scaling);

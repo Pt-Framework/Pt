@@ -1,10 +1,10 @@
 /* Copyright (C) 2022 Marc Boris Duerner
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -46,7 +46,7 @@ namespace Forms {
 //       where to align
 //       when is invalidate, relayout, repaint called
 //       some onXYZRequested handlers in Widget
-//       
+//
 ///////////////////////////////////////////////////////////////////////
 
 //
@@ -84,7 +84,7 @@ class PT_FORMS_API Form : public View
 
         const Control* content()  const;
 
-        void setContent(Control* control);       
+        void setContent(Control* control);
 
 
         //Gfx::PaintSurface& surface();
@@ -109,14 +109,14 @@ class PT_FORMS_API Form : public View
         virtual Gfx::SizeF onProcessMeasure();
 
         virtual void onProcessLayout(const Gfx::RectF& rect);
-        
+
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 
     //
     // focus handling
-    // 
+    //
     public:
         Control* focusControl();
 
@@ -138,7 +138,7 @@ class PT_FORMS_API Form : public View
         virtual void onSetShortcut(Control& control, const std::vector<Key>& keys);
 
         virtual void onSetMnemonic(Control& control, const std::vector<Char>& chs);
-    
+
     //
     // View
     //
@@ -153,10 +153,10 @@ class PT_FORMS_API Form : public View
 
         virtual void onRelease(Control& control);
 
-        virtual Gfx::PointF onToControl(const Control& control, 
+        virtual Gfx::PointF onToControl(const Control& control,
                                         const Gfx::PointF& pos) const;
 
-        virtual Gfx::PointF onFromControl(const Control& control, 
+        virtual Gfx::PointF onFromControl(const Control& control,
                                           const Gfx::PointF& pos) const;
 
     protected:
@@ -184,7 +184,7 @@ class PT_FORMS_API Form : public View
 
         virtual void onDisconnect();
 
-        
+
         virtual Widget* onHitTest(const Gfx::PointF& pos);
 
         virtual void onRequestCapture(bool capture);
@@ -200,7 +200,7 @@ class PT_FORMS_API Form : public View
     //
     protected:
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
-    
+
         virtual void onInvalidate();
 
     //
@@ -250,14 +250,14 @@ class PT_FORMS_API Form : public View
         virtual void onMoveEvent(const MoveEvent& ev);
 
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
-        
+
         virtual void onResizeEvent(const ResizeEvent& ev);
     //
     // input
     //
     protected:
         virtual void onProcessMouseEvent(const MouseEvent& ev);
-        
+
         virtual void onProcessTouchEvent(const TouchEvent& ev);
 
         virtual void onProcessScrollEvent(const ScrollEvent& sev);
@@ -273,9 +273,9 @@ class PT_FORMS_API Form : public View
     //
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
-        
+
         virtual bool onTouchEvent(const TouchEvent& ev);
-        
+
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
         virtual bool onEnterEvent(const EnterEvent& ev);
@@ -283,11 +283,11 @@ class PT_FORMS_API Form : public View
         virtual bool onLeaveEvent(const LeaveEvent& ev);
 
         virtual bool onKeyEvent(const KeyEvent& ev);
-    
+
     private:
         template <typename Iter>
         void moveFocus(Iter begin, Iter end);
-        
+
     protected:
         const std::map<Key, Control*>& shortcuts() const
         {
@@ -301,13 +301,13 @@ class PT_FORMS_API Form : public View
 
     private:
         Control*                      _mainControl;
-                                     
+
         int                           _layouts;
 
         Control*                      _active;
 
         std::vector<Control*>         _focusList;
-        Control*                      _focusControl;        
+        Control*                      _focusControl;
         std::map<Key, Control*>       _shortcuts;
         std::map<Pt::Char, Control*>  _mnemonics;
 
