@@ -56,6 +56,17 @@ namespace Forms {
 //  - set Decorator on Window to translate positions
 //
 
+/** @brief A view that hosts one content control and manages its form state.
+
+    A %Form attaches one content %Control and is the point where the content
+    hierarchy joins a window or another form host. It delegates measuring and
+    layout to that content, forwards view requests, and coordinates focus
+    traversal, shortcuts, and mnemonics for all attached controls. Use
+    %setContent() to replace the content; the form does not own the control,
+    so the caller must keep it alive until it is detached.
+
+    @ingroup Pt-Forms-Architecture
+*/
 class PT_FORMS_API Form : public View
 {
     friend class Control;

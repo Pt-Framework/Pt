@@ -58,6 +58,16 @@ class LeaveEvent;
 class KeyEvent;
 
 
+/** @brief Common base for objects that participate in the Forms runtime.
+
+    %Widget supplies identity, screen connection, geometry, visibility,
+    enabled state, coordinate conversion, repaint requests, event dispatch,
+    and pointer capture. The Forms runtime calls its protected hooks as state
+    and events move through the hierarchy. Custom widget bases implement the
+    coordinate conversions and override only the hooks for behavior they own.
+
+    @ingroup Pt-Forms-Architecture
+*/
 class PT_FORMS_API Widget : public Responder
                           , public Pt::Connectable
 {

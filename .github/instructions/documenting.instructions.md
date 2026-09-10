@@ -20,6 +20,11 @@ Pages, the Website and agent instructions build on top of it. Pages assemble
 the Doxygen content for human readers, and instructions files index it by
 features for agents.
 
+Organize groups and pages around reader tasks, concepts, public mechanisms,
+and design principles. They are not mechanical inventories of headers or
+types. Explain a concept in a group when it spans multiple APIs, or in the
+detailed documentation of its owning API when it is local to that API.
+
 # API Documentation
 
 - Prefer compact documentation. Use a one-line `/** @brief ... */` comment
@@ -32,13 +37,20 @@ features for agents.
   behavior, contracts, errors, or complex usage.
 - All API documentation (namespaces, classes, methods, enums, free
   functions) belongs in the public header files, not in `.cpp` files.
-- Document every public namespace, class, funtions using Doxygen.
-- Assign each class/interface/function to a Doxygen group using `@ingroup`.
+- Document every public namespace, class, function, enum, and public member
+  using Doxygen.
+- Assign an API to a Doxygen group with `@ingroup` when it has a meaningful
+  role in that group's reader task, concept, or public mechanism. An API may
+  belong to more than one group.
+- Do not assign an API to a group solely to classify it. When a concept,
+  lifecycle, ownership rule, extension point, or design principle belongs only
+  to one API, explain it in that API's detailed documentation. The API may
+  remain outside a feature group.
 - Internal helpers in `.cpp` files may use brief comments but do not need
   Doxygen markup.
 - Class-specific documentation belongs in the class comment in its header.
-- Cross-cutting concepts, patterns, and examples that span multiple
-  classes belong in a doxygen group.
+- Cross-cutting concepts, patterns, principles, mechanisms, and examples that
+  span multiple APIs belong in a Doxygen group.
 - Module-level concepts belong in the `@namespace` comment in the
   module's `Api.h`.
 - Group IDs are derived from the C++ namespace by replacing `::` with `-`:
@@ -62,12 +74,19 @@ features for agents.
   - Example: group `Pt-Signals` → page `Pt-Signals-Page`.
   - Section anchors use the page ID as prefix with hyphens:
     `Pt-Signals-Page-Signals`.
-- API topic pages (`pt-signals.page`, ...) contain **no new content** —
-  only `@copydetails` references to groups and types.
+- API topic pages (`pt-signals.page`, ...) contain **no new prose**. They use
+  structural Doxygen markup and `@copydetails` references to assemble existing
+  group and API documentation for a reader task.
 - Use `@copydetails <GroupId>` in a page to pull in group documentation.
 - Use `@section <anchor> <Title>` to introduce page subsections.
 - Use `@copydetails <Qualified::Name>` in a page to pull in class or function
   documentation.
+- A page may copy multiple groups and individual namespaces, classes, enums,
+  or functions. A Doxygen group may appear on multiple pages. There is no
+  required one-to-one relationship between a page and a group.
+- Use `@copydetails`, rather than `@copydoc`, when composing pages. This keeps
+  the page in control of its section structure and copies the detailed API
+  documentation without duplicating its brief.
 - Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
   contain original prose and follow User-Facing Prose. They must not
   repeat API reference that already lives in a group, or steps that
@@ -107,7 +126,8 @@ features for agents.
   indented to align flush with the `@brief` command (4 spaces from `/**`).
 - If Doxygen commands (e.g. `@ingroup`, `@param`, `@return`) follow the
   detailed description, separate them with a blank line.
-- Use `@ingroup <group>` to assign the class/function to a module group.
+- Use `@ingroup <group>` when the documented API has a meaningful role in the
+  group's reader task, concept, or public mechanism.
 - Use `@related <ClassName>` to associate operators and free functions with
   a class when appropriate.
 - Escape class names, namespace-qualified names, and function names in
@@ -118,8 +138,8 @@ features for agents.
 - Feature groups are defined with `@defgroup`.
 - Each `@defgroup` block contains:
   - `@brief` one-line summary
-  - Detailed description of the feature area
-  - Usage rules and design guidance that apply to the whole group
+  - Detailed explanation of the feature area's reader task, concepts, public
+    mechanisms, principles, usage rules, and design guidance
   - `@code` / `@endcode` example(s) showing the canonical usage pattern
 
 # Header Example
@@ -177,7 +197,8 @@ class MyClass
 
     @brief Brief description of the feature group.
 
-    Detailed description of the feature area, usage rules, and design guidance.
+  Detailed explanation of the feature area, its public mechanisms, usage
+  rules, and design guidance.
 */
 ```
 

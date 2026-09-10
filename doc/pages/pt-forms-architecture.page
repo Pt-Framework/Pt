@@ -1,0 +1,22 @@
+/** \page Pt-Forms-Architecture-Page Forms Architecture
+
+    @copydetails Pt-Forms-Architecture
+
+    @section Pt-Forms-Architecture-Page-Application Application
+    @copydetails Pt::Forms::Application
+
+    @section Pt-Forms-Architecture-Page-Screen Screen
+    @copydetails Pt::Forms::Screen
+
+    @section Pt-Forms-Architecture-Page-Widget Widget
+    @copydetails Pt::Forms::Widget
+
+    @section Pt-Forms-Architecture-Page-View View
+    @copydetails Pt::Forms::View
+
+    @section Pt-Forms-Architecture-Page-Form Form
+    @copydetails Pt::Forms::Form
+
+    @section Pt-Forms-Architecture-Page-Control Control
+    @copydetails Pt::Forms::Control
+*/

@@ -98,6 +98,12 @@
     </ul>
 </ul>
 
+@section pt_forms Graphical User Interface
+
+<ul>
+    <li> @ref Pt-Forms-Architecture-Page </li>
+</ul>
+
 @section pt_http HTTP Clients and Servers
 
 <ul>

@@ -65,6 +65,21 @@ namespace Forms {
 class Form;
 class Key;
 
+/** @brief A view that can be attached as application content.
+
+    A %Control is the reusable building block of a Forms user interface. It
+    can be the content of a %Form or the child of another view, and it can
+    attach child controls of its own. Attachment is non-owning: a parent
+    stores control pointers but does not destroy its children. A control
+    participates in its form's measurement, layout, focus traversal,
+    shortcuts, mnemonics, painting, and input routing.
+
+    Derive a control to implement custom content. Override the protected
+    measurement, layout, painting, and event hooks that define its behavior;
+    use %add() and %remove() to manage its child controls.
+
+    @ingroup Pt-Forms-Architecture
+*/
 class PT_FORMS_API Control : public View
 {
     typedef View Base;

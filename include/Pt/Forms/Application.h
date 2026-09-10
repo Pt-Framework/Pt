@@ -56,12 +56,13 @@ class Popup;
 
 /** @brief Main element of a %Pt::Forms graphical user interface.
 
-    The %Application object is the central class of every %Pt::Forms-based
-    graphical user interface. It is the root of the widget tree, hosts the
-    event loop, and provides fundamental services such as styles, style
-    options, and the input method.
+    Create one %Application before creating Forms windows or controls. It
+    owns the GUI runtime and its primary %Screen, dispatches platform events,
+    and provides application-wide services such as styles, style options,
+    input methods, fonts, and scaling. Start its inherited event loop with
+    %Pt::System::Application::run() after the visual hierarchy is shown.
 
-    @ingroup Pt-Forms-Basics
+    @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Application : public Pt::System::Application
 {

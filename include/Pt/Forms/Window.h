@@ -61,6 +61,14 @@ class WindowStateEvent;
 class PaintEvent;
 
 /** @brief Window base class.
+
+    A %Window is a top-level %Form that presents one content control on a
+    screen. Show it after attaching its content. The window translates its
+    form's requests for geometry, visibility, activation, repainting, and
+    input into operations on the platform window. Its content remains owned
+    by the caller and must outlive its attachment to the window.
+
+    @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Window : public Form
 {

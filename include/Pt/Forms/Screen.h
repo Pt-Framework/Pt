@@ -50,6 +50,15 @@ class WindowManager;
 class RescaleEvent;
 
 /** @brief Screen of a display.
+
+    A %Screen is the runtime root for the top-level windows on one display.
+    %Application provides the primary screen and connects it to the platform.
+    The screen tracks attached %Window objects, routes input to the widget
+    below the pointer, and requests drawing of changed regions. Applications
+    normally use the screen through %Application::screen() rather than
+    creating one directly.
+
+    @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Screen : public Widget
 {

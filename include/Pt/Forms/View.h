@@ -51,6 +51,17 @@ namespace Forms {
 class Control;
 class PaintContext;
 
+/** @brief A widget that connects controls to a paint surface.
+
+    A %View owns the boundary between a control hierarchy and the
+    %PaintSurface on which it is displayed. It establishes the surface and
+    coordinate mapping for attached controls, then forwards their repaint,
+    layout, visibility, geometry, and activation requests. %Form and
+    %Control provide the usual view implementations; derive a view when a
+    custom content host needs different forwarding or coordinate behavior.
+
+    @ingroup Pt-Forms-Architecture
+*/
 class PT_FORMS_API View : public Widget
 {
     friend class Control;
