@@ -90,7 +90,7 @@ class PaintEvent;
     %showModal() runs a nested event loop and temporarily disables the other
     top-level windows, so reserve it for intentionally synchronous dialogs.
 
-    @ingroup Pt-Forms-Architecture
+    @ingroup Pt-Forms-Application
 */
 class PT_FORMS_API Window : public Form
 {

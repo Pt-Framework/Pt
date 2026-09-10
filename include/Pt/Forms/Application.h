@@ -83,7 +83,7 @@ class Popup;
     %graphicsBackend() support Forms backend implementations; ordinary
     applications use the higher-level Forms APIs.
 
-    @ingroup Pt-Forms-Architecture
+    @ingroup Pt-Forms-Application
 */
 class PT_FORMS_API Application : public Pt::System::Application
 {

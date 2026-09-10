@@ -102,7 +102,7 @@ class Key;
     %onPaint(), and the protected input hooks as required; use state-changing
     public APIs so changes travel through the parent hierarchy.
 
-    @ingroup Pt-Forms-Architecture
+    @ingroup Pt-Forms-Application
 */
 class PT_FORMS_API Control : public View
 {

@@ -23,7 +23,9 @@ platforms, and user requirements.
   improve the design. Compatibility is desirable but secondary.
 - After a completed task, suggest instruction-file fixes if the task revealed
   missing, unneeded, unclear, or incorrect instructions.
-- Code only, no explanation. Bullets over paragraphs. No explanations unless asked.
+- For chat responses only: use code and bullets, with no explanations unless
+  asked. This does not apply to generated or modified repository artifacts,
+  including documentation, source comments, changelogs, and configuration files.
 - Prefer repo-root-relative paths; use absolute paths when tools are path-ambiguous.
 - Multi-root workspaces may show the same file under different folder roots.
 - Do not search `build/`, `tmp/`, `deps/`, `doc/website/htdocs/`, or large

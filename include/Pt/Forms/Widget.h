@@ -94,7 +94,7 @@ class KeyEvent;
     screen connection. A widget can also supply a %Cursor while it is under the
     pointer; clearing that cursor restores the application default.
 
-    @ingroup Pt-Forms-Architecture
+    @ingroup Pt-Forms-Application
 */
 class PT_FORMS_API Widget : public Responder
                           , public Pt::Connectable

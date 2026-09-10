@@ -27,12 +27,12 @@
   Boston, MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_API_ARCHITECTURE_H
-#define PT_FORMS_API_ARCHITECTURE_H
+#ifndef PT_FORMS_API_APPLICATION_H
+#define PT_FORMS_API_APPLICATION_H
 
-/** @defgroup Pt-Forms-Architecture Forms Architecture
+/** @defgroup Pt-Forms-Application Forms Application
 
-    @brief The Forms object model and lifecycle.
+    @brief The Application lifecycle and Structure.
 
     A Forms application creates windows and controls, shows the visual
     hierarchy, and runs the event loop. The inherited event loop also supports

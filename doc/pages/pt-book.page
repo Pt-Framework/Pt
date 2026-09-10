@@ -101,7 +101,7 @@
 @section pt_forms Graphical User Interface
 
 <ul>
-    <li> @ref Pt-Forms-Architecture-Page </li>
+    <li> @ref Pt-Forms-Application-Page </li>
 </ul>
 
 @section pt_http HTTP Clients and Servers

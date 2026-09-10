@@ -1,0 +1,21 @@
+/** \page Pt-Forms-Application-Page Application lifecycle and Structure
+
+    @copydetails Pt-Forms-Application
+
+    @section Pt-Forms-Application-Page-Application Application
+    @copydetails Pt::Forms::Application
+
+    @section Pt-Forms-Application-Page-Screen Screen
+    @copydetails Pt::Forms::Screen
+
+    @section Pt-Forms-Application-Page-Windows Top-Level Windows
+    @copydetails Pt::Forms::Window
+
+    @section Pt-Forms-Application-Page-Content Forms and Control Trees
+    @copydetails Pt::Forms::Form
+    @copydetails Pt::Forms::Control
+
+    @section Pt-Forms-Application-Page-Views Views and Widget Services
+    @copydetails Pt::Forms::View
+    @copydetails Pt::Forms::Widget
+*/
