@@ -6,7 +6,7 @@ description: "API Documentation"
 # User Documentation
 
 - Write for a reader who will use the feature, not for the person who
-  implemented it. ASCII only.
+  implemented it.
 - Full sentences and short paragraphs. Lead with what the thing is or what
   the reader does, then the command, identifier, or example.
 - Use plain language in running text. Keep real identifiers as names
