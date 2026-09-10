@@ -34,57 +34,99 @@
 
     @brief The Forms object model and lifecycle.
 
-    A Forms application creates windows and controls, processes platform
-    events, and runs the event loop. The inherited event loop also supports
+    A Forms application creates windows and controls, shows the visual
+    hierarchy, and runs the event loop. The inherited event loop also supports
     I/O, timers, and asynchronous operations.
 
-    %Application is the runtime root. It provides the main %Screen, which
-    represents a display and owns its top-level %WindowManager. A
-    %WindowManager can also be embedded in a %Workspace. Windows attach to a
-    window manager; each window is a %Form that acts as the root of one
-    control tree.
+    %Application is the starting point of a Forms user interface and must be
+    constructed before forms, windows, or controls. It provides the primary
+    %Screen and %WindowManager, dispatches platform events, and supplies shared
+    services such as scaling, styles, fonts, and input methods.
 
-    The following diagram shows the class hierarchy. It does not describe the
-    runtime parent relationship between controls.
+    Forms distinguishes the class hierarchy from the visual hierarchy. The
+    following diagram shows the C++ inheritance relationship. It does not show
+    which objects display or contain other objects.
 
     @code
     Widget
+        Screen
         View
             Form
                 Window
             Control
-            Layout
     @endcode
 
-    The runtime containment model is separate from that hierarchy:
+    The visual hierarchy describes how Forms objects appear together. A
+    %Screen represents a display and provides the top-level %WindowManager.
+    A %Window belongs to that manager and is itself a %Form. A form displays
+    one content %Control, and controls display child controls, including
+    layouts. A %Workspace follows the same principle within an ordinary
+    control: it contains a window manager that presents several windows in its
+    bounds.
 
     @code
-    Application -> Screen -> Window -> Form -> content Control -> child Controls
+    Application -> Screen -> WindowManager -> Window (Form) -> content Control -> child Controls
     @endcode
 
-    %Screen and %View are %Widget types. A widget supplies the common geometry,
-    visibility, repainting, scaling, screen-connection, and event-processing
-    behavior. The platform backend submits events to the application event
-    loop, which dispatches them to widgets. Every widget is also a %Responder.
-    This lets input events travel through the responder chain.
+    Forms does not take ownership of a window or control when it becomes part
+    of the visual hierarchy. The code that creates an application object keeps
+    it alive while the hierarchy uses it. A window or control removes itself
+    from its parent when it is destroyed.
 
-    %Form and %Control are %View types. A form has one main content control; a
-    control can have several child controls. Together, these controls form the
-    visible user interface. A form is the layout root for its content tree,
-    while each control is responsible for the geometry of its direct children.
-    Layouting happens in two passes. The first pass determines the space each
-    control needs. The second pass arranges the controls within the available
-    space.
+    %Screen and %View inherit the common %Widget base class. A widget supplies
+    identity, screen connection, parent relationships, geometry, visibility,
+    enabled state, scaling, coordinate conversion, repaint requests, event
+    dispatch, and pointer capture. Every widget is also a %Responder, which
+    lets input events travel through the responder chain. The platform backend
+    submits events to the application event loop, which dispatches them into
+    the connected hierarchy.
 
-    A view provides a %PaintSurface for its attached controls and translates
-    coordinates at the boundary between the view and each control. A window is
-    connected to the paint surface supplied by its internal %WindowFrame. The
-    frame uses a pixmap surface that the display presents after painting.
+    A %View is the boundary between controls and a %PaintSurface. It provides
+    the surface and converts coordinates between its own space and each
+    attached control. %Form and %Control are the normal view implementations.
+    A form is the layout root for its content tree, while a control is
+    responsible for the geometry of its direct children. Measurement
+    determines the preferred size for a %SizePolicy; layout then assigns
+    geometry within the available rectangle.
 
-    Changes to visual state or layout normally request a repaint. The repaint
-    request travels upward through the views to the window and its window frame.
-    Painting then travels downward again: the window paints its content, and
-    forms and controls paint their visible children.
+    When a control becomes part of a form that is shown on a screen, it gains
+    access to the screen, scaling, coordinate mapping, and paint surface.
+    Removing it reverses that relationship. Changes to visual state, geometry,
+    or drawing request an update through the containing views to the window.
+    Painting then travels back down through visible content after the window
+    frame makes a paint surface available.
+
+    Derive custom visual content from %Control. Derive from %View only when a
+    custom content host needs different paint-surface or coordinate behavior.
+    %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
+    embedded-window implementations; applications normally use the window
+    manager provided by a %Screen or %Workspace. See the Layouts, Input,
+    Windows and Workspaces, Styles and Renderers, and Painting documentation
+    for those specialized mechanisms.
+
+    The following example creates the smallest useful visual hierarchy: a
+    window, its content layout, and a control displayed by that layout.
+
+    @code
+    int main(int argc, char** argv)
+    {
+        Pt::Forms::Application application(argc, argv);
+
+        Pt::Forms::Label label;
+        label.setText("Hello, Forms");
+
+        Pt::Forms::FlowLayout content;
+        content.addItem(label);
+
+        Pt::Forms::Window window;
+        window.setTitle("Example");
+        window.setContent(&content);
+        window.show();
+
+        application.run();
+        return 0;
+    }
+    @endcode
 */
 
 #endif

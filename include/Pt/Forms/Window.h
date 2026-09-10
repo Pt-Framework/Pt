@@ -68,6 +68,28 @@ class PaintEvent;
     input into operations on the platform window. Its content remains owned
     by the caller and must outlive its attachment to the window.
 
+    Construct a window, configure its content, title, icon, geometry, and
+    presentation state, and then call %show(). An unparented window is added
+    to the primary screen's window manager when it is shown. Use %setParent()
+    only to select another manager, for example the manager of a workspace.
+    The manager supplies a frame that connects the window to the screen and
+    applies pending configuration when that connection is made.
+
+    %move() and %resize() request normal-window geometry. %autoSize() measures
+    the content with a %SizePolicy, while %autoCenter() asks the current frame
+    to choose a position in its manager's available area. A manual move or
+    resize returns the window to the normal state and can end the corresponding
+    automatic behavior. %setAbove() controls stacking within the current
+    manager; it is not an operating-system-wide always-on-top guarantee.
+
+    Visibility, enabled state, and activation are requested from the frame and
+    confirmed by the corresponding Forms events. A window accepts pointer,
+    touch, scroll, and keyboard input only while it is visible and enabled.
+    %close() requests a close transition. Once processed, the window is hidden,
+    detached, marked closed, and emits %closed(); it is not destroyed.
+    %showModal() runs a nested event loop and temporarily disables the other
+    top-level windows, so reserve it for intentionally synchronous dialogs.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Window : public Form

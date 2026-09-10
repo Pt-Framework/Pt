@@ -62,6 +62,27 @@ class Popup;
     input methods, fonts, and scaling. Start its inherited event loop with
     %Pt::System::Application::run() after the visual hierarchy is shown.
 
+    The application owns its platform implementation, graphics backend, and
+    primary screen, but it does not own the windows or controls that use them.
+    Widgets remove themselves from their visual parent when they are
+    destroyed. Each widget receives an ID while the application exists.
+    %findWidget() can resolve that ID only while the widget remains alive.
+
+    Platform events first enter the inherited event loop and are then routed
+    through the Forms event dispatcher to their target widget or the primary
+    screen. State changes such as layout, invalidation, repainting, scaling,
+    and window changes use the same dispatcher, which permits the hierarchy
+    to coalesce deferred work. Applications normally request changes through
+    widget APIs rather than calling %processEvent() directly. The latter is
+    useful only for code that deliberately supplies Forms events.
+
+    %setStyle() and %setStyleOptions() reset the shared style and invalidate
+    the registered widgets so their visual state is rebuilt. %setScaleFactor()
+    sends a rescale event through the primary screen. Configure these shared
+    services before showing the user interface when possible. %impl() and
+    %graphicsBackend() support Forms backend implementations; ordinary
+    applications use the higher-level Forms APIs.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Application : public Pt::System::Application
@@ -71,24 +92,62 @@ class PT_FORMS_API Application : public Pt::System::Application
     friend class Screen;
 
     public:
+        /** @brief Creates the Forms runtime and its primary screen.
+        */
         Application(int argc = 0, char** argv = 0);
 
+        /** @brief Destroys the Forms runtime and the services it owns.
+        */
         virtual ~Application();
 
+        /** @brief Returns the platform-specific Forms implementation.
+
+            This is an implementation API for Forms backends. The application
+            owns the returned object.
+        */
         ApplicationImpl* impl();
 
+        /** @brief Returns the graphics backend used by Forms.
+
+            This is an implementation API for Forms backends. The application
+            owns the returned backend.
+        */
         GraphicsBackend& graphicsBackend();
 
+        /** @brief Returns the graphics backend used by Forms.
+
+            This is an implementation API for Forms backends. The application
+            owns the returned backend.
+        */
         const GraphicsBackend& graphicsBackend() const;
 
+        /** @brief Returns the Forms application instance.
+        */
         static Application& instance();
 
+        /** @brief Returns the primary screen.
+
+            The application owns the returned screen. Use its window manager
+            for top-level windows.
+        */
         const Screen& screen() const;
 
+        /** @brief Returns the primary screen.
+
+            The application owns the returned screen. Use its window manager
+            for top-level windows.
+        */
         Screen& screen();
 
+        /** @brief Returns the time since the last platform user activity.
+        */
         Pt::Timespan inactivityTime() const;
 
+        /** @brief Sets the platform cursor.
+
+            Pass 0 to restore the platform default cursor. The caller retains
+            ownership of @a cursor.
+        */
         void setCursor(const Cursor* cursor = 0);
 
         /** @brief Returns the current style.
@@ -96,6 +155,9 @@ class PT_FORMS_API Application : public Pt::System::Application
         const Style& style() const;
 
         /** @brief Sets the global style for all widgets.
+
+            Resets the style with the current %StyleOptions and invalidates all
+            registered widgets.
         */
         void setStyle(const Style& s);
 
@@ -104,61 +166,153 @@ class PT_FORMS_API Application : public Pt::System::Application
         const StyleOptions& styleOptions() const;
 
         /** @brief Replaces the style options for all widgets.
+
+            Resets the current style and invalidates all registered widgets.
         */
         void setStyleOptions(const StyleOptions& options);
 
+        /** @brief Loads a PNG file into @a image.
+
+            Resets @a image when @a path does not exist.
+        */
         void loadImage(const System::Path& path, Gfx::Image& image);
 
+        /** @brief Sets the Forms scaling factor.
+
+            Immediately sends a %RescaleEvent through the primary screen.
+        */
         void setScaleFactor(double scale);
 
+        /** @brief Returns the current Forms scaling factor.
+        */
         double scaleFactor() const;
 
+        /** @brief Returns the active input method.
+
+            The application always provides its default input method when no
+            custom method is installed.
+        */
         InputMethod& inputMethod();
 
+        /** @brief Installs @a im as the active input method.
+
+            Removes the previously active method and registers @a im with this
+            application. The caller retains ownership of @a im and must keep
+            it alive until it is removed.
+        */
         void setInputMethod(InputMethod& im);
 
+        /** @brief Removes @a im when it is the active input method.
+
+            Restores the application-owned default input method.
+        */
         void removeInputMethod(InputMethod& im);
 
+        /** @brief Creates an ID for an internal Forms widget.
+
+            The ID is unique within this application while the application is
+            alive.
+        */
         Pt::uint64_t makeId();
 
+        /** @brief Finds the live widget with @a id.
+
+            Returns 0 when no registered widget has @a id. The returned widget
+            is not owned by the application and remains valid only while the
+            widget remains alive.
+        */
         Widget* findWidget(Pt::uint64_t id);
 
-        // TODO: this might be the same as loop().waitNext()
+        /** @brief Processes the next platform event.
+
+            Use this only when implementing a manual Forms event loop.
+
+            TODO: this might be the same as loop().waitNext()
+        */
         void nextEvent();
 
+        /** @brief Queues @a ev on the application event loop.
+        */
         void commitEvent(const Event& ev);
 
+        /** @brief Processes @a ev immediately through Forms event dispatch.
+
+            This supports Forms backends, tests, and deliberate event
+            injection. Applications normally request state changes through
+            widget APIs instead.
+        */
         void processEvent(const Event& ev);
 
+        /** @brief Notifies of events passed to %processEvent().
+        */
         Pt::Signal<const Pt::Event&>& eventReceived();
 
+        /** @brief Invalidates every registered widget.
+
+            Use this for application-wide visual changes such as a style
+            update.
+        */
         void invalidate();
 
-        /** @brief Emulates a key event.
+        /** @brief Emulates a platform key event.
+
+            This supports tests and automation, not ordinary widget event
+            delivery.
         */
         void sendKeyEvent(const KeyEvent& ev);
 
-        /** @brief Emulates a mouse event.
+        /** @brief Emulates a platform mouse event.
+
+            This supports tests and automation, not ordinary widget event
+            delivery.
         */
         void sendMouseEvent(const MouseEvent& ev);
 
+        /** @brief Returns the active pointer-capture target.
+
+            Returns the most recently capturing widget, otherwise the most
+            recently shown transient popup, or 0 when neither exists. The
+            returned widget is not owned by the application.
+        */
         Widget* capture() const;
 
     public:
+        /** @brief Adds the font files found in @a dir.
+        */
         void addFonts(const Pt::System::Path& dir);
 
+        /** @brief Adds the font at @a path.
+
+            Returns true when the font was added.
+        */
         bool addFont(const Pt::System::Path& path);
 
+        /** @brief Removes the font at @a path.
+
+            Returns true when the font was removed.
+        */
         bool removeFont(const Pt::System::Path& path);
 
+        /** @brief Returns the paths of the registered font files.
+
+            The returned collection is owned by the font subsystem.
+        */
         const std::vector<Pt::System::Path>& fontFiles() const;
 
+        /** @brief Returns the default font family used by the graphics backend.
+        */
         std::string defaultFont() const;
 
+        /** @brief Sets the default font family used by the graphics backend.
+        */
         void setDefaultFont(const std::string& family);
 
+        /** @brief Returns the available font family names.
+        */
         std::vector<std::string> fontFamilies() const;
 
+        /** @brief Returns the available faces in @a family.
+        */
         std::vector<Gfx::FontFace> fontFaces(const std::string& family) const;
 
     protected:

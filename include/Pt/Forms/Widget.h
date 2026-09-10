@@ -66,6 +66,34 @@ class KeyEvent;
     and events move through the hierarchy. Custom widget bases implement the
     coordinate conversions and override only the hooks for behavior they own.
 
+    Construct widgets only after an %Application exists. The application gives
+    each widget an ID, registers it for event routing, and removes that entry
+    during destruction. A widget name is optional and is not an identifier.
+    Parent and screen pointers describe non-owning runtime relationships.
+    A widget is connected when its parent hierarchy reaches a screen, which is
+    independent of whether it is visible. Container classes attach and detach
+    widgets through their public APIs; callers keep attached widgets alive.
+
+    Geometry is expressed in local logical coordinates. %position() is in the
+    parent coordinate system, %bounds() begins at the local origin, and
+    %toParent(), %fromParent(), %toGlobal(), and %fromGlobal() cross those
+    coordinate systems. The default global conversion walks the parent chain.
+    A custom widget base must implement the parent conversion hooks so hit
+    testing, painting, and pointer event delivery agree on the same geometry.
+
+    Public state operations are requests, not direct mutations. Their result
+    arrives through Forms events and the matching protected hooks. %invalidate()
+    queues a coalesced invalidation; %repaint() forwards a dirty local region
+    towards the screen. %setCapture() routes pointer input to the widget until
+    capture is released. Widgets are also responders: unhandled input passes
+    to the next responder, with mouse and touch coordinates converted locally.
+
+    Peers form non-hierarchical, bidirectional associations between widgets.
+    %addPeer() and %removePeer() notify both endpoints, and destruction removes
+    the remaining associations. Peers do not establish ownership, parenting, or
+    screen connection. A widget can also supply a %Cursor while it is under the
+    pointer; clearing that cursor restores the application default.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Widget : public Responder

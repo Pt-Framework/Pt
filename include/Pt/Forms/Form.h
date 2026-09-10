@@ -65,6 +65,28 @@ namespace Forms {
     %setContent() to replace the content; the form does not own the control,
     so the caller must keep it alive until it is detached.
 
+    A form is normally a %Window, but custom form hosts can derive from it.
+    It has exactly one content root. That root can itself contain an arbitrary
+    control tree. Replacing the content detaches the old root before attaching
+    the new one. Attachment connects the complete tree to the screen, paint
+    surface, responder chain, and form; detachment reverses those links. These
+    links are non-owning, so destruction order remains the caller's
+    responsibility.
+
+    %relayout() queues a layout event only while the form is connected. Pending
+    layout requests are combined before the form first measures its content
+    and then assigns it the available bounds. Controls request layout from
+    their parent rather than laying out an enclosing form directly. Custom
+    form hosts override the protected measuring and layout hooks when their
+    content needs a different allocation rule.
+
+    The form maintains the focusable controls in its content tree and delivers
+    focus changes as %FocusEvent objects. %focusNext() and %focusPrev() follow
+    their focus indices, skipping controls whose focus policy is %NoFocus. It
+    also dispatches registered shortcuts, Alt mnemonics, and Tab traversal
+    before delivering ordinary keyboard input to the focused control. A
+    control with %KeepFocus can prevent focus traversal away from itself.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Form : public View

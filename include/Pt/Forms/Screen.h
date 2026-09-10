@@ -58,6 +58,25 @@ class RescaleEvent;
     normally use the screen through %Application::screen() rather than
     creating one directly.
 
+    A screen provides the top-level %WindowManager for its display. Showing
+    an unparented %Window attaches it through that manager. The manager and
+    screen use non-owning relationships to the windows, so the application
+    must keep every attached window alive and detach it before destruction.
+    Use a %Workspace when an application needs a window manager within a
+    control instead of another platform display.
+
+    Screen coordinates are global Forms coordinates. The screen hit-tests
+    windows and their content to choose the input target. When that target
+    changes, %setPointer() delivers a leave event to the old widget before an
+    enter event is delivered to the new one. Pointer capture and transient
+    popups can override normal hit-test routing through %Application.
+
+    Repaint requests from the hierarchy reach the screen as dirty rectangles.
+    The screen combines pending rectangles and schedules one paint pass, then
+    passes the resulting update to the platform implementation. %Screen is a
+    backend extension point; applications should use its window manager and
+    should not call its protected event and platform hooks.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Screen : public Widget

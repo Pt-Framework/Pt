@@ -60,6 +60,26 @@ class PaintContext;
     %Control provide the usual view implementations; derive a view when a
     custom content host needs different forwarding or coordinate behavior.
 
+    The view owns its surface adapter, not the %PaintSurface assigned through
+    %setSurface(). The adapter presents the view's local size, scaling, and
+    offset within the borrowed surface. When a control is initialized, the
+    view gives it that surface with an offset derived from the control's
+    position; release clears the control's surface. %Form and %Control extend
+    this mechanism to their content and child controls.
+
+    %toControl() and %fromControl() convert between view-local and attached
+    control coordinates. Their default mapping uses the control position.
+    View implementations also align child move and resize requests to the
+    active scaling before sending the corresponding Forms event. Override the
+    protected mapping and forwarding hooks only when a custom host has a
+    different coordinate system, surface arrangement, or request policy.
+
+    %View is an implementation boundary rather than the usual application
+    base class. Derive visible application content from %Control. A custom
+    view must arrange a complete attach, initialize, release, and detach
+    lifecycle for every hosted control and must not retain a surface supplied
+    by another view beyond that lifecycle.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API View : public Widget

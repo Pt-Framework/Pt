@@ -8,15 +8,14 @@
     @section Pt-Forms-Architecture-Page-Screen Screen
     @copydetails Pt::Forms::Screen
 
-    @section Pt-Forms-Architecture-Page-Widget Widget
-    @copydetails Pt::Forms::Widget
+    @section Pt-Forms-Architecture-Page-Windows Top-Level Windows
+    @copydetails Pt::Forms::Window
 
-    @section Pt-Forms-Architecture-Page-View View
-    @copydetails Pt::Forms::View
-
-    @section Pt-Forms-Architecture-Page-Form Form
+    @section Pt-Forms-Architecture-Page-Content Forms and Control Trees
     @copydetails Pt::Forms::Form
-
-    @section Pt-Forms-Architecture-Page-Control Control
     @copydetails Pt::Forms::Control
+
+    @section Pt-Forms-Architecture-Page-Views Views and Widget Services
+    @copydetails Pt::Forms::View
+    @copydetails Pt::Forms::Widget
 */

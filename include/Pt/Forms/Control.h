@@ -78,6 +78,30 @@ class Key;
     measurement, layout, painting, and event hooks that define its behavior;
     use %add() and %remove() to manage its child controls.
 
+    A control's parent is a %View, and its direct children are controls. The
+    hierarchy does not transfer ownership. %add() first detaches a child from
+    any old parent, while %remove() detaches it without destroying it. When the
+    tree joins a connected form, the connection, form association, responder
+    chain, scaling, and paint surface are propagated through all descendants.
+    Removing a control reverses those runtime relationships. Keep every
+    attached control alive until it has been removed or its parent is gone.
+
+    The parent paints children in their stacking order and hit-tests them from
+    front to back. %raise() moves a direct child to the front of that order.
+    Controls forward repaint and relayout requests to their parent, which
+    converts the requested local region to its own coordinates. A control
+    measures under the supplied %SizePolicy and caches the preferred size until
+    content, policy, limits, or scaling invalidate it. Its layout hook assigns
+    geometry to its direct children.
+
+    Once associated with a form, a control may participate in focus traversal,
+    action keys, shortcuts, and mnemonics. %focus() requests focus only when
+    the focus policy permits it. Pointer and touch presses focus an eligible
+    control and capture input until release when it handles the press itself.
+    Implement custom controls by overriding %onMeasure(), %onLayout(),
+    %onPaint(), and the protected input hooks as required; use state-changing
+    public APIs so changes travel through the parent hierarchy.
+
     @ingroup Pt-Forms-Architecture
 */
 class PT_FORMS_API Control : public View
