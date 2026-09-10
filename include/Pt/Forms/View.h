@@ -89,91 +89,226 @@ class PT_FORMS_API View : public Widget
     typedef Widget Base;
 
     public:
+        /** @brief Defines whether a control can receive or retain focus.
+        */
         enum FocusPolicy
         {
+            /** @brief The control cannot receive focus.
+            */
             NoFocus,
+
+            /** @brief The control participates in normal focus navigation.
+            */
             AcceptFocus,
+
+            /** @brief The control retains focus during focus navigation.
+            */
             KeepFocus
         };
 
     protected:
+        /** @brief Creates a view for a derived content host.
+        */
         View();
 
     public:
+        /** @brief Destroys the view and its surface adapter.
+        */
         virtual ~View();
 
+        /** @brief Converts @a pos from this view to @a control coordinates.
+
+            The default conversion subtracts the control position. Override
+            %onToControl() when the hosted control uses a different coordinate
+            mapping.
+        */
         Gfx::PointF toControl(const Control& control,
                               const Gfx::PointF& pos) const;
 
+        /** @brief Converts @a pos from @a control to this view coordinates.
+
+            The default conversion adds the control position. Override
+            %onFromControl() when the hosted control uses a different coordinate
+            mapping.
+        */
         Gfx::PointF fromControl(const Control& control,
                                 const Gfx::PointF& pos) const;
 
+        /** @brief Returns this view's local paint-surface adapter.
+
+            The adapter exposes this view's size, scaling, and position on the
+            surface assigned with %setSurface(). It remains available while no
+            parent surface is assigned, but cannot then obtain a canvas.
+        */
         PaintSurface& surface();
 
+        /** @brief Returns this view's local paint-surface adapter.
+        */
         const PaintSurface& surface() const;
 
+        /** @brief Assigns the surface on which this view displays its controls.
+
+            The view borrows @a surface and does not destroy it. Pass null to
+            detach the view from its parent surface. @a pos identifies this
+            view's origin in the assigned surface and is used to establish
+            child-control surface positions.
+        */
         void setSurface(PaintSurface* surface,
                         const Gfx::PointF& pos = Gfx::PointF() );
 
     protected:
+        /** @brief Notifies the view after its surface assignment changes.
+
+            Override to propagate @a surface and @a pos to hosted controls or
+            to establish a custom surface arrangement.
+        */
         virtual void onSetSurface(PaintSurface* surface,
                                   const Gfx::PointF& pos);
 
+        /** @brief Paints this view into @a context for the local @a rect.
+
+            The default implementation does not draw. Use this hook for custom
+            view content rather than overriding %onPaintEvent().
+        */
         virtual void onPaint(PaintContext& context,
                              const Gfx::RectF& rect);
 
     protected:
+        /** @brief Notifies the view that @a control was attached.
+
+            The base implementation does not retain the control. A custom host
+            stores controls or updates its content relationship here.
+        */
         virtual void onAttach(Control& control);
 
+        /** @brief Notifies the view that @a control was detached.
+
+            The base implementation does not manage control ownership or a
+            child list.
+        */
         virtual void onDetach(Control& control);
 
+        /** @brief Initializes @a control after it has been attached.
+
+            The base implementation assigns the current parent surface at the
+            control position. An override that retains the standard surface
+            mapping must call the base implementation.
+        */
         virtual void onInit(Control& control);
 
+        /** @brief Releases runtime resources associated with @a control.
+
+            The base implementation removes the control's surface assignment.
+            An override that used %onInit() must call the base implementation
+            or provide an equivalent release operation.
+        */
         virtual void onRelease(Control& control);
 
+        /** @brief Converts @a pos from this view to @a control coordinates.
+        */
         virtual Gfx::PointF onToControl(const Control& control,
                                         const Gfx::PointF& pos) const;
 
+        /** @brief Converts @a pos from @a control to this view coordinates.
+        */
         virtual Gfx::PointF onFromControl(const Control& control,
                                           const Gfx::PointF& pos) const;
 
     protected:
+        /** @brief Receives a repaint request for @a rect in @a control coordinates.
+
+            The base implementation discards the request. A content host
+            converts and forwards the dirty region to its own repaint target.
+        */
         virtual void onRepaintRequest(Control& control, const Gfx::RectF& rect);
 
+        /** @brief Receives a request to recalculate @a control's layout.
+
+            The base implementation discards the request.
+        */
         virtual void onRelayoutRequest(Control& control);
 
+        /** @brief Receives a request to enable or disable @a control.
+
+            The base implementation discards the request.
+        */
         virtual void onEnableRequest(Control& control, bool isEnable);
 
+        /** @brief Receives a request to activate or deactivate @a control.
+
+            The base implementation discards the request.
+        */
         virtual void onActivateRequest(Control& control, bool active);
 
+        /** @brief Receives a request to show or hide @a control.
+
+            The base implementation discards the request.
+        */
         virtual void onShowRequest(Control& control, bool isShown);
 
+        /** @brief Receives a request to move @a control to @a pos.
+
+            The base implementation aligns @a pos to the active scaling,
+            updates the control surface position, and commits a %MoveEvent.
+        */
         virtual void onMoveRequest(Control& control, const Gfx::PointF& pos);
 
+        /** @brief Receives a request to resize @a control to @a size.
+
+            The base implementation aligns @a size to the active scaling and
+            commits a %ResizeEvent.
+        */
         virtual void onResizeRequest(Control& control, const Gfx::SizeF& size);
 
+        /** @brief Receives a request to raise @a control in its host.
+
+            The base implementation discards the request.
+        */
         virtual void onRaiseRequest(Control& control);
 
     //
     // Widget
     //
     protected:
+        /** @brief Connects the view to @a screen.
+
+            The base implementation connects the underlying widget.
+        */
         virtual void onConnect(Screen& screen);
 
+        /** @brief Disconnects the view from its screen.
+
+            The base implementation disconnects the underlying widget.
+        */
         virtual void onDisconnect();
 
 
+        /** @brief Processes a paint event and invokes %onPaint().
+
+            The base implementation processes the widget event, then creates a
+            %PaintContext using this view's surface adapter. Overrides that
+            need the standard painting sequence must call the base method.
+        */
         virtual void onPaintEvent(const PaintEvent& ev) override;
 
+        /** @brief Repaints the union of the old and new view bounds.
+
+            The base implementation then applies the move event to the widget.
+        */
         virtual void onMoveEvent(const MoveEvent& ev) override;
 
+        /** @brief Repaints the union of the old and new view bounds.
+
+            The base implementation then applies the resize event to the
+            widget.
+        */
         virtual void onResizeEvent(const ResizeEvent& ev) override;
 
     private:
         class ViewSurface* _surface;
 };
 
-/** @internal
+/** @internal @brief View paint surface
 */
 class ViewSurface : public PaintSurface
 {
