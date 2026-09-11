@@ -1,10 +1,10 @@
-﻿/* Copyright (C) 2015 Marc Boris Duerner 
-  
+﻿/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -62,13 +62,13 @@ Form::~Form()
 }
 
 
-Control* Form::content() 
+Control* Form::content()
 {
     return _mainControl;
 }
 
 
-const Control* Form::content()  const 
+const Control* Form::content()  const
 {
     return _mainControl;
 }
@@ -84,42 +84,11 @@ void Form::setContent(Control* control)
     if(control)
     {
         control->setParent(*this);
-        
+
         // TODO: handle multiple calls of control.setParent(form)
         _mainControl = control;
     }
 }
-
-
-//Gfx::PaintSurface& Form::surface()
-//{
-//    //return _surface;
-//    return *this;
-//}
-//
-//
-//const Gfx::PaintSurface& Form::surface() const
-//{
-//    //return _surface;
-//    return *this;
-//}
-
-
-//void Form::setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos)
-//{
-//    ViewSurface::resetSurface(surface, pos);
-//
-//    //if( ! surface )
-//    //{
-//    //    _surface.detach();
-//    //}
-//    //else
-//    //{
-//    //    Gfx::RectF surfaceRect( pos, size() );
-//    //    _surface.attach(*surface, surfaceRect);
-//    //}
-//}
-
 
 void Form::onSetSurface(PaintSurface* surface, const Gfx::PointF& pos)
 {
@@ -178,7 +147,7 @@ void Form::onProcessLayoutEvent(const LayoutEvent& ev)
 
     //
     // 1. Pass: measure preferred size of contents
-    //  
+    //
     Gfx::SizeF size = onProcessMeasure();
 
     //
@@ -226,9 +195,9 @@ void Form::onLayout(const Gfx::RectF& rect)
     if( _mainControl )
     {
         Gfx::PointF controlPos(0, 0);
-        Gfx::SizeF controlSize = rect.size();      
+        Gfx::SizeF controlSize = rect.size();
 
-        
+
         _mainControl->move(controlPos);
         _mainControl->resize(controlSize);
     }
@@ -258,7 +227,7 @@ void Form::moveFocus(Iter begin, Iter end)
 {
     Iter current = std::find(begin, end, _focusControl);
     Iter it = current;
-    
+
     if( it != end )
         ++it;
     else
@@ -270,7 +239,7 @@ void Form::moveFocus(Iter begin, Iter end)
             it = begin;
 
         Control* control = *it;
-        
+
         if( control->focusPolicy() != Control::NoFocus )
         {
             onSetFocus(*control);
@@ -322,7 +291,7 @@ void Form::onSetFocus(Control& control)
         FocusEvent fev(*_focusControl, false);
         _focusControl->processEvent(fev);
     }
-    
+
     _focusControl = &control;
 
     if(_focusControl)
@@ -473,7 +442,7 @@ void Form::onInit(Control& control)
     if( screen )
     {
         double scaling = scaleFactor();
-    
+
         RescaleEvent ev(control, scaling);
         control.processEvent(ev);
     }
@@ -496,7 +465,7 @@ void Form::onRelease(Control& control)
 
 Gfx::PointF Form::onToControl(const Control& control, const Gfx::PointF& pos) const
 {
-    return pos - control.position();   
+    return pos - control.position();
 }
 
 
@@ -549,7 +518,7 @@ void Form::onInvalidateEvent(const InvalidateEvent& ev)
 void Form::onInvalidate()
 {
     Base::onInvalidate();
-    
+
     relayout();
 }
 
@@ -558,7 +527,7 @@ void Form::onInvalidate()
 //
 
 void Form::onProcessPaintEvent(const PaintEvent& ev)
-{    
+{
     const Gfx::RectF& rect = ev.rect();
     if( rect.isEmpty() )
         return;
@@ -612,7 +581,7 @@ void Form::onRelayoutRequest(Control& control)
 //
 
 void Form::onProcessRescaleEvent(const RescaleEvent& ev)
-{   
+{
     Base::onProcessRescaleEvent(ev);
 
     if(_mainControl)
@@ -621,7 +590,7 @@ void Form::onProcessRescaleEvent(const RescaleEvent& ev)
         RescaleEvent ev(*_mainControl, scaling);
         _mainControl->processEvent(ev);
     }
-}  
+}
 
 
 void Form::onRescaleEvent(const RescaleEvent& ev)
@@ -652,7 +621,7 @@ void Form::onProcessEnableEvent(const EnableEvent& ev)
 
 
 void Form::onEnableEvent(const EnableEvent& ev)
-{    
+{
     Base::onEnableEvent(ev);
 }
 
@@ -785,8 +754,8 @@ void Form::onProcessMouseEvent(const MouseEvent& ev)
 
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    if(_mainControl && 
-       _mainControl->geometry().contains(pos) && 
+    if(_mainControl &&
+       _mainControl->geometry().contains(pos) &&
        _mainControl->acceptsInput() )
     {
         _mainControl->processEvent(ev);
@@ -804,14 +773,14 @@ bool Form::onMouseEvent(const MouseEvent& ev)
 
 
 void Form::onProcessTouchEvent(const TouchEvent& ev)
-{ 
+{
     //if( ! acceptsInput() )
     //    return;
 
     Gfx::PointF pos = fromGlobal( ev.position() );
 
-    if(_mainControl && 
-       _mainControl->geometry().contains(pos) && 
+    if(_mainControl &&
+       _mainControl->geometry().contains(pos) &&
        _mainControl->acceptsInput() )
     {
         _mainControl->processEvent(ev);
@@ -820,7 +789,7 @@ void Form::onProcessTouchEvent(const TouchEvent& ev)
 
     //
     // process event
-    //    
+    //
     Base::onProcessTouchEvent(ev);
 }
 
@@ -837,7 +806,7 @@ void Form::onProcessScrollEvent(const ScrollEvent& ev)
     //    return;
 
     //
-    // TODO: disptch by responder chain obsoletes dispatch 
+    // TODO: disptch by responder chain obsoletes dispatch
     //       to _active and _focus
     //
 
@@ -947,7 +916,7 @@ void Form::onProcessKeyEvent(const KeyEvent& ev)
     // pass event to responder chain
     //
     if( _focusControl )
-    {       
+    {
         _focusControl->processEvent(ev);
     }
     else
