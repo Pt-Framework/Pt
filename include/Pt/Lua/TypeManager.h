@@ -49,6 +49,10 @@ class PT_LUA_API TypeManager : public Pt::Reflex::TypeManager
   public:
     TypeManager();
 
+    TypeManager(const TypeManager&) = delete;
+
+    TypeManager& operator=(const TypeManager&) = delete;
+
     ~TypeManager();
 
     Pt::Reflex::Type& voidType() const

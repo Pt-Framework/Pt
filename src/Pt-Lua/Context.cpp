@@ -35,6 +35,7 @@
 #include <Pt/Reflex/MethodInfo.h>
 #include <Pt/Reflex/PropertyInfo.h>
 #include <Pt/Reflex/ConstructorInfo.h>
+#include <Pt/Reflex/FunctionInfo.h>
 #include <Pt/Reflex/Argument.h>
 #include <Pt/Any.h>
 
@@ -43,6 +44,8 @@
 #include <lauxlib.h>
 
 #include <cstring>
+#include <new>
+#include <stdexcept>
 #include <typeinfo>
 #include <vector>
 #include <string>
@@ -429,12 +432,41 @@ static bool hasBindings(const Pt::Reflex::Type& t)
          ! t.properties().empty();
 }
 
+
+class LuaStateHolder
+{
+  public:
+    explicit LuaStateHolder(lua_State* state)
+    : _state(state)
+    {}
+
+    ~LuaStateHolder()
+    {
+      if(_state)
+        lua_close(_state);
+    }
+
+    lua_State* get() const
+    { return _state; }
+
+    void release()
+    { _state = 0; }
+
+  private:
+    lua_State* _state;
+};
+
 } // anonymous namespace
 
 Context::Context(Pt::Reflex::TypeManager& tm)
 : _tm(tm)
-, _L(luaL_newstate())
+, _L(0)
 {
+  LuaStateHolder state(luaL_newstate());
+  if( ! state.get() )
+    throw std::bad_alloc();
+
+  _L = state.get();
   luaL_openlibs(_L);
 
   // Snapshot standard-lib globals so reset() knows what to keep.
@@ -444,56 +476,48 @@ Context::Context(Pt::Reflex::TypeManager& tm)
   {
     lua_pop(_L, 1);  // pop value, keep key
     if(lua_type(_L, -1) == LUA_TSTRING)
-      _bindingKeys.push_back(lua_tostring(_L, -1));
+      _standardGlobals.push_back(lua_tostring(_L, -1));
   }
   lua_pop(_L, 1);  // pop global table
 
+  bind(_tm);
+  state.release();
+}
+
+
+void Context::bind(Pt::Reflex::TypeManager& tm)
+{
+  if(tm.parent())
+    bind(*tm.parent());
+
+  Pt::Reflex::TypeTable::Iterator tit = tm.types().begin();
+  for( ; tit != tm.types().end(); ++tit)
   {
-    Pt::Reflex::TypeTable::Iterator tit = tm.types().begin();
-    for( ; tit != tm.types().end(); ++tit)
-    {
-      Pt::Reflex::Type& t = *tit;
-      if( hasBindings(t) )
-        bindType(t);
-    }
+    Pt::Reflex::Type& type = *tit;
+    if( hasBindings(type) )
+      bindType(type);
   }
 
-  // Snapshot type binding globals (class tables).
-  lua_pushglobaltable(_L);
-  lua_pushnil(_L);
-  while(lua_next(_L, -2) != 0)
-  {
-    lua_pop(_L, 1);
-    if(lua_type(_L, -1) == LUA_TSTRING)
-    {
-      std::string key = lua_tostring(_L, -1);
-      bool found = false;
-      for(std::size_t i = 0; i < _bindingKeys.size(); ++i)
-        if(_bindingKeys[i] == key) { found = true; break; }
-      if( ! found)
-        _bindingKeys.push_back(key);
-    }
-  }
-  lua_pop(_L, 1);
-
-  // Install global async functions.
   Pt::Reflex::FunctionTable::Iterator fit = tm.functions().begin();
   for( ; fit != tm.functions().end(); ++fit)
-  {
-    Pt::Reflex::FunctionInfo& fi = *fit;
-    const std::type_info* rtid = fi.rtype().id();
-    if( ! rtid || *rtid != typeid(AsyncCall*))
-      continue;
-    lua_pushlightuserdata(_L, &fi);
-    lua_pushcclosure(_L, &luaFunctionDispatchClosure, 1);
-    lua_setglobal(_L, fi.name());
-    _bindingKeys.push_back(fi.name());
-  }
+    bindFunction(*fit);
 }
 
 
 void Context::bindType(Pt::Reflex::Type& type)
 {
+  std::map<std::string, void*>::iterator binding = _bindings.find(type.name());
+  if(binding != _bindings.end())
+  {
+    if(binding->second != &type)
+      throw std::logic_error("Lua name is already bound");
+
+    return;
+  }
+
+  if( hasStandardGlobal(type.name()) )
+    throw std::logic_error("Lua name is already bound");
+
   // Method table
   lua_newtable(_L);
   int methodTableIdx = lua_gettop(_L);
@@ -570,8 +594,46 @@ void Context::bindType(Pt::Reflex::Type& type)
   lua_setmetatable(_L, classTableIdx);
 
   lua_setglobal(_L, type.name().c_str());
+  _bindings.insert(std::make_pair(type.name(), &type));
 
   lua_pop(_L, 2);  // propTable, methodTable
+}
+
+
+void Context::bindFunction(Pt::Reflex::FunctionInfo& function)
+{
+  const std::type_info* resultType = function.rtype().id();
+  if( ! resultType || *resultType != typeid(AsyncCall*) )
+    return;
+
+  std::map<std::string, void*>::iterator binding = _bindings.find(function.name());
+  if(binding != _bindings.end())
+  {
+    if(binding->second != &function)
+      throw std::logic_error("Lua name is already bound");
+
+    return;
+  }
+
+  if( hasStandardGlobal(function.name()) )
+    throw std::logic_error("Lua name is already bound");
+
+  lua_pushlightuserdata(_L, &function);
+  lua_pushcclosure(_L, &luaFunctionDispatchClosure, 1);
+  lua_setglobal(_L, function.name());
+  _bindings.insert(std::make_pair(function.name(), &function));
+}
+
+
+bool Context::hasStandardGlobal(const std::string& name) const
+{
+  for(std::size_t i = 0; i < _standardGlobals.size(); ++i)
+  {
+    if(_standardGlobals[i] == name)
+      return true;
+  }
+
+  return false;
 }
 
 
@@ -594,10 +656,7 @@ void Context::reset()
     if(lua_type(_L, -1) == LUA_TSTRING)
     {
       std::string key = lua_tostring(_L, -1);
-      bool keep = false;
-      for(std::size_t i = 0; i < _bindingKeys.size(); ++i)
-        if(_bindingKeys[i] == key) { keep = true; break; }
-      if( ! keep)
+      if(_bindings.find(key) == _bindings.end() && ! hasStandardGlobal(key))
         toRemove.push_back(key);
     }
   }

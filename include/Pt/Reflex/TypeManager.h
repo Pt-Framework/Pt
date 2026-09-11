@@ -294,6 +294,10 @@ class PT_REFLEX_API TypeManager
 
         TypeManager(TypeManager& parent);
 
+        TypeManager(const TypeManager&) = delete;
+
+        TypeManager& operator=(const TypeManager&) = delete;
+
         virtual ~TypeManager();
 
         virtual void* alloc(std::size_t bytes)
@@ -305,6 +309,16 @@ class PT_REFLEX_API TypeManager
         {
             return ::operator delete(p);
         }
+
+        /** @brief Returns the parent manager, or null if this is a root manager.
+        */
+        TypeManager* parent()
+        { return _parent; }
+
+        /** @brief Returns the parent manager, or null if this is a root manager.
+        */
+        const TypeManager* parent() const
+        { return _parent; }
 
         Type* getType(const std::type_info& ti);
 

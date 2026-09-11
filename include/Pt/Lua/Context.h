@@ -35,6 +35,7 @@
 #include <Pt/Reflex/TypeManager.h>
 #include <Pt/Any.h>
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -63,15 +64,22 @@ class PT_LUA_API Context
 
   private:
     Context(const Context&);
+
     Context& operator=(const Context&);
 
     void bindType(Pt::Reflex::Type& type);
 
+    void bindFunction(Pt::Reflex::FunctionInfo& function);
+
+    void bind(Pt::Reflex::TypeManager& tm);
+
+    bool hasStandardGlobal(const std::string& name) const;
+
   private:
     Pt::Reflex::TypeManager&  _tm;
     struct lua_State* _L;
-    // Snapshot of global keys present after bindType() calls, used by reset().
-    std::vector<std::string> _bindingKeys;
+    std::map<std::string, void*> _bindings;
+    std::vector<std::string> _standardGlobals;
 };
 
 /** @internal

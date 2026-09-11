@@ -85,6 +85,56 @@ inline AsyncCall* waitAsync(int ms)
 }
 
 
+class PointCall : public BasicAsyncCall<Point>
+{
+  public:
+    explicit PointCall(int value)
+    : _value(value)
+    {}
+
+  private:
+    void onBeginCall(Pt::System::EventLoop& /*loop*/) override
+    { setReady(); }
+
+    Point onResult() override
+    { return Point(_value, _value); }
+
+    void onCancel() override
+    {}
+
+  private:
+    int _value;
+};
+
+
+inline AsyncCall* pointAsync(int value)
+{
+  return new PointCall(value);
+}
+
+
+class NamedPointType : public Pt::Reflex::BasicType<Point>
+{
+  public:
+    explicit NamedPointType(const char* name)
+    : Pt::Reflex::BasicType<Point>(name)
+    {}
+
+    void define(Pt::Reflex::TypeManager& tm)
+    { this->registerMethod(tm, "sum", &NamedPointType::sum); }
+
+  private:
+    static int sum(Point& point)
+    { return point.x + point.y; }
+};
+
+
+void createContext(Pt::Reflex::TypeManager& tm)
+{
+  Pt::Lua::Context context(tm);
+}
+
+
 // WaitFunction demonstrates a user-managed BasicFunctionInfo subclass that
 // holds host-program state (a scale factor) and forwards it to the AsyncCall
 // constructor. It auto-unregisters from the TypeManager when destroyed.
@@ -148,6 +198,12 @@ ScriptTest::ScriptTest()
                                       *this, &ScriptTest::AsyncAdvanceWithState);
   Pt::Unit::TestSuite::registerMethod("ReturnObjectByValue",
                                       *this, &ScriptTest::ReturnObjectByValue);
+  Pt::Unit::TestSuite::registerMethod("ParentTypes",
+                                      *this, &ScriptTest::ParentTypes);
+  Pt::Unit::TestSuite::registerMethod("NoMove",
+                                      *this, &ScriptTest::NoMove);
+  Pt::Unit::TestSuite::registerMethod("NameCollisions",
+                                      *this, &ScriptTest::NameCollisions);
 
 #if __cplusplus >= 202002L
   Pt::Unit::TestSuite::registerMethod("CoAdvance",
@@ -297,6 +353,99 @@ void ScriptTest::ReturnObjectByValue()
 
   Result r(ctx.state());
   PT_UNIT_ASSERT_EQUAL(r.get("result"), 2);
+}
+
+
+void ScriptTest::ParentTypes()
+{
+  TypeManager builtins;
+  Pt::Reflex::TypeManager parent(builtins);
+  Pt::Reflex::TypeManager child(parent);
+  PointType pointType;
+  VectorIntType vectorType;
+  parent.registerType(vectorType);
+  parent.registerType(pointType);
+  vectorType.define(parent);
+  pointType.define(parent);
+  child.registerFunction("pointAsync", &pointAsync);
+
+  PT_UNIT_ASSERT(pointType.parent() == &parent);
+
+  Pt::Lua::Context ctx(child);
+
+  const char* source =
+    "local q = pointAsync(5)\n"
+    "result = q:sum()\n";
+
+  Script script(ctx, source);
+  script.setActive(*_loop);
+  script.advanced() += Pt::slot(*this, &ScriptTest::onAsyncAdvanced);
+  _script = &script;
+  script.beginAdvance();
+  _loop->run();
+  _script = 0;
+
+  Result result(ctx.state());
+  PT_UNIT_ASSERT_EQUAL(result.get("result"), 10);
+  PT_UNIT_ASSERT(pointType.parent() == &parent);
+}
+
+
+void ScriptTest::NoMove()
+{
+  TypeManager builtins;
+  Pt::Reflex::TypeManager catalog(builtins);
+  PointType pointType;
+  VectorIntType vectorType;
+  catalog.registerType(vectorType);
+  catalog.registerType(pointType);
+  vectorType.define(catalog);
+  pointType.define(catalog);
+
+  PT_UNIT_ASSERT(pointType.parent() == &catalog);
+
+  Pt::Lua::Context ctx(catalog);
+
+  PT_UNIT_ASSERT(pointType.parent() == &catalog);
+}
+
+
+void ScriptTest::NameCollisions()
+{
+  {
+    TypeManager builtins;
+    Pt::Reflex::TypeManager parent(builtins);
+    Pt::Reflex::TypeManager child(parent);
+    NamedPointType firstType("Duplicate");
+    NamedPointType secondType("Duplicate");
+    parent.registerType(firstType);
+    child.registerType(secondType);
+    firstType.define(parent);
+    secondType.define(child);
+
+    PT_UNIT_ASSERT_THROW(createContext(child), std::logic_error);
+  }
+
+  {
+    TypeManager builtins;
+    Pt::Reflex::TypeManager catalog(builtins);
+    NamedPointType type("wait");
+    catalog.registerType(type);
+    type.define(catalog);
+    catalog.registerFunction("wait", &waitAsync);
+
+    PT_UNIT_ASSERT_THROW(createContext(catalog), std::logic_error);
+  }
+
+  {
+    TypeManager builtins;
+    Pt::Reflex::TypeManager catalog(builtins);
+    NamedPointType type("string");
+    catalog.registerType(type);
+    type.define(catalog);
+
+    PT_UNIT_ASSERT_THROW(createContext(catalog), std::logic_error);
+  }
 }
 
 

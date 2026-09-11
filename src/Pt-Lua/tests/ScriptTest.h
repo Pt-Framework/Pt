@@ -68,6 +68,9 @@ struct Point
       return nums;
   }
 
+  Point translated(int delta) const
+  { return Point(x + delta, y + delta); }
+
   int x;
   int y;
 };
@@ -80,7 +83,7 @@ class PointType : public Pt::Reflex::BasicType<Point>
     : Pt::Reflex::BasicType<Point>("Point")
     {}
 
-    void define(TypeManager& tm)
+    void define(Pt::Reflex::TypeManager& tm)
     {
       this->registerConstructor(tm, *this, &PointType::construct0);
       this->registerConstructor(tm, *this, &PointType::construct2);
@@ -89,6 +92,7 @@ class PointType : public Pt::Reflex::BasicType<Point>
       this->registerProperty(tm, "y", &getY, &setY);
 
       this->registerMethod(tm, "toNumbers", &PointType::toNumsProxy);
+      this->registerMethod(tm, "translated", &PointType::translateProxy);
     }
 
   private:
@@ -115,6 +119,9 @@ class PointType : public Pt::Reflex::BasicType<Point>
 
     static std::vector<int> toNumsProxy(Point& p)
     { return p.toNumbers(); }
+
+    static Point translateProxy(Point& p, int delta)
+    { return p.translated(delta); }
 };
 
 
@@ -170,7 +177,7 @@ class VectorIntType : public Pt::Reflex::BasicType<std::vector<int>>
     : Pt::Reflex::BasicType<std::vector<int>>("VectorInt")
     {}
 
-    void define(TypeManager& tm)
+    void define(Pt::Reflex::TypeManager& tm)
     {
       this->registerMethod(tm, "length", &vectorLength);
     }
@@ -188,7 +195,7 @@ class CounterType : public Pt::Reflex::BasicType<Counter>
     : Pt::Reflex::BasicType<Counter>("Counter")
     {}
 
-    void define(TypeManager& tm)
+    void define(Pt::Reflex::TypeManager& tm)
     {
       this->registerConstructor(tm, *this, &CounterType::construct);
       this->registerProperty(tm, "value", &getValue, &setValue);
@@ -229,6 +236,12 @@ class ScriptTest : public Pt::Unit::TestSuite
     void AsyncAdvanceWithState();
 
     void ReturnObjectByValue();
+
+    void ParentTypes();
+
+    void NoMove();
+
+    void NameCollisions();
 
     void onAsyncAdvanced();
 
