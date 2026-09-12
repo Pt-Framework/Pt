@@ -50,6 +50,7 @@
     @code
     Widget
         Screen
+        WindowManager
         View
             Form
                 Window

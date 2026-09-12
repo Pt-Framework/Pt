@@ -47,6 +47,8 @@ namespace Forms {
   such as %FlowLayout or %GridLayout when content must adapt to available
   space. As a control, a layout can itself be the content of a %Form or the
   child of another control.
+
+  @ingroup Pt-Forms-Layouts
 */
 class PT_FORMS_API Layout : public Control
 {

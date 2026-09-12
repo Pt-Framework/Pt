@@ -7,6 +7,7 @@
 
     @section Pt-Forms-Application-Page-Screen Screen
     @copydetails Pt::Forms::Screen
+    @copydetails Pt::Forms::WindowManager
 
     @section Pt-Forms-Application-Page-Windows Top-Level Windows
     @copydetails Pt::Forms::Window
