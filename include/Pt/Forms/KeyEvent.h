@@ -39,6 +39,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Key press or release.
+
+    The event carries a %Key, optional Unicode text, and the action. The
+    widget pointer and widget ID identify the target.
+
+    @ingroup Pt-Forms-Input
+*/
 class PT_FORMS_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 {
     public:

@@ -38,6 +38,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Pointer left a widget.
+
+    Sent before an enter event on the new target. The widget pointer and
+    widget ID identify the widget that lost the pointer.
+
+    @ingroup Pt-Forms-Input
+*/
 class PT_FORMS_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
 {
     public:

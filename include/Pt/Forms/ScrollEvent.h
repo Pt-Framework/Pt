@@ -40,6 +40,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Scroll or wheel movement.
+
+    The event identifies the scroll axis. The widget pointer and widget ID
+    identify the target.
+
+    @ingroup Pt-Forms-Input
+*/
 class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
 {
     public:

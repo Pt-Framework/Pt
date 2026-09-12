@@ -11,6 +11,14 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Key code and modifiers.
+
+    A %Key identifies a physical or logical key, optionally with modifier
+    flags such as Shift or Control. %KeyEvent carries a %Key together with
+    press or release and optional Unicode text.
+
+    @ingroup Pt-Forms-Input
+*/
 class Key
 {
     public:

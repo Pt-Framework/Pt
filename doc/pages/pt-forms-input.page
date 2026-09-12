@@ -1,0 +1,7 @@
+/** \page Pt-Forms-Input-Page Mouse, Touch, Keyboard Input
+
+    @copydetails Pt-Forms-Input
+
+    @section Pt-Forms-Input-Page-Responder Responders
+    @copydetails Pt::Forms::Responder
+*/

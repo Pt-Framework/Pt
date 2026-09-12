@@ -40,6 +40,10 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Mouse button identity.
+
+    @ingroup Pt-Forms-Input
+*/
 class MouseButton
 {
     public:
@@ -64,6 +68,10 @@ class MouseButton
 };
 
 
+/** @brief Pressed or released state of the mouse buttons.
+
+    @ingroup Pt-Forms-Input
+*/
 class MouseState
 {
     public:
@@ -103,6 +111,13 @@ class MouseState
 };
 
 
+/** @brief Pointer movement or button change.
+
+    The event carries a local position, the action, the button, and the
+    button state. The widget pointer and widget ID identify the target.
+
+    @ingroup Pt-Forms-Input
+*/
 class MouseEvent : public Pt::BasicEvent<MouseEvent>
 {
     public:    

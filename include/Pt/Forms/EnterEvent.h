@@ -38,6 +38,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Pointer entered a widget.
+
+    Sent after a leave event on the previous target. The widget pointer
+    and widget ID identify the widget now under the pointer.
+
+    @ingroup Pt-Forms-Input
+*/
 class EnterEvent : public Pt::BasicEvent<EnterEvent>
 {
     public:

@@ -82,15 +82,19 @@ class PaintEvent;
     automatic behavior. %setAbove() controls stacking within the current
     manager; it is not an operating-system-wide always-on-top guarantee.
 
-    Visibility, enabled state, and activation are requested from the frame and
-    confirmed by the corresponding Forms events. A window accepts pointer,
-    touch, scroll, and keyboard input only while it is visible and enabled.
-    %close() requests a close transition. Once processed, the window is hidden,
-    detached, marked closed, and emits %closed(); it is not destroyed.
-    %showModal() runs a nested event loop and temporarily disables the other
-    top-level windows, so reserve it for intentionally synchronous dialogs.
+    %WindowType selects the normal or borderless frame. %WindowState is
+    normal, minimized, or maximized. Visibility, enabled state, and
+    activation are requested from the frame and confirmed by %ShowEvent,
+    %MoveEvent, %ResizeEvent, %WindowStateEvent, %ActivateEvent, and
+    %CloseEvent. A window accepts pointer, touch, scroll, and keyboard
+    input only while it is visible and enabled. %close() requests a close
+    transition. Once processed, the window is hidden, detached, marked
+    closed, and emits %closed(); it is not destroyed. %showModal() runs a
+    nested event loop and temporarily disables the other top-level windows,
+    so reserve it for intentionally synchronous dialogs.
 
     @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Windows
 */
 class PT_FORMS_API Window : public Form
 {

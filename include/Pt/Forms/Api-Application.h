@@ -95,10 +95,10 @@
     This overview places the types, the two hierarchies, and the host chain.
     Read %Application for the runtime. Read %Widget for the shared visual
     contract: parent, connection, request versus event, and peers. Read
-    %View, %Form, and %Control to build content. Read %Window, %Screen, and
-    %WindowManager for how a form appears on a display. See the Layouts,
-    Input, Windows and Workspaces, Styles and Renderers, and Painting
-    documentation for those specialized mechanisms.
+    %View, %Form, and %Control to build content. Read %Screen for the display
+    root. Showing, closing, popups, and workspaces follow in Windows and
+    Workspaces. See @ref Pt-Forms-Input-Page, the Layouts, Styles and
+    Renderers, and Painting documentation for those specialized mechanisms.
 
     The following example creates the smallest useful visual hierarchy: a
     window, its content layout, and a control displayed by that layout.

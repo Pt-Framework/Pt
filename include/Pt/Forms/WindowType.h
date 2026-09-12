@@ -42,6 +42,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Frame style of a window.
+
+    %Default is a normal decorated window. %Borderless is a window without
+    decoration.
+
+    @ingroup Pt-Forms-Windows
+*/
 class WindowType
 {
     public:
@@ -72,6 +79,12 @@ class WindowType
         Pt::uint32_t _type;
 };
 
+/** @brief Presentation state of a window.
+
+    A window is %Normal, %Minimized, or %Maximized.
+
+    @ingroup Pt-Forms-Windows
+*/
 class WindowState
 {
     public:

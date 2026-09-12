@@ -40,6 +40,12 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports that a window's presentation state changed.
+
+    The widget pointer and widget ID identify the affected Forms object.
+
+    @ingroup Pt-Forms-Windows
+*/
 class PT_FORMS_API WindowStateEvent : public Pt::BasicEvent<WindowStateEvent>
 {
     public:

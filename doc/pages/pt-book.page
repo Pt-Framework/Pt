@@ -102,6 +102,7 @@
 
 <ul>
     <li> @ref Pt-Forms-Application-Page </li>
+    <li> @ref Pt-Forms-Input-Page </li>
 </ul>
 
 @section pt_http HTTP Clients and Servers

@@ -40,6 +40,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Touch press, move, or release.
+
+    The event carries a local position and a touch identity. The widget
+    pointer and widget ID identify the target.
+
+    @ingroup Pt-Forms-Input
+*/
 class TouchEvent : public Pt::BasicEvent<TouchEvent>
 {
     private:    

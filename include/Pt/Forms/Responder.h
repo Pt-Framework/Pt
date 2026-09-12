@@ -43,53 +43,123 @@ class EnterEvent;
 class LeaveEvent;
 class KeyEvent;
 
+/** @brief Object that handles input or forwards it.
+
+    A %Responder is the unit of input delivery. %Widget is the usual
+    responder. Handle an event by returning true; return false to continue
+    to the next responder. Mouse and touch positions are converted to the
+    current responder's local coordinates before the handler runs.
+
+    Applications derive visual content from %Control, not from %Responder.
+    A custom responder must implement %onNextResponder(), %onToGlobal(),
+    and %onFromGlobal() and must not create a cycle in the chain.
+
+    @ingroup Pt-Forms-Input
+*/
 class PT_FORMS_API Responder
 {
     protected:
+        /** @brief Creates a responder.
+        */
         Responder();
 
     public:
+        /** @brief Destructor.
+        */
         virtual ~Responder();
 
+        /** @brief Delivers @a ev along the mouse responder chain.
+
+            Converts the position to each responder's local coordinates.
+            Returns true when a responder handles the event.
+        */
         bool mouseEvent(const MouseEvent& ev);
 
+        /** @brief Delivers @a ev along the touch responder chain.
+
+            Converts the position to each responder's local coordinates.
+        */
         void touchEvent(const TouchEvent& ev);
 
+        /** @brief Delivers @a ev along the scroll responder chain.
+        */
         void scrollEvent(const ScrollEvent& ev);
 
+        /** @brief Delivers @a ev along the enter responder chain.
+        */
         void enterEvent(const EnterEvent& ev);
 
+        /** @brief Delivers @a ev along the leave responder chain.
+        */
         void leaveEvent(const LeaveEvent& ev);
 
+        /** @brief Delivers @a ev along the key responder chain.
+        */
         void keyEvent(const KeyEvent& ev);
 
     protected:
+        /** @brief Returns the next responder, or 0 at the end of the chain.
+        */
         virtual Responder* onNextResponder() = 0;
 
+        /** @brief Converts local position @a pos to global coordinates.
+        */
         virtual Gfx::PointF onToGlobal(const Gfx::PointF& pos) const = 0;
 
+        /** @brief Converts global position @a pos to local coordinates.
+        */
         virtual Gfx::PointF onFromGlobal(const Gfx::PointF& pos) const = 0;
 
     protected:
+        /** @brief Handles a mouse event in local coordinates.
+
+            Return true to stop the chain, false to continue.
+        */
         virtual bool onMouseEvent(const MouseEvent& ev);
 
+        /** @brief Handles a touch event in local coordinates.
+
+            Return true to stop the chain, false to continue.
+        */
         virtual bool onTouchEvent(const TouchEvent& ev);
 
+        /** @brief Handles a scroll event.
+
+            Return true to stop the chain, false to continue.
+        */
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
+        /** @brief Handles pointer entry.
+
+            Return true to stop the chain, false to continue.
+        */
         virtual bool onEnterEvent(const EnterEvent& ev);
 
+        /** @brief Handles pointer leave.
+
+            Return true to stop the chain, false to continue.
+        */
         virtual bool onLeaveEvent(const LeaveEvent& ev);
 
+        /** @brief Handles a key event.
+
+            Return true to stop the chain, false to continue.
+        */
         virtual bool onKeyEvent(const KeyEvent& ev);
 
     protected:
+        /** @brief Handles a mouse press. The default returns false.
+        */
         virtual bool onMousePress(const MouseEvent& ev) 
         { return false; }
 
+        /** @brief Handles a mouse release. The default returns false.
+        */
         virtual bool onMouseRelease(const MouseEvent& ev) 
         { return false; }
 
+        /** @brief Handles a mouse move. The default returns false.
+        */
         virtual bool onMouseMove(const MouseEvent& ev) 
         { return false; }
 };

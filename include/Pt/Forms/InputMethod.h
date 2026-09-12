@@ -45,25 +45,53 @@ class PushButton;
 class FlowLayout;
 class Application;
 
+/** @brief Extension for platform or custom text entry.
+
+    An input method begins and finishes a session for a %Control, may
+    provide an active window, and sends %KeyEvent objects to its current
+    receiver. The caller does not own the receiver. Derive from this class
+    only to implement a text-entry interface; ordinary controls use the
+    method installed on %Application.
+
+    @ingroup Pt-Forms-Input
+*/
 class PT_FORMS_API InputMethod
 {
     friend class Application;
 
     public:
+        /** @brief Creates an inactive input method.
+        */
         InputMethod();
 
+        /** @brief Destructor.
+        */
         virtual ~InputMethod();
 
+        /** @brief Returns true when the method is showing UI.
+        */
         bool isVisible() const;
 
+        /** @brief Returns the method's active window, or 0.
+        */
         Window* activeWindow();
 
+        /** @brief Begins a session for @a control.
+
+            The control remains owned by its caller.
+        */
         void begin(Control& control);
 
+        /** @brief Ends the current session.
+        */
         void finish();
 
+        /** @brief Returns the current receiver, or 0.
+        */
         Widget* receiver() const;
 
+        /** @brief Sends @a ev to the current receiver.
+        */
         void sendEvent(const KeyEvent& ev);
 
     protected:
@@ -86,6 +114,8 @@ class PT_FORMS_API InputMethod
 };
 
 
+/** @brief Application-owned default input method.
+*/
 class DefaultInputMethod : public InputMethod
                          , public Connectable
 {

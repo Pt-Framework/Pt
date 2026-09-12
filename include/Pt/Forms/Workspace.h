@@ -40,6 +40,17 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Control that presents windows in its own bounds.
+
+    A %Workspace nests the windowing model inside a %Control. It has
+    ordinary background content and an embedded window stack. %addWindow()
+    attaches a window it does not own. Visible windows paint in stack
+    order. The workspace hit-tests the frontmost window first, activates a
+    window on a pointer or touch press, and sends keyboard and scroll input
+    to its active window.
+
+    @ingroup Pt-Forms-Windows
+*/
 class PT_FORMS_API Workspace : public Control
 {
     friend class WorkspaceManager;
@@ -47,24 +58,50 @@ class PT_FORMS_API Workspace : public Control
     typedef Control Base;
 
     public:
+        /** @brief Creates a workspace without content or windows.
+        */
         Workspace();
 
+        /** @brief Detaches managed windows and content.
+        */
         virtual ~Workspace();
 
     public:
+        /** @brief Attaches @a w to this workspace's window manager.
+
+            The workspace does not own @a w.
+        */
         void addWindow(Window& w);
 
+        /** @brief Detaches @a w without destroying it.
+        */
         void removeWindow(Window& w);
 
+        /** @brief Returns the windows currently attached to this workspace.
+        */
         const std::vector<Window*>& windows() const;
 
+        /** @brief Returns the embedded window manager.
+
+            The returned type is %WindowManager. Workspace-specific members
+            are not reachable through this reference.
+        */
         WindowManager& windowManager();
 
     public:
+        /** @brief Returns the background content control, or 0.
+        */
         Control* content();
 
+        /** @brief Returns the background content control, or 0.
+        */
         const Control* content()  const;
 
+        /** @brief Replaces the background content with @a control.
+
+            The workspace does not own @a control. Pass 0 to detach the
+            current content.
+        */
         void setContent(Control* control);
 
     //

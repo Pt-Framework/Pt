@@ -38,6 +38,12 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports that a widget was shown or hidden.
+
+    The widget pointer and widget ID identify the affected Forms object.
+
+    @ingroup Pt-Forms-Windows
+*/
 class PT_FORMS_API ShowEvent : public Pt::BasicEvent<ShowEvent>
 {
     public:

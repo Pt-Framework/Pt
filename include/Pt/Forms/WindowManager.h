@@ -63,6 +63,7 @@ class WindowFrame;
     customization API.
 
     @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Windows
 */
 class WindowManager : public Widget
 {

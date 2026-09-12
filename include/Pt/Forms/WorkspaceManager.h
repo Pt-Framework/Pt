@@ -48,6 +48,14 @@ class WorkspaceFrame;
 
 class Workspace;
 
+/** @brief Window manager embedded in a workspace.
+
+    A %WorkspaceManager presents windows inside a %Workspace. Applications
+    attach windows through %Workspace or %Window, not by deriving from this
+    class.
+
+    @ingroup Pt-Forms-Windows
+*/
 class WorkspaceManager : public WindowManager
 {
     typedef WindowManager Base;

@@ -39,6 +39,12 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports that a widget became active or inactive.
+
+    The widget pointer and widget ID identify the affected Forms object.
+
+    @ingroup Pt-Forms-Windows
+*/
 class PT_FORMS_API ActivateEvent : public Pt::BasicEvent<ActivateEvent>
 {
     public:

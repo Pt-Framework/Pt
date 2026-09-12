@@ -40,6 +40,12 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports that a widget moved.
+
+    The widget pointer and widget ID identify the affected Forms object.
+
+    @ingroup Pt-Forms-Windows
+*/
 class MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
     public:    

@@ -35,6 +35,15 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Borderless transient window.
+
+    A %Popup is a %Window shown for a short interaction such as a menu.
+    %setAnchor() relates it to the widget that opened it for popup input
+    handling. The anchor does not position or size the popup. Move, size,
+    raise, and show it explicitly.
+
+    @ingroup Pt-Forms-Windows
+*/
 class PT_FORMS_API Popup : public Window
 {
     typedef Window Base;
@@ -44,8 +53,15 @@ class PT_FORMS_API Popup : public Window
 		
         virtual ~Popup();
 
+        /** @brief Returns the anchor widget, or 0 when none is set.
+        */
         Widget* anchor();
 
+        /** @brief Relates this popup to @a anchor for popup input handling.
+
+            Pass 0 to clear the anchor. The popup does not own @a anchor.
+            The anchor does not position or size the popup.
+        */
         void setAnchor(Widget* anchor = 0);
 
     protected:

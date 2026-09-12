@@ -38,6 +38,12 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports that a widget gained or lost focus.
+
+    The widget pointer and widget ID identify the affected Forms object.
+
+    @ingroup Pt-Forms-Input
+*/
 class FocusEvent : public Pt::BasicEvent<FocusEvent>
 {
     public:

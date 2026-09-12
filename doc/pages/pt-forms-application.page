@@ -17,12 +17,15 @@
     @section Pt-Forms-Application-Page-Control Controls
     @copydetails Pt::Forms::Control
 
-    @section Pt-Forms-Application-Page-Window Windows
-    @copydetails Pt::Forms::Window
-
     @section Pt-Forms-Application-Page-Screen Screens
     @copydetails Pt::Forms::Screen
 
-    @section Pt-Forms-Application-Page-WindowManager Window Managers
+    @section Pt-Forms-Application-Page-Windows Windows and Workspaces
+    @copydetails Pt-Forms-Windows
+
+    @subsection Pt-Forms-Application-Page-Window Windows
+    @copydetails Pt::Forms::Window
+
+    @subsection Pt-Forms-Application-Page-WindowManager Window Managers
     @copydetails Pt::Forms::WindowManager
 */

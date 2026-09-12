@@ -39,6 +39,13 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports that a widget is closing.
+
+    After this event is processed, a window is hidden, detached, and marked
+    closed. The widget pointer and widget ID identify the affected object.
+
+    @ingroup Pt-Forms-Windows
+*/
 class PT_FORMS_API CloseEvent : public Pt::BasicEvent<CloseEvent>
 {
     public:
