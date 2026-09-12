@@ -1,22 +1,28 @@
-/** \page Pt-Forms-Application-Page Application lifecycle and Structure
+/** \page Pt-Forms-Application-Page Application Lifecycle and Structure
 
     @copydetails Pt-Forms-Application
 
-    @section Pt-Forms-Application-Page-Application Application
+    @section Pt-Forms-Application-Page-Application Application Runtime
     @copydetails Pt::Forms::Application
 
-    @section Pt-Forms-Application-Page-Screen Screen
-    @copydetails Pt::Forms::Screen
-    @copydetails Pt::Forms::WindowManager
+    @section Pt-Forms-Application-Page-Widget Widgets
+    @copydetails Pt::Forms::Widget
 
-    @section Pt-Forms-Application-Page-Windows Top-Level Windows
-    @copydetails Pt::Forms::Window
+    @section Pt-Forms-Application-Page-View Views
+    @copydetails Pt::Forms::View
 
-    @section Pt-Forms-Application-Page-Content Forms and Control Trees
+    @section Pt-Forms-Application-Page-Form Forms
     @copydetails Pt::Forms::Form
+
+    @section Pt-Forms-Application-Page-Control Controls
     @copydetails Pt::Forms::Control
 
-    @section Pt-Forms-Application-Page-Views Views and Widget Services
-    @copydetails Pt::Forms::View
-    @copydetails Pt::Forms::Widget
+    @section Pt-Forms-Application-Page-Window Windows
+    @copydetails Pt::Forms::Window
+
+    @section Pt-Forms-Application-Page-Screen Screens
+    @copydetails Pt::Forms::Screen
+
+    @section Pt-Forms-Application-Page-WindowManager Window Managers
+    @copydetails Pt::Forms::WindowManager
 */

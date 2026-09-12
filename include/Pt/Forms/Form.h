@@ -56,36 +56,33 @@ namespace Forms {
 //  - set Decorator on Window to translate positions
 //
 
-/** @brief A view that hosts one content control and manages its form state.
+/** @brief View that hosts one content control.
 
     A %Form attaches one content %Control and is the point where the content
-    hierarchy joins a window or another form host. It delegates measuring and
-    layout to that content, forwards view requests, and coordinates focus
-    traversal, shortcuts, and mnemonics for all attached controls. Use
-    %setContent() to replace the content; the form does not own the control,
-    so the caller must keep it alive until it is detached.
+    hierarchy joins a window or another form host. It is the layout root of
+    that tree. It delegates measuring and layout to that content, forwards
+    view requests, and does not own the control. Use %setContent() to
+    replace the content; keep the control alive until it is detached. A
+    form is often a %Window, but other hosts can derive from %Form.
 
-    A form is normally a %Window, but custom form hosts can derive from it.
-    It has exactly one content root. That root can itself contain an arbitrary
-    control tree. Replacing the content detaches the old root before attaching
-    the new one. Attachment connects the complete tree to the screen, paint
-    surface, responder chain, and form; detachment reverses those links. These
-    links are non-owning, so destruction order remains the caller's
+    Attachment connects the complete tree to the screen, paint surface,
+    responder chain, and form. Detachment reverses those links. Replacing
+    the content detaches the old root before attaching the new one. The
+    content root may itself contain an arbitrary control tree. These links
+    are non-owning, so destruction order remains the caller's
     responsibility.
 
-    %relayout() queues a layout event only while the form is connected. Pending
-    layout requests are combined before the form first measures its content
-    and then assigns it the available bounds. Controls request layout from
-    their parent rather than laying out an enclosing form directly. Custom
-    form hosts override the protected measuring and layout hooks when their
-    content needs a different allocation rule.
+    %relayout() queues a layout event only while the form is connected.
+    Pending layout requests are combined before the form measures its
+    content and then assigns it the available bounds. Controls request
+    layout from their parent rather than laying out an enclosing form
+    directly. Custom form hosts override the protected measuring and layout
+    hooks when their content needs a different allocation rule.
 
-    The form maintains the focusable controls in its content tree and delivers
-    focus changes as %FocusEvent objects. %focusNext() and %focusPrev() follow
-    their focus indices, skipping controls whose focus policy is %NoFocus. It
-    also dispatches registered shortcuts, Alt mnemonics, and Tab traversal
-    before delivering ordinary keyboard input to the focused control. A
-    control with %KeepFocus can prevent focus traversal away from itself.
+    The form is the focus root for its content tree. It delivers focus
+    changes as %FocusEvent objects and handles Tab traversal, shortcuts,
+    and Alt mnemonics before ordinary keyboard input reaches the focused
+    control.
 
     @ingroup Pt-Forms-Application
 */
@@ -162,13 +159,17 @@ class PT_FORMS_API Form : public View
         virtual void onProcessLayout(const Gfx::RectF& rect);
 
         /** @brief Measures the content for @a policy.
+
+            Custom form hosts override this when content needs a different
+            measurement rule.
         */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         /** @brief Lays out the content in @a rect.
 
             The default implementation positions the content at the form origin and
-            gives it the complete size of @a rect.
+            gives it the complete size of @a rect. Custom form hosts override
+            this when content needs a different allocation rule.
         */
         virtual void onLayout(const Gfx::RectF& rect);
 

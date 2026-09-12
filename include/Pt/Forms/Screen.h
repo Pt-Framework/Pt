@@ -49,7 +49,7 @@ class Window;
 class WindowManager;
 class RescaleEvent;
 
-/** @brief Screen of a display.
+/** @brief Display root for top-level windows.
 
     A %Screen is the runtime root for the top-level windows on one display.
     %Application provides the primary screen and connects it to the platform.

@@ -51,14 +51,13 @@ namespace Forms {
 class Control;
 class PaintContext;
 
-/** @brief A widget that connects controls to a paint surface.
+/** @brief Widget that hosts controls on a paint surface.
 
-    A %View owns the boundary between a control hierarchy and the
-    %PaintSurface on which it is displayed. It establishes the surface and
-    coordinate mapping for attached controls, then forwards their repaint,
-    layout, visibility, geometry, and activation requests. %Form and
-    %Control provide the usual view implementations; derive a view when a
-    custom content host needs different forwarding or coordinate behavior.
+    A %View is a %Widget that attaches controls to a %PaintSurface. It
+    establishes the surface and coordinate mapping for those controls and
+    forwards their repaint, layout, visibility, geometry, and activation
+    requests. %Form and %Control are the usual view implementations.
+    %Screen and %WindowManager are widgets but not views.
 
     The view owns its surface adapter, not the %PaintSurface assigned through
     %setSurface(). The adapter presents the view's local size, scaling, and
@@ -69,16 +68,17 @@ class PaintContext;
 
     %toControl() and %fromControl() convert between view-local and attached
     control coordinates. Their default mapping uses the control position.
-    View implementations also align child move and resize requests to the
-    active scaling before sending the corresponding Forms event. Override the
+    View implementations align child move and resize requests to the active
+    scaling before sending the corresponding Forms event. Override the
     protected mapping and forwarding hooks only when a custom host has a
     different coordinate system, surface arrangement, or request policy.
 
     %View is an implementation boundary rather than the usual application
-    base class. Derive visible application content from %Control. A custom
-    view must arrange a complete attach, initialize, release, and detach
-    lifecycle for every hosted control and must not retain a surface supplied
-    by another view beyond that lifecycle.
+    base class. Derive visible application content from %Control. Derive
+    from %View only when a custom content host needs different paint-surface
+    or coordinate behavior. A custom view must arrange a complete attach, initialize,
+    release, and detach lifecycle for every hosted control and must not
+    retain a surface supplied by another view beyond that lifecycle.
 
     @ingroup Pt-Forms-Application
 */

@@ -65,48 +65,41 @@ namespace Forms {
 class Form;
 class Key;
 
-/** @brief A view that can be attached as application content.
+/** @brief Reusable view used as application content.
 
-    A %Control is the reusable building block of a Forms user interface. It
-    can be the content of a %Form or the child of another view, and it can
-    attach child controls of its own. Attachment is non-owning: a parent
-    stores control pointers but does not destroy its children. A control
-    participates in its form's measurement, layout, focus traversal,
-    shortcuts, mnemonics, painting, and input routing.
+    A %Control is the building block of a Forms user interface. Derive from
+    it to implement custom content. It can be the content of a %Form or the
+    child of another view, and it can attach child controls of its own.
+    Attachment is non-owning: a parent stores control pointers but does not
+    destroy its children.
 
-    Derive a control to implement custom content. Override the protected
-    measurement, layout, painting, and event hooks that define its behavior;
-    use %add() and %remove() to manage its child controls.
+    A control's parent is a %View, and its direct children are controls.
+    %add() first detaches a child from any old parent; %remove() detaches it
+    without destroying it. When the tree joins a connected form, connection,
+    form association, responder chain, scaling, and paint surface propagate
+    through all descendants. Removing a control reverses those runtime
+    relationships. Keep every attached control alive until it has been
+    removed or its parent is gone.
 
-    A control's parent is a %View, and its direct children are controls. The
-    hierarchy does not transfer ownership. %add() first detaches a child from
-    any old parent, while %remove() detaches it without destroying it. When the
-    tree joins a connected form, the connection, form association, responder
-    chain, scaling, and paint surface are propagated through all descendants.
-    Removing a control reverses those runtime relationships. Keep every
-    attached control alive until it has been removed or its parent is gone.
+    The parent paints children in stacking order and hit-tests them from
+    front to back. %raise() moves a direct child to the front. Controls
+    forward repaint and relayout requests to their parent, which converts
+    the requested local region to its own coordinates. A control measures
+    under the supplied %SizePolicy and caches the preferred size until
+    content, policy, limits, or scaling invalidate it. Its layout hook
+    assigns geometry to its direct children.
 
-    The parent paints children in their stacking order and hit-tests them from
-    front to back. %raise() moves a direct child to the front of that order.
-    Controls forward repaint and relayout requests to their parent, which
-    converts the requested local region to its own coordinates. A control
-    measures under the supplied %SizePolicy and caches the preferred size until
-    content, policy, limits, or scaling invalidate it. Its layout hook assigns
-    geometry to its direct children.
+    The default measurement returns an empty size and the default layout
+    does not assign child geometry. A derived container measures its content
+    in %onMeasure() and places each child with %move() and %resize() in
+    %onLayout(). Call %relayout() after a content change that affects size
+    or geometry and %invalidate() after a visual-only change.
 
-    Once associated with a form, a control may participate in focus traversal,
-    action keys, shortcuts, and mnemonics. %focus() requests focus only when
-    the focus policy permits it. Pointer and touch presses delivered to the
-    control request focus and capture input until release. Implement custom
-    controls by overriding %onMeasure(), %onLayout(), %onPaint(), and the
-    protected input hooks as required; use state-changing public APIs so
-    changes travel through the parent hierarchy.
-
-    The default measurement returns an empty size and the default layout does
-    not assign child geometry. A derived container measures its content in
-    %onMeasure() and places each child with %move() and %resize() in
-    %onLayout(). Call %relayout() after a content change that affects size or
-    geometry and %invalidate() after a visual-only change.
+    Once associated with a form, a control may take part in focus traversal,
+    action keys, shortcuts, and mnemonics. Override %onMeasure(),
+    %onLayout(), %onPaint(), and the protected input hooks as required; use
+    state-changing public APIs so changes travel through the parent
+    hierarchy.
 
     @ingroup Pt-Forms-Application
 */
@@ -154,6 +147,9 @@ class PT_FORMS_API Control : public View
         void add(Control& control);
 
         /** @brief Detaches direct child @a control without destroying it.
+
+            Detachment reverses the runtime relationships established during
+            attachment.
         */
         void remove(Control& control);
 

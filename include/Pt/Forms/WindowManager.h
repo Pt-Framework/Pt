@@ -40,13 +40,13 @@ namespace Forms {
 class Window;
 class WindowFrame;
 
-/** @brief Shared window-host abstraction for screens and workspaces.
+/** @brief Host that attaches windows to a screen or workspace.
 
-    A %WindowManager is a %Widget that attaches %Window objects to a visual
-    host. %Screen provides the manager for top-level platform windows, while
+    A %WindowManager is a %Widget that attaches %Window objects it does not
+    own. %Screen provides the manager for top-level platform windows, while
     %Workspace uses a derived manager to present windows in its own bounds.
-    Applications normally select a manager through a screen or workspace and
-    attach windows through %Window; they do not derive from this class.
+    Applications select a manager through a screen or workspace and attach
+    windows through %Window; they do not derive from this class.
 
     Backend implementations derive from %WindowManager and implement the
     attachment and lifecycle hooks that create, initialize, release, and

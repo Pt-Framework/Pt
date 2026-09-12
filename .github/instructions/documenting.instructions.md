@@ -25,32 +25,42 @@ and design principles. They are not mechanical inventories of headers or
 types. Explain a concept in a group when it spans multiple APIs, or in the
 detailed documentation of its owning API when it is local to that API.
 
+A group overview may summarize the whole feature area. It must also tell
+the reader what that overview already covers and which later group or
+class sections are worth reading for contracts, usage, or extension.
+
+A page assembles that overview and those sections into one document.
+Section order and titles are the reading order.
+
+Copied class documentation is a chapter of that document, not an appendix
+of type summaries. It must deepen the group overview and still stand
+alone on the class reference page.
+
 # API Documentation
 
 - Prefer compact documentation. Use a one-line `/** @brief ... */` comment
-  when the signature and brief text are sufficient to understand the API.
-- Do not add detailed description blocks, `@param`, or `@return` for trivial
-  or self-evident members (e.g., default constructors, destructors, simple
-  getters/setters). Instead, the text must still cover the relevant arguments,
-  return value, and exceptions. Refer to parameters with `@a <name>`.
-- Add detailed descriptions, parameters, and return values only for non-obvious
-  behavior, contracts, errors, or complex usage.
+  when the signature and brief text are sufficient. Add detailed descriptions,
+  `@param`, and `@return` only for non-obvious behavior, contracts, errors,
+  or complex usage, not for trivial members (default constructors, destructors,
+  simple getters/setters). The text must still cover relevant arguments, return
+  value, and exceptions. Refer to parameters with `@a <name>`.
 - All API documentation (namespaces, classes, methods, enums, free
   functions) belongs in the public header files, not in `.cpp` files.
 - Document every public namespace, class, function, enum, and public member
   using Doxygen.
 - Assign an API to a Doxygen group with `@ingroup` when it has a meaningful
   role in that group's reader task, concept, or public mechanism. An API may
-  belong to more than one group.
-- Do not assign an API to a group solely to classify it. When a concept,
-  lifecycle, ownership rule, extension point, or design principle belongs only
-  to one API, explain it in that API's detailed documentation. The API may
-  remain outside a feature group.
+  belong to more than one group. Do not assign an API to a group solely to
+  classify it; it may remain outside a feature group.
 - Internal helpers in `.cpp` files may use brief comments but do not need
   Doxygen markup.
-- Class-specific documentation belongs in the class comment in its header.
-- Cross-cutting concepts, patterns, principles, mechanisms, and examples that
-  span multiple APIs belong in a Doxygen group.
+- Give a class a detailed description when its role, ownership, lifecycle,
+  extension point, or interaction with another type is not self-evident,
+  or when a page copies that class as a chapter. Lead with the type's role,
+  then the contract the group overview does not already state: ownership,
+  lifecycle, usage, and whether the reader derives from it.
+- The text must make sense on the class page without referring to a
+  previous page section.
 - Module-level concepts belong in the `@namespace` comment in the
   module's `Api.h`.
 - Group IDs are derived from the C++ namespace by replacing `::` with `-`:
@@ -74,26 +84,29 @@ detailed documentation of its owning API when it is local to that API.
   - Example: group `Pt-Signals` → page `Pt-Signals-Page`.
   - Section anchors use the page ID as prefix with hyphens:
     `Pt-Signals-Page-Signals`.
-- API topic pages (`pt-signals.page`, ...) contain **no new prose**. They use
-  structural Doxygen markup and `@copydetails` references to assemble existing
-  group and API documentation for a reader task.
-- Use `@copydetails <GroupId>` in a page to pull in group documentation.
-- Use `@section <anchor> <Title>` to introduce page subsections.
-- Use `@copydetails <Qualified::Name>` in a page to pull in class or function
-  documentation.
+- API topic pages contain no concept, contract, usage rule, or example
+  that belongs in a group or class comment. They assemble that
+  documentation with structural Doxygen markup and `@copydetails`.
+  Short glue is allowed when it only states reading order or points
+  to another section or page.
+- Use `@copydetails`, not `@copydoc`, to pull in group, class, or function
+  documentation. The page keeps the section structure; the brief is not copied,
+  so the detailed description must open as the chapter.
 - A page may copy multiple groups and individual namespaces, classes, enums,
   or functions. A Doxygen group may appear on multiple pages. There is no
   required one-to-one relationship between a page and a group.
-- Use `@copydetails`, rather than `@copydoc`, when composing pages. This keeps
-  the page in control of its section structure and copies the detailed API
-  documentation without duplicating its brief.
+- Give each copied type its own `@section` when it is a chapter. Name
+  the section after the reader-facing role, not after an inventory label
+  (`Widgets`, not `Views and Widget Services`).
+- Put the central type of the object model or reader task where the
+  reading order needs it, even if that is not inheritance or `main()`
+  order.
 - Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
   contain original prose and follow User-Facing Prose. They must not
   repeat API reference that already lives in a group, or steps that
   already live on another guide page.
 - Do not repeat another page. Point to it with `@ref` instead.
-- `@code` for commands, `@verbatim` for directory trees and URLs,
-  `@section` for headings.
+- `@code` for commands, `@verbatim` for directory trees and URLs.
 
 # Agent Instructions
 
@@ -126,8 +139,6 @@ detailed documentation of its owning API when it is local to that API.
   indented to align flush with the `@brief` command (4 spaces from `/**`).
 - If Doxygen commands (e.g. `@ingroup`, `@param`, `@return`) follow the
   detailed description, separate them with a blank line.
-- Use `@ingroup <group>` when the documented API has a meaningful role in the
-  group's reader task, concept, or public mechanism.
 - Use `@related <ClassName>` to associate operators and free functions with
   a class when appropriate.
 - Escape class names, namespace-qualified names, and function names in
@@ -138,8 +149,10 @@ detailed documentation of its owning API when it is local to that API.
 - Feature groups are defined with `@defgroup`.
 - Each `@defgroup` block contains:
   - `@brief` one-line summary
-  - Detailed explanation of the feature area's reader task, concepts, public
-    mechanisms, principles, usage rules, and design guidance
+  - A complete overview of the reader task, concepts, public mechanisms,
+    principles, usage rules, and design guidance
+  - What the overview already answers, and which following sections or
+    related pages to read for type contracts, extension, or other tasks
   - `@code` / `@endcode` example(s) showing the canonical usage pattern
 
 # Header Example
@@ -197,8 +210,9 @@ class MyClass
 
     @brief Brief description of the feature group.
 
-  Detailed explanation of the feature area, its public mechanisms, usage
-  rules, and design guidance.
+  Complete overview of the feature area, its public mechanisms, usage
+  rules, and design guidance. What this overview already answers, and
+  which following sections or related pages to read next.
 */
 ```
 

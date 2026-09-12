@@ -57,36 +57,40 @@ class EnterEvent;
 class LeaveEvent;
 class KeyEvent;
 
-/** @brief Abstract base for objects that participate in the Forms runtime.
+/** @brief Common type of every visual Forms object.
 
-    %Widget supplies identity, screen connection, geometry, visibility,
-    enabled state, coordinate conversion, repaint requests, event dispatch,
-    and pointer capture. Derive ordinary visual content from %Control. Derive
-    directly from %Widget only for a runtime or host base with its own parent
-    coordinate system; derived classes must implement %onToParent() and
-    %onFromParent().
+    Every visual Forms object is a %Widget. %Application is not. A widget
+    supplies identity, screen connection, parent relationships, geometry,
+    visibility, enabled state, scaling, coordinate conversion, repaint
+    requests, event dispatch, and pointer capture. Derive ordinary visual
+    content from %Control. Derive directly from %Widget only for a runtime
+    or host base with its own parent coordinate system; derived classes must
+    implement %onToParent() and %onFromParent().
 
-    Construct widgets only after an %Application exists. The application gives
-    each widget an ID, registers it for event routing, and removes that entry
-    during destruction. A name is optional metadata, not an identifier. Parent
-    and screen pointers are non-owning runtime relationships. A widget is
-    connected when its parent hierarchy reaches a screen, independent of its
-    visibility. Containers attach and detach widgets through their public APIs;
-    callers keep attached widgets alive.
+    Construct widgets only after an %Application exists. The application
+    gives each widget an ID, registers it for event routing, and removes that
+    entry during destruction. A name is optional metadata, not an identifier.
+    Parent and screen pointers are non-owning runtime relationships. A widget
+    is connected when its parent hierarchy reaches a screen, independent of
+    its visibility. Containers attach and detach widgets through their public
+    APIs; callers keep attached widgets alive.
 
     Geometry uses logical coordinates. %position() is in parent coordinates,
     while %size() and %bounds() are local and %bounds() starts at the local
     origin. %toParent(), %fromParent(), %toGlobal(), and %fromGlobal() convert
-    between these systems. The default global conversion walks the parent chain.
-    Coordinate hooks must agree with hit testing, painting, and input delivery.
+    between these systems. The default global conversion walks the parent
+    chain. Coordinate hooks must agree with hit testing, painting, and input
+    delivery.
 
     %show(), %enable(), %activate(), %move(), and %resize() are requests. A
-    parent, frame, or backend confirms them by sending Forms events, which then
-    update the observable state. In contrast, names, size limits, cursor
-    overrides, and the next responder change local state immediately.
-    %invalidate() queues coalesced deferred work; %repaint() asks to redraw a
-    local dirty region. Widgets are responders: unhandled input continues to
-    the next responder, with mouse and touch coordinates converted locally.
+    parent, frame, or backend confirms them by sending Forms events, which
+    then update the observable state. Names, size limits, cursor overrides,
+    and the next responder change local state immediately. %invalidate()
+    queues coalesced deferred work; %repaint() asks to redraw a local dirty
+    region.
+
+    A widget is a %Responder. Unhandled input continues to the next
+    responder, with mouse and touch coordinates converted locally.
 
     Peers are non-hierarchical, bidirectional associations. They do not
     establish ownership, parenting, or screen connection. A widget can also
@@ -174,18 +178,23 @@ class PT_FORMS_API Widget : public Responder
         Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
         /** @brief Converts local position @a pos to global coordinates.
+
+            The default conversion walks the parent chain.
         */
         Gfx::PointF toGlobal(const Gfx::PointF& pos) const;
 
         /** @brief Converts global position @a pos to local coordinates.
+
+            The default conversion walks the parent chain.
         */
         Gfx::PointF fromGlobal(const Gfx::PointF& pos) const;
 
     public:
         /** @brief Adds a bidirectional, non-owning peer association with @a peer.
 
-            Add a relationship only once. Both endpoints receive
-            %onAttachPeer().
+            Peers are not a parent, child, or screen connection and do not
+            transfer ownership. Add a relationship only once. Both endpoints
+            receive %onAttachPeer().
         */
         void addPeer(Widget& peer);
 
@@ -352,9 +361,10 @@ class PT_FORMS_API Widget : public Responder
 
         /** @brief Sets a local cursor override.
 
-            Pass 0 to remove the override. The cursor is copied, so the caller
-            retains ownership of @a c. When this widget is under the pointer,
-            the platform cursor is updated immediately.
+            Pass 0 to remove the override and restore the default cursor.
+            The cursor is copied, so the caller retains ownership of @a c.
+            When this widget is under the pointer, the platform cursor is
+            updated immediately.
         */
         void setCursor(const Cursor* c);
 

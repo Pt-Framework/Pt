@@ -30,7 +30,7 @@
 #ifndef PT_FORMS_API_APPLICATION_H
 #define PT_FORMS_API_APPLICATION_H
 
-/** @defgroup Pt-Forms-Application Forms Application
+/** @defgroup Pt-Forms-Application Forms Applications
 
     @brief The Application lifecycle and Structure.
 
@@ -38,10 +38,10 @@
     hierarchy, and runs the event loop. The inherited event loop also supports
     I/O, timers, and asynchronous operations.
 
-    %Application is the starting point of a Forms user interface and must be
-    constructed before forms, windows, or controls. It provides the primary
-    %Screen and %WindowManager, dispatches platform events, and supplies shared
-    services such as scaling, styles, fonts, and input methods.
+    %Application is the starting point and must be constructed before forms,
+    windows, or controls. It is not a %Widget. It provides the primary
+    %Screen and %WindowManager, dispatches platform events, and supplies
+    shared services such as scaling, styles, fonts, and input methods.
 
     Forms distinguishes the class hierarchy from the visual hierarchy. The
     following diagram shows the C++ inheritance relationship. It does not show
@@ -57,53 +57,48 @@
             Control
     @endcode
 
-    The visual hierarchy describes how Forms objects appear together. A
-    %Screen represents a display and provides the top-level %WindowManager.
-    A %Window belongs to that manager and is itself a %Form. A form displays
-    one content %Control, and controls display child controls, including
-    layouts. A %Workspace follows the same principle within an ordinary
-    control: it contains a window manager that presents several windows in its
-    bounds.
+    The visual hierarchy describes how Forms objects appear together. The
+    same non-owning host pattern repeats at each level: %Application provides
+    the %Screen, a %WindowManager attaches %Window objects, a %Form attaches
+    one content %Control, and a %Control attaches child controls, including
+    layouts. A %Workspace follows the same principle inside an ordinary
+    control: it contains a window manager that presents several windows in
+    its bounds.
 
     @code
     Application -> Screen -> WindowManager -> Window (Form) -> content Control -> child Controls
     @endcode
 
     Forms does not take ownership of a window or control when it becomes part
-    of the visual hierarchy. The code that creates an application object keeps
-    it alive while the hierarchy uses it. A window or control removes itself
-    from its parent when it is destroyed.
+    of the visual hierarchy. The code that creates an object keeps it alive
+    while the hierarchy uses it. A window or control removes itself from its
+    parent when it is destroyed.
 
-    %Screen and %View inherit the common %Widget base class. A widget supplies
-    identity, screen connection, parent relationships, geometry, visibility,
-    enabled state, scaling, coordinate conversion, repaint requests, event
-    dispatch, and pointer capture. Every widget is also a %Responder, which
-    lets input events travel through the responder chain. The platform backend
-    submits events to the application event loop, which dispatches them into
-    the connected hierarchy.
-
-    A %View is the boundary between controls and a %PaintSurface. It provides
-    the surface and converts coordinates between its own space and each
-    attached control. %Form and %Control are the normal view implementations.
-    A form is the layout root for its content tree, while a control is
-    responsible for the geometry of its direct children. Measurement
-    determines the preferred size for a %SizePolicy; layout then assigns
-    geometry within the available rectangle.
-
-    When a control becomes part of a form that is shown on a screen, it gains
-    access to the screen, scaling, coordinate mapping, and paint surface.
-    Removing it reverses that relationship. Changes to visual state, geometry,
-    or drawing request an update through the containing views to the window.
-    Painting then travels back down through visible content after the window
-    frame makes a paint surface available.
+    Every visual object is a %Widget. %Screen and %WindowManager are widgets
+    but not views. %Form and %Control are the usual %View implementations; a
+    view is the host and paint-surface boundary for controls. When a control
+    joins a form that is shown on a screen, the screen, scaling, coordinates,
+    and paint surface become available. Removing it reverses that
+    relationship. Measurement determines the preferred size for a
+    %SizePolicy; layout then assigns geometry within the available
+    rectangle. Changes to visual state, geometry, or drawing request an
+    update through the containing views to the window. Painting then
+    travels back down through visible content after the window frame makes
+    a paint surface available.
 
     Derive custom visual content from %Control. Derive from %View only when a
     custom content host needs different paint-surface or coordinate behavior.
     %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
     embedded-window implementations; applications normally use the window
-    manager provided by a %Screen or %Workspace. See the Layouts, Input,
-    Windows and Workspaces, Styles and Renderers, and Painting documentation
-    for those specialized mechanisms.
+    manager provided by a %Screen or %Workspace.
+
+    This overview places the types, the two hierarchies, and the host chain.
+    Read %Application for the runtime. Read %Widget for the shared visual
+    contract: parent, connection, request versus event, and peers. Read
+    %View, %Form, and %Control to build content. Read %Window, %Screen, and
+    %WindowManager for how a form appears on a display. See the Layouts,
+    Input, Windows and Workspaces, Styles and Renderers, and Painting
+    documentation for those specialized mechanisms.
 
     The following example creates the smallest useful visual hierarchy: a
     window, its content layout, and a control displayed by that layout.

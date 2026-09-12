@@ -54,16 +54,14 @@ namespace Forms {
 class Cursor;
 class Popup;
 
-/** @brief Main element of a %Pt::Forms graphical user interface.
+/** @brief Runtime root of a Forms user interface.
 
-    Create one %Application before creating Forms windows or controls. It
-    owns the GUI runtime and its primary %Screen, dispatches platform events,
-    and provides application-wide services such as styles, style options,
-    input methods, fonts, and scaling. Start its inherited event loop with
-    %Pt::System::Application::run() after the visual hierarchy is shown.
+    %Application is the Forms runtime. It is not a %Widget. Construct one
+    before any widget, then show the visual hierarchy and enter the inherited
+    event loop with %Pt::System::Application::run().
 
     The application owns its platform implementation, graphics backend, and
-    primary screen, but it does not own the windows or controls that use them.
+    primary %Screen. It does not own the windows or controls that use them.
     Widgets remove themselves from their visual parent when they are
     destroyed. Each widget receives an ID while the application exists.
     %findWidget() can resolve that ID only while the widget remains alive.
@@ -76,12 +74,14 @@ class Popup;
     widget APIs rather than calling %processEvent() directly. The latter is
     useful only for code that deliberately supplies Forms events.
 
-    %setStyle() and %setStyleOptions() reset the shared style and invalidate
-    the registered widgets so their visual state is rebuilt. %setScaleFactor()
-    sends a rescale event through the primary screen. Configure these shared
-    services before showing the user interface when possible. %impl() and
-    %graphicsBackend() support Forms backend implementations; ordinary
-    applications use the higher-level Forms APIs.
+    The application provides shared services such as styles, style options,
+    input methods, fonts, and scaling. %setStyle() and %setStyleOptions()
+    reset the shared style and invalidate the registered widgets so their
+    visual state is rebuilt. %setScaleFactor() sends a rescale event through
+    the primary screen. Configure these services before showing the user
+    interface when possible. %impl() and %graphicsBackend() support Forms
+    backend implementations; ordinary applications use the higher-level
+    Forms APIs.
 
     @ingroup Pt-Forms-Application
 */

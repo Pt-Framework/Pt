@@ -60,13 +60,13 @@ class WindowManager;
 class WindowStateEvent;
 class PaintEvent;
 
-/** @brief Window base class.
+/** @brief Form presented by a window manager.
 
-    A %Window is a top-level %Form that presents one content control on a
-    screen. Show it after attaching its content. The window translates its
-    form's requests for geometry, visibility, activation, repainting, and
-    input into operations on the platform window. Its content remains owned
-    by the caller and must outlive its attachment to the window.
+    A %Window is a %Form shown by a %WindowManager. Show it after attaching
+    its content with %setContent(). The window translates form requests for
+    geometry, visibility, activation, repainting, and input into operations
+    on the platform window. Its content remains owned by the caller and must
+    outlive its attachment.
 
     Construct a window, configure its content, title, icon, geometry, and
     presentation state, and then call %show(). An unparented window is added
@@ -89,15 +89,6 @@ class PaintEvent;
     detached, marked closed, and emits %closed(); it is not destroyed.
     %showModal() runs a nested event loop and temporarily disables the other
     top-level windows, so reserve it for intentionally synchronous dialogs.
-
-    @code
-    Forms::Window window;
-    window.setTitle("Report");
-    window.setContent(reportView);
-    window.autoSize();
-    window.autoCenter();
-    window.show();
-    @endcode
 
     @ingroup Pt-Forms-Application
 */
