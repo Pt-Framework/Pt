@@ -87,7 +87,7 @@ namespace Forms {
     before delivering ordinary keyboard input to the focused control. A
     control with %KeepFocus can prevent focus traversal away from itself.
 
-    @ingroup Pt-Forms-Architecture
+    @ingroup Pt-Forms-Application
 */
 class PT_FORMS_API Form : public View
 {
