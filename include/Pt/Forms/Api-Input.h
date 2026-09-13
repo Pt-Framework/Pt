@@ -30,7 +30,7 @@
 #ifndef PT_FORMS_API_INPUT_H
 #define PT_FORMS_API_INPUT_H
 
-/** @defgroup Pt-Forms-Input Pointer and Keyboard Input
+/** @addtogroup Pt-Forms-Input
 
     @brief Pointer, keyboard, focus, and text input to controls.
 
@@ -60,8 +60,6 @@
     %MouseEvent, %TouchEvent, %ScrollEvent, %EnterEvent, %LeaveEvent,
     %KeyEvent, and %FocusEvent carry the event data. %Key identifies a key
     and its modifiers.
-
-    @ingroup Pt-Forms
 */
 
 #endif

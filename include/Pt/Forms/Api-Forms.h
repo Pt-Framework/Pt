@@ -99,4 +99,19 @@
     @endcode
 */
 
+/** @defgroup Pt-Forms-Widgets Widgets and Views
+
+    @ingroup Pt-Forms
+*/
+
+/** @defgroup Pt-Forms-Windows Windows and Workspaces
+
+    @ingroup Pt-Forms
+*/
+
+/** @defgroup Pt-Forms-Input Pointer and Keyboard Input
+
+    @ingroup Pt-Forms
+*/
+
 #endif

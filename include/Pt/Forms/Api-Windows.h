@@ -30,7 +30,7 @@
 #ifndef PT_FORMS_API_WINDOWS_H
 #define PT_FORMS_API_WINDOWS_H
 
-/** @defgroup Pt-Forms-Windows Windows and Workspaces
+/** @addtogroup Pt-Forms-Windows
 
     @brief Windows and windows management.
 
@@ -54,8 +54,6 @@
 
     %WindowType and %WindowState are presentation of a window, not separate
     object kinds.
-
-    @ingroup Pt-Forms
 */
 
 #endif

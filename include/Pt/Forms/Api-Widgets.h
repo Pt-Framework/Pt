@@ -30,7 +30,7 @@
 #ifndef PT_FORMS_API_WIDGETS_H
 #define PT_FORMS_API_WIDGETS_H
 
-/** @defgroup Pt-Forms-Widgets Widgets and Views
+/** @addtogroup Pt-Forms-Widgets
 
     @brief Widget and view object model.
 
@@ -51,8 +51,6 @@
     %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
     embedded-window implementations; applications normally use the window
     manager provided by a %Screen or %Workspace.
-
-    @ingroup Pt-Forms
 */
 
 #endif

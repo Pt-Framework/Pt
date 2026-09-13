@@ -28,11 +28,11 @@ detailed documentation of its owning API when it is local to that API.
 A group overview may summarize the whole feature area. Keep it to concepts,
 mechanisms, principles, and usage.
 
-Groups may form a hierarchy. A subgroup declares its parent group with
-`@ingroup <ParentGroup>` in its `@defgroup` block. The parent group explains
-the module-wide model, while each subgroup documents one reader task within
-that model. A subgroup remains a complete group with its own overview and
-API membership.
+Groups may form a hierarchy. A subgroup normally declares its parent group
+with `@ingroup <ParentGroup>` in its `@defgroup` block. The parent group
+explains the module-wide model, while each subgroup documents one reader task
+within that model. A subgroup remains a complete group with its own overview
+and API membership.
 
 A page assembles group overviews and class sections into one document.
 There are two normal page shapes:
@@ -80,8 +80,15 @@ alone on the class reference page.
 - Doxygen Group headers live in the module's public include directory, named
   `Api-<Feature>.h`, e.g. `include/<Project>/<Module>/Api-<Feature>.h`.
   Core module groups live in `include/<Project>/Api-<Feature>.h`.
-- Each `Api-<Feature>.h` file contains exactly one `@defgroup` block,
-  wrapped in include guards (`#ifndef PT[_MODULE]_API_FEATURE_H`).
+- Each `Api-<Feature>.h` file normally contains exactly one `@defgroup`
+  block, wrapped in include guards (`#ifndef PT[_MODULE]_API_FEATURE_H`).
+- A main module group may centrally declare direct child groups when their
+  order in Doxygen's Modules tree is part of the documentation structure.
+  Declare those child groups in the main group's `Api-<Feature>.h` with
+  `@defgroup` and `@ingroup`, in the required order. Each child
+  `Api-<Feature>.h` then contains exactly one matching `@addtogroup` block
+  with its complete overview. Use this exception only for ordered direct
+  children of a main module group.
 - Class-doc overrides use `Api-<ClassName>.h` in the same include directory
   as the real header. These provide Doxygen documentation for classes that
   are typedefs or template specializations where Doxygen generates poor
