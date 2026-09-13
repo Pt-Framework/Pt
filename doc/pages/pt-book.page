@@ -98,11 +98,15 @@
     </ul>
 </ul>
 
-@section pt_forms Graphical User Interface
+@section pt_forms Graphical User Interfaces
 
 <ul>
     <li> @ref Pt-Forms-Application-Page </li>
-    <li> @ref Pt-Forms-Input-Page </li>
+    <ul>
+        <li> @ref Pt-Forms-Application-Page-Application </li>
+        <li> @ref Pt-Forms-Application-Page-Windows </li>
+        <li> @ref Pt-Forms-Application-Page-Input </li>
+    </ul>
 </ul>
 
 @section pt_http HTTP Clients and Servers

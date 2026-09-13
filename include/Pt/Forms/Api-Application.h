@@ -92,14 +92,6 @@
     embedded-window implementations; applications normally use the window
     manager provided by a %Screen or %Workspace.
 
-    This overview places the types, the two hierarchies, and the host chain.
-    Read %Application for the runtime. Read %Widget for the shared visual
-    contract: parent, connection, request versus event, and peers. Read
-    %View, %Form, and %Control to build content. Read %Screen for the display
-    root. Showing, closing, popups, and workspaces follow in Windows and
-    Workspaces. See @ref Pt-Forms-Input-Page, the Layouts, Styles and
-    Renderers, and Painting documentation for those specialized mechanisms.
-
     The following example creates the smallest useful visual hierarchy: a
     window, its content layout, and a control displayed by that layout.
 

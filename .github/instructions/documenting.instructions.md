@@ -25,12 +25,14 @@ and design principles. They are not mechanical inventories of headers or
 types. Explain a concept in a group when it spans multiple APIs, or in the
 detailed documentation of its owning API when it is local to that API.
 
-A group overview may summarize the whole feature area. It must also tell
-the reader what that overview already covers and which later group or
-class sections are worth reading for contracts, usage, or extension.
+A group overview may summarize the whole feature area. Keep it to concepts,
+mechanisms, principles, and usage.
 
-A page assembles that overview and those sections into one document.
-Section order and titles are the reading order.
+A page assembles a group's overview and its class sections into one
+document. Section order and titles are the reading order. When a page
+assembles more than one group, open the page with a short table of
+contents naming the sections that follow, instead of relying on
+cross-references buried in each group.
 
 Copied class documentation is a chapter of that document, not an appendix
 of type summaries. It must deepen the group overview and still stand
@@ -59,8 +61,6 @@ alone on the class reference page.
   or when a page copies that class as a chapter. Lead with the type's role,
   then the contract the group overview does not already state: ownership,
   lifecycle, usage, and whether the reader derives from it.
-- The text must make sense on the class page without referring to a
-  previous page section.
 - Module-level concepts belong in the `@namespace` comment in the
   module's `Api.h`.
 - Group IDs are derived from the C++ namespace by replacing `::` with `-`:
@@ -87,16 +87,31 @@ alone on the class reference page.
 - API topic pages contain no concept, contract, usage rule, or example
   that belongs in a group or class comment. They assemble that
   documentation with structural Doxygen markup and `@copydetails`.
-- When assembling pages with @copydetails, ensure sections flow logically
-  like a technical paper or article. Transitional prose and short glue may
-  brudge sections, but the content itself always stays in the copied group
-  or class doxygen comment.
 - Use `@copydetails`, not `@copydoc`, to pull in group, class, or function
   documentation. The page keeps the section structure; the brief is not copied,
   so the detailed description must open as the chapter.
 - A page may copy multiple groups and individual namespaces, classes, enums,
   or functions. A Doxygen group may appear on multiple pages. There is no
   required one-to-one relationship between a page and a group.
+- When assembling pages with @copydetails, ensure sections flow logically
+  like a technical paper or article. Transitional prose and short glue may
+  bridge sections, but the content itself always stays in the copied group
+  or class doxygen comment.
+- Decide whether a group gets its own page or folds into another page's
+  section by coupling, not by counting files elsewhere in the repository.
+  Fold a group in only when its subject is inseparable from the target
+  page's object model, for example a base class the page already
+  documents (`Widget` deriving from `Responder`); do not fold it in
+  merely because the group is short.
+- Test coupling with two questions: could the mechanism plausibly ship as
+  a separate, swappable library or extension (own page), and does it need
+  a vocabulary beyond the target page's base types (own page)? A short
+  group is a signal to re-check its placement, never a reason by itself
+  to merge it.
+- A group keeps its `@ingroup` identity no matter which page copies it.
+  Reference it from elsewhere with the section anchor that actually holds
+  it (`@ref <Page>-<Section>`), not a group-only page ID, once it has no
+  page of its own.
 - Give each copied type its own `@section` when it is a chapter. Name
   the section after the reader-facing role, not after an inventory label
   (`Widgets`, not `Views and Widget Services`).
@@ -104,10 +119,9 @@ alone on the class reference page.
   reading order needs it, even if that is not inheritance or `main()`
   order.
 - Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
-  contain original prose and follow User-Facing Prose. They must not
-  repeat API reference that already lives in a group, or steps that
-  already live on another guide page.
-- Do not repeat another page. Point to it with `@ref` instead.
+  contain original prose and follow User Documentation. They must not
+  repeat API reference that already lives in a group, or content that
+  already lives on another page; point to it with `@ref` instead.
 - `@code` for commands, `@verbatim` for directory trees and URLs.
 
 # Agent Instructions
@@ -148,13 +162,11 @@ alone on the class reference page.
   - Examples: `%MyClass`, `%MyNamespace::MyModule::MyClass`, `%MyClass::begin()`
 - Do not use structural keywords like `@class` when the context is already
   unambiguously clear to Doxygen.
-- Feature groups are defined with `@defgroup`.
 - Each `@defgroup` block contains:
   - `@brief` one-line summary
   - A complete overview of the reader task, concepts, public mechanisms,
-    principles, usage rules, and design guidance
-  - What the overview already answers, and which following sections or
-    related pages to read for type contracts, extension, or other tasks
+    principles, usage rules, and design guidance (see Documentation
+    Structure)
   - `@code` / `@endcode` example(s) showing the canonical usage pattern
 
 # Header Example
@@ -213,8 +225,7 @@ class MyClass
     @brief Brief description of the feature group.
 
   Complete overview of the feature area, its public mechanisms, usage
-  rules, and design guidance. What this overview already answers, and
-  which following sections or related pages to read next.
+  rules, and design guidance.
 */
 ```
 

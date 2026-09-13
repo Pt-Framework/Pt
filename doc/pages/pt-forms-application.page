@@ -1,5 +1,8 @@
 /** \page Pt-Forms-Application-Page Application Lifecycle and Structure
 
+    This page covers the application runtime, the widget and view object
+    model, the display root, windows and workspaces, and input delivery.
+
     @copydetails Pt-Forms-Application
 
     @section Pt-Forms-Application-Page-Application Application Runtime
@@ -28,4 +31,13 @@
 
     @subsection Pt-Forms-Application-Page-WindowManager Window Managers
     @copydetails Pt::Forms::WindowManager
+
+    @section Pt-Forms-Application-Page-Input Mouse, Touch, Keyboard Input
+    @copydetails Pt-Forms-Input
+
+    @subsection Pt-Forms-Application-Page-Responder Responders
+    @copydetails Pt::Forms::Responder
+
+    @subsection Pt-Forms-Application-Page-InputMethod Input Methods
+    @copydetails Pt::Forms::InputMethod
 */

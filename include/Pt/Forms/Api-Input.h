@@ -60,11 +60,6 @@
     %MouseEvent, %TouchEvent, %ScrollEvent, %EnterEvent, %LeaveEvent,
     %KeyEvent, and %FocusEvent carry the event data. %Key identifies a key
     and its modifiers.
-
-    This overview places targeting, the responder chain, focus, and text
-    entry. Read %Responder for the chain contract. Event types, %Key, and
-    %InputMethod have their own class documentation. %Form and %Control
-    document focus APIs. Capture lives on %Widget.
 */
 
 #endif

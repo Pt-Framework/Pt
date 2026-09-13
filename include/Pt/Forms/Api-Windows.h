@@ -54,12 +54,6 @@
 
     %WindowType and %WindowState are presentation of a window, not separate
     object kinds.
-
-    This overview places the two models and the host. Read %Window for
-    construct, show, close, and geometry. Read %WindowManager for the host.
-    %Popup and %Workspace have their own class documentation. %Screen is
-    the display root in the application structure. Input delivery is
-    documented in @ref Pt-Forms-Input-Page.
 */
 
 #endif
