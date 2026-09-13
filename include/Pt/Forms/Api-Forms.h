@@ -30,7 +30,7 @@
 #ifndef PT_FORMS_API_FORMS_H
 #define PT_FORMS_API_FORMS_H
 
-/** @defgroup Pt-Forms Forms
+/** @defgroup Pt-Forms Graphical User Interfaces
 
     @brief Application lifecycle and structure.
 
