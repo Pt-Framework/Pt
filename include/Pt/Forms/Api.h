@@ -47,7 +47,7 @@ namespace Pt {
 
 /** @namespace Pt::Forms
 
-    @brief Build graphical user interfaces with windows and controls.
+    @brief Graphical user interfaces.
 */
 namespace Forms {
 

@@ -112,9 +112,11 @@ alone on the class reference page.
   Reference it from elsewhere with the section anchor that actually holds
   it (`@ref <Page>-<Section>`), not a group-only page ID, once it has no
   page of its own.
-- Give each copied type its own `@section` when it is a chapter. Name
-  the section after the reader-facing role, not after an inventory label
-  (`Widgets`, not `Views and Widget Services`).
+- Give each copied type its own chapter on the appropriate heading level:
+  use `@section` on a single-group page and `@subsection` below a copied
+  group section on a multi-group page. Name the chapter after the
+  reader-facing role, not after an inventory label (`Widgets`, not `Views
+  and Widget Services`).
 - Put the central type of the object model or reader task where the
   reading order needs it, even if that is not inheritance or `main()`
   order.

@@ -32,7 +32,7 @@
 
 /** @defgroup Pt-Forms-Application Forms Applications
 
-    @brief The Application lifecycle and Structure.
+    @brief Application lifecycle and structure.
 
     A Forms application creates windows and controls, shows the visual
     hierarchy, and runs the event loop. The inherited event loop also supports

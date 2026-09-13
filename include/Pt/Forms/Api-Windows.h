@@ -32,7 +32,7 @@
 
 /** @defgroup Pt-Forms-Windows Windows and Workspaces
 
-    @brief Create, show, and organize top-level and embedded windows.
+    @brief Windows and windows management.
 
     Forms presents windows in two places: on a platform display, and inside
     a workspace. In both cases a %Window is a %Form attached to a
