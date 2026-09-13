@@ -1,6 +1,6 @@
-/** \page Pt-Forms-Page Application Lifecycle and Structure
+/** \page Pt-Forms-Page Graphical User Interfaces
 
-    This page covers the application runtime, the widget and view object
+    This chapter covers the application runtime, the widget and view object
     model, the display root, windows and workspaces, and input delivery.
 
     @copydetails Pt-Forms
