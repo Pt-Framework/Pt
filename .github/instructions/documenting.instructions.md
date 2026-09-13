@@ -87,8 +87,10 @@ alone on the class reference page.
 - API topic pages contain no concept, contract, usage rule, or example
   that belongs in a group or class comment. They assemble that
   documentation with structural Doxygen markup and `@copydetails`.
-  Short glue is allowed when it only states reading order or points
-  to another section or page.
+- When assembling pages with @copydetails, ensure sections flow logically
+  like a technical paper or article. Transitional prose and short glue may
+  brudge sections, but the content itself always stays in the copied group
+  or class doxygen comment.
 - Use `@copydetails`, not `@copydoc`, to pull in group, class, or function
   documentation. The page keeps the section structure; the brief is not copied,
   so the detailed description must open as the chapter.
