@@ -1,5 +1,5 @@
 /* Copyright (C) 2019 Marc Boris Duerner
- 
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
@@ -22,7 +22,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301 USA
 */
 
@@ -42,16 +42,16 @@ namespace Forms {
 
 class IconImpl;
 
-/** @brief Extension that supplies images for %Icon objects.
+/** @brief Provides images for %Icon objects.
 
-    Derive from %IconProvider only to implement a custom image source.
-    Ordinary code uses the built-in provider created by a default %Icon.
-    Implement every pure virtual function. %getImage() selects and, when
-    needed, loads the image for a requested size.
+    Derive from %IconProvider only to provide a custom image source. Ordinary
+    code uses the built-in provider created by a default %Icon. A custom
+    provider implements every pure virtual function. Its %getImage() function
+    selects and, when needed, loads an image for the requested size.
 
-    An %Icon constructed with a provider does not own it. Keep the
-    provider alive while those icons use it. Destroying the provider
-    detaches remaining icons. %getImage() on a detached icon is invalid.
+    An %Icon constructed with a provider does not own it. Keep the provider
+    alive while an icon uses it. Destroying a provider detaches its remaining
+    icons. Calling %Icon::getImage() on a detached icon is invalid.
 
     @ingroup Pt-Forms-Icons
 */
@@ -89,7 +89,7 @@ class PT_FORMS_API IconProvider
         /** @brief Returns the smallest registered size, or an empty size.
         */
         virtual Gfx::SizeF minimumSize() const = 0;
-        
+
         /** @brief Returns the largest registered size, or an empty size.
         */
         virtual Gfx::SizeF maximumSize() const = 0;
@@ -108,27 +108,25 @@ class PT_FORMS_API IconProvider
 };
 
 
-/** @brief Size-keyed icon used by controls.
+/** @brief Represents an image at one or more logical sizes.
 
-    An %Icon is not a %Widget. It holds images at one or more sizes so a
-    control can request an image for a layout size with %getImage().
-    %Label, %PushButton, %Panel, and list items take an %Icon through
-    %setIcon().
+    An %Icon is not a %Widget. It supplies images to controls, which request
+    an image for a layout area with %getImage(). %Label, %PushButton, %Panel,
+    and list items accept an %Icon through %setIcon().
 
-    Default construction uses a built-in provider. %Icon(IconProvider&)
-    attaches a caller-owned provider that must outlive the icon. Copies
-    share the implementation until %addImage() or %clear().
+    A default icon uses a built-in provider. %Icon(IconProvider&) attaches a
+    caller-owned provider that must outlive the icon. Copies share the same
+    implementation until %addImage() or %clear() changes one copy.
 
-    %addImage() registers an image or a file path at a size. Passing only
-    an image uses the image pixel size as the key. A logical size may
-    differ from the pixel size. Path images load as PNG on first use
-    through %Application::loadImage(). A missing path yields an empty
-    image.
+    %addImage() registers an image or file path at a logical size. Passing
+    only an image uses its pixel size as the key. The logical size may differ
+    from the pixel size. Images registered by path load as PNG on first use
+    through %Application::loadImage(). A missing path produces an empty image.
 
-    %getImage() returns a registered image for the requested area. The
-    built-in provider prefers the largest image that fits entirely in that
-    area. An empty icon yields an empty image. %minimumSize() and
-    %maximumSize() are the smallest and largest registered keys.
+    %getImage() returns the registered image for a requested area. The
+    built-in provider selects the largest image that fits entirely in that
+    area. An empty icon produces an empty image. %minimumSize() and
+    %maximumSize() return the smallest and largest registered keys.
 
     @code
     Pt::Forms::Icon icon;

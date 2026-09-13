@@ -12,19 +12,19 @@
     @section Pt-Forms-Page-Widgets Widgets and Views
     @copydetails Pt-Forms-Widgets
 
-    @subsection Pt-Forms-Page-Widget Widgets
+    @subsection Pt-Forms-Page-Widget Widget
     @copydetails Pt::Forms::Widget
 
-    @subsection Pt-Forms-Page-View Views
+    @subsection Pt-Forms-Page-View View
     @copydetails Pt::Forms::View
 
-    @subsection Pt-Forms-Page-Form Forms
+    @subsection Pt-Forms-Page-Form Form
     @copydetails Pt::Forms::Form
 
-    @subsection Pt-Forms-Page-Control Controls
+    @subsection Pt-Forms-Page-Control Control
     @copydetails Pt::Forms::Control
 
-    @subsection Pt-Forms-Page-Screen Screens
+    @subsection Pt-Forms-Page-Screen Screen
     @copydetails Pt::Forms::Screen
 
     @section Pt-Forms-Page-Windows Windows and Workspaces

@@ -1,10 +1,10 @@
 /* Copyright (C) 2017 Marc Boris Duerner
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA 02110-1301 USA
 */
 
@@ -45,12 +45,12 @@ namespace Forms {
 
 class Painter;
 
-/** @brief One laid-out line inside a %TextBlock.
+/** @brief Represents one laid-out line in a %TextBlock.
 
-    A %TextLine is produced by %TextBlock::layout(). Application code
-    does not construct it as a standalone object. It stores the line
-    text, its position in the block, and the font metrics used to wrap
-    it. %cursorToX() and %xToCursor() map caret indices for editors.
+    %TextBlock::layout() produces %TextLine objects. Application code does
+    not construct them as standalone objects. A line stores its text, its
+    position in the block, and the text and font metrics used to lay it out.
+    %cursorToX() and %xToCursor() map caret indices for editors.
 
     @ingroup Pt-Forms-Icons
 */
@@ -68,7 +68,7 @@ class PT_FORMS_API TextLine
         /** @brief Returns the position relative to the text block origin.
         */
         const Gfx::PointF& position() const;
-        
+
         /** @brief Sets the position relative to the text block origin.
         */
         void setPosition(const Gfx::PointF& p);
@@ -124,22 +124,23 @@ class PT_FORMS_API TextLine
 };
 
 
-/** @brief Wrapped text laid out as positioned lines.
+/** @brief Represents wrapped text as positioned lines.
 
-    A %TextBlock is not a %Widget. It does not own a painter or a control.
-    %Label and %LineEditor use it. Custom controls configure
-    %setMaxWidth(), %setAdjustment(), and %setLineSpacing(), call
-    %layout(), then iterate the lines to measure or paint.
+    A %TextBlock is not a %Widget and does not own a painter or control.
+    %Label and %LineEditor use it. A custom control sets the maximum width,
+    adjustment, and line spacing, calls %layout(), then iterates the lines to
+    measure or paint the text.
 
-    %layout() wraps the string into %TextLine objects using the painter's
-    font metrics and replaces the previous lines. Wrapping is word-based.
-    Whitespace separates words. Explicit newlines are not hard breaks.
-    %Adjustment::Left, %Adjustment::Right, and %Adjustment::Center align
-    each line within the maximum width. %Adjustment::Justify is treated
-    as left. The default adjustment is Center.
+    %layout() uses the painter's font metrics to wrap a string into
+    %TextLine objects. It replaces the previous lines and updates the block
+    size. Wrapping is word-based: whitespace separates words, and explicit
+    newlines are not hard breaks. %Adjustment::Left, %Adjustment::Right, and
+    %Adjustment::Center align each line within the maximum width.
+    %Adjustment::Justify is treated as left. The default adjustment is Center.
 
-    %position() is the origin of the block. Each line's position is
-    relative to that origin. %size() is the laid-out width and height.
+    %position() is the block origin and each line position is relative to it.
+    %size() returns the laid-out width and height. Line spacing adds extra
+    space between consecutive lines.
 
     @ingroup Pt-Forms-Icons
 */
@@ -169,7 +170,7 @@ class PT_FORMS_API TextBlock
         /** @brief Returns the origin of the block.
         */
         const Gfx::PointF& position() const;
-        
+
         /** @brief Sets the origin of the block.
         */
         void setPosition(const Gfx::PointF& p);

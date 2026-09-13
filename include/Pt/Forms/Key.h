@@ -22,6 +22,8 @@ namespace Forms {
 class Key
 {
     public:
+        /** @brief Defines key codes.
+        */
         // see also: https://w3c.github.io/uievents-code/
         enum Code
         {
@@ -45,109 +47,109 @@ class Key
 
             // The 0 key.
             D0     = 48,
-        
+
             // The 1 key.
             D1     = 49,
-        
+
             // The 2 key.
             D2     = 50,
-        
+
             // The 3 key.
             D3     = 51,
-        
+
             // The 4 key.
             D4     = 52,
-        
+
             // The 5 key.
             D5     = 53,
-        
+
             // The 6 key.
             D6     = 54,
-        
+
             // The 7 key.
             D7     = 55,
-        
+
             // The 8 key.
             D8     = 56,
-        
+
             // The 9 key.
             D9     = 57,
-        
+
             // The A key.
             A      = 65,
-        
+
             // The B key.
             B      = 66,
-        
+
             // The C key.
             C      = 67,
-        
+
             // The D key.
             D      = 68,
-        
+
             // The E key.
             E      = 69,
-        
+
             // The F key.
             F      = 70,
-        
+
             // The G key.
             G      = 71,
-        
+
             // The H key.
             H      = 72,
-        
+
             // The I key.
             I      = 73,
-        
+
             // The J key.
             J      = 74,
-        
+
             // The K key.
             K      = 75,
-        
+
             // The L key.
             L      = 76,
-        
+
             // The M key.
             M      = 77,
-        
+
             // The N key.
             N      = 78,
-        
+
             // The O key.
             O      = 79,
-        
+
             // The P key.
             P      = 80,
-        
+
             // The Q key.
             Q      = 81,
-        
+
             // The R key.
             R      = 82,
-        
+
             // The S key.
             S      = 83,
-        
+
             // The T key.
             T      = 84,
-        
+
             // The U key.
             U      = 85,
-        
+
             // The V key.
             V      = 86,
-        
+
             // The W key.
             W      = 87,
-        
+
             // The X key.
             X      = 88,
-        
+
             // The Y key.
             Y      = 89,
-        
+
             // The Z key.
             Z      = 90,
 
@@ -162,7 +164,7 @@ class Key
 
             // The Control Key.
             ControlKey     = 0x100002, // 2
-        
+
             // The Alt Key.
             AltKey         = 0x100004, // 4
 
@@ -171,13 +173,13 @@ class Key
 
             // Reserved.
             Modifier5      = 0x100010, // 16
-            
+
             // Reserved.
             Modifier6      = 0x100020, // 32
-            
+
             // Reserved.
             Modifier7      = 0x100040, // 64
-            
+
             // Reserved.
             Modifier8      = 0x100080, // 128
 
@@ -188,139 +190,139 @@ class Key
             // NAVIGATION KEYS 33 to 63
 
             ArrowLeft    = 0x100021,
-                         
+
             ArrowRight   = 0x100022,
-                         
+
             ArrowUp      = 0x100023,
-                         
+
             ArrowDown    = 0x100024,
-            
+
 
             // NUMPAD 65 to 127
-                    
+
             // The NUM LOCK key.
             NumLock     = 0x100041,
 
             // The 0 key on the numeric keypad.
             NumPad0     = 0x100042,
-        
+
             // The 1 key on the numeric keypad.
             NumPad1     = 0x100043,
-        
+
             // The 2 key on the numeric keypad.
             NumPad2     = 0x100044,
-        
+
             // The 3 key on the numeric keypad.
             NumPad3     = 0x100045,
-        
+
             // The 4 key on the numeric keypad.
             NumPad4     = 0x100046,
-        
+
             // The 5 key on the numeric keypad.
             NumPad5     = 0x100047,
-        
+
             // The 6 key on the numeric keypad.
             NumPad6     = 0x100048,
-        
+
             // The 7 key on the numeric keypad.
             NumPad7     = 0x100049,
-        
+
             // The 8 key on the numeric keypad.
             NumPad8     = 0x10004A,
-        
+
             // The 9 key on the numeric keypad.
             NumPad9     = 0x10004B,
-        
+
             // The multiply key.
             Multiply    = 0x10004C,
-        
+
             // The add key.
             Add         = 0x10004D,
-            
+
             // The divide key.
             Divide      = 0x10004E,
 
             // The subtract key.
             Subtract    = 0x10004F,
-            
+
             // The separator key.
             Separator   = 0x100050,
-        
+
             // The decimal key.
             Decimal     = 0x100051,
 
 
             // FUNCTION KEYS 129 to 191
-            
+
             // The F1 key.
             F1  = 0x100081, // 129
-        
+
             // The F2 key.
             F2  = 0x100082,
-        
+
             // The F3 key.
             F3  = 0x100083,
-        
+
             // The F4 key.
             F4  = 0x100084,
-        
+
             // The F5 key.
             F5  = 0x100085,
-        
+
             // The F6 key.
             F6  = 0x100086,
-        
+
             // The F7 key.
             F7  = 0x100087,
-        
+
             // The F8 key.
             F8  = 0x100088,
-        
+
             // The F9 key.
             F9  = 0x100089,
-        
+
             // The F10 key.
             F10 = 0x10008A,
-        
+
             // The F11 key.
             F11 = 0x10008B,
-        
+
             // The F12 key.
             F12 = 0x10008C,
-        
+
             // The F13 key.
             F13 = 0x10008D,
-        
+
             // The F14 key.
             F14 = 0x10008E,
-        
+
             // The F15 key.
             F15 = 0x10008F,
-        
+
             // The F16 key.
             F16 = 0x100090,
-        
+
             // The F17 key.
             F17 = 0x100091,
-        
+
             // The F18 key.
             F18 = 0x100092,
-        
+
             // The F19 key.
             F19 = 0x100093,
-        
+
             // The F20 key.
             F20 = 0x100094,
-        
+
             // The F21 key.
             F21 = 0x100095,
-        
+
             // The F22 key.
             F22 = 0x100096,
-        
+
             // The F23 key.
             F23 = 0x100097,
-        
+
             // The F24 key.
             F24 = 0x100098,
 
@@ -328,91 +330,93 @@ class Key
             // SPECIAL KEYS 192 to 255
 
             Insert             = 0x1000C0, // 192
-                               
+
             Delete             = 0x1000C1,
-                               
+
             Home               = 0x1000C2,
-                               
+
             End                = 0x1000C3,
-                               
+
             PageUp             = 0x1000C4,
-                               
+
             PageDown           = 0x1000C5,
-                               
+
             CapsLock           = 0x1000C6,
-                               
+
             PrintScreen        = 0x1000C7,
-                               
+
             SysReq             = 0x1000C8,
-                               
+
             ScrollLock         = 0x1000C9,
-                               
+
             Pause              = 0x1000CA,
-                               
+
             Break              = 0x1000CB, // 204
-                               
+
             Clear              = 0x1000E0, // 224
-                               
+
             Sleep              = 0x1000E1,
-                               
+
             Select             = 0x1000E2,
-                               
+
             Print              = 0x1000E3,
-                               
+
             Execute            = 0x1000E4,
-                               
+
             Help               = 0x1000E5,
-                               
+
             AppsMenu           = 0x1000E6,
-                               
+
             ModeChange         = 0x1000E7, // 231
 
 
             // SPECIAL APPLICATION KEYS 257 to 511
-            
+
             Play               = 0x100101,
-                               
+
             Zoom               = 0x100102,
-                               
+
             BrowserBack        = 0x100103,
-                               
+
             BrowserForward     = 0x100104,
-                               
+
             BrowserRefresh     = 0x100105,
-                               
+
             BrowserStop        = 0x100106,
-                               
+
             BrowserSearch      = 0x100107,
-                               
+
             BrowserFavorites   = 0x100108,
-                               
+
             BrowserHome        = 0x100109,
-                               
+
             VolumeMute         = 0x10010A,
-                               
+
             VolumeDown         = 0x10010B,
-                               
+
             VolumeUp           = 0x10010C,
-                               
+
             MediaNext          = 0x10010D,
-                               
+
             MediaPrev          = 0x10010E,
-                               
+
             MediaStop          = 0x10010F,
-                               
+
             MediaPlay          = 0x100111,
-                               
+
             LaunchMail         = 0x100112,
-                               
+
             LaunchMedia        = 0x100113,
-                               
+
             LaunchApp1         = 0x100114,
-                               
+
             LaunchApp2         = 0x100115,
 
             KeyMax = 0x10FFFF
         };
 
+        /** @brief Defines key modifier flags.
+        */
         enum Modifier
         {
             // No modifier pressed.
@@ -433,75 +437,105 @@ class Key
             ModifierMax = KeyMax
         };
 
+        /** @brief Stores a set of key modifier flags.
+        */
         class Modifiers
         {
             friend Modifiers operator|(Modifier m1, Modifier m2);
-            
+
             public:
+                /** @brief Creates an empty modifier set.
+                */
                 Modifiers()
                 : _value(NoModifier)
                 { }
 
+                /** @brief Creates a modifier set containing @a m.
+                */
                 explicit Modifiers(Modifier m)
                 : _value(m)
                 { }
 
+                /** @brief Replaces this set with @a m and returns it.
+                */
                 Modifiers operator=(Modifier m)
                 {
                     _value = m;
                     return *this;
                 }
 
+                /** @brief Removes all modifiers.
+                */
                 void clear()
                 {
                     _value = NoModifier;
                 }
 
+                /** @brief Returns true when no modifier is set.
+                */
                 bool empty() const
                 {
                     return _value == NoModifier;
                 }
 
+                /** @brief Adds @a m to this set.
+                */
                 void add(Modifier m)
                 {
                     _value |= m;
                 }
-                
+
+                /** @brief Returns true when this set contains @a m.
+                */
                 bool has(Modifier m) const
                 {
                     return (_value & m) == m;
                 }
-                
+
+                /** @brief Returns true when this set contains every modifier in @a m.
+                */
                 bool has(Modifiers m) const
                 {
                     return (_value & m._value) == m._value;
                 }
 
+                /** @brief Returns this set combined with @a m.
+                */
                 Modifiers operator|(Modifier m) const
                 {
                     return Modifiers(_value | m);
                 }
 
+                /** @brief Returns true when this set equals @a m.
+                */
                 bool operator==(Modifier m) const
                 {
                     return _value == static_cast<Pt::uint32_t>(m);
                 }
-                
+
+                /** @brief Returns true when this set equals @a m.
+                */
                 bool operator==(Modifiers m) const
                 {
                     return _value == m._value;
                 }
-                
+
+                /** @brief Returns true when this set does not equal @a m.
+                */
                 bool operator!=(Modifier m) const
                 {
                     return _value != static_cast<Pt::uint32_t>(m);
                 }
 
+                /** @brief Returns true when this set does not equal @a m.
+                */
                 bool operator!=(Modifiers m) const
                 {
                     return _value != m._value;
                 }
 
+                /** @brief Returns true when this set sorts before @a m.
+                */
                 bool operator<(Modifiers m) const
                 {
                     return _value < m._value;
@@ -517,72 +551,98 @@ class Key
         };
 
     public:
+        /** @brief Creates an empty key.
+        */
         Key()
         : _code(NoKey)
         {}
 
+        /** @brief Creates a key with code @a c and no modifiers.
+        */
         explicit Key(Pt::uint32_t c)
         : _code(c)
         {}
 
+        /** @brief Creates a key with modifier @a m and code @a c.
+        */
         Key(Modifier m, Pt::uint32_t c)
         : _code(c)
         , _modifier(m)
         {}
 
+        /** @brief Creates a key with modifiers @a m and code @a c.
+        */
         Key(Modifiers m, Pt::uint32_t c)
         : _code(c)
         , _modifier( m )
         {}
 
+        /** @brief Resets this key to %NoKey with no modifiers.
+        */
         void clear()
         {
             _code = NoKey;
             _modifier = Modifiers();
         }
 
+        /** @brief Sets the code to @a c and removes all modifiers.
+        */
         void set(Pt::uint32_t c)
         {
             _code = c;
             _modifier = Modifiers();
         }
 
+        /** @brief Sets the modifier to @a m and the code to @a c.
+        */
         void set(Modifier m, Pt::uint32_t c)
         {
             _code = c;
             _modifier = m;
         }
 
+        /** @brief Sets the modifiers to @a m and the code to @a c.
+        */
         void set(Modifiers m, Pt::uint32_t c)
         {
             _code = c;
             _modifier = m;
         }
 
+        /** @brief Returns the key code.
+        */
         Pt::uint32_t code() const
-        { 
-            return _code; 
+        {
+            return _code;
         }
 
+        /** @brief Returns the key modifiers.
+        */
         Modifiers modifiers() const
-        { 
-            return _modifier; 
+        {
+            return _modifier;
         }
 
+        /** @brief Returns true when this key equals @a k.
+        */
         bool operator==(const Key& k) const
         {
             return ! (*this != k);
         }
 
+        /** @brief Returns true when this key does not equal @a k.
+        */
         bool operator!=(const Key& k) const
         {
-            return _code != k._code || 
+            return _code != k._code ||
                    _modifier != k._modifier;
         }
 
+        /** @brief Returns true when this key sorts before @a k.
+        */
         bool operator<(const Key& k) const
         {
-            return _code < k._code || 
+            return _code < k._code ||
                   (_code == k._code && _modifier < k._modifier);
         }
 
@@ -619,6 +679,8 @@ class Key
             return Pt::String();
         }
 
+        /** @brief Returns true when the key code is %NoKey.
+        */
         bool empty() const
         {
             return _code  == Key::NoKey;
@@ -630,6 +692,8 @@ class Key
         Modifiers _modifier;
 };
 
+/** @brief Returns a modifier set containing @a m1 and @a m2.
+*/
 inline Key::Modifiers operator|(Key::Modifier m1, Key::Modifier m2)
 {
     Key::Modifiers m(m1);

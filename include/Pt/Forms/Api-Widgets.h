@@ -34,23 +34,30 @@
 
     @brief Widget and view object model.
 
-    Every visual %Forms object is a %Widget. %Screen and %WindowManager are
-    widgets but not views. %Form and %Control are the usual %View
-    implementations; a view is the host and paint-surface boundary for
-    controls. When a control joins a form that is shown on a screen, the
-    screen, scaling, coordinates, and paint surface become available.
-    Removing it reverses that relationship. Measurement determines the
-    preferred size for a %SizePolicy; layout then assigns geometry within
-    the available rectangle. Changes to visual state, geometry, or drawing
-    request an update through the containing views to the window. Painting
-    then travels back down through visible content after the window frame
-    makes a paint surface available.
+  Every visual Forms object is a %Widget. A widget has a non-owning parent
+  relationship and becomes connected when its parent hierarchy reaches a
+  %Screen. Connection is independent of visibility. It supplies logical
+  coordinates, scaling, repaint and state-change requests, and input
+  delivery. Attaching a control does not transfer ownership: the caller
+  keeps every attached object alive until it is detached.
 
-    Derive custom visual content from %Control. Derive from %View only when a
-    custom content host needs different paint-surface or coordinate behavior.
-    %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
-    embedded-window implementations; applications normally use the window
-    manager provided by a %Screen or %Workspace.
+  %Screen and %WindowManager are widgets but not views. %Form and %Control
+  are the usual %View implementations. A view is the host and paint-surface
+  boundary for controls. When a control joins a form that is shown on a
+  screen, the screen, scaling, coordinates, and paint surface become
+  available. Removing it reverses that relationship.
+
+  A control measures its preferred size for a %SizePolicy, and layout then
+  assigns geometry within the available rectangle. Changes to visual state,
+  geometry, or drawing request an update through the containing views to the
+  window. Painting then travels back down through visible content after the
+  window frame makes a paint surface available.
+
+  Derive custom visual content from %Control. Derive from %View only when a
+  custom content host needs different paint-surface or coordinate behavior.
+  %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
+  embedded-window implementations; applications normally use the window
+  manager provided by a %Screen or %Workspace.
 */
 
 #endif

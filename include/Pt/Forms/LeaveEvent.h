@@ -1,10 +1,10 @@
 /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  As a special exception, you may use this file as part of a free
  software library without restriction. Specifically, if other files
  instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
  License. This exception does not however invalidate any other
  reasons why the executable file might be covered by the GNU Library
  General Public License.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  02110-1301  USA
 */
 
@@ -48,6 +48,8 @@ namespace Forms {
 class PT_FORMS_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
 {
     public:
+        /** @brief Creates an event for pointer departure from @a widget.
+        */
         LeaveEvent(Widget& widget)
         : _widgetId_( widget.id() )
         , _widget(&widget)
@@ -56,23 +58,33 @@ class PT_FORMS_API LeaveEvent : public Pt::BasicEvent<LeaveEvent>
         {
         }
 
+        /** @brief Destructor.
+        */
         virtual ~LeaveEvent()
         {
         }
 
+        /** @brief Returns the ID of the widget that lost the pointer.
+        */
         Pt::uint64_t widgetId() const
         {
             return _widgetId_;
         }
 
+        /** @brief Returns the widget that lost the pointer.
+        */
         Widget* widget() const
         {
             return _widget;
         }
 
+        /** @brief Returns reserved extension storage.
+        */
         void* r0()
         { return _reserved0; }
-        
+
+        /** @brief Returns reserved extension storage.
+        */
         Pt::uint64_t r1()
         { return _reserved1; }
 

@@ -1,12 +1,12 @@
-/* 
-   Copyright (C) 2015 Marc Boris Duerner 
+/*
+   Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
    version 2.1 of the License, or (at your option) any later version.
-   
+
    As a special exception, you may use this file as part of a free
    software library without restriction. Specifically, if other files
    instantiate templates or use macros or inline functions from this
@@ -16,15 +16,15 @@
    License. This exception does not however invalidate any other
    reasons why the executable file might be covered by the GNU Library
    General Public License.
-   
+
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301 USA
 */
 
@@ -47,6 +47,8 @@ namespace Forms {
 class MouseButton
 {
     public:
+        /** @brief Defines a mouse button.
+        */
         enum Type
         {
             Left = 0,
@@ -54,13 +56,17 @@ class MouseButton
             Middle = 2,
         };
 
+        /** @brief Creates a mouse button with @a type.
+        */
         MouseButton(Type type = Left)
         : _type(type)
         { }
 
+        /** @brief Returns the numeric button value.
+        */
         operator Pt::uint32_t() const
-        { 
-            return _type; 
+        {
+            return _type;
         }
 
     private:
@@ -75,6 +81,8 @@ class MouseButton
 class MouseState
 {
     public:
+        /** @brief Creates a state in which no button is pressed.
+        */
         MouseState()
         : _buttonState(0)
         { }
@@ -87,6 +95,8 @@ class MouseState
              return (_buttonState & mask) == mask;
         }
 
+        /** @brief Records @a button as pressed.
+        */
         void setPressed(MouseButton button)
         {
             Pt::uint32_t mask = 0x1 << button;
@@ -101,6 +111,8 @@ class MouseState
              return (_buttonState & mask) != mask;
         }
 
+        /** @brief Records @a button as released.
+        */
         void setReleased(MouseButton button)
         {
             Pt::uint32_t mask = 0x1 << button;
@@ -120,7 +132,9 @@ class MouseState
 */
 class MouseEvent : public Pt::BasicEvent<MouseEvent>
 {
-    public:    
+    public:
+        /** @brief Defines the mouse action.
+        */
         enum Action
         {
             Move = 0,
@@ -128,6 +142,8 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             Release = 2
         };
 
+        /** @brief Defines a mouse button.
+        */
         enum Button
         {
             Left = 0,
@@ -135,6 +151,8 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             Middle = 2,
         };
 
+        /** @brief Creates an event without a target.
+        */
         explicit MouseEvent()
         : _widgetId_(0)
         , _widget(0)
@@ -144,6 +162,8 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         , _button(0)
         { }
 
+        /** @brief Creates an event targeted at @a widget.
+        */
         explicit MouseEvent(Widget& widget)
         : _widgetId_( widget.id() )
         , _widget(&widget)
@@ -153,57 +173,79 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         , _button(0)
         { }
 
+        /** @brief Returns the target widget ID, or 0 when no target is set.
+        */
         Pt::uint64_t widgetId() const
         {
             return _widgetId_;
         }
 
+        /** @brief Returns the target widget, or 0 when no target is set.
+        */
         Widget* widget() const
         {
             return _widget;
         }
 
+        /** @brief Sets the target widget and its ID.
+        */
         void setWidget(Widget* widget)
         {
             _widget = widget;
             _widgetId_ = widget ? widget->id() : 0;
         }
-        
+
+        /** @brief Returns the pointer position in local coordinates.
+        */
         const Gfx::PointF& position() const
         {
             return _pos;
         }
 
+        /** @brief Sets the pointer position to @a pos.
+        */
         void setPosition(const Gfx::PointF& pos)
         {
             _pos = pos;
         }
 
+        /** @brief Returns the local horizontal pointer position.
+        */
         double x() const
         {
             return _pos.x();
         }
 
+        /** @brief Sets the local horizontal pointer position to @a x.
+        */
         void setX(double x)
         {
             _pos.setX(x);
         }
 
+        /** @brief Returns the local vertical pointer position.
+        */
         double y() const
         {
             return _pos.y();
         }
-    
+
+        /** @brief Sets the local vertical pointer position to @a y.
+        */
         void setY(double y)
         {
             _pos.setY(y);
         }
 
+        /** @brief Returns true when the event reports pointer movement.
+        */
         bool isMove() const
         {
             return _action == Move;
         }
 
+        /** @brief Changes the event to pointer movement.
+        */
         void setMove()
         {
             _action = Move;
@@ -226,6 +268,8 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
              return (_button & mask) == mask && _action == Press;
         }
 
+        /** @brief Changes the event to a press of @a button.
+        */
         void setPress(Pt::uint32_t button = Left)
         {
             Pt::uint32_t mask = 0x1 << button;
@@ -251,6 +295,8 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
              return (_button & mask) == mask && _action == Release;
         }
 
+        /** @brief Changes the event to a release of @a button.
+        */
         void setRelease(Pt::uint32_t button = Left)
         {
             Pt::uint32_t mask = 0x1 << button;

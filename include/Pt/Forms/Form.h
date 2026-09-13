@@ -85,6 +85,7 @@ namespace Forms {
     control.
 
     @ingroup Pt-Forms-Widgets
+    @ingroup Pt-Forms-Input
 */
 class PT_FORMS_API Form : public View
 {

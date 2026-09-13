@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301 USA
 */
 
@@ -95,15 +95,21 @@ class PT_FORMS_API InputMethod
         void sendEvent(const KeyEvent& ev);
 
     protected:
+        /** @brief Starts the platform or custom text-entry session.
+        */
         virtual void onBegin() = 0;
 
+        /** @brief Finishes the platform or custom text-entry session.
+        */
         virtual void onFinish() = 0;
 
+        /** @brief Returns the active text-entry window, or 0.
+        */
         virtual Window* onActiveWindow() = 0;
 
     private:
         void registerApplication(Application& app);
-        
+
         void unregisterApplication(Application& app);
 
     private:
@@ -114,14 +120,20 @@ class PT_FORMS_API InputMethod
 };
 
 
-/** @brief Application-owned default input method.
+/** @brief Provides the application-owned default input method.
+
+    @ingroup Pt-Forms-Input
 */
 class DefaultInputMethod : public InputMethod
                          , public Connectable
 {
     public:
+        /** @brief Creates the default input method.
+        */
         DefaultInputMethod();
 
+        /** @brief Destructor.
+        */
         ~DefaultInputMethod();
 
     protected:

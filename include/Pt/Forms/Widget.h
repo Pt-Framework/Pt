@@ -98,6 +98,7 @@ class KeyEvent;
     restores the default cursor.
 
     @ingroup Pt-Forms-Widgets
+    @ingroup Pt-Forms-Input
 */
 class PT_FORMS_API Widget : public Responder
                           , public Pt::Connectable

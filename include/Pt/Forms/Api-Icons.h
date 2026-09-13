@@ -34,17 +34,19 @@
 
     @brief Icons and textual content for controls.
 
-    Controls display icons and text. %Icon and %TextBlock supply that
-    content. They are not widgets. Derive custom visual content from
-    %Control, not from these types.
+  Controls use %Icon and %TextBlock to supply visual content. These types
+  are not widgets and do not appear in the visual hierarchy. Derive custom
+  visual content from %Control, not from an icon or text block.
 
-    An %Icon holds images at one or more sizes so a control can show the
-    same picture at the size it needs. Fill it with images, or attach a
-    custom %IconProvider when the images come from another source.
+  An %Icon associates one picture with images at one or more logical sizes.
+  A control requests the image that fits the area it is about to display.
+  Add images directly for the usual case. Implement %IconProvider only when
+  images must come from another source.
 
-    A %TextBlock lays out a string into lines. Controls such as %Label
-    use it. Custom controls use it when they measure or paint wrapped
-    text.
+  A %TextBlock converts a string into positioned %TextLine objects. Controls
+  such as %Label use it to lay out text. A custom control configures the
+  available width and alignment, calls %TextBlock::layout(), and uses the
+  resulting lines when it measures or paints wrapped text.
 */
 
 #endif

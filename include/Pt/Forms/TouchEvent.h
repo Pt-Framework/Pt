@@ -1,12 +1,12 @@
-/* 
-   Copyright (C) 2015 Marc Boris Duerner 
+/*
+   Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
    version 2.1 of the License, or (at your option) any later version.
-   
+
    As a special exception, you may use this file as part of a free
    software library without restriction. Specifically, if other files
    instantiate templates or use macros or inline functions from this
@@ -16,15 +16,15 @@
    License. This exception does not however invalidate any other
    reasons why the executable file might be covered by the GNU Library
    General Public License.
-   
+
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA 02110-1301 USA
 */
 
@@ -49,7 +49,9 @@ namespace Forms {
 */
 class TouchEvent : public Pt::BasicEvent<TouchEvent>
 {
-    private:    
+    private:
+        /** @brief Defines the touch action.
+        */
         enum Action
         {
             Move = 0,
@@ -58,6 +60,8 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         };
 
     public:
+        /** @brief Creates an event without a target.
+        */
         explicit TouchEvent()
         : _widgetId(0)
         , _widget()
@@ -67,6 +71,8 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         , _pressure(1.0)
         { }
 
+        /** @brief Creates an event targeted at @a widget.
+        */
         TouchEvent(Widget& widget)
         : _widgetId( widget.id() )
         , _widget(&widget)
@@ -75,7 +81,9 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         , _trackingId(0)
         , _pressure(1.0)
         { }
-        
+
+        /** @brief Resets the touch data while retaining the target.
+        */
         void clear()
         {
             _pos.set(0, 0);
@@ -83,83 +91,115 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             _trackingId = 0;
             _pressure = 1.0;
         }
-        
+
+        /** @brief Sets the target widget ID to @a widgetId.
+        */
         void setId(Pt::uint64_t widgetId)
         {
             _widgetId = widgetId;
         }
 
+        /** @brief Returns the target widget ID.
+        */
         Pt::uint64_t widgetId() const
         {
             return _widgetId;
         }
 
+        /** @brief Returns the target widget, or 0 when no target is set.
+        */
         Widget* widget() const
         {
             return _widget;
         }
 
+        /** @brief Sets the target widget and its ID.
+        */
         void setWidget(Widget* widget)
         {
             _widget = widget;
             _widgetId = widget ? widget->id() : 0;
         }
 
+        /** @brief Returns the touch position in local coordinates.
+        */
         const Gfx::PointF& position() const
         {
             return _pos;
         }
 
+        /** @brief Sets the touch position to @a pos.
+        */
         void setPosition(const Gfx::PointF& pos)
         {
             _pos = pos;
         }
 
+        /** @brief Returns the local horizontal touch position.
+        */
         double x() const
         {
             return _pos.x();
         }
-        
+
+        /** @brief Sets the local horizontal touch position to @a x.
+        */
         void setX(double x)
         {
             _pos.setX(x);
         }
-        
+
+        /** @brief Returns the local vertical touch position.
+        */
         double y() const
         {
             return _pos.y();
         }
 
+        /** @brief Sets the local vertical touch position to @a y.
+        */
         void setY(double y)
         {
             _pos.setY(y);
         }
-        
+
+        /** @brief Returns the identity of the tracked touch.
+        */
         Pt::uint32_t trackingId() const
         {
             return _trackingId;
         }
-        
+
+        /** @brief Sets the tracked touch identity to @a tid.
+        */
         void setTrackingId(Pt::uint32_t tid)
         {
             _trackingId = tid;
         }
-        
+
+        /** @brief Returns the touch pressure.
+        */
         double pressure() const
         {
             return _pressure;
         }
 
+        /** @brief Sets the touch pressure to @a p.
+        */
         void setPressure(double p)
         {
             _pressure = p;
         }
 
+        /** @brief Returns true when the event reports touch movement.
+        */
         bool isMove() const
         {
             return _action == Move;
         }
 
+        /** @brief Changes the event to touch movement.
+        */
         void setMove()
         {
             _action = Move;
@@ -179,6 +219,8 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             return _action == Press;
         }
 
+        /** @brief Changes the event to a touch press.
+        */
         void setPress()
         {
             _action = Press;
@@ -191,6 +233,8 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             return _action == Release;
         }
 
+        /** @brief Changes the event to a touch release.
+        */
         void setRelease()
         {
             _action = Release;

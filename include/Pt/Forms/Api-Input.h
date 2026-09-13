@@ -32,34 +32,39 @@
 
 /** @addtogroup Pt-Forms-Input
 
-    @brief Pointer, keyboard, focus, and text input to controls.
+    @brief Pointer, keyboard, and text-entry input.
 
-    Platform input enters the %Application event loop and is then targeted
-    into the connected visual hierarchy. Pointer, touch, and scroll use
-    hit-testing: the %Screen (or a workspace) finds the widget under the
-    pointer. Keyboard input uses focus: the %Form delivers keys to the
-    focused %Control. These are two targeting models, not two event loops.
+  Platform input enters the %Application event loop and is targeted into the
+  connected visual hierarchy. Pointer, touch, and scroll input are directed
+  by hit testing, while keyboard input is directed by focus. The %Screen or a
+  workspace finds the widget below the pointer. These are two targeting
+  models, not two event loops. Every %Widget is a %Responder. A responder
+  handles an event by returning true; returning false continues delivery
+  through the responder chain. Mouse and touch positions are converted to
+  each responder's local coordinates before its handler runs.
 
-    Every %Widget is a %Responder. A responder handles an event or forwards
-    it. Returning true stops the chain; returning false continues to the
-    next responder. Mouse and touch positions are converted to each
-    responder's local coordinates. Pointer capture overrides hit-testing
-    until release. When the pointer target changes, the previous widget
-    receives a leave event before the new widget receives an enter event.
+  Hit testing selects the frontmost eligible widget below the pointer.
+  %Widget::setCapture() temporarily overrides hit testing and directs pointer
+  input to the capturing widget until it releases capture. Forms sends a
+  %LeaveEvent before an %EnterEvent when the pointer target changes. A
+  %MouseEvent reports movement and button state, a %TouchEvent reports an
+  individual touch and pressure, and a %ScrollEvent reports the scroll axis
+  and delta.
 
-    A %Form is the focus root of its content tree. It handles Tab
-    traversal, shortcuts, and Alt mnemonics before ordinary keys reach the
-    focused control. A %Control may take part in that focus set; pointer
-    and touch presses on a control typically request focus.
+  A %Form is the focus root for its content tree. A focused control receives
+  key input, subject to the form's interaction rules: an active control is
+  considered first, then registered shortcuts, Alt mnemonics, and Tab focus
+  traversal, followed by the focused control and responder chain. A control
+  can take part in that focus set; pointer and touch presses on a control
+  typically request focus. A %KeyEvent carries a %Key, press or release
+  action, and optional Unicode text. Controls register their focus policy,
+  action key, shortcut, and mnemonic through their public APIs.
 
-    An %InputMethod is the extension for platform or custom text entry. It
-    begins and finishes a session for a control, may show an active window,
-    and sends %KeyEvent objects to its current receiver. The application
-    always has a default method.
-
-    %MouseEvent, %TouchEvent, %ScrollEvent, %EnterEvent, %LeaveEvent,
-    %KeyEvent, and %FocusEvent carry the event data. %Key identifies a key
-    and its modifiers.
+  %InputMethod is the extension point for platform or custom text entry. It
+  begins a session for a control, retains only a non-owning receiver, and
+  sends %KeyEvent objects to that receiver. Ordinary controls use the method
+  installed on the application, which always provides a default method;
+  derive an input method only to implement a text-entry interface.
 */
 
 #endif
