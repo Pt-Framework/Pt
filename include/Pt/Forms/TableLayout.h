@@ -105,40 +105,99 @@ class PT_FORMS_API TableLayout : public Layout
 };
 
 
-/** @brief Table layout with two-phase measure for Fill and nested layouts.
+/** @brief Arranges children in row and column tracks.
 
-    @ingroup Pt-Forms
+    %addItem() places a child in a cell. %setColumn() and %setRow() set each
+    track to %Preferred, %Fixed, or %Fill. Preferred tracks use the largest
+    preferred child on that track. Fixed tracks use the given size. Fill
+    tracks share leftover space after preferred and fixed tracks. Measure
+    resolves preferred and fixed tracks first so Fill cells and nested
+    layouts see the resulting track size. Layout assigns each visible cell
+    the track rectangle minus its margin.
+
+    @code
+    Preferred | Fill
+    +---------+---------------+
+    | name    | edit          |  Preferred
+    +---------+---------------+
+    | notes   |               |  Fill
+    +---------+---------------+
+    @endcode
+
+    @code
+    Pt::Forms::TableLayout2 table;
+    table.setColumn(0, Pt::Forms::TableLayout2::Preferred);
+    table.setColumn(1, Pt::Forms::TableLayout2::Fill);
+    table.setRow(0, Pt::Forms::TableLayout2::Preferred);
+    table.setRow(1, Pt::Forms::TableLayout2::Fill);
+    table.addItem(name, 0, 0);
+    table.addItem(edit, 0, 1);
+    table.addItem(notes, 1, 0);
+    window.setContent(&table);
+    @endcode
+
+    @ingroup Pt-Forms-Layouts
 */
 class PT_FORMS_API TableLayout2 : public Layout
 {
     typedef Layout Base;
 
     public:
+        /** @brief Sizing rule for a row or column track.
+        */
         enum SizeMode
         {
+            /** @brief The track shares leftover space.
+            */
             Fill,
+
+            /** @brief The track uses the largest preferred child size.
+            */
             Preferred,
+
+            /** @brief The track uses a fixed size.
+            */
             Fixed
         };
 
     public:
+        /** @brief Creates an empty table layout.
+        */
         TableLayout2();
 
+        /** @brief Destroys the layout. Attached controls are not destroyed.
+        */
         virtual ~TableLayout2();
 
+        /** @brief Attaches @a control at @a row and @a column.
+
+            The layout does not take ownership. Missing tracks are created.
+        */
         void addItem(Control& control, std::size_t row, std::size_t column);
 
+        /** @brief Detaches @a control without destroying it.
+        */
         void removeItem(Control& control);
 
+        /** @brief Sets column @a col to @a mode and optional fixed @a size.
+        */
         void setColumn(std::size_t col, SizeMode mode, double size = 0);
 
+        /** @brief Sets row @a row to @a mode and optional fixed @a size.
+        */
         void setRow(std::size_t row, SizeMode mode, double size = 0);
 
     protected:
+        /** @brief Clears the cell that held @a control.
+        */
         virtual void onRemoveControl(Control& control);
 
+        /** @brief Measures tracks, then Fill cells at the resolved sizes.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Assigns each visible cell its track rectangle.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
     private:

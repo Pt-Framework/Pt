@@ -36,27 +36,58 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Names a flow direction.
+
+    %Left and %Right are horizontal. %Top and %Bottom are vertical. The
+    default is %Left.
+
+    @code
+    Pt::Forms::FlowLayout row(Pt::Forms::Direction::Left);
+    row.setDirection(Pt::Forms::Direction::Top);
+    @endcode
+
+    @ingroup Pt-Forms-Layouts
+*/
 class Direction
 {
   public:
+    /** @brief Flow axis and sense.
+    */
     enum Mode
     {
+        /** @brief Left to right.
+        */
         Left,
+
+        /** @brief Right to left.
+        */
         Right,
+
+        /** @brief Top to bottom.
+        */
         Top,
+
+        /** @brief Bottom to top.
+        */
         Bottom
     };
 
+    /** @brief Creates a direction with mode @a m.
+    */
     Direction(Mode m = Left)
     : _mode(m)
     {}
 
+    /** @brief Sets the direction to @a m and returns this object.
+    */
     Direction& operator=(Mode m)
     {
         _mode = m;
         return *this;
     }
 
+    /** @brief Returns the direction as an unsigned integer value.
+    */
     operator Pt::uint32_t() const
     {
         return _mode;

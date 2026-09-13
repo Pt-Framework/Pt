@@ -38,34 +38,78 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Arranges children in a single row or column.
+
+    %Direction::Left and %Direction::Right place children on a horizontal
+    axis. %Direction::Top and %Direction::Bottom place them on a vertical
+    axis. Each child keeps its preferred size on the flow axis and stretches
+    on the cross axis. %setCenter() packs the group in the remaining space.
+    %setReverse() visits children in reverse order along the same direction.
+
+    @code
+    Direction::Left                 Direction::Top
+    +----------------------+        +--------+
+    | [A] [B] [C]          |        | [A]    |
+    +----------------------+        | [B]    |
+                                    | [C]    |
+    Left, centered                  +--------+
+    +----------------------+
+    |      [A] [B] [C]     |
+    +----------------------+
+    @endcode
+
+    @code
+    Pt::Forms::FlowLayout row(Pt::Forms::Direction::Left);
+    row.addItem(a);
+    row.addItem(b);
+    row.addItem(c);
+    window.setContent(&row);
+    @endcode
+
+    @ingroup Pt-Forms-Layouts
+*/
 class PT_FORMS_API FlowLayout : public Layout
 {
     typedef Layout Base;
 
     public:
-        // Horizontal          use all space in row, same size for elements
-        // HorizontalCenter    place elements accoring to size
-        // Vertical            use all space in row, same size for elements
-        // VerticalCenter      place elements accoring to size
-
-    public:
+        /** @brief Creates a flow layout in direction @a d.
+        */
         explicit FlowLayout(Direction d = Direction::Left);
 
+        /** @brief Destroys the layout. Attached controls are not destroyed.
+        */
         virtual ~FlowLayout();
 
+        /** @brief Sets the flow direction to @a d and requests relayout.
+        */
         void setDirection(Direction d);
 
+        /** @brief Sets whether items are packed as a centered group.
+        */
         void setCenter(bool b);
 
+        /** @brief Sets whether children are visited in reverse order.
+        */
         void setReverse(bool b);
 
+        /** @brief Attaches @a control as a flow item.
+
+            The layout does not take ownership.
+        */
         void addItem(Control& control);
 
+        /** @brief Detaches @a control without destroying it.
+        */
         void removeItem(Control& control);
 
     protected:
+        /** @brief Measures children along the flow axis.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Places children along the flow direction.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
     private:

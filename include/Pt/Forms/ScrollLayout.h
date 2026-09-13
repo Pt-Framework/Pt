@@ -38,49 +38,118 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Offsets children when content exceeds the viewport.
+
+    Children are measured with %setContentMode() and placed at their
+    preferred size. %scrollX() and %scrollY() move the content within the
+    layout bounds. Offsets are clamped to the scrollable range.
+    %enableScrolling() selects which axes accept scroll input. This layout
+    does not draw scroll bars.
+
+    @code
+    +------------------+
+    | visible window   |
+    |            [====]|  content extends
+    +------------------+
+    @endcode
+
+    @code
+    Pt::Forms::ScrollLayout scroll;
+    scroll.enableScrolling(true, true);
+    scroll.addItem(content);
+    window.setContent(&scroll);
+    @endcode
+
+    @ingroup Pt-Forms-Layouts
+*/
 class PT_FORMS_API ScrollLayout : public Layout
 {
     typedef Layout Base;
 
     public:
+        /** @brief Creates an empty scroll layout.
+        */
         ScrollLayout();
 
+        /** @brief Destroys the layout. Attached controls are not destroyed.
+        */
         virtual ~ScrollLayout();
 
+        /** @brief Enables horizontal scrolling when @a scrollX is true and
+            vertical scrolling when @a scrollY is true.
+        */
         void enableScrolling(bool scrollX, bool scrollY);
 
+        /** @brief Returns the measured content extent on the X axis.
+        */
         double maximumX() const;
 
+        /** @brief Returns the measured content extent on the Y axis.
+        */
         double maximumY() const;
 
+        /** @brief Sets the horizontal scroll offset to @a xpos.
+
+            The value is clamped to the scrollable range.
+        */
         void scrollX(double xpos);
 
+        /** @brief Sets the vertical scroll offset to @a ypos.
+
+            The value is clamped to the scrollable range.
+        */
         void scrollY(double ypos);
 
+        /** @brief Returns the horizontal scroll offset.
+        */
         double scrollPosX() const;
 
+        /** @brief Returns the vertical scroll offset.
+        */
         double scrollPosY() const;
 
+        /** @brief Returns the signal emitted when the horizontal offset changes.
+        */
         Pt::Signal<double>& scrolledX();
 
+        /** @brief Returns the signal emitted when the vertical offset changes.
+        */
         Pt::Signal<double>& scrolledY();
 
+        /** @brief Attaches @a control as scrollable content.
+
+            The layout does not take ownership.
+        */
         void addItem(Control& control);
 
+        /** @brief Detaches @a control without destroying it.
+        */
         void removeItem(Control& control);
 
+        /** @brief Sets the size-policy modes used to measure children.
+        */
         void setContentMode(SizePolicy::Mode hmode, SizePolicy::Mode vmode);
 
     protected:
+        /** @brief Measures children and records the content extent.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Places children at their preferred size, offset by scroll.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
     protected:
+        /** @brief Forwards the mouse event to the base control.
+        */
         virtual bool onMouseEvent(const MouseEvent& ev);
-        
+
+        /** @brief Forwards the touch event to the base control.
+        */
         virtual bool onTouchEvent(const TouchEvent& ev);
 
+        /** @brief Adjusts the scroll offset from @a ev and returns true.
+        */
         virtual bool onScrollEvent(const ScrollEvent& ev);
        
     private:

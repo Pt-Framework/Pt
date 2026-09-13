@@ -40,15 +40,7 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief A control that arranges child controls.
-
-  A %Layout participates in the normal control hierarchy while deriving
-  the geometry of its children from its layout policy. Use a concrete layout
-  such as %FlowLayout or %GridLayout when content must adapt to available
-  space. As a control, a layout can itself be the content of a %Form or the
-  child of another control.
-
-  @ingroup Pt-Forms-Layouts
+/** @brief Control that arranges child controls.
 */
 class PT_FORMS_API Layout : public Control
 {

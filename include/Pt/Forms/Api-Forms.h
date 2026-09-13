@@ -118,6 +118,11 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Layouts Layouts
+
+    @ingroup Pt-Forms
+*/
+
 /** @defgroup Pt-Forms-Icons Icons and Text
 
     @ingroup Pt-Forms

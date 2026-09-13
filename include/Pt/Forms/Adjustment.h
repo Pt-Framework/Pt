@@ -36,27 +36,66 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Aligns content along one axis.
+
+    %Left, %Right, and %Center place a line within its available width.
+    %Justify is available as a mode; a consumer may treat it as left. The
+    default is %Left.
+
+    @code
+    Left                    Center
+    |text      |            |   text   |
+
+    Right                   Justify
+    |      text|            |t e x t|
+    @endcode
+
+    @code
+    editor.setAdjustment(Pt::Forms::Adjustment::Left);
+    @endcode
+
+    @ingroup Pt-Forms-Layouts
+*/
 class Adjustment
 {
     public:
+        /** @brief Alignment along one axis.
+        */
         enum Mode
         {
+            /** @brief Aligns to the start of the axis.
+            */
             Left,
+
+            /** @brief Aligns to the end of the axis.
+            */
             Right,
+
+            /** @brief Centers on the axis.
+            */
             Center,
+
+            /** @brief Spreads content along the axis.
+            */
             Justify
         };
 
+        /** @brief Creates an adjustment with mode @a m.
+        */
         Adjustment(Mode m = Left)
         : _mode(m)
         {}
 
+        /** @brief Sets the adjustment to @a m and returns this object.
+        */
         Adjustment& operator=(Mode m)
         {
             _mode = m;
             return *this;
         }
 
+        /** @brief Returns the adjustment as an unsigned integer value.
+        */
         operator Pt::uint32_t() const
         { 
             return _mode; 

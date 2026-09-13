@@ -36,32 +36,87 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Names a position in a rectangle.
+
+    The nine modes place content at a corner, an edge center, or the middle
+    of a rectangle. The default is %Center.
+
+    @code
+    +-----+-----+-----+
+    | TL  | Top | TR  |
+    +-----+-----+-----+
+    | Left|  C  |Right|
+    +-----+-----+-----+
+    | BL  | Bot | BR  |
+    +-----+-----+-----+
+    @endcode
+
+    @code
+    label.setAlignment(Pt::Forms::Alignment::TopLeft);
+    @endcode
+
+    @ingroup Pt-Forms-Layouts
+*/
 class Alignment
 {
     public:
+        /** @brief Position of content in a rectangle.
+        */
         enum Mode
         {
+            /** @brief Top-left corner.
+            */
             TopLeft,
+
+            /** @brief Top edge, horizontally centered.
+            */
             Top,
+
+            /** @brief Top-right corner.
+            */
             TopRight,
+
+            /** @brief Left edge, vertically centered.
+            */
             Left,
+
+            /** @brief Center of the rectangle.
+            */
             Center,
+
+            /** @brief Right edge, vertically centered.
+            */
             Right,
+
+            /** @brief Bottom-left corner.
+            */
             BottomLeft,
+
+            /** @brief Bottom edge, horizontally centered.
+            */
             Bottom,
+
+            /** @brief Bottom-right corner.
+            */
             BottomRight
         };
 
+        /** @brief Creates an alignment with mode @a m.
+        */
         Alignment(Mode m = Center)
         : _mode(m)
         {}
 
+        /** @brief Sets the alignment to @a m and returns this object.
+        */
         Alignment& operator=(Mode m)
         {
             _mode = m;
             return *this;
         }
 
+        /** @brief Returns the alignment as an unsigned integer value.
+        */
         operator Pt::uint32_t() const
         { 
             return _mode; 
