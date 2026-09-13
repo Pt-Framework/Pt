@@ -104,6 +104,7 @@
     <li> @ref Pt-Forms-Application-Page </li>
     <ul>
         <li> @ref Pt-Forms-Application-Page-Application </li>
+        <li> @ref Pt-Forms-Application-Page-Widgets </li>
         <li> @ref Pt-Forms-Application-Page-Windows </li>
         <li> @ref Pt-Forms-Application-Page-Input </li>
     </ul>

@@ -77,7 +77,7 @@ class RescaleEvent;
     backend extension point; applications should use its window manager and
     should not call its protected event and platform hooks.
 
-    @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Widgets
 */
 class PT_FORMS_API Screen : public Widget
 {

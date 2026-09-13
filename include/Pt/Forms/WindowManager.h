@@ -62,7 +62,6 @@ class WindowFrame;
     hooks are for backend implementations and are not an application
     customization API.
 
-    @ingroup Pt-Forms-Application
     @ingroup Pt-Forms-Windows
 */
 class WindowManager : public Widget

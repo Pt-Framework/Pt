@@ -84,7 +84,7 @@ namespace Forms {
     and Alt mnemonics before ordinary keyboard input reaches the focused
     control.
 
-    @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Widgets
 */
 class PT_FORMS_API Form : public View
 {

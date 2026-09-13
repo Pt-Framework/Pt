@@ -97,7 +97,7 @@ class KeyEvent;
     provide a %Cursor while it is under the pointer; clearing the override
     restores the default cursor.
 
-    @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Widgets
 */
 class PT_FORMS_API Widget : public Responder
                           , public Pt::Connectable

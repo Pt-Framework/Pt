@@ -30,9 +30,9 @@
 #ifndef PT_FORMS_API_INPUT_H
 #define PT_FORMS_API_INPUT_H
 
-/** @defgroup Pt-Forms-Input Mouse, Touch, Keyboard Input
+/** @defgroup Pt-Forms-Input Pointer and Keyboard Input
 
-    @brief Deliver pointer, keyboard, focus, and text input to controls.
+    @brief Pointer, keyboard, focus, and text input to controls.
 
     Platform input enters the %Application event loop and is then targeted
     into the connected visual hierarchy. Pointer, touch, and scroll use

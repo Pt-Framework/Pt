@@ -101,7 +101,7 @@ class Key;
     state-changing public APIs so changes travel through the parent
     hierarchy.
 
-    @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Widgets
 */
 class PT_FORMS_API Control : public View
 {

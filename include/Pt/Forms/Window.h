@@ -93,7 +93,6 @@ class PaintEvent;
     nested event loop and temporarily disables the other top-level windows,
     so reserve it for intentionally synchronous dialogs.
 
-    @ingroup Pt-Forms-Application
     @ingroup Pt-Forms-Windows
 */
 class PT_FORMS_API Window : public Form

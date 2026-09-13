@@ -80,7 +80,7 @@ class PaintContext;
     release, and detach lifecycle for every hosted control and must not
     retain a surface supplied by another view beyond that lifecycle.
 
-    @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms-Widgets
 */
 class PT_FORMS_API View : public Widget
 {
