@@ -48,6 +48,11 @@ namespace Pt {
 /** @namespace Pt::Forms
 
     @brief Graphical user interfaces.
+
+  The %Pt::Forms namespace provides the types for building event-driven
+  graphical user interfaces. It contains applications, windows, widgets,
+  controls, layouts, and the events that report user input and lifecycle
+  changes.
 */
 namespace Forms {
 
