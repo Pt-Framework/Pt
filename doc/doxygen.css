@@ -52,14 +52,14 @@ H2 A {
     margin-top: 22px;
     margin-bottom: 6px;
 }
-H3 
+H3
 {
 	font-size: 14px;
     color: #000000;
     margin-top: 20px;
     margin-bottom: 4px;
 }
-H3 A 
+H3 A
 {
     color: #000000;
     margin-top: 20px;
@@ -71,7 +71,7 @@ H4
     margin-top: 16px;
     margin-bottom: 6px;
 }
-H4 A 
+H4 A
 {
     color: #000000;
     margin-top: 16px;
@@ -82,7 +82,7 @@ H5
     color: #000000;
     margin-bottom: 4px;
 }
-H5 A 
+H5 A
 {
     color: #000000;
     margin-bottom: 4px;
@@ -104,7 +104,7 @@ A:hover {
 a:visited {
     color: #2d378c;
 }
-p 
+p
 {
 	margin: 0;
     padding-top: 5px;
@@ -551,6 +551,9 @@ TH.dirtab { background: #e8eef2;
     font-style: italic;
 }
 
+div.directory span.arrow {
+    display: none;
+}
 
 /* Page elements */
 
@@ -599,33 +602,33 @@ div.contents hr {
 }
 
 .header-menu {
-	clear: both; 
-	height: 30px; 
+	clear: both;
+	height: 30px;
     padding-left: 5px;
 	padding-top: 1px;
 }
 
 #header-menu-link {
-	color: #FFFFFF; 
-	text-decoration: none; 
-	font-weight: bold; 
+	color: #FFFFFF;
+	text-decoration: none;
+	font-weight: bold;
 	font-size: 14px;
 }
 
 .header-menu-entry {
-	float: left; 
+	float: left;
 	margin-top: 5px;
 }
 
 .header-menu-entry-sep{
-	float: left; 
+	float: left;
 	margin-top: 5px;
 	width: 20px;
 }
 
 .header-submenu {
-	clear: both; 
-	height: 20px; 
+	clear: both;
+	height: 20px;
 }
 
 .header-submenu-term {
@@ -633,19 +636,19 @@ div.contents hr {
 }
 
 #header-submenu-link {
-	color: #FFFFFF; 
+	color: #FFFFFF;
 	text-decoration: none;
 }
 
 .header-submenu-entry {
-	float: left; 
-	height: 20px; 
+	float: left;
+	height: 20px;
 	background-color: #c73139
 }
 
 .header-submenu-entry-sep {
-	float: left; 
-	height: 20px; 
+	float: left;
+	height: 20px;
 	width: 20px;
 	background-color: #c73139
 }
@@ -760,7 +763,7 @@ table.classindex td { white-space: nowrap; }
 h2.memtitle {
     font-size: 13px;
     font-weight: normal;
-    color: #154374; 
+    color: #154374;
     margin-top: 15px;
     margin-bottom: 2px;
     padding: 0;
@@ -784,4 +787,3 @@ div.ttc { display: none; }
 
 /* Hide the namespace 'N' icon generated in newer Doxygen versions */
 .icona .icon { display: none; }
-
