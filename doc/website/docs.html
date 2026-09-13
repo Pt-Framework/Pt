@@ -26,6 +26,24 @@
         .docs-body a {
             text-decoration: none;
         }
+
+        .docs-module {
+            width: 33.333%;
+            padding: 0;
+        }
+
+        .docs-module .infobox-header {
+            text-align: left;
+            padding: 5px 25px 5px 25px;
+            color: #000000;
+            font-size: 15px;
+            border-bottom: 3px solid #CCCCCC;
+        }
+
+        .docs-module .infobox-body {
+            font-size: inherit;
+            padding: 0;
+        }
     </style>
 
 </head>
@@ -168,30 +186,10 @@
             </td>
         </tr>
         <tr>
-            <th class="docs-header">Concepts</th>
             <th class="docs-header">Tools</th>
+            <td colspan="2"></td>
         </tr>
         <tr>
-            <td valign="top" class="docs-body">
-            <ul>
-                <li><a href="htdocs/Pt-Basics-Page.html">Basic Types</a></li>
-                <li><a href="htdocs/utilities.html">Utilities</a></li>
-                <li><a href="htdocs/Pt-Signals-Page.html">Signals and Delegates</a></li>
-                <li><a href="htdocs/text.html">Text Processing</a></li>
-                <li><a href="htdocs/serialization.html">Serialization</a></li>
-                <li><a href="htdocs/logging.html">Logging</a></li>
-                <li><a href="htdocs/filesystem.html">File System Access</a></li>
-                <li><a href="htdocs/Pt-System-Tar-Page.html">Tar Archive I/O</a></li>
-                <li><a href="htdocs/plugins.html">Plugins</a></li>
-                <li><a href="htdocs/ssl.html">Secure Communication</a></li>
-                <li><a href="htdocs/http_client.html">HTTP Clients</a></li>
-                <li><a href="htdocs/http_server.html">HTTP Server and Services</a></li>
-                <li><a href="htdocs/xmlrpc.html">XML-RPC Communication</a></li>
-                <li><a href="htdocs/Pt-Unit-Page.html">Unit Testing</a></li>
-                <li><a href="htdocs/Pt-Gfx-Drawing-Page.html">Drawing Graphics and Text</a></li>
-                <li><a href="htdocs/Pt-Forms-Page.html">Graphical User Interfaces</a></li>
-            </ul>
-            </td>
             <td valign="top" class="docs-body">
                 <ul>
                     <li><a href="https://github.com/lezsakdomi/perforce-jam">Perforce Jam</a></li>
@@ -200,6 +198,104 @@
                     <li><a href="http://gcc.gnu.org/">GNU Toolset</a></li>
                     <li><a href="http://www.mingw.org/">GNU for Win32</a></li>
                 </ul>
+            </td>
+            <td colspan="2"></td>
+        </tr>
+        <tr>
+            <td colspan="3" valign="top" class="docs-body">
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header">Pt</div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/Pt-Basics-Page.html">Basic Types</a></li>
+                            <li><a href="htdocs/allocators.html">Allocators</a></li>
+                            <li><a href="htdocs/Pt-Signals-Page.html">Signals and Delegates</a></li>
+                            <li><a href="htdocs/text.html">Text Processing</a></li>
+                            <li><a href="htdocs/serialization.html">Serialization</a></li>
+                            <li><a href="htdocs/utilities.html">Utilities</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header">Pt-System</div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/filesystem.html">File System Access</a></li>
+                            <li><a href="htdocs/Pt-System-Concurrency-Page.html">Concurrency</a></li>
+                            <li><a href="htdocs/logging.html">Logging</a></li>
+                            <li><a href="htdocs/plugins.html">Plugins</a></li>
+                            <li><a href="htdocs/Pt-System-Tar-Page.html">Tar Archive I/O</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header">Pt-Gfx</div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/Pt-Gfx-Drawing-Page.html">Drawing Graphics and Text</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="clear">&nbsp;</div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header"><a href="htdocs/Pt-Forms-Page.html">Pt-Forms</a></div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Application">Application</a></li>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Widgets">Widgets</a></li>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Windows">Windows</a></li>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Updating">Updating</a></li>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Input">Input</a></li>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Icons">Icons</a></li>
+                            <li><a href="htdocs/Pt-Forms-Page.html#Pt-Forms-Page-Styling">Styling</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header">Pt-Http</div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/http_client.html">HTTP Clients</a></li>
+                            <li><a href="htdocs/http_server.html">HTTP Server and Services</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header">Pt-Ssl</div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/ssl.html">Secure Communication</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="clear">&nbsp;</div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header">Pt-XmlRpc</div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/xmlrpc.html">XML-RPC Communication</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="infobox docs-module" style="float:left">
+                    <div class="infobox-header"><a href="htdocs/Pt-Unit-Page.html">Pt-Unit</a></div>
+                    <div class="infobox-body">
+                        <ul>
+                            <li><a href="htdocs/Pt-Unit-Page.html">Unit Testing</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="clear">&nbsp;</div>
             </td>
         </tr>
     </table>

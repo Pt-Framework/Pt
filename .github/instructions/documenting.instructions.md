@@ -183,6 +183,8 @@ alone on the class reference page.
   contain hand-written navigation links to Doxygen output in `doc/website/*.html`.
   - Doxygen `\page <id>` produces `htdocs/<id>.html`.
   - Doxygen `@defgroup <id>` produces `htdocs/group__<id>.html`.
+- Maintain the matching module box in `doc/website/docs.html` when adding or
+  changing a documented module.
 
 # Doxygen Style
 
