@@ -28,11 +28,23 @@ detailed documentation of its owning API when it is local to that API.
 A group overview may summarize the whole feature area. Keep it to concepts,
 mechanisms, principles, and usage.
 
-A page assembles a group's overview and its class sections into one
-document. Section order and titles are the reading order. When a page
-assembles more than one group, open the page with a short table of
-contents naming the sections that follow, instead of relying on
-cross-references buried in each group.
+Groups may form a hierarchy. A subgroup declares its parent group with
+`@ingroup <ParentGroup>` in its `@defgroup` block. The parent group explains
+the module-wide model, while each subgroup documents one reader task within
+that model. A subgroup remains a complete group with its own overview and
+API membership.
+
+A page assembles group overviews and class sections into one document.
+There are two normal page shapes:
+
+- A topic page assembles one independent group and its class sections.
+- A module page copies its main group first, then copies its subgroups as
+  sections in the reader-facing order. The subgroups declare the same
+  parent with `@ingroup`; the page defines their reading order.
+
+Section order and titles are the reading order. A module page opens with a
+short table of contents naming the main sections that follow, instead of
+relying on cross-references buried in each group.
 
 Copied class documentation is a chapter of that document, not an appendix
 of type summaries. It must deepen the group overview and still stand
@@ -90,19 +102,19 @@ alone on the class reference page.
 - Use `@copydetails`, not `@copydoc`, to pull in group, class, or function
   documentation. The page keeps the section structure; the brief is not copied,
   so the detailed description must open as the chapter.
-- A page may copy multiple groups and individual namespaces, classes, enums,
-  or functions. A Doxygen group may appear on multiple pages. There is no
-  required one-to-one relationship between a page and a group.
+- A topic page normally copies one independent group and its public API. A
+  module page copies its main group, its subgroups, and their public API. A
+  Doxygen group may appear on multiple pages; there is no required
+  one-to-one relationship between a page and a group.
 - When assembling pages with @copydetails, ensure sections flow logically
   like a technical paper or article. Transitional prose and short glue may
   bridge sections, but the content itself always stays in the copied group
   or class doxygen comment.
-- Decide whether a group gets its own page or folds into another page's
-  section by coupling, not by counting files elsewhere in the repository.
-  Fold a group in only when its subject is inseparable from the target
-  page's object model, for example a base class the page already
-  documents (`Widget` deriving from `Responder`); do not fold it in
-  merely because the group is short.
+- Decide whether a feature is an independent topic group or a subgroup of a
+  module's main group by coupling, not by counting files elsewhere in the
+  repository. Make it a subgroup when it shares the module's object model
+  and belongs on the module page; otherwise give it an independent topic
+  page. Do not make it a subgroup merely because its documentation is short.
 - Test coupling with two questions: could the mechanism plausibly ship as
   a separate, swappable library or extension (own page), and does it need
   a vocabulary beyond the target page's base types (own page)? A short
@@ -113,10 +125,10 @@ alone on the class reference page.
   it (`@ref <Page>-<Section>`), not a group-only page ID, once it has no
   page of its own.
 - Give each copied type its own chapter on the appropriate heading level:
-  use `@section` on a single-group page and `@subsection` below a copied
-  group section on a multi-group page. Name the chapter after the
-  reader-facing role, not after an inventory label (`Widgets`, not `Views
-  and Widget Services`).
+  use `@section` on a topic page, and use `@section` for a module page's
+  subgroups and direct main-group chapters. Use `@subsection` for types
+  below a subgroup section. Name the chapter after the reader-facing role,
+  not after an inventory label (`Widgets`, not `Views and Widget Services`).
 - Put the central type of the object model or reader task where the
   reading order needs it, even if that is not inheritance or `main()`
   order.
