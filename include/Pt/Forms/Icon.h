@@ -42,27 +42,60 @@ namespace Forms {
 
 class IconImpl;
 
+/** @brief Extension that supplies images for %Icon objects.
+
+    Derive from %IconProvider only to implement a custom image source.
+    Ordinary code uses the built-in provider created by a default %Icon.
+    Implement every pure virtual function. %getImage() selects and, when
+    needed, loads the image for a requested size.
+
+    An %Icon constructed with a provider does not own it. Keep the
+    provider alive while those icons use it. Destroying the provider
+    detaches remaining icons. %getImage() on a detached icon is invalid.
+
+    @ingroup Pt-Forms-Icons
+*/
 class PT_FORMS_API IconProvider
 {
     friend class IconImpl;
 
     public:
+        /** @brief Creates an unused provider.
+        */
         IconProvider();
 
+        /** @brief Detaches remaining icons so they no longer use this provider.
+        */
         virtual ~IconProvider();
 
+        /** @brief Returns true when no images are registered.
+        */
         virtual bool empty() const = 0;
 
+        /** @brief Removes all registered images.
+        */
         virtual void clear() = 0;
 
+        /** @brief Registers @a image at @a size.
+        */
         virtual void addImage(const Gfx::SizeF& size, const Gfx::Image& image) = 0;
 
+        /** @brief Registers a file path at @a size.
+
+            The image loads on first use.
+        */
         virtual void addImage(const Gfx::SizeF& size, const System::Path& path) = 0;
 
+        /** @brief Returns the smallest registered size, or an empty size.
+        */
         virtual Gfx::SizeF minimumSize() const = 0;
         
+        /** @brief Returns the largest registered size, or an empty size.
+        */
         virtual Gfx::SizeF maximumSize() const = 0;
 
+        /** @brief Returns an image for the requested @a area.
+        */
         virtual const Gfx::Image& getImage(const Gfx::SizeF& area) = 0;
 
     private:
@@ -75,35 +108,112 @@ class PT_FORMS_API IconProvider
 };
 
 
+/** @brief Size-keyed icon used by controls.
+
+    An %Icon is not a %Widget. It holds images at one or more sizes so a
+    control can request an image for a layout size with %getImage().
+    %Label, %PushButton, %Panel, and list items take an %Icon through
+    %setIcon().
+
+    Default construction uses a built-in provider. %Icon(IconProvider&)
+    attaches a caller-owned provider that must outlive the icon. Copies
+    share the implementation until %addImage() or %clear().
+
+    %addImage() registers an image or a file path at a size. Passing only
+    an image uses the image pixel size as the key. A logical size may
+    differ from the pixel size. Path images load as PNG on first use
+    through %Application::loadImage(). A missing path yields an empty
+    image.
+
+    %getImage() returns a registered image for the requested area. The
+    built-in provider prefers the largest image that fits entirely in that
+    area. An empty icon yields an empty image. %minimumSize() and
+    %maximumSize() are the smallest and largest registered keys.
+
+    @code
+    Pt::Forms::Icon icon;
+    icon.addImage(Pt::Gfx::SizeF(16, 16), Pt::System::Path("app-16.png"));
+    icon.addImage(Pt::Gfx::SizeF(32, 32), Pt::System::Path("app-32.png"));
+
+    Pt::Forms::Label label;
+    label.setIcon(icon, Pt::Gfx::SizeF(16, 16));
+    label.setText("Hello");
+    @endcode
+
+    @ingroup Pt-Forms-Icons
+*/
 class PT_FORMS_API Icon
 {
     public:
+        /** @brief Creates an empty icon with a built-in provider.
+        */
         Icon();
 
+        /** @brief Shares images with @a icon until %addImage() or %clear().
+        */
         Icon(const Icon& icon);
 
+        /** @brief Attaches @a provider. The icon does not own it.
+        */
         Icon(IconProvider& provider);
 
+        /** @brief Releases this copy.
+
+            The last copy destroys the shared images and detaches from a
+            custom provider.
+        */
         ~Icon();
 
+        /** @brief Shares images with @a icon until %addImage() or %clear().
+        */
         Icon& operator=(const Icon& icon);
 
+        /** @brief Returns true when no images are registered.
+        */
         bool empty() const;
 
+        /** @brief Removes all images from this icon.
+
+            Copies of this icon are not affected.
+        */
         void clear();
 
+        /** @brief Registers @a image using its pixel size as the key.
+
+            Copies of this icon are not affected.
+        */
         void addImage(const Gfx::Image& image);
 
+        /** @brief Registers @a image at logical size @a size.
+
+            Copies of this icon are not affected. @a size may differ from
+            the image pixel size.
+        */
         void addImage(const Gfx::SizeF& size, const Gfx::Image& image);
 
+        /** @brief Registers a file path at logical size @a size.
+
+            The image loads on first use. Copies of this icon are not
+            affected.
+        */
         void addImage(const Gfx::SizeF& size, const System::Path& path);
 
+        /** @brief Registers a file path at @a width by @a height.
+        */
         void addImage(double width, double height, const System::Path& path);
 
+        /** @brief Returns an image for the requested @a area.
+
+            May load a path image on first use.
+        */
         const Gfx::Image& getImage(const Gfx::SizeF& area) const;
 
+        /** @brief Returns the smallest registered size, or an empty size.
+        */
         Gfx::SizeF minimumSize() const;
 
+        /** @brief Returns the largest registered size, or an empty size.
+        */
         Gfx::SizeF maximumSize() const;
 
     private:
