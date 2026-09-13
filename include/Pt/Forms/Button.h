@@ -36,51 +36,116 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Interaction control for press, release, and click.
+
+    A %Button holds a caption and hover, and runs a press, release, and
+    cancel protocol that ends in %clicked(). It is not a look. Derive
+    %PushButton for a command or %CheckBox for a boolean choice.
+
+    %setText() sets the caption and records a mnemonic from an ampersand.
+    Pointer, touch, mnemonic, shortcut, and the action key all run the
+    protocol. A release outside the widget, or a scroll during a press,
+    cancels.
+
+    Connect %clicked() to handle a completed gesture. Override
+    %onPressed(), %onReleased(), and %onCanceled() in a subclass to
+    implement the command or choice.
+
+    @code
+    download.setText("&Download");
+    download.clicked() += Pt::slot(*this, &MainWindow::onStartDownload);
+
+    void MainWindow::onStartDownload()
+    {
+        client.fetch(url);
+    }
+    @endcode
+
+    @ingroup Pt-Forms-Buttons
+*/
 class PT_FORMS_API Button : public Control
 {
     public:
         typedef Control Base;
 
     public:
+        /** @brief Creates a button that accepts focus.
+        */
         Button();
     
+        /** @brief Destroys the button.
+        */
         virtual ~Button();
 
+        /** @brief Returns the caption.
+        */
         const Pt::String& text() const;
 
+        /** @brief Sets the caption to @a t and records its mnemonic.
+        */
         void setText(const Pt::String& t);
 
+        /** @brief Returns true if the pointer is over the button.
+        */
         bool isHovered() const;
 
+        /** @brief Runs press then release as a completed click.
+        */
         void click();
 
+        /** @brief Returns the signal emitted after a completed click.
+        */
         Signal<>& clicked();
     
     protected:
+        /** @brief Called when a click gesture begins.
+        */
         virtual void onPressed();
 
+        /** @brief Called when a click gesture completes.
+        */
         virtual void onReleased();
 
+        /** @brief Called when a click gesture is abandoned.
+        */
         virtual void onCanceled();
 
     protected:
+        /** @brief Runs a completed click for the mnemonic character @a m.
+        */
         virtual void onMnemonic(Pt::Char m);
 
+        /** @brief Runs a completed click for the shortcut @a key.
+        */
         virtual void onShortcut(const Key& key);
 
+        /** @brief Presses or releases the button for the action key @a kev.
+        */
         virtual void onActionKey(const KeyEvent& kev);
 
     protected:
+        /** @brief Marks the button hovered and requests a repaint.
+        */
         virtual bool onEnterEvent(const EnterEvent& ev);
 
+        /** @brief Clears hover and requests a repaint.
+        */
         virtual bool onLeaveEvent(const LeaveEvent& ev);
 
+        /** @brief Forwards the focus change to the base control.
+        */
         virtual void onFocusEvent(const FocusEvent& ev);
 
+        /** @brief Presses, releases, or cancels from the mouse event @a ev.
+        */
         virtual bool onMouseEvent(const MouseEvent& ev);
 
+        /** @brief Presses, releases, or cancels from the touch event @a ev.
+        */
         virtual bool onTouchEvent(const TouchEvent& ev);
 
+        /** @brief Cancels an in-progress click and forwards @a ev.
+        */
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
     private:

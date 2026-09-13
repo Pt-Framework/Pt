@@ -37,73 +37,164 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Control that shows a value within a range.
+
+    A %ProgressBar maps an integer value between %minimum() and
+    %maximum() to a ratio from 0 to 1. %setRange() sets the bounds.
+    %setValue() clamps the value and emits %valueChanged(). %progress()
+    returns the ratio used to fill the track. %reset() returns to the
+    minimum.
+
+    The bar owns a %ProgressBarStyler. On invalidate it binds that
+    styler. Appearance getters and setters overlay the application
+    style. %setRenderer() assigns a %ProgressBarRenderer.
+    %progressBarState() is the snapshot passed to paint layers.
+
+    @code
+    Pt::Forms::Label caption;
+    caption.setText("Copying photos...");
+
+    Pt::Forms::ProgressBar copy;
+    copy.setRange(0, photoCount);
+    copy.setValue(0);
+
+    void Album::onPhotoCopied()
+    {
+        copy.setValue(copy.value() + 1);
+    }
+    @endcode
+
+    @ingroup Pt-Forms-Displays
+*/
 class PT_FORMS_API ProgressBar : public Control
 {
     public:
         typedef Control Base;
 
     public:
+        /** @brief Creates a progress bar with range 0 to 100 and value 50.
+        */
         ProgressBar();
 
+        /** @brief Destroys the progress bar.
+        */
         virtual ~ProgressBar();
 
+        /** @brief Returns the upper bound of the range.
+        */
         int maximum() const;
 
+        /** @brief Returns the lower bound of the range.
+        */
         int minimum() const;
 
+        /** @brief Sets the range to @a minpos through @a maxpos.
+        */
         void setRange(int minpos, int maxpos);
 
+        /** @brief Returns the current value.
+        */
         int value() const;
 
+        /** @brief Sets the value to @a n, clamped to the range, and emits %valueChanged().
+        */
         void setValue(int n);
 
+        /** @brief Returns the filled ratio from 0 to 1.
+        */
         float progress() const;
 
+        /** @brief Sets the value to the minimum.
+        */
         void reset();
 
+        /** @brief Returns the signal emitted after %setValue() changes the value.
+        */
         Signal<int>& valueChanged();
 
     public:
+        /** @brief Returns the effective background brush.
+        */
         const Gfx::Brush& background() const;
 
+        /** @brief Sets the widget-local background brush to @a b.
+        */
         void setBackground(const Gfx::Brush& b);
 
+        /** @brief Returns the effective foreground brush.
+        */
         const Gfx::Brush& foreground() const;
 
+        /** @brief Sets the widget-local foreground brush to @a b.
+        */
         void setForeground(const Gfx::Brush& b);
 
+        /** @brief Returns the effective contour pen.
+        */
         const Gfx::Pen& contour() const;
 
+        /** @brief Sets the widget-local contour pen to @a p.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Returns the effective text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the widget-local text color to @a color.
+        */
         void setTextColor(const Gfx::Color& color);
 
+        /** @brief Returns the effective font.
+        */
         Gfx::Font font() const;
 
+        /** @brief Sets the widget-local font to @a font.
+        */
         void setFont(const Gfx::Font& font);
 
+        /** @brief Sets the widget-local font size to @a size.
+        */
         void setFontSize(std::size_t size);
 
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
         void setFontWeight(Gfx::Font::Weight weight);
 
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
         void setFontSlant(Gfx::Font::Slant slant);
 
+        /** @brief Assigns @a renderer as the family renderer.
+
+            A null renderer falls back to the current style on the next bind.
+        */
         void setRenderer(ProgressBarRenderer* renderer);
 
+        /** @brief Returns the snapshot passed to paint layers.
+        */
         ProgressBarState progressBarState() const;
 
     protected:
+        /** @brief Binds the styler and requests relayout.
+        */
         virtual void onInvalidate();
 
+        /** @brief Measures the track and frame.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Places the track and filled portion in @a rect.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
+        /** @brief Paints the chrome for the current progress.
+        */
         virtual void onPaint(PaintContext& context,
                             const Gfx::RectF& updateRect);
 
+        /** @brief Paints track, filled portion, and text for @a state.
+        */
         virtual void onPaintChrome(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const Gfx::RectF& trackRect,

@@ -36,9 +36,13 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores the transient render state for a check box widget.
+/** @brief Transient visual state of a check box.
 
-    Carries only widget state that render hooks may observe directly.
+    %CheckBoxState is the snapshot a %CheckBox passes to measure, layout,
+    and paint. It is not the application model. Enabled, hovered, focused,
+    and checked describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Buttons
 */
 class PT_FORMS_API CheckBoxState
 {
@@ -86,16 +90,29 @@ class PT_FORMS_API CheckBoxState
         bool _checked;
 };
 
-/** @brief Renders the visual appearance of a check box widget.
+/** @brief Renders the look of a check box.
 
-    Provides rendering primitives for the check indicator, label text,
-    and mnemonic underline. Subclasses override the protected virtuals.
+    A %CheckBoxRenderer is a %Style::Facet for the check-box family.
+    Named measure methods run inside-out: indicator, content, then
+    frame. Named layout methods run outside-in: frame, then content
+    and mnemonic. Named render methods paint prepared rectangles. The
+    widget owns geometry and orchestrates those passes. The renderer
+    does not mutate widget geometry.
+
+    Derive a renderer to change the look of check boxes. Register it
+    on a %Style, or assign it to a widget with %CheckBox::setRenderer().
+
+    @ingroup Pt-Forms-Buttons
 */
 class PT_FORMS_API CheckBoxRenderer : public Renderer
 {
     public:
+        /** @brief Constructs a renderer with reference count @a refs.
+        */
         explicit CheckBoxRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~CheckBoxRenderer();
 
         /** @brief Creates a new default-constructed instance that the caller owns.
@@ -167,24 +184,36 @@ class PT_FORMS_API CheckBoxRenderer : public Renderer
                             const CheckBoxState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual CheckBoxRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Returns the natural size of the checkable area.
+        */
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
 
+        /** @brief Returns the combined size of the checkable area and caption.
+        */
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             const Gfx::SizeF& indicatorSize,
                                             const Gfx::SizeF& textSize) = 0;
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Returns the content rectangle within @a frameRect.
+        */
         virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
                                          const Gfx::RectF& frameRect) = 0;
 
+        /** @brief Partitions @a contentRect into checkable area and caption.
+        */
         virtual void onLayoutContent(PaintSurface& surface,
                                      const Gfx::RectF& contentRect,
                                      const Gfx::SizeF& indicatorSize,
@@ -192,35 +221,55 @@ class PT_FORMS_API CheckBoxRenderer : public Renderer
                                      Gfx::RectF& indicatorRect,
                                      Gfx::RectF& textRect) = 0;
 
+        /** @brief Returns the mnemonic underline rectangle.
+        */
         virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
                                             const String& text,
                                             const Gfx::PointF& textPos,
                                             const Gfx::FontMetrics& fontMetrics,
                                             String::size_type mnemonicIndex) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Paints the checkable area for @a state.
+        */
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& boxRect,
                                     const CheckBoxState& state) = 0;
 
+        /** @brief Paints @a text at @a pos for @a state.
+        */
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
                                   const Gfx::PointF& pos,
                                   const CheckBoxState& state) = 0;
 
+        /** @brief Paints the mnemonic underline for @a state.
+        */
         virtual void onRenderMnemonic(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const Gfx::RectF& mnemonic,
                                       const CheckBoxState& state) = 0;
 };
 
-/** @brief Binds a check box widget to the currently active renderer.
+/** @brief Binds a check box to the current style renderer.
 
-    Keeps the active renderer binding for the shared style renderer, a private
-    override clone, or an explicitly assigned custom renderer.
+    A %CheckBox owns a %CheckBoxStyler. Applications do not construct
+    one. Call %Styler::bind() from %onInvalidate(). When the overlay
+    has no local options, bind uses the shared renderer from the style.
+    Local options use a private clone. %setRenderer() keeps an assigned
+    renderer until it is cleared. A null renderer falls back on the
+    next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Buttons
 */
 class PT_FORMS_API CheckBoxStyler : public Styler
 {
@@ -349,10 +398,16 @@ class PT_FORMS_API CheckBoxStyler : public Styler
         const StyleOptions& options() const;
 
     protected:
+        /** @brief Binds the overlay to @a global and returns it.
+        */
         virtual StyleOptions& onBindOptions(const StyleOptions& global);
 
+        /** @brief Returns the shared check-box renderer from @a style, or 0.
+        */
         virtual Renderer* onStyleRenderer(const Style& style);
 
+        /** @brief Creates an independent clone of the style renderer, or 0.
+        */
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:

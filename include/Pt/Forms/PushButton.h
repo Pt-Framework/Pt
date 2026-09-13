@@ -44,82 +44,183 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Command button with optional toggle, icon, and caption.
+
+    A %PushButton is a %Button that presents a command. A completed click
+    emits %clicked() and, unless it is a toggle, returns to the unpressed
+    look. %setToggle() keeps the pressed state after release so the button
+    can show an on/off command such as Bold.
+
+    %setIcon() places a picture next to the caption. %setLayout() chooses
+    the %Direction of icon and text. %setFlat() drops the framed face.
+
+    The button owns a %ButtonStyler. On invalidate it calls %Styler::bind().
+    Appearance getters and setters read and write widget-local options.
+    %setRenderer() assigns a %ButtonRenderer until it is cleared. Measure,
+    layout, and paint call typed methods on the styler. %ButtonState is the
+    snapshot passed to paint layers.
+
+    @code
+    Pt::Forms::PushButton send;
+    send.setText("&Send");
+    send.clicked() += Pt::slot(*this, &MailComposer::onSend);
+
+    void MailComposer::onSend()
+    {
+        mailer.send(message);
+    }
+    @endcode
+
+    @ingroup Pt-Forms-Buttons
+*/
 class PT_FORMS_API PushButton : public Button
 {
     public:
         typedef Button Base;
 
     public:
+        /** @brief Creates a command button.
+        */
         PushButton();
 
+        /** @brief Destroys the button.
+        */
         virtual ~PushButton();
 
+        /** @brief Returns true if the button is visually pressed.
+        */
         bool isPressed() const;
 
+        /** @brief Sets whether the button is visually pressed.
+        */
         void setPressed(bool pressed);
 
+        /** @brief Returns true if the button stays pressed after a click.
+        */
         bool isToggle() const;
 
+        /** @brief Sets whether the button stays pressed after a click.
+        */
         void setToggle(bool toggle);
 
+        /** @brief Sets the icon shown beside the caption.
+
+            @a iconSize is the logical size requested from @a icon.
+        */
         void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);
 
+        /** @brief Returns true if the button uses a flat face.
+        */
         bool isFlat() const;
 
+        /** @brief Sets whether the button uses a flat face.
+        */
         void setFlat(bool f);
 
+        /** @brief Sets the direction of icon and caption to @a d.
+        */
         void setLayout(Direction d);
 
     public:
+        /** @brief Returns the effective foreground brush.
+        */
         const Gfx::Brush& foreground() const;
 
+        /** @brief Sets the widget-local foreground brush to @a b.
+        */
         void setForeground(const Gfx::Brush& b);
 
+        /** @brief Returns the effective contour pen.
+        */
         const Gfx::Pen& contour() const;
 
+        /** @brief Sets the widget-local contour pen to @a p.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Returns the effective accent color.
+        */
         const Gfx::Color& accentColor() const;
 
+        /** @brief Sets the widget-local accent color to @a color.
+        */
         void setAccentColor(const Gfx::Color& color);
 
+        /** @brief Returns the effective highlight color.
+        */
         const Gfx::Color& highlightColor() const;
 
+        /** @brief Sets the widget-local highlight color to @a c.
+        */
         void setHighlightColor(const Gfx::Color& c);
 
+        /** @brief Returns the effective text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the widget-local text color to @a color.
+        */
         void setTextColor(const Gfx::Color& color);
 
+        /** @brief Returns the effective font.
+        */
         Gfx::Font font() const;
 
+        /** @brief Sets the widget-local font to @a font.
+        */
         void setFont(const Gfx::Font& font);
 
+        /** @brief Sets the widget-local font size to @a size.
+        */
         void setFontSize(std::size_t size);
 
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
         void setFontWeight(Gfx::Font::Weight weight);
 
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
         void setFontSlant(Gfx::Font::Slant slant);
 
+        /** @brief Assigns @a renderer as the family renderer.
+
+            A null renderer falls back to the current style on the next bind.
+        */
         void setRenderer(ButtonRenderer* renderer);
 
     protected:
+        /** @brief Presses the button, or toggles it when %isToggle() is true.
+        */
         virtual void onPressed();
 
+        /** @brief Completes the click and emits %clicked().
+        */
         virtual void onReleased();
 
+        /** @brief Restores the pressed state after an abandoned click.
+        */
         virtual void onCanceled();
 
     protected:
+        /** @brief Invalidates a prepared icon after a scale change.
+        */
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
     protected:
+        /** @brief Binds the styler and prepares the icon.
+        */
         virtual void onInvalidate();
 
+        /** @brief Measures icon, caption, and frame.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Places icon, caption, and mnemonic in @a rect.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
+        /** @brief Paints background, frame, icon, caption, and mnemonic.
+        */
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
         /** @brief Paints the button background layer.

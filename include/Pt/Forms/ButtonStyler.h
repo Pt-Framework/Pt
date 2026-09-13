@@ -37,10 +37,13 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores the widget-local visual state for a push button.
+/** @brief Transient visual state of a push button.
 
-    Carries only the transient interaction state that render and icon hooks
-    may observe directly.
+    %ButtonState is the snapshot a %PushButton passes to measure, layout,
+    and paint. It is not the application model. Enabled, hovered, focused,
+    pressed, and flat describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Buttons
 */
 class PT_FORMS_API ButtonState
 {
@@ -97,16 +100,29 @@ class PT_FORMS_API ButtonState
         bool _flat;
 };
 
-/** @brief Renders the visual appearance of a push button.
+/** @brief Renders the look of a push button.
 
-    Provides rendering primitives for button surfaces, text, mnemonic
-    underlines, and icons. Subclasses override the protected virtuals.
+    A %ButtonRenderer is a %Style::Facet for the push-button family.
+    Named measure methods run inside-out: content, then frame. Named
+    layout methods run outside-in: frame, then content and mnemonic.
+    Named render methods paint prepared rectangles. The widget owns
+    geometry and orchestrates those passes. The renderer does not
+    mutate widget geometry.
+
+    Derive a renderer to change the look of push buttons. Register it
+    on a %Style, or assign it to a widget with %PushButton::setRenderer().
+
+    @ingroup Pt-Forms-Buttons
 */
 class PT_FORMS_API ButtonRenderer : public Renderer
 {
     public:
+        /** @brief Constructs a renderer with reference count @a refs.
+        */
         explicit ButtonRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~ButtonRenderer();
 
         /** @brief Creates a new default-constructed instance that the caller owns.
@@ -204,31 +220,45 @@ class PT_FORMS_API ButtonRenderer : public Renderer
                         const ButtonState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual ButtonRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Measures icon and text arranged by @a direction.
+        */
         virtual Gfx::SizeF onMeasureContent(PaintSurface& surface,
                                             Direction direction,
                                             const Gfx::SizeF& iconSize,
                                             const Gfx::SizeF& textSize) = 0;
 
+        /** @brief Returns the content rectangle within @a frameRect.
+        */
         virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
                                          const Gfx::RectF& frameRect) = 0;
 
+        /** @brief Returns the mnemonic underline rectangle.
+        */
         virtual Gfx::RectF onLayoutMnemonic(PaintSurface& surface,
                                             const String& text,
                                             const Gfx::PointF& textPos,
                                             const Gfx::FontMetrics& fontMetrics,
                                             String::size_type mnemonicIndex) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Partitions @a contentRect into icon and text rectangles.
+        */
         virtual void onLayoutContent(PaintSurface& surface,
                                      const Gfx::RectF& contentRect,
                                      Direction direction,
@@ -237,29 +267,41 @@ class PT_FORMS_API ButtonRenderer : public Renderer
                                      Gfx::RectF& iconRect,
                                      Gfx::RectF& textRect) = 0;
 
+        /** @brief Paints the background fill for @a state.
+        */
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& rect,
                                         const ButtonState& state) = 0;
 
+        /** @brief Prepares @a picture from @a icon for @a state.
+        */
         virtual void onPrepareIcon(const Gfx::Image& icon,
                                    Pixmap& picture,
                                    const ButtonState& state) const = 0;
 
+        /** @brief Paints the button chrome for @a state.
+        */
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const ButtonState& state) = 0;
 
+        /** @brief Paints @a text at @a pos for @a state.
+        */
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& pos,
                                   const ButtonState& state) = 0;
 
+        /** @brief Paints the mnemonic underline for @a state.
+        */
         virtual void onRenderMnemonic(PaintContext& context,
                                       const Gfx::RectF& rect,
                                       const Gfx::RectF& mnemonic,
                                       const ButtonState& state) = 0;
 
+        /** @brief Paints @a picture at @a pos for @a state.
+        */
         virtual void onRenderIcon(PaintContext& context,
                                   const Gfx::RectF& rect,
                                   const Pixmap& picture,
@@ -267,7 +309,20 @@ class PT_FORMS_API ButtonRenderer : public Renderer
                                   const ButtonState& state) = 0;
 };
 
-/** @brief Button styler.
+/** @brief Binds a push button to the current style renderer.
+
+    A %PushButton owns a %ButtonStyler. Applications do not construct
+    one. Call %Styler::bind() from %onInvalidate(). When the overlay
+    has no local options, bind uses the shared renderer from the style.
+    Local options use a private clone. %setRenderer() keeps an assigned
+    renderer until it is cleared. A null renderer falls back on the
+    next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Buttons
 */
 class PT_FORMS_API ButtonStyler : public Styler
 {
@@ -436,10 +491,16 @@ class PT_FORMS_API ButtonStyler : public Styler
         const StyleOptions& options() const;
 
     protected:
+        /** @brief Binds the overlay to @a styleOptions and returns it.
+        */
         virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
 
+        /** @brief Returns the shared button renderer from @a style, or 0.
+        */
         virtual Renderer* onStyleRenderer(const Style& style);
 
+        /** @brief Creates an independent clone of the style renderer, or 0.
+        */
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:

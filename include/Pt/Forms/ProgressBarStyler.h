@@ -35,17 +35,35 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Transient visual state of a progress bar.
+
+    %ProgressBarState is the snapshot a %ProgressBar passes to measure,
+    layout, and paint. It is not the application model. Enabled and
+    focused describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Displays
+*/
 class PT_FORMS_API ProgressBarState
 {
     public:
+        /** @brief Constructs an empty progress bar state.
+        */
         ProgressBarState();
 
+        /** @brief Returns true if the widget is currently enabled.
+        */
         bool isEnabled() const;
 
+        /** @brief Sets whether the widget is enabled.
+        */
         void setEnabled(bool value);
 
+        /** @brief Returns true if the widget currently has focus.
+        */
         bool isFocused() const;
 
+        /** @brief Sets whether the widget has focus.
+        */
         void setFocused(bool value);
 
     private:
@@ -53,23 +71,46 @@ class PT_FORMS_API ProgressBarState
         bool _focused;
 };
 
-/** @brief Renders the visual appearance of a progress bar.
+/** @brief Renders the look of a progress bar.
+
+    A %ProgressBarRenderer is a %Style::Facet for the progress-bar
+    family. Named measure methods run inside-out. Named layout methods
+    run outside-in. Named render methods paint prepared rectangles.
+    The widget owns geometry and orchestrates those passes. The
+    renderer does not mutate widget geometry.
+
+    Derive a renderer to change the look of progress bars. Register it
+    on a %Style, or assign it with %ProgressBar::setRenderer().
+
+    @ingroup Pt-Forms-Displays
 */
 class PT_FORMS_API ProgressBarRenderer : public Renderer
 {
     public:
+        /** @brief Constructs a renderer with reference count @a refs.
+        */
         explicit ProgressBarRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~ProgressBarRenderer();
 
+        /** @brief Creates a new default-constructed instance that the caller owns.
+        */
         ProgressBarRenderer* create() const;
 
     public:
+        /** @brief Returns the outer size including the frame for @a contentSize.
+        */
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
 
+        /** @brief Returns the natural size of the track.
+        */
         Gfx::SizeF measureBar(PaintSurface& surface);
 
+        /** @brief Places the track and text rectangles in @a rect.
+        */
         void layoutChrome(PaintSurface& surface,
                           const Gfx::RectF& rect,
                           const Gfx::SizeF& barSize,
@@ -77,14 +118,20 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                           Gfx::RectF& barRect,
                           Gfx::RectF& textRect);
 
+        /** @brief Places the track and filled portion for @a progressRatio.
+        */
         void layoutBar(PaintSurface& surface,
                        const Gfx::RectF& barRect,
                        float progressRatio,
                        Gfx::RectF& trackRect,
                        Gfx::RectF& chunkRect);
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         const Painter& textPainter(PaintSurface& surface);
 
+        /** @brief Paints track, filled portion, and text for @a state.
+        */
         void renderChrome(PaintContext& context,
                           const Gfx::RectF& rect,
                           const Gfx::RectF& trackRect,
@@ -94,19 +141,27 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                           const Gfx::PointF& textPos,
                           const ProgressBarState& state);
 
+        /** @brief Paints the track and filled portion for @a state.
+        */
         void renderBar(PaintContext& context,
                        const Gfx::RectF& trackRect,
                        const Gfx::RectF& chunkRect,
                        const ProgressBarState& state);
 
+        /** @brief Paints the track for @a state.
+        */
         void renderTrack(PaintContext& context,
                          const Gfx::RectF& trackRect,
                          const ProgressBarState& state);
 
+        /** @brief Paints the filled portion for @a state.
+        */
         void renderChunk(PaintContext& context,
                          const Gfx::RectF& chunkRect,
                          const ProgressBarState& state);
 
+        /** @brief Paints @a text at @a textPos for @a state.
+        */
         void renderText(PaintContext& context,
                         const Gfx::RectF& textRect,
                         const Gfx::RectF& chunkRect,
@@ -115,17 +170,25 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                         const ProgressBarState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual ProgressBarRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Returns the natural size of the track.
+        */
         virtual Gfx::SizeF onMeasureBar(PaintSurface& surface) = 0;
 
+        /** @brief Places the track and text rectangles in @a rect.
+        */
         virtual void onLayoutChrome(PaintSurface& surface,
                                     const Gfx::RectF& rect,
                                     const Gfx::SizeF& barSize,
@@ -133,14 +196,20 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                                     Gfx::RectF& barRect,
                                     Gfx::RectF& textRect) = 0;
 
+        /** @brief Places the track and filled portion for @a progressRatio.
+        */
         virtual void onLayoutBar(PaintSurface& surface,
                                  const Gfx::RectF& barRect,
                                  float progressRatio,
                                  Gfx::RectF& trackRect,
                                  Gfx::RectF& chunkRect) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Paints track, filled portion, and text for @a state.
+        */
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& trackRect,
@@ -150,19 +219,27 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                                     const Gfx::PointF& textPos,
                                     const ProgressBarState& state);
 
+        /** @brief Paints the track and filled portion for @a state.
+        */
         virtual void onRenderBar(PaintContext& context,
                                  const Gfx::RectF& trackRect,
                                  const Gfx::RectF& chunkRect,
                                  const ProgressBarState& state);
 
+        /** @brief Paints the track for @a state.
+        */
         virtual void onRenderTrack(PaintContext& context,
                                    const Gfx::RectF& trackRect,
                                    const ProgressBarState& state) = 0;
 
+        /** @brief Paints the filled portion for @a state.
+        */
         virtual void onRenderChunk(PaintContext& context,
                                    const Gfx::RectF& chunkRect,
                                    const ProgressBarState& state) = 0;
 
+        /** @brief Paints @a text at @a textPos for @a state.
+        */
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const Gfx::RectF& chunkRect,
@@ -171,7 +248,20 @@ class PT_FORMS_API ProgressBarRenderer : public Renderer
                                   const ProgressBarState& state) = 0;
 };
 
-/** @brief Progress bar styler.
+/** @brief Binds a progress bar to the current style renderer.
+
+    A %ProgressBar owns a %ProgressBarStyler. Applications do not
+    construct one. Call %Styler::bind() from %onInvalidate(). When
+    the overlay has no local options, bind uses the shared renderer
+    from the style. Local options use a private clone. %setRenderer()
+    keeps an assigned renderer until it is cleared. A null renderer
+    falls back on the next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Displays
 */
 class PT_FORMS_API ProgressBarStyler : public Styler
 {
@@ -316,10 +406,16 @@ class PT_FORMS_API ProgressBarStyler : public Styler
         const StyleOptions& options() const;
 
     protected:
+        /** @brief Binds the overlay to @a styleOptions and returns it.
+        */
         virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
 
+        /** @brief Returns the shared progress-bar renderer from @a style, or 0.
+        */
         virtual Renderer* onStyleRenderer(const Style& style);
 
+        /** @brief Creates an independent clone of the style renderer, or 0.
+        */
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:

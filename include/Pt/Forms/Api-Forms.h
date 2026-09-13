@@ -123,6 +123,16 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Buttons Buttons
+
+    @ingroup Pt-Forms
+*/
+
+/** @defgroup Pt-Forms-Displays Displays
+
+    @ingroup Pt-Forms
+*/
+
 /** @defgroup Pt-Forms-Icons Icons and Text
 
     @ingroup Pt-Forms

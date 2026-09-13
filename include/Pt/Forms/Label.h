@@ -45,69 +45,159 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Control that displays text or an icon.
+
+    A %Label presents a caption or a picture. It does not edit text.
+    %setText() sets the caption and clears any icon. %setIcon() shows
+    an icon instead of text. %setAlignment() places the content in the
+    label bounds.
+
+    %setBackground() and %setContour() enable a fill or frame.
+    %setBackground(false) and %setFrame(false) turn them off without
+    replacing the style.
+
+    The label owns a %PanelStyler and shares the panel appearance family
+    with %Panel. On invalidate it binds that styler. Measure, layout, and
+    paint call typed methods on it. %TextBlock lays out wrapped text.
+    %Icon supplies pictures. Neither is a widget.
+
+    @code
+    Pt::Forms::Label heading;
+    heading.setText("Inbox");
+    heading.setAlignment(Pt::Forms::Alignment::Left);
+    heading.setFontWeight(Pt::Gfx::Font::Weight::Bold);
+
+    Pt::Forms::Label empty;
+    empty.setText("No messages");
+    empty.setAlignment(Pt::Forms::Alignment::Center);
+    empty.setTextColor(Pt::Gfx::Color(120, 120, 120));
+    @endcode
+
+    @ingroup Pt-Forms-Displays
+*/
 class PT_FORMS_API Label : public Control
 {
     public:
         typedef Control Base;
 
     public:
+        /** @brief Creates an empty label.
+        */
         Label();
 
+        /** @brief Destroys the label.
+        */
         virtual ~Label();
 
+        /** @brief Returns the alignment of the caption or icon.
+        */
         Alignment alignment() const;
 
+        /** @brief Sets the alignment of the caption or icon to @a a.
+        */
         void setAlignment(Alignment a);
 
+        /** @brief Returns the caption.
+        */
         const Pt::String& text() const;
 
+        /** @brief Sets the caption to @a text and clears any icon.
+        */
         void setText(const Pt::String& text);
 
+        /** @brief Shows @a icon instead of the caption.
+
+            @a iconSize is the logical size requested from @a icon.
+        */
         void setIcon(const Icon& icon, const Gfx::SizeF& iconSize);
 
     public:
+        /** @brief Returns the background brush, or 0 if the fill is off.
+        */
         const Gfx::Brush* background() const;
 
+        /** @brief Sets the widget-local background brush to @a b and enables the fill.
+        */
         void setBackground(const Gfx::Brush& b);
 
+        /** @brief Sets whether the label paints a background fill.
+        */
         void setBackground(bool b);
 
+        /** @brief Returns the contour pen, or 0 if the frame is off.
+        */
         const Gfx::Pen* contour() const;
 
+        /** @brief Sets the widget-local contour pen to @a p and enables the frame.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Sets whether the label paints a frame.
+        */
         void setFrame(bool b);
 
+        /** @brief Returns the effective text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the widget-local text color to @a color.
+        */
         void setTextColor(const Gfx::Color& color);
 
+        /** @brief Returns the effective font.
+        */
         Gfx::Font font() const;
 
+        /** @brief Sets the widget-local font to @a font.
+        */
         void setFont(const Gfx::Font& font);
 
+        /** @brief Sets the widget-local font size to @a size.
+        */
         void setFontSize(std::size_t size);
 
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
         void setFontWeight(Gfx::Font::Weight weight);
 
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
         void setFontSlant(Gfx::Font::Slant slant);
 
+        /** @brief Assigns @a renderer as the family renderer.
+
+            A null renderer falls back to the current style on the next bind.
+        */
         void setRenderer(PanelRenderer* renderer);
 
     protected:
+        /** @brief Measures the caption or icon and the frame.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Places the caption or icon in @a rect.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
+        /** @brief Invalidates a prepared icon after a scale change.
+        */
         virtual void onRescaleEvent(const RescaleEvent& ev);
 
+        /** @brief Forwards the resize to the base control.
+        */
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     protected:
+        /** @brief Forwards the screen connection to the base control.
+        */
         virtual void onConnect(Screen& screen);
 
+        /** @brief Binds the styler and prepares the icon.
+        */
         virtual void onInvalidate();
 
+        /** @brief Paints background, frame, icon, and caption.
+        */
         virtual void onPaint(PaintContext& context,
                              const Gfx::RectF& rect);
 

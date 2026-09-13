@@ -36,9 +36,13 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores the transient render state for panel-like widgets.
+/** @brief Transient visual state of a panel-like widget.
 
-    Carries only widget state that render hooks may observe directly.
+    %PanelState is the snapshot a %Panel or %Label passes to measure,
+    layout, and paint. It is not the application model. Enabled and
+    focused describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Displays
 */
 class PT_FORMS_API PanelState
 {
@@ -68,16 +72,29 @@ class PT_FORMS_API PanelState
         bool _focused;
 };
 
-/** @brief Renders the visual appearance of a panel-like widget.
+/** @brief Renders the look of a panel-like widget.
 
-    Provides rendering primitives for panel backgrounds, frames, text,
-    and icons. Subclasses override the protected virtuals.
+    A %PanelRenderer is a %Style::Facet for %Panel and %Label. Named
+    measure methods run inside-out. Named layout methods run
+    outside-in. Named render methods paint prepared rectangles. The
+    widget owns geometry and orchestrates those passes. The renderer
+    does not mutate widget geometry.
+
+    Derive a renderer to change the look of panels and labels.
+    Register it on a %Style, or assign it with %Panel::setRenderer()
+    or %Label::setRenderer().
+
+    @ingroup Pt-Forms-Displays
 */
 class PT_FORMS_API PanelRenderer : public Renderer
 {
     public:
+        /** @brief Constructs a renderer with reference count @a refs.
+        */
         explicit PanelRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~PanelRenderer();
 
         /** @brief Creates a new default-constructed instance that the caller owns.
@@ -128,34 +145,50 @@ class PT_FORMS_API PanelRenderer : public Renderer
                         const PanelState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual PanelRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Returns the content rectangle within @a frameRect.
+        */
         virtual Gfx::RectF onLayoutFrame(PaintSurface& surface,
                                          const Gfx::RectF& frameRect) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Paints the background fill for @a state.
+        */
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& rect,
                                         const PanelState& state) = 0;
 
+        /** @brief Paints the frame for @a state.
+        */
         virtual void onRenderFrame(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const PanelState& state) = 0;
 
+        /** @brief Paints @a text at @a pos for @a state.
+        */
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& rect,
                                   const String& text,
                                   const Gfx::PointF& pos,
                                   const PanelState& state) = 0;
 
+        /** @brief Paints @a picture at @a pos for @a state.
+        */
         virtual void onRenderIcon(PaintContext& context,
                                   const Gfx::RectF& rect,
                                   const Pixmap& picture,
@@ -163,7 +196,20 @@ class PT_FORMS_API PanelRenderer : public Renderer
                                   const PanelState& state) = 0;
 };
 
-/** @brief Panel styler.
+/** @brief Binds a panel-like widget to the current style renderer.
+
+    A %Panel or %Label owns a %PanelStyler. Applications do not
+    construct one. Call %Styler::bind() from %onInvalidate(). When
+    the overlay has no local options, bind uses the shared renderer
+    from the style. Local options use a private clone. %setRenderer()
+    keeps an assigned renderer until it is cleared. A null renderer
+    falls back on the next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Displays
 */
 class PT_FORMS_API PanelStyler : public Styler
 {
@@ -273,10 +319,16 @@ class PT_FORMS_API PanelStyler : public Styler
         const StyleOptions& options() const;
 
     protected:
+        /** @brief Binds the overlay to @a styleOptions and returns it.
+        */
         virtual StyleOptions& onBindOptions(const StyleOptions& styleOptions);
 
+        /** @brief Returns the shared panel renderer from @a style, or 0.
+        */
         virtual Renderer* onStyleRenderer(const Style& style);
 
+        /** @brief Creates an independent clone of the style renderer, or 0.
+        */
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:
