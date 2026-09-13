@@ -552,7 +552,7 @@ TH.dirtab { background: #e8eef2;
 }
 
 div.directory span.arrow {
-    display: none;
+    visibility: hidden;
 }
 
 /* Page elements */
