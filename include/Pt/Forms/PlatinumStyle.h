@@ -809,11 +809,19 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
 };
 
 
+/** @brief Provides the built-in default %Style.
+
+    @ingroup Pt-Forms-Styling
+*/
 class PT_FORMS_API PlatinumStyle : public Style
 {
     public:
+        /** @brief Constructor.
+        */
         PlatinumStyle();
 
+        /** @brief Destructor.
+        */
         ~PlatinumStyle();
 };
 

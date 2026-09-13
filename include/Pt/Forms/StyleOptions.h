@@ -50,27 +50,46 @@ namespace Forms {
 
 class StyleOptions;
 
-/** @brief Non-template base for a typed style option.
+/** @brief Defines the base type of a named appearance option.
 
     Each concrete option type implements %clone(), %typeId(), and %name().
     The lookup key is the option class, not the stored value type.
+    Applications use the built-in option types. Derive only to add a
+    new token to the contract.
+
+    @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API StyleOption
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~StyleOption();
 
+        /** @brief Returns a copy of this option.
+        */
         virtual StyleOption* clone() const = 0;
 
+        /** @brief Returns the option class used as the lookup key.
+        */
         virtual const std::type_info& typeId() const = 0;
 
+        /** @brief Returns the option name.
+        */
         virtual const char* name() const = 0;
 
+        /** @brief Materializes this option against @a inherited.
+
+            Partial options such as %FontOption merge with the inherited
+            value. Passing 0 clears the inherited value.
+        */
         virtual void bind(const StyleOptions* /*inherited*/)
         {}
 };
 
 /** @brief Background brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class BackgroundOption : public StyleOption
 {
@@ -100,6 +119,8 @@ class BackgroundOption : public StyleOption
 };
 
 /** @brief Foreground brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class ForegroundOption : public StyleOption
 {
@@ -129,6 +150,8 @@ class ForegroundOption : public StyleOption
 };
 
 /** @brief Contour pen option.
+
+    @ingroup Pt-Forms-Styling
 */
 class ContourOption : public StyleOption
 {
@@ -158,6 +181,8 @@ class ContourOption : public StyleOption
 };
 
 /** @brief Accent color option.
+
+    @ingroup Pt-Forms-Styling
 */
 class AccentColorOption : public StyleOption
 {
@@ -183,6 +208,8 @@ class AccentColorOption : public StyleOption
 };
 
 /** @brief View background brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class ViewBackgroundOption : public StyleOption
 {
@@ -212,6 +239,8 @@ class ViewBackgroundOption : public StyleOption
 };
 
 /** @brief Highlight color option.
+
+    @ingroup Pt-Forms-Styling
 */
 class HighlightColorOption : public StyleOption
 {
@@ -237,6 +266,8 @@ class HighlightColorOption : public StyleOption
 };
 
 /** @brief Hover background brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class HoverBackgroundOption : public StyleOption
 {
@@ -266,6 +297,8 @@ class HoverBackgroundOption : public StyleOption
 };
 
 /** @brief Text background brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class TextBackgroundOption : public StyleOption
 {
@@ -295,6 +328,8 @@ class TextBackgroundOption : public StyleOption
 };
 
 /** @brief Text color option.
+
+    @ingroup Pt-Forms-Styling
 */
 class TextColorOption : public StyleOption
 {
@@ -320,6 +355,8 @@ class TextColorOption : public StyleOption
 };
 
 /** @brief Placeholder text color option.
+
+    @ingroup Pt-Forms-Styling
 */
 class PlaceholderTextColorOption : public StyleOption
 {
@@ -345,6 +382,8 @@ class PlaceholderTextColorOption : public StyleOption
 };
 
 /** @brief Highlighted text color option.
+
+    @ingroup Pt-Forms-Styling
 */
 class HighlightedTextColorOption : public StyleOption
 {
@@ -370,6 +409,8 @@ class HighlightedTextColorOption : public StyleOption
 };
 
 /** @brief Alternate view background brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class AlternateViewBackgroundOption : public StyleOption
 {
@@ -399,6 +440,8 @@ class AlternateViewBackgroundOption : public StyleOption
 };
 
 /** @brief Popup background brush option.
+
+    @ingroup Pt-Forms-Styling
 */
 class PopupBackgroundOption : public StyleOption
 {
@@ -428,6 +471,8 @@ class PopupBackgroundOption : public StyleOption
 };
 
 /** @brief Popup text color option.
+
+    @ingroup Pt-Forms-Styling
 */
 class PopupTextColorOption : public StyleOption
 {
@@ -452,7 +497,14 @@ class PopupTextColorOption : public StyleOption
         Gfx::Color _value;
 };
 
-/** @brief Font option.
+/** @brief Stores a complete font or partial font overrides.
+
+    A %FontOption can replace the whole font, or change only the size,
+    weight, or slant. The remaining attributes then come from the
+    application font. %value() is the effective font after %bind().
+    %getFont() merges the local overrides with @a baseFont.
+
+    @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API FontOption : public StyleOption
 {
@@ -461,14 +513,24 @@ class PT_FORMS_API FontOption : public StyleOption
         */
         FontOption();
 
+        /** @brief Copies @a o.
+        */
         FontOption(const FontOption& o);
 
+        /** @brief Assigns @a o.
+        */
         FontOption& operator=(const FontOption& o);
 
+        /** @brief Returns a copy of this option.
+        */
         virtual StyleOption* clone() const;
 
+        /** @brief Returns the option class used as the lookup key.
+        */
         virtual const std::type_info& typeId() const;
 
+        /** @brief Returns the option name.
+        */
         virtual const char* name() const override
         { return "font"; }
 
@@ -476,7 +538,7 @@ class PT_FORMS_API FontOption : public StyleOption
         */
         bool isSet() const;
 
-        /** @brief Returns the effective font.
+        /** @brief Returns the effective font after %bind().
         */
         const Gfx::Font& value() const;
 
@@ -496,6 +558,8 @@ class PT_FORMS_API FontOption : public StyleOption
         */
         void setSlant(Gfx::Font::Slant slant);
 
+        /** @brief Merges this option with the inherited font from @a inherited.
+        */
         virtual void bind(const StyleOptions* inherited);
 
         /** @brief Returns the local font overrides merged with @a baseFont.
@@ -520,28 +584,68 @@ class PT_FORMS_API FontOption : public StyleOption
         unsigned              _overrides;
 };
 
-/** @brief Style options container.
+/** @brief Stores named appearance options.
 
-    Contains local style options such as %ForegroundOption or %FontOption.
-    The default constructor creates an empty container. %defaults() returns
-    a container populated with the built-in default options.
+    A %StyleOptions object contains named appearance options, such as the
+    application background, text colors, accent color, contour pen, and
+    default font. A %Style uses these values when it prepares the renderers
+    that paint controls.
 
-    %bind() associates an inherited container and materializes local partial
-    options against its effective values. %find() and %get() consider both local and
-    inherited options. %findLocal() and %hasOptions() only consider
-    locally stored options. %set() and %reset() modify the local options.
+    %Application owns the global style options. It creates them from
+    %defaults() and uses them with the default %PlatinumStyle. To change the
+    application theme, create an options object, change the values that the
+    application requires, and pass it to %Application::setStyleOptions().
+    The application resets its renderers and invalidates its widgets so that
+    the new appearance is applied.
+
+    @code
+    Pt::Forms::StyleOptions options = Pt::Forms::StyleOptions::defaults();
+
+    options.set(
+        Pt::Forms::AccentColorOption(Pt::Gfx::Color(20, 140, 250))
+    );
+    options.set(
+        Pt::Forms::TextColorOption(Pt::Gfx::Color(30, 30, 30))
+    );
+
+    Pt::Forms::Application& app = Pt::Forms::Application::instance();
+    app.setStyleOptions(options);
+    @endcode
+
+    The default constructor creates an empty options object. An empty object
+    is useful as a local overlay for a control. A styler binds this overlay to
+    the application options. A local option overrides the option of the same
+    type in the application options, while an option that is not present
+    locally continues to use the application value.
+
+    %findLocal() searches only this object. %find() searches this object and
+    then its bound parent. %get() performs the same lookup and throws
+    %std::logic_error when the requested option is not available. %set()
+    adds or replaces a local option, and %reset() removes a local option.
+
+    %FontOption supports complete and partial font overrides. A local option
+    can change only the font size, weight, or slant while inheriting the font
+    family and all remaining attributes from the application font.
+
+    %generation() changes when local options or their binding change. Stylers
+    use the generation to detect that a renderer must prepare its drawing
+    state again.
+
+    @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API StyleOptions
 {
     public:
+        /** @brief Invalid generation value.
+        */
         static const std::size_t InvalidGeneration = 0;
 
     public:
-        /** @brief Constructs an empty container.
+        /** @brief Constructs an empty options object.
         */
         StyleOptions();
 
-        /** @brief Copy Constructor.
+        /** @brief Copies @a o.
         */
         StyleOptions(const StyleOptions& o);
 
@@ -549,55 +653,58 @@ class PT_FORMS_API StyleOptions
         */
         ~StyleOptions();
 
-        /** @brief Assigns style options.
+        /** @brief Assigns @a o.
         */
         StyleOptions& operator=(const StyleOptions& o);
 
-        /** @brief Returns a complete container with the built-in default options.
+        /** @brief Returns options filled with the built-in default values.
         */
         static StyleOptions defaults();
 
         /** @brief Returns the current change generation.
+
+            The generation changes when local options or their binding
+            change.
         */
         std::size_t generation() const;
 
-        /** @brief Returns true if the container contains any local option.
-
-            TODO: remove this in favour of isDefault
+        /** @brief Returns true if this object contains any local option.
         */
         bool hasOptions() const;
 
-        /** @brief Returns true if no options override @a base.
+        /** @brief Returns true if this object does not override @a base.
         */
         bool isDefault(const StyleOptions& base) const;
 
-        /** @brief Binds local options to @a inherited and materializes effective values.
+        /** @brief Binds this overlay to the parent options @a inherited.
 
-            Rebinding with unchanged local and inherited generations performs no option
-            traversal. Passing 0 removes the inherited container.
+            Rebinding with the same parent and parent generation does no
+            work. Passing 0 removes the parent.
         */
         void bind(const StyleOptions* inherited);
 
-        /** @brief Returns the parent container that provides inherited options, or 0.
+        /** @brief Returns the bound parent options, or 0.
         */
         const StyleOptions* parent() const;
 
-        /** @brief Returns the local option of type T, or 0 if absent.
+        /** @brief Returns the local option of type T, or 0.
         */
         template <typename T>
         const T* findLocal() const;
 
-        /** @brief Returns the local or inherited option of type T, or 0 if absent.
+        /** @brief Returns the local or inherited option of type T, or 0.
         */
         template <typename T>
         const T* find() const;
 
         /** @brief Returns the local or inherited option of type T.
+
+            @throw %std::logic_error if the requested option is not available.
         */
         template <typename T>
         const T& get() const;
 
-        /** @brief Sets or replaces the local option of type T.
+        /** @brief Adds or replaces the local option of type T.
         */
         template <typename T>
         void set(const T& option);

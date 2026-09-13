@@ -39,14 +39,33 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Styler.
+/** @brief Manages renderer binding for one control family.
 
-    Binds a specific renderer or the default renderer to style options.
+    A %Styler connects a control family to the current %Style and
+    %StyleOptions. Widgets own a derived styler. Applications do not
+    construct %Styler. Derive from it only to add a styler for a new
+    control family.
+
+    Use %bind() to associate the styler with a style and the
+    application options. It returns true when the effective renderer or
+    the effective options changed. Call %bind() from %onInvalidate()
+    after the base implementation.
+
+    When the overlay contains no local options, %bind() uses the shared
+    renderer from the style. When the overlay contains local options, it
+    uses a private clone. A renderer assigned through the derived
+    %setRenderer() remains until it is cleared. Passing a null renderer
+    falls back to the current style on the next %bind().
+
+    %Styler does not provide a public renderer accessor. Measure,
+    layout, and paint use typed methods on the derived styler.
+
+    @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API Styler : private NonCopyable
 {
     public:
-        /** @brief Constructs an unbound styler.
+        /** @brief Constructor.
         */
         Styler();
 
@@ -54,28 +73,42 @@ class PT_FORMS_API Styler : private NonCopyable
         */
         virtual ~Styler();
 
-        /** @brief Binds or rebinds to a style and global style options.
+        /** @brief Binds this styler to @a style and @a styleOptions.
+
+            Returns true when the effective renderer or the effective
+            options changed.
         */
         bool bind(const Style& style, const StyleOptions& styleOptions);
 
-        /** @brief Returns true if bound.
+        /** @brief Returns true if a renderer is bound.
         */
         bool isBound() const;
 
     protected:
-        /** @brief Initializes with a specific renderer.
+        /** @brief Replaces the bound renderer with @a renderer.
+
+            A non-null @a renderer is a custom renderer. %bind() keeps it
+            until %init() is called with 0, which falls back to the
+            current style.
         */
         void init(Renderer* renderer);
 
-        /** @brief Returns the specific style options.
+        /** @brief Binds the overlay to @a global and returns it.
+
+            Bind the derived overlay with %StyleOptions::bind() against
+            @a global. Do not reset the shared style renderer here.
         */
         virtual StyleOptions& onBindOptions(const StyleOptions& global) = 0;
 
-        /** @brief Resolves the shared style renderer for the current style.
+        /** @brief Returns the shared style renderer, or 0.
+
+            Do not reset or clone the returned renderer.
         */
         virtual Renderer* onStyleRenderer(const Style& style) = 0;
 
-        /** @brief Creates an independant style renderer.
+        /** @brief Creates an independent clone of the style renderer, or 0.
+
+            The clone must have a reference count of 0.
         */
         virtual Renderer* onCreateRenderer(const Style& style) = 0;
 

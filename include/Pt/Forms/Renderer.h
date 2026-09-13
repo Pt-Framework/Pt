@@ -37,24 +37,31 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Cloneable style facet used by widget renderers.
+/** @brief Provides cloneable drawing for one control family.
 
-    Extends %Style::Facet with a prototype clone operation. %create()
-    returns a freshly allocated instance with a reference count of 0.
-    Shared theme instances stay in %Style and are synchronized through
-    %reset(), not by cloning.
+    A %Renderer is a %Style::Facet that can clone itself. Shared
+    instances remain in %Style. Use %reset() to apply application
+    options. Use %create() to allocate a new instance with a reference
+    count of 0. %FacetPtr and %Style::set() take their own references.
+
+    Named measure, layout, and render methods belong on derived
+    renderer types.
+
+    Derive a renderer for a control family and register it on a %Style.
+
+    @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API Renderer : public Style::Facet
 {
     public:
-        /** @brief Constructs a renderer facet of the given dynamic type.
+        /** @brief Constructor.
         */
         explicit Renderer(const std::type_info& ti, std::size_t refs = 0)
         : Facet(ti, refs)
         {
         }
 
-        /** @brief Creates a new default-constructed instance that the caller owns.
+        /** @brief Creates a new instance with a reference count of 0.
         */
         Renderer* create() const
         {
@@ -62,7 +69,7 @@ class PT_FORMS_API Renderer : public Style::Facet
         }
 
     protected:
-        /** @brief Hook that allocates a new renderer of the same concrete type.
+        /** @brief Creates a new renderer of the same concrete type.
         */
         virtual Renderer* onCreate() const = 0;
 };

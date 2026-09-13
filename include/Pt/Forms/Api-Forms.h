@@ -119,4 +119,9 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Styling Styles and Renderers
+
+    @ingroup Pt-Forms
+*/
+
 #endif

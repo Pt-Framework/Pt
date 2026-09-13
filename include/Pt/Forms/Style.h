@@ -66,10 +66,20 @@ class MenuBar;
 class MenuBarItem;
 class ProgressBar;
 
+/** @brief Manages a reference-counted %Style::Facet.
+
+    Construction, copy, and %reset() take a reference to an existing
+    facet. Destruction releases it and destroys the facet when the
+    count reaches 0. Pass a facet with a reference count of 0.
+
+    @ingroup Pt-Forms-Styling
+*/
 template <typename T>
 class FacetPtr
 {
     public:
+        /** @brief Holds @a facet, or 0.
+        */
         FacetPtr(T* facet = 0)
         : _facet(facet)
         {
@@ -77,6 +87,8 @@ class FacetPtr
                 _facet->ref();
         }
 
+        /** @brief Shares the facet held by @a ptr.
+        */
         FacetPtr(const FacetPtr& ptr)
         : _facet(ptr._facet)
         {
@@ -84,6 +96,8 @@ class FacetPtr
                 _facet->ref();
         }
 
+        /** @brief Destructor.
+        */
         ~FacetPtr()
         {
             if(_facet)
@@ -93,6 +107,8 @@ class FacetPtr
             }
         }
 
+        /** @brief Replaces the held facet with the facet from @a ptr.
+        */
         FacetPtr& operator=(const FacetPtr& ptr)
         {
             if(this == &ptr)
@@ -111,6 +127,8 @@ class FacetPtr
             return *this;
         }
 
+        /** @brief Replaces the held facet with @a facet, or 0.
+        */
         void reset(T* facet = 0)
         {
             if (_facet == facet)
@@ -127,21 +145,33 @@ class FacetPtr
                 _facet->ref();
         }
 
+        /** @brief Returns the facet.
+        */
         T* operator->() const
         { return _facet; }
 
+        /** @brief Returns the facet.
+        */
         T& operator*() const
         { return *_facet; }
 
+        /** @brief Returns true if no facet is held.
+        */
         bool operator! () const
         { return _facet == 0; }
 
+        /** @brief Returns true if a facet is held.
+        */
         operator bool () const
         { return _facet != 0; }
 
+        /** @brief Returns the facet, or 0.
+        */
         T* get()
         { return _facet; }
 
+        /** @brief Returns the facet, or 0.
+        */
         const T* get() const
         { return _facet; }
 
@@ -149,38 +179,68 @@ class FacetPtr
         T* _facet;
 };
 
-/** @brief Style for widgets.
- */
+/** @brief Stores renderer facets for the active theme.
+
+    A %Style stores one renderer facet per dynamic type. Use %set() to
+    register or replace a facet. Use %get() to retrieve it. Use %reset()
+    to apply %StyleOptions to every registered facet. %generation()
+    changes when the set of facets changes.
+
+    Facets are reference counted. %set() takes a reference. Pass a facet
+    with a reference count of 0. Use %Renderer::create() to allocate such
+    an instance.
+
+    Use %Application::setStyle() to install a complete style. The
+    application starts with %PlatinumStyle. Derive %Renderer, or another
+    %Facet, to add drawing for a control family.
+
+    @ingroup Pt-Forms-Styling
+*/
 class PT_FORMS_API Style
 {
     public:
+        /** @brief Represents a type-tagged, reference-counted object stored by %Style.
+
+            %typeId() is the registry key. %ref() and %unref() manage the
+            reference count. Use %reset() to apply %StyleOptions.
+        */
         class Facet : private NonCopyable
         {
             public:
+                /** @brief Constructor.
+                */
                 explicit Facet(const std::type_info& ti, std::size_t refs = 0)
                 : _typeId(&ti)
                 , _refs(refs)
                 {}
 
+                /** @brief Destructor.
+                */
                 virtual ~Facet()
                 {}
 
+                /** @brief Returns the dynamic type used as the registry key.
+                */
                 const std::type_info& typeId() const
                 {
                     return *_typeId;
                 }
 
+                /** @brief Adds one reference.
+                */
                 void ref()
                 {
                     ++_refs;
                 }
 
+                /** @brief Removes one reference and returns the remaining count.
+                */
                 std::size_t unref()
                 {
                     return --_refs;
                 }
 
-                /** @brief Resets with new style options.
+                /** @brief Resets this facet with @a options.
                 */
                 void reset(const StyleOptions& options)
                 {
@@ -188,7 +248,7 @@ class PT_FORMS_API Style
                 }
 
             protected:
-                /** @brief Resets with new style options.
+                /** @brief Resets this facet with @a options.
                 */
                 virtual void onReset(const StyleOptions& /*options*/)
                 {
@@ -200,45 +260,48 @@ class PT_FORMS_API Style
         };
 
     public:
-        /** @brief Constructs an empty style.
+        /** @brief Constructor.
         */
         Style();
 
-        /** @brief Constructs a style by copying another style.
+        /** @brief Copies @a style.
         */
         Style(const Style& style);
 
-        /** @brief Destroys the style and releases all registered facets.
+        /** @brief Destructor.
         */
         virtual ~Style();
 
-        /** @brief Assigns the contents of another style.
+        /** @brief Replaces the contents with a copy of @a style.
         */
         Style& operator=(const Style& style);
 
-        /** @brief Replaces all facets with those from another style.
+        /** @brief Replaces all facets with those from @a style.
         */
         void assign(const Style& style);
 
-        /** @brief Registers or replaces a facet.
+        /** @brief Adds or replaces a facet.
+
+            Takes a reference to @a facet. Pass a facet with a reference
+            count of 0.
         */
         void set(Facet* facet);
 
-        /** @brief Resets all registered facets to the given global style options.
+        /** @brief Resets all registered facets with @a options.
         */
         void reset(const StyleOptions& options);
 
         /** @brief Returns the current style generation.
 
-            The generation changes whenever the style content of this instance
-            changes and can be used to detect when a widget must rebind to a
-            different renderer source.
+            The generation changes when the set of facets changes.
         */
         std::size_t generation() const
         {
             return _generation;
         }
 
+        /** @brief Returns the facet of type FacetT, or 0.
+        */
         template <typename FacetT>
         FacetT* get() const
         {
