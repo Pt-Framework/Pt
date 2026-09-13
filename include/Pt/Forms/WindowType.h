@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301  USA
 */
 
@@ -52,27 +52,50 @@ namespace Forms {
 class WindowType
 {
     public:
+        /** @brief Defines a window frame style.
+        */
         enum Type
         {
-            Default = 0,      // default window style
-            Borderless = 1,   // no decoration
-            Frameless = Borderless, // TODO: deprecated
-            Popup = Borderless      // TODO: deprecated
+            /** @brief Uses the default decorated frame.
+            */
+            Default = 0,
+
+            /** @brief Uses a frame without decoration.
+            */
+            Borderless = 1,
+
+            /** @brief Alias for %Borderless.
+
+                @deprecated Use %Borderless instead.
+            */
+            Frameless = Borderless,
+
+            /** @brief Alias for %Borderless.
+
+                @deprecated Use %Borderless instead.
+            */
+            Popup = Borderless
         };
 
-        WindowType(Type t = Default)
-        : _type(t)
+        /** @brief Creates a window type with @a type.
+        */
+        WindowType(Type type = Default)
+        : _type(type)
         {}
 
-        WindowType& operator=(Type t)
+        /** @brief Sets the window type to @a type and returns this object.
+        */
+        WindowType& operator=(Type type)
         {
-            _type = t;
+            _type = type;
             return *this;
         }
 
+        /** @brief Returns the window type as an unsigned integer value.
+        */
         operator Pt::uint32_t() const
-        { 
-            return _type; 
+        {
+            return _type;
         }
 
     private:
@@ -88,26 +111,42 @@ class WindowType
 class WindowState
 {
     public:
+        /** @brief Defines a window presentation state.
+        */
         enum State
         {
+            /** @brief Uses the normal window state.
+            */
             Normal = 0,
+
+            /** @brief Uses the minimized window state.
+            */
             Minimized = 1,
+
+            /** @brief Uses the maximized window state.
+            */
             Maximized = 2
         };
 
-        WindowState(State t = Normal)
-        : _state(t)
+        /** @brief Creates a window state with @a state.
+        */
+        WindowState(State state = Normal)
+        : _state(state)
         {}
 
-        WindowState& operator=(State t)
+        /** @brief Sets the window state to @a state and returns this object.
+        */
+        WindowState& operator=(State state)
         {
-            _state = t;
+            _state = state;
             return *this;
         }
 
+        /** @brief Returns the window state as an unsigned integer value.
+        */
         operator Pt::uint32_t() const
-        { 
-            return _state; 
+        {
+            return _state;
         }
 
     private:

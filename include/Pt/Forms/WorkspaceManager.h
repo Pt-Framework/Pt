@@ -48,13 +48,11 @@ class WorkspaceFrame;
 
 class Workspace;
 
-/** @brief Window manager embedded in a workspace.
+/** @brief Internal window manager used by a workspace.
 
-    A %WorkspaceManager presents windows inside a %Workspace. Applications
-    attach windows through %Workspace or %Window, not by deriving from this
-    class.
-
-    @ingroup Pt-Forms-Windows
+    A %WorkspaceManager presents windows inside its %Workspace. Applications
+    use the workspace to attach and manage windows; they do not derive from
+    this class.
 */
 class WorkspaceManager : public WindowManager
 {
@@ -64,10 +62,16 @@ class WorkspaceManager : public WindowManager
     friend class WorkspaceFrame;
 
     public:
+        /** @brief Creates a detached workspace window manager.
+        */
         WorkspaceManager();
 
+        /** @brief Destroys the workspace window manager.
+        */
         virtual ~WorkspaceManager();
 
+        /** @brief Sets the workspace that contains this manager.
+        */
         void setParent(Workspace* workspace);
 
         //Gfx::PaintSurface& surface();
@@ -76,49 +80,73 @@ class WorkspaceManager : public WindowManager
 
         //void setSurface(Gfx::PaintSurface* surface, const Gfx::PointF& pos);
 
+        /** @brief Processes @a ev for the hosted windows.
+
+            Returns true if a hosted window consumes the event.
+        */
         bool processMouseEvent(const MouseEvent& ev);
 
+        /** @brief Processes @a ev for the hosted windows.
+
+            Returns true if a hosted window consumes the event.
+        */
         bool processTouchEvent(const TouchEvent& ev);
-    
+
     public:
+        /** @brief Returns the active hosted window, or null.
+        */
         Window* activeWindow();
 
+        /** @brief Returns the windows attached to this workspace.
+        */
         const std::vector<Window*>& windows() const;
 
+        /** @brief Returns the width of each workspace window border.
+        */
         double borderWidth() const
         {
             return _borderWidth;
         }
 
+        /** @brief Returns the height of each workspace window title area.
+        */
         double titleHeight()  const
         {
             return _titleHeight;
         }
 
+        /** @brief Returns the border color of an inactive workspace window.
+        */
         const Gfx::Color& inactiveColor() const
         {
             return _inactiveColor;
         }
 
+        /** @brief Returns the border color of the active workspace window.
+        */
         const Gfx::Color& activeColor() const
         {
             return _activeColor;
         }
 
+        /** @brief Returns the title text color of the active workspace window.
+        */
         const Gfx::Color& textColor() const
         {
             return _textColor;
         }
 
+        /** @brief Returns the title text color of an inactive workspace window.
+        */
         const Gfx::Color& inactiveTextColor() const
         {
             return _inactiveTextColor;
         }
-    
+
     //
     // layouting
     //
-    protected:      
+    protected:
         virtual void onProcessLayoutEvent(const LayoutEvent& ev);
 
         virtual void onLayoutEvent(const LayoutEvent& ev);
@@ -141,23 +169,23 @@ class WorkspaceManager : public WindowManager
         virtual void onRelease(WindowFrame& w);
 
     protected:
-        Gfx::PointF toFrame(const WorkspaceFrame& w, 
+        Gfx::PointF toFrame(const WorkspaceFrame& w,
                             const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromFrame(const WorkspaceFrame& w, 
+        Gfx::PointF fromFrame(const WorkspaceFrame& w,
                               const Gfx::PointF& pos) const;
 
         virtual void onSetAbove(WorkspaceFrame& w, bool above);
 
-        virtual void onSetSizeLimits(WorkspaceFrame& w, 
-                                     const Gfx::SizeF& minSize, 
+        virtual void onSetSizeLimits(WorkspaceFrame& w,
+                                     const Gfx::SizeF& minSize,
                                      const Gfx::SizeF& maxSize);
 
         virtual void onAutoCenter(WindowFrame& w, const Gfx::SizeF* size);
 
         virtual void onShow(WorkspaceFrame& w, bool visible);
 
-        virtual void onActivate(WorkspaceFrame& w, bool active); 
+        virtual void onActivate(WorkspaceFrame& w, bool active);
 
         virtual void onEnable(WorkspaceFrame& w, bool enable);
 
@@ -175,18 +203,18 @@ class WorkspaceManager : public WindowManager
 
         virtual void onDisconnect();
 
-        
+
         virtual Gfx::PointF onToParent(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Gfx::PointF& pos) const;
 
         virtual Widget* onHitTest(const Gfx::PointF& p);
 
-        
+
         virtual void onRequestRepaint(const Gfx::RectF& rect);
 
         virtual void onRequestActivate(bool active);
-        
+
         virtual void onRequestCapture(bool capture);
 
     protected:
@@ -195,14 +223,14 @@ class WorkspaceManager : public WindowManager
         virtual void onProcessRescaleEvent(const RescaleEvent& ev);
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
-        
+
         virtual void onProcessEnableEvent(const EnableEvent& ev);
 
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
-        
-        virtual void onProcessMouseEvent(const MouseEvent& ev);    
+
+        virtual void onProcessMouseEvent(const MouseEvent& ev);
 
         virtual void onProcessTouchEvent(const TouchEvent& ev);
 
@@ -231,7 +259,7 @@ class WorkspaceManager : public WindowManager
         Gfx::Color                   _activeColor;
         Gfx::Color                   _inactiveColor;
         Gfx::Color                   _textColor;
-        Gfx::Color                   _inactiveTextColor;  
+        Gfx::Color                   _inactiveTextColor;
 };
 
 } // namespace

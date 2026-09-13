@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -49,6 +49,8 @@ namespace Forms {
 class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
     public:
+        /** @brief Creates a resize event for @a widget with @a size.
+        */
         ResizeEvent(Widget& widget, const Gfx::SizeF& size)
         : _widgetId_( widget.id() )
         , _widget(&widget)
@@ -56,25 +58,35 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
         {
         }
 
+        /** @brief Destroys the resize event.
+        */
         virtual ~ResizeEvent()
         {
         }
-        
+
+        /** @brief Returns the ID of the affected widget.
+        */
         Pt::uint64_t widgetId() const
         {
             return _widgetId_;
         }
 
+        /** @brief Returns the affected widget.
+        */
         Widget* widget() const
         {
             return _widget;
         }
 
+        /** @brief Returns the widget size.
+        */
         const Gfx::SizeF& size() const
         {
             return _size;
         }
 
+        /** @brief Sets the widget size to @a size.
+        */
         void setSize(const Gfx::SizeF& size)
         {
             _size = size;

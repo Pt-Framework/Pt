@@ -101,8 +101,16 @@ class PT_FORMS_API Window : public Form
     friend class WindowFrame;
 
     public:
+        /** @brief Defines the base form type.
+        */
         typedef Form Base;
+
+        /** @brief Defines the window frame type.
+        */
         typedef WindowType Type;
+
+        /** @brief Defines the window presentation state type.
+        */
         typedef WindowState State;
 
     public:
@@ -264,7 +272,7 @@ class PT_FORMS_API Window : public Form
         */
         Signal<>& closed();
 
-        /** @brief Returns whether the window accepts pointer and keyboard input.
+        /** @brief Returns whether the window accepts pointer, touch, scroll, and keyboard input.
 
             A window accepts input only while it is visible and enabled.
         */

@@ -54,34 +54,32 @@ namespace Forms {
 class Cursor;
 class Popup;
 
-/** @brief Runtime root of a Forms user interface.
+/** @brief Provides the runtime root of a Forms user interface.
 
-    %Application is the Forms runtime. It is not a %Widget. Construct one
-    before any widget, then show the visual hierarchy and enter the inherited
+    %Application provides the Forms runtime. It is not a %Widget. Construct
+    one before any widget, show the visual hierarchy, then enter the inherited
     event loop with %Pt::System::Application::run().
 
     The application owns its platform implementation, graphics backend, and
-    primary %Screen. It does not own the windows or controls that use them.
-    Widgets remove themselves from their visual parent when they are
-    destroyed. Each widget receives an ID while the application exists.
-    %findWidget() can resolve that ID only while the widget remains alive.
+    primary %Screen. It does not own the windows or controls that use those
+    services. Widgets remove themselves from their visual parent when they
+    are destroyed. Each widget receives an ID while the application exists;
+    %findWidget() resolves that ID only while the widget remains alive.
 
-    Platform events first enter the inherited event loop and are then routed
-    through the Forms event dispatcher to their target widget or the primary
-    screen. State changes such as layout, invalidation, repainting, scaling,
-    and window changes use the same dispatcher, which permits the hierarchy
-    to coalesce deferred work. Applications normally request changes through
-    widget APIs rather than calling %processEvent() directly. The latter is
-    useful only for code that deliberately supplies Forms events.
+    Platform events enter the inherited event loop and are routed through the
+    Forms event dispatcher to their target widget or the primary screen. The
+    same dispatcher handles layout, invalidation, repainting, scaling, and
+    window changes. It permits the visual hierarchy to coalesce deferred
+    work. Applications normally request changes through widget APIs. Use
+    %processEvent() only when deliberately supplying Forms events.
 
-    The application provides shared services such as styles, style options,
-    input methods, fonts, and scaling. %setStyle() and %setStyleOptions()
-    reset the shared style and invalidate the registered widgets so their
-    visual state is rebuilt. %setScaleFactor() sends a rescale event through
-    the primary screen. Configure these services before showing the user
-    interface when possible. %impl() and %graphicsBackend() support Forms
-    backend implementations; ordinary applications use the higher-level
-    Forms APIs.
+    The application provides shared styles, style options, input methods,
+    fonts, and scaling. %setStyle() and %setStyleOptions() reset the shared
+    style and invalidate registered widgets so that their visual state is
+    rebuilt. %setScaleFactor() sends a rescale event through the primary
+    screen. Configure shared services before showing the user interface when
+    possible. %impl() and %graphicsBackend() support Forms backend
+    implementations; ordinary applications use the higher-level Forms APIs.
 
     @ingroup Pt-Forms
 */

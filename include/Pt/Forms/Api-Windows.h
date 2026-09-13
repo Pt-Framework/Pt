@@ -32,7 +32,7 @@
 
 /** @addtogroup Pt-Forms-Windows
 
-    @brief Windows and windows management.
+    @brief Windows and workspace management.
 
     Forms presents windows in two places: on a platform display, and inside
     a workspace. In both cases a %Window is a %Form attached to a
@@ -51,9 +51,6 @@
     and frame. Closing detaches it and does not destroy it. Geometry,
     visibility, and activation are requests confirmed by events, as with
     other widgets.
-
-    %WindowType and %WindowState are presentation of a window, not separate
-    object kinds.
 */
 
 #endif

@@ -81,10 +81,10 @@ class PT_FORMS_API Workspace : public Control
         */
         const std::vector<Window*>& windows() const;
 
-        /** @brief Returns the embedded window manager.
+        /** @brief Returns the workspace's internal window manager.
 
-            The returned type is %WindowManager. Workspace-specific members
-            are not reachable through this reference.
+            The manager presents the workspace's windows. Applications use
+            %addWindow(), %removeWindow(), and %windows() to manage them.
         */
         WindowManager& windowManager();
 
@@ -111,8 +111,8 @@ class PT_FORMS_API Workspace : public Control
         virtual void onConnect(Screen& screen);
 
         virtual void onDisconnect();
-      
-        
+
+
         virtual Widget* onHitTest(const Gfx::PointF& p);
 
         virtual void onRequestResize(const Gfx::SizeF& s);
@@ -139,7 +139,7 @@ class PT_FORMS_API Workspace : public Control
         virtual void onProcessResizeEvent(const ResizeEvent& ev);
 
         virtual void onProcessPaintEvent(const PaintEvent& ev);
-        
+
         virtual void onProcessEnableEvent(const EnableEvent& ev);
 
     protected:

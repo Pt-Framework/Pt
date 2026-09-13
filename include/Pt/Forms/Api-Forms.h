@@ -34,18 +34,19 @@
 
     @brief Application lifecycle and structure.
 
-    A Forms application creates windows and controls, shows the visual
-    hierarchy, and runs the event loop. The inherited event loop also supports
-    I/O, timers, and asynchronous operations.
+    A Forms application constructs its visual hierarchy, shows its windows,
+    and runs the event loop. The inherited event loop also supports I/O,
+    timers, and asynchronous operations.
 
-    %Application is the starting point and must be constructed before forms,
-    windows, or controls. It is not a %Widget. It provides the primary
-    %Screen and %WindowManager, dispatches platform events, and supplies
-    shared services such as scaling, styles, fonts, and input methods.
+    %Application is the runtime root. Construct it before forms, windows, or
+    controls. It is not a %Widget. The application provides the primary
+    %Screen and its %WindowManager, dispatches platform events, and owns the
+    shared scaling, style, font, and input-method services.
 
-    Forms distinguishes the class hierarchy from the visual hierarchy. The
-    following diagram shows the C++ inheritance relationship. It does not show
-    which objects display or contain other objects.
+    The C++ class hierarchy and the visual hierarchy describe different
+    relationships. The following diagram shows inheritance only. It does not
+    describe which objects display or contain other objects. In particular,
+    %Window derives from %Form; it is not a direct child of %View.
 
     @code
     Widget
@@ -57,25 +58,23 @@
             Control
     @endcode
 
-    The visual hierarchy describes how Forms objects appear together. The
-    same non-owning host pattern repeats at each level: %Application provides
-    the %Screen, a %WindowManager attaches %Window objects, a %Form attaches
-    one content %Control, and a %Control attaches child controls, including
-    layouts. A %Workspace follows the same principle inside an ordinary
-    control: it contains a window manager that presents several windows in
-    its bounds.
+    The visual hierarchy describes how Forms objects appear together. Each
+    level follows the same non-owning host pattern: %Application provides the
+    %Screen, a %WindowManager attaches %Window objects, a %Form attaches one
+    content %Control, and a %Control attaches child controls, including
+    layouts. A %Workspace applies the same pattern inside an ordinary control:
+    its window manager presents several windows within the workspace bounds.
 
     @code
     Application -> Screen -> WindowManager -> Window (Form) -> content Control -> child Controls
     @endcode
 
-    Forms does not take ownership of a window or control when it becomes part
-    of the visual hierarchy. The code that creates an object keeps it alive
-    while the hierarchy uses it. A window or control removes itself from its
-    parent when it is destroyed.
+    Attaching a window or control does not transfer ownership. The code that
+    creates an object keeps it alive while the hierarchy uses it. A window or
+    control removes itself from its parent when it is destroyed.
 
-    The following example creates the smallest useful visual hierarchy: a
-    window, its content layout, and a control displayed by that layout.
+    The following example creates a visual hierarchy with a window, its
+    content layout, and a control displayed by that layout.
 
     @code
     int main(int argc, char** argv)

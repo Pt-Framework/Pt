@@ -69,6 +69,8 @@ class WindowManager : public Widget
     friend class Window;
 
     public:
+        /** @brief Defines the base widget type.
+        */
         typedef Widget Base;
 
     public:

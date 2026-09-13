@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -48,7 +48,9 @@ namespace Forms {
 */
 class MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
-    public:    
+    public:
+        /** @brief Creates a move event for @a widget at @a pos.
+        */
         MoveEvent(Widget& widget, const Gfx::PointF& pos)
         : _widgetId_( widget.id() )
         , _widget(&widget)
@@ -56,28 +58,38 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
         {
         }
 
+        /** @brief Destroys the move event.
+        */
         virtual ~MoveEvent()
         {
         }
-        
+
+        /** @brief Returns the ID of the affected widget.
+        */
         Pt::uint64_t widgetId() const
         {
             return _widgetId_;
         }
 
+        /** @brief Returns the affected widget.
+        */
         Widget* widget() const
         {
             return _widget;
         }
 
+        /** @brief Returns the widget position.
+        */
         const Gfx::PointF& position() const
         {
             return _position;
-        }    
+        }
 
-        void setPosition(const Gfx::PointF& p)
+        /** @brief Sets the widget position to @a position.
+        */
+        void setPosition(const Gfx::PointF& position)
         {
-            _position = p;
+            _position = position;
         }
 
     private:
