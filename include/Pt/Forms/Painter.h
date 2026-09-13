@@ -40,20 +40,27 @@ namespace Forms {
 class PaintContext;
 class Pixmap;
 
-/** @brief 2D painter for Forms paint surfaces.
+/** @brief Draws on a Forms paint surface or paint context.
+
+    %Painter extends %Gfx::PainterBase with pixmap drawing. Construct it
+    or call %begin() on a %PaintSurface or %PaintContext. It does not own
+    the target. Cached paint state remains across %begin() until it is
+    changed.
+
+    @ingroup Pt-Forms-Updating
 */
 class PT_FORMS_API Painter : public Gfx::PainterBase
 {
     public:
-        /** @brief Default constructor.
+        /** @brief Creates an inactive painter.
         */
         Painter();
 
-        /** @brief Constructs using a Forms paint surface.
+        /** @brief Constructs and begins painting on @a surface.
         */
         explicit Painter(PaintSurface& surface);
 
-        /** @brief Constructs using a Forms paint context.
+        /** @brief Constructs and begins painting on @a context.
         */
         explicit Painter(PaintContext& context);
 
@@ -61,24 +68,26 @@ class PT_FORMS_API Painter : public Gfx::PainterBase
         */
         virtual ~Painter();
 
-        /** @brief Begins painting to a Forms paint surface.
+        /** @brief Begins painting on @a surface.
         */
         void begin(PaintSurface& surface);
 
-        /** @brief Begins painting to a Forms paint context.
+        /** @brief Begins painting on @a context.
         */
         void begin(PaintContext& context);
 
-        /** @brief Draws a pixmap.
+        /** @brief Draws @a pixmap at @a to.
         */
         void drawPixmap(const Gfx::PointF& to, const Pixmap& pixmap);
 
-        /** @brief Draws a part of a pixmap.
+        /** @brief Draws the @a rect region of @a pixmap at @a to.
         */
         void drawPixmap(const Gfx::PointF& to, const Pixmap& pixmap,
                         const Gfx::RectF& rect);
 
     protected:
+        /** @brief Clears the Forms surface binding when the Gfx surface detaches.
+        */
         virtual void onDetachSurface(Gfx::PaintSurface& surface);
 
     private:

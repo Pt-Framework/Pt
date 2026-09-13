@@ -45,19 +45,14 @@
   are the usual %View implementations. A view is the host and paint-surface
   boundary for controls. When a control joins a form that is shown on a
   screen, the screen, scaling, coordinates, and paint surface become
-  available. Removing it reverses that relationship.
-
-  A control measures its preferred size for a %SizePolicy, and layout then
-  assigns geometry within the available rectangle. Changes to visual state,
-  geometry, or drawing request an update through the containing views to the
-  window. Painting then travels back down through visible content after the
-  window frame makes a paint surface available.
+  available for the cycle in @ref Pt-Forms-Page-Updating. Removing it
+  reverses that relationship.
 
   Derive custom visual content from %Control. Derive from %View only when a
   custom content host needs different paint-surface or coordinate behavior.
-  %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
-  embedded-window implementations; applications normally use the window
-  manager provided by a %Screen or %Workspace.
+  %WindowManager and %WindowFrame support platform and embedded-window
+  implementations; applications normally use the window manager provided
+  by a %Screen or %Workspace.
 */
 
 #endif

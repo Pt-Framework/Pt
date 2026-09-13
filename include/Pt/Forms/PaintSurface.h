@@ -38,21 +38,38 @@ namespace Forms {
 
 class Pixmap;
 
-/** @brief Paint surface.
+/** @brief Forms render target for painting.
+
+    %PaintSurface extends %Gfx::PaintSurface with pixmap drawing. A view
+    borrows a surface and adapts size, scaling, and offset. It does not
+    own the assigned surface.
+
+    @ingroup Pt-Forms-Updating
 */
 class PT_FORMS_API PaintSurface : public Gfx::PaintSurface
 {
     public:
+        /** @brief Constructs an unbound paint surface.
+        */
         PaintSurface();
 
+        /** @brief Destructor.
+        */
         ~PaintSurface();
 
+        /** @brief Draws @a pixmap onto @a canvas at @a to.
+
+            When @a rect is not null, only that region of the pixmap is
+            drawn.
+        */
         void drawPixmap(Gfx::Canvas& canvas,
                         const Gfx::PointF& to,
                         const Pixmap& pixmap,
                         const Gfx::RectF* rect = 0);
 
     protected:
+        /** @brief Draws @a pixmap onto @a canvas at @a to.
+        */
         virtual void onDrawPixmap(Gfx::Canvas& canvas,
                                   const Gfx::PointF& to,
                                   const Pixmap& pixmap,

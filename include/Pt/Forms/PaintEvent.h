@@ -40,9 +40,15 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Reports a dirty rectangle that a widget must paint.
+
+    @ingroup Pt-Forms-Updating
+*/
 class PT_FORMS_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 {
-    public:    
+    public:
+        /** @brief Constructs an event for @a widget and dirty rectangle @a rect.
+        */
         PaintEvent(Widget& widget, const Gfx::RectF& rect)
         : _widgetId_( widget.id() )
         , _widget(&widget)
@@ -50,25 +56,35 @@ class PT_FORMS_API PaintEvent : public Pt::BasicEvent<PaintEvent>
         {
         }
 
+        /** @brief Destructor.
+        */
         virtual ~PaintEvent()
         {
         }
 
+        /** @brief Returns the target widget ID.
+        */
         Pt::uint64_t widgetId() const
         {
             return _widgetId_;
         }
 
+        /** @brief Returns the target widget.
+        */
         Widget* widget() const
         {
             return _widget;
         }
 
+        /** @brief Returns the dirty rectangle in local coordinates.
+        */
         const Gfx::RectF& rect() const
         {
             return _rect;
         }
 
+        /** @brief Sets the dirty rectangle to @a r.
+        */
         void setRect(const Gfx::RectF& r)
         {
             _rect = r;

@@ -41,25 +41,40 @@ namespace Forms {
 
 class IPixmapImpl;
 
-/** @brief Graphics backend interface used by platform integration.
+/** @brief Graphics backend used by platform integration.
 
-    @ingroup Pt-Forms
+    %Application owns the backend. It creates pixmap implementations and
+    enumerates fonts. Ordinary applications do not call this API.
+
+    @ingroup Pt-Forms-Updating
 */
 class PT_FORMS_API GraphicsBackend
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~GraphicsBackend()
         {
         }
 
+        /** @brief Creates a platform pixmap implementation.
+        */
         virtual IPixmapImpl* createPixmapImpl() = 0;
 
+        /** @brief Returns the default font family.
+        */
         virtual const std::string& defaultFont() const = 0;
 
+        /** @brief Sets the default font family to @a family.
+        */
         virtual void setDefaultFont(const std::string& family) = 0;
 
+        /** @brief Returns the available font family names.
+        */
         virtual std::vector<std::string> fontFamilies() const = 0;
 
+        /** @brief Returns the faces of font family @a family.
+        */
         virtual std::vector<Gfx::FontFace> fontFaces(const std::string& family) const = 0;
 };
 

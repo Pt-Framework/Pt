@@ -1,8 +1,8 @@
 /** \page Pt-Forms-Page Graphical User Interfaces
 
     This chapter covers the application runtime, the widget and view object
-    model, the display root, windows and workspaces, input delivery, icons
-    and textual content, and styles and renderers.
+    model, the display root, windows and workspaces, layouting and painting,
+    input delivery, icons and textual content, and styles and renderers.
 
     @copydetails Pt-Forms
 
@@ -41,6 +41,9 @@
 
     @subsection Pt-Forms-Page-Workspace Workspaces
     @copydetails Pt::Forms::Workspace
+
+    @section Pt-Forms-Page-Updating Layouting and Painting
+    @copydetails Pt-Forms-Updating
 
     @section Pt-Forms-Page-Input Pointer and Keyboard Input
     @copydetails Pt-Forms-Input

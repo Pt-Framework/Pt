@@ -36,104 +36,153 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Constraint used when measuring a control.
+
+    A %SizePolicy has a horizontal mode, a vertical mode, and an optional
+    size hint. %Control::measure() combines the parent policy with the
+    control's own policy.
+
+    @ingroup Pt-Forms-Updating
+*/
 class SizePolicy
 {
     public:
+        /** @brief Constraint applied to one axis.
+        */
         enum Mode
         {
+            /** @brief The axis is not constrained by this policy.
+            */
             Any = 0,
 
+            /** @brief The axis uses the preferred size.
+            */
             Preferred = 1,
 
-            // Is Maximum required?
+            /** @brief The axis is capped by the policy size.
+            */
             Maximum = 2,
-            
+
+            /** @brief The axis uses the policy size.
+            */
             Fixed = 3,
         };
 
     public:
+        /** @brief Creates a policy with unconstrained axes.
+        */
         SizePolicy()
         : _horizontalMode(Any)
         , _verticalMode(Any)
         { }
 
+        /** @brief Creates a policy with @a horizontal and @a vertical modes.
+        */
         SizePolicy(Mode horizontal, Mode vertical)
         : _horizontalMode(horizontal)
         , _verticalMode(vertical)
         { }
 
+        /** @brief Returns the horizontal mode.
+        */
         Mode horizontal() const
         {
             return _horizontalMode;
         }
 
+        /** @brief Sets the horizontal mode to @a m.
+        */
         void setHorizontal(Mode m)
         {
             _horizontalMode = m;
         }
-        
+
+        /** @brief Returns the vertical mode.
+        */
         Mode vertical() const
         {
             return _verticalMode;
         }
-        
+
+        /** @brief Sets the vertical mode to @a m.
+        */
         void setVertical(Mode m)
         {
             _verticalMode = m;
         }
 
+        /** @brief Sets both modes to @a horizontal and @a vertical.
+        */
         void setMode(Mode horizontal, Mode vertical)
         {
             _horizontalMode = horizontal;
             _verticalMode = vertical;
         }
-        
+
+        /** @brief Returns the size hint.
+        */
         const Gfx::SizeF& size() const
         {
             return _sizeHint;
         }
 
+        /** @brief Sets the size hint to @a hint.
+        */
         void setSize(const Gfx::SizeF& hint)
         {
             _sizeHint = hint;
         }
 
+        /** @brief Sets the size hint to @a w by @a h.
+        */
         void setSize(double w, double h)
         {
             _sizeHint.set(w, h);
         }
 
+        /** @brief Returns the width hint.
+        */
         double width() const
-        { 
-            return _sizeHint.width(); 
+        {
+            return _sizeHint.width();
         }
 
+        /** @brief Sets the width hint to @a w.
+        */
         void setWidth(double w)
         {
             _sizeHint.setWidth(w);
         }
 
+        /** @brief Returns the height hint.
+        */
         double height() const
-        { 
-            return _sizeHint.height(); 
+        {
+            return _sizeHint.height();
         }
 
+        /** @brief Sets the height hint to @a h.
+        */
         void setHeight(double h)
         {
             _sizeHint.setHeight(h);
         }
 
+        /** @brief Returns true when both policies compare equal.
+        */
         bool operator== (const SizePolicy& s) const
         {
-            return _horizontalMode == s._horizontalMode && 
-                   _verticalMode == s._verticalMode && 
+            return _horizontalMode == s._horizontalMode &&
+                   _verticalMode == s._verticalMode &&
                    _sizeHint.isEqual(s._sizeHint);
         }
-        
+
+        /** @brief Returns true when the policies differ.
+        */
         bool operator!= (const SizePolicy& s) const
         {
-            return _horizontalMode != s._horizontalMode || 
-                   _verticalMode != s._verticalMode || 
+            return _horizontalMode != s._horizontalMode ||
+                   _verticalMode != s._verticalMode ||
                    ! _sizeHint.isEqual(s._sizeHint);
         }
 

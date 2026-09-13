@@ -108,6 +108,11 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Updating Layouting and Painting
+
+    @ingroup Pt-Forms
+*/
+
 /** @defgroup Pt-Forms-Input Pointer and Keyboard Input
 
     @ingroup Pt-Forms

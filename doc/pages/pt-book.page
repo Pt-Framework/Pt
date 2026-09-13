@@ -106,6 +106,7 @@
         <li> @ref Pt-Forms-Page-Application </li>
         <li> @ref Pt-Forms-Page-Widgets </li>
         <li> @ref Pt-Forms-Page-Windows </li>
+        <li> @ref Pt-Forms-Page-Updating </li>
         <li> @ref Pt-Forms-Page-Input </li>
         <li> @ref Pt-Forms-Page-Icons </li>
         <li> @ref Pt-Forms-Page-Styling </li>

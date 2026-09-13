@@ -36,6 +36,8 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Alias of %Pixmap.
+*/
 typedef Pixmap PixmapSurface;
 
 } // namespace

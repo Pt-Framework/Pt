@@ -41,10 +41,18 @@
     Change the theme on the application. A widget can overlay local
     options or assign a custom renderer without replacing the style.
 
-    %Styler binds a control to the current style. %Renderer is the
-    cloneable facet that draws one control family. Derive a %Style to
-    install a different look. Derive a %Renderer to draw a control
-    family. Derive a %Styler only when adding a new control family.
+    A %Renderer implements layouting and painting for one control family.
+    Named measure methods run inside-out. Named layout methods run
+    outside-in. Named render methods paint prepared rectangles. The widget
+    owns geometry and orchestrates those passes. The renderer does not
+    mutate widget geometry. @ref Pt-Forms-Page-Updating describes the
+    cycle.
+
+    %Styler binds a control to the current style. Call %Styler::bind()
+    from %onInvalidate(). Layouting and painting call typed methods on
+    the derived styler. Derive a %Style to install a different look.
+    Derive a %Renderer to draw a control family. Derive a %Styler only
+    when adding a new control family.
 */
 
 #endif

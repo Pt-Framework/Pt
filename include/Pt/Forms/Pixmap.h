@@ -43,57 +43,122 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Interface for the platform/backend-specific pixmap implementation.
+/** @brief Platform pixmap implementation.
+
+    %GraphicsBackend creates this object. Ordinary applications do not
+    call this API.
+
+    @ingroup Pt-Forms-Updating
 */
 class PT_FORMS_API IPixmapImpl
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~IPixmapImpl() {}
 
+        /** @brief Resets the pixmap from @a image.
+        */
         virtual void reset(const Gfx::Image& image) = 0;
+
+        /** @brief Resets the pixmap to @a size in physical pixels.
+        */
         virtual void reset(const Gfx::SizeF& size) = 0;
+
+        /** @brief Clears the pixmap.
+        */
         virtual void reset() = 0;
 
+        /** @brief Copies @a rect into @a bitmap.
+        */
         virtual void getBitmap(Gfx::Bitmap& bitmap, const Gfx::RectF& rect) const = 0;
+
+        /** @brief Sets the scale factor to @a scaleFactor.
+        */
         virtual void setScaleFactor(double scaleFactor) = 0;
+
+        /** @brief Draws @a pm onto @a canvas at @a to.
+
+            When @a rect is not null, only that region of the pixmap is
+            drawn.
+        */
         virtual void drawPixmap(Gfx::Canvas& canvas, const Gfx::PointF& to,
                                 const Pixmap& pm, const Gfx::RectF* rect) = 0;
 
+        /** @brief Returns the image format.
+        */
         virtual const Gfx::ImageFormat& format() const = 0;
+
+        /** @brief Returns the size in physical pixels.
+        */
         virtual const Gfx::SizeF& size() const = 0;
+
+        /** @brief Returns the scaling from logical to physical pixels.
+        */
         virtual const Gfx::Scaling& scaling() const = 0;
 
+        /** @brief Returns a canvas, reusing @a reuse when possible.
+        */
         virtual Gfx::Canvas* getCanvas(Gfx::Canvas* reuse) = 0;
+
+        /** @brief Creates a canvas, reusing @a reuse when possible.
+        */
         virtual Gfx::Canvas* createCanvas(Gfx::Canvas* reuse) = 0;
+
+        /** @brief Releases the current canvas.
+        */
         virtual void releaseCanvas() = 0;
+
+        /** @brief Synchronizes pending drawing operations.
+        */
         virtual void sync() = 0;
+
+        /** @brief Finishes painting on the pixmap.
+        */
         virtual void finish() = 0;
 };
 
 
-/** @brief Back buffer drawing surface.
+/** @brief Off-screen Forms paint surface.
+
+    A %Pixmap is a %PaintSurface used as a back buffer or as cached image
+    content. Reset it from an image or a size in physical pixels.
+
+    @ingroup Pt-Forms-Updating
 */
 class PT_FORMS_API Pixmap : public PaintSurface
 {
     public:
+        /** @brief Creates an empty pixmap.
+        */
         Pixmap();
 
+        /** @brief Destructor.
+        */
         virtual ~Pixmap();
 
+        /** @brief Clears the pixmap.
+        */
         void reset();
 
-        /** @brief Resets to an image. 
+        /** @brief Resets the pixmap from @a image.
         */
         void reset(const Gfx::Image& image);
 
-        /** @brief Resizes to a size in physical pixels. 
+        /** @brief Resets the pixmap to @a size in physical pixels.
         */
         void reset(const Gfx::SizeF& size);
 
+        /** @brief Returns true when the pixmap has no size.
+        */
         bool empty() const;
 
+        /** @brief Copies @a rect into @a image.
+        */
         void getBitmap(Gfx::Bitmap& image, const Gfx::RectF& rect);
 
+        /** @brief Sets the scale factor to @a v.
+        */
         void setScaleFactor(double v);
 
     protected:
@@ -120,11 +185,19 @@ class PT_FORMS_API Pixmap : public PaintSurface
         virtual void onFinish() override;
 
     public:
+        /** @brief Returns the platform pixmap implementation.
+
+            This is an implementation API for Forms backends.
+        */
         IPixmapImpl* impl()
         {
             return _impl;
         }
 
+        /** @brief Returns the platform pixmap implementation.
+
+            This is an implementation API for Forms backends.
+        */
         const IPixmapImpl* impl() const
         {
             return _impl;
@@ -134,6 +207,8 @@ class PT_FORMS_API Pixmap : public PaintSurface
         IPixmapImpl* _impl;
 };
 
+/** @brief Alias of %Pixmap.
+*/
 typedef Pixmap PixmapSurface;
 
 } // namespace
