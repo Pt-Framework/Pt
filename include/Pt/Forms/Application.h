@@ -83,7 +83,7 @@ class Popup;
     backend implementations; ordinary applications use the higher-level
     Forms APIs.
 
-    @ingroup Pt-Forms-Application
+    @ingroup Pt-Forms
 */
 class PT_FORMS_API Application : public Pt::System::Application
 {

@@ -60,6 +60,8 @@
     %MouseEvent, %TouchEvent, %ScrollEvent, %EnterEvent, %LeaveEvent,
     %KeyEvent, and %FocusEvent carry the event data. %Key identifies a key
     and its modifiers.
+
+    @ingroup Pt-Forms
 */
 
 #endif

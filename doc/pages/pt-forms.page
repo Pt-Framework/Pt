@@ -1,0 +1,46 @@
+/** \page Pt-Forms-Page Application Lifecycle and Structure
+
+    This page covers the application runtime, the widget and view object
+    model, the display root, windows and workspaces, and input delivery.
+
+    @copydetails Pt-Forms
+
+    @section Pt-Forms-Page-Application Application
+    @copydetails Pt::Forms::Application
+
+    @section Pt-Forms-Page-Widgets Widgets and Views
+    @copydetails Pt-Forms-Widgets
+
+    @subsection Pt-Forms-Page-Widget Widgets
+    @copydetails Pt::Forms::Widget
+
+    @subsection Pt-Forms-Page-View Views
+    @copydetails Pt::Forms::View
+
+    @subsection Pt-Forms-Page-Form Forms
+    @copydetails Pt::Forms::Form
+
+    @subsection Pt-Forms-Page-Control Controls
+    @copydetails Pt::Forms::Control
+
+    @subsection Pt-Forms-Page-Screen Screens
+    @copydetails Pt::Forms::Screen
+
+    @section Pt-Forms-Page-Windows Windows and Workspaces
+    @copydetails Pt-Forms-Windows
+
+    @subsection Pt-Forms-Page-Window Windows
+    @copydetails Pt::Forms::Window
+
+    @subsection Pt-Forms-Page-WindowManager Window Managers
+    @copydetails Pt::Forms::WindowManager
+
+    @section Pt-Forms-Page-Input Pointer and Keyboard Input
+    @copydetails Pt-Forms-Input
+
+    @subsection Pt-Forms-Page-Responder Responders
+    @copydetails Pt::Forms::Responder
+
+    @subsection Pt-Forms-Page-InputMethod Input Methods
+    @copydetails Pt::Forms::InputMethod
+*/

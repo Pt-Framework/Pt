@@ -54,6 +54,8 @@
 
     %WindowType and %WindowState are presentation of a window, not separate
     object kinds.
+
+    @ingroup Pt-Forms
 */
 
 #endif

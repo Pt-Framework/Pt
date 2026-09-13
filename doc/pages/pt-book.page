@@ -101,12 +101,12 @@
 @section pt_forms Graphical User Interfaces
 
 <ul>
-    <li> @ref Pt-Forms-Application-Page </li>
+    <li> @ref Pt-Forms-Page </li>
     <ul>
-        <li> @ref Pt-Forms-Application-Page-Application </li>
-        <li> @ref Pt-Forms-Application-Page-Widgets </li>
-        <li> @ref Pt-Forms-Application-Page-Windows </li>
-        <li> @ref Pt-Forms-Application-Page-Input </li>
+        <li> @ref Pt-Forms-Page-Application </li>
+        <li> @ref Pt-Forms-Page-Widgets </li>
+        <li> @ref Pt-Forms-Page-Windows </li>
+        <li> @ref Pt-Forms-Page-Input </li>
     </ul>
 </ul>
 

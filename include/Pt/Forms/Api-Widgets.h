@@ -30,9 +30,9 @@
 #ifndef PT_FORMS_API_WIDGETS_H
 #define PT_FORMS_API_WIDGETS_H
 
-/** @defgroup Pt-Forms-Widgets Forms Widgets and Views
+/** @defgroup Pt-Forms-Widgets Widgets and Views
 
-    @brief The widget and view object model.
+    @brief Widget and view object model.
 
     Every visual %Forms object is a %Widget. %Screen and %WindowManager are
     widgets but not views. %Form and %Control are the usual %View
@@ -51,6 +51,8 @@
     %WindowManager, %WindowFrame, and %GraphicsBackend support platform and
     embedded-window implementations; applications normally use the window
     manager provided by a %Screen or %Workspace.
+
+    @ingroup Pt-Forms
 */
 
 #endif

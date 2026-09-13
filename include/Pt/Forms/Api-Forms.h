@@ -27,10 +27,10 @@
   Boston, MA 02110-1301 USA
 */
 
-#ifndef PT_FORMS_API_APPLICATION_H
-#define PT_FORMS_API_APPLICATION_H
+#ifndef PT_FORMS_API_FORMS_H
+#define PT_FORMS_API_FORMS_H
 
-/** @defgroup Pt-Forms-Application Forms Applications
+/** @defgroup Pt-Forms Forms
 
     @brief Application lifecycle and structure.
 
