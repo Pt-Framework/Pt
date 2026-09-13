@@ -5,13 +5,30 @@ description: "API Documentation"
 
 # User Documentation
 
-- Write for a reader who will use the feature, not for the person who
-  implemented it.
-- Full sentences and short paragraphs. Lead with what the thing is or what
-  the reader does, then the command, identifier, or example.
-- Use plain language in running text. Keep real identifiers as names
-  (`--with-prebuilt`, `PREBUILT_ROOT`). Do not stack jargon
-  (not "relocatable ABI tree under the identity directory").
+- Write for a reader who uses the public API, not for its implementer.
+- Write complete sentences and short paragraphs in a concise, neutral reference
+  style.
+- Use plain, precise language. Keep real identifiers as names
+  (`--with-prebuilt`, `PREBUILT_ROOT`). Use established API terms such as
+  object, instance, value, parent, owner, lifetime, default, local, inherited,
+  and override only when they describe a public contract.
+- Avoid informal wording, marketing language, stacked jargon, and descriptions
+  of internal implementation details.
+
+# API Reference Voice
+
+- Begin class briefs with a precise role verb such as "Represents", "Provides",
+  "Manages", "Stores", or "Defines".
+- Begin function briefs with the observable result or effect: "Returns",
+  "Sets", "Adds", "Removes", "Creates", "Replaces", "Binds", or "Resets".
+- Describe public behavior, ownership, lifetime, side effects, errors, and
+  ordering requirements. Do not narrate internal execution steps.
+- Use one term consistently for one concept. Do not use near synonyms unless
+  they denote different public concepts.
+- Use "Use %Type::function() to ..." for the canonical operation and
+  "Call %Type::function() before ..." for ordering requirements.
+- Keep each brief useful on its own. Put concepts and non-obvious contracts in
+  the detailed paragraph.
 
 # Documentation Structure
 
@@ -68,11 +85,14 @@ alone on the class reference page.
   classify it; it may remain outside a feature group.
 - Internal helpers in `.cpp` files may use brief comments but do not need
   Doxygen markup.
-- Give a class a detailed description when its role, ownership, lifecycle,
-  extension point, or interaction with another type is not self-evident,
-  or when a page copies that class as a chapter. Lead with the type's role,
-  then the contract the group overview does not already state: ownership,
-  lifecycle, usage, and whether the reader derives from it.
+- Give a class a detailed description when its role, ownership, lifetime,
+  extension point, or relationship to another public type is not self-evident,
+  or when a page copies it as a chapter. State only the contract that the group
+  overview does not already explain.
+- Method briefs state the result or effect first. Use "Returns ..." for
+  queries, "Sets ..." or "Changes ..." for mutators, and "Creates ..." or
+  "Adds ..." for factory and registration operations. Do not begin a brief
+  with "This function" or repeat the method name in prose.
 - Module-level concepts belong in the `@namespace` comment in the
   module's `Api.h`.
 - Group IDs are derived from the C++ namespace by replacing `::` with `-`:
@@ -221,18 +241,11 @@ class MyClass
     */
     int multiply(int a, int b);
 
-    /** @brief This method does something complicated.
+    /** @brief Divides @a value by @a divisor.
 
-        Detailed description of the method.
-
-        @param name Description of parameter name.
-        @param b Description of parameter b.
-
-        @return Description of the result.
-
-        @throw std::invalid_argument if @a  b is 0.
+      @throw %std::invalid_argument if @a divisor is 0.
     */
-    float somethingComplicated(const std::string& name, float b);
+    float divide(float value, float divisor);
 };
 
 }
