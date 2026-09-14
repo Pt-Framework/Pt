@@ -43,26 +43,25 @@ namespace Forms {
 
 /** @brief Provides a text entry field with a drop-down list.
 
-    A %ComboBox presents a current text in an entry and a button that
-    opens a popup list. %addItem() adds a caller-owned %ListBoxItem.
-    Choosing an item emits %selected() and sets the text.
-    %setText() assigns the string and emits %textChanged(). User typing
-    emits %textEdited() when the box is editable.
+    A %ComboBox presents a current text in an entry and a button that opens a
+    popup list. Use %addItem() to add a caller-owned %ListBoxItem. Choosing an
+    item emits the %selected() signal and sets the text. Use %setText() to
+    assign the string and emit %textChanged(). User typing emits %textEdited()
+    when the box is editable.
 
-    %setEditable(false) keeps the text from being typed; the user still
-    picks from the list. %setAccepted(true) completes an edit: Return
-    emits %returnPressed(), and losing focus after a change emits
-    %editingFinished(). %setMaxHeight() limits the popup. %setScrollBars()
-    shows scroll bars on the list.
+    Calling %setEditable(false) keeps the text from being typed, allowing the
+    user to still pick from the list. Calling %setAccepted(true) completes an
+    edit: pressing Return emits %returnPressed(), and losing focus after a
+    change emits %editingFinished(). Calling %setMaxHeight() limits the popup
+    height, and calling %setScrollBars() shows scroll bars on the list.
 
-    The box owns a %ComboBoxStyler. On invalidate it calls
-    %Styler::bind(). Appearance getters and setters overlay the
-    application style. %setRenderer() assigns a %ComboBoxRenderer until
-    it is cleared. Measure, layout, and paint call typed methods on the
-    styler.
+    The box owns a %ComboBoxStyler. On invalidate, it calls %Styler::bind().
+    Appearance getters and setters overlay the application style. Use
+    %setRenderer() to assign a %ComboBoxRenderer until it is cleared.
+    Measure, layout, and paint operations call typed methods on the styler.
 
-    A %LineEditor stores the entry text and caret. It is not a widget.
-    The popup list is a %Popup that hosts a %ListBox.
+    An internal %LineEditor stores the entry text and caret, but is not a
+    widget. The popup list is a %Popup that hosts a %ListBox.
 
     @code
     Pt::Forms::ListBoxItem berlin;
