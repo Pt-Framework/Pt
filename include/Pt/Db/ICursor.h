@@ -74,9 +74,9 @@ class PT_DB_API ICursor : public RefCounted
         virtual Result onEndBatchFetch() = 0;
         virtual void   onClose() = 0;
 
-        Signal<> _fetched;
-        bool     _open;
+        Signal<>     _fetched;
         IConnection* _conn;
+        bool         _open;
 };
 
 } //namespace Db
@@ -84,4 +84,3 @@ class PT_DB_API ICursor : public RefCounted
 } //namespace Pt
 
 #endif // PT_DB_ICURSOR_H
-
