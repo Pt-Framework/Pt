@@ -194,6 +194,9 @@ class FacetPtr
     application starts with %PlatinumStyle. Derive %Renderer, or another
     %Facet, to add drawing for a control family.
 
+    Shared facets receive global options only through %reset(). Look-
+    specific metrics stay in the derived renderer, not on %Style.
+
     @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API Style
@@ -249,6 +252,11 @@ class PT_FORMS_API Style
 
             protected:
                 /** @brief Resets this facet with @a options.
+
+                    Resolves tokens from @a options and stores the painter
+                    and metric state used later by measure, layout, and
+                    render. Shared facets are reset when the application
+                    applies global options.
                 */
                 virtual void onReset(const StyleOptions& /*options*/)
                 {

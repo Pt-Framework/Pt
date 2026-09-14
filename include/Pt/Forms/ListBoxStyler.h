@@ -83,6 +83,9 @@ class PT_FORMS_API ListBoxState
     widget owns geometry and orchestrates those passes. The renderer
     does not mutate widget geometry.
 
+    This renderer paints the list chrome. %ListItemRenderer paints
+    each item.
+
     Derive a renderer to change the look of list boxes. Register it
     on a %Style, or assign it to a widget with %ListBox::setRenderer().
 
@@ -307,6 +310,9 @@ class PT_FORMS_API ListItemState
     outside-in. Named render methods paint prepared rectangles. The
     widget owns geometry and orchestrates those passes. The renderer
     does not mutate widget geometry.
+
+    Item methods take rectangles, text, icons, and item state. They
+    do not take the list.
 
     Derive a renderer to change the look of list items. Register it
     on a %Style, or assign it to a widget with

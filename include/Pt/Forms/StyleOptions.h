@@ -502,7 +502,9 @@ class PopupTextColorOption : public StyleOption
     A %FontOption can replace the whole font, or change only the size,
     weight, or slant. The remaining attributes then come from the
     application font. %value() is the effective font after %bind().
-    %getFont() merges the local overrides with @a baseFont.
+    %getFont() merges the local overrides with @a baseFont. Use
+    %StyleOptions::findLocal() to detect a local overlay, then
+    %getFont() to merge it with a base font.
 
     @ingroup Pt-Forms-Styling
 */
@@ -616,12 +618,19 @@ class PT_FORMS_API FontOption : public StyleOption
     is useful as a local overlay for a control. A styler binds this overlay to
     the application options. A local option overrides the option of the same
     type in the application options, while an option that is not present
-    locally continues to use the application value.
+    locally continues to use the application value. %Application owns the
+    live global instance, constructed from %defaults().
+    %Application::styleOptions() returns that object as const.
 
-    %findLocal() searches only this object. %find() searches this object and
-    then its bound parent. %get() performs the same lookup and throws
-    %std::logic_error when the requested option is not available. %set()
-    adds or replaces a local option, and %reset() removes a local option.
+    %findLocal() searches only this object and returns 0 when the option is
+    not stored locally. %find() searches this object and then its bound
+    parent. After %bind(), %get() returns a local or inherited token and
+    throws %std::logic_error when the requested option is not available.
+    %set() adds or replaces a local option, and %reset() removes a local
+    option.
+
+    %StyleOptions stores tokens that every style can honor. Look-specific
+    metrics stay in the derived style or renderer.
 
     %FontOption supports complete and partial font overrides. A local option
     can change only the font size, weight, or slant while inheriting the font

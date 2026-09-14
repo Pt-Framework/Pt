@@ -54,7 +54,8 @@ namespace Forms {
 
     %setBackground() and %setContour() enable a fill or frame.
     %setBackground(false) and %setFrame(false) turn them off without
-    replacing the style.
+    replacing the style. Whether the fill or frame is on is a widget
+    setting, not a style option.
 
     The label owns a %PanelStyler and shares the panel appearance family
     with %Panel. On invalidate it binds that styler. Measure, layout, and
@@ -166,7 +167,8 @@ class PT_FORMS_API Label : public Control
 
         /** @brief Assigns @a renderer as the family renderer.
 
-            A null renderer falls back to the current style on the next bind.
+            Passing 0 uses the renderer from the current style. The
+            change takes effect before this function returns.
         */
         void setRenderer(PanelRenderer* renderer);
 
@@ -193,6 +195,10 @@ class PT_FORMS_API Label : public Control
         virtual void onConnect(Screen& screen);
 
         /** @brief Binds the styler and prepares the icon.
+
+            Calls the base implementation, then %Styler::bind(). When
+            bind returns true, refreshes widget-owned caches such as
+            icon pixmaps.
         */
         virtual void onInvalidate();
 

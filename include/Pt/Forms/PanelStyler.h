@@ -80,6 +80,9 @@ class PT_FORMS_API PanelState
     widget owns geometry and orchestrates those passes. The renderer
     does not mutate widget geometry.
 
+    %renderBackground() fills the whole control. %renderFrame() draws
+    the border.
+
     Derive a renderer to change the look of panels and labels.
     Register it on a %Style, or assign it with %Panel::setRenderer()
     or %Label::setRenderer().

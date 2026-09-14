@@ -811,6 +811,10 @@ class PT_FORMS_API PlatinumTabViewRenderer : public TabViewRenderer
 
 /** @brief Provides the built-in default %Style.
 
+    %PlatinumStyle is the look that %Application installs at start.
+    Control backgrounds stay transparent unless a local background
+    option is set.
+
     @ingroup Pt-Forms-Styling
 */
 class PT_FORMS_API PlatinumStyle : public Style

@@ -126,7 +126,8 @@ class TabViewItem
     a time. Use %addTab() to add a control with a title. Keep each
     control alive until %removeTab() detaches it. %setCurrent() shows
     that page. Choosing a tab shows its page. %setText() changes a
-    tab title.
+    tab title. The view owns the titles, the current tab, tab geometry,
+    and tab input. There is no separate tab-bar widget.
 
     The view owns a %TabViewStyler. On invalidate it calls
     %Styler::bind(). Appearance getters and setters overlay the

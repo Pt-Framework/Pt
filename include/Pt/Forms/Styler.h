@@ -52,8 +52,9 @@ namespace Forms {
     after the base implementation.
 
     When the overlay contains no local options, %bind() uses the shared
-    renderer from the style. When the overlay contains local options, it
-    uses a private clone. A renderer assigned through the derived
+    renderer from the style and does not reset it. When the overlay
+    contains local options, it uses a private clone and resets that
+    clone with the overlay. A renderer assigned through the derived
     %setRenderer() remains until it is cleared. Passing a null renderer
     falls back to the current style on the next %bind().
 

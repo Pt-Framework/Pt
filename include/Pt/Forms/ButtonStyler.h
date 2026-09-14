@@ -109,6 +109,12 @@ class PT_FORMS_API ButtonState
     geometry and orchestrates those passes. The renderer does not
     mutate widget geometry.
 
+    Caption, icon, and mnemonic underline are independent layers.
+    %layoutContent() returns the text and icon rectangles.
+    %renderText() paints the caption in the text rectangle.
+    %renderIcon() paints the picture. %renderMnemonic() paints the
+    underline.
+
     Derive a renderer to change the look of push buttons. Register it
     on a %Style, or assign it to a widget with %PushButton::setRenderer().
 

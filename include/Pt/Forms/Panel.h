@@ -55,7 +55,9 @@ class Painter;
 
     %setBackground() and %setContour() enable a fill or frame.
     %setBackground(false) and %setFrame(false) turn them off.
-    %setIcon() paints a picture aligned with the given %Alignment.
+    Whether the fill or frame is on is a widget setting, not a style
+    option. %setIcon() paints a picture aligned with the given
+    %Alignment.
 
     The panel owns a %PanelStyler and shares that appearance family with
     %Label. On invalidate it binds the styler. Measure, layout, and paint
@@ -133,7 +135,8 @@ class PT_FORMS_API Panel : public Control
 
         /** @brief Assigns @a renderer as the family renderer.
 
-            A null renderer falls back to the current style on the next bind.
+            Passing 0 uses the renderer from the current style. The
+            change takes effect before this function returns.
         */
         void setRenderer(PanelRenderer* renderer);
 
@@ -143,6 +146,10 @@ class PT_FORMS_API Panel : public Control
         virtual void onRemoveControl(Control& control);
 
         /** @brief Binds the styler and prepares the icon.
+
+            Calls the base implementation, then %Styler::bind(). When
+            bind returns true, refreshes widget-owned caches such as
+            icon pixmaps.
         */
         virtual void onInvalidate();
 

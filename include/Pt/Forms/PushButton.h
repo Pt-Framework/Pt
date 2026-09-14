@@ -184,7 +184,8 @@ class PT_FORMS_API PushButton : public Button
 
         /** @brief Assigns @a renderer as the family renderer.
 
-            A null renderer falls back to the current style on the next bind.
+            Passing 0 uses the renderer from the current style. The
+            change takes effect before this function returns.
         */
         void setRenderer(ButtonRenderer* renderer);
 
@@ -208,6 +209,10 @@ class PT_FORMS_API PushButton : public Button
 
     protected:
         /** @brief Binds the styler and prepares the icon.
+
+            Calls the base implementation, then %Styler::bind(). When
+            bind returns true, refreshes widget-owned caches such as
+            icon pixmaps.
         */
         virtual void onInvalidate();
 

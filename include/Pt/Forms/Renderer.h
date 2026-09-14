@@ -45,7 +45,13 @@ namespace Forms {
     count of 0. %FacetPtr and %Style::set() take their own references.
 
     Named measure, layout, and render methods belong on derived
-    renderer types.
+    renderer types. Use %Facet::onReset() to read style options and
+    store drawing state for those methods.
+
+    A renderer may store a %Painter. That painter keeps its brush, pen,
+    font, clip, and composition after %begin(). %onReset() assigns the
+    default attributes. A render method that changes them assigns the
+    defaults again before it returns.
 
     Derive a renderer for a control family and register it on a %Style.
 

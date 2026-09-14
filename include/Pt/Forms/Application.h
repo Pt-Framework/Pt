@@ -74,9 +74,10 @@ class Popup;
     %processEvent() only when deliberately supplying Forms events.
 
     The application provides shared styles, style options, input methods,
-    fonts, and scaling. %setStyle() and %setStyleOptions() reset the shared
-    style and invalidate registered widgets so that their visual state is
-    rebuilt. %setScaleFactor() sends a rescale event through the primary
+    fonts, and scaling. Use %setStyle() and %setStyleOptions() to change
+    the global theme. Those methods reset shared renderer facets and
+    invalidate registered widgets. Widgets rebuild in %onInvalidate().
+    %setScaleFactor() sends a rescale event through the primary
     screen. Configure shared services before showing the user interface when
     possible. %impl() and %graphicsBackend() support Forms backend
     implementations; ordinary applications use the higher-level Forms APIs.

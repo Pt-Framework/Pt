@@ -91,7 +91,9 @@ class PT_FORMS_API SliderState
 
     Track and handle are public primitives. Custom widgets such as
     scrubbers, timelines, mixers, range editors, and color controls
-    may reuse them.
+    may reuse them. %renderChrome() may paint track and handle
+    together. A derived renderer may override %renderTrack() and
+    %renderHandle() instead.
 
     Derive a renderer to change the look of sliders. Register it
     on a %Style, or assign it to a widget with %Slider::setRenderer().

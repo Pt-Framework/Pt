@@ -57,8 +57,21 @@
     bars move the content.
 
     %TabViewItem is not a control. %TabView creates tab labels from
-    %addTab titles. %ListBoxLayout is an integrated subpart.
-    Applications do not construct it.
+    %addTab titles. The view owns the titles, the current tab, tab
+    geometry, and tab input. There is no tab-bar widget.
+    %ListBoxLayout is an integrated subpart. Applications do not
+    construct it.
+
+    List and tab chrome are separate from repeated-element visuals.
+    %ListBoxRenderer paints the list. %ListItemRenderer paints an
+    item. %TabViewRenderer paints the view chrome and each tab.
+    Item and tab methods take rectangles, text, icons, and item or
+    tab state. They do not take the item widget, a model object, or
+    the tab collection.
+
+    A collection that only needs pane or frame chrome can use the
+    panel appearance family. A dedicated container renderer is for
+    chrome that differs from a panel.
 
     %ScrollView has no appearance family of its own. Optional bars
     are %ScrollBar objects. Offset of oversized content is a

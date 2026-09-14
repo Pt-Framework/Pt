@@ -135,6 +135,9 @@ class PT_FORMS_API TabViewItemState
     widget owns geometry and orchestrates those passes. The renderer
     does not mutate widget geometry.
 
+    View chrome uses %TabViewState. Each tab uses %TabViewItemState.
+    %renderTab() takes tab state, not view state.
+
     Derive a renderer to change the look of tab views. Register it
     on a %Style, or assign it to a widget with %TabView::setRenderer().
 
