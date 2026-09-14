@@ -37,68 +37,144 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Represents the common content and activation behavior of a menu item.
+
+    A menu item displays text, an optional icon, an optional separator, and a
+    shortcut when one is registered. A pointer or touch release over the item,
+    or a matching shortcut, emits %triggered(). A highlighted item is the item
+    currently under the pointer.
+
+    The item derives its default drawing attributes from the application style.
+    Its background, contour, text color, and font setters provide local
+    overrides. %MenuItem, %MenuSubItem, %MenuMenuItem, and %MenuBarItem use
+    this common behavior.
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API MenuItemBase : public Control
 {
     public:
+        /** @brief Defines the inherited control type.
+        */
         typedef Control Base;
 
     public:
 
+        /** @brief Creates a menu item with empty content.
+        */
         MenuItemBase();
 
+        /** @brief Destroys the menu item.
+        */
         virtual ~MenuItemBase();
 
+        /** @brief Returns the item text.
+        */
         const Pt::String& text() const;
 
+        /** @brief Sets the item text.
+        */
         void setText(const Pt::String& t);
 
+        /** @brief Returns the item icon.
+        */
         const Pt::Gfx::Image& icon() const;
 
+        /** @brief Sets the item icon.
+        */
         void setIcon(const Pt::Gfx::Image& img);
 
+        /** @brief Returns the space reserved before the item icon.
+        */
         double iconPadding() const;
 
+        /** @brief Sets the space reserved before the item icon.
+
+            The reserved space is at least the width of the current icon.
+        */
         void setIconPadding(double left);
 
+        /** @brief Sets whether a separator is drawn below this item.
+        */
         void setSeperator(bool v)
         {
             _hasSeparator = v;
         }
 
+        /** @brief Returns true if a separator is drawn below this item.
+        */
         bool hasSeperator() const
         {
             return _hasSeparator;
         }
 
+        /** @brief Returns true while the pointer is over this item.
+        */
         bool isHighlighted() const
         {
             return _isHighlighted;
         }
 
+        /** @brief Returns the signal emitted when this item is activated.
+        */
         Pt::Signal<MenuItemBase&>& triggered();
 
 
     public:
+        /** @brief Returns the background brush.
+
+            Returns the local override when one was set; otherwise returns the
+            application style background brush.
+        */
         const Pt::Gfx::Brush& background() const;
 
+        /** @brief Sets a local background brush.
+        */
         void setBackground(const Pt::Gfx::Brush& b);
 
+        /** @brief Returns the contour pen.
+
+            Returns the local override when one was set; otherwise returns the
+            application style contour pen.
+        */
         const Pt::Gfx::Pen& contour() const;
 
+        /** @brief Sets a local contour pen.
+        */
         void setContour(const Pt::Gfx::Pen& p);
 
+        /** @brief Returns the text color.
+
+            Returns the local override when one was set; otherwise returns the
+            application style text color.
+        */
         const Pt::Gfx::Color& textColor() const;
 
+        /** @brief Sets a local text color.
+        */
         void setTextColor(const Pt::Gfx::Color& color);
 
+        /** @brief Returns the item font.
+
+            Returns the local full or partial override when one was set;
+            otherwise returns the application style font.
+        */
         const Pt::Gfx::Font& font() const;
 
+        /** @brief Sets a local font.
+        */
         void setFont(const Pt::Gfx::Font& font);
 
+        /** @brief Sets a local font size.
+        */
         void setFontSize(std::size_t size);
 
+        /** @brief Sets a local font weight.
+        */
         void setFontWeight(Pt::Gfx::Font::Weight weight);
 
+        /** @brief Sets a local font slant.
+        */
         void setFontSlant(Pt::Gfx::Font::Slant slant);
 
     protected:

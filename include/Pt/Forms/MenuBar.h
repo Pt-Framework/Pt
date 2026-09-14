@@ -45,26 +45,79 @@ namespace Forms {
 class Menu;
 class MenuBar;
 
+/** @brief Represents a horizontal bar of top-level menus.
+
+    Use a %MenuBar to present a stable row of top-level command categories.
+    Add %MenuBarItem objects and associate each item with a %Menu. The bar
+    opens the selected menu below its item and closes the previously active
+    menu. It does not own its items; remove an item before destroying it.
+
+    A menu bar derives its default background and contour from the application
+    style during invalidation. %setBackground() and %setContour() supply local
+    overrides for this menu bar.
+
+    @code
+    Pt::Forms::MenuBarItem fileItem;
+    fileItem.setText("File");
+
+    Pt::Forms::MenuBarItem editItem;
+    editItem.setText("Edit");
+
+    Pt::Forms::Menu fileMenu;
+    fileMenu.addItem(&fileItem);
+    fileMenu.addItem(&editItem);
+
+    Pt::Forms::MenuBar menuBar;
+    menuBar.addItem(fileItem);
+    @endcode
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API MenuBar : public Control
                          , protected MenuBase
 {
     typedef Control Base;
 
     public:
+        /** @brief Creates an empty menu bar.
+        */
         MenuBar();
 
+        /** @brief Destroys the menu bar.
+        */
         virtual ~MenuBar();
 
+        /** @brief Adds top-level entry @a item to this menu bar.
+
+            The menu bar does not own @a item. Keep it alive until it is
+            removed. Keep an associated menu alive while the item uses it.
+        */
         void addItem(MenuBarItem& item);
 
+        /** @brief Removes top-level entry @a item from this menu bar.
+        */
         void removeItem(MenuBarItem& item);
 
+        /** @brief Returns the background brush.
+
+            Returns the local override when one was set; otherwise returns the
+            application style background brush.
+        */
         const Pt::Gfx::Brush& background() const;
 
+        /** @brief Sets a local background brush.
+        */
         void setBackground(const Pt::Gfx::Brush& b);
 
+        /** @brief Returns the contour pen.
+
+            Returns the local override when one was set; otherwise returns the
+            application style contour pen.
+        */
         const Pt::Gfx::Pen& contour() const;
 
+        /** @brief Sets a local contour pen.
+        */
         void setContour(const Pt::Gfx::Pen& p);
 
     protected:

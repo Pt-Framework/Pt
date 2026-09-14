@@ -3,7 +3,7 @@
     This chapter covers the application runtime, the widget and view object
     model, the display root, windows and workspaces, layouting and painting,
     input delivery, layouts, buttons, displays, editors and selectors,
-    collections, icons and textual content, and styles and renderers.
+    collections, menus, icons and textual content, and styles and renderers.
 
     @copydetails Pt-Forms
 
@@ -36,9 +36,6 @@
 
     @subsection Pt-Forms-Page-WindowManager Window Managers
     @copydetails Pt::Forms::WindowManager
-
-    @subsection Pt-Forms-Page-Popup Popups
-    @copydetails Pt::Forms::Popup
 
     @subsection Pt-Forms-Page-Workspace Workspaces
     @copydetails Pt::Forms::Workspace
@@ -132,6 +129,30 @@
 
     @subsection Pt-Forms-Page-ScrollView Scroll Views
     @copydetails Pt::Forms::ScrollView
+
+    @section Pt-Forms-Page-Menus Menus
+    @copydetails Pt-Forms-Menus
+
+    @subsection Pt-Forms-Page-Menu Menu
+    @copydetails Pt::Forms::Menu
+    @copydetails Pt::Forms::MenuBase
+
+    @subsection Pt-Forms-Page-MenuBar Menu Bars
+    @copydetails Pt::Forms::MenuBar
+
+    @subsection Pt-Forms-Page-MenuItem Menu Items
+    @copydetails Pt::Forms::MenuItemBase
+    @copydetails Pt::Forms::MenuItem
+    @copydetails Pt::Forms::MenuMenuItem
+
+    @subsection Pt-Forms-Page-MenuSubItem Menu Subitems
+    @copydetails Pt::Forms::MenuSubItem
+
+    @subsection Pt-Forms-Page-MenuBarItem Menu Bar Items
+    @copydetails Pt::Forms::MenuBarItem
+
+    @subsection Pt-Forms-Page-Popup Popups
+    @copydetails Pt::Forms::Popup
 
     @section Pt-Forms-Page-Icons Icons and Text
     @copydetails Pt-Forms-Icons

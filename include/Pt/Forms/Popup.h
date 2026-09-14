@@ -35,14 +35,14 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Borderless transient window.
+/** @brief Represents a borderless transient window.
 
     A %Popup is a %Window shown for a short interaction such as a menu.
     %setAnchor() relates it to the widget that opened it for popup input
     handling. The anchor does not position or size the popup. Move, size,
     raise, and show it explicitly.
 
-    @ingroup Pt-Forms-Windows
+    @ingroup Pt-Forms-Windows Pt-Forms-Menus
 */
 class PT_FORMS_API Popup : public Window
 {

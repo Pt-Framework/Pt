@@ -40,44 +40,79 @@ namespace Forms {
 class Menu;
 class MenuBar;
 
+/** @brief Represents an alternate menu item that manages a nested menu.
+
+    %MenuMenuItem provides the same nested-menu association and keyboard
+    delegation as %MenuSubItem while using the base item presentation.
+    %setMenu() associates a nested menu without taking ownership.
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API MenuMenuItem : public MenuItemBase
 {
     friend class Menu;
 
     public:
+        /** @brief Defines the inherited menu item type.
+        */
         typedef MenuItemBase Base;
 
     public:
+        /** @brief Creates an item without a nested menu.
+        */
         MenuMenuItem();
 
+        /** @brief Destroys the item.
+        */
         virtual ~MenuMenuItem();
 
+        /** @brief Associates @a menu with this item.
+
+            Pass 0 to remove the current association. The item does not own
+            @a menu, which must remain alive while it is associated.
+        */
         void setMenu(Menu* menu);
 
+        /** @brief Returns the nested menu, or 0 when none is assigned.
+        */
         const Menu* menu() const
         {
             return _menu;
         }
 
 
+        /** @brief Returns the nested menu, or 0 when none is assigned.
+        */
         Menu* menu()
         {
             return _menu;
         }
 
+        /** @brief Sets the containing menu coordinator.
+
+            The item does not own @a p.
+        */
         void setParentMenu(MenuBase* p)
         {
             _parentMenu = p;
         }
 
+        /** @brief Cancels the nested menu interaction.
+        */
         void cancel();
 
 
+        /** @brief Closes the nested menu.
+        */
         void closeMenu();
 
+        /** @brief Opens the nested menu.
+        */
         void openMenu();
 
 
+        /** @brief Returns true if the nested menu is open.
+        */
         bool isMenuOpen() const
         {
             return _isOpen;

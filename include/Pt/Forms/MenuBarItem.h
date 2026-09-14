@@ -42,11 +42,23 @@ namespace Forms {
 
 class MenuBar;
 
+/** @brief Represents a top-level entry in a menu bar.
+
+    Use a %MenuBarItem to give a %MenuBar a labeled top-level category. It
+    inherits the nested-menu association and opening behavior of
+    %MenuSubItem. Add it to a %MenuBar after assigning its menu.
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API MenuBarItem : public MenuSubItem
 {
     public:
+        /** @brief Creates an empty top-level menu entry.
+        */
         MenuBarItem();
 
+        /** @brief Destroys the top-level menu entry.
+        */
         virtual ~MenuBarItem();
 
     protected:

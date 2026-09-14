@@ -37,13 +37,26 @@ namespace Forms {
 
 class Menu;
 
+/** @brief Represents a command that can be chosen from a menu.
+
+    Use a %MenuItem for a command that does not open a nested menu. Add it to
+    a %Menu and connect %triggered() to perform the command. Its text, icon,
+    separator, and local appearance overrides are inherited from
+    %MenuItemBase.
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API MenuItem : public MenuItemBase
 {
     typedef MenuItemBase Base;
 
     public:
+        /** @brief Creates a command item.
+      */
         MenuItem();
 
+        /** @brief Destroys the command item.
+      */
         virtual ~MenuItem();
 };
 

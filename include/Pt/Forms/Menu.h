@@ -46,6 +46,27 @@ class MenuBarItem;
 class MenuSubItem;
 class MenuItemBase;
 
+/** @brief Represents a popup menu containing commands and nested menus.
+
+    Use a %Menu for commands chosen from a vertical popup list, including a
+    context menu or the menu opened by a %MenuBarItem. Add %MenuItem objects
+    for commands and %MenuSubItem objects for nested menus. The menu does not
+    own its items; remove an item before destroying it.
+
+    A menu derives its default background and contour from the application
+    style during invalidation. %setBackground() and %setContour() supply local
+    overrides for this menu. A nested menu is opened and positioned by its
+    associated submenu item.
+
+    @code
+    Pt::Forms::Menu fileMenu;
+    Pt::Forms::MenuItem openItem;
+    openItem.setText("Open");
+    fileMenu.addItem(openItem);
+    @endcode
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
 {
     public:
@@ -53,26 +74,58 @@ class PT_FORMS_API Menu : public Pt::Forms::Popup, protected MenuBase
         friend class MenuSubItem;
 
     public:
+        /** @brief Creates a detached popup menu.
+        */
         Menu();
 
+        /** @brief Destroys the menu.
+        */
         virtual ~Menu();
 
+        /** @brief Returns the width reserved for item icons.
+        */
         double iconWidth() const;
 
+        /** @brief Returns the background brush.
+
+            Returns the local override when one was set; otherwise returns the
+            application style background brush.
+        */
         const Pt::Gfx::Brush& background() const;
 
+        /** @brief Sets a local background brush.
+        */
         void setBackground(const Pt::Gfx::Brush& b);
 
+        /** @brief Returns the contour pen.
+
+            Returns the local override when one was set; otherwise returns the
+            application style contour pen.
+        */
         const Pt::Gfx::Pen& contour() const;
 
+        /** @brief Sets a local contour pen.
+        */
         void setContour(const Pt::Gfx::Pen& p);
 
+        /** @brief Adds command @a item to this menu.
+
+            The menu does not own @a item. Keep it alive until it is removed.
+        */
         void addItem(MenuItem& item);
 
+        /** @brief Adds submenu entry @a item to this menu.
+
+            The menu does not own @a item. Keep it alive until it is removed.
+        */
         void addItem(MenuSubItem& item);
 
+        /** @brief Removes command @a item from this menu.
+        */
         void removeItem(MenuItem& item);
 
+        /** @brief Removes submenu entry @a item from this menu.
+        */
         void removeItem(MenuSubItem& item);
 
     protected:

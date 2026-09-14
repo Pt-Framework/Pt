@@ -38,53 +38,86 @@ namespace Forms {
 class MenuSubItem;
 class MenuItemBase;
 
+/** @brief Defines the coordination interface shared by menu containers.
+
+    %Menu and %MenuBar use this interface to register submenu items, track
+    their parent item, and coordinate opening, closing, and cancellation.
+    Applications use a concrete menu container instead of deriving from this
+    type.
+
+    @ingroup Pt-Forms-Menus
+*/
 class PT_FORMS_API MenuBase
 {
     public:
+        /** @brief Creates an unassociated menu coordination interface.
+        */
         MenuBase();
 
+        /** @brief Destroys the menu coordination interface.
+        */
         virtual ~MenuBase();
 
+        /** @brief Cancels the active menu interaction.
+        */
         void cancel()
         {
             onCancel();
         }
 
+        /** @brief Returns the menu widget at @a screenPos, or 0 when none is found.
+        */
         Pt::Forms::Widget* findMenu(const Pt::Gfx::PointF& screenPos)
         {
             return onFindMenu(screenPos);
         }
 
+        /** @brief Closes the submenu associated with @a item.
+        */
         void closeMenu(MenuSubItem& item)
         {
             onCloseMenu(item);
         }
 
+        /** @brief Opens the submenu associated with @a item.
+        */
         void openMenu(MenuSubItem& item)
         {
             onOpenMenu(item);
         }
 
+        /** @brief Returns the item associated with this nested menu, or 0 for a root menu.
+        */
         const MenuItemBase* parentItem() const
         {
             return _parentItem;
         }
 
+        /** @brief Returns the item associated with this nested menu, or 0 for a root menu.
+        */
         MenuItemBase* parentItem()
         {
             return _parentItem;
         }
 
+        /** @brief Associates this nested menu with @a item.
+
+            The menu does not own @a item.
+        */
         void setParentItem(MenuItemBase* item)
         {
             _parentItem = item;
         }
 
+        /** @brief Registers @a item as a submenu entry.
+        */
         void addMenu(MenuSubItem& item)
         {
             onAddMenu(item);
         }
 
+        /** @brief Unregisters @a item as a submenu entry.
+        */
         void removeMenu(MenuSubItem& item)
         {
             onRemoveMenu(item);

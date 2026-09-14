@@ -143,6 +143,11 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Menus Menus
+
+    @ingroup Pt-Forms
+*/
+
 /** @defgroup Pt-Forms-Icons Icons and Text
 
     @ingroup Pt-Forms
