@@ -138,6 +138,11 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Collections Collections
+
+    @ingroup Pt-Forms
+*/
+
 /** @defgroup Pt-Forms-Icons Icons and Text
 
     @ingroup Pt-Forms

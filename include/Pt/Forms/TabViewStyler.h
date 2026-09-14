@@ -35,17 +35,35 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Transient visual state of a tab view.
+
+    %TabViewState is the snapshot a %TabView passes to measure, layout,
+    and paint. It is not the application model. Enabled and focused
+    describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Collections
+*/
 class PT_FORMS_API TabViewState
 {
     public:
+        /** @brief Constructs an empty tab view state.
+        */
         TabViewState();
 
+        /** @brief Returns true if the view is currently enabled.
+        */
         bool isEnabled() const;
 
+        /** @brief Sets whether the view is enabled.
+        */
         void setEnabled(bool value);
 
+        /** @brief Returns true if the view currently has focus.
+        */
         bool isFocused() const;
 
+        /** @brief Sets whether the view has focus.
+        */
         void setFocused(bool value);
 
     private:
@@ -54,25 +72,51 @@ class PT_FORMS_API TabViewState
 };
 
 
+/** @brief Transient visual state of a tab.
+
+    %TabViewItemState is the snapshot a %TabView passes for one tab.
+    It is not the application model. Enabled, active, highlighted, and
+    pressed describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Collections
+*/
 class PT_FORMS_API TabViewItemState
 {
     public:
+        /** @brief Constructs an empty tab state.
+        */
         TabViewItemState();
 
+        /** @brief Returns true if the tab is currently enabled.
+        */
         bool isEnabled() const;
 
+        /** @brief Sets whether the tab is enabled.
+        */
         void setEnabled(bool value);
 
+        /** @brief Returns true if the tab is the current tab.
+        */
         bool isActive() const;
 
+        /** @brief Sets whether the tab is the current tab.
+        */
         void setActive(bool value);
 
+        /** @brief Returns true if the pointer is currently over the tab.
+        */
         bool isHighlighted() const;
 
+        /** @brief Sets whether the pointer is over the tab.
+        */
         void setHighlighted(bool value);
 
+        /** @brief Returns true if the tab is currently pressed.
+        */
         bool isPressed() const;
 
+        /** @brief Sets whether the tab is pressed.
+        */
         void setPressed(bool value);
 
     private:
@@ -83,39 +127,64 @@ class PT_FORMS_API TabViewItemState
 };
 
 
-/** @brief Renders tab view chrome and tab items.
+/** @brief Renders the look of a tab view.
+
+    A %TabViewRenderer is a %Style::Facet for the tab-view family.
+    Named measure methods run inside-out. Named layout methods run
+    outside-in. Named render methods paint prepared rectangles. The
+    widget owns geometry and orchestrates those passes. The renderer
+    does not mutate widget geometry.
+
+    Derive a renderer to change the look of tab views. Register it
+    on a %Style, or assign it to a widget with %TabView::setRenderer().
+
+    @ingroup Pt-Forms-Collections
 */
 class PT_FORMS_API TabViewRenderer : public Renderer
 {
     public:
-        /** @brief Constructs a tab view renderer.
+        /** @brief Constructs a renderer with reference count @a refs.
         */
         explicit TabViewRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~TabViewRenderer();
 
-        /** @brief Creates a new default-constructed renderer instance.
+        /** @brief Creates a new default-constructed instance that the caller owns.
         */
         TabViewRenderer* create() const;
 
     public:
+        /** @brief Returns the natural size of a tab labeled @a text.
+        */
         Gfx::SizeF measureTab(PaintSurface& surface,
                               const Pt::String& text);
 
+        /** @brief Returns the label rectangle within @a tabRect.
+        */
         Gfx::RectF layoutTab(PaintSurface& surface,
                              const Gfx::RectF& tabRect);
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         const Painter& textPainter(PaintSurface& surface);
 
+        /** @brief Paints the background for @a state.
+        */
         void renderBackground(PaintContext& context,
                               const Gfx::RectF& contentRect,
                               const TabViewState& state);
 
+        /** @brief Paints the frame for @a state.
+        */
         void renderChrome(PaintContext& context,
                           const Gfx::RectF& contentRect,
                           const Gfx::RectF& activeTabRect,
                           const TabViewState& state);
 
+        /** @brief Paints a tab labeled @a text for @a state.
+        */
         void renderTab(PaintContext& context,
                        const Gfx::RectF& tabRect,
                        const Pt::String& text,
@@ -123,29 +192,43 @@ class PT_FORMS_API TabViewRenderer : public Renderer
                        const TabViewItemState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual TabViewRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Returns the natural size of a tab labeled @a text.
+        */
         virtual Gfx::SizeF onMeasureTab(PaintSurface& surface,
                                         const Pt::String& text) = 0;
 
+        /** @brief Returns the label rectangle within @a tabRect.
+        */
         virtual Gfx::RectF onLayoutTab(PaintSurface& surface,
                                        const Gfx::RectF& tabRect) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Paints the background for @a state.
+        */
         virtual void onRenderBackground(PaintContext& context,
                                         const Gfx::RectF& contentRect,
                                         const TabViewState& state) = 0;
 
+        /** @brief Paints the frame for @a state.
+        */
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& contentRect,
                                     const Gfx::RectF& activeTabRect,
                                     const TabViewState& state) = 0;
 
+        /** @brief Paints a tab labeled @a text for @a state.
+        */
         virtual void onRenderTab(PaintContext& context,
                                  const Gfx::RectF& tabRect,
                                  const Pt::String& text,
@@ -154,7 +237,20 @@ class PT_FORMS_API TabViewRenderer : public Renderer
 };
 
 
-/** @brief Binds tab view renderers and local style options.
+/** @brief Binds a tab view to the current style renderer.
+
+    A %TabView owns a %TabViewStyler. Applications do not construct
+    one. Call %Styler::bind() from %onInvalidate(). When the overlay
+    has no local options, bind uses the shared renderer from the style.
+    Local options use a private clone. %setRenderer() keeps an assigned
+    renderer until it is cleared. A null renderer falls back on the
+    next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Collections
 */
 class PT_FORMS_API TabViewStyler : public Styler
 {
@@ -251,6 +347,8 @@ class PT_FORMS_API TabViewStyler : public Styler
                        const TabViewItemState& state) const;
 
         /** @brief Assigns a specific tab view renderer.
+
+            A null renderer falls back to the current style on the next bind.
         */
         void setRenderer(TabViewRenderer* renderer = 0);
 

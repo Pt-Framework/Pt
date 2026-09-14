@@ -39,42 +39,101 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Viewport over larger content.
+
+    A %ScrollView presents one caller-owned content control that may
+    be larger than the view. Use %setContent() to attach the control.
+    Keep it alive until another call replaces it. Calling
+    %setScrollBars() shows horizontal and vertical %ScrollBar objects
+    when the content does not fit. %scrollX() and %scrollY() move the
+    content. %setContentMode() chooses how the content is measured.
+
+    The view has no family renderer. It hosts a %ScrollLayout and
+    optional %ScrollBar objects. Offset of oversized content is a
+    %ScrollLayout.
+
+    @code
+    Pt::Forms::Label terms;
+    terms.setText("These terms apply to all deliveries. "
+                  "Orders ship within five working days. "
+                  "Damaged goods must be reported within 14 days.");
+
+    Pt::Forms::ScrollView page;
+    page.setContent(terms);
+    page.setScrollBars(true);
+    window.setContent(&page);
+    @endcode
+
+    @ingroup Pt-Forms-Collections
+*/
 class PT_FORMS_API ScrollView : public Control
 {
     typedef Control Base;
 
     public:
+        /** @brief Creates an empty scroll view.
+        */
         ScrollView();
 
+        /** @brief Destroys the scroll view. The content control is not destroyed.
+        */
         virtual ~ScrollView();
 
+        /** @brief Sets whether the view shows scroll bars.
+        */
         void setScrollBars(bool hasScrollBars);
 
+        /** @brief Sets the caller-owned content to @a control.
+
+            Replaces the previous content control.
+        */
         void setContent(Control& control);
 
+        /** @brief Sets how the content is measured on each axis.
+        */
         void setContentMode(SizePolicy::Mode horizontal, 
                             SizePolicy::Mode vertical);
 
+        /** @brief Scrolls the content horizontally to @a xpos.
+        */
         void scrollX(double xpos);
 
+        /** @brief Scrolls the content vertically to @a ypos.
+        */
         void scrollY(double ypos);
 
+        /** @brief Returns the maximum horizontal scroll offset.
+        */
         double maximumX() const;
 
+        /** @brief Returns the maximum vertical scroll offset.
+        */
         double maximumY() const;
         
     protected:
+        /** @brief Scrolls the content horizontally from the horizontal bar.
+        */
         void onScrollBarX(double pos);
         
+        /** @brief Scrolls the content vertically from the vertical bar.
+        */
         void onScrollBarY(double pos);
 
+        /** @brief Updates the horizontal bar from the layout offset.
+        */
         void onScrolledX(double n);
         
+        /** @brief Updates the vertical bar from the layout offset.
+        */
         void onScrolledY(double n);
 
     protected:
+        /** @brief Measures the content and scroll bars.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Places the content and scroll bars in @a rect.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
     
     private:

@@ -2,8 +2,8 @@
 
     This chapter covers the application runtime, the widget and view object
     model, the display root, windows and workspaces, layouting and painting,
-    input delivery, layouts, buttons, displays, editors and selectors, icons
-    and textual content, and styles and renderers.
+    input delivery, layouts, buttons, displays, editors and selectors,
+    collections, icons and textual content, and styles and renderers.
 
     @copydetails Pt-Forms
 
@@ -117,6 +117,21 @@
 
     @subsection Pt-Forms-Page-Slider Sliders
     @copydetails Pt::Forms::Slider
+
+    @section Pt-Forms-Page-Collections Collections
+    @copydetails Pt-Forms-Collections
+
+    @subsection Pt-Forms-Page-ListBox List Boxes
+    @copydetails Pt::Forms::ListBox
+
+    @subsection Pt-Forms-Page-TabView Tab Views
+    @copydetails Pt::Forms::TabView
+
+    @subsection Pt-Forms-Page-ScrollBar Scroll Bars
+    @copydetails Pt::Forms::ScrollBar
+
+    @subsection Pt-Forms-Page-ScrollView Scroll Views
+    @copydetails Pt::Forms::ScrollView
 
     @section Pt-Forms-Page-Icons Icons and Text
     @copydetails Pt-Forms-Icons
