@@ -16,11 +16,12 @@ The user provides the module name (e.g. `System`, `Net`, `Http`) and optionally 
 1. **Explore the module**
    - List all public headers in `include/Pt/<Module>/`.
    - Identify any Doxygen group headers named `Api*.h` (e.g. `Api.h`, `Api-Threads.h`).
-   - Distinguish real `@defgroup` group headers from Doxygen workaround headers that only contain declarations.
+   - Classify each `Api*.h` header by its Doxygen directive: `@defgroup`, `@addtogroup`, or neither.
+   - Treat `@defgroup` and `@addtogroup` as equally valid group documentation. An `@addtogroup` header may document a group declared in another header.
 
 2. **Group thematically**
    - Create one `.instructions.md` file per coherent theme.
-   - Every real Doxygen group header must map to exactly one instructions file.
+   - Every Doxygen group header containing `@defgroup` or `@addtogroup` must map to exactly one instructions file.
    - Group related non-group headers around the same themes.
 
 3. **Name the files**
@@ -36,9 +37,9 @@ The user provides the module name (e.g. `System`, `Net`, `Http`) and optionally 
    - Do not include code examples.
    - Do not list source files (`src/...`).
 
-5. **Handle Doxygen groups correctly**
-   - Include real `@defgroup` headers in the matching instructions file.
-   - Omit Doxygen workaround `Api*.h` headers that have no `@defgroup`.
+5. **Handle Doxygen group headers correctly**
+   - Include each `Api*.h` header containing `@defgroup` or `@addtogroup` in its matching instructions file.
+   - Omit `Api*.h` headers that contain neither `@defgroup` nor `@addtogroup`.
 
 6. **Update AGENTS.md**
    - Add one index entry per new instructions file in the same style as the existing entries:
@@ -59,6 +60,6 @@ The user provides the module name (e.g. `System`, `Net`, `Http`) and optionally 
 Before finishing, confirm:
 - All new files are under `.github/instructions/` and have the `pt-<module>-api-` prefix.
 - Each file has a YAML frontmatter with `description`.
-- Every real Doxygen group in the module is assigned to one instructions file.
-- No workaround `Api*.h` without `@defgroup` is listed.
+- Every Doxygen group header containing `@defgroup` or `@addtogroup` in the module is assigned to one instructions file.
+- No `Api*.h` header without `@defgroup` or `@addtogroup` is listed.
 - `AGENTS.md` references each new file once.

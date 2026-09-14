@@ -167,6 +167,45 @@ content is in context without having read it.
 - For Draw shapes, paths, text, bitmaps, stroke, fill, gradient, paint surface read:
   `.github/instructions/pt-gfx-api-drawing.instructions.md`
 
+- For Forms application lifecycle, runtime services, and visual hierarchy read:
+  `.github/instructions/pt-forms-api-application.instructions.md`
+
+- For Forms widgets, views, controls, screens, responders, and form content read:
+  `.github/instructions/pt-forms-api-widgets.instructions.md`
+
+- For Forms windows, popups, workspaces, window management, and window events read:
+  `.github/instructions/pt-forms-api-windows.instructions.md`
+
+- For Forms invalidation, layout, painting, graphics backends, and pixmaps read:
+  `.github/instructions/pt-forms-api-updating.instructions.md`
+
+- For Forms pointer, touch, keyboard, focus, cursor, and text-input events read:
+  `.github/instructions/pt-forms-api-input.instructions.md`
+
+- For Forms layout containers, child arrangement, sizing, spacing, and alignment read:
+  `.github/instructions/pt-forms-api-layouts.instructions.md`
+
+- For Forms command buttons, push buttons, check boxes, and their renderers read:
+  `.github/instructions/pt-forms-api-buttons.instructions.md`
+
+- For Forms labels, panels, progress displays, and their renderers read:
+  `.github/instructions/pt-forms-api-displays.instructions.md`
+
+- For Forms text, number, choice, and range editors with their renderers read:
+  `.github/instructions/pt-forms-api-editors.instructions.md`
+
+- For Forms lists, tabs, scroll bars, scroll views, and their renderers read:
+  `.github/instructions/pt-forms-api-collections.instructions.md`
+
+- For Forms menu bars, popup menus, menu items, and submenus read:
+  `.github/instructions/pt-forms-api-menus.instructions.md`
+
+- For Forms icons, icon providers, and reusable formatted text blocks read:
+  `.github/instructions/pt-forms-api-icons.instructions.md`
+
+- For Forms styles, style options, stylers, renderers, and the Platinum style read:
+  `.github/instructions/pt-forms-api-styling.instructions.md`
+
 - For XML parsing, writing, DTDs, namespaces, and serialization read:
   `.github/instructions/pt-xml-api.instructions.md`
 
