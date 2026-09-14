@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
+/* Copyright (C) 2016 Marc Boris Duerner
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
    MA  02110-1301  USA
 */
 
@@ -39,8 +39,9 @@ namespace Forms {
 /** @brief Interaction control for press, release, and click.
 
     A %Button holds a caption and hover, and runs a press, release, and
-    cancel protocol that ends in %clicked(). It is not a look. Derive
-    %PushButton for a command or %CheckBox for a boolean choice.
+    cancel protocol that ends in %clicked(). It is a base class for all
+    button-like controls. Derive %PushButton for a command or %CheckBox for
+    a boolean choice.
 
     %setText() sets the caption and records a mnemonic from an ampersand.
     Pointer, touch, mnemonic, shortcut, and the action key all run the
@@ -72,7 +73,7 @@ class PT_FORMS_API Button : public Control
         /** @brief Creates a button that accepts focus.
         */
         Button();
-    
+
         /** @brief Destroys the button.
         */
         virtual ~Button();
@@ -96,7 +97,7 @@ class PT_FORMS_API Button : public Control
         /** @brief Returns the signal emitted after a completed click.
         */
         Signal<>& clicked();
-    
+
     protected:
         /** @brief Called when a click gesture begins.
         */

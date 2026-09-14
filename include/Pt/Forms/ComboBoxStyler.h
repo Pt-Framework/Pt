@@ -36,29 +36,60 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Transient visual state of a combo box.
+
+    %ComboBoxState is the snapshot a %ComboBox passes to measure, layout,
+    and paint. It is not the application model. Enabled, focused,
+    highlighted, editable, and popup visibility describe the look of one
+    paint pass.
+
+    @ingroup Pt-Forms-Editors
+*/
 class PT_FORMS_API ComboBoxState
 {
     public:
+        /** @brief Constructs an empty combo box state.
+        */
         ComboBoxState();
 
+        /** @brief Returns true if the box is currently enabled.
+        */
         bool isEnabled() const;
 
+        /** @brief Sets whether the box is enabled.
+        */
         void setEnabled(bool value);
 
+        /** @brief Returns true if the box currently has focus.
+        */
         bool isFocused() const;
 
+        /** @brief Sets whether the box has focus.
+        */
         void setFocused(bool value);
 
+        /** @brief Returns true if the pointer is currently over the box.
+        */
         bool isHighlighted() const;
 
+        /** @brief Sets whether the pointer is over the box.
+        */
         void setHighlighted(bool value);
 
+        /** @brief Returns true if the box currently accepts typing.
+        */
         bool isEditable() const;
 
+        /** @brief Sets whether the box currently accepts typing.
+        */
         void setEditable(bool value);
 
+        /** @brief Returns true if the popup list is currently shown.
+        */
         bool isPopupVisible() const;
 
+        /** @brief Sets whether the popup list is shown.
+        */
         void setPopupVisible(bool value);
 
     private:
@@ -70,17 +101,35 @@ class PT_FORMS_API ComboBoxState
 };
 
 
+/** @brief Transient visual state of a combo-box drop button.
+
+    %ComboBoxButtonState is the snapshot a %ComboBox passes for the
+    drop button. It is not the application model. Highlighted and
+    pressed describe the look of one paint pass.
+
+    @ingroup Pt-Forms-Editors
+*/
 class PT_FORMS_API ComboBoxButtonState
 {
     public:
+        /** @brief Constructs an empty combo-box button state.
+        */
         ComboBoxButtonState();
 
+        /** @brief Returns true if the pointer is currently over the button.
+        */
         bool isHighlighted() const;
 
+        /** @brief Sets whether the pointer is over the button.
+        */
         void setHighlighted(bool value);
 
+        /** @brief Returns true if the button is currently pressed.
+        */
         bool isPressed() const;
 
+        /** @brief Sets whether the button is pressed.
+        */
         void setPressed(bool value);
 
     private:
@@ -89,35 +138,58 @@ class PT_FORMS_API ComboBoxButtonState
 };
 
 
-/** @brief Renders the visual appearance of a combo box.
+/** @brief Renders the look of a combo box.
+
+    A %ComboBoxRenderer is a %Style::Facet for the combo-box family.
+    Named measure methods run inside-out. Named layout methods run
+    outside-in. Named render methods paint prepared rectangles. The
+    widget owns geometry and orchestrates those passes. The renderer
+    does not mutate widget geometry.
+
+    Derive a renderer to change the look of combo boxes. Register it
+    on a %Style, or assign it to a widget with %ComboBox::setRenderer().
+
+    @ingroup Pt-Forms-Editors
 */
 class PT_FORMS_API ComboBoxRenderer : public Renderer
 {
     public:
-        /** @brief Constructs a combo box renderer.
+        /** @brief Constructs a renderer with reference count @a refs.
         */
         explicit ComboBoxRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~ComboBoxRenderer();
 
-        /** @brief Creates a new default-constructed renderer instance.
+        /** @brief Creates a new default-constructed instance that the caller owns.
         */
         ComboBoxRenderer* create() const;
 
     public:
+        /** @brief Returns the outer size including the frame for @a contentSize.
+        */
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
 
+        /** @brief Returns the natural size of the drop button.
+        */
         Gfx::SizeF measureButton(PaintSurface& surface);
 
+        /** @brief Places the entry, drop button, and text in @a rect.
+        */
         void layoutChrome(PaintSurface& surface,
                           const Gfx::RectF& rect,
                           Gfx::RectF& entryRect,
                           Gfx::RectF& buttonRect,
                           Gfx::RectF& textRect);
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         const Painter& textPainter(PaintSurface& surface);
 
+        /** @brief Paints entry and drop button for @a state.
+        */
         void renderChrome(PaintContext& context,
                           const Gfx::RectF& rect,
                           const Gfx::RectF& entryRect,
@@ -125,11 +197,15 @@ class PT_FORMS_API ComboBoxRenderer : public Renderer
                           const ComboBoxState& state,
                           const ComboBoxButtonState& buttonState);
 
+        /** @brief Paints the drop button for @a state.
+        */
         void renderButton(PaintContext& context,
                           const Gfx::RectF& buttonRect,
                           const ComboBoxState& state,
                           const ComboBoxButtonState& buttonState);
 
+        /** @brief Paints @a text at @a textPos for @a state.
+        */
         void renderText(PaintContext& context,
                         const Gfx::RectF& textRect,
                         const String& text,
@@ -138,25 +214,37 @@ class PT_FORMS_API ComboBoxRenderer : public Renderer
                         const ComboBoxState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual ComboBoxRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Returns the natural size of the drop button.
+        */
         virtual Gfx::SizeF onMeasureButton(PaintSurface& surface) = 0;
 
+        /** @brief Places the entry, drop button, and text in @a rect.
+        */
         virtual void onLayoutChrome(PaintSurface& surface,
                                     const Gfx::RectF& rect,
                                     Gfx::RectF& entryRect,
                                     Gfx::RectF& buttonRect,
                                     Gfx::RectF& textRect) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Paints entry and drop button for @a state.
+        */
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& entryRect,
@@ -164,15 +252,21 @@ class PT_FORMS_API ComboBoxRenderer : public Renderer
                                     const ComboBoxState& state,
                                     const ComboBoxButtonState& buttonState);
 
+        /** @brief Paints the entry for @a state.
+        */
         virtual void onRenderEntry(PaintContext& context,
                                    const Gfx::RectF& entryRect,
                                    const ComboBoxState& state) = 0;
 
+        /** @brief Paints the drop button for @a state.
+        */
         virtual void onRenderButton(PaintContext& context,
                                     const Gfx::RectF& buttonRect,
                                     const ComboBoxState& state,
                                     const ComboBoxButtonState& buttonState) = 0;
 
+        /** @brief Paints @a text at @a textPos for @a state.
+        */
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
@@ -182,7 +276,20 @@ class PT_FORMS_API ComboBoxRenderer : public Renderer
 };
 
 
-/** @brief Binds ComboBox renderers and widget-local style options.
+/** @brief Binds a combo box to the current style renderer.
+
+    A %ComboBox owns a %ComboBoxStyler. Applications do not construct
+    one. Call %Styler::bind() from %onInvalidate(). When the overlay
+    has no local options, bind uses the shared renderer from the style.
+    Local options use a private clone. %setRenderer() keeps an assigned
+    renderer until it is cleared. A null renderer falls back on the
+    next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Editors
 */
 class PT_FORMS_API ComboBoxStyler : public Styler
 {
@@ -279,6 +386,8 @@ class PT_FORMS_API ComboBoxStyler : public Styler
                         const ComboBoxState& state) const;
 
         /** @brief Assigns a specific combo box renderer.
+
+            A null renderer falls back to the current style on the next bind.
         */
         void setRenderer(ComboBoxRenderer* renderer = 0);
 
@@ -291,10 +400,16 @@ class PT_FORMS_API ComboBoxStyler : public Styler
         const StyleOptions& options() const;
 
     protected:
+        /** @brief Binds the overlay to @a global and returns it.
+        */
         virtual StyleOptions& onBindOptions(const StyleOptions& global);
 
+        /** @brief Returns the shared combo-box renderer from @a style, or 0.
+        */
         virtual Renderer* onStyleRenderer(const Style& style);
 
+        /** @brief Creates an independent clone of the style renderer, or 0.
+        */
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:

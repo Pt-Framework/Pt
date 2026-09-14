@@ -35,45 +35,84 @@ namespace Pt {
 
 namespace Forms {
 
-/** @brief Stores the transient render state for a spin box widget.
+/** @brief Transient visual state of a spin box.
 
-    Carries only widget state that render hooks may observe directly.
+    %SpinBoxState is the snapshot a %SpinBox passes to measure, layout,
+    and paint. It is not the application model. Enabled, hovered,
+    focused, editable, and the up and down control flags describe the
+    look of one paint pass.
+
+    @ingroup Pt-Forms-Editors
 */
 class PT_FORMS_API SpinBoxState
 {
     public:
+        /** @brief Constructs an empty spin box state.
+        */
         SpinBoxState();
 
+        /** @brief Returns true if the box is currently enabled.
+        */
         bool isEnabled() const;
 
+        /** @brief Sets whether the box is enabled.
+        */
         void setEnabled(bool value);
 
+        /** @brief Returns true if the pointer is currently over the box.
+        */
         bool isHovered() const;
 
+        /** @brief Sets whether the pointer is over the box.
+        */
         void setHovered(bool value);
 
+        /** @brief Returns true if the box currently has focus.
+        */
         bool isFocused() const;
 
+        /** @brief Sets whether the box has focus.
+        */
         void setFocused(bool value);
 
+        /** @brief Returns true if the box currently accepts typing.
+        */
         bool isEditable() const;
 
+        /** @brief Sets whether the box currently accepts typing.
+        */
         void setEditable(bool value);
 
+        /** @brief Returns true if the up control is currently pressed.
+        */
         bool isUpPressed() const;
 
+        /** @brief Sets whether the up control is pressed.
+        */
         void setUpPressed(bool value);
 
+        /** @brief Returns true if the pointer is currently over the up control.
+        */
         bool isUpHovered() const;
 
+        /** @brief Sets whether the pointer is over the up control.
+        */
         void setUpHovered(bool value);
 
+        /** @brief Returns true if the down control is currently pressed.
+        */
         bool isDownPressed() const;
 
+        /** @brief Sets whether the down control is pressed.
+        */
         void setDownPressed(bool value);
 
+        /** @brief Returns true if the pointer is currently over the down control.
+        */
         bool isDownHovered() const;
 
+        /** @brief Sets whether the pointer is over the down control.
+        */
         void setDownHovered(bool value);
 
     private:
@@ -88,31 +127,55 @@ class PT_FORMS_API SpinBoxState
 };
 
 
-/** @brief Renders the visual appearance of a spin box widget.
+/** @brief Renders the look of a spin box.
 
-    Provides rendering primitives for the entry area, up/down buttons,
-    indicators, and text. Subclasses override the protected virtuals.
+    A %SpinBoxRenderer is a %Style::Facet for the spin-box family.
+    Named measure methods run inside-out. Named layout methods run
+    outside-in. Named render methods paint prepared rectangles. The
+    widget owns geometry and orchestrates those passes. The renderer
+    does not mutate widget geometry.
+
+    Up and down controls are integrated subparts. A style may merge
+    them with the entry or place them beside it. They are not public
+    borrowable primitives.
+
+    Derive a renderer to change the look of spin boxes. Register it
+    on a %Style, or assign it to a widget with %SpinBox::setRenderer().
+
+    @ingroup Pt-Forms-Editors
 */
 class PT_FORMS_API SpinBoxRenderer : public Renderer
 {
     public:
+        /** @brief Constructs a renderer with reference count @a refs.
+        */
         explicit SpinBoxRenderer(std::size_t refs = 0);
 
+        /** @brief Destroys the renderer.
+        */
         virtual ~SpinBoxRenderer();
 
-        /** @brief Creates a new default-constructed spin box renderer.
+        /** @brief Creates a new default-constructed instance that the caller owns.
         */
         SpinBoxRenderer* create() const;
 
     public:
+        /** @brief Returns the outer size including the frame for @a contentSize.
+        */
         Gfx::SizeF measureFrame(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
 
+        /** @brief Returns the entry size for @a contentSize.
+        */
         Gfx::SizeF measureEntry(PaintSurface& surface,
                                 const Gfx::SizeF& contentSize);
 
+        /** @brief Returns the natural size of a step control.
+        */
         Gfx::SizeF measureIndicator(PaintSurface& surface);
 
+        /** @brief Places the entry, step controls, and text in @a rect.
+        */
         void layoutChrome(PaintSurface& surface,
                           const Gfx::RectF& rect,
                           Gfx::RectF& entryRect,
@@ -120,11 +183,17 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
                           Gfx::RectF& downButtonRect,
                           Gfx::RectF& textRect);
 
+        /** @brief Returns the text rectangle within @a entryRect.
+        */
         Gfx::RectF layoutEntry(PaintSurface& surface,
                                const Gfx::RectF& entryRect);
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         const Painter& textPainter(PaintSurface& surface);
 
+        /** @brief Paints entry and step controls for @a state.
+        */
         void renderChrome(PaintContext& context,
                           const Gfx::RectF& rect,
                           const Gfx::RectF& entryRect,
@@ -132,6 +201,8 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
                           const Gfx::RectF& downButtonRect,
                           const SpinBoxState& state);
 
+        /** @brief Paints @a text at @a textPos for @a state.
+        */
         void renderText(PaintContext& context,
                         const Gfx::RectF& textRect,
                         const String& text,
@@ -140,20 +211,30 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
                         const SpinBoxState& state);
 
     protected:
+        /** @brief Creates a new instance of the same concrete type.
+        */
         virtual SpinBoxRenderer* onCreate() const = 0;
 
         /** @copydoc Style::Facet::onReset
         */
         virtual void onReset(const StyleOptions& options) = 0;
 
+        /** @brief Measures the frame enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureFrame(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Measures the entry enclosing @a contentSize.
+        */
         virtual Gfx::SizeF onMeasureEntry(PaintSurface& surface,
                                           const Gfx::SizeF& contentSize) = 0;
 
+        /** @brief Returns the natural size of a step control.
+        */
         virtual Gfx::SizeF onMeasureIndicator(PaintSurface& surface) = 0;
 
+        /** @brief Places the entry, step controls, and text in @a rect.
+        */
         virtual void onLayoutChrome(PaintSurface& surface,
                                     const Gfx::RectF& rect,
                                     Gfx::RectF& entryRect,
@@ -161,11 +242,17 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
                                     Gfx::RectF& downButtonRect,
                                     Gfx::RectF& textRect) = 0;
 
+        /** @brief Returns the text rectangle within @a entryRect.
+        */
         virtual Gfx::RectF onLayoutEntry(PaintSurface& surface,
                                          const Gfx::RectF& entryRect) = 0;
 
+        /** @brief Returns a painter with the current font and text color.
+        */
         virtual const Painter& onGetTextPainter(PaintSurface& surface) = 0;
 
+        /** @brief Paints entry and step controls for @a state.
+        */
         virtual void onRenderChrome(PaintContext& context,
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& entryRect,
@@ -173,18 +260,26 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
                                     const Gfx::RectF& downButtonRect,
                                     const SpinBoxState& state);
 
+        /** @brief Paints the entry for @a state.
+        */
         virtual void onRenderEntry(PaintContext& context,
                                    const Gfx::RectF& entryRect,
                                    const SpinBoxState& state) = 0;
 
+        /** @brief Paints the up control for @a state.
+        */
         virtual void onRenderUpButton(PaintContext& context,
                                       const Gfx::RectF& buttonRect,
                                       const SpinBoxState& state) = 0;
 
+        /** @brief Paints the down control for @a state.
+        */
         virtual void onRenderDownButton(PaintContext& context,
                                         const Gfx::RectF& buttonRect,
                                         const SpinBoxState& state) = 0;
 
+        /** @brief Paints @a text at @a textPos for @a state.
+        */
         virtual void onRenderText(PaintContext& context,
                                   const Gfx::RectF& textRect,
                                   const String& text,
@@ -194,7 +289,20 @@ class PT_FORMS_API SpinBoxRenderer : public Renderer
 };
 
 
-/** @brief Binds spin box renderers and widget-local style options.
+/** @brief Binds a spin box to the current style renderer.
+
+    A %SpinBox owns a %SpinBoxStyler. Applications do not construct
+    one. Call %Styler::bind() from %onInvalidate(). When the overlay
+    has no local options, bind uses the shared renderer from the style.
+    Local options use a private clone. %setRenderer() keeps an assigned
+    renderer until it is cleared. A null renderer falls back on the
+    next bind.
+
+    Appearance getters return effective tokens after bind. Setters
+    write widget-local options. Measure, layout, and paint call the
+    typed methods on this styler, not a public renderer accessor.
+
+    @ingroup Pt-Forms-Editors
 */
 class PT_FORMS_API SpinBoxStyler : public Styler
 {
@@ -292,6 +400,8 @@ class PT_FORMS_API SpinBoxStyler : public Styler
                         const SpinBoxState& state) const;
 
         /** @brief Assigns a specific spin box renderer.
+
+            A null renderer falls back to the current style on the next bind.
         */
         void setRenderer(SpinBoxRenderer* renderer = 0);
 
@@ -304,10 +414,16 @@ class PT_FORMS_API SpinBoxStyler : public Styler
         const StyleOptions& options() const;
 
     protected:
+        /** @brief Binds the overlay to @a global and returns it.
+        */
         virtual StyleOptions& onBindOptions(const StyleOptions& global);
 
+        /** @brief Returns the shared spin-box renderer from @a style, or 0.
+        */
         virtual Renderer* onStyleRenderer(const Style& style);
 
+        /** @brief Creates an independent clone of the style renderer, or 0.
+        */
         virtual Renderer* onCreateRenderer(const Style& style);
 
     private:

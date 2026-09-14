@@ -133,6 +133,11 @@
     @ingroup Pt-Forms
 */
 
+/** @defgroup Pt-Forms-Editors Editors and Selectors
+
+    @ingroup Pt-Forms
+*/
+
 /** @defgroup Pt-Forms-Icons Icons and Text
 
     @ingroup Pt-Forms

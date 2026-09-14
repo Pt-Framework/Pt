@@ -40,55 +40,119 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Single-line text, caret, and scroll helper.
+
+    A %LineEditor stores the entered string, the caret index, and the
+    scroll of one line. It is not a %Control. %LineEdit, %SpinBox, and
+    %ComboBox use it to edit text. Applications do not place it in a
+    layout.
+
+    %text() is the entered string. %displayText() is that string, or a
+    mask character per entered character when %isMasked() is true.
+    %layout() writes a positioned %TextLine for painting.
+
+    @ingroup Pt-Forms-Editors
+*/
 class LineEditor
 {
     public:
+        /** @brief Constructs an empty line editor.
+        */
         LineEditor();
         
+        /** @brief Destroys the line editor.
+        */
         ~LineEditor();
 
+        /** @brief Returns the top-left position of the line.
+        */
         const Gfx::PointF& position() const;
         
+        /** @brief Sets the top-left position of the line to @a p.
+        */
         void setPosition(const Gfx::PointF& p);
 
+        /** @brief Returns the size of the line.
+        */
         const Gfx::SizeF& size() const;
 
+        /** @brief Sets the size of the line to @a s.
+        */
         void setSize(const Gfx::SizeF& s);
 
+        /** @brief Returns the horizontal adjustment of the text.
+        */
         Adjustment adjustment() const;
 
+        /** @brief Sets the horizontal adjustment of the text to @a a.
+        */
         void setAdjustment(Adjustment a);
 
+        /** @brief Returns true if %displayText() shows a mask character per character.
+        */
         bool isMasked() const;
 
+        /** @brief Sets whether %displayText() shows a mask character per character.
+        */
         void setMasked(bool m);
 
+        /** @brief Returns the entered text.
+        */
         const Pt::String& text() const;
 
+        /** @brief Sets the entered text to @a s.
+        */
         void setText(const Pt::String& s);
 
+        /** @brief Returns the text shown for the line.
+
+            This is the entered text, or a mask string when %isMasked()
+            is true.
+        */
         const Pt::String& displayText() const;
 
+        /** @brief Returns the caret index in the entered text.
+        */
         std::size_t cursorPosition() const;
         
+        /** @brief Sets the caret index in the entered text to @a n.
+        */
         void setCursorPosition(std::size_t n);
 
+        /** @brief Returns true if the entered text is empty.
+        */
         bool isEmpty() const;
 
+        /** @brief Clears the entered text, caret, and scroll.
+        */
         void clear();
 
+        /** @brief Inserts @a ch at the caret and advances the caret.
+        */
         void insert(Char ch);
 
+        /** @brief Moves the caret one character to the left.
+        */
         void left();
 
+        /** @brief Moves the caret one character to the right.
+        */
         void right();
 
+        /** @brief Deletes the character at the caret.
+        */
         void del();
 
+        /** @brief Deletes the character before the caret.
+        */
         void backspace();
 
+        /** @brief Lays out %displayText() into @a line using @a painter.
+        */
         void layout(const Painter& painter, TextLine& line);
 
+        /** @brief Lays out @a text into @a line using @a painter.
+        */
         void layout(const Painter& painter, const Pt::String& text, TextLine& line);
 
     private:

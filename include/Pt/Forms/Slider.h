@@ -38,82 +38,180 @@ namespace Pt {
 
 namespace Forms {
 
+/** @brief Value chosen along a range by dragging a handle on a track.
+
+    A %Slider maps an integer between %minimum() and %maximum() to a
+    handle on a track. %setRange() sets the bounds. %setPosition()
+    clamps the value and emits %positionChanged() when it changes.
+    Dragging the handle updates the position.
+
+    The slider owns a %SliderStyler. On invalidate it calls
+    %Styler::bind(). Appearance getters and setters overlay the
+    application style. %setRenderer() assigns a %SliderRenderer until
+    it is cleared. Measure, layout, and paint call typed methods on the
+    styler. %sliderState() is the snapshot passed to paint layers.
+
+    Track and handle are borrowable renderer primitives. The slider
+    still orchestrates measure, layout, and paint through the styler.
+
+    @code
+    Pt::Forms::Slider volume;
+    volume.setRange(0, 100);
+    volume.setPosition(50);
+    volume.positionChanged() += Pt::slot(*this, &Mixer::onVolumeChanged);
+
+    void Mixer::onVolumeChanged(int pos)
+    {
+        output.setVolume(pos);
+    }
+    @endcode
+
+    @ingroup Pt-Forms-Editors
+*/
 class PT_FORMS_API Slider : public Control
 {
     public:
         typedef Control Base;
 
     public:
+        /** @brief Creates a slider.
+        */
         Slider();
 
+        /** @brief Destroys the slider.
+        */
         virtual ~Slider();
 
+        /** @brief Returns the current position.
+        */
         int position() const;
 
+        /** @brief Sets the position to @a pos, clamped to the range, and emits %positionChanged() when it changes.
+        */
         void setPosition(int pos);
 
+        /** @brief Returns the lower bound of the range.
+        */
         int minimum() const;
 
+        /** @brief Returns the upper bound of the range.
+        */
         int maximum() const;
 
+        /** @brief Sets the range to @a min through @a max.
+        */
         void setRange(int min, int max);
 
+        /** @brief Returns true if the pointer is over the slider.
+        */
         bool isHighlighted() const;
 
+        /** @brief Returns the signal emitted when the position changes.
+        */
         Signal<int>& positionChanged();
 
     public:
+        /** @brief Returns the effective background brush.
+        */
         const Gfx::Brush& background() const;
 
+        /** @brief Sets the widget-local background brush to @a b.
+        */
         void setBackground(const Gfx::Brush& b);
 
+        /** @brief Returns the effective foreground brush.
+        */
         const Gfx::Brush& foreground() const;
 
+        /** @brief Sets the widget-local foreground brush to @a b.
+        */
         void setForeground(const Gfx::Brush& b);
 
+        /** @brief Returns the effective contour pen.
+        */
         const Gfx::Pen& contour() const;
 
+        /** @brief Sets the widget-local contour pen to @a p.
+        */
         void setContour(const Gfx::Pen& p);
 
+        /** @brief Returns the effective text color.
+        */
         const Gfx::Color& textColor() const;
 
+        /** @brief Sets the widget-local text color to @a color.
+        */
         void setTextColor(const Gfx::Color& color);
 
+        /** @brief Returns the effective font.
+        */
         Gfx::Font font() const;
 
+        /** @brief Sets the widget-local font to @a font.
+        */
         void setFont(const Gfx::Font& font);
 
+        /** @brief Sets the widget-local font size to @a size.
+        */
         void setFontSize(std::size_t size);
 
+        /** @brief Sets the widget-local font weight to @a weight.
+        */
         void setFontWeight(Gfx::Font::Weight weight);
 
+        /** @brief Sets the widget-local font slant to @a slant.
+        */
         void setFontSlant(Gfx::Font::Slant slant);
 
+        /** @brief Assigns @a renderer as the family renderer.
+
+            A null renderer falls back to the current style on the next bind.
+        */
         void setRenderer(SliderRenderer* renderer);
 
+        /** @brief Returns the transient visual state for the current paint pass.
+        */
         SliderState sliderState() const;
 
     protected:
+        /** @brief Measures the track, handle, and frame.
+        */
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        /** @brief Binds the styler.
+        */
         virtual void onInvalidate();
 
+        /** @brief Places the track and handle in @a rect.
+        */
         virtual void onLayout(const Gfx::RectF& rect);
 
+        /** @brief Paints the track and handle.
+        */
         virtual void onPaint(PaintContext& context, const Gfx::RectF& updateRect);
 
+        /** @brief Paints the slider chrome for @a state.
+        */
         virtual void onPaintChrome(PaintContext& context,
                                    const Gfx::RectF& rect,
                                    const Gfx::RectF& trackRect,
                                    const Gfx::RectF& handleRect,
                                    const SliderState& state);
 
+        /** @brief Updates the position from a pointer drag.
+        */
         virtual bool onMouseEvent(const MouseEvent& ev);
 
+        /** @brief Updates the position from a touch drag.
+        */
         virtual bool onTouchEvent(const TouchEvent& ev);
 
+        /** @brief Highlights the slider when the pointer enters.
+        */
         virtual bool onEnterEvent(const EnterEvent& ev);
 
+        /** @brief Clears the highlight when the pointer leaves.
+        */
         virtual bool onLeaveEvent(const LeaveEvent& ev);
 
     private:
