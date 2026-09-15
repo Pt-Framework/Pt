@@ -1318,7 +1318,7 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = PT_API= PT_SYSTEM_API= PT_SSL_API= USHRT_MAX=0xffff \
                          UINT_MAX=0xffffffffUL ULONG_MAX=18446744073709551615ULL \
-                         __cplusplus:=202002L
+                         __cplusplus=202002L
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
