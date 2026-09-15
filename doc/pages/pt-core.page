@@ -10,7 +10,7 @@
 
     - @ref Pt-Core-Page-Basics covers program options, application settings, events, fixed-size integers and atomic operations.
     - @ref Pt-Core-Page-DateTime covers dates and times.
-    - @ref Pt-Core-Page-Coroutines covers tasks and generators.
+    - @ref Pt-Core-Page-Coroutines covers tasks, awaitables and generators.
     - @ref Pt-Core-Page-Allocator covers custom allocation strategies.
     - @ref Pt-Core-Page-Text covers unicode text processing and regular expressions.
     - @ref Pt-Core-Page-Signals covers signals, slots and delegates.
@@ -56,6 +56,11 @@
 
     @subsection Pt-Core-Page-Task Tasks
     @copydetails Pt::Task
+
+    @subsection Pt-Core-Page-Awaitables Awaitables
+    @copydetails Pt::Awaiter
+
+    @copydetails Pt::BasicAwaiter
 
     @subsection Pt-Core-Page-Generators Generators
     @copydetails Pt::Generator

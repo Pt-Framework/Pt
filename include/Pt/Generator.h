@@ -37,6 +37,8 @@
 
 namespace Pt {
 
+/** @internal
+*/
 template<typename T>
 class GeneratorResult
 {
@@ -62,6 +64,8 @@ class GeneratorResult
 };
 
 
+/** @internal
+*/
 template<typename T>
 class GeneratorResult<T&>
 {
@@ -84,6 +88,8 @@ class GeneratorResult<T&>
 };
 
 
+/** @internal
+*/
 class YieldAwaiter
 {
     public:
@@ -110,11 +116,45 @@ class YieldAwaiter
         {}
 };
 
-/** @brief A coroutine based active generator that allows co_await functionality.
+/** @brief Represents a coroutine that yields a sequence of values and may itself co_await.
 
-    This Generator integrates natively into Pt::Task and Pt::Awaiter semantics.
-    It produces values lazily by resuming via a NextAwaiter. Unlike standard synchronous
-    generators, its body may also co_await as it maps back to the EventLoop correctly.
+    A %Generator produces values lazily with co_yield. Unlike a
+    synchronous generator, its body may also co_await.
+
+    Consume a generator from a %Task. Await %Generator::next() until it
+    returns false and read each value with %Generator::value().
+
+    A %Generator is move-only and owns the coroutine frame.
+    %Generator<T&> yields a reference. That object must remain valid
+    until the next %Generator::next() or until the generator is
+    destroyed.
+
+    Only one %Generator::next() may be pending. Awaiting next() while
+    another next() is already pending throws %std::logic_error.
+
+    Exceptions that leave the coroutine body are rethrown from the
+    %Generator::next() await.
+
+    The following task sums the values of a generator:
+
+    @code
+    Pt::Generator<int> squares(int n)
+    {
+        for(int i = 1; i <= n; ++i)
+            co_yield i * i;
+    }
+
+    Pt::Task<int> sumSquares(int n)
+    {
+        auto gen = squares(n);
+        int sum = 0;
+
+        while( co_await gen.next() )
+            sum += gen.value();
+
+        co_return sum;
+    }
+    @endcode
 
     @ingroup Pt-Coroutines
 */
@@ -122,6 +162,8 @@ template<typename T>
 class Generator : public AwaiterBase
 {
     public:
+        /** @internal
+        */
         class Promise : public GeneratorResult<T>
                       , public Pt::PromiseBase
         {
@@ -162,30 +204,51 @@ class Generator : public AwaiterBase
         using promise_type = Promise;
         using handle_type = std::coroutine_handle<promise_type>;
 
+        /** @brief Provides the awaitable returned by %Generator::next().
+
+            co_await resumes when the generator yields a value or
+            finishes. The resume value is true if %Generator::value()
+            is valid. Cancelling the generator cancels a pending
+            next() await.
+
+            @ingroup Pt-Coroutines
+        */
         class NextAwaiter : public AwaiterBase
         {
             public:
+                /** @brief Constructs a next-awaiter for @a generator.
+                */
                 explicit NextAwaiter(Generator& generator)
                 : _generator(&generator)
                 , _handle(generator._handle)
                 , _isPending(false)
                 {}
 
+                /** @brief Detaches from the generator if still pending.
+                */
                 ~NextAwaiter()
                 {
                     if(_generator && _isPending)
                         _generator->detachAwaiter(*this);
                 }
 
+                /** @brief Cancels the generator's pending operation.
+                */
                 void cancel() override
                 {
                     if( _handle && ! _handle.done() )
                         _handle.promise().cancel();
                 }
 
+                /** @brief Returns true if the generator has already finished.
+                */
                 bool await_ready() const noexcept
                 { return ! _handle || _handle.done(); }
 
+                /** @brief Suspends the consumer and resumes the generator.
+
+                    @throw %std::logic_error if the generator is already pending.
+                */
                 template<typename FormP>
                 std::coroutine_handle<> await_suspend(std::coroutine_handle<FormP> outer)
                 {
@@ -200,6 +263,10 @@ class Generator : public AwaiterBase
                     return _handle;
                 }
 
+                /** @brief Returns true if a yielded value is available.
+
+                    Rethrows if the generator body exited with an exception.
+                */
                 bool await_resume()
                 {
                     if(_generator && _isPending)
@@ -233,21 +300,32 @@ class Generator : public AwaiterBase
         };
 
     public:
+        /** @brief Constructs a generator that takes ownership of @a h.
+        */
         explicit Generator(handle_type h)
         : _handle(h)
         {}
 
+        /** @brief Moves the coroutine frame from @a other.
+        */
         Generator(Generator&& other) noexcept
         : _handle(other._handle)
         {
             other._handle = nullptr;
         }
 
+        /** @brief Cancels the generator if it still owns a coroutine frame.
+        */
         ~Generator()
         {
             cancel();
         }
 
+        /** @brief Cancels the generator.
+
+            Aborts the pending awaitable, if any, detaches an in-flight
+            next() await, and destroys the coroutine frame.
+        */
         void cancel() override
         {
             if(_awaiter)
@@ -264,11 +342,20 @@ class Generator : public AwaiterBase
             }
         }
 
+        /** @brief Returns an awaitable that produces the next value.
+
+            co_await of the result is true while a value is available.
+            Use %Generator::value() to read that value.
+        */
         NextAwaiter next()
         {
             return NextAwaiter(*this);
         }
 
+        /** @brief Returns the last yielded value.
+
+            Valid after a co_await of %Generator::next() returned true.
+        */
         T value()
         {
             return _handle.promise().get();

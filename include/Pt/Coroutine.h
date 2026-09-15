@@ -41,18 +41,19 @@
 
 namespace Pt {
 
-/** @brief Base class for all co_await-able types used inside a %Task coroutine.
+/** @brief Defines the cancellation interface for a pending awaitable.
 
-    Both %Awaiter (IO-driven awaitables) and %Task<T> (coroutine chaining)
-    derive from this class, allowing to cancel any pending operation through
-    a single virtual dispatch.
+    %Task, %Awaiter and %Generator derive from this class so a single
+    %AwaiterBase::cancel() can abort whichever operation is in flight.
+    Application code uses those derived types rather than %AwaiterBase
+    directly.
 
     @ingroup Pt-Coroutines
 */
 class AwaiterBase
 {
     public:
-        /** @brief Cancel the pending operation.
+        /** @brief Cancels the pending operation.
         */
         virtual void cancel() = 0;
 
@@ -74,22 +75,63 @@ class AwaiterBase
         virtual ~AwaiterBase() = default;
 };
 
-/** @brief Base class for coroutine awaitables.
+/** @brief Provides the base class for I/O-driven co_await-able operations.
 
-    Subclasses implement two customization points:
-    - onBegin(): subscribe to the completion signal and start the operation.
-    - onCancel(): abort the in-flight operation.
+    Derive from %Awaiter to wrap an asynchronous operation so a %Task
+    or %Generator can suspend until it completes. Implement %Awaiter::onBegin()
+    to subscribe to completion and start the work. Implement
+    %Awaiter::onCancel() to abort that work. Call %Awaiter::setReady()
+    when the operation finishes; that resumes the waiting coroutine.
 
-    The result is retrieved via await_resume() in the subclass.
+    Implement await_resume() in the subclass to deliver the result, or
+    derive from %BasicAwaiter when the awaitable only needs to produce
+    a value through %BasicAwaiter::onReady().
+
+    The following awaiter starts a device operation and resumes when
+    the device signals completion:
+
+    @code
+    class AsyncOp : public Pt::Awaiter
+    {
+        public:
+            explicit AsyncOp(Device& device)
+            : _device(device)
+            {}
+
+            int await_resume()
+            {
+                return _device.endOp();
+            }
+
+        protected:
+            void onBegin() override
+            {
+                _device.finished() += Pt::slot(*this, &AsyncOp::setReady);
+                _device.beginOp();
+            }
+
+            void onCancel() override
+            {
+                _device.cancel();
+            }
+
+        private:
+            Device& _device;
+    };
+    @endcode
 
     @ingroup Pt-Coroutines
 */
 class Awaiter : public AwaiterBase
 {
     public:
+        /** @brief Returns false so co_await always suspends.
+        */
         bool await_ready() const
         { return false; }
 
+        /** @brief Starts the operation and suspends the coroutine.
+        */
         template<typename P>
         bool await_suspend(std::coroutine_handle<P> h)
         {
@@ -98,6 +140,8 @@ class Awaiter : public AwaiterBase
             return true;
         }
 
+        /** @brief Cancels the in-flight operation.
+        */
         void cancel() override
         {
             _handle = nullptr;
@@ -105,9 +149,16 @@ class Awaiter : public AwaiterBase
         }
 
     protected:
+        /** @brief Constructor.
+        */
         Awaiter()
         {}
 
+        /** @brief Resumes the waiting coroutine.
+
+            Call this when the asynchronous operation has completed.
+            Typically connect a completion signal to this method.
+        */
         void setReady()
         {
             if( _handle )
@@ -119,8 +170,18 @@ class Awaiter : public AwaiterBase
         }
 
     protected:
+        /** @brief Starts the asynchronous operation.
+
+            Subscribe to completion and begin the work. The coroutine
+            remains suspended until %Awaiter::setReady() is called.
+        */
         virtual void onBegin() = 0;
 
+        /** @brief Aborts the in-flight operation.
+
+            Called from %Awaiter::cancel() when the waiting task or
+            generator is cancelled.
+        */
         virtual void onCancel() = 0;
 
     protected:
@@ -128,13 +189,17 @@ class Awaiter : public AwaiterBase
 };
 
 
-/** @brief Basic coroutine awaitable.
+/** @brief Provides an awaitable that delivers a result through onReady().
 
-    Use %BasicAwaiter<R> instead of %Awaiter when the awaitable only
-    needs to deliver a result upon resumption. Subclasses implement
-    the onBegin() / onCancel() customization points and provide a result
-    via onReady(). The await_resume() method calls onReady() and returns
-    its value.
+    Use %BasicAwaiter instead of %Awaiter when the awaitable only needs
+    to produce a value, or to complete with no value. Subclasses still
+    implement %Awaiter::onBegin() and %Awaiter::onCancel(). Implement
+    %BasicAwaiter::onReady() to return the result. The co_await
+    expression is that return value.
+
+    %BasicAwaiter<void> is the specialization for operations that do
+    not produce a result. Its %BasicAwaiter::onReady() returns nothing
+    and can finalize or clean up the operation.
 
     @ingroup Pt-Coroutines
 */
@@ -150,7 +215,7 @@ class BasicAwaiter : public Awaiter
         }
 
     protected:
-        /** @brief Produce the result for await_resume().
+        /** @brief Returns the result for the co_await expression.
 
             Called exactly once when the coroutine is resumed.
         */
@@ -158,7 +223,10 @@ class BasicAwaiter : public Awaiter
 };
 
 
-/** @brief BasicAwaiter specialization for awaitables without a result.
+/** @brief Specializes %BasicAwaiter for awaitables without a result.
+
+    Use this when the operation completes without producing a value.
+    Implement %BasicAwaiter::onReady() to finalize or clean up.
 
     @ingroup Pt-Coroutines
 */
@@ -172,14 +240,16 @@ class BasicAwaiter<void> : public Awaiter
         { onReady(); }
 
     protected:
-        /** @brief Called once when the awaitable resumes.
+        /** @brief Finalizes the operation when the awaitable resumes.
 
-            Use this to clean up or finalize the operation.
+            Called exactly once when the coroutine is resumed.
         */
         virtual void onReady() = 0;
 };
 
 
+/** @internal
+*/
 class PromiseBase
 {
     public:
@@ -211,6 +281,8 @@ class PromiseBase
 };
 
 
+/** @internal
+*/
 template<typename T>
 class PromiseResult
 {
@@ -232,6 +304,8 @@ class PromiseResult
 };
 
 
+/** @internal
+*/
 template<typename T>
 class PromiseResult<T&>
 {
@@ -253,6 +327,8 @@ class PromiseResult<T&>
 };
 
 
+/** @internal
+*/
 template<>
 class PromiseResult<void>
 {
@@ -272,6 +348,8 @@ class PromiseResult<void>
 };
 
 
+/** @internal
+*/
 template<typename A>
 class AwaiterProxy
 {
@@ -294,6 +372,8 @@ class AwaiterProxy
 };
 
 
+/** @internal
+*/
 class FinalAwaiter
 {
     public:
@@ -320,17 +400,34 @@ class FinalAwaiter
         {}
 };
 
-/** @brief Cancellable coroutine task for single-threaded async operations.
+/** @brief Represents a cancellable C++20 coroutine that produces a single result.
 
-    Manages the lifetime of a C++20 coroutine frame. The task starts
-    suspended; call run() to begin execution. Call cancel() to abort
-    a suspended coroutine and immediately destroy its frame. Exceptions
-    in the coroutine body must be handled with try/catch; unhandled
-    exceptions call %std::terminate().
+    A %Task is move-only and owns the coroutine frame. A
+    default-constructed task is empty; %Task::operator bool() is false
+    until a coroutine is assigned. Move assignment cancels the current
+    task first.
 
-    A %Task<T> is itself co_await-able, allowing coroutine chaining: an
-    outer coroutine can co_await an inner %Task<T> and resume when it
-    completes, with the result available as the co_await expression value.
+    %Task<void> produces no value. %Task<T&> returns a reference; that
+    object must outlive the consumer.
+
+    An outer coroutine can co_await an inner %Task. The co_await
+    expression is the inner result:
+
+    @code
+    Pt::Task<int> inner()
+    {
+        co_return 41;
+    }
+
+    Pt::Task<int> outer()
+    {
+        int n = co_await inner();
+        co_return n + 1;
+    }
+    @endcode
+
+    %Task::run() and awaiting a task that is already pending throw
+    %std::logic_error.
 
     @ingroup Pt-Coroutines
 */
@@ -338,6 +435,8 @@ template<typename T = void>
 class Task : public AwaiterBase
 {
     public:
+        /** @internal
+        */
         class Promise : public PromiseResult<T>
                       , public PromiseBase
         {
@@ -370,20 +469,30 @@ class Task : public AwaiterBase
         using handle_type = std::coroutine_handle<promise_type>;
 
     public:
+        /** @brief Constructs an empty task with no coroutine frame.
+        */
         Task() noexcept
         : _handle(nullptr)
         {}
 
+        /** @brief Constructs a task that takes ownership of @a h.
+        */
         explicit Task(handle_type h)
         : _handle(h)
         {}
 
+        /** @brief Moves the coroutine frame from @a other.
+        */
         Task(Task&& other) noexcept
         : _handle(other._handle)
         {
             other._handle = nullptr;
         }
 
+        /** @brief Moves the coroutine frame from @a other.
+
+            Cancels this task before taking ownership of @a other.
+        */
         Task& operator=(Task&& other) noexcept
         {
             if(this != &other)
@@ -395,10 +504,16 @@ class Task : public AwaiterBase
             return *this;
         }
 
+        /** @brief Cancels the task if it still owns a coroutine frame.
+        */
         ~Task()
         { cancel(); }
 
-        /** @brief Start execution of the coroutine.
+        /** @brief Starts execution of the coroutine.
+
+            Has no effect if the task is empty or already finished.
+
+            @throw %std::logic_error if the task is already pending.
         */
         void run()
         {
@@ -412,7 +527,10 @@ class Task : public AwaiterBase
             }
         }
 
-        /** @brief Request cancellation of the running coroutine.
+        /** @brief Cancels the running coroutine.
+
+            Aborts the pending awaitable, if any, and destroys the
+            coroutine frame. The task is empty afterwards.
         */
         void cancel() override
         {
@@ -425,7 +543,7 @@ class Task : public AwaiterBase
             }
         }
 
-        /** @brief Returns true if the coroutine has finished normally.
+        /** @brief Returns true if the coroutine has finished.
         */
         bool done() const
         { return _handle && _handle.done(); }
@@ -435,7 +553,10 @@ class Task : public AwaiterBase
         explicit operator bool() const
         { return _handle != nullptr; }
 
-        /** @brief Retrieve the coroutine result. Only valid after done() == true.
+        /** @brief Returns the coroutine result.
+
+            Use this after %Task::done() is true. If the coroutine body
+            exited with an exception, that exception is rethrown.
         */
         T result()
         {
@@ -450,7 +571,9 @@ class Task : public AwaiterBase
         bool await_ready() const noexcept
         { return done(); }
 
-        /** @brief Suspend the outer coroutine and start the inner coroutine.
+        /** @brief Suspends the outer coroutine and starts the inner coroutine.
+
+            @throw %std::logic_error if the task is already pending.
         */
         template<typename P>
         std::coroutine_handle<> await_suspend(std::coroutine_handle<P> outer)
@@ -465,7 +588,9 @@ class Task : public AwaiterBase
             return _handle;
         }
 
-        /** @brief Resume the outer coroutine with the result of the inner task.
+        /** @brief Returns the result of the inner task.
+
+            Rethrows if the inner coroutine body exited with an exception.
         */
         T await_resume()
         {
