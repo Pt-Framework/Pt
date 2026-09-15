@@ -37,7 +37,65 @@ namespace Pt {
 
 /** @brief Composes types during serialization.
 
-    @ingroup Serialization
+    Implementing the serialization operators is not the only way to make a
+    type serializable. An alternative is to specialize Pt::BasicComposer.
+    The default implementation of %BasicComposer uses the serialization
+    operators and a tree of SerializationInfo objects, which is fine for
+    small and medium sized objects. The parsing layer interacts with this
+    class to compose the actual type, and this layer can be completely
+    customized. This is normally done for container types, where building
+    the complete tree of SerializationInfo objects in memory is undesirable.
+    The following example shows a specialization for std::vector:
+
+    @code
+    template <typename T>
+    class BasicComposer< std::vector<T> > : public Composer
+    {
+        public:
+            BasicComposer(SerializationContext* context = 0)
+            : _type(0)
+            {
+                _elemComposer.setParent(this);
+            }
+
+            void begin(std::vector<T>& type)
+            {
+                _type = &type;
+                _type->clear();
+            }
+
+        protected:
+            virtual void onSetId(const char* id, std::size_t len)
+            { }
+
+            virtual Composer* onBeginElement()
+            {
+                _type->push_back( T() );
+                _elemComposer.begin( _type->back() );
+                return &_elemComposer;
+            }
+
+        private:
+            std::vector<T>* _type;
+            BasicComposer<T> _elemComposer;
+    };
+    @endcode
+
+    The specialized %BasicComposer inherits %Composer, which is the
+    interface used by the deserializer to report parse events. The virtual
+    functions onBeginElement() and onSetId() are overridden to build the
+    vector from the parse events. onBeginElement() is called when the
+    beginning of a vector element has been parsed; it sets up and returns a
+    composer for the new element in the vector. A constructor is required
+    that optionally takes a reference to a SerializationContext; the context
+    can be used in onSetId() to map a reference id to the vector being
+    composed, if another object has a weak reference to it. The begin()
+    function is also required, to set up the composer to start composing a
+    type. A composer may delegate to other composers, which might or might
+    not be specialized; here, the composer for the element type is used,
+    which works for a vector of vectors right away.
+
+    @ingroup Pt-Serialization
 */
 class Composer
 {
@@ -63,7 +121,7 @@ class Composer
         */
         void setTypeName(const std::string& type)
         { onSetTypeName( type.c_str(), type.size() ); }
-        
+
         /** @brief Sets the type name of the type to compose.
 
             This is only supported by formats that save typename information.
@@ -77,7 +135,7 @@ class Composer
         */
         void setId(const std::string& id)
         { onSetId( id.c_str(), id.size() ); }
-        
+
         /** @brief Sets the reference id of the type to compose.
 
             This is only supported by formats that support references.
@@ -113,15 +171,15 @@ class Composer
         /** @brief Composes a signed integer type.
 
             There is only one method for all sizes of signed integer types,
-            because that type information is not required for composition. 
+            because that type information is not required for composition.
         */
         void setInt(Pt::int64_t value)
         { onSetInt(value); }
-        
+
         /** @brief Composes an unsigned integer type.
 
             There is only one method for all sizes of unsigned integer types,
-            because that type information is not required for composition. 
+            because that type information is not required for composition.
         */
         void setUInt(Pt::int64_t value)
         { onSetUInt(value); }
@@ -135,7 +193,7 @@ class Composer
         */
         void setReference(const std::string& id)
         { onSetReference(id.c_str(), id.size()); }
-        
+
         /** @brief Composes a reference.
         */
         void setReference(const char* id, std::size_t len)
@@ -145,7 +203,7 @@ class Composer
         */
         Composer* beginMember(const std::string& name)
         { return onBeginMember( name.c_str(), name.size() ); }
-        
+
         /** @brief Begins composition of a struct member.
         */
         Composer* beginMember(const char* name, std::size_t len)
@@ -214,7 +272,7 @@ class Composer
         //! @brief Compose a integer value.
         virtual void onSetInt(Pt::int64_t)
         { throw SerializationError("unexpected integer value"); }
-        
+
         //! @brief Compose a unsigned integer value.
         virtual void onSetUInt(Pt::uint64_t)
         { throw SerializationError("unexpected unsigned value"); }
@@ -262,7 +320,7 @@ class Composer
 
 /** @brief Composes serializable types during serialization.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <typename T>
 class BasicComposer : public Composer
@@ -410,7 +468,7 @@ class BasicComposer : public Composer
 
 /** @brief Composes a %SerializationInfo.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <>
 class BasicComposer<Pt::SerializationInfo> : public Composer

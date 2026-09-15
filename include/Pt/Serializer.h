@@ -40,7 +40,7 @@ namespace Pt {
 
 /** @brief Serializes a set of types.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class PT_API Serializer
 {

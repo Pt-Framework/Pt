@@ -43,7 +43,7 @@ class RegexSMatch;
 
 /** @brief Invalid regular expression.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API InvalidRegex : public std::runtime_error
 {
@@ -168,7 +168,7 @@ class PT_API InvalidRegex : public std::runtime_error
     }
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API Regex
 {
@@ -220,7 +220,7 @@ class PT_API Regex
 
 /** @brief Result of a regular expression match.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API RegexSMatch
 {

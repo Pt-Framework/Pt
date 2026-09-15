@@ -37,7 +37,7 @@ namespace Pt {
 
 /** @brief UTF-16 big endian codec.
     
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API Utf16BECodec : public TextCodec<Char, char> 
 {
@@ -76,7 +76,7 @@ class PT_API Utf16BECodec : public TextCodec<Char, char>
 
 /** @brief UTF-16 little endian codec.
     
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API Utf16LECodec : public TextCodec<Char, char> 
 {

@@ -16,7 +16,7 @@ class SerializationContextImpl;
 /** @brief Context for the serialization of types.
 
     @headerfile SerializationContext.h <Pt/SerializationContext.h>
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class PT_API SerializationContext
 {

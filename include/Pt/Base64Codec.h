@@ -37,7 +37,26 @@ namespace Pt {
 
 /** @brief A codec for base-64 encoding.
 
-    @ingroup Unicode
+    The base-64 encoding scheme is not a character encoding in the classical
+    sense, but works very similar to other types of encodings. %Base64Codec
+    can be used with the basic text stream templates, where the internal and
+    external character types are both @c char. The following example shows
+    how text is converted to base-64:
+
+    @code
+    std::ostringstream oss;
+
+    BasicTextOStream<char, char> b64(oss, new Base64Codec());
+    b64 << "Hello World!";
+    b64.flush();
+    @endcode
+
+    The string stream serves as the output for the base-64 encoded text. It
+    is important to terminate the output sequence by calling flush(), because
+    the base-64 format requires padding at the end. Inserting std::endl also
+    terminates the base-64 sequence.
+
+    @ingroup Pt-Text
 */
 class Base64Codec : public TextCodec<char, char>
 {
@@ -218,7 +237,7 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
             third  = fromNext++;
             break;
 
-        default:           
+        default:
             if(fromEnd - fromNext == 1)
             {
                 state.value.mbytes[0] = *fromNext++;
@@ -233,7 +252,7 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
                 state.n = 2;
                 return std::codecvt_base::partial;
             }
-            
+
             first  = fromNext++;
             second = fromNext++;
             third  = fromNext++;

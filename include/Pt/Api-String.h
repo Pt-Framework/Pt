@@ -35,12 +35,31 @@ namespace Pt {
     should also work with Pt::String. Please refer to a standard c++ manual for
     a complete overview.
     Additional methods make it easier to work with other character types. For
-    example, the relational operators are also overloaded for char and wchar_t.  
+    example, the relational operators are also overloaded for char and wchar_t.
+
+    Since a specialization of std::char_traits is also provided, the C++
+    iostreams can be instantiated for %Pt::Char, including the string
+    streams. Three typedefs provide shorter names for the unicode capable
+    string streams:
+
+    @code
+    typedef std::basic_istringstream<Pt::Char> IStringStream;
+
+    typedef std::basic_ostringstream<Pt::Char> OStringStream;
+
+    typedef std::basic_stringstream<Pt::Char> StringStream;
+    @endcode
+
+    The insertion and extraction operators (<< and >>) for iostreams require
+    certain localization facets to be present in the std::locale. %Pt will
+    install specializations of std::num_put, std::num_get, std::numpunct and
+    std::ctype for %Pt::Char. This means that all other facilities that use
+    localization facets will also work.
 
     @headerfile String.h <Pt/String.h>
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
-class String 
+class String
 {
     public:
         typedef Pt::Char value_type;
@@ -78,11 +97,11 @@ class String
         /** @brief Constructor.
         */
         String(const Pt::Char* str, const allocator_type& a = allocator_type());
-        
+
         /** @brief Constructor.
         */
         String(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
-        
+
         /** @brief Constructor.
         */
         String(const wchar_t* str, const allocator_type& a = allocator_type());
@@ -131,17 +150,17 @@ class String
         */
         iterator begin()
         { return privdata_rw(); }
-        
+
         /**  @brief Returns an iterator to the end of the string.
         */
         iterator end()
         { return privdata_rw() + length(); }
-        
+
         /** @brief Returns an iterator to the begin of the string.
         */
         const_iterator begin() const
         { return privdata_ro(); }
-        
+
         /** @brief Returns an iterator to the end of the string.
         */
         const_iterator end() const
@@ -180,21 +199,21 @@ class String
         /** @brief Random access to characters.
         */
         reference at(size_type n)
-        { 
+        {
             if( n >= size() )
                 throw out_of_range("at");
 
-            return privdata_rw()[n]; 
+            return privdata_rw()[n];
         }
 
         /** @brief Random access to characters.
         */
         const_reference at(size_type n) const
-        { 
+        {
             if( n >= size() )
                 throw out_of_range("at");
-            
-            return privdata_ro()[n]; 
+
+            return privdata_ro()[n];
         }
 
     public:
@@ -660,7 +679,7 @@ class String
             {
                 Pt::Char* str = reinterpret_cast<Pt::Char*>(&_u._s[0]);
                 *str = 0;
-                
+
                 _u._s[_nS - 1] = _nN - 1;
             }
 
@@ -674,42 +693,42 @@ class String
     private:
         const Pt::Char* privdata_ro() const
         { return isShortString() ? shortStringData() : longStringData(); }
-        
+
         Pt::Char* privdata_rw()
         { return isShortString() ? shortStringData() : longStringData(); }
 
         void privreserve(std::size_t n);
 
-        bool isShortString() const                    
+        bool isShortString() const
         { return shortStringMagic() != 0xff; }
-        
-        void markLongString()                         
+
+        void markLongString()
         { shortStringMagic() = 0xff; }
-        
-        const Pt::Char* shortStringData() const       
+
+        const Pt::Char* shortStringData() const
         { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
-        
-        Pt::Char* shortStringData()                   
+
+        Pt::Char* shortStringData()
         { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
-        
-        unsigned char shortStringMagic() const        
+
+        unsigned char shortStringMagic() const
         { return _d._u._s[_nS - 1]; }
-        
-        unsigned char& shortStringMagic()              
+
+        unsigned char& shortStringMagic()
         { return _d._u._s[_nS - 1]; }
-        
-        size_type shortStringLength() const           
+
+        size_type shortStringLength() const
         { return _nN - 1 - shortStringMagic(); }
-        
-        size_type shortStringCapacity() const         
+
+        size_type shortStringCapacity() const
         { return _nN - 1; }
-        
-        void setShortStringLength(size_type n)        
-        { 
-            shortStringData()[n] = Pt::Char(0); 
-            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1); 
+
+        void setShortStringLength(size_type n)
+        {
+            shortStringData()[n] = Pt::Char(0);
+            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1);
         }
-        
+
         void shortStringAssign(const Pt::Char* str, size_type n)
         {
             traits_type::copy(shortStringData(), str, n);
@@ -724,18 +743,18 @@ class String
             shortStringMagic() = static_cast<unsigned char>(_nN - n - 1);
         }
 
-        const Pt::Char* longStringData() const          
+        const Pt::Char* longStringData() const
         { return _d._u._p._begin; }
-        
-        Pt::Char* longStringData()                      
+
+        Pt::Char* longStringData()
         { return _d._u._p._begin; }
-        
-        size_type longStringLength() const              
+
+        size_type longStringLength() const
         { return _d._u._p._end - _d._u._p._begin; }
-        
-        size_type longStringCapacity() const            
+
+        size_type longStringCapacity() const
         { return _d._u._p._capacity - _d._u._p._begin; }
-        
+
         void setLength(size_type n)
         {
             if (isShortString())

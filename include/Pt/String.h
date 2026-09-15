@@ -61,7 +61,7 @@ namespace Pt {
     assert( isupper(ch) );
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
  */
 struct Char
 {

@@ -64,7 +64,7 @@ namespace Pt {
     required for a float. Each time the pool itself requires more memory,
     it will allocate a new block of 4096 bytes.
 
-    @ingroup Allocator
+    @ingroup Pt-Allocator
 */
 class PT_API MemoryPool : public NonCopyable
 {
@@ -240,7 +240,7 @@ class PT_API MemoryPool : public NonCopyable
     of records per block. A new block of records is added, when a pool is
     depleted and has to be extended to allow more allocations.
     
-    @ingroup Allocator
+    @ingroup Pt-Allocator
 */
 class PT_API PoolAllocator : public Allocator 
                            , protected NonCopyable

@@ -2,8 +2,8 @@
 description: "Text Processing"
 ---
 
-- Unicode module overview and API boundaries:
-  `include/Pt/Api-Unicode.h`
+- Pt-Text module overview and API boundaries:
+  `include/Pt/Api-Text.h`
 - Unicode string type based on std::basic_string<Pt::Char>:
   `include/Pt/String.h`
 - UTF-8 byte sequence helpers:
@@ -30,7 +30,3 @@ description: "Text Processing"
   `include/Pt/Locale.h`
 - Locale facet definitions for text processing:
   `include/Pt/Facets.h`
-- String/number parsing and formatting (parseInt, formatInt, parseFloat, formatFloat, narrow):
-  `include/Pt/Convert.h`
-- Errors thrown by conversion utilities:
-  `include/Pt/ConversionError.h`

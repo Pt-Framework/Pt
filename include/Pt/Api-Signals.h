@@ -29,7 +29,7 @@
 #ifndef PT_API_SIGNALS_H
 #define PT_API_SIGNALS_H
 
-/** @defgroup Pt-Signals Signals and Delegates
+/** @addtogroup Pt-Signals
 
     @brief Type-safe callback mechanism for connecting signals to slots and delegates.
 

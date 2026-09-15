@@ -26,22 +26,18 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_API_ALLOCATOR_H
-#define PT_API_ALLOCATOR_H
+#ifndef PT_API_COROUTINES_H
+#define PT_API_COROUTINES_H
 
-/** @addtogroup Pt-Allocator
+/** @addtogroup Pt-Coroutines
 
-    @brief Custom allocation strategies for optimized memory management.
+    @brief Cancellable, co_await-able tasks and lazily produced value sequences.
 
-    The Pt::Allocator interface can be used to optimize or customize allocation
-    strategies. Two allocators are provided, which can be approached by the
-    Allocator interface, a pool based allocator and a page based allocator.
-    A pool based allocator is beneficial in all cases where many small objects
-    of small sizes are created. This is for example used to optimize memory
-    usage during serialization. The page based allocator simply places data
-    consecutively in memory and frees the whole block when its no longer in
-    use. This is useful in situations where chunks of memory or objects are
-    created and destroyed at the same time.
+    Pt::Task and Pt::Generator build on the C++20 coroutine facilities to
+    provide cancellable, co_await-able tasks and lazily produced value
+    sequences that integrate with the event loop; Pt::Awaiter and
+    Pt::BasicAwaiter are the base classes used to implement custom
+    co_await-able operations.
 */
 
 #endif

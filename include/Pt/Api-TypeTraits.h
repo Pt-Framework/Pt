@@ -4,6 +4,20 @@
 #include <Pt/Api.h>
 #include <cstddef>
 
+/** @addtogroup Pt-TypeTraits
+
+    @brief Compile-time type traits and runtime type information.
+
+    Two types are useful to get type information: Pt::TypeTraits and
+    Pt::TypeInfo. TypeTraits are used for generic programming, for example
+    to deduce the pointer type in templated code, or to branch differently
+    for const and non-const types. The TypeInfo class is a wrapper for
+    std::type_info, which makes it easier to store and compare type
+    information. The std::type_info is normally not copyable and
+    comparable. Pt::SourceInfo is used to store information about a
+    location in the source code.
+*/
+
 namespace Pt {
 
 /** @brief Traits for type properties.
@@ -13,7 +27,7 @@ namespace Pt {
     where code can branch differently depending on the type traits.
 
     @headerfile TypeTraits.h <Pt/TypeTraits.h>
-    @ingroup Utilities
+    @ingroup Pt-TypeTraits
 */
 template <typename T>
 struct TypeTraits

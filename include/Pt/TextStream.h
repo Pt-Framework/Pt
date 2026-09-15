@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2004-2013 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,7 +41,39 @@ namespace Pt {
     This stream decodes an external character sequence using a codec. Reading
     from the stream will convert from the the encoding of external characters.
 
-    @ingroup Unicode
+    Text streams do not only convert between text encodings, but also between
+    character types of different size. The first template parameter @a CharT
+    is the character type of the decoded text and the second one @a ByteT is
+    the character type of the encoded text. They are also called the internal
+    and external character types and may be of the same type. The internal
+    character type is used as the character type of the standard C++ stream
+    base class.
+
+    A text stream always works with another stream as input or output. This
+    stream works with another std::basic_istream to read the encoded input,
+    using the external character type. A text stream can be constructed with
+    an underlying stream and a codec, but both can also be set or reset
+    later. If no codec is set, the stream will directly assign characters,
+    instead of converting them. If no target stream is set, the text stream
+    will always be EOF.
+
+    The following example demonstrates how a string stream is used as the
+    input for a text stream, which uses a Pt::Utf8Codec to decode UTF-8
+    encoded text:
+
+    @code
+    std::istringstream iss("UTF-8 encoded text");
+
+    Pt::String s;
+    Pt::TextIStream tis(iss, new Pt::Utf8Codec());
+    std::getline(tis, s);
+    @endcode
+
+    The std::getline() function reads all input into a Pt::String. The
+    extraction operator can also be used, for example to directly read
+    numbers from the stream.
+
+    @ingroup Pt-Text
 */
 template <typename CharT, typename ByteT>
 class BasicTextIStream : public BasicIStream<CharT>
@@ -49,7 +81,7 @@ class BasicTextIStream : public BasicIStream<CharT>
     public:
         //! @brief External character type
         typedef ByteT extern_type;
-        
+
         //! @brief Internal character type
         typedef CharT intern_type;
 
@@ -85,8 +117,8 @@ class BasicTextIStream : public BasicIStream<CharT>
         BasicTextIStream(StreamType& is, CodecType* codec)
         : BasicIStream<intern_type>(0)
         , _tbuffer( is, codec )
-        { 
-            this->setBuffer(&_tbuffer); 
+        {
+            this->setBuffer(&_tbuffer);
         }
 
         /** @brief Construct with codec.
@@ -97,8 +129,8 @@ class BasicTextIStream : public BasicIStream<CharT>
         explicit BasicTextIStream(CodecType* codec)
         : BasicIStream<intern_type>(0)
         , _tbuffer(codec )
-        { 
-            this->setBuffer(&_tbuffer); 
+        {
+            this->setBuffer(&_tbuffer);
         }
 
         /** @brief Destructor.
@@ -109,17 +141,17 @@ class BasicTextIStream : public BasicIStream<CharT>
         /** @brief Returns the used code or a nullptr.
         */
         CodecType* codec()
-        { 
-            return _tbuffer.codec(); 
+        {
+            return _tbuffer.codec();
         }
 
         /** @brief Sets the text codec.
-            
+
             The codec object which is passed as pointer will be managed by
             this class and deleted if its reference count reaches 0.
         */
         void setCodec(CodecType* codec)
-        {           
+        {
             _tbuffer.setCodec(codec);
         }
 
@@ -129,7 +161,7 @@ class BasicTextIStream : public BasicIStream<CharT>
         {
             _tbuffer.attach(is);
         }
-        
+
         /** @brief Detach from external target.
         */
         void detach()
@@ -147,7 +179,7 @@ class BasicTextIStream : public BasicIStream<CharT>
         /** @brief Resets the buffer and target.
 
             The target is detached and the buffer content is discarded.
-            The codec is kept, if one was set previously.  
+            The codec is kept, if one was set previously.
         */
         void reset()
         {
@@ -157,7 +189,7 @@ class BasicTextIStream : public BasicIStream<CharT>
         /** @brief Resets the buffer and target.
 
             Attaches to the new target and discards the buffer. The codec is
-            kept, if one was set previously. 
+            kept, if one was set previously.
         */
         void reset(StreamType& is)
         {
@@ -180,7 +212,24 @@ class BasicTextIStream : public BasicIStream<CharT>
     to the stream will convert the written characters to the external character
     types in the external encoding.
 
-    @ingroup Unicode
+    The following example shows how to encode text to an UTF-8 byte sequence:
+
+    @code
+    std::ostringstream oss;
+
+    Pt::String s = L"Hello World!";
+    Pt::TextOStream tos(oss, new Pt::Utf8Codec());
+    tos << s;
+    tos.flush();
+    @endcode
+
+    The string stream serves as the output of the text stream, which uses a
+    Pt::Utf8Codec to encode text to UTF-8. The insertion operator can be used
+    for strings or to format numbers. When all data has been written to the
+    text stream, flush() needs to be called to finish off the output byte
+    sequence. This is especially important for encodings with shift states.
+
+    @ingroup Pt-Text
 */
 template <typename CharT, typename ByteT>
 class BasicTextOStream : public BasicOStream<CharT>
@@ -188,7 +237,7 @@ class BasicTextOStream : public BasicOStream<CharT>
     public:
         //! @brief External character type
         typedef ByteT extern_type;
-        
+
         //! @brief Internal character type
         typedef CharT intern_type;
 
@@ -224,8 +273,8 @@ class BasicTextOStream : public BasicOStream<CharT>
         BasicTextOStream(StreamType& os, CodecType* codec)
         : BasicOStream<intern_type>(0)
         , _tbuffer( os , codec )
-        { 
-            this->setBuffer(&_tbuffer); 
+        {
+            this->setBuffer(&_tbuffer);
         }
 
         /** @brief Construct with codec.
@@ -236,8 +285,8 @@ class BasicTextOStream : public BasicOStream<CharT>
         explicit BasicTextOStream(CodecType* codec)
         : BasicOStream<intern_type>(0)
         , _tbuffer( codec )
-        { 
-            this->setBuffer(&_tbuffer); 
+        {
+            this->setBuffer(&_tbuffer);
         }
 
         /** @brief Destructor.
@@ -248,17 +297,17 @@ class BasicTextOStream : public BasicOStream<CharT>
         /** @brief Returns the used code or a nullptr.
         */
         CodecType* codec()
-        { 
-            return _tbuffer.codec(); 
+        {
+            return _tbuffer.codec();
         }
 
         /** @brief Sets the text codec.
-            
+
             The codec object which is passed as pointer will be managed by
             this class and deleted if its reference count reaches 0.
         */
         void setCodec(CodecType* codec)
-        {           
+        {
             _tbuffer.setCodec(codec);
         }
 
@@ -286,7 +335,7 @@ class BasicTextOStream : public BasicOStream<CharT>
         /** @brief Resets the buffer and target.
 
             The target is detached and the buffer content is discarded.
-            The codec is kept, if one was set previously.  
+            The codec is kept, if one was set previously.
         */
         void reset()
         {
@@ -296,7 +345,7 @@ class BasicTextOStream : public BasicOStream<CharT>
         /** @brief Resets the buffer and target.
 
             Attaches to the new target and discards the buffer. The codec is
-            kept, if one was set previously. 
+            kept, if one was set previously.
         */
         void reset(StreamType& os)
         {
@@ -314,12 +363,12 @@ class BasicTextOStream : public BasicOStream<CharT>
 
 /** @brief Converts character sequences using a codec.
 
-    This stream encodes and decodes an external character sequence using a 
+    This stream encodes and decodes an external character sequence using a
     codec. Writing to the stream will convert the written characters to the
     external character types in the external encoding. Reading from the stream
     will convert from the the encoding of external characters.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 template <typename CharT, typename ByteT>
 class BasicTextStream : public BasicIOStream<CharT>
@@ -327,7 +376,7 @@ class BasicTextStream : public BasicIOStream<CharT>
     public:
         //! @brief External character type
         typedef ByteT extern_type;
-        
+
         //! @brief Internal character type
         typedef CharT intern_type;
 
@@ -355,7 +404,7 @@ class BasicTextStream : public BasicIOStream<CharT>
     public:
         /** @brief Construct by stream and codec.
 
-            The stream @a ios is used to read and write a character sequence 
+            The stream @a ios is used to read and write a character sequence
             and convert it using a @a codec. The codec object which is passed
             as a pointer will be managed by this class and deleted if its
             reference count reaches 0.
@@ -363,8 +412,8 @@ class BasicTextStream : public BasicIOStream<CharT>
         BasicTextStream(StreamType& ios, CodecType* codec)
         : BasicIOStream<intern_type>(0)
         , _tbuffer( ios, codec)
-        { 
-            this->setBuffer(&_tbuffer); 
+        {
+            this->setBuffer(&_tbuffer);
         }
 
         /** @brief Construct with codec.
@@ -375,8 +424,8 @@ class BasicTextStream : public BasicIOStream<CharT>
         explicit BasicTextStream(CodecType* codec)
         : BasicIOStream<intern_type>(0)
         , _tbuffer(codec)
-        { 
-            this->setBuffer(&_tbuffer); 
+        {
+            this->setBuffer(&_tbuffer);
         }
 
         /** @brief Destructor.
@@ -387,17 +436,17 @@ class BasicTextStream : public BasicIOStream<CharT>
         /** @brief Returns the used code or a nullptr.
         */
         CodecType* codec()
-        { 
-            return _tbuffer.codec(); 
+        {
+            return _tbuffer.codec();
         }
 
         /** @brief Sets the text codec.
-            
+
             The codec object which is passed as pointer will be managed by
             this class and deleted if its reference count reaches 0.
         */
         void setCodec(CodecType* codec)
-        {           
+        {
             _tbuffer.setCodec(codec);
         }
 
@@ -425,7 +474,7 @@ class BasicTextStream : public BasicIOStream<CharT>
         /** @brief Resets the buffer and target.
 
             The target is detached and the buffer content is discarded.
-            The codec is kept, if one was set previously.  
+            The codec is kept, if one was set previously.
         */
         void reset()
         {
@@ -435,7 +484,7 @@ class BasicTextStream : public BasicIOStream<CharT>
         /** @brief Resets the buffer and target.
 
             Attaches to the new target and discards the buffer. The codec is
-            kept, if one was set previously. 
+            kept, if one was set previously.
         */
         void reset(StreamType& ios)
         {
@@ -461,7 +510,7 @@ class BasicTextStream : public BasicIOStream<CharT>
     typedef BasicTextIStream<Pt::Char, char> TextBuffer;
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 typedef BasicTextIStream<Char, char>  TextIStream;
 
@@ -475,7 +524,7 @@ typedef BasicTextIStream<Char, char>  TextIStream;
     typedef BasicTextOStream<Pt::Char, char> TextBuffer;
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 typedef BasicTextOStream<Char, char>  TextOStream;
 
@@ -489,14 +538,14 @@ typedef BasicTextOStream<Char, char>  TextOStream;
     typedef BasicTextStream<Pt::Char, char> TextBuffer;
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 typedef BasicTextStream<Char, char> TextStream;
 
 
 ///** @brief Text Input Stream for Character conversion
 //
-//    @ingroup Unicode
+//    @ingroup Pt-Text
 //*/
 //class PT_API TextIStream : public BasicTextIStream<Char, char>
 //{
@@ -521,7 +570,7 @@ typedef BasicTextStream<Char, char> TextStream;
 //
 ///** @brief Text Output Stream for Character conversion
 //
-//    @ingroup Unicode
+//    @ingroup Pt-Text
 //*/
 //class PT_API TextOStream : public BasicTextOStream<Char, char>
 //{
@@ -546,7 +595,7 @@ typedef BasicTextStream<Char, char> TextStream;
 //
 ///** @brief Text Stream for Character conversion
 //
-//    @ingroup Unicode
+//    @ingroup Pt-Text
 //*/
 //class PT_API TextStream : public BasicTextStream<Char, char>
 //{

@@ -45,7 +45,7 @@ namespace Pt {
     Reading from the stream buffer will convert from the the encoding of
     external characters.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 template <typename CharT, typename ByteT>
 class BasicTextBuffer : public BasicStreamBuffer<CharT>
@@ -526,7 +526,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
     typedef BasicTextBuffer<Pt::Char, char> TextBuffer;
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 typedef BasicTextBuffer<Pt::Char, char> TextBuffer;
 

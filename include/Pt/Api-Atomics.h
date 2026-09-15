@@ -26,22 +26,20 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_API_ALLOCATOR_H
-#define PT_API_ALLOCATOR_H
+#ifndef PT_API_ATOMICS_H
+#define PT_API_ATOMICS_H
 
-/** @addtogroup Pt-Allocator
+/** @addtogroup Pt-Atomics
 
-    @brief Custom allocation strategies for optimized memory management.
+    @brief Lock-free atomic integer and pointer operations.
 
-    The Pt::Allocator interface can be used to optimize or customize allocation
-    strategies. Two allocators are provided, which can be approached by the
-    Allocator interface, a pool based allocator and a page based allocator.
-    A pool based allocator is beneficial in all cases where many small objects
-    of small sizes are created. This is for example used to optimize memory
-    usage during serialization. The page based allocator simply places data
-    consecutively in memory and frees the whole block when its no longer in
-    use. This is useful in situations where chunks of memory or objects are
-    created and destroyed at the same time.
+    Pt::atomic_t and the atomicGet(), atomicSet(), atomicIncrement(),
+    atomicDecrement(), atomicExchange() and atomicCompareExchange() functions
+    perform lock-free integer and pointer operations with acquire or release
+    memory ordering; they are the building block for the higher-level
+    concurrency primitives of @ref Pt-System-Concurrency.
+
+    @ingroup Pt-Basics
 */
 
 #endif

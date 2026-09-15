@@ -53,7 +53,7 @@ class Formatter;
 
 /** @brief Represents arbitrary types during serialization.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class PT_API SerializationInfo
 {
@@ -138,7 +138,7 @@ class PT_API SerializationInfo
         */
         inline bool isVoid() const
         { return _type == Void; }
-         
+
         /** @brief Set to void type.
         */
         void setVoid();
@@ -227,7 +227,7 @@ class PT_API SerializationInfo
         /** @brief Sets the type name.
         */
         void setTypeName(const char* type, std::size_t len);
-        
+
         /** @brief Sets the type name.
         */
         void setTypeName(const LiteralPtr<char>& type);
@@ -248,7 +248,7 @@ class PT_API SerializationInfo
         /** @brief Sets the instance name.
         */
         void setName(const char* type, std::size_t len);
-        
+
         /** @brief Sets the instance name.
         */
         void setName(const LiteralPtr<char>& type);
@@ -343,15 +343,15 @@ class PT_API SerializationInfo
         /** @brief Get value as a 8-bit integer.
         */
         void getInt8(Pt::int8_t& n) const;
-        
+
         /** @brief Set to 8-bit integer value.
         */
         void setInt8(Pt::int8_t n);
-        
+
         /** @brief Get value as a 16-bit integer.
         */
         void getInt16(Pt::int16_t& n) const;
-        
+
         /** @brief Set to 16-bit integer value.
         */
         void setInt16(Pt::int16_t n);
@@ -419,7 +419,7 @@ class PT_API SerializationInfo
         /** @brief Set to double value.
         */
         void setDouble(double f);
-                
+
         /** @brief Get value as a long double.
         */
         void getLongDouble(long double& d) const;
@@ -427,7 +427,7 @@ class PT_API SerializationInfo
         /** @brief Set to long double value.
         */
         void setLongDouble(long double d);
-        
+
         /** @brief Begin saving.
         */
         bool beginSave(const void* p);
@@ -453,11 +453,11 @@ class PT_API SerializationInfo
         */
         SerializationInfo& addMember(const char* name)
         { return this->addMember(name, std::strlen(name)); }
-        
+
         /** @brief Add a struct member.
         */
         SerializationInfo& addMember(const char* name, std::size_t len);
-        
+
         /** @brief Add a struct member.
         */
         SerializationInfo& addMember(const LiteralPtr<char>& name);
@@ -466,7 +466,7 @@ class PT_API SerializationInfo
         */
         void removeMember(const std::string& name)
         { return this->removeMember( name.c_str() ); }
-        
+
         /** @brief Remove a struct member.
         */
         void removeMember(const char* name);
@@ -480,15 +480,15 @@ class PT_API SerializationInfo
         SerializationInfo& addElement();
 
         /** @brief Add a dict element.
-        */       
+        */
         SerializationInfo& addDictElement();
 
         /** @brief Add a dict key.
-        */ 
+        */
         SerializationInfo& addDictKey();
 
         /** @brief Add a dict value.
-        */ 
+        */
         SerializationInfo& addDictValue();
 
         /** @brief Get a struct member
@@ -507,7 +507,7 @@ class PT_API SerializationInfo
         */
         const SerializationInfo* findMember(const std::string& name) const
         { return this->findMember( name.c_str() ); }
-        
+
         /** @brief Find a struct member
 
             This method returns the data for a member with the name \a name.
@@ -522,7 +522,7 @@ class PT_API SerializationInfo
         */
         SerializationInfo* findMember(const std::string& name)
         { return this->findMember( name.c_str() ); }
-        
+
         /** @brief Find a struct member
 
             This method returns the data for a member with the name \a name.
@@ -547,7 +547,7 @@ class PT_API SerializationInfo
         /** @brief Returns an iterator to the begin of child elements.
         */
         Iterator begin();
-        
+
         /** @brief Returns an iterator to the end of child elements.
         */
         Iterator end();
@@ -837,7 +837,7 @@ inline SerializationInfo::ConstIterator SerializationInfo::end() const
 
 /** @brief Saves referencable types.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class SaveInfo
 {
@@ -896,7 +896,7 @@ inline void operator <<=(SaveInfo info, const T& type)
 /** @brief Saves referencable types.
 
     @related SaveInfo
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <typename T>
 inline void save(SaveInfo& si, const T& type)
@@ -910,7 +910,7 @@ inline void save(SaveInfo& si, const T& type)
 
 /** @brief Loads referencable types.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class LoadInfo
 {
@@ -967,7 +967,7 @@ inline void operator >>=(const LoadInfo& li, T& type)
 /** @brief Loads referencable types.
 
     @related LoadInfo
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <typename T>
 inline void load(const LoadInfo& li, T& type)
@@ -978,6 +978,16 @@ inline void load(const LoadInfo& li, T& type)
 
 /** @brief Deserializes a pointer reference.
 
+    The serialization of pointers is identical to the serialization of
+    values if the object pointed to is owned by the pointer: the pointer can
+    simply be dereferenced and the object it points to passed to the
+    serialization operator. Any pointer serialized or deserialized through
+    this overload is instead treated as a weak reference to another object
+    in the same object graph. Depending on the format, this parses a
+    reference id pointing to another object in the object stream. It does
+    not matter in which order weak pointers and the objects they point to
+    are serialized; both forward and backward references work.
+
     @related SerializationInfo
 */
 template <typename T>
@@ -987,6 +997,11 @@ inline void operator >>=(const SerializationInfo& si, T*& ptr)
 }
 
 /** @brief Serializes a pointer reference.
+
+    Any pointer serialized through this overload is treated as a weak
+    reference to another object in the same object graph, and formatted as
+    a reference id instead of the pointed-to value. See the deserialization
+    overload of operator>>=() for @a T* for details.
 
     @related SerializationInfo
 */
@@ -1299,6 +1314,25 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
 
 /** @brief Serializes a std::vector
 
+    Each element of the vector is added to the parent SerializationInfo
+    using Pt::SerializationInfo::addElement(). The modifier Pt::save() marks
+    the element as a type that is potentially referenceable by a weak
+    pointer in another object; this improves performance, because the
+    serializer only has to consider reachable objects when pointers are
+    also serialized. At the end, a type name is set and the parent
+    SerializationInfo is marked as a sequence, which is necessary to allow
+    empty vectors. Deserialization reserves the vector's memory upfront and
+    then deserializes each child SerializationInfo into the back of the
+    vector, using the Pt::load() modifier to mark the element as
+    referenceable by a pointer in another object.
+
+    Building the complete tree of SerializationInfo objects for a container
+    consumes memory proportional to its element count and cannot work
+    incrementally. An alternative for large or performance sensitive
+    container types is to specialize Pt::BasicComposer and
+    Pt::BasicDecomposer instead of relying on these operators; see their
+    class documentation for the std::vector specialization example.
+
     @related SerializationInfo
 */
 template <typename T, typename A>
@@ -1509,7 +1543,7 @@ inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         K k;
-        
+
         SerializationInfo::ConstIterator kv = it->begin();
         if( kv != it->end() )
             *kv >>= k;
@@ -1555,7 +1589,7 @@ inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>&
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         K k;
-        
+
         SerializationInfo::ConstIterator kv = it->begin();
         if( kv != it->end() )
             *kv >>= k;

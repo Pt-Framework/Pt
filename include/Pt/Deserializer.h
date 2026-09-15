@@ -39,7 +39,7 @@ namespace Pt {
 
 /** @brief Deserializes a set of types.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class PT_API Deserializer : private NonCopyable
 {

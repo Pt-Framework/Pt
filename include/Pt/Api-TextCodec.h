@@ -33,7 +33,7 @@ namespace Pt {
     @endcode
 
     @headerfile TextCodec.h <Pt/TextCodec.h>
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 template <typename CharT, typename ByteT>
 class TextCodec : public std::codecvt<T, B, Pt::MBState>

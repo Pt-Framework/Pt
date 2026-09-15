@@ -40,7 +40,7 @@ namespace Pt {
     This Exception indicates a error during serialization caused by
     missing or invalid object attributes.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class PT_API SerializationError : public std::runtime_error
 {

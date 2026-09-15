@@ -169,7 +169,7 @@ class PT_API Utf8Iterator
     assert(s, "\303\266\303\266\303\266");
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API Utf8Appender
 {
@@ -264,7 +264,7 @@ class PT_API Utf8Appender
     std::string latin1 = conv.toBytes(utf8);
     @endcode
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API Utf8Convert
 {

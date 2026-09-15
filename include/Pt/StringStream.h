@@ -39,7 +39,7 @@ namespace Pt {
 
 /** @brief Unicode string stream buffer.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API StringBuffer : public BasicStreamBuffer<Char>
 {
@@ -120,7 +120,7 @@ typedef std::basic_ostringstream<Pt::Char> OStringStream;
 
 /** @brief Unicode string input stream.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API IStringStream : public std::basic_istream<Pt::Char>
 {
@@ -153,7 +153,7 @@ class PT_API IStringStream : public std::basic_istream<Pt::Char>
 
 /** @brief Unicode string output stream.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API OStringStream : public std::basic_ostream<Pt::Char>
 {
@@ -186,7 +186,7 @@ class PT_API OStringStream : public std::basic_ostream<Pt::Char>
 
 /** @brief Unicode string stream.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API StringStream : public std::basic_iostream<Pt::Char>
 {

@@ -2,7 +2,7 @@
 description: "Serialization"
 ---
 
-- Serialization module overview and two-phase compose/decompose design:
+- Pt-Serialization module overview and two-phase compose/decompose design:
   `include/Pt/Api-Serialization.h`
 - High-level serialization of types to a formatter:
   `include/Pt/Serializer.h`

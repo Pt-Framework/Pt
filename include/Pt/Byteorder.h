@@ -144,14 +144,14 @@ namespace Pt {
 
     /** @brief Swaps the byteorder of an int32_t.
 
-        @ingroup Utilities
+        @ingroup Pt-Convert
      */
     inline int32_t swab(int32_t value)
     { return swab32(value); }
 
     /** @brief Swaps the byteorder of a uint32_t.
 
-        @ingroup Utilities
+        @ingroup Pt-Convert
     */
     inline uint32_t swab(uint32_t value)
     { return swab32(value); }
@@ -166,7 +166,7 @@ namespace Pt {
 
     /** @brief Returns true, if the cpu is big-endian (high-byte first).
 
-        @ingroup Utilities
+        @ingroup Pt-Convert
     */
     inline bool isBigEndian()
     {
@@ -176,7 +176,7 @@ namespace Pt {
 
     /** @brief Returns true, if the cpu is little-endian (low-byte first).
 
-        @ingroup Utilities
+        @ingroup Pt-Convert
     */
     inline bool isLittleEndian()
     {
@@ -191,7 +191,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
        
-        @ingroup Utilities
+        @ingroup Pt-Convert
      */
     template <typename T>
     inline T hostToLe(const T& value)
@@ -210,7 +210,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
 
-        @ingroup Utilities
+        @ingroup Pt-Convert
      */
     template <typename T>
     inline T leToHost(const T& value)
@@ -229,7 +229,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
        
-        @ingroup Utilities
+        @ingroup Pt-Convert
      */
     template <typename T>
     inline T hostToBe(const T& value)
@@ -248,7 +248,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
 
-        @ingroup Utilities
+        @ingroup Pt-Convert
      */
     template <typename T>
     inline T beToHost(const T& value)

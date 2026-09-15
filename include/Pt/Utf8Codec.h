@@ -38,7 +38,7 @@ namespace Pt {
 
 /** @brief Convert between unicode and UTF-8.
 
-    @ingroup Unicode
+    @ingroup Pt-Text
 */
 class PT_API Utf8Codec : public TextCodec<Char, char> 
 {

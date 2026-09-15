@@ -43,7 +43,7 @@ One needs to inherit Pt::XmlRpc::ServiceDefinition and register the XML-RPC
 procedures in the constructor. The string passed to registerProcedure() is
 the name of the procedure and all XML-RPC requests with this 'methodName' 
 XML tag will be dispatched to that method. The types used in the signatures
-of the service procedures have to be serializable (see @ref serialization).
+of the service procedures have to be serializable (see @ref Pt-Core-Page-Serialization).
 
 Once the XML-RPC service definition is implemented, it can be run within an
 instance of %Pt's HTTP server. The incoming requests are mapped by the service
@@ -198,7 +198,7 @@ function object of type Pt::XmlRpc::RemoteProcedure is constructed then, where
 the template parameters describe the signature of the remote procedure. The 
 first template parameter is the return value and the following ones are the 
 arguments. The types used as the return value and the arguments have to be
-serializable (see @ref serialization). The actual call might throw an exception, especially one of type 
+serializable (see @ref Pt-Core-Page-Serialization). The actual call might throw an exception, especially one of type 
 Pt::XmlRpc::Fault, if an error occurs in the XML-RPC layer.
 
 A non-blocking API also exists, to make XML-RPC calls concurrently to other

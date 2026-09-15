@@ -40,7 +40,7 @@ namespace Pt {
     example, converting a string to an integer can fail if the string does
     not represent a number. 
 
-    @ingroup Utilities
+    @ingroup Pt-Convert
 */
 class PT_API ConversionError : public std::runtime_error
 {

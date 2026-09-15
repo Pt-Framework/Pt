@@ -37,7 +37,7 @@ namespace Pt {
 
 /** @brief %Settings Format Error.
 
-    @ingroup Utilities
+    @ingroup Pt-Basics
 */
 class PT_API SettingsError : public SerializationError
 {
@@ -167,7 +167,7 @@ class PT_API SettingsError : public SerializationError
     "animals" and "plants". Both entries will have two subentries named "a"
     and "b".
 
-    @ingroup Utilities
+    @ingroup Pt-Basics
 */
 class PT_API Settings : private SerializationInfo
 {

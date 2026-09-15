@@ -72,7 +72,8 @@ content is in context without having read it.
 - For Signals, slots, delegates, events, connect, emit, observable read:
   `.github/instructions/pt-api-signals.instructions.md`
 
-- For Basic types, Any, dates, times, events and atomic integers read:
+- For Basic types, program options, application settings, events, Any, dates,
+  times and atomic integers read:
   `.github/instructions/pt-api-basics.instructions.md`
 
 - For Unicode strings, text codecs, regex, Base64, parsing and formatting read:
@@ -93,7 +94,7 @@ content is in context without having read it.
 - For I/O streams, buffers and zlib streams read:
   `.github/instructions/pt-api-streams.instructions.md`
 
-- For Program arguments, settings, type traits and helper utilities read:
+- For Type traits, type information, source info and conversion utilities read:
   `.github/instructions/pt-api-utilities.instructions.md`
 
 - For database connections, queries, result sets, transactions, and database backends read:

@@ -40,7 +40,7 @@ class Composer;
 
 /** @brief Support for serialization to different formats.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class Formatter
 {

@@ -95,7 +95,7 @@ namespace Pt {
     Note, that the %SourceInfo will contain the file and line information
     of the location where the PT_SOURCEINFO macro is used.
 
-    @ingroup Utilities
+    @ingroup Pt-TypeTraits
 */
 class SourceInfo 
 {

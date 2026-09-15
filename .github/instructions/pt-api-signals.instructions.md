@@ -4,7 +4,9 @@ description: "Using Pt signals, slots, delegates, and events for type-safe callb
 
 # Doxygen Group and Headers
 
-- Group definition: `include/Pt/Api-Signals.h` — `@defgroup Pt-Signals`
+- Group definition: `include/Pt/Api-Signals.h` — `@addtogroup Pt-Signals` (the
+  group itself is declared centrally by `include/Pt/Api-Core.h` as a subgroup
+  of `Pt-Core`).
 - Public class documentation lives beside each declaration: `Invokable.h`,
   `Callable.h`, `Slot.h`, `Function.h`, `Method.h`, `ConstMethod.h`,
   `Lambda.h`, `Delegate.h`, and `Signal.h`.

@@ -2,7 +2,7 @@
 description: "Memory Management"
 ---
 
-- Allocator module overview and API boundaries:
+- Pt-Allocator module overview and API boundaries:
   `include/Pt/Api-Allocator.h`
 - Abstract allocator interface:
   `include/Pt/Allocator.h`

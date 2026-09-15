@@ -70,7 +70,7 @@ namespace Pt {
     allocator.clear();
     @endcode
 
-    @ingroup Allocator
+    @ingroup Pt-Allocator
 */
 class PT_API PageAllocator : public Pt::Allocator
                            , protected NonCopyable

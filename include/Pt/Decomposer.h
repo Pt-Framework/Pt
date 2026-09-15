@@ -38,7 +38,84 @@ namespace Pt {
 
 /** @brief Manages the decomposition of types during serialization.
 
-    @ingroup Serialization
+    An alternative to the serialization operators is to specialize
+    Pt::BasicDecomposer, normally for container types where driving output
+    directly to a Formatter is preferable to building a complete tree of
+    SerializationInfo objects in memory. The following example shows a
+    specialization for std::vector:
+
+    @code
+    template <typename T>
+    class BasicDecomposer< std::vector<T> > : public Decomposer
+    {
+        public:
+            BasicDecomposer(SerializationContext* context = 0)
+            : _type(0)
+            {
+                _elemDecomposer.setParent(this);
+            }
+
+            void begin(const std::vector<T>& type, const char* name)
+            {
+                _type = &type;
+                _name = name;
+            }
+
+        protected:
+            void onBeginFormat(Formatter& formatter)
+            {
+                formatter.beginSequence(_name.c_str(), "std::vector", "");
+                _it = _type->begin();
+            }
+
+            Decomposer* onAdvanceFormat(Formatter& formatter)
+            {
+                if( _it != _type->begin() )
+                {
+                    formatter.finishElement();
+                }
+
+                if( _it == _type->end() )
+                {
+                    formatter.finishSequence();
+                    return this->parent();
+                }
+
+                formatter.beginElement();
+                _elemDecomposer.begin(*_it, "");
+                _elemDecomposer.beginFormat(formatter);
+                ++_it;
+
+                return &_elemDecomposer;
+            }
+
+        private:
+            std::string _name;
+            const std::vector<T>* _type;
+            BasicDecomposer<T> _elemDecomposer;
+            typename std::vector<T>::const_iterator _it;
+    };
+    @endcode
+
+    A specialized %BasicDecomposer requires a constructor that optionally
+    takes a reference to a SerializationContext and a begin() function to
+    set up the decomposer to start decomposing a value by name. The virtual
+    functions onBeginFormat() and onAdvanceFormat() are overridden to react
+    to formatting events. onBeginFormat() is called when the vector should
+    start being formatted; here Pt::Formatter::beginSequence() formats the
+    beginning of the sequence and an iterator to the begin of the vector is
+    kept. onAdvanceFormat() is called when the next element can be
+    formatted: it finishes the current element with
+    Pt::Formatter::finishElement(), starts the next one with
+    Pt::Formatter::beginElement(), or finishes the sequence with
+    Pt::Formatter::finishSequence() once the end of the vector is reached. It
+    returns a decomposer, either for the current vector element or the
+    parent decomposer if all elements were decomposed. A decomposer may
+    delegate to other decomposers, which might or might not be specialized;
+    here the decomposer for the element type is used, which works for a
+    vector of vectors right away.
+
+    @ingroup Pt-Serialization
 */
 class Decomposer
 {
@@ -101,7 +178,7 @@ class Decomposer
 
 /** @brief Manages the decomposition of types during serialization.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <typename T>
 class BasicDecomposer : public Decomposer
@@ -115,7 +192,7 @@ class BasicDecomposer : public Decomposer
         , _current(0)
         { }
 
-        // TODO: pass instance name to format()/onFormat() and 
+        // TODO: pass instance name to format()/onFormat() and
         //                             beginFormat()/onBeginFormat()
 
         /** @brief Begin decomposing a type.
@@ -152,7 +229,7 @@ class BasicDecomposer : public Decomposer
         {
             _si << Pt::save() <<= *_type;
             _current = &_si;
-            
+
             _it = _si.beginFormat(formatter);
         }
 
@@ -162,7 +239,7 @@ class BasicDecomposer : public Decomposer
             if( _it == _current->end() )
             {
                 _current->endFormat(formatter);
-                
+
                 if( _current->sibling() )
                 {
                     _current = _current->sibling();
@@ -194,7 +271,7 @@ class BasicDecomposer : public Decomposer
                 _it->endFormat(formatter);
                 ++_it;
             }
-            
+
             return this;
         }
 

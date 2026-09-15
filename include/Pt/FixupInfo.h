@@ -37,7 +37,7 @@ namespace Pt {
 
 /** @brief Fixup of references during serialization.
 
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 class FixupInfo
 {
@@ -130,7 +130,7 @@ struct FixupThunk
 /** @brief Fixup references during serialization.
 
     @related FixupInfo
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <typename T>
 inline void fixup(const FixupInfo& fixup, T*& fixme)
@@ -146,7 +146,7 @@ inline void fixup(const FixupInfo& fixup, T*& fixme)
 /** @brief Fixup references during serialization.
 
     @related FixupInfo
-    @ingroup Serialization
+    @ingroup Pt-Serialization
 */
 template <typename T>
 inline void fixup(const FixupInfo& fixup, T& fixme)

@@ -1,4 +1,5 @@
-/* Copyright (C) 2008 Marc Boris Duerner
+/*
+  Copyright (C) 2008 Marc Boris Duerner
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
 
   You should have received a copy of the GNU Lesser General Public
@@ -26,22 +27,27 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_API_UNICODE_H
-#define PT_API_UNICODE_H
+#ifndef PT_API_BASICS_H
+#define PT_API_BASICS_H
 
-/** @defgroup Unicode Text Processing
+/** @addtogroup Pt-Basics
 
-    @brief Unicode characters, strings, encodings and regular expressions.
+    @brief Program options, application settings, events and a few
+    general-purpose helper types.
 
-    This set of classes and functions extends the string and localization
-    support of the C++ standard library to work with unicode characters and
-    strings. A unicode character type and string class (a specialization of
-    std::basic_string) can be used to hold unicode text. A set of functions
-    allows to transform and classify individual characters. Text can be 
-    converted e.g. between different encodings using i/o streams and text
-    codecs. A regular expression class allows to search and match patterns 
-    in unicode strings. Localization facets are available for the systems
-    which support standard C++ locales.
+    Basic application support is provided by the Pt::Arg class and the
+    Pt::Settings class. The first one is a convenient way to parse and
+    process program options and the latter one allows to load and store
+    application settings in files or other places.
+
+    Pt::Event is the base class for type-safe event objects dispatched by an
+    event loop.
+
+    Pt::Any holds a value of any default- and copy-constructible type, and
+    Pt::Void is a marker type used where @c void cannot be used as a
+    template argument. Pt::NonCopyable is a mixin base class that disables
+    copy construction and assignment, and Pt::Singleton implements the
+    singleton pattern for a type.
 */
 
 #endif

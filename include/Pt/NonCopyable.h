@@ -49,7 +49,7 @@ namespace Pt {
   
     Trying to copy a %NonCopyable object will cause a compile-time error.
 
-    @ingroup Utilities
+    @ingroup Pt-Basics
 */
 class NonCopyable {
     public:

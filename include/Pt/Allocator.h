@@ -76,7 +76,7 @@ namespace Pt {
     objects of the same size. It is however possible, to implement a
     std::allocator using the raw memory allocators described here.
 
-    @ingroup Allocator
+    @ingroup Pt-Allocator
 */
 class Allocator
 {

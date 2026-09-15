@@ -26,30 +26,15 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_API_UTILITIES_H
-#define PT_API_UTILITIES_H
+#ifndef PT_API_DATETIME_H
+#define PT_API_DATETIME_H
 
-/** @defgroup Utilities Utilities
+/** @addtogroup Pt-DateTime
 
-    @brief Conversion utilities, program options and type information.
+    @brief Durations and points in calendar time.
 
-    The conversion utilities of the Platinum core library include functions
-    to convert @link utilities_ByteOrder byte orders@endlink, to format and
-    parse @link utilities_StringConv numbers@endlink, and to perform checked
-    @link utilities_NumConv numeric conversions@endlink.
-
-    Basic application support is provided by the Pt::Arg class and the
-    Pt::Settings class. The first one is a convenient way to parse and 
-    process program options and the latter one allows to load and store
-    application settings in files or other places.
-
-    Two types are useful to get type information Pt::TypeTraits and
-    Pt::TypeInfo. TypeTraits are used for generic programming, for example
-    to deduce the pointer type in templated code, or to branch differently
-    for const and non-const types. The TypeInfo class is a wrapper for
-    std::type_info, which makes it easier to store and compare type information.
-    The std::type_info is normally not copyable and comparable. Pt::SourceInfo
-    is used to store information about a location in the source code.
+    Pt::Timespan, Pt::Date, Pt::Time and Pt::DateTime represent durations and
+    points in calendar time.
 */
 
 #endif

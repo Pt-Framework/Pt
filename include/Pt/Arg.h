@@ -193,7 +193,7 @@ class ArgBaseT<std::string> : public ArgBase
     The example shown above not only shows a boolean parameter, but also how
     long-named options are handled, in this case "--debug".
 
-    @ingroup Utilities
+    @ingroup Pt-Basics
  */
 template <typename T>
 class Arg : public ArgBaseT<T>

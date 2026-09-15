@@ -51,7 +51,7 @@ namespace Pt {
     std::map<Pt::TypeInfo, std::string> typeMap;
     @endcode
 
-    @ingroup Utilities
+    @ingroup Pt-TypeTraits
 */
 class TypeInfo
 {
