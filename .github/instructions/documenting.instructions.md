@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.h"
+applyTo: "**/*.{h,md,page}"
 description: "API Documentation"
 ---
 
@@ -101,7 +101,7 @@ alone on the class reference page.
   `Api-<Feature>.h`, e.g. `include/<Project>/<Module>/Api-<Feature>.h`.
   Core module groups live in `include/<Project>/Api-<Feature>.h`.
 - Each `Api-<Feature>.h` file normally contains exactly one `@defgroup`
-  block, wrapped in include guards (`#ifndef PT[_MODULE]_API_FEATURE_H`).
+  block, wrapped in include guards (`#ifndef <PROJECT>[_MODULE]_API_FEATURE_H`).
 - A main module group may centrally declare direct child groups when their
   order in Doxygen's Modules tree is part of the documentation structure.
   Declare those child groups in the main group's `Api-<Feature>.h` with
@@ -118,11 +118,11 @@ alone on the class reference page.
 
 - Doxygen Page files live in `doc/pages/` and compose the Doxygen API and group
   documentation into readable user documentation.
-- Page file names are lowercase, e.g. `pt-signals.page`.
+- Page file names are lowercase, e.g. `ns-myfeature.page`.
 - Page IDs use a `-Page` suffix to distinguish them from group IDs.
-  - Example: group `Pt-Signals` → page `Pt-Signals-Page`.
+  - Example: group `Ns-MyFeature` → page `Ns-MyFeature-Page`.
   - Section anchors use the page ID as prefix with hyphens:
-    `Pt-Signals-Page-Signals`.
+    `Ns-MyFeature-Page-MyFeature`.
 - API topic pages contain no concept, contract, usage rule, or example
   that belongs in a group or class comment. They assemble that
   documentation with structural Doxygen markup and `@copydetails`.
@@ -268,14 +268,14 @@ class MyClass
 # Page Example
 
 ```
-/** \page Cosmo-Activation-Page Activation
+/** \page Ns-MyFeature-Page Feature Name
 
-    @copydetails Cosmo-Activation
+    @copydetails Ns-MyFeature
 
-    @section Cosmo-Activation-Page-IActivate IActivate
-    @copydetails Cosmo::IActivate
+    @section Ns-MyFeature-Page-IMyInterface IMyInterface
+    @copydetails Ns::IMyInterface
 
-    @section Cosmo-Activation-Page-IActivator IActivator
-    @copydetails Cosmo::IActivator
+    @section Ns-MyFeature-Page-IMyProvider IMyProvider
+    @copydetails Ns::IMyProvider
 */
 ```
