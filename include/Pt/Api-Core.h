@@ -36,31 +36,7 @@
 
     The core module is the basis for all other modules of the framework. It
     has no dependency on any system specific libraries except the standard
-    C++ library. Applications and other modules build on the areas covered
-    by the core module:
-
-    - @ref Pt-Basics provides program options, application settings, a
-      type-safe event base class and a few general-purpose helper types.
-    - @ref Pt-IntTypes provides fixed-size, platform-independent integer
-      types.
-    - @ref Pt-DateTime provides durations and points in calendar time.
-    - @ref Pt-Atomics provides lock-free atomic integer and pointer
-      operations.
-    - @ref Pt-Coroutines provides cancellable, co_await-able tasks and
-      lazily produced value sequences.
-    - @ref Pt-Allocator provides custom allocation strategies for optimized
-      memory management.
-    - @ref Pt-Text extends the string and localization support of the C++
-      standard library to work with unicode characters, strings, encodings
-      and regular expressions.
-    - @ref Pt-Signals provides a type-safe callback mechanism for connecting
-      signals to slots and delegates.
-    - @ref Pt-TypeTraits provides compile-time type traits and runtime type
-      information.
-    - @ref Pt-Convert provides conversion between strings, numbers and byte
-      orders.
-    - @ref Pt-Serialization composes and decomposes types to text or binary
-      formats.
+    C++ library.
 */
 
 /** @defgroup Pt-Basics Basic Types

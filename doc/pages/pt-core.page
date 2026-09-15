@@ -1,12 +1,22 @@
 /** \page Pt-Core-Page Core Module
 
+    @copydetails Pt-Core
+
     This chapter covers program options, application settings and events,
     fixed-size integers, dates and times, atomic operations, coroutines, the
     core module's custom allocators, its unicode text processing, its
     signal and delegate callback mechanism, its type traits and conversion
     utilities, and its serialization framework.
 
-    @copydetails Pt-Core
+    - @ref Pt-Core-Page-Basics covers program options, application settings, events, fixed-size integers and atomic operations.
+    - @ref Pt-Core-Page-DateTime covers dates and times.
+    - @ref Pt-Core-Page-Coroutines covers tasks and generators.
+    - @ref Pt-Core-Page-Allocator covers custom allocation strategies.
+    - @ref Pt-Core-Page-Text covers unicode text processing and regular expressions.
+    - @ref Pt-Core-Page-Signals covers signals, slots and delegates.
+    - @ref Pt-Core-Page-TypeTraits covers type traits and type information.
+    - @ref Pt-Core-Page-Convert covers conversion utilities.
+    - @ref Pt-Core-Page-Serialization covers serialization.
 
     @section Pt-Core-Page-Basics Basic Types
     @copydetails Pt-Basics
