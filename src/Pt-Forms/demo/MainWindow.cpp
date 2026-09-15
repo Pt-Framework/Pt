@@ -258,8 +258,8 @@ void MainWindow::onPaint(PaintContext& ctx, const Gfx::RectF& rect)
     //{
     //Gfx::Painter p;
     //p.setPen( Pt::Gfx::Color(0, 0, 0));
-    //PixmapSurface pm;
-    //PixmapSurface pm2;
+    //Pixmap pm;
+    //Pixmap pm2;
     //p.begin(pm);
     //p.begin(pm2);
 

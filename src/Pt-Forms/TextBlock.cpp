@@ -29,7 +29,7 @@
 #include <Pt/Forms/TextBlock.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/Application.h>
 #include <Pt/Forms/Screen.h>
 #include <Pt/Forms/Painter.h>
@@ -112,7 +112,7 @@ const Pt::String& TextLine::text() const
 //    _text = text;
 //    _font = font;
 //
-//    _textMetrics = PixmapSurface::textMetrics(_font, _text);
+//    _textMetrics = Pixmap::textMetrics(_font, _text);
 //}
 
 

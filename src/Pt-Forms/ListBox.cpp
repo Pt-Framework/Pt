@@ -537,7 +537,7 @@ void ListBoxItem::onPaintContent(PaintContext& context,
 
 void ListBoxItem::onPaintIcon(PaintContext& context,
                               const Gfx::RectF& iconRect,
-                              const PixmapSurface& picture,
+                              const Pixmap& picture,
                               const Gfx::PointF& iconPos,
                               const ListItemState& st)
 {

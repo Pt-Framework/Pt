@@ -207,10 +207,6 @@ class PT_FORMS_API Pixmap : public PaintSurface
         IPixmapImpl* _impl;
 };
 
-/** @brief Alias of %Pixmap.
-*/
-typedef Pixmap PixmapSurface;
-
 } // namespace
 
 } // namespace

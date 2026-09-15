@@ -2,25 +2,23 @@
 description: "Forms invalidation, layout, painting, graphics backends, and pixmaps"
 ---
 
-- Forms layouting and painting group overview:
+- Forms layouting and painting group overview (Pt-Forms-Updating):
   `include/Pt/Forms/Api-Updating.h`
-- Schedule and handle visual invalidation:
+- Invalidate a widget or handle InvalidateEvent to schedule a redraw:
   `include/Pt/Forms/InvalidateEvent.h`
-- Handle layout passes and layout changes:
+- Handle MeasureEvent, LayoutEvent, and RescaleEvent for measure/layout/DPI-rescale passes:
   `include/Pt/Forms/LayoutEvent.h`
-- Handle repainting and invalid paint regions:
+- Handle PaintEvent and its dirty rectangle:
   `include/Pt/Forms/PaintEvent.h`
-- Create a Forms painting context and access its paint surface:
+- Use PaintContext for an active painting session and its clip:
   `include/Pt/Forms/PaintContext.h`
-- Draw Forms content with the graphics painter:
+- Use Painter to draw pixmaps and graphics on a paint surface or context:
   `include/Pt/Forms/Painter.h`
-- Render to a Forms paint surface and query its dimensions:
+- Use PaintSurface as a render target and query its size:
   `include/Pt/Forms/PaintSurface.h`
-- Create, load, scale, and render platform pixmaps:
+- Implement IPixmapImpl or use Pixmap to load, scale, and render platform pixmaps:
   `include/Pt/Forms/Pixmap.h`
-- Use a pixmap as a Forms paint surface:
-  `include/Pt/Forms/PixmapSurface.h`
-- Implement or select the Forms graphics backend:
+- Implement GraphicsBackend to create pixmap implementations and enumerate fonts:
   `include/Pt/Forms/GraphicsBackend.h`
-- Configure control size-policy behavior during updates:
+- Configure SizePolicy Mode and size hints used by Control::measure():
   `include/Pt/Forms/SizePolicy.h`

@@ -1773,9 +1773,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\Pixmap.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\PixmapSurface.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Forms\PlatinumStyle.h">
       <Filter>Pt-Forms</Filter>
     </ClInclude>

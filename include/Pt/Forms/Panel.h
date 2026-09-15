@@ -34,7 +34,7 @@
 #include <Pt/Forms/Alignment.h>
 #include <Pt/Forms/PanelStyler.h>
 #include <Pt/Forms/Icon.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Rect.h>
@@ -204,7 +204,7 @@ class PT_FORMS_API Panel : public Control
         Icon              _icon;
         Gfx::SizeF        _iconSize;
         Gfx::RectF        _contentRect;
-        PixmapSurface     _picture;
+        Pixmap            _picture;
         Alignment         _imageAlignment;
         bool              _iconInvalid;
 };

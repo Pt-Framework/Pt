@@ -170,7 +170,6 @@
     <ClInclude Include="..\..\include\Pt\Forms\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Forms\PanelStyler.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Pixmap.h" />
-    <ClInclude Include="..\..\include\Pt\Forms\PixmapSurface.h" />
     <ClInclude Include="..\..\include\Pt\Forms\PlatinumStyle.h" />
     <ClInclude Include="..\..\include\Pt\Forms\Popup.h" />
     <ClInclude Include="..\..\include\Pt\Forms\ProgressBar.h" />

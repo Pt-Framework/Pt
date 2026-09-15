@@ -35,7 +35,7 @@
 #include <Pt/Forms/Adjustment.h>
 #include <Pt/Forms/PanelStyler.h>
 #include <Pt/Forms/TextBlock.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/Icon.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/SmartPtr.h>

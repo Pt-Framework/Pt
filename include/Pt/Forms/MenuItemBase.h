@@ -31,7 +31,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Control.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 
 namespace Pt {
 
@@ -227,7 +227,7 @@ class PT_FORMS_API MenuItemBase : public Control
         Pt::Gfx::Font             _customFont;
         unsigned                  _overrides;
 
-        Pt::Forms::PixmapSurface     _picture;
+        Pt::Forms::Pixmap            _picture;
         Pt::Gfx::Brush        _brush;
         Pt::Gfx::Pen          _pen;
         Pt::Gfx::Pen          _textPen;

@@ -32,7 +32,7 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Form.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/WindowType.h>
 #include <Pt/Forms/SizePolicy.h>
 #include <Pt/Forms/ActivateEvent.h>

@@ -33,7 +33,7 @@
 #include <Pt/Forms/Button.h>
 #include <Pt/Forms/ButtonStyler.h>
 #include <Pt/Forms/Icon.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/Direction.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
@@ -282,7 +282,7 @@ class PT_FORMS_API PushButton : public Button
         Direction                 _direction;
         Icon                      _icon;
         bool                      _iconInvalid;
-        PixmapSurface             _picture;
+        Pixmap                    _picture;
 
         ButtonState               _buttonState;
         ButtonStyler              _styler;

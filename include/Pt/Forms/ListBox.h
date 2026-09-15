@@ -34,7 +34,7 @@
 #include <Pt/Forms/ScrollView.h>
 #include <Pt/Forms/FlowLayout.h>
 #include <Pt/Forms/Icon.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Image.h>
@@ -302,7 +302,7 @@ class PT_FORMS_API ListBoxItem : public Control
         */
         virtual void onPaintIcon(PaintContext& context,
                                  const Gfx::RectF& iconRect,
-                                 const PixmapSurface& picture,
+                                 const Pixmap& picture,
                                  const Gfx::PointF& iconPos,
                                  const ListItemState& state);
 
@@ -335,7 +335,7 @@ class PT_FORMS_API ListBoxItem : public Control
 
         ListItemStyler           _listItemStyle;
 
-        PixmapSurface            _picture;
+        Pixmap                   _picture;
 
         Gfx::SizeF               _measuredIconSz;
         Gfx::SizeF               _measuredTextSz;

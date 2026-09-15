@@ -30,7 +30,7 @@
 #include <Pt/Forms/PlatinumStyle.h>
 #include <Pt/Forms/StyleOptions.h>
 #include <Pt/Forms/Application.h>
-#include <Pt/Forms/PixmapSurface.h>
+#include <Pt/Forms/Pixmap.h>
 #include <Pt/Forms/Panel.h>
 #include <Pt/Forms/Label.h>
 #include <Pt/Forms/PushButton.h>
