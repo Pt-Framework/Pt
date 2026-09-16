@@ -6,8 +6,9 @@ description: "API Documentation"
 # User Documentation
 
 - Write for a reader who uses the public API, not for its implementer.
-- Write complete sentences and short paragraphs in a concise, neutral reference
-  style.
+- Write concise, neutral reference text in complete sentences. Keep it easy to
+  scan and not too dense: use short paragraphs, separate distinct ideas, and
+  use headings or lists when they improve scanning.
 - Use plain, precise language. Keep real identifiers as names
   (`--with-prebuilt`, `PREBUILT_ROOT`). Use established API terms such as
   object, instance, value, parent, owner, lifetime, default, local, inherited,
@@ -17,18 +18,15 @@ description: "API Documentation"
 
 # API Reference Voice
 
-- Begin class briefs with a precise role verb such as "Represents", "Provides",
-  "Manages", "Stores", or "Defines".
-- Begin function briefs with the observable result or effect: "Returns",
-  "Sets", "Adds", "Removes", "Creates", "Replaces", "Binds", or "Resets".
-- Describe public behavior, ownership, lifetime, side effects, errors, and
-  ordering requirements. Do not narrate internal execution steps.
-- Use one term consistently for one concept. Do not use near synonyms unless
-  they denote different public concepts.
-- Use "Use %Type::function() to ..." for the canonical operation and
-  "Call %Type::function() before ..." for ordering requirements.
-- Keep each brief useful on its own. Put concepts and non-obvious contracts in
-  the detailed paragraph.
+- State a class's public role or a function's observable result or effect
+  first.
+- Document behavior, ownership, lifetime, side effects, errors, and ordering
+  only when they are not evident from the declaration. Do not narrate internal
+  execution steps.
+- Use one term consistently for one concept. Explain non-obvious concepts and
+  contracts in the detail text.
+- Be concise but not terse. Include the context needed to use the API correctly
+  without requiring readers to infer contracts from dense prose.
 
 # Documentation Structure
 
@@ -38,12 +36,12 @@ the Doxygen content for human readers, and instructions files index it by
 features for agents.
 
 Organize groups and pages around reader tasks, concepts, public mechanisms,
-and design principles. They are not mechanical inventories of headers or
-types. Explain a concept in a group when it spans multiple APIs, or in the
-detailed documentation of its owning API when it is local to that API.
+and design principles, not inventories of headers or types. Explain shared
+concepts in a group and local concepts in the owning API.
 
 A group overview may summarize the whole feature area. Keep it to concepts,
-mechanisms, principles, and usage.
+mechanisms, principles, and usage and the context needed to choose and use the
+feature.
 
 Groups may form a hierarchy. A subgroup normally declares its parent group
 with `@ingroup <ParentGroup>` in its `@defgroup` block. The parent group
@@ -69,12 +67,11 @@ alone on the class reference page.
 
 # API Documentation
 
-- Prefer compact documentation. Use a one-line `/** @brief ... */` comment
-  when the signature and brief text are sufficient. Add detailed descriptions,
-  `@param`, and `@return` only for non-obvious behavior, contracts, errors,
-  or complex usage, not for trivial members (default constructors, destructors,
-  simple getters/setters). The text must still cover relevant arguments, return
-  value, and exceptions. Refer to parameters with `@a <name>`.
+- Prefer the shortest documentation that lets a reader use the API correctly.
+  Use a one-line `/** @brief ... */` when the declaration and brief are
+  sufficient. Add detail, `@param`, and `@return` only for non-obvious
+  behavior, contracts, errors, or complex usage. Refer to parameters with
+  `@a <name>`.
 - All API documentation (namespaces, classes, methods, enums, free
   functions) belongs in the public header files, not in `.cpp` files.
 - Document every public namespace, class, function, enum, and public member
