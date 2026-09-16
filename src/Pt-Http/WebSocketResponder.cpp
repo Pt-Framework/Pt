@@ -31,6 +31,7 @@
 #include <Pt/Http/Request.h>
 #include <Pt/TextStream.h>
 #include "Sha1.h"
+#include <cstdint>
 
 namespace Pt {
 namespace Http {
