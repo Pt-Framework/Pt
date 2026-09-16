@@ -11,6 +11,7 @@ if $(WITH_SSL)
 Main Pt-Http-test : Pt-Http-test.cpp
                     ServerTest.cpp
                     ParserTest.cpp
+                    WebSocketTest.cpp   
                     ;
 
 LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-Ssl Pt-System Pt-Unit ;

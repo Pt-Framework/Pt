@@ -265,6 +265,9 @@
     <Filter Include="Pt-Gfx\fonts">
       <UniqueIdentifier>{6d988e65-71d6-4f80-873d-7e9827ac29ce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Mcp">
+      <UniqueIdentifier>{1967126d-a9ac-48c5-af1c-e9c99cfc5f7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\freetype\include\ft2build.h">
@@ -2991,6 +2994,66 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Span.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocket.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\WebSocketStream.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Sha1.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Client.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\Formatter.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\HttpClient.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Mcp\HttpResponder.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-JsonRpc\HttpResponder.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mcp\HttpService.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\HttpService.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Mcp\McpResponder.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mcp\McpService.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Mcp\McpTextFormatter.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\ProcedureDeclaration.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\JsonRpc\ServiceDeclaration.h">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mcp\ToolDeclaration.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mcp\Api.h">
+      <Filter>Pt-Mcp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketResponder.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketService.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Pt-Http\Sha1.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\freetype\src\Jamfile">
@@ -3342,7 +3405,6 @@
     <None Include="..\..\jam\jam.exe" />
     <None Include="..\..\jam.sh" />
     <None Include="..\..\Jambase" />
-    <None Include="..\..\jam\Jambase" />
     <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
     <None Include="..\Pt-JsonRpc\Jamfile">
@@ -3353,6 +3415,18 @@
     </None>
     <None Include="..\..\jam\emcc.jam">
       <Filter>jam</Filter>
+    </None>
+    <None Include="..\Pt-Mcp\demo\Jamfile">
+      <Filter>Pt-Mcp</Filter>
+    </None>
+    <None Include="..\Pt-Forms\gallery\Jamfile">
+      <Filter>Pt-Forms\gallery</Filter>
+    </None>
+    <None Include="..\Pt-JsonRpc\tests\Jamfile">
+      <Filter>Pt-JsonRpc</Filter>
+    </None>
+    <None Include="..\Pt-Mcp\Jamfile">
+      <Filter>Pt-Mcp</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -5683,6 +5757,72 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Gfx\Yuv12.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocket.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketStream.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="Sha1.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Db\AsyncTest.cpp">
+      <Filter>Pt-Db</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\Client.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Db\CoroTest.cpp">
+      <Filter>Pt-Db</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\Formatter.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\HttpClient.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\HttpResponder.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\HttpResponder.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\HttpService.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\HttpService.cpp">
+      <Filter>Pt-Mcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\demo\McpDemo.cpp">
+      <Filter>Pt-Mcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\McpResponder.cpp">
+      <Filter>Pt-Mcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\McpService.cpp">
+      <Filter>Pt-Mcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\McpTextFormatter.cpp">
+      <Filter>Pt-Mcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-JsonRpc\tests\Pt-JsonRpc-test.cpp">
+      <Filter>Pt-JsonRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Mcp\ToolDeclaration.cpp">
+      <Filter>Pt-Mcp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketResponder.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketService.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\tests\WebSocketTest.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\Sha1.cpp">
+      <Filter>Pt-Http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

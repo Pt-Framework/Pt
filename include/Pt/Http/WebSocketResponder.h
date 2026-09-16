@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2012 Marc Boris Duerner
- * 
+ * Copyright (C) 2015 by Laurentiu-Gheorghe Crisan
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,59 +15,48 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <Pt/Http/Service.h>
-#include <Pt/Http/Server.h>
+#ifndef PT_HTTP_WEBSOCKETRESPONDER_H
+#define PT_HTTP_WEBSOCKETRESPONDER_H
+
+#include <Pt/Http/Api.h>
 #include <Pt/Http/Responder.h>
-#include <cassert>
+#include <Pt/Http/Reply.h>
+#include <Pt/Http/IOStream.h>
 
 namespace Pt {
-
 namespace Http {
 
-Service::Service()
-{ 
-}
+class WebSocketService;
 
-
-Service::~Service() 
+class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
 {
-}
+    public:
+        WebSocketResponder(Pt::Http::WebSocketService& s);
 
+    protected:
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
-Responder* Service::getResponder(const Request& request)
-{
-    Responder* responder = onGetResponder(request);
-    
-    return responder;
-}
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
-void Service::releaseResponder(Responder* responder)
-{
-    if( ! responder)
-        return;
-    
-    onReleaseResponder(responder);
-}
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop);
 
+    private:
+        static std::string computeAccept(const std::string& key);
+};
 
-Signal<IOStream*, const std::string&>& Service::upgradeRequested()
-{
-    return _upgradeRequested;
-}
+}}
 
-}
-
-}
-
+#endif

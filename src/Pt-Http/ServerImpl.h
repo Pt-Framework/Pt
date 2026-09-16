@@ -35,6 +35,7 @@
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Server.h>
+#include <Pt/Http/Service.h>
 #include <Pt/Http/IOStream.h>
 #include <Pt/Ssl/Context.h>
 #include <Pt/Net/TcpServer.h>
@@ -238,8 +239,10 @@ class ServerImpl : public Connectable
     class UpgradeEvent : public Pt::BasicEvent<UpgradeEvent>
     {
         public:
-            UpgradeEvent(IOStream* iostream)
+            UpgradeEvent(IOStream* iostream, Service* service, const std::string& protocol)
                 : _iostream(iostream)
+                , _service(service)
+                , _protocol(protocol)
             { }
 
             IOStream* iostream() const
@@ -247,8 +250,20 @@ class ServerImpl : public Connectable
                 return _iostream;
             }
 
+            Service* service() const
+            {
+                return _service;
+            }
+
+            const std::string& protocol() const
+            {
+                return _protocol;
+            }
+
         private:
             IOStream* _iostream;
+            Service* _service;
+            std::string _protocol;
     };
 
     typedef ServerThread::RemoveHandlerEvent RemoveHandlerEvent;
@@ -316,12 +331,7 @@ class ServerImpl : public Connectable
 
         Servlet* getServlet(const Request& request);
 
-        void upgrade(Connection* conn);
-
-        Signal<IOStream*>& upgradeRequested()
-        {
-            return _upgradeRequested;
-        }
+        void upgrade(Connection* conn, Service* service, const std::string& protocol);
 
     private:
         void onAccept(Net::TcpServer& server);
@@ -332,7 +342,7 @@ class ServerImpl : public Connectable
 
         void onUpgrade(const UpgradeEvent& ev)
         {
-            _upgradeRequested.send( ev.iostream() );
+             ev.service()->upgradeRequested().send( ev.iostream(), ev.protocol() );
         }
 
     private:
@@ -368,7 +378,6 @@ class ServerImpl : public Connectable
         System::ReadWriteMutex _serviceMutex;
         typedef std::vector<ServletListEntry> ServletList;
         ServletList _servlets;
-        Signal<IOStream*> _upgradeRequested;
 };
 
 } // namespace Http

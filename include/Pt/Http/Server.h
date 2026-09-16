@@ -149,8 +149,6 @@ class PT_HTTP_API Server : public Connectable
         //! @internal
         Servlet* getServlet(const Request& request);
 
-        Signal<IOStream*>& upgradeRequested();
-
     private:
         class ServerImpl* _impl;
 };

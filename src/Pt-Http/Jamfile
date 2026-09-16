@@ -20,6 +20,11 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         Service.cpp
                         Servlet.cpp
                         IOStream.cpp
+                        WebSocket.cpp   
+                        WebSocketStream.cpp 
+                        WebSocketResponder.cpp
+                        WebSocketService.cpp
+                        Sha1.cpp
                         ;
 
 LinkSharedLibraries Pt-Http : Pt Pt-System Pt-Net Pt-Ssl ;

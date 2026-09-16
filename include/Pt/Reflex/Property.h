@@ -106,8 +106,15 @@ class Property : public PropertyInfo
         Type* _type;
 };
 
-}
+/*
+class Test
+{
+        int get();
+        int set(int a);
 
-}
+        registerProperty("test", &Test::get, &Test::set, "");
+};
+*/
+}}
 
 #endif

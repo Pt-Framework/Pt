@@ -46,7 +46,6 @@ namespace Reflex {
 class Argument;
 class TypeManager;
 
-
 class PT_REFLEX_API ConstructorTable
 {
     typedef std::vector<Pt::Reflex::ConstructorInfo*> Container;

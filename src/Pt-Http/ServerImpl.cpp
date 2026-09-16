@@ -320,8 +320,11 @@ void Acceptor::onReplySent(Reply& r)
             {
                 PT_LOG_DEBUG("upgrade");
 
+                Service* service = _servlet->service();
+                const char* upgradeHeader = _request.header().get("Upgrade");
+                const std::string protocol = upgradeHeader ? upgradeHeader : "";
                 Connection* conn = this->release();
-                _server.upgrade(conn);
+                _server.upgrade(conn, service, protocol);
             }
 
             releaseResponder();
@@ -769,9 +772,9 @@ Servlet* ServerImpl::getServlet(const Request& request)
 }
 
 
-void ServerImpl::upgrade(Connection* conn)
+void ServerImpl::upgrade(Connection* conn, Service* service, const std::string& protocol)
 {
-    UpgradeEvent ev(new IOStream(conn));
+    UpgradeEvent ev(new IOStream(conn), service, protocol);
     loop()->commitEvent(ev);
 }
 
