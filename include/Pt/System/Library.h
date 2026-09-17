@@ -69,41 +69,41 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
 
 /** @brief Shared library loader.
 
-    The Pt::System::Library class can be used to dynamically load shared
-    libraries and resolve symbols from it. It also provides the static
-    functions @link Pt::System::Library::prefix prefix()@endlink and
-    @link Pt::System::Library::suffix suffix()@endlink, which allow to build
-    library names in a portable way. The next example shows how to load a
-    library with the basename "MyLib" at runtime and how to retrieve the
-    address of the function "myFunction":
+    %Library finds a shared library image from a path and returns
+    symbols by name.
+
+    Construction and open() look for a file at the given path. If none
+    is there, the path is extended by the platform suffix, then by the
+    shared-library prefix. A basename is enough. An
+    @link Pt::AccessFailed AccessFailed@endlink exception is thrown when
+    no image is found. A second open() may close the image loaded before.
+
+    prefix() and suffix() return the platform naming pieces so a
+    portable library name can be built without relying on that search.
+    suffix() is ".so" on Linux and ".dll" on Windows. prefix() is "lib"
+    on Linux and empty on Windows.
 
     @code
-    typedef int (*MyFunc)();
-
-    Pt::System::Path libPath = "MyLib";
-    Pt::System::Library library(libPath);
-    
-    Pt::System::Symbol symbol = library.getSymbol("myFunction");
-
-    MyFunc func = reinterpret_cast<MyFunc>(symbol.sym());
-    int result = func();
+    Pt::System::Path libPath = Pt::System::Library::prefix();
+    libPath += "MyLib";
+    libPath += Pt::System::Library::suffix();
     @endcode
 
-    The constructor of the %Library class will try to load the library at the
-    given path. If no library could be found, the path is extended by the
-    platform-specific library extension first, and then also by the shared
-    library prefix. If no library could be found at either path, an
-    @link Pt::AccessFailed AccessFailed@endlink exception is thrown.
-    The function @link Pt::System::Library::getSymbol getSymbol()@endlink
-    returns a @link Pt::System::Symbol Symbol@endlink object when the library
-    symbol could be resolved or a @link Pt::System::SymbolNotFound
-    SymbolNotFound@endlink exception, if the symbol name could not be found.
-    The actual address of the library symbol is returned by @link
-    Pt::System::Symbol::sym sym()@endlink. Alternatively, the index operator
-    can be used to load symbols, which will return the address of the symbol
-    as a pointer to void or a nullptr on failure. Note, that standard C++
-    does not allow to cast void pointers to function pointers, but nearly
-    all runtimes implement that as an extension.
+    getSymbol() returns a %Symbol when the name exists. It throws
+    %SymbolNotFound otherwise. The address is %Symbol::sym(). A %Symbol
+    holds the %Library that produced it, so the image stays loaded while
+    the symbol exists.
+
+    The index operator and resolve() return a void pointer, or a null
+    pointer when the name is missing. They do not throw. getSymbol()
+    treats a missing name as an error. The index operator leaves that
+    test to the caller.
+
+    Standard C++ does not allow a cast from a void pointer to a function
+    pointer. Nearly all runtimes implement that as an extension. The
+    caller casts %Symbol::sym() to a function pointer to call it.
+
+    %PluginManager uses a %Library to resolve PluginList.
 
     @ingroup Plugins
 */

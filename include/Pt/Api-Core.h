@@ -44,17 +44,7 @@
     @ingroup Pt-Core
 */
 
-/** @defgroup Pt-IntTypes Fixed-Size Integers
-
-    @ingroup Pt-Core
-*/
-
 /** @defgroup Pt-DateTime Dates and Times
-
-    @ingroup Pt-Core
-*/
-
-/** @defgroup Pt-Atomics Atomic Operations
 
     @ingroup Pt-Core
 */

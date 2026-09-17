@@ -29,7 +29,7 @@
 #ifndef PT_API_ATOMICS_H
 #define PT_API_ATOMICS_H
 
-/** @addtogroup Pt-Atomics
+/** @defgroup Pt-Atomics Atomic Operations
 
     @brief Lock-free atomic integer and pointer operations.
 

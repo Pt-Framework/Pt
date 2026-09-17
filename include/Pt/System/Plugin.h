@@ -101,19 +101,11 @@ class Plugin : public PluginId
 
 
 /** @brief A plugin implementation.
-    
-    In the plugin library, shared object global %BasicPlugins have to be
-    arranged in a null teminated array with C linkage. The PluginManager
-    can be set up to resolve the symbol of this array and use the plugins.
 
-    @code
-    static Pt::BasicPlugin<SomeClass, MyIface> plugin0("some-feature");
-    static Pt::BasicPlugin<OtherClass, MyIface> plugin1("other-feature");
-    
-    extern "C" { \
-        PT_API Pt::PluginId* PluginList[] = { &plugin0, &plugin1, 0 }; \
-    }
-    @endcode
+    %BasicPlugin is a %Plugin that constructs with new and destroys with
+    delete. The first template argument is the concrete class. The second
+    is the interface. The constructor takes a feature string and an
+    optional info string.
 
     @ingroup Plugins
 */
@@ -151,34 +143,27 @@ class BasicPlugin : public Plugin<Iface> {
 
 /** @brief Manages loaded plugins.
 
-    To load a plugin in an application the PluginManager class is used. It is a
-    class template that takes the Interface type, here Greeter, as parameter.
-    It will load the plugin, resolve the pluginlist and get the plugins to be
-    used when a class needs to be created. It is very simple to use:
+    %PluginManager loads a PluginList from a %Library and creates
+    instances of one interface. The first template argument is that
+    interface.
 
-    @code
-    Pt::System::PluginManager<Greeter> manager;
-    manager.loadPlugin("PluginList", "/path/to/plugin.so");
+    loadPlugin() opens the library and resolves the export name. The
+    name PluginList is the usual export. Another symbol name is valid if
+    the library exports that array.
 
-    Greeter* greeter = manager.create("en");
-    if(greeter)
-    {
-        greeter->sayHello();
-        manager.destroy(greeter);
-    }
-    @endcode
+    A loaded plugin is registered when its interface matches the
+    manager. Entries for other interfaces in the same PluginList are
+    skipped. Plugins that already live in the process can be registered
+    with registerPlugin(). They do not require a shared library.
 
-    First we need to load the shared library with PluginManager::loadPlugin().
-    Then we can create an instance of a Greeter by a feature string by calling
-    PluginManager::create(). Normally, one would ask the user for a language
-    and then see if we can create a Greeter. if the instance could be created
-    we use it like a normal C++ class, but not delete it directly and instead
-    use the PluginManager::destroy() method. The rationale behind this is that
-    the allocator in a shared library can differ from the allocator in the
-    application and the same code needs to delete it, which created it. The
-    life-time of the created classes is bound to the life-time of the
-    PluginManager. When the PluginManager goes out of scope it will not only
-    destroy all created instances, it will also unload all loaded plugin libraries.
+    destroy() must be used instead of delete. The allocator in the
+    library may differ from the application. Creation and deletion stay
+    on the same plugin. Remaining instances are destroyed and loaded
+    libraries are unloaded when the manager is destroyed. Instance
+    lifetime must not exceed the manager.
+
+    Iteration walks the loaded plugins without creating instances.
+    create() also accepts an iterator from that walk.
 
     @ingroup Plugins
 */

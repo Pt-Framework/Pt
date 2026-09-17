@@ -33,18 +33,55 @@
 
     @brief Loading dynamic libraries and creating plugin instances at runtime.
 
-    Dynamic libraries can be loaded at runtime and symbols can be resolved
-    using the Pt::System::Library class. Additionally, the plugin API provides
-    a more advanced way of creating classes, that implement a common interface,
-    from a dynamically loadable library or module. The mechanism is
-    non-intrusive and can be used with an existing class hierarchy. Plugins can
-    be loaded and unloaded by client application code. The concrete type of the
-    created class is opaque to the application that uses the plugin, it only
-    needs to know the interface.
+    A process can load a shared library after it has started and resolve
+    symbols from it. The same libraries can export classes that implement
+    a known interface. Symbol lookup and instance creation are two layers
+    of that mechanism.
 
-    Lets assume the classes you want to create from a plugin are derived from an
-    interface class called Greeter. The Greeter class has one abstract function
-    called sayHello:
+    %Library is the portable loader. It opens a library image and
+    resolves a named symbol.
+
+    @code
+    typedef int (*MyFunc)();
+
+    Pt::System::Path libPath = "MyLib";
+    Pt::System::Library library(libPath);
+
+    Pt::System::Symbol symbol = library.getSymbol("myFunction");
+
+    MyFunc func = reinterpret_cast<MyFunc>(symbol.sym());
+    int result = func();
+    @endcode
+
+    The path "MyLib" is a basename. %Library finds the platform image.
+    getSymbol() returns a %Symbol for the name "myFunction".
+
+    The address is a void pointer. Calling it as a function requires a
+    cast to a function pointer type. Standard C++ does not allow that
+    conversion. Nearly all runtimes implement it as an extension.
+
+    A plugin is a shared library. The application keeps the interface
+    type. The concrete class is compiled into the library. No extra
+    base class is required beyond that interface.
+
+    The library exports a null-terminated array of %PluginId named
+    PluginList. The export uses C linkage so the loader can resolve a
+    stable symbol. %PluginManager looks up that name through a %Library.
+
+    Each entry is a %Plugin that creates and destroys instances of one
+    interface. %BasicPlugin is the usual plugin. The first template
+    argument is the concrete class. The second is the interface it
+    implements. It constructs with new and destroys with delete.
+
+    The constructor takes a feature string that names the instance for
+    later construction. The address of the %BasicPlugin is placed in
+    PluginList.
+
+    Several plugins may share one PluginList. A second concrete class
+    for the same interface is another %BasicPlugin in the same array.
+
+    A plugin that needs another allocator derives from %Plugin and
+    overrides create and destroy.
 
     @code
     class Greeter
@@ -53,53 +90,50 @@
             virtual ~Greeter() {}
             virtual void sayHello() const = 0;
     };
-    @endcode
 
-    Now, we want to write a plugin that implements Greeter to say "Hello World" in
-    english. This simply means to derive from Greeter and implement the sayHello
-    method:
-
-    @code
     class EnglishGreeter : public Greeter
     {
         public:
             void sayHello() const
-            { 
-              std::cout << "Hello World\n";
-            }
+            { std::cout << "Hello World\n"; }
     };
-    @endcode
 
-    So far this has nothing to do with writing the plugin, it is pretty much the
-    situation how object-oriented applications and frameworks are designed. To
-    build the plugin, the EnglishGreeter must be build as a shared library and
-    export the symbol "PluginList" that we will use later to resolve our plugin.
-    PluginList must be a null-terminated array of PluginId* and be exported with
-    C-linkage. This array will contain a number of BasicPlugin instances that
-    serve as builder for the class we want to load from the plugin in our client
-    application.
+    class OtherGreeter : public Greeter
+    {
+        public:
+            void sayHello() const
+            { std::cout << "Hi\n"; }
+    };
 
-    @code
     static Pt::System::BasicPlugin<EnglishGreeter, Greeter> _enGreeter("en");
+    static Pt::System::BasicPlugin<OtherGreeter, Greeter> _otherGreeter("other");
 
     extern "C"
     {
-        Pt::System::PluginId* PluginList[] = { &_enGreeter, 0 };
+        Pt::System::PluginId* PluginList[] = { &_enGreeter, &_otherGreeter, 0 };
     }
     @endcode
 
-    Here we create a BasicPlugin statically in the plugin library that is able
-    to create an EnglishGreeter which implements the Greeter interface, hence
-    the two template parameters. The constructor takes a feature string, in this
-    case "en", that can be used later for named construction of objects. The
-    address of the BasicPlugin is then placed in the PluginList, so it can be
-    resolved by the loader code. This is pretty much all you need to do to write
-    a plugin. If we decide to write a GermanGreeter and FrenchGreeter later and
-    do not want to compile them into a separate file we can simply add them to
-    the PluginList. Instead of using the BasicPlugin template, we can derive from
-    Pt::System::Plugin and override the create and destroy methods if we need a special
-    way of creating or destroying. BasicPlugin is derived from Pt::System::Plugin and
-    simply creates with new and destroys with delete.
+    %PluginManager loads a PluginList through a %Library and creates
+    instances by feature. The application loads and unloads plugins
+    through the manager.
+
+    @code
+    Pt::System::PluginManager<Greeter> manager;
+    manager.loadPlugin("PluginList", "/path/to/plugin.so");
+
+    Greeter* greeter = manager.create("en");
+    if(greeter)
+    {
+        greeter->sayHello();
+        manager.destroy(greeter);
+    }
+    @endcode
+
+    The instance is created and destroyed through the manager, not with
+    delete. Loaded libraries unload when the manager is destroyed.
+
+    Path search, platform naming, and symbol lookup belong to %Library.
 */
 
 #endif

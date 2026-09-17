@@ -29,7 +29,7 @@
 #ifndef PT_API_INTTYPES_H
 #define PT_API_INTTYPES_H
 
-/** @addtogroup Pt-IntTypes
+/** @defgroup Pt-IntTypes Fixed-Size Integers
 
     @brief Fixed-size, platform-independent signed and unsigned integer types.
 

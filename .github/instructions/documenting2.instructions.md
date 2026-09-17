@@ -12,18 +12,32 @@ parent, owner, lifetime, default, local, inherited, and override only
 when they describe a public contract. Avoid informal wording, marketing
 language, stacked jargon, and internal implementation details.
 
-## Detailed Descriptions
+## Group and Class Detailed Descriptions
 
-Group and class detailed descriptions are connected prose, using accessible
-writing style similar to a textbook or a technical reference chapter.
-One idea per paragraph. A paragraph may use multiple sentences to develop
+These texts are the chapter. Write them as accessible textbook or
+technical-reference prose, not as briefs. Length follows the model. One
+idea per paragraph. A paragraph may use several sentences to develop
 that idea and lead into the next. Prefer an extra paragraph over a
 comma-separated inventory. Do not use lists or extra headings inside a
 detailed description unless the reader must choose between alternatives.
-Include the context needed to use the API correctly without requiring readers
-to infer contracts from dense prose.
+
+Include the context needed to use the API correctly. Explain this
+feature's object model, contracts, ownership, lifetime, errors, and
+ordering. An API technique that is part of the contract belongs here
+(C linkage of an export, a cast the platform requires, matching
+allocators). Do not teach general programming, and do not compare other
+frameworks.
+
+Use `@code` for the examples the chapter needs. An ordered explanation
+of the model is not a recipe. Do not write cookbook steps ("When you
+want to ..., first ..., then ..."). Do not write capability inventories
+or front-loaded catalogs of neighboring types.
 
 ## Brief Reference Text
+
+This short style is for member functions, parameters, enumerators, and
+similar declaration comments. It is not the style of group or class
+detailed descriptions.
 
 Method briefs, parameters, and enumerators stay short and scannable.
 Name the result or effect first. Use "Returns ..." for queries, "Sets ..."
@@ -31,21 +45,11 @@ or "Changes ..." for mutators, and "Creates ..." or "Adds ..." for factory
 and registration operations. Do not begin a brief with "This function" or
 repeat the method name in prose.
 
-Explain the model. Do not teach the reader how to program, how other
-frameworks do it.
-
-Do not write:
-
-- Capability inventories: "X provides A, B, C, D, and E."
-- Usage recipes: "When you want to ..., first ..., then ..."
-- Front-loaded catalogs of neighboring types
-- A restatement of the group inside a class comment
-- A walkthrough of methods the brief already covers
-
 If a sentence needs more than two commas or an "and" chain of APIs, split
 it. Document behavior, ownership, lifetime, side effects, errors, and
 ordering only when they are not evident from the declaration. Do not
-narrate internal execution steps.
+narrate internal execution steps. Do not walk through other members the
+brief already covers.
 
 # Where Documentation Lives
 
@@ -56,10 +60,10 @@ The website links to the generated HTML.
 - Document every public namespace, class, function, enum, and public
   member in the public header, not in a `.cpp` file. Internal helpers in
   `.cpp` files may use brief comments but do not need Doxygen markup.
-- A one-line `/** @brief ... */` is enough when the declaration and brief
-  suffice. Add detail, `@param`, and `@return` only for non-obvious
-  behavior, contracts, errors, or complex usage. Refer to parameters with
-  `@a <name>`.
+- A one-line `/** @brief ... */` is enough for a member when the
+  declaration and brief suffice. Add detail, `@param`, and `@return`
+  only for non-obvious behavior, contracts, errors, or complex usage.
+  Refer to parameters with `@a <name>`.
 - Assign an API to a group with `@ingroup` when it has a meaningful role
   in that group's reader task. An API may belong to more than one group.
   Do not assign an API to a group solely to classify it; it may remain
@@ -90,10 +94,10 @@ Local concepts belong on the owning API.
 Each module has one module page. That page sorts the whole module: the
 main group, every subgroup, and the types that deepen those groups.
 
-A group detailed description is a short chapter opening: what the feature
-is for, then the object model in reading order, then one canonical `@code`
-example. Introduce a type only when the next sentence needs it. Do not
-catalog the group's APIs.
+A group detailed description is the essential chapter: what the feature
+is for, then the object model in reading order, then the examples the
+reader needs. Introduce a type only when the next sentence needs it. Do
+not catalog the group's APIs.
 
 A subgroup declares its parent with `@ingroup <ParentGroup>`. The parent
 explains the module-wide model. The subgroup documents one reader task
@@ -110,19 +114,21 @@ belong once, in the group or on the first type that owns the mechanism.
 Later types assume them. If two classes would answer the same question,
 move that sentence to the group.
 
-A class detailed description continues the group chapter. Open with a
-hinge sentence that states this type's role in the already-told model,
-then only the non-obvious contracts of this type. Do not reteach the
-group, recap earlier types, or walk through a usage recipe. End so the
-next type on the page is expected. The class page must still read as a
-coherent excerpt, not as a second tutorial.
+A class detailed description continues the group chapter when the page
+copies it. Open with a hinge sentence that states this type's role in
+the already-told model, then develop the questions that type leaves
+open, in the same textbook voice as the group. Do not reteach the
+group or recap earlier types. End so the next type on the page is
+expected. The class page must still read as a coherent excerpt.
 
-Give a class a detailed description when its role, ownership, lifetime,
-extension point, or relationship to another public type is not
-self-evident, or when the module page copies it as a chapter. Copy a
-type as a chapter only when it deepens the group model. A brief is
-enough for a leaf type that adds no new question; do not copy it onto
-the module page.
+Copy a type onto the module page with `@copydetails` when that is
+possible: the type deepens the group model, and its detailed
+description can open as the next chapter beat. Prefer that
+continuation. Do not force it. If the class text would reteach the
+group, need glue of more than one thought, or cannot stand as the next
+beat, keep the class short and keep the content in the group. A brief
+is enough when the group already holds the content or the type adds no
+new question; do not copy that type onto the page.
 
 Pages live in `doc/pages/`. File names are lowercase. A module page ID
 uses a `-Page` suffix (`Ns-MyModule` -> `Ns-MyModule-Page`). Section
@@ -131,10 +137,11 @@ anchors use the page ID as prefix (`Ns-MyModule-Page-MyFeature`).
 The module page contains no concept, contract, usage rule, or example
 that belongs in a group or class comment. It assembles that
 documentation with `@copydetails`, not `@copydoc`. The page keeps the
-section structure; the detailed description must open as the chapter.
-A short glue sentence may bridge sections. If that glue needs more than
-one thought, the class hinge is missing or the type does not belong on
-the page.
+section structure. The group detailed description is the chapter. Each
+copied class detailed description must open as the next beat. A short
+glue sentence may bridge sections. If that glue needs more than one
+thought, do not copy the type: keep the class short and keep the
+content in the group.
 
 Copy the main group first, then subgroups, in reader order. The page
 defines that order. Open with a short table of contents naming the main
@@ -150,11 +157,10 @@ Use `@section` for subgroups and direct main-group chapters. Use
 `@subsection` for types below a subgroup. Name the chapter after the
 reader-facing role (`Widgets`, not `Views and Widget Services`).
 
-Write in this order: outline the group chapter and the module page as
-questions; give each copied type one role sentence that answers one
-leftover question; add only contracts the group did not already state;
-read the assembled page and cut repeats; drop types that have no
-question of their own.
+Write in this order: outline the group as the essential chapter and the
+page as questions; copy a type only when its detailed description
+continues that chapter; otherwise keep the class short and leave the
+content in the group; read the assembled page and cut repeats.
 
 Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
 contain original prose and follow the same voice. They must not repeat
@@ -199,6 +205,9 @@ or changing a documented module.
 - Do not use `@class` when the context is already clear to Doxygen.
 
 # Examples
+
+Group and class detailed descriptions use the connected chapter prose.
+Member comments use the short brief form.
 
 Dense inventory, do not write:
 

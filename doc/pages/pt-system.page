@@ -33,9 +33,9 @@
     @section Pt-System-Page-Plugins Dynamic Libraries and Plugins
     @copydetails Plugins
 
-    @subsection Pt-System-Page-Library Loading Libraries
+    @subsection Pt-System-Page-Library Shared Libraries
     @copydetails Pt::System::Library
 
-    @subsection Pt-System-Page-PluginManager Loading Plugins
+    @subsection Pt-System-Page-PluginManager Plugin Managers
     @copydetails Pt::System::PluginManager
 */
