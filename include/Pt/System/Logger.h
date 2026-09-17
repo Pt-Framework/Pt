@@ -89,7 +89,127 @@ namespace System {
     the log level of the record is less severe than the current log level of
     the target, the logger will discard the record. If a target has a log
     level of Info, the logger will reject records with the levels Trace or
-    Debug. See LogRecord and LogMessage for more information. 
+    Debug. See LogRecord and LogMessage for more information.
+
+    Macros are provided to make logging more convenient. The easiest way to 
+    log is to use the logging macros for a static logger instance. A logger 
+    instance can be defined for a compilation unit and then logged to:
+
+    @code
+    PT_LOG_DEFINE("app.module")
+
+    void foobar(int n)
+    {
+        PT_LOG_INFO("foobar was called with: " << n);
+    }
+    @endcode
+
+    The advantage of the macros is that they will expand to nothing if NLOG
+    is defined, so logging support can be conditionally compiled. Macros exist
+    for the various log levels:
+
+    - PT_LOG_FATAL()
+    - PT_LOG_ERROR()
+    - PT_LOG_WARN()
+    - PT_LOG_INFO()
+    - PT_LOG_DEBUG()
+    - PT_LOG_TRACE()
+
+    The disadvantage of these macros is that they do not allow more than one 
+    logger instance per compilation unit and the logger definition can not be 
+    placed in a public header file. A similar set of macros allows to define
+    global logger instances:
+
+
+    @code
+    #include <Pt/System/Logger.h>
+
+    PT_LOG_DEFINE_INSTANCE(mullog, "app.calc.multiply")
+    PT_LOG_DEFINE_INSTANCE(divlog, "app.calc.divide")
+
+    int multiply(int a, int b)
+    {
+        PT_LOG_INFO_TO(mullog, "multipy " << a << " by " << b)
+        return a*b;
+    }
+
+    int divide(int a, int b)
+    {
+        PT_LOG_INFO_TO(divlog, "divide " << a << " by " << b)
+        return a/b;
+    }
+    @endcode
+
+    Again, these logging statements can be conditionally compiled and the logging
+    macros expand to nothing if NLOG is defined. Here is a list of the macros for
+    the various log levels:
+
+    - PT_LOG_FATAL_TO()
+    - PT_LOG_ERROR_TO()
+    - PT_LOG_WARN_TO()
+    - PT_LOG_INFO_TO()
+    - PT_LOG_DEBUG_TO()
+    - PT_LOG_TRACE_TO()
+
+    The alternative to using the macros is to use logger objects directly in the 
+    code. To do so, a Logger object must be instanciated, for example as a class
+    member variable and then messages can be written to it:
+
+    @code
+    #include <Pt/System/Logger.h>
+
+    class Calculator
+    {
+        public:
+            Calculator()
+            : _logger("app.calc")
+            {}
+
+            int multiply(int a, int b)
+            {
+                Pt::System::LogMessage(_logger, Pt::System::Info)
+                    << "multipy " << a << " by " << b << Pt::System::endlog;
+                return a*b;
+            }
+
+        private:
+            Pt::System::Logger _logger;
+    };
+    @endcode
+
+    Note that the code above is somewhat inefficient, because the log record
+    is formatted even if its log level is below the threshold of the logger
+    target. It is more efficient if the log level is checked before the record
+    is formatted:
+
+    @code
+    if( _logger.enabled(Pt::System::Info) )
+    {
+        Pt::System::LogMessage(_logger, Pt::System::Info) << "multipy " << a << " by " << b;
+    }
+    @endcode
+
+    The library offers a set of macros that can be used with logger instances and 
+    implement this check:
+
+    @code
+    PT_LOGGER_BEGIN_INFO(_logger) << "multipy " << a << " by " << b;
+    @endcode
+
+    Here is the list of the available macros:
+
+    - PT_LOGGER_BEGIN_FATAL()
+    - PT_LOGGER_BEGIN_ERROR()
+    - PT_LOGGER_BEGIN_WARN()
+    - PT_LOGGER_BEGIN_INFO()
+    - PT_LOGGER_BEGIN_DEBUG()
+    - PT_LOGGER_BEGIN_TRACE()
+
+    Expansion of these macros is not affected by defining NLOG. These macros can
+    not be used with loggers defined by the previous macros, because construction
+    of global loggers is not trivial when the the static initialization fiasco has
+    to be avoided. Definition of global loggers with the macros does not simply
+    result in global variables.
 
     @ingroup Logging
 */
@@ -166,7 +286,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
             write out the time and the message for each log record:
 
             @code
-            olib::log::Logger::setPattern("%t - %m");
+            Pt::System::Logger::setPattern("%t - %m");
             @endcode
 
             Here is a list of possible specifiers:
@@ -256,8 +376,8 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         LogTarget* _target;
 };
 
-/** @brief Logs records with a logger. 
- 
+/** @brief Logs records with a logger.
+
     Log messages can be used to log records with a specific logger. They
     maintain a log record and a reference to a logger. The log record text
     can be formatted with the stream output operator, just like for the log 
@@ -279,6 +399,11 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
     enabled for the target. A log message can be send mutliple times, so
     formatting has to be done only once and the logging  performance can be
     increased.
+
+    Although it generates more code, it can still make sense to work with log
+    message and log record objects directly. These can improve performance, if
+    the same record has to be logged multiple times, because formatting has to 
+    be done only once:
  
     @code
     Pt::System::Logger logger("app.module");
@@ -291,7 +416,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
     // ... and later the second time
     msg.log();
     @endcode
- 
+
     @ingroup Logging
 */
 class LogMessage : protected Pt::NonCopyable

@@ -41,6 +41,8 @@ namespace System {
 class Symbol;
 
 /** @brief Thrown, when a symbol is not found in a library
+
+    @ingroup Plugins
 */
 class PT_SYSTEM_API SymbolNotFound : public SystemError
 {
@@ -102,6 +104,8 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
     as a pointer to void or a nullptr on failure. Note, that standard C++
     does not allow to cast void pointers to function pointers, but nearly
     all runtimes implement that as an extension.
+
+    @ingroup Plugins
 */
 class PT_SYSTEM_API Library
 {
@@ -200,6 +204,8 @@ class PT_SYSTEM_API Library
 };
 
 /** @brief Symbol resolved from a shared library
+
+    @ingroup Plugins
 */
 class Symbol
 {

@@ -31,19 +31,18 @@
 
     <li> @ref Pt-System-Concurrency-Page </li>
 
-    <li> @ref logging </li>
+    <li> @ref Pt-System-Page-Logging </li>
     <ul>
-        <li> @ref logging_Approach </li>
-        <li> @ref logging_Configuration </li>
-        <li> @ref logging_Usage </li>
+        <li> @ref Pt-System-Page-Logger </li>
+        <li> @ref Pt-System-Page-LogMessage </li>
+        <li> @ref Pt-System-Page-LogRecord </li>
     </ul>
 
-    <li> @ref plugins </li>
+    <li> @ref Pt-System-Page-Plugins </li>
 
     <ul>
-        <li> @ref plugins_Libraries </li>
-        <li> @ref plugins_Implementation </li>
-        <li> @ref plugins_LoadingPlugins </li>
+        <li> @ref Pt-System-Page-Library </li>
+        <li> @ref Pt-System-Page-PluginManager </li>
     </ul>
 
     <li> @ref Pt-System-Tar-Page </li>

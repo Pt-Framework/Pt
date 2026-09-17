@@ -14,15 +14,14 @@ language, stacked jargon, and internal implementation details.
 
 ## Detailed Descriptions
 
-Group and class detailed descriptions are connected prose, in the manner
-of a technical reference chapter. One idea per paragraph. A paragraph may
-use two to four sentences to develop that idea and lead into the next.
-Prefer an extra paragraph over a comma-separated inventory. Do not use
-lists or extra headings inside a detailed description unless the reader
-must choose between alternatives.
-
-Be concise but not terse. Include the context needed to use the API
-correctly without requiring readers to infer contracts from dense prose.
+Group and class detailed descriptions are connected prose, using accessible
+writing style similar to a textbook or a technical reference chapter.
+One idea per paragraph. A paragraph may use multiple sentences to develop
+that idea and lead into the next. Prefer an extra paragraph over a
+comma-separated inventory. Do not use lists or extra headings inside a
+detailed description unless the reader must choose between alternatives.
+Include the context needed to use the API correctly without requiring readers
+to infer contracts from dense prose.
 
 ## Brief Reference Text
 

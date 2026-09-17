@@ -73,18 +73,21 @@ namespace System {
     The same log record can be sent multiple times to a logger or to several
     loggers. This way formatting is only done once and logging performance
     can be increased.
+
+    Similarily, a log record can be sent multiple times to a logger or to several
+    loggers:
  
     @code
     Pt::System::Logger logger1("app.module1");
     Pt::System::Logger logger2("app.module2");
     
     Pt::System::LogRecord record(Pt::System::Info);
-    msg << "pi is: " << 3.1415;
+    record << "pi is: " << 3.1415;
  
     logger1.log(record);
     logger2.log(record);
     @endcode
- 
+
     @ingroup Logging
 */
 class LogRecord : protected Pt::NonCopyable

@@ -42,6 +42,8 @@ namespace Pt {
 namespace System {
 
 /** @brief ID for plugin exports.
+
+    @ingroup Plugins
 */
 class PluginId 
 {
@@ -75,6 +77,8 @@ class PluginId
 };
 
 /** @brief Interface for plugins.
+
+    @ingroup Plugins
 */
 template <typename Iface>
 class Plugin : public PluginId 
@@ -110,6 +114,8 @@ class Plugin : public PluginId
         PT_API Pt::PluginId* PluginList[] = { &plugin0, &plugin1, 0 }; \
     }
     @endcode
+
+    @ingroup Plugins
 */
 template <typename Class, typename Iface>
 class BasicPlugin : public Plugin<Iface> {
@@ -144,6 +150,37 @@ class BasicPlugin : public Plugin<Iface> {
 };
 
 /** @brief Manages loaded plugins.
+
+    To load a plugin in an application the PluginManager class is used. It is a
+    class template that takes the Interface type, here Greeter, as parameter.
+    It will load the plugin, resolve the pluginlist and get the plugins to be
+    used when a class needs to be created. It is very simple to use:
+
+    @code
+    Pt::System::PluginManager<Greeter> manager;
+    manager.loadPlugin("PluginList", "/path/to/plugin.so");
+
+    Greeter* greeter = manager.create("en");
+    if(greeter)
+    {
+        greeter->sayHello();
+        manager.destroy(greeter);
+    }
+    @endcode
+
+    First we need to load the shared library with PluginManager::loadPlugin().
+    Then we can create an instance of a Greeter by a feature string by calling
+    PluginManager::create(). Normally, one would ask the user for a language
+    and then see if we can create a Greeter. if the instance could be created
+    we use it like a normal C++ class, but not delete it directly and instead
+    use the PluginManager::destroy() method. The rationale behind this is that
+    the allocator in a shared library can differ from the allocator in the
+    application and the same code needs to delete it, which created it. The
+    life-time of the created classes is bound to the life-time of the
+    PluginManager. When the PluginManager goes out of scope it will not only
+    destroy all created instances, it will also unload all loaded plugin libraries.
+
+    @ingroup Plugins
 */
 template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
 class PluginManager

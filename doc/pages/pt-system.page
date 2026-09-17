@@ -3,6 +3,8 @@
     This chapter covers:
 
     - @ref Pt-System-Page-FileSystem
+    - @ref Pt-System-Page-Logging
+    - @ref Pt-System-Page-Plugins
 
     @section Pt-System-Page-FileSystem File System Access
     @copydetails FileSystem
@@ -15,4 +17,25 @@
 
     @subsection Pt-System-Page-FileIO File I/O
     @copydetails Pt::System::FileDevice
+
+    @section Pt-System-Page-Logging Logging
+    @copydetails Logging
+
+    @subsection Pt-System-Page-Logger Loggers
+    @copydetails Pt::System::Logger
+
+    @subsection Pt-System-Page-LogMessage Log Messages
+    @copydetails Pt::System::LogMessage
+
+    @subsection Pt-System-Page-LogRecord Log Records
+    @copydetails Pt::System::LogRecord
+
+    @section Pt-System-Page-Plugins Dynamic Libraries and Plugins
+    @copydetails Plugins
+
+    @subsection Pt-System-Page-Library Loading Libraries
+    @copydetails Pt::System::Library
+
+    @subsection Pt-System-Page-PluginManager Loading Plugins
+    @copydetails Pt::System::PluginManager
 */
