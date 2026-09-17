@@ -3,276 +3,312 @@ applyTo: "**/*.{h,md,page}"
 description: "API Documentation"
 ---
 
-# User Documentation
+# Voice
 
-- Write for a reader who uses the public API, not for its implementer.
-- Write concise, neutral reference text in complete sentences. Keep it easy to
-  scan and not too dense: use short paragraphs, separate distinct ideas, and
-  use headings or lists when they improve scanning.
-- Use plain, precise language. Keep real identifiers as names
-  (`--with-prebuilt`, `PREBUILT_ROOT`). Use established API terms such as
-  object, instance, value, parent, owner, lifetime, default, local, inherited,
-  and override only when they describe a public contract.
-- Avoid informal wording, marketing language, stacked jargon, and descriptions
-  of internal implementation details.
+Write for a reader who uses the public API, not for its implementer.
+Use plain, precise language in complete sentences. Keep real identifiers
+as names (`--with-prebuilt`, `PREBUILT_ROOT`). Use one term for one
+concept. Use established API terms such as object, instance, value,
+parent, owner, lifetime, default, local, inherited, and override only
+when they describe a public contract. Avoid informal wording, marketing
+language, stacked jargon, and internal implementation details. Do not
+teach general programming, and do not compare other frameworks.
 
-# API Reference Voice
+# Chapter Versus Brief
 
-- State a class's public role or a function's observable result or effect
-  first.
-- Document behavior, ownership, lifetime, side effects, errors, and ordering
-  only when they are not evident from the declaration. Do not narrate internal
-  execution steps.
-- Use one term consistently for one concept. Explain non-obvious concepts and
-  contracts in the detail text.
-- Be concise but not terse. Include the context needed to use the API correctly
-  without requiring readers to infer contracts from dense prose.
+Group and class detailed descriptions are the chapter. Write them as
+accessible textbook or technical-reference prose, not as a brief and
+not as a longer brief. Member functions, parameters, enumerators, and
+similar declaration comments use the short brief form.
 
-# Documentation Structure
+## Group and Class Detailed Descriptions
 
-Doxygen documentation for classes/functions/groups is the foundation.
-Pages, the Website and agent instructions build on top of it. Pages assemble
-the Doxygen content for human readers, and instructions files index it by
-features for agents.
+Develop the object model across several paragraphs. One contract per
+paragraph. Extra sentences and subordinate clauses only develop that
+contract: what it means, what it is not, what the caller must do. Do not
+introduce a second type, relation, or rule in the same paragraph. A
+paragraph that names two public types, two relations, or two rules is
+too tight: split it.
 
-Organize groups and pages around reader tasks, concepts, public mechanisms,
-and design principles, not inventories of headers or types. Explain shared
-concepts in a group and local concepts in the owning API.
+A paragraph may use several sentences to develop that one contract and
+lead into the next. Prefer three developed paragraphs over one paragraph
+of three new facts. Do not write telegraphic sentences that only name a
+fact. Subordinate clauses are wanted when they clarify the contract. Do
+not use lists or extra headings inside a detailed description unless the
+reader must choose between alternatives.
 
-A group overview may summarize the whole feature area. Keep it to concepts,
-mechanisms, principles, and usage and the context needed to choose and use the
-feature.
+A restatement of members in order is still a brief. Split it until each
+paragraph carries one contract the reader needs: role, ownership,
+lifetime, errors, or ordering. Explain the object model, contracts,
+ownership, lifetime, errors, and ordering. Include the context needed
+to use the API correctly, including an API technique that is part of
+the contract (C linkage of an export, a cast the platform requires,
+matching allocators). A reader should understand the type from this
+chapter without scanning every member.
 
-Groups may form a hierarchy. A subgroup normally declares its parent group
-with `@ingroup <ParentGroup>` in its `@defgroup` block. The parent group
-explains the module-wide model, while each subgroup documents one reader task
-within that model. A subgroup remains a complete group with its own overview
-and API membership.
+Organize groups around reader tasks, concepts, and public mechanisms,
+not inventories of headers or types. The group detailed description is
+the essential chapter: what the feature is for, then the object model
+in reading order. Introduce a type only when the next sentence needs
+it. Do not catalog the group's APIs, write capability inventories, or
+front-load neighboring types. An ordered explanation of the model is
+not a recipe. Do not write cookbook steps ("When you want to ...,
+first ..., then ...").
 
-A page assembles group overviews and class sections into one document.
-There are two normal page shapes:
+Do not split one essay across classes. The group tells the model once.
+Shared concepts and shared contracts belong once, in the group or on
+the first type that owns the mechanism. Local concepts belong on the
+owning API. Later types assume them. If two classes would answer the
+same question, move that sentence to the group.
 
-- A topic page assembles one independent group and its class sections.
-- A module page copies its main group first, then copies its subgroups as
-  sections in the reader-facing order. The subgroups declare the same
-  parent with `@ingroup`; the page defines their reading order.
+Each class answers one question that the group left open. When a page
+copies the class, open with a hinge sentence that states this type's
+role in the already-told model, then develop those remaining questions
+in several paragraphs, in the same textbook voice. Do not answer them
+in one packed paragraph of members. Do not reteach the group or recap
+earlier types. End so the next type on the page is expected. The class
+page must still read as a coherent excerpt.
 
-Section order and titles are the reading order. A module page opens with a
-short table of contents naming the main sections that follow, instead of
-relying on cross-references buried in each group.
+Keep a type to a brief when the group already holds the content or the
+type adds no new question.
 
-Copied class documentation is a chapter of that document, not an appendix
-of type summaries. It must deepen the group overview and still stand
-alone on the class reference page.
+Use `@code` where the example belongs. A group example shows the group
+model, not one type. A type-specific example belongs on the class that
+owns the remaining question. A group needs no `@code` when prose is
+enough or the examples live on the classes. Do not close the group with
+a type-specific example.
 
-# API Documentation
+## Brief Reference Text
 
-- Prefer the shortest documentation that lets a reader use the API correctly.
-  Use a one-line `/** @brief ... */` when the declaration and brief are
-  sufficient. Add detail, `@param`, and `@return` only for non-obvious
-  behavior, contracts, errors, or complex usage. Refer to parameters with
-  `@a <name>`.
-- All API documentation (namespaces, classes, methods, enums, free
-  functions) belongs in the public header files, not in `.cpp` files.
-- Document every public namespace, class, function, enum, and public member
-  using Doxygen.
-- Assign an API to a Doxygen group with `@ingroup` when it has a meaningful
-  role in that group's reader task, concept, or public mechanism. An API may
-  belong to more than one group. Do not assign an API to a group solely to
-  classify it; it may remain outside a feature group.
-- Internal helpers in `.cpp` files may use brief comments but do not need
-  Doxygen markup.
-- Give a class a detailed description when its role, ownership, lifetime,
-  extension point, or relationship to another public type is not self-evident,
-  or when a page copies it as a chapter. State only the contract that the group
-  overview does not already explain.
-- Method briefs state the result or effect first. Use "Returns ..." for
-  queries, "Sets ..." or "Changes ..." for mutators, and "Creates ..." or
-  "Adds ..." for factory and registration operations. Do not begin a brief
-  with "This function" or repeat the method name in prose.
+Method briefs, parameters, and enumerators stay short and scannable.
+Name the result or effect first. Use "Returns ..." for queries,
+"Sets ..." or "Changes ..." for mutators, and "Creates ..." or
+"Adds ..." for factory and registration operations. Do not begin a
+brief with "This function" or repeat the method name in prose.
+
+If a sentence needs more than two commas or an "and" chain of APIs,
+split it. Document behavior, ownership, lifetime, side effects, errors,
+and ordering only when they are not evident from the declaration. Do
+not narrate internal execution steps. Do not walk through other members
+the brief already covers.
+
+# Where Documentation Lives
+
+Doxygen comments in public headers are the foundation. Pages assemble
+them for human readers. Agent instruction files index that foundation.
+The website links to the generated HTML.
+
+- Document every public namespace, class, function, enum, and public
+  member in the public header, not in a `.cpp` file. Internal helpers in
+  `.cpp` files may use brief comments but do not need Doxygen markup.
+- A one-line `/** @brief ... */` is enough for a member when the
+  declaration and brief suffice. Add detail, `@param`, and `@return`
+  only for non-obvious behavior, contracts, errors, or complex usage.
+  Refer to parameters with `@a <name>`.
+- Assign an API to a group with `@ingroup` when it has a meaningful role
+  in that group's reader task. An API may belong to more than one group.
+  Do not assign an API to a group solely to classify it; it may remain
+  outside a feature group.
 - Module-level concepts belong in the `@namespace` comment in the
   module's `Api.h`.
-- Group IDs are derived from the C++ namespace by replacing `::` with `-`:
-  `Ns::` -> `Ns-<Feature>`, `Ns::Sub::` -> `Ns-Sub-<Feature>`.
-- Doxygen Group headers live in the module's public include directory, named
-  `Api-<Feature>.h`, e.g. `include/<Project>/<Module>/Api-<Feature>.h`.
-  Core module groups live in `include/<Project>/Api-<Feature>.h`.
-- Each `Api-<Feature>.h` file normally contains exactly one `@defgroup`
-  block, wrapped in include guards (`#ifndef <PROJECT>[_MODULE]_API_FEATURE_H`).
-- A main module group may centrally declare direct child groups when their
-  order in Doxygen's Modules tree is part of the documentation structure.
-  Declare those child groups in the main group's `Api-<Feature>.h` with
-  `@defgroup` and `@ingroup`, in the required order. Each child
-  `Api-<Feature>.h` then contains exactly one matching `@addtogroup` block
-  with its complete overview. Use this exception only for ordered direct
-  children of a main module group.
-- Class-doc overrides use `Api-<ClassName>.h` in the same include directory
-  as the real header. These provide Doxygen documentation for classes that
-  are typedefs or template specializations where Doxygen generates poor
-  output from the real declaration.
+- Group IDs replace `::` with `-`: `Ns::` -> `Ns-<Feature>`,
+  `Ns::Sub::` -> `Ns-Sub-<Feature>`.
+- Group headers live in the module's public include directory as
+  `Api-<Feature>.h`. Core module groups live in
+  `include/<Project>/Api-<Feature>.h`. Each file contains one `@defgroup`
+  or `@addtogroup` block, wrapped in include guards
+  (`#ifndef <PROJECT>[_MODULE]_API_FEATURE_H`).
+- A main module group may declare ordered child groups with `@defgroup`
+  and `@ingroup` when their order in Doxygen's Modules tree is part of
+  the documentation structure. Each child `Api-<Feature>.h` then uses
+  `@addtogroup`. Use this exception only for ordered direct children of
+  a main module group.
+- For typedefs or template specializations that Doxygen documents poorly,
+  put class documentation in `Api-<ClassName>.h` next to the real header.
+- Pages live in `doc/pages/`. File names are lowercase. A module page ID
+  uses a `-Page` suffix (`Ns-MyModule` -> `Ns-MyModule-Page`). Section
+  anchors use the page ID as prefix (`Ns-MyModule-Page-MyFeature`).
+- One `.instructions.md` file per high-level feature set, covering one or
+  more related groups. These files map features and tasks to the relevant
+  headers and `Api-<Feature>.h` group files. They do not contain
+  documentation or explanations; those belong in headers and group files.
+- Doxygen generates HTML into `doc/website/htdocs/`. Do not edit those
+  files by hand. The website root files in `doc/website/` (`index.html`,
+  `docs.html`) contain hand-written navigation links to that output.
+  `\page <id>` produces `htdocs/<id>.html`. `@defgroup <id>` produces
+  `htdocs/group__<id>.html`. Maintain the matching module box in
+  `doc/website/docs.html` when adding or changing a documented module.
 
-# User Documentation Pages
+# Assembly
 
-- Doxygen Page files live in `doc/pages/` and compose the Doxygen API and group
-  documentation into readable user documentation.
-- Page file names are lowercase, e.g. `ns-myfeature.page`.
-- Page IDs use a `-Page` suffix to distinguish them from group IDs.
-  - Example: group `Ns-MyFeature` → page `Ns-MyFeature-Page`.
-  - Section anchors use the page ID as prefix with hyphens:
-    `Ns-MyFeature-Page-MyFeature`.
-- API topic pages contain no concept, contract, usage rule, or example
-  that belongs in a group or class comment. They assemble that
-  documentation with structural Doxygen markup and `@copydetails`.
-- Use `@copydetails`, not `@copydoc`, to pull in group, class, or function
-  documentation. The page keeps the section structure; the brief is not copied,
-  so the detailed description must open as the chapter.
-- A topic page normally copies one independent group and its public API. A
-  module page copies its main group, its subgroups, and their public API. A
-  Doxygen group may appear on multiple pages; there is no required
-  one-to-one relationship between a page and a group.
-- When assembling pages with @copydetails, ensure sections flow logically
-  like a technical paper or article. Transitional prose and short glue may
-  bridge sections, but the content itself always stays in the copied group
-  or class doxygen comment.
-- Decide whether a feature is an independent topic group or a subgroup of a
-  module's main group by coupling, not by counting files elsewhere in the
-  repository. Make it a subgroup when it shares the module's object model
-  and belongs on the module page; otherwise give it an independent topic
-  page. Do not make it a subgroup merely because its documentation is short.
-- Test coupling with two questions: could the mechanism plausibly ship as
-  a separate, swappable library or extension (own page), and does it need
-  a vocabulary beyond the target page's base types (own page)? A short
-  group is a signal to re-check its placement, never a reason by itself
-  to merge it.
-- A group keeps its `@ingroup` identity no matter which page copies it.
-  Reference it from elsewhere with the section anchor that actually holds
-  it (`@ref <Page>-<Section>`), not a group-only page ID, once it has no
-  page of its own.
-- Give each copied type its own chapter on the appropriate heading level:
-  use `@section` on a topic page, and use `@section` for a module page's
-  subgroups and direct main-group chapters. Use `@subsection` for types
-  below a subgroup section. Name the chapter after the reader-facing role,
-  not after an inventory label (`Widgets`, not `Views and Widget Services`).
-- Put the central type of the object model or reader task where the
-  reading order needs it, even if that is not inheritance or `main()`
-  order.
-- Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
-  contain original prose and follow User Documentation. They must not
-  repeat API reference that already lives in a group, or content that
-  already lives on another page; point to it with `@ref` instead.
-- `@code` for commands, `@verbatim` for directory trees and URLs.
+Each module has one module page. That page sorts the whole module: the
+main group, every subgroup, and the types that deepen those groups.
 
-# Agent Instructions
+A subgroup declares its parent with `@ingroup <ParentGroup>`. The parent
+explains the module-wide model. The subgroup documents one reader task
+within that model. Place every feature of the module on the module page
+as a subgroup or a main-group chapter. Do not give a feature its own
+page because it is short, long, or could ship separately. Decide
+subgroup versus remaining in the parent by coupling: a subgroup needs
+its own reader task or vocabulary. Do not create or merge a subgroup
+merely because its documentation is short.
 
-- One `.instructions.md` file per **high-level feature set** (covering one
-  or more related groups), e.g. `<Module>.instructions.md` covers all
-  `<Module>-*` groups.
-- These files index the Doxygen foundation for agents: they map features
-  and tasks to the relevant headers and `Api-<Feature>.h` group files.
-- They do not contain documentation or explanations — those belong in
-  headers and group files.
+The module page contains no concept, contract, usage rule, or example
+that belongs in a group or class comment. It assembles that
+documentation with `@copydetails`, not `@copydoc`. The page keeps the
+section structure. Copy the main group first, then subgroups, in reader
+order. The page defines that order. Open with a short table of contents
+naming the main sections that follow. Put the central type of the object
+model or reader task where the reading order needs it, even if that is
+not inheritance or `main()` order.
 
-# Website
+Copy a type with `@copydetails` when it deepens the group model and its
+detailed description can open as the next chapter beat. Prefer that
+continuation. Do not force it. If the class text would reteach the
+group, need glue of more than one thought, or cannot stand as the next
+beat, keep the class short and keep the content in the group. A brief
+is enough when the group already holds the content or the type adds no
+new question; do not copy that type onto the page. A short glue
+sentence may bridge sections.
 
-- Doxygen generates HTML into `doc/website/htdocs/`. Do not edit those files
-  by hand.
-- The website root files in `doc/website/` (e.g. `index.html`, `docs.html`)
-  contain hand-written navigation links to Doxygen output in `doc/website/*.html`.
-  - Doxygen `\page <id>` produces `htdocs/<id>.html`.
-  - Doxygen `@defgroup <id>` produces `htdocs/group__<id>.html`.
-- Maintain the matching module box in `doc/website/docs.html` when adding or
-  changing a documented module.
+A group keeps its `@ingroup` identity on the module page. Reference it
+from elsewhere with the section anchor that holds it
+(`@ref <Page>-<Section>`), not a group-only page ID.
 
-# Doxygen Style
+Use `@section` for subgroups and direct main-group chapters. Use
+`@subsection` for types below a subgroup. Name the chapter after the
+reader-facing role (`Widgets`, not `Views and Widget Services`).
 
-- ALWAYS use `/** ... */` block comments for namespaces, classes, member
-  functions and standalone functions.
-- Place the closing `*/` of block comments on the next line.
-- Do not use leading asterisks (*) on intermediate lines inside block comments.
+Write in this order: outline the group as the essential chapter and the
+page as questions; copy a type only when its detailed description
+continues that chapter; otherwise keep the class short and leave the
+content in the group; read the assembled page and cut repeats.
+
+Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
+contain original prose and follow the same voice. They must not repeat
+API reference that already lives in a group, or content that already
+lives on another page; point to it with `@ref` instead. Use `@code` for
+commands and `@verbatim` for directory trees and URLs.
+
+# Doxygen Markup
+
+- Use `/** ... */` block comments. Place the closing `*/` on the next
+  line. Do not use leading asterisks on intermediate lines.
 - Do not document forward declarations.
-- Use `@brief` for the one-line summary. Place it right after `/**`.
-- Place the detailed description after a blank line following `@brief`,
-  indented to align flush with the `@brief` command (4 spaces from `/**`).
-- If Doxygen commands (e.g. `@ingroup`, `@param`, `@return`) follow the
-  detailed description, separate them with a blank line.
-- Use `@related <ClassName>` to associate operators and free functions with
-  a class when appropriate.
+- Place `@brief` on the first line. After a blank line, indent the
+  detailed description to align with `@brief` (4 spaces from `/**`).
+- Separate later Doxygen commands (`@ingroup`, `@param`, `@return`) from
+  the detailed description with a blank line.
+- Use `@related <ClassName>` for operators and free functions when
+  appropriate.
 - Escape class names, namespace-qualified names, and function names in
-  prose with `%` unless an explicit Doxygen link is desired.
-  - Examples: `%MyClass`, `%MyNamespace::MyModule::MyClass`, `%MyClass::begin()`
-- Do not use structural keywords like `@class` when the context is already
-  unambiguously clear to Doxygen.
-- Each `@defgroup` block contains:
-  - `@brief` one-line summary
-  - A complete overview of the reader task, concepts, public mechanisms,
-    principles, usage rules, and design guidance (see Documentation
-    Structure)
-  - `@code` / `@endcode` example(s) showing the canonical usage pattern
+  prose with `%` unless an explicit Doxygen link is desired
+  (`%MyClass`, `%MyClass::begin()`).
+- Do not use `@class` when the context is already clear to Doxygen.
 
-# Header Example
+# Examples
+
+Dense inventory, do not write:
+
+    A widget supplies identity, geometry, visibility, scaling, event
+    dispatch, and pointer capture. Construct widgets only after an
+    Application exists.
+
+Packed member tour, do not write:
+
+    Application is the console process root. There is one instance. It
+    uses an EventLoop. run() enters that loop. exit() leaves it. loop()
+    returns the loop.
+
+Too tight, do not write:
+
+    Every visual Forms object is a Widget. Application is not. A widget
+    lives in a parent chain that reaches a Screen; that chain is a
+    runtime relationship, not ownership. Geometry is logical: position
+    is in parent coordinates, size is local.
+
+Connected prose:
+
+    Every visual Forms object is a Widget. Application is not a widget,
+    even though it creates the runtime those widgets use.
+
+    A widget lives in a parent chain that reaches a Screen. That chain
+    is a runtime relationship, not ownership, so destroying a parent
+    does not destroy its children.
+
+    Geometry is logical rather than device pixels. Position is measured
+    in the parent, which means a widget keeps the same local size when
+    the parent moves it.
+
+    Application is the console process root. There is one instance per
+    process, which is the instance that widgets and windows already
+    assume when they are constructed.
+
+    The default constructors create a MainLoop. When the caller passes
+    a loop instead, that loop stays with the caller, who remains
+    responsible for its lifetime.
 
 ```cpp
+/** @brief Runtime root of a Forms user interface.
 
-namespace Ns {
+    %MyClass is the process root in the model above. It is not a
+    %Widget, and it does not stand in the visual parent chain.
 
-/** @brief Brief description of the class.
+    The code that creates windows and controls keeps them alive.
+    Attaching them to the hierarchy does not transfer ownership, so
+    destroying the application does not destroy those objects.
 
-    Detailed description of the %MyClass class.
+    The default constructors create a %MainLoop. When the caller
+    passes a loop instead, that loop remains owned by the caller.
+
 
     @ingroup Ns-MyFeature
 */
 class MyClass
 {
   public:
-    /** @brief Constructor.
-    */
-    MyClass();
-
-    /** @brief No copy constructor.
-    */
-    MyClass(const MyClass&) = delete;
-
-    /** @brief Destructor.
-    */
-    virtual ~MyClass();
-
-    /** @brief Multiplies @a a and @a b and returns the result.
-    */
-    int multiply(int a, int b);
-
     /** @brief Divides @a value by @a divisor.
 
-      @throw %std::invalid_argument if @a divisor is 0.
+        @throw %std::invalid_argument if @a divisor is 0.
     */
     float divide(float value, float divisor);
 };
-
-}
 ```
-
-# Group Example
 
 ```cpp
 /** @defgroup Ns-MyFeature Feature Name
 
     @brief Brief description of the feature group.
 
-  Complete overview of the feature area, its public mechanisms, usage
-  rules, and design guidance.
+    A Forms application constructs its visual hierarchy, shows its
+    windows, and runs the event loop.
+
+    %Application is the runtime root. Attaching a window or control
+    does not transfer ownership. The code that creates an object keeps
+    it alive while the hierarchy uses it.
+
+    @code
+    Pt::Forms::Application application(argc, argv);
+    Pt::Forms::Window window;
+    window.show();
+    application.run();
+    @endcode
 */
 ```
 
-# Page Example
-
 ```
-/** \page Ns-MyFeature-Page Feature Name
+/** \page Ns-MyModule-Page Module Name
 
+    @copydetails Ns-MyModule
+
+    This chapter covers:
+
+    - @ref Ns-MyModule-Page-MyFeature
+
+    @section Ns-MyModule-Page-MyFeature Feature Name
     @copydetails Ns-MyFeature
 
-    @section Ns-MyFeature-Page-IMyInterface IMyInterface
-    @copydetails Ns::IMyInterface
-
-    @section Ns-MyFeature-Page-IMyProvider IMyProvider
-    @copydetails Ns::IMyProvider
+    @subsection Ns-MyModule-Page-MyClass MyClass
+    @copydetails Ns::MyClass
 */
 ```

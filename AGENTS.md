@@ -54,7 +54,7 @@ content is in context without having read it.
   `.github/instructions/coding.instructions.md`
 
 - For Doxygen comments, public headers, API docs read:
-  `.github/instructions/documenting2.instructions.md`
+  `.github/instructions/documenting.instructions.md`
 
 - For Build system & setup, building, build configuration, adding source files read:
   `.github/instructions/building.instructions.md`
