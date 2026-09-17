@@ -38,35 +38,55 @@ namespace Net {
 
 class EndpointImpl;
 
-/** @brief Represents a Network Host
-    
-    Endpoints are constructed from a hostname and service name such as
-    an IP port number.
- */
+/** @brief Host and service address.
+
+    %Endpoint is the address value in the model above. It names a host
+    and a service port. It does not open a socket.
+
+    A host name and a port number construct it. The host may be a DNS
+    name or a numeric IPv4 or IPv6 address.
+
+    Factory functions build the IPv4 and IPv6 any and loopback
+    addresses, and the IPv4 broadcast address, for a port. Those
+    addresses do not perform name resolution.
+
+    %toString() formats the endpoint for display.
+
+    %clear() resets it to an empty address.
+
+    An endpoint is a copyable value.
+
+    @code
+    Pt::Net::Endpoint host("example.com", 80);
+    Pt::Net::Endpoint any = Pt::Net::Endpoint::ip4Any(8080);
+    @endcode
+
+    @ingroup Pt-Net
+*/
 class PT_NET_API Endpoint
 {
     public:
-        /** @brief Default contructor.
+        /** @brief Creates an empty endpoint.
         */
         Endpoint();
 
-        /** @brief Contruct from hostname and port number.
+        /** @brief Creates an endpoint for @a host and @a port.
         */
         Endpoint(const std::string& host, unsigned short port);
 
-        /** @brief Contruct from hostname and port number.
+        /** @brief Creates an endpoint for @a host and @a port.
         */
         Endpoint(const char* host, unsigned short port);
 
-        /** @brief Copy contructor.
+        /** @brief Copies the endpoint.
         */
         Endpoint(const Endpoint& src);
 
-        /** @brief Destructor.
+        /** @brief Destroys the endpoint.
         */
         ~Endpoint();
 
-        /** @brief Assignment operator.
+        /** @brief Assigns the endpoint.
         */
         Endpoint& operator=(const Endpoint& src);
 
@@ -74,27 +94,27 @@ class PT_NET_API Endpoint
         */
         void clear();
 
-        /** @brief Returns the endpoint a s a string.
+        /** @brief Returns the endpoint as a string.
         */
         std::string toString() const;
 
-        /** @brief Constructs the special IP4 any address.
+        /** @brief Creates the IPv4 any-address for @a port.
         */
         static Endpoint ip4Any(unsigned short port);
 
-        /** @brief Constructs the special IP4 loopback address.
+        /** @brief Creates the IPv4 loopback address for @a port.
         */
         static Endpoint ip4Loopback(unsigned short port);
 
-        /** @brief Constructs the special IP4 broadcast address.
+        /** @brief Creates the IPv4 broadcast address for @a port.
         */
         static Endpoint ip4Broadcast(unsigned short port);
 
-        /** @brief Constructs the special IP6 any address.
+        /** @brief Creates the IPv6 any-address for @a port.
         */
         static Endpoint ip6Any(unsigned short port);
 
-        /** @brief Constructs the special  IP6 loopback address.
+        /** @brief Creates the IPv6 loopback address for @a port.
         */
         static Endpoint ip6Loopback(unsigned short port);
 

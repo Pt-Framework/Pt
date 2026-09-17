@@ -36,6 +36,17 @@
     </ul>
 </ul>
 
+@section pt_net Networking
+
+<ul>
+    <li> @ref Pt-Net-Page </li>
+    <ul>
+        <li> @ref Pt-Net-Page-Endpoint </li>
+        <li> @ref Pt-Net-Page-Tcp </li>
+        <li> @ref Pt-Net-Page-Udp </li>
+    </ul>
+</ul>
+
 @section pt_gfx Graphics
 
 <ul>

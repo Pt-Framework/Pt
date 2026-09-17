@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,54 +15,39 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_NET_API_H
-#define PT_NET_API_H
+#ifndef PT_NET_API_UDP_H
+#define PT_NET_API_UDP_H
 
-#include <Pt/Api.h>
+/** @addtogroup Pt-Net-Udp
 
-#define PT_NET_VERSION_MAJOR PT_VERSION_MAJOR
-#define PT_NET_VERSION_MINOR PT_VERSION_MINOR
-#define PT_NET_VERSION_REVISION PT_VERSION_REVISION
-#define PT_NET_VERSION_PRERELEASE PT_VERSION_PRERELEASE
- 
-#if defined(PT_NET_API_EXPORT)
-#    define PT_NET_API PT_EXPORT
-#  else
-#    define PT_NET_API PT_IMPORT
-#  endif
+    @brief Bind, send and receive UDP datagrams.
 
-namespace Pt {
+    A UDP socket sends and receives datagrams. The same type covers
+    unicast, broadcast and multicast.
 
-/** @namespace Pt::Net
-    @brief TCP and UDP network sockets.
+    Bind sets the local endpoint that receives datagrams.
 
-    This module provides portable TCP and UDP sockets for IPv4 and IPv6,
-    including unicast, broadcast and multicast UDP.
+    Connect associates a remote peer. Writes go to that peer. Reads
+    come from it.
+
+    A send destination can be set without associating the socket.
+    Broadcast and multicast sends use that path.
+
+    A socket joins a multicast group to receive that group's datagrams.
+    Bind first.
+
+    Option values enable broadcast and set the hop limit.
 */
-namespace Net {
 
-class AddressInUse;
-class Endpoint;
-class TcpServer;
-class TcpServerOptions;
-class TcpSocket;
-class TcpSocketOptions;
-class UdpSocket;
-class UdpSocketOptions;
-
-} // namespace Net
-
-} // namespace Pt
- 
-#endif // PT_NET_API_H
+#endif

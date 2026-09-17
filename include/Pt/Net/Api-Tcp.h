@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,54 +15,38 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_NET_API_H
-#define PT_NET_API_H
+#ifndef PT_NET_API_TCP_H
+#define PT_NET_API_TCP_H
 
-#include <Pt/Api.h>
+/** @addtogroup Pt-Net-Tcp
 
-#define PT_NET_VERSION_MAJOR PT_VERSION_MAJOR
-#define PT_NET_VERSION_MINOR PT_VERSION_MINOR
-#define PT_NET_VERSION_REVISION PT_VERSION_REVISION
-#define PT_NET_VERSION_PRERELEASE PT_VERSION_PRERELEASE
- 
-#if defined(PT_NET_API_EXPORT)
-#    define PT_NET_API PT_EXPORT
-#  else
-#    define PT_NET_API PT_IMPORT
-#  endif
+    @brief Listen, accept and connect TCP streams.
 
-namespace Pt {
+    A TCP server listens on a local endpoint. It waits for peers and
+    reports each pending connection.
 
-/** @namespace Pt::Net
-    @brief TCP and UDP network sockets.
+    A TCP socket is the connected byte stream. Accepting a pending
+    connection from the server creates that stream.
 
-    This module provides portable TCP and UDP sockets for IPv4 and IPv6,
-    including unicast, broadcast and multicast UDP.
+    Connecting to a remote endpoint creates the stream from the client
+    side.
+
+    After the socket is connected, read and write are the inherited
+    I/O-device operations.
+
+    Listen and connection settings live in option values. Those values
+    do not open a socket.
 */
-namespace Net {
 
-class AddressInUse;
-class Endpoint;
-class TcpServer;
-class TcpServerOptions;
-class TcpSocket;
-class TcpSocketOptions;
-class UdpSocket;
-class UdpSocketOptions;
-
-} // namespace Net
-
-} // namespace Pt
- 
-#endif // PT_NET_API_H
+#endif

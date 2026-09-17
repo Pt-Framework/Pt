@@ -37,20 +37,22 @@ namespace Pt {
 
 namespace Net {
 
-/** @brief Network address is already used.
- */
+/** @brief Local network address is already in use.
+
+    @ingroup Pt-Net
+*/
 class PT_NET_API AddressInUse : public System::AccessFailed
 {
     public:
-        /** @brief Contruct with endpoint string.
+        /** @brief Creates the exception for @a endpoint.
         */
         AddressInUse(const std::string& endpoint);
 
-        /** @brief Contruct with endpoint string.
+        /** @brief Creates the exception for @a endpoint.
         */
         AddressInUse(const char* endpoint);
 
-        /** @brief Destructor.
+        /** @brief Destroys the exception.
         */
         ~AddressInUse() throw()
         {}

@@ -43,26 +43,38 @@ namespace Net {
 // SO_KEEPALIVE
 // SO_SNDBUF 
 
-/** @brief TCP socket options.
- */
+/** @brief TCP socket connection options.
+
+    @ingroup Pt-Net-Tcp
+*/
 class PT_NET_API TcpSocketOptions
 {
     public:
-        //! @brief Default Constructor.
+        /** @brief Creates default options.
+        */
         TcpSocketOptions();
 
-        //! @brief Copy Constructor.
+        /** @brief Copies the options.
+        */
         TcpSocketOptions(const TcpSocketOptions& opts);
 
-        //! @brief Destructor.
+        /** @brief Destroys the options.
+        */
         ~TcpSocketOptions();
 
-        //! @brief Assignment operator.
+        /** @brief Assigns the options.
+        */
         TcpSocketOptions& operator=(const TcpSocketOptions& opts);
 
+        /** @brief Returns the keep-alive interval in seconds, or a negative value if unset.
+        */
         int keepAlive() const
         { return _keepAlive.i; }
 
+        /** @brief Sets the keep-alive interval in seconds.
+
+            A negative value leaves keep-alive unset.
+        */
         void setKeepAlive(int n)
         { _keepAlive.i = n; }
 
@@ -75,83 +87,124 @@ class PT_NET_API TcpSocketOptions
 };
 
 
-/** @brief TCP client socket.
- */
+/** @brief Connected TCP byte stream.
+
+    %TcpSocket is the connected stream in the TCP model above.
+
+    %connect() reaches a remote endpoint and makes this socket the
+    client side of the stream.
+
+    %accept() takes a pending connection from a listening server and
+    makes this socket the accepted side.
+
+    %beginConnect() starts an asynchronous connect. The socket must be
+    attached to an event loop.
+
+    connected is emitted when the attempt finishes. %endConnect()
+    completes it. If the host is not reachable, the operation throws
+    %AccessFailed.
+
+    %isConnected() reports whether the stream is up.
+
+    %localEndpoint() writes the local side of the connection.
+
+    %remoteEndpoint() writes the remote side.
+
+    @code
+    void onConnected(Pt::Net::TcpSocket& socket)
+    {
+        socket.endConnect();
+        socket.beginWrite("Hello", 5);
+    }
+
+    Pt::System::MainLoop loop;
+    Pt::Net::TcpSocket socket;
+    socket.setActive(loop);
+    socket.connected() += Pt::slot(onConnected);
+    socket.beginConnect(Pt::Net::Endpoint("127.0.0.1", 9000));
+    loop.run();
+    @endcode
+
+    @ingroup Pt-Net-Tcp
+*/
 class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
-        //! @brief Default Constructor.
+        /** @brief Creates a closed socket.
+        */
         TcpSocket();
 
-        //! @brief Construct with event loop.
+        /** @brief Creates a socket and attaches it to @a loop.
+        */
         explicit TcpSocket(System::EventLoop& loop);
 
-        //! @brief Accepts a connection.
+        /** @brief Creates a socket and accepts a connection from @a server.
+        */
         explicit TcpSocket(TcpServer& server);
 
-        /** @brief Connects to a host.
-            
+        /** @brief Creates a socket and connects to @a ep.
+
             @throw System::AccessFailed if the host is not reachable
         */
         explicit TcpSocket(const Endpoint& ep);
 
-        //! @brief Destructor.
+        /** @brief Destroys the socket.
+        */
         ~TcpSocket();
 
-        //! @brief Accepts a connection.
+        /** @brief Accepts a connection from @a server.
+        */
         void accept(TcpServer& server);
 
-        //! @brief Accepts a connection.
+        /** @brief Accepts a connection from @a server with @a o.
+        */
         void accept(TcpServer& server, const TcpSocketOptions& o);
 
-        /** @brief Connect to a host.
-            
+        /** @brief Connects to @a ep.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void connect(const Endpoint& ep);
         
-        /** @brief Connect to a host.
-            
+        /** @brief Connects to @a ep with @a o.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void connect(const Endpoint& ep, const TcpSocketOptions& o);
 
-        /** @brief Begin connecting to a host.
-            
+        /** @brief Begins connecting to @a ep.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void beginConnect(const Endpoint& ep);
 
-        /** @brief Begin connecting to a host.
-            
+        /** @brief Begins connecting to @a ep with @a o.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void beginConnect(const Endpoint& ep, const TcpSocketOptions& o);
 
         /** @brief Ends connecting to a host.
-            
+
             @throw System::AccessFailed if the host is not reachable
         */
         void endConnect();
 
-        /** @brief Notifies that the socket was connected.
-            
-            This signal is send when the %TcpSocket is monitored
-            in an EventLoop and a connection was established.
+        /** @brief Returns the signal that the socket was connected.
         */
         Signal<TcpSocket&>& connected()
         { return _connected; }
 
-        /** @brief Returns true if connected.
+        /** @brief Returns true if the socket is connected.
         */
         bool isConnected() const
         { return _isConnected; }
 
-        /** @brief Gets the local endpoint.
+        /** @brief Writes the local endpoint into @a ep.
         */
         void localEndpoint(Endpoint& ep) const;
 
-        /** @brief Gets the remote endpoint.
+        /** @brief Writes the remote endpoint into @a ep.
         */
         void remoteEndpoint(Endpoint& ep) const;
 

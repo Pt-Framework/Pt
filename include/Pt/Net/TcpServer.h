@@ -38,37 +38,35 @@ namespace Pt {
 
 namespace Net {
 
-/** @brief TCP server options.
- */
+/** @brief TCP server listen options.
+
+    @ingroup Pt-Net-Tcp
+*/
 class PT_NET_API TcpServerOptions
 {
     public:
-        /** @brief Construct with accept backlog size.
+        /** @brief Creates options with accept backlog @a backlog.
         */
         explicit TcpServerOptions(int backlog = 5);
 
-        /** @brief Copy constructor.
+        /** @brief Copies the options.
         */
         TcpServerOptions(const TcpServerOptions& opts);
 
-        /** @brief Destructor.
+        /** @brief Destroys the options.
         */
         ~TcpServerOptions();
 
-        /** @brief Assignment operator.
+        /** @brief Assigns the options.
         */
         TcpServerOptions& operator=(const TcpServerOptions& opts);
 
-        /** @brief Returns the max time for data to arrive.
-
-            Returns -1, if the option was not set
+        /** @brief Returns the deferred-accept timeout in seconds, or -1 if unset.
         */
         int acceptDeferred() const
         { return _deferAccept; }
         
-        /** @brief Defer accept until data arrives.
-
-            Wait for at most @a n seconds for data to arrive.
+        /** @brief Sets deferred accept to wait at most @a n seconds for data.
         */  
         void setDeferAccept(int n)
         { _deferAccept = n; }
@@ -94,47 +92,87 @@ class PT_NET_API TcpServerOptions
 
 class TcpServerImpl;
 
-/** @brief TCP server socket.
- */
+/** @brief Listens for TCP connections.
+
+    %TcpServer is the listening side of the TCP model above.
+
+    %listen() binds a local endpoint and waits for peers. If that
+    address is already occupied, the call throws %AddressInUse.
+
+    %beginAccept() waits for the next pending connection. The server
+    must be attached to an event loop.
+
+    connectionPending is emitted when a peer is ready. There is no
+    matching end-accept.
+
+    A %TcpSocket takes the connection with accept().
+
+    %close() stops listening and accepting.
+
+    The caller owns the server. Attaching it to a loop does not
+    transfer ownership.
+
+    @code
+    class Acceptor : public Pt::Connectable
+    {
+        public:
+            explicit Acceptor(Pt::Net::TcpServer& server)
+            : _server(&server)
+            {
+                _server->connectionPending() += Pt::slot(*this, &Acceptor::onPending);
+            }
+
+            void onPending(Pt::Net::TcpServer& server)
+            {
+                _peer.accept(server);
+            }
+
+        private:
+            Pt::Net::TcpServer* _server;
+            Pt::Net::TcpSocket _peer;
+    };
+    @endcode
+
+    @ingroup Pt-Net-Tcp
+*/
 class PT_NET_API TcpServer : public System::Selectable
 {
     public:
-        /** @brief Default Constructor.
+        /** @brief Creates a closed server.
         */
         TcpServer();
 
-        /** @brief Construct with event loop.
+        /** @brief Creates a server and attaches it to @a loop.
         */
         explicit TcpServer(System::EventLoop& loop);
         
-        /** @brief Creates a server socket and listens on an address
+        /** @brief Creates a server and listens on @a ep.
         */
         explicit TcpServer(const Endpoint& ep);
 
-        /** @brief Destructor.
+        /** @brief Destroys the server.
         */
         ~TcpServer();
 
-        /** @brief Listen at local endpoint.
+        /** @brief Listens on local endpoint @a ep.
         */
         void listen(const Endpoint& ep);
         
-        /** @brief Listen at local endpoint.
+        /** @brief Listens on @a ep with @a options.
         */
         void listen(const Endpoint& ep, const TcpServerOptions& options);
 
-        /** @brief Begin accepting a connection.
+        /** @brief Begins accepting a connection.
+
+            The server must be attached to an event loop.
         */
         void beginAccept();
         
-        /** @brief Close the server and stop listening and accepting.
+        /** @brief Closes the server and stops listening.
         */
         void close();
 
-        /** @brief Notifies that a connection was accepted.
-            
-            This signal is send when the %TcpServer is monitored
-            in an EventLoop and a connection was accepted.
+        /** @brief Returns the signal that a connection is pending.
         */
         Signal<TcpServer&>& connectionPending()
         { return _connectionPending; }

@@ -39,24 +39,26 @@ namespace Pt {
 
 namespace Net {
 
-/** @brief UDP socket options.
- */
+/** @brief UDP socket bind and send options.
+
+    @ingroup Pt-Net-Udp
+*/
 class PT_NET_API UdpSocketOptions
 {
     public:
-        /** @brief Default constructor.
+        /** @brief Creates default options.
         */
         UdpSocketOptions();
 
-        /** @brief Copy constructor.
+        /** @brief Copies the options.
         */
         UdpSocketOptions(const UdpSocketOptions& opts);
 
-        /** @brief Destructor.
+        /** @brief Destroys the options.
         */
         ~UdpSocketOptions();
 
-        /** @brief Assignment operator.
+        /** @brief Assigns the options.
         */
         UdpSocketOptions& operator=(const UdpSocketOptions& opts);
                 
@@ -65,7 +67,7 @@ class PT_NET_API UdpSocketOptions
         bool isBroadcast() const
         { return (_flags & Broadcast) != 0; }
         
-        /** @brief enables UDP broadcast.
+        /** @brief Enables UDP broadcast.
         */
         void setBroadcast()
         { _flags |= Broadcast; }
@@ -95,30 +97,78 @@ class PT_NET_API UdpSocketOptions
 };
 
 
-/** @brief UDP server and client socket.
- */
+/** @brief UDP datagram socket.
+
+    %UdpSocket is the datagram socket in the model above.
+
+    %bind() sets the local endpoint that receives datagrams.
+
+    %beginBind() starts that bind on an attached event loop.
+
+    bound() is emitted when it finishes. %endBind() completes it.
+
+    %connect() associates a remote peer so writes go there and reads
+    come from it.
+
+    %setTarget() sets a send destination without associating the
+    socket. Broadcast and multicast sends use that path.
+
+    %joinMulticastGroup() joins a multicast group. Bind first.
+
+    @code
+    char buffer[256];
+
+    void onBound(Pt::Net::UdpSocket& socket)
+    {
+        socket.endBind();
+        socket.beginRead(buffer, sizeof(buffer));
+    }
+
+    void onConnected(Pt::Net::UdpSocket& socket)
+    {
+        socket.endConnect();
+        socket.beginWrite("Hello", 5);
+    }
+
+    Pt::System::MainLoop loop;
+
+    Pt::Net::UdpSocket receiver;
+    receiver.setActive(loop);
+    receiver.bound() += Pt::slot(onBound);
+    receiver.beginBind(Pt::Net::Endpoint::ip4Any(8000));
+
+    Pt::Net::UdpSocket sender;
+    sender.setActive(loop);
+    sender.connected() += Pt::slot(onConnected);
+    sender.beginConnect(Pt::Net::Endpoint::ip4Loopback(8000));
+
+    loop.run();
+    @endcode
+
+    @ingroup Pt-Net-Udp
+*/
 class PT_NET_API UdpSocket : public System::IODevice
 {
     public:
-        /** @brief Default constructor.
+        /** @brief Creates a closed socket.
         */
         UdpSocket();
 
-        /** @brief Construct with event loop.
+        /** @brief Creates a socket and attaches it to @a loop.
         */
         explicit UdpSocket(System::EventLoop& loop);
 
-        /** @brief Destructor.
+        /** @brief Destroys the socket.
         */
         ~UdpSocket();
         
-        /** @brief Bind to local endpoint.
+        /** @brief Binds to local endpoint @a ep.
 
             @throw System::AccessFailed if the host is not reachable
         */
         void bind(const Endpoint& ep);
 
-        /** @brief Bind to local endpoint.
+        /** @brief Binds to @a ep with @a o.
 
             @throw System::AccessFailed if the host is not reachable
         */
@@ -126,18 +176,15 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         //void bindMulticast(const Endpoint& e);
 
-        /** @brief Begin bind to local endpoint.
+        /** @brief Begins binding to @a ep.
 
-            Begins binding to the Endpoint @a ep. The %UdpSocket must be
-            attached to a event loop with setActive(). Once the binding has
-            completed, the signal bound() will be sent. In response, the
-            method endBind() has to be called to finish the bind operation.
+            The socket must be attached to an event loop.
 
             @throw System::AccessFailed if the host is not reachable
         */
         bool beginBind(const Endpoint& ep);
 
-        /** @brief Begin bind to local endpoint.
+        /** @brief Begins binding to @a ep with @a o.
 
             @throw System::AccessFailed if the host is not reachable
         */
@@ -145,89 +192,83 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         //bool beginBindMulticast(const Endpoint& iface, const UdpSocketOptions& o);
 
-        /** @brief end bind to local endpoint.
+        /** @brief Ends binding to a local endpoint.
 
             @throw System::AccessFailed if the host is not reachable
         */
         void endBind();
 
-        /** @brief Notifies that the socket was bound.
-            
-            This signal is send when the %UdpSocket is monitored
-            in an EventLoop and was bound to a local endpoint.
+        /** @brief Returns the signal that the socket was bound.
         */
         Signal<UdpSocket&>& bound()
         { return _bound; }
 
-        /** @brief Returns true if bound.
+        /** @brief Returns true if the socket is bound.
         */
         bool isBound() const;
 
-        /** @brief Connect to an endpoint.
-            
+        /** @brief Connects to @a ep.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void connect(const Endpoint& ep);
 
-        /** @brief Connect to an endpoint.
-            
+        /** @brief Connects to @a ep with @a o.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void connect(const Endpoint& ep, const UdpSocketOptions& o);
 
-        /** @brief Set target endpoint.
-            
+        /** @brief Sets the send target to @a ep.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void setTarget(const Endpoint& ep);
 
-        /** @brief Set target endpoint.
-            
+        /** @brief Sets the send target to @a ep with @a o.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void setTarget(const Endpoint& ep, const UdpSocketOptions& o);
 
-        /** @brief Begin connect to an endpoint.
-            
+        /** @brief Begins connecting to @a ep.
+
             @throw System::AccessFailed if the host is not reachable
         */
         bool beginConnect(const Endpoint& ep);
 
-        /** @brief Begin connect to an endpoint.
-            
+        /** @brief Begins connecting to @a ep with @a o.
+
             @throw System::AccessFailed if the host is not reachable
         */
         bool beginConnect(const Endpoint& ep, const UdpSocketOptions& o);
 
-        /** @brief End connect to an endpoint.
-            
+        /** @brief Ends connecting to an endpoint.
+
             @throw System::AccessFailed if the host is not reachable
         */
         void endConnect();
 
-        /** @brief Notifies that the socket was connected.
-            
-            This signal is send when the %UdpSocket is monitored
-            in an EventLoop and a connection was established.
+        /** @brief Returns the signal that the socket was connected.
         */
         Signal<UdpSocket&>& connected()
         { return _connected; }
 
-        /** @brief Returns true if connected.
+        /** @brief Returns true if the socket is connected.
         */
         bool isConnected() const;
 
-        /** @brief Joins a multicast group.
+        /** @brief Joins multicast group @a ipaddr.
         */
         void joinMulticastGroup(const std::string& ipaddr);
 
         //void dropMulticastGroup(const std::string& ipaddr);
 
-        /** @brief Gets the local endpoint.
+        /** @brief Writes the local endpoint into @a ep.
         */
         void localEndpoint(Endpoint& ep) const;
 
-        /** @brief Gets the remote endpoint.
+        /** @brief Returns the remote endpoint.
         */
         const Endpoint& remoteEndpoint() const;
 
