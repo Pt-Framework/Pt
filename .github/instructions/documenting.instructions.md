@@ -132,6 +132,9 @@ The website links to the generated HTML.
   more related groups. These files map features and tasks to the relevant
   headers and `Api-<Feature>.h` group files. They do not contain
   documentation or explanations; those belong in headers and group files.
+
+## Website
+
 - Doxygen generates HTML into `doc/website/htdocs/`. Do not edit those
   files by hand. The website root files in `doc/website/` (`index.html`,
   `docs.html`) contain hand-written navigation links to that output.
