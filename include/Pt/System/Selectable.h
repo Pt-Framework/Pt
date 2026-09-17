@@ -39,7 +39,22 @@ namespace System {
 class EventLoop;
 class SelectableList;
 
-/** @brief Dispatches operations through an event loop.
+/** @brief Operation that runs through an event loop.
+
+    %Selectable is the attachment between an asynchronous operation
+    and an %EventLoop. setActive() attaches it. The loop then monitors
+    the operation. detach() removes it and cancels work that is still
+    running. cancel() cancels without detaching. parent() is the loop.
+
+    run() executes the operation when the loop has marked it ready.
+    post() asks the loop to run it from any thread. %IODevice and
+    %IONotifier are selectables. %Timer is not; it registers with the
+    loop on its own.
+
+    The loop does not own the selectable. The caller keeps it alive
+    while it is attached.
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {

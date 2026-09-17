@@ -31,14 +31,30 @@
 
 /** @defgroup Pt-System System Module
 
-    @brief Files, logging, shared libraries and plugins.
+    @brief Portable operating-system layer for a process.
 
     This module is the portable operating-system layer for a process.
-    This chapter covers the file system, logging, shared libraries, and
-    plugins.
+    This chapter covers the file system, threads and processes, event
+    loops, I/O devices, logging, shared libraries, plugins, tar archives,
+    and the clock.
 */
 
 /** @defgroup Pt-System-FileSystem File System Access
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-Concurrency Concurrency
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-EventLoop Event Loops
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-IO I/O
 
     @ingroup Pt-System
 */
@@ -54,6 +70,11 @@
 */
 
 /** @defgroup Pt-System-Plugins Plugins
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-Tar Tar Archive I/O
 
     @ingroup Pt-System
 */

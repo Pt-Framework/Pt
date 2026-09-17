@@ -44,12 +44,19 @@ namespace System {
 
 class EventSink;
 
-/** @brief Sends Events to receivers in other threads
+/** @brief Sends events to sinks in other threads.
 
-    The Signal class is not thread-safe and can only be used for intra-thread
-    communication. To pass Events between different threads use an
-    %EventSource instead, which synchronizes sending of events and connecting
-    and disconnecting sinks appropriately.
+    %Signal is not thread-safe and is for use inside one thread.
+    %EventSource sends a %Event to connected %EventSink objects and
+    synchronizes connect, disconnect, and send. An %EventLoop is an
+    %EventSink, so a source in one thread can queue events for a loop
+    in another.
+
+    connect() adds a sink. disconnect() removes it. subscribe() limits
+    a sink to one event type. unsubscribe() removes that limit. send()
+    delivers to every connected sink that accepts the type.
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API EventSource : private NonCopyable
 {

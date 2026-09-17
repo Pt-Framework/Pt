@@ -38,7 +38,22 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Implements std::streambuf for I/O devices.
+/** @brief Stream buffer for an %IODevice.
+
+    %IOBuffer is a std::streambuf that reads and writes an %IODevice.
+    attach() binds the buffer to a device. detach() unbinds it.
+    discard() drops buffered bytes. reset() discards and detaches.
+
+    beginRead() fills the get area from the device. beginWrite()
+    drains the put area to the device. Those transfers run through
+    the device's %EventLoop. inputReady and outputReady fire when a
+    transfer finishes. endRead() and endWrite() complete it.
+    isReading() and isWriting() report a transfer in progress.
+
+    %IStream, %OStream, and %IOStream own an %IOBuffer. Formatted
+    extraction and insertion then use the attached device.
+
+    @ingroup Pt-System-IO
 */
 class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
                              , public Connectable
@@ -105,6 +120,8 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         //! @internal
         void onWrite(IODevice& dev);
 
+        /** @brief Ends writing buffered data to the I/O device.
+        */
         std::size_t endWrite();
 
         /** @brief Returns true if a read operation is running.

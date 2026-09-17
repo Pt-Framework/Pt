@@ -22,35 +22,17 @@
 @section pt_system System Programming
 
 <ul>
-    <li> @ref filesystem </li>
+    <li> @ref Pt-System-Page </li>
     <ul>
-        <li> @ref filesystem_FileInfo </li>
-        <li> @ref filesystem_Directory </li>
-        <li> @ref filesystem_FileIO </li>
-    </ul>
-
-    <li> @ref Pt-System-Concurrency-Page </li>
-
-    <li> @ref Pt-System-Page-Logging </li>
-    <ul>
-        <li> @ref Pt-System-Page-Logger </li>
-        <li> @ref Pt-System-Page-LogMessage </li>
-        <li> @ref Pt-System-Page-LogRecord </li>
-    </ul>
-
-    <li> @ref Pt-System-Page-Library </li>
-
-    <li> @ref Pt-System-Page-Plugins </li>
-    <ul>
-        <li> @ref Pt-System-Page-Plugin </li>
-        <li> @ref Pt-System-Page-PluginManager </li>
-    </ul>
-
-    <li> @ref Pt-System-Tar-Page </li>
-    <ul>
-        <li> @ref Pt-System-Tar-Page-TarEntry </li>
-        <li> @ref Pt-System-Tar-Page-TarReader </li>
-        <li> @ref Pt-System-Tar-Page-TarWriter </li>
+        <li> @ref Pt-System-Page-FileSystem </li>
+        <li> @ref Pt-System-Page-Concurrency </li>
+        <li> @ref Pt-System-Page-EventLoop </li>
+        <li> @ref Pt-System-Page-IO </li>
+        <li> @ref Pt-System-Page-Logging </li>
+        <li> @ref Pt-System-Page-Library </li>
+        <li> @ref Pt-System-Page-Plugins </li>
+        <li> @ref Pt-System-Page-Tar </li>
+        <li> @ref Pt-System-Page-Utilities </li>
     </ul>
 </ul>
 

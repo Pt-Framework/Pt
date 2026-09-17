@@ -40,10 +40,34 @@ namespace System {
 
 /** @brief Mutual exclusion device.
 
-    A %Mutex is a mutual exclusion device. It is used to synchronize
-    the access to data which is accessed by more than one thread or
-    process at the same time. Mutexes are not recursive, that is the
-    same thread can not lock a mutex multiple times without deadlocking.
+    %Mutex serializes access to shared data. lock() waits if another
+    thread holds it. The same thread must not lock it again. The mutex
+    must be unlocked when it is destroyed.
+
+    %MutexLock locks in the constructor and unlocks in the destructor,
+    including during stack unwinding.
+
+    @code
+    class Counter
+    {
+        public:
+            Counter()
+            : _value(0)
+            { }
+
+            void increment()
+            {
+                Pt::System::MutexLock lock(_mutex);
+                ++_value;
+            }
+
+        private:
+            Pt::System::Mutex _mutex;
+            int _value;
+    };
+    @endcode
+
+    @ingroup Pt-System-Concurrency
 */
 class PT_SYSTEM_API Mutex : private NonCopyable
 {
@@ -92,36 +116,12 @@ class PT_SYSTEM_API Mutex : private NonCopyable
         { return *_impl;  }
 };
 
-/** @brief %MutexLock class for Mutex.
+/** @brief Scoped lock for a %Mutex.
 
-    The %MutexLock class adds functionality for scoped
-    locking. In the constructor of a  MutexLock, the mutex is locked
-    and in the destructor it is unlocked. This way if for example an
-    exception occures in the protected section the Mutex will be unlocked
-    during stack unwinding when the MutexLock is destructed.
+    %MutexLock locks a %Mutex in the constructor and unlocks it in the
+    destructor, including during stack unwinding.
 
-    @code
-            // example how to make a member function thread-safe
-            #include <Pt/System/Mutex.h>
-
-            class MyClass
-            {
-                public:
-                    void function()
-                    {
-                        MutexLock lock(_mtx);
-
-                        //
-                        // protected operations
-                        //
-
-                        // dtor of MutexLock unlocks _mtx
-                    }
-
-                private:
-                    Pt::System::Mutex _mtx;
-            };
-    @endcode
+    @ingroup Pt-System-Concurrency
 */
 class MutexLock : private NonCopyable
 {
@@ -183,6 +183,8 @@ class MutexLock : private NonCopyable
 };
 
 /** @brief Recursive mutual exclusion device.
+
+    @ingroup Pt-System-Concurrency
 */
 class PT_SYSTEM_API RecursiveMutex : private NonCopyable
 {
@@ -214,7 +216,9 @@ class PT_SYSTEM_API RecursiveMutex : private NonCopyable
         bool unlockNoThrow();
 };
 
-/** @brief Lock class for recursive mutexes.
+/** @brief Scoped lock for a %RecursiveMutex.
+
+    @ingroup Pt-System-Concurrency
 */
 class RecursiveLock : private NonCopyable
 {
@@ -274,10 +278,9 @@ class RecursiveLock : private NonCopyable
         bool _isLocked;
 };
 
-/** @brief Synchronisation device similar to a POSIX rwlock
+/** @brief Mutex for concurrent readers or one writer.
 
-    A %ReadWriteMutex allows multiple concurrent readers or one exclusive
-    writer to access a resource.
+    @ingroup Pt-System-Concurrency
 */
 class PT_SYSTEM_API ReadWriteMutex : private NonCopyable
 {
@@ -330,7 +333,9 @@ class PT_SYSTEM_API ReadWriteMutex : private NonCopyable
         class ReadWriteMutexImpl* _impl;
 };
 
-/** @brief Reader lock object for read-write mutexes.
+/** @brief Scoped read lock for a %ReadWriteMutex.
+
+    @ingroup Pt-System-Concurrency
 */
 class ReadLock : private NonCopyable
 {
@@ -386,7 +391,9 @@ class ReadLock : private NonCopyable
         bool _locked;
 };
 
-/** @brief Writer lock object for read-write mutexes.
+/** @brief Scoped write lock for a %ReadWriteMutex.
+
+    @ingroup Pt-System-Concurrency
 */
 class WriteLock : private NonCopyable
 {
@@ -443,18 +450,16 @@ class WriteLock : private NonCopyable
 };
 
 
-/** @brief Spinmutex class.
+/** @brief Spin mutex.
 
-   The most lightweight synchronisation object is the %SpinMutex. It is
-   usually implemented with a status variable that can be set to locked
-   and unlocked and atomic operations to change and inspect the status.
-   When lock() is called, the status is changed to Locked.
-   Subsequent calls of lock() from other threads will block until
-   the first thread has called unlock() and the state of
-   the Spinlock has changed to Unlocked. Note that SpinMutexes are not recursive.
-   When a lock() blocks a busy-wait happens, therefore a %SpinMutex is only
-   usable in cases where resources need to be locked for a very short time, but in
-   these cases a higher performance can be achieved.
+    %SpinMutex is the lightest mutex. lock() sets a locked status with
+    an atomic operation. Another thread that calls lock() waits until
+    unlock() clears that status. It is not recursive.
+
+    Use it only when the lock is held for a very short time. For a
+    longer critical section use %Mutex.
+
+    @ingroup Pt-System-Concurrency
 */
 class SpinMutex : private NonCopyable
 {
@@ -510,7 +515,9 @@ class SpinMutex : private NonCopyable
         volatile Pt::atomic_t _count;
 };
 
-/** @brief Lock object for spin mutexes.
+/** @brief Scoped lock for a %SpinMutex.
+
+    @ingroup Pt-System-Concurrency
 */
 class SpinLock : private NonCopyable
 {

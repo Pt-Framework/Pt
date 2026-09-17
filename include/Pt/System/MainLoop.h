@@ -38,30 +38,14 @@ namespace System {
 
 class MainLoopImpl;
 
-/** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
+/** @brief Platform event loop.
 
-    The following example uses a %MainLoop to wait on acitvity on
-    a Timer, which is set to time-out after 1000 msecs.
+    %MainLoop is the %EventLoop implementation for the platform. It
+    multiplexes I/O and timers. %Application creates one by default.
+    Construct a %MainLoop directly when the process has no
+    %Application, or when a second loop runs in another thread.
 
-    @code
-    // slot to handle timer activity
-    void onTimer();
-
-    int main()
-    {
-        using Pt::System;
-
-        MainLoop loop;
-
-        Timer timer;
-        timer.setActive(loop);
-        timer.start(1000);
-        timer.timeout() += Pt::slot(onTimer);
-
-        loop.run();
-        return 0;
-    }
-    @endcode
+    @ingroup Pt-System-EventLoop
 */   
 class PT_SYSTEM_API MainLoop : public EventLoop
 {

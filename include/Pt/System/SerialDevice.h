@@ -38,36 +38,32 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Serial device
+/** @brief Serial port as an %IODevice.
 
-    This class implements access to a serial port as an %IODevice. A
-    %SerialDevice can be opened by passing a system dependent path
-    and an open mode. Then serial port attributes can be set before
-    read or write operations are performed. The following example
-    opens a COM port on windows, sets serial device attributes for
-    a serial mouse and toggles the flow control to cause the device
-    to send a PNP string which will be read subsequently:
+    %SerialDevice opens a serial port as an %IODevice. The path is
+    system-dependent, for example "COM1" on Windows or
+    "/dev/ttyS0" on POSIX. Open the port, then set baud rate,
+    character size, stop bits, parity, and flow control before
+    read or write.
+
+    The device supports the blocking and asynchronous transfers of
+    %IODevice. Control lines are available as setRts(), setDtr(),
+    isCts(), and isDsr(). setBreak() and sendBreak() generate a
+    break condition.
 
     @code
-        using Pt::System;
+    Pt::System::SerialDevice device("COM1", std::ios_base::in);
+    device.setBaudRate(Pt::System::SerialDevice::BaudRate9600);
+    device.setCharSize(8);
+    device.setStopBits(Pt::System::SerialDevice::OneStopBit);
+    device.setParity(Pt::System::SerialDevice::ParityNone);
+    device.setFlowControl(Pt::System::SerialDevice::FlowControlNone);
 
-        Pt::System::SerialDevice serdev( "COM1",  std::ios_base::in );
-        serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
-        serdev.setCharSize(7);
-        serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
-        serdev.setParity(Pt::System::SerialDevice::ParityNone);
-
-        serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
-        Thread::sleep( 300 );
-
-        serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
-        Thread::sleep( 300 );
-
-        char pnp_id[200];
-        size_t size = serdev.read( pnp_id, 200);
-        std::cerr << "Mouse Id: ";
-        std::cerr.write(pnp_id, size) << std::endl;
+    char buffer[64];
+    std::size_t n = device.read(buffer, sizeof(buffer));
     @endcode
+
+    @ingroup Pt-System-IO
 */
 class PT_SYSTEM_API SerialDevice : public IODevice
 {
@@ -183,20 +179,33 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Gets the current flow control kind
         FlowControl flowControl() const;
 
-        //! @brief
+        /** @brief Sets the RTS control line.
+        */
         void setRts(bool on);
-		
-		void setDtr(bool on);
 
-		void setBreak(bool on);		
-		
-		void sendBreak(int duration = 0);
+        /** @brief Sets the DTR control line.
+        */
+        void setDtr(bool on);
 
-		bool isCts() const;
+        /** @brief Sets or clears a break condition.
+        */
+        void setBreak(bool on);
 
-		bool isDsr() const;
+        /** @brief Sends a break condition.
+        */
+        void sendBreak(int duration = 0);
 
-    void clear();
+        /** @brief Returns true if CTS is asserted.
+        */
+        bool isCts() const;
+
+        /** @brief Returns true if DSR is asserted.
+        */
+        bool isDsr() const;
+
+        /** @brief Clears pending error flags.
+        */
+        void clear();
 
     protected:
         // inherit docs

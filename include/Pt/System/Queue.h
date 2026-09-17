@@ -38,13 +38,14 @@ namespace Pt {
 
 namespace System {
 
-/** @brief This class implements a thread safe queue.
+/** @brief Thread-safe FIFO queue.
 
-    A queue is a container where the elements put into the queue are
-    fetched in the same order (first-in-first-out, fifo).
-    The class has a optional maximum size. If the size is set to 0 the
-    queue has no limit. Otherwise putting a element to the queue may
-    block until another thread fetches a element or icreases the limit.
+    get() returns the next element and blocks while the queue is empty.
+    put() appends an element and blocks when a maximum size is set and
+    the queue is full. A maximum of zero means no limit. Raising the
+    maximum may wake a thread blocked in put().
+
+    @ingroup Pt-System-Concurrency
   */
 template <typename T>
 class Queue

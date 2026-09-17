@@ -38,10 +38,22 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Measures time intervals.
+/** @brief Stopwatch, system time and monotonic ticks.
 
-    The %Clock class can be used like a stop-watch by calling start() and
-    stop(). The latter method returns the elapsed time.
+    %Clock measures elapsed time and reports the system clock. start()
+    begins a measurement. stop() returns the %Timespan since start().
+    A second start() begins a new measurement.
+
+    getSystemTime() returns the current UTC time as a %DateTime.
+    getLocalTime() returns the local wall time. These values follow
+    the system clock, including adjustments.
+
+    getSystemTicks() returns the timespan since a fixed point in the
+    past. That origin is platform-defined. It may be boot time or an
+    epoch. Differences between two tick values are monotonic and are
+    the right way to measure elapsed time across threads.
+
+    @ingroup Pt-System
 */
 class PT_SYSTEM_API Clock : private NonCopyable
 {

@@ -38,7 +38,14 @@ namespace Pt {
 
 namespace System {
 
-    /** @brief %Signal and wait synchronisation promitive.
+    /** @brief Signal and wait synchronisation primitive.
+
+        %Condition waits while a %Mutex is held. wait() unlocks that
+        mutex, suspends the caller, and relocks when the wait ends.
+        A timed wait returns false on timeout. signal() wakes one
+        waiter. broadcast() wakes all.
+
+        @ingroup Pt-System-Concurrency
      */
     class PT_SYSTEM_API Condition : private NonCopyable
     {
@@ -49,6 +56,8 @@ namespace System {
             //! @brief Destructor.
             ~Condition();
 
+            /** @brief Wait until the condition is signaled.
+            */
             void wait(Mutex& mtx);
 
             /** @brief Wait until condition becomes signaled.
@@ -60,6 +69,10 @@ namespace System {
             void wait(MutexLock& m)
             { this->wait( m.mutex() ); }
 
+            /** @brief Wait until the condition is signaled or @a ms elapses.
+
+                Returns false if the wait timed out.
+            */
             bool wait(Mutex& mtx, unsigned int ms);
 
             /** @brief Wait until condition becomes signalled.

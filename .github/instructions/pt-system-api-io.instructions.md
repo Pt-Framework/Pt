@@ -2,6 +2,8 @@
 description: "Synchronous and asynchronous I/O, streams and archive formats"
 ---
 
+- I/O group, devices, streams, pipes and serial ports:
+  `include/Pt/System/Api-IO.h`
 - I/O device endpoint, sync/async read and write, seek:
   `include/Pt/System/IODevice.h`
 - Stream buffer for I/O devices:

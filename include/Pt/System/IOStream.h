@@ -38,7 +38,12 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Input stream for I/O devices.
+/** @brief Input stream for an %IODevice.
+
+    %IStream is a C++ istream whose buffer is an %IOBuffer. attach()
+    binds an %IODevice. Extraction then reads from that device.
+
+    @ingroup Pt-System-IO
 */
 class IStream : public BasicIStream<char>
 {
@@ -89,7 +94,12 @@ class IStream : public BasicIStream<char>
         IOBuffer _buffer;
 };
 
-/** @brief Output stream for I/O devices.
+/** @brief Output stream for an %IODevice.
+
+    %OStream is a C++ ostream whose buffer is an %IOBuffer. attach()
+    binds an %IODevice. Insertion then writes to that device.
+
+    @ingroup Pt-System-IO
 */
 class OStream : public BasicOStream<char>
 {
@@ -140,7 +150,18 @@ class OStream : public BasicOStream<char>
         IOBuffer _buffer;
 };
 
-/** @brief Input/Output stream for I/O devices.
+/** @brief Bidirectional stream for an %IODevice.
+
+    %IOStream is a C++ iostream whose buffer is an %IOBuffer. attach()
+    binds an %IODevice. Extraction and insertion then use that device.
+    ioBuffer() returns the buffer so beginRead() and beginWrite() can
+    run through the same %EventLoop as the device.
+
+    The stream does not own the device. The caller keeps the device
+    alive while the stream is attached. detach() unbinds it.
+    discard() drops buffered bytes. reset() discards and detaches.
+
+    @ingroup Pt-System-IO
 */
 class IOStream : public BasicIOStream<char>
 {

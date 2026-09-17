@@ -37,16 +37,21 @@ namespace Pt {
 
 namespace System {
 
-/** @brief A Pair of IODevices that form a half-duplex pipe
+/** @brief Pair of %IODevice endpoints that form a half-duplex pipe.
 
-    A pipe consists of a pair of IODevices: A writable output device and a
-    readable input device. If bytes are written to the output device they
-    can be read from the input device in exactly the order in which they
-    were written. Whether or not the writer to a pipe will block until the
-    reader reads the data, or some previously-written bytes, from the pipe is
-    system-dependent and therefore unspecified. Many pipe implementations will
-    buffer up to a certain number of bytes between input and output, but such
-    buffering should not be assumed.
+    A pipe is two %IODevice objects created together. Bytes written to
+    in() are read from out() in the same order. The constructor opens
+    both ends. The destructor closes them.
+
+    Whether a write blocks until a read consumes data is
+    system-dependent. Some platforms buffer a limited number of bytes
+    between the ends. That buffer must not be assumed. Treat a write
+    as complete only when write() or endWrite() returns.
+
+    Each end is a %Selectable. Attach out() to an %EventLoop to read
+    without blocking the thread. Attach in() to write the same way.
+
+    @ingroup Pt-System-IO
 */
 class PT_SYSTEM_API Pipe : public NonCopyable
 {

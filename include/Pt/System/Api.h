@@ -49,12 +49,10 @@ namespace Pt {
 /** @namespace Pt::System
     @brief %System programming
 
-    This module offers support for multithreaded programming, API's for
-    file system operations such as traversing through directories and files,
-    creating and handling of subprocesses, synchronous or asynchronous IO,
-    logging, shared libraries and plugins. It introduces event loops as the
-    central software interrupt to handle events across thread boundaries,
-    timers and reactive I/O.
+    This module is the portable operating-system layer for a process. It
+    covers the file system, threads and processes, event loops, I/O
+    devices, logging, shared libraries, plugins, tar archives, and the
+    clock.
 */
 namespace System {
 

@@ -40,17 +40,57 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Endpoint for I/O operations
+/** @brief Endpoint for I/O operations.
 
-    This class serves as the base class for all kinds of I/O devices. The
-    interface supports synchronous and asynchronous I/O operations, peeking
-    and seeking. I/O buffers and I/O streams within the %Pt framework use
-    IODevices as endpoints and therefore fully feaured standard C++ compliant
-    IOStreams can be constructed at runtime.
-    Examples of IODevices are the SerialDevice, the endpoints of a Pipe
-    or the FileDevice. An EventLoop can be used to wait on activity on an
-    %IODevice. The signals inputReady or outputReady of the %IODevice  indicate
-    that an I/O operation has finished.
+    %IODevice is the endpoint for I/O. It is a %Selectable. A file, a
+    pipe end, and a serial port are %IODevice types. I/O buffers and
+    I/O streams use this endpoint, so a standard C++ stream can be
+    built at runtime.
+
+    read() and write() transfer bytes and may return fewer than
+    requested. They throw %IOError on failure. When the device reaches
+    the end of the stream, isEof() is true. setTimeout() limits how
+    long a blocking transfer waits. close() releases the endpoint.
+
+    beginRead() and beginWrite() start an asynchronous transfer. The
+    device must be attached to an %EventLoop with setActive(). When
+    the transfer finishes, inputReady or outputReady is emitted.
+    endRead() and endWrite() complete the operation and return the
+    number of bytes. Only one read and one write may run at a time.
+
+    Some devices can seek. seekable() reports that. seek() and
+    position() throw %IOError when the device cannot seek. peek()
+    copies bytes without consuming them. sync() commits written data
+    to the device.
+
+    @code
+    class Reader
+    {
+        public:
+            explicit Reader(Pt::System::IODevice& device)
+            : _device(&device)
+            {
+                _device->inputReady() += Pt::slot(*this, &Reader::onInput);
+            }
+
+            void begin()
+            {
+                _device->beginRead(_buffer, sizeof(_buffer));
+            }
+
+            void onInput(Pt::System::IODevice& device)
+            {
+                device.endRead();
+                device.beginRead(_buffer, sizeof(_buffer));
+            }
+
+        private:
+            Pt::System::IODevice* _device;
+            char _buffer[256];
+    };
+    @endcode
+
+    @ingroup Pt-System-IO
 */
 class PT_SYSTEM_API IODevice : public Selectable
 {

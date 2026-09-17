@@ -58,25 +58,25 @@ class Selector;
 class AsyncYield;
 #endif
 
-/** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
+/** @brief Event loop of a thread or process.
 
-    The %EventLoop can be used as the central entity of a thread or process to
-    dispatch application events and wait on multiple Selectables, IODevices or
-    Timers for activity.
+    %EventLoop is the dispatch core of a thread or process. It
+    monitors %Selectable objects and %Timer objects and delivers
+    queued events. A process often runs one loop in the main thread.
+    A second loop can run in another %Thread.
 
-    Events can be added to the internal event queue, even from other threads
-    using the method commitEvent() or queueEvent(). The
-    first method will add the event to the internal queue and wake the
-    event loop, the latter allows queing multiple events and it is up to
-    the caller to wake the event loop by calling wake() when all
-    events are added. When the event loop processes its event, the signal
-    eventReceived is send for each processed event. Events are processed in
-    the order they were added.
+    The loop is an %EventSink. commitEvent() queues an event and wakes
+    the loop. queueEvent() queues without waking, so several events can
+    be added and then released with one wake(). Events are delivered on
+    eventReceived in the thread that called run(), in the order they
+    were queued.
 
-    To start the %MainLoop the method run() must be executed. It blocks
-    until the event loop is stopped. To stop the loop, exit()
-    can be called. The delivery of the events occurs inside the thread that
-    started the execution of the event loop.
+    run() enters the loop and returns when exit() stops it. processEvents()
+    delivers queued events without entering run(). exited is emitted
+    when the loop leaves run(). Delivery always happens in the loop
+    thread, including events queued from other threads.
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API EventLoop : public Connectable
                               , public EventSink
@@ -246,7 +246,8 @@ class PT_SYSTEM_API TimerQueue
 
     This splits heavy coroutine computations into chunks avoiding
     EventLoop starvation for socket or UI events.
-    @ingroup Pt-System
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API AsyncYield : public Pt::Awaiter
                                , private Pt::System::Selectable

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2004-2007 Marc Boris Duerner
- * 
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,51 +15,42 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_System_SystemError_h
-#define Pt_System_SystemError_h
+#ifndef PT_SYSTEM_API_EVENTLOOP_H
+#define PT_SYSTEM_API_EVENTLOOP_H
 
-#include <Pt/System/Api.h>
-#include <stdexcept>
-#include <string>
+/** @addtogroup Pt-System-EventLoop
 
-namespace Pt {
+    @brief Event loops, timers and console applications.
 
-namespace System {
+    %Application is the console process root. There is one instance.
+    It uses an %EventLoop. run() enters that loop. exit() leaves it.
+    Command line arguments, environment variables, the working
+    directory, and C signals are %Application services.
 
-/** @brief Exception for a failed system operation.
+    %EventLoop is the dispatch core of a thread or process.
+    It is an %EventSink. commitEvent() queues an event and wakes the
+    loop. queueEvent() queues without waking. wake() starts processing.
+    Events are delivered on eventReceived in the thread that called
+    run(). %MainLoop is the platform %EventLoop.
 
-    @ingroup Pt-System
- */
-class PT_SYSTEM_API SystemError : public std::runtime_error
-{
-    public:
-        /** @brief Construct with error message.
-        */
-        explicit SystemError(const std::string& what);
+    A %Selectable attaches with setActive so the loop can wait for it.
+    detach() removes it and cancels outstanding operations. %Timer is
+    not a %Selectable. It registers with setActive and emits timeout
+    at an interval.
 
-        /** @brief Construct with error message.
-        */
-        explicit SystemError(const char* what);
+    %EventSource sends events to %EventSink objects in other threads.
+    %Signal is not thread-safe. %EventSource is.
+*/
 
-        /** @brief Destructor.
-        */
-        ~SystemError() throw()
-        {}
-};
-
-} // namespace System
-
-} // namespace Pt
-
-#endif // Pt_System_SystemError_h
+#endif

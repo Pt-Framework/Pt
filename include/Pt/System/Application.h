@@ -41,15 +41,34 @@ namespace System {
 
 class ApplicationImpl;
 
-/** @brief Console applications without a GUI.
- 
-    This class is used by non-GUI applications to provide the central event
-    loop, handle C signals and process command line arguments. There can be
-    only one instance per application.
-    The application and therefore the event loop is started with a call to
-    run() and can be exited with a call to exit(). The event loop can be
-    obtained by calling loop(). Command line arguments can be parsed as Arg
-    and static methods exist to set environment variables.
+/** @brief Console process root.
+
+    %Application is the console process root. There is one instance
+    per process. It uses an %EventLoop. The default constructors
+    create a %MainLoop. A custom loop can be passed in. The
+    application does not own a loop passed by the caller.
+
+    run() enters the loop. exit() leaves it. loop() returns the loop
+    so timers and selectables can attach to it. instance() returns the
+    single application.
+
+    Command line arguments are available through argc(), argv(), and
+    getArg(). catchSystemSignal() reports a C signal on systemSignal.
+    ignoreSystemSignal() leaves a signal to the default handler.
+    chdir(), cwd(), rootdir(), and tmpdir() are the process
+    directories. setEnvVar(), unsetEnvVar(), and getEnvVar() change
+    the environment.
+
+    @code
+    int main(int argc, char* argv[])
+    {
+        Pt::System::Application app(argc, argv);
+        app.run();
+        return 0;
+    }
+    @endcode
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API Application : public Pt::Connectable
 {
@@ -195,6 +214,8 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         */
         static std::string getEnvVar(const std::string& name);
 
+        /** @brief Returns the amount of used memory.
+        */
         static unsigned long usedMemory();
 
         //! @internal

@@ -41,6 +41,16 @@ namespace System {
 class EventSource;
 
 /** @brief Receiver for events.
+
+    An %EventSink accepts events from an %EventSource or from direct
+    calls. commitEvent() queues an event and starts processing.
+    queueEvent() queues without starting processing, so several events
+    can be added first. wake() starts processing.
+
+    %EventLoop is an %EventSink. Events queued for a loop are
+    delivered on eventReceived in the loop thread.
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API EventSink : private NonCopyable
 {

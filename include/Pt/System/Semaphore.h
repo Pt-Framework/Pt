@@ -36,7 +36,13 @@ namespace Pt {
 
 namespace System {
 
-/** @brief %Semaphore synchronization object.
+/** @brief Counting semaphore.
+
+    wait() decrements the count when it is positive, or suspends the
+    caller until post() increments it. tryWait() returns false if the
+    count is zero. The destructor does not wake waiters.
+
+    @ingroup Pt-System-Concurrency
 */
 class PT_SYSTEM_API Semaphore : private NonCopyable
 {
@@ -46,7 +52,10 @@ class PT_SYSTEM_API Semaphore : private NonCopyable
         //! @brief Construct with initial count
         Semaphore(unsigned int initial = 0);
 
-        //! @brief Destructor. Does not signal...
+        /** @brief Destructor.
+
+            Does not wake waiting threads.
+        */
         ~Semaphore();
 
         //! @brief Wait for the semaphore to become signaled

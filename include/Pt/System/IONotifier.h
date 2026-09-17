@@ -39,35 +39,72 @@ namespace Pt {
 
 namespace System {
 
+/** @brief Monitors a native handle or file descriptor.
+
+    %IONotifier is a %Selectable that reports activity on a native
+    endpoint the rest of the I/O API does not own. setHandle() names a
+    Windows handle. setFd() names a POSIX file descriptor. The
+    constructor can pass either.
+
+    Attach the notifier to an %EventLoop with setActive(). beginWait()
+    starts monitoring for a combination of WaitFlags. When the loop
+    sees activity, eventReady is emitted. endWait() returns the flags
+    that are ready. reset() clears the handle or descriptor.
+
+    Use this type when the endpoint is not an %IODevice: a socket
+    created outside Pt, or a handle from another library.
+
+    @ingroup Pt-System-IO
+*/
 class PT_SYSTEM_API IONotifier : public Selectable
 {
     public:
         enum WaitFlags
         {
-            Read = 1,
-            Write = 2,
-            Except = 4
+            Read = 1,   //!< Readable
+            Write = 2,  //!< Writable
+            Except = 4  //!< Exceptional condition
         };
 
     public:
+        /** @brief Default constructor.
+        */
         IONotifier();
 
+        /** @brief Construct with a native handle.
+        */
         explicit IONotifier(void* handle);
 
+        /** @brief Construct with a file descriptor.
+        */
         explicit IONotifier(int fd);
 
+        /** @brief Destructor.
+        */
         ~IONotifier();
 
+        /** @brief Clears the handle or file descriptor.
+        */
         void reset();
 
+        /** @brief Sets the file descriptor to monitor.
+        */
         void setFd(int fd);
 
+        /** @brief Sets the native handle to monitor.
+        */
         void setHandle(void* handle);
 
+        /** @brief Begins monitoring for @a flags.
+        */
         void beginWait(int flags);
 
+        /** @brief Ends monitoring and returns the ready flags.
+        */
         int endWait();
 
+        /** @brief Notifies when the handle or descriptor is ready.
+        */
         Pt::Signal<>& eventReady()
         { return _eventReady; } 
 

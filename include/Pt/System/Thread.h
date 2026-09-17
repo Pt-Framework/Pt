@@ -41,25 +41,42 @@ namespace System {
 
 class EventLoop;
 
-/** @brief Platform independent threads
+/** @brief Portable thread of control.
 
-    This is a thread base class, which is flexible, but harder to use. Try
-    to use either an AttachedThread or a DetachedThread instead.
+    %Thread is the portable thread. Construction does not start it.
+    start() runs the %Callable passed to the constructor or to init(),
+    or it runs an %EventLoop. The object must be joined or detached
+    before it is destroyed. Destroying a running joinable thread is an
+    error.
 
-    A %Thread represents a separate thread of control within the program.
-    It shares data with all the other threads within the process but
-    executes independently in the way that a separate program does on a
-    multitasking operating system. Each thread gets its own stack, which
-    size is determinated by the operating system.
+    join() blocks until the entry returns. detach() lets the thread
+    run without a waiter. After detach(), join() is not used. sleep()
+    suspends the calling thread. yield() gives up the rest of the time
+    slice. exit() leaves the current thread.
 
-    The execution of a thread starts either by calling start() which
-    calls the thread entry object passed to the constructor. Threads can
-    either be joined, so you can wait for them, or be detached, so they
-    run indepentently.
+    The callable must outlive a joinable thread. %AttachedThread joins
+    in its destructor. %DetachedThread detaches in the constructor and
+    destroys itself when the entry returns.
 
-    %Thread also provides a platform independent sleep function. A thread
-    can give up CPU time either by calling yield() or sleep() to
-    stop for a specified period of time.
+    @code
+    class Work
+    {
+        public:
+            void run()
+            {
+            }
+    };
+
+    int main()
+    {
+        Work work;
+        Pt::System::AttachedThread thread( Pt::callable(work, &Work::run) );
+        thread.start();
+        return 0;
+    }
+    @endcode
+
+    @ingroup Pt-System-Concurrency
 */
 class PT_SYSTEM_API Thread : protected NonCopyable
 {
@@ -170,40 +187,13 @@ class PT_SYSTEM_API Thread : protected NonCopyable
         class ThreadImpl* _impl;
 };
 
-/** @brief A Joinable thread.
+/** @brief Thread that joins in its destructor.
 
-    %AttachedThreads are threads, which are managed by the creator,
-    and are normally created on the stack. The creator must wait,
-    until the thread terminates either explicitly by calling join()
-    or implicitly by the destructor. The life-time of the callable
-    object must exceed the life-time of the thread. Mind the order
-    of destruction if the %AttachedThread is a member variable of
-    a class.
+    %AttachedThread is a %Thread that calls join() when it is
+    destroyed, unless join() already ran. The callable must outlive
+    the thread.
 
-    Example:
-    \code
-    struct Operation
-    {
-        void run()
-        {
-            // implement, whatever needs to be done in parallel
-        }
-    };
-
-    int main()
-    {
-        Operation op;
-        AttachedThread thread( Pt::callable(op, &Operation::run) );
-        thread.start();
-
-        // the thread runs and we can do something else in parallel
-
-        doMoreWork();
-
-        // AttachedThread's destructor joins the thread
-        return 0;
-    }
-    \endcode
+    @ingroup Pt-System-Concurrency
 */
 class AttachedThread : public Thread
 {
@@ -245,38 +235,14 @@ class AttachedThread : public Thread
 };
 
 
-/** @brief A detached thread.
+/** @brief Thread that runs without a waiter.
 
-    A detached thread runs just for its own. The user does not need
-    (actually can not even) wait for the thread to stop. The object
-    is normally created on the heap.
+    %DetachedThread is a %Thread that detaches in the constructor.
+    join() is not used. The object is usually created with new. The
+    default destroy() deletes it when the entry returns. Override
+    run() for the thread entry, or pass a function pointer.
 
-    Example:
-
-    \code
-    class MyThread : public Pt::System::::DetachedThread
-    {
-        protected:
-            void run();
-    };
-
-    void MyThread::run()
-    {
-        // implement, whatever needs to be done in parallel
-    }
-
-    void someFunc()
-    {
-        MyThread *thread = new MyThread();
-        thread->start();
-
-        // here the thread runs and the program can do something
-        // else in parallel. It continues to run even after this
-        // function returns. The object is automatically destroyed,
-        // when the thread has finished.
-    }
-    \endcode
-
+    @ingroup Pt-System-Concurrency
 */
 class DetachedThread : public Thread
 {

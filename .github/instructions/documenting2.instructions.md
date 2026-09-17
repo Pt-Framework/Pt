@@ -15,11 +15,19 @@ language, stacked jargon, and internal implementation details.
 ## Group and Class Detailed Descriptions
 
 These texts are the chapter. Write them as accessible textbook or
-technical-reference prose, not as briefs. Length follows the model. One
-idea per paragraph. A paragraph may use several sentences to develop
-that idea and lead into the next. Prefer an extra paragraph over a
-comma-separated inventory. Do not use lists or extra headings inside a
+technical-reference prose, not as briefs and not as a longer brief.
+Develop the object model across several paragraphs. One idea per
+paragraph. A paragraph may use several sentences to develop that idea
+and lead into the next. Prefer an extra paragraph over packing several
+contracts into one. Do not use lists or extra headings inside a
 detailed description unless the reader must choose between alternatives.
+
+A detailed description that restates members in order is still a brief.
+Split it until each paragraph carries one contract the reader needs:
+role, ownership, lifetime, errors, or ordering. A reader should
+understand the type from this chapter without scanning every member.
+Keep a type to a brief only when the group already holds the content
+or the type adds no new question.
 
 Include the context needed to use the API correctly. Explain this
 feature's object model, contracts, ownership, lifetime, errors, and
@@ -28,10 +36,13 @@ ordering. An API technique that is part of the contract belongs here
 allocators). Do not teach general programming, and do not compare other
 frameworks.
 
-Use `@code` for the examples the chapter needs. An ordered explanation
-of the model is not a recipe. Do not write cookbook steps ("When you
-want to ..., first ..., then ..."). Do not write capability inventories
-or front-loaded catalogs of neighboring types.
+Use `@code` where the example belongs. A group example shows the group
+model, not one type. A type-specific example belongs on that class. A
+group needs no `@code` when prose is enough or the examples live on
+the classes. An ordered explanation of the model is not a recipe. Do
+not write cookbook steps ("When you want to ..., first ..., then ...").
+Do not write capability inventories or front-loaded catalogs of
+neighboring types.
 
 ## Brief Reference Text
 
@@ -95,9 +106,9 @@ Each module has one module page. That page sorts the whole module: the
 main group, every subgroup, and the types that deepen those groups.
 
 A group detailed description is the essential chapter: what the feature
-is for, then the object model in reading order, then the examples the
-reader needs. Introduce a type only when the next sentence needs it. Do
-not catalog the group's APIs.
+is for, then the object model in reading order. Introduce a type only
+when the next sentence needs it. Do not catalog the group's APIs. Do
+not close the group with a type-specific example.
 
 A subgroup declares its parent with `@ingroup <ParentGroup>`. The parent
 explains the module-wide model. The subgroup documents one reader task
@@ -112,13 +123,16 @@ Do not split one essay across classes. The group tells the model once.
 Each class answers one question that group left open. Shared contracts
 belong once, in the group or on the first type that owns the mechanism.
 Later types assume them. If two classes would answer the same question,
-move that sentence to the group.
+move that sentence to the group. Place `@code` by the same split: the
+group model in the group, a remaining question on the class that owns
+it.
 
 A class detailed description continues the group chapter when the page
 copies it. Open with a hinge sentence that states this type's role in
 the already-told model, then develop the questions that type leaves
-open, in the same textbook voice as the group. Do not reteach the
-group or recap earlier types. End so the next type on the page is
+open, in several paragraphs, in the same textbook voice as the group.
+Do not answer them in one packed paragraph of members. Do not reteach
+the group or recap earlier types. End so the next type on the page is
 expected. The class page must still read as a coherent excerpt.
 
 Copy a type onto the module page with `@copydetails` when that is
@@ -207,7 +221,9 @@ or changing a documented module.
 # Examples
 
 Group and class detailed descriptions use the connected chapter prose.
-Member comments use the short brief form.
+Member comments use the short brief form. The group sample below shows
+the feature model, so its `@code` stays in the group. A type-specific
+example belongs on the class.
 
 Dense inventory, do not write:
 
@@ -215,12 +231,26 @@ Dense inventory, do not write:
     dispatch, and pointer capture. Construct widgets only after an
     Application exists.
 
+Packed member tour, do not write:
+
+    Application is the console process root. There is one instance. It
+    uses an EventLoop. run() enters that loop. exit() leaves it. loop()
+    returns the loop.
+
 Connected prose:
 
     Every visual Forms object is a Widget. Application is not. A widget
     lives in a parent chain that reaches a Screen; that chain is a
     runtime relationship, not ownership. Geometry is logical: position
     is in parent coordinates, size is local.
+
+    Application is the console process root. There is one instance per
+    process. It uses an EventLoop. The default constructors create a
+    MainLoop. A custom loop can be passed in. The application does not
+    own a loop passed by the caller.
+
+    run() enters the loop. exit() leaves it. loop() returns the loop so
+    timers and selectables can attach to it.
 
 ```cpp
 /** @brief Runtime root of a Forms user interface.

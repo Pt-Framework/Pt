@@ -44,36 +44,31 @@ namespace System {
 
 class AsyncWait;
 
-/** @brief Notifies clients in constant intervals
+/** @brief Interval timeout notifications.
 
-    Timers can be used to be notified if a time interval expires. It
-    usually works with an event loop, where the %Timer
-    needs to be registered. Timers send the timeout signal
-    in given intervals, to which the interested clients connect. The
-    interval can be changed at any time and timers
-    can switch between an active and inactive state.
+    %Timer emits timeout at a fixed interval. It is not a %Selectable.
+    setActive() registers it with an %EventLoop. start() begins the
+    interval from the moment it is called. stop() ends it. timeout is
+    not sent until the timer is registered and started.
 
-    The following code calls the function onTimer every second:
+    The interval can be changed while the timer runs. start() again
+    replaces it. detach() removes the timer from the loop. The
+    destructor emits no timeout after that.
 
     @code
-    void onTimer()
+    void onTimeout()
     {
-        std::cerr << "Time out!\n";
     }
 
-    int main()
-    {
-        Pt::System::MainLoop loop;
-
-        Pt::System::Timer timer;
-        timer.timeout() += Pt::slot(onTimer);
-        timer.setActive(loop);
-        timer.start(1000);
-
-        loop.run();
-        return 0;
-    }
+    Pt::System::MainLoop loop;
+    Pt::System::Timer timer;
+    timer.timeout() += Pt::slot(onTimeout);
+    timer.setActive(loop);
+    timer.start(1000);
+    loop.run();
     @endcode
+
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API Timer
 {
@@ -210,7 +205,7 @@ class PT_SYSTEM_API Timer
     C++20 awaitable for use with co_await. The timer is automatically
     started when the awaitable begins and stopped when it completes.
 
-    @ingroup Pt-System
+    @ingroup Pt-System-EventLoop
 */
 class PT_SYSTEM_API AsyncWait : public Pt::BasicAwaiter<void>
                               , public Pt::Connectable

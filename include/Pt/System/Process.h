@@ -42,10 +42,9 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Indicates process failure.
+/** @brief Thrown when a process does not terminate normally.
 
-    This exception is thrown, when a process does not terminate
-    normally in Process::wait().
+    @ingroup Pt-System-Concurrency
 */
 class PT_SYSTEM_API ProcessFailed : public SystemError
 {
@@ -61,7 +60,10 @@ class PT_SYSTEM_API ProcessFailed : public SystemError
 };
 
 
-//! @brief %Process startup parameters
+/** @brief Startup parameters for a %Process.
+
+    @ingroup Pt-System-Concurrency
+*/
 class ProcessInfo
 {
     public:
@@ -172,7 +174,20 @@ class ProcessInfo
         IOMode _stderrMode;
 };
 
-//! @brief Executes shell commands
+/** @brief Starts another program as a child process.
+
+    Construct with a %ProcessInfo that names the command, arguments,
+    and how stdin, stdout, and stderr are handled. start() runs the
+    program. wait() joins it and returns the exit status. tryWait()
+    reports whether it has finished. kill() terminates it.
+    stdInput(), stdOutput(), and stdError() return the redirected
+    %IODevice endpoints when redirection was requested.
+
+    @throw SystemError if start(), kill(), or wait() fails.
+    @throw ProcessFailed if wait() finds a non-normal termination.
+
+    @ingroup Pt-System-Concurrency
+*/
 class PT_SYSTEM_API Process : private NonCopyable
 {
     public:
@@ -217,6 +232,11 @@ class PT_SYSTEM_API Process : private NonCopyable
         */
         int wait();
 
+        /** @brief Returns true if the process has finished.
+
+            Sets @a status to the exit status when the process has
+            finished.
+        */
         bool tryWait(int& status);
 
         //! @brief Returns an I/O device to stdin.
