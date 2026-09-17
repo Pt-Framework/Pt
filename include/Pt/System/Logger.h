@@ -211,7 +211,7 @@ namespace System {
     to be avoided. Definition of global loggers with the macros does not simply
     result in global variables.
 
-    @ingroup Logging
+    @ingroup Pt-System-Logging
 */
 class PT_SYSTEM_API Logger : protected Pt::NonCopyable
 {
@@ -417,7 +417,7 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
     msg.log();
     @endcode
 
-    @ingroup Logging
+    @ingroup Pt-System-Logging
 */
 class LogMessage : protected Pt::NonCopyable
 {

@@ -98,7 +98,7 @@ namespace System {
     createDirectory(), resize() and remove(). The exception reports the name
     of the resource that could not be accessed.
 
-    @ingroup FileSystem
+    @ingroup Pt-System-FileSystem
 */
 class PT_SYSTEM_API FileInfo
 {

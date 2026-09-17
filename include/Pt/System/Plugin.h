@@ -43,7 +43,7 @@ namespace System {
 
 /** @brief ID for plugin exports.
 
-    @ingroup Plugins
+    @ingroup Pt-System-Plugins
 */
 class PluginId 
 {
@@ -78,7 +78,20 @@ class PluginId
 
 /** @brief Interface for plugins.
 
-    @ingroup Plugins
+    %Plugin is one entry in a PluginList. The template argument is the
+    interface it implements.
+
+    %PluginId names the interface type, the feature string, and an info
+    string. feature() is the name used later to construct an instance.
+    info() is an optional description.
+
+    create() returns a new instance. destroy() releases that instance.
+    They are the allocator for objects that come from the plugin.
+
+    %PluginManager registers matching plugins and creates instances by
+    feature.
+
+    @ingroup Pt-System-Plugins
 */
 template <typename Iface>
 class Plugin : public PluginId 
@@ -107,7 +120,7 @@ class Plugin : public PluginId
     is the interface. The constructor takes a feature string and an
     optional info string.
 
-    @ingroup Plugins
+    @ingroup Pt-System-Plugins
 */
 template <typename Class, typename Iface>
 class BasicPlugin : public Plugin<Iface> {
@@ -165,7 +178,7 @@ class BasicPlugin : public Plugin<Iface> {
     Iteration walks the loaded plugins without creating instances.
     create() also accepts an iterator from that walk.
 
-    @ingroup Plugins
+    @ingroup Pt-System-Plugins
 */
 template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
 class PluginManager

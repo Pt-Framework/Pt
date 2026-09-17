@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,30 +15,47 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_SYSTEM_API_FILESYSTEM_H
-#define PT_SYSTEM_API_FILESYSTEM_H
+#ifndef PT_SYSTEM_API_SYSTEM_H
+#define PT_SYSTEM_API_SYSTEM_H
 
-/** @addtogroup Pt-System-FileSystem
+/** @defgroup Pt-System System Module
 
-    @brief File and directory operations with iterator-based traversal.
+    @brief Files, logging, shared libraries and plugins.
 
-    The systems programming library (Pt::System) provides functionality to
-    identify, create, rename, move or remove files and directories. An iterator
-    based API can be used to traverse through the entries in a directory. It
-    can be used with the iterator based algorithms in the C++ standard library.
-    The FileDevice is an implementation of the IODevice to read and write
-    files. 
+    This module is the portable operating-system layer for a process.
+    This chapter covers the file system, logging, shared libraries, and
+    plugins.
+*/
+
+/** @defgroup Pt-System-FileSystem File System Access
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-Logging Logging
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-Libraries Shared Libraries
+
+    @ingroup Pt-System
+*/
+
+/** @defgroup Pt-System-Plugins Plugins
+
+    @ingroup Pt-System
 */
 
 #endif

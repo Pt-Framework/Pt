@@ -125,7 +125,7 @@ namespace System {
     main() function and end the program. Normally, larger applications will
     need to process errors in the slots, so the %EventLoop is not stopped.
 
-    @ingroup FileSystem
+    @ingroup Pt-System-FileSystem
 */
 class PT_SYSTEM_API FileDevice : public IODevice 
 {

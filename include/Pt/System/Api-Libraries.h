@@ -26,19 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_SYSTEM_API_FILESYSTEM_H
-#define PT_SYSTEM_API_FILESYSTEM_H
+#ifndef PT_SYSTEM_API_LIBRARIES_H
+#define PT_SYSTEM_API_LIBRARIES_H
 
-/** @addtogroup Pt-System-FileSystem
+/** @addtogroup Pt-System-Libraries
 
-    @brief File and directory operations with iterator-based traversal.
+    @brief Loading shared libraries and resolving symbols at runtime.
 
-    The systems programming library (Pt::System) provides functionality to
-    identify, create, rename, move or remove files and directories. An iterator
-    based API can be used to traverse through the entries in a directory. It
-    can be used with the iterator based algorithms in the C++ standard library.
-    The FileDevice is an implementation of the IODevice to read and write
-    files. 
+    A process can load a shared library after it has started and resolve
+    symbols from it. %Library is the portable loader.
 */
 
 #endif

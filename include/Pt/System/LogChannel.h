@@ -46,7 +46,7 @@ namespace System {
     and asynchronous logging, whereby the latter one usually involves a thread
     and a message qeueue.
     
-    @ingroup Logging
+    @ingroup Pt-System-Logging
 */
 class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
 {

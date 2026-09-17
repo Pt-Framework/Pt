@@ -88,7 +88,7 @@ namespace System {
     logger2.log(record);
     @endcode
 
-    @ingroup Logging
+    @ingroup Pt-System-Logging
 */
 class LogRecord : protected Pt::NonCopyable
 {

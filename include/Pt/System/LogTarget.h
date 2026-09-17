@@ -57,7 +57,7 @@ class LogRecord;
     targets. Each target also has a log level which is used by the logger to
     determine if a record should be sent to a target.
 
-    @ingroup Logging
+    @ingroup Pt-System-Logging
 */
 class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 {

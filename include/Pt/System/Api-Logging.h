@@ -29,7 +29,7 @@
 #ifndef PT_SYSTEM_API_LOGGING_H
 #define PT_SYSTEM_API_LOGGING_H
 
-/** @defgroup Logging Logging
+/** @addtogroup Pt-System-Logging
 
     @brief Efficient multi-threaded logging with configurable output channels.
 

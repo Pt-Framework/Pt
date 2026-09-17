@@ -42,7 +42,7 @@ class Symbol;
 
 /** @brief Thrown, when a symbol is not found in a library
 
-    @ingroup Plugins
+    @ingroup Pt-System-Libraries
 */
 class PT_SYSTEM_API SymbolNotFound : public SystemError
 {
@@ -69,14 +69,28 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
 
 /** @brief Shared library loader.
 
-    %Library finds a shared library image from a path and returns
-    symbols by name.
+    A process can load a shared library after it has started and resolve
+    symbols from it. %Library is the portable loader. It opens a library
+    image and returns symbols by name.
 
-    Construction and open() look for a file at the given path. If none
-    is there, the path is extended by the platform suffix, then by the
-    shared-library prefix. A basename is enough. An
-    @link Pt::AccessFailed AccessFailed@endlink exception is thrown when
-    no image is found. A second open() may close the image loaded before.
+    @code
+    typedef int (*MyFunc)();
+
+    Pt::System::Path libPath = "MyLib";
+    Pt::System::Library library(libPath);
+
+    Pt::System::Symbol symbol = library.getSymbol("myFunction");
+
+    MyFunc func = reinterpret_cast<MyFunc>(symbol.sym());
+    int result = func();
+    @endcode
+
+    The path "MyLib" is a basename. Construction and open() look for a
+    file at the given path. If none is there, the path is extended by
+    the platform suffix, then by the shared-library prefix. A basename
+    is enough. An @link Pt::AccessFailed AccessFailed@endlink exception
+    is thrown when no image is found. A second open() may close the
+    image loaded before.
 
     prefix() and suffix() return the platform naming pieces so a
     portable library name can be built without relying on that search.
@@ -103,9 +117,7 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
     pointer. Nearly all runtimes implement that as an extension. The
     caller casts %Symbol::sym() to a function pointer to call it.
 
-    %PluginManager uses a %Library to resolve PluginList.
-
-    @ingroup Plugins
+    @ingroup Pt-System-Libraries
 */
 class PT_SYSTEM_API Library
 {
@@ -205,7 +217,7 @@ class PT_SYSTEM_API Library
 
 /** @brief Symbol resolved from a shared library
 
-    @ingroup Plugins
+    @ingroup Pt-System-Libraries
 */
 class Symbol
 {

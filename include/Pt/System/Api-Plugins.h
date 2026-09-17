@@ -29,36 +29,9 @@
 #ifndef PT_SYSTEM_API_PLUGINS_H
 #define PT_SYSTEM_API_PLUGINS_H
 
-/** @defgroup Plugins Dynamic Libraries and Plugins
+/** @addtogroup Pt-System-Plugins
 
-    @brief Loading dynamic libraries and creating plugin instances at runtime.
-
-    A process can load a shared library after it has started and resolve
-    symbols from it. The same libraries can export classes that implement
-    a known interface. Symbol lookup and instance creation are two layers
-    of that mechanism.
-
-    %Library is the portable loader. It opens a library image and
-    resolves a named symbol.
-
-    @code
-    typedef int (*MyFunc)();
-
-    Pt::System::Path libPath = "MyLib";
-    Pt::System::Library library(libPath);
-
-    Pt::System::Symbol symbol = library.getSymbol("myFunction");
-
-    MyFunc func = reinterpret_cast<MyFunc>(symbol.sym());
-    int result = func();
-    @endcode
-
-    The path "MyLib" is a basename. %Library finds the platform image.
-    getSymbol() returns a %Symbol for the name "myFunction".
-
-    The address is a void pointer. Calling it as a function requires a
-    cast to a function pointer type. Standard C++ does not allow that
-    conversion. Nearly all runtimes implement it as an extension.
+    @brief Creating plugin instances from shared libraries at runtime.
 
     A plugin is a shared library. The application keeps the interface
     type. The concrete class is compiled into the library. No extra
@@ -132,8 +105,6 @@
 
     The instance is created and destroyed through the manager, not with
     delete. Loaded libraries unload when the manager is destroyed.
-
-    Path search, platform naming, and symbol lookup belong to %Library.
 */
 
 #endif

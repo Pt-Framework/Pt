@@ -1,13 +1,16 @@
 /** \page Pt-System-Page System
 
+    @copydetails Pt-System
+
     This chapter covers:
 
     - @ref Pt-System-Page-FileSystem
     - @ref Pt-System-Page-Logging
+    - @ref Pt-System-Page-Library
     - @ref Pt-System-Page-Plugins
 
     @section Pt-System-Page-FileSystem File System Access
-    @copydetails FileSystem
+    @copydetails Pt-System-FileSystem
 
     @subsection Pt-System-Page-FileInfo File Information
     @copydetails Pt::System::FileInfo
@@ -19,7 +22,7 @@
     @copydetails Pt::System::FileDevice
 
     @section Pt-System-Page-Logging Logging
-    @copydetails Logging
+    @copydetails Pt-System-Logging
 
     @subsection Pt-System-Page-Logger Loggers
     @copydetails Pt::System::Logger
@@ -30,11 +33,14 @@
     @subsection Pt-System-Page-LogRecord Log Records
     @copydetails Pt::System::LogRecord
 
-    @section Pt-System-Page-Plugins Dynamic Libraries and Plugins
-    @copydetails Plugins
-
-    @subsection Pt-System-Page-Library Shared Libraries
+    @section Pt-System-Page-Library Shared Libraries
     @copydetails Pt::System::Library
+
+    @section Pt-System-Page-Plugins Plugins
+    @copydetails Pt-System-Plugins
+
+    @subsection Pt-System-Page-Plugin Plugin Interfaces
+    @copydetails Pt::System::Plugin
 
     @subsection Pt-System-Page-PluginManager Plugin Managers
     @copydetails Pt::System::PluginManager

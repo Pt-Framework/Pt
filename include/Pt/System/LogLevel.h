@@ -36,7 +36,7 @@ namespace Pt {
 namespace System {
 
 /** @brief Severity of the log-message.
-    @ingroup Logging
+    @ingroup Pt-System-Logging
 */
 enum LogLevel {
     None = 0,

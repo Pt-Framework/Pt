@@ -42,7 +42,7 @@ class PathImpl;
 
 /** @brief Represents a path in the file-system.
 
-    @ingroup FileSystem
+    @ingroup Pt-System-FileSystem
 */
 class PT_SYSTEM_API Path
 {

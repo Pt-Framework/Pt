@@ -75,7 +75,7 @@ class FileInfo;
     for the next file in the directory, until the end of the directory contents
     is reached.
 
-    @ingroup FileSystem
+    @ingroup Pt-System-FileSystem
 */
 class PT_SYSTEM_API DirectoryIterator
 {

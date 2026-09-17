@@ -57,7 +57,7 @@ class PT_API IOError : public std::ios::failure
 
 /** @brief Failed to access a resource.
 
-    @ingroup FileSystem
+    @ingroup Pt-System-FileSystem
 */
 class PT_API AccessFailed : public IOError
 {
