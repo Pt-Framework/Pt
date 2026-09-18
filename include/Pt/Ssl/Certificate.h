@@ -40,6 +40,17 @@ namespace Ssl {
 class CertificateImpl;
     
 /** @brief X509 certificate.
+
+    %Certificate is the non-copyable handle the store holds for one
+    X509 certificate. %subject() is the subject string used to find
+    it. The private key, when the store loaded one for this
+    certificate, stays inside the handle and is not readable.
+
+    Pass the certificate by const reference to %Context::setIdentity(),
+    %addCertificate(), or %addCACertificate(). The store remains the
+    owner of this object.
+
+    @ingroup Pt-Ssl-Certificates
 */
 class PT_SSL_API Certificate : private NonCopyable
 {

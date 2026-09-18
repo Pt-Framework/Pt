@@ -45,7 +45,10 @@
 namespace Pt {
 
 /** @namespace Pt::Ssl
-    @brief Secure Communication using SSL/TLS.
+    @brief SSL/TLS streams, certificates and contexts.
+
+    Portable SSL/TLS on top of an iostream, including certificate
+    stores and shared connection contexts.
 */
 namespace Ssl {
     

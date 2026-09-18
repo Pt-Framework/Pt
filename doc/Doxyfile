@@ -617,7 +617,8 @@ RECURSIVE              = YES
 EXCLUDE                = ../include/Pt/Gui ../include/Pt/_Gfx ../include/Pt/Db \
                          ../include/Pt/Cma ../include/Pt/Hmi ../include/Pt/Reflex \
                          ../include/Pt/Mfc ../include/Pt/Qt ../include/Pt/WxWidgets \
-                         ./pages/http.page
+                         ./pages/http.page \
+                         ./pages/ssl.page
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or
 # directories that are symbolic links (a Unix filesystem feature) are excluded

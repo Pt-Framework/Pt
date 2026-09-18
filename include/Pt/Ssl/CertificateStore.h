@@ -39,7 +39,25 @@ namespace Pt {
 
 namespace Ssl {
 
-/** @brief A store for X509 certificates.
+/** @brief Store for X509 certificates and their keys.
+
+    %CertificateStore is the owner of the certificates the group
+    described. PKCS12 data is loaded from an iostream or from a
+    memory buffer, and PEM data is loaded from memory. Each load
+    adds to the store; it does not replace certificates already
+    loaded. Unreadable PKCS12 or PEM data throws
+    %InvalidCertificate.
+
+    %findCertificate() searches for a subject substring and returns
+    a pointer the store still owns, or a null pointer.
+    %getCertificate() is the same search and throws
+    %InvalidCertificate when nothing matches. %size(), %begin() and
+    %end() inspect the current contents.
+
+    A %Certificate reference or pointer from this store is valid
+    only while the store exists and still holds that certificate.
+
+    @ingroup Pt-Ssl-Certificates
 */
 class PT_SSL_API CertificateStore
 {
@@ -47,38 +65,41 @@ class PT_SSL_API CertificateStore
         class ConstIterator;
 
     public:
-        /** @brief Constructor.
+        /** @brief Creates an empty certificate store.
         */
         CertificateStore();
 
-        /** @brief Destructor.
+        /** @brief Destroys the store and its certificates.
         */
         ~CertificateStore();
 
-        /** @brief Loads PKCS12 data from a stream.
+        /** @brief Loads PKCS12 certificates and keys from @a is.
+
+            @throw %InvalidCertificate if the PKCS12 data is invalid.
         */
         void loadPkcs12(std::istream& is, const char* passwd);
 
-        /** @brief Loads PKCS12 data from memory.
+        /** @brief Loads PKCS12 certificates and keys from memory.
+
+            @throw %InvalidCertificate if the PKCS12 data is invalid.
         */
         void loadPkcs12(const char* data, std::size_t len, const char* passwd);
 
-        /** @brief Loads PEM data from memory.
+        /** @brief Loads PEM certificates and keys from memory.
+
+            @throw %InvalidCertificate if the PEM data is invalid.
         */
         void loadPem(const char* data, std::size_t len, const char* passwd);
 
-        /** @brief Finds a certificate by subject.
+        /** @brief Returns a certificate whose subject contains @a subject.
 
-            Searches for a certificate with the substring @a subject in it's
-            subject. Returns nullptr if no certificate was found.
+            Returns a null pointer if no certificate was found.
         */
         const Certificate* findCertificate(const std::string& subject);
 
-        /** @brief Gets a certificate by subject.
+        /** @brief Returns a certificate whose subject contains @a subject.
 
-            Searches for a certificate with the substring @a subject in it's
-            subject. Throws InvalidCertificate if no certificate with the
-            subject was found.
+            @throw %InvalidCertificate if no certificate was found.
         */
         const Certificate& getCertificate(const std::string& subject);
 
@@ -86,11 +107,11 @@ class PT_SSL_API CertificateStore
         */
         std::size_t size() const;
 
-        /** @brief Returns an iterator to the begin of the certificates.
+        /** @brief Returns an iterator to the first certificate.
         */
         ConstIterator begin() const;
 
-        /** @brief Returns an iterator to the end of the certificates.
+        /** @brief Returns an iterator to one past the last certificate.
         */
         ConstIterator end() const;
 
@@ -109,6 +130,7 @@ class PT_SSL_API CertificateStore::ConstIterator
         //! @brief Copy constructor.
         ConstIterator(const ConstIterator& other);
 
+        //! @internal
         explicit ConstIterator(Certificate* const* cert);
 
         //! @brief Assignment operator.

@@ -43,76 +43,107 @@ namespace Ssl {
 class Connection;
 
 /** @brief SSL stream buffer.
+
+    %StreamBuffer is the streambuf that implements the secure
+    connection the group described. %IOStream holds one and forwards
+    handshake, import, and shutdown to it. Construct this type
+    directly when the caller already works with a %std::streambuf,
+    or when the expected peer name must be set.
+
+    %setPeerName() is the name expected in the peer certificate. It
+    may be called before or after %open(); an open connection
+    receives the name immediately. %import() returns the number of
+    bytes consumed from the underlying stream. %readHandshake()
+    and %writeHandshake() are the same non-blocking handshake as on
+    %IOStream. %currentCipher() is the cipher in use, or a
+    placeholder when no connection is open.
+
+    The example opens a client buffer and sets the name that must
+    appear in the peer certificate.
+
+    @code
+    std::iostream& ios = ...;
+    Pt::Ssl::StreamBuffer sb(ctx, ios, Pt::Ssl::Connect);
+    sb.setPeerName("example.com");
+    @endcode
+
+    @ingroup Pt-Ssl-Streams
 */
 class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
 {
     public:
-        /** @brief Construct an SSL stream buffer. 
+        /** @brief Creates a closed SSL stream buffer.
         */
         StreamBuffer(std::size_t bufferSize = 1024);
 
-        /** @brief Construct an SSL stream buffer.. 
+        /** @brief Creates an SSL stream buffer and opens it.
         */
         StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, std::size_t bufferSize = 1024);
 
-        /** @brief Destructor. 
+        /** @brief Destructor.
         */
         virtual ~StreamBuffer();
 
-        /** @brief Opens the stream buffer. 
+        /** @brief Opens the stream buffer on @a ios using @a ctx and @a mode.
         */
         void open(Context& ctx, std::ios& ios, OpenMode mode);
         
-        /** @brief Sets the expected peer name.
+        /** @brief Sets the name expected in the peer certificate.
         */
         void setPeerName(const std::string& peerName);
 
-        /** @brief Return the currently used cipher.
+        /** @brief Returns the cipher in use, or a placeholder if not connected.
         */
         const char* currentCipher() const;
 
-        /** @brief Closes the stream buffer.
+        /** @brief Closes the stream buffer without a TLS shutdown.
         */
         void close();
 
-        /** @brief Returns true if connected to peer. 
+        /** @brief Returns true if the handshake has completed.
         */
         bool isConnected() const;
 
-        /** @brief Writes a handshake message to the underlying stream
-            
-            Returns true if handshake data was written, false if not.
+        /** @brief Writes a handshake message to the underlying stream.
+
+            Returns true if handshake data was written, false otherwise.
+
+            @throw %HandshakeFailed if the handshake cannot complete.
+            @throw %SslError if the stream is not open.
         */
         bool writeHandshake();
 
-        /** @brief Reads handshake message from the underlying stream
-            
+        /** @brief Reads a handshake message from the underlying stream.
+
             Returns true if more handshake data needs to be read, false
-            if not.
+            otherwise.
+
+            @throw %HandshakeFailed if the handshake cannot complete.
+            @throw %SslError if the stream is not open.
         */
         bool readHandshake(std::streamsize maxRead = 0);
 
-        /** @brief Shutdown the SSL connection. 
-         
-            If isShutdown() returned false, the shutdown message is written
-            to the output. If isShutdown() returned true, or a previous call
-            of shutdown() returned false, more data is required to read the 
-            shutdown reply. True is returned if the shutown was completed.
+        /** @brief Completes or starts the TLS shutdown.
+
+            Returns true if the shutdown completed.
+
+            @throw %SslError if the shutdown fails.
         */
         bool shutdown();
 
-        /** @brief Returns true if the shutown notify has to be completed.
+        /** @brief Returns true if a shutdown alert was received.
         */
         bool isShutdown() const;
 
-        /** @brief Returns true if the connection is closed.
+        /** @brief Returns true if the connection was closed prematurely.
         */
         bool isClosed() const;
 
-        /** @brief Reads user message from the underlying stream.
-            
-            Call isShutdown() to find out if a shutdown notify was received.
-            Returns the number of bytes consumed from the underlyig stream.
+        /** @brief Decrypts available data from the underlying stream.
+
+            Returns the number of bytes consumed from the underlying
+            stream. Call %isShutdown() to find out if a shutdown alert
+            was received.
         */
         std::streamsize import(std::streamsize maxImport = 0);
 

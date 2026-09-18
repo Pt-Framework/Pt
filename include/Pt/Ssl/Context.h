@@ -48,83 +48,124 @@ static struct PT_SSL_API SSLInit
     ~SSLInit();
 } ssl_init;
 
-//! @brief Open mode for ssl I/O.
+/** @brief Open mode for an SSL stream.
+
+    @ingroup Pt-Ssl-Streams
+*/
 enum OpenMode
 {
-    Connect = 1, //!< Connect to server
-    Accept = 2   //!< Accept client
+    Connect = 1, //!< Client handshake
+    Accept = 2   //!< Server handshake
 };
 
-//! @brief Communication protocol.
+/** @brief SSL/TLS protocol version.
+
+    @ingroup Pt-Ssl-Context
+*/
 enum Protocol 
 {
     SSLv2     = 0,   //!< SSL version 2
-    SSLv3or2  = 1,   //!< highest possible protocol version
+    SSLv3or2  = 1,   //!< Highest available protocol version
     SSLv3     = 2,   //!< SSL version 3
-    TLS = SSLv3or2,  //!< highest possible TLS protocol version
+    TLS = SSLv3or2,  //!< Highest available TLS protocol version
     TLSv1     = 3,   //!< TLS version 1.0
     TLSv1_1   = 4,   //!< TLS version 1.1
     TLSv1_2   = 5    //!< TLS version 1.2
 };
 
-//! @brief Verification mode.
+/** @brief How the peer certificate is verified.
+
+    @ingroup Pt-Ssl-Context
+*/
 enum VerifyMode
 {
-    NoVerify = 0,    //!< No verification
-    TryVerify = 1,   //!< Verify if certificate is presented
-    AlwaysVerify = 2 //!< Require tp present certificate
+    NoVerify = 0,    //!< Do not verify the peer
+    TryVerify = 1,   //!< Verify a certificate when the peer presents one
+    AlwaysVerify = 2 //!< Require a peer certificate
 };
 
-//! @brief %Context for SSL connections.
+/** @brief Shared configuration for SSL connections.
+
+    %Context is the configuration the group described: protocol,
+    verification, identity, chain, and trusted CAs, used by every
+    stream opened with it. It is not a connected stream. Keep the
+    context alive while a stream that opened with it is still open.
+
+    The default constructor selects %TLS, the highest available
+    protocol, and %TryVerify. The protocol constructor selects that
+    protocol and the same default verify mode. %setProtocol() and
+    %setVerifyMode() change them later. %setVerifyDepth() limits
+    how many certificates in the peer's chain are checked.
+
+    %setIdentity() is required on a server context and optional on
+    a client context. %addCertificate() extends the chain presented
+    with that identity. %addCACertificate() extends the trust store
+    used to verify the peer. Each of those calls copies what it
+    needs from the %Certificate argument, which must be valid for
+    the call. Unusable material throws %InvalidCertificate.
+
+    The object is not copyable. %assign() copies protocol, verify
+    settings, and certificates from another context into this one.
+
+    @ingroup Pt-Ssl-Context
+*/
 class PT_SSL_API Context : public NonCopyable
 {
     public:
-        //! @brief Construct with defaults. 
+        /** @brief Creates a context for the highest available TLS protocol.
+        */
         Context();
 
-        //! @brief Construct with specific protocol. 
+        /** @brief Creates a context for @a protocol.
+        */
         Context(Protocol protocol);
 
-        //! @brief Destructor.
+        /** @brief Destructor.
+        */
         ~Context();
 
-        //! @brief Assigns the certificates, verify mode and protocol.
+        /** @brief Copies protocol, verify settings and certificates from @a ctx.
+        */
         void assign(const Context& ctx);
 
-        //! @brief Returns the current protocol. 
+        /** @brief Returns the protocol.
+        */
         Protocol protocol() const;
 
-        //! @brief Sets the current protocol. 
+        /** @brief Sets the protocol.
+        */
         void setProtocol(Protocol protocol);
 
-        //! @brief Limits the number of certificates checked in the peer's certificate chain.
+        /** @brief Limits how many certificates are checked in the peer chain.
+        */
         void setVerifyDepth(int n);
 
-        //! @brief Returns the current verify mode.
+        /** @brief Returns the verification mode.
+        */
         VerifyMode verifyMode() const;
 
-        //! @brief Sets the current validation mode.
+        /** @brief Sets the verification mode.
+        */
         void setVerifyMode(VerifyMode mode);
 
-        /** @brief Add a certificate to the  trusted CA certificates.
-            
-            Trusted CA certificates are needed to check, if the peer's 
-            certificate is signed by a trusted Certificate Authority. 
-            Add the certificates of all trusted CAs.
-         */
+        /** @brief Adds @a trustedCert to the trusted CA certificates.
+
+            @throw %InvalidCertificate if @a trustedCert cannot be used.
+        */
         void addCACertificate(const Certificate& trustedCert);
 
-        /** @brief Set the main certificate of this context.
+        /** @brief Sets the certificate presented to the peer.
 
-            Setting a main certificate is mandatory for a server context. For
-            a client context, it is only needed for client authentication.
-         */
+            Required for a server context. For a client context, needed
+            only for client authentication.
+
+            @throw %InvalidCertificate if @a cert cannot be used as identity.
+        */
         void setIdentity(const Certificate& cert);
 
-        /** @brief Builds certificate chain.
+        /** @brief Adds @a cert to the chain presented with the identity.
 
-            Adds the certificate to the certificate chain presented to the
-            peer together with the main certificate.
+            @throw %InvalidCertificate if @a cert cannot be used.
         */
         void addCertificate(const Certificate& cert);
 

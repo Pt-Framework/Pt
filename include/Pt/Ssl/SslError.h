@@ -38,47 +38,63 @@ namespace Pt {
 namespace Ssl {
 
 /** @brief Generic SSL run-time error.
+
+    @ingroup Pt-Ssl
   */
 class PT_SSL_API SslError : public System::IOError
 {
     public:
-        //! @brief Contructs with message.
+        /** @brief Constructs with message.
+        */
         SslError(const std::string& what);
 
-        //! @brief Contructs with message.
+        /** @brief Constructs with message.
+        */
         SslError(const char* what);
 
-        //! @brief Destructor.
+        /** @brief Destructor.
+        */
         ~SslError() throw();
 };
 
-/** @brief SSL Handshake failed.
+/** @brief SSL handshake failed.
+
+    @ingroup Pt-Ssl-Streams
   */
 class PT_SSL_API HandshakeFailed : public SslError 
 {
     public:
-        //! @brief Contructs with message.
+        /** @brief Constructs with message.
+        */
         HandshakeFailed(const std::string& what) throw();
 
-        //! @brief Contructs with message.
+        /** @brief Constructs with message.
+        */
         HandshakeFailed(const char* what) throw();
 
-        //! @brief Destructor.
+        /** @brief Destructor.
+        */
         ~HandshakeFailed() throw();
 };
 
 /** @brief Invalid SSL certificate or certificate chain.
+
+    @ingroup Pt-Ssl-Certificates
+    @ingroup Pt-Ssl-Context
   */
 class PT_SSL_API InvalidCertificate : public SslError 
 {
     public:
-        //! @brief Contructs with message.
+        /** @brief Constructs with message.
+        */
         InvalidCertificate(const std::string& what) throw();
 
-        //! @brief Contructs with message.
+        /** @brief Constructs with message.
+        */
         InvalidCertificate(const char* what) throw();
 
-        //! @brief Destructor.
+        /** @brief Destructor.
+        */
         ~InvalidCertificate() throw();
 };
 

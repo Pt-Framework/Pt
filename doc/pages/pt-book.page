@@ -88,11 +88,12 @@
 @section pt_ssl Secure Communication
 
 <ul>
-    <li> @ref ssl_CertStore </li>
-    <li> @ref ssl_Context </li>
-    <li> @ref ssl_Connection </li>
-    <li> @ref ssl_ReadWrite </li>
-    <li> @ref ssl_Shutdown </li>
+    <li> @ref Pt-Ssl-Page </li>
+    <ul>
+        <li> @ref Pt-Ssl-Page-Certificates </li>
+        <li> @ref Pt-Ssl-Page-Context </li>
+        <li> @ref Pt-Ssl-Page-Streams </li>
+    </ul>
 </ul>
 
 @section pt_xmlrpc XML-RPC Communication
