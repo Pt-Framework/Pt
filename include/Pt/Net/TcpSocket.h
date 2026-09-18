@@ -89,26 +89,36 @@ class PT_NET_API TcpSocketOptions
 
 /** @brief Connected TCP byte stream.
 
-    %TcpSocket is the connected stream in the TCP model above.
+    %TcpSocket is the connected TCP %IODevice. The same type is the
+    client side of a %connect() and the accepted side of a pending
+    %TcpServer connection. After the stream is up, %read() and %write()
+    are the inherited device operations, blocking or asynchronous.
 
     %connect() reaches a remote endpoint and makes this socket the
-    client side of the stream.
+    client stream. If the host is not reachable, the operation throws
+    %AccessFailed. %accept() takes a pending connection from a listening
+    server and makes this socket the accepted stream. A socket is one
+    side or the other, not both at once: %connect() and %accept() close
+    any previous connection first.
 
-    %accept() takes a pending connection from a listening server and
-    makes this socket the accepted side.
+    @par Asynchronous connect
 
     %beginConnect() starts an asynchronous connect. The socket must be
-    attached to an event loop.
+    attached to an event loop. %connected() is emitted when the attempt
+    finishes. %endConnect() completes it and throws %AccessFailed if
+    the host is not reachable. %isConnected() reports whether the
+    stream is up. %localEndpoint() and %remoteEndpoint() write the two
+    sides of the connection.
 
-    connected is emitted when the attempt finishes. %endConnect()
-    completes it. If the host is not reachable, the operation throws
-    %AccessFailed.
+    %TcpSocketOptions configure the connection. They do not open a
+    socket. Keep-alive, when set to a non-negative interval in seconds,
+    enables periodic probes on the stream. A negative value leaves
+    keep-alive unset.
 
-    %isConnected() reports whether the stream is up.
-
-    %localEndpoint() writes the local side of the connection.
-
-    %remoteEndpoint() writes the remote side.
+    The example is an asynchronous client connect. The slot calls
+    %endConnect() and then writes through the inherited device
+    operation. The accept path is the %TcpServer pending-connection
+    slot.
 
     @code
     void onConnected(Pt::Net::TcpSocket& socket)
@@ -144,7 +154,7 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         /** @brief Creates a socket and connects to @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         explicit TcpSocket(const Endpoint& ep);
 
@@ -162,31 +172,35 @@ class PT_NET_API TcpSocket : public System::IODevice
 
         /** @brief Connects to @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void connect(const Endpoint& ep);
         
         /** @brief Connects to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void connect(const Endpoint& ep, const TcpSocketOptions& o);
 
         /** @brief Begins connecting to @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            The socket must be attached to an event loop.
+
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void beginConnect(const Endpoint& ep);
 
         /** @brief Begins connecting to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            The socket must be attached to an event loop.
+
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void beginConnect(const Endpoint& ep, const TcpSocketOptions& o);
 
         /** @brief Ends connecting to a host.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void endConnect();
 

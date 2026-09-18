@@ -33,21 +33,25 @@
 
     @brief Bind, send and receive UDP datagrams.
 
-    A UDP socket sends and receives datagrams. The same type covers
-    unicast, broadcast and multicast.
+    UDP is datagram I/O on a single %UdpSocket type. The same type
+    sends and receives unicast, broadcast, and multicast datagrams. It
+    is an %IODevice: after a local bind or a send destination is set,
+    %read() and %write() are the inherited device operations, blocking
+    or asynchronous. Each %write() sends one datagram. Each %read()
+    receives one datagram. This is not a TCP-style byte stream.
 
-    Bind sets the local endpoint that receives datagrams.
-
-    Connect associates a remote peer. Writes go to that peer. Reads
-    come from it.
-
-    A send destination can be set without associating the socket.
-    Broadcast and multicast sends use that path.
+    Three operations set where datagrams go and where they come from.
+    %bind() sets the local endpoint that receives datagrams. %connect()
+    associates a remote peer, so writes go to that peer and reads come
+    from it. %setTarget() sets a send destination without associating
+    the socket; broadcast and multicast sends use that path. A socket
+    may bind and still set a target, which is how a receiver that also
+    sends to a group is set up.
 
     A socket joins a multicast group to receive that group's datagrams.
-    Bind first.
-
-    Option values enable broadcast and set the hop limit.
+    Bind first, then join. %UdpSocketOptions enable broadcast and set
+    the hop limit. Those values configure an operation; they do not
+    open a socket.
 */
 
 #endif

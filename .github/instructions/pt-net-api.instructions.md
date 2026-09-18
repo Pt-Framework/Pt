@@ -12,7 +12,7 @@ description: "TCP and UDP network sockets"
   `include/Pt/Net/Api-Tcp.h`
 - Listen for TCP connections, configure accept backlog, receive pending connections:
   `include/Pt/Net/TcpServer.h`
-- Connect, accept, read, write and configure TCP client sockets:
+- Connect, accept, read, write and configure connected TCP sockets:
   `include/Pt/Net/TcpSocket.h`
 - UDP sockets group, bind, connect, setTarget, broadcast and multicast:
   `include/Pt/Net/Api-Udp.h`

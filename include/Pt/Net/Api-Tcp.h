@@ -33,20 +33,43 @@
 
     @brief Listen, accept and connect TCP streams.
 
-    A TCP server listens on a local endpoint. It waits for peers and
-    reports each pending connection.
+    TCP is a connected byte stream between two endpoints. Two types
+    implement that model. %TcpServer listens on a local endpoint and
+    reports pending peers. %TcpSocket is the stream that transfers
+    bytes. The same socket type is the client side of a %connect() and
+    the accepted side of a pending server connection.
 
-    A TCP socket is the connected byte stream. Accepting a pending
-    connection from the server creates that stream.
+    A server %listen() binds the local endpoint and waits for peers.
+    %TcpSocket::accept() takes one pending connection and makes that
+    socket the accepted stream. %TcpSocket::connect() reaches a remote
+    endpoint and makes that socket the client stream. After the stream
+    is up, %read() and %write() are the inherited I/O-device operations,
+    blocking or asynchronous.
 
-    Connecting to a remote endpoint creates the stream from the client
-    side.
+    %TcpServer is a %Selectable, not an %IODevice. It does not read or
+    write. %TcpSocket is an %IODevice. Listen and connection settings
+    live in %TcpServerOptions and %TcpSocketOptions. Those values
+    configure an operation; they do not open a socket.
 
-    After the socket is connected, read and write are the inherited
-    I/O-device operations.
+    The example is the two-type model on one thread. %listen() queues
+    incoming connections. %connect() completes against that queue.
+    %accept() takes the pending stream. The bytes then move through the
+    inherited device operations.
 
-    Listen and connection settings live in option values. Those values
-    do not open a socket.
+    @code
+    Pt::Net::TcpServer server;
+    server.listen(Pt::Net::Endpoint::ip4Any(9000));
+
+    Pt::Net::TcpSocket client;
+    client.connect(Pt::Net::Endpoint::ip4Loopback(9000));
+
+    Pt::Net::TcpSocket peer;
+    peer.accept(server);
+
+    peer.write("Hello", 5);
+    char buf[5];
+    client.read(buf, 5);
+    @endcode
 */
 
 #endif

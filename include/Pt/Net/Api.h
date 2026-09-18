@@ -47,8 +47,8 @@ namespace Pt {
 /** @namespace Pt::Net
     @brief TCP and UDP network sockets.
 
-    This module provides portable TCP and UDP sockets for IPv4 and IPv6,
-    including unicast, broadcast and multicast UDP.
+    Portable TCP and UDP sockets for IPv4 and IPv6, including unicast,
+    broadcast and multicast UDP.
 */
 namespace Net {
 

@@ -17,12 +17,12 @@
     @subsection Pt-Net-Page-TcpServer TCP Servers
     @copydetails Pt::Net::TcpServer
 
-    @subsection Pt-Net-Page-TcpSocket TCP Client Sockets
+    @subsection Pt-Net-Page-TcpSocket Connected TCP Sockets
     @copydetails Pt::Net::TcpSocket
 
     @section Pt-Net-Page-Udp UDP Sockets
     @copydetails Pt-Net-Udp
 
-    @subsection Pt-Net-Page-UdpSocket UDP Sockets
+    @subsection Pt-Net-Page-UdpSocket Datagram Socket
     @copydetails Pt::Net::UdpSocket
 */

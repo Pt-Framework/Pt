@@ -99,21 +99,44 @@ class PT_NET_API UdpSocketOptions
 
 /** @brief UDP datagram socket.
 
-    %UdpSocket is the datagram socket in the model above.
+    %UdpSocket is the datagram %IODevice for unicast, broadcast, and
+    multicast. One type covers all three modes. After a local bind or a
+    send destination is set, %read() and %write() are the inherited
+    device operations, blocking or asynchronous. Each %write() sends
+    one datagram. Each %read() receives one datagram.
 
-    %bind() sets the local endpoint that receives datagrams.
+    %bind() sets the local endpoint that receives datagrams. If that
+    address is already occupied, the call throws %AddressInUse. If the
+    host cannot be used, it throws %AccessFailed. %connect() associates
+    a remote peer so writes go there and reads come from it.
+    %setTarget() sets a send destination without associating the socket.
+    Broadcast and multicast sends use %setTarget(). %connect() and
+    %setTarget() throw %AccessFailed when the host is not reachable.
 
-    %beginBind() starts that bind on an attached event loop.
+    @par Asynchronous bind and connect
 
-    bound() is emitted when it finishes. %endBind() completes it.
+    %beginBind() and %beginConnect() start those operations on an
+    attached event loop. They return true when the operation completed
+    immediately. %bound() and %connected() are emitted when the attempt
+    finishes. %endBind() and %endConnect() complete it. The socket must
+    be attached before either begin method is called. %isBound() and
+    %isConnected() report the current associations. %localEndpoint()
+    writes the local side. %remoteEndpoint() is the associated peer.
 
-    %connect() associates a remote peer so writes go there and reads
-    come from it.
+    @par Broadcast and multicast
 
-    %setTarget() sets a send destination without associating the
-    socket. Broadcast and multicast sends use that path.
+    Broadcast send sets the broadcast option and uses the IPv4
+    broadcast endpoint as the target. Multicast send uses a multicast
+    group address as the target. To receive a group's datagrams, bind
+    first, then %joinMulticastGroup(). %UdpSocketOptions also set the
+    hop limit. Those values configure an operation; they do not open a
+    socket.
 
-    %joinMulticastGroup() joins a multicast group. Bind first.
+    The first example is asynchronous unicast: one socket binds the
+    local any-address, the other connects to loopback, and each slot
+    completes the begin operation before I/O. The second example is a
+    broadcast send. The third binds, joins a group, and sends to that
+    group.
 
     @code
     char buffer[256];
@@ -145,6 +168,25 @@ class PT_NET_API UdpSocketOptions
     loop.run();
     @endcode
 
+    @code
+    Pt::Net::UdpSocketOptions opts;
+    opts.setBroadcast();
+
+    Pt::Net::UdpSocket sender;
+    sender.setTarget(Pt::Net::Endpoint::ip4Broadcast(8000), opts);
+    sender.write("Hello", 5);
+    @endcode
+
+    @code
+    Pt::Net::UdpSocket receiver;
+    receiver.bind(Pt::Net::Endpoint::ip4Any(8000));
+    receiver.joinMulticastGroup("224.0.1.1");
+
+    Pt::Net::UdpSocket sender;
+    sender.setTarget(Pt::Net::Endpoint("224.0.1.1", 8000));
+    sender.write("Hello", 5);
+    @endcode
+
     @ingroup Pt-Net-Udp
 */
 class PT_NET_API UdpSocket : public System::IODevice
@@ -164,13 +206,15 @@ class PT_NET_API UdpSocket : public System::IODevice
         
         /** @brief Binds to local endpoint @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %AddressInUse if the local address is already occupied.
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void bind(const Endpoint& ep);
 
         /** @brief Binds to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %AddressInUse if the local address is already occupied.
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void bind(const Endpoint& ep, const UdpSocketOptions& o);
 
@@ -180,13 +224,19 @@ class PT_NET_API UdpSocket : public System::IODevice
 
             The socket must be attached to an event loop.
 
-            @throw System::AccessFailed if the host is not reachable
+            @return true if the bind completed immediately
+            @throw %AddressInUse if the local address is already occupied.
+            @throw %System::AccessFailed if the host is not reachable.
         */
         bool beginBind(const Endpoint& ep);
 
         /** @brief Begins binding to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            The socket must be attached to an event loop.
+
+            @return true if the bind completed immediately
+            @throw %AddressInUse if the local address is already occupied.
+            @throw %System::AccessFailed if the host is not reachable.
         */
         bool beginBind(const Endpoint& ep, const UdpSocketOptions& o);
 
@@ -194,7 +244,8 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         /** @brief Ends binding to a local endpoint.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %AddressInUse if the local address is already occupied.
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void endBind();
 
@@ -209,43 +260,49 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         /** @brief Connects to @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void connect(const Endpoint& ep);
 
         /** @brief Connects to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void connect(const Endpoint& ep, const UdpSocketOptions& o);
 
         /** @brief Sets the send target to @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void setTarget(const Endpoint& ep);
 
         /** @brief Sets the send target to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void setTarget(const Endpoint& ep, const UdpSocketOptions& o);
 
         /** @brief Begins connecting to @a ep.
 
-            @throw System::AccessFailed if the host is not reachable
+            The socket must be attached to an event loop.
+
+            @return true if the connect completed immediately
+            @throw %System::AccessFailed if the host is not reachable.
         */
         bool beginConnect(const Endpoint& ep);
 
         /** @brief Begins connecting to @a ep with @a o.
 
-            @throw System::AccessFailed if the host is not reachable
+            The socket must be attached to an event loop.
+
+            @return true if the connect completed immediately
+            @throw %System::AccessFailed if the host is not reachable.
         */
         bool beginConnect(const Endpoint& ep, const UdpSocketOptions& o);
 
         /** @brief Ends connecting to an endpoint.
 
-            @throw System::AccessFailed if the host is not reachable
+            @throw %System::AccessFailed if the host is not reachable.
         */
         void endConnect();
 
