@@ -100,43 +100,43 @@ class PT_NET_API UdpSocketOptions
 /** @brief UDP datagram socket.
 
     %UdpSocket is the datagram %IODevice for unicast, broadcast, and
-    multicast. One type covers all three modes. After a local bind or a
-    send destination is set, %read() and %write() are the inherited
-    device operations, blocking or asynchronous. Each %write() sends
-    one datagram. Each %read() receives one datagram.
+    multicast, so one type covers all three modes. After a local bind
+    or a send destination is set, %read() and %write() are the inherited
+    device operations, blocking or asynchronous, except that each
+    %write() sends one datagram and each %read() receives one datagram.
 
-    %bind() sets the local endpoint that receives datagrams. If that
-    address is already occupied, the call throws %AddressInUse. If the
-    host cannot be used, it throws %AccessFailed. %connect() associates
-    a remote peer so writes go there and reads come from it.
-    %setTarget() sets a send destination without associating the socket.
-    Broadcast and multicast sends use %setTarget(). %connect() and
-    %setTarget() throw %AccessFailed when the host is not reachable.
+    %bind() sets the local endpoint that receives datagrams, throwing
+    %AddressInUse if that address is already occupied and %AccessFailed
+    if the host cannot be used. %connect() associates a remote peer so
+    writes go there and reads come from it, while %setTarget() sets a
+    send destination without associating the socket, which is the path
+    broadcast and multicast sends use. %connect() and %setTarget()
+    throw %AccessFailed when the host is not reachable.
 
     @par Asynchronous bind and connect
 
     %beginBind() and %beginConnect() start those operations on an
-    attached event loop. They return true when the operation completed
+    attached event loop and return true when the operation completed
     immediately. %bound() and %connected() are emitted when the attempt
-    finishes. %endBind() and %endConnect() complete it. The socket must
-    be attached before either begin method is called. %isBound() and
-    %isConnected() report the current associations. %localEndpoint()
-    writes the local side. %remoteEndpoint() is the associated peer.
+    finishes, and %endBind() and %endConnect() complete it. The socket
+    must be attached before either begin method is called. %isBound()
+    and %isConnected() report the current associations, %localEndpoint()
+    writes the local side, and %remoteEndpoint() is the associated peer.
 
     @par Broadcast and multicast
 
     Broadcast send sets the broadcast option and uses the IPv4
-    broadcast endpoint as the target. Multicast send uses a multicast
-    group address as the target. To receive a group's datagrams, bind
-    first, then %joinMulticastGroup(). %UdpSocketOptions also set the
-    hop limit. Those values configure an operation; they do not open a
-    socket.
+    broadcast endpoint as the target, while multicast send uses a
+    multicast group address as the target. To receive a group's
+    datagrams, bind first, then %joinMulticastGroup(). %UdpSocketOptions
+    also set the hop limit; those values configure an operation, but
+    they do not open a socket.
 
     The first example is asynchronous unicast: one socket binds the
     local any-address, the other connects to loopback, and each slot
     completes the begin operation before I/O. The second example is a
-    broadcast send. The third binds, joins a group, and sends to that
-    group.
+    broadcast send, and the third binds, joins a group, and sends to
+    that group.
 
     @code
     char buffer[256];

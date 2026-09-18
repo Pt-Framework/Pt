@@ -94,21 +94,22 @@ class TcpServerImpl;
 
 /** @brief Listens for TCP connections.
 
-    %TcpServer is the listening %Selectable in the TCP model. It binds a
-    local endpoint and reports pending peers. It is not an %IODevice and
-    it does not read or write bytes. A %TcpSocket takes each connection.
+    %TcpServer is the listening %Selectable in the TCP model: it binds
+    a local endpoint and reports pending peers, but it is not an
+    %IODevice and it does not read or write bytes. A %TcpSocket takes
+    each connection.
 
-    %listen() binds the local endpoint and waits for peers. If that
-    address is already occupied, the call throws %AddressInUse. A second
+    %listen() binds the local endpoint and waits for peers, and if that
+    address is already occupied the call throws %AddressInUse. A second
     %listen() closes the previous listen first, so the server holds at
     most one local binding. The constructors create a closed server,
     attach one to an %EventLoop, or listen immediately on an endpoint.
 
     @par Listen options
 
-    %TcpServerOptions configure the listen. They do not open a server.
+    %TcpServerOptions configure the listen; they do not open a server.
     The accept backlog is the number of pending connections the server
-    will queue. Deferred accept, when set to a positive number of
+    will queue, and deferred accept, when set to a positive number of
     seconds, may wait until the peer sends data before reporting the
     connection. A negative deferred-accept value leaves that setting
     unset.
@@ -116,18 +117,19 @@ class TcpServerImpl;
     @par Accepting connections
 
     Asynchronous accept requires an attached event loop. %beginAccept()
-    waits for the next pending connection. %connectionPending() is
+    waits for the next pending connection, and %connectionPending() is
     emitted when a peer is ready. There is no matching end-accept: a
     %TcpSocket takes the connection with %accept(). The server must be
-    attached before %beginAccept(). After the slot takes the
-    connection, call %beginAccept() again to wait for the next peer.
+    attached before %beginAccept(), and after the slot takes the
+    connection, %beginAccept() is called again to wait for the next
+    peer.
 
-    %close() stops listening and accepting. The caller owns the server.
-    Attaching it to a loop does not transfer ownership.
+    %close() stops listening and accepting. The caller owns the server,
+    and attaching it to a loop does not transfer ownership.
 
     The example is the pending-connection slot. The acceptor is
-    %Connectable so it can bind %connectionPending() to %onPending().
-    When the signal fires, %accept() takes the stream into a
+    %Connectable so it can bind %connectionPending() to %onPending(),
+    and when the signal fires, %accept() takes the stream into a
     %TcpSocket that the acceptor owns.
 
     @code

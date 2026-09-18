@@ -89,34 +89,34 @@ class PT_NET_API TcpSocketOptions
 
 /** @brief Connected TCP byte stream.
 
-    %TcpSocket is the connected TCP %IODevice. The same type is the
+    %TcpSocket is the connected TCP %IODevice, and the same type is the
     client side of a %connect() and the accepted side of a pending
     %TcpServer connection. After the stream is up, %read() and %write()
     are the inherited device operations, blocking or asynchronous.
 
     %connect() reaches a remote endpoint and makes this socket the
-    client stream. If the host is not reachable, the operation throws
-    %AccessFailed. %accept() takes a pending connection from a listening
-    server and makes this socket the accepted stream. A socket is one
-    side or the other, not both at once: %connect() and %accept() close
+    client stream, throwing %AccessFailed if the host is not reachable,
+    while %accept() takes a pending connection from a listening server
+    and makes this socket the accepted stream. A socket is one side or
+    the other, not both at once, because %connect() and %accept() close
     any previous connection first.
 
     @par Asynchronous connect
 
-    %beginConnect() starts an asynchronous connect. The socket must be
-    attached to an event loop. %connected() is emitted when the attempt
-    finishes. %endConnect() completes it and throws %AccessFailed if
-    the host is not reachable. %isConnected() reports whether the
-    stream is up. %localEndpoint() and %remoteEndpoint() write the two
-    sides of the connection.
+    %beginConnect() starts an asynchronous connect, which requires the
+    socket to be attached to an event loop. %connected() is emitted
+    when the attempt finishes, and %endConnect() completes it, throwing
+    %AccessFailed if the host is not reachable. %isConnected() reports
+    whether the stream is up, and %localEndpoint() and %remoteEndpoint()
+    write the two sides of the connection.
 
-    %TcpSocketOptions configure the connection. They do not open a
+    %TcpSocketOptions configure the connection but do not open a
     socket. Keep-alive, when set to a non-negative interval in seconds,
-    enables periodic probes on the stream. A negative value leaves
+    enables periodic probes on the stream, and a negative value leaves
     keep-alive unset.
 
-    The example is an asynchronous client connect. The slot calls
-    %endConnect() and then writes through the inherited device
+    The example is an asynchronous client connect, in which the slot
+    calls %endConnect() and then writes through the inherited device
     operation. The accept path is the %TcpServer pending-connection
     slot.
 

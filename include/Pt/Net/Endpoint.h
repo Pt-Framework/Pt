@@ -41,29 +41,30 @@ class EndpointImpl;
 /** @brief Host and service address.
 
     %Endpoint is the copyable address value that TCP and UDP operations
-    use. It names a host and a service port. It does not open a socket,
-    and constructing one does not start a connection or a listen.
+    use: it names a host and a service port, but it does not open a
+    socket, and constructing one does not start a connection or a
+    listen.
 
-    A host string and a port number construct it. The host may be a DNS
-    name or a numeric IPv4 or IPv6 address. Name resolution happens when
-    a socket uses the endpoint, not when the value is created, so an
-    invalid name fails on listen, bind, or connect rather than on
+    A host string and a port number construct it, and the host may be a
+    DNS name or a numeric IPv4 or IPv6 address. Name resolution happens
+    when a socket uses the endpoint, not when the value is created, so
+    an invalid name fails on listen, bind, or connect rather than on
     construction.
 
     Factory functions build the IPv4 and IPv6 any and loopback
-    addresses, and the IPv4 broadcast address, for a port. Those
+    addresses, and the IPv4 broadcast address, for a port, and those
     addresses do not perform name resolution. The any-address is the
-    local wildcard used to listen or bind on every local interface.
-    Loopback is the host itself. The IPv4 broadcast address is the send
-    destination for UDP broadcast.
+    local wildcard used to listen or bind on every local interface,
+    loopback is the host itself, and the IPv4 broadcast address is the
+    send destination for UDP broadcast.
 
-    %toString() formats the endpoint for display. %clear() resets it to
-    an empty address. Copy and assignment duplicate the address, not a
-    socket.
+    %toString() formats the endpoint for display, %clear() resets it to
+    an empty address, and copy and assignment duplicate the address,
+    not a socket.
 
     The example constructs a named host-and-port endpoint and an IPv4
-    any-address for a port. The first is a remote or named host. The
-    second is a local wildcard.
+    any-address for a port, so the first is a remote or named host and
+    the second is a local wildcard.
 
     @code
     Pt::Net::Endpoint host("example.com", 80);

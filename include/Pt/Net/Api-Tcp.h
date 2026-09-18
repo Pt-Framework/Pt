@@ -33,28 +33,28 @@
 
     @brief Listen, accept and connect TCP streams.
 
-    TCP is a connected byte stream between two endpoints. Two types
-    implement that model. %TcpServer listens on a local endpoint and
-    reports pending peers. %TcpSocket is the stream that transfers
-    bytes. The same socket type is the client side of a %connect() and
-    the accepted side of a pending server connection.
+    TCP is a connected byte stream between two endpoints, implemented
+    by two types: %TcpServer listens on a local endpoint and reports
+    pending peers, and %TcpSocket is the stream that transfers bytes,
+    whether it is the client side of a %connect() or the accepted side
+    of a pending server connection.
 
     A server %listen() binds the local endpoint and waits for peers.
     %TcpSocket::accept() takes one pending connection and makes that
-    socket the accepted stream. %TcpSocket::connect() reaches a remote
-    endpoint and makes that socket the client stream. After the stream
-    is up, %read() and %write() are the inherited I/O-device operations,
-    blocking or asynchronous.
+    socket the accepted stream, while %TcpSocket::connect() reaches a
+    remote endpoint and makes that socket the client stream. After the
+    stream is up, %read() and %write() are the inherited I/O-device
+    operations, blocking or asynchronous.
 
-    %TcpServer is a %Selectable, not an %IODevice. It does not read or
-    write. %TcpSocket is an %IODevice. Listen and connection settings
-    live in %TcpServerOptions and %TcpSocketOptions. Those values
-    configure an operation; they do not open a socket.
+    %TcpServer is a %Selectable, not an %IODevice, so it does not read
+    or write, whereas %TcpSocket is an %IODevice. Listen and connection
+    settings live in %TcpServerOptions and %TcpSocketOptions, which
+    configure an operation but do not open a socket.
 
-    The example is the two-type model on one thread. %listen() queues
-    incoming connections. %connect() completes against that queue.
-    %accept() takes the pending stream. The bytes then move through the
-    inherited device operations.
+    The example is the two-type model on one thread: %listen() queues
+    incoming connections, %connect() completes against that queue,
+    %accept() takes the pending stream, and the bytes then move through
+    the inherited device operations.
 
     @code
     Pt::Net::TcpServer server;
