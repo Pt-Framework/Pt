@@ -38,14 +38,18 @@ namespace Pt {
 namespace Http {
 
 /** @brief HTTP run-time error.
-  */
+
+    @ingroup Pt-Http-Messages
+*/
 class PT_HTTP_API HttpError : public System::IOError
 {
     public:
-        //! @brief Contruct with message.
+        /** @brief Constructs the error with message @a what.
+        */
         explicit HttpError(const char* what);
 
-        //! @brief Contruct with message.
+        /** @brief Constructs the error with message @a what.
+        */
         explicit HttpError(const std::string& what);
 
         //! @brief Destructor.

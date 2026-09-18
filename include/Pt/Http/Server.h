@@ -52,7 +52,31 @@ class Context;
 
 namespace Http {
 
-/** @brief An HTTP server.
+/** @brief Listening HTTP server.
+
+    %Server is the listening HTTP service in the server model. It binds
+    a local %Endpoint and accepts connections, but it does not implement
+    a resource. Incoming requests are mapped by servlets that have been
+    added with %addServlet(). The first servlet that maps the request
+    handles it. %removeServlet() unregisters a servlet.
+
+    All server I/O is asynchronous, so the server needs an %EventLoop,
+    passed to a constructor or to %setActive(). The loop does not own
+    the server. %listen() binds the local endpoint, optionally with
+    %TcpServerOptions, and a second listen replaces the previous
+    binding. %cancel() stops accepting and pending work.
+
+    %setSecure() assigns a %Pt::Ssl::Context so the server accepts only
+    HTTPS connections. Further use of servlets and responders is
+    unchanged. Certificate and handshake details live in the SSL
+    module.
+
+    %setMaxThreads() bounds worker threads. %setTimeout() and
+    %setKeepAliveTimeout() bound idle I/O and persistent connections,
+    and %setMaxRequestSize() rejects a request whose size exceeds that
+    limit.
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Server : public Connectable
                          , private NonCopyable
@@ -90,7 +114,7 @@ class PT_HTTP_API Server : public Connectable
         */
         void setTimeout(std::size_t ms);
 
-        /** @brief Enables to use HTTPS.
+        /** @brief Enables HTTPS with @a ctx.
         */
         void setSecure(Ssl::Context& ctx);
         

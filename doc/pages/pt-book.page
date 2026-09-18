@@ -76,22 +76,12 @@
 @section pt_http HTTP Clients and Servers
 
 <ul>
-    <li> @ref http_client </li>
+    <li> @ref Pt-Http-Page </li>
     <ul>
-        <li> @ref http_client_send </li>
-        <li> @ref http_client_pipelining </li>
-        <li> @ref http_client_chunked </li>
-        <li> @ref http_client_ssl </li>
-        <li> @ref http_client_auth </li>
-    </ul>
-
-    <li> @ref http_server </li>
-
-    <ul>
-        <li> @ref http_server_service </li>
-        <li> @ref http_server_servlet </li>
-        <li> @ref http_server_ssl </li>
-        <li> @ref http_server_auth </li>
+        <li> @ref Pt-Http-Page-Messages </li>
+        <li> @ref Pt-Http-Page-Clients </li>
+        <li> @ref Pt-Http-Page-Servers </li>
+        <li> @ref Pt-Http-Page-WebSocket </li>
     </ul>
 </ul>
 

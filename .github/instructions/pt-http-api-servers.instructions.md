@@ -2,6 +2,8 @@
 description: "HTTP Servers and Services"
 ---
 
+- HTTP servers group, listen, mapping, responders and authorization:
+  `include/Pt/Http/Api-Servers.h`
 - Create HTTP servers, listen on endpoints, configure timeouts, HTTPS and threading:
   `include/Pt/Http/Server.h`
 - Handle request lifecycles, read request bodies and send replies:

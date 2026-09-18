@@ -44,7 +44,9 @@ namespace Http {
 class Request;
 class Reply;
 
-/** @brief HTTP authorization operation.
+/** @brief Asynchronous HTTP authorization operation.
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Authorization : private Pt::NonCopyable
 {
@@ -86,7 +88,58 @@ class PT_HTTP_API Authorization : private Pt::NonCopyable
         Signal<Authorization&> _finished;
 };
 
-/** @brief %Server side authorization.
+/** @brief Server-side authorization.
+
+    %Authorizer is the access check in the server model. It is attached
+    to a %Servlet, not to the server as a whole, and the same
+    authorizer may be shared by several servlets. It is not the
+    client-side %Authenticator. The realm is passed to the constructor
+    and returned by %realm().
+
+    %beginAuthorize() starts the check for a request and reply. When
+    the result is already known, @a granted is set and a null pointer
+    is returned. When the check needs I/O, an %Authorization object is
+    returned; %endAuthorization() completes it, and
+    %cancelAuthorization() aborts it. The authorizer releases that
+    object in %onReleaseAuthorization().
+
+    %BasicAuthorizer implements HTTP Basic authentication. A derived
+    class implements %onAuthorizeCredentials() and either sets
+    @a granted immediately or returns an %Authorization for later
+    completion. %BasicUserListAuthorizer is that check against an
+    in-memory user list.
+
+    The example grants or denies access from credentials in one step,
+    so it returns a null pointer and does not need to release an
+    authorization object.
+
+    @code
+    class AccessAuthorizer : public Pt::Http::BasicAuthorizer
+    {
+        public:
+            explicit AccessAuthorizer(const std::string& realm)
+            : Pt::Http::BasicAuthorizer(realm)
+            {}
+
+        protected:
+            virtual Pt::Http::Authorization* onAuthorizeCredentials(
+                const Pt::Http::Credential& cred, bool& granted)
+            {
+                granted = checkCredentials(cred.user(), cred.password());
+                return 0;
+            }
+
+            virtual void onReleaseAuthorization(Pt::Http::Authorization* auth)
+            {}
+    };
+
+    AccessAuthorizer auth("some-realm");
+    HelloService hello;
+    Pt::Http::MapUrl mapHello("/hello", hello, auth);
+    server.addServlet(mapHello);
+    @endcode
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Authorizer : private Pt::NonCopyable
 {
@@ -133,7 +186,9 @@ class PT_HTTP_API Authorizer : private Pt::NonCopyable
         std::string _realm;
 };
 
-/** @brief %Server side basic HTTP authorization.
+/** @brief Server-side basic HTTP authorization.
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API BasicAuthorizer : public Authorizer
 {
@@ -159,7 +214,9 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
 };
 
 
-/** @brief %Server side basic HTTP authorization.
+/** @brief Server-side basic HTTP authorization against a user list.
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
 {

@@ -136,6 +136,9 @@ content is in context without having read it.
 - For HTTP servers, authorization, responders, services, request routing and HTTPS read:
   `.github/instructions/pt-http-api-servers.instructions.md`
 
+- For HTTP WebSocket upgrade, framed I/O and handshake services read:
+  `.github/instructions/pt-http-api-websocket.instructions.md`
+
 - For implementing RPC clients and services:
   `.github/instructions/pt-remoting-api.instructions.md`
 

@@ -38,9 +38,15 @@ namespace Pt {
 
 namespace Http {
 
+/** @brief HTTP service for the WebSocket handshake.
+
+    @ingroup Pt-Http-WebSocket
+*/
 class PT_HTTP_API WebSocketService : public  Pt::Http::Service
 {
     public:
+        /** @brief Default constructor.
+        */
         WebSocketService();
         
         /** @brief Destructor.

@@ -44,7 +44,34 @@ namespace Http {
 class Request;
 class IOStream;
 
-/** @brief HTTP service.
+/** @brief Factory for request responders.
+
+    %Service is the responder factory in the server model. The server
+    does not construct responders itself: when a servlet maps a
+    request, the service's %getResponder() calls %onGetResponder(), and
+    when the reply has been sent or the exchange has failed,
+    %releaseResponder() calls %onReleaseResponder(). The service must
+    remain alive while any responder it created is still in use.
+
+    %BasicService is that factory for a single responder type, using
+    an allocator that defaults to %new and %delete. Use a custom
+    %Service when the responder type depends on the request headers, or
+    when responders are pooled.
+
+    %upgradeRequested() is emitted when a request asks to upgrade the
+    connection. The signal provides the accepted %IOStream and the
+    value of the Upgrade header. That stream is the upgraded
+    connection, not the HTTP message body.
+
+    The example is the usual factory: a %BasicService for a responder
+    type. The equivalent hand-written service implements
+    %onGetResponder() and %onReleaseResponder() in the same way.
+
+    @code
+    typedef Pt::Http::BasicService<HelloResponder> HelloService;
+    @endcode
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Service : private NonCopyable
 {
@@ -100,6 +127,8 @@ class PT_HTTP_API Service : private NonCopyable
 };
 
 /** @brief Basic HTTP service implementation.
+
+    @ingroup Pt-Http-Servers
 */
 template <typename R, typename Alloc = Allocator>
 class BasicService : public Service

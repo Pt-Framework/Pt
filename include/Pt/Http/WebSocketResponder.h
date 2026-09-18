@@ -39,9 +39,15 @@ namespace Http {
 
 class WebSocketService;
 
+/** @brief Responder for the WebSocket handshake.
+
+    @ingroup Pt-Http-WebSocket
+*/
 class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
 {
     public:
+        /** @brief Constructs the responder for @a s.
+        */
         WebSocketResponder(Pt::Http::WebSocketService& s);
 
     protected:

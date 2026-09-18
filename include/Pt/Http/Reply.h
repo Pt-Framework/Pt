@@ -39,6 +39,26 @@ namespace Pt {
 namespace Http {
 
 /** @brief HTTP reply message.
+
+    %Reply is the %Message a server sends and a client receives. It
+    adds the status line: %statusCode() and %statusText(), set
+    together with %setStatus(). The default is 200 OK. The nested
+    %StatusCode enumeration names the codes the API uses in replies it
+    generates, but %setStatus() accepts any code.
+
+    On the client, the reply is %Client::reply() after a receive step
+    has made it available. Read %body() when progress reports body
+    bytes, and read the status when progress reports the header. On
+    the server, the responder writes the reply and starts sending it
+    with %beginSend(). The completion flag is true when this is the
+    last chunk of the body, and false when %onWriteReply() should run
+    again for more. Calling %beginSend(true) finishes the reply and
+    releases the responder.
+
+    %clear() resets status, header and body so the same reply object
+    can be used for another exchange.
+
+    @ingroup Pt-Http-Messages
 */
 class PT_HTTP_API Reply : public Message
 {
@@ -100,7 +120,10 @@ class PT_HTTP_API Reply : public Message
         //! @internal
         MessageProgress endReceive();
 
-        //! @brief Begin sending the reply.
+        /** @brief Begins sending the reply.
+
+            @a finish is true when this is the last chunk of the body.
+        */
         void beginSend(bool finish = true);
 
         //! @internal

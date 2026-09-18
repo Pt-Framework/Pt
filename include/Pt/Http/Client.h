@@ -53,25 +53,136 @@ class Context;
 
 namespace Http {
 
-/** @brief An HTTP client.
+/** @brief HTTP user agent.
 
-    A connection will be persistent (keep-alive), if the request headers
-    contains the keep-alive header fields. A persistent connection is needed
-    for HTTP request pipelining. Once all requests have been made, the client
-    should be closed, otherwise it may run into the servers keep-alive
-    timeout, if the client is used again later.
+    %Client is the HTTP user agent in the client model. It holds one
+    %Request and one %Reply. Fill the request, send it, and read the
+    reply. The client opens a TCP connection to its host when a send
+    needs one, so there is no separate connect method. The host is an
+    %Endpoint passed to a constructor or to %setHost().
+
+    Asynchronous work needs an %EventLoop, passed to a constructor or
+    to %setActive(). The loop does not own the client; keep the client
+    alive while an operation is still waiting on the loop. %setTimeout()
+    bounds I/O. %send() and %receive() are the blocking forms of the
+    same exchange.
+
+    The request is %request(). Set the URL, the method, query
+    parameters and header fields before the send starts, and write the
+    body with %request().body(). The default method is GET. The reply
+    is %reply() after a receive step has made it available.
+
+    Asynchronous receive is %beginReceive() and %endReceive().
+    %replyReceived() is emitted when a step has completed. The slot
+    calls %endReceive(), which returns %MessageProgress. If the header
+    is available, the status can be read; if the body is available, it
+    can be read from %reply().body(); if the reply is not finished,
+    %beginReceive() continues the same reply. A short reply often
+    completes in one step.
+
+    The example is an asynchronous GET. The client is constructed with
+    the loop and the host, the request URL is set, and %beginReceive()
+    starts the exchange. The slot ends each receive step and exits the
+    loop when the reply is finished.
 
     @code
-        Pt::Http::Client client;
-        client.request().header().setKeepAlive();
+    void onReplyReceived(Pt::Http::Client& client)
+    {
+        Pt::Http::MessageProgress progress = client.endReceive();
+        Pt::Http::Reply& reply = client.reply();
 
-        // use client for multiple requests
-        ...
+        if( progress.header() )
+        {
+            std::cout << reply.statusCode() << ' '
+                      << reply.statusText() << std::endl;
+        }
 
-        // close the persistent connection
-        client.close();
+        if( progress.body() )
+        {
+            while( reply.body().rdbuf()->in_avail() )
+                std::cout << reply.body().get();
+        }
 
+        if( progress.finished() )
+        {
+            client.loop()->exit();
+            return;
+        }
+
+        client.beginReceive();
+    }
+
+    Pt::System::MainLoop loop;
+    Pt::Net::Endpoint ep("www.example.com", 80);
+    Pt::Http::Client client(loop, ep);
+
+    client.request().setUrl("/index.html");
+    client.replyReceived() += Pt::slot(onReplyReceived);
+    client.beginReceive();
+    loop.run();
     @endcode
+
+    @par Pipelining
+
+    Pipelining sends several requests before receiving the matching
+    replies, which needs a persistent connection. Set the keep-alive
+    header on the request, connect %requestSent() as well as
+    %replyReceived(), and start with %beginSend() rather than
+    %beginReceive(). The send slot calls %endSend(); if that send is
+    not finished, %beginSend() continues it, and if it is finished,
+    the next request can be filled and sent. When no further request
+    will be pipelined, %beginReceive() starts reading the replies.
+    Identify each reply by order or by application state, because
+    %Reply does not store the request URL.
+
+    @code
+    void onRequestSent(Pt::Http::Client& client)
+    {
+        Pt::Http::MessageProgress progress = client.endSend();
+        if( ! progress.finished() )
+        {
+            client.beginSend();
+            return;
+        }
+
+        if( client.request().url() == "/cat.png" )
+        {
+            client.request().setUrl("/dog.png");
+            client.beginSend();
+            return;
+        }
+
+        client.beginReceive();
+    }
+    @endcode
+
+    @par Chunked bodies
+
+    A chunked request body is sent with %beginSend(false) until the
+    last chunk, so the completion flag is false while more body data
+    will be written. %endSend() reports whether the current chunk has
+    left the socket, not whether the whole request is complete. When
+    a chunk has finished and more data remains, write it to
+    %request().body() and call %beginSend(false) again. When no more
+    chunks remain, %beginReceive() finishes the request correctly. To
+    pipeline another chunked request after this one, call
+    %beginSend(true) so the request body is terminated.
+
+    @par Persistent connections and HTTPS
+
+    A keep-alive header on the request asks for a persistent
+    connection, which pipelining needs and which the server may still
+    close. %close() ends the connection. Leave it open only while the
+    next request will reuse it; otherwise the server keep-alive
+    timeout may close it before the client is used again. A later send
+    on a closed or timed-out connection opens a new one.
+
+    %setSecure() assigns a %Pt::Ssl::Context so further connections
+    are HTTPS. %setPeerName() sets the name expected in the peer
+    certificate. Send and receive are otherwise unchanged. Certificate
+    and handshake details live in the SSL module.
+
+    @ingroup Pt-Http-Clients
 */
 class PT_HTTP_API Client : public Connectable
                          , private NonCopyable
@@ -109,19 +220,19 @@ class PT_HTTP_API Client : public Connectable
         */
         void setTimeout(std::size_t timeout);
 
-        /** @brief Enable to use HTTPS.
+        /** @brief Enables HTTPS with @a ctx.
         */
         void setSecure(Ssl::Context& ctx);
 
-        /** @brief Set expected SSL peer name.
+        /** @brief Sets the expected SSL peer name.
         */
         void setPeerName(const std::string& peer);
 
-        /** @brief Set host to connect to.
+        /** @brief Sets the host to connect to.
         */
         void setHost(const Net::Endpoint& ep);
 
-        /** @brief Set host to connect to.
+        /** @brief Sets the host to connect to.
         */
         void setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
 
@@ -145,7 +256,9 @@ class PT_HTTP_API Client : public Connectable
         */
         const Reply& reply() const;
 
-        /** @brief Begin sending the request.
+        /** @brief Begins sending the request.
+
+            @a finished is true when this is the last chunk of the body.
         */
         void beginSend(bool finished = true);
 

@@ -42,7 +42,9 @@ namespace Http {
 class Request;
 class Reply;
 
-/** @brief HTTP authentication for clients.
+/** @brief HTTP authentication method for clients.
+
+    @ingroup Pt-Http-Clients
 */
 class Authentication
 {
@@ -91,6 +93,8 @@ class Authentication
 };
 
 /** @brief Basic HTTP authentication for clients.
+
+    @ingroup Pt-Http-Clients
 */
 class PT_HTTP_API BasicAuthentication : public Authentication
 {
@@ -106,13 +110,43 @@ class PT_HTTP_API BasicAuthentication : public Authentication
         virtual ~BasicAuthentication()
         {}
 
+        /** @brief Writes basic credentials onto @a request before a challenge.
+        */
         void preAuthenticate(const Credential& credential, Request& request);
 
-        // inheric docs
+        /** @brief Authenticates @a request from @a credentials in response to @a reply.
+        */
         virtual bool authenticate(const Credentials& credentials, Request& request, const Reply& reply);
 };
 
-/** @brief %Client side authentication.
+/** @brief Client-side authentication.
+
+    %Authenticator prepares a request after a 401 reply so the client
+    can send it again. It is not the server-side authorizer. Store
+    credentials per realm with %setCredential(), then call
+    %authenticate() with the rejected request and the 401 reply. The
+    method writes the authentication headers onto the request and
+    returns true when that is possible. It returns false when no
+    credentials are available for the realm, or when the challenge
+    cannot be met.
+
+    Basic authentication is registered by default. Other
+    %Authentication methods can be added with %addAuthentication().
+    The authenticator does not send the request; the caller sends it
+    again through the client.
+
+    The example stores a realm credential and applies it to a request
+    that just received 401.
+
+    @code
+    Pt::Http::Authenticator auth;
+    auth.setCredential("some-realm", Pt::Http::Credential("john", "12345"));
+
+    Pt::Http::Client& client = ...;
+    bool isAuth = auth.authenticate(client.request(), client.reply());
+    @endcode
+
+    @ingroup Pt-Http-Clients
 */
 class PT_HTTP_API Authenticator : private NonCopyable
 {

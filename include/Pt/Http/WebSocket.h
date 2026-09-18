@@ -46,76 +46,98 @@ namespace Http {
 class WebSocketParser;
 class WebSocketStream;
 
+/** @brief Framed WebSocket I/O device.
+
+    %WebSocket is the %IODevice that follows a WebSocket handshake. After
+    the handshake the same TCP connection carries framed messages instead
+    of HTTP request and reply messages. %read() and %write() transfer
+    payload bytes. The frame type is separate: %setSendFrame() selects
+    the opcode for the next send, and %receiveFrame() reports the opcode
+    of the frame that was last received.
+
+    On the client, attach the socket to an event loop, connect
+    %connected(), and call %beginConnect() with a %ws:// URL.
+    %endConnect() completes the handshake and throws if it failed. On
+    the server, %accept() takes the %IOStream of an upgraded connection,
+    which a %WebSocketService handshake produces.
+
+    Ping and pong are control frames. %sendPingFrame() writes a ping,
+    and after a ping is received %sendPongFrame() writes the matching
+    pong. Text and binary are the data payload. Unknown is the unset
+    frame type.
+
+    @ingroup Pt-Http-WebSocket
+*/
 class PT_HTTP_API WebSocket : public Pt::System::IODevice, public Pt::Connectable
 {
     public:
-        /**@brief Define the frame kind.*/
+        /** @brief WebSocket frame opcode.
+        */
         enum Frame
         {
-            Unknow, ///< Unknow frame 
+            Unknow, ///< Unset frame type
             Text,   ///< Text data frame
             Binary, ///< Binary data frame
             Ping,   ///< Ping frame
             Pong    ///< Pong frame
         };
 
-        /**@brief Contructor. */
+        /** @brief Creates a closed WebSocket.
+        */
         WebSocket();
 
+        /** @brief Creates a WebSocket that accepts @a stream.
+        */
         WebSocket(Pt::Http::IOStream* stream);
 
-        /**@brief Destructor */
+        /** @brief Destructor.
+        */
         virtual ~WebSocket();
 
+        /** @brief Accepts an upgraded connection @a stream.
+        */
         void accept(Pt::Http::IOStream* stream);
 
-        /**@brief Start the connection request.
-        *
-        * @param url The target Url. Ex.: ws://localhost/ws
-        * @param origin The origin Url. Ee.: localhost:5000
-        * @param keepAlive If true the keep alive request ist send to the server.*/
+        /** @brief Begins a client handshake to @a url.
+
+            @a origin is the Origin header. @a keepAlive requests a
+            persistent HTTP connection for the handshake.
+        */
         void beginConnect(const std::string& url, const std::string& origin = std::string(), bool keepAlive = true);
 
-        /**@brief The connected signal.
-        *
-        *  Usage:
-        *  @code
-        *   webSocket.connected() += Pt::slot(obj, & MyObject::onConnected);
-        *  @endcode
-        *
-        *  @return Gets the connected signal. */
+        /** @brief Returns the signal emitted when the handshake finishes.
+        */
         Pt::Signal<WebSocket&>& connected()
         {
             return _connected;
         }
 
-        /**@brief Call this to get the connect result.
-        *
-        * Throw std::exception derivate if the connection failed.*/
+        /** @brief Completes the client handshake.
+
+            @throw %std::exception if the handshake failed.
+        */
         void endConnect();
 
-        /**@brief Sets the send frame mode.
-        *
-        * @param m The send frame mode. */
+        /** @brief Sets the opcode for the next send.
+        */
         void setSendFrame(Frame m)
         {
             _sendFrameMode = m;
         }
 
-        /**@brief Gets for the current received frame the mode.
-        *
-        * @return The frame mode.*/
+        /** @brief Returns the opcode of the last received frame.
+        */
         Frame receiveFrame() const
         {
             return _receiveframeMode;
         }
 
-        /**@brief Sends the pong frame.
-        *
-        * Shoult be called after receiving a ping frame*/
+        /** @brief Sends a pong frame.
+        */
         void sendPongFrame();
 
-        /**@brief Sends the ping frame.*/
+        /** @brief Sends a ping frame.
+        */
         void sendPingFrame();
 
     private:

@@ -83,9 +83,6 @@ Name the result or effect first. Use "Returns ..." for queries,
 "Adds ..." for factory and registration operations. Do not begin a
 brief with "This function" or repeat the method name in prose.
 
-If a sentence needs more than two commas or an "and" chain of APIs,
-split it.
-
 ```cpp
 /** @brief Divides @a value by @a divisor.
 
@@ -212,8 +209,8 @@ because its documentation is short.
 Textbook prose: comprehensive, patient, and as thorough as a tutor
 explaining the feature in chat. Complete thoughts, enough context, and
 as many paragraphs as the topic needs. This is not a brief and not a
-longer brief. Sentence-length limits, "Returns ..." openings, and other
-API-declaration style rules do not apply here.
+longer brief. "Returns ..." openings and other API-declaration style
+rules do not apply here.
 
 Write developed paragraphs. A paragraph may name several types,
 relations, or rules when they belong to the same explanation.

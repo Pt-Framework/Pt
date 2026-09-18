@@ -39,6 +39,27 @@ namespace Pt {
 namespace Http {
 
 /** @brief HTTP request message.
+
+    %Request is the %Message a client sends and a server receives. It
+    adds the request line: method, URL and query string. The default
+    method is GET. %setUrl() sets the resource path, %setMethod() sets
+    the verb, and %setQParams() sets the query without the leading
+    question mark. Header fields and the body are the inherited
+    %Message operations.
+
+    On the client, the request is %Client::request(). Fill it before
+    %beginSend() or %beginReceive(), including keep-alive or content
+    headers that the exchange needs. On the server, the responder
+    receives it in %onBeginRequest() and %onReadRequest(), where the
+    header is already parsed and the body arrives in chunks.
+
+    %clear() resets URL, method, query and the inherited header and
+    body so the same request object can be filled for another
+    exchange. Send and receive on %Request itself are used by the
+    connection; the client API is %Client::beginSend() and
+    %Client::beginReceive().
+
+    @ingroup Pt-Http-Messages
 */
 class PT_HTTP_API Request : public Message
 {

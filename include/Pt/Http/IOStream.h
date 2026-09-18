@@ -40,33 +40,58 @@ namespace Http {
 
 class Connection;
 
+/** @brief Stream of an upgraded HTTP connection.
+
+    %IOStream is the connection after an HTTP upgrade, not the body of
+    a request or reply. %Service::upgradeRequested() provides it, and
+    %WebSocket::accept() takes it.
+
+    @ingroup Pt-Http-WebSocket
+*/
 class PT_HTTP_API IOStream : public Pt::BasicIOStream<char>,
                              public Pt::Connectable
 {
     public :
+        /** @brief Constructs the stream for @a conn.
+        */
         IOStream(Connection* conn);
 
+        /** @brief Destructor.
+        */
         virtual ~IOStream();
 
+        /** @brief Begins an asynchronous read.
+        */
         void beginInput();
 
+        /** @brief Ends an asynchronous read.
+        */
         size_t endInput();
 
+        /** @brief Begins an asynchronous write.
+        */
         void beginOutput();
 
+        /** @brief Ends an asynchronous write.
+        */
         size_t endOutput();
 
+        /** @brief Returns the signal emitted when input is ready.
+        */
         Pt::Signal<>& inputReady()
         {
             return _inputReady;
         }
 
+        /** @brief Returns the signal emitted when output is ready.
+        */
         Pt::Signal<>& outputReady()
         {
             return _outputReady;
         }
 
-
+        /** @brief Cancels pending I/O.
+        */
         void cancel();
 
     private:

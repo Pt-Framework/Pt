@@ -43,11 +43,38 @@ class Reply;
 class Server;
 class Service;
 
-/** @brief %Servlet for HTTP services.
-    
-    Servlets are used by the HttpServer to map incoming requests to services
-    and to authorize requests. Therefore servlets combine a service with a
-    authorizer and mapping rule. Servlets can be added to a %HttpServer.
+/** @brief Maps requests to a service.
+
+    %Servlet is the mapping rule in the server model. It combines a
+    %Service with an optional %Authorizer and decides whether an
+    incoming request belongs to that service. The server calls
+    %isMapped(), which forwards to %onRequest(), and the first servlet
+    that returns true handles the request.
+
+    Construct it with a service, or with a service and an authorizer.
+    Several servlets may share one service, so the same resource can
+    appear under more than one name, and they may share one authorizer.
+    %service() and %authorizer() return those pointers.
+
+    %MapUrl maps one exact URL. %MapAny maps every request. A custom
+    servlet implements %onRequest() and returns true when its service
+    should run. Do not reimplement %MapUrl unless the mapping rule is
+    actually different.
+
+    %setShutdown() marks the servlet so it stops taking new work, and
+    %isIdle() is true when no exchange is using it. %detach()
+    unregisters it from the server that holds it.
+
+    The example is the usual mapping: one URL, one service. The
+    optional authorizer is passed as a third argument.
+
+    @code
+    HelloService hello;
+    Pt::Http::MapUrl mapHello("/hello", hello);
+    server.addServlet(mapHello);
+    @endcode
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Servlet : private NonCopyable
 {
@@ -113,6 +140,8 @@ class PT_HTTP_API Servlet : private NonCopyable
 };
 
 /** @brief Maps requests to a service by URL.
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API MapUrl : public Servlet
 {
@@ -139,6 +168,8 @@ class PT_HTTP_API MapUrl : public Servlet
 };
 
 /** @brief Maps any request to a service.
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API MapAny : public Servlet
 {

@@ -38,6 +38,8 @@ namespace Pt {
 namespace Http {
 
 /** @brief Credentials for authorization and authentication.
+
+    @ingroup Pt-Http-Messages
 */
 class Credential
 {

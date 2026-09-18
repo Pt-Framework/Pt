@@ -44,6 +44,31 @@ namespace Http {
 class Connection;
 
 /** @brief HTTP message header.
+
+    %MessageHeader is the field list and HTTP version of a message. It
+    is the header half of %Message, and through that of %Request and
+    %Reply. Callers do not usually construct a header on its own; they
+    use %header() on the message the client or responder already holds.
+
+    Fields are names and values. %set() replaces the value for a name,
+    %add() appends another value for the same name, and %remove()
+    deletes it. %get() returns the value or a null pointer, %has()
+    reports presence, and %isSet() tests that a name has a particular
+    value. %begin() and %end() walk the fields as %Field values, each
+    with a name and a value pointer into the header's buffer.
+
+    Keep-alive, chunked transfer coding, content length and Upgrade are
+    not a second header model: they are derived from those fields.
+    %isKeepAlive(), %isChunked(), %contentLength() and %isUpgrade()
+    read them, while %setKeepAlive() and %setUpgrade() write the
+    corresponding fields. HTTP version is %versionMajor() and
+    %versionMinor(), set together with %setVersion().
+
+    The header has a fixed size, so the caller must not rely on filling
+    it beyond that limit. %clear() empties the fields so the same
+    header can be used for another message.
+
+    @ingroup Pt-Http-Messages
 */
 class PT_HTTP_API MessageHeader : private Pt::NonCopyable
 {
@@ -82,7 +107,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
                 const char* value() const
                 { return _value; }
 
-                /** @brief Sets the field name.
+                /** @brief Sets the field value.
                 */
                 void setValue(const char* value)
                 { _value = value; }
@@ -178,7 +203,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         MessageHeader();
 
-        /** @brief Denstructor.
+        /** @brief Destructor.
         */
         ~MessageHeader();
 
@@ -255,12 +280,18 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         void setKeepAlive();
         
+        /** @brief Returns true if the Upgrade header is set.
+        */
         bool isUpgrade() const;
 
+        /** @brief Sets the Upgrade header.
+        */
         void setUpgrade();
 
-        // Returns a properly formatted current time-string, as needed in http.
-        // The buffer must have at least 30 bytes.
+        /** @brief Writes a current HTTP date into @a buffer.
+
+            @a buffer must have at least 30 bytes.
+        */
         static char* htdateCurrent(char* buffer);
 
     private:
@@ -276,7 +307,31 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         unsigned _httpVersionMinor;
 };
 
-/** @brief HTTP message progress.
+/** @brief Progress of an asynchronous HTTP send or receive.
+
+    %MessageProgress is the result of one begin/end step on a message.
+    The client returns it from %endSend() and %endReceive(), and the
+    same flags describe how far a request or a reply has moved.
+
+    The flags are independent and can be combined. %header() means the
+    header of that message is now available to read or has been sent.
+    %body() means body bytes were processed on this step. %finished()
+    means the message is complete, so the caller must not begin the
+    same send or receive again. %trailer() means trailer fields were
+    processed.
+
+    A short reply often arrives in one receive step, in which case
+    header, body and finished are all true. A large body, or a socket
+    that accepted only part of a write, returns finished as false, and
+    the caller calls begin again. It is also possible that I/O made
+    progress without a header or body becoming visible yet, so none of
+    the three is true; begin again until finished.
+
+    For a chunked send, finished means the current chunk has left the
+    socket, not that the whole request is complete. The completion flag
+    on the next %beginSend() decides whether another chunk follows.
+
+    @ingroup Pt-Http-Messages
 */
 class MessageProgress
 {
@@ -308,6 +363,8 @@ class MessageProgress
         bool body() const
         { return (_result & Body) == Body; }
 
+        /** @brief Returns true if the trailer was processed.
+        */
         bool trailer() const
         { return (_result & Trailer) == Trailer; }
 
@@ -381,6 +438,23 @@ class MessageBuffer : public std::streambuf
 };
 
 /** @brief HTTP message with header and body.
+
+    %Message is the header-and-body object that %Request and %Reply
+    extend. The header is %header(), and the body is %body(), an
+    iostream. Write the body before sending, and read it when progress
+    reports that body bytes are available.
+
+    Callers do not construct a %Message. A %Client owns the request and
+    reply, and a %Responder is passed the server-side pair. The
+    connection that carries the message is %connection(), which is the
+    HTTP connection the client or server already opened.
+
+    %available() is how many body bytes can be read without blocking,
+    and %pending() is how many body bytes still have to be written.
+    %discard() drops the buffered body so the stream can be reused for
+    another message.
+
+    @ingroup Pt-Http-Messages
 */
 class PT_HTTP_API Message
 {

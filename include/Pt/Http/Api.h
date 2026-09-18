@@ -44,7 +44,11 @@
 namespace Pt {
 
 /** @namespace Pt::Http
-    @brief HTTP server and client
+    @brief HTTP clients and servers.
+
+    Request and reply messages, an HTTP client, and an HTTP server that
+    maps URLs to services. HTTPS uses %Pt::Ssl. WebSocket is an HTTP
+    upgrade of the same connection.
 */
 namespace Http {
 
@@ -61,7 +65,7 @@ class Server;
 class Service;
 class Servlet;
 
-} // namespace Net
+} // namespace Http
 
 } // namespace Pt
 

@@ -44,7 +44,66 @@ class Reply;
 class Service;
 class Acceptor;
 
-/** @brief HTTP service responder.
+/** @brief Handles one HTTP request and writes the reply.
+
+    %Responder is the per-exchange handler in the server model. A
+    %Service creates it for a mapped request and releases it when the
+    reply has been sent. Derive from it and implement the four
+    callbacks, which the server calls in order.
+
+    %onBeginRequest() runs when the request header is available, so
+    the responder can inspect fields and prepare the reply.
+    %onReadRequest() runs for each chunk of the request body, and may
+    be called more than once. %onBeginReply() runs when the request is
+    complete and the reply should start. %onWriteReply() runs when a
+    previous %Reply::beginSend(false) needs another chunk of the reply
+    body, which is how a large reply is written in chunked encoding.
+
+    Finish the reply with %Reply::beginSend() and the completion flag
+    set to true. That call may be made from an earlier callback, in
+    which case the remaining callbacks are skipped and the rest of the
+    request is ignored. %service() is the service that created this
+    responder.
+
+    The example is a responder that ignores the request body and
+    writes a fixed reply. %beginSend(true) completes the reply in
+    %onBeginReply(), so %onWriteReply() stays empty.
+
+    @code
+    class HelloResponder : public Pt::Http::Responder
+    {
+        public:
+            explicit HelloResponder(Pt::Http::Service& s)
+            : Pt::Http::Responder(s)
+            {}
+
+        protected:
+            virtual void onBeginRequest(Pt::Http::Request& request,
+                                        Pt::Http::Reply& reply,
+                                        Pt::System::EventLoop& loop)
+            {}
+
+            virtual void onReadRequest(Pt::Http::Request& request,
+                                       Pt::Http::Reply& reply,
+                                       Pt::System::EventLoop& loop)
+            {}
+
+            virtual void onBeginReply(const Pt::Http::Request& request,
+                                      Pt::Http::Reply& reply,
+                                      Pt::System::EventLoop& loop)
+            {
+                reply.body() << "Hello World!";
+                reply.beginSend(true);
+            }
+
+            virtual void onWriteReply(const Pt::Http::Request& request,
+                                      Pt::Http::Reply& reply,
+                                      Pt::System::EventLoop& loop)
+            {}
+    };
+    @endcode
+
+    @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Responder
 {
@@ -67,6 +126,7 @@ class PT_HTTP_API Responder
         const Service& service() const
         { return _service; }
 
+        //! @internal
         void setAcceptor(Acceptor& a)
         { _acceptor = &a; }
 
@@ -96,6 +156,8 @@ class PT_HTTP_API Responder
         virtual void onBeginRequest(Request& request, Reply& reply, 
                                     System::EventLoop& loop) = 0;
         
+        /** @brief Called for each chunk of the request body.
+        */
         virtual void onReadRequest(Request& request, Reply& reply, 
                                    System::EventLoop& loop) = 0;
 
@@ -111,8 +173,12 @@ class PT_HTTP_API Responder
 
         // TODO: setFinished() -> setReady()
 
+        /** @brief Sets whether the current step is complete.
+        */
         void setReady(bool isFinished);
 
+        /** @brief Sets whether the exchange is finished.
+        */
         void setFinished(bool isFinished);
 
     private:
