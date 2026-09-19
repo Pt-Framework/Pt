@@ -122,10 +122,9 @@ pages.
 
 Write a chapter the reader can learn from without scanning every member.
 Explain what the feature or type is for, how this API maps its subject,
-how the types work together, how a caller uses them, ownership, lifetime, errors, ordering, and the distinctions that prevent mistakes. Include the
-context needed to use the API correctly, including an API technique that
-is part of the contract (C linkage of an export, a cast the platform
-requires, matching allocators).
+how the types work together, how a caller uses them, ownership, lifetime, errors, ordering, practical advantages that follow from the design, and the distinctions that prevent mistakes. Include the context needed to use the
+API correctly,including an API technique that is part of the contract (C
+linkage of an export, a cast the platform requires, matching allocators).
 
 A restatement of members in declaration order is not a chapter. Fold
 member facts into the model and leave compact wording to the briefs. A
