@@ -1,0 +1,182 @@
+\page Pt-Forms-Page Graphical User Interfaces
+
+This chapter covers the application runtime, the widget and view object
+model, the display root, windows and workspaces, layouting and painting,
+input delivery, layouts, buttons, displays, editors and selectors,
+collections, menus, icons and textual content, and styles and renderers.
+
+@copydetails Pt-Forms
+
+@section Pt-Forms-Page-Application Application
+@copydetails Pt::Forms::Application
+
+@section Pt-Forms-Page-Widgets Widgets and Views
+@copydetails Pt-Forms-Widgets
+
+@subsection Pt-Forms-Page-Widget Widget
+@copydetails Pt::Forms::Widget
+
+@subsection Pt-Forms-Page-View View
+@copydetails Pt::Forms::View
+
+@subsection Pt-Forms-Page-Form Form
+@copydetails Pt::Forms::Form
+
+@subsection Pt-Forms-Page-Control Control
+@copydetails Pt::Forms::Control
+
+@subsection Pt-Forms-Page-Screen Screen
+@copydetails Pt::Forms::Screen
+
+@section Pt-Forms-Page-Windows Windows and Workspaces
+@copydetails Pt-Forms-Windows
+
+@subsection Pt-Forms-Page-Window Windows
+@copydetails Pt::Forms::Window
+
+@subsection Pt-Forms-Page-WindowManager Window Managers
+@copydetails Pt::Forms::WindowManager
+
+@subsection Pt-Forms-Page-Workspace Workspaces
+@copydetails Pt::Forms::Workspace
+
+@section Pt-Forms-Page-Updating Layouting and Painting
+@copydetails Pt-Forms-Updating
+
+@section Pt-Forms-Page-Input Pointer and Keyboard Input
+@copydetails Pt-Forms-Input
+
+@subsection Pt-Forms-Page-Responder Responders
+@copydetails Pt::Forms::Responder
+
+@subsection Pt-Forms-Page-InputMethod Input Methods
+@copydetails Pt::Forms::InputMethod
+
+@section Pt-Forms-Page-Layouts Layouts
+@copydetails Pt-Forms-Layouts
+
+@subsection Pt-Forms-Page-CanvasLayout Canvas Layout
+@copydetails Pt::Forms::CanvasLayout
+
+@subsection Pt-Forms-Page-DockingLayout Docking Layout
+@copydetails Pt::Forms::DockingLayout
+
+@subsection Pt-Forms-Page-FlowLayout Flow Layout
+@copydetails Pt::Forms::FlowLayout
+
+@subsection Pt-Forms-Page-GridLayout Grid Layout
+@copydetails Pt::Forms::GridLayout
+
+@subsection Pt-Forms-Page-StackLayout Stack Layout
+@copydetails Pt::Forms::StackLayout
+
+@subsection Pt-Forms-Page-TableLayout Table Layout
+@copydetails Pt::Forms::TableLayout2
+
+@subsection Pt-Forms-Page-ScrollLayout Scroll Layout
+@copydetails Pt::Forms::ScrollLayout
+
+@section Pt-Forms-Page-Buttons Buttons
+@copydetails Pt-Forms-Buttons
+
+@subsection Pt-Forms-Page-Button Button
+@copydetails Pt::Forms::Button
+
+@subsection Pt-Forms-Page-PushButton Push Buttons
+@copydetails Pt::Forms::PushButton
+
+@subsection Pt-Forms-Page-CheckBox Check Boxes
+@copydetails Pt::Forms::CheckBox
+
+@section Pt-Forms-Page-Displays Displays
+@copydetails Pt-Forms-Displays
+
+@subsection Pt-Forms-Page-Label Labels
+@copydetails Pt::Forms::Label
+
+@subsection Pt-Forms-Page-Panel Panels
+@copydetails Pt::Forms::Panel
+
+@subsection Pt-Forms-Page-ProgressBar Progress Bars
+@copydetails Pt::Forms::ProgressBar
+
+@section Pt-Forms-Page-Editors Editors and Selectors
+@copydetails Pt-Forms-Editors
+
+@subsection Pt-Forms-Page-LineEdit Line Edits
+@copydetails Pt::Forms::LineEdit
+
+@subsection Pt-Forms-Page-SpinBox Spin Boxes
+@copydetails Pt::Forms::SpinBox
+
+@subsection Pt-Forms-Page-ComboBox Combo Boxes
+@copydetails Pt::Forms::ComboBox
+
+@subsection Pt-Forms-Page-Slider Sliders
+@copydetails Pt::Forms::Slider
+
+@section Pt-Forms-Page-Collections Collections
+@copydetails Pt-Forms-Collections
+
+@subsection Pt-Forms-Page-ListBox List Boxes
+@copydetails Pt::Forms::ListBox
+
+@subsection Pt-Forms-Page-TabView Tab Views
+@copydetails Pt::Forms::TabView
+
+@subsection Pt-Forms-Page-ScrollBar Scroll Bars
+@copydetails Pt::Forms::ScrollBar
+
+@subsection Pt-Forms-Page-ScrollView Scroll Views
+@copydetails Pt::Forms::ScrollView
+
+@section Pt-Forms-Page-Menus Menus
+@copydetails Pt-Forms-Menus
+
+@subsection Pt-Forms-Page-Menu Menu
+@copydetails Pt::Forms::Menu
+@copydetails Pt::Forms::MenuBase
+
+@subsection Pt-Forms-Page-MenuBar Menu Bars
+@copydetails Pt::Forms::MenuBar
+
+@subsection Pt-Forms-Page-MenuItem Menu Items
+@copydetails Pt::Forms::MenuItemBase
+@copydetails Pt::Forms::MenuItem
+@copydetails Pt::Forms::MenuMenuItem
+
+@subsection Pt-Forms-Page-MenuSubItem Menu Subitems
+@copydetails Pt::Forms::MenuSubItem
+
+@subsection Pt-Forms-Page-MenuBarItem Menu Bar Items
+@copydetails Pt::Forms::MenuBarItem
+
+@subsection Pt-Forms-Page-Popup Popups
+@copydetails Pt::Forms::Popup
+
+@section Pt-Forms-Page-Icons Icons and Text
+@copydetails Pt-Forms-Icons
+
+@subsection Pt-Forms-Page-Icon Icons
+@copydetails Pt::Forms::Icon
+
+@subsection Pt-Forms-Page-IconProvider Icon Providers
+@copydetails Pt::Forms::IconProvider
+
+@subsection Pt-Forms-Page-TextBlock Text Blocks
+@copydetails Pt::Forms::TextBlock
+
+@section Pt-Forms-Page-Styling Styles and Renderers
+@copydetails Pt-Forms-Styling
+
+@subsection Pt-Forms-Page-Style Styles
+@copydetails Pt::Forms::Style
+
+@subsection Pt-Forms-Page-StyleOptions Style Options
+@copydetails Pt::Forms::StyleOptions
+
+@subsection Pt-Forms-Page-Styler Stylers
+@copydetails Pt::Forms::Styler
+
+@subsection Pt-Forms-Page-Renderer Renderers
+@copydetails Pt::Forms::Renderer

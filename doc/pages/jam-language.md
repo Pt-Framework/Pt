@@ -1,4 +1,4 @@
-/** \page jam-language Jam Language Features
+\page jam-language Jam Language Features
 
 \htmlonly
 
@@ -1025,5 +1025,3 @@
     </CODE></TABLE>
 
 \endhtmlonly
-
-*/

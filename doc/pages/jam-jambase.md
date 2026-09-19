@@ -1,4 +1,4 @@
-/** \page jam-jambase Jambase Reference
+\page jam-jambase Jambase Reference
 
 \htmlonly
 
@@ -1008,5 +1008,3 @@ Jambase Variables
 
 
 \endhtmlonly
-
-*/

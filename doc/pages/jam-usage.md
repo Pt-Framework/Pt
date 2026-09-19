@@ -1,4 +1,4 @@
-/** \page jam-usage Basic Jam Usage
+\page jam-usage Basic Jam Usage
 
 \htmlonly
 
@@ -643,5 +643,3 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     A poorly set &#36;(JAMSHELL) is likely to result in silent failure.
 
 \endhtmlonly
-
-*/

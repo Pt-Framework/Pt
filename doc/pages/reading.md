@@ -1,4 +1,4 @@
-/** \page reading Recommended Reading
+\page reading Recommended Reading
 
 \htmlonly
 
@@ -66,5 +66,3 @@
     </div>
 
 \endhtmlonly
-
-*/

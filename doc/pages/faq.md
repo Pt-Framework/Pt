@@ -1,4 +1,4 @@
-/** \page faq Frequently Asked Questions
+\page faq Frequently Asked Questions
 
 \htmlonly
 
@@ -42,5 +42,3 @@
     </div>
 
 \endhtmlonly
-
-*/

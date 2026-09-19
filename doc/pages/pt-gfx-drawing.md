@@ -1,4 +1,4 @@
-/** \page Pt-Gfx-Drawing-Page Drawing Graphics and Text
+\page Pt-Gfx-Drawing-Page Drawing Graphics and Text
 
 @copydetails Pt-Gfx-Drawing
 
@@ -25,5 +25,3 @@
 @copydetails Pt::Gfx::FontMetrics
 
 @copydetails Pt::Gfx::TextMetrics
-
-*/

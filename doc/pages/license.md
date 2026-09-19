@@ -1,4 +1,4 @@
-/** \page license License
+\page license License
 
 \htmlonly
 
@@ -36,5 +36,3 @@
     </div>
 
 \endhtmlonly
-
-*/

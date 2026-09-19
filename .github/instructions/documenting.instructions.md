@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.{h,md,page}"
+applyTo: "**/*.{h,md}"
 description: "API Documentation"
 ---
 
@@ -265,18 +265,29 @@ class MyClass
 
 Each module has one module page. That page sorts the whole module: the
 main group, every subgroup, and the types that deepen those groups.
-Guide pages are separate documents with original prose.
+Guide pages are standalone documents. Write each in Doxygen page
+syntax, in Markdown, or as an `\htmlonly` body.
 
 ## Formatting
 
-- A page is a Doxygen page comment: `\page <id>` or `@page <id>`.
-- Assemble group and class chapters with `@copydetails`, not `@copydoc`.
+- A page is a Markdown file in `doc/pages/`. One page per file.
+- Module pages start with `@page <id> Title` at column 0. Write the
+  Doxygen-command body at column 0.
+- Module pages assemble group and class chapters with `@copydetails`,
+  not `@copydoc`.
 - Use `@section` for subgroups and direct main-group chapters. Use
   `@subsection` for types below a subgroup.
 - Reference a group from elsewhere with the section anchor that holds it
   (`@ref <Page>-<Section>`), not a group-only page ID.
-- Guide pages use `@code` for commands and `@verbatim` for directory
-  trees and URLs.
+- A guide page uses one of these forms:
+  - Doxygen page syntax, as on a module page: `@page`, `@section`,
+    `@code` for commands, `@verbatim` for directory trees and URLs.
+    Wrap HTML in `\htmlonly` ... `\endhtmlonly` when the content is
+    HTML.
+  - Markdown: `# Title {#id}`, `##` / `###` headings, fenced code.
+    `{#id}` is the page ID.
+- Do not mix Doxygen page syntax with Markdown headings in one file.
+  `@ref` is valid in both forms.
 
 ## Content
 
@@ -295,9 +306,10 @@ instead.
 
 ## Structure
 
-Pages live in `doc/pages/`. File names are lowercase. A module page ID
-uses a `-Page` suffix (`Ns-MyModule` -> `Ns-MyModule-Page`). Section
-anchors use the page ID as prefix (`Ns-MyModule-Page-MyFeature`).
+Pages live in `doc/pages/`. File names are lowercase with a `.md`
+extension. A module page ID uses a `-Page` suffix (`Ns-MyModule` ->
+`Ns-MyModule-Page`). Section anchors use the page ID as prefix
+(`Ns-MyModule-Page-MyFeature`).
 
 Copy the main group first, then subgroups, in reader order. The page
 defines that order. Put the central type of the object model or reader
@@ -320,25 +332,46 @@ The module page is assembly, not authorship. The copied group and class
 chapters already have the textbook voice. Do not rewrite them on the
 page.
 
-Guide pages (`jam-*.page`, `installing.page`, `tutorial.page`, ...)
-contain original prose and follow the chapter voice of group and class
-detailed descriptions.
+Guide pages contain original prose and follow the chapter voice of group
+and class detailed descriptions. An `\htmlonly` body is the page
+content; do not restate it beside the HTML.
 
 ```
-/** \page Ns-MyModule-Page Module Name
+@page Ns-MyModule-Page Module Name
 
-    @copydetails Ns-MyModule
+@copydetails Ns-MyModule
 
-    This chapter covers:
+This chapter covers:
 
-    - @ref Ns-MyModule-Page-MyFeature
+- @ref Ns-MyModule-Page-MyFeature
 
-    @section Ns-MyModule-Page-MyFeature Feature Name
-    @copydetails Ns-MyFeature
+@section Ns-MyModule-Page-MyFeature Feature Name
+@copydetails Ns-MyFeature
 
-    @subsection Ns-MyModule-Page-MyClass MyClass
-    @copydetails Ns::MyClass
-*/
+@subsection Ns-MyModule-Page-MyClass MyClass
+@copydetails Ns::MyClass
+```
+
+```
+@page user-guide User Guide
+
+@section user-guide-setup Setup
+...
+```
+
+```
+# User Guide {#user-guide}
+
+## Setup {#user-guide-setup}
+...
+```
+
+```
+@page license License
+
+\htmlonly
+...
+\endhtmlonly
 ```
 
 # Website
@@ -355,7 +388,7 @@ that output.
 
 ## Content
 
-- `\page <id>` produces `htdocs/<id>.html`.
+- `\page <id>` or `# Title {#id}` produces `htdocs/<id>.html`.
 - `@defgroup <id>` produces `htdocs/group__<id>.html`.
 
 Maintain the matching module box in `doc/website/docs.html` when adding

@@ -1,4 +1,4 @@
-/** \page jam-getting Getting Jam
+\page jam-getting Getting Jam
 
 The Jam distribution provides a self-contained jam based build system. It can
 be included and distributed with your project's source files, so you are not
@@ -30,5 +30,3 @@ These scripts bootstrap and run the jam executable, so that jam executables
 do not have to be included for all possible build hosts, but rather built
 on demand. A precompiled version for windows hosts is distributed with
 the scripts named jam.exe.
-
-*/

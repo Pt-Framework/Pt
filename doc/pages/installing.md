@@ -1,4 +1,4 @@
-/** \page installing Installing from Source
+\page installing Installing from Source
 
 \htmlonly
 <P>
@@ -226,5 +226,3 @@ named 'include', 'lib' and 'bin'. As you may have guessed, INSTALL_DIR is used
 as the base for the other variables INSTALL_BINDIR, INSTALL_INCLUDEDIR and
 INSTALL_LIBDIR. Alternatively, you can set the three latter variables to
 separate directories to have full control of the installation.
-
-*/

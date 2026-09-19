@@ -1,4 +1,4 @@
-/** \page requirements Requirements
+\page requirements Requirements
 
 @section requirements_cpplang C++ Language Requirements
 
@@ -73,5 +73,3 @@ is provided for platforms that do not have freetype by default.
 It is useful to install subversion on the build host to get the source code
 directly from the repository. If you want to build the documentation you need
 to install doxygen.
-
-*/

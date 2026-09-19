@@ -1,4 +1,4 @@
-/** \page Pt-Unit-Page Unit Testing
+\page Pt-Unit-Page Unit Testing
 
 @copydetails Pt::Unit
 
@@ -22,5 +22,3 @@
 
 @section Pt-Unit-Page-Reporter Reporting Test Results
 @copydetails Pt::Unit::Reporter
-
-*/

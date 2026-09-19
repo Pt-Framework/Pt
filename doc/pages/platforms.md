@@ -1,4 +1,4 @@
-/** \page platforms Supported Platforms
+\page platforms Supported Platforms
 
 \htmlonly
 
@@ -169,5 +169,3 @@
     </div>
 
 \endhtmlonly
-
-*/

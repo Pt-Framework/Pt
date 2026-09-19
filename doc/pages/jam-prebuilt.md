@@ -1,4 +1,4 @@
-/** \page jam-prebuilt-page Prebuilt Dependencies
+\page jam-prebuilt-page Prebuilt Dependencies
 
 A Jam project can take third-party libraries from a prebuilt dependency bundle
 instead of from the system or from sources in the tree. A bundle is a directory
@@ -454,5 +454,3 @@ A generator, including one driven by Conan in CI, writes the same layout:
 - Check: @c zlib/include/zlib.h, @c zlib/lib/zlib.lib or @c libz.a, @c bin/
   when shared, @c jam/packages.jam, no version directories, no absolute
   machine paths
-
-*/

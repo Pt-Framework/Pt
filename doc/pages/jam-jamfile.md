@@ -1,4 +1,4 @@
-/** \page jam-jamfile Using the Jambase
+\page jam-jamfile Using the Jambase
 
 \htmlonly
 
@@ -1456,5 +1456,3 @@ RmTemps Rule
 <P>
 
 \endhtmlonly
-
-*/

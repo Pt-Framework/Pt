@@ -1,4 +1,4 @@
-/** \page jam-intro Introduction to Jam
+\page jam-intro Introduction to Jam
 
 Jam is a software build tool that makes building simple things simple and 
 building complicated things manageable. It has been developed by 
@@ -29,7 +29,7 @@ source files.\n\n
 
 - build large projects spread across many directories in a single pass
 
-- know the full dependency graph and can do parallel builds safely with the ‘-j’ flag
+- know the full dependency graph and can do parallel builds safely with the ï¿½-jï¿½ flag
 
 - Use the same build scripts work for all platforms, compilers and toolsets
 
@@ -52,5 +52,3 @@ source files.\n\n
 - Jam has a tiny footprint, and is a lot faster than Make at building large projects (independent of target build times, of course)
 
 - Jam is free and can be incorporated into commercial products without licensing restrictions
-
-*/

@@ -1,4 +1,4 @@
-/** \page tutorial Jam Tutorial
+\page tutorial Jam Tutorial
 
 @section JamTutorialJambase Adding Jam Support
 
@@ -124,5 +124,3 @@ target:
 @verbatim
   ./jam.sh clean
 @endverbatim
-
-*/

@@ -1,0 +1,61 @@
+\page Pt-Http-Page HTTP Clients and Servers
+
+@copydetails Pt-Http
+
+This chapter covers:
+
+- @ref Pt-Http-Page-Messages
+- @ref Pt-Http-Page-Clients
+- @ref Pt-Http-Page-Servers
+- @ref Pt-Http-Page-WebSocket
+
+@section Pt-Http-Page-Messages HTTP Messages
+@copydetails Pt-Http-Messages
+
+@subsection Pt-Http-Page-MessageHeader Message Header
+@copydetails Pt::Http::MessageHeader
+
+@subsection Pt-Http-Page-Message Message
+@copydetails Pt::Http::Message
+
+@subsection Pt-Http-Page-MessageProgress Message Progress
+@copydetails Pt::Http::MessageProgress
+
+@subsection Pt-Http-Page-Request Request
+@copydetails Pt::Http::Request
+
+@subsection Pt-Http-Page-Reply Reply
+@copydetails Pt::Http::Reply
+
+@section Pt-Http-Page-Clients HTTP Clients
+@copydetails Pt-Http-Clients
+
+@subsection Pt-Http-Page-Client Client
+@copydetails Pt::Http::Client
+
+@subsection Pt-Http-Page-Authenticator Authenticator
+@copydetails Pt::Http::Authenticator
+
+@section Pt-Http-Page-Servers HTTP Servers
+@copydetails Pt-Http-Servers
+
+@subsection Pt-Http-Page-Server Server
+@copydetails Pt::Http::Server
+
+@subsection Pt-Http-Page-Servlet Servlet
+@copydetails Pt::Http::Servlet
+
+@subsection Pt-Http-Page-Service Service
+@copydetails Pt::Http::Service
+
+@subsection Pt-Http-Page-Responder Responder
+@copydetails Pt::Http::Responder
+
+@subsection Pt-Http-Page-Authorizer Authorizer
+@copydetails Pt::Http::Authorizer
+
+@section Pt-Http-Page-WebSocket WebSocket
+@copydetails Pt-Http-WebSocket
+
+@subsection Pt-Http-Page-WebSocketClass WebSocket
+@copydetails Pt::Http::WebSocket
