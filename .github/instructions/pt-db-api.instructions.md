@@ -4,20 +4,24 @@ description: "Database connections, queries, result sets, transactions, and back
 
 - Open, close, ping, execute SQL, select results, prepare statements, and use async connection operations:
   `include/Pt/Db/Connection.h`
+  `include/Pt/Db/Api-Connections.h`
 - Implement a database connection backend, synchronous and asynchronous operation hooks, statement caches, or cursor fetching:
   `include/Pt/Db/IConnection.h`
 - Provide a driver connector that allocates unconnected database backends:
   `include/Pt/Db/IConnector.h`
 - Bind named SQL parameters, execute or select prepared statements, retrieve generated IDs, and open batch cursors:
   `include/Pt/Db/Statement.h`
+  `include/Pt/Db/Api-Statements.h`
 - Implement a backend prepared statement and parameter binding:
   `include/Pt/Db/IStatement.h`
 - Iterate large result sets in synchronous or asynchronous batches:
   `include/Pt/Db/Cursor.h`
+  `include/Pt/Db/Api-Cursors.h`
 - Implement a backend cursor and its batch-fetch lifecycle:
   `include/Pt/Db/ICursor.h`
 - Store, index, and randomly iterate buffered query result rows:
   `include/Pt/Db/Result.h`
+  `include/Pt/Db/Api-Results.h`
 - Implement a backend buffered query result:
   `include/Pt/Db/IResult.h`
 - Access values in a database row by index or iterate its columns:
@@ -32,5 +36,6 @@ description: "Database connections, queries, result sets, transactions, and back
   `include/Pt/Db/Blob.h`
 - Begin, commit, roll back, or customize database transactions:
   `include/Pt/Db/Transaction.h`
+  `include/Pt/Db/Api-Transactions.h`
 - Handle database connection, SQL query, constraint, and type-conversion failures:
   `include/Pt/Db/DbError.h`

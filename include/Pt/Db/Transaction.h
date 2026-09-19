@@ -1,32 +1,7 @@
-/*
- * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+/* Copyright (C) 2006-2026 by Tommi Maekitalo
+   Copyright (C) 2006-2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
 
 #ifndef PT_DB_TRANSACTION_H
 #define PT_DB_TRANSACTION_H
@@ -40,11 +15,36 @@ namespace Pt {
 
 namespace Db {
 
-/** The class Transaction monitors the state of a transaction on a database-conection.
+/** @brief Unit of work on a database connection.
 
-    The constructor starts by default a transaction on the database. The transactionstate
-    is hold it the class. The destructor rolls the transaction back, when not explicitely
-    commited or rolled back.
+    %Transaction is the unit of work the group described. The
+    constructor begins a deferred transaction unless @a starttransaction
+    is false. The object is not copyable and does not own the
+    connection.
+
+    %begin() starts a transaction; if one is already active it is
+    rolled back first. %commit() keeps the changes. %rollback()
+    discards them. If the object is destroyed while still active, the
+    destructor rolls back and swallows any error from that rollback.
+
+    Asynchronous begin, commit and rollback need %setActive() on the
+    connection. %beginStart() / %endStart() / %startFinished() begin
+    the transaction; %endStart() is the call that marks it active.
+    %beginCommit() / %endCommit() / %commitFinished() commit.
+    %beginRollback() / %endRollback() / %rollbackFinished() roll
+    back.
+
+    Override %onGetBeginSql(), %onGetCommitSql() and
+    %onGetRollbackSql() to supply backend-specific SQL. A null return
+    lets the backend use its default.
+
+    @code
+    Pt::Db::Transaction txn(conn);
+    conn.execute("UPDATE t SET n = n + 1");
+    txn.commit();
+    @endcode
+
+    @ingroup Pt-Db-Transactions
 */
 class Transaction : private NonCopyable
 {
@@ -56,10 +56,9 @@ class Transaction : private NonCopyable
         Pt::Signal<> _rollbackFinished;
 
     public:
-        /** Creates a transaction
+        /** @brief Creates a transaction on @a conn.
 
-            Creates a new transaction from a connection and parameter
-            whether the transaction should start immediately.
+            Begins the transaction unless @a starttransaction is false.
         */
         Transaction(Connection& conn, bool starttransaction = true)
         : _connection(conn)
@@ -71,9 +70,7 @@ class Transaction : private NonCopyable
             }
         }
 
-        /** \brief Destructor
-
-            If active the current transaction will be rolled back.
+        /** @brief Rolls back an active transaction and destroys the object.
         */
         ~Transaction()
         {
@@ -89,19 +86,14 @@ class Transaction : private NonCopyable
             }
         }
 
-        /** Returns connection.
-
-            Returns the current connection object.
-
-            \return Connection reference.
+        /** @brief Returns the connection this transaction uses.
         */
         const Connection& getConnection() const
         { return _connection; }
 
-        /** \brief Begin transaction.
+        /** @brief Begins a deferred transaction.
 
-            Starts a new deferred transaction. If there is an active transaction it will be rolled back
-            before beginning this transaction.
+            Rolls back an already active transaction first.
         */
         void begin()
         {
@@ -111,10 +103,9 @@ class Transaction : private NonCopyable
             _active = true;
         }
 
-        /** \brief Commit a transaction
+        /** @brief Commits the active transaction.
 
-            Commits the current transaction. If there is no active transaction
-            nothing happens. The transaction state is reset.
+            Does nothing if no transaction is active.
         */
         void commit()
         {
@@ -125,10 +116,9 @@ class Transaction : private NonCopyable
             }
         }
 
-        /** \brief Roll back a transaction.
+        /** @brief Rolls back the active transaction.
 
-            Rolls back the current transaction. If there is no active
-            transaction nothing is done. The transaction state is reset.
+            Does nothing if no transaction is active.
         */
         void rollback()
         {
@@ -139,12 +129,7 @@ class Transaction : private NonCopyable
             }
         }
 
-        // --- Async variants (require Connection::setActive(loop)) ---
-
-        /** \brief Begin async BEGIN TRANSACTION.
-
-            Starts the async transaction. Call endStart() in the
-            transactionFinished() signal handler to complete.
+        /** @brief Starts an asynchronous begin-transaction.
         */
         void beginStart()
         {
@@ -153,7 +138,7 @@ class Transaction : private NonCopyable
             _connection.beginStartTransaction(*this, onGetBeginSql());
         }
 
-        /** \brief Complete async BEGIN TRANSACTION.
+        /** @brief Completes an asynchronous begin-transaction.
         */
         void endStart()
         {
@@ -161,10 +146,12 @@ class Transaction : private NonCopyable
             _active = true;
         }
 
+        /** @brief Signal emitted when an asynchronous begin completes.
+        */
         Pt::Signal<>& startFinished()
         { return _startFinished; }
 
-        /** \brief Begin async COMMIT TRANSACTION.
+        /** @brief Starts an asynchronous commit.
         */
         void beginCommit()
         {
@@ -172,18 +159,20 @@ class Transaction : private NonCopyable
             _connection.beginCommitTransaction(*this, onGetCommitSql());
         }
 
-        /** \brief Complete async COMMIT TRANSACTION.
+        /** @brief Completes an asynchronous commit.
         */
         void endCommit()
         {
             _connection.endCommitTransaction();
         }
 
+        /** @brief Signal emitted when an asynchronous commit completes.
+        */
         Pt::Signal<>& commitFinished()
         { return _commitFinished; }
 
 
-        /** \brief Begin async ROLLBACK TRANSACTION.
+        /** @brief Starts an asynchronous rollback.
         */
         void beginRollback()
         {
@@ -191,31 +180,50 @@ class Transaction : private NonCopyable
             _connection.beginRollbackTransaction(*this, onGetRollbackSql());
         }
 
-        /** \brief Complete async ROLLBACK TRANSACTION.
+        /** @brief Completes an asynchronous rollback.
         */
         void endRollback()
         {
             _connection.endRollbackTransaction();
         }
 
+        /** @brief Signal emitted when an asynchronous rollback completes.
+        */
         Pt::Signal<>& rollbackFinished()
         { return _rollbackFinished; }
 
     protected:
+        /** @brief Returns SQL for BEGIN, or a null pointer for the backend default.
+        */
         virtual const char* onGetBeginSql()
         { return nullptr; }
 
+        /** @brief Returns SQL for COMMIT, or a null pointer for the backend default.
+        */
         virtual const char* onGetCommitSql()
         { return nullptr; }
 
+        /** @brief Returns SQL for ROLLBACK, or a null pointer for the backend default.
+        */
         virtual const char* onGetRollbackSql()
         { return nullptr; }
 };
 
 
+/** @brief SQLite transaction with optional immediate locking.
+
+    %SqliteTransaction is a %Transaction that can start with
+    `BEGIN IMMEDIATE TRANSACTION` instead of the backend default.
+    Pass @a immediate true for that locking. @a start still controls
+    whether the constructor begins the transaction.
+
+    @ingroup Pt-Db-Transactions
+*/
 class SqliteTransaction : public Transaction
 {
     public:
+        /** @brief Creates a SQLite transaction on @a conn.
+        */
         SqliteTransaction(Connection& conn, bool start = true, bool immediate = false)
         : Transaction(conn, false)
         , _immediate(immediate)
@@ -239,4 +247,3 @@ class SqliteTransaction : public Transaction
 } // namespace Pt
 
 #endif // PT_DB_TRANSACTION_H
-

@@ -1,31 +1,8 @@
-/*
- * Copyright (C) 2007 by Tommi Maekitalo
- * Copyright (C) 200-2008 by Marc Duerner
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+/* Copyright (C) 2007 by Tommi Maekitalo
+   Copyright (C) 2007-2026 by Marc Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
+
 #ifndef PT_BLOB_H
 #define PT_BLOB_H
 
@@ -39,55 +16,38 @@ namespace Pt {
 
 namespace Db {
 
-/** @brief Implementation base of Blob values
-
-    This class serves as the base for the shared implementation classes used
-    in Blob objects. The non-virtual interface consists of a pointer to the
-    blob-data and its size. The implementor has to override three virtual methods,
-    IBlob::assign, IBlob::create and IBlob::destroy. The main purpose of these
-    methods is to customize memory allocation of blob-data, aswell as the shared
-    implementation class derived from IBlob. A default implementation, called
-    BlobImpl, is provided, that uses new/delete and the implementation class.
+/** @brief Shared implementation of blob data.
 */
 class IBlob : public RefCounted
 {
     public:
-        /** @brief Destructor
+        /** @brief Destructor.
         */
         virtual ~IBlob() {}
 
-        /** @brief Assign data of a given length
-
-            The \a len bytes of the data pointed to by \a data are copied
-            to this blob.
+        /** @brief Copies @a len bytes from @a data into this blob.
         */
         virtual void assign(const char* data, std::size_t len) = 0;
 
-        /** @brief Create a value implementation
-
-            Returns a pointer to a implementation class derived from IBlob.
-            IBlob::destroy must be implemented accordingly to destroy this
-            instance.
+        /** @brief Creates a new implementation of the same type.
         */
         virtual IBlob* create() const = 0;
 
-        /** @brief Destroy a value implementation
-
-            Destroys an instance previously created by the IBlob::create.
+        /** @brief Destroys an instance created by %create().
         */
         virtual void destroy() = 0;
 
-        /** @brief Returns the size of the blob-data.
+        /** @brief Returns the size of the blob data.
         */
         std::size_t size() const
         { return _size; }
 
-        /** @brief Returns a pointer to the blob-data or 0 if the blob is empty
+        /** @brief Returns a pointer to the blob data, or 0 if empty.
         */
         const char* data() const
         { return _data; }
 
-        /** @brief Returns true if the two instances contain the same data
+        /** @brief Returns true if both instances contain the same data.
         */
         bool operator==(const IBlob& other) const
         {
@@ -105,11 +65,7 @@ class IBlob : public RefCounted
         std::size_t _size;
 };
 
-/** @brief Default %Blob value implementation
-
-    This implementation uses new/delete to create and destroy
-    the shared objects and new/delete to allocate memory for
-    the blob-data.
+/** @brief Default blob implementation using new and delete.
 */
 class BlobImpl : public IBlob
 {
@@ -160,9 +116,7 @@ class BlobImpl : public IBlob
 };
 
 
-/** @internal Initialize statics in BlobImpl during static initialization
-
-    Thread-safety.
+/** @internal Initialize statics in BlobImpl during static initialization.
 */
 static struct BlobStaticInitializer
 {
@@ -173,11 +127,21 @@ static struct BlobStaticInitializer
 } pt_blob_static_initializer;
 
 
-/** @brief Binary large objects
+/** @brief Copy-on-write binary large object.
+
+    %Blob holds binary column data as a shared, copy-on-write value.
+    The default constructor is empty. The data constructor copies
+    @a len bytes from @a data. The %IBlob constructor takes ownership
+    of a custom implementation.
+
+    %assign() replaces the bytes and copies on write when the value is
+    shared. %data() returns the bytes or 0 when empty. %size() is the
+    length. Equality compares the bytes.
+
+    @ingroup Pt-Db-Results
 */
 class Blob
 {
-    //! @brief Release policy for SmartPtr
     template <typename T>
     struct Release
     {
@@ -185,19 +149,16 @@ class Blob
         { blob->destroy(); }
     };
 
-    //! @brief Pointer to shared data
     SmartPtr<IBlob, InternalRefCounted<IBlob>, Release<IBlob> > m_data;
 
 public:
+    /** @brief Creates an empty blob.
+    */
     Blob()
     : m_data( BlobImpl::emptyInstance() )
     { }
 
-    /** Construct a Blob with data of a given length
-
-        Constructs a Blob using a default implementation using new/delete
-        to manage the blob-data and the shared data object. The first \a len
-        bytes of the data pointed to by \a data are copied to this Blob.
+    /** @brief Copies @a len bytes from @a data.
     */
     Blob(const char* data, std::size_t len)
     : m_data( new BlobImpl() )
@@ -205,12 +166,14 @@ public:
         m_data->assign(data, len);
     }
 
-    /** Construct a Blob to use a customized implementation
+    /** @brief Takes ownership of the implementation @a b.
     */
     explicit Blob(IBlob* b)
     : m_data(b)
     { }
 
+    /** @brief Replaces the bytes with @a len bytes from @a data.
+    */
     void assign(const char* data, std::size_t len)
     {
         // copy-on-write
@@ -222,24 +185,28 @@ public:
         m_data->assign(data, len);
     }
 
+    /** @brief Returns true if both blobs contain the same data.
+    */
     bool operator==(const Blob& b) const
     {
         return *m_data == *b.m_data;
     }
 
+    /** @brief Returns true if the blobs do not contain the same data.
+    */
     bool operator!=(const Blob& b) const
     {
         return !operator==(b);
     }
 
-    /** Returns a pointer to the data or 0 if no data is set.
+    /** @brief Returns a pointer to the data, or 0 if empty.
     */
     const char* data() const
     {
         return  m_data->data();
     }
 
-    /** Returns the size of the data
+    /** @brief Returns the size of the data.
     */
     std::size_t size() const
     {
@@ -252,4 +219,3 @@ public:
 } // namespace Pt
 
 #endif //PT_BLOB_H
-

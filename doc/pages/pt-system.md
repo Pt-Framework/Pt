@@ -12,7 +12,7 @@ This chapter covers:
 - @ref Pt-System-Page-Library
 - @ref Pt-System-Page-Plugins
 - @ref Pt-System-Page-Tar
-- @ref Pt-System-Page-Utilities
+- @ref Pt-System-Page-Clock
 
 @section Pt-System-Page-FileSystem File System Access
 @copydetails Pt-System-FileSystem
@@ -119,5 +119,5 @@ This chapter covers:
 @subsection Pt-System-Page-TarWriter Writing Archives
 @copydetails Pt::System::TarWriter
 
-@section Pt-System-Page-Utilities Utilities
+@section Pt-System-Page-Clock System Clock
 @copydetails Pt::System::Clock
