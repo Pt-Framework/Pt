@@ -1,31 +1,6 @@
-/*
- * Copyright (C) 2020-2026 by Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA
- */
+/* Copyright (C) 2020-2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
 
 #ifndef PT_MCP_SERVICE_H
 #define PT_MCP_SERVICE_H
@@ -40,36 +15,49 @@ namespace Pt {
 
 namespace Mcp {
 
-/** @brief MCP protocol service over stdio.
+/** @brief Synchronous MCP service over standard streams.
 
-    Handles the full MCP protocol lifecycle: initialize, tools/list,
-    and tools/call. Reads/writes Content-Length framed messages.
+    %Service is the synchronous stdio transport. It reads and writes
+    Content-Length framed JSON-RPC messages and dispatches initialize,
+    tools/list, and tools/call on the calling thread. Use it when every
+    tool is a synchronous procedure. Asynchronous procedures need
+    %StdioService and an %EventLoop.
+
+    %readMessage() consumes one framed message from a stream and
+    returns the JSON body, or an empty string on EOF.
+    %writeMessage() writes a Content-Length header and the JSON body.
+    %dispatch() runs the request and returns the response JSON, or an
+    empty string for a notification.
+
+    The %Pt::Remoting::ServiceDefinition and the %ToolDeclaration are
+    not owned. Both must outlive this service.
+
+    @ingroup Pt-Mcp-Stdio
 */
 class PT_MCP_API Service
 {
   public:
-    /** @brief Construct with a service definition and tool declaration.
+    /** @brief Creates a service for @a serviceDef and @a decl.
     */
     Service(Remoting::ServiceDefinition& serviceDef,
             const ToolDeclaration& decl);
 
-    /** @brief Destructor.
+    /** @brief Destroys the service.
     */
     ~Service();
 
-    /** @brief Read a Content-Length framed message from the stream.
+    /** @brief Reads one Content-Length framed message from @a is.
 
         Returns the JSON body, or an empty string on EOF.
     */
     std::string readMessage(std::istream& is);
 
-    /** @brief Write a Content-Length framed message to the stream.
+    /** @brief Writes a Content-Length framed message @a json to @a os.
     */
     void writeMessage(std::ostream& os, const std::string& json);
 
-    /** @brief Dispatch an MCP request and return the response JSON.
+    /** @brief Dispatches an MCP request and returns the response JSON.
 
-        Routes to initialize, tools/list, or tools/call handlers.
         Returns an empty string for notifications (no id).
     */
     std::string dispatch(const std::string& json);

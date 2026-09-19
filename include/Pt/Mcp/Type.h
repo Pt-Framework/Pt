@@ -1,31 +1,6 @@
-/*
- * Copyright (C) 2020-2026 by Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA
- */
+/* Copyright (C) 2020-2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
 
 #ifndef PT_MCP_TYPE_H
 #define PT_MCP_TYPE_H
@@ -40,32 +15,56 @@ namespace Pt {
 
 namespace Mcp {
 
-/** @brief JSON Schema type descriptor for MCP tool parameters.
+/** @brief JSON Schema type for an MCP tool parameter.
+
+    %Type is the schema node the parameter-schema group described. It
+    is either a primitive from %integerType() and the other factories,
+    or a composed type the caller owns. %typeId() is the JSON Schema
+    kind. %toSchema() writes that kind as a JSON object, with an
+    optional description. Composed types override %toSchema() to add
+    properties, items, enum values, or null.
+
+    The type does not own other types. An %ObjectType, %ArrayType, or
+    %NullableType stores pointers to the types it names, and those
+    types must outlive it. %Type is not copyable.
+
+    @ingroup Pt-Mcp-Types
 */
 class PT_MCP_API Type : private NonCopyable
 {
   public:
+    /** @brief JSON Schema kind of a %Type.
+    */
     enum TypeId
     {
-        Null = 0,
-        Integer = 1,
-        Number = 2,
-        String = 3,
-        Boolean = 4,
-        Object = 5,
-        Array = 6
+        Null = 0,     //!< JSON null
+        Integer = 1,  //!< JSON integer
+        Number = 2,   //!< JSON number
+        String = 3,   //!< JSON string
+        Boolean = 4,  //!< JSON boolean
+        Object = 5,   //!< JSON object
+        Array = 6     //!< JSON array
     };
 
+    /** @brief Creates a type with schema kind @a id.
+    */
     explicit Type(TypeId id)
     : _id(id)
     {}
 
+    /** @brief Destroys the type.
+    */
     virtual ~Type();
 
+    /** @brief Returns the JSON Schema kind of this type.
+    */
     TypeId typeId() const
     { return _id; }
 
-    /** @brief Writes the JSON Schema representation to the stream.
+    /** @brief Writes this type as a JSON Schema object to @a os.
+
+        When @a description is not empty, it is written as the schema
+        description member.
     */
     virtual void toSchema(std::ostream& os,
                           const std::string& description = "") const;
@@ -75,37 +74,78 @@ class PT_MCP_API Type : private NonCopyable
 };
 
 
+/** @brief Returns the process-wide JSON null schema type.
+
+    @ingroup Pt-Mcp-Types
+*/
 PT_MCP_API const Type& nullType();
 
+/** @brief Returns the process-wide JSON integer schema type.
+
+    @ingroup Pt-Mcp-Types
+*/
 PT_MCP_API const Type& integerType();
 
+/** @brief Returns the process-wide JSON number schema type.
+
+    @ingroup Pt-Mcp-Types
+*/
 PT_MCP_API const Type& numberType();
 
+/** @brief Returns the process-wide JSON string schema type.
+
+    @ingroup Pt-Mcp-Types
+*/
 PT_MCP_API const Type& stringType();
 
+/** @brief Returns the process-wide JSON boolean schema type.
+
+    @ingroup Pt-Mcp-Types
+*/
 PT_MCP_API const Type& booleanType();
 
 
-/** @brief Property of an ObjectType.
+/** @brief Named slot of an object schema or a tool parameter.
+
+    %Property is the name, type, description, and required flag the
+    schema group uses for both %ObjectType members and %Tool
+    parameters. The type is not owned; it must outlive the property.
+    A new property is required. %setOptional() clears that flag.
+
+    @ingroup Pt-Mcp-Types
 */
 class PT_MCP_API Property
 {
   public:
+    /** @brief Creates a required property named @a name of @a type.
+
+        @a description is the schema description of this property.
+    */
     Property(const std::string& name, const Type& type,
              const std::string& description = "");
 
+    /** @brief Returns the property name.
+    */
     const std::string& name() const
     { return _name; }
 
+    /** @brief Returns the schema type of this property.
+    */
     const Type& type() const
     { return *_type; }
 
+    /** @brief Returns the schema description of this property.
+    */
     const std::string& description() const
     { return _description; }
 
+    /** @brief Returns true when the property is required.
+    */
     bool isRequired() const
     { return _required; }
 
+    /** @brief Marks the property as optional.
+    */
     void setOptional()
     { _required = false; }
 
@@ -117,33 +157,58 @@ class PT_MCP_API Property
 };
 
 
-/** @brief Object type with named properties.
+/** @brief JSON object schema with named properties.
 
-    Describes a JSON object schema with properties, each having
-    a name, type, and required flag.
+    %ObjectType is a composed %Type whose schema is a JSON object.
+    %addProperty() appends a required property. %setOptional() makes
+    an existing property optional by name; a name that is not present
+    is ignored. %setStrict() writes additionalProperties as false so
+    undeclared members are rejected.
+
+    Each property stores a pointer to its %Type. Those types must
+    outlive this object type. The object type must outlive every
+    %Tool that uses it as a parameter.
+
+    @ingroup Pt-Mcp-Types
 */
 class PT_MCP_API ObjectType : public Type
 {
   public:
+    /** @brief Creates an empty object schema.
+    */
     ObjectType();
 
+    /** @brief Destroys the object schema.
+    */
     ~ObjectType();
 
+    /** @brief Adds a required property named @a name of @a type.
+
+        @a description is the schema description of the property.
+    */
     ObjectType& addProperty(const std::string& name, const Type& type,
                             const std::string& description = "");
 
+    /** @brief Marks the property named @a name as optional.
+    */
     ObjectType& setOptional(const std::string& name);
 
-    /** @brief Disallow properties not listed in the schema.
+    /** @brief Forbids properties that are not listed in the schema.
     */
     ObjectType& setStrict();
 
+    /** @brief Returns the properties of this object schema.
+    */
     const std::vector<Property>& properties() const
     { return _properties; }
 
+    /** @brief Returns true when additional properties are forbidden.
+    */
     bool isStrict() const
     { return _strict; }
 
+    /** @brief Writes this object as a JSON Schema object to @a os.
+    */
     void toSchema(std::ostream& os,
                   const std::string& description = "") const override;
 
@@ -153,20 +218,32 @@ class PT_MCP_API ObjectType : public Type
 };
 
 
-/** @brief Array type with element type.
+/** @brief JSON array schema with one element type.
 
-    Describes a JSON array schema with a single items type.
+    %ArrayType is a composed %Type whose schema is a JSON array. The
+    items type is the schema of every element. It is not owned; it
+    must outlive this array type.
+
+    @ingroup Pt-Mcp-Types
 */
 class PT_MCP_API ArrayType : public Type
 {
   public:
+    /** @brief Creates an array schema whose items have type @a items.
+    */
     explicit ArrayType(const Type& items);
 
+    /** @brief Destroys the array schema.
+    */
     ~ArrayType();
 
+    /** @brief Returns the schema type of the array elements.
+    */
     const Type& items() const
     { return *_items; }
 
+    /** @brief Writes this array as a JSON Schema object to @a os.
+    */
     void toSchema(std::ostream& os,
                   const std::string& description = "") const override;
 
@@ -175,20 +252,37 @@ class PT_MCP_API ArrayType : public Type
 };
 
 
-/** @brief Enum type with a fixed set of allowed string values.
+/** @brief String schema restricted to a fixed set of values.
+
+    %EnumType is a composed %Type whose schema is a JSON string with
+    an enum list. %addValue() appends an allowed string. The type id
+    is %Type::String. The caller owns the enum type and must keep it
+    alive while a tool names it.
+
+    @ingroup Pt-Mcp-Types
 */
 class PT_MCP_API EnumType : public Type
 {
   public:
+    /** @brief Creates an enum schema with no values.
+    */
     EnumType();
 
+    /** @brief Destroys the enum schema.
+    */
     ~EnumType();
 
+    /** @brief Adds @a value to the set of allowed strings.
+    */
     EnumType& addValue(const std::string& value);
 
+    /** @brief Returns the allowed string values.
+    */
     const std::vector<std::string>& values() const
     { return _values; }
 
+    /** @brief Writes this enum as a JSON Schema object to @a os.
+    */
     void toSchema(std::ostream& os,
                   const std::string& description = "") const override;
 
@@ -197,20 +291,34 @@ class PT_MCP_API EnumType : public Type
 };
 
 
-/** @brief Nullable wrapper that allows null as an alternative value.
+/** @brief Schema that accepts a type or JSON null.
 
-    Outputs a schema with type as an array, e.g. {"type":["string","null"]}.
+    %NullableType wraps another %Type so the schema allows null as
+    well as that inner type. For primitives the schema uses a type
+    array, for example {"type":["string","null"]}. For objects and
+    arrays it uses oneOf. The inner type is not owned; it must
+    outlive this wrapper.
+
+    @ingroup Pt-Mcp-Types
 */
 class PT_MCP_API NullableType : public Type
 {
   public:
+    /** @brief Creates a nullable wrapper around @a inner.
+    */
     explicit NullableType(const Type& inner);
 
+    /** @brief Destroys the nullable wrapper.
+    */
     ~NullableType();
 
+    /** @brief Returns the wrapped schema type.
+    */
     const Type& inner() const
     { return *_inner; }
 
+    /** @brief Writes this nullable type as a JSON Schema object to @a os.
+    */
     void toSchema(std::ostream& os,
                   const std::string& description = "") const override;
 

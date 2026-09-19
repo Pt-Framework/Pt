@@ -23,13 +23,28 @@ namespace Pt {
 /** @namespace Pt::Mcp
     @brief Model Context Protocol (MCP) services.
 
-    The MCP module (Pt::Mcp) of the %Pt framework provides an implementation
-    of the Model Context Protocol for exposing tool-based services. It builds
-    on top of the JSON-RPC module (Pt::JsonRpc) and uses its Formatter and
-    Fault infrastructure. Custom data-types can be used in MCP tool procedures
-    if they are serializable using %Pt's serialization API.
+    An MCP server that exposes C++ procedures as tools. Parameter
+    schemas, a tool catalog, result content, and HTTP or standard-I/O
+    transport. Procedures live on %Pt::Remoting::ServiceDefinition.
+    Arguments and results must be serializable.
 */
 namespace Mcp {
+
+class Type;
+class Property;
+class ObjectType;
+class ArrayType;
+class EnumType;
+class NullableType;
+class Tool;
+class ToolDeclaration;
+class ContentFormatter;
+class ContentType;
+class TextContent;
+class ImageContent;
+class HttpService;
+class Service;
+class StdioService;
 
 } // namespace Mcp
 
