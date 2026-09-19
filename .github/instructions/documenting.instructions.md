@@ -22,8 +22,8 @@ Compact wording belongs in API declaration comments. Group and class
 detailed descriptions are textbook chapters.
 
 The chat convention of code and bullets, and the coding-guideline
-preference for short comments, do not apply to Doxygen comments.
-Doxygen comments are documentation.
+preference for short comments, do not apply to Doxygen comments and
+documentation.
 
 # API Declaration Comments
 
@@ -287,7 +287,6 @@ syntax, in Markdown, or as an `\htmlonly` body.
   - Markdown: `# Title {#id}`, `##` / `###` headings, fenced code.
     `{#id}` is the page ID.
 - Do not mix Doxygen page syntax with Markdown headings in one file.
-  `@ref` is valid in both forms.
 
 ## Content
 
@@ -323,8 +322,6 @@ short, long, or could ship separately.
 Copy a type with `@copydetails` when it deepens that section's model.
 Prefer copying the central types of a reader task. A brief-only class
 that adds no chapter of its own is not copied.
-
-A group keeps its `@ingroup` identity on the module page.
 
 ## Style
 
