@@ -40,6 +40,14 @@ namespace Gfx {
 
 class FontProvider;
 
+/** @brief Registry of font files.
+
+    %FontRegistry holds the font file paths %Font::addFont()
+    registers. Call those %Font functions instead of using this
+    type directly.
+
+    @ingroup Pt-Gfx-Drawing
+*/
 class PT_GFX_API FontRegistry
 {
     friend class FontProvider;

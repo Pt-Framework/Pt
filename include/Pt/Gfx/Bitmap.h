@@ -49,12 +49,23 @@ namespace Gfx {
 
 class BitmapSurface;
 
-/** @brief Off-screen drawing surface backed by an image.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Off-screen image that can be painted.
 
-    %Bitmap is the standard in-memory %PaintSurface implementation. It can be
-    used as a rendering target for %Painter and also exposes the rendered image
-    so that drawing results can be copied, inspected or reused by image APIs.
+    %Bitmap is the in-memory %PaintSurface. Construct it with a
+    physical size, paint with a %Painter, then read the pixels with
+    %image(). %reset() replaces the buffer with a new size or with
+    a copy of an existing %Image. %setScaleFactor() sets the
+    logical-to-physical scaling used while drawing.
+
+    The bitmap owns its image. A painter on the bitmap does not own
+    the bitmap. After %finish(), the image remains valid until the
+    bitmap is reset or destroyed.
+
+    %defaultFont(), %fontFamilies(), and %fontFaces() query the
+    backend font list. %Font::addFont() registers files those
+    queries can resolve.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Bitmap : public PaintSurface
 {

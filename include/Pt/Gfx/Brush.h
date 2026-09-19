@@ -134,12 +134,18 @@ class ColorStops
 };
 
 
-/** @brief Fill description for shapes and text.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Fill color, gradient or texture.
 
-    Brush describes how closed geometry is filled. It can represent solid
-    colors, textures and gradients with absolute or relative coordinates so
-    that painters can reuse the same fill definition across targets.
+    %Brush describes how a painter fills closed shapes, paths, and
+    text. A solid brush is a %Color. A gradient interpolates
+    %ColorStop values along a line or between two circles. A texture
+    repeats an %Image. The default brush is null and does not fill.
+
+    %PositionMode chooses whether gradient and texture coordinates
+    are absolute or relative to the shape being filled. Relative
+    coordinates map the unit square onto that shape.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Brush
 {

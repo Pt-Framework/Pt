@@ -41,7 +41,25 @@ namespace Gfx {
 
 class ColorF;
 
-/** @brief Standard color type.
+/** @brief 8-bit ARGB color.
+
+    %Color is the packed ARGB value painters, pens, brushes, and
+    8-bit pixels use. It is not a pixel in an image and it does not
+    refer to a buffer. Alpha is straight, not premultiplied. Channel
+    accessors return 8-bit components. The three-argument constructor
+    sets alpha to 255.
+
+    Convert to and from %ColorF when float channels are required.
+    Conversion clamps %ColorF channels to the 8-bit range.
+
+    The example constructs an opaque red and a half-transparent blue.
+
+    @code
+    Pt::Gfx::Color red(255, 0, 0);
+    Pt::Gfx::Color blue(128, 0, 0, 255);
+    @endcode
+
+    @ingroup Pt-Gfx-Images
 */
 class Color
 {
@@ -137,13 +155,19 @@ class Color
         Pt::uint32_t _value;
 };
 
-/** @brief RGBA float32 working color.
+/** @brief Floating-point RGBA color.
 
-    Four native floats in RGBA memory order. Channels use the range
-    [0, 1]. Values greater than 1 are allowed for HDR. Alpha is
-    straight. ColorF is a working type, not a pixel buffer format.
-    Memory order matches RGBA32F so a later ArgbF32 format can copy
-    a ColorF as 16 bytes.
+    %ColorF is a working color with four float channels in RGBA
+    memory order. It is not a pixel buffer. Channels use the range
+    [0, 1]; values greater than 1 are allowed for HDR. Alpha is
+    straight, not premultiplied. %ImageF uses this type as its
+    working color through the same runtime %ImageFormat as %Image.
+
+    Convert to and from %Color with the converting constructors.
+    %toChannel8() clamps values below 0 to 0 and values of 1 or
+    greater to 255.
+
+    @ingroup Pt-Gfx-Images
 */
 class ColorF
 {

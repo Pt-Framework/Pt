@@ -44,12 +44,23 @@ namespace Gfx {
 
 class PaintContext;
 
-/** @brief Abstract target for drawing operations.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Target for drawing operations.
 
-    %PaintSurface supplies the backend-specific resources needed for painting.
-    It reports target format, size and scaling, creates a %Canvas on demand and
-    coordinates %PainterBase and %PaintContext while drawing is active.
+    %PaintSurface is the abstract render target a %Painter paints on.
+    It reports the pixel %format(), the physical %size(), and the
+    %scaling() from logical units to device pixels. A backend creates
+    a %Canvas while painting is active. Ordinary callers do not call
+    %getCanvas().
+
+    %Bitmap is the in-memory surface in this module. Forms provides
+    surfaces for windows and controls. The surface does not own the
+    painter or the context attached to it. It must outlive both.
+
+    This type is not constructed by application code. Construct a
+    %Bitmap, or receive a surface from the host that owns the
+    display.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API PaintSurface : private NonCopyable
 {

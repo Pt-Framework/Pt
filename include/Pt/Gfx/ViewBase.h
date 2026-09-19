@@ -36,6 +36,16 @@ namespace Pt {
 
 namespace Gfx {
 
+/** @brief Width, height and stride of an image or view.
+
+    %ViewBase stores the dimensions shared by images and views.
+    %width() and %height() are in pixels. %stride() is the number of
+    bytes from one row to the next, including padding. %empty() is
+    true when width or height is zero. This type is not used on its
+    own; %BasicImage and %BasicView derive from it.
+
+    @ingroup Pt-Gfx-Images
+*/
 class ViewBase
 {
     public:

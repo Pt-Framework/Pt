@@ -40,7 +40,14 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief ARGB-32 pixel.
+/** @brief Cursor to one ARGB-32 pixel.
+
+    %Argb32Pixel refers to one position in an %Argb32Image or
+    %Argb32View. Copy assignment is deleted; call %reset() to bind
+    another position. Assigning a %Color writes the four 8-bit
+    channels.
+
+    @ingroup Pt-Gfx-Images
 */
 class Argb32Pixel
 {
@@ -125,7 +132,9 @@ class Argb32Pixel
         Pt::uint8_t*    _base;
 };
 
-/** @brief ARGB-32 const pixel.
+/** @brief Read-only cursor to one ARGB-32 pixel.
+
+    @ingroup Pt-Gfx-Images
 */
 class Argb32ConstPixel
 {
@@ -200,6 +209,12 @@ class Argb32ConstPixel
 };
 
 /** @brief ARGB-32 image format.
+
+    %Argb32 stores each pixel as 32 bits with 8-bit alpha, red, green,
+    and blue, with straight alpha. %Argb32Image uses this format at
+    compile time. %ImageFormat::argb32() returns the runtime instance.
+
+    @ingroup Pt-Gfx-Images
 */
 class PT_GFX_API Argb32 final : public ImageFormat
 {

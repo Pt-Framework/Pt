@@ -2,6 +2,8 @@
 description: "Drawing Graphics and Text"
 ---
 
+- Module group order and module chapter:
+  `include/Pt/Gfx/Api-Gfx.h`
 - Concepts, painter lifecycle, API boundaries:
   `include/Pt/Gfx/Api-Drawing.h`
 - Draw lines, rectangles, circles, ellipses, arcs, pie, chord, polygon:

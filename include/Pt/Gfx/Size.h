@@ -41,7 +41,29 @@ namespace Gfx {
 
 class SizeI;
 
-/** @brief %Size with floating-point width and height.
+/** @brief Floating-point width and height.
+
+    %Size is the logical width and height drawing uses. It is not a
+    pixel count. Image and view dimensions are integers; convert with
+    %round(), %floor(), or %ceil() when a pixel size is required.
+    %SizeF is a typedef of this type.
+
+    The value is copyable. %isEmpty() is true when width or height is
+    zero. %area() is width times height. %transpose() swaps the
+    components. Arithmetic scales or grows both dimensions.
+
+    Construct from two floats, or widen a %SizeI with the explicit
+    constructor.
+
+    The example builds a logical size and converts it to an integer
+    pixel size by rounding.
+
+    @code
+    Pt::Gfx::Size s(320.0, 240.0);
+    Pt::Gfx::SizeI pixels = s.round();
+    @endcode
+
+    @ingroup Pt-Gfx
 */
 class Size
 {
@@ -242,7 +264,16 @@ class Size
 
 typedef Size SizeF;
 
-/** @brief %Size with integer width and height.
+/** @brief Integer width and height.
+
+    %SizeI is the integer counterpart of %Size. Image width and
+    height, and rounded drawing sizes, use this type. Widen it to
+    %Size when a painter needs a floating-point extent.
+
+    Arithmetic matches %Size but uses %Int. There is no rounding
+    API on this type: rounding is how a %Size becomes a %SizeI.
+
+    @ingroup Pt-Gfx
 */
 class SizeI
 {

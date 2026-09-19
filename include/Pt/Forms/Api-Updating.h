@@ -59,7 +59,7 @@
     the argument to %onPaint(). A %Painter binds to the surface or the
     context and issues drawing commands. It extends Gfx with pixmap
     drawing. A %Pixmap is an off-screen %PaintSurface used as a back buffer
-    or as cached image content. Use @ref Pt-Gfx-Drawing-Page for pens,
+    or as cached image content. Use @ref Pt-Gfx-Page-Drawing for pens,
     brushes, text, and paths.
 
     A styled control does not invent a second cycle. %onInvalidate() binds

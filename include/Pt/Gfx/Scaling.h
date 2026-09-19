@@ -38,12 +38,15 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Logical-to-physical unit conversion.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Conversion between logical units and pixels.
 
-    Scaling converts coordinates, sizes and rectangles between logical drawing
-    units and physical device pixels. It also provides alignment helpers that
-    snap geometry to pixel boundaries for crisp rendering.
+    %Scaling is the factor a %PaintSurface uses to map logical
+    drawing coordinates to physical pixels. %toPhysical() multiplies
+    by that factor. %toLogical() divides. Alignment helpers snap
+    geometry to pixel boundaries. A painter reads scaling from the
+    target; set it on a %Bitmap with %setScaleFactor().
+
+    @ingroup Pt-Gfx-Drawing
 */
 class Scaling
 {

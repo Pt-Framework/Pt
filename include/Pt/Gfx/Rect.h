@@ -41,7 +41,36 @@ namespace Gfx {
 
 class RectI;
 
-/** @brief %Rect with floating-point coordinates.
+/** @brief Floating-point rectangle.
+
+    %Rect is an origin %Point and a %Size. Drawing clips, fill
+    rectangles, and path bounds use this type. Image regions use
+    integer rectangles; convert with %round(), %floor(), %ceil(),
+    %roundOut(), or %roundIn() when a pixel rect is required.
+    %RectF is a typedef of this type.
+
+    The origin is the top-left. %right() and %bottom() are origin
+    plus size, and %contains(const Point&) treats the right and
+    bottom edges as exclusive. %isEmpty() is true when width or
+    height is zero. Negative width or height is allowed until
+    %normalize() moves the origin so both are non-negative.
+
+    Construct from a point and a size, from a size at the origin,
+    from two corner points, or with %fromLTRB() and %fromXYWH().
+    Widen a %RectI with the explicit constructor.
+
+    %unify() grows this rect to include another. %toIntersected()
+    returns the overlap, or an empty rect. %intersects() is true
+    when the interiors overlap.
+
+    The example constructs a clip rectangle and tests a point.
+
+    @code
+    Pt::Gfx::Rect r = Pt::Gfx::Rect::fromXYWH(10, 20, 100, 50);
+    bool inside = r.contains(Pt::Gfx::Point(15, 25));
+    @endcode
+
+    @ingroup Pt-Gfx
 */
 class Rect
 {
@@ -368,7 +397,18 @@ class Rect
 
 typedef Rect RectF;
 
-/** @brief %Rect with integer coordinates.
+/** @brief Integer rectangle.
+
+    %RectI is the integer counterpart of %Rect: a %PointI origin and
+    a %SizeI. Image regions and rounded drawing rectangles use this
+    type. Widen it to %Rect when a painter needs a floating-point
+    rectangle.
+
+    Geometry matches %Rect, including exclusive right and bottom
+    edges in %contains(). There is no rounding API on this type:
+    rounding is how a %Rect becomes a %RectI.
+
+    @ingroup Pt-Gfx
 */
 class RectI
 {

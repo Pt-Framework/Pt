@@ -2,6 +2,8 @@
 description: "Images, formats, pixels, views, conversion, scaling, and image codecs in Pt::Gfx."
 ---
 
+- Module group order and module chapter:
+	`include/Pt/Gfx/Api-Gfx.h`
 - Image ownership, formats, views, and pixel access concepts:
 	`include/Pt/Gfx/Api-Images.h`
 - Create format-generic images, own or wrap image data:

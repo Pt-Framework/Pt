@@ -7,13 +7,18 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Image storing pixels in premultiplied ARGB-32 format.
+/** @brief Premultiplied ARGB-32 image.
 
-    %Rgb32Image owns its pixel data and stores each pixel as a 32-bit value
-    with four 8-bit channels in premultiplied ARGB-32 layout. When colors are
-    written, the RGB components are multiplied by alpha. This format is the
-    native target for compositing operations and avoids the per-pixel division
-    during blending.
+    %Rgb32Image is %BasicImage with the %Rgb32 format bound at
+    compile time. Each pixel is 32 bits with 8-bit channels in
+    premultiplied ARGB-32 layout: when a color is written, the RGB
+    components are multiplied by alpha. Use this type when blending
+    should not divide by alpha per pixel. Use %Argb32Image when
+    channels are stored with straight alpha.
+
+    Constructors that take width and height allocate. Constructors
+    that take a data pointer wrap the caller buffer; that buffer must
+    remain valid for the lifetime of the image.
 
     @headerfile Rgb32Image.h <Pt/Gfx/Rgb32Image.h>
     @ingroup Pt-Gfx-Images

@@ -41,7 +41,33 @@ namespace Gfx {
 
 class PointI;
 
-/** @brief %Point with floating-point X and Y coordinates.
+/** @brief Floating-point X and Y coordinates.
+
+    %Point is the logical coordinate value drawing uses: an X and a Y
+    of type %Float. It is not a pixel index. Image and view positions
+    are integers; convert with %round(), %floor(), or %ceil() when a
+    pixel location is required. %PointF is a typedef of this type.
+
+    The value is copyable. Arithmetic treats it as a vector: addition
+    and subtraction with another point, scaling by a scalar, and
+    %move() by a delta. %length() is the Euclidean length from the
+    origin, and %distanceTo() is the length to another point.
+    %isEqual() compares with a tolerance, because floating-point
+    coordinates are not exact.
+
+    Construct from two floats, or widen a %PointI with the explicit
+    constructor. Widening does not round; the integer coordinates
+    become floats.
+
+    The example builds a logical point and converts it to an integer
+    pixel position by rounding.
+
+    @code
+    Pt::Gfx::Point p(10.4, 20.6);
+    Pt::Gfx::PointI pixel = p.round();
+    @endcode
+
+    @ingroup Pt-Gfx
 */
 class Point
 {
@@ -249,7 +275,18 @@ class Point
 
 typedef Point PointF;
 
-/** @brief %Point with integer X and Y coordinates.
+/** @brief Integer X and Y coordinates.
+
+    %PointI is the integer counterpart of %Point. Image pixels, view
+    origins, and rounded drawing coordinates use this type. It is not
+    a logical drawing point; widen it to %Point when a painter needs
+    a floating-point coordinate.
+
+    Arithmetic matches %Point but uses %Int. Equality is exact.
+    There is no rounding API on this type: rounding is how a %Point
+    becomes a %PointI.
+
+    @ingroup Pt-Gfx
 */
 class PointI
 {

@@ -36,7 +36,18 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Reader for PNG images.
+/** @brief PNG image reader.
+
+    %PngReader decodes PNG data from an iostream into an %Image.
+    Attach a stream and an image, then call %get() to read the whole
+    image, or %advance() to consume bytes as they become available.
+    The reader does not own the stream or the image.
+
+    When %advance() is called with import size 0, only bytes already
+    in the stream buffer are consumed. A positive import size may
+    block on the underlying stream.
+
+    @ingroup Pt-Gfx-Images
 */
 class PT_GFX_API PngReader
 {

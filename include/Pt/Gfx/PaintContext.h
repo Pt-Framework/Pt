@@ -42,12 +42,20 @@ namespace Gfx {
 class PainterBase;
 class PaintSurface;
 
-/** @brief Active painting session for a surface.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Active painting session on a surface.
 
-    %PaintContext represents a prepared drawing session on a %PaintSurface. It
-    exposes target properties, provides access to a backend canvas and keeps
-    painter and surface lifetime in sync while painting is active.
+    %PaintContext attaches to a %PaintSurface for the duration of a
+    paint. It can install a default clip that every painter on this
+    session intersects. Format, size, and scaling are those of the
+    surface. Destroying the context detaches it. The surface must
+    outlive the context.
+
+    Forms passes a context into widget paint handlers. A caller can
+    also construct a %Painter on a context that already exists.
+    Constructing a %Painter directly on a surface creates the
+    session without an explicit context.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API PaintContext : private NonCopyable
 {

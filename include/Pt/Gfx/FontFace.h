@@ -40,6 +40,14 @@ namespace Gfx {
 
 class FontFaceData;
 
+/** @brief Resolved font family and style.
+
+    %FontFace is a family, weight, slant, stretch, and optional style
+    name the backend can draw. %Bitmap::fontFaces() returns these
+    values. A %Font request selects among them.
+
+    @ingroup Pt-Gfx-Drawing
+*/
 class PT_GFX_API FontFace
 {
     public:

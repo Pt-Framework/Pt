@@ -41,6 +41,25 @@ namespace Pt {
 
 namespace Gfx {
 
+/** @brief Non-owning image region.
+
+    %BasicView refers to a whole image or to a sub-rectangle. It
+    does not copy pixels and it does not own the buffer. The source
+    image or buffer must outlive the view. Width, height, and stride
+    come from %ViewBase. The format is the source format, typed or
+    runtime.
+
+    Construct from a source image, from a source plus a rectangle,
+    or from a raw pointer with explicit size and padding. The free
+    function %view() is the usual way to open a region.
+    %Argb32View and %ImageView are this template with a concrete
+    or runtime format.
+
+    Writing through a pixel bound to the view changes the source
+    image. Copying a view copies the pointer, not the pixels.
+
+    @ingroup Pt-Gfx-Images
+*/
 template <typename FormatT, typename TraitsT>
 class BasicView : public ViewBase
 {
@@ -93,6 +112,14 @@ class BasicView : public ViewBase
 };
 
 
+/** @brief Read-only image region.
+
+    %BasicConstView is the const counterpart of %BasicView. It can
+    be constructed from a const image or from a mutable view. It
+    does not write.
+
+    @ingroup Pt-Gfx-Images
+*/
 template <typename FormatT, typename TraitsT>
 class BasicConstView : public ViewBase
 {

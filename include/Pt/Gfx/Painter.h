@@ -37,13 +37,26 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Concrete painter for Pt::Gfx paint targets.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Painter for a surface or a paint context.
 
-    %Painter is the entry point for issuing drawing commands against a
-    %PaintSurface or an existing %PaintContext. It owns no rendering backend
-    itself and instead binds %PainterBase to the target supplied through begin
-    or the corresponding constructor.
+    %Painter is the type a caller constructs to draw. It begins a
+    session on a %PaintSurface or on an existing %PaintContext,
+    through a constructor or %begin(). Drawing commands live on
+    %PainterBase. This type does not own the surface or the context.
+    One painter is bound to at most one target at a time.
+    %finish() ends the session.
+
+    The example begins painting on a bitmap and fills it.
+
+    @code
+    Pt::Gfx::Bitmap bitmap(Pt::Gfx::SizeF(64, 64));
+    Pt::Gfx::Painter painter(bitmap);
+    painter.setBrush(Pt::Gfx::Brush(Pt::Gfx::Color(255, 255, 255)));
+    painter.fillRect(Pt::Gfx::RectF(Pt::Gfx::SizeF(64, 64)));
+    painter.finish();
+    @endcode
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Painter : public PainterBase
 {

@@ -35,12 +35,15 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Metrics for a measured line of text.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Width and bounds of a text run.
 
-    TextMetrics stores the horizontal advance and bounding-box information of
-    a rendered text run. Painters return this structure when text needs to be
-    aligned before it is drawn.
+    %TextMetrics is the result of %PainterBase::textMetrics() for
+    one string in the current font. %advance() is the distance to
+    move the origin for the next run. %bearingX() and %bearingY()
+    are the offset from that origin to the bounding box.
+    %boundingWidth() and %boundingHeight() are the box size.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API TextMetrics
 {

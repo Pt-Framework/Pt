@@ -42,6 +42,13 @@ namespace Gfx {
 
 class FontRegistry;
 
+/** @brief Backend that loads font files.
+
+    %FontProvider is implemented by a paint backend. Call
+    %Font::addFont() instead of using this type directly.
+
+    @ingroup Pt-Gfx-Drawing
+*/
 class PT_GFX_API FontProvider
 {
     friend class FontRegistry;

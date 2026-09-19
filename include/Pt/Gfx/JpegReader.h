@@ -38,7 +38,18 @@ namespace Gfx {
 
 // TODO: ImageIOHandler used by ImageReader and ImageWriter
 
-/** @brief Reader for JPEG images.
+/** @brief JPEG image reader.
+
+    %JpegReader decodes JPEG data from an iostream into an %Image.
+    Attach a stream and an image, then call %get() to read the whole
+    image, or %advance() to consume bytes as they become available.
+    The reader does not own the stream or the image. %detach()
+    releases both. %reset() starts a new decode on the same pair.
+
+    The image format is chosen by the decoder. Use this type when
+    the input is JPEG; use %PngReader for PNG.
+
+    @ingroup Pt-Gfx-Images
 */
 class PT_GFX_API JpegReader
 {

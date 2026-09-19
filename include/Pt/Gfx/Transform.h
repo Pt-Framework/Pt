@@ -37,13 +37,18 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Affine transform for drawing coordinates.
-    @ingroup Pt-Gfx-Drawing
+/** @brief 2D affine transform.
 
-    Transform stores the matrix used to map logical drawing coordinates to the
-    coordinate system of the target. It can be composed from translation,
-    scaling, rotation and shear operations and is used by painters, paths and
-    text drawing.
+    %Transform maps logical drawing coordinates. The default is
+    identity. Translate, scale, rotate, and shear compose on the
+    left. A painter's %setTransform() applies this mapping before
+    the surface scaling. %drawText() can take an extra transform
+    for a single run.
+
+    Invert a transform only when it is invertible. The type is a
+    value; copying duplicates the matrix, not a painter.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Transform
 {

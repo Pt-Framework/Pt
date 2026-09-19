@@ -50,12 +50,32 @@ class PathData;
 class PathElement;
 class PathIterator;
 
-/** @brief Vector path for drawing outlines and filled shapes.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Sequence of lines and curves.
 
-    %Path stores a sequence of drawing commands such as moves, lines and curves.
-    Painters can stroke or fill the current path directly, while helper
-    functions make it easy to append rectangles, ellipses and arc segments.
+    %Path stores moves, lines, quadratic and cubic curves, and close
+    commands. It does not belong to a painter. Build a path, then
+    stroke or fill it with %PainterBase::drawPath() and
+    %fillPath(), or assign it as the painter's current path.
+
+    %moveTo() starts a subpath. %lineTo(), %quadTo(), %cubicTo(),
+    and the arc helpers append to the current subpath. %contains()
+    and %intersects() test geometry against the filled area using a
+    %FillRule, without a surface.
+
+    The example builds a triangle and fills it on a bitmap.
+
+    @code
+    Pt::Gfx::Bitmap bitmap(Pt::Gfx::SizeF(64, 64));
+    Pt::Gfx::Painter painter(bitmap);
+    Pt::Gfx::Path path;
+    path.moveTo(Pt::Gfx::PointF(10, 10));
+    path.lineTo(Pt::Gfx::PointF(50, 10));
+    path.lineTo(Pt::Gfx::PointF(30, 40));
+    path.close();
+    painter.fillPath(path);
+    @endcode
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Path
 {

@@ -42,13 +42,18 @@ namespace Gfx {
 
 class PenData;
 
-/** @brief Attributes for the drawing of outlines.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Outline color, width and style.
 
-    %Pen objects are used as container of drawing attributes for %Painter
-    objects. A size and a color can be specified per pen. The size and
-    color are used to draw outlined shapes by the %Painter. Outlined shapes
-    for example are lines, outlined rectangles or ellipses and text.
+    %Pen describes how a painter strokes lines, polylines, arcs,
+    rectangle and ellipse outlines, paths, and text outlines. The
+    default pen is null and does not stroke. A pen constructed from
+    a %Color is solid, one pixel wide, with round caps and joins.
+
+    %Style selects solid, dotted, dashed, or a custom dash pattern.
+    %CapStyle is the shape of open ends. %JoinStyle is the shape of
+    corners. Width is in logical units.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Pen
 {

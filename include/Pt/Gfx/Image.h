@@ -45,7 +45,38 @@ namespace Gfx {
 
 //inline namespace v2 {
 
-/** @brief Basic image.
+/** @brief Image that owns or wraps pixel data.
+
+    %BasicImage is the image type both families use. A typed image such
+    as %Argb32Image is this template with a concrete format. %Image is
+    this template with %ImageFormat, so the format is chosen at run
+    time. Width, height, and stride come from %ViewBase.
+
+    Constructors that take width and height allocate a buffer the
+    image owns. Constructors that take a data pointer wrap that
+    buffer without copying it; the caller keeps the memory valid for
+    the lifetime of the image. The optional padding is extra bytes
+    after each row. %reset() repeats either construction. %clear()
+    releases an owned buffer or drops a wrap. Copying an owning
+    image copies the pixels. Copying a wrapped image copies the
+    pointer, not the pixels, and does not take ownership.
+
+    %data() is the first byte of the first row. %format() is the
+    format used to interpret those bytes. Use the free functions
+    %view(), %pixelView(), and %lineView() to look at a region
+    without copying.
+
+    The example allocates an ARGB-32 image and wraps the same
+    dimensions over an external buffer. The second image does not
+    own @a bits.
+
+    @code
+    Pt::Gfx::Argb32Image owned(64, 48);
+    std::vector<Pt::uint8_t> bits(64 * 48 * 4);
+    Pt::Gfx::Argb32Image wrapped(bits.data(), 64, 48);
+    @endcode
+
+    @ingroup Pt-Gfx-Images
 */
 template <typename FormatT, typename TraitsT>
 class BasicImage : public ViewBase
@@ -55,26 +86,26 @@ class BasicImage : public ViewBase
         typedef TraitsT Traits;
 
     public:
-        /** @brief Constructor.
+        /** @brief Constructs an empty image.
         */
         explicit BasicImage( const Format& format = FormatT::get() );
 
-        /** @brief Constructor.
+        /** @brief Constructs an image of the given size with row padding.
         */
         BasicImage(Pt::ssize_t width, Pt::ssize_t height, Pt::ssize_t padding, 
                    const Format& format = FormatT::get() );
         
-        /** @brief Constructor.
+        /** @brief Constructs an image of the given size.
         */
         BasicImage(Pt::ssize_t width, Pt::ssize_t height, 
                    const Format& format = FormatT::get() );
         
-        /** @brief Constructor.
+        /** @brief Constructs an image over external pixel data with row padding.
         */
         BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    Pt::ssize_t padding, const Format& format = FormatT::get() );
         
-        /** @brief Constructor.
+        /** @brief Constructs an image over external pixel data.
         */
         BasicImage(Pt::uint8_t* data, Pt::ssize_t width, Pt::ssize_t height, 
                    const Format& format = FormatT::get() );
@@ -145,7 +176,13 @@ class BasicImage : public ViewBase
         Pt::uint8_t* _data;
 };
 
-/** @brief Basic const image.
+/** @brief Read-only wrap of pixel data.
+
+    %BasicConstImage refers to existing pixels and never allocates.
+    Construct it from a const buffer, from a %BasicImage, or from
+    another const image. The source buffer must outlive this object.
+
+    @ingroup Pt-Gfx-Images
 */
 template <typename FormatT, typename TraitsT>
 class BasicConstImage : public ViewBase

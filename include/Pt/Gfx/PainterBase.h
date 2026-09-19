@@ -61,13 +61,25 @@ class Bitmap;
 class PaintSurface;
 class PaintContext;
 
-/** @brief Base class for drawing commands and paint state.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Drawing commands and paint state.
 
-    %PainterBase stores the state used by drawing operations and forwards the
-    resulting commands to a %Canvas supplied by a %PaintSurface or %PaintContext.
-    It provides the common API for lines, filled shapes, paths, text and image
-    rendering, while concrete painters only need to manage how painting begins.
+    %PainterBase is the command API %Painter inherits. It holds the
+    current %Pen, %Brush, %Font, %CompositionMode, user %Transform,
+    and clip, and it forwards draw and fill operations to the
+    %Canvas of the bound surface or context.
+
+    Outline commands use the pen. Fill commands use the brush.
+    %drawPath() and %fillPath() use the current path or a path
+    passed as an argument. %drawText() uses the current font.
+    %drawImage() and %drawBitmap() composite existing pixels.
+    Coordinates are logical; the target %Scaling converts them
+    to physical pixels.
+
+    This type is not constructed by application code. Construct a
+    %Painter. %beginPaint() is protected so only a concrete painter
+    starts a session.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API PainterBase : private NonCopyable
 {

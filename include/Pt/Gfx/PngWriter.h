@@ -36,7 +36,14 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Writer for PNG images.
+/** @brief PNG image writer.
+
+    %PngWriter encodes an %Image as PNG on an iostream. Attach an
+    output stream, then call %write() to emit the whole image, or
+    %beginWrite() and %advance() to encode in steps. The writer does
+    not own the stream or the image.
+
+    @ingroup Pt-Gfx-Images
 */
 class PT_GFX_API PngWriter
 {

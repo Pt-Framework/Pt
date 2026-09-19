@@ -44,13 +44,20 @@ namespace Gfx {
 
 class FontData;
 
-/** @brief Font request used for text drawing and measurement.
-    @ingroup Pt-Gfx-Drawing
+/** @brief Font family, size and style.
 
-    %Font describes the family, size and style attributes that painters use to
-    select a concrete typeface. The same description can be used both for text
-    measurement and for actual rendering, which keeps layout and drawing in
-    sync across paint targets.
+    %Font is a request, not a loaded face. A painter uses the same
+    request to measure and to draw, so layout and rendering stay
+    aligned. Family, size, %Weight, %Slant, and %Stretch select a
+    face. %Category names a generic fallback when no family is set.
+    %withSize() and the other %with...() helpers return a modified
+    copy.
+
+    %addFont() and %addFonts() register font files for later
+    requests. %fontFiles() lists those paths. %Bitmap lists the
+    families and faces the backend can resolve.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class PT_GFX_API Font
 {

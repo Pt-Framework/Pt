@@ -47,7 +47,26 @@ namespace Gfx {
 // ImageFormat
 ///////////////////////////////////////////////////////////////////////
 
-/** @brief %Image format.
+/** @brief Runtime pixel format.
+
+    %ImageFormat describes how bytes in a buffer become colors when
+    the layout is not fixed at compile time. %Image uses it for
+    pixel operations. Callers do not construct a useful format
+    directly. Use %argb32(), %rgb32(), %rgb16(), or %get(), or take
+    the format from an existing image.
+
+    Typed images use a concrete format type such as %Argb32 for
+    their pixel operations. Those concrete types still derive from
+    %ImageFormat so a typed image can be used where a runtime format
+    is required.
+
+    Equality compares the dynamic type, so two format objects of the
+    same layout compare equal. Adding a format means deriving from
+    this class, implementing the protected storage operations, and
+    providing matching pixel types and an %ImageTraits
+    specialization.
+
+    @ingroup Pt-Gfx-Images
 */
 class ImageFormat
 { 
@@ -178,6 +197,23 @@ struct ImageTraitsF
 // Pixel
 ///////////////////////////////////////////////////////////////////////
 
+/** @brief Cursor to one pixel.
+
+    %Pixel refers to one position in an %Image or a runtime view.
+    %ColorT is the working color, usually %Color or %ColorF, not
+    the storage layout. Storage operations go through the view's
+    %ImageFormat.
+
+    Copy construction duplicates the cursor. Copy assignment is
+    deleted; call %reset() to bind another position. Assigning a
+    color or calling %assign() or %fill() writes through to the
+    buffer. %advance() and %skipPadding() walk scanlines.
+
+    Typed images use a concrete pixel such as %Argb32Pixel instead
+    of this template. The cursor rules are the same.
+
+    @ingroup Pt-Gfx-Images
+*/
 template <typename ColorT>
 class Pixel
 {
@@ -296,6 +332,14 @@ class Pixel
 // ConstPixel
 ///////////////////////////////////////////////////////////////////////
 
+/** @brief Read-only cursor to one pixel.
+
+    %ConstPixel is the const counterpart of %Pixel. It can be
+    constructed from a const view or from a mutable %Pixel. It
+    reads colors and advances, but it does not write.
+
+    @ingroup Pt-Gfx-Images
+*/
 template <typename ColorT>
 class ConstPixel
 {

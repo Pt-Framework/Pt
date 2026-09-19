@@ -48,10 +48,8 @@ namespace Pt {
 /** @namespace Pt::Gfx
     @brief Graphics and imaging services.
 
-  %Pt::Gfx provides APIs for drawing 2D shapes and text on different paint
-  surfaces, such as in-memory bitmaps. It also provides image, view and pixel
-  classes for storing image data, accessing pixels and working with image
-  formats.
+    Portable 2D images, pixel access, and drawing of shapes and text
+    on paint surfaces.
 */
 namespace Gfx {
 

@@ -37,11 +37,13 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Blend mode used for drawing operations.
-    @ingroup Pt-Gfx-Drawing
+/** @brief How new pixels combine with existing pixels.
 
-    %CompositionMode selects how new drawing results are combined with the
-    existing pixels of a target.
+    %CompositionMode is the blend operator a painter uses.
+    %SourceCopy replaces destination pixels. %SourceOver blends
+    source over destination using source alpha.
+
+    @ingroup Pt-Gfx-Drawing
 */
 class CompositionMode
 {

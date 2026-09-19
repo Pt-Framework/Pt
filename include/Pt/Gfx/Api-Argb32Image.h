@@ -7,10 +7,17 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Image storing pixels in ARGB-32 format.
+/** @brief ARGB-32 image.
 
-    %Argb32Image owns its pixel data and stores each pixel as a 32-bit value
-    with four 8-bit channels: alpha, red, green, and blue.
+    %Argb32Image is %BasicImage with the %Argb32 format bound at
+    compile time. Each pixel is 32 bits with 8-bit alpha, red, green,
+    and blue, and the matching cursor is %Argb32Pixel. Use this type
+    when the calling code already knows the layout. Use %Image when
+    the format comes from a decoder or other runtime input.
+
+    Constructors that take width and height allocate. Constructors
+    that take a data pointer wrap the caller buffer; that buffer must
+    remain valid for the lifetime of the image.
 
     @headerfile Argb32Image.h <Pt/Gfx/Argb32Image.h>
     @ingroup Pt-Gfx-Images
