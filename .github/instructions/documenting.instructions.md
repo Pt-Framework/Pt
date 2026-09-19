@@ -270,7 +270,6 @@ syntax, in Markdown, or as an `\htmlonly` body.
 
 ## Formatting
 
-- A page is a Markdown file in `doc/pages/`. One page per file.
 - Module pages start with `@page <id> Title` at column 0. Write the
   Doxygen-command body at column 0.
 - Module pages assemble group and class chapters with `@copydetails`,
@@ -305,10 +304,9 @@ instead.
 
 ## Structure
 
-Pages live in `doc/pages/`. File names are lowercase with a `.md`
-extension. A module page ID uses a `-Page` suffix (`Ns-MyModule` ->
-`Ns-MyModule-Page`). Section anchors use the page ID as prefix
-(`Ns-MyModule-Page-MyFeature`).
+A page is a Markdown file in `doc/pages/`. One page per file. File names
+are lowercase with a `.md` extension. A module page ID uses a `-Page` suffix (`Ns-MyModule` -> `Ns-MyModule-Page`). Section anchors use the page ID as
+prefix (`Ns-MyModule-Page-MyFeature`).
 
 Copy the main group first, then subgroups, in reader order. The page
 defines that order. Put the central type of the object model or reader
