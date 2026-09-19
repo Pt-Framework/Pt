@@ -1,31 +1,6 @@
-/*
- * Copyright (C) 2020-2026 by Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA
- */
+/* Copyright (C) 2020-2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
 
 #ifndef PT_LUA_SCRIPT_H
 #define PT_LUA_SCRIPT_H
@@ -62,42 +37,90 @@ class AsyncAdvance;
 
 /** @brief Lua script.
 
-    @ingroup Pt-Lua
+    %Script is the coroutine that runs Lua source in a %Context.
+    The source is a C string loaded at construction. Only one
+    script may use a context at a time; a second construction
+    throws %std::logic_error. A syntax error does not throw: the
+    status is %ScriptError, %errorMessage() holds the compiler
+    text, and the context is free for another script.
+
+    The script is a %Selectable. Blocking %advance() runs on the
+    calling thread and returns at the next step. Continue while
+    the status is %Yield or %NativeCall. %Yield is a cooperative
+    pause so other work can run. %NativeCall means Lua invoked a
+    reflected method, property, or constructor; the next
+    %advance() performs that %Call and resumes. Stop on %ScriptOk
+    or %ScriptError. Blocking %advance() throws if an %AsyncCall
+    is pending.
+
+    Asynchronous work attaches the script with %setActive() on an
+    %EventLoop. %beginAdvance() starts a step, %advanced() is
+    emitted when the step completes, and %endAdvance() returns the
+    status. Call %beginAdvance() again while the status is %Yield
+    or %NativeCall. The loop does not own the script. Keep it
+    alive until no step is waiting. %cancel() aborts a pending
+    step and any active async call.
+
+    C++20 %advanceAsync() is that asynchronous step as an
+    awaitable. %fromState() finds the script stored in a Lua
+    registry, for Lua C API code that needs it. The script is not
+    copyable.
+
+    @ingroup Pt-Lua-Scripts
 */
 class PT_LUA_API Script : public System::Selectable
                         , public Connectable
 {
   public:
+    /** @brief Step reached by the last advance.
+    */
     enum Status
     {
-      Yield,
-      NativeCall,
-      ScriptOk,
-      ScriptError
+      Yield,       //!< Cooperative pause of the Lua coroutine.
+      NativeCall,  //!< A reflected or asynchronous native call is pending.
+      ScriptOk,    //!< The chunk finished.
+      ScriptError  //!< Compile or runtime failure.
     };
 
+    /** @brief Loads @a script into @a ctx as a coroutine.
+
+        @throw %std::logic_error if @a ctx already has a script.
+    */
     Script(Context& ctx, const char* script);
 
+    /** @brief Cancels pending work and releases the context.
+    */
     ~Script();
 
+    /** @brief Starts an asynchronous advance step on the event loop.
+    */
     void beginAdvance();
 
+    /** @brief Returns the status of the last advance step.
+    */
     Status endAdvance() const;
 
+    /** @brief Signal emitted when an asynchronous advance step completes.
+    */
     Pt::Signal<>& advanced();
 
+    /** @brief Advances the script on the calling thread.
+
+        @throw %std::logic_error if an asynchronous native call is pending.
+    */
     Status advance();
 
+    /** @brief Returns the last compile or runtime error text.
+    */
     const std::string& errorMessage() const
     { return _errorMsg; }
 
+    /** @brief Returns the script stored in the registry of @a L, or a null pointer.
+    */
     static Script* fromState(lua_State* L);
 
 #if __cplusplus >= 202002L
-    /** @brief Asynchronously advance the Lua script as a C++20 awaitable.
-
-        Returns an awaitable for use with co_await.
-        Wraps beginAdvance() / endAdvance() / advanced().
+    /** @brief Returns an awaitable for one asynchronous advance step.
     */
     AsyncAdvance advanceAsync();
 #endif
@@ -160,21 +183,36 @@ class PT_LUA_API Script : public System::Selectable
 
 #if __cplusplus >= 202002L
 
-/** @brief Awaitable for async advance of a Lua %Script.
+/** @brief Awaitable advance of a Lua script.
 
-    Wraps the beginAdvance() / endAdvance() / advanced() async pattern
-    into a C++20 awaitable for use with co_await.
+    %AsyncAdvance is the C++20 form of %beginAdvance(),
+    %endAdvance(), and %advanced(). %co_await script.advanceAsync()
+    runs one step and %await_resume() returns that step's %Status.
+    Continue awaiting while the status is %Yield or %NativeCall.
 
-    @ingroup Pt-Lua
+    Only one awaiter may be pending on a script. A second
+    construction throws %std::logic_error. Destroying a pending
+    awaiter cancels the script. Destroying the script detaches the
+    awaiter.
+
+    @ingroup Pt-Lua-Scripts
 */
 class PT_LUA_API AsyncAdvance : public Pt::Awaiter
                               , public Pt::Connectable
 {
     public:
+    /** @brief Creates an awaitable for one advance of @a script.
+
+        @throw %std::logic_error if another awaiter is already pending.
+    */
     AsyncAdvance(Script& script);
 
+    /** @brief Cancels a pending step and detaches from the script.
+    */
     ~AsyncAdvance();
 
+    /** @brief Returns the status of the completed advance step.
+    */
     Script::Status await_resume();
 
     private:

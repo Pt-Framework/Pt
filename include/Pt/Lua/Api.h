@@ -21,7 +21,11 @@
 namespace Pt {
 
 /** @namespace Pt::Lua
-    @brief Lua Runtime and Bindiungs.
+    @brief Lua runtime and reflected bindings.
+
+    A Lua state bound to a %Pt::Reflex type catalog, scripts that
+    advance on an event loop, and asynchronous native calls those
+    scripts can invoke.
 */
 namespace Lua {
 
@@ -30,7 +34,6 @@ class Context;
 class Result;
 class Call;
 class AsyncCall;
-class Type;
 class TypeManager;
 
 } // namespace

@@ -1,31 +1,6 @@
-/*
- * Copyright (C) 2020-2026 by Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA
- */
+/* Copyright (C) 2020-2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
 
 #ifndef PT_LUA_CALL_H
 #define PT_LUA_CALL_H
@@ -44,19 +19,44 @@ namespace Pt {
 
 namespace Lua {
 
+/** @brief Synchronous native call from Lua.
+
+    %Call is the work a %Script runs when Lua invokes a reflected
+    method, property, or constructor. The script owns the call and
+    deletes it after %call() returns. Application code does not
+    construct a %Call; the binding closures do.
+
+    %call() performs the invocation and returns the result as
+    %Any. A thrown %std::exception is stored as an error:
+    %hasError() is true and %errorMessage() holds the text.
+    %rtype() is the Reflex result type, or a null pointer when
+    the call has no result to push.
+
+    @ingroup Pt-Lua-Calls
+*/
 class Call
 {
   public:
+    /** @brief Destroys the call.
+    */
     virtual ~Call()
     {}
 
+    /** @brief Performs the invocation and returns the result.
+    */
     virtual Pt::Any call() = 0;
 
+    /** @brief Returns the Reflex result type, or a null pointer.
+    */
     virtual Pt::Reflex::Type* rtype() const = 0;
 
+    /** @brief Returns true when the invocation stored an error.
+    */
     bool hasError() const
     { return ! _errorMsg.empty(); }
 
+    /** @brief Returns the stored error text.
+    */
     const std::string& errorMessage() const
     { return _errorMsg; }
 
@@ -67,6 +67,8 @@ class Call
 
     Call& operator=(const Call&) = delete;
 
+    /** @brief Stores @a msg as the error of this call.
+    */
     void setError(const std::string& msg)
     { _errorMsg = msg; }
 
@@ -75,9 +77,15 @@ class Call
 };
 
 
+/** @brief Reflected method invocation from Lua.
+
+    @ingroup Pt-Lua-Calls
+*/
 class MethodCall : public Call
 {
   public:
+    /** @brief Creates a call of @a mi on @a self with @a args.
+    */
     MethodCall(Pt::Reflex::MethodInfo* mi, void* self,
                std::vector<Pt::Reflex::Argument> args)
     : _mi(mi)
@@ -109,9 +117,15 @@ class MethodCall : public Call
 };
 
 
+/** @brief Reflected property read from Lua.
+
+    @ingroup Pt-Lua-Calls
+*/
 class PropertyGetCall : public Call
 {
   public:
+    /** @brief Creates a read of @a pi on @a self.
+    */
     PropertyGetCall(Pt::Reflex::PropertyInfo* pi, void* self)
     : _pi(pi)
     , _self(self)
@@ -134,9 +148,15 @@ class PropertyGetCall : public Call
 };
 
 
+/** @brief Reflected property write from Lua.
+
+    @ingroup Pt-Lua-Calls
+*/
 class PropertySetCall : public Call
 {
   public:
+    /** @brief Creates a write of @a value to @a pi on @a self.
+    */
     PropertySetCall(Pt::Reflex::PropertyInfo* pi, void* self,
                     Pt::Reflex::Argument value)
     : _pi(pi)
@@ -162,9 +182,15 @@ class PropertySetCall : public Call
 };
 
 
+/** @brief Reflected constructor invocation from Lua.
+
+    @ingroup Pt-Lua-Calls
+*/
 class ConstructorCall : public Call
 {
   public:
+    /** @brief Creates a construction of @a instance with @a ci and @a args.
+    */
     ConstructorCall(Pt::Reflex::ConstructorInfo* ci, void* instance,
                     std::vector<Pt::Reflex::Argument> args)
     : _ci(ci)

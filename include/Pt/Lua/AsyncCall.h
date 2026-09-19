@@ -1,31 +1,6 @@
-/*
- * Copyright (C) 2020-2026 by Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA
- */
+/* Copyright (C) 2020-2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
 
 #ifndef PT_LUA_ASYNCCALL_H
 #define PT_LUA_ASYNCCALL_H
@@ -45,32 +20,74 @@ namespace Pt {
 
 namespace Lua {
 
+/** @brief Asynchronous native call from Lua.
+
+    %AsyncCall is native work that Lua starts and that finishes
+    later on an %EventLoop. A reflected function or method whose
+    return type is %AsyncCall* returns a heap instance; the
+    %Script takes ownership, binds it, starts it, and resumes
+    when %finished() is emitted.
+
+    Subclass %BasicAsyncCall rather than this type. The script
+    calls %bind() with the context's type manager so %rtype() is
+    known, then %beginAdvance() on the loop, which reaches
+    %onBeginCall(). When the work is done, %setReady() emits
+    %finished(). %setError() records a failure instead. The
+    script then calls %getResult() and pushes it to Lua, or
+    becomes %ScriptError. %cancel() reaches %onCancel().
+
+    @ingroup Pt-Lua-Calls
+*/
 class PT_LUA_API AsyncCall
 {
   public:
+    /** @brief Creates an idle asynchronous call.
+    */
     AsyncCall();
 
+    /** @brief Destroys the call.
+    */
     virtual ~AsyncCall();
 
+    /** @brief Binds the result type from @a tm.
+    */
     void bind(Pt::Reflex::TypeManager& tm);
 
+    /** @brief Returns the Reflex result type, or a null pointer before bind.
+    */
     Pt::Reflex::Type* rtype() const;
 
+    /** @brief Starts the call on @a loop.
+    */
     void beginCall(Pt::System::EventLoop& loop);
 
+    /** @brief Returns the result after the call has finished.
+    */
     Pt::Any getResult();
 
+    /** @brief Signal emitted when the call is ready or has failed.
+    */
     Pt::Signal<>& finished();
 
+    /** @brief Cancels the call.
+    */
     void cancel();
 
+    /** @brief Returns true when the call stored an error.
+    */
     bool hasError() const;
 
+    /** @brief Returns the stored error text.
+    */
     const std::string& errorMessage() const;
 
   protected:
+    /** @brief Emits %finished() to mark the call ready.
+    */
     void setReady();
 
+    /** @brief Stores @a msg as the error of this call.
+    */
     void setError(const std::string& msg);
 
   private:
@@ -90,6 +107,15 @@ class PT_LUA_API AsyncCall
 };
 
 
+/** @brief Asynchronous native call with result type @a R.
+
+    %BasicAsyncCall looks up typeid(R) at bind time. Override
+    %onBeginCall() to start work on the loop, %onResult() to
+    produce R, and %onCancel() to abort. Call %setReady() or
+    %setError() when the work ends.
+
+    @ingroup Pt-Lua-Calls
+*/
 template <typename R>
 class BasicAsyncCall : public AsyncCall
 {
@@ -99,6 +125,8 @@ class BasicAsyncCall : public AsyncCall
       return tm.getType( typeid(R) );
     }
 
+    /** @brief Returns the result of the finished call.
+    */
     virtual R onResult() = 0;
 
   private:
@@ -110,6 +138,14 @@ class BasicAsyncCall : public AsyncCall
 };
 
 
+/** @brief Asynchronous native call with no result.
+
+    Override %onBeginCall() and %onCancel(). There is no
+    %onResult(). Call %setReady() or %setError() when the work
+    ends.
+
+    @ingroup Pt-Lua-Calls
+*/
 template <>
 class BasicAsyncCall<void> : public AsyncCall
 {
