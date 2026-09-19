@@ -18,10 +18,8 @@ link earlier ones; they do not rewrite them.
 4. **Website** — hand-written navigation to the HTML Doxygen generates.
 
 Write for a reader who uses the public API, not for its implementer.
-Use plain, precise language in complete sentences. Keep real identifiers
-as names (`--with-prebuilt`, `PREBUILT_ROOT`). Use one term for one
-concept. Avoid informal wording, marketing language, stacked jargon,
-and internal implementation details.
+Compact wording belongs in API declaration comments. Group and class
+detailed descriptions are textbook chapters.
 
 The chat convention of code and bullets, and the coding-guideline
 preference for short comments, do not apply to Doxygen comments.

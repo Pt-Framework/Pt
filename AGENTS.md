@@ -31,8 +31,7 @@ platforms, and user requirements.
 - Do not search `build/`, `tmp/`, `deps/`, `doc/website/htdocs/`, or large
   vendored trees (`src/skia`, `src/openssl`, …) unless the task requires it.
 - Use only ASCII characters in all output (code, comments, file names, messages)
-  unless the task explicitly requires non-ASCII characters (e.g. localized strings,
-  binary data, or Unicode-specific tests).
+  unless the task explicitly requires non-ASCII characters (e.g. localized strings, binary data, or Unicode-specific tests).
 
 ## Task Specific Instructions
 
