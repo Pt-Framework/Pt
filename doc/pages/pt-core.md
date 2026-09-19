@@ -8,9 +8,6 @@ This chapter covers:
 - @ref Pt-Core-Page-Settings
 - @ref Pt-Core-Page-Event
 - @ref Pt-Core-Page-Any
-- @ref Pt-Core-Page-Void
-- @ref Pt-Core-Page-NonCopyable
-- @ref Pt-Core-Page-Singleton
 - @ref Pt-Core-Page-IntTypes
 - @ref Pt-Core-Page-Byteorder
 - @ref Pt-Core-Page-Atomics
