@@ -33,39 +33,47 @@
 
 namespace Pt {
 
-/** @brief %Singleton class template
+/** @brief Process-wide single instance of @a T.
 
-    @param T Type of the singleton
-    @param A Allocator for type T
+    %Singleton<T> owns one @a T for the process. %instance() creates
+    that object on the first call and returns the same object on every
+    later call. The instance is a function-local static created by
+    %create(); it lives until the program exits.
 
-    The %Singleton class template can be used to easily implement the
-    %Singleton design pattern. It can either be used directly or as a
-    base class.
+    Derive from %Singleton<T> with @a T equal to the derived class,
+    and befriend the base so it can construct @a T:
 
-    The follwing example shows how to use the singleton as a base class:
     @code
-          class MySingleton : public Singleton<MySingleton>
-          {
-                friend class Singleton<MySingleton>;
+    class MySingleton : public Pt::Singleton<MySingleton>
+    {
+        friend class Pt::Singleton<MySingleton>;
 
-                // ...
-            };
+    protected:
+        MySingleton()
+        { }
+    };
     @endcode
 
-    @ingroup Pt-Basics
+    The derived constructor stays protected so callers cannot build a
+    second instance. %instance() is the only public way to get the
+    object. %Singleton is %NonCopyable, so the instance cannot be
+    copied either.
+
+    Construction is not synchronized. The first call to %instance()
+    must happen before other threads call it, or the program must
+    otherwise guarantee a single initializing call. There is no
+    destructor hook and no way to replace the instance. Use this type
+    for a process-wide service that is created on demand, not for
+    objects whose lifetime the caller must control.
+
+    @ingroup Pt-Core
 */
 template <typename T>
 class Singleton : public NonCopyable
 {
     public:
-        /** @brief Returns the instance of the singleton type
-
-                When called for the first time, the singleton instance will
-                be created with the specified alloctaor. All subsequent calls
-                will return a reference to the previously created instance.
-
-            @return The singleton instance
-          */
+        /** @brief Returns the process-wide instance, creating it on first call.
+        */
         static T& instance()
         {
             if( !_instance )

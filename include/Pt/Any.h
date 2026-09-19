@@ -36,29 +36,44 @@
 
 namespace Pt {
 
-/** @brief Contains an arbitrary type.
+/** @brief Value of any copyable type.
 
-    %Pt::Any can contain any other type, which is default- and copy constructible.
-    When a value is assigned to an %Any, a copy is made, just like when a type
-    is inserted in a standard C++ container. %Anys can be assigned to another
-    %Any, which will also copy the contained value. The contained type can be
-    accessed via any_cast(). It is only possible to get the contained value,
-    if the type matches.
+    %Any holds a single value whose type is chosen at run time. Assigning
+    a value by copy stores a copy, as a standard container would. Assigning
+    another %Any copies that stored value. The stored type is recovered
+    with %any_cast(); the cast succeeds only when the requested type is
+    the type that was stored.
 
     @code
-    #include <Pt/Any.h>
-
     Pt::Any a = 5;
-    int i = any_cast<int>( a );    // i is 5 now
-    float f = any_cast<float>( a ) // throws std::bad_cast
+    int i = Pt::any_cast<int>(a);
+    float f = Pt::any_cast<float>(a); // throws std::bad_cast
     @endcode
 
-    The %any_cast() to value and reference types will throw a std::bad_cast
-    exception, if the type is not correct. Using a pointer type as the
-    template argument for %any_cast() will not throw an exception, but return
-    a null pointer if the requested type does not match.
+    Construction and assignment from a value of type @a T require @a T
+    to be copy-constructible. Small values live in an internal buffer.
+    Larger values are allocated. An exception during construction or
+    assignment leaves the %Any empty on construction, or unchanged on
+    assignment.
 
-    @ingroup Pt-Basics
+    Construction and assignment from a pointer store a reference, not
+    a copy. %isRef() is then true. The pointed-to object must outlive
+    the %Any. There is also a type-erased pointer constructor that
+    takes a @c void* and a @c std::type_info, which must describe the
+    object that pointer refers to.
+
+    An empty %Any stores nothing. %empty() is true, %type() is
+    @c typeid(void), and %get() returns a null pointer. %clear()
+    destroys the stored value and returns to that state. %swap()
+    exchanges two %Any objects without allocating.
+
+    %any_cast<T>() copies or binds the stored value as @a T. A
+    mismatch throws @c std::bad_cast. %any_cast<T*>() returns a
+    pointer to the stored object, or null when the types do not
+    match. Do not %any_cast to a type that is only related by
+    conversion: an %Any that holds @c int does not yield a @c float.
+
+    @ingroup Pt-Core
 */
 class Any
 {
@@ -545,16 +560,12 @@ struct AnyCast<T*>
     }
 };
 
-/** @brief Get contained value
+/** @brief Returns the value stored in @a any as type @a T.
 
-    This function is used to get the contained value from an %Any. It is
-    not possible to get a float out of an %Any, if the contained value is
-    an int, but the typeid's must match. It is, however, possible to
-    get a const reference to the contained type.
+    A value or reference cast throws @c std::bad_cast when the stored
+    type is not @a T. A pointer cast returns a null pointer on mismatch.
 
     @related Any
-    @return contained value
-    @throw std::bad_cast on type mismatch
 */
 template <typename T>
 inline T any_cast(const Any& any)

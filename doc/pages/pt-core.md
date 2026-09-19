@@ -2,39 +2,91 @@
 
 @copydetails Pt-Core
 
-This chapter covers program options, application settings and events,
-fixed-size integers, dates and times, atomic operations, coroutines, the
-core module's custom allocators, its unicode text processing, its
-signal and delegate callback mechanism, its type traits and conversion
-utilities, and its serialization framework.
+This chapter covers:
 
-- @ref Pt-Core-Page-Basics covers program options, application settings, events, fixed-size integers and atomic operations.
-- @ref Pt-Core-Page-DateTime covers dates and times.
-- @ref Pt-Core-Page-Coroutines covers tasks, awaitables and generators.
-- @ref Pt-Core-Page-Allocator covers custom allocation strategies.
-- @ref Pt-Core-Page-Text covers unicode text processing and regular expressions.
-- @ref Pt-Core-Page-Signals covers signals, slots and delegates.
-- @ref Pt-Core-Page-TypeTraits covers type traits and type information.
-- @ref Pt-Core-Page-Convert covers conversion utilities.
-- @ref Pt-Core-Page-Serialization covers serialization.
+- @ref Pt-Core-Page-Arg
+- @ref Pt-Core-Page-Settings
+- @ref Pt-Core-Page-Event
+- @ref Pt-Core-Page-Any
+- @ref Pt-Core-Page-Void
+- @ref Pt-Core-Page-NonCopyable
+- @ref Pt-Core-Page-Singleton
+- @ref Pt-Core-Page-IntTypes
+- @ref Pt-Core-Page-Byteorder
+- @ref Pt-Core-Page-Atomics
+- @ref Pt-Core-Page-Streams
+- @ref Pt-Core-Page-ZStreams
+- @ref Pt-Core-Page-DateTime
+- @ref Pt-Core-Page-Coroutines
+- @ref Pt-Core-Page-Allocator
+- @ref Pt-Core-Page-Text
+- @ref Pt-Core-Page-Signals
+- @ref Pt-Core-Page-TypeTraits
+- @ref Pt-Core-Page-Convert
+- @ref Pt-Core-Page-Serialization
 
-@section Pt-Core-Page-Basics Basic Types
-@copydetails Pt-Basics
-
-@subsection Pt-Core-Page-Event Events
-@copydetails Pt::Event
-
-@subsection Pt-Core-Page-Arg Command Line Arguments
+@section Pt-Core-Page-Arg Command Line Arguments
 @copydetails Pt::Arg
 
-@subsection Pt-Core-Page-Settings Application Settings
+@section Pt-Core-Page-Settings Application Settings
 @copydetails Pt::Settings
 
-@subsection Pt-Core-Page-IntTypes Fixed-Size Integers
+@section Pt-Core-Page-Event Events
+@copydetails Pt::Event
+
+@subsection Pt-Core-Page-BasicEvent BasicEvent
+@copydetails Pt::BasicEvent
+
+@section Pt-Core-Page-Any Type-Erased Values
+@copydetails Pt::Any
+
+@section Pt-Core-Page-Void Void Type
+@copydetails Pt::Void
+
+@section Pt-Core-Page-NonCopyable Non-Copyable Objects
+@copydetails Pt::NonCopyable
+
+@section Pt-Core-Page-Singleton Singletons
+@copydetails Pt::Singleton
+
+@section Pt-Core-Page-IntTypes Fixed-Size Integers
 @copydetails Pt-IntTypes
 
-@subsection Pt-Core-Page-Atomics Atomic Operations
+@section Pt-Core-Page-Byteorder Byte Order
+@copydetails Pt-Byteorder
+
+@section Pt-Core-Page-Atomics Atomic Operations
 @copydetails Pt-Atomics
+
+@section Pt-Core-Page-Streams Streams
+@copydetails Pt-Streams
+
+@subsection Pt-Core-Page-StreamBuffer Stream Buffer
+@copydetails Pt::BasicStreamBuffer
+
+@subsection Pt-Core-Page-IStream Input Stream
+@copydetails Pt::BasicIStream
+
+@subsection Pt-Core-Page-OStream Output Stream
+@copydetails Pt::BasicOStream
+
+@subsection Pt-Core-Page-IOStream Input/Output Stream
+@copydetails Pt::BasicIOStream
+
+@section Pt-Core-Page-ZStreams Zlib Streams
+@copydetails Pt-ZStreams
+
+@subsection Pt-Core-Page-ZBuffer ZBuffer
+@copydetails Pt::ZBuffer
+
+@subsection Pt-Core-Page-ZIStream ZIStream
+@copydetails Pt::ZIStream
+
+@subsection Pt-Core-Page-ZOStream ZOStream
+@copydetails Pt::ZOStream
+
+@subsection Pt-Core-Page-ZIOStream ZIOStream
+@copydetails Pt::ZIOStream
 
 @section Pt-Core-Page-DateTime Dates and Times
 @copydetails Pt-DateTime

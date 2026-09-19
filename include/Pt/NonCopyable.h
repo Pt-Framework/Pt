@@ -33,23 +33,28 @@
 
 namespace Pt {
 
-/** @brief Protects derived classes from being copied.
-  
-    The %NonCopyable class has a private copy constructor and assignment
-    operator, therefore derived classes cannot be copied. This class
-    is meant to be used as a base class as shown in the code example
-    below.
-  
+/** @brief Base class that disables copy construction and assignment.
+
+    Inherit privately from %NonCopyable when a type must not be copied.
+    The copy constructor and assignment operator are private, so a
+    derived class cannot copy or assign, and neither can a caller.
+    The result is a compile-time error, not a run-time failure.
+
     @code
-    class MyClass : private NonCopyable 
+    class MyClass : private Pt::NonCopyable
     {
         // ...
     };
     @endcode
-  
-    Trying to copy a %NonCopyable object will cause a compile-time error.
 
-    @ingroup Pt-Basics
+    Private inheritance is the usual form: %NonCopyable is not part of
+    the public interface. Public inheritance also prevents copies, but
+    it exposes the mixin as a base. Do not try to make a type
+    copyable again in a further derived class; the private members of
+    %NonCopyable stay private. Types that need to be moved but not
+    copied still inherit here and define their own move operations.
+
+    @ingroup Pt-Core
 */
 class NonCopyable {
     public:

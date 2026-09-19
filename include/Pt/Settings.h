@@ -35,17 +35,19 @@
 
 namespace Pt {
 
-/** @brief %Settings Format Error.
+/** @brief Invalid settings text.
 
-    @ingroup Pt-Basics
+    @ingroup Pt-Core
 */
 class PT_API SettingsError : public SerializationError
 {
     public:
-        //! @brief Constructor.
+        /** @brief Constructs with a message and the line of the error.
+        */
         SettingsError(const char* what, std::size_t line);
 
-        //! @brief Destructor.
+        /** @brief Destructor.
+        */
         ~SettingsError() throw()
         {}
 
@@ -59,43 +61,27 @@ class PT_API SettingsError : public SerializationError
         std::size_t _line;
 };
 
-/** @brief Store application settings.
+/** @brief Hierarchical application settings loaded from text.
 
-    Many programs need to be able to restore its settings from a persistent
-    location, such as a file. The @link Pt::Settings Settings@endlink class
-    provides an hierachical organisation of settings entries and an API to
-    read and write them in a text format. The following example illustrates
-    how settings can be read from a file:
+    %Settings is a tree of named entries that a program can load, change,
+    and save. The unit of persistence is the whole tree. %load() replaces
+    it from a @c std::basic_istream of %Pt::Char or from a %Formatter.
+    %save() writes it the same way. A file is a typical source, but a
+    string stream is equally valid, which is useful in tests.
 
     @code
     std::ifstream ifs("app.settings");
-    Pt::TextIStream tis(ifs, new Pt::Utf8codec);
+    Pt::TextIStream tis(ifs, new Pt::Utf8Codec);
 
     Pt::Settings settings;
     settings.load(tis);
     @endcode
 
-    Settings can be loaded from any input stream, so the API is not limited to
-    files. In this example, a file stream is opened and a text input stream is
-    used to read UTF-8 encoded text. Another interesting use-case is to load
-    settings from a string stream, which can greatly simplify unit testing.
-    Writing settings to a file is just as easy:
-
-    @code
-    std::ofstream ofs("app.settings", std::ios::out|std::ios::trunc);
-    Pt::TextOStream tos(ofs, new Pt::Utf8codec);
-
-    Pt::Settings settings;
-    settings.save(tos);
-    @endcode
-
-    Any output stream can be used to save the settings, in this case UTF-8
-    encoded text is written to a file. Note, that the file is truncated when
-    opened, so the content is replaced.
-
-    Settings are saved in a compact text format, which supports integers,
-    floats, strings and booleans as scalar value types and arrays and structs
-    as compound types. The next example shows some possibilities:
+    The text format stores scalars, arrays, and structs. Integers,
+    floating-point values, strings, and booleans are scalars. An array
+    is a bracketed list. A struct is a brace-delimited list of named
+    members. A @c [section] line is a top-level struct: the names that
+    follow become its members until the next section.
 
     @code
     a = 1
@@ -104,70 +90,46 @@ class PT_API SettingsError : public SerializationError
     d = true
     e = [ 1, 2, 3 ]
     f = { red = 255, green = 0, blue = 0 }
+
+    [animals]
+    a = "dog"
+    b = "cat"
     @endcode
 
-    The entry values for a, b, c and d are of type integer, float, string and
-    bool, respectively. The entries e and f demonstrate the syntax for arrays
-    and structs. The following example shows how such a settings file can be
-    loaded and how the entries are accessed:
+    After a load, that file has top-level entries @c a through @c f
+    and a top-level entry @c animals with subentries @c a and @c b.
+    %entry() and @c operator[] return a %ConstEntry or %Entry by name.
+    A missing name yields an empty entry. Empty entries are false in
+    boolean context. %get() extracts a serializable value and returns
+    false when the entry is empty. %set() replaces the value of an
+    existing entry. %addEntry() and %makeEntry() create members;
+    %makeEntry() returns the member if it already exists.
+    %removeEntry() drops a member.
+
+    The stored type must have serialization operators. STL containers
+    already do. A user type needs @c operator<<= and @c operator>>=
+    for %SerializationInfo, the same operators the rest of the
+    serialization framework uses. %Settings privately inherits
+    %SerializationInfo; do not use that base as a public API.
 
     @code
-    std::ifstream ifs("app.settings");
-    Pt::TextIStream tis(ifs, new Pt::Utf8codec);
-
-    Pt::Settings settings;
-    settings.load(tis);
-
     int a = 0;
     bool ok = settings["a"].get(a);
-
-    float b = 0;
-    ok = settings.entry("b").get(b);
-
-    Pt::String c;
-    ok = settings.entry("c").get(c);
-
-    bool d = false;
-    ok = settings.entry("d").get(d);
 
     std::vector<int> e;
     ok = settings.entry("e").get(e);
 
-    Color f;
-    ok = settings.entry("f").get(f);
+    settings.makeEntry("port").set(8080);
+    settings.save(tos);
     @endcode
 
-    The @link Pt::Settings::entry() entry()@endlink method or alternatively,
-    the index operator can be used, to access entries and subentries by name.
-    If a subentry does not exist, an empty entry object will be returned.
-    Values can be retrieved with the @link Pt::Settings::ConstEntry::get()
-    get()@endlink method, which returns false, if the value does not exist.
-    The data type, which is stored in the settings must be serializable i.e.
-    the serialization operators must be defined. The framework defines the
-    serialization operators for STL containers, so these work out of the box.
-    The @link Pt::Settings::Entry::set() set()@endlink function can be used
-    to set an entry to a new value, before the modified settings are saved.
-    New subentries can be added using the @link Pt::Settings::addEntry()
-    addEntry()@endlink function.
+    %load() from malformed text throws %SettingsError, which reports
+    the line of the failure. Saving truncates nothing by itself; open
+    the destination stream with @c ios::trunc when the file should be
+    replaced. %Entry iterates like a sibling walk: %begin() / %end()
+    and @c operator++ move to the next member of the same parent.
 
-    Settings can be split into sections, to improve the readability of the
-    file, using the following syntax:
-
-    @code
-    [animals]
-    a = "dog"
-    b = "cat"
-
-    [plants]
-    a = "tulip"
-    b = "rose"
-    @endcode
-
-    When such a settings file is loaded, it will contain two entries named
-    "animals" and "plants". Both entries will have two subentries named "a"
-    and "b".
-
-    @ingroup Pt-Basics
+    @ingroup Pt-Core
 */
 class PT_API Settings : private SerializationInfo
 {

@@ -45,7 +45,30 @@
 
 namespace Pt {
 
-/** @brief Buffer for input and output streams.
+/** @brief Stream buffer with peek and available output.
+
+    %BasicStreamBuffer is the buffer in the @ref Pt-Streams model. It is
+    a @c std::basic_streambuf. Derived buffers implement underflow and
+    overflow as they would for any streambuf. This type adds two
+    queries that those derived buffers can serve from the get and put
+    areas without going through the iostream formatting layer.
+
+    %speekn() copies up to @a size characters from the get area into
+    @a buffer and does not consume them. If the get area is empty, it
+    calls underflow once. An unbuffered buffer, where underflow
+    produced a character but no get area, yields that one character.
+    A short count means fewer characters were available, not that the
+    stream has failed.
+
+    %out_avail() is the number of characters already in the put area.
+    When there is no put pointer, it calls %showfull(), which is zero
+    unless a derived unbuffered buffer overrides it.
+
+    The stream types %BasicIStream, %BasicOStream and %BasicIOStream
+    hold a pointer to this buffer. They do not own it. A derived
+    buffer must outlive every stream that still uses it.
+
+    @ingroup Pt-Streams
 */
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
@@ -63,7 +86,11 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
         ~BasicStreamBuffer()
         { }
 
-        /** @brief Peek data in stream.
+        /** @brief Peeks characters in the stream buffer.
+
+            The number of characters that can be peeked depends on the
+            current get area and may be less than requested, similar to
+            istream::readsome(). The characters are not consumed.
         */
         std::streamsize speekn(CharT* buffer, std::streamsize size)
         {

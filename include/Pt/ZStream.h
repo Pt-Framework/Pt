@@ -36,7 +36,15 @@
 
 namespace Pt {
 
-/** @brief Input stream for zlib compression.
+/** @brief Input stream that inflates zlib or gzip data.
+
+    %ZIStream owns a %ZBuffer and reads uncompressed bytes from a
+    compressed @c std::istream. Construct it with a format, or with a
+    target stream and a format. %attach(), %detach(), %reset() and
+    %finish() forward to the buffer. %zBuffer() returns the owned
+    buffer. The target is not owned.
+
+    @ingroup Pt-ZStreams
 */
 class ZIStream : public BasicIStream<char>
 {
@@ -116,7 +124,15 @@ class ZIStream : public BasicIStream<char>
         ZBuffer _buffer;
 };
 
-/** @brief Output stream for zlib compression.
+/** @brief Output stream that deflates to zlib or gzip.
+
+    %ZOStream owns a %ZBuffer and writes uncompressed bytes to a
+    compressed @c std::ostream. Construct it with a format, or with a
+    target stream and a format. %attach(), %detach(), %reset() and
+    %finish() forward to the buffer. Call %finish() before relying on
+    the target to contain a complete frame. The target is not owned.
+
+    @ingroup Pt-ZStreams
 */
 class ZOStream : public BasicOStream<char>
 {
@@ -191,7 +207,14 @@ class ZOStream : public BasicOStream<char>
         ZBuffer _buffer;
 };
 
-/** @brief I/O stream for zlib compression.
+/** @brief Bidirectional stream for zlib or gzip.
+
+    %ZIOStream owns a %ZBuffer and reads and writes uncompressed bytes
+    on a compressed @c std::iostream. %attach(), %detach(), %reset()
+    and %finish() forward to the buffer. %zcount() is inflate output
+    so far. The target is not owned.
+
+    @ingroup Pt-ZStreams
 */
 class ZIOStream : public BasicIOStream<char>
 {

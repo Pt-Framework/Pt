@@ -38,7 +38,25 @@ typedef struct z_stream_s z_stream;
 
 namespace Pt {
 
-/** @brief Stream buffer for zlib compression.
+/** @brief Stream buffer that inflates on read and deflates on write.
+
+    %ZBuffer is the buffer in the @ref Pt-ZStreams model. It is a
+    %BasicStreamBuffer of @c char attached to a target @c std::ios.
+    Reading inflates compressed bytes from the target. Writing
+    deflates uncompressed bytes into the target.
+
+    %Format selects zlib or gzip wrapping at construction and must
+    match the target data. %attach() sets the target. %detach() drops
+    it without finishing a frame. %reset() discards buffered data and
+    begins a new zlib stream, optionally with a new target.
+    %discard() resets the state and keeps the target. %finish()
+    flushes remaining compressed bytes and ends the stream.
+
+    %zcount() is the total number of uncompressed bytes produced by
+    inflate. The buffer does not own the target; keep the target
+    alive until %detach() or destruction.
+
+    @ingroup Pt-ZStreams
 */
 class PT_API ZBuffer : public BasicStreamBuffer<char>
 {

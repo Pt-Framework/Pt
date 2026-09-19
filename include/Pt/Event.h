@@ -37,20 +37,36 @@
 
 namespace Pt {
 
-/** @brief Base class for all event types.
+/** @brief Base class for typed events.
 
-    Specific event objects, subclass from %Event and implement the onClone(),
-    onDestroy() and onTypeInfo() methods. The first two are used to copy event
-    objects for example in an EventLoop and the latter one is used to dispatch
-    events by type.
+    %Event is the base of every event that an event loop can copy and
+    dispatch. A loop does not know the concrete type when it stores an
+    event, so the event clones itself into an %Allocator, destroys
+    itself from that allocator, and reports a @c std::type_info that
+    identifies the dynamic type. Slots subscribe to that type.
 
-    @ingroup Pt-Basics
- */
+    %clone() and %destroy() forward to %onClone() and %onDestroy().
+    %typeInfo() forwards to %onTypeInfo(). A derived class that does
+    not use %BasicEvent must implement those three hooks. %clone()
+    returns a new object of the same dynamic type, allocated from the
+    given allocator. %destroy() undoes that allocation. The allocator
+    is the loop's; the event does not own it.
+
+    %copyConstruct() and %destruct() are helpers for those hooks.
+    They placement-new and destroy a concrete %EventT through the
+    allocator. Prefer %BasicEvent, which already calls them.
+
+    Do not slice an %Event. Copying the base is not allowed as a
+    value; the type is meant to be cloned through the allocator.
+    Destroy an event only with the allocator that cloned it.
+
+    @ingroup Pt-Core
+*/
 class Event
 {
     public:
-        /** \brief Destructor.
-         */
+        /** @brief Destructor.
+        */
         virtual ~Event()
         {}
 
@@ -70,8 +86,8 @@ class Event
         { return onTypeInfo(); }
 
     protected:
-        /** \brief Constructor.
-         */
+        /** @brief Constructor.
+        */
         Event()
         {}
         
@@ -108,6 +124,21 @@ class Event
         }
 };
 
+/** @brief Event base that clones, destroys and identifies a derived type T.
+
+    Derive as @c class MyEvent : public BasicEvent<MyEvent>. @a T is
+    the derived type. %onTypeInfo() returns @c typeid(T). %onClone()
+    allocates @c sizeof(T) from the allocator and copy-constructs
+    @a T. %onDestroy() runs the %BasicEvent destructor and returns
+    that storage to the allocator.
+
+    The derived class must be copy-constructible. It does not override
+    the three hooks unless it needs a different allocation size or
+    copy. Construction of %BasicEvent is protected, so it is only a
+    base.
+
+    @ingroup Pt-Core
+*/
 template <typename T>
 class BasicEvent : public Event
 {

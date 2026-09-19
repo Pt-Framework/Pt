@@ -33,12 +33,20 @@
 
 namespace Pt {
 
-/** @brief %Void type.
+/** @brief Marker type for an unused template argument.
 
-    The %Void type is used as marker type for template specialisations,
-    where void is not enough to indicate an unused template parameter.
+    Some templates cannot use @c void as a parameter: @c void is not a
+    complete type, and it cannot be a function argument or a member.
+    %Void is an empty complete type that fills that slot. A traits
+    specialization, a signal with no value, or a tuple-like parameter
+    pack can name %Void to mean "this parameter is absent" without
+    leaving the type system.
 
-    @ingroup Pt-Basics
+    %Void has no data and no operations of its own. Compare it with
+    @c typeid or a template specialization, do not construct values
+    of it as application data.
+
+    @ingroup Pt-Core
 */
 struct PT_API Void
 {};

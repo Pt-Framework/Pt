@@ -37,6 +37,8 @@
 namespace Pt {
 
 /** @brief I/O error.
+
+    @ingroup Pt-Core
 */
 class PT_API IOError : public std::ios::failure
 {
@@ -57,6 +59,7 @@ class PT_API IOError : public std::ios::failure
 
 /** @brief Failed to access a resource.
 
+    @ingroup Pt-Core
     @ingroup Pt-System-FileSystem
 */
 class PT_API AccessFailed : public IOError

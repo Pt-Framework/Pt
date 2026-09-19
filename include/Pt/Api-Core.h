@@ -11,10 +11,34 @@
 
     The core module is the basis for all other modules of the framework. It
     has no dependency on any system specific libraries except the standard
-    C++ library.
+    C++ library. This chapter covers command-line arguments, application
+    settings, events, type-erased values, the Void marker, non-copyable
+    objects, singletons, fixed-size integers, byte order, atomic operations,
+    streams, zlib streams, dates and times, coroutines, allocators, unicode
+    text, signals and delegates, type traits, conversions, and serialization.
 */
 
-/** @defgroup Pt-Basics Basic Types
+/** @defgroup Pt-IntTypes Fixed-Size Integers
+
+    @ingroup Pt-Core
+*/
+
+/** @defgroup Pt-Byteorder Byte Order
+
+    @ingroup Pt-Core
+*/
+
+/** @defgroup Pt-Atomics Atomic Operations
+
+    @ingroup Pt-Core
+*/
+
+/** @defgroup Pt-Streams Streams
+
+    @ingroup Pt-Core
+*/
+
+/** @defgroup Pt-ZStreams Zlib Streams
 
     @ingroup Pt-Core
 */

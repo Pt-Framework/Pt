@@ -7,7 +7,7 @@
 
 /** @addtogroup Pt-Convert
 
-    @brief Conversion between strings, numbers and byte orders.
+    @brief Conversion between strings and numbers.
 
     The framework includes functions for fast conversion between strings and
     numbers. The overloaded functions Pt::parseInt() and Pt::formatInt()
@@ -105,28 +105,6 @@
     }
     @endcode
 
-    The byte order conversion API consists of two sets of functions.
-    Pt::swab() swaps the byte order of a type by bytewise copying, and is
-    overloaded for all fixed-size integer types such as Pt::uint32_t:
-
-    @code
-    #include <Pt/Byteorder.h>
-
-    Pt::uint32_t value = ...;
-    Pt::uint32_t swapped = Pt::swab(value);
-    @endcode
-
-    A second set of functions can be used to convert from a specific
-    external byte order to the native host byte order: Pt::beToHost(),
-    Pt::hostToBe(), Pt::leToHost() and Pt::hostToLe(). For example
-    Pt::beToHost() converts from big-endian to the host byte order:
-
-    @code
-    #include <Pt/Byteorder.h>
-
-    Pt::uint32_t beVal = ...;
-    Pt::uint32_t value = Pt::beToHost(beVal);
-    @endcode
 */
 
 #endif

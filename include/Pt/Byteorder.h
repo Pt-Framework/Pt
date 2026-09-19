@@ -130,43 +130,67 @@ namespace Pt {
     }
 #endif
 
+    /** @brief Returns @a value unchanged.
+
+        @ingroup Pt-Byteorder
+    */
     inline int8_t swab(int8_t value)
     { return value; }
 
+    /** @brief Returns @a value unchanged.
+
+        @ingroup Pt-Byteorder
+    */
     inline uint8_t swab(uint8_t value)
     { return value; }
 
+    /** @brief Swaps the bytes of a 16-bit integer.
+
+        @ingroup Pt-Byteorder
+    */
     inline int16_t swab(int16_t value)
     { return swab16(value); }
 
+    /** @brief Swaps the bytes of a 16-bit integer.
+
+        @ingroup Pt-Byteorder
+    */
     inline uint16_t swab(uint16_t value)
     { return swab16(value); }
 
-    /** @brief Swaps the byteorder of an int32_t.
+    /** @brief Swaps the bytes of a 32-bit integer.
 
-        @ingroup Pt-Convert
-     */
+        @ingroup Pt-Byteorder
+    */
     inline int32_t swab(int32_t value)
     { return swab32(value); }
 
-    /** @brief Swaps the byteorder of a uint32_t.
+    /** @brief Swaps the bytes of a 32-bit integer.
 
-        @ingroup Pt-Convert
+        @ingroup Pt-Byteorder
     */
     inline uint32_t swab(uint32_t value)
     { return swab32(value); }
 
 #ifdef PT_WITH_INT64
+    /** @brief Swaps the bytes of a 64-bit integer.
+
+        @ingroup Pt-Byteorder
+    */
     inline int64_t swab(int64_t value)
     { return swab64(value); }
 
+    /** @brief Swaps the bytes of a 64-bit integer.
+
+        @ingroup Pt-Byteorder
+    */
     inline uint64_t swab(uint64_t value)
     { return swab64(value); }
 #endif
 
-    /** @brief Returns true, if the cpu is big-endian (high-byte first).
+    /** @brief Returns true if the host stores the most significant byte first.
 
-        @ingroup Pt-Convert
+        @ingroup Pt-Byteorder
     */
     inline bool isBigEndian()
     {
@@ -174,9 +198,9 @@ namespace Pt {
         return *reinterpret_cast<const int8_t*>(&i) == 0;
     }
 
-    /** @brief Returns true, if the cpu is little-endian (low-byte first).
+    /** @brief Returns true if the host stores the least significant byte first.
 
-        @ingroup Pt-Convert
+        @ingroup Pt-Byteorder
     */
     inline bool isLittleEndian()
     {
@@ -184,15 +208,14 @@ namespace Pt {
         return *reinterpret_cast<const int8_t*>(&i) == 1;
     }
 
-    /** @brief Converts a value from host-byteorder to little-endian.
-     
-        This function does nothing on a LE system, but calls swap() on a BE system.
-        The generic swap() function expects the type passed in to be an integer type
-        and so does this function. Overloading swab can remove this restriction and
-        may improve performance for custom types.
-       
-        @ingroup Pt-Convert
-     */
+    /** @brief Converts @a value from host order to little-endian.
+
+        Returns @a value unchanged on a little-endian host. Calls %swab()
+        on a big-endian host. Overload %swab() for types that are not
+        fixed-size integers.
+
+        @ingroup Pt-Byteorder
+    */
     template <typename T>
     inline T hostToLe(const T& value)
     {
@@ -203,15 +226,14 @@ namespace Pt {
 #endif
     }
 
-    /** @brief Converts a value from little-endian to host-byteorder.
+    /** @brief Converts @a value from little-endian to host order.
 
-        This function does nothing on a LE system, but calls swap() on a BE system.
-        The generic swap() function expects the type passed in to be an integer type
-        and so does this function. Overloading swab can remove this restriction and
-        may improve performance for custom types.
+        Returns @a value unchanged on a little-endian host. Calls %swab()
+        on a big-endian host. Overload %swab() for types that are not
+        fixed-size integers.
 
-        @ingroup Pt-Convert
-     */
+        @ingroup Pt-Byteorder
+    */
     template <typename T>
     inline T leToHost(const T& value)
     {
@@ -222,15 +244,14 @@ namespace Pt {
 #endif
     }
 
-    /** @brief Converts a value from the host-byteorder to big-endian.
+    /** @brief Converts @a value from host order to big-endian.
 
-        This function does nothing on a BE system, but calls swap() on a LE system.
-        The generic swap() function expects the type passed in to be an integer type
-        and so does this function. Overloading swab can remove this restriction and
-        may improve performance for custom types.
-       
-        @ingroup Pt-Convert
-     */
+        Returns @a value unchanged on a big-endian host. Calls %swab()
+        on a little-endian host. Overload %swab() for types that are not
+        fixed-size integers.
+
+        @ingroup Pt-Byteorder
+    */
     template <typename T>
     inline T hostToBe(const T& value)
     {
@@ -241,15 +262,14 @@ namespace Pt {
 #endif
     }
 
-    /** @brief Converts a value from big-endian to host-byteorder.
-     
-        This function does nothing on a BE system, but calls swap() on a LE system.
-        The generic swap() function expects the type passed in to be an integer type
-        and so does this function. Overloading swab can remove this restriction and
-        may improve performance for custom types.
+    /** @brief Converts @a value from big-endian to host order.
 
-        @ingroup Pt-Convert
-     */
+        Returns @a value unchanged on a big-endian host. Calls %swab()
+        on a little-endian host. Overload %swab() for types that are not
+        fixed-size integers.
+
+        @ingroup Pt-Byteorder
+    */
     template <typename T>
     inline T beToHost(const T& value)
     {

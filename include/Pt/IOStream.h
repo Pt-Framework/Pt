@@ -51,7 +51,20 @@
 
 namespace Pt {
 
-/** @brief Input stream.
+/** @brief Input stream over a %BasicStreamBuffer.
+
+    %BasicIStream is the input stream in the @ref Pt-Streams model. It
+    is a @c std::basic_istream that holds a %BasicStreamBuffer pointer.
+    Extraction uses that buffer through @c rdbuf(). %peeksome() looks
+    ahead by more than one character: it calls %BasicStreamBuffer::speekn()
+    when @c rdbuf() is still this buffer, and otherwise peeks a single
+    character. The returned count may be less than requested.
+
+    %buffer() returns the pointer. %setBuffer() replaces it and
+    updates @c rdbuf(). The stream does not own the buffer. Pass a
+    null buffer to construct a stream that will receive one later.
+
+    @ingroup Pt-Streams
 */
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicIStream : public std::basic_istream<CharT, TraitsT>
@@ -95,7 +108,19 @@ class BasicIStream : public std::basic_istream<CharT, TraitsT>
 };
 
 
-/** @brief Output stream.
+/** @brief Output stream over a %BasicStreamBuffer.
+
+    %BasicOStream is the output stream in the @ref Pt-Streams model. It
+    is a @c std::basic_ostream that holds a %BasicStreamBuffer pointer.
+    Insertion uses that buffer through @c rdbuf(). %writesome() writes
+    at most %BasicStreamBuffer::out_avail() characters with @c sputn()
+    and writes nothing when the put area is empty. That is a partial
+    write; it does not block waiting for overflow to flush.
+
+    %buffer() returns the pointer. %setBuffer() replaces it and
+    updates @c rdbuf(). The stream does not own the buffer.
+
+    @ingroup Pt-Streams
 */
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicOStream : public std::basic_ostream<CharT, TraitsT>
@@ -135,7 +160,20 @@ class BasicOStream : public std::basic_ostream<CharT, TraitsT>
 };
 
 
-/** @brief Input/Output stream.
+/** @brief Input and output stream over a %BasicStreamBuffer.
+
+    %BasicIOStream is the bidirectional stream in the @ref Pt-Streams
+    model. It is a @c std::basic_iostream that holds a
+    %BasicStreamBuffer pointer. %peeksome() is the input lookahead of
+    %BasicIStream. %writesome() is the partial write of %BasicOStream.
+    Both require that @c rdbuf() still is this buffer.
+
+    %buffer() returns the pointer. %setBuffer() replaces it and
+    updates @c rdbuf(). The stream does not own the buffer. Use this
+    type when the same buffer is read and written; use %BasicIStream
+    or %BasicOStream when the direction is fixed.
+
+    @ingroup Pt-Streams
 */
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicIOStream : public std::basic_iostream<CharT, TraitsT>
