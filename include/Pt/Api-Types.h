@@ -1,3 +1,7 @@
+/* Copyright (C) 2008 Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
+
 #ifndef PT_API_TYPES_H
 #define PT_API_TYPES_H
 

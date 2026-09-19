@@ -1,3 +1,7 @@
+/* Copyright (C) 2015 Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
+
 #ifndef PT_GFX_API_RGB32IMAGE_H
 #define PT_GFX_API_RGB32IMAGE_H
 

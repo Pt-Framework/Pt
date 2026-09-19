@@ -84,8 +84,14 @@ description: "Coding Styles and Guidelines"
 # Coding Guidelines
 
 - Copyright Header:
-  - Start every file with the copyright header from `include/<Project>/Api.h`.
+  - Start every file with the SPDX header from `include/<Project>/Api.h`:
+    ```cpp
+    /* Copyright (C) YEAR Author
+       SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+    */
+    ```
   - Fill in the current year, leaving the author list intact.
+  - Cosmo files keep their existing license text; do not replace it with SPDX-only.
 
 - C++ Standard: Prefer C++14 features, use C++20 where necessary.
 
