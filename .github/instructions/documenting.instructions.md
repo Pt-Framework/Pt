@@ -121,9 +121,8 @@ pages.
 ## Content
 
 Write a chapter the reader can learn from without scanning every member.
-Explain what the feature or type is for, the object model, how the types
-work together, how a caller uses them, ownership, lifetime, errors,
-ordering, and the distinctions that prevent mistakes. Include the
+Explain what the feature or type is for, how this API maps its subject,
+how the types work together, how a caller uses them, ownership, lifetime, errors, ordering, and the distinctions that prevent mistakes. Include the
 context needed to use the API correctly, including an API technique that
 is part of the contract (C linkage of an export, a cast the platform
 requires, matching allocators).
@@ -204,8 +203,8 @@ because its documentation is short.
 
 ## Style
 
-Textbook prose: comprehensive, patient, and as thorough as a tutor
-explaining the feature in chat. Complete thoughts, enough context, and
+Use Textbook prose: comprehensive, patient, and as thorough as a tutor
+explaining the feature. Complete thoughts, enough context, and
 as many paragraphs as the topic needs. This is not a brief and not a
 longer brief. "Returns ..." openings and other API-declaration style
 rules do not apply here.
@@ -213,6 +212,12 @@ rules do not apply here.
 Write developed paragraphs. A paragraph may name several types,
 relations, or rules when they belong to the same explanation.
 Subordinate clauses are wanted when they clarify the contract.
+
+Write the group chapter first, then each class chapter, then member
+briefs.
+
+Stop only when a reader who has not opened the header can use the API
+from this comment. A list of types or capabilities is not a chapter.
 
 ```cpp
 /** @defgroup Ns-MyModule Module Name
