@@ -9,8 +9,8 @@ Thank you for contributing to the Platinum C++ Framework.
 - Keep each pull request focused on one problem or feature.
 - Do not include unrelated formatting changes, generated files, or build
   artifacts.
-- Read the [requirements](https://pt-framework.net/htdocs/requirements.html)
-  and [installation guide](https://pt-framework.net/htdocs/installing.html).
+- Read the [installation guide](https://pt-framework.net/installing.html)
+  and [supported platforms](https://pt-framework.net/platforms.html).
 
 ## Git Setup
 
@@ -38,12 +38,12 @@ apply them to all repositories for the current user. May require `ceredentials.h
 - Module sources: `src/Pt-<Module>/`
 - Tests: `src/Pt/tests/` or `src/Pt-<Module>/tests/`
 - User documentation pages: `doc/pages/`
-- Generated Doxygen HTML: `doc/website/htdocs/`
+- Generated Doxygen HTML: `doc/website/`
 
 ## Building
 
-Pt uses its [Jam-based build system](https://pt-framework.net/htdocs/jam-intro.html).
-For further commands and options, see the [Jam usage guide](https://pt-framework.net/htdocs/jam-usage.html).
+Pt uses its [Jam-based build system](https://pt-framework.net/jam-intro.html).
+For further commands and options, see the [Jam usage guide](https://pt-framework.net/jam-usage.html).
 
 On Windows, configure and build a debug configuration from the repository
 root:
@@ -71,7 +71,7 @@ Run a full project build before opening a pull request.
 ## Tests
 
 Add or update tests for every behavior change and bug fix. Pt uses the
-[Pt::Unit testing framework](https://pt-framework.net/htdocs/Pt-Unit-Page.html).
+[Pt::Unit testing framework](https://pt-framework.net/Pt-Unit-Page.html).
 
 - Keep tests in the namespace of the unit under test.
 - Name test classes with a `Test` suffix.

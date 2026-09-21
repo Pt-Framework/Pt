@@ -28,7 +28,7 @@ platforms, and user requirements.
   including documentation, source comments, changelogs, and configuration files.
 - Prefer repo-root-relative paths; use absolute paths when tools are path-ambiguous.
 - Multi-root workspaces may show the same file under different folder roots.
-- Do not search `build/`, `tmp/`, `deps/`, `doc/website/htdocs/`, or large
+- Do not search `build/`, `tmp/`, `deps/`, `doc/website/`, or large
   vendored trees (`src/skia`, `src/openssl`, …) unless the task requires it.
 - Use only ASCII characters in all output (code, comments, file names, messages)
   unless the task explicitly requires non-ASCII characters (e.g. localized strings, binary data, or Unicode-specific tests).

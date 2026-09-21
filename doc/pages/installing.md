@@ -103,18 +103,10 @@ selects the Visual Studio 2008 compiler:
 jam.bat configure -sTOOLSET=vc9
 @endcode
 
-The build options TARGET_OS and TARGET_OSPLAT need to be set for cross 
+The build options TARGET_OS and TARGET_OSPLAT need to be set for cross
 compiling. Possible values for the target operating system are nt, linux,
-macosx, wince or qnxnto. Possible values for the target CPU platform are
-x86, ppc, arm, mips, sh4 or sparc.
-
-Windows CE targets need to be cross compiled under Windows hosts. Therefore 
-the TARGET_OS and TARGET_OSPLAT variables need to be set when the build is
-configured. The following command builds for windows CE on ARM CPUs:
-
-@code
-jam.bat configure -sTARGET_OS=wince -sTARGET_OSPLAT=arm
-@endcode
+macosx, qnxnto, or emscripten. Possible values for the target CPU platform
+are x86, x86_64, ppc, arm, mips, sh4, sparc, or wasm32.
 
 QNX targets can be cross compiled on both, QNX and windows build hosts. In 
 the first case, only the TARGET_OSPLAT option needs to be set, in the latter

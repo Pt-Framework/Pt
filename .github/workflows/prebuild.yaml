@@ -295,5 +295,6 @@ jobs:
             ${{ github.workspace }}/artifacts/*.zip.manifest
             ${{ github.workspace }}/artifacts/conan.lock
           prerelease: true
+          make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
