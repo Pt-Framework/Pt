@@ -58,7 +58,8 @@ and border and stays off the accent.
 
 Azure is the second color. It is one hue, 208 degrees, on a ladder.
 Red remains the saturated structure accent. Names sit on the 400 step.
-Boxes sit on 900 and 950.
+Boxes sit on 900 and 950. Code fragments and the clone box sit inset
+24px from the content edge.
 
 | Step | HSL | Hex | Role |
 |---|---|---|---|

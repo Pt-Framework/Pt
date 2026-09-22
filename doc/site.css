@@ -1391,7 +1391,7 @@ a.pt-card:hover {
   border: 1px solid var(--pt-box-line);
   padding: 14px 16px;
   overflow-x: auto;
-  margin: 20px 0;
+  margin: 20px 24px;
 }
 
 /* Code/example boxes only. Member details use tile gray, no stroke. */
@@ -1401,6 +1401,11 @@ pre.fragment {
   background-color: var(--pt-box);
   border-color: var(--pt-box-line);
   line-height: 1.4;
+  margin-left: 24px;
+  margin-right: 24px;
+  width: auto;
+  max-width: none;
+  box-sizing: border-box;
 }
 
 div.fragment div.line {
