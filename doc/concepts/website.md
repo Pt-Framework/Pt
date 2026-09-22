@@ -141,7 +141,7 @@ Start
   Getting Started
   License
 
-References
+Reference
   Jam Build Tool
   Class Index
   Namespaces
@@ -162,7 +162,7 @@ Home and Documentation stay out of the panel because the crumb already
 reaches them. Contributing and Security stay in the Getting Started
 portal as GitHub links.
 
-The headings `START` and `REFERENCES` are labels (`div`, not links):
+The headings `START` and `REFERENCE` are labels (`div`, not links):
 `#eeeeee`, 11px, weight 700, uppercase, letter-spacing 0.12em. Entries
 are 14px, weight 400, `#a8a8a8`, padding 5px 12px, on the same left
 edge as the labels. The panel fill is `#1f1f1f`, the border `#3a3a3a`.
