@@ -15,7 +15,8 @@ link earlier ones; they do not rewrite them.
    prose in group files and on class declarations.
 3. **Pages** — one module page that copies those chapters into reading
    order, plus guide pages with original prose.
-4. **Website** — hand-written navigation to the HTML Doxygen generates.
+4. **Website** — Doxygen generates the whole site from pages, header,
+   footer, and CSS. `doc/website/` is output only.
 
 Write for a reader who uses the public API, not for its implementer.
 Compact wording belongs in API declaration comments. Group and class
@@ -307,6 +308,11 @@ A page is a Markdown file in `doc/pages/`. One page per file. File names
 are lowercase with a `.md` extension. A module page ID uses a `-Page` suffix (`Ns-MyModule` -> `Ns-MyModule-Page`). Section anchors use the page ID as
 prefix (`Ns-MyModule-Page-MyFeature`).
 
+Site entry pages (home, documentation inventory, download) list modules
+and guides. They do not copy group or class chapters. Use an `\htmlonly`
+body when the layout is HTML. Keep existing page IDs so generated file
+names stay stable.
+
 Copy the main group first, then subgroups, in reader order. The page
 defines that order. Put the central type of the object model or reader
 task where the reading order needs it, even if that is not inheritance
@@ -370,29 +376,39 @@ This chapter covers:
 
 # Website
 
-The website is navigation to generated HTML. It is not a place to write
-API chapters.
+The website is the Doxygen HTML output. It is not a place to write
+API chapters. Do not edit generated files.
 
 ## Formatting
 
-Doxygen generates HTML into `doc/website/htdocs/`. Do not edit those
-files by hand. The website root files in `doc/website/` (`index.html`,
-`docs.html`) are ordinary HTML with hand-written navigation links to
-that output.
+Doxygen writes HTML into `doc/website/` (`OUTPUT_DIRECTORY` there,
+`HTML_OUTPUT = .`). Page ID `<id>` becomes `<id>.html` at that root.
+`@defgroup <id>` becomes `group__<id>.html`. The modules index is
+`topics.html`.
+
+Chrome is the files named by `HTML_HEADER`, `HTML_FOOTER`, and
+`HTML_EXTRA_STYLESHEET`. `HTML_EXTRA_FILES` is for assets only, not
+content.
 
 ## Content
 
-- `\page <id>` or `# Title {#id}` produces `htdocs/<id>.html`.
-- `@defgroup <id>` produces `htdocs/group__<id>.html`.
+- The mainpage (`USE_MDFILE_AS_MAINPAGE`) produces `index.html`. Module
+  cards: title plus one line, link to the module page.
+- The documentation inventory (`\page docs`) produces `docs.html`.
+  Module tiles: name plus chapter links into the module page.
+- Other site pages (`\page <id>`) produce `<id>.html`.
 
-Maintain the matching module box in `doc/website/docs.html` when adding
-or changing a documented module.
+When adding or changing a documented module, update the home cards and
+the documentation-inventory tiles. Keep the inventory page ID `docs`.
 
 ## Structure
 
-Hand-written files live in `doc/website/`. Generated files live in
-`doc/website/htdocs/`. A new documented module needs a box in
-`docs.html` that points at its generated page.
+Sources live in `doc/pages/` and in the chrome files next to the
+Doxyfile. Generated files live in `doc/website/`.
+
+Change header, footer, or CSS only when site navigation or layout
+changes. Module inventory belongs on the home and documentation
+inventory pages, not in the header menu.
 
 ## Style
 
