@@ -104,10 +104,11 @@ Download:      Pt  ›  Get Platinum                             ≡
 Other pages:   Pt  ›  Documentation                            ≡
 ```
 
-The wordmark `Pt` always opens Home (`index.html`). Later artwork
-keeps that link and the class `.pt-nav-home`; the wordmark becomes the
-icon. The slot is 32 by 32 pixels, centered in the 48 pixel bar, the
-same box as the hamburger.
+The wordmark `Pt` always opens Home (`index.html`) and uses the same
+type size as the crumb (`Documentation` / `Get Platinum`). The accent
+box is tight to that word. Opposite corners are cut so the remaining
+edges sit flush with the letter box. The hamburger keeps the 32 by 32
+pixel slot, centered in the 48 pixel bar.
 
 `Documentation` opens the docs root (`docs.html`). On that page the
 word is the current crumb: bar color, and not a link. `Get Platinum`
