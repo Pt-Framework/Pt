@@ -386,8 +386,11 @@ class ConnectionAwaiter : public Pt::Awaiter
             }
         }
 
-        void onDetach()
+        virtual void onDetach()
         {
+            if(_conn)
+                _conn->detachAwaiter(*this);
+
             _conn = nullptr;
             _handle = nullptr;
         }

@@ -27,6 +27,12 @@
     %rollbackFinished() roll it back. %endStart() is the call that
     marks the transaction active on the async path.
 
+    C++20 awaitables wrap those pairs: %beginAsync(), %commitAsync()
+    and %rollbackAsync() are used with co_await and complete through
+    the same signals. Only one awaitable may be pending on the
+    connection. Destroying the %Transaction while one is in flight
+    detaches it; a later resume throws %std::logic_error.
+
     Override %onGetBeginSql(), %onGetCommitSql() and
     %onGetRollbackSql() to supply backend-specific SQL. A null return
     lets the backend use its default. %SqliteTransaction() uses that

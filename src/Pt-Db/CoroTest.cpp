@@ -21,6 +21,7 @@
 #include <Pt/Unit/RegisterTest.h>
 #include <Pt/Db/Connection.h>
 #include <Pt/Db/Result.h>
+#include <Pt/Db/Transaction.h>
 #include <Pt/System/MainLoop.h>
 
 
@@ -42,6 +43,12 @@ class CoroTest : public Pt::Unit::TestSuite
             registerMethod("PendingAwaiter",  *this, &CoroTest::pendingAwaiter);
             registerMethod("NestedTask",    *this, &CoroTest::nestedTask);
             registerMethod("DeferredArguments", *this, &CoroTest::deferredArguments);
+            registerMethod("BeginCommit",   *this, &CoroTest::beginCommit);
+            registerMethod("BeginRollback", *this, &CoroTest::beginRollback);
+            registerMethod("DestroyTransaction", *this, &CoroTest::destroyTransaction);
+            registerMethod("DestroyStoredAwaiterTransaction", *this,
+                           &CoroTest::destroyStoredAwaiterTransaction);
+            registerMethod("PendingTxnAwaiter", *this, &CoroTest::pendingTxnAwaiter);
         }
 
     protected:
@@ -66,6 +73,11 @@ class CoroTest : public Pt::Unit::TestSuite
         void pendingAwaiter();
         void nestedTask();
         void deferredArguments();
+        void beginCommit();
+        void beginRollback();
+        void destroyTransaction();
+        void destroyStoredAwaiterTransaction();
+        void pendingTxnAwaiter();
 
         Pt::Task<>             openCloseAsync();
         Pt::Task<>             executeAsync();
@@ -81,6 +93,10 @@ class CoroTest : public Pt::Unit::TestSuite
                               Pt::System::EventLoop& loop);
         Pt::Task<std::size_t>  insertRowAsync(Pt::Db::Connection& conn, int id);
         Pt::Task<>             nestedTaskAsync();
+        Pt::Task<>             beginCommitAsync();
+        Pt::Task<>             beginRollbackAsync();
+        Pt::Task<>             awaitBeginAsync(Pt::Db::Transaction& txn);
+        Pt::Task<>             awaitBeginStored(Pt::Db::AsyncBegin& awaiter);
 
     private:
         Pt::System::MainLoop* _loop;
@@ -354,6 +370,122 @@ void CoroTest::nestedTask()
     Pt::Task<> task = nestedTaskAsync();
     task.run();
     _loop->run();
+}
+
+
+Pt::Task<> CoroTest::beginCommitAsync()
+{
+    Pt::Db::Connection conn("sqlite");
+    conn.setActive(*_loop);
+
+    co_await conn.openAsync(":memory:");
+    co_await conn.executeAsync("CREATE TABLE t (id INTEGER)");
+
+    Pt::Db::Transaction txn(conn, false);
+    co_await txn.beginAsync();
+    co_await conn.executeAsync("INSERT INTO t VALUES (1)");
+    co_await txn.commitAsync();
+
+    Pt::Db::Result r = co_await conn.selectAsync("SELECT id FROM t");
+    PT_UNIT_ASSERT( r.size() == 1 );
+    PT_UNIT_ASSERT( r[0][0].getInt() == 1 );
+
+    _loop->exit();
+}
+
+void CoroTest::beginCommit()
+{
+    Pt::Task<> task = beginCommitAsync();
+    task.run();
+    _loop->run();
+}
+
+
+Pt::Task<> CoroTest::beginRollbackAsync()
+{
+    Pt::Db::Connection conn("sqlite");
+    conn.setActive(*_loop);
+
+    co_await conn.openAsync(":memory:");
+    co_await conn.executeAsync("CREATE TABLE t (id INTEGER)");
+
+    Pt::Db::Transaction txn(conn, false);
+    co_await txn.beginAsync();
+    co_await conn.executeAsync("INSERT INTO t VALUES (1)");
+    co_await txn.rollbackAsync();
+
+    Pt::Db::Result r = co_await conn.selectAsync("SELECT id FROM t");
+    PT_UNIT_ASSERT( r.size() == 0 );
+
+    _loop->exit();
+}
+
+void CoroTest::beginRollback()
+{
+    Pt::Task<> task = beginRollbackAsync();
+    task.run();
+    _loop->run();
+}
+
+
+Pt::Task<> CoroTest::awaitBeginAsync(Pt::Db::Transaction& txn)
+{
+    co_await txn.beginAsync();
+}
+
+
+void CoroTest::destroyTransaction()
+{
+    Pt::Db::Connection conn("sqlite");
+    conn.setActive(*_loop);
+    conn.open(":memory:");
+
+    Pt::Db::Transaction* txn = new Pt::Db::Transaction(conn, false);
+
+    Pt::Task<> task = awaitBeginAsync(*txn);
+    task.run();
+    delete txn;
+
+    PT_UNIT_ASSERT( task );
+    task.cancel();
+    PT_UNIT_ASSERT( ! task );
+}
+
+
+Pt::Task<> CoroTest::awaitBeginStored(Pt::Db::AsyncBegin& awaiter)
+{
+    co_await awaiter;
+}
+
+
+void CoroTest::destroyStoredAwaiterTransaction()
+{
+    Pt::Db::Connection conn("sqlite");
+    conn.setActive(*_loop);
+    conn.open(":memory:");
+
+    Pt::Db::Transaction* txn = new Pt::Db::Transaction(conn, false);
+
+    {
+        Pt::Db::AsyncBegin awaiter = txn->beginAsync();
+        delete txn;
+
+        Pt::Task<> task = awaitBeginStored(awaiter);
+        task.run();
+
+        PT_UNIT_ASSERT( task.done() );
+        PT_UNIT_ASSERT_THROW( task.result(), std::logic_error );
+    }
+}
+
+
+void CoroTest::pendingTxnAwaiter()
+{
+    Pt::Db::Connection conn("sqlite");
+    Pt::Db::Transaction txn(conn, false);
+    Pt::Db::AsyncBegin begin = txn.beginAsync();
+
+    PT_UNIT_ASSERT_THROW( conn.pingAsync(), std::logic_error );
 }
 
 #endif // __cplusplus >= 202002L

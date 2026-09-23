@@ -11,9 +11,20 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 
+#if __cplusplus >= 202002L
+#include <Pt/Slot.h>
+#include <Pt/Coroutine.h>
+#endif
+
 namespace Pt {
 
 namespace Db {
+
+#if __cplusplus >= 202002L
+class AsyncBegin;
+class AsyncCommit;
+class AsyncRollback;
+#endif
 
 /** @brief Unit of work on a database connection.
 
@@ -34,6 +45,12 @@ namespace Db {
     %beginRollback() / %endRollback() / %rollbackFinished() roll
     back.
 
+    When C++20 is available, %beginAsync(), %commitAsync() and
+    %rollbackAsync() wrap those pairs for co_await. Only one
+    awaitable may be pending on the connection. Destroying the
+    transaction while one is in flight detaches it; a later resume
+    throws %std::logic_error.
+
     Override %onGetBeginSql(), %onGetCommitSql() and
     %onGetRollbackSql() to supply backend-specific SQL. A null return
     lets the backend use its default.
@@ -42,6 +59,13 @@ namespace Db {
     Pt::Db::Transaction txn(conn);
     conn.execute("UPDATE t SET n = n + 1");
     txn.commit();
+    @endcode
+
+    @code
+    Pt::Db::Transaction txn(conn, false);
+    co_await txn.beginAsync();
+    co_await conn.executeAsync("INSERT INTO t VALUES (1)");
+    co_await txn.commitAsync();
     @endcode
 
     @ingroup Pt-Db-Transactions
@@ -54,6 +78,10 @@ class Transaction : private NonCopyable
         Pt::Signal<> _startFinished;
         Pt::Signal<> _commitFinished;
         Pt::Signal<> _rollbackFinished;
+
+#if __cplusplus >= 202002L
+        ConnectionAwaiter* _awaiter = nullptr;
+#endif
 
     public:
         /** @brief Creates a transaction on @a conn.
@@ -74,6 +102,15 @@ class Transaction : private NonCopyable
         */
         ~Transaction()
         {
+#if __cplusplus >= 202002L
+            if(_awaiter)
+            {
+                _awaiter->cancel();
+                _awaiter->onDetach();
+                _awaiter = nullptr;
+            }
+#endif
+
             if (_active)
             {
                 try
@@ -89,6 +126,11 @@ class Transaction : private NonCopyable
         /** @brief Returns the connection this transaction uses.
         */
         const Connection& getConnection() const
+        { return _connection; }
+
+        /** @brief Returns the connection this transaction uses.
+        */
+        Connection& getConnection()
         { return _connection; }
 
         /** @brief Begins a deferred transaction.
@@ -192,6 +234,20 @@ class Transaction : private NonCopyable
         Pt::Signal<>& rollbackFinished()
         { return _rollbackFinished; }
 
+#if __cplusplus >= 202002L
+        /** @brief Returns an awaitable that begins the transaction.
+        */
+        AsyncBegin beginAsync();
+
+        /** @brief Returns an awaitable that commits the transaction.
+        */
+        AsyncCommit commitAsync();
+
+        /** @brief Returns an awaitable that rolls back the transaction.
+        */
+        AsyncRollback rollbackAsync();
+#endif
+
     protected:
         /** @brief Returns SQL for BEGIN, or a null pointer for the backend default.
         */
@@ -207,7 +263,215 @@ class Transaction : private NonCopyable
         */
         virtual const char* onGetRollbackSql()
         { return nullptr; }
+
+#if __cplusplus >= 202002L
+    private:
+        friend class AsyncBegin;
+        friend class AsyncCommit;
+        friend class AsyncRollback;
+
+        void attachAwaiter(ConnectionAwaiter& awaiter)
+        {
+            _awaiter = &awaiter;
+        }
+
+        void detachAwaiter(ConnectionAwaiter& awaiter)
+        {
+            if(_awaiter == &awaiter)
+                _awaiter = nullptr;
+        }
+#endif
 };
+
+
+#if __cplusplus >= 202002L
+
+/** @brief Awaitable for asynchronous begin-transaction.
+
+    @ingroup Pt-Db-Transactions
+*/
+class AsyncBegin : public ConnectionAwaiter
+{
+    public:
+        explicit AsyncBegin(Transaction& txn)
+        : ConnectionAwaiter(txn.getConnection())
+        , _txn(&txn)
+        {
+            txn.attachAwaiter(*this);
+        }
+
+        ~AsyncBegin()
+        {
+            if(_txn)
+                _txn->detachAwaiter(*this);
+        }
+
+        void onDetach() override
+        {
+            if(_txn)
+            {
+                _txn->detachAwaiter(*this);
+                _txn = nullptr;
+            }
+
+            ConnectionAwaiter::onDetach();
+        }
+
+        void await_resume()
+        {
+            transaction().endStart();
+        }
+
+    private:
+        Transaction& transaction()
+        {
+            if( ! _txn )
+                throw std::logic_error("invalid transaction");
+
+            return *_txn;
+        }
+
+        void onBegin() override
+        {
+            Transaction& txn = transaction();
+            txn.startFinished() += slot(*this, &AsyncBegin::setReady);
+            txn.beginStart();
+        }
+
+        Transaction* _txn;
+};
+
+
+/** @brief Awaitable for asynchronous commit.
+
+    @ingroup Pt-Db-Transactions
+*/
+class AsyncCommit : public ConnectionAwaiter
+{
+    public:
+        explicit AsyncCommit(Transaction& txn)
+        : ConnectionAwaiter(txn.getConnection())
+        , _txn(&txn)
+        {
+            txn.attachAwaiter(*this);
+        }
+
+        ~AsyncCommit()
+        {
+            if(_txn)
+                _txn->detachAwaiter(*this);
+        }
+
+        void onDetach() override
+        {
+            if(_txn)
+            {
+                _txn->detachAwaiter(*this);
+                _txn = nullptr;
+            }
+
+            ConnectionAwaiter::onDetach();
+        }
+
+        void await_resume()
+        {
+            transaction().endCommit();
+        }
+
+    private:
+        Transaction& transaction()
+        {
+            if( ! _txn )
+                throw std::logic_error("invalid transaction");
+
+            return *_txn;
+        }
+
+        void onBegin() override
+        {
+            Transaction& txn = transaction();
+            txn.commitFinished() += slot(*this, &AsyncCommit::setReady);
+            txn.beginCommit();
+        }
+
+        Transaction* _txn;
+};
+
+
+/** @brief Awaitable for asynchronous rollback.
+
+    @ingroup Pt-Db-Transactions
+*/
+class AsyncRollback : public ConnectionAwaiter
+{
+    public:
+        explicit AsyncRollback(Transaction& txn)
+        : ConnectionAwaiter(txn.getConnection())
+        , _txn(&txn)
+        {
+            txn.attachAwaiter(*this);
+        }
+
+        ~AsyncRollback()
+        {
+            if(_txn)
+                _txn->detachAwaiter(*this);
+        }
+
+        void onDetach() override
+        {
+            if(_txn)
+            {
+                _txn->detachAwaiter(*this);
+                _txn = nullptr;
+            }
+
+            ConnectionAwaiter::onDetach();
+        }
+
+        void await_resume()
+        {
+            transaction().endRollback();
+        }
+
+    private:
+        Transaction& transaction()
+        {
+            if( ! _txn )
+                throw std::logic_error("invalid transaction");
+
+            return *_txn;
+        }
+
+        void onBegin() override
+        {
+            Transaction& txn = transaction();
+            txn.rollbackFinished() += slot(*this, &AsyncRollback::setReady);
+            txn.beginRollback();
+        }
+
+        Transaction* _txn;
+};
+
+
+inline AsyncBegin Transaction::beginAsync()
+{
+    return AsyncBegin(*this);
+}
+
+
+inline AsyncCommit Transaction::commitAsync()
+{
+    return AsyncCommit(*this);
+}
+
+
+inline AsyncRollback Transaction::rollbackAsync()
+{
+    return AsyncRollback(*this);
+}
+
+#endif // __cplusplus >= 202002L
 
 
 /** @brief SQLite transaction with optional immediate locking.
