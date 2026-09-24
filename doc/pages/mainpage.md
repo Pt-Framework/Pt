@@ -27,7 +27,7 @@
 </div>
 
 <div class="pt-section">
-  <h2>Modules</h2>
+  <h2>Explore Platinum</h2>
   <div class="pt-grid">
     <a class="pt-card" href="Pt-Core-Page.html">
       <h3>Core</h3>
@@ -89,7 +89,7 @@
 </div>
 
 <div class="pt-section">
-  <h2>Design</h2>
+  <h2>Design Principles</h2>
   <div class="pt-build">
     <div class="pt-build-item">
       <h3>Standard C++</h3>
