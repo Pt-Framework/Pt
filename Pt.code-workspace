@@ -168,6 +168,7 @@
             "${workspaceFolder:All Files}/include",
             "${workspaceFolder:All Files}/src"
         ],
+        "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false,
         "chat.tools.terminal.autoApprove": {
             "Rename-Item": true,
             "ForEach-Object": true,
