@@ -63,6 +63,22 @@ namespace Pt {
 
 namespace Forms {
 
+Application::Application()
+: System::Application()
+, _impl( new ApplicationImpl() )
+, _graphicsBackend(0)
+, _mainScreen(0)
+, _lastId(1)
+, _styleOptions(StyleOptions::defaults())
+, _defaultInputMethod(0)
+, _inputMethod(0)
+, _onScroll(false)
+, _scaling(1)
+{
+    initRuntime();
+}
+
+
 Application::Application(int& argc, char** argv)
 : System::Application(0, argc, argv)
 , _impl( new ApplicationImpl() )
@@ -74,6 +90,12 @@ Application::Application(int& argc, char** argv)
 , _inputMethod(0)
 , _onScroll(false)
 , _scaling(1)
+{
+    initRuntime();
+}
+
+
+void Application::initRuntime()
 {
     this->init(*_impl);
 

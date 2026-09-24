@@ -93,6 +93,13 @@ class PT_FORMS_API Application : public Pt::System::Application
     public:
         /** @brief Creates the Forms runtime and its primary screen.
         */
+        Application();
+
+        /** @brief Creates the Forms runtime from @a argc and @a argv.
+
+            @a argc must remain valid for the lifetime of this application.
+            %getArg() may change @a argc and the array pointed to by @a argv.
+        */
         explicit Application(int& argc, char** argv = 0);
 
         /** @brief Destroys the Forms runtime and the services it owns.
@@ -425,6 +432,9 @@ class PT_FORMS_API Application : public Pt::System::Application
         void onDispatchWindowStateEvent(const WindowStateEvent& ev);
 
         void onProcessWindowStateEvent(const WindowStateEvent& ev);
+
+    private:
+        void initRuntime();
 
     private:
         typedef std::map<Pt::uint64_t, Widget*> WidgetMap;
