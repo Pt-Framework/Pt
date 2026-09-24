@@ -60,10 +60,12 @@ Connection::~Connection()
 #if __cplusplus >= 202002L
     if(_awaiter)
     {
+        _awaiter->cancel();
         _awaiter->onDetach();
         _awaiter = nullptr;
     }
 #endif
+
     cancel();
 }
 
