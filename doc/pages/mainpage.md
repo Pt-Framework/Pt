@@ -16,7 +16,7 @@
     codebase. It provides a large amount of features and is still very easy
     to use. It integrates well into existing toolkits and frameworks.
   </p>
-  <div class="pt-actions">
+  <div class="pt-actions pt-actions-home">
     <div class="pt-actions-start">
       <a class="pt-btn pt-btn-ghost" href="docs.html#getting-started">Getting Started</a>
       <a class="pt-btn pt-btn-ghost" href="docs.html">Documentation</a>

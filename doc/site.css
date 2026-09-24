@@ -273,6 +273,12 @@ div.directory:not(:has(td.entry a[href^="class"])) .icona {
   text-decoration: none;
 }
 
+a.pt-nav.pt-nav-home,
+a.pt-nav.pt-nav-home:visited,
+a.pt-nav.pt-nav-home:hover {
+  color: var(--pt-text);
+}
+
 .pt-nav:hover {
   color: var(--pt-text);
   text-decoration: none;
@@ -1137,6 +1143,14 @@ address.footer {
 
 .pt-hero .pt-actions .pt-btn-primary {
   margin-left: auto;
+}
+
+.pt-page-home ~ .pt-hero .pt-meta {
+  margin-bottom: 32px;
+}
+
+.pt-page-home ~ .pt-hero .pt-actions-home {
+  margin-top: 48px;
 }
 
 .pt-btn {
