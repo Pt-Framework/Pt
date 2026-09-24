@@ -63,7 +63,7 @@ namespace Pt {
 
 namespace Forms {
 
-Application::Application(int argc, char** argv)
+Application::Application(int& argc, char** argv)
 : System::Application(0, argc, argv)
 , _impl( new ApplicationImpl() )
 , _graphicsBackend(0)

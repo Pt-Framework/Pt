@@ -93,7 +93,7 @@ class PT_FORMS_API Application : public Pt::System::Application
     public:
         /** @brief Creates the Forms runtime and its primary screen.
         */
-        Application(int argc = 0, char** argv = 0);
+        explicit Application(int& argc, char** argv = 0);
 
         /** @brief Destroys the Forms runtime and the services it owns.
         */
