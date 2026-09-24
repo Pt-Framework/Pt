@@ -284,6 +284,14 @@ a.pt-nav.pt-nav-home:hover {
   text-decoration: none;
 }
 
+a.pt-nav.pt-nav-docs,
+a.pt-nav.pt-nav-docs:visited,
+a.pt-nav.pt-nav-docs:hover,
+.pt-nav.pt-nav-docs-here,
+.pt-nav.pt-nav-docs-here:hover {
+  color: #eeeeee;
+}
+
 .pt-nav-home,
 .pt-nav-toc {
   justify-content: center;
