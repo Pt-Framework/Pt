@@ -24,7 +24,7 @@ description: "Synchronous and asynchronous I/O, streams and archive formats"
   `include/Pt/System/UriQuery.h`
 - Tar archive I/O group, Pax/UStar format:
   `include/Pt/System/Api-Tar.h`
-- Tar entry metadata, type, path and content chunks:
+- Tar entry metadata, type, path, permissions, mtime, owner, group and content chunks:
   `include/Pt/System/TarEntry.h`
 - Incremental tar reader, non-blocking advance:
   `include/Pt/System/TarReader.h`

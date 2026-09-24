@@ -1,29 +1,5 @@
 /* Copyright (C) 2008 Marc Boris Duerner
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  As a special exception, you may use this file as part of a free
-  software library without restriction. Specifically, if other files
-  instantiate templates or use macros or inline functions from this
-  file, or you compile this file and link it with other files to
-  produce an executable, this file does not by itself cause the
-  resulting executable to be covered by the GNU General Public
-  License. This exception does not however invalidate any other
-  reasons why the executable file might be covered by the GNU Library
-  General Public License.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301 USA
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
 */
 
 #ifndef PT_SYSTEM_TAR_READER_H
@@ -40,25 +16,50 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Incremental reader for tar archives (Pax/UStar format).
+/** @brief Reads a tar archive from a stream, one chunk at a time.
 
-    %TarReader parses a tar archive from a std::istream one entry at a time.
-    It is designed for non-blocking use: advance() delivers only the bytes
-    already in the stream buffer and returns nullptr when the stream is
-    starved.
+    A %TarReader walks a Pax/UStar archive held by a std::istream. Each
+    call to %advance() does a bounded amount of work and then returns,
+    so the same reader serves a file that is already complete and a
+    socket that delivers the archive in pieces. The caller asks for the
+    next step, processes what came back, and asks again.
 
-    Call advance() in a loop.  A non-null return value holds a %TarEntry
-    with the current entry's metadata and the first content chunk.  Read
-    %TarEntry::data() for %TarEntry::avail() bytes, then call advance()
-    again to fetch the next chunk.  Repeat until %TarEntry::isEnd() is
-    true, then call advance() once more to move to the next archive entry.
-    The loop ends when isEnd() on the reader itself returns true.
+    %advance() returns a %TarEntry once a member header has been parsed,
+    and returns the same entry again for each following content chunk.
+    The pointer is null when the stream has no more bytes yet. That is
+    a pause, not the end of the archive. The caller waits for more input
+    and calls %advance() again with the same reader. %isEnd() becomes
+    true only after the two zero blocks that mark the end of the archive
+    have been read. A null return together with %isEnd() means there is
+    nothing further to read.
 
-    Pass a non-zero @a importSize to advance() to read more bytes from the
-    stream per call — this may block and is suitable for file-based use.
+    The entry stays valid until the next %advance() call. Its metadata
+    is complete on the first return for that member: path, type, size,
+    link target, permissions, modification time, owner id and name, and
+    group id and name. A Pax extended header that preceded the member is
+    already applied, so the caller never sees the Pax header as an entry
+    of its own. A global Pax header is skipped. A member type the reader
+    does not recognise is skipped as well, including its content, and
+    the next recognised member is what comes back.
 
-    Pax extended headers handle long paths (> 99 characters), UTF-8 paths,
-    and extended modification times automatically.
+    Content arrives through the entry's window. %TarEntry::data() points
+    at %TarEntry::avail() bytes inside the reader's buffer. Copy those
+    bytes out before the next %advance(), which reuses the buffer. For a
+    file, repeat until %TarEntry::isEnd() is true, then call %advance()
+    once more to move to the following member. A directory and a link
+    have no content, so %isEnd() is already true on the first return.
+
+    The @a importSize argument bounds how much %advance() may pull from
+    the stream. Zero means: use only the bytes the stream buffer already
+    holds, and do not block. That is the right call from an event loop,
+    after the loop has been told that the stream is readable. A positive
+    value allows %advance() to read up to that many additional bytes,
+    which may block, and suits a file stream whose data is known to be
+    available.
+
+    A header whose checksum does not match throws %Pt::IOError. The
+    archive is then unusable from the point of the bad header, because
+    the reader can no longer trust the block boundaries.
 
     @code
     TarReader reader(stream);
@@ -67,13 +68,13 @@ namespace System {
     {
         const TarEntry* entry = reader.advance();
         if( ! entry )
-            break; // not enough data, call advance() again when more arrives
+            break; // stream starved; call advance() again when more arrives
 
         if(entry->type() == TarEntry::File)
         {
             do
             {
-                outFile.write(entry->data(), entry->avail());
+                out.write(entry->data(), entry->avail());
                 if(entry->isEnd())
                     break;
                 entry = reader.advance();
@@ -91,11 +92,11 @@ class PT_SYSTEM_API TarReader
     using Entry = TarEntry;
 
   public:
-    /** @brief Default constructor.
+    /** @brief Creates a reader with no stream attached.
     */
     TarReader();
 
-    /** @brief Constructor attaching to @a is.
+    /** @brief Creates a reader that parses @a is.
     */
     explicit TarReader(std::istream& is);
 
@@ -103,41 +104,51 @@ class PT_SYSTEM_API TarReader
     */
     ~TarReader();
 
-    /** @brief Attach to an input stream.
+    /** @brief Attaches @a is as the source.
+
+        Parsing continues with the next header. Call %reset() instead
+        when the new stream is the start of an archive.
     */
     void attach(std::istream& is);
 
-    /** @brief Detach from the current input stream.
+    /** @brief Detaches the current source.
+
+        The parse state is kept. %advance() returns null until a stream
+        is attached again.
     */
     void detach();
 
-    /** @brief Reset state and detach from the input stream.
+    /** @brief Clears the parse state and detaches the source.
     */
     void reset();
 
-    /** @brief Reset state and attach to a new input stream.
+    /** @brief Clears the parse state and attaches @a is.
+
+        The next %advance() call starts at the first header of @a is.
     */
     void reset(std::istream& is);
 
-    /** @brief Advance to the next entry or deliver the next content chunk.
+    /** @brief Parses the next header or delivers the next content chunk.
 
-        Each call consumes the bytes previously exposed via %TarEntry::data()
-        and fetches the next data from the stream.  Process %TarEntry::data()
-        before calling advance() again — the buffer is reused on each call.
+        Consumes the chunk previously exposed through %TarEntry::data()
+        and then reads what it needs from the stream. Copy those bytes
+        out before calling %advance() again.
 
-        When @a importSize is 0 (default), only bytes already in the stream
-        buffer are used and no blocking I/O is performed, making this safe
-        for event-loop use.  A value greater than 0 allows reading up to
-        that many additional bytes from the stream, which may block.
+        A return of null with %isEnd() false means the stream buffer
+        ran out. Call %advance() again when more bytes are available.
+        A return of null with %isEnd() true means the end-of-archive
+        marker has been read.
 
-        @param importSize Maximum bytes to read from the stream; 0 is non-blocking.
-
-        @return Pointer to the current %TarEntry once a header has been parsed,
-                or nullptr when the stream is starved and more data is needed.
+        @param importSize Maximum number of additional bytes to pull
+                          from the stream. Zero uses only bytes already
+                          buffered and does not block.
+        @return The current entry, or null when more input is required
+                or the archive has ended.
+        @throw Pt::IOError if a header checksum does not match.
     */
     const TarEntry* advance(std::streamsize importSize = 0);
 
-    /** @brief Returns true when the end-of-archive marker has been read.
+    /** @brief Returns true after the end-of-archive marker has been read.
     */
     bool isEnd() const;
 
@@ -154,4 +165,4 @@ class PT_SYSTEM_API TarReader
 
 } // namespace Pt
 
-#endif // include guard
+#endif // PT_SYSTEM_TAR_READER_H

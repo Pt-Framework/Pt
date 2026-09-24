@@ -30,6 +30,7 @@
 #include <Pt/System/TarReader.h>
 
 #include <Pt/IOError.h>
+#include <Pt/Utf8Codec.h>
 
 #include <algorithm>
 #include <cstring>
@@ -49,32 +50,54 @@ struct PaxOverrides
 {
     std::string path;
     std::string linkPath;
+    std::string ownerName;
+    std::string groupName;
     std::size_t size;
     double      mtime;
+    Pt::uint32_t ownerId;
+    Pt::uint32_t groupId;
     bool        hasPath;
     bool        hasLinkPath;
     bool        hasSize;
     bool        hasMtime;
+    bool        hasOwnerName;
+    bool        hasGroupName;
+    bool        hasOwnerId;
+    bool        hasGroupId;
 
     PaxOverrides()
     : size(0)
     , mtime(0.0)
+    , ownerId(0)
+    , groupId(0)
     , hasPath(false)
     , hasLinkPath(false)
     , hasSize(false)
     , hasMtime(false)
+    , hasOwnerName(false)
+    , hasGroupName(false)
+    , hasOwnerId(false)
+    , hasGroupId(false)
     { }
 
     void clear()
     {
         path.clear();
         linkPath.clear();
-        size        = 0;
-        mtime       = 0.0;
-        hasPath     = false;
-        hasLinkPath = false;
-        hasSize     = false;
-        hasMtime    = false;
+        ownerName.clear();
+        groupName.clear();
+        size         = 0;
+        mtime        = 0.0;
+        ownerId      = 0;
+        groupId      = 0;
+        hasPath      = false;
+        hasLinkPath  = false;
+        hasSize      = false;
+        hasMtime     = false;
+        hasOwnerName = false;
+        hasGroupName = false;
+        hasOwnerId   = false;
+        hasGroupId   = false;
     }
 };
 
@@ -132,6 +155,26 @@ static void parsePaxData(const std::string& data, PaxOverrides& pax)
             pax.mtime    = std::stod(value);
             pax.hasMtime = true;
         }
+        else if(key == "uid")
+        {
+            pax.ownerId    = static_cast<Pt::uint32_t>(std::stoul(value));
+            pax.hasOwnerId = true;
+        }
+        else if(key == "gid")
+        {
+            pax.groupId    = static_cast<Pt::uint32_t>(std::stoul(value));
+            pax.hasGroupId = true;
+        }
+        else if(key == "uname")
+        {
+            pax.ownerName    = value;
+            pax.hasOwnerName = true;
+        }
+        else if(key == "gname")
+        {
+            pax.groupName    = value;
+            pax.hasGroupName = true;
+        }
 
         pos += recLen;
     }
@@ -152,6 +195,7 @@ class TarReaderImpl
     , _nullBlocks(0)
     , _skipRemaining(0)
     , _padding(0)
+    , _contentRemaining(0)
     , _bufData(0)
     , _bufEnd(0)
     { }
@@ -162,6 +206,7 @@ class TarReaderImpl
     , _nullBlocks(0)
     , _skipRemaining(0)
     , _padding(0)
+    , _contentRemaining(0)
     , _bufData(0)
     , _bufEnd(0)
     { }
@@ -179,13 +224,14 @@ class TarReaderImpl
 
     void reset()
     {
-        _source        = 0;
-        _state         = OnBegin;
-        _nullBlocks    = 0;
-        _skipRemaining = 0;
-        _padding       = 0;
-        _bufData       = 0;
-        _bufEnd        = 0;
+        _source           = 0;
+        _state            = OnBegin;
+        _nullBlocks       = 0;
+        _skipRemaining    = 0;
+        _padding          = 0;
+        _contentRemaining = 0;
+        _bufData          = 0;
+        _bufEnd           = 0;
         _paxBuf.clear();
         _pax.clear();
         _entry.clear();
@@ -326,11 +372,11 @@ class TarReaderImpl
                     if(_entry.avail() > 0)
                     {
                         _bufData += _entry.avail();
-                        _entry.setRemaining(_entry.remaining() - _entry.avail());
-                        _entry.setData(0, 0);
+                        _contentRemaining -= _entry.avail();
+                        _entry.setContent(0, 0, _contentRemaining);
                     }
 
-                    if(_entry.remaining() == 0)
+                    if(_contentRemaining == 0)
                     {
                         _state = OnPadding;
                         break;
@@ -430,8 +476,52 @@ class TarReaderImpl
 
     void setData()
     {
-        std::size_t a = std::min( _entry.remaining(), available() );
-        _entry.setData(a > 0 ? _buf + _bufData : 0, a);
+        std::size_t avail = std::min(_contentRemaining, available());
+        const char* data = avail > 0 ? _buf + _bufData : 0;
+        _entry.setContent(data, avail, _contentRemaining);
+    }
+
+    static Pt::uint32_t idFromField(const char* field, std::size_t len, bool& present)
+    {
+        const char* p = field;
+        const char* end = field + len;
+        while(p < end && (*p == ' ' || *p == '\0'))
+            ++p;
+        present = p < end && *p >= '0' && *p <= '7';
+        if( ! present )
+            return TarEntry::NoId;
+        return static_cast<Pt::uint32_t>(tarParseOctal(field, len));
+    }
+
+    static Pt::String nameFromField(const char* field, std::size_t len)
+    {
+        std::size_t n = tarFieldLen(field, len);
+        if(n == 0)
+            return Pt::String();
+        return Pt::Utf8Codec::decode(field, n);
+    }
+
+    void publishMeta(const std::string& path,
+                     TarEntry::Type type,
+                     std::size_t size,
+                     const std::string& linkTarget,
+                     Pt::System::FileInfo::Perms perms,
+                     const Pt::DateTime& mtime,
+                     Pt::uint32_t ownerId,
+                     const Pt::String& ownerName,
+                     Pt::uint32_t groupId,
+                     const Pt::String& groupName)
+    {
+        _entry.setPath(Pt::System::Path(path.c_str()));
+        _entry.setSize(size);
+        _entry.setType(type);
+        _entry.setLinkTarget(Pt::System::Path(linkTarget.c_str()));
+        _entry.setPermissions(perms);
+        _entry.setMtime(mtime);
+        _entry.setOwnerId(ownerId);
+        _entry.setOwnerName(ownerName);
+        _entry.setGroupId(groupId);
+        _entry.setGroupName(groupName);
     }
 
     // Returns true when a TarEntry is ready to be returned, false when
@@ -462,6 +552,22 @@ class TarReaderImpl
         // --- mode ---
         std::size_t mode = tarParseOctal(h->mode, sizeof(h->mode));
 
+        // --- owner and group; Pax overrides the UStar fields ---
+        bool hasUStarUid = false;
+        bool hasUStarGid = false;
+        Pt::uint32_t ownerId = idFromField(h->uid, sizeof(h->uid), hasUStarUid);
+        Pt::uint32_t groupId = idFromField(h->gid, sizeof(h->gid), hasUStarGid);
+        Pt::String ownerName = nameFromField(h->uname, sizeof(h->uname));
+        Pt::String groupName = nameFromField(h->gname, sizeof(h->gname));
+        if(_pax.hasOwnerId)
+            ownerId = _pax.ownerId;
+        if(_pax.hasGroupId)
+            groupId = _pax.groupId;
+        if(_pax.hasOwnerName)
+            ownerName = Pt::Utf8Codec::decode(_pax.ownerName);
+        if(_pax.hasGroupName)
+            groupName = Pt::Utf8Codec::decode(_pax.groupName);
+
         // --- mtime ---
         Pt::DateTime mtime;
         if(_pax.hasMtime)
@@ -486,21 +592,17 @@ class TarReaderImpl
         if(typeflag == '\0')
             typeflag = '0';
 
-        auto perms =
-            static_cast<Pt::System::FileInfo::Perms>(mode & 0777u);
+        auto perms = static_cast<Pt::System::FileInfo::Perms>(
+            mode & static_cast<std::size_t>(Pt::System::FileInfo::PermMask));
 
         switch(typeflag)
         {
             case '0': // regular file
             {
-                _entry.setPath( Pt::System::Path(path.c_str()) );
-                _entry.setSize(size);
-                _entry.setRemaining(size);
-                _entry.setData(0, 0);
-                _entry.setType(TarEntry::File);
-                _entry.setLinkTarget(Pt::System::Path());
-                _entry.setPermissions(perms);
-                _entry.setMtime(mtime);
+                publishMeta(path, TarEntry::File, size, std::string(),
+                            perms, mtime, ownerId, ownerName, groupId, groupName);
+                _contentRemaining = size;
+                _entry.setContent(0, 0, size);
                 _padding = (512u - (size % 512u)) % 512u;
                 _state   = OnData;
                 return true;
@@ -508,14 +610,10 @@ class TarReaderImpl
 
             case '2': // symbolic link
             {
-                _entry.setPath( Pt::System::Path(path.c_str()) );
-                _entry.setSize(0);
-                _entry.setRemaining(0);
-                _entry.setData(0, 0);
-                _entry.setType(TarEntry::Link);
-                _entry.setLinkTarget( Pt::System::Path(linkTarget.c_str()) );
-                _entry.setPermissions(perms);
-                _entry.setMtime(mtime);
+                publishMeta(path, TarEntry::Link, 0, linkTarget,
+                            perms, mtime, ownerId, ownerName, groupId, groupName);
+                _contentRemaining = 0;
+                _entry.setContent(0, 0, 0);
                 _state = OnHeader;
                 return true;
             }
@@ -524,14 +622,10 @@ class TarReaderImpl
             {
                 while( ! path.empty() && path.back() == '/')
                     path.pop_back();
-                _entry.setPath( Pt::System::Path(path.c_str()) );
-                _entry.setSize(0);
-                _entry.setRemaining(0);
-                _entry.setData(0, 0);
-                _entry.setType(TarEntry::Directory);
-                _entry.setLinkTarget(Pt::System::Path());
-                _entry.setPermissions(perms);
-                _entry.setMtime(mtime);
+                publishMeta(path, TarEntry::Directory, 0, std::string(),
+                            perms, mtime, ownerId, ownerName, groupId, groupName);
+                _contentRemaining = 0;
+                _entry.setContent(0, 0, 0);
                 _state = OnHeader;
                 return true;
             }
@@ -555,13 +649,10 @@ class TarReaderImpl
 
             case '1': // hard link
             {
-                _entry.setPath( Pt::System::Path(path.c_str()) );
-                _entry.setSize(0);
-                _entry.setRemaining(0);
-                _entry.setData(0, 0);
-                _entry.setType(TarEntry::Hardlink);
-                _entry.setLinkTarget( Pt::System::Path(linkTarget.c_str()) );
-                _entry.setMtime(mtime);
+                publishMeta(path, TarEntry::Hardlink, 0, linkTarget,
+                            perms, mtime, ownerId, ownerName, groupId, groupName);
+                _contentRemaining = 0;
+                _entry.setContent(0, 0, 0);
                 _state = OnHeader;
                 return true;
             }
@@ -596,6 +687,7 @@ class TarReaderImpl
     int           _nullBlocks;
     std::size_t   _skipRemaining;
     std::size_t   _padding;
+    std::size_t   _contentRemaining;
 
     char          _buf[BufSize];
     std::size_t   _bufData;

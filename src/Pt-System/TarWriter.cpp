@@ -30,11 +30,11 @@
 
 #include <Pt/System/TarWriter.h>
 #include <Pt/IOError.h>
+#include <Pt/Utf8Codec.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <ctime>
 #include <string>
 
 namespace Pt {
@@ -77,15 +77,10 @@ class TarWriterImpl
         _filePadding     = 0;
     }
 
-    void addFile(const Pt::System::Path& path,
-                 const char* data,
-                 std::size_t size,
-                 Pt::System::FileInfo::Perms permissions)
+    void addFile(const TarEntry& entry, const char* data, std::size_t size)
     {
         requireEndFile();
-        std::string p = path.toLocal();
-        writePaxHeaderIfNeeded(p, "");
-        writeUStarHeader(p, "", '0', size, permissions, std::time(0));
+        writeMember(entry, '0', entry.size());
         if(data && size > 0)
         {
             writeRaw(data, size);
@@ -93,49 +88,30 @@ class TarWriterImpl
         }
     }
 
-    void addDirectory(const Pt::System::Path& path,
-                      Pt::System::FileInfo::Perms permissions)
+    void addDirectory(const TarEntry& entry)
     {
         requireEndFile();
-        std::string p = path.toLocal();
-        if( ! p.empty() && p.back() != '/')
-            p += '/';
-        writePaxHeaderIfNeeded(p, "");
-        writeUStarHeader(p, "", '5', 0, permissions, std::time(0));
+        writeMember(entry, '5', 0);
     }
 
-    void addSymlink(const Pt::System::Path& path,
-                    const Pt::System::Path& target)
+    void addSymlink(const TarEntry& entry)
     {
         requireEndFile();
-        std::string p = path.toLocal();
-        std::string t = target.toLocal();
-        writePaxHeaderIfNeeded(p, t);
-        writeUStarHeader(p, t, '2', 0, Pt::System::FileInfo::NoPerms,
-                         std::time(0));
+        writeMember(entry, '2', 0);
     }
 
-    void addHardlink(const Pt::System::Path& path,
-                     const Pt::System::Path& target)
+    void addHardlink(const TarEntry& entry)
     {
         requireEndFile();
-        std::string p = path.toLocal();
-        std::string t = target.toLocal();
-        writePaxHeaderIfNeeded(p, t);
-        writeUStarHeader(p, t, '1', 0, Pt::System::FileInfo::NoPerms,
-                         std::time(0));
+        writeMember(entry, '1', 0);
     }
 
-    void beginFile(const Pt::System::Path& path,
-                   std::size_t totalSize,
-                   Pt::System::FileInfo::Perms permissions)
+    void beginFile(const TarEntry& entry)
     {
         requireEndFile();
-        std::string p = path.toLocal();
-        writePaxHeaderIfNeeded(p, "");
-        writeUStarHeader(p, "", '0', totalSize, permissions, std::time(0));
-        _pendingFileSize = totalSize;
-        _filePadding     = (512u - (totalSize % 512u)) % 512u;
+        writeMember(entry, '0', entry.size());
+        _pendingFileSize = entry.size();
+        _filePadding     = (512u - (entry.size() % 512u)) % 512u;
     }
 
     void writeFile(const char* data, std::size_t size)
@@ -253,59 +229,119 @@ class TarWriterImpl
         return false;
     }
 
-    static bool needsPax(const std::string& path, const std::string& linkname)
+    // UStar numeric fields keep a trailing NUL, so the usable width is
+    // one digit shorter than the on-disk field.
+    static const unsigned long long MaxUStarId   = 07777777ull;
+    static const unsigned long long MaxUStarSize = 077777777777ull;
+
+    struct MemberFields
     {
-        return path.size() > 99u
-            || ( ! linkname.empty() && linkname.size() > 99u)
-            || hasNonAscii(path)
-            || ( ! linkname.empty() && hasNonAscii(linkname));
+        std::string path;
+        std::string linkname;
+        std::string ownerName;
+        std::string groupName;
+        unsigned long long mode;
+        Pt::uint32_t ownerId;
+        Pt::uint32_t groupId;
+        std::size_t size;
+        time_t mtime;
+        bool hasOwnerId;
+        bool hasGroupId;
+    };
+
+    static MemberFields fieldsFrom(const TarEntry& entry, std::size_t size)
+    {
+        MemberFields f;
+        f.path = entry.path().toLocal();
+        f.linkname = entry.linkTarget().toLocal();
+        f.ownerName = Pt::Utf8Codec::encode(entry.ownerName());
+        f.groupName = Pt::Utf8Codec::encode(entry.groupName());
+        f.mode = static_cast<unsigned long long>(entry.permissions())
+               & static_cast<unsigned long long>(Pt::System::FileInfo::PermMask);
+        f.ownerId = entry.ownerId();
+        f.groupId = entry.groupId();
+        f.size = size;
+        f.mtime = tarDatetimeToEpoch(entry.mtime());
+        f.hasOwnerId = entry.ownerId() != TarEntry::NoId;
+        f.hasGroupId = entry.groupId() != TarEntry::NoId;
+        return f;
     }
 
-    void writePaxHeaderIfNeeded(const std::string& path,
-                                const std::string& linkname)
+    static bool nameNeedsPax(const std::string& name)
     {
-        if( ! needsPax(path, linkname) )
-            return;
+        return ! name.empty() && (name.size() > 31u || hasNonAscii(name));
+    }
 
-        // Build pax record content
+    void writeMember(const TarEntry& entry, char typeflag, std::size_t size)
+    {
+        MemberFields fields = fieldsFrom(entry, size);
+        if(typeflag == '5' && ! fields.path.empty() && fields.path.back() != '/')
+            fields.path += '/';
+
+        writePaxHeaderIfNeeded(fields);
+        writeUStarHeader(fields, typeflag);
+    }
+
+    void writePaxHeaderIfNeeded(const MemberFields& fields)
+    {
         std::string content;
-        if(path.size() > 99u || hasNonAscii(path))
-            content += makePaxRecord("path", path);
-        if( ! linkname.empty() && (linkname.size() > 99u || hasNonAscii(linkname)))
-            content += makePaxRecord("linkpath", linkname);
+        if(fields.path.size() > 99u || hasNonAscii(fields.path))
+            content += makePaxRecord("path", fields.path);
+        if( ! fields.linkname.empty()
+            && (fields.linkname.size() > 99u || hasNonAscii(fields.linkname)) )
+            content += makePaxRecord("linkpath", fields.linkname);
+        if(fields.size > MaxUStarSize)
+            content += makePaxRecord("size", std::to_string(fields.size));
+        if(fields.hasOwnerId && fields.ownerId > MaxUStarId)
+            content += makePaxRecord("uid", std::to_string(fields.ownerId));
+        if(fields.hasGroupId && fields.groupId > MaxUStarId)
+            content += makePaxRecord("gid", std::to_string(fields.groupId));
+        if(nameNeedsPax(fields.ownerName))
+            content += makePaxRecord("uname", fields.ownerName);
+        if(nameNeedsPax(fields.groupName))
+            content += makePaxRecord("gname", fields.groupName);
 
         if(content.empty())
             return;
 
-        // Derive a short name for the pax header block itself
+        // The Pax header block itself must fit in a UStar name field.
         std::string paxName = "PaxHeaders/";
-        std::size_t slash   = path.rfind('/');
-        paxName += (slash == std::string::npos) ? path : path.substr(slash + 1);
+        std::size_t slash = fields.path.rfind('/');
+        paxName += (slash == std::string::npos)
+                 ? fields.path
+                 : fields.path.substr(slash + 1);
         if(paxName.size() > 99u)
             paxName.resize(99u);
 
-        writeUStarHeader(paxName, "", 'x', content.size(),
-                         Pt::System::FileInfo::NoPerms, std::time(0));
+        MemberFields paxFields;
+        paxFields.path = paxName;
+        paxFields.mode = 0;
+        paxFields.ownerId = 0;
+        paxFields.groupId = 0;
+        paxFields.size = content.size();
+        paxFields.mtime = fields.mtime;
+        paxFields.hasOwnerId = false;
+        paxFields.hasGroupId = false;
+
+        writeUStarHeader(paxFields, 'x');
         writeRaw(content.c_str(), content.size());
         writePadding((512u - (content.size() % 512u)) % 512u);
     }
 
-    void writeUStarHeader(const std::string& path,
-                          const std::string& linkname,
-                          char typeflag,
-                          std::size_t size,
-                          Pt::System::FileInfo::Perms permissions,
-                          time_t mtime)
+    void writeUStarHeader(const MemberFields& fields, char typeflag)
     {
         char block[512] = {};
         auto* h = reinterpret_cast<UStarHeader*>(block);
 
-        // Split path into UStar prefix + name if needed
+        const std::string& path = fields.path;
+        const std::string& linkname = fields.linkname;
+
+        // Split path into UStar prefix + name if needed. A path that
+        // still does not fit is also stored in the preceding Pax header.
         std::string name   = path;
         std::string prefix;
         if(name.size() > 99u)
         {
-            // Find rightmost '/' within prefix length limit
             for(std::size_t i = std::min(path.size() - 1u, std::size_t(154u));
                 i > 0u; --i)
             {
@@ -321,7 +357,7 @@ class TarWriterImpl
                 }
             }
             if(name.size() > 99u)
-                name.resize(99u); // truncate as last resort
+                name.resize(99u);
         }
 
         // name
@@ -333,16 +369,21 @@ class TarWriterImpl
             std::memcpy(h->prefix, prefix.c_str(),
                         std::min(prefix.size(), sizeof(h->prefix) - 1u));
 
-        // numeric fields
-        unsigned long long permbits =
-            static_cast<unsigned long long>(permissions) & 0777ull;
-        writeOctalField(h->mode,  sizeof(h->mode),  permbits);
-        writeOctalField(h->uid,   sizeof(h->uid),   0ull);
-        writeOctalField(h->gid,   sizeof(h->gid),   0ull);
-        writeOctalField(h->size,  sizeof(h->size),
-                        static_cast<unsigned long long>(size));
-        writeOctalField(h->mtime, sizeof(h->mtime),
-                        static_cast<unsigned long long>(mtime < 0 ? 0 : mtime));
+        writeOctalField(h->mode, sizeof(h->mode), fields.mode);
+        if(fields.hasOwnerId && fields.ownerId <= MaxUStarId)
+            writeOctalField(h->uid, sizeof(h->uid), fields.ownerId);
+        if(fields.hasGroupId && fields.groupId <= MaxUStarId)
+            writeOctalField(h->gid, sizeof(h->gid), fields.groupId);
+
+        unsigned long long ustarSize = fields.size > MaxUStarSize
+                                     ? 0ull
+                                     : static_cast<unsigned long long>(fields.size);
+        writeOctalField(h->size, sizeof(h->size), ustarSize);
+
+        unsigned long long mtime = fields.mtime < 0
+                                 ? 0ull
+                                 : static_cast<unsigned long long>(fields.mtime);
+        writeOctalField(h->mtime, sizeof(h->mtime), mtime);
 
         // typeflag
         h->typeflag = typeflag;
@@ -358,9 +399,17 @@ class TarWriterImpl
         h->version[0] = '0';
         h->version[1] = '0';
 
-        // uname + gname
-        std::memcpy(h->uname, "root", 4);
-        std::memcpy(h->gname, "root", 4);
+        // Names that do not fit are carried by the preceding Pax header.
+        if( ! fields.ownerName.empty() && ! nameNeedsPax(fields.ownerName) )
+        {
+            std::memcpy(h->uname, fields.ownerName.c_str(),
+                        fields.ownerName.size());
+        }
+        if( ! fields.groupName.empty() && ! nameNeedsPax(fields.groupName) )
+        {
+            std::memcpy(h->gname, fields.groupName.c_str(),
+                        fields.groupName.size());
+        }
 
         // checksum (must be computed last)
         unsigned sum = computeChecksum(block);
@@ -410,33 +459,27 @@ void TarWriter::reset()
 }
 
 
-void TarWriter::addFile(const Pt::System::Path& path,
-                        const char* data,
-                        std::size_t size,
-                        Pt::System::FileInfo::Perms permissions)
+void TarWriter::addFile(const TarEntry& entry, const char* data, std::size_t size)
 {
-    _impl->addFile(path, data, size, permissions);
+    _impl->addFile(entry, data, size);
 }
 
 
-void TarWriter::addDirectory(const Pt::System::Path& path,
-                             Pt::System::FileInfo::Perms permissions)
+void TarWriter::addDirectory(const TarEntry& entry)
 {
-    _impl->addDirectory(path, permissions);
+    _impl->addDirectory(entry);
 }
 
 
-void TarWriter::addSymlink(const Pt::System::Path& path,
-                           const Pt::System::Path& target)
+void TarWriter::addSymlink(const TarEntry& entry)
 {
-    _impl->addSymlink(path, target);
+    _impl->addSymlink(entry);
 }
 
 
-void TarWriter::addHardlink(const Pt::System::Path& path,
-                            const Pt::System::Path& target)
+void TarWriter::addHardlink(const TarEntry& entry)
 {
-    _impl->addHardlink(path, target);
+    _impl->addHardlink(entry);
 }
 
 
@@ -446,11 +489,9 @@ void TarWriter::finish()
 }
 
 
-void TarWriter::beginFile(const Pt::System::Path& path,
-                          std::size_t totalSize,
-                          Pt::System::FileInfo::Perms permissions)
+void TarWriter::beginFile(const TarEntry& entry)
 {
-    _impl->beginFile(path, totalSize, permissions);
+    _impl->beginFile(entry);
 }
 
 

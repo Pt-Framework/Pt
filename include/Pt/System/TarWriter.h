@@ -1,36 +1,12 @@
 /* Copyright (C) 2008 Marc Boris Duerner
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  As a special exception, you may use this file as part of a free
-  software library without restriction. Specifically, if other files
-  instantiate templates or use macros or inline functions from this
-  file, or you compile this file and link it with other files to
-  produce an executable, this file does not by itself cause the
-  resulting executable to be covered by the GNU General Public
-  License. This exception does not however invalidate any other
-  reasons why the executable file might be covered by the GNU Library
-  General Public License.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301 USA
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
 */
 
 #ifndef PT_SYSTEM_TAR_WRITER_H
 #define PT_SYSTEM_TAR_WRITER_H
 
-#include <Pt/System/Path.h>
-#include <Pt/System/FileInfo.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/TarEntry.h>
 
 #include <ostream>
 #include <cstddef>
@@ -39,35 +15,69 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Blocking writer for tar archives (Pax/UStar format).
+/** @brief Writes a tar archive to a stream.
 
-    %TarWriter writes entries sequentially into a tar archive.  All
-    operations are synchronous and write directly to the attached
-    std::ostream.
+    A %TarWriter appends archive members to a std::ostream, in order,
+    and blocks on each write. The caller builds a %TarEntry for the
+    metadata and passes that entry to the writer. The writer does not
+    invent an owner, a group, or a modification time. Whatever the
+    entry carries is what the archive stores, and whatever the entry
+    leaves unset stays unset.
 
-    Use addFile(), addDirectory(), addSymlink(), or addHardlink() to write
-    complete entries in a single call.  For large files, use the streaming
-    API: beginFile() writes the header, writeFile() delivers the content in
-    one or more chunks, and endFile() closes the entry.
+    A complete member is one call. %addFile() writes a regular file
+    whose bytes are already in memory. %addDirectory() writes a
+    directory. %addSymlink() and %addHardlink() write a link, and they
+    take the link target, the permissions, the modification time, and
+    the owner and group from the entry, the same fields a file carries.
+    The type flag in the archive comes from the method, so the caller
+    does not have to set %TarEntry::type(). The path, the size, and the
+    link target do have to be set, because those are the member's
+    identity.
 
-    Always call finish() before closing the stream to write the mandatory
-    end-of-archive marker.  Paths are interpreted as UTF-8; Pax extended
-    headers are written automatically for long or non-ASCII paths.
+    A file too large to hold in one buffer is written in three steps.
+    %beginFile() writes the header and declares %TarEntry::size() as
+    the total number of content bytes. %writeFile() delivers those
+    bytes in as many chunks as needed. %endFile() writes the padding
+    that rounds the member up to a 512-byte block, and it fails if the
+    chunks so far do not add up to the declared size. Starting another
+    member, or calling %finish(), while a streamed file is still open
+    fails the same way: the open member has to be closed first.
+
+    %finish() writes the two zero blocks that mark the end of the
+    archive. A reader treats an archive without that marker as
+    truncated, so finish() belongs before the stream is closed.
+
+    Names, ids, sizes, and times that fit in a UStar header are stored
+    there. A path or a link target longer than 99 bytes, a name that is
+    not ASCII, an owner or group name longer than 31 bytes, a numeric
+    id above 07777777, or a size above eleven octal digits is stored in
+    a Pax extended header that precedes the member. The caller does not
+    choose the form. Reading the result back yields the same %TarEntry
+    fields either way.
+
+    The writer throws %Pt::IOError when the stream is missing or a
+    write fails, when %writeFile() is asked for more bytes than the
+    header declared, when %endFile() is called before those bytes have
+    all been written, and when a new member is started while a streamed
+    file is still open.
 
     @code
-    std::ofstream ofs("archive.tar", std::ios::binary);
-    TarWriter writer(ofs);
+    std::ofstream out("archive.tar", std::ios::binary);
+    TarWriter writer(out);
 
-    // complete entries
-    writer.addDirectory(Pt::System::Path("src/"), dirPerms);
-    writer.addFile(Pt::System::Path("src/main.cpp"),
-                   src.data(), src.size(), filePerms);
+    TarEntry dir;
+    dir.setPath(Path("src"));
+    dir.setPermissions(FileInfo::OwnerAll);
+    writer.addDirectory(dir);
 
-    // streaming a large file
-    writer.beginFile(Pt::System::Path("data.bin"), totalSize, filePerms);
-    writer.writeFile(chunk1, size1);
-    writer.writeFile(chunk2, size2);
-    writer.endFile();
+    TarEntry file;
+    file.setPath(Path("src/main.cpp"));
+    file.setSize(source.size());
+    file.setPermissions(FileInfo::OwnerRead);
+    file.setMtime(DateTime(2024, 6, 1, 12, 0, 0));
+    file.setOwnerId(1000);
+    file.setOwnerName(String("marc"));
+    writer.addFile(file, source.data(), source.size());
 
     writer.finish();
     @endcode
@@ -77,11 +87,11 @@ namespace System {
 class PT_SYSTEM_API TarWriter
 {
   public:
-    /** @brief Default constructor.
+    /** @brief Creates a writer with no stream attached.
     */
     TarWriter();
 
-    /** @brief Constructor attaching to @a os.
+    /** @brief Creates a writer that appends to @a os.
     */
     explicit TarWriter(std::ostream& os);
 
@@ -89,91 +99,105 @@ class PT_SYSTEM_API TarWriter
     */
     ~TarWriter();
 
-    /** @brief Attach to an output stream.
+    /** @brief Attaches @a os as the destination.
+
+        A streamed file that is still open on the previous stream stays
+        open. Call %endFile() before detaching if that member should be
+        finished.
     */
     void attach(std::ostream& os);
 
-    /** @brief Detach from the current output stream.
+    /** @brief Detaches the current destination.
     */
     void detach();
 
-    /** @brief Detach from the current output stream and reset state.
+    /** @brief Detaches the destination and clears the writer state.
+
+        An open streamed file is abandoned. Its header may already have
+        been written to the previous stream.
     */
     void reset();
 
-    /** @brief Write a regular file entry.
+    /** @brief Writes a regular file from a memory buffer.
 
-        @param path        Archive path (UTF-8).
-        @param data        File content buffer.
-        @param size        Number of bytes in @a data.
-        @param permissions POSIX permission bits.
+        @a size is the number of content bytes taken from @a data. The
+        header declares %TarEntry::size(). For a member that should
+        round-trip, the two lengths are equal.
+
+        @param entry Metadata of the file. %TarEntry::path() and
+                     %TarEntry::size() are written into the header.
+        @param data  Content bytes. May be null when @a size is 0.
+        @param size  Number of bytes to write from @a data.
     */
-    void addFile(const Pt::System::Path& path,
-                 const char* data,
-                 std::size_t size,
-                 Pt::System::FileInfo::Perms permissions);
+    void addFile(const TarEntry& entry, const char* data, std::size_t size);
 
-    /** @brief Write a directory entry.
+    /** @brief Writes a directory member.
 
-        @param path        Archive path (UTF-8).
-        @param permissions POSIX permission bits.
+        @param entry Metadata of the directory. %TarEntry::path() is the
+                     archive path. A trailing slash is added in the
+                     archive when the path does not already end with one.
     */
-    void addDirectory(const Pt::System::Path& path,
-                      Pt::System::FileInfo::Perms permissions);
+    void addDirectory(const TarEntry& entry);
 
-    /** @brief Write a symbolic-link entry.
+    /** @brief Writes a symbolic link.
 
-        @param path   Archive path (UTF-8).
-        @param target Link target path (UTF-8).
+        @param entry Metadata of the link. %TarEntry::linkTarget() is
+                     the path the link points at. Permissions,
+                     modification time, owner, and group are stored the
+                     same way as for a file.
     */
-    void addSymlink(const Pt::System::Path& path,
-                    const Pt::System::Path& target);
+    void addSymlink(const TarEntry& entry);
 
-    /** @brief Write a hard-link entry.
+    /** @brief Writes a hard link.
 
-        @param path   Archive path of the new link (UTF-8).
-        @param target Archive path of the existing file to link to (UTF-8).
+        @param entry Metadata of the link. %TarEntry::linkTarget() is
+                     the archive path of the existing member. Permissions,
+                     modification time, owner, and group are stored the
+                     same way as for a file.
     */
-    void addHardlink(const Pt::System::Path& path,
-                     const Pt::System::Path& target);
+    void addHardlink(const TarEntry& entry);
 
-    /** @brief Begin writing a regular file entry for streaming.
+    /** @brief Writes the header of a file whose content follows in chunks.
 
-        Writes the archive header for a file of the given total size.
-        Subsequent calls to writeFile() deliver the content bytes;
-        endFile() must be called once all data has been written.
+        %TarEntry::size() is the total number of bytes %writeFile() must
+        deliver before %endFile(). The header is written immediately, so
+        the size cannot be changed afterwards.
 
-        @param path        Archive path (UTF-8).
-        @param totalSize   Total byte count that will be written via writeFile().
-        @param permissions POSIX permission bits.
+        @param entry Metadata of the file, including the total content
+                     length.
+        @throw Pt::IOError if a previous streamed file was not closed
+               with %endFile().
     */
-    void beginFile(const Pt::System::Path& path,
-                   std::size_t totalSize,
-                   Pt::System::FileInfo::Perms permissions);
+    void beginFile(const TarEntry& entry);
 
-    /** @brief Write a chunk of data for the current streaming file entry.
+    /** @brief Writes the next content chunk of the open streamed file.
 
-        May be called multiple times after beginFile() until all totalSize
-        bytes have been written.  The sum of all @a size arguments must equal
-        the @a totalSize passed to beginFile().
+        The sum of every @a size passed between %beginFile() and
+        %endFile() must equal %TarEntry::size().
 
-        @param data   Pointer to data bytes.
-        @param size   Number of bytes to write.
-        @throws Pt::IOError if @a size exceeds the remaining byte count
-                declared in beginFile().
+        @param data Content bytes. May be null when @a size is 0.
+        @param size Number of bytes to write from @a data.
+        @throw Pt::IOError if @a size exceeds the number of bytes still
+               expected for this member.
     */
     void writeFile(const char* data, std::size_t size);
 
-    /** @brief Finish the current streaming file entry started by beginFile().
+    /** @brief Finishes the streamed file opened by beginFile().
 
-        Writes the 512-byte block-alignment padding.
+        Writes the padding that rounds the member up to a 512-byte
+        block.
 
-        @throws Pt::IOError if not all bytes declared in beginFile() have
-                been written via writeFile().
+        @throw Pt::IOError if %writeFile() has not yet delivered every
+               byte declared by %TarEntry::size().
     */
     void endFile();
 
-    /** @brief Write the end-of-archive marker (two 512-byte null blocks).
+    /** @brief Writes the end-of-archive marker.
+
+        The marker is two 512-byte blocks of zeros. Call this before
+        closing the stream.
+
+        @throw Pt::IOError if a streamed file is still open.
     */
     void finish();
 
@@ -186,9 +210,8 @@ class PT_SYSTEM_API TarWriter
     class TarWriterImpl* _impl;
 };
 
-
 } // namespace System
 
 } // namespace Pt
 
-#endif // include guard
+#endif // PT_SYSTEM_TAR_WRITER_H

@@ -34,6 +34,7 @@
 #include <Pt/System/TarEntry.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/Path.h>
+#include <Pt/DateTime.h>
 #include <Pt/IOError.h>
 
 #include <sstream>
@@ -131,6 +132,38 @@ struct TarBuilder
         bytes.insert(bytes.end(), hdr, hdr + 512);
     }
 
+    // Foreign UStar header: identity lives only in the fixed fields.
+    void addOwnedFile(const char* name,
+                      unsigned long mode,
+                      unsigned long uid,
+                      unsigned long gid,
+                      const char* uname,
+                      const char* gname,
+                      unsigned long mtime,
+                      const void* content,
+                      std::size_t size)
+    {
+        char hdr[512] = {};
+        std::strncpy(hdr, name, 99);
+        setOctal(hdr + 100, 8, mode);
+        setOctal(hdr + 108, 8, uid);
+        setOctal(hdr + 116, 8, gid);
+        setOctal(hdr + 124, 12, static_cast<unsigned long>(size));
+        setOctal(hdr + 136, 12, mtime);
+        hdr[156] = '0';
+        std::strncpy(hdr + 265, uname, 31);
+        std::strncpy(hdr + 297, gname, 31);
+        std::memcpy(hdr + 257, "ustar", 5);
+        std::memcpy(hdr + 263, "00", 2);
+        computeChksum(hdr);
+        bytes.insert(bytes.end(), hdr, hdr + 512);
+
+        const char* p = static_cast<const char*>(content);
+        bytes.insert(bytes.end(), p, p + size);
+        std::size_t pad = (512 - (size % 512)) % 512;
+        bytes.insert(bytes.end(), pad, '\0');
+    }
+
     void finalize()
     {
         bytes.insert(bytes.end(), 1024, '\0');
@@ -162,6 +195,7 @@ class TarReaderTest : public Pt::Unit::TestSuite
         registerMethod("MultipleFiles", *this, &TarReaderTest::MultipleFiles);
         registerMethod("LargeFile",     *this, &TarReaderTest::LargeFile);
         registerMethod("HardLink",      *this, &TarReaderTest::HardLink);
+        registerMethod("UStarIdentity", *this, &TarReaderTest::UStarIdentity);
     }
 
   protected:
@@ -279,6 +313,39 @@ class TarReaderTest : public Pt::Unit::TestSuite
         PT_UNIT_ASSERT(reader.isEnd());
     }
 
+    // Identity stored only in the UStar header, with no Pax records.
+    void UStarIdentity()
+    {
+        const std::string content = "owned";
+
+        TarBuilder b;
+        b.addOwnedFile("owned.txt",
+                       0644 | 04000,
+                       1000,
+                       100,
+                       "marc",
+                       "staff",
+                       1717243200,
+                       content.data(),
+                       content.size());
+        b.finalize();
+        auto ss = b.stream();
+
+        Pt::System::TarReader reader(ss);
+        const Pt::System::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT(entry->path().toString() == "owned.txt");
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), static_cast<Pt::uint32_t>(1000));
+        PT_UNIT_ASSERT_EQUAL(entry->groupId(), static_cast<Pt::uint32_t>(100));
+        PT_UNIT_ASSERT(entry->ownerName() == "marc");
+        PT_UNIT_ASSERT(entry->groupName() == "staff");
+        PT_UNIT_ASSERT_EQUAL(
+            static_cast<unsigned>(entry->permissions()),
+            static_cast<unsigned>(0644 | 04000));
+        PT_UNIT_ASSERT(entry->mtime() == Pt::DateTime(2024, 6, 1, 12, 0, 0));
+        PT_UNIT_ASSERT(entry->isEnd());
+    }
+
     // Two files — verify sequential reading does not mix content.
     void MultipleFiles()
     {
@@ -390,6 +457,11 @@ class TarWriterTest : public Pt::Unit::TestSuite
         registerMethod("WriteStreamingOverrun",  *this, &TarWriterTest::WriteStreamingOverrun);
         registerMethod("WriteStreamingUnderrun", *this, &TarWriterTest::WriteStreamingUnderrun);
         registerMethod("MissingEndFile",         *this, &TarWriterTest::MissingEndFile);
+        registerMethod("WriteIdentity",          *this, &TarWriterTest::WriteIdentity);
+        registerMethod("WriteUnsetIdentity",     *this, &TarWriterTest::WriteUnsetIdentity);
+        registerMethod("WriteRootIdentity",      *this, &TarWriterTest::WriteRootIdentity);
+        registerMethod("WritePaxIdentity",       *this, &TarWriterTest::WritePaxIdentity);
+        registerMethod("WriteLinkMetadata",      *this, &TarWriterTest::WriteLinkMetadata);
     }
 
   protected:
@@ -414,9 +486,10 @@ class TarWriterTest : public Pt::Unit::TestSuite
 
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.addFile(Pt::System::Path("hello.txt"),
-                       content.data(), content.size(),
-                       Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("hello.txt"));
+        file.setSize(content.size());
+        writer.addFile(file, content.data(), content.size());
         writer.finish();
 
         std::istringstream iss(oss.str(), std::ios::binary);
@@ -449,8 +522,9 @@ class TarWriterTest : public Pt::Unit::TestSuite
     {
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.addDirectory(Pt::System::Path("subdir"),
-                            Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry dir;
+        dir.setPath(Pt::System::Path("subdir"));
+        writer.addDirectory(dir);
         writer.finish();
 
         std::istringstream iss(oss.str(), std::ios::binary);
@@ -472,8 +546,10 @@ class TarWriterTest : public Pt::Unit::TestSuite
     {
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.addSymlink(Pt::System::Path("link.txt"),
-                          Pt::System::Path("target.txt"));
+        Pt::System::TarEntry link;
+        link.setPath(Pt::System::Path("link.txt"));
+        link.setLinkTarget(Pt::System::Path("target.txt"));
+        writer.addSymlink(link);
         writer.finish();
 
         std::istringstream iss(oss.str(), std::ios::binary);
@@ -496,8 +572,10 @@ class TarWriterTest : public Pt::Unit::TestSuite
     {
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.addHardlink(Pt::System::Path("link.bin"),
-                           Pt::System::Path("original.bin"));
+        Pt::System::TarEntry link;
+        link.setPath(Pt::System::Path("link.bin"));
+        link.setLinkTarget(Pt::System::Path("original.bin"));
+        writer.addHardlink(link);
         writer.finish();
 
         std::istringstream iss(oss.str(), std::ios::binary);
@@ -524,12 +602,15 @@ class TarWriterTest : public Pt::Unit::TestSuite
 
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.addFile(Pt::System::Path("a.txt"),
-                       first.data(), first.size(),
-                       Pt::System::FileInfo::NoPerms);
-        writer.addFile(Pt::System::Path("b.txt"),
-                       second.data(), second.size(),
-                       Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry a;
+        a.setPath(Pt::System::Path("a.txt"));
+        a.setSize(first.size());
+        writer.addFile(a, first.data(), first.size());
+
+        Pt::System::TarEntry b;
+        b.setPath(Pt::System::Path("b.txt"));
+        b.setSize(second.size());
+        writer.addFile(b, second.data(), second.size());
         writer.finish();
 
         std::istringstream iss(oss.str(), std::ios::binary);
@@ -581,9 +662,10 @@ class TarWriterTest : public Pt::Unit::TestSuite
 
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.beginFile(Pt::System::Path("large.bin"),
-                         fileSize,
-                         Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("large.bin"));
+        file.setSize(fileSize);
+        writer.beginFile(file);
 
         const std::size_t chunkSize = 4096;
         for(std::size_t offset = 0; offset < fileSize; offset += chunkSize)
@@ -625,8 +707,10 @@ class TarWriterTest : public Pt::Unit::TestSuite
     {
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.beginFile(Pt::System::Path("f.bin"), 4,
-                         Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("f.bin"));
+        file.setSize(4);
+        writer.beginFile(file);
         const char data[5] = {};
         PT_UNIT_ASSERT_THROW(writer.writeFile(data, 5), Pt::IOError);
     }
@@ -636,8 +720,10 @@ class TarWriterTest : public Pt::Unit::TestSuite
     {
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.beginFile(Pt::System::Path("f.bin"), 10,
-                         Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("f.bin"));
+        file.setSize(10);
+        writer.beginFile(file);
         const char data[5] = {};
         writer.writeFile(data, 5);
         PT_UNIT_ASSERT_THROW(writer.endFile(), Pt::IOError);
@@ -648,14 +734,187 @@ class TarWriterTest : public Pt::Unit::TestSuite
     {
         std::ostringstream oss;
         Pt::System::TarWriter writer(oss);
-        writer.beginFile(Pt::System::Path("f.bin"), 10,
-                         Pt::System::FileInfo::NoPerms);
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("f.bin"));
+        file.setSize(10);
+        writer.beginFile(file);
         const char data[5] = {};
         writer.writeFile(data, 5);
-        PT_UNIT_ASSERT_THROW(
-            writer.addFile(Pt::System::Path("g.bin"), data, 5,
-                           Pt::System::FileInfo::NoPerms),
-            Pt::IOError);
+
+        Pt::System::TarEntry other;
+        other.setPath(Pt::System::Path("g.bin"));
+        other.setSize(5);
+        PT_UNIT_ASSERT_THROW(writer.addFile(other, data, 5), Pt::IOError);
+    }
+
+    // uid, gid, ASCII names, setuid and an explicit mtime stay in UStar.
+    void WriteIdentity()
+    {
+        const std::string content = "owned";
+        const Pt::DateTime when(2024, 6, 1, 12, 0, 0);
+
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("owned.txt"));
+        file.setSize(content.size());
+        file.setPermissions(static_cast<Pt::System::FileInfo::Perms>(0644 | 04000));
+        file.setMtime(when);
+        file.setOwnerId(1000);
+        file.setOwnerName(Pt::String("marc"));
+        file.setGroupId(100);
+        file.setGroupName(Pt::String("staff"));
+
+        std::ostringstream oss;
+        Pt::System::TarWriter writer(oss);
+        writer.addFile(file, content.data(), content.size());
+        writer.finish();
+
+        std::istringstream iss(oss.str(), std::ios::binary);
+        Pt::System::TarReader reader(iss);
+        const Pt::System::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), static_cast<Pt::uint32_t>(1000));
+        PT_UNIT_ASSERT_EQUAL(entry->groupId(), static_cast<Pt::uint32_t>(100));
+        PT_UNIT_ASSERT(entry->ownerName() == "marc");
+        PT_UNIT_ASSERT(entry->groupName() == "staff");
+        PT_UNIT_ASSERT_EQUAL(
+            static_cast<unsigned>(entry->permissions()),
+            static_cast<unsigned>(0644 | 04000));
+        PT_UNIT_ASSERT(entry->mtime() == when);
+    }
+
+    // An entry that never sets an identity stores neither id nor name.
+    void WriteUnsetIdentity()
+    {
+        const std::string content = "plain";
+
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("plain.txt"));
+        file.setSize(content.size());
+
+        std::ostringstream oss;
+        Pt::System::TarWriter writer(oss);
+        writer.addFile(file, content.data(), content.size());
+        writer.finish();
+
+        std::istringstream iss(oss.str(), std::ios::binary);
+        Pt::System::TarReader reader(iss);
+        const Pt::System::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), Pt::System::TarEntry::NoId);
+        PT_UNIT_ASSERT_EQUAL(entry->groupId(), Pt::System::TarEntry::NoId);
+        PT_UNIT_ASSERT(entry->ownerName().empty());
+        PT_UNIT_ASSERT(entry->groupName().empty());
+        PT_UNIT_ASSERT(entry->mtime() == Pt::DateTime(1970, 1, 1));
+    }
+
+    // Numeric id 0 and the name "root" are real values, not sentinels.
+    void WriteRootIdentity()
+    {
+        const std::string content = "root-owned";
+
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("root.txt"));
+        file.setSize(content.size());
+        file.setOwnerId(0);
+        file.setOwnerName(Pt::String("root"));
+        file.setGroupId(0);
+        file.setGroupName(Pt::String("root"));
+
+        std::ostringstream oss;
+        Pt::System::TarWriter writer(oss);
+        writer.addFile(file, content.data(), content.size());
+        writer.finish();
+
+        std::istringstream iss(oss.str(), std::ios::binary);
+        Pt::System::TarReader reader(iss);
+        const Pt::System::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), static_cast<Pt::uint32_t>(0));
+        PT_UNIT_ASSERT_EQUAL(entry->groupId(), static_cast<Pt::uint32_t>(0));
+        PT_UNIT_ASSERT(entry->ownerName() == "root");
+        PT_UNIT_ASSERT(entry->groupName() == "root");
+    }
+
+    // An id past seven octal digits and a long name travel in a Pax header.
+    void WritePaxIdentity()
+    {
+        const std::string content = "pax";
+        const Pt::uint32_t bigId = 010000000u;
+        const Pt::String longName("abcdefghijklmnopqrstuvwxyz012345");
+
+        Pt::System::TarEntry file;
+        file.setPath(Pt::System::Path("pax.txt"));
+        file.setSize(content.size());
+        file.setOwnerId(bigId);
+        file.setOwnerName(longName);
+        file.setGroupId(bigId);
+        Pt::String groupName("m");
+        groupName += Pt::Char(0x00fc);
+        groupName += "ller";
+        file.setGroupName(groupName);
+
+        std::ostringstream oss;
+        Pt::System::TarWriter writer(oss);
+        writer.addFile(file, content.data(), content.size());
+        writer.finish();
+
+        std::istringstream iss(oss.str(), std::ios::binary);
+        Pt::System::TarReader reader(iss);
+        const Pt::System::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), bigId);
+        PT_UNIT_ASSERT_EQUAL(entry->groupId(), bigId);
+        PT_UNIT_ASSERT(entry->ownerName() == longName);
+        PT_UNIT_ASSERT(entry->groupName() == groupName);
+    }
+
+    // Links carry permissions, mtime, owner and group like a file does.
+    void WriteLinkMetadata()
+    {
+        const Pt::DateTime when(2024, 6, 1, 12, 0, 0);
+
+        Pt::System::TarEntry link;
+        link.setPath(Pt::System::Path("link.txt"));
+        link.setLinkTarget(Pt::System::Path("target.txt"));
+        link.setPermissions(Pt::System::FileInfo::OwnerRead);
+        link.setMtime(when);
+        link.setOwnerId(1000);
+        link.setOwnerName(Pt::String("marc"));
+        link.setGroupId(100);
+        link.setGroupName(Pt::String("staff"));
+
+        std::ostringstream oss;
+        Pt::System::TarWriter writer(oss);
+        writer.addSymlink(link);
+
+        Pt::System::TarEntry hard;
+        hard.setPath(Pt::System::Path("hard.bin"));
+        hard.setLinkTarget(Pt::System::Path("original.bin"));
+        hard.setPermissions(Pt::System::FileInfo::OwnerWrite);
+        hard.setMtime(when);
+        hard.setOwnerId(7);
+        writer.addHardlink(hard);
+        writer.finish();
+
+        std::istringstream iss(oss.str(), std::ios::binary);
+        Pt::System::TarReader reader(iss);
+
+        const Pt::System::TarEntry* entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT(entry->type() == Pt::System::TarEntry::Link);
+        PT_UNIT_ASSERT(entry->permissions() == Pt::System::FileInfo::OwnerRead);
+        PT_UNIT_ASSERT(entry->mtime() == when);
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), static_cast<Pt::uint32_t>(1000));
+        PT_UNIT_ASSERT(entry->ownerName() == "marc");
+        PT_UNIT_ASSERT_EQUAL(entry->groupId(), static_cast<Pt::uint32_t>(100));
+
+        entry = reader.advance(4096);
+        PT_UNIT_ASSERT(entry != 0);
+        PT_UNIT_ASSERT(entry->type() == Pt::System::TarEntry::Hardlink);
+        PT_UNIT_ASSERT(entry->permissions() == Pt::System::FileInfo::OwnerWrite);
+        PT_UNIT_ASSERT(entry->mtime() == when);
+        PT_UNIT_ASSERT_EQUAL(entry->ownerId(), static_cast<Pt::uint32_t>(7));
+        PT_UNIT_ASSERT(entry->groupName().empty());
     }
 };
 
