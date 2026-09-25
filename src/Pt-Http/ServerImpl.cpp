@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2011-2012 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -66,7 +66,7 @@ Acceptor::Acceptor(ServerImpl& server, Net::TcpServer& tcpServer)
 Acceptor::~Acceptor()
 {
     releaseResponder();
-    
+
     if(_auth)
     {
         assert(_servlet);
@@ -93,7 +93,7 @@ void Acceptor::releaseResponder()
 
 
 void Acceptor::beginServe(System::EventLoop& loop)
-{  
+{
     PT_LOG_TRACE("Acceptor::beginServe");
 
     _conn->setActive(loop);
@@ -107,11 +107,11 @@ void Acceptor::beginServe(System::EventLoop& loop)
 void Acceptor::onRequestReceived(Request& req)
 {
     PT_LOG_TRACE("Acceptor::onRequestReceived");
-    
+
     try
     {
         _requestProgress = _request.endReceive();
-        
+
         if( _requestProgress.header() )
         {
             PT_LOG_DEBUG("received request header");
@@ -139,7 +139,7 @@ void Acceptor::onRequestReceived(Request& req)
                     _auth->finished() += Pt::slot(*this, &Acceptor::onAuthorization);
                     return;
                 }
-                
+
                 if( ! granted )
                 {
                     PT_LOG_DEBUG("access immediately denied");
@@ -154,7 +154,7 @@ void Acceptor::onRequestReceived(Request& req)
                 PT_LOG_DEBUG("access immediately granted");
             }
         }
-    
+
         onRequest(_requestProgress);
     }
     catch(const HttpError& e)
@@ -182,7 +182,7 @@ void Acceptor::onAuthorization(Authorization& auth)
     {
         bool granted = _servlet->authorizer()->endAuthorization(_auth);
         _auth = 0;
-    
+
         if( ! granted )
         {
             PT_LOG_DEBUG("request not granted");
@@ -204,7 +204,7 @@ void Acceptor::onAuthorization(Authorization& auth)
         replyError();
         _finished.send(*this);
     }
-    catch(const System::IOError& e) 
+    catch(const System::IOError& e)
     {
         PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
@@ -232,7 +232,7 @@ void Acceptor::onRequest(MessageProgress progress)
             _responder->beginRequest( _request, _reply, *_conn->loop() );
             return;
         }
-    
+
         if( progress.body() )
         {
             PT_LOG_DEBUG("received request body");
@@ -288,7 +288,7 @@ void Acceptor::onRequest(MessageProgress progress)
         PT_LOG_DEBUG("continue reading request");
         _request.beginReceive();
     }
-    catch(const System::IOError& e) 
+    catch(const System::IOError& e)
     {
         PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
@@ -364,7 +364,7 @@ void Acceptor::onReplySent(Reply& r)
 
         PT_LOG_DEBUG("continuing reply");
         _reply.discard();
-        
+
         _state = OnWriteReply;
 
         assert(_responder);
@@ -435,7 +435,7 @@ ServerThread::ServerThread()
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onRemoveHandler);
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onRemoveServlet);
     _loop.eventReceived() += Pt::slot(*this, &ServerThread::onIsServletIdle);
-    
+
     _thread.start();
 }
 
@@ -451,7 +451,7 @@ void ServerThread::setSecure(Ssl::Context& ctx)
     _sslctx.assign(ctx);
     _ssl = true;
 }
-        
+
 
 void ServerThread::serve(Acceptor* conn)
 {
@@ -688,7 +688,7 @@ void ServerImpl::removeServlet(Servlet& servlet)
     while( hit != _handlers.end() )
     {
         std::vector<Acceptor*>::iterator handler = hit++;
-        
+
         if( (*handler)->servlet() == &servlet )
         {
             delete *handler;
@@ -729,7 +729,7 @@ bool ServerImpl::isServletIdle(Servlet& servlet)
     // check all connections in this thread
     std::vector<Acceptor*>::iterator it;
     for( it = _handlers.begin(); it != _handlers.end(); ++it)
-    {      
+    {
         if( (*it)->servlet() == &servlet )
         {
             return false;
@@ -772,18 +772,11 @@ Servlet* ServerImpl::getServlet(const Request& request)
 }
 
 
-void ServerImpl::upgrade(Connection* conn, Service* service, const std::string& protocol)
-{
-    UpgradeEvent ev(new IOStream(conn), service, protocol);
-    loop()->commitEvent(ev);
-}
-
-
 void ServerImpl::onAccept(Net::TcpServer& server)
 {
     PT_LOG_TRACE("Server::onAccept");
 
-    // TODO: we should only pass the TcpSocket to the worker thread so that 
+    // TODO: we should only pass the TcpSocket to the worker thread so that
     // an Acceptor can be constructed with an event loop there
 
     Pt::AutoPtr<Acceptor> handler( new Acceptor(*this, server) );
@@ -802,7 +795,7 @@ void ServerImpl::onAccept(Net::TcpServer& server)
     {
         if(_sslctx)
             handler->setSecure(*_sslctx);
-        
+
         System::EventLoop* loop = this->loop();
         if( ! loop)
         {
@@ -820,6 +813,19 @@ void ServerImpl::onAccept(Net::TcpServer& server)
     }
 
     _serverSocket.beginAccept();
+}
+
+
+void ServerImpl::upgrade(Connection* conn, Service* service, const std::string& protocol)
+{
+    UpgradeEvent ev(new IOStream(conn), service, protocol);
+    loop()->commitEvent(ev);
+}
+
+
+void ServerImpl::onUpgrade(const UpgradeEvent& ev)
+{
+    ev.service()->upgradeRequested().send( ev.iostream(), ev.protocol() );
 }
 
 
