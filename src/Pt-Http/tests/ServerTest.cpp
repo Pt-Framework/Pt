@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006 - 2009 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -43,11 +43,10 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Logger.h"
 #include <string>
-#include <fstream>
 
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/CertificateStore.h>
-#include "../../Pt-Ssl/tests/PemData.h"
+#include "../../Pt-Ssl/tests/Pkcs12Data.h"
 
 class EchoQueryResponder : public Pt::Http::Responder
 {
@@ -55,30 +54,30 @@ class EchoQueryResponder : public Pt::Http::Responder
         EchoQueryResponder(Pt::Http::Service& s)
         : Pt::Http::Responder(s)
         {}
-        
-        void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+
+        void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
                             Pt::System::EventLoop& loop)
-        { 
-            setReady(false); 
+        {
+            setReady(false);
         }
-        
-        void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+
+        void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
                              Pt::System::EventLoop& loop)
-        { 
-            setReady(false); 
+        {
+            setReady(false);
         }
 
         void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
                             Pt::System::EventLoop& loop)
-        { 
-          return onWriteReply(request, reply, loop); 
+        {
+          return onWriteReply(request, reply, loop);
         }
 
         void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
                             Pt::System::EventLoop& loop)
         {
             reply.body() << request.qparams();
-            setReady(true); 
+            setReady(true);
         }
 };
 
@@ -162,7 +161,7 @@ class HelloResponder : public Pt::Http::Responder
         , _counter(c)
         {
         }
-        
+
         virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
                                     Pt::System::EventLoop& loop)
         {
@@ -172,7 +171,7 @@ class HelloResponder : public Pt::Http::Responder
 
           return onReadRequest(request, reply, loop);
         }
-        
+
         virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
                                    Pt::System::EventLoop& loop)
         {
@@ -195,8 +194,8 @@ class HelloResponder : public Pt::Http::Responder
 
         virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
                                   Pt::System::EventLoop& loop)
-        { 
-          return onWriteReply(request, reply, loop); 
+        {
+          return onWriteReply(request, reply, loop);
         }
 
         virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
@@ -213,7 +212,7 @@ class HelloResponder : public Pt::Http::Responder
         {
           _timer.stop();
           _reply->body() << "Hello World #" << _counter.count();
-          
+
           setReady(true);
         }
 
@@ -236,7 +235,7 @@ class HelloService : public Pt::Http::Service
         {
             return new HelloResponder(*this, _counter);
         }
-        
+
         virtual void onReleaseResponder(Pt::Http::Responder* r)
         {
             delete r;
@@ -254,24 +253,24 @@ class ChunkedResponder : public Pt::Http::Responder
         : Pt::Http::Responder(s)
         , _chunks(5)
         {}
-      
-        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
                                     Pt::System::EventLoop& loop)
-        { 
+        {
             _chunks = 5;
             setReady(false);
         }
-        
-        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, 
+
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply,
                                    Pt::System::EventLoop& loop)
-        { 
-            setReady(false); 
+        {
+            setReady(false);
         }
 
         virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
                                   Pt::System::EventLoop& loop)
         {
-            return onWriteReply(request, reply, loop); 
+            return onWriteReply(request, reply, loop);
         }
 
         virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply,
@@ -312,7 +311,7 @@ class ServerTest : public Pt::Unit::TestSuite
             registerMethod( "PipelinedRequests", *this,  &ServerTest::PipelinedRequests);
             registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
             registerMethod( "QueryString", *this, &ServerTest::QueryString);
-            
+
             //registerMethod("Upgrade", *this, &ServerTest::Upgrade);
         }
 
@@ -343,7 +342,7 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8001);
             HelloService service;
-            
+
             Pt::Http::Server server(*_loop, ep);
             server.setMaxRequestSize(5);
 
@@ -429,7 +428,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             }
-            
+
             if(progress.body())
             {
                 while ( client.reply().body().rdbuf()->in_avail() )
@@ -453,7 +452,7 @@ class ServerTest : public Pt::Unit::TestSuite
         void NotFound()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8001);
-            
+
             Pt::Http::Server server(*_loop, ep);
 
             Pt::Http::Client client(*_loop);
@@ -495,18 +494,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
             Pt::Ssl::Context serverCtx;
             setupSslServerContext(serverCtx);
-            
+
             // NOTE: enable this to cause a server side handshake failure
             //serverCtx.setProtocol(Pt::Ssl::TLSv1);
-            
-            // start HTTP server          
+
+            // start HTTP server
             Pt::Http::Server server(*_loop);
             server.setSecure(serverCtx);
             server.listen(ep);
 
             Pt::Ssl::Context clientContext;
             setupSslClientContext(clientContext);
-            
+
             // start HTTP client
             Pt::Http::Client client(*_loop);
             client.setHost(ep);
@@ -523,21 +522,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
         static void setupSslClientContext(Pt::Ssl::Context& ctx)
         {
-            #ifdef _WIN32
-                std::ifstream ifs("src\\Pt-Ssl\\tests\\cert\\client-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream ifs("src/Pt-Ssl/tests/cert/client-with-password.p12", std::ios::binary);
-            #endif
-
-            #ifdef _WIN32
-                std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
-            #endif
-
             Pt::Ssl::CertificateStore store;
-            store.loadPkcs12(ifs, "123");
-            store.loadPkcs12(ifs_ca, "123");
+            store.loadPkcs12(reinterpret_cast<const char*>(clientPkcs12), sizeof(clientPkcs12), "123");
+            store.loadPkcs12(reinterpret_cast<const char*>(caPkcs12), sizeof(caPkcs12), "123");
 
             ctx.setVerifyMode(Pt::Ssl::TryVerify);
 
@@ -552,21 +539,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
         static void setupSslServerContext(Pt::Ssl::Context& ctx)
         {
-            #ifdef _WIN32
-                std::ifstream ifs_ca("src\\Pt-Ssl\\tests\\cert\\ca-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream ifs_ca("src/Pt-Ssl/tests/cert/ca-with-password.p12", std::ios::binary);
-            #endif
-
-            #ifdef _WIN32
-                std::ifstream server_ifs("src\\Pt-Ssl\\tests\\cert\\server-with-password.p12", std::ios::binary);
-            #else
-                std::ifstream server_ifs("src/Pt-Ssl/tests/cert/server-with-password.p12", std::ios::binary);
-            #endif
-
             Pt::Ssl::CertificateStore store;
-            store.loadPkcs12(server_ifs, "123");
-            store.loadPkcs12(ifs_ca, "123");
+            store.loadPkcs12(reinterpret_cast<const char*>(serverPkcs12), sizeof(serverPkcs12), "123");
+            store.loadPkcs12(reinterpret_cast<const char*>(caPkcs12), sizeof(caPkcs12), "123");
 
             ctx.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
@@ -617,9 +592,9 @@ class ServerTest : public Pt::Unit::TestSuite
 
                     _reply += client.reply().statusText();
                     _reply += ' ';
-                }               
+                }
             }
-            
+
             if( progress.body() )
                 while ( client.reply().body().rdbuf()->in_avail() )
                     _reply += client.reply().body().get();
@@ -669,7 +644,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             }
-            
+
             if( progress.body() )
                 while ( client.reply().body().rdbuf()->in_avail() )
                     _reply += client.reply().body().get();
@@ -686,7 +661,7 @@ class ServerTest : public Pt::Unit::TestSuite
         void QueryString()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8001);
-            
+
             EchoQueryService service;
 
             Pt::Http::Server server(*_loop, ep);
@@ -738,7 +713,7 @@ class ServerTest : public Pt::Unit::TestSuite
             _ioStream = stream;
             _ioStream->inputReady() += Pt::slot(*this, &ServerTest::onUpgradeInput);
             _ioStream->beginInput();
-            
+
         }
 
         void onQueryStringReceived(Pt::Http::Client& client)
@@ -749,7 +724,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             }
-            
+
             if( progress.body() )
                 while ( client.reply().body().rdbuf()->in_avail() )
                     _reply += client.reply().body().get();
@@ -778,7 +753,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
             client.request().setUrl("/test");
-            
+
             client.request().body() << _chunks.front();
             _chunks.erase( _chunks.begin() );
             client.beginSend(false);
@@ -827,7 +802,7 @@ class ServerTest : public Pt::Unit::TestSuite
                 _loop->exit();
                 return;
             }
-            
+
             client.beginReceive();
         }
 
