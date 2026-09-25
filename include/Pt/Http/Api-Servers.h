@@ -34,6 +34,13 @@
     an earlier callback, in which case remaining callbacks are skipped
     and the rest of the request is ignored.
 
+    A finished reply with status 101 upgrades the connection. The
+    server delivers the accepted %IOStream to the service on the
+    server thread through %Service::onAcceptUpgrade() and
+    %Service::upgradeRequested(). The value of the request's Upgrade
+    header names the protocol. WebSocket is one protocol that uses
+    this path.
+
     All server I/O is asynchronous, so the server needs an %EventLoop,
     passed to a constructor or to %setActive(). %listen() binds the
     local endpoint, and a second listen replaces the previous binding.

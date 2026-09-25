@@ -58,10 +58,12 @@ class IOStream;
     %Service when the responder type depends on the request headers, or
     when responders are pooled.
 
-    %upgradeRequested() is emitted when a request asks to upgrade the
-    connection. The signal provides the accepted %IOStream and the
-    value of the Upgrade header. That stream is the upgraded
-    connection, not the HTTP message body.
+    A responder upgrades the connection by finishing the reply with
+    status 101. The server then calls %onAcceptUpgrade() on the server
+    thread and emits %upgradeRequested() with the accepted %IOStream
+    and the value of the Upgrade header. That stream is the upgraded
+    connection, not the HTTP message body. WebSocket is one protocol
+    that uses this path.
 
     The example is the usual factory: a %BasicService for a responder
     type. The equivalent hand-written service implements
@@ -94,10 +96,10 @@ class PT_HTTP_API Service : private NonCopyable
         */
         void releaseResponder(Responder*);
 
-        /** @brief Returns the signal emitted when a request upgrades to this service.
+        /** @brief Returns the signal emitted when an upgrade is accepted.
 
-            The signal provides the accepted stream and the value of the request's
-            %Upgrade header.
+            The signal provides the accepted stream and the value of the
+            request's %Upgrade header. A connected slot owns the stream.
         */
         Signal<IOStream*, const std::string&>& upgradeRequested();
 
@@ -110,12 +112,17 @@ class PT_HTTP_API Service : private NonCopyable
         */
         virtual void onReleaseResponder(Responder*) = 0;
 
-        /** @brief Returns whether the service accepts an upgraded connection.
+        /** @brief Accepts an upgraded connection.
 
-            @a stream is deleted when this function returns false. The caller of a
-            connected %upgradeRequested signal slot owns @a stream when this
-            function returns true.
+            Called on the server thread after a 101 reply has been sent.
+            Returns true when the upgrade is accepted. The default returns
+            true when a slot is connected to %upgradeRequested(), emits
+            that signal with @a stream and the value of the request's
+            Upgrade header, and the connected slot owns @a stream. Returns
+            false to decline. The server then deletes @a stream and closes
+            the connection.
         */
+        virtual bool onAcceptUpgrade(IOStream& stream, const std::string& protocol);
 
     private:
         // service specific options need to be set in Service ctor so it can

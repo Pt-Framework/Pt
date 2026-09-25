@@ -37,7 +37,6 @@
 #include <Pt/System/Logger.h>
 
 #include <limits>
-#include <memory>
 #include <cassert>
 
 PT_LOG_DEFINE("Pt.Http.Server")
@@ -316,7 +315,9 @@ void Acceptor::onReplySent(Reply& r)
         {
             PT_LOG_DEBUG("reply finished");
 
-            if (r.statusCode() == 101)
+            // 101 Switching Protocols hands the connection to the server
+            // thread. WebSocket is one protocol that uses this status.
+            if( r.statusCode() == 101 )
             {
                 PT_LOG_DEBUG("upgrade connection");
 
@@ -324,7 +325,8 @@ void Acceptor::onReplySent(Reply& r)
                 const char* upgradeHeader = _request.header().get("Upgrade");
                 const std::string protocol = upgradeHeader ? upgradeHeader : "";
                 Connection* conn = this->release();
-                _server.upgrade(conn, service, protocol);
+                conn->detach();
+                _server.beginUpgrade(conn, service, protocol);
             }
 
             releaseResponder();
@@ -637,6 +639,16 @@ void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Net::TcpServerOptio
 
 void ServerImpl::cancel()
 {
+    {
+        System::MutexLock lock(_upgradeMutex);
+
+        while( ! _pendingUpgrades.empty() )
+        {
+            delete _pendingUpgrades.front().connection;
+            _pendingUpgrades.pop_front();
+        }
+    }
+
     _serverSocket.cancel();
 
     std::vector<ServerThread*>::iterator threadIt;
@@ -816,16 +828,55 @@ void ServerImpl::onAccept(Net::TcpServer& server)
 }
 
 
-void ServerImpl::upgrade(Connection* conn, Service* service, const std::string& protocol)
+void ServerImpl::beginUpgrade(Connection* conn, Service* service,
+                              const std::string& protocol)
 {
-    UpgradeEvent ev(new IOStream(conn), service, protocol);
-    loop()->commitEvent(ev);
+    System::EventLoop* eventLoop = this->loop();
+    if( ! eventLoop )
+    {
+        delete conn;
+        return;
+    }
+
+    System::MutexLock lock(_upgradeMutex);
+    _pendingUpgrades.push_back( Upgrade(conn, service, protocol) );
+    lock.unlock();
+
+    // Notify main server loop thread
+    UpgradeEvent ev;
+    eventLoop->commitEvent(ev);
 }
 
 
-void ServerImpl::onUpgrade(const UpgradeEvent& ev)
+void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
 {
-    ev.service()->upgradeRequested().send( ev.iostream(), ev.protocol() );
+    while( true )
+    {
+        System::MutexLock lock(_upgradeMutex);
+
+        if( _pendingUpgrades.empty() )
+            return;
+
+        Upgrade upgrade = _pendingUpgrades.front();
+        _pendingUpgrades.pop_front();
+        lock.unlock();
+
+        System::EventLoop* eventLoop = this->loop();
+        if( ! eventLoop )
+        {
+            delete upgrade.connection;
+            continue;
+        }
+
+        upgrade.connection->setActive(*eventLoop);
+
+        IOStream* stream = new IOStream(upgrade.connection);
+
+        // A declined upgrade deletes the stream, which also closes the
+        // connection. An accepted upgrade is owned by the service slot.
+        if( ! upgrade.service->onAcceptUpgrade(*stream, upgrade.protocol) )
+            delete stream;
+    }
 }
 
 

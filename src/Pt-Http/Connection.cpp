@@ -112,14 +112,14 @@ Connection::Connection()
 
 Connection::~Connection()
 {
-  cancel();
+  close();
 }
 
 
 void Connection::accept(Net::TcpServer& tcpServer)
 {
     PT_LOG_TRACE("Connection::accept");
-    cancel();
+    close();
 
     _socket.accept(tcpServer);
 
@@ -134,7 +134,7 @@ void Connection::setHost(const Net::Endpoint& addrinfo)
 {
     if(_state != NotConnected)
     {
-        cancel();
+        close();
     }
 
     _addrInfo = addrinfo;
@@ -145,7 +145,7 @@ void Connection::setHost(const Net::Endpoint& addrinfo, const Net::TcpSocketOpti
 {
     if(_state != NotConnected)
     {
-        cancel();
+        close();
     }
 
     _addrInfo = addrinfo;
@@ -167,7 +167,7 @@ void Connection::setSecure(Ssl::Context& ctx)
         }
         else if(_state != NotConnected)
         {
-            cancel();
+            close();
         }
 
         _ssl = true;
@@ -191,33 +191,22 @@ void Connection::setPeerName(const std::string& peer)
 //}
 
 
+void Connection::close()
+{
+    PT_LOG_DEBUG("closing connection");
+
+    cancel();
+
+    _socket.close();
+    _state = NotConnected;
+    _keepAlive = false;
+}
+
+
 void Connection::onCancel()
 {
     PT_LOG_DEBUG("cancelling connection");
     _timer.stop();
-    _readSize = 0;
-    _readBytes = 0;
-    _socket.close();
-    _sockbuf.discard();
-    _sockios.clear();
-    _reply = 0;
-    _request = 0;
-    _state = NotConnected;
-    _outputPipelined = false;
-    _inputPipelined = false;
-    _chunked = false;
-    _keepAlive = false;
-    _onTimeout = false;
-    _isFailed = false;
-    _parser.reset(false);
-    _replyParser.reset(true);
-    _httpbuf.reset();
-    _os.clear();
-}
-
-void Connection::reset()
-{
-    PT_LOG_DEBUG("reset connection");
     _readSize = 0;
     _readBytes = 0;
     _socket.cancel();
@@ -378,7 +367,7 @@ void Connection::receiveReply(Reply& reply)
     if( ! keepalive )
     {
         PT_LOG_DEBUG("closing, no keep alive");
-        cancel();
+        close();
 
         // TODO: do SSL shutdown here
     }
@@ -717,7 +706,7 @@ MessageProgress Connection::endSendReply()
     if( ! _keepAlive && ! isUpgrade )
     {
         PT_LOG_DEBUG("no keep alive, closing connection");
-        cancel();
+        close();
 
         //TODO: start SSL shutdown here
     }
@@ -1055,7 +1044,7 @@ MessageProgress Connection::endReceiveReply()
             if( ! keepalive )
             {
                 PT_LOG_DEBUG("closing, no keep alive");
-                cancel();
+                close();
 
                 //TODO: start SSL shutdown here
             }
@@ -1309,8 +1298,10 @@ void Connection::onAttach(System::EventLoop& loop)
 }
 
 
-void Connection::onDetach(System::EventLoop& loop)
+void Connection::onDetach(System::EventLoop& /*loop*/)
 {
+    _socket.detach();
+    _timer.detach();
 }
 
 

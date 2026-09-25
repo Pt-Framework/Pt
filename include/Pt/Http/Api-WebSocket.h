@@ -33,8 +33,10 @@
     device.
 
     %IOStream is the upgraded connection, not the HTTP message body.
-    %Service::upgradeRequested() reports that stream and the Upgrade
-    header value to a service that handles upgrades itself.
+    A 101 reply is the generic HTTP upgrade. %WebSocketService is the
+    WebSocket case: %Service::onAcceptUpgrade() runs on the server
+    thread, and %Service::upgradeRequested() reports that stream and
+    the Upgrade header value.
 
     Ping and pong are control frames. %sendPingFrame() writes a ping,
     and after a ping is received %sendPongFrame() writes the matching

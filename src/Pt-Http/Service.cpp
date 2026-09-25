@@ -67,6 +67,16 @@ Signal<IOStream*, const std::string&>& Service::upgradeRequested()
     return _upgradeRequested;
 }
 
+
+bool Service::onAcceptUpgrade(IOStream& stream, const std::string& protocol)
+{
+    if( _upgradeRequested.connectionCount() == 0 )
+        return false;
+
+    _upgradeRequested.send(&stream, protocol);
+    return true;
+}
+
 }
 
 }

@@ -47,6 +47,7 @@
 #include <Pt/Signal.h>
 
 #include <vector>
+#include <deque>
 #include <string>
 #include <cstddef>
 #include <cassert>
@@ -236,34 +237,26 @@ class ServerThread : public Connectable
 class ServerImpl : public Connectable
                  , private NonCopyable
 {
+    // Notifies the server thread that upgrades are pending. The event
+    // carries no connection, because the event loop clones every event
+    // and a copied connection would leak.
     class UpgradeEvent : public Pt::BasicEvent<UpgradeEvent>
     {
-        public:
-            UpgradeEvent(IOStream* iostream, Service* service, const std::string& protocol)
-                : _iostream(iostream)
-                , _service(service)
-                , _protocol(protocol)
-            { }
+    };
 
-            IOStream* iostream() const
-            {
-                return _iostream;
-            }
+    // One accepted upgrade, owned by ServerImpl until the server thread
+    // delivers it to the service.
+    struct Upgrade
+    {
+        Connection* connection;
+        Service* service;
+        std::string protocol;
 
-            Service* service() const
-            {
-                return _service;
-            }
-
-            const std::string& protocol() const
-            {
-                return _protocol;
-            }
-
-        private:
-            IOStream* _iostream;
-            Service* _service;
-            std::string _protocol;
+        Upgrade(Connection* conn, Service* svc, const std::string& proto)
+        : connection(conn)
+        , service(svc)
+        , protocol(proto)
+        { }
     };
 
     typedef ServerThread::RemoveHandlerEvent RemoveHandlerEvent;
@@ -331,7 +324,9 @@ class ServerImpl : public Connectable
 
         Servlet* getServlet(const Request& request);
 
-        void upgrade(Connection* conn, Service* service, const std::string& protocol);
+        // Queues an upgrade from a worker thread. The server thread
+        // performs the upgrade when it receives UpgradeEvent.
+        void beginUpgrade(Connection* conn, Service* service, const std::string& protocol);
 
     private:
         void onAccept(Net::TcpServer& server);
@@ -375,6 +370,9 @@ class ServerImpl : public Connectable
         System::ReadWriteMutex _serviceMutex;
         typedef std::vector<ServletListEntry> ServletList;
         ServletList _servlets;
+
+        System::Mutex _upgradeMutex;
+        std::deque<Upgrade> _pendingUpgrades;
 };
 
 } // namespace Http

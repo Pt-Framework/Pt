@@ -285,7 +285,7 @@ MessageProgress ClientImpl::endReceive()
 
 void ClientImpl::close()
 {
-    _conn.cancel();
+    _conn.close();
     _hstate = Idle;
     _requestCount = 0;
 }
