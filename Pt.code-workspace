@@ -179,6 +179,7 @@
         "grok.showThinking": true,
         "grok.useCtrlEnterToSend": true,
         "grok.expandCommandOutputs": true,
-        "grok.includeActiveFileByDefault": false
+        "grok.includeActiveFileByDefault": false,
+        "grok.chatFontScale": 105
     }
 }
