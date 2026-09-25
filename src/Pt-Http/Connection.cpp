@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2011 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -118,7 +118,7 @@ Connection::~Connection()
 
 void Connection::accept(Net::TcpServer& tcpServer)
 {
-    PT_LOG_TRACE("Connection::accept");    
+    PT_LOG_TRACE("Connection::accept");
     cancel();
 
     _socket.accept(tcpServer);
@@ -280,14 +280,14 @@ void Connection::sendRequest(Request& request)
             }
         }
     }
-    
-    std::ostream& os = _os; 
+
+    std::ostream& os = _os;
     MessageBuffer& mbuf = request.buffer();
 
     if( request.isFinished() )
     {
         PT_LOG_DEBUG("HTTP request finished");
-        
+
         if(_chunked)
         {
             PT_LOG_DEBUG("sending last HTTP chunk: "  << mbuf.size() << " bytes");
@@ -297,7 +297,7 @@ void Connection::sendRequest(Request& request)
                 os.write( mbuf.data(), mbuf.size() );
                 os.write("\r\n", 2);
             }
-            
+
             os.write("0\r\n\r\n", 5);
             _chunked = false;
         }
@@ -341,12 +341,12 @@ void Connection::sendRequest(Request& request)
 void Connection::receiveReply(Reply& reply)
 {
     PT_LOG_DEBUG("Connection::receiveReply");
-    
+
     char ch = ' ';
     std::istream is( _httpbuf.buffer() );
 
     _replyParseEvent.init( reply );
-        
+
     while( ! _replyParser.end() && is.get(ch) )
     {
         _replyParser.parse(ch);
@@ -373,7 +373,7 @@ void Connection::receiveReply(Reply& reply)
     }
 
     _replyParser.reset(true);
-            
+
     bool keepalive = reply.header().isKeepAlive();
     if( ! keepalive )
     {
@@ -424,7 +424,7 @@ void Connection::beginSendRequest(Request& request)
             _state = SslHandshakeRead;
             return;
         }
-        
+
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
 
@@ -432,7 +432,7 @@ void Connection::beginSendRequest(Request& request)
         _timer.stop();
         _state = Connected;
     }
-    
+
     if( _state == SslHandshakeRead)
     {
         if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
@@ -450,10 +450,10 @@ void Connection::beginSendRequest(Request& request)
               _state = SslHandshakeWrite;
             return;
         }
-        
+
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
-            
+
         PT_LOG_DEBUG("Handshake finished");
         _timer.stop();
         _state = Connected;
@@ -465,7 +465,7 @@ void Connection::beginSendRequest(Request& request)
     if( request.isFinished() )
     {
         PT_LOG_DEBUG("HTTP request finished");
-        
+
         if(_chunked)
         {
             PT_LOG_DEBUG("sending last HTTP chunk: "  << mbuf.size() << " bytes");
@@ -475,14 +475,14 @@ void Connection::beginSendRequest(Request& request)
                 os.write( mbuf.data(), mbuf.size() );
                 os.write("\r\n", 2);
             }
-            
+
             os.write("0\r\n\r\n", 5);
             _chunked = false;
         }
         else
         {
             writeRequestHeader(os, request);
-            
+
             PT_LOG_DEBUG("writing body: " << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
                 os.write( mbuf.data(), mbuf.size() );
@@ -573,7 +573,7 @@ MessageProgress Connection::endSendRequest()
             throw System::IOError("connection lost");
         }
     }
- 
+
     // indicates that the request or chunk was completely written
     PT_LOG_DEBUG("request data sent");
     progress.setFinished();
@@ -620,7 +620,7 @@ void Connection::beginSendReply(Reply& reply)
             _chunked = false;
         }
         else
-        {          
+        {
             writeReplyHeader(os, reply);
 
             PT_LOG_DEBUG("writing body: " << mbuf.size() << " bytes");
@@ -656,7 +656,7 @@ void Connection::beginSendReply(Reply& reply)
         os << std::hex << mbuf.size() << std::dec << "\r\n";
         os.write( mbuf.data(), mbuf.size() );
         os.write("\r\n", 2);
-        
+
         mbuf.discard();
     }
 
@@ -671,13 +671,13 @@ MessageProgress Connection::endSendReply()
     PT_LOG_TRACE("Connection::endSendReply");
 
     MessageProgress progress;
-    
+
     if(_onTimeout)
         throw System::IOError("timeout");
 
     if(_isFailed)
         throw System::IOError("I/O Error");
-        
+
     if( ! _reply->isFinished() || ! _keepAlive )
     {
         endWrite();
@@ -766,7 +766,7 @@ void Connection::beginReceiveRequest(Request& request)
         _timer.stop();
         _state = Accepted;
     }
-    
+
     if( _state == SslAcceptRead)
     {
         if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
@@ -784,10 +784,10 @@ void Connection::beginReceiveRequest(Request& request)
               _state = SslAcceptWrite;
             return;
         }
-        
+
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
-        
+
         PT_LOG_DEBUG("Handshake finished");
         _timer.stop();
         _state = Accepted;
@@ -795,10 +795,10 @@ void Connection::beginReceiveRequest(Request& request)
 
     // send remaining pipelined replies, if no further requests
     // are in the pipeline.
-    
+
     // TODO: obsolete?
 
-    // TODO: send remaining pipelined reply data before processing 
+    // TODO: send remaining pipelined reply data before processing
     //       further requests
 
     // HEAD: if( outputAvailable() && ! inputAvailable() )
@@ -814,7 +814,7 @@ void Connection::beginReceiveRequest(Request& request)
     _parseEvent.init( request );
 
     // NOTE: the http header parser is also not at begin if data from the
-    // last request has not been read. 
+    // last request has not been read.
 
     if( _parser.begin() )
     {
@@ -832,7 +832,7 @@ void Connection::beginReceiveRequest(Request& request)
             _timer.start( _timeout );
         }
     }
-    
+
     beginRead();
 }
 
@@ -847,7 +847,7 @@ MessageProgress Connection::endReceiveRequest()
 
     if(_isFailed)
         throw System::IOError("I/O Error");
-   
+
     if(_state == SslAcceptWrite)
     {
         PT_LOG_DEBUG("wrote SSL handshake");
@@ -862,7 +862,7 @@ MessageProgress Connection::endReceiveRequest()
 
         if( _socket.isEof() )
             throw System::IOError("connection lost");
-        
+
         return progress;
     }
 
@@ -886,7 +886,7 @@ MessageProgress Connection::endReceiveRequest()
     }
 
     if( ! _parser.end() )
-    {       
+    {
         // switch from keepalive timeout to receive timeout
         if( _parser.begin() && _keepAlive )
             _timer.start(_timeout);
@@ -899,7 +899,7 @@ MessageProgress Connection::endReceiveRequest()
 
             // TODO define exception class
             // TODO: handle any previously pipelined reply
-            throw HttpError("invalid HTTP message"); 
+            throw HttpError("invalid HTTP message");
         }
 
         if( ! _parser.end() )
@@ -921,10 +921,10 @@ MessageProgress Connection::endReceiveRequest()
 
         if(avail < 0)
             throw System::IOError("connection lost");
-        
+
         _httpbuf.import();
         PT_LOG_DEBUG("bytes available: " << _httpbuf.in_avail());
-               
+
         if(_httpbuf.in_avail() > 0)
             progress.setBody();
 
@@ -1032,7 +1032,7 @@ MessageProgress Connection::endReceiveReply()
 
         if(avail < 0)
             throw System::IOError("connection lost");
-        
+
         _httpbuf.import();
         PT_LOG_DEBUG("bytes available: " << _httpbuf.in_avail());
 
@@ -1043,9 +1043,9 @@ MessageProgress Connection::endReceiveReply()
         {
             PT_LOG_DEBUG("reply body finished");
             progress.setFinished();
-            
+
             bool keepalive = _reply->header().isKeepAlive();
-            
+
             _reply = 0;
             _replyParser.reset(true);
             _timer.stop();
@@ -1085,7 +1085,7 @@ void Connection::onOutput()
             _request->onInput();
         else
             _request->onOutput();
-        
+
         return;
     }
 
@@ -1109,7 +1109,7 @@ void Connection::onInput()
             _request->onInput();
         else
             _request->onOutput();
-        
+
         return;
     }
 
@@ -1206,7 +1206,7 @@ bool Connection::inputAvailable()
     if(_ssl)
     {
         //_sslbuf.import();
-        if( _sslbuf.in_avail() > 0 ) 
+        if( _sslbuf.in_avail() > 0 )
             return true;
     }
 
@@ -1227,10 +1227,10 @@ void Connection::beginWrite()
         }
 
         PT_LOG_DEBUG("begin writing socket buffer: " << _sockbuf.out_avail());
-        
+
         _sockbuf.beginWrite();
         _timer.start(_timeout);
-    } 
+    }
     catch(System::IOError&)
     {
         PT_LOG_DEBUG("deferred I/O error");
@@ -1259,38 +1259,38 @@ bool Connection::outputAvailable()
 
 
 void Connection::setInputReady()
-{ 
+{
     _inputPipelined = true;
 
     System::EventLoop* loop = this->loop();
     if( ! loop )
         throw std::logic_error("socket not active");
-            
-    loop->setReady(*this); 
+
+    loop->setReady(*this);
 }
 
 
 void Connection::setOutputReady()
-{ 
+{
     _outputPipelined = true;
-            
+
     System::EventLoop* loop = this->loop();
     if( ! loop )
         throw std::logic_error("socket not active");
-            
-    loop->setReady(*this);  
+
+    loop->setReady(*this);
 }
 
-   
+
 bool Connection::onRun()
-{ 
+{
     if(_outputPipelined)
     {
         _outputPipelined = false;
         this->onOutput();
         return true;
     }
-            
+
     if(_inputPipelined)
     {
         _inputPipelined = false;
@@ -1298,7 +1298,7 @@ bool Connection::onRun()
         return true;
     }
 
-    return false; 
+    return false;
 }
 
 
@@ -1310,7 +1310,7 @@ void Connection::onAttach(System::EventLoop& loop)
 
 
 void Connection::onDetach(System::EventLoop& loop)
-{ 
+{
 }
 
 
@@ -1385,7 +1385,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     os.write("HTTP/", 5);
     formatInt(oit, header.versionMajor());
     os << '.';
-    formatInt(oit, header.versionMinor()); 
+    formatInt(oit, header.versionMinor());
     os << ' ';
     formatInt(oit, reply.statusCode());
     os << ' ';
@@ -1410,7 +1410,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     else
     {
         os.write("Content-Length: ", 16);
-        formatInt( oit, _reply->buffer().size() ); 
+        formatInt( oit, _reply->buffer().size() );
         os.write("\r\n", 2);
     }
 
@@ -1422,7 +1422,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     if( ! header.has("Date") )
     {
         char buffer[50];
-        os.write("Date: ", 6); 
+        os.write("Date: ", 6);
         os << MessageHeader::htdateCurrent(buffer);
         os.write("\r\n", 2);
     }

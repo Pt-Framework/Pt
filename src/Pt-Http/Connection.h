@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2012 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
@@ -65,25 +65,25 @@ class Request;
 //        {}
 //
 //        void setInputReady()
-//        { 
+//        {
 //            _input = true;
 //
 //            System::EventLoop* loop = this->loop();
 //            if( ! loop )
 //                throw std::logic_error("socket not active");
-//            
-//            loop->setReady(*this); 
+//
+//            loop->setReady(*this);
 //        }
 //
 //        void setOutputReady()
-//        { 
+//        {
 //            _output = true;
-//            
+//
 //            System::EventLoop* loop = this->loop();
 //            if( ! loop )
 //                throw std::logic_error("socket not active");
-//            
-//            loop->setReady(*this);  
+//
+//            loop->setReady(*this);
 //        }
 //
 //        Signal<>& outputPipelined()
@@ -99,16 +99,16 @@ class Request;
 //            _input = false;
 //            Net::TcpSocket::onCancel();
 //        }
-//        
+//
 //        virtual bool onRun()
-//        { 
+//        {
 //            if(_output)
 //            {
 //                _output = false;
 //                _outputPipelined.send();
 //                return true;
 //            }
-//            
+//
 //            if(_input)
 //            {
 //                _input = false;
@@ -116,7 +116,7 @@ class Request;
 //                return true;
 //            }
 //
-//            return Net::TcpSocket::onRun(); 
+//            return Net::TcpSocket::onRun();
 //        }
 //
 //    private:
@@ -140,8 +140,8 @@ class Connection : public Connectable
             { }
 
             void init(Request& request)
-            { 
-                _request = &request; 
+            {
+                _request = &request;
                 HeaderParser::MessageHeaderEvent::init(request.header());
             }
 
@@ -161,8 +161,8 @@ class Connection : public Connectable
                 { }
 
             void init(Reply& reply)
-            { 
-                _reply = &reply; 
+            {
+                _reply = &reply;
                 HeaderParser::MessageHeaderEvent::init(reply.header());
             }
 
@@ -198,7 +198,7 @@ class Connection : public Connectable
         { return _socket.loop(); }
 
         void setTimeout(std::size_t timeout)
-        { 
+        {
             _socket.setTimeout(timeout);
             _timeout = timeout;
         }
@@ -317,7 +317,7 @@ class Connection : public Connectable
         void setInputReady();
 
         void setOutputReady();
-        
+
         virtual bool onRun();
 
         virtual void onCancel();
@@ -349,7 +349,7 @@ class Connection : public Connectable
         Net::TcpSocketOptions _tcpOptions;
 
         bool _ssl; // TODO: remove, same as _ctx != 0
-        Ssl::Context* _ctx; 
+        Ssl::Context* _ctx;
         Ssl::StreamBuffer _sslbuf;
 
         HttpBuffer _httpbuf;
