@@ -318,7 +318,7 @@ void Acceptor::onReplySent(Reply& r)
 
             if (r.statusCode() == 101)
             {
-                PT_LOG_DEBUG("upgrade");
+                PT_LOG_DEBUG("upgrade connection");
 
                 Service* service = _servlet->service();
                 const char* upgradeHeader = _request.header().get("Upgrade");

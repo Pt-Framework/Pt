@@ -128,10 +128,12 @@ void WebSocketResponder::onBeginReply(const Pt::Http::Request& request, Pt::Http
 
 void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
 {
-    const std::string up  = toLower(request.header().get("Connection"));
-    const std::string upw = toLower(request.header().get("Upgrade"));
+    const char* connection = request.header().get("Connection");
+    const char* upgrade = request.header().get("Upgrade");
+    const std::string connectionValue = connection ? toLower(connection) : std::string();
+    const std::string upgradeValue = upgrade ? toLower(upgrade) : std::string();
 
-    if (up == "upgrade" && upw == "websocket")
+    if (connectionValue.find("upgrade") != std::string::npos && upgradeValue == "websocket")
     {
         std::string key = request.header().get("Sec-WebSocket-Key");
         reply.setStatus(101, "Switching Protocols");

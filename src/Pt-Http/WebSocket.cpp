@@ -160,20 +160,14 @@ void WebSocket::parseUrl(const std::string& url, const std::string& origin)
     else
         ss << "Host: " << _host << ":" << _port << "\r\n";
 
-    if (_keepAlive)
-        ss << "Connection: Upgrade, Keep-Alive\r\n";
-    else
-        ss << "Connection: Upgrade\r\n";
-
-    ss << "Pragma: no-cache\r\n";
-    ss << "Cache-Control: no-cache\r\n";
-    ss << "Upgrade: WebSocketClient\r\n";
+    ss << "Connection: Upgrade\r\n";
+    ss << "Upgrade: websocket\r\n";
 
     if (!origin.empty())
         ss << "Origin: " << origin << "\r\n";
 
-    ss << "Sec-WebSocketClient-Version: 13\r\n";
-    ss << "Sec-WebSocketClient-Key: " << createKey() << "\r\n";
+    ss << "Sec-WebSocket-Version: 13\r\n";
+    ss << "Sec-WebSocket-Key: " << createKey() << "\r\n";
 
     ss << "\r\n";
 
