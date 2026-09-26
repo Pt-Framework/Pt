@@ -2100,7 +2100,7 @@
     <ClInclude Include="..\..\include\Pt\Http\HttpError.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Http\IOStream.h">
+    <ClInclude Include="..\..\include\Pt\Http\Stream.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\Message.h">
@@ -2995,9 +2995,6 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Http\WebSocket.h">
-      <Filter>Pt-Http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Http\WebSocketStream.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Sha1.h">
@@ -5092,7 +5089,7 @@
     <ClCompile Include="..\Pt-Http\HttpError.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
-    <ClCompile Include="..\Pt-Http\IOStream.cpp">
+    <ClCompile Include="..\Pt-Http\Stream.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\Message.cpp">
@@ -5759,9 +5756,6 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\WebSocket.cpp">
-      <Filter>Pt-Http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Http\WebSocketStream.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="Sha1.cpp">

@@ -220,13 +220,11 @@ void MessageHeader::setKeepAlive()
 
 bool MessageHeader::isUpgrade() const
 {
-    const char* ch = get("Connection");
+    if( ! isSet("Connection", "upgrade") )
+        return false;
 
-    if (ch == 0)
-        return versionMajor() == 1
-        && versionMinor() >= 1;
-    else
-        return compareIgnoreCase(ch, "upgrade") == 0;
+    const char* upgrade = get("Upgrade");
+    return upgrade && upgrade[0] != '\0';
 }
 
 

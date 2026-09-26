@@ -212,7 +212,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Client.h" />
     <ClInclude Include="..\..\include\Pt\Http\Credentials.h" />
     <ClInclude Include="..\..\include\Pt\Http\HttpError.h" />
-    <ClInclude Include="..\..\include\Pt\Http\IOStream.h" />
+    <ClInclude Include="..\..\include\Pt\Http\Stream.h" />
     <ClInclude Include="..\..\include\Pt\Http\Message.h" />
     <ClInclude Include="..\..\include\Pt\Http\Reply.h" />
     <ClInclude Include="..\..\include\Pt\Http\Request.h" />
@@ -237,7 +237,6 @@
     <ClInclude Include="..\..\include\Pt\JsonRpc\ServiceDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Sha1.h" />
     <ClInclude Include="..\Pt-Http\Sha1.h" />
-    <ClInclude Include="..\Pt-Http\WebSocketStream.h" />
     <ClInclude Include="..\Pt-JsonRpc\HttpResponder.h" />
     <ClInclude Include="..\..\include\Pt\Json\Api.h" />
     <ClInclude Include="..\..\include\Pt\Json\Boolean.h" />
@@ -1571,7 +1570,7 @@
     <ClCompile Include="..\Pt-Http\Connection.cpp" />
     <ClCompile Include="..\Pt-Http\HttpBuffer.cpp" />
     <ClCompile Include="..\Pt-Http\HttpError.cpp" />
-    <ClCompile Include="..\Pt-Http\IOStream.cpp" />
+    <ClCompile Include="..\Pt-Http\Stream.cpp" />
     <ClCompile Include="..\Pt-Http\Message.cpp" />
     <ClCompile Include="..\Pt-Http\Parser.cpp" />
     <ClCompile Include="..\Pt-Http\Reply.cpp" />
@@ -1589,7 +1588,6 @@
     <ClCompile Include="..\Pt-Http\WebSocket.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketResponder.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketService.cpp" />
-    <ClCompile Include="..\Pt-Http\WebSocketStream.cpp" />
     <ClCompile Include="..\Pt-JsonRpc\Client.cpp" />
     <ClCompile Include="..\Pt-JsonRpc\Fault.cpp" />
     <ClCompile Include="..\Pt-JsonRpc\Formatter.cpp" />

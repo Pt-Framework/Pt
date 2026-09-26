@@ -32,7 +32,6 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/Http/Reply.h>
-#include <Pt/Http/IOStream.h>
 
 namespace Pt {
 namespace Http {

@@ -280,7 +280,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         void setKeepAlive();
         
-        /** @brief Returns true if the Upgrade header is set.
+        /** @brief Returns true if Connection and Upgrade request a protocol switch.
         */
         bool isUpgrade() const;
 

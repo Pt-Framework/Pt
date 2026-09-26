@@ -31,6 +31,7 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Responder.h>
+#include <Pt/Http/Stream.h>
 #include <Pt/Types.h>
 #include <Pt/Allocator.h>
 #include <Pt/NonCopyable.h>
@@ -42,7 +43,6 @@ namespace Pt {
 namespace Http {
 
 class Request;
-class IOStream;
 
 /** @brief Factory for request responders.
 
@@ -59,11 +59,15 @@ class IOStream;
     when responders are pooled.
 
     A responder upgrades the connection by finishing the reply with
-    status 101. The server then calls %onAcceptUpgrade() on the server
-    thread and emits %upgradeRequested() with the accepted %IOStream
-    and the value of the Upgrade header. That stream is the upgraded
-    connection, not the HTTP message body. WebSocket is one protocol
-    that uses this path.
+    status 101. The server keeps the TCP connection and emits
+    %upgradeRequested() on the server thread with a %Stream. The
+    responder has already been released. The slot calls
+    %Stream::retain() to keep the stream. A service with no
+    connected slot, or a slot that does not retain, declines the
+    upgrade and the server closes the connection. %Stream::protocol()
+    is the value of the request's Upgrade header. The stream buffer
+    is %Stream::buffer(). %beginInput() and %beginOutput() transfer
+    that buffer.
 
     The example is the usual factory: a %BasicService for a responder
     type. The equivalent hand-written service implements
@@ -96,12 +100,13 @@ class PT_HTTP_API Service : private NonCopyable
         */
         void releaseResponder(Responder*);
 
-        /** @brief Returns the signal emitted when an upgrade is accepted.
+        /** @brief Returns the signal emitted when a connection is upgraded.
 
-            The signal provides the accepted stream and the value of the
-            request's %Upgrade header. A connected slot owns the stream.
+            Emitted on the server thread after a 101 reply. The slot
+            calls %Stream::retain() to keep @a stream. The server
+            closes a stream that was not retained.
         */
-        Signal<IOStream*, const std::string&>& upgradeRequested();
+        Signal<Stream&>& upgradeRequested();
 
     protected:
         /** @brief Creates a responder to handle request received by a server.
@@ -112,25 +117,13 @@ class PT_HTTP_API Service : private NonCopyable
         */
         virtual void onReleaseResponder(Responder*) = 0;
 
-        /** @brief Accepts an upgraded connection.
-
-            Called on the server thread after a 101 reply has been sent.
-            Returns true when the upgrade is accepted. The default returns
-            true when a slot is connected to %upgradeRequested(), emits
-            that signal with @a stream and the value of the request's
-            Upgrade header, and the connected slot owns @a stream. Returns
-            false to decline. The server then deletes @a stream and closes
-            the connection.
-        */
-        virtual bool onAcceptUpgrade(IOStream& stream, const std::string& protocol);
-
     private:
         // service specific options need to be set in Service ctor so it can
         // be used concurrently by server threads without locking
         Pt::varint_t _r0;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
-        Signal<IOStream*, const std::string&> _upgradeRequested;
+        Signal<Stream&> _upgradeRequested;
 };
 
 /** @brief Basic HTTP service implementation.

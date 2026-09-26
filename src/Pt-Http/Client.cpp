@@ -242,6 +242,16 @@ void Client::onRequestSent(Request& r)
 }
 
 
+Stream Client::upgrade()
+{
+    const char* protocol = _impl->reply().header().get("Upgrade");
+    if( ! protocol )
+        protocol = "";
+
+    return _impl->upgrade(protocol);
+}
+
+
 void Client::onReplyReceived(Reply& r)
 {
     PT_LOG_TRACE("onReplyReceived: " << _impl->state());

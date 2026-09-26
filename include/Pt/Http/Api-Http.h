@@ -48,10 +48,11 @@
     is an I/O error. A local address that is already occupied still
     throws %AddressInUse from the listen that uses it.
 
-    An HTTP connection can be upgraded. %WebSocket is the framed
-    %IODevice that follows a WebSocket handshake, which the client
-    opens and the server accepts through a %WebSocketService and an
-    %IOStream taken from the upgraded connection.
+    An HTTP connection can be upgraded. The server keeps the
+    connection and reports a %Stream through
+    %Service::upgradeRequested(). A client obtains the same stream
+    from a finished 101 reply with %Client::upgrade(). %WebSocket
+    formats frames into that stream.
 
     The rest of this chapter is the message model, then the client,
     then the server, then the WebSocket upgrade.

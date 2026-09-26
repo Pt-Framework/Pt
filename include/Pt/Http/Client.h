@@ -30,6 +30,7 @@
 #define Pt_Http_Client_h
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/Stream.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <string>
@@ -182,6 +183,11 @@ namespace Http {
     certificate. Send and receive are otherwise unchanged. Certificate
     and handshake details live in the SSL module.
 
+    A finished reply with status 101 switches the connection to a
+    %Stream. Call %upgrade() after %endReceive() reports the reply
+    finished. The client no longer sends requests on that connection.
+    Retain the stream to keep it.
+
     @ingroup Pt-Http-Clients
 */
 class PT_HTTP_API Client : public Connectable
@@ -296,6 +302,14 @@ class PT_HTTP_API Client : public Connectable
         /** @brief Blocks until reply is received.
         */
         std::istream& receive();
+
+        /** @brief Returns the stream of a finished 101 reply.
+
+            Call after %endReceive() reports the reply finished and
+            the status is 101. Retain the stream to keep the
+            connection. The client no longer sends requests on it.
+        */
+        Stream upgrade();
 
     protected:
         //! @internal

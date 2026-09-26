@@ -649,6 +649,14 @@ void ServerImpl::cancel()
         }
     }
 
+    while( ! _connections.empty() )
+    {
+        Connection* conn = _connections.back();
+        _connections.pop_back();
+        conn->invalidateStream();
+        delete conn;
+    }
+
     _serverSocket.cancel();
 
     std::vector<ServerThread*>::iterator threadIt;
@@ -870,13 +878,44 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
 
         upgrade.connection->setActive(*eventLoop);
 
-        IOStream* stream = new IOStream(upgrade.connection);
+        if( upgrade.service->upgradeRequested().connectionCount() == 0 )
+        {
+            delete upgrade.connection;
+            continue;
+        }
 
-        // A declined upgrade deletes the stream, which also closes the
-        // connection. An accepted upgrade is owned by the service slot.
-        if( ! upgrade.service->onAcceptUpgrade(*stream, upgrade.protocol) )
-            delete stream;
+        Stream stream( upgrade.connection->openStream(this, upgrade.protocol) );
+        upgrade.service->upgradeRequested().send(stream);
+
+        // The slot retains the stream to keep the connection. A
+        // declined upgrade leaves the flag clear and the server
+        // deletes the connection.
+        if( ! stream.isRetained() )
+        {
+            upgrade.connection->invalidateStream();
+            delete upgrade.connection;
+            continue;
+        }
+
+        _connections.push_back(upgrade.connection);
     }
+}
+
+
+void ServerImpl::onStreamClosed(Connection* conn)
+{
+    std::vector<Connection*>::iterator it;
+    for(it = _connections.begin(); it != _connections.end(); ++it)
+    {
+        if(*it == conn)
+        {
+            _connections.erase(it);
+            break;
+        }
+    }
+
+    conn->invalidateStream();
+    delete conn;
 }
 
 

@@ -36,7 +36,7 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Service.h>
-#include <Pt/Http/IOStream.h>
+#include <Pt/Http/Stream.h>
 #include <Pt/Ssl/Context.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
@@ -328,6 +328,9 @@ class ServerImpl : public Connectable
         // performs the upgrade when it receives UpgradeEvent.
         void beginUpgrade(Connection* conn, Service* service, const std::string& protocol);
 
+        // Removes and deletes a connection closed by its session.
+        void onStreamClosed(Connection* conn);
+
     private:
         void onAccept(Net::TcpServer& server);
 
@@ -373,6 +376,7 @@ class ServerImpl : public Connectable
 
         System::Mutex _upgradeMutex;
         std::deque<Upgrade> _pendingUpgrades;
+        std::vector<Connection*> _connections;
 };
 
 } // namespace Http

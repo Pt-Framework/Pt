@@ -35,11 +35,13 @@
     and the rest of the request is ignored.
 
     A finished reply with status 101 upgrades the connection. The
-    server delivers the accepted %IOStream to the service on the
-    server thread through %Service::onAcceptUpgrade() and
-    %Service::upgradeRequested(). The value of the request's Upgrade
-    header names the protocol. WebSocket is one protocol that uses
-    this path.
+    server keeps the connection and emits
+    %Service::upgradeRequested() on the server thread with a
+    %Stream. The slot calls %Stream::retain() to keep that stream.
+    A slot that does not retain declines the upgrade, and the server
+    closes the connection. %Stream::protocol() is the value of the
+    request's Upgrade header. %Stream::buffer() is the byte buffer
+    of that channel.
 
     All server I/O is asynchronous, so the server needs an %EventLoop,
     passed to a constructor or to %setActive(). %listen() binds the

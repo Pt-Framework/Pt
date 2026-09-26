@@ -114,26 +114,6 @@ class WebSocketResponder : public Pt::Http::Responder
             reply.beginSend(true);
         }
 
-        virtual void onUpgrade(const Pt::Http::Request& request, Pt::Http::IOStream* stream)
-        {
-            //TODO send event to WebSocketService
-            // return true to destroy responder
-        }
-};
-
-class WebSocketService : public  Pt::Http::BasicService<WebSocketService>
-{
-    public:
-        WebSocketService()
-        {}
-
-        void onUpgrade(Pt::Http::IOStream* stream)
-        {
-            auto s = new WebSocket(stream);
-
-            _signal.send(s);
-        }
-};
 */
 
 class Counter
@@ -312,7 +292,7 @@ class ServerTest : public Pt::Unit::TestSuite
             registerMethod( "MaxRequestSize", *this, &ServerTest::MaxRequestSize);
             registerMethod( "QueryString", *this, &ServerTest::QueryString);
 
-            //registerMethod("Upgrade", *this, &ServerTest::Upgrade);
+
         }
 
         void setUp()
@@ -679,41 +659,6 @@ class ServerTest : public Pt::Unit::TestSuite
             _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "a=4&b=Hello");
-        }
-
-        void Upgrade()
-        {
-            /*
-            Pt::Net::Endpoint ep("127.0.0.1", 80);
-
-            WebSocketService service;
-
-            Pt::Http::Server server(*_loop, ep);
-
-            Pt::Http::MapUrl mapurl("/WebSocket", service);
-            server.addServlet(mapurl);
-
-            server.upgradeRequested() += Pt::slot(*this, &ServerTest::onUpgrade);
-
-            _loop->run();
-            */
-        }
-
-        Pt::Http::IOStream* _ioStream;
-
-        void onUpgradeInput()
-        {
-            size_t s = _ioStream->endInput();
-            char buffer[1024];
-            _ioStream->read(buffer, s);
-
-        }
-        void onUpgrade(Pt::Http::IOStream* stream)
-        {
-            _ioStream = stream;
-            _ioStream->inputReady() += Pt::slot(*this, &ServerTest::onUpgradeInput);
-            _ioStream->beginInput();
-
         }
 
         void onQueryStringReceived(Pt::Http::Client& client)

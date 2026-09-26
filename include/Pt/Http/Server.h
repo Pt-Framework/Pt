@@ -30,7 +30,6 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/IOStream.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
 #include <cstddef>

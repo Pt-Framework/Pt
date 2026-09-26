@@ -35,6 +35,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Http/Stream.h>
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOBuffer.h>
@@ -55,6 +56,7 @@ namespace Http {
 
 class Reply;
 class Request;
+class ServerImpl;
 
 //class Socket : public Net::TcpSocket
 //{
@@ -235,13 +237,20 @@ class Connection : public Connectable
         std::streambuf& buffer()
         { return _httpbuf; }
 
-        std::streambuf* releaseBuffer()
-        {
-            _sockbuf.outputReady() -= slot(*this, &Connection::onHttpOutput);
-            _sockbuf.inputReady() -= slot(*this, &Connection::onHttpInput);
+        // Opens one stream. The server deletes this connection unless
+        // the stream is retained. invalidateStream() clears the shared
+        // connection pointer before that delete.
+        Stream openStream(ServerImpl* server, const std::string& protocol);
 
-            return _os.rdbuf();
-        }
+        // Opens a stream on a client connection after a finished 101
+        // reply. The caller retains the stream to keep the connection.
+        Stream openStream(const std::string& protocol);
+
+        void invalidateStream();
+
+        std::streambuf* streamBuffer();
+
+        void setStreamTimeout(std::size_t ms);
 
         Pt::Signal<Pt::System::IOBuffer&>& inputReady()
         {
@@ -253,39 +262,18 @@ class Connection : public Connectable
             return _sockbuf.outputReady();
         }
 
-        void beginInput()
-        {
-            if (_ssl)
-                _sslbuf.import();
+        void beginInput();
 
-            _sockbuf.beginRead();
-        }
+        std::size_t endInput();
 
-        size_t endInput()
-        {
-            std::size_t readSize = _sockbuf.endRead();
+        void beginOutput();
 
-            if (_ssl)
-            {
-                _sslbuf.import();
-                return _sslbuf.in_avail();
-            }
+        std::size_t endOutput();
 
-            return readSize;
-        }
-
-        void beginOutput()
-        {
-            if (_ssl)
-                _sslbuf.pubsync();
-
-            _sockbuf.beginWrite();
-        }
-
-        size_t endOutput()
-        {
-             return _sockbuf.endWrite();
-        }
+        // Closes the socket and notifies the server that owns this
+        // connection. The server deletes it. A multiplexed connection
+        // closes when its last stream ends.
+        void closeStream();
 
         void close();
 
@@ -386,6 +374,9 @@ class Connection : public Connectable
         bool _keepAlive;
         bool _onTimeout;
         bool _isFailed;
+
+        ServerImpl* _server;
+        StreamState* _streamState;
 };
 
 } // namespace Http

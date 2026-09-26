@@ -32,7 +32,6 @@
 #include <Pt/Http/WebSocketResponder.h>
 #include <Pt/Http/WebSocket.h>
 #include <Pt/Http/Service.h>
-#include <Pt/Http/IOStream.h>
 
 namespace Pt {
 

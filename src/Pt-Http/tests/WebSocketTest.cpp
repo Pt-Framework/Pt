@@ -9,10 +9,13 @@
 #include "Pt/Http/Servlet.h"
 #include "Pt/Http/WebSocket.h"
 #include "Pt/Http/WebSocketService.h"
+#include "Pt/Http/Client.h"
+#include "Pt/Http/Request.h"
 #include "Pt/Net/Endpoint.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Timer.h"
-#include <sstream>
+#include <memory>
+#include <streambuf>
 #include <string>
 
 class WebSocketTest : public Pt::Unit::TestSuite
@@ -23,17 +26,20 @@ class WebSocketTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("Pt::Http::WebSocketTest")
         , _loop(0)
         , _received(false)
-        , _frame(Pt::Http::WebSocket::Unknow)
+        , _declined(false)
+        , _frame(Pt::Http::WebSocket::Unknown)
         {
             registerMethod("Text", *this, &WebSocketTest::Text);
+            registerMethod("Decline", *this, &WebSocketTest::Decline);
         }
 
         void setUp()
         {
             _loop = new Pt::System::MainLoop();
             _received = false;
+            _declined = false;
             _message.clear();
-            _frame = Pt::Http::WebSocket::Unknow;
+            _frame = Pt::Http::WebSocket::Unknown;
 
             _exitTimer.setActive(*_loop);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
@@ -58,12 +64,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl mapUrl("/ws", service);
             server.addServlet(mapUrl);
 
-            std::ostringstream url;
-            url << "ws://127.0.0.1:8011/ws";
-
-            _client.setActive(*_loop);
-            _client.connected() += Pt::slot(*this, &WebSocketTest::onConnected);
-            _client.beginConnect(url.str());
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnected);
+            socket.beginConnect("/ws");
 
             _loop->run();
 
@@ -72,25 +76,77 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocket::Text);
         }
 
-        void onUpgrade(Pt::Http::IOStream* stream, const std::string& /*protocol*/)
+        void Decline()
         {
-            _serverSocket.accept(stream);
-            _serverSocket.inputReady() += Pt::slot(*this, &WebSocketTest::onInput);
-            _serverSocket.beginRead(_buffer, sizeof(_buffer));
+            Pt::Net::Endpoint ep("127.0.0.1", 8012);
+
+            Pt::Http::Server server(*_loop, ep);
+            Pt::Http::WebSocketService service;
+            service.upgradeRequested() += Pt::slot(*this, &WebSocketTest::onDecline);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client client(*_loop);
+            client.setHost(ep);
+            client.request().setUrl("/ws");
+            client.request().header().set("Connection", "Upgrade");
+            client.request().header().set("Upgrade", "websocket");
+            client.request().header().set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==");
+            client.request().header().set("Sec-WebSocket-Version", "13");
+            client.replyReceived() += Pt::slot(*this, &WebSocketTest::onDeclinedReply);
+            client.beginReceive();
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_declined);
+        }
+
+        void onDecline(Pt::Http::Stream& /*stream*/)
+        {
+        }
+
+        void onDeclinedReply(Pt::Http::Client& client)
+        {
+            try
+            {
+                Pt::Http::MessageProgress progress = client.endReceive();
+                if( ! progress.finished() )
+                {
+                    client.beginReceive();
+                    return;
+                }
+            }
+            catch(const std::exception&)
+            {
+            }
+
+            _declined = true;
+            _loop->exit();
+        }
+
+        void onUpgrade(Pt::Http::Stream& stream)
+        {
+            _server.reset(new Pt::Http::WebSocket(stream));
+            _server->inputReady() += Pt::slot(*this, &WebSocketTest::onInput);
+            _server->beginReceive();
         }
 
         void onConnected(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.setSendFrame(Pt::Http::WebSocket::Text);
-            socket.beginWrite("hello", 5);
+            socket.buffer().sputn("hello", 5);
+            socket.beginSend(Pt::Http::WebSocket::Text);
         }
 
-        void onInput(Pt::System::IODevice& /*device*/)
+        void onInput(Pt::Http::WebSocket& socket)
         {
-            std::size_t n = _serverSocket.endRead();
-            _message.assign(_buffer, n);
-            _frame = _serverSocket.receiveFrame();
+            socket.endReceive();
+            std::streambuf& buf = socket.buffer();
+            while( buf.in_avail() > 0 )
+                _message.push_back( static_cast<char>(buf.sbumpc()) );
+
+            _frame = socket.frame();
             _received = true;
             _loop->exit();
         }
@@ -98,11 +154,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
     private:
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
-        Pt::Http::WebSocket _client;
-        Pt::Http::WebSocket _serverSocket;
-        char _buffer[64];
+        std::unique_ptr<Pt::Http::WebSocket> _server;
         std::string _message;
         bool _received;
+        bool _declined;
         Pt::Http::WebSocket::Frame _frame;
 };
 

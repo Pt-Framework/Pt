@@ -137,6 +137,8 @@ class ClientImpl : public Connectable
         Signal<Client&>& replyReceived()
         { return _replyReceived; }
 
+        Stream upgrade(const std::string& protocol);
+
     private:
         void init();
 

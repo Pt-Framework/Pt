@@ -27,6 +27,7 @@
  */
 
 #include "Connection.h"
+#include "ServerImpl.h"
 
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -95,6 +96,8 @@ Connection::Connection()
 , _keepAlive(false)
 , _onTimeout(false)
 , _isFailed(false)
+, _server(0)
+, _streamState(0)
 {
     _socket.connected() += slot(*this, &Connection::onConnect);
     //_socket.outputPipelined() += slot(*this, &Connection::onOutput);
@@ -112,7 +115,8 @@ Connection::Connection()
 
 Connection::~Connection()
 {
-  close();
+    invalidateStream();
+    close();
 }
 
 
@@ -189,6 +193,99 @@ void Connection::setPeerName(const std::string& peer)
 //    _socket.setActive(loop);
 //    _timer.setActive(loop);
 //}
+
+
+Stream Connection::openStream(ServerImpl* server, const std::string& protocol)
+{
+    _server = server;
+    return openStream(protocol);
+}
+
+
+Stream Connection::openStream(const std::string& protocol)
+{
+    _timer.stop();
+    _keepaliveTimeout = WaitInfinite;
+    _streamState = new StreamState(this, protocol);
+    return Stream(_streamState);
+}
+
+
+void Connection::invalidateStream()
+{
+    if( ! _streamState )
+        return;
+
+    StreamState* state = _streamState;
+    _streamState = 0;
+    state->connection = 0;
+
+    if(state->handles == 0)
+        delete state;
+}
+
+
+std::streambuf* Connection::streamBuffer()
+{
+    if(_ssl)
+        return &_sslbuf;
+
+    return &_sockbuf;
+}
+
+
+void Connection::setStreamTimeout(std::size_t ms)
+{
+    _timeout = ms;
+    _socket.setTimeout(ms);
+}
+
+
+void Connection::beginInput()
+{
+    if(_ssl)
+        _sslbuf.import();
+
+    _sockbuf.beginRead();
+}
+
+
+std::size_t Connection::endInput()
+{
+    std::size_t readSize = _sockbuf.endRead();
+
+    if(_ssl)
+    {
+        _sslbuf.import();
+        return static_cast<std::size_t>( _sslbuf.in_avail() );
+    }
+
+    return readSize;
+}
+
+
+void Connection::beginOutput()
+{
+    if(_ssl)
+        _sslbuf.pubsync();
+
+    _sockbuf.beginWrite();
+}
+
+
+std::size_t Connection::endOutput()
+{
+    return _sockbuf.endWrite();
+}
+
+
+void Connection::closeStream()
+{
+    close();
+
+    if(_server)
+        _server->onStreamClosed(this);
+}
 
 
 void Connection::close()
@@ -1034,6 +1131,7 @@ MessageProgress Connection::endReceiveReply()
             progress.setFinished();
 
             bool keepalive = _reply->header().isKeepAlive();
+            bool upgrade = _reply->header().isUpgrade();
 
             _reply = 0;
             _replyParser.reset(true);
@@ -1041,7 +1139,13 @@ MessageProgress Connection::endReceiveReply()
             _readSize = 0;
             _readBytes = 0;
 
-            if( ! keepalive )
+            if( upgrade )
+            {
+                PT_LOG_DEBUG("reply upgrades the connection");
+                _timer.stop();
+                _keepaliveTimeout = WaitInfinite;
+            }
+            else if( ! keepalive )
             {
                 PT_LOG_DEBUG("closing, no keep alive");
                 close();
