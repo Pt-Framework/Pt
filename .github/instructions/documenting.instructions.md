@@ -123,9 +123,20 @@ pages.
 
 Write a chapter the reader can learn from without scanning every member.
 Explain what the feature or type is for, how this API maps its subject,
-how the types work together, how a caller uses them, ownership, lifetime, errors, ordering, practical advantages that follow from the design, and the distinctions that prevent mistakes. Include the context needed to use the
-API correctly,including an API technique that is part of the contract (C
+how the types work together, how a caller uses them, ownership, lifetime,
+errors, ordering, practical advantages that follow from the design, and the
+distinctions that prevent mistakes. Include the context needed to use the
+API correctly, including an API technique that is part of the contract (C
 linkage of an export, a cast the platform requires, matching allocators).
+
+Include the background knowledge the API assumes, not only the API's own
+mechanics. When a type or feature encodes an external concept - a wire
+protocol, a binary layout, an encoding, an algorithm - explain that concept
+well enough that a reader unfamiliar with it can use the API correctly.
+Name the concrete domain terms (request/reply, planar, packed, subsampling,
+endianness, opcode) so the reader can connect the API to outside
+literature and other implementations. A chapter that only names a format
+or protocol without explaining what distinguishes it is unfinished.
 
 A restatement of members in declaration order is not a chapter. Fold
 member facts into the model and leave compact wording to the briefs. A
