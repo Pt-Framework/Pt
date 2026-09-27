@@ -31,6 +31,12 @@ git config credential.github.com.useHttpPath true
 Add `--local` to apply these settings to this repository, or `--global` to
 apply them to all repositories for the current user. May require `ceredentials.helper` set to true.
 
+Windows may require the credential Manager for https:
+
+```
+git config --global credential.helper manager
+```
+
 ## Repository Layout
 
 - Public headers: `include/Pt/` and `include/Pt/<Module>/`
