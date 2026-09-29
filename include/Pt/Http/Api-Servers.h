@@ -36,11 +36,11 @@
 
     A finished reply with status 101 upgrades the connection. The
     server keeps the connection and emits
-    %Service::upgradeRequested() on the server thread with a
-    %Stream. The slot calls %Stream::retain() to keep that stream.
-    A slot that does not retain declines the upgrade, and the server
-    closes the connection. %Stream::protocol() is the value of the
-    request's Upgrade header. %Stream::buffer() is the byte buffer
+    %Service::upgradeRequested() on the server thread with the
+    %Stream it owns. Binding a %StreamSession to that stream accepts the
+    upgrade. A slot that leaves the stream unbound declines it, and
+    the server closes the stream. %Stream::protocol() is the value of
+    the request's Upgrade header. %Stream::buffer() is the byte buffer
     of that channel.
 
     All server I/O is asynchronous, so the server needs an %EventLoop,

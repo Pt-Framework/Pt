@@ -212,6 +212,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Client.h" />
     <ClInclude Include="..\..\include\Pt\Http\Credentials.h" />
     <ClInclude Include="..\..\include\Pt\Http\HttpError.h" />
+    <ClInclude Include="..\..\include\Pt\Http\Protocol.h" />
     <ClInclude Include="..\..\include\Pt\Http\Stream.h" />
     <ClInclude Include="..\..\include\Pt\Http\Message.h" />
     <ClInclude Include="..\..\include\Pt\Http\Reply.h" />
@@ -1570,6 +1571,7 @@
     <ClCompile Include="..\Pt-Http\Connection.cpp" />
     <ClCompile Include="..\Pt-Http\HttpBuffer.cpp" />
     <ClCompile Include="..\Pt-Http\HttpError.cpp" />
+    <ClCompile Include="..\Pt-Http\Protocol.cpp" />
     <ClCompile Include="..\Pt-Http\Stream.cpp" />
     <ClCompile Include="..\Pt-Http\Message.cpp" />
     <ClCompile Include="..\Pt-Http\Parser.cpp" />

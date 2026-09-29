@@ -315,7 +315,7 @@ void Acceptor::onReplySent(Reply& r)
         {
             PT_LOG_DEBUG("reply finished");
 
-            // 101 Switching Protocols hands the connection to the server
+            // 101 Switching Protocols hands the connection to the main
             // thread. WebSocket is one protocol that uses this status.
             if( r.statusCode() == 101 )
             {
@@ -324,7 +324,8 @@ void Acceptor::onReplySent(Reply& r)
                 Service* service = _servlet->service();
                 const char* upgradeHeader = _request.header().get("Upgrade");
                 const std::string protocol = upgradeHeader ? upgradeHeader : "";
-                Connection* conn = this->release();
+
+                Connection* conn = this->releaseConnection();
                 conn->detach();
                 _server.beginUpgrade(conn, service, protocol);
             }
@@ -649,11 +650,10 @@ void ServerImpl::cancel()
         }
     }
 
-    while( ! _connections.empty() )
+    while( ! _upgradedConnections.empty() )
     {
-        Connection* conn = _connections.back();
-        _connections.pop_back();
-        conn->invalidateStream();
+        Connection* conn = _upgradedConnections.back();
+        _upgradedConnections.pop_back();
         delete conn;
     }
 
@@ -869,52 +869,66 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         _pendingUpgrades.pop_front();
         lock.unlock();
 
+        Connection* conn = upgrade.connection;
+        Service* service = upgrade.service;
+        const std::string& protocol = upgrade.protocol;
+
         System::EventLoop* eventLoop = this->loop();
         if( ! eventLoop )
         {
-            delete upgrade.connection;
+            delete conn;
             continue;
         }
 
-        upgrade.connection->setActive(*eventLoop);
+        conn->setActive(*eventLoop);
+        conn->closed() += Pt::slot(*this, &ServerImpl::onConnectionClosed);
+        conn->setTimeout(Connection::WaitInfinite);
+        conn->setKeepAliveTimeout(Connection::WaitInfinite);
 
-        if( upgrade.service->upgradeRequested().connectionCount() == 0 )
+        Stream& stream = conn->openStream(protocol);
+
+        service->upgradeRequested().send(stream);
+
+        // Close unused orphaned streams
+        if( ! stream.session() )
         {
-            delete upgrade.connection;
+            stream.close();
             continue;
         }
 
-        Stream stream( upgrade.connection->openStream(this, upgrade.protocol) );
-        upgrade.service->upgradeRequested().send(stream);
-
-        // The slot retains the stream to keep the connection. A
-        // declined upgrade leaves the flag clear and the server
-        // deletes the connection.
-        if( ! stream.isRetained() )
-        {
-            upgrade.connection->invalidateStream();
-            delete upgrade.connection;
-            continue;
-        }
-
-        _connections.push_back(upgrade.connection);
+        _upgradedConnections.push_back(conn);
     }
 }
 
 
-void ServerImpl::onStreamClosed(Connection* conn)
+void ServerImpl::onConnectionClosed(Connection& conn)
 {
+    System::EventLoop* eventLoop = this->loop();
+    if( ! eventLoop )
+    {
+        delete &conn;
+        return;
+    }
+
+    RemoveConnectionEvent ev(&conn);
+    eventLoop->commitEvent(ev);
+}
+
+
+void ServerImpl::onRemoveConnection(const RemoveConnectionEvent& ev)
+{
+    Connection* conn = ev.connection();
+
     std::vector<Connection*>::iterator it;
-    for(it = _connections.begin(); it != _connections.end(); ++it)
+    for(it = _upgradedConnections.begin(); it != _upgradedConnections.end(); ++it)
     {
         if(*it == conn)
         {
-            _connections.erase(it);
+            _upgradedConnections.erase(it);
             break;
         }
     }
 
-    conn->invalidateStream();
     delete conn;
 }
 

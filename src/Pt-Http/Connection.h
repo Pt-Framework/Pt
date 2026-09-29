@@ -45,6 +45,7 @@
 #include <Pt/Connectable.h>
 
 #include <iostream>
+#include <vector>
 
 namespace Pt {
 
@@ -56,77 +57,6 @@ namespace Http {
 
 class Reply;
 class Request;
-class ServerImpl;
-
-//class Socket : public Net::TcpSocket
-//{
-//    public:
-//        Socket()
-//        : _output(false)
-//        , _input(false)
-//        {}
-//
-//        void setInputReady()
-//        {
-//            _input = true;
-//
-//            System::EventLoop* loop = this->loop();
-//            if( ! loop )
-//                throw std::logic_error("socket not active");
-//
-//            loop->setReady(*this);
-//        }
-//
-//        void setOutputReady()
-//        {
-//            _output = true;
-//
-//            System::EventLoop* loop = this->loop();
-//            if( ! loop )
-//                throw std::logic_error("socket not active");
-//
-//            loop->setReady(*this);
-//        }
-//
-//        Signal<>& outputPipelined()
-//        { return _outputPipelined; }
-//
-//        Signal<>& inputPipelined()
-//        { return _inputPipelined; }
-//
-//    protected:
-//        virtual void onCancel()
-//        {
-//            _output = false;
-//            _input = false;
-//            Net::TcpSocket::onCancel();
-//        }
-//
-//        virtual bool onRun()
-//        {
-//            if(_output)
-//            {
-//                _output = false;
-//                _outputPipelined.send();
-//                return true;
-//            }
-//
-//            if(_input)
-//            {
-//                _input = false;
-//                _inputPipelined.send();
-//                return true;
-//            }
-//
-//            return Net::TcpSocket::onRun();
-//        }
-//
-//    private:
-//        bool _output;
-//        bool _input;
-//        Signal<> _outputPipelined;
-//        Signal<> _inputPipelined;
-//};
 
 class Connection : public Connectable
                  , public System::Selectable
@@ -181,6 +111,8 @@ class Connection : public Connectable
 
         virtual ~Connection();
 
+        void close();
+
         void accept(Net::TcpServer& tcpServer);
 
         void setHost(const Net::Endpoint& addrinfo);
@@ -193,8 +125,6 @@ class Connection : public Connectable
         void setSecure(Ssl::Context& ctx);
 
         void setPeerName(const std::string& peer);
-
-        //void setActive(System::EventLoop& loop);
 
         System::EventLoop* loop() const
         { return _socket.loop(); }
@@ -237,16 +167,26 @@ class Connection : public Connectable
         std::streambuf& buffer()
         { return _httpbuf; }
 
-        // Opens one stream. The server deletes this connection unless
-        // the stream is retained. invalidateStream() clears the shared
-        // connection pointer before that delete.
-        Stream openStream(ServerImpl* server, const std::string& protocol);
+    public:
+        // Opens one stream after a finished 101 reply. The connection
+        // owns the stream. HTTP/1 has one entry.
+        Stream& openStream(const std::string& protocol);
 
-        // Opens a stream on a client connection after a finished 101
-        // reply. The caller retains the stream to keep the connection.
-        Stream openStream(const std::string& protocol);
+        const std::vector<Stream*>& streams() const
+        { return _streams; }
 
-        void invalidateStream();
+        // Sent after the last stream has closed this connection.
+        // The connection stays alive until the slot returns.
+        Signal<Connection&>& closed()
+        { return _closed; }
+
+        // Detaches a stream closed by its session. The connection
+        // deletes it with the other streams. Closes this connection
+        // when no stream remains, then sends closed().
+        void closeStream(Stream& stream);
+
+        // Cancels the I/O of the open stream. Does not close it.
+        void cancelStream(Stream& stream);
 
         std::streambuf* streamBuffer();
 
@@ -269,13 +209,6 @@ class Connection : public Connectable
         void beginOutput();
 
         std::size_t endOutput();
-
-        // Closes the socket and notifies the server that owns this
-        // connection. The server deletes it. A multiplexed connection
-        // closes when its last stream ends.
-        void closeStream();
-
-        void close();
 
     protected:
         void beginRead();
@@ -375,8 +308,9 @@ class Connection : public Connectable
         bool _onTimeout;
         bool _isFailed;
 
-        ServerImpl* _server;
-        StreamState* _streamState;
+        Signal<Connection&> _closed;
+        std::vector<Stream*> _streams;
+        std::vector<Stream*> _closedStreams;
 };
 
 } // namespace Http

@@ -32,14 +32,15 @@
     WebSocket Upgrade request with 101 Switching Protocols, or with
     404 when the request is not a WebSocket upgrade. After a
     successful upgrade the server keeps the connection and emits
-    %Service::upgradeRequested() with a %Stream.
-    %WebSocket::accept() retains that stream and formats it. The
-    socket does not own the connection.
+    %Service::upgradeRequested() with the %Stream it owns.
+    %WebSocket::accept() binds that stream and formats it. The socket
+    does not own the connection. A slot that does not bind a stream session
+    declines the upgrade.
 
     %Stream is the upgraded channel, not the HTTP message body.
     A 101 reply is the generic HTTP upgrade. %WebSocketService is the
     WebSocket case: %Service::upgradeRequested() runs on the server
-    thread, and %WebSocket::accept() keeps the stream.
+    thread, and %WebSocket::accept() binds the stream.
 
     Ping and pong are control frames. %sendPing() writes a ping, and
     after a ping is received %sendPong() writes the matching pong.

@@ -4,6 +4,7 @@
 */
 
 #include <Pt/Http/WebSocket.h>
+#include <Pt/Http/Stream.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -75,8 +76,8 @@ class WebSocket::PayloadBuffer : public std::streambuf
 
 
 WebSocket::WebSocket(Client& client)
-: _client(&client)
-, _stream()
+: StreamSession()
+, _client(&client)
 , _isClient(true)
 , _path("/")
 , _timeout(30000)
@@ -94,8 +95,8 @@ WebSocket::WebSocket(Client& client)
 
 
 WebSocket::WebSocket(Stream& stream)
-: _client(0)
-, _stream()
+: StreamSession()
+, _client(0)
 , _isClient(false)
 , _path("/")
 , _timeout(30000)
@@ -123,11 +124,10 @@ WebSocket::~WebSocket()
 void WebSocket::accept(Stream& stream)
 {
     _isClient = false;
-    _stream = stream;
-    _stream.retain();
-    _stream.setTimeout(_timeout);
-    _stream.inputReady() += Pt::slot(*this, &WebSocket::onInput);
-    _stream.outputReady() += Pt::slot(*this, &WebSocket::onOutput);
+    open(stream);
+    stream.setTimeout(_timeout);
+    stream.inputReady() += Pt::slot(*this, &WebSocket::onInput);
+    stream.outputReady() += Pt::slot(*this, &WebSocket::onOutput);
 }
 
 
@@ -217,11 +217,11 @@ void WebSocket::onReply(Client& client)
         if( client.reply().statusCode() != 101 )
             throw std::runtime_error("WebSocket handshake failed");
 
-        _stream = client.upgrade();
-        _stream.retain();
-        _stream.setTimeout(_timeout);
-        _stream.inputReady() += Pt::slot(*this, &WebSocket::onInput);
-        _stream.outputReady() += Pt::slot(*this, &WebSocket::onOutput);
+        Stream& stream = client.upgrade();
+        open(stream);
+        stream.setTimeout(_timeout);
+        stream.inputReady() += Pt::slot(*this, &WebSocket::onInput);
+        stream.outputReady() += Pt::slot(*this, &WebSocket::onOutput);
         finishHandshake(false);
     }
     catch(const std::exception&)
@@ -239,13 +239,14 @@ std::streambuf& WebSocket::buffer()
 
 void WebSocket::beginSend(Frame frame)
 {
-    if( ! _stream.isValid() )
+    Stream* stream = this->stream();
+    if( ! stream )
         throw std::logic_error("WebSocket has no stream");
 
     _state = Sending;
     writeFrame(frame, _payload.empty() ? 0 : &_payload[0], _payload.size());
     _payloadBuffer->reset();
-    _stream.beginOutput();
+    stream->beginOutput();
 }
 
 
@@ -254,14 +255,18 @@ void WebSocket::endSend()
     if(_error)
         throw std::runtime_error("WebSocket send failed");
 
-    _stream.endOutput();
+    Stream* stream = this->stream();
+    if( ! stream )
+        throw std::logic_error("WebSocket has no stream");
+
+    stream->endOutput();
     _state = Idle;
 }
 
 
 void WebSocket::beginReceive()
 {
-    if( ! _stream.isValid() )
+    if( ! stream() )
         throw std::logic_error("WebSocket has no stream");
 
     _frame = Unknown;
@@ -288,23 +293,25 @@ void WebSocket::endReceive()
 
 void WebSocket::sendPing()
 {
-    if( ! _stream.isValid() )
+    Stream* stream = this->stream();
+    if( ! stream )
         throw std::logic_error("WebSocket has no stream");
 
     writeFrame(Ping, 0, 0);
-    _stream.beginOutput();
-    _stream.endOutput();
+    stream->beginOutput();
+    stream->endOutput();
 }
 
 
 void WebSocket::sendPong()
 {
-    if( ! _stream.isValid() )
+    Stream* stream = this->stream();
+    if( ! stream )
         throw std::logic_error("WebSocket has no stream");
 
     writeFrame(Pong, 0, 0);
-    _stream.beginOutput();
-    _stream.endOutput();
+    stream->beginOutput();
+    stream->endOutput();
 }
 
 
@@ -312,15 +319,15 @@ void WebSocket::setTimeout(std::size_t timeout)
 {
     _timeout = timeout;
 
-    if( _stream.isValid() )
-        _stream.setTimeout(timeout);
+    if( Stream* stream = this->stream() )
+        stream->setTimeout(timeout);
 }
 
 
-void WebSocket::close()
+void WebSocket::onCloseStream(Stream& stream)
 {
-    if( _stream.isValid() )
-        _stream.close();
+    _error = true;
+    _state = Idle;
 }
 
 
@@ -372,7 +379,8 @@ Pt::uint32_t WebSocket::createMask()
 
 void WebSocket::writeFrame(Frame frame, const char* payload, std::size_t n)
 {
-    std::streambuf* buf = _stream.buffer();
+    Stream* stream = this->stream();
+    std::streambuf* buf = stream ? stream->buffer() : 0;
     if( ! buf )
         throw std::logic_error("WebSocket has no stream");
 
@@ -440,20 +448,25 @@ void WebSocket::writeFrame(Frame frame, const char* payload, std::size_t n)
 
 void WebSocket::beginFrameRead()
 {
-    std::streambuf* buf = _stream.buffer();
+    Stream* stream = this->stream();
+    if( ! stream )
+        return;
+
+    std::streambuf* buf = stream->buffer();
     if(buf && buf->in_avail() > 0)
     {
         if( parseAvailable() )
             return;
     }
 
-    _stream.beginInput();
+    stream->beginInput();
 }
 
 
 bool WebSocket::parseAvailable()
 {
-    std::streambuf* buf = _stream.buffer();
+    Stream* stream = this->stream();
+    std::streambuf* buf = stream ? stream->buffer() : 0;
     if( ! buf )
         return false;
 
@@ -569,14 +582,18 @@ bool WebSocket::parseAvailable()
 
 void WebSocket::onInput()
 {
+    Stream* stream = this->stream();
+    if( ! stream )
+        return;
+
     try
     {
-        _stream.endInput();
+        stream->endInput();
 
         if( parseAvailable() )
             return;
 
-        _stream.beginInput();
+        stream->beginInput();
     }
     catch(const std::exception&)
     {
@@ -589,9 +606,13 @@ void WebSocket::onInput()
 
 void WebSocket::onOutput()
 {
+    Stream* stream = this->stream();
+    if( ! stream )
+        return;
+
     try
     {
-        _stream.endOutput();
+        stream->endOutput();
         _state = Idle;
         _outputReady.send(*this);
     }
@@ -603,4 +624,6 @@ void WebSocket::onOutput()
     }
 }
 
-}}
+} // namespace Http
+
+} // namespace Pt

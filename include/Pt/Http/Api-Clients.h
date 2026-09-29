@@ -48,8 +48,8 @@
     calling thread.
 
     A finished reply with status 101 switches the connection to a
-    %Stream. %upgrade() returns that stream. The client no longer
-    sends requests on it. Retain the stream to keep it.
+    %Stream. %upgrade() returns the stream the client already owns.
+    The client no longer sends requests on it.
 
     When a reply is 401, %Authenticator complements the request from
     realm credentials so the client can send it again. Basic

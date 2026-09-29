@@ -42,6 +42,7 @@ class Server;
 class Service;
 class Servlet;
 class Stream;
+class StreamSession;
 
 } // namespace Http
 

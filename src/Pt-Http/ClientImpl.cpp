@@ -283,7 +283,7 @@ MessageProgress ClientImpl::endReceive()
 }
 
 
-Stream ClientImpl::upgrade(const std::string& protocol)
+Stream& ClientImpl::upgrade(const std::string& protocol)
 {
     if(_hstate != Idle && _hstate != OnReplyComplete)
         throw HttpError("HTTP message pending");
@@ -292,6 +292,12 @@ Stream ClientImpl::upgrade(const std::string& protocol)
         throw HttpError("HTTP reply is not an upgrade");
 
     _hstate = Idle;
+
+    if( ! _conn.streams().empty() )
+        return *_conn.streams().front();
+
+    _conn.setTimeout(Connection::WaitInfinite);
+    _conn.setKeepAliveTimeout(Connection::WaitInfinite);
     return _conn.openStream(protocol);
 }
 

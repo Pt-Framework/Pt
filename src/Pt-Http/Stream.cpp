@@ -3,225 +3,125 @@
 */
 
 #include <Pt/Http/Stream.h>
+#include <Pt/Http/StreamSession.h>
 #include "Connection.h"
 
 #include <stdexcept>
-#include <streambuf>
 
 namespace Pt {
 
 namespace Http {
 
-Stream::Stream()
-: _state(0)
+Stream::Stream(Connection& connection, const std::string& protocol)
+: _connection(&connection)
+, _session(0)
+, _protocolName(protocol)
 {
-}
-
-
-Stream::Stream(const Stream& other)
-: _state(other._state)
-{
-    attach();
-}
-
-
-Stream::Stream(StreamState* state)
-: _state(state)
-{
-    if( ! _state )
-        throw std::logic_error("HTTP stream has no connection");
-
-    attach();
 }
 
 
 Stream::~Stream()
 {
-    detach();
-    release();
+    StreamSession* session = _session;
+
+    if(session)
+        session->closeStream(*this);
 }
 
 
-Stream& Stream::operator=(const Stream& other)
+void Stream::openSession(StreamSession& session)
 {
-    if( this == &other )
-        return *this;
+    if(_session)
+        throw std::logic_error("HTTP stream already has a session");
 
-    detach();
-    release();
-    _state = other._state;
-    attach();
-    return *this;
-}
-
-
-const std::string& Stream::protocol() const
-{
-    if( ! _state )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    return _state->protocol;
+    _session = &session;
 }
 
 
-void Stream::retain()
+void Stream::closeSession(StreamSession& session)
 {
-    if( ! _state || ! _state->connection )
-        throw std::logic_error("HTTP stream has no connection");
-
-    _state->retained = true;
-}
-
-
-bool Stream::isRetained() const
-{
-    return _state && _state->retained;
+    if(_session == &session)
+        _session = 0;
 }
 
 
 void Stream::close()
 {
-    if( ! _state || ! _state->connection )
-        return;
+    StreamSession* session = _session;
+    _session = 0;
 
-    Http::Connection* conn = _state->connection;
-    _state->connection = 0;
-    detach();
+    Connection* connection = _connection;
+    _connection = 0;
 
-    _closed.send();
-    conn->closeStream();
+    if(session)
+        session->closeStream(*this);
+
+    if(connection)
+        connection->closeStream(*this);
 }
 
 
 std::streambuf* Stream::buffer()
 {
-    if( ! _state || ! _state->connection )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    return _state->connection->streamBuffer();
+    return _connection->streamBuffer();
 }
 
 
 void Stream::beginInput()
 {
-    if( ! _state || ! _state->connection )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    _state->connection->beginInput();
+    _connection->beginInput();
 }
 
 
 std::size_t Stream::endInput()
 {
-    if( ! _state || ! _state->connection )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    return _state->connection->endInput();
+    return _connection->endInput();
 }
 
 
 void Stream::beginOutput()
 {
-    if( ! _state || ! _state->connection )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    _state->connection->beginOutput();
+    _connection->beginOutput();
 }
 
 
 std::size_t Stream::endOutput()
 {
-    if( ! _state || ! _state->connection )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    return _state->connection->endOutput();
+    return _connection->endOutput();
 }
 
 
 void Stream::cancel()
 {
-    if(_state && _state->connection)
-        _state->connection->cancel();
+    if(_connection)
+        _connection->cancelStream(*this);
 }
 
 
 void Stream::setTimeout(std::size_t ms)
 {
-    if( ! _state || ! _state->connection )
+    if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    _state->connection->setStreamTimeout(ms);
-}
-
-
-Signal<>& Stream::inputReady()
-{
-    return _inputReady;
-}
-
-
-Signal<>& Stream::outputReady()
-{
-    return _outputReady;
-}
-
-
-Signal<>& Stream::closed()
-{
-    return _closed;
-}
-
-
-void Stream::attach()
-{
-    if( ! _state )
-        return;
-
-    ++_state->handles;
-
-    if( ! _state->connection )
-        return;
-
-    _state->connection->inputReady() += Pt::slot(*this, &Stream::onInput);
-    _state->connection->outputReady() += Pt::slot(*this, &Stream::onOutput);
-}
-
-
-void Stream::detach()
-{
-    if( ! _state || ! _state->connection )
-        return;
-
-    _state->connection->inputReady() -= Pt::slot(*this, &Stream::onInput);
-    _state->connection->outputReady() -= Pt::slot(*this, &Stream::onOutput);
-}
-
-
-void Stream::release()
-{
-    if( ! _state )
-        return;
-
-    StreamState* state = _state;
-    _state = 0;
-
-    if(state->handles > 0)
-        --state->handles;
-
-    if(state->handles == 0 && state->connection == 0)
-        delete state;
-}
-
-
-void Stream::onInput(Pt::System::IOBuffer&)
-{
-    _inputReady.send();
-}
-
-
-void Stream::onOutput(Pt::System::IOBuffer&)
-{
-    _outputReady.send();
+    _connection->setStreamTimeout(ms);
 }
 
 } // namespace Http

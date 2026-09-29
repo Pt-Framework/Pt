@@ -37,6 +37,7 @@
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
 #include <Pt/Convert.h>
+#include <stdexcept>
 
 #include <iterator>
 #include <cassert>
@@ -96,8 +97,6 @@ Connection::Connection()
 , _keepAlive(false)
 , _onTimeout(false)
 , _isFailed(false)
-, _server(0)
-, _streamState(0)
 {
     _socket.connected() += slot(*this, &Connection::onConnect);
     //_socket.outputPipelined() += slot(*this, &Connection::onOutput);
@@ -115,7 +114,20 @@ Connection::Connection()
 
 Connection::~Connection()
 {
-    invalidateStream();
+    while( ! _streams.empty() )
+    {
+        Stream* stream = _streams.back();
+        _streams.pop_back();
+        delete stream;
+    }
+
+    while( ! _closedStreams.empty() )
+    {
+        Stream* stream = _closedStreams.back();
+        _closedStreams.pop_back();
+        delete stream;
+    }
+
     close();
 }
 
@@ -195,33 +207,42 @@ void Connection::setPeerName(const std::string& peer)
 //}
 
 
-Stream Connection::openStream(ServerImpl* server, const std::string& protocol)
+Stream& Connection::openStream(const std::string& protocol)
 {
-    _server = server;
-    return openStream(protocol);
+    if( ! _streams.empty() )
+        throw std::logic_error("HTTP connection already has a stream");
+
+    Stream* stream = new Stream(*this, protocol);
+    _streams.push_back(stream);
+    return *stream;
 }
 
 
-Stream Connection::openStream(const std::string& protocol)
+void Connection::closeStream(Stream& stream)
 {
-    _timer.stop();
-    _keepaliveTimeout = WaitInfinite;
-    _streamState = new StreamState(this, protocol);
-    return Stream(_streamState);
-}
+    std::vector<Stream*>::iterator it;
+    for(it = _streams.begin(); it != _streams.end(); ++it)
+    {
+        if(*it == &stream)
+        {
+            _streams.erase(it);
+            _closedStreams.push_back(&stream);
+            break;
+        }
+    }
 
-
-void Connection::invalidateStream()
-{
-    if( ! _streamState )
+    if( ! _streams.empty() )
         return;
 
-    StreamState* state = _streamState;
-    _streamState = 0;
-    state->connection = 0;
+    close();
+    _closed.send(*this);
+}
 
-    if(state->handles == 0)
-        delete state;
+
+void Connection::cancelStream(Stream& stream)
+{
+    _sockbuf.discard();
+    _socket.cancel();
 }
 
 
@@ -276,15 +297,6 @@ void Connection::beginOutput()
 std::size_t Connection::endOutput()
 {
     return _sockbuf.endWrite();
-}
-
-
-void Connection::closeStream()
-{
-    close();
-
-    if(_server)
-        _server->onStreamClosed(this);
 }
 
 
@@ -1188,7 +1200,12 @@ void Connection::onOutput()
             _reply->onInput();
         else
             _reply->onOutput();
+
+        return;
     }
+
+    if( ! _streams.empty() && _streams.front() )
+        _streams.front()->outputReady().send();
 }
 
 
@@ -1212,7 +1229,12 @@ void Connection::onInput()
             _reply->onInput();
         else
             _reply->onOutput();
+
+        return;
     }
+
+    if( ! _streams.empty() && _streams.front() )
+        _streams.front()->inputReady().send();
 }
 
 

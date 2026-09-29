@@ -242,7 +242,7 @@ void Client::onRequestSent(Request& r)
 }
 
 
-Stream Client::upgrade()
+Stream& Client::upgrade()
 {
     const char* protocol = _impl->reply().header().get("Upgrade");
     if( ! protocol )

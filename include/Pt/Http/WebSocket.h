@@ -7,7 +7,7 @@
 #define PT_HTTP_WEBSOCKET_H
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/Stream.h>
+#include <Pt/Http/StreamSession.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <string>
@@ -42,9 +42,10 @@ class Client;
     becomes the %Stream this socket formats. After the handshake the
     socket no longer uses the client.
     On the server, construct the socket with the %Stream from
-    %Service::upgradeRequested(). %accept() retains that stream on a
-    socket that already exists. The server keeps the connection. The
-    socket formats that stream and does not own it.
+    %Service::upgradeRequested(). %accept() binds that stream on a
+    socket that already exists. Binding accepts the upgrade. The
+    server keeps the connection. The socket formats that stream and
+    does not own it.
 
     %beginSend() writes one frame. The opcode is the argument. The
     payload is what was written to %buffer() since the previous send.
@@ -63,7 +64,8 @@ class Client;
 
     @ingroup Pt-Http-WebSocket
 */
-class PT_HTTP_API WebSocket : public Pt::Connectable
+class PT_HTTP_API WebSocket : public StreamSession
+                            , public Pt::Connectable
 {
     public:
         /** @brief WebSocket frame opcode.
@@ -94,7 +96,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Accepts an upgraded @a stream.
 
-            Retains @a stream. The server keeps the connection.
+            Binds @a stream. The server keeps the connection.
         */
         void accept(Stream& stream);
 
@@ -107,7 +109,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @throw %std::logic_error if this socket was constructed
             from a stream.
         */
-        void beginConnect(const std::string& url, const std::string& origin = std::string());
+        void beginConnect(const std::string& url,
+                          const std::string& origin = std::string());
 
         /** @brief Returns the signal emitted when the handshake finishes.
         */
@@ -172,10 +175,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void setTimeout(std::size_t timeout);
 
-        /** @brief Closes the WebSocket.
-        */
-        void close();
-
     private:
         void parseUrl(const std::string& url, const std::string& origin);
 
@@ -188,6 +187,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         void onRequestSent(Client& client);
 
         void onReply(Client& client);
+
+        virtual void onCloseStream(Stream&) override;
 
         void onInput();
 
@@ -213,7 +214,6 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         };
 
         Client* _client;
-        Stream _stream;
         bool _isClient;
         std::string _path;
         Pt::Signal<WebSocket&> _connected;
@@ -234,6 +234,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         PayloadBuffer* _payloadBuffer;
 };
 
-}}
+} // namespace Http
+
+} // namespace Pt
 
 #endif

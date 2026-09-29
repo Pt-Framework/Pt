@@ -98,7 +98,7 @@ class Acceptor : public Pt::Connectable
         Servlet* servlet()
         { return _servlet; }
 
-        Connection* release()
+        Connection* releaseConnection()
         {
             Connection* conn = _conn;
             _conn = 0;
@@ -244,6 +244,23 @@ class ServerImpl : public Connectable
     {
     };
 
+    // Deletes a connection after its last stream has closed. The
+    // connection stays owned by ServerImpl until this handler runs,
+    // so a stream method still on the stack is not deleted under it.
+    class RemoveConnectionEvent : public Pt::BasicEvent<RemoveConnectionEvent>
+    {
+        public:
+            explicit RemoveConnectionEvent(Connection* connection)
+            : _connection(connection)
+            { }
+
+            Connection* connection() const
+            { return _connection; }
+
+        private:
+            Connection* _connection;
+    };
+
     // One accepted upgrade, owned by ServerImpl until the server thread
     // delivers it to the service.
     struct Upgrade
@@ -276,11 +293,13 @@ class ServerImpl : public Connectable
             {
                 loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onUpgrade);
                 loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onRemoveHandler);
+                loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onRemoveConnection);
             }
 
             _serverSocket.setActive(eventLoop);
             eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onUpgrade);
             eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onRemoveHandler);
+            eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onRemoveConnection);
         }
 
         std::size_t timeout() const
@@ -328,8 +347,9 @@ class ServerImpl : public Connectable
         // performs the upgrade when it receives UpgradeEvent.
         void beginUpgrade(Connection* conn, Service* service, const std::string& protocol);
 
-        // Removes and deletes a connection closed by its session.
-        void onStreamClosed(Connection* conn);
+    private:
+        // Posts deletion of a connection closed by its last stream.
+        void onConnectionClosed(Connection& conn);
 
     private:
         void onAccept(Net::TcpServer& server);
@@ -339,6 +359,8 @@ class ServerImpl : public Connectable
         void onHandlerFinished(Acceptor& conn);
 
         void onRemoveHandler(const RemoveHandlerEvent& ev);
+
+        void onRemoveConnection(const RemoveConnectionEvent& ev);
 
     private:
         struct ServletListEntry
@@ -376,7 +398,7 @@ class ServerImpl : public Connectable
 
         System::Mutex _upgradeMutex;
         std::deque<Upgrade> _pendingUpgrades;
-        std::vector<Connection*> _connections;
+        std::vector<Connection*> _upgradedConnections;
 };
 
 } // namespace Http

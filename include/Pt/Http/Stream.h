@@ -7,8 +7,8 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Connectable.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
-#include <Pt/System/IOBuffer.h>
 #include <string>
 #include <cstddef>
 #include <iosfwd>
@@ -18,117 +18,95 @@ namespace Pt {
 namespace Http {
 
 class Connection;
-class ServerImpl;
+class StreamSession;
 
-struct StreamState
-{
-    Connection* connection;
-    std::string protocol;
-    bool retained;
-    std::size_t handles;
+/** @brief One HTTP stream on a connection.
 
-    StreamState(Connection* conn, const std::string& proto)
-    : connection(conn)
-    , protocol(proto)
-    , retained(false)
-    , handles(0)
-    { }
-};
+    %Stream is one bidirectional channel of a connection the server or
+    the client still owns. A finished reply with status 101 does not
+    hand the TCP connection to the service. The owner keeps that
+    connection and keeps this stream. HTTP/1 has one stream, and it
+    fills the connection. A later multiplexed protocol can issue more
+    than one stream for the same connection.
 
-/** @brief One HTTP stream on a server-owned connection.
+    The connection creates the stream after the 101 reply has been
+    written, and it deletes the stream. This type is not copyable and
+    has no public constructor. The server reports it through
+    %Service::upgradeRequested(). The client reports it through
+    %Client::upgrade(). Both return the stream the owner already holds.
 
-    %Stream is one bidirectional channel of a connection the server
-    still owns. A finished reply with status 101 does not hand the TCP
-    connection to the service. The server keeps that connection and
-    emits %Service::upgradeRequested() with a %Stream on the server
-    thread. HTTP/1 has one stream, and it fills the connection. A
-    later multiplexed protocol can issue more than one stream for the
-    same connection. WebSocket is one protocol that formats frames
-    into the stream buffer.
+    A %StreamSession is the external peer. The stream stores one session
+    pointer, and the session stores one stream pointer. Binding that
+    peer accepts the upgrade. A second bind throws %std::logic_error.
+    On the server, a stream that still has no session after
+    %upgradeRequested() returns is declined, and the server closes it.
+    %WebSocket is one session type that formats frames into %buffer().
 
-    The signal argument is the server's stream. A slot that needs the
-    handle after the signal returns copies it. Copying shares the
-    connection and does not retain it, and destroying a copy does not
-    close the stream. Lifetime follows %retain() and %close().
+    %close() ends this stream. It clears the session pointer first
+    and then tells the session that the stream ended, so a close
+    that runs from the session destructor does not re-enter this
+    stream. While this stream is the only stream of the connection,
+    closing it also closes the connection. The server deletes that
+    connection on its event loop, after the close that requested it
+    has returned. Destroying the stream tells the session the same
+    way. The session object stays, and its stream pointer is null.
 
-    %retain() tells the server to keep the connection. The server
-    deletes a connection whose stream was not retained, which is how
-    an upgrade is declined. %close() ends this stream. While it is the
-    only stream of the connection, that also closes and deletes the
-    connection. A later protocol that multiplexes streams closes the
-    connection when its last stream ends.
-
-    %buffer() is the stream buffer of the connection. A protocol
+    %buffer() is the stream buffer of the connection. A session
     formats into that buffer and extracts from it. The stream does not
     take a caller buffer, and it does not expose the socket.
     %beginInput() and %beginOutput() start a transfer of that buffer.
     %inputReady() and %outputReady() report that a transfer finished,
     and %endInput() and %endOutput() complete it. One read and one
-    write may run at a time. Copies share that transfer. The copy that
-    started it receives the ready signal.
+    write may run at a time. %cancel() stops the transfer of this
+    stream.
 
     %protocol() is the value of the request's Upgrade header.
     %setTimeout() replaces the HTTP read and write timeout for this
-    stream. The server has already stopped that timeout when it
-    opened the stream.
+    stream. The owner has already stopped that timeout when it opened
+    the stream.
 
-    The example retains the stream and starts a read. Without
-    %retain() the server closes the connection when the signal
-    returns.
+    The example accepts the upgrade by constructing a %WebSocket on
+    the stream. A slot that does not bind a session declines it.
 
     @code
     void onUpgrade(Pt::Http::Stream& stream)
     {
-        stream.retain();
-        stream.inputReady() += Pt::slot(onInput);
-        stream.beginInput();
+        _socket.accept(stream);
+        _socket.inputReady() += Pt::slot(onInput);
+        _socket.beginReceive();
     }
     @endcode
 
     @ingroup Pt-Http-Servers
 */
 class PT_HTTP_API Stream : public Connectable
+                         , private NonCopyable
 {
     friend class Connection;
+    friend class StreamSession;
 
     public:
-        /** @brief Creates an empty stream.
-        */
-        Stream();
-
-        /** @brief Copies @a other without retaining the connection.
-        */
-        Stream(const Stream& other);
-
         /** @brief Destructor.
 
-            Does not close the stream.
+            Unbinds the session and notifies it. Does not close the
+            connection. The connection deletes this stream.
         */
         ~Stream();
 
-        /** @brief Shares the connection of @a other.
-
-            Does not retain the connection and does not close the
-            previous stream.
-        */
-        Stream& operator=(const Stream& other);
-
-        /** @brief Returns true when this handle has a connection.
+        /** @brief Returns true when the connection still owns this stream.
         */
         bool isValid() const
-        { return _state && _state->connection; }
+        { return _connection != 0; }
+
+        /** @brief Returns the bound stream session, or null.
+        */
+        StreamSession* session() const
+        { return _session; }
 
         /** @brief Returns the Upgrade header value.
         */
-        const std::string& protocol() const;
-
-        /** @brief Keeps the connection after the upgrade signal returns.
-        */
-        void retain();
-
-        /** @brief Returns true when %retain() was called.
-        */
-        bool isRetained() const;
+        const std::string& protocol() const
+        { return _protocolName; }
 
         /** @brief Ends this stream.
 
@@ -158,7 +136,7 @@ class PT_HTTP_API Stream : public Connectable
         */
         std::size_t endOutput();
 
-        /** @brief Cancels a pending transfer.
+        /** @brief Cancels a pending transfer of this stream.
         */
         void cancel();
 
@@ -168,35 +146,27 @@ class PT_HTTP_API Stream : public Connectable
 
         /** @brief Returns the signal emitted when input is ready.
         */
-        Signal<>& inputReady();
+        Signal<>& inputReady()
+        { return _inputReady; }
 
         /** @brief Returns the signal emitted when output is ready.
         */
-        Signal<>& outputReady();
+        Signal<>& outputReady()
+        { return _outputReady; }
 
-        /** @brief Returns the signal emitted when the stream is closed.
-        */
-        Signal<>& closed();
+    protected:
+        Stream(Connection& connection, const std::string& protocol);
 
-    private:
-        explicit Stream(StreamState* state);
+        void openSession(StreamSession& session);
 
-    private:
-        void onInput(System::IOBuffer&);
-
-        void onOutput(System::IOBuffer&);
-
-        void attach();
-
-        void detach();
-
-        void release();
+        void closeSession(StreamSession& session);
 
     private:
-        StreamState* _state;
+        Connection* _connection;
+        StreamSession* _session;
+        std::string _protocolName;
         Signal<> _inputReady;
         Signal<> _outputReady;
-        Signal<> _closed;
 };
 
 } // namespace Http

@@ -13,6 +13,17 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Pt-Http-test (Windows) - Debug",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/Pt-Http-test.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Pt-Forms-Demo (Windows) - Debug",
             "type": "cppvsdbg",
             "request": "launch",

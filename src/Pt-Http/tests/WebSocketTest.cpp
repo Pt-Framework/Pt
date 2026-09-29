@@ -128,6 +128,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onUpgrade(Pt::Http::Stream& stream)
         {
             _server.reset(new Pt::Http::WebSocket(stream));
+            PT_UNIT_ASSERT( stream.session() == _server.get() );
             _server->inputReady() += Pt::slot(*this, &WebSocketTest::onInput);
             _server->beginReceive();
         }

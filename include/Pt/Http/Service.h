@@ -60,11 +60,11 @@ class Request;
 
     A responder upgrades the connection by finishing the reply with
     status 101. The server keeps the TCP connection and emits
-    %upgradeRequested() on the server thread with a %Stream. The
-    responder has already been released. The slot calls
-    %Stream::retain() to keep the stream. A service with no
-    connected slot, or a slot that does not retain, declines the
-    upgrade and the server closes the connection. %Stream::protocol()
+    %upgradeRequested() on the server thread with the %Stream it
+    owns. The responder has already been released. Binding a
+    %Protocol to that stream accepts the upgrade. A service with no
+    connected slot, or a slot that does not bind a protocol, declines
+    the upgrade and the server closes the stream. %Stream::protocol()
     is the value of the request's Upgrade header. The stream buffer
     is %Stream::buffer(). %beginInput() and %beginOutput() transfer
     that buffer.
@@ -103,8 +103,8 @@ class PT_HTTP_API Service : private NonCopyable
         /** @brief Returns the signal emitted when a connection is upgraded.
 
             Emitted on the server thread after a 101 reply. The slot
-            calls %Stream::retain() to keep @a stream. The server
-            closes a stream that was not retained.
+            binds a %Protocol to @a stream to accept it. The server
+            closes a stream that has no protocol when the signal returns.
         */
         Signal<Stream&>& upgradeRequested();
 
