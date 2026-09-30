@@ -51,8 +51,8 @@ div.contents {
   max-width: 100%;
   margin-left: 0;
   margin-right: 0;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 /* Class index: name #518DC2, A–Z separators box-line, namespace muted. */
@@ -1423,8 +1423,8 @@ pre.fragment {
   background-color: var(--pt-box);
   border-color: var(--pt-box-line);
   line-height: 1.4;
-  margin-left: 24px;
-  margin-right: 24px;
+  margin-left: 16px;
+  margin-right: 16px;
   width: auto;
   max-width: none;
   box-sizing: border-box;
@@ -1433,6 +1433,70 @@ pre.fragment {
 div.fragment div.line {
   line-height: 1.4;
   min-height: 1.4em;
+}
+
+div.fragment span.keyword,
+div.fragment span.keywordflow {
+  color: #91afff;
+}
+
+div.fragment span.keywordtype,
+div.fragment span.preprocessor {
+  color: #7fc7d8;
+}
+
+div.fragment span.comment {
+  color: #9aaac9;
+}
+
+div.fragment span.stringliteral,
+div.fragment span.charliteral {
+  color: #dfbc82;
+}
+
+div.fragment a.code,
+div.fragment a.code:link,
+div.fragment a.code:visited {
+  color: #d2dcff;
+}
+
+div.fragment a.code:hover {
+  color: var(--pt-text);
+}
+
+div.fragment a.code.hl_class {
+  color: #7fc7d8;
+}
+
+div.fragment a.code.hl_enumvalue {
+  color: #dfbc82;
+}
+
+table.markdownTable {
+  margin: 20px 16px;
+  border-color: var(--pt-box-line);
+  color: var(--pt-box-text);
+}
+
+table.markdownTable th {
+  background: #273452;
+  border-color: var(--pt-box-line);
+  color: #d9e4ff;
+}
+
+table.markdownTable td {
+  background: var(--pt-box);
+  border-color: var(--pt-box-line);
+}
+
+table.markdownTable span.tt {
+  background: transparent;
+  color: var(--pt-box-text);
+}
+
+span.tt {
+  background: transparent;
+  color: #dfbc82;
 }
 
 .pt-download-note {
