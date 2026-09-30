@@ -61,7 +61,7 @@
     The example registers a Point type, binds it, runs a chunk
     that constructs a point and calls sum, and reads the result.
 
-    @code
+    @code{.cpp}
     struct Point
     {
         Point(int x_, int y_)
@@ -100,9 +100,8 @@
     pointType.define(tm);
 
     Pt::Lua::Context ctx(tm);
-    Pt::Lua::Script script(ctx,
-        "local p = Point(3, 4)\n"
-        "result = p:sum()\n");
+    Pt::Lua::Script script(ctx, "local p = Point(3, 4)\n"
+                                "result = p:sum()\n");
 
     Pt::Lua::Script::Status status = script.advance();
     while(status == Pt::Lua::Script::Yield ||

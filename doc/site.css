@@ -13,11 +13,11 @@
   --pt-panel: #1f1f1f;
   --pt-card: #1f1f1f;
   --pt-btn: #2a2a2a;
-  --pt-box: #0E1D2A;
-  --pt-box-line: #30495E;
-  --pt-box-text: #A8B7C4;
+  --pt-box: #181A22;
+  --pt-box-line: #273452;
+  --pt-box-text: #c8c8c8;
   --pt-symbol: #518DC2;
-  --pt-param: #A39274;
+  --pt-param: #c8c8c8;
   --pt-word: 26px;
   --pt-logo-cut: 10px;
   --pt-logo: calc(var(--pt-word) + 2 * var(--pt-logo-cut));
@@ -1451,13 +1451,13 @@ div.fragment span.comment {
 
 div.fragment span.stringliteral,
 div.fragment span.charliteral {
-  color: #dfbc82;
+  color: #C8BC8B;
 }
 
 div.fragment a.code,
 div.fragment a.code:link,
 div.fragment a.code:visited {
-  color: #d2dcff;
+  color: var(--pt-text);
 }
 
 div.fragment a.code:hover {
@@ -1469,7 +1469,23 @@ div.fragment a.code.hl_class {
 }
 
 div.fragment a.code.hl_enumvalue {
-  color: #dfbc82;
+  color: #C8BC8B;
+}
+
+table.fieldtable
+{
+  border-color: var(--pt-box-line);
+}
+
+table.fieldtable th
+{
+  background: var(--pt-box-line);
+  border-color: var(--pt-box-line);
+  color: var(--pt-text);
+}
+
+table.fieldtable td {
+  border-color: var(--pt-box-line);
 }
 
 table.markdownTable {
@@ -1479,9 +1495,9 @@ table.markdownTable {
 }
 
 table.markdownTable th {
-  background: #273452;
+  background: var(--pt-box-line);
   border-color: var(--pt-box-line);
-  color: #d9e4ff;
+  color: var(--pt-muted-bright);
 }
 
 table.markdownTable td {
@@ -1496,7 +1512,7 @@ table.markdownTable span.tt {
 
 span.tt {
   background: transparent;
-  color: #dfbc82;
+  color: #C8BC8B;
 }
 
 .pt-download-note {

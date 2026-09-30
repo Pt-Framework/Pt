@@ -56,17 +56,16 @@ primary button keeps the accent. Titles and bright labels are RGB(238,
 Doxygen blue never appears. A ghost button on hover lightens its fill
 and border and stays off the accent.
 
-Azure is the second color. It is one hue, 208 degrees, on a ladder.
-Red remains the saturated structure accent. Names sit on the 400 step.
-Boxes sit on 900 and 950. Code fragments and the clone box sit inset
-24px from the content edge.
+Azure is the second color. `#518DC2` is the saturated name color.
+Code and table surfaces use muted blue-grays; their text uses the
+shared bright neutral.
 
-| Step | HSL | Hex | Role |
-|---|---|---|---|
-| 950 | 208deg 50% 11% | `#0E1D2A` | Clone box and code fragments |
-| 700 | 208deg 32% 28% | `#30495E` | Border on clone and code only |
-| 400 | 208deg 48% 54% | `#518DC2` | Class index, member names, class names |
-| 300 | 208deg 16% 70% | `#A8B7C4` | Text inside the code box |
+| Role     | Hex       | Usage                                  |
+|   ---    |    ---    |                 ---                    |
+| Box fill | `#181A22` | Clone box, code fragments, table cells |
+| Box line | `#273452` | Borders on clone, code, and tables; table header fill |
+| Azure    | `#518DC2` | Class index, member names, class names   |
+| Box text | `#c8c8c8` | Text inside code boxes and table headers |
 
 Parameters in signatures are RGB(163, 146, 116) (`#A39274`).
 

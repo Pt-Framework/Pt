@@ -48,7 +48,7 @@ namespace Gfx {
 
     The example begins painting on a bitmap and fills it.
 
-    @code
+    @code{.cpp}
     Pt::Gfx::Bitmap bitmap(Pt::Gfx::SizeF(64, 64));
     Pt::Gfx::Painter painter(bitmap);
     painter.setBrush(Pt::Gfx::Brush(Pt::Gfx::Color(255, 255, 255)));
