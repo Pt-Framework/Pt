@@ -1437,7 +1437,7 @@ div.fragment div.line {
 
 div.fragment span.keyword,
 div.fragment span.keywordflow {
-  color: #91afff;
+  color: var(--pt-symbol);
 }
 
 div.fragment span.keywordtype,
