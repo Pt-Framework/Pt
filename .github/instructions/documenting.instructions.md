@@ -224,6 +224,16 @@ Write developed paragraphs. A paragraph may name several types,
 relations, or rules when they belong to the same explanation.
 Subordinate clauses are wanted when they clarify the contract.
 
+Copy only the central types that deepen the reader task into a module page.
+Do not create a page section or subsection solely for a small value type, enum,
+status, identifier, fixture, or other supporting type. Document those types
+normally in their public headers and let Doxygen expose them through the class
+reference.
+
+A supporting type may appear in an example or prose on the module page when it
+is necessary to understand the central workflow, without receiving its own
+`@subsection`.
+
 Write the group chapter first, then each class chapter, then member
 briefs.
 
@@ -271,6 +281,18 @@ class MyClass
 {
 };
 ```
+
+## Examples
+
+Every group chapter and every class chapter with a detailed description
+that explains the API must contain at least one focused `@code` example.
+
+Place the example after the opening paragraph that establishes the type or
+feature in the public model and before the detailed API, ownership, lifetime,
+error, and ordering discussion.
+
+A brief-only helper, value type, enum, alias, or fixture does not require an
+example. Its declaration documentation remains compact.
 
 # Pages
 
