@@ -177,7 +177,6 @@
             ".\\jam.bat": true
         },
         "grok.showThinking": true,
-        "grok.useCtrlEnterToSend": true,
         "grok.expandCommandOutputs": true,
         "grok.includeActiveFileByDefault": false,
         "grok.chatFontScale": 105
