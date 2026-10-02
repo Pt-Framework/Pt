@@ -52,8 +52,9 @@
     connection and calls %Service::onUpgrade() with the %Stream it
     owns. A client obtains the stream it owns from a finished 101
     reply with %Client::upgrade(). Binding a %StreamSession accepts
-    that stream. %WebSocket is one stream session and formats frames
-    into the stream.
+    that stream. %WebSocket formats frames into the stream. On the
+    server, %WebSocketSession is the application object that contains
+    one such socket for the lifetime of the stream.
 
     The rest of this chapter is the message model, then the client,
     then the server, then the WebSocket upgrade.

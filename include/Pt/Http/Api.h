@@ -43,6 +43,10 @@ class Service;
 class Servlet;
 class Stream;
 class StreamSession;
+class WebSocket;
+class WebSocketServer;
+class WebSocketService;
+class WebSocketSession;
 
 } // namespace Http
 

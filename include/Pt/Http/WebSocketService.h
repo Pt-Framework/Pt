@@ -1,92 +1,98 @@
-/*
- * Copyright (C) 2015 by Laurentiu-Gheorghe Crisan
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- */
+/* Copyright (C) 2015 by Laurentiu-Gheorghe Crisan
+   Copyright (C) 2026 by Marc Boris Duerner
+   SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
+*/
+
 #ifndef PT_HTTP_WEBSOCKETSERVICE_H
 #define PT_HTTP_WEBSOCKETSERVICE_H
 
 #include <Pt/Http/Api.h>
-#include <Pt/Http/WebSocketResponder.h>
-#include <Pt/Http/WebSocket.h>
 #include <Pt/Http/Service.h>
-#include <Pt/Signal.h>
+#include <Pt/Http/WebSocketSession.h>
+#include <Pt/Allocator.h>
 #include <Pt/Connectable.h>
-#include <vector>
 #include <cstddef>
 
 namespace Pt {
 
+namespace System {
+class EventLoop;
+}
+
 namespace Http {
 
-/** @brief HTTP service that owns accepted WebSocket connections.
+class Request;
+class Responder;
+class Stream;
+class WebSocketServer;
 
-    The responder answers a WebSocket upgrade with 101, or with 503
-    when %maxSockets() accepted sockets are already open. After the
-    101 the server calls %onUpgrade(). This service constructs the
-    %WebSocket, binds the stream, and emits %accepted(). The slot
-    receives the socket this service owns. It does not construct one
-    and does not free it.
+/** @brief Factory for WebSocket sessions.
 
-    %closed() erases the socket from this service. The destructor
-    deletes any socket still tracked. The stream and the socket only
-    clear each other's pointer.
+    %WebSocketService is the server-side factory and the endpoint
+    policy. Map it with a servlet like any other %Service. Its
+    handshake responder answers a WebSocket upgrade with 101, with
+    503 when %maxSockets() sessions are already open, or with 404
+    when the request is not a WebSocket upgrade.
+
+    This service does not keep the sessions it creates. A
+    %WebSocketServer does. The server is constructed with this
+    service and destroyed before it, so the factory is still fully
+    constructed when the last session is released. One service can
+    feed several servers. Each server releases only the sessions it
+    accepted.
+
+    After a finished 101 the HTTP server keeps the connection and
+    calls %Service::onUpgrade(). This service implements that call.
+    It forwards the stream to the %WebSocketServer registered for
+    that upgrade. The server asks %onGetSession() for a
+    %WebSocketSession and passes the %EventLoop of the stream
+    together with the stream. The session binds the stream in its
+    constructor, which accepts the upgrade. A null return, or no
+    registered server, leaves the stream unbound, and the HTTP server
+    closes it.
+
+    %onGetSession() creates the session and %onReleaseSession()
+    destroys it. The two methods must use the same allocator. The
+    %WebSocketServer calls the second while this service is still
+    alive.
+
+    %maxSockets(), %idleTimeout(), and %maxMessageSize() are endpoint
+    policy. The handshake reads the session limit. The session base
+    copies the idle timeout and the frame limit onto the socket
+    before the derived constructor runs. A session may lower those
+    socket limits. It does not raise them past the service limit.
+
+    %BasicWebSocketService is this factory for one session type.
+    Derive %WebSocketService when the session type depends on the
+    upgrade, or when the session constructor needs more than the
+    service and the loop.
 
     @ingroup Pt-Http-WebSocket
 */
-class PT_HTTP_API WebSocketService : public Pt::Http::Service
-                                   , public Pt::Connectable
+class PT_HTTP_API WebSocketService : public Service
+                                   , public Connectable
 {
+    friend class WebSocketResponder;
+
     public:
         /** @brief Default constructor.
         */
         WebSocketService();
-        
+
         /** @brief Destructor.
 
-            Deletes every socket this service still owns.
+            Does not release sessions. Each %WebSocketServer of this
+            service does that, and it is destroyed first.
         */
         ~WebSocketService();
 
-        /** @brief Returns the signal emitted when a socket is accepted.
+        /** @brief Returns the maximum number of live sessions.
 
-            Emitted on the server thread after the socket has bound
-            the stream. The socket stays valid until its owner deletes
-            it.
-        */
-        Signal<WebSocket&>& accepted();
-
-        /** @brief Returns the number of accepted sockets not yet closed.
-        */
-        std::size_t size() const;
-
-        /** @brief Returns the maximum number of accepted sockets.
+            Zero means no limit.
         */
         std::size_t maxSockets() const;
 
-        /** @brief Sets the maximum number of accepted sockets.
+        /** @brief Sets the maximum number of live sessions.
 
             A handshake above this limit is answered with 503. Zero
             means no limit.
@@ -116,22 +122,93 @@ class PT_HTTP_API WebSocketService : public Pt::Http::Service
         void setMaxMessageSize(std::size_t n);
 
     protected:
+        /** @brief Creates the handshake responder.
+        */
         virtual Responder* onGetResponder(const Request&);
 
-        virtual void onReleaseResponder(Responder* r);
+        /** @brief Destroys the handshake responder.
+        */
+        virtual void onReleaseResponder(Responder* responder);
 
-        virtual void onUpgrade(Stream& stream);
+        /** @brief Creates the session for @a stream.
+
+            @a server owns the returned session. @a loop serializes
+            @a stream. Return null to decline the upgrade.
+        */
+        virtual WebSocketSession* onGetSession(WebSocketServer& server,
+                                               System::EventLoop& loop,
+                                               Stream& stream) = 0;
+
+        /** @brief Destroys a session created by %onGetSession().
+
+            Called by the %WebSocketServer that owns the session,
+            while this service is still fully constructed.
+        */
+        virtual void onReleaseSession(WebSocketSession* session) = 0;
+
+        /** @brief Accepts or declines the upgraded stream.
+
+            Implemented by this class. A derived service uses
+            %onGetSession() instead.
+        */
+        virtual void onUpgrade(Stream& stream) final;
 
     private:
-        void onClosed(WebSocket& socket);
+        friend class WebSocketServer;
 
-        std::vector<WebSocket*> _sockets;
-        Signal<WebSocket&> _accepted;
+        /** @internal Live sessions of the registered server.
+        */
+        std::size_t sessionCount() const;
+
+        void registerServer(WebSocketServer& server);
+
+        void unregisterServer(WebSocketServer& server);
+
+        WebSocketServer* _server;
         std::size_t _maxSockets;
         std::size_t _idleTimeout;
         std::size_t _maxMessageSize;
 };
 
-}}
+/** @brief WebSocket service for one session type.
+
+    @ingroup Pt-Http-WebSocket
+*/
+template <typename S, typename Alloc = Allocator>
+class BasicWebSocketService : public WebSocketService
+{
+    public:
+        /** @brief Default constructor.
+        */
+        BasicWebSocketService()
+        { }
+
+        /** @brief Destructor.
+        */
+        ~BasicWebSocketService()
+        { }
+
+    protected:
+        virtual WebSocketSession* onGetSession(WebSocketServer& server,
+                                               System::EventLoop& loop,
+                                               Stream& stream)
+        {
+            void* memory = _alloc.allocate(sizeof(S));
+            return new(memory) S(server, loop, stream);
+        }
+
+        virtual void onReleaseSession(WebSocketSession* session)
+        {
+            session->~WebSocketSession();
+            _alloc.deallocate(session, sizeof(S));
+        }
+
+    private:
+        Alloc _alloc;
+};
+
+} // namespace Http
+
+} // namespace Pt
 
 #endif

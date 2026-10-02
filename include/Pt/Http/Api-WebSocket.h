@@ -31,22 +31,28 @@
     %endConnect() completes it and throws if the handshake failed.
 
     On the server, %WebSocketService is an HTTP %Service, mapped with
-    a servlet like any other service. Its responder answers a
-    WebSocket Upgrade request with 101 Switching Protocols, with 503
-    when the accepted-socket limit is already reached, or with 404
-    when the request is not a WebSocket upgrade. After a successful
-    upgrade the server keeps the connection and calls
-    %Service::onUpgrade(). %WebSocketService constructs the %WebSocket,
-    binds the stream, and emits %accepted(). The service owns that
-    socket. The socket does not own the connection, and the stream does
-    not own the socket. Each side clears its pointer to the other.
-    %closed() reports that the stream has ended. The service erases
-    the socket there and deletes it when the service is destroyed.
+    a servlet like any other service. It is the factory and the
+    endpoint policy. It does not keep the sessions. A %WebSocketServer
+    does, and it is constructed with the service and destroyed before
+    it. The handshake responder answers a WebSocket Upgrade request
+    with 101 Switching Protocols, with 503 when the accepted-session
+    limit is already reached, or with 404 when the request is not a
+    WebSocket upgrade. After a successful upgrade the HTTP server
+    keeps the connection and calls %Service::onUpgrade(). The
+    WebSocket server asks the service for one %WebSocketSession,
+    holds it, and passes the stream together with the loop that
+    already serializes it. The session contains one %WebSocket and
+    binds it, which accepts the upgrade. A null session, or no
+    registered WebSocket server, leaves the stream unbound, and the
+    HTTP server closes it. The socket does not own the connection,
+    and the stream does not own the socket. When the stream ends,
+    the session's %onClose() runs and the WebSocket server releases
+    the session while the service is still alive.
 
     %Stream is the upgraded channel, not the HTTP message body.
     A 101 reply is the generic HTTP upgrade. %WebSocketService is the
-    WebSocket case: %onUpgrade() runs on the server thread and binds
-    the stream before %accepted() is emitted.
+    WebSocket case of %onUpgrade(). The application derives
+    %WebSocketSession and keeps the state of that connection there.
 
     Ping and pong are control frames. %sendPing() writes a ping, and
     after a ping is received %sendPong() writes the matching pong.
@@ -73,28 +79,46 @@
     loop.run();
     @endcode
 
-    The server example receives the socket the service already owns.
-    The slot starts the receive and does not free the socket. When the
-    frame is complete, the payload is read from %body().
+    The server example is one session type. The constructor starts
+    the receive. %onInput() reads the payload from the member socket.
+    The service owns the session and releases it when the stream ends.
 
     @code
-    void onInput(Pt::Http::WebSocket& socket)
+    class EchoSession : public Pt::Http::WebSocketSession
     {
-        socket.endReceive();
-        std::string message;
-        message.resize(socket.available());
-        if( ! message.empty() )
-            socket.body().read(&message[0], message.size());
-    }
+        public:
+            EchoSession(Pt::Http::WebSocketServer& server,
+                        Pt::System::EventLoop& loop,
+                        Pt::Http::Stream& stream)
+            : Pt::Http::WebSocketSession(server, loop, stream)
+            {
+                socket().beginReceive();
+            }
 
-    void onAccepted(Pt::Http::WebSocket& socket)
-    {
-        socket.inputReady() += Pt::slot(onInput);
-        socket.beginReceive();
-    }
+        protected:
+            virtual void onInput()
+            {
+                socket().endReceive();
+                std::string message;
+                message.resize(socket().available());
+                if( ! message.empty() )
+                    socket().body().read(&message[0], message.size());
+                socket().beginReceive();
+            }
 
-    Pt::Http::WebSocketService service;
-    service.accepted() += Pt::slot(onAccepted);
+            virtual void onOutput()
+            {
+                socket().endSend();
+            }
+
+            virtual void onClose()
+            {}
+    };
+
+    typedef Pt::Http::BasicWebSocketService<EchoSession> EchoService;
+
+    EchoService service;
+    Pt::Http::WebSocketServer sockets(service);
     @endcode
 */
 

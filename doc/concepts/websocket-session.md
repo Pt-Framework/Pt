@@ -212,7 +212,9 @@ session, not the socket signal.
 class WebSocketSession : public Connectable
 {
     public:
-        WebSocketSession(WebSocketService& service, System::EventLoop& loop);
+        WebSocketSession(WebSocketServer& server,
+                         System::EventLoop& loop,
+                         Stream& stream);
         ~WebSocketSession();
 
         WebSocketService& service();
@@ -231,11 +233,13 @@ class WebSocketSession : public Connectable
 };
 ```
 
-The base constructor receives the service and the loop. It binds
-`socket()` to the stream of this upgrade, copies `maxMessageSize()`
-and `idleTimeout()` from the service onto the socket, stores the
-loop, and connects the socket signals to `onInput()`, `onOutput()`,
-and `onClose()`.
+The base constructor receives the server, the loop, and the stream.
+The service is `server.service()`.
+It binds `socket()` to that stream, copies `maxMessageSize()` and
+`idleTimeout()` from the service onto the socket, stores the loop,
+and connects the socket signals to `onInput()`, `onOutput()`, and
+`onClose()`. The stream is an argument. It is not recovered from
+thread-local state.
 
 The derived constructor runs after that. Its members are initialized,
 `socket()` is open, and `loop()` is the loop that serializes this
@@ -283,14 +287,16 @@ stream without an owner.
 
 ## WebSocketService {#wss-service}
 
-`WebSocketService` becomes the session factory, in the same way
-`Service` is the responder factory.
+`WebSocketService` is the factory and the endpoint policy. It does
+not keep the sessions it creates.
 
 ```cpp
 class WebSocketService : public Service
 {
     protected:
-        virtual WebSocketSession* onGetSession(System::EventLoop& loop) = 0;
+        virtual WebSocketSession* onGetSession(WebSocketServer& server,
+                                               System::EventLoop& loop,
+                                               Stream& stream) = 0;
         virtual void onReleaseSession(WebSocketSession* session) = 0;
 };
 ```
@@ -298,23 +304,36 @@ class WebSocketService : public Service
 `onGetSession()` creates the session. `onReleaseSession()` destroys
 it. The two must match, including the allocator, as
 `onGetResponder()` and `onReleaseResponder()` must match.
+`BasicWebSocketService<S>` is that factory for one session type.
 
-`BasicWebSocketService<S>` is that factory for one session type, using
-an allocator that defaults to `new` and `delete`. A custom service
-overrides the two methods when the session type depends on the
-upgrade, or when sessions are pooled.
+A `WebSocketServer` is the owner of the sessions. It is constructed
+with the service and destroyed before it. That construction order is
+the lifetime guarantee: when the server destructor releases the last
+session, the derived service is still fully constructed. The service
+destructor does not release sessions. One service has one registered
+server. A second server replaces the registration. The previous
+server keeps the sessions it already accepted.
 
 `onUpgrade()` stays on `Service` and stays generic. `WebSocketService`
-implements it. The implementation asks `onGetSession()` for a
-session. A null return declines the upgrade before any bind. A
-session binds in its constructor, which accepts the upgrade. The
-application does not override `onUpgrade()` to receive WebSocket
-streams.
+implements it and forwards the stream to the registered
+`WebSocketServer`. No registered server leaves the stream unbound.
+The server reads `stream.loop()`. The HTTP server has already
+activated the connection, so that loop is the loop of the upgrade.
+It then calls `onGetSession(loop, stream)`. A null return declines
+the upgrade before any bind. A session binds in its constructor,
+which accepts the upgrade. The application does not override
+`onUpgrade()` to receive WebSocket streams.
+
+The HTTP `Stream` does not know `WebSocketSession` or
+`WebSocketServer`. It knows the `WebSocket` the session bound. When
+that socket closes, the session tells the server that owns it, and
+the server releases it.
 
 `maxSockets()`, `idleTimeout()`, and `maxMessageSize()` stay on the
 service. They are endpoint policy, not per-session policy. The
 handshake responder reads `maxSockets()` and answers 503 when the
-limit is already reached. The session base reads the other two and
+number of live sessions has reached the limit. That count is
+internal to the service. There is no public `size()`. The session base reads the other two and
 applies them to the socket before the derived constructor runs. A
 session may still tighten the socket limits after that. It does not
 raise them past the service limit.
@@ -325,9 +344,10 @@ socket leaves the application with no object to put state in.
 `size()` as a count of owned sockets goes away with the socket vector.
 A service that still wants a count counts the sessions it creates.
 
-The service owns every session it creates. Destroying the service
-releases the sessions that are still open. Releasing a session closes
-its socket and therefore its stream.
+The WebSocket server owns every session it accepted. Destroying that
+server releases them while the service is still alive. Releasing a
+session closes its socket and therefore its stream. Destroying the
+service does not walk the sessions.
 
 ## Handshake responder {#wss-handshake}
 
@@ -360,16 +380,18 @@ The order on the server is fixed.
 4. The server releases the responder.
 5. A finished 101 makes the server open a `Stream` and call
    `Service::onUpgrade()` on the server thread.
-6. `WebSocketService` calls `onGetSession(loop)` with the loop that
-   serializes that stream.
+6. `WebSocketService` forwards the stream to the registered
+   `WebSocketServer`. That server reads the loop and calls
+   `onGetSession(loop, stream)`.
 7. A null session declines the stream. The server closes it.
 8. Otherwise the session constructor binds `socket()` to the stream.
    That bind accepts the upgrade.
 9. The derived constructor starts the first transfer.
 10. Frame callbacks run on the same loop until the stream ends.
 11. `onClose()` runs while the session is still alive.
-12. The service calls `onReleaseSession()`. The session destructor
-    runs. The socket is already unbound.
+12. The `WebSocketServer` calls `onReleaseSession()`. The session
+    destructor runs. The socket is already unbound. The service is
+    still alive.
 
 The server owns the connection and the stream. The service owns the
 session. The session owns the socket as a member. The socket owns
@@ -399,8 +421,11 @@ the session is what survives from one write to the next.
 class FeedSession : public WebSocketSession
 {
     public:
-        FeedSession(WebSocketService& service, System::EventLoop& loop, Feed& feed)
-        : WebSocketSession(service, loop)
+        FeedSession(WebSocketServer& server,
+                    System::EventLoop& loop,
+                    Stream& stream,
+                    Feed& feed)
+        : WebSocketSession(server, loop, stream)
         , _feed(feed)
         {
             _feed.attach(*this);
@@ -450,10 +475,10 @@ callbacks, because it is the same loop.
 
 `BasicWebSocketService<FeedSession>` cannot pass the `Feed&` unless
 the session constructor can reach the feed through `service()`. A
-session that needs constructor arguments beyond the service and the
-loop uses a small service subclass whose `onGetSession()` constructs
-`FeedSession` with those arguments. That is the same reason a custom
-`Service` exists beside `BasicService`.
+session that needs constructor arguments beyond the service, the
+loop, and the stream uses a small service subclass whose
+`onGetSession()` constructs `FeedSession` with those arguments. That
+is the same reason a custom `Service` exists beside `BasicService`.
 
 ## HTTP/2 {#wss-http2}
 
@@ -464,14 +489,14 @@ stream, not the whole connection. Other streams on that connection
 continue as HTTP.
 
 This design already matches that boundary. `Service::onUpgrade()`
-receives one `Stream`. `WebSocketService` creates one
-`WebSocketSession` for that stream. `socket()` binds that stream and
-no other. `Stream::close()` ends that stream and does not end the
-other streams of the connection.
+receives one `Stream`. `WebSocketService` reads that stream's loop
+and creates one `WebSocketSession` for that stream. `socket()` binds
+that stream and no other. `Stream::close()` ends that stream and
+does not end the other streams of the connection.
 
 HTTP/2 therefore multiplies sessions, not sockets inside one session.
-Each Extended CONNECT is a new `onGetSession()` call, a new session,
-and a new member socket. Several sessions of one connection may hold
+Each Extended CONNECT is a new `onGetSession(loop, stream)` call, a
+new session, and a new member socket. Several sessions of one connection may hold
 the same `EventLoop&`, because the server serializes those streams on
 one loop. They may also hold the same service, and through
 `service()` the same domain objects. Shared state stays on the
@@ -527,9 +552,10 @@ sessions it creates, through `onGetSession()` and
 `onReleaseSession()`. `accepted()`, the internal socket list, and
 `size()` as a count of owned sockets are removed.
 
-`WebSocket(Stream&)` is no longer an application-facing server entry.
-The session constructs the member socket and binds the stream. The
-client constructor, `beginConnect()`, and `endConnect()` stay.
+`WebSocket(Stream&)` is no longer a public constructor. The server
+entry is a protected default constructor plus a protected `accept`.
+`WebSocketSession` is the only caller. The client constructor,
+`beginConnect()`, and `endConnect()` stay public.
 
 `WebSocketResponder` stays the handshake responder. Its name stays.
 New application code derives `WebSocketSession`, not the responder.

@@ -21,6 +21,7 @@ namespace Pt {
 namespace Http {
 
 class Client;
+class WebSocketSession;
 
 
 
@@ -44,10 +45,10 @@ class Client;
     %endConnect() completes it and throws if it failed. The 101 reply
     becomes the %Stream this socket formats. After the handshake the
     socket no longer uses the client.
-    On the server, %WebSocketService constructs the socket with the
-    %Stream from %Service::onUpgrade() and emits %accepted(). Binding
-    accepts the upgrade. The server keeps the connection. The socket
-    formats that stream and does not own it.
+    On the server the application does not construct a %WebSocket.
+    %WebSocketSession contains one and binds it to the stream of the
+    upgrade. Binding accepts the upgrade. The server keeps the
+    connection. The socket formats that stream and does not own it.
 
     %beginSend() writes one frame. The opcode is the argument. The
     payload is what was written to %body() since the previous send.
@@ -70,6 +71,8 @@ class Client;
 class PT_HTTP_API WebSocket : public StreamSession
                             , public Pt::Connectable
 {
+    friend class WebSocketSession;
+
     public:
         /** @brief WebSocket frame opcode.
         */
@@ -90,19 +93,9 @@ class PT_HTTP_API WebSocket : public StreamSession
         */
         explicit WebSocket(Client& client);
 
-        /** @brief Creates a WebSocket that accepts @a stream.
-        */
-        WebSocket(Stream& stream);
-
         /** @brief Destructor.
         */
         ~WebSocket();
-
-        /** @brief Accepts an upgraded @a stream.
-
-            Binds @a stream. The server keeps the connection.
-        */
-        void accept(Stream& stream);
 
         /** @brief Begins a client handshake for @a url.
 
@@ -126,6 +119,13 @@ class PT_HTTP_API WebSocket : public StreamSession
             @throw %std::exception if the handshake failed.
         */
         void endConnect();
+
+        /** @brief Returns the client used for the handshake.
+
+            Null after a server accept, and after a finished handshake.
+        */
+        Client* client()
+        { return _client; }
 
         /** @brief Returns the payload stream.
 
@@ -218,6 +218,17 @@ class PT_HTTP_API WebSocket : public StreamSession
             restarts it.
         */
         void setIdleTimeout(std::size_t ms);
+
+    protected:
+        /** @brief Creates a server socket with no stream.
+        */
+        WebSocket();
+
+        /** @brief Accepts an upgraded @a stream.
+
+            Binds @a stream. The server keeps the connection.
+        */
+        void accept(Stream& stream);
 
     private:
         void parseUrl(const std::string& url, const std::string& origin);

@@ -99,7 +99,7 @@ WebSocket::WebSocket(Client& client)
 }
 
 
-WebSocket::WebSocket(Stream& stream)
+WebSocket::WebSocket()
 : StreamSession()
 , _client(0)
 , _isClient(false)
@@ -119,7 +119,6 @@ WebSocket::WebSocket(Stream& stream)
 , _body(_payloadBuffer)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocket::onIdleTimeout);
-    accept(stream);
 }
 
 
