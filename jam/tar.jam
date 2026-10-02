@@ -131,6 +131,9 @@ actions together TarBuild bind ARCHIVE_NAME
 
   if exist "%ARCHIVE%" del "%ARCHIVE%"
 
+  REM "." is the only directory argument GNU tar 1.13 can open on Windows.
+  REM A named directory such as "opt" fails with "Invalid argument". Passing
+  REM "." stores a "./" member, which --delete removes from every mode group.
   for %%m in ($(ARCHIVE_MODES:J= )) do (
     if exist "%TMP_DIR_FWD%/%%m" (
       if exist "%ARCHIVE%" (
@@ -150,6 +153,10 @@ actions together TarBuild bind ARCHIVE_NAME
         )
       )
     )
+  )
+
+  if exist "%ARCHIVE%" (
+    $(TAR) --delete -f "%ARCHIVE%" .
   )
 
   REM Clean up staging tree now that the archive is complete.
