@@ -49,11 +49,11 @@
     throws %AddressInUse from the listen that uses it.
 
     An HTTP connection can be upgraded. The server keeps the
-    connection and reports the %Stream it owns through
-    %Service::upgradeRequested(). A client obtains the stream it owns
-    from a finished 101 reply with %Client::upgrade(). Binding a
-    %StreamSession accepts that stream. %WebSocket is one stream
-    session and formats frames into the stream.
+    connection and calls %Service::onUpgrade() with the %Stream it
+    owns. A client obtains the stream it owns from a finished 101
+    reply with %Client::upgrade(). Binding a %StreamSession accepts
+    that stream. %WebSocket is one stream session and formats frames
+    into the stream.
 
     The rest of this chapter is the message model, then the client,
     then the server, then the WebSocket upgrade.

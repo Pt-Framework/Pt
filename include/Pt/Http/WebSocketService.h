@@ -32,16 +32,32 @@
 #include <Pt/Http/WebSocketResponder.h>
 #include <Pt/Http/WebSocket.h>
 #include <Pt/Http/Service.h>
+#include <Pt/Signal.h>
+#include <Pt/Connectable.h>
+#include <vector>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Http {
 
-/** @brief HTTP service for the WebSocket handshake.
+/** @brief HTTP service that owns accepted WebSocket connections.
+
+    The responder answers a WebSocket upgrade with 101, or with 503
+    when %maxSockets() accepted sockets are already open. After the
+    101 the server calls %onUpgrade(). This service constructs the
+    %WebSocket, binds the stream, and emits %accepted(). The slot
+    receives the socket this service owns. It does not construct one
+    and does not free it.
+
+    %closed() erases the socket from this service. The destructor
+    deletes any socket still tracked. The stream and the socket only
+    clear each other's pointer.
 
     @ingroup Pt-Http-WebSocket
 */
-class PT_HTTP_API WebSocketService : public  Pt::Http::Service
+class PT_HTTP_API WebSocketService : public Pt::Http::Service
+                                   , public Pt::Connectable
 {
     public:
         /** @brief Default constructor.
@@ -49,13 +65,71 @@ class PT_HTTP_API WebSocketService : public  Pt::Http::Service
         WebSocketService();
         
         /** @brief Destructor.
+
+            Deletes every socket this service still owns.
         */
         ~WebSocketService();
+
+        /** @brief Returns the signal emitted when a socket is accepted.
+
+            Emitted on the server thread after the socket has bound
+            the stream. The socket stays valid until its owner deletes
+            it.
+        */
+        Signal<WebSocket&>& accepted();
+
+        /** @brief Returns the number of accepted sockets not yet closed.
+        */
+        std::size_t size() const;
+
+        /** @brief Returns the maximum number of accepted sockets.
+        */
+        std::size_t maxSockets() const;
+
+        /** @brief Sets the maximum number of accepted sockets.
+
+            A handshake above this limit is answered with 503. Zero
+            means no limit.
+        */
+        void setMaxSockets(std::size_t n);
+
+        /** @brief Returns the idle timeout in milliseconds.
+        */
+        std::size_t idleTimeout() const;
+
+        /** @brief Sets the idle timeout in milliseconds.
+
+            An accepted socket is closed after @a ms without a finished
+            transfer. A finished send or receive restarts the timeout.
+            Zero disables it.
+        */
+        void setIdleTimeout(std::size_t ms);
+
+        /** @brief Returns the maximum frame payload in bytes.
+        */
+        std::size_t maxMessageSize() const;
+
+        /** @brief Sets the maximum frame payload in bytes.
+
+            A larger frame closes the socket. Zero disables the limit.
+        */
+        void setMaxMessageSize(std::size_t n);
 
     protected:
         virtual Responder* onGetResponder(const Request&);
 
         virtual void onReleaseResponder(Responder* r);
+
+        virtual void onUpgrade(Stream& stream);
+
+    private:
+        void onClosed(WebSocket& socket);
+
+        std::vector<WebSocket*> _sockets;
+        Signal<WebSocket&> _accepted;
+        std::size_t _maxSockets;
+        std::size_t _idleTimeout;
+        std::size_t _maxMessageSize;
 };
 
 }}

@@ -1,44 +1,107 @@
-# HTTP Upgrade und Websocket
+# HTTP Upgrade and WebSocket
 
-Es ist das Paradebeispiel für das "Inversion of Control" (Umkehrung der Kontrolle)-Prinzip: Der Server stellt nur die HTTP-Infrastruktur bereit, und die Applikation steuert das Verhalten rein über standardisierte HTTP-Zustände.
+HTTP Upgrade turns a successfully completed HTTP exchange into a long-lived,
+bidirectional protocol session. The HTTP server remains responsible for
+routing, authentication, logging, resource limits, and transport lifetime. A
+protocol session receives only a logical stream, never the underlying socket
+or the whole connection.
 
-## Wer macht das noch so? (Industrie-Beispiele)
+This model separates HTTP infrastructure from application protocols. The HTTP
+core knows no WebSocket frames, masking, or ping/pong semantics. WebSocket is
+one session that uses such a stream. Other protocols can use the same boundary
+when their HTTP transport supports it.
 
-Rust / hyper (Die Basis von Axum/Tokio): hyper ist einer der performantesten HTTP-Server überhaupt. Er weiß absolut nichts von WebSockets. Wenn eine Applikation ein Upgrade durchführen möchte, fügt sie der normalen HTTP-Response ein generisches Element hinzu (über das extensions-Feld des Response-Objekts). Nach dem Senden der Response prüft hyper, ob dieses Flag gesetzt ist, koppelt den I/O-Stream ab und übergibt ihn über ein OnUpgrade-Future an die WebSocket-Bibliothek (wie tokio-tungstenite).
+## Industry Examples
 
-Node.js (http & http2 Module): Wenn du in Node.js einen WebSocket-Server an einen HTTP-Server hängst, wartet die WebSocket-Bibliothek oft auf das standardmäßige upgrade-Event, das vom HTTP-Server gefeuert wird, nachdem die HTTP-Header analysiert wurden. Der Server entscheidet anhand des HTTP-Zustands, die Verbindung an die Extension weiterzureichen.
+Several HTTP stacks separate HTTP message handling from the protocol stream.
+Rust's hyper exposes an `OnUpgrade` future obtained from the request or
+response. After the upgrade succeeds, the future yields an `Upgraded`
+transport that a WebSocket library, such as tokio-tungstenite, can consume.
+Hyper itself does not parse WebSocket frames.
 
-## Warum das eine exzellente Lösung für dein Design ist
+Node.js exposes a different HTTP/1.1 boundary. Its `upgrade` event receives
+the request, a raw duplex socket, and any bytes already read after the
+headers. The event handler writes the handshake response and then owns
+protocol I/O on that socket.
 
-Dieses Design bietet eine perfekte Balance zwischen Entkopplung und Protokoll-Treue. Hier sind die wichtigsten Vorteile für deine Architektur:
+For HTTP/2, Node.js exposes an `Http2Stream` for each request rather than
+handing out the TCP socket. Extended CONNECT is enabled through the HTTP/2
+settings and uses `:protocol`; the handler responds and continues I/O on that
+one stream, while the HTTP/2 session retains ownership of the connection.
 
-1. Maximale Entkopplung (Clean Architecture)
-Dein Server bleibt zu 100 % ein reiner HTTP-Server. Er benötigt keine Abhängigkeiten zu WebSocket-Frames, Maskierung (Masking) oder Ping/Pong-Logik. Wenn morgen ein neues Protokoll über HTTP/2 oder HTTP/3 tunneln möchte (z. B. WebTransport oder SSH-over-HTTP), musst du am Core-Server keine einzige Zeile Code ändern.
+The APIs differ, but the common principle remains: HTTP decides the protocol
+transition; the extension processes the byte stream only afterwards.
 
-2. Einheitlicher Lebenszyklus
-Jeder Request – egal ob REST-API, statisches Bild oder WebSocket – durchläuft exakt dieselbe Pipeline: Mapper -> Service -> Responder.onBeginRequest(). Das macht Logging, Telemetrie, Authentifizierungs-Middleware und Ratenbegrenzung (Rate Limiting) im Server extrem einfach, da sie nicht wissen müssen, was am Ende aus dem Request wird.
+## Unified Lifecycle
 
-3. Perfekte HTTP/2-Kompatibilität (RFC 8441)
-Gerade bei HTTP/2 zeigt sich die Stärke dieses Designs. Da die TCP-Verbindung beim Server verbleiben muss, darf die Extension niemals den echten TCP-Socket anfassen. Indem der Server am Reply (CONNECT + 200) erkennt, was zu tun ist, kann er den HTTP/2-Stream-Multiplexer anweisen:
+Every request follows the same HTTP pipeline: routing, authentication, service,
+and responder. Logging, telemetry, rate limiting, and error handling therefore
+apply to upgrade requests as well as to ordinary replies.
 
-„Leite ab jetzt alle HTTP/2-DATA-Frames mit der Stream-ID X direkt an diesen Responder weiter, anstatt sie durch den HTTP-Parser zu jagen.“
+A successful upgrade reply does not end the server's responsibility. It moves
+processing from HTTP messages to a stream session:
 
-## Worauf du bei der Implementierung achten musst (Die Fallstricke)
+1. The responder creates an upgrade reply valid for the HTTP protocol in use.
+2. The server writes that reply completely and successfully.
+3. The server creates the logical stream and reports it to the responsible
+   upgrade handler.
+4. The handler accepts the stream by binding a session, or declines it.
+5. The server closes a stream that has no bound session.
 
-Damit die Lösung perfekt funktioniert, solltest du zwei Details im Server-Core beachten:
+The server owns the connection and the stream. A session owns neither socket
+nor connection; it binds exclusively to the stream. Closing the session closes
+its stream.
 
-Das Timing des Protokollwechsels:Der Server darf den Stream/Socket erst nachdem die Header des Reply vollständig und erfolgreich auf die Leitung geschrieben wurden, an den Responder übergeben (provideStream). Schreibt der Responder zu früh in den rohen Stream, vermischen sich die WebSocket-Frames mit den HTTP-Antwort-Headern, was die Verbindung korrumpiert.
-Speicher- und Timeout-Management:Normale HTTP-Requests haben im Server oft ein Read-/Write-Timeout (z. B. 30 Sekunden). Sobald der Server am Reply das Upgrade (101) oder den Tunnel (200 CONNECT) erkennt, muss er die HTTP-Timeouts für diese Verbindung/diesen Stream deaktivieren (oder stark anheben), da WebSockets für langlebige Verbindungen gedacht sind.
+## Protocol Transitions
 
-## Fazit
+### HTTP/1.1
 
-Du hast hier intuitiv ein High-End-Architekturmuster gewählt. Es hält deinen Server schlank, macht deine WebSocket-Extension modular austauschbar und löst das Problem, dass die Verbindung für HTTP/2 sicher beim Server verbleibt.
+An HTTP/1.1 upgrade is valid only when the request and successful reply contain
+the required upgrade fields. The reply uses status 101 together with
+`Connection: Upgrade` and a non-empty `Upgrade` protocol. The resulting stream
+represents the entire HTTP/1.1 connection.
 
-## Offene Punkte:
+### HTTP/2
 
-- Wie das Schnittstellen-Design des Stream-Objekts aussehen sollte, damit die
-  Extension HTTP/1-Sockets und HTTP/2-Streams identisch behandeln kann?
-- Wenn wir im Responder mit der normalen Request/Reply API dem server eine upgrade
-  signalisieren wolln, dann haben wir in Reply -> Message -> Connection schon
-  Zugriff auf viele Klassen. Kan man da was machen?
-- Soll Upgrade wirklich einen Wechsel des Thread durchführen?
+HTTP/2 uses Extended CONNECT for WebSocket and comparable protocols. After the
+endpoints have enabled Extended CONNECT, the request identifies the protocol
+through the `:protocol` pseudo-header and a successful reply has status 200.
+The resulting stream represents only the selected multiplexed HTTP/2 stream.
+Other streams on the same connection remain independent and continue to be
+processed as HTTP.
+
+HTTP/3 follows the same principle: a session owns a logical stream, not the
+underlying transport.
+
+## Stream Contract
+
+A stream is a bidirectional, asynchronous byte channel. It provides input,
+output, completion, cancellation, timeout, and a clearly defined execution
+context. It encapsulates HTTP/1.1 connections as well as multiplexed HTTP/2 or
+HTTP/3 streams. It provides no access to a socket or the whole connection.
+
+At most one transfer may be active per direction. Input and output operations
+may run concurrently. Completing or cancelling a stream affects only that
+logical stream; for multiplexed protocols, it does not end other streams.
+
+## Timing, Timeouts, and Execution
+
+The server must not forward application data for the new session until it has
+written the HTTP reply that confirms the transition completely and
+successfully. Until then, neither the session nor the upgrade handler may write
+bytes to the stream. This keeps HTTP reply data and protocol data separate.
+
+When the stream session begins, HTTP-specific request and keep-alive timeouts
+end for that stream. The session then configures its own application-level idle
+and transfer timeouts.
+
+An upgrade does not require a thread transition. All operations and callbacks
+of one stream must, however, be serialized on one clearly defined event loop or
+executor.
+
+## Upgrade Signalling
+
+The reply describes only the HTTP protocol result. It does not provide access
+to a connection or socket. The server derives the state transition from a valid
+upgrade reply and delivers the stream to the responsible handler through the
+defined upgrade boundary.

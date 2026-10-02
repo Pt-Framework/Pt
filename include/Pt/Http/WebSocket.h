@@ -10,8 +10,10 @@
 #include <Pt/Http/StreamSession.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
+#include <Pt/System/Timer.h>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <cstddef>
 
 namespace Pt {
@@ -25,10 +27,11 @@ class Client;
 /** @brief Framed messages on an HTTP stream.
 
     %WebSocket formats WebSocket frames into the stream buffer of an
-    upgraded HTTP connection. It is not an I/O device. The caller
-    writes payload into %buffer() and sends that buffer as one frame.
-    A receive parses one frame from the stream and leaves the payload
-    in the same buffer.
+    upgraded HTTP connection. It is not an I/O device. The payload is
+    %body(), an iostream, the same surface a %Message uses for its
+    body. Write that stream and send it as one frame. A receive parses
+    one frame from the connection stream and leaves the payload in
+    %body(). The connection stream buffer stays inside the socket.
 
     On the client, construct the socket with the %Client that will
     perform the handshake. The socket stores a reference and does not
@@ -41,26 +44,26 @@ class Client;
     %endConnect() completes it and throws if it failed. The 101 reply
     becomes the %Stream this socket formats. After the handshake the
     socket no longer uses the client.
-    On the server, construct the socket with the %Stream from
-    %Service::upgradeRequested(). %accept() binds that stream on a
-    socket that already exists. Binding accepts the upgrade. The
-    server keeps the connection. The socket formats that stream and
-    does not own it.
+    On the server, %WebSocketService constructs the socket with the
+    %Stream from %Service::onUpgrade() and emits %accepted(). Binding
+    accepts the upgrade. The server keeps the connection. The socket
+    formats that stream and does not own it.
 
     %beginSend() writes one frame. The opcode is the argument. The
-    payload is what was written to %buffer() since the previous send.
-    %outputReady() reports that the frame has left the stream buffer,
-    and %endSend() completes the send.
+    payload is what was written to %body() since the previous send.
+    %outputReady() reports that the frame has left the connection
+    stream buffer, and %endSend() completes the send.
 
     %beginReceive() reads one frame. %inputReady() reports that the
     frame is complete. %endReceive() completes the read. %frame() is
-    the opcode, and %buffer() then holds the payload. A short read
-    stays inside the socket until the frame is complete, so the ready
-    signal means one whole frame.
+    the opcode, and %body() then holds the payload. %available() is
+    how many of those bytes can be read. A short read stays inside
+    the socket until the frame is complete, so the ready signal means
+    one whole frame.
 
     Ping and pong are control frames. %sendPing() and %sendPong()
-    write those frames through the same stream buffer. Text and binary
-    are the data payload. Unknown is the unset frame type.
+    write those frames through the connection stream buffer. Text and
+    binary are the data payload. Unknown is the unset frame type.
 
     @ingroup Pt-Http-WebSocket
 */
@@ -76,7 +79,8 @@ class PT_HTTP_API WebSocket : public StreamSession
             Text,    ///< Text data frame
             Binary,  ///< Binary data frame
             Ping,    ///< Ping frame
-            Pong     ///< Pong frame
+            Pong,    ///< Pong frame
+            Close    ///< Close frame
         };
 
         /** @brief Creates a WebSocket that handshakes through @a client.
@@ -123,19 +127,32 @@ class PT_HTTP_API WebSocket : public StreamSession
         */
         void endConnect();
 
-        /** @brief Returns the payload buffer.
+        /** @brief Returns the payload stream.
 
             Write payload here before %beginSend(). After
-            %endReceive() this buffer holds the received payload.
+            %endReceive() this stream holds the received payload.
         */
-        std::streambuf& buffer();
+        std::iostream& body()
+        { return _body; }
+
+        /** @brief Returns how many payload bytes can be read.
+        */
+        std::size_t available() const;
+
+        /** @brief Returns how many payload bytes are waiting to be sent.
+        */
+        std::size_t pending() const;
+
+        /** @brief Drops the buffered payload.
+        */
+        void discard();
 
         /** @brief Returns the opcode of the frame last received.
         */
         Frame frame() const
         { return _frame; }
 
-        /** @brief Begins sending the payload in %buffer() as @a frame.
+        /** @brief Begins sending the payload in %body() as @a frame.
         */
         void beginSend(Frame frame);
 
@@ -159,6 +176,10 @@ class PT_HTTP_API WebSocket : public StreamSession
         */
         void sendPong();
 
+        /** @brief Sends a close frame and closes the stream.
+        */
+        void close();
+
         /** @brief Returns the signal emitted when a frame was received.
         */
         Pt::Signal<WebSocket&>& inputReady()
@@ -169,11 +190,34 @@ class PT_HTTP_API WebSocket : public StreamSession
         Pt::Signal<WebSocket&>& outputReady()
         { return _outputReady; }
 
+        /** @brief Returns the signal emitted when the stream ends.
+
+            Emitted while this socket is still alive. The stream has
+            already cleared its session pointer. Peer close, an I/O
+            error, a close frame and destruction of the stream all
+            emit it. The owner deletes this socket.
+        */
+        Pt::Signal<WebSocket&>& closed()
+        { return _closed; }
+
         /** @brief Sets the stream timeout in milliseconds.
 
             The handshake timeout is %Client::setTimeout().
         */
         void setTimeout(std::size_t timeout);
+
+        /** @brief Closes the stream when a frame exceeds @a maxSize.
+
+            Zero disables the limit.
+        */
+        void setMaxMessageSize(std::size_t maxSize);
+
+        /** @brief Closes the stream after @a ms without a finished transfer.
+
+            Zero disables the idle timeout. A finished send or receive
+            restarts it.
+        */
+        void setIdleTimeout(std::size_t ms);
 
     private:
         void parseUrl(const std::string& url, const std::string& origin);
@@ -200,6 +244,10 @@ class PT_HTTP_API WebSocket : public StreamSession
 
         bool parseAvailable();
 
+        void failStream();
+
+        void onIdleTimeout();
+
     private:
         enum State
         {
@@ -219,7 +267,11 @@ class PT_HTTP_API WebSocket : public StreamSession
         Pt::Signal<WebSocket&> _connected;
         Pt::Signal<WebSocket&> _inputReady;
         Pt::Signal<WebSocket&> _outputReady;
+        Pt::Signal<WebSocket&> _closed;
         std::size_t _timeout;
+        std::size_t _maxMessageSize;
+        std::size_t _idleTimeout;
+        System::Timer _idleTimer;
         bool _error;
         State _state;
         Frame _frame;
@@ -232,6 +284,7 @@ class PT_HTTP_API WebSocket : public StreamSession
         std::vector<char> _payload;
         class PayloadBuffer;
         PayloadBuffer* _payloadBuffer;
+        std::iostream _body;
 };
 
 } // namespace Http

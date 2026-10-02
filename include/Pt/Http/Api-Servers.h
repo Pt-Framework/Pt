@@ -35,13 +35,12 @@
     and the rest of the request is ignored.
 
     A finished reply with status 101 upgrades the connection. The
-    server keeps the connection and emits
-    %Service::upgradeRequested() on the server thread with the
-    %Stream it owns. Binding a %StreamSession to that stream accepts the
-    upgrade. A slot that leaves the stream unbound declines it, and
-    the server closes the stream. %Stream::protocol() is the value of
-    the request's Upgrade header. %Stream::buffer() is the byte buffer
-    of that channel.
+    server keeps the connection and calls %Service::onUpgrade() on
+    the server thread with the %Stream it owns. Binding a
+    %StreamSession to that stream accepts the upgrade. A service that
+    leaves the stream unbound declines it, and the server closes the
+    stream. %Stream::protocol() is the value of the request's Upgrade
+    header. %Stream::buffer() is the byte buffer of that channel.
 
     All server I/O is asynchronous, so the server needs an %EventLoop,
     passed to a constructor or to %setActive(). %listen() binds the

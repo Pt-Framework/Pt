@@ -887,9 +887,16 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
 
         Stream& stream = conn->openStream(protocol);
 
-        service->upgradeRequested().send(stream);
+        try
+        {
+            service->onUpgrade(stream);
+        }
+        catch(...)
+        {
+            stream.close();
+            continue;
+        }
 
-        // Close unused orphaned streams
         if( ! stream.session() )
         {
             stream.close();

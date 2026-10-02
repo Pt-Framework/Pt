@@ -124,6 +124,15 @@ void Stream::setTimeout(std::size_t ms)
     _connection->setStreamTimeout(ms);
 }
 
+
+System::EventLoop* Stream::loop() const
+{
+    if( ! _connection )
+        return 0;
+
+    return _connection->loop();
+}
+
 } // namespace Http
 
 } // namespace Pt

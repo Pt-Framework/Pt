@@ -35,8 +35,6 @@
 #include <Pt/Types.h>
 #include <Pt/Allocator.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/Signal.h>
-#include <string>
 
 namespace Pt {
 
@@ -59,15 +57,14 @@ class Request;
     when responders are pooled.
 
     A responder upgrades the connection by finishing the reply with
-    status 101. The server keeps the TCP connection and emits
-    %upgradeRequested() on the server thread with the %Stream it
-    owns. The responder has already been released. Binding a
-    %Protocol to that stream accepts the upgrade. A service with no
-    connected slot, or a slot that does not bind a protocol, declines
-    the upgrade and the server closes the stream. %Stream::protocol()
-    is the value of the request's Upgrade header. The stream buffer
-    is %Stream::buffer(). %beginInput() and %beginOutput() transfer
-    that buffer.
+    status 101. The server keeps the TCP connection and calls
+    %onUpgrade() on the server thread with the %Stream it owns. The
+    responder has already been released. Binding a %StreamSession to
+    that stream accepts the upgrade. The empty base implementation
+    leaves the stream unbound, and the server closes it.
+    %Stream::protocol() is the value of the request's Upgrade header.
+    The stream buffer is %Stream::buffer(). %beginInput() and
+    %beginOutput() transfer that buffer.
 
     The example is the usual factory: a %BasicService for a responder
     type. The equivalent hand-written service implements
@@ -100,14 +97,6 @@ class PT_HTTP_API Service : private NonCopyable
         */
         void releaseResponder(Responder*);
 
-        /** @brief Returns the signal emitted when a connection is upgraded.
-
-            Emitted on the server thread after a 101 reply. The slot
-            binds a %Protocol to @a stream to accept it. The server
-            closes a stream that has no protocol when the signal returns.
-        */
-        Signal<Stream&>& upgradeRequested();
-
     protected:
         /** @brief Creates a responder to handle request received by a server.
         */
@@ -117,13 +106,22 @@ class PT_HTTP_API Service : private NonCopyable
         */
         virtual void onReleaseResponder(Responder*) = 0;
 
+        /** @brief Called when a 101 reply has upgraded a connection.
+
+            Runs on the server thread with the %Stream the server owns.
+            The responder has already been released. Bind a
+            %StreamSession to @a stream to accept it. The empty
+            implementation leaves the stream unbound, and the server
+            closes it.
+        */
+        virtual void onUpgrade(Stream& stream);
+
     private:
         // service specific options need to be set in Service ctor so it can
         // be used concurrently by server threads without locking
         Pt::varint_t _r0;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
-        Signal<Stream&> _upgradeRequested;
 };
 
 /** @brief Basic HTTP service implementation.

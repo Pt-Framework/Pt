@@ -26,17 +26,75 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include <Pt/Http/WebSocketService.h>
+#include <algorithm>
 
 namespace Pt {
 namespace Http {
 
 WebSocketService::WebSocketService()
+: _maxSockets(1024)
+, _idleTimeout(60000)
+, _maxMessageSize(1024 * 1024)
 {
 }
 
 
 WebSocketService::~WebSocketService()
 {
+    while( ! _sockets.empty() )
+    {
+        WebSocket* socket = _sockets.back();
+        _sockets.pop_back();
+        delete socket;
+    }
+}
+
+
+Signal<WebSocket&>& WebSocketService::accepted()
+{
+    return _accepted;
+}
+
+
+std::size_t WebSocketService::size() const
+{
+    return _sockets.size();
+}
+
+
+std::size_t WebSocketService::maxSockets() const
+{
+    return _maxSockets;
+}
+
+
+void WebSocketService::setMaxSockets(std::size_t n)
+{
+    _maxSockets = n;
+}
+
+
+std::size_t WebSocketService::idleTimeout() const
+{
+    return _idleTimeout;
+}
+
+
+void WebSocketService::setIdleTimeout(std::size_t ms)
+{
+    _idleTimeout = ms;
+}
+
+
+std::size_t WebSocketService::maxMessageSize() const
+{
+    return _maxMessageSize;
+}
+
+
+void WebSocketService::setMaxMessageSize(std::size_t n)
+{
+    _maxMessageSize = n;
 }
 
 Responder* WebSocketService::onGetResponder(const Request&)
@@ -47,6 +105,28 @@ Responder* WebSocketService::onGetResponder(const Request&)
 void WebSocketService::onReleaseResponder(Responder* r)
 {
     delete r;
+}
+
+
+void WebSocketService::onUpgrade(Stream& stream)
+{
+    WebSocket* socket = new WebSocket(stream);
+    socket->setMaxMessageSize(_maxMessageSize);
+    socket->setIdleTimeout(_idleTimeout);
+    socket->closed() += Pt::slot(*this, &WebSocketService::onClosed);
+
+    _sockets.push_back(socket);
+    _accepted.send(*socket);
+}
+
+
+void WebSocketService::onClosed(WebSocket& socket)
+{
+    std::vector<WebSocket*>::iterator it =
+        std::find(_sockets.begin(), _sockets.end(), &socket);
+
+    if(it != _sockets.end())
+        _sockets.erase(it);
 }
 
 }}

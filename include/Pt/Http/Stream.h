@@ -15,6 +15,10 @@
 
 namespace Pt {
 
+namespace System {
+class EventLoop;
+}
+
 namespace Http {
 
 class Connection;
@@ -32,14 +36,14 @@ class StreamSession;
     The connection creates the stream after the 101 reply has been
     written, and it deletes the stream. This type is not copyable and
     has no public constructor. The server reports it through
-    %Service::upgradeRequested(). The client reports it through
+    %Service::onUpgrade(). The client reports it through
     %Client::upgrade(). Both return the stream the owner already holds.
 
     A %StreamSession is the external peer. The stream stores one session
     pointer, and the session stores one stream pointer. Binding that
     peer accepts the upgrade. A second bind throws %std::logic_error.
     On the server, a stream that still has no session after
-    %upgradeRequested() returns is declined, and the server closes it.
+    %onUpgrade() returns is declined, and the server closes it.
     %WebSocket is one session type that formats frames into %buffer().
 
     %close() ends this stream. It clears the session pointer first
@@ -66,7 +70,7 @@ class StreamSession;
     the stream.
 
     The example accepts the upgrade by constructing a %WebSocket on
-    the stream. A slot that does not bind a session declines it.
+    the stream. A service that does not bind a session declines it.
 
     @code
     void onUpgrade(Pt::Http::Stream& stream)
@@ -143,6 +147,12 @@ class PT_HTTP_API Stream : public Connectable
         /** @brief Sets the stream timeout in milliseconds.
         */
         void setTimeout(std::size_t ms);
+
+        /** @brief Returns the event loop of the owning connection.
+
+            Returns null after the stream has been closed.
+        */
+        System::EventLoop* loop() const;
 
         /** @brief Returns the signal emitted when input is ready.
         */
