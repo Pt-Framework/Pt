@@ -890,15 +890,13 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         try
         {
             service->onUpgrade(stream);
-        }
-        catch(...)
-        {
-            stream.close();
-            continue;
-        }
 
-        if( ! stream.session() )
+            if( ! stream.session() )
+                throw std::logic_error("stream not accepted");
+        }
+        catch(const std::exception& e)
         {
+            PT_LOG_WARN( "upgrade failed " << protocol << "): " << e.what() );
             stream.close();
             continue;
         }
