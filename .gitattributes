@@ -25,6 +25,7 @@
 *.targets          text eol=crlf
 
 *.exe      binary
+jam/jam-linux-x64 binary
 *.zip      binary
 *.pdf      binary
 *.pptx     binary

@@ -29,4 +29,5 @@ hosts, the other one named jam.bat runs on windows based build hosts.
 These scripts bootstrap and run the jam executable, so that jam executables
 do not have to be included for all possible build hosts, but rather built
 on demand. A precompiled version for windows hosts is distributed with
-the scripts named jam.exe.
+the scripts named jam.exe. Linux x64 hosts use the static binary
+jam/jam-linux-x64; other hosts still build jam on first use.
