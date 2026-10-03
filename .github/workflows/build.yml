@@ -14,10 +14,10 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Configure Debug
-        run: .\jam.bat configure -sCONFIG=debug --debug
+        run: .\jam.bat configure -sCONFIG=debug --debug --stdc++=20
 
       - name: Build
-        run: .\jam.bat -q -j6
+        run: .\jam.bat -q -j8
 
   Ubuntu-2024-Debug:
     runs-on: ubuntu-24.04
@@ -25,12 +25,12 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Configure Debug
-        run: ./jam.sh configure -sCONFIG=debug --debug
+        run: ./jam.sh configure -sCONFIG=debug --debug --stdc++=20
 
       - name: Build
-        run: ./jam.sh -q -j6
+        run: ./jam.sh -q -j8
 
-  MacOS-14-Debug:
+  MacOS-15-Debug:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v6
@@ -39,4 +39,4 @@ jobs:
         run: ./jam.sh configure -sCONFIG=debug --debug --stdc++=20
 
       - name: Build
-        run: ./jam.sh -q -j6
+        run: ./jam.sh -q -j8
