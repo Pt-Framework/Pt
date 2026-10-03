@@ -7,6 +7,11 @@ JAM_SOURCES="./builtins.c ./class.c ./command.c ./compile.c ./constants.c ./debu
 
 #use -DPT_MCHECK for memory usage statistics
 
+# Prebuilt static glibc binary. Other hosts still bootstrap from jam/src.
+if test "$(uname -s)" = "Linux" && test "$(uname -m)" = "x86_64" && test -x ./jam/jam-linux-x64; then
+    exec ./jam/jam-linux-x64 "$@"
+fi
+
 if test ! -f ./jam100.bin; then
     echo "Building jam executable version 1.00..."
     cd jam/src
@@ -15,4 +20,4 @@ if test ! -f ./jam100.bin; then
     echo "Built jam100.bin"
 fi
 
-./jam100.bin $*
+./jam100.bin "$@"
