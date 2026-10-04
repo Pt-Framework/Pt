@@ -3000,6 +3000,9 @@
     <ClInclude Include="..\..\include\Pt\Http\WebSocket.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketFrame.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Sha1.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -5762,6 +5765,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\WebSocket.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketFrame.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="Sha1.cpp">

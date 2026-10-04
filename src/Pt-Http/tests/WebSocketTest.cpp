@@ -11,6 +11,7 @@
 #include "Pt/Http/Service.h"
 #include "Pt/Http/Responder.h"
 #include "Pt/Http/WebSocket.h"
+#include "Pt/Http/WebSocketFrame.h"
 #include "Pt/Http/WebSocketService.h"
 #include "Pt/Http/WebSocketServer.h"
 #include "Pt/Http/WebSocketSession.h"
@@ -67,7 +68,7 @@ class RecordSession : public Pt::Http::WebSocketSession
                       Pt::System::EventLoop& loop,
                       Pt::Http::Stream& stream,
                       std::string& message,
-                      Pt::Http::WebSocket::Frame& frame,
+                      Pt::Http::WebSocketFrame::Type& frame,
                       bool& received,
                       bool& closed,
                       Pt::System::EventLoop& exitLoop)
@@ -86,9 +87,9 @@ class RecordSession : public Pt::Http::WebSocketSession
         {
             socket().endReceive();
 
-            _message->assign( std::istreambuf_iterator<char>( socket().body() ),
+            _message->assign( std::istreambuf_iterator<char>( socket().input().body() ),
                               std::istreambuf_iterator<char>() );
-            *_frame = socket().frame();
+            *_frame = socket().input().type();
             *_received = true;
             _exitLoop->exit();
         }
@@ -106,7 +107,7 @@ class RecordSession : public Pt::Http::WebSocketSession
 
     private:
         std::string* _message;
-        Pt::Http::WebSocket::Frame* _frame;
+        Pt::Http::WebSocketFrame::Type* _frame;
         bool* _received;
         bool* _closed;
         Pt::System::EventLoop* _exitLoop;
@@ -116,7 +117,7 @@ class RecordService : public Pt::Http::WebSocketService
 {
     public:
         RecordService(std::string& message,
-                      Pt::Http::WebSocket::Frame& frame,
+                      Pt::Http::WebSocketFrame::Type& frame,
                       bool& received,
                       bool& closed,
                       Pt::System::EventLoop& loop)
@@ -156,7 +157,7 @@ class RecordService : public Pt::Http::WebSocketService
 
     private:
         std::string* _message;
-        Pt::Http::WebSocket::Frame* _frame;
+        Pt::Http::WebSocketFrame::Type* _frame;
         bool* _received;
         bool* _closed;
         Pt::System::EventLoop* _loop;
@@ -288,8 +289,9 @@ class PushSession : public Pt::Http::WebSocketSession
                     Pt::Http::Stream& stream)
         : Pt::Http::WebSocketSession(server, loop, stream)
         {
-            socket().body() << "feed";
-            socket().beginSend(Pt::Http::WebSocket::Text);
+            socket().output().setType(Pt::Http::WebSocketFrame::Text);
+            socket().output().body() << "feed";
+            socket().beginSend();
         }
 
     protected:
@@ -318,7 +320,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _declined(false)
         , _closed(false)
         , _status(0)
-        , _frame(Pt::Http::WebSocket::Unknown)
+        , _frame(Pt::Http::WebSocketFrame::Text)
         , _limitSocket(0)
         {
             registerMethod("Text", *this, &WebSocketTest::Text);
@@ -340,7 +342,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _status = 0;
             _limitSocket = 0;
             _message.clear();
-            _frame = Pt::Http::WebSocket::Unknown;
+            _frame = Pt::Http::WebSocketFrame::Text;
 
             _exitTimer.setActive(*_loop);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
@@ -375,14 +377,16 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(_received);
             PT_UNIT_ASSERT_EQUALS(_message, "hello");
-            PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocket::Text);
+            PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocketFrame::Text);
         }
 
         void onConnected(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.body() << "hello";
-            socket.beginSend(Pt::Http::WebSocket::Text);
+            Pt::Http::WebSocketFrame& out = socket.output();
+            out.setType(Pt::Http::WebSocketFrame::Text);
+            out.body() << "hello";
+            socket.beginSend();
         }
 
     protected:
@@ -541,7 +545,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(_received);
             PT_UNIT_ASSERT_EQUALS(_message, "feed");
-            PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocket::Text);
+            PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocketFrame::Text);
         }
 
         void onPushConnected(Pt::Http::WebSocket& socket)
@@ -553,9 +557,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onPushInput(Pt::Http::WebSocket& socket)
         {
             socket.endReceive();
-            _message.assign( std::istreambuf_iterator<char>( socket.body() ),
+            _message.assign( std::istreambuf_iterator<char>( socket.input().body() ),
                              std::istreambuf_iterator<char>() );
-            _frame = socket.frame();
+            _frame = socket.input().type();
             _received = true;
             _loop->exit();
         }
@@ -615,8 +619,58 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _declined;
         bool _closed;
         unsigned _status;
-        Pt::Http::WebSocket::Frame _frame;
+        Pt::Http::WebSocketFrame::Type _frame;
         Pt::Http::WebSocket* _limitSocket;
 };
 
 Pt::Unit::RegisterTest<WebSocketTest> register_HttpWebSocketTest;
+
+
+class WebSocketFrameTest : public Pt::Unit::TestSuite
+{
+    public:
+        WebSocketFrameTest()
+        : Pt::Unit::TestSuite("Pt::Http::WebSocketFrameTest")
+        {
+            registerMethod("Clear", *this, &WebSocketFrameTest::Clear);
+            registerMethod("Close", *this, &WebSocketFrameTest::Close);
+        }
+
+        void Clear()
+        {
+            Pt::Http::WebSocketFrame frame;
+            PT_UNIT_ASSERT_EQUALS(frame.type(), Pt::Http::WebSocketFrame::Text);
+            PT_UNIT_ASSERT(frame.fin());
+            PT_UNIT_ASSERT_EQUALS(frame.pending(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(frame.closeCode(), static_cast<unsigned short>(0));
+
+            frame.setType(Pt::Http::WebSocketFrame::Binary);
+            frame.setFin(false);
+            frame.body() << "abc";
+            PT_UNIT_ASSERT_EQUALS(frame.pending(), static_cast<std::size_t>(3));
+
+            frame.discard();
+            PT_UNIT_ASSERT_EQUALS(frame.type(), Pt::Http::WebSocketFrame::Binary);
+            PT_UNIT_ASSERT( ! frame.fin() );
+            PT_UNIT_ASSERT_EQUALS(frame.pending(), static_cast<std::size_t>(0));
+
+            frame.clear();
+            PT_UNIT_ASSERT_EQUALS(frame.type(), Pt::Http::WebSocketFrame::Text);
+            PT_UNIT_ASSERT(frame.fin());
+        }
+
+        void Close()
+        {
+            Pt::Http::WebSocketFrame frame;
+            frame.setCloseCode(1001);
+            frame.setCloseReason("bye");
+            PT_UNIT_ASSERT_EQUALS(frame.closeCode(), static_cast<unsigned short>(0));
+            PT_UNIT_ASSERT(frame.closeReason().empty());
+
+            frame.setType(Pt::Http::WebSocketFrame::Close);
+            PT_UNIT_ASSERT_EQUALS(frame.closeCode(), static_cast<unsigned short>(1001));
+            PT_UNIT_ASSERT_EQUALS(frame.closeReason(), std::string("bye"));
+        }
+};
+
+Pt::Unit::RegisterTest<WebSocketFrameTest> register_HttpWebSocketFrameTest;

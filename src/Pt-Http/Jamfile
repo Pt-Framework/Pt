@@ -22,6 +22,7 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         StreamSession.cpp
                         Stream.cpp
                         WebSocket.cpp
+                        WebSocketFrame.cpp
                         WebSocketResponder.cpp
                         WebSocketServer.cpp
                         WebSocketService.cpp

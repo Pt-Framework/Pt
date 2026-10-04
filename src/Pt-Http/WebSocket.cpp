@@ -23,57 +23,16 @@ namespace Pt {
 
 namespace Http {
 
-class WebSocket::PayloadBuffer : public std::streambuf
+namespace {
+
+bool isControl(WebSocketFrame::Type type)
 {
-    public:
-        explicit PayloadBuffer(std::vector<char>& payload)
-        : _payload(&payload)
-        {
-        }
+    return type == WebSocketFrame::Close ||
+           type == WebSocketFrame::Ping ||
+           type == WebSocketFrame::Pong;
+}
 
-        void reset()
-        {
-            _payload->clear();
-            setp(0, 0);
-            setg(0, 0, 0);
-        }
-
-        void prepareGet()
-        {
-            if( _payload->empty() )
-            {
-                setg(0, 0, 0);
-                return;
-            }
-
-            setg(&(*_payload)[0], &(*_payload)[0], &(*_payload)[0] + _payload->size());
-        }
-
-    protected:
-        virtual int_type overflow(int_type ch)
-        {
-            if( ch == traits_type::eof() )
-                return traits_type::not_eof(ch);
-
-            std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase()) : _payload->size();
-            _payload->push_back( static_cast<char>(ch) );
-            setp(&(*_payload)[0], &(*_payload)[0] + _payload->size());
-            pbump( static_cast<int>(off + 1) );
-            return ch;
-        }
-
-        virtual std::streamsize xsputn(const char* data, std::streamsize n)
-        {
-            std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase()) : _payload->size();
-            _payload->insert(_payload->end(), data, data + n);
-            setp(&(*_payload)[0], &(*_payload)[0] + _payload->size());
-            pbump( static_cast<int>(off + static_cast<std::size_t>(n)) );
-            return n;
-        }
-
-    private:
-        std::vector<char>* _payload;
-};
+} // namespace
 
 
 WebSocket::WebSocket(Client& client)
@@ -85,15 +44,17 @@ WebSocket::WebSocket(Client& client)
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
 , _error(false)
+, _outputActive(false)
+, _inputActive(false)
+, _peerClose(false)
 , _state(Idle)
-, _frame(Unknown)
+, _fin(true)
+, _frame(WebSocketFrame::Text)
 , _masked(false)
 , _mask(0)
 , _payloadSize(0)
 , _payloadGot(0)
 , _headerNeed(2)
-, _payloadBuffer(new PayloadBuffer(_payload))
-, _body(_payloadBuffer)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocket::onIdleTimeout);
 }
@@ -108,15 +69,17 @@ WebSocket::WebSocket()
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
 , _error(false)
+, _outputActive(false)
+, _inputActive(false)
+, _peerClose(false)
 , _state(Idle)
-, _frame(Unknown)
+, _fin(true)
+, _frame(WebSocketFrame::Text)
 , _masked(false)
 , _mask(0)
 , _payloadSize(0)
 , _payloadGot(0)
 , _headerNeed(2)
-, _payloadBuffer(new PayloadBuffer(_payload))
-, _body(_payloadBuffer)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocket::onIdleTimeout);
 }
@@ -124,9 +87,13 @@ WebSocket::WebSocket()
 
 WebSocket::~WebSocket()
 {
-    close();
-    _body.rdbuf(0);
-    delete _payloadBuffer;
+    try
+    {
+        shutdown( ! _outputActive );
+    }
+    catch(...)
+    {
+    }
 }
 
 
@@ -240,39 +207,27 @@ void WebSocket::onReply(Client& client)
 }
 
 
-std::size_t WebSocket::available() const
-{
-    std::streambuf* sb = _body.rdbuf();
-    if( ! sb )
-        return 0;
-
-    std::streamsize n = sb->in_avail();
-    return n > 0 ? static_cast<std::size_t>(n) : 0;
-}
-
-
-std::size_t WebSocket::pending() const
-{
-    return _payload.size();
-}
-
-
-void WebSocket::discard()
-{
-    _payloadBuffer->reset();
-    _body.clear();
-}
-
-
-void WebSocket::beginSend(Frame frame)
+void WebSocket::beginSend()
 {
     Stream* stream = this->stream();
     if( ! stream )
         throw std::logic_error("WebSocket has no stream");
 
-    _state = Sending;
-    writeFrame(frame, _payload.empty() ? 0 : &_payload[0], _payload.size());
-    _payloadBuffer->reset();
+    if(_outputActive)
+        throw std::logic_error("WebSocket output transfer is active");
+
+    if( isControl(_output.type()) && ! _output.fin() )
+        throw std::logic_error("WebSocket control frame must be final");
+
+    if(_output.type() == WebSocketFrame::Close)
+        _output.composeClosePayload();
+
+    if( isControl(_output.type()) && _output.size() > 125 )
+        throw std::logic_error("WebSocket control frame is too large");
+
+    _outputActive = true;
+    _output.setBusy(true);
+    writeFrame(_output.type(), _output.fin(), _output.data(), _output.size());
     stream->beginOutput();
 }
 
@@ -290,7 +245,8 @@ void WebSocket::endSend()
         throw std::logic_error("WebSocket has no stream");
 
     stream->endOutput();
-    _state = Idle;
+    _outputActive = false;
+    _output.setBusy(false);
 }
 
 
@@ -299,14 +255,20 @@ void WebSocket::beginReceive()
     if( ! stream() )
         throw std::logic_error("WebSocket has no stream");
 
-    _frame = Unknown;
-    _payload.clear();
-    _payloadBuffer->reset();
+    if(_inputActive)
+        throw std::logic_error("WebSocket input transfer is active");
+
+    _peerClose = false;
     _header.clear();
+    _payload.clear();
     _payloadSize = 0;
     _payloadGot = 0;
     _headerNeed = 2;
     _masked = false;
+    _fin = true;
+    _frame = WebSocketFrame::Text;
+    _inputActive = true;
+    _input.setBusy(true);
     _state = ReceiveHeader;
     beginFrameRead();
 }
@@ -320,41 +282,55 @@ void WebSocket::endReceive()
     if(_error)
         throw std::runtime_error("WebSocket receive failed");
 
-    _payloadBuffer->prepareGet();
+    _inputActive = false;
+    _input.setBusy(false);
 }
 
 
 void WebSocket::sendPing()
 {
-    Stream* stream = this->stream();
-    if( ! stream )
-        throw std::logic_error("WebSocket has no stream");
+    if(_outputActive)
+        throw std::logic_error("WebSocket output transfer is active");
 
-    writeFrame(Ping, 0, 0);
-    stream->beginOutput();
-    stream->endOutput();
+    _output.setType(WebSocketFrame::Ping);
+    _output.setFin(true);
+    beginSend();
 }
 
 
 void WebSocket::sendPong()
 {
-    Stream* stream = this->stream();
-    if( ! stream )
-        throw std::logic_error("WebSocket has no stream");
+    if(_outputActive)
+        throw std::logic_error("WebSocket output transfer is active");
 
-    writeFrame(Pong, 0, 0);
-    stream->beginOutput();
-    stream->endOutput();
+    _output.setType(WebSocketFrame::Pong);
+    _output.setFin(true);
+    beginSend();
 }
 
 
 void WebSocket::close()
 {
-    if( Stream* stream = this->stream() )
+    if(_outputActive)
+        throw std::logic_error("WebSocket output transfer is active");
+
+    shutdown(true);
+}
+
+
+void WebSocket::shutdown(bool sendClose)
+{
+    if( sendClose )
     {
-        writeFrame(Close, 0, 0);
-        stream->beginOutput();
-        stream->endOutput();
+        if( Stream* stream = this->stream() )
+        {
+            _output.setType(WebSocketFrame::Close);
+            _output.setFin(true);
+            _output.composeClosePayload();
+            writeFrame(_output.type(), _output.fin(), _output.data(), _output.size());
+            stream->beginOutput();
+            stream->endOutput();
+        }
     }
 
     StreamSession::close();
@@ -406,6 +382,10 @@ void WebSocket::onCloseStream(Stream&)
 {
     _error = true;
     _state = Idle;
+    _inputActive = false;
+    _outputActive = false;
+    _input.setBusy(false);
+    _output.setBusy(false);
     _closed.send(*this);
 }
 
@@ -414,6 +394,10 @@ void WebSocket::failStream()
 {
     _error = true;
     _state = Idle;
+    _inputActive = false;
+    _outputActive = false;
+    _input.setBusy(false);
+    _output.setBusy(false);
 
     if( Stream* stream = this->stream() )
         stream->close();
@@ -466,7 +450,8 @@ Pt::uint32_t WebSocket::createMask()
 }
 
 
-void WebSocket::writeFrame(Frame frame, const char* payload, std::size_t n)
+void WebSocket::writeFrame(WebSocketFrame::Type type, bool fin,
+                           const char* payload, std::size_t n)
 {
     Stream* stream = this->stream();
     std::streambuf* buf = stream ? stream->buffer() : 0;
@@ -476,17 +461,17 @@ void WebSocket::writeFrame(Frame frame, const char* payload, std::size_t n)
     char header[14];
     std::size_t headerLen = 2;
 
-    header[0] = (char)0x80;
-    if(frame == Text)
+    header[0] = fin ? (char)0x80 : 0;
+    if(type == WebSocketFrame::Text)
         header[0] |= 0x01;
-    else if(frame == Binary)
+    else if(type == WebSocketFrame::Binary)
         header[0] |= 0x02;
-    else if(frame == Ping)
-        header[0] |= 0x09;
-    else if(frame == Pong)
-        header[0] |= 0x0A;
-    else if(frame == Close)
+    else if(type == WebSocketFrame::Close)
         header[0] |= 0x08;
+    else if(type == WebSocketFrame::Ping)
+        header[0] |= 0x09;
+    else if(type == WebSocketFrame::Pong)
+        header[0] |= 0x0A;
 
     header[1] = _isClient ? (char)0x80 : 0;
 
@@ -578,25 +563,58 @@ bool WebSocket::parseAvailable()
 
             if(_state == ReceiveHeader)
             {
-                unsigned opcode = static_cast<unsigned char>(_header[0]) & 0x0F;
-                if(opcode == 0x01)
-                    _frame = Text;
-                else if(opcode == 0x02)
-                    _frame = Binary;
-                else if(opcode == 0x09)
-                    _frame = Ping;
-                else if(opcode == 0x0A)
-                    _frame = Pong;
-                else if(opcode == 0x08)
+                unsigned char b0 = static_cast<unsigned char>(_header[0]);
+                if( (b0 & 0x70) != 0 )
                 {
                     failStream();
                     return true;
                 }
+
+                _fin = (b0 & 0x80) != 0;
+                unsigned opcode = b0 & 0x0F;
+                if(opcode == 0x00)
+                    _frame = WebSocketFrame::Continuation;
+                else if(opcode == 0x01)
+                    _frame = WebSocketFrame::Text;
+                else if(opcode == 0x02)
+                    _frame = WebSocketFrame::Binary;
+                else if(opcode == 0x08)
+                    _frame = WebSocketFrame::Close;
+                else if(opcode == 0x09)
+                    _frame = WebSocketFrame::Ping;
+                else if(opcode == 0x0A)
+                    _frame = WebSocketFrame::Pong;
                 else
-                    _frame = Unknown;
+                {
+                    failStream();
+                    return true;
+                }
+
+                if( isControl(_frame) && ! _fin )
+                {
+                    failStream();
+                    return true;
+                }
 
                 _masked = (_header[1] & 0x80) != 0;
+                if(_isClient && _masked)
+                {
+                    failStream();
+                    return true;
+                }
+
+                if( ! _isClient && ! _masked )
+                {
+                    failStream();
+                    return true;
+                }
+
                 unsigned len7 = static_cast<unsigned char>(_header[1]) & 0x7F;
+                if( isControl(_frame) && len7 > 125 )
+                {
+                    failStream();
+                    return true;
+                }
 
                 if(len7 == 126)
                 {
@@ -634,6 +652,12 @@ bool WebSocket::parseAvailable()
                     _payloadSize = static_cast<std::size_t>( Pt::beToHost(size) );
                 }
 
+                if( isControl(_frame) && _payloadSize > 125 )
+                {
+                    failStream();
+                    return true;
+                }
+
                 if(_maxMessageSize != 0 && _payloadSize > _maxMessageSize)
                 {
                     failStream();
@@ -659,7 +683,10 @@ bool WebSocket::parseAvailable()
             if(_payloadSize == 0)
             {
                 _state = Idle;
+                _input.assign(_frame, _fin, 0, 0);
                 _inputReady.send(*this);
+                if(_frame == WebSocketFrame::Close)
+                    failStream();
                 return true;
             }
         }
@@ -676,8 +703,19 @@ bool WebSocket::parseAvailable()
 
             if(_payloadGot == _payloadSize)
             {
+                if(_frame == WebSocketFrame::Close && _payload.size() == 1)
+                {
+                    failStream();
+                    return true;
+                }
+
                 _state = Idle;
+                _input.assign(_frame, _fin,
+                              _payload.empty() ? 0 : &_payload[0],
+                              _payload.size());
                 _inputReady.send(*this);
+                if(_frame == WebSocketFrame::Close)
+                    failStream();
                 return true;
             }
         }
@@ -722,7 +760,6 @@ void WebSocket::onOutput()
     try
     {
         stream->endOutput();
-        _state = Idle;
         _outputReady.send(*this);
     }
     catch(const std::exception&)

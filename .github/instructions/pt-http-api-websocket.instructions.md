@@ -6,6 +6,8 @@ description: "HTTP WebSocket"
   `include/Pt/Http/Api-WebSocket.h`
 - Connect, accept, send and receive WebSocket frames:
   `include/Pt/Http/WebSocket.h`
+- One WebSocket frame, opcode, FIN, and payload stream:
+  `include/Pt/Http/WebSocketFrame.h`
 - Handshake service for WebSocket upgrades:
   `include/Pt/Http/WebSocketService.h`
 - Handshake responder for WebSocket upgrades:

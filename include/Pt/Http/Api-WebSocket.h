@@ -13,11 +13,14 @@
     handshake, and after the handshake the same connection carries
     framed messages instead of request and reply messages. %WebSocket
     formats those frames into the connection stream buffer. It is not
-    an I/O device. The payload is %body(), an iostream, the same
-    surface a %Message uses for its body. Write that stream and send
-    it as one frame. A receive parses one frame and leaves the payload
-    in %body(). %available() is how many of those bytes can be read.
-    %frame() is the opcode. The connection stream buffer is not the
+    an I/O device. The socket owns two %WebSocketFrame objects.
+    %output() is the frame the next send writes. %input() is the frame
+    the next receive fills. The opcode and FIN live on the frame. The
+    payload is %WebSocketFrame::body(), an iostream, the same surface
+    a %Message uses for its body. Write that stream and send it as one
+    frame. A receive parses one frame and leaves the payload in
+    %input().body(). %WebSocketFrame::available() is how many of those
+    bytes can be read. The connection stream buffer is not the
     payload.
 
     On the client, construct %WebSocket with the %Client that performs
@@ -54,20 +57,24 @@
     WebSocket case of %onUpgrade(). The application derives
     %WebSocketSession and keeps the state of that connection there.
 
-    Ping and pong are control frames. %sendPing() writes a ping, and
-    after a ping is received %sendPong() writes the matching pong.
-    Text and binary frames are the data payload. Unknown is the unset
-    frame type.
+    Ping and pong are control frames. %sendPing() writes a ping from
+    %output(), and after a ping is received the session can write the
+    matching pong with %sendPong(). The socket does not answer a ping
+    by itself. Text and binary frames are the data payload.
+    %WebSocketFrame::Continuation is a following fragment. A cleared
+    frame is text with FIN set.
 
     The example is a client handshake. The slot completes the connect
-    and then writes the payload body as a text frame.
+    and then writes the output frame as text.
 
     @code
     void onConnected(Pt::Http::WebSocket& socket)
     {
         socket.endConnect();
-        socket.body() << "hello";
-        socket.beginSend(Pt::Http::WebSocket::Text);
+        Pt::Http::WebSocketFrame& out = socket.output();
+        out.setType(Pt::Http::WebSocketFrame::Text);
+        out.body() << "hello";
+        socket.beginSend();
     }
 
     Pt::System::MainLoop loop;
@@ -99,10 +106,11 @@
             virtual void onInput()
             {
                 socket().endReceive();
+                Pt::Http::WebSocketFrame& in = socket().input();
                 std::string message;
-                message.resize(socket().available());
+                message.resize(in.available());
                 if( ! message.empty() )
-                    socket().body().read(&message[0], message.size());
+                    in.body().read(&message[0], message.size());
                 socket().beginReceive();
             }
 

@@ -8,12 +8,12 @@
 
 #include <Pt/Http/Api.h>
 #include <Pt/Http/StreamSession.h>
+#include <Pt/Http/WebSocketFrame.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Timer.h>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <cstddef>
 
 namespace Pt {
@@ -24,15 +24,22 @@ class Client;
 class WebSocketSession;
 
 
-
 /** @brief Framed messages on an HTTP stream.
 
     %WebSocket formats WebSocket frames into the stream buffer of an
-    upgraded HTTP connection. It is not an I/O device. The payload is
-    %body(), an iostream, the same surface a %Message uses for its
-    body. Write that stream and send it as one frame. A receive parses
-    one frame from the connection stream and leaves the payload in
-    %body(). The connection stream buffer stays inside the socket.
+    upgraded HTTP connection and parses frames out of it. It is not an
+    I/O device. The HTTP core does not know frames. The handshake
+    remains an HTTP exchange. The frame exists only after the server
+    has written the upgrade reply and opened the stream.
+
+    The socket owns two %WebSocketFrame objects for its life.
+    %output() is the frame the next %beginSend() writes. %input() is
+    the frame the next %beginReceive() fills. The caller does not
+    pass a frame in, and does not construct one. The two frames are
+    distinct buffers. A receive does not overwrite the outbound
+    payload, and a send does not consume the inbound payload. The
+    caller may fill %output() while a receive is in progress, and may
+    read %input() while a send is in progress.
 
     On the client, construct the socket with the %Client that will
     perform the handshake. The socket stores a reference and does not
@@ -50,21 +57,52 @@ class WebSocketSession;
     upgrade. Binding accepts the upgrade. The server keeps the
     connection. The socket formats that stream and does not own it.
 
-    %beginSend() writes one frame. The opcode is the argument. The
-    payload is what was written to %body() since the previous send.
+    A send is fill, begin, ready, end. Set the opcode and FIN on
+    %output(), write %output().body(), and call %beginSend().
     %outputReady() reports that the frame has left the connection
-    stream buffer, and %endSend() completes the send.
+    stream buffer, and %endSend() completes the send. The output
+    frame still holds what was sent. Nothing in %endSend() discards
+    the body. The caller clears it or overwrites it before the next
+    send.
 
-    %beginReceive() reads one frame. %inputReady() reports that the
-    frame is complete. %endReceive() completes the read. %frame() is
-    the opcode, and %body() then holds the payload. %available() is
-    how many of those bytes can be read. A short read stays inside
+    @code
+    Pt::Http::WebSocketFrame& out = socket.output();
+    out.setType(Pt::Http::WebSocketFrame::Text);
+    out.setFin(true);
+    out.body() << "hello";
+    socket.beginSend();
+    @endcode
+
+    A receive is begin, ready, end, read. %beginReceive() reads one
+    frame. %inputReady() reports that the frame is complete.
+    %endReceive() completes the read. %input().type() is the opcode,
+    and %input().body() holds the payload. A short read stays inside
     the socket until the frame is complete, so the ready signal means
-    one whole frame.
+    one whole frame, not one reassembled message.
 
-    Ping and pong are control frames. %sendPing() and %sendPong()
-    write those frames through the connection stream buffer. Text and
-    binary are the data payload. Unknown is the unset frame type.
+    One transfer per direction still holds. A second %beginSend()
+    before %endSend() is an error. A second %beginReceive() before
+    %endReceive() is an error. %WebSocketFrame::discard() and
+    %WebSocketFrame::clear() on a frame that has a transfer in flight
+    are an error.
+
+    Ping, pong, and close are frames. The caller can fill %output()
+    with %WebSocketFrame::Ping, %WebSocketFrame::Pong, or
+    %WebSocketFrame::Close and send it. %sendPing() and %sendPong()
+    are the helpers for the common case. They set the output opcode,
+    leave the payload empty unless the caller has already written
+    %output().body(), and send that frame. They are valid only when
+    no output transfer is active. %close() sets the output type to
+    %Close, writes the close code and reason the caller set on
+    %output(), sends that frame, and then closes the stream. The
+    default code is 1000. A received close frame arrives on %input()
+    like any other frame. The socket then ends the stream. A received
+    ping is also an input frame. The socket does not answer it.
+
+    Masking stays inside the socket. The client masks every frame it
+    sends. The server rejects a masked frame it did not expect and
+    unmasks a frame the client sent. RSV stays internal until an
+    extension exists.
 
     @ingroup Pt-Http-WebSocket
 */
@@ -74,18 +112,6 @@ class PT_HTTP_API WebSocket : public StreamSession
     friend class WebSocketSession;
 
     public:
-        /** @brief WebSocket frame opcode.
-        */
-        enum Frame
-        {
-            Unknown, ///< Unset frame type
-            Text,    ///< Text data frame
-            Binary,  ///< Binary data frame
-            Ping,    ///< Ping frame
-            Pong,    ///< Pong frame
-            Close    ///< Close frame
-        };
-
         /** @brief Creates a WebSocket that handshakes through @a client.
 
             Stores a reference to @a client. The client must outlive
@@ -127,56 +153,79 @@ class PT_HTTP_API WebSocket : public StreamSession
         Client* client()
         { return _client; }
 
-        /** @brief Returns the payload stream.
-
-            Write payload here before %beginSend(). After
-            %endReceive() this stream holds the received payload.
+        /** @brief Returns the frame the next receive fills.
         */
-        std::iostream& body()
-        { return _body; }
+        WebSocketFrame& input()
+        { return _input; }
 
-        /** @brief Returns how many payload bytes can be read.
+        /** @brief Returns the frame the next receive fills.
         */
-        std::size_t available() const;
+        const WebSocketFrame& input() const
+        { return _input; }
 
-        /** @brief Returns how many payload bytes are waiting to be sent.
+        /** @brief Returns the frame the next send writes.
         */
-        std::size_t pending() const;
+        WebSocketFrame& output()
+        { return _output; }
 
-        /** @brief Drops the buffered payload.
+        /** @brief Returns the frame the next send writes.
         */
-        void discard();
+        const WebSocketFrame& output() const
+        { return _output; }
 
-        /** @brief Returns the opcode of the frame last received.
-        */
-        Frame frame() const
-        { return _frame; }
+        /** @brief Begins sending %output().
 
-        /** @brief Begins sending the payload in %body() as @a frame.
+            The opcode and FIN are already on %output(). The payload
+            is what %output().body() holds.
+
+            @throw %std::logic_error if no stream is bound, if an
+            output transfer is already active, or if a control frame
+            is not final.
         */
-        void beginSend(Frame frame);
+        void beginSend();
 
         /** @brief Completes the send started by %beginSend().
+
+            The output frame still holds what was sent.
         */
         void endSend();
 
-        /** @brief Begins receiving one frame.
+        /** @brief Begins receiving one frame into %input().
+
+            @throw %std::logic_error if no stream is bound, or if an
+            input transfer is already active.
         */
         void beginReceive();
 
         /** @brief Completes the receive started by %beginReceive().
+
+            %input().type() is the opcode and %input().body() holds
+            the payload.
         */
         void endReceive();
 
-        /** @brief Sends a ping frame.
+        /** @brief Sends %output() as a ping frame.
+
+            Leaves the payload empty unless the caller has already
+            written %output().body(). Valid only when no output
+            transfer is active.
         */
         void sendPing();
 
-        /** @brief Sends a pong frame.
+        /** @brief Sends %output() as a pong frame.
+
+            Leaves the payload empty unless the caller has already
+            written %output().body(). Valid only when no output
+            transfer is active.
         */
         void sendPong();
 
         /** @brief Sends a close frame and closes the stream.
+
+            Uses the close code and reason set on %output(). The
+            default code is 1000.
+
+            @throw %std::logic_error if an output transfer is active.
         */
         void close();
 
@@ -208,7 +257,8 @@ class PT_HTTP_API WebSocket : public StreamSession
 
         /** @brief Closes the stream when a frame exceeds @a maxSize.
 
-            Zero disables the limit.
+            Zero disables the limit. The limit is one frame, not a
+            reassembled message.
         */
         void setMaxMessageSize(std::size_t maxSize);
 
@@ -249,7 +299,8 @@ class PT_HTTP_API WebSocket : public StreamSession
 
         void onOutput();
 
-        void writeFrame(Frame frame, const char* payload, std::size_t n);
+        void writeFrame(WebSocketFrame::Type type, bool fin,
+                        const char* payload, std::size_t n);
 
         void beginFrameRead();
 
@@ -258,6 +309,8 @@ class PT_HTTP_API WebSocket : public StreamSession
         void failStream();
 
         void onIdleTimeout();
+
+        void shutdown(bool sendClose);
 
     private:
         enum State
@@ -268,8 +321,7 @@ class PT_HTTP_API WebSocket : public StreamSession
             ReceiveHeader,
             ReceiveLength,
             ReceiveMask,
-            ReceivePayload,
-            Sending
+            ReceivePayload
         };
 
         Client* _client;
@@ -284,8 +336,12 @@ class PT_HTTP_API WebSocket : public StreamSession
         std::size_t _idleTimeout;
         System::Timer _idleTimer;
         bool _error;
+        bool _outputActive;
+        bool _inputActive;
+        bool _peerClose;
         State _state;
-        Frame _frame;
+        bool _fin;
+        WebSocketFrame::Type _frame;
         bool _masked;
         Pt::uint32_t _mask;
         std::size_t _payloadSize;
@@ -293,9 +349,8 @@ class PT_HTTP_API WebSocket : public StreamSession
         std::size_t _headerNeed;
         std::vector<char> _header;
         std::vector<char> _payload;
-        class PayloadBuffer;
-        PayloadBuffer* _payloadBuffer;
-        std::iostream _body;
+        WebSocketFrame _input;
+        WebSocketFrame _output;
 };
 
 } // namespace Http

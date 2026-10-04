@@ -44,6 +44,7 @@ class Servlet;
 class Stream;
 class StreamSession;
 class WebSocket;
+class WebSocketFrame;
 class WebSocketServer;
 class WebSocketService;
 class WebSocketSession;

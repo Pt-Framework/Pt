@@ -180,9 +180,9 @@ session type in this chapter is the WebSocket case only.
 ## WebSocket {#wss-socket}
 
 `WebSocket` stays the framed device described by its class chapter.
-`body()` is the payload stream. `beginSend()` writes one frame from
-that body. `beginReceive()` reads one frame into it. `frame()` is the
-opcode. Ping, pong, and close stay control operations on this type.
+It owns `output()` and `input()`, one `WebSocketFrame` per direction.
+`beginSend()` writes `output()`. `beginReceive()` reads one frame into
+`input()`. Ping, pong, and close stay control operations on this type.
 
 On the client nothing in this design changes. The application
 constructs `WebSocket` with a `Client`, connects `connected()`, and
@@ -271,7 +271,7 @@ constructor rejects a different loop. All callbacks of one session
 run on that loop. The session does not migrate.
 
 `onInput()` runs when one whole frame has been received. The derived
-session calls `socket().endReceive()`, reads `socket().body()`, and
+session calls `socket().endReceive()`, reads `socket().input()`, and
 starts the next receive or a reply. `onOutput()` runs when a frame
 has left the stream buffer. The derived session calls
 `socket().endSend()` and starts the next send when it still has data.
@@ -462,7 +462,7 @@ class FeedSession : public WebSocketSession
 };
 ```
 
-`writeNext()` formats the next chunk into `socket().body()` and calls
+`writeNext()` formats the next chunk into `socket().output().body()` and calls
 `socket().beginSend()`. `onOutput()` continues the stream. The cursor,
 the subscription, and the back-reference from the feed all live in
 the session. The feed holds `FeedSession&` or `WebSocket&`. It does

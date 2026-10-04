@@ -59,3 +59,6 @@ This chapter covers:
 
 @subsection Pt-Http-Page-WebSocketClass WebSocket
 @copydetails Pt::Http::WebSocket
+
+@subsection Pt-Http-Page-WebSocketFrame WebSocket Frame
+@copydetails Pt::Http::WebSocketFrame
