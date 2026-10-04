@@ -49,6 +49,7 @@ jam/
     ├── hash.c/.h        # Hash table
     ├── mem.c/.h         # Memory allocation (+ Pt PT_MCHECK extension)
     ├── Makefile.win32   # nmake build for Windows
+    ├── Makefile.macos   # make build for macOS
     ├── build.bat/.sh    # Bootstrap build scripts
     └── modules/         # Native rule implementations for Boost.Build modules
         ├── set.c        #   set.difference
@@ -141,11 +142,11 @@ LIST *builtin_myrule(FRAME *frame, int flags)
 }
 ```
 
-### 4. Add to `Makefile.win32`
+### 4. Add to the platform Makefiles
 
 If you created a new `.c` file, add it to the `SOURCES` variable in
-`jam/src/Makefile.win32`. For a new builtin in the existing `builtins.c`, no
-build file changes are needed.
+`jam/src/Makefile.win32` and `jam/src/Makefile.macos`. For a new builtin in
+the existing `builtins.c`, no build file changes are needed.
 
 ## Key C API Patterns
 
