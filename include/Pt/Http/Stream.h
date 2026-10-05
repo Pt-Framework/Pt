@@ -44,7 +44,9 @@ class StreamSession;
     peer accepts the upgrade. A second bind throws %std::logic_error.
     On the server, a stream that still has no session after
     %onUpgrade() returns is declined, and the server closes it.
-    %WebSocket is one session type that formats frames into %buffer().
+    A WebSocket formats frames into %buffer(). The bind is internal
+    to that protocol. Application code uses %WebSocket on the client
+    and %WebSocketSession on the server.
 
     %close() ends this stream. It clears the session pointer first
     and then tells the session that the stream ended, so a close
@@ -69,15 +71,15 @@ class StreamSession;
     stream. The owner has already stopped that timeout when it opened
     the stream.
 
-    The example accepts the upgrade by constructing a %WebSocket on
+    The example accepts the upgrade by opening a stream session on
     the stream. A service that does not bind a session declines it.
 
     @code
     void onUpgrade(Pt::Http::Stream& stream)
     {
-        _socket.accept(stream);
-        _socket.inputReady() += Pt::slot(onInput);
-        _socket.beginReceive();
+        _session.open(stream);
+        stream.inputReady() += Pt::slot(onInput);
+        stream.beginInput();
     }
     @endcode
 

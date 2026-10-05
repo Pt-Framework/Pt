@@ -4,7 +4,7 @@
 */
 
 #include <Pt/Http/WebSocketService.h>
-#include <Pt/Http/WebSocketServer.h>
+#include <Pt/Http/WebSocketServlet.h>
 #include <Pt/Http/WebSocketResponder.h>
 #include <Pt/Http/Stream.h>
 
@@ -13,7 +13,7 @@ namespace Pt {
 namespace Http {
 
 WebSocketService::WebSocketService()
-: _server(0)
+: _servlet(0)
 , _maxSockets(1024)
 , _idleTimeout(60000)
 , _maxMessageSize(1024 * 1024)
@@ -64,23 +64,23 @@ void WebSocketService::setMaxMessageSize(std::size_t n)
 
 std::size_t WebSocketService::sessionCount() const
 {
-    if( ! _server )
+    if( ! _servlet )
         return 0;
 
-    return _server->size();
+    return _servlet->size();
 }
 
 
-void WebSocketService::registerServer(WebSocketServer& server)
+void WebSocketService::registerServlet(WebSocketServlet& servlet)
 {
-    _server = &server;
+    _servlet = &servlet;
 }
 
 
-void WebSocketService::unregisterServer(WebSocketServer& server)
+void WebSocketService::unregisterServlet(WebSocketServlet& servlet)
 {
-    if(_server == &server)
-        _server = 0;
+    if(_servlet == &servlet)
+        _servlet = 0;
 }
 
 
@@ -98,10 +98,10 @@ void WebSocketService::onReleaseResponder(Responder* responder)
 
 void WebSocketService::onUpgrade(Stream& stream)
 {
-    if( ! _server )
+    if( ! _servlet )
         return;
 
-    _server->onUpgrade(stream);
+    _servlet->onUpgrade(stream);
 }
 
 } // namespace Http

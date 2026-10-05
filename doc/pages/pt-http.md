@@ -59,3 +59,12 @@ This chapter covers:
 
 @subsection Pt-Http-Page-WebSocketClass WebSocket
 @copydetails Pt::Http::WebSocket
+
+@subsection Pt-Http-Page-WebSocketSession WebSocketSession
+@copydetails Pt::Http::WebSocketSession
+
+@subsection Pt-Http-Page-WebSocketService WebSocketService
+@copydetails Pt::Http::WebSocketService
+
+@subsection Pt-Http-Page-WebSocketServlet WebSocketServlet
+@copydetails Pt::Http::WebSocketServlet

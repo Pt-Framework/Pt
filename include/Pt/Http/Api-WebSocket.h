@@ -29,25 +29,29 @@
     request and reply. A finished 101 becomes the %Stream this socket
     formats. %connected() is emitted when the attempt finishes, and
     %endConnect() completes it and throws if the handshake failed.
+    A client masks every frame it writes.
 
     On the server, %WebSocketService is an HTTP %Service, mapped with
-    a servlet like any other service. It is the factory and the
-    endpoint policy. It does not keep the sessions. A %WebSocketServer
-    does, and it is constructed with the service and destroyed before
-    it. The handshake responder answers a WebSocket Upgrade request
-    with 101 Switching Protocols, with 503 when the accepted-session
-    limit is already reached, or with 404 when the request is not a
-    WebSocket upgrade. After a successful upgrade the HTTP server
-    keeps the connection and calls %Service::onUpgrade(). The
-    WebSocket server asks the service for one %WebSocketSession,
-    holds it, and passes the stream together with the loop that
-    already serializes it. The session contains one %WebSocket and
-    binds it, which accepts the upgrade. A null session, or no
-    registered WebSocket server, leaves the stream unbound, and the
-    HTTP server closes it. The socket does not own the connection,
-    and the stream does not own the socket. When the stream ends,
-    the session's %onClose() runs and the WebSocket server releases
-    the session while the service is still alive.
+    a %Servlet like any other service. It is the factory and the
+    endpoint policy. It does not keep the sessions. A
+    %WebSocketServlet does, and it is constructed with the service
+    and destroyed before it. That servlet is the release scope. It
+    is not the %Servlet that maps the URL, and it is not the HTTP
+    server. The handshake responder answers a WebSocket Upgrade
+    request with 101 Switching Protocols, with 503 when the
+    accepted-session limit is already reached, or with 404 when the
+    request is not a WebSocket upgrade. After a successful upgrade
+    the HTTP server keeps the connection and calls
+    %Service::onUpgrade(). The WebSocket servlet asks the service for
+    one %WebSocketSession, holds it, and passes the stream together
+    with the loop that already serializes it. The session formats
+    that stream, which accepts the upgrade. A server does not mask.
+    A null session, or no registered WebSocket servlet, leaves the
+    stream unbound, and the HTTP server closes it. The session does
+    not own the connection, and the stream does not own the session.
+    When the stream ends, the session's %onClose() runs and the
+    WebSocket servlet releases the session while the service is still
+    alive.
 
     %Stream is the upgraded channel, not the HTTP message body.
     A 101 reply is the generic HTTP upgrade. %WebSocketService is the
@@ -87,28 +91,28 @@
     class EchoSession : public Pt::Http::WebSocketSession
     {
         public:
-            EchoSession(Pt::Http::WebSocketServer& server,
+            EchoSession(Pt::Http::WebSocketServlet& servlet,
                         Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream)
-            : Pt::Http::WebSocketSession(server, loop, stream)
+            : Pt::Http::WebSocketSession(servlet, loop, stream)
             {
-                socket().beginReceive();
+                beginReceive();
             }
 
         protected:
             virtual void onInput()
             {
-                socket().endReceive();
+                endReceive();
                 std::string message;
-                message.resize(socket().available());
+                message.resize(available());
                 if( ! message.empty() )
-                    socket().body().read(&message[0], message.size());
-                socket().beginReceive();
+                    body().read(&message[0], message.size());
+                beginReceive();
             }
 
             virtual void onOutput()
             {
-                socket().endSend();
+                endSend();
             }
 
             virtual void onClose()
@@ -118,7 +122,7 @@
     typedef Pt::Http::BasicWebSocketService<EchoSession> EchoService;
 
     EchoService service;
-    Pt::Http::WebSocketServer sockets(service);
+    Pt::Http::WebSocketServlet sockets(service);
     @endcode
 */
 

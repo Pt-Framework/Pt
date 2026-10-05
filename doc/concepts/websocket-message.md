@@ -11,9 +11,8 @@ The HTTP upgrade boundary in
 HTTP core still knows no WebSocket frames. The session model in
 [WebSocket Session](websocket-session.md) stays as it is, except where
 this chapter changes what `onInput()` and `onOutput()` mean: a
-message step, not a frame. The client and server split in
-[WebSocket Client and Server](websocket-session-cs.md) is unchanged.
-Both facades forward the same message operations.
+message step, not a frame. Both facades are defined there, and both
+forward the same message operations.
 
 This chapter covers:
 

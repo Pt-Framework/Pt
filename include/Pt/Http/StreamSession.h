@@ -32,11 +32,13 @@ class Stream;
 
     This base does not transfer bytes. The derived type uses the stream it
     holds: %Stream::buffer(), %beginInput(), %beginOutput(), and the ready
-    signals of that stream. %WebSocket is one such type. It formats frames
-    into the stream buffer and connects its own slots to the stream.
+    signals of that stream. A framed protocol formats into the stream
+    buffer and connects its own slots to the stream. Application code
+    does not derive this base for WebSocket. The client uses %WebSocket,
+    and the server uses %WebSocketSession.
 
     %open() and %close() are protected because the derived type owns the
-    handshake and the shutdown frame. %WebSocket::close() writes the close
+    handshake and the shutdown frame. A WebSocket close writes the close
     frame and then calls %close(). A public close on this base would skip that
     frame.
 

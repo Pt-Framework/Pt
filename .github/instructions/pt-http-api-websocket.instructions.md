@@ -12,7 +12,7 @@ description: "HTTP WebSocket"
   `include/Pt/Http/WebSocketResponder.h`
 - Server-side session of one accepted WebSocket stream:
   `include/Pt/Http/WebSocketSession.h`
-- Owner of the sessions a WebSocket service creates:
-  `include/Pt/Http/WebSocketServer.h`
+- Release scope of the sessions a WebSocket service creates:
+  `include/Pt/Http/WebSocketServlet.h`
 - Stream of an upgraded HTTP connection:
   `include/Pt/Http/Stream.h`

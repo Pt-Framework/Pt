@@ -24,48 +24,66 @@ namespace Http {
 class Request;
 class Responder;
 class Stream;
-class WebSocketServer;
+class WebSocketServlet;
 
-/** @brief Factory for WebSocket sessions.
+/** @brief Factory and endpoint policy for WebSocket sessions.
 
-    %WebSocketService is the server-side factory and the endpoint
-    policy. Map it with a servlet like any other %Service. Its
-    handshake responder answers a WebSocket upgrade with 101, with
-    503 when %maxSockets() sessions are already open, or with 404
-    when the request is not a WebSocket upgrade.
+    %WebSocketService is the server-side factory. Map it with a
+    %Servlet like any other %Service, so the handshake request
+    reaches it. Its handshake responder answers a WebSocket upgrade
+    with 101, with 503 when %maxSockets() sessions are already open,
+    or with 404 when the request is not a WebSocket upgrade. The
+    responder is released before the server opens the stream. It is
+    not the session.
 
     This service does not keep the sessions it creates. A
-    %WebSocketServer does. The server is constructed with this
+    %WebSocketServlet does. The servlet is constructed with this
     service and destroyed before it, so the factory is still fully
-    constructed when the last session is released. One service can
-    feed several servers. Each server releases only the sessions it
-    accepted.
+    constructed when the last session is released. The service
+    destructor does not release sessions. By then the derived
+    destructor has already run, and the virtual release call and the
+    allocator are gone. One service has one registered servlet. A
+    second registration replaces it. The previous servlet keeps the
+    sessions it already holds and releases them itself.
 
     After a finished 101 the HTTP server keeps the connection and
-    calls %Service::onUpgrade(). This service implements that call.
-    It forwards the stream to the %WebSocketServer registered for
-    that upgrade. The server asks %onGetSession() for a
+    calls %Service::onUpgrade(). This service implements that call
+    and does not pass it on. It forwards the stream to the registered
+    %WebSocketServlet. The servlet asks %onGetSession() for a
     %WebSocketSession and passes the %EventLoop of the stream
     together with the stream. The session binds the stream in its
     constructor, which accepts the upgrade. A null return, or no
-    registered server, leaves the stream unbound, and the HTTP server
-    closes it.
+    registered servlet, leaves the stream unbound, and the HTTP
+    server closes it.
 
     %onGetSession() creates the session and %onReleaseSession()
-    destroys it. The two methods must use the same allocator. The
-    %WebSocketServer calls the second while this service is still
-    alive.
+    destroys it. The two methods must use the same allocator, as
+    %onGetResponder() and %onReleaseResponder() must match. A pool,
+    or any other detach, lives in the derived service. The servlet
+    only holds the pointers so release runs while this service is
+    still fully constructed.
 
     %maxSockets(), %idleTimeout(), and %maxMessageSize() are endpoint
     policy. The handshake reads the session limit. The session base
-    copies the idle timeout and the frame limit onto the socket
-    before the derived constructor runs. A session may lower those
-    socket limits. It does not raise them past the service limit.
+    copies the idle timeout and the frame limit onto the connection
+    before the derived constructor runs.
 
     %BasicWebSocketService is this factory for one session type.
     Derive %WebSocketService when the session type depends on the
     upgrade, or when the session constructor needs more than the
-    service and the loop.
+    servlet, the loop, and the stream.
+
+    The example is the usual server setup. The mapping servlet and
+    the release scope are different objects.
+
+    @code
+    typedef Pt::Http::BasicWebSocketService<EchoSession> EchoService;
+
+    EchoService service;
+    Pt::Http::WebSocketServlet sockets(service);
+    Pt::Http::MapUrl mapUrl("/ws", service);
+    server.addServlet(mapUrl);
+    @endcode
 
     @ingroup Pt-Http-WebSocket
 */
@@ -81,7 +99,7 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Destructor.
 
-            Does not release sessions. Each %WebSocketServer of this
+            Does not release sessions. The %WebSocketServlet of this
             service does that, and it is destroyed first.
         */
         ~WebSocketService();
@@ -132,16 +150,16 @@ class PT_HTTP_API WebSocketService : public Service
 
         /** @brief Creates the session for @a stream.
 
-            @a server owns the returned session. @a loop serializes
+            @a servlet holds the returned session. @a loop serializes
             @a stream. Return null to decline the upgrade.
         */
-        virtual WebSocketSession* onGetSession(WebSocketServer& server,
+        virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
                                                Stream& stream) = 0;
 
         /** @brief Destroys a session created by %onGetSession().
 
-            Called by the %WebSocketServer that owns the session,
+            Called by the %WebSocketServlet that holds the session,
             while this service is still fully constructed.
         */
         virtual void onReleaseSession(WebSocketSession* session) = 0;
@@ -154,17 +172,17 @@ class PT_HTTP_API WebSocketService : public Service
         virtual void onUpgrade(Stream& stream) final;
 
     private:
-        friend class WebSocketServer;
+        friend class WebSocketServlet;
 
-        /** @internal Live sessions of the registered server.
+        /** @internal Live sessions of the registered servlet.
         */
         std::size_t sessionCount() const;
 
-        void registerServer(WebSocketServer& server);
+        void registerServlet(WebSocketServlet& servlet);
 
-        void unregisterServer(WebSocketServer& server);
+        void unregisterServlet(WebSocketServlet& servlet);
 
-        WebSocketServer* _server;
+        WebSocketServlet* _servlet;
         std::size_t _maxSockets;
         std::size_t _idleTimeout;
         std::size_t _maxMessageSize;
@@ -189,12 +207,12 @@ class BasicWebSocketService : public WebSocketService
         { }
 
     protected:
-        virtual WebSocketSession* onGetSession(WebSocketServer& server,
+        virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
                                                Stream& stream)
         {
             void* memory = _alloc.allocate(sizeof(S));
-            return new(memory) S(server, loop, stream);
+            return new(memory) S(servlet, loop, stream);
         }
 
         virtual void onReleaseSession(WebSocketSession* session)

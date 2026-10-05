@@ -2,7 +2,7 @@
    SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
 */
 
-#include <Pt/Http/WebSocketServer.h>
+#include <Pt/Http/WebSocketServlet.h>
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/Stream.h>
@@ -15,28 +15,29 @@ namespace Pt {
 
 namespace Http {
 
-WebSocketServer::WebSocketServer(WebSocketService& service)
+WebSocketServlet::WebSocketServlet(WebSocketService& service)
 : _service(&service)
 {
-    _service->registerServer(*this);
+    _service->registerServlet(*this);
 }
 
 
-WebSocketServer::~WebSocketServer()
+WebSocketServlet::~WebSocketServlet()
 {
     if(_service)
-        _service->unregisterServer(*this);
+        _service->unregisterServlet(*this);
 
     while( ! _sessions.empty() )
     {
         WebSocketSession* session = _sessions.back();
         _sessions.pop_back();
+        session->close();
         releaseSession(session);
     }
 }
 
 
-void WebSocketServer::onUpgrade(Stream& stream)
+void WebSocketServlet::onUpgrade(Stream& stream)
 {
     System::EventLoop* loop = stream.loop();
     if( ! loop )
@@ -50,7 +51,7 @@ void WebSocketServer::onUpgrade(Stream& stream)
 }
 
 
-void WebSocketServer::onSessionClosed(WebSocketSession& session)
+void WebSocketServlet::onSessionClosed(WebSocketSession& session)
 {
     std::vector<WebSocketSession*>::iterator it =
         std::find(_sessions.begin(), _sessions.end(), &session);
@@ -63,7 +64,7 @@ void WebSocketServer::onSessionClosed(WebSocketSession& session)
 }
 
 
-void WebSocketServer::releaseSession(WebSocketSession* session)
+void WebSocketServlet::releaseSession(WebSocketSession* session)
 {
     if( ! session || ! _service )
         return;

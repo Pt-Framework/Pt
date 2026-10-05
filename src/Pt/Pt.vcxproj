@@ -224,6 +224,8 @@
     <ClInclude Include="..\..\include\Pt\Http\WebSocket.h" />
     <ClInclude Include="..\..\include\Pt\Http\WebSocketResponder.h" />
     <ClInclude Include="..\..\include\Pt\Http\WebSocketService.h" />
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketServlet.h" />
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketSession.h" />
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
     <ClInclude Include="..\..\include\Pt\IOError.h" />
     <ClInclude Include="..\..\include\Pt\IOStream.h" />
@@ -1588,8 +1590,11 @@
     <ClCompile Include="..\Pt-Http\tests\ServerTest.cpp" />
     <ClCompile Include="..\Pt-Http\tests\WebSocketTest.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocket.cpp" />
+    <ClCompile Include="..\Pt-Http\WebSocketConnection.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketResponder.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketService.cpp" />
+    <ClCompile Include="..\Pt-Http\WebSocketServlet.cpp" />
+    <ClCompile Include="..\Pt-Http\WebSocketSession.cpp" />
     <ClCompile Include="..\Pt-JsonRpc\Client.cpp" />
     <ClCompile Include="..\Pt-JsonRpc\Fault.cpp" />
     <ClCompile Include="..\Pt-JsonRpc\Formatter.cpp" />

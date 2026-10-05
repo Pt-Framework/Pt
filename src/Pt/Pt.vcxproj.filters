@@ -3051,6 +3051,12 @@
     <ClInclude Include="..\..\include\Pt\Http\WebSocketService.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketServlet.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketSession.h">
+      <Filter>Pt-Http</Filter>
+    </ClInclude>
     <ClInclude Include="..\Pt-Http\Sha1.h">
       <Filter>Pt-Http</Filter>
     </ClInclude>
@@ -5764,6 +5770,9 @@
     <ClCompile Include="..\Pt-Http\WebSocket.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketConnection.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
     <ClCompile Include="Sha1.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
@@ -5816,6 +5825,12 @@
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\WebSocketService.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketServlet.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\WebSocketSession.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Http\tests\WebSocketTest.cpp">
