@@ -52,23 +52,34 @@ object the application reads and writes.
 
 ## Current state {#wsm-current}
 
-`WebSocket` exposes one `body()`. Send and receive share that stream
-and the payload buffer behind it. `beginSend(Frame)` writes whatever
-is buffered as one frame. `beginReceive()` parses one frame back into
-the same body. `frame()` is the opcode of that frame. `inputReady()`
-means the frame is complete.
+The frame engine is `WebSocketConnection`. `WebSocket` and
+`WebSocketSession` do not keep a payload of their own. Both forward
+the same frame operations to that connection.
 
-One `_state` covers the handshake, the receive steps, and the send.
-A receive in progress cannot coexist with a send. `sendPing()` and
-`close()` call `beginOutput()` and `endOutput()` on the stream
-directly, so a control write overwrites a data write that has not
-finished.
+The connection exposes one `body()`. Send and receive share that
+stream and the payload buffer behind it. `beginSend(Frame)` writes
+whatever is buffered as one frame. `beginReceive()` parses one frame
+back into the same body. `frame()` is the opcode of that frame.
+`inputReady()` means the frame is complete.
+
+One `_state` on the connection covers the receive steps and the send.
+The handshake is a flag on the client socket, and it finishes before
+either transfer starts. A receive in progress cannot coexist with a
+send. `sendPing()`, `sendPong()`, and `close()` call `beginOutput()`
+and `endOutput()` on the stream directly, so a control write
+overwrites a data write that has not finished.
 
 The implementation always sets FIN on a written frame. A
 continuation opcode is not a public type. On input it becomes
 `Unknown`. `setMaxMessageSize()` limits one frame payload, not the
 reassembled message. The public unit is therefore a frame, and
 fragmentation is neither hidden nor implemented.
+
+A received ping or pong is delivered as that frame. `inputReady()`
+runs, and the engine does not answer. A received close does not
+become a frame the application reads. The parser calls `failStream()`
+as soon as the opcode is close, so the payload is not read and no
+status code or reason is kept.
 
 That surface cannot meet the stream contract, and it does not match
 the message model the rest of HTTP already uses.
@@ -379,8 +390,9 @@ There is still no client session.
 ## What changes {#wsm-changes}
 
 `body()`, `frame()`, `available()`, `pending()`, and `discard()` move
-from `WebSocket` to `WebSocketMessage`. The socket forwards nothing
-in their place except `incoming()` and `outgoing()`.
+from both facades to `WebSocketMessage`. `WebSocket` and
+`WebSocketSession` forward nothing in their place except
+`incoming()` and `outgoing()`.
 
 `beginSend(Frame)` becomes `beginSend()`. The type is
 `outgoing().setType()`. `beginReceive()` and `endReceive()` stay, and
