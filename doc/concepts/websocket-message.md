@@ -77,7 +77,8 @@ the message model the rest of HTTP already uses.
 ## Principles {#wsm-principles}
 
 The public unit is a message. A message is text or binary. It has a
-body. It has no opcode, no FIN bit, no mask, and no RSV bits.
+body. It has no opcode, no FIN bit, no mask, and no RSV bits. A text
+message is UTF-8. Invalid UTF-8 fails the stream.
 
 The socket owns two messages, `incoming()` and `outgoing()`, the way
 `Client` owns `request()` and `reply()`. The application does not
@@ -207,6 +208,18 @@ set. The opcode of the first fragment is the message type.
 Continuations follow. Masking stays a mode of the engine: a client
 masks, a server does not. The application does not supply a mask.
 
+A text message is a UTF-8 sequence over the whole message, not over
+one fragment. The engine validates it as the bytes arrive. A
+sequence that ends in the middle of a code unit is valid so far if
+the next fragment can complete it. It is invalid when FIN arrives
+and the sequence is still incomplete, and it is invalid as soon as a
+byte cannot continue the sequence. `discard()` does not turn the
+check off. The engine has already seen those bytes, and the
+application does not have to retain them for the check to hold.
+Invalid text fails the stream with close code 1007. Binary is not
+checked. An outgoing text message is checked the same way before it
+is written.
+
 `maxMessageSize()` limits one data message. The count runs from the
 first data opcode to FIN. Each fragment adds its declared payload
 length before those bytes are read. The sum is what matters, not the
@@ -284,7 +297,8 @@ bytes before finished. The application reads `incoming().body()`,
 discards what it has consumed, and calls `beginReceive()` again until
 finished. What it reads is payload. It is not a frame, and it is not
 aligned to a frame boundary. Discarding consumed bytes does not reset
-`maxMessageSize()`.
+`maxMessageSize()`, and it does not skip the UTF-8 check of a text
+message.
 
 Delivering only whole messages would match the browser and Beast. It
 would also force the socket to buffer up to `maxMessageSize()` before
@@ -362,6 +376,11 @@ between fragments are consumed or inserted by the engine.
 payload bytes from the first data opcode to FIN, including bytes the
 application has already discarded. It is not a frame limit and not a
 buffer limit. Exceeding it closes the stream with 1009.
+
+A text message must be valid UTF-8 across all of its fragments. The
+engine checks the bytes as they arrive. Discarding them does not
+remove them from the check. Invalid text closes the stream with
+1007. Binary is not checked.
 
 The session chapter's statement that `onInput()` means one whole
 frame, and that `onOutput()` means one frame has left the buffer, is
