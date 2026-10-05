@@ -88,12 +88,13 @@ One receive and one send may be outstanding. A second begin on the
 same direction is an error. The other direction is unaffected.
 
 Fragmentation is an engine concern. The application never sees a
-continuation. `maxMessageSize()` applies to the sum of the fragments
-of one data message.
+continuation. `maxMessageSize()` is the limit of one data message,
+not of one frame and not of the unread buffer.
 
 Ping, pong, and close are not messages. They are socket operations.
 A received ping is answered by the engine. A close is a stream end,
-not a body the application reads as `incoming()`.
+not a body the application reads as `incoming()`. It carries a status
+code and a reason.
 
 Progress follows HTTP. `endReceive()` can report body bytes before
 the message is finished. `finished()` means the message is complete,
@@ -160,6 +161,8 @@ class WebSocket
         void beginReceive();
         MessageProgress endReceive();
         Signal<WebSocket&>& inputReady();
+
+        void setMaxMessageSize(std::size_t maxSize);
 };
 ```
 
@@ -204,9 +207,25 @@ set. The opcode of the first fragment is the message type.
 Continuations follow. Masking stays a mode of the engine: a client
 masks, a server does not. The application does not supply a mask.
 
-`maxMessageSize()` counts reassembled data bytes. Zero still disables
-the limit. A message that would exceed it fails the stream, as an
-oversized frame does today. The limit is not a per-frame limit.
+`maxMessageSize()` limits one data message. The count runs from the
+first data opcode to FIN. Each fragment adds its declared payload
+length before those bytes are read. The sum is what matters, not the
+size of one frame and not the bytes still sitting in `incoming()`.
+A peer that splits a large message into small continuations does not
+get a fresh budget per frame.
+
+`discard()` frees the unread remainder of `incoming()`. It does not
+subtract from the count. The message is the same message until FIN.
+The buffer may stay small while the sum grows to the limit. How much
+unread data the engine holds ahead of the application is flow
+control, and it is a different limit.
+
+Control frames do not count. Their payload is at most 125 bytes.
+Zero disables the limit. A declared length that would make the sum
+exceed it fails the stream before that payload is buffered. The close
+code is 1009. The same check applies to a message the engine is
+sending: `beginSend()` fails the stream rather than writing a message
+over the limit.
 
 RSV bits and extensions are not on the message. An extension, if one
 is added later, is negotiated at the handshake and applied by the
@@ -219,9 +238,11 @@ Control frames are socket operations. They are not a
 
 ```cpp
 void ping();
-void close(unsigned code = 1000);
+void close(unsigned code = 1000,
+           const std::string& reason = std::string());
 
 unsigned closeCode() const;
+const std::string& closeReason() const;
 Signal<WebSocket&>& closed();
 ```
 
@@ -234,12 +255,17 @@ answered with a pong the same way. The application does not call
 application needs to see it. The default is to answer and not
 deliver.
 
-`close()` enqueues a close frame with the code, then ends the
-stream after the close handshake. A received close is the same end.
-`closeCode()` is the code from that handshake. `closed()` stays the
-signal that the stream has ended. Peer close, an I/O error, a close
-frame, and destruction of the stream all emit it. `incoming().type()`
-is never close, and the close body is not the application payload.
+`close()` enqueues a close frame and ends the stream after the close
+handshake. The frame payload is the status code and the reason. The
+code defaults to 1000. The reason defaults to empty. It is an
+UTF-8 text, not a message body, and it is not delivered through
+`incoming()`. A received close is the same end. `closeCode()` and
+`closeReason()` are the values from that handshake. A local close
+keeps the values passed to `close()` when the peer sends none.
+`closed()` stays the signal that the stream has ended. Peer close, an
+I/O error, a close frame, and destruction of the stream all emit it.
+An I/O error leaves the code at 1006 and the reason empty, because no
+close frame arrived. `incoming().type()` is never close.
 
 This keeps the one-transfer rule. The application still has one
 outstanding data send. The engine may insert a control frame around
@@ -257,7 +283,8 @@ type, body, and finished are all true. A large message reports body
 bytes before finished. The application reads `incoming().body()`,
 discards what it has consumed, and calls `beginReceive()` again until
 finished. What it reads is payload. It is not a frame, and it is not
-aligned to a frame boundary.
+aligned to a frame boundary. Discarding consumed bytes does not reset
+`maxMessageSize()`.
 
 Delivering only whole messages would match the browser and Beast. It
 would also force the socket to buffer up to `maxMessageSize()` before
@@ -305,9 +332,9 @@ buffer. The derived session calls `socket().endSend()` and starts the
 next send when it still has a message. It does not run once per
 fragment.
 
-`onClose()` is unchanged. It is the last look at the session. The
-close code is `socket().closeCode()` if a close handshake produced
-one.
+`onClose()` is unchanged. It is the last look at the session. A close
+handshake leaves `socket().closeCode()` and `socket().closeReason()`
+set. An I/O error leaves the code at 1006 and the reason empty.
 
 The client uses the same two messages on the `WebSocket` it
 constructed. It connects `inputReady()` and `outputReady()` itself.
@@ -325,12 +352,16 @@ in their place except `incoming()` and `outgoing()`.
 
 `sendPing()` and `sendPong()` leave the public surface. `ping()`
 enqueues a ping. Pong is the engine's answer. `close()` remains, and
-gains a close code. It no longer writes the stream as a side door
-around the output pump.
+gains a status code and a reason. `closeCode()` and `closeReason()`
+report the handshake that ended the stream. `close()` no longer
+writes the stream as a side door around the output pump.
 
 The receive path reassembles. The send path fragments. Control frames
 between fragments are consumed or inserted by the engine.
-`maxMessageSize()` limits the message.
+`maxMessageSize()` limits one data message. It counts declared
+payload bytes from the first data opcode to FIN, including bytes the
+application has already discarded. It is not a frame limit and not a
+buffer limit. Exceeding it closes the stream with 1009.
 
 The session chapter's statement that `onInput()` means one whole
 frame, and that `onOutput()` means one frame has left the buffer, is
