@@ -93,9 +93,10 @@ continuation. `maxMessageSize()` is the limit of one data message,
 not of one frame and not of the unread buffer.
 
 Ping, pong, and close are not messages. They are socket operations.
-A received ping is answered by the engine. A close is a stream end,
-not a body the application reads as `incoming()`. It carries a status
-code and a reason.
+A received ping is answered by the engine. A received pong is
+consumed. Neither is delivered, and neither frees the data channel.
+A close is a stream end, not a body the application reads as
+`incoming()`. It carries a status code and a reason.
 
 Progress follows HTTP. `endReceive()` can report body bytes before
 the message is finished. `finished()` means the message is complete,
@@ -247,10 +248,12 @@ engine before the body is visible.
 ## Control plane {#wsm-control}
 
 Control frames are socket operations. They are not a
-`WebSocketMessage`, and they are not a second public write.
+`WebSocketMessage`, and they are not a second public write. Ping and
+pong do not emit `inputReady()` or `outputReady()`. They do not
+finish a data message, and they do not free the data channel.
 
 ```cpp
-void ping();
+void ping(const char* payload = 0, std::size_t n = 0);
 void close(unsigned code = 1000,
            const std::string& reason = std::string());
 
@@ -259,14 +262,32 @@ const std::string& closeReason() const;
 Signal<WebSocket&>& closed();
 ```
 
-`ping()` enqueues a ping. It does not call `beginOutput()` itself,
-and it does not require the data send to be idle. The output pump
-writes it when no data frame is in the middle of being written, or
-between two data fragments of the current message. A received ping is
-answered with a pong the same way. The application does not call
-`sendPong()`. A signal for a received ping can be added if an
-application needs to see it. The default is to answer and not
-deliver.
+`ping()` enqueues a ping. The payload is at most 125 bytes. A longer
+payload fails the call. It does not call `beginOutput()` itself, and
+it does not require the data send to be idle. The output pump writes
+it when no data frame is in the middle of being written, or between
+two data fragments of the current message. The data send stays
+outstanding. `outputReady()` still means that data message has left
+the stream buffer, not that the ping has been written.
+
+A received ping is consumed by the parser. It does not become
+`incoming()`, and it does not emit `inputReady()`. The engine
+enqueues a pong with the same payload, at most 125 bytes. That pong
+is written by the same pump, under the same rule, and it does not
+emit `outputReady()`. The application does not call `sendPong()`.
+Answering the ping restarts the idle timer. A signal for a received
+ping can be added if an application needs to see it. The default is
+to answer and not deliver.
+
+A received pong, opcode `0xA`, takes the same read path. The parser
+reads the payload and discards it. It does not touch `incoming()`,
+and it does not emit `inputReady()`. If a `ping()` is still
+outstanding, the payload is compared with that ping and the ping is
+retired. A pong that matches nothing is still valid. An unsolicited
+pong is allowed and takes this path. Either way the data message is
+unchanged, and the idle timer restarts. The application does not see
+the pong. A signal for it can be added later. The default is to
+consume it.
 
 `close()` enqueues a close frame and ends the stream after the close
 handshake. The frame payload is the status code and the reason. The
@@ -281,7 +302,7 @@ An I/O error leaves the code at 1006 and the reason empty, because no
 close frame arrived. `incoming().type()` is never close.
 
 This keeps the one-transfer rule. The application still has one
-outstanding data send. The engine may insert a control frame around
+outstanding data send. The engine may insert a ping or a pong around
 the data frames of that send. A ping during a large message is
 therefore possible without a second `beginSend()`.
 
@@ -326,7 +347,9 @@ user transfer.
 `idleTimeout()` restarts when a send or a receive step finishes, as
 it does today. It is not restarted by an internal continuation alone
 if that continuation did not complete a step the application saw.
-A ping the engine answers does restart it. The peer is alive.
+A received ping that the engine answers restarts it, and so does a
+received pong. The peer is alive. Writing a ping does not by itself
+restart it. The answer does.
 
 ## Session callbacks {#wsm-session}
 
@@ -339,12 +362,12 @@ has been parsed. The derived session calls `socket().endReceive()`.
 If the progress reports body bytes, it reads `socket().incoming()`.
 If the progress is not finished, it calls `beginReceive()` again. If
 it is finished, it handles the message and starts the next receive,
-or a reply.
+or a reply. A ping or a pong does not run `onInput()`.
 
 `onOutput()` runs when the outgoing message has left the stream
 buffer. The derived session calls `socket().endSend()` and starts the
 next send when it still has a message. It does not run once per
-fragment.
+fragment, and it does not run for a ping or a pong.
 
 `onClose()` is unchanged. It is the last look at the session. A close
 handshake leaves `socket().closeCode()` and `socket().closeReason()`
@@ -365,10 +388,14 @@ in their place except `incoming()` and `outgoing()`.
 `endReceive()` returns `MessageProgress`.
 
 `sendPing()` and `sendPong()` leave the public surface. `ping()`
-enqueues a ping. Pong is the engine's answer. `close()` remains, and
-gains a status code and a reason. `closeCode()` and `closeReason()`
-report the handshake that ended the stream. `close()` no longer
-writes the stream as a side door around the output pump.
+enqueues a ping of at most 125 bytes. A received ping is answered
+with a pong that mirrors the payload. A received pong, including an
+unsolicited one, is consumed and restarts the idle timer. Neither
+emits `inputReady()` or `outputReady()`, and neither frees the data
+channel. There is no `sendPong()`. `close()` remains, and gains a
+status code and a reason. `closeCode()` and `closeReason()` report
+the handshake that ended the stream. `close()` no longer writes the
+stream as a side door around the output pump.
 
 The receive path reassembles. The send path fragments. Control frames
 between fragments are consumed or inserted by the engine.
@@ -393,4 +420,5 @@ responder, or who owns the stream. It does not decide the client and
 server facade split. It does not add permessage-deflate, subprotocols
 as a message property, or an application-supplied message pool.
 Incremental send with a completion flag is allowed later and is not
-the first surface.
+the first surface. A signal for a received ping or pong is not part
+of the first surface either.
