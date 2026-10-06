@@ -69,7 +69,7 @@ class WebSocketConnection;
         socket.beginReceive();
     }
 
-    void onClosed(Pt::Http::WebSocket& /*socket*/)
+    void onClosed(Pt::Http::WebSocket& socket)
     {
     }
 
