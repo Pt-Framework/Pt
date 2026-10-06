@@ -28,60 +28,18 @@ class WebSocketConnection;
 /** @brief Server facade of one accepted WebSocket stream.
 
     %WebSocketSession is the application object of one upgraded
-    stream. A %WebSocketServlet asks the %WebSocketService to create
-    it when a handshake has finished, holds it, and releases it when
-    the stream ends or when the servlet is destroyed. Derive from it
-    to keep the state that must survive from one message to the next:
-    a subscription, a cursor, a user, or a reference into the
-    application domain.
+    stream. Derive from it to keep the state that must survive from
+    one message to the next: a subscription, a cursor, a user, or a
+    reference into the application domain. The HTTP server already
+    owns the connection and the stream. This session formats messages
+    on that stream. It is not a stream-session bind the application
+    performs, and it is not a request responder. The handshake
+    responder has already been released when the session begins. A
+    server does not mask the frames it writes.
 
-    The session formats messages on the stream the HTTP server already
-    owns. It is not a %StreamSession. The bind belongs to the message
-    connection inside the session, and a second bind would throw. It
-    is not a %Responder. The handshake responder has already been
-    released when the session begins. Application code does not see
-    that connection, the same way an HTTP caller sees %Client and not
-    the connection behind it.
-
-    The servlet constructs the session with itself, with the loop
-    that serializes this stream, and with the stream of this upgrade.
-    The base constructor binds the stream, copies the service limits
-    onto the connection, and stores the loop. The derived constructor
-    runs after that. Its members are initialized, the stream is open,
-    and %loop() is the loop of this stream. Start the first
-    %beginReceive() or %beginSend() there. There is no separate
-    accept callback. By the time the derived constructor body runs,
-    the base has already bound the stream.
-
-    The message operations are methods of this session. %incoming()
-    and %outgoing() are the two payloads. %beginSend() writes
-    %outgoing(). %beginReceive() reads into %incoming(). Ping and
-    close stay control operations on this type. A server does not
-    mask the frames it writes.
-
-    %onInput(), %onOutput(), and %onClose() are the later events. They
-    take no arguments. The session and the loop do not change between
-    callbacks. %onInput() runs when data bytes were received. Call
-    %endReceive(), read %incoming() when progress reports body bytes,
-    and start the next receive if the message is not finished. A ping
-    or a pong does not run %onInput(). %onOutput() runs when data
-    bytes were sent. Call %endSend() and continue the send when
-    progress is not finished. %onClose() runs while this object is
-    still alive, after the stream has ended. Do not call %endReceive()
-    or %endSend() from %onClose(). The %WebSocketServlet releases the
-    session after %onClose() returns.
-
-    %service() reaches state shared by every connection of this
-    endpoint. %loop() is where a timer or posted work must run.
-    Closing the session closes the stream. The session does not own
-    the stream or the connection.
-
-    The destructor closes the stream. A derived constructor that
-    throws still runs this destructor, so a failed construction does
-    not leave an accepted stream without an owner.
-
-    The example echoes by receiving one message and starting the next
-    receive. Domain state belongs in the derived session.
+    The example starts a receive in the constructor and reads each
+    payload from the input callback. Domain state belongs in the
+    derived session.
 
     @code
     class EchoSession : public Pt::Http::WebSocketSession
@@ -120,7 +78,49 @@ class WebSocketConnection;
     };
     @endcode
 
-    @ingroup Pt-Http-WebSocket
+    The servlet constructs the session with itself, with the loop
+    that serializes this stream, and with the stream of this upgrade.
+    The loop must be the loop of the stream. The base constructor
+    binds the stream, copies the service limits onto the connection,
+    and stores the loop. The derived constructor runs after that.
+    Its members are initialized, the stream is open, and %loop() is
+    the loop of this stream. Start the first %beginReceive() or
+    %beginSend() there. There is no separate accept callback. By the
+    time the derived constructor body runs, the base has already
+    bound the stream.
+
+    %incoming() and %outgoing() are the two payloads. %beginSend()
+    writes %outgoing(). %beginReceive() reads into %incoming().
+    %onInput() runs when data bytes were received. Call
+    %endReceive(), read %incoming() when progress reports body
+    bytes, and start the next receive if the message is not
+    finished. A ping or a pong does not run %onInput(). %onOutput()
+    runs when data bytes were sent. Call %endSend() and continue
+    the send when progress is not finished. %onClose() runs while
+    this object is still alive, after the stream has ended. Do not
+    call %endReceive() or %endSend() from %onClose(). The servlet
+    that holds this session releases it after %onClose() returns.
+
+    %service() reaches state shared by every connection of this
+    endpoint. %loop() is where a timer or posted work must run.
+    Closing the session closes the stream. The session does not own
+    the stream or the connection. The destructor closes the stream.
+    A derived constructor that throws still runs this destructor, so
+    a failed construction does not leave an accepted stream without
+    an owner.
+
+    Ping and close stay control operations on this type.
+
+    @code
+    ping();
+    close(1000, "done");
+    @endcode
+
+    %ping() enqueues a ping. %close() enqueues a close frame.
+    %closeCode() and %closeReason() report the handshake that ended
+    the stream.
+
+    @ingroup Pt-Http-WebSocket-Server
 */
 class PT_HTTP_API WebSocketSession : public Connectable
 {

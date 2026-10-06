@@ -8,6 +8,8 @@ This chapter covers:
 - @ref Pt-Http-Page-Clients
 - @ref Pt-Http-Page-Servers
 - @ref Pt-Http-Page-WebSocket
+- @ref Pt-Http-Page-WebSocket-Client
+- @ref Pt-Http-Page-WebSocket-Server
 
 @section Pt-Http-Page-Messages HTTP Messages
 @copydetails Pt-Http-Messages
@@ -60,8 +62,14 @@ This chapter covers:
 @subsection Pt-Http-Page-WebSocketMessage WebSocketMessage
 @copydetails Pt::Http::WebSocketMessage
 
+@section Pt-Http-Page-WebSocket-Client Client Sockets
+@copydetails Pt-Http-WebSocket-Client
+
 @subsection Pt-Http-Page-WebSocketClass WebSocket
 @copydetails Pt::Http::WebSocket
+
+@section Pt-Http-Page-WebSocket-Server Server Sessions
+@copydetails Pt-Http-WebSocket-Server
 
 @subsection Pt-Http-Page-WebSocketSession WebSocketSession
 @copydetails Pt::Http::WebSocketSession

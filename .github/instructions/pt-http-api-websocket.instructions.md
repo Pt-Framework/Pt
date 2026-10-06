@@ -2,8 +2,14 @@
 description: "HTTP WebSocket"
 ---
 
-- WebSocket group, HTTP upgrade and message I/O:
+- HTTP module group, messages, clients, servers and WebSocket:
+  `include/Pt/Http/Api-Http.h`
+- WebSocket group, handshake, frames and message I/O:
   `include/Pt/Http/Api-WebSocket.h`
+- Client handshake group:
+  `include/Pt/Http/Api-WebSocketClient.h`
+- Server session group:
+  `include/Pt/Http/Api-WebSocketServer.h`
 - Payload of one text or binary WebSocket message:
   `include/Pt/Http/WebSocketMessage.h`
 - Connect, accept, send and receive WebSocket messages:

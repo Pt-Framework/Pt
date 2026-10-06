@@ -95,6 +95,8 @@
       <li><a href="Pt-Http-Page.html#Pt-Http-Page-Clients">HTTP Clients</a></li>
       <li><a href="Pt-Http-Page.html#Pt-Http-Page-Servers">HTTP Servers</a></li>
       <li><a href="Pt-Http-Page.html#Pt-Http-Page-WebSocket">WebSocket</a></li>
+      <li><a href="Pt-Http-Page.html#Pt-Http-Page-WebSocket-Client">Client Sockets</a></li>
+      <li><a href="Pt-Http-Page.html#Pt-Http-Page-WebSocket-Server">Server Sessions</a></li>
     </ul>
   </div>
 

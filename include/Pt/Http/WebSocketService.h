@@ -28,50 +28,14 @@ class WebSocketServlet;
 
 /** @brief Factory and endpoint policy for WebSocket sessions.
 
-    %WebSocketService is the server-side factory. Map it with a
-    %Servlet like any other %Service, so the handshake request
-    reaches it. Its handshake responder answers a WebSocket upgrade
-    with 101, with 503 when %maxSockets() sessions are already open,
-    or with 404 when the request is not a WebSocket upgrade. The
-    responder is released before the server opens the stream. It is
-    not the session.
-
-    This service does not keep the sessions it creates. A
-    %WebSocketServlet does. The servlet is constructed with this
-    service and destroyed before it, so the factory is still fully
-    constructed when the last session is released. The service
-    destructor does not release sessions. By then the derived
-    destructor has already run, and the virtual release call and the
-    allocator are gone. One service has one registered servlet. A
-    second registration replaces it. The previous servlet keeps the
-    sessions it already holds and releases them itself.
-
-    After a finished 101 the HTTP server keeps the connection and
-    calls %Service::onUpgrade(). This service implements that call
-    and does not pass it on. It forwards the stream to the registered
-    %WebSocketServlet. The servlet asks %onGetSession() for a
-    %WebSocketSession and passes the %EventLoop of the stream
-    together with the stream. The session binds the stream in its
-    constructor, which accepts the upgrade. A null return, or no
-    registered servlet, leaves the stream unbound, and the HTTP
-    server closes it.
-
-    %onGetSession() creates the session and %onReleaseSession()
-    destroys it. The two methods must use the same allocator, as
-    %onGetResponder() and %onReleaseResponder() must match. A pool,
-    or any other detach, lives in the derived service. The servlet
-    only holds the pointers so release runs while this service is
-    still fully constructed.
-
-    %maxSockets(), %idleTimeout(), and %maxMessageSize() are endpoint
-    policy. The handshake reads the session limit. The session base
-    copies the idle timeout and the data-message limit onto the
-    connection before the derived constructor runs.
-
-    %BasicWebSocketService is this factory for one session type.
-    Derive %WebSocketService when the session type depends on the
-    upgrade, or when the session constructor needs more than the
-    servlet, the loop, and the stream.
+    %WebSocketService is the server-side factory. Map it with an HTTP
+    servlet like any other service, so the handshake request reaches
+    it. This type does not keep the sessions it creates. A separate
+    release scope does, and that scope is destroyed before this
+    service so the factory is still fully constructed when the last
+    session is released. The service destructor does not release
+    sessions. By then the derived destructor has already run, and the
+    virtual release call and the allocator are gone.
 
     The example is the usual server setup. The mapping servlet and
     the release scope are different objects.
@@ -80,12 +44,63 @@ class WebSocketServlet;
     typedef Pt::Http::BasicWebSocketService<EchoSession> EchoService;
 
     EchoService service;
+    service.setMaxSockets(100);
+    service.setIdleTimeout(60000);
+    service.setMaxMessageSize(1 << 20);
     Pt::Http::WebSocketServlet sockets(service);
     Pt::Http::MapUrl mapUrl("/ws", service);
     server.addServlet(mapUrl);
     @endcode
 
-    @ingroup Pt-Http-WebSocket
+    The handshake responder answers a WebSocket upgrade with 101,
+    with 503 when the accepted-session limit is already reached, or
+    with 404 when the request is not a WebSocket upgrade. The responder
+    is released before the server opens the stream. It is not the
+    session. %setMaxSockets(), %setIdleTimeout() and
+    %setMaxMessageSize() are endpoint policy. The handshake reads
+    the session limit. The session base copies the idle timeout and
+    the data-message limit onto the connection before the derived
+    constructor runs. One service has one registered
+    %WebSocketServlet. A second registration replaces it. The
+    previous servlet keeps the sessions it already holds and
+    releases them itself.
+
+    After a finished 101 the HTTP server keeps the connection and
+    delivers the upgraded stream to this service. This class
+    implements that delivery and does not pass it on. It forwards
+    the stream to the registered servlet. The servlet asks the
+    factory for a session and passes the loop of the stream together
+    with the stream. The session binds the stream in its
+    constructor, which accepts the upgrade. A null session, or no
+    registered servlet, leaves the stream unbound, and the HTTP
+    server closes it.
+
+    %BasicWebSocketService is this factory for one session type.
+    Derive this class when the session type depends on the upgrade,
+    or when the session constructor needs more than the servlet, the
+    loop and the stream.
+
+    @code
+    Pt::Http::WebSocketSession* ChatService::onGetSession(
+        Pt::Http::WebSocketServlet& servlet,
+        Pt::System::EventLoop& loop,
+        Pt::Http::Stream& stream)
+    {
+        return new ChatSession(servlet, loop, stream, _rooms);
+    }
+
+    void ChatService::onReleaseSession(Pt::Http::WebSocketSession* session)
+    {
+        delete session;
+    }
+    @endcode
+
+    %onGetSession() creates the session and %onReleaseSession()
+    destroys it. The two methods must use the same allocator. A
+    pool, or any other detach, lives in the derived service. Return
+    null from %onGetSession() to decline the upgrade.
+
+    @ingroup Pt-Http-WebSocket-Server
 */
 class PT_HTTP_API WebSocketService : public Service
                                    , public Connectable
@@ -192,7 +207,7 @@ class PT_HTTP_API WebSocketService : public Service
 
 /** @brief WebSocket service for one session type.
 
-    @ingroup Pt-Http-WebSocket
+    @ingroup Pt-Http-WebSocket-Server
 */
 template <typename S, typename Alloc = Allocator>
 class BasicWebSocketService : public WebSocketService

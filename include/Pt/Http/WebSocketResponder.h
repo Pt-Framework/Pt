@@ -40,7 +40,7 @@ class WebSocketService;
 
 /** @brief Responder for the WebSocket handshake.
 
-    @ingroup Pt-Http-WebSocket
+    @ingroup Pt-Http-WebSocket-Server
 */
 class PT_HTTP_API WebSocketResponder : public Pt::Http::Responder
 {

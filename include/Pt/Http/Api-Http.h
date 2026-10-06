@@ -48,17 +48,17 @@
     is an I/O error. A local address that is already occupied still
     throws %AddressInUse from the listen that uses it.
 
-    An HTTP connection can be upgraded. The server keeps the
-    connection and calls %Service::onUpgrade() with the %Stream it
-    owns. A client obtains the stream it owns from a finished 101
-    reply with %Client::upgrade(). Binding a %StreamSession accepts
-    that stream. %WebSocket is the client handshake and sends and
-    receives messages on the stream after a finished 101. On the
-    server, %WebSocketSession is the application object that formats
-    one accepted stream for its lifetime.
+    An HTTP connection can be upgraded. After a finished 101 the
+    owner keeps the TCP connection and exposes it as a %Stream. The
+    server calls %Service::onUpgrade() with that stream. A client
+    obtains the stream it already owns with %Client::upgrade().
+    Binding a %StreamSession accepts the upgrade. WebSocket is the
+    framed protocol on that path: a handshake that is still HTTP,
+    then messages on the same connection for as long as the stream
+    lasts.
 
     The rest of this chapter is the message model, then the client,
-    then the server, then the WebSocket upgrade.
+    then the server, then WebSocket.
 */
 
 /** @defgroup Pt-Http-Messages HTTP Messages
@@ -79,6 +79,16 @@
 /** @defgroup Pt-Http-WebSocket WebSocket
 
     @ingroup Pt-Http
+*/
+
+/** @defgroup Pt-Http-WebSocket-Client Client Sockets
+
+    @ingroup Pt-Http-WebSocket
+*/
+
+/** @defgroup Pt-Http-WebSocket-Server Server Sessions
+
+    @ingroup Pt-Http-WebSocket
 */
 
 #endif

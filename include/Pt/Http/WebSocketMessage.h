@@ -16,33 +16,15 @@ namespace Http {
 
 class WebSocketConnection;
 
-/** @brief Payload of one WebSocket text or binary message.
+/** @brief Payload of one text or binary WebSocket message.
 
-    %WebSocketMessage is the payload object of a WebSocket. It is the
-    peer of %Message, not of %Request or %Reply. A socket holds two of
-    them for the life of the stream: %incoming() is filled by a
-    receive, and %outgoing() is what a send writes. Callers do not
-    construct a message. There is no header and no URL. The only type
-    it exposes is the data type of the payload.
-
-    %Type is %Unknown until a data type is set. %setType() is for the
-    outgoing message and accepts %Text or %Binary. The engine sets the
-    type of the incoming message when it has parsed the first data
-    frame of that message. A text message is UTF-8 over the whole
-    message. Binary is an uninterpreted payload.
-
-    %body() is the iostream, the same surface %Message uses. Write it
-    before %WebSocket::beginSend(). After a receive step, read the
-    bytes that step delivered. %available() is how many payload bytes
-    can be read. %pending() is how many payload bytes are waiting to
-    be sent.
-
-    %discard() drops the buffered body and leaves the type. That is
-    the call during a message that is not finished, after the
-    application has consumed what %body() holds. %clear() drops the
-    body and sets the type to %Unknown, so the same object can carry
-    the next message. After a receive that reports finished, the
-    application calls %clear().
+    %WebSocketMessage is the payload of one WebSocket data message. It
+    is the peer of an HTTP message, not of a request or a reply. There
+    is no header and no URL. The only type it exposes is the data type
+    of the payload: UTF-8 text, or an uninterpreted binary body.
+    Callers do not construct this object. The socket holds two of them
+    for the life of the stream, one that a receive fills and one that
+    a send writes.
 
     The example writes a text payload on the outgoing message and
     reads an incoming payload after a receive step.
@@ -65,6 +47,23 @@ class WebSocketConnection;
     else
         socket.incoming().clear();
     @endcode
+
+    %type() is %Unknown until a data type is set. %setType() is for
+    the outgoing message and accepts %Text or %Binary. The engine
+    sets the type of the incoming message when it has parsed the
+    first data frame of that message. A text body must be valid
+    UTF-8 over the whole message. %body() is the iostream. Write it
+    before the send begins. After a receive step, read the bytes
+    that step delivered. %available() is how many payload bytes can
+    be read. %pending() is how many payload bytes are waiting to be
+    sent.
+
+    %discard() drops the buffered body and leaves the type. That is
+    the call during a message that is not finished, after the
+    application has consumed what %body() holds. %clear() drops the
+    body and sets the type to %Unknown, so the same object can carry
+    the next message. After a receive that reports finished, the
+    application calls %clear().
 
     @ingroup Pt-Http-WebSocket
 */

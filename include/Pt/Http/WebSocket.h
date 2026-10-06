@@ -24,57 +24,53 @@ class WebSocketConnection;
 
 /** @brief Client handshake and messages on an upgraded stream.
 
-    %WebSocket is the client side of a WebSocket upgrade. Construct it
-    with the %Client that performs the handshake. The socket stores a
-    reference and does not own that client, so the client must outlive
-    the socket, including a handshake that is still waiting on the
-    loop. Host, port, event loop, timeout and TLS are settings of that
-    client.
-
-    Connect %connected() and call %beginConnect() with the request
-    path, or with a %ws:// URL whose host and port are the client's
-    endpoint. The handshake is an HTTP request and reply on that
-    client. %endConnect() completes it and throws if it failed. A
-    finished 101 becomes the stream this socket formats. After the
-    handshake the socket no longer uses the client for messages. The
-    client still owns the connection and the stream.
-
-    The socket owns two messages, %incoming() and %outgoing(), the way
-    a %Client owns a request and a reply. A send writes %outgoing().
-    Set the type, write the body, and call %beginSend().
-    %outputReady() reports that data bytes were sent. %endSend()
-    returns %MessageProgress. If the send is not finished,
-    %beginSend() continues the same message. A receive fills
-    %incoming(). %inputReady() reports that data bytes were received.
-    %endReceive() returns progress. Body bytes are readable from
-    %incoming().body(). After %finished(), %clear() drops the body
-    so the same object can carry the next message.
-
-    Ping, pong, and close are socket operations, not messages. %ping()
-    enqueues a ping. A received ping is answered by the engine. A
-    received pong is consumed. Neither is delivered through
-    %incoming(). %close() enqueues a close frame with a status code
-    and a reason. A received close is answered by the engine.
-    %closeCode() and %closeReason() report the handshake that ended
-    the stream. %closed() ends an outstanding send or receive.
-
-    On the server the application does not construct a %WebSocket.
-    %WebSocketSession is the server facade. It exposes the same
-    message operations without a client handshake.
-
-    A client masks every frame it writes. A server does not. That
-    mode is fixed when the upgraded stream opens.
+    %WebSocket is the client side of a WebSocket upgrade. It performs
+    the HTTP handshake through an HTTP user agent and then sends and
+    receives payloads on the stream that handshake produces. Host,
+    port, event loop, timeout and TLS are settings of that agent. The
+    socket stores a reference and does not own it, so the agent must
+    outlive the socket, including a handshake that is still waiting
+    on the loop. After a finished 101 the socket formats the stream
+    the client already owns. The client still owns the connection.
+    Closing the socket closes the stream. The socket does not own the
+    stream. A client masks every frame it writes.
 
     The example completes the handshake and then writes a text
     message.
 
     @code
+    void onOutputReady(Pt::Http::WebSocket& socket)
+    {
+        Pt::Http::MessageProgress progress = socket.endSend();
+        if( ! progress.finished() )
+            socket.beginSend();
+    }
+
+    void onInputReady(Pt::Http::WebSocket& socket)
+    {
+        Pt::Http::MessageProgress progress = socket.endReceive();
+        if( ! progress.finished() )
+        {
+            socket.incoming().discard();
+            socket.beginReceive();
+            return;
+        }
+
+        socket.incoming().clear();
+        socket.beginReceive();
+    }
+
     void onConnected(Pt::Http::WebSocket& socket)
     {
         socket.endConnect();
         socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
         socket.outgoing().body() << "hello";
         socket.beginSend();
+        socket.beginReceive();
+    }
+
+    void onClosed(Pt::Http::WebSocket& /*socket*/)
+    {
     }
 
     Pt::System::MainLoop loop;
@@ -82,17 +78,56 @@ class WebSocketConnection;
     Pt::Http::Client client(loop, ep);
     Pt::Http::WebSocket socket(client);
     socket.connected() += Pt::slot(onConnected);
+    socket.outputReady() += Pt::slot(onOutputReady);
+    socket.inputReady() += Pt::slot(onInputReady);
+    socket.closed() += Pt::slot(onClosed);
     socket.beginConnect("/ws");
     loop.run();
     @endcode
 
-    %closed() is emitted while this socket is still alive. The stream
-    has already cleared its session pointer. Peer close, an I/O
-    error, a close frame and destruction of the stream all emit it.
-    The owner deletes this socket. Closing the socket closes the
-    stream. The socket does not own the stream or the connection.
+    Construct the socket with the %Client that performs the
+    handshake. Connect %connected() and call %beginConnect() with a
+    request path, or with a %ws:// URL whose host and port are
+    already the client's endpoint. The path and query of that URL
+    become the request URL; the client does not take the host from
+    the URL. The optional second argument is the Origin header.
+    %endConnect() completes the handshake and throws if it failed.
+    After that success the socket no longer uses the client for
+    messages.
 
-    @ingroup Pt-Http-WebSocket
+    The socket owns two %WebSocketMessage objects, %incoming() and
+    %outgoing(), the way a client owns a request and a reply. Set
+    the type, write the body, and call %beginSend(). %outputReady()
+    reports that data bytes were sent. %endSend() returns
+    %MessageProgress. If the send is not finished, %beginSend()
+    continues the same message. %beginReceive() fills %incoming().
+    %inputReady() reports that data bytes were received.
+    %endReceive() returns progress. After %finished(), %clear()
+    drops the body so the same object can carry the next message.
+
+    Ping, pong and close are socket operations, not messages.
+
+    @code
+    socket.ping();
+    socket.close(1000, "done");
+    @endcode
+
+    %ping() enqueues a ping. A received ping is answered by the
+    engine. A received pong is consumed. Neither is delivered
+    through %incoming(). %close() enqueues a close frame with a
+    status code and a reason. A received close is answered by the
+    engine. %closeCode() and %closeReason() report the handshake
+    that ended the stream. %closed() is emitted while this socket
+    is still alive. The stream has already cleared its session
+    pointer. Peer close, an I/O error, a close frame and
+    destruction of the stream all emit it. It ends an outstanding
+    send or receive. The owner deletes this socket.
+
+    On the server the application does not construct this type. The
+    server facade is %WebSocketSession, which exposes the same
+    message operations without a client handshake.
+
+    @ingroup Pt-Http-WebSocket-Client
 */
 class PT_HTTP_API WebSocket : public Pt::Connectable
 {
