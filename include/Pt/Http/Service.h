@@ -59,7 +59,7 @@ class Request;
     A responder upgrades the connection by finishing the reply with
     status 101. The server keeps the TCP connection and calls
     %onUpgrade() on the server thread with the %Stream it owns. The
-    responder has already been released. Binding a %StreamSession to
+    responder has already been released. Binding a %Channel to
     that stream accepts the upgrade. The empty base implementation
     leaves the stream unbound, and the server closes it.
     %Stream::protocol() is the value of the request's Upgrade header.
@@ -110,7 +110,7 @@ class PT_HTTP_API Service : private NonCopyable
 
             Runs on the server thread with the %Stream the server owns.
             The responder has already been released. Bind a
-            %StreamSession to @a stream to accept it. The empty
+            %Channel to @a stream to accept it. The empty
             implementation leaves the stream unbound, and the server
             closes it.
         */

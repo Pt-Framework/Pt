@@ -22,7 +22,7 @@ class EventLoop;
 namespace Http {
 
 class Connection;
-class StreamSession;
+class Channel;
 
 /** @brief One HTTP stream on a connection.
 
@@ -39,25 +39,25 @@ class StreamSession;
     %Service::onUpgrade(). The client reports it through
     %Client::upgrade(). Both return the stream the owner already holds.
 
-    A %StreamSession is the external peer. The stream stores one session
-    pointer, and the session stores one stream pointer. Binding that
+    A %Channel is the external peer. The stream stores one channel
+    pointer, and the channel stores one stream pointer. Binding that
     peer accepts the upgrade. A second bind throws %std::logic_error.
-    On the server, a stream that still has no session after
+    On the server, a stream that still has no channel after
     %onUpgrade() returns is declined, and the server closes it.
     A WebSocket formats frames into %buffer(). The bind is internal
     to that protocol. Application code uses %WebSocket on the client
     and %WebSocketSession on the server.
 
-    %close() ends this stream. It clears the session pointer first
-    and then tells the session that the stream ended, so a close
-    that runs from the session destructor does not re-enter this
+    %close() ends this stream. It clears the channel pointer first
+    and then tells the channel that the stream ended, so a close
+    that runs from the channel destructor does not re-enter this
     stream. While this stream is the only stream of the connection,
     closing it also closes the connection. The server deletes that
     connection on its event loop, after the close that requested it
-    has returned. Destroying the stream tells the session the same
-    way. The session object stays, and its stream pointer is null.
+    has returned. Destroying the stream tells the channel the same
+    way. The channel object stays, and its stream pointer is null.
 
-    %buffer() is the stream buffer of the connection. A session
+    %buffer() is the stream buffer of the connection. A channel
     formats into that buffer and extracts from it. The stream does not
     take a caller buffer, and it does not expose the socket.
     %beginInput() and %beginOutput() start a transfer of that buffer.
@@ -71,13 +71,13 @@ class StreamSession;
     stream. The owner has already stopped that timeout when it opened
     the stream.
 
-    The example accepts the upgrade by opening a stream session on
-    the stream. A service that does not bind a session declines it.
+    The example accepts the upgrade by opening a channel on
+    the stream. A service that does not bind a channel declines it.
 
     @code
     void onUpgrade(Pt::Http::Stream& stream)
     {
-        _session.open(stream);
+        _channel.open(stream);
         stream.inputReady() += Pt::slot(onInput);
         stream.beginInput();
     }
@@ -89,12 +89,12 @@ class PT_HTTP_API Stream : public Connectable
                          , private NonCopyable
 {
     friend class Connection;
-    friend class StreamSession;
+    friend class Channel;
 
     public:
         /** @brief Destructor.
 
-            Unbinds the session and notifies it. Does not close the
+            Unbinds the channel and notifies it. Does not close the
             connection. The connection deletes this stream.
         */
         ~Stream();
@@ -104,10 +104,10 @@ class PT_HTTP_API Stream : public Connectable
         bool isValid() const
         { return _connection != 0; }
 
-        /** @brief Returns the bound stream session, or null.
+        /** @brief Returns the bound channel, or null.
         */
-        StreamSession* session() const
-        { return _session; }
+        Channel* channel() const
+        { return _channel; }
 
         /** @brief Returns the Upgrade header value.
         */
@@ -169,13 +169,13 @@ class PT_HTTP_API Stream : public Connectable
     protected:
         Stream(Connection& connection, const std::string& protocol);
 
-        void openSession(StreamSession& session);
+        void openChannel(Channel& channel);
 
-        void closeSession(StreamSession& session);
+        void closeChannel(Channel& channel);
 
     private:
         Connection* _connection;
-        StreamSession* _session;
+        Channel* _channel;
         std::string _protocolName;
         Signal<> _inputReady;
         Signal<> _outputReady;

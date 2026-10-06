@@ -891,7 +891,7 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         {
             service->onUpgrade(stream);
 
-            if( ! stream.session() )
+            if( ! stream.channel() )
                 throw std::logic_error("stream not accepted");
         }
         catch(const std::exception& e)

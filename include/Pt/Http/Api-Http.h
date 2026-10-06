@@ -52,7 +52,7 @@
     owner keeps the TCP connection and exposes it as a %Stream. The
     server calls %Service::onUpgrade() with that stream. A client
     obtains the stream it already owns with %Client::upgrade().
-    Binding a %StreamSession accepts the upgrade. WebSocket is the
+    Binding a %Channel accepts the upgrade. WebSocket is the
     framed protocol on that path: a handshake that is still HTTP,
     then messages on the same connection for as long as the stream
     lasts.

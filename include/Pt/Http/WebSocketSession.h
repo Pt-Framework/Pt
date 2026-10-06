@@ -23,7 +23,7 @@ namespace Http {
 class Stream;
 class WebSocketServlet;
 class WebSocketService;
-class WebSocketConnection;
+class WebSocketChannel;
 
 /** @brief Server facade of one accepted WebSocket stream.
 
@@ -32,7 +32,7 @@ class WebSocketConnection;
     one message to the next: a subscription, a cursor, a user, or a
     reference into the application domain. The HTTP server already
     owns the connection and the stream. This session formats messages
-    on that stream. It is not a stream-session bind the application
+    on that stream. It is not a channel bind the application
     performs, and it is not a request responder. The handshake
     responder has already been released when the session begins. A
     server does not mask the frames it writes.
@@ -237,7 +237,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         WebSocketService*    _service;
         WebSocketServlet*    _servlet;
         System::EventLoop*   _loop;
-        WebSocketConnection* _connection;
+        WebSocketChannel* _channel;
 };
 
 } // namespace Http

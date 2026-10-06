@@ -19,10 +19,10 @@ SharedLibrary Pt-Http : Authorizer.cpp
                         ServerImpl.cpp
                         Service.cpp
                         Servlet.cpp
-                        StreamSession.cpp
+                        Channel.cpp
                         Stream.cpp
                         WebSocket.cpp
-                        WebSocketConnection.cpp
+                        WebSocketChannel.cpp
                         WebSocketMessage.cpp
                         WebSocketResponder.cpp
                         WebSocketService.cpp

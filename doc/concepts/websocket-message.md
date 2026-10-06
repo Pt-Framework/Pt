@@ -53,7 +53,7 @@ object the application reads and writes.
 
 ## Current state {#wsm-current}
 
-The frame engine is `WebSocketConnection`. `WebSocket` and
+The frame engine is `WebSocketChannel`. `WebSocket` and
 `WebSocketSession` do not keep a payload of their own. Both forward
 the same frame operations to that connection.
 

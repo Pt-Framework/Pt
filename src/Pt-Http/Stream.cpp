@@ -3,7 +3,7 @@
 */
 
 #include <Pt/Http/Stream.h>
-#include <Pt/Http/StreamSession.h>
+#include <Pt/Http/Channel.h>
 #include "Connection.h"
 
 #include <stdexcept>
@@ -14,7 +14,7 @@ namespace Http {
 
 Stream::Stream(Connection& connection, const std::string& protocol)
 : _connection(&connection)
-, _session(0)
+, _channel(0)
 , _protocolName(protocol)
 {
 }
@@ -22,42 +22,42 @@ Stream::Stream(Connection& connection, const std::string& protocol)
 
 Stream::~Stream()
 {
-    StreamSession* session = _session;
+    Channel* channel = _channel;
 
-    if(session)
-        session->closeStream(*this);
+    if(channel)
+        channel->closeStream(*this);
 }
 
 
-void Stream::openSession(StreamSession& session)
+void Stream::openChannel(Channel& channel)
 {
-    if(_session)
-        throw std::logic_error("HTTP stream already has a session");
+    if(_channel)
+        throw std::logic_error("HTTP stream already has a channel");
 
     if( ! _connection )
         throw std::logic_error("HTTP stream has no connection");
 
-    _session = &session;
+    _channel = &channel;
 }
 
 
-void Stream::closeSession(StreamSession& session)
+void Stream::closeChannel(Channel& channel)
 {
-    if(_session == &session)
-        _session = 0;
+    if(_channel == &channel)
+        _channel = 0;
 }
 
 
 void Stream::close()
 {
-    StreamSession* session = _session;
-    _session = 0;
+    Channel* channel = _channel;
+    _channel = 0;
 
     Connection* connection = _connection;
     _connection = 0;
 
-    if(session)
-        session->closeStream(*this);
+    if(channel)
+        channel->closeStream(*this);
 
     if(connection)
         connection->closeStream(*this);
