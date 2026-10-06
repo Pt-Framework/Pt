@@ -31,7 +31,7 @@ WebSocketServlet::~WebSocketServlet()
     {
         WebSocketSession* session = _sessions.back();
         _sessions.pop_back();
-        session->close();
+        session->shutdown();
         releaseSession(session);
     }
 }

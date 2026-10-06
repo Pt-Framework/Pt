@@ -57,6 +57,9 @@ This chapter covers:
 @section Pt-Http-Page-WebSocket WebSocket
 @copydetails Pt-Http-WebSocket
 
+@subsection Pt-Http-Page-WebSocketMessage WebSocketMessage
+@copydetails Pt::Http::WebSocketMessage
+
 @subsection Pt-Http-Page-WebSocketClass WebSocket
 @copydetails Pt::Http::WebSocket
 

@@ -65,8 +65,8 @@ class WebSocketServlet;
 
     %maxSockets(), %idleTimeout(), and %maxMessageSize() are endpoint
     policy. The handshake reads the session limit. The session base
-    copies the idle timeout and the frame limit onto the connection
-    before the derived constructor runs.
+    copies the idle timeout and the data-message limit onto the
+    connection before the derived constructor runs.
 
     %BasicWebSocketService is this factory for one session type.
     Derive %WebSocketService when the session type depends on the
@@ -129,13 +129,15 @@ class PT_HTTP_API WebSocketService : public Service
         */
         void setIdleTimeout(std::size_t ms);
 
-        /** @brief Returns the maximum frame payload in bytes.
+        /** @brief Returns the maximum data message size in bytes.
         */
         std::size_t maxMessageSize() const;
 
-        /** @brief Sets the maximum frame payload in bytes.
+        /** @brief Sets the maximum data message size in bytes.
 
-            A larger frame closes the socket. Zero disables the limit.
+            A larger data message closes the socket. Zero disables the
+            limit. The count is the declared payload from the first
+            data opcode to FIN.
         */
         void setMaxMessageSize(std::size_t n);
 

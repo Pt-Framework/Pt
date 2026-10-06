@@ -2,9 +2,11 @@
 description: "HTTP WebSocket"
 ---
 
-- WebSocket group, HTTP upgrade and framed I/O:
+- WebSocket group, HTTP upgrade and message I/O:
   `include/Pt/Http/Api-WebSocket.h`
-- Connect, accept, send and receive WebSocket frames:
+- Payload of one text or binary WebSocket message:
+  `include/Pt/Http/WebSocketMessage.h`
+- Connect, accept, send and receive WebSocket messages:
   `include/Pt/Http/WebSocket.h`
 - Handshake service for WebSocket upgrades:
   `include/Pt/Http/WebSocketService.h`

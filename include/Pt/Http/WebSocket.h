@@ -7,10 +7,11 @@
 #define PT_HTTP_WEBSOCKET_H
 
 #include <Pt/Http/Api.h>
+#include <Pt/Http/WebSocketMessage.h>
+#include <Pt/Http/Message.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <string>
-#include <iostream>
 #include <cstddef>
 
 namespace Pt {
@@ -21,7 +22,7 @@ class Client;
 class WebSocketConnection;
 
 
-/** @brief Client handshake and framed messages on an upgraded stream.
+/** @brief Client handshake and messages on an upgraded stream.
 
     %WebSocket is the client side of a WebSocket upgrade. Construct it
     with the %Client that performs the handshake. The socket stores a
@@ -35,49 +36,45 @@ class WebSocketConnection;
     endpoint. The handshake is an HTTP request and reply on that
     client. %endConnect() completes it and throws if it failed. A
     finished 101 becomes the stream this socket formats. After the
-    handshake the socket no longer uses the client for frames. The
+    handshake the socket no longer uses the client for messages. The
     client still owns the connection and the stream.
 
-    The payload is %body(), an iostream, the same surface a %Message
-    uses for its body. Write that stream and send it as one frame. A
-    receive parses one frame and leaves the payload in %body(). The
-    connection stream buffer stays inside the socket. %WebSocket is
-    not an I/O device, and it is not a %StreamSession that application
-    code binds itself.
+    The socket owns two messages, %incoming() and %outgoing(), the way
+    a %Client owns a request and a reply. A send writes %outgoing().
+    Set the type, write the body, and call %beginSend().
+    %outputReady() reports that data bytes were sent. %endSend()
+    returns %MessageProgress. If the send is not finished,
+    %beginSend() continues the same message. A receive fills
+    %incoming(). %inputReady() reports that data bytes were received.
+    %endReceive() returns progress. Body bytes are readable from
+    %incoming().body(). After %finished(), %clear() drops the body
+    so the same object can carry the next message.
+
+    Ping, pong, and close are socket operations, not messages. %ping()
+    enqueues a ping. A received ping is answered by the engine. A
+    received pong is consumed. Neither is delivered through
+    %incoming(). %close() enqueues a close frame with a status code
+    and a reason. A received close is answered by the engine.
+    %closeCode() and %closeReason() report the handshake that ended
+    the stream. %closed() ends an outstanding send or receive.
 
     On the server the application does not construct a %WebSocket.
-    %WebSocketSession is the server facade. It formats the stream the
-    HTTP server already owns and exposes the same frame operations
-    without a client handshake.
-
-    %beginSend() writes one frame. The opcode is the argument. The
-    payload is what was written to %body() since the previous send.
-    %outputReady() reports that the frame has left the connection
-    stream buffer, and %endSend() completes the send.
-
-    %beginReceive() reads one frame. %inputReady() reports that the
-    frame is complete. %endReceive() completes the read. %frame() is
-    the opcode, and %body() then holds the payload. %available() is
-    how many of those bytes can be read. A short read stays inside
-    the socket until the frame is complete, so the ready signal means
-    one whole frame.
+    %WebSocketSession is the server facade. It exposes the same
+    message operations without a client handshake.
 
     A client masks every frame it writes. A server does not. That
-    mode is fixed when the upgraded stream opens, so application code
-    does not choose a mask.
+    mode is fixed when the upgraded stream opens.
 
-    Ping and pong are control frames. %sendPing() and %sendPong()
-    write those frames through the connection stream buffer. Text and
-    binary are the data payload. Unknown is the unset frame type.
-
-    The example completes the handshake and then writes a text frame.
+    The example completes the handshake and then writes a text
+    message.
 
     @code
     void onConnected(Pt::Http::WebSocket& socket)
     {
         socket.endConnect();
-        socket.body() << "hello";
-        socket.beginSend(Pt::Http::WebSocket::Text);
+        socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+        socket.outgoing().body() << "hello";
+        socket.beginSend();
     }
 
     Pt::System::MainLoop loop;
@@ -100,18 +97,6 @@ class WebSocketConnection;
 class PT_HTTP_API WebSocket : public Pt::Connectable
 {
     public:
-        /** @brief WebSocket frame opcode.
-        */
-        enum Frame
-        {
-            Unknown, ///< Unset frame type
-            Text,    ///< Text data frame
-            Binary,  ///< Binary data frame
-            Ping,    ///< Ping frame
-            Pong,    ///< Pong frame
-            Close    ///< Close frame
-        };
-
         /** @brief Creates a WebSocket that handshakes through @a client.
 
             Stores a reference to @a client. The client must outlive
@@ -143,63 +128,75 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void endConnect();
 
-        /** @brief Returns the payload stream.
-
-            Write payload here before %beginSend(). After
-            %endReceive() this stream holds the received payload.
+        /** @brief Returns the incoming message.
         */
-        std::iostream& body();
+        WebSocketMessage& incoming();
 
-        /** @brief Returns how many payload bytes can be read.
+        /** @brief Returns the outgoing message.
         */
-        std::size_t available() const;
+        WebSocketMessage& outgoing();
 
-        /** @brief Returns how many payload bytes are waiting to be sent.
-        */
-        std::size_t pending() const;
+        /** @brief Begins sending %outgoing().
 
-        /** @brief Drops the buffered payload.
+            @throw %std::logic_error if a send is outstanding, the
+            handshake is not finished, or a close is queued.
+            @throw %std::invalid_argument if the type is %Unknown, the
+            body is larger than %setMaxMessageSize(), or a text body
+            is not valid UTF-8.
         */
-        void discard();
-
-        /** @brief Returns the opcode of the frame last received.
-        */
-        Frame frame() const;
-
-        /** @brief Begins sending the payload in %body() as @a frame.
-        */
-        void beginSend(Frame frame);
+        void beginSend();
 
         /** @brief Completes the send started by %beginSend().
-        */
-        void endSend();
 
-        /** @brief Begins receiving one frame.
+            @return Progress of this send step.
+        */
+        MessageProgress endSend();
+
+        /** @brief Begins receiving into %incoming().
+
+            @throw %std::logic_error if a receive is outstanding, the
+            handshake is not finished, or the stream has ended.
         */
         void beginReceive();
 
         /** @brief Completes the receive started by %beginReceive().
-        */
-        void endReceive();
 
-        /** @brief Sends a ping frame.
+            @return Progress of this receive step.
         */
-        void sendPing();
+        MessageProgress endReceive();
 
-        /** @brief Sends a pong frame.
+        /** @brief Enqueues a ping with an optional payload of at most 125 bytes.
+
+            @throw %std::invalid_argument if @a n is greater than 125.
+            @throw %std::logic_error if the handshake is not finished.
         */
-        void sendPong();
+        void ping(const char* payload = 0, std::size_t n = 0);
 
-        /** @brief Sends a close frame and closes the stream.
+        /** @brief Enqueues a close frame and ends the stream after the close handshake.
+
+            @throw %std::invalid_argument if @a code is 1005, 1006 or
+            1015, if @a reason is longer than 123 bytes, or if @a reason
+            is not valid UTF-8.
+            @throw %std::logic_error if the handshake is not finished
+            or a close is already queued.
         */
-        void close();
+        void close(unsigned code = 1000,
+                   const std::string& reason = std::string());
 
-        /** @brief Returns the signal emitted when a frame was received.
+        /** @brief Returns the close status code of the handshake that ended the stream.
+        */
+        unsigned closeCode() const;
+
+        /** @brief Returns the close reason of the handshake that ended the stream.
+        */
+        const std::string& closeReason() const;
+
+        /** @brief Returns the signal emitted when data bytes were received.
         */
         Pt::Signal<WebSocket&>& inputReady()
         { return _inputReady; }
 
-        /** @brief Returns the signal emitted when a frame was sent.
+        /** @brief Returns the signal emitted when data bytes were sent.
         */
         Pt::Signal<WebSocket&>& outputReady()
         { return _outputReady; }
@@ -209,7 +206,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             Emitted while this socket is still alive. The stream has
             already cleared its session pointer. Peer close, an I/O
             error, a close frame and destruction of the stream all
-            emit it. The owner deletes this socket.
+            emit it. The owner deletes this socket. Ends an outstanding
+            send or receive.
         */
         Pt::Signal<WebSocket&>& closed()
         { return _closed; }
@@ -220,16 +218,17 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void setTimeout(std::size_t timeout);
 
-        /** @brief Closes the stream when a frame exceeds @a maxSize.
+        /** @brief Closes the stream when a data message exceeds @a maxSize.
 
-            Zero disables the limit.
+            Zero disables the limit. The count is the declared payload
+            of one data message from the first data opcode to FIN.
         */
         void setMaxMessageSize(std::size_t maxSize);
 
         /** @brief Closes the stream after @a ms without a finished transfer.
 
             Zero disables the idle timeout. A finished send or receive
-            restarts it.
+            restarts it. A received ping or pong restarts it.
         */
         void setIdleTimeout(std::size_t ms);
 

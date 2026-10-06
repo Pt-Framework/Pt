@@ -15,22 +15,6 @@ namespace Pt {
 
 namespace Http {
 
-namespace {
-
-WebSocket::Frame toFrame(WebSocketConnection::Frame frame)
-{
-    return static_cast<WebSocket::Frame>(frame);
-}
-
-
-WebSocketConnection::Frame toConnectionFrame(WebSocket::Frame frame)
-{
-    return static_cast<WebSocketConnection::Frame>(frame);
-}
-
-} // namespace
-
-
 WebSocketSession::WebSocketSession(WebSocketServlet& servlet,
                                    System::EventLoop& loop,
                                    Stream& stream)
@@ -59,45 +43,27 @@ WebSocketSession::~WebSocketSession()
 }
 
 
-std::iostream& WebSocketSession::body()
+WebSocketMessage& WebSocketSession::incoming()
 {
-    return _connection->body();
+    return _connection->incoming();
 }
 
 
-std::size_t WebSocketSession::available() const
+WebSocketMessage& WebSocketSession::outgoing()
 {
-    return _connection->available();
+    return _connection->outgoing();
 }
 
 
-std::size_t WebSocketSession::pending() const
+void WebSocketSession::beginSend()
 {
-    return _connection->pending();
+    _connection->beginSend();
 }
 
 
-void WebSocketSession::discard()
+MessageProgress WebSocketSession::endSend()
 {
-    _connection->discard();
-}
-
-
-WebSocket::Frame WebSocketSession::frame() const
-{
-    return toFrame( _connection->frame() );
-}
-
-
-void WebSocketSession::beginSend(WebSocket::Frame frame)
-{
-    _connection->beginSend( toConnectionFrame(frame) );
-}
-
-
-void WebSocketSession::endSend()
-{
-    _connection->endSend();
+    return _connection->endSend();
 }
 
 
@@ -107,27 +73,39 @@ void WebSocketSession::beginReceive()
 }
 
 
-void WebSocketSession::endReceive()
+MessageProgress WebSocketSession::endReceive()
 {
-    _connection->endReceive();
+    return _connection->endReceive();
 }
 
 
-void WebSocketSession::sendPing()
+void WebSocketSession::ping(const char* payload, std::size_t n)
 {
-    _connection->sendPing();
+    _connection->ping(payload, n);
 }
 
 
-void WebSocketSession::sendPong()
+void WebSocketSession::close(unsigned code, const std::string& reason)
 {
-    _connection->sendPong();
+    _connection->close(code, reason);
 }
 
 
-void WebSocketSession::close()
+unsigned WebSocketSession::closeCode() const
 {
-    _connection->close();
+    return _connection->closeCode();
+}
+
+
+const std::string& WebSocketSession::closeReason() const
+{
+    return _connection->closeReason();
+}
+
+
+void WebSocketSession::shutdown()
+{
+    _connection->detach();
 }
 
 

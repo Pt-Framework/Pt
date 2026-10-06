@@ -21,21 +21,6 @@ namespace Pt {
 
 namespace Http {
 
-namespace {
-
-WebSocket::Frame toFrame(WebSocketConnection::Frame frame)
-{
-    return static_cast<WebSocket::Frame>(frame);
-}
-
-
-WebSocketConnection::Frame toConnectionFrame(WebSocket::Frame frame)
-{
-    return static_cast<WebSocketConnection::Frame>(frame);
-}
-
-} // namespace
-
 WebSocket::WebSocket(Client& client)
 : _client(&client)
 , _connection(new WebSocketConnection())
@@ -152,50 +137,35 @@ void WebSocket::onReply(Client& client)
     }
     catch(const std::exception&)
     {
+        if( ! _connecting )
+            throw;
+
         finishHandshake(true);
     }
 }
 
 
-std::iostream& WebSocket::body()
+WebSocketMessage& WebSocket::incoming()
 {
-    return _connection->body();
+    return _connection->incoming();
 }
 
 
-std::size_t WebSocket::available() const
+WebSocketMessage& WebSocket::outgoing()
 {
-    return _connection->available();
+    return _connection->outgoing();
 }
 
 
-std::size_t WebSocket::pending() const
+void WebSocket::beginSend()
 {
-    return _connection->pending();
+    _connection->beginSend();
 }
 
 
-void WebSocket::discard()
+MessageProgress WebSocket::endSend()
 {
-    _connection->discard();
-}
-
-
-WebSocket::Frame WebSocket::frame() const
-{
-    return toFrame( _connection->frame() );
-}
-
-
-void WebSocket::beginSend(Frame frame)
-{
-    _connection->beginSend( toConnectionFrame(frame) );
-}
-
-
-void WebSocket::endSend()
-{
-    _connection->endSend();
+    return _connection->endSend();
 }
 
 
@@ -205,27 +175,33 @@ void WebSocket::beginReceive()
 }
 
 
-void WebSocket::endReceive()
+MessageProgress WebSocket::endReceive()
 {
-    _connection->endReceive();
+    return _connection->endReceive();
 }
 
 
-void WebSocket::sendPing()
+void WebSocket::ping(const char* payload, std::size_t n)
 {
-    _connection->sendPing();
+    _connection->ping(payload, n);
 }
 
 
-void WebSocket::sendPong()
+void WebSocket::close(unsigned code, const std::string& reason)
 {
-    _connection->sendPong();
+    _connection->close(code, reason);
 }
 
 
-void WebSocket::close()
+unsigned WebSocket::closeCode() const
 {
-    _connection->close();
+    return _connection->closeCode();
+}
+
+
+const std::string& WebSocket::closeReason() const
+{
+    return _connection->closeReason();
 }
 
 

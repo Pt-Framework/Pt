@@ -14,8 +14,10 @@ HTTP core knows no frames. The handshake responder writes the upgrade
 reply. The server then opens a `Stream` and delivers it to
 `Service::onUpgrade()`. Accepting still means binding one session to
 that stream. This chapter decides what the WebSocket types do with
-that stream, and how the client reaches the same frame engine after
-its own handshake.
+that stream, and how the client reaches the same engine after
+its own handshake. The public send and receive unit is a message,
+as in [WebSocket Message](websocket-message.md). `onInput()` and
+`onOutput()` are I/O steps of a message.
 
 This chapter covers:
 
@@ -291,7 +293,7 @@ registry, the limits, anything that belongs to every connection of
 this endpoint rather than to one stream. `loop()` is how a session
 attaches a timer or posts work onto the loop that owns this stream.
 
-`onInput()` runs when one whole frame has been received. The derived
+`onInput()` runs when data bytes were received. The derived
 session calls `endReceive()`, reads `body()`, and starts the next
 receive or a reply. `onOutput()` runs when a frame has left the stream
 buffer. The derived session calls `endSend()` and starts the next

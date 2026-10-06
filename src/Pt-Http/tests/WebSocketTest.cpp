@@ -11,6 +11,8 @@
 #include "Pt/Http/Service.h"
 #include "Pt/Http/Responder.h"
 #include "Pt/Http/WebSocket.h"
+#include "Pt/Http/WebSocketMessage.h"
+#include "Pt/Http/Message.h"
 #include "Pt/Http/WebSocketService.h"
 #include "Pt/Http/WebSocketServlet.h"
 #include "Pt/Http/WebSocketSession.h"
@@ -67,13 +69,13 @@ class RecordSession : public Pt::Http::WebSocketSession
                       Pt::System::EventLoop& loop,
                       Pt::Http::Stream& stream,
                       std::string& message,
-                      Pt::Http::WebSocket::Frame& frame,
+                      Pt::Http::WebSocketMessage::Type& type,
                       bool& received,
                       bool& closed,
                       Pt::System::EventLoop& exitLoop)
         : Pt::Http::WebSocketSession(servlet, loop, stream)
         , _message(&message)
-        , _frame(&frame)
+        , _type(&type)
         , _received(&received)
         , _closed(&closed)
         , _exitLoop(&exitLoop)
@@ -86,9 +88,9 @@ class RecordSession : public Pt::Http::WebSocketSession
         {
             endReceive();
 
-            _message->assign( std::istreambuf_iterator<char>( body() ),
+            _message->assign( std::istreambuf_iterator<char>( incoming().body() ),
                               std::istreambuf_iterator<char>() );
-            *_frame = frame();
+            *_type = incoming().type();
             *_received = true;
             _exitLoop->exit();
         }
@@ -106,7 +108,7 @@ class RecordSession : public Pt::Http::WebSocketSession
 
     private:
         std::string* _message;
-        Pt::Http::WebSocket::Frame* _frame;
+        Pt::Http::WebSocketMessage::Type* _type;
         bool* _received;
         bool* _closed;
         Pt::System::EventLoop* _exitLoop;
@@ -116,12 +118,12 @@ class RecordService : public Pt::Http::WebSocketService
 {
     public:
         RecordService(std::string& message,
-                      Pt::Http::WebSocket::Frame& frame,
+                      Pt::Http::WebSocketMessage::Type& type,
                       bool& received,
                       bool& closed,
                       Pt::System::EventLoop& loop)
         : _message(&message)
-        , _frame(&frame)
+        , _type(&type)
         , _received(&received)
         , _closed(&closed)
         , _loop(&loop)
@@ -145,7 +147,7 @@ class RecordService : public Pt::Http::WebSocketService
         {
             ++_opened;
             return new RecordSession(servlet, loop, stream,
-                                     *_message, *_frame, *_received, *_closed, *_loop);
+                                     *_message, *_type, *_received, *_closed, *_loop);
         }
 
         virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -156,12 +158,101 @@ class RecordService : public Pt::Http::WebSocketService
 
     private:
         std::string* _message;
-        Pt::Http::WebSocket::Frame* _frame;
+        Pt::Http::WebSocketMessage::Type* _type;
         bool* _received;
         bool* _closed;
         Pt::System::EventLoop* _loop;
         std::size_t _opened;
         std::size_t _released;
+};
+
+class CollectSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CollectSession(Pt::Http::WebSocketServlet& servlet,
+                       Pt::System::EventLoop& loop,
+                       Pt::Http::Stream& stream,
+                       std::string& message,
+                       Pt::Http::WebSocketMessage::Type& type,
+                       bool& received,
+                       Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(servlet, loop, stream)
+        , _message(&message)
+        , _type(&type)
+        , _received(&received)
+        , _exitLoop(&exitLoop)
+        {
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            Pt::Http::MessageProgress progress = endReceive();
+            std::string chunk;
+            chunk.assign( std::istreambuf_iterator<char>( incoming().body() ),
+                          std::istreambuf_iterator<char>() );
+            *_message += chunk;
+            *_type = incoming().type();
+
+            if( ! progress.finished() )
+            {
+                incoming().discard();
+                beginReceive();
+                return;
+            }
+
+            *_received = true;
+            _exitLoop->exit();
+        }
+
+        virtual void onOutput()
+        {
+            endSend();
+        }
+
+        virtual void onClose()
+        {}
+
+    private:
+        std::string* _message;
+        Pt::Http::WebSocketMessage::Type* _type;
+        bool* _received;
+        Pt::System::EventLoop* _exitLoop;
+};
+
+class CollectService : public Pt::Http::WebSocketService
+{
+    public:
+        CollectService(std::string& message,
+                       Pt::Http::WebSocketMessage::Type& type,
+                       bool& received,
+                       Pt::System::EventLoop& loop)
+        : _message(&message)
+        , _type(&type)
+        , _received(&received)
+        , _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
+                                                         Pt::System::EventLoop& loop,
+                                                         Pt::Http::Stream& stream)
+        {
+            return new CollectSession(servlet, loop, stream,
+                                      *_message, *_type, *_received, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        std::string* _message;
+        Pt::Http::WebSocketMessage::Type* _type;
+        bool* _received;
+        Pt::System::EventLoop* _loop;
 };
 
 class IdleSession : public Pt::Http::WebSocketSession
@@ -288,8 +379,9 @@ class PushSession : public Pt::Http::WebSocketSession
                     Pt::Http::Stream& stream)
         : Pt::Http::WebSocketSession(servlet, loop, stream)
         {
-            body() << "feed";
-            beginSend(Pt::Http::WebSocket::Text);
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "feed";
+            beginSend();
         }
 
     protected:
@@ -318,7 +410,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _declined(false)
         , _closed(false)
         , _status(0)
-        , _frame(Pt::Http::WebSocket::Unknown)
+        , _type(Pt::Http::WebSocketMessage::Unknown)
         , _limitSocket(0)
         , _limitClient(0)
         {
@@ -330,6 +422,13 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ConstructFails", *this, &WebSocketTest::ConstructFails);
             registerMethod("Push", *this, &WebSocketTest::Push);
             registerMethod("Limit", *this, &WebSocketTest::Limit);
+            registerMethod("Binary", *this, &WebSocketTest::Binary);
+            registerMethod("Empty", *this, &WebSocketTest::Empty);
+            registerMethod("Large", *this, &WebSocketTest::Large);
+            registerMethod("CloseHandshake", *this, &WebSocketTest::CloseHandshake);
+            registerMethod("BeginTwice", *this, &WebSocketTest::BeginTwice);
+            registerMethod("CloseCodes", *this, &WebSocketTest::CloseCodes);
+            registerMethod("HandshakeControl", *this, &WebSocketTest::HandshakeControl);
         }
 
         void setUp()
@@ -342,7 +441,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _limitSocket = 0;
             _limitClient = 0;
             _message.clear();
-            _frame = Pt::Http::WebSocket::Unknown;
+            _type = Pt::Http::WebSocketMessage::Unknown;
 
             _exitTimer.setActive(*_loop);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
@@ -362,7 +461,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8011);
 
             Pt::Http::Server server(*_loop, ep);
-            RecordService service(_message, _frame, _received, _closed, *_loop);
+            RecordService service(_message, _type, _received, _closed, *_loop);
             Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
@@ -377,14 +476,15 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(_received);
             PT_UNIT_ASSERT_EQUALS(_message, "hello");
-            PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocket::Text);
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Text);
         }
 
         void onConnected(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.body() << "hello";
-            socket.beginSend(Pt::Http::WebSocket::Text);
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "hello";
+            socket.beginSend();
         }
 
     protected:
@@ -420,7 +520,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8013);
 
             Pt::Http::Server server(*_loop, ep);
-            RecordService service(_message, _frame, _received, _closed, *_loop);
+            RecordService service(_message, _type, _received, _closed, *_loop);
             Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
@@ -543,7 +643,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT(_received);
             PT_UNIT_ASSERT_EQUALS(_message, "feed");
-            PT_UNIT_ASSERT_EQUALS(_frame, Pt::Http::WebSocket::Text);
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Text);
         }
 
         void onPushConnected(Pt::Http::WebSocket& socket)
@@ -555,9 +655,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onPushInput(Pt::Http::WebSocket& socket)
         {
             socket.endReceive();
-            _message.assign( std::istreambuf_iterator<char>( socket.body() ),
+            _message.assign( std::istreambuf_iterator<char>( socket.incoming().body() ),
                              std::istreambuf_iterator<char>() );
-            _frame = socket.frame();
+            _type = socket.incoming().type();
             _received = true;
             _loop->exit();
         }
@@ -611,6 +711,213 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->exit();
         }
 
+    protected:
+        void Binary()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8019);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedBinary);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT_EQUALS(_message, std::string("\x00\x01\x02", 3));
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Binary);
+        }
+
+        void onConnectedBinary(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Binary);
+            socket.outgoing().body().write("\x00\x01\x02", 3);
+            socket.beginSend();
+        }
+
+    protected:
+        void Empty()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8020);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedEmpty);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT(_message.empty());
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Text);
+        }
+
+        void onConnectedEmpty(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.beginSend();
+        }
+
+    protected:
+        void Large()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8021);
+
+            Pt::Http::Server server(*_loop, ep);
+            CollectService service(_message, _type, _received, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            _limitSocket = &socket;
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedLarge);
+            socket.outputReady() += Pt::slot(*this, &WebSocketTest::onLargeOutput);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT_EQUALS(_message.size(), static_cast<std::size_t>(5000));
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Text);
+            _limitSocket = 0;
+        }
+
+        void onConnectedLarge(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << std::string(5000, 'a');
+            socket.beginSend();
+        }
+
+        void onLargeOutput(Pt::Http::WebSocket& socket)
+        {
+            Pt::Http::MessageProgress progress = socket.endSend();
+            if( ! progress.finished() )
+                socket.beginSend();
+        }
+
+    protected:
+        void CloseHandshake()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8022);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedCloseCode);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void onConnectedCloseCode(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.close(1000, "bye");
+        }
+
+    protected:
+        void BeginTwice()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8023);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedBeginTwice);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+        }
+
+        void onConnectedBeginTwice(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            _loop->exit();
+        }
+
+    protected:
+        void CloseCodes()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8024);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedCloseCodes);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+        }
+
+        void onConnectedCloseCodes(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "x";
+            socket.beginSend();
+            PT_UNIT_ASSERT_THROW(socket.beginSend(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.close(1005), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.close(1006), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.close(1015), std::invalid_argument);
+            socket.close();
+            PT_UNIT_ASSERT_THROW(socket.close(), std::logic_error);
+            _loop->exit();
+        }
+
+    protected:
+        void HandshakeControl()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8025);
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            PT_UNIT_ASSERT_THROW(socket.ping(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.close(), std::logic_error);
+        }
+
     private:
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
@@ -619,7 +926,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _declined;
         bool _closed;
         unsigned _status;
-        Pt::Http::WebSocket::Frame _frame;
+        Pt::Http::WebSocketMessage::Type _type;
         Pt::Http::WebSocket* _limitSocket;
         Pt::Http::Client* _limitClient;
 };

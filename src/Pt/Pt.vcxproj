@@ -222,6 +222,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Service.h" />
     <ClInclude Include="..\..\include\Pt\Http\Servlet.h" />
     <ClInclude Include="..\..\include\Pt\Http\WebSocket.h" />
+    <ClInclude Include="..\..\include\Pt\Http\WebSocketMessage.h" />
     <ClInclude Include="..\..\include\Pt\Http\WebSocketResponder.h" />
     <ClInclude Include="..\..\include\Pt\Http\WebSocketService.h" />
     <ClInclude Include="..\..\include\Pt\Http\WebSocketServlet.h" />
@@ -1591,6 +1592,7 @@
     <ClCompile Include="..\Pt-Http\tests\WebSocketTest.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocket.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketConnection.cpp" />
+    <ClCompile Include="..\Pt-Http\WebSocketMessage.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketResponder.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketService.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketServlet.cpp" />

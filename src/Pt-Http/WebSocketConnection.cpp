@@ -15,75 +15,140 @@ namespace Pt {
 
 namespace Http {
 
-class WebSocketConnection::PayloadBuffer : public std::streambuf
+namespace {
+
+const std::size_t MaxFramePayload = 4096;
+
+bool feedUtf8(unsigned& need, unsigned char& lead, bool& error,
+              const char* data, std::size_t n)
 {
-    public:
-        explicit PayloadBuffer(std::vector<char>& payload)
-        : _payload(&payload)
-        {
-        }
+    if(error)
+        return false;
 
-        void reset()
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(data);
+    for(std::size_t i = 0; i < n; ++i)
+    {
+        unsigned char c = p[i];
+        if(need == 0)
         {
-            _payload->clear();
-            setp(0, 0);
-            setg(0, 0, 0);
-        }
+            lead = c;
+            if(c <= 0x7F)
+                continue;
 
-        void prepareGet()
-        {
-            if( _payload->empty() )
+            if(c >= 0xC2 && c <= 0xDF)
             {
-                setg(0, 0, 0);
-                return;
+                need = 1;
+                continue;
             }
 
-            setg(&(*_payload)[0], &(*_payload)[0], &(*_payload)[0] + _payload->size());
+            if(c >= 0xE0 && c <= 0xEF)
+            {
+                need = 2;
+                continue;
+            }
+
+            if(c >= 0xF0 && c <= 0xF4)
+            {
+                need = 3;
+                continue;
+            }
+
+            error = true;
+            return false;
         }
 
-    protected:
-        virtual int_type overflow(int_type ch)
+        if( (c & 0xC0) != 0x80 )
         {
-            if( ch == traits_type::eof() )
-                return traits_type::not_eof(ch);
-
-            std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase()) : _payload->size();
-            _payload->push_back( static_cast<char>(ch) );
-            setp(&(*_payload)[0], &(*_payload)[0] + _payload->size());
-            pbump( static_cast<int>(off + 1) );
-            return ch;
+            error = true;
+            return false;
         }
 
-        virtual std::streamsize xsputn(const char* data, std::streamsize n)
+        if(need == 2 && lead == 0xE0 && c < 0xA0)
         {
-            std::size_t off = pptr() ? static_cast<std::size_t>(pptr() - pbase()) : _payload->size();
-            _payload->insert(_payload->end(), data, data + n);
-            setp(&(*_payload)[0], &(*_payload)[0] + _payload->size());
-            pbump( static_cast<int>(off + static_cast<std::size_t>(n)) );
-            return n;
+            error = true;
+            return false;
         }
 
-    private:
-        std::vector<char>* _payload;
-};
+        if(need == 2 && lead == 0xED && c > 0x9F)
+        {
+            error = true;
+            return false;
+        }
+
+        if(need == 3 && lead == 0xF0 && c < 0x90)
+        {
+            error = true;
+            return false;
+        }
+
+        if(need == 3 && lead == 0xF4 && c > 0x8F)
+        {
+            error = true;
+            return false;
+        }
+
+        --need;
+    }
+
+    return true;
+}
+
+
+bool finishUtf8(unsigned need, bool error)
+{
+    return ! error && need == 0;
+}
+
+
+bool isValidUtf8(const char* data, std::size_t n)
+{
+    unsigned need = 0;
+    unsigned char lead = 0;
+    bool error = false;
+    if( ! feedUtf8(need, lead, error, data, n) )
+        return false;
+
+    return finishUtf8(need, error);
+}
+
+} // namespace
 
 
 WebSocketConnection::WebSocketConnection()
 : StreamSession()
 , _clientMask(false)
+, _opened(false)
+, _ended(false)
 , _timeout(30000)
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
-, _error(false)
-, _state(Idle)
-, _frame(Unknown)
-, _masked(false)
-, _mask(0)
+, _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
+, _inputState(InputIdle)
+, _receiveOutstanding(false)
+, _messageOpen(false)
+, _frameFin(false)
+, _frameMasked(false)
+, _frameOpcode(0)
+, _messageOpcode(0)
+, _frameMask(0)
 , _payloadSize(0)
 , _payloadGot(0)
 , _headerNeed(2)
-, _payloadBuffer(new PayloadBuffer(_payload))
-, _body(_payloadBuffer)
+, _messageSize(0)
+, _utf8Need(0)
+, _utf8Lead(0)
+, _utf8Error(false)
+, _outputState(OutputIdle)
+, _outputKind(OutputNone)
+, _sendOutstanding(false)
+, _sendStarted(false)
+, _firstFragment(true)
+, _dataFinWritten(false)
+, _awaitingEndSend(false)
+, _closeQueued(false)
+, _closeSent(false)
+, _closeReceived(false)
+, _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketConnection::onIdleTimeout);
 }
@@ -91,15 +156,15 @@ WebSocketConnection::WebSocketConnection()
 
 WebSocketConnection::~WebSocketConnection()
 {
-    close();
-    _body.rdbuf(0);
-    delete _payloadBuffer;
+    if( stream() )
+        StreamSession::close();
 }
 
 
 void WebSocketConnection::open(Stream& stream, bool clientMask)
 {
     _clientMask = clientMask;
+    _opened = true;
     StreamSession::open(stream);
     stream.setTimeout(_timeout);
     stream.inputReady() += Pt::slot(*this, &WebSocketConnection::onInput);
@@ -107,124 +172,169 @@ void WebSocketConnection::open(Stream& stream, bool clientMask)
 }
 
 
-void WebSocketConnection::close()
+void WebSocketConnection::requireOpen() const
 {
-    if( Stream* stream = this->stream() )
+    if( ! _opened || ! stream() )
+        throw std::logic_error("WebSocket handshake is not finished");
+}
+
+
+void WebSocketConnection::requireNotEnded() const
+{
+    if(_ended)
+        throw std::logic_error("WebSocket is closed");
+}
+
+
+void WebSocketConnection::beginSend()
+{
+    requireOpen();
+    requireNotEnded();
+
+    if(_sendOutstanding)
+        throw std::logic_error("WebSocket send is outstanding");
+
+    if(_closeQueued || _closeSent)
+        throw std::logic_error("WebSocket is closing");
+
+    if( ! _sendStarted )
     {
-        writeFrame(Close, 0, 0);
-        stream->beginOutput();
-        stream->endOutput();
+        WebSocketMessage::Type type = _outgoing.type();
+        if(type != WebSocketMessage::Text && type != WebSocketMessage::Binary)
+            throw std::invalid_argument("WebSocket message type");
+
+        std::size_t n = _outgoing.sendSize();
+        if(_maxMessageSize != 0 && n > _maxMessageSize)
+            throw std::invalid_argument("WebSocket message too large");
+
+        if(type == WebSocketMessage::Text)
+        {
+            const char* data = _outgoing.sendData();
+            if( ! isValidUtf8(data, n) )
+                throw std::invalid_argument("WebSocket text is not UTF-8");
+        }
+
+        _firstFragment = true;
+        _dataFinWritten = false;
+        _sendStarted = true;
     }
 
-    StreamSession::close();
+    _sendOutstanding = true;
+    _awaitingEndSend = false;
+    _sendProgress = MessageProgress();
+    _sendProgress.setHeader();
+    pumpOutput();
 }
 
 
-std::size_t WebSocketConnection::available() const
+MessageProgress WebSocketConnection::endSend()
 {
-    std::streambuf* sb = _body.rdbuf();
-    if( ! sb )
-        return 0;
+    requireNotEnded();
 
-    std::streamsize n = sb->in_avail();
-    return n > 0 ? static_cast<std::size_t>(n) : 0;
-}
+    if( ! _sendOutstanding )
+        throw std::logic_error("WebSocket send is not outstanding");
 
+    restartIdleTimer();
+    _sendOutstanding = false;
+    _awaitingEndSend = false;
 
-std::size_t WebSocketConnection::pending() const
-{
-    return _payload.size();
-}
+    MessageProgress progress = _sendProgress;
+    if(progress.finished())
+        _sendStarted = false;
 
-
-void WebSocketConnection::discard()
-{
-    _payloadBuffer->reset();
-    _body.clear();
-}
-
-
-void WebSocketConnection::beginSend(Frame frame)
-{
-    Stream* stream = this->stream();
-    if( ! stream )
-        throw std::logic_error("WebSocket has no stream");
-
-    _state = Sending;
-    writeFrame(frame, _payload.empty() ? 0 : &_payload[0], _payload.size());
-    _payloadBuffer->reset();
-    stream->beginOutput();
-}
-
-
-void WebSocketConnection::endSend()
-{
-    if(_idleTimeout != 0)
-        _idleTimer.start(_idleTimeout);
-
-    if(_error)
-        throw std::runtime_error("WebSocket send failed");
-
-    Stream* stream = this->stream();
-    if( ! stream )
-        throw std::logic_error("WebSocket has no stream");
-
-    stream->endOutput();
-    _state = Idle;
+    pumpOutput();
+    return progress;
 }
 
 
 void WebSocketConnection::beginReceive()
 {
-    if( ! stream() )
-        throw std::logic_error("WebSocket has no stream");
+    requireOpen();
+    requireNotEnded();
 
-    _frame = Unknown;
-    _payload.clear();
-    _payloadBuffer->reset();
-    _header.clear();
-    _payloadSize = 0;
-    _payloadGot = 0;
-    _headerNeed = 2;
-    _masked = false;
-    _state = ReceiveHeader;
-    beginFrameRead();
+    if(_receiveOutstanding)
+        throw std::logic_error("WebSocket receive is outstanding");
+
+    _receiveOutstanding = true;
+    _receiveProgress = MessageProgress();
+
+    if( ! _messageOpen )
+    {
+        _incoming.setTypeFromEngine(WebSocketMessage::Unknown);
+        _incoming.discard();
+        _messageSize = 0;
+        _utf8Need = 0;
+        _utf8Lead = 0;
+        _utf8Error = false;
+    }
+
+    if( _incoming.type() != WebSocketMessage::Unknown )
+        _receiveProgress.setHeader();
+
+    beginInputPump();
 }
 
 
-void WebSocketConnection::endReceive()
+MessageProgress WebSocketConnection::endReceive()
 {
-    if(_idleTimeout != 0)
-        _idleTimer.start(_idleTimeout);
+    requireNotEnded();
 
-    if(_error)
-        throw std::runtime_error("WebSocket receive failed");
+    if( ! _receiveOutstanding )
+        throw std::logic_error("WebSocket receive is not outstanding");
 
-    _payloadBuffer->prepareGet();
+    restartIdleTimer();
+    _incoming.prepareRead();
+    _receiveOutstanding = false;
+
+    MessageProgress progress = _receiveProgress;
+    if(progress.finished())
+        _messageOpen = false;
+
+    return progress;
 }
 
 
-void WebSocketConnection::sendPing()
+void WebSocketConnection::ping(const char* payload, std::size_t n)
 {
-    Stream* stream = this->stream();
-    if( ! stream )
-        throw std::logic_error("WebSocket has no stream");
+    requireOpen();
+    requireNotEnded();
 
-    writeFrame(Ping, 0, 0);
-    stream->beginOutput();
-    stream->endOutput();
+    if(n > 125)
+        throw std::invalid_argument("WebSocket ping payload");
+
+    enqueueControl(0x09, payload, n);
+    pumpOutput();
 }
 
 
-void WebSocketConnection::sendPong()
+void WebSocketConnection::close(unsigned code, const std::string& reason)
 {
-    Stream* stream = this->stream();
-    if( ! stream )
-        throw std::logic_error("WebSocket has no stream");
+    requireOpen();
+    requireNotEnded();
 
-    writeFrame(Pong, 0, 0);
-    stream->beginOutput();
-    stream->endOutput();
+    if(_closeQueued || _closeSent)
+        throw std::logic_error("WebSocket already closing");
+
+    if(code == 1005 || code == 1006 || code == 1015)
+        throw std::invalid_argument("WebSocket close code");
+
+    if(reason.size() > 123)
+        throw std::invalid_argument("WebSocket close reason");
+
+    if( ! isValidUtf8(reason.data(), reason.size()) )
+        throw std::invalid_argument("WebSocket close reason");
+
+    _closeCode = code;
+    _closeReason = reason;
+    enqueueClose(code, reason);
+    pumpOutput();
+}
+
+
+void WebSocketConnection::detach()
+{
+    if( stream() )
+        StreamSession::close();
 }
 
 
@@ -265,36 +375,153 @@ void WebSocketConnection::setIdleTimeout(std::size_t ms)
 
 void WebSocketConnection::onIdleTimeout()
 {
-    failStream();
-}
-
-
-void WebSocketConnection::onCloseStream(Stream&)
-{
-    _error = true;
-    _state = Idle;
-    _closed.send();
-}
-
-
-void WebSocketConnection::failStream()
-{
-    _error = true;
-    _state = Idle;
+    if(_closeCode == 0)
+        _closeCode = 1006;
 
     if( Stream* stream = this->stream() )
         stream->close();
 }
 
 
-Pt::uint32_t WebSocketConnection::createMask()
+void WebSocketConnection::onCloseStream(Stream&)
 {
-    std::srand( static_cast<unsigned int>(std::time(0)) );
-    return static_cast<Pt::uint32_t>(std::rand());
+    _ended = true;
+    _opened = false;
+    _receiveOutstanding = false;
+    _sendOutstanding = false;
+    _sendStarted = false;
+
+    if( ! _closeReceived && _closeCode == 0)
+        _closeCode = 1006;
+
+    _closed.send();
 }
 
 
-void WebSocketConnection::writeFrame(Frame frame, const char* payload, std::size_t n)
+void WebSocketConnection::enqueueControl(unsigned opcode, const char* payload, std::size_t n)
+{
+    ControlFrame frame;
+    frame.opcode = opcode;
+    frame.size = n;
+    if(n != 0 && payload)
+        std::memcpy(frame.payload, payload, n);
+
+    _controlQueue.push_back(frame);
+}
+
+
+void WebSocketConnection::enqueueClose(unsigned code, const std::string& reason)
+{
+    if(_closeQueued || _closeSent)
+        return;
+
+    _closeQueued = true;
+
+    char payload[125];
+    std::size_t n = 0;
+    Pt::uint16_t be = Pt::hostToBe( static_cast<Pt::uint16_t>(code) );
+    std::memcpy(payload, &be, 2);
+    n = 2;
+    if( ! reason.empty() )
+    {
+        std::memcpy(payload + 2, reason.data(), reason.size());
+        n += reason.size();
+    }
+
+    enqueueControl(0x08, payload, n);
+}
+
+
+void WebSocketConnection::protocolFail(unsigned code)
+{
+    if(_ended)
+        return;
+
+    if(_closeCode == 0)
+        _closeCode = code;
+
+    enqueueClose(code, std::string());
+    pumpOutput();
+}
+
+
+void WebSocketConnection::beginInputPump()
+{
+    if(_ended)
+        return;
+
+    Stream* stream = this->stream();
+    if( ! stream || ! stream->isValid() )
+        return;
+
+    if( ! stream->loop() )
+        return;
+
+    if( parseAvailable() )
+        return;
+
+    stream->beginInput();
+}
+
+
+void WebSocketConnection::pumpOutput()
+{
+    if(_ended || _outputState == OutputWriting)
+        return;
+
+    Stream* stream = this->stream();
+    if( ! stream )
+        return;
+
+    if( ! _controlQueue.empty() )
+    {
+        const ControlFrame& frame = _controlQueue.front();
+        writeFrame(frame.opcode, true, frame.payload, frame.size);
+
+        if(frame.opcode == 0x09)
+            _unansweredPings.push_back( std::string(frame.payload, frame.size) );
+
+        if(frame.opcode == 0x08)
+            _closeSent = true;
+
+        _controlQueue.pop_front();
+        _outputKind = OutputControl;
+        _outputState = OutputWriting;
+        stream->beginOutput();
+        return;
+    }
+
+    if(_awaitingEndSend)
+        return;
+
+    if( ! _sendOutstanding || _dataFinWritten )
+        return;
+
+    std::size_t remaining = _outgoing.sendSize();
+    std::size_t n = remaining;
+    if(n > MaxFramePayload)
+        n = MaxFramePayload;
+
+    bool fin = remaining <= MaxFramePayload;
+    unsigned opcode = 0;
+    if(_firstFragment)
+    {
+        opcode = (_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02;
+        _firstFragment = false;
+    }
+
+    const char* data = (n == 0) ? 0 : _outgoing.sendData();
+    writeFrame(opcode, fin, data, n);
+    _outgoing.consume(n);
+    _dataFinWritten = fin;
+    _outputKind = OutputData;
+    _outputState = OutputWriting;
+    stream->beginOutput();
+}
+
+
+void WebSocketConnection::writeFrame(unsigned opcode, bool fin,
+                                     const char* payload, std::size_t n)
 {
     Stream* stream = this->stream();
     std::streambuf* buf = stream ? stream->buffer() : 0;
@@ -304,34 +531,27 @@ void WebSocketConnection::writeFrame(Frame frame, const char* payload, std::size
     char header[14];
     std::size_t headerLen = 2;
 
-    header[0] = (char)0x80;
-    if(frame == Text)
-        header[0] |= 0x01;
-    else if(frame == Binary)
-        header[0] |= 0x02;
-    else if(frame == Ping)
-        header[0] |= 0x09;
-    else if(frame == Pong)
-        header[0] |= 0x0A;
-    else if(frame == Close)
-        header[0] |= 0x08;
+    header[0] = static_cast<char>(opcode);
+    if(fin)
+        header[0] = static_cast<char>( static_cast<unsigned char>(header[0]) | 0x80 );
 
-    header[1] = _clientMask ? (char)0x80 : 0;
+    header[1] = _clientMask ? static_cast<char>(0x80) : 0;
 
     if(n < 126)
     {
-        header[1] |= static_cast<char>(n);
+        header[1] = static_cast<char>(
+            static_cast<unsigned char>(header[1]) | static_cast<unsigned char>(n) );
     }
     else if(n < 65536)
     {
-        header[1] |= 126;
+        header[1] = static_cast<char>( static_cast<unsigned char>(header[1]) | 126 );
         Pt::uint16_t size = Pt::hostToBe( static_cast<Pt::uint16_t>(n) );
         std::memcpy(header + 2, &size, 2);
         headerLen = 4;
     }
     else
     {
-        header[1] |= 127;
+        header[1] = static_cast<char>( static_cast<unsigned char>(header[1]) | 127 );
         Pt::uint64_t size = Pt::hostToBe( static_cast<Pt::uint64_t>(n) );
         std::memcpy(header + 2, &size, 8);
         headerLen = 10;
@@ -340,7 +560,7 @@ void WebSocketConnection::writeFrame(Frame frame, const char* payload, std::size
     char maskBytes[4];
     if(_clientMask)
     {
-        Pt::uint32_t mask = createMask();
+        Pt::uint32_t mask = nextMask();
         std::memcpy(maskBytes, &mask, 4);
         std::memcpy(header + headerLen, maskBytes, 4);
         headerLen += 4;
@@ -365,20 +585,10 @@ void WebSocketConnection::writeFrame(Frame frame, const char* payload, std::size
 }
 
 
-void WebSocketConnection::beginFrameRead()
+Pt::uint32_t WebSocketConnection::nextMask()
 {
-    Stream* stream = this->stream();
-    if( ! stream )
-        return;
-
-    std::streambuf* buf = stream->buffer();
-    if(buf && buf->in_avail() > 0)
-    {
-        if( parseAvailable() )
-            return;
-    }
-
-    stream->beginInput();
+    _maskSeed = _maskSeed * 1664525u + 1013904223u;
+    return _maskSeed;
 }
 
 
@@ -389,6 +599,16 @@ bool WebSocketConnection::parseAvailable()
     if( ! buf )
         return false;
 
+    if(_inputState == InputIdle)
+    {
+        _header.clear();
+        _headerNeed = 2;
+        _payloadSize = 0;
+        _payloadGot = 0;
+        _controlPayload.clear();
+        _inputState = InputHeader;
+    }
+
     while( buf->in_avail() > 0 )
     {
         int ch = buf->sbumpc();
@@ -397,57 +617,96 @@ bool WebSocketConnection::parseAvailable()
 
         char byte = static_cast<char>(ch);
 
-        if(_state == ReceiveHeader || _state == ReceiveLength || _state == ReceiveMask)
+        if(_inputState == InputHeader || _inputState == InputLength ||
+           _inputState == InputMask)
         {
             _header.push_back(byte);
-
             if(_header.size() < _headerNeed)
                 continue;
 
-            if(_state == ReceiveHeader)
+            if(_inputState == InputHeader)
             {
-                unsigned opcode = static_cast<unsigned char>(_header[0]) & 0x0F;
-                if(opcode == 0x01)
-                    _frame = Text;
-                else if(opcode == 0x02)
-                    _frame = Binary;
-                else if(opcode == 0x09)
-                    _frame = Ping;
-                else if(opcode == 0x0A)
-                    _frame = Pong;
-                else if(opcode == 0x08)
-                {
-                    failStream();
-                    return true;
-                }
-                else
-                    _frame = Unknown;
+                unsigned char b0 = static_cast<unsigned char>(_header[0]);
+                unsigned char b1 = static_cast<unsigned char>(_header[1]);
+                _frameFin = (b0 & 0x80) != 0;
+                unsigned rsv = b0 & 0x70;
+                _frameOpcode = b0 & 0x0F;
+                _frameMasked = (b1 & 0x80) != 0;
+                unsigned len7 = b1 & 0x7F;
 
-                _masked = (_header[1] & 0x80) != 0;
-                unsigned len7 = static_cast<unsigned char>(_header[1]) & 0x7F;
+                if(rsv != 0)
+                {
+                    protocolFail(1002);
+                    return false;
+                }
+
+                bool control = _frameOpcode == 0x08 || _frameOpcode == 0x09 ||
+                               _frameOpcode == 0x0A;
+                if(control && ! _frameFin)
+                {
+                    protocolFail(1002);
+                    return false;
+                }
+
+                if(control && len7 > 125)
+                {
+                    protocolFail(1002);
+                    return false;
+                }
+
+                if(_frameOpcode == 0x00)
+                {
+                    if( ! _messageOpen )
+                    {
+                        protocolFail(1002);
+                        return false;
+                    }
+                }
+                else if(_frameOpcode == 0x01 || _frameOpcode == 0x02)
+                {
+                    if(_messageOpen)
+                    {
+                        protocolFail(1002);
+                        return false;
+                    }
+                }
+                else if( ! control )
+                {
+                    protocolFail(1002);
+                    return false;
+                }
+
+                if(_clientMask)
+                {
+                    if(_frameMasked)
+                    {
+                        protocolFail(1002);
+                        return false;
+                    }
+                }
+                else if( ! _frameMasked )
+                {
+                    protocolFail(1002);
+                    return false;
+                }
 
                 if(len7 == 126)
                 {
-                    _state = ReceiveLength;
+                    _inputState = InputLength;
                     _headerNeed = 4;
                     continue;
                 }
 
                 if(len7 == 127)
                 {
-                    _state = ReceiveLength;
+                    _inputState = InputLength;
                     _headerNeed = 10;
                     continue;
                 }
 
                 _payloadSize = len7;
-                if(_maxMessageSize != 0 && _payloadSize > _maxMessageSize)
-                {
-                    failStream();
-                    return true;
-                }
             }
-            else if(_state == ReceiveLength)
+            else if(_inputState == InputLength)
             {
                 if(_headerNeed == 4)
                 {
@@ -461,71 +720,245 @@ bool WebSocketConnection::parseAvailable()
                     std::memcpy(&size, &_header[2], 8);
                     _payloadSize = static_cast<std::size_t>( Pt::beToHost(size) );
                 }
-
-                if(_maxMessageSize != 0 && _payloadSize > _maxMessageSize)
-                {
-                    failStream();
-                    return true;
-                }
             }
 
-            if(_masked && _state != ReceiveMask)
+            bool control = _frameOpcode == 0x08 || _frameOpcode == 0x09 ||
+                           _frameOpcode == 0x0A;
+            if( ! control )
             {
-                _state = ReceiveMask;
+                if(_maxMessageSize != 0 &&
+                   (_payloadSize > _maxMessageSize ||
+                    _messageSize > _maxMessageSize - _payloadSize))
+                {
+                    protocolFail(1009);
+                    return false;
+                }
+
+                _messageSize += _payloadSize;
+            }
+
+            if(_frameMasked && _inputState != InputMask)
+            {
+                _inputState = InputMask;
                 _headerNeed = _header.size() + 4;
                 continue;
             }
 
-            if(_masked)
-                std::memcpy(&_mask, &_header[_header.size() - 4], 4);
+            if(_frameMasked)
+                std::memcpy(&_frameMask, &_header[_header.size() - 4], 4);
 
             _payloadGot = 0;
-            _payload.clear();
-            _payload.reserve(_payloadSize);
-            _state = ReceivePayload;
+            _controlPayload.clear();
+            _inputState = InputPayload;
 
             if(_payloadSize == 0)
             {
-                _state = Idle;
-                _inputReady.send();
-                return true;
+                if(control)
+                {
+                    if( onControlFrame() )
+                        return true;
+                }
+                else if( onDataFrameComplete() )
+                    return true;
+
+                continue;
             }
         }
-        else if(_state == ReceivePayload)
+        else if(_inputState == InputPayload)
         {
-            if(_masked)
+            if(_frameMasked)
             {
-                const char* maskBytes = reinterpret_cast<const char*>(&_mask);
+                const char* maskBytes = reinterpret_cast<const char*>(&_frameMask);
                 byte = static_cast<char>(byte ^ maskBytes[_payloadGot % 4]);
             }
 
-            _payload.push_back(byte);
-            ++_payloadGot;
-
-            if(_payloadGot == _payloadSize)
+            bool control = _frameOpcode == 0x08 || _frameOpcode == 0x09 ||
+                           _frameOpcode == 0x0A;
+            if(control)
+                _controlPayload.push_back(byte);
+            else if(_receiveOutstanding)
             {
-                _state = Idle;
-                _inputReady.send();
-                return true;
+                _incoming.append(&byte, 1);
+                _receiveProgress.setBody();
+
+                if(_messageOpcode == 0x01 || _frameOpcode == 0x01)
+                {
+                    if( ! feedUtf8(_utf8Need, _utf8Lead, _utf8Error, &byte, 1) )
+                    {
+                        protocolFail(1007);
+                        return false;
+                    }
+                }
             }
+
+            ++_payloadGot;
+            if(_payloadGot != _payloadSize)
+                continue;
+
+            if(control)
+            {
+                if( onControlFrame() )
+                    return true;
+            }
+            else if( onDataFrameComplete() )
+                return true;
         }
+    }
+
+    if(_receiveOutstanding && _receiveProgress.body() &&
+       _inputState == InputPayload)
+    {
+        _incoming.prepareRead();
+        _inputReady.send();
+        return true;
     }
 
     return false;
 }
 
 
+bool WebSocketConnection::onDataFrameComplete()
+{
+    _inputState = InputIdle;
+
+    if(_frameOpcode == 0x01 || _frameOpcode == 0x02)
+    {
+        _messageOpen = true;
+        _messageOpcode = _frameOpcode;
+        WebSocketMessage::Type type = (_frameOpcode == 0x01)
+                                    ? WebSocketMessage::Text
+                                    : WebSocketMessage::Binary;
+        _incoming.setTypeFromEngine(type);
+        _receiveProgress.setHeader();
+    }
+
+    if(_frameFin)
+    {
+        if(_messageOpcode == 0x01 && ! finishUtf8(_utf8Need, _utf8Error) )
+        {
+            protocolFail(1007);
+            return false;
+        }
+
+        _receiveProgress.setFinished();
+    }
+
+    if(_receiveOutstanding)
+    {
+        _incoming.prepareRead();
+        _inputReady.send();
+        return true;
+    }
+
+    _incoming.discard();
+    if(_frameFin)
+        _messageOpen = false;
+
+    return false;
+}
+
+
+bool WebSocketConnection::onControlFrame()
+{
+    _inputState = InputIdle;
+
+    if(_frameOpcode == 0x09)
+    {
+        enqueueControl(0x0A,
+                       _controlPayload.empty() ? 0 : &_controlPayload[0],
+                       _controlPayload.size());
+        restartIdleTimer();
+        pumpOutput();
+        return false;
+    }
+
+    if(_frameOpcode == 0x0A)
+    {
+        std::string payload(_controlPayload.begin(), _controlPayload.end());
+        if( ! _unansweredPings.empty() && _unansweredPings.front() == payload )
+            _unansweredPings.pop_front();
+
+        restartIdleTimer();
+        return false;
+    }
+
+    _closeReceived = true;
+
+    if(_controlPayload.size() == 1)
+    {
+        protocolFail(1002);
+        return false;
+    }
+
+    if(_controlPayload.size() >= 2)
+    {
+        Pt::uint16_t be = 0;
+        std::memcpy(&be, &_controlPayload[0], 2);
+        unsigned code = Pt::beToHost(be);
+        std::string reason(_controlPayload.begin() + 2, _controlPayload.end());
+
+        if( ! isValidUtf8(reason.data(), reason.size()) )
+        {
+            protocolFail(1002);
+            return false;
+        }
+
+        if(_closeCode == 0)
+        {
+            _closeCode = code;
+            _closeReason = reason;
+        }
+    }
+    else if(_closeCode == 0)
+    {
+        _closeCode = 1005;
+    }
+
+    if(_messageOpen)
+    {
+        _incoming.discard();
+        _messageOpen = false;
+    }
+
+    unsigned reply = 1000;
+    if(_closeCode != 1005 && _closeCode != 1006 && _closeCode != 1015 &&
+       _closeCode != 0)
+        reply = _closeCode;
+
+    enqueueClose(reply, std::string());
+    pumpOutput();
+
+    if(_closeSent && _closeReceived && _outputState == OutputIdle)
+    {
+        if( Stream* stream = this->stream() )
+            stream->close();
+    }
+
+    return true;
+}
+
+
+void WebSocketConnection::restartIdleTimer()
+{
+    if(_idleTimeout != 0)
+        _idleTimer.start(_idleTimeout);
+}
+
+
 void WebSocketConnection::onInput()
 {
     Stream* stream = this->stream();
-    if( ! stream )
+    if( ! stream || _ended )
         return;
 
     try
     {
         if( stream->endInput() == 0 )
         {
-            failStream();
+            if(_closeCode == 0)
+                _closeCode = 1006;
+
+            stream->close();
             return;
         }
 
@@ -536,7 +969,10 @@ void WebSocketConnection::onInput()
     }
     catch(const std::exception&)
     {
-        failStream();
+        if(_closeCode == 0)
+            _closeCode = 1006;
+
+        stream->close();
     }
 }
 
@@ -544,18 +980,51 @@ void WebSocketConnection::onInput()
 void WebSocketConnection::onOutput()
 {
     Stream* stream = this->stream();
-    if( ! stream )
+    if( ! stream || _ended )
         return;
 
     try
     {
         stream->endOutput();
-        _state = Idle;
-        _outputReady.send();
+        OutputKind kind = _outputKind;
+        _outputState = OutputIdle;
+        _outputKind = OutputNone;
+
+        if(kind == OutputControl)
+        {
+            if(_closeSent && _closeReceived)
+            {
+                stream->close();
+                return;
+            }
+
+            pumpOutput();
+            if(_outputState == OutputIdle && _closeSent &&
+               ! _closeReceived && ! _receiveOutstanding)
+                beginInputPump();
+
+            return;
+        }
+
+        if(kind == OutputData)
+        {
+            _sendProgress.setBody();
+            if(_dataFinWritten && _outgoing.sendSize() == 0)
+                _sendProgress.setFinished();
+
+            _awaitingEndSend = true;
+            _outputReady.send();
+            return;
+        }
+
+        pumpOutput();
     }
     catch(const std::exception&)
     {
-        failStream();
+        if(_closeCode == 0)
+            _closeCode = 1006;
+
+        stream->close();
     }
 }
 

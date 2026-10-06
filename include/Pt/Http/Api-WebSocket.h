@@ -11,67 +11,94 @@
 
     WebSocket is an HTTP upgrade. The HTTP exchange performs a
     handshake, and after the handshake the same connection carries
-    framed messages instead of request and reply messages. %WebSocket
-    formats those frames into the connection stream buffer. It is not
-    an I/O device. The payload is %body(), an iostream, the same
-    surface a %Message uses for its body. Write that stream and send
-    it as one frame. A receive parses one frame and leaves the payload
-    in %body(). %available() is how many of those bytes can be read.
-    %frame() is the opcode. The connection stream buffer is not the
-    payload.
+    messages instead of request and reply messages. The public unit is
+    a text or binary payload. Framing, fragmentation, masking, and
+    control frames stay inside the engine. The application does not
+    read an opcode, a FIN bit, or a continuation.
+
+    An HTTP exchange already separates the message from the connection.
+    A %Client holds a %Request and a %Reply. A WebSocket needs the same
+    split. The socket owns two %WebSocketMessage objects, %incoming()
+    and %outgoing(). A send writes %outgoing(). A receive fills
+    %incoming(). Those two messages may move at the same time. One
+    begin is outstanding until the matching end. A second begin on the
+    same direction while that begin is outstanding is an error.
+
+    %beginSend() writes %outgoing(). Set the type, write the body, and
+    call %beginSend(). %outputReady() reports that data bytes were
+    sent. %endSend() returns %MessageProgress. If the send is not
+    finished, %beginSend() continues the same message. The engine may
+    split the body into several frames. The application does not see
+    that split.
+
+    %beginReceive() fills %incoming(). %inputReady() reports that data
+    bytes were received. %endReceive() returns %MessageProgress.
+    %header() means the message type is known. %body() means payload
+    bytes were processed on this step. %finished() means the data
+    message is complete. If the receive is not finished, the
+    application discards the consumed body and calls %beginReceive()
+    again. After %finished(), %clear() drops the body so the same
+    object can carry the next message.
+
+    Ping, pong, and close are socket operations, not messages. %ping()
+    enqueues a ping. A received ping is answered by the engine. A
+    received pong is consumed. Neither is delivered through
+    %incoming(), and neither emits %inputReady() or %outputReady().
+    %close() enqueues a close frame with a status code and a reason.
+    A received close is answered by the engine. After a local close,
+    no more data frames are sent. Receive continues until the peer
+    close or the idle timeout. %closeCode() and %closeReason() report
+    the handshake that ended the stream. %closed() ends an outstanding
+    send or receive.
 
     On the client, construct %WebSocket with the %Client that performs
     the handshake. The socket stores a reference and does not own the
     client, so the client must outlive the socket. Host, port, event
     loop, timeout and TLS are settings of that client. %beginConnect()
     sends the handshake for a request path, or for a %ws:// URL whose
-    host and port are the client's endpoint. The handshake is an HTTP
-    request and reply. A finished 101 becomes the %Stream this socket
-    formats. %connected() is emitted when the attempt finishes, and
-    %endConnect() completes it and throws if the handshake failed.
-    A client masks every frame it writes.
+    host and port are the client's endpoint. A finished 101 becomes
+    the %Stream this socket formats. A client masks every frame it
+    writes.
 
     On the server, %WebSocketService is an HTTP %Service, mapped with
     a %Servlet like any other service. It is the factory and the
     endpoint policy. It does not keep the sessions. A
     %WebSocketServlet does, and it is constructed with the service
-    and destroyed before it. That servlet is the release scope. It
-    is not the %Servlet that maps the URL, and it is not the HTTP
-    server. The handshake responder answers a WebSocket Upgrade
-    request with 101 Switching Protocols, with 503 when the
-    accepted-session limit is already reached, or with 404 when the
-    request is not a WebSocket upgrade. After a successful upgrade
-    the HTTP server keeps the connection and calls
-    %Service::onUpgrade(). The WebSocket servlet asks the service for
-    one %WebSocketSession, holds it, and passes the stream together
-    with the loop that already serializes it. The session formats
-    that stream, which accepts the upgrade. A server does not mask.
-    A null session, or no registered WebSocket servlet, leaves the
-    stream unbound, and the HTTP server closes it. The session does
-    not own the connection, and the stream does not own the session.
-    When the stream ends, the session's %onClose() runs and the
-    WebSocket servlet releases the session while the service is still
-    alive.
+    and destroyed before it. That servlet is the release scope. The
+    handshake responder answers a WebSocket Upgrade request with 101
+    Switching Protocols, with 503 when the accepted-session limit is
+    already reached, or with 404 when the request is not a WebSocket
+    upgrade. After a successful upgrade the HTTP server keeps the
+    connection and calls %Service::onUpgrade(). The WebSocket servlet
+    asks the service for one %WebSocketSession, holds it, and passes
+    the stream together with the loop that already serializes it. The
+    session formats that stream, which accepts the upgrade. A server
+    does not mask. A null session, or no registered WebSocket servlet,
+    leaves the stream unbound, and the HTTP server closes it.
 
-    %Stream is the upgraded channel, not the HTTP message body.
-    A 101 reply is the generic HTTP upgrade. %WebSocketService is the
+    %WebSocketSession exposes the same %incoming(), %outgoing(),
+    %beginSend(), %endSend(), %beginReceive(), and %endReceive()
+    operations directly. %onInput() runs when data bytes were
+    received. %onOutput() runs when data bytes were sent. A ping or a
+    pong does not run those callbacks. %onClose() is the last look at
+    the session. Do not call %endReceive() or %endSend() from
+    %onClose().
+
+    %Stream is the upgraded channel, not the HTTP message body. A 101
+    reply is the generic HTTP upgrade. %WebSocketService is the
     WebSocket case of %onUpgrade(). The application derives
     %WebSocketSession and keeps the state of that connection there.
 
-    Ping and pong are control frames. %sendPing() writes a ping, and
-    after a ping is received %sendPong() writes the matching pong.
-    Text and binary frames are the data payload. Unknown is the unset
-    frame type.
-
     The example is a client handshake. The slot completes the connect
-    and then writes the payload body as a text frame.
+    and then writes a text message.
 
     @code
     void onConnected(Pt::Http::WebSocket& socket)
     {
         socket.endConnect();
-        socket.body() << "hello";
-        socket.beginSend(Pt::Http::WebSocket::Text);
+        socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+        socket.outgoing().body() << "hello";
+        socket.beginSend();
     }
 
     Pt::System::MainLoop loop;
@@ -84,8 +111,8 @@
     @endcode
 
     The server example is one session type. The constructor starts
-    the receive. %onInput() reads the payload from the member socket.
-    The service owns the session and releases it when the stream ends.
+    the receive. %onInput() reads the payload from %incoming(). The
+    service owns the session and releases it when the stream ends.
 
     @code
     class EchoSession : public Pt::Http::WebSocketSession
@@ -102,11 +129,15 @@
         protected:
             virtual void onInput()
             {
-                endReceive();
-                std::string message;
-                message.resize(available());
-                if( ! message.empty() )
-                    body().read(&message[0], message.size());
+                Pt::Http::MessageProgress progress = endReceive();
+                if( ! progress.finished() )
+                {
+                    incoming().discard();
+                    beginReceive();
+                    return;
+                }
+
+                incoming().clear();
                 beginReceive();
             }
 
