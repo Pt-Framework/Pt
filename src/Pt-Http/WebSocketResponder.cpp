@@ -32,6 +32,8 @@
 #include <Pt/TextStream.h>
 #include "Sha1.h"
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace Pt {
 namespace Http {
@@ -80,6 +82,71 @@ static std::string toBase64(const uint8_t* input, size_t size)
 
     return encodedString;
 }
+
+static bool isOws(char ch)
+{
+    return ch == ' ' || ch == '\t';
+}
+
+
+static bool isProtocolToken(const std::string& name)
+{
+    if(name.empty())
+        return false;
+
+    for(std::size_t i = 0; i < name.size(); ++i)
+    {
+        const unsigned char ch = static_cast<unsigned char>(name[i]);
+        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
+           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
+           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
+           || ch == '[' || ch == ']' || ch == '?' || ch == '='
+           || ch == '{' || ch == '}')
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+static bool parseProtocols(const char* field, std::vector<std::string>& names)
+{
+    names.clear();
+    if( ! field || ! *field )
+        return true;
+
+    const std::string text(field);
+    std::size_t begin = 0;
+    while(begin <= text.size())
+    {
+        const std::size_t comma = text.find(',', begin);
+        const std::size_t end = comma == std::string::npos ? text.size() : comma;
+
+        std::size_t left = begin;
+        while(left < end && isOws(text[left]))
+            ++left;
+
+        std::size_t right = end;
+        while(right > left && isOws(text[right - 1]))
+            --right;
+
+        const std::string name = text.substr(left, right - left);
+        if( ! isProtocolToken(name) )
+            return false;
+
+        names.push_back(name);
+
+        if(comma == std::string::npos)
+            break;
+
+        begin = comma + 1;
+    }
+
+    return true;
+}
+
 
 static std::string toLower(const std::string& str)
 {
@@ -144,12 +211,48 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
             return;
         }
 
+        std::vector<std::string> offered;
+        if( ! parseProtocols(request.header().get("Sec-WebSocket-Protocol"), offered) )
+        {
+            reply.setStatus(400, "Bad Request");
+            reply.header().set("Connection", "close");
+            setReady(true);
+            return;
+        }
+
+        const std::vector<std::string>& accepted = service.protocols();
+        std::string selected;
+        if( ! accepted.empty() )
+        {
+            for(std::size_t i = 0; i < offered.size() && selected.empty(); ++i)
+            {
+                for(std::size_t n = 0; n < accepted.size(); ++n)
+                {
+                    if(offered[i] == accepted[n])
+                    {
+                        selected = offered[i];
+                        break;
+                    }
+                }
+            }
+
+            if(selected.empty())
+            {
+                reply.setStatus(400, "Bad Request");
+                reply.header().set("Connection", "close");
+                setReady(true);
+                return;
+            }
+        }
+
         std::string key = request.header().get("Sec-WebSocket-Key");
         reply.setStatus(101, "Switching Protocols");
         reply.header().setUpgrade();
         reply.header().set("Upgrade", "websocket");
         reply.header().set("Connection", "Upgrade");
         reply.header().set("Sec-WebSocket-Accept", computeAccept(key).c_str());
+        if( ! selected.empty() )
+            reply.header().set("Sec-WebSocket-Protocol", selected.c_str());
     }
     else
     {

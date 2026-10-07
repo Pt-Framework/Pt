@@ -16,6 +16,7 @@
 #include <sstream>
 #include <ctime>
 #include <stdexcept>
+#include <vector>
 
 namespace Pt {
 
@@ -40,6 +41,47 @@ WebSocket::~WebSocket()
     }
 
     delete _channel;
+}
+
+
+namespace {
+
+bool isProtocolToken(const std::string& name)
+{
+    if(name.empty())
+        return false;
+
+    for(std::size_t i = 0; i < name.size(); ++i)
+    {
+        const unsigned char ch = static_cast<unsigned char>(name[i]);
+        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
+           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
+           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
+           || ch == '[' || ch == ']' || ch == '?' || ch == '='
+           || ch == '{' || ch == '}')
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool isOws(char ch)
+{
+    return ch == ' ' || ch == '\t';
+}
+
+}
+
+
+void WebSocket::addProtocol(const std::string& name)
+{
+    if( ! isProtocolToken(name) )
+        throw std::invalid_argument("WebSocket protocol name is not a token");
+
+    _protocols.push_back(name);
 }
 
 
@@ -69,6 +111,16 @@ void WebSocket::beginConnect(const std::string& url, const std::string& origin)
     if( ! origin.empty() )
         request.header().set("Origin", origin.c_str());
 
+    if( ! _protocols.empty() )
+    {
+        std::string offered = _protocols[0];
+        for(std::size_t i = 1; i < _protocols.size(); ++i)
+            offered += ", " + _protocols[i];
+
+        request.header().set("Sec-WebSocket-Protocol", offered.c_str());
+    }
+
+    _protocol.clear();
     _client->beginSend(true);
 }
 
@@ -127,6 +179,38 @@ void WebSocket::onReply(Client& client)
 
         if( client.reply().statusCode() != 101 )
             throw std::runtime_error("WebSocket handshake failed");
+
+        const char* echoed = client.reply().header().get("Sec-WebSocket-Protocol");
+        std::string selected;
+        if(echoed && *echoed)
+        {
+            const std::string field(echoed);
+            std::size_t left = 0;
+            std::size_t right = field.size();
+            while(left < right && isOws(field[left]))
+                ++left;
+            while(right > left && isOws(field[right - 1]))
+                --right;
+
+            selected = field.substr(left, right - left);
+            if(selected.find(',') != std::string::npos || ! isProtocolToken(selected))
+                throw std::runtime_error("WebSocket handshake failed");
+
+            bool offered = false;
+            for(std::size_t i = 0; i < _protocols.size(); ++i)
+            {
+                if(_protocols[i] == selected)
+                {
+                    offered = true;
+                    break;
+                }
+            }
+
+            if( ! offered )
+                throw std::runtime_error("WebSocket handshake failed");
+        }
+
+        _protocol = selected;
 
         Stream& stream = client.upgrade();
         _channel->open(stream, true);

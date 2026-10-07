@@ -78,7 +78,12 @@
     503 when the accepted-session limit is already reached, or with
     404 when the request is not a WebSocket upgrade. The responder
     is released before the server opens the stream. It is not the
-    session. %setMaxSockets(), %setIdleTimeout() and
+    session. %addProtocol() names one Sec-WebSocket-Protocol value
+    this endpoint accepts. Several calls name several values, in
+    preference order. An empty list accepts the upgrade and selects
+    no name. A non-empty list selects the first offered name that
+    is also accepted, and a request that offers none of them is
+    answered with 400. %setMaxSockets(), %setIdleTimeout() and
     %setMaxMessageSize() are endpoint policy. The handshake reads
     the session limit. The session base copies the idle timeout and
     the data-message limit onto the connection before the derived
@@ -89,7 +94,8 @@
     implements that delivery and does not pass it on. It forwards
     the stream to the registered %WebSocketServlet. The servlet
     asks the factory for a %WebSocketSession and passes the
-    %EventLoop of the stream together with the stream. The session
+    %EventLoop of the stream, the stream, and the opening request.
+    The request is valid for that call. The session
     binds the stream in its constructor, which accepts the upgrade.
     A null session, or no registered servlet, leaves the stream
     unbound, and the HTTP server closes it. A server does not mask
@@ -124,9 +130,12 @@
     Pt::Http::WebSocketSession* ChatService::onGetSession(
         Pt::Http::WebSocketServlet& servlet,
         Pt::System::EventLoop& loop,
-        Pt::Http::Stream& stream)
+        Pt::Http::Stream& stream,
+        const Pt::Http::Request& request)
     {
-        return new ChatSession(servlet, loop, stream, _rooms);
+        const char* user = request.header().get("X-User");
+        return new ChatSession(servlet, loop, stream, _rooms,
+                               user ? user : "");
     }
 
     void ChatService::onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -136,10 +145,13 @@
     @endcode
 
     %onGetSession() creates the session and %onReleaseSession()
-    destroys it. The two methods must use the same allocator, as
-    %onGetResponder() and %onReleaseResponder() must match. A pool,
-    or any other detach, lives in the derived service. Return null
-    from %onGetSession() to decline the upgrade. The servlet
+    destroys it. The request argument is the opening request. It is
+    valid for that call. Copy any header the session must keep. The
+    session does not store the request. The two methods must use the
+    same allocator, as %onGetResponder() and %onReleaseResponder()
+    must match. A pool, or any other detach, lives in the derived
+    service. Return null from %onGetSession() to decline the upgrade.
+    The servlet
     releases a session through %onReleaseSession() after %onClose()
     returns, and from its destructor for every session it still
     holds.

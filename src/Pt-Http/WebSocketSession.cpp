@@ -26,6 +26,8 @@ WebSocketSession::WebSocketSession(WebSocketServlet& servlet,
     if( stream.loop() != &loop )
         throw std::logic_error("WebSocketSession loop is not the stream loop");
 
+    _protocol = stream.selectedProtocol();
+
     _channel->open(stream, false);
     _channel->setMaxMessageSize(_service->maxMessageSize());
     _channel->setIdleTimeout(_service->idleTimeout());

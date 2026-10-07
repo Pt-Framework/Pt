@@ -50,7 +50,8 @@
 
     An HTTP connection can be upgraded. After a finished 101 the
     owner keeps the TCP connection and exposes it as a %Stream. The
-    server calls %Service::onUpgrade() with that stream. A client
+    server calls %Service::onUpgrade() with that stream, the request,
+    and the reply. A client
     obtains the stream it already owns with %Client::upgrade().
     Binding a %Channel accepts the upgrade. WebSocket is the
     framed protocol on that path: a handshake that is still HTTP,

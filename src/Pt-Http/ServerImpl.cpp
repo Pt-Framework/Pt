@@ -78,6 +78,12 @@ Acceptor::~Acceptor()
 }
 
 
+Service* Acceptor::service() const
+{
+    return _servlet ? _servlet->service() : 0;
+}
+
+
 void Acceptor::releaseResponder()
 {
     PT_LOG_TRACE("Acceptor::releaseResponder " << _responder);
@@ -321,13 +327,11 @@ void Acceptor::onReplySent(Reply& r)
             {
                 PT_LOG_DEBUG("upgrade connection");
 
-                Service* service = _servlet->service();
-                const char* upgradeHeader = _request.header().get("Upgrade");
-                const std::string protocol = upgradeHeader ? upgradeHeader : "";
+                if(_conn)
+                    _conn->detach();
 
-                Connection* conn = this->releaseConnection();
-                conn->detach();
-                _server.beginUpgrade(conn, service, protocol);
+                _upgraded.send(*this);
+                return;
             }
 
             releaseResponder();
@@ -516,6 +520,7 @@ void ServerThread::onAccept(const AcceptEvent& ev)
 
     _handlers.push_back(handler);
     handler->finished() += Pt::slot(*this, &ServerThread::onHandlerFinished);
+    handler->upgraded() += Pt::slot(*this, &ServerThread::onHandlerUpgraded);
 
     if(_ssl)
         handler->setSecure(_sslctx);
@@ -577,6 +582,22 @@ void ServerThread::onIsServletIdle(const ServletInfoEvent& ev)
     _isReturned = true;
     _isServletIdle = (it == _handlers.end());
     _hasReturned.signal();
+}
+
+
+void ServerThread::onHandlerUpgraded(Acceptor& handler)
+{
+    std::vector<Acceptor*>::iterator it;
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
+    {
+        if(*it == &handler)
+        {
+            _handlers.erase(it);
+            break;
+        }
+    }
+
+    handler.server().beginUpgrade(handler);
 }
 
 
@@ -645,7 +666,7 @@ void ServerImpl::cancel()
 
         while( ! _pendingUpgrades.empty() )
         {
-            delete _pendingUpgrades.front().connection;
+            delete _pendingUpgrades.front();
             _pendingUpgrades.pop_front();
         }
     }
@@ -702,6 +723,23 @@ void ServerImpl::removeServlet(Servlet& servlet)
     }
 
     serviceLock.unlock();
+
+    {
+        System::MutexLock lock(_upgradeMutex);
+        std::deque<Acceptor*>::iterator pending = _pendingUpgrades.begin();
+        while(pending != _pendingUpgrades.end())
+        {
+            if( (*pending)->servlet() == &servlet )
+            {
+                delete *pending;
+                pending = _pendingUpgrades.erase(pending);
+            }
+            else
+            {
+                ++pending;
+            }
+        }
+    }
 
     // close all connections in this thread, which use the servlet
     std::vector<Acceptor*>::iterator hit  = _handlers.begin();
@@ -826,6 +864,7 @@ void ServerImpl::onAccept(Net::TcpServer& server)
 
         handler->beginServe(*loop);
         handler->finished() += Pt::slot(*this, &ServerImpl::onHandlerFinished);
+        handler->upgraded() += Pt::slot(*this, &ServerImpl::onHandlerUpgraded);
         _handlers.push_back( handler.get() );
         handler.release();
 
@@ -836,18 +875,17 @@ void ServerImpl::onAccept(Net::TcpServer& server)
 }
 
 
-void ServerImpl::beginUpgrade(Connection* conn, Service* service,
-                              const std::string& protocol)
+void ServerImpl::beginUpgrade(Acceptor& handler)
 {
     System::EventLoop* eventLoop = this->loop();
     if( ! eventLoop )
     {
-        delete conn;
+        delete &handler;
         return;
     }
 
     System::MutexLock lock(_upgradeMutex);
-    _pendingUpgrades.push_back( Upgrade(conn, service, protocol) );
+    _pendingUpgrades.push_back(&handler);
     lock.unlock();
 
     // Notify main server loop thread
@@ -865,18 +903,20 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         if( _pendingUpgrades.empty() )
             return;
 
-        Upgrade upgrade = _pendingUpgrades.front();
+        Acceptor* handler = _pendingUpgrades.front();
         _pendingUpgrades.pop_front();
         lock.unlock();
 
-        Connection* conn = upgrade.connection;
-        Service* service = upgrade.service;
-        const std::string& protocol = upgrade.protocol;
+        Connection* conn = handler->releaseConnection();
+        Service* service = handler->service();
+        const char* upgradeHeader = handler->request().header().get("Upgrade");
+        const std::string protocol = upgradeHeader ? upgradeHeader : "";
 
         System::EventLoop* eventLoop = this->loop();
-        if( ! eventLoop )
+        if( ! eventLoop || ! conn || ! service )
         {
             delete conn;
+            delete handler;
             continue;
         }
 
@@ -889,7 +929,7 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
 
         try
         {
-            service->onUpgrade(stream);
+            service->onUpgrade(stream, handler->request(), handler->reply());
 
             if( ! stream.channel() )
                 throw std::logic_error("stream not accepted");
@@ -898,9 +938,11 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         {
             PT_LOG_WARN( "upgrade failed " << protocol << "): " << e.what() );
             stream.close();
+            delete handler;
             continue;
         }
 
+        delete handler;
         _upgradedConnections.push_back(conn);
     }
 }
@@ -935,6 +977,22 @@ void ServerImpl::onRemoveConnection(const RemoveConnectionEvent& ev)
     }
 
     delete conn;
+}
+
+
+void ServerImpl::onHandlerUpgraded(Acceptor& handler)
+{
+    std::vector<Acceptor*>::iterator it;
+    for(it = _handlers.begin(); it != _handlers.end(); ++it)
+    {
+        if(*it == &handler)
+        {
+            _handlers.erase(it);
+            break;
+        }
+    }
+
+    beginUpgrade(handler);
 }
 
 

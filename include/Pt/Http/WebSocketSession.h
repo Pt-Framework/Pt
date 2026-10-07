@@ -101,6 +101,9 @@ class WebSocketChannel;
     call %endReceive() or %endSend() from %onClose(). The servlet
     that holds this session releases it after %onClose() returns.
 
+    %protocol() is the single name the responder wrote on the 101,
+    or empty when none was selected. It is copied before the derived
+    constructor body runs. It is not the list the client offered.
     %service() reaches state shared by every connection of this
     endpoint. %loop() is where a timer or posted work must run.
     Closing the session closes the stream. The session does not own
@@ -162,6 +165,13 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         const System::EventLoop& loop() const
         { return *_loop; }
+
+        /** @brief Returns the protocol name selected on the 101.
+
+            Empty when the opening reply selected no name.
+        */
+        const std::string& protocol() const
+        { return _protocol; }
 
         /** @brief Returns the incoming message.
         */
@@ -238,6 +248,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         WebSocketServlet*    _servlet;
         System::EventLoop*   _loop;
         WebSocketChannel* _channel;
+        std::string _protocol;
 };
 
 } // namespace Http

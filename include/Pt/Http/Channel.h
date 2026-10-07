@@ -23,7 +23,8 @@ class Stream;
     %std::logic_error.
 
     Binding is how an upgrade is accepted. On the server,
-    %Service::onUpgrade() receives the stream the server already owns. A
+    %Service::onUpgrade() receives the stream the server already owns,
+    with the request and the reply of the finished 101. A
     derived channel constructs itself with that stream, or calls %open() from
     its own accept method. After %onUpgrade() returns, a stream with no channel
     is declined and the server closes it. On the client, %Client::upgrade()

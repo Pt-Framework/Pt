@@ -15,6 +15,8 @@ namespace Pt {
 
 namespace Http {
 
+class Request;
+class Reply;
 class Stream;
 class WebSocketService;
 class WebSocketSession;
@@ -92,7 +94,9 @@ class PT_HTTP_API WebSocketServlet : public Connectable
         { return _sessions.size(); }
 
     private:
-        void onUpgrade(Stream& stream);
+        void onUpgrade(Stream& stream,
+                       const Request& request,
+                       const Reply& reply);
 
         void onSessionClosed(WebSocketSession& session);
 

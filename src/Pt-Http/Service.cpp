@@ -28,6 +28,8 @@
 
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Server.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Http/Responder.h>
 #include <cassert>
 
@@ -61,7 +63,9 @@ void Service::releaseResponder(Responder* responder)
 }
 
 
-void Service::onUpgrade(Stream& /*stream*/)
+void Service::onUpgrade(Stream& /*stream*/,
+                        const Request& /*request*/,
+                        const Reply& /*reply*/)
 {
 }
 

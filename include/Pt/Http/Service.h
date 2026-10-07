@@ -41,6 +41,7 @@ namespace Pt {
 namespace Http {
 
 class Request;
+class Reply;
 
 /** @brief Factory for request responders.
 
@@ -58,7 +59,9 @@ class Request;
 
     A responder upgrades the connection by finishing the reply with
     status 101. The server keeps the TCP connection and calls
-    %onUpgrade() on the server thread with the %Stream it owns. The
+    %onUpgrade() on the server thread with the %Stream it owns, the
+    request that opened the upgrade, and the reply that finished it.
+    Those two references are valid until the call returns. The
     responder has already been released. Binding a %Channel to
     that stream accepts the upgrade. The empty base implementation
     leaves the stream unbound, and the server closes it.
@@ -109,12 +112,15 @@ class PT_HTTP_API Service : private NonCopyable
         /** @brief Called when a 101 reply has upgraded a connection.
 
             Runs on the server thread with the %Stream the server owns.
-            The responder has already been released. Bind a
-            %Channel to @a stream to accept it. The empty
-            implementation leaves the stream unbound, and the server
-            closes it.
+            @a request and @a reply are the exchange that finished the
+            101. They are valid until this call returns. The responder
+            has already been released. Bind a %Channel to @a stream to
+            accept it. The empty implementation leaves the stream
+            unbound, and the server closes it.
         */
-        virtual void onUpgrade(Stream& stream);
+        virtual void onUpgrade(Stream& stream,
+                               const Request& request,
+                               const Reply& reply);
 
     private:
         // service specific options need to be set in Service ctor so it can

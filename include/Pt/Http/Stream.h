@@ -75,7 +75,9 @@ class Channel;
     the stream. A service that does not bind a channel declines it.
 
     @code
-    void onUpgrade(Pt::Http::Stream& stream)
+    void onUpgrade(Pt::Http::Stream& stream,
+                   const Pt::Http::Request&,
+                   const Pt::Http::Reply&)
     {
         _channel.open(stream);
         stream.inputReady() += Pt::slot(onInput);
@@ -113,6 +115,19 @@ class PT_HTTP_API Stream : public Connectable
         */
         const std::string& protocol() const
         { return _protocolName; }
+
+        /** @internal Name selected on the opening reply.
+
+            Set before the session constructor runs. Empty when the
+            reply selected none.
+        */
+        const std::string& selectedProtocol() const
+        { return _selectedProtocol; }
+
+        /** @internal Stores the name selected on the opening reply.
+        */
+        void setSelectedProtocol(const std::string& name)
+        { _selectedProtocol = name; }
 
         /** @brief Ends this stream.
 
@@ -177,6 +192,7 @@ class PT_HTTP_API Stream : public Connectable
         Connection* _connection;
         Channel* _channel;
         std::string _protocolName;
+        std::string _selectedProtocol;
         Signal<> _inputReady;
         Signal<> _outputReady;
 };

@@ -143,7 +143,8 @@ class RecordService : public Pt::Http::WebSocketService
     protected:
         virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
                                                          Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream)
+                                                         Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&)
         {
             ++_opened;
             return new RecordSession(servlet, loop, stream,
@@ -237,7 +238,8 @@ class CollectService : public Pt::Http::WebSocketService
     protected:
         virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
                                                          Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream)
+                                                         Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&)
         {
             return new CollectSession(servlet, loop, stream,
                                       *_message, *_type, *_received, *_loop);
@@ -300,7 +302,8 @@ class IdleService : public Pt::Http::WebSocketService
     protected:
         virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
                                                          Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream)
+                                                         Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&)
         {
             ++_opened;
             return new IdleSession(servlet, loop, stream, *_loop, _exitOnAccept);
@@ -324,7 +327,8 @@ class NullService : public Pt::Http::WebSocketService
     protected:
         virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet&,
                                                          Pt::System::EventLoop&,
-                                                         Pt::Http::Stream&)
+                                                         Pt::Http::Stream&,
+                                                         const Pt::Http::Request&)
         {
             return 0;
         }
@@ -360,7 +364,8 @@ class ThrowService : public Pt::Http::WebSocketService
     protected:
         virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
                                                          Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream)
+                                                         Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&)
         {
             return new ThrowSession(servlet, loop, stream);
         }
@@ -399,6 +404,90 @@ class PushSession : public Pt::Http::WebSocketSession
 
 typedef Pt::Http::BasicWebSocketService<PushSession> PushService;
 
+class ProtocolSession : public Pt::Http::WebSocketSession
+{
+    public:
+        ProtocolSession(Pt::Http::WebSocketServlet& servlet,
+                        Pt::System::EventLoop& loop,
+                        Pt::Http::Stream& stream,
+                        std::string& selected,
+                        std::string& offered,
+                        std::string& copied,
+                        Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(servlet, loop, stream)
+        , _selected(&selected)
+        , _exitLoop(&exitLoop)
+        {
+            *_selected = protocol();
+            _exitLoop->exit();
+        }
+
+        const std::string& copiedHeader() const
+        { return _copied; }
+
+    protected:
+        virtual void onInput()
+        {}
+
+        virtual void onOutput()
+        {}
+
+        virtual void onClose()
+        {}
+
+    private:
+        std::string* _selected;
+        Pt::System::EventLoop* _exitLoop;
+        std::string _copied;
+};
+
+class ProtocolService : public Pt::Http::WebSocketService
+{
+    public:
+        ProtocolService(std::string& selected,
+                        std::string& offered,
+                        std::string& copied,
+                        Pt::System::EventLoop& loop)
+        : _selected(&selected)
+        , _offered(&offered)
+        , _copied(&copied)
+        , _loop(&loop)
+        , _opened(0)
+        {}
+
+        std::size_t opened() const
+        { return _opened; }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
+                                                         Pt::System::EventLoop& loop,
+                                                         Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request& request)
+        {
+            ++_opened;
+            const char* field = request.header().get("Sec-WebSocket-Protocol");
+            *_offered = field ? field : "";
+            const char* origin = request.header().get("Origin");
+            *_copied = origin ? origin : "";
+            ProtocolSession* session = new ProtocolSession(servlet, loop, stream,
+                                                           *_selected, *_offered, *_copied,
+                                                           *_loop);
+            return session;
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        std::string* _selected;
+        std::string* _offered;
+        std::string* _copied;
+        Pt::System::EventLoop* _loop;
+        std::size_t _opened;
+};
+
 class WebSocketTest : public Pt::Unit::TestSuite
                     , public Pt::Connectable
 {
@@ -429,6 +518,11 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("BeginTwice", *this, &WebSocketTest::BeginTwice);
             registerMethod("CloseCodes", *this, &WebSocketTest::CloseCodes);
             registerMethod("HandshakeControl", *this, &WebSocketTest::HandshakeControl);
+            registerMethod("Protocol", *this, &WebSocketTest::Protocol);
+            registerMethod("ProtocolNone", *this, &WebSocketTest::ProtocolNone);
+            registerMethod("ProtocolRequired", *this, &WebSocketTest::ProtocolRequired);
+            registerMethod("ProtocolRejected", *this, &WebSocketTest::ProtocolRejected);
+            registerMethod("ProtocolHeader", *this, &WebSocketTest::ProtocolHeader);
         }
 
         void setUp()
@@ -441,6 +535,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _limitSocket = 0;
             _limitClient = 0;
             _message.clear();
+            _offered.clear();
+            _copied.clear();
             _type = Pt::Http::WebSocketMessage::Unknown;
 
             _exitTimer.setActive(*_loop);
@@ -909,6 +1005,144 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void Protocol()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8026);
+
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, *_loop);
+            service.addProtocol("superchat");
+            service.addProtocol("chat");
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.addProtocol("chat");
+            socket.addProtocol("superchat");
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocol);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(socket.protocol(), "chat");
+            PT_UNIT_ASSERT_EQUALS(_message, "chat");
+            PT_UNIT_ASSERT_EQUALS(_offered, "chat, superchat");
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(1));
+        }
+
+        void onConnectedProtocol(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+        }
+
+    protected:
+        void ProtocolNone()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8027);
+
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.addProtocol("chat");
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocol);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(socket.protocol().empty());
+            PT_UNIT_ASSERT(_message.empty());
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(1));
+        }
+
+    protected:
+        void ProtocolRequired()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8028);
+
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, *_loop);
+            service.addProtocol("chat");
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_declined);
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+        }
+
+    protected:
+        void ProtocolRejected()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8029);
+
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, *_loop);
+            service.addProtocol("chat");
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.addProtocol("other");
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_declined);
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+        }
+
+        void onConnectedProtocolFailed(Pt::Http::WebSocket& socket)
+        {
+            PT_UNIT_ASSERT_THROW(socket.endConnect(), std::exception);
+            _declined = true;
+            _loop->exit();
+        }
+
+    protected:
+        void ProtocolHeader()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8030);
+
+            Pt::Http::Server server(*_loop, ep);
+            ProtocolService service(_message, _offered, _copied, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocol);
+            socket.beginConnect("/ws", "https://example.test");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT_EQUALS(_copied, "https://example.test");
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(1));
+        }
+
+    protected:
         void HandshakeControl()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8025);
@@ -922,6 +1156,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
         std::string _message;
+        std::string _offered;
+        std::string _copied;
         bool _received;
         bool _declined;
         bool _closed;

@@ -5,6 +5,8 @@
 #include <Pt/Http/WebSocketServlet.h>
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketSession.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
 #include <Pt/System/EventLoop.h>
 
@@ -37,13 +39,18 @@ WebSocketServlet::~WebSocketServlet()
 }
 
 
-void WebSocketServlet::onUpgrade(Stream& stream)
+void WebSocketServlet::onUpgrade(Stream& stream,
+                                 const Request& request,
+                                 const Reply& reply)
 {
     System::EventLoop* loop = stream.loop();
     if( ! loop )
         throw std::logic_error("WebSocket upgrade has no event loop");
 
-    WebSocketSession* session = _service->onGetSession(*this, *loop, stream);
+    const char* selected = reply.header().get("Sec-WebSocket-Protocol");
+    stream.setSelectedProtocol(selected ? selected : "");
+
+    WebSocketSession* session = _service->onGetSession(*this, *loop, stream, request);
     if( ! session )
         return;
 

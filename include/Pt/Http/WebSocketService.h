@@ -11,6 +11,8 @@
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Allocator.h>
 #include <Pt/Connectable.h>
+#include <string>
+#include <vector>
 #include <cstddef>
 
 namespace Pt {
@@ -22,6 +24,7 @@ class EventLoop;
 namespace Http {
 
 class Request;
+class Reply;
 class Responder;
 class Stream;
 class WebSocketServlet;
@@ -56,7 +59,12 @@ class WebSocketServlet;
     with 503 when the accepted-session limit is already reached, or
     with 404 when the request is not a WebSocket upgrade. The responder
     is released before the server opens the stream. It is not the
-    session. %setMaxSockets(), %setIdleTimeout() and
+    session. %addProtocol() names one Sec-WebSocket-Protocol value
+    this endpoint accepts. Several calls name several values, in
+    preference order. An empty list accepts the upgrade and selects
+    no name. A non-empty list selects the first offered name that
+    is also accepted, and a request that offers none of them is
+    answered with 400. %setMaxSockets(), %setIdleTimeout() and
     %setMaxMessageSize() are endpoint policy. The handshake reads
     the session limit. The session base copies the idle timeout and
     the data-message limit onto the connection before the derived
@@ -84,9 +92,12 @@ class WebSocketServlet;
     Pt::Http::WebSocketSession* ChatService::onGetSession(
         Pt::Http::WebSocketServlet& servlet,
         Pt::System::EventLoop& loop,
-        Pt::Http::Stream& stream)
+        Pt::Http::Stream& stream,
+        const Pt::Http::Request& request)
     {
-        return new ChatSession(servlet, loop, stream, _rooms);
+        const char* user = request.header().get("X-User");
+        return new ChatSession(servlet, loop, stream, _rooms,
+                               user ? user : "");
     }
 
     void ChatService::onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -96,9 +107,11 @@ class WebSocketServlet;
     @endcode
 
     %onGetSession() creates the session and %onReleaseSession()
-    destroys it. The two methods must use the same allocator. A
-    pool, or any other detach, lives in the derived service. Return
-    null from %onGetSession() to decline the upgrade.
+    destroys it. The request argument is the opening request. It is
+    valid for that call. Copy any header the session must keep. The
+    session does not store the request. The two methods must use the
+    same allocator. A pool, or any other detach, lives in the derived
+    service. Return null from %onGetSession() to decline the upgrade.
 
     @ingroup Pt-Http-WebSocket-Server
 */
@@ -156,6 +169,20 @@ class PT_HTTP_API WebSocketService : public Service
         */
         void setMaxMessageSize(std::size_t n);
 
+        /** @brief Adds one accepted Sec-WebSocket-Protocol name.
+
+            Names are matched in the order they were added. An empty
+            list accepts the upgrade and selects no name.
+
+            @throw %std::invalid_argument if @a name is empty or is
+            not a single protocol token.
+        */
+        void addProtocol(const std::string& name);
+
+        /** @brief Drops every accepted protocol name.
+        */
+        void clearProtocols();
+
     protected:
         /** @brief Creates the handshake responder.
         */
@@ -168,11 +195,14 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Creates the session for @a stream.
 
             @a servlet holds the returned session. @a loop serializes
-            @a stream. Return null to decline the upgrade.
+            @a stream. @a request is the opening request and is valid
+            for this call. Copy any header the session must keep.
+            Return null to decline the upgrade.
         */
         virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
-                                               Stream& stream) = 0;
+                                               Stream& stream,
+                                               const Request& request) = 0;
 
         /** @brief Destroys a session created by %onGetSession().
 
@@ -186,14 +216,20 @@ class PT_HTTP_API WebSocketService : public Service
             Implemented by this class. A derived service uses
             %onGetSession() instead.
         */
-        virtual void onUpgrade(Stream& stream) final;
+        virtual void onUpgrade(Stream& stream,
+                               const Request& request,
+                               const Reply& reply) final;
 
     private:
         friend class WebSocketServlet;
+        friend class WebSocketResponder;
 
         /** @internal Live sessions of the registered servlet.
         */
         std::size_t sessionCount() const;
+
+        const std::vector<std::string>& protocols() const
+        { return _protocols; }
 
         void registerServlet(WebSocketServlet& servlet);
 
@@ -203,6 +239,7 @@ class PT_HTTP_API WebSocketService : public Service
         std::size_t _maxSockets;
         std::size_t _idleTimeout;
         std::size_t _maxMessageSize;
+        std::vector<std::string> _protocols;
 };
 
 /** @brief WebSocket service for one session type.
@@ -226,7 +263,8 @@ class BasicWebSocketService : public WebSocketService
     protected:
         virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
-                                               Stream& stream)
+                                               Stream& stream,
+                                               const Request& /*request*/)
         {
             void* memory = _alloc.allocate(sizeof(S));
             return new(memory) S(servlet, loop, stream);

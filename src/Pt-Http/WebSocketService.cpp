@@ -6,7 +6,11 @@
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketServlet.h>
 #include <Pt/Http/WebSocketResponder.h>
+#include <Pt/Http/Request.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
+
+#include <stdexcept>
 
 namespace Pt {
 
@@ -62,6 +66,34 @@ void WebSocketService::setMaxMessageSize(std::size_t n)
 }
 
 
+void WebSocketService::addProtocol(const std::string& name)
+{
+    if(name.empty())
+        throw std::invalid_argument("WebSocket protocol name is empty");
+
+    for(std::size_t i = 0; i < name.size(); ++i)
+    {
+        const unsigned char ch = static_cast<unsigned char>(name[i]);
+        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
+           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
+           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
+           || ch == '[' || ch == ']' || ch == '?' || ch == '='
+           || ch == '{' || ch == '}')
+        {
+            throw std::invalid_argument("WebSocket protocol name is not a token");
+        }
+    }
+
+    _protocols.push_back(name);
+}
+
+
+void WebSocketService::clearProtocols()
+{
+    _protocols.clear();
+}
+
+
 std::size_t WebSocketService::sessionCount() const
 {
     if( ! _servlet )
@@ -96,12 +128,14 @@ void WebSocketService::onReleaseResponder(Responder* responder)
 }
 
 
-void WebSocketService::onUpgrade(Stream& stream)
+void WebSocketService::onUpgrade(Stream& stream,
+                                 const Request& request,
+                                 const Reply& reply)
 {
     if( ! _servlet )
         return;
 
-    _servlet->onUpgrade(stream);
+    _servlet->onUpgrade(stream, request, reply);
 }
 
 } // namespace Http

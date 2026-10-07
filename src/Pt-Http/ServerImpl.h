@@ -95,8 +95,14 @@ class Acceptor : public Pt::Connectable
         Signal<Acceptor&>& finished()
         { return _finished; }
 
+        Signal<Acceptor&>& upgraded()
+        { return _upgraded; }
+
         Servlet* servlet()
         { return _servlet; }
+
+        Connection* connection() const
+        { return _conn; }
 
         Connection* releaseConnection()
         {
@@ -104,6 +110,17 @@ class Acceptor : public Pt::Connectable
             _conn = 0;
             return conn;
         }
+
+        const Request& request() const
+        { return _request; }
+
+        const Reply& reply() const
+        { return _reply; }
+
+        Service* service() const;
+
+        ServerImpl& server()
+        { return _server; }
 
         void setFinished(bool isDone);
 
@@ -132,6 +149,7 @@ class Acceptor : public Pt::Connectable
         bool _isReply;
         MessageProgress _requestProgress;
         Signal<Acceptor&> _finished;
+        Signal<Acceptor&> _upgraded;
 };
 
 class ServerThread : public Connectable
@@ -219,6 +237,8 @@ class ServerThread : public Connectable
 
         void onHandlerFinished(Acceptor& handler);
 
+        void onHandlerUpgraded(Acceptor& handler);
+
     private:
         Pt::System::MainLoop _loop;
 
@@ -259,21 +279,6 @@ class ServerImpl : public Connectable
 
         private:
             Connection* _connection;
-    };
-
-    // One accepted upgrade, owned by ServerImpl until the server thread
-    // delivers it to the service.
-    struct Upgrade
-    {
-        Connection* connection;
-        Service* service;
-        std::string protocol;
-
-        Upgrade(Connection* conn, Service* svc, const std::string& proto)
-        : connection(conn)
-        , service(svc)
-        , protocol(proto)
-        { }
     };
 
     typedef ServerThread::RemoveHandlerEvent RemoveHandlerEvent;
@@ -343,9 +348,10 @@ class ServerImpl : public Connectable
 
         Servlet* getServlet(const Request& request);
 
-        // Queues an upgrade from a worker thread. The server thread
-        // performs the upgrade when it receives UpgradeEvent.
-        void beginUpgrade(Connection* conn, Service* service, const std::string& protocol);
+        // Takes ownership of @a handler. The caller has removed it
+        // from its handler list and must not delete it. The server
+        // thread delivers the upgrade, then deletes the acceptor.
+        void beginUpgrade(Acceptor& handler);
 
     private:
         // Posts deletion of a connection closed by its last stream.
@@ -357,6 +363,8 @@ class ServerImpl : public Connectable
         void onUpgrade(const UpgradeEvent& ev);
 
         void onHandlerFinished(Acceptor& conn);
+
+        void onHandlerUpgraded(Acceptor& handler);
 
         void onRemoveHandler(const RemoveHandlerEvent& ev);
 
@@ -397,7 +405,7 @@ class ServerImpl : public Connectable
         ServletList _servlets;
 
         System::Mutex _upgradeMutex;
-        std::deque<Upgrade> _pendingUpgrades;
+        std::deque<Acceptor*> _pendingUpgrades;
         std::vector<Connection*> _upgradedConnections;
 };
 

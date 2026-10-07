@@ -36,7 +36,8 @@
 
     A finished reply with status 101 upgrades the connection. The
     server keeps the connection and calls %Service::onUpgrade() on
-    the server thread with the %Stream it owns. Binding a
+    the server thread with the %Stream it owns, the request, and the
+    reply. Those two references last until the call returns. Binding a
     %Channel to that stream accepts the upgrade. A service that
     leaves the stream unbound declines it, and the server closes the
     stream. %Stream::protocol() is the value of the request's Upgrade

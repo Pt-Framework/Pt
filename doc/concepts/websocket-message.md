@@ -542,8 +542,8 @@ This chapter does not change the upgrade boundary, the handshake
 responder, or who owns the stream. It does not decide the client and
 server facade split. It does not add permessage-deflate, subprotocols
 as a message property, or an application-supplied message pool.
-The selected protocol is a handshake result, owned by the session
-chapter. Incremental send with a completion flag is allowed later
+The selected protocol is the name written on the 101, owned by the
+session chapter. Incremental send with a completion flag is allowed later
 and is not the first surface. A separate unread-buffer or
 flow-control limit is later. The first size limit is
 `maxMessageSize()`.

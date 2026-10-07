@@ -56,10 +56,15 @@
     the URL. The optional second argument is the Origin header.
     %beginConnect() fills a GET with Connection, Upgrade,
     Sec-WebSocket-Version 13 and Sec-WebSocket-Key, and sends it
-    through the client. A finished 101 becomes the stream this
+    through the client. %addProtocol() offers one
+    Sec-WebSocket-Protocol name before that send. Several calls
+    offer several names, in order. A finished 101 becomes the stream this
     socket formats. %endConnect() completes the handshake and throws
-    if it failed. After that success the socket no longer uses the
-    client for messages. A client masks every frame it writes.
+    if it failed. %protocol() is the single name the server echoed,
+    or empty when the server selected none. An echo that was not
+    offered fails the handshake. After that success the socket no
+    longer uses the client for messages. A client masks every frame
+    it writes.
 
     %closed() is emitted while this socket is still alive. The
     stream has already cleared its channel pointer. Peer close, an

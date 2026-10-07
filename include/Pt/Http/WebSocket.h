@@ -12,6 +12,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <string>
+#include <vector>
 #include <cstddef>
 
 namespace Pt {
@@ -92,8 +93,12 @@ class WebSocketChannel;
     become the request URL; the client does not take the host from
     the URL. The optional second argument is the Origin header.
     %endConnect() completes the handshake and throws if it failed.
-    After that success the socket no longer uses the client for
-    messages.
+    %addProtocol() offers one Sec-WebSocket-Protocol name before
+    %beginConnect(). Several calls offer several names, in order.
+    After a finished handshake %protocol() is the single name the
+    server echoed, or empty when the server selected none. An echo
+    that was not offered fails the handshake. After that success
+    the socket no longer uses the client for messages.
 
     The socket owns two %WebSocketMessage objects, %incoming() and
     %outgoing(), the way a client owns a request and a reply. Set
@@ -151,6 +156,24 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void beginConnect(const std::string& url,
                           const std::string& origin = std::string());
+
+        /** @brief Offers one Sec-WebSocket-Protocol name.
+
+            Several calls offer several names, in order. The offer is
+            sent by the next %beginConnect().
+
+            @throw %std::invalid_argument if @a name is empty or is
+            not a single protocol token.
+        */
+        void addProtocol(const std::string& name);
+
+        /** @brief Returns the protocol name echoed by the server.
+
+            Empty before a finished handshake, and empty when the
+            server selected no name.
+        */
+        const std::string& protocol() const
+        { return _protocol; }
 
         /** @brief Returns the signal emitted when the handshake finishes.
         */
@@ -288,6 +311,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         Client* _client;
         WebSocketChannel* _channel;
         std::string _path;
+        std::string _protocol;
+        std::vector<std::string> _protocols;
         bool _error;
         bool _connecting;
         Pt::Signal<WebSocket&> _connected;

@@ -1,27 +1,11 @@
 # WebSocket
 
-The chapters are the target. A change to a linked section updates the
-matching item in the same change. A decision that lands in the tree
-drops the item. A decision that changes is rewritten in the chapter,
-and the item here is rewritten with it.
-
-Open work is not repeated in `doc/pages/`. A page describes the built
-API.
-
 ## Documents
 
 - [Session](websocket-session.md)
 - [Message](websocket-message.md)
 
 ## Open
-
-- [websocket-protocol](websocket-session.md#wss-protocol).
-  The client offers names with `addProtocol()`. The responder echoes
-  one. `protocol()` reports the agreed name.
-
-- [websocket-handshake](websocket-session.md#wss-handshake).
-  `WebSocketHandshake` is copied before the responder is released and
-  passed to `onGetSession()`. The session keeps the copy, not the request.
 
 - [websocket-client](websocket-session.md#wss-client).
   Headers set before `beginConnect()` are kept. `endConnect()` checks

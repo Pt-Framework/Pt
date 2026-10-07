@@ -26,7 +26,10 @@
     The server answers with status 101 Switching Protocols, repeats
     the Upgrade, and returns Sec-WebSocket-Accept, which is the
     Base64 encoding of the SHA-1 of that key concatenated with the
-    RFC 6455 GUID. After that 101 the bytes on the connection are
+    RFC 6455 GUID. Sec-WebSocket-Protocol offers subprotocol names.
+    The server selects at most one of those names and writes that
+    one name back. No echo means no subprotocol was agreed. After
+    that 101 the bytes on the connection are
     WebSocket frames, not HTTP messages. A later HTTP request on the
     same connection would be a protocol error.
 
