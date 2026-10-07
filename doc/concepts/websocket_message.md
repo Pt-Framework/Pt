@@ -13,7 +13,7 @@ frames stay inside the engine.
 The HTTP upgrade boundary in
 [HTTP Upgrade](http-upgrade.md) stays as it is. The
 HTTP core still knows no WebSocket frames. The session model in
-[WebSocket Session](websocket-session.md) stays as it is, except where
+[WebSocket Session](websocket_session.md) stays as it is, except where
 this chapter changes what `onInput()` and `onOutput()` mean: a
 message step, not a frame. `WebSocket` and `WebSocketSession` retain
 the client and server roles defined there, and both expose the same
