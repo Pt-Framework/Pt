@@ -2,7 +2,7 @@
 
 ## Documents
 
-- [Boundary](http-upgrade_boundary.md)
+- [Boundary](http-upgrade-boundary.md)
 
 ## Open
 

@@ -20,7 +20,7 @@ reply. The server then opens a `Stream` and delivers it to
 that stream. This chapter decides what the WebSocket types do with
 that stream, and how the client reaches the same engine after
 its own handshake. The public send and receive unit is a message,
-as in [WebSocket Message](websocket_message.md). `onInput()` and
+as in [WebSocket Message](websocket-message.md). `onInput()` and
 `onOutput()` are I/O steps of a message.
 
 This chapter covers:
