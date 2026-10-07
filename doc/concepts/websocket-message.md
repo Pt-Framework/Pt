@@ -1,5 +1,7 @@
 # WebSocket Message {#websocket-message}
 
+<!-- status: doc/concepts/websocket-status.md -->
+
 This document is the design for the public read and write API of a
 WebSocket in Platinum HTTP. It is a framework concept, not an
 application sketch. The goal is that the application sends and
@@ -109,8 +111,8 @@ continuation. `maxMessageSize()` is the limit of one data message,
 not of one frame and not of the unread buffer.
 
 Ping, pong, and close are not messages. They are socket operations.
-A received ping is answered by the engine. A received pong is
-consumed. Neither is delivered, and neither frees the data channel.
+A received ping is answered by the engine. A received pong is consumed as a message. The facade still sees
+it. Neither frees the data channel.
 A close is a stream end, not a body the application reads as
 `incoming()`. It carries a status code and a reason. A received
 close is answered by the engine. After a local `close()`, no more
@@ -306,6 +308,7 @@ void close(unsigned code = 1000,
 unsigned closeCode() const;
 const std::string& closeReason() const;
 Signal<WebSocket&>& closed();
+Signal<WebSocket&, const char*, std::size_t>& pong();
 ```
 
 `ping()` enqueues a ping. The payload is at most 125 bytes. A longer
@@ -334,14 +337,20 @@ if an application needs to see it. The default is to answer and not
 deliver.
 
 A received pong, opcode `0xA`, takes the same read path. The parser
-reads the payload and discards it. It does not touch `incoming()`,
-and it does not emit `inputReady()`. If a `ping()` is still
-outstanding, the payload is compared with that ping and the ping is
-retired. A pong that matches nothing is still valid. An unsolicited
-pong is allowed and takes this path. Either way the data message is
-unchanged, and the idle timer restarts. The application does not see
-the pong. A signal for it can be added later. The default is to
-consume it.
+reads the payload. It does not touch `incoming()`, and it does not
+emit `inputReady()`. If a `ping()` is still outstanding, the payload
+is compared with that ping and the ping is retired. A pong that
+matches nothing is still valid. An unsolicited pong is allowed and
+takes this path. Either way the data message is unchanged, and the
+idle timer restarts.
+
+The facade sees that pong. On the client, `pong()` is emitted with
+the payload. On the session, `onPong()` runs with the same payload.
+Neither is a data-ready signal, and neither frees the data channel.
+An unanswered ping is a state of the facade. The application may
+close from it. The idle timeout remains the limit without a finished
+transfer. Codes 1005, 1006, and 1015 are recorded locally and are
+not written on the wire.
 
 `close()` enqueues a close frame and ends the stream after the close
 handshake. The frame payload is the status code and the reason. The
@@ -447,8 +456,9 @@ reached through `incoming()` and `outgoing()` on the session itself.
 been parsed. The derived session calls `endReceive()`. If the
 progress reports body bytes, it reads `incoming()`. If the progress
 is not finished, it calls `beginReceive()` again. If it is finished,
-it handles the message and starts the next receive, or a reply. A
-ping or a pong does not run `onInput()`.
+it handles the message and starts the next receive, or a reply. A ping or a pong does not run `onInput()`. A received pong runs
+`onPong()` with its payload. The derived session uses that to
+retire a keepalive. It does not read `incoming()` from `onPong()`.
 
 `onOutput()` runs when bytes were sent. The derived session calls
 `endSend()`. If the send is not finished, it calls `beginSend()`
@@ -484,9 +494,10 @@ values of that type. `beginReceive()` and `endReceive()` stay.
 `sendPing()` and `sendPong()` leave the public surface. `ping()`
 enqueues a ping of at most 125 bytes. A second `ping()` enqueues
 another. Each received ping is answered with a pong that mirrors
-the payload. A received pong, including an unsolicited one, is
-consumed and restarts the idle timer. Neither emits `inputReady()`
-or `outputReady()`, and neither frees the data channel. There is no
+the payload. A received pong, including an unsolicited one, is consumed as a
+message, restarts the idle timer, and is reported on the facade.
+Neither emits `inputReady()` or `outputReady()`, and neither frees
+the data channel. There is no
 `sendPong()`. `ping()` and `close()` throw if the handshake is not
 finished. `close()` remains, and gains a status code and a reason.
 The reason is UTF-8 and at most 123 bytes. `close(1005)`,
@@ -529,7 +540,8 @@ This chapter does not change the upgrade boundary, the handshake
 responder, or who owns the stream. It does not decide the client and
 server facade split. It does not add permessage-deflate, subprotocols
 as a message property, or an application-supplied message pool.
-Incremental send with a completion flag is allowed later and is not
-the first surface. A signal for a received ping or pong is not part
-of the first surface either. A separate unread-buffer or flow-control
-limit is later. The first size limit is `maxMessageSize()`.
+The selected protocol is a handshake result, owned by the session
+chapter. Incremental send with a completion flag is allowed later
+and is not the first surface. A separate unread-buffer or
+flow-control limit is later. The first size limit is
+`maxMessageSize()`.
