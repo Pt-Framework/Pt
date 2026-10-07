@@ -116,19 +116,6 @@ class PT_HTTP_API Stream : public Connectable
         const std::string& protocol() const
         { return _protocolName; }
 
-        /** @internal Name selected on the opening reply.
-
-            Set before the session constructor runs. Empty when the
-            reply selected none.
-        */
-        const std::string& selectedProtocol() const
-        { return _selectedProtocol; }
-
-        /** @internal Stores the name selected on the opening reply.
-        */
-        void setSelectedProtocol(const std::string& name)
-        { _selectedProtocol = name; }
-
         /** @brief Ends this stream.
 
             Closes the connection while this stream is its only stream.
@@ -192,7 +179,6 @@ class PT_HTTP_API Stream : public Connectable
         Connection* _connection;
         Channel* _channel;
         std::string _protocolName;
-        std::string _selectedProtocol;
         Signal<> _inputReady;
         Signal<> _outputReady;
 };

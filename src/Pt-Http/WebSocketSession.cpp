@@ -5,6 +5,7 @@
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketServlet.h>
+#include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
 #include <Pt/System/EventLoop.h>
 #include "WebSocketChannel.h"
@@ -15,18 +16,75 @@ namespace Pt {
 
 namespace Http {
 
+namespace {
+
+bool isOws(char ch)
+{
+    return ch == ' ' || ch == '\t';
+}
+
+
+bool isProtocolToken(const std::string& name)
+{
+    if(name.empty())
+        return false;
+
+    for(std::size_t i = 0; i < name.size(); ++i)
+    {
+        const unsigned char ch = static_cast<unsigned char>(name[i]);
+        if(ch <= 32 || ch == 127 || ch == ',' || ch == '(' || ch == ')'
+           || ch == '<' || ch == '>' || ch == '@' || ch == ';'
+           || ch == ':' || ch == '\\' || ch == '"' || ch == '/'
+           || ch == '[' || ch == ']' || ch == '?' || ch == '='
+           || ch == '{' || ch == '}')
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+std::string selectedProtocol(const Reply& reply)
+{
+    const char* field = reply.header().get("Sec-WebSocket-Protocol");
+    if( ! field || ! *field )
+        return std::string();
+
+    const std::string text(field);
+    std::size_t left = 0;
+    std::size_t right = text.size();
+    while(left < right && isOws(text[left]))
+        ++left;
+    while(right > left && isOws(text[right - 1]))
+        --right;
+
+    const std::string name = text.substr(left, right - left);
+    if(name.empty())
+        return std::string();
+
+    if(name.find(',') != std::string::npos || ! isProtocolToken(name))
+        throw std::runtime_error("WebSocket protocol is not one token");
+
+    return name;
+}
+
+}
+
+
 WebSocketSession::WebSocketSession(WebSocketServlet& servlet,
                                    System::EventLoop& loop,
-                                   Stream& stream)
+                                   Stream& stream,
+                                   const Reply& reply)
 : _service(&servlet.service())
 , _servlet(&servlet)
 , _loop(&loop)
 , _channel(new WebSocketChannel())
+, _protocol(selectedProtocol(reply))
 {
     if( stream.loop() != &loop )
         throw std::logic_error("WebSocketSession loop is not the stream loop");
-
-    _protocol = stream.selectedProtocol();
 
     _channel->open(stream, false);
     _channel->setMaxMessageSize(_service->maxMessageSize());

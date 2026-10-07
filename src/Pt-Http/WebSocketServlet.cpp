@@ -47,10 +47,8 @@ void WebSocketServlet::onUpgrade(Stream& stream,
     if( ! loop )
         throw std::logic_error("WebSocket upgrade has no event loop");
 
-    const char* selected = reply.header().get("Sec-WebSocket-Protocol");
-    stream.setSelectedProtocol(selected ? selected : "");
-
-    WebSocketSession* session = _service->onGetSession(*this, *loop, stream, request);
+    WebSocketSession* session = _service->onGetSession(*this, *loop, stream,
+                                                      request, reply);
     if( ! session )
         return;
 

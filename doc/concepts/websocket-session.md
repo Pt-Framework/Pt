@@ -258,7 +258,8 @@ class WebSocketSession : public Connectable
     public:
         WebSocketSession(WebSocketServlet& servlet,
                          System::EventLoop& loop,
-                         Stream& stream);
+                         Stream& stream,
+                         const Reply& reply);
         ~WebSocketSession();
 
         WebSocketService& service();
@@ -286,15 +287,20 @@ class WebSocketSession : public Connectable
 ```
 
 The servlet constructs the session with itself, with the loop that
-serializes this stream, and with the stream of this upgrade. The base
-constructor opens the frame connection on that stream, copies
-`maxMessageSize()` and `idleTimeout()` from the service onto that
-connection, stores the loop and the selected protocol, and connects the
-connection signals to `onInput()`, `onOutput()`, and `onClose()`.
-The stream is an argument. It is not recovered from thread-local
-state. A loop that is not the loop of the stream is an error.
-`protocol()` is the name the responder wrote on the 101, or empty
-when none was selected. It is not the list the client offered.
+serializes this stream, with the stream of this upgrade, and with
+the opening reply. The reply is valid for that constructor call.
+The session does not store it. The base constructor reads
+`Sec-WebSocket-Protocol` from that reply, opens the frame connection
+on the stream, copies `maxMessageSize()` and `idleTimeout()` from
+the service onto that connection, stores the loop and the selected
+protocol, and connects the connection signals to `onInput()`,
+`onOutput()`, and `onClose()`. The stream is an argument. It is not
+recovered from thread-local state. A loop that is not the loop of
+the stream is an error. `protocol()` is the single name the
+responder wrote on the 101, or empty when none was selected. It is
+not the list the client offered. A reply that echoes more than one
+token, or a value that is not one protocol token, fails construction.
+The server then closes the stream.
 
 The derived constructor runs after that. Its members are initialized,
 the stream is open, and `loop()` is the loop that serializes this
@@ -348,7 +354,8 @@ class WebSocketService : public Service
         virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
                                                Stream& stream,
-                                               const Request& request) = 0;
+                                               const Request& request,
+                                               const Reply& reply) = 0;
         virtual void onReleaseSession(WebSocketSession* session) = 0;
 };
 ```
@@ -358,7 +365,8 @@ it. The two must match, including the allocator, as
 `onGetResponder()` and `onReleaseResponder()` must match. A pool, or
 any other detach, lives in the derived service.
 `BasicWebSocketService<S>` is that factory for one session type. Its
-session constructor takes the servlet, the loop, and the stream. A
+session constructor takes the servlet, the loop, the stream, and
+the opening reply. A
 session that needs further constructor arguments uses a small
 service subclass whose `onGetSession()` passes them. That is the
 same reason a custom `Service` exists beside `BasicService`.
@@ -370,11 +378,12 @@ not override `onUpgrade()` to receive WebSocket streams. No
 registered servlet leaves the stream unbound. The servlet reads
 `stream.loop()`. The HTTP server has already activated the
 connection, so that loop is the loop of the upgrade. It then calls
-`onGetSession(servlet, loop, stream, request)`. The request is the
-opening request. It is valid for that call. The derived service
-reads the headers it needs and copies those values into the session
-it creates. The session does not store the request. After the call
-returns, the request is gone. A null return declines the upgrade
+`onGetSession(servlet, loop, stream, request, reply)`. The request
+is the opening request. The reply is the opening reply. Both are
+valid for that call. The derived service reads the headers it needs
+and copies those values into the session it creates. The session
+does not store the request or the reply. After the call returns,
+both are gone. A null return declines the upgrade
 before any bind. A session binds in its constructor, which accepts
 the upgrade.
 
@@ -447,13 +456,16 @@ The handshake and the session are different lifetimes. The handshake
 is one HTTP exchange. The session begins only after that exchange has
 completed and the server has opened the stream. Keeping them as two
 types is what makes the release of the responder safe. The request
-reaches `onGetSession()` and does not survive that call. The session
-keeps the values the service copied, not the request.
+reaches `onGetSession()` and does not survive that call. The reply
+reaches that call the same way and does not survive it. The session
+keeps the values the service copied, and the subprotocol name the
+base copied from the reply. It does not keep the request or the
+reply.
 
 An application that must reject an upgrade for a reason the
 handshake responder cannot see, for example an application-level
 admission check that runs after 101, returns null from
-`onGetSession()` after reading the request. The server then closes
+`onGetSession()` after reading the request or the reply. The server then closes
 the unbound stream. The preferred rejection is still an HTTP error
 from the handshake, so the client learns the reason as a status
 code. A decision that can still be said as a status is made in the
@@ -473,8 +485,10 @@ No echo means no protocol was agreed.
 `protocol()` on `WebSocket` and `WebSocketSession` returns the name
 written on the 101, or an empty string. It is not the offer in the
 request. The offer is still on the request while `onGetSession()`
-runs. The frame engine does not know the name. The message chapter
-does not put it on `WebSocketMessage`.
+runs. The reply is still available for that call, and the session
+base reads the selected name from it. The frame engine does not
+know the name. The message chapter does not put it on
+`WebSocketMessage`.
 
 ## Lifetime {#wss-lifetime}
 
@@ -488,8 +502,8 @@ The order on the server is fixed.
    `Service::onUpgrade()` on the server thread.
 6. `WebSocketService` forwards the stream to the registered
    `WebSocketServlet`. That servlet reads the loop and calls
-   `onGetSession(servlet, loop, stream, request)` with the opening
-   request. The request does not survive that call.
+   `onGetSession(servlet, loop, stream, request, reply)` with the
+   opening request and the opening reply. Neither survives that call.
 7. A null session, or no registered servlet, declines the stream.
    The server closes it.
 8. Otherwise the session constructor binds the frame connection to
@@ -532,8 +546,9 @@ class FeedSession : public WebSocketSession
         FeedSession(WebSocketServlet& servlet,
                     System::EventLoop& loop,
                     Stream& stream,
+                    const Reply& reply,
                     Feed& feed)
-        : WebSocketSession(servlet, loop, stream)
+        : WebSocketSession(servlet, loop, stream, reply)
         , _feed(feed)
         {
             _feed.attach(*this);
@@ -584,9 +599,9 @@ callbacks, because it is the same loop.
 `BasicWebSocketService<FeedSession>` cannot pass the `Feed&` unless
 the session constructor can reach the feed through `service()`. A
 session that needs constructor arguments beyond the servlet, the
-loop, and the stream uses a small service subclass whose
-`onGetSession()` reads the request and constructs `FeedSession`
-with those arguments.
+loop, the stream, and the opening reply uses a small service
+subclass whose `onGetSession()` reads the request and constructs
+`FeedSession` with those arguments.
 
 ## HTTP/2 {#wss-http2}
 
@@ -670,8 +685,10 @@ the `WebSocket` it constructs.
 
 It does not merge the handshake responder into the session. The
 responder is released before the session begins. The request
-reaches `onGetSession()` and is not kept. The session holds the
-values the service copied, not the request.
+reaches `onGetSession()` and is not kept. The reply reaches that
+call and is not kept. The session holds the values the service
+copied, and the subprotocol name the base copied from the reply,
+not the request or the reply.
 
 It does not make the selected protocol a message property. The
 name is a handshake result. `permessage-deflate` is not part of

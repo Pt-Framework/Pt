@@ -47,8 +47,9 @@ class WebSocketChannel;
         public:
             EchoSession(Pt::Http::WebSocketServlet& servlet,
                         Pt::System::EventLoop& loop,
-                        Pt::Http::Stream& stream)
-            : Pt::Http::WebSocketSession(servlet, loop, stream)
+                        Pt::Http::Stream& stream,
+                        const Pt::Http::Reply& reply)
+            : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
             {
                 beginReceive();
             }
@@ -79,10 +80,13 @@ class WebSocketChannel;
     @endcode
 
     The servlet constructs the session with itself, with the loop
-    that serializes this stream, and with the stream of this upgrade.
-    The loop must be the loop of the stream. The base constructor
+    that serializes this stream, with the stream of this upgrade,
+    and with the opening reply. The loop must be the loop of the
+    stream. The reply is valid for the constructor call. The base
+    constructor reads the selected subprotocol from that reply,
     binds the stream, copies the service limits onto the connection,
-    and stores the loop. The derived constructor runs after that.
+    and stores the loop. It does not store the reply. The derived
+    constructor runs after that.
     Its members are initialized, the stream is open, and %loop() is
     the loop of this stream. Start the first %beginReceive() or
     %beginSend() there. There is no separate accept callback. By the
@@ -101,9 +105,13 @@ class WebSocketChannel;
     call %endReceive() or %endSend() from %onClose(). The servlet
     that holds this session releases it after %onClose() returns.
 
-    %protocol() is the single name the responder wrote on the 101,
-    or empty when none was selected. It is copied before the derived
-    constructor body runs. It is not the list the client offered.
+    %protocol() is the single name the responder wrote as
+    Sec-WebSocket-Protocol on the 101, or empty when none was
+    selected. The base copies it from the opening reply before the
+    derived constructor body runs. It is not the list the client
+    offered. A reply that echoes more than one token, or a value
+    that is not one protocol token, fails construction. The server
+    then closes the stream.
     %service() reaches state shared by every connection of this
     endpoint. %loop() is where a timer or posted work must run.
     Closing the session closes the stream. The session does not own
@@ -133,14 +141,19 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Binds @a stream on @a loop.
 
             @a servlet holds this session. @a loop must be the loop of
-            @a stream.
+            @a stream. @a reply is the opening handshake reply and is
+            valid for this call. The selected subprotocol is copied
+            from it. The reply is not stored.
 
             @throw %std::logic_error if @a loop is not the loop of
             @a stream.
+            @throw %std::runtime_error if Sec-WebSocket-Protocol is
+            not one protocol token.
         */
         WebSocketSession(WebSocketServlet& servlet,
                          System::EventLoop& loop,
-                         Stream& stream);
+                         Stream& stream,
+                         const Reply& reply);
 
         /** @brief Closes the stream.
         */

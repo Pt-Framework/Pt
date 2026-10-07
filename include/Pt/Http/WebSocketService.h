@@ -77,26 +77,27 @@ class WebSocketServlet;
     delivers the upgraded stream to this service. This class
     implements that delivery and does not pass it on. It forwards
     the stream to the registered servlet. The servlet asks the
-    factory for a session and passes the loop of the stream together
-    with the stream. The session binds the stream in its
-    constructor, which accepts the upgrade. A null session, or no
-    registered servlet, leaves the stream unbound, and the HTTP
-    server closes it.
+    factory for a session and passes the loop of the stream, the
+    stream, the opening request, and the opening reply. The session
+    binds the stream in its constructor, which accepts the upgrade.
+    A null session, or no registered servlet, leaves the stream
+    unbound, and the HTTP server closes it.
 
     %BasicWebSocketService is this factory for one session type.
     Derive this class when the session type depends on the upgrade,
     or when the session constructor needs more than the servlet, the
-    loop and the stream.
+    loop, the stream, and the opening reply.
 
     @code
     Pt::Http::WebSocketSession* ChatService::onGetSession(
         Pt::Http::WebSocketServlet& servlet,
         Pt::System::EventLoop& loop,
         Pt::Http::Stream& stream,
-        const Pt::Http::Request& request)
+        const Pt::Http::Request& request,
+        const Pt::Http::Reply& reply)
     {
         const char* user = request.header().get("X-User");
-        return new ChatSession(servlet, loop, stream, _rooms,
+        return new ChatSession(servlet, loop, stream, reply, _rooms,
                                user ? user : "");
     }
 
@@ -107,9 +108,10 @@ class WebSocketServlet;
     @endcode
 
     %onGetSession() creates the session and %onReleaseSession()
-    destroys it. The request argument is the opening request. It is
-    valid for that call. Copy any header the session must keep. The
-    session does not store the request. The two methods must use the
+    destroys it. The request argument is the opening request. The
+    reply argument is the opening reply. Both are valid for that
+    call. Copy any header the session must keep. The session does
+    not store the request or the reply. The two methods must use the
     same allocator. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
 
@@ -195,14 +197,16 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Creates the session for @a stream.
 
             @a servlet holds the returned session. @a loop serializes
-            @a stream. @a request is the opening request and is valid
-            for this call. Copy any header the session must keep.
-            Return null to decline the upgrade.
+            @a stream. @a request is the opening request and @a reply
+            is the opening reply. Both are valid for this call. Copy
+            any header the session must keep. Return null to decline
+            the upgrade.
         */
         virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
                                                Stream& stream,
-                                               const Request& request) = 0;
+                                               const Request& request,
+                                               const Reply& reply) = 0;
 
         /** @brief Destroys a session created by %onGetSession().
 
@@ -264,10 +268,11 @@ class BasicWebSocketService : public WebSocketService
         virtual WebSocketSession* onGetSession(WebSocketServlet& servlet,
                                                System::EventLoop& loop,
                                                Stream& stream,
-                                               const Request& /*request*/)
+                                               const Request& /*request*/,
+                                               const Reply& reply)
         {
             void* memory = _alloc.allocate(sizeof(S));
-            return new(memory) S(servlet, loop, stream);
+            return new(memory) S(servlet, loop, stream, reply);
         }
 
         virtual void onReleaseSession(WebSocketSession* session)

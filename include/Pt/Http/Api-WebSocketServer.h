@@ -31,8 +31,9 @@
         public:
             EchoSession(Pt::Http::WebSocketServlet& servlet,
                         Pt::System::EventLoop& loop,
-                        Pt::Http::Stream& stream)
-            : Pt::Http::WebSocketSession(servlet, loop, stream)
+                        Pt::Http::Stream& stream,
+                        const Pt::Http::Reply& reply)
+            : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
             {
                 beginReceive();
             }
@@ -87,16 +88,20 @@
     %setMaxMessageSize() are endpoint policy. The handshake reads
     the session limit. The session base copies the idle timeout and
     the data-message limit onto the connection before the derived
-    constructor runs.
+    constructor runs. It also copies the single
+    Sec-WebSocket-Protocol name from the opening reply, or leaves
+    that name empty when the reply selected none.
 
     After a finished 101 the HTTP server keeps the connection and
     delivers the upgraded stream to this service. The service
     implements that delivery and does not pass it on. It forwards
     the stream to the registered %WebSocketServlet. The servlet
     asks the factory for a %WebSocketSession and passes the
-    %EventLoop of the stream, the stream, and the opening request.
-    The request is valid for that call. The session
-    binds the stream in its constructor, which accepts the upgrade.
+    %EventLoop of the stream, the stream, the opening request, and
+    the opening reply. Both messages are valid for that call. The
+    session binds the stream in its constructor, which accepts the
+    upgrade. It reads the selected subprotocol from the reply and
+    does not store the reply.
     A null session, or no registered servlet, leaves the stream
     unbound, and the HTTP server closes it. A server does not mask
     the frames it writes.
@@ -124,17 +129,18 @@
     %BasicWebSocketService is this factory for one session type.
     Derive %WebSocketService when the session type depends on the
     upgrade, or when the session constructor needs more than the
-    servlet, the loop and the stream.
+    servlet, the loop, the stream, and the opening reply.
 
     @code
     Pt::Http::WebSocketSession* ChatService::onGetSession(
         Pt::Http::WebSocketServlet& servlet,
         Pt::System::EventLoop& loop,
         Pt::Http::Stream& stream,
-        const Pt::Http::Request& request)
+        const Pt::Http::Request& request,
+        const Pt::Http::Reply& reply)
     {
         const char* user = request.header().get("X-User");
-        return new ChatSession(servlet, loop, stream, _rooms,
+        return new ChatSession(servlet, loop, stream, reply, _rooms,
                                user ? user : "");
     }
 
@@ -145,9 +151,10 @@
     @endcode
 
     %onGetSession() creates the session and %onReleaseSession()
-    destroys it. The request argument is the opening request. It is
-    valid for that call. Copy any header the session must keep. The
-    session does not store the request. The two methods must use the
+    destroys it. The request argument is the opening request. The
+    reply argument is the opening reply. Both are valid for that
+    call. Copy any header the session must keep. The session does
+    not store the request or the reply. The two methods must use the
     same allocator, as %onGetResponder() and %onReleaseResponder()
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
