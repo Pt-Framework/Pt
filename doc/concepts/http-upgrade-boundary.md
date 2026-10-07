@@ -1,3 +1,7 @@
+---
+topic: http-upgrade.md
+---
+
 # HTTP Upgrade and WebSocket
 
 HTTP Upgrade turns a successfully completed HTTP exchange into a long-lived,

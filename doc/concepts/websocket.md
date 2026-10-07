@@ -1,13 +1,19 @@
-# WebSocket status {#websocket-status}
+# WebSocket
 
-This file lists work the WebSocket chapters describe and the tree does
-not have yet. The chapters stay the target. A change to a linked
-section updates the matching item in the same change. A decision that
-lands in the tree drops the item. A decision that changes is rewritten
-in the chapter, and the item here is rewritten with it.
+The chapters are the target. A change to a linked section updates the
+matching item in the same change. A decision that lands in the tree
+drops the item. A decision that changes is rewritten in the chapter,
+and the item here is rewritten with it.
 
 Open work is not repeated in `doc/pages/`. A page describes the built
 API.
+
+## Documents
+
+- [Session](websocket-session.md)
+- [Message](websocket-message.md)
+
+## Open
 
 - [websocket-protocol](websocket-session.md#wss-protocol).
   The client offers names with `addProtocol()`. The responder echoes

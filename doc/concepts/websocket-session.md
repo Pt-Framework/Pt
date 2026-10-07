@@ -1,6 +1,8 @@
-# WebSocket Session {#websocket-session}
+---
+topic: websocket.md
+---
 
-<!-- status: doc/concepts/websocket-status.md -->
+# WebSocket Session {#websocket-session}
 
 This document is the design for a WebSocket after the HTTP upgrade in
 Platinum HTTP. It is a framework concept, not an application sketch.
@@ -11,7 +13,7 @@ The client already owns the `WebSocket` it constructs, so it does not
 need a second object.
 
 The HTTP upgrade boundary in
-[HTTP Upgrade](../requirements/http-upgrade.md) stays as it is. The
+[HTTP Upgrade](http-upgrade.md) stays as it is. The
 HTTP core knows no frames. The handshake responder writes the upgrade
 reply. The server then opens a `Stream` and delivers it to
 `Service::onUpgrade()`. Accepting still means binding one session to

@@ -1,6 +1,8 @@
-# WebSocket Message {#websocket-message}
+---
+topic: websocket.md
+---
 
-<!-- status: doc/concepts/websocket-status.md -->
+# WebSocket Message {#websocket-message}
 
 This document is the design for the public read and write API of a
 WebSocket in Platinum HTTP. It is a framework concept, not an
@@ -9,7 +11,7 @@ receives messages, while framing, fragmentation, masking, and control
 frames stay inside the engine.
 
 The HTTP upgrade boundary in
-[HTTP Upgrade](../requirements/http-upgrade.md) stays as it is. The
+[HTTP Upgrade](http-upgrade.md) stays as it is. The
 HTTP core still knows no WebSocket frames. The session model in
 [WebSocket Session](websocket-session.md) stays as it is, except where
 this chapter changes what `onInput()` and `onOutput()` mean: a

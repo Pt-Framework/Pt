@@ -1,3 +1,7 @@
+---
+topic: lua.md
+---
+
 # Lua Embedding
 
 Pt-Lua embeds a Lua interpreter in a C++ program and exposes Reflex types to scripts. A context binds a type catalog, a script runs source as a coroutine of that context, and native methods, properties, and constructors can be invoked from Lua. Asynchronous native work can finish later on an event loop.
@@ -88,7 +92,7 @@ This document does not require a second scripting language, a replacement for th
 
 Efficiency of context reset and cleanup of binding storage are implementation concerns. They are not separate embedding capabilities.
 
-## Open points for the architecture
+## Open points for the architecture {#lua-open}
 
 The architecture has to decide these points. This document only requires that each decision preserves the capabilities above.
 
