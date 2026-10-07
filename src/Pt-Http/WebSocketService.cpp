@@ -10,6 +10,7 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace Pt {
@@ -27,6 +28,42 @@ WebSocketService::WebSocketService()
 
 WebSocketService::~WebSocketService()
 {
+}
+
+
+void WebSocketService::activate(WebSocketServlet& servlet)
+{
+    if(_servlet)
+        throw std::logic_error("WebSocket service scope is already active");
+
+    _servlet = &servlet;
+}
+
+
+void WebSocketService::deactivate()
+{
+    _servlet = 0;
+
+    while( ! _sessions.empty() )
+    {
+        WebSocketSession* session = _sessions.back();
+        _sessions.pop_back();
+        session->shutdown();
+        onReleaseSession(session);
+    }
+}
+
+
+void WebSocketService::onSessionClosed(WebSocketSession& session)
+{
+    std::vector<WebSocketSession*>::iterator it =
+        std::find(_sessions.begin(), _sessions.end(), &session);
+
+    if(it == _sessions.end())
+        return;
+
+    _sessions.erase(it);
+    onReleaseSession(&session);
 }
 
 
@@ -94,28 +131,6 @@ void WebSocketService::clearProtocols()
 }
 
 
-std::size_t WebSocketService::sessionCount() const
-{
-    if( ! _servlet )
-        return 0;
-
-    return _servlet->size();
-}
-
-
-void WebSocketService::registerServlet(WebSocketServlet& servlet)
-{
-    _servlet = &servlet;
-}
-
-
-void WebSocketService::unregisterServlet(WebSocketServlet& servlet)
-{
-    if(_servlet == &servlet)
-        _servlet = 0;
-}
-
-
 Responder* WebSocketService::onGetResponder(const Request&)
 {
     return new WebSocketResponder(*this);
@@ -132,10 +147,17 @@ void WebSocketService::onUpgrade(Stream& stream,
                                  const Request& request,
                                  const Reply& reply)
 {
+    // NOTE: only create session if servlet is active
     if( ! _servlet )
         return;
 
-    _servlet->onUpgrade(stream, request, reply);
+    System::EventLoop* loop = stream.loop();
+    if( ! loop )
+        throw std::logic_error("WebSocket upgrade has no event loop");
+
+    WebSocketSession* session = onGetSession(*loop, stream, request, reply);
+    if(session)
+        _sessions.push_back(session);
 }
 
 } // namespace Http

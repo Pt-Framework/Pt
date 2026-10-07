@@ -65,7 +65,7 @@ typedef Pt::Http::BasicService<DeclineResponder> DeclineService;
 class RecordSession : public Pt::Http::WebSocketSession
 {
     public:
-        RecordSession(Pt::Http::WebSocketServlet& servlet,
+        RecordSession(Pt::Http::WebSocketService& service,
                       Pt::System::EventLoop& loop,
                       Pt::Http::Stream& stream,
                       const Pt::Http::Reply& reply,
@@ -74,7 +74,7 @@ class RecordSession : public Pt::Http::WebSocketSession
                       bool& received,
                       bool& closed,
                       Pt::System::EventLoop& exitLoop)
-        : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, loop, stream, reply)
         , _message(&message)
         , _type(&type)
         , _received(&received)
@@ -142,14 +142,13 @@ class RecordService : public Pt::Http::WebSocketService
         { return _opened - _released; }
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
-                                                         Pt::System::EventLoop& loop,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
                                                          Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
             ++_opened;
-            return new RecordSession(servlet, loop, stream, reply,
+            return new RecordSession(*this, loop, stream, reply,
                                      *_message, *_type, *_received, *_closed, *_loop);
         }
 
@@ -172,7 +171,7 @@ class RecordService : public Pt::Http::WebSocketService
 class CollectSession : public Pt::Http::WebSocketSession
 {
     public:
-        CollectSession(Pt::Http::WebSocketServlet& servlet,
+        CollectSession(Pt::Http::WebSocketService& service,
                        Pt::System::EventLoop& loop,
                        Pt::Http::Stream& stream,
                        const Pt::Http::Reply& reply,
@@ -180,7 +179,7 @@ class CollectSession : public Pt::Http::WebSocketSession
                        Pt::Http::WebSocketMessage::Type& type,
                        bool& received,
                        Pt::System::EventLoop& exitLoop)
-        : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, loop, stream, reply)
         , _message(&message)
         , _type(&type)
         , _received(&received)
@@ -239,13 +238,12 @@ class CollectService : public Pt::Http::WebSocketService
         {}
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
-                                                         Pt::System::EventLoop& loop,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
                                                          Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
-            return new CollectSession(servlet, loop, stream, reply,
+            return new CollectSession(*this, loop, stream, reply,
                                       *_message, *_type, *_received, *_loop);
         }
 
@@ -264,13 +262,13 @@ class CollectService : public Pt::Http::WebSocketService
 class IdleSession : public Pt::Http::WebSocketSession
 {
     public:
-        IdleSession(Pt::Http::WebSocketServlet& servlet,
+        IdleSession(Pt::Http::WebSocketService& service,
                     Pt::System::EventLoop& loop,
                     Pt::Http::Stream& stream,
                     const Pt::Http::Reply& reply,
                     Pt::System::EventLoop& exitLoop,
                     bool exitOnAccept)
-        : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, loop, stream, reply)
         , _exitLoop(&exitLoop)
         {
             if(exitOnAccept)
@@ -304,15 +302,17 @@ class IdleService : public Pt::Http::WebSocketService
         std::size_t live() const
         { return _opened - _released; }
 
+        std::size_t opened() const
+        { return _opened; }
+
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
-                                                         Pt::System::EventLoop& loop,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
                                                          Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
             ++_opened;
-            return new IdleSession(servlet, loop, stream, reply, *_loop, _exitOnAccept);
+            return new IdleSession(*this, loop, stream, reply, *_loop, _exitOnAccept);
         }
 
         virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -331,8 +331,7 @@ class IdleService : public Pt::Http::WebSocketService
 class NullService : public Pt::Http::WebSocketService
 {
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet&,
-                                                         Pt::System::EventLoop&,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop&,
                                                          Pt::Http::Stream&,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply&)
@@ -347,11 +346,11 @@ class NullService : public Pt::Http::WebSocketService
 class ThrowSession : public Pt::Http::WebSocketSession
 {
     public:
-        ThrowSession(Pt::Http::WebSocketServlet& servlet,
+        ThrowSession(Pt::Http::WebSocketService& service,
                      Pt::System::EventLoop& loop,
                      Pt::Http::Stream& stream,
                      const Pt::Http::Reply& reply)
-        : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, loop, stream, reply)
         {
             throw std::runtime_error("session construction failed");
         }
@@ -370,13 +369,12 @@ class ThrowSession : public Pt::Http::WebSocketSession
 class ThrowService : public Pt::Http::WebSocketService
 {
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
-                                                         Pt::System::EventLoop& loop,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
                                                          Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
-            return new ThrowSession(servlet, loop, stream, reply);
+            return new ThrowSession(*this, loop, stream, reply);
         }
 
         virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -388,11 +386,11 @@ class ThrowService : public Pt::Http::WebSocketService
 class PushSession : public Pt::Http::WebSocketSession
 {
     public:
-        PushSession(Pt::Http::WebSocketServlet& servlet,
+        PushSession(Pt::Http::WebSocketService& service,
                     Pt::System::EventLoop& loop,
                     Pt::Http::Stream& stream,
                     const Pt::Http::Reply& reply)
-        : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, loop, stream, reply)
         {
             outgoing().setType(Pt::Http::WebSocketMessage::Text);
             outgoing().body() << "feed";
@@ -417,7 +415,7 @@ typedef Pt::Http::BasicWebSocketService<PushSession> PushService;
 class ProtocolSession : public Pt::Http::WebSocketSession
 {
     public:
-        ProtocolSession(Pt::Http::WebSocketServlet& servlet,
+        ProtocolSession(Pt::Http::WebSocketService& service,
                         Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply,
@@ -425,7 +423,7 @@ class ProtocolSession : public Pt::Http::WebSocketSession
                         std::string& offered,
                         std::string& copied,
                         Pt::System::EventLoop& exitLoop)
-        : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, loop, stream, reply)
         , _selected(&selected)
         , _exitLoop(&exitLoop)
         {
@@ -470,8 +468,7 @@ class ProtocolService : public Pt::Http::WebSocketService
         { return _opened; }
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::WebSocketServlet& servlet,
-                                                         Pt::System::EventLoop& loop,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
                                                          Pt::Http::Stream& stream,
                                                          const Pt::Http::Request& request,
                                                          const Pt::Http::Reply& reply)
@@ -481,7 +478,7 @@ class ProtocolService : public Pt::Http::WebSocketService
             *_offered = field ? field : "";
             const char* origin = request.header().get("Origin");
             *_copied = origin ? origin : "";
-            ProtocolSession* session = new ProtocolSession(servlet, loop, stream, reply,
+            ProtocolSession* session = new ProtocolSession(*this, loop, stream, reply,
                                                            *_selected, *_offered, *_copied,
                                                            *_loop);
             return session;
@@ -517,6 +514,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
         {
             registerMethod("Text", *this, &WebSocketTest::Text);
             registerMethod("Accepted", *this, &WebSocketTest::Accepted);
+            registerMethod("NoScope", *this, &WebSocketTest::NoScope);
+            registerMethod("Scope", *this, &WebSocketTest::Scope);
+            registerMethod("SecondScope", *this, &WebSocketTest::SecondScope);
             registerMethod("PeerClose", *this, &WebSocketTest::PeerClose);
             registerMethod("Decline", *this, &WebSocketTest::Decline);
             registerMethod("NullSession", *this, &WebSocketTest::NullSession);
@@ -614,12 +614,76 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             _loop->run();
 
-            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(1));
         }
 
         void onConnectedIdle(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
+        }
+
+    protected:
+        void NoScope()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8031);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeclineConnected);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_declined);
+            PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+        }
+
+    protected:
+        void Scope()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8032);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop);
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+
+            {
+                Pt::Http::WebSocketServlet sockets(service);
+                Pt::Http::MapUrl mapUrl("/ws", service);
+                server.addServlet(mapUrl);
+
+                socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdle);
+                socket.beginConnect("/ws");
+
+                _loop->run();
+
+                PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(1));
+                PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(1));
+            }
+
+            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+        }
+
+    protected:
+        void SecondScope()
+        {
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            PT_UNIT_ASSERT_THROW(createScope(service), std::logic_error);
+        }
+
+        void createScope(Pt::Http::WebSocketService& service)
+        {
+            Pt::Http::WebSocketServlet scope(service);
         }
 
     protected:
@@ -642,7 +706,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
-            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedClose(Pt::Http::WebSocket& socket)
@@ -798,7 +862,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT_EQUALS(_status, 503u);
-            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(1));
             _limitSocket = 0;
             _limitClient = 0;
         }
@@ -944,7 +1008,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
-            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedCloseCode(Pt::Http::WebSocket& socket)

@@ -4,7 +4,6 @@
 
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/WebSocketService.h>
-#include <Pt/Http/WebSocketServlet.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
 #include <Pt/System/EventLoop.h>
@@ -73,15 +72,15 @@ std::string selectedProtocol(const Reply& reply)
 }
 
 
-WebSocketSession::WebSocketSession(WebSocketServlet& servlet,
+WebSocketSession::WebSocketSession(WebSocketService& service,
                                    System::EventLoop& loop,
                                    Stream& stream,
                                    const Reply& reply)
-: _service(&servlet.service())
-, _servlet(&servlet)
+: _service(&service)
 , _loop(&loop)
 , _channel(new WebSocketChannel())
 , _protocol(selectedProtocol(reply))
+, _ended(false)
 {
     if( stream.loop() != &loop )
         throw std::logic_error("WebSocketSession loop is not the stream loop");
@@ -98,7 +97,7 @@ WebSocketSession::WebSocketSession(WebSocketServlet& servlet,
 
 WebSocketSession::~WebSocketSession()
 {
-    _servlet = 0;
+    _ended = true;
     delete _channel;
 }
 
@@ -183,13 +182,13 @@ void WebSocketSession::onOutputReady()
 
 void WebSocketSession::onClosed()
 {
-    if( ! _servlet )
+    if(_ended)
         return;
 
-    WebSocketServlet* servlet = _servlet;
-    _servlet = 0;
+    _ended = true;
+
     onClose();
-    servlet->onSessionClosed(*this);
+    _service->onSessionClosed(*this);
 }
 
 } // namespace Http

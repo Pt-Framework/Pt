@@ -21,7 +21,6 @@ class EventLoop;
 namespace Http {
 
 class Stream;
-class WebSocketServlet;
 class WebSocketService;
 class WebSocketChannel;
 
@@ -45,11 +44,11 @@ class WebSocketChannel;
     class EchoSession : public Pt::Http::WebSocketSession
     {
         public:
-            EchoSession(Pt::Http::WebSocketServlet& servlet,
+            EchoSession(Pt::Http::WebSocketService& service,
                         Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply)
-            : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+            : Pt::Http::WebSocketSession(service, loop, stream, reply)
             {
                 beginReceive();
             }
@@ -79,13 +78,13 @@ class WebSocketChannel;
     };
     @endcode
 
-    The servlet constructs the session with itself, with the loop
-    that serializes this stream, with the stream of this upgrade,
-    and with the opening reply. The loop must be the loop of the
-    stream. The reply is valid for the constructor call. The base
-    constructor reads the selected subprotocol from that reply,
-    binds the stream, copies the service limits onto the connection,
-    and stores the loop. It does not store the reply. The derived
+    The service factory constructs the session with the service, with
+    the loop that serializes this stream, with the stream of this
+    upgrade, and with the opening reply. The loop must be the loop of
+    the stream. The reply is valid for the constructor call. The base
+    constructor reads the selected subprotocol from that reply, binds
+    the stream, copies the service limits onto the connection, and
+    stores the loop. It does not store the reply. The derived
     constructor runs after that.
     Its members are initialized, the stream is open, and %loop() is
     the loop of this stream. Start the first %beginReceive() or
@@ -102,8 +101,8 @@ class WebSocketChannel;
     runs when data bytes were sent. Call %endSend() and continue
     the send when progress is not finished. %onClose() runs while
     this object is still alive, after the stream has ended. Do not
-    call %endReceive() or %endSend() from %onClose(). The servlet
-    that holds this session releases it after %onClose() returns.
+    call %endReceive() or %endSend() from %onClose(). The service
+    releases this session after %onClose() returns.
 
     %protocol() is the single name the responder wrote as
     Sec-WebSocket-Protocol on the 101, or empty when none was
@@ -135,12 +134,12 @@ class WebSocketChannel;
 */
 class PT_HTTP_API WebSocketSession : public Connectable
 {
-    friend class WebSocketServlet;
+    friend class WebSocketService;
 
     public:
-        /** @brief Binds @a stream on @a loop.
+        /** @brief Binds @a stream on @a loop for @a service.
 
-            @a servlet holds this session. @a loop must be the loop of
+            @a service owns this session. @a loop must be the loop of
             @a stream. @a reply is the opening handshake reply and is
             valid for this call. The selected subprotocol is copied
             from it. The reply is not stored.
@@ -150,7 +149,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
             @throw %std::runtime_error if Sec-WebSocket-Protocol is
             not one protocol token.
         */
-        WebSocketSession(WebSocketServlet& servlet,
+        WebSocketSession(WebSocketService& service,
                          System::EventLoop& loop,
                          Stream& stream,
                          const Reply& reply);
@@ -242,7 +241,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         /** @brief Called when the stream has ended.
 
-            This object is still alive. The servlet releases it after
+            This object is still alive. The service releases it after
             this call returns. Do not call %endReceive() or %endSend().
         */
         virtual void onClose() = 0;
@@ -258,10 +257,10 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
     private:
         WebSocketService*    _service;
-        WebSocketServlet*    _servlet;
         System::EventLoop*   _loop;
         WebSocketChannel* _channel;
         std::string _protocol;
+        bool _ended;
 };
 
 } // namespace Http

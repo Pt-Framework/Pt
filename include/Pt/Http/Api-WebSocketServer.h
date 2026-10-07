@@ -13,10 +13,10 @@
     A server WebSocket is an HTTP service that answers the handshake
     and a session object that lasts for the life of the upgraded
     stream. The HTTP server still owns the connection. The service
-    is the factory and the endpoint policy. It does not keep the
-    sessions it creates. A separate release scope does, and that
-    scope is destroyed before the service so the factory is still
-    fully constructed when the last session is released. Derive the
+    is the factory, endpoint policy, and owner of its live sessions.
+    %WebSocketServlet provides the sole active release scope and, on
+    destruction, asks the service to release remaining sessions while
+    the factory is still fully constructed. Derive the
     session to keep the state that must survive from one message to
     the next: a subscription, a cursor, a user, or a reference into
     the application domain.
@@ -29,11 +29,11 @@
     class EchoSession : public Pt::Http::WebSocketSession
     {
         public:
-            EchoSession(Pt::Http::WebSocketServlet& servlet,
+            EchoSession(Pt::Http::WebSocketService& service,
                         Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply)
-            : Pt::Http::WebSocketSession(servlet, loop, stream, reply)
+            : Pt::Http::WebSocketSession(service, loop, stream, reply)
             {
                 beginReceive();
             }
@@ -93,18 +93,16 @@
     that name empty when the reply selected none.
 
     After a finished 101 the HTTP server keeps the connection and
-    delivers the upgraded stream to this service. The service
-    implements that delivery and does not pass it on. It forwards
-    the stream to the registered %WebSocketServlet. The servlet
-    asks the factory for a %WebSocketSession and passes the
-    %EventLoop of the stream, the stream, the opening request, and
-    the opening reply. Both messages are valid for that call. The
-    session binds the stream in its constructor, which accepts the
-    upgrade. It reads the selected subprotocol from the reply and
-    does not store the reply.
-    A null session, or no registered servlet, leaves the stream
-    unbound, and the HTTP server closes it. A server does not mask
-    the frames it writes.
+    delivers the upgraded stream to this service. The service accepts
+    it only while a %WebSocketServlet scope is active. It calls
+    %onGetSession() with the %EventLoop of the stream, the stream, the
+    opening request, and the opening reply, and retains a non-null
+    result as a live session. Both messages are valid for that call.
+    The session binds the stream in its constructor, which accepts the
+    upgrade. It reads the selected subprotocol from the reply and does
+    not store the reply. A null session, or no active scope, leaves
+    the stream unbound, and the HTTP server closes it. A server does
+    not mask the frames it writes.
 
     %WebSocketSession exposes %incoming(), %outgoing(),
     %beginSend(), %endSend(), %beginReceive() and %endReceive()
@@ -115,16 +113,13 @@
     %onClose(). Closing the session closes the stream. The session
     does not own the stream or the connection.
 
-    %WebSocketServlet holds the session pointers. Construct it with
-    the service and destroy it before the service. The constructor
-    registers this servlet, so the next upgrade of that service is
-    delivered here. The destructor releases every session it still
-    holds while the service is still fully constructed. The derived
-    service destructor has not run yet, so the virtual release call
-    and the allocator are still there. That order is required. One
-    service has one registered servlet. A second servlet replaces
-    the registration. The previous servlet keeps the sessions it
-    already accepted and releases them itself.
+    %WebSocketServlet establishes the service's one active release
+    scope. Construct it with the service and destroy it before the
+    service. The destructor asks the service to release every session
+    it still owns while the derived service is fully constructed. The
+    derived service destructor has not run yet, so the virtual release
+    call and the allocator are still there. Constructing a second
+    scope for the same service throws %std::logic_error.
 
     %BasicWebSocketService is this factory for one session type.
     Derive %WebSocketService when the session type depends on the
@@ -133,14 +128,13 @@
 
     @code
     Pt::Http::WebSocketSession* ChatService::onGetSession(
-        Pt::Http::WebSocketServlet& servlet,
         Pt::System::EventLoop& loop,
         Pt::Http::Stream& stream,
         const Pt::Http::Request& request,
         const Pt::Http::Reply& reply)
     {
         const char* user = request.header().get("X-User");
-        return new ChatSession(servlet, loop, stream, reply, _rooms,
+        return new ChatSession(*this, loop, stream, reply, _rooms,
                                user ? user : "");
     }
 
@@ -158,10 +152,9 @@
     same allocator, as %onGetResponder() and %onReleaseResponder()
     must match. A pool, or any other detach, lives in the derived
     service. Return null from %onGetSession() to decline the upgrade.
-    The servlet
-    releases a session through %onReleaseSession() after %onClose()
-    returns, and from its destructor for every session it still
-    holds.
+        The service releases a session through %onReleaseSession() after
+    %onClose() returns, and when its release scope ends for every
+    remaining session it owns.
 */
 
 #endif
