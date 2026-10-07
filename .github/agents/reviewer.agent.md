@@ -4,6 +4,8 @@ description: "Reviews a plan, implementation, or API documentation for correctne
 argument-hint: "Review the specified plan, files, or documentation. State the review mode: plan, implementation, or documentation."
 tools: [read, search]
 model: [ "Claude Sonnet 5" ]
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Agent Profile

@@ -4,6 +4,8 @@ description: "Use when updating API documentation in changed Pt public headers a
 argument-hint: "Document the specified public headers. Name the headers and describe the implemented API behavior."
 tools: [read, edit, search]
 model: [ "GPT-5.6 Terra" ]
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Agent Profile

@@ -4,6 +4,8 @@ description: "Use when adding, updating, building, or running focused Pt C++ uni
 argument-hint: "Test the specified change or module. Name affected files, expected behavior, and any relevant test target."
 tools: [read, edit, search, execute]
 model: [ "GPT-5.6 Terra" ]
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Agent Profile

@@ -3,7 +3,9 @@ name: "Builder"
 description: "Use when verifying the full project build or diagnosing compiler and linker failures."
 argument-hint: "Build the full project and report the command, configuration, exit code, and relevant errors."
 tools: [read, search, execute]
-model: [ "Kimi K2.7 Code" ]
+model: [ "GPT-5.6 Luna (copilot)" ]
+user-invocable: true
+disable-model-invocation: true
 ---
 
 # Agent Profile
