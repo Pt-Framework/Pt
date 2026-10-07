@@ -14,7 +14,7 @@ namespace Pt {
 
 namespace Http {
 
-class WebSocketConnection;
+class WebSocketChannel;
 
 /** @brief Payload of one text or binary WebSocket message.
 
@@ -69,7 +69,7 @@ class WebSocketConnection;
 */
 class PT_HTTP_API WebSocketMessage : private NonCopyable
 {
-    friend class WebSocketConnection;
+    friend class WebSocketChannel;
 
     public:
         /** @brief Data type of a WebSocket message.

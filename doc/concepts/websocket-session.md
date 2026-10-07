@@ -67,7 +67,7 @@ type would only rename an object the application already owns.
 ## Principles {#wss-principles}
 
 One accepted stream is one bind. The bind is an internal frame
-connection, a `StreamSession`. A second bind on the same stream
+connection, a `Channel`. A second bind on the same stream
 throws. The parser, the mask, the payload, and the idle timer live
 in that connection. They do not live in the type the application
 derives, and they do not live in a public frame type.
@@ -142,7 +142,7 @@ WebSocketServlet  holds sessions for onReleaseSession()
         |
         +-- WebSocketSession          server facade, application state
                  |
-                 +-- WebSocketConnection --> Stream
+                 +-- WebSocketChannel --> Stream
 ```
 
 The client has no factory and no release scope.
@@ -150,17 +150,17 @@ The client has no factory and no release scope.
 ```text
 WebSocket          client facade, holds Client*
     |
-    +-- WebSocketConnection --> Stream --> Connection
+    +-- WebSocketChannel --> Stream --> Connection
 ```
 
 A later protocol that also uses `Service::onUpgrade()` does not
-derive `WebSocketSession`. It binds its own `StreamSession`. The
+derive `WebSocketSession`. It binds its own `Channel`. The
 session type in this chapter is the WebSocket case only.
 
 ## Frame connection {#wss-connection}
 
-`WebSocketConnection` is the internal frame engine. It is the
-`StreamSession`, and so it is the one bind. It parses and writes
+`WebSocketChannel` is the internal frame engine. It is the
+`Channel`, and so it is the one bind. It parses and writes
 frames, and it holds the payload, the mask, the size limit, and the
 idle timer. Masking is a mode set when it opens: a client masks, a
 server does not. It has no `Client`, no URL, and no
@@ -186,7 +186,7 @@ Connect `connected()` and call `beginConnect()` with the request
 path, or with a `ws://` URL whose host and port are the client's
 endpoint. The handshake is an HTTP request and reply on that client.
 `endConnect()` completes it and throws if it failed. A finished 101
-opens a `WebSocketConnection` on the stream from the client upgrade.
+opens a `WebSocketChannel` on the stream from the client upgrade.
 After the handshake the socket no longer uses the client for frames.
 The client still owns the connection and the stream.
 
@@ -226,7 +226,7 @@ constructor and no `accept()` on this type.
 ## Session {#wss-session}
 
 `WebSocketSession` is the per-stream application object and the server
-facade. It is a `Connectable`. It is not a `StreamSession` and not a
+facade. It is a `Connectable`. It is not a `Channel` and not a
 `Responder`.
 
 ```cpp
@@ -257,7 +257,7 @@ class WebSocketSession : public Connectable
         WebSocketService* _service;
         WebSocketServlet* _servlet;
         System::EventLoop* _loop;
-        WebSocketConnection* _connection;
+        WebSocketChannel* _channel;
 };
 ```
 
@@ -298,7 +298,7 @@ session calls `endReceive()`, reads `body()`, and starts the next
 receive or a reply. `onOutput()` runs when a frame has left the stream
 buffer. The derived session calls `endSend()` and starts the next
 send when it still has data. `onClose()` runs while the session object
-is still alive. The stream has already cleared its session pointer.
+is still alive. The stream has already cleared its channel pointer.
 Peer close, an I/O error, a close frame, and destruction of the
 stream all end here. The servlet releases the session after
 `onClose()` returns.
@@ -597,7 +597,7 @@ not try to receive or send again.
 
 ## Out of scope {#wss-scope}
 
-This design does not change `Stream`, `StreamSession`, or
+This design does not change `Stream`, `Channel`, or
 `Service::onUpgrade()`. Those stay the generic upgrade boundary.
 `WebSocketService::onUpgrade()` stays final and forwards to the
 registered servlet.
@@ -608,8 +608,8 @@ the `WebSocket` it constructs.
 It does not merge the handshake responder into the session. The
 responder is released before the session begins.
 
-It does not publish `WebSocketConnection`. The two facades forward
-the frame operations. Application code does not name the connection.
+It does not publish `WebSocketChannel`. The two facades forward
+the frame operations. Application code does not name the channel.
 
 It does not define HTTP/2 Extended CONNECT in the server. It only
 requires that the session model still holds when that upgrade arrives

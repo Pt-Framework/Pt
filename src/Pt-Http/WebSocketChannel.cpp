@@ -3,7 +3,7 @@
    SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
 */
 
-#include "WebSocketConnection.h"
+#include "WebSocketChannel.h"
 #include <Pt/Http/Stream.h>
 #include <Pt/Byteorder.h>
 #include <Pt/System/EventLoop.h>
@@ -114,8 +114,8 @@ bool isValidUtf8(const char* data, std::size_t n)
 } // namespace
 
 
-WebSocketConnection::WebSocketConnection()
-: StreamSession()
+WebSocketChannel::WebSocketChannel()
+: Channel()
 , _clientMask(false)
 , _opened(false)
 , _ended(false)
@@ -150,43 +150,43 @@ WebSocketConnection::WebSocketConnection()
 , _closeReceived(false)
 , _closeCode(0)
 {
-    _idleTimer.timeout() += Pt::slot(*this, &WebSocketConnection::onIdleTimeout);
+    _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
 }
 
 
-WebSocketConnection::~WebSocketConnection()
+WebSocketChannel::~WebSocketChannel()
 {
     if( stream() )
-        StreamSession::close();
+        Channel::close();
 }
 
 
-void WebSocketConnection::open(Stream& stream, bool clientMask)
+void WebSocketChannel::open(Stream& stream, bool clientMask)
 {
     _clientMask = clientMask;
     _opened = true;
-    StreamSession::open(stream);
+    Channel::open(stream);
     stream.setTimeout(_timeout);
-    stream.inputReady() += Pt::slot(*this, &WebSocketConnection::onInput);
-    stream.outputReady() += Pt::slot(*this, &WebSocketConnection::onOutput);
+    stream.inputReady() += Pt::slot(*this, &WebSocketChannel::onInput);
+    stream.outputReady() += Pt::slot(*this, &WebSocketChannel::onOutput);
 }
 
 
-void WebSocketConnection::requireOpen() const
+void WebSocketChannel::requireOpen() const
 {
     if( ! _opened || ! stream() )
         throw std::logic_error("WebSocket handshake is not finished");
 }
 
 
-void WebSocketConnection::requireNotEnded() const
+void WebSocketChannel::requireNotEnded() const
 {
     if(_ended)
         throw std::logic_error("WebSocket is closed");
 }
 
 
-void WebSocketConnection::beginSend()
+void WebSocketChannel::beginSend()
 {
     requireOpen();
     requireNotEnded();
@@ -227,7 +227,7 @@ void WebSocketConnection::beginSend()
 }
 
 
-MessageProgress WebSocketConnection::endSend()
+MessageProgress WebSocketChannel::endSend()
 {
     requireNotEnded();
 
@@ -247,7 +247,7 @@ MessageProgress WebSocketConnection::endSend()
 }
 
 
-void WebSocketConnection::beginReceive()
+void WebSocketChannel::beginReceive()
 {
     requireOpen();
     requireNotEnded();
@@ -275,7 +275,7 @@ void WebSocketConnection::beginReceive()
 }
 
 
-MessageProgress WebSocketConnection::endReceive()
+MessageProgress WebSocketChannel::endReceive()
 {
     requireNotEnded();
 
@@ -294,7 +294,7 @@ MessageProgress WebSocketConnection::endReceive()
 }
 
 
-void WebSocketConnection::ping(const char* payload, std::size_t n)
+void WebSocketChannel::ping(const char* payload, std::size_t n)
 {
     requireOpen();
     requireNotEnded();
@@ -307,7 +307,7 @@ void WebSocketConnection::ping(const char* payload, std::size_t n)
 }
 
 
-void WebSocketConnection::close(unsigned code, const std::string& reason)
+void WebSocketChannel::close(unsigned code, const std::string& reason)
 {
     requireOpen();
     requireNotEnded();
@@ -331,14 +331,14 @@ void WebSocketConnection::close(unsigned code, const std::string& reason)
 }
 
 
-void WebSocketConnection::detach()
+void WebSocketChannel::detach()
 {
     if( stream() )
-        StreamSession::close();
+        Channel::close();
 }
 
 
-void WebSocketConnection::setTimeout(std::size_t timeout)
+void WebSocketChannel::setTimeout(std::size_t timeout)
 {
     _timeout = timeout;
 
@@ -347,13 +347,13 @@ void WebSocketConnection::setTimeout(std::size_t timeout)
 }
 
 
-void WebSocketConnection::setMaxMessageSize(std::size_t maxSize)
+void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
 {
     _maxMessageSize = maxSize;
 }
 
 
-void WebSocketConnection::setIdleTimeout(std::size_t ms)
+void WebSocketChannel::setIdleTimeout(std::size_t ms)
 {
     _idleTimeout = ms;
 
@@ -373,7 +373,7 @@ void WebSocketConnection::setIdleTimeout(std::size_t ms)
 }
 
 
-void WebSocketConnection::onIdleTimeout()
+void WebSocketChannel::onIdleTimeout()
 {
     if(_closeCode == 0)
         _closeCode = 1006;
@@ -383,7 +383,7 @@ void WebSocketConnection::onIdleTimeout()
 }
 
 
-void WebSocketConnection::onCloseStream(Stream&)
+void WebSocketChannel::onCloseStream(Stream&)
 {
     _ended = true;
     _opened = false;
@@ -398,7 +398,7 @@ void WebSocketConnection::onCloseStream(Stream&)
 }
 
 
-void WebSocketConnection::enqueueControl(unsigned opcode, const char* payload, std::size_t n)
+void WebSocketChannel::enqueueControl(unsigned opcode, const char* payload, std::size_t n)
 {
     ControlFrame frame;
     frame.opcode = opcode;
@@ -410,7 +410,7 @@ void WebSocketConnection::enqueueControl(unsigned opcode, const char* payload, s
 }
 
 
-void WebSocketConnection::enqueueClose(unsigned code, const std::string& reason)
+void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 {
     if(_closeQueued || _closeSent)
         return;
@@ -432,7 +432,7 @@ void WebSocketConnection::enqueueClose(unsigned code, const std::string& reason)
 }
 
 
-void WebSocketConnection::protocolFail(unsigned code)
+void WebSocketChannel::protocolFail(unsigned code)
 {
     if(_ended)
         return;
@@ -445,7 +445,7 @@ void WebSocketConnection::protocolFail(unsigned code)
 }
 
 
-void WebSocketConnection::beginInputPump()
+void WebSocketChannel::beginInputPump()
 {
     if(_ended)
         return;
@@ -464,7 +464,7 @@ void WebSocketConnection::beginInputPump()
 }
 
 
-void WebSocketConnection::pumpOutput()
+void WebSocketChannel::pumpOutput()
 {
     if(_ended || _outputState == OutputWriting)
         return;
@@ -520,7 +520,7 @@ void WebSocketConnection::pumpOutput()
 }
 
 
-void WebSocketConnection::writeFrame(unsigned opcode, bool fin,
+void WebSocketChannel::writeFrame(unsigned opcode, bool fin,
                                      const char* payload, std::size_t n)
 {
     Stream* stream = this->stream();
@@ -585,14 +585,14 @@ void WebSocketConnection::writeFrame(unsigned opcode, bool fin,
 }
 
 
-Pt::uint32_t WebSocketConnection::nextMask()
+Pt::uint32_t WebSocketChannel::nextMask()
 {
     _maskSeed = _maskSeed * 1664525u + 1013904223u;
     return _maskSeed;
 }
 
 
-bool WebSocketConnection::parseAvailable()
+bool WebSocketChannel::parseAvailable()
 {
     Stream* stream = this->stream();
     std::streambuf* buf = stream ? stream->buffer() : 0;
@@ -817,7 +817,7 @@ bool WebSocketConnection::parseAvailable()
 }
 
 
-bool WebSocketConnection::onDataFrameComplete()
+bool WebSocketChannel::onDataFrameComplete()
 {
     _inputState = InputIdle;
 
@@ -858,7 +858,7 @@ bool WebSocketConnection::onDataFrameComplete()
 }
 
 
-bool WebSocketConnection::onControlFrame()
+bool WebSocketChannel::onControlFrame()
 {
     _inputState = InputIdle;
 
@@ -938,14 +938,14 @@ bool WebSocketConnection::onControlFrame()
 }
 
 
-void WebSocketConnection::restartIdleTimer()
+void WebSocketChannel::restartIdleTimer()
 {
     if(_idleTimeout != 0)
         _idleTimer.start(_idleTimeout);
 }
 
 
-void WebSocketConnection::onInput()
+void WebSocketChannel::onInput()
 {
     Stream* stream = this->stream();
     if( ! stream || _ended )
@@ -977,7 +977,7 @@ void WebSocketConnection::onInput()
 }
 
 
-void WebSocketConnection::onOutput()
+void WebSocketChannel::onOutput()
 {
     Stream* stream = this->stream();
     if( ! stream || _ended )

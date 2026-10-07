@@ -42,7 +42,7 @@ class Server;
 class Service;
 class Servlet;
 class Stream;
-class StreamSession;
+class Channel;
 class WebSocket;
 class WebSocketMessage;
 class WebSocketService;

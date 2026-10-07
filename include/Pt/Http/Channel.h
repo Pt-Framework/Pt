@@ -2,8 +2,8 @@
    SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
 */
 
-#ifndef PT_HTTP_STREAMSESSION_H
-#define PT_HTTP_STREAMSESSION_H
+#ifndef PT_HTTP_CHANNEL_H
+#define PT_HTTP_CHANNEL_H
 
 #include <Pt/Http/Api.h>
 #include <Pt/NonCopyable.h>
@@ -14,20 +14,20 @@ namespace Http {
 
 class Stream;
 
-/** @brief Binds one session object to one HTTP stream.
+/** @brief Binds one channel to one HTTP stream.
 
-    %StreamSession is the external peer of one %Stream. The server or the
-    client owns the connection, and the connection owns the stream. A session
+    %Channel is the external peer of one %Stream. The server or the
+    client owns the connection, and the connection owns the stream. A channel
     does not own either. It stores a pointer to the stream, and the stream
-    stores a pointer back. One stream has one session. A second %open() throws
+    stores a pointer back. One stream has one channel. A second %open() throws
     %std::logic_error.
 
     Binding is how an upgrade is accepted. On the server,
     %Service::onUpgrade() receives the stream the server already owns. A
-    derived session constructs itself with that stream, or calls %open() from
-    its own accept method. After %onUpgrade() returns, a stream with no session
+    derived channel constructs itself with that stream, or calls %open() from
+    its own accept method. After %onUpgrade() returns, a stream with no channel
     is declined and the server closes it. On the client, %Client::upgrade()
-    returns the stream the client already owns, and the derived session opens
+    returns the stream the client already owns, and the derived channel opens
     that stream after the 101 reply.
 
     This base does not transfer bytes. The derived type uses the stream it
@@ -43,14 +43,14 @@ class Stream;
     frame.
 
     The destructor unbinds and closes the stream. Destroying the stream
-    unbinds this session and calls %onClose(). The session object stays, and
+    unbinds this channel and calls %onClose(). The channel object stays, and
     %stream() is null. The two sides call each other through the peer pointer.
     %isOpen() is false after either side ends.
 
     @ingroup Pt-Http-Servers
     @ingroup Pt-Http-WebSocket
 */
-class PT_HTTP_API StreamSession : private NonCopyable
+class PT_HTTP_API Channel : private NonCopyable
 {
     friend class Stream;
 
@@ -61,31 +61,31 @@ class PT_HTTP_API StreamSession : private NonCopyable
         { return _stream != 0; }
 
     protected:
-        /** @brief Creates a session with no stream.
+        /** @brief Creates a channel with no stream.
         */
-        StreamSession();
+        Channel();
 
-        /** @brief Creates a session bound to @a stream.
+        /** @brief Creates a channel bound to @a stream.
 
-            @throw %std::logic_error if @a stream already has a session.
+            @throw %std::logic_error if @a stream already has a channel.
         */
-        explicit StreamSession(Stream& stream);
+        explicit Channel(Stream& stream);
 
         /** @brief Unbinds and closes the stream.
         */
-        ~StreamSession();
+        ~Channel();
 
         /** @brief Binds @a stream.
 
-            @throw %std::logic_error if this session is already open,
-            or if @a stream already has a session.
+            @throw %std::logic_error if this channel is already open,
+            or if @a stream already has a channel.
         */
         void open(Stream& stream);
 
         /** @brief Unbinds and closes the stream.
 
             Does nothing when no stream is bound. The stream clears
-            its session pointer before it ends, so a close that runs
+            its channel pointer before it ends, so a close that runs
             from this destructor does not re-enter the stream.
         */
         void close();
@@ -112,4 +112,4 @@ class PT_HTTP_API StreamSession : private NonCopyable
 
 } // namespace Pt
 
-#endif // PT_HTTP_STREAMSESSION_H
+#endif // PT_HTTP_CHANNEL_H

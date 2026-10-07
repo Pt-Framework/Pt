@@ -19,7 +19,7 @@ namespace Pt {
 namespace Http {
 
 class Client;
-class WebSocketConnection;
+class WebSocketChannel;
 
 
 /** @brief Client handshake and messages on an upgraded stream.
@@ -239,7 +239,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Returns the signal emitted when the stream ends.
 
             Emitted while this socket is still alive. The stream has
-            already cleared its session pointer. Peer close, an I/O
+            already cleared its channel pointer. Peer close, an I/O
             error, a close frame and destruction of the stream all
             emit it. The owner deletes this socket. Ends an outstanding
             send or receive.
@@ -286,7 +286,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
     private:
         Client* _client;
-        WebSocketConnection* _connection;
+        WebSocketChannel* _channel;
         std::string _path;
         bool _error;
         bool _connecting;

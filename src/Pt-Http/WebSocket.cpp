@@ -12,7 +12,7 @@
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
 #include <Pt/System/Uri.h>
-#include "WebSocketConnection.h"
+#include "WebSocketChannel.h"
 #include <sstream>
 #include <ctime>
 #include <stdexcept>
@@ -23,7 +23,7 @@ namespace Http {
 
 WebSocket::WebSocket(Client& client)
 : _client(&client)
-, _connection(new WebSocketConnection())
+, _channel(new WebSocketChannel())
 , _path("/")
 , _error(false)
 , _connecting(false)
@@ -39,7 +39,7 @@ WebSocket::~WebSocket()
         _client->replyReceived() -= Pt::slot(*this, &WebSocket::onReply);
     }
 
-    delete _connection;
+    delete _channel;
 }
 
 
@@ -129,10 +129,10 @@ void WebSocket::onReply(Client& client)
             throw std::runtime_error("WebSocket handshake failed");
 
         Stream& stream = client.upgrade();
-        _connection->open(stream, true);
-        _connection->inputReady() += Pt::slot(*this, &WebSocket::onInputReady);
-        _connection->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
-        _connection->closed() += Pt::slot(*this, &WebSocket::onClosed);
+        _channel->open(stream, true);
+        _channel->inputReady() += Pt::slot(*this, &WebSocket::onInputReady);
+        _channel->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
+        _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
         finishHandshake(false);
     }
     catch(const std::exception&)
@@ -147,79 +147,79 @@ void WebSocket::onReply(Client& client)
 
 WebSocketMessage& WebSocket::incoming()
 {
-    return _connection->incoming();
+    return _channel->incoming();
 }
 
 
 WebSocketMessage& WebSocket::outgoing()
 {
-    return _connection->outgoing();
+    return _channel->outgoing();
 }
 
 
 void WebSocket::beginSend()
 {
-    _connection->beginSend();
+    _channel->beginSend();
 }
 
 
 MessageProgress WebSocket::endSend()
 {
-    return _connection->endSend();
+    return _channel->endSend();
 }
 
 
 void WebSocket::beginReceive()
 {
-    _connection->beginReceive();
+    _channel->beginReceive();
 }
 
 
 MessageProgress WebSocket::endReceive()
 {
-    return _connection->endReceive();
+    return _channel->endReceive();
 }
 
 
 void WebSocket::ping(const char* payload, std::size_t n)
 {
-    _connection->ping(payload, n);
+    _channel->ping(payload, n);
 }
 
 
 void WebSocket::close(unsigned code, const std::string& reason)
 {
-    _connection->close(code, reason);
+    _channel->close(code, reason);
 }
 
 
 unsigned WebSocket::closeCode() const
 {
-    return _connection->closeCode();
+    return _channel->closeCode();
 }
 
 
 const std::string& WebSocket::closeReason() const
 {
-    return _connection->closeReason();
+    return _channel->closeReason();
 }
 
 
 void WebSocket::setTimeout(std::size_t timeout)
 {
-    _connection->setTimeout(timeout);
+    _channel->setTimeout(timeout);
 }
 
 
 void WebSocket::setMaxMessageSize(std::size_t maxSize)
 {
-    _connection->setMaxMessageSize(maxSize);
+    _channel->setMaxMessageSize(maxSize);
 }
 
 
 void WebSocket::setIdleTimeout(std::size_t ms)
 {
-    _connection->setIdleTimeout(ms);
+    _channel->setIdleTimeout(ms);
 }
 
 

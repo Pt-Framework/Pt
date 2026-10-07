@@ -3,10 +3,10 @@
    SPDX-License-Identifier: LGPL-2.1-or-later WITH mif-exception
 */
 
-#ifndef PT_HTTP_WEBSOCKETCONNECTION_H
-#define PT_HTTP_WEBSOCKETCONNECTION_H
+#ifndef PT_HTTP_WEBSOCKETCHANNEL_H
+#define PT_HTTP_WEBSOCKETCHANNEL_H
 
-#include <Pt/Http/StreamSession.h>
+#include <Pt/Http/Channel.h>
 #include <Pt/Http/WebSocketMessage.h>
 #include <Pt/Http/Message.h>
 #include <Pt/Connectable.h>
@@ -25,13 +25,13 @@ class Stream;
 
 /** @internal Message engine of one upgraded HTTP stream.
 */
-class WebSocketConnection : public StreamSession
+class WebSocketChannel : public Channel
                           , public Connectable
 {
     public:
-        WebSocketConnection();
+        WebSocketChannel();
 
-        ~WebSocketConnection();
+        ~WebSocketChannel();
 
         void open(Stream& stream, bool clientMask);
 

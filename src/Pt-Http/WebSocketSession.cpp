@@ -7,7 +7,7 @@
 #include <Pt/Http/WebSocketServlet.h>
 #include <Pt/Http/Stream.h>
 #include <Pt/System/EventLoop.h>
-#include "WebSocketConnection.h"
+#include "WebSocketChannel.h"
 
 #include <stdexcept>
 
@@ -21,91 +21,91 @@ WebSocketSession::WebSocketSession(WebSocketServlet& servlet,
 : _service(&servlet.service())
 , _servlet(&servlet)
 , _loop(&loop)
-, _connection(new WebSocketConnection())
+, _channel(new WebSocketChannel())
 {
     if( stream.loop() != &loop )
         throw std::logic_error("WebSocketSession loop is not the stream loop");
 
-    _connection->open(stream, false);
-    _connection->setMaxMessageSize(_service->maxMessageSize());
-    _connection->setIdleTimeout(_service->idleTimeout());
+    _channel->open(stream, false);
+    _channel->setMaxMessageSize(_service->maxMessageSize());
+    _channel->setIdleTimeout(_service->idleTimeout());
 
-    _connection->inputReady() += Pt::slot(*this, &WebSocketSession::onInputReady);
-    _connection->outputReady() += Pt::slot(*this, &WebSocketSession::onOutputReady);
-    _connection->closed() += Pt::slot(*this, &WebSocketSession::onClosed);
+    _channel->inputReady() += Pt::slot(*this, &WebSocketSession::onInputReady);
+    _channel->outputReady() += Pt::slot(*this, &WebSocketSession::onOutputReady);
+    _channel->closed() += Pt::slot(*this, &WebSocketSession::onClosed);
 }
 
 
 WebSocketSession::~WebSocketSession()
 {
     _servlet = 0;
-    delete _connection;
+    delete _channel;
 }
 
 
 WebSocketMessage& WebSocketSession::incoming()
 {
-    return _connection->incoming();
+    return _channel->incoming();
 }
 
 
 WebSocketMessage& WebSocketSession::outgoing()
 {
-    return _connection->outgoing();
+    return _channel->outgoing();
 }
 
 
 void WebSocketSession::beginSend()
 {
-    _connection->beginSend();
+    _channel->beginSend();
 }
 
 
 MessageProgress WebSocketSession::endSend()
 {
-    return _connection->endSend();
+    return _channel->endSend();
 }
 
 
 void WebSocketSession::beginReceive()
 {
-    _connection->beginReceive();
+    _channel->beginReceive();
 }
 
 
 MessageProgress WebSocketSession::endReceive()
 {
-    return _connection->endReceive();
+    return _channel->endReceive();
 }
 
 
 void WebSocketSession::ping(const char* payload, std::size_t n)
 {
-    _connection->ping(payload, n);
+    _channel->ping(payload, n);
 }
 
 
 void WebSocketSession::close(unsigned code, const std::string& reason)
 {
-    _connection->close(code, reason);
+    _channel->close(code, reason);
 }
 
 
 unsigned WebSocketSession::closeCode() const
 {
-    return _connection->closeCode();
+    return _channel->closeCode();
 }
 
 
 const std::string& WebSocketSession::closeReason() const
 {
-    return _connection->closeReason();
+    return _channel->closeReason();
 }
 
 
 void WebSocketSession::shutdown()
 {
-    _connection->detach();
+    _channel->detach();
 }
 
 
