@@ -12,10 +12,6 @@
 
 namespace Pt {
 
-namespace System {
-class EventLoop;
-}
-
 namespace Http {
 
 class Request;

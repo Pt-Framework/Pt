@@ -30,10 +30,9 @@
     {
         public:
             EchoSession(Pt::Http::WebSocketService& service,
-                        Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply)
-            : Pt::Http::WebSocketSession(service, loop, stream, reply)
+            : Pt::Http::WebSocketSession(service, stream, reply)
             {
                 beginReceive();
             }
@@ -100,8 +99,8 @@
     After a finished 101 the HTTP server keeps the connection and
     delivers the upgraded stream to this service. The service asks
     the attached %WebSocketServlet to accept it. The servlet calls
-    %getSession() with the %EventLoop of the stream, the stream, the
-    opening request, and the opening reply, and retains a non-null
+    %getSession() with the stream, the opening request, and the
+    opening reply, and retains a non-null
     result as a live session. %getSession() calls %onGetSession() and
     counts that result. A null return is not counted. Both messages
     are valid for that call.
@@ -133,17 +132,16 @@
     %BasicWebSocketService is this factory for one session type.
     Derive %WebSocketService when the session type depends on the
     upgrade, or when the session constructor needs more than the
-    servlet, the loop, the stream, and the opening reply.
+    service, the stream, and the opening reply.
 
     @code
     Pt::Http::WebSocketSession* ChatService::onGetSession(
-        Pt::System::EventLoop& loop,
         Pt::Http::Stream& stream,
         const Pt::Http::Request& request,
         const Pt::Http::Reply& reply)
     {
         const char* user = request.header().get("X-User");
-        return new ChatSession(*this, loop, stream, reply, _rooms,
+        return new ChatSession(*this, stream, reply, _rooms,
                                user ? user : "");
     }
 

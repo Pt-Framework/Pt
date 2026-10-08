@@ -66,7 +66,6 @@ class RecordSession : public Pt::Http::WebSocketSession
 {
     public:
         RecordSession(Pt::Http::WebSocketService& service,
-                      Pt::System::EventLoop& loop,
                       Pt::Http::Stream& stream,
                       const Pt::Http::Reply& reply,
                       std::string& message,
@@ -74,7 +73,7 @@ class RecordSession : public Pt::Http::WebSocketSession
                       bool& received,
                       bool& closed,
                       Pt::System::EventLoop& exitLoop)
-        : Pt::Http::WebSocketSession(service, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
         , _message(&message)
         , _type(&type)
         , _received(&received)
@@ -142,13 +141,12 @@ class RecordService : public Pt::Http::WebSocketService
         { return _opened - _released; }
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
             ++_opened;
-            return new RecordSession(*this, loop, stream, reply,
+            return new RecordSession(*this, stream, reply,
                                      *_message, *_type, *_received, *_closed, *_loop);
         }
 
@@ -172,14 +170,13 @@ class CollectSession : public Pt::Http::WebSocketSession
 {
     public:
         CollectSession(Pt::Http::WebSocketService& service,
-                       Pt::System::EventLoop& loop,
                        Pt::Http::Stream& stream,
                        const Pt::Http::Reply& reply,
                        std::string& message,
                        Pt::Http::WebSocketMessage::Type& type,
                        bool& received,
                        Pt::System::EventLoop& exitLoop)
-        : Pt::Http::WebSocketSession(service, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
         , _message(&message)
         , _type(&type)
         , _received(&received)
@@ -238,12 +235,11 @@ class CollectService : public Pt::Http::WebSocketService
         {}
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
-            return new CollectSession(*this, loop, stream, reply,
+            return new CollectSession(*this, stream, reply,
                                       *_message, *_type, *_received, *_loop);
         }
 
@@ -263,12 +259,11 @@ class IdleSession : public Pt::Http::WebSocketSession
 {
     public:
         IdleSession(Pt::Http::WebSocketService& service,
-                    Pt::System::EventLoop& loop,
                     Pt::Http::Stream& stream,
                     const Pt::Http::Reply& reply,
                     Pt::System::EventLoop& exitLoop,
                     bool exitOnAccept)
-        : Pt::Http::WebSocketSession(service, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
         , _exitLoop(&exitLoop)
         {
             if(exitOnAccept)
@@ -306,13 +301,12 @@ class IdleService : public Pt::Http::WebSocketService
         { return _opened; }
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
             ++_opened;
-            return new IdleSession(*this, loop, stream, reply, *_loop, _exitOnAccept);
+            return new IdleSession(*this, stream, reply, *_loop, _exitOnAccept);
         }
 
         virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -331,8 +325,7 @@ class IdleService : public Pt::Http::WebSocketService
 class NullService : public Pt::Http::WebSocketService
 {
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop&,
-                                                         Pt::Http::Stream&,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream&,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply&)
         {
@@ -347,10 +340,9 @@ class ThrowSession : public Pt::Http::WebSocketSession
 {
     public:
         ThrowSession(Pt::Http::WebSocketService& service,
-                     Pt::System::EventLoop& loop,
                      Pt::Http::Stream& stream,
                      const Pt::Http::Reply& reply)
-        : Pt::Http::WebSocketSession(service, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
         {
             throw std::runtime_error("session construction failed");
         }
@@ -369,12 +361,11 @@ class ThrowSession : public Pt::Http::WebSocketSession
 class ThrowService : public Pt::Http::WebSocketService
 {
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
                                                          const Pt::Http::Request&,
                                                          const Pt::Http::Reply& reply)
         {
-            return new ThrowSession(*this, loop, stream, reply);
+            return new ThrowSession(*this, stream, reply);
         }
 
         virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
@@ -387,10 +378,9 @@ class PushSession : public Pt::Http::WebSocketSession
 {
     public:
         PushSession(Pt::Http::WebSocketService& service,
-                    Pt::System::EventLoop& loop,
                     Pt::Http::Stream& stream,
                     const Pt::Http::Reply& reply)
-        : Pt::Http::WebSocketSession(service, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
         {
             outgoing().setType(Pt::Http::WebSocketMessage::Text);
             outgoing().body() << "feed";
@@ -416,14 +406,13 @@ class ProtocolSession : public Pt::Http::WebSocketSession
 {
     public:
         ProtocolSession(Pt::Http::WebSocketService& service,
-                        Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply,
                         std::string& selected,
                         std::string& offered,
                         std::string& copied,
                         Pt::System::EventLoop& exitLoop)
-        : Pt::Http::WebSocketSession(service, loop, stream, reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
         , _selected(&selected)
         , _exitLoop(&exitLoop)
         {
@@ -468,8 +457,7 @@ class ProtocolService : public Pt::Http::WebSocketService
         { return _opened; }
 
     protected:
-        virtual Pt::Http::WebSocketSession* onGetSession(Pt::System::EventLoop& loop,
-                                                         Pt::Http::Stream& stream,
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
                                                          const Pt::Http::Request& request,
                                                          const Pt::Http::Reply& reply)
         {
@@ -478,7 +466,7 @@ class ProtocolService : public Pt::Http::WebSocketService
             *_offered = field ? field : "";
             const char* origin = request.header().get("Origin");
             *_copied = origin ? origin : "";
-            ProtocolSession* session = new ProtocolSession(*this, loop, stream, reply,
+            ProtocolSession* session = new ProtocolSession(*this, stream, reply,
                                                            *_selected, *_offered, *_copied,
                                                            *_loop);
             return session;

@@ -47,12 +47,11 @@ void WebSocketService::detach(WebSocketServlet& servlet)
 }
 
 
-WebSocketSession* WebSocketService::getSession(System::EventLoop& loop,
-                                               Stream& stream,
+WebSocketSession* WebSocketService::getSession(Stream& stream,
                                                const Request& request,
                                                const Reply& reply)
 {
-    WebSocketSession* session = onGetSession(loop, stream, request, reply);
+    WebSocketSession* session = onGetSession(stream, request, reply);
     if(session)
         ++_socketCount;
 

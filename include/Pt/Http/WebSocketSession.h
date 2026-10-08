@@ -14,10 +14,6 @@
 
 namespace Pt {
 
-namespace System {
-class EventLoop;
-}
-
 namespace Http {
 
 class Stream;
@@ -45,10 +41,9 @@ class WebSocketChannel;
     {
         public:
             EchoSession(Pt::Http::WebSocketService& service,
-                        Pt::System::EventLoop& loop,
                         Pt::Http::Stream& stream,
                         const Pt::Http::Reply& reply)
-            : Pt::Http::WebSocketSession(service, loop, stream, reply)
+            : Pt::Http::WebSocketSession(service, stream, reply)
             {
                 beginReceive();
             }
@@ -79,18 +74,15 @@ class WebSocketChannel;
     @endcode
 
     The service factory constructs the session with the service, with
-    the loop that serializes this stream, with the stream of this
-    upgrade, and with the opening reply. The loop must be the loop of
-    the stream. The reply is valid for the constructor call. The base
-    constructor reads the selected subprotocol from that reply, binds
-    the stream, copies the service idle timeout and data-message
-    limit onto the connection, and stores the loop. It does not store
-    the reply. The derived constructor runs after that.
-    Its members are initialized, the stream is open, and %loop() is
-    the loop of this stream. Start the first %beginReceive() or
-    %beginSend() there. There is no separate accept callback. By the
-    time the derived constructor body runs, the base has already
-    bound the stream.
+    the stream of this upgrade, and with the opening reply. The reply
+    is valid for the constructor call. The base constructor reads the
+    selected subprotocol from that reply, binds the stream, and copies
+    the service idle timeout and data-message limit onto the
+    connection. It does not store the reply. The derived constructor
+    runs after that. Its members are initialized and the stream is
+    open. Start the first %beginReceive() or %beginSend() there.
+    There is no separate accept callback. By the time the derived
+    constructor body runs, the base has already bound the stream.
 
     %incoming() and %outgoing() are the two payloads. %beginSend()
     writes %outgoing(). %beginReceive() reads into %incoming().
@@ -114,7 +106,6 @@ class WebSocketChannel;
     %service() reaches state shared by every connection of this
     endpoint. The idle timeout and the data-message limit are copied
     from the %WebSocketService before the derived constructor runs.
-    %loop() is where a timer or posted work must run.
     Closing the session closes the stream. The session does not own
     the stream or the connection. The destructor closes the stream.
     A derived constructor that throws still runs this destructor, so
@@ -140,23 +131,20 @@ class PT_HTTP_API WebSocketSession : public Connectable
     friend class WebSocketServlet;
 
     public:
-        /** @brief Binds @a stream on @a loop for @a service.
+        /** @brief Binds @a stream for @a service.
 
-            The active %WebSocketServlet owns this session. @a loop
-            must be the loop of @a stream. @a reply is the opening
-            handshake reply and is valid for this call. The selected
-            subprotocol is copied from it. The reply is not stored.
+            The active %WebSocketServlet owns this session. @a reply
+            is the opening handshake reply and is valid for this
+            call. The selected subprotocol is copied from it. The
+            reply is not stored.
 
             The idle timeout and the data-message limit are copied
             from @a service.
 
-            @throw %std::logic_error if @a loop is not the loop of
-            @a stream.
             @throw %std::runtime_error if Sec-WebSocket-Protocol is
             not one protocol token.
         */
         WebSocketSession(WebSocketService& service,
-                         System::EventLoop& loop,
                          Stream& stream,
                          const Reply& reply);
 
@@ -173,16 +161,6 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         const WebSocketService& service() const
         { return *_service; }
-
-        /** @brief Returns the loop that serializes this stream.
-        */
-        System::EventLoop& loop()
-        { return *_loop; }
-
-        /** @brief Returns the loop that serializes this stream.
-        */
-        const System::EventLoop& loop() const
-        { return *_loop; }
 
         /** @brief Returns the protocol name selected on the 101.
 
@@ -262,8 +240,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
         void onClosed();
 
     private:
-        WebSocketService*    _service;
-        System::EventLoop*   _loop;
+        WebSocketService* _service;
         WebSocketChannel* _channel;
         std::string _protocol;
         bool _ended;

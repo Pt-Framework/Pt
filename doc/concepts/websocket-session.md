@@ -112,14 +112,14 @@ implements `onGetSession()` and the session callbacks. The servlet
 calls `getSession()`, which runs that method and counts a non-null
 session.
 
-The event loop is an explicit argument of session construction. The
-application does not recover it by walking from the connection to the
-stream. The loop passed to the session is the loop that serializes
-that stream. A different loop is an error.
+The event loop of the upgrade is the loop of the stream. The session
+does not take it as a constructor argument and does not store it. A
+derived session that attaches a timer or posts work reads
+`stream.loop()` in its constructor.
 
 No callback repeats an object the session already holds. `onInput()`,
-`onOutput()`, and `onClose()` take no arguments. The service and the
-loop are members, reached through accessors. The frame operations are
+`onOutput()`, and `onClose()` take no arguments. The service is a
+member, reached through `service()`. The frame operations are
 methods, so a callback does not receive a socket either.
 
 ## Object model {#wss-model}
@@ -260,13 +260,11 @@ class WebSocketSession : public Connectable
 {
     public:
         WebSocketSession(WebSocketService& service,
-                         System::EventLoop& loop,
                          Stream& stream,
                          const Reply& reply);
         ~WebSocketSession();
 
         WebSocketService& service();
-        System::EventLoop& loop();
         const std::string& protocol() const;
 
         std::iostream& body();
@@ -283,49 +281,45 @@ class WebSocketSession : public Connectable
 
     private:
         WebSocketService* _service;
-        System::EventLoop* _loop;
         WebSocketChannel* _channel;
 };
 ```
 
 The service factory constructs the session with the service, with the
-loop that serializes this stream, with the stream of this upgrade, and
-with the opening reply. The reply is valid for that constructor call.
-The session does not store it. The base constructor reads
-`Sec-WebSocket-Protocol` from that reply, opens the frame connection
-on the stream, copies `maxMessageSize()` and `idleTimeout()` from
-the service onto that connection, stores the loop and the selected
-protocol, and connects the connection signals to `onInput()`,
-`onOutput()`, and `onClose()`. The stream is an argument. It is not
-recovered from thread-local state. A loop that is not the loop of
-the stream is an error. `protocol()` is the single name the
-responder wrote on the 101, or empty when none was selected. It is
-not the list the client offered. A reply that echoes more than one
-token, or a value that is not one protocol token, fails construction.
-The server then closes the stream.
+stream of this upgrade, and with the opening reply. The reply is
+valid for that constructor call. The session does not store it. The
+base constructor reads `Sec-WebSocket-Protocol` from that reply,
+opens the frame connection on the stream, copies `maxMessageSize()`
+and `idleTimeout()` from the service onto that connection, stores the
+selected protocol, and connects the connection signals to
+`onInput()`, `onOutput()`, and `onClose()`. The stream is an
+argument. It is not recovered from thread-local state. `protocol()`
+is the single name the responder wrote on the 101, or empty when none
+was selected. It is not the list the client offered. A reply that
+echoes more than one token, or a value that is not one protocol
+token, fails construction. The server then closes the stream.
 
-The derived constructor runs after that. Its members are initialized,
-the stream is open, and `loop()` is the loop that serializes this
-stream. That constructor holds the domain references and starts the
-first transfer, `beginReceive()` or `beginSend()`. There is no
-`onAccept()`. By the time the derived constructor body runs, the base
-has already done the work an accept callback would do: the stream is
-bound, the limits are set, and the loop is known. A callback that
-only restates the constructor would force every session to implement
-an empty entry point.
+The derived constructor runs after that. Its members are initialized
+and the stream is open. That constructor holds the domain references
+and starts the first transfer, `beginReceive()` or `beginSend()`.
+There is no `onAccept()`. By the time the derived constructor body
+runs, the base has already done the work an accept callback would
+do: the stream is bound and the limits are set. A callback that only
+restates the constructor would force every session to implement an
+empty entry point.
 
 `onInput()`, `onOutput()`, and `onClose()` stay. They are later
 events. A constructor cannot receive them. They take no arguments.
-The session and the loop are the same objects the constructor stored.
-Passing them again would imply that a callback might see a different
-session or a different loop, and it does not. The frame operations
-are methods of the session, so the callback does not receive a socket
-either. There is no `socket()`.
+The session is the same object the constructor stored. Passing it
+again would imply that a callback might see a different session, and
+it does not. The frame operations are methods of the session, so the
+callback does not receive a socket either. There is no `socket()`.
 
 `service()` is how a session reaches shared state: the feed, the
 registry, the limits, anything that belongs to every connection of
-this endpoint rather than to one stream. `loop()` is how a session
-attaches a timer or posts work onto the loop that owns this stream.
+this endpoint rather than to one stream. A derived session that
+attaches a timer or posts work reads `stream.loop()` in its
+constructor.
 
 `onInput()` runs when data bytes were received. The derived
 session calls `endReceive()`, reads `body()`, and starts the next
@@ -354,16 +348,14 @@ sessions.
 class WebSocketService : public Service
 {
     public:
-        WebSocketSession* getSession(System::EventLoop& loop,
-                                     Stream& stream,
+        WebSocketSession* getSession(Stream& stream,
                                      const Request& request,
                                      const Reply& reply);
         void releaseSession(WebSocketSession* session);
         std::size_t socketCount() const;
 
     protected:
-        virtual WebSocketSession* onGetSession(System::EventLoop& loop,
-                                               Stream& stream,
+        virtual WebSocketSession* onGetSession(Stream& stream,
                                                const Request& request,
                                                const Reply& reply) = 0;
         virtual void onReleaseSession(WebSocketSession* session) = 0;
@@ -380,8 +372,8 @@ any other detach, lives in the derived service. The service does not
 keep a session list. `socketCount()` is the count those two calls
 move.
 `BasicWebSocketService<S>` is that factory for one session type. Its
-session constructor takes the service, the loop, the stream, and the
-opening reply. A
+session constructor takes the service, the stream, and the opening
+reply. A
 session that needs further constructor arguments uses a small
 service subclass whose `onGetSession()` passes them. That is the
 same reason a custom `Service` exists beside `BasicService`.
@@ -393,10 +385,8 @@ implements it. The implementation is final. The application does not
 override `onUpgrade()` to receive WebSocket streams. No attached
 servlet is a 503 from the handshake, so no stream is opened. The
 null return from `onUpgrade()` covers only the window after a
-finished 101 and before the stream is delivered. The servlet reads
-`stream.loop()`. The HTTP server has already activated the
-connection, so that loop is the loop of the upgrade. It then calls
-`getSession(loop, stream, request, reply)`. That call runs
+finished 101 and before the stream is delivered. The servlet calls
+`getSession(stream, request, reply)`. That call runs
 `onGetSession()` and counts a non-null result. The request is the
 opening request. The reply is the opening reply. Both are valid for
 that call. The derived service reads the headers it needs and copies
@@ -530,9 +520,9 @@ The order on the server is fixed.
 5. A finished 101 makes the server open a `Stream` and call
    `Service::onUpgrade()` on the server thread.
 6. `WebSocketService` requires an attached `WebSocketServlet`. The
-    servlet reads the loop and calls `getSession(loop, stream,
-    request, reply)` with the opening request and the opening reply.
-    That call runs `onGetSession()` and counts a non-null result.
+    servlet calls `getSession(stream, request, reply)` with the
+    opening request and the opening reply. That call runs
+    `onGetSession()` and counts a non-null result.
     Neither message survives that call.
 7. A null session declines the stream. The server closes it. No
    attached servlet was already a 503, so this step has a servlet.
@@ -579,11 +569,10 @@ class FeedSession : public WebSocketSession
 {
     public:
         FeedSession(WebSocketService& service,
-                    System::EventLoop& loop,
                     Stream& stream,
                     const Reply& reply,
                     Feed& feed)
-        : WebSocketSession(service, loop, stream, reply)
+        : WebSocketSession(service, stream, reply)
         , _feed(feed)
         {
             _feed.attach(*this);
@@ -627,16 +616,16 @@ session. The feed holds `FeedSession&`. It does not own the session.
 It drops the reference in `onClose()` or in the destructor, whichever
 runs first for that detach.
 
-A timer that paces the feed is started on `loop()` in the derived
-constructor. The timer callback is serialized with the frame
-callbacks, because it is the same loop.
+A timer that paces the feed is started on `stream.loop()` in the
+derived constructor. The timer callback is serialized with the frame
+callbacks, because it is the loop of that stream.
 
 `BasicWebSocketService<FeedSession>` cannot pass the `Feed&` unless
 the session constructor can reach the feed through `service()`. A
 session that needs constructor arguments beyond the service, the
-loop, the stream, and the opening reply uses a small service
-subclass whose `onGetSession()` reads the request and constructs
-`FeedSession` with those arguments.
+stream, and the opening reply uses a small service subclass whose
+`onGetSession()` reads the request and constructs `FeedSession` with
+those arguments.
 
 ## HTTP/2 {#wss-http2}
 
@@ -647,25 +636,24 @@ stream, not the whole connection. Other streams on that connection
 continue as HTTP.
 
 This design already matches that boundary. `Service::onUpgrade()`
-receives one `Stream`. `WebSocketService` reads that stream's loop
-and creates one `WebSocketSession` for that stream. The frame
-connection binds that stream and no other. `Stream::close()` ends
-that stream and does not end the other streams of the connection.
+receives one `Stream`. `WebSocketService` creates one
+`WebSocketSession` for that stream. The frame connection binds that
+stream and no other. `Stream::close()` ends that stream and does not
+end the other streams of the connection.
 
 HTTP/2 therefore multiplies sessions, not connections inside one
 session. Each Extended CONNECT is a new `getSession()` call, a new
 session, and a new frame connection. Several sessions of one
-connection may hold the same `EventLoop&`, because the server
+connection may run on the same event loop, because the server
 serializes those streams on one loop. They may also hold the same
 service, and through `service()` the same domain objects. Shared
 state stays on the service or in the domain. Per-stream state stays
 in the session.
 
 The session constructor signature does not grow an HTTP-version
-parameter. The loop argument is already the loop the server chose for
-that stream. Application code that only uses the frame methods,
-`loop()`, and `service()` runs unchanged when the same service later
-accepts an HTTP/2 WebSocket stream.
+parameter. Application code that only uses the frame methods and
+`service()` runs unchanged when the same service later accepts an
+HTTP/2 WebSocket stream.
 
 What HTTP/2 does not justify is a session that owns many connections,
 or a callback that receives a connection because the session might
@@ -734,9 +722,9 @@ the frame operations. Application code does not name the channel.
 
 It does not define HTTP/2 Extended CONNECT in the server. It only
 requires that the session model still holds when that upgrade arrives
-as one `Stream` and one loop. The handshake responder learning the
-HTTP/2 status and headers is separate work.
+as one `Stream`. The handshake responder learning the HTTP/2 status
+and headers is separate work.
 
 It does not introduce a multi-connection session, a connection pool
 inside one session, or callback arguments that repeat the frame
-operations, `loop()`, or `service()`.
+operations or `service()`.

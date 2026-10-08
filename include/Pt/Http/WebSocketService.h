@@ -17,10 +17,6 @@
 
 namespace Pt {
 
-namespace System {
-class EventLoop;
-}
-
 namespace Http {
 
 class Request;
@@ -81,8 +77,8 @@ class WebSocketServlet;
     After a finished 101 the HTTP server keeps the connection and
     delivers the upgraded stream to this service. This class
     implements that delivery and asks the servlet to create a session
-    through %getSession() with the loop of the stream, the stream, the
-    opening request, and the opening reply. %getSession() calls
+    through %getSession() with the stream, the opening request, and
+    the opening reply. %getSession() calls
     %onGetSession() and counts a non-null session. The session binds
     the stream in its constructor, which accepts the upgrade. A null
     session leaves the stream unbound, and the HTTP server closes it.
@@ -93,17 +89,16 @@ class WebSocketServlet;
     %BasicWebSocketService is this factory for one session type.
     Derive this class when the session type depends on the upgrade,
     or when the session constructor needs more than the service, the
-    loop, the stream, and the opening reply.
+    stream, and the opening reply.
 
     @code
     Pt::Http::WebSocketSession* ChatService::onGetSession(
-        Pt::System::EventLoop& loop,
         Pt::Http::Stream& stream,
         const Pt::Http::Request& request,
         const Pt::Http::Reply& reply)
     {
         const char* user = request.header().get("X-User");
-        return new ChatSession(*this, loop, stream, reply, _rooms,
+        return new ChatSession(*this, stream, reply, _rooms,
                                user ? user : "");
     }
 
@@ -247,8 +242,7 @@ class PT_HTTP_API WebSocketService : public Service
             this call returns. A null return declines the upgrade and
             is not counted.
         */
-        WebSocketSession* getSession(System::EventLoop& loop,
-                                     Stream& stream,
+        WebSocketSession* getSession(Stream& stream,
                                      const Request& request,
                                      const Reply& reply);
 
@@ -282,14 +276,12 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Creates the session for @a stream.
 
             Called by %getSession(). The active %WebSocketServlet owns
-            a non-null result. @a loop serializes @a stream.
-            @a request is the opening request and @a reply is the
-            opening reply. Both are valid for this call. Copy any
-            header the session must keep. Return null to decline the
-            upgrade. A null return is not counted.
+            a non-null result. @a request is the opening request and
+            @a reply is the opening reply. Both are valid for this
+            call. Copy any header the session must keep. Return null
+            to decline the upgrade. A null return is not counted.
         */
-        virtual WebSocketSession* onGetSession(System::EventLoop& loop,
-                                               Stream& stream,
+        virtual WebSocketSession* onGetSession(Stream& stream,
                                                const Request& request,
                                                const Reply& reply) = 0;
 
@@ -344,13 +336,12 @@ class BasicWebSocketService : public WebSocketService
         { }
 
     protected:
-        virtual WebSocketSession* onGetSession(System::EventLoop& loop,
-                                               Stream& stream,
+        virtual WebSocketSession* onGetSession(Stream& stream,
                                                const Request& /*request*/,
                                                const Reply& reply)
         {
             void* memory = _alloc.allocate(sizeof(S));
-            return new(memory) S(*this, loop, stream, reply);
+            return new(memory) S(*this, stream, reply);
         }
 
         virtual void onReleaseSession(WebSocketSession* session)

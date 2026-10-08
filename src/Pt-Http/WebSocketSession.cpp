@@ -6,7 +6,6 @@
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
-#include <Pt/System/EventLoop.h>
 #include "WebSocketChannel.h"
 
 #include <stdexcept>
@@ -73,18 +72,13 @@ std::string selectedProtocol(const Reply& reply)
 
 
 WebSocketSession::WebSocketSession(WebSocketService& service,
-                                   System::EventLoop& loop,
                                    Stream& stream,
                                    const Reply& reply)
 : _service(&service)
-, _loop(&loop)
 , _channel(0)
 , _protocol(selectedProtocol(reply))
 , _ended(false)
 {
-    if( stream.loop() != &loop )
-        throw std::logic_error("WebSocketSession loop is not the stream loop");
-
     _channel = new WebSocketChannel();
     _channel->open(stream, false);
     _channel->setMaxMessageSize(_service->maxMessageSize());

@@ -6,10 +6,8 @@
 #include <Pt/Http/WebSocketService.h>
 #include <Pt/Http/WebSocketSession.h>
 #include <Pt/Http/Stream.h>
-#include <Pt/System/EventLoop.h>
 
 #include <algorithm>
-#include <stdexcept>
 
 namespace Pt {
 
@@ -42,11 +40,7 @@ void WebSocketServlet::accept(Stream& stream,
                               const Request& request,
                               const Reply& reply)
 {
-    System::EventLoop* loop = stream.loop();
-    if( ! loop )
-        throw std::logic_error("WebSocket upgrade has no event loop");
-
-    WebSocketSession* session = _service->getSession(*loop, stream, request, reply);
+    WebSocketSession* session = _service->getSession(stream, request, reply);
     if(session)
         _sessions.push_back(session);
 }
