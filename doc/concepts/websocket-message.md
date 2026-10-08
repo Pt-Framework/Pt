@@ -28,6 +28,7 @@ This chapter covers:
 - [Two directions](#wsm-directions)
 - [Frames stay internal](#wsm-frames)
 - [Control plane](#wsm-control)
+- [Close](#wsm-close)
 - [Progress](#wsm-progress)
 - [Engine state](#wsm-state)
 - [Session callbacks](#wsm-session)
@@ -112,14 +113,14 @@ Fragmentation is an engine concern. The application never sees a
 continuation. `maxMessageSize()` is the limit of one data message,
 not of one frame and not of the unread buffer.
 
-Ping, pong, and close are not messages. They are socket operations.
-A received ping is answered by the engine. A received pong is consumed as a message. The facade still sees
-it. Neither frees the data channel.
-A close is a stream end, not a body the application reads as
-`incoming()`. It carries a status code and a reason. A received
-close is answered by the engine. After a local `close()`, no more
-data frames are sent. Receive continues until the peer close or
-`idleTimeout()`.
+Ping and pong are not messages. They are socket operations.
+A received ping is answered by the engine. A received pong is
+consumed as a message. The facade still sees it. Neither frees the
+data channel. Ending the stream is not a message either.
+`shutdown()` announces it with a close frame. `close()` releases
+the stream and writes no frame. A received close is answered by
+the engine. After a local `shutdown()`, no more data frames are
+sent. Receive continues until the peer close or `idleTimeout()`.
 
 Progress follows HTTP. `endReceive()` and `endSend()` each report
 one I/O step. Either can report body bytes before the message is
@@ -304,20 +305,16 @@ finish a data message, and they do not free the data channel.
 
 ```cpp
 void ping(const char* payload = 0, std::size_t n = 0);
-void close(unsigned code = 1000,
-           const std::string& reason = std::string());
-
-unsigned closeCode() const;
-const std::string& closeReason() const;
-Signal<WebSocket&>& closed();
 Signal<WebSocket&, const char*, std::size_t>& pong();
 ```
 
 `ping()` enqueues a ping. The payload is at most 125 bytes. A longer
 payload throws. A second `ping()` while another ping is still queued
 or unanswered enqueues another ping. Each ping is written, and the
-peer answers each. `ping()` and `close()` throw if the handshake is
-not finished.
+peer answers each. `ping()` throws if the handshake is not finished.
+`shutdown()` uses this same pump. The close frame, the release of
+the stream, and the codes that stay off the wire are specified in
+[Close](#wsm-close).
 
 `ping()` does not call `beginOutput()` itself, and it does not
 require the data send to be idle. The output pump writes it when no
@@ -350,49 +347,79 @@ The facade sees that pong. On the client, `pong()` is emitted with
 the payload. On the session, `onPong()` runs with the same payload.
 Neither is a data-ready signal, and neither frees the data channel.
 An unanswered ping is a state of the facade. The application may
-close from it. The idle timeout remains the limit without a finished
-transfer. Codes 1005, 1006, and 1015 are recorded locally and are
-not written on the wire.
-
-`close()` enqueues a close frame and ends the stream after the close
-handshake. The frame payload is the status code and the reason. The
-code defaults to 1000. The reason defaults to empty. It is UTF-8,
-at most 123 bytes, not a message body, and it is not delivered
-through `incoming()`. A longer reason or invalid UTF-8 throws.
-`close(1005)`, `close(1006)`, and `close(1015)` throw. Those codes
-are not written on the wire. A second `close()` throws.
-
-The output pump writes the close frame after the current data frame,
-if a send is in progress. It does not wait for the rest of the
-outgoing message, and it does not cut a frame in the middle. The
-same frame-boundary rule applies when the engine closes for 1002,
-1007, or 1009. After the local close is queued, `beginSend()` throws.
-Receive continues. Complete data messages still run `inputReady()`
-until the peer close. The engine keeps reading until that close or
-`idleTimeout()`, including when no `beginReceive()` is outstanding.
-
-A received close is consumed by the parser. It does not become
-`incoming()`, and it does not emit `inputReady()`. The engine
-enqueues a close frame if it has not already sent one, under the
-same pump rule. If a data message was open, its body is discarded.
-`onInput()` does not run for that incomplete message. `incoming().type()`
-is never close.
-
-`closeCode()` and `closeReason()` are the values from that handshake.
-A local close keeps the values passed to `close()` when the peer
-sends none. A peer close with an empty payload is 1005 and an empty
-reason, unless a local code was already set. An I/O error leaves the
-code at 1006 and the reason empty, because no close frame arrived.
-`closed()` stays the signal that the stream has ended. Peer close,
-an I/O error, a close frame, and destruction of the stream all emit
-it. `closed()` ends an outstanding send or receive. The application
-does not call `endSend()` or `endReceive()` after it. Those calls
-throw.
+shut the stream down from it. The idle timeout remains the limit
+without a finished transfer.
 
 This keeps the one-transfer rule. The application still has one
 outstanding data send. The engine may insert a ping, a pong, or a
-close around the data frames of that send. A ping during a large
-message is therefore possible without a second `beginSend()`.
+shutdown frame around the data frames of that send. A ping during a
+large message is therefore possible without a second `beginSend()`.
+
+## Close {#wsm-close}
+
+Ending a WebSocket is not one operation. `shutdown()` announces the
+end with a close frame and leaves the stream open. `close()` releases
+the stream and writes no frame. A received close is not a third
+operation. The engine answers it with `shutdown()` when this side has
+not sent a close frame, and then releases the stream with `close()`.
+
+```cpp
+void shutdown(unsigned code = 1000,
+              const std::string& reason = std::string());
+void close();
+
+unsigned closeCode() const;
+const std::string& closeReason() const;
+Signal<WebSocket&>& closed();
+```
+
+`shutdown()` enqueues a close frame. It does not release the stream.
+The frame payload is the status code and the reason. The code
+defaults to 1000. The reason defaults to empty. It is UTF-8, at most
+123 bytes, not a message body, and it is not delivered through
+`incoming()`. A longer reason or invalid UTF-8 throws.
+`shutdown(1005)`, `shutdown(1006)`, and `shutdown(1015)` throw. Those
+codes are not written on the wire. A second `shutdown()` throws.
+`shutdown()` throws if the handshake is not finished.
+
+The output pump writes that frame under the same rule as a ping. It
+writes the frame after the current data frame, if a send is in
+progress. It does not wait for `endSend()`, it does not wait for the
+rest of the outgoing message, and it does not cut a frame in the
+middle. The same frame-boundary rule applies when the engine shuts
+down for 1002, 1007, or 1009. After the local close is queued,
+`beginSend()` throws. Receive continues. Complete data messages still
+run `inputReady()` until the peer close. The engine keeps reading
+until that close or `idleTimeout()`, including when no
+`beginReceive()` is outstanding.
+
+A received close is consumed by the parser. It does not become
+`incoming()`, and it does not emit `inputReady()`. If this side has
+not sent a close frame, the engine enqueues the reply with
+`shutdown()`, under the same pump rule. A peer code that must not be
+written is not echoed. The reply is 1000. If a data message was open,
+its body is discarded. `onInput()` does not run for that incomplete
+message. `incoming().type()` is never close. After the reply has been
+written, the engine calls `close()`.
+
+`close()` releases the stream. It writes no frame, and it does not
+block. The destructor calls it. Inside, `cancel` stops a pending
+transfer and discards the buffer. That is not a facade operation.
+The framed stream is not resumed: a discarded buffer loses alignment,
+and WebSocket has no resynchronization. `beginSend()` and
+`beginReceive()` then throw. `closed()` is not emitted from the
+destructor. An I/O error, an idle timeout, and a release with no
+close frame leave the code at 1006 and the reason empty, because no
+close frame arrived.
+
+`closeCode()` and `closeReason()` are the values from the handshake.
+A local `shutdown()` keeps the values passed to it when the peer
+sends none. A peer close with an empty payload is 1005 and an empty
+reason, unless a local code was already set. `closed()` is the signal
+that the stream has ended. Peer close, an I/O error, and a finished
+shutdown all emit it while the facade is still alive. `closed()` ends
+an outstanding send or receive. The application does not call
+`endSend()` or `endReceive()` after it. Those calls throw.
 
 ## Progress {#wsm-progress}
 
@@ -439,7 +466,8 @@ The parser runs from `Stream::inputReady()`. The writer runs from
 output at the same time. The engine must not take a second begin on
 either. A control frame is a write of the output pump, not a second
 user transfer. When the output is idle, the pump may start
-`Stream::beginOutput()` to write a queued ping, pong, or close.
+`Stream::beginOutput()` to write a queued ping, pong, or shutdown
+frame.
 
 `idleTimeout()` restarts when a send or a receive step finishes, as
 it does today. It is not restarted by an internal continuation alone
@@ -468,12 +496,13 @@ again. If it is finished, it starts the next send when it still has
 a message. The callback is not aligned to a fragment, and it does
 not run for a ping or a pong.
 
-`onClose()` is unchanged. It is the last look at the session. A close
-handshake leaves `closeCode()` and `closeReason()` set. An I/O error
-leaves the code at 1006 and the reason empty. `onClose()` does not
-call `endReceive()` or `endSend()`. `closed()` has already ended
-those transfers. A close in the middle of an incoming message does
-not run `onInput()`.
+`onClose()` is the last look at the session. It runs while the
+session is still alive, after the stream has ended. A shutdown
+leaves `closeCode()` and `closeReason()` set. An I/O error leaves
+the code at 1006 and the reason empty. `onClose()` does not call
+`endReceive()` or `endSend()`. `closed()` has already ended those
+transfers. A close in the middle of an incoming message does not
+run `onInput()`. The destructor calls `close()`, not `shutdown()`.
 
 The client uses the same two messages on the `WebSocket` it
 constructed. It connects `inputReady()` and `outputReady()` itself.
@@ -500,18 +529,24 @@ the payload. A received pong, including an unsolicited one, is consumed as a
 message, restarts the idle timer, and is reported on the facade.
 Neither emits `inputReady()` or `outputReady()`, and neither frees
 the data channel. There is no
-`sendPong()`. `ping()` and `close()` throw if the handshake is not
-finished. `close()` remains, and gains a status code and a reason.
-The reason is UTF-8 and at most 123 bytes. `close(1005)`,
-`close(1006)`, and `close(1015)` throw. A received close is answered
-by the engine. After a local close, no more data frames are sent.
-Receive continues until the peer close or `idleTimeout()`. A close
-is written after the current data frame. `closed()` ends an
-outstanding send or receive. `closeCode()` and `closeReason()`
+`sendPong()`. `ping()` and `shutdown()` throw if the handshake is
+not finished. `shutdown(code, reason)` enqueues a close frame and
+does not release the stream. The reason is UTF-8 and at most 123
+bytes. `shutdown(1005)`, `shutdown(1006)`, and `shutdown(1015)`
+throw. A received close is answered by `shutdown()` when no close
+frame was sent. A peer code that must not be written is not echoed.
+After a local shutdown, no more data frames are sent. Receive
+continues until the peer close or `idleTimeout()`. The close frame
+is written after the current data frame and does not wait for
+`endSend()`. `close()` releases the stream, writes no frame, and
+does not block. The destructor calls it. Inside, `cancel` stops a
+pending transfer and discards the buffer. The framed stream is not
+resumed. `closed()` ends an outstanding send or receive and is not
+emitted from the destructor. `closeCode()` and `closeReason()`
 report the handshake that ended the stream. An empty peer close is
-1005 unless a local code was already set. An I/O error is 1006.
-`close()` no longer writes the stream as a side door around the
-output pump.
+1005 unless a local code was already set. No close frame leaves the
+code at 1006. `shutdown()` does not write the stream as a side door
+around the output pump.
 
 The receive path reassembles. The send path fragments. Control frames
 between fragments are consumed or inserted by the engine.

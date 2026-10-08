@@ -551,7 +551,9 @@ requested it has returned.
 
 `onClose()` is the application's last look at the session. Domain
 objects that hold a `WebSocketSession&` must drop it there. After
-`onReleaseSession()` returns, the reference is gone.
+`onReleaseSession()` returns, the reference is gone. `shutdown()`
+does not release the session. The destructor calls `close()`, not
+`shutdown()`. `close()` releases the stream and writes no frame.
 
 A pooled session is released back to the pool from
 `onReleaseSession()`, not destroyed. The next upgrade opens a new
