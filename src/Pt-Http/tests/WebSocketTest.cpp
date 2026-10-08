@@ -701,7 +701,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedClose(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.close();
+            socket.shutdown();
         }
 
     protected:
@@ -1003,7 +1003,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedCloseCode(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.close(1000, "bye");
+            socket.shutdown(1000, "bye");
         }
 
     protected:
@@ -1061,11 +1061,11 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.outgoing().body() << "x";
             socket.beginSend();
             PT_UNIT_ASSERT_THROW(socket.beginSend(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.close(1005), std::invalid_argument);
-            PT_UNIT_ASSERT_THROW(socket.close(1006), std::invalid_argument);
-            PT_UNIT_ASSERT_THROW(socket.close(1015), std::invalid_argument);
-            socket.close();
-            PT_UNIT_ASSERT_THROW(socket.close(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.shutdown(1005), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.shutdown(1006), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.shutdown(1015), std::invalid_argument);
+            socket.shutdown();
+            PT_UNIT_ASSERT_THROW(socket.shutdown(), std::logic_error);
             _loop->exit();
         }
 
@@ -1214,7 +1214,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::Client http(*_loop, ep);
             Pt::Http::WebSocket socket(http);
             PT_UNIT_ASSERT_THROW(socket.ping(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.close(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.shutdown(), std::logic_error);
         }
 
     private:

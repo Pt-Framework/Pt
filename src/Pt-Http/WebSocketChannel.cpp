@@ -307,7 +307,7 @@ void WebSocketChannel::ping(const char* payload, std::size_t n)
 }
 
 
-void WebSocketChannel::close(unsigned code, const std::string& reason)
+void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
 {
     requireOpen();
     requireNotEnded();

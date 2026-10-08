@@ -110,16 +110,16 @@ class WebSocketChannel;
     %endReceive() returns progress. After %finished(), %clear()
     drops the body so the same object can carry the next message.
 
-    Ping, pong and close are socket operations, not messages.
+    Ping, pong and shutdown are socket operations, not messages.
 
     @code
     socket.ping();
-    socket.close(1000, "done");
+    socket.shutdown(1000, "done");
     @endcode
 
     %ping() enqueues a ping. A received ping is answered by the
     engine. A received pong is consumed. Neither is delivered
-    through %incoming(). %close() enqueues a close frame with a
+    through %incoming(). %shutdown() enqueues a close frame with a
     status code and a reason. A received close is answered by the
     engine. %closeCode() and %closeReason() report the handshake
     that ended the stream. %closed() is emitted while this socket
@@ -197,7 +197,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Begins sending %outgoing().
 
             @throw %std::logic_error if a send is outstanding, the
-            handshake is not finished, or a close is queued.
+            handshake is not finished, or a shutdown is queued.
             @throw %std::invalid_argument if the type is %Unknown, the
             body is larger than %setMaxMessageSize(), or a text body
             is not valid UTF-8.
@@ -238,8 +238,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @throw %std::logic_error if the handshake is not finished
             or a close is already queued.
         */
-        void close(unsigned code = 1000,
-                   const std::string& reason = std::string());
+        void shutdown(unsigned code = 1000,
+                      const std::string& reason = std::string());
 
         /** @brief Returns the close status code of the handshake that ended the stream.
         */

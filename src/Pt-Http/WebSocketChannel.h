@@ -51,7 +51,7 @@ class WebSocketChannel : public Channel
 
         void ping(const char* payload, std::size_t n);
 
-        void close(unsigned code, const std::string& reason);
+        void shutdown(unsigned code, const std::string& reason);
 
         void detach();
 

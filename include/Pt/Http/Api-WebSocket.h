@@ -127,20 +127,20 @@
     the same begin and end methods on the session object; the data
     callbacks there take the place of the ready signals.
 
-    Heartbeats and close are socket operations, not payloads.
+    Heartbeats and shutdown are socket operations, not payloads.
 
     @code
     socket.ping("are you there", 13);
-    socket.close(1000, "done");
+    socket.shutdown(1000, "done");
     @endcode
 
     %ping() enqueues a ping frame. A received ping is answered by
     the engine. A received pong is consumed. Neither is delivered
-    through %incoming(), and neither reports data-ready. %close()
+    through %incoming(), and neither reports data-ready. %shutdown()
     enqueues a close frame with a status code and a reason. Codes
     1005, 1006 and 1015 cannot be sent; they are reserved for "no
     status received", abnormal closure, and a failed TLS handshake.
-    A received close is answered by the engine. After a local close,
+    A received close is answered by the engine. After a local shutdown,
     no more data frames are sent. %closeCode() and %closeReason()
     report the handshake that ended the stream. A data message
     larger than the configured limit, or an idle period without a

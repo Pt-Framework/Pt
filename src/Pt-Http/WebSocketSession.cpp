@@ -139,9 +139,9 @@ void WebSocketSession::ping(const char* payload, std::size_t n)
 }
 
 
-void WebSocketSession::close(unsigned code, const std::string& reason)
+void WebSocketSession::shutdown(unsigned code, const std::string& reason)
 {
-    _channel->close(code, reason);
+    _channel->shutdown(code, reason);
 }
 
 
@@ -157,7 +157,7 @@ const std::string& WebSocketSession::closeReason() const
 }
 
 
-void WebSocketSession::shutdown()
+void WebSocketSession::detach()
 {
     _channel->detach();
 }

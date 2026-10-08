@@ -39,9 +39,9 @@ class Stream;
     and the server uses %WebSocketSession.
 
     %open() and %close() are protected because the derived type owns the
-    handshake and the shutdown frame. A WebSocket close writes the close
-    frame and then calls %close(). A public close on this base would skip that
-    frame.
+    handshake and the shutdown frame. %shutdown() writes that frame.
+    %close() releases the stream and does not write it. A public close
+    on this base would skip the frame.
 
     The destructor unbinds and closes the stream. Destroying the stream
     unbinds this channel and calls %onClose(). The channel object stays, and
