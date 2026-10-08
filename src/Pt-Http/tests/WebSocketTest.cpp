@@ -614,7 +614,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             _loop->run();
 
-            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
         }
 
         void onConnectedIdle(Pt::Http::WebSocket& socket)
@@ -634,14 +634,16 @@ class WebSocketTest : public Pt::Unit::TestSuite
             server.addServlet(mapUrl);
 
             Pt::Http::Client http(*_loop, ep);
+            _limitClient = &http;
             Pt::Http::WebSocket socket(http);
-            socket.connected() += Pt::slot(*this, &WebSocketTest::onDeclineConnected);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onLimitRejected);
             socket.beginConnect("/ws");
 
             _loop->run();
 
-            PT_UNIT_ASSERT(_declined);
+            PT_UNIT_ASSERT_EQUALS(_status, 503u);
             PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(0));
+            _limitClient = 0;
         }
 
     protected:
@@ -664,11 +666,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
                 _loop->run();
 
-                PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(1));
+                PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
                 PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(1));
             }
 
-            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(0));
             PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
         }
 
@@ -706,7 +707,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
-            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedClose(Pt::Http::WebSocket& socket)
@@ -841,8 +842,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             Pt::Http::Server server(*_loop, ep);
             IdleService service(*_loop, false);
-            Pt::Http::WebSocketServlet sockets(service);
             service.setMaxSockets(1);
+            Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
             server.addServlet(mapUrl);
@@ -862,7 +863,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT_EQUALS(_status, 503u);
-            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(1));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(1));
             _limitSocket = 0;
             _limitClient = 0;
         }
@@ -1008,7 +1009,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
-            PT_UNIT_ASSERT_EQUALS(service.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedCloseCode(Pt::Http::WebSocket& socket)

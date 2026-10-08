@@ -78,13 +78,14 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
                                    const Reply& reply)
 : _service(&service)
 , _loop(&loop)
-, _channel(new WebSocketChannel())
+, _channel(0)
 , _protocol(selectedProtocol(reply))
 , _ended(false)
 {
     if( stream.loop() != &loop )
         throw std::logic_error("WebSocketSession loop is not the stream loop");
 
+    _channel = new WebSocketChannel();
     _channel->open(stream, false);
     _channel->setMaxMessageSize(_service->maxMessageSize());
     _channel->setIdleTimeout(_service->idleTimeout());
@@ -188,7 +189,8 @@ void WebSocketSession::onClosed()
     _ended = true;
 
     onClose();
-    _service->onSessionClosed(*this);
+
+    _service->close(*this);
 }
 
 } // namespace Http

@@ -203,7 +203,8 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
     if (connectionValue.find("upgrade") != std::string::npos && upgradeValue == "websocket")
     {
         WebSocketService& service = static_cast<WebSocketService&>( this->service() );
-        if( service.maxSockets() != 0 && service.size() >= service.maxSockets() )
+        if( ! service.hasServlet()
+            || (service.maxSockets() != 0 && service.socketCount() >= service.maxSockets()) )
         {
             reply.setStatus(503, "Service Unavailable");
             reply.header().set("Connection", "close");

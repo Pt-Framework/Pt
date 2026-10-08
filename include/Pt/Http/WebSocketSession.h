@@ -83,9 +83,9 @@ class WebSocketChannel;
     upgrade, and with the opening reply. The loop must be the loop of
     the stream. The reply is valid for the constructor call. The base
     constructor reads the selected subprotocol from that reply, binds
-    the stream, copies the service limits onto the connection, and
-    stores the loop. It does not store the reply. The derived
-    constructor runs after that.
+    the stream, copies the service idle timeout and data-message
+    limit onto the connection, and stores the loop. It does not store
+    the reply. The derived constructor runs after that.
     Its members are initialized, the stream is open, and %loop() is
     the loop of this stream. Start the first %beginReceive() or
     %beginSend() there. There is no separate accept callback. By the
@@ -112,7 +112,9 @@ class WebSocketChannel;
     that is not one protocol token, fails construction. The server
     then closes the stream.
     %service() reaches state shared by every connection of this
-    endpoint. %loop() is where a timer or posted work must run.
+    endpoint. The idle timeout and the data-message limit are copied
+    from the %WebSocketService before the derived constructor runs.
+    %loop() is where a timer or posted work must run.
     Closing the session closes the stream. The session does not own
     the stream or the connection. The destructor closes the stream.
     A derived constructor that throws still runs this destructor, so
@@ -135,14 +137,18 @@ class WebSocketChannel;
 class PT_HTTP_API WebSocketSession : public Connectable
 {
     friend class WebSocketService;
+    friend class WebSocketServlet;
 
     public:
         /** @brief Binds @a stream on @a loop for @a service.
 
-            @a service owns this session. @a loop must be the loop of
-            @a stream. @a reply is the opening handshake reply and is
-            valid for this call. The selected subprotocol is copied
-            from it. The reply is not stored.
+            The active %WebSocketServlet owns this session. @a loop
+            must be the loop of @a stream. @a reply is the opening
+            handshake reply and is valid for this call. The selected
+            subprotocol is copied from it. The reply is not stored.
+
+            The idle timeout and the data-message limit are copied
+            from @a service.
 
             @throw %std::logic_error if @a loop is not the loop of
             @a stream.

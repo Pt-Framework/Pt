@@ -10,7 +10,6 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Stream.h>
 
-#include <algorithm>
 #include <stdexcept>
 
 namespace Pt {
@@ -19,6 +18,7 @@ namespace Http {
 
 WebSocketService::WebSocketService()
 : _servlet(0)
+, _socketCount(0)
 , _maxSockets(1024)
 , _idleTimeout(60000)
 , _maxMessageSize(1024 * 1024)
@@ -31,75 +31,53 @@ WebSocketService::~WebSocketService()
 }
 
 
-void WebSocketService::activate(WebSocketServlet& servlet)
+void WebSocketService::attach(WebSocketServlet& servlet)
 {
     if(_servlet)
-        throw std::logic_error("WebSocket service scope is already active");
+        throw std::logic_error("WebSocket service already has a servlet");
 
     _servlet = &servlet;
 }
 
 
-void WebSocketService::deactivate()
+void WebSocketService::detach(WebSocketServlet& servlet)
 {
-    _servlet = 0;
-
-    while( ! _sessions.empty() )
-    {
-        WebSocketSession* session = _sessions.back();
-        _sessions.pop_back();
-        session->shutdown();
-        onReleaseSession(session);
-    }
+    if(_servlet == &servlet)
+        _servlet = 0;
 }
 
 
-void WebSocketService::onSessionClosed(WebSocketSession& session)
+WebSocketSession* WebSocketService::getSession(System::EventLoop& loop,
+                                               Stream& stream,
+                                               const Request& request,
+                                               const Reply& reply)
 {
-    std::vector<WebSocketSession*>::iterator it =
-        std::find(_sessions.begin(), _sessions.end(), &session);
+    WebSocketSession* session = onGetSession(loop, stream, request, reply);
+    if(session)
+        ++_socketCount;
 
-    if(it == _sessions.end())
+    return session;
+}
+
+
+void WebSocketService::releaseSession(WebSocketSession* session)
+{
+    if( ! session )
         return;
 
-    _sessions.erase(it);
-    onReleaseSession(&session);
+    onReleaseSession(session);
+
+    if(_socketCount > 0)
+        --_socketCount;
 }
 
 
-std::size_t WebSocketService::maxSockets() const
+void WebSocketService::close(WebSocketSession& session)
 {
-    return _maxSockets;
-}
+    if( ! _servlet )
+        return;
 
-
-void WebSocketService::setMaxSockets(std::size_t n)
-{
-    _maxSockets = n;
-}
-
-
-std::size_t WebSocketService::idleTimeout() const
-{
-    return _idleTimeout;
-}
-
-
-void WebSocketService::setIdleTimeout(std::size_t ms)
-{
-    _idleTimeout = ms;
-}
-
-
-std::size_t WebSocketService::maxMessageSize() const
-{
-    return _maxMessageSize;
-}
-
-
-void WebSocketService::setMaxMessageSize(std::size_t n)
-{
-    _maxMessageSize = n;
+    _servlet->close(session);
 }
 
 
@@ -147,17 +125,10 @@ void WebSocketService::onUpgrade(Stream& stream,
                                  const Request& request,
                                  const Reply& reply)
 {
-    // NOTE: only create session if servlet is active
     if( ! _servlet )
         return;
 
-    System::EventLoop* loop = stream.loop();
-    if( ! loop )
-        throw std::logic_error("WebSocket upgrade has no event loop");
-
-    WebSocketSession* session = onGetSession(*loop, stream, request, reply);
-    if(session)
-        _sessions.push_back(session);
+    _servlet->accept(stream, request, reply);
 }
 
 } // namespace Http
