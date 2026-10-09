@@ -22,8 +22,7 @@ Stream::Stream(Connection& connection, const std::string& protocol)
 
 Stream::~Stream()
 {
-    if(_channel)
-        _channel->closeStream(*this);
+    close();
 }
 
 
