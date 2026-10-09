@@ -53,8 +53,14 @@ processing from HTTP messages to a channel:
 5. The server closes a stream that has no bound channel.
 
 The server owns the connection and the stream. A channel owns neither socket
-nor connection; it binds exclusively to the stream. Closing the channel closes
-its stream.
+nor connection; it binds exclusively to the stream. `Channel::close()` calls
+`Stream::close()` and then drops its stream pointer. `Stream::close()` cancels
+that stream, detaches it from the connection, and then tells the channel.
+The stream does not clear the channel pointer. While that stream is the only
+stream of the connection, closing it also closes the connection. The connection
+stays alive until `Connection::closed()` returns. The owner deletes the
+connection after that slot returns. Closing the connection does not delete the
+stream.
 
 ## Protocol Transitions
 

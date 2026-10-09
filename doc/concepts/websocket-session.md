@@ -179,8 +179,13 @@ The connection is not a public type. There is no public
 name the connection. The client facade opens it after a finished 101.
 The server facade opens it in its constructor. Both forward
 `body()`, `beginSend()`, `beginReceive()`, `frame()`, ping, pong, and
-close. Closing the frame connection closes the stream. The connection
-owns neither the stream nor the HTTP connection.
+close. `Channel::close()` calls `Stream::close()` and then drops its
+stream pointer. It owns neither the stream nor the HTTP connection.
+`Stream::close()` cancels this stream, tells the connection, and then
+tells the channel through `onCloseStream()`. The stream does not
+clear the channel pointer. While this stream is the only stream of
+the HTTP connection, closing it also closes the connection. The
+connection stays alive until `Connection::closed()` returns.
 
 ## Client {#wss-client}
 
@@ -334,10 +339,11 @@ send when it still has data. An I/O error on an outstanding receive
 or send runs `onInput()` or `onOutput()` first, and the matching end
 throws. The stream stays open. The derived session calls `close()`.
 `onClose()` runs while the session object is still alive, after the
-stream ended without a call to `close()`. The stream has already
-cleared its channel pointer. Peer close, an idle timeout, and a
-finished shutdown end here. An I/O error does not. The service
-releases the session after `onClose()` returns. `WebSocketSession::close()` releases the
+stream ended without a call to `close()`. `Stream::close()` has told
+the channel, and the channel has dropped its stream pointer. Peer
+close, an idle timeout, a finished shutdown, and a read that returns
+no bytes end here. An I/O error does not. The service
+releases the session after `onClose()` returns. `WebSocketSession::close()` ends the
 stream and tells the service in the same call. It does not run
 `onClose()`. The caller already left the session.
 
@@ -406,14 +412,15 @@ null return declines the upgrade before any bind. A session binds in
 its constructor, which accepts the upgrade.
 
 The HTTP `Stream` does not know `WebSocketSession` or
-`WebSocketServlet`. It knows the frame connection the session bound.
-When that connection ends without a call to `close()`, the session
-tells the service from `onClose()`. `WebSocketSession::close()` tells
-the service itself and does not run `onClose()`. Either way the
-service tells the attached servlet, and the servlet releases the
-session through `releaseSession()`. That call runs
-`onReleaseSession()` and drops the count. The destructor does not
-tell the service. It runs inside that release.
+`WebSocketServlet`. It knows the frame channel the session bound.
+`Stream::close()` tells that channel through `onCloseStream()`. When
+the channel had not already ended, the session tells the service from
+`onClose()`. `WebSocketSession::close()` marks the channel ended,
+calls `Stream::close()`, tells the service itself, and does not run
+`onClose()`. Either way the service tells the attached servlet, and
+the servlet releases the session through `releaseSession()`. That
+call runs `onReleaseSession()` and drops the count. The destructor
+does not tell the service. It runs inside that release.
 
 `maxSockets()`, `idleTimeout()`, and `maxMessageSize()` live on the
 service. They are endpoint policy, not per-session policy, and they
@@ -544,27 +551,30 @@ The order on the server is fixed.
 9. The derived constructor starts the first transfer.
 10. Frame callbacks run on the same loop until the stream ends.
 11. When the stream ends without a call to `close()`, `onClose()` runs
-    while the session is still alive. An I/O error does not end the
+    while the session is still alive. `Stream::close()` has told the
+    channel through `onCloseStream()`. An I/O error does not end the
     stream. The matching callback runs, the matching end throws, and
     the derived session calls `close()`. `WebSocketSession::close()`
     tells the service in the same call and does not run `onClose()`.
 12. The service tells the attached `WebSocketServlet`. The servlet
     removes the session and calls `releaseSession()`. That call runs
     `onReleaseSession()` and drops the count. The session destructor
-    runs. The connection is already unbound. The service is still
-    alive. The destructor does not tell the service again.
+    runs. The channel has already dropped its stream pointer. The
+    service is still alive. The destructor does not tell the service
+    again.
 
 The HTTP server owns the connection and the stream. The servlet owns
 the live sessions. The service owns the endpoint policy, the
 allocator, and the session count, and remains the factory. The
-session owns the frame
-connection as a
-member. The connection owns neither the stream nor the HTTP
-connection. Closing the
-connection closes the stream. While that stream is the only stream of
-the HTTP connection, closing it also closes the connection. The
-server deletes that connection on its event loop after the close that
-requested it has returned.
+session owns the frame channel as a member. The channel owns neither
+the stream nor the HTTP connection. `Channel::close()` calls
+`Stream::close()` and then drops its stream pointer. `Stream::close()`
+tells the connection, which detaches the stream. While that stream is
+the only stream of the HTTP connection, closing it also closes the
+connection and sends `Connection::closed()`. The connection stays
+alive until that slot returns. The server deletes that connection on
+its event loop after the slot returns. Closing the connection does
+not delete the stream.
 
 `onClose()` is the application's last look at the session when the
 stream ends without a call to `close()`. Domain objects that hold a
@@ -572,10 +582,11 @@ stream ends without a call to `close()`. Domain objects that hold a
 After `onReleaseSession()` returns, the reference is gone.
 `shutdown()` does not release the session. The destructor calls
 `close()`, not `shutdown()`, and does not release the session.
-`close()` releases the stream, writes no frame, and emits nothing.
+`close()` ends the stream, writes no frame, and emits nothing.
 On the session it also tells the service, so the servlet removes the
 session. The servlet destructor removes each session from its list
-before that `close()`, and then calls `releaseSession()` itself.
+and then calls `releaseSession()`. The session destructor closes the
+stream inside that release.
 
 A pooled session is released back to the pool from
 `onReleaseSession()`, not destroyed. The next upgrade opens a new
@@ -661,9 +672,9 @@ continue as HTTP.
 
 This design already matches that boundary. `Service::onUpgrade()`
 receives one `Stream`. `WebSocketService` creates one
-`WebSocketSession` for that stream. The frame connection binds that
-stream and no other. `Stream::close()` ends that stream and does not
-end the other streams of the connection.
+`WebSocketSession` for that stream. The frame channel binds that
+stream and no other. `Stream::close()` ends that stream. The
+connection closes only when no stream remains.
 
 HTTP/2 therefore multiplies sessions, not connections inside one
 session. Each Extended CONNECT is a new `getSession()` call, a new

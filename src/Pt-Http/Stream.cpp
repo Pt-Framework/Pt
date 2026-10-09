@@ -31,9 +31,6 @@ void Stream::attachChannel(Channel& channel)
     if(_channel)
         throw std::logic_error("HTTP stream already has a channel");
 
-    if( ! _connection )
-        throw std::logic_error("HTTP stream has no connection");
-
     _channel = &channel;
 }
 
@@ -47,17 +44,16 @@ void Stream::detachChannel(Channel& channel)
 
 void Stream::close()
 {
-    Channel* channel = _channel;
-    _channel = 0;
+    cancel();
 
-    Connection* connection = _connection;
-    _connection = 0;
+    if(_connection)
+    {
+        _connection->closeStream(*this);
+        _connection = 0;
 
-    if(channel)
-        channel->closeStream(*this);
-
-    if(connection)
-        connection->closeStream(*this);
+        if(_channel)
+            _channel->closeStream(*this);
+    }
 }
 
 

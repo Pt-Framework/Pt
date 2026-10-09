@@ -24,8 +24,3 @@ description: "HTTP WebSocket"
   `include/Pt/Http/WebSocketServlet.h`
 - Stream of an upgraded HTTP connection:
   `include/Pt/Http/Stream.h`
-- Ending a WebSocket: `shutdown(code, reason)` enqueues a close frame
-  and does not release the stream. `close()` releases the stream and
-  writes no frame. `cancel` is not a facade operation. The framed
-  stream is not resumed.
-  `doc/concepts/websocket-message.md`

@@ -20,15 +20,15 @@
   the session. An unanswered ping is facade state.
 
 - [websocket-shutdown](websocket-message.md#wsm-close).
-  `shutdown(code, reason)` enqueues a close frame and does not release
+  `shutdown(code, reason)` enqueues a close frame and does not end
   the stream. The pump writes it after the current data frame and does
   not wait for `endSend()`. A second `shutdown()` throws. 1005, 1006,
   and 1015 throw and stay off the wire.
 
 - [websocket-peer-close](websocket-message.md#wsm-close).
   A received close is answered by `shutdown` when no close frame was
-  sent. A peer code that must not be written is not echoed. The engine
-  calls `close()` after that reply is written.
+  sent. A peer code that must not be written is not echoed. After
+  that reply is written, the engine calls `Stream::close()`.
 
 - [websocket-nonce](websocket-session.md#wss-handshake).
   The handshake key and the masking key come from an unpredictable
