@@ -127,11 +127,13 @@
     the same begin and end methods on the session object; the data
     callbacks there take the place of the ready signals.
 
-    Heartbeats and shutdown are socket operations, not payloads.
+    Heartbeats, shutdown and close are socket operations, not
+    payloads.
 
     @code
     socket.ping("are you there", 13);
     socket.shutdown(1000, "done");
+    socket.close();
     @endcode
 
     %ping() enqueues a ping frame. A received ping is answered by
@@ -141,10 +143,16 @@
     1005, 1006 and 1015 cannot be sent; they are reserved for "no
     status received", abnormal closure, and a failed TLS handshake.
     A received close is answered by the engine. After a local shutdown,
-    no more data frames are sent. %closeCode() and %closeReason()
-    report the handshake that ended the stream. A data message
-    larger than the configured limit, or an idle period without a
-    finished transfer, closes the stream. Zero disables each limit.
+    no more data frames are sent. %close() releases the stream and
+    writes no frame. It does not block. The destructor calls it.
+    A pending transfer is cancelled and the buffer is discarded.
+    The framed stream is not resumed. %beginSend() and
+    %beginReceive() then throw. %closed() is not emitted from the
+    destructor. %closeCode() and %closeReason() report the handshake
+    that ended the stream. No close frame leaves the code at 1006.
+    A data message larger than the configured limit, or an idle
+    period without a finished transfer, closes the stream. Zero
+    disables each limit.
     The size count is the declared payload from the first data
     opcode to FIN. A finished send or receive restarts the idle
     timeout, and a received ping or pong restarts it as well.

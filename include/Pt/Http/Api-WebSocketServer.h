@@ -116,8 +116,9 @@
     %onOutput() runs when data bytes were sent. A ping or a pong
     does not run those callbacks. %onClose() is the last look at
     the session. Do not call %endReceive() or %endSend() from
-    %onClose(). Closing the session closes the stream. The session
-    does not own the stream or the connection.
+    %onClose(). %close() releases the stream and writes no frame.
+    The destructor calls it. The session does not own the stream or
+    the connection.
 
     %WebSocketServlet owns the live sessions of one service. The
     service owns the endpoint policy and the allocator. Construct the

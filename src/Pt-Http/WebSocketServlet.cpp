@@ -29,7 +29,7 @@ WebSocketServlet::~WebSocketServlet()
     {
         WebSocketSession* session = _sessions.back();
         _sessions.pop_back();
-        session->detach();
+        session->close();
         if(_service)
             _service->releaseSession(session);
     }

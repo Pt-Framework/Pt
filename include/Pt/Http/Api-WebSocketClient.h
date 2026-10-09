@@ -66,6 +66,8 @@
     longer uses the client for messages. A client masks every frame
     it writes.
 
+    %close() releases the stream and writes no frame. The destructor
+    calls it. %closed() is not emitted from the destructor.
     %closed() is emitted while this socket is still alive. The
     stream has already cleared its channel pointer. Peer close, an
     I/O error, a close frame and destruction of the stream all emit

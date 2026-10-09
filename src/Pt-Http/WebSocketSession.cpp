@@ -93,6 +93,7 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 WebSocketSession::~WebSocketSession()
 {
     _ended = true;
+    close();
     delete _channel;
 }
 
@@ -145,6 +146,13 @@ void WebSocketSession::shutdown(unsigned code, const std::string& reason)
 }
 
 
+void WebSocketSession::close()
+{
+    if(_channel)
+        _channel->close();
+}
+
+
 unsigned WebSocketSession::closeCode() const
 {
     return _channel->closeCode();
@@ -154,12 +162,6 @@ unsigned WebSocketSession::closeCode() const
 const std::string& WebSocketSession::closeReason() const
 {
     return _channel->closeReason();
-}
-
-
-void WebSocketSession::detach()
-{
-    _channel->detach();
 }
 
 

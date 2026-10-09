@@ -40,6 +40,7 @@ WebSocket::~WebSocket()
         _client->replyReceived() -= Pt::slot(*this, &WebSocket::onReply);
     }
 
+    close();
     delete _channel;
 }
 
@@ -274,6 +275,12 @@ void WebSocket::ping(const char* payload, std::size_t n)
 void WebSocket::shutdown(unsigned code, const std::string& reason)
 {
     _channel->shutdown(code, reason);
+}
+
+
+void WebSocket::close()
+{
+    _channel->close();
 }
 
 

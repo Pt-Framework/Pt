@@ -112,16 +112,19 @@ class WebSocketChannel;
     a failed construction does not leave an accepted stream without
     an owner.
 
-    Ping and shutdown stay control operations on this type.
+    Ping, shutdown and close stay control operations on this type.
 
     @code
     ping();
     shutdown(1000, "done");
+    close();
     @endcode
 
     %ping() enqueues a ping. %shutdown() enqueues a close frame.
-    %closeCode() and %closeReason() report the handshake that ended
-    the stream.
+    %close() releases the stream and writes no frame. The destructor
+    calls it. %beginSend() and %beginReceive() then throw. No close
+    frame leaves the code at 1006. %closeCode() and %closeReason()
+    report the handshake that ended the stream.
 
     @ingroup Pt-Http-WebSocket-Server
 */
@@ -206,6 +209,14 @@ class PT_HTTP_API WebSocketSession : public Connectable
         void shutdown(unsigned code = 1000,
                       const std::string& reason = std::string());
 
+        /** @brief Releases the stream and writes no frame.
+
+            Does not block. The destructor calls this. %beginSend()
+            and %beginReceive() then throw. No close frame leaves
+            %closeCode() at 1006.
+        */
+        void close();
+
         /** @brief Returns the close status code of the handshake that ended the stream.
         */
         unsigned closeCode() const;
@@ -231,8 +242,6 @@ class PT_HTTP_API WebSocketSession : public Connectable
         virtual void onClose() = 0;
 
     private:
-        void detach();
-
         void onInputReady();
 
         void onOutputReady();

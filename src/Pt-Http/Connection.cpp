@@ -241,8 +241,8 @@ void Connection::closeStream(Stream& stream)
 
 void Connection::cancelStream(Stream& stream)
 {
-    _sockbuf.discard();
     _socket.cancel();
+    _sockbuf.discard();
 }
 
 

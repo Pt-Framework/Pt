@@ -156,8 +156,7 @@ WebSocketChannel::WebSocketChannel()
 
 WebSocketChannel::~WebSocketChannel()
 {
-    if( stream() )
-        Channel::close();
+    close();
 }
 
 
@@ -188,8 +187,8 @@ void WebSocketChannel::requireNotEnded() const
 
 void WebSocketChannel::beginSend()
 {
-    requireOpen();
     requireNotEnded();
+    requireOpen();
 
     if(_sendOutstanding)
         throw std::logic_error("WebSocket send is outstanding");
@@ -249,8 +248,8 @@ MessageProgress WebSocketChannel::endSend()
 
 void WebSocketChannel::beginReceive()
 {
-    requireOpen();
     requireNotEnded();
+    requireOpen();
 
     if(_receiveOutstanding)
         throw std::logic_error("WebSocket receive is outstanding");
@@ -296,8 +295,8 @@ MessageProgress WebSocketChannel::endReceive()
 
 void WebSocketChannel::ping(const char* payload, std::size_t n)
 {
-    requireOpen();
     requireNotEnded();
+    requireOpen();
 
     if(n > 125)
         throw std::invalid_argument("WebSocket ping payload");
@@ -309,8 +308,8 @@ void WebSocketChannel::ping(const char* payload, std::size_t n)
 
 void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
 {
-    requireOpen();
     requireNotEnded();
+    requireOpen();
 
     if(_closeQueued || _closeSent)
         throw std::logic_error("WebSocket already closing");
@@ -331,10 +330,34 @@ void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
 }
 
 
+void WebSocketChannel::close()
+{
+    if(_ended)
+        return;
+
+    _ended = true;
+    _opened = false;
+    _receiveOutstanding = false;
+    _sendOutstanding = false;
+    _sendStarted = false;
+    _idleTimer.stop();
+    _incoming.clear();
+    _outgoing.clear();
+
+    if(_closeCode == 0)
+        _closeCode = 1006;
+
+    if(Stream* stream = this->stream())
+    {
+        stream->cancel();
+        Channel::close();
+    }
+}
+
+
 void WebSocketChannel::detach()
 {
-    if( stream() )
-        Channel::close();
+    close();
 }
 
 

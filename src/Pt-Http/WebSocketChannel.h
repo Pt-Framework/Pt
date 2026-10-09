@@ -53,6 +53,8 @@ class WebSocketChannel : public Channel
 
         void shutdown(unsigned code, const std::string& reason);
 
+        void close();
+
         void detach();
 
         unsigned closeCode() const

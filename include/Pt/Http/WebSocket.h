@@ -110,23 +110,29 @@ class WebSocketChannel;
     %endReceive() returns progress. After %finished(), %clear()
     drops the body so the same object can carry the next message.
 
-    Ping, pong and shutdown are socket operations, not messages.
+    Ping, pong, shutdown and close are socket operations, not
+    messages.
 
     @code
     socket.ping();
     socket.shutdown(1000, "done");
+    socket.close();
     @endcode
 
     %ping() enqueues a ping. A received ping is answered by the
     engine. A received pong is consumed. Neither is delivered
     through %incoming(). %shutdown() enqueues a close frame with a
     status code and a reason. A received close is answered by the
-    engine. %closeCode() and %closeReason() report the handshake
-    that ended the stream. %closed() is emitted while this socket
-    is still alive. The stream has already cleared its session
-    pointer. Peer close, an I/O error, a close frame and
-    destruction of the stream all emit it. It ends an outstanding
-    send or receive. The owner deletes this socket.
+    engine. %close() releases the stream and writes no frame. It
+    does not block. The destructor calls it. %beginSend() and
+    %beginReceive() then throw. %closed() is not emitted from the
+    destructor. %closeCode() and %closeReason() report the handshake
+    that ended the stream. No close frame leaves the code at 1006.
+    %closed() is emitted while this socket is still alive. The
+    stream has already cleared its session pointer. Peer close, an
+    I/O error, a close frame and destruction of the stream all
+    emit it. It ends an outstanding send or receive. The owner
+    deletes this socket.
 
     On the server the application does not construct this type. The
     server facade is %WebSocketSession, which exposes the same
@@ -144,7 +150,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         explicit WebSocket(Client& client);
 
-        /** @brief Destructor.
+        /** @brief Calls %close().
         */
         ~WebSocket();
 
@@ -240,6 +246,14 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void shutdown(unsigned code = 1000,
                       const std::string& reason = std::string());
+
+        /** @brief Releases the stream and writes no frame.
+
+            Does not block. The destructor calls this. %beginSend()
+            and %beginReceive() then throw. No close frame leaves
+            %closeCode() at 1006.
+        */
+        void close();
 
         /** @brief Returns the close status code of the handshake that ended the stream.
         */

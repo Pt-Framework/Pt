@@ -30,13 +30,6 @@
   sent. A peer code that must not be written is not echoed. The engine
   calls `close()` after that reply is written.
 
-- [websocket-close](websocket-message.md#wsm-close).
-  `close()` releases the stream and writes no frame. It does not block.
-  The destructor calls it. Inside, `cancel` stops a pending transfer
-  and discards the buffer. The framed stream is not resumed.
-  `beginSend()` and `beginReceive()` then throw. `closed()` is not
-  emitted from the destructor. No close frame leaves the code at 1006.
-
 - [websocket-nonce](websocket-session.md#wss-handshake).
   The handshake key and the masking key come from an unpredictable
   source.
