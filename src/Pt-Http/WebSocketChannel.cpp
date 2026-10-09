@@ -355,11 +355,6 @@ void WebSocketChannel::close()
 }
 
 
-void WebSocketChannel::detach()
-{
-    close();
-}
-
 
 void WebSocketChannel::setTimeout(std::size_t timeout)
 {

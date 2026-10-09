@@ -55,8 +55,6 @@ class WebSocketChannel : public Channel
 
         void close();
 
-        void detach();
-
         unsigned closeCode() const
         { return _closeCode; }
 
