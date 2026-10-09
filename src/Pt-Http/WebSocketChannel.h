@@ -13,6 +13,7 @@
 #include <Pt/Signal.h>
 #include <Pt/System/Timer.h>
 #include <deque>
+#include <exception>
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -189,6 +190,8 @@ class WebSocketChannel : public Channel
         bool _closeReceived;
         unsigned _closeCode;
         std::string _closeReason;
+        std::exception_ptr _inputError;
+        std::exception_ptr _outputError;
 
         Signal<> _inputReady;
         Signal<> _outputReady;

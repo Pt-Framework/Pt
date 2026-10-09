@@ -22,29 +22,6 @@ namespace Pt {
 
 namespace Http {
 
-WebSocket::WebSocket(Client& client)
-: _client(&client)
-, _channel(new WebSocketChannel())
-, _path("/")
-, _error(false)
-, _connecting(false)
-{
-}
-
-
-WebSocket::~WebSocket()
-{
-    if(_client && _connecting)
-    {
-        _client->requestSent() -= Pt::slot(*this, &WebSocket::onRequestSent);
-        _client->replyReceived() -= Pt::slot(*this, &WebSocket::onReply);
-    }
-
-    close();
-    delete _channel;
-}
-
-
 namespace {
 
 bool isProtocolToken(const std::string& name)
@@ -74,6 +51,28 @@ bool isOws(char ch)
     return ch == ' ' || ch == '\t';
 }
 
+} // namespace
+
+WebSocket::WebSocket(Client& client)
+: _client(&client)
+, _channel(new WebSocketChannel())
+, _path("/")
+, _error(false)
+, _connecting(false)
+{
+}
+
+
+WebSocket::~WebSocket()
+{
+    if(_client && _connecting)
+    {
+        _client->requestSent() -= Pt::slot(*this, &WebSocket::onRequestSent);
+        _client->replyReceived() -= Pt::slot(*this, &WebSocket::onReply);
+    }
+
+    close();
+    delete _channel;
 }
 
 

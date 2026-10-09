@@ -22,14 +22,12 @@ Stream::Stream(Connection& connection, const std::string& protocol)
 
 Stream::~Stream()
 {
-    Channel* channel = _channel;
-
-    if(channel)
-        channel->closeStream(*this);
+    if(_channel)
+        _channel->closeStream(*this);
 }
 
 
-void Stream::openChannel(Channel& channel)
+void Stream::attachChannel(Channel& channel)
 {
     if(_channel)
         throw std::logic_error("HTTP stream already has a channel");
@@ -41,7 +39,7 @@ void Stream::openChannel(Channel& channel)
 }
 
 
-void Stream::closeChannel(Channel& channel)
+void Stream::detachChannel(Channel& channel)
 {
     if(_channel == &channel)
         _channel = 0;

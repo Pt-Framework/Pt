@@ -211,9 +211,10 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
         /** @brief Releases the stream and writes no frame.
 
-            Does not block. The destructor calls this. %beginSend()
-            and %beginReceive() then throw. No close frame leaves
-            %closeCode() at 1006.
+            Does not block and emits nothing. The servlet releases
+            this session. %beginSend() and %beginReceive() then throw.
+            No close frame leaves %closeCode() at 1006. %onClose()
+            does not run.
         */
         void close();
 
@@ -234,10 +235,14 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         virtual void onOutput() = 0;
 
-        /** @brief Called when the stream has ended.
+        /** @brief Called when the stream ended without %close().
 
             This object is still alive. The service releases it after
-            this call returns. Do not call %endReceive() or %endSend().
+            this call returns. Peer close, an idle timeout, and a
+            finished shutdown run this directly. An I/O error on an
+            outstanding receive or send runs %onInput() or %onOutput()
+            first, and the matching end throws, before this call.
+            Do not call %endReceive() or %endSend().
         */
         virtual void onClose() = 0;
 
@@ -252,7 +257,6 @@ class PT_HTTP_API WebSocketSession : public Connectable
         WebSocketService* _service;
         WebSocketChannel* _channel;
         std::string _protocol;
-        bool _ended;
 };
 
 } // namespace Http

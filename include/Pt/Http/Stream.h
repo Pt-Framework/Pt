@@ -171,9 +171,9 @@ class PT_HTTP_API Stream : public Connectable
     protected:
         Stream(Connection& connection, const std::string& protocol);
 
-        void openChannel(Channel& channel);
+        void attachChannel(Channel& channel);
 
-        void closeChannel(Channel& channel);
+        void detachChannel(Channel& channel);
 
     private:
         Connection* _connection;

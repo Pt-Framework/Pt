@@ -249,9 +249,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Releases the stream and writes no frame.
 
-            Does not block. The destructor calls this. %beginSend()
-            and %beginReceive() then throw. No close frame leaves
-            %closeCode() at 1006.
+            Does not block and emits nothing. The destructor calls
+            this. %beginSend() and %beginReceive() then throw. No
+            close frame leaves %closeCode() at 1006.
         */
         void close();
 
@@ -275,11 +275,12 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Returns the signal emitted when the stream ends.
 
-            Emitted while this socket is still alive. The stream has
-            already cleared its channel pointer. Peer close, an I/O
-            error, a close frame and destruction of the stream all
-            emit it. The owner deletes this socket. Ends an outstanding
-            send or receive.
+            Emitted while this socket is still alive, after an end
+            this socket did not start. Peer close, an idle timeout,
+            and a finished shutdown emit it. An I/O error on an
+            outstanding receive or send runs %inputReady() or
+            %outputReady() first, and the matching end throws, before
+            this signal. %close() and destruction do not emit it.
         */
         Pt::Signal<WebSocket&>& closed()
         { return _closed; }

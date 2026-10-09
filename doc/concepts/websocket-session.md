@@ -219,10 +219,15 @@ source.
 Frame events are signals on this facade. `inputReady()` reports that
 one whole frame has been received. `outputReady()` reports that a
 frame has left the connection stream buffer. `closed()` is emitted
-while the socket is still alive. Peer close, an I/O error, a close
-frame, and destruction of the stream all emit it. The application
-deletes the socket. There are no virtual callbacks, because the
-application constructed the object and can connect slots to it.
+while the socket is still alive, after an end the application did
+not start and that no outstanding transfer reports. Peer close, an
+idle timeout, and a finished shutdown emit it. An I/O error stores
+the exception and leaves the stream open. `inputReady()` or
+`outputReady()` runs, and the matching end throws. The application
+calls `close()`. `close()` and destruction of the socket do not emit
+`closed()`. The application deletes
+the socket. There are no virtual callbacks, because the application
+constructed the object and can connect slots to it.
 
 `body()` is the payload stream. `beginSend()` writes one frame from
 that body. `beginReceive()` reads one frame into it. `frame()` is the
@@ -325,11 +330,16 @@ constructor.
 session calls `endReceive()`, reads `body()`, and starts the next
 receive or a reply. `onOutput()` runs when a frame has left the stream
 buffer. The derived session calls `endSend()` and starts the next
-send when it still has data. `onClose()` runs while the session object
-is still alive. The stream has already cleared its channel pointer.
-Peer close, an I/O error, a close frame, and destruction of the
-stream all end here. The service releases the session after
-`onClose()` returns.
+send when it still has data. An I/O error on an outstanding receive
+or send runs `onInput()` or `onOutput()` first, and the matching end
+throws. The stream stays open. The derived session calls `close()`.
+`onClose()` runs while the session object is still alive, after the
+stream ended without a call to `close()`. The stream has already
+cleared its channel pointer. Peer close, an idle timeout, and a
+finished shutdown end here. An I/O error does not. The service
+releases the session after `onClose()` returns. `WebSocketSession::close()` releases the
+stream and tells the service in the same call. It does not run
+`onClose()`. The caller already left the session.
 
 The destructor closes the stream. If the derived constructor throws,
 that destructor still runs, so a session that fails during
@@ -397,10 +407,13 @@ its constructor, which accepts the upgrade.
 
 The HTTP `Stream` does not know `WebSocketSession` or
 `WebSocketServlet`. It knows the frame connection the session bound.
-When that connection closes, the session tells the service. The
+When that connection ends without a call to `close()`, the session
+tells the service from `onClose()`. `WebSocketSession::close()` tells
+the service itself and does not run `onClose()`. Either way the
 service tells the attached servlet, and the servlet releases the
 session through `releaseSession()`. That call runs
-`onReleaseSession()` and drops the count.
+`onReleaseSession()` and drops the count. The destructor does not
+tell the service. It runs inside that release.
 
 `maxSockets()`, `idleTimeout()`, and `maxMessageSize()` live on the
 service. They are endpoint policy, not per-session policy, and they
@@ -530,12 +543,16 @@ The order on the server is fixed.
    the stream. That bind accepts the upgrade.
 9. The derived constructor starts the first transfer.
 10. Frame callbacks run on the same loop until the stream ends.
-11. `onClose()` runs while the session is still alive.
-12. The session tells the service. The service tells the attached
-    `WebSocketServlet`. The servlet removes the session and calls
-    `releaseSession()`. That call runs `onReleaseSession()` and drops
-    the count. The session destructor runs. The connection is already
-    unbound. The service is still alive.
+11. When the stream ends without a call to `close()`, `onClose()` runs
+    while the session is still alive. An I/O error does not end the
+    stream. The matching callback runs, the matching end throws, and
+    the derived session calls `close()`. `WebSocketSession::close()`
+    tells the service in the same call and does not run `onClose()`.
+12. The service tells the attached `WebSocketServlet`. The servlet
+    removes the session and calls `releaseSession()`. That call runs
+    `onReleaseSession()` and drops the count. The session destructor
+    runs. The connection is already unbound. The service is still
+    alive. The destructor does not tell the service again.
 
 The HTTP server owns the connection and the stream. The servlet owns
 the live sessions. The service owns the endpoint policy, the
@@ -549,11 +566,16 @@ the HTTP connection, closing it also closes the connection. The
 server deletes that connection on its event loop after the close that
 requested it has returned.
 
-`onClose()` is the application's last look at the session. Domain
-objects that hold a `WebSocketSession&` must drop it there. After
-`onReleaseSession()` returns, the reference is gone. `shutdown()`
-does not release the session. The destructor calls `close()`, not
-`shutdown()`. `close()` releases the stream and writes no frame.
+`onClose()` is the application's last look at the session when the
+stream ends without a call to `close()`. Domain objects that hold a
+`WebSocketSession&` drop it there, or before they call `close()`.
+After `onReleaseSession()` returns, the reference is gone.
+`shutdown()` does not release the session. The destructor calls
+`close()`, not `shutdown()`, and does not release the session.
+`close()` releases the stream, writes no frame, and emits nothing.
+On the session it also tells the service, so the servlet removes the
+session. The servlet destructor removes each session from its list
+before that `close()`, and then calls `releaseSession()` itself.
 
 A pooled session is released back to the pool from
 `onReleaseSession()`, not destroyed. The next upgrade opens a new
@@ -615,8 +637,8 @@ class FeedSession : public WebSocketSession
 `beginSend()`. `onOutput()` continues the stream. The cursor, the
 subscription, and the back-reference from the feed all live in the
 session. The feed holds `FeedSession&`. It does not own the session.
-It drops the reference in `onClose()` or in the destructor, whichever
-runs first for that detach.
+It drops the reference in `onClose()` or before `close()`, whichever
+ends that session. `close()` does not run `onClose()`.
 
 A timer that paces the feed is started on `stream.loop()` in the
 derived constructor. The timer callback is serialized with the frame
@@ -694,8 +716,10 @@ ordinary refusal. Ordinary refusal is a null return, before the
 session exists.
 
 `onClose()` is not a decline. The upgrade was accepted. The stream
-ended later. The application drops domain references there and does
-not try to receive or send again.
+ended later, and the application did not call `close()`. The
+application drops domain references there and does not try to
+receive or send again. A call to `close()` releases the session
+without that callback.
 
 ## Out of scope {#wss-scope}
 

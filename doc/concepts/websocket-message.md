@@ -118,9 +118,12 @@ A received ping is answered by the engine. A received pong is
 consumed as a message. The facade still sees it. Neither frees the
 data channel. Ending the stream is not a message either.
 `shutdown()` announces it with a close frame. `close()` releases
-the stream and writes no frame. A received close is answered by
-the engine. After a local `shutdown()`, no more data frames are
-sent. Receive continues until the peer close or `idleTimeout()`.
+the stream, writes no frame, and emits nothing. A received close is
+answered by the engine. After a local `shutdown()`, no more data
+frames are sent. Receive continues until the peer close or
+`idleTimeout()`. An I/O error stores the exception and leaves the
+stream open. The ready signal of the outstanding transfer runs, and
+the matching end throws. The application calls `close()`.
 
 Progress follows HTTP. `endReceive()` and `endSend()` each report
 one I/O step. Either can report body bytes before the message is
@@ -402,24 +405,56 @@ its body is discarded. `onInput()` does not run for that incomplete
 message. `incoming().type()` is never close. After the reply has been
 written, the engine calls `close()`.
 
-`close()` releases the stream. It writes no frame, and it does not
-block. The destructor calls it. Inside, `cancel` stops a pending
-transfer and discards the buffer. That is not a facade operation.
-The framed stream is not resumed: a discarded buffer loses alignment,
-and WebSocket has no resynchronization. `beginSend()` and
-`beginReceive()` then throw. `closed()` is not emitted from the
-destructor. An I/O error, an idle timeout, and a release with no
-close frame leave the code at 1006 and the reason empty, because no
+`close()` releases the stream. It writes no frame, it does not
+block, and it emits nothing. The caller already knows the stream has
+ended when the call returns. The destructor calls it and emits
+nothing either. Inside, `cancel` stops a pending transfer and
+discards the buffer. That is not a facade operation. The framed
+stream is not resumed: a discarded buffer loses alignment, and
+WebSocket has no resynchronization. `beginSend()` and
+`beginReceive()` then throw. An idle timeout, and a release with no
+close frame, leave the code at 1006 and the reason empty, because no
 close frame arrived.
+
+The unbind callback of the stream emits `closed()` when the channel
+had not already ended. `close()` marks the channel ended before it
+releases the stream, so that call and the destructor emit nothing.
+A stream that ends from outside arrives at the same callback and
+emits `closed()`, because the application did not call `close()`.
+A finished shutdown and an idle timeout release the stream the same
+way and get the same signal. The facade is still alive.
+
+An I/O error on an outstanding receive or send is the completion of
+that transfer, the same way `endRead()` throws `IOError` after
+`inputReady`. The engine stores the exception and does not close the
+stream. `inputReady()` runs for a failed receive, and `outputReady()`
+runs for a failed send. `endReceive()` or `endSend()` rethrows the
+stored exception and leaves it stored. The next `beginReceive()` or
+`beginSend()` clears it, and so does `close()`. If the application
+does not call the matching end, the exception stays until one of
+those calls. `closed()` is not emitted for the error. The application
+calls `close()`, or the destructor does.
 
 `closeCode()` and `closeReason()` are the values from the handshake.
 A local `shutdown()` keeps the values passed to it when the peer
 sends none. A peer close with an empty payload is 1005 and an empty
 reason, unless a local code was already set. `closed()` is the signal
-that the stream has ended. Peer close, an I/O error, and a finished
-shutdown all emit it while the facade is still alive. `closed()` ends
-an outstanding send or receive. The application does not call
-`endSend()` or `endReceive()` after it. Those calls throw.
+that the stream ended without a call to `close()`. Peer close, an
+idle timeout, and a finished shutdown emit it. An I/O error does not.
+A `close()` the application called, and the `close()` in the
+destructor, do not. After `closed()`, the application does not call
+`endSend()` or `endReceive()`. Those calls throw.
+
+On the session, `onClose()` is that same signal. It does not run from
+`WebSocketSession::close()`. That call still has to release the
+session, because the servlet list is not the stream. `close()` tells
+the service, the service tells the servlet, and the servlet removes
+the session and calls `releaseSession()`. The derived `onClose()`
+does not run. The caller already left the session. The destructor
+does not tell the service. It runs inside `releaseSession()`, after
+the servlet has removed the entry. The servlet destructor removes
+each remaining session from its list before it calls `close()`, so
+that call does not release the session a second time.
 
 ## Progress {#wsm-progress}
 
@@ -496,13 +531,19 @@ again. If it is finished, it starts the next send when it still has
 a message. The callback is not aligned to a fragment, and it does
 not run for a ping or a pong.
 
-`onClose()` is the last look at the session. It runs while the
-session is still alive, after the stream has ended. A shutdown
-leaves `closeCode()` and `closeReason()` set. An I/O error leaves
-the code at 1006 and the reason empty. `onClose()` does not call
-`endReceive()` or `endSend()`. `closed()` has already ended those
-transfers. A close in the middle of an incoming message does not
-run `onInput()`. The destructor calls `close()`, not `shutdown()`.
+`onClose()` is the last look at the session when the stream ends
+without a call to `close()`. It runs while the session is still
+alive. A finished shutdown leaves `closeCode()` and `closeReason()`
+set. An idle timeout leaves the code at 1006 and the reason empty.
+An I/O error on an outstanding receive or send runs `onInput()` or
+`onOutput()` first, and `endReceive()` or `endSend()` throws. The
+stream stays open. The derived session calls `close()`. `onClose()`
+does not run for that error, and it does not call `endReceive()` or
+`endSend()`. A close in the middle of an incoming message does not
+run `onInput()` for the discarded body. `WebSocketSession::close()`
+releases the stream and the session and does not run `onClose()`.
+The destructor calls `close()`, not `shutdown()`, and it does not
+release the session again.
 
 The client uses the same two messages on the `WebSocket` it
 constructed. It connects `inputReady()` and `outputReady()` itself.
@@ -539,10 +580,15 @@ After a local shutdown, no more data frames are sent. Receive
 continues until the peer close or `idleTimeout()`. The close frame
 is written after the current data frame and does not wait for
 `endSend()`. `close()` releases the stream, writes no frame, and
-does not block. The destructor calls it. Inside, `cancel` stops a
-pending transfer and discards the buffer. The framed stream is not
-resumed. `closed()` ends an outstanding send or receive and is not
-emitted from the destructor. `closeCode()` and `closeReason()`
+does not block, and emits nothing. The destructor calls it and
+emits nothing. Inside, `cancel` stops a pending transfer and
+discards the buffer. The framed stream is not resumed. `closed()`
+reports a peer close, an idle timeout, and a finished shutdown. An
+I/O error stores the exception and leaves the stream open. The ready
+signal of the outstanding transfer runs, and the matching end throws.
+The application calls `close()`. `close()` and the destructor do not
+emit `closed()`. `closeCode()` and
+`closeReason()`
 report the handshake that ended the stream. An empty peer close is
 1005 unless a local code was already set. No close frame leaves the
 code at 1006. `shutdown()` does not write the stream as a side door

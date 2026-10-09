@@ -7,8 +7,10 @@
 #include <Pt/Http/Stream.h>
 #include <Pt/Byteorder.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/IOError.h>
 #include <cstring>
 #include <ctime>
+#include <exception>
 #include <stdexcept>
 
 namespace Pt {
@@ -220,6 +222,7 @@ void WebSocketChannel::beginSend()
 
     _sendOutstanding = true;
     _awaitingEndSend = false;
+    _outputError = std::exception_ptr();
     _sendProgress = MessageProgress();
     _sendProgress.setHeader();
     pumpOutput();
@@ -228,14 +231,20 @@ void WebSocketChannel::beginSend()
 
 MessageProgress WebSocketChannel::endSend()
 {
-    requireNotEnded();
-
     if( ! _sendOutstanding )
+    {
+        requireNotEnded();
         throw std::logic_error("WebSocket send is not outstanding");
+    }
 
-    restartIdleTimer();
     _sendOutstanding = false;
     _awaitingEndSend = false;
+
+    if(_outputError)
+        std::rethrow_exception(_outputError);
+
+    requireNotEnded();
+    restartIdleTimer();
 
     MessageProgress progress = _sendProgress;
     if(progress.finished())
@@ -255,6 +264,7 @@ void WebSocketChannel::beginReceive()
         throw std::logic_error("WebSocket receive is outstanding");
 
     _receiveOutstanding = true;
+    _inputError = std::exception_ptr();
     _receiveProgress = MessageProgress();
 
     if( ! _messageOpen )
@@ -276,14 +286,20 @@ void WebSocketChannel::beginReceive()
 
 MessageProgress WebSocketChannel::endReceive()
 {
-    requireNotEnded();
-
     if( ! _receiveOutstanding )
+    {
+        requireNotEnded();
         throw std::logic_error("WebSocket receive is not outstanding");
+    }
 
+    _receiveOutstanding = false;
+
+    if(_inputError)
+        std::rethrow_exception(_inputError);
+
+    requireNotEnded();
     restartIdleTimer();
     _incoming.prepareRead();
-    _receiveOutstanding = false;
 
     MessageProgress progress = _receiveProgress;
     if(progress.finished())
@@ -340,6 +356,8 @@ void WebSocketChannel::close()
     _receiveOutstanding = false;
     _sendOutstanding = false;
     _sendStarted = false;
+    _inputError = std::exception_ptr();
+    _outputError = std::exception_ptr();
     _idleTimer.stop();
     _incoming.clear();
     _outgoing.clear();
@@ -347,11 +365,7 @@ void WebSocketChannel::close()
     if(_closeCode == 0)
         _closeCode = 1006;
 
-    if(Stream* stream = this->stream())
-    {
-        stream->cancel();
-        Channel::close();
-    }
+    Channel::close();
 }
 
 
@@ -393,6 +407,9 @@ void WebSocketChannel::setIdleTimeout(std::size_t ms)
 
 void WebSocketChannel::onIdleTimeout()
 {
+    if(_ended)
+        return;
+
     if(_closeCode == 0)
         _closeCode = 1006;
 
@@ -403,6 +420,8 @@ void WebSocketChannel::onIdleTimeout()
 
 void WebSocketChannel::onCloseStream(Stream&)
 {
+    bool started = _ended;
+
     _ended = true;
     _opened = false;
     _receiveOutstanding = false;
@@ -412,7 +431,8 @@ void WebSocketChannel::onCloseStream(Stream&)
     if( ! _closeReceived && _closeCode == 0)
         _closeCode = 1006;
 
-    _closed.send();
+    if( ! started )
+        _closed.send();
 }
 
 
@@ -985,12 +1005,18 @@ void WebSocketChannel::onInput()
 
         stream->beginInput();
     }
-    catch(const std::exception&)
+    catch(...)
     {
+        if(_ended)
+            return;
+
         if(_closeCode == 0)
             _closeCode = 1006;
 
-        stream->close();
+        _inputError = std::current_exception();
+
+        if(_receiveOutstanding)
+            _inputReady.send();
     }
 }
 
@@ -1037,12 +1063,18 @@ void WebSocketChannel::onOutput()
 
         pumpOutput();
     }
-    catch(const std::exception&)
+    catch(...)
     {
+        if(_ended)
+            return;
+
         if(_closeCode == 0)
             _closeCode = 1006;
 
-        stream->close();
+        _outputError = std::current_exception();
+
+        if(_sendOutstanding)
+            _outputReady.send();
     }
 }
 

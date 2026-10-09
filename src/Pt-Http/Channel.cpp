@@ -35,7 +35,7 @@ void Channel::open(Stream& stream)
     if(_stream)
         throw std::logic_error("HTTP channel is already open");
 
-    stream.openChannel(*this);
+    stream.attachChannel(*this);
     _stream = &stream;
 }
 
@@ -48,14 +48,16 @@ void Channel::close()
     Stream* stream = _stream;
     _stream = 0;
 
-    stream->closeChannel(*this);
+    stream->cancel();
     stream->close();
+    
+    stream->detachChannel(*this);
 }
 
 
 void Channel::closeStream(Stream& stream)
 {
-    _stream = 0;
+    _stream = 0; 
     onCloseStream(stream);
 }
 
