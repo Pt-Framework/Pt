@@ -8,8 +8,7 @@ description: "Design proposals that lead implementation"
 A proposal is a set of proposal files with one index file. It lets
 architecture and API design run ahead of implementation and records the
 current state of that implementation. It is not API documentation and
-not a second source of truth for an implemented surface. Stable models
-may be captured as concepts.
+not a second source of truth for an implemented surface.
 
 ## Proposal layout
 
@@ -41,8 +40,6 @@ proposal: websocket.md
 ---
 ```
 
-Concepts do not carry frontmatter that points at proposals.
-
 File names are lowercase with hyphens. ASCII only.
 
 # Workflow
@@ -51,7 +48,7 @@ File names are lowercase with hyphens. ASCII only.
 - Add a proposal file in `doc/proposals/` for a coherent design topic,
   set its `proposal` frontmatter, and link it from the index Documents
   section. Keep it focused on the model (public surface, ownership,
-  lifetime, failure handling, rules). Do not let it grow into a task
+  lifetime, failure handling, rules, etc...). Do not let it grow into a task
   narrative.
 - When a stable model is worth keeping, write or update a concept in
   `doc/concepts/` and link it from the index. Concepts do not start in
