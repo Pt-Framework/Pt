@@ -84,14 +84,3 @@ are not collected as script state.
 
 One context is not required to run two top-level scripts at the same
 time, except as far as nested loading needs a defined rule.
-
-## Out of scope
-
-This model does not require a second scripting language, a replacement
-for the Reflex catalog, a debugger interface, a package manager, or a
-change of Lua version. It does not require operating-system isolation.
-Bytecode loading is not required; if added later, it uses the same
-host-controlled loader as source loading.
-
-Efficiency of context reset and cleanup of binding storage are
-implementation concerns. They are not separate capabilities.
