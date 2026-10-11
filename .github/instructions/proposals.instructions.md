@@ -32,8 +32,8 @@ From the index:
 - the other proposal files of the set also live flat in
   `doc/proposals/`.
 
-Proposal files and concepts carry frontmatter that names the proposal
-they belong to:
+Proposal files carry frontmatter that names the proposal they belong
+to:
 
 ```yaml
 ---
@@ -41,7 +41,7 @@ proposal: websocket.md
 ---
 ```
 
-A concept used by more than one proposal lists every index file.
+Concepts do not carry frontmatter that points at proposals.
 
 File names are lowercase with hyphens. ASCII only.
 
@@ -54,8 +54,8 @@ File names are lowercase with hyphens. ASCII only.
   lifetime, failure handling, rules). Do not let it grow into a task
   narrative.
 - When a stable model is worth keeping, write or update a concept in
-  `doc/concepts/`, set its `proposal` frontmatter, and link it from the
-  index. Concepts do not start in `doc/proposals/`.
+  `doc/concepts/` and link it from the index. Concepts do not start in
+  `doc/proposals/` and do not point back at proposals.
 - Record open implementation steps as anchors in the index Open section.
 - Load the index first, then only the linked concepts and the proposal
   files the task needs.
