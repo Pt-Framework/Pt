@@ -39,44 +39,28 @@ From the index:
 
 File names are lowercase with hyphens. ASCII only.
 
-# Creating proposals
+# Workflow
 
-- Start from the index file of the feature. Create it if it does not
-  exist yet.
-- Add a proposal file directly in `doc/proposals/` for a coherent
-  design topic. Link it from the index.
-- Write the proposal so that its stable model can become a concept if
-  one is useful: public surface, ownership, lifetime, failure handling,
-  and the rules that must hold.
-- Keep each proposal focused. Do not let it grow into a long narrative
-  of every task.
-- When a concept is useful, place or update it in `doc/concepts/` and
-  link it from the index.
-- Record open implementation steps in the feature's implementation
-  topic. Link them from the Open section of the index.
-- Do not restate already implemented behavior. Point at the existing
-  class chapter, group chapter, guide page, or concept instead.
-- Do not invent conventions. Follow existing framework patterns unless
-  the proposal explicitly improves them.
-
-# Working through proposals
-
-- Load the index first.
-- Then load the concept (if it exists) and only the implementation-topic
-  sections (or proposal files) the current task needs.
-- Do not load the whole `doc/proposals/` or `doc/concepts/` tree.
-- When a concept exists, treat it as the design to implement against.
-  Prefer it over a local minimal change when the local change would
-  weaken the model.
-- Documents may be revised at any time. Update the proposal, concept,
-  or implementation topic when the work reveals a necessary adjustment.
-- When an implementation point is finished:
-  - remove it from the proposal and from the implementation topic,
-  - move any newly stable public rules into the matching class chapter,
-    group chapter, or guide page,
-  - leave the concept in place if one exists.
+- Start from the index. Create it if it does not exist.
+- Add a proposal file in `doc/proposals/` for a coherent design topic
+  and link it from the index. Keep it focused on the model (public
+  surface, ownership, lifetime, failure handling, rules). Do not let it
+  grow into a task narrative.
+- When a concept is useful, place it in `doc/concepts/` and link it from
+  the index.
+- Record open implementation steps in the implementation topic and link
+  them from the index Open section.
+- Load the index first, then only the concept (if any) and the
+  implementation-topic sections or proposal files the task needs.
+- When a concept exists, prefer it over a local minimal change that
+  would weaken the model.
+- Documents may be revised at any time.
+- When an implementation point is finished, remove it from the proposal
+  and the implementation topic. Move newly stable public rules into the
+  matching class chapter, group chapter, or guide page.
 - When a proposal has no remaining open points it may be deleted. The
   index and any concept stay.
 - For an already implemented surface, prefer the matching instruction
-  file, the Doxygen chapters, and the concept (if present) over any
-  remaining proposal text.
+  file, the Doxygen chapters, and the concept (if present).
+- Do not restate already implemented behavior. Do not invent
+  conventions.
