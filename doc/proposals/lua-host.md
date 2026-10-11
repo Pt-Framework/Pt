@@ -29,3 +29,17 @@
 
 - [nested-load](lua-host-loading.md#nested-load).
   How nested loading interacts with one script per context.
+
+## Priority
+
+The first architecture should cover reading results, supplying values,
+and distinguishable errors. Those three close the gap that makes a
+script unable to exchange real values with the host.
+
+Calling Lua, tables, synchronous free functions, and multiple values
+are the next slice. They are what ordinary scripts already assume.
+
+Callbacks, host-controlled loading, standard library selection, and the
+full integer range follow. They matter for untrusted scripts and for
+larger script collections, and they depend on the conversion and
+lifetime rules chosen first.
