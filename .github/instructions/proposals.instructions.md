@@ -31,6 +31,8 @@ From the index:
 - the other proposal files of the set also live flat in
   `doc/proposals/`.
 
+File names are lowercase with hyphens. ASCII only.
+
 Proposal files carry frontmatter that names the proposal they belong
 to:
 
@@ -39,8 +41,6 @@ to:
 proposal: websocket.md
 ---
 ```
-
-File names are lowercase with hyphens. ASCII only.
 
 # Workflow
 
