@@ -10,11 +10,12 @@ A proposal is not API documentation and not a second source of truth
 for an implemented surface.
 
 The intention is that architecture and API design can run ahead of
-code. A proposal may have a corresponding concept file in
-`doc/concepts/` (optional, at most one). Open implementation steps are
-recorded as anchors in the index. Documents may be changed at any time.
-Implemented points are removed from the proposal and the index once
-finished. When a proposal is complete it may be deleted.
+code. Concepts live only in `doc/concepts/`. They are optional. An
+index may link to one or more concepts (its own or others). Open
+implementation steps are recorded as anchors in the index. Documents
+may be changed at any time. Implemented points are removed from the
+proposal and the index once finished. When a proposal is complete it
+may be deleted.
 
 ## Proposal layout
 
@@ -23,15 +24,16 @@ All proposal files live directly in `doc/proposals/` (no subdirectories).
 An index file (for example `websocket.md`) is the entry point for a
 feature. It stays thin and contains:
 
-- a short list of related documents (concept if present, and any
-  still-active proposal files),
+- a short list of related documents (concepts from `doc/concepts/`, and
+  any still-active proposal files),
 - an Open section whose items are anchors in the index itself (or link
   to anchors in a proposal file).
 
 From the index:
 
-- the concept, when it exists, lives in `doc/concepts/` (at most one
-  concept file per proposal),
+- concepts live only in `doc/concepts/`. A concept is recognized by its
+  location and by being linked from the index. Multiple concepts are
+  allowed,
 - individual proposal files, while they still exist, also live flat in
   `doc/proposals/`.
 
@@ -44,10 +46,11 @@ File names are lowercase with hyphens. ASCII only.
   and link it from the index. Keep it focused on the model (public
   surface, ownership, lifetime, failure handling, rules). Do not let it
   grow into a task narrative.
-- When a concept is useful, place it in `doc/concepts/` and link it from
-  the index.
+- When a stable model is worth keeping, write or update a concept in
+  `doc/concepts/` and link it from the index. Concepts do not start in
+  `doc/proposals/`.
 - Record open implementation steps as anchors in the index Open section.
-- Load the index first, then only the concept (if any) and the proposal
+- Load the index first, then only the linked concepts and the proposal
   files the task needs.
 - When a concept exists, prefer it over a local minimal change that
   would weaken the model.
@@ -56,8 +59,8 @@ File names are lowercase with hyphens. ASCII only.
   and from the index. Move newly stable public rules into the matching
   class chapter, group chapter, or guide page.
 - When a proposal has no remaining open points it may be deleted. The
-  index and any concept stay.
+  index and any concepts stay.
 - For an already implemented surface, prefer the matching instruction
-  file, the Doxygen chapters, and the concept (if present).
+  file, the Doxygen chapters, and the linked concepts.
 - Do not restate already implemented behavior. Do not invent
   conventions.
