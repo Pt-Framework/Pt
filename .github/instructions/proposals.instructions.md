@@ -8,7 +8,8 @@ description: "Design proposals that lead implementation"
 A proposal is a set of proposal files with one index file. It lets
 architecture and API design run ahead of implementation and records the
 current state of that implementation. It is not API documentation and
-not a second source of truth for an implemented surface.
+not a second source of truth for an implemented surface. A proposal may
+refer to one or more implementation-neutral concepts.
 
 ## Proposal layout
 
@@ -50,8 +51,9 @@ proposal: websocket.md
   section. Keep it focused on the model (public surface, ownership,
   lifetime, failure handling, rules, etc...). Do not let it grow into a task
   narrative.
-- When a stable model is worth keeping, write or update a concept in
-  `doc/concepts/` and link it from the index.
+- When a stable, implementation-neutral model is worth keeping, write
+  or update a concept in `doc/concepts/` and link it from the index. A
+  concept states the model, not the implementation steps.
 - Record open implementation steps as anchors in the index Open section.
 - Load the index first, then only the linked concepts and the proposal
   files the task needs.
