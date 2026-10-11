@@ -5,13 +5,11 @@ description: "Design proposals that lead implementation"
 
 # Overview
 
-A proposal is a set of proposal files with one index file. It holds
-design that may precede implementation and records the current state of
-that implementation. It is not API documentation and not a second
-source of truth for an implemented surface.
-
-The intention is that architecture and API design can run ahead of
-code. Stable models may be captured as concepts.
+A proposal is a set of proposal files with one index file. It lets
+architecture and API design run ahead of implementation and records the
+current state of that implementation. It is not API documentation and
+not a second source of truth for an implemented surface. Stable models
+may be captured as concepts.
 
 ## Proposal layout
 
