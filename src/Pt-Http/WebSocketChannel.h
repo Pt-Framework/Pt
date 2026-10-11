@@ -54,8 +54,6 @@ class WebSocketChannel : public Channel
 
         void shutdown(unsigned code, const std::string& reason);
 
-        void close();
-
         unsigned closeCode() const
         { return _closeCode; }
 
@@ -78,7 +76,7 @@ class WebSocketChannel : public Channel
         void setIdleTimeout(std::size_t ms);
 
     protected:
-        virtual void onCloseStream(Stream& stream);
+        virtual void onClose();
 
     private:
         struct ControlFrame
@@ -141,6 +139,8 @@ class WebSocketChannel : public Channel
         void onOutput();
 
         void onIdleTimeout();
+
+        void passiveClose();
 
     private:
         bool _clientMask;

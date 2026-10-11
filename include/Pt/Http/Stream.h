@@ -48,14 +48,15 @@ class Channel;
     to that protocol. Application code uses %WebSocket on the client
     and %WebSocketSession on the server.
 
-    %close() ends this stream. It clears the channel pointer first
-    and then tells the channel that the stream ended, so a close
-    that runs from the channel destructor does not re-enter this
-    stream. While this stream is the only stream of the connection,
-    closing it also closes the connection. The server deletes that
+    %close() ends this stream. It calls %Channel::onDetachStream()
+    when a channel is still bound, and then leaves the connection.
+    That call does not close this stream again and does not emit a
+    protocol signal. While this stream is the only stream of the
+    connection, closing it also closes the connection. The server deletes that
     connection on its event loop, after the close that requested it
-    has returned. Destroying the stream tells the channel the same
-    way. The channel object stays, and its stream pointer is null.
+    has returned. Destroying the stream detaches the channel the
+    same way. The channel object stays, and its stream pointer is
+    null.
 
     %buffer() is the stream buffer of the connection. A channel
     formats into that buffer and extracts from it. The stream does not
@@ -96,8 +97,8 @@ class PT_HTTP_API Stream : public Connectable
     public:
         /** @brief Destructor.
 
-            Unbinds the channel and notifies it. Does not close the
-            connection. The connection deletes this stream.
+            Detaches the channel. Does not close the connection. The
+            connection deletes this stream.
         */
         ~Stream();
 
@@ -119,6 +120,8 @@ class PT_HTTP_API Stream : public Connectable
         /** @brief Ends this stream.
 
             Closes the connection while this stream is its only stream.
+            Detaches a still-bound channel without closing this stream
+            again.
         */
         void close();
 

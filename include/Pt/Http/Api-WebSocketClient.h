@@ -70,9 +70,10 @@
     calls it. %closed() is not emitted from the destructor.
     %closed() is emitted while this socket is still alive. The
     stream has already cleared its channel pointer. Peer close, an
-    I/O error, a close frame and destruction of the stream all emit
-    it. It ends an outstanding send or receive. The owner deletes
-    this socket. %setTimeout() bounds I/O after the upgrade. The
+    I/O end with no close frame, a close frame, and an idle timeout
+    emit it. Destruction of the stream detaches the channel and does
+    not emit it. It ends an outstanding send or receive. The owner
+    deletes this socket. %setTimeout() bounds I/O after the upgrade. The
     handshake still uses the timeout of the client.
 */
 

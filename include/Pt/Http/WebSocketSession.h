@@ -239,10 +239,11 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             This object is still alive. The service releases it after
             this call returns. Peer close, an idle timeout, and a
-            finished shutdown run this directly. An I/O error on an
-            outstanding receive or send runs %onInput() or %onOutput()
-            first, and the matching end throws, before this call.
-            Do not call %endReceive() or %endSend().
+            finished shutdown run this directly. Destruction of the
+            stream does not. An I/O error on an outstanding receive
+            or send runs %onInput() or %onOutput() first, and the
+            matching end throws, before this call. Do not call
+            %endReceive() or %endSend().
         */
         virtual void onClose() = 0;
 

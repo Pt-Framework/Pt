@@ -179,13 +179,14 @@ The connection is not a public type. There is no public
 name the connection. The client facade opens it after a finished 101.
 The server facade opens it in its constructor. Both forward
 `body()`, `beginSend()`, `beginReceive()`, `frame()`, ping, pong, and
-close. `Channel::close()` calls `Stream::close()` and then drops its
-stream pointer. It owns neither the stream nor the HTTP connection.
-`Stream::close()` cancels this stream, tells the connection, and then
-tells the channel through `onCloseStream()`. The stream does not
-clear the channel pointer. While this stream is the only stream of
-the HTTP connection, closing it also closes the connection. The
-connection stays alive until `Connection::closed()` returns.
+close. `Channel::close()` calls `Stream::close()`. It owns neither the
+stream nor the HTTP connection. `Stream::close()` cancels this
+stream, calls `Channel::onDetachStream()` when a channel is still
+bound, and then tells the connection. `onDetachStream()` runs
+`onClose()` and drops the stream pointer. It does not close the
+stream. While this stream is the only stream of the HTTP
+connection, closing it also closes the connection. The connection
+stays alive until `Connection::closed()` returns.
 
 ## Client {#wss-client}
 
@@ -413,11 +414,13 @@ its constructor, which accepts the upgrade.
 
 The HTTP `Stream` does not know `WebSocketSession` or
 `WebSocketServlet`. It knows the frame channel the session bound.
-`Stream::close()` tells that channel through `onCloseStream()`. When
-the channel had not already ended, the session tells the service from
-`onClose()`. `WebSocketSession::close()` marks the channel ended,
-calls `Stream::close()`, tells the service itself, and does not run
-`onClose()`. Either way the service tells the attached servlet, and
+`Stream::close()` calls `Channel::onDetachStream()` when a channel is
+still bound. That call does not emit `closed()`. A passive end emits
+through the channel, and the session tells the service from
+`onClose()` while the session is still alive.
+`WebSocketSession::close()` calls `Channel::close()`, tells the
+service itself, and does not run `onClose()`. Either way the service
+tells the attached servlet, and
 the servlet releases the session through `releaseSession()`. That
 call runs `onReleaseSession()` and drops the count. The destructor
 does not tell the service. It runs inside that release.
@@ -551,9 +554,11 @@ The order on the server is fixed.
 9. The derived constructor starts the first transfer.
 10. Frame callbacks run on the same loop until the stream ends.
 11. When the stream ends without a call to `close()`, `onClose()` runs
-    while the session is still alive. `Stream::close()` has told the
-    channel through `onCloseStream()`. An I/O error does not end the
-    stream. The matching callback runs, the matching end throws, and
+    while the session is still alive. The channel has closed the
+    stream and then emitted `closed()`. Destruction of the stream
+    detaches the channel and does not run `onClose()`. An I/O error
+    does not end the stream. The matching callback runs, the matching
+    end throws, and
     the derived session calls `close()`. `WebSocketSession::close()`
     tells the service in the same call and does not run `onClose()`.
 12. The service tells the attached `WebSocketServlet`. The servlet
@@ -568,8 +573,9 @@ the live sessions. The service owns the endpoint policy, the
 allocator, and the session count, and remains the factory. The
 session owns the frame channel as a member. The channel owns neither
 the stream nor the HTTP connection. `Channel::close()` calls
-`Stream::close()` and then drops its stream pointer. `Stream::close()`
-tells the connection, which detaches the stream. While that stream is
+`Stream::close()`. `Stream::close()` calls `Channel::onDetachStream()`
+when a channel is still bound, and then tells the connection, which
+detaches the stream. While that stream is
 the only stream of the HTTP connection, closing it also closes the
 connection and sends `Connection::closed()`. The connection stays
 alive until that slot returns. The server deletes that connection on

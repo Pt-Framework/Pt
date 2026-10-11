@@ -38,14 +38,16 @@ class Stream;
     does not derive this base for WebSocket. The client uses %WebSocket,
     and the server uses %WebSocketSession.
 
-    %open() and %close() are protected because the derived type owns the
-    handshake and the shutdown frame. %shutdown() writes that frame.
-    %close() releases the stream and does not write it. A public close
-    on this base would skip the frame.
+    %open() is protected because the derived type owns the handshake.
+    %shutdown() on that type writes the shutdown frame. %close() is
+    public. It releases the stream and does not write a frame. A close
+    that starts here calls %Stream::close(). A close that starts at
+    the stream calls %onDetachStream(). That call runs %onClose() and
+    drops the stream pointer. It does not close the stream. Neither
+    path emits a protocol signal.
 
-    The destructor unbinds and closes the stream. Destroying the stream
-    unbinds this channel and calls %onClose(). The channel object stays, and
-    %stream() is null. The two sides call each other through the peer pointer.
+    The destructor calls %close(). Destroying the stream calls
+    %onDetachStream(). The channel object stays, and %stream() is null.
     %isOpen() is false after either side ends.
 
     @ingroup Pt-Http-Servers
@@ -61,6 +63,13 @@ class PT_HTTP_API Channel : private NonCopyable
         bool isOpen() const
         { return _stream != 0; }
 
+        /** @brief Releases the bound stream.
+
+            Does nothing when no stream is bound. Closes the stream.
+            Does not write a protocol frame.
+        */
+        void close();
+
     protected:
         /** @brief Creates a channel with no stream.
         */
@@ -72,7 +81,7 @@ class PT_HTTP_API Channel : private NonCopyable
         */
         explicit Channel(Stream& stream);
 
-        /** @brief Unbinds and closes the stream.
+        /** @brief Releases the bound stream.
         */
         ~Channel();
 
@@ -83,27 +92,26 @@ class PT_HTTP_API Channel : private NonCopyable
         */
         void open(Stream& stream);
 
-        /** @brief Unbinds and closes the stream.
-
-            Does nothing when no stream is bound. The stream clears
-            its channel pointer before it ends, so a close that runs
-            from this destructor does not re-enter the stream.
-        */
-        void close();
-
         /** @brief Returns the bound stream, or null.
         */
         Stream* stream() const
         { return _stream; }
 
-    protected:
-        void closeStream(Stream& stream);
+        /** @brief Cleans up before the stream pointer is dropped.
 
-        /** @brief Called when the stream ends.
-
-            The stream pointer is already null.
+            Called by %onDetachStream() while this channel still holds
+            the stream pointer. Not called when no stream is bound.
+            The stream is still attached to its connection.
         */
-        virtual void onCloseStream(Stream& stream);
+        virtual void onClose();
+
+    private:
+        /** @brief Drops the stream after the stream detaches.
+
+            Does nothing when no stream is bound. Runs %onClose() and
+            drops the stream pointer. Does not close the stream.
+        */
+        void onDetachStream(Stream& stream);
 
     private:
         Stream* _stream;

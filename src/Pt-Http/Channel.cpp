@@ -46,18 +46,20 @@ void Channel::close()
         return;
 
     _stream->close();
-    _stream->detachChannel(*this);
+}
+
+
+void Channel::onDetachStream(Stream&)
+{
+    if( ! _stream )
+        return;
+
+    onClose();
     _stream = 0;
 }
 
 
-void Channel::closeStream(Stream& stream)
-{
-    onCloseStream(stream);
-}
-
-
-void Channel::onCloseStream(Stream& stream)
+void Channel::onClose()
 {
 }
 

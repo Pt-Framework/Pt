@@ -346,11 +346,8 @@ void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
 }
 
 
-void WebSocketChannel::close()
+void WebSocketChannel::onClose()
 {
-    if(_ended)
-        return;
-
     _ended = true;
     _opened = false;
     _receiveOutstanding = false;
@@ -362,10 +359,18 @@ void WebSocketChannel::close()
     _incoming.clear();
     _outgoing.clear();
 
-    if(_closeCode == 0)
+    if(_closeCode == 0 && ! _closeReceived)
         _closeCode = 1006;
+}
+
+
+void WebSocketChannel::passiveClose()
+{
+    if(_ended)
+        return;
 
     Channel::close();
+    _closed.send();
 }
 
 
@@ -407,32 +412,7 @@ void WebSocketChannel::setIdleTimeout(std::size_t ms)
 
 void WebSocketChannel::onIdleTimeout()
 {
-    if(_ended)
-        return;
-
-    if(_closeCode == 0)
-        _closeCode = 1006;
-
-    if( Stream* stream = this->stream() )
-        stream->close();
-}
-
-
-void WebSocketChannel::onCloseStream(Stream&)
-{
-    bool started = _ended;
-
-    _ended = true;
-    _opened = false;
-    _receiveOutstanding = false;
-    _sendOutstanding = false;
-    _sendStarted = false;
-
-    if( ! _closeReceived && _closeCode == 0)
-        _closeCode = 1006;
-
-    if( ! started )
-        _closed.send();
+    passiveClose();
 }
 
 
@@ -967,10 +947,7 @@ bool WebSocketChannel::onControlFrame()
     pumpOutput();
 
     if(_closeSent && _closeReceived && _outputState == OutputIdle)
-    {
-        if( Stream* stream = this->stream() )
-            stream->close();
-    }
+        passiveClose();
 
     return true;
 }
@@ -993,10 +970,7 @@ void WebSocketChannel::onInput()
     {
         if( stream->endInput() == 0 )
         {
-            if(_closeCode == 0)
-                _closeCode = 1006;
-
-            stream->close();
+            passiveClose();
             return;
         }
 
@@ -1038,7 +1012,7 @@ void WebSocketChannel::onOutput()
         {
             if(_closeSent && _closeReceived)
             {
-                stream->close();
+                passiveClose();
                 return;
             }
 
