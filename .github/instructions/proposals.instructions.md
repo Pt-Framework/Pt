@@ -19,8 +19,8 @@ A proposal is a set of proposal files headed by an index file (for
 example `websocket.md`). The index is the entry point. It stays thin
 and contains:
 
-- a short list of related documents (concepts from `doc/concepts/`, and
-  the other proposal files that belong to this proposal),
+- a Documents section that lists the other proposal files of this
+  proposal and any concepts,
 - an Open section whose items are anchors in the index itself (or link
   to anchors in a proposal file).
 
@@ -32,18 +32,30 @@ From the index:
 - the other proposal files of the set also live flat in
   `doc/proposals/`.
 
+Proposal files and concepts carry frontmatter that names the proposal
+they belong to:
+
+```yaml
+---
+proposal: websocket.md
+---
+```
+
+A concept used by more than one proposal lists every index file.
+
 File names are lowercase with hyphens. ASCII only.
 
 # Workflow
 
 - Start from the index of the proposal. Create it if it does not exist.
-- Add a proposal file in `doc/proposals/` for a coherent design topic
-  and link it from the index. Keep it focused on the model (public
-  surface, ownership, lifetime, failure handling, rules). Do not let it
-  grow into a task narrative.
+- Add a proposal file in `doc/proposals/` for a coherent design topic,
+  set its `proposal` frontmatter, and link it from the index Documents
+  section. Keep it focused on the model (public surface, ownership,
+  lifetime, failure handling, rules). Do not let it grow into a task
+  narrative.
 - When a stable model is worth keeping, write or update a concept in
-  `doc/concepts/` and link it from the index. Concepts do not start in
-  `doc/proposals/`.
+  `doc/concepts/`, set its `proposal` frontmatter, and link it from the
+  index. Concepts do not start in `doc/proposals/`.
 - Record open implementation steps as anchors in the index Open section.
 - Load the index first, then only the linked concepts and the proposal
   files the task needs.
