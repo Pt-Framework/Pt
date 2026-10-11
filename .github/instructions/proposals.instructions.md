@@ -5,18 +5,13 @@ description: "Design proposals that lead implementation"
 
 # Overview
 
-`doc/proposals/` holds design proposals that may precede implementation.
-A proposal is a set of proposal files with one index file. It is not API
-documentation and not a second source of truth for an implemented
-surface.
+A proposal is a set of proposal files with one index file. It holds
+design that may precede implementation and records the current state of
+that implementation. It is not API documentation and not a second
+source of truth for an implemented surface.
 
 The intention is that architecture and API design can run ahead of
-code. Concepts live only in `doc/concepts/`. They are optional. An
-index may link to one or more concepts (its own or others). Open
-implementation steps are recorded as anchors in the index. Documents
-may be changed at any time. Implemented points are removed from the
-proposal files and the index once finished. When a proposal is complete
-its remaining proposal files may be deleted.
+code. Stable models may be captured as concepts.
 
 ## Proposal layout
 
