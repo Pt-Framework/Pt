@@ -59,9 +59,9 @@ nor connection; it binds exclusively to the stream. `Channel::close()` calls
 the stream from the connection. `onDetachStream()` runs `onClose()` and drops
 the stream pointer. It does not close the stream. Neither call emits
 `closed()`. While that stream is the only stream of the connection, closing it
-also closes the connection. The connection stays alive until
-`Connection::closed()` returns. The owner deletes the connection after that
-slot returns. Closing the connection does not delete the stream.
+also closes the connection. The owner deletes the connection in the
+`Connection::closed()` slot, so that call returns after the connection
+is gone. Closing the connection does not delete the stream.
 
 ## Protocol Transitions
 

@@ -229,6 +229,8 @@ void Connection::closeStream(Stream& stream)
         return;
 
     close();
+
+    // NOTE: Owner may delete the connectiom
     _closed.send(*this);
 }
 

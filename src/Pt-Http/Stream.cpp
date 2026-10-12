@@ -58,6 +58,7 @@ void Stream::close()
     if(channel)
         channel->onDetachStream(*this);
 
+    // NOTE: Connection owns and deletes the stream
     if(connection)
         connection->closeStream(*this);
 }

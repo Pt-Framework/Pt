@@ -264,23 +264,6 @@ class ServerImpl : public Connectable
     {
     };
 
-    // Deletes a connection after its last stream has closed. The
-    // connection stays owned by ServerImpl until this handler runs,
-    // so a stream method still on the stack is not deleted under it.
-    class RemoveConnectionEvent : public Pt::BasicEvent<RemoveConnectionEvent>
-    {
-        public:
-            explicit RemoveConnectionEvent(Connection* connection)
-            : _connection(connection)
-            { }
-
-            Connection* connection() const
-            { return _connection; }
-
-        private:
-            Connection* _connection;
-    };
-
     typedef ServerThread::RemoveHandlerEvent RemoveHandlerEvent;
 
     public:
@@ -298,13 +281,11 @@ class ServerImpl : public Connectable
             {
                 loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onUpgrade);
                 loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onRemoveHandler);
-                loop->eventReceived() -= Pt::slot(*this, &ServerImpl::onRemoveConnection);
             }
 
             _serverSocket.setActive(eventLoop);
             eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onUpgrade);
             eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onRemoveHandler);
-            eventLoop.eventReceived() += Pt::slot(*this, &ServerImpl::onRemoveConnection);
         }
 
         std::size_t timeout() const
@@ -367,8 +348,6 @@ class ServerImpl : public Connectable
         void onHandlerUpgraded(Acceptor& handler);
 
         void onRemoveHandler(const RemoveHandlerEvent& ev);
-
-        void onRemoveConnection(const RemoveConnectionEvent& ev);
 
     private:
         struct ServletListEntry

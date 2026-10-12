@@ -935,7 +935,6 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         catch(const std::exception& e)
         {
             PT_LOG_WARN( "upgrade failed " << protocol << "): " << e.what() );
-            //stream.close();
             delete conn;
             delete handler;
             continue;
@@ -951,33 +950,17 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
 
 void ServerImpl::onConnectionClosed(Connection& conn)
 {
-    System::EventLoop* eventLoop = this->loop();
-    if( ! eventLoop )
-    {
-        delete &conn;
-        return;
-    }
-
-    RemoveConnectionEvent ev(&conn);
-    eventLoop->commitEvent(ev);
-}
-
-
-void ServerImpl::onRemoveConnection(const RemoveConnectionEvent& ev)
-{
-    Connection* conn = ev.connection();
-
     std::vector<Connection*>::iterator it;
     for(it = _upgradedConnections.begin(); it != _upgradedConnections.end(); ++it)
     {
-        if(*it == conn)
+        if(*it == &conn)
         {
             _upgradedConnections.erase(it);
             break;
         }
     }
 
-    delete conn;
+    delete &conn;
 }
 
 

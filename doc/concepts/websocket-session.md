@@ -185,8 +185,9 @@ stream, calls `Channel::onDetachStream()` when a channel is still
 bound, and then tells the connection. `onDetachStream()` runs
 `onClose()` and drops the stream pointer. It does not close the
 stream. While this stream is the only stream of the HTTP
-connection, closing it also closes the connection. The connection
-stays alive until `Connection::closed()` returns.
+connection, closing it also closes the connection. The server
+deletes the connection in the `Connection::closed()` slot, so that
+call returns after the connection is gone.
 
 ## Client {#wss-client}
 
@@ -577,10 +578,9 @@ the stream nor the HTTP connection. `Channel::close()` calls
 when a channel is still bound, and then tells the connection, which
 detaches the stream. While that stream is
 the only stream of the HTTP connection, closing it also closes the
-connection and sends `Connection::closed()`. The connection stays
-alive until that slot returns. The server deletes that connection on
-its event loop after the slot returns. Closing the connection does
-not delete the stream.
+connection and sends `Connection::closed()`. The server deletes
+that connection in the slot, so the call returns after the connection
+is gone. Closing the connection does not delete the stream.
 
 `onClose()` is the application's last look at the session when the
 stream ends without a call to `close()`. Domain objects that hold a

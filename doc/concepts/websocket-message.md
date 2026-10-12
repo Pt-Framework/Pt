@@ -411,9 +411,9 @@ the facade.
 of this stream, calls `Channel::onDetachStream()` when a channel is
 still bound, and then tells the connection. The connection detaches
 the stream. While this stream is the only stream of the connection,
-that also closes the connection. The connection stays alive until
-`Connection::closed()` returns. The server deletes it on the event
-loop after that slot returns. The client still owns its connection.
+that also closes the connection. The server deletes the connection
+in the `Connection::closed()` slot, so that call returns after the
+connection is gone. The client still owns its connection.
 Closing the connection does not delete the stream. The connection
 deletes a detached stream when it opens the next stream, and in its
 destructor.
@@ -610,8 +610,9 @@ stores the exception and leaves the stream open. The ready signal of
 the outstanding transfer runs, and the matching end throws. The
 application calls `close()`. `close()` and the destructor do not
 emit `closed()`. The last stream of a connection closes that
-connection. The connection stays alive until `Connection::closed()`
-returns. `closeCode()` and
+connection. The server deletes the connection in the
+`Connection::closed()` slot, so that call returns after the
+connection is gone. `closeCode()` and
 `closeReason()`
 report the handshake that ended the stream. An empty peer close is
 1005 unless a local code was already set. No close frame leaves the
