@@ -117,12 +117,7 @@ Connection::~Connection()
     while( ! _streams.empty() )
     {
         _streams.back()->close();
-    }
-
-    while( ! _closedStreams.empty() )
-    {
-        delete _closedStreams.back();
-        _closedStreams.pop_back();
+        //delete _streams.back();
     }
 
     close();
@@ -206,12 +201,6 @@ void Connection::setPeerName(const std::string& peer)
 
 Stream& Connection::openStream(const std::string& protocol)
 {
-    while( ! _closedStreams.empty() )
-    {
-        delete _closedStreams.back();
-        _closedStreams.pop_back();
-    }
-
     if( ! _streams.empty() )
         throw std::logic_error("HTTP connection already has a stream");
 
@@ -223,12 +212,6 @@ Stream& Connection::openStream(const std::string& protocol)
 
 void Connection::closeStream(Stream& stream)
 {
-    while( ! _closedStreams.empty() )
-    {
-        delete _closedStreams.back();
-        _closedStreams.pop_back();
-    }
-
     std::vector<Stream*>::iterator it;
     for(it = _streams.begin(); it != _streams.end(); ++it)
     {
@@ -239,8 +222,8 @@ void Connection::closeStream(Stream& stream)
     if( it == _streams.end() )
         return;
 
-    _closedStreams.push_back(*it);
     _streams.erase(it);
+    delete &stream;
 
     if( ! _streams.empty() )
         return;

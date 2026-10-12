@@ -44,19 +44,22 @@ void Stream::detachChannel(Channel& channel)
 
 void Stream::close()
 {
+    if( ! _connection && ! _channel )
+        return;
+
     cancel();
 
-    if(_channel)
-    {
-        _channel->onDetachStream(*this);
-        _channel = 0;
-    }
+    Connection* connection = _connection;
+    _connection = 0;
 
-    if(_connection)
-    {
-        _connection->closeStream(*this);
-        _connection = 0;
-    }
+    Channel* channel = _channel;
+    _channel = 0;
+
+    if(channel)
+        channel->onDetachStream(*this);
+
+    if(connection)
+        connection->closeStream(*this);
 }
 
 

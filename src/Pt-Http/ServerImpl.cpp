@@ -921,14 +921,12 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         }
 
         conn->setActive(*eventLoop);
-        conn->closed() += Pt::slot(*this, &ServerImpl::onConnectionClosed);
         conn->setTimeout(Connection::WaitInfinite);
         conn->setKeepAliveTimeout(Connection::WaitInfinite);
 
-        Stream& stream = conn->openStream(protocol);
-
         try
         {
+            Stream& stream = conn->openStream(protocol);
             service->onUpgrade(stream, handler->request(), handler->reply());
 
             if( ! stream.channel() )
@@ -937,12 +935,15 @@ void ServerImpl::onUpgrade(const UpgradeEvent& /*ev*/)
         catch(const std::exception& e)
         {
             PT_LOG_WARN( "upgrade failed " << protocol << "): " << e.what() );
-            stream.close();
+            //stream.close();
+            delete conn;
             delete handler;
             continue;
         }
 
         delete handler;
+
+        conn->closed() += Pt::slot(*this, &ServerImpl::onConnectionClosed);
         _upgradedConnections.push_back(conn);
     }
 }

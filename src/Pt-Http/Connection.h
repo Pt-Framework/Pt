@@ -310,7 +310,6 @@ class Connection : public Connectable
 
         Signal<Connection&> _closed;
         std::vector<Stream*> _streams;
-        std::vector<Stream*> _closedStreams;
 };
 
 } // namespace Http
