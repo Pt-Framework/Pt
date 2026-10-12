@@ -55,6 +55,9 @@ content is in context without having read it.
 - For Doxygen comments, public headers, API docs read:
   `.github/instructions/documenting.instructions.md`
 
+- For design proposals, implementation tasks in `doc/proposals/`, and concepts in `doc/concepts/` read:
+  `.github/instructions/proposals.instructions.md`
+
 - For creating or updating thematic instruction indexes that map topics to public headers read:
   `.github/instructions/api-index.instructions.md`
 

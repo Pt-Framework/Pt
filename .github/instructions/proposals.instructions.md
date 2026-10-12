@@ -1,5 +1,4 @@
 ---
-applyTo: "doc/proposals/**/*.md"
 description: "Design proposals that lead implementation"
 ---
 
@@ -11,7 +10,7 @@ current state of that implementation. It is not API documentation and
 not a second source of truth for an implemented surface. A proposal may
 refer to one or more implementation-neutral concepts.
 
-## Proposal layout
+# Layout
 
 All proposal files live directly in `doc/proposals/` (no subdirectories).
 
@@ -21,21 +20,21 @@ and contains:
 
 - a Documents section that lists the other proposal files of this
   proposal and any concepts,
-- an Open section whose items are anchors in the index itself (or link
-  to anchors in a proposal file).
+- an Open section. Each item links to a heading in a proposal file and
+  states the implementation task,
+- an optional Priority section that orders those tasks.
 
 From the index:
 
 - concepts live only in `doc/concepts/`. A concept is recognized by its
-  location and by being linked from the index. Multiple concepts are
-  allowed,
-- the other proposal files of the set also live flat in
-  `doc/proposals/`.
+  location and by being linked from the index. Several indexes may link
+  the same concept,
+- the other proposal files of the set also live flat in `doc/proposals/`.
 
 File names are lowercase with hyphens. ASCII only.
 
-Proposal files carry frontmatter that names the proposal they belong
-to:
+The index has no frontmatter. Proposal files carry frontmatter that names
+the proposal they belong to:
 
 ```yaml
 ---
@@ -43,9 +42,26 @@ proposal: websocket.md
 ---
 ```
 
+# Contents
+
+The set records the current state of the implementation against the
+model.
+
+The index lists that state. Each Open item is one implementation task
+the code does not follow yet. It links to the heading that states the
+model and says what to implement.
+
+A proposal file holds one design topic: the public surface, ownership,
+lifetime, failure handling, and rules. Where the implementation still
+differs, a Baseline section states that behavior.
+
+A concept holds the stable, implementation-neutral model. It has no
+Baseline and no Open items.
+
 # Workflow
 
-- Start from the index of the proposal. Create it if it does not exist.
+- Search `doc/proposals/` and `doc/concepts/` before creating an index,
+  a proposal file, or a concept. Extend the matching set.
 - Add a proposal file in `doc/proposals/` for a coherent design topic,
   set its `proposal` frontmatter, and link it from the index Documents
   section. Keep it focused on the model (public surface, ownership,
@@ -54,19 +70,21 @@ proposal: websocket.md
 - When a stable, implementation-neutral model is worth keeping, write
   or update a concept in `doc/concepts/` and link it from the index. A
   concept states the model, not the implementation steps.
-- Record open implementation steps as anchors in the index Open section.
+- Record an implementation task as an item in the index Open section.
+  Link it to the heading that states the model.
 - Load the index first, then only the linked concepts and the proposal
   files the task needs.
 - When a concept exists, prefer it over a local minimal change that
   would weaken the model.
 - Documents may be revised at any time.
-- When an implementation point is finished, remove it from the proposal
-  files and from the index. Move newly stable public rules into the
-  matching class chapter, group chapter, or guide page.
-- When a proposal has no remaining open points its proposal files may
+- When an Open task is implemented, remove the item from the index.
+  Leave the model in the proposal file or fold it into the concept.
+  Move a public rule into the matching class chapter, group chapter,
+  or guide page. Remove a Baseline once the implementation matches it.
+- When a proposal has no remaining open tasks its proposal files may
   be deleted. The index may stay or be removed with them. Any concepts
   stay.
-- For an already implemented surface, prefer the matching instruction
-  file, the Doxygen chapters, and the linked concepts.
-- Do not restate already implemented behavior. Do not invent
-  conventions.
+- While Open tasks remain, the proposal states the work. Instruction
+  files and Doxygen chapters state the current surface.
+- Do not copy behavior that already matches the model. A Baseline
+  states only behavior an Open task still changes.
