@@ -54,9 +54,8 @@ class Channel;
     protocol signal. While this stream is the only stream of the
     connection, closing it also closes the connection. The server deletes that
     connection on its event loop, after the close that requested it
-    has returned. Destroying the stream detaches the channel the
-    same way. The channel object stays, and its stream pointer is
-    null.
+    has returned. The destructor calls %close(). The channel object
+    stays, and its stream pointer is null.
 
     %buffer() is the stream buffer of the connection. A channel
     formats into that buffer and extracts from it. The stream does not
@@ -95,10 +94,10 @@ class PT_HTTP_API Stream : public Connectable
     friend class Channel;
 
     public:
-        /** @brief Destructor.
+        /** @brief Calls %close().
 
-            Detaches the channel. Does not close the connection. The
-            connection deletes this stream.
+            Ends this stream. Closes the connection while this stream
+            is its only stream. Detaches a still-bound channel.
         */
         ~Stream();
 
