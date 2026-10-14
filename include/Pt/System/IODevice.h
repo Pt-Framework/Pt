@@ -56,7 +56,9 @@ namespace System {
     device must be attached to an %EventLoop with setActive(). When
     the transfer finishes, inputReady or outputReady is emitted.
     endRead() and endWrite() complete the operation and return the
-    number of bytes. Only one read and one write may run at a time.
+    number of bytes. One read and one write may run concurrently and
+    complete independently; starting a second read or a second write
+    before the first of that same direction ends is rejected.
 
     Some devices can seek. seekable() reports that. seek() and
     position() throw %IOError when the device cannot seek. peek()

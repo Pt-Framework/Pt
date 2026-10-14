@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -43,8 +43,9 @@ namespace System {
 IODeviceImpl::IODeviceImpl(IODevice& device)
 : _ioh(device)
 , _timeout(System::EventLoop::WaitInfinite)
-, _errorPending(false)
-{ 
+, _readErrorPending(false)
+, _writeErrorPending(false)
+{
 }
 
 
@@ -76,7 +77,7 @@ void IODeviceImpl::open(int fd, bool inherit)
     int ret = fcntl(this->fd(), F_SETFL, flags);
     if(-1 == ret)
         throw IOError("fcntl O_NONBLOCK failed");
-    
+
     if ( ! inherit)
     {
         int flags = fcntl(this->fd(), F_GETFD);
@@ -101,7 +102,8 @@ void IODeviceImpl::close()
 
     if( this->isOpen() )
     {
-        _errorPending = false;
+        _readErrorPending = false;
+        _writeErrorPending = false;
 
         //if(loop)
         //    loop->impl().disable(_ioh);
@@ -136,7 +138,7 @@ void IODeviceImpl::cancel(EventLoop& loop)
 std::size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     PT_LOG_DEBUG("begin read on fd:" << _ioh.fd);
-    
+
     for(;;)
     {
         ssize_t ret = ::read( _ioh.fd, (void*)buffer, n);
@@ -171,9 +173,9 @@ std::size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, 
 
     loop.selector().endRead( &_ioh );
 
-    if (_errorPending)
+    if (_readErrorPending)
     {
-        _errorPending = false;
+        _readErrorPending = false;
         throw IOError("read error");
     }
 
@@ -239,7 +241,7 @@ std::size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::s
         if(errno != EINTR)
             throw System::IOError("write failed");
     }
-    
+
     loop.selector().beginWrite( &_ioh );
     return 0;
 }
@@ -251,9 +253,9 @@ std::size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::siz
 
     loop.selector().endWrite( &_ioh );
 
-    if (_errorPending)
+    if (_writeErrorPending)
     {
-        _errorPending = false;
+        _writeErrorPending = false;
         throw IOError("write error");
     }
 
@@ -308,7 +310,7 @@ bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* e
     do
     {
         ret = ::select(FD_SETSIZE, rfds, wfds, efds, timeout);
-    } 
+    }
     while (ret == -1 && errno == EINTR);
 
     if (ret == -1)
@@ -337,7 +339,7 @@ bool IODeviceImpl::runRead(EventLoop& loop)
 
     if ( selector.isError(&_ioh) )
     {
-        _errorPending = true;
+        _readErrorPending = true;
         return true;
     }
 
@@ -357,7 +359,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
 
     if ( selector.isError(&_ioh) )
     {
-        _errorPending = true;
+        _writeErrorPending = true;
         return true;
     }
 

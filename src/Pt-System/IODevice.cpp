@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2004-2013 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -69,13 +69,13 @@ void IODevice::beginRead(char* buffer, std::size_t n)
     if( ! loop )
         throw std::logic_error("I/O device not active");
 
-    if (_rbuf || _wbuf)
+    if (_rbuf)
         throw IOError("I/O operation pending");
 
     std::size_t r = this->onBeginRead(*loop, buffer, n, _eof);
 
     if(r > 0 || _eof)
-        loop->setReady(*this); 
+        loop->setReady(*this);
 
     _rbuf = buffer;
     _rbuflen = n;
@@ -122,7 +122,7 @@ std::size_t IODevice::endRead()
 
 std::size_t IODevice::read(char* buffer, std::size_t n)
 {
-    if( _rbuf || _wbuf)
+    if( _rbuf )
         throw IOError("I/O operation pending");
 
     return this->onRead(buffer, n, _eof);
@@ -135,13 +135,13 @@ void IODevice::beginWrite(const char* buffer, std::size_t n)
     if( ! loop )
         throw std::logic_error("I/O device not active");
 
-    if (_wbuf || _rbuf)
+    if (_wbuf)
         throw IOError("I/O operation pending");
 
     std::size_t r = this->onBeginWrite(*loop, buffer, n);
 
     if(r > 0)
-        loop->setReady(*this); 
+        loop->setReady(*this);
 
     _wbuf = buffer;
     _wbuflen = n;
@@ -188,7 +188,7 @@ std::size_t IODevice::endWrite()
 
 std::size_t IODevice::write(const char* buffer, std::size_t n)
 {
-    if( _rbuf || _wbuf)
+    if( _wbuf )
         throw IOError("I/O operation pending");
 
     return this->onWrite(buffer, n);
@@ -212,32 +212,32 @@ IODevice::pos_type IODevice::seek(off_type offset, seekdir sd)
 
 
 std::size_t IODevice::peek(char* buffer, std::size_t n)
-{ 
-    return this->onPeek(buffer, n); 
+{
+    return this->onPeek(buffer, n);
 }
 
 
 void IODevice::sync()
-{ 
-    return this->onSync(); 
+{
+    return this->onSync();
 }
 
 
 IODevice::pos_type IODevice::position()
-{ 
-    return this->seek(0, std::ios::cur); 
+{
+    return this->seek(0, std::ios::cur);
 }
 
 
 bool IODevice::isEof() const
-{ 
-    return _eof; 
+{
+    return _eof;
 }
 
 
 void IODevice::setEof(bool eof)
-{ 
-    _eof = eof; 
+{
+    _eof = eof;
 }
 
 

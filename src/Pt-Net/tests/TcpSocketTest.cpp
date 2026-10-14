@@ -66,6 +66,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
           this->registerMethod("ConnectFailed", *this,
                                &TcpSocketTest::ConnectFailed);
+
+          this->registerMethod("ConcurrentReadWrite", *this,
+                               &TcpSocketTest::ConcurrentReadWrite);
         }
 
         void setUp()
@@ -336,11 +339,78 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(n > 5);
         }
 
+        void ConcurrentReadWrite()
+        {
+            // a beginRead and a beginWrite on the same connected socket must
+            // run concurrently; only a second call in the same direction is rejected
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(9000);
+            Pt::Net::TcpServer server(ep);
+
+            server.connectionPending() += Pt::slot(*this, &TcpSocketTest::onAcceptAndBeginRead);
+            server.setActive(*_loop);
+            server.beginAccept();
+
+            _acceptor->inputReady() += Pt::slot(*this, &TcpSocketTest::onEchoInput);
+            _acceptor->outputReady() += Pt::slot(*this, &TcpSocketTest::onEchoOutput);
+            _acceptor->setActive(*_loop);
+
+            Pt::Net::TcpSocket client;
+            client.connected() += Pt::slot(*this, &TcpSocketTest::onConnectAndBeginReadWrite);
+            client.outputReady() += Pt::slot(*this, &TcpSocketTest::onClientOutput);
+            client.inputReady() += Pt::slot(*this, &TcpSocketTest::onClientInput);
+            client.setActive(*_loop);
+
+            client.beginConnect( Pt::Net::Endpoint::ip4Loopback(9000) );
+
+            _loop->run();
+
+            PT_UNIT_ASSERT( 0 == std::strncmp(echoBuf, "Hello World !!!", 15) );
+        }
+
+        void onConnectAndBeginReadWrite(Pt::Net::TcpSocket& socket)
+        {
+            socket.endConnect();
+
+            static const char buffer[] = "Hello World !!!";
+            std::memcpy(writeBuf, buffer, sizeof(buffer));
+
+            PT_UNIT_ASSERT_NOTHROW( socket.beginWrite(writeBuf, sizeof(buffer)) );
+            PT_UNIT_ASSERT_NOTHROW( socket.beginRead(echoBuf, sizeof(echoBuf)) );
+
+            // same direction must still be rejected while one of it is pending
+            PT_UNIT_ASSERT_THROW( socket.beginRead(echoBuf, sizeof(echoBuf)), Pt::System::IOError );
+            PT_UNIT_ASSERT_THROW( socket.beginWrite(writeBuf, sizeof(buffer)), Pt::System::IOError );
+        }
+
+        void onClientOutput(Pt::System::IODevice& device)
+        {
+            device.endWrite();
+        }
+
+        void onClientInput(Pt::System::IODevice& device)
+        {
+            device.endRead();
+            _loop->exit();
+        }
+
+        void onEchoInput(Pt::System::IODevice& device)
+        {
+            std::size_t n = device.endRead();
+            PT_UNIT_ASSERT_NOTHROW( device.beginWrite(input, n) );
+        }
+
+        void onEchoOutput(Pt::System::IODevice& device)
+        {
+            device.endWrite();
+        }
+
     private:
         Pt::Net::TcpSocket* _acceptor;
         Pt::Net::TcpSocket* _client;
         Pt::System::MainLoop* _loop;
         char input[200];
+        char writeBuf[200];
+        char echoBuf[200];
 };
 
 Pt::Unit::RegisterTest<TcpSocketTest> register_TcpSocketTest;

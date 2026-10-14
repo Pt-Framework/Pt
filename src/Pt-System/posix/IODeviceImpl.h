@@ -76,7 +76,7 @@ namespace System {
             virtual size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
 
             virtual size_t write( const char* buffer, size_t count );
-            
+
             virtual void sync() const;
 
             bool runRead(EventLoop& loop);
@@ -88,7 +88,8 @@ namespace System {
         protected:
             IOHandle    _ioh;
             std::size_t _timeout;
-            bool        _errorPending;
+            bool        _readErrorPending;
+            bool        _writeErrorPending;
     };
 
 } //namespace System

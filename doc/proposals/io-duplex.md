@@ -8,10 +8,6 @@
 
 ## Open
 
-- [cross-direction-guard](io-duplex-device.md#cross-direction-guard).
-  IODevice::beginRead/read and beginWrite/write reject a call whenever
-  the other direction is pending, not just the same direction.
-
 - [offset-coupling](io-duplex-device.md#offset-coupling).
   OverlappedIODeviceImpl advances both the read and the write OVERLAPPED
   offset after either operation completes, coupling the two directions
@@ -29,12 +25,8 @@
 
 ## Priority
 
-The device guard is the foundation: nothing above it can be full
-duplex while IODevice itself serializes read against write. It is a
-small, low-risk change confined to IODevice.cpp.
-
-The SSL want-write handling follows. It makes the data phase of an
-already full-duplex-capable layer robust against protocol-internal
+The SSL want-write handling comes first. It makes the data phase of
+an already full-duplex-capable layer robust against protocol-internal
 interleaving, without touching the existing reentrancy guard.
 
 The offset coupling in the Windows overlapped implementation only
