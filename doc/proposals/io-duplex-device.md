@@ -36,13 +36,29 @@ instances (pipes), so no device currently needs its own override.
 
 ## Offset coupling {#offset-coupling}
 
-OverlappedIODeviceImpl::endRead() advances both _readOv.Offset and
-_writeOv.Offset by the number of bytes read, and the write path
-advances both the same way. This assumes one shared, sequential file
-position used by both directions. That assumption is harmless for a
-device that is not seekable (socket, pipe, serial port) and wrong for
-a seekable device driven with concurrent, independently positioned
-read and write. FileDeviceImpl must decide whether it keeps one
-coupled position, which forces sequential, non-overlapping use of read
-and write, or gives each direction its own offset once concurrent read
-and write are allowed on a seekable device.
+OverlappedIODeviceImpl currently advances both _readOv.Offset and
+_writeOv.Offset after either a read or a write completes. This couples
+the two directions to one shared sequential position. The coupling is
+harmless for non-seekable devices and wrong for a seekable device that
+allows concurrent, independently positioned read and write.
+
+Each direction keeps its own offset. A read advances only the read
+OVERLAPPED offset; a write advances only the write OVERLAPPED offset.
+Both offsets are 64-bit (Offset + OffsetHigh).
+
+seek sets both offsets to the same absolute position. position() and
+seek(0, ios::cur) return the read offset as the public current
+position. On Windows the implementation must not use the OS file
+pointer as the source of the current position: ReadFile and WriteFile
+with OVERLAPPED do not update it. The OVERLAPPED offsets are the
+source of truth. After computing a new absolute position, both offsets
+are set and the file pointer may be synchronized with SetFilePointer
+for compatibility.
+
+IOBuffer::seekoff ends any pending transfer, calls the device seek,
+and discards its buffers. The next transfer in either direction
+therefore starts from the common position established by the seek.
+
+This replaces the coupled advances in OverlappedIODeviceImpl and the
+WCE FileDeviceImpl path, and makes FileDeviceImpl::seek and
+position() consistent with independent offsets.
