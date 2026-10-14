@@ -9,9 +9,10 @@
 ## Open
 
 - [offset-coupling](io-duplex-device.md#offset-coupling).
-  OverlappedIODeviceImpl advances both the read and the write OVERLAPPED
-  offset after either operation completes, coupling the two directions
-  for seekable files.
+  OverlappedIODeviceImpl advances both OVERLAPPED offsets after either
+  direction completes, and position()/seek(0, cur) reads the stale OS
+  file pointer. Give each direction its own offset and make the read
+  offset the public current position.
 
 - [ssl-want-write](io-duplex-transforms.md#ssl-want-write).
   Connection::read and Connection::write (openssl, mbedtls) treat the
