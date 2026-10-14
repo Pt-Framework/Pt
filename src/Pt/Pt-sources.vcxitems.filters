@@ -85,9 +85,6 @@
     <Filter Include="Pt-Ssl\openssl">
       <UniqueIdentifier>{f77f44cd-6a30-4bfc-9f3f-d9824a71879b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Ssl\applessl">
-      <UniqueIdentifier>{f1fe6224-a86d-4479-8865-c69c3a7dc308}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Ssl\nossl">
       <UniqueIdentifier>{cc68e034-c172-4659-9704-170615bce7cb}</UniqueIdentifier>
     </Filter>
@@ -983,15 +980,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\openssl\ContextImpl.cpp">
       <Filter>Pt-Ssl\openssl</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\Connection.cpp">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\ContextImpl.cpp">
-      <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>
@@ -3130,18 +3118,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\openssl\OpenSsl.h">
       <Filter>Pt-Ssl\openssl</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\CertificateImpl.h">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\CertificateStoreImpl.h">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\Connection.h">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\ContextImpl.h">
-      <Filter>Pt-Ssl\applessl</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\nossl\CertificateImpl.h">
       <Filter>Pt-Ssl\nossl</Filter>

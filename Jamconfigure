@@ -780,25 +780,6 @@ if ! $(WITH_SSL) && --with-mbedtls in $(ARGV)
     }
 }
 
-if ! $(WITH_SSL) && ! $(PT_PREBUILT_ROOT)
-{
-    SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-framework Foundation -framework Security") ;
-
-    WITH_SSL = [ CheckBuildC++ "#include <Security/Security.h>"
-                               "int main() {"
-                               "SSLContextRef context;"
-                               "SSLNewContext(false, &context);"
-                               "return 0; }"
-                               : [ FIncludes $(SSL_INCLUDES) ]
-                               : $(SSL_CHECK_LINKLIBS) ] ;
-
-    if $(WITH_SSL)
-    {
-        PT_SSL_IMPL = "applessl" ;
-        SSL_LINKLIBS = $(SSL_CHECK_LINKLIBS) ;
-    }
-}
-
 if ! $(WITH_SSL)
 {
     if $(PT_PREBUILT_ROOT)

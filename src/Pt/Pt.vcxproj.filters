@@ -220,9 +220,6 @@
     <Filter Include="Pt-Ssl\openssl">
       <UniqueIdentifier>{b7f78de1-1275-4bb4-a253-2a4e535bb532}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Ssl\applessl">
-      <UniqueIdentifier>{b0dfeef0-38ae-40f4-9fe8-6fbecd47c9e6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Ssl\nossl">
       <UniqueIdentifier>{d78d41a4-081b-46aa-84be-d33112f88c32}</UniqueIdentifier>
     </Filter>
@@ -2429,18 +2426,6 @@
     </ClInclude>
     <ClInclude Include="..\Pt-Ssl\openssl\OpenSsl.h">
       <Filter>Pt-Ssl\openssl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Ssl\applessl\CertificateImpl.h">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Ssl\applessl\CertificateStoreImpl.h">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Ssl\applessl\Connection.h">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Pt-Ssl\applessl\ContextImpl.h">
-      <Filter>Pt-Ssl\applessl</Filter>
     </ClInclude>
     <ClInclude Include="..\Pt-Ssl\nossl\CertificateImpl.h">
       <Filter>Pt-Ssl\nossl</Filter>
@@ -5331,15 +5316,6 @@
     </ClCompile>
     <ClCompile Include="..\Pt-Ssl\openssl\ContextImpl.cpp">
       <Filter>Pt-Ssl\openssl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Ssl\applessl\CertificateStoreImpl.cpp">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Ssl\applessl\Connection.cpp">
-      <Filter>Pt-Ssl\applessl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Pt-Ssl\applessl\ContextImpl.cpp">
-      <Filter>Pt-Ssl\applessl</Filter>
     </ClCompile>
     <ClCompile Include="..\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>

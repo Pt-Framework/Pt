@@ -867,10 +867,6 @@
     <ClInclude Include="..\Pt-Net\win32\UdpSocketImpl.h" />
     <ClInclude Include="..\Pt-Qt\win32\ApplicationImpl.h" />
     <ClInclude Include="..\Pt-Qt\win32\MainLoopImpl.h" />
-    <ClInclude Include="..\Pt-Ssl\applessl\CertificateImpl.h" />
-    <ClInclude Include="..\Pt-Ssl\applessl\CertificateStoreImpl.h" />
-    <ClInclude Include="..\Pt-Ssl\applessl\Connection.h" />
-    <ClInclude Include="..\Pt-Ssl\applessl\ContextImpl.h" />
     <ClInclude Include="..\Pt-Ssl\nossl\CertificateImpl.h" />
     <ClInclude Include="..\Pt-Ssl\nossl\CertificateStoreImpl.h" />
     <ClInclude Include="..\Pt-Ssl\nossl\Connection.h" />
@@ -1662,9 +1658,6 @@
     <ClCompile Include="..\Pt-Soap\Responder.cpp" />
     <ClCompile Include="..\Pt-Soap\ServiceDeclaration.cpp" />
     <ClCompile Include="..\Pt-Soap\ServiceDefinition.cpp" />
-    <ClCompile Include="..\Pt-Ssl\applessl\CertificateStoreImpl.cpp" />
-    <ClCompile Include="..\Pt-Ssl\applessl\Connection.cpp" />
-    <ClCompile Include="..\Pt-Ssl\applessl\ContextImpl.cpp" />
     <ClCompile Include="..\Pt-Ssl\Certificate.cpp" />
     <ClCompile Include="..\Pt-Ssl\CertificateStore.cpp" />
     <ClCompile Include="..\Pt-Ssl\Context.cpp" />

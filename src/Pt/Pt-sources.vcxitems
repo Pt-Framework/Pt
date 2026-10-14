@@ -468,9 +468,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Soap\Responder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Soap\ServiceDeclaration.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Soap\ServiceDefinition.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\CertificateStoreImpl.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\Connection.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\ContextImpl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\Certificate.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\CertificateStore.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\Context.cpp" />
@@ -1349,10 +1346,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Net\win32\UdpSocketImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Qt\win32\ApplicationImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Qt\win32\MainLoopImpl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\CertificateImpl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\CertificateStoreImpl.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\Connection.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\applessl\ContextImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\nossl\CertificateImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\nossl\CertificateStoreImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\Pt-Ssl\nossl\Connection.h" />
