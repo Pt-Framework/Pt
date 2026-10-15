@@ -3,68 +3,54 @@ JAMBASE_TAR_JAM_INCLUDED = true ;
 
 TAR ?= tar ;
 
+# Tar <archive> : <files> : <archive-dir>
+#
+# Add files to archive. archive-dir is optional and becomes the
+# directory of every added member. Members default to mode 0666.
+# Adds archive to package and package-clean.
+#
 rule Tar
 {
-  local _tar    = $(1) ;
-  local _files  = $(2) ;
+  local _tar = $(1) ;
+  local _files = $(2) ;
   local _tmpdir = $(1:B)-tar ;
 
   $(<)_type = "Tar" ;
 
   Clean package-clean : $(_tar) ;
+
   Depends package : $(_tar) ;
-
-  ARCHIVE_NAME on $(_tar) = $(_tar) ;
-
-  local _all_stages ;
 
   for local f in $(_files)
   {
-    local _stage = $(f:BSG=$(_tar)-stage) ;
+    local _member = $(f:BSG=$(_tar)) ;
 
-    _all_stages += $(_stage) ;
-
-    Depends $(_stage) : $(f) ;
-    Depends $(_stage) : $(_tmpdir) ;
+    Depends $(_tar) : $(_member) ;
+    Depends $(_member) : $(f) ;
+    Depends $(_member) : $(_tmpdir) ;
     MkDir $(_tmpdir) ;
 
-    ARCHIVE_NAME   on $(_stage) = $(_tar) ;
-    ARCHIVE_DIR    on $(_stage) = "" ;
-    ARCHIVE_RIGHTS on $(_stage) = 0666 ;
+    ARCHIVE_RIGHTS on $(_member) = 0666 ;
+    ARCHIVE_OWNER on $(_member) = ;
+    ARCHIVE_GROUP on $(_member) = ;
+    ARCHIVE_NAME on $(_member) = $(_tar) ;
+    ARCHIVE_DIR on $(_member) = "" ;
 
     if $(3)
     {
-      ARCHIVE_DIR on $(_stage) = [ FDirName $(3) ] ;
+      ARCHIVE_DIR on $(_member) = [ FDirName $(3) ] ;
     }
 
-    TarCopy $(_stage) : $(f) ;
+    TarFile $(_member) : $(f) ;
   }
-
-  if ! [ on $(_tar) return $(TAR_CLEAN_REGISTERED) ]
-  {
-      TAR_CLEAN_REGISTERED on $(_tar) = true ;
-      local _clean = $(_tar:G=tar-clean) ;
-      NOTFILE $(_clean) ;
-      ALWAYS $(_clean) ;
-      STAGEDIR on $(_clean) = $(_tmpdir) ;
-      Depends package-clean : $(_clean) ;
-      TarClean $(_clean) ;
-  }
-
-  # Accumulate the default mode so TarBuild can iterate over known modes
-  # instead of scanning the staging tree on disk.
-  if ! 0666 in [ on $(_tar) return $(ARCHIVE_MODES) ] {
-    ARCHIVE_MODES on $(_tar) += 0666 ;
-  }
-
-  # All staging must complete before the archive is assembled.
-  # Pass $(_all_stages) as sources so 'actions together TarBuild' accumulates
-  # stages across multiple Tar calls for the same archive.
-  Depends $(_tar) : $(_all_stages) ;
-  TarBuild $(_tar) : $(_all_stages) ;
 }
 
 
+# Tar-MakeLocate <archive> : <directory>
+#
+# Locate archive and its temporary staging directory below directory.
+# Called by MakeLocate for targets created by Tar.
+#
 rule Tar-MakeLocate
 {
   local _tmpdir = $(1:B)-tar ;
@@ -74,95 +60,157 @@ rule Tar-MakeLocate
 }
 
 
+# TarMode <archive> : <files> : <mode>
+#
+# Set the archive mode for members added from files. Each file must
+# already have been declared for archive with Tar.
+#
 rule TarMode
 {
-  local _tar    = $(1) ;
-  local _files  = $(2) ;
+  local _tar = $(1) ;
+  local _files = $(2) ;
   local _rights = $(3) ;
 
   for local f in $(_files)
   {
-    # Mode is encoded in the staging path; set it on the _stage target so
-    # TarCopy places the file under the correct mode-named subdirectory.
-    ARCHIVE_RIGHTS on $(f:BSG=$(_tar)-stage) = $(_rights) ;
-  }
-
-  # Accumulate this mode so TarBuild knows which subdirectories to process.
-  if ! $(_rights) in [ on $(_tar) return $(ARCHIVE_MODES) ] {
-    ARCHIVE_MODES on $(_tar) += $(_rights) ;
+    local _member = $(f:BSG=$(_tar)) ;
+    ARCHIVE_RIGHTS on $(_member) = $(_rights) ;
   }
 }
 
 
-actions TarClean bind STAGEDIR
+# TarOwner <archive> : <files> : <owner>
+#
+# Set the archive owner name for members added from files. Each file
+# must already have been declared for archive with Tar. The selected
+# tar implementation must support the owner name.
+#
+rule TarOwner
 {
-    if exist "$(STAGEDIR)" ( rd /s /q "$(STAGEDIR)" )
+  local _tar = $(1) ;
+  local _files = $(2) ;
+  local _owner = $(3) ;
+
+  for local f in $(_files)
+  {
+    local _member = $(f:BSG=$(_tar)) ;
+    ARCHIVE_OWNER on $(_member) = --owner=$(_owner) ;
+  }
 }
 
 
-# Phase 1 — copy each file into tmpdir/<mode>/<dir>/.
-# All TarCopy invocations for the same archive run in parallel.
-actions quietly TarCopy bind ARCHIVE_NAME
+# TarGroup <archive> : <files> : <group>
+#
+# Set the archive group name for members added from files. Each file
+# must already have been declared for archive with Tar. The selected
+# tar implementation must support the group name.
+#
+rule TarGroup
 {
-  set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
-  set FILE_DIR=%TMP_DIR%\$(ARCHIVE_RIGHTS)\$(ARCHIVE_DIR)
+  local _tar = $(1) ;
+  local _files = $(2) ;
+  local _group = $(3) ;
 
-  if not exist "%FILE_DIR%" (
-    mkdir "%FILE_DIR%" 2> NUL
-  )
-
-  copy "$(2)" "%FILE_DIR%" > NUL
+  for local f in $(_files)
+  {
+    local _member = $(f:BSG=$(_tar)) ;
+    ARCHIVE_GROUP on $(_member) = --group=$(_group) ;
+  }
 }
 
 
-# Phase 2 — assemble the archive from the staging tree.
-# Iterates over ARCHIVE_MODES (pre-computed in Jam rules); one 'tar' invocation
-# per mode group. 'together' merges multiple Tar calls for the same archive.
-actions together TarBuild bind ARCHIVE_NAME
+if $(OS:L) = nt
 {
-  set CURRENT_DIR=%cd%
-  for /f "delims=" %%i in ("%CURRENT_DIR%") do set CURRENT_DIR=%%~pnxi
+  actions TarFile bind ARCHIVE_NAME
+  {
+    set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
+    set FILE_DIR=%TMP_DIR%\$(ARCHIVE_DIR)
+    set FILE_DIR=%FILE_DIR:/=\%
 
-  set ARCHIVE=%CURRENT_DIR%/$(ARCHIVE_NAME)
-  set ARCHIVE=%ARCHIVE:\=/%
+    if not exist "%FILE_DIR%" (
+      mkdir "%FILE_DIR%"
+    )
 
-  set TMP_DIR=$(ARCHIVE_NAME:DB)-tar
-  set TMP_DIR_FWD=%TMP_DIR:\=/%
+    if exist "$(>)\\" (
+      xcopy "$(>)" "%FILE_DIR%\\$(>:BS)" /E /I /Y > NUL
+    ) else (
+      copy "$(>)" "%FILE_DIR%" > NUL
+    )
 
-  if exist "%ARCHIVE%" del "%ARCHIVE%"
+    cd "%TMP_DIR%"
 
-  REM "." is the only directory argument GNU tar 1.13 can open on Windows.
-  REM A named directory such as "opt" fails with "Invalid argument". Passing
-  REM "." stores a "./" member, which --delete removes from every mode group.
-  for %%m in ($(ARCHIVE_MODES:J= )) do (
-    if exist "%TMP_DIR_FWD%/%%m" (
+    set FILE=$(>:BSD=$(ARCHIVE_DIR))
+    set FILE=%FILE:\=/%%
+
+    set ARCHIVE=../$(ARCHIVE_NAME:BS)
+    set ARCHIVE=%ARCHIVE:\=/%%
+
+    if exist "%ARCHIVE%" (
+      $(TAR) rf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS) $(ARCHIVE_OWNER) $(ARCHIVE_GROUP)
+    ) else (
+      $(TAR) cf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS) $(ARCHIVE_OWNER) $(ARCHIVE_GROUP)
+    )
+
+    if ERRORLEVEL 1 (
+      echo REPEATING $(2:BS) $(ARCHIVE_NAME:BS)
+      timeout /t 1 /nobreak > NUL
+
       if exist "%ARCHIVE%" (
-        $(TAR) rf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
+        $(TAR) rf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS) $(ARCHIVE_OWNER) $(ARCHIVE_GROUP)
       ) else (
-        $(TAR) cf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
-      )
-
-      if ERRORLEVEL 1 (
-        echo REPEATING %%m $(ARCHIVE_NAME:BS)
-        timeout /t 3 /nobreak > NUL
-
-        if exist "%ARCHIVE%" (
-          $(TAR) rf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
-        ) else (
-          $(TAR) cf "%ARCHIVE%" --mode=%%m -C "%TMP_DIR_FWD%/%%m" .
-        )
+        $(TAR) cf "%ARCHIVE%" "%FILE%" --mode=$(ARCHIVE_RIGHTS) $(ARCHIVE_OWNER) $(ARCHIVE_GROUP)
       )
     )
-  )
+  }
+}
 
-  if exist "%ARCHIVE%" (
-    $(TAR) --delete -f "%ARCHIVE%" .
-  )
+if $(OS:L) != nt
+{
+  actions TarFile bind ARCHIVE_NAME
+  {
+    set -e
 
-  REM Clean up staging tree now that the archive is complete.
-  if exist "%TMP_DIR%" (
-    rd /s/q "%TMP_DIR%"
-  )
+    TMP_DIR="$(ARCHIVE_NAME:DB)-tar"
+    FILE_DIR="$TMP_DIR/$(ARCHIVE_DIR)"
+    mkdir -p "$FILE_DIR"
+    if test -d "$(>)"; then
+      cp -R "$(>)" "$FILE_DIR"
+    else
+      cp "$(>)" "$FILE_DIR"
+    fi
+
+    CURRENT_DIR="$PWD"
+    cd "$TMP_DIR"
+
+    FILE="$(>:BSD=$(ARCHIVE_DIR))"
+    ARCHIVE="$CURRENT_DIR/$(ARCHIVE_NAME)"
+
+    if test -e "$ARCHIVE"; then
+      $(TAR) rf "$ARCHIVE" "$FILE" --mode=$(ARCHIVE_RIGHTS) $(ARCHIVE_OWNER) $(ARCHIVE_GROUP)
+    else
+      $(TAR) cf "$ARCHIVE" "$FILE" --mode=$(ARCHIVE_RIGHTS) $(ARCHIVE_OWNER) $(ARCHIVE_GROUP)
+    fi
+  }
+}
+
+if $(OS:L) = nt
+{
+  actions together Tar
+  {
+    set TMP_DIR=$(1:DB)-tar
+    REM echo REMOVE %TMP_DIR%
+
+    if exist "%TMP_DIR%" (
+      rd /s/q "%TMP_DIR%"
+    )
+  }
+}
+else
+{
+  actions together Tar
+  {
+    rm -rf "$(1:DB)-tar"
+  }
 }
 
 } # JAMBASE_TAR_JAM_INCLUDED
