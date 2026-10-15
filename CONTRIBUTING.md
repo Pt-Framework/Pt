@@ -25,7 +25,7 @@ To use separate GitHub credentials for repositories that share the same host,
 enable path-aware credential lookup:
 
 ```sh
-git config credential.github.com.useHttpPath true
+git config credential.useHttpPath true
 ```
 
 Add `--local` to apply these settings to this repository, or `--global` to
