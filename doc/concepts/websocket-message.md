@@ -22,7 +22,6 @@ message operations directly.
 This chapter covers:
 
 - [Purpose](#wsm-purpose)
-- [Current state](#wsm-current)
 - [Principles](#wsm-principles)
 - [WebSocketMessage](#wsm-message)
 - [Two directions](#wsm-directions)
@@ -56,40 +55,6 @@ fragments does not replace the data message. Platinum should do the
 same. The frame remains the encoding on the stream. It is not the
 object the application reads and writes.
 
-## Current state {#wsm-current}
-
-The frame engine is `WebSocketChannel`. `WebSocket` and
-`WebSocketSession` do not keep a payload of their own. Both forward
-the same frame operations to that connection.
-
-The connection exposes one `body()`. Send and receive share that
-stream and the payload buffer behind it. `beginSend(Frame)` writes
-whatever is buffered as one frame. `beginReceive()` parses one frame
-back into the same body. `frame()` is the opcode of that frame.
-`inputReady()` means the frame is complete.
-
-One `_state` on the connection covers the receive steps and the send.
-The handshake is a flag on the client socket, and it finishes before
-either transfer starts. A receive in progress cannot coexist with a
-send. `sendPing()`, `sendPong()`, and `close()` call `beginOutput()`
-and `endOutput()` on the stream directly, so a control write
-overwrites a data write that has not finished.
-
-The implementation always sets FIN on a written frame. A
-continuation opcode is not a public type. On input it becomes
-`Unknown`. `setMaxMessageSize()` limits one frame payload, not the
-reassembled message. The public unit is therefore a frame, and
-fragmentation is neither hidden nor implemented.
-
-A received ping or pong is delivered as that frame. `inputReady()`
-runs, and the engine does not answer. A received close does not
-become a frame the application reads. The parser calls `failStream()`
-as soon as the opcode is close, so the payload is not read and no
-status code or reason is kept.
-
-That surface cannot meet the stream contract, and it does not match
-the message model the rest of HTTP already uses.
-
 ## Principles {#wsm-principles}
 
 The public unit is a message. A message is text or binary. It has a
@@ -108,6 +73,17 @@ that begin is outstanding is an error. After an end that is not
 finished, the next begin continues the same message. After
 `finished()`, the next begin starts a new message. The other
 direction is unaffected.
+
+The input pump runs from open until the stream ends. It does not
+depend on `beginReceive()`. Controls and close are processed on every
+input step. Data payloads are delivered to `incoming()` and reported
+by `inputReady()` only when a receive is outstanding. The engine
+never cancels an outstanding input to start an output, or an
+outstanding output to start an input. `Stream` allows one of each.
+`beginSend()`, `ping()`, and `shutdown()` only enqueue and call the
+output pump. A control is written when the output channel is free,
+between data fragments, and it does not emit `outputReady()`.
+
 
 Fragmentation is an engine concern. The application never sees a
 continuation. `maxMessageSize()` is the limit of one data message,
@@ -653,3 +629,4 @@ session chapter. Incremental send with a completion flag is allowed later
 and is not the first surface. A separate unread-buffer or
 flow-control limit is later. The first size limit is
 `maxMessageSize()`.
+
