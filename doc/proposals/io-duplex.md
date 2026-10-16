@@ -8,21 +8,12 @@
 
 ## Open Tasks
 
-- [ssl-want-write](io-duplex-transforms.md#ssl-want-write).
-  Connection::read and Connection::write (openssl, mbedtls) treat the
-  cross-direction want-code as a hard failure instead of a retryable
-  state.
-
 - [codec-direction-state](io-duplex-transforms.md#codec-direction-state).
   ZBuffer and BasicTextBuffer hold one piece of transform state shared
   by both directions and silently discard the other direction's
   buffered data when they switch.
 
 ## Priority
-
-The SSL want-write handling comes first. It makes the data phase of
-an already full-duplex-capable layer robust against protocol-internal
-interleaving, without touching the existing reentrancy guard.
 
 The codec direction state is the largest change and the one with the
 least existing demand: zlib and text codec transforms are mostly used

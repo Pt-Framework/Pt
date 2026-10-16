@@ -6,20 +6,6 @@ proposal: io-duplex.md
 
 ## Baseline
 
-Ssl::Connection (openssl and mbedtls backends) tracks _isReading and
-_isWriting and makes the BIO callback of the direction currently
-marked false refuse to run: bioRead()/bioRecv() return a retry
-indication while _isWriting is true, and bioWrite()/bioSend() return
-one while _isReading is true. Connection::read() handles its own
-direction's want-code (SSL_ERROR_WANT_READ for openssl,
-MBEDTLS_ERR_SSL_WANT_READ for mbedtls) and end-of-stream, but not the
-cross-direction want-code (SSL_ERROR_WANT_WRITE /
-MBEDTLS_ERR_SSL_WANT_WRITE); it throws SslError instead.
-Connection::write() is the mirror case: it handles its own want-code
-but throws on the cross-direction one. writeHandshake() and
-readHandshake() already treat both want-codes as a normal, retryable
-outcome; only the data-phase read()/write() do not.
-
 ZBuffer holds one z_stream* _zstr used for both inflate (read) and
 deflate (write). import() and overflow() each call discard() and
 reinitialize _zstr for their own direction when the other direction's

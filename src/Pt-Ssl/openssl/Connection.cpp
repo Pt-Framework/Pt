@@ -50,7 +50,7 @@ int BIO_get_new_index()
 
 BIO_METHOD* BIO_meth_new(int type, const char* name)
 {
-    BIO_METHOD* m = new BIO_METHOD; 
+    BIO_METHOD* m = new BIO_METHOD;
     *m = {
 	      type, name,
 	      NULL,
@@ -156,7 +156,7 @@ int Connection::bio_create(BIO* bio)
 
 int Connection::bio_destroy(BIO* bio)
 {
-    if(bio == NULL) 
+    if(bio == NULL)
         return 0;
 
     return 1;
@@ -267,14 +267,14 @@ void Connection::verifyPeerName()
         throw HandshakeFailed("SSL handshake failed");
 
     X509AutoPtr peer( SSL_get_peer_certificate(_ssl) );
-    if( ! peer) 
+    if( ! peer)
         throw HandshakeFailed("Invalid peer name");
 
     char peerCN[256];
-    int ret = X509_NAME_get_text_by_NID(X509_get_subject_name( peer.get() ), 
-                                        NID_commonName, 
+    int ret = X509_NAME_get_text_by_NID(X509_get_subject_name( peer.get() ),
+                                        NID_commonName,
                                         peerCN, sizeof(peerCN));
-    if(ret <= 0) 
+    if(ret <= 0)
         throw HandshakeFailed("Invalid peer name");
 
     if(_peerName != peerCN)
@@ -287,11 +287,11 @@ void Connection::verifyPeerName()
 //    if( ! _ssl )
 //        return std::string();
 //
-//    if(SSL_get_verify_result(_ssl) != X509_V_OK) 
+//    if(SSL_get_verify_result(_ssl) != X509_V_OK)
 //        return std::string();
 //
 //    X509* peer = SSL_get_peer_certificate(_ssl);
-//    if( ! peer) 
+//    if( ! peer)
 //        return std::string();
 //
 //    char peerCN[256];
@@ -342,7 +342,7 @@ bool Connection::writeHandshake()
 {
     PT_LOG_TRACE("Connection::writeHandshake");
 
-    if( SSL_want_read(_ssl) || _connected )      
+    if( SSL_want_read(_ssl) || _connected )
         return false;
 
     _isWriting = true;
@@ -351,13 +351,13 @@ bool Connection::writeHandshake()
 
     int ret = SSL_do_handshake(_ssl);
     PT_LOG_DEBUG("SSL_do_handshake: " << ret);
-    
+
     _isWriting = false;
 
     if(ret <= 0)
     {
         const int sslerr = SSL_get_error(_ssl, ret);
-        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+        if(sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
         {
             if(sslerr == SSL_ERROR_SSL)
             {
@@ -365,7 +365,7 @@ bool Connection::writeHandshake()
                 ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
                 PT_LOG_WARN("handshake failed: " << buf);
             }
-            
+
             throw HandshakeFailed("SSL handshake failed");
         }
     }
@@ -376,7 +376,7 @@ bool Connection::writeHandshake()
         _connected = true;
     }
 
-    return SSL_want_write(_ssl);   
+    return SSL_want_write(_ssl);
 }
 
 
@@ -390,7 +390,7 @@ bool Connection::readHandshake()
     _isWriting = false;
     _isReading = true;
     _maxImport = 0;
-    
+
     int ret = SSL_do_handshake(_ssl);
     PT_LOG_DEBUG("SSL_do_handshake returns " << ret);
 
@@ -400,7 +400,7 @@ bool Connection::readHandshake()
     if( ret <= 0 )
     {
         int sslerr = SSL_get_error(_ssl, ret);
-        if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE) 
+        if( sslerr != SSL_ERROR_WANT_READ && sslerr != SSL_ERROR_WANT_WRITE)
         {
             if(sslerr == SSL_ERROR_SSL)
             {
@@ -417,9 +417,9 @@ bool Connection::readHandshake()
     {
         verifyPeerName();
         _connected = true;
-    }  
+    }
 
-    return SSL_want_read(_ssl); 
+    return SSL_want_read(_ssl);
 }
 
 
@@ -486,7 +486,7 @@ bool Connection::isShutdown() const
 {
     int state = SSL_get_shutdown(_ssl);
     PT_LOG_DEBUG("SSL_get_shutdown() = " << state);
-    
+
     return state != 0;
 }
 
@@ -502,11 +502,20 @@ std::streamsize Connection::write(const char* buf, std::size_t n)
     _isWriting = true;
     _isReading = false;
     _maxImport = 0;
-    
+
     std::streamsize written = SSL_write(_ssl, buf, n);
     PT_LOG_DEBUG("encrypted " << written << " bytes");
 
     _isWriting = false;
+
+    if(written < 0)
+    {
+        const int sslerr = SSL_get_error(_ssl, written);
+        if(sslerr == SSL_ERROR_WANT_READ || sslerr == SSL_ERROR_WANT_WRITE)
+            return 0;
+
+        throw SslError("SSL output failed");
+    }
 
     return written;
 }
@@ -517,41 +526,42 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
     _isWriting = false;
     _isReading = true;
     _maxImport = maxImport;
-    
+
     const int readSize = SSL_read(_ssl, buf, n);
     PT_LOG_DEBUG("Read " << readSize << " bytes from _ssl");
-    
+
     _isReading = false;
     _maxImport = 0;
-    
+
     PT_LOG_DEBUG("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
-    if(readSize >= 0)
-        return readSize;
-
-    long sslerr = SSL_get_error(_ssl, readSize);
-
-    // happens when the peer has send the shutdown alert
-    if(sslerr == SSL_ERROR_ZERO_RETURN)
+    if(readSize < 0)
     {
-        PT_LOG_DEBUG("SSL_ERROR_ZERO_RETURN");
-        return 0;
+        long sslerr = SSL_get_error(_ssl, readSize);
+
+        // happens when the peer has send the shutdown alert
+        if(sslerr == SSL_ERROR_ZERO_RETURN)
+        {
+            PT_LOG_DEBUG("SSL_ERROR_ZERO_RETURN");
+            return 0;
+        }
+
+        if(sslerr == SSL_ERROR_WANT_READ || sslerr == SSL_ERROR_WANT_WRITE)
+        {
+            PT_LOG_DEBUG("SSL_ERROR_WANT_IO");
+            return 0;
+        }
+
+        PT_LOG_DEBUG("ssl error occured");
+        while( (sslerr = ERR_get_error()) )
+        {
+            PT_LOG_DEBUG("ERR_error_string = " << ERR_error_string(sslerr, 0));
+        }
+
+        throw SslError("SSL input failed");
     }
 
-    if(sslerr == SSL_ERROR_WANT_READ)
-    {
-        PT_LOG_DEBUG("SSL_ERROR_WANT_READ");
-        return 0;
-    }
-
-    PT_LOG_DEBUG("ssl error occured");
-    while( (sslerr = ERR_get_error()) ) 
-    {
-        PT_LOG_DEBUG("ERR_error_string = " << ERR_error_string(sslerr, 0));
-    }
-            
-    throw SslError("SSL input failed");
-    return 0;
+    return readSize;
 }
 
 
@@ -564,7 +574,7 @@ int Connection::bioRead(char *buf, int len)
         BIO_set_retry_read(_in);
         return -1;
     }
-    
+
     std::streamsize avail = sb->in_avail();
     if(avail == 0 && _maxImport == 0)
     {
@@ -577,7 +587,7 @@ int Connection::bioRead(char *buf, int len)
         n = std::min(n, _maxImport);
     else
         n = std::min(n, avail);
-        
+
     std::streamsize r = sb->sgetn(buf, n);
     return r;
 }
@@ -611,7 +621,7 @@ long Connection::bioCtrl(BIO *bio, int cmd, long argn, void* argv)
         case BIO_CTRL_RESET:
             ret = 1;
             break;
-        
+
 	      case BIO_CTRL_EOF:
 		        ret = _ios->eof() ? 1 : 0;
 		        break;
@@ -631,12 +641,12 @@ long Connection::bioCtrl(BIO *bio, int cmd, long argn, void* argv)
         case BIO_CTRL_GET_CLOSE:
             ret = BIO_get_shutdown(bio);
             break;
-        
+
         case BIO_CTRL_SET_CLOSE:
             BIO_set_shutdown(bio, argn);
             ret = 1;
             break;
-      
+
 	      case BIO_CTRL_DUP:
 	      case BIO_CTRL_FLUSH:
 		        ret = 1;

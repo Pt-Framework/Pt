@@ -284,13 +284,15 @@ std::streamsize Connection::write(const char* buf, std::size_t n)
 
     _isWriting = false;
 
-    if(written >= 0)
-        return written;
+    if(written < 0)
+    {
+        if(written == MBEDTLS_ERR_SSL_WANT_WRITE || written == MBEDTLS_ERR_SSL_WANT_READ)
+            return 0;
 
-    if(written == MBEDTLS_ERR_SSL_WANT_WRITE)
-        return 0;
+        throw SslError("encoding failed");
+    }
 
-    throw SslError("encoding failed");
+    return written;
 }
 
 
@@ -306,18 +308,19 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
     _isReading = false;
     _maxImport = 0;
 
-    if(readSize >= 0)
-        return readSize;
+    if(readSize < 0)
+    {
+        // happens when the peer has sent the close_notify alert
+        if(readSize == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY
+           || readSize == MBEDTLS_ERR_SSL_WANT_READ
+           || readSize == MBEDTLS_ERR_SSL_WANT_WRITE)
+            return 0;
 
-    // happens when the peer has sent the close_notify alert
-    if(readSize == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
-        return 0;
+        PT_LOG_DEBUG("ssl error: " << mbedErrorString(readSize));
+        throw SslError("decoding failed");
+    }
 
-    if(readSize == MBEDTLS_ERR_SSL_WANT_READ)
-        return 0;
-
-    PT_LOG_DEBUG("ssl error: " << mbedErrorString(readSize));
-    throw SslError("decoding failed");
+    return readSize;
 }
 
 
