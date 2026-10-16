@@ -67,12 +67,11 @@ UdpSocketImpl::~UdpSocketImpl()
 }
 
 
-void UdpSocketImpl::close()
+void UdpSocketImpl::onClose()
 {
-    System::IODeviceImpl::close();
     _isConnected = false;
     _isBound = false;
-    
+
     _sendaddrLen = 0;
 }
 
@@ -101,7 +100,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocketOptions& opts)
 {
     const int on = 1;
     bool addrInUse = false;
-    
+
     AddrInfo ai;
     ai.resolve(ep, true);
 
@@ -326,7 +325,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     AddrInfo ai;
     Endpoint ep(ipaddr, 0);
     ai.resolve(ep, true);
-    
+
     AdapterInfo adapters( this->fd() );
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
@@ -334,17 +333,17 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
         if(it->ai_family == AF_INET)
         {
             unsigned joined = 0;
-            
+
             AdapterInfo::Iterator adapter;
             for(adapter = adapters.begin(); adapter != adapters.end(); ++adapter)
             {
                 sockaddr* adapterAddress = adapter.addr();
-                
+
                 if(adapterAddress->sa_family != it->ai_family)
                     continue;
-                    
+
                 ip_mreq req;
-                
+
                 sockaddr_in* groupAddress = (sockaddr_in*)(it->ai_addr);
                 std::memcpy( &req.imr_multiaddr, &groupAddress->sin_addr, sizeof(struct in_addr) );
 
@@ -367,9 +366,9 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
         else if(it->ai_family == AF_INET6)
         {
             unsigned joined = 0;
-            
+
             AdapterInfo::Iterator adapter;
-            for(adapter = adapters.begin(); adapter != adapters.end(); ++adapter) 
+            for(adapter = adapters.begin(); adapter != adapters.end(); ++adapter)
             {
                 ipv6_mreq req;
 
@@ -387,7 +386,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 
             if(joined == 0)
                 throw System::IOError("setsockopt failed");
-            
+
             PT_LOG_DEBUG( "joined IP6 multicast group: " << ipaddr );
             return;
         }
@@ -443,7 +442,7 @@ void UdpSocketImpl::dropMulticastGroup(const std::string& ipaddr)
 
 
 void UdpSocketImpl::localEndpoint(Endpoint& ep) const
-{      
+{
     struct sockaddr_storage addr;
     socklen_t slen = sizeof(addr);
 
@@ -464,24 +463,42 @@ const Endpoint& UdpSocketImpl::remoteEndpoint() const
 }
 
 
-std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
+ssize_t UdpSocketImpl::readFrom(char* buffer, std::size_t count)
 {
-    PT_LOG_DEBUG("begin read on fd:" << _ioh.fd);
-
     sockaddr_storage peerAddr;
     socklen_t addrlen = sizeof(peerAddr);
     sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
 
+    ssize_t ret = ::recvfrom(this->fd(), buffer, count, 0, addr, &addrlen);
+    if(ret >= 0)
+    {
+        _peerAddr.impl()->init(addr, addrlen);
+    }
+
+    return ret;
+}
+
+
+ssize_t UdpSocketImpl::writeTo(const char* buffer, std::size_t count)
+{
+    if(_isConnected)
+        return ::write(this->fd(), buffer, count);
+
+    return ::sendto(this->fd(), buffer, count, 0,
+                    reinterpret_cast<sockaddr*>(&_sendaddr), _sendaddrLen);
+}
+
+
+std::size_t UdpSocketImpl::onBeginRead(System::EventLoop& loop, char* buffer,
+                                       std::size_t count, bool& /*eof*/)
+{
+    PT_LOG_DEBUG("begin read on fd:" << fd());
+
     for(;;)
     {
-        ssize_t ret = ::recvfrom( this->fd(), buffer, n, 0, addr, &addrlen );
-        if (ret > 0)
-        {
-            PT_LOG_DEBUG("read:" << ret << " bytes");
-            
-            _peerAddr.impl()->init(addr, addrlen);
+        ssize_t ret = readFrom(buffer, count);
+        if(ret >= 0)
             return static_cast<std::size_t>(ret);
-        }
 
         if(errno == EAGAIN || errno == EWOULDBLOCK)
             break;
@@ -490,100 +507,105 @@ std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std:
             throw System::IOError("read failed");
     }
 
-    loop.selector().beginRead( &_ioh );
+    loop.selector().beginRead(&ioHandle());
     return 0;
 }
 
 
-std::size_t UdpSocketImpl::read( char* buffer, std::size_t count, bool& eof )
+std::size_t UdpSocketImpl::onEndRead(System::EventLoop& loop, char* buffer,
+                                     std::size_t count, bool& /*eof*/)
 {
-    ssize_t ret = 0;
+    return readFromImpl(buffer, count);
+}
 
-    sockaddr_storage peerAddr;
-    socklen_t addrlen = sizeof(peerAddr);
-    sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
 
-    while(true)
+std::size_t UdpSocketImpl::onRead(char* buffer, std::size_t count, bool& /*eof*/)
+{
+    return readFromImpl(buffer, count);
+}
+
+
+std::size_t UdpSocketImpl::onBeginWrite(System::EventLoop& loop, const char* buffer,
+                                        std::size_t count)
+{
+    PT_LOG_DEBUG("begin write on fd:" << fd());
+
+    for(;;)
     {
-        ret = ::recvfrom( this->fd(), buffer, count, 0, addr, &addrlen );
-        if(ret > 0)
+        ssize_t ret = writeTo(buffer, count);
+        if(ret >= 0)
+            return static_cast<std::size_t>(ret);
+
+        if(errno == EAGAIN || errno == EWOULDBLOCK)
             break;
+
+        if(errno != EINTR)
+            throw System::IOError("write failed");
+    }
+
+    loop.selector().beginWrite(&ioHandle());
+    return 0;
+}
+
+
+std::size_t UdpSocketImpl::onEndWrite(System::EventLoop& loop, const char* buffer,
+                                      std::size_t count)
+{
+    return writeToImpl(buffer, count);
+}
+
+
+std::size_t UdpSocketImpl::onWrite(const char* buffer, std::size_t count)
+{
+    return writeToImpl(buffer, count);
+}
+
+
+std::size_t UdpSocketImpl::readFromImpl(char* buffer, std::size_t count)
+{
+    for(;;)
+    {
+        ssize_t ret = readFrom(buffer, count);
+        if(ret >= 0)
+            return static_cast<std::size_t>(ret);
 
         if(errno == EINTR)
             continue;
 
-        if(errno != EAGAIN)
+        if(errno != EAGAIN && errno != EWOULDBLOCK)
             throw System::IOError("read failed");
 
         fd_set rfds;
         FD_ZERO(&rfds);
-        FD_SET(this->fd(), &rfds);
-        bool ret = this->wait(_timeout, &rfds, 0, 0);
-        if(false == ret)
-        {
-            throw System::IOError("recvfrom");
-        }
+        FD_SET(fd(), &rfds);
+        bool avail = wait(timeout(), &rfds, 0, 0);
+        if( ! avail )
+            throw System::IOError("read");
     }
-
-    _peerAddr.impl()->init(addr, addrlen);
-    return ret;
 }
 
 
-std::size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
+std::size_t UdpSocketImpl::writeToImpl(const char* buffer, std::size_t count)
 {
-    ssize_t ret = 0;
-
-    if(_isConnected)
-        ret = ::write( this->fd(), buffer, n);
-    else
-        ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_sendaddr, _sendaddrLen);
-
-    if (ret > 0)
-        return static_cast<std::size_t>(ret);
-
-    if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
-        throw System::IOError("lost connection to peer");
-
-    loop.selector().beginWrite( &_ioh );
-
-    return 0;
-}
-
-
-std::size_t UdpSocketImpl::write( const char* buffer, std::size_t count )
-{
-    ssize_t ret = 0;
-
-    while(true)
+    for(;;)
     {
-        if(_isConnected)
-            ret = ::write( this->fd(), buffer, count);
-        else
-            ret = ::sendto( this->fd(), buffer, count, 0, (sockaddr*)&_sendaddr, _sendaddrLen);
-
+        ssize_t ret = writeTo(buffer, count);
         if(ret >= 0)
-            break;
+            return static_cast<std::size_t>(ret);
 
         if(errno == EINTR)
             continue;
 
-        if(errno != EAGAIN)
-        {
-            throw System::IOError("udp socket I/O failed");
-        }
+        if(errno != EAGAIN && errno != EWOULDBLOCK)
+            throw System::IOError("write failed");
 
         fd_set wfds;
         FD_ZERO(&wfds);
-        FD_SET(this->fd(), &wfds);
-
-        if(false == this->wait(_timeout, 0, &wfds, 0) )
-        {
-            throw System::IOError("recvfrom");
-        }
+        FD_SET(fd(), &wfds);
+        bool avail = wait(timeout(), 0, &wfds, 0);
+        if( ! avail )
+            throw System::IOError("write");
     }
-
-    return ret;
 }
 
 } // namespace Net

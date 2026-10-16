@@ -51,8 +51,6 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         ~UdpSocketImpl();
 
-        void close();
-
         bool beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions& o);
 
         bool runBind(System::EventLoop& loop);
@@ -85,13 +83,33 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         const Endpoint& remoteEndpoint() const;
 
-        size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
+    protected:
+        void onClose();
 
-        size_t read(char* buffer, size_t count, bool& eof);
+        std::size_t onBeginRead(System::EventLoop& loop, char* buffer,
+                                                                std::size_t count, bool& /*eof*/);
 
-        size_t beginWrite(System::EventLoop& loop, const char* buffer, size_t n);
+        std::size_t onEndRead(System::EventLoop& loop, char* buffer,
+                                                            std::size_t count, bool& /*eof*/);
 
-        size_t write(const char* buffer, size_t n);
+                std::size_t onRead(char* buffer, std::size_t count, bool& /*eof*/);
+
+        std::size_t onBeginWrite(System::EventLoop& loop, const char* buffer,
+                                 std::size_t count);
+
+        std::size_t onEndWrite(System::EventLoop& loop, const char* buffer,
+                               std::size_t count);
+
+        std::size_t onWrite(const char* buffer, std::size_t count);
+
+    private:
+        ssize_t readFrom(char* buffer, std::size_t count);
+
+        ssize_t writeTo(const char* buffer, std::size_t count);
+
+        std::size_t readFromImpl(char* buffer, std::size_t count);
+
+        std::size_t writeToImpl(const char* buffer, std::size_t count);
 
     private:
         bool             _isConnected;

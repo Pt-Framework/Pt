@@ -75,20 +75,20 @@ void TcpSocketImpl::init(int fd)
         PT_LOG_DEBUG("using SO_KEEPALIVE");
 
         int on = 1;
-        if( ::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) ) 
+        if( ::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) )
         {
             close();
             throw System::SystemError("setsockopt SO_KEEPALIVE");
         }
     }
-        
+
     if( _opts.keepAlive() > 0 )
     {
         PT_LOG_DEBUG( "using keep-alive: " << _opts.keepAlive() );
 
 #if defined(TCP_KEEPIDLE)
         int secs = _opts.keepAlive();
-        if( ::setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &secs, sizeof(secs)) ) 
+        if( ::setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &secs, sizeof(secs)) )
         {
             close();
             throw System::SystemError("setsockopt TCP_KEEPIDLE");
@@ -111,26 +111,14 @@ void TcpSocketImpl::init(int fd)
 }
 
 
-void TcpSocketImpl::close()
+void TcpSocketImpl::onClose()
 {
-    if( this->isOpen() )
-    {
-        PT_LOG_DEBUG("close socket " << fd());
-        System::IODeviceImpl::close();
-    }
-
     _errorPending = false;
 }
 
 
-void TcpSocketImpl::cancel(System::EventLoop& loop)
+void TcpSocketImpl::onCancel(System::EventLoop& loop)
 {
-    if( this->isOpen() )
-    {
-        PT_LOG_DEBUG("cancel socket " << fd());
-        IODeviceImpl::cancel(loop);
-    }
-
     _errorPending = false;
 }
 
@@ -207,28 +195,28 @@ void TcpSocketImpl::connect()
                 close();
                 throw System::SystemError("getsockopt");
             }
-        
+
             if (sockerr == 0)
             {
                 PT_LOG_DEBUG("connect sucessful");
                 break;
             }
         }
-        
+
         PT_LOG_DEBUG("connect failed for address" << this->fd());
         close();
     }
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, 
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop,
                                  const Endpoint& ep, const TcpSocketOptions& opts)
 {
     PT_LOG_TRACE("begin connect");
 
     _opts = opts;
     _errorPending = false;
-    
+
     _addrInfo.resolve(ep);
     _addrInfoPtr = _addrInfo.begin();
 
@@ -262,11 +250,11 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop)
             PT_LOG_DEBUG("connect imediately successful " << this->fd());
             return true;
         }
-   
+
         if (errno == EINPROGRESS)
-        { 
+        {
             PT_LOG_DEBUG("connect in progress " << this->fd());
-            loop.selector().beginWrite( &_ioh );
+            loop.selector().beginWrite( &ioHandle() );
             return false;
         }
 
@@ -292,7 +280,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
         throw System::AccessFailed( _addrInfo.host() );
     }
 
-    loop.selector().endWrite( &_ioh );
+    loop.selector().endWrite( &ioHandle() );
 
     PT_LOG_INFO("wait for connect to finish");
 
@@ -309,7 +297,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             // getsockopt failed, not an I/O error
             throw System::SystemError("getsockopt");
         }
-    
+
         if (sockerr == 0)
         {
             PT_LOG_DEBUG("connected successfully");
@@ -332,7 +320,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
 
     System::Selector& selector = loop.selector();
 
-    if( selector.isError(&_ioh) )
+    if( selector.isError( &ioHandle() ) )
     {
         PT_LOG_DEBUG("socket has error");
 
@@ -345,13 +333,13 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
             isConnected = this->beginConnect(loop);
         }
         catch(const System::AccessFailed& )
-        { 
+        {
             _errorPending = true;
         }
 
         return isConnected || _errorPending;
     }
-    else if( selector.isWritable(&_ioh)  )
+    else if( selector.isWritable( &ioHandle() )  )
     {
         PT_LOG_DEBUG("socket is writable");
 
@@ -365,11 +353,11 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
             // getsockopt failure is not an I/O error
             throw System::SystemError("getsockopt");
         }
-    
+
         if (sockerr == 0)
         {
             PT_LOG_DEBUG("connected successfully");
-            loop.selector().endWrite( &_ioh );
+            loop.selector().endWrite( &ioHandle() );
             isConnected = true;
             return true;
         }
@@ -383,7 +371,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
             isConnected = this->beginConnect(loop);
         }
         catch(const System::AccessFailed& )
-        { 
+        {
             _errorPending = true;
         }
 
@@ -424,4 +412,3 @@ void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 } // namespace Net
 
 } // namespace Pt
-

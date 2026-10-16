@@ -23,6 +23,7 @@
 #include "Pt/System/FileDevice.h"
 #include "Pt/System/IODevice.h"
 #include "IODeviceImpl.h"
+#include <cstdint>
 
 namespace Pt {
 
@@ -54,6 +55,33 @@ class FileDeviceImpl : public IODeviceImpl
         void resize(off_type size);
 
         size_t peek(char* buffer, size_t count);
+
+    protected:
+        std::size_t onBeginRead(EventLoop& loop, char* buffer,
+                                std::size_t count, bool& eof);
+
+        std::size_t onEndRead(EventLoop& loop, char* buffer,
+                              std::size_t count, bool& eof);
+
+        std::size_t onRead(char* buffer, std::size_t count, bool& eof);
+
+        std::size_t onBeginWrite(EventLoop& loop, const char* buffer,
+                                 std::size_t count);
+
+        std::size_t onEndWrite(EventLoop& loop, const char* buffer,
+                               std::size_t count);
+
+        std::size_t onWrite(const char* buffer, std::size_t count);
+
+    private:
+        std::uint64_t advance(std::size_t count);
+
+        void setPosition(std::uint64_t position);
+
+    private:
+        std::uint64_t _pos;
+        std::uint64_t _readPos;
+        std::uint64_t _writePos;
 };
 
 } //namespace System

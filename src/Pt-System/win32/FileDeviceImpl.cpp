@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -59,18 +59,74 @@ FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
 
 FileDeviceImpl::FileDeviceImpl(FileDevice& dev)
 : OverlappedIODeviceImpl(dev)
+, _pos(0)
 {
 }
 
 #endif
 
 FileDeviceImpl::~FileDeviceImpl()
-{ 
+{
 }
+
+#ifndef _WIN32_WCE
+
+std::uint64_t FileDeviceImpl::position() const
+{
+    return _pos;
+}
+
+
+void FileDeviceImpl::setPosition(std::uint64_t position)
+{
+    _pos = position;
+}
+
+
+void FileDeviceImpl::advance(std::size_t count)
+{
+    if(count > std::numeric_limits<std::uint64_t>::max() - _pos)
+        throw IOError("I/O position overflow");
+
+    _pos += count;
+}
+
+
+void FileDeviceImpl::setOffset(OVERLAPPED& ov, std::uint64_t position)
+{
+    ov.Offset = static_cast<DWORD>(position);
+    ov.OffsetHigh = static_cast<DWORD>(position >> 32);
+}
+
+
+void FileDeviceImpl::close()
+{
+    OverlappedIODeviceImpl::close();
+    setPosition(0);
+}
+
+
+void FileDeviceImpl::onBeginRead(OVERLAPPED& ov, std::size_t count)
+{
+    setOffset(ov, _pos);
+    advance(count);
+}
+
+
+void FileDeviceImpl::onBeginWrite(OVERLAPPED& ov, std::size_t count)
+{
+    setOffset(ov, _pos);
+    advance(count);
+}
+
+#endif
 
 
 void FileDeviceImpl::open( const Path& path, std::ios::openmode mode)
 {
+#ifndef _WIN32_WCE
+    setPosition(0);
+#else
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
     _readOv.hEvent = NULL;
@@ -78,6 +134,7 @@ void FileDeviceImpl::open( const Path& path, std::ios::openmode mode)
     _writeOv.Offset = 0;
     _writeOv.OffsetHigh = 0;
     _writeOv.hEvent = NULL;
+#endif
 
     DWORD access = GENERIC_READ;
     DWORD share  = FILE_SHARE_READ|FILE_SHARE_WRITE;
@@ -94,7 +151,7 @@ void FileDeviceImpl::open( const Path& path, std::ios::openmode mode)
     }
 
     if( mode & std::ios::trunc )
-        create |= TRUNCATE_EXISTING;
+        create = CREATE_ALWAYS;
 
 #ifndef _WIN32_WCE
     flags |= FILE_FLAG_OVERLAPPED;
@@ -140,6 +197,44 @@ bool FileDeviceImpl::runOpen(EventLoop& loop)
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd)
 {
+#ifndef _WIN32_WCE
+    if(sd == std::ios::cur && offset == 0)
+        return pos_type( static_cast<off_type>(position()) );
+
+    DWORD whence = FILE_BEGIN;
+    LARGE_INTEGER li;
+    li.QuadPart = offset;
+
+    switch(sd)
+    {
+        case std::ios::beg:
+            break;
+
+        case std::ios::cur:
+            if(position() > static_cast<std::uint64_t>(std::numeric_limits<LONGLONG>::max()))
+                throw IOError("I/O position out of range");
+
+            li.QuadPart += static_cast<LONGLONG>(position());
+            break;
+
+        case std::ios::end:
+            whence = FILE_END;
+            break;
+
+        default:
+            throw std::invalid_argument("Unknown seekdir");
+    }
+
+    LARGE_INTEGER result;
+    if( FALSE == SetFilePointerEx(handle(), li, &result, whence) )
+        throw IOError( PT_ERROR_MSG("Could not set file pointer") );
+
+    if(result.QuadPart < 0)
+        throw IOError("I/O position out of range");
+
+    setPosition(static_cast<std::uint64_t>(result.QuadPart));
+    return pos_type( static_cast<off_type>(position()) );
+#else
     DWORD whence = FILE_BEGIN;
     switch(sd)
     {
@@ -172,17 +267,26 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
     _writeOv.Offset = ret;
 
     return ret;
+#endif
 }
 
 
 std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
+#ifndef _WIN32_WCE
+    OVERLAPPED ov = {};
+    setOffset(ov, position());
+
+    bool eof;
+    return OverlappedIODeviceImpl::read(buffer, count, eof, ov);
+#else
     bool eof;
     std::size_t ret = this->read(buffer, count, eof);
     if(ret > 0)
         this->seek(-((off_type)ret), std::ios::cur);
 
     return ret;
+#endif
 }
 
 #ifdef _WIN32_WCE
@@ -238,7 +342,7 @@ std::size_t FileDeviceImpl::read(char* buffer, std::size_t count, bool& eof)
     DWORD readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
     {
-        if( ERROR_HANDLE_EOF == GetLastError() || 
+        if( ERROR_HANDLE_EOF == GetLastError() ||
             ERROR_BROKEN_PIPE == GetLastError() )
         {
             eof = true;

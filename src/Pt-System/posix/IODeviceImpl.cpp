@@ -119,6 +119,8 @@ void IODeviceImpl::close()
 
         PT_LOG_DEBUG("closed fd:" << fd);
     }
+
+    onClose();
 }
 
 
@@ -132,38 +134,14 @@ void IODeviceImpl::cancel(EventLoop& loop)
         loop.selector().cancel(_ioh);
         PT_LOG_DEBUG("cancelling fd:" << _ioh.fd);
     }
+
+    onCancel(loop);
 }
 
 
 std::size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
-    PT_LOG_DEBUG("begin read on fd:" << _ioh.fd);
-
-    for(;;)
-    {
-        ssize_t ret = ::read( _ioh.fd, (void*)buffer, n);
-        if (ret > 0)
-        {
-            PT_LOG_DEBUG("read:" << ret << " bytes");
-            return static_cast<std::size_t>(ret);
-        }
-
-        if(ret == 0 || errno == ECONNRESET)
-        {
-            eof = true;
-            PT_LOG_DEBUG("read: EOF");
-            return 0;
-        }
-
-        if(errno == EAGAIN)
-            break;
-
-        if(errno != EINTR)
-            throw IOError("read failed");
-    }
-
-    loop.selector().beginRead( &_ioh );
-    return 0;
+    return onBeginRead(loop, buffer, n, eof);
 }
 
 
@@ -171,25 +149,31 @@ std::size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, 
 {
     PT_LOG_DEBUG("end read on fd:" << _ioh.fd);
 
-    loop.selector().endRead( &_ioh );
+    loop.selector().endRead(&_ioh);
 
-    if (_readErrorPending)
+    if(_readErrorPending)
     {
         _readErrorPending = false;
         throw IOError("read error");
     }
 
-    return this->read( buffer, n, eof );
+    return onEndRead(loop, buffer, n, eof);
 }
 
 
-std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
+std::size_t IODeviceImpl::read(char* buffer, std::size_t count, bool& eof)
+{
+    return onRead(buffer, count, eof);
+}
+
+
+std::size_t IODeviceImpl::readImpl(char* buffer, std::size_t count, bool& eof)
 {
     ssize_t ret = 0;
 
     while(true)
     {
-        ret = ::read( _ioh.fd, (void*)buffer, count);
+        ret = ::read(_ioh.fd, static_cast<void*>(buffer), count);
         if(ret > 0)
             break;
 
@@ -203,7 +187,7 @@ std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
         if(errno == EINTR)
             continue;
 
-        if(errno != EAGAIN)
+        if(errno != EAGAIN && errno != EWOULDBLOCK)
             throw IOError("read failed");
 
         fd_set rfds;
@@ -221,29 +205,7 @@ std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
 
 std::size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
-    PT_LOG_DEBUG("begin write on fd:" << _ioh.fd);
-
-    for(;;)
-    {
-        ssize_t ret = ::write(_ioh.fd, (const void*)buffer, n);
-        if (ret > 0)
-        {
-            PT_LOG_DEBUG("wrote:" << ret << " bytes");
-            return static_cast<std::size_t>(ret);
-        }
-
-        if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
-            throw System::IOError("lost connection to peer");
-
-        if(errno == EAGAIN)
-            break;
-
-        if(errno != EINTR)
-            throw System::IOError("write failed");
-    }
-
-    loop.selector().beginWrite( &_ioh );
-    return 0;
+    return onBeginWrite(loop, buffer, n);
 }
 
 
@@ -251,25 +213,31 @@ std::size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::siz
 {
     PT_LOG_DEBUG("end write on fd:" << _ioh.fd);
 
-    loop.selector().endWrite( &_ioh );
+    loop.selector().endWrite(&_ioh);
 
-    if (_writeErrorPending)
+    if(_writeErrorPending)
     {
         _writeErrorPending = false;
         throw IOError("write error");
     }
 
-    return this->write( buffer, n );
+    return onEndWrite(loop, buffer, n);
 }
 
 
-std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
+std::size_t IODeviceImpl::write(const char* buffer, std::size_t count)
+{
+    return onWrite(buffer, count);
+}
+
+
+std::size_t IODeviceImpl::writeImpl(const char* buffer, std::size_t count)
 {
     ssize_t ret = 0;
 
     while(true)
     {
-        ret = ::write(_ioh.fd, (const void*)buffer, count);
+        ret = ::write(_ioh.fd, static_cast<const void*>(buffer), count);
         if(ret > 0)
             break;
 
@@ -279,7 +247,7 @@ std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
         if(errno == EINTR)
             continue;
 
-        if(errno != EAGAIN)
+        if(errno != EAGAIN && errno != EWOULDBLOCK)
             throw IOError("Could not write to file handle");
 
         fd_set wfds;
@@ -325,6 +293,111 @@ void IODeviceImpl::sync() const
     int ret = fsync(_ioh.fd);
     if(ret != 0)
         throw IOError( PT_ERROR_MSG("sync failed") );
+
+    onSync();
+}
+
+
+void IODeviceImpl::onClose()
+{
+}
+
+
+void IODeviceImpl::onCancel(EventLoop&)
+{
+}
+
+
+std::size_t IODeviceImpl::onBeginRead(EventLoop& loop, char* buffer,
+                                      std::size_t count, bool& eof)
+{
+    PT_LOG_DEBUG("begin read on fd:" << _ioh.fd);
+
+    for(;;)
+    {
+        ssize_t ret = ::read(_ioh.fd, static_cast<void*>(buffer), count);
+        if(ret > 0)
+        {
+            PT_LOG_DEBUG("read:" << ret << " bytes");
+            return static_cast<std::size_t>(ret);
+        }
+
+        if(ret == 0 || errno == ECONNRESET)
+        {
+            eof = true;
+            PT_LOG_DEBUG("read: EOF");
+            return 0;
+        }
+
+        if(errno == EAGAIN || errno == EWOULDBLOCK)
+            break;
+
+        if(errno != EINTR)
+            throw IOError("read failed");
+    }
+
+    loop.selector().beginRead(&_ioh);
+    return 0;
+}
+
+
+std::size_t IODeviceImpl::onEndRead(EventLoop& loop, char* buffer,
+                                    std::size_t count, bool& eof)
+{
+    return readImpl(buffer, count, eof);
+}
+
+
+std::size_t IODeviceImpl::onRead(char* buffer, std::size_t count, bool& eof)
+{
+    return readImpl(buffer, count, eof);
+}
+
+
+std::size_t IODeviceImpl::onBeginWrite(EventLoop& loop, const char* buffer,
+                                       std::size_t count)
+{
+    PT_LOG_DEBUG("begin write on fd:" << _ioh.fd);
+
+    for(;;)
+    {
+        ssize_t ret = ::write(_ioh.fd, static_cast<const void*>(buffer), count);
+        if(ret > 0)
+        {
+            PT_LOG_DEBUG("wrote:" << ret << " bytes");
+            return static_cast<std::size_t>(ret);
+        }
+
+        if(ret == 0 || errno == ECONNRESET || errno == EPIPE)
+            throw IOError("lost connection to peer");
+
+        if(errno == EAGAIN || errno == EWOULDBLOCK)
+            break;
+
+        if(errno != EINTR)
+            throw IOError("write failed");
+    }
+
+    loop.selector().beginWrite(&_ioh);
+    return 0;
+}
+
+
+std::size_t IODeviceImpl::onEndWrite(EventLoop& loop, const char* buffer,
+                                     std::size_t count)
+{
+    return writeImpl(buffer, count);
+}
+
+
+std::size_t IODeviceImpl::onWrite(const char* buffer, std::size_t count)
+{
+    return writeImpl(buffer, count);
+}
+
+
+void IODeviceImpl::onSync() const
+{
 }
 
 

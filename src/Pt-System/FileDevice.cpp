@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2006-2007 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -75,11 +75,11 @@ FileDevice::FileDevice(const Path& path, std::ios::openmode mode)
 
 FileDevice::~FileDevice()
 {
-    try 
-    { 
-        this->close(); 
-    } 
-    catch(...) 
+    try
+    {
+        this->close();
+    }
+    catch(...)
     { }
 
     delete _impl;
@@ -107,7 +107,7 @@ void FileDevice::beginOpen(const Path& path, std::ios::openmode mode)
 
     if(_isOpen)
     {
-        loop->setReady(*this); 
+        loop->setReady(*this);
     }
 }
 
@@ -157,8 +157,8 @@ void FileDevice::onSetTimeout(std::size_t timeout)
 
 
 bool FileDevice::onSeekable() const
-{ 
-    return true; 
+{
+    return true;
 }
 
 std::size_t FileDevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
@@ -187,9 +187,13 @@ std::size_t FileDevice::onEndWrite(EventLoop& loop, const char* buffer, std::siz
 
 FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
-    if( _opening || this->isReading() || this->isWriting() )
+    bool isPosition = offset == 0 && sd == std::ios::cur;
+    bool isReadWrite = this->isReading() || this->isWriting();
+    bool isPending = isReadWrite && ! isPosition;
+
+    if(_opening || isPending)
         throw IOError("I/O operation pending");
-    
+
     return _impl->seek(offset, sd);
 }
 

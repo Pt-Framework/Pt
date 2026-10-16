@@ -36,29 +36,29 @@ instances (pipes), so no device currently needs its own override.
 
 ## Offset coupling {#offset-coupling}
 
-OverlappedIODeviceImpl currently advances both _readOv.Offset and
-_writeOv.Offset after either a read or a write completes. This couples
-the two directions to one shared sequential position. The coupling is
-harmless for non-seekable devices and wrong for a seekable device that
-allows concurrent, independently positioned read and write.
+%FileDevice keeps one logical position that reserves ranges for both
+directions in transfer-start order. Starting a read or write reserves
+the requested byte count, even when the transfer later completes with
+fewer bytes because it reaches end of file or reports a short result.
+The next transfer starts at the end of that requested range. A caller
+can therefore begin a read and a write concurrently without either
+operation changing the other operation's native position.
 
-Each direction keeps its own offset. A read advances only the read
-OVERLAPPED offset; a write advances only the write OVERLAPPED offset.
-Both offsets are 64-bit (Offset + OffsetHigh).
+The logical position is the public current position. %position() and
+seek(0, ios::cur) return it; they do not derive it from a native file
+pointer or from a completed byte count. A seek establishes a new
+logical position for later transfers. It cannot alter an operation
+that is already in flight. Direct device seeks reject that state, while
+%IOBuffer ends its pending transfer and discards its buffers before
+asking the device to seek.
 
-seek sets both offsets to the same absolute position. position() and
-seek(0, ios::cur) return the read offset as the public current
-position. On Windows the implementation must not use the OS file
-pointer as the source of the current position: ReadFile and WriteFile
-with OVERLAPPED do not update it. The OVERLAPPED offsets are the
-source of truth. After computing a new absolute position, both offsets
-are set and the file pointer may be synchronized with SetFilePointer
-for compatibility.
+Each native transfer receives its own position context. On Windows the
+context is the %OVERLAPPED structure prepared immediately before
+%ReadFile or %WriteFile. On POSIX the file backend restores the
+transfer's reserved offset before delegating to the generic I/O
+operation. These native positions serve only their one transfer; they
+are not the public cursor.
 
-IOBuffer::seekoff ends any pending transfer, calls the device seek,
-and discards its buffers. The next transfer in either direction
-therefore starts from the common position established by the seek.
-
-This replaces the coupled advances in OverlappedIODeviceImpl and the
-WCE FileDeviceImpl path, and makes FileDeviceImpl::seek and
-position() consistent with independent offsets.
+%FileDevice::peek() reads at the current logical position without
+reserving a range. A following read therefore observes the same bytes
+and advances the logical position normally.

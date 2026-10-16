@@ -8,12 +8,6 @@
 
 ## Open
 
-- [offset-coupling](io-duplex-device.md#offset-coupling).
-  OverlappedIODeviceImpl advances both OVERLAPPED offsets after either
-  direction completes, and position()/seek(0, cur) reads the stale OS
-  file pointer. Give each direction its own offset and make the read
-  offset the public current position.
-
 - [ssl-want-write](io-duplex-transforms.md#ssl-want-write).
   Connection::read and Connection::write (openssl, mbedtls) treat the
   cross-direction want-code as a hard failure instead of a retryable
@@ -29,10 +23,6 @@
 The SSL want-write handling comes first. It makes the data phase of
 an already full-duplex-capable layer robust against protocol-internal
 interleaving, without touching the existing reentrancy guard.
-
-The offset coupling in the Windows overlapped implementation only
-matters once a seekable device is driven with concurrent read and
-write; it can trail the socket- and pipe-facing work above.
 
 The codec direction state is the largest change and the one with the
 least existing demand: zlib and text codec transforms are mostly used

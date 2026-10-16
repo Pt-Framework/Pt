@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2005 by Marc Boris Drner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits>
 
 namespace Pt {
 
@@ -43,11 +44,36 @@ namespace System {
 
 FileDeviceImpl::FileDeviceImpl(FileDevice& device)
 : IODeviceImpl(device)
+, _pos(0)
+, _readPos(0)
+, _writePos(0)
 { }
 
 
 FileDeviceImpl::~FileDeviceImpl()
 { }
+
+
+std::uint64_t FileDeviceImpl::advance(std::size_t count)
+{
+    if(count > std::numeric_limits<std::uint64_t>::max() - _pos)
+        throw IOError("I/O position overflow");
+
+    std::uint64_t position = _pos;
+    _pos += count;
+    return position;
+}
+
+
+void FileDeviceImpl::setPosition(std::uint64_t position)
+{
+    if(position > static_cast<std::uint64_t>(std::numeric_limits<off_t>::max()))
+        throw IOError("I/O position out of range");
+
+    off_t target = static_cast<off_t>(position);
+    if( ::lseek(fd(), target, SEEK_SET) != target )
+        throw IOError( PT_ERROR_MSG("lseek failed") );
+}
 
 
 void FileDeviceImpl::open(const Path& path, std::ios::openmode mode)
@@ -78,6 +104,10 @@ void FileDeviceImpl::open(const Path& path, std::ios::openmode mode)
     }
 
     IODeviceImpl::open(fd, false);
+
+    _pos = 0;
+    _readPos = 0;
+    _writePos = 0;
 
     try {
         if(mode & std::ios::ate)
@@ -112,7 +142,7 @@ bool FileDeviceImpl::seekable() const
 {
     struct stat s;
 
-    int ret = fstat(_ioh.fd, &s);
+    int ret = fstat(fd(), &s);
     if(ret == 0)
     {
         if(S_ISREG(s.st_mode) || S_ISBLK(s.st_mode))
@@ -125,7 +155,11 @@ bool FileDeviceImpl::seekable() const
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd )
 {
-    int whence = std::ios::cur;
+    if(sd == std::ios::cur && offset == 0)
+        return pos_type( static_cast<off_type>(_pos) );
+
+    int whence = SEEK_SET;
+    off_t target = static_cast<off_t>(offset);
     switch(sd)
     {
         case std::ios::beg:
@@ -133,7 +167,10 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
             break;
 
         case std::ios::cur:
-            whence = SEEK_CUR;
+            if(_pos > static_cast<std::uint64_t>(std::numeric_limits<off_t>::max()))
+                throw IOError("I/O position out of range");
+
+            target += static_cast<off_t>(_pos);
             break;
 
         case std::ios::end:
@@ -141,14 +178,17 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
             break;
 
         default:
-            break;
+            throw std::invalid_argument("Unknown seekdir");
     }
 
-    off_t ret = lseek(fd(), offset, whence);
+    off_t ret = lseek(fd(), target, whence);
     if( ret == (off_t)-1 )
         throw IOError( PT_ERROR_MSG("lseek failed") );
 
-    return ret;
+    _pos = static_cast<std::uint64_t>(ret);
+    _readPos = _pos;
+    _writePos = _pos;
+    return pos_type( static_cast<off_type>(_pos) );
 }
 
 
@@ -163,14 +203,71 @@ void FileDeviceImpl::resize(off_type size)
 
 std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
-    bool eof;
-    std::size_t ret = this->read(buffer, count, eof);
+    if(_pos > static_cast<std::uint64_t>(std::numeric_limits<off_t>::max()))
+        throw IOError("I/O position out of range");
 
-    // if we could read data seek back
-    if(ret > 0)
-        this->seek(-((off_type)ret), std::ios::cur);
+    off_t position = static_cast<off_t>(_pos);
+    ssize_t ret;
+    do
+    {
+        ret = ::pread(fd(), static_cast<void*>(buffer), count, position);
+    }
+    while(ret == -1 && errno == EINTR);
 
-    return ret;
+    if(ret == -1)
+        throw IOError( PT_ERROR_MSG("pread failed") );
+
+    return static_cast<std::size_t>(ret);
+}
+
+
+std::size_t FileDeviceImpl::onBeginRead(EventLoop& loop, char* buffer,
+                                        std::size_t count, bool& eof)
+{
+    _readPos = advance(count);
+    setPosition(_readPos);
+    return IODeviceImpl::onBeginRead(loop, buffer, count, eof);
+}
+
+
+std::size_t FileDeviceImpl::onEndRead(EventLoop& loop, char* buffer,
+                                      std::size_t count, bool& eof)
+{
+    setPosition(_readPos);
+    return IODeviceImpl::onEndRead(loop, buffer, count, eof);
+}
+
+
+std::size_t FileDeviceImpl::onRead(char* buffer, std::size_t count, bool& eof)
+{
+    _readPos = advance(count);
+    setPosition(_readPos);
+    return IODeviceImpl::onRead(buffer, count, eof);
+}
+
+
+std::size_t FileDeviceImpl::onBeginWrite(EventLoop& loop, const char* buffer,
+                                         std::size_t count)
+{
+    _writePos = advance(count);
+    setPosition(_writePos);
+    return IODeviceImpl::onBeginWrite(loop, buffer, count);
+}
+
+
+std::size_t FileDeviceImpl::onEndWrite(EventLoop& loop, const char* buffer,
+                                       std::size_t count)
+{
+    setPosition(_writePos);
+    return IODeviceImpl::onEndWrite(loop, buffer, count);
+}
+
+
+std::size_t FileDeviceImpl::onWrite(const char* buffer, std::size_t count)
+{
+    _writePos = advance(count);
+    setPosition(_writePos);
+    return IODeviceImpl::onWrite(buffer, count);
 }
 
 } //namespace System

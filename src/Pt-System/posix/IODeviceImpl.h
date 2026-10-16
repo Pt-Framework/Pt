@@ -25,13 +25,11 @@
 #include <string>
 #include <iostream>
 #include <unistd.h>
-#include <fcntl.h>
 #include <sys/select.h>
 
 namespace Pt {
 
 namespace System {
-
     struct IOHandle;
 
     class IODeviceImpl
@@ -46,9 +44,9 @@ namespace System {
 
             int setFd(int fd)
             {
-              int replaceFd = _ioh.fd;
-              _ioh.fd = fd;
-              return replaceFd;
+                int replaceFd = _ioh.fd;
+                _ioh.fd = fd;
+                return replaceFd;
             }
 
             void setTimeout(std::size_t msecs)
@@ -61,23 +59,23 @@ namespace System {
 
             bool isOpen() const;
 
-            virtual void cancel(EventLoop& loop);
+            void cancel(EventLoop& loop);
 
-            virtual void close();
+            void close();
 
-            virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+            size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-            virtual size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+            size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-            virtual size_t read( char* buffer, size_t count, bool& eof );
+            size_t read(char* buffer, size_t count, bool& eof);
 
-            virtual size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
+            size_t beginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-            virtual size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
+            size_t endWrite(EventLoop& loop, const char* buffer, size_t n);
 
-            virtual size_t write( const char* buffer, size_t count );
+            size_t write(const char* buffer, size_t count);
 
-            virtual void sync() const;
+            void sync() const;
 
             bool runRead(EventLoop& loop);
 
@@ -86,6 +84,36 @@ namespace System {
             static bool wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds);
 
         protected:
+            virtual void onCancel(EventLoop& loop);
+
+            virtual void onClose();
+
+            virtual std::size_t onBeginRead(EventLoop& loop, char* buffer,
+                                            std::size_t count, bool& eof);
+
+            virtual std::size_t onEndRead(EventLoop& loop, char* buffer,
+                                          std::size_t count, bool& eof);
+
+            virtual std::size_t onRead(char* buffer, std::size_t count, bool& eof);
+
+            virtual std::size_t onBeginWrite(EventLoop& loop, const char* buffer,
+                                             std::size_t count);
+
+            virtual std::size_t onEndWrite(EventLoop& loop, const char* buffer,
+                                           std::size_t count);
+
+            virtual std::size_t onWrite(const char* buffer, std::size_t count);
+
+            virtual void onSync() const;
+
+            IOHandle& ioHandle()
+            { return _ioh; }
+
+        private:
+            std::size_t readImpl(char* buffer, std::size_t count, bool& eof);
+
+            std::size_t writeImpl(const char* buffer, std::size_t count);
+
             IOHandle    _ioh;
             std::size_t _timeout;
             bool        _readErrorPending;

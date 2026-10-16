@@ -59,6 +59,10 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
 
         size_t peek( char* buffer, size_t count );
 
+    #ifndef _WIN32_WCE
+        void close();
+    #endif
+
 #ifdef _WIN32_WCE
         void setTimeout(size_t timeout);
 
@@ -86,6 +90,22 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
         IODevice& _device;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
+#else
+    protected:
+        void onBeginRead(OVERLAPPED& ov, size_t count) override;
+
+        void onBeginWrite(OVERLAPPED& ov, size_t count) override;
+
+    private:
+        std::uint64_t position() const;
+
+        void setPosition(std::uint64_t position);
+
+        void advance(std::size_t count);
+
+        static void setOffset(OVERLAPPED& ov, std::uint64_t position);
+
+        std::uint64_t _pos;
 #endif
 };
 

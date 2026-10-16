@@ -26,6 +26,7 @@
 #include "Pt/System/IOError.h"
 #include "Pt/SourceInfo.h"
 #include <windows.h>
+#include <cstdint>
 
 namespace Pt {
 
@@ -75,17 +76,9 @@ class OverlappedIODeviceImpl : public IODeviceImpl
 
         void init(IODevice& dev);
 
-        void setTimeout(std::size_t msecs)
-        {
-            DWORD maxTimeout = std::numeric_limits<DWORD>::max() - 1;
-            
-            _timeout = (msecs == EventLoop::WaitInfinite) ? INFINITE
-                           : (msecs > maxTimeout) ? maxTimeout 
-                               : static_cast<DWORD>(msecs);
-        }
+        std::size_t timeout() const;
 
-        std::size_t timeout() const
-        { return _timeout; }
+        void setTimeout(std::size_t msecs);
 
         virtual bool runRead(EventLoop&);
 
@@ -108,6 +101,16 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         virtual void cancel(EventLoop& loop) ;
 
      protected:
+          virtual void onBeginRead(OVERLAPPED& ov, size_t count);
+
+          virtual void onBeginWrite(OVERLAPPED& ov, size_t count);
+
+    protected:
+          size_t read(char* buffer, size_t count, bool& eof, OVERLAPPED& ov);
+
+          size_t write(const char* buffer, size_t count, OVERLAPPED& ov);
+
+    protected:
         IOHandle _ioh;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
