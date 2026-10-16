@@ -64,7 +64,7 @@ namespace Pt {
 namespace Forms {
 
 Application::Application()
-: System::Application()
+: System::Application(0)
 , _impl( new ApplicationImpl() )
 , _graphicsBackend(0)
 , _mainScreen(0)
