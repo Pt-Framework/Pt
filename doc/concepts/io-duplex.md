@@ -51,9 +51,3 @@ protocol-internal need to touch the other direction (an alert, a key
 update, a renegotiation) into an unrecoverable failure. The
 caller-visible contract for that case is the same one used for a
 device direction that is not yet ready: no progress yet, retry later.
-
-## Out of scope
-
-This concept addresses one EventLoop thread alternating or overlapping
-operations on one device or streambuf. It does not address two threads
-calling into the same device or streambuf at the same time.
