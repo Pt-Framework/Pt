@@ -174,6 +174,12 @@ idle timer. Masking is a mode set when it opens: a client masks, a
 server does not. It has no `Client`, no URL, and no
 `Sec-WebSocket-Key`. The receive and send states live only here.
 
+The channel starts the input pump when it opens. Controls and close
+are processed for the life of the stream, even when no
+`beginReceive()` is outstanding. The derived constructor does not
+have to start a receive only to keep the control plane alive.
+
+
 The connection is not a public type. There is no public
 `WebSocketStream`, and application code does not construct, bind, or
 name the connection. The client facade opens it after a finished 101.
@@ -771,3 +777,4 @@ and headers is separate work.
 It does not introduce a multi-connection session, a connection pool
 inside one session, or callback arguments that repeat the frame
 operations or `service()`.
+
