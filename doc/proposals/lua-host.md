@@ -8,7 +8,7 @@
 - [Interop](lua-host-interop.md)
 - [Concept](../concepts/lua.md)
 
-## Open
+## Open Tasks
 
 - [representation](lua-embedding-interop.md#representation).
   Whether chunk returns, named globals, and host calls into Lua share

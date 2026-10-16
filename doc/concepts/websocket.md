@@ -5,7 +5,7 @@
 - [Session](websocket-session.md)
 - [Message](websocket-message.md)
 
-## Open
+## Open Tasks
 
 - [websocket-client](websocket-session.md#wss-client).
   Headers set before `beginConnect()` are kept. `endConnect()` checks

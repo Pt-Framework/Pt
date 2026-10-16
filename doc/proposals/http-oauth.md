@@ -10,7 +10,7 @@
 - [Server](http-oauth-server.md)
 - [Concept](../concepts/http-oauth.md)
 
-## Open
+## Open Tasks
 
 - [query-params](http-oauth-primitives.md#query-params).
   Decoded, multi-value query fields.

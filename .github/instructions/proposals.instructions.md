@@ -20,7 +20,7 @@ and contains:
 
 - a Documents section that lists the other proposal files of this
   proposal and any concepts,
-- an Open section. Each item links to a heading in a proposal file and
+- an Open Tasks section. Each item links to a heading in a proposal file and
   states the implementation task,
 - an optional Priority section that orders those tasks.
 
@@ -33,7 +33,8 @@ From the index:
 
 File names are lowercase with hyphens. ASCII only.
 
-The index has no frontmatter. Proposal files carry frontmatter that names
+The index has no frontmatter. Its Open Tasks section records implementation
+work. Proposal files carry frontmatter that names
 the proposal they belong to:
 
 ```yaml
@@ -47,7 +48,7 @@ proposal: websocket.md
 The set records the current state of the implementation against the
 model.
 
-The index lists that state. Each Open item is one implementation task
+The index lists that state. Each item in Open Tasks is one implementation task
 the code does not follow yet. It links to the heading that states the
 model and says what to implement.
 
@@ -56,7 +57,7 @@ lifetime, failure handling, and rules. Where the implementation still
 differs, a Baseline section states that behavior.
 
 A concept holds the stable, implementation-neutral model. It has no
-Baseline and no Open items.
+Baseline and no Open Tasks section.
 
 # Workflow
 
@@ -70,7 +71,7 @@ Baseline and no Open items.
 - When a stable, implementation-neutral model is worth keeping, write
   or update a concept in `doc/concepts/` and link it from the index. A
   concept states the model, not the implementation steps.
-- Record an implementation task as an item in the index Open section.
+- Record an implementation task as an item in the index Open Tasks section.
   Link it to the heading that states the model.
 - Load the index first, then only the linked concepts and the proposal
   files the task needs.

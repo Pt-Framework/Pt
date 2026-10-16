@@ -6,7 +6,7 @@
 - [Transforms](io-duplex-transforms.md)
 - [Concept](../concepts/io-duplex.md)
 
-## Open
+## Open Tasks
 
 - [ssl-want-write](io-duplex-transforms.md#ssl-want-write).
   Connection::read and Connection::write (openssl, mbedtls) treat the
