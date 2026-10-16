@@ -53,8 +53,11 @@ namespace Pt {
     flushes remaining compressed bytes and ends the stream.
 
     %zcount() is the total number of uncompressed bytes produced by
-    inflate. The buffer does not own the target; keep the target
-    alive until %detach() or destruction.
+    inflate. Read and write transformations retain independent state,
+    so either direction can start while the other has buffered data.
+    %discard() and %reset() explicitly discard both directions. The
+    buffer does not own the target; keep the target alive until
+    %detach() or destruction.
 
     @ingroup Pt-ZStreams
 */
@@ -138,16 +141,19 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
 
     private:
         std::ios* _target;
-        z_stream* _zstr;
+        z_stream* _zread;
+        z_stream* _zwrite;
         Format _format;
 
         static const int _pbmax = 4;
         static const int _bufmax = 4096;
-        char _buf[_bufmax];
+        char _ibuf[_bufmax];
+        char _obuf[_bufmax];
 
         static const int _zbufmax = 4096;
-        char _zbuf[_zbufmax];
-        int _zbufsize;
+        char _zibuf[_zbufmax];
+        int _zibufsize;
+        char _zobuf[_zbufmax];
 
         std::size_t _zcount;
 };

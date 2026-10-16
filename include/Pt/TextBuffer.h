@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2004-2013 Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,17 +15,17 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef Pt_TextBuffer_h
 #define Pt_TextBuffer_h
 
@@ -43,7 +43,9 @@ namespace Pt {
     using a codec. Writing to the stream buffer will convert the written
     characters to the external character types in the external encoding.
     Reading from the stream buffer will convert from the the encoding of
-    external characters.
+    external characters. Reading and writing retain separate codec state and
+    buffered data, so either direction can start while the other has pending
+    conversion work. discard() and reset() explicitly discard both directions.
 
     @ingroup Pt-Text
 */
@@ -53,7 +55,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
     public:
         //! @brief External character type
         typedef ByteT extern_type;
-        
+
         //! @brief Internal character type
         typedef CharT intern_type;
 
@@ -88,15 +90,16 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             count reaches 0.
         */
         explicit BasicTextBuffer(std::basic_ios<extern_type>& target, CodecType* codec = 0)
-        : _ebufsize(0)
+        : _iebufsize(0)
+        , _oebufsize(0)
         , _codec(codec)
         , _codecRefs( codec ? codec->refs() : 0 )
         , _target(&target)
-        { 
+        {
             this->setg(0, 0, 0);
             this->setp(0, 0);
         }
-        
+
         /** @brief Construct with codec.
 
             All input from and output to the external device is converted
@@ -106,7 +109,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             this class and deleted if its reference count reaches 0.
         */
         explicit BasicTextBuffer(CodecType* codec = 0)
-        : _ebufsize(0)
+        : _iebufsize(0)
+        , _oebufsize(0)
         , _codec(codec)
         , _codecRefs( codec ? codec->refs() : 0 )
         , _target(0)
@@ -114,7 +118,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             this->setg(0, 0, 0);
             this->setp(0, 0);
         }
-        
+
         /** @brief Destructor.
         */
         ~BasicTextBuffer() throw()
@@ -122,7 +126,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             // if _codecRefs is greater than 0, the codec might have been
             // destroyed before the text buffer, therefore we work with a
             // separate refcount to mark owned codecs
-            
+
             if(_codecRefs == 0)
                 delete _codec;
         }
@@ -133,13 +137,14 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         { return _codec; }
 
         /** @brief Sets the text codec.
-            
+
             The codec object which is passed as pointer will be managed by
             this class and deleted if its reference count reaches 0.
         */
         void setCodec(CodecType* codec)
-        {           
-            _state = state_type();
+        {
+            _readState = state_type();
+            _writeState = state_type();
 
             if(_codecRefs == 0)
                 delete _codec;
@@ -154,7 +159,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         {
             _target = &target;
         }
-        
+
         /** @brief Detach from external target.
         */
         void detach()
@@ -165,7 +170,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         /** @brief Resets the buffer and target.
 
             The target is detached and the buffer content is discarded.
-            The codec is kept, if one was set previously.  
+            The codec is kept, if one was set previously.
         */
         void reset()
         {
@@ -176,7 +181,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         /** @brief Resets the buffer and target.
 
             Attaches to the new target and discards the buffer. The codec is
-            kept, if one was set previously. 
+            kept, if one was set previously.
         */
         void reset(std::basic_ios<extern_type>& target)
         {
@@ -188,11 +193,13 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         */
         void discard()
         {
-            _ebufsize = 0;
+            _iebufsize = 0;
+            _oebufsize = 0;
             this->setp(0, 0);
             this->setg(0, 0, 0);
-            
-            _state = state_type();
+
+            _readState = state_type();
+            _writeState = state_type();
         }
 
         /** @brief Import data from the external device.
@@ -201,11 +208,6 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         */
         std::streamsize import(std::streamsize size = 0)
         {
-            if( this->pptr() )
-            {
-                discard();
-            }
-
             if( ! this->gptr() )
             {
                 this->setg(_ibuf, _ibuf, _ibuf);
@@ -214,24 +216,24 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             std::streamsize n = 0;
             std::basic_streambuf<extern_type>* rdbuf = _target ? _target->rdbuf()
                                                                : 0;
-            
+
             // special case: read available input
             if(size == 0 && rdbuf)
                 size = rdbuf->in_avail();
 
             // not more than input buffer size
-            const std::streamsize ebufavail = _ebufmax - _ebufsize;
+            const std::streamsize ebufavail = _ebufmax - _iebufsize;
             size = ebufavail < size ? ebufavail : size;
 
             if(size > 0 && rdbuf)
             {
-                n = rdbuf->sgetn( _ebuf + _ebufsize,  size );
-                _ebufsize += static_cast<int>(n);
+                n = rdbuf->sgetn( _iebuf + _iebufsize,  size );
+                _iebufsize += static_cast<int>(n);
                 if(n <= 0)
                 {
                     // rdbuf == 0 means "at end of input"
                     rdbuf = 0;
-                }  
+                }
             }
 
             if( this->gptr() - this->eback() > _pbmax)
@@ -247,7 +249,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
             // fail if partial conversion at the end of input
             // rdbuf == 0 means "at end of input"
-            if( rdbuf == 0 && _ebufsize == 0 && r == CodecType::partial)
+            if( rdbuf == 0 && _iebufsize == 0 && r == CodecType::partial)
                 throw ConversionError("character encoding");
 
             return n;
@@ -259,22 +261,17 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         */
         std::streamsize import(const extern_type* buf, std::streamsize size)
         {
-            if( this->pptr() )
-            {
-                discard();
-            }
-
             if( ! this->gptr() )
             {
                 this->setg(_ibuf, _ibuf, _ibuf);
             }
 
-            const std::streamsize bufavail = _ebufmax - _ebufsize;
+            const std::streamsize bufavail = _ebufmax - _iebufsize;
             size = bufavail < size ? bufavail : size;
             if(size > 0)
             {
-                std::char_traits<extern_type>::copy( _ebuf + _ebufsize, buf, static_cast<std::size_t>(size) );
-                _ebufsize += static_cast<int>(size);
+                std::char_traits<extern_type>::copy( _iebuf + _iebufsize, buf, static_cast<std::size_t>(size) );
+                _iebufsize += static_cast<int>(size);
             }
 
             if( this->gptr() - this->eback() > _pbmax)
@@ -313,21 +310,23 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 do
                 {
                     extern_type* next = 0;
-                    res = _codec->unshift(_state, _ebuf, _ebuf + _ebufmax, next);
+                    res = _codec->unshift(_writeState, _oebuf, _oebuf + _ebufmax, next);
                     if(res == CodecType::noconv)
                         break;
 
                     if(res == CodecType::error)
                         throw ConversionError("character encoding");
 
-                    std::streamsize n = static_cast<std::streamsize>(next - _ebuf);
-                    if( n != _target->rdbuf()->sputn(_ebuf, n) )
+                    std::streamsize n = static_cast<std::streamsize>(next - _oebuf);
+                    if( n != _target->rdbuf()->sputn(_oebuf, n) )
                         return -1;
                 }
                 while(res == CodecType::partial);
             }
 
-            discard();
+            _oebufsize = 0;
+            this->setp(0, 0);
+            _writeState = state_type();
 
             return 0;
         }
@@ -335,7 +334,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         // inheritdoc
         virtual std::streamsize showmanyc()
         {
-            //return _target && _target->rdbuf() ? _target->rdbuf()->in_avail() 
+            //return _target && _target->rdbuf() ? _target->rdbuf()->in_avail()
             //                                   : -1;
 
             // Return 0, because we can not predict how many characters
@@ -349,26 +348,26 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         // inheritdoc
         virtual int_type overflow( int_type ch = traits_type::eof() )
         {
-            if( ! _target || ! _target->rdbuf() || this->gptr() )
+            if( ! _target || ! _target->rdbuf() )
                 return traits_type::eof();
 
             if( ! this->pptr() )
             {
-                this->setp( _ibuf, _ibuf + _ibufmax );
+                this->setp( _obuf, _obuf + _obufmax );
             }
 
             while( this->pptr() > this->pbase() )
             {
-                const char_type* fromBegin = _ibuf;
+                const char_type* fromBegin = _obuf;
                 const char_type* fromEnd   = this->pptr();
                 const char_type* fromNext  = fromBegin;
-                extern_type* toBegin       = _ebuf + _ebufsize;
-                extern_type* toEnd         = _ebuf + _ebufmax;
+                extern_type* toBegin       = _oebuf + _oebufsize;
+                extern_type* toEnd         = _oebuf + _ebufmax;
                 extern_type* toNext        = toBegin;
 
                 typename CodecType::result res = CodecType::noconv;
                 if(_codec)
-                    res = _codec->out(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+                    res = _codec->out(_writeState, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
 
                 if(res == CodecType::noconv)
                 {
@@ -382,24 +381,24 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                     toNext += size;
                 }
 
-                _ebufsize += static_cast<int>(toNext - toBegin);
+                _oebufsize += static_cast<int>(toNext - toBegin);
                 std::size_t leftover = fromEnd - fromNext;
                 if(leftover && fromNext > fromBegin)
                 {
-                    std::char_traits<char_type>::move(_ibuf, fromNext, leftover);
+                    std::char_traits<char_type>::move(_obuf, fromNext, leftover);
                 }
 
-                this->setp( _ibuf, _ibuf + _ibufmax );
+                this->setp( _obuf, _obuf + _obufmax );
                 this->pbump( static_cast<int>(leftover) );
 
                 if(res == CodecType::error)
                     throw ConversionError("character encoding");
 
-                if(res == CodecType::partial && _ebufsize == 0)
+                if(res == CodecType::partial && _oebufsize == 0)
                     break;
 
-                _ebufsize -= static_cast<int>(_target->rdbuf()->sputn(_ebuf, _ebufsize));
-                if(_ebufsize)
+                _oebufsize -= static_cast<int>(_target->rdbuf()->sputn(_oebuf, _oebufsize));
+                if(_oebufsize)
                     return traits_type::eof();
             }
 
@@ -428,8 +427,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         //! @internal
         CodecResult decode()
         {
-            const extern_type* fromBegin = _ebuf;
-            const extern_type* fromEnd   = _ebuf + _ebufsize;
+            const extern_type* fromBegin = _iebuf;
+            const extern_type* fromEnd   = _iebuf + _iebufsize;
             const extern_type* fromNext  = fromBegin;
             char_type* toBegin           = this->egptr();
             char_type* toEnd             = _ibuf + _ibufmax;
@@ -437,12 +436,12 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
             typename CodecType::result r = CodecType::noconv;
             if(_codec)
-                r = _codec->in(_state, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
+                r = _codec->in(_readState, fromBegin, fromEnd, fromNext, toBegin, toEnd, toNext);
 
             if(r == CodecType::noconv)
             {
                 // copy characters and advance fromNext and toNext
-                int n =_ebufsize > _ibufmax ? _ibufmax : _ebufsize ;
+                int n =_iebufsize > _ibufmax ? _ibufmax : _iebufsize ;
                 this->copyChars(toBegin, fromBegin, n);
                 fromNext += n;
                 toNext += n;
@@ -451,8 +450,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             std::streamsize consumed = fromNext - fromBegin;
             if(consumed > 0)
             {
-                _ebufsize -= static_cast<int>(consumed);
-                std::char_traits<extern_type>::move( _ebuf, _ebuf + consumed, _ebufsize);
+                _iebufsize -= static_cast<int>(consumed);
+                std::char_traits<extern_type>::move( _iebuf, _iebuf + consumed, _iebufsize);
             }
 
             std::streamsize generated = toNext - toBegin;
@@ -504,13 +503,18 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         static const int _pbmax = 4;
 
         static const int _ebufmax = 256;
-        extern_type _ebuf[_ebufmax];
-        int _ebufsize;
+        extern_type _iebuf[_ebufmax];
+        int _iebufsize;
+        extern_type _oebuf[_ebufmax];
+        int _oebufsize;
 
         static const int _ibufmax = 256;
         intern_type _ibuf[_ibufmax];
+        static const int _obufmax = 256;
+        intern_type _obuf[_obufmax];
 
-        state_type _state;
+        state_type _readState;
+        state_type _writeState;
         CodecType* _codec;
         std::size_t _codecRefs;
         std::basic_ios<extern_type>* _target;

@@ -36,35 +36,47 @@ namespace Pt {
 
 ZBuffer::ZBuffer(Format fmt)
 : _target(0)
-, _zstr(0)
+, _zread(0)
+, _zwrite(0)
 , _format(fmt)
-, _zbufsize(0)
+, _zibufsize(0)
 , _zcount(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
 
-    _zstr = new z_stream;
-    _zstr->zalloc = (alloc_func)0;
-    _zstr->zfree = (free_func)0;
-    _zstr->opaque = (voidpf)0;
+    _zread = new z_stream;
+    _zread->zalloc = (alloc_func)0;
+    _zread->zfree = (free_func)0;
+    _zread->opaque = (voidpf)0;
+
+    _zwrite = new z_stream;
+    _zwrite->zalloc = (alloc_func)0;
+    _zwrite->zfree = (free_func)0;
+    _zwrite->opaque = (voidpf)0;
 }
 
 
 ZBuffer::ZBuffer(std::ios& ios, Format fmt)
 : _target(&ios)
-, _zstr(0)
+, _zread(0)
+, _zwrite(0)
 , _format(fmt)
-, _zbufsize(0)
+, _zibufsize(0)
 , _zcount(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
 
-    _zstr = new z_stream;
-    _zstr->zalloc = (alloc_func)0;
-    _zstr->zfree = (free_func)0;
-    _zstr->opaque = (voidpf)0;
+    _zread = new z_stream;
+    _zread->zalloc = (alloc_func)0;
+    _zread->zfree = (free_func)0;
+    _zread->opaque = (voidpf)0;
+
+    _zwrite = new z_stream;
+    _zwrite->zalloc = (alloc_func)0;
+    _zwrite->zfree = (free_func)0;
+    _zwrite->opaque = (voidpf)0;
 }
 
 
@@ -77,7 +89,8 @@ ZBuffer::~ZBuffer()
     catch(...)
     {}
 
-    delete _zstr;
+    delete _zread;
+    delete _zwrite;
 }
 
 
@@ -97,17 +110,17 @@ void ZBuffer::discard()
 {
     if( this->pptr() )
     {
-        deflateEnd(_zstr);
+        deflateEnd(_zwrite);
         setp(0, 0);
     }
 
     if( this->gptr() )
     {
-      inflateEnd(_zstr);
-      setg(0, 0, 0);
+        inflateEnd(_zread);
+        setg(0, 0, 0);
     }
 
-    _zbufsize = 0;
+    _zibufsize = 0;
     _zcount   = 0;
 }
 
@@ -130,25 +143,25 @@ void ZBuffer::finish()
 {
     if( this->pptr() )
     {
-        _zstr->next_in  = reinterpret_cast<Bytef*>(_buf);
-        _zstr->avail_in = this->pptr() - this->pbase();
+        _zwrite->next_in  = reinterpret_cast<Bytef*>(_obuf);
+        _zwrite->avail_in = this->pptr() - this->pbase();
 
         for(int err = Z_OK; err != Z_STREAM_END; )
         {
-          _zstr->next_out = reinterpret_cast<Bytef*>(_zbuf);
-          _zstr->avail_out = _zbufmax;
+            _zwrite->next_out = reinterpret_cast<Bytef*>(_zobuf);
+            _zwrite->avail_out = _zbufmax;
 
-          err = deflate(_zstr, Z_FINISH);
-          if(err != Z_STREAM_END && err != Z_OK)
-              throw IOError("deflate failed");
+            err = deflate(_zwrite, Z_FINISH);
+            if(err != Z_STREAM_END && err != Z_OK)
+                throw IOError("deflate failed");
 
-          std::streamsize avail = _zbufmax - _zstr->avail_out;
-          avail -= _target->rdbuf()->sputn(_zbuf, avail);
-          if(avail > 0)
-              throw IOError("deflate failed");
+            std::streamsize avail = _zbufmax - _zwrite->avail_out;
+            avail -= _target->rdbuf()->sputn(_zobuf, avail);
+            if(avail > 0)
+                throw IOError("deflate failed");
         }
 
-        deflateReset(_zstr);
+        deflateReset(_zwrite);
     }
 }
 
@@ -157,15 +170,12 @@ std::streamsize ZBuffer::import(std::streamsize maxImport)
 {
     if( ! this->gptr() )
     {
-        // discard ends deflating for put area
-        discard();
-
         const int windowBits = (_format == Gzip) ? MAX_WBITS + 32 : MAX_WBITS;
-        int err = inflateInit2(_zstr, windowBits);
+        int err = inflateInit2(_zread, windowBits);
         if (err != Z_OK)
             throw IOError("inflateInit failed");
 
-        this->setg(_buf, _buf, _buf);
+        this->setg(_ibuf, _ibuf, _ibuf);
     }
 
     if( ! _target || ! _target->rdbuf() )
@@ -181,14 +191,14 @@ std::streamsize ZBuffer::import(std::streamsize maxImport)
         maxImport = _target->rdbuf()->in_avail();
 
     // not more than available zbuffer size
-    const std::streamsize zbufavail = _zbufmax - _zbufsize;
+    const std::streamsize zbufavail = _zbufmax - _zibufsize;
     maxImport = zbufavail < maxImport ? zbufavail : maxImport;
 
     if(maxImport > 0)
     {
-        n = _target->rdbuf()->sgetn( _zbuf + _zbufsize,  maxImport );
+        n = _target->rdbuf()->sgetn( _zibuf + _zibufsize,  maxImport );
         if(n > 0)
-            _zbufsize += static_cast<int>(n);
+            _zibufsize += static_cast<int>(n);
     }
 
     inflateBuffer();
@@ -201,25 +211,22 @@ std::streamsize ZBuffer::import(const char* data, std::streamsize size)
 {
     if( ! this->gptr() )
     {
-        // discard ends deflating for put area
-        discard();
-
         const int windowBits = (_format == Gzip) ? MAX_WBITS + 32 : MAX_WBITS;
-        int err = inflateInit2(_zstr, windowBits);
+        int err = inflateInit2(_zread, windowBits);
         if (err != Z_OK)
             throw IOError("inflateInit failed");
 
-        this->setg(_buf, _buf, _buf);
+        this->setg(_ibuf, _ibuf, _ibuf);
     }
 
     // not more than available zbuffer size
-    const std::streamsize zbufavail = _zbufmax - _zbufsize;
+    const std::streamsize zbufavail = _zbufmax - _zibufsize;
     std::streamsize n = zbufavail < size ? zbufavail : size;
 
     if(n > 0)
     {
-        std::memcpy(_zbuf + _zbufsize, data, static_cast<std::size_t>(n));
-        _zbufsize += static_cast<int>(n);
+        std::memcpy(_zibuf + _zibufsize, data, static_cast<std::size_t>(n));
+        _zibufsize += static_cast<int>(n);
     }
 
     inflateBuffer();
@@ -234,10 +241,10 @@ void ZBuffer::inflateBuffer()
     if( this->gptr() - this->eback() > _pbmax)
     {
         std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
-        std::char_traits<char_type>::move( _buf,
+        std::char_traits<char_type>::move( _ibuf,
                                             this->gptr() - _pbmax,
                                             static_cast<std::size_t>(movelen));
-        this->setg(_buf, _buf + _pbmax, _buf + movelen);
+        this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
     }
 
     // inflate to end of input buffer area
@@ -245,28 +252,28 @@ void ZBuffer::inflateBuffer()
     const std::streamsize unused = _bufmax - used;
     assert(used + unused == _bufmax);
 
-    _zstr->next_in = reinterpret_cast<Bytef*>( const_cast<char*>(_zbuf) );
-    _zstr->avail_in = static_cast<uLong>(_zbufsize);
+    _zread->next_in = reinterpret_cast<Bytef*>( const_cast<char*>(_zibuf) );
+    _zread->avail_in = static_cast<uLong>(_zibufsize);
 
-    _zstr->next_out = reinterpret_cast<Bytef*>( this->egptr() );
-    _zstr->avail_out = static_cast<uLong>(unused);
+    _zread->next_out = reinterpret_cast<Bytef*>( this->egptr() );
+    _zread->avail_out = static_cast<uLong>(unused);
 
-    while( _zstr->avail_in > 0 && _zstr->avail_out > 0)
+    while( _zread->avail_in > 0 && _zread->avail_out > 0)
     {
-      int err = inflate(_zstr, Z_NO_FLUSH);
+        int err = inflate(_zread, Z_NO_FLUSH);
 
-      if(err == Z_STREAM_END)
-          break;
+        if(err == Z_STREAM_END)
+            break;
 
-      if(err != Z_OK)
-          throw IOError("inflate failed");
+        if(err != Z_OK)
+            throw IOError("inflate failed");
     }
 
     // move leftover compressed data to front
-    std::memmove(_zbuf, _zstr->next_in, _zstr->avail_in);
-    _zbufsize = _zstr->avail_in;
+    std::memmove(_zibuf, _zread->next_in, _zread->avail_in);
+    _zibufsize = _zread->avail_in;
 
-    std::streamsize generated = unused - _zstr->avail_out;
+    std::streamsize generated = unused - _zread->avail_out;
     if(generated)
     {
         _zcount += static_cast<std::size_t>(generated);
@@ -331,37 +338,34 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
 
     if( ! this->pptr() )
     {
-        // discard ends inflating for get area
-        discard();
-
         const int windowBits = (_format == Gzip) ? MAX_WBITS + 16 : MAX_WBITS;
-        int err = deflateInit2(_zstr, Z_DEFAULT_COMPRESSION, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
+        int err = deflateInit2(_zwrite, Z_DEFAULT_COMPRESSION, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
         if (err != Z_OK)
           throw IOError("deflateInit failed");
 
-        this->setp( _buf, _buf + _bufmax );
+        this->setp( _obuf, _obuf + _bufmax );
     }
     else
     {
-        _zstr->next_in  = reinterpret_cast<Bytef*>(_buf);
-        _zstr->avail_in = this->pptr() - this->pbase();
+        _zwrite->next_in  = reinterpret_cast<Bytef*>(_obuf);
+        _zwrite->avail_in = this->pptr() - this->pbase();
 
-        while(_zstr->avail_in > 0)
+        while(_zwrite->avail_in > 0)
         {
-            _zstr->next_out = reinterpret_cast<Bytef*>(_zbuf);
-            _zstr->avail_out = _zbufmax;
+            _zwrite->next_out = reinterpret_cast<Bytef*>(_zobuf);
+            _zwrite->avail_out = _zbufmax;
 
-            int err = deflate(_zstr, Z_NO_FLUSH);
+            int err = deflate(_zwrite, Z_NO_FLUSH);
             if (err != Z_OK)
                 throw IOError("deflate failed");
 
-            std::streamsize avail = _zbufmax - _zstr->avail_out;
-            avail -= _target->rdbuf()->sputn(_zbuf, avail);
+            std::streamsize avail = _zbufmax - _zwrite->avail_out;
+            avail -= _target->rdbuf()->sputn(_zobuf, avail);
             if(avail > 0)
                 return traits_type::eof();
         }
 
-        this->setp(_buf, _buf + _bufmax);
+        this->setp(_obuf, _obuf + _bufmax);
     }
 
     if( ! traits_type::eq_int_type(ch, traits_type::eof()) )

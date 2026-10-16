@@ -79,6 +79,11 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::UTF32LeToUnicode);
             Pt::Unit::TestSuite::registerMethod( "UnicodeToUTF32Le",
                                                  *this, &TextStreamTest::UnicodeToUTF32Le);
+
+            Pt::Unit::TestSuite::registerMethod( "ImportWhileOutput",
+                                                 *this, &TextStreamTest::ImportWhileOutput);
+            Pt::Unit::TestSuite::registerMethod( "OutputWhileInput",
+                                                 *this, &TextStreamTest::OutputWhileInput);
             
             Pt::Unit::TestSuite::registerMethod( "GetChar",
                                                  *this, &TextStreamTest::GetChar );
@@ -118,6 +123,8 @@ class TextStreamTest : public Pt::Unit::TestSuite
 
         void UTF32LeToUnicode();
         void UnicodeToUTF32Le();
+        void ImportWhileOutput();
+        void OutputWhileInput();
         
         void GetChar();
         void GetLineBuffer();
@@ -375,6 +382,39 @@ void TextStreamTest::UnicodeToUTF32Le()
     std::string str = ss.str();
     PT_UNIT_ASSERT( str.size() == sizeof(TextUTF32LE) - 1 );
     PT_UNIT_ASSERT( 0 == std::memcmp(str.c_str(), TextUTF32LE, sizeof(TextUTF32LE) - 1) );
+}
+
+
+void TextStreamTest::ImportWhileOutput()
+{
+    std::stringstream output;
+    Pt::BasicTextBuffer<char, char> buffer(output, new Pt::Base64Codec);
+    buffer.sputn("ab", 2);
+    buffer.import("Y2Q=", 4);
+
+    char input[2];
+    PT_UNIT_ASSERT_EQUALS(std::streamsize(2), buffer.sgetn(input, sizeof(input)));
+    PT_UNIT_ASSERT(std::string(input, sizeof(input)) == "cd");
+
+    PT_UNIT_ASSERT_EQUALS(0, buffer.pubsync());
+    PT_UNIT_ASSERT(output.str() == "YWI=");
+}
+
+
+void TextStreamTest::OutputWhileInput()
+{
+    std::stringstream output;
+    Pt::BasicTextBuffer<char, char> buffer(output, new Pt::Base64Codec);
+    buffer.import("Y2Q=", 4);
+
+    PT_UNIT_ASSERT_EQUALS(std::streamsize(2), buffer.sputn("ab", 2));
+
+    char input[2];
+    PT_UNIT_ASSERT_EQUALS(std::streamsize(2), buffer.sgetn(input, sizeof(input)));
+    PT_UNIT_ASSERT(std::string(input, sizeof(input)) == "cd");
+
+    PT_UNIT_ASSERT_EQUALS(0, buffer.pubsync());
+    PT_UNIT_ASSERT(output.str() == "YWI=");
 }
 
 
