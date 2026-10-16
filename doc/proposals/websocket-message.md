@@ -23,6 +23,93 @@ yet reported on the facade. `shutdown` enqueues a close frame.
 Peer close is not yet answered by a reply close before the stream
 ends.
 
+The frame parser lives inside `WebSocketChannel::parseAvailable`.
+It reads one byte at a time with `sbumpc`. Header, length, and mask
+share one block. A 16-bit or 64-bit length is not checked against
+the minimal form. The parser cannot be tested without a channel.
+
+## Frame reader {#frame-reader}
+
+`FrameReader` is the internal frame parser. It is not a public type.
+Its surface follows `JsonReader`: `attach`, `reset`, `get`,
+`advance`. It returns a `Frame`, not a `Node`. There is no iterator
+and no event interface.
+
+```cpp
+class Frame
+{
+    public:
+        enum Type { None, Data, Control, Fail };
+
+        Type type() const;
+        unsigned opcode() const;
+        bool fin() const;
+        const char* data() const;
+        std::size_t size() const;
+        unsigned failCode() const;
+};
+
+class FrameReader : private NonCopyable
+{
+    public:
+        FrameReader();
+        explicit FrameReader(std::streambuf& sb);
+
+        void attach(std::streambuf& sb);
+        void reset();
+        void reset(std::streambuf& sb);
+
+        void setMaxMessageSize(std::size_t n);
+        void setExpectMasked(bool masked);
+
+        Frame& get();
+        Frame& next();
+        Frame* advance();
+};
+```
+
+`advance` processes what the buffer holds and pauses anywhere.
+It returns the `Frame` when one is complete, otherwise nullptr.
+`get` is the current frame, valid until the next `advance` or
+`next`. `next` pulls the next complete frame. The channel uses
+`advance` only.
+
+The reader is a need-N-bytes machine. One state, one task, the
+transition at the end:
+
+```text
+NeedHeader    2 bytes
+NeedLength    2 or 8
+NeedMask      4
+NeedPayload   N
+Idle
+```
+
+Header, length, and mask are filled with `sgetn` into fixed
+buffers. The payload is read in blocks with `sgetn`, not one byte
+at a time. A masked payload is unmasked in words after alignment.
+`sgetn` may return fewer bytes than asked. The state and the got
+counters stay. The next `advance` continues there. It never blocks.
+
+A 16-bit length is valid only when it is at least 126. A 64-bit
+length is valid only when it is at least 65536 and its high bit is
+clear. RSV bits, a control frame without FIN, a control payload
+over 125, a continuation with no open message, a data opcode while
+a message is open, and a wrong mask direction each fail the frame
+with 1002. A data message over `maxMessageSize` fails with 1009.
+Invalid UTF-8 fails with 1007. A failed frame is `Frame::Fail`.
+The reader does not close a stream.
+
+The channel owns the reader. It builds the message from a data
+frame, answers a ping, and reports a pong. The reader does not know
+the channel, the signals, or the messages.
+
+Tests feed a `stringbuf` and call `advance`. They cover a complete
+frame, a frame split across calls, an invalid length form, RSV,
+a wrong mask direction, a control without FIN, a continuation with
+no open message, and a payload over the size limit. No socket, no
+loop, no channel.
+
 ## Permanent input {#permanent-input}
 
 The input pump runs from `open` until the stream ends. It does not
