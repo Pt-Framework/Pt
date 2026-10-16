@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2007-2016 Marc Boris Duerner
  * Copyright (C) 2007-2016 Laurentiu-Gheorghe Crisan
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -47,13 +47,13 @@ SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 , _terminateThread(false)
 , _beginWait(0)
 , _event(0)
-{ 
+{
     _beginWait = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 
 SerialDeviceImpl::~SerialDeviceImpl()
-{ 
+{
     CloseHandle( _beginWait );
 }
 
@@ -82,7 +82,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
     try
     {
         if( ! GetCommState( h, &_orgCommState ) )
-            throw AccessFailed("Get port state failed" );       
+            throw AccessFailed("Get port state failed" );
 
         // ReadFile and WriteFile are non-blocking
         COMMTIMEOUTS comTimeOut;
@@ -117,10 +117,10 @@ void SerialDeviceImpl::cancel(EventLoop& loop)
 {
     if( handle() == 0 || handle() == INVALID_HANDLE_VALUE )
         return;
-    
+
     // Signalise the thread to terminate
     _terminateThread = true;
-    
+
     // Reset the wait mask, to wake up WaitCommEvent
     SetCommMask( handle(), 0 );
 
@@ -149,9 +149,9 @@ bool SerialDeviceImpl::runWrite(EventLoop& loop)
 
 
 void SerialDeviceImpl::run()
-{ 
+{
     while( ! _terminateThread )
-    {   
+    {
         WaitForSingleObject(_beginWait, INFINITE);
 
         if(_terminateThread)
@@ -160,18 +160,18 @@ void SerialDeviceImpl::run()
         // NOTE: WaitCommEvent can be interrupted by calling SetCommMask
         // from another thread
         _event = 0;
-        BOOL ret = WaitCommEvent(handle(), &_event, NULL); 
+        BOOL ret = WaitCommEvent(handle(), &_event, NULL);
 
         //TODO: Handle comm errors
         DWORD error = 0;
-        COMSTAT cs; 
+        COMSTAT cs;
         ClearCommError( handle(), &error, &cs );
         DWORD err = GetLastError();
-        
+
         if( ret == TRUE && (_event & (EV_TXEMPTY|EV_RXCHAR)) )
-        {         
+        {
             _device.loop()->setReady(_device);
-        }        
+        }
         else
         {
             // TODO: Handling for unexpected events
@@ -181,7 +181,7 @@ void SerialDeviceImpl::run()
 }
 
 
-std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) 
+std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     DWORD len = 0;
     if( ! ReadFile( handle(), buffer, n, &len, 0 ) )
@@ -202,7 +202,7 @@ std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size
         _thread->start();
     }
 
-    SetEvent(_beginWait); 
+    SetEvent(_beginWait);
     return 0;
 }
 
@@ -233,14 +233,14 @@ std::size_t SerialDeviceImpl::read( char* buffer, std::size_t count, bool& eof )
     SetCommMask( handle(), mask | EV_RXCHAR );
 
     DWORD event = 0;
-    WaitCommEvent(handle(), &event, NULL); 
+    WaitCommEvent(handle(), &event, NULL);
 
     SetCommMask( handle(), mask &~ EV_RXCHAR );
 
     if( ! ReadFile( handle(), buffer, count, &length, 0 ) )
         throw IOError( PT_ERROR_MSG("Read port failed") );
 
-    if( length == 0 )     
+    if( length == 0 )
        eof = true;
 
     return length;
@@ -282,7 +282,7 @@ std::size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std:
     _event &= ~EV_TXEMPTY;
 
     return write(buffer, n);
-}   
+}
 
 
 std::size_t SerialDeviceImpl::write( const char* buffer, std::size_t count )
@@ -302,7 +302,7 @@ std::size_t SerialDeviceImpl::write( const char* buffer, std::size_t count )
     SetCommMask(handle(), mask | EV_TXEMPTY);
 
     DWORD event = 0;
-    WaitCommEvent(handle(), &event, NULL); 
+    WaitCommEvent(handle(), &event, NULL);
 
     SetCommMask( handle(), mask &~ EV_TXEMPTY );
 
@@ -404,7 +404,7 @@ void SerialDeviceImpl::close()
 {
     //Restore the port state.
     SetCommState( handle(), &_orgCommState );
-    
+
     OverlappedIODeviceImpl::close();
 }
 
@@ -429,7 +429,8 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
     }
 
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, static_cast<DWORD>(n),
+                          &readBytes, &_readOv) )
     {
         DWORD err = GetLastError();
         if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
@@ -449,7 +450,7 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
         return readBytes;
 
     SetCommMask(handle(), EV_RXCHAR);
-    
+
     _eventMask = 0;
     BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
     if(ret == FALSE)
@@ -471,7 +472,7 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
 
         throw IOError("read failed");
     }
-        
+
     return 0;
 }
 
@@ -493,7 +494,8 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
     }
 
     readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, static_cast<DWORD>(n),
+                          &readBytes, &_readOv) )
     {
         DWORD err = GetLastError();
         if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
@@ -514,7 +516,7 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
 
 
 bool SerialDeviceImpl::runRead(EventLoop& loop)
-{  
+{
     if( HasOverlappedIoCompleted(&_readOv) )
     {
         COMSTAT stat;
@@ -545,7 +547,7 @@ std::size_t SerialDeviceImpl::read(char* buffer, std::size_t n, bool& eof)
     ov.hEvent = _ioEvent;
     ov.Offset = _readOv.Offset;
     ov.OffsetHigh = _readOv.OffsetHigh;
-    
+
     DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
                                                           : static_cast<DWORD>(n);
 
@@ -568,7 +570,7 @@ std::size_t SerialDeviceImpl::read(char* buffer, std::size_t n, bool& eof)
             return readBytes;
 
         SetCommMask(handle(), EV_RXCHAR);
-    
+
         _eventMask = 0;
         BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &ov);
         if(ret == FALSE)
@@ -591,7 +593,7 @@ std::size_t SerialDeviceImpl::read(char* buffer, std::size_t n, bool& eof)
         {
             throw IOError("ReadFile timeout");
         }
-    
+
         if(FALSE == GetOverlappedResult(handle(), &ov, &readBytes, TRUE) )
         {
             throw IOError("GetOverlappedResult failed");
@@ -752,19 +754,19 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 
 void SerialDeviceImpl::setRts(bool on)
 {
-    DWORD flag = on ? SETRTS : CLRRTS;    
+    DWORD flag = on ? SETRTS : CLRRTS;
     EscapeCommFunction(handle(), flag);
 }
 
 void SerialDeviceImpl::setDtr(bool on)
 {
-    DWORD flag = on ? SETDTR : CLRDTR;    
+    DWORD flag = on ? SETDTR : CLRDTR;
     EscapeCommFunction(handle(), flag);
 }
 
 void SerialDeviceImpl::setBreak(bool on)
 {
-    DWORD flag = on ? SETBREAK : CLRBREAK;    
+    DWORD flag = on ? SETBREAK : CLRBREAK;
     EscapeCommFunction(handle(), flag);
 }
 
@@ -787,7 +789,7 @@ bool SerialDeviceImpl::isDsr() const
 {
     DWORD flags = 0;
     GetCommModemStatus( handle() , &flags);
-    return ((flags & MS_DSR_ON) == MS_DSR_ON);    
+    return ((flags & MS_DSR_ON) == MS_DSR_ON);
 }
 
 
