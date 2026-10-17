@@ -7,7 +7,7 @@ proposal: websocket.md
 The server session is the application context of one accepted
 stream. The client facade is the `WebSocket` the application
 constructed. The model is
-[WebSocket Session](../concepts/websocket-session.md). This file
+[WebSocket](../concepts/websocket.md). This file
 states the handshake rules the implementation still has to follow,
 and the behavior it has today.
 
