@@ -32,8 +32,15 @@
 
 - [peer-close](websocket-message.md#peer-close).
   A received close is answered by shutdown when no close frame was
-  sent. A peer code that must not be written is not echoed. After
-  that reply is written, the engine ends the stream.
+  sent. A peer code that must not be written is not echoed. The
+  reply is 1000. After that reply is written, the engine ends the
+  stream.
+
+- [close-path](websocket-message.md#close-path).
+  closed() reports only an end the application did not start.
+  close() and the destructor do not emit. After the stream ends,
+  beginSend and beginReceive throw. A discarded buffer is not
+  resumed. WebSocket has no resynchronization.
 
 - [client-handshake](websocket-session.md#client-handshake).
   Headers set before beginConnect are kept. endConnect checks status
@@ -52,5 +59,5 @@
 FrameReader first, with its own tests. It is the parser the rest of
 the engine sits on, and it can land without a channel. Permanent
 input next. It uses the reader and the concurrent read and write
-that Stream already allows. Pong visibility, shutdown, and peer
-close after that. Handshake checks last.
+that Stream already allows. Pong visibility, shutdown, peer close,
+and the close path after that. Handshake checks last.
