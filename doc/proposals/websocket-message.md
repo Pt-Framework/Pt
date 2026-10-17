@@ -6,7 +6,7 @@ proposal: websocket.md
 
 The public unit is a message. Framing, fragmentation, masking, and
 control frames stay inside the engine. The model is
-[WebSocket Message](../concepts/websocket-message.md). This file
+[WebSocket](../concepts/websocket.md). This file
 states the rules the implementation still has to follow, and the
 behavior it has today.
 
