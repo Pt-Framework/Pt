@@ -495,6 +495,44 @@ class ProtocolService : public Pt::Http::WebSocketService
         std::size_t _opened;
 };
 
+class CloseNowSession : public Pt::Http::WebSocketSession
+{
+    public:
+        CloseNowSession(Pt::Http::WebSocketService& service,
+                        Pt::Http::Stream& stream,
+                        const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            close();
+        }
+
+    protected:
+        virtual void onInput()
+        {}
+
+        virtual void onOutput()
+        {}
+
+        virtual void onClose()
+        {}
+};
+
+class CloseNowService : public Pt::Http::WebSocketService
+{
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new CloseNowSession(*this, stream, reply);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+};
+
 class WebSocketTest : public Pt::Unit::TestSuite
                     , public Pt::Connectable
 {
@@ -537,6 +575,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ProtocolRequired", *this, &WebSocketTest::ProtocolRequired);
             registerMethod("ProtocolRejected", *this, &WebSocketTest::ProtocolRejected);
             registerMethod("ProtocolHeader", *this, &WebSocketTest::ProtocolHeader);
+            registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
         }
 
         void setUp()
@@ -1351,6 +1390,43 @@ class WebSocketTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT_EQUALS(_copied, "https://example.test");
             PT_UNIT_ASSERT_EQUALS(service.opened(), static_cast<std::size_t>(1));
+        }
+
+    protected:
+        void EndAfterClosed()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8035);
+
+            Pt::Http::Server server(*_loop, ep);
+            CloseNowService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedEndAfterClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+        }
+
+        void onConnectedEndAfterClosed(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onClientEndAfterClosed);
+            socket.beginReceive();
+        }
+
+        void onClientEndAfterClosed(Pt::Http::WebSocket& socket)
+        {
+            PT_UNIT_ASSERT_THROW(socket.endSend(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.endReceive(), std::logic_error);
+            _closed = true;
+            _loop->exit();
         }
 
     protected:

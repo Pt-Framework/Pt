@@ -174,7 +174,3 @@ run for that incomplete message. After the reply has been written,
 the engine ends the stream. It does not call `close` on the facade.
 The close is processed and `closed()` is emitted even when no
 `beginReceive` is outstanding.
-
-## Close path {#close-path}
-
-`endSend()` and `endReceive()` throw after `closed()`.
