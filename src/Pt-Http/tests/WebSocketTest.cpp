@@ -427,7 +427,7 @@ class ProtocolSession : public Pt::Http::WebSocketSession
         , _exitLoop(&exitLoop)
         {
             *_selected = protocol();
-            _exitLoop->exit();
+            // do not exit here; client must finish the handshake first
         }
 
         const std::string& copiedHeader() const
@@ -1286,6 +1286,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedProtocol(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
+            _loop->exit();
         }
 
     protected:
