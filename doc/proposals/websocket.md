@@ -37,9 +37,6 @@
   stream. The close is processed and closed() is emitted even when
   no beginReceive is outstanding.
 
-- [close-path](websocket-message.md#close-path).
-  endSend() and endReceive() throw after closed().
-
 - [client-handshake](websocket-session.md#client-handshake).
   Headers set before beginConnect are kept. endConnect checks status
   101 and Sec-WebSocket-Accept.
@@ -57,5 +54,5 @@
 FrameReader first, with its own tests. It is the parser the rest of
 the engine sits on, and it can land without a channel. Permanent
 input next. It uses the reader and the concurrent read and write
-that Stream already allows. Pong visibility, shutdown, peer close,
-and the close path after that. Handshake checks last.
+that Stream already allows. Pong visibility, shutdown, and peer close after that.
+Handshake checks last.
