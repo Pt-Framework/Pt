@@ -20,8 +20,19 @@ queued controls over data fragments and can run while a read is
 outstanding, because `Stream` allows one input and one output at the
 same time. A received ping enqueues a pong. A received pong is not
 yet reported on the facade. `shutdown` enqueues a close frame.
-Peer close is not yet answered by a reply close before the stream
-ends.
+
+Input and output already have separate state. The public surface is
+already `incoming()`, `outgoing()`, and `beginSend()` without a
+frame argument. Those are not open tasks.
+
+A received close is parsed. The channel stores the code and the
+reason, discards an open data message, and enqueues a reply close.
+The reply echoes a writable peer code. It does not always use 1000.
+After both closes have been exchanged and the output is idle, the
+channel ends the stream and emits `closed()`. `close()` and the
+destructor do not emit. After the stream has ended, `beginSend()`
+and `beginReceive()` throw. A discarded buffer is not resumed.
+WebSocket has no resynchronization.
 
 The frame parser lives inside `WebSocketChannel::parseAvailable`.
 It reads one byte at a time with `sbumpc`. Header, length, and mask
@@ -164,3 +175,20 @@ code that must not be written is not echoed. The reply is 1000. If a
 data message was open, its body is discarded and `onInput` does not
 run for that incomplete message. After the reply has been written,
 the engine ends the stream. It does not call `close` on the facade.
+
+## Close path {#close-path}
+
+`closed()` reports an end the application did not start. Peer close,
+an idle timeout, a finished shutdown, and a read that returns no
+bytes emit it. `close()` and the destructor do not. After the stream
+has ended, `beginSend()` and `beginReceive()` throw. `endSend()` and
+`endReceive()` throw after `closed()`.
+
+Ending the stream discards the buffer. The framed stream is not
+resumed. A discarded buffer loses alignment, and WebSocket has no
+resynchronization. That is why a close is final for this stream.
+
+`closeCode()` and `closeReason()` are the values from the handshake
+that ended the stream. A local `shutdown()` keeps the values passed
+to it when the peer sends none. An empty peer close is 1005 unless a
+local code was already set. No close frame leaves the code at 1006.
