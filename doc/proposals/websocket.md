@@ -4,8 +4,7 @@
 
 - [Message](websocket-message.md)
 - [Session](websocket-session.md)
-- [Concept Message](../concepts/websocket-message.md)
-- [Concept Session](../concepts/websocket-session.md)
+- [Concept](../concepts/websocket.md)
 
 ## Open Tasks
 
