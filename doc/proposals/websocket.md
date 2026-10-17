@@ -34,13 +34,11 @@
   A received close is answered by shutdown when no close frame was
   sent. A peer code that must not be written is not echoed. The
   reply is 1000. After that reply is written, the engine ends the
-  stream.
+  stream. The close is processed and closed() is emitted even when
+  no beginReceive is outstanding.
 
 - [close-path](websocket-message.md#close-path).
-  closed() reports only an end the application did not start.
-  close() and the destructor do not emit. After the stream ends,
-  beginSend and beginReceive throw. A discarded buffer is not
-  resumed. WebSocket has no resynchronization.
+  endSend() and endReceive() throw after closed().
 
 - [client-handshake](websocket-session.md#client-handshake).
   Headers set before beginConnect are kept. endConnect checks status
