@@ -56,16 +56,16 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         { return _failCode; }
 
         bool hasControl() const
-        { return _hasControl; }
+        { return _control.complete(); }
 
         unsigned controlOpcode() const
-        { return _controlOpcode; }
+        { return _control.opcode(); }
 
         const char* controlData() const
-        { return _controlSize == 0 ? 0 : _control; }
+        { return _control.data(); }
 
         std::size_t controlSize() const
-        { return _controlSize; }
+        { return _control.size(); }
 
         void consumeControl();
 
@@ -75,6 +75,141 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         virtual std::streamsize showmanyc();
 
     private:
+        class Header
+        {
+            public:
+                Header();
+
+                void clear();
+
+                void resize(std::size_t n);
+
+                char* at(std::size_t pos)
+                { return _bytes + pos; }
+
+                std::size_t size() const
+                { return _size; }
+
+                std::size_t avail() const
+                { return _avail; }
+
+                void setAvail(std::size_t n)
+                { _avail = n; }
+
+                std::size_t remaining() const
+                { return _size - _avail; }
+
+                bool fin() const;
+
+                unsigned opcode() const;
+
+                bool isControl() const;
+
+                unsigned rsv() const;
+
+                bool masked() const;
+
+                unsigned len7() const;
+
+                unsigned payloadLength(std::size_t& n) const;
+
+                void mask(char out[4]) const;
+
+                static bool isControl(unsigned opcode);
+
+            private:
+                char _bytes[14];
+                std::size_t _size;
+                std::size_t _avail;
+        };
+
+
+        class Control
+        {
+            public:
+                Control();
+
+                void clear();
+
+                void begin(unsigned opcode, std::size_t n);
+
+                bool complete() const
+                { return _complete; }
+
+                void setComplete()
+                { _complete = true; }
+
+                unsigned opcode() const
+                { return _opcode; }
+
+                char* at(std::size_t pos)
+                { return _bytes + pos; }
+
+                const char* data() const
+                { return _size == 0 ? 0 : _bytes; }
+
+                std::size_t size() const
+                { return _size; }
+
+                std::size_t got() const
+                { return _got; }
+
+                void addGot(std::size_t n)
+                { _got += n; }
+
+            private:
+                char _bytes[125];
+                std::size_t _size;
+                std::size_t _got;
+                unsigned _opcode;
+                bool _complete;
+        };
+
+
+        class Frame
+        {
+            public:
+                Frame();
+
+                void clear();
+
+                void begin(const Header& header, std::size_t payload);
+
+                bool fin() const
+                { return _fin; }
+
+                unsigned opcode() const
+                { return _opcode; }
+
+                bool isControl() const
+                { return Header::isControl(_opcode); }
+
+                bool masked() const
+                { return _masked; }
+
+                std::size_t payloadSize() const
+                { return _payloadSize; }
+
+                std::size_t payloadGot() const
+                { return _payloadGot; }
+
+                std::size_t remaining() const
+                { return _payloadSize - _payloadGot; }
+
+                void addGot(std::size_t n)
+                { _payloadGot += n; }
+
+                void unmask(char* p, std::size_t n) const;
+
+            private:
+                bool _fin;
+                bool _masked;
+                unsigned _opcode;
+                char _mask[4];
+                std::size_t _payloadSize;
+                std::size_t _payloadGot;
+        };
+
         enum State
         {
             NeedHeader,
@@ -107,20 +242,6 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         void finishFrame();
 
-        bool isControl(unsigned opcode) const;
-
-        unsigned headerOpcode() const;
-
-        bool headerFin() const;
-
-        bool headerMasked() const;
-
-        unsigned headerRsv() const;
-
-        std::size_t headerLen7() const;
-
-        std::size_t payloadLength();
-
     private:
         static const std::size_t WindowSize = 4096;
 
@@ -131,17 +252,10 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         std::size_t _maxRead;
         std::size_t _bytesRead;
 
-        char _hdr[14];
-        std::size_t _hdrSize;
-        std::size_t _hdrAvail;
-
+        Header _hdr;
+        Control _control;
+        Frame _frame;
         char _window[WindowSize];
-
-        char _control[125];
-        std::size_t _controlSize;
-        std::size_t _controlGot;
-        bool _hasControl;
-        unsigned _controlOpcode;
 
         bool _headerSeen;
         unsigned _opcode;
@@ -153,13 +267,6 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         unsigned _utf8Need;
         unsigned char _utf8Lead;
         bool _utf8Error;
-
-        bool _frameFin;
-        bool _frameMasked;
-        unsigned _frameOpcode;
-        char _mask[4];
-        std::size_t _payloadSize;
-        std::size_t _payloadGot;
 };
 
 } // namespace Http

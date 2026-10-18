@@ -92,14 +92,186 @@ bool finishUtf8(unsigned need, bool error)
     return ! error && need == 0;
 }
 
+} // namespace
 
-void xorMask(char* p, std::size_t n, std::size_t off, const char* mask)
+
+WebSocketBuffer::Header::Header()
+: _size(2)
+, _avail(0)
 {
-    for(std::size_t i = 0; i < n; ++i)
-        p[i] = static_cast<char>(p[i] ^ mask[(off + i) % 4]);
+    std::memset(_bytes, 0, sizeof(_bytes));
 }
 
-} // namespace
+
+void WebSocketBuffer::Header::clear()
+{
+    _size = 2;
+    _avail = 0;
+}
+
+
+void WebSocketBuffer::Header::resize(std::size_t n)
+{
+    _size = n;
+}
+
+
+bool WebSocketBuffer::Header::fin() const
+{
+    return (_bytes[0] & 0x80) != 0;
+}
+
+
+unsigned WebSocketBuffer::Header::opcode() const
+{
+    return static_cast<unsigned char>(_bytes[0]) & 0x0F;
+}
+
+
+bool WebSocketBuffer::Header::isControl() const
+{
+    return isControl( opcode() );
+}
+
+
+unsigned WebSocketBuffer::Header::rsv() const
+{
+    return static_cast<unsigned char>(_bytes[0]) & 0x70;
+}
+
+
+bool WebSocketBuffer::Header::masked() const
+{
+    return (_bytes[1] & 0x80) != 0;
+}
+
+
+unsigned WebSocketBuffer::Header::len7() const
+{
+    return static_cast<unsigned char>(_bytes[1]) & 0x7F;
+}
+
+
+unsigned WebSocketBuffer::Header::payloadLength(std::size_t& n) const
+{
+    unsigned len7 = static_cast<unsigned char>(_bytes[1]) & 0x7F;
+    if(len7 < 126)
+    {
+        n = len7;
+        return 0;
+    }
+
+    if(len7 == 126)
+    {
+        Pt::uint16_t size = 0;
+        std::memcpy(&size, _bytes + 2, 2);
+        size = Pt::beToHost(size);
+        if(size < 126)
+            return 1002;
+
+        n = size;
+        return 0;
+    }
+
+    Pt::uint64_t size = 0;
+    std::memcpy(&size, _bytes + 2, 8);
+    size = Pt::beToHost(size);
+    if( (size & 0x8000000000000000ull) != 0 || size < 65536 )
+        return 1002;
+
+    if(sizeof(std::size_t) < 8 &&
+       size > static_cast<Pt::uint64_t>(static_cast<std::size_t>(-1)) )
+        return 1009;
+
+    n = static_cast<std::size_t>(size);
+    return 0;
+}
+
+
+void WebSocketBuffer::Header::mask(char out[4]) const
+{
+    std::memcpy(out, _bytes + _size - 4, 4);
+}
+
+
+bool WebSocketBuffer::Header::isControl(unsigned opcode)
+{
+    return opcode == 0x08 || opcode == 0x09 || opcode == 0x0A;
+}
+
+
+WebSocketBuffer::Control::Control()
+: _size(0)
+, _got(0)
+, _opcode(0)
+, _complete(false)
+{
+}
+
+
+void WebSocketBuffer::Control::clear()
+{
+    _size = 0;
+    _got = 0;
+    _opcode = 0;
+    _complete = false;
+}
+
+
+void WebSocketBuffer::Control::begin(unsigned opcode, std::size_t n)
+{
+    _opcode = opcode;
+    _size = n;
+    _got = 0;
+    _complete = false;
+}
+
+
+WebSocketBuffer::Frame::Frame()
+: _fin(false)
+, _masked(false)
+, _opcode(0)
+, _payloadSize(0)
+, _payloadGot(0)
+{
+    std::memset(_mask, 0, sizeof(_mask));
+}
+
+
+void WebSocketBuffer::Frame::clear()
+{
+    _fin = false;
+    _masked = false;
+    _opcode = 0;
+    _payloadSize = 0;
+    _payloadGot = 0;
+    std::memset(_mask, 0, sizeof(_mask));
+}
+
+
+void WebSocketBuffer::Frame::begin(const Header& header, std::size_t payload)
+{
+    _fin = header.fin();
+    _masked = header.masked();
+    _opcode = header.opcode();
+    _payloadSize = payload;
+    _payloadGot = 0;
+
+    if(_masked)
+        header.mask(_mask);
+    else
+        std::memset(_mask, 0, sizeof(_mask));
+}
+
+
+void WebSocketBuffer::Frame::unmask(char* p, std::size_t n) const
+{
+    if( ! _masked || n == 0)
+        return;
+
+    for(std::size_t i = 0; i < n; ++i)
+        p[i] = static_cast<char>(p[i] ^ _mask[(_payloadGot + i) % 4]);
+}
 
 
 WebSocketBuffer::WebSocketBuffer()
@@ -109,12 +281,6 @@ WebSocketBuffer::WebSocketBuffer()
 , _maxMessageSize(1024 * 1024)
 , _maxRead(0)
 , _bytesRead(0)
-, _hdrSize(2)
-, _hdrAvail(0)
-, _controlSize(0)
-, _controlGot(0)
-, _hasControl(false)
-, _controlOpcode(0)
 , _headerSeen(false)
 , _opcode(0)
 , _finished(false)
@@ -124,49 +290,15 @@ WebSocketBuffer::WebSocketBuffer()
 , _utf8Need(0)
 , _utf8Lead(0)
 , _utf8Error(false)
-, _frameFin(false)
-, _frameMasked(false)
-, _frameOpcode(0)
-, _payloadSize(0)
-, _payloadGot(0)
 {
-    std::memset(_hdr, 0, sizeof(_hdr));
-    std::memset(_mask, 0, sizeof(_mask));
     setg(0, 0, 0);
 }
 
 
 WebSocketBuffer::WebSocketBuffer(std::streambuf& sb)
-: _sb(&sb)
-, _state(NeedHeader)
-, _masking(true)
-, _maxMessageSize(1024 * 1024)
-, _maxRead(0)
-, _bytesRead(0)
-, _hdrSize(2)
-, _hdrAvail(0)
-, _controlSize(0)
-, _controlGot(0)
-, _hasControl(false)
-, _controlOpcode(0)
-, _headerSeen(false)
-, _opcode(0)
-, _finished(false)
-, _failCode(0)
-, _messageOpen(false)
-, _messageSize(0)
-, _utf8Need(0)
-, _utf8Lead(0)
-, _utf8Error(false)
-, _frameFin(false)
-, _frameMasked(false)
-, _frameOpcode(0)
-, _payloadSize(0)
-, _payloadGot(0)
+: WebSocketBuffer()
 {
-    std::memset(_hdr, 0, sizeof(_hdr));
-    std::memset(_mask, 0, sizeof(_mask));
-    setg(0, 0, 0);
+    _sb = &sb;
 }
 
 
@@ -185,12 +317,11 @@ void WebSocketBuffer::reset()
 {
     _sb = 0;
     _state = NeedHeader;
-    _hdrSize = 2;
-    _hdrAvail = 0;
-    _controlSize = 0;
-    _controlGot = 0;
-    _hasControl = false;
-    _controlOpcode = 0;
+    _maxRead = 0;
+    _bytesRead = 0;
+    _hdr.clear();
+    _control.clear();
+    _frame.clear();
     _headerSeen = false;
     _opcode = 0;
     _finished = false;
@@ -200,13 +331,6 @@ void WebSocketBuffer::reset()
     _utf8Need = 0;
     _utf8Lead = 0;
     _utf8Error = false;
-    _frameFin = false;
-    _frameMasked = false;
-    _frameOpcode = 0;
-    _payloadSize = 0;
-    _payloadGot = 0;
-    std::memset(_hdr, 0, sizeof(_hdr));
-    std::memset(_mask, 0, sizeof(_mask));
     setg(0, 0, 0);
 }
 
@@ -232,10 +356,7 @@ void WebSocketBuffer::setMasking(bool masked)
 
 void WebSocketBuffer::consumeControl()
 {
-    _hasControl = false;
-    _controlSize = 0;
-    _controlGot = 0;
-    _controlOpcode = 0;
+    _control.clear();
 }
 
 
@@ -257,16 +378,16 @@ std::streamsize WebSocketBuffer::import(std::streamsize n)
         if(_failCode != 0)
             break;
 
-        if(_hasControl)
+        if(_control.complete())
             break;
 
-        if(_state == NeedPayload && ! isControl(_frameOpcode) && unused() == 0)
+        if(_state == NeedPayload && ! _frame.isControl() && unused() == 0)
             break;
 
         std::streamsize avail = _sb->in_avail();
         if(avail < 0)
         {
-            bool started = _state != NeedHeader || _hdrAvail > 0;
+            bool started = _state != NeedHeader || _hdr.avail() > 0;
             if(started)
                 fail(1002);
 
@@ -276,14 +397,14 @@ std::streamsize WebSocketBuffer::import(std::streamsize n)
         if(avail == 0)
             break;
 
-        if(_finished && _state == NeedHeader && _hdrAvail == 0)
+        if(_finished && _state == NeedHeader && _hdr.avail() == 0)
         {
             int ch = _sb->sgetc();
             if(ch < 0)
                 break;
 
             unsigned opcode = static_cast<unsigned>(ch) & 0x0F;
-            if( ! isControl(opcode) )
+            if( ! Header::isControl(opcode) )
                 break;
         }
 
@@ -419,28 +540,28 @@ bool WebSocketBuffer::readBytes(char* dst, std::size_t n, std::size_t& got)
 
 void WebSocketBuffer::onHeader()
 {
-    std::size_t n = take(_hdrSize - _hdrAvail);
+    std::size_t n = take(_hdr.remaining());
     if(n == 0)
         return;
 
     std::size_t got = 0;
-    if( ! readBytes(_hdr + _hdrAvail, n, got) )
+    if( ! readBytes(_hdr.at(_hdr.avail()), n, got) )
         return;
 
-    _hdrAvail += got;
-    if(_hdrAvail < _hdrSize)
+    _hdr.setAvail(_hdr.avail() + got);
+    if(_hdr.avail() < _hdr.size())
         return;
 
-    if(headerRsv() != 0)
+    if(_hdr.rsv() != 0)
     {
         fail(1002);
         return;
     }
 
-    unsigned opcode = headerOpcode();
-    bool control = isControl(opcode);
+    unsigned opcode = _hdr.opcode();
+    bool control = _hdr.isControl();
 
-    if(control && ! headerFin() )
+    if(control && ! _hdr.fin() )
     {
         fail(1002);
         return;
@@ -468,13 +589,13 @@ void WebSocketBuffer::onHeader()
         return;
     }
 
-    if(headerMasked() != _masking)
+    if(_hdr.masked() != _masking)
     {
         fail(1002);
         return;
     }
 
-    std::size_t len7 = headerLen7();
+    unsigned len7 = _hdr.len7();
     if(control && len7 > 125)
     {
         fail(1002);
@@ -483,126 +604,116 @@ void WebSocketBuffer::onHeader()
 
     if(len7 == 126)
     {
-        _hdrSize = 4;
+        _hdr.resize(4);
         _state = NeedLength;
         return;
     }
 
     if(len7 == 127)
     {
-        _hdrSize = 10;
+        _hdr.resize(10);
         _state = NeedLength;
         return;
     }
 
-    if(headerMasked())
+    if(_hdr.masked())
     {
-        _hdrSize = 6;
+        _hdr.resize(6);
         _state = NeedMask;
         return;
     }
 
-    _payloadSize = len7;
     beginPayload();
 }
 
 
 void WebSocketBuffer::onLength()
 {
-    std::size_t n = take(_hdrSize - _hdrAvail);
+    std::size_t n = take(_hdr.remaining());
     if(n == 0)
         return;
 
     std::size_t got = 0;
-    if( ! readBytes(_hdr + _hdrAvail, n, got) )
+    if( ! readBytes(_hdr.at(_hdr.avail()), n, got) )
         return;
 
-    _hdrAvail += got;
-    if(_hdrAvail < _hdrSize)
+    _hdr.setAvail(_hdr.avail() + got);
+    if(_hdr.avail() < _hdr.size())
         return;
 
-    std::size_t payload = payloadLength();
-    if(_failCode != 0)
+    std::size_t payload = 0;
+    unsigned err = _hdr.payloadLength(payload);
+    if(err != 0)
+    {
+        fail(err);
         return;
+    }
 
-    unsigned opcode = headerOpcode();
-    bool control = isControl(opcode);
-    if(control && payload > 125)
+    if(_hdr.isControl() && payload > 125)
     {
         fail(1002);
         return;
     }
 
-    if(headerMasked())
+    if(_hdr.masked())
     {
-        _hdrSize = _hdrSize + 4;
+        _hdr.resize(_hdr.size() + 4);
         _state = NeedMask;
         return;
     }
 
-    _payloadSize = payload;
     beginPayload();
 }
 
 
 void WebSocketBuffer::onMask()
 {
-    std::size_t n = take(_hdrSize - _hdrAvail);
+    std::size_t n = take(_hdr.remaining());
     if(n == 0)
         return;
 
     std::size_t got = 0;
-    if( ! readBytes(_hdr + _hdrAvail, n, got) )
+    if( ! readBytes(_hdr.at(_hdr.avail()), n, got) )
         return;
 
-    _hdrAvail += got;
-    if(_hdrAvail < _hdrSize)
+    _hdr.setAvail(_hdr.avail() + got);
+    if(_hdr.avail() < _hdr.size())
         return;
 
-    std::size_t payload = payloadLength();
-    if(_failCode != 0)
-        return;
-
-    _payloadSize = payload;
     beginPayload();
 }
 
 
 void WebSocketBuffer::beginPayload()
 {
-    unsigned opcode = headerOpcode();
-    bool control = isControl(opcode);
+    std::size_t payload = 0;
+    unsigned err = _hdr.payloadLength(payload);
+    if(err != 0)
+    {
+        fail(err);
+        return;
+    }
+
+    unsigned opcode = _hdr.opcode();
+    bool control = _hdr.isControl();
 
     if( ! control )
     {
         if(_maxMessageSize != 0 &&
-           (_payloadSize > _maxMessageSize ||
-            _messageSize > _maxMessageSize - _payloadSize))
+           (payload > _maxMessageSize ||
+            _messageSize > _maxMessageSize - payload))
         {
             fail(1009);
             return;
         }
 
-        _messageSize += _payloadSize;
+        _messageSize += payload;
     }
 
-    _frameFin = headerFin();
-    _frameMasked = headerMasked();
-    _frameOpcode = opcode;
-    _payloadGot = 0;
-
-    if(_frameMasked)
-        std::memcpy(_mask, _hdr + _hdrSize - 4, 4);
-    else
-        std::memset(_mask, 0, 4);
+    _frame.begin(_hdr, payload);
 
     if(control)
-    {
-        _controlOpcode = opcode;
-        _controlSize = _payloadSize;
-        _controlGot = 0;
-        _hasControl = false;
-    }
+        _control.begin(opcode, payload);
     else if(opcode == 0x01 || opcode == 0x02)
     {
         _messageOpen = true;
@@ -612,15 +723,15 @@ void WebSocketBuffer::beginPayload()
 
     _state = NeedPayload;
 
-    if(_payloadSize == 0)
+    if(payload == 0)
         finishFrame();
 }
 
 
 void WebSocketBuffer::onPayload()
 {
-    bool control = isControl(_frameOpcode);
-    std::size_t want = _payloadSize - _payloadGot;
+    bool control = _frame.isControl();
+    std::size_t want = _frame.remaining();
     if( ! control )
     {
         std::size_t space = unused();
@@ -637,7 +748,7 @@ void WebSocketBuffer::onPayload()
 
     char* dst = 0;
     if(control)
-        dst = _control + _payloadGot;
+        dst = _control.at(_control.got());
     else
         dst = egptr();
 
@@ -645,13 +756,12 @@ void WebSocketBuffer::onPayload()
     if( ! readBytes(dst, n, got) )
         return;
 
-    if(_frameMasked)
-        xorMask(dst, got, _payloadGot, _mask);
+    _frame.unmask(dst, got);
 
     if( ! control )
     {
-        bool text = _frameOpcode == 0x01 ||
-                    (_frameOpcode == 0x00 && _opcode == 0x01);
+        bool text = _frame.opcode() == 0x01 ||
+                    (_frame.opcode() == 0x00 && _opcode == 0x01);
         if(text && ! feedUtf8(_utf8Need, _utf8Lead, _utf8Error, dst, got) )
         {
             fail(1007);
@@ -660,9 +770,11 @@ void WebSocketBuffer::onPayload()
 
         setg(eback(), gptr(), egptr() + static_cast<std::streamsize>(got));
     }
+    else
+        _control.addGot(got);
 
-    _payloadGot += got;
-    if(_payloadGot != _payloadSize)
+    _frame.addGot(got);
+    if(_frame.remaining() != 0)
         return;
 
     finishFrame();
@@ -671,13 +783,11 @@ void WebSocketBuffer::onPayload()
 
 void WebSocketBuffer::finishFrame()
 {
-    bool control = isControl(_frameOpcode);
-
-    if(control)
+    if(_frame.isControl())
     {
-        if(_frameOpcode == 0x08 && _payloadSize > 0)
+        if(_frame.opcode() == 0x08 && _frame.payloadSize() > 0)
         {
-            if(_payloadSize == 1)
+            if(_frame.payloadSize() == 1)
             {
                 fail(1002);
                 return;
@@ -686,8 +796,8 @@ void WebSocketBuffer::finishFrame()
             unsigned need = 0;
             unsigned char lead = 0;
             bool error = false;
-            const char* reason = _control + 2;
-            if( ! feedUtf8(need, lead, error, reason, _payloadSize - 2) ||
+            const char* reason = _control.data() + 2;
+            if( ! feedUtf8(need, lead, error, reason, _frame.payloadSize() - 2) ||
                 ! finishUtf8(need, error) )
             {
                 fail(1002);
@@ -695,15 +805,13 @@ void WebSocketBuffer::finishFrame()
             }
         }
 
-        _hasControl = true;
-        _controlGot = _payloadSize;
-        _hdrSize = 2;
-        _hdrAvail = 0;
+        _control.setComplete();
+        _hdr.clear();
         _state = NeedHeader;
         return;
     }
 
-    if(_frameFin)
+    if(_frame.fin())
     {
         if(_opcode == 0x01 && ! finishUtf8(_utf8Need, _utf8Error) )
         {
@@ -715,85 +823,8 @@ void WebSocketBuffer::finishFrame()
         _messageOpen = false;
     }
 
-    _hdrSize = 2;
-    _hdrAvail = 0;
+    _hdr.clear();
     _state = NeedHeader;
-}
-
-
-bool WebSocketBuffer::isControl(unsigned opcode) const
-{
-    return opcode == 0x08 || opcode == 0x09 || opcode == 0x0A;
-}
-
-
-unsigned WebSocketBuffer::headerOpcode() const
-{
-    return static_cast<unsigned char>(_hdr[0]) & 0x0F;
-}
-
-
-bool WebSocketBuffer::headerFin() const
-{
-    return (_hdr[0] & 0x80) != 0;
-}
-
-
-bool WebSocketBuffer::headerMasked() const
-{
-    return (_hdr[1] & 0x80) != 0;
-}
-
-
-unsigned WebSocketBuffer::headerRsv() const
-{
-    return static_cast<unsigned char>(_hdr[0]) & 0x70;
-}
-
-
-std::size_t WebSocketBuffer::headerLen7() const
-{
-    return static_cast<unsigned char>(_hdr[1]) & 0x7F;
-}
-
-
-std::size_t WebSocketBuffer::payloadLength()
-{
-    unsigned len7 = static_cast<unsigned char>(_hdr[1]) & 0x7F;
-    if(len7 < 126)
-        return len7;
-
-    if(len7 == 126)
-    {
-        Pt::uint16_t size = 0;
-        std::memcpy(&size, _hdr + 2, 2);
-        size = Pt::beToHost(size);
-        if(size < 126)
-        {
-            fail(1002);
-            return 0;
-        }
-
-        return size;
-    }
-
-    Pt::uint64_t size = 0;
-    std::memcpy(&size, _hdr + 2, 8);
-    size = Pt::beToHost(size);
-    if( (size & 0x8000000000000000ull) != 0 || size < 65536 )
-    {
-        fail(1002);
-        return 0;
-    }
-
-    if(sizeof(std::size_t) < 8 &&
-       size > static_cast<Pt::uint64_t>(static_cast<std::size_t>(-1)) )
-    {
-        fail(1009);
-        return 0;
-    }
-
-    return static_cast<std::size_t>(size);
 }
 
 } // namespace Http
