@@ -31,58 +31,80 @@ The reply echoes a writable peer code. It does not always use 1000.
 After both closes have been exchanged and the output is idle, the
 channel ends the stream and emits `closed()`.
 
-The frame parser lives inside `WebSocketChannel::parseAvailable`.
-It reads one byte at a time with `sbumpc`. Header, length, and mask
-share one block. A 16-bit or 64-bit length is not checked against
-the minimal form. The parser cannot be tested without a channel.
+## WebSocket buffer {#websocket-buffer}
 
-## Frame reader {#frame-reader}
-
-`FrameReader` is the internal frame parser. It is not a public type.
-Its surface follows `JsonReader`: `attach`, `reset`, `get`,
-`advance`. It returns a `Frame`, not a `Node`. There is no iterator
-and no event interface.
+`WebSocketBuffer` is the internal frame parser and the body of an
+incoming message. It is not a public type. It is a `streambuf`,
+the way `HttpBuffer` is the body of an HTTP message. The channel
+owns it. `incoming().body()` uses it for the life of a receive.
+`outgoing().body()` stays the payload buffer the application writes.
 
 ```cpp
-class Frame
+class WebSocketBuffer : public std::streambuf
 {
     public:
-        enum Type { None, Data, Control, Fail };
-
-        Type type() const;
-        unsigned opcode() const;
-        bool fin() const;
-        const char* data() const;
-        std::size_t size() const;
-        unsigned failCode() const;
-};
-
-class FrameReader : private NonCopyable
-{
-    public:
-        FrameReader();
-        explicit FrameReader(std::streambuf& sb);
+        WebSocketBuffer();
+        explicit WebSocketBuffer(std::streambuf& sb);
 
         void attach(std::streambuf& sb);
         void reset();
         void reset(std::streambuf& sb);
 
         void setMaxMessageSize(std::size_t n);
-        void setExpectMasked(bool masked);
+        void setMasking(bool masked);
 
-        Frame& get();
-        Frame& next();
-        Frame* advance();
+        std::streamsize import(std::streamsize n = 0);
+
+        bool header() const;
+        unsigned opcode() const;
+        bool finished() const;
+        unsigned failCode() const;
+
+        bool hasControl() const;
+        unsigned controlOpcode() const;
+        const char* controlData() const;
+        std::size_t controlSize() const;
+        void consumeControl();
 };
 ```
 
-`advance` processes what the buffer holds and pauses anywhere.
-It returns the `Frame` when one is complete, otherwise nullptr.
-`get` is the current frame, valid until the next `advance` or
-`next`. `next` pulls the next complete frame. The channel uses
-`advance` only.
+The unit is the data message. Frames stay inside the buffer, the
+way chunks stay inside `HttpBuffer`. A continuation extends the
+current message and does not change its type. The first text or
+binary opcode is `header()`. `opcode()` is that opcode until the
+message ends. `finished()` is the FIN of the message. The next
+`import` after `finished()` starts the next message.
 
-The reader is a need-N-bytes machine. One state, one task, the
+`beginReceive` points `incoming().body()` at this buffer.
+`import` copies what the socket buffer holds into a fixed get
+area. One copy: the socket into that window. A masked payload is
+unmasked in place at the offset into the frame, so a window that
+is not the start of the frame stays correct. `available()` is
+`in_avail()`. The application reads `incoming().body()`.
+`discard()` drains the get area. `underflow` returns EOF when the
+get area is empty. It does not read the socket. At the FIN of a
+data message the get area ends, the way `HttpBuffer::isEnd` ends
+an HTTP body.
+
+`import` never waits for a whole frame or a whole message.
+`MessageProgress::body()` can be true in the middle of a frame.
+The window is a few kilobytes, not `payloadLength`. `sgetn` may
+return fewer bytes than asked. The state and the got counters
+stay. The next `import` continues there. It never blocks.
+
+Control frames are a side channel. They occur only at frame
+boundaries. Their payload, at most 125 bytes, is not the get
+area. `hasControl()` is true when a ping, pong, or close is
+complete. The channel answers a ping, reports a pong, and
+handles a close, then calls `consumeControl()`. A control
+between two data fragments leaves the get area as it is. A close
+discards an open data body and does not finish that message.
+
+When no receive is outstanding, `import` still runs. It consumes
+data payload without filling the get area, and it still completes
+control frames.
+
+The parser is a need-N-bytes machine. One state, one task, the
 transition at the end:
 
 ```text
@@ -90,14 +112,12 @@ NeedHeader    2 bytes
 NeedLength    2 or 8
 NeedMask      4
 NeedPayload   N
-Idle
 ```
 
 Header, length, and mask are filled with `sgetn` into fixed
-buffers. The payload is read in blocks with `sgetn`, not one byte
-at a time. A masked payload is unmasked in words after alignment.
-`sgetn` may return fewer bytes than asked. The state and the got
-counters stay. The next `advance` continues there. It never blocks.
+buffers. Data payload is filled with `sgetn` into the unused
+part of the get area. Control payload is filled into the control
+buffer.
 
 A 16-bit length is valid only when it is at least 126. A 64-bit
 length is valid only when it is at least 65536 and its high bit is
@@ -105,28 +125,32 @@ clear. RSV bits, a control frame without FIN, a control payload
 over 125, a continuation with no open message, a data opcode while
 a message is open, and a wrong mask direction each fail the frame
 with 1002. A data message over `maxMessageSize` fails with 1009.
-Invalid UTF-8 fails with 1007. A failed frame is `Frame::Fail`.
-The reader does not close a stream.
+Invalid UTF-8 fails with 1007. `failCode()` is that code. Zero
+means no failure. The buffer does not close a stream.
 
-The channel owns the reader. It builds the message from a data
-frame, answers a ping, and reports a pong. The reader does not know
-the channel, the signals, or the messages.
+The buffer does not know the channel, the signals, or the
+messages. The channel calls `import`, reads `failCode`,
+consumes a control, sets the incoming type from `opcode` when
+`header` becomes true, and sets progress from `header`,
+`in_avail`, and `finished`.
 
-Tests feed a `stringbuf` and call `advance`. They cover a complete
-frame, a frame split across calls, an invalid length form, RSV,
-a wrong mask direction, a control without FIN, a continuation with
-no open message, and a payload over the size limit. No socket, no
-loop, no channel.
+Tests feed a `stringbuf` and call `import`. They cover a
+complete data frame in the get area, a frame split across
+calls, a partial payload smaller than the frame, two fragments
+of one message in the same get area, a ping that does not enter
+the get area, a ping between two fragments, an invalid length
+form, RSV, a wrong mask direction, a control without FIN, a
+continuation with no open message, and a payload over the size
+limit. No socket, no loop, no channel.
 
 ## Permanent input {#permanent-input}
 
 The input pump runs from `open` until the stream ends. It does not
 depend on `beginReceive`. Controls and close are processed on every
-input step. Data payloads are written into `incoming()` and reported
-by `inputReady` only when a receive is outstanding. When no receive
-is outstanding, a data frame is parsed and its payload is held or
-discarded according to the message rules, but it does not emit
-`inputReady`.
+input step. Data payloads fill the get area of `incoming()` and are
+reported by `inputReady` only when a receive is outstanding. When
+no receive is outstanding, `import` consumes a data payload without
+filling the get area. It does not emit `inputReady`.
 
 The engine never cancels an outstanding input to start an output, or
 an outstanding output to start an input. `Stream` already allows one

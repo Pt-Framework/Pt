@@ -9,13 +9,13 @@
 #include <Pt/Http/Channel.h>
 #include <Pt/Http/WebSocketMessage.h>
 #include <Pt/Http/Message.h>
+#include "WebSocketBuffer.h"
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Timer.h>
 #include <deque>
 #include <exception>
 #include <string>
-#include <vector>
 #include <cstddef>
 
 namespace Pt {
@@ -86,15 +86,6 @@ class WebSocketChannel : public Channel
             std::size_t size;
         };
 
-        enum InputState
-        {
-            InputIdle,
-            InputHeader,
-            InputLength,
-            InputMask,
-            InputPayload
-        };
-
         enum OutputState
         {
             OutputIdle,
@@ -128,8 +119,6 @@ class WebSocketChannel : public Channel
 
         bool parseAvailable();
 
-        bool onDataFrameComplete();
-
         bool onControlFrame();
 
         void restartIdleTimer();
@@ -154,24 +143,10 @@ class WebSocketChannel : public Channel
 
         WebSocketMessage _incoming;
         WebSocketMessage _outgoing;
+        WebSocketBuffer _wsbuf;
 
-        InputState _inputState;
         bool _receiveOutstanding;
         bool _messageOpen;
-        bool _frameFin;
-        bool _frameMasked;
-        unsigned _frameOpcode;
-        unsigned _messageOpcode;
-        Pt::uint32_t _frameMask;
-        std::size_t _payloadSize;
-        std::size_t _payloadGot;
-        std::size_t _headerNeed;
-        std::size_t _messageSize;
-        std::vector<char> _header;
-        std::vector<char> _controlPayload;
-        unsigned _utf8Need;
-        unsigned char _utf8Lead;
-        bool _utf8Error;
         MessageProgress _receiveProgress;
 
         OutputState _outputState;

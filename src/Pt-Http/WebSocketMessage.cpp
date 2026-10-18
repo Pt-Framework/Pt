@@ -154,7 +154,8 @@ void WebSocketMessage::setTypeFromEngine(Type type)
 
 std::size_t WebSocketMessage::available() const
 {
-    return _buffer->available();
+    std::streambuf* sb = _body.rdbuf();
+    return sb ? static_cast<std::size_t>(sb->in_avail()) : 0;
 }
 
 
@@ -166,6 +167,14 @@ std::size_t WebSocketMessage::pending() const
 
 void WebSocketMessage::discard()
 {
+    std::streambuf* sb = _body.rdbuf();
+    if(sb && sb != _buffer)
+    {
+        std::streamsize avail = sb->in_avail();
+        while(avail-- > 0)
+            sb->sbumpc();
+    }
+
     _buffer->reset();
     _body.clear();
 }
@@ -174,20 +183,13 @@ void WebSocketMessage::discard()
 void WebSocketMessage::clear()
 {
     _type = Unknown;
-    _buffer->reset();
-    _body.clear();
+    discard();
 }
 
 
-void WebSocketMessage::append(const char* data, std::size_t n)
+void WebSocketMessage::setBuffer(std::streambuf& sb)
 {
-    _buffer->append(data, n);
-}
-
-
-void WebSocketMessage::prepareRead()
-{
-    _buffer->prepareRead();
+    _body.rdbuf(&sb);
 }
 
 

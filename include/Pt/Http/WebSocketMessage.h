@@ -8,6 +8,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/NonCopyable.h>
 #include <iostream>
+#include <streambuf>
 #include <cstddef>
 
 namespace Pt {
@@ -122,9 +123,8 @@ class PT_HTTP_API WebSocketMessage : private NonCopyable
 
         void setTypeFromEngine(Type type);
 
-        void append(const char* data, std::size_t n);
-
-        void prepareRead();
+        //! @internal
+        void setBuffer(std::streambuf& sb);
 
         const char* sendData() const;
 

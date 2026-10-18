@@ -45,7 +45,7 @@
 
 ## Priority
 
-Permanent input next. It uses the reader and the concurrent read
-and write that Stream already allows. Pong visibility, shutdown, and
-peer close after that.
+Permanent input next. It uses WebSocketBuffer and the concurrent
+read and write that Stream already allows. Pong visibility,
+shutdown, and peer close after that.
 Handshake checks last.

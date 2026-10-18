@@ -125,21 +125,8 @@ WebSocketChannel::WebSocketChannel()
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
-, _inputState(InputIdle)
 , _receiveOutstanding(false)
 , _messageOpen(false)
-, _frameFin(false)
-, _frameMasked(false)
-, _frameOpcode(0)
-, _messageOpcode(0)
-, _frameMask(0)
-, _payloadSize(0)
-, _payloadGot(0)
-, _headerNeed(2)
-, _messageSize(0)
-, _utf8Need(0)
-, _utf8Lead(0)
-, _utf8Error(false)
 , _outputState(OutputIdle)
 , _outputKind(OutputNone)
 , _sendOutstanding(false)
@@ -170,6 +157,13 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     stream.setTimeout(_timeout);
     stream.inputReady() += Pt::slot(*this, &WebSocketChannel::onInput);
     stream.outputReady() += Pt::slot(*this, &WebSocketChannel::onOutput);
+
+    if( std::streambuf* sb = stream.buffer() )
+        _wsbuf.reset(*sb);
+
+    _wsbuf.setMasking( ! clientMask );
+    _wsbuf.setMaxMessageSize(_maxMessageSize);
+    _incoming.setBuffer(_wsbuf);
 }
 
 
@@ -271,10 +265,6 @@ void WebSocketChannel::beginReceive()
     {
         _incoming.setTypeFromEngine(WebSocketMessage::Unknown);
         _incoming.discard();
-        _messageSize = 0;
-        _utf8Need = 0;
-        _utf8Lead = 0;
-        _utf8Error = false;
     }
 
     if( _incoming.type() != WebSocketMessage::Unknown )
@@ -299,7 +289,6 @@ MessageProgress WebSocketChannel::endReceive()
 
     requireNotEnded();
     restartIdleTimer();
-    _incoming.prepareRead();
 
     MessageProgress progress = _receiveProgress;
     if(progress.finished())
@@ -387,6 +376,7 @@ void WebSocketChannel::setTimeout(std::size_t timeout)
 void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
 {
     _maxMessageSize = maxSize;
+    _wsbuf.setMaxMessageSize(maxSize);
 }
 
 
@@ -613,264 +603,67 @@ Pt::uint32_t WebSocketChannel::nextMask()
 bool WebSocketChannel::parseAvailable()
 {
     Stream* stream = this->stream();
-    std::streambuf* buf = stream ? stream->buffer() : 0;
-    if( ! buf )
+    if( ! stream || ! stream->buffer() )
         return false;
 
-    if(_inputState == InputIdle)
+    for(;;)
     {
-        _header.clear();
-        _headerNeed = 2;
-        _payloadSize = 0;
-        _payloadGot = 0;
-        _controlPayload.clear();
-        _inputState = InputHeader;
-    }
+        _wsbuf.import();
 
-    while( buf->in_avail() > 0 )
-    {
-        int ch = buf->sbumpc();
-        if(ch < 0)
-            break;
-
-        char byte = static_cast<char>(ch);
-
-        if(_inputState == InputHeader || _inputState == InputLength ||
-           _inputState == InputMask)
+        if(_wsbuf.failCode() != 0)
         {
-            _header.push_back(byte);
-            if(_header.size() < _headerNeed)
-                continue;
-
-            if(_inputState == InputHeader)
-            {
-                unsigned char b0 = static_cast<unsigned char>(_header[0]);
-                unsigned char b1 = static_cast<unsigned char>(_header[1]);
-                _frameFin = (b0 & 0x80) != 0;
-                unsigned rsv = b0 & 0x70;
-                _frameOpcode = b0 & 0x0F;
-                _frameMasked = (b1 & 0x80) != 0;
-                unsigned len7 = b1 & 0x7F;
-
-                if(rsv != 0)
-                {
-                    protocolFail(1002);
-                    return false;
-                }
-
-                bool control = _frameOpcode == 0x08 || _frameOpcode == 0x09 ||
-                               _frameOpcode == 0x0A;
-                if(control && ! _frameFin)
-                {
-                    protocolFail(1002);
-                    return false;
-                }
-
-                if(control && len7 > 125)
-                {
-                    protocolFail(1002);
-                    return false;
-                }
-
-                if(_frameOpcode == 0x00)
-                {
-                    if( ! _messageOpen )
-                    {
-                        protocolFail(1002);
-                        return false;
-                    }
-                }
-                else if(_frameOpcode == 0x01 || _frameOpcode == 0x02)
-                {
-                    if(_messageOpen)
-                    {
-                        protocolFail(1002);
-                        return false;
-                    }
-                }
-                else if( ! control )
-                {
-                    protocolFail(1002);
-                    return false;
-                }
-
-                if(_clientMask)
-                {
-                    if(_frameMasked)
-                    {
-                        protocolFail(1002);
-                        return false;
-                    }
-                }
-                else if( ! _frameMasked )
-                {
-                    protocolFail(1002);
-                    return false;
-                }
-
-                if(len7 == 126)
-                {
-                    _inputState = InputLength;
-                    _headerNeed = 4;
-                    continue;
-                }
-
-                if(len7 == 127)
-                {
-                    _inputState = InputLength;
-                    _headerNeed = 10;
-                    continue;
-                }
-
-                _payloadSize = len7;
-            }
-            else if(_inputState == InputLength)
-            {
-                if(_headerNeed == 4)
-                {
-                    Pt::uint16_t size = 0;
-                    std::memcpy(&size, &_header[2], 2);
-                    _payloadSize = Pt::beToHost(size);
-                }
-                else
-                {
-                    Pt::uint64_t size = 0;
-                    std::memcpy(&size, &_header[2], 8);
-                    _payloadSize = static_cast<std::size_t>( Pt::beToHost(size) );
-                }
-            }
-
-            bool control = _frameOpcode == 0x08 || _frameOpcode == 0x09 ||
-                           _frameOpcode == 0x0A;
-            if( ! control )
-            {
-                if(_maxMessageSize != 0 &&
-                   (_payloadSize > _maxMessageSize ||
-                    _messageSize > _maxMessageSize - _payloadSize))
-                {
-                    protocolFail(1009);
-                    return false;
-                }
-
-                _messageSize += _payloadSize;
-            }
-
-            if(_frameMasked && _inputState != InputMask)
-            {
-                _inputState = InputMask;
-                _headerNeed = _header.size() + 4;
-                continue;
-            }
-
-            if(_frameMasked)
-                std::memcpy(&_frameMask, &_header[_header.size() - 4], 4);
-
-            _payloadGot = 0;
-            _controlPayload.clear();
-            _inputState = InputPayload;
-
-            if(_payloadSize == 0)
-            {
-                if(control)
-                {
-                    if( onControlFrame() )
-                        return true;
-                }
-                else if( onDataFrameComplete() )
-                    return true;
-
-                continue;
-            }
-        }
-        else if(_inputState == InputPayload)
-        {
-            if(_frameMasked)
-            {
-                const char* maskBytes = reinterpret_cast<const char*>(&_frameMask);
-                byte = static_cast<char>(byte ^ maskBytes[_payloadGot % 4]);
-            }
-
-            bool control = _frameOpcode == 0x08 || _frameOpcode == 0x09 ||
-                           _frameOpcode == 0x0A;
-            if(control)
-                _controlPayload.push_back(byte);
-            else if(_receiveOutstanding)
-            {
-                _incoming.append(&byte, 1);
-                _receiveProgress.setBody();
-
-                if(_messageOpcode == 0x01 || _frameOpcode == 0x01)
-                {
-                    if( ! feedUtf8(_utf8Need, _utf8Lead, _utf8Error, &byte, 1) )
-                    {
-                        protocolFail(1007);
-                        return false;
-                    }
-                }
-            }
-
-            ++_payloadGot;
-            if(_payloadGot != _payloadSize)
-                continue;
-
-            if(control)
-            {
-                if( onControlFrame() )
-                    return true;
-            }
-            else if( onDataFrameComplete() )
-                return true;
-        }
-    }
-
-    if(_receiveOutstanding && _receiveProgress.body() &&
-       _inputState == InputPayload)
-    {
-        _incoming.prepareRead();
-        _inputReady.send();
-        return true;
-    }
-
-    return false;
-}
-
-
-bool WebSocketChannel::onDataFrameComplete()
-{
-    _inputState = InputIdle;
-
-    if(_frameOpcode == 0x01 || _frameOpcode == 0x02)
-    {
-        _messageOpen = true;
-        _messageOpcode = _frameOpcode;
-        WebSocketMessage::Type type = (_frameOpcode == 0x01)
-                                    ? WebSocketMessage::Text
-                                    : WebSocketMessage::Binary;
-        _incoming.setTypeFromEngine(type);
-        _receiveProgress.setHeader();
-    }
-
-    if(_frameFin)
-    {
-        if(_messageOpcode == 0x01 && ! finishUtf8(_utf8Need, _utf8Error) )
-        {
-            protocolFail(1007);
+            protocolFail(_wsbuf.failCode());
             return false;
         }
 
-        _receiveProgress.setFinished();
+        if(_wsbuf.hasControl())
+        {
+            bool stop = onControlFrame();
+            _wsbuf.consumeControl();
+            if(stop)
+                return true;
+
+            if(_wsbuf.finished())
+                break;
+
+            continue;
+        }
+
+        break;
     }
 
-    if(_receiveOutstanding)
+    if( ! _receiveOutstanding )
+        return false;
+
+    if(_wsbuf.header())
     {
-        _incoming.prepareRead();
+        if(_incoming.type() == WebSocketMessage::Unknown)
+        {
+            WebSocketMessage::Type type = (_wsbuf.opcode() == 0x01)
+                                        ? WebSocketMessage::Text
+                                        : WebSocketMessage::Binary;
+            _incoming.setTypeFromEngine(type);
+            _messageOpen = true;
+        }
+
+        _receiveProgress.setHeader();
+    }
+
+    if(_wsbuf.in_avail() > 0)
+        _receiveProgress.setBody();
+
+    if(_wsbuf.finished())
+    {
+        _receiveProgress.setFinished();
+        _messageOpen = false;
+    }
+
+    if(_receiveProgress.header() || _receiveProgress.body() ||
+       _receiveProgress.finished())
+    {
         _inputReady.send();
         return true;
     }
-
-    _incoming.discard();
-    if(_frameFin)
-        _messageOpen = false;
 
     return false;
 }
@@ -878,21 +671,21 @@ bool WebSocketChannel::onDataFrameComplete()
 
 bool WebSocketChannel::onControlFrame()
 {
-    _inputState = InputIdle;
+    unsigned opcode = _wsbuf.controlOpcode();
+    const char* data = _wsbuf.controlData();
+    std::size_t n = _wsbuf.controlSize();
 
-    if(_frameOpcode == 0x09)
+    if(opcode == 0x09)
     {
-        enqueueControl(0x0A,
-                       _controlPayload.empty() ? 0 : &_controlPayload[0],
-                       _controlPayload.size());
+        enqueueControl(0x0A, data, n);
         restartIdleTimer();
         pumpOutput();
         return false;
     }
 
-    if(_frameOpcode == 0x0A)
+    if(opcode == 0x0A)
     {
-        std::string payload(_controlPayload.begin(), _controlPayload.end());
+        std::string payload(data ? data : "", n);
         if( ! _unansweredPings.empty() && _unansweredPings.front() == payload )
             _unansweredPings.pop_front();
 
@@ -902,18 +695,18 @@ bool WebSocketChannel::onControlFrame()
 
     _closeReceived = true;
 
-    if(_controlPayload.size() == 1)
+    if(n == 1)
     {
         protocolFail(1002);
         return false;
     }
 
-    if(_controlPayload.size() >= 2)
+    if(n >= 2)
     {
         Pt::uint16_t be = 0;
-        std::memcpy(&be, &_controlPayload[0], 2);
+        std::memcpy(&be, data, 2);
         unsigned code = Pt::beToHost(be);
-        std::string reason(_controlPayload.begin() + 2, _controlPayload.end());
+        std::string reason(data + 2, n - 2);
 
         if( ! isValidUtf8(reason.data(), reason.size()) )
         {
