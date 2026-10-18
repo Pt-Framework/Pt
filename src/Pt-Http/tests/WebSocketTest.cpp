@@ -55,7 +55,6 @@ class DeclineResponder : public Pt::Http::Responder
             reply.setStatus(101, "Switching Protocols");
             reply.header().setUpgrade();
             reply.header().set("Upgrade", "websocket");
-            reply.header().set("Connection", "Upgrade");
             setReady(true);
         }
 };
@@ -427,7 +426,7 @@ class ProtocolSession : public Pt::Http::WebSocketSession
         , _exitLoop(&exitLoop)
         {
             *_selected = protocol();
-            // do not exit here; client must finish the handshake first
+            _exitLoop->exit();
         }
 
         const std::string& copiedHeader() const
@@ -1286,7 +1285,6 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedProtocol(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            _loop->exit();
         }
 
     protected:

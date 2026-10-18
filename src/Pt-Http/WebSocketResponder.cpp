@@ -250,7 +250,6 @@ void WebSocketResponder::onWriteReply(const Pt::Http::Request& request, Pt::Http
         reply.setStatus(101, "Switching Protocols");
         reply.header().setUpgrade();
         reply.header().set("Upgrade", "websocket");
-        reply.header().set("Connection", "Upgrade");
         reply.header().set("Sec-WebSocket-Accept", computeAccept(key).c_str());
         if( ! selected.empty() )
             reply.header().set("Sec-WebSocket-Protocol", selected.c_str());
