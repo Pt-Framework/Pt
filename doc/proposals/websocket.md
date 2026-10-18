@@ -8,6 +8,12 @@
 
 ## Open Tasks
 
+- [frame-result](websocket-message.md#websocket-buffer).
+  import returns a Frame pointer or null. The pointer is metadata
+  and is valid until the next import. Data bytes stay in the get
+  area. A protocol error throws WebSocketError. failCode,
+  hasControl, and consumeControl go away.
+
 - [permanent-input](websocket-message.md#permanent-input).
   The input pump runs from open until the stream ends. Controls and
   close are processed even when no beginReceive is outstanding.
@@ -45,7 +51,6 @@
 
 ## Priority
 
-Permanent input next. It uses WebSocketBuffer and the concurrent
-read and write that Stream already allows. Pong visibility,
-shutdown, and peer close after that.
-Handshake checks last.
+Frame result first. Permanent input uses that surface. Pong
+visibility, shutdown, and peer close after that. Handshake checks
+last.

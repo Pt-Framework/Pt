@@ -31,6 +31,10 @@ The reply echoes a writable peer code. It does not always use 1000.
 After both closes have been exchanged and the output is idle, the
 channel ends the stream and emits `closed()`.
 
+`WebSocketBuffer::import` still returns a byte count. The channel
+then reads `failCode`, `hasControl`, `header`, `opcode`, `finished`,
+and `in_avail`, and calls `consumeControl` after a control.
+
 ## WebSocket buffer {#websocket-buffer}
 
 `WebSocketBuffer` is the internal frame parser and the body of an
@@ -40,6 +44,26 @@ owns it. `incoming().body()` uses it for the life of a receive.
 `outgoing().body()` stays the payload buffer the application writes.
 
 ```cpp
+class Frame
+{
+    public:
+        enum Kind { Data, Control };
+
+        Kind kind() const;
+        unsigned opcode() const;
+        bool fin() const;
+
+        const char* data() const;
+        std::size_t size() const;
+};
+
+class WebSocketError : public std::runtime_error
+{
+    public:
+        explicit WebSocketError(unsigned code);
+        unsigned code() const;
+};
+
 class WebSocketBuffer : public std::streambuf
 {
     public:
@@ -53,27 +77,19 @@ class WebSocketBuffer : public std::streambuf
         void setMaxMessageSize(std::size_t n);
         void setMasking(bool masked);
 
-        std::streamsize import(std::streamsize n = 0);
-
-        bool header() const;
-        unsigned opcode() const;
-        bool finished() const;
-        unsigned failCode() const;
-
-        bool hasControl() const;
-        unsigned controlOpcode() const;
-        const char* controlData() const;
-        std::size_t controlSize() const;
-        void consumeControl();
+        const Frame* import(std::streamsize n = 0);
 };
 ```
 
 The unit is the data message. Frames stay inside the buffer, the
 way chunks stay inside `HttpBuffer`. A continuation extends the
-current message and does not change its type. The first text or
-binary opcode is `header()`. `opcode()` is that opcode until the
-message ends. `finished()` is the FIN of the message. The next
-`import` after `finished()` starts the next message.
+current message and does not change its type. `import` returns a
+pointer to frame metadata, or null when there is no progress. The
+pointer is valid until the next `import`. A data payload is not in
+the frame. It is the get area. A control payload is in the frame.
+`fin` is true when a data message ends on this step. A control is
+always complete. The next `import` after a finished data message
+starts the next message and reuses the control buffer.
 
 `beginReceive` points `incoming().body()` at this buffer.
 `import` copies what the socket buffer holds into a fixed get
@@ -94,11 +110,10 @@ stay. The next `import` continues there. It never blocks.
 
 Control frames are a side channel. They occur only at frame
 boundaries. Their payload, at most 125 bytes, is not the get
-area. `hasControl()` is true when a ping, pong, or close is
-complete. The channel answers a ping, reports a pong, and
-handles a close, then calls `consumeControl()`. A control
-between two data fragments leaves the get area as it is. A close
-discards an open data body and does not finish that message.
+area. A control between two data fragments leaves the get area
+as it is. A close discards an open data body and does not finish
+that message. The channel reads the control from the returned
+frame and does not call a consume. The next `import` clears it.
 
 When no receive is outstanding, `import` still runs. It consumes
 data payload without filling the get area, and it still completes
@@ -123,16 +138,17 @@ A 16-bit length is valid only when it is at least 126. A 64-bit
 length is valid only when it is at least 65536 and its high bit is
 clear. RSV bits, a control frame without FIN, a control payload
 over 125, a continuation with no open message, a data opcode while
-a message is open, and a wrong mask direction each fail the frame
-with 1002. A data message over `maxMessageSize` fails with 1009.
-Invalid UTF-8 fails with 1007. `failCode()` is that code. Zero
-means no failure. The buffer does not close a stream.
+a message is open, and a wrong mask direction each throw
+`WebSocketError` with 1002. A data message over `maxMessageSize`
+throws with 1009. Invalid UTF-8 throws with 1007. The buffer does
+not close a stream.
 
 The buffer does not know the channel, the signals, or the
-messages. The channel calls `import`, reads `failCode`,
-consumes a control, sets the incoming type from `opcode` when
-`header` becomes true, and sets progress from `header`,
-`in_avail`, and `finished`.
+messages. The channel calls `import`. A null result means idle.
+A control frame is handled from the returned metadata. A data
+frame sets the incoming type from `opcode` when it is the first
+of the message, and sets progress from `fin` and `in_avail`.
+A `WebSocketError` becomes `protocolFail`.
 
 Tests feed a `stringbuf` and call `import`. They cover a
 complete data frame in the get area, a frame split across
