@@ -8,12 +8,6 @@
 
 ## Open Tasks
 
-- [frame-reader](websocket-message.md#frame-reader).
-  FrameReader is the internal frame parser. Its surface follows
-  JsonReader: attach, reset, get, advance. It returns a Frame.
-  Need-N-bytes, non-blocking, pausable at any byte. Own tests on a
-  stringbuf, no channel.
-
 - [permanent-input](websocket-message.md#permanent-input).
   The input pump runs from open until the stream ends. Controls and
   close are processed even when no beginReceive is outstanding.
@@ -51,8 +45,7 @@
 
 ## Priority
 
-FrameReader first, with its own tests. It is the parser the rest of
-the engine sits on, and it can land without a channel. Permanent
-input next. It uses the reader and the concurrent read and write
-that Stream already allows. Pong visibility, shutdown, and peer close after that.
+Permanent input next. It uses the reader and the concurrent read
+and write that Stream already allows. Pong visibility, shutdown, and
+peer close after that.
 Handshake checks last.

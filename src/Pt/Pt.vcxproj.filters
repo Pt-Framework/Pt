@@ -5746,6 +5746,12 @@
     <ClCompile Include="..\Pt-Gfx\Yuv12.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
+    <ClCompile Include="..\Pt-Http\FrameReader.cpp">
+      <Filter>Pt-Http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Pt-Http\tests\FrameReaderTest.cpp">
+      <Filter>Pt-Http\tests</Filter>
+    </ClCompile>
     <ClCompile Include="..\Pt-Http\WebSocketMessage.cpp">
       <Filter>Pt-Http</Filter>
     </ClCompile>

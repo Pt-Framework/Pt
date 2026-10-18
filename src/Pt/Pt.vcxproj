@@ -1586,6 +1586,8 @@
     <ClCompile Include="..\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\Pt-Http\tests\ServerTest.cpp" />
     <ClCompile Include="..\Pt-Http\tests\WebSocketTest.cpp" />
+    <ClCompile Include="..\Pt-Http\FrameReader.cpp" />
+    <ClCompile Include="..\Pt-Http\tests\FrameReaderTest.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocket.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketConnection.cpp" />
     <ClCompile Include="..\Pt-Http\WebSocketMessage.cpp" />
