@@ -167,9 +167,7 @@ class WebSocketChannel : public Channel
 
         OperationState _outputState;
         OperationState _sendState;
-        bool _sendStarted;
-        bool _firstFragment;
-        bool _dataFinWritten;
+        std::size_t _sendFragment;
         MessageProgress _sendProgress;
 
         std::deque<PendingFrame> _outputQueue;

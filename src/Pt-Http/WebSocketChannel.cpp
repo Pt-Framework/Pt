@@ -130,9 +130,7 @@ WebSocketChannel::WebSocketChannel()
 , _messageOpen(false)
 , _outputState(Idle)
 , _sendState(Idle)
-, _sendStarted(false)
-, _firstFragment(true)
-, _dataFinWritten(false)
+, _sendFragment(0)
 , _closeState(CloseOpen)
 , _closeCode(0)
 {
@@ -215,7 +213,7 @@ void WebSocketChannel::beginSend()
     if(_closeState != CloseOpen)
         throw std::logic_error("WebSocket is closing");
 
-    if( ! _sendStarted )
+    if(_sendFragment == 0)
     {
         WebSocketMessage::Type type = _outgoing.type();
         if(type != WebSocketMessage::Text && type != WebSocketMessage::Binary)
@@ -232,9 +230,6 @@ void WebSocketChannel::beginSend()
                 throw std::invalid_argument("WebSocket text is not UTF-8");
         }
 
-        _firstFragment = true;
-        _dataFinWritten = false;
-        _sendStarted = true;
     }
 
     _sendState = Pending;
@@ -265,7 +260,7 @@ MessageProgress WebSocketChannel::endSend()
     MessageProgress progress = _sendProgress;
     _sendState = Idle;
     if(progress.finished())
-        _sendStarted = false;
+        _sendFragment = 0;
 
     pumpOutput();
     return progress;
@@ -376,7 +371,7 @@ void WebSocketChannel::onClose()
     _receiveState = Idle;
     _outputState = Idle;
     _sendState = Idle;
-    _sendStarted = false;
+    _sendFragment = 0;
     _inputError = std::exception_ptr();
     _outputError = std::exception_ptr();
     _idleTimer.stop();
@@ -550,7 +545,7 @@ void WebSocketChannel::pumpOutput()
     if( ! stream )
         return;
 
-    if(_outputQueue.empty() && _sendState == Pending && ! _dataFinWritten)
+    if(_outputQueue.empty() && _sendState == Pending)
     {
         PendingFrame frame;
         frame.fin = _outgoing.sendSize() <= MaxFramePayload;
@@ -558,7 +553,7 @@ void WebSocketChannel::pumpOutput()
         frame.size = _outgoing.sendSize();
         if(frame.size > MaxFramePayload)
             frame.size = MaxFramePayload;
-        frame.opcode = _firstFragment
+        frame.opcode = _sendFragment == 0
                      ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
                      : 0;
         _outputQueue.push_back(frame);
@@ -900,8 +895,7 @@ void WebSocketChannel::onOutput()
         }
 
         _outgoing.consume(frame.size);
-        _firstFragment = false;
-        _dataFinWritten = frame.fin;
+        ++_sendFragment;
         if(_sendState == Pending)
         {
             _sendProgress.setBody();
