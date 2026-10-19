@@ -17,168 +17,14 @@ namespace Http {
 
 /** @internal Result of one `WebSocketBuffer::import` step.
 
-    `import` always returns a pointer to one of two members it owns,
-    `DataFrame` or `ControlFrame`, valid only until the next call. `opcode`
-    and `fin` are the current wire frame's values. `size` is its total payload
-    length, `pos` is the imported payload length, and `avail` is the current
-    get area's length starting at `data`.
+    `import` returns a pointer to a member it owns, valid only until the next
+    call. `opcode` and `fin` are the current wire frame's values. `size` is
+    its total payload length, `pos` is the imported payload length, and
+    `avail` is the current get area's length starting at `data`.
 */
 class PT_HTTP_API Frame
 {
     public:
-        enum Kind { Data, Control };
-
-        Kind kind() const
-        { return _kind; }
-
-        unsigned opcode() const
-        { return _opcode; }
-
-        bool fin() const
-        { return _fin; }
-
-        const char* data() const
-        { return _data; }
-
-        std::size_t size() const
-        { return _size; }
-
-        std::size_t avail() const
-        { return _avail; }
-
-        std::size_t pos() const
-        { return _pos; }
-
-        std::size_t remaining() const
-        { return _size - _pos; }
-
-        void advance(std::size_t n)
-        { _pos += n; }
-
-        void setOpcode(unsigned opcode)
-        { _opcode = opcode; }
-
-        void setFin(bool fin)
-        { _fin = fin; }
-
-        void setSize(std::size_t size)
-        {
-            _size = size;
-            _avail = 0;
-            _pos = 0;
-        }
-
-        void setAvail(const char* data, std::size_t avail)
-        {
-            _data = data;
-            _avail = avail;
-        }
-
-        void set(unsigned opcode, bool fin, const char* data, std::size_t avail);
-
-    protected:
-        explicit Frame(Kind kind);
-
-    private:
-        unsigned _opcode;
-        bool _fin;
-        const char* _data;
-        std::size_t _size;
-        std::size_t _avail;
-        std::size_t _pos;
-        Kind _kind;
-};
-
-
-/** @internal A data frame; its buffer backs the stream buffer's get area.
-
-    A subsequent `import` compacts consumed bytes and may append payload from
-    the same frame. It does not advance to the following frame until this
-    frame is imported and its get area is consumed.
-*/
-class PT_HTTP_API DataFrame : public Frame
-{
-    public:
-        DataFrame();
-
-        /** @brief Returns the raw storage later exposed read-only via `data()`/`avail()`.
-        */
-        char* buffer()
-        { return _buffer; }
-
-        static const std::size_t BufferSize = 4096;
-
-    private:
-        char _buffer[BufferSize];
-};
-
-
-/** @internal A complete control frame, buffered since it is never streamed.
-*/
-class PT_HTTP_API ControlFrame : public Frame
-{
-    public:
-        ControlFrame();
-
-        char* at(std::size_t pos)
-        { return _bytes + pos; }
-
-    private:
-        char _bytes[125];
-};
-
-
-/** @internal A WebSocket protocol violation, carrying the close code to send.
-*/
-class PT_HTTP_API WebSocketError : public std::runtime_error
-{
-    public:
-        explicit WebSocketError(unsigned code);
-
-        unsigned code() const
-        { return _code; }
-
-    private:
-        unsigned _code;
-};
-
-
-/** @internal Pull parser for WebSocket frames.
-
-    A data result exposes the current frame's payload through the get area.
-    A control result is returned only after its complete payload is buffered.
-*/
-class PT_HTTP_API WebSocketBuffer : public std::streambuf
-{
-    public:
-        WebSocketBuffer();
-
-        explicit WebSocketBuffer(std::streambuf& sb);
-
-        ~WebSocketBuffer();
-
-        WebSocketBuffer(const WebSocketBuffer&) = delete;
-
-        WebSocketBuffer& operator=(const WebSocketBuffer&) = delete;
-
-        void attach(std::streambuf& sb);
-
-        void reset();
-
-        void reset(std::streambuf& sb);
-
-        void setMaxMessageSize(std::size_t n);
-
-        void setMasking(bool masked);
-
-        const Frame* import(std::streamsize n = 0);
-
-    protected:
-        virtual int_type underflow();
-
-        virtual std::streamsize showmanyc();
-
-    private:
         class Header
         {
             public:
@@ -227,7 +73,135 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
                 std::size_t _avail;
         };
 
+    public:
+        enum Kind { Data, Control };
 
+        Frame();
+
+        Kind kind() const
+        { return _kind; }
+
+        unsigned opcode() const
+        { return _opcode; }
+
+        bool fin() const
+        { return _fin; }
+
+        const char* data() const
+        { return _data; }
+
+        std::size_t size() const
+        { return _size; }
+
+        std::size_t avail() const
+        { return _avail; }
+
+        std::size_t pos() const
+        { return _pos; }
+
+        std::size_t remaining() const
+        { return _size - _pos; }
+
+        void advance(std::size_t n)
+        { _pos += n; }
+
+        void setOpcode(unsigned opcode)
+        { _opcode = opcode; }
+
+        void setKind(Kind kind)
+        { _kind = kind; }
+
+        void setFin(bool fin)
+        { _fin = fin; }
+
+        void setSize(std::size_t size)
+        {
+            _size = size;
+            _avail = 0;
+            _pos = 0;
+        }
+
+        void setAvail(const char* data, std::size_t avail)
+        {
+            _data = data;
+            _avail = avail;
+        }
+
+        char* buffer()
+        { return _buffer; }
+
+        char* at(std::size_t pos)
+        { return _buffer + pos; }
+
+        static const std::size_t BufferSize = 4096;
+
+        Header& header()
+        { return _header; }
+
+    private:
+        unsigned _opcode;
+        bool _fin;
+        const char* _data;
+        std::size_t _size;
+        std::size_t _avail;
+        std::size_t _pos;
+        Kind _kind;
+        char _buffer[BufferSize];
+        Header _header;
+};
+
+
+/** @internal A WebSocket protocol violation, carrying the close code to send.
+*/
+class PT_HTTP_API WebSocketError : public std::runtime_error
+{
+    public:
+        explicit WebSocketError(unsigned code);
+
+        unsigned code() const
+        { return _code; }
+
+    private:
+        unsigned _code;
+};
+
+
+/** @internal Pull parser for WebSocket frames.
+
+    A data result exposes the current frame's payload through the get area. A
+    control result is returned only after its complete payload is buffered.
+*/
+class PT_HTTP_API WebSocketBuffer : public std::streambuf
+{
+    public:
+        WebSocketBuffer();
+
+        explicit WebSocketBuffer(std::streambuf& sb);
+
+        ~WebSocketBuffer();
+
+        WebSocketBuffer(const WebSocketBuffer&) = delete;
+
+        WebSocketBuffer& operator=(const WebSocketBuffer&) = delete;
+
+        void attach(std::streambuf& sb);
+
+        void reset();
+
+        void reset(std::streambuf& sb);
+
+        void setMaxMessageSize(std::size_t n);
+
+        void setMasking(bool masked);
+
+        const Frame* import(std::streamsize n = 0);
+
+    protected:
+        virtual int_type underflow();
+
+        virtual std::streamsize showmanyc();
+
+    private:
         enum State
         {
             NeedHeader,
@@ -240,7 +214,7 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         void failThrow(unsigned code);
 
-        void beginNextMessage();
+        void beginMessage(unsigned opcode);
 
         std::size_t readBytes(char* dst, std::size_t n);
 
@@ -260,26 +234,20 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
     private:
         std::streambuf* _sb;
-        State _state;
-        bool _masking;
-        std::size_t _maxMessageSize;
-        std::size_t _maxRead;
-        std::size_t _bytesRead;
+        State           _state;
+        bool            _masking;
+        std::size_t     _maxMessageSize;
+        std::size_t     _importRemaining;
 
-        Header _hdr;
-        DataFrame _dataResult;
-        ControlFrame _controlResult;
-        const Frame* _frame;
+        Frame         _frame;
+        bool          _frameReady;
 
-        unsigned _messageOpcode;
-        bool _messageFinished;
-        unsigned _failCode;
+        unsigned      _messageOpcode;
+        unsigned      _failCode;
+        std::size_t   _messageSize;
 
-        bool _messageOpen;
-        std::size_t _messageSize;
-        unsigned _utf8Need;
+        unsigned      _utf8Need;
         unsigned char _utf8Lead;
-        bool _utf8Error;
 };
 
 } // namespace Http
