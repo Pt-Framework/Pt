@@ -633,9 +633,10 @@ bool WebSocketChannel::parseAvailable()
 
     if(frame && frame->kind() == Frame::Data)
     {
-        if(_incoming.type() == WebSocketMessage::Unknown)
+        unsigned opcode = frame->opcode();
+        if(opcode == 0x01 || opcode == 0x02)
         {
-            WebSocketMessage::Type type = (frame->opcode() == 0x01)
+            WebSocketMessage::Type type = (opcode == 0x01)
                                         ? WebSocketMessage::Text
                                         : WebSocketMessage::Binary;
             _incoming.setTypeFromEngine(type);
@@ -644,7 +645,7 @@ bool WebSocketChannel::parseAvailable()
 
         _receiveProgress.setHeader();
 
-        if(frame->fin())
+        if(frame->fin() && frame->remaining() == 0)
         {
             _receiveProgress.setFinished();
             _messageOpen = false;

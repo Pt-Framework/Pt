@@ -22,6 +22,18 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod("Split", *this,
                 &WebSocketBufferTest::Split);
 
+            Pt::Unit::TestSuite::registerMethod("HeaderOnly", *this,
+                &WebSocketBufferTest::HeaderOnly);
+
+            Pt::Unit::TestSuite::registerMethod("CurrentFrame", *this,
+                &WebSocketBufferTest::CurrentFrame);
+
+            Pt::Unit::TestSuite::registerMethod("EmptyData", *this,
+                &WebSocketBufferTest::EmptyData);
+
+            Pt::Unit::TestSuite::registerMethod("BufferLimit", *this,
+                &WebSocketBufferTest::BufferLimit);
+
             Pt::Unit::TestSuite::registerMethod("Masked", *this,
                 &WebSocketBufferTest::Masked);
 
@@ -33,6 +45,9 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
 
             Pt::Unit::TestSuite::registerMethod("Ping", *this,
                 &WebSocketBufferTest::Ping);
+
+            Pt::Unit::TestSuite::registerMethod("PartialControl", *this,
+                &WebSocketBufferTest::PartialControl);
 
             Pt::Unit::TestSuite::registerMethod("PingBetween", *this,
                 &WebSocketBufferTest::PingBetween);
@@ -107,13 +122,19 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             ws.setMasking(false);
 
             const Pt::Http::Frame* frame = ws.import(1);
-            PT_UNIT_ASSERT( ! frame || ! frame->fin() );
+            PT_UNIT_ASSERT(frame == 0);
             frame = ws.import(1);
-            PT_UNIT_ASSERT( ! frame || ! frame->fin() );
+            PT_UNIT_ASSERT(frame == 0);
             frame = ws.import(1);
-            PT_UNIT_ASSERT( ! frame || ! frame->fin() );
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(frame->pos(), std::size_t(1));
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(2));
             frame = ws.import(1);
-            PT_UNIT_ASSERT( ! frame || ! frame->fin() );
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(frame->pos(), std::size_t(2));
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(1));
 
             frame = ws.import();
             PT_UNIT_ASSERT(frame != 0);
@@ -124,6 +145,122 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             char text[3];
             PT_UNIT_ASSERT_EQUAL(ws.sgetn(text, 3), std::streamsize(3));
             PT_UNIT_ASSERT(std::memcmp(text, "abc", 3) == 0);
+        }
+
+        void HeaderOnly()
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x81));
+            bytes.push_back(static_cast<char>(1));
+
+            std::stringbuf buf(bytes);
+            Pt::Http::WebSocketBuffer ws(buf);
+            ws.setMasking(false);
+
+            PT_UNIT_ASSERT(ws.import() == 0);
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(0));
+        }
+
+        void CurrentFrame()
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x82));
+            bytes.push_back(static_cast<char>(3));
+            bytes += "abc";
+            bytes.push_back(static_cast<char>(0x89));
+            bytes.push_back(static_cast<char>(0));
+
+            std::stringbuf buf(bytes);
+            Pt::Http::WebSocketBuffer ws(buf);
+            ws.setMasking(false);
+
+            const Pt::Http::Frame* frame = ws.import(3);
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(frame->pos(), std::size_t(1));
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(2));
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
+
+            const Pt::Http::Frame* extended = ws.import(1);
+            PT_UNIT_ASSERT(extended == frame);
+            PT_UNIT_ASSERT_EQUAL(extended->pos(), std::size_t(2));
+            PT_UNIT_ASSERT_EQUAL(extended->remaining(), std::size_t(1));
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(2));
+
+            extended = ws.import();
+            PT_UNIT_ASSERT(extended == frame);
+            PT_UNIT_ASSERT_EQUAL(extended->pos(), std::size_t(3));
+            PT_UNIT_ASSERT_EQUAL(extended->remaining(), std::size_t(0));
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(3));
+
+            PT_UNIT_ASSERT(ws.import() == frame);
+
+            char text[3];
+            PT_UNIT_ASSERT_EQUAL(ws.sgetn(text, 3), std::streamsize(3));
+            PT_UNIT_ASSERT(std::memcmp(text, "abc", 3) == 0);
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+        }
+
+        void EmptyData()
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x81));
+            bytes.push_back(static_cast<char>(0));
+            bytes.push_back(static_cast<char>(0x89));
+            bytes.push_back(static_cast<char>(0));
+
+            std::stringbuf buf(bytes);
+            Pt::Http::WebSocketBuffer ws(buf);
+            ws.setMasking(false);
+
+            const Pt::Http::Frame* frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x01u);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(0));
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(0));
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+        }
+
+        void BufferLimit()
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x82));
+            bytes.push_back(static_cast<char>(126));
+            bytes.push_back(static_cast<char>(0x10));
+            bytes.push_back(static_cast<char>(0x01));
+            bytes.append(4097, 'x');
+
+            std::stringbuf buf(bytes);
+            Pt::Http::WebSocketBuffer ws(buf);
+            ws.setMasking(false);
+
+            const Pt::Http::Frame* frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(frame->pos(), std::size_t(4096));
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(1));
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(4096));
+
+            std::string data(4096, '\0');
+            PT_UNIT_ASSERT_EQUAL(ws.sgetn(&data[0], 4096), std::streamsize(4096));
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT_EQUAL(frame->pos(), std::size_t(4097));
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(0));
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
+            PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'x');
         }
 
         void Masked()
@@ -165,7 +302,8 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             const Pt::Http::Frame* frame = ws.import(3);
             PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
-            PT_UNIT_ASSERT( ! frame->fin() );
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(frame->remaining(), std::size_t(4));
             PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
 
             PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'a');
@@ -174,6 +312,7 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             const Pt::Http::Frame* finished = ws.import();
             PT_UNIT_ASSERT(finished != 0);
             PT_UNIT_ASSERT(finished->fin());
+            PT_UNIT_ASSERT_EQUAL(finished->remaining(), std::size_t(0));
             PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(4));
             PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'b');
         }
@@ -196,12 +335,17 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
             PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x01u);
-            PT_UNIT_ASSERT(frame->fin());
-            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(2));
+            PT_UNIT_ASSERT( ! frame->fin() );
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
 
-            char text[2];
-            PT_UNIT_ASSERT_EQUAL(ws.sgetn(text, 2), std::streamsize(2));
-            PT_UNIT_ASSERT(std::memcmp(text, "ab", 2) == 0);
+            PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'a');
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x00u);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'b');
         }
 
         void Ping()
@@ -227,6 +371,26 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(frame == 0);
         }
 
+        void PartialControl()
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x89));
+            bytes.push_back(static_cast<char>(2));
+            bytes += "hi";
+
+            std::stringbuf buf(bytes);
+            Pt::Http::WebSocketBuffer ws(buf);
+            ws.setMasking(false);
+
+            PT_UNIT_ASSERT(ws.import(3) == 0);
+
+            const Pt::Http::Frame* frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+            PT_UNIT_ASSERT(std::memcmp(frame->data(), "hi", 2) == 0);
+        }
+
         void PingBetween()
         {
             std::string bytes;
@@ -245,16 +409,22 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
 
             const Pt::Http::Frame* frame = ws.import();
             PT_UNIT_ASSERT(frame != 0);
-            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
-            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x01u);
+            PT_UNIT_ASSERT( ! frame->fin() );
             PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
             PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'a');
 
             frame = ws.import();
             PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
             PT_UNIT_ASSERT(frame->fin());
-            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x01u);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x00u);
             PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
             PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'b');
         }
@@ -366,6 +536,9 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             std::stringbuf buf(bytes);
             Pt::Http::WebSocketBuffer ws(buf);
             ws.setMasking(false);
+            const Pt::Http::Frame* frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'a');
             assertFails(ws, 1002u);
         }
 
@@ -394,13 +567,17 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             Pt::Http::WebSocketBuffer wsParts(bufParts);
             wsParts.setMasking(false);
             wsParts.setMaxMessageSize(3);
+            const Pt::Http::Frame* frame = wsParts.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT_EQUAL(wsParts.sbumpc(), 'a');
+            PT_UNIT_ASSERT_EQUAL(wsParts.sbumpc(), 'b');
             assertFails(wsParts, 1009u);
 
             std::stringbuf bufOpen(bytes);
             Pt::Http::WebSocketBuffer wsOpen(bufOpen);
             wsOpen.setMasking(false);
             wsOpen.setMaxMessageSize(0);
-            const Pt::Http::Frame* frame = wsOpen.import();
+            frame = wsOpen.import();
             PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT(frame->fin());
         }
@@ -420,8 +597,13 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             wsSplit.setMasking(false);
             const Pt::Http::Frame* frame = wsSplit.import();
             PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT( ! frame->fin() );
+            PT_UNIT_ASSERT_EQUAL(wsSplit.sbumpc(), 0xC3);
+
+            frame = wsSplit.import();
+            PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT(frame->fin());
-            PT_UNIT_ASSERT_EQUAL(wsSplit.in_avail(), std::streamsize(2));
+            PT_UNIT_ASSERT_EQUAL(wsSplit.sbumpc(), 0xA9);
 
             std::string bad;
             bad.push_back(static_cast<char>(0x81));
@@ -441,6 +623,9 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             std::stringbuf bufOpen(open);
             Pt::Http::WebSocketBuffer wsOpen(bufOpen);
             wsOpen.setMasking(false);
+            frame = wsOpen.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT_EQUAL(wsOpen.sbumpc(), 0xC3);
             assertFails(wsOpen, 1007u);
         }
 };

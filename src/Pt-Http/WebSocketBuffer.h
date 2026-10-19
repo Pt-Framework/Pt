@@ -18,10 +18,10 @@ namespace Http {
 /** @internal Result of one `WebSocketBuffer::import` step.
 
     `import` always returns a pointer to one of two members it owns,
-    `DataFrame` or `ControlFrame`, valid only until the next call. `size` is
-    the current wire frame's total payload length for both kinds; `avail` is
-    how many bytes starting at `data` are valid right now, which for an
-    in-progress data frame is less than `size`.
+    `DataFrame` or `ControlFrame`, valid only until the next call. `opcode`
+    and `fin` are the current wire frame's values. `size` is its total payload
+    length, `pos` is the imported payload length, and `avail` is the current
+    get area's length starting at `data`.
 */
 class PT_HTTP_API Frame
 {
@@ -92,8 +92,9 @@ class PT_HTTP_API Frame
 
 /** @internal A data frame; its buffer backs the stream buffer's get area.
 
-    `data`/`avail` are finalized once per `import` to the get area's current
-    extent; `size` stays the total declared length of the wire frame.
+    A subsequent `import` compacts consumed bytes and may append payload from
+    the same frame. It does not advance to the following frame until this
+    frame is imported and its get area is consumed.
 */
 class PT_HTTP_API DataFrame : public Frame
 {
@@ -142,9 +143,10 @@ class PT_HTTP_API WebSocketError : public std::runtime_error
 };
 
 
-/** @internal Parses WebSocket frames as the body of one data message.
+/** @internal Pull parser for WebSocket frames.
 
-    Data payload is the get area. Control frames are a side channel.
+    A data result exposes the current frame's payload through the get area.
+    A control result is returned only after its complete payload is buffered.
 */
 class PT_HTTP_API WebSocketBuffer : public std::streambuf
 {
@@ -231,14 +233,15 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
             NeedHeader,
             NeedLength,
             NeedMask,
-            NeedPayload
+            NeedDataPayload,
+            NeedControlPayload
         };
 
         void failThrow(unsigned code);
 
         void beginNextMessage();
 
-        void compact();
+        void refreshDataResult();
 
         std::size_t unused() const;
 
@@ -246,19 +249,23 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         std::size_t readBytes(char* dst, std::size_t n);
 
-        void onHeader();
+        const Frame* onHeader();
 
-        void onLength();
+        const Frame* onLength();
 
-        void onMask();
+        const Frame* onMask();
 
-        void beginPayload();
+        const Frame* beginPayload();
 
         void unmaskPayload(char* p, std::size_t n, std::size_t pos);
 
-        void onPayload();
+        const Frame* onDataPayload();
 
-        void finishFrame();
+        const Frame* onControlPayload();
+
+        void finishDataFrame();
+
+        void finishControlFrame();
 
     private:
         std::streambuf* _sb;
@@ -271,11 +278,9 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         Header _hdr;
         DataFrame _dataResult;
         ControlFrame _controlResult;
-        bool _dataProgress;
-        bool _controlReady;
 
         unsigned _messageOpcode;
-        bool _finished;
+        bool _messageFinished;
         unsigned _failCode;
 
         bool _messageOpen;
