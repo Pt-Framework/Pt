@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2011-2012 by Marc Boris Duerner
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,12 +15,12 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -51,29 +51,24 @@ class Context;
 
 namespace Http {
 
-/** @brief Listening HTTP server.
+/** @brief HTTP server that listens for incoming connections.
 
-    %Server is the listening HTTP service in the server model. It binds
-    a local %Endpoint and accepts connections, but it does not implement
-    a resource. Incoming requests are mapped by servlets that have been
-    added with %addServlet(). The first servlet that maps the request
-    handles it. %removeServlet() unregisters a servlet.
+    %Server binds a local %Endpoint and routes each incoming request to
+    the first registered servlet that maps it. The server itself does not
+    provide a resource. Use %addServlet() to register a servlet and
+    %removeServlet() to unregister it.
 
-    All server I/O is asynchronous, so the server needs an %EventLoop,
-    passed to a constructor or to %setActive(). The loop does not own
-    the server. %listen() binds the local endpoint, optionally with
-    %TcpServerOptions, and a second listen replaces the previous
-    binding. %cancel() stops accepting and pending work.
+    Server I/O is asynchronous and requires an %EventLoop. Supply the
+    loop when constructing the server or later through %setActive(); the
+    server does not take ownership of it. %listen() binds an endpoint and
+    replaces an existing binding. %cancel() stops accepting connections
+    and cancels pending work.
 
-    %setSecure() assigns a %Pt::Ssl::Context so the server accepts only
-    HTTPS connections. Further use of servlets and responders is
-    unchanged. Certificate and handshake details live in the SSL
-    module.
+    %setSecure() configures the server with a %Pt::Ssl::Context for HTTPS
+    connections. The servlet and responder model remains the same.
 
-    %setMaxThreads() bounds worker threads. %setTimeout() and
-    %setKeepAliveTimeout() bound idle I/O and persistent connections,
-    and %setMaxRequestSize() rejects a request whose size exceeds that
-    limit.
+    The server can limit worker threads, request size, idle I/O, and the
+    lifetime of persistent connections.
 
     @ingroup Pt-Http-Servers
 */
@@ -116,7 +111,7 @@ class PT_HTTP_API Server : public Connectable
         /** @brief Enables HTTPS with @a ctx.
         */
         void setSecure(Ssl::Context& ctx);
-        
+
         /** @brief Returns the maximum number of server threads.
         */
         std::size_t maxThreads() const;
