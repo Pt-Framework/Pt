@@ -119,8 +119,6 @@ bool isValidUtf8(const char* data, std::size_t n)
 WebSocketChannel::WebSocketChannel()
 : Channel()
 , _clientMask(false)
-, _opened(false)
-, _ended(false)
 , _timeout(30000)
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
@@ -146,9 +144,27 @@ WebSocketChannel::~WebSocketChannel()
 
 void WebSocketChannel::open(Stream& stream, bool clientMask)
 {
-    _clientMask = clientMask;
-    _opened = true;
     Channel::open(stream);
+
+    _clientMask = clientMask;
+    _inputState = Idle;
+    _receiveState = Idle;
+    _messageOpen = false;
+    _receiveProgress = MessageProgress();
+    _outputState = Idle;
+    _sendState = Idle;
+    _sendFragment = 0;
+    _sendProgress = MessageProgress();
+    _outputQueue.clear();
+    _pings.clear();
+    _closeState = CloseOpen;
+    _closeCode = 0;
+    _closeReason.clear();
+    _inputError = std::exception_ptr();
+    _outputError = std::exception_ptr();
+    _incoming.clear();
+    _outgoing.clear();
+
     stream.setTimeout(_timeout);
     stream.inputReady() += Pt::slot(*this, &WebSocketChannel::onInput);
     stream.outputReady() += Pt::slot(*this, &WebSocketChannel::onOutput);
@@ -164,15 +180,8 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
 
 void WebSocketChannel::requireOpen() const
 {
-    if( ! _opened || ! stream() )
-        throw std::logic_error("WebSocket handshake is not finished");
-}
-
-
-void WebSocketChannel::requireNotEnded() const
-{
-    if(_ended)
-        throw std::logic_error("WebSocket is closed");
+    if( ! isOpen() )
+        throw std::logic_error("WebSocket is not open");
 }
 
 
@@ -204,7 +213,6 @@ bool WebSocketChannel::closeNeedsInput() const
 
 void WebSocketChannel::beginSend()
 {
-    requireNotEnded();
     requireOpen();
 
     if(_sendState != Idle)
@@ -244,7 +252,7 @@ MessageProgress WebSocketChannel::endSend()
 {
     if(_sendState != Ready && _sendState != Failed)
     {
-        requireNotEnded();
+        requireOpen();
         throw std::logic_error("WebSocket send is not ready");
     }
 
@@ -254,7 +262,7 @@ MessageProgress WebSocketChannel::endSend()
         std::rethrow_exception(_outputError);
     }
 
-    requireNotEnded();
+    requireOpen();
     restartIdleTimer();
 
     MessageProgress progress = _sendProgress;
@@ -269,7 +277,6 @@ MessageProgress WebSocketChannel::endSend()
 
 void WebSocketChannel::beginReceive()
 {
-    requireNotEnded();
     requireOpen();
 
     if(_receiveState != Idle)
@@ -301,7 +308,7 @@ MessageProgress WebSocketChannel::endReceive()
 {
     if(_receiveState != Ready && _receiveState != Failed)
     {
-        requireNotEnded();
+        requireOpen();
         throw std::logic_error("WebSocket receive is not ready");
     }
 
@@ -313,7 +320,7 @@ MessageProgress WebSocketChannel::endReceive()
         std::rethrow_exception(error);
     }
 
-    requireNotEnded();
+    requireOpen();
     restartIdleTimer();
 
     MessageProgress progress = _receiveProgress;
@@ -327,7 +334,6 @@ MessageProgress WebSocketChannel::endReceive()
 
 void WebSocketChannel::ping(const char* payload, std::size_t n)
 {
-    requireNotEnded();
     requireOpen();
 
     if(n > 125)
@@ -340,7 +346,6 @@ void WebSocketChannel::ping(const char* payload, std::size_t n)
 
 void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
 {
-    requireNotEnded();
     requireOpen();
 
     if(_closeState != CloseOpen)
@@ -365,8 +370,6 @@ void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
 
 void WebSocketChannel::onClose()
 {
-    _ended = true;
-    _opened = false;
     _inputState = Idle;
     _receiveState = Idle;
     _outputState = Idle;
@@ -386,7 +389,7 @@ void WebSocketChannel::onClose()
 
 void WebSocketChannel::passiveClose()
 {
-    if(_ended)
+    if( ! isOpen() )
         return;
 
     Channel::close();
@@ -478,7 +481,7 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 
 void WebSocketChannel::protocolFail(unsigned code)
 {
-    if(_ended)
+    if( ! isOpen() )
         return;
 
     if(_closeCode == 0)
@@ -491,7 +494,7 @@ void WebSocketChannel::protocolFail(unsigned code)
 
 void WebSocketChannel::requestInput()
 {
-    if(_ended || _inputState != Idle || _inputError)
+    if( ! isOpen() || _inputState != Idle || _inputError)
         return;
 
     if(_receiveState != Pending && ! closeNeedsInput())
@@ -519,7 +522,7 @@ void WebSocketChannel::requestInput()
 
 void WebSocketChannel::setInputError(std::exception_ptr error)
 {
-    if(_ended || _inputError)
+    if( ! isOpen() || _inputError)
         return;
 
     _inputError = error;
@@ -538,7 +541,7 @@ void WebSocketChannel::setInputError(std::exception_ptr error)
 
 void WebSocketChannel::pumpOutput()
 {
-    if(_ended || _outputState != Idle)
+    if( ! isOpen() || _outputState != Idle)
         return;
 
     Stream* stream = this->stream();
@@ -644,7 +647,7 @@ Pt::uint32_t WebSocketChannel::nextMask()
 
 void WebSocketChannel::processInput()
 {
-    if(_ended || _inputState == Ready || _inputState == Failed || _inputError)
+    if( ! isOpen() || _inputState == Ready || _inputState == Failed || _inputError)
         return;
 
     if(_receiveState != Pending && ! closeNeedsInput())
@@ -755,8 +758,8 @@ bool WebSocketChannel::onControlFrame(const Frame& frame)
     if(opcode == 0x0A)
     {
         std::string payload(data ? data : "", n);
-        if( ! _unansweredPings.empty() && _unansweredPings.front() == payload )
-            _unansweredPings.pop_front();
+        if( ! _pings.empty() && _pings.front() == payload )
+            _pings.pop_front();
 
         restartIdleTimer();
         return false;
@@ -825,7 +828,7 @@ void WebSocketChannel::restartIdleTimer()
 void WebSocketChannel::onInput()
 {
     Stream* stream = this->stream();
-    if( ! stream || _ended )
+    if( ! stream )
         return;
 
     try
@@ -842,7 +845,7 @@ void WebSocketChannel::onInput()
     }
     catch(...)
     {
-        if(_ended)
+        if( ! isOpen() )
             return;
 
         _inputState = Idle;
@@ -858,7 +861,7 @@ void WebSocketChannel::onInput()
 void WebSocketChannel::onOutput()
 {
     Stream* stream = this->stream();
-    if( ! stream || _ended )
+    if( ! stream )
         return;
 
     try
@@ -879,7 +882,7 @@ void WebSocketChannel::onOutput()
         if( ! frame.data )
         {
             if(frame.opcode == 0x09)
-                _unansweredPings.push_back( std::string(frame.payload, frame.size) );
+                _pings.push_back( std::string(frame.payload, frame.size) );
 
             if(frame.opcode == 0x08)
                 setCloseSent();
@@ -910,7 +913,7 @@ void WebSocketChannel::onOutput()
     }
     catch(...)
     {
-        if(_ended)
+        if( ! isOpen() )
             return;
 
         if(_closeCode == 0)

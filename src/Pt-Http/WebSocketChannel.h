@@ -108,8 +108,6 @@ class WebSocketChannel : public Channel
 
         void requireOpen() const;
 
-        void requireNotEnded() const;
-
         void setCloseSent();
 
         void setCloseReceived();
@@ -147,40 +145,38 @@ class WebSocketChannel : public Channel
         void passiveClose();
 
     private:
-        bool _clientMask;
-        bool _opened;
-        bool _ended;
-        std::size_t _timeout;
-        std::size_t _maxMessageSize;
-        std::size_t _idleTimeout;
+        bool          _clientMask;
+        std::size_t   _timeout;
+        std::size_t   _maxMessageSize;
+        std::size_t   _idleTimeout;
         System::Timer _idleTimer;
-        Pt::uint32_t _maskSeed;
+        Pt::uint32_t  _maskSeed;
 
         WebSocketMessage _incoming;
         WebSocketMessage _outgoing;
-        WebSocketBuffer _wsbuf;
-
-        OperationState _inputState;
-        OperationState _receiveState;
-        bool _messageOpen;
-        MessageProgress _receiveProgress;
-
-        OperationState _outputState;
-        OperationState _sendState;
-        std::size_t _sendFragment;
-        MessageProgress _sendProgress;
+        WebSocketBuffer  _wsbuf;
 
         std::deque<PendingFrame> _outputQueue;
-        std::deque<std::string> _unansweredPings;
-        CloseState _closeState;
-        unsigned _closeCode;
-        std::string _closeReason;
-        std::exception_ptr _inputError;
-        std::exception_ptr _outputError;
+        std::deque<std::string>  _pings;
 
-        Signal<> _inputReady;
-        Signal<> _outputReady;
-        Signal<> _closed;
+        OperationState     _inputState;
+        OperationState     _receiveState;
+        bool               _messageOpen;
+        MessageProgress    _receiveProgress;
+        std::exception_ptr _inputError;
+        Signal<>           _inputReady;
+
+        OperationState     _outputState;
+        OperationState     _sendState;
+        std::size_t        _sendFragment;
+        MessageProgress    _sendProgress;
+        std::exception_ptr _outputError;
+        Signal<>           _outputReady;
+
+        CloseState  _closeState;
+        unsigned    _closeCode;
+        std::string _closeReason;
+        Signal<>    _closed;
 };
 
 } // namespace Http
