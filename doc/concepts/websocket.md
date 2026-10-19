@@ -63,6 +63,12 @@ After an end that is not finished, the next begin continues the same
 message. After `finished()`, the next begin starts a new message.
 Starting one direction does not cancel the other.
 
+The matching ready notification completes a step. `endSend()` and
+`endReceive()` are valid only after `outputReady()` or `inputReady()`,
+respectively, or after the corresponding I/O failure notification.
+They throw `std::logic_error` while the operation is still pending or
+after the stream has ended.
+
 ```cpp
 void beginSend();
 MessageProgress endSend();
@@ -110,10 +116,12 @@ On output the engine fragments the body at its frame limit. Every
 fragment but the last has FIN clear. The last has FIN set. A client
 masks. A server does not. The application does not supply a mask.
 
-Controls and close are processed for the life of the stream, even
-when no `beginReceive()` is outstanding. Data payloads are delivered
-to `incoming()` and reported by `inputReady()` only when a receive is
-outstanding. One direction is never cancelled to free the other.
+`beginReceive()` starts frame processing. Until then, frames stay in
+the stream. During a receive the engine consumes control frames and
+delivers data payloads to `incoming()` through `inputReady()`. The
+application consumes or discards those bytes before it starts the
+next receive step. One direction is never cancelled to free the
+other.
 
 A text message is UTF-8 over the whole message, not over one
 fragment. The engine validates it as the bytes arrive. A sequence
@@ -192,8 +200,11 @@ UTF-8 throws. `shutdown(1005)`, `shutdown(1006)`, and
 second `shutdown()` throws. After a local close is queued,
 `beginSend()` throws. The close frame is written after the current
 data frame. It does not wait for `endSend()` and does not cut a frame.
-Receive continues until the peer close or `idleTimeout()`, including
-when no `beginReceive()` is outstanding.
+After a local close is queued, the engine keeps reading until the
+peer close or `idleTimeout()`, even when no `beginReceive()` is
+outstanding. During that close-only phase it discards data frames and
+continues to process control frames. When a receive is outstanding,
+data that arrives before the peer close is still delivered normally.
 
 A received close is consumed. It does not become `incoming()` and
 does not emit `inputReady()`. If this side has not sent a close

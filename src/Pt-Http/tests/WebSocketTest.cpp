@@ -331,6 +331,217 @@ class IdleService : public Pt::Http::WebSocketService
         std::size_t _released;
 };
 
+
+class DeferredCloseSession : public Pt::Http::WebSocketSession
+{
+    public:
+        DeferredCloseSession(Pt::Http::WebSocketService& service,
+                             Pt::Http::Stream& stream,
+                             const Pt::Http::Reply& reply,
+                             std::string& message,
+                             Pt::Http::WebSocketMessage::Type& type,
+                             bool& received,
+                             bool& closed,
+                             Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _message(&message)
+        , _type(&type)
+        , _received(&received)
+        , _closed(&closed)
+        , _exitLoop(&exitLoop)
+        {}
+
+        void beginDeferredReceive()
+        {
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            Pt::Http::MessageProgress progress = endReceive();
+            _message->append( std::istreambuf_iterator<char>( incoming().body() ),
+                              std::istreambuf_iterator<char>() );
+            *_type = incoming().type();
+
+            if( ! progress.finished() )
+            {
+                incoming().discard();
+                beginReceive();
+                return;
+            }
+
+            *_received = true;
+            incoming().clear();
+            beginReceive();
+        }
+
+        virtual void onOutput()
+        {
+            endSend();
+        }
+
+        virtual void onClose()
+        {
+            *_closed = true;
+            _exitLoop->exit();
+        }
+
+    private:
+        std::string* _message;
+        Pt::Http::WebSocketMessage::Type* _type;
+        bool* _received;
+        bool* _closed;
+        Pt::System::EventLoop* _exitLoop;
+};
+
+
+class DeferredCloseService : public Pt::Http::WebSocketService
+{
+    public:
+        DeferredCloseService(std::string& message,
+                             Pt::Http::WebSocketMessage::Type& type,
+                             bool& received,
+                             bool& closed,
+                             Pt::System::EventLoop& loop)
+        : _message(&message)
+        , _type(&type)
+        , _received(&received)
+        , _closed(&closed)
+        , _loop(&loop)
+        , _session(0)
+        , _receiveRequested(false)
+        {}
+
+        void beginDeferredReceive()
+        {
+            _receiveRequested = true;
+
+            if(_session)
+                _session->beginDeferredReceive();
+        }
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            _session = new DeferredCloseSession(*this, stream, reply,
+                                                *_message, *_type, *_received, *_closed, *_loop);
+
+            if(_receiveRequested)
+                _session->beginDeferredReceive();
+
+            return _session;
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            _session = 0;
+            delete session;
+        }
+
+    private:
+        std::string* _message;
+        Pt::Http::WebSocketMessage::Type* _type;
+        bool* _received;
+        bool* _closed;
+        Pt::System::EventLoop* _loop;
+        DeferredCloseSession* _session;
+        bool _receiveRequested;
+};
+
+
+class PartialCloseSession : public Pt::Http::WebSocketSession
+{
+    public:
+        PartialCloseSession(Pt::Http::WebSocketService& service,
+                            Pt::Http::Stream& stream,
+                            const Pt::Http::Reply& reply,
+                            bool& partial,
+                            bool& finished,
+                            bool& closed,
+                            Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _partial(&partial)
+        , _finished(&finished)
+        , _closed(&closed)
+        , _exitLoop(&exitLoop)
+        {
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            Pt::Http::MessageProgress progress = endReceive();
+            if( ! progress.finished() )
+            {
+                *_partial = true;
+                incoming().discard();
+                beginReceive();
+                return;
+            }
+
+            *_finished = true;
+            incoming().clear();
+            beginReceive();
+        }
+
+        virtual void onOutput()
+        {
+            endSend();
+        }
+
+        virtual void onClose()
+        {
+            *_closed = true;
+            _exitLoop->exit();
+        }
+
+    private:
+        bool* _partial;
+        bool* _finished;
+        bool* _closed;
+        Pt::System::EventLoop* _exitLoop;
+};
+
+
+class PartialCloseService : public Pt::Http::WebSocketService
+{
+    public:
+        PartialCloseService(bool& partial,
+                            bool& finished,
+                            bool& closed,
+                            Pt::System::EventLoop& loop)
+        : _partial(&partial)
+        , _finished(&finished)
+        , _closed(&closed)
+        , _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new PartialCloseSession(*this, stream, reply,
+                                           *_partial, *_finished, *_closed, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        bool* _partial;
+        bool* _finished;
+        bool* _closed;
+        Pt::System::EventLoop* _loop;
+};
+
+
 class NullService : public Pt::Http::WebSocketService
 {
     protected:
@@ -542,10 +753,13 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _received(false)
         , _declined(false)
         , _closed(false)
+        , _partial(false)
+        , _finished(false)
         , _status(0)
         , _type(Pt::Http::WebSocketMessage::Unknown)
         , _limitSocket(0)
         , _limitClient(0)
+        , _deferredCloseService(0)
         {
             registerMethod("Text", *this, &WebSocketTest::Text);
             registerMethod("Accepted", *this, &WebSocketTest::Accepted);
@@ -554,6 +768,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("SecondScope", *this, &WebSocketTest::SecondScope);
             registerMethod("PeerClose", *this, &WebSocketTest::PeerClose);
             registerMethod("DataBeforeClose", *this, &WebSocketTest::DataBeforeClose);
+            registerMethod("ClosePartialReceive", *this, &WebSocketTest::ClosePartialReceive);
             registerMethod("Decline", *this, &WebSocketTest::Decline);
             registerMethod("NullSession", *this, &WebSocketTest::NullSession);
             registerMethod("ConstructFails", *this, &WebSocketTest::ConstructFails);
@@ -568,6 +783,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("CloseDestructor", *this, &WebSocketTest::CloseDestructor);
             registerMethod("CloseNoFrame", *this, &WebSocketTest::CloseNoFrame);
             registerMethod("BeginTwice", *this, &WebSocketTest::BeginTwice);
+            registerMethod("EndBeforeReady", *this, &WebSocketTest::EndBeforeReady);
             registerMethod("CloseCodes", *this, &WebSocketTest::CloseCodes);
             registerMethod("HandshakeControl", *this, &WebSocketTest::HandshakeControl);
             registerMethod("Protocol", *this, &WebSocketTest::Protocol);
@@ -584,9 +800,12 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _received = false;
             _declined = false;
             _closed = false;
+            _partial = false;
+            _finished = false;
             _status = 0;
             _limitSocket = 0;
             _limitClient = 0;
+            _deferredCloseService = 0;
             _message.clear();
             _offered.clear();
             _copied.clear();
@@ -763,7 +982,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8036);
 
             Pt::Http::Server server(*_loop, ep);
-            IdleService service(*_loop, false);
+            DeferredCloseService service(_message, _type, _received, _closed, *_loop);
             Pt::Http::WebSocketServlet sockets(service);
 
             Pt::Http::MapUrl mapUrl("/ws", service);
@@ -774,13 +993,17 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedDataBeforeClose);
             socket.outputReady() += Pt::slot(*this, &WebSocketTest::onDataBeforeCloseOutput);
             socket.closed() += Pt::slot(*this, &WebSocketTest::onDataBeforeCloseClosed);
+            _deferredCloseService = &service;
             socket.beginConnect("/ws");
 
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT_EQUALS(_message, "ignored");
+            PT_UNIT_ASSERT_EQUALS(_type, Pt::Http::WebSocketMessage::Text);
             PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
-            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+            _deferredCloseService = 0;
         }
 
         void onConnectedDataBeforeClose(Pt::Http::WebSocket& socket)
@@ -801,12 +1024,54 @@ class WebSocketTest : public Pt::Unit::TestSuite
             }
 
             socket.shutdown();
+            _deferredCloseService->beginDeferredReceive();
         }
 
         void onDataBeforeCloseClosed(Pt::Http::WebSocket&)
         {
             _closed = true;
             _loop->exit();
+        }
+
+    protected:
+        void ClosePartialReceive()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8037);
+
+            Pt::Http::Server server(*_loop, ep);
+            PartialCloseService service(_partial, _finished, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPartialClose);
+            socket.outputReady() += Pt::slot(*this, &WebSocketTest::onPartialCloseOutput);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_partial);
+            PT_UNIT_ASSERT(! _finished);
+            PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+        }
+
+        void onConnectedPartialClose(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << std::string(5000, 'a');
+            socket.beginSend();
+        }
+
+        void onPartialCloseOutput(Pt::Http::WebSocket& socket)
+        {
+            Pt::Http::MessageProgress progress = socket.endSend();
+            if( ! progress.finished() )
+                socket.shutdown();
         }
 
     protected:
@@ -1272,6 +1537,38 @@ class WebSocketTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void EndBeforeReady()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8038);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedEndBeforeReady);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+        }
+
+        void onConnectedEndBeforeReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "pending";
+            socket.beginSend();
+            socket.beginReceive();
+            PT_UNIT_ASSERT_THROW(socket.endSend(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.endReceive(), std::logic_error);
+            _loop->exit();
+        }
+
+    protected:
         void CloseCodes()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8024);
@@ -1500,10 +1797,13 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _received;
         bool _declined;
         bool _closed;
+        bool _partial;
+        bool _finished;
         unsigned _status;
         Pt::Http::WebSocketMessage::Type _type;
         Pt::Http::WebSocket* _limitSocket;
         Pt::Http::Client* _limitClient;
+        DeferredCloseService* _deferredCloseService;
 };
 
 Pt::Unit::RegisterTest<WebSocketTest> register_HttpWebSocketTest;

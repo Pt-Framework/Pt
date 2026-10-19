@@ -79,40 +79,30 @@ class WebSocketChannel : public Channel
         virtual void onClose();
 
     private:
-        struct PendingControl
+        struct PendingFrame
         {
             unsigned opcode;
+            bool fin;
+            bool data;
             char payload[125];
             std::size_t size;
         };
 
-        enum Action
+        enum OperationState
         {
-            NoAction      = 0,
-            ReceiveAction = 1,
-            SendAction    = 2,
-            CloseAction   = 4
-        };
-
-        enum InputState
-        {
-            InputIdle,
-            OnInput
-        };
-
-        enum OutputState
-        {
-            OutputIdle,
-            OnControlOutput,
-            OnDataOutput,
-            OnEndSend
+            Idle,
+            Pending,
+            Ready,
+            Failed
         };
 
         enum CloseState
         {
             CloseOpen,
+            CloseQueued,
             CloseSent,
             CloseReceived,
+            CloseReplyQueued,
             CloseExchanged
         };
 
@@ -120,15 +110,11 @@ class WebSocketChannel : public Channel
 
         void requireNotEnded() const;
 
-        bool isActionPending(Action action) const;
-
-        void setActionPending(Action action);
-
-        void clearAction(Action action);
-
         void setCloseSent();
 
         void setCloseReceived();
+
+        bool closeNeedsInput() const;
 
         void enqueueControl(unsigned opcode, const char* payload, std::size_t n);
 
@@ -174,21 +160,19 @@ class WebSocketChannel : public Channel
         WebSocketMessage _outgoing;
         WebSocketBuffer _wsbuf;
 
-        unsigned _actions;
-        InputState _inputState;
-        bool _inputProcessing;
-        bool _discardingInput;
+        OperationState _inputState;
+        OperationState _receiveState;
         bool _messageOpen;
         MessageProgress _receiveProgress;
 
-        OutputState _outputState;
-        unsigned _outputOpcode;
+        OperationState _outputState;
+        OperationState _sendState;
         bool _sendStarted;
         bool _firstFragment;
         bool _dataFinWritten;
         MessageProgress _sendProgress;
 
-        std::deque<PendingControl> _controlQueue;
+        std::deque<PendingFrame> _outputQueue;
         std::deque<std::string> _unansweredPings;
         CloseState _closeState;
         unsigned _closeCode;

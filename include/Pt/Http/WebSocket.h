@@ -109,9 +109,10 @@ class WebSocketChannel;
     %inputReady() reports that data bytes were received.
     %endReceive() returns progress. After %finished(), %clear()
     drops the body so the same object can carry the next message.
-    The engine continues to process control and close frames when no
-    receive is outstanding. It discards a data message that arrives
-    without one.
+    %beginReceive() starts frame processing. Until then, incoming
+    frames stay in the stream. Control frames are processed while a
+    receive is outstanding. A local %shutdown() keeps processing input
+    until the peer replies with its close frame.
 
     Ping, pong, shutdown and close are socket operations, not
     messages.
@@ -217,10 +218,16 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Completes the send started by %beginSend().
 
             @return Progress of this send step.
+
+            @throw %std::logic_error if the send has not completed or
+            the stream has ended.
         */
         MessageProgress endSend();
 
         /** @brief Begins receiving into %incoming().
+
+            Starts processing incoming frames. Frames received before
+            this call stay in the stream.
 
             @throw %std::logic_error if a receive is outstanding, the
             handshake is not finished, or the stream has ended.
@@ -230,6 +237,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         /** @brief Completes the receive started by %beginReceive().
 
             @return Progress of this receive step.
+
+            @throw %std::logic_error if the receive has not completed
+            or the stream has ended.
         */
         MessageProgress endReceive();
 

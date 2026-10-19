@@ -96,8 +96,10 @@ class WebSocketChannel;
     call %endReceive() or %endSend() from %onClose(). The service
     releases this session after %onClose() returns.
 
-    The engine processes control and close frames while no receive is
-    outstanding. It discards a data message that arrives without one.
+    %beginReceive() starts frame processing. Until then, incoming
+    frames stay in the stream. Control frames are processed while a
+    receive is outstanding. A local %shutdown() keeps processing input
+    until the peer replies with its close frame.
 
     %protocol() is the single name the responder wrote as
     Sec-WebSocket-Protocol on the 101, or empty when none was
@@ -190,16 +192,25 @@ class PT_HTTP_API WebSocketSession : public Connectable
         /** @brief Completes the send started by %beginSend().
 
             @return Progress of this send step.
+
+            @throw %std::logic_error if the send has not completed or
+            the stream has ended.
         */
         MessageProgress endSend();
 
         /** @brief Begins receiving into %incoming().
+
+            Starts processing incoming frames. Frames received before
+            this call stay in the stream.
         */
         void beginReceive();
 
         /** @brief Completes the receive started by %beginReceive().
 
             @return Progress of this receive step.
+
+            @throw %std::logic_error if the receive has not completed
+            or the stream has ended.
         */
         MessageProgress endReceive();
 
