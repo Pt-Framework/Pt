@@ -233,6 +233,7 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
             NeedHeader,
             NeedLength,
             NeedMask,
+            NeedPayload,
             NeedDataPayload,
             NeedControlPayload
         };
@@ -241,31 +242,21 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         void beginNextMessage();
 
-        void refreshDataResult();
-
-        std::size_t unused() const;
-
-        std::size_t take(std::size_t want);
-
         std::size_t readBytes(char* dst, std::size_t n);
 
-        const Frame* onHeader();
+        State onHeader();
 
-        const Frame* onLength();
+        State onLength();
 
-        const Frame* onMask();
+        State onMask();
 
-        const Frame* beginPayload();
+        State onPayload();
 
         void unmaskPayload(char* p, std::size_t n, std::size_t pos);
 
-        const Frame* onDataPayload();
+        State onDataPayload();
 
-        const Frame* onControlPayload();
-
-        void finishDataFrame();
-
-        void finishControlFrame();
+        State onControlPayload();
 
     private:
         std::streambuf* _sb;
@@ -278,6 +269,7 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         Header _hdr;
         DataFrame _dataResult;
         ControlFrame _controlResult;
+        const Frame* _frame;
 
         unsigned _messageOpcode;
         bool _messageFinished;

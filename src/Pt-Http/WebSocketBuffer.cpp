@@ -246,6 +246,7 @@ WebSocketBuffer::WebSocketBuffer()
 , _maxMessageSize(1024 * 1024)
 , _maxRead(0)
 , _bytesRead(0)
+, _frame(0)
 , _messageOpcode(0)
 , _messageFinished(false)
 , _failCode(0)
@@ -284,6 +285,7 @@ void WebSocketBuffer::reset()
     _maxRead = 0;
     _bytesRead = 0;
     _hdr.clear();
+    _frame = 0;
     _messageOpcode = 0;
     _messageFinished = false;
     _failCode = 0;
@@ -325,26 +327,43 @@ const Frame* WebSocketBuffer::import(std::streamsize n)
 
     _maxRead = static_cast<std::size_t>(n < 0 ? 0 : n);
     _bytesRead = 0;
+    _frame = 0;
 
-    switch(_state)
+    while( ! _frame )
     {
-        case NeedHeader:
-            return onHeader();
+        State state = _state;
+        switch(state)
+        {
+            case NeedHeader:
+                _state = onHeader();
+                break;
 
-        case NeedLength:
-            return onLength();
+            case NeedLength:
+                _state = onLength();
+                break;
 
-        case NeedMask:
-            return onMask();
+            case NeedMask:
+                _state = onMask();
+                break;
 
-        case NeedDataPayload:
-            return onDataPayload();
+            case NeedPayload:
+                _state = onPayload();
+                break;
 
-        case NeedControlPayload:
-            return onControlPayload();
+            case NeedDataPayload:
+                _state = onDataPayload();
+                break;
+
+            case NeedControlPayload:
+                _state = onControlPayload();
+                break;
+        }
+
+        if(_state == state)
+            break;
     }
 
-    return 0;
+    return _frame;
 }
 
 
@@ -387,32 +406,8 @@ void WebSocketBuffer::beginNextMessage()
 }
 
 
-void WebSocketBuffer::refreshDataResult()
+std::size_t WebSocketBuffer::readBytes(char* dst, std::size_t n)
 {
-    if( ! gptr() )
-    {
-        _dataResult.setAvail(_dataResult.buffer(), 0);
-        return;
-    }
-
-    std::size_t avail = static_cast<std::size_t>(egptr() - gptr());
-    _dataResult.setAvail(gptr(), avail);
-}
-
-
-std::size_t WebSocketBuffer::unused() const
-{
-    if( ! eback() )
-        return DataFrame::BufferSize;
-
-    return DataFrame::BufferSize - static_cast<std::size_t>(egptr() - eback());
-}
-
-
-std::size_t WebSocketBuffer::take(std::size_t want)
-{
-    std::size_t n = want;
-
     if(_maxRead != 0 && n > _maxRead - _bytesRead)
         n = _maxRead - _bytesRead;
 
@@ -429,12 +424,9 @@ std::size_t WebSocketBuffer::take(std::size_t want)
     if(n > static_cast<std::size_t>(avail))
         n = static_cast<std::size_t>(avail);
 
-    return n;
-}
+    if(n == 0)
+        return 0;
 
-
-std::size_t WebSocketBuffer::readBytes(char* dst, std::size_t n)
-{
     std::streamsize r = _sb->sgetn(dst, static_cast<std::streamsize>(n));
     if(r <= 0)
         failThrow(1002);
@@ -445,17 +437,15 @@ std::size_t WebSocketBuffer::readBytes(char* dst, std::size_t n)
 }
 
 
-const Frame* WebSocketBuffer::onHeader()
+WebSocketBuffer::State WebSocketBuffer::onHeader()
 {
-    std::size_t n = take(_hdr.remaining());
-    if(n == 0)
-        return 0;
-
-    std::size_t got = readBytes(_hdr.at(_hdr.avail()), n);
+    std::size_t got = readBytes(_hdr.at(_hdr.avail()), _hdr.remaining());
+    if(got == 0)
+        return NeedHeader;
 
     _hdr.setAvail(_hdr.avail() + got);
     if(_hdr.avail() < _hdr.size())
-        return 0;
+        return NeedHeader;
 
     if(_hdr.rsv() != 0)
         failThrow(1002);
@@ -491,39 +481,34 @@ const Frame* WebSocketBuffer::onHeader()
     if(len7 == 126)
     {
         _hdr.resize(4);
-        _state = NeedLength;
-        return onLength();
+        return NeedLength;
     }
 
     if(len7 == 127)
     {
         _hdr.resize(10);
-        _state = NeedLength;
-        return onLength();
+        return NeedLength;
     }
 
     if(_hdr.masked())
     {
         _hdr.resize(6);
-        _state = NeedMask;
-        return onMask();
+        return NeedMask;
     }
 
-    return beginPayload();
+    return NeedPayload;
 }
 
 
-const Frame* WebSocketBuffer::onLength()
+WebSocketBuffer::State WebSocketBuffer::onLength()
 {
-    std::size_t n = take(_hdr.remaining());
-    if(n == 0)
-        return 0;
-
-    std::size_t got = readBytes(_hdr.at(_hdr.avail()), n);
+    std::size_t got = readBytes(_hdr.at(_hdr.avail()), _hdr.remaining());
+    if(got == 0)
+        return NeedLength;
 
     _hdr.setAvail(_hdr.avail() + got);
     if(_hdr.avail() < _hdr.size())
-        return 0;
+        return NeedLength;
 
     std::size_t payload = 0;
     unsigned err = _hdr.payloadLength(payload);
@@ -536,31 +521,28 @@ const Frame* WebSocketBuffer::onLength()
     if(_hdr.masked())
     {
         _hdr.resize(_hdr.size() + 4);
-        _state = NeedMask;
-        return onMask();
+        return NeedMask;
     }
 
-    return beginPayload();
+    return NeedPayload;
 }
 
 
-const Frame* WebSocketBuffer::onMask()
+WebSocketBuffer::State WebSocketBuffer::onMask()
 {
-    std::size_t n = take(_hdr.remaining());
-    if(n == 0)
-        return 0;
-
-    std::size_t got = readBytes(_hdr.at(_hdr.avail()), n);
+    std::size_t got = readBytes(_hdr.at(_hdr.avail()), _hdr.remaining());
+    if(got == 0)
+        return NeedMask;
 
     _hdr.setAvail(_hdr.avail() + got);
     if(_hdr.avail() < _hdr.size())
-        return 0;
+        return NeedMask;
 
-    return beginPayload();
+    return NeedPayload;
 }
 
 
-const Frame* WebSocketBuffer::beginPayload()
+WebSocketBuffer::State WebSocketBuffer::onPayload()
 {
     std::size_t payload = 0;
     unsigned err = _hdr.payloadLength(payload);
@@ -600,20 +582,16 @@ const Frame* WebSocketBuffer::beginPayload()
         }
     }
 
-    _state = control ? NeedControlPayload : NeedDataPayload;
-
     if(payload == 0)
     {
         if(control)
-        {
-            finishControlFrame();
-            return &_controlResult;
-        }
-        else
-            return &_dataResult;
+            return NeedControlPayload;
+
+        _frame = &_dataResult;
+        return NeedDataPayload;
     }
 
-    return control ? onControlPayload() : onDataPayload();
+    return control ? NeedControlPayload : NeedDataPayload;
 }
 
 
@@ -629,102 +607,79 @@ void WebSocketBuffer::unmaskPayload(char* p, std::size_t n, std::size_t pos)
 }
 
 
-const Frame* WebSocketBuffer::onDataPayload()
+WebSocketBuffer::State WebSocketBuffer::onDataPayload()
 {
     if(_dataResult.remaining() == 0)
     {
-        refreshDataResult();
-        if(showmanyc() != 0)
-            return &_dataResult;
+        if(showmanyc() == 0)
+        {
+            if(_hdr.fin())
+            {
+                if(_messageOpcode == 0x01 && ! finishUtf8(_utf8Need, _utf8Error) )
+                    failThrow(1007);
 
-        finishDataFrame();
-        return onHeader();
-    }
+                _messageFinished = true;
+                _messageOpen = false;
+            }
 
-    std::size_t n = take(_dataResult.remaining());
-    if(n == 0)
-    {
-        refreshDataResult();
-        return showmanyc() != 0 ? &_dataResult : 0;
-    }
-
-    char* buffer = _dataResult.buffer();
-    if( ! gptr() )
-    {
-        setg(buffer, buffer, buffer);
+            _hdr.clear();
+            return NeedHeader;
+        }
     }
     else
     {
-        std::size_t leftover = static_cast<std::size_t>(egptr() - gptr());
-        if(leftover != 0 && gptr() != buffer)
-            std::memmove(buffer, gptr(), leftover);
+        char* buffer = _dataResult.buffer();
+        std::size_t avail = static_cast<std::size_t>(showmanyc());
+        if(avail != 0 && gptr() != buffer)
+            std::memmove(buffer, gptr(), avail);
 
-        setg(buffer, buffer, buffer + leftover);
+        setg(buffer, buffer, buffer + avail);
+
+        std::size_t space = DataFrame::BufferSize - avail;
+        if(space != 0)
+        {
+            char* dst = egptr();
+            std::size_t got = readBytes(dst, std::min(_dataResult.remaining(), space));
+            if(got != 0)
+            {
+                unmaskPayload(dst, got, _dataResult.pos());
+
+                bool text = _hdr.opcode() == 0x01 ||
+                            (_hdr.opcode() == 0x00 && _messageOpcode == 0x01);
+                if(text && ! feedUtf8(_utf8Need, _utf8Lead, _utf8Error, dst, got) )
+                    failThrow(1007);
+
+                setg(eback(), gptr(), egptr() + static_cast<std::streamsize>(got));
+                _dataResult.advance(got);
+            }
+        }
     }
 
-    std::size_t space = unused();
-    if(space == 0)
-        return &_dataResult;
+    std::size_t avail = static_cast<std::size_t>(showmanyc());
+    _dataResult.setAvail(gptr(), avail);
+    if(avail != 0)
+        _frame = &_dataResult;
 
-    if(n > space)
-        n = space;
-
-    char* dst = egptr();
-
-    std::size_t got = readBytes(dst, n);
-
-    unmaskPayload(dst, got, _dataResult.pos());
-
-    bool text = _hdr.opcode() == 0x01 ||
-                (_hdr.opcode() == 0x00 && _messageOpcode == 0x01);
-    if(text && ! feedUtf8(_utf8Need, _utf8Lead, _utf8Error, dst, got) )
-        failThrow(1007);
-
-    setg(eback(), gptr(), egptr() + static_cast<std::streamsize>(got));
-    _dataResult.advance(got);
-    refreshDataResult();
-    return &_dataResult;
+    return NeedDataPayload;
 }
 
 
-const Frame* WebSocketBuffer::onControlPayload()
+WebSocketBuffer::State WebSocketBuffer::onControlPayload()
 {
-    std::size_t pos = _controlResult.pos();
-    std::size_t n = take(_controlResult.remaining());
-    if(n == 0)
-        return 0;
-
-    char* dst = _controlResult.at(pos);
-    std::size_t got = readBytes(dst, n);
-    unmaskPayload(dst, got, pos);
-
-    _controlResult.advance(got);
     if(_controlResult.remaining() != 0)
-        return 0;
-
-    finishControlFrame();
-    return &_controlResult;
-}
-
-
-void WebSocketBuffer::finishDataFrame()
-{
-    if(_hdr.fin())
     {
-        if(_messageOpcode == 0x01 && ! finishUtf8(_utf8Need, _utf8Error) )
-            failThrow(1007);
+        std::size_t pos = _controlResult.pos();
+        char* dst = _controlResult.at(pos);
+        std::size_t got = readBytes(dst, _controlResult.remaining());
+        if(got == 0)
+            return NeedControlPayload;
+        unmaskPayload(dst, got, pos);
 
-        _messageFinished = true;
-        _messageOpen = false;
+        _controlResult.advance(got);
+        if(_controlResult.remaining() != 0)
+            return NeedControlPayload;
     }
 
-    _hdr.clear();
-    _state = NeedHeader;
-}
-
-
-void WebSocketBuffer::finishControlFrame()
-{
     std::size_t size = _controlResult.size();
     if(_hdr.opcode() == 0x08 && size > 0)
     {
@@ -737,13 +692,16 @@ void WebSocketBuffer::finishControlFrame()
         const char* reason = _controlResult.at(2);
         if( ! feedUtf8(need, lead, error, reason, size - 2) ||
             ! finishUtf8(need, error) )
+        {
             failThrow(1002);
+        }
     }
 
     _controlResult.setFin(true);
     _controlResult.setAvail(_controlResult.at(0), size);
     _hdr.clear();
-    _state = NeedHeader;
+    _frame = &_controlResult;
+    return NeedHeader;
 }
 
 } // namespace Http
