@@ -31,10 +31,6 @@ The reply echoes a writable peer code. It does not always use 1000.
 After both closes have been exchanged and the output is idle, the
 channel ends the stream and emits `closed()`.
 
-`WebSocketBuffer::import` still returns a byte count. The channel
-then reads `failCode`, `hasControl`, `header`, `opcode`, `finished`,
-and `in_avail`, and calls `consumeControl` after a control.
-
 ## WebSocket buffer {#websocket-buffer}
 
 `WebSocketBuffer` is the internal frame parser and the body of an

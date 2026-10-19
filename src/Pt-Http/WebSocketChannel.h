@@ -79,7 +79,7 @@ class WebSocketChannel : public Channel
         virtual void onClose();
 
     private:
-        struct ControlFrame
+        struct PendingControl
         {
             unsigned opcode;
             char payload[125];
@@ -119,7 +119,7 @@ class WebSocketChannel : public Channel
 
         bool parseAvailable();
 
-        bool onControlFrame();
+        bool onControlFrame(const Frame& frame);
 
         void restartIdleTimer();
 
@@ -158,7 +158,7 @@ class WebSocketChannel : public Channel
         bool _awaitingEndSend;
         MessageProgress _sendProgress;
 
-        std::deque<ControlFrame> _controlQueue;
+        std::deque<PendingControl> _controlQueue;
         std::deque<std::string> _unansweredPings;
         bool _closeQueued;
         bool _closeSent;

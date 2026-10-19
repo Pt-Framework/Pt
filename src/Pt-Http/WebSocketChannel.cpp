@@ -408,7 +408,7 @@ void WebSocketChannel::onIdleTimeout()
 
 void WebSocketChannel::enqueueControl(unsigned opcode, const char* payload, std::size_t n)
 {
-    ControlFrame frame;
+    PendingControl frame;
     frame.opcode = opcode;
     frame.size = n;
     if(n != 0 && payload)
@@ -483,7 +483,7 @@ void WebSocketChannel::pumpOutput()
 
     if( ! _controlQueue.empty() )
     {
-        const ControlFrame& frame = _controlQueue.front();
+        const PendingControl& frame = _controlQueue.front();
         writeFrame(frame.opcode, true, frame.payload, frame.size);
 
         if(frame.opcode == 0x09)
@@ -606,40 +606,36 @@ bool WebSocketChannel::parseAvailable()
     if( ! stream || ! stream->buffer() )
         return false;
 
+    const Frame* frame = 0;
+
     for(;;)
     {
-        _wsbuf.import();
-
-        if(_wsbuf.failCode() != 0)
+        try
         {
-            protocolFail(_wsbuf.failCode());
+            frame = _wsbuf.import();
+        }
+        catch(const WebSocketError& e)
+        {
+            protocolFail( e.code() );
             return false;
         }
 
-        if(_wsbuf.hasControl())
-        {
-            bool stop = onControlFrame();
-            _wsbuf.consumeControl();
-            if(stop)
-                return true;
+        if( ! frame || frame->kind() != Frame::Control )
+            break;
 
-            if(_wsbuf.finished())
-                break;
-
-            continue;
-        }
-
-        break;
+        bool stop = onControlFrame(*frame);
+        if(stop)
+            return true;
     }
 
     if( ! _receiveOutstanding )
         return false;
 
-    if(_wsbuf.header())
+    if(frame && frame->kind() == Frame::Data)
     {
         if(_incoming.type() == WebSocketMessage::Unknown)
         {
-            WebSocketMessage::Type type = (_wsbuf.opcode() == 0x01)
+            WebSocketMessage::Type type = (frame->opcode() == 0x01)
                                         ? WebSocketMessage::Text
                                         : WebSocketMessage::Binary;
             _incoming.setTypeFromEngine(type);
@@ -647,16 +643,16 @@ bool WebSocketChannel::parseAvailable()
         }
 
         _receiveProgress.setHeader();
+
+        if(frame->fin())
+        {
+            _receiveProgress.setFinished();
+            _messageOpen = false;
+        }
     }
 
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
-
-    if(_wsbuf.finished())
-    {
-        _receiveProgress.setFinished();
-        _messageOpen = false;
-    }
 
     if(_receiveProgress.header() || _receiveProgress.body() ||
        _receiveProgress.finished())
@@ -669,11 +665,11 @@ bool WebSocketChannel::parseAvailable()
 }
 
 
-bool WebSocketChannel::onControlFrame()
+bool WebSocketChannel::onControlFrame(const Frame& frame)
 {
-    unsigned opcode = _wsbuf.controlOpcode();
-    const char* data = _wsbuf.controlData();
-    std::size_t n = _wsbuf.controlSize();
+    unsigned opcode = frame.opcode();
+    const char* data = frame.data();
+    std::size_t n = frame.size();
 
     if(opcode == 0x09)
     {
