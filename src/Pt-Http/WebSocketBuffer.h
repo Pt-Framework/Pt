@@ -150,7 +150,6 @@ class PT_HTTP_API Frame
         Header _header;
 };
 
-
 /** @internal A WebSocket protocol violation, carrying the close code to send.
 */
 class PT_HTTP_API WebSocketError : public std::runtime_error
@@ -164,7 +163,6 @@ class PT_HTTP_API WebSocketError : public std::runtime_error
     private:
         unsigned _code;
 };
-
 
 /** @internal Pull parser for WebSocket frames.
 
@@ -204,19 +202,13 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
     private:
         enum State
         {
-            NeedHeader,
-            NeedLength,
-            NeedMask,
-            NeedPayload,
-            NeedDataPayload,
-            NeedControlPayload
+            OnHeader,
+            OnLength,
+            OnMask,
+            OnPayload,
+            OnDataPayload,
+            OnControlPayload
         };
-
-        void failThrow(unsigned code);
-
-        void beginMessage(unsigned opcode);
-
-        std::size_t readBytes(char* dst, std::size_t n);
 
         State onHeader();
 
@@ -226,11 +218,16 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         State onPayload();
 
-        void unmaskPayload(char* p, std::size_t n, std::size_t pos);
-
         State onDataPayload();
 
         State onControlPayload();
+
+    private:
+        void fail(unsigned code);
+
+        std::size_t readBytes(char* dst, std::size_t n);
+
+        void unmaskPayload(char* p, std::size_t n, std::size_t pos);
 
     private:
         std::streambuf* _sb;
@@ -250,8 +247,8 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
         unsigned char _utf8Lead;
 };
 
-} // namespace Http
+} // namespace
 
-} // namespace Pt
+} // namespace
 
 #endif
