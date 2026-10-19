@@ -446,4 +446,3 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<WebSocketBufferTest> register_WebSocketBufferTest;
-
