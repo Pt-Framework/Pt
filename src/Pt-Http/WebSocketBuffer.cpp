@@ -331,6 +331,12 @@ const Frame* WebSocketBuffer::import(std::streamsize n)
 }
 
 
+void WebSocketBuffer::discard()
+{
+    setg(0, 0, 0);
+}
+
+
 WebSocketBuffer::int_type WebSocketBuffer::underflow()
 {
     if(gptr() && gptr() < egptr())

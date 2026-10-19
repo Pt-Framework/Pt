@@ -12,14 +12,15 @@ behavior it has today.
 
 ## Baseline
 
-`WebSocketChannel` starts the input pump only from `beginReceive`.
-`open` connects the stream signals and does not begin a read.
-A silent peer therefore leaves controls and close unprocessed until
-the application starts a receive. The output pump already prefers
-queued controls over data fragments and can run while a read is
-outstanding, because `Stream` allows one input and one output at the
-same time. A received ping enqueues a pong. A received pong is not
-yet reported on the facade. `shutdown` enqueues a close frame.
+`WebSocketChannel` starts the input pump from `open` and keeps it
+running until the stream ends. Controls and close are processed even
+when no receive is outstanding. Data is delivered only to an
+outstanding receive; otherwise the complete data message is discarded.
+The output pump already prefers queued controls over data fragments
+and can run while a read is outstanding, because `Stream` allows one
+input and one output at the same time. A received ping enqueues a
+pong. A received pong is not yet reported on the facade. `shutdown`
+enqueues a close frame.
 
 Input and output already have separate state. The public surface is
 already `incoming()`, `outgoing()`, and `beginSend()` without a

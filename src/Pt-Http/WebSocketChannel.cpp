@@ -125,18 +125,17 @@ WebSocketChannel::WebSocketChannel()
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
-, _receiveOutstanding(false)
+, _actions(NoAction)
+, _inputState(InputIdle)
+, _inputProcessing(false)
+, _discardingInput(false)
 , _messageOpen(false)
 , _outputState(OutputIdle)
-, _outputKind(OutputNone)
-, _sendOutstanding(false)
+, _outputOpcode(0)
 , _sendStarted(false)
 , _firstFragment(true)
 , _dataFinWritten(false)
-, _awaitingEndSend(false)
-, _closeQueued(false)
-, _closeSent(false)
-, _closeReceived(false)
+, _closeState(CloseOpen)
 , _closeCode(0)
 {
     _idleTimer.timeout() += Pt::slot(*this, &WebSocketChannel::onIdleTimeout);
@@ -164,6 +163,7 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _wsbuf.setMasking( ! clientMask );
     _wsbuf.setMaxMessageSize(_maxMessageSize);
     _incoming.setBuffer(_wsbuf);
+    requestInput();
 }
 
 
@@ -181,15 +181,51 @@ void WebSocketChannel::requireNotEnded() const
 }
 
 
+bool WebSocketChannel::isActionPending(Action action) const
+{
+    return (_actions & static_cast<unsigned>(action)) != 0;
+}
+
+
+void WebSocketChannel::setActionPending(Action action)
+{
+    _actions |= static_cast<unsigned>(action);
+}
+
+
+void WebSocketChannel::clearAction(Action action)
+{
+    _actions &= ~static_cast<unsigned>(action);
+}
+
+
+void WebSocketChannel::setCloseSent()
+{
+    if(_closeState == CloseOpen)
+        _closeState = CloseSent;
+    else if(_closeState == CloseReceived)
+        _closeState = CloseExchanged;
+}
+
+
+void WebSocketChannel::setCloseReceived()
+{
+    if(_closeState == CloseOpen)
+        _closeState = CloseReceived;
+    else if(_closeState == CloseSent)
+        _closeState = CloseExchanged;
+}
+
+
 void WebSocketChannel::beginSend()
 {
     requireNotEnded();
     requireOpen();
 
-    if(_sendOutstanding)
+    if( isActionPending(SendAction) )
         throw std::logic_error("WebSocket send is outstanding");
 
-    if(_closeQueued || _closeSent)
+    if( isActionPending(CloseAction) )
         throw std::logic_error("WebSocket is closing");
 
     if( ! _sendStarted )
@@ -214,8 +250,7 @@ void WebSocketChannel::beginSend()
         _sendStarted = true;
     }
 
-    _sendOutstanding = true;
-    _awaitingEndSend = false;
+    setActionPending(SendAction);
     _outputError = std::exception_ptr();
     _sendProgress = MessageProgress();
     _sendProgress.setHeader();
@@ -225,14 +260,15 @@ void WebSocketChannel::beginSend()
 
 MessageProgress WebSocketChannel::endSend()
 {
-    if( ! _sendOutstanding )
+    if( ! isActionPending(SendAction) )
     {
         requireNotEnded();
         throw std::logic_error("WebSocket send is not outstanding");
     }
 
-    _sendOutstanding = false;
-    _awaitingEndSend = false;
+    clearAction(SendAction);
+    if(_outputState == OnEndSend)
+        _outputState = OutputIdle;
 
     if(_outputError)
         std::rethrow_exception(_outputError);
@@ -254,11 +290,10 @@ void WebSocketChannel::beginReceive()
     requireNotEnded();
     requireOpen();
 
-    if(_receiveOutstanding)
+    if( isActionPending(ReceiveAction) )
         throw std::logic_error("WebSocket receive is outstanding");
 
-    _receiveOutstanding = true;
-    _inputError = std::exception_ptr();
+    setActionPending(ReceiveAction);
     _receiveProgress = MessageProgress();
 
     if( ! _messageOpen )
@@ -270,22 +305,29 @@ void WebSocketChannel::beginReceive()
     if( _incoming.type() != WebSocketMessage::Unknown )
         _receiveProgress.setHeader();
 
-    beginInputPump();
+    if(_inputError)
+        _inputReady.send();
+    else
+        processInput();
 }
 
 
 MessageProgress WebSocketChannel::endReceive()
 {
-    if( ! _receiveOutstanding )
+    if( ! isActionPending(ReceiveAction) )
     {
         requireNotEnded();
         throw std::logic_error("WebSocket receive is not outstanding");
     }
 
-    _receiveOutstanding = false;
+    clearAction(ReceiveAction);
 
     if(_inputError)
-        std::rethrow_exception(_inputError);
+    {
+        std::exception_ptr error = _inputError;
+        _inputError = std::exception_ptr();
+        std::rethrow_exception(error);
+    }
 
     requireNotEnded();
     restartIdleTimer();
@@ -316,7 +358,7 @@ void WebSocketChannel::shutdown(unsigned code, const std::string& reason)
     requireNotEnded();
     requireOpen();
 
-    if(_closeQueued || _closeSent)
+    if( isActionPending(CloseAction) )
         throw std::logic_error("WebSocket already closing");
 
     if(code == 1005 || code == 1006 || code == 1015)
@@ -339,8 +381,12 @@ void WebSocketChannel::onClose()
 {
     _ended = true;
     _opened = false;
-    _receiveOutstanding = false;
-    _sendOutstanding = false;
+    _actions = NoAction;
+    _inputState = InputIdle;
+    _inputProcessing = false;
+    _discardingInput = false;
+    _outputState = OutputIdle;
+    _outputOpcode = 0;
     _sendStarted = false;
     _inputError = std::exception_ptr();
     _outputError = std::exception_ptr();
@@ -348,7 +394,8 @@ void WebSocketChannel::onClose()
     _incoming.clear();
     _outgoing.clear();
 
-    if(_closeCode == 0 && ! _closeReceived)
+    if(_closeCode == 0 && _closeState != CloseReceived &&
+       _closeState != CloseExchanged)
         _closeCode = 1006;
 }
 
@@ -420,10 +467,10 @@ void WebSocketChannel::enqueueControl(unsigned opcode, const char* payload, std:
 
 void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 {
-    if(_closeQueued || _closeSent)
+    if( isActionPending(CloseAction) )
         return;
 
-    _closeQueued = true;
+    setActionPending(CloseAction);
 
     char payload[125];
     std::size_t n = 0;
@@ -453,9 +500,9 @@ void WebSocketChannel::protocolFail(unsigned code)
 }
 
 
-void WebSocketChannel::beginInputPump()
+void WebSocketChannel::requestInput()
 {
-    if(_ended)
+    if(_ended || _inputState != InputIdle || _inputError)
         return;
 
     Stream* stream = this->stream();
@@ -465,16 +512,34 @@ void WebSocketChannel::beginInputPump()
     if( ! stream->loop() )
         return;
 
-    if( parseAvailable() )
+    try
+    {
+        _inputState = OnInput;
+        stream->beginInput();
+    }
+    catch(...)
+    {
+        _inputState = InputIdle;
+        setInputError( std::current_exception() );
+    }
+}
+
+
+void WebSocketChannel::setInputError(std::exception_ptr error)
+{
+    if(_ended || _inputError)
         return;
 
-    stream->beginInput();
+    _inputError = error;
+
+    if( isActionPending(ReceiveAction) )
+        _inputReady.send();
 }
 
 
 void WebSocketChannel::pumpOutput()
 {
-    if(_ended || _outputState == OutputWriting)
+    if(_ended || _outputState != OutputIdle)
         return;
 
     Stream* stream = this->stream();
@@ -489,20 +554,14 @@ void WebSocketChannel::pumpOutput()
         if(frame.opcode == 0x09)
             _unansweredPings.push_back( std::string(frame.payload, frame.size) );
 
-        if(frame.opcode == 0x08)
-            _closeSent = true;
-
         _controlQueue.pop_front();
-        _outputKind = OutputControl;
-        _outputState = OutputWriting;
+        _outputOpcode = frame.opcode;
+        _outputState = OnControlOutput;
         stream->beginOutput();
         return;
     }
 
-    if(_awaitingEndSend)
-        return;
-
-    if( ! _sendOutstanding || _dataFinWritten )
+    if( ! isActionPending(SendAction) || _dataFinWritten )
         return;
 
     std::size_t remaining = _outgoing.sendSize();
@@ -522,8 +581,7 @@ void WebSocketChannel::pumpOutput()
     writeFrame(opcode, fin, data, n);
     _outgoing.consume(n);
     _dataFinWritten = fin;
-    _outputKind = OutputData;
-    _outputState = OutputWriting;
+    _outputState = OnDataOutput;
     stream->beginOutput();
 }
 
@@ -600,69 +658,91 @@ Pt::uint32_t WebSocketChannel::nextMask()
 }
 
 
-bool WebSocketChannel::parseAvailable()
+void WebSocketChannel::processInput()
 {
-    Stream* stream = this->stream();
-    if( ! stream || ! stream->buffer() )
-        return false;
+    if(_ended || _inputProcessing || _inputError)
+        return;
 
-    const Frame* frame = 0;
+    _inputProcessing = true;
+    bool request = false;
 
-    for(;;)
+    try
     {
-        try
+        for(;;)
         {
-            frame = _wsbuf.import();
-        }
-        catch(const WebSocketError& e)
-        {
-            protocolFail( e.code() );
-            return false;
-        }
+            const Frame* frame = _wsbuf.import();
+            if( ! frame )
+            {
+                request = true;
+                break;
+            }
 
-        if( ! frame || frame->kind() != Frame::Control )
-            break;
+            if(frame->kind() == Frame::Control)
+            {
+                if( onControlFrame(*frame) )
+                    break;
 
-        bool stop = onControlFrame(*frame);
-        if(stop)
-            return true;
+                continue;
+            }
+
+            bool finished = frame->fin() && frame->remaining() == 0;
+            if( ! isActionPending(ReceiveAction) || _discardingInput )
+            {
+                _wsbuf.discard();
+                _discardingInput = ! finished;
+                continue;
+            }
+
+            unsigned opcode = frame->opcode();
+            if(opcode == 0x01 || opcode == 0x02)
+            {
+                WebSocketMessage::Type type = (opcode == 0x01)
+                                            ? WebSocketMessage::Text
+                                            : WebSocketMessage::Binary;
+                _incoming.setTypeFromEngine(type);
+                _messageOpen = true;
+            }
+
+            _receiveProgress.setHeader();
+
+            if(finished)
+            {
+                _receiveProgress.setFinished();
+                _messageOpen = false;
+            }
+
+            if(_wsbuf.in_avail() > 0)
+                _receiveProgress.setBody();
+
+            _inputReady.send();
+
+            if( isActionPending(ReceiveAction) && _wsbuf.in_avail() != 0)
+                break;
+
+            if( isActionPending(ReceiveAction) )
+                continue;
+
+            if(_wsbuf.in_avail() != 0)
+            {
+                _wsbuf.discard();
+                _discardingInput = ! finished;
+            }
+        }
+    }
+    catch(const WebSocketError& e)
+    {
+        protocolFail( e.code() );
+        request = true;
+    }
+    catch(...)
+    {
+        setInputError( std::current_exception() );
     }
 
-    if( ! _receiveOutstanding )
-        return false;
+    _inputProcessing = false;
 
-    if(frame && frame->kind() == Frame::Data)
-    {
-        unsigned opcode = frame->opcode();
-        if(opcode == 0x01 || opcode == 0x02)
-        {
-            WebSocketMessage::Type type = (opcode == 0x01)
-                                        ? WebSocketMessage::Text
-                                        : WebSocketMessage::Binary;
-            _incoming.setTypeFromEngine(type);
-            _messageOpen = true;
-        }
-
-        _receiveProgress.setHeader();
-
-        if(frame->fin() && frame->remaining() == 0)
-        {
-            _receiveProgress.setFinished();
-            _messageOpen = false;
-        }
-    }
-
-    if(_wsbuf.in_avail() > 0)
-        _receiveProgress.setBody();
-
-    if(_receiveProgress.header() || _receiveProgress.body() ||
-       _receiveProgress.finished())
-    {
-        _inputReady.send();
-        return true;
-    }
-
-    return false;
+    if(request)
+        requestInput();
 }
 
 
@@ -690,7 +770,7 @@ bool WebSocketChannel::onControlFrame(const Frame& frame)
         return false;
     }
 
-    _closeReceived = true;
+    setCloseReceived();
 
     if(n == 1)
     {
@@ -736,7 +816,7 @@ bool WebSocketChannel::onControlFrame(const Frame& frame)
     enqueueClose(reply, std::string());
     pumpOutput();
 
-    if(_closeSent && _closeReceived && _outputState == OutputIdle)
+    if(_closeState == CloseExchanged && _outputState == OutputIdle)
         passiveClose();
 
     return true;
@@ -758,29 +838,27 @@ void WebSocketChannel::onInput()
 
     try
     {
+        _inputState = InputIdle;
+
         if( stream->endInput() == 0 )
         {
             passiveClose();
             return;
         }
 
-        if( parseAvailable() )
-            return;
-
-        stream->beginInput();
+        processInput();
     }
     catch(...)
     {
         if(_ended)
             return;
 
+        _inputState = InputIdle;
+
         if(_closeCode == 0)
             _closeCode = 1006;
 
-        _inputError = std::current_exception();
-
-        if(_receiveOutstanding)
-            _inputReady.send();
+        setInputError( std::current_exception() );
     }
 }
 
@@ -794,37 +872,38 @@ void WebSocketChannel::onOutput()
     try
     {
         stream->endOutput();
-        OutputKind kind = _outputKind;
-        _outputState = OutputIdle;
-        _outputKind = OutputNone;
 
-        if(kind == OutputControl)
+        if(_outputState == OnControlOutput)
         {
-            if(_closeSent && _closeReceived)
+            unsigned opcode = _outputOpcode;
+            _outputState = OutputIdle;
+            _outputOpcode = 0;
+
+            if(opcode == 0x08)
+                setCloseSent();
+
+            if(_closeState == CloseExchanged)
             {
                 passiveClose();
                 return;
             }
 
             pumpOutput();
-            if(_outputState == OutputIdle && _closeSent &&
-               ! _closeReceived && ! _receiveOutstanding)
-                beginInputPump();
-
             return;
         }
 
-        if(kind == OutputData)
+        if(_outputState == OnDataOutput)
         {
             _sendProgress.setBody();
             if(_dataFinWritten && _outgoing.sendSize() == 0)
                 _sendProgress.setFinished();
 
-            _awaitingEndSend = true;
+            _outputState = OnEndSend;
             _outputReady.send();
             return;
         }
 
+        _outputState = OutputIdle;
         pumpOutput();
     }
     catch(...)
@@ -837,7 +916,7 @@ void WebSocketChannel::onOutput()
 
         _outputError = std::current_exception();
 
-        if(_sendOutstanding)
+        if( isActionPending(SendAction) )
             _outputReady.send();
     }
 }

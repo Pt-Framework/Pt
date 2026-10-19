@@ -96,6 +96,9 @@ class WebSocketChannel;
     call %endReceive() or %endSend() from %onClose(). The service
     releases this session after %onClose() returns.
 
+    The engine processes control and close frames while no receive is
+    outstanding. It discards a data message that arrives without one.
+
     %protocol() is the single name the responder wrote as
     Sec-WebSocket-Protocol on the 101, or empty when none was
     selected. The base copies it from the opening reply before the

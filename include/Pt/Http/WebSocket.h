@@ -109,6 +109,9 @@ class WebSocketChannel;
     %inputReady() reports that data bytes were received.
     %endReceive() returns progress. After %finished(), %clear()
     drops the body so the same object can carry the next message.
+    The engine continues to process control and close frames when no
+    receive is outstanding. It discards a data message that arrives
+    without one.
 
     Ping, pong, shutdown and close are socket operations, not
     messages.

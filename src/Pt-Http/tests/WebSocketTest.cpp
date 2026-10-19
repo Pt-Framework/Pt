@@ -553,6 +553,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("Scope", *this, &WebSocketTest::Scope);
             registerMethod("SecondScope", *this, &WebSocketTest::SecondScope);
             registerMethod("PeerClose", *this, &WebSocketTest::PeerClose);
+            registerMethod("DataBeforeClose", *this, &WebSocketTest::DataBeforeClose);
             registerMethod("Decline", *this, &WebSocketTest::Decline);
             registerMethod("NullSession", *this, &WebSocketTest::NullSession);
             registerMethod("ConstructFails", *this, &WebSocketTest::ConstructFails);
@@ -754,6 +755,58 @@ class WebSocketTest : public Pt::Unit::TestSuite
         {
             socket.endConnect();
             socket.shutdown();
+        }
+
+    protected:
+        void DataBeforeClose()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8036);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedDataBeforeClose);
+            socket.outputReady() += Pt::slot(*this, &WebSocketTest::onDataBeforeCloseOutput);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onDataBeforeCloseClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
+            PT_UNIT_ASSERT_EQUALS(service.live(), static_cast<std::size_t>(0));
+        }
+
+        void onConnectedDataBeforeClose(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << "ignored";
+            socket.beginSend();
+        }
+
+        void onDataBeforeCloseOutput(Pt::Http::WebSocket& socket)
+        {
+            Pt::Http::MessageProgress progress = socket.endSend();
+            if( ! progress.finished() )
+            {
+                socket.beginSend();
+                return;
+            }
+
+            socket.shutdown();
+        }
+
+        void onDataBeforeCloseClosed(Pt::Http::WebSocket&)
+        {
+            _closed = true;
+            _loop->exit();
         }
 
     protected:

@@ -28,6 +28,9 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod("CurrentFrame", *this,
                 &WebSocketBufferTest::CurrentFrame);
 
+            Pt::Unit::TestSuite::registerMethod("Discard", *this,
+                &WebSocketBufferTest::Discard);
+
             Pt::Unit::TestSuite::registerMethod("EmptyData", *this,
                 &WebSocketBufferTest::EmptyData);
 
@@ -204,6 +207,44 @@ class WebSocketBufferTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(frame != 0);
             PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
             PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+        }
+
+        void Discard()
+        {
+            std::string bytes;
+            bytes.push_back(static_cast<char>(0x01));
+            bytes.push_back(static_cast<char>(1));
+            bytes.push_back('a');
+            bytes.push_back(static_cast<char>(0x89));
+            bytes.push_back(static_cast<char>(0));
+            bytes.push_back(static_cast<char>(0x80));
+            bytes.push_back(static_cast<char>(1));
+            bytes.push_back('b');
+
+            std::stringbuf buf(bytes);
+            Pt::Http::WebSocketBuffer ws(buf);
+            ws.setMasking(false);
+
+            const Pt::Http::Frame* frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
+            PT_UNIT_ASSERT( ! frame->fin() );
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(1));
+
+            ws.discard();
+            PT_UNIT_ASSERT_EQUAL(ws.in_avail(), std::streamsize(0));
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Control);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x09u);
+
+            frame = ws.import();
+            PT_UNIT_ASSERT(frame != 0);
+            PT_UNIT_ASSERT(frame->kind() == Pt::Http::Frame::Data);
+            PT_UNIT_ASSERT_EQUAL(frame->opcode(), 0x00u);
+            PT_UNIT_ASSERT(frame->fin());
+            PT_UNIT_ASSERT_EQUAL(ws.sbumpc(), 'b');
         }
 
         void EmptyData()

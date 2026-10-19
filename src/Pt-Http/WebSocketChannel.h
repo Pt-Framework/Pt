@@ -27,7 +27,7 @@ class Stream;
 /** @internal Message engine of one upgraded HTTP stream.
 */
 class WebSocketChannel : public Channel
-                          , public Connectable
+                       , public Connectable
 {
     public:
         WebSocketChannel();
@@ -86,22 +86,49 @@ class WebSocketChannel : public Channel
             std::size_t size;
         };
 
+        enum Action
+        {
+            NoAction      = 0,
+            ReceiveAction = 1,
+            SendAction    = 2,
+            CloseAction   = 4
+        };
+
+        enum InputState
+        {
+            InputIdle,
+            OnInput
+        };
+
         enum OutputState
         {
             OutputIdle,
-            OutputWriting
+            OnControlOutput,
+            OnDataOutput,
+            OnEndSend
         };
 
-        enum OutputKind
+        enum CloseState
         {
-            OutputNone,
-            OutputData,
-            OutputControl
+            CloseOpen,
+            CloseSent,
+            CloseReceived,
+            CloseExchanged
         };
 
         void requireOpen() const;
 
         void requireNotEnded() const;
+
+        bool isActionPending(Action action) const;
+
+        void setActionPending(Action action);
+
+        void clearAction(Action action);
+
+        void setCloseSent();
+
+        void setCloseReceived();
 
         void enqueueControl(unsigned opcode, const char* payload, std::size_t n);
 
@@ -109,15 +136,17 @@ class WebSocketChannel : public Channel
 
         void protocolFail(unsigned code);
 
-        void beginInputPump();
+        void requestInput();
+
+        void processInput();
+
+        void setInputError(std::exception_ptr error);
 
         void pumpOutput();
 
         void writeFrame(unsigned opcode, bool fin, const char* payload, std::size_t n);
 
         Pt::uint32_t nextMask();
-
-        bool parseAvailable();
 
         bool onControlFrame(const Frame& frame);
 
@@ -145,24 +174,23 @@ class WebSocketChannel : public Channel
         WebSocketMessage _outgoing;
         WebSocketBuffer _wsbuf;
 
-        bool _receiveOutstanding;
+        unsigned _actions;
+        InputState _inputState;
+        bool _inputProcessing;
+        bool _discardingInput;
         bool _messageOpen;
         MessageProgress _receiveProgress;
 
         OutputState _outputState;
-        OutputKind _outputKind;
-        bool _sendOutstanding;
+        unsigned _outputOpcode;
         bool _sendStarted;
         bool _firstFragment;
         bool _dataFinWritten;
-        bool _awaitingEndSend;
         MessageProgress _sendProgress;
 
         std::deque<PendingControl> _controlQueue;
         std::deque<std::string> _unansweredPings;
-        bool _closeQueued;
-        bool _closeSent;
-        bool _closeReceived;
+        CloseState _closeState;
         unsigned _closeCode;
         std::string _closeReason;
         std::exception_ptr _inputError;

@@ -8,12 +8,6 @@
 
 ## Open Tasks
 
-- [permanent-input](websocket-message.md#permanent-input).
-  The input pump runs from open until the stream ends. Controls and
-  close are processed even when no beginReceive is outstanding.
-  Data payloads are delivered only when a receive is outstanding.
-  The engine never cancels one direction to free the other.
-
 - [pong-visible](websocket-message.md#pong-visible).
   A received pong is reported: pong() on the client, onPong() on the
   session. An unanswered ping is facade state.
@@ -45,5 +39,5 @@
 
 ## Priority
 
-Permanent input first. Pong visibility, shutdown, and peer close after
-that. Handshake checks last.
+Pong visibility, shutdown, and peer close first. Handshake checks
+last.

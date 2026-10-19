@@ -194,6 +194,8 @@ class PT_HTTP_API WebSocketBuffer : public std::streambuf
 
         const Frame* import(std::streamsize n = 0);
 
+            void discard();
+
     protected:
         virtual int_type underflow();
 
