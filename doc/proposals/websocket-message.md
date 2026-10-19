@@ -51,6 +51,9 @@ class Frame
 
         const char* data() const;
         std::size_t size() const;
+        std::size_t avail() const;
+        std::size_t pos() const;
+        std::size_t remaining() const;
 };
 
 class WebSocketError : public std::runtime_error
@@ -77,15 +80,24 @@ class WebSocketBuffer : public std::streambuf
 };
 ```
 
-The unit is the data message. Frames stay inside the buffer, the
-way chunks stay inside `HttpBuffer`. A continuation extends the
-current message and does not change its type. `import` returns a
-pointer to frame metadata, or null when there is no progress. The
-pointer is valid until the next `import`. A data payload is not in
-the frame. It is the get area. A control payload is in the frame.
-`fin` is true when a data message ends on this step. A control is
-always complete. The next `import` after a finished data message
-starts the next message and reuses the control buffer.
+The unit of the buffer is the current wire frame. `WebSocketChannel`
+turns data frames into the public data message. A continuation frame
+therefore stays visible to the buffer, while the channel preserves the
+message type it received from the first text or binary frame. `import`
+returns a pointer to the current frame, or null when it cannot make
+progress. The pointer is valid until the next `import`.
+
+`opcode` and `fin` are the values of the current wire frame header.
+`size` is its declared payload length, `pos` is the imported payload
+length, and `remaining` is the payload length still to import. A data
+result refers to the streambuf get area through `data` and `avail`; it
+may contain one chunk of an unfinished data frame. A control result is
+returned only after the complete control payload is buffered.
+
+The buffer does not advance past a data frame until its payload is
+imported and its get area is consumed. A following control frame cannot
+overwrite unread data. Once the current frame is complete, the next
+`import` reuses the same frame storage for the following wire frame.
 
 `beginReceive` points `incoming().body()` at this buffer.
 `import` copies what the socket buffer holds into a fixed get
@@ -105,30 +117,27 @@ return fewer bytes than asked. The state and the got counters
 stay. The next `import` continues there. It never blocks.
 
 Control frames are a side channel. They occur only at frame
-boundaries. Their payload, at most 125 bytes, is not the get
-area. A control between two data fragments leaves the get area
-as it is. A close discards an open data body and does not finish
-that message. The channel reads the control from the returned
-frame and does not call a consume. The next `import` clears it.
+boundaries. Their payload, at most 125 bytes, is buffered in the
+current frame and is not the get area. The channel reads a complete
+control from the returned metadata and does not call a consume. A
+close discards an open data body and does not finish that message.
 
-When no receive is outstanding, `import` still runs. It consumes
-data payload without filling the get area, and it still completes
-control frames.
-
-The parser is a need-N-bytes machine. One state, one task, the
-transition at the end:
+The parser has one state for each parsing task. Every state performs
+its work and returns the next state:
 
 ```text
-NeedHeader    2 bytes
-NeedLength    2 or 8
-NeedMask      4
-NeedPayload   N
+OnHeader           read the 2-byte base header
+OnLength           read the 2-byte or 8-byte extended length
+OnMask             read the 4-byte masking key
+OnPayload          initialize the current frame
+OnDataPayload      expose or append one data payload chunk
+OnControlPayload   collect and report a complete control payload
 ```
 
 Header, length, and mask are filled with `sgetn` into fixed
-buffers. Data payload is filled with `sgetn` into the unused
-part of the get area. Control payload is filled into the control
-buffer.
+storage owned by the current frame. Data payload is filled with
+`sgetn` into the unused part of the get area. Control payload is
+filled into the frame buffer.
 
 A 16-bit length is valid only when it is at least 126. A 64-bit
 length is valid only when it is at least 65536 and its high bit is
@@ -139,20 +148,22 @@ a message is open, and a wrong mask direction each throw
 throws with 1009. Invalid UTF-8 throws with 1007. The buffer does
 not close a stream.
 
-The buffer does not know the channel, the signals, or the
-messages. The channel calls `import`. A null result means idle.
-A control frame is handled from the returned metadata. A data
-frame sets the incoming type from `opcode` when it is the first
-of the message, and sets progress from `fin` and `in_avail`.
-A `WebSocketError` becomes `protocolFail`.
+The buffer does not know the channel, the signals, or the public
+messages. The channel calls `import`. A null result means idle. A
+control frame is handled from the returned metadata. A data frame
+sets the incoming type only for opcode 0x01 or 0x02; a continuation
+keeps the existing type. The channel reports a finished public message
+only when `fin` is set and `remaining` is 0. A `WebSocketError`
+becomes `protocolFail`.
 
-Tests feed a `stringbuf` and call `import`. They cover a
-complete data frame in the get area, a frame split across
-calls, a partial payload smaller than the frame, two fragments
-of one message in the same get area, a ping that does not enter
-the get area, a ping between two fragments, an invalid length
+Tests feed a `stringbuf` and call `import`. They cover the current
+data frame and its get-area chunk, a zero-length data frame, a frame
+split across calls, a partial payload smaller than the frame, the
+import budget, and a control frame that is reported only when complete.
+They also cover two fragments of one message, a ping that does not
+enter the get area, a ping between two fragments, an invalid length
 form, RSV, a wrong mask direction, a control without FIN, a
-continuation with no open message, and a payload over the size
+continuation with no open message, UTF-8, and a payload over the size
 limit. No socket, no loop, no channel.
 
 ## Permanent input {#permanent-input}
