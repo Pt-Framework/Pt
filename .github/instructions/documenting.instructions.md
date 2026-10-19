@@ -138,17 +138,7 @@ A restatement of members in declaration order is not a chapter; fold
 member facts into the model and leave compact wording to the briefs. A
 chapter is unfinished if it only names a format or protocol without
 explaining what distinguishes it, only names capabilities instead of
-folding them into the model, or is shorter than a careful chat
-explanation of the same topic.
-
-Use `@code` where the example belongs, and write the sentences around it
-that tell the reader what to look at. Teaching the concepts of this
-API is the job of the chapter. Teaching C++ itself is not.
-
-Lists, numbered steps, and `@par` subtopics are welcome when they help
-the reader choose among alternatives, follow a usage sequence, or open a
-new aspect of the same chapter. They supplement the prose; they do not
-replace it.
+folding them into the model.
 
 ### Groups
 
@@ -157,6 +147,11 @@ feature: what it is for, then the object model in reading order. Tell the
 shared model once at this level. Shared concepts and shared contracts belong
 once, in the group or on the first type that owns the mechanism. Local
 concepts belong on the owning class.
+
+When a workflow spans several classes, explain the workflow in the
+narrowest group that contains all of them. The group owns its shared
+concepts, choices, examples, and cross-type contracts. Class chapters
+refer to that model and add only the constraints specific to the class.
 
 Use subgroups when a feature contains distinct reader tasks, workflows, or
 vocabularies. The parent group introduces the common model; each subgroup
@@ -169,9 +164,6 @@ distinct workflows. Give those workflows visible structure through
 subgroups or `@par` headings so that the chapter can be read without
 scanning every paragraph for a change of subject.
 
-A group or subgroup example, when required (see Examples), shows its
-reader task and shared model, not only one type.
-
 Module-level concepts belong in the `@namespace` comment in the module's
 `Api.h`.
 
@@ -180,19 +172,12 @@ Module-level concepts belong in the `@namespace` comment in the module's
 Each class chapter answers what this type is in the model the group
 told. Open with a hinge that places the type in that model, then develop
 this type: its role, its distinct contracts, how a caller uses it, and
-the mistakes that are specific to it. A type-specific example belongs on
-the class that owns that remaining question.
+the mistakes that are specific to it.
 
-The class page must still read as a coherent excerpt, so introduce the
-type fully enough that a reader who opened only the class HTML
-understands it; do not paste the group chapter into the class, though
-overlap that the class page needs is expected.
-
-A class chapter must stand alone when opened directly: it must not
-depend on prose from a group or module page for its purpose, usage,
-ownership, lifetime, or important constraints, though it may rely on
-linked types and concepts as long as the context needed to use the
-class is present in its own chapter.
+A class chapter must stand alone when opened directly. Explain the type
+well enough that a reader understands its purpose, usage, ownership,
+lifetime, and important constraints without the group chapter. Do not
+repeat shared group concepts unless the class page needs that context.
 
 Do not shrink the class to a brief because the group exists; keep a
 type to a brief only when it really adds no question of its own - a
@@ -202,17 +187,11 @@ the group's.
 ## Structure
 
 Organize groups around reader tasks, concepts, and public mechanisms,
-not inventories of headers or types. A subgroup declares its parent with
-`@ingroup <ParentGroup>`. The parent is the module-wide model. The
-subgroup is one reader task within that model. A subgroup needs its own
-reader task or vocabulary. Do not create or merge a subgroup merely
-because its documentation is short.
-
-A feature may therefore consist of one parent group and several subgroups.
-The module group header owns the child `@defgroup` declarations and their
-order; each subgroup feature header owns its corresponding `@addtogroup`
-chapter. Do not flatten distinct reader tasks into the parent group merely
-to keep the feature in one file.
+not inventories of headers or types. A feature may have one parent group
+and several subgroups. A subgroup declares its parent with
+`@ingroup <ParentGroup>` and has its own reader task or vocabulary. Do
+not create, merge, or flatten subgroups merely because their documentation
+is short.
 
 - Group IDs replace `::` with `-`: `Ns::` -> `Ns-<Feature>`,
   `Ns::Sub::` -> `Ns-Sub-<Feature>`.
@@ -232,21 +211,21 @@ to keep the feature in one file.
 
 ## Style
 
-Use Textbook prose: comprehensive, patient, and as thorough as a tutor
-explaining the feature. Complete thoughts, enough context, and
-as many paragraphs as the topic needs. This is not a brief and not a
-longer brief. "Returns ..." openings and other API-declaration style
+Use textbook prose when the subject needs explanation. Prefer natural,
+direct technical writing over exhaustive member-by-member summaries.
+Explain the model and its important workflows; leave routine details to
+the member briefs. "Returns ..." openings and other API-declaration style
 rules do not apply here.
 
 Write developed paragraphs. A paragraph may name several types,
 relations, or rules when they belong to the same explanation.
-Subordinate clauses are wanted when they clarify the contract.
+Prefer active voice and present tense. Use precise nouns instead of
+ambiguous references such as "this", "it", or "there are". Combine
+related facts, but prefer direct sentences over dense clause chains.
 
-Write the group chapter first, then each class chapter, then member
-briefs.
-
-Stop only when a reader who has not opened the header can use the API
-from this comment.
+A chapter is complete when a reader who has not opened the header can
+use the API correctly from its description. Its length follows from the
+subject, not from a minimum amount of prose.
 
 ```cpp
 /** @defgroup Ns-MyModule Module Name
@@ -289,33 +268,21 @@ class MyClass
 
 ## Examples
 
-Every class chapter with a detailed description that explains the API must
-contain at least one focused `@code` example. Every group or subgroup that
-defines a distinct usage workflow must also contain at least one focused
-example. A parent group needs its own example only when it defines a
-workflow of its own; examples in child subgroups do not need to be
-duplicated in the parent.
+Use a focused `@code` example when it helps a reader understand a
+workflow, an ownership rule, ordering, error handling, or another
+non-obvious contract. Put the example before the prose it supports.
 
-Place every example before the prose that names or explains the specific
-functions, types, or members it demonstrates. An example satisfies this only
-for the functions, types, and members it actually exercises; a paragraph that
-names different functions or types still needs its own preceding example
-covering those, an earlier example for an unrelated subset does not excuse
-it. A chapter's opening paragraph may state what the feature or type is and
-why it exists, but it must not name individual functions or types; that
-naming happens after the example that covers it. A chapter with more than
-one distinct workflow repeats this: each workflow gets a short lead-in, then
-its example, then the prose that names that workflow's functions and types.
-
-A brief-only helper, value type, enum, alias, or fixture does not require an
-example. Its declaration documentation remains compact.
+An opening paragraph may name important types and functions when that
+makes the model clearer. Brief-only helpers, simple value types, enums,
+aliases, and types whose use is evident from their declaration do not
+require an example. Their declaration documentation remains compact.
 
 # Pages
 
 Each module has one module page. That page sorts the whole module: the
 main group, every subgroup, and the types that deepen those groups.
-Guide pages are standalone documents. Write each in Doxygen page
-syntax, in Markdown, or as an `\htmlonly` body.
+Write each page in Doxygen page syntax, in Markdown, or as an `\htmlonly`
+body.
 
 ## Formatting
 
@@ -349,20 +316,18 @@ Open with a short table of contents naming the main sections that follow.
 Name each chapter after the reader-facing role, not after internal type
 lists or service names.
 
-Guide pages must not repeat API reference that already lives in a group,
-or content that already lives on another page; point to it with `@ref`
-instead.
-
 Guide pages contain original prose for documentation outside API module
 chapters, such as build-system, contribution, or deployment guides. Do not
-create an additional feature-specific guide page for API documentation; an
-API feature belongs in its groups, subgroups, classes, and required module
-page.
+repeat API reference or content from another page; point to it with `@ref`
+instead. Do not create an additional feature-specific guide page for API
+documentation; an API feature belongs in its groups, subgroups, classes,
+and required module page.
 
 ## Structure
 
 A page is a Markdown file in `doc/pages/`. One page per file. File names
-are lowercase with a `.md` extension. A module page ID uses a `-Page` suffix (`Ns-MyModule` -> `Ns-MyModule-Page`). Section anchors use the page ID as
+are lowercase with a `.md` extension. A module page ID uses a `-Page` suffix
+(`Ns-MyModule` -> `Ns-MyModule-Page`). Section anchors use the page ID as
 prefix (`Ns-MyModule-Page-MyFeature`).
 
 Site entry pages (home, documentation inventory, download) list modules
@@ -388,16 +353,6 @@ normally in their public headers and let Doxygen expose them through
 the class reference. A supporting type may appear in an example or
 prose on the module page when it is necessary to understand the
 central workflow, without receiving its own `@subsection`.
-
-## Style
-
-The module page is assembly only, not authorship. The copied group and class
-chapters already have the textbook voice. Do not rewrite them on the
-page.
-
-Guide pages contain original prose and follow the chapter voice of group
-and class detailed descriptions. An `\htmlonly` body is the page
-content; do not restate it beside the HTML.
 
 ```
 @page Ns-MyModule-Page Module Name
