@@ -216,6 +216,9 @@ void WebSocket::onReply(Client& client)
         _channel->open(stream, true);
         _channel->inputReady() += Pt::slot(*this, &WebSocket::onInputReady);
         _channel->outputReady() += Pt::slot(*this, &WebSocket::onOutputReady);
+        _channel->pingReady() += Pt::slot(*this, &WebSocket::onPingReady);
+        _channel->shutdownReady() += Pt::slot(*this, &WebSocket::onShutdownReady);
+        _channel->pong() += Pt::slot(*this, &WebSocket::onPong);
         _channel->closed() += Pt::slot(*this, &WebSocket::onClosed);
         finishHandshake(false);
     }
@@ -265,15 +268,27 @@ MessageProgress WebSocket::endReceive()
 }
 
 
-void WebSocket::ping(const char* payload, std::size_t n)
+void WebSocket::beginPing(const char* payload, std::size_t n)
 {
-    _channel->ping(payload, n);
+    _channel->beginPing(payload, n);
 }
 
 
-void WebSocket::shutdown(unsigned code, const std::string& reason)
+void WebSocket::endPing()
 {
-    _channel->shutdown(code, reason);
+    _channel->endPing();
+}
+
+
+void WebSocket::beginShutdown(unsigned code, const std::string& reason)
+{
+    _channel->beginShutdown(code, reason);
+}
+
+
+void WebSocket::endShutdown()
+{
+    _channel->endShutdown();
 }
 
 
@@ -322,6 +337,24 @@ void WebSocket::onInputReady()
 void WebSocket::onOutputReady()
 {
     _outputReady.send(*this);
+}
+
+
+void WebSocket::onPingReady()
+{
+    _pingReady.send(*this);
+}
+
+
+void WebSocket::onShutdownReady()
+{
+    _shutdownReady.send(*this);
+}
+
+
+void WebSocket::onPong(const std::string& payload)
+{
+    _pong.send(*this, payload);
 }
 
 

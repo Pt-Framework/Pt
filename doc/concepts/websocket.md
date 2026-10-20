@@ -156,7 +156,7 @@ and they do not free the data channel.
 
 ```cpp
 void ping(const char* payload = 0, std::size_t n = 0);
-Signal<WebSocket&, const char*, std::size_t>& pong();
+Signal<WebSocket&, const std::string&>& pong();
 ```
 
 `ping()` enqueues a ping of at most 125 bytes. A longer payload

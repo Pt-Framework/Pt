@@ -56,9 +56,13 @@ class WebSocketChannel : public Channel
 
         MessageProgress endReceive();
 
-        void ping(const char* payload, std::size_t n);
+        void beginPing(const char* payload, std::size_t n);
 
-        void shutdown(unsigned code, const std::string& reason);
+        void endPing();
+
+        void beginShutdown(unsigned code, const std::string& reason);
+
+        void endShutdown();
 
         unsigned closeCode() const
         { return _closeCode; }
@@ -72,6 +76,15 @@ class WebSocketChannel : public Channel
         Signal<>& outputReady()
         { return _outputReady; }
 
+        Signal<const std::string&>& pong()
+        { return _pong; }
+
+        Signal<>& pingReady()
+        { return _pingReady; }
+
+        Signal<>& shutdownReady()
+        { return _shutdownReady; }
+
         Signal<>& closed()
         { return _closed; }
 
@@ -81,9 +94,17 @@ class WebSocketChannel : public Channel
     private:
         struct PendingFrame
         {
+            enum Owner
+            {
+                None,
+                Ping,
+                Shutdown
+            };
+
             unsigned opcode;
             bool fin;
             bool data;
+            Owner owner;
             char payload[125];
             std::size_t size;
         };
@@ -92,8 +113,7 @@ class WebSocketChannel : public Channel
         {
             Idle,
             Pending,
-            Ready,
-            Failed
+            Ready
         };
 
         enum CloseState
@@ -101,7 +121,6 @@ class WebSocketChannel : public Channel
             CloseOpen,
             CloseQueued,
             CloseSent,
-            CloseReceived,
             CloseReplyQueued,
             CloseExchanged
         };
@@ -109,7 +128,7 @@ class WebSocketChannel : public Channel
     private:
         void onInput();
 
-        void setCloseReceived();
+        bool setCloseReceived();
 
         void requestInput();
 
@@ -135,10 +154,15 @@ class WebSocketChannel : public Channel
 
         void passiveClose();
 
-    private:
-        void enqueueControl(unsigned opcode, const char* payload, std::size_t n);
+        void finishShutdown();
 
-        void enqueueClose(unsigned code, const std::string& reason);
+    private:
+        void enqueueControl(unsigned opcode, const char* payload, std::size_t n,
+                    PendingFrame::Owner owner = PendingFrame::None);
+
+        void enqueueClose(unsigned code, const std::string& reason,
+                  PendingFrame::Owner owner = PendingFrame::None,
+                  bool reply = false);
 
         void requireOpen() const;
 
@@ -161,7 +185,6 @@ class WebSocketChannel : public Channel
         WebSocketBuffer  _wsbuf;
 
         std::deque<PendingFrame> _outputQueue;
-        std::deque<std::string>  _pings;
 
         OperationState     _inputState;
         OperationState     _receiveState;
@@ -176,6 +199,17 @@ class WebSocketChannel : public Channel
         MessageProgress    _sendProgress;
         std::exception_ptr _outputError;
         Signal<>           _outputReady;
+
+        OperationState     _pingState;
+        std::exception_ptr _pingError;
+        Signal<>           _pingReady;
+
+        std::string _pongPayload;
+        Signal<const std::string&> _pong;
+
+        OperationState     _shutdownState;
+        std::exception_ptr _shutdownError;
+        Signal<>           _shutdownReady;
 
         CloseState  _closeState;
         unsigned    _closeCode;

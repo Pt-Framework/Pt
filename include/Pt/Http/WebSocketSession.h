@@ -89,17 +89,18 @@ class WebSocketChannel;
     %onInput() runs when data bytes were received. Call
     %endReceive(), read %incoming() when progress reports body
     bytes, and start the next receive if the message is not
-    finished. A ping or a pong does not run %onInput(). %onOutput()
-    runs when data bytes were sent. Call %endSend() and continue
-    the send when progress is not finished. %onClose() runs while
-    this object is still alive, after the stream has ended. Do not
-    call %endReceive() or %endSend() from %onClose(). The service
-    releases this session after %onClose() returns.
+    finished. A ping does not run %onInput(). A pong runs %onPong()
+    and does not change %incoming(). %onOutput() runs when data bytes
+    were sent. Call %endSend() and continue the send when progress is
+    not finished. %onClose() runs while this object is still alive,
+    after the stream has ended. Do not call %endReceive() or
+    %endSend() from %onClose(). The service releases this session
+    after %onClose() returns.
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
-    receive is outstanding. A local %shutdown() keeps processing input
-    until the peer replies with its close frame.
+    receive is outstanding. A local %beginShutdown() owns input until
+    the peer replies with its close frame.
 
     %protocol() is the single name the responder wrote as
     Sec-WebSocket-Protocol on the 101, or empty when none was
@@ -120,13 +121,17 @@ class WebSocketChannel;
     Ping, shutdown and close stay control operations on this type.
 
     @code
-    ping();
-    shutdown(1000, "done");
+    beginPing();
+    beginShutdown(1000, "done");
     close();
     @endcode
 
-    %ping() enqueues a ping. %shutdown() enqueues a close frame.
-    %close() releases the stream and writes no frame. The destructor
+    %beginPing() enqueues a ping. %onPingReady() reports that its frame
+    was written; call %endPing() from that callback to observe a write
+    error. %beginShutdown() enqueues a close frame and owns input until
+    the peer replies. %onShutdownReady() reports the completed handshake
+    before %onClose(); call %endShutdown() from that callback to observe
+    an error. %close() releases the stream and writes no frame. The destructor
     calls it. %beginSend() and %beginReceive() then throw. No close
     frame leaves the code at 1006. %closeCode() and %closeReason()
     report the handshake that ended the stream.
@@ -202,6 +207,9 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             Starts processing incoming frames. Frames received before
             this call stay in the stream.
+
+            @throw %std::logic_error if a receive or shutdown is outstanding,
+            or the stream has ended.
         */
         void beginReceive();
 
@@ -214,14 +222,38 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         MessageProgress endReceive();
 
-        /** @brief Enqueues a ping with an optional payload of at most 125 bytes.
-        */
-        void ping(const char* payload = 0, std::size_t n = 0);
+        /** @brief Begins writing a ping with an optional payload of at most 125 bytes.
 
-        /** @brief Enqueues a close frame and ends the stream after the close handshake.
+            @throw %std::invalid_argument if @a n is greater than 125,
+            or if @a payload is null and @a n is nonzero.
+            @throw %std::logic_error if the stream has ended.
         */
-        void shutdown(unsigned code = 1000,
-                      const std::string& reason = std::string());
+        void beginPing(const char* payload = 0, std::size_t n = 0);
+
+        /** @brief Completes the ping started by %beginPing().
+
+            @throw %std::logic_error if the ping is not ready.
+            @throw %std::exception if writing the ping failed.
+        */
+        void endPing();
+
+        /** @brief Begins a close handshake.
+
+            @throw %std::invalid_argument if @a code is 1005, 1006 or
+            1015, if @a reason is longer than 123 bytes, or if @a reason
+            is not valid UTF-8.
+            @throw %std::logic_error if a receive or shutdown is outstanding,
+            or a close is already queued.
+        */
+        void beginShutdown(unsigned code = 1000,
+                   const std::string& reason = std::string());
+
+        /** @brief Completes the shutdown started by %beginShutdown().
+
+            @throw %std::logic_error if the shutdown is not ready.
+            @throw %std::exception if the close handshake failed.
+        */
+        void endShutdown();
 
         /** @brief Releases the stream and writes no frame.
 
@@ -249,11 +281,33 @@ class PT_HTTP_API WebSocketSession : public Connectable
         */
         virtual void onOutput() = 0;
 
+        /** @brief Reports that the ping operation completed.
+
+            Call %endPing() to observe a write error.
+        */
+        virtual void onPingReady();
+
+        /** @brief Reports that the shutdown operation completed.
+
+            The stream is detached. Call %endShutdown() to observe a
+            close-handshake error. This callback runs before %onClose().
+        */
+        virtual void onShutdownReady();
+
+        /** @brief Reports a received pong.
+
+            The payload contains arbitrary bytes and is valid for the
+            duration of this call. A pong does not change %incoming() or
+            run %onInput().
+        */
+        virtual void onPong(const std::string& payload);
+
         /** @brief Called when the stream ended without %close().
 
             This object is still alive. The service releases it after
             this call returns. Peer close, an idle timeout, and a
-            finished shutdown run this directly. Destruction of the
+            finished shutdown run this directly, after %onShutdownReady().
+            Destruction of the
             stream does not. An I/O error on an outstanding receive
             or send runs %onInput() or %onOutput() first, and the
             matching end throws, before this call. Do not call
@@ -265,6 +319,10 @@ class PT_HTTP_API WebSocketSession : public Connectable
         void onInputReady();
 
         void onOutputReady();
+
+        void onChannelPingReady();
+
+        void onChannelShutdownReady();
 
         void onClosed();
 

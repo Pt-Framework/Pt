@@ -111,23 +111,27 @@ class WebSocketChannel;
     drops the body so the same object can carry the next message.
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
-    receive is outstanding. A local %shutdown() keeps processing input
-    until the peer replies with its close frame.
+    receive is outstanding. A local %beginShutdown() owns input until
+    the peer replies with its close frame.
 
     Ping, pong, shutdown and close are socket operations, not
     messages.
 
     @code
-    socket.ping();
-    socket.shutdown(1000, "done");
+    socket.beginPing();
+    socket.beginShutdown(1000, "done");
     socket.close();
     @endcode
 
-    %ping() enqueues a ping. A received ping is answered by the
-    engine. A received pong is consumed. Neither is delivered
-    through %incoming(). %shutdown() enqueues a close frame with a
-    status code and a reason. A received close is answered by the
-    engine. %close() releases the stream and writes no frame. It
+    %beginPing() enqueues a ping. %pingReady() reports that its frame
+    was written; call %endPing() from that signal to observe a write
+    error. A received ping is answered by the engine. A received pong
+    is reported by %pong(). Neither is delivered through %incoming().
+    %beginShutdown() enqueues a close frame with a status code and a
+    reason, then owns input until the peer replies. %shutdownReady()
+    reports the completed handshake before %closed(); call
+    %endShutdown() from that signal to observe an error. A received
+    close is answered by the engine. %close() releases the stream and writes no frame. It
     does not block. The destructor calls it. %beginSend() and
     %beginReceive() then throw. %closed() is not emitted from the
     destructor. %closeCode() and %closeReason() report the handshake
@@ -229,8 +233,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             Starts processing incoming frames. Frames received before
             this call stay in the stream.
 
-            @throw %std::logic_error if a receive is outstanding, the
-            handshake is not finished, or the stream has ended.
+            @throw %std::logic_error if a receive or shutdown is outstanding,
+            the handshake is not finished, or the stream has ended.
         */
         void beginReceive();
 
@@ -243,23 +247,39 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         MessageProgress endReceive();
 
-        /** @brief Enqueues a ping with an optional payload of at most 125 bytes.
+        /** @brief Begins writing a ping with an optional payload of at most 125 bytes.
 
-            @throw %std::invalid_argument if @a n is greater than 125.
-            @throw %std::logic_error if the handshake is not finished.
+            @throw %std::invalid_argument if @a n is greater than 125,
+            or if @a payload is null and @a n is nonzero.
+            @throw %std::logic_error if a ping is outstanding or the handshake
+            is not finished.
         */
-        void ping(const char* payload = 0, std::size_t n = 0);
+        void beginPing(const char* payload = 0, std::size_t n = 0);
 
-        /** @brief Enqueues a close frame and ends the stream after the close handshake.
+        /** @brief Completes the ping started by %beginPing().
+
+            @throw %std::logic_error if the ping is not ready.
+            @throw %std::exception if writing the ping failed.
+        */
+        void endPing();
+
+        /** @brief Begins a close handshake.
 
             @throw %std::invalid_argument if @a code is 1005, 1006 or
             1015, if @a reason is longer than 123 bytes, or if @a reason
             is not valid UTF-8.
-            @throw %std::logic_error if the handshake is not finished
-            or a close is already queued.
+            @throw %std::logic_error if a receive or shutdown is outstanding,
+            the handshake is not finished, or a close is already queued.
         */
-        void shutdown(unsigned code = 1000,
-                      const std::string& reason = std::string());
+        void beginShutdown(unsigned code = 1000,
+                           const std::string& reason = std::string());
+
+        /** @brief Completes the shutdown started by %beginShutdown().
+
+            @throw %std::logic_error if the shutdown is not ready.
+            @throw %std::exception if the close handshake failed.
+        */
+        void endShutdown();
 
         /** @brief Releases the stream and writes no frame.
 
@@ -287,11 +307,37 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         Pt::Signal<WebSocket&>& outputReady()
         { return _outputReady; }
 
+        /** @brief Returns the signal emitted when a ping operation completes.
+
+            Call %endPing() from the signal to observe a write error.
+        */
+        Pt::Signal<WebSocket&>& pingReady()
+        { return _pingReady; }
+
+        /** @brief Returns the signal emitted when a shutdown operation completes.
+
+            The stream is detached. Call %endShutdown() from the signal
+            to observe a close-handshake error. This signal is emitted
+            before %closed().
+        */
+        Pt::Signal<WebSocket&>& shutdownReady()
+        { return _shutdownReady; }
+
+        /** @brief Returns the signal emitted for a received pong.
+
+            The payload contains arbitrary bytes and is valid for the
+            duration of the signal call. A pong does not change
+            %incoming() or emit %inputReady().
+        */
+        Pt::Signal<WebSocket&, const std::string&>& pong()
+        { return _pong; }
+
         /** @brief Returns the signal emitted when the stream ends.
 
             Emitted while this socket is still alive, after an end
             this socket did not start. Peer close, an idle timeout,
-            and a finished shutdown emit it. An I/O error on an
+            and a finished shutdown emit it. A finished shutdown emits
+            %shutdownReady() first. An I/O error on an
             outstanding receive or send runs %inputReady() or
             %outputReady() first, and the matching end throws, before
             this signal. %close() and destruction do not emit it.
@@ -334,6 +380,12 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         void onOutputReady();
 
+        void onPingReady();
+
+        void onShutdownReady();
+
+        void onPong(const std::string& payload);
+
         void onClosed();
 
     private:
@@ -347,6 +399,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         Pt::Signal<WebSocket&> _connected;
         Pt::Signal<WebSocket&> _inputReady;
         Pt::Signal<WebSocket&> _outputReady;
+        Pt::Signal<WebSocket&> _pingReady;
+        Pt::Signal<WebSocket&> _shutdownReady;
+        Pt::Signal<WebSocket&, const std::string&> _pong;
         Pt::Signal<WebSocket&> _closed;
 };
 

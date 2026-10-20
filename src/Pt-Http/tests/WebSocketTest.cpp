@@ -622,6 +622,184 @@ class PushSession : public Pt::Http::WebSocketSession
 
 typedef Pt::Http::BasicWebSocketService<PushSession> PushService;
 
+
+class PongSession : public Pt::Http::WebSocketSession
+{
+    public:
+        PongSession(Pt::Http::WebSocketService& service,
+                    Pt::Http::Stream& stream,
+                    const Pt::Http::Reply& reply,
+                    bool& pong,
+                    bool& pingReady,
+                    bool& inputReady,
+                    std::string& payload,
+                    Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _pong(&pong)
+        , _pingReady(&pingReady)
+        , _inputReady(&inputReady)
+        , _payload(&payload)
+        , _exitLoop(&exitLoop)
+        {
+            beginPing("session-ping", 12);
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            *_inputReady = true;
+            _exitLoop->exit();
+        }
+
+        virtual void onOutput()
+        {}
+
+        virtual void onPingReady()
+        {
+            endPing();
+            *_pingReady = true;
+            finish();
+        }
+
+        virtual void onPong(const std::string& payload)
+        {
+            *_payload = payload;
+            *_pong = true;
+            finish();
+        }
+
+        virtual void onClose()
+        {}
+
+    private:
+        void finish()
+        {
+            if(*_pong && *_pingReady)
+                _exitLoop->exit();
+        }
+
+    private:
+        bool* _pong;
+        bool* _pingReady;
+        bool* _inputReady;
+        std::string* _payload;
+        Pt::System::EventLoop* _exitLoop;
+};
+
+
+class PongService : public Pt::Http::WebSocketService
+{
+    public:
+        PongService(bool& pong,
+                    bool& pingReady,
+                    bool& inputReady,
+                    std::string& payload,
+                    Pt::System::EventLoop& loop)
+        : _pong(&pong)
+        , _pingReady(&pingReady)
+        , _inputReady(&inputReady)
+        , _payload(&payload)
+        , _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new PongSession(*this, stream, reply, *_pong, *_pingReady, *_inputReady,
+                                   *_payload, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        bool* _pong;
+        bool* _pingReady;
+        bool* _inputReady;
+        std::string* _payload;
+        Pt::System::EventLoop* _loop;
+};
+
+
+class ShutdownSession : public Pt::Http::WebSocketSession
+{
+    public:
+        ShutdownSession(Pt::Http::WebSocketService& service,
+                        Pt::Http::Stream& stream,
+                        const Pt::Http::Reply& reply,
+                        bool& shutdownReady,
+                        bool& closed,
+                        Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _shutdownReady(&shutdownReady)
+        , _closed(&closed)
+        , _exitLoop(&exitLoop)
+        {
+            beginShutdown();
+        }
+
+    protected:
+        virtual void onInput()
+        {}
+
+        virtual void onOutput()
+        {}
+
+        virtual void onShutdownReady()
+        {
+            endShutdown();
+            *_shutdownReady = true;
+        }
+
+        virtual void onClose()
+        {
+            *_closed = *_shutdownReady;
+            _exitLoop->exit();
+        }
+
+    private:
+        bool* _shutdownReady;
+        bool* _closed;
+        Pt::System::EventLoop* _exitLoop;
+};
+
+
+class ShutdownService : public Pt::Http::WebSocketService
+{
+    public:
+        ShutdownService(bool& shutdownReady,
+                        bool& closed,
+                        Pt::System::EventLoop& loop)
+        : _shutdownReady(&shutdownReady)
+        , _closed(&closed)
+        , _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new ShutdownSession(*this, stream, reply, *_shutdownReady, *_closed, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        bool* _shutdownReady;
+        bool* _closed;
+        Pt::System::EventLoop* _loop;
+};
+
+
 class ProtocolSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -755,6 +933,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _closed(false)
         , _partial(false)
         , _finished(false)
+        , _pong(false)
+        , _inputReady(false)
+        , _pingReady(false)
+        , _shutdownReady(false)
         , _status(0)
         , _type(Pt::Http::WebSocketMessage::Unknown)
         , _limitSocket(0)
@@ -773,6 +955,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("NullSession", *this, &WebSocketTest::NullSession);
             registerMethod("ConstructFails", *this, &WebSocketTest::ConstructFails);
             registerMethod("Push", *this, &WebSocketTest::Push);
+            registerMethod("Pong", *this, &WebSocketTest::Pong);
+            registerMethod("SessionPong", *this, &WebSocketTest::SessionPong);
+            registerMethod("SessionShutdown", *this, &WebSocketTest::SessionShutdown);
+            registerMethod("PingPayload", *this, &WebSocketTest::PingPayload);
             registerMethod("Limit", *this, &WebSocketTest::Limit);
             registerMethod("Binary", *this, &WebSocketTest::Binary);
             registerMethod("Empty", *this, &WebSocketTest::Empty);
@@ -802,6 +988,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _closed = false;
             _partial = false;
             _finished = false;
+            _pong = false;
+            _inputReady = false;
+            _pingReady = false;
+            _shutdownReady = false;
             _status = 0;
             _limitSocket = 0;
             _limitClient = 0;
@@ -962,18 +1152,26 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Http::Client http(*_loop, ep);
             Pt::Http::WebSocket socket(http);
             socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedClose);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onShutdownReady);
             socket.beginConnect("/ws");
 
             _loop->run();
 
             PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT(_shutdownReady);
             PT_UNIT_ASSERT_EQUALS(sockets.size(), static_cast<std::size_t>(0));
         }
 
         void onConnectedClose(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.shutdown();
+            socket.beginShutdown();
+        }
+
+        void onShutdownReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endShutdown();
+            _shutdownReady = true;
         }
 
     protected:
@@ -1023,7 +1221,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
                 return;
             }
 
-            socket.shutdown();
+            socket.beginShutdown();
             _deferredCloseService->beginDeferredReceive();
         }
 
@@ -1071,7 +1269,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         {
             Pt::Http::MessageProgress progress = socket.endSend();
             if( ! progress.finished() )
-                socket.shutdown();
+                socket.beginShutdown();
         }
 
     protected:
@@ -1191,6 +1389,147 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _type = socket.incoming().type();
             _received = true;
             _loop->exit();
+        }
+
+    protected:
+        void Pong()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8039);
+
+            Pt::Http::Server server(*_loop, ep);
+            RecordService service(_message, _type, _received, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPong);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onUnexpectedInput);
+            socket.pingReady() += Pt::slot(*this, &WebSocketTest::onPingReady);
+            socket.pong() += Pt::slot(*this, &WebSocketTest::onPong);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_pong);
+            PT_UNIT_ASSERT(_pingReady);
+            PT_UNIT_ASSERT(!_inputReady);
+            PT_UNIT_ASSERT_EQUALS(_message, std::string("client\0ping", 11));
+        }
+
+        void onConnectedPong(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginPing("client\0ping", 11);
+            socket.beginReceive();
+        }
+
+        void onPong(Pt::Http::WebSocket&, const std::string& payload)
+        {
+            _message = payload;
+            _pong = true;
+            _loop->exit();
+        }
+
+        void onPingReady(Pt::Http::WebSocket& socket)
+        {
+            socket.endPing();
+            _pingReady = true;
+        }
+
+        void onUnexpectedInput(Pt::Http::WebSocket&)
+        {
+            _inputReady = true;
+            _loop->exit();
+        }
+
+    protected:
+        void PingPayload()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8041);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPingPayload);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+        }
+
+        void onConnectedPingPayload(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            PT_UNIT_ASSERT_THROW(socket.beginPing(0, 1), std::invalid_argument);
+            _loop->exit();
+        }
+
+    protected:
+        void SessionPong()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8040);
+
+            Pt::Http::Server server(*_loop, ep);
+            PongService service(_pong, _pingReady, _inputReady, _message, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedSessionPong);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_pong);
+            PT_UNIT_ASSERT(_pingReady);
+            PT_UNIT_ASSERT(!_inputReady);
+            PT_UNIT_ASSERT_EQUALS(_message, "session-ping");
+        }
+
+        void onConnectedSessionPong(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+        }
+
+    protected:
+        void SessionShutdown()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8042);
+
+            Pt::Http::Server server(*_loop, ep);
+            ShutdownService service(_shutdownReady, _closed, *_loop);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedSessionShutdown);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_shutdownReady);
+            PT_UNIT_ASSERT(_closed);
+        }
+
+        void onConnectedSessionShutdown(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
         }
 
     protected:
@@ -1373,7 +1712,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         void onConnectedCloseCode(Pt::Http::WebSocket& socket)
         {
             socket.endConnect();
-            socket.shutdown(1000, "bye");
+            socket.beginShutdown(1000, "bye");
         }
 
     protected:
@@ -1407,8 +1746,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(socket.closeReason().empty());
             PT_UNIT_ASSERT_THROW(socket.beginSend(), std::logic_error);
             PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.ping(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.shutdown(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginPing(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
             socket.close();
             _loop->exit();
         }
@@ -1533,6 +1872,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.endConnect();
             socket.beginReceive();
             PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
             _loop->exit();
         }
 
@@ -1595,11 +1935,12 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.outgoing().body() << "x";
             socket.beginSend();
             PT_UNIT_ASSERT_THROW(socket.beginSend(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.shutdown(1005), std::invalid_argument);
-            PT_UNIT_ASSERT_THROW(socket.shutdown(1006), std::invalid_argument);
-            PT_UNIT_ASSERT_THROW(socket.shutdown(1015), std::invalid_argument);
-            socket.shutdown();
-            PT_UNIT_ASSERT_THROW(socket.shutdown(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(1005), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(1006), std::invalid_argument);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(1015), std::invalid_argument);
+            socket.beginShutdown();
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
             _loop->exit();
         }
 
@@ -1784,8 +2125,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep("127.0.0.1", 8025);
             Pt::Http::Client http(*_loop, ep);
             Pt::Http::WebSocket socket(http);
-            PT_UNIT_ASSERT_THROW(socket.ping(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.shutdown(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginPing(), std::logic_error);
+            PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
         }
 
     private:
@@ -1799,6 +2140,10 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _closed;
         bool _partial;
         bool _finished;
+        bool _pong;
+        bool _inputReady;
+        bool _pingReady;
+        bool _shutdownReady;
         unsigned _status;
         Pt::Http::WebSocketMessage::Type _type;
         Pt::Http::WebSocket* _limitSocket;

@@ -85,6 +85,9 @@ WebSocketSession::WebSocketSession(WebSocketService& service,
 
     _channel->inputReady() += Pt::slot(*this, &WebSocketSession::onInputReady);
     _channel->outputReady() += Pt::slot(*this, &WebSocketSession::onOutputReady);
+    _channel->pingReady() += Pt::slot(*this, &WebSocketSession::onChannelPingReady);
+    _channel->shutdownReady() += Pt::slot(*this, &WebSocketSession::onChannelShutdownReady);
+    _channel->pong() += Pt::slot(*this, &WebSocketSession::onPong);
     _channel->closed() += Pt::slot(*this, &WebSocketSession::onClosed);
 }
 
@@ -134,15 +137,27 @@ MessageProgress WebSocketSession::endReceive()
 }
 
 
-void WebSocketSession::ping(const char* payload, std::size_t n)
+void WebSocketSession::beginPing(const char* payload, std::size_t n)
 {
-    _channel->ping(payload, n);
+    _channel->beginPing(payload, n);
 }
 
 
-void WebSocketSession::shutdown(unsigned code, const std::string& reason)
+void WebSocketSession::endPing()
 {
-    _channel->shutdown(code, reason);
+    _channel->endPing();
+}
+
+
+void WebSocketSession::beginShutdown(unsigned code, const std::string& reason)
+{
+    _channel->beginShutdown(code, reason);
+}
+
+
+void WebSocketSession::endShutdown()
+{
+    _channel->endShutdown();
 }
 
 
@@ -165,6 +180,33 @@ unsigned WebSocketSession::closeCode() const
 const std::string& WebSocketSession::closeReason() const
 {
     return _channel->closeReason();
+}
+
+
+void WebSocketSession::onPong(const std::string&)
+{
+}
+
+
+void WebSocketSession::onPingReady()
+{
+}
+
+
+void WebSocketSession::onShutdownReady()
+{
+}
+
+
+void WebSocketSession::onChannelPingReady()
+{
+    onPingReady();
+}
+
+
+void WebSocketSession::onChannelShutdownReady()
+{
+    onShutdownReady();
 }
 
 

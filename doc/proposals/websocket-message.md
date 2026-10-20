@@ -12,15 +12,12 @@ behavior it has today.
 
 ## Baseline
 
-`WebSocketChannel` starts the input pump from `open` and keeps it
-running until the stream ends. Controls and close are processed even
-when no receive is outstanding. Data is delivered only to an
-outstanding receive; otherwise the complete data message is discarded.
-The output pump already prefers queued controls over data fragments
-and can run while a read is outstanding, because `Stream` allows one
-input and one output at the same time. A received ping enqueues a
-pong. A received pong is not yet reported on the facade. `shutdown`
-enqueues a close frame.
+`WebSocketChannel` starts input only for an outstanding receive or a
+locally queued close. The output pump already prefers queued controls
+over data fragments and can run while a read is outstanding, because
+`Stream` allows one input and one output at the same time. A received
+ping enqueues a pong. `ping` and `shutdown` enqueue frames without an
+operation completion or an operation-specific I/O error.
 
 Input and output already have separate state. The public surface is
 already `incoming()`, `outgoing()`, and `beginSend()` without a
@@ -167,58 +164,58 @@ form, RSV, a wrong mask direction, a control without FIN, a
 continuation with no open message, UTF-8, and a payload over the size
 limit. No socket, no loop, no channel.
 
-## Permanent input {#permanent-input}
+## Input operations {#input-operations}
 
-The input pump runs from `open` until the stream ends. It does not
-depend on `beginReceive`. Controls and close are processed on every
-input step. Data payloads fill the get area of `incoming()` and are
-reported by `inputReady` only when a receive is outstanding. When
-no receive is outstanding, `import` consumes a data payload without
-filling the get area. It does not emit `inputReady`.
+The input pump runs only for an outstanding `beginReceive` or for a
+locally initiated shutdown waiting for the peer close. No input is
+started from `open`. A receive delivers data frames through `incoming`.
+It also handles ping, pong, and close internally. Ping enqueues a pong.
+Pong runs the pong notification. Neither becomes `incoming` or emits
+`inputReady`. A received close ends the receive without delivering an
+incomplete data message.
+
+`beginShutdown` owns input until the peer close arrives. It throws when
+a receive is outstanding. While it owns input, ping and pong are handled
+internally and data is not delivered. `beginReceive` throws until the
+shutdown result is consumed by `endShutdown`.
 
 The engine never cancels an outstanding input to start an output, or
 an outstanding output to start an input. `Stream` already allows one
 of each. `pumpOutput` writes a queued control or the next data
 fragment whenever the output channel is free. A control is inserted
 between data fragments. It does not cut a data frame. It does not
-emit `outputReady`. `beginSend`, `ping`, and `shutdown` only enqueue
-and call `pumpOutput`.
+emit `outputReady` for a control operation.
 
-An I/O error on one direction stores the exception and leaves the
-other direction and the stream open. The ready signal of the failed
-transfer runs, and the matching end throws. The application calls
-`close`.
+## Control operations {#control-operations}
+
+`beginPing(payload)` enqueues one ping and starts its output. Its ready
+signal runs after that ping frame was written. `endPing` returns that
+operation to idle or throws its stored I/O error. It does not wait for
+or match a pong.
+
+`beginShutdown(code, reason)` validates the close code and reason,
+enqueues one close frame, and starts input for the peer close. It does
+not wait for `endSend` and does not cut the current data frame. A second
+shutdown throws. 1005, 1006, and 1015 throw and stay off the wire.
+Its ready signal runs after the stream detached, before `closed`. Then
+`endShutdown` returns the operation to idle or throws its stored I/O
+error. `closed` is a lifecycle notification, not shutdown completion.
 
 ## Pong visible {#pong-visible}
 
 A received pong is consumed by the parser. It does not become
-`incoming` and does not emit `inputReady`. If a `ping` is still
-outstanding, the payload is compared and that ping is retired. An
-unsolicited pong is still valid. The facade sees the pong: `pong()`
-on the client, `onPong()` on the session. Neither frees the data
-channel. An unanswered ping is facade state. The application may
-shut the stream down from it. The idle timer restarts on a received
-ping and on a received pong.
-
-## Shutdown {#shutdown}
-
-`shutdown(code, reason)` enqueues a close frame and does not end the
-stream. The pump writes it after the current data frame, if a send
-is in progress. It does not wait for `endSend` and does not cut a
-frame. A second `shutdown` throws. `shutdown(1005)`,
-`shutdown(1006)`, and `shutdown(1015)` throw and stay off the wire.
-After a local close is queued, `beginSend` throws. Receive continues
-until the peer close or the idle timeout, including when no
-`beginReceive` is outstanding.
+`incoming` and does not emit `inputReady`. The facade sees the pong:
+`pong()` on the client, `onPong()` on the session. The idle timer
+restarts on a received ping and on a received pong.
 
 ## Peer close {#peer-close}
 
 A received close is consumed by the parser. It does not become
-`incoming` and does not emit `inputReady`. If this side has not sent
-a close frame, the engine enqueues the reply with `shutdown`. A peer
-code that must not be written is not echoed. The reply is 1000. If a
-data message was open, its body is discarded and `onInput` does not
-run for that incomplete message. After the reply has been written,
-the engine ends the stream. It does not call `close` on the facade.
-The close is processed and `closed()` is emitted even when no
-`beginReceive` is outstanding.
+`incoming` and does not emit `inputReady`. It is processed only while
+a receive or a local shutdown owns input. If this side has not sent a
+close frame, the engine enqueues a reply. A peer code that must not be
+written is not echoed. The reply is 1000. If a data message was open,
+its body is discarded and `onInput` does not run for that incomplete
+message. After the reply is written, the engine ends the stream. It
+does not call `close` on the facade. A peer close during shutdown
+completes that shutdown; one during receive only emits `closed`.
