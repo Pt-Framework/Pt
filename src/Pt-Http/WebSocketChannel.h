@@ -135,7 +135,9 @@ class WebSocketChannel : public Channel
 
         bool onProcessInput();
 
-        bool onControlFrame(const Frame& frame);
+        bool onProcessControl(const Frame& frame);
+
+        bool onProcessData(const Frame& frame);
 
     private:
         void requestOutput();
@@ -170,7 +172,7 @@ class WebSocketChannel : public Channel
 
         void requireOpen() const;
 
-        bool closeNeedsInput() const;
+        bool awaitingCloseReply() const;
 
         void protocolFail(unsigned code);
 
