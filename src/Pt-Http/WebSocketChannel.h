@@ -131,7 +131,9 @@ class WebSocketChannel : public Channel
 
         void onInput();
 
-        void processInput();
+        void onInputFailed(std::exception_ptr error);
+
+        bool onProcessInput();
 
         bool onControlFrame(const Frame& frame);
 
@@ -140,7 +142,9 @@ class WebSocketChannel : public Channel
 
         void onOutput();
 
-        void processOutput();
+        void onOutputFailed(std::exception_ptr error);
+
+        void onProcessOutput();
 
         void writeFrame(unsigned opcode, bool fin,
                         const char* payload, std::size_t n);

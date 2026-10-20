@@ -595,135 +595,127 @@ void WebSocketChannel::onInput()
     {
         _inputState = Idle;
 
-        if( stream->endInput() == 0 )
+        std::size_t n = stream->endInput();
+        if(n == 0)
         {
             passiveClose();
             return;
         }
 
-        processInput();
+        _inputState = Ready;
+
+        while( onProcessInput() )
+            ;
+
+        if(_inputState == Ready)
+            _inputState = Idle;
     }
     catch(...)
     {
-        if( ! isOpen() )
-            return;
+        onInputFailed( std::current_exception() );
+    }
+}
 
-        if(_closeCode == 0)
-            _closeCode = 1006;
 
-        std::exception_ptr error = std::current_exception();
-        _inputState = Ready;
-        if(_shutdownState == Pending)
+void WebSocketChannel::onInputFailed(std::exception_ptr error)
+{
+    if( ! isOpen() )
+        return;
+
+    if(_closeCode == 0)
+        _closeCode = 1006;
+
+    _inputState = Ready;
+    if(_shutdownState == Pending)
+    {
+        _shutdownError = error;
+        finishShutdown();
+    }
+    else if( ! _inputError)
+    {
+        _inputError = error;
+        if(_receiveState == Pending)
         {
-            _shutdownError = error;
-            finishShutdown();
+            _receiveState = Ready;
+            _inputReady.send();
         }
-        else if( ! _inputError)
+        else if( closeNeedsInput() )
         {
-            _inputError = error;
-            if(_receiveState == Pending)
-            {
-                _receiveState = Ready;
-                _inputReady.send();
-            }
-            else if( closeNeedsInput() )
-            {
-                passiveClose();
-            }
+            passiveClose();
         }
     }
 }
 
 
-void WebSocketChannel::processInput()
+bool WebSocketChannel::onProcessInput()
 {
-    if( ! isOpen() || _inputState == Ready || _inputError)
-        return;
-
-    if(_receiveState != Pending && ! closeNeedsInput())
-        return;
-
-    _inputState = Ready;
-    bool request = false;
-
     try
     {
-        for(;;)
+        const Frame* frame = _wsbuf.import();
+        if( ! frame )
         {
-            const Frame* frame = _wsbuf.import();
-            if( ! frame )
-            {
-                request = true;
-                break;
-            }
-
-            if(frame->kind() == Frame::Control)
-            {
-                if( onControlFrame(*frame) )
-                    break;
-
-                continue;
-            }
-
-            bool finished = frame->fin() && frame->remaining() == 0;
-            if(_shutdownState == Pending || _receiveState != Pending)
-            {
-                _wsbuf.discard();
-                continue;
-            }
-
-            unsigned opcode = frame->opcode();
-            if(opcode == 0x01 || opcode == 0x02)
-            {
-                WebSocketMessage::Type type = (opcode == 0x01)
-                                            ? WebSocketMessage::Text
-                                            : WebSocketMessage::Binary;
-                _incoming.setTypeFromEngine(type);
-                _messageOpen = true;
-            }
-
-            _receiveProgress.setHeader();
-
-            if(finished)
-            {
-                _receiveProgress.setFinished();
-                _messageOpen = false;
-            }
-
-            if(_wsbuf.in_avail() > 0)
-                _receiveProgress.setBody();
-
-            _receiveState = Ready;
-            _inputReady.send();
-
-            if((_receiveState == Ready || _receiveState == Pending) && _wsbuf.in_avail() != 0)
-                break;
-
-            if(_receiveState == Ready || _receiveState == Pending)
-                continue;
-
-            if(closeNeedsInput())
-            {
-                if(_wsbuf.in_avail() != 0)
-                    _wsbuf.discard();
-
-                continue;
-            }
-
-            break;
+            _inputState = Idle;
+            requestInput();
+            return false;
         }
+
+        if(frame->kind() == Frame::Control)
+            return ! onControlFrame(*frame);
+
+        bool finished = frame->fin() && frame->remaining() == 0;
+        if(_shutdownState == Pending || _receiveState != Pending)
+        {
+            _wsbuf.discard();
+            return true;
+        }
+
+        unsigned opcode = frame->opcode();
+        if(opcode == 0x01 || opcode == 0x02)
+        {
+            WebSocketMessage::Type type = (opcode == 0x01)
+                                        ? WebSocketMessage::Text
+                                        : WebSocketMessage::Binary;
+            _incoming.setTypeFromEngine(type);
+            _messageOpen = true;
+        }
+
+        _receiveProgress.setHeader();
+
+        if(finished)
+        {
+            _receiveProgress.setFinished();
+            _messageOpen = false;
+        }
+
+        if(_wsbuf.in_avail() > 0)
+            _receiveProgress.setBody();
+
+        _receiveState = Ready;
+        _inputReady.send();
+
+        if((_receiveState == Ready || _receiveState == Pending) && _wsbuf.in_avail() != 0)
+            return false;
+
+        if(_receiveState == Ready || _receiveState == Pending)
+            return true;
+
+        if(closeNeedsInput())
+        {
+            if(_wsbuf.in_avail() != 0)
+                _wsbuf.discard();
+
+            return true;
+        }
+
+        return false;
     }
     catch(const WebSocketError& e)
     {
         protocolFail( e.code() );
-        request = true;
-    }
-
-    if(_inputState == Ready)
         _inputState = Idle;
-
-    if(request)
         requestInput();
+        return false;
+    }
 }
 
 
@@ -844,56 +836,84 @@ void WebSocketChannel::onOutput()
     try
     {
         stream->endOutput();
-        processOutput();
+        onProcessOutput();
         requestOutput();
     }
     catch(...)
     {
-        if( ! isOpen() )
-            return;
-
-        if(_closeCode == 0)
-            _closeCode = 1006;
-
-        _outputError = std::current_exception();
-        _outputState = Ready;
-
-        if(_outputQueue.empty())
-        {
-            passiveClose();
-            return;
-        }
-
-        const PendingFrame& frame = _outputQueue.front();
-
-        if(frame.kind == PendingFrame::Ping && _pingState == Pending)
-        {
-            _pingError = _outputError;
-            _pingState = Ready;
-            _pingReady.send();
-            return;
-        }
-
-        if(frame.kind == PendingFrame::Shutdown && _shutdownState == Pending)
-        {
-            _shutdownError = _outputError;
-            finishShutdown();
-            return;
-        }
-
-        if(frame.kind == PendingFrame::Data && _sendState == Pending)
-        {
-            _sendState = Ready;
-            _outputReady.send();
-            return;
-        }
-
-        passiveClose();
+        onOutputFailed( std::current_exception() );
     }
 }
 
 
-void WebSocketChannel::processOutput()
+void WebSocketChannel::onOutputFailed(std::exception_ptr error)
+{
+    if( ! isOpen() )
+        return;
+
+    if(_closeCode == 0)
+        _closeCode = 1006;
+
+    _outputError = error;
+    _outputState = Ready;
+
+    if(_outputQueue.empty())
+    {
+        passiveClose();
+        return;
+    }
+
+    const PendingFrame& frame = _outputQueue.front();
+
+    switch(frame.kind)
+    {
+        case PendingFrame::Data:
+        {
+            if(_sendState == Pending)
+            {
+                _sendState = Ready;
+                _outputReady.send();
+                return;
+            }
+
+            break;
+        }
+
+        case PendingFrame::Ping:
+        {
+            if(_pingState == Pending)
+            {
+                _pingError = _outputError;
+                _pingState = Ready;
+                _pingReady.send();
+                return;
+            }
+
+            break;
+        }
+
+        case PendingFrame::Shutdown:
+        {
+            if(_shutdownState == Pending)
+            {
+                _shutdownError = _outputError;
+                finishShutdown();
+                return;
+            }
+
+            break;
+        }
+
+        case PendingFrame::Close:
+        case PendingFrame::Pong:
+            break;
+    }
+
+    passiveClose();
+}
+
+
+void WebSocketChannel::onProcessOutput()
 {
     if( ! isOpen() || _outputState == Ready || _outputError)
         return;
@@ -901,7 +921,6 @@ void WebSocketChannel::processOutput()
     if( _outputQueue.empty() )
     {
         _outputState = Idle;
-        requestOutput();
         return;
     }
 
@@ -909,44 +928,57 @@ void WebSocketChannel::processOutput()
     _outputQueue.pop_front();
     _outputState = Idle;
 
-    if(frame.kind == PendingFrame::Data)
+    switch(frame.kind)
     {
-        _outgoing.consume(frame.size);
-        ++_sendFragment;
-        if(_sendState == Pending)
+        case PendingFrame::Data:
         {
-            _sendProgress.setBody();
-            if(frame.fin && _outgoing.sendSize() == 0)
-                _sendProgress.setFinished();
+            _outgoing.consume(frame.size);
+            ++_sendFragment;
+            if(_sendState == Pending)
+            {
+                _sendProgress.setBody();
+                if(frame.fin && _outgoing.sendSize() == 0)
+                    _sendProgress.setFinished();
 
-            _sendState = Ready;
-            _outputReady.send();
+                _sendState = Ready;
+                _outputReady.send();
+            }
+
+            return;
         }
 
-        return;
-    }
+        case PendingFrame::Ping:
+        {
+            if(_pingState == Pending)
+            {
+                _pingState = Ready;
+                _pingReady.send();
+            }
 
-    if(frame.kind == PendingFrame::Ping && _pingState == Pending)
-    {
-        _pingState = Ready;
-        _pingReady.send();
-        return;
-    }
+            return;
+        }
 
-    if(frame.kind != PendingFrame::Close && frame.kind != PendingFrame::Shutdown)
-        return;
+        case PendingFrame::Close:
+        case PendingFrame::Shutdown:
+        {
+            if(_closeState == CloseQueued)
+                _closeState = CloseSent;
+            else if(_closeState == CloseReplyQueued)
+                _closeState = CloseExchanged;
 
-    if(_closeState == CloseQueued)
-        _closeState = CloseSent;
-    else if(_closeState == CloseReplyQueued)
-        _closeState = CloseExchanged;
+            if(_closeState == CloseExchanged)
+            {
+                if(_shutdownState == Pending)
+                    finishShutdown();
+                else
+                    passiveClose();
+            }
 
-    if(_closeState == CloseExchanged)
-    {
-        if(_shutdownState == Pending)
-            finishShutdown();
-        else
-            passiveClose();
+            return;
+        }
+
+        case PendingFrame::Pong:
+            return;
     }
 }
 
