@@ -1,6 +1,8 @@
 # Platinum (Pt) - Agent Instructions
 
-You are designing and developing Platinum: a general-purpose, easy to use, high-performance, multi-platform C++ framework to buld applications from one codebase. Develop durable framework concepts, APIs, and implementations that
+You are designing and developing Platinum: a general-purpose, easy to use,
+high-performance, multi-platform C++ framework to buld applications from one
+codebase. Develop durable framework concepts, APIs, and implementations that
 must serve many applications, platforms, and user requirements.
 
 ## General Instructions
@@ -17,35 +19,33 @@ must serve many applications, platforms, and user requirements.
 - Reuse and extend established framework patterns when they express the model
   well. Do not add special cases or convenience shortcuts that weaken
   conceptual consistency.
-- Prefer substantive improvements; breaking changes are acceptable when they
-  improve the design. Compatibility is desirable but secondary.
-- After a completed task, suggest instruction-file fixes if the task revealed
-  missing, unneeded, unclear, or incorrect instructions.
-- For chat responses only: use code and bullets, with no explanations unless
-  asked. This does not apply to generated or modified repository artifacts,
-  including documentation, source comments, changelogs, and configuration files.
-- Prefer repo-root-relative paths; use absolute paths when tools are path-ambiguous.
-- Multi-root workspaces may show the same file under different folder roots.
+- Prefer coherent improvements over compatibility-preserving workarounds when
+  the broader design benefit is clear.
+- Before you add a local abstraction, check whether the framework already
+  provides the required behavior.
+- Reuse or extend the framework abstraction that owns the behavior. Do not
+  implement general behavior only in local code.
+- Use repo-root-relative paths in repository content and user-facing references.
+  Use absolute paths for tool calls when required or when a multi-root workspace
+  could make a relative path ambiguous.
+- In multi-root workspaces, identify the workspace folder explicitly before
+  resolving relative paths.
 - Do not search `build/`, `tmp/`, `deps/`, `doc/website/`, or large
   vendored trees (`src/skia`, `src/openssl`, …) unless the task requires it.
-- Use only ASCII characters in all output (code, comments, file names, messages)
-  unless the task explicitly requires non-ASCII characters (e.g. localized strings, binary data, or Unicode-specific tests).
+- Use ASCII characters in authored source files, source comments, documentation
+  source, and file names unless the task requires non-ASCII text. This does not
+  restrict generated, rendered, or runtime output.
 
-## Task Specific Instructions
+## Applicable Instruction Files
 
-Before acting, choose the **smallest** set of modules that match the task
-(usually 1–4). Read each chosen file **fully once**. Then act.
+- Use the Instructions Index to identify instruction files whose topics apply to
+  the requested work.
+- Read each applicable instruction file in full, even if it was automatically
+  attached to the context.
+- Treat instruction files as authoritative; do not rely on remembered
+  conventions.
 
-- Do **not** load modules “just in case”.
-- Do **not** re-read a module already loaded in this session.
-- Do **not** skip a module that clearly matches.
-- Do **not** invent conventions from memory; the file is authoritative.
-
-### Instructions Index
-
-Read the matching file explicitly whenever its topic applies to the task, even
-if it has an `applyTo` pattern that may already auto-attach - never assume its
-content is in context without having read it.
+## Instructions Index
 
 - For Coding guidelines & style, directory layout, writing and reviewing code read:
   `.github/instructions/coding.instructions.md`
