@@ -144,6 +144,13 @@ WebSocketChannel::~WebSocketChannel()
 }
 
 
+void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
+{
+    _maxMessageSize = maxSize;
+    _wsbuf.setMaxMessageSize(maxSize);
+}
+
+
 void WebSocketChannel::open(Stream& stream, bool clientMask)
 {
     Channel::open(stream);
@@ -398,6 +405,31 @@ void WebSocketChannel::endShutdown()
 }
 
 
+void WebSocketChannel::finishShutdown()
+{
+    if(_shutdownState != Pending)
+        return;
+
+    _shutdownState = Ready;
+
+    if(isOpen())
+        Channel::close();
+
+    _shutdownReady.send();
+    _closed.send();
+}
+
+
+void WebSocketChannel::passiveClose()
+{
+    if( ! isOpen() )
+        return;
+
+    Channel::close();
+    _closed.send();
+}
+
+
 void WebSocketChannel::onClose()
 {
     _inputState = Idle;
@@ -416,32 +448,6 @@ void WebSocketChannel::onClose()
 }
 
 
-void WebSocketChannel::passiveClose()
-{
-    if( ! isOpen() )
-        return;
-
-    Channel::close();
-    _closed.send();
-}
-
-
-void WebSocketChannel::finishShutdown()
-{
-    if(_shutdownState != Pending)
-        return;
-
-    _shutdownState = Ready;
-
-    if(isOpen())
-        Channel::close();
-
-    _shutdownReady.send();
-    _closed.send();
-}
-
-
-
 void WebSocketChannel::setTimeout(std::size_t timeout)
 {
     _timeout = timeout;
@@ -450,12 +456,6 @@ void WebSocketChannel::setTimeout(std::size_t timeout)
         stream->setTimeout(timeout);
 }
 
-
-void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
-{
-    _maxMessageSize = maxSize;
-    _wsbuf.setMaxMessageSize(maxSize);
-}
 
 
 void WebSocketChannel::setIdleTimeout(std::size_t ms)
@@ -475,6 +475,13 @@ void WebSocketChannel::setIdleTimeout(std::size_t ms)
     }
 
     _idleTimer.start(ms);
+}
+
+
+void WebSocketChannel::restartIdleTimer()
+{
+    if(_idleTimeout != 0)
+        _idleTimer.start(_idleTimeout);
 }
 
 
@@ -536,6 +543,63 @@ void WebSocketChannel::protocolFail(unsigned code)
 }
 
 
+Pt::uint32_t WebSocketChannel::nextMask()
+{
+    _maskSeed = _maskSeed * 1664525u + 1013904223u;
+    return _maskSeed;
+}
+
+
+void WebSocketChannel::onInput()
+{
+    Stream* stream = this->stream();
+    if( ! stream )
+        return;
+
+    try
+    {
+        _inputState = Idle;
+
+        if( stream->endInput() == 0 )
+        {
+            passiveClose();
+            return;
+        }
+
+        processInput();
+    }
+    catch(...)
+    {
+        if( ! isOpen() )
+            return;
+
+        if(_closeCode == 0)
+            _closeCode = 1006;
+
+        std::exception_ptr error = std::current_exception();
+        _inputState = Ready;
+        if(_shutdownState == Pending)
+        {
+            _shutdownError = error;
+            finishShutdown();
+        }
+        else if( ! _inputError)
+        {
+            _inputError = error;
+            if(_receiveState == Pending)
+            {
+                _receiveState = Ready;
+                _inputReady.send();
+            }
+            else if( closeNeedsInput() )
+            {
+                passiveClose();
+            }
+        }
+    }
+}
+
+
 void WebSocketChannel::requestInput()
 {
     if( ! isOpen() || _inputState != Idle || _inputError)
@@ -553,113 +617,6 @@ void WebSocketChannel::requestInput()
 
     stream->beginInput();
     _inputState = Pending;
-}
-
-
-void WebSocketChannel::requestOutput()
-{
-    if( ! isOpen() || _outputState != Idle)
-        return;
-
-    Stream* stream = this->stream();
-    if( ! stream )
-        return;
-
-    if(_outputQueue.empty() && _sendState == Pending)
-    {
-        PendingFrame frame;
-        frame.fin = _outgoing.sendSize() <= MaxFramePayload;
-        frame.data = true;
-        frame.owner = PendingFrame::None;
-        frame.size = _outgoing.sendSize();
-        if(frame.size > MaxFramePayload)
-            frame.size = MaxFramePayload;
-        frame.opcode = _sendFragment == 0
-                     ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
-                     : 0;
-        _outputQueue.push_back(frame);
-    }
-
-    if(_outputQueue.empty())
-        return;
-
-    const PendingFrame& frame = _outputQueue.front();
-    const char* payload = frame.data && frame.size != 0 ? _outgoing.sendData() : frame.payload;
-    writeFrame(frame.opcode, frame.fin, payload, frame.size);
-    _outputState = Pending;
-    stream->beginOutput();
-}
-
-
-void WebSocketChannel::writeFrame(unsigned opcode, bool fin,
-                                  const char* payload, std::size_t n)
-{
-    Stream* stream = this->stream();
-    std::streambuf* buf = stream ? stream->buffer() : 0;
-    if( ! buf )
-        throw std::logic_error("WebSocket has no stream");
-
-    char header[14];
-    std::size_t headerLen = 2;
-
-    header[0] = static_cast<char>(opcode);
-    if(fin)
-        header[0] = static_cast<char>( static_cast<unsigned char>(header[0]) | 0x80 );
-
-    header[1] = _clientMask ? static_cast<char>(0x80) : 0;
-
-    if(n < 126)
-    {
-        header[1] = static_cast<char>(
-            static_cast<unsigned char>(header[1]) | static_cast<unsigned char>(n) );
-    }
-    else if(n < 65536)
-    {
-        header[1] = static_cast<char>( static_cast<unsigned char>(header[1]) | 126 );
-        Pt::uint16_t size = Pt::hostToBe( static_cast<Pt::uint16_t>(n) );
-        std::memcpy(header + 2, &size, 2);
-        headerLen = 4;
-    }
-    else
-    {
-        header[1] = static_cast<char>( static_cast<unsigned char>(header[1]) | 127 );
-        Pt::uint64_t size = Pt::hostToBe( static_cast<Pt::uint64_t>(n) );
-        std::memcpy(header + 2, &size, 8);
-        headerLen = 10;
-    }
-
-    char maskBytes[4];
-    if(_clientMask)
-    {
-        Pt::uint32_t mask = nextMask();
-        std::memcpy(maskBytes, &mask, 4);
-        std::memcpy(header + headerLen, maskBytes, 4);
-        headerLen += 4;
-    }
-
-    buf->sputn(header, static_cast<std::streamsize>(headerLen));
-
-    if(n == 0 || ! payload)
-        return;
-
-    if( ! _clientMask )
-    {
-        buf->sputn(payload, static_cast<std::streamsize>(n));
-        return;
-    }
-
-    for(std::size_t i = 0; i < n; ++i)
-    {
-        char masked = static_cast<char>(payload[i] ^ maskBytes[i % 4]);
-        buf->sputc(masked);
-    }
-}
-
-
-Pt::uint32_t WebSocketChannel::nextMask()
-{
-    _maskSeed = _maskSeed * 1664525u + 1013904223u;
-    return _maskSeed;
 }
 
 
@@ -840,14 +797,7 @@ bool WebSocketChannel::onControlFrame(const Frame& frame)
 }
 
 
-void WebSocketChannel::restartIdleTimer()
-{
-    if(_idleTimeout != 0)
-        _idleTimer.start(_idleTimeout);
-}
-
-
-void WebSocketChannel::onInput()
+void WebSocketChannel::onOutput()
 {
     Stream* stream = this->stream();
     if( ! stream )
@@ -855,15 +805,8 @@ void WebSocketChannel::onInput()
 
     try
     {
-        _inputState = Idle;
-
-        if( stream->endInput() == 0 )
-        {
-            passiveClose();
-            return;
-        }
-
-        processInput();
+        stream->endOutput();
+        processOutput();
     }
     catch(...)
     {
@@ -873,25 +816,32 @@ void WebSocketChannel::onInput()
         if(_closeCode == 0)
             _closeCode = 1006;
 
-        std::exception_ptr error = std::current_exception();
-        _inputState = Ready;
-        if(_shutdownState == Pending)
+        _outputError = std::current_exception();
+        _outputState = Ready;
+
+        PendingFrame::Owner owner = PendingFrame::None;
+        if( ! _outputQueue.empty() )
+            owner = _outputQueue.front().owner;
+
+        if(owner == PendingFrame::Ping && _pingState == Pending)
         {
-            _shutdownError = error;
-            finishShutdown();
+            _pingError = _outputError;
+            _pingState = Ready;
+            _pingReady.send();
+            return;
         }
-        else if( ! _inputError)
+
+        if(owner == PendingFrame::Shutdown && _shutdownState == Pending)
         {
-            _inputError = error;
-            if(_receiveState == Pending)
-            {
-                _receiveState = Ready;
-                _inputReady.send();
-            }
-            else if( closeNeedsInput() )
-            {
-                passiveClose();
-            }
+            _shutdownError = _outputError;
+            finishShutdown();
+            return;
+        }
+
+        if(_sendState == Pending)
+        {
+            _sendState = Ready;
+            _outputReady.send();
         }
     }
 }
@@ -957,52 +907,102 @@ void WebSocketChannel::processOutput()
 }
 
 
-void WebSocketChannel::onOutput()
+void WebSocketChannel::requestOutput()
 {
+    if( ! isOpen() || _outputState != Idle)
+        return;
+
     Stream* stream = this->stream();
     if( ! stream )
         return;
 
-    try
+    if(_outputQueue.empty() && _sendState == Pending)
     {
-        stream->endOutput();
-        processOutput();
+        PendingFrame frame;
+        frame.fin = _outgoing.sendSize() <= MaxFramePayload;
+        frame.data = true;
+        frame.owner = PendingFrame::None;
+        frame.size = _outgoing.sendSize();
+        if(frame.size > MaxFramePayload)
+            frame.size = MaxFramePayload;
+        frame.opcode = _sendFragment == 0
+                     ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
+                     : 0;
+        _outputQueue.push_back(frame);
     }
-    catch(...)
+
+    if(_outputQueue.empty())
+        return;
+
+    const PendingFrame& frame = _outputQueue.front();
+    const char* payload = frame.data && frame.size != 0 ? _outgoing.sendData() : frame.payload;
+    writeFrame(frame.opcode, frame.fin, payload, frame.size);
+    _outputState = Pending;
+    stream->beginOutput();
+}
+
+
+void WebSocketChannel::writeFrame(unsigned opcode, bool fin,
+                                  const char* payload, std::size_t n)
+{
+    Stream* stream = this->stream();
+    std::streambuf* buf = stream ? stream->buffer() : 0;
+    if( ! buf )
+        throw std::logic_error("WebSocket has no stream");
+
+    char header[14];
+    std::size_t headerLen = 2;
+
+    header[0] = static_cast<char>(opcode);
+    if(fin)
+        header[0] = static_cast<char>( static_cast<unsigned char>(header[0]) | 0x80 );
+
+    header[1] = _clientMask ? static_cast<char>(0x80) : 0;
+
+    if(n < 126)
     {
-        if( ! isOpen() )
-            return;
+        header[1] = static_cast<char>(
+            static_cast<unsigned char>(header[1]) | static_cast<unsigned char>(n) );
+    }
+    else if(n < 65536)
+    {
+        header[1] = static_cast<char>( static_cast<unsigned char>(header[1]) | 126 );
+        Pt::uint16_t size = Pt::hostToBe( static_cast<Pt::uint16_t>(n) );
+        std::memcpy(header + 2, &size, 2);
+        headerLen = 4;
+    }
+    else
+    {
+        header[1] = static_cast<char>( static_cast<unsigned char>(header[1]) | 127 );
+        Pt::uint64_t size = Pt::hostToBe( static_cast<Pt::uint64_t>(n) );
+        std::memcpy(header + 2, &size, 8);
+        headerLen = 10;
+    }
 
-        if(_closeCode == 0)
-            _closeCode = 1006;
+    char maskBytes[4];
+    if(_clientMask)
+    {
+        Pt::uint32_t mask = nextMask();
+        std::memcpy(maskBytes, &mask, 4);
+        std::memcpy(header + headerLen, maskBytes, 4);
+        headerLen += 4;
+    }
 
-        _outputError = std::current_exception();
-        _outputState = Ready;
+    buf->sputn(header, static_cast<std::streamsize>(headerLen));
 
-        PendingFrame::Owner owner = PendingFrame::None;
-        if( ! _outputQueue.empty() )
-            owner = _outputQueue.front().owner;
+    if(n == 0 || ! payload)
+        return;
 
-        if(owner == PendingFrame::Ping && _pingState == Pending)
-        {
-            _pingError = _outputError;
-            _pingState = Ready;
-            _pingReady.send();
-            return;
-        }
+    if( ! _clientMask )
+    {
+        buf->sputn(payload, static_cast<std::streamsize>(n));
+        return;
+    }
 
-        if(owner == PendingFrame::Shutdown && _shutdownState == Pending)
-        {
-            _shutdownError = _outputError;
-            finishShutdown();
-            return;
-        }
-
-        if(_sendState == Pending)
-        {
-            _sendState = Ready;
-            _outputReady.send();
-        }
+    for(std::size_t i = 0; i < n; ++i)
+    {
+        char masked = static_cast<char>(payload[i] ^ maskBytes[i % 4]);
+        buf->sputc(masked);
     }
 }
 
