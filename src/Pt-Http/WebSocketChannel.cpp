@@ -534,8 +534,10 @@ void WebSocketChannel::setInputError(std::exception_ptr error)
         _receiveState = Failed;
         _inputReady.send();
     }
-    else if(closeNeedsInput())
+    else if( closeNeedsInput() )
+    {
         passiveClose();
+    }
 }
 
 

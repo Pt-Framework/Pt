@@ -34,6 +34,12 @@ class WebSocketChannel : public Channel
 
         ~WebSocketChannel();
 
+        void setTimeout(std::size_t timeout);
+
+        void setMaxMessageSize(std::size_t maxSize);
+
+        void setIdleTimeout(std::size_t ms);
+
         void open(Stream& stream, bool clientMask);
 
         WebSocketMessage& incoming()
@@ -69,12 +75,6 @@ class WebSocketChannel : public Channel
         Signal<>& closed()
         { return _closed; }
 
-        void setTimeout(std::size_t timeout);
-
-        void setMaxMessageSize(std::size_t maxSize);
-
-        void setIdleTimeout(std::size_t ms);
-
     protected:
         virtual void onClose();
 
@@ -106,19 +106,10 @@ class WebSocketChannel : public Channel
             CloseExchanged
         };
 
-        void requireOpen() const;
-
-        void setCloseSent();
+    private:
+        void onInput();
 
         void setCloseReceived();
-
-        bool closeNeedsInput() const;
-
-        void enqueueControl(unsigned opcode, const char* payload, std::size_t n);
-
-        void enqueueClose(unsigned code, const std::string& reason);
-
-        void protocolFail(unsigned code);
 
         void requestInput();
 
@@ -126,23 +117,36 @@ class WebSocketChannel : public Channel
 
         void setInputError(std::exception_ptr error);
 
+        bool onControlFrame(const Frame& frame);
+
+    private:
+        void onOutput();
+
+        void setCloseSent();
+
         void pumpOutput();
 
         void writeFrame(unsigned opcode, bool fin, const char* payload, std::size_t n);
 
-        Pt::uint32_t nextMask();
-
-        bool onControlFrame(const Frame& frame);
-
+    private:
         void restartIdleTimer();
-
-        void onInput();
-
-        void onOutput();
 
         void onIdleTimeout();
 
         void passiveClose();
+
+    private:
+        void enqueueControl(unsigned opcode, const char* payload, std::size_t n);
+
+        void enqueueClose(unsigned code, const std::string& reason);
+
+        void requireOpen() const;
+
+        bool closeNeedsInput() const;
+
+        void protocolFail(unsigned code);
+
+        Pt::uint32_t nextMask();
 
     private:
         bool          _clientMask;
