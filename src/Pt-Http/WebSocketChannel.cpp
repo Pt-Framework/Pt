@@ -600,26 +600,6 @@ void WebSocketChannel::onInput()
 }
 
 
-void WebSocketChannel::requestInput()
-{
-    if( ! isOpen() || _inputState != Idle || _inputError)
-        return;
-
-    if(_receiveState != Pending && ! closeNeedsInput())
-        return;
-
-    Stream* stream = this->stream();
-    if( ! stream || ! stream->isValid() )
-        return;
-
-    if( ! stream->loop() )
-        return;
-
-    stream->beginInput();
-    _inputState = Pending;
-}
-
-
 void WebSocketChannel::processInput()
 {
     if( ! isOpen() || _inputState == Ready || _inputError)
@@ -709,6 +689,26 @@ void WebSocketChannel::processInput()
 
     if(request)
         requestInput();
+}
+
+
+void WebSocketChannel::requestInput()
+{
+    if( ! isOpen() || _inputState != Idle || _inputError)
+        return;
+
+    if(_receiveState != Pending && ! closeNeedsInput())
+        return;
+
+    Stream* stream = this->stream();
+    if( ! stream || ! stream->isValid() )
+        return;
+
+    if( ! stream->loop() )
+        return;
+
+    stream->beginInput();
+    _inputState = Pending;
 }
 
 
@@ -852,7 +852,7 @@ void WebSocketChannel::processOutput()
     if( ! isOpen() || _outputState == Ready || _outputError)
         return;
 
-    if(_outputQueue.empty())
+    if( _outputQueue.empty() )
     {
         _outputState = Idle;
         requestOutput();
