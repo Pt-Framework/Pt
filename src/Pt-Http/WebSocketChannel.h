@@ -94,17 +94,18 @@ class WebSocketChannel : public Channel
     private:
         struct PendingFrame
         {
-            enum Owner
+            enum Kind
             {
-                None,
+                Data,
                 Ping,
+                Pong,
+                Close,
                 Shutdown
             };
 
             unsigned opcode;
             bool fin;
-            bool data;
-            Owner owner;
+            Kind kind;
             char payload[125];
             std::size_t size;
         };
@@ -126,20 +127,20 @@ class WebSocketChannel : public Channel
         };
 
     private:
+        void requestInput();
+
         void onInput();
 
         void processInput();
 
-        void requestInput();
-
         bool onControlFrame(const Frame& frame);
 
     private:
+        void requestOutput();
+
         void onOutput();
 
         void processOutput();
-
-        void requestOutput();
 
         void writeFrame(unsigned opcode, bool fin,
                         const char* payload, std::size_t n);
@@ -154,11 +155,13 @@ class WebSocketChannel : public Channel
         void finishShutdown();
 
     private:
-        void enqueueControl(unsigned opcode, const char* payload, std::size_t n,
-                            PendingFrame::Owner owner = PendingFrame::None);
+        void enqueueData();
+
+        void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
+                            const char* payload, std::size_t n);
 
         void enqueueClose(unsigned code, const std::string& reason,
-                          PendingFrame::Owner owner = PendingFrame::None,
+                          PendingFrame::Kind kind = PendingFrame::Close,
                           bool reply = false);
 
         void requireOpen() const;
