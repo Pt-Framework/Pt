@@ -128,24 +128,21 @@ class WebSocketChannel : public Channel
     private:
         void onInput();
 
-        bool setCloseReceived();
-
-        void requestInput();
-
         void processInput();
 
-        void setInputError(std::exception_ptr error);
+        void requestInput();
 
         bool onControlFrame(const Frame& frame);
 
     private:
         void onOutput();
 
-        void setCloseSent();
+        void processOutput();
 
-        void pumpOutput();
+        void requestOutput();
 
-        void writeFrame(unsigned opcode, bool fin, const char* payload, std::size_t n);
+        void writeFrame(unsigned opcode, bool fin,
+                        const char* payload, std::size_t n);
 
     private:
         void restartIdleTimer();
@@ -158,11 +155,11 @@ class WebSocketChannel : public Channel
 
     private:
         void enqueueControl(unsigned opcode, const char* payload, std::size_t n,
-                    PendingFrame::Owner owner = PendingFrame::None);
+                            PendingFrame::Owner owner = PendingFrame::None);
 
         void enqueueClose(unsigned code, const std::string& reason,
-                  PendingFrame::Owner owner = PendingFrame::None,
-                  bool reply = false);
+                          PendingFrame::Owner owner = PendingFrame::None,
+                          bool reply = false);
 
         void requireOpen() const;
 
