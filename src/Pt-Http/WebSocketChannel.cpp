@@ -370,59 +370,6 @@ void WebSocketChannel::endShutdown()
 }
 
 
-void WebSocketChannel::completeSend(std::exception_ptr error)
-{
-    if( ! _send.isPending() )
-        return;
-
-    _send.complete(error);
-
-    if( ! error )
-        restartIdleTimer();
-
-    _outputReady.send();
-}
-
-
-void WebSocketChannel::completeReceive(std::exception_ptr error)
-{
-    if( ! _receive.isPending() )
-        return;
-
-    _receive.complete(error);
-
-    if( ! error )
-        restartIdleTimer();
-
-    _inputReady.send();
-}
-
-
-void WebSocketChannel::completePing(std::exception_ptr error)
-{
-    if( ! _ping.isPending() )
-        return;
-
-    _ping.complete(error);
-    _pingReady.send();
-}
-
-
-void WebSocketChannel::completeShutdown(std::exception_ptr error)
-{
-    if( ! _shutdown.isPending() )
-        return;
-
-    _shutdown.complete(error);
-
-    if( isOpen() )
-        Channel::close();
-
-    _shutdownReady.send();
-    _closed.send();
-}
-
-
 // The first code decides; later ones only describe the consequence.
 void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
 {
@@ -461,10 +408,8 @@ void WebSocketChannel::endStreamIfClosed()
     if( ! _outputQueue.empty() || _outputPending )
         return;
 
-    if( _shutdown.isPending() )
-        completeShutdown( std::exception_ptr() );
-    else
-        onPassiveClose();
+    _shutdown.complete( std::exception_ptr() );
+    onPassiveClose();
 }
 
 
@@ -764,7 +709,8 @@ WebSocketChannel::InputAction WebSocketChannel::onData(const Frame& frame)
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
 
-    completeReceive( std::exception_ptr() );
+    if( _receive.complete( std::exception_ptr() ) )
+        restartIdleTimer();
 
     if( _receive.isPending() )
         return _wsbuf.in_avail() == 0 ? NextFrame : Stop;
@@ -786,7 +732,7 @@ void WebSocketChannel::onProtocolError(std::exception_ptr error, unsigned code)
 
     setCloseCode(code, std::string());
     _inputFailure = error;
-    completeReceive(error);
+    _receive.complete(error);
 
     _closeState = CloseFailing;
     enqueueClose(code, std::string());
@@ -799,8 +745,8 @@ void WebSocketChannel::onInputError(std::exception_ptr error)
         return;
 
     _inputFailure = error;
-    completeReceive(error);
-    completeShutdown(error);
+    _receive.complete(error);
+    _shutdown.complete(error);
 }
 
 
@@ -874,11 +820,12 @@ void WebSocketChannel::onFrameWritten(const PendingFrame& frame)
             _sendProgress.setBody();
             if(frame.fin && _outgoing.sendSize() == 0)
                 _sendProgress.setFinished();
-            completeSend( std::exception_ptr() );
+            if( _send.complete( std::exception_ptr() ) )
+                restartIdleTimer();
             break;
 
         case PendingFrame::Ping:
-            completePing( std::exception_ptr() );
+            _ping.complete( std::exception_ptr() );
             break;
 
         case PendingFrame::Pong:
@@ -913,15 +860,15 @@ void WebSocketChannel::onOutputError(std::exception_ptr error)
     switch(frame.kind)
     {
         case PendingFrame::Data:
-            completeSend(error);
+            _send.complete(error);
             break;
 
         case PendingFrame::Ping:
-            completePing(error);
+            _ping.complete(error);
             break;
 
         case PendingFrame::Close:
-            completeShutdown(error);
+            _shutdown.complete(error);
             break;
 
         case PendingFrame::Pong:

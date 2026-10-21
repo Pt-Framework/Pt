@@ -71,19 +71,19 @@ class WebSocketChannel : public Channel
         { return _closeReason; }
 
         Signal<>& inputReady()
-        { return _inputReady; }
+        { return _receive.ready(); }
 
         Signal<>& outputReady()
-        { return _outputReady; }
+        { return _send.ready(); }
 
         Signal<const std::string&>& pong()
         { return _pong; }
 
         Signal<>& pingReady()
-        { return _pingReady; }
+        { return _ping.ready(); }
 
         Signal<>& shutdownReady()
-        { return _shutdownReady; }
+        { return _shutdown.ready(); }
 
         Signal<>& closed()
         { return _closed; }
@@ -125,16 +125,24 @@ class WebSocketChannel : public Channel
                 bool isReady() const
                 { return _state == Ready; }
 
+                Signal<>& ready()
+                { return _ready; }
+
                 void begin()
                 {
                     _state = Pending;
                     _error = std::exception_ptr();
                 }
 
-                void complete(std::exception_ptr error)
+                bool complete(std::exception_ptr error)
                 {
+                    if(_state != Pending)
+                        return false;
+
                     _state = Ready;
                     _error = error;
+                    _ready.send();
+                    return true;
                 }
 
                 void finish()
@@ -170,6 +178,7 @@ class WebSocketChannel : public Channel
                     Ready
                 };
 
+                Signal<>           _ready;
                 State              _state;
                 std::exception_ptr _error;
         };
@@ -245,15 +254,6 @@ class WebSocketChannel : public Channel
         void setCloseCode(unsigned code, const std::string& reason);
 
     private:
-        void completeSend(std::exception_ptr error);
-
-        void completeReceive(std::exception_ptr error);
-
-        void completePing(std::exception_ptr error);
-
-        void completeShutdown(std::exception_ptr error);
-
-    private:
         void resetState();
 
         void armIdleTimer();
@@ -283,23 +283,19 @@ class WebSocketChannel : public Channel
         Operation          _receive;
         MessageProgress    _receiveProgress;
         std::exception_ptr _inputFailure;
-        Signal<>           _inputReady;
 
         bool               _outputPending;
         Operation          _send;
         bool               _sendContinuation;
         MessageProgress    _sendProgress;
         std::exception_ptr _outputFailure;
-        Signal<>           _outputReady;
 
         Operation _ping;
-        Signal<>  _pingReady;
 
         std::string _pongPayload;
         Signal<const std::string&> _pong;
 
         Operation _shutdown;
-        Signal<>  _shutdownReady;
 
         CloseState  _closeState;
         unsigned    _closeCode;
