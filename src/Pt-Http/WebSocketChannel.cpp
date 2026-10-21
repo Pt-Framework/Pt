@@ -155,7 +155,6 @@ void WebSocketChannel::resetState()
     _messageOpen = false;
     _receiveProgress = MessageProgress();
     _inputFailure = std::exception_ptr();
-    _protocolFailure = std::exception_ptr();
 
     _outputState = IOIdle;
     _outputQueue.clear();
@@ -297,9 +296,6 @@ void WebSocketChannel::beginReceive()
     if( ! _receive.isIdle() )
         throw std::logic_error("WebSocket receive is outstanding");
 
-    if(_protocolFailure)
-        std::rethrow_exception(_protocolFailure);
-
     if(_inputFailure)
         std::rethrow_exception(_inputFailure);
 
@@ -379,11 +375,11 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
         std::rethrow_exception(_outputFailure);
 
     _shutdown.begin();
+
     setCloseCode(code, reason);
-    enqueueClose(code, reason);
     setCloseState(CloseSent);
+    requestClose(code, reason);
     addPendingInput(PendingCloseReply);
-    requestOutput();
 }
 
 
@@ -586,7 +582,7 @@ void WebSocketChannel::enqueueControl(unsigned opcode, PendingFrame::Kind kind,
 }
 
 
-void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
+void WebSocketChannel::requestClose(unsigned code, const std::string& reason)
 {
     char payload[125];
     Pt::uint16_t be = Pt::hostToBe( static_cast<Pt::uint16_t>(code) );
@@ -599,22 +595,6 @@ void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
     }
 
     enqueueControl(0x08, PendingFrame::Close, payload, n);
-}
-
-
-void WebSocketChannel::protocolFail(unsigned code, std::exception_ptr error)
-{
-    if( ! isOpen() || _closeState != CloseOpen )
-        return;
-
-    setCloseCode(code, std::string());
-
-    _protocolFailure = error;
-
-    completeReceive(error);
-
-    enqueueClose(code, std::string());
-    setCloseState(CloseFailing);
     requestOutput();
 }
 
@@ -658,14 +638,37 @@ void WebSocketChannel::onInput()
 
         _inputState = IOImporting;
 
-        FrameResult result = onProcessInput();
-        while(result == FrameConsumed)
-            result = onProcessInput();
+        try
+        {
+            for(;;)
+            {
+                const Frame* frame = _wsbuf.import();
+                if( ! frame )
+                {
+                    _inputState = IOIdle;
+                    requestInput();
+                    return;
+                }
+
+                if( ! onProcessInput(*frame) )
+                    break;
+            }
+        }
+        catch(const WebSocketError& e)
+        {
+            if( isOpen() && _closeState == CloseOpen )
+            {
+                setCloseCode(e.code(), std::string());
+
+                _inputFailure = std::current_exception();
+                completeReceive(_inputFailure);
+
+                setCloseState(CloseFailing);
+                requestClose(e.code(), std::string());
+            }
+        }
 
         _inputState = IOIdle;
-
-        if(result == FrameIncomplete)
-            requestInput();
     }
     catch(...)
     {
@@ -674,54 +677,40 @@ void WebSocketChannel::onInput()
 }
 
 
+bool WebSocketChannel::onProcessInput(const Frame& frame)
+{
+    bool consumed = false;
+    switch( frame.kind() )
+    {
+        case Frame::Control:
+            consumed = onProcessControl(frame);
+            break;
+
+        case Frame::Data:
+            consumed = onProcessData(frame);
+            break;
+    }
+
+    return consumed;
+}
+
+
 void WebSocketChannel::onInputFailed(std::exception_ptr error)
 {
     if( ! isOpen() )
         return;
 
-    setCloseCode(1006, std::string());
-
     _inputState = IOFailed;
     _inputFailure = error;
 
-    const bool closing = hasPendingInput(PendingCloseReply);
     removePendingInput(PendingCloseReply);
 
     completeReceive(error);
-
-    if(closing)
-        completeShutdown(error);
+    completeShutdown(error);
 }
 
 
-WebSocketChannel::FrameResult WebSocketChannel::onProcessInput()
-{
-    try
-    {
-        const Frame* frame = _wsbuf.import();
-        if( ! frame )
-            return FrameIncomplete;
-
-        switch( frame->kind() )
-        {
-            case Frame::Control:
-                return onProcessControl(*frame);
-
-            case Frame::Data:
-                return onProcessData(*frame);
-        }
-
-        return FrameDelivered;
-    }
-    catch(const WebSocketError& e)
-    {
-        protocolFail( e.code(), std::current_exception() );
-        return FrameClosed;
-    }
-}
-
-
-WebSocketChannel::FrameResult WebSocketChannel::onProcessControl(const Frame& frame)
+bool WebSocketChannel::onProcessControl(const Frame& frame)
 {
     unsigned opcode = frame.opcode();
     const char* data = frame.data();
@@ -737,7 +726,7 @@ WebSocketChannel::FrameResult WebSocketChannel::onProcessControl(const Frame& fr
             requestOutput();
         }
 
-        return FrameConsumed;
+        return true;
     }
 
     if(opcode == 0x0A)
@@ -745,13 +734,12 @@ WebSocketChannel::FrameResult WebSocketChannel::onProcessControl(const Frame& fr
         _pongPayload.assign(data ? data : "", n);
         restartIdleTimer();
         _pong.send(_pongPayload);
-        return FrameConsumed;
+        return true;
     }
 
     if(n == 1)
     {
-        protocolFail( 1002, std::make_exception_ptr( WebSocketError(1002) ) );
-        return FrameClosed;
+        throw WebSocketError(1002);
     }
 
     if(n >= 2)
@@ -763,8 +751,7 @@ WebSocketChannel::FrameResult WebSocketChannel::onProcessControl(const Frame& fr
 
         if( ! isValidUtf8(reason.data(), reason.size()) )
         {
-            protocolFail( 1002, std::make_exception_ptr( WebSocketError(1002) ) );
-            return FrameClosed;
+            throw WebSocketError(1002);
         }
 
         setCloseCode(code, reason);
@@ -791,28 +778,28 @@ WebSocketChannel::FrameResult WebSocketChannel::onProcessControl(const Frame& fr
            _closeCode != 0)
             reply = _closeCode;
 
-        enqueueClose(reply, std::string());
         setCloseState(CloseReceived);
+        requestClose(reply, std::string());
     }
     else if(_closeState == CloseSent)
     {
         setCloseState(CloseExchanged);
+        requestOutput();
     }
 
-    requestOutput();
     finishClose();
 
-    return FrameClosed;
+    return false;
 }
 
 
-WebSocketChannel::FrameResult WebSocketChannel::onProcessData(const Frame& frame)
+bool WebSocketChannel::onProcessData(const Frame& frame)
 {
     bool finished = frame.fin() && frame.remaining() == 0;
     if( ! hasPendingInput(PendingReceive) )
     {
         _wsbuf.discard();
-        return FrameConsumed;
+        return true;
     }
 
     unsigned opcode = frame.opcode();
@@ -839,15 +826,15 @@ WebSocketChannel::FrameResult WebSocketChannel::onProcessData(const Frame& frame
     completeReceive( std::exception_ptr() );
 
     if( ! _receive.isIdle() )
-        return _wsbuf.in_avail() == 0 ? FrameConsumed : FrameDelivered;
+        return _wsbuf.in_avail() == 0;
 
     if( ! hasPendingInput(PendingCloseReply) )
-        return FrameDelivered;
+        return false;
 
     if(_wsbuf.in_avail() != 0)
         _wsbuf.discard();
 
-    return FrameConsumed;
+    return true;
 }
 
 

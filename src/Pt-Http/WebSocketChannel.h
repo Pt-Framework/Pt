@@ -189,14 +189,6 @@ class WebSocketChannel : public Channel
             PendingCloseReply = 1 << 1
         };
 
-        enum FrameResult
-        {
-            FrameConsumed,
-            FrameIncomplete,
-            FrameDelivered,
-            FrameClosed
-        };
-
         enum CloseState
         {
             CloseOpen,
@@ -211,13 +203,13 @@ class WebSocketChannel : public Channel
 
         void onInput();
 
+        bool onProcessInput(const Frame& frame);
+
         void onInputFailed(std::exception_ptr error);
 
-        FrameResult onProcessInput();
+        bool onProcessControl(const Frame& frame);
 
-        FrameResult onProcessControl(const Frame& frame);
-
-        FrameResult onProcessData(const Frame& frame);
+        bool onProcessData(const Frame& frame);
 
     private:
         void requestOutput();
@@ -267,7 +259,7 @@ class WebSocketChannel : public Channel
         void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
                             const char* payload, std::size_t n);
 
-        void enqueueClose(unsigned code, const std::string& reason);
+        void requestClose(unsigned code, const std::string& reason);
 
         void requireOpen() const;
 
@@ -278,8 +270,6 @@ class WebSocketChannel : public Channel
         bool hasPendingInput() const;
 
         bool hasPendingInput(PendingInput pending) const;
-
-        void protocolFail(unsigned code, std::exception_ptr error);
 
     private:
         bool          _clientMask;
@@ -301,7 +291,6 @@ class WebSocketChannel : public Channel
         Operation          _receive;
         MessageProgress    _receiveProgress;
         std::exception_ptr _inputFailure;
-        std::exception_ptr _protocolFailure;
         Signal<>           _inputReady;
 
         IOState            _outputState;
