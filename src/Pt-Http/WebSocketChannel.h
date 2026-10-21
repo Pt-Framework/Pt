@@ -178,6 +178,7 @@ class WebSocketChannel : public Channel
         {
             IOIdle,
             IOPending,
+            IOImporting,
             IOFailed
         };
 
@@ -231,8 +232,6 @@ class WebSocketChannel : public Channel
 
         void onCloseWritten(const PendingFrame& frame, std::exception_ptr error);
 
-        const char* payloadOf(const PendingFrame& frame);
-
         void writeFrame(unsigned opcode, bool fin,
                         const char* payload, std::size_t n);
 
@@ -282,8 +281,6 @@ class WebSocketChannel : public Channel
 
         void protocolFail(unsigned code, std::exception_ptr error);
 
-        Pt::uint32_t nextMask();
-
     private:
         bool          _clientMask;
         std::size_t   _timeout;
@@ -299,7 +296,6 @@ class WebSocketChannel : public Channel
         std::deque<PendingFrame> _outputQueue;
 
         IOState            _inputState;
-        bool               _importing;
         unsigned           _pendingInput;
         bool               _messageOpen;
         Operation          _receive;

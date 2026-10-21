@@ -124,7 +124,6 @@ WebSocketChannel::WebSocketChannel()
 , _idleTimeout(0)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
 , _inputState(IOIdle)
-, _importing(false)
 , _pendingInput(NoInput)
 , _messageOpen(false)
 , _outputState(IOIdle)
@@ -152,7 +151,6 @@ void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
 void WebSocketChannel::resetState()
 {
     _inputState = IOIdle;
-    _importing = false;
     _pendingInput = NoInput;
     _messageOpen = false;
     _receiveProgress = MessageProgress();
@@ -621,16 +619,9 @@ void WebSocketChannel::protocolFail(unsigned code, std::exception_ptr error)
 }
 
 
-Pt::uint32_t WebSocketChannel::nextMask()
-{
-    _maskSeed = _maskSeed * 1664525u + 1013904223u;
-    return _maskSeed;
-}
-
-
 void WebSocketChannel::requestInput()
 {
-    if( ! isOpen() || _importing || _inputState != IOIdle )
+    if( ! isOpen() || _inputState != IOIdle )
         return;
 
     if( hasPendingInput() )
@@ -665,20 +656,19 @@ void WebSocketChannel::onInput()
             return;
         }
 
-        _importing = true;
+        _inputState = IOImporting;
 
         FrameResult result = onProcessInput();
         while(result == FrameConsumed)
             result = onProcessInput();
 
-        _importing = false;
+        _inputState = IOIdle;
 
         if(result == FrameIncomplete)
             requestInput();
     }
     catch(...)
     {
-        _importing = false;
         onInputFailed( std::current_exception() );
     }
 }
@@ -861,15 +851,6 @@ WebSocketChannel::FrameResult WebSocketChannel::onProcessData(const Frame& frame
 }
 
 
-const char* WebSocketChannel::payloadOf(const PendingFrame& frame)
-{
-    if(frame.kind != PendingFrame::Data)
-        return frame.payload;
-
-    return frame.size != 0 ? _outgoing.sendData() : 0;
-}
-
-
 void WebSocketChannel::requestOutput()
 {
     if( ! isOpen() || _outputState != IOIdle)
@@ -883,7 +864,11 @@ void WebSocketChannel::requestOutput()
         return;
 
     const PendingFrame& frame = _outputQueue.front();
-    writeFrame(frame.opcode, frame.fin, payloadOf(frame), frame.size);
+    const char* payload = frame.kind == PendingFrame::Data
+                        ? (frame.size != 0 ? _outgoing.sendData() : 0)
+                        : frame.payload;
+    writeFrame(frame.opcode, frame.fin, payload, frame.size);
+
     _outputState = IOPending;
     stream->beginOutput();
 }
@@ -1030,7 +1015,8 @@ void WebSocketChannel::writeFrame(unsigned opcode, bool fin,
     char maskBytes[4];
     if(_clientMask)
     {
-        Pt::uint32_t mask = nextMask();
+        _maskSeed = _maskSeed * 1664525u + 1013904223u;
+        Pt::uint32_t mask = _maskSeed;
         std::memcpy(maskBytes, &mask, 4);
         std::memcpy(header + headerLen, maskBytes, 4);
         headerLen += 4;
