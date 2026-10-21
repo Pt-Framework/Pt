@@ -99,8 +99,7 @@ class WebSocketChannel : public Channel
                 Data,
                 Ping,
                 Pong,
-                Close,
-                Shutdown
+                Close
             };
 
             unsigned opcode;
@@ -110,19 +109,99 @@ class WebSocketChannel : public Channel
             std::size_t size;
         };
 
-        enum OperationState
+        class Operation
         {
-            Idle,
-            Pending,
-            Ready
+            public:
+                Operation()
+                : _state(Idle)
+                { }
+
+                bool isIdle() const
+                { return _state == Idle; }
+
+                bool isPending() const
+                { return _state == Pending; }
+
+                bool isReady() const
+                { return _state == Ready; }
+
+                void begin()
+                {
+                    _state = Pending;
+                    _error = std::exception_ptr();
+                }
+
+                void complete(std::exception_ptr error)
+                {
+                    _state = Ready;
+                    _error = error;
+                }
+
+                void finish()
+                {
+                    _state = Idle;
+
+                    if(_error)
+                    {
+                        std::exception_ptr error = _error;
+                        _error = std::exception_ptr();
+                        std::rethrow_exception(error);
+                    }
+                }
+
+                void reset()
+                {
+                    _state = Idle;
+                    _error = std::exception_ptr();
+                }
+
+                // A ready result stays; the application may not have read it yet.
+                void cancel()
+                {
+                    if(_state == Pending)
+                        reset();
+                }
+
+            private:
+                enum State
+                {
+                    Idle,
+                    Pending,
+                    Ready
+                };
+
+                State              _state;
+                std::exception_ptr _error;
+        };
+
+        enum IOState
+        {
+            IOIdle,
+            IOPending,
+            IOFailed
+        };
+
+        enum PendingInput
+        {
+            NoInput           = 0,
+            PendingReceive    = 1 << 0,
+            PendingCloseReply = 1 << 1
+        };
+
+        enum FrameResult
+        {
+            FrameConsumed,
+            FrameIncomplete,
+            FrameDelivered,
+            FrameClosed
         };
 
         enum CloseState
         {
             CloseOpen,
-            CloseQueued,
             CloseSent,
-            CloseReplyQueued,
+            CloseReceived,
+            CloseFailing,
             CloseExchanged
         };
 
@@ -133,34 +212,55 @@ class WebSocketChannel : public Channel
 
         void onInputFailed(std::exception_ptr error);
 
-        bool onProcessInput();
+        FrameResult onProcessInput();
 
-        bool onProcessControl(const Frame& frame);
+        FrameResult onProcessControl(const Frame& frame);
 
-        bool onProcessData(const Frame& frame);
+        FrameResult onProcessData(const Frame& frame);
 
     private:
         void requestOutput();
 
         void onOutput();
 
-        void onOutputFailed(std::exception_ptr error);
+        void onProcessOutput(std::exception_ptr error);
 
-        void onProcessOutput();
+        void onDataWritten(const PendingFrame& frame, std::exception_ptr error);
+
+        void onPingWritten(const PendingFrame& frame, std::exception_ptr error);
+
+        void onCloseWritten(const PendingFrame& frame, std::exception_ptr error);
+
+        const char* payloadOf(const PendingFrame& frame);
 
         void writeFrame(unsigned opcode, bool fin,
                         const char* payload, std::size_t n);
 
     private:
+        void completeSend(std::exception_ptr error);
+
+        void completeReceive(std::exception_ptr error);
+
+        void completePing(std::exception_ptr error);
+
+        void completeShutdown(std::exception_ptr error);
+
+    private:
+        void resetState();
+
         void armIdleTimer();
 
         void restartIdleTimer();
 
         void onIdleTimeout();
 
-        void passiveClose();
+        void setCloseState(CloseState state);
 
-        void finishShutdown();
+        void setCloseCode(unsigned code, const std::string& reason);
+
+        void finishClose();
+
+        void passiveClose();
 
     private:
         void enqueueData();
@@ -168,15 +268,19 @@ class WebSocketChannel : public Channel
         void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
                             const char* payload, std::size_t n);
 
-        void enqueueClose(unsigned code, const std::string& reason,
-                          PendingFrame::Kind kind = PendingFrame::Close,
-                          bool reply = false);
+        void enqueueClose(unsigned code, const std::string& reason);
 
         void requireOpen() const;
 
-        bool awaitingCloseReply() const;
+        void addPendingInput(PendingInput pending);
 
-        void protocolFail(unsigned code);
+        void removePendingInput(PendingInput pending);
+
+        bool hasPendingInput() const;
+
+        bool hasPendingInput(PendingInput pending) const;
+
+        void protocolFail(unsigned code, std::exception_ptr error);
 
         Pt::uint32_t nextMask();
 
@@ -194,30 +298,31 @@ class WebSocketChannel : public Channel
 
         std::deque<PendingFrame> _outputQueue;
 
-        OperationState     _inputState;
-        OperationState     _receiveState;
+        IOState            _inputState;
+        bool               _importing;
+        unsigned           _pendingInput;
         bool               _messageOpen;
+        Operation          _receive;
         MessageProgress    _receiveProgress;
-        std::exception_ptr _inputError;
+        std::exception_ptr _inputFailure;
+        std::exception_ptr _protocolFailure;
         Signal<>           _inputReady;
 
-        OperationState     _outputState;
-        OperationState     _sendState;
-        std::size_t        _sendFragment;
+        IOState            _outputState;
+        Operation          _send;
+        bool               _sendContinuation;
         MessageProgress    _sendProgress;
-        std::exception_ptr _outputError;
+        std::exception_ptr _outputFailure;
         Signal<>           _outputReady;
 
-        OperationState     _pingState;
-        std::exception_ptr _pingError;
-        Signal<>           _pingReady;
+        Operation _ping;
+        Signal<>  _pingReady;
 
         std::string _pongPayload;
         Signal<const std::string&> _pong;
 
-        OperationState     _shutdownState;
-        std::exception_ptr _shutdownError;
-        Signal<>           _shutdownReady;
+        Operation _shutdown;
+        Signal<>  _shutdownReady;
 
         CloseState  _closeState;
         unsigned    _closeCode;

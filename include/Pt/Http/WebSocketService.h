@@ -192,7 +192,7 @@ class PT_HTTP_API WebSocketService : public Service
         /** @brief Sets the idle timeout in milliseconds.
 
             An accepted socket is closed after @a ms without a finished
-            transfer. A finished send or receive restarts the timeout.
+            transfer. Transferred data bytes restart the timeout.
             Zero disables it. This is endpoint policy of this service.
             It applies before a servlet is constructed.
         */

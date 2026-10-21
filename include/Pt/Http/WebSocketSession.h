@@ -99,8 +99,10 @@ class WebSocketChannel;
 
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
-    receive is outstanding. A local %beginShutdown() owns input until
-    the peer replies with its close frame.
+    receive is outstanding. A local %beginShutdown() also keeps input
+    running until the peer replies with its close frame. The two are
+    independent: a receive started before or during a shutdown still
+    delivers what the peer sent before that reply.
 
     %protocol() is the single name the responder wrote as
     Sec-WebSocket-Protocol on the 101, or empty when none was
@@ -131,8 +133,10 @@ class WebSocketChannel;
     error. A received ping is answered by the engine. After a close
     frame is queued nothing further is written, so %beginPing() throws
     and a received ping is no longer answered. %beginShutdown() enqueues
-    a close frame and owns input until
-    the peer replies. %onShutdownReady() reports the completed handshake
+    a close frame and keeps reading until
+    the peer replies. A peer that never starts a receive never replies,
+    so the idle timeout copied from the %WebSocketService is the only
+    bound on that wait. %onShutdownReady() reports the completed handshake
     before %onClose(); call %endShutdown() from that callback to observe
     an error. %close() releases the stream and writes no frame. The destructor
     calls it. %beginSend() and %beginReceive() then throw. No close
@@ -211,8 +215,10 @@ class PT_HTTP_API WebSocketSession : public Connectable
             Starts processing incoming frames. Frames received before
             this call stay in the stream.
 
-            @throw %std::logic_error if a receive or shutdown is outstanding,
+            @throw %std::logic_error if a receive is outstanding,
             or the stream has ended.
+            @throw %std::exception if a protocol violation ended the
+            frame stream, or a previous read failed.
         */
         void beginReceive();
 
@@ -246,7 +252,7 @@ class PT_HTTP_API WebSocketSession : public Connectable
             @throw %std::invalid_argument if @a code is 1005, 1006 or
             1015, if @a reason is longer than 123 bytes, or if @a reason
             is not valid UTF-8.
-            @throw %std::logic_error if a receive or shutdown is outstanding,
+            @throw %std::logic_error if a shutdown is outstanding,
             or a close is already queued.
         */
         void beginShutdown(unsigned code = 1000,

@@ -111,8 +111,10 @@ class WebSocketChannel;
     drops the body so the same object can carry the next message.
     %beginReceive() starts frame processing. Until then, incoming
     frames stay in the stream. Control frames are processed while a
-    receive is outstanding. A local %beginShutdown() owns input until
-    the peer replies with its close frame.
+    receive is outstanding. A local %beginShutdown() also keeps input
+    running until the peer replies with its close frame. The two are
+    independent: a receive started before or during a shutdown still
+    delivers what the peer sent before that reply.
 
     Ping, pong, shutdown and close are socket operations, not
     messages.
@@ -130,9 +132,12 @@ class WebSocketChannel;
     and a received ping is no longer answered. A received pong
     is reported by %pong(). Neither is delivered through %incoming().
     %beginShutdown() enqueues a close frame with a status code and a
-    reason, then owns input until the peer replies. %shutdownReady()
+    reason, then keeps reading until the peer replies. %shutdownReady()
     reports the completed handshake before %closed(); call
-    %endShutdown() from that signal to observe an error. A received
+    %endShutdown() from that signal to observe an error. A peer that
+    never starts a receive never replies, so %setIdleTimeout() is the
+    only bound on that wait. It is zero on this type until the
+    application sets it. A received
     close is answered by the engine. %close() releases the stream and writes no frame. It
     does not block. The destructor calls it. %beginSend() and
     %beginReceive() then throw. %closed() is not emitted from the
@@ -140,10 +145,12 @@ class WebSocketChannel;
     that ended the stream. No close frame leaves the code at 1006.
     %closed() is emitted while this socket is still alive. The
     stream has already cleared its channel pointer. Peer close, an
-    I/O end with no close frame, a close frame, and an idle timeout
-    emit it. Destruction of the stream detaches the channel and does
-    not emit it. It ends an outstanding send or receive. The owner
-    deletes this socket.
+    I/O end with no close frame, a close frame, a protocol violation,
+    and an idle timeout emit it. An I/O error does not: it is reported
+    to every outstanding operation, the stream stays open, and the
+    application calls %close(). Destruction of the stream detaches the
+    channel and does not emit it. It ends an outstanding send or
+    receive. The owner deletes this socket.
 
     On the server the application does not construct this type. The
     server facade is %WebSocketSession, which exposes the same
@@ -218,6 +225,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @throw %std::invalid_argument if the type is %Unknown, the
             body is larger than %setMaxMessageSize(), or a text body
             is not valid UTF-8.
+            @throw %std::exception if a previous write failed.
         */
         void beginSend();
 
@@ -235,8 +243,10 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             Starts processing incoming frames. Frames received before
             this call stay in the stream.
 
-            @throw %std::logic_error if a receive or shutdown is outstanding,
+            @throw %std::logic_error if a receive is outstanding,
             the handshake is not finished, or the stream has ended.
+            @throw %std::exception if a protocol violation ended the
+            frame stream, or a previous read failed.
         */
         void beginReceive();
 
@@ -255,6 +265,7 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             or if @a payload is null and @a n is nonzero.
             @throw %std::logic_error if a ping is outstanding, a close is
             queued, or the handshake is not finished.
+            @throw %std::exception if a previous write failed.
         */
         void beginPing(const char* payload = 0, std::size_t n = 0);
 
@@ -270,8 +281,9 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
             @throw %std::invalid_argument if @a code is 1005, 1006 or
             1015, if @a reason is longer than 123 bytes, or if @a reason
             is not valid UTF-8.
-            @throw %std::logic_error if a receive or shutdown is outstanding,
+            @throw %std::logic_error if a shutdown is outstanding,
             the handshake is not finished, or a close is already queued.
+            @throw %std::exception if a previous write failed.
         */
         void beginShutdown(unsigned code = 1000,
                            const std::string& reason = std::string());
@@ -338,11 +350,13 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             Emitted while this socket is still alive, after an end
             this socket did not start. Peer close, an idle timeout,
-            and a finished shutdown emit it. A finished shutdown emits
-            %shutdownReady() first. An I/O error on an
-            outstanding receive or send runs %inputReady() or
-            %outputReady() first, and the matching end throws, before
-            this signal. %close() and destruction do not emit it.
+            a read that returns no bytes, a protocol violation, and a
+            finished shutdown emit it. A finished shutdown emits
+            %shutdownReady() first. An I/O error does not emit it. It
+            runs %inputReady() or %outputReady() instead, the matching
+            end throws, and the stream stays open until the
+            application calls %close(). %close() and destruction do
+            not emit it.
         */
         Pt::Signal<WebSocket&>& closed()
         { return _closed; }
@@ -360,10 +374,11 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
         */
         void setMaxMessageSize(std::size_t maxSize);
 
-        /** @brief Closes the stream after @a ms without a finished transfer.
+        /** @brief Closes the stream after @a ms without a transfer.
 
-            Zero disables the idle timeout. A finished send or receive
-            restarts it. A received ping or pong restarts it.
+            Zero disables the idle timeout. Transferred data bytes, a
+            received ping, and a received pong restart it. It is also
+            the only bound on a close handshake the peer never answers.
         */
         void setIdleTimeout(std::size_t ms);
 

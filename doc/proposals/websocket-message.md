@@ -174,10 +174,12 @@ Pong runs the pong notification. Neither becomes `incoming` or emits
 `inputReady`. A received close ends the receive without delivering an
 incomplete data message.
 
-`beginShutdown` owns input until the peer close arrives. It throws when
-a receive is outstanding. While it owns input, ping and pong are handled
-internally and data is not delivered. `beginReceive` throws until the
-shutdown result is consumed by `endShutdown`.
+`beginShutdown` keeps input running until the peer close arrives. It
+does not require the receive to be idle, and `beginReceive` does not
+require the shutdown to be consumed by `endShutdown`. The two hold the
+input independently. While only the shutdown holds it, ping and pong
+are handled internally and data is discarded; while a receive also
+holds it, data is delivered as usual until the peer close arrives.
 
 The engine never cancels an outstanding input to start an output, or
 an outstanding output to start an input. `Stream` already allows one
@@ -212,7 +214,7 @@ restarts on a received ping and on a received pong.
 
 A received close is consumed by the parser. It does not become
 `incoming` and does not emit `inputReady`. It is processed only while
-a receive or a local shutdown owns input. If this side has not sent a
+a receive or a local shutdown holds the input. If this side has not sent a
 close frame, the engine enqueues a reply. A peer code that must not be
 written is not echoed. The reply is 1000. If a data message was open,
 its body is discarded and `onInput` does not run for that incomplete

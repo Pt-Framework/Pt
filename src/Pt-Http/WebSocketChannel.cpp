@@ -123,14 +123,12 @@ WebSocketChannel::WebSocketChannel()
 , _maxMessageSize(1024 * 1024)
 , _idleTimeout(0)
 , _maskSeed( static_cast<Pt::uint32_t>(std::time(0)) )
-, _inputState(Idle)
-, _receiveState(Idle)
+, _inputState(IOIdle)
+, _importing(false)
+, _pendingInput(NoInput)
 , _messageOpen(false)
-, _outputState(Idle)
-, _sendState(Idle)
-, _sendFragment(0)
-, _pingState(Idle)
-, _shutdownState(Idle)
+, _outputState(IOIdle)
+, _sendContinuation(false)
 , _closeState(CloseOpen)
 , _closeCode(0)
 {
@@ -151,31 +149,47 @@ void WebSocketChannel::setMaxMessageSize(std::size_t maxSize)
 }
 
 
+void WebSocketChannel::resetState()
+{
+    _inputState = IOIdle;
+    _importing = false;
+    _pendingInput = NoInput;
+    _messageOpen = false;
+    _receiveProgress = MessageProgress();
+    _inputFailure = std::exception_ptr();
+    _protocolFailure = std::exception_ptr();
+
+    _outputState = IOIdle;
+    _outputQueue.clear();
+    _outputFailure = std::exception_ptr();
+    _sendContinuation = false;
+    _sendProgress = MessageProgress();
+
+    _send.cancel();
+    _receive.cancel();
+    _ping.cancel();
+    _shutdown.cancel();
+
+    _idleTimer.stop();
+
+    _incoming.clear();
+    _outgoing.clear();
+}
+
+
 void WebSocketChannel::open(Stream& stream, bool clientMask)
 {
     Channel::open(stream);
 
     _clientMask = clientMask;
-    _inputState = Idle;
-    _receiveState = Idle;
-    _messageOpen = false;
-    _receiveProgress = MessageProgress();
-    _outputState = Idle;
-    _sendState = Idle;
-    _sendFragment = 0;
-    _sendProgress = MessageProgress();
-    _pingState = Idle;
-    _pingError = std::exception_ptr();
-    _outputQueue.clear();
-    _shutdownState = Idle;
-    _shutdownError = std::exception_ptr();
     _closeState = CloseOpen;
     _closeCode = 0;
     _closeReason.clear();
-    _inputError = std::exception_ptr();
-    _outputError = std::exception_ptr();
-    _incoming.clear();
-    _outgoing.clear();
+    _send.reset();
+    _receive.reset();
+    _ping.reset();
+    _shutdown.reset();
+    resetState();
 
     stream.setTimeout(_timeout);
     stream.inputReady() += Pt::slot(*this, &WebSocketChannel::onInput);
@@ -199,9 +213,28 @@ void WebSocketChannel::requireOpen() const
 }
 
 
-bool WebSocketChannel::awaitingCloseReply() const
+bool WebSocketChannel::hasPendingInput() const
 {
-    return _closeState == CloseQueued || _closeState == CloseSent;
+    return _pendingInput != NoInput;
+}
+
+
+bool WebSocketChannel::hasPendingInput(PendingInput pending) const
+{
+    return (_pendingInput & pending) != 0;
+}
+
+
+void WebSocketChannel::addPendingInput(PendingInput pending)
+{
+    _pendingInput |= pending;
+    requestInput();
+}
+
+
+void WebSocketChannel::removePendingInput(PendingInput pending)
+{
+    _pendingInput &= ~static_cast<unsigned>(pending);
 }
 
 
@@ -209,13 +242,16 @@ void WebSocketChannel::beginSend()
 {
     requireOpen();
 
-    if(_sendState != Idle)
+    if( ! _send.isIdle() )
         throw std::logic_error("WebSocket send is outstanding");
 
     if(_closeState != CloseOpen)
         throw std::logic_error("WebSocket is closing");
 
-    if(_sendFragment == 0)
+    if(_outputFailure)
+        std::rethrow_exception(_outputFailure);
+
+    if( ! _sendContinuation )
     {
         WebSocketMessage::Type type = _outgoing.type();
         if(type != WebSocketMessage::Text && type != WebSocketMessage::Binary)
@@ -231,11 +267,9 @@ void WebSocketChannel::beginSend()
             if( ! isValidUtf8(data, n) )
                 throw std::invalid_argument("WebSocket text is not UTF-8");
         }
-
     }
 
-    _sendState = Pending;
-    _outputError = std::exception_ptr();
+    _send.begin();
     _sendProgress = MessageProgress();
     _sendProgress.setHeader();
     enqueueData();
@@ -245,25 +279,14 @@ void WebSocketChannel::beginSend()
 
 MessageProgress WebSocketChannel::endSend()
 {
-    if(_sendState != Ready)
-    {
-        requireOpen();
+    if( ! _send.isReady() )
         throw std::logic_error("WebSocket send is not ready");
-    }
 
-    if(_outputError)
-    {
-        _sendState = Idle;
-        std::rethrow_exception(_outputError);
-    }
-
-    requireOpen();
-    restartIdleTimer();
+    _send.finish();
 
     MessageProgress progress = _sendProgress;
-    _sendState = Idle;
-    if(progress.finished())
-        _sendFragment = 0;
+    if( progress.finished() )
+        _sendContinuation = false;
 
     return progress;
 }
@@ -273,57 +296,34 @@ void WebSocketChannel::beginReceive()
 {
     requireOpen();
 
-    if(_receiveState != Idle)
+    if( ! _receive.isIdle() )
         throw std::logic_error("WebSocket receive is outstanding");
 
-    if(_shutdownState != Idle)
-        throw std::logic_error("WebSocket shutdown is outstanding");
+    if(_protocolFailure)
+        std::rethrow_exception(_protocolFailure);
 
-    if(_inputError)
-    {
-        std::exception_ptr error = _inputError;
-        _inputError = std::exception_ptr();
-        std::rethrow_exception(error);
-    }
+    if(_inputFailure)
+        std::rethrow_exception(_inputFailure);
 
-    _receiveState = Pending;
+    _receive.begin();
     _receiveProgress = MessageProgress();
 
-    if( ! _messageOpen )
-    {
-        _incoming.setTypeFromEngine(WebSocketMessage::Unknown);
-        _incoming.discard();
-    }
-
-    if( _incoming.type() != WebSocketMessage::Unknown )
+    if( _messageOpen )
         _receiveProgress.setHeader();
 
-    requestInput();
+    addPendingInput(PendingReceive);
 }
 
 
 MessageProgress WebSocketChannel::endReceive()
 {
-    if(_receiveState != Ready)
-    {
-        requireOpen();
+    if( ! _receive.isReady() )
         throw std::logic_error("WebSocket receive is not ready");
-    }
 
-    if(_inputError)
-    {
-        std::exception_ptr error = _inputError;
-        _inputError = std::exception_ptr();
-        _receiveState = Idle;
-        std::rethrow_exception(error);
-    }
-
-    requireOpen();
-    restartIdleTimer();
+    _receive.finish();
 
     MessageProgress progress = _receiveProgress;
-    _receiveState = Idle;
-    if(progress.finished())
+    if( progress.finished() )
         _messageOpen = false;
 
     return progress;
@@ -334,7 +334,7 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
 {
     requireOpen();
 
-    if(_pingState != Idle)
+    if( ! _ping.isIdle() )
         throw std::logic_error("WebSocket ping is outstanding");
 
     if(_closeState != CloseOpen)
@@ -343,8 +343,10 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
     if(n > 125 || (n != 0 && ! payload))
         throw std::invalid_argument("WebSocket ping payload");
 
-    _pingState = Pending;
-    _pingError = std::exception_ptr();
+    if(_outputFailure)
+        std::rethrow_exception(_outputFailure);
+
+    _ping.begin();
     enqueueControl(0x09, PendingFrame::Ping, payload, n);
     requestOutput();
 }
@@ -352,16 +354,10 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
 
 void WebSocketChannel::endPing()
 {
-    if(_pingState != Ready)
+    if( ! _ping.isReady() )
         throw std::logic_error("WebSocket ping is not ready");
 
-    if(_pingError)
-    {
-        _pingState = Idle;
-        std::rethrow_exception(_pingError);
-    }
-
-    _pingState = Idle;
+    _ping.finish();
 }
 
 
@@ -369,11 +365,8 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
 {
     requireOpen();
 
-    if(_shutdownState != Idle)
+    if( ! _shutdown.isIdle() )
         throw std::logic_error("WebSocket shutdown is outstanding");
-
-    if(_receiveState != Idle)
-        throw std::logic_error("WebSocket receive is outstanding");
 
     if(_closeState != CloseOpen)
         throw std::logic_error("WebSocket already closing");
@@ -384,43 +377,113 @@ void WebSocketChannel::beginShutdown(unsigned code, const std::string& reason)
     if(reason.size() > 123 || ! isValidUtf8(reason.data(), reason.size()))
         throw std::invalid_argument("WebSocket close reason");
 
-    _shutdownState = Pending;
-    _shutdownError = std::exception_ptr();
-    _closeCode = code;
-    _closeReason = reason;
-    enqueueClose(code, reason, PendingFrame::Shutdown);
+    if(_outputFailure)
+        std::rethrow_exception(_outputFailure);
+
+    _shutdown.begin();
+    setCloseCode(code, reason);
+    enqueueClose(code, reason);
+    setCloseState(CloseSent);
+    addPendingInput(PendingCloseReply);
     requestOutput();
-    requestInput();
 }
 
 
 void WebSocketChannel::endShutdown()
 {
-    if(_shutdownState != Ready)
+    if( ! _shutdown.isReady() )
         throw std::logic_error("WebSocket shutdown is not ready");
 
-    if(_shutdownError)
-    {
-        _shutdownState = Idle;
-        std::rethrow_exception(_shutdownError);
-    }
-
-    _shutdownState = Idle;
+    _shutdown.finish();
 }
 
 
-void WebSocketChannel::finishShutdown()
+void WebSocketChannel::completeSend(std::exception_ptr error)
 {
-    if(_shutdownState != Pending)
+    if( ! _send.isPending() )
         return;
 
-    _shutdownState = Ready;
+    _send.complete(error);
 
-    if(isOpen())
+    if( ! error )
+        restartIdleTimer();
+
+    _outputReady.send();
+}
+
+
+void WebSocketChannel::completeReceive(std::exception_ptr error)
+{
+    if( ! _receive.isPending() )
+        return;
+
+    _receive.complete(error);
+    removePendingInput(PendingReceive);
+
+    if( ! error )
+        restartIdleTimer();
+
+    _inputReady.send();
+}
+
+
+void WebSocketChannel::completePing(std::exception_ptr error)
+{
+    if( ! _ping.isPending() )
+        return;
+
+    _ping.complete(error);
+    _pingReady.send();
+}
+
+
+void WebSocketChannel::completeShutdown(std::exception_ptr error)
+{
+    if( ! _shutdown.isPending() )
+        return;
+
+    _shutdown.complete(error);
+
+    if( isOpen() )
         Channel::close();
 
     _shutdownReady.send();
     _closed.send();
+}
+
+
+void WebSocketChannel::setCloseState(CloseState state)
+{
+    _closeState = state;
+
+    if(state == CloseExchanged)
+        finishClose();
+}
+
+
+// The first code decides; later ones only describe the consequence.
+void WebSocketChannel::setCloseCode(unsigned code, const std::string& reason)
+{
+    if(_closeCode != 0)
+        return;
+
+    _closeCode = code;
+    _closeReason = reason;
+}
+
+
+void WebSocketChannel::finishClose()
+{
+    if(_closeState != CloseExchanged)
+        return;
+
+    if( ! _outputQueue.empty() || _outputState == IOPending )
+        return;
+
+    if( _shutdown.isPending() )
+        completeShutdown( std::exception_ptr() );
+    else
+        passiveClose();
 }
 
 
@@ -436,19 +499,10 @@ void WebSocketChannel::passiveClose()
 
 void WebSocketChannel::onClose()
 {
-    _inputState = Idle;
-    _receiveState = Idle;
-    _outputState = Idle;
-    _sendState = Idle;
-    _sendFragment = 0;
-    _inputError = std::exception_ptr();
-    _outputError = std::exception_ptr();
-    _idleTimer.stop();
-    _incoming.clear();
-    _outgoing.clear();
+    if(_closeState != CloseExchanged)
+        setCloseCode(1006, std::string());
 
-    if(_closeCode == 0 && _closeState != CloseExchanged)
-        _closeCode = 1006;
+    resetState();
 }
 
 
@@ -504,15 +558,16 @@ void WebSocketChannel::onIdleTimeout()
 
 void WebSocketChannel::enqueueData()
 {
+    // One fragment per send, so a queued control frame waits at most this long.
     PendingFrame frame;
     frame.fin = _outgoing.sendSize() <= MaxFramePayload;
     frame.kind = PendingFrame::Data;
     frame.size = _outgoing.sendSize();
     if(frame.size > MaxFramePayload)
         frame.size = MaxFramePayload;
-    frame.opcode = _sendFragment == 0
-                 ? ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02)
-                 : 0;
+    frame.opcode = _sendContinuation
+                 ? 0
+                 : ((_outgoing.type() == WebSocketMessage::Text) ? 0x01 : 0x02);
 
     _outputQueue.push_back(frame);
 }
@@ -533,38 +588,35 @@ void WebSocketChannel::enqueueControl(unsigned opcode, PendingFrame::Kind kind,
 }
 
 
-void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason,
-                                    PendingFrame::Kind kind, bool reply)
+void WebSocketChannel::enqueueClose(unsigned code, const std::string& reason)
 {
-    if(_closeState != CloseOpen)
-        return;
-
-    _closeState = reply ? CloseReplyQueued : CloseQueued;
-
     char payload[125];
-    std::size_t n = 0;
     Pt::uint16_t be = Pt::hostToBe( static_cast<Pt::uint16_t>(code) );
     std::memcpy(payload, &be, 2);
-    n = 2;
+    std::size_t n = 2;
     if( ! reason.empty() )
     {
         std::memcpy(payload + 2, reason.data(), reason.size());
         n += reason.size();
     }
 
-    enqueueControl(0x08, kind, payload, n);
+    enqueueControl(0x08, PendingFrame::Close, payload, n);
 }
 
 
-void WebSocketChannel::protocolFail(unsigned code)
+void WebSocketChannel::protocolFail(unsigned code, std::exception_ptr error)
 {
-    if( ! isOpen() )
+    if( ! isOpen() || _closeState != CloseOpen )
         return;
 
-    if(_closeCode == 0)
-        _closeCode = code;
+    setCloseCode(code, std::string());
+
+    _protocolFailure = error;
+
+    completeReceive(error);
 
     enqueueClose(code, std::string());
+    setCloseState(CloseFailing);
     requestOutput();
 }
 
@@ -578,10 +630,10 @@ Pt::uint32_t WebSocketChannel::nextMask()
 
 void WebSocketChannel::requestInput()
 {
-    if( ! isOpen() || _inputState != Idle || _inputError )
+    if( ! isOpen() || _importing || _inputState != IOIdle )
         return;
 
-    if( _receiveState == Pending || awaitingCloseReply() )
+    if( hasPendingInput() )
     {
         Stream* stream = this->stream();
         if( ! stream || ! stream->isValid() )
@@ -591,7 +643,7 @@ void WebSocketChannel::requestInput()
             return;
 
         stream->beginInput();
-        _inputState = Pending;
+        _inputState = IOPending;
     }
 }
 
@@ -604,7 +656,7 @@ void WebSocketChannel::onInput()
 
     try
     {
-        _inputState = Idle;
+        _inputState = IOIdle;
 
         std::size_t n = stream->endInput();
         if(n == 0)
@@ -613,16 +665,20 @@ void WebSocketChannel::onInput()
             return;
         }
 
-        _inputState = Ready;
+        _importing = true;
 
-        while( onProcessInput() )
-            ;
+        FrameResult result = onProcessInput();
+        while(result == FrameConsumed)
+            result = onProcessInput();
 
-        if(_inputState == Ready)
-            _inputState = Idle;
+        _importing = false;
+
+        if(result == FrameIncomplete)
+            requestInput();
     }
     catch(...)
     {
+        _importing = false;
         onInputFailed( std::current_exception() );
     }
 }
@@ -633,41 +689,28 @@ void WebSocketChannel::onInputFailed(std::exception_ptr error)
     if( ! isOpen() )
         return;
 
-    if(_closeCode == 0)
-        _closeCode = 1006;
+    setCloseCode(1006, std::string());
 
-    _inputState = Ready;
+    _inputState = IOFailed;
+    _inputFailure = error;
 
-    if(_shutdownState == Pending)
-    {
-        _shutdownError = error;
-        finishShutdown();
-        return;
-    }
+    const bool closing = hasPendingInput(PendingCloseReply);
+    removePendingInput(PendingCloseReply);
 
-    if(_receiveState == Pending)
-    {
-        _inputError = error;
-        _receiveState = Ready;
-        _inputReady.send();
-        return;
-    }
+    completeReceive(error);
 
-    passiveClose();
+    if(closing)
+        completeShutdown(error);
 }
 
 
-bool WebSocketChannel::onProcessInput()
+WebSocketChannel::FrameResult WebSocketChannel::onProcessInput()
 {
     try
     {
         const Frame* frame = _wsbuf.import();
         if( ! frame )
-        {
-            _inputState = Idle;
-            requestInput();
-            return false;
-        }
+            return FrameIncomplete;
 
         switch( frame->kind() )
         {
@@ -678,19 +721,17 @@ bool WebSocketChannel::onProcessInput()
                 return onProcessData(*frame);
         }
 
-        return false;
+        return FrameDelivered;
     }
     catch(const WebSocketError& e)
     {
-        protocolFail( e.code() );
-        _inputState = Idle;
-        requestInput();
-        return false;
+        protocolFail( e.code(), std::current_exception() );
+        return FrameClosed;
     }
 }
 
 
-bool WebSocketChannel::onProcessControl(const Frame& frame)
+WebSocketChannel::FrameResult WebSocketChannel::onProcessControl(const Frame& frame)
 {
     unsigned opcode = frame.opcode();
     const char* data = frame.data();
@@ -706,7 +747,7 @@ bool WebSocketChannel::onProcessControl(const Frame& frame)
             requestOutput();
         }
 
-        return true;
+        return FrameConsumed;
     }
 
     if(opcode == 0x0A)
@@ -714,13 +755,13 @@ bool WebSocketChannel::onProcessControl(const Frame& frame)
         _pongPayload.assign(data ? data : "", n);
         restartIdleTimer();
         _pong.send(_pongPayload);
-        return true;
+        return FrameConsumed;
     }
 
     if(n == 1)
     {
-        protocolFail(1002);
-        return true;
+        protocolFail( 1002, std::make_exception_ptr( WebSocketError(1002) ) );
+        return FrameClosed;
     }
 
     if(n >= 2)
@@ -732,26 +773,20 @@ bool WebSocketChannel::onProcessControl(const Frame& frame)
 
         if( ! isValidUtf8(reason.data(), reason.size()) )
         {
-            protocolFail(1002);
-            return true;
+            protocolFail( 1002, std::make_exception_ptr( WebSocketError(1002) ) );
+            return FrameClosed;
         }
 
-        if(_closeCode == 0)
-        {
-            _closeCode = code;
-            _closeReason = reason;
-        }
+        setCloseCode(code, reason);
     }
-    else if(_closeCode == 0)
+    else
     {
-        _closeCode = 1005;
+        setCloseCode(1005, std::string());
     }
 
     bool replyNeeded = _closeState == CloseOpen;
-    if(_closeState == CloseQueued)
-        _closeState = CloseReplyQueued;
-    else if(_closeState == CloseSent)
-        _closeState = CloseExchanged;
+
+    removePendingInput(PendingCloseReply);
 
     if(_messageOpen)
     {
@@ -759,35 +794,35 @@ bool WebSocketChannel::onProcessControl(const Frame& frame)
         _messageOpen = false;
     }
 
-    unsigned reply = 1000;
-    if(_closeCode != 1005 && _closeCode != 1006 && _closeCode != 1015 &&
-       _closeCode != 0)
-        reply = _closeCode;
-
     if(replyNeeded)
-        enqueueClose(reply, std::string(), PendingFrame::Close, true);
-
-    requestOutput();
-
-    if(_closeState == CloseExchanged && _outputState == Idle)
     {
-        if(_shutdownState == Pending)
-            finishShutdown();
-        else
-            passiveClose();
+        unsigned reply = 1000;
+        if(_closeCode != 1005 && _closeCode != 1006 && _closeCode != 1015 &&
+           _closeCode != 0)
+            reply = _closeCode;
+
+        enqueueClose(reply, std::string());
+        setCloseState(CloseReceived);
+    }
+    else if(_closeState == CloseSent)
+    {
+        setCloseState(CloseExchanged);
     }
 
-    return false;
+    requestOutput();
+    finishClose();
+
+    return FrameClosed;
 }
 
 
-bool WebSocketChannel::onProcessData(const Frame& frame)
+WebSocketChannel::FrameResult WebSocketChannel::onProcessData(const Frame& frame)
 {
     bool finished = frame.fin() && frame.remaining() == 0;
-    if(_shutdownState == Pending || _receiveState != Pending)
+    if( ! hasPendingInput(PendingReceive) )
     {
         _wsbuf.discard();
-        return true;
+        return FrameConsumed;
     }
 
     unsigned opcode = frame.opcode();
@@ -811,25 +846,33 @@ bool WebSocketChannel::onProcessData(const Frame& frame)
     if(_wsbuf.in_avail() > 0)
         _receiveProgress.setBody();
 
-    _receiveState = Ready;
-    _inputReady.send();
+    completeReceive( std::exception_ptr() );
 
-    if(_receiveState != Idle)
-        return _wsbuf.in_avail() == 0;
+    if( ! _receive.isIdle() )
+        return _wsbuf.in_avail() == 0 ? FrameConsumed : FrameDelivered;
 
-    if( ! awaitingCloseReply())
-        return false;
+    if( ! hasPendingInput(PendingCloseReply) )
+        return FrameDelivered;
 
     if(_wsbuf.in_avail() != 0)
         _wsbuf.discard();
 
-    return true;
+    return FrameConsumed;
+}
+
+
+const char* WebSocketChannel::payloadOf(const PendingFrame& frame)
+{
+    if(frame.kind != PendingFrame::Data)
+        return frame.payload;
+
+    return frame.size != 0 ? _outgoing.sendData() : 0;
 }
 
 
 void WebSocketChannel::requestOutput()
 {
-    if( ! isOpen() || _outputState != Idle)
+    if( ! isOpen() || _outputState != IOIdle)
         return;
 
     Stream* stream = this->stream();
@@ -840,11 +883,8 @@ void WebSocketChannel::requestOutput()
         return;
 
     const PendingFrame& frame = _outputQueue.front();
-    const char* payload = frame.kind == PendingFrame::Data && frame.size != 0
-                        ? _outgoing.sendData()
-                        : frame.payload;
-    writeFrame(frame.opcode, frame.fin, payload, frame.size);
-    _outputState = Pending;
+    writeFrame(frame.opcode, frame.fin, payloadOf(frame), frame.size);
+    _outputState = IOPending;
     stream->beginOutput();
 }
 
@@ -858,150 +898,95 @@ void WebSocketChannel::onOutput()
     try
     {
         stream->endOutput();
-        onProcessOutput();
+        onProcessOutput( std::exception_ptr() );
         requestOutput();
+        finishClose();
     }
     catch(...)
     {
-        onOutputFailed( std::current_exception() );
+        onProcessOutput( std::current_exception() );
     }
 }
 
 
-void WebSocketChannel::onOutputFailed(std::exception_ptr error)
+void WebSocketChannel::onProcessOutput(std::exception_ptr error)
 {
     if( ! isOpen() )
         return;
 
-    if(_closeCode == 0)
-        _closeCode = 1006;
-
-    _outputError = error;
-    _outputState = Ready;
-
-    if(_outputQueue.empty())
+    if(error)
     {
-        passiveClose();
-        return;
+        _outputFailure = error;
+        _outputState = IOFailed;
+
+        setCloseCode(1006, std::string());
     }
-
-    const PendingFrame& frame = _outputQueue.front();
-
-    switch(frame.kind)
+    else
     {
-        case PendingFrame::Data:
-        {
-            if(_sendState == Pending)
-            {
-                _sendState = Ready;
-                _outputReady.send();
-                return;
-            }
+        if(_outputState == IOFailed)
+            return;
 
-            break;
-        }
-
-        case PendingFrame::Ping:
-        {
-            if(_pingState == Pending)
-            {
-                _pingError = _outputError;
-                _pingState = Ready;
-                _pingReady.send();
-                return;
-            }
-
-            break;
-        }
-
-        case PendingFrame::Shutdown:
-        {
-            if(_shutdownState == Pending)
-            {
-                _shutdownError = _outputError;
-                finishShutdown();
-                return;
-            }
-
-            break;
-        }
-
-        case PendingFrame::Close:
-        case PendingFrame::Pong:
-            break;
+        _outputState = IOIdle;
     }
-
-    passiveClose();
-}
-
-
-void WebSocketChannel::onProcessOutput()
-{
-    if( ! isOpen() || _outputState == Ready || _outputError)
-        return;
 
     if( _outputQueue.empty() )
-    {
-        _outputState = Idle;
         return;
-    }
 
     PendingFrame frame = _outputQueue.front();
     _outputQueue.pop_front();
-    _outputState = Idle;
 
     switch(frame.kind)
     {
         case PendingFrame::Data:
-        {
-            _outgoing.consume(frame.size);
-            ++_sendFragment;
-            if(_sendState == Pending)
-            {
-                _sendProgress.setBody();
-                if(frame.fin && _outgoing.sendSize() == 0)
-                    _sendProgress.setFinished();
-
-                _sendState = Ready;
-                _outputReady.send();
-            }
-
+            onDataWritten(frame, error);
             return;
-        }
 
         case PendingFrame::Ping:
-        {
-            if(_pingState == Pending)
-            {
-                _pingState = Ready;
-                _pingReady.send();
-            }
-
+            onPingWritten(frame, error);
             return;
-        }
 
         case PendingFrame::Close:
-        case PendingFrame::Shutdown:
-        {
-            if(_closeState == CloseQueued)
-                _closeState = CloseSent;
-            else if(_closeState == CloseReplyQueued)
-                _closeState = CloseExchanged;
-
-            if(_closeState == CloseExchanged)
-            {
-                if(_shutdownState == Pending)
-                    finishShutdown();
-                else
-                    passiveClose();
-            }
-
+            onCloseWritten(frame, error);
             return;
-        }
 
         case PendingFrame::Pong:
             return;
     }
+}
+
+
+void WebSocketChannel::onDataWritten(const PendingFrame& frame, std::exception_ptr error)
+{
+    if( ! error )
+    {
+        _outgoing.consume(frame.size);
+        _sendContinuation = true;
+
+        _sendProgress.setBody();
+        if(frame.fin && _outgoing.sendSize() == 0)
+            _sendProgress.setFinished();
+    }
+
+    completeSend(error);
+}
+
+
+void WebSocketChannel::onPingWritten(const PendingFrame& /*frame*/, std::exception_ptr error)
+{
+    completePing(error);
+}
+
+
+void WebSocketChannel::onCloseWritten(const PendingFrame& /*frame*/, std::exception_ptr error)
+{
+    if(error)
+    {
+        completeShutdown(error);
+        return;
+    }
+
+    if(_closeState == CloseReceived || _closeState == CloseFailing)
+        setCloseState(CloseExchanged);
 }
 
 

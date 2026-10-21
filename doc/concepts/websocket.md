@@ -147,12 +147,23 @@ stream with close code 1002. An extension, if one is added later, is
 negotiated at the handshake and applied by the engine before the body
 is visible.
 
+Failing the stream is not a close handshake. The frame stream is
+unusable from that point, so the engine completes an outstanding
+receive with that error, writes its close frame, and ends the stream
+without waiting for the peer to answer. `closeCode()` is the code of
+the violation and `closed()` reports the end. A later `beginReceive()`
+throws the same error.
+
 ## Control plane
 
 Ping and pong are socket operations. They are not a
 `WebSocketMessage` and not a second public write. They do not emit
 `inputReady()` or `outputReady()`. They do not finish a data message,
 and they do not free the data channel.
+
+The engine sees an incoming control frame only while it reads, that
+is while a receive or a close handshake holds the input. An endpoint
+that never starts a receive answers neither a ping nor a close.
 
 ```cpp
 void ping(const char* payload = 0, std::size_t n = 0);
@@ -205,7 +216,9 @@ second `shutdown()` throws. After a local close is queued,
 data frame. It does not wait for `endSend()` and does not cut a frame.
 After a local close is queued, the engine keeps reading until the
 peer close or `idleTimeout()`, even when no `beginReceive()` is
-outstanding. During that close-only phase it discards data frames and
+outstanding. A peer that never starts a receive never answers, so
+that timeout is the only bound on the wait, and the application owns
+it. During that close-only phase it discards data frames and
 continues to process control frames. When a receive is outstanding,
 data that arrives before the peer close is still delivered normally.
 
@@ -218,14 +231,18 @@ incomplete message. After the reply has been written, the engine ends
 the stream. It does not call `close()` on the facade.
 
 `closed()` reports an end the application did not start. Peer close,
-an idle timeout, a finished shutdown, and a read that returns no
-bytes emit it. An I/O error does not. `close()` and the destructor
-do not. After `closed()`, `endSend()` and `endReceive()` throw.
+an idle timeout, a finished shutdown, a protocol violation, and a read
+that returns no bytes emit it. An I/O error does not. `close()` and
+the destructor do not. After `closed()`, `endSend()` and
+`endReceive()` throw.
 
 An I/O error on an outstanding receive or send stores the exception
 and leaves the stream open. The ready signal of that transfer runs,
 and the matching end throws. The other direction is unaffected. The
-application calls `close()`.
+application calls `close()`. The direction that failed keeps the
+reason: a later `beginSend()`, `beginPing()`, or `beginShutdown()`
+throws the write failure, and a later `beginReceive()` throws the
+read failure.
 
 `closeCode()` and `closeReason()` are the values from the handshake
 that ended the stream. A local `shutdown()` keeps the values passed

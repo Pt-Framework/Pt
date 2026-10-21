@@ -154,7 +154,7 @@
     period without a finished transfer, closes the stream. Zero
     disables each limit.
     The size count is the declared payload from the first data
-    opcode to FIN. A finished send or receive restarts the idle
+    opcode to FIN. Transferred data bytes restart the idle
     timeout, and a received ping or pong restarts it as well.
 
     The HTTP owner still owns the stream. Opening a client socket

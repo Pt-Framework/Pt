@@ -623,6 +623,38 @@ class PushSession : public Pt::Http::WebSocketSession
 typedef Pt::Http::BasicWebSocketService<PushSession> PushService;
 
 
+class FeedSession : public Pt::Http::WebSocketSession
+{
+    public:
+        FeedSession(Pt::Http::WebSocketService& service,
+                    Pt::Http::Stream& stream,
+                    const Pt::Http::Reply& reply)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        {
+            outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            outgoing().body() << "feed";
+            beginSend();
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            endReceive();
+        }
+
+        virtual void onOutput()
+        {
+            endSend();
+        }
+
+        virtual void onClose()
+        {}
+};
+
+typedef Pt::Http::BasicWebSocketService<FeedSession> FeedService;
+
+
 class PongSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -883,6 +915,91 @@ class ProtocolService : public Pt::Http::WebSocketService
         std::size_t _opened;
 };
 
+class FailSession : public Pt::Http::WebSocketSession
+{
+    public:
+        FailSession(Pt::Http::WebSocketService& service,
+                    Pt::Http::Stream& stream,
+                    const Pt::Http::Reply& reply,
+                    bool& failed,
+                    bool& closed,
+                    unsigned& code,
+                    Pt::System::EventLoop& exitLoop)
+        : Pt::Http::WebSocketSession(service, stream, reply)
+        , _failed(&failed)
+        , _closed(&closed)
+        , _code(&code)
+        , _exitLoop(&exitLoop)
+        {
+            beginReceive();
+        }
+
+    protected:
+        virtual void onInput()
+        {
+            try
+            {
+                endReceive();
+            }
+            catch(const std::exception&)
+            {
+                *_failed = true;
+            }
+        }
+
+        virtual void onOutput()
+        {}
+
+        virtual void onClose()
+        {
+            *_code = closeCode();
+            *_closed = true;
+            _exitLoop->exit();
+        }
+
+    private:
+        bool* _failed;
+        bool* _closed;
+        unsigned* _code;
+        Pt::System::EventLoop* _exitLoop;
+};
+
+
+class FailService : public Pt::Http::WebSocketService
+{
+    public:
+        FailService(bool& failed,
+                    bool& closed,
+                    unsigned& code,
+                    Pt::System::EventLoop& loop)
+        : _failed(&failed)
+        , _closed(&closed)
+        , _code(&code)
+        , _loop(&loop)
+        {}
+
+    protected:
+        virtual Pt::Http::WebSocketSession* onGetSession(Pt::Http::Stream& stream,
+                                                         const Pt::Http::Request&,
+                                                         const Pt::Http::Reply& reply)
+        {
+            return new FailSession(*this, stream, reply,
+                                   *_failed, *_closed, *_code, *_loop);
+        }
+
+        virtual void onReleaseSession(Pt::Http::WebSocketSession* session)
+        {
+            delete session;
+        }
+
+    private:
+        bool* _failed;
+        bool* _closed;
+        unsigned* _code;
+        Pt::System::EventLoop* _loop;
+};
+
+
 class CloseNowSession : public Pt::Http::WebSocketSession
 {
     public:
@@ -981,6 +1098,8 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
             registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
             registerMethod("IdleBeforeConnect", *this, &WebSocketTest::IdleBeforeConnect);
+            registerMethod("ReceiveDuringShutdown", *this, &WebSocketTest::ReceiveDuringShutdown);
+            registerMethod("ProtocolFailure", *this, &WebSocketTest::ProtocolFailure);
             registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
         }
 
@@ -1877,6 +1996,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             socket.endConnect();
             socket.beginReceive();
             PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            socket.beginShutdown();
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
             _loop->exit();
         }
@@ -1945,7 +2065,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(1015), std::invalid_argument);
             socket.beginShutdown();
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
-            PT_UNIT_ASSERT_THROW(socket.beginReceive(), std::logic_error);
+            socket.beginReceive();
             _loop->exit();
         }
 
@@ -2201,6 +2321,93 @@ class WebSocketTest : public Pt::Unit::TestSuite
         {
             _closed = true;
             _loop->exit();
+        }
+
+    protected:
+        void ReceiveDuringShutdown()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8046);
+
+            Pt::Http::Server server(*_loop, ep);
+            FeedService service;
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedReceiveDuringShutdown);
+            socket.inputReady() += Pt::slot(*this, &WebSocketTest::onReceiveDuringShutdownInput);
+            socket.shutdownReady() += Pt::slot(*this, &WebSocketTest::onShutdownReady);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onReceiveDuringShutdownClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_received);
+            PT_UNIT_ASSERT_EQUALS(_message, "feed");
+            PT_UNIT_ASSERT(_shutdownReady);
+        }
+
+        void onConnectedReceiveDuringShutdown(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginReceive();
+            socket.beginShutdown();
+        }
+
+        void onReceiveDuringShutdownInput(Pt::Http::WebSocket& socket)
+        {
+            Pt::Http::MessageProgress progress = socket.endReceive();
+            _message.append( std::istreambuf_iterator<char>( socket.incoming().body() ),
+                             std::istreambuf_iterator<char>() );
+
+            if( ! progress.finished() )
+            {
+                socket.beginReceive();
+                return;
+            }
+
+            _received = true;
+        }
+
+        void onReceiveDuringShutdownClosed(Pt::Http::WebSocket&)
+        {
+            _loop->exit();
+        }
+
+    protected:
+        void ProtocolFailure()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8047);
+
+            Pt::Http::Server server(*_loop, ep);
+            FailService service(_rejected, _closed, _status, *_loop);
+            service.setMaxMessageSize(16);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedProtocolFailure);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+            PT_UNIT_ASSERT(_closed);
+            PT_UNIT_ASSERT_EQUALS(_status, 1009u);
+        }
+
+        void onConnectedProtocolFailure(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.outgoing().setType(Pt::Http::WebSocketMessage::Text);
+            socket.outgoing().body() << std::string(64, 'x');
+            socket.beginSend();
         }
 
     protected:
