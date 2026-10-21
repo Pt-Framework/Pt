@@ -174,21 +174,6 @@ class WebSocketChannel : public Channel
                 std::exception_ptr _error;
         };
 
-        enum IOState
-        {
-            IOIdle,
-            IOPending,
-            IOImporting,
-            IOFailed
-        };
-
-        enum PendingInput
-        {
-            NoInput           = 0,
-            PendingReceive    = 1 << 0,
-            PendingCloseReply = 1 << 1
-        };
-
         enum CloseState
         {
             CloseOpen,
@@ -198,34 +183,66 @@ class WebSocketChannel : public Channel
             CloseExchanged
         };
 
+        enum InputAction
+        {
+            NextFrame,
+            Stop
+        };
+
     private:
+        bool wantsInput() const;
+
         void requestInput();
 
         void onInput();
 
-        bool onProcessInput(const Frame& frame);
+        InputAction onFrame(const Frame& frame);
 
-        void onInputFailed(std::exception_ptr error);
+        InputAction onPing(const Frame& frame);
 
-        bool onProcessControl(const Frame& frame);
+        InputAction onPong(const Frame& frame);
 
-        bool onProcessData(const Frame& frame);
+        InputAction onPeerClose(const Frame& frame);
+
+        InputAction onData(const Frame& frame);
+
+        void onProtocolError(std::exception_ptr error, unsigned code);
+
+        void onInputError(std::exception_ptr error);
+
+        void onPeerEof();
 
     private:
+        void enqueueData();
+
+        void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
+                            const char* payload, std::size_t n);
+
+        void enqueueClose(unsigned code, const std::string& reason);
+
         void requestOutput();
 
         void onOutput();
 
-        void onProcessOutput(std::exception_ptr error);
+        void onFrameWritten(const PendingFrame& frame);
 
-        void onDataWritten(const PendingFrame& frame, std::exception_ptr error);
-
-        void onPingWritten(const PendingFrame& frame, std::exception_ptr error);
-
-        void onCloseWritten(const PendingFrame& frame, std::exception_ptr error);
+        void onOutputError(std::exception_ptr error);
 
         void writeFrame(unsigned opcode, bool fin,
                         const char* payload, std::size_t n);
+
+    private:
+        void takeClosePayload(const Frame& frame);
+
+        unsigned echoableCloseCode(unsigned code) const;
+
+        void discardOpenMessage();
+
+        void endStreamIfClosed();
+
+        void onPassiveClose();
+
+        void setCloseCode(unsigned code, const std::string& reason);
 
     private:
         void completeSend(std::exception_ptr error);
@@ -245,31 +262,7 @@ class WebSocketChannel : public Channel
 
         void onIdleTimeout();
 
-        void setCloseState(CloseState state);
-
-        void setCloseCode(unsigned code, const std::string& reason);
-
-        void finishClose();
-
-        void passiveClose();
-
-    private:
-        void enqueueData();
-
-        void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
-                            const char* payload, std::size_t n);
-
-        void requestClose(unsigned code, const std::string& reason);
-
         void requireOpen() const;
-
-        void addPendingInput(PendingInput pending);
-
-        void removePendingInput(PendingInput pending);
-
-        bool hasPendingInput() const;
-
-        bool hasPendingInput(PendingInput pending) const;
 
     private:
         bool          _clientMask;
@@ -285,15 +278,14 @@ class WebSocketChannel : public Channel
 
         std::deque<PendingFrame> _outputQueue;
 
-        IOState            _inputState;
-        unsigned           _pendingInput;
+        bool               _inputPending;
         bool               _messageOpen;
         Operation          _receive;
         MessageProgress    _receiveProgress;
         std::exception_ptr _inputFailure;
         Signal<>           _inputReady;
 
-        IOState            _outputState;
+        bool               _outputPending;
         Operation          _send;
         bool               _sendContinuation;
         MessageProgress    _sendProgress;
