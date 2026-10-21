@@ -97,10 +97,12 @@ class WebSocketChannel;
 
     The socket owns two %WebSocketMessage objects, %incoming() and
     %outgoing(), the way a client owns a request and a reply. Set
-    the type, write the body, and call %beginSend(). %outputReady()
-    reports that data bytes were sent. %endSend() returns
-    %MessageProgress. If the send is not finished, %beginSend()
-    continues the same message. %beginReceive() fills %incoming().
+    the type, write the body, and call %beginSend(). Call
+    %beginSend(false) while more body will be written, then
+    %beginSend(true) for the last part. %outputReady() reports that
+    data bytes were sent. %endSend() returns %MessageProgress. If
+    the send step is not finished, %beginSend() continues it with
+    the same completion flag. %beginReceive() fills %incoming().
     %inputReady() reports that data bytes were received.
     %endReceive() returns progress. After %finished(), %clear()
     drops the body so the same object can carry the next message.
@@ -213,14 +215,23 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
         /** @brief Begins sending %outgoing().
 
+            The completion flag is true when this is the last part of
+            the message. Call %beginSend(false) while more body will
+            be written. %endSend() reports whether this step has left
+            the socket. If it is not finished, call %beginSend() again
+            with the same flag. The engine may still split this step
+            into frames.
+
+            @param finished True if this is the last part of the message.
+
             @throw %std::logic_error if a send is outstanding, the
             handshake is not finished, or a shutdown is queued.
             @throw %std::invalid_argument if the type is %Unknown, the
-            body is larger than %setMaxMessageSize(), or a text body
-            is not valid UTF-8.
+            body is larger than %setMaxMessageSize(), or a finished
+            text body is not valid UTF-8.
             @throw %std::exception if a previous write failed.
         */
-        void beginSend();
+        void beginSend(bool finished = true);
 
         /** @brief Completes the send started by %beginSend().
 

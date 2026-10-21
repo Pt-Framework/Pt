@@ -112,9 +112,9 @@ WebSocketMessage& WebSocketSession::outgoing()
 }
 
 
-void WebSocketSession::beginSend()
+void WebSocketSession::beginSend(bool finished)
 {
-    _channel->beginSend();
+    _channel->beginSend(finished);
 }
 
 

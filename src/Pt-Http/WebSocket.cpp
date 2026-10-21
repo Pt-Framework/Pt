@@ -243,9 +243,9 @@ WebSocketMessage& WebSocket::outgoing()
 }
 
 
-void WebSocket::beginSend()
+void WebSocket::beginSend(bool finished)
 {
-    _channel->beginSend();
+    _channel->beginSend(finished);
 }
 
 

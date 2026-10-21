@@ -112,10 +112,12 @@
 
     The outgoing payload is %outgoing() and the incoming payload is
     %incoming(). Both are %WebSocketMessage objects. Set the type to
-    %Text or %Binary, write the body, and call %beginSend().
-    %outputReady() reports that data bytes were sent. %endSend()
-    returns %MessageProgress. If the send is not finished,
-    %beginSend() continues the same message. %beginReceive() fills
+    %Text or %Binary, write the body, and call %beginSend(). Call
+    %beginSend(false) while more body will be written, then
+    %beginSend(true) for the last part. %outputReady() reports that
+    data bytes were sent. %endSend() returns %MessageProgress. If
+    the send step is not finished, %beginSend() continues it with
+    the same completion flag. %beginReceive() fills
     %incoming(). %inputReady() reports that data bytes were received.
     %endReceive() returns progress. %header() means the data type is
     known, which is the first data opcode of that message. %body()

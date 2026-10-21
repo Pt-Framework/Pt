@@ -89,7 +89,8 @@ class WebSocketChannel;
     constructor body runs, the base has already bound the stream.
 
     %incoming() and %outgoing() are the two payloads. %beginSend()
-    writes %outgoing(). %beginReceive() reads into %incoming().
+    writes %outgoing(). Call %beginSend(false) while more body will
+    be written. %beginReceive() reads into %incoming().
     %onInput() runs when data bytes were received. Call
     %endReceive(), read %incoming() when progress reports body
     bytes, and start the next receive if the message is not
@@ -203,8 +204,14 @@ class PT_HTTP_API WebSocketSession : public Connectable
         WebSocketMessage& outgoing();
 
         /** @brief Begins sending %outgoing().
+
+            The completion flag is true when this is the last part of
+            the message. Call %beginSend(false) while more body will
+            be written.
+
+            @param finished True if this is the last part of the message.
         */
-        void beginSend();
+        void beginSend(bool finished = true);
 
         /** @brief Completes the send started by %beginSend().
 

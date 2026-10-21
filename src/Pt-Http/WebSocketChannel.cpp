@@ -215,7 +215,7 @@ bool WebSocketChannel::wantsInput() const
 }
 
 
-void WebSocketChannel::beginSend()
+void WebSocketChannel::beginSend(bool finished)
 {
     requireOpen();
 
@@ -228,7 +228,7 @@ void WebSocketChannel::beginSend()
     if(_outputFailure)
         std::rethrow_exception(_outputFailure);
 
-    bool isBegin = _sendProgress.finished() || ! _sendProgress.header();
+    bool isBegin = ! _sendProgress.header() && ! _sendProgress.body();
 
     if(isBegin)
     {
@@ -240,7 +240,7 @@ void WebSocketChannel::beginSend()
         if(_maxMessageSize != 0 && n > _maxMessageSize)
             throw std::invalid_argument("WebSocket message too large");
 
-        if(type == WebSocketMessage::Text)
+        if(finished && type == WebSocketMessage::Text)
         {
             const char* data = _outgoing.sendData();
             if( ! isValidUtf8(data, n) )
@@ -250,8 +250,10 @@ void WebSocketChannel::beginSend()
 
     _send.begin();
     _sendProgress = MessageProgress();
-    _sendProgress.setHeader();
-    enqueueData(isBegin);
+    if(isBegin)
+        _sendProgress.setHeader();
+
+    enqueueData(isBegin, finished);
 }
 
 
@@ -261,7 +263,12 @@ MessageProgress WebSocketChannel::endSend()
         throw std::logic_error("WebSocket send is not ready");
 
     _send.finish();
-    return _sendProgress;
+
+    MessageProgress progress = _sendProgress;
+    if( progress.finished() )
+        _sendProgress = MessageProgress();
+
+    return progress;
 }
 
 
@@ -275,12 +282,8 @@ void WebSocketChannel::beginReceive()
     if(_inputFailure)
         std::rethrow_exception(_inputFailure);
 
-    bool open = _receiveProgress.header() && ! _receiveProgress.finished();
     _receive.begin();
     _receiveProgress = MessageProgress();
-    if(open)
-        _receiveProgress.setHeader();
-
     requestInput();
 }
 
@@ -475,11 +478,11 @@ void WebSocketChannel::onIdleTimeout()
 }
 
 
-void WebSocketChannel::enqueueData(bool isBegin)
+void WebSocketChannel::enqueueData(bool isBegin, bool finished)
 {
     // One fragment per send, so a queued control frame waits at most this long.
     PendingFrame frame;
-    frame.fin = _outgoing.sendSize() <= MaxFramePayload;
+    frame.fin = finished && _outgoing.sendSize() <= MaxFramePayload;
     frame.kind = PendingFrame::Data;
     frame.size = _outgoing.sendSize();
     if(frame.size > MaxFramePayload)
@@ -692,9 +695,8 @@ WebSocketChannel::InputAction WebSocketChannel::onData(const Frame& frame)
                                     ? WebSocketMessage::Text
                                     : WebSocketMessage::Binary;
         _incoming.setTypeFromEngine(type);
+        _receiveProgress.setHeader();
     }
-
-    _receiveProgress.setHeader();
 
     if( frame.fin() && frame.remaining() == 0 )
         _receiveProgress.setFinished();

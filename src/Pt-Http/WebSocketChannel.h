@@ -49,7 +49,7 @@ class WebSocketChannel : public Channel
         WebSocketMessage& outgoing()
         { return _outgoing; }
 
-        void beginSend();
+        void beginSend(bool finished);
 
         MessageProgress endSend();
 
@@ -243,7 +243,7 @@ class WebSocketChannel : public Channel
         void onInputError(std::exception_ptr error);
 
     private:
-        void enqueueData(bool isBegin);
+        void enqueueData(bool isBegin, bool finished);
 
         void enqueueControl(unsigned opcode, PendingFrame::Kind kind,
                             const char* payload, std::size_t n);

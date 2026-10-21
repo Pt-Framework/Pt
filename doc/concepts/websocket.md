@@ -70,7 +70,7 @@ They throw `std::logic_error` while the operation is still pending or
 after the stream has ended.
 
 ```cpp
-void beginSend();
+void beginSend(bool finished = true);
 MessageProgress endSend();
 Signal<WebSocket&>& outputReady();
 
@@ -80,9 +80,11 @@ Signal<WebSocket&>& inputReady();
 ```
 
 A send writes `outgoing()`. The application sets the type, writes
-the body, and calls `beginSend()`. `beginSend()` throws if the type
-is `Unknown`. `outputReady()` reports that data bytes were sent.
-`endSend()` returns `MessageProgress`. The engine may split the body
+the body, and calls `beginSend()`. `beginSend(false)` means more
+body will follow. `beginSend(true)` is the last part of the
+message. `beginSend()` throws if the type is `Unknown`.
+`outputReady()` reports that data bytes were sent. `endSend()`
+returns `MessageProgress`. The engine may still split this step
 into several frames. The application does not see that split.
 
 A receive fills `incoming()`. `inputReady()` reports that data bytes
@@ -97,10 +99,10 @@ that a frame was parsed. The application does not learn how many
 frames those bytes came from. Neither ready signal waits for the
 whole message.
 
-The first public send has a complete body before `beginSend()`.
-Partial `outputReady()` steps still occur. A send that produces the
-body while it is in progress can be added later. It is not the first
-surface.
+`beginSend()` with the default completion flag has a complete body
+before the call. Partial `outputReady()` steps still occur when the
+engine splits that body. `beginSend(false)` produces the body while
+the send is in progress.
 
 ## Frames stay internal
 
