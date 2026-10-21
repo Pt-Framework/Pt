@@ -152,6 +152,8 @@ class WebSocketChannel : public Channel
                         const char* payload, std::size_t n);
 
     private:
+        void armIdleTimer();
+
         void restartIdleTimer();
 
         void onIdleTimeout();

@@ -125,7 +125,9 @@ class WebSocketChannel;
 
     %beginPing() enqueues a ping. %pingReady() reports that its frame
     was written; call %endPing() from that signal to observe a write
-    error. A received ping is answered by the engine. A received pong
+    error. A received ping is answered by the engine. After a close
+    frame is queued nothing further is written, so %beginPing() throws
+    and a received ping is no longer answered. A received pong
     is reported by %pong(). Neither is delivered through %incoming().
     %beginShutdown() enqueues a close frame with a status code and a
     reason, then owns input until the peer replies. %shutdownReady()
@@ -251,8 +253,8 @@ class PT_HTTP_API WebSocket : public Pt::Connectable
 
             @throw %std::invalid_argument if @a n is greater than 125,
             or if @a payload is null and @a n is nonzero.
-            @throw %std::logic_error if a ping is outstanding or the handshake
-            is not finished.
+            @throw %std::logic_error if a ping is outstanding, a close is
+            queued, or the handshake is not finished.
         */
         void beginPing(const char* payload = 0, std::size_t n = 0);
 

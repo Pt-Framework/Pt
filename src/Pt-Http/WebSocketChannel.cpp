@@ -187,6 +187,8 @@ void WebSocketChannel::open(Stream& stream, bool clientMask)
     _wsbuf.setMasking( ! clientMask );
     _wsbuf.setMaxMessageSize(_maxMessageSize);
     _incoming.setBuffer(_wsbuf);
+
+    armIdleTimer();
 }
 
 
@@ -335,6 +337,9 @@ void WebSocketChannel::beginPing(const char* payload, std::size_t n)
     if(_pingState != Idle)
         throw std::logic_error("WebSocket ping is outstanding");
 
+    if(_closeState != CloseOpen)
+        throw std::logic_error("WebSocket is closing");
+
     if(n > 125 || (n != 0 && ! payload))
         throw std::invalid_argument("WebSocket ping payload");
 
@@ -460,20 +465,27 @@ void WebSocketChannel::setTimeout(std::size_t timeout)
 void WebSocketChannel::setIdleTimeout(std::size_t ms)
 {
     _idleTimeout = ms;
+    armIdleTimer();
+}
 
-    if(ms == 0)
+
+void WebSocketChannel::armIdleTimer()
+{
+    if(_idleTimeout == 0)
     {
         _idleTimer.stop();
         return;
     }
 
-    if( Stream* stream = this->stream() )
-    {
-        if( System::EventLoop* loop = stream->loop() )
-            _idleTimer.setActive(*loop);
-    }
+    Stream* stream = this->stream();
+    System::EventLoop* loop = stream ? stream->loop() : 0;
+    if( ! loop )
+        return;
 
-    _idleTimer.start(ms);
+    if( ! _idleTimer.loop() )
+        _idleTimer.setActive(*loop);
+
+    _idleTimer.start(_idleTimeout);
 }
 
 
@@ -686,9 +698,14 @@ bool WebSocketChannel::onProcessControl(const Frame& frame)
 
     if(opcode == 0x09)
     {
-        enqueueControl(0x0A, PendingFrame::Pong, data, n);
         restartIdleTimer();
-        requestOutput();
+
+        if(_closeState == CloseOpen)
+        {
+            enqueueControl(0x0A, PendingFrame::Pong, data, n);
+            requestOutput();
+        }
+
         return true;
     }
 

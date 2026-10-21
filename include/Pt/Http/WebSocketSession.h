@@ -128,7 +128,10 @@ class WebSocketChannel;
 
     %beginPing() enqueues a ping. %onPingReady() reports that its frame
     was written; call %endPing() from that callback to observe a write
-    error. %beginShutdown() enqueues a close frame and owns input until
+    error. A received ping is answered by the engine. After a close
+    frame is queued nothing further is written, so %beginPing() throws
+    and a received ping is no longer answered. %beginShutdown() enqueues
+    a close frame and owns input until
     the peer replies. %onShutdownReady() reports the completed handshake
     before %onClose(); call %endShutdown() from that callback to observe
     an error. %close() releases the stream and writes no frame. The destructor
@@ -226,7 +229,8 @@ class PT_HTTP_API WebSocketSession : public Connectable
 
             @throw %std::invalid_argument if @a n is greater than 125,
             or if @a payload is null and @a n is nonzero.
-            @throw %std::logic_error if the stream has ended.
+            @throw %std::logic_error if a ping is outstanding, a close is
+            queued, or the stream has ended.
         */
         void beginPing(const char* payload = 0, std::size_t n = 0);
 

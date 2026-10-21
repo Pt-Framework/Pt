@@ -163,12 +163,15 @@ Signal<WebSocket&, const std::string&>& pong();
 throws. A second `ping()` enqueues another. Each is written, and the
 peer answers each. `ping()` does not require the data send to be
 idle. A ping may be written between two data fragments of the current
-message. `outputReady()` still means that data bytes were sent.
+message. `outputReady()` still means that data bytes were sent. A
+close frame is the last frame this side writes, so a `ping()` after a
+close is queued throws.
 
 A received ping is answered by the engine with a pong of the same
 payload. The application does not call `sendPong()`. Answering the
 ping restarts the idle timer. A received ping is not delivered. A
-signal for it can be added later.
+ping that arrives after a close is queued restarts the idle timer and
+is not answered. A signal for a received ping can be added later.
 
 A received pong is consumed. It does not become `incoming()`. If a
 `ping()` is still outstanding, the payload is compared and that ping

@@ -937,6 +937,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         , _inputReady(false)
         , _pingReady(false)
         , _shutdownReady(false)
+        , _rejected(false)
         , _status(0)
         , _type(Pt::Http::WebSocketMessage::Unknown)
         , _limitSocket(0)
@@ -978,6 +979,9 @@ class WebSocketTest : public Pt::Unit::TestSuite
             registerMethod("ProtocolRejected", *this, &WebSocketTest::ProtocolRejected);
             registerMethod("ProtocolHeader", *this, &WebSocketTest::ProtocolHeader);
             registerMethod("EndAfterClosed", *this, &WebSocketTest::EndAfterClosed);
+            registerMethod("PingAfterShutdown", *this, &WebSocketTest::PingAfterShutdown);
+            registerMethod("IdleBeforeConnect", *this, &WebSocketTest::IdleBeforeConnect);
+            registerMethod("IdleTimeoutTwice", *this, &WebSocketTest::IdleTimeoutTwice);
         }
 
         void setUp()
@@ -992,6 +996,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
             _inputReady = false;
             _pingReady = false;
             _shutdownReady = false;
+            _rejected = false;
             _status = 0;
             _limitSocket = 0;
             _limitClient = 0;
@@ -2129,6 +2134,114 @@ class WebSocketTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW(socket.beginShutdown(), std::logic_error);
         }
 
+    protected:
+        void PingAfterShutdown()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8043);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedPingAfterShutdown);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_rejected);
+        }
+
+        void onConnectedPingAfterShutdown(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+            socket.beginShutdown();
+
+            try
+            {
+                socket.beginPing();
+            }
+            catch(const std::logic_error&)
+            {
+                _rejected = true;
+            }
+
+            _loop->exit();
+        }
+
+    protected:
+        void IdleBeforeConnect()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8044);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.setIdleTimeout(200);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdle);
+            socket.closed() += Pt::slot(*this, &WebSocketTest::onIdleClosed);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_closed);
+        }
+
+        void onIdleClosed(Pt::Http::WebSocket&)
+        {
+            _closed = true;
+            _loop->exit();
+        }
+
+    protected:
+        void IdleTimeoutTwice()
+        {
+            Pt::Net::Endpoint ep("127.0.0.1", 8045);
+
+            Pt::Http::Server server(*_loop, ep);
+            IdleService service(*_loop, false);
+            Pt::Http::WebSocketServlet sockets(service);
+
+            Pt::Http::MapUrl mapUrl("/ws", service);
+            server.addServlet(mapUrl);
+
+            Pt::Http::Client http(*_loop, ep);
+            Pt::Http::WebSocket socket(http);
+            socket.connected() += Pt::slot(*this, &WebSocketTest::onConnectedIdleTwice);
+            socket.beginConnect("/ws");
+
+            _loop->run();
+
+            PT_UNIT_ASSERT(_finished);
+        }
+
+        void onConnectedIdleTwice(Pt::Http::WebSocket& socket)
+        {
+            socket.endConnect();
+
+            try
+            {
+                socket.setIdleTimeout(1000);
+                socket.setIdleTimeout(2000);
+                _finished = true;
+            }
+            catch(const std::exception&)
+            {
+            }
+
+            _loop->exit();
+        }
+
     private:
         Pt::System::MainLoop* _loop;
         Pt::System::Timer _exitTimer;
@@ -2144,6 +2257,7 @@ class WebSocketTest : public Pt::Unit::TestSuite
         bool _inputReady;
         bool _pingReady;
         bool _shutdownReady;
+        bool _rejected;
         unsigned _status;
         Pt::Http::WebSocketMessage::Type _type;
         Pt::Http::WebSocket* _limitSocket;
